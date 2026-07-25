@@ -81,19 +81,27 @@ combined firmware — trust them:
     at `0x435E`. Public payloads store `0xFEBF0000` at offset `0xFD0`.
   - `0xFF00` is therefore not a direct execute-RAM routine; execution occurs by
     replacing the legitimate flash-driver callback inside the authenticated image.
-- The report's proposed SecOC runtime-key path is **wrong**. Read
+- The report's proposed SecOC runtime-key command path is **wrong**. Read
   `SECOC_RUNTIME_KEY_LIFECYCLE.md`; `verify_secoc_nvm.py` checks 53/53 facts:
-  - `0x72F58` is AUTOSAR NvM `ReadBlock` (service `0x06`), not CSM key-set.
-  - `0x72F84` is NvM `WriteBlock` (service `0x07`), not MAC generation.
-  - `0x67590/0x67608/0x67C34` restore, persist, and reconcile raw/XOR55/XORAA
-    redundant state records. They do not install or verify a cryptographic key.
-  - pages 468–479 decode exactly to four structured NvM objects; FEBEF468/478/488
-    and workbuf FEBFEB08 hold those objects, not the SecOC AES key.
+  - `0x72F58`/`0x72F84` are AUTOSAR NvM `ReadBlock`/`WriteBlock`, not CSM key-set/MAC.
+  - `0x67590/0x67608/0x67C34` generically restore, persist, and reconcile
+    raw/XOR55/XORAA objects. This is not an ICU command path.
+  - pages 468–479 are objects 0–3; FEBEF468/478/488 contain their structured state.
   - `0x758A0/0x785D2` are NvM/DataFlash service machinery, not ICU derivation.
-  - the final unconfigured 2 KiB DataFlash tail is strongly consistent with
-    ICU-S protected storage, but the exact SecOC slot/provisioning path is unknown.
-  - do not implement the dealer/FEBEF/`0x72F58` hook proposed in
-    `../RH850_P1m-E/rekey-capture-design.md`; it would capture NvM state, not a key.
+- The complete 32 KiB map is in `DATAFLASH_LAYOUT.md` and is checked 71/71 by
+  `verify_dataflash_layout.py`:
+  - 122 physical records occupy pages 256–479; pages 0–255 are not in the map.
+  - pages 432–479 are the full 16-object SecOC triplicate bank.
+  - object 15 is len32/base block41/RAM `0xFEBF02E8`; its key field maps raw
+    `0xFF206E14`, XOR55 `0xFF206D14`, XORAA `0xFF206C14`, RAM `0xFEBF02F8`.
+  - related-variant field evidence CMAC-verifies the SecOC key at `0xFF206E14`.
+    This exact dump has three invalid object-15 copies and no verified key.
+  - DIDs `0x201/0x202/0x203` are volatile bootloader inputs, not DataFlash-backed.
+  - the final 2 KiB is likely ICU-S-reserved, but linking this SecOC key to that
+    tail is unsupported. The exact operational source for this snapshot is unknown.
+  - the dealer/FEBEF capture design remains wrong. A generic `0x72F58` hook must
+    filter blocks 41/45/49 and observe completion to see object 15 on a provisioned
+    variant; the call itself is not key-set.
 
 The prior "secrets are unreferenced / separate bootloader image" conclusion was
 an artifact of the wrong flat import and is **false**. The scripts that produced
@@ -113,6 +121,9 @@ it live in `legacy-flat-import/` — do not use them for current results.
 | `SeedSecocNvmFunctions.java` | seed valid NvM request/queue functions missed by auto-analysis |
 | `AnnotateSecocNvmCorrection.java` | apply corrected NvM names/comments and RAM/DataFlash labels |
 | `verify_secoc_nvm.py` | verify the NvM service map, triplicate objects, and reserved DataFlash tail |
+| `AnnotateDataFlashLayout.java` | label complete NvM regions, object-15 key fields/RAM mirror, and volatile DIDs |
+| `generate_dataflash_layout.py` / `dataflash_nvm_records.csv` | regenerate/list all 122 configured physical records |
+| `verify_dataflash_layout.py` | verify the complete map, 16-object bank, object-15 mapping, and DID volatility |
 | `FindOperandRefs.java` | locate operand references while recovering missed state-machine code |
 | `FindMappedSecretRefs.java` | verify direct refs to both corrected secret VAs |
 | `FindMappedRegionRefs.java`, `FindBootloaderDiagnostics.java`, `FindHandlerRegistrations.java` | investigation helpers |

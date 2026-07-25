@@ -4,12 +4,15 @@ This note re-investigates the report's headline claim that the Sienna CN EPS
 `8965B4512000` derives its SecOC key inside ICU-S and exposes the plaintext key at
 `0xFEBEF468`, `0xFEBFEB08`, and `0x72F58` during a dealer-triggered rekey.
 
-The claimed path was traced completely. It is **not a cryptographic key lifecycle**.
+The claimed path was traced completely. It is **not a CSM/ICU command chain**.
 It is an AUTOSAR NvM-backed redundancy and checkpoint subsystem used by
-SecOC-associated application state.
+SecOC-associated objects. The initial analysis decoded only objects 0–3 and
+incorrectly generalized that every object was non-key state. The full DataFlash
+map in `DATAFLASH_LAYOUT.md` shows that object 15 is a 32-byte triplicate object
+whose second half is the field-verified SecOC-key location on related variants.
 
-`verify_secoc_nvm.py` independently verifies the tables and DataFlash records from
-the committed split images.
+`verify_secoc_nvm.py` verifies the original NvM correction. The broader 16-object
+map and key-location correction are checked by `verify_dataflash_layout.py`.
 
 ## Executive conclusion
 
@@ -32,8 +35,10 @@ The prior labels were wrong:
 | `0x758A0` | ICU key derivation | synchronous/status-mapped NvM/DataFlash read |
 | `0x785D2` | ICU opcode validator | NvM service-ID validator/state setter |
 
-The proposed rekey monitor would therefore capture ordinary persistent state—not
-the SecOC AES key. Hooking `0x72F58` would observe NvM block reads.
+The report's proposed FEBEF object-0 monitor would capture ordinary persistent
+state, not the SecOC AES key. `0x72F58` is still generic `NvM_ReadBlock`, not a
+key-set operation; however, a block-aware monitor can observe object 15 reads on
+a provisioned variant. In this exact dump object 15 has no valid persistent copy.
 
 ## 1. Conclusive NvM service identification
 
@@ -198,6 +203,12 @@ The report called pages 468–479 “key-slot metadata” and interpreted their 
 patterns as derivation parameters. The differences are instead exactly explained
 by the raw/XOR55/XORAA encoding implemented at `0x67608`.
 
+The complete table has 16 objects, not four. Objects 12–15 are 32-byte records in
+pages 440–443 (raw), 436–439 (XOR55), and 432–435 (XORAA).
+Object 15 is base block 41 with RAM mirror `0xFEBF02E8`; its raw second field is
+`0xFF206E14`, the CMAC-verified SecOC-key location on related EPS variants. All
+three object-15 copies are invalid/uncommitted in this particular dump.
+
 ## 6. What `0x679D6 -> 0x78504 -> 0x758A0` really does
 
 `nvm_validate_triplicate_records @ 0x679D6` resolves each configured NvM block to
@@ -208,90 +219,93 @@ The buffer is discarded because this particular call is a validity probe. No
 buffer, metadata, or key is passed to a cryptographic engine. Therefore this call
 chain is not evidence of key derivation, a fused master key, or ICU-S binding.
 
-## 7. Where the actual SecOC key most likely lives
+## 7. Where the SecOC key is represented
 
-The MCU facts and firmware layout support a different model:
+The full object table provides a concrete model that the earlier four-object pass
+missed:
 
-1. Renesas documents R7F701381/P1M-E as ICU-S-equipped.
-2. ICU-S provides SHE-style AES/CMAC acceleration and protected key storage.
-3. The normal firmware NvM configuration has 124 blocks and maps DataFlash only
-   through page 479 (`0xFF2077C0`).
-4. Pages 480–511 (`0xFF207800–0xFF207FFF`) are absent from that NvM map.
-5. This final 2 KiB reads as only `0x00`/`0xFF`, unlike normal NvM data.
-6. External RH850 programming documentation describes the last 1 or 2 KiB of
-   DataFlash on ICU-S devices as an ICU-S-reserved secure region.
+```text
+object 15: length 32, base NvM block 41, RAM mirror 0xFEBF02E8
+raw copy:   page 440, second field 0xFF206E14
+XOR55 copy: page 436, second field 0xFF206D14
+XORAA copy: page 432, second field 0xFF206C14
+RAM field:  0xFEBF02F8
+```
 
-This is strongly consistent with the SecOC key residing in an ICU-S/SHE protected
-slot in the reserved tail, selected by slot ID for CMAC operations. It does **not**
-show per-boot derivation from pages 468–479.
+Vance's partner `8965B4514000` dump and Calvin's later in-car Sienna experiment
+independently CMAC-verified the operational SecOC key at `0xFF206E14`. Thus this
+is a real key-bearing NvM object on related variants, and a valid restore makes its
+second field CPU-visible at `0xFEBF02F8`.
 
-The exact key slot and ICU-S register protocol are vendor-confidential and are not
-recoverable from the ordinary CodeFlash/NvM path analyzed here. Therefore
-“secure-slot storage/use” is the best-supported model, while the precise SecOC slot
-remains unproven.
+All three copies are invalid/uncommitted in the committed `8965B4512000` dump and
+the raw field has zero CMAC matches. Static evidence does not establish whether
+that reflects product policy, provisioning state, a masked/incomplete snapshot,
+or another operational source. The exact key source for this captured image is
+therefore unknown.
+
+Pages 480–511 remain strongly consistent with an ICU-S-reserved 2 KiB tail, but
+that hardware/layout fact no longer supports placing this SecOC key there. Secure
+ICU-S storage may hold other material.
 
 ## 8. Injection and refresh implications
 
-A standard SHE persistent-key update uses authenticated/encrypted M1–M3 messages.
-The new AES key is encrypted inside M2 and decrypted inside SHE/ICU-S; successful
-installation returns M4/M5 proof. Except for an explicit development-only
-`LOAD_PLAIN_KEY` into `RAM_KEY`, plaintext persistent keys do not need to appear in
-host CPU RAM.
+No dealer-triggered update state machine was identified. The traced path is generic
+NvM restore/persistence, but generic does not mean non-key: object 15 is key-bearing
+on field-verified related variants.
 
-No dealer-triggered key update, SHE `LOAD_KEY`, `LOAD_PLAIN_KEY`, M1–M5 parser, or
-plaintext key handoff was identified in the report's proposed path. Consequently:
+Consequently:
 
-- monitoring `0xFEBEF468/478/488` captures structured NvM state;
-- monitoring `0xFEBFEB08` captures raw/XOR redundant NvM copies;
-- hooking `0x72F58` captures `NvM_ReadBlock` destinations and contents;
-- none of these is a validated SecOC key capture point;
-- the claimed 58% dealer-tool capture design has no firmware basis.
-
-If a dealer rekey operation exists, its correct observation point must be found at
-the ICU-S/SHE command interface or at the diagnostic/RTE path carrying M1–M3—not
-in this NvM redundancy module. A real dealer trace or dynamic ICU-S SFR trace is
-needed to identify it.
+- monitoring `0xFEBEF468/478/488` still captures objects 0/1/3, not the key;
+- object 15's known related-variant locations are DataFlash `0xFF206E14` and RAM
+  `0xFEBF02F8`;
+- `0xFEBFEB08` can temporarily hold any currently processed triplicate object,
+  including object 15, but it is not a fixed key staging address;
+- hooking `0x72F58` identifies generic reads; a useful monitor must filter block
+  41/45/49 and observe completion, not treat the call as ICU key-set;
+- none of those locations contains a valid key in this exact committed snapshot;
+- the original dealer/FEBEF capture design remains unsupported.
 
 ## 9. Answers to the original questions
 
 ### How is the SecOC key injected?
 
-**Not through `0x65CD8 -> 0x66E48 -> 0x67590 -> 0x72F58`.** That is NvM state
-restore/persistence. Static evidence does not identify the production provisioning
-path. ICU-S/SHE authenticated key provisioning is the hardware-consistent model.
+The production provisioning command remains unknown. On related variants the
+result is persisted as object 15's raw/XOR55/XORAA NvM copies. No SHE M1–M5 parser
+or ICU key-set path was established in the functions originally claimed.
 
 ### How is it derived?
 
-There is **no evidence** of per-boot derivation from pages 468–479 or of a fused
-master-key KDF in this path. Pages 468–479 decode deterministically as redundant
-application state. The report's derivation claim must be retracted.
+There is no evidence of per-boot derivation from pages 468–479 or of a fused-key KDF
+in this path. Pages 468–479 are redundant application objects. Related variants
+store the already usable AES key in object 15; this exact dump has no valid copy.
 
 ### How is it refreshed?
 
-No SecOC rekey state machine was found in the claimed functions. They refresh NvM
-RAM mirrors after reads and persist changed state after writes. A genuine key
-refresh, if supported, should use the ICU-S/SHE key-update protocol and remains to
-be located dynamically.
+`0x65CD8/0x66E48/0x67608` can update and persist any configured redundancy object,
+including object 15 when addressed through namespace `0x100`. The diagnostic or
+RTE source that would authorize/populate object 15 was not identified, so a dealer
+rekey trigger remains unknown.
 
 ### Is it ever in dumpable CPU RAM?
 
-Not at any of the claimed locations. The traced CPU-visible data is fully decoded
-and is not the AES key. Static analysis cannot prove that no other code ever uses
-`LOAD_PLAIN_KEY`, but no such plaintext handoff has been identified. Persistent
-ICU-S keys are designed not to be readable by the main CPU.
+On a provisioned variant using object 15, yes: triplicate reconciliation copies the
+32-byte consensus to `0xFEBF02E8`, placing its key field at `0xFEBF02F8`. The
+previously proposed FEBEF addresses are wrong. This exact dump does not establish
+that the RAM field held a valid key at capture time.
 
 ## 10. Evidence grades
 
 | Finding | Grade |
 |---|---|
 | `0x72F58/0x72F84` are NvM ReadBlock/WriteBlock | **Definitive** |
-| pages 468–479 are redundant encoded state, not derivation metadata | **Definitive** |
-| FEBEF mirrors/workbuf do not contain the SecOC AES key in this path | **Definitive** |
-| report's rekey-capture path is invalid | **Definitive** |
-| report's per-boot ICU derivation claim is unsupported | **Definitive** |
-| final 2 KiB is the ICU-S protected storage tail | **Strong inference** |
-| SecOC key resides in a persistent ICU-S slot | **Strong inference** |
-| exact SecOC slot/provisioning/rekey diagnostic | **Unknown** |
+| pages 468–479 are redundant objects 0–3, not derivation metadata | **Definitive** |
+| object 15 is len32/base41/RAM `0xFEBF02E8` | **Definitive** |
+| `0xFF206E14` maps to object 15's RAM field `0xFEBF02F8` | **Definitive** |
+| this dump's three object-15 copies are invalid and contain no verified key | **Definitive** |
+| related variants store a CMAC-verified SecOC key at `0xFF206E14` | **Strong field evidence** |
+| report's FEBEF/key-set/derivation path is invalid | **Definitive** |
+| final 2 KiB is an ICU-S protected storage tail | **Strong inference** |
+| exact key source/provisioning path for captured `8965B4512000` | **Unknown** |
 
 ## References
 

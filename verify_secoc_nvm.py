@@ -4,6 +4,8 @@
 Reads only the committed CodeFlash/DataFlash split images. It verifies the object
 descriptors, AUTOSAR NvM service mapping, triplicate DataFlash records, decoded
 RAM values, NvM page ceiling, and the unconfigured final 2 KiB DataFlash tail.
+It covers the original objects 0..3 correction; verify_dataflash_layout.py checks
+the complete 16-object map and field-known object-15 key location.
 """
 from pathlib import Path
 import struct
@@ -111,7 +113,7 @@ for obj, length, pages, expected in objects:
     check(f"object {obj} three copies decode identically", len(set(decoded)) == 1)
     check(f"object {obj} decoded structured value", decoded[0] == expected, decoded[0].hex())
 
-print("\n== normal NvM boundary and protected tail ==")
+print("\n== normal NvM boundary and unconfigured/reserved tail ==")
 check("highest configured normal NvM page is 479", max(configured_pages) == 479,
       str(max(configured_pages)))
 check("no normal NvM job maps into pages 480..511",

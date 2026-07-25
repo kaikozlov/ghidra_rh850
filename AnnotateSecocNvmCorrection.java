@@ -34,7 +34,7 @@ public class AnnotateSecocNvmCorrection extends GhidraScript {
         rename(0x66DB2L,"secoc_nvm_queue_restore",
             "Queue state 0x11 for a configured redundant object. The scheduler later calls NvM_ReadBlock for its three copies.");
         rename(0x66E48L,"secoc_nvm_redundant_object_update",
-            "Copy changed structured state into its configured RAM mirror and queue persistence. Object 0 is 16 bytes at FEBEF468; it is not an AES key injection API.");
+            "Copy a changed object into its configured RAM mirror and queue triplicate persistence. This is generic NvM rather than a CSM key-set API; object 15 is key-bearing on field-verified related variants.");
         rename(0x66AC2L,"secoc_nvm_redundancy_scheduler",
             "Processes restore/write requests for redundant NvM objects. State 0x11 restores; 0x22/0x33 persists or validates.");
         rename(0x67162L,"secoc_nvm_state_init",
@@ -46,7 +46,7 @@ public class AnnotateSecocNvmCorrection extends GhidraScript {
         rename(0x674A8L,"secoc_nvm_checkpoint_write_submit",
             "Build counter/payload/complement NvM block and submit NvM_WriteBlock through 0x72F84. No CMAC is generated here.");
         rename(0x67590L,"secoc_nvm_restore_triplicate",
-            "Submit three NvM_ReadBlock jobs into raw/XOR55/XORAA work buffers at FEBFEB08. This is not key_set.");
+            "Submit three NvM_ReadBlock jobs into raw/XOR55/XORAA work buffers at FEBFEB08. This is generic object restore, not an ICU key-set command; configured object 15 may carry key data.");
         rename(0x67608L,"secoc_nvm_persist_triplicate",
             "Create raw, XOR55, and XORAA copies of a structured RAM object and submit three NvM_WriteBlock jobs. This is not MAC verification.");
         rename(0x67C34L,"secoc_nvm_triplicate_read_complete",
@@ -65,7 +65,7 @@ public class AnnotateSecocNvmCorrection extends GhidraScript {
             "Validate/store NvM service IDs 0x06/07/08/0C/0D/16/17/18. These match AUTOSAR NvM APIs, not ICU opcodes.");
 
         label(0x2B0ACL,"secoc_nvm_redundant_object_table",
-            "16 descriptors: length u16, base NvM block u16, RAM mirror u32. Objects 0..3 use triple blocks base/base+4/base+8.");
+            "16 descriptors: length u16, base NvM block u16, RAM mirror u32. Configured objects use base/base+4/base+8 as raw/XOR55/XORAA; object 15 is len32/base41/RAM FEBF02E8.");
         label(0x26DE0L,"nvm_block_descriptor_table",
             "124 AUTOSAR NvM block descriptors, addressed with application tp=0x23EE4.");
         label(0x277A0L,"nvm_service_magic_table",
@@ -77,7 +77,7 @@ public class AnnotateSecocNvmCorrection extends GhidraScript {
         label(0xFEBEF468L,"secoc_nvm_object0_ram_mirror","16-byte structured state (A55A5AA5/counter fields), not a SecOC AES key.");
         label(0xFEBEF478L,"secoc_nvm_object1_ram_mirror","16-byte structured NvM object; not a SecOC AES key.");
         label(0xFEBEF488L,"secoc_nvm_object3_ram_mirror","16-byte structured NvM object; not a SecOC AES key.");
-        label(0xFEBFEB08L,"secoc_nvm_triplicate_workbuf","Four groups of raw/XOR55/XORAA 32-byte buffers used by NvM restore/write operations; not a key-set staging area.");
+        label(0xFEBFEB08L,"secoc_nvm_triplicate_workbuf","Four groups of generic raw/XOR55/XORAA 32-byte buffers used by NvM restore/write operations. Not an ICU key-set API, though a key-bearing configured object can pass through them.");
 
         label(0xFF207500L,"secoc_nvm_obj3_xoraa_record","Object 3 XOR-AA persistent copy (NvM block/job 13, page 468).");
         label(0xFF207540L,"secoc_nvm_obj2_xoraa_record","Object 2 XOR-AA persistent copy (job 12, page 469).");
@@ -92,6 +92,6 @@ public class AnnotateSecocNvmCorrection extends GhidraScript {
         label(0xFF207780L,"secoc_nvm_obj1_raw_record","Object 1 raw persistent copy (job 3, page 478).");
         label(0xFF2077C0L,"secoc_nvm_obj0_raw_record","Object 0 raw persistent copy (job 2, page 479); highest normal NvM page.");
         label(0xFF207800L,"dataflash_reserved_tail_2k",
-            "Pages 480..511 are absent from the normal NvM map and read only as 00/FF. Strongly consistent with the ICU-S-reserved secure DataFlash tail; exact security layout is vendor-confidential.");
+            "Pages 480..511 are absent from the normal NvM map and read only as 00/FF. Strongly consistent with an ICU-S-reserved tail, but the SecOC key is not proven to reside here.");
     }
 }

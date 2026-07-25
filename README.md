@@ -16,8 +16,8 @@ Reproducible procedure and scripts for the China-market Sienna EPS firmware
 Evidence:
 
 - R7F701381 has 1 MiB CodeFlash + 32 KiB DataFlash.
-- The leading `0x8000` bytes match the report's DataFlash key-slot pages exactly
-  (page 468 at file `0x7500`, page 475 at `0x76c0`, etc.).
+- The leading `0x8000` bytes match the report's cited DataFlash page bytes exactly
+  (page 468 at file `0x7500`, page 475 at `0x76c0`, etc.); their corrected NvM semantics are documented in `DATAFLASH_LAYOUT.md`.
 - File `0x8180` contains `BOOT INFO AREA R7F701381...`, hence CodeFlash VA `0x180`.
 - File `0x81F2` is the report's reset handler VA `0x1F2` and begins by setting
   `gp = 0xFEBF9800`.
@@ -173,7 +173,7 @@ execution trace.
 
 ## Corrected result
 
-- **5,477 functions, 171,689 instructions, 27,492 symbols**.
+- **5,477 functions, 171,689 instructions, 27,506 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -272,11 +272,27 @@ Definitive corrections, independently checked by `verify_secoc_nvm.py` (53/53):
 - no dealer-triggered rekey, plaintext key injection, or per-boot fused-key
   derivation exists in the claimed path.
 
-Normal NvM configuration ends at page 479 (`0xFF2077C0`). The unconfigured final
-2 KiB (`0xFF207800–0xFF207FFF`) is `00/FF`-only and strongly consistent with the
-ICU-S protected DataFlash tail. Secure ICU-S slot storage/use is therefore the
-best-supported key model; the exact SecOC slot and provisioning diagnostic remain
-unproven. The proposed FEBEF/workbuf/`0x72F58` capture design is invalid.
+`DATAFLASH_LAYOUT.md` completes the entire 32 KiB map; `verify_dataflash_layout.py`
+checks 71/71 facts and `dataflash_nvm_records.csv` lists all 122 physical records.
+Key corrections:
+
+- configured normal NvM records occupy pages 256–479;
+- pages 432–479 are a 48-record raw/XOR55/XORAA bank for all 16
+  SecOC-associated redundancy objects—not 12 ICU key-slot pages;
+- object 15 is length 32, base NvM block 41, RAM mirror `0xFEBF02E8`;
+- its second field is raw `0xFF206E14`, XOR55 `0xFF206D14`, XORAA
+  `0xFF206C14`, and RAM `0xFEBF02F8`;
+- related Sienna/Yaris/partner EPS field evidence CMAC-verifies the operational
+  SecOC key at `0xFF206E14`, but all three object-15 copies are invalid in this
+  exact committed `8965B4512000` snapshot;
+- DIDs `0x201/0x202/0x203` are volatile bootloader session parameters at RAM
+  `0xFEBF2D08`/`0xFEBF2CF8`/special state, not DataFlash-backed values;
+- the final 2 KiB remains strongly consistent with an ICU-S-reserved tail, but
+  this no longer supports claiming that the SecOC key resides there.
+
+The proposed FEBEF object-0/key-set interpretation remains invalid. The exact
+operational key source for this captured 12000 image remains unknown; absence from
+the readable snapshot does not prove ICU derivation.
 
 ## Report observations
 
@@ -302,6 +318,9 @@ unproven. The proposed FEBEF/workbuf/`0x72F58` capture design is invalid.
 - `SeedSecocNvmFunctions.java` — recover valid NvM request/queue functions missed by auto-analysis.
 - `AnnotateSecocNvmCorrection.java` — replace the report's incorrect CSM/ICU/key labels with verified NvM semantics.
 - `verify_secoc_nvm.py` — verify object descriptors, NvM services, triplicate records, and the reserved DataFlash tail.
+- `AnnotateDataFlashLayout.java` — label the complete NvM regions, object-15 copies/key fields, RAM mirror, and volatile payload DIDs.
+- `generate_dataflash_layout.py` / `dataflash_nvm_records.csv` — regenerate/list all 122 configured physical records.
+- `verify_dataflash_layout.py` — independently verify the full map, 16-object bank, object-15 key-field mapping, and DID volatility.
 - `FindOperandRefs.java` — locate rendered Ghidra operand references during state-machine recovery.
 - `FindMappedSecretRefs.java` — verify direct references to both corrected secret VAs.
 - `FindMappedRegionRefs.java`, `FindBootloaderDiagnostics.java`,
