@@ -66,9 +66,9 @@ the two bootloader secrets were unreferenced. Use project **`rh850_p1me_mapped`*
 
 The fully analyzed, annotated project is committed in `project/`
 (`rh850_p1me_mapped.gpr` + `rh850_p1me_mapped.rep/`, ~24 MiB). It already
-contains the discovered functions, both secret labels, the UDS handlers, and
-the annotated SecurityAccess/payload-gate/AES/SecOC/CAN transport paths — so
-you can explore it directly without rebuilding.
+contains the discovered functions, both secret labels, the bootloader and
+application diagnostic handlers, and the annotated SecurityAccess/payload-gate/
+AES/SecOC/CAN transport paths — so you can explore it directly without rebuilding.
 
 Open it with the `ghidra` CLI. The project location must be an **absolute**
 path: Ghidra 12.1+ rejects any path component beginning with `.`
@@ -170,6 +170,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `SeedCanTransportFunctions.java`;
    - `SeedPayloadVerificationFunctions.java`;
    - `SeedSecocNvmFunctions.java`;
+   - `SeedApplicationDiagnosticFunctions.java`;
 5. re-run analysis and apply every annotation script:
    - `AnnotateBootloaderSecrets.java`;
    - `AnnotatePayloadGate.java`;
@@ -177,9 +178,10 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateDataFlashLayout.java`;
    - `AnnotateDidModel.java`;
    - `AnnotateCanTransport.java`;
+   - `AnnotateApplicationDiagnostics.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
-7. require exactly 5,484 functions, 171,829 instructions, 27,547 symbols, two
+7. require exactly 5,490 functions, 171,898 instructions, 27,589 symbols, two
    memory sections, and `0x108000` mapped bytes.
 
 Expected memory map:
@@ -194,7 +196,7 @@ and execution trace.
 
 ## Corrected result
 
-- **5,484 functions, 171,829 instructions, 27,547 symbols**.
+- **5,490 functions, 171,898 instructions, 27,589 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -331,6 +333,33 @@ The proposed FEBEF object-0/key-set interpretation remains invalid. The exact
 operational key source for this captured 12000 image remains unknown; absence from
 the readable snapshot does not prove ICU derivation.
 
+### Application diagnostics and bootloader entry
+
+`docs/APPLICATION_DIAGNOSTICS.md` separates the application diagnostic stack from
+the bootloader handlers above; `tests/verify_application_diagnostics.py` checks
+the recovered tables and control-flow evidence directly from CodeFlash:
+
+- the primary application service table at `0x25E30` contains exactly
+  `10/11/14/19/22/23/27/28/2E/31/34/36/37/3E/85/AB/BA`;
+- application DID records at `0x2A30C` expose `F181`, `F186`, and `F18C` through
+  callbacks `0x4E8E4`/`0x4E90A`/`0x4E918`;
+- application `F181` emits the real `8965B4512000` software-ID slot, while the
+  bootloader's separate four-entry DID table emits the placeholder response;
+- application DiagnosticSessionControl subfunctions 1/2/3 call wrappers at
+  `0x93FF6`/`0x94006`/`0x94016` and share an asynchronous state machine at
+  `0x93F3C`;
+- the first PROGRAMMING request in public extraction tooling is handled by this
+  application path, not bootloader handler `0x614A`;
+- bootloader `0x614A` itself queues valid transitions for task `0x6244`; helper
+  `0x4776` reserves transient main-loop state cleared by `0x479A` and is not a
+  one-attempt-per-boot latch;
+- the bootloader's functional request ID is `0x777`, not generic OBD `0x7DF`.
+
+These findings provide strong evidence for Denso software continuity when a
+related EPS returns the same application DID/service schema. They do not prove
+the related MCU, byte-identical bootloader contents, retained secrets/payload
+routines, or that a PROGRAMMING timeout must be external to the EPS.
+
 ### Confirmed CAN / ISO-TP / UDS transport
 
 `docs/CAN_TRANSPORT_ANALYSIS.md` traces the complete diagnostic path and
@@ -371,12 +400,12 @@ extraction tooling and shellcode:
 
 | Path | Contents |
 |---|---|
-| `docs/` | Payload gate, SecOC/NvM correction, DataFlash, DID, and CAN transport reports |
+| `docs/` | Payload gate, SecOC/NvM correction, DataFlash, application/bootloader diagnostics, DID, and CAN transport reports |
 | `ghidra/scripts/import/` | DataFlash attachment/import helper |
 | `ghidra/scripts/seed/` | Function and table seeds missed by auto-analysis |
 | `ghidra/scripts/annotate/` | Durable names, labels, and comments for each completed investigation |
 | `ghidra/scripts/investigate/` | Reusable reference/operand search helpers |
-| `tests/` | Six self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
+| `tests/` | Seven self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
 | `tools/` | DataFlash CSV generator, durable Ghidra rebuild, and project-statistics verifier |
 | `external-references.lock.json` | Exact upstream commits and artifact hashes |
 | `pyproject.toml`, `uv.lock` | Locked UV/PyCryptodome verification environment |
@@ -386,5 +415,5 @@ extraction tooling and shellcode:
 | `project/` | Pre-built durable Ghidra project |
 
 Use `make rebuild-project` for a non-destructive rebuild under `build/project/`.
-All seed and annotation scripts are idempotent; the rebuild script runs all of
-them in one durable headless transaction.
+All seed and annotation scripts are idempotent; the rebuild script runs them in
+staged durable headless transactions.

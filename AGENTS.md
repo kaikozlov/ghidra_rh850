@@ -129,6 +129,24 @@ the reconstructed combined firmware — trust them:
   - no VIN, serial, spare-part, configuration, or DataFlash-backed DID exists in
     these bootloader handlers. Do not project application-mode/related-variant
     probe expectations onto this table.
+- The separate application diagnostic stack is documented in
+  `docs/APPLICATION_DIAGNOSTICS.md` and checked by
+  `tests/verify_application_diagnostics.py`:
+  - the 17-entry primary application service table is at `0x25E30` and contains
+    `10/11/14/19/22/23/27/28/2E/31/34/36/37/3E/85/AB/BA`;
+  - application DID records at `0x2A30C` expose real `F181`, `F186`, and `F18C`
+    responses through callbacks `0x4E8E4`/`0x4E90A`/`0x4E918`;
+  - application session callbacks `0x93FF6`/`0x94006`/`0x94016` share the
+    asynchronous state machine at `0x93F3C`; the first `10 02` in extraction
+    tooling is an application-to-bootloader transition, not a call to bootloader
+    handler `0x614A`;
+  - bootloader handler `0x614A` also queues valid transitions for task `0x6244`;
+    `0x4776` reserves transient main-loop state cleared by `0x479A` and is not a
+    per-boot one-shot latch;
+  - bootloader functional diagnostics use CAN `0x777`, not generic OBD `0x7DF`;
+  - matching application tables in a related EPS are strong software-family
+    evidence, but do not prove its MCU, bootloader payload path, or an external
+    gateway explanation for silence.
 
 The prior "secrets are unreferenced / separate bootloader image" conclusion was
 an artifact of the wrong flat import and is **false**. The scripts that produced
@@ -140,7 +158,7 @@ it live in `legacy/flat-import/` — do not use them for current results.
 - `ghidra/scripts/seed/` contains all function/table seeds missed by analysis.
 - `ghidra/scripts/annotate/` contains the durable labels/comments for completed work.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
-- `make verify` runs six self-contained suites through UV; it must not require
+- `make verify` runs seven self-contained suites through UV; it must not require
   sibling repositories.
 - `make verify-external EXTERNAL_REPOS_DIR=...` checks optional public checkouts
   against `external-references.lock.json`.
