@@ -30,7 +30,7 @@ the two bootloader secrets were unreferenced. Use project **`rh850_p1me_mapped`*
 
 The fully analyzed, annotated project is committed in `project/`
 (`rh850_p1me_mapped.gpr` + `rh850_p1me_mapped.rep/`, ~24 MiB). It already
-contains the 5,473 discovered functions, both secret labels, the UDS handlers,
+contains the 5,477 discovered functions, both secret labels, the UDS handlers,
 and the annotated SecurityAccess/payload-gate/AES/SecOC paths — so you can
 explore it directly without rebuilding.
 
@@ -173,7 +173,7 @@ execution trace.
 
 ## Corrected result
 
-- **5,473 functions, 171,533 instructions, 27,450 symbols**.
+- **5,477 functions, 171,689 instructions, 27,492 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -254,15 +254,41 @@ payloads deliberately store `0xFEBF0000` at plaintext offset `0xFD0`. Thus
 `0xFF00` is not a direct execute-RAM service: it is an erase operation whose
 RAM-resident flash callback is overwritten by the authenticated 4 KiB image.
 
+### Corrected SecOC runtime-key investigation
+
+`SECOC_RUNTIME_KEY_LIFECYCLE.md` completely retraces the report's proposed
+`0x65CD8 -> 0x66E48 -> 0x67590 -> 0x72F58` key path. It is not a key lifecycle:
+it is an AUTOSAR NvM redundancy/checkpoint subsystem.
+
+Definitive corrections, independently checked by `verify_secoc_nvm.py` (53/53):
+
+- `0x72F58` is NvM service `0x06` (`ReadBlock`), not CSM key-set.
+- `0x72F84` is NvM service `0x07` (`WriteBlock`), not MAC generation.
+- `0x67590` restores raw/XOR55/XORAA persistent copies into `0xFEBFEB08`.
+- `0x67608` creates and persists those three copies.
+- pages 468–479 decode exactly to four structured state objects; they are not
+  ICU derivation metadata or raw AES keys.
+- `0xFEBEF468/478/488` and the workbuf contain those state records, not the SecOC key.
+- no dealer-triggered rekey, plaintext key injection, or per-boot fused-key
+  derivation exists in the claimed path.
+
+Normal NvM configuration ends at page 479 (`0xFF2077C0`). The unconfigured final
+2 KiB (`0xFF207800–0xFF207FFF`) is `00/FF`-only and strongly consistent with the
+ICU-S protected DataFlash tail. Secure ICU-S slot storage/use is therefore the
+best-supported key model; the exact SecOC slot and provisioning diagnostic remain
+unproven. The proposed FEBEF/workbuf/`0x72F58` capture design is invalid.
+
 ## Report observations
 
-- The report's function/virtual addresses are correct; the initial local analysis
-  was wrong because the combined file was imported flat.
+- The report's virtual addresses generally map to real code after correcting the
+  combined-file import, but several semantic labels and its headline ICU/key
+  lifecycle interpretation are wrong; see `SECOC_RUNTIME_KEY_LIFECYCLE.md`.
 - Appendix A says "SHA-256 hashes only," but lists 16-byte values (32 hex chars),
   not 32-byte SHA-256 values; both are the actual public secrets and validate
   cryptographically against the existing tooling/payloads.
 - DataFlash page 478 is quoted as beginning `020000cb...`; this dump actually has
-  `0200feca...`. Other cited key-slot signatures match.
+  `0200feca...`. The page bytes match the decoded triplicate NvM state described
+  in the corrected lifecycle analysis.
 
 ## Scripts
 
@@ -273,6 +299,9 @@ RAM-resident flash callback is overwritten by the authenticated 4 KiB image.
 - `SeedPayloadVerificationFunctions.java` — recover valid CMAC/RoutineControl code missed by auto-analysis.
 - `AnnotatePayloadGate.java` — name/comment the verified download, CRC, CMAC, and flash-callback path.
 - `verify_payload_gate.py` — independently verify the gate tables, callback instructions, and public payloads.
+- `SeedSecocNvmFunctions.java` — recover valid NvM request/queue functions missed by auto-analysis.
+- `AnnotateSecocNvmCorrection.java` — replace the report's incorrect CSM/ICU/key labels with verified NvM semantics.
+- `verify_secoc_nvm.py` — verify object descriptors, NvM services, triplicate records, and the reserved DataFlash tail.
 - `FindOperandRefs.java` — locate rendered Ghidra operand references during state-machine recovery.
 - `FindMappedSecretRefs.java` — verify direct references to both corrected secret VAs.
 - `FindMappedRegionRefs.java`, `FindBootloaderDiagnostics.java`,
