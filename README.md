@@ -29,10 +29,10 @@ the two bootloader secrets were unreferenced. Use project **`rh850_p1me_mapped`*
 ## Pre-built project (committed under `project/`)
 
 The fully analyzed, annotated project is committed in `project/`
-(`rh850_p1me_mapped.gpr` + `rh850_p1me_mapped.rep/`, ~12 MiB). It already
-contains the 5,445 discovered functions, both secret labels, the UDS-handler
-names, and the AES/SecOC annotations — so you can explore it directly without
-rebuilding.
+(`rh850_p1me_mapped.gpr` + `rh850_p1me_mapped.rep/`, ~24 MiB). It already
+contains the 5,473 discovered functions, both secret labels, the UDS handlers,
+and the annotated SecurityAccess/payload-gate/AES/SecOC paths — so you can
+explore it directly without rebuilding.
 
 Open it with the `ghidra` CLI. The project location must be an **absolute**
 path: Ghidra 12.1+ rejects any path component beginning with `.`
@@ -101,8 +101,7 @@ CodeFlash  21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde
 # Build in-repo. Delete project/ first if rebuilding from scratch.
 PROJDIR=/absolute/path/to/ghidra_rh850_analysis/project
 AN=/absolute/path/to/ghidra_rh850_analysis
-# Later `ghidra` CLI steps use the default cache dir unless you pass
-# --projects-dir "$AN/project" (absolute only).
+# All CLI steps below explicitly use this in-repo project directory.
 
 "$GH/support/analyzeHeadless" "$PROJDIR" rh850_p1me_mapped \
   -import "$AN/RH850_P1M-E_CodeFlash.bin" \
@@ -122,9 +121,12 @@ DataFlash  ff200000..ff207fff  rw
 ### 4. Seed report entry points and analyze
 
 ```bash
-ghidra --project rh850_p1me_mapped --program RH850_P1M-E_CodeFlash.bin \
-  script run "$AN/SeedEntries.java"
-ghidra --project rh850_p1me_mapped --program RH850_P1M-E_CodeFlash.bin analyze
+ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin script run "$AN/SeedEntries.java"
+ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin analyze
+ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin stop
 ```
 
 ### 5. Parse/seed the bootloader UDS service table
@@ -133,21 +135,45 @@ ghidra --project rh850_p1me_mapped --program RH850_P1M-E_CodeFlash.bin analyze
 and names each handler, and adds explicit data references from table entries.
 
 ```bash
-ghidra --project rh850_p1me_mapped --program RH850_P1M-E_CodeFlash.bin \
-  script run "$AN/SeedUdsServiceTable.java"
-ghidra --project rh850_p1me_mapped --program RH850_P1M-E_CodeFlash.bin analyze
+ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin script run "$AN/SeedUdsServiceTable.java"
+ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin analyze
+ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin stop
 ```
 
 ### 6. Apply secret/crypto annotations
 
 ```bash
-ghidra --project rh850_p1me_mapped --program RH850_P1M-E_CodeFlash.bin \
-  script run "$AN/AnnotateBootloaderSecrets.java"
+ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin script run "$AN/AnnotateBootloaderSecrets.java"
+ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin stop
 ```
+
+### 7. Recover and annotate the payload gate
+
+Auto-analysis misses several valid functions in the payload CMAC/RoutineControl
+path. Use a one-shot headless transaction so seeding, analysis, annotations, and
+the durable project commit cannot race the CLI daemon shutdown:
+
+```bash
+"$GH/support/analyzeHeadless" "$AN/project" rh850_p1me_mapped \
+  -process RH850_P1M-E_CodeFlash.bin \
+  -scriptPath "$AN" \
+  -preScript SeedPayloadVerificationFunctions.java \
+  -postScript AnnotateBootloaderSecrets.java \
+  -postScript AnnotatePayloadGate.java \
+  -commit
+```
+
+See `PAYLOAD_GATE_ANALYSIS.md` for the complete download, authentication, and
+execution trace.
 
 ## Corrected result
 
-- **5,445 functions, 170,833 instructions, 27,350 symbols**.
+- **5,473 functions, 171,533 instructions, 27,450 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -200,6 +226,34 @@ matches:
 derived_payload_key = AES-128-ECB-ENCRYPT(PAYLOAD_BUILD_SECRET, DID_0x201)
 ```
 
+### Complete payload acceptance and execution path
+
+The firmware-side security boundary is now fully traced in
+`PAYLOAD_GATE_ANALYSIS.md` and independently checked by
+`verify_payload_gate.py` (37/37 checks):
+
+```text
+RequestDownload 0x34 @ 0x5D68
+  -> derive payload key; initialize AES-CBC
+TransferData 0x36 @ 0x4DBA
+  -> decrypt ciphertext into 0xFEBF0000..0xFEBF0FFF
+TransferExit 0x37 @ 0x5C92
+Routine 0x10F0 @ 0x567E
+  -> validate embedded address/length
+  -> CRC32 plaintext[0:0xFF0] == 0xFFFFFFFF
+  -> CMAC(DID_0x202_IV || plaintext[0:0xFF0]) == plaintext[0xFF0:]
+  -> authorize the RAM region
+Routine 0xFF00 @ 0x567E
+  -> start legitimate erase path
+  -> flash engine loads *(uint32_t *)0xFEBF0FD0
+  -> indirect call to 0xFEBF0000 (uploaded shellcode)
+```
+
+The callback load and call are at CodeFlash `0x4350` and `0x435E`. All public
+payloads deliberately store `0xFEBF0000` at plaintext offset `0xFD0`. Thus
+`0xFF00` is not a direct execute-RAM service: it is an erase operation whose
+RAM-resident flash callback is overwritten by the authenticated 4 KiB image.
+
 ## Report observations
 
 - The report's function/virtual addresses are correct; the initial local analysis
@@ -216,6 +270,10 @@ derived_payload_key = AES-128-ECB-ENCRYPT(PAYLOAD_BUILD_SECRET, DID_0x201)
 - `SeedEntries.java` — seed report-named reset/SecOC/CSM entry points.
 - `SeedUdsServiceTable.java` — parse/seed/name the bootloader UDS table.
 - `AnnotateBootloaderSecrets.java` — name secrets and verified AES/UDS functions.
+- `SeedPayloadVerificationFunctions.java` — recover valid CMAC/RoutineControl code missed by auto-analysis.
+- `AnnotatePayloadGate.java` — name/comment the verified download, CRC, CMAC, and flash-callback path.
+- `verify_payload_gate.py` — independently verify the gate tables, callback instructions, and public payloads.
+- `FindOperandRefs.java` — locate rendered Ghidra operand references during state-machine recovery.
 - `FindMappedSecretRefs.java` — verify direct references to both corrected secret VAs.
 - `FindMappedRegionRefs.java`, `FindBootloaderDiagnostics.java`,
   `FindHandlerRegistrations.java` — investigation helpers.

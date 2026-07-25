@@ -70,6 +70,17 @@ combined firmware — trust them:
   SID `0x27` → handler `0x5516`.
 - AES-128 S-box @ `0x8FF1`, Rcon @ `0x8FE1` (note the `+1`).
 - SecurityAccess algorithm: `expected = AES-ENC(AES-DEC(SEED_KEY, data_record), ecu_seed)`.
+- The complete payload gate is documented in `PAYLOAD_GATE_ANALYSIS.md` and
+  independently checked by `verify_payload_gate.py` (37/37 pass):
+  - TransferData decrypts AES-CBC ciphertext into `0xFEBF0000..0xFEBF0FFF`.
+  - Routine `0x10F0` checks embedded address/length, CRC32 residue, then
+    `CMAC(DID_0x202_IV || plaintext[0:0xFF0])` against the final 16 bytes.
+  - Success authorizes the RAM region; failure returns NRC `0x72`.
+  - Routine `0xFF00` starts a flash erase path which loads the function pointer
+    at RAM `0xFEBF0FD0` (CodeFlash instruction `0x4350`) and calls it indirectly
+    at `0x435E`. Public payloads store `0xFEBF0000` at offset `0xFD0`.
+  - `0xFF00` is therefore not a direct execute-RAM routine; execution occurs by
+    replacing the legitimate flash-driver callback inside the authenticated image.
 
 The prior "secrets are unreferenced / separate bootloader image" conclusion was
 an artifact of the wrong flat import and is **false**. The scripts that produced
@@ -83,6 +94,10 @@ it live in `legacy-flat-import/` — do not use them for current results.
 | `SeedEntries.java` | seed report-named reset/SecOC/CSM entry points |
 | `SeedUdsServiceTable.java` | parse/seed/name the UDS table at `0x8E54` |
 | `AnnotateBootloaderSecrets.java` | name secrets + verified AES/UDS functions |
+| `SeedPayloadVerificationFunctions.java` | seed payload-CMAC/RoutineControl functions missed by auto-analysis |
+| `AnnotatePayloadGate.java` | name/comment the complete download, CRC, CMAC, and callback-execution path |
+| `verify_payload_gate.py` | independently verify tables, callback instructions, and all public payloads |
+| `FindOperandRefs.java` | locate operand references while recovering missed state-machine code |
 | `FindMappedSecretRefs.java` | verify direct refs to both corrected secret VAs |
 | `FindMappedRegionRefs.java`, `FindBootloaderDiagnostics.java`, `FindHandlerRegistrations.java` | investigation helpers |
 | `verify_findings.py` | standalone re-verification against the raw combined dump |
