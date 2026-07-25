@@ -154,31 +154,142 @@ phase 2 -> application_session_request_cancel @ 0x93E32
 phase 3 -> application_session_request_poll   @ 0x93E72
 ```
 
-### Initial request path
+### Current-session and request-shape prerequisites
 
-`0x93D28`:
+The subfunction records contain current-session allow-lists. They are enforced by
+the generic Dcm layer before the wrapper callback runs:
 
-1. validates the request object/length;
-2. calls the application transition-policy hook through
-   `0x93FE8 -> 0x8A27E -> 0x4C942`;
-3. finds the requested session in a five-entry session configuration;
-4. either updates the Dcm session and prepares the positive timing response, or
-   starts an asynchronous transition and emits NRC `0x78` (response pending).
+| Requested session | Allow-list pointer | Allowed current sessions |
+|---|---:|---|
+| default `0x01` | `0x25BAB` | default `01`, programming `02`, extended `03` |
+| programming `0x02` | `0x25B64` | programming `02`, extended `03` |
+| extended `0x03` | `0x25B66` | default `01`, extended `03` |
 
-### Asynchronous programming transition
+Thus the first Sienna application request must be **EXTENDED -> PROGRAMMING**.
+A direct DEFAULT -> PROGRAMMING request does not reach `0x94006`; already being
+in PROGRAMMING is also accepted. This table restriction is independent of the
+application-specific policy hook below.
 
-The poll path at `0x93E72` eventually invokes
-`0x93FDC -> application_session_transition_async_worker @ 0x8A244`. That worker
-uses the application's lower service path around `0x8A0C2/0x8A172` and can return
-success, failure, or pending. `application_internal_result_to_nrc @ 0x8D5FC`
-maps internal result codes to UDS NRCs including `0x22`, `0x31`, `0x72`, `0x78`,
-and vendor NRC `0x88`.
+The callback receives the subfunction after generic Dcm parsing. At `0x93D28`,
+the remaining request-data length must be zero. For the ordinary wire request,
+that means the exact two-byte UDS payload `10 02`; trailing bytes produce NRC
+`0x13`. Generic suppress-positive-response parsing can route `10 82` to the same
+subfunction, but negative responses such as `0x78` are not suppressed.
+
+### Runtime session record and timing
+
+Application `tp` is `0x23EE4`, so the five 10-byte records scanned as
+`tp+0x2412+n*10` start at `0x262F6`. The PROGRAMMING record is at `0x26300`:
+
+```text
+02 02 32 00 88 13 D0 07 F4 01
+```
+
+The first byte is transition kind `2`, selecting the asynchronous handoff. The
+second is session `2`. The response timing words include P2 `0x0032` = 50 ms and
+encoded P2* `0x01F4` = 500 units = 5,000 ms. The two intermediate configuration
+words are `0x1388` and `0x07D0`; their exact generated-Dcm field names have not
+been recovered. The same timing values occur in the default and extended
+records, so no one-second pre-request delay is encoded as a PROGRAMMING
+prerequisite.
+
+### Immediate vehicle-speed policy
+
+`0x93D28` calls:
+
+```text
+0x93FE8 -> application_session_transition_check_adapter @ 0x8A27E
+         -> application_session_transition_policy @ 0x4C942
+```
+
+Disassembly resolves the calling-convention ambiguity: the adapter places the
+current session in `r6` and requested session in `r7`. The policy ignores `r6`.
+It rejects only requested session `2` when:
+
+```text
+uint16(FEBFC892) > uint16(CodeFlash[0x181DC])
+                         0x0180
+```
+
+Internal result `0x0B` is mapped by `0x8D5FC` to standard UDS NRC `0x88`,
+`vehicleSpeedTooHigh` (not a vendor-specific NRC). Elsewhere at `0x5379C`, the
+same RAM value is converted as `raw * 100 / 128`; threshold `0x0180` therefore
+becomes 300 scaled units, strongly indicating a **3.00 km/h** ceiling. The raw
+comparison and NRC meaning are definitive; the physical-unit reconstruction is
+a strong inference.
+
+There is no security-unlock, DTC-setting, communication-control, tester-present,
+or prior failed-attempt check in this policy.
+
+### Asynchronous handoff prerequisites
+
+After the speed check passes, `0x93D28` selects transition kind 2, stores pending
+state, and emits NRC `0x78`. Polling reaches:
+
+```text
+0x93E72 -> 0x93FDC -> application_session_transition_async_worker @ 0x8A244
+```
+
+The worker has two generated lower stages:
+
+1. `application_programming_prepare_handoff @ 0x8A0C2` calls `0x8A01C` with
+   operation `0x08000200`, status `10`, and no payload.
+2. `application_programming_commit_handoff @ 0x8A172` calls `0x8A01C` with
+   operation `0x08000201`, status `10`, and four zero bytes.
+
+Crucially, `0x8A01C`, its poll helper `0x8A020`, and token validator `0x8D534`
+are compiled stubs in this image: they return immediate success/valid without
+using the operation ID or payload. These constants therefore do **not** prove an
+NvM boot-selection write. The observed handoff state at `0xFEBF3B14` is explicitly
+zeroed before the second call.
+
+Between those stages, `0x4C960` requires all three of the following:
+
+| Check | Exact condition | Failure |
+|---|---|---|
+| status input | byte `FEBFC81F != 0x11` | internal `1` -> NRC `0x22` |
+| scaled supply input | `uint16(FEBF4692) >= 0x0A00` (`CodeFlash 0x181DE`) | internal `1` -> NRC `0x22` |
+| alternate-handoff flag | byte `FEBF6152 == 0` | internal `1` -> NRC `0x22` |
+
+The supply value is converted elsewhere as `raw * 10 / 256`; `0x0A00` becomes
+100 scaled units, strongly indicating a **10.0 V** minimum. The first status
+byte's physical meaning is not yet resolved, so it is intentionally not named as
+an ignition, READY, or communication state. `FEBF6152` is set from an application
+initialization callback (`0x8F1E8 -> 0x8A00C -> 0x4C506`); normal diagnostic
+operation requires its clear branch.
+
+No latch requires a power cycle between attempts. The worker state is reset by
+`0x8A082 -> 0x8A044`, and the one-request marker at `FEBF6166` is explicitly
+cleared before a new reset request.
+
+### Reset/shutdown behavior
+
+When both lower stages succeed, `application_programming_reset_request @ 0x4C98C`:
+
+1. checks that `FEBF6152` is clear;
+2. if marker `FEBF6166` is clear, invokes the system event API at `0xB02BC` with
+   event `9`;
+3. sets `FEBF6166 = 0x5A` so that the event is queued once.
+
+`system_mode_coordinator @ 0xB0518` checks event 9 in every ordinary mode and
+moves to mode `0x900`. Its entry callback at `0xB20EA` writes paired subsystem
+shutdown requests `0x70017001` and `0x00020002`. The coordinator then advances
+through mode `0x800`; its final reset branch reaches `0x608AA`, which disables
+hardware, programs reset/watchdog registers, invokes the low-level reset helper,
+and loops forever awaiting reset.
+
+After event 9 is queued, `0x8A244` latches `FEBF3B19 = 0x5A` and deliberately
+returns internal value `10` (pending), not success. The UDS path therefore keeps
+NRC `0x78`/pending semantics while shutdown and reset overtake it; an application
+`50 02` is not required before the CAN endpoint disappears. This behavior can
+look exactly like a client timeout when the client consumes response-pending
+frames and waits for a final positive response.
 
 This is the code relevant to the **first** `10 02` in the public extraction flow.
 The tooling reads an application `F181`, sends DEFAULT -> EXTENDED -> PROGRAMMING,
-then reads the bootloader's placeholder `F181`. The bootloader handler at `0x614A`
-is therefore not sufficient to explain whether that first request was accepted,
-filtered, or stalled.
+then expects the bootloader's placeholder `F181`. The bootloader handler at
+`0x614A` cannot explain the first request, and a silent final response is
+compatible with the confirmed application reset path.
 
 ## 4. Corrected bootloader session-control interpretation
 
@@ -223,30 +334,50 @@ been traced end-to-end, so `0x777` should be treated as a high-value,
 firmware-grounded test—not as proof that every related application must listen on
 that ID.
 
-## 6. Related-variant interpretation and limits
+## 6. Corolla comparison
 
-A related EPS that returns:
+The 2025 Corolla Hybrid observations for EPS `8965F1208000` show the same
+application-facing identity shape (`F181`, `F186`, and `F18C`) and successful
+DEFAULT/EXTENDED sessions. That is strong evidence of related Denso application
+architecture, but the Sienna prerequisites must be compared individually:
 
-- a counted list of one or more 16-byte software IDs from `F181`;
-- current session from `F186`;
-- an ASCII serial from `F18C`;
-- the same application service set;
+| Sienna requirement/behavior | Corolla probe status | Interpretation |
+|---|---|---|
+| start in EXTENDED (`F186=03`) or PROGRAMMING | **tested** by extended -> programming sequences | matches the required Sienna starting session |
+| direct DEFAULT -> PROGRAMMING | **tested but invalid for Sienna** | its failure/silence says nothing about the valid Sienna path |
+| exact physical `10 02` to `0x7A1` | **tested** | correct physical request shape/ID |
+| speed `<= 0x0180` raw (strongly 3.00 km/h) | **likely but not measured from EPS RAM** in stationary/Not-Ready tests | no observed motion suggests it was met, but this is not a firmware-level Corolla proof |
+| scaled supply `>= 0x0A00` (strongly 10.0 V) | **not measured** | a low-voltage condition remains an untested Sienna-equivalent NRC `0x22` cause |
+| status byte not `0x11` | **not identified or measured** | this is the only unresolved ordinary-state input in the Sienna lower gate |
+| security unlock before `10 02` | **not required by Sienna** | Corolla security-first attempts test a variant difference, not a Sienna prerequisite |
+| `0x85`/`0x28` preamble | **not required by Sienna** | those experiments may reveal Corolla-specific behavior but cannot satisfy a missing Sienna gate |
+| one-second settle/tester-present/double request | **not required by Sienna** | no such prerequisite exists in the session record or policy |
+| initial and continuing NRC `0x78` followed by shutdown/reset | client reports final timeout/silence | compatible with the Sienna path because the client waits for a final `50 02` that the reset can overtake |
+| bootloader functional request at `0x777` | **untested**; probes used `0x7DF` | the firmware-derived functional path remains open |
+| post-reset bootloader response on `0x7A9` | not conclusively captured during the reset window | required to distinguish successful silent handoff from Corolla policy/filtering |
 
-is showing strong structural continuity with this Denso application stack. This
-supports investigating the known bootloader-entry and payload path before assuming
-that a different part-number prefix implies a completely different implementation.
+The key correction is that Sienna does **not** require a secret preamble. Its
+valid path is EXTENDED -> PROGRAMMING while stationary, with adequate supply and
+one unresolved status input. It then queues reset while keeping UDS pending. A
+Corolla timeout after a valid extended request is therefore not, by itself,
+evidence of either refusal or gateway filtering.
 
-It still does **not** prove:
+A post-timeout `F186` read is also not decisive: if the ECU reset into the
+bootloader and then returned to the application before the read, it will again
+report default/application state. The discriminating probe is reset-window
+capture on every panda bus for response ID `0x7A9`, followed by bootloader `F181`
+and functional `10 02`/preamble traffic on `0x777` rather than `0x7DF`.
 
-- the MCU part number;
-- byte-identical application transition policy;
-- the identity of an intervening gateway or diagnostic master;
-- that silence on `10 02` is external rather than an application policy/stall;
-- that `SEED_KEY_SECRET`, `PAYLOAD_BUILD_SECRET`, DIDs `0201/0202/0203`, or
-  routines `10F0/FF00` are retained in the related bootloader.
+The similarity still does **not** prove:
 
-Those require either successful bootloader entry, a firmware image from the
-related EPS, or additional transport/gateway evidence.
+- the Corolla MCU part number or byte-identical application policy;
+- the semantic identity/value of the Sienna status byte in the Corolla;
+- the identity of responder `0x7F1` or an intervening gateway/diagnostic master;
+- that the Corolla bootloader retains `SEED_KEY_SECRET`, `PAYLOAD_BUILD_SECRET`,
+  DIDs `0201/0202/0203`, or routines `10F0/FF00`.
+
+Those require successful bootloader capture or a firmware image from part
+`8965F-12080`.
 
 ## 7. Evidence grades
 
@@ -256,8 +387,15 @@ related EPS, or additional transport/gateway evidence.
 | application `F181/F186/F18C` records and callback addresses | **Definitive** |
 | `F181` copies one stored 16-byte software ID in this image | **Definitive** |
 | session 1/2/3 wrapper callbacks and shared state machine | **Definitive** |
+| PROGRAMMING is allowed only from current session 2 or 3 | **Definitive** |
+| programming policy rejects raw speed above `0x0180` with NRC `0x88` | **Definitive** |
+| `0x0180` represents 3.00 km/h | **Strong inference from conversion and NRC semantics** |
+| lower handoff requires status != `0x11`, supply >= `0x0A00`, and flag clear | **Definitive** |
+| `0x0A00` represents 10.0 V | **Strong inference from conversion and use** |
+| lower operation IDs `0x08000200/201` write an NvM boot flag | **Unsupported; compiled callee is a no-op stub** |
 | application session state machine supports asynchronous transition and NRC `0x78` | **Definitive** |
-| PROGRAMMING uses that asynchronous lower transition to enter the bootloader | **Strong inference** |
+| successful PROGRAMMING queues event 9, shutdown mode `0x900`, and reset sequencing | **Definitive** |
+| reset reaches the bootloader rather than returning directly to application | **Strong inference** |
 | bootloader `0x614A` queues valid transitions instead of responding directly | **Definitive** |
 | `0x4776` state is cleared by the main-loop task and is not per-boot one-shot | **Definitive** |
 | a related real-identifier response indicates application mode | **Strong inference** |

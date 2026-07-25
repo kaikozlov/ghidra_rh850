@@ -34,5 +34,7 @@ public class SeedApplicationDiagnosticFunctions extends GhidraScript {
         ensureFunction(0x93FF6L,"application_session_default_callback");
         ensureFunction(0x94006L,"application_session_programming_callback");
         ensureFunction(0x94016L,"application_session_extended_callback");
+        ensureFunction(0x93F9AL,"application_session_transition_background_poll");
+        ensureFunction(0xB20EAL,"system_programming_shutdown_mode_entry");
     }
 }

@@ -137,9 +137,13 @@ the reconstructed combined firmware — trust them:
   - application DID records at `0x2A30C` expose real `F181`, `F186`, and `F18C`
     responses through callbacks `0x4E8E4`/`0x4E90A`/`0x4E918`;
   - application session callbacks `0x93FF6`/`0x94006`/`0x94016` share the
-    asynchronous state machine at `0x93F3C`; the first `10 02` in extraction
-    tooling is an application-to-bootloader transition, not a call to bootloader
-    handler `0x614A`;
+    asynchronous state machine at `0x93F3C`; PROGRAMMING is allowed only from
+    current session 2/3, rejects raw speed above `0x0180` with NRC `0x88`, and
+    requires status != `0x11`, scaled supply >= `0x0A00`, and a clear handoff flag;
+  - the `0x08000200/201` callees are compiled no-op stubs; successful PROGRAMMING
+    queues system event 9, shutdown mode `0x900`, and hardware reset while UDS
+    remains pending. The first `10 02` in extraction tooling is therefore an
+    application reset/handoff, not a call to bootloader handler `0x614A`;
   - bootloader handler `0x614A` also queues valid transitions for task `0x6244`;
     `0x4776` reserves transient main-loop state cleared by `0x479A` and is not a
     per-boot one-shot latch;

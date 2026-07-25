@@ -181,7 +181,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateApplicationDiagnostics.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
-7. require exactly 5,490 functions, 171,898 instructions, 27,589 symbols, two
+7. require exactly 5,492 functions, 171,898 instructions, 27,594 symbols, two
    memory sections, and `0x108000` mapped bytes.
 
 Expected memory map:
@@ -196,7 +196,7 @@ and execution trace.
 
 ## Corrected result
 
-- **5,490 functions, 171,898 instructions, 27,589 symbols**.
+- **5,492 functions, 171,898 instructions, 27,594 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -348,8 +348,15 @@ the recovered tables and control-flow evidence directly from CodeFlash:
 - application DiagnosticSessionControl subfunctions 1/2/3 call wrappers at
   `0x93FF6`/`0x94006`/`0x94016` and share an asynchronous state machine at
   `0x93F3C`;
+- application PROGRAMMING is allowed only from current session 2 or 3, rejects
+  raw speed above `0x0180` with NRC `0x88`, and then requires an unresolved
+  status byte, scaled supply at least `0x0A00`, and a clear handoff flag;
+- the generated `0x08000200/201` lower calls are no-op stubs in this image;
+  successful entry instead queues system event 9, shutdown mode `0x900`, and
+  the hard-reset path while UDS remains response-pending;
 - the first PROGRAMMING request in public extraction tooling is handled by this
-  application path, not bootloader handler `0x614A`;
+  application path, not bootloader handler `0x614A`, and its final timeout is
+  compatible with reset overtaking the final positive response;
 - bootloader `0x614A` itself queues valid transitions for task `0x6244`; helper
   `0x4776` reserves transient main-loop state cleared by `0x479A` and is not a
   one-attempt-per-boot latch;

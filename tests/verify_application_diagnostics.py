@@ -84,10 +84,50 @@ check("programming wrapper passes requested session 2",
       CF[0x94006:0x94016] == bytes.fromhex("8007210086000242bfff2eff40063f00"))
 check("extended wrapper passes requested session 3",
       CF[0x94016:0x94026] == bytes.fromhex("8007210086000342bfff1eff40063f00"))
+check("default subfunction allows current sessions 1/2/3",
+      CF[session_rows[0][2]:session_rows[0][2] + session_rows[0][4]] == bytes([1, 2, 3]))
+check("programming subfunction allows only current sessions 2/3",
+      CF[session_rows[1][2]:session_rows[1][2] + session_rows[1][4]] == bytes([2, 3]))
+check("extended subfunction allows only current sessions 1/3",
+      CF[session_rows[2][2]:session_rows[2][2] + session_rows[2][4]] == bytes([1, 3]))
+SESSION_CONFIG = struct.Struct("<BBHHHH")
+programming_config = SESSION_CONFIG.unpack_from(CF, 0x26300)
+check("programming runtime config selects async kind 2/session 2",
+      programming_config[:2] == (2, 2), repr(programming_config))
+check("programming runtime config carries 50 ms P2 and encoded 5 s P2*",
+      programming_config[2] == 50 and programming_config[5] == 500,
+      repr(programming_config))
 check("application result mapper contains NRC 0x78",
       bytes.fromhex("7800") in CF[0x8D5FC:0x8D680])
-check("application result mapper contains vendor NRC 0x88",
+check("application result mapper contains vehicleSpeedTooHigh NRC 0x88",
       bytes.fromhex("200e88ff") in CF[0x8D5FC:0x8D680])
+
+print("\n== programming policy and reset handoff ==")
+check("programming calibrations are speed 0x0180 and supply 0x0A00",
+      struct.unpack_from("<HH", CF, 0x181DC) == (0x0180, 0x0A00))
+check("speed policy has exact recovered body",
+      CF[0x4C942:0x4C960] == bytes.fromhex(
+          "8700e40f9330623a9a0d409e0200f39fdd81f309b3050b527f0000527f00"))
+check("lower request/poll stubs return immediate success",
+      CF[0x8A01C:0x8A024] == bytes.fromhex("00527f0000527f00"))
+check("lower token validator returns 0x5A",
+      CF[0x8D534:0x8D53A] == bytes.fromhex("20565a007f00"))
+check("prepare stage embeds operation 0x08000200",
+      bytes.fromhex("00020008") in CF[0x8A0C2:0x8A172])
+check("commit stage embeds operation 0x08000201",
+      bytes.fromhex("01020008") in CF[0x8A172:0x8A244])
+check("reset request queues system event 9",
+      CF[0x4C9A0:0x4C9A6] == bytes.fromhex("09328bff5a16"),
+      CF[0x4C9A0:0x4C9A6].hex())
+check("mode 0x900 callback table points to shutdown entry/exit",
+      struct.unpack_from("<II", CF, 0xAEB48) == (0xB20EA, 0xB213A))
+check("shutdown entry carries subsystem request 0x70017001",
+      struct.pack("<I", 0x70017001) in CF[0xB20EA:0xB213A])
+check("shutdown entry carries subsystem request 0x00020002",
+      struct.pack("<I", 0x00020002) in CF[0xB20EA:0xB213A])
+check("hard-reset path enters an intentional terminal loop",
+      CF[0x60928:0x6092A] == bytes.fromhex("8505"),
+      CF[0x60928:0x6092A].hex())
 
 print("\n== bootloader/application separation ==")
 BOOT_SERVICE = struct.Struct("<BBHI")
