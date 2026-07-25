@@ -3,6 +3,25 @@
 Reproducible procedure and scripts for the China-market Sienna EPS firmware
 (`8965B4512000`, RH850/P1M-E R7F701381).
 
+## Repository layout
+
+```text
+docs/                 analysis reports by subsystem
+firmware/             committed CodeFlash/DataFlash split images
+data/                 generated analysis artifacts
+ghidra/scripts/       import, seed, annotation, and investigation scripts
+project/              durable annotated Ghidra project
+tests/                independent raw-firmware verification suites
+tools/                data generators
+legacy/flat-import/   preserved invalid flat-import investigation
+```
+
+Run every independent verification suite with:
+
+```bash
+make verify
+```
+
 ## Critical file-layout correction
 
 `RH850_P1M-E_Firmware.bin` is **not** one flat block beginning at virtual address
@@ -17,7 +36,7 @@ Evidence:
 
 - R7F701381 has 1 MiB CodeFlash + 32 KiB DataFlash.
 - The leading `0x8000` bytes match the report's cited DataFlash page bytes exactly
-  (page 468 at file `0x7500`, page 475 at `0x76c0`, etc.); their corrected NvM semantics are documented in `DATAFLASH_LAYOUT.md`.
+  (page 468 at file `0x7500`, page 475 at `0x76c0`, etc.); their corrected NvM semantics are documented in `docs/DATAFLASH_LAYOUT.md`.
 - File `0x8180` contains `BOOT INFO AREA R7F701381...`, hence CodeFlash VA `0x180`.
 - File `0x81F2` is the report's reset handler VA `0x1F2` and begins by setting
   `gp = 0xFEBF9800`.
@@ -84,8 +103,10 @@ Adjust the copy paths to the repository root if running from another directory.
 from pathlib import Path
 src = Path("../RH850_P1m-E/RH850_P1M-E_Firmware.bin").read_bytes()
 assert len(src) == 0x108000
-Path("RH850_P1M-E_DataFlash.bin").write_bytes(src[:0x8000])
-Path("RH850_P1M-E_CodeFlash.bin").write_bytes(src[0x8000:])
+out = Path("firmware")
+out.mkdir(exist_ok=True)
+(out / "RH850_P1M-E_DataFlash.bin").write_bytes(src[:0x8000])
+(out / "RH850_P1M-E_CodeFlash.bin").write_bytes(src[0x8000:])
 ```
 
 Current split-file SHA-256 values:
@@ -99,16 +120,17 @@ CodeFlash  21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde
 
 ```bash
 # Build in-repo. Delete project/ first if rebuilding from scratch.
-PROJDIR=/absolute/path/to/ghidra_rh850_analysis/project
-AN=/absolute/path/to/ghidra_rh850_analysis
-# All CLI steps below explicitly use this in-repo project directory.
+ROOT=/absolute/path/to/ghidra_rh850_analysis
+PROJDIR="$ROOT/project"
+FIRMWARE="$ROOT/firmware"
+SCRIPTS="$ROOT/ghidra/scripts"
 
 "$GH/support/analyzeHeadless" "$PROJDIR" rh850_p1me_mapped \
-  -import "$AN/RH850_P1M-E_CodeFlash.bin" \
+  -import "$FIRMWARE/RH850_P1M-E_CodeFlash.bin" \
   -processor v850e3:LE:32:default \
   -noanalysis \
-  -scriptPath "$AN" \
-  -postScript AddDataFlash.java "$AN/RH850_P1M-E_DataFlash.bin"
+  -scriptPath "$SCRIPTS/import" \
+  -postScript AddDataFlash.java "$FIRMWARE/RH850_P1M-E_DataFlash.bin"
 ```
 
 Expected memory map:
@@ -121,34 +143,34 @@ DataFlash  ff200000..ff207fff  rw
 ### 4. Seed report entry points and analyze
 
 ```bash
-ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin script run "$AN/SeedEntries.java"
-ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin script run "$SCRIPTS/seed/SeedEntries.java"
+ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
   --program RH850_P1M-E_CodeFlash.bin analyze
-ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
   --program RH850_P1M-E_CodeFlash.bin stop
 ```
 
 ### 5. Parse/seed the bootloader UDS service table
 
-`SeedUdsServiceTable.java` parses the 20-entry table at CodeFlash `0x8E54`, creates
+`ghidra/scripts/seed/SeedUdsServiceTable.java` parses the 20-entry table at CodeFlash `0x8E54`, creates
 and names each handler, and adds explicit data references from table entries.
 
 ```bash
-ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin script run "$AN/SeedUdsServiceTable.java"
-ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin script run "$SCRIPTS/seed/SeedUdsServiceTable.java"
+ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
   --program RH850_P1M-E_CodeFlash.bin analyze
-ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
   --program RH850_P1M-E_CodeFlash.bin stop
 ```
 
 ### 6. Apply secret/crypto annotations
 
 ```bash
-ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin script run "$AN/AnnotateBootloaderSecrets.java"
-ghidra --projects-dir "$AN/project" --project rh850_p1me_mapped \
+ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
+  --program RH850_P1M-E_CodeFlash.bin script run "$SCRIPTS/annotate/AnnotateBootloaderSecrets.java"
+ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
   --program RH850_P1M-E_CodeFlash.bin stop
 ```
 
@@ -159,16 +181,16 @@ path. Use a one-shot headless transaction so seeding, analysis, annotations, and
 the durable project commit cannot race the CLI daemon shutdown:
 
 ```bash
-"$GH/support/analyzeHeadless" "$AN/project" rh850_p1me_mapped \
+"$GH/support/analyzeHeadless" "$PROJDIR" rh850_p1me_mapped \
   -process RH850_P1M-E_CodeFlash.bin \
-  -scriptPath "$AN" \
+  -scriptPath "$SCRIPTS/seed;$SCRIPTS/annotate" \
   -preScript SeedPayloadVerificationFunctions.java \
   -postScript AnnotateBootloaderSecrets.java \
   -postScript AnnotatePayloadGate.java \
   -commit
 ```
 
-See `PAYLOAD_GATE_ANALYSIS.md` for the complete download, authentication, and
+See `docs/PAYLOAD_GATE_ANALYSIS.md` for the complete download, authentication, and
 execution trace.
 
 ## Corrected result
@@ -229,8 +251,8 @@ derived_payload_key = AES-128-ECB-ENCRYPT(PAYLOAD_BUILD_SECRET, DID_0x201)
 ### Complete payload acceptance and execution path
 
 The firmware-side security boundary is now fully traced in
-`PAYLOAD_GATE_ANALYSIS.md` and independently checked by
-`verify_payload_gate.py` (37/37 checks):
+`docs/PAYLOAD_GATE_ANALYSIS.md` and independently checked by
+`tests/verify_payload_gate.py` (37/37 checks):
 
 ```text
 RequestDownload 0x34 @ 0x5D68
@@ -256,11 +278,11 @@ RAM-resident flash callback is overwritten by the authenticated 4 KiB image.
 
 ### Corrected SecOC runtime-key investigation
 
-`SECOC_RUNTIME_KEY_LIFECYCLE.md` completely retraces the report's proposed
+`docs/SECOC_RUNTIME_KEY_LIFECYCLE.md` completely retraces the report's proposed
 `0x65CD8 -> 0x66E48 -> 0x67590 -> 0x72F58` key path. It is not a key lifecycle:
 it is an AUTOSAR NvM redundancy/checkpoint subsystem.
 
-Definitive corrections, independently checked by `verify_secoc_nvm.py` (53/53):
+Definitive corrections, independently checked by `tests/verify_secoc_nvm.py` (53/53):
 
 - `0x72F58` is NvM service `0x06` (`ReadBlock`), not CSM key-set.
 - `0x72F84` is NvM service `0x07` (`WriteBlock`), not MAC generation.
@@ -272,8 +294,8 @@ Definitive corrections, independently checked by `verify_secoc_nvm.py` (53/53):
 - no dealer-triggered rekey, plaintext key injection, or per-boot fused-key
   derivation exists in the claimed path.
 
-`DATAFLASH_LAYOUT.md` completes the entire 32 KiB map; `verify_dataflash_layout.py`
-checks 71/71 facts and `dataflash_nvm_records.csv` lists all 122 physical records.
+`docs/DATAFLASH_LAYOUT.md` completes the entire 32 KiB map; `tests/verify_dataflash_layout.py`
+checks 71/71 facts and `data/dataflash_nvm_records.csv` lists all 122 physical records.
 Key corrections:
 
 - configured normal NvM records occupy pages 256–479;
@@ -290,8 +312,8 @@ Key corrections:
 - the final 2 KiB remains strongly consistent with an ICU-S-reserved tail, but
   this no longer supports claiming that the SecOC key resides there.
 
-`DID_MODEL.md` completes the bootloader ReadDataByIdentifier/WriteDataByIdentifier
-model; `verify_did_model.py` checks 46/46 facts directly from CodeFlash:
+`docs/DID_MODEL.md` completes the bootloader ReadDataByIdentifier/WriteDataByIdentifier
+model; `tests/verify_did_model.py` checks 46/46 facts directly from CodeFlash:
 
 - the table at `0x8F14` has exactly four descriptors;
 - `F181` is the sole readable DID and returns `02 || 32*0x21`, not a VIN or
@@ -311,8 +333,8 @@ the readable snapshot does not prove ICU derivation.
 
 ### Confirmed CAN / ISO-TP / UDS transport
 
-`CAN_TRANSPORT_ANALYSIS.md` traces the complete diagnostic path and
-`verify_can_transport.py` independently checks it directly against CodeFlash and
+`docs/CAN_TRANSPORT_ANALYSIS.md` traces the complete diagnostic path and
+`tests/verify_can_transport.py` independently checks it directly against CodeFlash and
 the local extraction tooling:
 
 - standard physical request ID **`0x7A1`** routes through channel 1/common FIFO
@@ -336,7 +358,7 @@ the local extraction tooling:
 
 - The report's virtual addresses generally map to real code after correcting the
   combined-file import, but several semantic labels and its headline ICU/key
-  lifecycle interpretation are wrong; see `SECOC_RUNTIME_KEY_LIFECYCLE.md`.
+  lifecycle interpretation are wrong; see `docs/SECOC_RUNTIME_KEY_LIFECYCLE.md`.
 - Appendix A says "SHA-256 hashes only," but lists 16-byte values (32 hex chars),
   not 32-byte SHA-256 values; both are the actual public secrets and validate
   cryptographically against the existing tooling/payloads.
@@ -344,33 +366,21 @@ the local extraction tooling:
   `0200feca...`. The page bytes match the decoded triplicate NvM state described
   in the corrected lifecycle analysis.
 
-## Scripts
+## Analysis assets
 
-- `AddDataFlash.java` — attach DataFlash at `0xFF200000`.
-- `SeedEntries.java` — seed report-named reset/SecOC/CSM entry points.
-- `SeedUdsServiceTable.java` — parse/seed/name the bootloader UDS table.
-- `AnnotateBootloaderSecrets.java` — name secrets and verified AES/UDS functions.
-- `SeedPayloadVerificationFunctions.java` — recover valid CMAC/RoutineControl code missed by auto-analysis.
-- `AnnotatePayloadGate.java` — name/comment the verified download, CRC, CMAC, and flash-callback path.
-- `verify_payload_gate.py` — independently verify the gate tables, callback instructions, and public payloads.
-- `SeedSecocNvmFunctions.java` — recover valid NvM request/queue functions missed by auto-analysis.
-- `AnnotateSecocNvmCorrection.java` — replace the report's incorrect CSM/ICU/key labels with verified NvM semantics.
-- `verify_secoc_nvm.py` — verify object descriptors, NvM services, triplicate records, and the reserved DataFlash tail.
-- `AnnotateDataFlashLayout.java` — label the complete NvM regions, object-15 copies/key fields, RAM mirror, and volatile payload DIDs.
-- `generate_dataflash_layout.py` / `dataflash_nvm_records.csv` — regenerate/list all 122 configured physical records.
-- `verify_dataflash_layout.py` — independently verify the full map, 16-object bank, object-15 key-field mapping, and DID volatility.
-- `AnnotateDidModel.java` — name/comment the complete four-entry DID table, response helpers, ordering state, RAM buffers, and access state.
-- `verify_did_model.py` — independently verify the descriptor table, F181 response, WDBI ordering, consumers, and tooling correlation.
-- `SeedCanTransportFunctions.java` — recover missed CanTp callback, confirmation, and RSCFD receive entry points.
-- `AnnotateCanTransport.java` — name/comment the RSCFD, CanIf, CanTp, PduR, Dcm, and UDS dispatch chain and its configuration tables.
-- `verify_can_transport.py` — independently verify CAN IDs, hardware routing/registers, ISO-TP dispatch, UDS integration, and tooling correlation.
-- `FindOperandRefs.java` — locate rendered Ghidra operand references during state-machine recovery.
-- `FindMappedSecretRefs.java` — verify direct references to both corrected secret VAs.
-- `FindMappedRegionRefs.java`, `FindBootloaderDiagnostics.java`,
-  `FindHandlerRegistrations.java` — investigation helpers.
-- `legacy-flat-import/` — preserved scripts from the invalid flat-import analysis;
-  do not use them for current results.
+| Path | Contents |
+|---|---|
+| `docs/` | Payload gate, SecOC/NvM correction, DataFlash, DID, and CAN transport reports |
+| `ghidra/scripts/import/` | DataFlash attachment/import helper |
+| `ghidra/scripts/seed/` | Function and table seeds missed by auto-analysis |
+| `ghidra/scripts/annotate/` | Durable names, labels, and comments for each completed investigation |
+| `ghidra/scripts/investigate/` | Reusable reference/operand search helpers |
+| `tests/` | Six independent verification suites; run all with `make verify` |
+| `tools/` | DataFlash CSV generator; run with `make generate-dataflash` |
+| `data/` | Generated 122-record NvM map |
+| `firmware/` | Correctly split CodeFlash and DataFlash images |
+| `legacy/flat-import/` | Preserved scripts from the invalid original mapping; do not use |
+| `project/` | Pre-built durable Ghidra project |
 
-The analyzed project is committed in this repo under `project/`. To rebuild it
-from scratch, delete `project/` and run the procedure in §Import procedure above,
-which imports directly into `project/`.
+To rebuild the project from scratch, delete `project/` and run the import
+procedure above. All seed and annotation scripts are idempotent.

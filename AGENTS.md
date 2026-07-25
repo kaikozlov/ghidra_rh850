@@ -17,9 +17,20 @@ flat block. Always split before importing:
 | `0x000000–0x007fff` | `0x8000` | `0xFF200000–0xFF207FFF` | DataFlash |
 | `0x008000–0x107fff` | `0x100000` | `0x00000000–0x000FFFFF` | CodeFlash |
 
-Mapping CodeFlash VA = `file_offset − 0x8000`. The committed
-`RH850_P1M-E_CodeFlash.bin` / `_DataFlash.bin` are already split; `verify_findings.py`
-re-checks the split hashes and every finding against the raw combined dump.
+Mapping CodeFlash VA = `file_offset − 0x8000`. The committed images under
+`firmware/` are already split; `tests/verify_findings.py` re-checks their hashes
+and every base finding against the raw combined dump.
+
+## Repository layout
+
+- `docs/` — subsystem analysis reports.
+- `firmware/` — committed CodeFlash/DataFlash split images.
+- `data/` — generated analysis artifacts.
+- `ghidra/scripts/{import,seed,annotate,investigate}/` — Ghidra scripts by role.
+- `tests/` — independent raw-firmware verification suites (`make verify`).
+- `tools/` — generators (`make generate-dataflash`).
+- `project/` — durable annotated Ghidra project; do not move transient state here.
+- `legacy/flat-import/` — preserved invalid original analysis.
 
 ## The `ghidra` CLI is a persistent daemon — durability is the main trap
 
@@ -58,7 +69,7 @@ If you re-run `analyze` or any `script run` and want to keep the result, run
 
 ## Verified findings (do not re-claim the old wrong conclusions)
 
-These are all checked by `verify_findings.py` (22/22 pass) against the raw
+These are all checked by `tests/verify_findings.py` (22/22 pass) against the raw
 combined firmware — trust them:
 
 - Reset handler `0x1F2` sets `gp = 0xFEBF9800`.
@@ -70,8 +81,8 @@ combined firmware — trust them:
   SID `0x27` → handler `0x5516`.
 - AES-128 S-box @ `0x8FF1`, Rcon @ `0x8FE1` (note the `+1`).
 - SecurityAccess algorithm: `expected = AES-ENC(AES-DEC(SEED_KEY, data_record), ecu_seed)`.
-- The complete payload gate is documented in `PAYLOAD_GATE_ANALYSIS.md` and
-  independently checked by `verify_payload_gate.py` (37/37 pass):
+- The complete payload gate is documented in `docs/PAYLOAD_GATE_ANALYSIS.md` and
+  independently checked by `tests/verify_payload_gate.py` (37/37 pass):
   - TransferData decrypts AES-CBC ciphertext into `0xFEBF0000..0xFEBF0FFF`.
   - Routine `0x10F0` checks embedded address/length, CRC32 residue, then
     `CMAC(DID_0x202_IV || plaintext[0:0xFF0])` against the final 16 bytes.
@@ -82,14 +93,14 @@ combined firmware — trust them:
   - `0xFF00` is therefore not a direct execute-RAM routine; execution occurs by
     replacing the legitimate flash-driver callback inside the authenticated image.
 - The report's proposed SecOC runtime-key command path is **wrong**. Read
-  `SECOC_RUNTIME_KEY_LIFECYCLE.md`; `verify_secoc_nvm.py` checks 53/53 facts:
+  `docs/SECOC_RUNTIME_KEY_LIFECYCLE.md`; `tests/verify_secoc_nvm.py` checks 53/53 facts:
   - `0x72F58`/`0x72F84` are AUTOSAR NvM `ReadBlock`/`WriteBlock`, not CSM key-set/MAC.
   - `0x67590/0x67608/0x67C34` generically restore, persist, and reconcile
     raw/XOR55/XORAA objects. This is not an ICU command path.
   - pages 468–479 are objects 0–3; FEBEF468/478/488 contain their structured state.
   - `0x758A0/0x785D2` are NvM/DataFlash service machinery, not ICU derivation.
-- The complete 32 KiB map is in `DATAFLASH_LAYOUT.md` and is checked 71/71 by
-  `verify_dataflash_layout.py`:
+- The complete 32 KiB map is in `docs/DATAFLASH_LAYOUT.md` and is checked 71/71 by
+  `tests/verify_dataflash_layout.py`:
   - 122 physical records occupy pages 256–479; pages 0–255 are not in the map.
   - pages 432–479 are the full 16-object SecOC triplicate bank.
   - object 15 is len32/base block41/RAM `0xFEBF02E8`; its key field maps raw
@@ -102,8 +113,8 @@ combined firmware — trust them:
   - the dealer/FEBEF capture design remains wrong. A generic `0x72F58` hook must
     filter blocks 41/45/49 and observe completion to see object 15 on a provisioned
     variant; the call itself is not key-set.
-- The complete bootloader DID model is in `DID_MODEL.md` and is checked 46/46 by
-  `verify_did_model.py`:
+- The complete bootloader DID model is in `docs/DID_MODEL.md` and is checked 46/46 by
+  `tests/verify_did_model.py`:
   - handlers `0x5FB8`/`0x4948` search exactly four descriptors at `0x8F14`;
   - `F181` is the only readable DID and synthesizes `02 || 32*0x21`; it does not
     return VIN, part number, `BOOT INFO AREA`, or `8965B4512000` in this bootloader;
@@ -118,32 +129,18 @@ combined firmware — trust them:
 
 The prior "secrets are unreferenced / separate bootloader image" conclusion was
 an artifact of the wrong flat import and is **false**. The scripts that produced
-it live in `legacy-flat-import/` — do not use them for current results.
+it live in `legacy/flat-import/` — do not use them for current results.
 
-## Scripts
+## Scripts and verification
 
-| Script | Purpose |
-|---|---|
-| `AddDataFlash.java` | attach DataFlash at `0xFF200000` during import |
-| `SeedEntries.java` | seed report-named reset/SecOC/CSM entry points |
-| `SeedUdsServiceTable.java` | parse/seed/name the UDS table at `0x8E54` |
-| `AnnotateBootloaderSecrets.java` | name secrets + verified AES/UDS functions |
-| `SeedPayloadVerificationFunctions.java` | seed payload-CMAC/RoutineControl functions missed by auto-analysis |
-| `AnnotatePayloadGate.java` | name/comment the complete download, CRC, CMAC, and callback-execution path |
-| `verify_payload_gate.py` | independently verify tables, callback instructions, and all public payloads |
-| `SeedSecocNvmFunctions.java` | seed valid NvM request/queue functions missed by auto-analysis |
-| `AnnotateSecocNvmCorrection.java` | apply corrected NvM names/comments and RAM/DataFlash labels |
-| `verify_secoc_nvm.py` | verify the NvM service map, triplicate objects, and reserved DataFlash tail |
-| `AnnotateDataFlashLayout.java` | label complete NvM regions, object-15 key fields/RAM mirror, and volatile DIDs |
-| `generate_dataflash_layout.py` / `dataflash_nvm_records.csv` | regenerate/list all 122 configured physical records |
-| `verify_dataflash_layout.py` | verify the complete map, 16-object bank, object-15 mapping, and DID volatility |
-| `AnnotateDidModel.java` | annotate the complete four-entry DID table, response helpers, ordering state, and volatile consumers |
-| `verify_did_model.py` | verify the descriptors, F181 response, WDBI sequence, RAM consumers, and tooling order |
-| `FindOperandRefs.java` | locate operand references while recovering missed state-machine code |
-| `FindMappedSecretRefs.java` | verify direct refs to both corrected secret VAs |
-| `FindMappedRegionRefs.java`, `FindBootloaderDiagnostics.java`, `FindHandlerRegistrations.java` | investigation helpers |
-| `verify_findings.py` | standalone re-verification against the raw combined dump |
-| `legacy-flat-import/*` | preserved scripts from the invalid flat mapping — do not use |
+- `ghidra/scripts/import/` contains the split-image import helper.
+- `ghidra/scripts/seed/` contains all function/table seeds missed by analysis.
+- `ghidra/scripts/annotate/` contains the durable labels/comments for completed work.
+- `ghidra/scripts/investigate/` contains operand/reference search helpers.
+- `tests/` contains the six independent verification suites. Run `make verify`.
+- `tools/generate_dataflash_layout.py` regenerates `data/dataflash_nvm_records.csv`;
+  run `make generate-dataflash`.
+- `legacy/flat-import/` is historical only and must not be used.
 
 ## Rebuilding the project from scratch
 
