@@ -4,8 +4,11 @@ This note traces the complete firmware-side path used by the public RH850/P1M-E
 payload toolchain: UDS download, AES-CBC decryption, CRC + CMAC authentication,
 and the `0xFF00` execution trigger. Addresses are CodeFlash virtual addresses.
 
-`../tests/verify_payload_gate.py` independently checks the static tables, callback
-instructions, and all four available encrypted payload binaries.
+`../tests/verify_payload_gate.py` independently checks the static tables,
+callback instructions, and the two unique encrypted payload fixtures represented
+by four pinned public upstream copies. Fixture provenance and upstream hashes are
+in `../external-references.lock.json`; `make verify-external` compares them to
+optional external checkouts.
 
 ## Executive result
 

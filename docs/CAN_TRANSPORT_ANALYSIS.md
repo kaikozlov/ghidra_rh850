@@ -6,8 +6,10 @@ CanTp, PduR, and Dcm/UDS, and back to RSCFD transmission.
 
 All virtual addresses are CodeFlash addresses. `tp` is initialized to `0x869C`
 at reset (`0x1F8`), so the configuration offsets used by the code can be
-resolved directly into CodeFlash tables. `../tests/verify_can_transport.py` checks the
-static data and instruction evidence without using Ghidra.
+resolved directly into CodeFlash tables. `../tests/verify_can_transport.py`
+checks the static data and instruction evidence without Ghidra or sibling
+repositories. The optional `make verify-external` suite corroborates the IDs and
+registers against pinned public extraction tooling.
 
 ## Result
 
@@ -269,6 +271,7 @@ CAN 0x7A1, channel 1 common FIFO 0
 
 This is static proof of the configured firmware path. It does not establish
 which vehicle bus exposes channel 1 or whether gateway routing can alter IDs at
-runtime. The local extraction tooling and captures independently corroborate
-`0x7A1/0x7A9`. No local tool currently uses the firmware's `0x777` functional
+runtime. Public extraction tooling and captures independently corroborate
+`0x7A1/0x7A9`; that source-level corroboration is kept in the optional external
+suite. No checked public tool currently uses the firmware's `0x777` functional
 path.

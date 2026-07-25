@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Verify the bootloader payload acceptance/execution findings without Ghidra.
 
-Reads the committed CodeFlash image and public encrypted payloads directly.
-Requires PyCryptodome. Exits nonzero on any mismatch.
+Reads the committed CodeFlash and pinned public-payload fixtures directly. The
+fixtures' upstream provenance is checked separately by verify_external_corroboration.py.
 """
 from pathlib import Path
 import binascii
@@ -14,7 +14,6 @@ from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
 
 REPO = Path(__file__).resolve().parents[1]
-REPOS = REPO.parent
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 PAYLOAD_BUILD_SECRET = bytes.fromhex("ba052435f8843f985fd1329d2b6117b0")
 DID_201_KEY = bytes(16)
@@ -79,19 +78,23 @@ check("second callback load/call at 0x4402/0x440E",
       CF[0x4402:0x440E] == bytes.fromhex("40eebffe234e03003defd10f") and
       CF[0x440E:0x4412] == bytes.fromhex("fdc760f9"))
 
-print("\n== Public encrypted payloads ==")
-payload_paths = [
-    REPOS / "secoc/payload.bin",
-    REPOS / "calvinpark-openpilot/tsk/lib/payload.bin",
-    REPOS / "calvinpark-openpilot/tsk/lib/payload_dataflash_ff200000_ff208000.bin",
-    REPOS / "tsk_extraction_by_can_log/payload_dataflash_ff200000_ff208000.bin",
+print("\n== Pinned public encrypted-payload fixtures ==")
+payloads = [
+    (
+        "RAM-dump payload",
+        REPO / "tests/fixtures/payloads/ram_dump_payload.bin",
+        "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2",
+    ),
+    (
+        "DataFlash-dump payload",
+        REPO / "tests/fixtures/payloads/dataflash_dump_payload.bin",
+        "d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34",
+    ),
 ]
-plaintexts = []
-for path in payload_paths:
+for label, path, expected_sha256 in payloads:
     ciphertext = path.read_bytes()
     plaintext = AES.new(DERIVED_KEY, AES.MODE_CBC, DID_202_IV).decrypt(ciphertext)
-    plaintexts.append(plaintext)
-    label = str(path.relative_to(REPOS))
+    check(f"{label}: pinned SHA-256", hashlib.sha256(ciphertext).hexdigest() == expected_sha256)
     check(f"{label}: encrypted size is 0x1000", len(ciphertext) == 0x1000)
     check(f"{label}: callback slot points to payload base",
           struct.unpack_from("<I", plaintext, 0xFD0)[0] == 0xFEBF0000)
@@ -106,8 +109,6 @@ for path in payload_paths:
     check(f"{label}: AES-CBC round trip",
           AES.new(DERIVED_KEY, AES.MODE_CBC, DID_202_IV).encrypt(plaintext) == ciphertext)
 
-check("Willem and Calvin RAM payload binaries are identical", plaintexts[0] == plaintexts[1])
-check("thehui and Calvin DataFlash payload binaries are identical", plaintexts[2] == plaintexts[3])
 check("derived zero-DID key",
       DERIVED_KEY.hex() == "80d221a05622b4f9d4f287922e6c78d1", DERIVED_KEY.hex())
 

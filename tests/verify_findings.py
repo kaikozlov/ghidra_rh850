@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Independent verification of ghidra_rh850_analysis findings, read directly
-from the raw combined firmware (the source of truth). No Ghidra involved."""
+"""Independent verification of the base firmware findings.
+
+Reads only the committed split images, reconstructing the original combined
+layout in memory. No Ghidra project or sibling repository is required.
+"""
 import hashlib, struct, sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-REPOS = REPO.parent
-COMBINED = REPOS / "RH850_P1m-E" / "RH850_P1M-E_Firmware.bin"
 SPLIT_CF = REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 SPLIT_DF = REPO / "firmware" / "RH850_P1M-E_DataFlash.bin"
 
@@ -35,23 +36,24 @@ def check(name, cond, detail=""):
     else: bad += 1
     print(f"[{status}] {name}" + (f"  ({detail})" if detail else ""))
 
-fw = COMBINED.read_bytes()
+df = SPLIT_DF.read_bytes()
+cf = SPLIT_CF.read_bytes()
+fw = df + cf
 
 # ---- 1. Layout & split SHA-256 ----
 print("\n== 1. file layout & split hashes ==")
-check("combined size == 0x108000", len(fw) == 0x108000, f"{len(fw):#x}")
-df, cf = fw[:0x8000], fw[0x8000:]
+check("reconstructed combined size == 0x108000", len(fw) == 0x108000, f"{len(fw):#x}")
 check("DataFlash size == 0x8000", len(df) == 0x8000)
 check("CodeFlash size == 0x100000", len(cf) == 0x100000)
+h_combined = hashlib.sha256(fw).hexdigest()
 h_df = hashlib.sha256(df).hexdigest()
 h_cf = hashlib.sha256(cf).hexdigest()
+check("combined sha256 matches pinned original",
+      h_combined == "0bba74d0e443f9dd3da33e3a28c3511ec31e35e8303acef7e0117fbdc91d5a86", h_combined[:16])
 check("DataFlash sha256 matches README",
       h_df == "81d87b678784bb2a07b1fdcb3d43dd40767d4f5ca1b56867b6575cd652a9ecb8", h_df[:16])
 check("CodeFlash sha256 matches README",
       h_cf == "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde", h_cf[:16])
-# also confirm the committed split files equal the freshly-split slices
-check("committed CodeFlash.bin == freshly split", SPLIT_CF.read_bytes() == cf)
-check("committed DataFlash.bin == freshly split", SPLIT_DF.read_bytes() == df)
 
 # ---- 2. Reset handler gp setup at VA 0x1F2 (file 0x81F2) ----
 print("\n== 2. reset handler @ VA 0x1F2 ==")

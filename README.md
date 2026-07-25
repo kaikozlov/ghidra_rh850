@@ -11,16 +11,33 @@ firmware/             committed CodeFlash/DataFlash split images
 data/                 generated analysis artifacts
 ghidra/scripts/       import, seed, annotation, and investigation scripts
 project/              durable annotated Ghidra project
-tests/                independent raw-firmware verification suites
-tools/                data generators
+tests/                self-contained verification, fixtures, optional corroboration
+tools/                data generators and durable Ghidra rebuild tooling
+external-references.lock.json  pinned public repositories/artifacts
+pyproject.toml, uv.lock         locked UV verification environment
 legacy/flat-import/   preserved invalid flat-import investigation
 ```
 
-Run every independent verification suite with:
+Install the locked Python environment and run the self-contained firmware suites:
 
 ```bash
+uv sync --locked
 make verify
 ```
+
+`make verify` reads only tracked files. Optional checks against pinned public
+repositories are separate:
+
+```bash
+make verify-external EXTERNAL_REPOS_DIR=/path/containing/the/checkouts
+```
+
+Exact repository commits, expected checkout directory names, artifact hashes,
+and payload-fixture provenance are recorded in
+`external-references.lock.json`. Check out those commits beneath
+`EXTERNAL_REPOS_DIR`; the optional suite fails on a missing checkout, a commit
+mismatch, or changed artifact bytes. It is intentionally not part of the
+self-contained default target.
 
 ## Critical file-layout correction
 
@@ -71,67 +88,99 @@ ghidra --projects-dir "$PWD/project" --project rh850_p1me_mapped \
 
 ## Prerequisites
 
-- Ghidra 12.x (here: `/opt/homebrew/opt/ghidra/libexec`).
-- Rust `ghidra` CLI (`ghidra doctor` passes). `$GHIDRA` need not be set.
-- `../ghidra_v850`, esaulenka's processor extension providing
-  `v850e3:LE:32:default` (V850E3 / RH850).
+- [Astral UV](https://docs.astral.sh/uv/) for the locked Python environment.
+- Ghidra **12.1.2** (the tested Homebrew location is
+  `/opt/homebrew/opt/ghidra/libexec`).
+- Rust `ghidra` CLI **0.2.1** (`ghidra doctor` must pass).
+- esaulenka's `ghidra_v850` processor extension at the exact revision below.
 
-The extension is incomplete upstream, and its calling-convention model often
-mis-infers argument counts/order. Confirm register setup in disassembly before
-trusting decompiled signatures.
+The processor pin in `external-references.lock.json` is:
 
-## Import procedure
+```text
+repository  https://github.com/esaulenka/ghidra_v850.git
+commit      14c1b5be32b8ec741ee626c8bca9885c58f7a473
+v850e3 spec 50df5bd3d5b7a23018533f126d83ea5249cb92b8645b1cd0d1a9f309a993eb15
+```
 
-### 1. Build/install the RH850 language
+The extension's calling-convention model is incomplete. Confirm register setup
+in disassembly before trusting decompiled signatures.
+
+### Install the pinned RH850 language
 
 ```bash
 GH=/opt/homebrew/opt/ghidra/libexec
-cd ../ghidra_v850/data/languages
-"$GH/support/sleigh" v850e3.slaspec
-"$GH/support/sleigh" v850e2.slaspec       # optional
+V850=/absolute/path/to/ghidra_v850
+
+gh repo clone esaulenka/ghidra_v850 "$V850"
+git -C "$V850" checkout 14c1b5be32b8ec741ee626c8bca9885c58f7a473
+printf '%s  %s\n' \
+  50df5bd3d5b7a23018533f126d83ea5249cb92b8645b1cd0d1a9f309a993eb15 \
+  "$V850/data/languages/v850e3.slaspec" | shasum -a 256 -c -
+
+"$GH/support/sleigh" "$V850/data/languages/v850e3.slaspec"
+"$GH/support/sleigh" "$V850/data/languages/v850e2.slaspec"  # optional
 
 DST="$GH/Ghidra/Extensions/Renesas_v850"
 mkdir -p "$DST"
-cp -R ../../extension.properties ../../Module.manifest ../../data ../../LICENSE "$DST"/
+cp -R "$V850/extension.properties" "$V850/Module.manifest" \
+      "$V850/data" "$V850/LICENSE" "$DST"/
 ```
 
-Adjust the copy paths to the repository root if running from another directory.
+`tools/rebuild_project.sh` refuses to run if the installed `v850e3.slaspec`
+does not match this pinned source hash.
 
-### 2. Split the combined dump
+## Rebuild the complete Ghidra project
 
-```python
-from pathlib import Path
-src = Path("../RH850_P1m-E/RH850_P1M-E_Firmware.bin").read_bytes()
-assert len(src) == 0x108000
-out = Path("firmware")
-out.mkdir(exist_ok=True)
-(out / "RH850_P1M-E_DataFlash.bin").write_bytes(src[:0x8000])
-(out / "RH850_P1M-E_CodeFlash.bin").write_bytes(src[0x8000:])
-```
-
-Current split-file SHA-256 values:
+The committed split images are the only firmware inputs. Their SHA-256 values
+are:
 
 ```text
 DataFlash  81d87b678784bb2a07b1fdcb3d43dd40767d4f5ca1b56867b6575cd652a9ecb8
 CodeFlash  21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde
+Combined   0bba74d0e443f9dd3da33e3a28c3511ec31e35e8303acef7e0117fbdc91d5a86
 ```
 
-### 3. Import CodeFlash and attach DataFlash
+Run the canonical rebuild command into the ignored `build/project/` directory:
 
 ```bash
-# Build in-repo. Delete project/ first if rebuilding from scratch.
-ROOT=/absolute/path/to/ghidra_rh850_analysis
-PROJDIR="$ROOT/project"
-FIRMWARE="$ROOT/firmware"
-SCRIPTS="$ROOT/ghidra/scripts"
-
-"$GH/support/analyzeHeadless" "$PROJDIR" rh850_p1me_mapped \
-  -import "$FIRMWARE/RH850_P1M-E_CodeFlash.bin" \
-  -processor v850e3:LE:32:default \
-  -noanalysis \
-  -scriptPath "$SCRIPTS/import" \
-  -postScript AddDataFlash.java "$FIRMWARE/RH850_P1M-E_DataFlash.bin"
+make rebuild-project
 ```
+
+Choose another absolute output path with:
+
+```bash
+make rebuild-project PROJECT_DIR=/absolute/path/to/project
+```
+
+To deliberately replace an existing output—including the committed snapshot—use
+the script directly and pass `--force`:
+
+```bash
+tools/rebuild_project.sh --project-dir "$PWD/project" --force
+```
+
+The script uses four staged `analyzeHeadless` transactions, each with a durable
+`-commit`. Staging matters: injecting every seed before the first analysis pass
+produces a different graph and does not reproduce the committed statistics.
+
+1. import CodeFlash without analysis and map DataFlash with `AddDataFlash.java`;
+2. run `SeedEntries.java`, then the base auto-analysis;
+3. run `SeedUdsServiceTable.java`, then re-run analysis;
+4. seed the remaining missed functions with:
+   - `SeedCanTransportFunctions.java`;
+   - `SeedPayloadVerificationFunctions.java`;
+   - `SeedSecocNvmFunctions.java`;
+5. re-run analysis and apply every annotation script:
+   - `AnnotateBootloaderSecrets.java`;
+   - `AnnotatePayloadGate.java`;
+   - `AnnotateSecocNvmCorrection.java`;
+   - `AnnotateDataFlashLayout.java`;
+   - `AnnotateDidModel.java`;
+   - `AnnotateCanTransport.java`;
+6. open the result through the CLI, record statistics, and cleanly stop the
+   daemon so the database is durable;
+7. require exactly 5,484 functions, 171,829 instructions, 27,547 symbols, two
+   memory sections, and `0x108000` mapped bytes.
 
 Expected memory map:
 
@@ -140,58 +189,8 @@ CodeFlash  00000000..000fffff  rx
 DataFlash  ff200000..ff207fff  rw
 ```
 
-### 4. Seed report entry points and analyze
-
-```bash
-ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin script run "$SCRIPTS/seed/SeedEntries.java"
-ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin analyze
-ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin stop
-```
-
-### 5. Parse/seed the bootloader UDS service table
-
-`ghidra/scripts/seed/SeedUdsServiceTable.java` parses the 20-entry table at CodeFlash `0x8E54`, creates
-and names each handler, and adds explicit data references from table entries.
-
-```bash
-ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin script run "$SCRIPTS/seed/SeedUdsServiceTable.java"
-ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin analyze
-ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin stop
-```
-
-### 6. Apply secret/crypto annotations
-
-```bash
-ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin script run "$SCRIPTS/annotate/AnnotateBootloaderSecrets.java"
-ghidra --projects-dir "$PROJDIR" --project rh850_p1me_mapped \
-  --program RH850_P1M-E_CodeFlash.bin stop
-```
-
-### 7. Recover and annotate the payload gate
-
-Auto-analysis misses several valid functions in the payload CMAC/RoutineControl
-path. Use a one-shot headless transaction so seeding, analysis, annotations, and
-the durable project commit cannot race the CLI daemon shutdown:
-
-```bash
-"$GH/support/analyzeHeadless" "$PROJDIR" rh850_p1me_mapped \
-  -process RH850_P1M-E_CodeFlash.bin \
-  -scriptPath "$SCRIPTS/seed;$SCRIPTS/annotate" \
-  -preScript SeedPayloadVerificationFunctions.java \
-  -postScript AnnotateBootloaderSecrets.java \
-  -postScript AnnotatePayloadGate.java \
-  -commit
-```
-
-See `docs/PAYLOAD_GATE_ANALYSIS.md` for the complete download, authentication, and
-execution trace.
+See `docs/PAYLOAD_GATE_ANALYSIS.md` for the complete download, authentication,
+and execution trace.
 
 ## Corrected result
 
@@ -251,8 +250,8 @@ derived_payload_key = AES-128-ECB-ENCRYPT(PAYLOAD_BUILD_SECRET, DID_0x201)
 ### Complete payload acceptance and execution path
 
 The firmware-side security boundary is now fully traced in
-`docs/PAYLOAD_GATE_ANALYSIS.md` and independently checked by
-`tests/verify_payload_gate.py` (37/37 checks):
+`docs/PAYLOAD_GATE_ANALYSIS.md` and independently checked against the committed
+firmware and two unique pinned payload fixtures by `tests/verify_payload_gate.py`:
 
 ```text
 RequestDownload 0x34 @ 0x5D68
@@ -282,7 +281,7 @@ RAM-resident flash callback is overwritten by the authenticated 4 KiB image.
 `0x65CD8 -> 0x66E48 -> 0x67590 -> 0x72F58` key path. It is not a key lifecycle:
 it is an AUTOSAR NvM redundancy/checkpoint subsystem.
 
-Definitive corrections, independently checked by `tests/verify_secoc_nvm.py` (53/53):
+Definitive corrections, independently checked by `tests/verify_secoc_nvm.py`:
 
 - `0x72F58` is NvM service `0x06` (`ReadBlock`), not CSM key-set.
 - `0x72F84` is NvM service `0x07` (`WriteBlock`), not MAC generation.
@@ -294,8 +293,9 @@ Definitive corrections, independently checked by `tests/verify_secoc_nvm.py` (53
 - no dealer-triggered rekey, plaintext key injection, or per-boot fused-key
   derivation exists in the claimed path.
 
-`docs/DATAFLASH_LAYOUT.md` completes the entire 32 KiB map; `tests/verify_dataflash_layout.py`
-checks 71/71 facts and `data/dataflash_nvm_records.csv` lists all 122 physical records.
+`docs/DATAFLASH_LAYOUT.md` completes the entire 32 KiB map;
+`tests/verify_dataflash_layout.py` checks it and
+`data/dataflash_nvm_records.csv` lists all 122 physical records.
 Key corrections:
 
 - configured normal NvM records occupy pages 256–479;
@@ -313,7 +313,7 @@ Key corrections:
   this no longer supports claiming that the SecOC key resides there.
 
 `docs/DID_MODEL.md` completes the bootloader ReadDataByIdentifier/WriteDataByIdentifier
-model; `tests/verify_did_model.py` checks 46/46 facts directly from CodeFlash:
+model; `tests/verify_did_model.py` checks it directly from CodeFlash:
 
 - the table at `0x8F14` has exactly four descriptors;
 - `F181` is the sole readable DID and returns `02 || 32*0x21`, not a VIN or
@@ -334,8 +334,9 @@ the readable snapshot does not prove ICU derivation.
 ### Confirmed CAN / ISO-TP / UDS transport
 
 `docs/CAN_TRANSPORT_ANALYSIS.md` traces the complete diagnostic path and
-`tests/verify_can_transport.py` independently checks it directly against CodeFlash and
-the local extraction tooling:
+`tests/verify_can_transport.py` independently checks it directly against CodeFlash.
+`tests/verify_external_corroboration.py` optionally checks the matching public
+extraction tooling and shellcode:
 
 - standard physical request ID **`0x7A1`** routes through channel 1/common FIFO
   0, CanIf RxPduId 0, and the physical CanTp/Dcm connection;
@@ -375,12 +376,15 @@ the local extraction tooling:
 | `ghidra/scripts/seed/` | Function and table seeds missed by auto-analysis |
 | `ghidra/scripts/annotate/` | Durable names, labels, and comments for each completed investigation |
 | `ghidra/scripts/investigate/` | Reusable reference/operand search helpers |
-| `tests/` | Six independent verification suites; run all with `make verify` |
-| `tools/` | DataFlash CSV generator; run with `make generate-dataflash` |
+| `tests/` | Six self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
+| `tools/` | DataFlash CSV generator, durable Ghidra rebuild, and project-statistics verifier |
+| `external-references.lock.json` | Exact upstream commits and artifact hashes |
+| `pyproject.toml`, `uv.lock` | Locked UV/PyCryptodome verification environment |
 | `data/` | Generated 122-record NvM map |
 | `firmware/` | Correctly split CodeFlash and DataFlash images |
 | `legacy/flat-import/` | Preserved scripts from the invalid original mapping; do not use |
 | `project/` | Pre-built durable Ghidra project |
 
-To rebuild the project from scratch, delete `project/` and run the import
-procedure above. All seed and annotation scripts are idempotent.
+Use `make rebuild-project` for a non-destructive rebuild under `build/project/`.
+All seed and annotation scripts are idempotent; the rebuild script runs all of
+them in one durable headless transaction.

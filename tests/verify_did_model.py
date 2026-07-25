@@ -5,7 +5,6 @@ import struct
 import sys
 
 REPO = Path(__file__).resolve().parents[1]
-REPOS = REPO.parent
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 
 passed = 0
@@ -114,18 +113,6 @@ check("RequestDownload checks crypto-ready three times",
       str(CF[0x5D68:0x5F38].count(ready_load)))
 check("no DID destination points into DataFlash",
       all(not (0xFF200000 <= r[0] <= 0xFF207FFF) for r in rows))
-
-print("\n== public tooling correlation ==")
-source = (REPOS / "secoc" / "extract_keys.py").read_text(encoding="utf-8")
-p203 = source.find("write_data_by_identifier(0x203")
-p201 = source.find("write_data_by_identifier(0x201")
-p202 = source.find("write_data_by_identifier(0x202")
-check("Willem tooling writes 0203 -> 0201 -> 0202", -1 < p203 < p201 < p202)
-check("Willem tooling uses exactly five bytes for 0203", '0x203, b"\\x00" * 5' in source)
-check("Willem's unresolved state-machine comment is present", "not sure why but needed for state machine" in source)
-uds_source = (REPOS / "calvinpark-openpilot" / "opendbc_repo" / "opendbc" / "car" / "uds.py").read_text(encoding="utf-8")
-check("local UDS enum identifies F181 as application software ID",
-      "APPLICATION_SOFTWARE_IDENTIFICATION = 0xF181" in uds_source)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 sys.exit(1 if failed else 0)

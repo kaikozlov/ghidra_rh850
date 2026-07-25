@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Independent raw-CodeFlash checks for CAN_TRANSPORT_ANALYSIS.md.
 
-No Ghidra project is opened. Static tables/instructions are checked directly,
-then correlated with the local public extraction tooling and shellcode.
+No Ghidra project or external repository is required. Static tables and
+instructions are checked directly from the committed CodeFlash fixture.
 """
 from pathlib import Path
 import struct
 import sys
 
 REPO = Path(__file__).resolve().parents[1]
-REPOS = REPO.parent
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 
 passed = 0
@@ -185,19 +184,6 @@ check("CanIf_Transmit calls Can_Write",
       CF[0x4668:0x466C] == bytes.fromhex("bfffe6f0"))
 check("Can_Write calls RSCFD Tx primitive",
       CF[0x37A6:0x37AA] == bytes.fromhex("bfff38ff"))
-
-print("\n== local tooling/shellcode corroboration ==")
-extract = (REPOS / "secoc" / "extract_keys.py").read_text(encoding="utf-8").lower()
-dump_step = (REPOS / "tsk_extraction_by_can_log" / "steps" / "step_dump_dataflash.py").read_text(encoding="utf-8").lower()
-shellcode = (REPOS / "secoc" / "shellcode" / "main.c").read_text(encoding="utf-8").lower()
-check("Willem extractor transmits to 0x7A1", "addr = 0x7a1" in extract)
-check("DataFlash tool uses TX 0x7A1", "tx_addr = 0x7a1" in dump_step)
-check("DataFlash tool expects RX 0x7A9", "rx_addr = 0x7a9" in dump_step)
-check("dump shellcode transmits CAN 0x7A9", "= 0x7a9;" in shellcode)
-for address in ("0xffd20250", "0xffd202d0", "0xffd24000", "0xffd24004", "0xffd24008", "0xffd2400c", "0xffd24010"):
-    check(f"dump shellcode independently uses RSCFD {address}", address in shellcode)
-check("no local extraction tool currently names functional 0x777",
-      "0x777" not in extract and "0x777" not in dump_step and "0x777" not in shellcode)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 sys.exit(1 if failed else 0)

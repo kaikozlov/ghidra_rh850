@@ -1,9 +1,9 @@
 # AGENTS.md — ghidra_rh850_analysis
 
 Ghidra analysis of the China-market Sienna EPS firmware
-(`8965B4512000`, RH850/P1M-E R7F701381). The combined dump is
-`../RH850_P1m-E/RH850_P1M-E_Firmware.bin`; this repo holds the corrected split
-images, analysis scripts, and the pre-built Ghidra project. Read `README.md`
+(`8965B4512000`, RH850/P1M-E R7F701381). This repo holds the corrected split
+images, analysis scripts, pinned payload fixtures, and the pre-built Ghidra
+project; core verification does not require the original sibling checkout. Read `README.md`
 for the full procedure and evidence — the notes below are the parts that are
 easy to get wrong.
 
@@ -18,8 +18,8 @@ flat block. Always split before importing:
 | `0x008000–0x107fff` | `0x100000` | `0x00000000–0x000FFFFF` | CodeFlash |
 
 Mapping CodeFlash VA = `file_offset − 0x8000`. The committed images under
-`firmware/` are already split; `tests/verify_findings.py` re-checks their hashes
-and every base finding against the raw combined dump.
+`firmware/` are already split; `tests/verify_findings.py` re-checks their hashes,
+reconstructs the combined image in memory, and verifies every base finding.
 
 ## Repository layout
 
@@ -27,8 +27,10 @@ and every base finding against the raw combined dump.
 - `firmware/` — committed CodeFlash/DataFlash split images.
 - `data/` — generated analysis artifacts.
 - `ghidra/scripts/{import,seed,annotate,investigate}/` — Ghidra scripts by role.
-- `tests/` — independent raw-firmware verification suites (`make verify`).
-- `tools/` — generators (`make generate-dataflash`).
+- `tests/` — self-contained raw-firmware suites plus optional external corroboration.
+- `tools/` — generators and the durable project rebuild workflow.
+- `external-references.lock.json` — pinned upstream commits and artifact hashes.
+- `pyproject.toml` / `uv.lock` — locked verification environment.
 - `project/` — durable annotated Ghidra project; do not move transient state here.
 - `legacy/flat-import/` — preserved invalid original analysis.
 
@@ -69,8 +71,8 @@ If you re-run `analyze` or any `script run` and want to keep the result, run
 
 ## Verified findings (do not re-claim the old wrong conclusions)
 
-These are all checked by `tests/verify_findings.py` (22/22 pass) against the raw
-combined firmware — trust them:
+These are all checked by the self-contained `tests/verify_findings.py` against
+the reconstructed combined firmware — trust them:
 
 - Reset handler `0x1F2` sets `gp = 0xFEBF9800`.
 - `PAYLOAD_BUILD_SECRET`: CodeFlash VA **`0xBFD8`** (file `0x13FD8`), referenced
@@ -82,7 +84,8 @@ combined firmware — trust them:
 - AES-128 S-box @ `0x8FF1`, Rcon @ `0x8FE1` (note the `+1`).
 - SecurityAccess algorithm: `expected = AES-ENC(AES-DEC(SEED_KEY, data_record), ecu_seed)`.
 - The complete payload gate is documented in `docs/PAYLOAD_GATE_ANALYSIS.md` and
-  independently checked by `tests/verify_payload_gate.py` (37/37 pass):
+  independently checked by `tests/verify_payload_gate.py` against two unique
+  pinned public payload fixtures:
   - TransferData decrypts AES-CBC ciphertext into `0xFEBF0000..0xFEBF0FFF`.
   - Routine `0x10F0` checks embedded address/length, CRC32 residue, then
     `CMAC(DID_0x202_IV || plaintext[0:0xFF0])` against the final 16 bytes.
@@ -93,13 +96,13 @@ combined firmware — trust them:
   - `0xFF00` is therefore not a direct execute-RAM routine; execution occurs by
     replacing the legitimate flash-driver callback inside the authenticated image.
 - The report's proposed SecOC runtime-key command path is **wrong**. Read
-  `docs/SECOC_RUNTIME_KEY_LIFECYCLE.md`; `tests/verify_secoc_nvm.py` checks 53/53 facts:
+  `docs/SECOC_RUNTIME_KEY_LIFECYCLE.md`; `tests/verify_secoc_nvm.py` checks it:
   - `0x72F58`/`0x72F84` are AUTOSAR NvM `ReadBlock`/`WriteBlock`, not CSM key-set/MAC.
   - `0x67590/0x67608/0x67C34` generically restore, persist, and reconcile
     raw/XOR55/XORAA objects. This is not an ICU command path.
   - pages 468–479 are objects 0–3; FEBEF468/478/488 contain their structured state.
   - `0x758A0/0x785D2` are NvM/DataFlash service machinery, not ICU derivation.
-- The complete 32 KiB map is in `docs/DATAFLASH_LAYOUT.md` and is checked 71/71 by
+- The complete 32 KiB map is in `docs/DATAFLASH_LAYOUT.md` and is checked by
   `tests/verify_dataflash_layout.py`:
   - 122 physical records occupy pages 256–479; pages 0–255 are not in the map.
   - pages 432–479 are the full 16-object SecOC triplicate bank.
@@ -113,7 +116,7 @@ combined firmware — trust them:
   - the dealer/FEBEF capture design remains wrong. A generic `0x72F58` hook must
     filter blocks 41/45/49 and observe completion to see object 15 on a provisioned
     variant; the call itself is not key-set.
-- The complete bootloader DID model is in `docs/DID_MODEL.md` and is checked 46/46 by
+- The complete bootloader DID model is in `docs/DID_MODEL.md` and is checked by
   `tests/verify_did_model.py`:
   - handlers `0x5FB8`/`0x4948` search exactly four descriptors at `0x8F14`;
   - `F181` is the only readable DID and synthesizes `02 || 32*0x21`; it does not
@@ -137,22 +140,29 @@ it live in `legacy/flat-import/` — do not use them for current results.
 - `ghidra/scripts/seed/` contains all function/table seeds missed by analysis.
 - `ghidra/scripts/annotate/` contains the durable labels/comments for completed work.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
-- `tests/` contains the six independent verification suites. Run `make verify`.
+- `make verify` runs six self-contained suites through UV; it must not require
+  sibling repositories.
+- `make verify-external EXTERNAL_REPOS_DIR=...` checks optional public checkouts
+  against `external-references.lock.json`.
 - `tools/generate_dataflash_layout.py` regenerates `data/dataflash_nvm_records.csv`;
   run `make generate-dataflash`.
 - `legacy/flat-import/` is historical only and must not be used.
 
 ## Rebuilding the project from scratch
 
-Delete `project/` and follow §"Import procedure" in `README.md`. The import
-targets `project/` directly. All seed/annotation scripts are idempotent and can
-be re-run in any order after analysis.
+Run `make rebuild-project` for a non-destructive rebuild under `build/project/`.
+`tools/rebuild_project.sh` imports both regions, runs every seed and annotation
+in four staged durable headless commits, cleanly stops the stats daemon, and
+verifies exact project statistics. Do not collapse the stages: seed timing
+changes Ghidra's recovered graph. Use `--project-dir "$PWD/project" --force` only when
+deliberately replacing the committed snapshot.
 
 ## Tooling notes
 
-- Ghidra 12.1.2 at `/opt/homebrew/opt/ghidra/libexec`; RH850 language from
-  `../ghidra_v850` (`v850e3:LE:32:default`). The upstream processor extension's
-  calling-convention model is incomplete — confirm register setup in disassembly
-  before trusting decompiled signatures.
+- Ghidra 12.1.2 at `/opt/homebrew/opt/ghidra/libexec`; RH850 language
+  `v850e3:LE:32:default` from esaulenka/ghidra_v850 commit
+  `14c1b5be32b8ec741ee626c8bca9885c58f7a473`. The rebuild script verifies the
+  installed `v850e3.slaspec` hash. The extension's calling-convention model is
+  incomplete — confirm register setup before trusting decompiled signatures.
 - `ghidra` CLI project resolution: `GHIDRA_PROJECT_DIR` env, config
   `ghidra_project_dir`, `--projects-dir`, else `~/Library/Caches/ghidra-cli/projects`.

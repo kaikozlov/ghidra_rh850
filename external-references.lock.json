@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "repositories": {
+    "rh850_p1me_original": {
+      "url": "https://github.com/lochuan/RH850_P1m-E.git",
+      "directory": "RH850_P1m-E",
+      "commit": "b8c6bcf6b84763a9c5288fc8fa6766ebfe66ce4a"
+    },
+    "icanhack_secoc": {
+      "url": "https://github.com/I-CAN-hack/secoc.git",
+      "directory": "secoc",
+      "commit": "4ce19cc31ff560b697bcd59cc3db55711f50b7b3"
+    },
+    "calvinpark_openpilot": {
+      "url": "https://github.com/calvinpark/openpilot.git",
+      "directory": "calvinpark-openpilot",
+      "commit": "b9db236acc7a616325f5cde6cc6f83b9c572c20d"
+    },
+    "toyota_dataflash_secoc_setup": {
+      "url": "https://github.com/Bk2ol/tsk_extraction_by_can_log.git",
+      "directory": "tsk_extraction_by_can_log",
+      "commit": "db453752beeb7cdd024a1a9c38c6711c981e75ad"
+    },
+    "ghidra_v850": {
+      "url": "https://github.com/esaulenka/ghidra_v850.git",
+      "directory": "ghidra_v850",
+      "commit": "14c1b5be32b8ec741ee626c8bca9885c58f7a473"
+    }
+  },
+  "artifacts": [
+    {
+      "repository": "rh850_p1me_original",
+      "path": "RH850_P1M-E_Firmware.bin",
+      "size": 1081344,
+      "sha256": "0bba74d0e443f9dd3da33e3a28c3511ec31e35e8303acef7e0117fbdc91d5a86"
+    },
+    {
+      "repository": "icanhack_secoc",
+      "path": "payload.bin",
+      "size": 4096,
+      "sha256": "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2",
+      "fixture": "tests/fixtures/payloads/ram_dump_payload.bin"
+    },
+    {
+      "repository": "calvinpark_openpilot",
+      "path": "tsk/lib/payload.bin",
+      "size": 4096,
+      "sha256": "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2",
+      "fixture": "tests/fixtures/payloads/ram_dump_payload.bin"
+    },
+    {
+      "repository": "calvinpark_openpilot",
+      "path": "tsk/lib/payload_dataflash_ff200000_ff208000.bin",
+      "size": 4096,
+      "sha256": "d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34",
+      "fixture": "tests/fixtures/payloads/dataflash_dump_payload.bin"
+    },
+    {
+      "repository": "toyota_dataflash_secoc_setup",
+      "path": "payload_dataflash_ff200000_ff208000.bin",
+      "size": 4096,
+      "sha256": "d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34",
+      "fixture": "tests/fixtures/payloads/dataflash_dump_payload.bin"
+    },
+    {
+      "repository": "icanhack_secoc",
+      "path": "extract_keys.py",
+      "sha256": "a4927044cdc944e496ff7b56d8241f1353278e651a0e51eb3961f55c2f89d96b"
+    },
+    {
+      "repository": "icanhack_secoc",
+      "path": "shellcode/main.c",
+      "sha256": "bfa673dda68292505ee6be6e34f8ddf5b3f3c7595529400543ad66d64869eea7"
+    },
+    {
+      "repository": "calvinpark_openpilot",
+      "path": "opendbc_repo/opendbc/car/uds.py",
+      "sha256": "688f9af41c7dbf48bace98d683a67ac9d69cd74af270c58a034a00da391e65de"
+    },
+    {
+      "repository": "toyota_dataflash_secoc_setup",
+      "path": "steps/step_dump_dataflash.py",
+      "sha256": "ddf902816d4f5dcb978857f2d17c9fb23baa83dbfad2da3eb4d4a17bb4d102d8"
+    },
+    {
+      "repository": "ghidra_v850",
+      "path": "data/languages/v850e3.slaspec",
+      "sha256": "50df5bd3d5b7a23018533f126d83ea5249cb92b8645b1cd0d1a9f309a993eb15"
+    }
+  ]
+}
