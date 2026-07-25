@@ -1,0 +1,5 @@
+# Ghidra project transient files — created when a daemon has the project open.
+# Never commit these; they are regenerated on open and are machine-specific.
+*.lock
+*.lock~
+**/tmp*

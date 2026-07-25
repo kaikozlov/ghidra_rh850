@@ -26,6 +26,30 @@ The old `rh850fw` flat project is invalid. It shifted all CodeFlash addresses by
 `+0x8000`, only found about 2,000 functions, and led to a false conclusion that
 the two bootloader secrets were unreferenced. Use project **`rh850_p1me_mapped`**.
 
+## Pre-built project (committed under `project/`)
+
+The fully analyzed, annotated project is committed in `project/`
+(`rh850_p1me_mapped.gpr` + `rh850_p1me_mapped.rep/`, ~12 MiB). It already
+contains the 5,445 discovered functions, both secret labels, the UDS-handler
+names, and the AES/SecOC annotations — so you can explore it directly without
+rebuilding.
+
+Open it with the `ghidra` CLI. The project location must be an **absolute**
+path: Ghidra 12.1+ rejects any path component beginning with `.`
+(so `./project` fails; use `$PWD/project` or a full path).
+
+```bash
+ghidra --projects-dir "$PWD/project" --project rh850_p1me_mapped \
+       --program RH850_P1M-E_CodeFlash.bin <subcommand>
+```
+
+> **Durability caveat.** The `ghidra` CLI bridge keeps the program in memory and
+> only writes a durable snapshot when the daemon shuts down cleanly. After any
+> `analyze` or `script run` whose changes you want to keep, run
+> `ghidra --projects-dir "$PWD/project" --project rh850_p1me_mapped stop`
+> (teardown commits to disk). Never commit `project/` while a daemon is running
+> — it holds transient `.lock` / `tmp*` files (git-ignored under `project/`).
+
 ## Prerequisites
 
 - Ghidra 12.x (here: `/opt/homebrew/opt/ghidra/libexec`).
@@ -74,8 +98,11 @@ CodeFlash  21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde
 ### 3. Import CodeFlash and attach DataFlash
 
 ```bash
-PROJDIR="$HOME/Library/Caches/ghidra-cli/projects"
+# Build in-repo. Delete project/ first if rebuilding from scratch.
+PROJDIR=/absolute/path/to/ghidra_rh850_analysis/project
 AN=/absolute/path/to/ghidra_rh850_analysis
+# Later `ghidra` CLI steps use the default cache dir unless you pass
+# --projects-dir "$AN/project" (absolute only).
 
 "$GH/support/analyzeHeadless" "$PROJDIR" rh850_p1me_mapped \
   -import "$AN/RH850_P1M-E_CodeFlash.bin" \
@@ -195,5 +222,6 @@ derived_payload_key = AES-128-ECB-ENCRYPT(PAYLOAD_BUILD_SECRET, DID_0x201)
 - `legacy-flat-import/` — preserved scripts from the invalid flat-import analysis;
   do not use them for current results.
 
-The valid project is stored at:
-`~/Library/Caches/ghidra-cli/projects/rh850_p1me_mapped`.
+The analyzed project is committed in this repo under `project/`. To rebuild it
+from scratch, delete `project/` and run the procedure in §Import procedure above,
+which imports directly into `project/`.
