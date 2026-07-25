@@ -102,6 +102,19 @@ combined firmware — trust them:
   - the dealer/FEBEF capture design remains wrong. A generic `0x72F58` hook must
     filter blocks 41/45/49 and observe completion to see object 15 on a provisioned
     variant; the call itself is not key-set.
+- The complete bootloader DID model is in `DID_MODEL.md` and is checked 46/46 by
+  `verify_did_model.py`:
+  - handlers `0x5FB8`/`0x4948` search exactly four descriptors at `0x8F14`;
+  - `F181` is the only readable DID and synthesizes `02 || 32*0x21`; it does not
+    return VIN, part number, `BOOT INFO AREA`, or `8965B4512000` in this bootloader;
+  - `0201/0202/0203` are the only writable DIDs and require programming session,
+    SecurityAccess state 2, exact lengths, and strict order `0203 -> 0201 -> 0202`;
+  - `0203` ignores its five bytes and merely arms state 0 -> 1;
+  - `0201` copies to `0xFEBF2D08`; `0202` copies to `0xFEBF2CF8`, sets the crypto-ready
+    flag at `0xFEBF2B16`, and returns the sequence to state 0;
+  - no VIN, serial, spare-part, configuration, or DataFlash-backed DID exists in
+    these bootloader handlers. Do not project application-mode/related-variant
+    probe expectations onto this table.
 
 The prior "secrets are unreferenced / separate bootloader image" conclusion was
 an artifact of the wrong flat import and is **false**. The scripts that produced
@@ -124,6 +137,8 @@ it live in `legacy-flat-import/` — do not use them for current results.
 | `AnnotateDataFlashLayout.java` | label complete NvM regions, object-15 key fields/RAM mirror, and volatile DIDs |
 | `generate_dataflash_layout.py` / `dataflash_nvm_records.csv` | regenerate/list all 122 configured physical records |
 | `verify_dataflash_layout.py` | verify the complete map, 16-object bank, object-15 mapping, and DID volatility |
+| `AnnotateDidModel.java` | annotate the complete four-entry DID table, response helpers, ordering state, and volatile consumers |
+| `verify_did_model.py` | verify the descriptors, F181 response, WDBI sequence, RAM consumers, and tooling order |
 | `FindOperandRefs.java` | locate operand references while recovering missed state-machine code |
 | `FindMappedSecretRefs.java` | verify direct refs to both corrected secret VAs |
 | `FindMappedRegionRefs.java`, `FindBootloaderDiagnostics.java`, `FindHandlerRegistrations.java` | investigation helpers |

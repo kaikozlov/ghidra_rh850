@@ -173,7 +173,7 @@ execution trace.
 
 ## Corrected result
 
-- **5,477 functions, 171,689 instructions, 27,506 symbols**.
+- **5,477 functions, 171,689 instructions, 27,518 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -290,6 +290,21 @@ Key corrections:
 - the final 2 KiB remains strongly consistent with an ICU-S-reserved tail, but
   this no longer supports claiming that the SecOC key resides there.
 
+`DID_MODEL.md` completes the bootloader ReadDataByIdentifier/WriteDataByIdentifier
+model; `verify_did_model.py` checks 46/46 facts directly from CodeFlash:
+
+- the table at `0x8F14` has exactly four descriptors;
+- `F181` is the sole readable DID and returns `02 || 32*0x21`, not a VIN or
+  `8965B...` identifier;
+- `0201/0202/0203` are the only writable DIDs and require programming session,
+  unlocked SecurityAccess, exact lengths, and order `0203 -> 0201 -> 0202`;
+- `0203` ignores all five request bytes and exists only to arm the sequence;
+- `0201` supplies the payload key-derivation input at `0xFEBF2D08`;
+- `0202` supplies the CBC IV/CMAC prefix at `0xFEBF2CF8` and sets the
+  RequestDownload crypto-ready flag;
+- no VIN, serial, part-number, fingerprint, config, or DataFlash-backed DID is
+  exposed by these two bootloader handlers.
+
 The proposed FEBEF object-0/key-set interpretation remains invalid. The exact
 operational key source for this captured 12000 image remains unknown; absence from
 the readable snapshot does not prove ICU derivation.
@@ -321,6 +336,8 @@ the readable snapshot does not prove ICU derivation.
 - `AnnotateDataFlashLayout.java` — label the complete NvM regions, object-15 copies/key fields, RAM mirror, and volatile payload DIDs.
 - `generate_dataflash_layout.py` / `dataflash_nvm_records.csv` — regenerate/list all 122 configured physical records.
 - `verify_dataflash_layout.py` — independently verify the full map, 16-object bank, object-15 key-field mapping, and DID volatility.
+- `AnnotateDidModel.java` — name/comment the complete four-entry DID table, response helpers, ordering state, RAM buffers, and access state.
+- `verify_did_model.py` — independently verify the descriptor table, F181 response, WDBI ordering, consumers, and tooling correlation.
 - `FindOperandRefs.java` — locate rendered Ghidra operand references during state-machine recovery.
 - `FindMappedSecretRefs.java` — verify direct references to both corrected secret VAs.
 - `FindMappedRegionRefs.java`, `FindBootloaderDiagnostics.java`,

@@ -159,14 +159,16 @@ from the captured readable bytes.
 
 ## 5. Bootloader DIDs are not DataFlash-backed
 
-The four-entry DID table at CodeFlash `0x8F14`/`0x8F20` contains:
+The complete access, response, and ordering analysis is in `DID_MODEL.md` and is
+independently checked by `verify_did_model.py`. The four-entry DID table at
+CodeFlash `0x8F14` contains:
 
 | DID | Length | Destination/behavior |
 |---:|---:|---|
-| `0xF181` | 32 | read-only identification entry |
+| `0xF181` | 32 | read-only; generates `02 || 32*0x21` rather than a stored identifier |
 | `0x0201` | 16 | direct copy to RAM `0xFEBF2D08` |
 | `0x0202` | 16 | direct copy to RAM `0xFEBF2CF8` |
-| `0x0203` | 5 | special state-reset/sequence handler; no DataFlash pointer |
+| `0x0203` | 5 | sequence-arm request; five data bytes ignored; no DataFlash pointer |
 
 `uds_write_data_by_identifier @ 0x4948` calls `bootloader_did_write_dispatch @
 0x6D5E`; mode 1 invokes a direct byte copy at `0x6D3A`. DID `0x201` becomes the
