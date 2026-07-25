@@ -30,9 +30,9 @@ the two bootloader secrets were unreferenced. Use project **`rh850_p1me_mapped`*
 
 The fully analyzed, annotated project is committed in `project/`
 (`rh850_p1me_mapped.gpr` + `rh850_p1me_mapped.rep/`, ~24 MiB). It already
-contains the 5,477 discovered functions, both secret labels, the UDS handlers,
-and the annotated SecurityAccess/payload-gate/AES/SecOC paths — so you can
-explore it directly without rebuilding.
+contains the discovered functions, both secret labels, the UDS handlers, and
+the annotated SecurityAccess/payload-gate/AES/SecOC/CAN transport paths — so
+you can explore it directly without rebuilding.
 
 Open it with the `ghidra` CLI. The project location must be an **absolute**
 path: Ghidra 12.1+ rejects any path component beginning with `.`
@@ -173,7 +173,7 @@ execution trace.
 
 ## Corrected result
 
-- **5,477 functions, 171,689 instructions, 27,518 symbols**.
+- **5,484 functions, 171,829 instructions, 27,547 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -309,6 +309,29 @@ The proposed FEBEF object-0/key-set interpretation remains invalid. The exact
 operational key source for this captured 12000 image remains unknown; absence from
 the readable snapshot does not prove ICU derivation.
 
+### Confirmed CAN / ISO-TP / UDS transport
+
+`CAN_TRANSPORT_ANALYSIS.md` traces the complete diagnostic path and
+`verify_can_transport.py` independently checks it directly against CodeFlash and
+the local extraction tooling:
+
+- standard physical request ID **`0x7A1`** routes through channel 1/common FIFO
+  0, CanIf RxPduId 0, and the physical CanTp/Dcm connection;
+- standard functional request ID **`0x777`** routes through common FIFO 1 and is
+  single-frame-only;
+- standard response ID **`0x7A9`** uses hardware Tx handle `0x13`;
+- the firmware implements classic 8-byte ISO-TP SF/FF/CF/FC reception,
+  segmented responses, sequence/block/STmin handling, and a 12-bit `0xFFF`
+  maximum SDU;
+- `rscfd_tx_buffer_submit @ 0x36DE` writes the Tx message-buffer registers and
+  requests transmission through **`CFDTMCn @ 0xFFD20250+n`**; for the diagnostic
+  route, `n=16` and the command byte is `0xFFD20260`;
+- the receive chain is RSCFD -> CanIf -> CanTp -> PduR/Dcm ->
+  `uds_service_dispatch @ 0x5222`, and the response chain returns through CanTp,
+  CanIf, and RSCFD;
+- the second byte of each UDS table entry at `0x8E54` is a
+  **physical/functional addressing mask**, not a session mask.
+
 ## Report observations
 
 - The report's virtual addresses generally map to real code after correcting the
@@ -338,6 +361,9 @@ the readable snapshot does not prove ICU derivation.
 - `verify_dataflash_layout.py` — independently verify the full map, 16-object bank, object-15 key-field mapping, and DID volatility.
 - `AnnotateDidModel.java` — name/comment the complete four-entry DID table, response helpers, ordering state, RAM buffers, and access state.
 - `verify_did_model.py` — independently verify the descriptor table, F181 response, WDBI ordering, consumers, and tooling correlation.
+- `SeedCanTransportFunctions.java` — recover missed CanTp callback, confirmation, and RSCFD receive entry points.
+- `AnnotateCanTransport.java` — name/comment the RSCFD, CanIf, CanTp, PduR, Dcm, and UDS dispatch chain and its configuration tables.
+- `verify_can_transport.py` — independently verify CAN IDs, hardware routing/registers, ISO-TP dispatch, UDS integration, and tooling correlation.
 - `FindOperandRefs.java` — locate rendered Ghidra operand references during state-machine recovery.
 - `FindMappedSecretRefs.java` — verify direct references to both corrected secret VAs.
 - `FindMappedRegionRefs.java`, `FindBootloaderDiagnostics.java`,

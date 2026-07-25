@@ -38,7 +38,7 @@ public class AnnotateBootloaderSecrets extends GhidraScript {
             "Family-shared AES-128 UDS SecurityAccess secret. Directly loaded at 0x6FF8. " +
             "Original combined-file offset 0x13FE8; corrected CodeFlash VA 0xBFE8.");
         labelData(0x8E54L,"uds_service_table",
-            "20 entries x 8 bytes: SID, session mask, reserved u16, handler pointer u32.");
+            "20 entries x 8 bytes: SID, physical/functional addressing mask, reserved u16, handler pointer u32. Not a session mask.");
 
         renameFunction(0x5328L,"uds_security_access_request_seed",
             "UDS SID 0x27 request-seed path. Saves the tester's 16-byte data record and prepares/returns the ECU seed.");
