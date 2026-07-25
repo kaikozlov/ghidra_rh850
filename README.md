@@ -1,4 +1,4 @@
-# Corrected Ghidra RH850 analysis of `RH850_P1M-E_Firmware.bin`
+# Ghidra RH850 analysis of `RH850_P1M-E_Firmware.bin`
 
 Reproducible procedure and scripts for the China-market Sienna EPS firmware
 (`8965B4512000`, RH850/P1M-E R7F701381).
