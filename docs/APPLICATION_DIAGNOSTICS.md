@@ -53,21 +53,21 @@ through `w3`.
 |---:|---|---|---|---|---|
 | `10` | DiagnosticSessionControl | `1/2/3` | subfn `0x25BC0` | async programming handoff; NRC `0x88`/`0x22`/`0x78` | recovered |
 | `11` | ECUReset | `2` | callback `0x8B1F0` | length-3 request; lower ops `0x18000000/1`; pending `10` | recovered |
-| `14` | ClearDiagnosticInformation | `1/3` | null callback | bound: `w3=0`, no record xref, gate `0x8F282` | config-only |
+| `14` | ClearDiagnosticInformation | `1/3` | null callback; simple-response (byte[9]==0) | echoes `54`+request; no DTC clearing | resolved |
 | `19` | ReadDTCInformation | `1/3` | subfn `0x25BF0` + callback `0x945DC` | subfn `01..04`; absolute request mirrors `FEBF3BFC/3F24/4248/457C` | recovered |
 | `22` | ReadDataByIdentifier | `1/2/3` | callback `0x948AA` | 242-DID table `0x2941C`; NRC `0x31`/`0x33`/`0x78` | recovered |
-| `23` | ReadMemoryByAddress | `3` | null callback | bound: `w3=0`, no record xref, gate `0x8F282` | config-only |
+| `23` | ReadMemoryByAddress | `3` | null callback; simple-response (byte[9]==0) | echoes `63`+request; no memory read | resolved |
 | `27` | SecurityAccess | `2/3` | subfn `0x25C30` | levels `1/2`, 16-byte seed/key; NRC `0x35`/`0x36`/`0x37` | recovered |
 | `28` | CommunicationControl | `3` | subfn `0x25C70` + callback `0x93C62` | subfn `00/01/03`; mode updates via `0x95154` | recovered |
 | `2E` | WriteDataByIdentifier | `2/3` | callback `0x95DCE` | 19 write-DIDs at `0x26AEC`; NRC `0x12`/`0x31`/`0x33` | recovered |
-| `31` | RoutineControl | `1/2/3` | null callback + RID table `0x25768` | RID table recovered; SID DSP unbound from `w3` | config-table |
-| `34` | RequestDownload | `2` | null callback | bound: `w3=0`, no record xref, gate `0x8F282` | config-only |
-| `36` | TransferData | `2` | null callback | bound: `w3=0`, no record xref, gate `0x8F282` | config-only |
-| `37` | RequestTransferExit | `2` | null callback | bound: `w3=0`, no record xref, gate `0x8F282` | config-only |
+| `31` | RoutineControl | `1/2/3` | null callback; simple-response (byte[9]==0); excluded from subfn path | echoes `71`+request; RID table for AB consumer only | resolved |
+| `34` | RequestDownload | `2` | null callback; simple-response (byte[9]==0) | echoes `74`+request; no download setup | resolved |
+| `36` | TransferData | `2` | null callback; simple-response (byte[9]==0) | echoes `76`+request; no data transfer | resolved |
+| `37` | RequestTransferExit | `2` | null callback; simple-response (byte[9]==0) | echoes `77`+request; no transfer exit | resolved |
 | `3E` | TesterPresent | `1/2/3` | subfn `0x25CA0` | zero-length ack only; no S3 timer | recovered |
 | `85` | ControlDTCSetting | `3` | subfn `0x25CB0` | settings `01/02`; absolute store `FEBF45A8` | recovered |
 | `AB` | proprietary | `1/3` | subfn `0x25CD0` + callback `0x8D344` | mirrors `FEBF48EC` and `FEBF48EC+0x50`; RID `0..12` | structural |
-| `BA` | proprietary | `3` | null callback | bound: `w3=0`, no record xref, gate `0x8F282` | config-only |
+| `BA` | proprietary | `3` | null callback; simple-response (byte[9]==0) | echoes `FA`+request; no proprietary processing | resolved |
 
 No primary service record carries a non-zero service-level security allow-count
 (`b10=0` for all 17). Security is enforced inside handlers (RDBI/WDBI/SA) or not
@@ -302,23 +302,70 @@ absolute literal. Buffer field layout remains opaque.
 
 Proprietary `0xBA` is config-only (extended session, null callback).
 
-### Bounded negatives (`14`/`23`/`31`/`34`/`36`/`37`/`BA`)
+### Bounded negatives (`14`/`23`/`31`/`34`/`36`/`37`/`BA`) — resolved
 
-Machine-checked bound for each null-callback SID (not an exhaustive semantic
-absence proof):
+The null-callback SIDs were previously marked `dsp-indirection-unresolved`. The
+generated Dcm DSP dispatch framework has now been fully traced, and the
+indirection is resolved: **these services are configured but inert** in this
+calibration. They receive a simple positive response (SID`|0x40` + request echo)
+without any service-specific processing.
 
-1. service-record `w3` callback dword is zero;
-2. CodeFlash dword search for the record address finds no additional pointer
-   xrefs;
-3. shared service gate `0x8F282` encodes `tp+0x1F54` SID compare (absolute
-   `0x25E38`), `mulhi 0x18` record stride, and calls `0x8F202` with the session
-   allow-list pointer/count from the matched record (failure path emits NRC
-   `0x7F`).
+#### DSP dispatch architecture
 
-Deeper ClearDTC groups, memory ranges, and download/transfer state machines are
-therefore **not claimed** for those SIDs. The RID table remains a recovered
-config artifact for `0x31`/`AB` consumers without inventing a full SID `0x31`
-DSP path.
+The application Dcm has a two-stage dispatch after the service gate:
+
+1. **Service gate** `0x8F282` — matches the SID byte against the 17-entry table,
+   checks the session allow-list via `0x8F202` (NRC `0x7F` on failure), and
+   checks security via `0x8F242` (NRC `0x33`). The gate sets a flag
+   (`*param_3 = 1`) when `byte[9] == 0x01` and `SID != 0x31` — this marks the
+   service as requiring subfunction/callback processing.
+
+2. **DSP dispatcher** `0x8F3E4` — a compiled generated-DSP entry point called by
+   the main Dcm processor `0x8F850` at two phases: start (phase 0) and complete
+   (phase 2). Each phase has its own enable flag and function-pointer pair:
+
+| Phase | Enable flag | Ptr-pair | Handler | Status |
+|---|---|---|---|---|
+| Start (0) | `0x25DCC = 0x00` | `0x25DD0` → `0x25B54` → `0x8F1E0` | `mov 1, r10; jmp lp` (return 1) | **globally disabled** |
+| Complete (2) | `0x25DCD = 0x01` | `0x25DD8` → `0x25B5C` → `0x8F1E8` | → `0x8A00C` → `0x4C506` (init stub) | enabled (generic init/teardown) |
+
+The start-phase DSP flag is `0x00`, so `0x8F3E4` skips the handler call entirely
+and returns 0 (no-op success) for every service. The complete-phase DSP is
+enabled but resolves to `0x4C506`, a generic Dcm initialization/teardown stub
+that sets the alternate-handoff flag and returns init status — not a
+SID-specific DSP.
+
+3. **Response routing** in `0x8F850`: after both DSP phases return 0 (success):
+   - Flag `0` (byte[9]==0x00, including all null-callback SIDs) → **simple
+     positive response** via `0x8F6FA`: writes `SID|0x40` prefix, copies request
+     data, sends response.
+   - Flag `1` (byte[9]==0x01) → **subfunction/callback processing** via
+     `0x8F750`: matches subfunction via `0x8F344`, then invokes the service
+     callback or subfunction worker.
+
+#### Null-callback SID resolution
+
+All seven null-callback SIDs have `byte[9] == 0x00` and `callback == 0`:
+
+| SID | Sessions | Response |
+|---:|---|---|
+| `0x14` | `1,3` | `54` + request echo (no DTC clearing) |
+| `0x23` | `3` | `63` + request echo (no memory read) |
+| `0x31` | `1,2,3` | `71` + request echo (no routine dispatch) |
+| `0x34` | `2` | `74` + request echo (no download setup) |
+| `0x36` | `2` | `76` + request echo (no data transfer) |
+| `0x37` | `2` | `77` + request echo (no transfer exit) |
+| `0xBA` | `3` | `FA` + request echo (no proprietary processing) |
+
+SID `0x31` is also explicitly excluded from the subfunction path by the gate
+check `SID != '1'` (0x31 = ASCII `'1'`). The 32-entry RID table at `0x25768` is
+consumed only by the proprietary `0xAB` callback (`0x8D3CC` scans entries
+`0..12`), not by SID `0x31` dispatch.
+
+The Corolla's observed `0x34`-silent / `0x36`→NRC `0x7F` / `0x37`→NRC `0x7F`
+behavior cannot be explained by a hidden DSP handler in this image. These
+services either echo a positive response (when the session is allowed) or return
+NRC `0x7F` (when the session does not match).
 
 ## 3. Application DiagnosticSessionControl
 
@@ -608,7 +655,9 @@ Those require successful bootloader capture or a firmware image from part
 | application ECUReset/RDBI/WDBI/SA/CommControl/TesterPresent/ControlDTC handlers | **Definitive** |
 | application SecurityAccess uses bootloader `SEED_KEY_SECRET` | **Unsupported; independent application SA path** |
 | SID `0x31` DSP binding to routine-ID table | **Unknown / generated indirection** |
-| SID `0x14`/`0x23`/`0x34`/`0x36`/`0x37`/`0xBA` request semantics beyond session gates | **Unsupported from static service records** |
+| null-callback SIDs `14`/`23`/`31`/`34`/`36`/`37`/`BA` receive simple positive responses (no service-specific DSP) | **Definitive** |
+| generated Dcm DSP start-phase globally disabled (flag @0x25DCC=0) | **Definitive** |
+| SID `0x31` excluded from subfunction path; RID table consumed only by `0xAB` callback | **Definitive** |
 | proprietary SID `0xAB` OEM name/purpose | **Unknown** |
 | reset reaches the bootloader rather than returning directly to application | **Strong inference** |
 | bootloader `0x614A` queues valid transitions instead of responding directly | **Definitive** |

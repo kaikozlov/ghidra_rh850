@@ -77,16 +77,17 @@ SEMANTICS = {
         "notes": "Requires request length 3; not bootloader hardReset-only shape",
     },
     0x14: {
-        "service_callback_role": "null in service table",
+        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
         "async_worker": "",
         "security_policy": "none at service level (b10=0)",
         "nrcs": "generic session NRC 0x7F via dispatcher when session not allowed",
-        "side_effects": "none claimed beyond shared session gate",
+        "side_effects": "none; simple positive response (SID|0x40 + request echo) via 0x8F6FA",
         "config_tables": "session allow [1,3] only in service record",
-        "evidence_status": "config-only; dsp-indirection-unresolved",
+        "evidence_status": "resolved; simple-response-only",
         "notes": (
-            "Bound: w3=0; no CodeFlash dword xref to record 0x25E60; shared gate 0x8F282 "
-            "enforces the session allow-list (NRC 0x7F). Does not claim exhaustive DSP absence"
+            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
+            "byte[9]==0 selects simple-response path. Service echoes SID|0x40 + request "
+            "without service-specific processing. No hidden DSP handler."
         ),
     },
     0x19: {
@@ -113,16 +114,16 @@ SEMANTICS = {
         "notes": "242 DID records; F181/F186/F18C previously documented",
     },
     0x23: {
-        "service_callback_role": "null in service table",
+        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
         "async_worker": "",
         "security_policy": "none at service level (b10=0)",
         "nrcs": "generic session NRC 0x7F when not in extended",
-        "side_effects": "none claimed beyond shared session gate",
+        "side_effects": "none; simple positive response (SID|0x40 + request echo) via 0x8F6FA",
         "config_tables": "session allow [3] only",
-        "evidence_status": "config-only; dsp-indirection-unresolved",
+        "evidence_status": "resolved; simple-response-only",
         "notes": (
-            "Bound: w3=0; no CodeFlash dword xref to record 0x25EA8; shared gate 0x8F282 "
-            "enforces session allow-list (NRC 0x7F). No memory-range table tied to this record"
+            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
+            "byte[9]==0 selects simple-response path. No memory-range table or read handler."
         ),
     },
     0x27: {
@@ -159,51 +160,60 @@ SEMANTICS = {
         "notes": "Write set is a 19-entry subset (1000..110D class), not the full 242-DID read table",
     },
     0x31: {
-        "service_callback_role": "null in service table",
+        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
         "async_worker": "",
         "security_policy": "none at service level (b10=0)",
         "nrcs": "shared gate NRC 0x7F when session not allowed",
-        "side_effects": "none claimed from SID record; RID table exists for other consumers",
+        "side_effects": "none from SID dispatch; RID table consumed only by 0xAB callback 0x8D3CC",
         "config_tables": f"routine-ID table 0x{ROUTINE_TABLE:X} count {ROUTINE_COUNT}",
-        "evidence_status": "config-table-recovered; service-callback-null; dsp-indirection-unresolved",
+        "evidence_status": "resolved; simple-response-only (RID table for AB consumer)",
         "notes": (
-            "Bound: w3=0; no CodeFlash dword xref to record 0x25F08; gate 0x8F282 enforces "
-            "sessions. 32-entry table at 0x25768 has start/result ptrs; AB lookup 0x8D3CC "
-            "scans 0..12 only. No claim that SID 0x31 DSP is absent—only unbound from w3"
+            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
+            "byte[9]==0 selects simple-response path. SID 0x31 also excluded from subfn "
+            "path by gate check (SID==0x31=ASCII '1'). The 32-entry RID table at 0x25768 "
+            "is consumed only by the 0xAB callback (0x8D3CC scans entries 0..12). SID 0x31 "
+            "itself echoes SID|0x40 without dispatching routines."
         ),
     },
     0x34: {
-        "service_callback_role": "null in service table",
+        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
         "async_worker": "",
         "security_policy": "none at service level (b10=0)",
         "nrcs": "shared gate NRC 0x7F outside programming",
-        "side_effects": "none claimed beyond shared session gate",
+        "side_effects": "none; simple positive response (SID|0x40 + request echo) via 0x8F6FA",
         "config_tables": "session allow [2] only",
-        "evidence_status": "config-only; dsp-indirection-unresolved",
+        "evidence_status": "resolved; simple-response-only",
         "notes": (
-            "Bound: w3=0; no CodeFlash dword xref to record 0x25F20; gate 0x8F282. "
-            "Unlike bootloader RequestDownload at 0x5D68; no download-range table xref from this record"
+            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
+            "byte[9]==0 selects simple-response path. Unlike bootloader RequestDownload "
+            "at 0x5D68; no download-range table or transfer state machine."
         ),
     },
     0x36: {
-        "service_callback_role": "null in service table",
+        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
         "async_worker": "",
         "security_policy": "none at service level (b10=0)",
         "nrcs": "shared gate NRC 0x7F outside programming",
-        "side_effects": "none claimed beyond shared session gate",
+        "side_effects": "none; simple positive response (SID|0x40 + request echo) via 0x8F6FA",
         "config_tables": "session allow [2] only",
-        "evidence_status": "config-only; dsp-indirection-unresolved",
-        "notes": "Bound: w3=0; no CodeFlash dword xref to record 0x25F38; gate 0x8F282",
+        "evidence_status": "resolved; simple-response-only",
+        "notes": (
+            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
+            "byte[9]==0 selects simple-response path. No transfer state machine."
+        ),
     },
     0x37: {
-        "service_callback_role": "null in service table",
+        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
         "async_worker": "",
         "security_policy": "none at service level (b10=0)",
         "nrcs": "shared gate NRC 0x7F outside programming",
-        "side_effects": "none claimed beyond shared session gate",
+        "side_effects": "none; simple positive response (SID|0x40 + request echo) via 0x8F6FA",
         "config_tables": "session allow [2] only",
-        "evidence_status": "config-only; dsp-indirection-unresolved",
-        "notes": "Bound: w3=0; no CodeFlash dword xref to record 0x25F50; gate 0x8F282",
+        "evidence_status": "resolved; simple-response-only",
+        "notes": (
+            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
+            "byte[9]==0 selects simple-response path. No transfer-exit handler."
+        ),
     },
     0x3E: {
         "service_callback_role": "subfunction_table_only; row callback 0x93CFE",
@@ -245,16 +255,17 @@ SEMANTICS = {
         "notes": "Proprietary; no OEM service name assigned. Secondary record uses data ptrs 0x26104/0x26110",
     },
     0xBA: {
-        "service_callback_role": "null in service table",
+        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
         "async_worker": "",
         "security_policy": "none at service level (b10=0)",
         "nrcs": "shared gate NRC 0x7F outside extended",
-        "side_effects": "none claimed beyond shared session gate",
+        "side_effects": "none; simple positive response (SID|0x40 + request echo) via 0x8F6FA",
         "config_tables": "session allow [3] only",
-        "evidence_status": "config-only; proprietary-unresolved",
+        "evidence_status": "resolved; simple-response-only",
         "notes": (
-            "Bound: w3=0; no CodeFlash dword xref to record 0x25FB0; gate 0x8F282. "
-            "No OEM name; no claim of exhaustive DSP absence"
+            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
+            "byte[9]==0 selects simple-response path. No OEM service handler; "
+            "service echoes positive response without service-specific processing."
         ),
     },
 }

@@ -436,6 +436,82 @@ check("CommunicationControl 0x95154 jarls mode helpers 0x94F8E and 0x9505C",
       bytes.fromhex("bfff62fd") in CF[0x95154:0x952D0] and
       bytes.fromhex("bfff90fd") in CF[0x95154:0x952D0])
 
+print("\n== Dcm DSP dispatch architecture ==")
+
+# The application Dcm has a compiled generated-DSP framework at 0x8F3E4 that is
+# entered after the service gate succeeds. It uses two enable flags and two
+# function-pointer pairs to select start-phase and complete-phase DSP handlers.
+# In this calibration the start-phase DSP is globally disabled, so all services
+# (including null-callback SIDs) receive the same no-op start processing. The
+# complete-phase DSP is enabled but resolves to a generic init/teardown stub.
+check("DSP start-phase enable flag @0x25DCC is 0x00 (globally disabled)",
+      CF[0x25DCC] == 0x00)
+check("DSP complete-phase enable flag @0x25DCD is 0x01 (enabled)",
+      CF[0x25DCD] == 0x01)
+
+# DSP pointer-pair chain: flag-ptr -> ptr-table -> handler-fn
+dsp_start_pair = struct.unpack_from("<I", CF, 0x25DD0)[0]
+dsp_complete_pair = struct.unpack_from("<I", CF, 0x25DD8)[0]
+check("DSP start ptr-pair @0x25DD0 resolves to 0x25B54",
+      dsp_start_pair == 0x25B54)
+check("DSP complete ptr-pair @0x25DD8 resolves to 0x25B5C",
+      dsp_complete_pair == 0x25B5C)
+dsp_start_fn = struct.unpack_from("<I", CF, dsp_start_pair)[0]
+dsp_complete_fn = struct.unpack_from("<I", CF, dsp_complete_pair)[0]
+check("DSP start handler is stub 0x8F1E0 (mov 1,r10; jmp lp = return 1)",
+      dsp_start_fn == 0x8F1E0 and
+      CF[0x8F1E0:0x8F1E4] == bytes.fromhex("01527f00"))
+check("DSP complete handler is 0x8F1E8 (-> 0x8A00C -> 0x4C506 init stub)",
+      dsp_complete_fn == 0x8F1E8)
+check("DSP complete stub 0x8F1E8 jarls 0x8A00C at 0x8F1F0",
+      CF[0x8F1F0:0x8F1F4] == bytes.fromhex("bfff1cae"))
+check("DSP complete callee 0x8A00C is a prepare/dispose wrapper",
+      CF[0x8A00C:0x8A010] == bytes.fromhex("80072100") and
+      CF[0x8A018:0x8A01C] == bytes.fromhex("40063f00"))
+check("handoff-flag setter 0x4C506 stores to application_alternate_handoff_flag",
+      bytes.fromhex("06a6ff") in CF[0x4C506:0x4C540])
+
+# Service record byte[9] is the subfunction/callback processing flag.
+# byte[9]==0x01 -> service routes through subfn dispatch (0x8F750)
+# byte[9]==0x00 -> service routes through simple response (0x8F6FA)
+byte9_subfn = {0x10, 0x19, 0x27, 0x28, 0x3E, 0x85, 0xAB}
+byte9_simple = {0x11, 0x14, 0x22, 0x23, 0x2E, 0x31, 0x34, 0x36, 0x37, 0xBA}
+for sid in byte9_subfn:
+    idx = [i for i in range(17) if app_services[i][2] == sid][0]
+    check(f"SID 0x{sid:02X} byte[9] marks subfn/callback processing",
+          app_services[idx][3] == 0x01)
+for sid in byte9_simple:
+    idx = [i for i in range(17) if app_services[i][2] == sid][0]
+    check(f"SID 0x{sid:02X} byte[9] marks simple-response path",
+          app_services[idx][3] == 0x00)
+
+# All null-callback SIDs have byte[9]==0x00 -> they take the simple-response
+# path. This is the definitive resolution of the "dsp-indirection-unresolved"
+# status: there is no hidden DSP path; the generated DSP start-phase is globally
+# disabled and these services echo a positive response without service-specific
+# processing.
+for sid in (0x14, 0x23, 0x31, 0x34, 0x36, 0x37, 0xBA):
+    idx = [i for i in range(17) if app_services[i][2] == sid][0]
+    check(f"null-callback SID 0x{sid:02X} takes simple-response path "
+          f"(byte[9]==0 and callback==0)",
+          app_services[idx][3] == 0x00 and app_services[idx][7] == 0)
+
+# The main Dcm request processor at 0x8F850 calls the gate, then the DSP
+# dispatcher, then routes to simple-response (0x8F6FA) or subfn dispatch
+# (0x8F750) based on the flag the gate sets.
+check("Dcm main processor 0x8F850 calls service gate 0x8F282 at 0x8F8BC",
+      CF[0x8F8BC:0x8F8C0] == bytes.fromhex("bfffc6f9"))
+check("Dcm main processor 0x8F850 calls DSP dispatcher 0x8F3E4 (phase 0 at 0x8F88E)",
+      CF[0x8F88E:0x8F892] == bytes.fromhex("bfff56fb"))
+check("Dcm main processor 0x8F850 calls DSP dispatcher 0x8F3E4 (phase 2 at 0x8F8D6)",
+      CF[0x8F8D6:0x8F8DA] == bytes.fromhex("bfff0efb"))
+check("Dcm main processor 0x8F850 calls simple-response 0x8F6FA at 0x8F8EA",
+      CF[0x8F8EA:0x8F8EE] == bytes.fromhex("bfff10fe"))
+check("Dcm main processor 0x8F850 calls subfn dispatch 0x8F750 at 0x8F8F0",
+      CF[0x8F8F0:0x8F8F4] == bytes.fromhex("bfff60fe"))
+check("simple-response builder 0x8F6FA ORs SID with 0x40 positive-response prefix",
+      bytes.fromhex("4000") in CF[0x8F6FA:0x8F720])
+
 print("\n== generated application diagnostic map artifact ==")
 import csv
 import tempfile
