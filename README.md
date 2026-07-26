@@ -489,7 +489,7 @@ extraction tooling and shellcode:
 | `ghidra/scripts/seed/` | Function and table seeds missed by auto-analysis |
 | `ghidra/scripts/annotate/` | Durable names, labels, and comments for each completed investigation |
 | `ghidra/scripts/investigate/` | Reusable reference/operand search helpers |
-| `tests/` | Ten self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
+| `tests/` | Eleven self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
 | `tools/` | DataFlash CSV generator, durable Ghidra rebuild, and project-statistics verifier |
 | `external-references.lock.json` | Exact upstream commits and artifact hashes |
 | `pyproject.toml`, `uv.lock` | Locked UV/PyCryptodome verification environment |
