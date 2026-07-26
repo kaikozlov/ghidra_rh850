@@ -139,11 +139,14 @@ run_headless() {
   "$ANALYZE_HEADLESS" "$@" >"$log" 2>&1
   local rc=$?
   set -e
-  if ((rc != 0)) || grep -E 'REPORT SCRIPT ERROR|IllegalStateException' "$log" >/dev/null; then
+  if ((rc != 0)) || rg -q 'REPORT SCRIPT ERROR|IllegalStateException' "$log"; then
     echo "ERROR: headless stage failed: $stage (rc=$rc)" >&2
-    grep -E 'SCRIPT ERROR|IllegalStateException|Created |RecoverVector|ApplyCalling|RecoverSwitch|ApplyRam|ASSERT|ERROR' "$log" | tail -80 >&2 || true
+    rg -n 'SCRIPT ERROR|IllegalStateException|Created |RecoverVector|ApplyCalling|RecoverSwitch|ApplyRam|ASSERT|ERROR' "$log" | tail -80 >&2 || true
     echo "full log: $log" >&2
     exit 1
+  fi
+  if [[ "$stage" == "annotate" || "$stage" == "finalize-conventions" ]]; then
+    rg -n 'ApplyCallingConventions:|RecoverSwitchTables:|RecoverVectorHandlers:' "$log" || true
   fi
   rm -f "$log"
 }
@@ -154,8 +157,9 @@ echo "Isolated v850 plugin: $V850_EXT_DIR"
 echo "Processor manifest: $PROCESSOR_MANIFEST"
 
 # Analysis is intentionally staged. Ghidra discovers a different graph if all
-# seeds are injected before its first pass; these four durable commits reproduce
-# the checked-in project's exact function/instruction/symbol counts.
+# seeds are injected before its first pass; these four durable analysis commits
+# reproduce the checked-in project's exact function/instruction/symbol counts.
+# A separate -noanalysis convention finalizer follows (not a fifth analysis stage).
 echo "[1/4] Import mapped images without analysis"
 run_headless "import" "$PROJECT_DIR" "$PROJECT_NAME" \
   -import "$CODEFLASH" \
@@ -195,6 +199,7 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -preScript SeedBootloaderDiagnosticFunctions.java \
   -preScript SeedArchitectureFunctions.java \
   -preScript SeedApplicationTransmitFunctions.java \
+  -preScript SeedApplicationReceiveFunctions.java \
   -postScript AnnotateBootloaderSecrets.java \
   -postScript AnnotatePayloadGate.java \
   -postScript AnnotateSecocNvmCorrection.java \
@@ -205,11 +210,26 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -postScript AnnotateApplicationDiagnostics.java \
   -postScript AnnotateBootloaderDiagnostics.java \
   -postScript RecoverVectorHandlers.java \
-  -postScript ApplyCallingConventions.java \
   -postScript RecoverSwitchTables.java \
   -postScript AnnotateArchitecture.java \
   -postScript AnnotateApplicationTransmit.java \
+  -postScript AnnotateApplicationReceive.java \
+  -postScript ApplyCallingConventions.java \
   -commit "Complete reproducible RH850 analysis"
+
+# Convention finalizer (not an analysis stage): after the annotate-stage commit,
+# a -noanalysis reopen consistently surfaces two additional non-ISR bodies at
+# 0x3b0be and 0x6f0d0 that were absent from FunctionManager during stage-4
+# ApplyCallingConventions (iterator count 5731 → 5733). Without this pass they
+# remain calling-convention "unknown" and fail AssertProjectInvariants /
+# AssertDecompilerInvariants. The finalizer sets exactly those two to __stdcall.
+echo "[4b] Finalize calling conventions (no analysis)"
+run_headless "finalize-conventions" "$PROJECT_DIR" "$PROJECT_NAME" \
+  -process "$PROGRAM_NAME" \
+  -noanalysis \
+  "${COMMON_ARGS[@]}" \
+  -postScript ApplyCallingConventions.java \
+  -commit "Finalize calling conventions"
 
 CLI_ARGS=(
   --projects-dir "$PROJECT_DIR"

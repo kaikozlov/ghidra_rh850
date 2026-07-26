@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 public class AssertSwitchTables extends GhidraScript {
-    private static final int EXPECTED_REAL_SWITCHES = 19;
+    private static final int EXPECTED_REAL_SWITCHES = 20;
     private static final int MAX_TABLE = 256;
     private static final int MAX_LOOKBACK = 16;
     private static final long CODEFLASH_END = 0x100000L;

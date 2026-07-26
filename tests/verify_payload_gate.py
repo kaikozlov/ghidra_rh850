@@ -68,6 +68,68 @@ check("RoutineControl IDs",
 check("0x10F0 and 0xFF00 require START + 10 option bytes",
       routines[0][2:4] == (1, 10) and routines[4][2:4] == (1, 10))
 
+print("\n== Download / decrypt / erase control flow ==")
+services = {
+    sid: handler
+    for sid, _mask, _rsv, handler in (
+        struct.unpack_from("<BBHI", CF, 0x8E54 + i * 8) for i in range(20)
+    )
+}
+check("SID 0x34 RequestDownload handler is 0x5D68", services[0x34] == 0x5D68)
+check("SID 0x36 TransferData handler is 0x4DBA", services[0x36] == 0x4DBA)
+check("SID 0x37 TransferExit handler is 0x5C92", services[0x37] == 0x5C92)
+check("SID 0x31 RoutineControl handler is 0x567E", services[0x31] == 0x567E)
+
+check("RequestDownload calls payload crypto init wrapper",
+      CF[0x5F1A:0x5F1E] == bytes.fromhex("80ff8e0c"), CF[0x5F1A:0x5F1E].hex())
+check("crypto init wrapper calls payload_crypto_initialize",
+      CF[0x6BA8:0x6BB0] == bytes.fromhex("8007210080ff2805"),
+      CF[0x6BA8:0x6BB0].hex())
+check("payload_crypto_initialize calls derive then CBC/CMAC init",
+      CF[0x70D4:0x70E0] == bytes.fromhex("80072100bfff90ffbfffbeff"),
+      CF[0x70D4:0x70E0].hex())
+
+check("TransferData dispatches active download path to 0x4B7C",
+      CF[0x4DD6:0x4DDE] == bytes.fromhex("620aca05bfffa2fd"),
+      CF[0x4DD6:0x4DDE].hex())
+check("TransferData enqueue calls payload_decrypt_enqueue",
+      CF[0x4C72:0x4C76] == bytes.fromhex("80ff421f"), CF[0x4C72:0x4C76].hex())
+check("TransferData path rejects bad chunk length with NRC 0x31",
+      bytes.fromhex("20363100") in CF[0x4B7C:0x4DBA])
+check("TransferData enqueue-failure path emits NRC 0x72",
+      CF[0x4C7A:0x4C7E] == bytes.fromhex("20367200"))
+
+check("decrypt task calls CBC wrapper 0x7108",
+      CF[0x6C06:0x6C0A] == bytes.fromhex("80ff0205"), CF[0x6C06:0x6C0A].hex())
+check("decrypt task advances pointers by one AES block",
+      CF[0x6C10:0x6C14] == bytes.fromhex("010e1000"), CF[0x6C10:0x6C14].hex())
+
+check("TransferExit finalizes payload crypto through 0x6BD2",
+      CF[0x5CE6:0x5CEA] == bytes.fromhex("80ffec0e"), CF[0x5CE6:0x5CEA].hex())
+check("payload_crypto_finalize wrapper sits at 0x6BD2",
+      CF[0x6BD2:0x6BDA] == bytes.fromhex("8007210080ff2605"),
+      CF[0x6BD2:0x6BDA].hex())
+
+check("RoutineControl CRC path calls queue helper 0x47BA",
+      CF[0x57C4:0x57C8] == bytes.fromhex("bffff6ef"), CF[0x57C4:0x57C8].hex())
+check("RoutineControl erase path calls flash_erase_start",
+      CF[0x58B4:0x58B8] == bytes.fromhex("bfff2ce9"), CF[0x58B4:0x58B8].hex())
+check("CMAC verify path calls payload_cmac_verify_enqueue",
+      CF[0x5978:0x597C] == bytes.fromhex("80ff4215"), CF[0x5978:0x597C].hex())
+check("RAM verifier/erase workers contain NRC 0x72 failure sites",
+      CF[0x5936:0x5C00].count(bytes.fromhex("20367200")) >= 2)
+
+check("main loop invokes flash_operation_task",
+      CF[0x1388:0x138C] == bytes.fromhex("80ffa030"), CF[0x1388:0x138C].hex())
+check("flash task reaches driver call-block at 0x4332",
+      CF[0x44A8:0x44AC] == bytes.fromhex("bfff8afe"), CF[0x44A8:0x44AC].hex())
+check("flash_erase_start prologue is at 0x41E0",
+      CF[0x41E0:0x41E4] == bytes.fromhex("8807e110"), CF[0x41E0:0x41E4].hex())
+check("flash_operation_task prologue is at 0x4428",
+      CF[0x4428:0x442C] == bytes.fromhex("8207e130"), CF[0x4428:0x442C].hex())
+check("erase engine function prologue is at 0x4332",
+      CF[0x4332:0x4336] == bytes.fromhex("8207e110"), CF[0x4332:0x4336].hex())
+
 # Exact RH850 sequence used twice by the flash engine:
 #   movhi 0xFEBF,r0,r29; ld.w 0xFD0[r29],r29; ...; jarl r29,lp
 check("flash callback load at 0x434C reads RAM 0xFEBF0FD0",

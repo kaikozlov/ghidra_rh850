@@ -127,7 +127,7 @@ Safe interactive workflow: `make work-project` → absolute `--projects-dir` on
 `build/project/` → `ghidra ... stop` before any copy/commit → promote only with
 `make snapshot-project`. Processor fingerprint mismatches fail work/snapshot.
 CI always runs `make verify`, runs synthetic and committed-project processor
-audits on processor-path changes, and runs four-stage rebuild parity for
+audits on processor-path changes, and runs four-analysis-stage rebuild parity for
 processor/script/snapshot changes, main pushes, dispatches, and nightly builds.
 
 ## Rebuild the complete Ghidra project
@@ -158,9 +158,13 @@ To replace an existing disposable working build, use
 point the rebuild at committed `project/`; promote only with
 `make snapshot-project`.
 
-The script uses four staged `analyzeHeadless` transactions, each with a durable
-`-commit`. Staging matters: injecting every seed before the first analysis pass
-produces a different graph and does not reproduce the committed statistics.
+The script uses four staged durable analysis commits plus a separate
+`-noanalysis` calling-convention finalizer. Staging matters: injecting every
+seed before the first analysis pass produces a different graph and does not
+reproduce the committed statistics. The finalizer is not a fifth analysis
+stage — after annotate reopen, Ghidra surfaces two additional non-ISR bodies
+(`0x3b0be`, `0x6f0d0`) that stage-4 `ApplyCallingConventions` never saw
+(function iterator 5731 → 5733); without the finalizer they stay `unknown`.
 
 1. import CodeFlash without analysis, map DataFlash with `AddDataFlash.java`,
    and apply `ApplyP1MDeviceProfile.java` (LocalRAM/SFR windows, GP/TP, SFR
@@ -180,7 +184,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `SeedBootloaderDiagnosticFunctions.java`;
    - `SeedArchitectureFunctions.java`;
    - `SeedApplicationTransmitFunctions.java`;
-5. re-run analysis and apply every annotation script:
+   then re-run analysis and apply every annotation script:
    - `AnnotateBootloaderSecrets.java`;
    - `AnnotatePayloadGate.java`;
    - `AnnotateSecocNvmCorrection.java`;
@@ -191,10 +195,12 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateApplicationDiagnostics.java`;
    - `AnnotateBootloaderDiagnostics.java`;
    - `RecoverVectorHandlers.java` (INTBP/EBASE/`__interrupt`);
-   - `ApplyCallingConventions.java` (explicit `__stdcall` on non-ISR functions);
    - `RecoverSwitchTables.java` (in-function `switch` jump tables);
    - `AnnotateArchitecture.java`;
    - `AnnotateApplicationTransmit.java`;
+   - `ApplyCallingConventions.java` (explicit `__stdcall` on non-ISR functions);
+5. `-noanalysis` convention finalizer: re-run `ApplyCallingConventions.java` and
+   commit so the two post-annotate bodies receive `__stdcall`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
 7. write `processor_manifest.json` beside the working project and require
@@ -224,7 +230,11 @@ and execution trace.
 
 - Landmark smoke signal on the last annotated rebuild: **5,731 functions,
   174,783 instructions, 37,001 symbols** (floors for gates; semantic checks live
-  in `make verify-processor`).
+  in `make verify-processor`). The generated whole-image ledger
+  `data/semantic_coverage_ledger.csv` (via `make generate-semantic-coverage`)
+  has **5733** recovered-function rows; the verify suite floors at that count
+  independently. Most rows remain `evidence_grade=recovered` and are not claimed
+  as behaviorally understood. See `docs/PLUGIN_AUDIT.md` (Semantic coverage ledger).
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -308,7 +318,7 @@ RAM-resident flash callback is overwritten by the authenticated 4 KiB image.
 ### Resolution of five previously open semantics
 
 `docs/OPEN_SEMANTICS_RESOLUTION.md` closes the prior questions around
-`0xFEBFC81F`, the limited secondary diagnostic endpoint, EIINT 292/293,
+`0xFEBEE81F` (`GP+0x301F`), the limited secondary diagnostic endpoint, EIINT 292/293,
 DataFlash pages 0–255, and checkpoint payload naming. The bounded results are
 also integrated into the subsystem reports and raw-image verification suites.
 
@@ -424,9 +434,10 @@ the recovered tables and control-flow evidence directly from CodeFlash:
   `0x93F3C`;
 - application PROGRAMMING is allowed only from current session 2 or 3, rejects
   raw speed above `0x0180` with NRC `0x88`, and then requires system-transition
-  phase snapshot `0xFEBFC81F != 0x11`, scaled supply at least `0x0A00`, and a
-  clear handoff flag; the snapshot is copied from the non-Dcm state machine at
-  `0xB28AC/0xB2912`, whose recovered phase markers are `0/0x11/0x22`;
+  phase snapshot `0xFEBEE81F` (`GP+0x301F`) `!= 0x11`, scaled supply
+  `0xFEBE6692` (`GP-0x516E`) at least `0x0A00`, and clear alternate flag
+  `0xFEBE8152` (`GP-0x36AE`); the snapshot is copied from the non-Dcm state
+  machine at `0xB28AC/0xB2912`, whose recovered phase markers are `0/0x11/0x22`;
 - the generated `0x08000200/201` lower calls are no-op stubs in this image;
   successful entry instead queues system event 9, shutdown mode `0x900`, and
   the hard-reset path while UDS remains response-pending;
@@ -495,6 +506,16 @@ and `0x85`, plus routines `0x10F1–0x10F3`; its raw-image checks are in
 - public Toyota DBC names are used only where the pinned bit layout agrees (`STEER_TORQUE_SENSOR` and `EPS_STATUS`); unknown OEM semantics remain anonymous;
 - the path is COM -> PduR -> CanIf -> the CAN1 RSCFD transmit queue, with EIINT 188 providing completion.
 
+### Complete application receive I-PDU and COM signal map
+
+`docs/APPLICATION_RECEIVE_MAP.md` and
+`tests/verify_application_receive.py` complete the application receive side:
+
+- 47 normal Rx I-PDUs (acceptance `0x231A0` / descriptors `0x22018` / COM PDUs 6..52) carry 242 generated signals 58..299;
+- `data/application_rx_map.csv` is generated from `data/application_rx_signal_evidence.csv` and records per-signal parent PDU, CAN ID, lengths, timeout ticks, unpacker, call site, wire field or bounded unresolved status, and first consumer;
+- six SecOC envelopes remain members of the 47 (cross-checked to `0x25970`); diagnostic `0x7A1/0x777/0x7A0/0x7F7` stay outside the COM map; `0x344` remains absent;
+- 145 signals have recovered unpack destinations gated by unpacker body hashes and immediates; 97 stay configured-unresolved; `AssertApplicationReceiveMap.java` audits destination WRITE/READ ownership under `make verify-processor`.
+
 ### Confirmed bootloader CAN / ISO-TP / UDS transport
 
 `docs/CAN_TRANSPORT_ANALYSIS.md` traces the complete diagnostic path and
@@ -540,11 +561,11 @@ extraction tooling and shellcode:
 | `ghidra/scripts/seed/` | Function and table seeds missed by auto-analysis |
 | `ghidra/scripts/annotate/` | Durable names, labels, and comments for each completed investigation |
 | `ghidra/scripts/investigate/` | Reusable reference/operand search helpers |
-| `tests/` | Twelve self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
-| `tools/` | DataFlash CSV generator, durable Ghidra rebuild, and project-statistics verifier |
+| `tests/` | Self-contained firmware suites (including semantic coverage ledger), optional external corroboration, and pinned payload fixtures |
+| `tools/` | DataFlash CSV generator, semantic coverage ledger export, durable Ghidra rebuild, and project-statistics verifier |
 | `external-references.lock.json` | Exact upstream commits and artifact hashes |
 | `pyproject.toml`, `uv.lock` | Locked UV/PyCryptodome verification environment |
-| `data/` | Generated 122-record NvM map and complete 58-signal application transmit map |
+| `data/` | Generated NvM/transmit maps plus whole-image `semantic_coverage_ledger.csv` |
 | `firmware/` | Correctly split CodeFlash and DataFlash images |
 | `legacy/flat-import/` | Preserved scripts from the invalid original mapping; do not use |
 | `project/` | Pre-built durable Ghidra project |

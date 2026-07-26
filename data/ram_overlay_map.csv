@@ -17,15 +17,15 @@ address,name,size,type,gp_base,gp_offset,comment
 0xFEBF2B0F,uds_security_access_state,1,uint8,0xFEBF9800,-0x6CF1,SecurityAccess state; protected paths require 2
 0xFEBF2B16,payload_did_crypto_ready,1,uint8,0xFEBF9800,-0x6CEA,Set after successful DID 0202
 0xFEBF2B6C,uds_read_did_response_length,2,uint16,0xFEBF9800,-0x6C94,ReadDID response payload length excluding SID 0x62
-0xFEBEB1A4,application_system_transition_phase_live,1,uint8,0xFEBEB800,-0x65C,Live system-transition phase byte
-0xFEBFC81F,application_system_transition_phase_snapshot,1,uint8,0xFEBEB800,0x1101F,Phase snapshot; 0x11 blocks programming handoff
-0xFEBFC892,application_vehicle_speed_raw,2,uint16,0xFEBEB800,0x11092,Unsigned speed signal; >0x0180 -> NRC 0x88
-0xFEBF4692,application_supply_value_raw,2,uint16,0xFEBEB800,0x8E92,Scaled supply; <0x0A00 blocks handoff
-0xFEBF6152,application_alternate_handoff_flag,1,uint8,0xFEBEB800,0xA952,Must be clear for normal PROGRAMMING reset path
-0xFEBF6166,application_programming_reset_requested,1,uint8,0xFEBEB800,0xA966,One-request marker set to 0x5A after event 9
-0xFEBF3B14,application_programming_handoff_value,4,uint32,0xFEBEB800,0x8314,Four-byte handoff payload (written as zero)
-0xFEBF3B18,application_programming_readiness_latch,1,uint8,0xFEBEB800,0x8318,Set to 0x5A after readiness check
-0xFEBF3B19,application_programming_reset_latch,1,uint8,0xFEBEB800,0x8319,Set to 0x5A after reset request succeeds
+0xFEBEB1A4,application_system_transition_phase_live,1,uint8,0xFEBEB800,-0x65C,Live system-transition phase byte (ld.bu -0x65C[gp] @ 0xBCD02)
+0xFEBEE81F,application_system_transition_phase_snapshot,1,uint8,0xFEBEB800,0x301F,Phase snapshot GP+0x301F; 0x11 blocks programming handoff (ld.bu 0x301F[gp] @ 0x4C960)
+0xFEBEE892,application_vehicle_speed_raw,2,uint16,0xFEBEB800,0x3092,Unsigned speed GP+0x3092; >0x0180 -> NRC 0x88 (ld.hu 0x3092[gp] @ 0x4C944)
+0xFEBE6692,application_supply_value_raw,2,uint16,0xFEBEB800,-0x516E,Scaled supply GP-0x516E; <0x0A00 blocks handoff (ld.hu -0x516E[gp] @ 0x4C964)
+0xFEBE8152,application_alternate_handoff_flag,1,uint8,0xFEBEB800,-0x36AE,Must be clear for normal PROGRAMMING reset path (ld.bu -0x36AE[gp] @ 0x4C968)
+0xFEBE8166,application_programming_reset_requested,1,uint8,0xFEBEB800,-0x369A,One-request marker set to 0x5A after event 9 (st.b/ld.bu -0x369A[gp] @ 0x4C986/0x4C998)
+0xFEBF3B14,application_programming_handoff_value,4,uint32,,,Absolute mov 0xFEBF3B14 @ 0x8A248; not GP-relative
+0xFEBF3B18,application_programming_readiness_latch,1,uint8,,,Absolute mov 0xFEBF3B18 @ 0x8A092; set to 0x5A after readiness check
+0xFEBF3B19,application_programming_reset_latch,1,uint8,,,FEBF3B14+5 via ld.bu/st.b 0x5[r29] @ 0x8A24E/0x8A276; absolute base
 0xFEBEFC18,checkpoint_monitor_aggregate,160,Checkpoint_monitor_aggregate,0xFEBEB800,0x4418,enabled checkpoint slot from checkpoint_payload_map.csv
 0xFEBEFCB8,checkpoint_monitor_state_bank_0,240,Checkpoint_monitor_state_bank_0,0xFEBEB800,0x44B8,enabled checkpoint slot from checkpoint_payload_map.csv
 0xFEBEFDA8,checkpoint_monitor_state_bank_1,240,Checkpoint_monitor_state_bank_1,0xFEBEB800,0x45A8,enabled checkpoint slot from checkpoint_payload_map.csv

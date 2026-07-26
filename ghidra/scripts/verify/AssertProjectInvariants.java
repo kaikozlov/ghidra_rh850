@@ -205,6 +205,41 @@ public class AssertProjectInvariants extends GhidraScript {
         requireFunction(0x650acL, "application_icus_ch292_isr");
         requireFunction(0x650eeL, "application_icus_ch293_isr");
 
+        // Stage-1 verification landmarks: programming handoff, SecurityAccess,
+        // payload download/erase chain, and checkpoint update API.
+        requireFunction(0x4c960L, "application_programming_handoff_prerequisites");
+        requireFunction(0x5328L, "uds_security_access_request_seed");
+        requireFunction(0x53f2L, "uds_security_access_send_key");
+        requireFunction(0x5d68L, "uds_request_download");
+        requireFunction(0x4dbaL, "uds_transfer_data");
+        requireFunction(0x5c92L, "uds_request_transfer_exit");
+        requireFunction(0x567eL, "uds_routine_control");
+        requireFunction(0x6bdeL, "payload_decrypt_transfer_task");
+        requireFunction(0x41e0L, "flash_erase_start");
+        requireFunction(0x4428L, "flash_operation_task");
+        requireFunction(0x4332L, "flash_driver_call_block_operation");
+        requireFunction(0x65cd8L, "secoc_nvm_object_update");
+        requireFunction(0x6bb4L, "payload_decrypt_enqueue");
+        requireFunction(0x70d4L, "payload_crypto_initialize");
+
+        // Stage-2 application UDS landmarks (stable subset of the 17-SID map).
+        requireFunction(0x8b1f0L, "application_ecu_reset_callback");
+        requireFunction(0x948aaL, "application_rdbi_callback");
+        requireFunction(0x94e32L, "application_security_access_subfunction_01");
+        requireFunction(0x95dceL, "application_wdbi_callback");
+        requireFunction(0x8d344L, "application_proprietary_ab_callback");
+        requireLabel(0x2941cL, "application_did_table");
+        requireLabel(0x26aecl, "application_write_did_table");
+        requireLabel(0x25768L, "application_routine_id_table");
+
+        // Stage-3 application receive landmarks.
+        requireFunction(0x7c640L, "application_com_rx_indication");
+        requireFunction(0x7c03eL, "application_com_receive_signal");
+        requireFunction(0x4a244L, "application_unpack_can_2e4");
+        requireFunction(0x80006L, "application_can_normal_rx_demux");
+        requireLabel(0x231a0L, "application_can1_acceptance_rules");
+        requireLabel(0xfebe532cL, "application_com_rx_update_counters");
+
         requireLabel(0xbfd8L, "PAYLOAD_BUILD_SECRET");
         requireLabel(0xbfe8L, "SEED_KEY_SECRET");
         requireLabel(0x8e54L, "uds_service_table");
@@ -271,9 +306,24 @@ public class AssertProjectInvariants extends GhidraScript {
         // Every enabled checkpoint RAM mirror must be present and correctly typed.
         requireCheckpointCsv(checkpointCsv);
         requireDefinedLength(0xFEBEB1A4L, 1);
-        requireDefinedLength(0xFEBFC81FL, 1);
+        requireDefinedLength(0xFEBEE81FL, 1);
+        requireDefinedLength(0xFEBEE892L, 2);
+        requireDefinedLength(0xFEBE6692L, 2);
+        requireDefinedLength(0xFEBE8152L, 1);
+        requireDefinedLength(0xFEBE8166L, 1);
+        requireDefinedLength(0xFEBF3B14L, 4);
+        requireDefinedLength(0xFEBF3B18L, 1);
+        requireDefinedLength(0xFEBF3B19L, 1);
         requireDefinedLength(0xFEBF2B16L, 1);
         requireLabel(0xFEBEB1A4L, "application_system_transition_phase_live");
+        requireLabel(0xFEBEE81FL, "application_system_transition_phase_snapshot");
+        requireLabel(0xFEBEE892L, "application_vehicle_speed_raw");
+        requireLabel(0xFEBE6692L, "application_supply_value_raw");
+        requireLabel(0xFEBE8152L, "application_alternate_handoff_flag");
+        requireLabel(0xFEBE8166L, "application_programming_reset_requested");
+        requireLabel(0xFEBF3B14L, "application_programming_handoff_value");
+        requireLabel(0xFEBF3B18L, "application_programming_readiness_latch");
+        requireLabel(0xFEBF3B19L, "application_programming_reset_latch");
         requireLabel(0xFEBF2D08L, "payload_did_0201_key_material");
 
         // Register context is mandatory after applying the device profile.
@@ -301,6 +351,11 @@ public class AssertProjectInvariants extends GhidraScript {
         requireConvention(0x614aL, "__stdcall");
         requireConvention(0x87610L, "__stdcall");
         requireConvention(0x87636L, "__stdcall");
+        requireConvention(0x4c960L, "__stdcall");
+        requireConvention(0x5328L, "__stdcall");
+        requireConvention(0x53f2L, "__stdcall");
+        requireConvention(0x5d68L, "__stdcall");
+        requireConvention(0x65cd8L, "__stdcall");
         requireReference(0x20010L, 0x61d88L);
         requireReference(0x20090L, 0x64b3eL);
         int intbpRefs = 0;

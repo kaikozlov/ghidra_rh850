@@ -218,6 +218,65 @@ public class AssertDecompilerInvariants extends GhidraScript {
             println("boot_reset_startup decompile ok");
         }
 
+        // Programming handoff prerequisites: phase != 0x11 and internal failure 1.
+        Function handoff = requireFunction(0x4c960L, "application_programming_handoff_prerequisites");
+        requireConvention(handoff, "__stdcall");
+        if (handoff != null) {
+            String c = decompile(handoff);
+            if (!c.contains("0x11") && !c.contains("'\\x11'")) {
+                fail("handoff prerequisites decompilation missing phase 0x11 check");
+            }
+            println("handoff prerequisites decompile ok (" + handoff.getName() + ")");
+        }
+
+        // SecurityAccess send-key must expose NRC 0x35 / 0x36 failure paths.
+        // The expected-key call at 0x5468 is asserted in raw-image suites; Ghidra's
+        // recovered function body does not always own that CALL reference.
+        Function sendKey = requireFunction(0x53f2L, "uds_security_access_send_key");
+        requireConvention(sendKey, "__stdcall");
+        if (sendKey != null) {
+            String c = decompile(sendKey);
+            if (!c.contains("0x35") || !c.contains("0x36")) {
+                fail("send-key decompilation missing NRC 0x35/0x36 literals");
+            }
+            println("send-key decompile ok (" + sendKey.getName() + ")");
+        }
+
+        // RequestDownload is the payload-gate entry landmark.
+        Function download = requireFunction(0x5d68L, "uds_request_download");
+        requireConvention(download, "__stdcall");
+        if (download != null) {
+            decompile(download);
+            println("request-download decompile ok (" + download.getName() + ")");
+        }
+
+        // Checkpoint object update API is the shared writer sink.
+        Function nvmUpdate = requireFunction(0x65cd8L, "secoc_nvm_object_update");
+        requireConvention(nvmUpdate, "__stdcall");
+        if (nvmUpdate != null) {
+            decompile(nvmUpdate);
+            println("secoc_nvm_object_update decompile ok (" + nvmUpdate.getName() + ")");
+        }
+
+        // Application ECUReset is the Stage-2 service-callback landmark.
+        Function appReset = requireFunction(0x8b1f0L, "application_ecu_reset_callback");
+        requireConvention(appReset, "__stdcall");
+        if (appReset != null) {
+            decompile(appReset);
+            println("application ECUReset decompile ok (" + appReset.getName() + ")");
+        }
+
+        // Application SecurityAccess send-key exposes NRC 0x35 / 0x36.
+        Function appSendKey = requireFunction(0x94a72L, "application_security_access_send_key");
+        requireConvention(appSendKey, "__stdcall");
+        if (appSendKey != null) {
+            String c = decompile(appSendKey);
+            if (!c.contains("0x35") || !c.contains("0x36")) {
+                fail("application send-key decompilation missing NRC 0x35/0x36 literals");
+            }
+            println("application send-key decompile ok (" + appSendKey.getName() + ")");
+        }
+
         decomp.dispose();
         String[] args = getScriptArgs();
         if (args.length > 1) {

@@ -56,23 +56,23 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
         fn(0x8A27EL,"application_session_transition_check_adapter",
             "Read the current application Dcm session into r6, pass requested session in r7 to the policy hook at 0x4C942, and map its internal result to a UDS NRC.");
         fn(0x4C942L,"application_session_transition_policy",
-            "Reject requested session 2 with internal result 0x0B / NRC 0x88 (vehicleSpeedTooHigh) when the unsigned raw speed at FEBFC892 exceeds calibration 0x0180 at CodeFlash 0x181DC. The current-session argument in r6 is not tested here.");
+            "Reject requested session 2 with internal result 0x0B / NRC 0x88 (vehicleSpeedTooHigh) when the unsigned raw speed at FEBEE892 (GP+0x3092) exceeds calibration 0x0180 at CodeFlash 0x181DC. The current-session argument in r6 is not tested here.");
         fn(0x8A01CL,"application_programming_lower_request_stub",
             "Compiled lower-request stub. It accepts operation ID, status 10, payload length/data, and token pointer but returns success without using them in this image.");
         fn(0x8A08EL,"application_programming_readiness_check_adapter",
-            "Run the lower programming-handoff prerequisites once. On success clear the reset-request marker and latch completion at FEBF3B18.");
+            "Run the lower programming-handoff prerequisites once. On success clear the reset-request marker and latch completion at absolute FEBF3B18.");
         fn(0x4C960L,"application_programming_handoff_prerequisites",
-            "Return failure unless system-transition phase snapshot FEBFC81F is not 0x11, scaled supply value FEBF4692 is at least calibration 0x0A00, and alternate-handoff flag FEBF6152 is clear.");
+            "Return failure unless system-transition phase snapshot FEBEE81F (GP+0x301F) is not 0x11, scaled supply FEBE6692 (GP-0x516E) is at least calibration 0x0A00, and alternate-handoff flag FEBE8152 (GP-0x36AE) is clear.");
         fn(0xB28ACL,"application_system_transition_phase_init",
             "Initialize the live generated system-transition phase at FEBEB1A4 (application GP-0x65C) to zero.");
         fn(0xB2912L,"application_system_transition_phase_step",
             "Advance the generated system-transition state around modes 0x300/0x400/0x500 and event 0x23. Recovered phase markers are 0, 0x11, and 0x22; adjacent flags, not this phase byte, use 0x5A.");
         fn(0xBCB3AL,"application_input_snapshot_update",
-            "Copy the broad generated application input snapshot. At BCD02..BCD06 it copies live system-transition phase FEBEB1A4 (GP-0x65C) to FEBFC81F (GP+0x301F).");
+            "Copy the broad generated application input snapshot. At BCD02..BCD06 it copies live system-transition phase FEBEB1A4 (GP-0x65C) to FEBEE81F (GP+0x301F via EP=GP+0x3000).");
         fn(0x4C986L,"application_programming_reset_marker_clear",
-            "Clear the one-request marker at FEBF6166 before the programming reset is queued.");
+            "Clear the one-request marker at FEBE8166 (GP-0x369A) before the programming reset is queued.");
         fn(0x4C98CL,"application_programming_reset_request",
-            "Queue system event 9 once and set marker FEBF6166 to 0x5A. Event 9 drives the system-mode coordinator into shutdown mode 0x900; the alternate FEBF6152 branch reinitializes local stacks instead.");
+            "Queue system event 9 once and set marker FEBE8166 (GP-0x369A) to 0x5A. Event 9 drives the system-mode coordinator into shutdown mode 0x900; the alternate FEBE8152 (GP-0x36AE) branch reinitializes local stacks instead.");
         fn(0x8A0C2L,"application_programming_prepare_handoff",
             "First asynchronous PROGRAMMING stage: issue compiled-stub operation 0x08000200 with no payload, validate its token, then enforce the 0x4C960 readiness conditions.");
         fn(0x8A172L,"application_programming_commit_handoff",
@@ -154,24 +154,24 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
         label(0x2A32CL,"application_f18c_record",
             "Application DID F18C record: flags 0x0014, read callback 0x4E918.");
 
-        label(0xFEBFC892L,"application_vehicle_speed_raw",
-            "Unsigned speed signal tested against CodeFlash 0x181DC for PROGRAMMING entry; values above 0x0180 map to NRC 0x88 vehicleSpeedTooHigh.");
+        label(0xFEBEE892L,"application_vehicle_speed_raw",
+            "Unsigned speed at GP+0x3092 tested against CodeFlash 0x181DC for PROGRAMMING entry; values above 0x0180 map to NRC 0x88 vehicleSpeedTooHigh.");
         label(0xFEBEB1A4L,"application_system_transition_phase_live",
             "Live phase byte owned by 0xB28AC/0xB2912. Recovered phase markers are 0, 0x11, and 0x22; exact OEM phase labels are unknown.");
-        label(0xFEBFC81FL,"application_system_transition_phase_snapshot",
-            "Snapshot copied from FEBEB1A4 by 0xBCB3A. Phase 0x11 prevents programming reset handoff and produces NRC 0x22; this is not a Dcm-produced programming-status byte.");
-        label(0xFEBF4692L,"application_supply_value_raw",
-            "Scaled supply signal used by the lower handoff. Values below calibration 0x0A00 prevent reset handoff and produce NRC 0x22.");
-        label(0xFEBF6152L,"application_alternate_handoff_flag",
-            "Flag set from the application diagnostic initialization callback. It must be clear for the normal event-9 PROGRAMMING reset path.");
-        label(0xFEBF6166L,"application_programming_reset_requested",
-            "One-request marker: cleared before handoff and set to 0x5A after system event 9 is queued.");
+        label(0xFEBEE81FL,"application_system_transition_phase_snapshot",
+            "Snapshot at GP+0x301F copied from FEBEB1A4 by 0xBCB3A. Phase 0x11 prevents programming reset handoff and produces NRC 0x22; this is not a Dcm-produced programming-status byte.");
+        label(0xFEBE6692L,"application_supply_value_raw",
+            "Scaled supply at GP-0x516E used by the lower handoff. Values below calibration 0x0A00 prevent reset handoff and produce NRC 0x22.");
+        label(0xFEBE8152L,"application_alternate_handoff_flag",
+            "Flag at GP-0x36AE set from the application diagnostic initialization callback. It must be clear for the normal event-9 PROGRAMMING reset path.");
+        label(0xFEBE8166L,"application_programming_reset_requested",
+            "One-request marker at GP-0x369A: cleared before handoff and set to 0x5A after system event 9 is queued.");
         label(0xFEBF3B14L,"application_programming_handoff_value",
-            "Four-byte value passed as an all-zero payload to compiled-stub operation 0x08000201.");
+            "Four-byte value at absolute FEBF3B14 passed as an all-zero payload to compiled-stub operation 0x08000201.");
         label(0xFEBF3B18L,"application_programming_readiness_latch",
-            "Set to 0x5A after the lower programming readiness check succeeds.");
+            "Absolute FEBF3B18 set to 0x5A after the lower programming readiness check succeeds.");
         label(0xFEBF3B19L,"application_programming_reset_latch",
-            "Set to 0x5A after the programming reset request succeeds; subsequent worker polls remain pending until reset.");
+            "Absolute FEBF3B19 (FEBF3B14+5) set to 0x5A after the programming reset request succeeds; subsequent worker polls remain pending until reset.");
         label(0xAEB00L,"system_mode_transition_callbacks",
             "Interleaved entry/exit callback table for system modes 0x000 through 0x900. Mode 0x900 entry pointer at 0xAEB48 is 0xB20EA.");
 
@@ -185,5 +185,102 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
             "Queued DiagnosticSessionControl session value with suppressPosRsp bit removed.");
         label(0xFEBF2BA3L,"bootloader_session_task_state",
             "Asynchronous bootloader session-control state consumed by task 0x6244.");
+
+        // Stage-2 primary SID handlers and tables.
+        fn(0x8B1F0L,"application_ecu_reset_callback",
+            "Application ECUReset service callback. Phase 0 starts 0x8B144; nonzero finalizes through 0x8B1D4.");
+        fn(0x8B144L,"application_ecu_reset_request_start",
+            "Require request length 3, pack three request bytes, and enter the lower reset prepare/commit stages.");
+        fn(0x8AF28L,"application_ecu_reset_prepare_stage",
+            "First ECUReset lower stage: issue compiled-stub operation 0x18000000 and map failures to NRC 0x22/0x31.");
+        fn(0x8B014L,"application_ecu_reset_commit_stage",
+            "Second ECUReset lower stage: issue compiled-stub operation 0x18000001; success builds the positive response, pending returns 10.");
+        fn(0x945DCL,"application_read_dtc_callback",
+            "Application ReadDTCInformation service callback. Phase 0 starts 0x944C6; phase 2 completes through 0x9452E.");
+        fn(0x8B5AAL,"application_read_dtc_subfunction_01",
+            "ReadDTCInformation subfunction 0x01 wrapper; copy request context and start worker 0x8B532.");
+        fn(0x8BA2AL,"application_read_dtc_subfunction_02",
+            "ReadDTCInformation subfunction 0x02 wrapper; copy request context and start worker 0x8B99A.");
+        fn(0x8BD94L,"application_read_dtc_subfunction_03",
+            "ReadDTCInformation subfunction 0x03 wrapper; copy request context and start worker 0x8BD30.");
+        fn(0x8C326L,"application_read_dtc_subfunction_04",
+            "ReadDTCInformation subfunction 0x04 wrapper; copy request context and start worker 0x8C276.");
+        fn(0x948AAL,"application_rdbi_callback",
+            "Application ReadDataByIdentifier service callback. Phases 0/2/3 start, cancel, and poll DID reads.");
+        fn(0x9479AL,"application_rdbi_request_start",
+            "Validate RDBI request shape, resolve DID policy, enforce per-DID security, then begin/poll the read.");
+        fn(0x946FAL,"application_rdbi_request_poll",
+            "Poll an asynchronous RDBI transfer; pending returns 10, failures emit the worker NRC byte.");
+        fn(0x94E32L,"application_security_access_subfunction_01",
+            "SecurityAccess subfunction 0x01 (level-1 requestSeed) wrapper around 0x94CCE.");
+        fn(0x94E46L,"application_security_access_subfunction_02",
+            "SecurityAccess subfunction 0x02 (level-1 sendKey) wrapper around 0x94DEE.");
+        fn(0x94E5AL,"application_security_access_subfunction_03",
+            "SecurityAccess subfunction 0x03 (level-2 requestSeed) wrapper around 0x94CCE.");
+        fn(0x94E6EL,"application_security_access_subfunction_04",
+            "SecurityAccess subfunction 0x04 (level-2 sendKey) wrapper around 0x94DEE.");
+        fn(0x9497CL,"application_security_access_request_seed",
+            "Application requestSeed worker for configured levels 1/2. Emits seed bytes or NRC 0x37 when delay-locked.");
+        fn(0x94A72L,"application_security_access_send_key",
+            "Application sendKey worker. Success unlocks via 0x900FC; failures map to NRC 0x35/0x36.");
+        fn(0x93C62L,"application_communication_control_callback",
+            "Application CommunicationControl service callback. Phase 0 starts 0x93B56; phase 2 completes 0x93BDE.");
+        fn(0x9542CL,"application_communication_control_subfunction_00",
+            "CommunicationControl subfunction 0x00 wrapper into shared start helper 0x95306.");
+        fn(0x9543CL,"application_communication_control_subfunction_01",
+            "CommunicationControl subfunction 0x01 wrapper into shared start helper 0x95306.");
+        fn(0x9544CL,"application_communication_control_subfunction_03",
+            "CommunicationControl subfunction 0x03 wrapper into shared start helper 0x95306.");
+        fn(0x95154L,"application_communication_control_request_start",
+            "Validate CommunicationControl request length/control type and apply configured communication-mode updates.");
+        fn(0x95DCEL,"application_wdbi_callback",
+            "Application WriteDataByIdentifier service callback. Phases 0/2/3 start, cancel, and poll DID writes.");
+        fn(0x95C8CL,"application_wdbi_request_start",
+            "Validate WDBI DID/security/session policy against the 19-entry write-DID table and begin the write worker.");
+        fn(0x93CFEL,"application_tester_present_subfunction_00",
+            "TesterPresent subfunction 0x00: accept zero-length request data and build the positive acknowledgment.");
+        fn(0x8CCDCL,"application_control_dtc_setting_subfunction_01",
+            "ControlDTCSetting subfunction 0x01 wrapper; require zero-length request data then store setting 1.");
+        fn(0x8CCFAL,"application_control_dtc_setting_subfunction_02",
+            "ControlDTCSetting subfunction 0x02 wrapper; require zero-length request data then store setting 2.");
+        fn(0x8D344L,"application_proprietary_ab_callback",
+            "Proprietary SID 0xAB service callback. Phase 0 mirrors the request and enters 0x8D2B2; OEM name unknown.");
+        fn(0x96A34L,"application_proprietary_ab_subfunction_01",
+            "Proprietary SID 0xAB subfunction 0x01 wrapper into shared worker 0x96918 with selector 1.");
+        fn(0x96A56L,"application_proprietary_ab_subfunction_02",
+            "Proprietary SID 0xAB subfunction 0x02 wrapper into shared worker 0x96918 with selector 2.");
+        fn(0x96A78L,"application_proprietary_ab_subfunction_03",
+            "Proprietary SID 0xAB subfunction 0x03 wrapper into shared worker 0x96918 with selector 3.");
+        fn(0x8D3CCL,"application_routine_id_lookup",
+            "Scan routine-ID table entries 0..12 at 0x25768 and invoke the matching start callback. Used from the proprietary 0xAB path.");
+        fn(0x4F928L,"application_did_table_getter",
+            "Return the application DID table base 0x2941C and count 0xF2 (242).");
+        fn(0x93910L,"application_uds_negative_response",
+            "Common application Dcm negative-response builder used by service workers.");
+        fn(0x938F8L,"application_uds_request_busy_set",
+            "Set/clear the application Dcm request-busy flag around synchronous and asynchronous service work.");
+
+        label(0x2941CL,"application_did_table",
+            "242 x 16-byte application DID records beginning at DID 0x0100 and ending at F18C. Getter 0x4F928 returns count 0xF2.");
+        label(0x26AECL,"application_write_did_table",
+            "19 x 8-byte write-DID descriptors used by application WDBI. Binary-searched from 0x9545C.");
+        label(0x25768L,"application_routine_id_table",
+            "32 x 12-byte routine-ID records (RID, flags, start_cb, result_cb). SID 0x31 has a null service callback; AB lookup 0x8D3CC consumes entries 0..12.");
+        label(0x25BF0L,"application_read_dtc_subfunction_table",
+            "ReadDTCInformation subfunction records 0x01..0x04 with callbacks 0x8B5AA/0x8BA2A/0x8BD94/0x8C326.");
+        label(0x25C30L,"application_security_access_subfunction_table",
+            "SecurityAccess subfunction records 0x01..0x04 for application levels 1/2 requestSeed/sendKey.");
+        label(0x25C70L,"application_communication_control_subfunction_table",
+            "CommunicationControl subfunction records 0x00/0x01/0x03.");
+        label(0x25CA0L,"application_tester_present_subfunction_table",
+            "TesterPresent subfunction 0x00 record; callback 0x93CFE.");
+        label(0x25CB0L,"application_control_dtc_setting_subfunction_table",
+            "ControlDTCSetting subfunction records 0x01/0x02.");
+        label(0x25CD0L,"application_proprietary_ab_subfunction_table",
+            "Proprietary SID 0xAB subfunction records 0x01/0x02/0x03. Structural names only.");
+        label(0x26338L,"application_security_access_level1_config",
+            "Application SecurityAccess level-1 slot: seed/key length 0x10 and timing words 0x2710.");
+        label(0x26350L,"application_security_access_level2_config",
+            "Application SecurityAccess level-2 slot: seed/key length 0x10 and timing words 0x2710.");
     }
 }

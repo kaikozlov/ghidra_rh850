@@ -35,15 +35,60 @@ check("application service record size is 24 bytes", APP_SERVICE.size == 24)
 check("application service table has 17 records", len(app_services) == 17)
 check("application SID sequence matches", app_sids == expected_sids,
       " ".join(f"{sid:02x}" for sid in app_sids))
-by_sid = {row[2]: row for row in app_services}
+check("every expected SID is present exactly once",
+      sorted(app_sids) == sorted(expected_sids) and len(set(app_sids)) == 17)
+by_sid = {row[2]: (i, row) for i, row in enumerate(app_services)}
+for sid in expected_sids:
+    check(f"SID 0x{sid:02X} exists in primary table", sid in by_sid)
+
+expected_callbacks = {
+    0x11: 0x8B1F0,
+    0x19: 0x945DC,
+    0x22: 0x948AA,
+    0x28: 0x93C62,
+    0x2E: 0x95DCE,
+    0xAB: 0x8D344,
+}
+# 0x10/27/3E/85 use subfunction tables rather than a service-level callback.
+for sid, callback in expected_callbacks.items():
+    check(f"SID 0x{sid:02X} config references callback 0x{callback:X}",
+          by_sid[sid][1][7] == callback, hex(by_sid[sid][1][7]))
+for sid in (0x14, 0x23, 0x31, 0x34, 0x36, 0x37, 0xBA):
+    check(f"SID 0x{sid:02X} has null service callback", by_sid[sid][1][7] == 0)
+
 check("SID 0x10 points at application subfunction table 0x25BC0",
-      by_sid[0x10][1] == 0x25BC0, hex(by_sid[0x10][1]))
-check("SID 0x11 config references callback 0x8B1F0", by_sid[0x11][7] == 0x8B1F0)
-check("SID 0x19 config references callback 0x945DC", by_sid[0x19][7] == 0x945DC)
-check("SID 0x22 config references callback 0x948AA", by_sid[0x22][7] == 0x948AA)
-check("SID 0x28 config references callback 0x93C62", by_sid[0x28][7] == 0x93C62)
-check("SID 0x2E config references callback 0x95DCE", by_sid[0x2E][7] == 0x95DCE)
-check("SID 0xAB config references callback 0x8D344", by_sid[0xAB][7] == 0x8D344)
+      by_sid[0x10][1][1] == 0x25BC0, hex(by_sid[0x10][1][1]))
+check("SID 0x19 points at subfunction table 0x25BF0", by_sid[0x19][1][1] == 0x25BF0)
+check("SID 0x27 points at subfunction table 0x25C30", by_sid[0x27][1][1] == 0x25C30)
+check("SID 0x28 points at subfunction table 0x25C70", by_sid[0x28][1][1] == 0x25C70)
+check("SID 0x3E points at subfunction table 0x25CA0", by_sid[0x3E][1][1] == 0x25CA0)
+check("SID 0x85 points at subfunction table 0x25CB0", by_sid[0x85][1][1] == 0x25CB0)
+check("SID 0xAB points at subfunction table 0x25CD0", by_sid[0xAB][1][1] == 0x25CD0)
+
+expected_sessions = {
+    0x10: [1, 2, 3],
+    0x11: [2],
+    0x14: [1, 3],
+    0x19: [1, 3],
+    0x22: [1, 2, 3],
+    0x23: [3],
+    0x27: [2, 3],
+    0x28: [3],
+    0x2E: [2, 3],
+    0x31: [1, 2, 3],
+    0x34: [2],
+    0x36: [2],
+    0x37: [2],
+    0x3E: [1, 2, 3],
+    0x85: [3],
+    0xAB: [1, 3],
+    0xBA: [3],
+}
+for sid, sessions in expected_sessions.items():
+    _index, row = by_sid[sid]
+    allow = list(CF[row[0]: row[0] + row[5]])
+    check(f"SID 0x{sid:02X} session allow-list matches", allow == sessions, repr(allow))
+    check(f"SID 0x{sid:02X} security allow-count is zero at service level", row[4] == 0)
 
 print("\n== application service groups and secondary endpoint ==")
 SERVICE_GROUP = struct.Struct("<HBBI")
@@ -134,9 +179,18 @@ check("application result mapper contains vehicleSpeedTooHigh NRC 0x88",
       bytes.fromhex("200e88ff") in CF[0x8D5FC:0x8D680])
 
 print("\n== programming policy and reset handoff ==")
+APP_GP = 0xFEBEB800
+
+def fits_s16(value: int) -> bool:
+    return -0x8000 <= value <= 0x7FFF
+
 check("programming calibrations are speed 0x0180 and supply 0x0A00",
       struct.unpack_from("<HH", CF, 0x181DC) == (0x0180, 0x0A00))
-check("input snapshot copies live GP-0x65C phase to GP+0x301F",
+check("snapshot prologue sets r19 = GP+0x3000",
+      CF[0xBCB3E:0xBCB42] == bytes.fromhex("249e0030"))
+check("snapshot restores EP from r19 before phase store window",
+      CF[0xBCCAE:0xBCCB0] == bytes.fromhex("13f0"))
+check("input snapshot copies live GP-0x65C phase to EP+0x1F (GP+0x301F)",
       CF[0xBCD02:0xBCD08] == bytes.fromhex("840fa5f99f0b"),
       CF[0xBCD02:0xBCD08].hex())
 check("transition phase initializer passes phase zero",
@@ -144,9 +198,55 @@ check("transition phase initializer passes phase zero",
 check("transition state machine embeds phase markers 0x11 and 0x22",
       bytes.fromhex("200e1100") in CF[0xB2912:0xB29EA] and
       bytes.fromhex("200e2200") in CF[0xB2912:0xB29EA])
+check("speed policy loads GP+0x3092 then compares calibration 0x0180",
+      CF[0x4C944:0x4C954] == bytes.fromhex("e40f9330623a9a0d409e0200f39fdd81"),
+      CF[0x4C944:0x4C954].hex())
 check("speed policy has exact recovered body",
       CF[0x4C942:0x4C960] == bytes.fromhex(
           "8700e40f9330623a9a0d409e0200f39fdd81f309b3050b527f0000527f00"))
+# application_programming_handoff_prerequisites @ 0x4C960:
+#   ld.bu 0x301F[gp] ; ld.hu -0x516E[gp] ; ld.bu -0x36AE[gp]
+#   addi -0x11 ; be fail ; movhi 2 / ld.hu -0x7E22[r1] (= CodeFlash 0x181DE)
+#   cmp supply ; bc fail ; cmp flag ; be ok ; mov 1 ; jmp lp
+HANDOFF = bytes.fromhex(
+    "a40f1f30e49f93ae845753c90106efff"
+    "920d400e0200e10fdf81e199b105e051"
+    "a20501527f00")
+check("handoff prerequisites body is exact through return",
+      CF[0x4C960:0x4C986] == HANDOFF, CF[0x4C960:0x4C986].hex())
+check("handoff loads phase via ld.bu 0x301F[gp] -> FEBEE81F",
+      CF[0x4C960:0x4C964] == bytes.fromhex("a40f1f30") and
+      (APP_GP + 0x301F) & 0xFFFFFFFF == 0xFEBEE81F and fits_s16(0x301F))
+check("handoff compares phase against immediate 0x11",
+      CF[0x4C96C:0x4C970] == bytes.fromhex("0106efff"))
+check("handoff loads supply via ld.hu -0x516E[gp] -> FEBE6692",
+      CF[0x4C964:0x4C968] == bytes.fromhex("e49f93ae") and
+      (APP_GP + (-0x516E)) & 0xFFFFFFFF == 0xFEBE6692 and fits_s16(-0x516E))
+check("handoff loads alternate flag via ld.bu -0x36AE[gp] -> FEBE8152",
+      CF[0x4C968:0x4C96C] == bytes.fromhex("845753c9") and
+      (APP_GP + (-0x36AE)) & 0xFFFFFFFF == 0xFEBE8152 and fits_s16(-0x36AE))
+check("handoff compares against calibrated min supply at 0x181DE",
+      CF[0x4C972:0x4C97A] == bytes.fromhex("400e0200e10fdf81") and
+      struct.unpack_from("<H", CF, 0x181DE)[0] == 0x0A00)
+check("handoff failure path returns internal 1",
+      CF[0x4C982:0x4C986] == bytes.fromhex("01527f00"))
+check("speed GP+0x3092 resolves to FEBEE892",
+      (APP_GP + 0x3092) & 0xFFFFFFFF == 0xFEBEE892 and fits_s16(0x3092))
+check("reset marker clear/store use GP-0x369A -> FEBE8166",
+      CF[0x4C986:0x4C98A] == bytes.fromhex("440766c9") and
+      CF[0x4C998:0x4C99C] == bytes.fromhex("840f67c9") and
+      (APP_GP + (-0x369A)) & 0xFFFFFFFF == 0xFEBE8166 and fits_s16(-0x369A))
+check("readiness/async workers use absolute FEBF3B18/FEBF3B14",
+      CF[0x8A092:0x8A098] == bytes.fromhex("3d06183bbffe") and
+      CF[0x8A248:0x8A24E] == bytes.fromhex("3d06143bbffe"))
+check("reset latch is absolute FEBF3B14+5",
+      CF[0x8A24E:0x8A252] == bytes.fromhex("bde70500") and
+      CF[0x8A276:0x8A27A] == bytes.fromhex("5de70500"))
+check("async poll maps worker result 1 to NRC 0x22",
+      CF[0x93EE6:0x93EFA] == bytes.fromhex("6152ea0d44072da51c3080ff480120ee22001d38"),
+      CF[0x93EE6:0x93EFA].hex())
+check("application result mapper still contains NRC 0x22 literal",
+      bytes.fromhex("200e2200") in CF[0x8D5FC:0x8D680])
 check("lower request/poll stubs return immediate success",
       CF[0x8A01C:0x8A024] == bytes.fromhex("00527f0000527f00"))
 check("lower token validator returns 0x5A",
@@ -155,6 +255,9 @@ check("prepare stage embeds operation 0x08000200",
       bytes.fromhex("00020008") in CF[0x8A0C2:0x8A172])
 check("commit stage embeds operation 0x08000201",
       bytes.fromhex("01020008") in CF[0x8A172:0x8A244])
+check("readiness adapter calls handoff prerequisites",
+      CF[0x8A0A0:0x8A0A4] == bytes.fromhex("bcffc028"),
+      CF[0x8A0A0:0x8A0A4].hex())
 check("reset request queues system event 9",
       CF[0x4C9A0:0x4C9A6] == bytes.fromhex("09328bff5a16"),
       CF[0x4C9A0:0x4C9A6].hex())
@@ -197,6 +300,170 @@ check("release helper clears both transient state bytes",
 check("reserve helper tests busy state before setting it",
       CF[0x4776:0x478A] == bytes.fromhex("a40fa3920152e009fa054457a392020a440fa292"),
       CF[0x4776:0x478A].hex())
+
+print("\n== application DID / write-DID / routine-ID tables ==")
+did_rows = [APP_DID.unpack_from(CF, 0x2941C + i * APP_DID.size) for i in range(0xF2)]
+check("application DID table getter embeds count 0xF2 and base 0x2941C",
+      CF[0x4F928:0x4F938] == bytes.fromhex("06f0200ef200800c2a061c9402007f00"),
+      CF[0x4F928:0x4F938].hex())
+check("DID table has 242 records from 0x0100 through F18C",
+      did_rows[0][0] == 0x0100 and did_rows[-1][0] == 0xF18C and len(did_rows) == 0xF2)
+check("DID table still contains F181/F186/F18C records",
+      [(0xF181, 0x0011, 0x4E8E4), (0xF186, 0x0001, 0x4E90A), (0xF18C, 0x0014, 0x4E918)]
+      == [(d, f, c) for d, f, c, _a1, _a2 in did_rows if d in (0xF181, 0xF186, 0xF18C)])
+WRITE_DID = struct.Struct("<HBBI")
+write_rows = [WRITE_DID.unpack_from(CF, 0x26AEC + i * WRITE_DID.size) for i in range(0x13)]
+check("write-DID table has 19 records from 0x1000 through 0x110D",
+      write_rows[0][0] == 0x1000 and write_rows[-1][0] == 0x110D and len(write_rows) == 0x13)
+check("write-DID records carry enable byte 0x01", all(row[2] == 1 for row in write_rows))
+ROUTINE = struct.Struct("<HHII")
+routine_rows = [ROUTINE.unpack_from(CF, 0x25768 + i * ROUTINE.size) for i in range(32)]
+check("routine-ID table has 32 records from 0x0204 through 0x110D",
+      routine_rows[0][0] == 0x0204 and routine_rows[-1][0] == 0x110D)
+check("routine-ID lookup scans tp+0x1884 (=0x25768)",
+      bytes.fromhex("8418") in CF[0x8D3CC:0x8D416])
+check("routine-ID lookup stops after index 0x0C",
+      bytes.fromhex("0c00") in CF[0x8D3CC:0x8D416])
+
+print("\n== per-SID handler bodies and bounded negatives ==")
+SUBFN = struct.Struct("<IIIHH")
+sa_rows = [SUBFN.unpack_from(CF, 0x25C30 + i * SUBFN.size) for i in range(4)]
+check("SecurityAccess subfunctions are 01..04", [row[3] for row in sa_rows] == [1, 2, 3, 4])
+check("SecurityAccess wrappers target shared level helpers",
+      [row[0] for row in sa_rows] == [0x94E32, 0x94E46, 0x94E5A, 0x94E6E])
+check("SecurityAccess level-1/2 configs use 16-byte seed/key",
+      struct.unpack_from("<I", CF, 0x26338)[0] == 0x10 and
+      struct.unpack_from("<I", CF, 0x26350)[0] == 0x10)
+check("SecurityAccess send-key embeds NRC 0x35 and 0x36",
+      bytes.fromhex("203e3500") in CF[0x94A72:0x94B66] and
+      bytes.fromhex("203e3600") in CF[0x94A72:0x94B66])
+check("ECUReset start packs three request bytes before lower stages",
+      bytes.fromhex("7d070100") in CF[0x8B144:0x8B180] and
+      bytes.fromhex("3d3e0800") in CF[0x8B144:0x8B180])
+check("ECUReset prepare stage embeds op 0x18000000",
+      bytes.fromhex("40360018") in CF[0x8AF28:0x8B014])
+check("ECUReset commit stage embeds op 0x18000001",
+      bytes.fromhex("40360018") in CF[0x8B014:0x8B124] or
+      bytes.fromhex("01000018") in CF[0x8B014:0x8B124])
+check("ControlDTCSetting subfunction 01 wrapper passes setting 1",
+      CF[0x8CCDC:0x8CCFA] == bytes.fromhex(
+          "80076100d832ea050132bfff96ff0ae8c50500eabfff90fd1d5040067f00"))
+check("CommunicationControl subfunctions are 00/01/03",
+      [SUBFN.unpack_from(CF, 0x25C70 + i * SUBFN.size)[3] for i in range(3)] == [0, 1, 3])
+check("proprietary AB subfunctions are 01/02/03",
+      [SUBFN.unpack_from(CF, 0x25CD0 + i * SUBFN.size)[3] for i in range(3)] == [1, 2, 3])
+check("RDBI start embeds NRC 0x13/0x31/0x33 literals",
+      bytes.fromhex("203e1300") in CF[0x9479A:0x9486C] and
+      bytes.fromhex("203e3100") in CF[0x9479A:0x9486C] and
+      bytes.fromhex("203e3300") in CF[0x9479A:0x9486C])
+check("WDBI start embeds NRC 0x13/0x31/0x33 literals",
+      bytes.fromhex("200e1300") in CF[0x95C8C:0x95D7E] and
+      bytes.fromhex("200e3100") in CF[0x95C8C:0x95D7E] and
+      bytes.fromhex("200e3300") in CF[0x95C8C:0x95D7E])
+check("WDBI start embeds NRC 0x12 via movea/mov immediate form",
+      bytes.fromhex("200e1200") in CF[0x95C8C:0x95D7E] or
+      bytes.fromhex("203e1200") in CF[0x95C8C:0x95D7E])
+
+# Bounded negatives: null-callback SIDs have no absolute callback pointer in-record
+# and no CodeFlash dword xref to the service-record address. Combined with the
+# shared gate check below, this matches the published search coverage — not an
+# exhaustive DSP-absence claim.
+for sid, record_addr in (
+    (0x14, 0x25E60),
+    (0x23, 0x25EA8),
+    (0x31, 0x25F08),
+    (0x34, 0x25F20),
+    (0x36, 0x25F38),
+    (0x37, 0x25F50),
+    (0xBA, 0x25FB0),
+):
+    needle = struct.pack("<I", record_addr)
+    hits = []
+    start = 0
+    while True:
+        at = CF.find(needle, start)
+        if at < 0:
+            break
+        hits.append(at)
+        start = at + 1
+    check(f"SID 0x{sid:02X} record address has no CodeFlash dword xrefs",
+          hits == [], repr([hex(h) for h in hits]))
+
+print("\n== instruction-proved RAM side effects and shared service gate ==")
+def mov_imm32_r1(imm: int) -> bytes:
+    return bytes.fromhex("2106") + struct.pack("<I", imm)
+
+
+for addr, imm, label in (
+    (0x8CC80, 0xFEBF45A8, "ControlDTCSetting"),
+    (0x8B5B0, 0xFEBF3BFC, "ReadDTC subfn01"),
+    (0x8BA30, 0xFEBF3F24, "ReadDTC subfn02"),
+    (0x8BD9A, 0xFEBF4248, "ReadDTC subfn03"),
+    (0x8C32C, 0xFEBF457C, "ReadDTC subfn04"),
+    (0x8D350, 0xFEBF48EC, "proprietary AB"),
+):
+    check(f"{label} absolute mov imm32,r1 at 0x{addr:X}",
+          CF[addr:addr + 6] == mov_imm32_r1(imm), CF[addr:addr + 6].hex())
+
+check("ControlDTCSetting stores setting byte via st.b r6,0[r1] after absolute base",
+      CF[0x8CCCA:0x8CCCE] == bytes.fromhex("41370000"))
+check("ControlDTCSetting request mirror targets FEBF45A8+0xC via movea 0xC,r1,r19",
+      CF[0x8CC9E:0x8CCA2] == bytes.fromhex("219e0c00"))
+check("proprietary AB st.w r19,0x50[r1] builds FEBF493C from FEBF48EC",
+      CF[0x8D358:0x8D35C] == bytes.fromhex("619f5100"))
+check("proprietary AB keeps FEBF48EC in r6 for primary 0/4/8/C stores",
+      CF[0x8D356:0x8D358] == bytes.fromhex("0130") and
+      CF[0x8D394:0x8D398] == bytes.fromhex("660f0100"))
+check("ReadDTC subfn01 mirrors request via st.w r19,0[r1] at absolute base",
+      CF[0x8B5BA:0x8B5BE] == bytes.fromhex("619f0100"))
+
+# Shared session gate 0x8F282: SID compare at tp+0x1F54 (=0x25E38), stride 0x18,
+# then jarl 0x8F202; session-list miss emits NRC 0x7F.
+APP_TP = 0x25E38 - 0x1F54
+check("service-table SID byte is at TP+0x1F54 (first record SID 0x10)",
+      APP_TP == 0x23EE4 and CF[APP_TP + 0x1F54] == 0x10)
+check("gate 0x8F282 encodes ld.bu 0x1F54[r17] SID compare",
+      CF[0x8F2B8:0x8F2BC] == bytes.fromhex("918f551f"))
+check("gate 0x8F282 encodes mulhi 0x18 record stride before SID load",
+      CF[0x8F2B2:0x8F2B6] == bytes.fromhex("f18e1800"))
+check("gate 0x8F282 jarls session allow-list helper 0x8F202",
+      CF[0x8F308:0x8F30C] == bytes.fromhex("bffffafe"))
+check("gate session-list failure path embeds NRC 0x7F",
+      CF[0x8F32C:0x8F330] == bytes.fromhex("200e7f00"))
+check("SecurityAccess send-key success jarls unlock helper 0x900FC",
+      CF[0x94AC0:0x94AC4] == bytes.fromhex("bfff3cb6"))
+check("CommunicationControl 0x95154 jarls mode helpers 0x94F8E and 0x9505C",
+      bytes.fromhex("bfff62fd") in CF[0x95154:0x952D0] and
+      bytes.fromhex("bfff90fd") in CF[0x95154:0x952D0])
+
+print("\n== generated application diagnostic map artifact ==")
+import csv
+import tempfile
+from pathlib import Path as _Path
+MAP_CSV = REPO / "data" / "application_diagnostic_map.csv"
+GEN = REPO / "tools" / "generate_application_diagnostic_map.py"
+check("application diagnostic map CSV exists", MAP_CSV.is_file())
+with MAP_CSV.open(newline="") as fh:
+    map_rows = list(csv.DictReader(fh))
+check("map CSV contains exactly 17 SID rows", len(map_rows) == 17, str(len(map_rows)))
+check("map CSV SID set matches primary table",
+      [int(row["sid"], 16) for row in map_rows] == expected_sids)
+missing = [sid for sid in expected_sids if f"0x{sid:02X}" not in {row["sid"] for row in map_rows}]
+check("map CSV fails closed if any of 17 SIDs missing", missing == [], repr(missing))
+with tempfile.TemporaryDirectory() as tmp:
+    out = _Path(tmp) / "application_diagnostic_map.csv"
+    import subprocess
+    proc = subprocess.run(
+        [sys.executable, str(GEN), "-o", str(out)],
+        cwd=REPO,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    check("generator rerun succeeds", proc.returncode == 0, proc.stderr)
+    regenerated = out.read_bytes()
+    check("committed map matches deterministic regeneration",
+          regenerated == MAP_CSV.read_bytes())
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 sys.exit(1 if failed else 0)

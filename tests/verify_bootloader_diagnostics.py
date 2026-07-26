@@ -136,6 +136,40 @@ check("TesterPresent subfunction store is unique", occurrences(tester_store) == 
 check("diagnostic initialization writes default session", CF[0x508C:0x5090] == bytes.fromhex("440f0e93"))
 check("explicit session completion is the other local session writer", CF[0x51E6:0x51EA] == bytes.fromhex("44e70e93"))
 
+print("\n== SecurityAccess 0x27 request-seed / send-key ==")
+BOOT_GP = 0xFEBF9800
+check("SID 0x27 handler is 0x5516", services[0x27] == (0x02, 0, 0x5516), repr(services.get(0x27)))
+check("request-seed rejects lockout flag with NRC 0x37",
+      CF[0x532C:0x533C] == bytes.fromhex("840f5793a4ef5593610aca0520363700"),
+      CF[0x532C:0x533C].hex())
+check("request-seed requires total length 0x12",
+      CF[0x5340:0x534A] == bytes.fromhex("0606eeffe20520361300"),
+      CF[0x5340:0x534A].hex())
+check("request-seed lockout/state GP loads resolve to FEBF2B56/FEBF2B55",
+      (BOOT_GP + (-0x6CAA)) & 0xFFFFFFFF == 0xFEBF2B56 and
+      (BOOT_GP + (-0x6CAB)) & 0xFFFFFFFF == 0xFEBF2B55)
+check("send-key gates on security state then requires length 0x12",
+      CF[0x53F6:0x5412] == bytes.fromhex(
+          "c600a4ef559361eae1070f01e207050163eaeb070501d97d0606eeff"),
+      CF[0x53F6:0x5412].hex())
+check("send-key calls security_access_compute_expected_key",
+      CF[0x5464:0x546C] == bytes.fromhex("0736100080ffe41b"),
+      CF[0x5464:0x546C].hex())
+check("send-key emits NRC 0x35 invalidKey",
+      CF[0x54D4:0x54DA] == bytes.fromhex("2036350085ad"),
+      CF[0x54D4:0x54DA].hex())
+check("send-key emits NRC 0x36 exceededNumberOfAttempts",
+      CF[0x54C8:0x54CE] == bytes.fromhex("20363600e5ad"),
+      CF[0x54C8:0x54CE].hex())
+check("send-key success stores security state 2 at FEBF2B0F",
+      CF[0x54DA:0x54E0] == bytes.fromhex("020a440f0f93") and
+      (BOOT_GP + (-0x6CF1)) & 0xFFFFFFFF == 0xFEBF2B0F,
+      CF[0x54DA:0x54E0].hex())
+check("send-key attempt counter lives at FEBF2B57",
+      (BOOT_GP + (-0x6CA9)) & 0xFFFFFFFF == 0xFEBF2B57)
+check("NRC helper builds negative response for SID 0x27",
+      CF[0x52CA:0x52D6] == bytes.fromhex("800721000638870020362700"))
+
 print("\n== RoutineControl table and common policy ==")
 routines = [struct.unpack_from("<I H B B I", CF, 0x8F44 + i * 12) for i in range(5)]
 check("routine IDs are 10F0/10F1/10F2/10F3/FF00", [r[1] for r in routines] == [0x10F0, 0x10F1, 0x10F2, 0x10F3, 0xFF00])

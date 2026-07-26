@@ -185,13 +185,13 @@ ones) and emits `data/switch_table_inventory.csv`. The result:
 
 | Class | Count | Bound | Verdict |
 |---|---:|---|---|
-| Real switches | **19** | `cmp+bh` (16) / `addi+bc` (3) | recovered; all in-function |
+| Real switches | **20** | `cmp+bh` (17) / `addi+bc` (3) | recovered; all in-function |
 | Packed-case0 hits | 5 | packed-case0 (no prefix bound) | **false positives** — unreachable data misread as code (e.g. six `switch r12`/`nop` pairs in a row at `0xd38xx`; offsets like `+25600`, `+32767`, repeated `+0`) |
 | Other decoded `switch` | 227 | none | no plausible table (`no-bound` / `nested-switch`) |
 
 Every real switch carries the compiler range check; the packed-case0 fallback
 matched **only** data (5/5 false positives), so it was removed as a recovery
-trigger. Requiring the prefix bound recovers the same 19 tables with zero false
+trigger. Requiring the prefix bound recovers the same 20 tables with zero false
 positives.
 
 ### `AssertSwitchTables` is a full-coverage verifier, not a count assert
@@ -240,11 +240,46 @@ Instruction inventory for this firmware is committed as
 `data/instruction_inventory.csv` (regenerate via
 `InventoryUsedInstructions.java` after a rebuild if coverage changes).
 
+## Semantic coverage ledger
+
+Whole-image recovered-function inventory (not full semantic understanding):
+
+- Exporter: `ghidra/scripts/investigate/ExportSemanticCoverageLedger.java`
+  (read-only headless against `build/project/` only).
+- Generator: `make generate-semantic-coverage` /
+  `tools/generate_semantic_coverage_ledger.sh`
+- Artifacts: `data/semantic_coverage_ledger.csv` and
+  `data/semantic_coverage_summary.json`
+- Gate: `tests/verify_semantic_coverage.py` (registered in `make verify`)
+
+Each CSV row is one recovered function, sorted by entry address, with Ghidra
+name-source provenance (`USER_DEFINED` / `DEFAULT` / …), calling convention,
+caller/callee counts, and a conservative evidence grade:
+
+| Grade | Meaning |
+|---|---|
+| `annotated` | `USER_DEFINED` name from seed/annotate scripts (role label only) |
+| `recovered` | Function body recovered; auto/analysis name; no semantic claim |
+| `thunk` | Ghidra thunk |
+
+Optional columns (`root_kind`, RAM/MMIO/`codeflash_data`/string reference
+counts, coarse `boot`/`application` subsystem) are filled only from reliable
+program facts; otherwise empty or zero. `codeflash_data_ref_count` is every
+DATA reference into CodeFlash that is not a function entry (scalars included),
+not a table-only classifier. The ledger deliberately does **not** claim that
+every function is behaviorally understood — the majority remain `recovered`.
+
+Generated ledger row count on the current working project: **5733** functions.
+`tests/verify_semantic_coverage.py` independently enforces a floor of 5733
+(aligned with AssertNoUndefined). Older hand-maintained counts elsewhere in
+this doc may lag; prefer the generated ledger/summary for the live boundary.
+
 ## What these audits do *not* claim
 
 - Zero undefined bytes inside functions proves decode coverage, not every
   p-code edge case (FP rounding, hypervisor ops, unexercised arithmetic forms, …).
 - Exact function/instruction counts are smoke signals; prefer the asserting
-  invariant scripts for semantic gates.
+  invariant scripts and the generated semantic coverage ledger for coverage
+  floors.
 - A provisioned SecOC key or live ICU-S behavior cannot be proven from this
   dump alone; see the firmware evidence docs for dynamic caveats.

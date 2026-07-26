@@ -259,6 +259,7 @@ See also:
 
 - `docs/CAN_TRANSPORT_ANALYSIS.md` for the bootloader CAN/ISO-TP path;
 - `docs/APPLICATION_TRANSMIT_MAP.md` for the complete application Tx-PDU/CAN-ID/COM-signal map;
+- `docs/APPLICATION_RECEIVE_MAP.md` for the complete application Rx-PDU/CAN-ID/COM-signal map;
 - `docs/SECOC_RUNTIME_KEY_LIFECYCLE.md` for the corrected SecOC-related NvM object model;
 - `docs/APPLICATION_DIAGNOSTICS.md` for application/boot diagnostic distinctions;
 - `docs/DATAFLASH_LAYOUT.md` for persistent storage architecture.

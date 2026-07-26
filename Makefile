@@ -17,11 +17,16 @@ VERIFY_SUITES := \
 	tests/verify_can_transport.py \
 	tests/verify_architecture.py \
 	tests/verify_application_transmit.py \
+	tests/verify_application_receive.py \
 	tests/verify_p1m_device_profile.py \
-	tests/verify_ram_overlays.py
+	tests/verify_ram_overlays.py \
+	tests/verify_semantic_coverage.py
 
 .PHONY: sync verify verify-core verify-external verify-sleigh verify-processor verify-ghidra \
-	generate-dataflash generate-processor-fixture rebuild-project work-project snapshot-project
+	generate-dataflash generate-application-diagnostics \
+	generate-application-receive-evidence generate-application-receive \
+	generate-processor-fixture generate-semantic-coverage \
+	rebuild-project work-project snapshot-project
 
 sync:
 	$(UV) sync --locked
@@ -51,8 +56,20 @@ generate-dataflash:
 	$(PYTHON) tools/generate_dataflash_layout.py
 	$(PYTHON) tools/generate_checkpoint_payload_map.py
 
+generate-application-diagnostics:
+	$(PYTHON) tools/generate_application_diagnostic_map.py
+
+generate-application-receive-evidence:
+	tools/generate_application_rx_signal_evidence.sh
+
+generate-application-receive: generate-application-receive-evidence
+	$(PYTHON) tools/generate_application_rx_map.py
+
 generate-processor-fixture:
 	$(PYTHON) tools/build_processor_fixture.py
+
+generate-semantic-coverage:
+	tools/generate_semantic_coverage_ledger.sh
 
 rebuild-project:
 	tools/rebuild_project.sh --project-dir "$(PROJECT_DIR)"

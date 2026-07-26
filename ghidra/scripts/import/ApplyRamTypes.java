@@ -296,25 +296,27 @@ public class ApplyRamTypes extends GhidraScript {
         applyScalar(0xFEBF2B6CL, u16, "uds_read_did_response_length",
                 "ReadDID response payload length excluding SID 0x62");
 
-        // Application handoff / phase landmarks.
+        // Application handoff / phase landmarks (application GP 0xFEBEB800).
+        // GP-relative roots use signed 16-bit displacements proved at 0x4C942/0x4C960/0x4C98C.
+        // FEBF3B14/18/19 are absolute mov immediates, not GP-relative.
         applyScalar(0xFEBEB1A4L, UnsignedCharDataType.dataType, "application_system_transition_phase_live",
-                "Live system-transition phase byte");
-        applyScalar(0xFEBFC81FL, UnsignedCharDataType.dataType, "application_system_transition_phase_snapshot",
-                "Phase snapshot; 0x11 blocks programming handoff");
-        applyScalar(0xFEBFC892L, u16, "application_vehicle_speed_raw",
-                "Unsigned speed signal; >0x0180 -> NRC 0x88");
-        applyScalar(0xFEBF4692L, u16, "application_supply_value_raw",
-                "Scaled supply; <0x0A00 blocks handoff");
-        applyScalar(0xFEBF6152L, UnsignedCharDataType.dataType, "application_alternate_handoff_flag",
-                "Must be clear for normal PROGRAMMING reset path");
-        applyScalar(0xFEBF6166L, UnsignedCharDataType.dataType, "application_programming_reset_requested",
-                "One-request marker set to 0x5A after event 9");
+                "Live system-transition phase byte (GP-0x65C)");
+        applyScalar(0xFEBEE81FL, UnsignedCharDataType.dataType, "application_system_transition_phase_snapshot",
+                "Phase snapshot GP+0x301F; 0x11 blocks programming handoff");
+        applyScalar(0xFEBEE892L, u16, "application_vehicle_speed_raw",
+                "Unsigned speed GP+0x3092; >0x0180 -> NRC 0x88");
+        applyScalar(0xFEBE6692L, u16, "application_supply_value_raw",
+                "Scaled supply GP-0x516E; <0x0A00 blocks handoff");
+        applyScalar(0xFEBE8152L, UnsignedCharDataType.dataType, "application_alternate_handoff_flag",
+                "Must be clear for normal PROGRAMMING reset path (GP-0x36AE)");
+        applyScalar(0xFEBE8166L, UnsignedCharDataType.dataType, "application_programming_reset_requested",
+                "One-request marker set to 0x5A after event 9 (GP-0x369A)");
         applyAt(0xFEBF3B14L, u32, "application_programming_handoff_value",
-                "Four-byte handoff payload (written as zero)");
+                "Four-byte handoff payload; absolute mov 0xFEBF3B14");
         applyScalar(0xFEBF3B18L, UnsignedCharDataType.dataType, "application_programming_readiness_latch",
-                "Set to 0x5A after readiness check");
+                "Set to 0x5A after readiness check; absolute mov 0xFEBF3B18");
         applyScalar(0xFEBF3B19L, UnsignedCharDataType.dataType, "application_programming_reset_latch",
-                "Set to 0x5A after reset request succeeds");
+                "Set to 0x5A after reset request succeeds; FEBF3B14+5");
 
         // Enabled checkpoint ring mirrors (sizes from evidence CSV).
         String[] args = getScriptArgs();

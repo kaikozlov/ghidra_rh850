@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = ROOT / "data" / "ram_overlay_map.csv"
 CHECKPOINT_CSV = ROOT / "data" / "checkpoint_payload_map.csv"
+CF = (ROOT / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 
 LOCAL_RAM = (0xFEBE0000, 0x20000)  # start, size
 APP_GP = 0xFEBEB800
@@ -24,13 +25,41 @@ REQUIRED = {
     0xFEBF2D08: ("payload_did_0201_key_material", 16, "PayloadDid0201KeyMaterial"),
     0xFEBF2CF8: ("payload_did_0202_iv", 16, "PayloadDid0202Iv"),
     0xFEBEB1A4: ("application_system_transition_phase_live", 1, "uint8"),
-    0xFEBFC81F: ("application_system_transition_phase_snapshot", 1, "uint8"),
+    0xFEBEE81F: ("application_system_transition_phase_snapshot", 1, "uint8"),
+    0xFEBEE892: ("application_vehicle_speed_raw", 2, "uint16"),
+    0xFEBE6692: ("application_supply_value_raw", 2, "uint16"),
+    0xFEBE8152: ("application_alternate_handoff_flag", 1, "uint8"),
+    0xFEBE8166: ("application_programming_reset_requested", 1, "uint8"),
+    0xFEBF3B14: ("application_programming_handoff_value", 4, "uint32"),
+    0xFEBF3B18: ("application_programming_readiness_latch", 1, "uint8"),
+    0xFEBF3B19: ("application_programming_reset_latch", 1, "uint8"),
 }
 
-# Documented GP displacements that must stay honest.
+# Documented GP displacements that must stay honest and signed-16-bit encodable.
 REQUIRED_GP = {
     "secoc_nvm_triplicate_workbuf_root": (APP_GP, 0x5308),
     "application_system_transition_phase_live": (APP_GP, -0x65C),
+    "application_system_transition_phase_snapshot": (APP_GP, 0x301F),
+    "application_vehicle_speed_raw": (APP_GP, 0x3092),
+    "application_supply_value_raw": (APP_GP, -0x516E),
+    "application_alternate_handoff_flag": (APP_GP, -0x36AE),
+    "application_programming_reset_requested": (APP_GP, -0x369A),
+}
+
+# Absolute (non-GP) handoff roots proved by mov immediates.
+ABSOLUTE_HANDOFF = {
+    "application_programming_handoff_value",
+    "application_programming_readiness_latch",
+    "application_programming_reset_latch",
+}
+
+# Instruction-proved application-GP roots (mnemonic site -> signed disp).
+PROVED_APP_GP_ROOTS = {
+    0xFEBEE81F: (0x4C960, 0x301F, "a40f1f30"),   # ld.bu 0x301F[gp]
+    0xFEBEE892: (0x4C944, 0x3092, "e40f9330"),   # ld.hu 0x3092[gp]
+    0xFEBE6692: (0x4C964, -0x516E, "e49f93ae"),  # ld.hu -0x516E[gp]
+    0xFEBE8152: (0x4C968, -0x36AE, "845753c9"),  # ld.bu -0x36AE[gp]
+    0xFEBE8166: (0x4C986, -0x369A, "440766c9"),  # st.b r0,-0x369A[gp]
 }
 
 passed = 0
@@ -55,6 +84,10 @@ def parse_signed(text: str) -> int:
     if text.startswith("-"):
         return -int(text[1:], 0)
     return int(text, 0)
+
+
+def fits_s16(value: int) -> bool:
+    return -0x8000 <= value <= 0x7FFF
 
 
 def main() -> int:
@@ -110,11 +143,20 @@ def main() -> int:
             base = int(row["gp_base"], 0)
             off = parse_signed(row["gp_offset"])
             check(f"{name} gp_base+offset == address",
-                  base + off == addr,
+                  (base + off) & 0xFFFFFFFF == addr,
                   f"{base:#x}+{off:#x} != {addr:#x}")
             check(f"{name} gp_base is boot or app GP",
                   base in {APP_GP, BOOT_GP},
                   hex(base))
+            # Handoff/phase roots are proved as ld.*/st.* disp16[gp]; enforce s16
+            # there. Other overlays may use movhi/absolute forms with wider math.
+            if name in REQUIRED_GP:
+                check(f"{name} GP offset fits signed int16",
+                      fits_s16(off),
+                      f"{off:#x}")
+        elif name in ABSOLUTE_HANDOFF:
+            check(f"{name} is absolute (empty GP fields)",
+                  not row["gp_base"] and not row["gp_offset"])
         addresses.add(addr)
         names.add(name)
         by_addr[addr] = (name, size, typ)
@@ -137,8 +179,31 @@ def main() -> int:
         check(f"required GP binding for {name}",
               row is not None
               and int(row["gp_base"], 0) == base
-              and parse_signed(row["gp_offset"]) == off,
+              and parse_signed(row["gp_offset"]) == off
+              and fits_s16(off),
               repr(row))
+
+    print("\n== proved application-GP handoff roots ==")
+    for addr, (site, disp, insn) in PROVED_APP_GP_ROOTS.items():
+        check(f"{addr:#x} instruction bytes at {site:#x}",
+              CF[site:site + len(bytes.fromhex(insn))] == bytes.fromhex(insn),
+              CF[site:site + 4].hex())
+        check(f"{addr:#x} == APP_GP + {disp:#x}",
+              (APP_GP + disp) & 0xFFFFFFFF == addr)
+        check(f"{addr:#x} displacement fits signed int16", fits_s16(disp))
+
+    # Absolute FEBF3B14/18 proved by 6-byte mov immediates.
+    check("absolute mov FEBF3B18 at readiness adapter",
+          CF[0x8A092:0x8A098] == bytes.fromhex("3d06183bbffe"))
+    check("absolute mov FEBF3B14 at async worker",
+          CF[0x8A248:0x8A24E] == bytes.fromhex("3d06143bbffe"))
+    check("reset latch is FEBF3B14+5 via ld.bu/st.b 5[r29]",
+          CF[0x8A24E:0x8A252] == bytes.fromhex("bde70500") and
+          CF[0x8A276:0x8A27A] == bytes.fromhex("5de70500"))
+    # Reject the old boot-GP/unsigned mislabels as overlay addresses.
+    for bad in (0xFEBFC81F, 0xFEBFC892, 0xFEBF4692, 0xFEBF6152, 0xFEBF6166):
+        check(f"old mislabel {bad:#x} is absent from overlays",
+              bad not in by_addr)
 
     # Enabled checkpoint mirrors from the evidence CSV must appear.
     check("checkpoint CSV exists", CHECKPOINT_CSV.is_file(), str(CHECKPOINT_CSV))

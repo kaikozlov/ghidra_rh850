@@ -125,8 +125,8 @@ the reconstructed combined firmware — trust them:
   - pages 468–479 are objects 0–3; FEBEF468/478/488 contain their structured state.
   - `0x758A0/0x785D2` are NvM/DataFlash service machinery, not ICU derivation.
 - Five formerly open semantics are closed in `docs/OPEN_SEMANTICS_RESOLUTION.md`:
-  - `0xFEBFC81F` snapshots the non-Dcm system-transition phase at `0xFEBEB1A4`;
-    phase `0x11` blocks programming handoff.
+  - `0xFEBEE81F` (`GP+0x301F`) snapshots the non-Dcm system-transition phase at
+    `0xFEBEB1A4`; phase `0x11` blocks programming handoff.
   - application service groups 2/3/4 select primary `7A1->7A9`, functional
     `777->7A9`, and limited secondary `7A0->7A8` contexts; the last has SIDs
     `10/19/22/3E/AB`.
@@ -200,12 +200,23 @@ the reconstructed combined firmware — trust them:
   `tests/verify_application_diagnostics.py`:
   - the 17-entry primary application service table is at `0x25E30` and contains
     `10/11/14/19/22/23/27/28/2E/31/34/36/37/3E/85/AB/BA`;
+  - `data/application_diagnostic_map.csv` (from
+    `tools/generate_application_diagnostic_map.py`) records per-SID routing,
+    session policy, callbacks/subfunction tables, and evidence status for all 17;
+  - application DID table `0x2941C` has 242 read records; write-DID table
+    `0x26AEC` has 19; routine-ID table `0x25768` has 32 start/result pairs;
   - application DID records at `0x2A30C` expose real `F181`, `F186`, and `F18C`
     responses through callbacks `0x4E8E4`/`0x4E90A`/`0x4E918`;
   - application session callbacks `0x93FF6`/`0x94006`/`0x94016` share the
     asynchronous state machine at `0x93F3C`; PROGRAMMING is allowed only from
     current session 2/3, rejects raw speed above `0x0180` with NRC `0x88`, and
     requires status != `0x11`, scaled supply >= `0x0A00`, and a clear handoff flag;
+  - SIDs `14/23/31/34/36/37/BA` have null service-table callbacks; bounded
+    negatives cover `w3=0`, no record-address dword xrefs, and shared gate
+    `0x8F282` session-list consumption (not exhaustive DSP absence);
+  - instruction-proved absolute RAM roots: ControlDTC store `FEBF45A8`, ReadDTC
+    request mirrors `FEBF3BFC/3F24/4248/457C`, AB mirrors `FEBF48EC` and
+    `FEBF48EC+0x50` (`FEBF493C`); buffers stay opaque;
   - the `0x08000200/201` callees are compiled no-op stubs; successful PROGRAMMING
     queues system event 9, shutdown mode `0x900`, and hardware reset while UDS
     remains pending. The first `10 02` in extraction tooling is therefore an
@@ -225,6 +236,17 @@ the reconstructed combined firmware — trust them:
   - application RSCAN CAN1 uses EIINT 187/188 and 51 acceptance rules at `0x231A0`;
   - `0x2E4`, `0x0F`, and `0x131` are explicit RX routes; `0x344` is not in the
     application RX acceptance table and must not be projected onto it.
+- The complete application receive map is in `docs/APPLICATION_RECEIVE_MAP.md`
+  and checked by `tests/verify_application_receive.py` plus
+  `AssertApplicationReceiveMap.java` in `make verify-processor`:
+  - 47 normal Rx I-PDUs and 242 COM signals 58..299; CSV from
+    `tools/generate_application_rx_map.py` driven by
+    `data/application_rx_signal_evidence.csv`;
+  - six SecOC envelopes stay inside the 47 (IDs from `0x25970`); diagnostic
+    `7A1/777/7A0/7F7` stay out;
+  - 145 signals recovered with per-unpacker body hashes + immediates/dest checks;
+    97 configured-unresolved with bounds;
+  - CAN `0x344` remains absent from acceptance, descriptors, and the CSV.
 
 The prior "secrets are unreferenced / separate bootloader image" conclusion was
 an artifact of the wrong flat import and is **false**. The scripts that produced
@@ -243,7 +265,7 @@ it live in `legacy/flat-import/` — do not use them for current results.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
 - `ghidra/scripts/verify/` contains asserting processor/project gates used by
   `make verify-processor`.
-- `make verify` runs thirteen self-contained suites through UV; it must not require
+- `make verify` runs sixteen self-contained suites through UV; it must not require
   sibling repositories or Ghidra.
 - `make verify-sleigh` compiles the vendored processor module into an isolated
   extension under `build/ghidra-home/` from a disposable source copy (does not
@@ -262,12 +284,15 @@ it live in `legacy/flat-import/` — do not use them for current results.
 Run `make rebuild-project` for a non-destructive rebuild under `build/project/`.
 `tools/rebuild_project.sh` installs the isolated processor extension, imports
 both regions (with the P1M-E device profile), runs every seed and annotation
-in four staged durable headless commits (including vector and switch-table
-recovery), cleanly
-stops the stats daemon, writes `processor_manifest.json`, and verifies project
-statistics. Do not collapse the stages: seed timing changes Ghidra's recovered
-graph. To promote a finished rebuild into the committed `project/` snapshot,
-run `make snapshot-project` (never point rebuild directly at `project/`).
+in four staged durable headless analysis commits (including vector and
+switch-table recovery), then a separate `-noanalysis` calling-convention
+finalizer, cleanly stops the stats daemon, writes `processor_manifest.json`,
+and verifies project statistics. Do not collapse the four analysis stages:
+seed timing changes Ghidra's recovered graph. The finalizer exists because
+two ordinary bodies (`0x3b0be`, `0x6f0d0`) appear only after the annotate-stage
+reopen and would otherwise stay on `unknown`. To promote a finished rebuild
+into the committed `project/` snapshot, run `make snapshot-project` (never
+point rebuild directly at `project/`).
 
 ## Tooling notes
 
@@ -295,7 +320,8 @@ run `make snapshot-project` (never point rebuild directly at `project/`).
   changes run SLEIGH, synthetic fixtures, and committed-project audits on
   macOS with pinned Ghidra 12.1.2 / ghidra CLI 0.2.1. Processor, script, and
   snapshot changes—as well as `main`, manual, and nightly runs—execute the full
-  four-stage rebuild plus project invariants and upload normalized audit artifacts.
+  four analysis-stage rebuild (plus convention finalizer) and project invariants,
+  and upload normalized audit artifacts.
 
 ## Final safe workflow
 

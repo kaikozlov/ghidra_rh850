@@ -7,6 +7,10 @@
 // signatures previously reported unknown even after the cspec rewrite.
 //
 // Run AFTER RecoverVectorHandlers so true ISR wrappers keep __interrupt.
+// Rebuild also re-runs this under -noanalysis after the annotate-stage commit
+// (see tools/rebuild_project.sh): two ordinary bodies at 0x3b0be/0x6f0d0 are
+// absent from the function iterator until that reopen, and would otherwise
+// remain unknown for project/decompiler invariants.
 // Idempotent: already-correct conventions are left alone.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.listing.Function;

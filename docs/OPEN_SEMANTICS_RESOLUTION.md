@@ -5,20 +5,24 @@ and DataFlash reports. All addresses are CodeFlash virtual addresses unless a
 full RAM/DataFlash address is shown. The conclusions use firmware evidence names,
 not invented Toyota/Denso identifiers.
 
-## 1. `0xFEBFC81F`: system-transition phase snapshot
+## 1. System-transition phase snapshot (`GP+0x301F`)
 
 `application_input_snapshot_update @ 0xBCB3A` performs the exact copy:
 
 ```text
 live source  GP-0x65C = 0xFEBEB1A4
-snapshot     GP+0x301F = 0xFEBFC81F
+snapshot     GP+0x301F = 0xFEBEE81F   (application GP 0xFEBEB800)
 ```
+
+Earlier notes mislabeled this as `0xFEBFC81F` by evaluating `GP+0x301F` under
+boot GP `0xFEBF9800`. That absolute is a documentation bug: the handoff path
+executes with application GP, so the correct absolute is `0xFEBEE81F`.
 
 The live byte is initialized and advanced by `0xB28AC/0xB2912`. This generated
 state machine coordinates system modes `0x300/0x400/0x500` and event `0x23`; the
 recovered phase values are `0`, `0x11`, and `0x22`. Adjacent flags use `0x5A`,
 but the copied phase byte does not. The programming-handoff prerequisite at
-`0x4C960` rejects snapshot phase `0x11`.
+`0x4C960` rejects snapshot phase `0x11` via `ld.bu 0x301F[gp]` / `addi -0x11`.
 
 **Resolution:** this is a system-transition phase snapshot, not a Dcm-produced
 "programming status" byte. Exact OEM names for the three phase values remain

@@ -1,0 +1,26 @@
+{
+  "calling_convention_counts": {
+    "__interrupt": 24,
+    "__stdcall": 5821
+  },
+  "csv": "semantic_coverage_ledger.csv",
+  "evidence_grade_counts": {
+    "annotated": 342,
+    "recovered": 5426,
+    "thunk": 77
+  },
+  "function_count": 5845,
+  "name_source_counts": {
+    "DEFAULT": 5503,
+    "USER_DEFINED": 342
+  },
+  "root_kind_counts": {
+    "interrupt": 24,
+    "scheduler": 1
+  },
+  "schema_version": 1,
+  "subsystem_counts": {
+    "application": 5462,
+    "boot": 382
+  }
+}

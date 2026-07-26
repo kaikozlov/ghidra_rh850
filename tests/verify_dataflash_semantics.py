@@ -247,6 +247,43 @@ check("object 27 remains an explicit configured orphan",
 check("disabled checkpoint objects receive no invented payload semantics",
       all(row["evidence_name"] == "disabled" for row in payload_rows
           if row["enabled"] == "no"))
+
+print("\n== checkpoint writer field assembly machine checks ==")
+# Object-index + secoc_nvm_object_update (0x65CD8) call sites, plus layout loop bounds.
+check("object 4 first group copies 18 halfwords",
+      CF[0x534B6:0x534BA] == bytes.fromhex("0106eeff"))  # addi -0x12
+check("object 4 second group copies 10 halfwords",
+      CF[0x534CE:0x534D0] == bytes.fromhex("6a0a"))  # cmp 0xa
+check("object 4 calls update with object index 4",
+      CF[0x534DA:0x534E0] == bytes.fromhex("043281fffc27"),
+      CF[0x534DA:0x534E0].hex())
+check("object 5 restore/writer embeds signed sentinel 32000",
+      CF[0x47808:0x4780C] == bytes.fromhex("200e007d"), CF[0x47808:0x4780C].hex())
+check("object 5 persist path moves index 5 then calls update",
+      CF[0x4796E:0x47970] == bytes.fromhex("0532") and
+      CF[0x47982:0x47986] == bytes.fromhex("81ff56e3"),
+      CF[0x4796E:0x47986].hex())
+check("object 5 persist zero-fills reserved u32",
+      CF[0x47978:0x4797A] == bytes.fromhex("0305"))  # sst.w 0x4[ep], r0
+check("object 12 persist moves index 0xC then calls update",
+      CF[0x452F8:0x452FA] == bytes.fromhex("0c32") and
+      CF[0x4530A:0x4530E] == bytes.fromhex("82ffce09"),
+      CF[0x452F8:0x4530E].hex())
+check("object 12 packs reserved-zero and pad bytes before update",
+      CF[0x45304:0x4530A] == bytes.fromhex("030589039103"))
+check("object 12 reset writer also calls update(0xC)",
+      CF[0x453DC:0x453E0] == bytes.fromhex("82fffc08"))
+check("object 14 copies 12 trigger bytes then 3 history entries",
+      CF[0x538EC:0x538EE] == bytes.fromhex("6c0a") and  # cmp 0xc
+      CF[0x5393A:0x53948] == bytes.fromhex("630a9693b6dd03380e3281ff9423"),
+      CF[0x5393A:0x53948].hex())
+check("object 24 decrements countdown then calls update(0x18)",
+      CF[0x34FCA:0x34FCC] == bytes.fromhex("5fea") and  # add -1,r29
+      CF[0x34FE0:0x34FE8] == bytes.fromhex("2036180083fff40c"),
+      CF[0x34FE0:0x34FE8].hex())
+check("object 24 zero-fills reserved halfword before update",
+      CF[0x34FDA:0x34FDC] == bytes.fromhex("8104"))  # sst.h 2[ep],r0
+
 with tempfile.TemporaryDirectory() as directory:
     generated = Path(directory) / "checkpoint_payload_map.csv"
     result = subprocess.run(
