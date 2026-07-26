@@ -77,8 +77,12 @@ This table explains the builder format without relying on source comments.
 ### Routine table at `0x8F44`
 
 Five 12-byte records describe RIDs `0x10F0`, `0x10F1`, `0x10F2`, `0x10F3`, and
-`0xFF00`. Both `0x10F0` and `0xFF00` accept only StartRoutine and require a
-10-byte option record (`45 00 || address_be32 || length_be32`).
+`0xFF00`. All are StartRoutine-only. `0x10F0`, `0x10F1`, `0x10F2`, and `0xFF00`
+require a 10-byte option record (`45 00 || address_be32 || length_be32`), while
+`0x10F3` has no option record. `BOOTLOADER_DIAGNOSTICS.md` completes the
+`0x10F1`–`0x10F3` behavior: `0x10F1` aliases `0x10F0`, `0x10F2` validates a
+CodeFlash region and programs its validity marker, and `0x10F3` arms an
+operation-bit-5 read-back comparison transfer.
 
 ## 2. RequestDownload (`SID 0x34`, handler `0x5D68`)
 

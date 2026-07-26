@@ -1,8 +1,10 @@
 # Application diagnostic stack and bootloader-entry analysis
 
 This note separates the **application-mode** diagnostic stack from the bootloader
-stack already documented in `DID_MODEL.md`, `CAN_TRANSPORT_ANALYSIS.md`, and
-`PAYLOAD_GATE_ANALYSIS.md`. Both stacks are present in the committed
+stack documented in `DID_MODEL.md`, `CAN_TRANSPORT_ANALYSIS.md`,
+`PAYLOAD_GATE_ANALYSIS.md`, and `BOOTLOADER_DIAGNOSTICS.md`. The latter completes
+bootloader SIDs `0x10/0x11/0x28/0x3E/0x85` and routines `0x10F1–0x10F3`.
+Both stacks are present in the committed
 `8965B4512000` CodeFlash image, but they use different tables, handlers, and
 identification responses.
 

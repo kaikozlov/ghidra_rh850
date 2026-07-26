@@ -142,6 +142,18 @@ the reconstructed combined firmware — trust them:
   - no VIN, serial, spare-part, configuration, or DataFlash-backed DID exists in
     these bootloader handlers. Do not project application-mode/related-variant
     probe expectations onto this table.
+- The remaining bootloader services/routines are complete in
+  `docs/BOOTLOADER_DIAGNOSTICS.md` and checked by
+  `tests/verify_bootloader_diagnostics.py`:
+  - `0x10` queues default/programming/extended transitions; default-to-programming
+    and programming-to-extended return NRC `0x7E`;
+  - `0x11` accepts hardReset only in unlocked programming session and coordinates
+    reset with response confirmation;
+  - functional-only `28 01 01` and `85 02` only acknowledge—the stored request
+    bytes have no consumer beyond their response builders;
+  - `3E 00/80` is accepted in sessions 1/2/3 but has no service-local S3 timer;
+  - `0x10F1` aliases RAM verifier `0x10F0`; `0x10F2` verifies CodeFlash and
+    programs marker `5A A5 A5 5A`; `0x10F3` arms operation-bit-5 read-back compare.
 - The separate application diagnostic stack is documented in
   `docs/APPLICATION_DIAGNOSTICS.md` and checked by
   `tests/verify_application_diagnostics.py`:
@@ -183,7 +195,7 @@ it live in `legacy/flat-import/` — do not use them for current results.
 - `ghidra/scripts/seed/` contains all function/table seeds missed by analysis.
 - `ghidra/scripts/annotate/` contains the durable labels/comments for completed work.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
-- `make verify` runs eight self-contained suites through UV; it must not require
+- `make verify` runs ten self-contained suites through UV; it must not require
   sibling repositories.
 - `make verify-external EXTERNAL_REPOS_DIR=...` checks optional public checkouts
   against `external-references.lock.json`.

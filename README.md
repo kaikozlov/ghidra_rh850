@@ -173,6 +173,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `SeedSecocNvmFunctions.java`;
    - `SeedSecocApplicationFunctions.java`;
    - `SeedApplicationDiagnosticFunctions.java`;
+   - `SeedBootloaderDiagnosticFunctions.java`;
    - `SeedArchitectureFunctions.java`;
 5. re-run analysis and apply every annotation script:
    - `AnnotateBootloaderSecrets.java`;
@@ -183,10 +184,11 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateDidModel.java`;
    - `AnnotateCanTransport.java`;
    - `AnnotateApplicationDiagnostics.java`;
+   - `AnnotateBootloaderDiagnostics.java`;
    - `AnnotateArchitecture.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
-7. require exactly 5,554 functions, 172,946 instructions, 27,742 symbols, two
+7. require exactly 5,554 functions, 172,946 instructions, 27,747 symbols, two
    memory sections, and `0x108000` mapped bytes.
 
 Expected memory map:
@@ -201,7 +203,7 @@ and execution trace.
 
 ## Corrected result
 
-- **5,554 functions, 172,946 instructions, 27,742 symbols**.
+- **5,554 functions, 172,946 instructions, 27,747 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -393,6 +395,26 @@ related EPS returns the same application DID/service schema. They do not prove
 the related MCU, byte-identical bootloader contents, retained secrets/payload
 routines, or that a PROGRAMMING timeout must be external to the EPS.
 
+### Complete remaining bootloader diagnostics
+
+`docs/BOOTLOADER_DIAGNOSTICS.md` completes SIDs `0x10`, `0x11`, `0x28`, `0x3E`,
+and `0x85`, plus routines `0x10F1–0x10F3`; its raw-image checks are in
+`tests/verify_bootloader_diagnostics.py`:
+
+- SessionControl supports default/programming/extended transitions through the
+  queued task at `0x6244`; default-to-programming and
+  programming-to-extended return NRC `0x7E`.
+- hardReset `11 01` requires programming session and unlocked SecurityAccess;
+  the non-suppressed path resets only after successful response confirmation.
+- functional-only `28 01 01` and `85 02` acknowledge the expected programming
+  preamble but have no consumer beyond their positive-response builders.
+- functional-only TesterPresent accepts `3E 00/80` in all three sessions and has
+  no service-local S3 timer or keepalive state.
+- `0x10F1` is an exact compiled alias of RAM verifier `0x10F0`; `0x10F2`
+  verifies a CodeFlash region and programs marker `5A A5 A5 5A` at
+  `0x17E00/0xFFE00`; `0x10F3` arms a TransferData read-back comparison mode and
+  does not itself erase or program memory.
+
 ### Boot/application architecture and application CAN routing
 
 `docs/FIRMWARE_ARCHITECTURE.md` maps the broader execution architecture and
@@ -457,7 +479,7 @@ extraction tooling and shellcode:
 | `ghidra/scripts/seed/` | Function and table seeds missed by auto-analysis |
 | `ghidra/scripts/annotate/` | Durable names, labels, and comments for each completed investigation |
 | `ghidra/scripts/investigate/` | Reusable reference/operand search helpers |
-| `tests/` | Eight self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
+| `tests/` | Ten self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
 | `tools/` | DataFlash CSV generator, durable Ghidra rebuild, and project-statistics verifier |
 | `external-references.lock.json` | Exact upstream commits and artifact hashes |
 | `pyproject.toml`, `uv.lock` | Locked UV/PyCryptodome verification environment |
