@@ -269,8 +269,8 @@ DATA reference into CodeFlash that is not a function entry (scalars included),
 not a table-only classifier. The ledger deliberately does **not** claim that
 every function is behaviorally understood — the majority remain `recovered`.
 
-Generated ledger row count on the current working project: **5733** functions.
-`tests/verify_semantic_coverage.py` independently enforces a floor of 5733
+Generated ledger row count on the current working project: **5845** functions.
+`tests/verify_semantic_coverage.py` independently enforces a floor of 5845
 (aligned with AssertNoUndefined). Older hand-maintained counts elsewhere in
 this doc may lag; prefer the generated ledger/summary for the live boundary.
 

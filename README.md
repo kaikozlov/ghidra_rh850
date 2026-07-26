@@ -119,7 +119,7 @@ prototype). Processor audits and semantic fixtures are documented in
 Verification targets:
 
 ```bash
-make verify            # nineteen firmware suites (no Ghidra)
+make verify            # twenty firmware suites (no Ghidra)
 make verify-sleigh     # SLEIGH compile + isolated install
 make verify-processor  # fixtures + working-project audits
 make verify-ghidra     # all of the above
@@ -166,7 +166,7 @@ seed before the first analysis pass produces a different graph and does not
 reproduce the committed statistics. The finalizer is not a fifth analysis
 stage — after annotate reopen, Ghidra surfaces two additional non-ISR bodies
 (`0x3b0be`, `0x6f0d0`) that stage-4 `ApplyCallingConventions` never saw
-(function iterator 5731 → 5733); without the finalizer they stay `unknown`.
+(function iterator 5843 → 5845); without the finalizer they stay `unknown`.
 
 1. import CodeFlash without analysis, map DataFlash with `AddDataFlash.java`,
    and apply `ApplyP1MDeviceProfile.java` (LocalRAM/SFR windows, GP/TP, SFR
@@ -230,11 +230,11 @@ and execution trace.
 
 ## Corrected result
 
-- Landmark smoke signal on the last annotated rebuild: **5,731 functions,
+- Landmark smoke signal on the last annotated rebuild: **5,845 functions,
   174,783 instructions, 37,001 symbols** (floors for gates; semantic checks live
   in `make verify-processor`). The generated whole-image ledger
   `data/semantic_coverage_ledger.csv` (via `make generate-semantic-coverage`)
-  has **5733** recovered-function rows; the verify suite floors at that count
+  has **5845** recovered-function rows; the verify suite floors at that count
   independently. Most rows remain `evidence_grade=recovered` and are not claimed
   as behaviorally understood. See `docs/PLUGIN_AUDIT.md` (Semantic coverage ledger).
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.

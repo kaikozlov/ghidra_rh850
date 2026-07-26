@@ -286,7 +286,7 @@ it live in `legacy/flat-import/` — do not use them for current results.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
 - `ghidra/scripts/verify/` contains asserting processor/project gates used by
   `make verify-processor`.
-- `make verify` runs nineteen self-contained suites through UV; it must not require
+- `make verify` runs twenty self-contained suites through UV; it must not require
   sibling repositories or Ghidra.
 - `make verify-sleigh` compiles the vendored processor module into an isolated
   extension under `build/ghidra-home/` from a disposable source copy (does not

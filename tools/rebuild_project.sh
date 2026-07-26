@@ -220,7 +220,7 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
 # Convention finalizer (not an analysis stage): after the annotate-stage commit,
 # a -noanalysis reopen consistently surfaces two additional non-ISR bodies at
 # 0x3b0be and 0x6f0d0 that were absent from FunctionManager during stage-4
-# ApplyCallingConventions (iterator count 5731 → 5733). Without this pass they
+# ApplyCallingConventions (iterator count 5843 → 5845). Without this pass they
 # remain calling-convention "unknown" and fail AssertProjectInvariants /
 # AssertDecompilerInvariants. The finalizer sets exactly those two to __stdcall.
 echo "[4b] Finalize calling conventions (no analysis)"
