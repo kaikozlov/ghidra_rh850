@@ -103,9 +103,10 @@ vendored `.slaspec` sources with `sleigh` and syncs the extension into
 `$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850/` on every run, so both
 `analyzeHeadless` and the `ghidra` CLI load the in-tree processor model.
 
-The upstream calling-convention model is incomplete and is being rewritten
-in-tree; confirm register setup in disassembly before trusting decompiled
-signatures.
+The in-tree `v850.cspec` models the RH850/G3 calling convention (r6-r9 args,
+r10 return, callee-saved r20-r29, lp link register, and an `__interrupt`
+prototype); confirm register setup in disassembly for novel cases before
+trusting decompiled signatures.
 
 ## Rebuild the complete Ghidra project
 

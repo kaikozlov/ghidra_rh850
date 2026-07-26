@@ -262,7 +262,9 @@ directly at `project/`).
   `14c1b5be32b8ec741ee626c8bca9885c58f7a473`). `tools/rebuild_project.sh`
   compiles the `.slaspec` sources with `sleigh` and syncs them into
   `$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850/`; there is no external pin or
-  manual install step. The calling-convention model is being rewritten in-tree
-  — confirm register setup before trusting decompiled signatures.
+  manual install step. The in-tree `v850.cspec` models the RH850/G3 calling
+  convention (r6-r9 args, r10 return, callee-saved r20-r29, lp link register,
+  `__interrupt` proto); still confirm register setup in disassembly for novel
+  cases before trusting decompiled signatures.
 - `ghidra` CLI project resolution: `GHIDRA_PROJECT_DIR` env, config
   `ghidra_project_dir`, `--projects-dir`, else `~/Library/Caches/ghidra-cli/projects`.
