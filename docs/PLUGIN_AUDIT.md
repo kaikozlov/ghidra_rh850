@@ -45,3 +45,35 @@ Two points worth recording:
   `0xFFFFB110` / `0xFFFFB248` / `0xFFFFB24A`, accessed via `ld.w`/`st.w`, not
   `ldsr`/`stsr`. They are therefore out of scope for the `selID` tables and are
   named through project labels (see the analysis docs), not the processor module.
+
+## Instruction-decode coverage
+
+Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`.
+
+The firmware disassembles completely: **zero** undefined bytes occur inside
+any of the 5560 function bodies. A SLEIGH decode failure would leave a hole
+inside a function; none exists, so the module decodes every instruction the
+compiler emitted. (That alone does not rule out a semantically-wrong decode
+that still consumes the right byte count; the checks below close that gap.)
+
+Semantic checks, all consistent with the verified findings in `AGENTS.md`:
+
+- **Immediate / gp-relative address math** decodes correctly: `ori 0xbfd8,r0,r6`
+  loads `PAYLOAD_BUILD_SECRET` (CodeFlash `0xBFD8`) and `movea -0x6ab8,gp,r29`
+  forms the AES-context pointer `gp-0x6ab8` (`gp = 0xFEBF9800`).
+- **`ld.w`/`st.w disp16` displacement** (`disp = field x 2` in
+  `v850_load_store.sinc`) is correct: `aes128_init_context` writes context
+  fields at clean offsets (`+0xb0`, `+0xc0`), and the SecurityAccess crypto
+  math checked by `tests/verify_findings.py` depends on those offsets being
+  right. A wrong scale would corrupt the AES state layout.
+- **Labeled addresses resolve** through the decompiler: the secret symbols at
+  `0xBFD8`/`0xBFE8` and the `gp`/`EBASE`/`INTBP` constants all resolve to their
+  independently-verified values.
+- **`prepare`/`dispose` save lists** (`{r20..r29, ep, lp}`) match the
+  callee-saved set modelled by the rewritten `v850.cspec`.
+
+No decode bug is encountered. The upstream open issues that could conceivably
+affect this firmware — `ld.w` "off by one" (#34) and `b8 02` not disassembling
+(#42) — do not manifest here: #34 is contradicted by the verified displacement
+math above, and #42 would have produced an undefined byte inside a function
+(none exist). Issue #40 (`IMSR`/`PMR`) is a core mismatch, covered above.
