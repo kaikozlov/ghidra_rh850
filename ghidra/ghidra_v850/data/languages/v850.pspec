@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- See Relax specification: Ghidra/Framework/SoftwareModeling/data/languages/processor_spec.rxg -->
+<!-- See Relax specification: Ghidra/Framework/SoftwareModeling/data/languages/processor_spec.rxg
+
+  Volatility for the RH850/P1M-E (R7F701381) analysis target.
+  The inherited upstream range 0x0..0x20 is CodeFlash in this project and must
+  NOT be marked volatile. Peripheral SFRs live in the high 24-bit window used
+  by the P1M-E (see hardware manual R01UH0585 and docs/FIRMWARE_ARCHITECTURE.md).
+-->
 
 <processor_spec>
   <programcounter register="PC"/>
   <data_space space="ram"/>
   <volatile outputop="write" inputop="read">
-    <range space="ram" first="0x0" last="0x20"/>
+    <!-- P1M-E peripheral I/O / SFR window (covers EIC, RSCAN/RSCFD, TAUJ, ICU-S, flash sequencer). -->
+    <range space="ram" first="0xFF600000" last="0xFFFFFFFF"/>
   </volatile>
 </processor_spec>

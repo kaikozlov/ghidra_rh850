@@ -18,7 +18,8 @@ VERIFY_SUITES := \
 	tests/verify_architecture.py \
 	tests/verify_application_transmit.py
 
-.PHONY: sync verify verify-core verify-external generate-dataflash rebuild-project work-project snapshot-project
+.PHONY: sync verify verify-core verify-external verify-sleigh verify-processor verify-ghidra \
+	generate-dataflash generate-processor-fixture rebuild-project work-project snapshot-project
 
 sync:
 	$(UV) sync --locked
@@ -35,9 +36,21 @@ verify-core:
 verify-external:
 	$(PYTHON) tests/verify_external_corroboration.py --repos-dir "$(EXTERNAL_REPOS_DIR)"
 
+verify-sleigh:
+	tools/verify_sleigh.sh
+
+verify-processor:
+	tools/verify_processor.sh
+
+# Full local gate: firmware suites + SLEIGH + processor audits.
+verify-ghidra: verify-core verify-sleigh verify-processor
+
 generate-dataflash:
 	$(PYTHON) tools/generate_dataflash_layout.py
 	$(PYTHON) tools/generate_checkpoint_payload_map.py
+
+generate-processor-fixture:
+	$(PYTHON) tools/build_processor_fixture.py
 
 rebuild-project:
 	tools/rebuild_project.sh --project-dir "$(PROJECT_DIR)"
@@ -54,6 +67,13 @@ work-project:
 		mkdir -p "$(PROJECT_DIR)"; \
 		cp -R "$(SNAPSHOT_DIR)/." "$(PROJECT_DIR)/"; \
 		echo "Ready: $(PROJECT_DIR)"; \
+	fi
+	@if [ -f "$(PROJECT_DIR)/processor_manifest.json" ]; then \
+		$(PYTHON) tools/fingerprint_processor.py --expect "$(PROJECT_DIR)/processor_manifest.json"; \
+	elif [ -f "$(SNAPSHOT_DIR)/processor_manifest.json" ]; then \
+		$(PYTHON) tools/fingerprint_processor.py --expect "$(SNAPSHOT_DIR)/processor_manifest.json"; \
+	else \
+		echo "NOTE: no processor_manifest.json yet; run rebuild-project to create one"; \
 	fi
 
 # Push the working project (build/project) into the committed snapshot

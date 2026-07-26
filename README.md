@@ -69,23 +69,26 @@ The fully analyzed, annotated project is committed in `project/`
 contains the discovered functions, both secret labels, the bootloader and
 application diagnostic handlers, and the annotated SecurityAccess/payload-gate/
 AES/SecOC/CAN transport and boot/application architecture paths — so you can
-explore it directly without rebuilding.
+explore it without rebuilding from scratch.
 
-Open it with the `ghidra` CLI. The project location must be an **absolute**
-path: Ghidra 12.1+ rejects any path component beginning with `.`
-(so `./project` fails; use `$PWD/project` or a full path).
+**Never open the committed `project/` with a `ghidra` daemon.** Any open
+compacts its DB and dirties the tree even with no analysis change. Materialize a
+working copy first, then use an **absolute** `--projects-dir` (Ghidra 12.1+
+rejects path components beginning with `.`):
 
 ```bash
-ghidra --projects-dir "$PWD/project" --project rh850_p1me_mapped \
+make work-project   # one-time: copy snapshot -> build/project
+ghidra --projects-dir "$PWD/build/project" --project rh850_p1me_mapped \
        --program RH850_P1M-E_CodeFlash.bin <subcommand>
 ```
 
 > **Durability caveat.** The `ghidra` CLI bridge keeps the program in memory and
 > only writes a durable snapshot when the daemon shuts down cleanly. After any
 > `analyze` or `script run` whose changes you want to keep, run
-> `ghidra --projects-dir "$PWD/project" --project rh850_p1me_mapped stop`
-> (teardown commits to disk). Never commit `project/` while a daemon is running
-> — it holds transient `.lock` / `tmp*` files (git-ignored under `project/`).
+> `ghidra --projects-dir "$PWD/build/project" --project rh850_p1me_mapped stop`
+> (teardown commits to disk). Promote a finished working copy with
+> `make snapshot-project`. Never commit while a daemon is running — it holds
+> transient `.lock` / `tmp*` files.
 
 ## Prerequisites
 
@@ -98,15 +101,31 @@ ghidra --projects-dir "$PWD/project" --project rh850_p1me_mapped \
   `14c1b5be32b8ec741ee626c8bca9885c58f7a473`). See
   `ghidra/ghidra_v850/README.md` for provenance and modification policy.
 
-There is no separate install step. `tools/rebuild_project.sh` compiles the
-vendored `.slaspec` sources with `sleigh` and syncs the extension into
-`$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850/` on every run, so both
-`analyzeHeadless` and the `ghidra` CLI load the in-tree processor model.
+There is no separate install step. `tools/install_v850_extension.sh` (invoked
+by `make verify-sleigh` and every project rebuild) compiles the vendored
+`.slaspec` sources with `sleigh` and installs the extension into an isolated
+Ghidra user-home under `build/ghidra-home/` via `-Duser.home`. It does **not**
+mutate `$GHIDRA_HOME/Ghidra/Extensions`.
 
 The in-tree `v850.cspec` models the RH850/G3 calling convention (r6-r9 args,
 r10 return, callee-saved r20-r29, lp link register, and an `__interrupt`
-prototype); confirm register setup in disassembly for novel cases before
-trusting decompiled signatures.
+prototype). Processor audits and semantic fixtures are documented in
+`docs/PLUGIN_AUDIT.md`.
+
+Verification targets:
+
+```bash
+make verify            # twelve firmware suites (no Ghidra)
+make verify-sleigh     # SLEIGH compile + isolated install
+make verify-processor  # fixtures + working-project audits
+make verify-ghidra     # all of the above
+```
+
+Safe interactive workflow: `make work-project` → absolute `--projects-dir` on
+`build/project/` → `ghidra ... stop` before any copy/commit → promote only with
+`make snapshot-project`. Processor fingerprint mismatches fail work/snapshot.
+Full four-stage rebuild parity is local (`make rebuild-project`); CI always runs
+`make verify` and runs `make verify-sleigh` on processor-path PRs / nightly.
 
 ## Rebuild the complete Ghidra project
 
@@ -142,7 +161,8 @@ The script uses four staged `analyzeHeadless` transactions, each with a durable
 `-commit`. Staging matters: injecting every seed before the first analysis pass
 produces a different graph and does not reproduce the committed statistics.
 
-1. import CodeFlash without analysis and map DataFlash with `AddDataFlash.java`;
+1. import CodeFlash without analysis, map DataFlash with `AddDataFlash.java`,
+   and apply `ApplyP1MDeviceProfile.java` (LocalRAM/SFR, GP/TP, SFR labels);
 2. run `SeedEntries.java`, then the base auto-analysis;
 3. run `SeedUdsServiceTable.java`, then re-run analysis;
 4. seed the remaining missed functions with:
@@ -166,25 +186,38 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateApplicationDiagnostics.java`;
    - `AnnotateBootloaderDiagnostics.java`;
    - `AnnotateArchitecture.java`;
+   - `RecoverVectorHandlers.java` (INTBP/EBASE/`__interrupt`);
    - `AnnotateApplicationTransmit.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
-7. require exactly 5,560 functions, 173,000 instructions, 27,773 symbols, two
-   memory sections, and `0x108000` mapped bytes.
+7. write `processor_manifest.json` beside the working project and require
+   function/instruction/symbol floors plus the expanded four-block memory map.
 
-Expected memory map:
+Expected memory map after the P1M-E device profile is applied:
 
 ```text
-CodeFlash  00000000..000fffff  rx
-DataFlash  ff200000..ff207fff  rw
+CodeFlash   00000000..000fffff  rx
+DataFlash   ff200000..ff207fff  rw
+LocalRAM    febe0000..febfffff  rw
+SFR_EIC     ffffb000..ffffbfff  rw volatile
+SFR_RSCFD   ffd20000..ffd2ffff  rw volatile
+SFR_ICUS    ffc5d000..ffc5dfff  rw volatile
 ```
+
+The full peripheral window `0xFF600000..0xFFFFFFFF` remains volatile in
+`v850.pspec` so MMIO reads/writes are not folded as ordinary RAM. Only the
+verified windows above are mapped as blocks — mapping the entire 10 MiB SFR
+range makes CodeFlash immediates look like valid pointers and collapses
+disassembly.
 
 See `docs/PAYLOAD_GATE_ANALYSIS.md` for the complete download, authentication,
 and execution trace.
 
 ## Corrected result
 
-- **5,560 functions, 173,000 instructions, 27,773 symbols**.
+- Landmark smoke signal on the last annotated rebuild: **5,731 functions,
+  174,798 instructions, 37,000 symbols** (floors for gates; semantic checks live
+  in `make verify-processor`).
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.

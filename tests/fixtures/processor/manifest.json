@@ -1,0 +1,135 @@
+{
+  "processor": "v850e3:LE:32:default",
+  "binary": "rh850_semantic_fixture.bin",
+  "size": 44,
+  "cases": [
+    {
+      "name": "sld.b",
+      "addr": 0,
+      "size": 2,
+      "bytes": "1053",
+      "mnemonic_prefix": "sld.b",
+      "must_pcode_ops": [
+        "INT_SEXT",
+        "LOAD"
+      ],
+      "forbid_pcode_ops": [],
+      "load_size": 1,
+      "sign_extend": true
+    },
+    {
+      "name": "sld.h",
+      "addr": 4,
+      "size": 2,
+      "bytes": "105c",
+      "mnemonic_prefix": "sld.h",
+      "must_pcode_ops": [
+        "INT_SEXT",
+        "LOAD"
+      ],
+      "load_size": 2,
+      "sign_extend": true
+    },
+    {
+      "name": "sld.bu",
+      "addr": 8,
+      "size": 2,
+      "bytes": "6460",
+      "mnemonic_prefix": "sld.bu",
+      "must_pcode_ops": [
+        "INT_ZEXT",
+        "LOAD"
+      ],
+      "load_size": 1,
+      "sign_extend": false
+    },
+    {
+      "name": "sld.hu",
+      "addr": 12,
+      "size": 2,
+      "bytes": "7468",
+      "mnemonic_prefix": "sld.hu",
+      "must_pcode_ops": [
+        "INT_ZEXT",
+        "LOAD"
+      ],
+      "load_size": 2,
+      "sign_extend": false
+    },
+    {
+      "name": "ld.w",
+      "addr": 16,
+      "size": 4,
+      "bytes": "2457b100",
+      "mnemonic_prefix": "ld.w",
+      "must_pcode_ops": [
+        "LOAD"
+      ],
+      "load_size": 4,
+      "disp": 176
+    },
+    {
+      "name": "divh",
+      "addr": 20,
+      "size": 2,
+      "bytes": "4650",
+      "mnemonic_prefix": "divh",
+      "must_pcode_ops": [
+        "INT_SDIV"
+      ],
+      "forbid_pcode_ops": [
+        "INT_DIV"
+      ]
+    },
+    {
+      "name": "satadd",
+      "addr": 24,
+      "size": 2,
+      "bytes": "c650",
+      "mnemonic_prefix": "satadd",
+      "must_pcode_ops": [
+        "INT_ADD",
+        "INT_SLESS"
+      ]
+    },
+    {
+      "name": "jarl",
+      "addr": 28,
+      "size": 4,
+      "bytes": "80ff2000",
+      "mnemonic_prefix": "jarl",
+      "flow": "CALL"
+    },
+    {
+      "name": "jmp_lp",
+      "addr": 32,
+      "size": 2,
+      "bytes": "7f00",
+      "mnemonic_prefix": "jmp",
+      "flow": "RETURN"
+    },
+    {
+      "name": "prepare",
+      "addr": 36,
+      "size": 4,
+      "bytes": "84072100",
+      "mnemonic_prefix": "prepare",
+      "must_pcode_ops": [
+        "STORE",
+        "INT_SUB"
+      ]
+    },
+    {
+      "name": "dispose",
+      "addr": 40,
+      "size": 4,
+      "bytes": "44063f00",
+      "mnemonic_prefix": "dispose",
+      "must_pcode_ops": [
+        "LOAD",
+        "INT_ADD"
+      ],
+      "flow": "RETURN"
+    }
+  ]
+}

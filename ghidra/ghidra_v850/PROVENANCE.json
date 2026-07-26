@@ -1,0 +1,20 @@
+{
+  "name": "Renesas_v850",
+  "language_id": "v850e3:LE:32:default",
+  "language_version": "0.2",
+  "upstream": {
+    "url": "https://github.com/esaulenka/ghidra_v850",
+    "baseline_commit": "14c1b5be32b8ec741ee626c8bca9885c58f7a473",
+    "notes": "Vendored in-tree; local edits prioritize RH850/P1M-E R7F701381 correctness over upstreamability."
+  },
+  "target": {
+    "mcu": "R7F701381",
+    "family": "RH850/P1M-E",
+    "core": "RH850G3K"
+  },
+  "ghidra": {
+    "required_version": "12.1.2",
+    "cli_required_version": "0.2.1"
+  },
+  "audit": "docs/PLUGIN_AUDIT.md"
+}

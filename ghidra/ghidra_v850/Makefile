@@ -1,14 +1,16 @@
-SLEIGH = ../../../support/sleigh
+# Local Makefile for the vendored processor module.
+# Prefer the repo-level targets:
+#   make verify-sleigh
+#   make verify-processor
+#   make rebuild-project
+#
+# This file remains as a thin wrapper around the isolated installer.
 
-.PHONY: all clean
+ROOT := $(abspath ../..)
+.PHONY: all clean install
 
-all: data/languages/v850e2.sla data/languages/v850e3.sla
-
-data/languages/v850e2.sla: data/languages/v850e2.slaspec $(wildcard data/languages/*.sinc)
-	$(SLEIGH) data/languages/v850e2.slaspec
-
-data/languages/v850e3.sla: data/languages/v850e3.slaspec $(wildcard data/languages/*.sinc)
-	$(SLEIGH) data/languages/v850e3.slaspec
+all install:
+	$(ROOT)/tools/install_v850_extension.sh
 
 clean:
-	rm -r data/languages/*.sla
+	rm -f data/languages/*.sla

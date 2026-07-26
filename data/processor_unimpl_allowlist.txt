@@ -1,0 +1,10 @@
+# Accepted unimplemented / callother p-codeops for instructions that appear in
+# the P1M-E firmware inventory but are intentionally modeled as opaque effects.
+# Format: mnemonic<TAB>reason
+#
+# Keep this list empty unless InventoryUsedInstructions shows a CALLOTHER that
+# is required for analysis and cannot yet be given precise p-code.
+#
+# Examples (commented):
+# cache	hardware cache maintenance; opaque synchronize is enough for static analysis
+# pref	prefetch hint; no architectural state for decompiler

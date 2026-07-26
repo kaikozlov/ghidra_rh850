@@ -86,25 +86,12 @@ GHIDRA_CLI_VERSION=$(ghidra --version | awk 'NR == 1 { print $2 }')
   exit 1
 }
 
-# --- Vendored Renesas_v850 processor extension -------------------------------
-# Source of truth is the in-repo vendored fork at ghidra/ghidra_v850 (forked
-# from esaulenka/ghidra_v850). Compile its SLEIGH and install the extension
-# into Ghidra's discovered extensions dir so both analyzeHeadless and the
-# `ghidra` CLI load our locally-edited processor model.
-VENDOR_V850="$ROOT/ghidra/ghidra_v850"
-V850_LANG_DIR="$VENDOR_V850/data/languages"
-V850_EXT_DIR="$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850"
-[[ -f "$V850_LANG_DIR/v850e3.slaspec" ]] || {
-  echo "missing vendored v850e3.slaspec: $V850_LANG_DIR/v850e3.slaspec" >&2
-  exit 1
-}
-command -v rsync >/dev/null 2>&1 || { echo "rsync is required to install the vendored extension" >&2; exit 1; }
-echo "Compiling vendored SLEIGH sources (*.slaspec)"
-( cd "$V850_LANG_DIR" && for spec in *.slaspec; do "$GHIDRA_HOME/support/sleigh" "$spec" >/dev/null; done )
-[[ -f "$V850_LANG_DIR/v850e3.sla" ]] || { echo "sleigh did not produce v850e3.sla" >&2; exit 1; }
-echo "Installing vendored Renesas_v850 -> $V850_EXT_DIR"
-mkdir -p "$V850_EXT_DIR"
-rsync -a --delete --exclude '.git' "$VENDOR_V850/" "$V850_EXT_DIR/"
+# --- Vendored Renesas_v850 processor extension (isolated) --------------------
+# Source of truth is the in-repo vendored fork at ghidra/ghidra_v850. Compile
+# and install into build/ghidra-home (never mutate GHIDRA_HOME/Ghidra/Extensions).
+"$ROOT/tools/install_v850_extension.sh"
+# shellcheck disable=SC1091
+source "$ROOT/build/ghidra-processor.env"
 
 if pgrep -f 'AnalyzeHeadless.*rh850_p1me_mapped' >/dev/null 2>&1; then
   echo "an RH850 AnalyzeHeadless process is already running; stop it before rebuilding" >&2
@@ -134,7 +121,7 @@ EOF
 
 CODEFLASH="$ROOT/firmware/RH850_P1M-E_CodeFlash.bin"
 DATAFLASH="$ROOT/firmware/RH850_P1M-E_DataFlash.bin"
-SCRIPT_PATH="$ROOT/ghidra/scripts/import;$ROOT/ghidra/scripts/seed;$ROOT/ghidra/scripts/annotate"
+SCRIPT_PATH="$ROOT/ghidra/scripts/import;$ROOT/ghidra/scripts/seed;$ROOT/ghidra/scripts/annotate;$ROOT/ghidra/scripts/verify"
 
 COMMON_ARGS=(
   -scriptPath "$SCRIPT_PATH"
@@ -142,38 +129,59 @@ COMMON_ARGS=(
   -max-cpu "${GHIDRA_MAX_CPU:-4}"
 )
 
+run_headless() {
+  local stage=$1
+  shift
+  local log
+  log=$(mktemp "${TMPDIR:-/tmp}/rh850-rebuild-XXXXXX.log")
+  # analyzeHeadless returns 0 even when a postScript throws; detect SCRIPT ERROR.
+  set +e
+  "$ANALYZE_HEADLESS" "$@" >"$log" 2>&1
+  local rc=$?
+  set -e
+  if ((rc != 0)) || grep -E 'REPORT SCRIPT ERROR|IllegalStateException' "$log" >/dev/null; then
+    echo "ERROR: headless stage failed: $stage (rc=$rc)" >&2
+    grep -E 'SCRIPT ERROR|IllegalStateException|Created |RecoverVector|ASSERT|ERROR' "$log" | tail -80 >&2 || true
+    echo "full log: $log" >&2
+    exit 1
+  fi
+  rm -f "$log"
+}
+
 echo "Rebuilding $PROJECT_NAME in $PROJECT_DIR"
 echo "Ghidra: $GHIDRA_HOME"
-echo "Vendored v850 plugin: $VENDOR_V850 (installed -> $V850_EXT_DIR)"
+echo "Isolated v850 plugin: $V850_EXT_DIR"
+echo "Processor manifest: $PROCESSOR_MANIFEST"
 
 # Analysis is intentionally staged. Ghidra discovers a different graph if all
 # seeds are injected before its first pass; these four durable commits reproduce
 # the checked-in project's exact function/instruction/symbol counts.
 echo "[1/4] Import mapped images without analysis"
-"$ANALYZE_HEADLESS" "$PROJECT_DIR" "$PROJECT_NAME" \
+run_headless "import" "$PROJECT_DIR" "$PROJECT_NAME" \
   -import "$CODEFLASH" \
   -processor "$PROCESSOR" \
   -noanalysis \
   "${COMMON_ARGS[@]}" \
   -postScript AddDataFlash.java "$DATAFLASH" \
+  -postScript ApplyP1MDeviceProfile.java "$ROOT/data/p1m_sfr_labels.csv" \
   -commit "Import mapped CodeFlash and DataFlash"
 
 echo "[2/4] Seed report entries and run base analysis"
-"$ANALYZE_HEADLESS" "$PROJECT_DIR" "$PROJECT_NAME" \
+run_headless "seed-entries" "$PROJECT_DIR" "$PROJECT_NAME" \
   -process "$PROGRAM_NAME" \
   "${COMMON_ARGS[@]}" \
   -preScript SeedEntries.java \
   -commit "Seed report entries and run base analysis"
 
 echo "[3/4] Seed the UDS table and re-run analysis"
-"$ANALYZE_HEADLESS" "$PROJECT_DIR" "$PROJECT_NAME" \
+run_headless "seed-uds" "$PROJECT_DIR" "$PROJECT_NAME" \
   -process "$PROGRAM_NAME" \
   "${COMMON_ARGS[@]}" \
   -preScript SeedUdsServiceTable.java \
   -commit "Seed UDS service table and handlers"
 
 echo "[4/4] Seed missed functions, analyze, and apply every annotation"
-"$ANALYZE_HEADLESS" "$PROJECT_DIR" "$PROJECT_NAME" \
+run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -process "$PROGRAM_NAME" \
   "${COMMON_ARGS[@]}" \
   -preScript SeedCanTransportFunctions.java \
@@ -194,6 +202,7 @@ echo "[4/4] Seed missed functions, analyze, and apply every annotation"
   -postScript AnnotateCanTransport.java \
   -postScript AnnotateApplicationDiagnostics.java \
   -postScript AnnotateBootloaderDiagnostics.java \
+  -postScript RecoverVectorHandlers.java \
   -postScript AnnotateArchitecture.java \
   -postScript AnnotateApplicationTransmit.java \
   -commit "Complete reproducible RH850 analysis"
@@ -219,5 +228,9 @@ BRIDGE_STARTED=0
 trap - EXIT INT TERM
 
 printf '%s\n' "$STATS_OUTPUT" | python3 "$ROOT/tools/verify_ghidra_stats.py"
+
+# Persist processor fingerprint beside the working project.
+cp "$PROCESSOR_MANIFEST" "$PROJECT_DIR/processor_manifest.json"
+echo "Wrote $PROJECT_DIR/processor_manifest.json"
 
 echo "Durable project rebuild verified: $PROJECT_DIR/$PROJECT_NAME.gpr"

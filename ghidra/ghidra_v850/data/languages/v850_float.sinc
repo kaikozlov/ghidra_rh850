@@ -53,7 +53,7 @@
 }
 
 # CEILF.SUW reg2, reg3
-:ceilf.sul R1115, R2731 is R1115 & op0510=0x3F & op0004=0b10010; R2731 & op2126=0b100010 & op1620=0b00000 {
+:ceilf.suw R1115, R2731 is R1115 & op0510=0x3F & op0004=0b10010; R2731 & op2126=0b100010 & op1620=0b00000 {
   R2731 = trunc(ceil(R1115));
 }
 

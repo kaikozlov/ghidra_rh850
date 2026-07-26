@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-firmware:
+    name: Firmware suites (make verify)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+      - run: make verify
+
+  changes:
+    name: Path filter
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    outputs:
+      processor: ${{ steps.filter.outputs.processor }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            processor:
+              - 'ghidra/ghidra_v850/**'
+              - 'tools/install_v850_extension.sh'
+              - 'tools/verify_sleigh.sh'
+              - 'tools/verify_processor.sh'
+              - 'tools/fingerprint_processor.py'
+              - 'tools/build_processor_fixture.py'
+              - 'tools/rebuild_project.sh'
+              - 'ghidra/scripts/verify/**'
+              - 'tests/fixtures/processor/**'
+
+  verify-sleigh:
+    name: SLEIGH compile + isolation
+    needs: [changes]
+    if: >
+      always() && (
+        github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'pull_request' && needs.changes.outputs.processor == 'true') ||
+        (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      )
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ghidra 12.1.2
+        run: |
+          set -euo pipefail
+          brew install ghidra
+          GHIDRA_HOME="$(brew --prefix ghidra)/libexec"
+          VER=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
+          echo "Ghidra version: $VER"
+          test "$VER" = "12.1.2"
+      - run: make verify-sleigh
+      - run: python3 tools/build_processor_fixture.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sleigh-logs
+          path: |
+            build/sleigh-logs/
+            build/processor_manifest.json
+            tests/fixtures/processor/
+          if-no-files-found: ignore

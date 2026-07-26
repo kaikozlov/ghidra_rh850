@@ -1,20 +1,40 @@
 # Plugin verification: v850e3 SLEIGH against the P1M-E firmware
 
 This records audits of the vendored `ghidra/ghidra_v850` processor module
-against the RH850/P1M-E CodeFlash, establishing that the SLEIGH sources
-correctly model every instruction and system register the firmware uses. Both
-audits are reproducible via the scripts under `ghidra/scripts/investigate/`,
-run against a working copy of the project (`make work-project`):
+against the RH850/P1M-E CodeFlash. **Decode coverage is not the same as p-code
+semantic correctness.** The checks below are layered:
+
+| Layer | What it proves | How to run |
+|---|---|---|
+| SLEIGH compile | Sources parse and produce `v850e3.sla` | `make verify-sleigh` |
+| Synthetic fixtures | Selected encodings have expected p-code ops / flow | `make verify-processor` |
+| Function-body decode | No undefined bytes inside recovered functions | `AssertNoUndefinedInFunctions` |
+| System-register naming | Every `ldsr`/`stsr` operand is named | `AssertSystemRegisterNames` |
+| Project invariants | Critical labels/functions/memory/context | `AssertProjectInvariants` |
+| Decompiler invariants | Landmark ABI/decompiler properties | `AssertDecompilerInvariants` |
+| Device profile | RAM/SFR map + boot/application GP/TP context | `ApplyP1MDeviceProfile` |
+| Vector recovery | INTBP/EBASE handlers + `__interrupt` | `RecoverVectorHandlers` |
+
+Automated gate:
 
 ```bash
-ghidra --projects-dir "$PWD/build/project" --project rh850_p1me_mapped \
-       --program RH850_P1M-E_CodeFlash.bin \
-       script run ghidra/scripts/investigate/<Script>.java
+make verify            # firmware-only, no Ghidra
+make verify-sleigh     # compile + isolated install
+make verify-processor  # fixtures (+ working-project audits if present)
+make verify-ghidra     # all of the above
+```
+
+Working-project audits require a materialized copy:
+
+```bash
+make work-project
+make verify-processor
 ```
 
 ## System-register coverage (ldsr / stsr)
 
-Script: `ghidra/scripts/investigate/FindSystemRegisterOps.java`.
+Script: `ghidra/scripts/investigate/FindSystemRegisterOps.java`
+(asserting companion: `ghidra/scripts/verify/AssertSystemRegisterNames.java`).
 
 Every system-register transfer in the firmware decodes with a correct register
 name; there is nothing to add to the `selID` tables in `v850e3.sinc`. Across the
@@ -44,36 +64,80 @@ Two points worth recording:
 - `EIC136`/`EIC292`/`EIC293` are **memory-mapped** peripheral registers at
   `0xFFFFB110` / `0xFFFFB248` / `0xFFFFB24A`, accessed via `ld.w`/`st.w`, not
   `ldsr`/`stsr`. They are therefore out of scope for the `selID` tables and are
-  named through project labels (see the analysis docs), not the processor module.
+  named through the device profile / project labels, not the processor module.
 
 ## Instruction-decode coverage
 
-Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`.
+Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`
+(asserting companion: `ghidra/scripts/verify/AssertNoUndefinedInFunctions.java`).
 
 The firmware disassembles completely: **zero** undefined bytes occur inside
 any of the 5560 function bodies. A SLEIGH decode failure would leave a hole
 inside a function; none exists, so the module decodes every instruction the
-compiler emitted. (That alone does not rule out a semantically-wrong decode
-that still consumes the right byte count; the checks below close that gap.)
+compiler emitted.
 
-Semantic checks, all consistent with the verified findings in `AGENTS.md`:
+That alone does **not** prove every decoded instruction has correct p-code.
+Semantic fixtures under `tests/fixtures/processor/` and the asserting scripts
+close the highest-impact gaps for this firmware:
 
-- **Immediate / gp-relative address math** decodes correctly: `ori 0xbfd8,r0,r6`
-  loads `PAYLOAD_BUILD_SECRET` (CodeFlash `0xBFD8`) and `movea -0x6ab8,gp,r29`
-  forms the AES-context pointer `gp-0x6ab8` (`gp = 0xFEBF9800`).
-- **`ld.w`/`st.w disp16` displacement** (`disp = field x 2` in
-  `v850_load_store.sinc`) is correct: `aes128_init_context` writes context
-  fields at clean offsets (`+0xb0`, `+0xc0`), and the SecurityAccess crypto
-  math checked by `tests/verify_findings.py` depends on those offsets being
-  right. A wrong scale would corrupt the AES state layout.
-- **Labeled addresses resolve** through the decompiler: the secret symbols at
-  `0xBFD8`/`0xBFE8` and the `gp`/`EBASE`/`INTBP` constants all resolve to their
-  independently-verified values.
-- **`prepare`/`dispose` save lists** (`{r20..r29, ep, lp}`) match the
-  callee-saved set modelled by the rewritten `v850.cspec`.
+- signed `sld.b` / `sld.h` use `sext` (not `zext`);
+- two-operand `divh` uses signed division (`s/`);
+- saturating arithmetic updates `PSW.SAT` from signed overflow (`OV`);
+- `ld.w`/`st.w` `disp16` scaling (`field × 2`) remains correct;
+- `prepare`/`dispose` and `jarl`/`jmp [lp]` flow types are checked on fixtures.
 
-No decode bug is encountered. The upstream open issues that could conceivably
-affect this firmware — `ld.w` "off by one" (#34) and `b8 02` not disassembling
-(#42) — do not manifest here: #34 is contradicted by the verified displacement
-math above, and #42 would have produced an undefined byte inside a function
-(none exist). Issue #40 (`IMSR`/`PMR`) is a core mismatch, covered above.
+Landmark decompiler checks (secrets at `0xBFD8`/`0xBFE8`, ISR calling
+convention, session-control decompilation) live in
+`AssertDecompilerInvariants.java`.
+
+## Device profile and interrupt recovery
+
+`ApplyP1MDeviceProfile.java` maps LocalRAM and verified peripheral windows
+(`SFR_EIC`, `SFR_RSCFD`, `SFR_ICUS`), labels observed EICs, and seeds
+boot/application `GP`/`TP` register context. The full `0xFF600000..0xFFFFFFFF`
+range stays volatile in `v850.pspec` without being mapped as one block (that
+caused false CodeFlash-as-SFR pointer creation).
+
+| Region | GP | TP |
+|---|---:|---:|
+| Boot CodeFlash `0x0..0x1FFFF` | `0xFEBF9800` | `0x869C` |
+| Application CodeFlash `0x20000..` | `0xFEBEB800` | `0x23EE4` |
+
+`RecoverVectorHandlers.java` walks the boot EIIC dispatch table, application
+EBASE vectors, and the 384-entry INTBP table, creates missing handler
+functions, and applies the `__interrupt` prototype to true ISR wrappers
+(not their normal callees such as `0x87610`/`0x87636`).
+
+## Accepted unimplemented ops
+
+Instructions that decode but intentionally use opaque `callother` p-code are
+listed in `data/processor_unimpl_allowlist.txt`. Keep that allowlist empty
+unless the instruction inventory shows a CALLOTHER that analysis requires.
+
+## Isolated install and processor fingerprint
+
+The module is compiled into `build/ghidra-home/.../Extensions/Renesas_v850/`
+(via `-Duser.home`), not into `$GHIDRA_HOME/Ghidra/Extensions`. Any stale
+install-tree copy is quarantined under `build/quarantined-extensions/` so
+language resolution cannot pick up a second `Renesas_v850` module.
+
+`tools/fingerprint_processor.py` hashes every `.slaspec` / `.sinc` / `.cspec` /
+`.pspec` / `.ldefs` / metadata file plus the compiled SLA and Ghidra versions.
+Rebuilds write `processor_manifest.json` beside `build/project/`.
+`make work-project` and `make snapshot-project` reject a source/project
+fingerprint mismatch when a manifest is present. A committed baseline of the
+source fingerprint (without a built project) lives at
+`data/processor_manifest.baseline.json`.
+
+Instruction inventory for this firmware is committed as
+`data/instruction_inventory.csv` (regenerate via
+`InventoryUsedInstructions.java` after a rebuild if coverage changes).
+
+## What these audits do *not* claim
+
+- Zero undefined bytes inside functions proves decode coverage, not every
+  p-code edge case (SAT boundary vectors, FP rounding, hypervisor ops, …).
+- Exact function/instruction counts are smoke signals; prefer the asserting
+  invariant scripts for semantic gates.
+- A provisioned SecOC key or live ICU-S behavior cannot be proven from this
+  dump alone; see the firmware evidence docs for dynamic caveats.

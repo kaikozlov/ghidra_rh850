@@ -1,0 +1,8 @@
+address,name,size,access,comment
+0xFFFFB110,EIC136,2,rw,TAUJ0 CH3 interrupt control (foreground tick)
+0xFFFFB248,EIC292,2,rw,ICU-S crypto-driver interrupt channel 292
+0xFFFFB24A,EIC293,2,rw,ICU-S crypto-driver interrupt channel 293
+0xFFD20178,CFSTS,4,rw,RSCFD status (from Can transport annotations)
+0xFFD201D8,CFPCTR,4,rw,RSCFD control
+0xFFD20250,CFDTMC,4,rw,RSCFD Tx message buffer control base
+0xFFD202D0,CFDTMSTS,4,rw,RSCFD Tx message buffer status base

@@ -1,6 +1,8 @@
 //@author kaikozlov
 //@category Analysis
-// Name and document verified boot/application architecture, interrupt, and CAN-routing landmarks.
+// Name and document verified boot/application architecture and CAN-routing
+// landmarks. Vector/ISR wrapper names and __interrupt come from
+// RecoverVectorHandlers (must run before this script).
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.*;
@@ -41,20 +43,6 @@ public class AnnotateArchitecture extends GhidraScript {
             "Boot EIINT dispatcher. Searches the (EIIC code, handler) pairs at 0x869C and invokes the match or final default entry.");
         renameFunction(0x13b0L, "boot_application_handoff",
             "Runs final boot checks. On success, loads the entry pointer at 0xFFDB8 and calls application entry 0x20880; otherwise stays in the boot failure path.");
-        renameFunction(0x1e1eL, "boot_default_exception_handler",
-            "Shared boot direct-vector handler used by most exception slots.");
-        renameFunction(0x1e2aL, "boot_secondary_exception_handler",
-            "Shared boot handler used by direct-vector offsets 0x20, 0xB0, and 0xD0.");
-        renameFunction(0x1e36L, "boot_fatal_exception_trap",
-            "Reports fatal code 0xFFFF through 0x721E and then loops forever.");
-        renameFunction(0x1e44L, "boot_tauj0_ch2_isr", "Boot EIINT 135 / source code 0x1087: TAUJ0 channel 2 wrapper.");
-        renameFunction(0x1e50L, "boot_can0_rx_isr", "Boot EIINT 184 / source code 0x10B8: RSCAN CAN0 receive wrapper.");
-        renameFunction(0x1e5eL, "boot_can0_tx_isr", "Boot EIINT 185 / source code 0x10B9: RSCAN CAN0 transmit wrapper.");
-        renameFunction(0x1e6cL, "boot_can1_rx_isr", "Boot EIINT 187 / source code 0x10BB: RSCAN CAN1 receive wrapper.");
-        renameFunction(0x1e7aL, "boot_can1_tx_isr", "Boot EIINT 188 / source code 0x10BC: RSCAN CAN1 transmit wrapper.");
-        renameFunction(0x1e88L, "boot_can2_rx_isr", "Boot EIINT 192 / source code 0x10C0: RSCAN CAN2 receive wrapper.");
-        renameFunction(0x1e96L, "boot_can2_tx_isr", "Boot EIINT 193 / source code 0x10C1: RSCAN CAN2 transmit wrapper.");
-        renameFunction(0x1ea4L, "boot_unexpected_eiint_trap", "Default boot EIINT dispatch target; reports 0xFFFF and loops forever.");
 
         labelData(0x869cL, "boot_interrupt_dispatch_table",
             "Eight-byte records: EIIC source code then handler pointer. Seven explicit entries (TAUJ0 CH2 and CAN0/1/2 RX/TX), followed by 0xFFFFFFFF/default trap.");
@@ -72,23 +60,10 @@ public class AnnotateArchitecture extends GhidraScript {
             "Installs INTBP=0x20200, EBASE=0x20000, GP=0xFEBEB800, TP=0x23EE4, and SP=0xFEBE2000.");
         renameFunction(0x64fccL, "application_foreground_cyclic_loop",
             "Polled foreground scheduler. Waits for TAUJ0 CH3 EIRF at EIC136 (0xFFFFB110 bit 12), clears it, then runs NvM/CSM, application, and SecOC-NvM cyclic groups.");
-        renameFunction(0x61d88L, "application_default_exception_handler",
-            "Default target for direct application exceptions and 373 of the 384 INTBP entries.");
-        renameFunction(0x64b3eL, "application_vector_0x90_handler",
-            "Specialized handler reached from application direct-vector offset 0x90; records fault context before recovery/reset handling.");
 
-        renameFunction(0x70a54L, "application_ecm_maskable_isr", "Application EIINT channel 8: maskable Error Control Module interrupt.");
-        renameFunction(0x70320L, "application_tauj0_ch0_isr", "Application EIINT channel 133: TAUJ0 channel 0 interrupt wrapper.");
-        renameFunction(0x703caL, "application_tauj0_ch1_isr", "Application EIINT channel 134: TAUJ0 channel 1 interrupt wrapper.");
-        renameFunction(0x70476L, "application_tauj0_ch2_isr", "Application EIINT channel 135: TAUJ0 channel 2 interrupt wrapper.");
-        renameFunction(0x6506aL, "application_can1_rx_isr", "Application EIINT channel 187: RSCAN CAN1 receive interrupt wrapper.");
-        renameFunction(0x65028L, "application_can1_tx_isr", "Application EIINT channel 188: RSCAN CAN1 transmit interrupt wrapper.");
-        renameFunction(0x650acL, "application_icus_ch292_isr", "EIINT channel 292 wrapper for the ICU-S crypto-driver callback path. The generic P1M-E table marks this channel number reserved, but this vector is active in firmware.");
-        renameFunction(0x650eeL, "application_icus_ch293_isr", "EIINT channel 293 wrapper for the second ICU-S crypto-driver callback path. The generic P1M-E table marks this channel number reserved, but this vector is active in firmware.");
         renameFunction(0x87610L, "icus_interrupt_channel292_dispatch", "Invoke the installed ICU-S driver callback only when its pointer/complement guard at GP+5994/+5998 is valid; otherwise set driver error GP+5991.");
         renameFunction(0x87636L, "icus_interrupt_channel293_dispatch", "Byte-identical second ICU-S interrupt callback dispatcher. Static analysis does not distinguish completion versus error between channels 292/293.");
         renameFunction(0x8913cL, "icus_interrupt_pair_set_enabled", "Mask or unmask EIC292/EIC293 at FFFFB248/FFFFB24A together, then issue the synchronization readback.");
-        renameFunction(0x65130L, "application_flash_end_isr", "Application EIINT channel 379: flash sequencer-end interrupt wrapper.");
         renameFunction(0x64f18L, "application_tauj0_ch0_body", "TAUJ0 channel 0 periodic interrupt body and event counter update.");
         renameFunction(0x64f54L, "application_tauj0_ch1_body", "TAUJ0 channel 1 periodic interrupt body and event counter update.");
         renameFunction(0x64f90L, "application_tauj0_ch2_body", "TAUJ0 channel 2 periodic interrupt body and event counter update.");

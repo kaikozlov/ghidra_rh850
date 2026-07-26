@@ -33,6 +33,11 @@ public class SeedArchitectureFunctions extends GhidraScript {
         int created = 0;
         for (long ea : entries) {
             Address address = space.getAddress(ea);
+            // Drop false pointer data that can land on code entries when SFR
+            // windows are mapped, and fix mid-instruction starts.
+            if (listing.getDataContaining(address) != null) {
+                listing.clearCodeUnits(address, address.add(7), false);
+            }
             Instruction containing = listing.getInstructionContaining(address);
             if (containing != null && !containing.getMinAddress().equals(address)) {
                 listing.clearCodeUnits(containing.getMinAddress(), containing.getMaxAddress(), false);

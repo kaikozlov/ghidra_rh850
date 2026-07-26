@@ -232,12 +232,21 @@ it live in `legacy/flat-import/` — do not use them for current results.
 
 ## Scripts and verification
 
-- `ghidra/scripts/import/` contains the split-image import helper.
+- `ghidra/scripts/import/` contains the split-image import helper and the
+  P1M-E device profile (`ApplyP1MDeviceProfile.java`).
 - `ghidra/scripts/seed/` contains all function/table seeds missed by analysis.
-- `ghidra/scripts/annotate/` contains the durable labels/comments for completed work.
+- `ghidra/scripts/annotate/` contains the durable labels/comments for completed
+  work, plus `RecoverVectorHandlers.java` for INTBP/EBASE/`__interrupt`.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
-- `make verify` runs ten self-contained suites through UV; it must not require
-  sibling repositories.
+- `ghidra/scripts/verify/` contains asserting processor/project gates used by
+  `make verify-processor`.
+- `make verify` runs twelve self-contained suites through UV; it must not require
+  sibling repositories or Ghidra.
+- `make verify-sleigh` compiles the vendored processor module into an isolated
+  extension under `build/ghidra-home/` (does not mutate `$GHIDRA_HOME`).
+- `make verify-processor` runs synthetic RH850 fixtures and, when
+  `build/project/` exists, the asserting audits.
+- `make verify-ghidra` runs firmware + SLEIGH + processor gates together.
 - `make verify-external EXTERNAL_REPOS_DIR=...` checks optional public checkouts
   against `external-references.lock.json`.
 - `tools/generate_dataflash_layout.py` regenerates `data/dataflash_nvm_records.csv`;
@@ -247,24 +256,46 @@ it live in `legacy/flat-import/` — do not use them for current results.
 ## Rebuilding the project from scratch
 
 Run `make rebuild-project` for a non-destructive rebuild under `build/project/`.
-`tools/rebuild_project.sh` imports both regions, runs every seed and annotation
-in four staged durable headless commits, cleanly stops the stats daemon, and
-verifies exact project statistics. Do not collapse the stages: seed timing
-changes Ghidra's recovered graph. To promote a finished rebuild into the
-committed `project/` snapshot, run `make snapshot-project` (never point rebuild
-directly at `project/`).
+`tools/rebuild_project.sh` installs the isolated processor extension, imports
+both regions (with the P1M-E device profile), runs every seed and annotation
+in four staged durable headless commits (including vector recovery), cleanly
+stops the stats daemon, writes `processor_manifest.json`, and verifies project
+statistics. Do not collapse the stages: seed timing changes Ghidra's recovered
+graph. To promote a finished rebuild into the committed `project/` snapshot,
+run `make snapshot-project` (never point rebuild directly at `project/`).
 
 ## Tooling notes
 
 - Ghidra 12.1.2 at `/opt/homebrew/opt/ghidra/libexec`; the RH850 language
   `v850e3:LE:32:default` is the **vendored in-tree fork** at
   `ghidra/ghidra_v850/` (forked from esaulenka/ghidra_v850 at commit
-  `14c1b5be32b8ec741ee626c8bca9885c58f7a473`). `tools/rebuild_project.sh`
-  compiles the `.slaspec` sources with `sleigh` and syncs them into
-  `$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850/`; there is no external pin or
-  manual install step. The in-tree `v850.cspec` models the RH850/G3 calling
-  convention (r6-r9 args, r10 return, callee-saved r20-r29, lp link register,
-  `__interrupt` proto); still confirm register setup in disassembly for novel
-  cases before trusting decompiled signatures.
+  `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
+  `ghidra/ghidra_v850/PROVENANCE.json`). `tools/install_v850_extension.sh`
+  compiles the `.slaspec` sources with `sleigh` and installs into
+  `build/ghidra-home/.../Extensions/Renesas_v850/` via `-Duser.home`, not into
+  `$GHIDRA_HOME/Ghidra/Extensions`. The in-tree `v850.cspec` models the
+  RH850/G3 calling convention (r6-r9 args, r10 return, callee-saved r20-r29,
+  lp link register, `__interrupt` proto). Processor audits are documented in
+  `docs/PLUGIN_AUDIT.md`.
 - `ghidra` CLI project resolution: `GHIDRA_PROJECT_DIR` env, config
   `ghidra_project_dir`, `--projects-dir`, else `~/Library/Caches/ghidra-cli/projects`.
+  Headless rebuild/verify always use the isolated extension. Interactive
+  `ghidra` CLI analysis that needs the vendored language should source
+  `build/ghidra-processor.env` (written by the installer) or set
+  `JAVA_TOOL_OPTIONS=-Duser.home=.../build/ghidra-home` accordingly.
+- CI (`.github/workflows/ci.yml`) always runs `make verify`. Processor-path
+  PRs, `main` pushes, and the nightly schedule also run `make verify-sleigh`
+  on macOS with pinned Homebrew Ghidra 12.1.2. Full four-stage rebuild parity
+  remains a local gate (`make rebuild-project` then `make snapshot-project`)
+  because it requires the `ghidra` CLI daemon workflow.
+
+## Final safe workflow
+
+1. `make verify` — firmware evidence, no Ghidra.
+2. `make verify-sleigh` — compile + isolated install + fingerprint.
+3. `make work-project` (or `make rebuild-project` after language/script changes).
+4. `make verify-processor` — fixtures + asserting audits on `build/project/`.
+5. Interactive work only against `$PWD/build/project` with an absolute
+   `--projects-dir`; always `ghidra ... stop` before copying or committing.
+6. Promote only with `make snapshot-project` (stats + fingerprint + stopped
+   daemon). Never daemon-open committed `project/`.

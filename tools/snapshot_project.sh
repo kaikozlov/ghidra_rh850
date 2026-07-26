@@ -72,6 +72,14 @@ if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then
 fi
 printf '%s\n' "$STATS_OUTPUT" | python3 "$ROOT/tools/verify_ghidra_stats.py"
 
+# Processor fingerprint must match the sources that built this working copy.
+if [[ -f "$PROJECT_DIR/processor_manifest.json" ]]; then
+  python3 "$ROOT/tools/fingerprint_processor.py" --expect "$PROJECT_DIR/processor_manifest.json"
+else
+  echo "ERROR: working project missing processor_manifest.json; rebuild first" >&2
+  exit 1
+fi
+
 echo "Syncing $PROJECT_DIR -> $SNAPSHOT_DIR (committed snapshot)"
 # --delete removes stale db versions from the previous snapshot. Exclude
 # transient Ghidra files and any nested .git so the snapshot stays clean.

@@ -1,21 +1,32 @@
 # Renesas v850 / RH850 processor module (vendored fork)
 
-This is a Ghidra processor module for the Renesas v850/RH850 family. It is 
-the source of truth for the `v850e3:LE:32:default` language used by this repo's 
+This is a Ghidra processor module for the Renesas v850/RH850 family. It is
+the source of truth for the `v850e3:LE:32:default` language used by this repo's
 RH850/P1M-E analysis.
 
 It has diverged from upstream and is edited freely to serve this project's
 firmware analysis. There is no intent to keep patches upstreamable; correctness
 for the RH850/P1M-E (`R7F701381`) target takes priority.
 
+Machine-readable provenance lives in [`PROVENANCE.json`](PROVENANCE.json).
+Processor-module audits against this firmware are recorded in
+[`docs/PLUGIN_AUDIT.md`](../../docs/PLUGIN_AUDIT.md).
+
 ## How it is built and installed
 
 The compiled `.sla` files are **not** committed (see `.gitignore`); they are
-regenerated from the `.slaspec` / `.sinc` sources on every project rebuild.
+regenerated from the `.slaspec` / `.sinc` sources by `make verify-sleigh` and
+by every project rebuild. Prefer the repo Make targets:
+
+```bash
+make verify-sleigh      # compile only
+make verify-processor   # fixtures + project audits
+make rebuild-project    # full annotated rebuild into build/project/
+```
+
 `tools/rebuild_project.sh` compiles each `*.slaspec` with Ghidra's `sleigh`
-compiler and rsyncs this directory into
-`$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850/`, where both `analyzeHeadless`
-and the `ghidra` CLI discover it. No manual install step is required.
+compiler and installs the extension into an isolated build location (see
+`tools/install_v850_extension.sh`). No manual install step is required.
 
 ## Original upstream basis (for reference)
 
@@ -32,5 +43,11 @@ and the `ghidra` CLI discover it. No manual install step is required.
 See the git history of this repo for the changes made on top of the fork
 point. Notable areas under active modification for the P1M-E target:
 
-- `data/languages/v850.cspec` — calling-convention model.
+- `data/languages/v850.cspec` — RH850/G3 calling-convention model.
+- `data/languages/v850.pspec` — processor volatility (P1M-E peripheral windows).
 - `data/languages/v850e3.sinc` — RH850 instructions and system-register maps.
+- `data/languages/v850_load_store.sinc` / `v850_arithmetic.sinc` — verified
+  load/store and arithmetic p-code semantics (`sld.b`/`sld.h` sext, signed
+  `divh`, saturating `PSW.SAT`/`OV`).
+- `data/languages/v850_float.sinc` — `ceilf.suw` constructor correction.
+- Language version `0.2` / extension metadata `12.1.2` (see `PROVENANCE.json`).
