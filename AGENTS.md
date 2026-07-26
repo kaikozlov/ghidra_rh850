@@ -203,6 +203,9 @@ the reconstructed combined firmware — trust them:
   - `data/application_diagnostic_map.csv` (from
     `tools/generate_application_diagnostic_map.py`) records per-SID routing,
     session policy, callbacks/subfunction tables, and evidence status for all 17;
+  - `data/tss3_eps_variant_matrix.csv` consolidates Sienna/Corolla and other
+    TSS 3 EPS variants into a structured comparison (populated rows are
+    evidence-graded; unobserved fields are `unknown`, not fabricated);
   - application DID table `0x2941C` has 242 read records; write-DID table
     `0x26AEC` has 19; routine-ID table `0x25768` has 32 start/result pairs;
   - application DID records at `0x2A30C` expose real `F181`, `F186`, and `F18C`
@@ -211,9 +214,24 @@ the reconstructed combined firmware — trust them:
     asynchronous state machine at `0x93F3C`; PROGRAMMING is allowed only from
     current session 2/3, rejects raw speed above `0x0180` with NRC `0x88`, and
     requires status != `0x11`, scaled supply >= `0x0A00`, and a clear handoff flag;
-  - SIDs `14/23/31/34/36/37/BA` have null service-table callbacks; bounded
-    negatives cover `w3=0`, no record-address dword xrefs, and shared gate
-    `0x8F282` session-list consumption (not exhaustive DSP absence);
+  - SIDs `14/23/31/34/36/37/BA` have null service-table callbacks and
+    `byte[9]==0`; the generated Dcm DSP start-phase is **globally disabled**
+    (flag `@0x25DCC=0x00`); these services receive only simple positive
+    responses (`SID|0x40` + request echo) via `0x8F6FA` — no hidden DSP handler;
+  - application SecurityAccess level 1 (`01/02`, programming) is a compiled
+    stub (`0x94E0E`/`0x94E22`: `return 1`); only level 2 (`03/04`, extended) is
+    functional. Seed generated via crypto hardware (`0x8C65A`) and stored at
+    `FEBF495A`. Expected key = AES/CMAC transform of stored seed under 16-byte
+    secret at CodeFlash `0x20840`. Attempt counter and delay are RAM-only.
+    Unlock state is a 2-dword bitmask set by `0x900FC`→`0x9075A`;
+  - proprietary `0xAB` is a calibration/flash control service: subfn `01`=start
+    (0 bytes), `02`=reset (2 bytes, clears control block at `FEBF45D0`, mode
+    `0x300`), `03`=configure (4 bytes, two `u16` params). Worker `0x96918`
+    copies 28-byte context to `FEBE5E0C`. RID lookup `0x8D3CC` scans entries
+    `0..12` (RIDs `0x0204..0x2014`). Response includes vendor byte from
+    `FEBF493C`. Secondary `0x7A0→0x7A8` endpoint uses same handlers; its
+    record fields at `0x26104`/`0x26110` are CAN routing IDs (`0x7A1`/`0x7A0`),
+    not code pointers;
   - instruction-proved absolute RAM roots: ControlDTC store `FEBF45A8`, ReadDTC
     request mirrors `FEBF3BFC/3F24/4248/457C`, AB mirrors `FEBF48EC` and
     `FEBF48EC+0x50` (`FEBF493C`); buffers stay opaque;

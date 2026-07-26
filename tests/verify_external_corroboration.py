@@ -108,6 +108,7 @@ def main() -> int:
         roots["icanhack_secoc"] / "shellcode/main.c",
         roots["toyota_dataflash_secoc_setup"] / "steps/step_dump_dataflash.py",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/car/uds.py",
+        roots["calvinpark_openpilot"] / "tsk/COROLLA_INVESTIGATION.md",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
     ]

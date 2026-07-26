@@ -14,7 +14,7 @@
     "calvinpark_openpilot": {
       "url": "https://github.com/calvinpark/openpilot.git",
       "directory": "calvinpark-openpilot",
-      "commit": "b9db236acc7a616325f5cde6cc6f83b9c572c20d"
+      "commit": "eeb87f4f9cbcba2ee9c358c8d93015a513c1f822"
     },
     "toyota_dataflash_secoc_setup": {
       "url": "https://github.com/Bk2ol/tsk_extraction_by_can_log.git",
@@ -71,6 +71,12 @@
       "repository": "icanhack_secoc",
       "path": "shellcode/main.c",
       "sha256": "bfa673dda68292505ee6be6e34f8ddf5b3f3c7595529400543ad66d64869eea7"
+    },
+    {
+      "repository": "calvinpark_openpilot",
+      "path": "tsk/COROLLA_INVESTIGATION.md",
+      "size": 85587,
+      "sha256": "b05fa2fd29ead90426cb5d31d7d077984c66a2657f2124db10f812a9476dce2e"
     },
     {
       "repository": "calvinpark_openpilot",
