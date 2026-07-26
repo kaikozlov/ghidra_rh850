@@ -133,22 +133,51 @@ CodeFlash INTBP references and all known wrapper conventions.
 
 ## Switch jump-table recovery
 
-`RecoverSwitchTables.java` recovers the RH850 `switch reg` idiom for every
-in-function site (19 in this image; the remaining decoded `switch` mnemonics
-sit outside function bodies and are treated as non-compiler collisions):
+`RecoverSwitchTables.java` recovers the RH850 `switch reg` idiom. The table size
+is taken **only** from the compiler's range-check prefix (`cmp IMM` +
+`bh`/`bnh` → `IMM+1`, or `addi -N,rX,r0` + `bc`/`bnc` → `N`). For each site it
+then:
 
-1. Size the table from the compiler bound check (`cmp IMM` + `bh`/`bnh` →
-   `IMM+1`, or `addi -N,rX,r0` + `bc`/`bnc` → `N`), falling back to the packed
-   case-0 idiom where the first signed halfword equals the entry count.
-2. Define a `short[N]` array immediately after the instruction, label it
-   `switch_table_<addr>`, and comment the switch with the table address/size.
-3. Add `COMPUTED_JUMP` references from the switch to every case target and
-   `DATA` references from each table halfword to its target; disassemble case
+1. defines a `short[N]` array immediately after the instruction, labels it
+   `switch_table_<addr>`, and comments the switch with the table address/size;
+2. adds `COMPUTED_JUMP` references from the switch to every case target and
+   `DATA` references from each table halfword to its target; disassembles case
    entries when needed.
 
-`AssertSwitchTables.java` (run by `make verify-processor`) requires all 19
-in-function switches to have a sized halfword table and complete jump-target
-coverage.
+### Why the prefix bound is the only trusted trigger (measured, not asserted)
+
+`InventorySwitchTables.java` runs the recovery's bound+validation logic against
+**all 251** decoded `switch` opcodes in this image (not just the in-function
+ones) and emits `data/switch_table_inventory.csv`. The result:
+
+| Class | Count | Bound | Verdict |
+|---|---:|---|---|
+| Real switches | **19** | `cmp+bh` (16) / `addi+bc` (3) | recovered; all in-function |
+| Packed-case0 hits | 5 | packed-case0 (no prefix bound) | **false positives** — unreachable data misread as code (e.g. six `switch r12`/`nop` pairs in a row at `0xd38xx`; offsets like `+25600`, `+32767`, repeated `+0`) |
+| Other decoded `switch` | 227 | none | no plausible table (`no-bound` / `nested-switch`) |
+
+Every real switch carries the compiler range check; the packed-case0 fallback
+matched **only** data (5/5 false positives), so it was removed as a recovery
+trigger. Requiring the prefix bound recovers the same 19 tables with zero false
+positives.
+
+### `AssertSwitchTables` is a full-coverage verifier, not a count assert
+
+`AssertSwitchTables.java` (run by `make verify-processor`) scans **every**
+decoded `switch`, independently recomputes which ones are prefix-bound with a
+valid table, and asserts that set **exactly equals** the recovered set. This
+proves three things each run:
+
+- **completeness** — every prefix-bound switch has a sized `short[N]` table and
+  complete `COMPUTED_JUMP` case coverage (real switches are never missed);
+- **soundness** — no switch without a prefix bound is recovered (no data
+  mislabelled as a switch table);
+- **the boundary itself** — the ~232 unrecovered `switch` opcodes are measured
+  collisions, not an assumption: none carries the range check a real compiler
+  switch requires.
+
+Re-run the measurement anytime with
+`ghidra ... -postScript InventorySwitchTables.java <out.csv>` (read-only).
 
 ## Accepted unimplemented ops
 

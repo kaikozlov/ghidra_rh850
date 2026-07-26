@@ -1,8 +1,12 @@
 //@author kaikozlov
 //@category Analysis
-// Recover RH850 `switch` jump tables for in-function sites: size the table from
-// the compiler bound check (or the packed case-0 idiom), define the halfword
-// array, and add COMPUTED_JUMP references from the switch to every case target.
+// Recover RH850 `switch` jump tables for in-function sites. The table size is
+// taken ONLY from the compiler's range-check prefix (cmp IMM + bh/bnh, or
+// addi -N,rX,r0 + bc/bnc): InventorySwitchTables measured all 251 decoded
+// `switch` opcodes in this image and found every real switch has a prefix
+// bound, while the "packed case-0" fallback matched only unreachable data
+// (5/5 false positives). Requiring the prefix bound recovers the same 19 tables
+// with zero false positives. AssertSwitchTables independently verifies coverage.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.data.ArrayDataType;
@@ -108,14 +112,6 @@ public class RecoverSwitchTables extends GhidraScript {
         return null;
     }
 
-    private Bound boundFromPackedCase0(long tableBase) throws Exception {
-        // Common RH850/GHS packing: case 0 starts immediately after the table, so
-        // the first signed halfword equals the entry count.
-        short first = getShort(toAddr(tableBase));
-        if (first < 1 || first > MAX_TABLE) return null;
-        return new Bound(first, "packed-case0");
-    }
-
     private long[] readTargets(long tableBase, int size) throws Exception {
         long[] targets = new long[size];
         for (int i = 0; i < size; i++) {
@@ -179,22 +175,15 @@ public class RecoverSwitchTables extends GhidraScript {
         return true;
     }
 
+    // The compiler's range-check prefix is the only trusted table-size source.
+    // (The packed case-0 fallback was removed: see the file header and
+    // data/switch_table_inventory.csv — it produced only false positives.)
     private Bound chooseBound(Instruction switchInsn, long tableBase) throws Exception {
         Bound fromPrefix = boundFromPrefix(switchInsn);
-        if (fromPrefix != null) {
-            long[] targets = readTargets(tableBase, fromPrefix.size);
-            if (validateTable(switchInsn, tableBase, fromPrefix.size, targets)) {
-                return fromPrefix;
-            }
-        }
-        Bound packed = boundFromPackedCase0(tableBase);
-        if (packed != null) {
-            long[] targets = readTargets(tableBase, packed.size);
-            if (validateTable(switchInsn, tableBase, packed.size, targets)) {
-                return packed;
-            }
-        }
-        return null;
+        if (fromPrefix == null) return null;
+        long[] targets = readTargets(tableBase, fromPrefix.size);
+        return validateTable(switchInsn, tableBase, fromPrefix.size, targets)
+                ? fromPrefix : null;
     }
 
     private void ensureTableData(long tableBase, int size) throws Exception {
