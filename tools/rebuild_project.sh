@@ -182,6 +182,7 @@ echo "[4/4] Seed missed functions, analyze, and apply every annotation"
   -preScript SeedApplicationDiagnosticFunctions.java \
   -preScript SeedBootloaderDiagnosticFunctions.java \
   -preScript SeedArchitectureFunctions.java \
+  -preScript SeedApplicationTransmitFunctions.java \
   -postScript AnnotateBootloaderSecrets.java \
   -postScript AnnotatePayloadGate.java \
   -postScript AnnotateSecocNvmCorrection.java \
@@ -192,6 +193,7 @@ echo "[4/4] Seed missed functions, analyze, and apply every annotation"
   -postScript AnnotateApplicationDiagnostics.java \
   -postScript AnnotateBootloaderDiagnostics.java \
   -postScript AnnotateArchitecture.java \
+  -postScript AnnotateApplicationTransmit.java \
   -commit "Complete reproducible RH850 analysis"
 
 CLI_ARGS=(

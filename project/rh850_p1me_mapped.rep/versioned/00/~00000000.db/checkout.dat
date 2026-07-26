@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CHECKOUT_LIST NEXT_ID="6">
-    <CHECKOUT ID="5" USER="kai" VERSION="4" TIME="1785029436240" PROJECT="rh850_p1me_mapped" EXCLUSIVE="true"/>
+    <CHECKOUT ID="5" USER="kai" VERSION="4" TIME="1785031931264" PROJECT="sol.lan::/Users/kai/dev/inspect/repos/ghidra_rh850_analysis/project/rh850_p1me_mapped" EXCLUSIVE="true" />
 </CHECKOUT_LIST>

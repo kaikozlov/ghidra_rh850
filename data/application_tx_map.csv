@@ -1,0 +1,59 @@
+tx_pdu_id,can_id,message_name,length,cycle_ticks,signal_id,wire_field,source_kind,source,static_role,packer
+0,0x260,STEER_TORQUE_SENSOR,8,4,0,B0[7],ram,0xFEBE8094,STEER_OVERRIDE (public Toyota DBC match),0x4BCEE
+0,0x260,STEER_TORQUE_SENSOR,8,4,1,B0[4],ram,0xFEBE8096,STEER_ANGLE_INITIALIZING (public Toyota DBC match),0x4BCEE
+0,0x260,STEER_TORQUE_SENSOR,8,4,2,B0[3],ram,0xFEBE8098,unresolved status bit,0x4BCEE
+0,0x260,STEER_TORQUE_SENSOR,8,4,3,B0[2],ram,0xFEBE8099,unresolved status bit,0x4BCEE
+0,0x260,STEER_TORQUE_SENSOR,8,4,4,B0[1],ram,0xFEBE809A,unresolved status bit,0x4BCEE
+0,0x260,STEER_TORQUE_SENSOR,8,4,5,B0[0],ram,0xFEBE809B,unresolved status bit,0x4BCEE
+0,0x260,STEER_TORQUE_SENSOR,8,4,6,B1..B2 BE16,ram,0xFEBE810A,STEER_TORQUE_DRIVER (public Toyota DBC match),0x4BCEE
+0,0x260,STEER_TORQUE_SENSOR,8,4,7,B3..B4 BE16,ram,0xFEBE810E,STEER_ANGLE (public Toyota DBC match),0x4BCEE
+0,0x260,STEER_TORQUE_SENSOR,8,4,8,B5..B6 BE16,ram,0xFEBE8110,STEER_TORQUE_EPS (public Toyota DBC match),0x4BCEE
+0,0x260,STEER_TORQUE_SENSOR,8,4,9,B7,configured-unresolved,none,CHECKSUM in public Toyota DBC; runtime producer unresolved,none
+1,0x262,EPS_STATUS,8,8,10,B0[7],ram,0xFEBE809C,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,11,B0[6],ram,0xFEBE80B4,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,12,B0[5],ram,0xFEBE809D,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,13,B0[4],constant,0,constant zero,0x4BE24
+1,0x262,EPS_STATUS,8,8,14,B0[2],ram,0xFEBE809E,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,15,B0[1],ram,0xFEBE809F,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,16,B0[0],ram,0xFEBE80A0,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,17,B1[7],ram,0xFEBE80A4,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,18,B1[6],ram,0xFEBE80A6,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,19,B1[5],ram,0xFEBE80A8,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,20,B1[4],ram,0xFEBE80AA,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,21,B1[3],ram,0xFEBE80AC,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,22,B1[2:0] || B2,constant,0,constant zero 11-bit field,0x4BE24
+1,0x262,EPS_STATUS,8,8,23,B3[7],ram,0xFEBE80A1,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,24,B3[6],ram,0xFEBE80A2,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,25,B3[5],ram,0xFEBE80A3,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,26,B3[4],ram,0xFEBE80A5,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,27,B3[3],ram,0xFEBE80A7,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,28,B3[2],ram,0xFEBE80A9,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,29,B3[1],ram,0xFEBE80AB,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,30,B3[0],ram,0xFEBE80AD,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,31,B4[7],ram,0xFEBE80AE,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,32,B4[6],ram,0xFEBE80AF,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,33,B4[5],ram,0xFEBE80B0,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,34,B4[4:3],ram,0xFEBE80B1,unresolved two-bit status,0x4BE24
+1,0x262,EPS_STATUS,8,8,35,B5,ram,0xFEBE80B2,unresolved byte,0x4BE24
+1,0x262,EPS_STATUS,8,8,36,B6,ram,0xFEBE80B3,unresolved byte,0x4BE24
+1,0x262,EPS_STATUS,8,8,37,B7,configured-unresolved,none,CHECKSUM in public Toyota DBC; runtime producer unresolved,none
+2,0x351,APP_TX_351,4,200,38,B2[7:5],ram,0xFEBE80B8,unresolved three-bit status,0x4C25C
+2,0x351,APP_TX_351,4,200,39,B2[4],ram,0xFEBE80B9,unresolved status bit,0x4C25C
+3,0x394,APP_TX_394,3,60,40,B0[6:4],ram,0xFEBE80BA,unresolved three-bit status,0x4C158
+3,0x394,APP_TX_394,3,60,41,B0[1:0],ram,0xFEBE80C2,unresolved two-bit status,0x4C158
+3,0x394,APP_TX_394,3,60,42,B1[7:6],ram,0xFEBE80BD,unresolved two-bit status,0x4C158
+3,0x394,APP_TX_394,3,60,43,B1[2:0],ram,0xFEBE80BE,unresolved three-bit status,0x4C158
+3,0x394,APP_TX_394,3,60,44,B2[3:1],ram,0xFEBE80BF,unresolved three-bit status,0x4C158
+3,0x394,APP_TX_394,3,60,45,B2[0],ram,0xFEBE80C1,unresolved status bit,0x4C158
+4,0x4A3,APP_TX_4A3,8,100,46,B0,ram,0xFEBE80C3,unresolved byte,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,47,B1,ram,0xFEBE80C4,unresolved byte,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,48,B2,ram,0xFEBE80C5,unresolved byte,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,49,B3,ram,0xFEBE80C6,unresolved byte,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,50,B4,ram,0xFEBE80C7,unresolved byte,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,51,B5,ram,0xFEBE80C8,unresolved byte,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,52,B6,ram,0xFEBE80C9,unresolved byte,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,53,B7,ram,0xFEBE80CA,unresolved byte,0x4BB1E
+5,0x4C8,APP_TX_4C8,8,196,54,B0,constant,9,constant 0x09,0x4BC54
+5,0x4C8,APP_TX_4C8,8,196,55,B1[7],constant,0,constant zero,0x4BC54
+5,0x4C8,APP_TX_4C8,8,196,56,B2..B3 BE16,constant,0,constant zero,0x4BC54
+5,0x4C8,APP_TX_4C8,8,196,57,B4..B7,configured-unresolved,none,configured signal initialized to zero; runtime producer unresolved,none

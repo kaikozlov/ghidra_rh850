@@ -176,6 +176,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `SeedApplicationDiagnosticFunctions.java`;
    - `SeedBootloaderDiagnosticFunctions.java`;
    - `SeedArchitectureFunctions.java`;
+   - `SeedApplicationTransmitFunctions.java`;
 5. re-run analysis and apply every annotation script:
    - `AnnotateBootloaderSecrets.java`;
    - `AnnotatePayloadGate.java`;
@@ -187,9 +188,10 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateApplicationDiagnostics.java`;
    - `AnnotateBootloaderDiagnostics.java`;
    - `AnnotateArchitecture.java`;
+   - `AnnotateApplicationTransmit.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
-7. require exactly 5,556 functions, 173,000 instructions, 27,762 symbols, two
+7. require exactly 5,560 functions, 173,000 instructions, 27,768 symbols, two
    memory sections, and `0x108000` mapped bytes.
 
 Expected memory map:
@@ -204,7 +206,7 @@ and execution trace.
 
 ## Corrected result
 
-- **5,556 functions, 173,000 instructions, 27,762 symbols**.
+- **5,560 functions, 173,000 instructions, 27,768 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -444,6 +446,17 @@ and `0x85`, plus routines `0x10F1–0x10F3`; its raw-image checks are in
   `0x7A1/0x777/0x7A0/0x7F7`; `0x2E4`, `0x0F`, and `0x131` are explicit RX
   routes, while `0x344` is absent from this firmware's receive filters.
 
+### Complete application transmit-PDU and COM signal map
+
+`docs/APPLICATION_TRANSMIT_MAP.md` and
+`tests/verify_application_transmit.py` complete the application transmit side:
+
+- 11 active CanIf Tx routes comprise six COM PDUs on `0x260/0x262/0x351/0x394/0x4A3/0x4C8`, four transport routes on `0x7A9/0x7A8`, and one special `0x7F8` route;
+- the six COM PDUs have lengths `8/8/4/3/8/8`, raw cyclic counts `4/8/200/60/100/196`, and 58 generated signal IDs;
+- `data/application_tx_map.csv` records every signal's exact wire field and static RAM source or bounded unresolved status;
+- public Toyota DBC names are used only where the pinned bit layout agrees (`STEER_TORQUE_SENSOR` and `EPS_STATUS`); unknown OEM semantics remain anonymous;
+- the path is COM -> PduR -> CanIf -> the CAN1 RSCFD transmit queue, with EIINT 188 providing completion.
+
 ### Confirmed bootloader CAN / ISO-TP / UDS transport
 
 `docs/CAN_TRANSPORT_ANALYSIS.md` traces the complete diagnostic path and
@@ -489,11 +502,11 @@ extraction tooling and shellcode:
 | `ghidra/scripts/seed/` | Function and table seeds missed by auto-analysis |
 | `ghidra/scripts/annotate/` | Durable names, labels, and comments for each completed investigation |
 | `ghidra/scripts/investigate/` | Reusable reference/operand search helpers |
-| `tests/` | Eleven self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
+| `tests/` | Twelve self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
 | `tools/` | DataFlash CSV generator, durable Ghidra rebuild, and project-statistics verifier |
 | `external-references.lock.json` | Exact upstream commits and artifact hashes |
 | `pyproject.toml`, `uv.lock` | Locked UV/PyCryptodome verification environment |
-| `data/` | Generated 122-record NvM map |
+| `data/` | Generated 122-record NvM map and complete 58-signal application transmit map |
 | `firmware/` | Correctly split CodeFlash and DataFlash images |
 | `legacy/flat-import/` | Preserved scripts from the invalid original mapping; do not use |
 | `project/` | Pre-built durable Ghidra project |

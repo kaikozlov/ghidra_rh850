@@ -25,6 +25,11 @@
       "url": "https://github.com/esaulenka/ghidra_v850.git",
       "directory": "ghidra_v850",
       "commit": "14c1b5be32b8ec741ee626c8bca9885c58f7a473"
+    },
+    "opendbc": {
+      "url": "https://github.com/commaai/opendbc.git",
+      "directory": "opendbc",
+      "commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93"
     }
   },
   "artifacts": [
@@ -86,6 +91,16 @@
       "repository": "ghidra_v850",
       "path": "data/languages/v850e3.slaspec",
       "sha256": "50df5bd3d5b7a23018533f126d83ea5249cb92b8645b1cd0d1a9f309a993eb15"
+    },
+    {
+      "repository": "opendbc",
+      "path": "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
+      "sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48"
+    },
+    {
+      "repository": "opendbc",
+      "path": "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
+      "sha256": "2d680b1b73102d1c88bd735da7683f9379c98f39e1ad608618b94bf037c76119"
     }
   ]
 }

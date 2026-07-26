@@ -227,9 +227,9 @@ The acceptance tail uses three callback classes:
 
 This is the application configuration, distinct from the bootloader's already-documented physical `0x7A1`, functional `0x777`, and response `0x7A9` transport route.
 
-### 5.4 What remains unresolved
+### 5.4 Application transmit map
 
-This overview establishes the hardware channel, complete RX filter inventory, queueing path, and upper PDU-router boundary. `SECOC_APPLICATION_CHAIN.md` now proves the six generated receive profiles, freshness packing, and 28-bit CMAC truncation. The complete transmit-PDU/CAN-ID map and assignment of every generated PDU to a named AUTOSAR COM signal remain open.
+`APPLICATION_TRANSMIT_MAP.md` completes the application transmit side. It proves 11 active CanIf routes, including six COM I-PDUs on CAN IDs `0x260`, `0x262`, `0x351`, `0x394`, `0x4A3`, and `0x4C8`. Those six I-PDUs contain 58 generated COM signal IDs with exact wire fields, RAM sources where statically recoverable, cyclic counts, and the channel-1 confirmation path. Unsupported OEM field names and three configured signals without recovered runtime producers remain explicitly unresolved.
 
 ## 6. Evidence boundaries
 
@@ -248,6 +248,7 @@ Peripheral names and EIINT-channel identities use Renesas **RH850/P1M-E User's M
 See also:
 
 - `docs/CAN_TRANSPORT_ANALYSIS.md` for the bootloader CAN/ISO-TP path;
+- `docs/APPLICATION_TRANSMIT_MAP.md` for the complete application Tx-PDU/CAN-ID/COM-signal map;
 - `docs/SECOC_RUNTIME_KEY_LIFECYCLE.md` for the corrected SecOC-related NvM object model;
 - `docs/APPLICATION_DIAGNOSTICS.md` for application/boot diagnostic distinctions;
 - `docs/DATAFLASH_LAYOUT.md` for persistent storage architecture.

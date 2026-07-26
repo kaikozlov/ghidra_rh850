@@ -108,6 +108,8 @@ def main() -> int:
         roots["icanhack_secoc"] / "shellcode/main.c",
         roots["toyota_dataflash_secoc_setup"] / "steps/step_dump_dataflash.py",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/car/uds.py",
+        roots["opendbc"] / "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
+        roots["opendbc"] / "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
     ]
     if any(not path.is_file() for path in semantic_inputs):
         print("source-level corroboration skipped because a pinned input is missing")
@@ -123,6 +125,14 @@ def main() -> int:
     uds = (
         roots["calvinpark_openpilot"]
         / "opendbc_repo/opendbc/car/uds.py"
+    ).read_text(encoding="utf-8")
+    toyota_2017_dbc = (
+        roots["opendbc"]
+        / "opendbc/dbc/generator/toyota/_toyota_2017.dbc"
+    ).read_text(encoding="utf-8")
+    toyota_secoc_dbc = (
+        roots["opendbc"]
+        / "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc"
     ).read_text(encoding="utf-8")
 
     p203 = extract.find("write_data_by_identifier(0x203")
@@ -146,6 +156,23 @@ def main() -> int:
     check(
         "public UDS enum identifies F181 as application software ID",
         "APPLICATION_SOFTWARE_IDENTIFICATION = 0xF181" in uds,
+    )
+    check(
+        "pinned Toyota DBC names CAN 0x260 STEER_TORQUE_SENSOR",
+        "BO_ 608 STEER_TORQUE_SENSOR: 8" in toyota_2017_dbc,
+    )
+    for signal in (
+        "STEER_OVERRIDE", "STEER_ANGLE_INITIALIZING", "STEER_TORQUE_DRIVER",
+        "STEER_ANGLE", "STEER_TORQUE_EPS", "CHECKSUM",
+    ):
+        check(f"pinned CAN 0x260 DBC contains {signal}", signal in toyota_2017_dbc)
+    check(
+        "pinned Toyota DBC names CAN 0x262 EPS_STATUS",
+        "BO_ 610 EPS_STATUS: 8 EPS" in toyota_secoc_dbc,
+    )
+    check(
+        "pinned CAN 0x262 DBC places checksum in final byte",
+        "SG_ CHECKSUM : 63|8@0+" in toyota_secoc_dbc,
     )
 
     print(f"\n== RESULT: {passed} passed, {failed} failed ==")
