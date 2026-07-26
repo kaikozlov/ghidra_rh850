@@ -266,6 +266,76 @@ Slots at `0x26338` / `0x26350` configure seed/key length `0x10` and timing word
 maps invalid key → NRC `0x35`, attempt exhaustion → `0x36`, and delay lock →
 `0x37`. This path is independent of bootloader `SEED_KEY_SECRET` AES math.
 
+#### Level dispatch: level 1 is a compiled stub
+
+The level dispatcher at `0x94E82` (seed) / `0x94EB8` (key) selects by the
+current SA level (RAM `0xFEBE5DA4`, zero-indexed):
+
+| Level | Subfn | Session | Seed dispatcher | Key dispatcher |
+|---:|---|---|---|---|
+| 1 | `01/02` | programming | `0x94E0E`: `mov 1, r10; jmp lp` (return 1 — **stub**) | `0x94E22`: `mov 1, r10; jmp lp` (**stub**) |
+| 2 | `03/04` | extended | `0x94E12` → `0x8C734` (functional) | `0x94E26` → `0x8C82A` (functional) |
+
+Level 1 SecurityAccess is non-functional: both seed and key handlers are
+`return 1` stubs. The shared workers at `0x9497C`/`0x94A72` interpret return 1
+as an error and emit a negative response. Programming-session access is
+therefore obtained via `DiagnosticSessionControl` (`10 02`), not via `SA 01/02`.
+
+#### Level 2 seed generation (`0x8C734`)
+
+The level 2 seed worker stores the 16-byte request field to RAM
+`0xFEBF497A`, then checks the provisioned flag at `0xFEBF4958`:
+
+- **Not provisioned** (`0xFEBF4958 != 0x5A`): calls `0x8C65A`, which generates a
+  seed via crypto-hardware operations (ICU-S mediated through `0x84850`/
+  `0x84874`/`0x8488C` using RAM `0xFEBF4A50`). On success (`0x5A`), stores the
+  16-byte seed to `0xFEBF495A` and returns 0. On failure, returns 1 → NRC `0x22`.
+- **Already provisioned** (`0xFEBF4958 == 0x5A`): returns the existing 16-byte
+  seed from `0xFEBF495A` without regeneration (seed reuse within the session).
+
+If the current session matches the requested session, the seed buffer is
+zeroed before generation (ensuring a fresh challenge for the first request
+in a given session context).
+
+#### Level 2 key verification (`0x8C82A`)
+
+The key worker requires `0xFEBF4958 == 0x5A` (provisioned). It derives the
+expected key via two crypto operations:
+
+1. `0x8C7BC`: initializes a crypto context with the 16-byte secret at
+   CodeFlash `0x20840`, then transforms the stored seed copy at `0xFEBF497A`
+   through `0x853EE` (AES/CMAC operation).
+2. `0x8C7F6`: initializes a second context with the stored seed, then
+   transforms through `0x852B0`.
+
+The 16-byte result is compared byte-by-byte against the tester-supplied key.
+
+- **Match**: clears all seed buffers (`FEBF495A`/`FEBF496A`), clears the
+  provisioned flag (`FEBF4958 = 0`), returns 0 → success → unlock.
+- **Mismatch**: returns `0x0B` (11), which the send-key worker `0x94A72`
+  maps to NRC `0x35` (invalidKey) or `0x36` (exceededNumberOfAttempts) after
+  incrementing the per-level attempt counter and checking the configured max.
+
+The 16-byte secret at CodeFlash `0x20840` is:
+```text
+89 3e 08 41 8c 74 1f fa 2a 9c 04 4b ff a5 58 13
+```
+
+#### Attempt counter and unlock state
+
+- **Attempt counter**: per-level byte in RAM near `0xFEBE5DA4`, incremented on
+  each mismatch. Compared against the configured max (from TP-relative
+  service config at `tp + level*0x18 + 0x2469`). RAM-only — not persisted to
+  DataFlash/NvM.
+- **Delay timer**: enforced by `0x96E24` when the configured delay word
+  (at `tp + level*0x18 + 0x2458`) is non-zero. Also RAM-only.
+- **Unlock state**: `0x900FC` → `0x9075A` sets bit `(level - 1)` in a 2-dword
+  bitmask (64-bit, supporting up to 64 levels). The `0x8FDCA` → `0x906F8`
+  reader scans the bitmask and returns the first set level. This bitmask is
+  the security state checked by `0x92FEE` for per-DID access control.
+- A successful level-2 unlock changes the accessible DID set: DIDs with
+  security requirements in the per-DID table are gated by this bitmask.
+
 ### CommunicationControl (`0x28`) / TesterPresent (`0x3E`) / ControlDTCSetting (`0x85`)
 
 - `0x28`: callback `0x93C62`; subfunctions `00/01/03` via `0x25C70` → shared start
@@ -654,6 +724,11 @@ Those require successful bootloader capture or a firmware image from part
 | successful PROGRAMMING queues event 9, shutdown mode `0x900`, and reset sequencing | **Definitive** |
 | application ECUReset/RDBI/WDBI/SA/CommControl/TesterPresent/ControlDTC handlers | **Definitive** |
 | application SecurityAccess uses bootloader `SEED_KEY_SECRET` | **Unsupported; independent application SA path** |
+| application SA level 1 (01/02) is functional | **Definitive: stub handlers, non-functional** |
+| application SA level 2 seed source and key derivation algorithm | **Definitive** |
+| application SA secret key at CodeFlash 0x20840 | **Definitive** |
+| application SA attempt counter and delay are RAM-only | **Definitive** |
+| application SA unlock state is a 2-dword bitmask | **Definitive** |
 | SID `0x31` DSP binding to routine-ID table | **Unknown / generated indirection** |
 | null-callback SIDs `14`/`23`/`31`/`34`/`36`/`37`/`BA` receive simple positive responses (no service-specific DSP) | **Definitive** |
 | generated Dcm DSP start-phase globally disabled (flag @0x25DCC=0) | **Definitive** |

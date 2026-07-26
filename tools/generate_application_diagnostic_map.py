@@ -128,16 +128,34 @@ SEMANTICS = {
     },
     0x27: {
         "service_callback_role": "subfunction_table_only",
-        "async_worker": "0x9497C request-seed / 0x94A72 send-key; pending 10 supported",
-        "security_policy": "levels 1 and 2; subfn sessions 1/2 require programming, 3/4 extended",
+        "async_worker": (
+            "0x9497C request-seed / 0x94A72 send-key; pending 10 supported. "
+            "Level 1 (01/02, programming) uses stubs at 0x94E0E/0x94E22 that always "
+            "return 1 (non-functional). Level 2 (03/04, extended) uses actual "
+            "implementations: seed via 0x94E12->0x8C734, key via 0x94E26->0x8C82A."
+        ),
+        "security_policy": (
+            "levels 1 and 2; subfn sessions 1/2 require programming, 3/4 extended. "
+            "Level 1 is a compiled-out stub; only level 2 is functional."
+        ),
         "nrcs": "0x13 length; 0x24 sequence; 0x35 invalidKey; 0x36 attempts; 0x37 delay",
-        "side_effects": "successful send-key jarls 0x900FC (unlock helper); attempt/delay state local",
+        "side_effects": (
+            "successful send-key calls unlock helper 0x900FC->0x9075A which sets "
+            "bit (level-1) in 2-dword bitmask. Seed stored at FEBF495A (16 bytes), "
+            "provisioned flag FEBF4958 (0x5A). Key derived via AES/CMAC using "
+            "CodeFlash secret at 0x20840."
+        ),
         "config_tables": (
             f"subfn 0x25C30; slots @0x{SA_SLOT0:X}/0x{SA_SLOT0+SA_SLOT_SIZE:X} "
-            "seed/key len 0x10, levels 1/2"
+            "seed/key len 0x10, levels 1/2; key material @0x20840"
         ),
         "evidence_status": "recovered",
-        "notes": "Application SA is independent of bootloader AES SEED_KEY_SECRET path",
+        "notes": (
+            "Application SA algorithm: level 2 seed generated via crypto hardware "
+            "(0x8C65A) and stored at FEBF495A; expected key = AES/CMAC transform of "
+            "stored seed under 16-byte secret at 0x20840. Attempt counter is per-level "
+            "RAM-only (not NvM-persisted). Independent of bootloader SEED_KEY_SECRET."
+        ),
     },
     0x28: {
         "service_callback_role": "phase_dispatcher 0=start 0x93B56; 2=complete 0x93BDE",

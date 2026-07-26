@@ -337,6 +337,41 @@ check("SecurityAccess level-1/2 configs use 16-byte seed/key",
 check("SecurityAccess send-key embeds NRC 0x35 and 0x36",
       bytes.fromhex("203e3500") in CF[0x94A72:0x94B66] and
       bytes.fromhex("203e3600") in CF[0x94A72:0x94B66])
+
+print("\n== application SecurityAccess algorithm ==")
+# Level 1 (programming, subfn 01/02) uses stub handlers that always return 1 (error).
+# Level 2 (extended, subfn 03/04) uses the actual crypto implementation.
+check("SA level-1 request-seed dispatcher is stub (return 1) at 0x94E0E",
+      CF[0x94E0E:0x94E12] == bytes.fromhex("01527f00"))
+check("SA level-1 send-key dispatcher is stub (return 1) at 0x94E22",
+      CF[0x94E22:0x94E26] == bytes.fromhex("01527f00"))
+# Level 2 dispatchers call the real implementation:
+# 0x94E12 -> 0x8C734 (seed generation), 0x94E26 -> 0x8C82A (key verification)
+check("SA level-2 seed dispatcher calls seed worker 0x8C734",
+      CF[0x94E12:0x94E14] == bytes.fromhex("8007") and  # prepare
+      CF[0x94E1E:0x94E22] == bytes.fromhex("40063f00"))  # dispose
+check("SA level-2 key dispatcher calls key worker 0x8C82A",
+      CF[0x94E26:0x94E28] == bytes.fromhex("8007") and  # prepare
+      CF[0x94E2E:0x94E32] == bytes.fromhex("40063f00"))  # dispose
+# Key material: 16-byte secret at CodeFlash 0x20840, used as AES/CMAC key.
+sa_key = CF[0x20840:0x20850]
+check("SA secret key material exists at CodeFlash 0x20840",
+      sa_key == bytes.fromhex("893e08418c741ffa2a9c044bffa55813"))
+check("SA crypto init at 0x8C7BC references key material at 0x20840",
+      struct.pack("<I", 0x20840) in CF[0x8C7BC:0x8C7F6])
+# Seed storage: FEBF495A (16 bytes), provisioned flag FEBF4958
+# Key comparison worker 0x8C82A checks provisioned flag == 0x5A ('Z')
+check("SA key verification worker loads provisioned flag from FEBF4958",
+      bytes.fromhex("5849") in CF[0x8C82A:0x8C900])  # ld.bu FEBF4958
+# Attempt counter: send-key worker 0x94A72 maps mismatch (0x0B) to NRC 0x35
+check("SA send-key worker contains NRC 0x35 invalidKey path",
+      bytes.fromhex("203e3500") in CF[0x94A72:0x94B66])
+# Unlock helper 0x900FC sets bitmask at GP-relative location
+check("SA unlock helper 0x900FC delegates to bitmask setter 0x9075A",
+      CF[0x900FC:0x91000] and CF[0x900FE:0x91002] != bytes.fromhex("7f000052"))
+# 0x9075A sets bit (level-1) in 2-dword bitmask, then calls propagation
+check("SA unlock bitmask setter uses and 0x1F mask for bit position",
+      bytes.fromhex("1f00") in CF[0x9075A:0x90800])  # and 0x1F for bit-within-dword
 check("ECUReset start packs three request bytes before lower stages",
       bytes.fromhex("7d070100") in CF[0x8B144:0x8B180] and
       bytes.fromhex("3d3e0800") in CF[0x8B144:0x8B180])
