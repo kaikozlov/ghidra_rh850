@@ -93,42 +93,19 @@ ghidra --projects-dir "$PWD/project" --project rh850_p1me_mapped \
 - Ghidra **12.1.2** (the tested Homebrew location is
   `/opt/homebrew/opt/ghidra/libexec`).
 - Rust `ghidra` CLI **0.2.1** (`ghidra doctor` must pass).
-- esaulenka's `ghidra_v850` processor extension at the exact revision below.
+- The Renesas v850/RH850 processor module, **vendored in-tree** at
+  `ghidra/ghidra_v850/` (a local fork of `esaulenka/ghidra_v850` at commit
+  `14c1b5be32b8ec741ee626c8bca9885c58f7a473`). See
+  `ghidra/ghidra_v850/README.md` for provenance and modification policy.
 
-The processor pin in `external-references.lock.json` is:
+There is no separate install step. `tools/rebuild_project.sh` compiles the
+vendored `.slaspec` sources with `sleigh` and syncs the extension into
+`$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850/` on every run, so both
+`analyzeHeadless` and the `ghidra` CLI load the in-tree processor model.
 
-```text
-repository  https://github.com/esaulenka/ghidra_v850.git
-commit      14c1b5be32b8ec741ee626c8bca9885c58f7a473
-v850e3 spec 50df5bd3d5b7a23018533f126d83ea5249cb92b8645b1cd0d1a9f309a993eb15
-```
-
-The extension's calling-convention model is incomplete. Confirm register setup
-in disassembly before trusting decompiled signatures.
-
-### Install the pinned RH850 language
-
-```bash
-GH=/opt/homebrew/opt/ghidra/libexec
-V850=/absolute/path/to/ghidra_v850
-
-gh repo clone esaulenka/ghidra_v850 "$V850"
-git -C "$V850" checkout 14c1b5be32b8ec741ee626c8bca9885c58f7a473
-printf '%s  %s\n' \
-  50df5bd3d5b7a23018533f126d83ea5249cb92b8645b1cd0d1a9f309a993eb15 \
-  "$V850/data/languages/v850e3.slaspec" | shasum -a 256 -c -
-
-"$GH/support/sleigh" "$V850/data/languages/v850e3.slaspec"
-"$GH/support/sleigh" "$V850/data/languages/v850e2.slaspec"  # optional
-
-DST="$GH/Ghidra/Extensions/Renesas_v850"
-mkdir -p "$DST"
-cp -R "$V850/extension.properties" "$V850/Module.manifest" \
-      "$V850/data" "$V850/LICENSE" "$DST"/
-```
-
-`tools/rebuild_project.sh` refuses to run if the installed `v850e3.slaspec`
-does not match this pinned source hash.
+The upstream calling-convention model is incomplete and is being rewritten
+in-tree; confirm register setup in disassembly before trusting decompiled
+signatures.
 
 ## Rebuild the complete Ghidra project
 

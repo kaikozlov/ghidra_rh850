@@ -234,10 +234,13 @@ deliberately replacing the committed snapshot.
 
 ## Tooling notes
 
-- Ghidra 12.1.2 at `/opt/homebrew/opt/ghidra/libexec`; RH850 language
-  `v850e3:LE:32:default` from esaulenka/ghidra_v850 commit
-  `14c1b5be32b8ec741ee626c8bca9885c58f7a473`. The rebuild script verifies the
-  installed `v850e3.slaspec` hash. The extension's calling-convention model is
-  incomplete — confirm register setup before trusting decompiled signatures.
+- Ghidra 12.1.2 at `/opt/homebrew/opt/ghidra/libexec`; the RH850 language
+  `v850e3:LE:32:default` is the **vendored in-tree fork** at
+  `ghidra/ghidra_v850/` (forked from esaulenka/ghidra_v850 at commit
+  `14c1b5be32b8ec741ee626c8bca9885c58f7a473`). `tools/rebuild_project.sh`
+  compiles the `.slaspec` sources with `sleigh` and syncs them into
+  `$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850/`; there is no external pin or
+  manual install step. The calling-convention model is being rewritten in-tree
+  — confirm register setup before trusting decompiled signatures.
 - `ghidra` CLI project resolution: `GHIDRA_PROJECT_DIR` env, config
   `ghidra_project_dir`, `--projects-dir`, else `~/Library/Caches/ghidra-cli/projects`.

@@ -86,31 +86,25 @@ GHIDRA_CLI_VERSION=$(ghidra --version | awk 'NR == 1 { print $2 }')
   exit 1
 }
 
-LOCK="$ROOT/external-references.lock.json"
-EXPECTED_V850_SPEC_SHA=$(python3 - "$LOCK" <<'PY'
-import json, sys
-lock = json.load(open(sys.argv[1], encoding="utf-8"))
-for item in lock["artifacts"]:
-    if item["repository"] == "ghidra_v850" and item["path"] == "data/languages/v850e3.slaspec":
-        print(item["sha256"])
-        break
-else:
-    raise SystemExit("missing pinned ghidra_v850 slaspec in external-references.lock.json")
-PY
-)
-V850_SPEC="$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850/data/languages/v850e3.slaspec"
-[[ -f "$V850_SPEC" ]] || {
-  echo "missing Renesas_v850 extension: $V850_SPEC" >&2
-  echo "install the pinned ghidra_v850 revision documented in README.md" >&2
+# --- Vendored Renesas_v850 processor extension -------------------------------
+# Source of truth is the in-repo vendored fork at ghidra/ghidra_v850 (forked
+# from esaulenka/ghidra_v850). Compile its SLEIGH and install the extension
+# into Ghidra's discovered extensions dir so both analyzeHeadless and the
+# `ghidra` CLI load our locally-edited processor model.
+VENDOR_V850="$ROOT/ghidra/ghidra_v850"
+V850_LANG_DIR="$VENDOR_V850/data/languages"
+V850_EXT_DIR="$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850"
+[[ -f "$V850_LANG_DIR/v850e3.slaspec" ]] || {
+  echo "missing vendored v850e3.slaspec: $V850_LANG_DIR/v850e3.slaspec" >&2
   exit 1
 }
-ACTUAL_V850_SPEC_SHA=$(shasum -a 256 "$V850_SPEC" | awk '{print $1}')
-[[ "$ACTUAL_V850_SPEC_SHA" == "$EXPECTED_V850_SPEC_SHA" ]] || {
-  echo "installed v850e3.slaspec does not match the pinned ghidra_v850 revision" >&2
-  echo "expected: $EXPECTED_V850_SPEC_SHA" >&2
-  echo "actual:   $ACTUAL_V850_SPEC_SHA" >&2
-  exit 1
-}
+command -v rsync >/dev/null 2>&1 || { echo "rsync is required to install the vendored extension" >&2; exit 1; }
+echo "Compiling vendored SLEIGH sources (*.slaspec)"
+( cd "$V850_LANG_DIR" && for spec in *.slaspec; do "$GHIDRA_HOME/support/sleigh" "$spec" >/dev/null; done )
+[[ -f "$V850_LANG_DIR/v850e3.sla" ]] || { echo "sleigh did not produce v850e3.sla" >&2; exit 1; }
+echo "Installing vendored Renesas_v850 -> $V850_EXT_DIR"
+mkdir -p "$V850_EXT_DIR"
+rsync -a --delete --exclude '.git' "$VENDOR_V850/" "$V850_EXT_DIR/"
 
 if pgrep -f 'AnalyzeHeadless.*rh850_p1me_mapped' >/dev/null 2>&1; then
   echo "an RH850 AnalyzeHeadless process is already running; stop it before rebuilding" >&2
@@ -150,7 +144,7 @@ COMMON_ARGS=(
 
 echo "Rebuilding $PROJECT_NAME in $PROJECT_DIR"
 echo "Ghidra: $GHIDRA_HOME"
-echo "Pinned ghidra_v850 slaspec: $EXPECTED_V850_SPEC_SHA"
+echo "Vendored v850 plugin: $VENDOR_V850 (installed -> $V850_EXT_DIR)"
 
 # Analysis is intentionally staged. Ghidra discovers a different graph if all
 # seeds are injected before its first pass; these four durable commits reproduce

@@ -21,11 +21,6 @@
       "directory": "tsk_extraction_by_can_log",
       "commit": "db453752beeb7cdd024a1a9c38c6711c981e75ad"
     },
-    "ghidra_v850": {
-      "url": "https://github.com/esaulenka/ghidra_v850.git",
-      "directory": "ghidra_v850",
-      "commit": "14c1b5be32b8ec741ee626c8bca9885c58f7a473"
-    },
     "opendbc": {
       "url": "https://github.com/commaai/opendbc.git",
       "directory": "opendbc",
@@ -86,11 +81,6 @@
       "repository": "toyota_dataflash_secoc_setup",
       "path": "steps/step_dump_dataflash.py",
       "sha256": "ddf902816d4f5dcb978857f2d17c9fb23baa83dbfad2da3eb4d4a17bb4d102d8"
-    },
-    {
-      "repository": "ghidra_v850",
-      "path": "data/languages/v850e3.slaspec",
-      "sha256": "50df5bd3d5b7a23018533f126d83ea5249cb92b8645b1cd0d1a9f309a993eb15"
     },
     {
       "repository": "opendbc",
