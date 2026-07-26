@@ -284,6 +284,64 @@ check("object 24 decrements countdown then calls update(0x18)",
 check("object 24 zero-fills reserved halfword before update",
       CF[0x34FDA:0x34FDC] == bytes.fromhex("8104"))  # sst.h 2[ep],r0
 
+print("\n== object 27 dead-config proof (enabled descriptor with no static writer) ==")
+# Object 27 is the only enabled checkpoint object whose writer_functions column is
+# empty. Its RAM mirror 0xFEBF0240 must appear ONLY inside the descriptor/owner
+# table region (as the descriptor's own RAM field), never inside a function body.
+# If a function wrote to it, the 32-bit literal 0xFEBF0240 would appear in that
+# function's code stream or the value would be constructed by a different
+# addressing scheme — a raw-image scan is the bounded check that no direct
+# immediate reference exists outside the table.
+obj27_ram_literal = (0xFEBF0240).to_bytes(4, "little")
+obj27_ram_hits = []
+_scan_start = 0
+while True:
+    _found = CF.find(obj27_ram_literal, _scan_start)
+    if _found < 0:
+        break
+    obj27_ram_hits.append(_found)
+    _scan_start = _found + 1
+# The descriptor/owner table region spans the checkpoint descriptor table
+# (0x2AF2C..0x2B0AC), the redundant table (0x2B0AC..0x2B12C), and the owner map
+# (0x2B1B0..0x2B2A8). Object 27's RAM field lives at descriptor offset 27*12+8.
+DESC_TABLE_LO = CHECKPOINT_TABLE                      # 0x2AF2C
+DESC_TABLE_HI = OWNER_MAP + 124 * 2                   # 0x2B2A8 (end of owner map)
+check("object 27 RAM literal 0xFEBF0240 occurs exactly once in CodeFlash",
+      len(obj27_ram_hits) == 1, repr([hex(h) for h in obj27_ram_hits]))
+check("the sole occurrence is object 27's descriptor RAM field at 0x2B078",
+      obj27_ram_hits == [CHECKPOINT_TABLE + 27 * 12 + 8],
+      repr([hex(h) for h in obj27_ram_hits]))
+check("the sole occurrence lies inside the descriptor/owner table region",
+      all(DESC_TABLE_LO <= h < DESC_TABLE_HI for h in obj27_ram_hits),
+      repr([hex(h) for h in obj27_ram_hits]))
+check("no occurrence lies inside a function body (outside the table region)",
+      all(DESC_TABLE_LO <= h < DESC_TABLE_HI for h in obj27_ram_hits)
+      and len(obj27_ram_hits) == 1)
+check("object 27 writer_functions column is empty (dead configuration)",
+      payload_rows[27]["writer_functions"] == "")
+check("object 27 is enabled (configured orphan, not a disabled slot)",
+      payload_rows[27]["enabled"] == "yes"
+      and payload_rows[27]["evidence_name"] == "configured_orphan_slot")
+
+print("\n== writer-offset presence checks (hand-authored addresses are live code) ==")
+# For every checkpoint object that has a writer_functions entry, confirm the
+# writer address points at a non-erased first instruction in CodeFlash. This
+# verifies the hand-authored writer addresses aren't stale. Same pattern as the
+# boot-trust test's setup-entry check: CF[addr:addr+2] != b"\x00\x00".
+_writer_zero = b"\x00\x00"
+_stale_writers = []
+for _row in payload_rows:
+    _writers = _row["writer_functions"]
+    if not _writers:
+        continue
+    for _w in _writers.split(";"):
+        _addr = int(_w, 16)
+        if CF[_addr:_addr + 2] == _writer_zero:
+            _stale_writers.append(f"obj {_row['object_index']} writer {_w}")
+check("all checkpoint writer addresses start at non-zero code",
+      not _stale_writers,
+      repr(_stale_writers))
+
 with tempfile.TemporaryDirectory() as directory:
     generated = Path(directory) / "checkpoint_payload_map.csv"
     result = subprocess.run(

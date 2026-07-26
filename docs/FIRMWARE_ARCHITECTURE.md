@@ -50,13 +50,110 @@ The direct boot exception vectors occupy the low vector area. Most point to `0x1
 
 ### 2.2 Handoff gate
 
-`boot_application_handoff` at `0x13B0` runs four setup/check functions and evaluates the result from `0x119E`. If the result is zero, it:
+`boot_application_handoff` at `0x13B0` is the single gate between boot and
+application execution. The four `jarl` call sites at `0x13B4`, `0x13B8`,
+`0x13BC`, `0x13C0` encode a fixed setup order, and the validity-check `jarl`
+is at `0x13C4` (these encodings are pinned in `tests/verify_boot_trust.py`).
+The full decision tree is documented in
+`docs/BOOT_VALIDITY_AND_FLASH_LIFECYCLE.md`; the summary below is the
+statically verifiable structure.
 
-1. reads the 32-bit pointer at CodeFlash `0xFFDB8`;
-2. obtains `0x00020880`;
-3. calls that address indirectly at `0x13FE`.
+#### Setup calls
 
-If the check fails, it follows a boot failure path and never enters the application. The application entry pointer is therefore executable handoff metadata, not merely an incidental reference near the end of flash.
+The handoff invokes four setup functions before the validity check:
+
+| Call site | Target | Role |
+|---|---|---|
+| `0x13B4` | `boot_peripheral_init` `0xC9A` | Initializes RSCFD CAN controller register windows (`0xFFC20000`/`0xFFC24000`/`0xFFC34000`) and CAN channel descriptors from the table at `0x87A0` |
+| `0x13B8` | `boot_key_mirror_init` `0xE54` | Reads three DataFlash triple-copy values at `0xFFC0A000-A008`, checks XOR55/XORAA complements, and copies valid primaries into GP-relative mirrors at `0xFEBFFC00-C14` |
+| `0x13BC` | `boot_flash_sequencer_init` `0xF80` | Configures flash sequencer protection registers (`0xFFD62000-28`) with enable key `0xA5`; sets blank/erase state for DataFlash banks at `0xFFD60000`/`0xFFD61000` |
+| `0x13C0` | `boot_clock_init` `0x10C6` | Writes `0xFFF890C0=4`, polls `0xFFF890C8` for completion, then sets `0xFFF88818=0x50` (main PLL configuration) |
+
+The peripheral, key-mirror, flash-sequencer, and clock roles are bounded to
+the register windows they touch; the exact clock tree and CAN bit timing are
+not fully decoded and are not claimed here.
+
+#### Validity check (`0x119E`)
+
+`boot_validity_check` at `0x119E` runs two retry-bounded phases, each with a
+ceiling of three attempts (loop counter compared against `2`):
+
+1. **Phase 1 — CRC descriptor verification.** Calls
+   `memory_crc_verify_descriptors` for both CodeFlash regions (region 1 then
+   region 0), then `boot_flash_status_check` at `0x115A`. It breaks only when
+   both CRCs pass and the flash status is idle; otherwise it retries up to
+   three times and returns `1` (failure) on exhaustion.
+2. **Phase 2 — validity-marker comparison.** Calls
+   `boot_validity_marker_check` at `0x6C5A` with `0xFFE00` (region 1) and
+   `0x17E00` (region 0). It breaks only when both markers are present,
+   otherwise retries up to three times and returns `1`.
+
+The function returns `0` only when both phases pass. The flash status helper
+at `0x115A` polls the flash sequencer command window at `0xFFD62034`, checks
+error bits 0 and 2 of the status snapshot, issues the `0xA5` examine-code
+sequence, and returns non-zero on error — a non-zero return forces the CRC
+phase to retry.
+
+#### Region table and markers
+
+Three 28-byte region descriptors at `0x8E00` define the validity-checked
+ranges:
+
+| Region | Data range | Marker addr | Marker value |
+|---|---|---|---|
+| 0 (low CodeFlash) | `0x10000..0x17DFF` | `0x17E00` | `0x5AA5A55A` |
+| 1 (high CodeFlash) | `0x18000..0xFFDFF` | `0xFFE00` | `0x5AA5A55A` |
+| 2 (RAM payload) | `0xFEBF0000..0xFEBF0FFF` | `0` (null) | n/a |
+
+Each CodeFlash region also has a CRC descriptor (base `0x8DD0`/`0x8DE0`)
+recording data base, length, and embedded address/length fields. The
+application vector base `0x20000` falls inside region 1 only, so the
+application image is covered by the high-flash CRC and marker. Region 2 is
+the authenticated RAM payload window managed by the payload gate
+(`docs/PAYLOAD_GATE_ANALYSIS.md`); it has a null marker field and is not
+marker-checked.
+
+The validity marker value is `0x5AA5A55A`. `boot_validity_marker_check`
+(`0x6C5A`) is a one-line predicate that returns true when the 32-bit value at
+its parameter address is **not** equal to `0x5AA5A55A` — a true return means
+the marker is invalid or erased. The literal is embedded at `0x6C60` inside
+the predicate.
+
+#### Success path
+
+If the validity check returns `0`, the handoff reads the 32-bit entry pointer
+at CodeFlash `0xFFDB8` (obtaining `0x00020880`) and calls it indirectly at
+`0x13FE`. The application then runs as described in section 2.3.
+
+#### Failure path
+
+If the validity check returns non-zero, the handoff calls
+`boot_failure_trap` at `0x1206`, which zeroes diagnostic state at
+`0xFFFEE980-988`, then enters `boot_failure_main_loop` at `0x1398` — a
+non-returning loop. The loop body `boot_failure_periodic` at `0x137A` sets
+state `0xFEBF2904=2` and runs `flash_operation_task` (`0x4428`), bootloader
+operation release, and `memory_crc_verify_task`. Keeping these tasks alive
+allows a diagnostic re-flash session (UDS `0x34`/`0x37`, RID `0x10F2`) to
+program a new image. The handoff function itself ends in an unconditional
+`do { } while(true)`, so neither path can return to its caller.
+
+#### Marker programming
+
+The validity markers are written by `program_region_validity_marker` at
+`0x5286`, reached via UDS RID `0x10F2`. The write path embeds the
+`0x5AA5A55A` immediate at `0x5286` (verified in
+`tests/verify_bootloader_diagnostics.py` and `tests/verify_boot_trust.py`).
+After a successful re-flash, the next reset re-runs the validity gate, which
+succeeds if both CRCs verify and both markers are present.
+
+#### Static-analysis scope
+
+Both marker domains (`0x17E00` and `0xFFE00`) currently hold `0x5AA5A55A` in
+this committed calibration, so this is a static analysis of a **valid image**.
+The decision tree above describes what the firmware checks at runtime; it does
+not exercise the failure path against a tampered image. The full flash
+lifecycle and the bounded object-15 negative are documented in
+`docs/BOOT_VALIDITY_AND_FLASH_LIFECYCLE.md`.
 
 ### 2.3 Application CPU context
 
@@ -82,7 +179,7 @@ The loop at `0x64FCC` polls bit 12 of the 16-bit interrupt-control register at `
 
 The loop waits for `EIRF136`, clears it in software, and executes one foreground cycle. Channel 136 remains mapped to the default pointer-table handler because the firmware consumes this timer event by polling rather than by an ISR.
 
-This establishes the tick **source**. The exact time period should not be claimed until the TAUJ0 clock and reload configuration are fully decoded.
+This establishes the tick **source**. The exact foreground-tick period remains `unsupported`: the TAUJ0 prescaler and reload (TDR) registers are not referenced via 32-bit absolute addresses in CodeFlash (the setup likely uses register-indirect or 16-bit-displacement addressing the decompiler does not resolve), and the RH850/P1M-E datasheet (`REFERENCE/r01ds0505ed0100-rh850p1m-e.pdf`) is a 72-page brief that documents TAUJ0 pin assignments and AC timing but not the register-level layout. The **PLL CPU clock is proven at 160 MHz** (16 MHz main oscillator × 10; REFERENCE PDF Sec 1.3 Table 1.1, Sec 3.4, Sec 3.6), but converting that to a TAUJ0 CH3 tick still requires the prescaler+TDR. All timing in `data/scheduler_periods.csv` is therefore expressed in foreground ticks, with microsecond periods marked `unsupported`. This is documented in `tests/verify_scheduler_timing.py`.
 
 ### 3.2 Foreground cycle
 

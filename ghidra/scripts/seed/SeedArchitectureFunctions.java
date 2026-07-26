@@ -14,6 +14,9 @@ public class SeedArchitectureFunctions extends GhidraScript {
             0x1e1eL, 0x1e2aL, 0x1e36L,
             0x1e44L, 0x1e50L, 0x1e5eL, 0x1e6cL,
             0x1e7aL, 0x1e88L, 0x1e96L, 0x1ea4L,
+            // Boot validity/handoff path functions.
+            0x119eL, 0x115aL, 0x6c5aL, 0x1206L, 0x1398L, 0x137aL, 0x1338L,
+            0xc9aL, 0xe54L, 0xf80L, 0x10c6L,
 
             // Application entry, startup, foreground loop, and vector handlers.
             0x20880L, 0x62758L, 0x64fccL, 0x70524L,

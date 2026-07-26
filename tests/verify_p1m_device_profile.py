@@ -13,6 +13,8 @@ WINDOWS = {
     "SFR_EIC": (0xFFFFB000, 0x1000),
     "SFR_RSCFD": (0xFFD20000, 0x10000),
     "SFR_ICUS": (0xFFC5D000, 0x1000),
+    "SFR_CLKGEN": (0xFFF88000, 0x2000),
+    "SFR_FCU": (0xFFD62000, 0x100),
 }
 
 # Landmarks that must remain labeled for day-to-day analysis.

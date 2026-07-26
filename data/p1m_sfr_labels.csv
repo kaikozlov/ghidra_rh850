@@ -33,3 +33,27 @@ address,name,size,access,comment
 0xFFC5D00C,ICUSSTS,4,rw,ICU-S status; driver polls bit 0 as busy/ready
 0xFFC5D014,ICUSSTS2,4,rw,ICU-S companion status; driver polls low bits with ICUSSTS
 0xFFC5D024,ICUSCTL,4,rw,ICU-S control word written during driver reset/abort path
+# PLL / clock generation SFRs (docs/FIRMWARE_ARCHITECTURE.md boot setup).
+# Written by boot_clock_init (0x10C6) and application PLL reconfig (0x607DE).
+0xFFF88818,PLLCFG,4,rw,PLL configuration register; boot writes 0x50 (main PLL enable)
+0xFFF890C0,PLLCTL,4,rw,PLL control register; write 4 to trigger reconfiguration
+0xFFF890C8,PLLSTS,4,rw,PLL status register; polled until == 4 (lock complete)
+# Flash sequencer (FCU) command/protection window.
+# The 0xA5 enable-key sequence at FKEY is used throughout boot and flashing.
+0xFFD62004,FCU_CMD_WINDOW_0,4,rw,FCU command window slot 0 (boot flash init path)
+0xFFD62008,FCU_CMD_WINDOW_1,4,rw,FCU command window slot 1 (boot flash init path)
+0xFFD6200C,FCU_CMD_WINDOW_2,4,rw,FCU command window slot 2 (boot flash init path)
+0xFFD62010,FCU_CMD_WINDOW_3,4,rw,FCU command window slot 3 (boot flash init path)
+0xFFD62014,FCU_CMD_WINDOW_4,4,rw,FCU command window slot 4 (boot flash init path)
+0xFFD62018,FCU_CMD_WINDOW_5,4,rw,FCU command window slot 5 (boot flash init path)
+0xFFD6201C,FCU_CMD_WINDOW_6,4,rw,FCU command window slot 6 (boot flash init path)
+0xFFD62020,FCU_CMD_WINDOW_7,4,rw,FCU command window slot 7 (boot flash init path)
+0xFFD62024,FCU_CMD_WINDOW_8,4,rw,FCU command window slot 8 (boot flash init path)
+0xFFD62028,FCU_PROT_CTRL,4,rw,FCU protection control (write sequence: clear/set/clear with FKEY)
+0xFFD6202C,FCU_PROT_CTRL_1,4,rw,FCU protection control slot 1 (blank check enable/disable)
+0xFFD62030,FCU_PROT_CTRL_2,4,rw,FCU protection control slot 2 (write-protect toggle)
+0xFFD62034,FCU_CMD_SEQUENCE,4,rw,FCU command sequence register; 3-word write with FKEY=0xA5
+0xFFD62038,FCU_CMD_SEQUENCE_1,4,rw,FCU command sequence slot 1 (alternate sequence)
+0xFFD6203C,FCU_CMD_SEQUENCE_2,4,rw,FCU command sequence slot 2 (alternate sequence)
+0xFFD62040,FKEY,4,w,FCU enable key register; write 0xA5 before FCU command sequences
+0xFFD62044,FSTS,1,r,FCU status readback; polled after each command sequence

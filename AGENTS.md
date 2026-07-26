@@ -228,6 +228,27 @@ the reconstructed combined firmware — trust them:
   - matching application tables in a related EPS are strong software-family
     evidence, but do not prove its MCU, bootloader payload path, or an external
     gateway explanation for silence.
+- The boot validity gate, flash lifecycle, and object-15 reachability proof are
+  documented in `docs/BOOT_VALIDITY_AND_FLASH_LIFECYCLE.md` and checked by
+  `tests/verify_boot_trust.py`:
+  - `boot_application_handoff` at `0x13B0` calls four setup functions in fixed
+    order, then `boot_validity_check` at `0x119E`; success calls `*(0xFFDB8)`
+    = `0x20880`, failure enters the non-returning failure main loop at `0x1398`;
+  - the validity gate has two retry-bounded phases (ceiling 3): CRC descriptor
+    verification for both CodeFlash regions + flash status check at `0x115A`,
+    then validity-marker comparison at `0x6C5A` (`!= 0x5AA5A55A`);
+  - three region descriptors at `0x8E00` define the checked ranges: region 0
+    `0x10000..0x17DFF` (marker `0x17E00`), region 1 `0x18000..0xFFDFF` (marker
+    `0xFFE00`), region 2 RAM payload (null marker); both CodeFlash markers
+    currently hold `0x5AA5A55A`;
+  - the failure loop at `0x137A` keeps `flash_operation_task` (`0x4428`) and CRC
+    verification alive for diagnostic re-flash; `program_region_validity_marker`
+    (`0x5280`) writes the `0x5AA5A55A` marker consumed by the next-reset gate;
+  - `tools/generate_object15_reachability.py` produces an exhaustive caller
+    census: index `0x10F` (SecOC triplicate object 15) has **no static producer**
+    in this calibration — 27 direct + 19 wrapper callsites, two dynamic-index
+    maps, and no AB/BA call edge; the observed namespace-`0x100` indices are
+    `0x100..0x103`/`0x105`/`0x106`.
 - The broader execution map is in `docs/FIRMWARE_ARCHITECTURE.md` and checked by
   `tests/verify_architecture.py`:
   - application vector/executable base `0x20000`; entry pointer `0xFFDB8 -> 0x20880`;
@@ -265,7 +286,7 @@ it live in `legacy/flat-import/` — do not use them for current results.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
 - `ghidra/scripts/verify/` contains asserting processor/project gates used by
   `make verify-processor`.
-- `make verify` runs sixteen self-contained suites through UV; it must not require
+- `make verify` runs nineteen self-contained suites through UV; it must not require
   sibling repositories or Ghidra.
 - `make verify-sleigh` compiles the vendored processor module into an isolated
   extension under `build/ghidra-home/` from a disposable source copy (does not

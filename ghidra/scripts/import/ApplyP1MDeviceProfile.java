@@ -157,6 +157,14 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         ensureUninitBlock("SFR_RSCFD", 0xFFD20000L, 0x10000L, true, true, false, true);
         // ICU-S crypto-driver command/status window (see architecture evidence).
         ensureUninitBlock("SFR_ICUS", 0xFFC5D000L, 0x1000L, true, true, false, true);
+        // PLL / clock generation SFRs written by boot_clock_init (0x10C6) and
+        // application PLL reconfig (0x607DE): 0xFFF88818 config, 0xFFF890C0
+        // control, 0xFFF890C8 status.
+        ensureUninitBlock("SFR_CLKGEN", 0xFFF88000L, 0x2000L, true, true, false, true);
+        // Flash sequencer SFRs written throughout boot/flashing: 0xFFD62000-0x44
+        // FCU command/protection window (enable key 0xA5), 0xFFD60000/0xFFD61000
+        // DataFlash bank control.
+        ensureUninitBlock("SFR_FCU", 0xFFD62000L, 0x100L, true, true, false, true);
 
         // Boot code occupies low CodeFlash; application starts at 0x20000.
         // GP/TP are constant within each region after startup.

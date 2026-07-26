@@ -64,12 +64,14 @@ the two bootloader secrets were unreferenced. Use project **`rh850_p1me_mapped`*
 
 ## Pre-built project (committed under `project/`)
 
-The fully analyzed, annotated project is committed in `project/`
+The statically recovered and annotated project is committed in `project/`
 (`rh850_p1me_mapped.gpr` + `rh850_p1me_mapped.rep/`, ~29 MiB). It already
 contains the discovered functions, both secret labels, the bootloader and
 application diagnostic handlers, and the annotated SecurityAccess/payload-gate/
 AES/SecOC/CAN transport and boot/application architecture paths — so you can
-explore it without rebuilding from scratch.
+explore it without rebuilding from scratch. Recovery is evidence-bounded: most
+function rows in the semantic coverage ledger remain grade `recovered` and are
+not claimed as behaviorally understood (see `docs/PLUGIN_AUDIT.md`).
 
 **Never open the committed `project/` with a `ghidra` daemon.** Any open
 compacts its DB and dirties the tree even with no analysis change. Materialize a
@@ -117,7 +119,7 @@ prototype). Processor audits and semantic fixtures are documented in
 Verification targets:
 
 ```bash
-make verify            # twelve firmware suites (no Ghidra)
+make verify            # nineteen firmware suites (no Ghidra)
 make verify-sleigh     # SLEIGH compile + isolated install
 make verify-processor  # fixtures + working-project audits
 make verify-ghidra     # all of the above
@@ -494,6 +496,39 @@ and `0x85`, plus routines `0x10F1–0x10F3`; its raw-image checks are in
 - the CAN1 acceptance table at `0x231A0` contains 47 normal receive IDs plus
   `0x7A1/0x777/0x7A0/0x7F7`; `0x2E4`, `0x0F`, and `0x131` are explicit RX
   routes, while `0x344` is absent from this firmware's receive filters.
+
+### Boot validity gate, flash lifecycle, and control/safety partition
+
+`docs/BOOT_VALIDITY_AND_FLASH_LIFECYCLE.md` documents the boot-trust decision
+tree and flash erase/program lifecycle, checked by
+`tests/verify_boot_trust.py`:
+
+- `boot_application_handoff` at `0x13B0` calls four setup functions in fixed
+  order, then `boot_validity_check` at `0x119E`; success calls `*(0xFFDB8)`
+  = `0x20880`, failure enters the non-returning failure main loop at `0x1398`;
+- the validity gate has two retry-bounded phases (ceiling 3): CRC descriptor
+  verification for both CodeFlash regions, then a `0x5AA5A55A` validity-marker
+  comparison at `0x6C5A`;
+- three region descriptors at `0x8E00` define the checked ranges; both
+  CodeFlash markers currently hold `0x5AA5A55A`;
+- the failure loop keeps `flash_operation_task` (`0x4428`) and CRC verification
+  alive for diagnostic re-flash; `program_region_validity_marker` (`0x5280`)
+  writes the marker consumed by the next-reset gate;
+- `tools/generate_object15_reachability.py` proves SecOC triplicate object 15
+  has no static producer in this calibration.
+
+`docs/CONTROL_PARTITION_REPORT.md` and `data/control_partition.csv` map the
+control/safety cyclic partition under `0x65750`, checked by
+`tests/verify_control_partition.py`:
+
+- six cyclic callees (`0x68c0c`/`0x791c4`/`0x96bac`/`0x68de6`/`0x57ac2`/`0x6547c`)
+  carry bounded subsystem names and evidence grades;
+- the `0x7F7` special RX demux row is documented alongside the Tx signal
+  closure for signals 9, 37, 57.
+
+`data/scheduler_periods.csv` records the recovered cyclic-task timing, checked
+by `tests/verify_scheduler_timing.py`, and confirms the SFR CSV now covers the
+PLL/clock and flash-sequencer windows mapped in the device profile.
 
 ### Complete application transmit-PDU and COM signal map
 

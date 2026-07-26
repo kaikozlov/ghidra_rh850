@@ -66,8 +66,9 @@ handoff = CF[0x13B0:0x1420]
 check("handoff body contains call site to validity check 0x119E",
       bytes.fromhex("bfffdafde051") in handoff or CF[0x13D4:0x13DA] == bytes.fromhex("bfffdafde051"),
       CF[0x13D0:0x13E0].hex())
-check("four setup entries exist as functions (0xC9A/0xE54/0xF80/0x10C6)",
-      all(CF[addr] != 0 for addr in (0xC9A, 0xE54, 0xF80, 0x10C6)))
+check("four setup entries are non-erased code (0xC9A/0xE54/0xF80/0x10C6)",
+      all(CF[addr] != 0xFF for addr in (0xC9A, 0xE54, 0xF80, 0x10C6)),
+      " ".join(f"0x{a:X}={CF[a:a+2].hex()}" for a in (0xC9A, 0xE54, 0xF80, 0x10C6)))
 # Exact call order: jarl targets recovered from instruction stream at 0x13B4..
 # The first four jarl destinations are 0xC9A, 0xE54, 0xF80, 0x10C6; fifth is 0x119E.
 # Validate by matching the unique 4-byte sequences previously recovered:
@@ -119,8 +120,7 @@ check("retry ceiling compares against 2 (max 3 attempts)",
       or bytes.fromhex("0ae8") in body
       or body.count(bytes.fromhex("e051")) >= 2)
 check("failure returns non-zero / success falls through to return 0",
-      bytes.fromhex("1c504006") in body or CF[0x11F8:0x1206].hex().endswith("4006ff30")
-      or True)  # structural: function ends before 0x1206
+      bytes.fromhex("1c504006") in body and CF[0x11F8:0x1206].hex().endswith("4006ff30"))
 
 print("\n== region table / markers / CRC descriptors ==")
 regions = []
@@ -159,7 +159,8 @@ check("program_region_validity_marker embeds 0x5AA5A55A",
       CF[0x5286:0x5290] == bytes.fromhex("0600e1ff21065aa5a55a")
       or bytes.fromhex("5aa5a55a") in CF[0x5286:0x52A0])
 check("boot marker predicate is inequality against 0x5AA5A55A",
-      u32(0x6C5E) == MARKER_VALUE or CF[0x6C5E:0x6C62] == bytes.fromhex("5aa5a55a"))
+      u32(0x6C60) == MARKER_VALUE or CF[0x6C60:0x6C64] == bytes.fromhex("5aa5a55a"),
+      f"u32(0x6C60)={u32(0x6C60):#x}")
 check("flash_erase_start / flash_operation_task / callback landmarks present",
       CF[0x41E0] != 0 and CF[0x4428] != 0 and CF[0x4332] != 0)
 check("failure main loop runs flash_operation_task then CRC task",
@@ -225,12 +226,11 @@ for cs in update_callsites:
 check("no callsite prelude combines mov15 with movea 0x10F",
       prelude_hits == [])
 # 0x66E48 sole caller site inside dispatcher.
-check("redundant update call site encoding at 0x65D18 present",
-      CF[0x65D18:0x65D1C] == bytes.fromhex("81ff3001")
-      or CF[0x65D14:0x65D1C].find(bytes.fromhex("81ff")) >= 0
-      or True)
+check("redundant update call site encoding at 0x65D18 (jarl 0x66E48) present",
+      CF[0x65D18:0x65D1C] == bytes.fromhex("80ff3011"),
+      CF[0x65D18:0x65D1C].hex())
 check("AB callback body has no jarl into 0x65CD8 window",
-      b"\x65\xcd\x8" not in CF[0x8D344:0x8D3C0]
+      b"\x65\xcd\x08" not in CF[0x8D344:0x8D3C0]
       and bytes.fromhex("65cd") not in CF[0x8D344:0x8D400])
 # Stronger AB/BA: service table callbacks don't reference the update API bytes.
 check("BA remains null service-table callback (no body to inventory)",
