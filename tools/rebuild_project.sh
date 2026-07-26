@@ -164,6 +164,7 @@ run_headless "import" "$PROJECT_DIR" "$PROJECT_NAME" \
   "${COMMON_ARGS[@]}" \
   -postScript AddDataFlash.java "$DATAFLASH" \
   -postScript ApplyP1MDeviceProfile.java "$ROOT/data/p1m_sfr_labels.csv" \
+  -postScript ApplyP1MSfrTypes.java \
   -commit "Import mapped CodeFlash and DataFlash"
 
 echo "[2/4] Seed report entries and run base analysis"

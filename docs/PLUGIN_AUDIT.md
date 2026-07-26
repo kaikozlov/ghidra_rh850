@@ -12,7 +12,7 @@ semantic correctness.** The checks below are layered:
 | System-register naming | Every `ldsr`/`stsr` operand is named | `AssertSystemRegisterNames` |
 | Project invariants | Critical labels/functions/memory/context | `AssertProjectInvariants` |
 | Decompiler invariants | Landmark ABI/decompiler properties | `AssertDecompilerInvariants` |
-| Device profile | RAM/SFR map + boot/application GP/TP context | `ApplyP1MDeviceProfile` |
+| Device profile | RAM/SFR map + SFR labels/types + boot/application GP/TP context | `ApplyP1MDeviceProfile`, `ApplyP1MSfrTypes` |
 | Vector recovery | INTBP/EBASE handlers + `__interrupt` | `RecoverVectorHandlers` |
 
 Automated gate:
@@ -98,10 +98,25 @@ hashes to `build/decompiler-signatures.txt`, compares them with
 ## Device profile and interrupt recovery
 
 `ApplyP1MDeviceProfile.java` maps LocalRAM and verified peripheral windows
-(`SFR_EIC`, `SFR_RSCFD`, `SFR_ICUS`), labels observed EICs, and seeds
-boot/application `GP`/`TP` register context. The full `0xFF600000..0xFFFFFFFF`
-range stays volatile in `v850.pspec` without being mapped as one block (that
-caused false CodeFlash-as-SFR pointer creation).
+(`SFR_EIC`, `SFR_RSCFD`, `SFR_ICUS`), labels observed SFRs from
+`data/p1m_sfr_labels.csv`, and seeds boot/application `GP`/`TP` register
+context. `ApplyP1MSfrTypes.java` then overlays structured types:
+
+| Type | Applied at | Fields named from evidence |
+|---|---|---|
+| `EIC_Register` | EIC8/133–136/187/188/292/293/379 | `EIP`, `EITB`, `EIMK`, `EIRF`, `EICT` |
+| `ICUS_Command` | `ICUSCMD` `0xFFC5D000` | `CMD`, `KEY_SLOT` |
+| `ICUS_Status` | `ICUSSTS` `0xFFC5D00C` | `BUSY` (bit 0) |
+| `RSCFD_CFSTS` | CFSTS / CFSTS_CH1 | `status_b3` (FIFO poll bit) |
+| `RSCFD_CFDTMC` | `CFDTMC16` | `TMTR` |
+| `RSCFD_CommonFifoFrame` | CFID / CFID_CH1 | CFID/CFPTR/CFFDCSTS/CFDF0/CFDF1 |
+| `RSCFD_TxMessageBuffer` | CFDTMID / CFDTMID16 | CFDTMID/PTR/FDCTR/DF0/DF1 |
+
+The full `0xFF600000..0xFFFFFFFF` range stays volatile in `v850.pspec` without
+being mapped as one block (that caused false CodeFlash-as-SFR pointer creation).
+CSV coverage is checked by `tests/verify_p1m_device_profile.py`; project
+invariants require the windows, a landmark label subset, and the structured
+overlays above.
 
 | Region | GP | TP |
 |---|---:|---:|

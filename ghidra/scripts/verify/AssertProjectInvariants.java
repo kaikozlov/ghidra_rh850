@@ -4,6 +4,8 @@
 // conventions, memory blocks, and boot/application register context.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
+import ghidra.program.model.data.DataType;
+import ghidra.program.model.listing.Data;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.mem.MemoryBlock;
 import ghidra.program.model.symbol.Symbol;
@@ -108,6 +110,25 @@ public class AssertProjectInvariants extends GhidraScript {
         }
     }
 
+    private void requireDataType(long addr, String typeName, int length) {
+        Data data = currentProgram.getListing().getDataAt(toAddr(addr));
+        if (data == null || !data.isDefined()) {
+            fail(String.format("missing defined data at 0x%x (expected %s)", addr, typeName));
+            return;
+        }
+        DataType dt = data.getDataType();
+        String actual = dt.getName();
+        // Accept either the bare type name or a CategoryPath-qualified form.
+        if (!typeName.equals(actual) && !actual.endsWith("/" + typeName)
+                && !typeName.equals(dt.getDisplayName())) {
+            fail(String.format("data at 0x%x typed %s, expected %s", addr, actual, typeName));
+        }
+        if (data.getLength() != length) {
+            fail(String.format("data at 0x%x length=%d expected=%d (%s)",
+                    addr, data.getLength(), length, typeName));
+        }
+    }
+
     @Override
     public void run() throws Exception {
         // Critical boot/application landmarks.
@@ -139,6 +160,33 @@ public class AssertProjectInvariants extends GhidraScript {
         requireBlock("SFR_EIC", 0xFFFFB000L, 0x1000L, true, true, false, true);
         requireBlock("SFR_RSCFD", 0xFFD20000L, 0x10000L, true, true, false, true);
         requireBlock("SFR_ICUS", 0xFFC5D000L, 0x1000L, true, true, false, true);
+
+        // Evidence-backed SFR labels from data/p1m_sfr_labels.csv.
+        requireLabel(0xFFFFB110L, "EIC136");
+        requireLabel(0xFFFFB10AL, "EIC133");
+        requireLabel(0xFFFFB248L, "EIC292");
+        requireLabel(0xFFFFB24AL, "EIC293");
+        requireLabel(0xFFFFB176L, "EIC187");
+        requireLabel(0xFFD20178L, "CFSTS");
+        requireLabel(0xFFD20184L, "CFSTS_CH1");
+        requireLabel(0xFFD201D8L, "CFPCTR");
+        requireLabel(0xFFD20250L, "CFDTMC");
+        requireLabel(0xFFD20260L, "CFDTMC16");
+        requireLabel(0xFFD202D0L, "CFDTMSTS");
+        requireLabel(0xFFD23400L, "CFID");
+        requireLabel(0xFFD24200L, "CFDTMID16");
+        requireLabel(0xFFC5D000L, "ICUSCMD");
+        requireLabel(0xFFC5D00CL, "ICUSSTS");
+
+        // Structured overlays from ApplyP1MSfrTypes.
+        requireDataType(0xFFFFB110L, "EIC_Register", 2);
+        requireDataType(0xFFFFB248L, "EIC_Register", 2);
+        requireDataType(0xFFC5D000L, "ICUS_Command", 4);
+        requireDataType(0xFFC5D00CL, "ICUS_Status", 4);
+        requireDataType(0xFFD20178L, "RSCFD_CFSTS", 4);
+        requireDataType(0xFFD20260L, "RSCFD_CFDTMC", 1);
+        requireDataType(0xFFD23400L, "RSCFD_CommonFifoFrame", 0x20);
+        requireDataType(0xFFD24200L, "RSCFD_TxMessageBuffer", 0x20);
 
         // Register context is mandatory after applying the device profile.
         Address bootAddr = toAddr(0x800L);

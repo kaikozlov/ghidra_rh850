@@ -1,8 +1,35 @@
 address,name,size,access,comment
-0xFFFFB110,EIC136,2,rw,TAUJ0 CH3 interrupt control (foreground tick)
+# EI level interrupt-control registers (EICn @ 0xFFFFB000 + 2*n). Named channels
+# are those with verified firmware roles in docs/FIRMWARE_ARCHITECTURE.md.
+0xFFFFB010,EIC8,2,rw,ECM maskable-error interrupt control (EIINT 8)
+0xFFFFB10A,EIC133,2,rw,TAUJ0 CH0 interrupt control (EIINT 133)
+0xFFFFB10C,EIC134,2,rw,TAUJ0 CH1 interrupt control (EIINT 134)
+0xFFFFB10E,EIC135,2,rw,TAUJ0 CH2 interrupt control (EIINT 135)
+0xFFFFB110,EIC136,2,rw,TAUJ0 CH3 interrupt control (foreground tick; EIRF bit 12 polled)
+0xFFFFB176,EIC187,2,rw,RSCAN CAN1 receive interrupt control (EIINT 187)
+0xFFFFB178,EIC188,2,rw,RSCAN CAN1 transmit interrupt control (EIINT 188)
 0xFFFFB248,EIC292,2,rw,ICU-S crypto-driver interrupt channel 292
 0xFFFFB24A,EIC293,2,rw,ICU-S crypto-driver interrupt channel 293
-0xFFD20178,CFSTS,4,rw,RSCFD status (from Can transport annotations)
-0xFFD201D8,CFPCTR,4,rw,RSCFD control
-0xFFD20250,CFDTMC,4,rw,RSCFD Tx message buffer control base
-0xFFD202D0,CFDTMSTS,4,rw,RSCFD Tx message buffer status base
+0xFFFFB2F6,EIC379,2,rw,Flash sequencer-end interrupt control (EIINT 379)
+# RSCFD / RSCAN-FD register bases used by Can transport (docs/CAN_TRANSPORT_ANALYSIS.md).
+# Channel-0 bases match the firmware peripheral table at 0x23000; channel-1
+# (application CAN1) and diagnostic Tx buffer n=16 are labeled explicitly.
+0xFFD20178,CFSTS,4,rw,RSCFD common-FIFO status base (ch0/fifo0; +0x0C*ch +4*fifo)
+0xFFD20184,CFSTS_CH1,4,rw,RSCFD common-FIFO status for application CAN1 (ch1/fifo0)
+0xFFD201D8,CFPCTR,4,rw,RSCFD common-FIFO pointer control base (write 0xFF advances)
+0xFFD201E4,CFPCTR_CH1,4,rw,RSCFD common-FIFO pointer control for application CAN1
+0xFFD20250,CFDTMC,4,rw,RSCFD Tx message-buffer control base (CFDTMCn.TMTR at +n)
+0xFFD20260,CFDTMC16,1,rw,Diagnostic Tx buffer control (HTH 0x13 -> n=16; TMTR bit 0)
+0xFFD202D0,CFDTMSTS,4,rw,RSCFD Tx message-buffer status base (CFDTMSTSn at +n)
+0xFFD202E0,CFDTMSTS_CH1,4,rw,RSCFD Tx status base for application CAN1 record
+0xFFD23400,CFID,4,rw,RSCFD common-FIFO message RAM base (CFID/CFPTR/CFDF window)
+0xFFD23580,CFID_CH1,4,rw,RSCFD common-FIFO message RAM for application CAN1
+0xFFD24000,CFDTMID,4,rw,RSCFD Tx message-buffer RAM base (0x20-byte entries)
+0xFFD24200,CFDTMID16,4,rw,Diagnostic Tx message RAM for buffer n=16 (CAN 0x7A9 path)
+# ICU-S crypto-driver command/status window (docs/SECOC_APPLICATION_CHAIN.md).
+# ICUSCMD encoding is verified; companion offsets use firmware-observed roles.
+0xFFC5D000,ICUSCMD,4,rw,ICU-S command register; CMAC verify writes (key_slot<<16)|7
+0xFFC5D004,ICUSDAT,4,rw,ICU-S data/parameter word written beside ICUSCMD (firmware role)
+0xFFC5D00C,ICUSSTS,4,rw,ICU-S status; driver polls bit 0 as busy/ready
+0xFFC5D014,ICUSSTS2,4,rw,ICU-S companion status; driver polls low bits with ICUSSTS
+0xFFC5D024,ICUSCTL,4,rw,ICU-S control word written during driver reset/abort path

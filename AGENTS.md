@@ -233,14 +233,14 @@ it live in `legacy/flat-import/` — do not use them for current results.
 ## Scripts and verification
 
 - `ghidra/scripts/import/` contains the split-image import helper and the
-  P1M-E device profile (`ApplyP1MDeviceProfile.java`).
+  P1M-E device profile (`ApplyP1MDeviceProfile.java`, `ApplyP1MSfrTypes.java`).
 - `ghidra/scripts/seed/` contains all function/table seeds missed by analysis.
 - `ghidra/scripts/annotate/` contains the durable labels/comments for completed
   work, plus `RecoverVectorHandlers.java` for INTBP/EBASE/`__interrupt`.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
 - `ghidra/scripts/verify/` contains asserting processor/project gates used by
   `make verify-processor`.
-- `make verify` runs twelve self-contained suites through UV; it must not require
+- `make verify` runs thirteen self-contained suites through UV; it must not require
   sibling repositories or Ghidra.
 - `make verify-sleigh` compiles the vendored processor module into an isolated
   extension under `build/ghidra-home/` from a disposable source copy (does not
