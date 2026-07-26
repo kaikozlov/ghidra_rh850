@@ -6,9 +6,9 @@ import json
 import sys
 
 EXPECTED = {
-    "functions": 5492,
-    "instructions": 171898,
-    "symbols": 27594,
+    "functions": 5537,
+    "instructions": 172325,
+    "symbols": 27660,
     "memory_size": 1081344,
     "sections": 2,
 }

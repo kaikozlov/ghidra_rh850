@@ -65,10 +65,11 @@ the two bootloader secrets were unreferenced. Use project **`rh850_p1me_mapped`*
 ## Pre-built project (committed under `project/`)
 
 The fully analyzed, annotated project is committed in `project/`
-(`rh850_p1me_mapped.gpr` + `rh850_p1me_mapped.rep/`, ~24 MiB). It already
+(`rh850_p1me_mapped.gpr` + `rh850_p1me_mapped.rep/`, ~29 MiB). It already
 contains the discovered functions, both secret labels, the bootloader and
 application diagnostic handlers, and the annotated SecurityAccess/payload-gate/
-AES/SecOC/CAN transport paths — so you can explore it directly without rebuilding.
+AES/SecOC/CAN transport and boot/application architecture paths — so you can
+explore it directly without rebuilding.
 
 Open it with the `ghidra` CLI. The project location must be an **absolute**
 path: Ghidra 12.1+ rejects any path component beginning with `.`
@@ -171,6 +172,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `SeedPayloadVerificationFunctions.java`;
    - `SeedSecocNvmFunctions.java`;
    - `SeedApplicationDiagnosticFunctions.java`;
+   - `SeedArchitectureFunctions.java`;
 5. re-run analysis and apply every annotation script:
    - `AnnotateBootloaderSecrets.java`;
    - `AnnotatePayloadGate.java`;
@@ -179,9 +181,10 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateDidModel.java`;
    - `AnnotateCanTransport.java`;
    - `AnnotateApplicationDiagnostics.java`;
+   - `AnnotateArchitecture.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
-7. require exactly 5,492 functions, 171,898 instructions, 27,594 symbols, two
+7. require exactly 5,537 functions, 172,325 instructions, 27,660 symbols, two
    memory sections, and `0x108000` mapped bytes.
 
 Expected memory map:
@@ -196,7 +199,7 @@ and execution trace.
 
 ## Corrected result
 
-- **5,492 functions, 171,898 instructions, 27,594 symbols**.
+- **5,537 functions, 172,325 instructions, 27,660 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -367,7 +370,26 @@ related EPS returns the same application DID/service schema. They do not prove
 the related MCU, byte-identical bootloader contents, retained secrets/payload
 routines, or that a PROGRAMMING timeout must be external to the EPS.
 
-### Confirmed CAN / ISO-TP / UDS transport
+### Boot/application architecture and application CAN routing
+
+`docs/FIRMWARE_ARCHITECTURE.md` maps the broader execution architecture and
+`tests/verify_architecture.py` checks its raw CodeFlash landmarks:
+
+- the application vector/executable base is `0x20000`, where it installs
+  `EBASE`; this is not a strict boundary for all calibration/metadata, and its
+  384-entry EIINT pointer table begins at `0x20200`;
+- boot handoff at `0x13B0` reads the entry pointer at `0xFFDB8`, whose value is
+  `0x20880`, then the application initializes modules and enters the foreground
+  loop at `0x64FCC`;
+- that foreground loop polls TAUJ0 channel 3's `EIRF136` tick and runs the
+  NvM/CSM, main application, and corrected SecOC-NvM cyclic groups;
+- the application table has explicit handlers for ECM, TAUJ0 channels 0..2,
+  RSCAN CAN1 RX/TX, two hardware-reserved channels, and flash completion;
+- the CAN1 acceptance table at `0x231A0` contains 47 normal receive IDs plus
+  `0x7A1/0x777/0x7A0/0x7F7`; `0x2E4`, `0x0F`, and `0x131` are explicit RX
+  routes, while `0x344` is absent from this firmware's receive filters.
+
+### Confirmed bootloader CAN / ISO-TP / UDS transport
 
 `docs/CAN_TRANSPORT_ANALYSIS.md` traces the complete diagnostic path and
 `tests/verify_can_transport.py` independently checks it directly against CodeFlash.
@@ -407,12 +429,12 @@ extraction tooling and shellcode:
 
 | Path | Contents |
 |---|---|
-| `docs/` | Payload gate, SecOC/NvM correction, DataFlash, application/bootloader diagnostics, DID, and CAN transport reports |
+| `docs/` | Firmware architecture, payload gate, SecOC/NvM correction, DataFlash, application/bootloader diagnostics, DID, and CAN transport reports |
 | `ghidra/scripts/import/` | DataFlash attachment/import helper |
 | `ghidra/scripts/seed/` | Function and table seeds missed by auto-analysis |
 | `ghidra/scripts/annotate/` | Durable names, labels, and comments for each completed investigation |
 | `ghidra/scripts/investigate/` | Reusable reference/operand search helpers |
-| `tests/` | Seven self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
+| `tests/` | Eight self-contained firmware suites, optional external corroboration, and pinned payload fixtures |
 | `tools/` | DataFlash CSV generator, durable Ghidra rebuild, and project-statistics verifier |
 | `external-references.lock.json` | Exact upstream commits and artifact hashes |
 | `pyproject.toml`, `uv.lock` | Locked UV/PyCryptodome verification environment |

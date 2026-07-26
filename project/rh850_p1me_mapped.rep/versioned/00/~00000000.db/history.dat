@@ -1,6 +1,4 @@
-1;kai;1785009744822;
-2;kai;1785010084027;
-3;kai;1785011797959;
-4;kai;1785013502310;
-5;kai;1785014618200;
-6;kai;1785016387665;
+1;kai;1785024514342;Import mapped CodeFlash and DataFlash
+2;kai;1785024542547;Seed report entries and run base analysis
+3;kai;1785024551563;Seed UDS service table and handlers
+4;kai;1785024561467;Complete reproducible RH850 analysis

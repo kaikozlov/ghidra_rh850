@@ -10,7 +10,8 @@ VERIFY_SUITES := \
 	tests/verify_dataflash_layout.py \
 	tests/verify_did_model.py \
 	tests/verify_application_diagnostics.py \
-	tests/verify_can_transport.py
+	tests/verify_can_transport.py \
+	tests/verify_architecture.py
 
 .PHONY: sync verify verify-core verify-external generate-dataflash rebuild-project
 

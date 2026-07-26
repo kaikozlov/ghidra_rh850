@@ -151,6 +151,14 @@ the reconstructed combined firmware — trust them:
   - matching application tables in a related EPS are strong software-family
     evidence, but do not prove its MCU, bootloader payload path, or an external
     gateway explanation for silence.
+- The broader execution map is in `docs/FIRMWARE_ARCHITECTURE.md` and checked by
+  `tests/verify_architecture.py`:
+  - application vector/executable base `0x20000`; entry pointer `0xFFDB8 -> 0x20880`;
+  - application `EBASE=0x20000`, `INTBP=0x20200`, and foreground loop `0x64FCC`;
+  - the foreground loop polls TAUJ0 CH3 `EIRF136`; CH0..2 use EIINT 133..135;
+  - application RSCAN CAN1 uses EIINT 187/188 and 51 acceptance rules at `0x231A0`;
+  - `0x2E4`, `0x0F`, and `0x131` are explicit RX routes; `0x344` is not in the
+    application RX acceptance table and must not be projected onto it.
 
 The prior "secrets are unreferenced / separate bootloader image" conclusion was
 an artifact of the wrong flat import and is **false**. The scripts that produced
@@ -162,7 +170,7 @@ it live in `legacy/flat-import/` — do not use them for current results.
 - `ghidra/scripts/seed/` contains all function/table seeds missed by analysis.
 - `ghidra/scripts/annotate/` contains the durable labels/comments for completed work.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
-- `make verify` runs seven self-contained suites through UV; it must not require
+- `make verify` runs eight self-contained suites through UV; it must not require
   sibling repositories.
 - `make verify-external EXTERNAL_REPOS_DIR=...` checks optional public checkouts
   against `external-references.lock.json`.
