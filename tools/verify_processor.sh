@@ -77,6 +77,7 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     -postScript AssertNoUndefinedInFunctions.java \
     -postScript AssertSystemRegisterNames.java \
     -postScript AssertProjectInvariants.java \
+    -postScript AssertSwitchTables.java \
     -postScript AssertDecompilerInvariants.java "$DECOMPILER_REPORT" \
     -postScript InventoryUsedInstructions.java "$INV_OUT" "$ROOT/data/processor_unimpl_allowlist.txt" \
     2>&1 | tee "$PROJECT_LOG"

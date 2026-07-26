@@ -189,6 +189,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateApplicationDiagnostics.java`;
    - `AnnotateBootloaderDiagnostics.java`;
    - `RecoverVectorHandlers.java` (INTBP/EBASE/`__interrupt`);
+   - `RecoverSwitchTables.java` (in-function `switch` jump tables);
    - `AnnotateArchitecture.java`;
    - `AnnotateApplicationTransmit.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the

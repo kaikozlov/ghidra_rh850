@@ -236,7 +236,8 @@ it live in `legacy/flat-import/` — do not use them for current results.
   P1M-E device profile (`ApplyP1MDeviceProfile.java`, `ApplyP1MSfrTypes.java`).
 - `ghidra/scripts/seed/` contains all function/table seeds missed by analysis.
 - `ghidra/scripts/annotate/` contains the durable labels/comments for completed
-  work, plus `RecoverVectorHandlers.java` for INTBP/EBASE/`__interrupt`.
+  work, plus `RecoverVectorHandlers.java` for INTBP/EBASE/`__interrupt` and
+  `RecoverSwitchTables.java` for in-function RH850 `switch` jump tables.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
 - `ghidra/scripts/verify/` contains asserting processor/project gates used by
   `make verify-processor`.
@@ -259,7 +260,8 @@ it live in `legacy/flat-import/` — do not use them for current results.
 Run `make rebuild-project` for a non-destructive rebuild under `build/project/`.
 `tools/rebuild_project.sh` installs the isolated processor extension, imports
 both regions (with the P1M-E device profile), runs every seed and annotation
-in four staged durable headless commits (including vector recovery), cleanly
+in four staged durable headless commits (including vector and switch-table
+recovery), cleanly
 stops the stats daemon, writes `processor_manifest.json`, and verifies project
 statistics. Do not collapse the stages: seed timing changes Ghidra's recovered
 graph. To promote a finished rebuild into the committed `project/` snapshot,

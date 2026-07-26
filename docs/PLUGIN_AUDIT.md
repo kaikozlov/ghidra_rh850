@@ -14,6 +14,7 @@ semantic correctness.** The checks below are layered:
 | Decompiler invariants | Landmark ABI/decompiler properties | `AssertDecompilerInvariants` |
 | Device profile | RAM/SFR map + SFR labels/types + boot/application GP/TP context | `ApplyP1MDeviceProfile`, `ApplyP1MSfrTypes` |
 | Vector recovery | INTBP/EBASE handlers + `__interrupt` | `RecoverVectorHandlers` |
+| Switch tables | In-function `switch` jump tables + xrefs | `RecoverSwitchTables` / `AssertSwitchTables` |
 
 Automated gate:
 
@@ -129,6 +130,25 @@ functions, and applies the `__interrupt` prototype to true ISR wrappers
 (not their normal callees such as `0x87610`/`0x87636`). It also creates explicit
 vector-to-handler references; project invariants require the expected 382
 CodeFlash INTBP references and all known wrapper conventions.
+
+## Switch jump-table recovery
+
+`RecoverSwitchTables.java` recovers the RH850 `switch reg` idiom for every
+in-function site (19 in this image; the remaining decoded `switch` mnemonics
+sit outside function bodies and are treated as non-compiler collisions):
+
+1. Size the table from the compiler bound check (`cmp IMM` + `bh`/`bnh` →
+   `IMM+1`, or `addi -N,rX,r0` + `bc`/`bnc` → `N`), falling back to the packed
+   case-0 idiom where the first signed halfword equals the entry count.
+2. Define a `short[N]` array immediately after the instruction, label it
+   `switch_table_<addr>`, and comment the switch with the table address/size.
+3. Add `COMPUTED_JUMP` references from the switch to every case target and
+   `DATA` references from each table halfword to its target; disassemble case
+   entries when needed.
+
+`AssertSwitchTables.java` (run by `make verify-processor`) requires all 19
+in-function switches to have a sized halfword table and complete jump-target
+coverage.
 
 ## Accepted unimplemented ops
 
