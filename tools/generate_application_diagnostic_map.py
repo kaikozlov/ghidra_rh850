@@ -261,16 +261,31 @@ SEMANTICS = {
             "phase_dispatcher 0x8D344 copies request then 0x8D2B2; "
             "subfn wrappers 0x96A34/0x96A56/0x96A78"
         ),
-        "async_worker": "0x96918/0x968A6; pending 10 posts event 0x16",
+        "async_worker": (
+            "0x96918 shared worker; subfn 1=start(0 data bytes), "
+            "2=reset/clear(2 bytes, calls 0x8CD9C), 3=configure(4 bytes, calls 0x8CDA8); "
+            "pending 10 posts event 0x16"
+        ),
         "security_policy": "none at service level; subfn sessions [1,3]",
         "nrcs": "0x13 length; 0x31 lookup miss; vendor byte from worker",
         "side_effects": (
             "absolute mov 0xFEBF48EC; primary mirror at FEBF48EC; secondary at "
-            "FEBF493C via st.w 0x50[r1]; may invoke routine-ID entries 0..12"
+            "FEBF493C via st.w 0x50[r1]; copies 28-byte request context to FEBE5E0C; "
+            "writes control block at FEBF45D0 (params, mode 0x300 on reset); "
+            "may invoke routine-ID entries 0..12 (RIDs 0x0204..0x2014)"
         ),
-        "config_tables": "subfn 0x25CD0 (01/02/03); routine-ID table head used by 0x8D3CC",
-        "evidence_status": "structural-recovered",
-        "notes": "Proprietary; no OEM service name assigned. Secondary record uses data ptrs 0x26104/0x26110",
+        "config_tables": (
+            "subfn 0x25CD0 (01/02/03); routine-ID table head used by 0x8D3CC; "
+            "control block FEBF45D0; response data at CodeFlash 0x2FD8C"
+        ),
+        "evidence_status": "recovered",
+        "notes": (
+            "Proprietary service controlling a calibration/flash control block at FEBF45D0. "
+            "Subfn 1=start, 2=reset (clears block, sets mode 0x300), 3=configure (writes two u16 params). "
+            "Secondary 0x7A0->0x7A8 endpoint routes through same subfn wrappers; "
+            "its record callback/trailing fields are CAN routing IDs (0x7A1/0x7A0), not code pointers. "
+            "Response includes vendor byte from FEBF493C."
+        ),
     },
     0xBA: {
         "service_callback_role": "null in service table; simple-response path (byte[9]==0)",

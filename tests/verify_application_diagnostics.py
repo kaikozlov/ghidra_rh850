@@ -449,6 +449,42 @@ check("proprietary AB st.w r19,0x50[r1] builds FEBF493C from FEBF48EC",
 check("proprietary AB keeps FEBF48EC in r6 for primary 0/4/8/C stores",
       CF[0x8D356:0x8D358] == bytes.fromhex("0130") and
       CF[0x8D394:0x8D398] == bytes.fromhex("660f0100"))
+
+print("\n== proprietary 0xAB semantics ==")
+# AB shared worker 0x96918 dispatches by selector (subfunction & 0x0F).
+# Selector 1: request data length must be 0 (start/initialize)
+# Selector 2: request data length must be 2 (reset/clear)
+# Selector 3: request data length must be 4 (configure with two u16 params)
+# The worker copies 28 bytes of request context to FEBE5E0C.
+check("AB shared worker 0x96918 copies request context to FEBE5E0C",
+      bytes.fromhex("0ca6") in CF[0x96918:0x96A34])  # GP-disp to FEBE5E0C (-0x59F4)
+# Selector dispatch: subfn 2 calls 0x8CD9C (reset), others call 0x8CDA8 (configure)
+check("AB subfn-2 path calls reset 0x8CD9C via 0x96B3A",
+      CF[0x96B3A:0x96B3C] == bytes.fromhex("8007") and  # prepare
+      CF[0x96B56:0x96B5A] == bytes.fromhex("40063f00"))  # dispose
+# Control block at FEBF45D0: configure writes params, reset clears all fields
+check("AB configure 0x8CDA8 stores params to FEBF45D0/FEBF45D2",
+      bytes.fromhex("d045") in CF[0x8CDA8:0x8CDC8])  # absolute ref to FEBF45D0
+check("AB reset 0x8CD2A sets mode 0x300 at FEBF45D6",
+      bytes.fromhex("0003") in CF[0x8CD2A:0x8CF84])  # 0x300 immediate
+# RID table entries 0..12 with start callbacks
+ROUTINE = struct.Struct("<HHII")
+ab_rids = [ROUTINE.unpack_from(CF, 0x25768 + i * ROUTINE.size) for i in range(13)]
+check("AB RID table covers 13 entries (0x0204 through 0x2014)",
+      ab_rids[0][0] == 0x0204 and ab_rids[12][0] == 0x2014 and len(ab_rids) == 13)
+check("AB RID entry 0 has non-zero start callback",
+      ab_rids[0][2] != 0)
+# Secondary endpoint: group 4 record at 0x26040 routes AB over 0x7A0->0x7A8
+ab_secondary = struct.unpack_from("<IIBBBBIII", CF, 0x26040)
+check("secondary AB record at 0x26040 has SID 0xAB",
+      ab_secondary[2] == 0xAB)
+check("secondary AB uses same subfn wrappers as primary",
+      struct.unpack_from("<I", CF, 0x25D90)[0] == 0x96A34)
+check("secondary AB callback field contains CAN routing ID 0x7A1",
+      struct.unpack_from("<I", CF, 0x26104)[0] == 0x7A1)
+check("secondary AB trailing word contains CAN routing ID 0x7A0",
+      struct.unpack_from("<I", CF, 0x26110)[0] == 0x01007A00 or
+      (struct.unpack_from("<I", CF, 0x26110)[0] & 0xFFFF) == 0x7A0)
 check("ReadDTC subfn01 mirrors request via st.w r19,0[r1] at absolute base",
       CF[0x8B5BA:0x8B5BE] == bytes.fromhex("619f0100"))
 

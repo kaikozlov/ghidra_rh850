@@ -66,7 +66,7 @@ through `w3`.
 | `37` | RequestTransferExit | `2` | null callback; simple-response (byte[9]==0) | echoes `77`+request; no transfer exit | resolved |
 | `3E` | TesterPresent | `1/2/3` | subfn `0x25CA0` | zero-length ack only; no S3 timer | recovered |
 | `85` | ControlDTCSetting | `3` | subfn `0x25CB0` | settings `01/02`; absolute store `FEBF45A8` | recovered |
-| `AB` | proprietary | `1/3` | subfn `0x25CD0` + callback `0x8D344` | mirrors `FEBF48EC` and `FEBF48EC+0x50`; RID `0..12` | structural |
+| `AB` | proprietary | `1/3` | subfn `0x25CD0` + callback `0x8D344` | calibration/flash control: start(01), reset(02), configure(03); control block `FEBF45D0` | recovered |
 | `BA` | proprietary | `3` | null callback; simple-response (byte[9]==0) | echoes `FA`+request; no proprietary processing | resolved |
 
 No primary service record carries a non-zero service-level security allow-count
@@ -358,19 +358,82 @@ from SID to this table is not statically recovered. AB-adjacent
 
 Proprietary `0xAB` uses callback `0x8D344` and subfunctions `01/02/03` at
 `0x25CD0` (`0x96A34`/`0x96A56`/`0x96A78`). No OEM service name is assigned.
-Request-mirror construction at phase 0:
+
+#### Wire format and typed structure
+
+The shared worker `0x96918` dispatches by selector `(subfunction & 0x0F)` and
+enforces exact request-data lengths:
+
+| Subfn | Selector | Request shape | Data length | Operation |
+|---:|---:|---|---:|---|
+| `01` | 1 | `AB 01` | 0 | **start/initialize** — no parameters |
+| `02` | 2 | `AB 02 XX XX` | 2 | **reset/clear** — clears control block, data bytes unused |
+| `03` | 3 | `AB 03 XX XX YY YY` | 4 | **configure** — two `u16` params written to control block |
+
+Length violations produce NRC `0x13`.
+
+The callback `0x8D344` at phase 0 copies the request into the typed mirror at
+`0xFEBF48EC`:
 
 ```text
 0x8D350  mov  0xFEBF48EC, r1          ; absolute base
 0x8D356  mov  r1, r6
-0x8D358  st.w r19, 0x50[r1]           ; FEBF48EC+0x50 = FEBF493C (+0x50..0x6A block)
+0x8D358  st.w r19, 0x50[r1]           ; FEBF48EC+0x50 = FEBF493C (secondary mirror)
 0x8D394  st.w ..., 0x0[r6]            ; primary mirror FEBF48EC (+0/4/8/C)
 ```
 
-So `FEBF493C` is a displacement store from the `FEBF48EC` base, not a second
-absolute literal. Buffer field layout remains opaque.
+The worker copies 28 bytes (7 dwords) of request context to RAM `0xFEBE5E0C`.
 
-Proprietary `0xBA` is config-only (extended session, null callback).
+#### Control block at `FEBF45D0`
+
+The three subfunctions operate on a shared control block at RAM `0xFEBF45D0`:
+
+- **Subfn 01 (start)**: calls `0x8CDA8` with `params=0xFFFF,0xFFFF`, stores the
+  selector to `FEBF45DC`, then calls `0x4F8AE` which propagates the selector
+  and params to `FEBE8165`/`FEBE8172`/`FEBE8174`.
+- **Subfn 02 (reset)**: calls `0x8CD9C` → `0x8CD2A`, which clears the entire
+  block: `FEBF45D0=0, FEBF45D2=0, FEBF45D4=0, FEBF45D6=0x300,
+  FEBF45DD=1, FEBF45DF=1, FEBF45E2=0xFF, FEBF45E3=1` (others zeroed).
+- **Subfn 03 (configure)**: calls `0x8CDA8` with the two `u16` params from the
+  request, storing them to `FEBF45D0` and `FEBF45D2`.
+
+After the control block update, the worker calls `0x968A6` (poll/finalize),
+which invokes `0x96B5A` → `0x8CF84`, a large state machine that may return
+pending (event `0x16`).
+
+#### RID table interaction
+
+`application_routine_id_lookup @ 0x8D3CC` scans entries `0..12` of the
+32-entry RID table at `0x25768`. The 13 accessible RIDs are:
+
+```text
+0x0204, 0x2001, 0x2002, 0x2005, 0x2006, 0x2007, 0x2008,
+0x2009, 0x200D, 0x2010, 0x2012, 0x2013, 0x2014
+```
+
+Each entry has `start_cb` and `result_cb` pointers. The lookup matches the RID
+from the request and invokes the start callback. This table is shared with SID
+`0x31`'s configuration, but `0x31` itself does not dispatch routines (see the
+DSP dispatch resolution above).
+
+#### Response format
+
+On success, `0x8D2B2` returns:
+- `**(param_1+8) = *FEBF493C` — vendor byte from the secondary mirror
+- `*(param_1+0xC) = 0x2FD8C + offset` — response data pointer into CodeFlash
+
+#### Secondary `0x7A0 → 0x7A8` endpoint
+
+The secondary physical endpoint (service group 4) exposes `0xAB` via an extra
+record at `0x26040`. This record uses the **same subfunction wrappers**
+(`0x96A34`/`0x96A56`/`0x96A78`) as the primary endpoint, confirming identical
+handler code. The record's "callback" (`0x26104` → `0x7A1`) and "trailing word"
+(`0x26110` → `0x7A0`) fields are **CAN routing IDs**, not code pointers — they
+configure the transport layer for the secondary bus.
+
+The secondary endpoint exists for a dedicated tester or manufacturing interface
+that uses CAN `0x7A0` instead of `0x7A1`. Both endpoints reach the same
+calibration/flash control logic.
 
 ### Bounded negatives (`14`/`23`/`31`/`34`/`36`/`37`/`BA`) — resolved
 
@@ -733,7 +796,7 @@ Those require successful bootloader capture or a firmware image from part
 | null-callback SIDs `14`/`23`/`31`/`34`/`36`/`37`/`BA` receive simple positive responses (no service-specific DSP) | **Definitive** |
 | generated Dcm DSP start-phase globally disabled (flag @0x25DCC=0) | **Definitive** |
 | SID `0x31` excluded from subfunction path; RID table consumed only by `0xAB` callback | **Definitive** |
-| proprietary SID `0xAB` OEM name/purpose | **Unknown** |
+| proprietary SID `0xAB` OEM name/purpose | **Calibration/flash control service (no OEM name recovered)** |
 | reset reaches the bootloader rather than returning directly to application | **Strong inference** |
 | bootloader `0x614A` queues valid transitions instead of responding directly | **Definitive** |
 | `0x4776` state is cleared by the main-loop task and is not per-boot one-shot | **Definitive** |
