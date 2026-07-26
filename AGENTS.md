@@ -224,14 +224,15 @@ the reconstructed combined firmware — trust them:
     `FEBF495A`. Expected key = AES/CMAC transform of stored seed under 16-byte
     secret at CodeFlash `0x20840`. Attempt counter and delay are RAM-only.
     Unlock state is a 2-dword bitmask set by `0x900FC`→`0x9075A`;
-  - proprietary `0xAB` is a calibration/flash control service: subfn `01`=start
-    (0 bytes), `02`=reset (2 bytes, clears control block at `FEBF45D0`, mode
+  - proprietary `0xAB` is an asynchronous control service: subfn `01`=start
+    (0 bytes), `02`=reset (2 bytes, clears state block at `FEBF45D0`, mode
     `0x300`), `03`=configure (4 bytes, two `u16` params). Worker `0x96918`
-    copies 28-byte context to `FEBE5E0C`. RID lookup `0x8D3CC` scans entries
-    `0..12` (RIDs `0x0204..0x2014`). Response includes vendor byte from
-    `FEBF493C`. Secondary `0x7A0→0x7A8` endpoint uses same handlers; its
-    record fields at `0x26104`/`0x26110` are CAN routing IDs (`0x7A1`/`0x7A0`),
-    not code pointers;
+    copies 28-byte context to `FEBE5E0C`. RID lookup `0x8D3CC` scans 13 entries
+    (RIDs `0x0204..0x2014`), all with non-zero start/result callbacks. Response
+    includes vendor byte from `FEBF493C`. Secondary `0x7A0→0x7A8` endpoint uses
+    same handlers; its record fields at `0x26104`/`0x26110` are CAN routing IDs
+    (`0x7A1`/`0x7A0`), not code pointers. 'Calibration/flash control' is a
+    hypothesis, not proven;
   - instruction-proved absolute RAM roots: ControlDTC store `FEBF45A8`, ReadDTC
     request mirrors `FEBF3BFC/3F24/4248/457C`, AB mirrors `FEBF48EC` and
     `FEBF48EC+0x50` (`FEBF493C`); buffers stay opaque;

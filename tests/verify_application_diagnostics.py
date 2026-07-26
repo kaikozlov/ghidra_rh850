@@ -366,12 +366,18 @@ check("SA key verification worker loads provisioned flag from FEBF4958",
 # Attempt counter: send-key worker 0x94A72 maps mismatch (0x0B) to NRC 0x35
 check("SA send-key worker contains NRC 0x35 invalidKey path",
       bytes.fromhex("203e3500") in CF[0x94A72:0x94B66])
-# Unlock helper 0x900FC sets bitmask at GP-relative location
-check("SA unlock helper 0x900FC delegates to bitmask setter 0x9075A",
-      CF[0x900FC:0x91000] and CF[0x900FE:0x91002] != bytes.fromhex("7f000052"))
-# 0x9075A sets bit (level-1) in 2-dword bitmask, then calls propagation
-check("SA unlock bitmask setter uses and 0x1F mask for bit position",
-      bytes.fromhex("1f00") in CF[0x9075A:0x90800])  # and 0x1F for bit-within-dword
+# Crypto operations reference the ICU-S temp buffer at FEBF498C
+check("SA crypto init 0x8C7BC references crypto temp at FEBF498C",
+      struct.pack("<I", 0xFEBF498C) in CF[0x8C7BC:0x8C7F6])
+check("SA crypto transform 0x8C7F6 references crypto temp at FEBF498C",
+      struct.pack("<I", 0xFEBF498C) in CF[0x8C7F6:0x8C82A])
+# Unlock helper 0x900FC is a prepare/call/return wrapper (10 bytes, not a stub)
+check("SA unlock helper 0x900FC starts with prepare {lp},0",
+      CF[0x900FC:0x90100] == bytes.fromhex("80072100"))
+check("SA unlock helper 0x900FC ends with jmp lp (return)",
+      CF[0x90104:0x90106] == bytes.fromhex("5806"))
+check("SA unlock helper 0x900FC is not a bare return (function body > 4 bytes)",
+      len(CF[0x900FC:0x90106]) == 10 and CF[0x900FC:0x900FE] != bytes.fromhex("00527f00"))
 check("ECUReset start packs three request bytes before lower stages",
       bytes.fromhex("7d070100") in CF[0x8B144:0x8B180] and
       bytes.fromhex("3d3e0800") in CF[0x8B144:0x8B180])
@@ -467,13 +473,22 @@ check("AB configure 0x8CDA8 stores params to FEBF45D0/FEBF45D2",
       bytes.fromhex("d045") in CF[0x8CDA8:0x8CDC8])  # absolute ref to FEBF45D0
 check("AB reset 0x8CD2A sets mode 0x300 at FEBF45D6",
       bytes.fromhex("0003") in CF[0x8CD2A:0x8CF84])  # 0x300 immediate
-# RID table entries 0..12 with start callbacks
+# RID table entries 0..12 with start callbacks — lock the full list
 ROUTINE = struct.Struct("<HHII")
 ab_rids = [ROUTINE.unpack_from(CF, 0x25768 + i * ROUTINE.size) for i in range(13)]
+expected_ab_rids = [
+    0x0204, 0x2001, 0x2002, 0x2005, 0x2006, 0x2007, 0x2008,
+    0x2009, 0x200D, 0x2010, 0x2012, 0x2013, 0x2014,
+]
 check("AB RID table covers 13 entries (0x0204 through 0x2014)",
       ab_rids[0][0] == 0x0204 and ab_rids[12][0] == 0x2014 and len(ab_rids) == 13)
-check("AB RID entry 0 has non-zero start callback",
-      ab_rids[0][2] != 0)
+check("AB RID sequence is exactly the 13 expected RIDs",
+      [r[0] for r in ab_rids] == expected_ab_rids,
+      repr([f"0x{r[0]:04X}" for r in ab_rids]))
+check("AB all 13 RID start callbacks are non-zero",
+      all(r[2] != 0 for r in ab_rids))
+check("AB all 13 RID result callbacks are non-zero",
+      all(r[3] != 0 for r in ab_rids))
 # Secondary endpoint: group 4 record at 0x26040 routes AB over 0x7A0->0x7A8
 ab_secondary = struct.unpack_from("<IIBBBBIII", CF, 0x26040)
 check("secondary AB record at 0x26040 has SID 0xAB",

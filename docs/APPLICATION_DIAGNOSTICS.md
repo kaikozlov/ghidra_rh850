@@ -66,7 +66,7 @@ through `w3`.
 | `37` | RequestTransferExit | `2` | null callback; simple-response (byte[9]==0) | echoes `77`+request; no transfer exit | resolved |
 | `3E` | TesterPresent | `1/2/3` | subfn `0x25CA0` | zero-length ack only; no S3 timer | recovered |
 | `85` | ControlDTCSetting | `3` | subfn `0x25CB0` | settings `01/02`; absolute store `FEBF45A8` | recovered |
-| `AB` | proprietary | `1/3` | subfn `0x25CD0` + callback `0x8D344` | calibration/flash control: start(01), reset(02), configure(03); control block `FEBF45D0` | recovered |
+| `AB` | proprietary | `1/3` | subfn `0x25CD0` + callback `0x8D344` | async control: start(01), reset(02), configure(03); state block `FEBF45D0`; RID `0..12` | recovered |
 | `BA` | proprietary | `3` | null callback; simple-response (byte[9]==0) | echoes `FA`+request; no proprietary processing | resolved |
 
 No primary service record carries a non-zero service-level security allow-count
@@ -431,9 +431,8 @@ handler code. The record's "callback" (`0x26104` → `0x7A1`) and "trailing word
 (`0x26110` → `0x7A0`) fields are **CAN routing IDs**, not code pointers — they
 configure the transport layer for the secondary bus.
 
-The secondary endpoint exists for a dedicated tester or manufacturing interface
-that uses CAN `0x7A0` instead of `0x7A1`. Both endpoints reach the same
-calibration/flash control logic.
+The secondary endpoint's intended OEM tester role is unknown. Both endpoints
+reach the same asynchronous control logic.
 
 ### Bounded negatives (`14`/`23`/`31`/`34`/`36`/`37`/`BA`) — resolved
 
@@ -796,7 +795,7 @@ Those require successful bootloader capture or a firmware image from part
 | null-callback SIDs `14`/`23`/`31`/`34`/`36`/`37`/`BA` receive simple positive responses (no service-specific DSP) | **Definitive** |
 | generated Dcm DSP start-phase globally disabled (flag @0x25DCC=0) | **Definitive** |
 | SID `0x31` excluded from subfunction path; RID table consumed only by `0xAB` callback | **Definitive** |
-| proprietary SID `0xAB` OEM name/purpose | **Calibration/flash control service (no OEM name recovered)** |
+| proprietary SID `0xAB` OEM name/purpose | **Asynchronous control service (calibration/flash is a hypothesis, not proven)** |
 | reset reaches the bootloader rather than returning directly to application | **Strong inference** |
 | bootloader `0x614A` queues valid transitions instead of responding directly | **Definitive** |
 | `0x4776` state is cleared by the main-loop task and is not per-boot one-shot | **Definitive** |

@@ -280,11 +280,17 @@ SEMANTICS = {
         ),
         "evidence_status": "recovered",
         "notes": (
-            "Proprietary service controlling a calibration/flash control block at FEBF45D0. "
-            "Subfn 1=start, 2=reset (clears block, sets mode 0x300), 3=configure (writes two u16 params). "
+            "Proprietary asynchronous control service operating a parameterized "
+            "state block (FEBF45D0) and dispatching a bounded set of routine "
+            "callback pairs. Subfn 1=start, 2=reset (clears block, sets mode "
+            "0x300), 3=configure (writes two u16 params). "
             "Secondary 0x7A0->0x7A8 endpoint routes through same subfn wrappers; "
-            "its record callback/trailing fields are CAN routing IDs (0x7A1/0x7A0), not code pointers. "
-            "Response includes vendor byte from FEBF493C."
+            "its record callback/trailing fields are CAN routing IDs (0x7A1/0x7A0), "
+            "not code pointers. "
+            "Response includes vendor byte from FEBF493C. "
+            "'Calibration/flash control' is a hypothesis (circumstantial: generic "
+            "control block, start/reset/configure pattern); RID callback semantics "
+            "and the state machine at 0x8CF84 have not been decoded."
         ),
     },
     0xBA: {
