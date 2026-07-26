@@ -177,11 +177,13 @@ echo "[4/4] Seed missed functions, analyze, and apply every annotation"
   -preScript SeedCanTransportFunctions.java \
   -preScript SeedPayloadVerificationFunctions.java \
   -preScript SeedSecocNvmFunctions.java \
+  -preScript SeedSecocApplicationFunctions.java \
   -preScript SeedApplicationDiagnosticFunctions.java \
   -preScript SeedArchitectureFunctions.java \
   -postScript AnnotateBootloaderSecrets.java \
   -postScript AnnotatePayloadGate.java \
   -postScript AnnotateSecocNvmCorrection.java \
+  -postScript AnnotateSecocApplication.java \
   -postScript AnnotateDataFlashLayout.java \
   -postScript AnnotateDidModel.java \
   -postScript AnnotateCanTransport.java \

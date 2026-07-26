@@ -148,10 +148,11 @@ It has low entropy and the original report measured zero CMAC matches. Therefore
   in any of the three object-15 copies.
 - **Strong external evidence:** provisioned related Sienna/Yaris/partner EPS
   variants store the operational key in object 15's second field.
-- **Unknown:** why this snapshot's object is invalid and where its operational key
-  came from at capture time. Possibilities include variant policy, provisioning
-  state, a masked/incomplete snapshot, or another source; static evidence does not
-  distinguish them.
+- **Strong inference:** the whole optional 32-byte bank is unprovisioned or
+  inactive in this snapshot. `SECOC_APPLICATION_CHAIN.md` adds that the compiled
+  CMAC path selects ICU-S slot 4 and its known-answer vector corresponds exactly
+  to an erased `FF*16` key. A masked/incomplete acquisition or different runtime
+  policy remains possible, so a provisioned-unit experiment is still required.
 
 The absence of a matching key in this dump is not evidence that pages 468–479 are
 KDF metadata, nor does it prove per-boot ICU derivation. It only proves absence
@@ -193,6 +194,8 @@ Accordingly:
 - the correct known related-variant locations are DataFlash `0xFF206E14` and RAM
   mirror field `0xFEBF02F8`;
 - neither is validated as containing a key in this exact snapshot;
+- the separate application verify path selects ICU-S slot 4 without reading the
+  object-15 mirror, and this calibration's known-answer vector expects `FF*16`;
 - the ICU-S tail may exist for other protected material, but it is no longer the
   best-supported location for this SecOC key.
 
@@ -209,4 +212,5 @@ Accordingly:
 | related variants store the CMAC-verified SecOC key at `0xFF206E14` | **Strong external/field evidence** |
 | DIDs 201/202/203 are volatile, not DataFlash-backed | **Definitive** |
 | pages 480–511 are ICU-S-reserved | **Strong hardware/layout inference** |
-| exact operational key source for this captured 12000 image | **Unknown** |
+| this snapshot's optional key bank is unprovisioned/inactive | **Strong inference** |
+| exact production relation between provisioned object 15 and ICU slot 4 | **Unknown** |

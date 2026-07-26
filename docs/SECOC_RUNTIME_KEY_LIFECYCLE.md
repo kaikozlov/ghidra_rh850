@@ -10,6 +10,9 @@ SecOC-associated objects. The initial analysis decoded only objects 0–3 and
 incorrectly generalized that every object was non-key state. The full DataFlash
 map in `DATAFLASH_LAYOUT.md` shows that object 15 is a 32-byte triplicate object
 whose second half is the field-verified SecOC-key location on related variants.
+The distinct application verification path, ICU-S slot-4 selection, erased-key
+known-answer vector, freshness format, and provisioned-unit experiment are in
+`SECOC_APPLICATION_CHAIN.md`.
 
 `../tests/verify_secoc_nvm.py` verifies the original NvM correction. The broader 16-object
 map and key-location correction are checked by `../tests/verify_dataflash_layout.py`.
@@ -124,7 +127,8 @@ This is software redundancy/TMR encoding, not three cryptographic key slots.
 ## 3. Boot restore lifecycle
 
 `secoc_nvm_state_init @ 0x67162` explicitly zeroes four groups of three 32-byte
-work buffers beginning at `0xFEBFEB08`.
+work buffers beginning at `0xFEBF0B08` (`application GP 0xFEBEB800 + 0x5308`).
+The earlier `0xFEBFEB08` rendering was an address-calculation error.
 
 `secoc_nvm_restore_all @ 0x6728E` then submits `NvM_ReadBlock` for all configured
 blocks. For a redundant object, `secoc_nvm_restore_triplicate @ 0x67590` submits:
@@ -258,8 +262,9 @@ Consequently:
 - monitoring `0xFEBEF468/478/488` still captures objects 0/1/3, not the key;
 - object 15's known related-variant locations are DataFlash `0xFF206E14` and RAM
   `0xFEBF02F8`;
-- `0xFEBFEB08` can temporarily hold any currently processed triplicate object,
-  including object 15, but it is not a fixed key staging address;
+- generic work groups rooted at `0xFEBF0B08` can temporarily hold currently
+  processed triplicate objects; object 15 specifically uses
+  `0xFEBF0C28/0xFEBF0C48/0xFEBF0C68`, but these are not fixed key-set buffers;
 - hooking `0x72F58` identifies generic reads; a useful monitor must filter block
   41/45/49 and observe completion, not treat the call as ICU key-set;
 - none of those locations contains a valid key in this exact committed snapshot;
@@ -271,7 +276,9 @@ Consequently:
 
 The production provisioning command remains unknown. On related variants the
 result is persisted as object 15's raw/XOR55/XORAA NvM copies. No SHE M1–M5 parser
-or ICU key-set path was established in the functions originally claimed.
+or ICU key-set path was established in the functions originally claimed. This
+image's separate application CMAC path selects ICU-S slot 4 without reading
+object 15; its embedded known-answer tag corresponds to an erased `FF*16` slot.
 
 ### How is it derived?
 
@@ -305,7 +312,10 @@ that the RAM field held a valid key at capture time.
 | related variants store a CMAC-verified SecOC key at `0xFF206E14` | **Strong field evidence** |
 | report's FEBEF/key-set/derivation path is invalid | **Definitive** |
 | final 2 KiB is an ICU-S protected storage tail | **Strong inference** |
-| exact key source/provisioning path for captured `8965B4512000` | **Unknown** |
+| application CMAC path selects ICU-S slot 4, not object-15 RAM | **Definitive** |
+| slot-4 known-answer vector in this calibration corresponds to `FF*16` | **Definitive** |
+| unprovisioned/inactive state explains the invalid 32-byte bank | **Strong inference** |
+| exact production provisioning path for a provisioned `8965B4512000` | **Unknown** |
 
 ## References
 

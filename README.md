@@ -171,12 +171,14 @@ produces a different graph and does not reproduce the committed statistics.
    - `SeedCanTransportFunctions.java`;
    - `SeedPayloadVerificationFunctions.java`;
    - `SeedSecocNvmFunctions.java`;
+   - `SeedSecocApplicationFunctions.java`;
    - `SeedApplicationDiagnosticFunctions.java`;
    - `SeedArchitectureFunctions.java`;
 5. re-run analysis and apply every annotation script:
    - `AnnotateBootloaderSecrets.java`;
    - `AnnotatePayloadGate.java`;
    - `AnnotateSecocNvmCorrection.java`;
+   - `AnnotateSecocApplication.java`;
    - `AnnotateDataFlashLayout.java`;
    - `AnnotateDidModel.java`;
    - `AnnotateCanTransport.java`;
@@ -184,7 +186,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateArchitecture.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
-7. require exactly 5,537 functions, 172,325 instructions, 27,660 symbols, two
+7. require exactly 5,554 functions, 172,946 instructions, 27,742 symbols, two
    memory sections, and `0x108000` mapped bytes.
 
 Expected memory map:
@@ -199,7 +201,7 @@ and execution trace.
 
 ## Corrected result
 
-- **5,537 functions, 172,325 instructions, 27,660 symbols**.
+- **5,554 functions, 172,946 instructions, 27,742 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -290,7 +292,8 @@ Definitive corrections, independently checked by `tests/verify_secoc_nvm.py`:
 
 - `0x72F58` is NvM service `0x06` (`ReadBlock`), not CSM key-set.
 - `0x72F84` is NvM service `0x07` (`WriteBlock`), not MAC generation.
-- `0x67590` restores raw/XOR55/XORAA persistent copies into `0xFEBFEB08`.
+- `0x67590` restores raw/XOR55/XORAA persistent copies into generic work
+  groups rooted at `0xFEBF0B08` (the earlier `0xFEBFEB08` address was wrong).
 - `0x67608` creates and persists those three copies.
 - pages 468–479 decode exactly to four structured state objects; they are not
   ICU derivation metadata or raw AES keys.
@@ -332,9 +335,29 @@ model; `tests/verify_did_model.py` checks it directly from CodeFlash:
 - no VIN, serial, part-number, fingerprint, config, or DataFlash-backed DID is
   exposed by these two bootloader handlers.
 
-The proposed FEBEF object-0/key-set interpretation remains invalid. The exact
-operational key source for this captured 12000 image remains unknown; absence from
-the readable snapshot does not prove ICU derivation.
+The proposed FEBEF object-0/key-set interpretation remains invalid.
+
+`docs/SECOC_APPLICATION_CHAIN.md` traces the separate generated application
+receive path and is checked by `tests/verify_secoc_application.py`:
+
+- six profiles bind CAN/Data IDs `0x0F/0x2E4/0x131/0x132/0x90/0xD7` to the
+  exact application RX PDU routes;
+- ordinary classic frames authenticate
+  `DataID_be16 || payload4 || freshness48`, with a four-bit transmitted
+  freshness value followed by the first 28 CMAC bits;
+- full freshness packs trip16/reset20/message8/reset-low2 plus two zero bits;
+- CMAC verification resolves CryptoIf handle 0, selects ICU-S key slot 4, and
+  never reads object-15 RAM `0xFEBF02F8`;
+- this calibration's slot-4 known-answer vector is exactly CMAC of 16 zero bytes
+  under an erased `FF*16` key;
+- `0x344` has no receive filter or SecOC record in this image.
+
+Together with the invalid object 12–15 bank, this makes an unprovisioned/default
+key state the leading explanation for this snapshot. The report
+specifies the correct provisioned-unit experiment: filter NvM blocks 41/45/49,
+observe asynchronous completion and the corrected work buffers, compare the RAM
+mirror and post-write DataFlash, instrument ICU slot 4, and validate candidates
+against synchronized CAN oracle data.
 
 ### Application diagnostics and bootloader entry
 
@@ -429,7 +452,7 @@ extraction tooling and shellcode:
 
 | Path | Contents |
 |---|---|
-| `docs/` | Firmware architecture, payload gate, SecOC/NvM correction, DataFlash, application/bootloader diagnostics, DID, and CAN transport reports |
+| `docs/` | Firmware architecture, application SecOC chain, SecOC/NvM correction, payload gate, DataFlash, application/bootloader diagnostics, DID, and CAN transport reports |
 | `ghidra/scripts/import/` | DataFlash attachment/import helper |
 | `ghidra/scripts/seed/` | Function and table seeds missed by auto-analysis |
 | `ghidra/scripts/annotate/` | Durable names, labels, and comments for each completed investigation |

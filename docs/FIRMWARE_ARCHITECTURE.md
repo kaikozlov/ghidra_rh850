@@ -229,7 +229,7 @@ This is the application configuration, distinct from the bootloader's already-do
 
 ### 5.4 What remains unresolved
 
-This overview establishes the hardware channel, complete RX filter inventory, queueing path, and upper PDU-router boundary. It does not yet assign every generated application PDU to a named AUTOSAR COM signal, recover the complete transmit-PDU/CAN-ID map, or prove the per-message SecOC freshness and truncation paths. Those are follow-on data-flow tasks.
+This overview establishes the hardware channel, complete RX filter inventory, queueing path, and upper PDU-router boundary. `SECOC_APPLICATION_CHAIN.md` now proves the six generated receive profiles, freshness packing, and 28-bit CMAC truncation. The complete transmit-PDU/CAN-ID map and assignment of every generated PDU to a named AUTOSAR COM signal remain open.
 
 ## 6. Evidence boundaries
 

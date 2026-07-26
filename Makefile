@@ -7,6 +7,7 @@ VERIFY_SUITES := \
 	tests/verify_findings.py \
 	tests/verify_payload_gate.py \
 	tests/verify_secoc_nvm.py \
+	tests/verify_secoc_application.py \
 	tests/verify_dataflash_layout.py \
 	tests/verify_did_model.py \
 	tests/verify_application_diagnostics.py \

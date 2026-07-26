@@ -46,7 +46,7 @@ public class AnnotateSecocNvmCorrection extends GhidraScript {
         rename(0x674A8L,"secoc_nvm_checkpoint_write_submit",
             "Build counter/payload/complement NvM block and submit NvM_WriteBlock through 0x72F84. No CMAC is generated here.");
         rename(0x67590L,"secoc_nvm_restore_triplicate",
-            "Submit three NvM_ReadBlock jobs into raw/XOR55/XORAA work buffers at FEBFEB08. This is generic object restore, not an ICU key-set command; configured object 15 may carry key data.");
+            "Submit three NvM_ReadBlock jobs into raw/XOR55/XORAA work groups rooted at FEBF0B08. This is generic object restore, not an ICU key-set command; configured object 15 may carry key data.");
         rename(0x67608L,"secoc_nvm_persist_triplicate",
             "Create raw, XOR55, and XORAA copies of a structured RAM object and submit three NvM_WriteBlock jobs. This is not MAC verification.");
         rename(0x67C34L,"secoc_nvm_triplicate_read_complete",
@@ -77,7 +77,7 @@ public class AnnotateSecocNvmCorrection extends GhidraScript {
         label(0xFEBEF468L,"secoc_nvm_object0_ram_mirror","16-byte structured state (A55A5AA5/counter fields), not a SecOC AES key.");
         label(0xFEBEF478L,"secoc_nvm_object1_ram_mirror","16-byte structured NvM object; not a SecOC AES key.");
         label(0xFEBEF488L,"secoc_nvm_object3_ram_mirror","16-byte structured NvM object; not a SecOC AES key.");
-        label(0xFEBFEB08L,"secoc_nvm_triplicate_workbuf","Four groups of generic raw/XOR55/XORAA 32-byte buffers used by NvM restore/write operations. Not an ICU key-set API, though a key-bearing configured object can pass through them.");
+        label(0xFEBF0B08L,"secoc_nvm_triplicate_workbuf_root","Four groups of generic raw/XOR55/XORAA 32-byte buffers used by NvM restore operations (application GP FEBEB800 + 5308). Not an ICU key-set API.");
 
         label(0xFF207500L,"secoc_nvm_obj3_xoraa_record","Object 3 XOR-AA persistent copy (NvM block/job 13, page 468).");
         label(0xFF207540L,"secoc_nvm_obj2_xoraa_record","Object 2 XOR-AA persistent copy (job 12, page 469).");

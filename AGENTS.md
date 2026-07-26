@@ -99,7 +99,8 @@ the reconstructed combined firmware — trust them:
   `docs/SECOC_RUNTIME_KEY_LIFECYCLE.md`; `tests/verify_secoc_nvm.py` checks it:
   - `0x72F58`/`0x72F84` are AUTOSAR NvM `ReadBlock`/`WriteBlock`, not CSM key-set/MAC.
   - `0x67590/0x67608/0x67C34` generically restore, persist, and reconcile
-    raw/XOR55/XORAA objects. This is not an ICU command path.
+    raw/XOR55/XORAA objects. This is not an ICU command path. The application-GP
+    work-buffer root is `0xFEBF0B08`, not the old erroneous `0xFEBFEB08`.
   - pages 468–479 are objects 0–3; FEBEF468/478/488 contain their structured state.
   - `0x758A0/0x785D2` are NvM/DataFlash service machinery, not ICU derivation.
 - The complete 32 KiB map is in `docs/DATAFLASH_LAYOUT.md` and is checked by
@@ -112,10 +113,22 @@ the reconstructed combined firmware — trust them:
     This exact dump has three invalid object-15 copies and no verified key.
   - DIDs `0x201/0x202/0x203` are volatile bootloader inputs, not DataFlash-backed.
   - the final 2 KiB is likely ICU-S-reserved, but linking this SecOC key to that
-    tail is unsupported. The exact operational source for this snapshot is unknown.
+    tail is unsupported.
   - the dealer/FEBEF capture design remains wrong. A generic `0x72F58` hook must
     filter blocks 41/45/49 and observe completion to see object 15 on a provisioned
     variant; the call itself is not key-set.
+- The application SecOC receive profile is in `docs/SECOC_APPLICATION_CHAIN.md`
+  and checked by `tests/verify_secoc_application.py`:
+  - six records bind `0x0F/0x2E4/0x131/0x132/0x90/0xD7` to exact RX PDU routes;
+    `0x344` has no receive filter or SecOC record in this image.
+  - ordinary classic frames authenticate `DataID_be16 || payload4 || freshness48`;
+    the trailer is four freshness bits followed by the first 28 CMAC bits.
+  - full freshness packs trip16/reset20/message8/reset-low2 plus two zero bits.
+  - CMAC verify resolves CryptoIf handle 0, uses ICU-S slot 4, and has no
+    object-15 RAM consumer.
+  - this calibration's slot-4 known-answer vector equals CMAC of 16 zero bytes
+    under `FF*16`; together with invalid objects 12–15 this strongly indicates an
+    unprovisioned/default key state. A provisioned unit must be tested dynamically.
 - The complete bootloader DID model is in `docs/DID_MODEL.md` and is checked by
   `tests/verify_did_model.py`:
   - handlers `0x5FB8`/`0x4948` search exactly four descriptors at `0x8F14`;
