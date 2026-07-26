@@ -9,6 +9,8 @@ import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.listing.Listing;
 import ghidra.program.model.mem.MemoryAccessException;
+import ghidra.program.model.symbol.RefType;
+import ghidra.program.model.symbol.Reference;
 import ghidra.program.model.symbol.SourceType;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -139,6 +141,17 @@ public class RecoverVectorHandlers extends GhidraScript {
         }
     }
 
+    private void addVectorReference(long from, long to, RefType type) {
+        Address fromAddr = toAddr(from);
+        Address toAddr = toAddr(to);
+        Reference[] refs = currentProgram.getReferenceManager().getReferencesFrom(fromAddr);
+        for (Reference ref : refs) {
+            if (ref.getToAddress().equals(toAddr)) return;
+        }
+        currentProgram.getReferenceManager().addMemoryReference(
+                fromAddr, toAddr, type, SourceType.ANALYSIS, 0);
+    }
+
     private int recoverBootDispatchTable() throws Exception {
         // Eight-byte records at 0x869C: EIIC code (u32) + handler (u32).
         int created = 0;
@@ -149,6 +162,7 @@ public class RecoverVectorHandlers extends GhidraScript {
                 println("boot dispatch terminator at index " + i);
                 break;
             }
+            addVectorReference(record + 4, handler, RefType.DATA);
             Function f = ensureFunction(handler);
             maybeRename(f, handler);
             if (interruptWrappers.contains(handler)) applyInterrupt(f);
@@ -173,6 +187,7 @@ public class RecoverVectorHandlers extends GhidraScript {
                 // INTBP reserved slots may hold non-flash sentinels; leave them alone.
                 continue;
             }
+            addVectorReference(ptrAddr, handler, RefType.DATA);
             if (!seen.add(handler)) continue;
             Function f = ensureFunction(handler);
             maybeRename(f, handler);
@@ -183,18 +198,28 @@ public class RecoverVectorHandlers extends GhidraScript {
         return created;
     }
 
-    private int recoverApplicationEbaseHandlers() throws Exception {
-        // Application EBASE at 0x20000 holds 16-byte code stubs, not a flat
-        // pointer table. Recover the verified CodeFlash targets only.
-        long[] targets = {0x61d88L, 0x64b3eL};
+    private int recoverDirectVectorStubs(long base, int count, String label)
+            throws Exception {
+        // Direct vectors are 16-byte stubs beginning with JMP disp32[r0].
+        // The common encoding is 1f 00 e0 06 <target:u32>; boot vector 0xd0
+        // uses the verified alternate 1f 00 80 07 form. Other encodings (for
+        // example application 0x20100+) are executable stubs, not pointers.
+        Set<Long> seen = new HashSet<>();
         int created = 0;
-        for (long handler : targets) {
+        for (int i = 0; i < count; i++) {
+            long slot = base + i * 0x10L;
+            long prefix = Integer.toUnsignedLong(getInt(toAddr(slot)));
+            if (prefix != 0x06e0001fL && prefix != 0x0780001fL) continue;
+            long handler = Integer.toUnsignedLong(getInt(toAddr(slot + 4)));
+            if (!isCodeFlashFunction(handler) || handler == 0) continue;
+            addVectorReference(slot, handler, RefType.UNCONDITIONAL_JUMP);
+            if (!seen.add(handler)) continue;
             Function f = ensureFunction(handler);
             maybeRename(f, handler);
             applyInterrupt(f);
             created++;
         }
-        println("EBASE: known CodeFlash handlers ensured=" + created);
+        println(label + ": parsed unique CodeFlash handlers=" + created);
         return created;
     }
 
@@ -202,15 +227,9 @@ public class RecoverVectorHandlers extends GhidraScript {
     public void run() throws Exception {
         seedKnownNames();
 
-        // Direct boot exception vectors occupy the low area; seed the known shared handlers.
-        for (long addr : new long[]{0x1e1eL, 0x1e2aL, 0x1e36L}) {
-            Function f = ensureFunction(addr);
-            maybeRename(f, addr);
-            applyInterrupt(f);
-        }
-
+        int directBoot = recoverDirectVectorStubs(0x10L, 15, "boot-direct");
         int boot = recoverBootDispatchTable();
-        int ebase = recoverApplicationEbaseHandlers();
+        int ebase = recoverDirectVectorStubs(0x20000L, 32, "EBASE");
         // Application INTBP: 384 entries at 0x20200 (true pointer table).
         int intbp = recoverPointerTable(0x20200L, 384, "INTBP");
 
@@ -232,7 +251,7 @@ public class RecoverVectorHandlers extends GhidraScript {
         }
 
         println(String.format(
-            "RecoverVectorHandlers: boot_dispatch=%d ebase_known=%d intbp_unique=%d",
-            boot, ebase, intbp));
+            "RecoverVectorHandlers: boot_direct=%d boot_dispatch=%d ebase=%d intbp_unique=%d",
+            directBoot, boot, ebase, intbp));
     }
 }

@@ -3,6 +3,7 @@
 // Validate synthetic RH850 fixture semantics against tests/fixtures/processor/manifest.json.
 // Args: <absolute-manifest-json>
 import ghidra.app.script.GhidraScript;
+import ghidra.app.emulator.EmulatorHelper;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.pcode.PcodeOp;
@@ -50,6 +51,147 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
 
     private boolean hasZeroExtendFromLoad(Instruction ins) {
         return pcodeOpNames(ins).contains("INT_ZEXT");
+    }
+
+    private EmulatorHelper emulator(long pc) {
+        EmulatorHelper emu = new EmulatorHelper(currentProgram);
+        emu.writeRegister("PC", pc);
+        return emu;
+    }
+
+    private void step(EmulatorHelper emu, String label) throws Exception {
+        if (!emu.step(monitor)) {
+            fail(label + ": emulator step failed: " + emu.getLastError());
+        }
+    }
+
+    private void requireRegister(EmulatorHelper emu, String label,
+                                 String register, long expected) {
+        long actual = emu.readRegister(register).longValue() & 0xffffffffL;
+        if (actual != (expected & 0xffffffffL)) {
+            fail(String.format("%s: %s=0x%x expected=0x%x",
+                    label, register, actual, expected & 0xffffffffL));
+        }
+    }
+
+    private void runExecutionVectors() throws Exception {
+        EmulatorHelper emu = emulator(0);
+        try {
+            emu.writeRegister("ep", 0x1000);
+            emu.writeMemory(toAddr(0x1010), new byte[]{(byte) 0x80});
+            step(emu, "sld.b negative");
+            requireRegister(emu, "sld.b negative", "r10", 0xffffff80L);
+        } finally {
+            emu.dispose();
+        }
+
+        emu = emulator(4);
+        try {
+            emu.writeRegister("ep", 0x1000);
+            emu.writeMemory(toAddr(0x1020), new byte[]{0x01, (byte) 0x80});
+            step(emu, "sld.h negative");
+            requireRegister(emu, "sld.h negative", "r11", 0xffff8001L);
+        } finally {
+            emu.dispose();
+        }
+
+        emu = emulator(16);
+        try {
+            emu.writeRegister("gp", 0x1000);
+            emu.writeMemory(toAddr(0x10b0),
+                    new byte[]{0x78, 0x56, 0x34, 0x12});
+            step(emu, "ld.w scaled displacement");
+            requireRegister(emu, "ld.w scaled displacement", "r10", 0x12345678L);
+        } finally {
+            emu.dispose();
+        }
+
+        emu = emulator(20);
+        try {
+            emu.writeRegister("r6", 0xfffffffeL);
+            emu.writeRegister("r10", 7);
+            emu.writeRegister("PSW", 0);
+            step(emu, "divh signed");
+            requireRegister(emu, "divh signed", "r10", 0xfffffffdL);
+        } finally {
+            emu.dispose();
+        }
+
+        emu = emulator(20);
+        try {
+            emu.writeRegister("r6", 0);
+            emu.writeRegister("r10", 0x12345678L);
+            emu.writeRegister("PSW", 0);
+            step(emu, "divh divide by zero");
+            requireRegister(emu, "divh divide by zero", "r10", 0x12345678L);
+            long psw = emu.readRegister("PSW").longValue();
+            if ((psw & (1L << 2)) == 0) {
+                fail(String.format("divh divide by zero: PSW=0x%x lacks OV", psw));
+            }
+        } finally {
+            emu.dispose();
+        }
+
+        emu = emulator(24);
+        try {
+            emu.writeRegister("r6", 1);
+            emu.writeRegister("r10", 0x7fffffffL);
+            emu.writeRegister("PSW", 0);
+            step(emu, "satadd positive overflow");
+            requireRegister(emu, "satadd positive overflow", "r10", 0x7fffffffL);
+            long psw = emu.readRegister("PSW").longValue();
+            if ((psw & (1L << 4)) == 0 || (psw & (1L << 2)) == 0) {
+                fail(String.format("satadd positive overflow: PSW=0x%x lacks SAT/OV", psw));
+            }
+        } finally {
+            emu.dispose();
+        }
+
+        emu = emulator(24);
+        try {
+            emu.writeRegister("r6", 0xffffffffL);
+            emu.writeRegister("r10", 1);
+            emu.writeRegister("PSW", 0);
+            step(emu, "satadd carry without overflow");
+            requireRegister(emu, "satadd carry without overflow", "r10", 0);
+            long psw = emu.readRegister("PSW").longValue();
+            if ((psw & (1L << 4)) != 0 || (psw & (1L << 2)) != 0
+                    || (psw & (1L << 3)) == 0) {
+                fail(String.format(
+                        "satadd carry without overflow: PSW=0x%x expected CY only", psw));
+            }
+        } finally {
+            emu.dispose();
+        }
+
+        emu = emulator(36);
+        try {
+            emu.writeRegister("sp", 0x2800);
+            emu.writeRegister("lp", 0x12345678L);
+            step(emu, "prepare stack effect");
+            requireRegister(emu, "prepare stack effect", "sp", 0x27f4);
+            long saved = ((long) emu.readMemoryByte(toAddr(0x27fc)) & 0xff)
+                    | (((long) emu.readMemoryByte(toAddr(0x27fd)) & 0xff) << 8)
+                    | (((long) emu.readMemoryByte(toAddr(0x27fe)) & 0xff) << 16)
+                    | (((long) emu.readMemoryByte(toAddr(0x27ff)) & 0xff) << 24);
+            if (saved != 0x12345678L) {
+                fail(String.format("prepare saved lp=0x%x expected=0x12345678", saved));
+            }
+        } finally {
+            emu.dispose();
+        }
+
+        emu = emulator(40);
+        try {
+            emu.writeRegister("sp", 0x27f4);
+            emu.writeMemory(toAddr(0x27fc),
+                    new byte[]{0x78, 0x56, 0x34, 0x12});
+            step(emu, "dispose stack effect");
+            requireRegister(emu, "dispose stack effect", "sp", 0x2800);
+            requireRegister(emu, "dispose stack effect", "lp", 0x12345678L);
+        } finally {
+            emu.dispose();
+        }
     }
 
     @Override
@@ -127,6 +269,8 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
             }
             println(String.format("  [%s] 0x%x %s ops=%s", c.name, c.addr, mnem, ops));
         }
+
+        runExecutionVectors();
 
         if (!failures.isEmpty()) {
             throw new IllegalStateException(failures.size() + " fixture failures: "

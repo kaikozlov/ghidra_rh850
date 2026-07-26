@@ -54,12 +54,17 @@ grep -q 'ASSERT processor-fixture: all .* cases passed' "$FIXTURE_LOG" || {
 echo "==> Working-project audits (if present)"
 if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
   if [[ -f "$PROJECT_DIR/processor_manifest.json" ]]; then
-    python3 "$ROOT/tools/fingerprint_processor.py" --expect "$PROJECT_DIR/processor_manifest.json"
+    python3 "$ROOT/tools/fingerprint_processor.py" \
+      --expect "$PROJECT_DIR/processor_manifest.json" \
+      --ghidra-version "$GHIDRA_VERSION" \
+      --cli-version "$GHIDRA_CLI_VERSION" \
+      --sla "$V850_EXT_DIR/data/languages/v850e3.sla"
   else
     echo "NOTE: no processor_manifest.json beside working project yet"
   fi
 
   INV_OUT="$ROOT/data/instruction_inventory.csv"
+  DECOMPILER_REPORT="$ROOT/build/decompiler-signatures.txt"
   mkdir -p "$(dirname "$INV_OUT")"
   PROJECT_LOG="$ROOT/build/verify-processor-project.log"
 
@@ -67,15 +72,20 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
   "$ANALYZE" "$PROJECT_DIR" "$PROJECT_NAME" \
     -process "$PROGRAM_NAME" \
     -noanalysis \
+    -readOnly \
     -scriptPath "$SCRIPT_PATH" \
     -postScript AssertNoUndefinedInFunctions.java \
     -postScript AssertSystemRegisterNames.java \
     -postScript AssertProjectInvariants.java \
-    -postScript AssertDecompilerInvariants.java \
-    -postScript InventoryUsedInstructions.java "$INV_OUT" \
-    -commit "Processor verification audits (read-mostly)" \
+    -postScript AssertDecompilerInvariants.java "$DECOMPILER_REPORT" \
+    -postScript InventoryUsedInstructions.java "$INV_OUT" "$ROOT/data/processor_unimpl_allowlist.txt" \
     2>&1 | tee "$PROJECT_LOG"
   fail_if_script_error "$PROJECT_LOG" "processor project audits"
+  if ! cmp -s "$ROOT/data/decompiler_signatures.baseline.csv" "$DECOMPILER_REPORT"; then
+    echo "decompiler signature baseline mismatch:" >&2
+    diff -u "$ROOT/data/decompiler_signatures.baseline.csv" "$DECOMPILER_REPORT" >&2 || true
+    exit 1
+  fi
 
   echo "Wrote instruction inventory: $INV_OUT"
 else

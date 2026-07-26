@@ -7,6 +7,8 @@ import ghidra.app.script.GhidraScript;
 import ghidra.program.model.listing.*;
 import ghidra.program.model.pcode.PcodeOp;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public class InventoryUsedInstructions extends GhidraScript {
@@ -22,8 +24,9 @@ public class InventoryUsedInstructions extends GhidraScript {
     @Override
     public void run() throws Exception {
         String[] args = getScriptArgs();
-        if (args.length != 1) {
-            throw new IllegalArgumentException("expected absolute CSV output path");
+        if (args.length != 2) {
+            throw new IllegalArgumentException(
+                    "expected absolute CSV output path and user-op allowlist path");
         }
         Map<String, Row> rows = new TreeMap<>();
         InstructionIterator it = currentProgram.getListing().getInstructions(true);
@@ -54,6 +57,7 @@ public class InventoryUsedInstructions extends GhidraScript {
         }
         println("InventoryUsedInstructions: wrote " + rows.size()
                 + " mnemonics to " + args[0]);
+        enforceAllowlist(rows.values(), Path.of(args[1]));
     }
 
     private static String bytesHex(Instruction ins) throws Exception {
@@ -63,14 +67,45 @@ public class InventoryUsedInstructions extends GhidraScript {
         return sb.toString();
     }
 
-    private static String userOps(Instruction ins) {
+    private String userOps(Instruction ins) {
         Set<String> ops = new TreeSet<>();
         for (PcodeOp op : ins.getPcode()) {
             if (op.getOpcode() == PcodeOp.CALLOTHER) {
-                ops.add(op.getMnemonic());
+                int index = (int) op.getInput(0).getOffset();
+                String name = currentProgram.getLanguage().getUserDefinedOpName(index);
+                ops.add(name == null ? "CALLOTHER#" + index : name);
             }
         }
         return String.join("|", ops);
+    }
+
+    private void enforceAllowlist(Collection<Row> rows, Path path) throws Exception {
+        Set<String> allowed = new TreeSet<>();
+        for (String raw : Files.readAllLines(path)) {
+            String line = raw.trim();
+            if (line.isEmpty() || line.startsWith("#")) continue;
+            String[] parts = line.split("\\t", 2);
+            if (parts.length != 2 || parts[0].isBlank() || parts[1].isBlank()) {
+                throw new IllegalStateException("invalid processor user-op allowlist line: " + raw);
+            }
+            if (!allowed.add(parts[0])) {
+                throw new IllegalStateException("duplicate allowlisted user-op " + parts[0]);
+            }
+        }
+        Set<String> used = new TreeSet<>();
+        for (Row row : rows) {
+            if (row.userops == null || row.userops.isBlank()) continue;
+            used.addAll(Arrays.asList(row.userops.split("\\|")));
+        }
+        Set<String> unapproved = new TreeSet<>(used);
+        unapproved.removeAll(allowed);
+        Set<String> stale = new TreeSet<>(allowed);
+        stale.removeAll(used);
+        if (!unapproved.isEmpty() || !stale.isEmpty()) {
+            throw new IllegalStateException("user-op allowlist mismatch: unapproved="
+                    + unapproved + " stale=" + stale);
+        }
+        println("ASSERT processor-userops: approved=" + used);
     }
 
     private static String csv(String s) {

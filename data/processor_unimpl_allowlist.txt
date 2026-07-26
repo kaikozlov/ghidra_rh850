@@ -1,10 +1,6 @@
-# Accepted unimplemented / callother p-codeops for instructions that appear in
-# the P1M-E firmware inventory but are intentionally modeled as opaque effects.
-# Format: mnemonic<TAB>reason
-#
-# Keep this list empty unless InventoryUsedInstructions shows a CALLOTHER that
-# is required for analysis and cannot yet be given precise p-code.
-#
-# Examples (commented):
-# cache	hardware cache maintenance; opaque synchronize is enough for static analysis
-# pref	prefetch hint; no architectural state for decompiler
+# Accepted CALLOTHER user-ops used by instructions in the P1M-E firmware.
+# Format: userop<TAB>reason
+__disable_irq	DI privilege/interrupt-controller side effect is opaque; PSW.ID is modeled by the instruction
+__enable_irq	EI privilege/interrupt-controller side effect is opaque; PSW.ID is modeled by the instruction
+__nop	NOP intentionally has no architectural state change
+__synchronize	pipeline/cache synchronization has no additional static-analysis state

@@ -4,12 +4,19 @@
 // boot/application GP/TP register context. Invoked during project import.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
+import ghidra.program.model.data.DataType;
+import ghidra.program.model.data.UnsignedCharDataType;
+import ghidra.program.model.data.UnsignedIntegerDataType;
+import ghidra.program.model.data.UnsignedLongDataType;
+import ghidra.program.model.data.UnsignedShortDataType;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.listing.ProgramContext;
 import ghidra.program.model.mem.Memory;
 import ghidra.program.model.mem.MemoryBlock;
 import ghidra.program.model.symbol.SourceType;
 import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ApplyP1MDeviceProfile extends GhidraScript {
     private MemoryBlock ensureUninitBlock(String name, long start, long size,
@@ -19,10 +26,15 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         Address addr = toAddr(start);
         MemoryBlock existing = mem.getBlock(addr);
         if (existing != null) {
-            if (!name.equals(existing.getName())) {
-                // Overlap with a differently named block — leave it.
-                println("block already present at " + addr + ": " + existing.getName());
+            if (!name.equals(existing.getName()) || !existing.getStart().equals(addr)
+                    || existing.getSize() != size) {
+                throw new IllegalStateException("conflicting block at " + addr + ": "
+                        + existing.getName() + " " + existing.getStart() + ".."
+                        + existing.getEnd());
             }
+            existing.setRead(read);
+            existing.setWrite(write);
+            existing.setExecute(exec);
             existing.setVolatile(volatileBlock);
             return existing;
         }
@@ -61,6 +73,73 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
                 regName, value, start, endExclusive - 1));
     }
 
+    private DataType unsignedType(int size) {
+        return switch (size) {
+            case 1 -> UnsignedCharDataType.dataType;
+            case 2 -> UnsignedShortDataType.dataType;
+            case 4 -> UnsignedIntegerDataType.dataType;
+            case 8 -> UnsignedLongDataType.dataType;
+            default -> throw new IllegalArgumentException("unsupported SFR width " + size);
+        };
+    }
+
+    private void loadSfrCsv(java.io.File csv) throws Exception {
+        Set<Long> addresses = new HashSet<>();
+        Set<String> names = new HashSet<>();
+        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(csv))) {
+            String header = br.readLine();
+            if (!"address,name,size,access,comment".equals(header)) {
+                throw new IllegalStateException("unexpected SFR CSV header: " + header);
+            }
+            String line;
+            int lineNo = 1;
+            while ((line = br.readLine()) != null) {
+                lineNo++;
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("#")) continue;
+                String[] parts = line.split(",", 5);
+                if (parts.length != 5) {
+                    throw new IllegalStateException("SFR CSV line " + lineNo
+                            + " must have five columns");
+                }
+                long addr = Long.decode(parts[0].trim());
+                String name = parts[1].trim();
+                int size = Integer.parseInt(parts[2].trim());
+                String access = parts[3].trim();
+                String comment = parts[4].trim();
+                if (!addresses.add(addr)) {
+                    throw new IllegalStateException(String.format(
+                            "duplicate SFR address 0x%x at line %d", addr, lineNo));
+                }
+                if (name.isEmpty() || !names.add(name)) {
+                    throw new IllegalStateException("empty/duplicate SFR name at line " + lineNo);
+                }
+                if (!Set.of("r", "w", "rw").contains(access)) {
+                    throw new IllegalStateException("invalid SFR access at line " + lineNo);
+                }
+                DataType type = unsignedType(size);
+                Address start = toAddr(addr);
+                Address end = start.add(size - 1L);
+                MemoryBlock block = currentProgram.getMemory().getBlock(start);
+                if (addr < 0xFF600000L || block == null || !block.isVolatile()
+                        || !block.contains(end)) {
+                    throw new IllegalStateException(String.format(
+                            "SFR %s 0x%x..0x%x is outside a mapped volatile window",
+                            name, addr, addr + size - 1L));
+                }
+                label(addr, name, comment + " [" + access + ", u" + (size * 8) + "]");
+                var existingData = currentProgram.getListing().getDataAt(start);
+                if (existingData == null || !existingData.isDefined()) {
+                    createData(start, type);
+                } else if (existingData.getLength() != size) {
+                    throw new IllegalStateException("conflicting SFR data width for " + name);
+                }
+            }
+        }
+        println("Loaded " + addresses.size() + " validated SFR labels from "
+                + csv.getAbsolutePath());
+    }
+
     @Override
     public void run() throws Exception {
         // R7F701381 memory map (P1M-E hardware manual):
@@ -79,11 +158,6 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         // ICU-S crypto-driver command/status window (see architecture evidence).
         ensureUninitBlock("SFR_ICUS", 0xFFC5D000L, 0x1000L, true, true, false, true);
 
-        // Frequently referenced SFRs from architecture analysis.
-        label(0xFFFFB110L, "EIC136", "TAUJ0 CH3 interrupt control (EIRF polled by foreground loop).");
-        label(0xFFFFB248L, "EIC292", "ICU-S crypto-driver interrupt control channel 292.");
-        label(0xFFFFB24AL, "EIC293", "ICU-S crypto-driver interrupt control channel 293.");
-
         // Boot code occupies low CodeFlash; application starts at 0x20000.
         // GP/TP are constant within each region after startup.
         setRegRange("gp", 0xFEBF9800L, 0x00000000L, 0x00020000L);
@@ -97,29 +171,14 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         ctx.setValue(sp, toAddr(0x1b0L), toAddr(0x1b0L), BigInteger.valueOf(0xFEBE8000L));
         ctx.setValue(sp, toAddr(0x20880L), toAddr(0x20880L), BigInteger.valueOf(0xFEBE2000L));
 
-        // Optional CSV of observed SFR labels. Prefer script arg, else cwd-relative.
-        java.io.File csv = null;
+        // Required, validated CSV of observed SFR labels and access widths.
         String[] args = getScriptArgs();
-        if (args.length >= 1) csv = new java.io.File(args[0]);
-        if (csv == null || !csv.isFile()) csv = new java.io.File("data/p1m_sfr_labels.csv");
-        if (csv.isFile()) {
-            try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(csv))) {
-                String line = br.readLine(); // header
-                while ((line = br.readLine()) != null) {
-                    line = line.trim();
-                    if (line.isEmpty() || line.startsWith("#")) continue;
-                    String[] parts = line.split(",", 5);
-                    if (parts.length < 2) continue;
-                    long addr = Long.decode(parts[0].trim());
-                    String name = parts[1].trim();
-                    String comment = parts.length >= 5 ? parts[4].trim() : null;
-                    label(addr, name, comment);
-                }
-            }
-            println("Loaded SFR labels from " + csv.getAbsolutePath());
-        } else {
-            println("No SFR CSV found; using built-in EIC labels only");
+        if (args.length != 1) {
+            throw new IllegalArgumentException("expected absolute p1m_sfr_labels.csv path");
         }
+        java.io.File csv = new java.io.File(args[0]);
+        if (!csv.isFile()) throw new IllegalStateException("missing SFR CSV " + csv);
+        loadSfrCsv(csv);
 
         println("Seeded SP at boot_reset_startup and application_entry only");
     }

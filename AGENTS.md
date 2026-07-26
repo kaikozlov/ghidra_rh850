@@ -243,9 +243,10 @@ it live in `legacy/flat-import/` — do not use them for current results.
 - `make verify` runs twelve self-contained suites through UV; it must not require
   sibling repositories or Ghidra.
 - `make verify-sleigh` compiles the vendored processor module into an isolated
-  extension under `build/ghidra-home/` (does not mutate `$GHIDRA_HOME`).
+  extension under `build/ghidra-home/` from a disposable source copy (does not
+  generate in the vendored tree or mutate `$GHIDRA_HOME`).
 - `make verify-processor` runs synthetic RH850 fixtures and, when
-  `build/project/` exists, the asserting audits.
+  `build/project/` exists, read-only asserting audits.
 - `make verify-ghidra` runs firmware + SLEIGH + processor gates together.
 - `make verify-external EXTERNAL_REPOS_DIR=...` checks optional public checkouts
   against `external-references.lock.json`.
@@ -271,7 +272,8 @@ run `make snapshot-project` (never point rebuild directly at `project/`).
   `ghidra/ghidra_v850/` (forked from esaulenka/ghidra_v850 at commit
   `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
   `ghidra/ghidra_v850/PROVENANCE.json`). `tools/install_v850_extension.sh`
-  compiles the `.slaspec` sources with `sleigh` and installs into
+  copies the module to `build/processor-extension-src/`, compiles there with
+  `sleigh`, and installs into
   `build/ghidra-home/.../Extensions/Renesas_v850/` via `-Duser.home`, not into
   `$GHIDRA_HOME/Ghidra/Extensions`. The in-tree `v850.cspec` models the
   RH850/G3 calling convention (r6-r9 args, r10 return, callee-saved r20-r29,
@@ -284,10 +286,10 @@ run `make snapshot-project` (never point rebuild directly at `project/`).
   `build/ghidra-processor.env` (written by the installer) or set
   `JAVA_TOOL_OPTIONS=-Duser.home=.../build/ghidra-home` accordingly.
 - CI (`.github/workflows/ci.yml`) always runs `make verify`. Processor-path
-  PRs, `main` pushes, and the nightly schedule also run `make verify-sleigh`
-  on macOS with pinned Homebrew Ghidra 12.1.2. Full four-stage rebuild parity
-  remains a local gate (`make rebuild-project` then `make snapshot-project`)
-  because it requires the `ghidra` CLI daemon workflow.
+  changes run SLEIGH, synthetic fixtures, and committed-project audits on
+  macOS with pinned Ghidra 12.1.2 / ghidra CLI 0.2.1. Processor, script, and
+  snapshot changes—as well as `main`, manual, and nightly runs—execute the full
+  four-stage rebuild plus project invariants and upload normalized audit artifacts.
 
 ## Final safe workflow
 

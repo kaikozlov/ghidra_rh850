@@ -11,12 +11,20 @@ import ghidra.program.model.pcode.HighSymbol;
 import ghidra.program.model.pcode.HighVariable;
 import ghidra.program.model.symbol.Symbol;
 import ghidra.program.model.symbol.SymbolIterator;
+import ghidra.program.model.symbol.Reference;
+import ghidra.program.model.symbol.ReferenceIterator;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 
 public class AssertDecompilerInvariants extends GhidraScript {
     private final List<String> failures = new ArrayList<>();
+    private final List<String> signatures = new ArrayList<>();
     private DecompInterface decomp;
 
     private void fail(String msg) {
@@ -30,7 +38,24 @@ public class AssertDecompilerInvariants extends GhidraScript {
             fail("decompile failed for " + f.getName() + " @ " + f.getEntryPoint());
             return "";
         }
-        return results.getDecompiledFunction().getC();
+        String c = results.getDecompiledFunction().getC();
+        String normalized = c.replaceAll("\\s+", " ").trim();
+        String digest = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                .digest(normalized.getBytes(StandardCharsets.UTF_8)));
+        signatures.add(String.format("%s,%s,%s,%d,%s",
+                f.getEntryPoint(), f.getName(), f.getCallingConventionName(),
+                f.getParameterCount(), digest));
+        return c;
+    }
+
+    private boolean hasReferenceFrom(Function function, long destination) {
+        ReferenceIterator refs = currentProgram.getReferenceManager()
+                .getReferencesTo(toAddr(destination));
+        while (refs.hasNext()) {
+            Reference ref = refs.next();
+            if (function.getBody().contains(ref.getFromAddress())) return true;
+        }
+        return false;
     }
 
     @Override
@@ -45,17 +70,11 @@ public class AssertDecompilerInvariants extends GhidraScript {
             fail("missing security_access_derive_stage1_key around 0x6fec");
         } else {
             String c = decompile(stage1);
-            if (!c.contains("SEED_KEY") && !c.contains("0xbfe8") && !c.contains("0xBFE8")) {
-                // Symbol name may appear; also accept raw address references.
-                boolean xrefOk = false;
-                SymbolIterator it = currentProgram.getSymbolTable().getSymbols("SEED_KEY_SECRET");
-                while (it.hasNext()) {
-                    Symbol s = it.next();
-                    if (s.getAddress().getOffset() == 0xbfe8L) xrefOk = true;
-                }
-                if (!c.toLowerCase().contains("bfe8") && !xrefOk) {
-                    fail("stage1 decompilation does not reference SEED_KEY_SECRET/0xBFE8");
-                }
+            if (!hasReferenceFrom(stage1, 0xbfe8L)) {
+                fail("stage1 function has no reference to SEED_KEY_SECRET/0xBFE8");
+            }
+            if (!c.contains("SEED_KEY") && !c.toLowerCase().contains("bfe8")) {
+                fail("stage1 decompilation does not render SEED_KEY_SECRET/0xBFE8");
             }
             println("stage1 decompile ok (" + stage1.getName() + ")");
         }
@@ -67,6 +86,9 @@ public class AssertDecompilerInvariants extends GhidraScript {
             fail("missing payload_build_derive_key around 0x7068");
         } else {
             String c = decompile(payload);
+            if (!hasReferenceFrom(payload, 0xbfd8L)) {
+                fail("payload function has no reference to PAYLOAD_BUILD_SECRET/0xBFD8");
+            }
             if (!c.contains("PAYLOAD_BUILD") && !c.toLowerCase().contains("bfd8")) {
                 fail("payload decompilation does not reference PAYLOAD_BUILD_SECRET/0xBFD8");
             }
@@ -91,6 +113,8 @@ public class AssertDecompilerInvariants extends GhidraScript {
                 }
             }
             println("ISR 0x650ac convention=" + cc + " params=" + params);
+        } else {
+            fail("missing ISR function at 0x650ac");
         }
 
         // Session control: prefer narrow first parameter when typed.
@@ -102,14 +126,29 @@ public class AssertDecompilerInvariants extends GhidraScript {
         if (session == null) session = getFunctionAt(toAddr(0x614aL));
         if (session != null) {
             String c = decompile(session);
-            // After cspec rewrite, ushort param should not need redundant & 0xffff
-            // on the first use of the session id when correctly typed. Soft check:
-            // function must decompile and not be empty.
             if (c.isBlank()) fail("empty decompilation for session control");
+            Parameter[] params = session.getParameters();
+            if (params.length > 0 && params[0].getDataType().getLength() > 2) {
+                fail("session-control first parameter widened to "
+                        + params[0].getDataType().getDisplayName());
+            }
             println("session-control decompile ok (" + session.getName() + ")");
+        } else {
+            fail("missing uds_diagnostic_session_control");
         }
 
         decomp.dispose();
+        String[] args = getScriptArgs();
+        if (args.length > 1) {
+            throw new IllegalArgumentException("expected at most one signature report path");
+        }
+        if (args.length == 1) {
+            List<String> lines = new ArrayList<>();
+            lines.add("address,name,calling_convention,parameter_count,normalized_c_sha256");
+            lines.addAll(signatures);
+            Files.writeString(Path.of(args[0]), String.join("\n", lines) + "\n");
+            println("Wrote decompiler signature report: " + args[0]);
+        }
         println("ASSERT decompiler-invariants: failures=" + failures.size());
         if (!failures.isEmpty()) {
             throw new IllegalStateException(failures.size() + " decompiler invariant failures: "

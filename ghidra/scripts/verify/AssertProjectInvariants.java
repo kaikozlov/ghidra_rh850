@@ -8,6 +8,7 @@ import ghidra.program.model.listing.Function;
 import ghidra.program.model.mem.MemoryBlock;
 import ghidra.program.model.symbol.Symbol;
 import ghidra.program.model.symbol.SymbolTable;
+import ghidra.program.model.symbol.Reference;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.lang.RegisterValue;
 import java.math.BigInteger;
@@ -59,6 +60,35 @@ public class AssertProjectInvariants extends GhidraScript {
         }
     }
 
+    private void requireReference(long from, long to) {
+        Reference[] refs = currentProgram.getReferenceManager()
+                .getReferencesFrom(toAddr(from));
+        for (Reference ref : refs) {
+            if (ref.getToAddress().equals(toAddr(to))) return;
+        }
+        fail(String.format("missing vector reference 0x%x -> 0x%x", from, to));
+    }
+
+    private void requireBlock(String name, long start, long size,
+                              boolean read, boolean write, boolean execute,
+                              boolean volatileBlock) {
+        MemoryBlock block = currentProgram.getMemory().getBlock(name);
+        if (block == null) {
+            fail("missing memory block " + name);
+            return;
+        }
+        if (block.getStart().getOffset() != start || block.getSize() != size) {
+            fail(String.format("%s range=%s..%s expected 0x%x..0x%x",
+                    name, block.getStart(), block.getEnd(), start, start + size - 1));
+        }
+        if (block.isRead() != read || block.isWrite() != write
+                || block.isExecute() != execute || block.isVolatile() != volatileBlock) {
+            fail(String.format("%s permissions r=%s w=%s x=%s volatile=%s",
+                    name, block.isRead(), block.isWrite(), block.isExecute(),
+                    block.isVolatile()));
+        }
+    }
+
     private void requireRegister(Address addr, String regName, long expected) {
         Register reg = currentProgram.getRegister(regName);
         if (reg == null) {
@@ -104,46 +134,50 @@ public class AssertProjectInvariants extends GhidraScript {
             fail("DataFlash block missing or wrong size");
         }
 
-        // Optional device-profile RAM/SFR windows (present after Milestone 3).
-        MemoryBlock localRam = currentProgram.getMemory().getBlock("LocalRAM");
-        if (localRam != null) {
-            println("LocalRAM block present: " + localRam.getStart() + ".." + localRam.getEnd());
-        }
-        for (String sfrName : new String[]{"SFR_EIC", "SFR_RSCFD", "SFR_ICUS"}) {
-            MemoryBlock sfr = currentProgram.getMemory().getBlock(sfrName);
-            if (sfr != null) {
-                println(sfrName + " block present: " + sfr.getStart() + ".." + sfr.getEnd());
-                if (!sfr.isVolatile()) fail(sfrName + " block should be volatile");
-            }
-        }
+        // Device-profile RAM/SFR windows are mandatory in the final project.
+        requireBlock("LocalRAM", 0xFEBE0000L, 0x20000L, true, true, false, false);
+        requireBlock("SFR_EIC", 0xFFFFB000L, 0x1000L, true, true, false, true);
+        requireBlock("SFR_RSCFD", 0xFFD20000L, 0x10000L, true, true, false, true);
+        requireBlock("SFR_ICUS", 0xFFC5D000L, 0x1000L, true, true, false, true);
 
-        // Register context when seeded.
+        // Register context is mandatory after applying the device profile.
         Address bootAddr = toAddr(0x800L);
         Address appAddr = toAddr(0x30000L);
-        Register gp = currentProgram.getRegister("gp");
-        if (gp != null) {
-            RegisterValue bootGp = currentProgram.getProgramContext().getRegisterValue(gp, bootAddr);
-            RegisterValue appGp = currentProgram.getProgramContext().getRegisterValue(gp, appAddr);
-            if (bootGp != null && bootGp.hasValue()) {
-                requireRegister(bootAddr, "gp", 0xFEBF9800L);
-                requireRegister(bootAddr, "tp", 0x869CL);
-            }
-            if (appGp != null && appGp.hasValue()) {
-                requireRegister(appAddr, "gp", 0xFEBEB800L);
-                requireRegister(appAddr, "tp", 0x23EE4L);
+        requireRegister(bootAddr, "gp", 0xFEBF9800L);
+        requireRegister(bootAddr, "tp", 0x869CL);
+        requireRegister(appAddr, "gp", 0xFEBEB800L);
+        requireRegister(appAddr, "tp", 0x23EE4L);
+        requireRegister(toAddr(0x1b0L), "sp", 0xFEBE8000L);
+        requireRegister(toAddr(0x20880L), "sp", 0xFEBE2000L);
+
+        requireConvention(0x650acL, "__interrupt");
+        requireConvention(0x650eeL, "__interrupt");
+        for (long handler : new long[]{
+                0x61d88L, 0x64b3eL, 0x70a54L, 0x70320L, 0x703caL,
+                0x70476L, 0x6506aL, 0x65028L, 0x650acL, 0x650eeL, 0x65130L}) {
+            requireConvention(handler, "__interrupt");
+        }
+        requireReference(0x20010L, 0x61d88L);
+        requireReference(0x20090L, 0x64b3eL);
+        int intbpRefs = 0;
+        for (int channel = 0; channel < 384; channel++) {
+            long entry = 0x20200L + channel * 4L;
+            long target = Integer.toUnsignedLong(getInt(toAddr(entry)));
+            if (target < 0x100000L && (target & 1L) == 0L) {
+                requireReference(entry, target);
+                intbpRefs++;
             }
         }
-
-        // Interrupt conventions when applied.
-        Function isr292 = getFunctionAt(toAddr(0x650acL));
-        if (isr292 != null) {
-            String cc = isr292.getCallingConventionName();
-            if ("__interrupt".equals(cc)) {
-                println("ISR 0x650ac uses __interrupt");
-            } else {
-                println("NOTE: ISR 0x650ac convention=" + cc
-                        + " (__interrupt applied in interrupt-recovery milestone)");
-            }
+        if (intbpRefs != 382) {
+            fail("INTBP CodeFlash reference count=" + intbpRefs + " expected=382");
+        }
+        Function normal292 = getFunctionAt(toAddr(0x87610L));
+        if (normal292 != null && "__interrupt".equals(normal292.getCallingConventionName())) {
+            fail("normal ICU dispatch callee 0x87610 must not use __interrupt");
+        }
+        Function normal293 = getFunctionAt(toAddr(0x87636L));
+        if (normal293 != null && "__interrupt".equals(normal293.getCallingConventionName())) {
+            fail("normal ICU dispatch callee 0x87636 must not use __interrupt");
         }
 
         println("ASSERT project-invariants: failures=" + failures.size());

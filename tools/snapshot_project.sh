@@ -46,6 +46,12 @@ command -v ghidra >/dev/null 2>&1 || { echo "ghidra CLI is required" >&2; exit 1
 command -v rsync >/dev/null 2>&1 || { echo "rsync is required" >&2; exit 1; }
 [[ -d "$SNAPSHOT_DIR" ]] || { echo "snapshot dir does not exist: $SNAPSHOT_DIR" >&2; exit 1; }
 
+# Compile the current processor in isolation so the project manifest is checked
+# against source, generated SLA, and pinned tool versions before promotion.
+"$ROOT/tools/install_v850_extension.sh"
+# shellcheck disable=SC1091
+source "$ROOT/build/ghidra-processor.env"
+
 DAEMON_RE='AnalyzeHeadless.*rh850_p1me_mapped'
 if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then
   echo "an RH850 daemon is still running; stop it before snapshotting" >&2
@@ -74,7 +80,11 @@ printf '%s\n' "$STATS_OUTPUT" | python3 "$ROOT/tools/verify_ghidra_stats.py"
 
 # Processor fingerprint must match the sources that built this working copy.
 if [[ -f "$PROJECT_DIR/processor_manifest.json" ]]; then
-  python3 "$ROOT/tools/fingerprint_processor.py" --expect "$PROJECT_DIR/processor_manifest.json"
+  python3 "$ROOT/tools/fingerprint_processor.py" \
+    --expect "$PROJECT_DIR/processor_manifest.json" \
+    --ghidra-version "$GHIDRA_VERSION" \
+    --cli-version "$GHIDRA_CLI_VERSION" \
+    --sla "$V850_EXT_DIR/data/languages/v850e3.sla"
 else
   echo "ERROR: working project missing processor_manifest.json; rebuild first" >&2
   exit 1

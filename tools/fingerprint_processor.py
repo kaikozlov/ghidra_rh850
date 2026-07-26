@@ -78,10 +78,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", type=Path, help="Write manifest JSON to this path")
     parser.add_argument("--expect", type=Path, help="Compare against an existing manifest")
+    parser.add_argument(
+        "--source-only",
+        action="store_true",
+        help="With --expect, compare source files only (for Ghidra-free work-project checks)",
+    )
     parser.add_argument("--ghidra-version")
     parser.add_argument("--cli-version")
     parser.add_argument("--sla", type=Path, help="Compiled v850e3.sla to hash")
     args = parser.parse_args()
+
+    if args.source_only and not args.expect:
+        parser.error("--source-only requires --expect")
 
     sla_hash = sha256_file(args.sla) if args.sla else None
     manifest = build_manifest(
@@ -92,22 +100,46 @@ def main() -> int:
 
     if args.expect:
         expected = json.loads(args.expect.read_text())
-        if expected.get("source_fingerprint") != manifest["source_fingerprint"]:
-            print(
-                "ERROR: processor source fingerprint mismatch\n"
-                f"  expected={expected.get('source_fingerprint')}\n"
-                f"  actual  ={manifest['source_fingerprint']}",
-                file=sys.stderr,
-            )
+        fields = ["schema_version", "language_id", "source_fingerprint", "files"]
+        if not args.source_only:
+            missing = []
+            if args.sla is None:
+                missing.append("--sla")
+            if args.ghidra_version is None:
+                missing.append("--ghidra-version")
+            if args.cli_version is None:
+                missing.append("--cli-version")
+            if missing:
+                print(
+                    "ERROR: full manifest verification requires " + ", ".join(missing),
+                    file=sys.stderr,
+                )
+                return 2
+            fields.extend(["ghidra_version", "ghidra_cli_version", "compiled_sla_sha256"])
+
+        mismatches = [
+            field for field in fields if expected.get(field) != manifest.get(field)
+        ]
+        if mismatches:
+            print("ERROR: processor manifest mismatch", file=sys.stderr)
+            for field in mismatches:
+                print(
+                    f"  {field}: expected={expected.get(field)!r} "
+                    f"actual={manifest.get(field)!r}",
+                    file=sys.stderr,
+                )
             return 1
-        print(f"[PASS] source_fingerprint == {manifest['source_fingerprint']}")
+        mode = "source" if args.source_only else "full"
+        print(
+            f"[PASS] {mode} processor manifest == {manifest['source_fingerprint']}"
+        )
 
     text = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
     if args.write:
         args.write.parent.mkdir(parents=True, exist_ok=True)
         args.write.write_text(text)
         print(f"Wrote {args.write}")
-    else:
+    elif not args.expect:
         sys.stdout.write(text)
     return 0
 

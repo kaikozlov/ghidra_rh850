@@ -78,6 +78,13 @@ def enc_jarl_disp22(disp22: int, r2: int) -> bytes:
     return u16(word0) + u16(word1)
 
 
+def enc_jarl_indirect(r1: int, r3: int) -> bytes:
+    # RH850G3K Format XI:
+    #   15..0  = 11000111111RRRRR
+    #   31..16 = WWWWW00101100000
+    return u16(0xC7E0 | (r1 & 0x1F)) + u16(((r3 & 0x1F) << 11) | 0x160)
+
+
 def enc_jmp_lp() -> bytes:
     # JMP [reg1] with reg1=lp(31): op0515=0x003 & R0004 & op0004=31
     # bits[15:5]=0x003, bits[4:0]=31
@@ -211,6 +218,11 @@ def build() -> tuple[bytes, list[dict]]:
         "mnemonic_prefix": "dispose",
         "must_pcode_ops": ["LOAD", "INT_ADD"],
         "flow": "RETURN",
+    })
+    add("jarl_indirect", enc_jarl_indirect(6, 10), {
+        "mnemonic_prefix": "jarl",
+        "must_pcode_ops": ["CALLIND"],
+        "flow": "CALL",
     })
 
     return bytes(blob), cases

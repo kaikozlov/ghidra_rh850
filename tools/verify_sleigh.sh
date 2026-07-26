@@ -20,6 +20,32 @@ fi
 }
 python3 "$ROOT/tools/fingerprint_processor.py" \
   --expect "$PROCESSOR_MANIFEST" \
+  --ghidra-version "$GHIDRA_VERSION" \
+  --cli-version "$GHIDRA_CLI_VERSION" \
   --sla "$V850_EXT_DIR/data/languages/v850e3.sla" >/dev/null
 
-echo "verify-sleigh passed (isolated extension resolves without install-tree copy)"
+if compgen -G "$ROOT/ghidra/ghidra_v850/data/languages/*.sla" >/dev/null; then
+  echo "vendored source tree was polluted by generated .sla files" >&2
+  exit 1
+fi
+
+# Resolve the language in a clean Ghidra subprocess. File existence alone does
+# not prove the isolated user-home extension is discoverable.
+RESOLVE_PROJECT="$ROOT/build/sleigh-resolution-project"
+RESOLVE_LOG="$ROOT/build/sleigh-logs/language-resolution.log"
+rm -rf "$RESOLVE_PROJECT"
+mkdir -p "$RESOLVE_PROJECT"
+"$GHIDRA_HOME/support/analyzeHeadless" "$RESOLVE_PROJECT" resolve_v850 \
+  -import "$ROOT/tests/fixtures/processor/rh850_semantic_fixture.bin" \
+  -processor v850e3:LE:32:default \
+  -loader BinaryLoader \
+  -loader-baseAddr 0x0 \
+  -noanalysis \
+  -deleteProject >"$RESOLVE_LOG" 2>&1
+grep -Eq 'Language.*v850e3:LE:32:default|v850e3:LE:32:default' "$RESOLVE_LOG" || {
+  echo "isolated language resolution did not report v850e3:LE:32:default" >&2
+  cat "$RESOLVE_LOG" >&2
+  exit 1
+}
+
+echo "verify-sleigh passed (clean subprocess resolved isolated extension)"

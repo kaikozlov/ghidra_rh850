@@ -69,9 +69,9 @@ work-project:
 		echo "Ready: $(PROJECT_DIR)"; \
 	fi
 	@if [ -f "$(PROJECT_DIR)/processor_manifest.json" ]; then \
-		$(PYTHON) tools/fingerprint_processor.py --expect "$(PROJECT_DIR)/processor_manifest.json"; \
+		$(PYTHON) tools/fingerprint_processor.py --source-only --expect "$(PROJECT_DIR)/processor_manifest.json"; \
 	elif [ -f "$(SNAPSHOT_DIR)/processor_manifest.json" ]; then \
-		$(PYTHON) tools/fingerprint_processor.py --expect "$(SNAPSHOT_DIR)/processor_manifest.json"; \
+		$(PYTHON) tools/fingerprint_processor.py --source-only --expect "$(SNAPSHOT_DIR)/processor_manifest.json"; \
 	else \
 		echo "NOTE: no processor_manifest.json yet; run rebuild-project to create one"; \
 	fi

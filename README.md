@@ -103,9 +103,11 @@ ghidra --projects-dir "$PWD/build/project" --project rh850_p1me_mapped \
 
 There is no separate install step. `tools/install_v850_extension.sh` (invoked
 by `make verify-sleigh` and every project rebuild) compiles the vendored
-`.slaspec` sources with `sleigh` and installs the extension into an isolated
-Ghidra user-home under `build/ghidra-home/` via `-Duser.home`. It does **not**
-mutate `$GHIDRA_HOME/Ghidra/Extensions`.
+`.slaspec` sources from a disposable copy under `build/processor-extension-src/`
+and installs the result into an isolated Ghidra user-home under
+`build/ghidra-home/` via `-Duser.home`. It does **not** generate files in the
+vendored tree or mutate `$GHIDRA_HOME/Ghidra/Extensions`; a conflicting
+install-tree extension is reported as an error for the user to remove explicitly.
 
 The in-tree `v850.cspec` models the RH850/G3 calling convention (r6-r9 args,
 r10 return, callee-saved r20-r29, lp link register, and an `__interrupt`
@@ -124,8 +126,9 @@ make verify-ghidra     # all of the above
 Safe interactive workflow: `make work-project` → absolute `--projects-dir` on
 `build/project/` → `ghidra ... stop` before any copy/commit → promote only with
 `make snapshot-project`. Processor fingerprint mismatches fail work/snapshot.
-Full four-stage rebuild parity is local (`make rebuild-project`); CI always runs
-`make verify` and runs `make verify-sleigh` on processor-path PRs / nightly.
+CI always runs `make verify`, runs synthetic and committed-project processor
+audits on processor-path changes, and runs four-stage rebuild parity for
+processor/script/snapshot changes, main pushes, dispatches, and nightly builds.
 
 ## Rebuild the complete Ghidra project
 
@@ -150,12 +153,10 @@ Choose another absolute output path with:
 make rebuild-project PROJECT_DIR=/absolute/path/to/project
 ```
 
-To deliberately replace an existing output—including the committed snapshot—use
-the script directly and pass `--force`:
-
-```bash
-tools/rebuild_project.sh --project-dir "$PWD/project" --force
-```
+To replace an existing disposable working build, use
+`tools/rebuild_project.sh --project-dir "$PWD/build/project" --force`. Never
+point the rebuild at committed `project/`; promote only with
+`make snapshot-project`.
 
 The script uses four staged `analyzeHeadless` transactions, each with a durable
 `-commit`. Staging matters: injecting every seed before the first analysis pass
@@ -185,13 +186,13 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateCanTransport.java`;
    - `AnnotateApplicationDiagnostics.java`;
    - `AnnotateBootloaderDiagnostics.java`;
-   - `AnnotateArchitecture.java`;
    - `RecoverVectorHandlers.java` (INTBP/EBASE/`__interrupt`);
+   - `AnnotateArchitecture.java`;
    - `AnnotateApplicationTransmit.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
 7. write `processor_manifest.json` beside the working project and require
-   function/instruction/symbol floors plus the expanded four-block memory map.
+   function/instruction/symbol floors plus the expanded six-block memory map.
 
 Expected memory map after the P1M-E device profile is applied:
 
@@ -216,7 +217,7 @@ and execution trace.
 ## Corrected result
 
 - Landmark smoke signal on the last annotated rebuild: **5,731 functions,
-  174,798 instructions, 37,000 symbols** (floors for gates; semantic checks live
+  174,783 instructions, 37,001 symbols** (floors for gates; semantic checks live
   in `make verify-processor`).
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and

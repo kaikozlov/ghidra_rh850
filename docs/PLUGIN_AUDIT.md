@@ -7,7 +7,7 @@ semantic correctness.** The checks below are layered:
 | Layer | What it proves | How to run |
 |---|---|---|
 | SLEIGH compile | Sources parse and produce `v850e3.sla` | `make verify-sleigh` |
-| Synthetic fixtures | Selected encodings have expected p-code ops / flow | `make verify-processor` |
+| Synthetic fixtures | Selected encodings plus executed register/memory/flag vectors | `make verify-processor` |
 | Function-body decode | No undefined bytes inside recovered functions | `AssertNoUndefinedInFunctions` |
 | System-register naming | Every `ldsr`/`stsr` operand is named | `AssertSystemRegisterNames` |
 | Project invariants | Critical labels/functions/memory/context | `AssertProjectInvariants` |
@@ -81,14 +81,19 @@ Semantic fixtures under `tests/fixtures/processor/` and the asserting scripts
 close the highest-impact gaps for this firmware:
 
 - signed `sld.b` / `sld.h` use `sext` (not `zext`);
-- two-operand `divh` uses signed division (`s/`);
-- saturating arithmetic updates `PSW.SAT` from signed overflow (`OV`);
-- `ld.w`/`st.w` `disp16` scaling (`field × 2`) remains correct;
-- `prepare`/`dispose` and `jarl`/`jmp [lp]` flow types are checked on fixtures.
+- two-operand `divh` uses signed division (`s/`) and sets `OV` without executing
+  an undefined host divide on a zero divisor;
+- saturating arithmetic updates `PSW.SAT` from signed overflow (`OV`), verified
+  with both positive-overflow and carry-without-overflow execution vectors;
+- `ld.w` `disp16` scaling (`field × 2`) is checked by an executed memory load;
+- `prepare`/`dispose` stack/register effects and direct/indirect
+  `jarl`/`jmp [lp]` flow types are checked on fixtures.
 
 Landmark decompiler checks (secrets at `0xBFD8`/`0xBFE8`, ISR calling
 convention, session-control decompilation) live in
-`AssertDecompilerInvariants.java`.
+`AssertDecompilerInvariants.java`; the gate writes deterministic normalized-C
+hashes to `build/decompiler-signatures.txt`, compares them with
+`data/decompiler_signatures.baseline.csv`, and uploads the report in CI.
 
 ## Device profile and interrupt recovery
 
@@ -106,27 +111,32 @@ caused false CodeFlash-as-SFR pointer creation).
 `RecoverVectorHandlers.java` walks the boot EIIC dispatch table, application
 EBASE vectors, and the 384-entry INTBP table, creates missing handler
 functions, and applies the `__interrupt` prototype to true ISR wrappers
-(not their normal callees such as `0x87610`/`0x87636`).
+(not their normal callees such as `0x87610`/`0x87636`). It also creates explicit
+vector-to-handler references; project invariants require the expected 382
+CodeFlash INTBP references and all known wrapper conventions.
 
 ## Accepted unimplemented ops
 
 Instructions that decode but intentionally use opaque `callother` p-code are
-listed in `data/processor_unimpl_allowlist.txt`. Keep that allowlist empty
-unless the instruction inventory shows a CALLOTHER that analysis requires.
+listed by user-op name in `data/processor_unimpl_allowlist.txt`. The inventory
+resolves CALLOTHER indexes to `__disable_irq`, `__enable_irq`, `__nop`, and
+`__synchronize`; verification fails for either an unapproved used op or a stale
+allowlist entry.
 
 ## Isolated install and processor fingerprint
 
-The module is compiled into `build/ghidra-home/.../Extensions/Renesas_v850/`
-(via `-Duser.home`), not into `$GHIDRA_HOME/Ghidra/Extensions`. Any stale
-install-tree copy is quarantined under `build/quarantined-extensions/` so
-language resolution cannot pick up a second `Renesas_v850` module.
+The module is copied to `build/processor-extension-src/`, compiled there, and
+installed into `build/ghidra-home/.../Extensions/Renesas_v850/` (via
+`-Duser.home`). Vendored sources and `$GHIDRA_HOME/Ghidra/Extensions` are never
+mutated. A conflicting install-tree copy causes an actionable failure, and a
+clean `analyzeHeadless` subprocess proves that the isolated language resolves.
 
 `tools/fingerprint_processor.py` hashes every `.slaspec` / `.sinc` / `.cspec` /
 `.pspec` / `.ldefs` / metadata file plus the compiled SLA and Ghidra versions.
 Rebuilds write `processor_manifest.json` beside `build/project/`.
-`make work-project` and `make snapshot-project` reject a source/project
-fingerprint mismatch when a manifest is present. A committed baseline of the
-source fingerprint (without a built project) lives at
+`make work-project` performs a Ghidra-free source check. Processor audits and
+`make snapshot-project` require source files, compiled SLA hash, Ghidra version,
+and CLI version all to match the project manifest. A committed full baseline lives at
 `data/processor_manifest.baseline.json`.
 
 Instruction inventory for this firmware is committed as
@@ -136,7 +146,7 @@ Instruction inventory for this firmware is committed as
 ## What these audits do *not* claim
 
 - Zero undefined bytes inside functions proves decode coverage, not every
-  p-code edge case (SAT boundary vectors, FP rounding, hypervisor ops, …).
+  p-code edge case (FP rounding, hypervisor ops, unexercised arithmetic forms, …).
 - Exact function/instruction counts are smoke signals; prefer the asserting
   invariant scripts for semantic gates.
 - A provisioned SecOC key or live ICU-S behavior cannot be proven from this

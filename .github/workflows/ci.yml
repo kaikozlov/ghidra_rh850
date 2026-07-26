@@ -30,6 +30,7 @@ jobs:
     if: github.event_name == 'pull_request'
     outputs:
       processor: ${{ steps.filter.outputs.processor }}
+      rebuild: ${{ steps.filter.outputs.rebuild }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -46,9 +47,27 @@ jobs:
               - 'tools/rebuild_project.sh'
               - 'ghidra/scripts/verify/**'
               - 'tests/fixtures/processor/**'
+              - 'data/processor_unimpl_allowlist.txt'
+              - 'data/processor_manifest.baseline.json'
+              - 'data/decompiler_signatures.baseline.csv'
+            rebuild:
+              - 'ghidra/ghidra_v850/**'
+              - 'ghidra/scripts/import/**'
+              - 'ghidra/scripts/seed/**'
+              - 'ghidra/scripts/annotate/**'
+              - 'ghidra/scripts/verify/**'
+              - 'tools/rebuild_project.sh'
+              - 'tools/snapshot_project.sh'
+              - 'tools/verify_ghidra_stats.py'
+              - 'tools/install_v850_extension.sh'
+              - 'tools/fingerprint_processor.py'
+              - 'data/p1m_sfr_labels.csv'
+              - 'data/processor_unimpl_allowlist.txt'
+              - 'data/decompiler_signatures.baseline.csv'
+              - 'project/**'
 
-  verify-sleigh:
-    name: SLEIGH compile + isolation
+  verify-processor:
+    name: SLEIGH + processor/project audits
     needs: [changes]
     if: >
       always() && (
@@ -60,6 +79,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
       - name: Install Ghidra 12.1.2
         run: |
           set -euo pipefail
@@ -68,14 +88,69 @@ jobs:
           VER=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
           echo "Ghidra version: $VER"
           test "$VER" = "12.1.2"
+          echo "GHIDRA_HOME=$GHIDRA_HOME" >> "$GITHUB_ENV"
+          echo "GHIDRA_INSTALL_DIR=$GHIDRA_HOME" >> "$GITHUB_ENV"
+      - name: Install pinned ghidra CLI
+        run: |
+          cargo install ghidra-cli --version 0.2.1 --locked
+          test "$(ghidra --version | awk 'NR == 1 { print $2 }')" = "0.2.1"
       - run: make verify-sleigh
-      - run: python3 tools/build_processor_fixture.py
+      - run: make work-project
+      - run: make verify-processor
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: sleigh-logs
+          name: processor-audit-logs
           path: |
             build/sleigh-logs/
             build/processor_manifest.json
+            build/verify-processor-*.log
+            build/decompiler-signatures.txt
+            data/instruction_inventory.csv
             tests/fixtures/processor/
+          if-no-files-found: ignore
+
+  rebuild-parity:
+    name: Four-stage rebuild parity
+    needs: [changes]
+    if: >
+      always() && (
+        github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'pull_request' && needs.changes.outputs.rebuild == 'true') ||
+        (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      )
+    runs-on: macos-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install Ghidra 12.1.2
+        run: |
+          set -euo pipefail
+          brew install ghidra
+          GHIDRA_HOME="$(brew --prefix ghidra)/libexec"
+          VER=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
+          test "$VER" = "12.1.2"
+          echo "GHIDRA_HOME=$GHIDRA_HOME" >> "$GITHUB_ENV"
+          echo "GHIDRA_INSTALL_DIR=$GHIDRA_HOME" >> "$GITHUB_ENV"
+      - name: Install pinned ghidra CLI
+        run: |
+          cargo install ghidra-cli --version 0.2.1 --locked
+          test "$(ghidra --version | awk 'NR == 1 { print $2 }')" = "0.2.1"
+      - run: make rebuild-project
+      - run: make verify-processor
+      - name: Compare rebuilt processor manifest with snapshot
+        run: cmp build/project/processor_manifest.json project/processor_manifest.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rebuild-parity-artifacts
+          path: |
+            build/sleigh-logs/
+            build/processor_manifest.json
+            build/project/processor_manifest.json
+            build/verify-processor-*.log
+            build/decompiler-signatures.txt
+            data/instruction_inventory.csv
           if-no-files-found: ignore

@@ -19,14 +19,17 @@ regenerated from the `.slaspec` / `.sinc` sources by `make verify-sleigh` and
 by every project rebuild. Prefer the repo Make targets:
 
 ```bash
-make verify-sleigh      # compile only
+make verify-sleigh      # compile + clean-process language resolution
 make verify-processor   # fixtures + project audits
 make rebuild-project    # full annotated rebuild into build/project/
 ```
 
-`tools/rebuild_project.sh` compiles each `*.slaspec` with Ghidra's `sleigh`
-compiler and installs the extension into an isolated build location (see
-`tools/install_v850_extension.sh`). No manual install step is required.
+`tools/install_v850_extension.sh` copies the module to
+`build/processor-extension-src/`, compiles each `*.slaspec` there with Ghidra's
+`sleigh` compiler, and installs the result into an isolated user home. It never
+generates `.sla` files in this directory or mutates Ghidra's installation tree.
+A conflicting install-tree copy is reported for explicit user removal. No
+manual install step is otherwise required.
 
 ## Original upstream basis (for reference)
 

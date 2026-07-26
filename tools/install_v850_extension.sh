@@ -6,7 +6,8 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 GHIDRA_HOME=$("$ROOT/tools/resolve_ghidra_home.sh")
 VENDOR="$ROOT/ghidra/ghidra_v850"
-LANG="$VENDOR/data/languages"
+BUILD_EXT="$ROOT/build/processor-extension-src/Renesas_v850"
+LANG="$BUILD_EXT/data/languages"
 USER_HOME="${GHIDRA_ISOLATED_HOME:-$ROOT/build/ghidra-home}"
 SETTINGS_DIR="$USER_HOME/Library/ghidra/ghidra_12.1.2_PUBLIC"
 EXT_DIR="${V850_EXT_DIR:-$SETTINGS_DIR/Extensions/Renesas_v850}"
@@ -30,14 +31,29 @@ else
 fi
 
 command -v rsync >/dev/null 2>&1 || { echo "rsync is required" >&2; exit 1; }
-mkdir -p "$LOG_DIR" "$SETTINGS_DIR/Extensions"
+mkdir -p "$LOG_DIR" "$SETTINGS_DIR/Extensions" "$(dirname "$BUILD_EXT")"
+
+INSTALL_TREE_EXT="$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850"
+if [[ -e "$INSTALL_TREE_EXT" ]]; then
+  echo "ERROR: conflicting install-tree extension exists at:" >&2
+  echo "  $INSTALL_TREE_EXT" >&2
+  echo "Remove it explicitly; this isolated installer will never modify GHIDRA_HOME." >&2
+  exit 1
+fi
+
+# Build from a disposable copy so generated .sla files never touch vendored
+# sources. Exclude any stale local outputs that may predate this installer.
+rm -rf "$BUILD_EXT"
+mkdir -p "$BUILD_EXT"
+rsync -a --delete --exclude '.git' --exclude '*.sla' "$VENDOR/" "$BUILD_EXT/"
 
 echo "Compiling vendored SLEIGH sources under $LANG"
 (
   cd "$LANG"
   for spec in *.slaspec; do
     log="$LOG_DIR/${spec%.slaspec}.log"
-    if ! "$GHIDRA_HOME/support/sleigh" "$spec" >"$log" 2>&1; then
+    if ! JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:-} -Duser.home=$USER_HOME" \
+      "$GHIDRA_HOME/support/sleigh" "$spec" >"$log" 2>&1; then
       echo "sleigh failed for $spec; see $log" >&2
       cat "$log" >&2
       exit 1
@@ -47,26 +63,21 @@ echo "Compiling vendored SLEIGH sources under $LANG"
       cat "$log" >&2
       exit 1
     fi
+    unexpected_warnings=$(grep -E '\bWARN(ING)?\b' "$log" \
+      | grep -Ev 'WARN  (24|26) NOP constructors found|WARN  Use -n switch to list each individually' \
+      || true)
+    if [[ -n "$unexpected_warnings" ]]; then
+      echo "unexpected sleigh warnings in $log" >&2
+      printf '%s\n' "$unexpected_warnings" >&2
+      exit 1
+    fi
   done
 )
 [[ -f "$LANG/v850e3.sla" ]] || { echo "sleigh did not produce v850e3.sla" >&2; exit 1; }
 
-INSTALL_TREE_EXT="$GHIDRA_HOME/Ghidra/Extensions/Renesas_v850"
-if [[ -e "$INSTALL_TREE_EXT" ]]; then
-  # Move completely outside Ghidra's Extensions scan path (a sibling *.stale*
-  # directory still gets scanned for language definitions).
-  STALE_ROOT="$ROOT/build/quarantined-extensions"
-  STALE="$STALE_ROOT/Renesas_v850.stale-install-tree"
-  mkdir -p "$STALE_ROOT"
-  echo "Quarantining install-tree extension:" >&2
-  echo "  $INSTALL_TREE_EXT -> $STALE" >&2
-  rm -rf "$STALE"
-  mv "$INSTALL_TREE_EXT" "$STALE"
-fi
-
 echo "Installing Renesas_v850 -> $EXT_DIR"
 mkdir -p "$(dirname "$EXT_DIR")"
-rsync -a --delete --exclude '.git' "$VENDOR/" "$EXT_DIR/"
+rsync -a --delete "$BUILD_EXT/" "$EXT_DIR/"
 
 python3 "$ROOT/tools/fingerprint_processor.py" \
   --ghidra-version "$GHIDRA_VERSION" \
@@ -80,7 +91,10 @@ cat >"$ENV_FILE" <<EOF
 export GHIDRA_HOME="$GHIDRA_HOME"
 export GHIDRA_ISOLATED_HOME="$USER_HOME"
 export V850_EXT_DIR="$EXT_DIR"
+export V850_BUILD_DIR="$BUILD_EXT"
 export PROCESSOR_MANIFEST="$MANIFEST"
+export GHIDRA_VERSION="$GHIDRA_VERSION"
+export GHIDRA_CLI_VERSION="$CLI_VERSION"
 export GHIDRA_JAVA_OPTIONS="\${GHIDRA_JAVA_OPTIONS:-} -Duser.home=$USER_HOME"
 export GHIDRA_HEADLESS_JAVA_OPTIONS="\${GHIDRA_HEADLESS_JAVA_OPTIONS:-} -Duser.home=$USER_HOME"
 EOF

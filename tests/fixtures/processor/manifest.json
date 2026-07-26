@@ -1,7 +1,7 @@
 {
   "processor": "v850e3:LE:32:default",
   "binary": "rh850_semantic_fixture.bin",
-  "size": 44,
+  "size": 48,
   "cases": [
     {
       "name": "sld.b",
@@ -130,6 +130,17 @@
         "INT_ADD"
       ],
       "flow": "RETURN"
+    },
+    {
+      "name": "jarl_indirect",
+      "addr": 44,
+      "size": 4,
+      "bytes": "e6c76051",
+      "mnemonic_prefix": "jarl",
+      "must_pcode_ops": [
+        "CALLIND"
+      ],
+      "flow": "CALL"
     }
   ]
 }
