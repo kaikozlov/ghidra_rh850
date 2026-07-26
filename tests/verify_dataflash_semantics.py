@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+"""Verify DataFlash logical ownership, checkpoint records, and reserved regions.
+
+Reads only committed CodeFlash/DataFlash images and the generated CSV. The checks
+are independent of Ghidra and sibling repositories.
+"""
+from __future__ import annotations
+
+import csv
+import struct
+import sys
+from collections import Counter
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
+DF = (REPO / "firmware" / "RH850_P1M-E_DataFlash.bin").read_bytes()
+CSV_PATH = REPO / "data" / "dataflash_nvm_records.csv"
+TP = 0x23EE4
+JOB_TABLE = TP + 0x2EFC
+STORAGE_MAP = TP + 0x3924
+CHECKPOINT_COUNT_ADDR = 0x2AF10
+CHECKPOINT_TABLE = 0x2AF2C
+REDUNDANT_TABLE = 0x2B0AC
+OWNER_MAP = 0x2B1B0
+
+passed = failed = 0
+
+
+def check(name: str, condition: object, detail: str = "") -> None:
+    global passed, failed
+    ok = bool(condition)
+    passed += int(ok)
+    failed += int(not ok)
+    suffix = f" ({detail})" if detail else ""
+    print(f"[{'PASS' if ok else 'FAIL'}] {name}{suffix}")
+
+
+def u16(data: bytes, offset: int) -> int:
+    return struct.unpack_from("<H", data, offset)[0]
+
+
+def physical_record(block: int) -> tuple[int, bytes, int]:
+    storage = u16(CF, JOB_TABLE + block * 16 + 8)
+    page_start = u16(CF, STORAGE_MAP + storage * 6)
+    page_end = 479 if storage == 1 else u16(CF, STORAGE_MAP + (storage - 1) * 6) - 1
+    record = DF[page_start * 64:(page_end + 1) * 64]
+    return storage, record, u16(CF, STORAGE_MAP + storage * 6 + 2)
+
+
+def record_valid(storage: int, record: bytes) -> bool:
+    return struct.unpack_from("<H", record)[0] == storage and record[-4:] == b"\xAA" * 4
+
+
+print("== logical-owner table ==")
+check("checkpoint descriptor count is 32", u16(CF, CHECKPOINT_COUNT_ADDR) == 32)
+owners = [struct.unpack_from("<BB", CF, OWNER_MAP + block * 2) for block in range(124)]
+check("NvM blocks 0/1 are owner sentinels", owners[:2] == [(0xFF, 0xFF)] * 2)
+check("blocks 2..49 are triplicate class 1", all(kind == 1 for _index, kind in owners[2:50]))
+check("blocks 50..123 are checkpoint class 0", all(kind == 0 for _index, kind in owners[50:]))
+
+triplicate_blocks = {
+    index: [block for block in range(2, 50) if owners[block] == (index, 1)]
+    for index in range(16)
+}
+expected_triplicate = {
+    index: [2 + group * 12 + offset + 4 * copy for copy in range(3)]
+    for group in range(4)
+    for offset, index in enumerate(range(group * 4, group * 4 + 4))
+}
+check("all 16 triplicate owners map to raw/XOR55/XORAA blocks",
+      triplicate_blocks == expected_triplicate, repr(triplicate_blocks))
+
+checkpoint_blocks = {
+    index: [block for block in range(50, 124) if owners[block] == (index, 0)]
+    for index in range(32)
+}
+expected_checkpoint = {
+    0: [50, 51], 1: [52, 53], 2: [54, 55], 3: [56, 57],
+    4: [58, 59], 5: list(range(64, 70)), 6: list(range(70, 76)),
+    7: [62, 63], 8: [76, 77], 9: [78, 79], 10: [60, 61],
+    11: [80, 81], 12: [82, 83], 13: [84, 85], 14: [86, 87],
+    15: [88, 89], 16: [90, 91], 17: [92, 93], 18: [94, 95],
+    19: [96, 97], 20: [98, 99], 21: [100, 101], 22: [102, 103],
+    23: [104, 105], 24: [106, 107], 25: list(range(108, 112)),
+    26: list(range(112, 116)), 27: [116, 117], 28: [118, 119],
+    29: [], 30: [120, 121], 31: [122, 123],
+}
+check("all 74 checkpoint blocks map to 32 logical slots",
+      checkpoint_blocks == expected_checkpoint, repr(checkpoint_blocks))
+check("ownership classes cover every persistent block exactly once",
+      sum(map(len, triplicate_blocks.values())) == 48 and
+      sum(map(len, checkpoint_blocks.values())) == 74)
+
+print("\n== checkpoint descriptors and record envelope ==")
+descriptors = [
+    struct.unpack_from("<HHHHI", CF, CHECKPOINT_TABLE + index * 12)
+    for index in range(32)
+]
+enabled = [index for index, (_length, count, base, _reserved, _ram) in enumerate(descriptors)
+           if count and base != 0xFFFF]
+disabled = [index for index in range(32) if index not in enabled]
+check("24 checkpoint descriptors are enabled", len(enabled) == 24, repr(enabled))
+check("disabled checkpoint slots are exact", disabled == [16, 22, 25, 26, 28, 29, 30, 31], repr(disabled))
+check("enabled descriptors own 56 ring blocks", sum(len(checkpoint_blocks[i]) for i in enabled) == 56)
+check("disabled descriptors reserve 18 physical blocks", sum(len(checkpoint_blocks[i]) for i in disabled) == 18)
+check("every enabled descriptor base/count matches owner map",
+      all(checkpoint_blocks[i] == list(range(descriptors[i][2], descriptors[i][2] + descriptors[i][1]))
+          for i in enabled))
+check("every disabled descriptor uses FFFF base",
+      all(descriptors[i][2] == 0xFFFF for i in disabled))
+check("disabled slot 16 retains count two; other disabled counts are zero",
+      descriptors[16][1] == 2 and all(descriptors[i][1] == 0 for i in disabled if i != 16))
+check("checkpoint descriptor reserved halfwords are zero", all(desc[3] == 0 for desc in descriptors))
+
+active_valid = active_invalid = disabled_valid = 0
+valid_counters = 0
+active_generations: dict[int, list[int]] = {index: [] for index in enabled}
+for index, blocks in checkpoint_blocks.items():
+    data_length = descriptors[index][0]
+    expected_payload_length = max(data_length, 56) + 8
+    for block in blocks:
+        storage, record, payload_length = physical_record(block)
+        valid = record_valid(storage, record)
+        if index in enabled:
+            check(f"block {block} checkpoint payload length", payload_length == expected_payload_length)
+        generation = struct.unpack_from("<I", record, 4)[0]
+        inverse = struct.unpack_from("<I", record, 8 + max(data_length, 56))[0]
+        complement_ok = inverse == (~generation & 0xFFFFFFFF)
+        if index in enabled:
+            active_valid += int(valid)
+            active_invalid += int(not valid)
+            if valid:
+                valid_counters += int(complement_ok)
+                active_generations[index].append(generation)
+        else:
+            disabled_valid += int(valid)
+
+check("50 enabled checkpoint records have valid outer envelopes", active_valid == 50, str(active_valid))
+check("six enabled checkpoint ring copies are invalid", active_invalid == 6, str(active_invalid))
+check("all disabled checkpoint records are invalid", disabled_valid == 0, str(disabled_valid))
+check("all valid enabled checkpoints have generation complements", valid_counters == 50, str(valid_counters))
+check("six-slot checkpoint 5 generations span 0x2782..0x2787",
+      sorted(active_generations[5]) == list(range(0x2782, 0x2788)))
+check("six-slot checkpoint 6 generations span 0x277B..0x2780",
+      sorted(active_generations[6]) == list(range(0x277B, 0x2781)))
+
+print("\n== triplicate/total validity accounting ==")
+redundant_desc = [struct.unpack_from("<HHI", CF, REDUNDANT_TABLE + index * 8) for index in range(16)]
+trip_enabled = [i for i, (_length, base, _ram) in enumerate(redundant_desc) if base != 0xFFFF]
+trip_valid_enabled = trip_invalid_disabled = 0
+for index, blocks in triplicate_blocks.items():
+    for block in blocks:
+        storage, record, _payload_length = physical_record(block)
+        valid = record_valid(storage, record)
+        if index in trip_enabled:
+            trip_valid_enabled += int(valid)
+        else:
+            trip_invalid_disabled += int(not valid)
+check("11 triplicate descriptors are enabled", trip_enabled == list(range(7)) + list(range(12, 16)))
+check("18 enabled triplicate records are valid", trip_valid_enabled == 18, str(trip_valid_enabled))
+check("all 15 disabled triplicate records are invalid", trip_invalid_disabled == 15)
+check("total valid configured records remains 68", active_valid + trip_valid_enabled == 68)
+
+print("\n== lower unallocated half and protected ranges ==")
+all_pages = []
+for block in range(2, 124):
+    storage = u16(CF, JOB_TABLE + block * 16 + 8)
+    all_pages.append(u16(CF, STORAGE_MAP + storage * 6))
+check("no persistent owner starts below page 256", min(all_pages) == 256)
+lower = DF[:0x4000]
+lower_words = Counter(lower[offset:offset + 4] for offset in range(0, len(lower), 4))
+check("lower half is exactly 256 pages / 4096 words", len(lower) == 0x4000 and sum(lower_words.values()) == 4096)
+check("lower half contains no configured AAAAAAAA trailer", b"\xAA" * 4 not in lower)
+check("lower readback word classes match captured image",
+      (lower_words[b"\x00" * 4], lower_words[b"\xFF" * 4],
+       4096 - lower_words[b"\x00" * 4] - lower_words[b"\xFF" * 4]) == (2250, 1306, 540))
+
+protected = struct.unpack_from("<IIII", CF, 0x293E4)
+check("compiled DataFlash protected-range table",
+      protected == (0xFF207800, 0xFF207FFF, 0xFF206C00, 0xFF206EFF),
+      repr(tuple(hex(value) for value in protected)))
+check("DataFlash range validator starts at 0x4EAD8",
+      CF[0x4EAD8:0x4EADC] == bytes.fromhex("400e20ff"), CF[0x4EAD8:0x4EADC].hex())
+check("range validator references protected table 0x293E4",
+      (0x293E4).to_bytes(4, "little") in CF[0x4EAD8:0x4EB1C])
+check("optional objects 12..15 occupy protected range FF206C00..FF206EFF",
+      min(physical_record(block)[0] for block in range(38, 50)) == 37 and
+      432 * 64 == 0x6C00 and 444 * 64 - 1 == 0x6EFF)
+
+tail = DF[0x7800:]
+tail_words = Counter(tail[offset:offset + 4] for offset in range(0, len(tail), 4))
+check("protected tail is exactly 2 KiB / 32 pages", len(tail) == 0x800)
+check("tail contains only all-zero/all-one words", set(tail_words) == {b"\x00" * 4, b"\xFF" * 4})
+check("tail readback has 236 zero and 276 all-one words",
+      (tail_words[b"\x00" * 4], tail_words[b"\xFF" * 4]) == (236, 276))
+
+print("\n== generated CSV semantic columns ==")
+with CSV_PATH.open(newline="", encoding="utf-8") as stream:
+    csv_rows = list(csv.DictReader(stream))
+check("CSV has 122 physical records", len(csv_rows) == 122)
+check("CSV ownership split is 48 triplicate / 74 checkpoint",
+      Counter(row["owner_class"] for row in csv_rows) == {"triplicate": 48, "checkpoint": 74})
+check("CSV enabled split matches firmware descriptors",
+      sum(row["owner_class"] == "checkpoint" and row["owner_enabled"] == "yes" for row in csv_rows) == 56 and
+      sum(row["owner_class"] == "checkpoint" and row["owner_enabled"] == "no" for row in csv_rows) == 18)
+check("CSV maps disabled triplicate objects 7..11",
+      {int(row["owner_index"]) for row in csv_rows
+       if row["owner_class"] == "triplicate" and row["owner_enabled"] == "no"} == set(range(7, 12)))
+check("CSV reports checkpoint generations for 56 enabled ring records",
+      sum(bool(row["checkpoint_generation"]) for row in csv_rows) == 56)
+check("CSV identifies all 50 valid checkpoint complements",
+      sum(row["owner_class"] == "checkpoint" and row["record_valid"] == "yes" and
+          row["checkpoint_counter_valid"] == "yes" for row in csv_rows) == 50)
+
+print(f"\n== RESULT: {passed} passed, {failed} failed ==")
+sys.exit(1 if failed else 0)

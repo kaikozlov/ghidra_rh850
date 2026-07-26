@@ -9,6 +9,7 @@ VERIFY_SUITES := \
 	tests/verify_secoc_nvm.py \
 	tests/verify_secoc_application.py \
 	tests/verify_dataflash_layout.py \
+	tests/verify_dataflash_semantics.py \
 	tests/verify_did_model.py \
 	tests/verify_application_diagnostics.py \
 	tests/verify_bootloader_diagnostics.py \

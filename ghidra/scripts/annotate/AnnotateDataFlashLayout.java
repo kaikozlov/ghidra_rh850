@@ -19,7 +19,7 @@ public class AnnotateDataFlashLayout extends GhidraScript {
         Address a=toAddr(value);
         SymbolTable st=currentProgram.getSymbolTable();
         Symbol s=st.getPrimarySymbol(a);
-        if (s!=null && s.getSource()!=SourceType.USER_DEFINED) {
+        if (s!=null && !s.getName().equals(name)) {
             s.setName(name,SourceType.USER_DEFINED);
         } else if (s==null) {
             s=st.createLabel(a,name,SourceType.USER_DEFINED);
@@ -33,6 +33,12 @@ public class AnnotateDataFlashLayout extends GhidraScript {
             "Dispatch a bootloader DID write to either a callback or a direct RAM copy. DIDs 0x201/0x202 are volatile payload-crypto inputs, not DataFlash-backed values.");
         rename(0x6D3AL,"bootloader_did_direct_ram_copy",
             "Copy a DID payload directly to the RAM pointer in its 12-byte descriptor.");
+        rename(0x67A98L,"checkpoint_restore_complete",
+            "Validate checkpoint generation/complement, select the current ring record, and restore bytes after the generation word to the configured RAM mirror.");
+        rename(0x4EA78L,"application_ram_range_allowed",
+            "Validate a RAM range while rejecting overlap with five protected RAM intervals at CodeFlash 0x293F4.");
+        rename(0x4EAD8L,"application_dataflash_range_allowed",
+            "Validate a DataFlash range and reject overlap with FF207800..FF207FFF or FF206C00..FF206EFF from the table at 0x293E4.");
 
         label(0x8F14L,"bootloader_payload_did_table",
             "Four 12-byte descriptors. 0x201 len16 -> FEBF2D08; 0x202 len16 -> FEBF2CF8; 0x203 len5 is handled specially. These are volatile session parameters.");
@@ -42,16 +48,26 @@ public class AnnotateDataFlashLayout extends GhidraScript {
             "124 NvM job descriptors. Jobs 0 and 2 alias storage index 1; job 1 is non-persistent; jobs 3..123 map storage indexes 2..122.");
         label(0x27808L,"nvm_block_storage_map",
             "Six-byte physical records (first page u16, payload length u16, flags u16). Configured records 1..122 pack pages 256..479.");
+        label(0x2AF10L,"checkpoint_object_count",
+            "Value 32: number of generation-protected checkpoint object descriptors at 0x2AF2C.");
+        label(0x2AF2CL,"checkpoint_object_descriptor_table",
+            "32 x 12-byte descriptors: data length, ring-block count, first NvM block, reserved zero, RAM mirror. Twenty-four entries are enabled.");
+        label(0x2B1B0L,"nvm_logical_owner_table",
+            "124 x 2-byte block owners: object index then class (0 checkpoint ring, 1 triplicate). Blocks 0/1 are FFFF; every persistent block 2..123 has an owner.");
+        label(0x293E4L,"dataflash_protected_range_table",
+            "Two inclusive ranges rejected by 0x4EAD8: FF207800..FF207FFF ICU-S-shaped tail and FF206C00..FF206EFF optional objects 12..15.");
 
         label(0xFEBF2D08L,"payload_did_0201_key_material",
             "Volatile 16-byte DID 0x201 buffer used to derive the payload key; not persisted in DataFlash.");
         label(0xFEBF2CF8L,"payload_did_0202_iv",
             "Volatile 16-byte DID 0x202 IV used by payload AES-CBC/CMAC; not persisted in DataFlash.");
 
-        label(0xFF200000L,"dataflash_unmapped_lower_half",
-            "Pages 0..255 are absent from the configured normal NvM storage map and contain no valid record boundary markers in this dump; exact role unknown.");
-        label(0xFF204000L,"dataflash_configured_nvm_start",
-            "Page 256: lowest configured normal NvM physical record. Configured records occupy pages 256..479.");
+        label(0xFF200000L,"dataflash_unallocated_lower_half",
+            "Pages 0..255 are outside both configured object classes. Erased RH850 DataFlash reads are undefined, so residual 00/FF/mixed words do not establish a hidden record format; exact prior use is unknown.");
+        label(0xFF204000L,"dataflash_checkpoint_ring_start",
+            "Page 256: lowest checkpoint-ring physical allocation. Pages 256..431 hold 74 records for 32 logical slots (24 enabled, 8 disabled).");
+        label(0xFF206B40L,"checkpoint_object0_ring_record0",
+            "Checkpoint object 0, ring block 50/storage 49. Record payload is generation + 160 RAM bytes + inverse generation; valid in this dump.");
         label(0xFF206C00L,"secoc_nvm_triplicate_bank_object15_xoraa_record",
             "Page 432 starts the 48-record SecOC triplicate bank and is object 15's XORAA copy (NvM block 49, storage index 48); invalid in this dump.");
 
@@ -76,7 +92,7 @@ public class AnnotateDataFlashLayout extends GhidraScript {
             "32-byte CPU-visible RAM mirror for object 15. A valid triplicate consensus is copied here by 0x67C34.");
         label(0xFEBF02F8L,"secoc_nvm_object15_key_field_ram",
             "Second 16-byte field of object 15 RAM mirror; corresponding field is the CMAC-verified SecOC key on related variants. Not validated for this dump.");
-        label(0xFF207800L,"dataflash_reserved_tail_2k",
-            "Pages 480..511 are outside the normal NvM map and read as 00/FF only. Strongly consistent with an ICU-S-reserved tail, but the SecOC key is not proven to reside here.");
+        label(0xFF207800L,"dataflash_icus_reserved_tail_2k",
+            "Pages 480..511 are outside both NvM owner classes, protected by 0x4EAD8, and align with the documented final 2 KiB ICU-S reservation. CPU-visible 00/FF words do not reveal secure contents or locate the SecOC slot-4 key.");
     }
 }

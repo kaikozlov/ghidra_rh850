@@ -172,6 +172,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `SeedPayloadVerificationFunctions.java`;
    - `SeedSecocNvmFunctions.java`;
    - `SeedSecocApplicationFunctions.java`;
+   - `SeedDataFlashSemanticsFunctions.java`;
    - `SeedApplicationDiagnosticFunctions.java`;
    - `SeedBootloaderDiagnosticFunctions.java`;
    - `SeedArchitectureFunctions.java`;
@@ -188,7 +189,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateArchitecture.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
-7. require exactly 5,554 functions, 172,946 instructions, 27,747 symbols, two
+7. require exactly 5,556 functions, 173,000 instructions, 27,762 symbols, two
    memory sections, and `0x108000` mapped bytes.
 
 Expected memory map:
@@ -203,7 +204,7 @@ and execution trace.
 
 ## Corrected result
 
-- **5,554 functions, 172,946 instructions, 27,747 symbols**.
+- **5,556 functions, 173,000 instructions, 27,762 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -304,11 +305,18 @@ Definitive corrections, independently checked by `tests/verify_secoc_nvm.py`:
   derivation exists in the claimed path.
 
 `docs/DATAFLASH_LAYOUT.md` completes the entire 32 KiB map;
-`tests/verify_dataflash_layout.py` checks it and
-`data/dataflash_nvm_records.csv` lists all 122 physical records.
-Key corrections:
+`tests/verify_dataflash_layout.py` and `tests/verify_dataflash_semantics.py` check it,
+and `data/dataflash_nvm_records.csv` lists all 122 physical records with logical
+owners. Key corrections:
 
 - configured normal NvM records occupy pages 256–479;
+- the owner table at `0x2B1B0` assigns every persistent block 2–123 to one of
+  two classes: 48 triplicate records or 74 generation-protected checkpoint-ring
+  records; no configured record remains semantically ownerless;
+- 24 of 32 checkpoint descriptors are enabled and own 56 ring records; all 50
+  physically valid enabled records have matching generation/complement words;
+- pages 0–255 are outside both object classes, and erased DataFlash readback is
+  undefined, so their residual bit patterns cannot support hidden-record claims;
 - pages 432–479 are a 48-record raw/XOR55/XORAA bank for all 16
   SecOC-associated redundancy objects—not 12 ICU key-slot pages;
 - object 15 is length 32, base NvM block 41, RAM mirror `0xFEBF02E8`;
@@ -319,8 +327,10 @@ Key corrections:
   exact committed `8965B4512000` snapshot;
 - DIDs `0x201/0x202/0x203` are volatile bootloader session parameters at RAM
   `0xFEBF2D08`/`0xFEBF2CF8`/special state, not DataFlash-backed values;
-- the final 2 KiB remains strongly consistent with an ICU-S-reserved tail, but
-  this no longer supports claiming that the SecOC key resides there.
+- `application_dataflash_range_allowed @ 0x4EAD8` protects both the final 2 KiB
+  ICU-S-shaped tail and pages 432–443 holding optional objects 12–15; the 00/FF
+  tail readback does not reveal protected contents or prove that slot-4 SecOC key
+  bytes reside there.
 
 `docs/DID_MODEL.md` completes the bootloader ReadDataByIdentifier/WriteDataByIdentifier
 model; `tests/verify_did_model.py` checks it directly from CodeFlash:

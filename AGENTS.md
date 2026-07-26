@@ -104,16 +104,24 @@ the reconstructed combined firmware — trust them:
   - pages 468–479 are objects 0–3; FEBEF468/478/488 contain their structured state.
   - `0x758A0/0x785D2` are NvM/DataFlash service machinery, not ICU derivation.
 - The complete 32 KiB map is in `docs/DATAFLASH_LAYOUT.md` and is checked by
-  `tests/verify_dataflash_layout.py`:
-  - 122 physical records occupy pages 256–479; pages 0–255 are not in the map.
+  `tests/verify_dataflash_layout.py` plus `tests/verify_dataflash_semantics.py`:
+  - 122 physical records occupy pages 256–479; pages 0–255 are outside both
+    configured persistent-object classes, and erased DataFlash readback is undefined.
+  - the owner table at `0x2B1B0` maps every persistent block 2–123: blocks 2–49
+    are the 48-record triplicate bank, while blocks 50–123 are 74 checkpoint-ring
+    records for 32 logical slots (24 enabled, 8 disabled).
+  - checkpoint records store generation + data/padding + inverse generation;
+    all 50 physically valid enabled records have a matching complement.
   - pages 432–479 are the full 16-object SecOC triplicate bank.
   - object 15 is len32/base block41/RAM `0xFEBF02E8`; its key field maps raw
     `0xFF206E14`, XOR55 `0xFF206D14`, XORAA `0xFF206C14`, RAM `0xFEBF02F8`.
   - related-variant field evidence CMAC-verifies the SecOC key at `0xFF206E14`.
     This exact dump has three invalid object-15 copies and no verified key.
   - DIDs `0x201/0x202/0x203` are volatile bootloader inputs, not DataFlash-backed.
-  - the final 2 KiB is likely ICU-S-reserved, but linking this SecOC key to that
-    tail is unsupported.
+  - `0x4EAD8` rejects accesses overlapping pages 480–511 and optional-object
+    pages 432–443. Hardware documentation identifies a final 1/2 KiB ICU-S
+    reservation, but the dumped 00/FF tail does not reveal its contents or locate
+    this SecOC key there.
   - the dealer/FEBEF capture design remains wrong. A generic `0x72F58` hook must
     filter blocks 41/45/49 and observe completion to see object 15 on a provisioned
     variant; the call itself is not key-set.

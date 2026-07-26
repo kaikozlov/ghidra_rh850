@@ -19,6 +19,9 @@ JOB_COUNT = struct.unpack_from("<H", CF, TP + 0x2EF8)[0]
 JOB_TABLE = TP + 0x2EFC
 STORAGE_MAP = TP + 0x3924
 OBJECT_TABLE = 0x2B0AC
+CHECKPOINT_COUNT = struct.unpack_from("<H", CF, 0x2AF10)[0]
+CHECKPOINT_TABLE = 0x2AF2C
+OWNER_MAP = 0x2B1B0
 DF_BASE = 0xFF200000
 
 u16 = lambda b, a: struct.unpack_from("<H", b, a)[0]
@@ -31,13 +34,23 @@ def build_rows():
         if cfg not in (0xFFFE, 0xFFFF):
             jobs_by_storage.setdefault(cfg, []).append(job)
 
-    object_by_job: dict[int, tuple[int, str]] = {}
-    for obj in range(16):
-        length, base_block, _ram = struct.unpack_from("<HHI", CF, OBJECT_TABLE + obj * 8)
-        if base_block == 0xFFFF:
-            continue
-        for delta, encoding in ((0, "raw"), (4, "xor55"), (8, "xoraa")):
-            object_by_job[base_block + delta] = (obj, encoding)
+    # The two-byte table at 0x2B1B0 assigns every persistent NvM block to one
+    # of the firmware's two logical ownership classes. Byte 0 is the logical
+    # object index; byte 1 is 0 for checkpoint rings and 1 for triplicate
+    # raw/XOR55/XORAA objects. Blocks 0/1 are sentinels/non-persistent.
+    jobs_by_owner: dict[tuple[int, int], list[int]] = {}
+    for job in range(2, JOB_COUNT):
+        owner_index, owner_class = struct.unpack_from("<BB", CF, OWNER_MAP + job * 2)
+        jobs_by_owner.setdefault((owner_class, owner_index), []).append(job)
+
+    checkpoint_desc = [
+        struct.unpack_from("<HHHHI", CF, CHECKPOINT_TABLE + index * 12)
+        for index in range(CHECKPOINT_COUNT)
+    ]
+    redundant_desc = [
+        struct.unpack_from("<HHI", CF, OBJECT_TABLE + index * 8)
+        for index in range(16)
+    ]
 
     rows = []
     # Storage indexes 1..122 are the configured physical records. Index 0 is a
@@ -53,9 +66,38 @@ def build_rows():
         trailer = record[-4:]
         valid = header_index == cfg and trailer == b"\xAA" * 4
         jobs = jobs_by_storage.get(cfg, [])
-        memberships = [object_by_job[j] for j in jobs if j in object_by_job]
-        obj = memberships[0][0] if memberships else ""
-        encoding = memberships[0][1] if memberships else ""
+        owner_class_name = ""
+        owner_index: int | str = ""
+        owner_enabled = ""
+        owner_slot: int | str = ""
+        obj: int | str = ""
+        encoding = ""
+        generation = ""
+        inverse = ""
+        counter_valid = ""
+        if jobs:
+            job = jobs[-1]  # storage index 1 aliases jobs 0 and 2; job 2 is persistent.
+            map_index, map_class = struct.unpack_from("<BB", CF, OWNER_MAP + job * 2)
+            owner_index = map_index
+            members = jobs_by_owner[(map_class, map_index)]
+            owner_slot = members.index(job)
+            if map_class == 1:
+                owner_class_name = "triplicate"
+                length, base_block, _ram = redundant_desc[map_index]
+                owner_enabled = "yes" if base_block != 0xFFFF else "no"
+                obj = map_index
+                encoding = ("raw", "xor55", "xoraa")[owner_slot]
+            else:
+                owner_class_name = "checkpoint"
+                data_length, ring_blocks, base_block, _reserved, _ram = checkpoint_desc[map_index]
+                owner_enabled = "yes" if base_block != 0xFFFF and ring_blocks else "no"
+                if owner_enabled == "yes":
+                    generation_value = struct.unpack_from("<I", record, 4)[0]
+                    inverse_offset = 8 + max(data_length, 56)
+                    inverse_value = struct.unpack_from("<I", record, inverse_offset)[0]
+                    generation = f"0x{generation_value:08X}"
+                    inverse = f"0x{inverse_value:08X}"
+                    counter_valid = "yes" if inverse_value == (~generation_value & 0xFFFFFFFF) else "no"
         rows.append({
             "storage_index": cfg,
             "nvm_jobs": ";".join(str(j) for j in jobs),
@@ -68,8 +110,15 @@ def build_rows():
             "header_index": f"0x{header_index:04X}",
             "trailer": trailer.hex(),
             "record_valid": "yes" if valid else "no",
+            "owner_class": owner_class_name,
+            "owner_index": owner_index,
+            "owner_enabled": owner_enabled,
+            "owner_slot": owner_slot,
             "secoc_object": obj,
             "copy_encoding": encoding,
+            "checkpoint_generation": generation,
+            "checkpoint_inverse": inverse,
+            "checkpoint_counter_valid": counter_valid,
         })
     return rows
 
