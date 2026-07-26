@@ -31,7 +31,9 @@ reconstructs the combined image in memory, and verifies every base finding.
 - `tools/` — generators and the durable project rebuild workflow.
 - `external-references.lock.json` — pinned upstream commits and artifact hashes.
 - `pyproject.toml` / `uv.lock` — locked verification environment.
-- `project/` — durable annotated Ghidra project; do not move transient state here.
+- `project/` — committed Ghidra project snapshot; never daemon-open directly
+  (see "Working copy vs. committed snapshot" below). Update only via
+  `make snapshot-project`.
 - `legacy/flat-import/` — preserved invalid original analysis.
 
 ## The `ghidra` CLI is a persistent daemon — durability is the main trap
@@ -40,34 +42,53 @@ The `ghidra` CLI runs a long-lived bridge (TCP server inside Ghidra) that keeps
 the program **in memory**. Edits (`analyze`, `script run`) are **not durable on
 disk until the daemon shuts down cleanly**. Concretely:
 
-1. **Always `stop` before copying or committing the project.**
+1. **Always `stop` before copying or committing the working project.**
    `ghidra ... stop` triggers the teardown commit that writes the durable
-   snapshot. Copying or `git add project/` while a daemon is running captures an
+   snapshot. Copying or `git add` while a daemon is running captures an
    empty/stale DB. If a fresh daemon opens the project and reports 0 functions,
    this is why — `stop`, then re-copy.
-2. **Never commit `project/` while a daemon is running.** It holds transient
-   `.lock` / `*.lock~` / `tmp*` files (git-ignored under `project/.gitignore`).
-   Confirm `pgrep -f 'AnalyzeHeadless.*rh850'` is empty before committing.
+2. **Never commit while a daemon is running.** It holds transient
+   `.lock` / `*.lock~` / `tmp*` files (git-ignored). Confirm
+   `pgrep -f 'AnalyzeHeadless.*rh850'` is empty before snapshotting.
 3. **Opening compacts the DB** (`db.N.gbf` → `db.N+1`) on each clean stop. This
-   is harmless and expected; don't be alarmed that the filename changes.
+   is harmless and expected; don't be alarmed that the filename changes. It is
+   also why the committed snapshot must never be daemon-opened (see below).
 4. **The `analyze` command's save is silently swallowed** by the bridge
    (`bridge.rs` notes the teardown commit "races the JVM kill"). Treat `stop` as
    the only reliable persist. For a guaranteed-durable rebuild, use a raw
    `analyzeHeadless -process -commit` one-shot instead of the daemon.
 
-## Opening the project
+## Working copy vs. committed snapshot
 
-The project is committed under `project/`. Use an **absolute** `--projects-dir`:
-Ghidra 12.1+ rejects any path component starting with `.`, so `./project` fails.
+`project/` is a **committed snapshot** — a durable, annotated reference. Rule 3
+above means it must **never be opened directly by a `ghidra` daemon**: any open
+compacts its DB and dirties the tree even with no analysis change. All
+interactive work happens in the gitignored working copy at `build/project/`:
+
+- `make work-project` — materialize `build/project/` from the committed
+  snapshot with a fast local copy (~2s) if it does not already exist.
+- `make rebuild-project` — fresh from-scratch rebuild into `build/project/`.
+- `make snapshot-project` — the **only** path that mutates the committed
+  `project/`. Verifies exact stats on the working copy, rsyncs
+  `build/project/ → project/`, and stages it.
+
+## Opening the working project
+
+Use `build/project/` (run `make work-project` first if it is missing) with an
+**absolute** `--projects-dir`: Ghidra 12.1+ rejects any path component starting
+with `.`, so `./build/project` fails.
 
 ```bash
-ghidra --projects-dir "$PWD/project" --project rh850_p1me_mapped \
+make work-project   # one-time: copy snapshot -> build/project
+ghidra --projects-dir "$PWD/build/project" --project rh850_p1me_mapped \
        --program RH850_P1M-E_CodeFlash.bin <subcommand>
 # e.g. ... stats | decompile 0x6fec | x-ref to 0xbfe8 | symbol list
 ```
 
-If you re-run `analyze` or any `script run` and want to keep the result, run
-`ghidra ... stop` afterward (the changes live in the daemon until then).
+If you re-run `analyze` or any `script run` and want to keep the result in the
+working copy, run `ghidra ... stop` afterward (the changes live in the daemon
+until then). To promote a finished working copy into the committed snapshot,
+run `make snapshot-project`.
 
 ## Verified findings (do not re-claim the old wrong conclusions)
 
@@ -229,8 +250,9 @@ Run `make rebuild-project` for a non-destructive rebuild under `build/project/`.
 `tools/rebuild_project.sh` imports both regions, runs every seed and annotation
 in four staged durable headless commits, cleanly stops the stats daemon, and
 verifies exact project statistics. Do not collapse the stages: seed timing
-changes Ghidra's recovered graph. Use `--project-dir "$PWD/project" --force` only when
-deliberately replacing the committed snapshot.
+changes Ghidra's recovered graph. To promote a finished rebuild into the
+committed `project/` snapshot, run `make snapshot-project` (never point rebuild
+directly at `project/`).
 
 ## Tooling notes
 

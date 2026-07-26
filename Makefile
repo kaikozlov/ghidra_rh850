@@ -2,6 +2,7 @@ UV ?= uv
 PYTHON ?= $(UV) run --locked python
 EXTERNAL_REPOS_DIR ?= $(abspath ..)
 PROJECT_DIR ?= $(CURDIR)/build/project
+SNAPSHOT_DIR ?= $(CURDIR)/project
 
 VERIFY_SUITES := \
 	tests/verify_findings.py \
@@ -17,7 +18,7 @@ VERIFY_SUITES := \
 	tests/verify_architecture.py \
 	tests/verify_application_transmit.py
 
-.PHONY: sync verify verify-core verify-external generate-dataflash rebuild-project
+.PHONY: sync verify verify-core verify-external generate-dataflash rebuild-project work-project snapshot-project
 
 sync:
 	$(UV) sync --locked
@@ -40,3 +41,23 @@ generate-dataflash:
 
 rebuild-project:
 	tools/rebuild_project.sh --project-dir "$(PROJECT_DIR)"
+
+# Materialize the gitignored working project (build/project) from the committed
+# snapshot (project/) if it does not already exist. Fast local copy (~2s). All
+# interactive `ghidra` CLI work targets build/project/ so the committed snapshot
+# is never daemon-opened (any open compacts its DB and churns the tree).
+work-project:
+	@if [ -d "$(PROJECT_DIR)/rh850_p1me_mapped.rep" ]; then \
+		echo "Working project already exists: $(PROJECT_DIR)"; \
+	else \
+		echo "Materializing working project from committed snapshot..."; \
+		mkdir -p "$(PROJECT_DIR)"; \
+		cp -R "$(SNAPSHOT_DIR)/." "$(PROJECT_DIR)/"; \
+		echo "Ready: $(PROJECT_DIR)"; \
+	fi
+
+# Push the working project (build/project) into the committed snapshot
+# (project/) and stage it. The ONLY path that mutates the committed project/.
+# Verifies exact stats first and refuses if a daemon is still running.
+snapshot-project:
+	tools/snapshot_project.sh --project-dir "$(PROJECT_DIR)" --snapshot-dir "$(SNAPSHOT_DIR)"
