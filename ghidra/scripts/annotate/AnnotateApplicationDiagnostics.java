@@ -62,7 +62,13 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
         fn(0x8A08EL,"application_programming_readiness_check_adapter",
             "Run the lower programming-handoff prerequisites once. On success clear the reset-request marker and latch completion at FEBF3B18.");
         fn(0x4C960L,"application_programming_handoff_prerequisites",
-            "Return failure unless status FEBFC81F is not 0x11, scaled supply value FEBF4692 is at least calibration 0x0A00, and alternate-handoff flag FEBF6152 is clear.");
+            "Return failure unless system-transition phase snapshot FEBFC81F is not 0x11, scaled supply value FEBF4692 is at least calibration 0x0A00, and alternate-handoff flag FEBF6152 is clear.");
+        fn(0xB28ACL,"application_system_transition_phase_init",
+            "Initialize the live generated system-transition phase at FEBEB1A4 (application GP-0x65C) to zero.");
+        fn(0xB2912L,"application_system_transition_phase_step",
+            "Advance the generated system-transition state around modes 0x300/0x400/0x500 and event 0x23. Recovered phase markers are 0, 0x11, and 0x22; adjacent flags, not this phase byte, use 0x5A.");
+        fn(0xBCB3AL,"application_input_snapshot_update",
+            "Copy the broad generated application input snapshot. At BCD02..BCD06 it copies live system-transition phase FEBEB1A4 (GP-0x65C) to FEBFC81F (GP+0x301F).");
         fn(0x4C986L,"application_programming_reset_marker_clear",
             "Clear the one-request marker at FEBF6166 before the programming reset is queued.");
         fn(0x4C98CL,"application_programming_reset_request",
@@ -106,7 +112,17 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
             "Second 16-byte application software-ID slot beginning with ASCII 8A311. Present in this image but not emitted by the count-1 F181 callback.");
 
         label(0x25E30L,"application_uds_service_table",
-            "Seventeen 24-byte application UDS service records. SID is byte 8; configured sequence is 10,11,14,19,22,23,27,28,2E,31,34,36,37,3E,85,AB,BA.");
+            "Seventeen 24-byte primary application UDS service records. SID is byte 8; configured sequence is 10,11,14,19,22,23,27,28,2E,31,34,36,37,3E,85,AB,BA.");
+        label(0x25DE0L,"application_uds_service_group_directory",
+            "Three 8-byte service-group descriptors: key/count/list are 2/17/25DF8, 3/6/25DC0, and 4/5/25E1C. They select primary physical 7A1, functional 777, and secondary physical 7A0 contexts.");
+        label(0x25DC0L,"application_functional_service_indices",
+            "Six global service-record indexes 17,2,7,9,13,14, yielding SIDs 10,14,28,31,3E,85 for functional CAN 777.");
+        label(0x25DF8L,"application_primary_service_indices",
+            "Seventeen indexes 0..16 selecting the primary physical 7A1 service table.");
+        label(0x25E1CL,"application_secondary_service_indices",
+            "Five global service-record indexes 18..22, yielding SIDs 10,19,22,3E,AB for secondary physical CAN 7A0 / response 7A8.");
+        label(0x25FC8L,"application_additional_uds_service_records",
+            "Six additional 24-byte service records used by limited groups 3/4. These are shared through index lists, not a standalone linear table.");
         int[] serviceSids={0x10,0x11,0x14,0x19,0x22,0x23,0x27,0x28,0x2E,0x31,0x34,0x36,0x37,0x3E,0x85,0xAB,0xBA};
         for (int i=1;i<serviceSids.length;i++) {
             long value=0x25E30L+i*24L;
@@ -140,8 +156,10 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
 
         label(0xFEBFC892L,"application_vehicle_speed_raw",
             "Unsigned speed signal tested against CodeFlash 0x181DC for PROGRAMMING entry; values above 0x0180 map to NRC 0x88 vehicleSpeedTooHigh.");
-        label(0xFEBFC81FL,"application_programming_status_input",
-            "Lower programming-handoff status byte. Value 0x11 prevents reset handoff and produces NRC 0x22.");
+        label(0xFEBEB1A4L,"application_system_transition_phase_live",
+            "Live phase byte owned by 0xB28AC/0xB2912. Recovered phase markers are 0, 0x11, and 0x22; exact OEM phase labels are unknown.");
+        label(0xFEBFC81FL,"application_system_transition_phase_snapshot",
+            "Snapshot copied from FEBEB1A4 by 0xBCB3A. Phase 0x11 prevents programming reset handoff and produces NRC 0x22; this is not a Dcm-produced programming-status byte.");
         label(0xFEBF4692L,"application_supply_value_raw",
             "Scaled supply signal used by the lower handoff. Values below calibration 0x0A00 prevent reset handoff and produce NRC 0x22.");
         label(0xFEBF6152L,"application_alternate_handoff_flag",

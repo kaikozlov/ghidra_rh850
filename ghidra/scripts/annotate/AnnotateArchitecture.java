@@ -83,8 +83,11 @@ public class AnnotateArchitecture extends GhidraScript {
         renameFunction(0x70476L, "application_tauj0_ch2_isr", "Application EIINT channel 135: TAUJ0 channel 2 interrupt wrapper.");
         renameFunction(0x6506aL, "application_can1_rx_isr", "Application EIINT channel 187: RSCAN CAN1 receive interrupt wrapper.");
         renameFunction(0x65028L, "application_can1_tx_isr", "Application EIINT channel 188: RSCAN CAN1 transmit interrupt wrapper.");
-        renameFunction(0x650acL, "application_reserved_ch292_isr", "Pointer-table wrapper installed for EIINT channel 292, which the P1M-E hardware manual marks reserved.");
-        renameFunction(0x650eeL, "application_reserved_ch293_isr", "Pointer-table wrapper installed for EIINT channel 293, which the P1M-E hardware manual marks reserved.");
+        renameFunction(0x650acL, "application_icus_ch292_isr", "EIINT channel 292 wrapper for the ICU-S crypto-driver callback path. The generic P1M-E table marks this channel number reserved, but this vector is active in firmware.");
+        renameFunction(0x650eeL, "application_icus_ch293_isr", "EIINT channel 293 wrapper for the second ICU-S crypto-driver callback path. The generic P1M-E table marks this channel number reserved, but this vector is active in firmware.");
+        renameFunction(0x87610L, "icus_interrupt_channel292_dispatch", "Invoke the installed ICU-S driver callback only when its pointer/complement guard at GP+5994/+5998 is valid; otherwise set driver error GP+5991.");
+        renameFunction(0x87636L, "icus_interrupt_channel293_dispatch", "Byte-identical second ICU-S interrupt callback dispatcher. Static analysis does not distinguish completion versus error between channels 292/293.");
+        renameFunction(0x8913cL, "icus_interrupt_pair_set_enabled", "Mask or unmask EIC292/EIC293 at FFFFB248/FFFFB24A together, then issue the synchronization readback.");
         renameFunction(0x65130L, "application_flash_end_isr", "Application EIINT channel 379: flash sequencer-end interrupt wrapper.");
         renameFunction(0x64f18L, "application_tauj0_ch0_body", "TAUJ0 channel 0 periodic interrupt body and event counter update.");
         renameFunction(0x64f54L, "application_tauj0_ch1_body", "TAUJ0 channel 1 periodic interrupt body and event counter update.");

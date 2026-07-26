@@ -122,7 +122,17 @@ not assign AUTOSAR types to every byte. The complete SID sequence is definitive:
 | 15 | `0x25F98` | `AB` | callback `0x8D344` |
 | 16 | `0x25FB0` | `BA` | — |
 
-A shorter secondary configuration block begins at `0x25FC8`; its protocol/connection role is not yet resolved and is outside this report's 17-record table model. The primary application table must not be confused with the bootloader table at `0x8E54`.
+The service-group directory at `0x25DE0` resolves the records after the primary table. It contains three generated service contexts:
+
+| Group key | Index list | Receive connection | Response CAN IDs | Effective SID set |
+|---:|---:|---|---|---|
+| 2 | `0x25DF8`, 17 entries `0..16` | physical `0x7A1` | `0x7A9` | primary 17-SID table above |
+| 3 | `0x25DC0`, six entries `17,2,7,9,13,14` | functional `0x777` | `0x7A9` | `10,14,28,31,3E,85` |
+| 4 | `0x25E1C`, five entries `18..22` | secondary physical `0x7A0` | `0x7A8` | `10,19,22,3E,AB` |
+
+The six extra 24-byte records at `0x25FC8..0x26057` supply the unique records needed by groups 3 and 4. They are not a fourth free-standing service table: the functional group reuses five primary records, while the secondary physical group uses five extra records. The application CAN demultiplexer maps `0x7A1/0x777/0x7A0` in that order to upper PDU IDs `0x0800..0x0802`; the generated Dcm group keys are correspondingly `2/3/4`. The transmit configuration supplies paired transport routes on `0x7A9` and `0x7A8`.
+
+This limited `0x7A0 -> 0x7A8` diagnostic endpoint is therefore real, but its intended external tester or manufacturing role and the OEM meaning of SID `0xAB` remain unresolved. The primary application table must not be confused with the bootloader table at `0x8E54`.
 For example, bootloader SIDs `14`, `19`, `23`, `AB`, and `BA` all point to
 `uds_unsupported_service_handler @ 0x69B0`, while the application configures them
 as independent services.
@@ -254,11 +264,22 @@ Between those stages, `0x4C960` requires all three of the following:
 | alternate-handoff flag | byte `FEBF6152 == 0` | internal `1` -> NRC `0x22` |
 
 The supply value is converted elsewhere as `raw * 10 / 256`; `0x0A00` becomes
-100 scaled units, strongly indicating a **10.0 V** minimum. The first status
-byte's physical meaning is not yet resolved, so it is intentionally not named as
-an ignition, READY, or communication state. `FEBF6152` is set from an application
-initialization callback (`0x8F1E8 -> 0x8A00C -> 0x4C506`); normal diagnostic
-operation requires its clear branch.
+100 scaled units, strongly indicating a **10.0 V** minimum.
+
+The first byte is now bounded structurally. `application_input_snapshot_update @
+0xBCB3A` copies it from the live GP-relative byte at `0xFEBEB1A4` (`gp-0x65C`)
+to snapshot byte `0xFEBFC81F` (`gp+0x301F`). The live source is owned by the
+generated transition state machine at `0xB28AC/0xB2912`, not by Dcm. Initialization
+sets phase `0`; the recovered transitions assign phase markers `0x11` and `0x22`
+while coordinating system modes `0x300/0x400/0x500` and event `0x23`. Adjacent
+state-machine flags use `0x5A`, but the copied phase byte itself is not that
+marker. The handoff gate rejects phase `0x11` specifically.
+
+Accordingly the defensible name is **system-transition phase snapshot**, not
+"programming status", ignition state, READY state, or communication status. Its
+exact Toyota/Denso phase labels and physical condition remain unavailable.
+`FEBF6152` is set from an application initialization callback (`0x8F1E8 ->
+0x8A00C -> 0x4C506`); normal diagnostic operation requires its clear branch.
 
 No latch requires a power cycle between attempts. The worker state is reset by
 `0x8A082 -> 0x8A044`, and the one-request marker at `FEBF6166` is explicitly
@@ -331,10 +352,10 @@ Its `0x28` and `0x85` masks are `0x01` (functional-only), while `0x11`, `0x27`,
 
 Standard OBD functional ID `0x7DF` is **not** configured in this bootloader.
 A related-variant probe that uses `0x7DF` has not exercised the firmware-derived
-functional path at `0x777`. The application transport configuration has not yet
-been traced end-to-end, so `0x777` should be treated as a high-value,
-firmware-grounded test—not as proof that every related application must listen on
-that ID.
+functional path at `0x777`. The application configuration also contains physical `0x7A1 -> 0x7A9`,
+functional `0x777 -> 0x7A9`, and limited secondary physical `0x7A0 -> 0x7A8`
+contexts. These are firmware facts for this image, not proof that every related
+application retains all three endpoints.
 
 ## 6. Corolla comparison
 
@@ -350,7 +371,7 @@ architecture, but the Sienna prerequisites must be compared individually:
 | exact physical `10 02` to `0x7A1` | **tested** | correct physical request shape/ID |
 | speed `<= 0x0180` raw (strongly 3.00 km/h) | **likely but not measured from EPS RAM** in stationary/Not-Ready tests | no observed motion suggests it was met, but this is not a firmware-level Corolla proof |
 | scaled supply `>= 0x0A00` (strongly 10.0 V) | **not measured** | a low-voltage condition remains an untested Sienna-equivalent NRC `0x22` cause |
-| status byte not `0x11` | **not identified or measured** | this is the only unresolved ordinary-state input in the Sienna lower gate |
+| system-transition phase snapshot not `0x11` | **not measured** | the producer is identified, but its Corolla value and OEM phase labels are unknown |
 | security unlock before `10 02` | **not required by Sienna** | Corolla security-first attempts test a variant difference, not a Sienna prerequisite |
 | `0x85`/`0x28` preamble | **not required by Sienna** | those experiments may reveal Corolla-specific behavior but cannot satisfy a missing Sienna gate |
 | one-second settle/tester-present/double request | **not required by Sienna** | no such prerequisite exists in the session record or policy |
@@ -360,7 +381,7 @@ architecture, but the Sienna prerequisites must be compared individually:
 
 The key correction is that Sienna does **not** require a secret preamble. Its
 valid path is EXTENDED -> PROGRAMMING while stationary, with adequate supply and
-one unresolved status input. It then queues reset while keeping UDS pending. A
+the system-transition phase not equal to `0x11`. It then queues reset while keeping UDS pending. A
 Corolla timeout after a valid extended request is therefore not, by itself,
 evidence of either refusal or gateway filtering.
 
@@ -373,7 +394,7 @@ and functional `10 02`/preamble traffic on `0x777` rather than `0x7DF`.
 The similarity still does **not** prove:
 
 - the Corolla MCU part number or byte-identical application policy;
-- the semantic identity/value of the Sienna status byte in the Corolla;
+- the Corolla value and OEM phase label corresponding to the Sienna system-transition snapshot;
 - the identity of responder `0x7F1` or an intervening gateway/diagnostic master;
 - that the Corolla bootloader retains `SEED_KEY_SECRET`, `PAYLOAD_BUILD_SECRET`,
   DIDs `0201/0202/0203`, or routines `10F0/FF00`.
@@ -386,13 +407,17 @@ Those require successful bootloader capture or a firmware image from part
 | Finding | Grade |
 |---|---|
 | primary application service table location and 17-SID sequence | **Definitive** |
+| group keys 2/3/4 select primary, functional six-SID, and secondary five-SID contexts | **Definitive** |
+| secondary `0x7A0 -> 0x7A8` endpoint's intended OEM tester role | **Unknown** |
 | application `F181/F186/F18C` records and callback addresses | **Definitive** |
 | `F181` copies one stored 16-byte software ID in this image | **Definitive** |
 | session 1/2/3 wrapper callbacks and shared state machine | **Definitive** |
 | PROGRAMMING is allowed only from current session 2 or 3 | **Definitive** |
 | programming policy rejects raw speed above `0x0180` with NRC `0x88` | **Definitive** |
 | `0x0180` represents 3.00 km/h | **Strong inference from conversion and NRC semantics** |
-| lower handoff requires status != `0x11`, supply >= `0x0A00`, and flag clear | **Definitive** |
+| lower handoff requires transition phase != `0x11`, supply >= `0x0A00`, and flag clear | **Definitive** |
+| `FEBFC81F` is a snapshot of the `0xB28AC/0xB2912` system-transition phase | **Definitive** |
+| OEM names for phase values `0/0x11/0x22` | **Unknown** |
 | `0x0A00` represents 10.0 V | **Strong inference from conversion and use** |
 | lower operation IDs `0x08000200/201` write an NvM boot flag | **Unsupported; compiled callee is a no-op stub** |
 | application session state machine supports asynchronous transition and NRC `0x78` | **Definitive** |

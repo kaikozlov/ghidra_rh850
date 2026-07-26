@@ -191,7 +191,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateApplicationTransmit.java`;
 6. open the result through the CLI, record statistics, and cleanly stop the
    daemon so the database is durable;
-7. require exactly 5,560 functions, 173,000 instructions, 27,768 symbols, two
+7. require exactly 5,560 functions, 173,000 instructions, 27,773 symbols, two
    memory sections, and `0x108000` mapped bytes.
 
 Expected memory map:
@@ -206,7 +206,7 @@ and execution trace.
 
 ## Corrected result
 
-- **5,560 functions, 173,000 instructions, 27,768 symbols**.
+- **5,560 functions, 173,000 instructions, 27,773 symbols**.
 - Reset handler `0x1F2` sets `gp=0xFEBF9800`, matching the report.
 - Report functions such as `0x66E48`, `0x674A8`, `0x730D4`, `0x758A0`, and
   `0x77E98` resolve/decompile at their stated addresses.
@@ -287,6 +287,13 @@ payloads deliberately store `0xFEBF0000` at plaintext offset `0xFD0`. Thus
 `0xFF00` is not a direct execute-RAM service: it is an erase operation whose
 RAM-resident flash callback is overwritten by the authenticated 4 KiB image.
 
+### Resolution of five previously open semantics
+
+`docs/OPEN_SEMANTICS_RESOLUTION.md` closes the prior questions around
+`0xFEBFC81F`, the limited secondary diagnostic endpoint, EIINT 292/293,
+DataFlash pages 0–255, and checkpoint payload naming. The bounded results are
+also integrated into the subsystem reports and raw-image verification suites.
+
 ### Corrected SecOC runtime-key investigation
 
 `docs/SECOC_RUNTIME_KEY_LIFECYCLE.md` completely retraces the report's proposed
@@ -309,7 +316,9 @@ Definitive corrections, independently checked by `tests/verify_secoc_nvm.py`:
 `docs/DATAFLASH_LAYOUT.md` completes the entire 32 KiB map;
 `tests/verify_dataflash_layout.py` and `tests/verify_dataflash_semantics.py` check it,
 and `data/dataflash_nvm_records.csv` lists all 122 physical records with logical
-owners. Key corrections:
+owners. `data/checkpoint_payload_map.csv` separately records all 32 checkpoint
+descriptors, direct writers, structural layouts, and explicit evidence limits.
+Key corrections:
 
 - configured normal NvM records occupy pages 256–479;
 - the owner table at `0x2B1B0` assigns every persistent block 2–123 to one of
@@ -317,8 +326,12 @@ owners. Key corrections:
   records; no configured record remains semantically ownerless;
 - 24 of 32 checkpoint descriptors are enabled and own 56 ring records; all 50
   physically valid enabled records have matching generation/complement words;
-- pages 0–255 are outside both object classes, and erased DataFlash readback is
-  undefined, so their residual bit patterns cannot support hidden-record claims;
+- pages 0–255 are outside both object classes, have no credible runtime object
+  reference, and show erased-compatible undefined readback; their current
+  unallocated state cannot reveal whether they were used before erase;
+- all 24 active checkpoint objects now have evidence-bounded producer/layout
+  classifications; object 27 is explicitly a configured 72-byte slot with no
+  static object-specific writer, and unavailable OEM field names remain unknown;
 - pages 432–479 are a 48-record raw/XOR55/XORAA bank for all 16
   SecOC-associated redundancy objects—not 12 ICU key-slot pages;
 - object 15 is length 32, base NvM block 41, RAM mirror `0xFEBF02E8`;
@@ -381,6 +394,9 @@ the recovered tables and control-flow evidence directly from CodeFlash:
 
 - the primary application service table at `0x25E30` contains exactly
   `10/11/14/19/22/23/27/28/2E/31/34/36/37/3E/85/AB/BA`;
+- service-group keys 2/3/4 select the primary physical `0x7A1 -> 0x7A9`
+  context, a six-service functional `0x777 -> 0x7A9` context, and a five-service
+  secondary physical `0x7A0 -> 0x7A8` context (`10/19/22/3E/AB`);
 - application DID records at `0x2A30C` expose `F181`, `F186`, and `F18C` through
   callbacks `0x4E8E4`/`0x4E90A`/`0x4E918`;
 - application `F181` emits the real `8965B4512000` software-ID slot, while the
@@ -389,8 +405,10 @@ the recovered tables and control-flow evidence directly from CodeFlash:
   `0x93FF6`/`0x94006`/`0x94016` and share an asynchronous state machine at
   `0x93F3C`;
 - application PROGRAMMING is allowed only from current session 2 or 3, rejects
-  raw speed above `0x0180` with NRC `0x88`, and then requires an unresolved
-  status byte, scaled supply at least `0x0A00`, and a clear handoff flag;
+  raw speed above `0x0180` with NRC `0x88`, and then requires system-transition
+  phase snapshot `0xFEBFC81F != 0x11`, scaled supply at least `0x0A00`, and a
+  clear handoff flag; the snapshot is copied from the non-Dcm state machine at
+  `0xB28AC/0xB2912`, whose recovered phase markers are `0/0x11/0x22`;
 - the generated `0x08000200/201` lower calls are no-op stubs in this image;
   successful entry instead queues system event 9, shutdown mode `0x900`, and
   the hard-reset path while UDS remains response-pending;
@@ -441,7 +459,9 @@ and `0x85`, plus routines `0x10F1–0x10F3`; its raw-image checks are in
 - that foreground loop polls TAUJ0 channel 3's `EIRF136` tick and runs the
   NvM/CSM, main application, and corrected SecOC-NvM cyclic groups;
 - the application table has explicit handlers for ECM, TAUJ0 channels 0..2,
-  RSCAN CAN1 RX/TX, two hardware-reserved channels, and flash completion;
+  RSCAN CAN1 RX/TX, ICU-S driver paths on channels 292/293, and flash completion;
+  the generic manual calls 292/293 reserved, but firmware initializes their EICs
+  and dispatches guarded crypto callbacks;
 - the CAN1 acceptance table at `0x231A0` contains 47 normal receive IDs plus
   `0x7A1/0x777/0x7A0/0x7F7`; `0x2E4`, `0x0F`, and `0x131` are explicit RX
   routes, while `0x344` is absent from this firmware's receive filters.

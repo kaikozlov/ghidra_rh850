@@ -103,6 +103,18 @@ the reconstructed combined firmware — trust them:
     work-buffer root is `0xFEBF0B08`, not the old erroneous `0xFEBFEB08`.
   - pages 468–479 are objects 0–3; FEBEF468/478/488 contain their structured state.
   - `0x758A0/0x785D2` are NvM/DataFlash service machinery, not ICU derivation.
+- Five formerly open semantics are closed in `docs/OPEN_SEMANTICS_RESOLUTION.md`:
+  - `0xFEBFC81F` snapshots the non-Dcm system-transition phase at `0xFEBEB1A4`;
+    phase `0x11` blocks programming handoff.
+  - application service groups 2/3/4 select primary `7A1->7A9`, functional
+    `777->7A9`, and limited secondary `7A0->7A8` contexts; the last has SIDs
+    `10/19/22/3E/AB`.
+  - EIINT 292/293 are active ICU-S crypto-driver callback paths despite generic
+    hardware-table `Reserved` labels.
+  - pages 0–255 are currently unallocated with erased-compatible undefined
+    readback; prior use is indeterminable.
+  - `data/checkpoint_payload_map.csv` contains bounded structural names/layouts;
+    do not invent unavailable OEM field names.
 - The complete 32 KiB map is in `docs/DATAFLASH_LAYOUT.md` and is checked by
   `tests/verify_dataflash_layout.py` plus `tests/verify_dataflash_semantics.py`:
   - 122 physical records occupy pages 256–479; pages 0–255 are outside both

@@ -129,6 +129,14 @@ if [[ -e "$PROJECT_DIR/$PROJECT_NAME.gpr" || -e "$PROJECT_DIR/$PROJECT_NAME.rep"
   rm -rf "$PROJECT_DIR"
 fi
 mkdir -p "$PROJECT_DIR"
+cat >"$PROJECT_DIR/.gitignore" <<'EOF'
+# Ghidra project transient files — created when a daemon has the project open.
+# Never commit these; they are regenerated on open and are machine-specific.
+*.lock
+*.lock~
+**/tmp*
+**/~journal*
+EOF
 
 CODEFLASH="$ROOT/firmware/RH850_P1M-E_CodeFlash.bin"
 DATAFLASH="$ROOT/firmware/RH850_P1M-E_DataFlash.bin"

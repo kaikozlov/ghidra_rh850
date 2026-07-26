@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import csv
 import struct
+import subprocess
 import sys
+import tempfile
 from collections import Counter
 from pathlib import Path
 
@@ -16,6 +18,7 @@ REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 DF = (REPO / "firmware" / "RH850_P1M-E_DataFlash.bin").read_bytes()
 CSV_PATH = REPO / "data" / "dataflash_nvm_records.csv"
+CHECKPOINT_CSV_PATH = REPO / "data" / "checkpoint_payload_map.csv"
 TP = 0x23EE4
 JOB_TABLE = TP + 0x2EFC
 STORAGE_MAP = TP + 0x3924
@@ -212,6 +215,48 @@ check("CSV reports checkpoint generations for 56 enabled ring records",
 check("CSV identifies all 50 valid checkpoint complements",
       sum(row["owner_class"] == "checkpoint" and row["record_valid"] == "yes" and
           row["checkpoint_counter_valid"] == "yes" for row in csv_rows) == 50)
+
+print("\n== checkpoint payload producer map ==")
+with CHECKPOINT_CSV_PATH.open(newline="", encoding="utf-8") as stream:
+    payload_rows = list(csv.DictReader(stream))
+check("checkpoint payload CSV has all 32 descriptors", len(payload_rows) == 32)
+check("checkpoint payload CSV geometry matches raw descriptors",
+      all(int(row["object_index"]) == index and
+          int(row["data_length"]) == descriptors[index][0] and
+          int(row["ring_blocks"]) == descriptors[index][1] and
+          row["ram_mirror"] == f"0x{descriptors[index][4]:08X}"
+          for index, row in enumerate(payload_rows)))
+check("checkpoint payload CSV marks exact active objects",
+      [int(row["object_index"]) for row in payload_rows if row["enabled"] == "yes"] == enabled)
+expected_writers = {
+    0: "0x5110A", 1: "0x51B70", 2: "0x51B70", 3: "0x51B70",
+    4: "0x53492", 5: "0x477C8;0x47958", 6: "0x38CEC;0x38EAA",
+    7: "0xB7E4A", 8: "0xBAF46", 9: "0xBAFB2", 10: "0x51176",
+    11: "0xBB286", 12: "0x4528C;0x453A2", 13: "0xBBCC4",
+    14: "0x538D4", 15: "0xBB482;0xBB508", 17: "0x53FC4",
+    18: "0x53FC4", 19: "0x53FC4", 20: "0x53F5E", 21: "0x53F5E",
+    23: "0x53F5E", 24: "0x34FB6", 27: "",
+}
+check("all active checkpoint objects have bounded writer ownership",
+      {int(row["object_index"]): row["writer_functions"]
+       for row in payload_rows if row["enabled"] == "yes"} == expected_writers)
+check("object 27 remains an explicit configured orphan",
+      payload_rows[27]["evidence_name"] == "configured_orphan_slot" and
+      payload_rows[27]["data_length"] == "72" and
+      payload_rows[27]["writer_functions"] == "")
+check("disabled checkpoint objects receive no invented payload semantics",
+      all(row["evidence_name"] == "disabled" for row in payload_rows
+          if row["enabled"] == "no"))
+with tempfile.TemporaryDirectory() as directory:
+    generated = Path(directory) / "checkpoint_payload_map.csv"
+    result = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "generate_checkpoint_payload_map.py"),
+         "-o", str(generated)], capture_output=True, text=True,
+    )
+    check("checkpoint payload generator exits successfully", result.returncode == 0,
+          result.stderr.strip())
+    check("checkpoint payload CSV regeneration is byte-for-byte deterministic",
+          result.returncode == 0 and generated.read_bytes() == CHECKPOINT_CSV_PATH.read_bytes())
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 sys.exit(1 if failed else 0)

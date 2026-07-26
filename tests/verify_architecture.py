@@ -128,8 +128,18 @@ check("TAUJ0 channel 3 / EIINT136 remains on default pointer",
       app_vectors[136] == 0x61D88, hex(app_vectors[136]))
 check("CAN1 receive/transmit channels are adjacent 187/188",
       app_vectors[187:189] == [0x6506A, 0x65028])
-check("reserved channels 292/293 retain explicit wrappers",
+check("manual-reserved channels 292/293 retain explicit wrappers",
       app_vectors[292:294] == [0x650AC, 0x650EE])
+check("channel 292/293 adapters have identical guarded callback bodies",
+      CF[0x87610:0x87636] == CF[0x87636:0x8765C])
+check("crypto adapters read callback/complement GP+0x5994/+0x5998",
+      CF[0x87610:0x8761C] == bytes.fromhex("8007610024ef9559249f9959"))
+check("crypto adapters set GP+0x5991 on complement failure",
+      CF[0x8762C:0x87632] == bytes.fromhex("010a440f9159"))
+check("driver interrupt control accesses EIC292/EIC293 short addresses",
+      CF[0x89140:0x89154] == bytes.fromhex("e00f49b26132aa0dc10e7fff600f48b2e00f4bb2"))
+check("same driver family writes ICU-S command SFR FFC5D000",
+      CF[0x8990C:0x89912] == bytes.fromhex("80070f08a08b"))
 check("flash completion channel 379 points to 0x65130",
       app_vectors[379] == 0x65130)
 check("tail channels 382/383 contain unresolved pointer 0x00400040",

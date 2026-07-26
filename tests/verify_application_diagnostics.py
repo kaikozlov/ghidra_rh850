@@ -45,6 +45,37 @@ check("SID 0x28 config references callback 0x93C62", by_sid[0x28][7] == 0x93C62)
 check("SID 0x2E config references callback 0x95DCE", by_sid[0x2E][7] == 0x95DCE)
 check("SID 0xAB config references callback 0x8D344", by_sid[0xAB][7] == 0x8D344)
 
+print("\n== application service groups and secondary endpoint ==")
+SERVICE_GROUP = struct.Struct("<HBBI")
+service_groups = [SERVICE_GROUP.unpack_from(CF, 0x25DE0 + i * 8) for i in range(3)]
+check("service-group directory defines keys/counts 2:17, 3:6, 4:5",
+      [(key, count) for key, count, _reserved, _pointer in service_groups]
+      == [(2, 17), (3, 6), (4, 5)], repr(service_groups))
+check("service-group index-list pointers are exact",
+      [row[3] for row in service_groups] == [0x25DF8, 0x25DC0, 0x25E1C])
+index_lists = [
+    list(struct.unpack_from("<17H", CF, 0x25DF8)),
+    list(struct.unpack_from("<6H", CF, 0x25DC0)),
+    list(struct.unpack_from("<5H", CF, 0x25E1C)),
+]
+check("primary group selects records 0..16", index_lists[0] == list(range(17)))
+check("functional group reuses exact six records",
+      index_lists[1] == [17, 2, 7, 9, 13, 14], repr(index_lists[1]))
+check("secondary physical group selects extra records 18..22",
+      index_lists[2] == list(range(18, 23)), repr(index_lists[2]))
+extra_services = [APP_SERVICE.unpack_from(CF, 0x25FC8 + i * 24) for i in range(6)]
+all_services = app_services + extra_services
+service_sets = [[all_services[index][2] for index in indexes] for indexes in index_lists]
+check("effective primary/functional/secondary SID sets match",
+      service_sets == [expected_sids, [0x10, 0x14, 0x28, 0x31, 0x3E, 0x85],
+                       [0x10, 0x19, 0x22, 0x3E, 0xAB]], repr(service_sets))
+check("application diagnostic receive CAN IDs are 7A1/777/7A0",
+      [struct.unpack_from("<I", CF, 0x21FC8 + i * 8)[0] for i in range(3)]
+      == [0x7A1, 0x777, 0x7A0])
+check("application diagnostic transmit CAN IDs are paired 7A9/7A8",
+      [struct.unpack_from("<I", CF, 0x21FA8 + i * 8)[0] for i in range(4)]
+      == [0x7A9, 0x7A9, 0x7A8, 0x7A8])
+
 print("\n== application identification DIDs ==")
 APP_DID = struct.Struct("<HHIII")
 app_dids = [APP_DID.unpack_from(CF, 0x2A30C + i * APP_DID.size) for i in range(3)]
@@ -105,6 +136,14 @@ check("application result mapper contains vehicleSpeedTooHigh NRC 0x88",
 print("\n== programming policy and reset handoff ==")
 check("programming calibrations are speed 0x0180 and supply 0x0A00",
       struct.unpack_from("<HH", CF, 0x181DC) == (0x0180, 0x0A00))
+check("input snapshot copies live GP-0x65C phase to GP+0x301F",
+      CF[0xBCD02:0xBCD08] == bytes.fromhex("840fa5f99f0b"),
+      CF[0xBCD02:0xBCD08].hex())
+check("transition phase initializer passes phase zero",
+      CF[0xB28AC:0xB28B2] == bytes.fromhex("80072100243e"))
+check("transition state machine embeds phase markers 0x11 and 0x22",
+      bytes.fromhex("200e1100") in CF[0xB2912:0xB29EA] and
+      bytes.fromhex("200e2200") in CF[0xB2912:0xB29EA])
 check("speed policy has exact recovered body",
       CF[0x4C942:0x4C960] == bytes.fromhex(
           "8700e40f9330623a9a0d409e0200f39fdd81f309b3050b527f0000527f00"))

@@ -8,7 +8,7 @@ import sys
 EXPECTED = {
     "functions": 5560,
     "instructions": 173000,
-    "symbols": 27768,
+    "symbols": 27773,
     "memory_size": 1081344,
     "sections": 2,
 }

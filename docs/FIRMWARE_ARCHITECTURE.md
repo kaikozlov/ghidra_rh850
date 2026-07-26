@@ -156,11 +156,21 @@ The last value is outside the mapped CodeFlash image and remains unresolved. Cha
 | 135 | TAUJ0 CH2 | `0x70476` | Generated wrapper -> `0x64F90` |
 | 187 | RSCAN CAN1 receive | `0x6506A` | Context wrapper -> CAN1 RX body `0x82E40` |
 | 188 | RSCAN CAN1 transmit | `0x65028` | Context wrapper -> CAN1 TX confirmation body `0x8474E` |
-| 292 | Reserved | `0x650AC` | Wrapper invokes callback adapter `0x87610`; source semantics unresolved |
-| 293 | Reserved | `0x650EE` | Wrapper invokes callback adapter `0x87636`; source semantics unresolved |
+| 292 | Reserved in generic P1M-E table | `0x650AC` | ICU-S crypto-driver callback interrupt path via `0x87610` |
+| 293 | Reserved in generic P1M-E table | `0x650EE` | ICU-S crypto-driver callback interrupt path via `0x87636` |
 | 379 | Flash sequencer end | `0x65130` | Flash service completion path via `0x78286` |
 
-The discrepancy at reserved channels 292/293 is preserved rather than assigned a guessed peripheral name. It may reflect a generated cross-variant vector layout.
+The generic hardware table's `Reserved` label does not make these vectors dead.
+Both wrappers are installed and dispatch through the same callback pointer and
+bitwise-complement guard at GP `+0x5994/+0x5998`; a failed guard sets driver error
+byte GP `+0x5991`. Driver initialization at `0x8735E` initializes those exact
+fields and calls `0x8913C`, which masks/unmasks EIC registers `0xFFFFB248` and
+`0xFFFFB24A`—the channel-292/293 control words. The same driver family accesses
+the ICU-S command/status register bank at `0xFFC5D000` used by the verified CMAC
+path. Thus **firmware role** (ICU-S crypto completion/error callbacks) is
+definitive even though the generic manual does not publish peripheral names for
+these channel numbers. The two adapters are byte-identical and static analysis
+does not distinguish which one is completion versus error.
 
 ## 5. Application CAN-routing overview
 

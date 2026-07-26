@@ -35,6 +35,26 @@ public class AnnotateDataFlashLayout extends GhidraScript {
             "Copy a DID payload directly to the RAM pointer in its 12-byte descriptor.");
         rename(0x67A98L,"checkpoint_restore_complete",
             "Validate checkpoint generation/complement, select the current ring record, and restore bytes after the generation word to the configured RAM mirror.");
+        rename(0x65D66L,"checkpoint_object_restore_read",
+            "Read an indexed checkpoint object through the generated restore API. Object-specific startup consumers call this with literal indexes.");
+        rename(0x5110AL,"checkpoint_monitor_aggregate_persist",
+            "Assemble and persist checkpoint object 0: two eight-byte groups and three 12-word monitor groups.");
+        rename(0x51B70L,"checkpoint_monitor_state_bank_persist",
+            "Persist one of checkpoint objects 1..3 as a whole 240-byte monitor-state bank.");
+        rename(0x53492L,"checkpoint_event_counter_groups_persist",
+            "Assemble and persist checkpoint object 4 as arrays of 18 and 10 16-bit counters.");
+        rename(0x38CECL,"checkpoint_multi_channel_u16_state_persist",
+            "Assemble and persist checkpoint object 6's 16-bit field groups. The OEM physical meaning is not established.");
+        rename(0x4528CL,"checkpoint_dual_incident_snapshot_persist",
+            "Assemble and persist checkpoint object 12: two counters, reserved zero, and two state/value/sample entries.");
+        rename(0x538D4L,"checkpoint_three_entry_condition_history_persist",
+            "Assemble and persist checkpoint object 14: 12 trigger counters and three condition-history entries.");
+        rename(0x53F5EL,"checkpoint_event_history_group_persist",
+            "Persist one of 168-byte checkpoint objects 20, 21, or 23 as a whole event-history buffer; entry-level OEM schema remains unresolved.");
+        rename(0x53FC4L,"checkpoint_event_log_banks_persist",
+            "Persist checkpoint object 17 control state and alternating 96-byte event-log banks 18/19.");
+        rename(0x34FB6L,"checkpoint_persistent_countdown_step",
+            "Decrement checkpoint object 24's one-byte countdown and clear related redundant state when it reaches zero.");
         rename(0x4EA78L,"application_ram_range_allowed",
             "Validate a RAM range while rejecting overlap with five protected RAM intervals at CodeFlash 0x293F4.");
         rename(0x4EAD8L,"application_dataflash_range_allowed",
@@ -51,7 +71,7 @@ public class AnnotateDataFlashLayout extends GhidraScript {
         label(0x2AF10L,"checkpoint_object_count",
             "Value 32: number of generation-protected checkpoint object descriptors at 0x2AF2C.");
         label(0x2AF2CL,"checkpoint_object_descriptor_table",
-            "32 x 12-byte descriptors: data length, ring-block count, first NvM block, reserved zero, RAM mirror. Twenty-four entries are enabled.");
+            "32 x 12-byte descriptors: data length, ring-block count, first NvM block, reserved zero, RAM mirror. Twenty-four entries are enabled; data/checkpoint_payload_map.csv records their evidence-bounded producer/layout names.");
         label(0x2B1B0L,"nvm_logical_owner_table",
             "124 x 2-byte block owners: object index then class (0 checkpoint ring, 1 triplicate). Blocks 0/1 are FFFF; every persistent block 2..123 has an owner.");
         label(0x293E4L,"dataflash_protected_range_table",
@@ -62,8 +82,8 @@ public class AnnotateDataFlashLayout extends GhidraScript {
         label(0xFEBF2CF8L,"payload_did_0202_iv",
             "Volatile 16-byte DID 0x202 IV used by payload AES-CBC/CMAC; not persisted in DataFlash.");
 
-        label(0xFF200000L,"dataflash_unallocated_lower_half",
-            "Pages 0..255 are outside both configured object classes. Erased RH850 DataFlash reads are undefined, so residual 00/FF/mixed words do not establish a hidden record format; exact prior use is unknown.");
+        label(0xFF200000L,"dataflash_currently_unallocated_lower_half",
+            "Pages 0..255 have no configured owner or credible runtime object reference. Their patterns are erased-readback-compatible and not recoverable records; whether they were used before erase is indeterminable.");
         label(0xFF204000L,"dataflash_checkpoint_ring_start",
             "Page 256: lowest checkpoint-ring physical allocation. Pages 256..431 hold 74 records for 32 logical slots (24 enabled, 8 disabled).");
         label(0xFF206B40L,"checkpoint_object0_ring_record0",

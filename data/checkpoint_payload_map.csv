@@ -1,0 +1,33 @@
+object_index,enabled,data_length,ring_blocks,first_nvm_block,ram_mirror,writer_functions,evidence_name,payload_layout,evidence_limit
+0,yes,160,2,50,0xFEBEFC18,0x5110A,monitor_aggregate,u8[8] group0; u8[8] group1; u32[12] group2; u32[12] group3; u32[12] group4,direct field assembly
+1,yes,240,2,52,0xFEBEFCB8,0x51B70,monitor_state_bank_0,u8[240] whole-buffer snapshot,direct whole-buffer copy; fields unresolved
+2,yes,240,2,54,0xFEBEFDA8,0x51B70,monitor_state_bank_1,u8[240] whole-buffer snapshot,direct whole-buffer copy; fields unresolved
+3,yes,240,2,56,0xFEBEFE98,0x51B70,monitor_state_bank_2,u8[240] whole-buffer snapshot,direct whole-buffer copy; fields unresolved
+4,yes,56,2,58,0xFEBEF498,0x53492,two_group_event_counters,u16[18] counter_group0; u16[10] counter_group1,direct field assembly
+5,yes,8,6,64,0xFEBEF430,0x477C8;0x47958,two_channel_s16_sentinel_state,s16 value0; s16 value1; u32 reserved_zero,direct accesses; 32000 sentinel observed; physical quantity unresolved
+6,yes,56,6,70,0xFEBEF4D0,0x38CEC;0x38EAA,multi_channel_u16_state,u16[12] group0; u16[10] group1; u32 reserved_zero; u16[4] group2,direct field assembly; OEM meaning unresolved
+7,yes,8,2,62,0xFEBEF428,0xB7E4A,three_phase_mode_latch,u8 phase; u8[7] reserved_zero,phase values 0x00/0x11/0x22 observed
+8,yes,8,2,76,0xFEBEF438,0xBAF46,u32_value_with_validity,u32 value; u16 companion; u8 validity; u8 reserved,direct field assembly; physical quantity unresolved
+9,yes,40,2,78,0xFEBEF508,0xBAFB2,runtime_condition_snapshot,u8[40] packed runtime-condition snapshot,direct field assembly; individual OEM fields unresolved
+10,yes,8,2,60,0xFEBEF420,0x51176,event_counter_pair,u16 counter; u16 value; u32 reserved_zero,direct field assembly
+11,yes,8,2,80,0xFEBEF440,0xBB286,two_channel_u16_state,u16 value0; u16 value1; u32 reserved_zero,direct restore/reset; physical quantity unresolved
+12,yes,24,2,82,0xFEBEF530,0x4528C;0x453A2,dual_incident_snapshot,u16 counter0; u16 counter1; u32 reserved_zero; 2 * {u8 state; u8 pad; u16 value; u32 sample},direct field assembly
+13,yes,8,2,84,0xFEBEF448,0xBBCC4,counter_and_accumulator,u8[8] counter/accumulator state,direct update; exact generated field types unresolved
+14,yes,48,2,86,0xFEBEF548,0x538D4,three_entry_condition_history,u8[12] trigger_counters; 3 * 12-byte condition entry,direct field assembly
+15,yes,24,2,88,0xFEBEF578,0xBB482;0xBB508,operating_state_snapshot,u16 field00; u16 field02; u32 field04; u8[10] fields08_11; u16 field12; u32 field14,direct field assembly; offset names retained
+16,no,48,2,,0xFEBEF590,,disabled,,descriptor disabled in this calibration
+17,yes,16,2,92,0xFEBEF5C0,0x53FC4,event_log_control,u8[16] event-log control state,direct field assembly; individual OEM fields unresolved
+18,yes,96,2,94,0xFEBEFF88,0x53FC4,event_log_snapshot_bank_a,u8[96] alternating event snapshot,direct whole-buffer copy; fields unresolved
+19,yes,96,2,96,0xFEBEFFE8,0x53FC4,event_log_snapshot_bank_b,u8[96] alternating event snapshot,direct whole-buffer copy; fields unresolved
+20,yes,168,2,98,0xFEBF0048,0x53F5E,event_history_group_0,u8[168] whole-buffer event-history snapshot,direct whole-buffer copy; entry schema unresolved
+21,yes,168,2,100,0xFEBF00F0,0x53F5E,event_history_group_1,u8[168] whole-buffer event-history snapshot,direct whole-buffer copy; entry schema unresolved
+22,no,8,0,,0xFEBEF458,,disabled,,descriptor disabled in this calibration
+23,yes,168,2,104,0xFEBF0198,0x53F5E,event_history_group_2,u8[168] whole-buffer event-history snapshot,direct whole-buffer copy; entry schema unresolved
+24,yes,8,2,106,0xFEBEF450,0x34FB6,persistent_countdown,u8 countdown; u8[7] reserved_zero,direct decrement and zero test
+25,no,8,0,,0xFEBEF458,,disabled,,descriptor disabled in this calibration
+26,no,8,0,,0xFEBEF458,,disabled,,descriptor disabled in this calibration
+27,yes,72,2,116,0xFEBF0240,,configured_orphan_slot,u8[72] unresolved,enabled descriptor; no static object-specific writer found
+28,no,8,0,,0xFEBEF458,,disabled,,descriptor disabled in this calibration
+29,no,8,0,,0xFEBEF458,,disabled,,descriptor disabled in this calibration
+30,no,8,0,,0xFEBEF458,,disabled,,descriptor disabled in this calibration
+31,no,8,0,,0xFEBEF458,,disabled,,descriptor disabled in this calibration

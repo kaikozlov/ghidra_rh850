@@ -36,6 +36,7 @@ verify-external:
 
 generate-dataflash:
 	$(PYTHON) tools/generate_dataflash_layout.py
+	$(PYTHON) tools/generate_checkpoint_payload_map.py
 
 rebuild-project:
 	tools/rebuild_project.sh --project-dir "$(PROJECT_DIR)"
