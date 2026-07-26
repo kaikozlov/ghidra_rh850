@@ -1,0 +1,48 @@
+target_api,caller_addr,caller_name,callsite_addr,call_kind,index_value,namespace,object_index,index_source,reachable_index_set,async_persist_behavior,secoc_object15_statically_selectable,notes
+secoc_nvm_object_update,0x320A8,FUN_000320a8,0x320E4,direct,0x208,0x2,8,literal_movea,0x208,namespace_0x200_mirror,no,
+secoc_nvm_object_update,0x320A8,FUN_000320a8,0x320EE,direct,0x209,0x2,9,literal_movea,0x209,namespace_0x200_mirror,no,
+secoc_nvm_object_update,0x343BA,FUN_000343ba,0x34696,direct,0x202,0x2,2,literal_decompile,0x202,namespace_0x200_mirror,no,
+secoc_nvm_object_update,0x346AE,FUN_000346ae,0x346C6,direct,0x202,0x2,2,literal_movea,0x202,namespace_0x200_mirror,no,
+secoc_nvm_object_update,0x34F9A,checkpoint_persistent_countdown_step,0x34FE4,direct,0x18,0x0,24,literal_movea,0x18,checkpoint_persist,no,
+secoc_nvm_object_update,0x34F9A,checkpoint_persistent_countdown_step,0x34FFA,direct,0x105,0x1,5,literal_movea,0x105,redundant_persist,no,
+secoc_nvm_object_update,0x35260,FUN_00035260,0x35290,direct,0x100,0x1,0,literal_decompile,0x100,redundant_persist,no,
+secoc_nvm_object_update,0x3547E,FUN_0003547e,0x354AA,direct,0x100,0x1,0,literal_movea,0x100,redundant_persist,no,
+secoc_nvm_object_update,0x38D4E,checkpoint_multi_channel_u16_state_persist,0x38DBC,direct,0x6,0x0,6,literal_mov,0x6,checkpoint_persist,no,
+secoc_nvm_object_update,0x38E56,FUN_00038e56,0x38F28,direct,0x6,0x0,6,literal_decompile,0x6,checkpoint_persist,no,
+secoc_nvm_object_update,0x4528C,checkpoint_dual_incident_snapshot_persist,0x4530A,direct,0xC,0x0,12,literal_mov,0xC,checkpoint_persist,no,
+secoc_nvm_object_update,0x453A2,FUN_000453a2,0x453DC,direct,0xC,0x0,12,literal_mov,0xC,checkpoint_persist,no,
+secoc_nvm_object_update,0x47958,FUN_00047958,0x47982,direct,0x5,0x0,5,literal_mov,0x5,checkpoint_persist,no,
+secoc_nvm_object_update,0x4798A,FUN_0004798a,0x4799E,direct,0x5,0x0,5,literal_mov,0x5,checkpoint_persist,no,
+secoc_nvm_object_update,0x5110C,checkpoint_monitor_aggregate_persist,0x51164,direct,0x0,0x0,0,literal_mov,0x0,checkpoint_persist,no,
+secoc_nvm_object_update,0x51176,FUN_00051176,0x51198,direct,0xA,0x0,10,literal_mov,0xA,checkpoint_persist,no,
+secoc_nvm_object_update,0x51B5E,checkpoint_monitor_state_bank_persist,0x51BB8,direct,0x1,0x0,1,literal_mov,0x1,checkpoint_persist,no,
+secoc_nvm_object_update,0x51B5E,checkpoint_monitor_state_bank_persist,0x51BC8,direct,0x2,0x0,2,literal_mov,0x2,checkpoint_persist,no,
+secoc_nvm_object_update,0x51B5E,checkpoint_monitor_state_bank_persist,0x51BD8,direct,0x3,0x0,3,literal_mov,0x3,checkpoint_persist,no,
+secoc_nvm_object_update,0x5347A,checkpoint_event_counter_groups_persist,0x534DC,direct,0x4,0x0,4,literal_mov,0x4,checkpoint_persist,no,
+secoc_nvm_object_update,0x538D4,checkpoint_three_entry_condition_history_persist,0x53944,direct,0xE,0x0,14,literal_mov,0xE,checkpoint_persist,no,
+secoc_nvm_object_update,0x539A8,FUN_000539a8,0x53A0C,direct,0xE,0x0,14,literal_mov,0xE,checkpoint_persist,no,
+secoc_nvm_object_update,0x53F60,checkpoint_event_history_group_persist,0x53FB8,direct,,mixed,20|21|23,dynamic_map_0x53b70,0x14|0x15|0x17,checkpoint_persist,no,mapper returns 0x14/0x15/0x17 (objects 20/21/23); 0x20 is no-op
+secoc_nvm_object_update,0x53FC4,checkpoint_event_log_banks_persist,0x54072,direct,0x11,0x0,17,literal_movea,0x11,checkpoint_persist,no,
+secoc_nvm_object_update,0x53FC4,checkpoint_event_log_banks_persist,0x54084,direct,,mixed,18|19,dynamic_bank_select_0x53ef2,0x12|0x13,checkpoint_persist,no,bank helper selects checkpoint objects 0x12/0x13 only
+secoc_nvm_object_update,0x53FC4,checkpoint_event_log_banks_persist,0x5409A,direct,,mixed,18|19,dynamic_bank_select_0x53ef2,0x12|0x13,checkpoint_persist,no,bank helper selects checkpoint objects 0x12/0x13 only
+secoc_nvm_object_update,0xFF09C,secoc_nvm_object_update_wrapper,0xFF0A2,direct,,,,passthrough_wrapper,,delegates_to_0x65cd8,no,thin wrapper; concrete indices come from WRAPPER_CALLS rows
+secoc_nvm_object_update_wrapper,0xB4396,FUN_000b4396,0xB43CA,via_wrapper,0x101,0x1,1,literal_movea,0x101,redundant_persist,no,
+secoc_nvm_object_update_wrapper,0xB4484,FUN_000b4484,0xB44C2,via_wrapper,0x101,0x1,1,literal_decompile,0x101,redundant_persist,no,
+secoc_nvm_object_update_wrapper,0xB458C,FUN_000b458c,0xB45D0,via_wrapper,0x101,0x1,1,literal_movea,0x101,redundant_persist,no,
+secoc_nvm_object_update_wrapper,0xB513A,FUN_000b513a,0xB5162,via_wrapper,0x103,0x1,3,literal_movea,0x103,redundant_persist,no,
+secoc_nvm_object_update_wrapper,0xB51B2,FUN_000b51b2,0xB51E8,via_wrapper,0x103,0x1,3,literal_movea,0x103,redundant_persist,no,
+secoc_nvm_object_update_wrapper,0xB52DA,FUN_000b52da,0xB5356,via_wrapper,0x103,0x1,3,literal_decompile,0x103,redundant_persist,no,
+secoc_nvm_object_update_wrapper,0xB5A7E,FUN_000b5a7e,0xB5AAA,via_wrapper,0x102,0x1,2,literal_movea,0x102,redundant_persist,no,
+secoc_nvm_object_update_wrapper,0xB5B66,FUN_000b5b66,0xB5B8A,via_wrapper,0x102,0x1,2,literal_movea,0x102,redundant_persist,no,
+secoc_nvm_object_update_wrapper,0xB5C16,FUN_000b5c16,0xB5C36,via_wrapper,0x102,0x1,2,literal_decompile,0x102,redundant_persist,no,
+secoc_nvm_object_update_wrapper,0xB72BA,FUN_000b72ba,0xB72CE,via_wrapper,0x106,0x1,6,literal_movea,0x106,redundant_persist,no,
+secoc_nvm_object_update_wrapper,0xB7E4A,FUN_000b7e4a,0xB7E62,via_wrapper,0x7,0x0,7,literal_mov,0x7,checkpoint_persist,no,
+secoc_nvm_object_update_wrapper,0xBAF46,FUN_000baf46,0xBAF70,via_wrapper,0x8,0x0,8,literal_mov,0x8,checkpoint_persist,no,
+secoc_nvm_object_update_wrapper,0xBAF82,FUN_000baf82,0xBAFA8,via_wrapper,0x8,0x0,8,literal_mov,0x8,checkpoint_persist,no,
+secoc_nvm_object_update_wrapper,0xBAFB2,FUN_000bafb2,0xBB098,via_wrapper,0x9,0x0,9,literal_decompile,0x9,checkpoint_persist,no,
+secoc_nvm_object_update_wrapper,0xBB286,FUN_000bb286,0xBB2A0,via_wrapper,0xB,0x0,11,literal_mov,0xB,checkpoint_persist,no,
+secoc_nvm_object_update_wrapper,0xBB3C6,FUN_000bb3c6,0xBB3E0,via_wrapper,0xB,0x0,11,literal_mov,0xB,checkpoint_persist,no,
+secoc_nvm_object_update_wrapper,0xBB482,checkpoint_object15_operating_state_persist,0xBB4D6,via_wrapper,0xF,0x0,15,literal_decompile,0xF,checkpoint_persist,no,checkpoint namespace-0 object 15 (operating_state_snapshot); NOT SecOC triplicate object 15 (requires 0x10F)
+secoc_nvm_object_update_wrapper,0xBB5EC,checkpoint_object15_operating_state_clear,0xBB63E,via_wrapper,0xF,0x0,15,literal_decompile,0xF,checkpoint_persist,no,checkpoint namespace-0 object 15 (operating_state_snapshot); NOT SecOC triplicate object 15 (requires 0x10F)
+secoc_nvm_object_update_wrapper,0xBBCC4,FUN_000bbcc4,0xBBCE0,via_wrapper,0xD,0x0,13,literal_mov,0xD,checkpoint_persist,no,
+secoc_nvm_redundant_object_update,0x65CD8,secoc_nvm_object_update,0x65D18,direct,,0x1,passthrough,dispatcher_namespace_0x100_branch,,triplicate_write_queue,no,sole caller of 0x66E48; object index is the low byte of dispatcher arg

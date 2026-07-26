@@ -1,0 +1,27 @@
+{
+  "application_ab_ba_reaches_object_update": false,
+  "checkpoint_namespace0_object15_producers": [
+    "0xBB482",
+    "0xBB5EC"
+  ],
+  "coverage_bound": "direct_callsites=27; wrapper_callsites=19; dynamic_index_maps={0x53B70\u2192{0x14,0x15,0x17}, 0x53EF2\u2192{0x12,0x13}}; AB/BA service callbacks have no call edge to 0x65CD8/0xFF09C",
+  "language": "no static producer recovered",
+  "redundant_namespace_0x100_indices_observed": [
+    "0x100",
+    "0x101",
+    "0x102",
+    "0x103",
+    "0x105",
+    "0x106"
+  ],
+  "schema_version": 1,
+  "search_method": "Ghidra UNCONDITIONAL_CALL xref census to 0x65CD8 and 0xFF09C; decompiler/immediate recovery of each index arg; raw scan for movea 0x10F,r6 (20 36 0F 01) and mov 15,r6 near update callsites; sole xref to 0x66E48 is the namespace-0x100 branch inside 0x65CD8",
+  "secoc_object15_selectable_row_count": 0,
+  "secoc_redundant_object15_descriptor": {
+    "base_block": 41,
+    "length": 32,
+    "ram_mirror": "0xFEBF02E8"
+  },
+  "secoc_redundant_object15_full_index": "0x10F",
+  "static_producer_status": "no static producer recovered"
+}
