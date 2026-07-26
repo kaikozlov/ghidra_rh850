@@ -173,6 +173,7 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
 
         // Required, validated CSV of observed SFR labels and access widths.
         // Structured bitfield/frame overlays are applied by ApplyP1MSfrTypes.
+        // LocalRAM structure overlays are applied by ApplyRamTypes.
         String[] args = getScriptArgs();
         if (args.length != 1) {
             throw new IllegalArgumentException("expected absolute p1m_sfr_labels.csv path");

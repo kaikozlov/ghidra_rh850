@@ -1,0 +1,52 @@
+address,name,size,type,gp_base,gp_offset,comment
+0xFEBF0FD0,payload_flash_callback,4,PayloadFlashCallback,0xFEBF9800,-0x8830,Flash-driver callback slot; public payloads store 0xFEBF0000
+0xFEBF0FE0,payload_crc_trailer,16,PayloadCrcTrailer,0xFEBF9800,-0x8820,Embedded CRC address/length/patch words before the CMAC tag
+0xFEBF0FF0,payload_cmac_tag,16,PayloadCmacTag,0xFEBF9800,-0x8810,16-byte AES-CMAC tag verified by routine 0x10F0
+0xFEBF02E8,secoc_nvm_object15_ram_mirror,32,SecocNvmObject15,0xFEBEB800,0x4AE8,32-byte object-15 mirror; key field at +0x10
+0xFEBF0B08,secoc_nvm_triplicate_workbuf_root,384,SecocNvmWorkbufRoot,0xFEBEB800,0x5308,Four groups of raw/XOR55/XORAA 32-byte buffers (GP+0x5308)
+0xFEBEF400,secoc_nvm_object2_ram_mirror,8,SecocNvmObject2,0xFEBEB800,0x3C00,8-byte structured NvM object; not key material
+0xFEBEF468,secoc_nvm_object0_ram_mirror,16,SecocNvmObject0,0xFEBEB800,0x3C68,16-byte structured state; not a SecOC AES key
+0xFEBEF478,secoc_nvm_object1_ram_mirror,16,SecocNvmObject1,0xFEBEB800,0x3C78,16-byte structured NvM object; not a SecOC AES key
+0xFEBEF488,secoc_nvm_object3_ram_mirror,16,SecocNvmObject3,0xFEBEB800,0x3C88,16-byte structured NvM object; not a SecOC AES key
+0xFEBF2D08,payload_did_0201_key_material,16,PayloadDid0201KeyMaterial,0xFEBF9800,-0x6AF8,Volatile 16-byte DID 0201 buffer
+0xFEBF2CF8,payload_did_0202_iv,16,PayloadDid0202Iv,0xFEBF9800,-0x6B08,Volatile 16-byte DID 0202 buffer
+0xFEBF2AB0,uds_write_did_descriptor_index,1,uint8,0xFEBF9800,-0x6D50,Selected index in the four-entry DID descriptor table
+0xFEBF2AB1,uds_write_did_pending,1,uint8,0xFEBF9800,-0x6D4F,Asynchronous 0201/0202 write pending flag
+0xFEBF2AB2,payload_did_sequence_state,1,uint8,0xFEBF9800,-0x6D4E,Required WDBI order state 0/1/2
+0xFEBF2B0E,uds_current_session,1,uint8,0xFEBF9800,-0x6CF2,Current UDS session: 1/2/3
+0xFEBF2B0F,uds_security_access_state,1,uint8,0xFEBF9800,-0x6CF1,SecurityAccess state; protected paths require 2
+0xFEBF2B16,payload_did_crypto_ready,1,uint8,0xFEBF9800,-0x6CEA,Set after successful DID 0202
+0xFEBF2B6C,uds_read_did_response_length,2,uint16,0xFEBF9800,-0x6C94,ReadDID response payload length excluding SID 0x62
+0xFEBEB1A4,application_system_transition_phase_live,1,uint8,0xFEBEB800,-0x65C,Live system-transition phase byte
+0xFEBFC81F,application_system_transition_phase_snapshot,1,uint8,0xFEBEB800,0x1101F,Phase snapshot; 0x11 blocks programming handoff
+0xFEBFC892,application_vehicle_speed_raw,2,uint16,0xFEBEB800,0x11092,Unsigned speed signal; >0x0180 -> NRC 0x88
+0xFEBF4692,application_supply_value_raw,2,uint16,0xFEBEB800,0x8E92,Scaled supply; <0x0A00 blocks handoff
+0xFEBF6152,application_alternate_handoff_flag,1,uint8,0xFEBEB800,0xA952,Must be clear for normal PROGRAMMING reset path
+0xFEBF6166,application_programming_reset_requested,1,uint8,0xFEBEB800,0xA966,One-request marker set to 0x5A after event 9
+0xFEBF3B14,application_programming_handoff_value,4,uint32,0xFEBEB800,0x8314,Four-byte handoff payload (written as zero)
+0xFEBF3B18,application_programming_readiness_latch,1,uint8,0xFEBEB800,0x8318,Set to 0x5A after readiness check
+0xFEBF3B19,application_programming_reset_latch,1,uint8,0xFEBEB800,0x8319,Set to 0x5A after reset request succeeds
+0xFEBEFC18,checkpoint_monitor_aggregate,160,Checkpoint_monitor_aggregate,0xFEBEB800,0x4418,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEFCB8,checkpoint_monitor_state_bank_0,240,Checkpoint_monitor_state_bank_0,0xFEBEB800,0x44B8,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEFDA8,checkpoint_monitor_state_bank_1,240,Checkpoint_monitor_state_bank_1,0xFEBEB800,0x45A8,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEFE98,checkpoint_monitor_state_bank_2,240,Checkpoint_monitor_state_bank_2,0xFEBEB800,0x4698,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF498,checkpoint_two_group_event_counters,56,Checkpoint_two_group_event_counters,0xFEBEB800,0x3C98,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF430,checkpoint_two_channel_s16_sentinel_state,8,Checkpoint_two_channel_s16_sentinel_state,0xFEBEB800,0x3C30,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF4D0,checkpoint_multi_channel_u16_state,56,Checkpoint_multi_channel_u16_state,0xFEBEB800,0x3CD0,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF428,checkpoint_three_phase_mode_latch,8,Checkpoint_three_phase_mode_latch,0xFEBEB800,0x3C28,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF438,checkpoint_u32_value_with_validity,8,Checkpoint_u32_value_with_validity,0xFEBEB800,0x3C38,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF508,checkpoint_runtime_condition_snapshot,40,Checkpoint_runtime_condition_snapshot,0xFEBEB800,0x3D08,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF420,checkpoint_event_counter_pair,8,Checkpoint_event_counter_pair,0xFEBEB800,0x3C20,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF440,checkpoint_two_channel_u16_state,8,Checkpoint_two_channel_u16_state,0xFEBEB800,0x3C40,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF530,checkpoint_dual_incident_snapshot,24,Checkpoint_dual_incident_snapshot,0xFEBEB800,0x3D30,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF448,checkpoint_counter_and_accumulator,8,Checkpoint_counter_and_accumulator,0xFEBEB800,0x3C48,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF548,checkpoint_three_entry_condition_history,48,Checkpoint_three_entry_condition_history,0xFEBEB800,0x3D48,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF578,checkpoint_operating_state_snapshot,24,Checkpoint_operating_state_snapshot,0xFEBEB800,0x3D78,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF5C0,checkpoint_event_log_control,16,Checkpoint_event_log_control,0xFEBEB800,0x3DC0,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEFF88,checkpoint_event_log_snapshot_bank_a,96,Checkpoint_event_log_snapshot_bank_a,0xFEBEB800,0x4788,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEFFE8,checkpoint_event_log_snapshot_bank_b,96,Checkpoint_event_log_snapshot_bank_b,0xFEBEB800,0x47E8,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBF0048,checkpoint_event_history_group_0,168,Checkpoint_event_history_group_0,0xFEBEB800,0x4848,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBF00F0,checkpoint_event_history_group_1,168,Checkpoint_event_history_group_1,0xFEBEB800,0x48F0,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBF0198,checkpoint_event_history_group_2,168,Checkpoint_event_history_group_2,0xFEBEB800,0x4998,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBEF450,checkpoint_persistent_countdown,8,Checkpoint_persistent_countdown,0xFEBEB800,0x3C50,enabled checkpoint slot from checkpoint_payload_map.csv
+0xFEBF0240,checkpoint_configured_orphan_slot,72,Checkpoint_configured_orphan_slot,0xFEBEB800,0x4A40,enabled checkpoint slot from checkpoint_payload_map.csv

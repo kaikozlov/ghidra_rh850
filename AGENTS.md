@@ -233,7 +233,8 @@ it live in `legacy/flat-import/` — do not use them for current results.
 ## Scripts and verification
 
 - `ghidra/scripts/import/` contains the split-image import helper and the
-  P1M-E device profile (`ApplyP1MDeviceProfile.java`, `ApplyP1MSfrTypes.java`).
+  P1M-E device profile (`ApplyP1MDeviceProfile.java`, `ApplyP1MSfrTypes.java`,
+  `ApplyRamTypes.java`).
 - `ghidra/scripts/seed/` contains all function/table seeds missed by analysis.
 - `ghidra/scripts/annotate/` contains the durable labels/comments for completed
   work, plus `RecoverVectorHandlers.java` for INTBP/EBASE/`__interrupt`,

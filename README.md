@@ -164,8 +164,10 @@ produces a different graph and does not reproduce the committed statistics.
 
 1. import CodeFlash without analysis, map DataFlash with `AddDataFlash.java`,
    and apply `ApplyP1MDeviceProfile.java` (LocalRAM/SFR windows, GP/TP, SFR
-   labels from `data/p1m_sfr_labels.csv`) plus `ApplyP1MSfrTypes.java`
-   (EIC/RSCFD/ICU-S structured overlays);
+   labels from `data/p1m_sfr_labels.csv`), `ApplyP1MSfrTypes.java`
+   (EIC/RSCFD/ICU-S structured overlays), and `ApplyRamTypes.java`
+   (LocalRAM payload/SecOC/DID/checkpoint overlays from
+   `data/checkpoint_payload_map.csv`; inventory in `data/ram_overlay_map.csv`);
 2. run `SeedEntries.java`, then the base auto-analysis;
 3. run `SeedUdsServiceTable.java`, then re-run analysis;
 4. seed the remaining missed functions with:

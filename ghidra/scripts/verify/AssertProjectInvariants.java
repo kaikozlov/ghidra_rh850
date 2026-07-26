@@ -13,6 +13,9 @@ import ghidra.program.model.symbol.SymbolTable;
 import ghidra.program.model.symbol.Reference;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.lang.RegisterValue;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -129,8 +132,72 @@ public class AssertProjectInvariants extends GhidraScript {
         }
     }
 
+    private void requireDefinedLength(long addr, int length) {
+        Data data = currentProgram.getListing().getDataAt(toAddr(addr));
+        if (data == null || !data.isDefined()) {
+            fail(String.format("missing defined data at 0x%x (expected length %d)",
+                    addr, length));
+            return;
+        }
+        if (data.getLength() != length) {
+            fail(String.format("data at 0x%x length=%d expected=%d",
+                    addr, data.getLength(), length));
+        }
+    }
+
+    /**
+     * Assert every enabled checkpoint RAM mirror is present and correctly typed,
+     * mirroring ApplyRamTypes.applyCheckpointCsv's CSV parsing. When invoked
+     * without the gate's CSV arg, checkpoint coverage is left to the firmware
+     * suite tests/verify_ram_overlays.py.
+     */
+    private void requireCheckpointCsv(String csvPath) throws Exception {
+        if (csvPath == null || csvPath.isEmpty()) {
+            return;
+        }
+        File csv = new File(csvPath);
+        if (!csv.isFile()) {
+            fail("missing checkpoint CSV: " + csvPath);
+            return;
+        }
+        int checked = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader(csv))) {
+            String header = br.readLine();
+            if (header == null || !header.startsWith("object_index,")) {
+                fail("unexpected checkpoint CSV header: " + header);
+                return;
+            }
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty() || line.startsWith("#")) continue;
+                String[] parts = line.split(",", -1);
+                if (parts.length < 10) {
+                    fail("checkpoint CSV row needs >=10 columns: " + line);
+                    continue;
+                }
+                if (!"yes".equalsIgnoreCase(parts[1].trim())) continue;
+                int length = Integer.parseInt(parts[2].trim());
+                long addr = Long.decode(parts[5].trim());
+                String evidenceName = parts[7].trim();
+                requireDataType(addr, "Checkpoint_" + evidenceName, length);
+                requireLabel(addr, "checkpoint_" + evidenceName);
+                checked++;
+            }
+        }
+        if (checked == 0) {
+            fail("checkpoint CSV yielded zero enabled entries: " + csvPath);
+        } else {
+            println("ASSERT checkpoint-overlays: verified " + checked
+                    + " enabled checkpoints from " + csvPath);
+        }
+    }
+
     @Override
     public void run() throws Exception {
+        String[] args = getScriptArgs();
+        String checkpointCsv = (args.length >= 1) ? args[0] : null;
+
         // Critical boot/application landmarks.
         requireFunction(0x1b0L, "boot_reset_startup");
         requireFunction(0x6fecL, "security_access_derive_stage1_key");
@@ -187,6 +254,27 @@ public class AssertProjectInvariants extends GhidraScript {
         requireDataType(0xFFD20260L, "RSCFD_CFDTMC", 1);
         requireDataType(0xFFD23400L, "RSCFD_CommonFifoFrame", 0x20);
         requireDataType(0xFFD24200L, "RSCFD_TxMessageBuffer", 0x20);
+
+        // LocalRAM overlays from ApplyRamTypes (absolute addresses; GP context
+        // already seeded by ApplyP1MDeviceProfile).
+        requireDataType(0xFEBF0FD0L, "PayloadFlashCallback", 4);
+        requireDataType(0xFEBF0FE0L, "PayloadCrcTrailer", 16);
+        requireDataType(0xFEBF0FF0L, "PayloadCmacTag", 16);
+        requireDataType(0xFEBF02E8L, "SecocNvmObject15", 32);
+        requireDataType(0xFEBF0B08L, "SecocNvmWorkbufRoot", 384);
+        requireDataType(0xFEBF2D08L, "PayloadDid0201KeyMaterial", 16);
+        requireDataType(0xFEBF2CF8L, "PayloadDid0202Iv", 16);
+        requireLabel(0xFEBF0FD0L, "payload_flash_callback");
+        requireLabel(0xFEBF0B08L, "secoc_nvm_triplicate_workbuf_root");
+        requireLabel(0xFEBF02F8L, "secoc_nvm_object15_key_field_ram");
+        requireLabel(0xFEBF0C28L, "secoc_nvm_object15_raw_workbuf");
+        // Every enabled checkpoint RAM mirror must be present and correctly typed.
+        requireCheckpointCsv(checkpointCsv);
+        requireDefinedLength(0xFEBEB1A4L, 1);
+        requireDefinedLength(0xFEBFC81FL, 1);
+        requireDefinedLength(0xFEBF2B16L, 1);
+        requireLabel(0xFEBEB1A4L, "application_system_transition_phase_live");
+        requireLabel(0xFEBF2D08L, "payload_did_0201_key_material");
 
         // Register context is mandatory after applying the device profile.
         Address bootAddr = toAddr(0x800L);

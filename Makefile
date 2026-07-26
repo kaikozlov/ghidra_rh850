@@ -17,7 +17,8 @@ VERIFY_SUITES := \
 	tests/verify_can_transport.py \
 	tests/verify_architecture.py \
 	tests/verify_application_transmit.py \
-	tests/verify_p1m_device_profile.py
+	tests/verify_p1m_device_profile.py \
+	tests/verify_ram_overlays.py
 
 .PHONY: sync verify verify-core verify-external verify-sleigh verify-processor verify-ghidra \
 	generate-dataflash generate-processor-fixture rebuild-project work-project snapshot-project

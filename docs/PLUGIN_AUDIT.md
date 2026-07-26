@@ -13,6 +13,7 @@ semantic correctness.** The checks below are layered:
 | Project invariants | Critical labels/functions/memory/context | `AssertProjectInvariants` |
 | Decompiler invariants | Landmark ABI/decompiler properties + no unset conventions | `AssertDecompilerInvariants` |
 | Device profile | RAM/SFR map + SFR labels/types + boot/application GP/TP context | `ApplyP1MDeviceProfile`, `ApplyP1MSfrTypes` |
+| LocalRAM overlays | Typed payload/SecOC/DID/checkpoint roots on LocalRAM | `ApplyRamTypes` |
 | Vector recovery | INTBP/EBASE handlers + `__interrupt` | `RecoverVectorHandlers` |
 | Calling conventions | Explicit `__stdcall` on non-ISR functions | `ApplyCallingConventions` |
 | Switch tables | In-function `switch` jump tables + xrefs | `RecoverSwitchTables` / `AssertSwitchTables` |
@@ -126,6 +127,23 @@ being mapped as one block (that caused false CodeFlash-as-SFR pointer creation).
 CSV coverage is checked by `tests/verify_p1m_device_profile.py`; project
 invariants require the windows, a landmark label subset, and the structured
 overlays above.
+
+`ApplyRamTypes.java` then overlays evidence-backed LocalRAM types at absolute
+addresses (GP/TP register context is already seeded above). Inventory and
+GP-displacement checks live in `data/ram_overlay_map.csv` /
+`tests/verify_ram_overlays.py`. Enabled checkpoint mirrors are sized from
+`data/checkpoint_payload_map.csv` without inventing OEM field names.
+
+| Type | Applied at | Notes |
+|---|---|---|
+| `PayloadFlashCallback` | `0xFEBF0FD0` | Flash-driver callback slot |
+| `PayloadCrcTrailer` | `0xFEBF0FE0` | Embedded CRC addr/length/patch |
+| `PayloadCmacTag` | `0xFEBF0FF0` | 16-byte AES-CMAC tag |
+| `SecocNvmObject15` | `0xFEBF02E8` | 32-byte mirror; key field at `+0x10` |
+| `SecocNvmWorkbufRoot` | `0xFEBF0B08` | 4×(raw/XOR55/XORAA)×32; app `GP+0x5308` |
+| `PayloadDid0201KeyMaterial` / `PayloadDid0202Iv` | `0xFEBF2D08` / `0xFEBF2CF8` | Volatile DID buffers |
+| `Checkpoint_*` | enabled ring mirrors | Opaque `u8[N]` from checkpoint CSV |
+| scalars | DID/UDS/handoff landmarks | Session, phase, speed, supply, latches |
 
 | Region | GP | TP |
 |---|---:|---:|

@@ -141,7 +141,7 @@ run_headless() {
   set -e
   if ((rc != 0)) || grep -E 'REPORT SCRIPT ERROR|IllegalStateException' "$log" >/dev/null; then
     echo "ERROR: headless stage failed: $stage (rc=$rc)" >&2
-    grep -E 'SCRIPT ERROR|IllegalStateException|Created |RecoverVector|ApplyCalling|RecoverSwitch|ASSERT|ERROR' "$log" | tail -80 >&2 || true
+    grep -E 'SCRIPT ERROR|IllegalStateException|Created |RecoverVector|ApplyCalling|RecoverSwitch|ApplyRam|ASSERT|ERROR' "$log" | tail -80 >&2 || true
     echo "full log: $log" >&2
     exit 1
   fi
@@ -165,6 +165,7 @@ run_headless "import" "$PROJECT_DIR" "$PROJECT_NAME" \
   -postScript AddDataFlash.java "$DATAFLASH" \
   -postScript ApplyP1MDeviceProfile.java "$ROOT/data/p1m_sfr_labels.csv" \
   -postScript ApplyP1MSfrTypes.java \
+  -postScript ApplyRamTypes.java "$ROOT/data/checkpoint_payload_map.csv" \
   -commit "Import mapped CodeFlash and DataFlash"
 
 echo "[2/4] Seed report entries and run base analysis"

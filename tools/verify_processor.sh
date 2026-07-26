@@ -76,7 +76,7 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     -scriptPath "$SCRIPT_PATH" \
     -postScript AssertNoUndefinedInFunctions.java \
     -postScript AssertSystemRegisterNames.java \
-    -postScript AssertProjectInvariants.java \
+    -postScript AssertProjectInvariants.java "$ROOT/data/checkpoint_payload_map.csv" \
     -postScript AssertSwitchTables.java \
     -postScript AssertDecompilerInvariants.java "$DECOMPILER_REPORT" \
     -postScript InventoryUsedInstructions.java "$INV_OUT" "$ROOT/data/processor_unimpl_allowlist.txt" \
