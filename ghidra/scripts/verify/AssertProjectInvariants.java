@@ -205,6 +205,14 @@ public class AssertProjectInvariants extends GhidraScript {
                 0x70476L, 0x6506aL, 0x65028L, 0x650acL, 0x650eeL, 0x65130L}) {
             requireConvention(handler, "__interrupt");
         }
+        // ApplyCallingConventions pins the RH850/G3 ABI on normal functions.
+        requireConvention(0x1b0L, "__stdcall");
+        requireConvention(0x6fecL, "__stdcall");
+        requireConvention(0x7068L, "__stdcall");
+        requireConvention(0x704cL, "__stdcall");
+        requireConvention(0x614aL, "__stdcall");
+        requireConvention(0x87610L, "__stdcall");
+        requireConvention(0x87636L, "__stdcall");
         requireReference(0x20010L, 0x61d88L);
         requireReference(0x20090L, 0x64b3eL);
         int intbpRefs = 0;
@@ -226,6 +234,25 @@ public class AssertProjectInvariants extends GhidraScript {
         Function normal293 = getFunctionAt(toAddr(0x87636L));
         if (normal293 != null && "__interrupt".equals(normal293.getCallingConventionName())) {
             fail("normal ICU dispatch callee 0x87636 must not use __interrupt");
+        }
+
+        // Census: every non-thunk function must have an explicit RH850 prototype.
+        int unknown = 0;
+        var fit = currentProgram.getFunctionManager().getFunctions(true);
+        while (fit.hasNext()) {
+            Function f = fit.next();
+            if (f.isThunk()) continue;
+            String cc = f.getCallingConventionName();
+            if (cc == null || "unknown".equals(cc) || "default".equals(cc)) {
+                unknown++;
+                if (unknown <= 5) {
+                    fail(String.format("function 0x%x (%s) convention unset (%s)",
+                            f.getEntryPoint().getOffset(), f.getName(), cc));
+                }
+            }
+        }
+        if (unknown > 5) {
+            fail("... and " + (unknown - 5) + " more functions with unset calling convention");
         }
 
         println("ASSERT project-invariants: failures=" + failures.size());

@@ -189,6 +189,7 @@ produces a different graph and does not reproduce the committed statistics.
    - `AnnotateApplicationDiagnostics.java`;
    - `AnnotateBootloaderDiagnostics.java`;
    - `RecoverVectorHandlers.java` (INTBP/EBASE/`__interrupt`);
+   - `ApplyCallingConventions.java` (explicit `__stdcall` on non-ISR functions);
    - `RecoverSwitchTables.java` (in-function `switch` jump tables);
    - `AnnotateArchitecture.java`;
    - `AnnotateApplicationTransmit.java`;

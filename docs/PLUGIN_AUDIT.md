@@ -11,9 +11,10 @@ semantic correctness.** The checks below are layered:
 | Function-body decode | No undefined bytes inside recovered functions | `AssertNoUndefinedInFunctions` |
 | System-register naming | Every `ldsr`/`stsr` operand is named | `AssertSystemRegisterNames` |
 | Project invariants | Critical labels/functions/memory/context | `AssertProjectInvariants` |
-| Decompiler invariants | Landmark ABI/decompiler properties | `AssertDecompilerInvariants` |
+| Decompiler invariants | Landmark ABI/decompiler properties + no unset conventions | `AssertDecompilerInvariants` |
 | Device profile | RAM/SFR map + SFR labels/types + boot/application GP/TP context | `ApplyP1MDeviceProfile`, `ApplyP1MSfrTypes` |
 | Vector recovery | INTBP/EBASE handlers + `__interrupt` | `RecoverVectorHandlers` |
+| Calling conventions | Explicit `__stdcall` on non-ISR functions | `ApplyCallingConventions` |
 | Switch tables | In-function `switch` jump tables + xrefs | `RecoverSwitchTables` / `AssertSwitchTables` |
 
 Automated gate:
@@ -91,10 +92,13 @@ close the highest-impact gaps for this firmware:
   `jarl`/`jmp [lp]` flow types are checked on fixtures.
 
 Landmark decompiler checks (secrets at `0xBFD8`/`0xBFE8`, ISR calling
-convention, session-control decompilation) live in
+convention, session-control decompilation, SecurityAccess expected-key,
+ICU dispatch callee, boot reset) live in
 `AssertDecompilerInvariants.java`; the gate writes deterministic normalized-C
 hashes to `build/decompiler-signatures.txt`, compares them with
 `data/decompiler_signatures.baseline.csv`, and uploads the report in CI.
+Every non-thunk function must carry an explicit `__stdcall` or `__interrupt`
+prototype — Ghidra's anonymous `unknown`/`default` is treated as a failure.
 
 ## Device profile and interrupt recovery
 
@@ -130,6 +134,13 @@ functions, and applies the `__interrupt` prototype to true ISR wrappers
 (not their normal callees such as `0x87610`/`0x87636`). It also creates explicit
 vector-to-handler references; project invariants require the expected 382
 CodeFlash INTBP references and all known wrapper conventions.
+
+`ApplyCallingConventions.java` then pins the RH850/G3 ABI prototype
+(`__stdcall` from `v850.cspec`) on every remaining non-thunk function. Newly
+created Ghidra functions otherwise stay on anonymous `unknown` even though the
+cspec default_proto is correct; explicit assignment is what makes landmark
+decompiler signatures and project invariants report `__stdcall` instead of
+`unknown`. The script is idempotent and preserves `__interrupt`.
 
 ## Switch jump-table recovery
 

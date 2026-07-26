@@ -141,7 +141,7 @@ run_headless() {
   set -e
   if ((rc != 0)) || grep -E 'REPORT SCRIPT ERROR|IllegalStateException' "$log" >/dev/null; then
     echo "ERROR: headless stage failed: $stage (rc=$rc)" >&2
-    grep -E 'SCRIPT ERROR|IllegalStateException|Created |RecoverVector|RecoverSwitch|ASSERT|ERROR' "$log" | tail -80 >&2 || true
+    grep -E 'SCRIPT ERROR|IllegalStateException|Created |RecoverVector|ApplyCalling|RecoverSwitch|ASSERT|ERROR' "$log" | tail -80 >&2 || true
     echo "full log: $log" >&2
     exit 1
   fi
@@ -204,6 +204,7 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -postScript AnnotateApplicationDiagnostics.java \
   -postScript AnnotateBootloaderDiagnostics.java \
   -postScript RecoverVectorHandlers.java \
+  -postScript ApplyCallingConventions.java \
   -postScript RecoverSwitchTables.java \
   -postScript AnnotateArchitecture.java \
   -postScript AnnotateApplicationTransmit.java \

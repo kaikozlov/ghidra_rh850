@@ -236,8 +236,9 @@ it live in `legacy/flat-import/` — do not use them for current results.
   P1M-E device profile (`ApplyP1MDeviceProfile.java`, `ApplyP1MSfrTypes.java`).
 - `ghidra/scripts/seed/` contains all function/table seeds missed by analysis.
 - `ghidra/scripts/annotate/` contains the durable labels/comments for completed
-  work, plus `RecoverVectorHandlers.java` for INTBP/EBASE/`__interrupt` and
-  `RecoverSwitchTables.java` for in-function RH850 `switch` jump tables.
+  work, plus `RecoverVectorHandlers.java` for INTBP/EBASE/`__interrupt`,
+  `ApplyCallingConventions.java` for explicit `__stdcall` on non-ISR functions,
+  and `RecoverSwitchTables.java` for in-function RH850 `switch` jump tables.
 - `ghidra/scripts/investigate/` contains operand/reference search helpers.
 - `ghidra/scripts/verify/` contains asserting processor/project gates used by
   `make verify-processor`.
@@ -279,7 +280,9 @@ run `make snapshot-project` (never point rebuild directly at `project/`).
   `build/ghidra-home/.../Extensions/Renesas_v850/` via `-Duser.home`, not into
   `$GHIDRA_HOME/Ghidra/Extensions`. The in-tree `v850.cspec` models the
   RH850/G3 calling convention (r6-r9 args, r10 return, callee-saved r20-r29,
-  lp link register, `__interrupt` proto). Processor audits are documented in
+  lp link register, `__interrupt` proto); `ApplyCallingConventions` pins
+  `__stdcall` onto recovered non-ISR functions so they are not left on
+  Ghidra's anonymous `unknown`. Processor audits are documented in
   `docs/PLUGIN_AUDIT.md`.
 - `ghidra` CLI project resolution: `GHIDRA_PROJECT_DIR` env, config
   `ghidra_project_dir`, `--projects-dir`, else `~/Library/Caches/ghidra-cli/projects`.

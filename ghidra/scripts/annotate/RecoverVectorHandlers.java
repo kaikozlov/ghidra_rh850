@@ -242,10 +242,12 @@ public class RecoverVectorHandlers extends GhidraScript {
         }
 
         // Explicitly do NOT mark normal ICU dispatch callees as interrupt.
+        // Prefer the named RH850/G3 ABI prototype over Ghidra's anonymous
+        // "default"/"unknown" so ApplyCallingConventions stays idempotent.
         for (long addr : new long[]{0x87610L, 0x87636L}) {
             Function f = getFunctionAt(toAddr(addr));
             if (f != null && "__interrupt".equals(f.getCallingConventionName())) {
-                f.setCallingConvention("default");
+                f.setCallingConvention("__stdcall");
                 println("cleared mistaken __interrupt on normal callee " + f.getName());
             }
         }

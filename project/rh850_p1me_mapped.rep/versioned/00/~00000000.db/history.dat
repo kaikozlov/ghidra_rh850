@@ -1,4 +1,5 @@
-1;kai;1785086737457;Import mapped CodeFlash and DataFlash
-2;kai;1785086765901;Seed report entries and run base analysis
-3;kai;1785086775733;Seed UDS service table and handlers
-4;kai;1785086786594;Complete reproducible RH850 analysis
+1;kai;1785087994240;Import mapped CodeFlash and DataFlash
+2;kai;1785088022724;Seed report entries and run base analysis
+3;kai;1785088032515;Seed UDS service table and handlers
+4;kai;1785088043771;Complete reproducible RH850 analysis
+5;kai;1785089127232;Apply explicit RH850/G3 __stdcall conventions

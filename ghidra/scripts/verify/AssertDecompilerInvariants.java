@@ -1,35 +1,59 @@
 //@author kaikozlov
 //@category Verification
 // Structured decompiler checks for ABI and landmark semantics.
+// Requires ApplyCallingConventions (and RecoverVectorHandlers for ISRs):
+// normal landmarks must be __stdcall; ISR wrappers must be __interrupt.
 import ghidra.app.decompiler.DecompInterface;
 import ghidra.app.decompiler.DecompileResults;
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.listing.Function;
+import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.Parameter;
-import ghidra.program.model.pcode.HighFunction;
-import ghidra.program.model.pcode.HighSymbol;
-import ghidra.program.model.pcode.HighVariable;
-import ghidra.program.model.symbol.Symbol;
-import ghidra.program.model.symbol.SymbolIterator;
 import ghidra.program.model.symbol.Reference;
 import ghidra.program.model.symbol.ReferenceIterator;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import ghidra.program.model.symbol.SymbolIterator;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.HexFormat;
 
 public class AssertDecompilerInvariants extends GhidraScript {
     private final List<String> failures = new ArrayList<>();
     private final List<String> signatures = new ArrayList<>();
+    private final Set<Long> signedAddrs = new HashSet<>();
     private DecompInterface decomp;
 
     private void fail(String msg) {
         failures.add(msg);
         println("FAIL: " + msg);
+    }
+
+    private Function requireFunction(long addr, String expectedName) {
+        Function f = getFunctionAt(toAddr(addr));
+        if (f == null) f = getFunctionContaining(toAddr(addr));
+        if (f == null) {
+            fail(String.format("missing function around 0x%x (%s)", addr, expectedName));
+            return null;
+        }
+        if (expectedName != null && !expectedName.equals(f.getName())) {
+            fail(String.format("function at 0x%x named %s, expected %s",
+                    addr, f.getName(), expectedName));
+        }
+        return f;
+    }
+
+    private void requireConvention(Function f, String expected) {
+        if (f == null) return;
+        String actual = f.getCallingConventionName();
+        if (actual == null || !actual.equals(expected)) {
+            fail(String.format("function 0x%x (%s) convention=%s expected=%s",
+                    f.getEntryPoint().getOffset(), f.getName(), actual, expected));
+        }
     }
 
     private String decompile(Function f) throws Exception {
@@ -42,9 +66,12 @@ public class AssertDecompilerInvariants extends GhidraScript {
         String normalized = c.replaceAll("\\s+", " ").trim();
         String digest = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
                 .digest(normalized.getBytes(StandardCharsets.UTF_8)));
-        signatures.add(String.format("%s,%s,%s,%d,%s",
-                f.getEntryPoint(), f.getName(), f.getCallingConventionName(),
-                f.getParameterCount(), digest));
+        long offset = f.getEntryPoint().getOffset();
+        if (signedAddrs.add(offset)) {
+            signatures.add(String.format("%08x,%s,%s,%d,%s",
+                    offset, f.getName(), f.getCallingConventionName(),
+                    f.getParameterCount(), digest));
+        }
         return c;
     }
 
@@ -58,17 +85,51 @@ public class AssertDecompilerInvariants extends GhidraScript {
         return false;
     }
 
+    private void checkNoUnknownConventions() {
+        int unknown = 0;
+        int stdcall = 0;
+        int interrupt = 0;
+        int other = 0;
+        FunctionIterator it = currentProgram.getFunctionManager().getFunctions(true);
+        while (it.hasNext()) {
+            Function f = it.next();
+            if (f.isThunk()) continue;
+            String cc = f.getCallingConventionName();
+            if ("__stdcall".equals(cc)) stdcall++;
+            else if ("__interrupt".equals(cc)) interrupt++;
+            else if (cc == null || "unknown".equals(cc) || "default".equals(cc)) {
+                unknown++;
+                if (unknown <= 8) {
+                    fail(String.format("function 0x%x (%s) still has unset convention (%s)",
+                            f.getEntryPoint().getOffset(), f.getName(), cc));
+                }
+            } else {
+                other++;
+                fail(String.format("function 0x%x (%s) unexpected convention %s",
+                        f.getEntryPoint().getOffset(), f.getName(), cc));
+            }
+        }
+        if (unknown > 8) {
+            fail(String.format("... and %d more functions still on unknown/default",
+                    unknown - 8));
+        }
+        println(String.format("convention census: __stdcall=%d __interrupt=%d unknown=%d other=%d",
+                stdcall, interrupt, unknown, other));
+        if (stdcall == 0) fail("expected at least one __stdcall function after ApplyCallingConventions");
+        if (interrupt == 0) fail("expected at least one __interrupt ISR wrapper");
+    }
+
     @Override
     public void run() throws Exception {
         decomp = new DecompInterface();
         decomp.openProgram(currentProgram);
 
+        checkNoUnknownConventions();
+
         // SecurityAccess stage1 key derivation must reference SEED_KEY_SECRET.
-        Function stage1 = getFunctionAt(toAddr(0x6fecL));
-        if (stage1 == null) stage1 = getFunctionContaining(toAddr(0x6fecL));
-        if (stage1 == null) {
-            fail("missing security_access_derive_stage1_key around 0x6fec");
-        } else {
+        Function stage1 = requireFunction(0x6fecL, "security_access_derive_stage1_key");
+        requireConvention(stage1, "__stdcall");
+        if (stage1 != null) {
             String c = decompile(stage1);
             if (!hasReferenceFrom(stage1, 0xbfe8L)) {
                 fail("stage1 function has no reference to SEED_KEY_SECRET/0xBFE8");
@@ -80,11 +141,9 @@ public class AssertDecompilerInvariants extends GhidraScript {
         }
 
         // Payload build key derivation must reference PAYLOAD_BUILD_SECRET.
-        Function payload = getFunctionAt(toAddr(0x7068L));
-        if (payload == null) payload = getFunctionContaining(toAddr(0x7068L));
-        if (payload == null) {
-            fail("missing payload_build_derive_key around 0x7068");
-        } else {
+        Function payload = requireFunction(0x7068L, "payload_build_derive_key");
+        requireConvention(payload, "__stdcall");
+        if (payload != null) {
             String c = decompile(payload);
             if (!hasReferenceFrom(payload, 0xbfd8L)) {
                 fail("payload function has no reference to PAYLOAD_BUILD_SECRET/0xBFD8");
@@ -95,36 +154,52 @@ public class AssertDecompilerInvariants extends GhidraScript {
             println("payload decompile ok (" + payload.getName() + ")");
         }
 
-        // ISR should not invent ABI args when __interrupt is applied.
-        Function isr = getFunctionAt(toAddr(0x650acL));
-        if (isr != null) {
+        // Expected-key computation is a second SecurityAccess ABI landmark.
+        Function expected = requireFunction(0x704cL, "security_access_compute_expected_key");
+        requireConvention(expected, "__stdcall");
+        if (expected != null) {
+            decompile(expected);
+            println("expected-key decompile ok (" + expected.getName() + ")");
+        }
+
+        // ISR wrappers must use __interrupt and must not invent ABI args.
+        for (long addr : new long[]{0x650acL, 0x650eeL}) {
+            Function isr = requireFunction(addr, null);
+            requireConvention(isr, "__interrupt");
+            if (isr == null) continue;
             String c = decompile(isr);
-            String cc = isr.getCallingConventionName();
             int params = isr.getParameterCount();
-            if ("__interrupt".equals(cc) && params > 0) {
-                fail("ISR 0x650ac has " + params + " parameters under __interrupt");
+            if (params > 0) {
+                fail(String.format("ISR 0x%x has %d parameters under __interrupt",
+                        addr, params));
             }
-            // Spurious code* arg was the pre-cspec failure mode; only enforce once
-            // __interrupt has been applied by RecoverVectorHandlers.
-            if ("__interrupt".equals(cc)) {
-                String firstLine = c.lines().findFirst().orElse("");
-                if (firstLine.contains("code *") || firstLine.matches(".*\\(.*code\\s*\\*.*")) {
-                    fail("ISR decompilation still shows spurious code* parameter: " + firstLine);
-                }
+            String firstLine = c.lines().findFirst().orElse("");
+            if (firstLine.contains("code *") || firstLine.matches(".*\\(.*code\\s*\\*.*")) {
+                fail("ISR decompilation still shows spurious code* parameter: " + firstLine);
             }
-            println("ISR 0x650ac convention=" + cc + " params=" + params);
-        } else {
-            fail("missing ISR function at 0x650ac");
+            println(String.format("ISR 0x%x convention=__interrupt params=%d", addr, params));
+        }
+
+        // Normal ICU dispatch callees use the RH850/G3 ABI, not __interrupt.
+        Function dispatch292 = requireFunction(0x87610L, "icus_interrupt_channel292_dispatch");
+        requireConvention(dispatch292, "__stdcall");
+        if (dispatch292 != null) {
+            decompile(dispatch292);
+            println("ICU dispatch 0x87610 decompile ok (" + dispatch292.getName() + ")");
         }
 
         // Session control: prefer narrow first parameter when typed.
         Function session = null;
-        SymbolIterator sit = currentProgram.getSymbolTable().getSymbols("uds_diagnostic_session_control");
+        SymbolIterator sit = currentProgram.getSymbolTable()
+                .getSymbols("uds_diagnostic_session_control");
         if (sit.hasNext()) {
             session = getFunctionAt(sit.next().getAddress());
         }
         if (session == null) session = getFunctionAt(toAddr(0x614aL));
-        if (session != null) {
+        if (session == null) {
+            fail("missing uds_diagnostic_session_control");
+        } else {
+            requireConvention(session, "__stdcall");
             String c = decompile(session);
             if (c.isBlank()) fail("empty decompilation for session control");
             Parameter[] params = session.getParameters();
@@ -133,8 +208,14 @@ public class AssertDecompilerInvariants extends GhidraScript {
                         + params[0].getDataType().getDisplayName());
             }
             println("session-control decompile ok (" + session.getName() + ")");
-        } else {
-            fail("missing uds_diagnostic_session_control");
+        }
+
+        // Boot reset is a non-ISR entry that must keep the normal ABI.
+        Function boot = requireFunction(0x1b0L, "boot_reset_startup");
+        requireConvention(boot, "__stdcall");
+        if (boot != null) {
+            decompile(boot);
+            println("boot_reset_startup decompile ok");
         }
 
         decomp.dispose();
