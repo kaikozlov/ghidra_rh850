@@ -132,11 +132,70 @@ def enc_mov_imm5(imm5: int, r2: int) -> bytes:
     return enc_imm5_reg(0x10, imm5 & 0x1F, r2)
 
 
+def enc_switch(reg: int) -> bytes:
+    # SWITCH reg1 : op0515=0x002 & R0004
+    return u16((0x002 << 5) | (reg & 0x1F))
+
+
+def enc_callt(imm6: int) -> bytes:
+    # CALLT imm6 : op0615=0x008 & op0005
+    return u16((0x008 << 6) | (imm6 & 0x3F))
+
+
+def enc_bins_low(r1: int, r2: int, pos: int, width: int) -> bytes:
+    """BINS with msb/lsb both < 16 (op2026=0x0D)."""
+    if not (0 <= pos < 16 and width >= 1 and pos + width <= 16):
+        raise ValueError(f"bins low form requires pos+width <= 16, got {pos}+{width}")
+    # width = op2831 + 1 - pos  =>  op2831 = width + pos - 1
+    op2831 = width + pos - 1
+    op1719 = pos & 0x7
+    op2727 = (pos >> 3) & 0x1
+    word0 = ((r2 & 0x1F) << 11) | (0x3F << 5) | (r1 & 0x1F)
+    word1 = ((op2831 & 0xF) << 12) | (op2727 << 11) | (0x0D << 4) | ((op1719 & 0x7) << 1)
+    return u16(word0) + u16(word1)
+
+
+def enc_bit3_mem(op1415: int, bit: int, r1: int, disp16: int) -> bytes:
+    # SET1/CLR1/TST1 bit3, disp16[reg1] : op0510=0x3E
+    word0 = ((op1415 & 0x3) << 14) | ((bit & 0x7) << 11) | (0x3E << 5) | (r1 & 0x1F)
+    return u16(word0) + u16(disp16 & 0xFFFF)
+
+
+def enc_set1_bit3(bit: int, r1: int, disp16: int) -> bytes:
+    return enc_bit3_mem(0, bit, r1, disp16)
+
+
+def enc_clr1_bit3(bit: int, r1: int, disp16: int) -> bytes:
+    return enc_bit3_mem(2, bit, r1, disp16)
+
+
+def enc_tst1_bit3(bit: int, r1: int, disp16: int) -> bytes:
+    return enc_bit3_mem(3, bit, r1, disp16)
+
+
+def enc_cmov_rr(cc: int, r1: int, r2: int, r3: int) -> bytes:
+    # CMOV cccc, reg1, reg2, reg3 : op2126=0x19, op1616=0, cc1720
+    word0 = ((r2 & 0x1F) << 11) | (0x3F << 5) | (r1 & 0x1F)
+    word1 = ((r3 & 0x1F) << 11) | (0x19 << 5) | ((cc & 0xF) << 1)
+    return u16(word0) + u16(word1)
+
+
+def enc_mulhi(imm16: int, r1: int, r2: int) -> bytes:
+    # MULHI imm16, reg1, reg2 : op0510=0x37
+    return enc_reg_reg(0x37, r1, r2) + u16(imm16 & 0xFFFF)
+
+
+def enc_sar_imm5(imm5: int, r2: int) -> bytes:
+    # SAR imm5, reg2 : op0510=0x15
+    return enc_imm5_reg(0x15, imm5, r2)
+
+
 def build() -> tuple[bytes, list[dict]]:
     cases: list[dict] = []
     blob = bytearray()
 
-    def add(name: str, encoding: bytes, expect: dict) -> None:
+    def add(name: str, encoding: bytes, expect: dict, *,
+            insn_size: int | None = None) -> None:
         addr = len(blob)
         blob.extend(encoding)
         # Pad to 4-byte alignment between cases for clarity.
@@ -146,8 +205,8 @@ def build() -> tuple[bytes, list[dict]]:
         cases.append({
             "name": name,
             "addr": addr,
-            "size": len(encoding),
-            "bytes": encoding.hex(),
+            "size": insn_size if insn_size is not None else len(encoding),
+            "bytes": encoding[:insn_size if insn_size is not None else len(encoding)].hex(),
             **expect,
         })
 
@@ -223,6 +282,57 @@ def build() -> tuple[bytes, list[dict]]:
         "mnemonic_prefix": "jarl",
         "must_pcode_ops": ["CALLIND"],
         "flow": "CALL",
+    })
+
+    # Inventory-driven risky ops: switch/callt/bitfield/bitmem/cmov/mulhi/sar.
+    # switch embeds its signed-halfword table immediately after the opcode.
+    # Index 0 → table[0]=+2 halfwords → target = inst_next + 4.
+    switch_blob = enc_switch(6) + u16(0x0002) + u16(0) + u16(0)  # insn+table+pad+landing
+    add("switch", switch_blob, {
+        "mnemonic_prefix": "switch",
+        "must_pcode_ops": ["LOAD", "INT_SEXT", "BRANCHIND"],
+        "flow": "BRANCH",
+    }, insn_size=2)
+
+    add("callt", enc_callt(0x4), {
+        "mnemonic_prefix": "callt",
+        "must_pcode_ops": ["LOAD", "CALLIND"],
+        "flow": "CALL",
+    })
+
+    add("bins", enc_bins_low(6, 10, pos=4, width=4), {
+        "mnemonic_prefix": "bins",
+        "must_pcode_ops": ["INT_AND", "INT_OR", "INT_LEFT"],
+    })
+
+    add("set1", enc_set1_bit3(3, 6, 0), {
+        "mnemonic_prefix": "set1",
+        "must_pcode_ops": ["LOAD", "STORE", "INT_OR"],
+    })
+    add("clr1", enc_clr1_bit3(3, 6, 0), {
+        "mnemonic_prefix": "clr1",
+        "must_pcode_ops": ["LOAD", "STORE", "INT_AND"],
+    })
+    add("tst1", enc_tst1_bit3(3, 6, 0), {
+        "mnemonic_prefix": "tst1",
+        "must_pcode_ops": ["LOAD"],
+        "forbid_pcode_ops": ["STORE"],
+    })
+
+    # cmovne: cc=0xA. Taken copies reg1→reg3; not-taken copies reg2→reg3.
+    add("cmovne", enc_cmov_rr(0xA, 6, 10, 11), {
+        "mnemonic_prefix": "cmovne",
+        "must_pcode_ops": ["CBRANCH"],
+    })
+
+    add("mulhi", enc_mulhi(0x0010, 6, 10), {
+        "mnemonic_prefix": "mulhi",
+        "must_pcode_ops": ["INT_MULT", "INT_SEXT"],
+    })
+
+    add("sar", enc_sar_imm5(4, 10), {
+        "mnemonic_prefix": "sar",
+        "must_pcode_ops": ["INT_SRIGHT"],
     })
 
     return bytes(blob), cases

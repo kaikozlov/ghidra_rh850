@@ -89,7 +89,11 @@ close the highest-impact gaps for this firmware:
   with both positive-overflow and carry-without-overflow execution vectors;
 - `ld.w` `disp16` scaling (`field × 2`) is checked by an executed memory load;
 - `prepare`/`dispose` stack/register effects and direct/indirect
-  `jarl`/`jmp [lp]` flow types are checked on fixtures.
+  `jarl`/`jmp [lp]` flow types are checked on fixtures;
+- inventory-driven risky ops used by this image: `switch` table walk +
+  `BRANCHIND`, `callt` CTBP-relative `CALLIND`, `bins` bitfield insert,
+  `set1`/`clr1`/`tst1` bit-memory side effects and Z semantics, `cmovne`
+  taken/not-taken, signed `mulhi`, and arithmetic `sar`.
 
 Landmark decompiler checks (secrets at `0xBFD8`/`0xBFE8`, ISR calling
 convention, session-control decompilation, SecurityAccess expected-key,

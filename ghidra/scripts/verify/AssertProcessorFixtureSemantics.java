@@ -74,123 +74,317 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
     }
 
-    private void runExecutionVectors() throws Exception {
-        EmulatorHelper emu = emulator(0);
-        try {
-            emu.writeRegister("ep", 0x1000);
-            emu.writeMemory(toAddr(0x1010), new byte[]{(byte) 0x80});
-            step(emu, "sld.b negative");
-            requireRegister(emu, "sld.b negative", "r10", 0xffffff80L);
-        } finally {
-            emu.dispose();
+    private long requireCaseAddr(java.util.Map<String, Long> addrs, String name) {
+        Long addr = addrs.get(name);
+        if (addr == null) {
+            fail("execution vector missing fixture case: " + name);
+            return -1;
         }
+        return addr;
+    }
 
-        emu = emulator(4);
-        try {
-            emu.writeRegister("ep", 0x1000);
-            emu.writeMemory(toAddr(0x1020), new byte[]{0x01, (byte) 0x80});
-            step(emu, "sld.h negative");
-            requireRegister(emu, "sld.h negative", "r11", 0xffff8001L);
-        } finally {
-            emu.dispose();
-        }
+    private boolean pswBit(EmulatorHelper emu, int bit) {
+        return (emu.readRegister("PSW").longValue() & (1L << bit)) != 0;
+    }
 
-        emu = emulator(16);
-        try {
-            emu.writeRegister("gp", 0x1000);
-            emu.writeMemory(toAddr(0x10b0),
-                    new byte[]{0x78, 0x56, 0x34, 0x12});
-            step(emu, "ld.w scaled displacement");
-            requireRegister(emu, "ld.w scaled displacement", "r10", 0x12345678L);
-        } finally {
-            emu.dispose();
-        }
+    private void runExecutionVectors(java.util.Map<String, Long> addrs) throws Exception {
+        long a;
 
-        emu = emulator(20);
-        try {
-            emu.writeRegister("r6", 0xfffffffeL);
-            emu.writeRegister("r10", 7);
-            emu.writeRegister("PSW", 0);
-            step(emu, "divh signed");
-            requireRegister(emu, "divh signed", "r10", 0xfffffffdL);
-        } finally {
-            emu.dispose();
-        }
-
-        emu = emulator(20);
-        try {
-            emu.writeRegister("r6", 0);
-            emu.writeRegister("r10", 0x12345678L);
-            emu.writeRegister("PSW", 0);
-            step(emu, "divh divide by zero");
-            requireRegister(emu, "divh divide by zero", "r10", 0x12345678L);
-            long psw = emu.readRegister("PSW").longValue();
-            if ((psw & (1L << 2)) == 0) {
-                fail(String.format("divh divide by zero: PSW=0x%x lacks OV", psw));
+        a = requireCaseAddr(addrs, "sld.b");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("ep", 0x1000);
+                emu.writeMemory(toAddr(0x1010), new byte[]{(byte) 0x80});
+                step(emu, "sld.b negative");
+                requireRegister(emu, "sld.b negative", "r10", 0xffffff80L);
+            } finally {
+                emu.dispose();
             }
-        } finally {
-            emu.dispose();
         }
 
-        emu = emulator(24);
-        try {
-            emu.writeRegister("r6", 1);
-            emu.writeRegister("r10", 0x7fffffffL);
-            emu.writeRegister("PSW", 0);
-            step(emu, "satadd positive overflow");
-            requireRegister(emu, "satadd positive overflow", "r10", 0x7fffffffL);
-            long psw = emu.readRegister("PSW").longValue();
-            if ((psw & (1L << 4)) == 0 || (psw & (1L << 2)) == 0) {
-                fail(String.format("satadd positive overflow: PSW=0x%x lacks SAT/OV", psw));
+        a = requireCaseAddr(addrs, "sld.h");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("ep", 0x1000);
+                emu.writeMemory(toAddr(0x1020), new byte[]{0x01, (byte) 0x80});
+                step(emu, "sld.h negative");
+                requireRegister(emu, "sld.h negative", "r11", 0xffff8001L);
+            } finally {
+                emu.dispose();
             }
-        } finally {
-            emu.dispose();
         }
 
-        emu = emulator(24);
-        try {
-            emu.writeRegister("r6", 0xffffffffL);
-            emu.writeRegister("r10", 1);
-            emu.writeRegister("PSW", 0);
-            step(emu, "satadd carry without overflow");
-            requireRegister(emu, "satadd carry without overflow", "r10", 0);
-            long psw = emu.readRegister("PSW").longValue();
-            if ((psw & (1L << 4)) != 0 || (psw & (1L << 2)) != 0
-                    || (psw & (1L << 3)) == 0) {
-                fail(String.format(
-                        "satadd carry without overflow: PSW=0x%x expected CY only", psw));
+        a = requireCaseAddr(addrs, "ld.w");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("gp", 0x1000); // ld.w disp[r4/gp], r10
+                emu.writeMemory(toAddr(0x10b0),
+                        new byte[]{0x78, 0x56, 0x34, 0x12});
+                step(emu, "ld.w scaled displacement");
+                requireRegister(emu, "ld.w scaled displacement", "r10", 0x12345678L);
+            } finally {
+                emu.dispose();
             }
-        } finally {
-            emu.dispose();
         }
 
-        emu = emulator(36);
-        try {
-            emu.writeRegister("sp", 0x2800);
-            emu.writeRegister("lp", 0x12345678L);
-            step(emu, "prepare stack effect");
-            requireRegister(emu, "prepare stack effect", "sp", 0x27f4);
-            long saved = ((long) emu.readMemoryByte(toAddr(0x27fc)) & 0xff)
-                    | (((long) emu.readMemoryByte(toAddr(0x27fd)) & 0xff) << 8)
-                    | (((long) emu.readMemoryByte(toAddr(0x27fe)) & 0xff) << 16)
-                    | (((long) emu.readMemoryByte(toAddr(0x27ff)) & 0xff) << 24);
-            if (saved != 0x12345678L) {
-                fail(String.format("prepare saved lp=0x%x expected=0x12345678", saved));
+        a = requireCaseAddr(addrs, "divh");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0xfffffffeL);
+                emu.writeRegister("r10", 7);
+                emu.writeRegister("PSW", 0);
+                step(emu, "divh signed");
+                requireRegister(emu, "divh signed", "r10", 0xfffffffdL);
+            } finally {
+                emu.dispose();
             }
-        } finally {
-            emu.dispose();
+
+            emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0);
+                emu.writeRegister("r10", 0x12345678L);
+                emu.writeRegister("PSW", 0);
+                step(emu, "divh divide by zero");
+                requireRegister(emu, "divh divide by zero", "r10", 0x12345678L);
+                if (!pswBit(emu, 2)) {
+                    fail(String.format("divh divide by zero: PSW=0x%x lacks OV",
+                            emu.readRegister("PSW").longValue()));
+                }
+            } finally {
+                emu.dispose();
+            }
         }
 
-        emu = emulator(40);
-        try {
-            emu.writeRegister("sp", 0x27f4);
-            emu.writeMemory(toAddr(0x27fc),
-                    new byte[]{0x78, 0x56, 0x34, 0x12});
-            step(emu, "dispose stack effect");
-            requireRegister(emu, "dispose stack effect", "sp", 0x2800);
-            requireRegister(emu, "dispose stack effect", "lp", 0x12345678L);
-        } finally {
-            emu.dispose();
+        a = requireCaseAddr(addrs, "satadd");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 1);
+                emu.writeRegister("r10", 0x7fffffffL);
+                emu.writeRegister("PSW", 0);
+                step(emu, "satadd positive overflow");
+                requireRegister(emu, "satadd positive overflow", "r10", 0x7fffffffL);
+                if (!pswBit(emu, 4) || !pswBit(emu, 2)) {
+                    fail(String.format("satadd positive overflow: PSW=0x%x lacks SAT/OV",
+                            emu.readRegister("PSW").longValue()));
+                }
+            } finally {
+                emu.dispose();
+            }
+
+            emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0xffffffffL);
+                emu.writeRegister("r10", 1);
+                emu.writeRegister("PSW", 0);
+                step(emu, "satadd carry without overflow");
+                requireRegister(emu, "satadd carry without overflow", "r10", 0);
+                if (pswBit(emu, 4) || pswBit(emu, 2) || !pswBit(emu, 3)) {
+                    fail(String.format(
+                            "satadd carry without overflow: PSW=0x%x expected CY only",
+                            emu.readRegister("PSW").longValue()));
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "prepare");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("sp", 0x2800);
+                emu.writeRegister("lp", 0x12345678L);
+                step(emu, "prepare stack effect");
+                requireRegister(emu, "prepare stack effect", "sp", 0x27f4);
+                long saved = ((long) emu.readMemoryByte(toAddr(0x27fc)) & 0xff)
+                        | (((long) emu.readMemoryByte(toAddr(0x27fd)) & 0xff) << 8)
+                        | (((long) emu.readMemoryByte(toAddr(0x27fe)) & 0xff) << 16)
+                        | (((long) emu.readMemoryByte(toAddr(0x27ff)) & 0xff) << 24);
+                if (saved != 0x12345678L) {
+                    fail(String.format("prepare saved lp=0x%x expected=0x12345678", saved));
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "dispose");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("sp", 0x27f4);
+                emu.writeMemory(toAddr(0x27fc),
+                        new byte[]{0x78, 0x56, 0x34, 0x12});
+                step(emu, "dispose stack effect");
+                requireRegister(emu, "dispose stack effect", "sp", 0x2800);
+                requireRegister(emu, "dispose stack effect", "lp", 0x12345678L);
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        // switch r6 with table[0]=+2 → PC = inst_next + 4
+        a = requireCaseAddr(addrs, "switch");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0);
+                step(emu, "switch case0");
+                requireRegister(emu, "switch case0", "PC", a + 2 + 4);
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        // callt idx=4: CTBP table entry supplies byte offset to target.
+        a = requireCaseAddr(addrs, "callt");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                long ctbp = 0x2000;
+                emu.writeRegister("CTBP", ctbp);
+                emu.writeRegister("PSW", 0x11);
+                // lbl = CTBP + (4<<1) = CTBP+8; halfword there is byte offset 0x20.
+                emu.writeMemory(toAddr(ctbp + 8), new byte[]{0x20, 0x00});
+                step(emu, "callt table lookup");
+                requireRegister(emu, "callt table lookup", "PC", ctbp + 0x20);
+                requireRegister(emu, "callt table lookup", "CTPC", a + 2);
+                requireRegister(emu, "callt table lookup", "CTPSW", 0x11);
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "bins");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0xf);
+                emu.writeRegister("r10", 0xffff0000L);
+                emu.writeRegister("PSW", 0);
+                step(emu, "bins insert nibble");
+                requireRegister(emu, "bins insert nibble", "r10", 0xffff00f0L);
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "set1");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x3000);
+                emu.writeRegister("PSW", 0);
+                emu.writeMemory(toAddr(0x3000), new byte[]{0x00});
+                step(emu, "set1 bit3");
+                byte got = emu.readMemoryByte(toAddr(0x3000));
+                if (got != 0x08) {
+                    fail(String.format("set1 bit3: mem=0x%x expected=0x08", got & 0xff));
+                }
+                if (!pswBit(emu, 0)) {
+                    fail("set1 bit3: expected Z set when prior bit was clear");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "clr1");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x3000);
+                emu.writeRegister("PSW", 0);
+                emu.writeMemory(toAddr(0x3000), new byte[]{0x0f});
+                step(emu, "clr1 bit3");
+                byte got = emu.readMemoryByte(toAddr(0x3000));
+                if (got != 0x07) {
+                    fail(String.format("clr1 bit3: mem=0x%x expected=0x07", got & 0xff));
+                }
+                if (pswBit(emu, 0)) {
+                    fail("clr1 bit3: expected Z clear when prior bit was set");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "tst1");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x3000);
+                emu.writeRegister("PSW", 0);
+                emu.writeMemory(toAddr(0x3000), new byte[]{0x08});
+                step(emu, "tst1 bit3 set");
+                byte got = emu.readMemoryByte(toAddr(0x3000));
+                if (got != 0x08) {
+                    fail(String.format("tst1 bit3: mem mutated to 0x%x", got & 0xff));
+                }
+                if (pswBit(emu, 0)) {
+                    fail("tst1 bit3 set: expected Z clear");
+                }
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "cmovne");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x11111111L);
+                emu.writeRegister("r10", 0x22222222L);
+                emu.writeRegister("r11", 0);
+                emu.writeRegister("PSW", 0); // Z clear → ne taken
+                step(emu, "cmovne taken");
+                requireRegister(emu, "cmovne taken", "r11", 0x11111111L);
+            } finally {
+                emu.dispose();
+            }
+
+            emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0x11111111L);
+                emu.writeRegister("r10", 0x22222222L);
+                emu.writeRegister("r11", 0);
+                emu.writeRegister("PSW", 1); // Z set → ne not taken
+                step(emu, "cmovne not taken");
+                requireRegister(emu, "cmovne not taken", "r11", 0x22222222L);
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "mulhi");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r6", 0xfffffffeL); // low16 = -2
+                emu.writeRegister("r10", 0);
+                step(emu, "mulhi signed halfword");
+                requireRegister(emu, "mulhi signed halfword", "r10", 0xffffffe0L); // -2 * 16
+            } finally {
+                emu.dispose();
+            }
+        }
+
+        a = requireCaseAddr(addrs, "sar");
+        if (a >= 0) {
+            EmulatorHelper emu = emulator(a);
+            try {
+                emu.writeRegister("r10", 0xfffffff0L);
+                emu.writeRegister("PSW", 0);
+                step(emu, "sar sign extend");
+                requireRegister(emu, "sar sign extend", "r10", 0xffffffffL);
+            } finally {
+                emu.dispose();
+            }
         }
     }
 
@@ -204,6 +398,10 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         // Very small hand-rolled extraction for cases array objects.
         List<Case> cases = Case.parseAll(text);
         println("AssertProcessorFixtureSemantics: cases=" + cases.size());
+        java.util.Map<String, Long> addrs = new java.util.HashMap<>();
+        for (Case c : cases) {
+            addrs.put(c.name, c.addr);
+        }
 
         for (Case c : cases) {
             Address addr = toAddr(c.addr);
@@ -270,7 +468,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
             println(String.format("  [%s] 0x%x %s ops=%s", c.name, c.addr, mnem, ops));
         }
 
-        runExecutionVectors();
+        runExecutionVectors(addrs);
 
         if (!failures.isEmpty()) {
             throw new IllegalStateException(failures.size() + " fixture failures: "

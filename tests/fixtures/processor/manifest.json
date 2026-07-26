@@ -1,7 +1,7 @@
 {
   "processor": "v850e3:LE:32:default",
   "binary": "rh850_semantic_fixture.bin",
-  "size": 48,
+  "size": 88,
   "cases": [
     {
       "name": "sld.b",
@@ -141,6 +141,111 @@
         "CALLIND"
       ],
       "flow": "CALL"
+    },
+    {
+      "name": "switch",
+      "addr": 48,
+      "size": 2,
+      "bytes": "4600",
+      "mnemonic_prefix": "switch",
+      "must_pcode_ops": [
+        "LOAD",
+        "INT_SEXT",
+        "BRANCHIND"
+      ],
+      "flow": "BRANCH"
+    },
+    {
+      "name": "callt",
+      "addr": 56,
+      "size": 2,
+      "bytes": "0402",
+      "mnemonic_prefix": "callt",
+      "must_pcode_ops": [
+        "LOAD",
+        "CALLIND"
+      ],
+      "flow": "CALL"
+    },
+    {
+      "name": "bins",
+      "addr": 60,
+      "size": 4,
+      "bytes": "e657d870",
+      "mnemonic_prefix": "bins",
+      "must_pcode_ops": [
+        "INT_AND",
+        "INT_OR",
+        "INT_LEFT"
+      ]
+    },
+    {
+      "name": "set1",
+      "addr": 64,
+      "size": 4,
+      "bytes": "c61f0000",
+      "mnemonic_prefix": "set1",
+      "must_pcode_ops": [
+        "LOAD",
+        "STORE",
+        "INT_OR"
+      ]
+    },
+    {
+      "name": "clr1",
+      "addr": 68,
+      "size": 4,
+      "bytes": "c69f0000",
+      "mnemonic_prefix": "clr1",
+      "must_pcode_ops": [
+        "LOAD",
+        "STORE",
+        "INT_AND"
+      ]
+    },
+    {
+      "name": "tst1",
+      "addr": 72,
+      "size": 4,
+      "bytes": "c6df0000",
+      "mnemonic_prefix": "tst1",
+      "must_pcode_ops": [
+        "LOAD"
+      ],
+      "forbid_pcode_ops": [
+        "STORE"
+      ]
+    },
+    {
+      "name": "cmovne",
+      "addr": 76,
+      "size": 4,
+      "bytes": "e657345b",
+      "mnemonic_prefix": "cmovne",
+      "must_pcode_ops": [
+        "CBRANCH"
+      ]
+    },
+    {
+      "name": "mulhi",
+      "addr": 80,
+      "size": 4,
+      "bytes": "e6561000",
+      "mnemonic_prefix": "mulhi",
+      "must_pcode_ops": [
+        "INT_MULT",
+        "INT_SEXT"
+      ]
+    },
+    {
+      "name": "sar",
+      "addr": 84,
+      "size": 2,
+      "bytes": "a452",
+      "mnemonic_prefix": "sar",
+      "must_pcode_ops": [
+        "INT_SRIGHT"
+      ]
     }
   ]
 }
