@@ -1,0 +1,259 @@
+# Application-level SecurityAccess (SID 0x27, levels 03/04)
+
+> **Calibration scope:** All findings apply to the Sienna EPS firmware
+> `8965B4512000` (RH850/P1M-E R7F701381). The Corolla EPS (`8965F1208000`)
+> is the same Denso/RH850 software family but a different calibration;
+> its Dcm policy tables, secrets, and gating behavior may differ.
+
+## 1. Separation from bootloader SecurityAccess
+
+The Sienna EPS has two independent SecurityAccess implementations:
+
+| | Bootloader | Application |
+|---|---|---|
+| **Code location** | `0x5516` (UDS handler) | `0x25C30` (subfn table), `0x9497C`/`0x94A72` (workers) |
+| **Secret name** | `SEED_KEY_SECRET` | `APPLICATION_LEVEL2_SA_SECRET` |
+| **Secret address** | CodeFlash `0xBFE8` | CodeFlash `0x20840` |
+| **Secret value** | (16 bytes, separately recovered) | `89 3e 08 41 8c 74 1f fa 2a 9c 04 4b ff a5 58 13` |
+| **Session** | Programming (1) | Extended (3) |
+| **Subfunctions** | `01`/`02` | `03`/`04` (level 1 `01`/`02` compiled to stubs) |
+| **Algorithm** | `AES-ENC(AES-DEC(SEED_KEY, data_record), seed)` | identical construction, different key |
+| **Entry path** | Direct UDS dispatch | `10 03` → `27 03` → `27 04` (no bootloader reset) |
+
+The two paths share the same two-stage AES-128-ECB construction but use
+different secrets, different CodeFlash addresses, and different entry
+requirements. The application path never transitions to the bootloader;
+it runs entirely within the AUTOSAR Dcm diagnostic stack.
+
+A third secret (`PAYLOAD_BUILD_SECRET` at `0xBFD8`) is used for bootloader
+payload encryption and is unrelated to either SecurityAccess path.
+
+## 2. Algorithm
+
+The level-2 key verification at `0x8C82A` is a two-stage AES-128-ECB
+pipeline:
+
+```
+intermediate = AES-128-ECB-DEC(APPLICATION_LEVEL2_SA_SECRET, data_record)
+expected_key = AES-128-ECB-ENC(intermediate, seed)
+```
+
+The 16-byte expected key is compared byte-by-byte against the tester's key.
+
+### Crypto primitives
+
+| Function | Address | Role |
+|---|---|---|
+| `0x865D4` | AES-128 key expansion | Standard S-box + Rcon, NIST FIPS-197 |
+| `0x853EE` | AES-128 single-block decrypt | Inverse S-box + Td tables |
+| `0x852B0` | AES-128 single-block encrypt wrapper | Calls `0x8496C` round function |
+| `0x8496C` | AES-128 encrypt round function | Te tables |
+| `0x869D2` | AES context clear | Zeroes the round-key buffer |
+
+### AES tables (all FIPS-197 verified by content)
+
+| Table | Address | Size | Notes |
+|---|---|---|---|
+| Forward S-box | `0x8FF1` | 256 B | Standard `63 7c 77 7b f2 6b 6f c5 ...` |
+| Inverse S-box | `0x25628` | 256 B | Standard `52 09 6a d5 30 36 a5 38 ...` |
+| Rcon | `0x23615` | 10 B | Standard `01 02 04 08 10 20 40 80 1b 36` |
+| Te0–Te3 | `0x23628`–`0x24228` | 4 × 1 KiB | Byte-swapped LE storage |
+| Td0–Td3 | `0x24628`–`0x25228` | 4 × 1 KiB | Td0[0]=0 (INV_SBOX[0x63]=0) |
+
+No ICU-S hardware crypto is involved in key derivation. The ICU-S is used
+only for seed generation (`0x8C65A`).
+
+### Dispatch chain
+
+```
+0x8C82A (orchestrator)
+  ├── 0x8C7BC (stage 1: AES-DEC)
+  │     ├── 0x865D4  key expansion with secret @ 0x20840
+  │     ├── 0x853EE  decrypt data_record @ FEBF497A
+  │     └── 0x869D2  clear context
+  ├── 0x8C7F6 (stage 2: AES-ENC)
+  │     ├── 0x865D4  key expansion with intermediate
+  │     ├── 0x852B0  encrypt seed @ FEBF495A
+  │     │     └── 0x8496C  T-table round function
+  │     └── 0x869D2  clear context
+  └── byte-by-byte compare vs tester key
+```
+
+All call edges verified by exact `jarl` instruction bytes at exact
+call-site addresses (`verify_application_diagnostics.py`).
+
+## 3. Data-record source (FEBF497A)
+
+The `data_record` input to AES-DEC is **tester-controlled**.
+
+### Producer chain
+
+The seed worker `0x8C734` loads the data-record source pointer via
+`ld.w -0x5a54[gp], r7` at `0x94996`. With `APP_GP = 0xFEBEB800`:
+
+```
+*(0xFEBEB800 - 0x5A54) = *(0xFEBE5DAC) = request_state[0]
+```
+
+`request_state[0]` is the pointer into the Dcm RX PDU buffer, already
+advanced past SID and subfunction by the Dcm DSP dispatcher (`0x8F750`).
+So `0x8C734` copies 16 bytes from `PDU_buffer[2:18]` into `FEBF497A`.
+
+### No request-length validation
+
+The Dcm seed-path handler (`0x94BCC`) performs no request-data-length
+check. The config value `0x10` at `0x26360` validates *response buffer
+space* (enough room for the 16-byte seed response), not request length.
+
+### Attack protocol
+
+The tester controls the data record by sending 16 bytes after the
+subfunction:
+
+```
+10 03                               # extended session
+27 03 00 00 00 00 00 00 00 00       # request seed with chosen data_record = zeros
+      00 00 00 00 00 00 00 00
+# receive: 67 03 <16-byte seed>
+# compute:
+#   K_inter = AES-128-ECB-DEC(SECRET, data_record)
+#   key     = AES-128-ECB-ENC(K_inter, seed)
+27 04 <16-byte key>                 # send key
+# expected: 67 04 (positive response)
+```
+
+For a bare `27 03` (no padding), the 16 bytes depend on PDU buffer state
+and are not statically provable. The recommended protocol is to always
+send `27 03` followed by 16 zero bytes.
+
+### Standalone keygen
+
+`tools/sienna_application_sa_keygen.py` computes the expected key:
+
+```
+python3 tools/sienna_application_sa_keygen.py <seed_hex> [data_record_hex]
+```
+
+## 4. Seed generation
+
+Level-2 seed generation (`0x8C734` → `0x8C65A`) uses the ICU-S crypto
+hardware through `0x84850`/`0x84874`/`0x8488C` with RAM `FEBF4A50`.
+The 16-byte seed is stored at `FEBF495A` and `FEBF496A`.
+
+If already provisioned (`FEBF4958 == 0x5A`), the existing seed is reused
+without regeneration. If the session matches the requested session, the
+seed buffer is zeroed before generation (fresh challenge).
+
+On failure, the worker returns `0x22` (conditionsNotCorrect).
+
+## 5. Attempt counter and unlock state
+
+- **Attempt counter**: per-level byte in RAM near `FEBE5DA4`, incremented
+  on each mismatch. Compared against configured max at
+  `DAT_00023EE4 + level*0x18 + 0x2469`.
+- **Delay timer**: enforced by `0x96E24` when the configured delay word
+  is non-zero. RAM-only.
+- **Unlock state**: `0x900FC` → `0x9075A` sets bit `(level - 1)` in a
+  2-dword bitmask. Reader `0x8FDCA` → `0x906F8` scans and returns the
+  current level. Cleared on session change (`0x90834`) or timeout
+  (`0x908C6`).
+- **NRC mapping**: mismatch → `0x35` (invalidKey) or `0x36`
+  (exceededNumberOfAttempts); delay active → `0x37`
+  (requiredTimeDelayNotExpired).
+
+## 6. Security-level consumers (what the unlock gates)
+
+**In this Sienna calibration, the level-2 unlock gates no diagnostic
+functionality.** The security-state machinery is wired up and exercised,
+but the policy tables are empty.
+
+| Scope | Check | Result |
+|---|---|---|
+| All 17 services (Dcm dispatch layer) | `sec_count=0` at `0x25E28 + i*0x18 + 0x12` | No service is security-gated |
+| All 242 readable DIDs (RDBI) | Policy table at `0x261A4`, strict scan of all 3 sessions | No DID requires level > 0 |
+| All 19 writable DIDs (WDBI) | Policy table at `0x26420`, flag at `0x26B8D` | All have `level_count=0` |
+| All 13 `0xAB` RID callbacks | Firmware-derived jarl target scan (30 unique targets) | Zero matches to crypto/NvM/ICU-S/SecOC |
+
+The architecture is:
+
+```
+Generic Denso/AUTOSAR diagnostic stack:
+    full SecurityAccess implementation
+    unlock bitmask machinery
+    per-service / per-DID security hooks
+
+Sienna 8965B4512000 calibration:
+    level-2 crypto enabled (real secret, real AES)
+    security policy tables unpopulated
+```
+
+The algorithm and unlock state are real; the policy tables are empty. The
+unlock may be a dormant platform feature rather than an intentional
+protection boundary on this firmware.
+
+**Corolla caveat:** The Corolla EPS (`8965F1208000`) is a different
+calibration. Its Dcm configuration tables are generated separately and may
+populate the same security-level fields. The algorithm, secret location
+pattern, and consumer machinery identified here are the template to check
+against when Corolla firmware becomes available.
+
+## 7. `0xAB` RID callback analysis
+
+The 13 RID callback pairs (at `0x25768`, RIDs `0x0204`..`0x2014`) were
+decoded via the RH850 `addr22` jarl encoding. The firmware-derived
+call-target set contains 30 unique valid targets; zero match sensitive
+functions (AES, CMAC, ICU-S, NvM, security-state reader, SecOC key
+material).
+
+The callbacks are three categories of mundane operations:
+
+| Category | RIDs | Behavior |
+|---|---|---|
+| Vehicle-speed gates | `0x0204`, `0x2002`, `0x2006`, `0x2007`, `0x2008` | Check speed < threshold, return NRC 0x05 if exceeded |
+| Handoff/session writers | `0x2001`, `0x2013`, `0x2014` | Write flags to FEBF45D0 area |
+| State-block configure | `0x2005`, `0x2009`, `0x200D`, `0x2010` | Write u16 parameters to state block |
+
+The state machine at `0x8CF84` manages byte-stream processing through
+`FUN_0004f8ba` with no identified crypto or provisioning calls.
+
+Based on direct call analysis, `0xAB` is not identified as a SecOC
+provisioning or key-update interface. Indirect calls through wrappers or
+GP-displacement RAM access not yet traced remain a residual possibility.
+
+## 8. Hardware-validation status
+
+Not yet validated on hardware. The protocol is documented for when a
+matching ECU or bench setup is available:
+
+1. Send `10 03` (extended session)
+2. Send `27 03` + 16 zero bytes
+3. Compute key with `sienna_application_sa_keygen.py`
+4. Send `27 04` + key
+5. Expect `67 04`
+
+Rules: do not send writes, resets, `0xAB`, or routines. Send `27 03` as
+the first UDS request or include explicit padding bytes.
+
+## 9. Variant limitations
+
+| Assumption | Status |
+|---|---|
+| Secret `893e08...5813` is universal | **Not assumed.** May be calibration-specific, market-specific, or software-version-specific |
+| Corolla uses same algorithm | **Plausible but unproven.** Corolla responds to `27 03` with a seed and rejects `27 04` with NRC 0x35 — consistent with the same `03/04` mechanism but not proof of identical crypto |
+| Corolla policy tables are also empty | **Unknown.** Must be checked against Corolla firmware when available |
+| Data-record is always tester-controlled | **Proven for Sienna.** The Dcm dispatch code is the same Denso AUTOSAR stack; likely holds for Corolla but requires firmware verification |
+
+## 10. Evidence
+
+| Claim | Verification |
+|---|---|
+| AES-128 tables are FIPS-197 standard | `verify_application_diagnostics.py`: S-box, inverse S-box, Rcon, Te0[0] content checks |
+| Crypto call chain | `verify_application_diagnostics.py`: 9 jarl call-edge assertions (exact bytes) |
+| Data-record = PDU_buffer[2:18] | `verify_application_diagnostics.py`: ld.w instruction bytes at `0x94996`/`0x94A88` |
+| No request-length check | `verify_application_diagnostics.py`: config value `0x10` at `0x26360` |
+| Secret at `0x20840` | `verify_application_diagnostics.py`: exact 16-byte assertion |
+| Services: all sec_count=0 | `verify_security_consumers.py`: 17 service-table checks |
+| RDBI: no DIDs require level > 0 | `verify_security_consumers.py`: 242-DID × 3-session strict scan |
+| WDBI: all level_count=0 | `verify_security_consumers.py`: 19 write-DID checks |
+| 0xAB callbacks: no sensitive targets | `verify_ab_rid_callbacks.py`: firmware-derived jarl scan (30 targets) |
+| Consumer set is exhaustive | `verify_security_consumers.py`: exact address-set assertion (11 addresses) |
