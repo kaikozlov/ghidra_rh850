@@ -259,16 +259,21 @@ the reconstructed combined firmware — trust them:
     (RIDs `0x0204..0x2014`), all with non-zero start/result callbacks. Response
     includes vendor byte from `FEBF493C`. Secondary `0x7A0→0x7A8` endpoint uses
     same handlers; its record fields at `0x26104`/`0x26110` are CAN routing IDs
-    (`0x7A1`/`0x7A0`), not code pointers. **The 13 RID callbacks contain zero
-    references** to AES/CMAC, ICU-S, NvM ReadBlock/WriteBlock, or SecOC key
-    material (`FEBF02E8`/`FF206E14`). They are vehicle-speed gates (RID
-    `0x0204`/`0x2002`/`0x2006`/`0x2007`/`0x2008`), handoff/session-state
-    writers (RID `0x2001`/`0x2013`/`0x2014`), and state-block configure
-    operations (RID `0x2005`/`0x2009`/`0x200D`/`0x2010`). The state machine
-    at `0x8CF84` manages byte-stream processing through `FUN_0004f8ba` with
-    no crypto or provisioning calls. `0xAB` is not a SecOC provisioning or
-    key-update interface in this calibration. 'Calibration/flash control'
-    remains a hypothesis, not proven;
+    (`0x7A1`/`0x7A0`), not code pointers. **The 13 RID callbacks and the traced
+    `0x8CF84` state-machine path contain no identified direct jarl references**
+    to AES/CMAC, ICU-S, NvM ReadBlock/WriteBlock, the security-state reader,
+    or known SecOC key material (`FEBF02E8`/`FF206E14`). The firmware-derived
+    call-target set (30 unique jarl targets decoded via the RH850 addr22
+    encoding) contains zero matches against the sensitive-function set. They
+    are vehicle-speed gates (RID `0x0204`/`0x2002`/`0x2006`/`0x2007`/`0x2008`),
+    handoff/session-state writers (RID `0x2001`/`0x2013`/`0x2014`), and
+    state-block configure operations (RID `0x2005`/`0x2009`/`0x200D`/`0x2010`).
+    The state machine at `0x8CF84` manages byte-stream processing through
+    `FUN_0004f8ba` with no identified crypto or provisioning calls. `0xAB` is
+    not identified as a SecOC provisioning or key-update interface based on
+    direct call analysis; indirect calls through wrappers or GP-displacement
+    RAM access not yet traced remain a residual possibility.
+    'Calibration/flash control' remains a hypothesis, not proven;
   - instruction-proved absolute RAM roots: ControlDTC store `FEBF45A8`, ReadDTC
     request mirrors `FEBF3BFC/3F24/4248/457C`, AB mirrors `FEBF48EC` and
     `FEBF48EC+0x50` (`FEBF493C`); buffers stay opaque;
