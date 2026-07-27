@@ -184,7 +184,72 @@ destination. Explicit WRITE co-owners `0x1404` (boot BSS clear) and `0x57bfe`
 Helpers `0x48CC8` / `0x48D14` consume validity through a secondary slot table at
 `0x29178`. Those slot semantics stay structural.
 
-## 7. Evidence boundaries
+## 7. COM signal deadline monitors
+
+Four large functions form the AUTOSAR COM signal deadline/timeout monitoring
+layer. They manage signal lifecycle states through function-pointer tables,
+which is why Ghidra's type propagation does not settle on them.
+
+| Function | Size | Indirect calls | Role |
+|---|---:|---:|---|
+| `com_signal_deadline_monitor_a` (`0x69824`) | 1352 B | 15-slot FP table | Called by 8 functions in `0x3Cxxx-0x45xxx` |
+| `com_signal_deadline_monitor_b` (`0x6AD24`) | 1444 B | 31 indirect calls | Called by 8 functions in `0x45xxx-0x46xxx` |
+| `com_signal_deadline_monitor_c` (`0x69DEC`) | 1182 B | 33 indirect calls | Called by 8 functions |
+| `com_signal_deadline_monitor_d` (`0x6A28A`) | 1208 B | 28 indirect calls | Called by 8 functions |
+
+Signal lifecycle states managed by these monitors:
+
+| State | Meaning |
+|---|---|
+| `0x00` | init |
+| `0x11` | signal received / alive |
+| `0x22` | timeout / deadline expired |
+| `0x33`/`0x44` | marked / replaced |
+
+Each dispatches lifecycle callbacks (timeout notification, reception
+notification, etc.) through a 15-slot function-pointer table
+(`param_3[0]`..`param_3[0xe]`). The four variants differ in signal class
+and timeout behavior.
+
+## 8. RTE input staging copies
+
+Three functions are pure AUTOSAR RTE-generated input staging — field-by-field
+struct copies with zero logic, zero `if` statements, and zero calls. They
+gather runnable inputs from scattered Rte buffers into contiguous
+runnable-local input structs inside critical sections.
+
+| Function | Size | Field copies | Source | Destination |
+|---|---:|---:|---|---|
+| `rte_input_staging_copy_a` (`0x5C666`) | 1442 B | 220 | `0xFEBE6800-0xFEBEE600` | `0xFEBE6400-0xFEBE676F` |
+| `rte_input_staging_copy_b` (`0x5C0B6`) | 1204 B | 189 | scattered Rte buffers | `0xFEBE6400-0xFEBE6600` |
+| `rte_input_staging_copy_c` (`0x5B9C4`) | 1250 B | 192 | scattered Rte buffers | `0xFEBE6200-0xFEBE6400` |
+
+Copy A and B run under the E2E config-management cyclic (`0x57AC2`) inside
+critical sections (interrupt masks `0xFF00`/`0xFFC0`). Copy C runs from both
+the TAUJ0 CH2 ISR and the foreground cyclic.
+
+## 9. Motor control calibration-change handlers
+
+Three functions are hand-written OEM motor-control code, but they are
+**calibration-version-change handlers**, not per-tick cyclic runnables. They
+only execute when the E2E-protected calibration block version transitions.
+The actual per-tick fast-loop motor control lives in sibling callees of
+`FUN_000656F0` and `FUN_00065720`.
+
+| Function | Size | Role | Calibration block |
+|---|---:|---|---|
+| `motor_phase_conditioning_calib_handler` (`0x47C3C`) | 1632 B | 3-phase u/v/w conditioning with gain multiplication (60 `longlong` multiplies, 103 saturations) | CodeFlash `0x1875x` |
+| `motor_coord_transform_calib_handler` (`0x32B80`) | 1560 B | 6-channel d/q axis transform + Q15 rescale + low-pass filter | CodeFlash `0x3103x` |
+| `motor_rotor_observer_calib_handler` (`0xB98BC`) | 1040 B | Rotor position/speed observer with atan2/sqrt, interpolation, DTCs | CodeFlash `0x1A12x-0x1A15x` |
+
+## 10. Hardware register access helper
+
+`hardware_register_access_helper` (`0x48312`, 2044 bytes) provides
+register-level I/O for peripheral configuration during signal processing.
+12 SFR references. Called by the CAN signal processing chain
+(`0x5D3CE`/`0x5D94E`).
+
+## 11. Evidence boundaries
 
 Core conclusions—47/242 counts, table addresses, CAN IDs, lengths, PDU
 ownership, `0x344` absence, SecOC inclusion (cross-checked to records at

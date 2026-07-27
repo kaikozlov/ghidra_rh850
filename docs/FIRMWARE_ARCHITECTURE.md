@@ -191,7 +191,33 @@ One cycle calls the following major groups in order:
 | 2 | `0x702E8` | Enter generated protected/timing wrapper |
 | 3 | `0x65F5C` | NvM/CSM asynchronous service group; reaches `csm_mainfunction` at `0x730D4` |
 | 4 | `0x70308` | Exit generated protected/timing wrapper |
-| 5 | `0x65750` | Main application component group; calls six large subsystem cyclic functions |
+| 5 | `0x65750` | Main application component group; calls six large subsystem cyclic functions including the COM dispatch chain |
+
+Order 5 expands as:
+
+```
+0x65750 → 0x57AC2 (E2E config-management cyclic)
+  ├→ autosar_os_task_signal_dispatch (0x58404) — generated Os task body,
+  │   352 sequential signal-processing calls, zero forward conditional branches.
+  │   Called both here and at boot via 0x65626 → 0x57768 → 0x57778.
+  ├→ autosar_com_rx_dispatch_group_a (0x5DB6E) — 269 COM signal unpackers.
+  └→ rte_input_staging_copy_a/b (0x5C666/0x5C0B6) — AUTOSAR RTE input staging.
+
+Separately, TAUJ0 CH2 ISR path:
+  0x64F90 → 0x65720 → 0x579B4
+    ├→ autosar_com_rx_dispatch_group_b (0x5D3CE) — 146 COM signal unpackers.
+    └→ rte_input_staging_copy_c (0x5B9C4) — RTE input staging.
+```
+
+The `autosar_os_task_signal_dispatch` at `0x58404` (12,894 bytes) is the
+largest function in the image. Full disassembly confirms it is a flat
+sequential call sequence: 352 unique `jarl` calls, zero forward conditional
+branches, zero `switch`. It is a generated Os task body that calls each
+configured signal-processing runnable in declaration order. 241 of its 352
+callees are 2-byte empty stubs. It is NOT the foreground loop itself — it is
+a callee reached from the periodic dispatcher `0x57778`, which also calls
+`eps_subsystem_init_orchestrator` (0xBD10E, boot only) and a RAM snapshot
+copy (0x5B662).
 | 6 | `0x702E8` | Enter the second protected/timing wrapper |
 | 7 | `0x65C60` | `secoc_nvm_cyclic_task`; services the corrected SecOC-related NvM object lifecycle |
 | 8 | `0x70308` | Exit wrapper |
@@ -359,4 +385,35 @@ See also:
 - `docs/APPLICATION_RECEIVE_MAP.md` for the complete application Rx-PDU/CAN-ID/COM-signal map;
 - `docs/SECOC_RUNTIME_KEY_LIFECYCLE.md` for the corrected SecOC-related NvM object model;
 - `docs/APPLICATION_DIAGNOSTICS.md` for application/boot diagnostic distinctions;
+
+## 7. Boot shutdown/reset path
+
+`boot_shutdown_reset_path` at `0x7059E` (1200 bytes) is a non-returning
+reset/shutdown sequence reached from `application_ecm_maskable_isr`. It checks
+the boot-state marker at `FEBF3401`, writes watchdog/reset registers, and
+calls `system_hard_reset`. 18 SFR references.
+
+## 8. Application peripheral initialization
+
+`application_peripheral_init` at `0x61DD4` (1096 bytes) is called by
+`application_startup_coordinator`. It writes 233 hardware registers (SFRs)
+to configure clock, timer, ADC, port, and communication peripherals, including
+port configuration bytes (0xCF) to multiple `FFFEEAxx` registers.
+
+## 9. Large unnamed function reference
+
+The 24 largest functions (≥1024 bytes) that were initially `FUN_*` are now
+fully classified and labeled. Their findings are distributed across domain
+docs rather than duplicated here:
+
+| Domain | Functions | Documented in |
+|---|---|---|
+| Application AES primitives | `0x853EE`, `0x8496C` | This doc §2.3 and `APPLICATION_SECURITY_ACCESS.md` |
+| Generated Os/RTE/COM | `0x58404`, `0x5DB6E`, `0x5D3CE` | This doc §3.2 and `APPLICATION_RECEIVE_MAP.md` |
+| COM deadline monitors | `0x69824`, `0x6AD24`, `0x69DEC`, `0x6A28A` | `APPLICATION_RECEIVE_MAP.md` |
+| RTE staging copies | `0x5C666`, `0x5C0B6`, `0x5B9C4` | `APPLICATION_RECEIVE_MAP.md` |
+| Boot/shutdown/init | `0xBD10E`, `0x57BFE`, `0x61DD4`, `0x7059E` | This doc §7-8 and `SYSTEM_MODE_CLUSTER_ANALYSIS.md` |
+| Motor control (OEM) | `0x47C3C`, `0x32B80`, `0xB98BC` | `APPLICATION_RECEIVE_MAP.md` (calibration handlers) |
+| System mode | `0xBA43A`, `0xBEC4C`, `0xCBCC8` | `SYSTEM_MODE_CLUSTER_ANALYSIS.md` |
+| Hardware | `0x1F2`, `0x48312` | This doc §2 and `APPLICATION_RECEIVE_MAP.md` |
 - `docs/DATAFLASH_LAYOUT.md` for persistent storage architecture.

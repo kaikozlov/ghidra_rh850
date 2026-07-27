@@ -45,9 +45,9 @@ The 16-byte expected key is compared byte-by-byte against the tester's key.
 | Function | Address | Role |
 |---|---|---|
 | `0x865D4` | AES-128 key expansion | Standard S-box + Rcon, NIST FIPS-197 |
-| `0x853EE` | AES-128 single-block decrypt | Inverse S-box + Td tables |
+| `0x853EE` | AES-128 single-block decrypt (application copy) | 4582 bytes. Inverse S-box + Td tables. Separate from bootloader's `0x7470`. Called only by `0x8C7BC` (SA stage 1). |
+| `0x8496C` | AES-128 encrypt round function (application copy) | 2372 bytes. Te tables. Called only by `0x852B0` (SA stage 2 wrapper). Separate from bootloader's `0x7352`. |
 | `0x852B0` | AES-128 single-block encrypt wrapper | Calls `0x8496C` round function |
-| `0x8496C` | AES-128 encrypt round function | Te tables |
 | `0x869D2` | AES context clear | Zeroes the round-key buffer |
 
 ### AES tables (all FIPS-197 verified by content)
