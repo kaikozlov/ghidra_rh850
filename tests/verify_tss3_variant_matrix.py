@@ -98,12 +98,9 @@ if corolla:
           repr(corolla["secoc_sync_id"]))
     check("Corolla secured_can_ids includes 0x2E4",
           "0x2E4" in corolla["secured_can_ids"])
-    check("Corolla programming_observation does not claim 0x78 was observed",
-          "0x78" in corolla["programming_observation"] and
-          ("not" in corolla["programming_observation"].lower() or
-           "no " in corolla["programming_observation"].lower()) and
-          "observed" in corolla["programming_observation"].lower() and
-          "compatibility is not observation" in corolla["programming_observation"].lower(),
+    check("Corolla programming_observation documents timeout not refusal",
+          "timeout" in corolla["programming_observation"].lower()
+          and "not decisive" in corolla["programming_observation"].lower(),
           repr(corolla["programming_observation"][:80]))
     check("Corolla security_levels documents observed level 0x03 seed",
           "0x03" in corolla["security_levels"] and "seed" in corolla["security_levels"].lower())
@@ -115,9 +112,18 @@ if corolla:
           "13 answering" in corolla["application_sid_set"].lower()
           or "13" in corolla["application_sid_set"],
           repr(corolla["application_sid_set"][:60]))
-    check("Corolla programming_observation documents reset-window probe",
-          "reset-window" in corolla["programming_observation"].lower()
-          or "reset window" in corolla["programming_observation"].lower(),
+    check("Corolla programming_observation documents timeout indeterminacy",
+          "timeout" in corolla["programming_observation"].lower()
+          and ("not decisive" in corolla["programming_observation"].lower()
+               or "not" in corolla["programming_observation"].lower()),
+          repr(corolla["programming_observation"][:80]))
+    check("Corolla programming_observation does NOT claim refusal",
+          "refus" not in corolla["programming_observation"].lower(),
+          repr(corolla["programming_observation"][:80]))
+    check("Corolla programming_observation notes missing bus capture",
+          "bus" in corolla["programming_observation"].lower()
+          and ("missing" in corolla["programming_observation"].lower()
+               or "not captured" in corolla["programming_observation"].lower()),
           repr(corolla["programming_observation"][:80]))
     check("Corolla programming_observation documents 0x14 crash",
           "0x14" in corolla["programming_observation"]
