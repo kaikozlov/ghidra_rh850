@@ -172,9 +172,9 @@ exercised, but the policy tables are empty.
 | Scope | Check | Result |
 |---|---|---|
 | All 17 services (Dcm dispatch layer) | `sec_count=0` at `0x25E28 + i*0x18 + 0x12` | No service is security-gated |
-| All 242 readable DIDs (RDBI) | Policy table at `0x261A4`, strict scan of all 3 sessions | No DID requires level > 0 |
+| All 242 readable DIDs (RDBI) | Policy table at `0x261A4`, bounded scan of recognized policy records | No DID requires level > 0 |
 | All 19 writable DIDs (WDBI) | Policy table at `0x26420`, flag at `0x26B8D` | All have `level_count=0` |
-| All 13 `0xAB` RID callbacks | Firmware-derived jarl target scan (30 unique targets) | Zero matches to crypto/NvM/ICU-S/SecOC |
+| All 13 `0xAB` RID callbacks + `0x8CF84` + `0x4F8BA` | Firmware-derived jarl/jr scan (39 unique targets across 3 ranges) | Zero matches to crypto/NvM/ICU-S/SecOC |
 
 The architecture is:
 
@@ -201,11 +201,13 @@ against when Corolla firmware becomes available.
 
 ## 7. `0xAB` RID callback analysis
 
-The 13 RID callback pairs (at `0x25768`, RIDs `0x0204`..`0x2014`) were
-decoded via the RH850 `addr22` jarl encoding. The firmware-derived
-call-target set contains 30 unique valid targets; zero match sensitive
-functions (AES, CMAC, ICU-S, NvM, security-state reader, SecOC key
-material).
+The 13 RID callback pairs (at `0x25768`, RIDs `0x0204`..`0x2014`), the
+state machine at `0x8CF84`, and worker `FUN_0x4F8BA` were scanned for
+direct branches using the RH850 `addr22` encoding with the SLEIGH
+`op1616=0` constraint (classifying `jarl` calls and `jr` jumps
+separately). The firmware-derived branch-target set contains 39 unique
+valid addresses across three ranges; zero match sensitive functions
+(AES, CMAC/CSM, ICU-S, NvM, security-state reader, SecOC key material).
 
 The callbacks are three categories of mundane operations:
 
@@ -255,7 +257,7 @@ the first UDS request or include explicit padding bytes.
 | No request-length check | `verify_application_diagnostics.py`: config value `0x10` at `0x26360` |
 | Secret at `0x20840` | `verify_application_diagnostics.py`: exact 16-byte assertion |
 | Services: all sec_count=0 | `verify_security_consumers.py`: 17 service-table checks |
-| RDBI: no DIDs require level > 0 | `verify_security_consumers.py`: 242-DID × 3-session strict scan |
+| RDBI: no DIDs require level > 0 | `verify_security_consumers.py`: 242-DID bounded policy scan |
 | WDBI: all level_count=0 | `verify_security_consumers.py`: 19 write-DID checks |
-| 0xAB callbacks: no sensitive targets | `verify_ab_rid_callbacks.py`: firmware-derived jarl scan (30 targets) |
+| 0xAB callbacks + state machine: no sensitive targets | `verify_ab_rid_callbacks.py`: firmware-derived jarl/jr scan (39 targets, 3 ranges) |
 | Consumer set is exhaustive | `verify_security_consumers.py`: exact address-set assertion (11 addresses) |

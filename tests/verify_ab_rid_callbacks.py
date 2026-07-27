@@ -70,6 +70,13 @@ SENSITIVE_TARGETS = {
     0x84874,  # ICU-S process
     0x8488C,  # ICU-S finalize
     0x880DC,  # ICU verify adapter
+    # Complete SecOC/CMAC verification chain (CSM/CryptoIf + ICU-S)
+    0x88B6A,  # CSM job start / CMAC verify init
+    0x88B9C,  # CSM process / CMAC update
+    0x88BA8,  # CSM finish / CMAC finalize
+    0x88556,  # CryptoIf job dispatch
+    0x88080,  # ICU-S CMAC operation
+    0x897F4,  # SecOC freshness / verify helper
     0x8C7BC,  # SA crypto stage 1
     0x8C7F6,  # SA crypto stage 2
     0x8FDCA,  # security-state reader

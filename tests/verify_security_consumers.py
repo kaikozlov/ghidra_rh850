@@ -3,10 +3,10 @@
 
 Findings (all scoped to this Sienna calibration 8965B4512000):
 - All 17 services: sec_count=0 at the Dcm service-dispatch layer
-- All 242 readable DIDs: no security level > 0 in any session
+- All 242 readable DIDs: no security level > 0 found in bounded policy scan
 - All 19 writable DIDs: security flag present but level_count=0
-- All 13 0xAB RID callbacks: zero references to crypto/NvM/SecOC
-- The security machinery is wired up and exercised but policy tables are empty
+- Security machinery is wired up and exercised but policy tables are empty
+- 0xAB callback/state-machine analysis is in verify_ab_rid_callbacks.py
 """
 from pathlib import Path
 import csv
@@ -88,7 +88,7 @@ for i in range(17):
           f"sid=0x{sid_byte:02X} sec_count={sec_count}")
 
 # ═══════════════════════════════════════════════════════════════════
-# 3. RDBI per-DID: strict scan of all 242 DIDs, no skip-on-garbage
+# 3. RDBI per-DID: bounded scan of all 242 DIDs
 # ═══════════════════════════════════════════════════════════════════
 print("\n== RDBI per-DID security (242 DIDs, bounded scan) ==")
 ptr_to_table = struct.unpack_from("<I", CF, 0x26208)[0]
