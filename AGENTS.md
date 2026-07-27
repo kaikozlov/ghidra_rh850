@@ -1,5 +1,9 @@
 # AGENTS.md — ghidra_rh850_analysis
 
+THE DOCS ARE NOT A PRIMARY SOURCE. THEY ARE AN APPROXIMATE EXPLANATION BASED ON FINDINGS UP TO THIS POINT. THEY ARE FALSIFIABLE.
+
+THE FIRMWARE IS THE SINGLE SOURCE OF TRUTH.
+
 Ghidra analysis of the China-market Sienna EPS firmware
 (`8965B4512000`, RH850/P1M-E R7F701381). This repo holds the corrected split
 images, analysis scripts, pinned payload fixtures, and the pre-built Ghidra
