@@ -119,7 +119,7 @@ prototype). Processor audits and semantic fixtures are documented in
 Verification targets:
 
 ```bash
-make verify            # twenty-one firmware suites (no Ghidra)
+make verify            # twenty-two firmware suites (no Ghidra)
 make verify-sleigh     # SLEIGH compile + isolated install
 make verify-processor  # fixtures + working-project audits
 make verify-ghidra     # all of the above

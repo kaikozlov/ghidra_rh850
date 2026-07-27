@@ -1,0 +1,14 @@
+rid,start_cb,result_cb,start_size_bytes,result_size_bytes,call_targets,evidence
+0x0204,0x4EC16,0x4EC2A,20,16,none,vehicle-speed gate (ld.hu 0x3092[gp]); returns NRC 0x05 if speed > threshold
+0x2001,0x4EC46,0x4EC78,54,68,0x8A6AA,session/handoff state setter; calls application_session_transition_check_adapter; writes FEBF3B20
+0x2002,0x4ECBC,0x4ECD0,20,12,none,vehicle-speed gate (same pattern as 0x0204); returns NRC 0x05 if speed > threshold
+0x2005,0x4ED2C,0x4ED40,74,12,none,state block write to FEBF45D0 area; configure two u16 params
+0x2006,0x4ED76,0x4ED8A,20,12,none,vehicle-speed gate; same pattern
+0x2007,0x4EDC0,0x4EDD4,20,12,none,vehicle-speed gate; same pattern
+0x2008,0x4EE0A,0x4EE1E,20,12,none,vehicle-speed gate; same pattern
+0x2009,0x4EE54,0x4EE68,62,12,none,state block write; similar to 0x2005
+0x200D,0x4EEA6,0x4EEBA,74,12,none,state block write; similar to 0x2005
+0x2010,0x4EEF0,0x4EF04,90,12,none,state block write; similar to 0x2005 with mode flag
+0x2012,0x4EF4A,0x4EF4E,4,30,none,trivial start (jmp lp); result reads state byte
+0x2013,0x4EF68,0x4EF90,40,44,none,handoff flag write; reads/writes FEBF45D0 area
+0x2014,0x4EFAC,0x4EFD4,40,44,none,handoff flag write; similar to 0x2013
