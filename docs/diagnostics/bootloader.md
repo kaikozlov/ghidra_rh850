@@ -1,10 +1,24 @@
 # Remaining bootloader diagnostic services and routines
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** —
+>
+> **Verification:** `tests/verify_bootloader_diagnostics.py`
+>
+> **Related:** [bootloader-dids](bootloader-dids.md), [payload-gate](../security/bootloader-payload-gate.md)
+
 This note completes the implemented bootloader diagnostics that were not covered
-in `DID_MODEL.md`, `PAYLOAD_GATE_ANALYSIS.md`, or the SecurityAccess analysis in
+in `../diagnostics/bootloader-dids.md`, `../security/bootloader-payload-gate.md`, or the SecurityAccess analysis in
 the top-level README. Its scope is the bootloader UDS table at CodeFlash
 `0x8E54`, not the separate application Dcm configuration documented in
-`APPLICATION_DIAGNOSTICS.md`.
+`../diagnostics/application.md`.
 
 All addresses are CodeFlash virtual addresses. The independent checks in
 `../tests/verify_bootloader_diagnostics.py` validate the service/routine tables,
@@ -141,7 +155,7 @@ non-returning reset path. Otherwise it sets pending-reset byte `0xFEBF2BBD`.
 `bootloader_hard_reset_wait @ 0x159E` disables interrupts, records low-level
 boot state 3, and enters the non-returning hardware wait/halt sequence at
 `0x1560`. This path is separate from the application event-9 shutdown/reset
-coordinator described in `APPLICATION_DIAGNOSTICS.md`.
+coordinator described in `../diagnostics/application.md`.
 
 ## 4. CommunicationControl (`SID 0x28`)
 
@@ -237,7 +251,7 @@ The compiled branches for `10F0` and `10F1` are identical. Both:
 4. resolve authorization bit 0;
 5. queue asynchronous embedded-address/length and CRC verification;
 6. when payload authentication is configured, verify the AES-CMAC described in
-   `PAYLOAD_GATE_ANALYSIS.md`;
+   `../security/bootloader-payload-gate.md`;
 7. set authorization bit 0 only after successful completion;
 8. emit `71 01 RID_hi RID_lo`.
 

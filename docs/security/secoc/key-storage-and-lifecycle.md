@@ -1,5 +1,19 @@
 # SecOC runtime key lifecycle: corrected firmware analysis
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** `data/dataflash_nvm_records.csv`
+>
+> **Verification:** `tests/verify_secoc_nvm.py`
+>
+> **Related:** [application-chain](application-chain.md), [dataflash](../../storage/dataflash.md)
+
 This note re-investigates the report's headline claim that the Sienna CN EPS
 `8965B4512000` derives its SecOC key inside ICU-S and exposes the plaintext key at
 `0xFEBEF468`, `0xFEBFEB08`, and `0x72F58` during a dealer-triggered rekey.
@@ -8,11 +22,11 @@ The claimed path was traced completely. It is **not a CSM/ICU command chain**.
 It is an AUTOSAR NvM-backed redundancy and checkpoint subsystem used by
 SecOC-associated objects. The initial analysis decoded only objects 0–3 and
 incorrectly generalized that every object was non-key state. The full DataFlash
-map in `DATAFLASH_LAYOUT.md` shows that object 15 is a 32-byte triplicate object
+map in `../../storage/dataflash.md` shows that object 15 is a 32-byte triplicate object
 whose second half is the field-verified SecOC-key location on related variants.
 The distinct application verification path, ICU-S slot-4 selection, erased-key
 known-answer vector, freshness format, and provisioned-unit experiment are in
-`SECOC_APPLICATION_CHAIN.md`.
+`../../security/secoc/application-chain.md`.
 
 `../tests/verify_secoc_nvm.py` verifies the original NvM correction. The broader 16-object
 map and key-location correction are checked by `../tests/verify_dataflash_layout.py`.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent raw-firmware checks for APPLICATION_DIAGNOSTICS.md."""
+"""Independent raw-firmware checks for docs/diagnostics/application.md."""
 from pathlib import Path
 import struct
 import sys

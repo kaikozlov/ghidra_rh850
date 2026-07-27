@@ -1,5 +1,19 @@
 # Bootloader payload authentication and execution path
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** pinned payload fixtures
+>
+> **Verification:** `tests/verify_payload_gate.py`
+>
+> **Related:** [bootloader diagnostics](../diagnostics/bootloader.md), [bootloader-dids](../diagnostics/bootloader-dids.md)
+
 This note traces the complete firmware-side path used by the public RH850/P1M-E
 payload toolchain: UDS download, AES-CBC decryption, CRC + CMAC authentication,
 and the `0xFF00` execution trigger. Addresses are CodeFlash virtual addresses.
@@ -79,7 +93,7 @@ This table explains the builder format without relying on source comments.
 Five 12-byte records describe RIDs `0x10F0`, `0x10F1`, `0x10F2`, `0x10F3`, and
 `0xFF00`. All are StartRoutine-only. `0x10F0`, `0x10F1`, `0x10F2`, and `0xFF00`
 require a 10-byte option record (`45 00 || address_be32 || length_be32`), while
-`0x10F3` has no option record. `BOOTLOADER_DIAGNOSTICS.md` completes the
+`0x10F3` has no option record. `../diagnostics/bootloader.md` completes the
 `0x10F1`–`0x10F3` behavior: `0x10F1` aliases `0x10F0`, `0x10F2` validates a
 CodeFlash region and programs its validity marker, and `0x10F3` arms an
 operation-bit-5 read-back comparison transfer.

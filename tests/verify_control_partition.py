@@ -6,7 +6,7 @@ Checks that:
 - all six cyclic callees under 0x65750 are represented;
 - the 0x7F7 special RX demux row is present;
 - each row has a bounded subsystem name and evidence grade;
-- docs/CONTROL_PARTITION_REPORT.md references the CSV and all six functions;
+- docs/architecture/control-partition.md references the CSV and all six functions;
 - the Tx signal closure for signals 9, 37, 57 is documented.
 """
 from __future__ import annotations
@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CSV_PATH = ROOT / "data" / "control_partition.csv"
-REPORT_PATH = ROOT / "docs" / "CONTROL_PARTITION_REPORT.md"
+REPORT_PATH = ROOT / "docs" / "architecture" / "control-partition.md"
 TX_MAP_PATH = ROOT / "data" / "application_tx_map.csv"
 
 EXPECTED_HEADER = [

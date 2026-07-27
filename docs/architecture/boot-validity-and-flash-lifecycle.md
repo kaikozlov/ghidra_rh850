@@ -1,5 +1,19 @@
 # Boot validity, flash lifecycle, and object-15 reachability
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** —
+>
+> **Verification:** `tests/verify_boot_trust.py`
+>
+> **Related:** [firmware-architecture](firmware-architecture.md), [payload-gate](../security/bootloader-payload-gate.md)
+
 This report completes the statically recoverable boot-trust analysis for
 China-market Sienna EPS firmware `8965B4512000`. It documents the four-check
 handoff gate, the validity-marker and CRC-descriptor machinery, the
@@ -129,7 +143,7 @@ confirming it is covered by the high-flash CRC and marker.
 Both marker domains currently hold `0x5AA5A55A` in this calibration, so the
 marker phase passes. Region 2 (the RAM payload window) has a null marker field
 and is not marker-checked — it is the authenticated RAM region managed by the
-payload gate (`docs/PAYLOAD_GATE_ANALYSIS.md`).
+payload gate (`../security/bootloader-payload-gate.md`).
 
 ## 4. Flash lifecycle on failure
 
@@ -170,7 +184,7 @@ The flash sequencer landmarks are:
 - `flash_program_start` `@ 0x4188` — initiates a program sequence;
 - `flash_program_queue_bytes` `@ 0x4276` — queues data into the program buffer;
 - the indirect callback dispatch at `0x4350`/`0x435E` (documented in
-  `docs/PAYLOAD_GATE_ANALYSIS.md` as the authenticated-flash-driver entry).
+  `../security/bootloader-payload-gate.md` as the authenticated-flash-driver entry).
 
 ## 5. Object-15 reachability (bounded negative)
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent raw-firmware checks for DID_MODEL.md (no Ghidra required)."""
+"""Independent raw-firmware checks for docs/diagnostics/bootloader-dids.md (no Ghidra required)."""
 from pathlib import Path
 import struct
 import sys

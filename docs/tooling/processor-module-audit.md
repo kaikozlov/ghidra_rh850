@@ -1,5 +1,19 @@
 # Plugin verification: v850e3 SLEIGH against the P1M-E firmware
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** `data/semantic_coverage_ledger.csv`
+>
+> **Verification:** `make verify-processor`
+>
+> **Related:** [WORKFLOW](../WORKFLOW.md), [firmware-architecture](../architecture/firmware-architecture.md)
+
 This records audits of the vendored `ghidra/ghidra_v850` processor module
 against the RH850/P1M-E CodeFlash. **Decode coverage is not the same as p-code
 semantic correctness.** The checks below are layered:

@@ -1,5 +1,19 @@
 # System Mode Cluster Analysis
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** recovered
+>
+> **Canonical artifacts:** —
+>
+> **Verification:** `tests/verify_application_diagnostics.py`
+>
+> **Related:** [firmware-architecture](firmware-architecture.md), [application diagnostics](../diagnostics/application.md)
+
 Decompilation and state-transition map for the three-function cluster
 `0xBA43A`, `0xBEC4C`, and `0xCBCC8`, their callers, and the
 `system_mode_coordinator @ 0xB0518` that drives them.
@@ -66,7 +80,7 @@ The coordinator (`0xB0518`) reads the current mode from `DAT_febeb11a` (masked
 2. **Mode 0x900's entry callback** is `system_programming_shutdown_mode_entry @ 0xB20EA`,
    which writes paired subsystem shutdown requests `0x70017001` (both subsystems)
    and `0x00020002` (both subsystems, two command slots). This matches
-   APPLICATION_DIAGNOSTICS.md §"Reset/shutdown behavior" (lines 708–713).
+   ../diagnostics/application.md §"Reset/shutdown behavior" (lines 708–713).
 
 3. **From 0x900 the only exit is event 0xE → 0x800**, which then performs the
    final reset sequencing (`FUN_000ff0d8` → hardware disable → reset/watchdog
@@ -80,7 +94,7 @@ The coordinator (`0xB0518`) reads the current mode from `DAT_febeb11a` (masked
 
 ## 3. Relationship to the PROGRAMMING handoff
 
-The PROGRAMMING handoff path (APPLICATION_DIAGNOSTICS.md §3, lines 699–726):
+The PROGRAMMING handoff path (../diagnostics/application.md §3, lines 699–726):
 
 ```
 application_programming_reset_request @ 0x4C98C
@@ -164,4 +178,4 @@ the dispatcher flag bit `0x10`.
   machine for application-level sequencing, independent of the system-mode enum.
 - The PROGRAMMING handoff queues event 9 via `0xB02BC`; the coordinator then
   drives the mode to `0x900` (entry callback `0xB20EA` writes shutdown requests)
-  and onward to `0x800` (reset). This matches APPLICATION_DIAGNOSTICS.md §3.
+  and onward to `0x800` (reset). This matches ../diagnostics/application.md §3.

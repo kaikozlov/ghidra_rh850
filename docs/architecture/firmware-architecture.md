@@ -1,5 +1,19 @@
 # Firmware Architecture
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** `data/semantic_coverage_ledger.csv`
+>
+> **Verification:** `tests/verify_architecture.py`
+>
+> **Related:** [boot-validity](boot-validity-and-flash-lifecycle.md), [control-partition](control-partition.md), [system-mode-cluster](system-mode-cluster.md)
+
 This document maps the broad control-flow architecture of the China-market Sienna EPS firmware `8965B4512000` for the RH850/P1M-E R7F701381. It covers the boot/application split, startup and handoff, foreground scheduling, interrupt routing, and the application-side CAN receive path.
 
 The addresses below are CodeFlash virtual addresses. The independent raw-image checks are in `tests/verify_architecture.py`.
@@ -55,7 +69,7 @@ application execution. The four `jarl` call sites at `0x13B4`, `0x13B8`,
 `0x13BC`, `0x13C0` encode a fixed setup order, and the validity-check `jarl`
 is at `0x13C4` (these encodings are pinned in `tests/verify_boot_trust.py`).
 The full decision tree is documented in
-`docs/BOOT_VALIDITY_AND_FLASH_LIFECYCLE.md`; the summary below is the
+`../architecture/boot-validity-and-flash-lifecycle.md`; the summary below is the
 statically verifiable structure.
 
 #### Setup calls
@@ -110,7 +124,7 @@ recording data base, length, and embedded address/length fields. The
 application vector base `0x20000` falls inside region 1 only, so the
 application image is covered by the high-flash CRC and marker. Region 2 is
 the authenticated RAM payload window managed by the payload gate
-(`docs/PAYLOAD_GATE_ANALYSIS.md`); it has a null marker field and is not
+(`../security/bootloader-payload-gate.md`); it has a null marker field and is not
 marker-checked.
 
 The validity marker value is `0x5AA5A55A`. `boot_validity_marker_check`
@@ -153,7 +167,7 @@ this committed calibration, so this is a static analysis of a **valid image**.
 The decision tree above describes what the firmware checks at runtime; it does
 not exercise the failure path against a tampered image. The full flash
 lifecycle and the bounded object-15 negative are documented in
-`docs/BOOT_VALIDITY_AND_FLASH_LIFECYCLE.md`.
+`../architecture/boot-validity-and-flash-lifecycle.md`.
 
 ### 2.3 Application CPU context
 
@@ -362,7 +376,7 @@ This is the application configuration, distinct from the bootloader's already-do
 
 ### 5.4 Application transmit map
 
-`APPLICATION_TRANSMIT_MAP.md` completes the application transmit side. It proves 11 active CanIf routes, including six COM I-PDUs on CAN IDs `0x260`, `0x262`, `0x351`, `0x394`, `0x4A3`, and `0x4C8`. Those six I-PDUs contain 58 generated COM signal IDs with exact wire fields, RAM sources where statically recoverable, cyclic counts, and the channel-1 confirmation path. Unsupported OEM field names and three configured signals without recovered runtime producers remain explicitly unresolved.
+`../communications/application-tx.md` completes the application transmit side. It proves 11 active CanIf routes, including six COM I-PDUs on CAN IDs `0x260`, `0x262`, `0x351`, `0x394`, `0x4A3`, and `0x4C8`. Those six I-PDUs contain 58 generated COM signal IDs with exact wire fields, RAM sources where statically recoverable, cyclic counts, and the channel-1 confirmation path. Unsupported OEM field names and three configured signals without recovered runtime producers remain explicitly unresolved.
 
 ## 6. Evidence boundaries
 
@@ -380,11 +394,11 @@ Peripheral names and EIINT-channel identities use Renesas **RH850/P1M-E User's M
 
 See also:
 
-- `docs/CAN_TRANSPORT_ANALYSIS.md` for the bootloader CAN/ISO-TP path;
-- `docs/APPLICATION_TRANSMIT_MAP.md` for the complete application Tx-PDU/CAN-ID/COM-signal map;
-- `docs/APPLICATION_RECEIVE_MAP.md` for the complete application Rx-PDU/CAN-ID/COM-signal map;
-- `docs/SECOC_RUNTIME_KEY_LIFECYCLE.md` for the corrected SecOC-related NvM object model;
-- `docs/APPLICATION_DIAGNOSTICS.md` for application/boot diagnostic distinctions;
+- `../communications/diagnostic-transport.md` for the bootloader CAN/ISO-TP path;
+- `../communications/application-tx.md` for the complete application Tx-PDU/CAN-ID/COM-signal map;
+- `../communications/application-rx.md` for the complete application Rx-PDU/CAN-ID/COM-signal map;
+- `../security/secoc/key-storage-and-lifecycle.md` for the corrected SecOC-related NvM object model;
+- `../diagnostics/application.md` for application/boot diagnostic distinctions;
 
 ## 7. Boot shutdown/reset path
 
@@ -408,12 +422,12 @@ docs rather than duplicated here:
 
 | Domain | Functions | Documented in |
 |---|---|---|
-| Application AES primitives | `0x853EE`, `0x8496C` | This doc §2.3 and `APPLICATION_SECURITY_ACCESS.md` |
-| Generated Os/RTE/COM | `0x58404`, `0x5DB6E`, `0x5D3CE` | This doc §3.2 and `APPLICATION_RECEIVE_MAP.md` |
-| COM deadline monitors | `0x69824`, `0x6AD24`, `0x69DEC`, `0x6A28A` | `APPLICATION_RECEIVE_MAP.md` |
-| RTE staging copies | `0x5C666`, `0x5C0B6`, `0x5B9C4` | `APPLICATION_RECEIVE_MAP.md` |
-| Boot/shutdown/init | `0xBD10E`, `0x57BFE`, `0x61DD4`, `0x7059E` | This doc §7-8 and `SYSTEM_MODE_CLUSTER_ANALYSIS.md` |
-| Motor control (OEM) | `0x47C3C`, `0x32B80`, `0xB98BC` | `APPLICATION_RECEIVE_MAP.md` (calibration handlers) |
-| System mode | `0xBA43A`, `0xBEC4C`, `0xCBCC8` | `SYSTEM_MODE_CLUSTER_ANALYSIS.md` |
-| Hardware | `0x1F2`, `0x48312` | This doc §2 and `APPLICATION_RECEIVE_MAP.md` |
-- `docs/DATAFLASH_LAYOUT.md` for persistent storage architecture.
+| Application AES primitives | `0x853EE`, `0x8496C` | This doc §2.3 and `../security/application-security-access.md` |
+| Generated Os/RTE/COM | `0x58404`, `0x5DB6E`, `0x5D3CE` | This doc §3.2 and `../communications/application-rx.md` |
+| COM deadline monitors | `0x69824`, `0x6AD24`, `0x69DEC`, `0x6A28A` | `../communications/application-rx.md` |
+| RTE staging copies | `0x5C666`, `0x5C0B6`, `0x5B9C4` | `../communications/application-rx.md` |
+| Boot/shutdown/init | `0xBD10E`, `0x57BFE`, `0x61DD4`, `0x7059E` | This doc §7-8 and `../architecture/system-mode-cluster.md` |
+| Motor control (OEM) | `0x47C3C`, `0x32B80`, `0xB98BC` | `../communications/application-rx.md` (calibration handlers) |
+| System mode | `0xBA43A`, `0xBEC4C`, `0xCBCC8` | `../architecture/system-mode-cluster.md` |
+| Hardware | `0x1F2`, `0x48312` | This doc §2 and `../communications/application-rx.md` |
+- `../storage/dataflash.md` for persistent storage architecture.

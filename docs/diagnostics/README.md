@@ -1,0 +1,30 @@
+# Diagnostics
+
+Two independent UDS stacks live in this image. Do not project one onto the
+other.
+
+| Stack | Physical ID | Functional ID | Report |
+|---|---|---|---|
+| Bootloader | `0x7A1` | `0x777` | [bootloader.md](bootloader.md) |
+| Application | `0x7A1` (primary), `0x7A0` (limited secondary) | `0x777` | [application.md](application.md) |
+
+| Report | Scope |
+|---|---|
+| [bootloader.md](bootloader.md) | Bootloader SIDs `10/11/28/3E/85`, routines `10F1–10F3` |
+| [bootloader-dids.md](bootloader-dids.md) | Bootloader DID model: the four-descriptor table, `F181` placeholder, strict `0203→0201→0202` write sequence |
+| [application.md](application.md) | Application 17-service table, 242 readable / 19 writable DIDs, `0xAB` proprietary service, programming handoff gate |
+
+## Important distinction
+
+The bootloader's `F181` returns a placeholder (`02 || 32*0x21`); the
+application's `F181` returns the real `8965B4512000` software ID. A probe that
+sees only the placeholder has not reached the application.
+
+The first `10 02` PROGRAMMING request in public extraction tooling is handled
+by the **application** session path and ends in a reset/handoff — it is not a
+call into the bootloader handler `0x614A`.
+
+## Security
+
+Diagnostic security (SecurityAccess, payload gate, SecOC) is covered under
+[../security/README.md](../security/README.md), not here.

@@ -1,5 +1,19 @@
 # Application SecOC receive chain and provisioned-unit experiment
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** —
+>
+> **Verification:** `tests/verify_secoc_application.py`
+>
+> **Related:** [key-storage](key-storage-and-lifecycle.md), [dataflash](../../storage/dataflash.md)
+
 This note traces the application-side SecOC receive configuration in the
 China-market Sienna EPS image `8965B4512000`. It also specifies the dynamic
 experiment needed to determine how a **provisioned** `12000` unit relates the

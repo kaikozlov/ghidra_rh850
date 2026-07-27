@@ -1,0 +1,93 @@
+# Findings ledger
+
+The canonical claim/evidence ledger for this repository. Every material claim
+has exactly one canonical home in a subsystem report; other documents
+summarize it in one sentence and link there.
+
+## Evidence grades
+
+| Grade | Meaning |
+|---|---|
+| **verified** | Directly asserted by a deterministic test in `tests/` |
+| **recovered** | Control/data flow substantially reconstructed; not claimed as behaviorally understood |
+| **bounded** | Interpretation constrained, exact semantics unknown |
+| **hypothesis** | Plausible, explicitly unverified |
+| **disproved** | Retained only to prevent regression; see [CORRECTIONS.md](CORRECTIONS.md) |
+
+## Core architecture
+
+| ID | Claim | Scope | Grade | Verified by | Canonical report |
+|---|---|---|---|---|---|
+| ARCH-001 | Reset handler `0x1F2` sets `gp = 0xFEBF9800` | Sienna | verified | `verify_findings.py` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
+| ARCH-002 | Application vector/executable base `0x20000`; entry `0xFFDB8 → 0x20880`; `EBASE=0x20000`, `INTBP=0x20200`; foreground loop `0x64FCC` | Sienna | verified | `verify_architecture.py` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
+| ARCH-003 | Boot validity gate: `0x13B0 → 0x119E`; two retry-bounded phases; markers at `0x17E00`/`0xFFE00` hold `0x5AA5A55A` | Sienna | verified | `verify_boot_trust.py` | [../architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md) |
+| ARCH-004 | Application foreground loop polls TAUJ0 CH3 `EIRF136`; EIINT 133–135 (CH0–2), 187/188 (RSCAN CAN1), 292/293 (ICU-S callbacks) | Sienna | verified | `verify_architecture.py` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
+| ARCH-005 | EIINT 292/293 are active ICU-S crypto-driver callback paths despite generic hardware-table `Reserved` labels | Sienna | recovered | `verify_architecture.py` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
+| ARCH-006 | 5,845 functions / 174,783 instructions / 37,001 symbols on the last annotated rebuild; most rows `evidence_grade=recovered` | Sienna | bounded | `make verify-processor` floors | [../tooling/processor-module-audit.md](../tooling/processor-module-audit.md) |
+
+## Bootloader security
+
+| ID | Claim | Scope | Grade | Verified by | Canonical report |
+|---|---|---|---|---|---|
+| SEC-BOOT-001 | `PAYLOAD_BUILD_SECRET` at CodeFlash `0xBFD8` (file `0x13FD8`), xref `0x7070` | Sienna | verified | `verify_findings.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
+| SEC-BOOT-002 | `SEED_KEY_SECRET` at CodeFlash `0xBFE8` (file `0x13FE8`), xref `0x6FF8` | Sienna | verified | `verify_findings.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
+| SEC-BOOT-003 | Bootloader SA: `expected = AES-ENC(AES-DEC(SEED_KEY_SECRET, data_record), ecu_seed)` | Sienna | verified | `verify_findings.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
+| SEC-BOOT-004 | UDS service table `0x8E54` (20 entries); SID `0x27` → handler `0x5516`; AES S-box `0x8FF1`, Rcon `0x8FE1` | Sienna | verified | `verify_findings.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
+| SEC-BOOT-005 | Payload gate: TransferData decrypts AES-CBC into `0xFEBF0000..0xFEBF0FFF`; routine `0x10F0` checks addr/len + CRC32 + CMAC; `0xFF00` erase path loads callback at RAM `0xFEBF0FD0` (CodeFlash `0x4350`, called `0x435E`) | Sienna | verified | `verify_payload_gate.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
+| SEC-BOOT-006 | `0xFF00` is not a direct execute-RAM routine; execution occurs by replacing the legitimate flash-driver callback inside the authenticated image | Sienna | verified | `verify_payload_gate.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
+
+## Application security
+
+| ID | Claim | Scope | Grade | Verified by | Canonical report |
+|---|---|---|---|---|---|
+| SEC-APP-001 | Application SA level 2 (`03/04`) uses 16-byte secret at CodeFlash `0x20840` | Sienna | verified | `verify_application_diagnostics.py` | [../security/application-security-access.md](../security/application-security-access.md) |
+| SEC-APP-002 | Application SA level 1 (`01/02`) is a compiled stub (`return 1`); only level 2 is functional | Sienna | verified | `verify_application_diagnostics.py` | [../security/application-security-access.md](../security/application-security-access.md) |
+| SEC-APP-003 | Application keygen is deterministic and attacker-controlled: no request-length check on the seed path; data record is tester-controlled padding or stale/zero | Sienna | verified | `verify_application_diagnostics.py` | [../security/application-security-access.md](../security/application-security-access.md) |
+| SEC-APP-004 | No configured SecurityAccess gating in this calibration: all 17 services `sec_count=0`, all 242 readable DIDs level ≤ 0, all 19 writable DIDs `level_count=0`, zero crypto refs in 13 `0xAB` RID callbacks | Sienna | verified | `verify_security_consumers.py`, `verify_ab_rid_callbacks.py` | [../security/application-security-access.md](../security/application-security-access.md) |
+
+## Diagnostics
+
+| ID | Claim | Scope | Grade | Verified by | Canonical report |
+|---|---|---|---|---|---|
+| DIAG-BOOT-001 | Bootloader DID table `0x8F14` has exactly 4 descriptors; `F181` sole readable, returns `02 ‖ 32*0x21` placeholder; `0201/0202/0203` only writable, strict order `0203→0201→0202` | Sienna | verified | `verify_did_model.py` | [../diagnostics/bootloader-dids.md](../diagnostics/bootloader-dids.md) |
+| DIAG-BOOT-002 | Bootloader SIDs `10/11/28/3E/85` and routines `10F1–10F3` fully characterized; functional ID is `0x777`, not generic OBD `0x7DF` | Sienna | verified | `verify_bootloader_diagnostics.py` | [../diagnostics/bootloader.md](../diagnostics/bootloader.md) |
+| DIAG-APP-001 | Application service table `0x25E30`: 17 SIDs `10/11/14/19/22/23/27/28/2E/31/34/36/37/3E/85/AB/BA`; DID table `0x2941C` (242 read) / `0x26AEC` (19 write); RID table `0x25768` (32 pairs) | Sienna | verified | `verify_application_diagnostics.py` | [../diagnostics/application.md](../diagnostics/application.md) |
+| DIAG-APP-002 | Application `F181`/`F186`/`F18C` return real values via callbacks `0x4E8E4/0x4E90A/0x4E918` | Sienna | verified | `verify_application_diagnostics.py` | [../diagnostics/application.md](../diagnostics/application.md) |
+| DIAG-APP-003 | PROGRAMMING handoff: allowed only from session 2/3, rejects speed > `0x0180` (NRC `0x88`), requires phase snapshot `0xFEBEE81F != 0x11`, supply ≥ `0x0A00`, clear handoff flag; success queues event 9, shutdown `0x900`, hard reset | Sienna | verified | `verify_application_diagnostics.py` | [../diagnostics/application.md](../diagnostics/application.md) |
+| DIAG-APP-004 | First `10 02` in extraction tooling is an application reset/handoff, not a call to bootloader handler `0x614A` | Sienna | verified | `verify_application_diagnostics.py` | [../diagnostics/application.md](../diagnostics/application.md) |
+| DIAG-APP-005 | `0xAB` is an asynchronous control service; 13 RID callbacks contain no identified direct references to AES/CMAC, ICU-S, NvM R/W, security-state reader, or SecOC key material; 'calibration/flash control' remains a hypothesis | Sienna | bounded | `verify_ab_rid_callbacks.py` | [../diagnostics/application.md](../diagnostics/application.md) |
+| DIAG-APP-006 | SIDs `14/23/31/34/36/37/BA` have null callbacks; generated Dcm DSP start-phase is globally disabled (flag `@0x25DCC=0x00`) — simple positive responses only | Sienna | verified | `verify_application_diagnostics.py` | [../diagnostics/application.md](../diagnostics/application.md) |
+
+## SecOC
+
+| ID | Claim | Scope | Grade | Verified by | Canonical report |
+|---|---|---|---|---|---|
+| SECOC-001 | Six records bind `0x0F/0x2E4/0x131/0x132/0x90/0xD7` to exact RX PDU routes; `0x344` has no receive filter or SecOC record | Sienna | verified | `verify_secoc_application.py` | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
+| SECOC-002 | Classic frames authenticate `DataID_be16 ‖ payload4 ‖ freshness48`; trailer = 4 freshness bits + first 28 CMAC bits; CMAC verify uses CryptoIf handle 0, ICU-S slot 4 | Sienna | verified | `verify_secoc_application.py` | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
+| SECOC-003 | Object 15 (SecOC key): len 32, base block 41, RAM `0xFEBF02E8`; raw `0xFF206E14`, XOR55 `0xFF206D14`, XORAA `0xFF206C14`; all three copies invalid in this snapshot | This exact dump | verified | `verify_dataflash_layout.py` | [../storage/dataflash.md](../storage/dataflash.md) |
+| SECOC-004 | This calibration's slot-4 KAV equals CMAC of 16 zero bytes under `FF*16`; with invalid objects 12–15 this strongly indicates unprovisioned/default key state | This calibration | bounded | `verify_secoc_application.py` | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
+| SECOC-005 | Object 15 has no static producer in this calibration (27 direct + 19 wrapper callsites, no AB/BA edge) | Sienna | verified | `generate_object15_reachability.py` census | [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md) |
+
+## Storage
+
+| ID | Claim | Scope | Grade | Verified by | Canonical report |
+|---|---|---|---|---|---|
+| STORE-001 | 122 physical records occupy pages 256–479; owner table `0x2B1B0` maps blocks 2–49 (triplicate bank) and 50–123 (74-record checkpoint ring, 24 enabled / 8 disabled slots) | Sienna | verified | `verify_dataflash_layout.py` | [../storage/dataflash.md](../storage/dataflash.md) |
+| STORE-002 | Pages 432–479 are the full 16-object SecOC triplicate bank | Sienna | verified | `verify_dataflash_layout.py` | [../storage/dataflash.md](../storage/dataflash.md) |
+| STORE-003 | Pages 0–255 unallocated, outside both configured classes, erased-compatible undefined readback; prior use indeterminable | Sienna | bounded | `verify_dataflash_semantics.py` | [../storage/dataflash.md](../storage/dataflash.md) |
+| STORE-004 | `0x4EAD8` rejects accesses overlapping pages 480–511 and optional-object pages 432–443; dumped 00/FF tail does not reveal protected contents | Sienna | verified | `verify_dataflash_layout.py` | [../storage/dataflash.md](../storage/dataflash.md) |
+| STORE-005 | DIDs `0x201/0x202/0x203` are volatile bootloader inputs, not DataFlash-backed | Sienna | verified | `verify_did_model.py` | [../diagnostics/bootloader-dids.md](../diagnostics/bootloader-dids.md) |
+
+## Communications
+
+| ID | Claim | Scope | Grade | Verified by | Canonical report |
+|---|---|---|---|---|---|
+| COM-001 | CAN1 acceptance table `0x231A0`: 47 normal Rx I-PDUs + `0x7A1/0x777/0x7A0/0x7F7`; `0x2E4/0x0F/0x131` explicit RX routes; `0x344` absent | Sienna | verified | `verify_architecture.py`, `verify_application_receive.py` | [../communications/application-rx.md](../communications/application-rx.md) |
+| COM-002 | 47 normal Rx I-PDUs, 242 COM signals (58..299); six SecOC envelopes stay inside the 47; 145 signals recovered, 97 configured-unresolved | Sienna | verified | `verify_application_receive.py` | [../communications/application-rx.md](../communications/application-rx.md) |
+| COM-003 | 11 active CanIf TX routes; 6 COM I-PDUs on CAN IDs `0x260/0x262/0x351/0x394/0x4A3/0x4C8`; 58 generated COM signal IDs | Sienna | verified | `verify_application_transmit.py` | [../communications/application-tx.md](../communications/application-tx.md) |
+
+## Variants
+
+| ID | Claim | Scope | Grade | Verified by | Canonical report |
+|---|---|---|---|---|---|
+| VAR-001 | Corolla `8965F1208000` is a different calibration; SA algorithm template, secret location, and consumer machinery are hypotheses to check, not confirmed facts | Corolla | hypothesis | — | [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) |

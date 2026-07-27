@@ -1,5 +1,19 @@
 # Complete bootloader DID model
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** —
+>
+> **Verification:** `tests/verify_did_model.py`
+>
+> **Related:** [bootloader](bootloader.md), [payload-gate](../security/bootloader-payload-gate.md)
+
 This note maps every DataIdentifier accepted by the bootloader handlers
 `uds_read_data_by_identifier @ 0x5FB8` and
 `uds_write_data_by_identifier @ 0x4948` in the `8965B4512000` image.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent raw-CodeFlash checks for APPLICATION_TRANSMIT_MAP.md."""
+"""Independent raw-CodeFlash checks for docs/communications/application-tx.md."""
 from __future__ import annotations
 
 from collections import Counter

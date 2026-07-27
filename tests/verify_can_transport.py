@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent raw-CodeFlash checks for CAN_TRANSPORT_ANALYSIS.md.
+"""Independent raw-CodeFlash checks for docs/communications/diagnostic-transport.md.
 
 No Ghidra project or external repository is required. Static tables and
 instructions are checked directly from the committed CodeFlash fixture.

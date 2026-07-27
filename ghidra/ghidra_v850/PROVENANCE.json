@@ -16,5 +16,5 @@
     "required_version": "12.1.2",
     "cli_required_version": "0.2.1"
   },
-  "audit": "docs/PLUGIN_AUDIT.md"
+  "audit": "docs/tooling/processor-module-audit.md"
 }

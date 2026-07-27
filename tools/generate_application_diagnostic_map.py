@@ -64,7 +64,7 @@ SEMANTICS = {
         "side_effects": "session transition; programming queues event 9 / mode 0x900 reset",
         "config_tables": "subfn 0x25BC0; runtime 0x262F6; speed/supply 0x181DC/0x181DE",
         "evidence_status": "recovered",
-        "notes": "See existing session/handoff analysis in APPLICATION_DIAGNOSTICS.md",
+        "notes": "See existing session/handoff analysis in docs/diagnostics/application.md",
     },
     0x11: {
         "service_callback_role": "phase_dispatcher 0=start 0x8B144; nonzero=cancel/finalize 0x8B1D4",

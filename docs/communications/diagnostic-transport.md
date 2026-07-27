@@ -1,5 +1,19 @@
 # RH850 bootloader CAN / ISO-TP / UDS transport analysis
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** —
+>
+> **Verification:** `tests/verify_findings.py`
+>
+> **Related:** [bootloader diagnostics](../diagnostics/bootloader.md), [payload-gate](../security/bootloader-payload-gate.md)
+
 This document traces the complete diagnostic transport path in the correctly
 mapped `8965B4512000` CodeFlash, from RSCFD hardware receive through CanIf,
 CanTp, PduR, and Dcm/UDS, and back to RSCFD transmission.

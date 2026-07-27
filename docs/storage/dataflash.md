@@ -1,5 +1,19 @@
 # RH850/P1M-E DataFlash layout
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** `data/dataflash_nvm_records.csv`, `data/checkpoint_payload_map.csv`
+>
+> **Verification:** `tests/verify_dataflash_layout.py`, `tests/verify_dataflash_semantics.py`
+>
+> **Related:** [secoc key-storage](../security/secoc/key-storage-and-lifecycle.md), [bootloader-dids](../diagnostics/bootloader-dids.md)
+
 This note maps the complete 32 KiB DataFlash prefix from the China-market Sienna
 EPS dump (`8965B4512000`). It corrects two earlier hypotheses:
 
@@ -312,7 +326,7 @@ It has low entropy and the original report measured zero CMAC matches. Therefore
 - **Strong external evidence:** provisioned related Sienna/Yaris/partner EPS
   variants store the operational key in object 15's second field.
 - **Strong inference:** the whole optional 32-byte bank is unprovisioned or
-  inactive in this snapshot. `SECOC_APPLICATION_CHAIN.md` adds that the compiled
+  inactive in this snapshot. `../security/secoc/application-chain.md` adds that the compiled
   CMAC path selects ICU-S slot 4 and its known-answer vector corresponds exactly
   to an erased `FF*16` key. A masked/incomplete acquisition or different runtime
   policy remains possible, so a provisioned-unit experiment is still required.
@@ -323,7 +337,7 @@ from the captured readable bytes.
 
 ## 5. Bootloader DIDs are not DataFlash-backed
 
-The complete access, response, and ordering analysis is in `DID_MODEL.md` and is
+The complete access, response, and ordering analysis is in `../diagnostics/bootloader-dids.md` and is
 independently checked by `../tests/verify_did_model.py`. The four-entry DID table at
 CodeFlash `0x8F14` contains:
 

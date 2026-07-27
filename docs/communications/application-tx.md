@@ -1,5 +1,19 @@
 # Application transmit-PDU and COM signal map
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** —
+>
+> **Verification:** `tests/verify_application_transmit.py`
+>
+> **Related:** [application-rx](application-rx.md), [firmware-architecture](../architecture/firmware-architecture.md)
+
 This report completes the statically recoverable application transmit map for
 China-market Sienna EPS firmware `8965B4512000`. It covers every active
 application CanIf transmit route, all six COM transmit I-PDUs, and all 58 COM
@@ -66,7 +80,7 @@ Application `tp` is `0x23EE4`. The relevant generated tables are:
 
 The 53 COM I-PDU descriptors split exactly into six transmit I-PDUs followed by
 47 normal receive I-PDUs. This independently agrees with the 47 normal receive
-CAN IDs documented in `FIRMWARE_ARCHITECTURE.md`.
+CAN IDs documented in `../architecture/firmware-architecture.md`.
 
 Each active CanIf record is eight bytes:
 
@@ -235,7 +249,7 @@ recorded as a bounded layout conclusion, not an OEM semantic claim.
 ## 5. Confirmation path
 
 The application uses RSCAN CAN1 and EIINT 188, already established in
-`FIRMWARE_ARCHITECTURE.md`:
+`../architecture/firmware-architecture.md`:
 
 ```text
 EIINT 188

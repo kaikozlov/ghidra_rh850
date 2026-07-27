@@ -5,7 +5,7 @@
   Volatility for the RH850/P1M-E (R7F701381) analysis target.
   The inherited upstream range 0x0..0x20 is CodeFlash in this project and must
   NOT be marked volatile. Peripheral SFRs live in the high 24-bit window used
-  by the P1M-E (see hardware manual R01UH0585 and docs/FIRMWARE_ARCHITECTURE.md).
+  by the P1M-E (see hardware manual R01UH0585 and docs/architecture/firmware-architecture.md).
 -->
 
 <processor_spec>

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent raw-CodeFlash checks for APPLICATION_RECEIVE_MAP.md.
+"""Independent raw-CodeFlash checks for docs/communications/application-rx.md.
 
 Recovered extraction rows are gated against the companion evidence artifact
 `data/application_rx_signal_evidence.csv` using CodeFlash bytes (body hashes,

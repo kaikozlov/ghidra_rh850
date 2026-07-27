@@ -1,8 +1,22 @@
 # Application diagnostic stack and bootloader-entry analysis
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** `data/application_diagnostic_map.csv`
+>
+> **Verification:** `tests/verify_application_diagnostics.py`
+>
+> **Related:** [bootloader](bootloader.md), [bootloader-dids](bootloader-dids.md), [application SA](../security/application-security-access.md)
+
 This note separates the **application-mode** diagnostic stack from the bootloader
-stack documented in `DID_MODEL.md`, `CAN_TRANSPORT_ANALYSIS.md`,
-`PAYLOAD_GATE_ANALYSIS.md`, and `BOOTLOADER_DIAGNOSTICS.md`. The latter completes
+stack documented in `../diagnostics/bootloader-dids.md`, `../communications/diagnostic-transport.md`,
+`../security/bootloader-payload-gate.md`, and `../diagnostics/bootloader.md`. The latter completes
 bootloader SIDs `0x10/0x11/0x28/0x3E/0x85` and routines `0x10F1–0x10F3`.
 Both stacks are present in the committed
 `8965B4512000` CodeFlash image, but they use different tables, handlers, and

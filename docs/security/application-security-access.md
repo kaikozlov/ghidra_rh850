@@ -1,5 +1,19 @@
 # Application-level SecurityAccess (SID 0x27, levels 03/04)
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** —
+>
+> **Verification:** `tests/verify_application_diagnostics.py`
+>
+> **Related:** [payload-gate](bootloader-payload-gate.md), [application diagnostics](../diagnostics/application.md)
+
 > **Calibration scope:** All findings apply to the Sienna EPS firmware
 > `8965B4512000` (RH850/P1M-E R7F701381). The Corolla EPS (`8965F1208000`)
 > is the same Denso/RH850 software family but a different calibration;

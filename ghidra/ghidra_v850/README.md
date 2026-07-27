@@ -10,7 +10,7 @@ for the RH850/P1M-E (`R7F701381`) target takes priority.
 
 Machine-readable provenance lives in [`PROVENANCE.json`](PROVENANCE.json).
 Processor-module audits against this firmware are recorded in
-[`docs/PLUGIN_AUDIT.md`](../../docs/PLUGIN_AUDIT.md).
+[`docs/tooling/processor-module-audit.md`](../../docs/tooling/processor-module-audit.md).
 
 ## How it is built and installed
 

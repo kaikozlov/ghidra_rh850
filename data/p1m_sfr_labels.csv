@@ -1,6 +1,6 @@
 address,name,size,access,comment
 # EI level interrupt-control registers (EICn @ 0xFFFFB000 + 2*n). Named channels
-# are those with verified firmware roles in docs/FIRMWARE_ARCHITECTURE.md.
+# are those with verified firmware roles in docs/architecture/firmware-architecture.md.
 0xFFFFB010,EIC8,2,rw,ECM maskable-error interrupt control (EIINT 8)
 0xFFFFB10A,EIC133,2,rw,TAUJ0 CH0 interrupt control (EIINT 133)
 0xFFFFB10C,EIC134,2,rw,TAUJ0 CH1 interrupt control (EIINT 134)
@@ -11,7 +11,7 @@ address,name,size,access,comment
 0xFFFFB248,EIC292,2,rw,ICU-S crypto-driver interrupt channel 292
 0xFFFFB24A,EIC293,2,rw,ICU-S crypto-driver interrupt channel 293
 0xFFFFB2F6,EIC379,2,rw,Flash sequencer-end interrupt control (EIINT 379)
-# RSCFD / RSCAN-FD register bases used by Can transport (docs/CAN_TRANSPORT_ANALYSIS.md).
+# RSCFD / RSCAN-FD register bases used by Can transport (docs/communications/diagnostic-transport.md).
 # Channel-0 bases match the firmware peripheral table at 0x23000; channel-1
 # (application CAN1) and diagnostic Tx buffer n=16 are labeled explicitly.
 0xFFD20178,CFSTS,4,rw,RSCFD common-FIFO status base (ch0/fifo0; +0x0C*ch +4*fifo)
@@ -26,14 +26,14 @@ address,name,size,access,comment
 0xFFD23580,CFID_CH1,4,rw,RSCFD common-FIFO message RAM for application CAN1
 0xFFD24000,CFDTMID,4,rw,RSCFD Tx message-buffer RAM base (0x20-byte entries)
 0xFFD24200,CFDTMID16,4,rw,Diagnostic Tx message RAM for buffer n=16 (CAN 0x7A9 path)
-# ICU-S crypto-driver command/status window (docs/SECOC_APPLICATION_CHAIN.md).
+# ICU-S crypto-driver command/status window (docs/security/secoc/application-chain.md).
 # ICUSCMD encoding is verified; companion offsets use firmware-observed roles.
 0xFFC5D000,ICUSCMD,4,rw,ICU-S command register; CMAC verify writes (key_slot<<16)|7
 0xFFC5D004,ICUSDAT,4,rw,ICU-S data/parameter word written beside ICUSCMD (firmware role)
 0xFFC5D00C,ICUSSTS,4,rw,ICU-S status; driver polls bit 0 as busy/ready
 0xFFC5D014,ICUSSTS2,4,rw,ICU-S companion status; driver polls low bits with ICUSSTS
 0xFFC5D024,ICUSCTL,4,rw,ICU-S control word written during driver reset/abort path
-# PLL / clock generation SFRs (docs/FIRMWARE_ARCHITECTURE.md boot setup).
+# PLL / clock generation SFRs (docs/architecture/firmware-architecture.md boot setup).
 # Written by boot_clock_init (0x10C6) and application PLL reconfig (0x607DE).
 0xFFF88818,PLLCFG,4,rw,PLL configuration register; boot writes 0x50 (main PLL enable)
 0xFFF890C0,PLLCTL,4,rw,PLL control register; write 4 to trigger reconfiguration

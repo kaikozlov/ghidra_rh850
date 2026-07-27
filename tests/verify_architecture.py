@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent raw-CodeFlash checks for FIRMWARE_ARCHITECTURE.md.
+"""Independent raw-CodeFlash checks for docs/architecture/firmware-architecture.md.
 
 No Ghidra project, sibling checkout, or hardware manual is required. The test
 checks firmware landmarks and channel numbers; peripheral names are documented

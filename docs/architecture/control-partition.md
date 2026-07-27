@@ -1,5 +1,19 @@
 # Control and Safety Cyclic Partition
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** recovered
+>
+> **Canonical artifacts:** `data/control_partition.csv`
+>
+> **Verification:** `tests/verify_architecture.py`
+>
+> **Related:** [firmware-architecture](firmware-architecture.md), [application-tx](../communications/application-tx.md)
+
 This report partitions the six cyclic subsystem functions dispatched by the
 foreground loop's main application component group (`FUN_00065750` at `0x65750`)
 into evidence-bounded control/safety subsystems. It also documents the separate
@@ -14,7 +28,7 @@ RAM) or `0xFFE2`/`0xFFE5` (peripheral MMIO). The application GP base is
 
 The six callees are invoked unconditionally and in fixed order from `0x65750`,
 which is itself step 5 of the foreground cycle documented in
-`docs/FIRMWARE_ARCHITECTURE.md` section 3.2.
+`../architecture/firmware-architecture.md` section 3.2.
 
 ## 1. Summary table
 
@@ -104,7 +118,7 @@ FUN_00078ea6, FUN_0007adae
 ### Output effects
 
 The dominant output is CAN TX via `application_com_tx_main()`, which drives the
-six COM transmit I-PDUs documented in `docs/APPLICATION_TRANSMIT_MAP.md`. The
+six COM transmit I-PDUs documented in `../communications/application-tx.md`. The
 other callees handle COM signal processing, PDU routing, and confirmation. No
 direct MMIO writes appear in this function.
 
@@ -273,7 +287,7 @@ is the highest-confidence subsystem in the partition.
 `application_can_special_rx_demux` at `0x7ff86` is a separate receive callback
 class registered for acceptance rule 50 / standard CAN ID `0x7F7`. It is
 distinct from both the 47-PDU normal demux (`0x80006`) and the diagnostic demux
-(`0x80114`) documented in `docs/FIRMWARE_ARCHITECTURE.md` section 5.3.
+(`0x80114`) documented in `../architecture/firmware-architecture.md` section 5.3.
 
 The function takes `(param_1, param_2, param_3)` where `param_3` selects an
 entry from the pointer table at `0x21A2C`. It indexes into a four-word record:
@@ -293,7 +307,7 @@ rather than dead code.
 The dispatch structure, pointer table, and registration are recovered. The
 upper-protocol semantics of CAN `0x7F7` are **not** resolved — no OEM protocol
 name is invented. CAN `0x7F8` (the single active special-class Tx route per
-`docs/APPLICATION_TRANSMIT_MAP.md`) is a separate endpoint and is not claimed to
+`../communications/application-tx.md`) is a separate endpoint and is not claimed to
 be the response pair without further evidence.
 
 ## 9. Tx signal producer closure — signals 9, 37, 57
@@ -335,6 +349,6 @@ The following are **not** claimed:
 
 See also:
 
-- `docs/FIRMWARE_ARCHITECTURE.md` for the foreground cycle and interrupt map;
-- `docs/APPLICATION_TRANSMIT_MAP.md` for the complete TX PDU and signal map;
-- `docs/APPLICATION_RECEIVE_MAP.md` for the normal and diagnostic RX paths.
+- `../architecture/firmware-architecture.md` for the foreground cycle and interrupt map;
+- `../communications/application-tx.md` for the complete TX PDU and signal map;
+- `../communications/application-rx.md` for the normal and diagnostic RX paths.

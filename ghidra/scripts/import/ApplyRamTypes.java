@@ -100,7 +100,7 @@ public class ApplyRamTypes extends GhidraScript {
 
     /**
      * Four work groups rooted at application GP+0x5308 = 0xFEBF0B08
-     * (docs/SECOC_RUNTIME_KEY_LIFECYCLE.md §3: four groups of three 32-byte work
+     * (docs/security/secoc/key-storage-and-lifecycle.md §3: four groups of three 32-byte work
      * buffers). The groups are generic transient restore slots, not fixed key-set
      * buffers; object 15 specifically uses group 3 at 0xFEBF0C28 / 0xC48 / 0xC68 (§8).
      */

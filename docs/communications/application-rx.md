@@ -1,5 +1,19 @@
 # Application receive I-PDU and COM signal map
 
+> **Scope:** Sienna EPS `8965B4512000`
+>
+> **Document type:** subsystem analysis
+>
+> **Status:** active
+>
+> **Evidence grade:** verified
+>
+> **Canonical artifacts:** `data/application_rx_signal_evidence.csv`
+>
+> **Verification:** `tests/verify_application_receive.py`
+>
+> **Related:** [application-tx](application-tx.md), [firmware-architecture](../architecture/firmware-architecture.md)
+
 This report completes the statically recoverable application receive map for
 China-market Sienna EPS firmware `8965B4512000`. It covers all **47 normal
 application Rx I-PDUs** and all **242 configured COM receive signals**.
@@ -78,7 +92,7 @@ timeout_or_cycle:u16, b1:u8, b2:u8, length:u16, b4:u8, flags:u8
 All 47 Rx descriptors use `flags=0x0C`. The first `u16` is recorded as
 `timeout_ticks` (raw COM counts; not claimed as milliseconds).
 
-Acceptance rule layout matches `FIRMWARE_ARCHITECTURE.md`: normal rules use
+Acceptance rule layout matches `../architecture/firmware-architecture.md`: normal rules use
 hardware labels 9..55 and route word `2`. Software CAN-FD markers
 (`0x40000000`) appear on descriptors for `0x025`, `0x090`, and `0x0D7` with
 length 32; hardware-rule ID fields keep the underlying 11-bit IDs.
@@ -99,7 +113,7 @@ classic `0x423`/`0x490` (1). Every PDU has at least one configured COM signal.
 ### 4.1 SecOC envelopes (included in the 47)
 
 These six normal Rx I-PDUs also have SecOC receive records at `0x25970` (see
-`SECOC_APPLICATION_CHAIN.md`):
+`../security/secoc/application-chain.md`):
 
 | CAN ID | Acceptance | COM PDU | Format |
 |---:|---:|---:|---|
@@ -126,7 +140,7 @@ These are not COM PDUs 6..52 and have no rows in `application_rx_map.csv`.
 
 ## 5. Signals and extraction
 
-Signals **0..57** are transmit (see `APPLICATION_TRANSMIT_MAP.md`). Signals
+Signals **0..57** are transmit (see `../communications/application-tx.md`). Signals
 **58..299** are receive.
 
 `application_com_receive_signal @ 0x7C03E` extracts a big-endian bit field from
