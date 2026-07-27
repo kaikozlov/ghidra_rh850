@@ -7,7 +7,7 @@ not facts.
 | Variant | Firmware | Status | Report |
 |---|---|---|---|
 | Sienna (China) | `8965B4512000` | Fully analyzed (this repo) | [sienna-8965B4512000.md](sienna-8965B4512000.md) |
-| Corolla | `8965F1208000` | Firmware not yet in hand; template hypotheses only | [corolla-8965F1208000.md](corolla-8965F1208000.md) |
+| Corolla | `8965F1208000` | Field probes done; firmware not yet in hand | [corolla-8965F1208000.md](corolla-8965F1208000.md) |
 | TSS 3.0 family | various | Partial comparison matrix | [tss3-family-comparison.md](tss3-family-comparison.md) |
 
 ## The transfer rule

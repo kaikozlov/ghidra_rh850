@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence grade:** verified
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SECOC-001, SECOC-002, SECOC-004
 >
 > **Canonical artifacts:** —
 >

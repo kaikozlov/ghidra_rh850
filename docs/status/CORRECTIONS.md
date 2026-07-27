@@ -15,7 +15,7 @@ the mistakes are not re-made.
 - **Consequence of the error:** all CodeFlash addresses shifted `+0x8000`;
   only ~2,000 functions found; the false conclusion that the two bootloader
   secrets were unreferenced and lived in a separate image.
-- **Canonical:** root `README.md` §"Critical file-layout correction";
+- **Canonical:** root `README.md` §"File layout";
   [../storage/dataflash.md](../storage/dataflash.md). The invalid analysis is
   preserved in `legacy/flat-import/` (do not use).
 

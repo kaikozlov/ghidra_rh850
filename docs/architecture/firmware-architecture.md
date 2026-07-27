@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence grade:** verified
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS ARCH-001 … ARCH-006
 >
 > **Canonical artifacts:** `data/semantic_coverage_ledger.csv`
 >

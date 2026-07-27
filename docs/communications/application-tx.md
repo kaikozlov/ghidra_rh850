@@ -6,9 +6,9 @@
 >
 > **Status:** active
 >
-> **Evidence grade:** verified
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS COM-003
 >
-> **Canonical artifacts:** —
+> **Canonical artifacts:** `data/application_tx_map.csv`
 >
 > **Verification:** `tests/verify_application_transmit.py`
 >

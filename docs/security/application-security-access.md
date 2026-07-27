@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence grade:** verified
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SEC-APP-001 … SEC-APP-004
 >
 > **Canonical artifacts:** —
 >

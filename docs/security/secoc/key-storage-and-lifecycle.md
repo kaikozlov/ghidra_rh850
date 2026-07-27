@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence grade:** verified
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SECOC-003, SECOC-005
 >
 > **Canonical artifacts:** `data/dataflash_nvm_records.csv`
 >

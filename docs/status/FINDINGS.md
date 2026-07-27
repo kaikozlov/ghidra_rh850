@@ -1,18 +1,53 @@
 # Findings ledger
 
-The canonical claim/evidence ledger for this repository. Every material claim
+The canonical key-findings ledger for this repository. Every material claim
 has exactly one canonical home in a subsystem report; other documents
-summarize it in one sentence and link there.
+summarize it in one sentence and link there. This ledger records the
+**key** findings per subsystem — it is not an exhaustive per-function index
+(for that see `data/semantic_coverage_ledger.csv`).
 
-## Evidence grades
+## Evidence model
+
+Evidence has two dimensions: **source** (where the observation came from) and
+**confidence** (how strongly it is established). Keep them separate — a
+Corolla field observation is a real, direct observation (`observed`) that is
+nonetheless not reproduced from firmware bytes.
+
+### Evidence source
+
+| Source | Meaning |
+|---|---|
+| **firmware-static** | Recovered from the committed firmware bytes |
+| **dynamic-probe** | Observed on a live vehicle / bus |
+| **generated-artifact** | Produced by a `data/` generator |
+| **external-source** | From an outside document, report, or third party |
+
+### Confidence grade
 
 | Grade | Meaning |
 |---|---|
 | **verified** | Directly asserted by a deterministic test in `tests/` |
+| **observed** | Directly observed (e.g. a field probe) but not reproduced by a repository test |
 | **recovered** | Control/data flow substantially reconstructed; not claimed as behaviorally understood |
 | **bounded** | Interpretation constrained, exact semantics unknown |
 | **hypothesis** | Plausible, explicitly unverified |
 | **disproved** | Retained only to prevent regression; see [CORRECTIONS.md](CORRECTIONS.md) |
+
+### Mapping the variant CSV vocabulary
+
+`data/tss3_eps_variant_matrix.csv` (and `tests/verify_tss3_variant_matrix.py`)
+use a coarser per-row grade. The mapping onto this model is:
+
+| CSV grade | Source | Confidence |
+|---|---|---|
+| `definitive` | firmware-static | verified |
+| `inference` | dynamic-probe / external-source | observed → hypothesis (per field) |
+| `none` | — | hypothesis (unobserved) |
+
+The CSV grade is a row-level summary; individual fields within an `inference`
+row carry their own confidence on the variant page (e.g. a directly observed
+software ID is `observed`, an inferred MCU is `hypothesis`).
+
 
 ## Core architecture
 
@@ -88,6 +123,8 @@ summarize it in one sentence and link there.
 
 ## Variants
 
-| ID | Claim | Scope | Grade | Verified by | Canonical report |
-|---|---|---|---|---|---|
-| VAR-001 | Corolla `8965F1208000` is a different calibration; SA algorithm template, secret location, and consumer machinery are hypotheses to check, not confirmed facts | Corolla | hypothesis | — | [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) |
+| ID | Claim | Scope | Source | Grade | Verified by | Canonical report |
+|---|---|---|---|---|---|---|
+| VAR-001 | Corolla field probes directly observe: software IDs `8965F1208000`/`8A3111213000`, CAN-FD bus, physical `0x7A1→0x7A9`, `F181/F186/F18C`, 13 answering SIDs, level-`0x03` seed behavior, SecOC sync `0x0F`, secured IDs `0x2E4/0x131/0x344` | Corolla | dynamic-probe | observed | `verify_tss3_variant_matrix.py` | [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) |
+| VAR-002 | Corolla MCU, SA algorithm template, application secret, bootloader payload gate, bootloader secrets, and complete SecOC implementation are hypotheses to check against firmware, not confirmed facts | Corolla | — | hypothesis | — | [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) |
+| VAR-003 | Corolla `10 02` programming timeout is inconclusive (reset vs. silent rejection unresolved; discriminating bus capture missing) | Corolla | dynamic-probe | bounded | `verify_tss3_variant_matrix.py` | [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) |

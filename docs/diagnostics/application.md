@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence grade:** verified
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS DIAG-APP-001 … DIAG-APP-006, SEC-APP-001 … SEC-APP-004
 >
 > **Canonical artifacts:** `data/application_diagnostic_map.csv`
 >

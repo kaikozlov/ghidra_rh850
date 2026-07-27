@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence grade:** verified
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS STORE-001 … STORE-005, SECOC-003
 >
 > **Canonical artifacts:** `data/dataflash_nvm_records.csv`, `data/checkpoint_payload_map.csv`
 >

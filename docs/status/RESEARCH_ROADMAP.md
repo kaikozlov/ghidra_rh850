@@ -43,4 +43,5 @@ What to investigate next, in rough priority order. Completed items move to
    MkDocs: explicit navigation, section index pages, search. Do only after
    canonical ownership is stable — search over duplicated docs just makes the
    inconsistency easier to find.
-9. **Link checking** in CI for `docs/` internal cross-references.
+9. ~~**Link checking** in CI for `docs/` internal cross-references.~~ **Done** —
+   `tests/verify_doc_links.py` runs in `make verify`.

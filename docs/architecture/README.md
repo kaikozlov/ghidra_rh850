@@ -12,3 +12,8 @@ Boot flow, execution architecture, and the control/safety partition.
 These reports describe *how the firmware runs*. For what the firmware *stores*,
 see [../storage/README.md](../storage/README.md); for how it talks on CAN, see
 [../communications/README.md](../communications/README.md).
+
+## Machine-readable canonical map
+
+- `data/control_partition.csv` — the control/safety cyclic-partition map
+  (see [control-partition.md](control-partition.md)).

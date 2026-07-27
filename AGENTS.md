@@ -7,10 +7,11 @@ This file is only what an agent must **obey** while working here.
 ## Source-of-truth hierarchy
 
 1. **Firmware bytes and deterministic verification** (`firmware/`, `tests/`)
-2. **Generated artifacts** (`data/` CSVs — regenerate, never hand-edit)
-3. **Annotated Ghidra project** (`project/` committed snapshot)
-4. **Narrative documentation** (`docs/` subsystem reports)
-5. **Historical notes** (`legacy/`, superseded claims in `docs/status/CORRECTIONS.md`)
+2. **Generated artifacts** (`data/` generated CSVs — regenerate, never hand-edit)
+3. **Curated evidence tables** (`data/` hand-maintained CSVs — edit intentionally, validate with tests)
+4. **Annotated Ghidra project** (`project/` committed snapshot)
+5. **Narrative documentation** (`docs/` subsystem reports)
+6. **Historical notes** (`legacy/`, superseded claims in `docs/status/CORRECTIONS.md`)
 
 THE DOCS ARE NOT A PRIMARY SOURCE. THEY ARE AN APPROXIMATE EXPLANATION BASED
 ON FINDINGS UP TO THIS POINT. THEY ARE FALSIFIABLE. THE FIRMWARE IS THE SINGLE
@@ -56,10 +57,13 @@ Interactive work only against `$PWD/build/project` with an **absolute**
 
 ## Evidence language
 
-Use these grades in any finding you record (definitions and full ledger in
-`docs/status/FINDINGS.md`):
+Use these confidence grades in any finding you record (definitions and full
+ledger in `docs/status/FINDINGS.md`). Evidence also carries a **source**
+(`firmware-static` / `dynamic-probe` / `generated-artifact` /
+`external-source`) — keep it distinct from confidence:
 
 - **verified** — directly asserted by a deterministic test;
+- **observed** — directly observed (e.g. a field probe) but not reproduced by a repository test;
 - **recovered** — control/data flow substantially reconstructed;
 - **bounded** — interpretation constrained, exact semantics unknown;
 - **hypothesis** — plausible, explicitly unverified;
@@ -77,7 +81,9 @@ When you produce a material conclusion:
 4. **Record any disproved prior claim** in `docs/status/CORRECTIONS.md`.
 5. **Keep this file slim** — never duplicate long findings lists here. Link to
    the canonical report instead.
-6. **Persist findings to the repo before delivering them** in chat.
+6. **When the requested task includes updating the repository**, persist durable
+   findings in the appropriate report and tests before reporting completion.
+   Do not modify or commit files during review-only tasks.
 
 ## Scope discipline
 

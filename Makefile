@@ -26,7 +26,8 @@ VERIFY_SUITES := \
 	tests/verify_control_partition.py \
 	tests/verify_tss3_variant_matrix.py \
 	tests/verify_security_consumers.py \
-	tests/verify_ab_rid_callbacks.py
+	tests/verify_ab_rid_callbacks.py \
+	tests/verify_doc_links.py
 
 .PHONY: sync verify verify-core verify-external verify-sleigh verify-processor verify-ghidra \
 	generate-dataflash generate-application-diagnostics \

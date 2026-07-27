@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence grade:** verified
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SEC-BOOT-001 … SEC-BOOT-006
 >
 > **Canonical artifacts:** pinned payload fixtures
 >

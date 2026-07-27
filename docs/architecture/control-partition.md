@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence grade:** recovered
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS ARCH-004, COM-003 (cyclic partition + TX)
 >
 > **Canonical artifacts:** `data/control_partition.csv`
 >

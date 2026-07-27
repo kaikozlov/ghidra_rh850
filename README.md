@@ -1,4 +1,4 @@
-# ghidra_rh850_analysis
+# ghidra_rh850
 
 Ghidra reverse-engineering of the China-market Sienna EPS firmware
 (`8965B4512000`, RH850/P1M-E R7F701381). The repository holds the corrected
