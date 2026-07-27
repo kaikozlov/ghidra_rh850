@@ -385,8 +385,8 @@ The 16-byte secret at CodeFlash `0x20840` is:
   bitmask (64-bit, supporting up to 64 levels). The `0x8FDCA` → `0x906F8`
   reader scans the bitmask and returns the first set level. This bitmask is
   the security state checked by `0x92FEE` for per-DID access control.
-- A successful level-2 unlock changes the accessible DID set: DIDs with
-  security requirements in the per-DID table are gated by this bitmask.
+- The bitmask is capable of gating configured DIDs, but no readable DID in
+  this calibration requires a nonzero security level.
 
 ### CommunicationControl (`0x28`) / TesterPresent (`0x3E`) / ControlDTCSetting (`0x85`)
 

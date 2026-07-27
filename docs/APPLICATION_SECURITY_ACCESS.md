@@ -15,7 +15,7 @@ The Sienna EPS has two independent SecurityAccess implementations:
 | **Secret name** | `SEED_KEY_SECRET` | `APPLICATION_LEVEL2_SA_SECRET` |
 | **Secret address** | CodeFlash `0xBFE8` | CodeFlash `0x20840` |
 | **Secret value** | (16 bytes, separately recovered) | `89 3e 08 41 8c 74 1f fa 2a 9c 04 4b ff a5 58 13` |
-| **Session** | Programming (1) | Extended (3) |
+| **Session** | Programming (0x02) | Extended (0x03) |
 | **Subfunctions** | `01`/`02` | `03`/`04` (level 1 `01`/`02` compiled to stubs) |
 | **Algorithm** | `AES-ENC(AES-DEC(SEED_KEY, data_record), seed)` | identical construction, different key |
 | **Entry path** | Direct UDS dispatch | `10 03` → `27 03` → `27 04` (no bootloader reset) |
@@ -163,9 +163,11 @@ On failure, the worker returns `0x22` (conditionsNotCorrect).
 
 ## 6. Security-level consumers (what the unlock gates)
 
-**In this Sienna calibration, the level-2 unlock gates no diagnostic
-functionality.** The security-state machinery is wired up and exercised,
-but the policy tables are empty.
+**No configured SecurityAccess gating was found at the service, RDBI, or WDBI
+policy layers in this Sienna calibration.** No direct sensitive call was
+identified in the 13 `0xAB` RID callback bodies or the traced state-machine
+path (`0x8CF84` + `0x4F8BA`). The security-state machinery is wired up and
+exercised, but the policy tables are empty.
 
 | Scope | Check | Result |
 |---|---|---|

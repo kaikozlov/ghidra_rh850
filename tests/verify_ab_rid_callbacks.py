@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Verify the 0xAB RID callback analysis from firmware bytes.
+"""Verify the 0xAB RID callback + state-machine analysis from firmware bytes.
 
-Decodes every jarl instruction in the 13 RID callback range (0x4EC16..0x4F000)
-using the RH850 addr22 encoding (s0005<<16 | word1, + inst_start) and asserts:
-1. No call targets match sensitive crypto/NvM/SecOC/security functions
-2. All call targets match the firmware-derived expected set
-3. No GP-relative SecOC key references appear in the byte range
+Decodes every jarl/jr instruction (op0610=0x1E) in three code ranges using
+the SLEIGH-verified addr22 encoding (s0005<<16 | word1, + inst_start) with
+the op1616=0 constraint (word1 must be even). Asserts:
+1. No call/jump targets match sensitive crypto/NvM/SecOC/security functions
+2. All targets match the firmware-derived expected set
+3. No GP-relative SecOC key references appear in the ranges
 4. The RID table at 0x25768 matches the documented entries
 """
 from pathlib import Path
@@ -32,30 +33,32 @@ def check(name, cond, detail=""):
     print(f"[{mark}] {name}{suffix}")
 
 
-def decode_jarl(addr):
-    """Decode RH850 jarl (op0610=0x1E). Returns (target, reg2) or None."""
+def decode_branch(addr):
+    """Decode RH850 jarl/jr (op0610=0x1E, op1616=0).
+
+    Returns (kind, target, reg2) where kind is 'jarl' (reg2!=0) or 'jr' (reg2==0).
+    Returns None if the instruction is not a valid jarl/jr encoding.
+    """
     if addr + 4 > len(CF):
         return None
     w0 = struct.unpack_from("<H", CF, addr)[0]
-    opcode = (w0 >> 6) & 0x1F
-    if opcode != 0x1E:
+    if (w0 >> 6) & 0x1F != 0x1E:
         return None
     w1 = struct.unpack_from("<H", CF, addr + 2)[0]
+    if w1 & 1:  # SLEIGH constraint: op1616=0
+        return None
     reg2 = (w0 >> 11) & 0x1F
     s0005 = w0 & 0x3F
     if s0005 & 0x20:
         s0005 -= 0x40
-    # addr22 = (s0005 << 16 | word1) + inst_start  [per SLEIGH]
     target = ((s0005 << 16) | w1) + addr
-    return (target, reg2)
+    kind = "jarl" if reg2 != 0 else "jr"
+    return (kind, target, reg2)
 
 
 # ═══════════════════════════════════════════════════════════════════
 # Constants
 # ═══════════════════════════════════════════════════════════════════
-CB_START = 0x4EC16   # first RID start callback
-CB_END = 0x4F000     # past last RID result callback + padding
-
 SENSITIVE_TARGETS = {
     0x865D4,  # AES key expansion
     0x853EE,  # AES decrypt block
@@ -75,15 +78,23 @@ SENSITIVE_TARGETS = {
     0x900FC,  # unlock helper
 }
 
-# Expected jarl call targets derived from firmware bytes
-# (30 unique valid targets in the callback range)
+# Three code ranges scanned for direct branch targets
+SCAN_RANGES = [
+    ("RID_callbacks", 0x4EC16, 0x4F000),
+    ("state_machine_0x8CF84", 0x8CF84, 0x8D400),
+    ("FUN_0x4F8BA", 0x4F8BA, 0x4FC00),
+]
+
+# Firmware-derived branch targets (39 unique valid addresses across all 3 ranges)
 FIRMWARE_TARGETS = {
-    0x4C4A4, 0x4EC5A, 0x4EC68, 0x4EC7B, 0x4EC89,
-    0x4ED59, 0x4EDA1, 0x4EDB1, 0x4EDEB, 0x4EE35,
-    0x4EE7F, 0x4EEC9, 0x4EF1B, 0x4EF25, 0x4EF6F,
-    0x4EFB1, 0x4EFF5, 0x8A6AA, 0x9B7E7, 0x9B82B,
-    0x9B951, 0xFDE58, 0xFDED0, 0xFE04C, 0xFE060,
-    0xFE09C, 0xFE0C4, 0xFE1B4, 0xFE1C8, 0xFE2A4,
+    0x4C4A4, 0x4C8A8, 0x4C8E8, 0x4EC5A, 0x4EC68,
+    0x4F8BA, 0x4F9EA, 0x4FA32, 0x54748, 0x548B0,
+    0x54BF2, 0x55F9C, 0x690DE, 0x8A01C, 0x8A020,
+    0x8A6AA, 0x8CDCE, 0x8CDF2, 0x8CF06, 0x8D0F0,
+    0x8D11E, 0x8D1EE, 0x8D2B2, 0x8D32E, 0x8D512,
+    0x8D534, 0x8D5CA, 0x8D5E2, 0x96D98, 0x96DA6,
+    0xFDE58, 0xFDED0, 0xFE04C, 0xFE060, 0xFE09C,
+    0xFE0C4, 0xFE1B4, 0xFE1C8, 0xFE2A4,
 }
 
 # ═══════════════════════════════════════════════════════════════════
@@ -110,72 +121,62 @@ for i, row in enumerate(rid_rows):
           f"got RID=0x{rid_actual:04X} start=0x{start_actual:X} result=0x{result_actual:X}")
 
 # ═══════════════════════════════════════════════════════════════════
-# 2. Firmware-derived jarl scan: no sensitive call targets
+# 2. Firmware-derived branch scan across all 3 ranges
 # ═══════════════════════════════════════════════════════════════════
-print("\n== firmware-derived jarl scan ==")
+print("\n== firmware-derived branch scan (jarl + jr) ==")
 
 firmware_targets = set()
 sensitive_hits = []
-for addr in range(CB_START, CB_END, 2):
-    result = decode_jarl(addr)
-    if result is None:
-        continue
-    target, reg2 = result
-    if target > 0 and target < 0x100000:
-        firmware_targets.add(target)
-        if target in SENSITIVE_TARGETS:
-            sensitive_hits.append((addr, target))
+for name, start, end in SCAN_RANGES:
+    for addr in range(start, end, 2):
+        result = decode_branch(addr)
+        if result is None:
+            continue
+        kind, target, reg2 = result
+        if 0 < target < 0x100000:
+            firmware_targets.add(target)
+            if target in SENSITIVE_TARGETS:
+                sensitive_hits.append((addr, kind, target))
 
-check("no sensitive call targets in RID callback range",
+check("no sensitive branch targets in scanned ranges (jarl + jr)",
       len(sensitive_hits) == 0,
-      f"{len(sensitive_hits)} found: {[(hex(a), hex(t)) for a, t in sensitive_hits]}")
+      f"{len(sensitive_hits)} found: {[(hex(a), k, hex(t)) for a, k, t in sensitive_hits]}")
 
-# Assert the exact target set matches (catches new calls if firmware changes)
-check("firmware-derived target set matches expected",
+check("firmware-derived target set matches expected (39 targets)",
       firmware_targets == FIRMWARE_TARGETS,
       f"missing={FIRMWARE_TARGETS - firmware_targets}; "
       f"extra={firmware_targets - FIRMWARE_TARGETS}")
 
 # ═══════════════════════════════════════════════════════════════════
-# 3. GP-relative SecOC key references
+# 3. GP-relative and literal SecOC key references
 # ═══════════════════════════════════════════════════════════════════
-print("\n== GP-relative and literal SecOC references ==")
+print("\n== SecOC key references in scanned ranges ==")
 
-# APP_GP = 0xFEBEB800
-# FEBF02E8 - GP = 0x5AE8  (SecOC key RAM)
-# FEBF02F8 - GP = 0x5AF8  (SecOC key field)
-for disp, label in [(0x5AE8, "FEBF02E8"), (0x5AF8, "FEBF02F8")]:
-    target_bytes = struct.pack("<h", disp)
-    found = CF.find(target_bytes, CB_START, CB_END)
-    check(f"no GP-displacement 0x{disp:04X} ({label}) in callback range",
-          found < 0, f"found at 0x{found:05X}")
+for name, start, end in SCAN_RANGES:
+    # GP-relative displacements (APP_GP = 0xFEBEB800)
+    for disp, label in [(0x5AE8, "FEBF02E8"), (0x5AF8, "FEBF02F8")]:
+        target_bytes = struct.pack("<h", disp)
+        found = CF.find(target_bytes, start, end)
+        check(f"{name}: no GP-disp 0x{disp:04X} ({label})",
+              found < 0, f"at 0x{found:05X}")
 
-# Also check literal 32-bit addresses
-for addr_val in [0xFEBF02E8, 0xFF206E14]:
-    target_bytes = struct.pack("<I", addr_val)
-    found = CF.find(target_bytes, CB_START, CB_END)
-    check(f"no literal 0x{addr_val:08X} in callback range",
-          found < 0, f"found at 0x{found:05X}")
+    # Literal 32-bit addresses
+    for addr_val in [0xFEBF02E8, 0xFF206E14]:
+        target_bytes = struct.pack("<I", addr_val)
+        found = CF.find(target_bytes, start, end)
+        check(f"{name}: no literal 0x{addr_val:08X}",
+              found < 0, f"at 0x{found:05X}")
 
 # ═══════════════════════════════════════════════════════════════════
-# 4. Callback addresses are live code
+# 4. Callback liveness
 # ═══════════════════════════════════════════════════════════════════
 print("\n== callback liveness ==")
 for row in rid_rows:
     rid = int(row["rid"], 16)
-    start_cb = int(row["start_cb"], 16)
-    result_cb = int(row["result_cb"], 16)
-    check(f"RID 0x{rid:04X} start 0x{start_cb:X} is live",
-          CF[start_cb:start_cb + 2] != b"\x00\x00")
-    check(f"RID 0x{rid:04X} result 0x{result_cb:X} is live",
-          CF[result_cb:result_cb + 2] != b"\x00\x00")
-
-# ═══════════════════════════════════════════════════════════════════
-# 5. State machine liveness
-# ═══════════════════════════════════════════════════════════════════
-print("\n== 0xAB state machine ==")
-check("state machine 0x8CF84 is live code",
-      CF[0x8CF84:0x8CF86] != b"\x00\x00")
+    for field in ("start_cb", "result_cb"):
+        cb = int(row[field], 16)
+        check(f"RID 0x{rid:04X} {field} 0x{cb:X} is live",
+              CF[cb:cb + 2] != b"\x00\x00")
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:

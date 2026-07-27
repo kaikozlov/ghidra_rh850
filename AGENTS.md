@@ -240,13 +240,15 @@ the reconstructed combined firmware — trust them:
     space). This makes the keygen fully deterministic and attacker-controlled.
     Attempt counter and delay are RAM-only. Unlock state is a 2-dword bitmask
     set by `0x900FC`→`0x9075A`;
-    **the level-2 unlock gates no diagnostic functionality in this Sienna
+    **no configured SecurityAccess gating was found in this Sienna
     calibration** — all 17 services have `sec_count=0` at the Dcm dispatch
-    layer; all 242 readable DIDs have no security level > 0 (strict scan of
+    layer; all 242 readable DIDs have no security level > 0 (bounded scan of
     the RDBI policy table); all 19 writable DIDs have `level_count=0` in the
     WDBI policy table at `0x26420`; all 13 `0xAB` RID callbacks contain zero
     references to crypto/NvM/SecOC machinery (checked by
-    `verify_security_consumers.py` and `verify_ab_rid_callbacks.py`); the
+    `verify_security_consumers.py` and `verify_ab_rid_callbacks.py` — the
+    latter scans callbacks, state machine, and worker with a SLEIGH-verified
+    jarl/jr decoder); the
     security-state machinery (`0x8FDCA`/`0x92FEE`/`0x900FC`) is wired up and
     exercised but the policy tables are empty. The Corolla (`8965F1208000`)
     is a different calibration and may populate these fields — the algorithm,
