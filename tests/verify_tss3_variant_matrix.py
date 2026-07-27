@@ -104,10 +104,14 @@ if corolla:
           repr(corolla["programming_observation"][:80]))
     check("Corolla security_levels documents observed level 0x03 seed",
           "0x03" in corolla["security_levels"] and "seed" in corolla["security_levels"].lower())
-    check("Corolla security_levels notes data_record protocol unconfirmed",
-          "data_record" in corolla["security_levels"].lower()
-          and "unconfirmed" in corolla["security_levels"].lower(),
-          repr(corolla["security_levels"][:60]))
+    check("Corolla security_levels documents bootloader secret was used",
+          "bootloader secret" in corolla["security_levels"].lower()
+          and "non-diagnostic" in corolla["security_levels"].lower(),
+          repr(corolla["security_levels"][:80]))
+    check("Corolla security_levels documents app SA secret is untested",
+          "untested" in corolla["security_levels"].lower()
+          and "893e08" in corolla["security_levels"],
+          repr(corolla["security_levels"][:80]))
     check("Corolla application_sid_set documents 13 answering services",
           "13 answering" in corolla["application_sid_set"].lower()
           or "13" in corolla["application_sid_set"],
