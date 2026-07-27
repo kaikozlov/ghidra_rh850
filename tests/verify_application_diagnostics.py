@@ -443,6 +443,22 @@ check("SA orchestrator jarl stage2 at 0x8C85E -> 0x8C7F6",
 check("SA aes_encrypt jarl rounds at 0x8535C -> 0x8496C",
       CF[0x8535C:0x85360] == bytes.fromhex("bfff10f6"))
 
+# -- Data-record source: Dcm request-state dereference --
+# The seed worker 0x9497C loads the data-record source pointer via
+# ld.w -0x5a54[gp], r7 at 0x94996. This dereferences FEBE5DAC (= APP_GP -
+# 0x5A54, where APP_GP = 0xFEBEB800), which holds request_state[0] =
+# pointer into the Dcm RX PDU buffer (advanced past SID+subfn).
+# 0x8C734 then copies 16 bytes from that pointer to FEBF497A.
+# The send_key worker has the same load at 0x94A88.
+# The Dcm config check at 0x26360 (value 0x10) validates response space,
+# NOT request data length — so extra bytes in "27 03" are accepted.
+check("SA seed worker loads data ptr via ld.w at 0x94996",
+      CF[0x94996:0x9499A] == bytes.fromhex("243fada5"))
+check("SA send-key worker loads data ptr via ld.w at 0x94A88",
+      CF[0x94A88:0x94A8C] == bytes.fromhex("243fada5"))
+check("SA Dcm seed-path config at 0x26360 is 0x10 (response-space floor)",
+      struct.unpack_from("<I", CF, 0x26360)[0] == 0x10)
+
 check("ECUReset start packs three request bytes before lower stages",
       bytes.fromhex("7d070100") in CF[0x8B144:0x8B180] and
       bytes.fromhex("3d3e0800") in CF[0x8B144:0x8B180])

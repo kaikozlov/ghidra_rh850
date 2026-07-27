@@ -228,9 +228,12 @@ the reconstructed combined firmware — trust them:
     encrypts the seed under the intermediate key via `0x865D4`→`0x852B0`
     (single-block encrypt). All AES tables (S-box `0x8FF1`, inverse S-box
     `0x25628`, Rcon `0x23615`, Te tables `0x23628`, Td tables `0x24628`) are
-    NIST FIPS-197 standard. The `FEBF497A` data-record contents are deterministic
-    per calibration but not fully resolved from static analysis — one known
-    seed→key pair resolves it empirically. Attempt counter and delay are
+    NIST FIPS-197 standard. The `FEBF497A` data-record is the 16 bytes at
+    `PDU_buffer[2:18]` — tester-controlled via `27 03` + 16 padding bytes, or
+    stale/zero for a bare `27 03`. The Dcm performs no request-length check
+    on the seed path (the config value `0x10` at `0x26360` validates response
+    space). This makes the keygen fully deterministic and attacker-controlled.
+    Attempt counter and delay are
     RAM-only. Unlock state is a 2-dword bitmask set by `0x900FC`→`0x9075A`;
   - proprietary `0xAB` is an asynchronous control service: subfn `01`=start
     (0 bytes), `02`=reset (2 bytes, clears state block at `FEBF45D0`, mode

@@ -329,11 +329,34 @@ the S-boxes and Rcon are identical. No ICU-S hardware crypto is involved in
 key derivation; the ICU-S is used only for seed generation at `0x8C65A`.
 
 The `data_record` at `FEBF497A` is filled by the seed worker `0x8C734` from
-the Dcm request descriptor at `DAT_febe5dac`. Its exact contents for a bare
-`27 03` request are not fully resolved from static analysis alone (the Dcm
-descriptor layout is implementation-specific). It is deterministic per
-calibration — not seed-dependent or session-dependent. One valid
-seed→key pair from any Denso RH850 EPS in this family resolves it empirically.
+a pointer loaded at `0x94996` (`ld.w -0x5a54[gp], r7`), which dereferences
+the first dword of the Dcm request-state copy at `FEBE5DAC`. That dword is
+`request_state[0]` — the pointer to the current position in the Dcm RX PDU
+buffer, already advanced past SID and subfunction by the Dcm DSP dispatcher
+(`0x8F750`). So `0x8C734` copies 16 bytes from `PDU_buffer[2:18]` into
+`FEBF497A`.
+
+**The tester controls these bytes.** The Dcm DSP seed path (`0x94BCC`)
+performs no request-data-length validation: the config check at offset
+`0x2464` (value `0x10`) validates *response* space, not request length.
+An attacker can send `27 03` followed by 16 bytes of chosen data; those
+bytes occupy `PDU_buffer[2:18]` and become the AES-DEC input. If a bare
+`27 03` is sent instead, the 16 bytes are whatever the PDU buffer contained
+previously (zeros on first boot, stale data after prior requests).
+
+This makes the key generation fully deterministic given the data record,
+and the data record is tester-chosen. The complete attack protocol:
+
+```text
+1. send: 27 03 <16-byte chosen data_record>
+2. receive: 67 03 <16-byte seed>
+3. compute: K_inter = AES-128-ECB-DEC(SECRET@0x20840, data_record)
+            key = AES-128-ECB-ENC(K_inter, seed)
+4. send: 27 04 <16-byte key>
+```
+
+For a bare `27 03` as the first UDS request after reset,
+`data_record = 0x00 * 16`.
 
 The 16-byte result is compared byte-by-byte against the tester-supplied key.
 
