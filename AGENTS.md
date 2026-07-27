@@ -240,11 +240,15 @@ the reconstructed combined firmware — trust them:
     space). This makes the keygen fully deterministic and attacker-controlled.
     Attempt counter and delay are RAM-only. Unlock state is a 2-dword bitmask
     set by `0x900FC`→`0x9075A`;
-    **the level-2 unlock gates no diagnostic functionality** — all 17
-    services have `sec_count=0` in the service table, and no readable DIDs
-    require security level > 0 (checked by `verify_security_consumers.py`);
-    the security-state machinery (`0x8FDCA`/`0x92FEE`/`0x900FC`) is exercised
-    but always passes;
+    **the level-2 unlock gates no diagnostic functionality in this Sienna
+    calibration** — all 17 services have `sec_count=0` in the service table,
+    and no readable DIDs require security level > 0 (checked by
+    `verify_security_consumers.py`); the security-state machinery
+    (`0x8FDCA`/`0x92FEE`/`0x900FC`) is wired up and exercised but the table
+    fields are empty. The Corolla (`8965F1208000`) is a different calibration
+    and may populate these fields — the algorithm, secret location, and
+    consumer machinery are the template to check against when its firmware
+    becomes available;
   - proprietary `0xAB` is an asynchronous control service: subfn `01`=start
     (0 bytes), `02`=reset (2 bytes, clears state block at `FEBF45D0`, mode
     `0x300`), `03`=configure (4 bytes, two `u16` params). Worker `0x96918`
