@@ -238,8 +238,13 @@ the reconstructed combined firmware — trust them:
     stale/zero for a bare `27 03`. The Dcm performs no request-length check
     on the seed path (the config value `0x10` at `0x26360` validates response
     space). This makes the keygen fully deterministic and attacker-controlled.
-    Attempt counter and delay are
-    RAM-only. Unlock state is a 2-dword bitmask set by `0x900FC`→`0x9075A`;
+    Attempt counter and delay are RAM-only. Unlock state is a 2-dword bitmask
+    set by `0x900FC`→`0x9075A`;
+    **the level-2 unlock gates no diagnostic functionality** — all 17
+    services have `sec_count=0` in the service table, and no readable DIDs
+    require security level > 0 (checked by `verify_security_consumers.py`);
+    the security-state machinery (`0x8FDCA`/`0x92FEE`/`0x900FC`) is exercised
+    but always passes;
   - proprietary `0xAB` is an asynchronous control service: subfn `01`=start
     (0 bytes), `02`=reset (2 bytes, clears state block at `FEBF45D0`, mode
     `0x300`), `03`=configure (4 bytes, two `u16` params). Worker `0x96918`

@@ -24,7 +24,8 @@ VERIFY_SUITES := \
 	tests/verify_scheduler_timing.py \
 	tests/verify_semantic_coverage.py \
 	tests/verify_control_partition.py \
-	tests/verify_tss3_variant_matrix.py
+	tests/verify_tss3_variant_matrix.py \
+	tests/verify_security_consumers.py
 
 .PHONY: sync verify verify-core verify-external verify-sleigh verify-processor verify-ghidra \
 	generate-dataflash generate-application-diagnostics \
