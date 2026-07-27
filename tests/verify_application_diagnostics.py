@@ -378,6 +378,71 @@ check("SA unlock helper 0x900FC ends with jmp lp (return)",
       CF[0x90104:0x90106] == bytes.fromhex("5806"))
 check("SA unlock helper 0x900FC is not a bare return (function body > 4 bytes)",
       len(CF[0x900FC:0x90106]) == 10 and CF[0x900FC:0x900FE] != bytes.fromhex("00527f00"))
+
+# -- AES-128 crypto primitive identification --
+# The SA level-2 key verification at 0x8C82A uses standard AES-128-ECB
+# in a two-stage pipeline structurally identical to the bootloader's
+# security_access_compute_expected_key at 0x704C:
+#   stage1 = AES-128-DEC(SECRET, data_record)
+#   expected_key = AES-128-ENC(stage1, seed)
+# All tables are standard NIST AES-128 (verified by content, not address).
+print("\n== application SecurityAccess AES-128 primitives ==")
+# Forward S-box at 0x8FF1 (standard NIST FIPS-197)
+check("SA forward S-box @0x8FF1 matches FIPS-197 standard",
+      CF[0x8FF1:0x8FF1+16] == bytes.fromhex("637c777bf26b6fc53001672bfed7ab76"))
+# Inverse S-box at 0x25628 (used by AES decrypt in 0x853EE)
+check("SA inverse S-box @0x25628 matches FIPS-197 standard",
+      CF[0x25628:0x25628+16] == bytes.fromhex("52096ad53036a538bf40a39e81f3d7fb"))
+# S-box / inverse S-box roundtrip (proves both tables are from the same AES)
+_fwd_sbox = CF[0x8FF1:0x8FF1+256]
+_inv_sbox = CF[0x25628:0x25628+256]
+check("SA S-box roundtrip (inv[fwd[i]]==i for all 256)",
+      all(_inv_sbox[_fwd_sbox[i]] == i for i in range(256)))
+# Rcon at 0x23615 (standard AES round constants)
+check("SA Rcon @0x23615 matches standard (01 02 04 08 10 20 40 80 1b 36)",
+      CF[0x23615:0x23615+10] == bytes.fromhex("01020408102040801b36"))
+# Te0[0] at 0x23628: byte-swapped standard 0xc66363a5 (LE storage on RH850)
+_te0_0_le = struct.unpack_from("<I", CF, 0x23628)[0]
+check("SA Te0[0] @0x23628 byte-swaps to standard 0xc66363a5",
+      struct.unpack(">I", struct.pack("<I", _te0_0_le))[0] == 0xc66363a5)
+# The 4 encryption T-tables span 0x23628..0x24628 (4 × 0x400 = 4 KiB)
+check("SA Te table group @0x23628 has 4 contiguous 1 KiB tables",
+      struct.unpack_from("<I", CF, 0x23628)[0] != 0 and
+      struct.unpack_from("<I", CF, 0x23A28)[0] != 0 and
+      struct.unpack_from("<I", CF, 0x23E28)[0] != 0 and
+      struct.unpack_from("<I", CF, 0x24228)[0] != 0)
+# The 4 decryption T-tables span 0x24628..0x25628 (Td0[0]=0 because INV_SBOX[0x63]=0)
+check("SA Td table group @0x24628 has 4 contiguous 1 KiB tables",
+      struct.unpack_from("<I", CF, 0x24628+4)[0] != 0 and
+      struct.unpack_from("<I", CF, 0x24A28+4)[0] != 0 and
+      struct.unpack_from("<I", CF, 0x24E28+4)[0] != 0 and
+      struct.unpack_from("<I", CF, 0x25228+4)[0] != 0)
+
+# -- Call-edge assertions (exact jarl bytes at exact call-site addresses) --
+# These prove the crypto dispatch chain, not just that functions exist nearby.
+# Stage 1 (0x8C7BC): key_init -> 0x865D4, decrypt -> 0x853EE, clear -> 0x869D2
+check("SA stage1 jarl key_init at 0x8C7D6 -> 0x865D4",
+      CF[0x8C7D6:0x8C7DA] == bytes.fromhex("bffffe9d"))
+check("SA stage1 jarl aes_decrypt at 0x8C7E4 -> 0x853EE",
+      CF[0x8C7E4:0x8C7E8] == bytes.fromhex("bfff0a8c"))
+check("SA stage1 jarl clear_ctx at 0x8C7EC -> 0x869D2",
+      CF[0x8C7EC:0x8C7F0] == bytes.fromhex("bfffe6a1"))
+# Stage 2 (0x8C7F6): key_init -> 0x865D4, encrypt -> 0x852B0, clear -> 0x869D2
+check("SA stage2 jarl key_init at 0x8C80A -> 0x865D4",
+      CF[0x8C80A:0x8C80E] == bytes.fromhex("bfffca9d"))
+check("SA stage2 jarl aes_encrypt at 0x8C81A -> 0x852B0",
+      CF[0x8C81A:0x8C81E] == bytes.fromhex("988a0ae0"))
+check("SA stage2 jarl clear_ctx at 0x8C820 -> 0x869D2",
+      CF[0x8C820:0x8C824] == bytes.fromhex("bfffb2a1"))
+# Orchestrator (0x8C82A): calls stage1 then stage2
+check("SA orchestrator jarl stage1 at 0x8C84A -> 0x8C7BC",
+      CF[0x8C84A:0x8C84E] == bytes.fromhex("bfff72ff"))
+check("SA orchestrator jarl stage2 at 0x8C85E -> 0x8C7F6",
+      CF[0x8C85E:0x8C862] == bytes.fromhex("bfff98ff"))
+# AES encrypt rounds: 0x852B0 calls 0x8496C (the T-table round function)
+check("SA aes_encrypt jarl rounds at 0x8535C -> 0x8496C",
+      CF[0x8535C:0x85360] == bytes.fromhex("bfff10f6"))
+
 check("ECUReset start packs three request bytes before lower stages",
       bytes.fromhex("7d070100") in CF[0x8B144:0x8B180] and
       bytes.fromhex("3d3e0800") in CF[0x8B144:0x8B180])

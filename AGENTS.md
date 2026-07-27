@@ -221,9 +221,17 @@ the reconstructed combined firmware — trust them:
   - application SecurityAccess level 1 (`01/02`, programming) is a compiled
     stub (`0x94E0E`/`0x94E22`: `return 1`); only level 2 (`03/04`, extended) is
     functional. Seed generated via crypto hardware (`0x8C65A`) and stored at
-    `FEBF495A`. Expected key = AES/CMAC transform of stored seed under 16-byte
-    secret at CodeFlash `0x20840`. Attempt counter and delay are RAM-only.
-    Unlock state is a 2-dword bitmask set by `0x900FC`→`0x9075A`;
+    `FEBF495A`. Key verification (`0x8C82A`) uses a two-stage AES-128-ECB
+    pipeline identical in structure to bootloader `0x704C`: stage 1 decrypts
+    `FEBF497A` under the 16-byte secret at CodeFlash `0x20840` via
+    `0x865D4`→`0x853EE` (AES key expansion + single-block decrypt), stage 2
+    encrypts the seed under the intermediate key via `0x865D4`→`0x852B0`
+    (single-block encrypt). All AES tables (S-box `0x8FF1`, inverse S-box
+    `0x25628`, Rcon `0x23615`, Te tables `0x23628`, Td tables `0x24628`) are
+    NIST FIPS-197 standard. The `FEBF497A` data-record contents are deterministic
+    per calibration but not fully resolved from static analysis — one known
+    seed→key pair resolves it empirically. Attempt counter and delay are
+    RAM-only. Unlock state is a 2-dword bitmask set by `0x900FC`→`0x9075A`;
   - proprietary `0xAB` is an asynchronous control service: subfn `01`=start
     (0 bytes), `02`=reset (2 bytes, clears state block at `FEBF45D0`, mode
     `0x300`), `03`=configure (4 bytes, two `u16` params). Worker `0x96918`

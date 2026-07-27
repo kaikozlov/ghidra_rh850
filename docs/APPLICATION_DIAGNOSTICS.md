@@ -300,13 +300,40 @@ in a given session context).
 #### Level 2 key verification (`0x8C82A`)
 
 The key worker requires `0xFEBF4958 == 0x5A` (provisioned). It derives the
-expected key via two crypto operations:
+expected key via a two-stage AES-128-ECB pipeline that is structurally
+identical to the bootloader's `security_access_compute_expected_key`
+(`0x704C`):
 
-1. `0x8C7BC`: initializes a crypto context with the 16-byte secret at
-   CodeFlash `0x20840`, then transforms the stored seed copy at `0xFEBF497A`
-   through `0x853EE` (AES/CMAC operation).
-2. `0x8C7F6`: initializes a second context with the stored seed, then
-   transforms through `0x852B0`.
+```
+intermediate = AES-128-ECB-DEC(SECRET@0x20840, data_record@FEBF497A)
+expected_key = AES-128-ECB-ENC(intermediate, seed@FEBF495A)
+```
+
+Stage 1 (`0x8C7BC`): calls `0x865D4` to expand the 16-byte secret at
+CodeFlash `0x20840` into an AES-128 round-key context at `FEBF498C`, then
+calls `0x853EE` (AES-128-ECB single-block decrypt) on the 16-byte data
+record at `FEBF497A`, producing the intermediate key. `0x869D2` clears the
+context.
+
+Stage 2 (`0x8C7F6`): calls `0x865D4` to expand the intermediate key into a
+new context, then calls `0x852B0` (AES-128-ECB single-block encrypt) on the
+seed at `FEBF495A`, producing the 16-byte expected key. `0x869D2` clears the
+context.
+
+`0x853EE` and `0x852B0` are standard AES-128 single-block operations. The
+implementation uses T-table lookup (4 × 1 KiB encrypt tables at `0x23628`,
+4 × 1 KiB decrypt tables at `0x24628`, forward S-box at `0x8FF1`, inverse
+S-box at `0x25628`, Rcon at `0x23615`). All tables match the NIST FIPS-197
+specification — the T-tables are byte-swapped for little-endian storage, but
+the S-boxes and Rcon are identical. No ICU-S hardware crypto is involved in
+key derivation; the ICU-S is used only for seed generation at `0x8C65A`.
+
+The `data_record` at `FEBF497A` is filled by the seed worker `0x8C734` from
+the Dcm request descriptor at `DAT_febe5dac`. Its exact contents for a bare
+`27 03` request are not fully resolved from static analysis alone (the Dcm
+descriptor layout is implementation-specific). It is deterministic per
+calibration — not seed-dependent or session-dependent. One valid
+seed→key pair from any Denso RH850 EPS in this family resolves it empirically.
 
 The 16-byte result is compared byte-by-byte against the tester-supplied key.
 
