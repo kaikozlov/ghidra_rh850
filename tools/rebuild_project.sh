@@ -217,6 +217,7 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -postScript AnnotateArchitecture.java \
   -postScript AnnotateApplicationTransmit.java \
   -postScript AnnotateApplicationReceive.java \
+  -postScript AnnotateLargeFunctions.java \
   -postScript ApplyCallingConventions.java \
   -commit "Complete reproducible RH850 analysis"
 
