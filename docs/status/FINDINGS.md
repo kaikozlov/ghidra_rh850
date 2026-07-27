@@ -51,7 +51,7 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 
 ## Core architecture
 
-| ID | Claim | Scope | Grade | Verified by | Canonical report |
+| ID | Claim | Scope | Grade | Checked by | Canonical report |
 |---|---|---|---|---|---|
 | ARCH-001 | Reset handler `0x1F2` sets `gp = 0xFEBF9800` | Sienna | verified | `verify_findings.py` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
 | ARCH-002 | Application vector/executable base `0x20000`; entry `0xFFDB8 → 0x20880`; `EBASE=0x20000`, `INTBP=0x20200`; foreground loop `0x64FCC` | Sienna | verified | `verify_architecture.py` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
@@ -62,7 +62,7 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 
 ## Bootloader security
 
-| ID | Claim | Scope | Grade | Verified by | Canonical report |
+| ID | Claim | Scope | Grade | Checked by | Canonical report |
 |---|---|---|---|---|---|
 | SEC-BOOT-001 | `PAYLOAD_BUILD_SECRET` at CodeFlash `0xBFD8` (file `0x13FD8`), xref `0x7070` | Sienna | verified | `verify_findings.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
 | SEC-BOOT-002 | `SEED_KEY_SECRET` at CodeFlash `0xBFE8` (file `0x13FE8`), xref `0x6FF8` | Sienna | verified | `verify_findings.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
@@ -73,7 +73,7 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 
 ## Application security
 
-| ID | Claim | Scope | Grade | Verified by | Canonical report |
+| ID | Claim | Scope | Grade | Checked by | Canonical report |
 |---|---|---|---|---|---|
 | SEC-APP-001 | Application SA level 2 (`03/04`) uses 16-byte secret at CodeFlash `0x20840` | Sienna | verified | `verify_application_diagnostics.py` | [../security/application-security-access.md](../security/application-security-access.md) |
 | SEC-APP-002 | Application SA level 1 (`01/02`) is a compiled stub (`return 1`); only level 2 is functional | Sienna | verified | `verify_application_diagnostics.py` | [../security/application-security-access.md](../security/application-security-access.md) |
@@ -82,7 +82,7 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 
 ## Diagnostics
 
-| ID | Claim | Scope | Grade | Verified by | Canonical report |
+| ID | Claim | Scope | Grade | Checked by | Canonical report |
 |---|---|---|---|---|---|
 | DIAG-BOOT-001 | Bootloader DID table `0x8F14` has exactly 4 descriptors; `F181` sole readable, returns `02 ‖ 32*0x21` placeholder; `0201/0202/0203` only writable, strict order `0203→0201→0202` | Sienna | verified | `verify_did_model.py` | [../diagnostics/bootloader-dids.md](../diagnostics/bootloader-dids.md) |
 | DIAG-BOOT-002 | Bootloader SIDs `10/11/28/3E/85` and routines `10F1–10F3` fully characterized; functional ID is `0x777`, not generic OBD `0x7DF` | Sienna | verified | `verify_bootloader_diagnostics.py` | [../diagnostics/bootloader.md](../diagnostics/bootloader.md) |
@@ -95,7 +95,7 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 
 ## SecOC
 
-| ID | Claim | Scope | Grade | Verified by | Canonical report |
+| ID | Claim | Scope | Grade | Checked by | Canonical report |
 |---|---|---|---|---|---|
 | SECOC-001 | Six records bind `0x0F/0x2E4/0x131/0x132/0x90/0xD7` to exact RX PDU routes; `0x344` has no receive filter or SecOC record | Sienna | verified | `verify_secoc_application.py` | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
 | SECOC-002 | Classic frames authenticate `DataID_be16 ‖ payload4 ‖ freshness48`; trailer = 4 freshness bits + first 28 CMAC bits; CMAC verify uses CryptoIf handle 0, ICU-S slot 4 | Sienna | verified | `verify_secoc_application.py` | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
@@ -105,7 +105,7 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 
 ## Storage
 
-| ID | Claim | Scope | Grade | Verified by | Canonical report |
+| ID | Claim | Scope | Grade | Checked by | Canonical report |
 |---|---|---|---|---|---|
 | STORE-001 | 122 physical records occupy pages 256–479; owner table `0x2B1B0` maps blocks 2–49 (triplicate bank) and 50–123 (74-record checkpoint ring, 24 enabled / 8 disabled slots) | Sienna | verified | `verify_dataflash_layout.py` | [../storage/dataflash.md](../storage/dataflash.md) |
 | STORE-002 | Pages 432–479 are the full 16-object SecOC triplicate bank | Sienna | verified | `verify_dataflash_layout.py` | [../storage/dataflash.md](../storage/dataflash.md) |
@@ -115,7 +115,7 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 
 ## Communications
 
-| ID | Claim | Scope | Grade | Verified by | Canonical report |
+| ID | Claim | Scope | Grade | Checked by | Canonical report |
 |---|---|---|---|---|---|
 | COM-001 | CAN1 acceptance table `0x231A0`: 47 normal Rx I-PDUs + `0x7A1/0x777/0x7A0/0x7F7`; `0x2E4/0x0F/0x131` explicit RX routes; `0x344` absent | Sienna | verified | `verify_architecture.py`, `verify_application_receive.py` | [../communications/application-rx.md](../communications/application-rx.md) |
 | COM-002 | 47 normal Rx I-PDUs, 242 COM signals (58..299); six SecOC envelopes stay inside the 47; 145 signals recovered, 97 configured-unresolved | Sienna | verified | `verify_application_receive.py` | [../communications/application-rx.md](../communications/application-rx.md) |
@@ -123,7 +123,7 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 
 ## Variants
 
-| ID | Claim | Scope | Source | Grade | Verified by | Canonical report |
+| ID | Claim | Scope | Source | Grade | Checked by | Canonical report |
 |---|---|---|---|---|---|---|
 | VAR-001 | Corolla field probes directly observe: software IDs `8965F1208000`/`8A3111213000`, CAN-FD bus, physical `0x7A1→0x7A9`, `F181/F186/F18C`, 13 answering SIDs, level-`0x03` seed behavior, SecOC sync `0x0F`, secured IDs `0x2E4/0x131/0x344` | Corolla | dynamic-probe | observed | `verify_tss3_variant_matrix.py` | [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) |
 | VAR-002 | Corolla MCU, SA algorithm template, application secret, bootloader payload gate, bootloader secrets, and complete SecOC implementation are hypotheses to check against firmware, not confirmed facts | Corolla | — | hypothesis | — | [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) |

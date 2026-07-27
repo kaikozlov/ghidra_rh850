@@ -8,7 +8,9 @@ CodeFlash VAs unless marked RAM or DataFlash.
 
 | Item | Address | Canonical report |
 |---|---|---|
-| Reset handler | `0x1F2` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
+| Reset vector | `0x00000000` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
+| `boot_reset_startup` | `0x1B0` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
+| Boot GP initialization (`gp = 0xFEBF9800`) | `0x1F2` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
 | `boot_application_handoff` | `0x13B0` | [../architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md) |
 | `boot_validity_check` | `0x119E` | [../architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md) |
 | Application entry pointer | `0xFFDB8 → 0x20880` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
@@ -90,7 +92,8 @@ CodeFlash VAs unless marked RAM or DataFlash.
 | `0x7A1` / `0x7A9` | Primary physical diagnostic request/response | [../diagnostics/application.md](../diagnostics/application.md) |
 | `0x777` | Functional diagnostic | [../diagnostics/application.md](../diagnostics/application.md) |
 | `0x7A0` / `0x7A8` | Limited secondary physical | [../diagnostics/application.md](../diagnostics/application.md) |
-| `0x7F7` | Diagnostic response address | [../communications/application-rx.md](../communications/application-rx.md) |
+| `0x7F7` | Special application receive rule (`application_can_special_rx_demux`) | [../communications/application-rx.md](../communications/application-rx.md) |
+| `0x7F8` | Special generated transmit route (active; class 5) | [../communications/application-tx.md](../communications/application-tx.md) |
 | `0x0F` / `0x2E4` / `0x131` / `0x132` / `0x90` / `0xD7` | SecOC-bound RX PDUs | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
 | `0x260` / `0x262` / `0x351` / `0x394` / `0x4A3` / `0x4C8` | Application TX COM I-PDUs | [../communications/application-tx.md](../communications/application-tx.md) |
 | `0x344` | **Absent** from this image — do not project | [../communications/application-rx.md](../communications/application-rx.md) |
