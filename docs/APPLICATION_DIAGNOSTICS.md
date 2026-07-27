@@ -355,7 +355,9 @@ and the data record is tester-chosen. The complete attack protocol:
 4. send: 27 04 <16-byte key>
 ```
 
-For a bare `27 03` as the first UDS request after reset,
+For a bare `27 03` (no padding), the 16 bytes depend on PDU buffer state
+and are not statically provable. The recommended protocol is to always
+send `27 03` followed by 16 zero bytes to ensure a deterministic
 `data_record = 0x00 * 16`.
 
 The 16-byte result is compared byte-by-byte against the tester-supplied key.

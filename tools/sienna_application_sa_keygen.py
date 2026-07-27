@@ -4,13 +4,15 @@ Standalone key generator for the Sienna EPS application SecurityAccess (27 03/04
 
 Algorithm (recovered from static analysis of 8965B4512000, RH850/P1M-E):
 
-    K_inter = AES-128-ECB-DEC(APPLICATION_SA_SECRET, data_record)
+    K_inter = AES-128-ECB-DEC(APPLICATION_LEVEL2_SA_SECRET, data_record)
     key     = AES-128-ECB-ENC(K_inter, seed)
 
 The secret is at CodeFlash 0x20840. The data_record is tester-controlled:
 it is the 16 bytes at PDU_buffer[2:18] during the 27 03 seed request.
-Send "27 03" + 16 bytes of chosen data to set a known data_record.
-For a bare "27 03" as the first request after reset, data_record = zeros.
+The Dcm performs no request-length check on the seed path, so the caller
+MUST send "27 03" + 16 bytes of chosen data to set a known data_record.
+The default (zeros) assumes the caller sends 27 03 followed by 16 zero
+bytes — do not rely on bare "27 03" producing zeros from buffer state.
 
 Usage:
     python3 sienna_application_sa_keygen.py <seed_hex> [data_record_hex]
@@ -19,10 +21,10 @@ Usage:
     data_record_hex 16-byte data record (hex, default = all zeros)
 
 Examples:
-    # Bare 27 03 (first request after reset, data_record = zeros):
+    # Default (caller sent: 27 03 00*16):
     python3 sienna_application_sa_keygen.py 00112233445566778899aabbccddeeff
 
-    # Chosen data record (attacker-controlled):
+    # Chosen data record (caller sent: 27 03 deadbeef0000...0000):
     python3 sienna_application_sa_keygen.py 00112233445566778899aabbccddeeff deadbeef000000000000000000000000
 
 Requirements:
