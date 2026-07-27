@@ -100,6 +100,11 @@ the reconstructed combined firmware — trust them:
   at `0x7070` in `payload_build_derive_key`.
 - `SEED_KEY_SECRET`: CodeFlash VA **`0xBFE8`** (file `0x13FE8`), referenced at
   `0x6FF8` in `security_access_derive_stage1_key`.
+- `APPLICATION_LEVEL2_SA_SECRET`: CodeFlash VA **`0x20840`**, the 16-byte
+  application-level SecurityAccess key (`89 3e 08 41 8c 74 1f fa 2a 9c 04 4b
+  ff a5 58 13`). Used by `0x8C7BC` in the level-2 key-verification pipeline.
+  This is the third recovered family secret alongside `PAYLOAD_BUILD_SECRET`
+  and `SEED_KEY_SECRET`.
 - UDS service table @ `0x8E54` (20 entries, `SID:u8 mask:u8 rsv:u16 handler:u32`);
   SID `0x27` → handler `0x5516`.
 - AES-128 S-box @ `0x8FF1`, Rcon @ `0x8FE1` (note the `+1`).

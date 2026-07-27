@@ -36,7 +36,7 @@ except ImportError:
     sys.stderr.write("pycryptodome required: pip install pycryptodome\n")
     sys.exit(1)
 
-APPLICATION_SA_SECRET = bytes.fromhex(
+APPLICATION_LEVEL2_SA_SECRET = bytes.fromhex(
     "893e08418c741ffa2a9c044bffa55813"
 )
 
@@ -49,7 +49,7 @@ def derive_application_sa_key(seed: bytes, data_record: bytes = ZERO_RECORD) -> 
     if len(data_record) != 16:
         raise ValueError(f"data_record must be exactly 16 bytes, got {len(data_record)}")
 
-    intermediate = AES.new(APPLICATION_SA_SECRET, AES.MODE_ECB).decrypt(data_record)
+    intermediate = AES.new(APPLICATION_LEVEL2_SA_SECRET, AES.MODE_ECB).decrypt(data_record)
     return AES.new(intermediate, AES.MODE_ECB).encrypt(seed)
 
 
@@ -63,7 +63,7 @@ def main():
 
     key = derive_application_sa_key(seed, data_record)
 
-    print(f"secret:       {APPLICATION_SA_SECRET.hex()}")
+    print(f"secret:       {APPLICATION_LEVEL2_SA_SECRET.hex()}")
     print(f"data_record:  {data_record.hex()}")
     print(f"seed:         {seed.hex()}")
     print(f"key:          {key.hex()}")
