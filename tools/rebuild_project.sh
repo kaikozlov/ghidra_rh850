@@ -160,6 +160,9 @@ echo "Processor manifest: $PROCESSOR_MANIFEST"
 # seeds are injected before its first pass; these four durable analysis commits
 # reproduce the checked-in project's exact function/instruction/symbol counts.
 # A separate -noanalysis convention finalizer follows (not a fifth analysis stage).
+# Note: the default analyzers (incl. Address Tables, Non-Returning Functions) are
+# left enabled deliberately. See docs/PLUGIN_AUDIT.md "Why auto-analysis options
+# are left on defaults" for the measured rationale.
 echo "[1/4] Import mapped images without analysis"
 run_headless "import" "$PROJECT_DIR" "$PROJECT_NAME" \
   -import "$CODEFLASH" \

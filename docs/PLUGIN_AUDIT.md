@@ -283,3 +283,30 @@ this doc may lag; prefer the generated ledger/summary for the live boundary.
   floors.
 - A provisioned SecOC key or live ICU-S behavior cannot be proven from this
   dump alone; see the firmware evidence docs for dynamic caveats.
+
+## Why auto-analysis options are left on defaults
+
+The rebuild (`tools/rebuild_project.sh`) runs Ghidra's default analyzers and does
+not disable "Address Tables" or "Non-Returning Functions" (a recommendation
+sometimes given for raw automotive images). This is deliberate for this image:
+
+- **Address Tables:** the over-eager-disassembly symptom it warns about *is*
+  present — 232 decoded `switch` opcodes are unreachable data misread as code
+  (see "Switch jump-table recovery" above). However most of those come from the
+  general disassembly pass following word-aligned operands into data, not from
+  this one analyzer, so disabling it alone would not remove them. The real
+  defense here is seeding all known functions before the first analysis pass
+  (`SeedEntries`, `SeedUdsServiceTable`, …, run as preScripts), which gives the
+  code finder real anchors. The residual noise is then filtered soundly and
+  completely by `RecoverSwitchTables` / `AssertSwitchTables` (20 real tables,
+  zero false positives). The final annotated project is clean.
+- **Non-Returning Functions:** no false positives have been observed in this
+  image — no truncated control flow or unreachable code after a call is flagged
+  by the invariant audits. Disabling it would instead add cost: the genuine
+  noreturn functions (boot failure loop `0x1398`, foreground cyclic loop,
+  bootloader reset path) would have to be marked `setNoReturn` by hand to keep
+  their call sites' decompilation clean.
+
+Net: leaving the defaults is a net win here. Revisit only if a future rebuild
+surfaces no-return false positives (truncated control flow) or a large new crop
+of data-as-code switches that the prefix-bound recovery cannot audit out.
