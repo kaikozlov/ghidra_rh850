@@ -31,12 +31,23 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 - **Live slot-4 behavior.** Static CodeFlash proves slot-4 verification but
   cannot determine the donor's protected key state because the `FF*16` KAT is
-  compiled out. The recovered command-5 generation family still requires a
-  dynamic slot-4 permission and generate/verify round-trip test. Dealer rekey
-  and ICU-S reservation contents in pages 480–511 also remain unknown. The
-  experiment is
+  compiled out. Command 5 accepts software selectors `0..14`, including 4, but
+  the protected slot's generation permission still requires a dynamic
+  generate/verify round trip. Dealer rekey and ICU-S reservation contents in
+  pages 480–511 also remain unknown. The experiment is
   specified in
-  [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md).
+  [../security/secoc/application-chain.md](../security/secoc/application-chain.md).
+- **Application-resident signing proxy.** The initialized command-5 wrapper is
+  structurally usable and arbitrates the shared ICU driver, but there is no
+  configured application upload/execution foothold, no stock output transport,
+  and no production SecOC transmit path. A dynamic prototype must establish
+  application-context execution, slot-4 permission, output transport,
+  sender-side freshness, latency, and command-7 contention.
+- **Dormant crypto-test activation.** CAN `0x01B..0x01F` provide the test
+  selector/message/expected result only after bank activator `0x69018` runs.
+  No caller or function-pointer entry reaches that activator in the recovered
+  graph; whether an unrecovered lifecycle or external debug path can arm it is
+  unknown.
 - **Object-15 producer.** No static producer exists in this calibration.
   Where a provisioned unit writes object 15 from is unknown (dealer tool path
   hypothesis only).
@@ -52,6 +63,6 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Tooling
 
-- **Semantic coverage.** 5,852 functions recovered; most remain evidence-grade
+- **Semantic coverage.** 5,858 functions recovered; most remain evidence-grade
   `recovered` rather than behaviorally understood. Closing this is a
   long-tail effort, not a single task.

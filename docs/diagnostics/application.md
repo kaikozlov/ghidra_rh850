@@ -508,6 +508,13 @@ indirection is resolved: **these services are configured but inert** in this
 calibration. They receive a simple positive response (SID`|0x40` + request echo)
 without any service-specific processing.
 
+In particular, application `0x34/0x36/0x37` do not establish a download,
+transfer, or execution context. They cannot directly host the application-mode
+ICU-S command-5 experiment described in
+[the SecOC application chain](../security/secoc/application-chain.md); the
+public callback payload executes later in the bootloader with different runtime
+state.
+
 #### DSP dispatch architecture
 
 The application Dcm has a two-stage dispatch after the service gate:

@@ -32,8 +32,22 @@ public class AnnotateSecocApplication extends GhidraScript {
         rename(0x682A6L,"secoc_icus_slot4_kat_disabled_async",
             "Compiled-out asynchronous ICU-S slot-4 CMAC KAT. It uses the same fixed 0x30EF3==0x5A gate as the synchronous twin; command 7 is not submitted in this calibration.");
 
+        rename(0x6875EL,"crypto_test_bank1_can_input_collect",
+            "Collect stable application COM inputs for crypto-test bank 1. CAN 0x01B supplies selector/mode; 0x01C/0x01D supply 16 input bytes; 0x01E/0x01F supply 16 expected-result bytes. Three identical updates are required before committing the bank.");
         rename(0x68B42L,"icus_crypto_test_submit",
             "Generated application crypto-test harness. Mode 1 submits ICU-S command 5 with a runtime key selector from FEBE5098, 16 input bytes at FEBE517A, and a 16-byte output buffer at FEBE51AA.");
+        rename(0x68BC2L,"crypto_test_bank1_state_step",
+            "Advance dormant crypto-test bank 1. State 0x11 collects stable COM inputs; state 0x22 submits the configured crypto operation. Execution requires activation byte FEBE508F==1.");
+        rename(0x68D0EL,"crypto_test_bank1_finalize",
+            "Finalize crypto-test bank 1: result 0x33 disables the bank cleanly; result 0x44 latches failure at FEBE5097. No generated MAC bytes are transmitted.");
+        rename(0x68F0CL,"crypto_test_bank0_update_counter_snapshot",
+            "Snapshot the eight COM update counters used by crypto-test bank 0.");
+        rename(0x68F92L,"crypto_test_bank0_activate",
+            "Dormant activator for crypto-test bank 0. It initializes state and update-counter snapshots but has no recovered caller or CodeFlash function-pointer entry.");
+        rename(0x68FC2L,"crypto_test_bank1_update_counter_snapshot",
+            "Snapshot the five COM update counters for CAN 0x01B..0x01F before crypto-test bank 1 begins.");
+        rename(0x69018L,"crypto_test_bank1_activate",
+            "Dormant activator for crypto-test bank 1. It sets FEBE508F=1, initializes state 0x11, clears bank RAM, and snapshots CAN 0x01B..0x01F update counters. No recovered caller or CodeFlash function-pointer entry reaches it.");
         rename(0x69068L,"icus_command5_test_result_compare",
             "Compare all 16 command-5 output bytes at FEBE51AA with the expected bytes at FEBE518A; return 0x33 on equality and 0x44 on mismatch.");
         rename(0x69246L,"icus_command7_test_completion",
@@ -85,6 +99,8 @@ public class AnnotateSecocApplication extends GhidraScript {
             "On successful command-5 completion, clamp *output_length to 16 and copy the generated 16-byte ICU result into the caller-provided output buffer.");
         rename(0x87BBAL,"icus_command5_mac_generate_finish",
             "Finish command-5 processing and publish completion through the selected lower-driver callback.");
+        rename(0x87C14L,"icus_command5_interrupt_completion",
+            "ICU-S command-5 interrupt callback. Poll hardware completion, translate status, release the shared lower-driver state, and publish the generated result through 0x87BBA.");
         rename(0x87C70L,"icus_command5_mac_generate_start",
             "Start the prepared ICU-S command-5 request through hardware engine 0x89630.");
         rename(0x87CCCL,"icus_command5_mac_generate_adapter",
@@ -106,6 +122,8 @@ public class AnnotateSecocApplication extends GhidraScript {
             "Lower crypto adapter for ICU-S CMAC verify. It accepts CPU message/tag buffers but not plaintext key bytes.");
         rename(0x88080L,"icus_cmac_verify_start",
             "Start ICU-S command 7 using the prepared request descriptor.");
+        rename(0x88028L,"icus_command7_interrupt_completion",
+            "ICU-S command-7 interrupt callback paired with command-5 callback 0x87C14; poll completion and publish verification status.");
         rename(0x881DCL,"icus_cmac_verify_completion",
             "Command-7 asynchronous completion worker paired with command-5 worker 0x87DD0.");
         rename(0x897F4L,"icus_command7_cmac_verify",
@@ -146,6 +164,24 @@ public class AnnotateSecocApplication extends GhidraScript {
             "Command-5 lower-driver record 0: synchronous completion callback 0x88B5C, adapter 0x87CCC, worker 0x87DD0.");
         label(0x27F98L,"crypto_generate_driver_record_1",
             "Command-5 lower-driver record 1: application-test callback 0x6926A, adapter 0x87CCC, worker 0x87DD0.");
+        label(0x258F8L,"crypto_test_bank1_update_counter_indices",
+            "Five COM update-counter indices 20..24 for the CAN 0x01B..0x01F crypto-test inputs.");
+        label(0x25912L,"crypto_test_bank1_signal_ids",
+            "Signal IDs 95..100: two scalar selector/mode inputs followed by four opaque eight-byte input/expected-result groups.");
+        label(0xFEBE508FL,"crypto_test_bank1_active",
+            "Dormant crypto-test bank-1 activation state. Only activator 0x69018 writes value 1; no recovered caller reaches that activator.");
+        label(0xFEBE5090L,"crypto_test_bank1_state",
+            "Crypto-test bank-1 state/result byte: collect 0x11, submit 0x22, success 0x33, failure 0x44.");
+        label(0xFEBE5098L,"crypto_test_runtime_key_selector",
+            "Runtime ICU-S key selector committed from the stable CAN 0x01B input.");
+        label(0xFEBE5099L,"crypto_test_runtime_mode",
+            "Runtime crypto-test mode committed from CAN 0x01B; mode 1 selects the command-5 generation dispatcher.");
+        label(0xFEBE517AL,"crypto_test_message",
+            "Sixteen-byte chosen-message input assembled from CAN 0x01C and 0x01D.");
+        label(0xFEBE518AL,"crypto_test_expected_result",
+            "Sixteen-byte expected-result input assembled from CAN 0x01E and 0x01F.");
+        label(0xFEBE51AAL,"crypto_test_generated_result",
+            "Sixteen-byte command-5 output. The stock harness compares it locally and never transmits these bytes.");
         label(0x27FBCL,"crypto_driver_record_0",
             "Lower crypto driver record 0, used by all six SecOC receive profiles; callback 0x880DC.");
         label(0x27FDCL,"crypto_driver_record_1",

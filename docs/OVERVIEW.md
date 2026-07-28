@@ -58,8 +58,10 @@ Three independent domains — do not conflate them:
   [security/application-security-access.md](security/application-security-access.md).
 - **SecOC** — runtime CAN authentication on six RX PDUs through ICU-S slot 4.
   The apparent `FF*16` KAT is compiled out and does not reveal the live key;
-  a paired command-5 MAC-generation family is present but slot-4 permission
-  remains unobserved. See
+  a paired command-5 MAC-generation primitive accepts selector 4 in software,
+  but its only configured caller is a dormant CAN-fed test harness rather than
+  a SecOC transmit path. Hardware slot permission and a practical
+  application-resident signing proxy remain dynamic questions. See
   [security/secoc/README.md](security/secoc/README.md).
 
 ## Communications
@@ -78,7 +80,7 @@ See [storage/dataflash.md](storage/dataflash.md).
 ## Execution architecture
 
 Application foreground loop at `0x64FCC` polls TAUJ0 CH3; EIINT table at
-`0x20200`; 5,852 recovered functions, most still evidence-grade `recovered`
+`0x20200`; 5,858 recovered functions, most still evidence-grade `recovered`
 rather than behaviorally understood. See
 [architecture/firmware-architecture.md](architecture/firmware-architecture.md)
 and [tooling/processor-module-audit.md](tooling/processor-module-audit.md).

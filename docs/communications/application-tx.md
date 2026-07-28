@@ -62,6 +62,15 @@ application output staging at 0xFEBE8094..0xFEBE8110
 No COM transmit I-PDU in this image is CAN FD: the lengths are 8, 8, 4, 3, 8,
 and 8 bytes and all six IDs are standard 11-bit identifiers.
 
+None of the 11 active transmit routes is a configured SecOC transmit path. The
+separate ICU-S command-5 MAC-generation dispatcher has exactly one recovered
+caller, a dormant receive-fed crypto-test harness, and its 16-byte result is
+compared locally rather than passed to the PDU router. Using the EPS as a
+signing proxy would therefore require new application-resident code, an output
+or in-EPS transmit route, and sender-side freshness handling; no existing
+production SecOC Tx stack is available to repurpose. See
+[SecOC application chain](../security/secoc/application-chain.md).
+
 ## 2. Generated configuration tables
 
 Application `tp` is `0x23EE4`. The relevant generated tables are:

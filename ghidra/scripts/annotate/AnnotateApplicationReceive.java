@@ -74,8 +74,8 @@ public class AnnotateApplicationReceive extends GhidraScript {
             "Generated unpacker for COM PDU 6 / CAN 0x2E4. Watches FEBE5332 and extracts signals 58..63 via receive_signal.");
         renameFunction(0x68368L, "application_com_opaque_rx_shadow_bank0",
             "Opaque property-4 Rx consumer: copy whole 8-byte PDUs for signals 87..94 into a stack shadow and compare.");
-        renameFunction(0x6875eL, "application_com_opaque_rx_shadow_bank1",
-            "Opaque property-4 Rx consumer: copy whole PDU payloads for signals 95..100 into a stack shadow and compare.");
+        renameFunction(0x6875eL, "crypto_test_bank1_can_input_collect",
+            "Collect stable crypto-test inputs from property-4 signals 95..100: selector/mode on CAN 0x01B, chosen input on 0x01C/0x01D, and expected result on 0x01E/0x01F.");
         renameFunction(0x56fc2L, "application_rx_signal_consumer_56fc2",
             "First recovered non-unpacker reader for many COM Rx destinations around FEBE7F94; structural consumer only.");
 

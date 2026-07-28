@@ -35,7 +35,7 @@ HEADER = [
 ]
 
 # Floor from AssertNoUndefinedInFunctions on the current working project.
-MIN_FUNCTIONS = 5852
+MIN_FUNCTIONS = 5858
 CODEFLASH_END = 0x100000
 APPLICATION_BASE = 0x20000
 LOCAL_RAM_START = 0xFEBE0000

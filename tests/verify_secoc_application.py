@@ -163,6 +163,41 @@ check("only configured command-5 dispatch call is the application crypto-test ha
 check("command-5 harness obtains selector from RAM rather than hard-coding slot 4",
       CF[0x68B82:0x68B92] ==
       bytes.fromhex("03f0070d840f9998204e1000644f6198"))
+check("command-5 engine accepts every software selector from 0 through 14",
+      CF[0x89656:0x8967C] ==
+      bytes.fromhex("0495407eff0001980180c89ad8824f9910990180"
+                    "8882d08600ff13810198989a10996e92ab0d"))
+
+print("\n== dormant CAN-controlled command-5 test harness ==")
+check("normal receive descriptors 14..18 are CAN 0x01B..0x01F",
+      normal_ids[14:19] == [0x01B, 0x01C, 0x01D, 0x01E, 0x01F])
+check("crypto-test bank uses COM update-counter indices 20..24",
+      [u16(0x258F8 + i * 2) for i in range(5)] == [20, 21, 22, 23, 24])
+check("crypto-test bank uses signal IDs 95..100",
+      [u16(0x25912 + i * 2) for i in range(6)] ==
+      [95, 96, 97, 98, 99, 100])
+check("bank-1 activator initializes active/state and snapshots counters",
+      CF[0x69018:0x69042] ==
+      bytes.fromhex("80072100a40f8f98e009ea0d010a440f8f986407"
+                    "7a98200e1100440f9098bfff14efbfff88ff40063f00"))
+check("bank-1 activator has no CodeFlash function-pointer entry",
+      struct.pack("<I", 0x69018) not in CF)
+check("command-5 upper dispatcher has no CodeFlash function-pointer entry",
+      struct.pack("<I", 0x88350) not in CF)
+check("command-5 interrupt callback is a distinct recovered function",
+      CF[0x87C14:0x87C70] ==
+      bytes.fromhex("80072100840f915901064cffea2580fffe216152aa"
+                    "0d1f0a640f995964079559200ec3ff0032d515e051"
+                    "f2150a06eeffc215640795591f0a640f995980ffaa"
+                    "22645785590032bfff92f1200ee1ff0132440f9059"
+                    "bfff52ff40063f00"))
+check("command-7 has its paired interrupt callback",
+      CF[0x88028:0x88080] ==
+      bytes.fromhex("840f915901064cffea2580ffee1d6152aa0d1f0a64"
+                    "0f995964079559200ec3ff0032d515e051f2150a06"
+                    "eeffc215640795591f0a640f995980ff9a1e645785"
+                    "590032bfff82ed200ee1ff0132440f9059bfff52ff"
+                    "40063f00"))
 
 print("\n== authenticated-input and freshness packing code ==")
 check("authenticated-input builder stores big-endian Data ID",

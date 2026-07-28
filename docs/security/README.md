@@ -26,5 +26,7 @@ them.
   see [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 - SecOC verifies through ICU-S slot 4, but static CodeFlash does not determine
   the donor's live key state. The former `FF*16` inference was disproved
-  because the KAT is compiled out; see
-  [secoc/key-storage-and-lifecycle.md](secoc/key-storage-and-lifecycle.md).
+  because the KAT is compiled out. A paired generation primitive exists, but
+  its only configured caller is a dormant test harness and there is no
+  production SecOC transmit path; see
+  [secoc/application-chain.md](secoc/application-chain.md).

@@ -188,6 +188,25 @@ Indirect stores through `receive_signal` are proved by unpacker DATA refs to the
 destination. Explicit WRITE co-owners `0x1404` (boot BSS clear) and `0x57bfe`
 (app default-init) are allowlisted; unexpected WRITE/READ owners fail.
 
+### 5.3 Signals 95..100 form a dormant crypto-test input bank
+
+The consumer at `0x6875E` bounds six previously anonymous generated signals:
+
+| CAN ID | Signal IDs | Recovered structural use |
+|---:|---:|---|
+| `0x01B` | 95, 96 | ICU-S runtime key selector and test mode |
+| `0x01C`, `0x01D` | 97, 98 | 16-byte chosen crypto input |
+| `0x01E`, `0x01F` | 99, 100 | 16-byte expected result |
+
+The collector watches PDU update-counter indices `20..24` and requires three
+identical updates before committing the values. These CAN frames do not expose
+a normally reachable signing service: the periodic consumer runs only after
+the dormant activator at `0x69018` sets the bank active, and no caller or
+CodeFlash function-pointer entry to that activator has been recovered. The
+command-5 result is compared locally with the expected input and is not sent
+back on CAN. The complete ICU interpretation and evidence bounds live in
+[SecOC application chain](../security/secoc/application-chain.md).
+
 ## 6. Timeout / validity RAM
 
 | Root | Role |

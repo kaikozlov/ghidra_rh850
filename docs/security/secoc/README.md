@@ -21,6 +21,9 @@ key-set/MAC or an ICU command path. The correction is fully documented in
 All three object-15 copies are invalid in this exact snapshot, while the live
 SecOC receive path selects protected ICU-S slot 4 without reading object 15.
 The embedded `FF*16` KAT is compiled out and says nothing about the live slot.
-Command 5 is substantially recovered as MAC generation, but slot-4 permission
-requires dynamic testing — see
+Command 5 is substantially recovered as MAC generation and accepts selector 4
+in software. Its sole configured caller is a dormant CAN-fed crypto-test bank;
+the stock bank compares the result locally, has no recovered activation edge,
+and is not a production SecOC transmit path. Slot-4 hardware permission and a
+practical application-resident signing proxy require dynamic testing — see
 [application-chain.md](application-chain.md).
