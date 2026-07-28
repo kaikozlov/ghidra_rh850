@@ -10,6 +10,7 @@ VERIFY_SUITES := \
 	tests/verify_secoc_nvm.py \
 	tests/verify_secoc_application.py \
 	tests/verify_icus_key_update.py \
+	tests/verify_icus_trace_decoder.py \
 	tests/verify_dataflash_layout.py \
 	tests/verify_dataflash_semantics.py \
 	tests/verify_did_model.py \

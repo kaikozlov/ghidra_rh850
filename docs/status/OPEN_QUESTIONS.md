@@ -63,7 +63,7 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Tooling
 
-- **Semantic coverage.** 5,858 functions recovered; most remain evidence-grade
+- **Semantic coverage.** 5,865 functions recovered; most remain evidence-grade
   `recovered` rather than behaviorally understood. Closing this is a
   long-tail effort, not a single task.
 - **RFP/P1M-E serial-protocol transfer.** The pinned Renesas host library
@@ -76,9 +76,11 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
 - **DID `0x1010` production use and slot-4 package.** Static firmware now
   recovers a SHE-compatible command-8 key-update service behind WDBI DID
-  `0x1010`; the package carries target slot/AuthID/counter and the ICU returns
-  M4/M5 proof. Capture a legitimate provisioning/rekey session to determine
-  whether Toyota/Denso actually invokes this DID, whether M1 targets slot 4,
-  and which lifecycle/session preconditions exist beyond the recovered
-  extended-session/no-Dcm-SA policy. RFP's `ValidateICU_S` remains a separate
-  lifecycle-validation operation, not this application request.
+  `0x1010`; selector `01` starts the 64-byte M1–M3 update and selector `03`
+  reads status `01/02/FF` plus M4/M5 on success. Capture a legitimate
+  provisioning/rekey session and process it with
+  `tools/decode_icus_key_update_trace.py` to determine whether Toyota/Denso
+  actually invokes this DID, whether M1 targets slot 4, observed polling
+  cadence/deadlines, and which lifecycle preconditions exist beyond the
+  recovered extended-session/no-Dcm-SA policy. RFP's `ValidateICU_S` remains a
+  separate lifecycle-validation operation, not this application request.

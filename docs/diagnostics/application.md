@@ -263,10 +263,11 @@ Writable DIDs are the separate 19-entry table at `0x26AEC` (`0x1000..0x110D`
 class), binary-searched by `0x9545C`. NRCs include `0x12`, `0x13`, `0x31`, and
 `0x33`.
 
-Entry 9 is enabled DID `0x1010`. Its fixed 64-byte request reaches ICU-S command
-8 and returns a 48-byte SHE-compatible key-update proof; its per-DID policy is
-extended session `0x03` with no Dcm SecurityAccess level. The key-lifecycle
-interpretation and package boundary are canonical in
+Entry 9 is enabled DID `0x1010`. OEM selector `0x01` submits a fixed 64-byte
+request to ICU-S command 8; selector `0x03` reads a one-byte state plus the
+48-byte SHE-compatible proof on success. Its per-DID policy is extended session
+`0x03` with no Dcm SecurityAccess level. The exact wire contract, state values,
+and key-lifecycle interpretation are canonical in
 [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md).
 
 ### SecurityAccess (`0x27`)

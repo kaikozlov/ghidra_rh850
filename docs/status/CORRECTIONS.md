@@ -114,3 +114,20 @@ the mistakes are not re-made.
 - **Canonical:**
   [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md)
   §"Injection and refresh"; `tests/verify_icus_key_update.py`.
+
+### CORR-011 — DID `0x1010` is one asynchronous WDBI exchange
+
+- **Wrong:** one ordinary `2E 1010 || M1 || M2 || M3` request remains pending
+  and eventually returns M4/M5 through the same transaction.
+- **Right:** this application places an OEM selector before the DID. Selector
+  `0x01` starts the operation with 64 package bytes and initially returns status
+  `0x01`; selector `0x03` is a separate status/result read. Status `0x02`
+  includes M4/M5, status `0xFF` reports failure, and reading either terminal
+  state clears the diagnostic banks.
+- **Wire forms:** `2E 01 10 10 || M1 || M2 || M3` and
+  `2E 03 10 10`, with positive responses beginning `6E 01 10 10` and
+  `6E 03 10 10`.
+- **Canonical:**
+  [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md)
+  §"Exact diagnostic transport contract";
+  `tests/verify_icus_key_update.py`, `tests/verify_icus_trace_decoder.py`.

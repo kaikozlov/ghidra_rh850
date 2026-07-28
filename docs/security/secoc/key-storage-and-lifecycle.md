@@ -320,12 +320,71 @@ the protected update counter. The application never sees the plaintext new key
 or the authorization key.
 
 The diagnostic result bank at `0xFEBE523A` can return all 48 M4/M5 bytes after
-completion. The 64-byte request bank is `0xFEBE51BA`. The production dealer
+completion. The 64-byte request bank is `0xFEBE51BA`. The application exposes
+these through two selector forms of service `0x2E`: selector `0x01` starts the
+operation and selector `0x03` reads its status/result. The production dealer
 backend, package-generation algorithm inputs, AuthID, and current slot-4 counter
 remain unobserved. Consequently DID `0x1010` is the strongest static candidate
 for dealer rekey, not proof that a particular dealer tool invokes it.
 
-### 8.1 What this firmware does with the package
+### 8.1 Exact diagnostic transport contract
+
+This application does not use the ordinary `2E DID data` shape for this
+operation. Its WDBI dispatcher consumes an OEM selector byte before the DID.
+The DID-`0x1010` configuration enables selectors `0x01` and `0x03`:
+
+```text
+start request:
+  2E 01 10 10 || M1[16] || M2[32] || M3[16]       68 UDS bytes
+
+start positive response:
+  6E 01 10 10 || status[1] || result[48]            53 UDS bytes
+
+result request:
+  2E 03 10 10                                         4 UDS bytes
+
+result positive response:
+  6E 03 10 10 || status[1] || result[48]            53 UDS bytes
+
+negative response:
+  7F 2E NRC
+```
+
+The static field descriptors prove one 512-bit selector-1 input field and one
+392-bit output field. Selector 3 has the same 392-bit output shape and no input
+field. The status values recovered from the operation state machine are:
+
+| Status | Meaning | Following 48 bytes |
+|---:|---|---|
+| `0x01` | accepted/pending | zero-filled |
+| `0x02` | complete | M4[32] + M5[16] |
+| `0xFF` | failed | zero-filled |
+
+`0x68E16` returns status `0x01` when it accepts and arms a new operation.
+`0x68EA8` returns the current status, copies proof bytes only for status `0x02`,
+and clears the diagnostic request/result banks after either terminal status
+`0x02` or `0xFF` is read. Starting another package while status remains
+`0x01` returns internal result `8`, which maps to NRC `0x24`
+(`requestSequenceError`); an external inhibit maps to NRC `0x22`
+(`conditionsNotCorrect`).
+
+This is application-level polling, not one long WDBI request that eventually
+returns M4/M5. A trace must retain both selector forms to distinguish acceptance
+from completion.
+
+The passive decoder implements this exact contract and reassembles normal
+ISO-TP on the Sienna diagnostic IDs:
+
+```bash
+uv run --locked python tools/decode_icus_key_update_trace.py capture.log --json
+```
+
+It defaults to request `0x7A1` and response `0x7A9`, accepts compact and
+bracketed `candump` lines, and hashes M1–M5 by default. `--show-package` exposes
+the vehicle-specific package bytes and should be used only with controlled
+artifacts.
+
+### 8.2 What this firmware does with the package
 
 MainPE is a transport, scheduling, and status layer for this operation. It does
 not construct an update package and does not interpret the package fields:
@@ -360,10 +419,12 @@ The success state progression is:
   -> diagnostic status 0x02
 ```
 
-Command failure or timeout reaches internal state `0x66`, which maps to
-diagnostic status `0xFF`. The paired result wrapper returns one status byte plus
-the 48-byte proof only when status is `0x02`; terminal reads then clear the
-diagnostic request/result banks.
+Command failure reaches internal state `0x66`, which maps to diagnostic status
+`0xFF`. The selector-3 result wrapper returns one status byte plus the 48-byte
+proof only when status is `0x02`; terminal reads then clear the diagnostic
+request/result banks. No independent operation deadline has yet been recovered
+from this state machine; live timing and any surrounding Dcm/session timeout
+remain to be measured.
 
 Consequently, this dump answers how the EPS **consumes** an authenticated
 update. An external provisioning system must still supply the already formed
@@ -428,9 +489,9 @@ store the already usable AES key in object 15; this exact dump has no valid copy
 ### How is it refreshed?
 
 For protected ICU-S slots, WDBI DID `0x1010` plus command 8 is the recovered
-refresh candidate. Its M1–M3 package carries authorization and a monotonic
-counter; M4/M5 reports completion. Whether production tooling uses it for slot
-4 requires a dynamic diagnostic trace.
+refresh candidate. Selector `0x01` submits the M1–M3 package; selector `0x03`
+polls the one-byte state and returns M4/M5 on status `0x02`. Whether production
+tooling uses it for slot 4 requires a dynamic diagnostic trace.
 
 Separately, `0x65CD8/0x66E48/0x67608` can update and persist any configured
 redundancy object, including object 15 when addressed through namespace `0x100`.
@@ -458,6 +519,8 @@ that the RAM field held a valid key at capture time.
 | application CMAC path selects ICU-S slot 4, not object-15 RAM | **Definitive** |
 | WDBI DID `0x1010` reaches literal ICU-S command 8 | **Definitive structural behavior** |
 | command-8 request/result widths are 16+32+16 / 32+16 | **Definitive** |
+| DID `0x1010` wire contract is selector-1 start plus selector-3 result read | **Definitive structural behavior** |
+| result status `01/02/FF` means pending/complete/failed; proof is exposed only with `02` | **Definitive** |
 | command 8 is a SHE-compatible authenticated memory/key update | **Recovered** |
 | DID `0x1010` per-DID policy is extended session, no Dcm SA level | **Definitive** |
 | command 8 is statically fixed to slot 4 | **Disproved; target is package-carried** |

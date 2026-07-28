@@ -80,7 +80,7 @@ See [storage/dataflash.md](storage/dataflash.md).
 ## Execution architecture
 
 Application foreground loop at `0x64FCC` polls TAUJ0 CH3; EIINT table at
-`0x20200`; 5,858 recovered functions, most still evidence-grade `recovered`
+`0x20200`; 5,865 recovered functions, most still evidence-grade `recovered`
 rather than behaviorally understood. See
 [architecture/firmware-architecture.md](architecture/firmware-architecture.md)
 and [tooling/processor-module-audit.md](tooling/processor-module-audit.md).

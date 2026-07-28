@@ -98,6 +98,39 @@ check(
     CF[0x96360:0x96368] == bytes.fromhex("203e4000204e3100"),
     CF[0x96360:0x96368].hex(),
 )
+check(
+    "application service table binds SID 0x2E to callback 0x95DCE",
+    CF[0x25EF8] == 0x2E and u32(0x25F00) == 0x95DCE,
+)
+did_config = CF[0x26B8D + 9 * 15 : 0x26B8D + 10 * 15]
+check(
+    "DID 0x1010 enables selector 1 with one input and one output field",
+    did_config[4] == 1 and did_config[6] == 1 and did_config[8] == 1,
+    did_config.hex(),
+)
+check(
+    "DID 0x1010 enables selector 3 with one output field",
+    did_config[1] == 1 and did_config[3] == 1,
+    did_config.hex(),
+)
+check(
+    "selector-1 input descriptor is one 512-bit byte-array field",
+    u32(0x2686C + 9 * 4) == 0x26790
+    and CF[0x26791] == 7
+    and u16(0x26792) == 512,
+)
+check(
+    "selector-1 output descriptor is one 392-bit byte-array field",
+    u32(0x268BC + 9 * 4) == 0x267B4
+    and CF[0x267B5] == 7
+    and u16(0x267B6) == 392,
+)
+check(
+    "selector-3 output descriptor is the same 392-bit status/result shape",
+    u32(0x267CC + 9 * 4) == 0x2670C
+    and CF[0x2670D] == 7
+    and u16(0x2670E) == 392,
+)
 
 print("\n== authenticated key-update envelope ==")
 check(
@@ -160,6 +193,23 @@ check(
     "failure state 0x66 maps to diagnostic status 0xFF",
     CF[0x68C9E:0x68CA6] == bytes.fromhex("13069afffa0d1f92"),
     CF[0x68C9E:0x68CA6].hex(),
+)
+check(
+    "diagnostic start reports status 0x01 before arming state 0x22",
+    bytes.fromhex("010a440f8598") in CF[0x68E40:0x68E5A]
+    and bytes.fromhex("200e2200440f8698") in CF[0x68E40:0x68E5A],
+    CF[0x68E40:0x68E5A].hex(),
+)
+check(
+    "result read returns proof only for status 0x02",
+    CF[0x68EC8:0x68ECE] == bytes.fromhex("629afa05b515"),
+    CF[0x68EC8:0x68ECE].hex(),
+)
+check(
+    "terminal status 0x02 or 0xFF clears the diagnostic bank after read",
+    CF[0x68EF6:0x68F06]
+    == bytes.fromhex("629ac205130601ffca050032bfff12f0"),
+    CF[0x68EF6:0x68F06].hex(),
 )
 check(
     "completion scrubs 64-byte input and 48-byte result staging",

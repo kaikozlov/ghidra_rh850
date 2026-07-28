@@ -438,7 +438,10 @@ extended diagnostic session `0x03` and configures no Dcm SecurityAccess level.
 That does **not** make arbitrary rekeying unauthenticated: ICU-S still validates
 the cryptographic M1–M3 authorization package and monotonic update state. The
 firmware result bank is `0xFEBE523A..0xFEBE5269`; the diagnostic state machine
-can return the 48-byte M4/M5-shaped proof after completion.
+can return the 48-byte M4/M5-shaped proof after completion. The exact wire
+contract is an OEM selector-`01` start request followed by selector-`03`
+status/result reads; it is documented and tested in
+[key-storage-and-lifecycle.md](key-storage-and-lifecycle.md#81-exact-diagnostic-transport-contract).
 
 Command 8 is not statically fixed to slot 4—the target is carried inside M1.
 This establishes a credible in-application mechanism capable of updating slot
@@ -549,16 +552,20 @@ not mislabel a generic NvM API as a dealer key-set command.
 Capture a legitimate dealer/manufacturing rekey without replaying or fabricating
 an update package:
 
-1. Record diagnostic session transitions and any WDBI DID `0x1010` request.
-   A conforming request carries 64 data bytes after the DID.
+1. Record diagnostic session transitions, selector-`01` WDBI DID `0x1010`
+   starts, and selector-`03` result reads. Run the capture through
+   `tools/decode_icus_key_update_trace.py`; it reassembles ISO-TP and redacts
+   package bytes by default.
 2. Correlate entry through `0x96354 → 0x68E16 → 0x6823C → 0x88936 →
    0x870A8 → 0x86E62 → 0x8997A`.
 3. Snapshot the 64-byte request bank at `0xFEBE51BA` and record the literal
    `ICUSCMD=8` submission. Treat its fields as opaque M1/M2/M3 until the exact
    bit layout is independently decoded; do not log or publish live secret
    material unnecessarily.
-4. On completion, capture the state/status and 48-byte M4/M5 proof from
-   `0xFEBE523A`, then observe whether slot-4 verification behavior changes.
+4. Confirm the selector-`01` response reports `0x01`, then poll with selector
+   `0x03`. Capture `0x01` pending transitions and the terminal `0x02` + 48-byte
+   M4/M5 proof (or `0xFF` failure) from `0xFEBE523A`, then observe whether
+   slot-4 verification behavior changes.
 5. Power-cycle and repeat a known command-7 verification to establish that the
    update persisted. Correlate any object-15 write separately rather than
    assuming command 8 mirrors protected storage into CPU-visible NvM.

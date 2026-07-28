@@ -51,9 +51,9 @@ public class AnnotateSecocApplication extends GhidraScript {
         rename(0x69068L,"icus_command5_test_result_compare",
             "Compare all 16 command-5 output bytes at FEBE51AA with the expected bytes at FEBE518A; return 0x33 on equality and 0x44 on mismatch.");
         rename(0x68E16L,"icus_key_update_diagnostic_start",
-            "Accept up to 64 diagnostic input bytes, arm key-update state 0x22, and expose a one-byte asynchronous status. The fixed caller supplies the full 64-byte command-8 envelope.");
+            "Selector-1 diagnostic start: accept the fixed 64-byte command-8 envelope, report status 0x01, clear the 48-byte result bank, and arm key-update state 0x22. A second start while pending returns internal result 8.");
         rename(0x68EA8L,"icus_key_update_diagnostic_read_result",
-            "Return asynchronous key-update state followed by up to 48 result bytes from FEBE523A; clear the 64-byte input and 48-byte result banks after terminal completion.");
+            "Selector-3 diagnostic result read: return status 0x01/0x02/0xFF and 48 bytes from FEBE523A only for 0x02; zero-fill otherwise and clear request/result banks after terminal 0x02 or 0xFF is read.");
         rename(0x6823CL,"icus_key_update_submit",
             "Submit the 64-byte diagnostic key-update envelope through driver record 0 and provide a 48-byte result buffer. Success advances the state from 0x22 to 0x33 while completion is pending.");
         rename(0x6920AL,"icus_key_update_completion_callback",
@@ -169,8 +169,30 @@ public class AnnotateSecocApplication extends GhidraScript {
             "Finalize an ICU-S command-engine request and translate ready/error state for the asynchronous driver.");
         rename(0x88C4CL,"crypto_icus_initialize",
             "Application startup initializer for the generated crypto stack and ICU-S lower driver.");
-        rename(0x96354L,"application_wdbi_1010_icus_key_update",
-            "Write-DID 0x1010 operation callback. On start it fixes the command-8 request to 64 input bytes and 49 returned status/result bytes.");
+        rename(0x8A6C8L,"icus_key_update_operation_reset",
+            "Reset the generated DID-1010 operation wrapper and clear its request/result scratch banks.");
+        rename(0x8A860L,"icus_key_update_result_read_wrapper",
+            "Generated selector-3 wrapper: request 49 status/result bytes from 0x68EA8 and copy them to the Dcm output field.");
+        rename(0x8A93CL,"icus_key_update_result_operation",
+            "Run the selector-3 result-read wrapper and translate generated operation results to the application Dcm return/NRC convention.");
+        rename(0x8AA1EL,"icus_key_update_start_wrapper",
+            "Generated selector-1 wrapper: clamp input/output to 64/49 bytes, invoke 0x68E16, and copy its immediate status/result field to Dcm.");
+        rename(0x8AB5AL,"icus_key_update_start_operation",
+            "Run the selector-1 start wrapper after generated readiness handling and translate its result to Dcm return/NRC convention.");
+        rename(0x955DCL,"application_wdbi_selector_supported",
+            "Validate OEM WDBI selector 1, 2, or 3 against the selected DID's generated configuration.");
+        rename(0x95624L,"application_wdbi_input_length_invalid",
+            "Compute the configured selector/DID input-field width plus the three-byte selector/DID header and reject unequal request length.");
+        rename(0x956C6L,"application_wdbi_output_capacity_invalid",
+            "Compute the configured selector/DID output-field width plus the three-byte selector/DID header and reject insufficient response capacity.");
+        rename(0x95F82L,"application_wdbi_1010_read_result",
+            "Selector-3 DID-1010 callback. Request exactly 49 bytes from the key-update status/result operation; non-start phases reset the generated wrapper.");
+        rename(0x96354L,"application_wdbi_1010_start_key_update",
+            "Selector-1 DID-1010 callback. Submit exactly 64 M1/M2/M3 bytes and return a 49-byte status/result field; non-start phases reset the generated wrapper.");
+        rename(0x965CEL,"application_wdbi_selector3_dispatch",
+            "Dispatch OEM WDBI selector 3 callbacks by write-DID table index; entry 9 routes to the DID-1010 status/result read.");
+        rename(0x96764L,"application_wdbi_selector1_dispatch",
+            "Dispatch OEM WDBI selector 1 callbacks by write-DID table index; entry 9 routes to the DID-1010 authenticated key-update start.");
 
         rename(0x87ED0L,"icus_cmac_verify_prepare",
             "Prepare ICU-S CMAC verification: copy message/tag, retain bit lengths, and read the key-slot selector from config+4.");
@@ -223,7 +245,13 @@ public class AnnotateSecocApplication extends GhidraScript {
         label(0x28024L,"icus_key_update_driver_record",
             "Command-8 record ID 0: completion callback 0x6920A, lower adapter 0x870A8, completion worker 0x871A0, state root 0x28020.");
         label(0x26B34L,"application_wdbi_1010_record",
-            "Enabled application WriteDataByIdentifier record for DID 0x1010. Its policy selects extended session 0x03 and no Dcm SecurityAccess level.");
+            "Enabled application WriteDataByIdentifier record for DID 0x1010. Extended session 0x03, no Dcm SecurityAccess level; selector 1 starts and selector 3 reads status/result.");
+        label(0x2670CL,"application_wdbi_1010_selector3_output",
+            "Selector-3 DID-1010 output descriptor: one 392-bit (49-byte) status/result field.");
+        label(0x26790L,"application_wdbi_1010_selector1_input",
+            "Selector-1 DID-1010 input descriptor: one 512-bit (64-byte) M1/M2/M3 field.");
+        label(0x267B4L,"application_wdbi_1010_selector1_output",
+            "Selector-1 DID-1010 output descriptor: one 392-bit (49-byte) immediate status/result field.");
         label(0xFEBE51BAL,"icus_key_update_m1_m2_m3",
             "Sixty-four-byte diagnostic command-8 input bank, staged as 16+32+16 bytes (SHE-compatible M1/M2/M3 shape).");
         label(0xFEBE523AL,"icus_key_update_m4_m5",

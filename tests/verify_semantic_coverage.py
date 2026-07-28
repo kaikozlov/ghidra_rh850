@@ -116,7 +116,7 @@ LANDMARKS = {
         "name_source": "USER_DEFINED",
     },
     0x00096354: {
-        "name": "application_wdbi_1010_icus_key_update",
+        "name": "application_wdbi_1010_start_key_update",
         "calling_convention": "__stdcall",
         "evidence_grade": "annotated",
         "subsystem": "application",
