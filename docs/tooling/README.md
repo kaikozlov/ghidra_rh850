@@ -5,6 +5,7 @@ The analysis toolchain: processor module, scripts, verification.
 | Report | Scope |
 |---|---|
 | [processor-module-audit.md](processor-module-audit.md) | Audit of the vendored `ghidra_v850` processor module: SLEIGH semantics, semantic coverage ledger, calling-convention model |
+| [renesas-rfp-rv40f.md](renesas-rfp-rv40f.md) | External-source recovery of the Renesas Flash Programmer RV40F serial protocol and its bounded ICU-S configuration interface |
 
 ## Operating manual
 

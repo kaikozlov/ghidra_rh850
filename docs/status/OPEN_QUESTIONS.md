@@ -66,3 +66,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **Semantic coverage.** 5,858 functions recovered; most remain evidence-grade
   `recovered` rather than behaviorally understood. Closing this is a
   long-tail effort, not a single task.
+- **RFP/P1M-E serial-protocol transfer.** The pinned Renesas host library
+  substantially exposes the RV40F protocol, but a live R7F701381 signature and
+  capability query has not yet shown which commands the P1M-E mask ROM accepts.
+  Remaining static work includes the complete RV40F command census,
+  mode-entry/reset sequence, capability-field parser, and exact `SetICUM` field
+  meanings. See
+  [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
+- **Dealer slot-4 provisioning.** RFP exposes ICU-S option, validation, and mode
+  operations but no named key-load API. Determine whether Toyota/Denso uses an
+  otherwise unnamed ROM primitive, a RAM-resident manufacturing payload, a
+  secure key-update package, or a diagnostic provisioning service.

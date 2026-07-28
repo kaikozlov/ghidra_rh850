@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "package": {
+    "name": "Renesas Flash Programmer",
+    "cli_version": "V1.17",
+    "module_version": "V3.24.00.000",
+    "package_version": "V3.24.00",
+    "release_date": "1 July 2026",
+    "platform": "macos-arm64",
+    "default_path": "Renesas/renesas_flash_programmer_macos-arm64"
+  },
+  "artifacts": {
+    "libRFP.dylib": {
+      "size": 3816192,
+      "sha256": "a1f147e30a41fe6e98f2fea672d302664735de972f178f7407600a237f6d3943"
+    },
+    "rfp-cli": {
+      "size": 31093584,
+      "sha256": "3d0fdc2d4d569b8c89dc4241593b7f32e949367355411a69925623f84551058b"
+    },
+    "Devices.xml": {
+      "size": 14748,
+      "sha256": "619fe216dd7bb7c6d9e715c4d675812d6f29179ca1a939d73a4ca3e56273dc11"
+    },
+    "docs/rfp-cli.md": {
+      "size": 48507,
+      "sha256": "8a63f5566703e7db707abaeec37bcbc507e09afe91832d6e9dc513785f87b559"
+    }
+  },
+  "macho": {
+    "cpu_type": 16777228,
+    "functions": {
+      "__ZN12_GLOBAL__N_114ProcessCommandER14AbstractDriverhPKhjPhjb": {
+        "address": 105620,
+        "size": 740,
+        "sha256": "b6274b54c1da223bef812b382c2d6a2510729f49b2da416efeba2311a2d6ea76"
+      },
+      "__ZN12_GLOBAL__N_113SendRecvFrameER14AbstractDriverPKhjPhPj": {
+        "address": 111484,
+        "size": 340,
+        "sha256": "7ab87f28b7a70d4cd80938f0fc5735e02eff8c6afcb950ef29d075b65b546ae1"
+      },
+      "__ZN9BootRV40F15SetOptionByteExER14AbstractDriverPKhbb": {
+        "address": 115044,
+        "size": 888,
+        "sha256": "b5ee6bef17380cdeb75f96e02b45c605d5ef029b0b5563be6b31cbfc3c4926b7"
+      },
+      "__ZN9BootRV40F17SetICUSOptionByteER14AbstractDriverPKh": {
+        "address": 115932,
+        "size": 208,
+        "sha256": "0c4ce7ae1027c66a630a59f88b3db5b6106ad616b87e9481a64d950a09945d9e"
+      },
+      "__ZN9BootRV40F7SetICUMER14AbstractDriverPKh": {
+        "address": 116140,
+        "size": 428,
+        "sha256": "3a448455bc0904b5cd0d858af5ffdc638a3de2671ce0c7f75f53b28abe9aea81"
+      },
+      "__ZN9BootRV40F17GetICUSOptionByteER14AbstractDriverPh": {
+        "address": 117392,
+        "size": 24,
+        "sha256": "5e7da6688f08bf310a8814757bdd7cbf2b3dbd1c6507545e7e2800c77ec0501a"
+      },
+      "__ZN9BootRV40F13ValidateICU_SER14AbstractDriver": {
+        "address": 120296,
+        "size": 160,
+        "sha256": "eef84e6edceab48fa7436d728e22a7b139e3b025b76b73cd47b904360c0b8423"
+      },
+      "__ZN9BootRV40F12CheckICUModeER14AbstractDriverPh": {
+        "address": 120456,
+        "size": 304,
+        "sha256": "dd7fd934afa95eedfb282cd211d7e4a988f4d06d424594d973b8a86d413c7b1e"
+      }
+    }
+  }
+}

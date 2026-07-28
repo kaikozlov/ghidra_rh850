@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+"""Verify the pinned Renesas RFP/RV40F external-source analysis.
+
+The licensed RFP distribution is intentionally not committed.  With no local
+package this suite still validates the committed lock, command model, and wire
+fixtures.  ``--require-package`` additionally verifies the local artifacts,
+Mach-O symbol table, and exact analyzed function bodies.
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import hashlib
+import json
+import struct
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+LOCK_PATH = REPO / "renesas-rfp.lock.json"
+COMMANDS_PATH = REPO / "data" / "renesas_rfp_rv40f_icu_commands.csv"
+
+LC_SEGMENT_64 = 0x19
+LC_SYMTAB = 0x2
+MH_MAGIC_64 = 0xFEEDFACF
+
+passed = failed = 0
+
+
+def check(name: str, condition: object, detail: str = "") -> None:
+    global passed, failed
+    ok = bool(condition)
+    passed += int(ok)
+    failed += int(not ok)
+    suffix = f" ({detail})" if detail else ""
+    print(f"[{'PASS' if ok else 'FAIL'}] {name}{suffix}")
+
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def request_frame(command: int, payload: bytes = b"") -> bytes:
+    """Build the RV40F host request framing recovered from ProcessCommand."""
+
+    body_length = len(payload) + 1
+    length = body_length.to_bytes(2, "big")
+    checksum = (-sum(length + bytes([command]) + payload)) & 0xFF
+    return b"\x01" + length + bytes([command]) + payload + bytes([checksum, 0x03])
+
+
+def parse_macho(data: bytes) -> tuple[int, dict[str, list[int]], list[tuple[int, int, int]]]:
+    """Return CPU type, symbol values, and file-backed segment mappings."""
+
+    if len(data) < 32:
+        raise ValueError("file is too small for a Mach-O 64 header")
+    magic, cpu_type, _, _, ncmds, _, _, _ = struct.unpack_from("<IiiIIIII", data, 0)
+    if magic != MH_MAGIC_64:
+        raise ValueError(f"unexpected Mach-O magic {magic:#x}")
+
+    commands_offset = 32
+    symtab: tuple[int, int, int, int] | None = None
+    segments: list[tuple[int, int, int]] = []
+    for _ in range(ncmds):
+        command, command_size = struct.unpack_from("<II", data, commands_offset)
+        if command_size < 8:
+            raise ValueError("invalid Mach-O load-command size")
+        if command == LC_SEGMENT_64:
+            (
+                _,
+                _,
+                _,
+                vmaddr,
+                _,
+                file_offset,
+                file_size,
+                _,
+                _,
+                _,
+                _,
+            ) = struct.unpack_from("<II16sQQQQiiII", data, commands_offset)
+            segments.append((vmaddr, file_offset, file_size))
+        elif command == LC_SYMTAB:
+            _, _, symbol_offset, symbol_count, string_offset, string_size = struct.unpack_from(
+                "<IIIIII", data, commands_offset
+            )
+            symtab = (symbol_offset, symbol_count, string_offset, string_size)
+        commands_offset += command_size
+
+    if symtab is None:
+        raise ValueError("Mach-O has no LC_SYMTAB")
+    symbol_offset, symbol_count, string_offset, string_size = symtab
+    strings = data[string_offset : string_offset + string_size]
+    symbols: dict[str, list[int]] = {}
+    for index in range(symbol_count):
+        entry = symbol_offset + index * 16
+        string_index, _, _, _, value = struct.unpack_from("<IBBHQ", data, entry)
+        if string_index == 0 or string_index >= len(strings):
+            continue
+        end = strings.find(b"\0", string_index)
+        if end < 0:
+            continue
+        name = strings[string_index:end].decode("utf-8", errors="replace")
+        symbols.setdefault(name, []).append(value)
+    return cpu_type, symbols, segments
+
+
+def address_to_file_offset(address: int, segments: list[tuple[int, int, int]]) -> int:
+    for vmaddr, file_offset, file_size in segments:
+        if vmaddr <= address < vmaddr + file_size:
+            return file_offset + address - vmaddr
+    raise ValueError(f"address {address:#x} has no file-backed segment")
+
+
+def verify_committed_model(lock: dict[str, object]) -> None:
+    print("== committed RFP command model ==")
+    with COMMANDS_PATH.open(newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+
+    commands = {row["command"]: row for row in rows}
+    check("six ICU-related RV40F command rows", len(rows) == 6)
+    check(
+        "command census is 0x6E/0x6F/0x70/0x71/0x74/0x75",
+        set(commands) == {"0x6E", "0x6F", "0x70", "0x71", "0x74", "0x75"},
+    )
+    check("all command rows are recovered", all(row["confidence"] == "recovered" for row in rows))
+    check(
+        "command model makes no key-load claim",
+        all("key payload" not in row["interpretation"].lower() or "not a key payload" in row["interpretation"].lower() for row in rows),
+    )
+
+    print("\n== recovered RV40F wire fixtures ==")
+    check("ValidateICU_S frame", request_frame(0x70).hex() == "010001708f03")
+    check("CheckICUMode FF probe", request_frame(0x71, b"\xff").hex() == "01000271ff8e03")
+    check("CheckICUMode 00 fallback", request_frame(0x71, b"\x00").hex() == "01000271008d03")
+    check(
+        "SetICUSOptionByte fixture",
+        request_frame(0x6E, bytes.fromhex("11223344")).hex() == "0100056e11223344e303",
+    )
+    check(
+        "SetICUM auxiliary fixture",
+        request_frame(0x75, bytes.fromhex("01020304")).hex() == "01000575010203047c03",
+    )
+
+    package = lock["package"]
+    check("lock schema version", lock["schema_version"] == 1)
+    check("pinned RFP package version", package["package_version"] == "V3.24.00")
+    check("pinned package platform", package["platform"] == "macos-arm64")
+
+
+def verify_package(root: Path, lock: dict[str, object]) -> None:
+    print("\n== pinned local RFP artifacts ==")
+    artifacts = lock["artifacts"]
+    for relative, metadata in artifacts.items():
+        path = root / relative
+        check(f"{relative} exists", path.is_file(), str(path))
+        if not path.is_file():
+            continue
+        data = path.read_bytes()
+        check(f"{relative} size", len(data) == metadata["size"], str(len(data)))
+        digest = sha256_bytes(data)
+        check(f"{relative} SHA-256", digest == metadata["sha256"], digest)
+
+    library_path = root / "libRFP.dylib"
+    devices_path = root / "Devices.xml"
+    if not library_path.is_file() or not devices_path.is_file():
+        return
+
+    print("\n== Mach-O symbols and analyzed function bodies ==")
+    library = library_path.read_bytes()
+    try:
+        cpu_type, symbols, segments = parse_macho(library)
+    except (ValueError, struct.error) as error:
+        check("parse libRFP Mach-O", False, str(error))
+        return
+    check("libRFP CPU type is pinned arm64", cpu_type == lock["macho"]["cpu_type"], hex(cpu_type))
+
+    functions = lock["macho"]["functions"]
+    for symbol, metadata in functions.items():
+        addresses = symbols.get(symbol, [])
+        check(f"{symbol} symbol exists", bool(addresses))
+        if not addresses:
+            continue
+        address = metadata["address"]
+        check(
+            f"{symbol} address",
+            address in addresses,
+            ", ".join(hex(candidate) for candidate in addresses),
+        )
+        if address not in addresses:
+            continue
+        try:
+            offset = address_to_file_offset(address, segments)
+        except ValueError as error:
+            check(f"{symbol} file mapping", False, str(error))
+            continue
+        body = library[offset : offset + metadata["size"]]
+        check(
+            f"{symbol} body SHA-256",
+            sha256_bytes(body) == metadata["sha256"],
+            sha256_bytes(body),
+        )
+
+    rv40f_symbols = [name for name in symbols if "BootRV40F" in name]
+    gen2_symbols = [name for name in symbols if "BootRH850Gen2" in name]
+    check("substantial BootRV40F API retained", len(rv40f_symbols) >= 40, str(len(rv40f_symbols)))
+    check("separate BootRH850Gen2 API retained", len(gen2_symbols) >= 10, str(len(gen2_symbols)))
+    forbidden_names = ("setkey", "loadkey", "keyupdate", "provisionkey")
+    check(
+        "no named BootRV40F key-loading API",
+        not any(token in name.lower() for name in rv40f_symbols for token in forbidden_names),
+    )
+
+    print("\n== device-family routing metadata ==")
+    devices = devices_path.read_text(encoding="utf-8-sig")
+    check("generic RH850 device entry", "<Name>RH850</Name>" in devices)
+    check("generic RH850 uses default mode entry", "<Entry>MODEENTRY_DEFAULT</Entry>" in devices)
+    check("RH850/E2x entry is separate", "<DisplayName>RH850/E2x</DisplayName>" in devices)
+    check("RH850/U2x entry is separate", "<DisplayName>RH850/U2x</DisplayName>" in devices)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--package-dir", type=Path)
+    parser.add_argument("--require-package", action="store_true")
+    args = parser.parse_args()
+
+    lock = json.loads(LOCK_PATH.read_text(encoding="utf-8"))
+    verify_committed_model(lock)
+
+    default_root = REPO / lock["package"]["default_path"]
+    root = (args.package_dir or default_root).expanduser().resolve()
+    if root.is_dir():
+        verify_package(root, lock)
+    elif args.require_package:
+        check("local RFP package exists", False, str(root))
+    else:
+        print(f"\n[SKIP] licensed local RFP package not present: {root}")
+        print("       Run `make verify-rfp` to require the pinned package checks.")
+
+    print(f"\n== RESULT: {passed} passed, {failed} failed ==")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

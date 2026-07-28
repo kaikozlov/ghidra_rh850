@@ -27,9 +27,10 @@ VERIFY_SUITES := \
 	tests/verify_tss3_variant_matrix.py \
 	tests/verify_security_consumers.py \
 	tests/verify_ab_rid_callbacks.py \
+	tests/verify_renesas_rfp.py \
 	tests/verify_doc_links.py
 
-.PHONY: sync verify verify-core verify-external verify-sleigh verify-processor verify-ghidra \
+.PHONY: sync verify verify-core verify-external verify-rfp verify-sleigh verify-processor verify-ghidra \
 	generate-dataflash generate-application-diagnostics \
 	generate-application-receive-evidence generate-application-receive \
 	generate-processor-fixture generate-semantic-coverage \
@@ -49,6 +50,9 @@ verify-core:
 
 verify-external:
 	$(PYTHON) tests/verify_external_corroboration.py --repos-dir "$(EXTERNAL_REPOS_DIR)"
+
+verify-rfp:
+	$(PYTHON) tests/verify_renesas_rfp.py --require-package
 
 verify-sleigh:
 	tools/verify_sleigh.sh

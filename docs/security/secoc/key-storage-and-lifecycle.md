@@ -296,6 +296,13 @@ object 15. The embedded `FF*16` vector is referenced only by two KAT bodies that
 are compiled out by `CodeFlash[0x30EF3]=0x00`, so it does not constrain the live
 slot.
 
+The pinned Renesas Flash Programmer host library exposes RV40F commands for
+ICU-S option configuration, validation, and mode selection, but no named
+key-load API. Its legacy `SetICUM` path serializes a structured extended-option
+record rather than `slot || AES key`; this narrows but does not identify the
+Toyota/Denso provisioning mechanism. See
+[the RFP/RV40F report](../../tooling/renesas-rfp-rv40f.md).
+
 ### How is it derived?
 
 There is no evidence of per-boot derivation from pages 468–479 or of a fused-key KDF

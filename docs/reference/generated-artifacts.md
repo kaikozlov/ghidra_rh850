@@ -44,6 +44,7 @@ curated.
 | `data/p1m_sfr_labels.csv` | P1M-E SFR labels used by the device profile | `make verify-processor` |
 | `data/scheduler_periods.csv` | Cyclic-task scheduler period evidence | `tests/verify_scheduler_timing.py` |
 | `data/decompiler_signatures.baseline.csv` | Decompiler-signature baseline diffed against the working project | `tools/verify_processor.sh` (`make verify-processor`) |
+| `data/renesas_rfp_rv40f_icu_commands.csv` | ICU-related RV40F host-command census recovered from the pinned Renesas RFP library | `tests/verify_renesas_rfp.py` |
 
 ## Rule
 
