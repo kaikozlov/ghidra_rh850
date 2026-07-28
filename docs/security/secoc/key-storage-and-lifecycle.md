@@ -325,6 +325,53 @@ backend, package-generation algorithm inputs, AuthID, and current slot-4 counter
 remain unobserved. Consequently DID `0x1010` is the strongest static candidate
 for dealer rekey, not proof that a particular dealer tool invokes it.
 
+### 8.1 What this firmware does with the package
+
+MainPE is a transport, scheduling, and status layer for this operation. It does
+not construct an update package and does not interpret the package fields:
+
+1. `0x96354` fixes the generated diagnostic operation to 64 input bytes and a
+   49-byte internal status/result contract.
+2. `0x68E16` copies the 64 input bytes into `0xFEBE51BA`, clears the 48-byte
+   result bank at `0xFEBE523A`, marks the operation active, and enters state
+   `0x22`.
+3. The cyclic worker `0x682F8` waits for the surrounding system/driver readiness
+   predicates. `0x6823C` then submits driver record 0 with 64 input bytes and 48
+   bytes of output capacity, advancing to state `0x33`.
+4. `0x86E62` performs only pointer, exact-length, and output-capacity checks,
+   then copies bytes `[0:16]`, `[16:48]`, and `[48:64]` into three ICU staging
+   regions. There is no CPU-side target-slot argument, key unwrap, AuthID
+   comparison, counter comparison, or package-derived branch in this path.
+5. `0x8997A` configures four 128-bit input transfers and three 128-bit output
+   transfers, then writes literal `8` to `ICUSCMD`. ICU-S is therefore the
+   boundary that must interpret and authenticate the package.
+6. On hardware success, `0x86EE8` copies 32+16 result bytes to
+   `0xFEBE523A`, sets the returned length to 48, and clears both the 64-byte ICU
+   input staging and 48-byte ICU result staging.
+
+The success state progression is:
+
+```text
+0x22 queued
+  -> 0x33 submitted
+  -> 0x44 command-8 completion success
+  -> 0x46 compiled-out post-update KAT skipped
+  -> 0x55 complete
+  -> diagnostic status 0x02
+```
+
+Command failure or timeout reaches internal state `0x66`, which maps to
+diagnostic status `0xFF`. The paired result wrapper returns one status byte plus
+the 48-byte proof only when status is `0x02`; terminal reads then clear the
+diagnostic request/result banks.
+
+Consequently, this dump answers how the EPS **consumes** an authenticated
+update. An external provisioning system must still supply the already formed
+M1–M3 package. If M1 names slot 4 and ICU-S accepts its AuthID, counter, flags,
+and lifecycle policy, this route can request a slot-4 update; nothing in MainPE
+rewrites the target to slot 4. No edge from this command-8 path to object-15 NvM
+persistence has been recovered.
+
 The generic NvM restore/persistence path remains separately relevant because
 object 15 is key-bearing on field-verified related variants:
 

@@ -145,6 +145,31 @@ check(
     == bytes.fromhex("200e6600d832ba05200e4400"),
     CF[0x6920A:0x69216].hex(),
 )
+check(
+    "post-update disabled KAT advances state 0x46 to complete 0x55",
+    CF[0x6834E:0x6835C]
+    == bytes.fromhex("0a06baffda05bfffc4fe20565500"),
+    CF[0x6834E:0x6835C].hex(),
+)
+check(
+    "complete state 0x55 maps to diagnostic status 0x02",
+    CF[0x68C96:0x68C9E] == bytes.fromhex("1306abffe2970493"),
+    CF[0x68C96:0x68C9E].hex(),
+)
+check(
+    "failure state 0x66 maps to diagnostic status 0xFF",
+    CF[0x68C9E:0x68CA6] == bytes.fromhex("13069afffa0d1f92"),
+    CF[0x68C9E:0x68CA6].hex(),
+)
+check(
+    "completion scrubs 64-byte input and 48-byte result staging",
+    CF[0x86F58:0x86F74]
+    == bytes.fromhex(
+        "24eef458203e40001d36080080ffe020"
+        "1d364800203e300080ffd420"
+    ),
+    CF[0x86F58:0x86F74].hex(),
+)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:
