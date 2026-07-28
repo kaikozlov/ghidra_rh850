@@ -7,6 +7,7 @@ SNAPSHOT_DIR ?= $(CURDIR)/project
 VERIFY_SUITES := \
 	tests/verify_findings.py \
 	tests/verify_payload_gate.py \
+	tests/verify_security_gate.py \
 	tests/verify_secoc_nvm.py \
 	tests/verify_secoc_application.py \
 	tests/verify_icus_key_update.py \

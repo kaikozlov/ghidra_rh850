@@ -70,6 +70,7 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 | SEC-BOOT-004 | UDS service table `0x8E54` (20 entries); SID `0x27` → handler `0x5516`; AES S-box `0x8FF1`, Rcon `0x8FE1` | Sienna | verified | `verify_findings.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
 | SEC-BOOT-005 | Payload gate: TransferData decrypts AES-CBC into `0xFEBF0000..0xFEBF0FFF`; routine `0x10F0` checks addr/len + CRC32 + CMAC; `0xFF00` erase path loads callback at RAM `0xFEBF0FD0` (CodeFlash `0x4350`, called `0x435E`) | Sienna | verified | `verify_payload_gate.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
 | SEC-BOOT-006 | `0xFF00` is not a direct execute-RAM routine; execution occurs by replacing the legitimate flash-driver callback inside the authenticated image | Sienna | verified | `verify_payload_gate.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
+| SEC-BOOT-007 | SecurityAccess is the mandatory gate (not merely the session) for download/write/reset: RequestDownload (`0x5D68`), WDBI (`0x49C6`), ECUReset (`0x610C`) each require SA-unlock byte `0xFEBF2B0F == 2` (else NRC `0x33`); the byte is set to `2` only by SA send_key success (`0x54DC`), while boot init (`0x5090`) and the session-change handler (`0x561E`) only write `1` — so `10 0x` alone never satisfies the gate | Sienna | verified | `verify_security_gate.py` | [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) |
 
 ## Application security
 

@@ -106,14 +106,43 @@ The request used by all available tooling is:
 34 01 46 01 00 FEBF0000 00001000
 ```
 
-The handler requires programming session + unlocked SecurityAccess, validates
-the range against `0x8DA0`, records the current destination and remaining byte
-count, and initializes payload crypto when enabled:
+The handler requires the SA-unlock state byte `0xFEBF2B0F == 2` (detailed in
+[§ SecurityAccess is the gate](#securityaccess-is-the-gate-not-the-session)
+below), validates the range against `0x8DA0`, records the current destination
+and remaining byte count, and initializes payload crypto when enabled:
 
 ```text
 payload_build_derive_key       0x7068
 payload_crypto_initialize      0x70D4
 ```
+
+### SecurityAccess is the gate (not the session)
+
+RequestDownload's security check is a single gp-relative byte load compared to
+`2`, not a session-type comparison:
+
+```text
+0x5efc  ld.bu -0x6cf1[gp], r19   ; byte @ 0xFEBF2B0F   (gp = 0xFEBF9800)
+0x5f00  cmp   0x2, r19
+0x5f02  be    <pass>
+0x5f04  movea 0x33, r0, r6        ; NRC securityAccessDenied
+```
+
+`0xFEBF2B0F` is the bootloader SA-unlock state. It is written to `2` by exactly
+one site — the success path of `uds_security_access_send_key` (`0x54dc`, reached
+only when a `27 02` key matches `security_access_compute_expected_key`); a key
+mismatch takes the `0x35` (invalidKey) branch at `0x54d4` instead. Boot init
+(`0x5090`, `FUN_00005086`) and the diagnostic-session-change handler (`0x561e`,
+`FUN_000055fc` called from `bootloader_set_diagnostic_session`) only ever write
+`1`. Therefore DiagnosticSessionControl (`10 0x`) alone cannot satisfy the gate;
+the `SEED_KEY_SECRET`-based SecurityAccess (SEC-BOOT-002/003) is mandatory, not
+redundant.
+
+The same byte gates two sibling services identically — `WriteDataByIdentifier`
+(read `0x49c6`) and `ECUReset` (read `0x610c`), both `cmp 2 / be / NRC 0x33`.
+Writer/reader provenance is re-runnable via `ghidra x-ref to 0xFEBF2B0F`, and the
+byte behaviour at every site is asserted in `tests/verify_security_gate.py`
+(SEC-BOOT-007).
 
 Its positive response is `74 20 04 02`, advertising maximum block length
 `0x0402`: SID + block counter + at most `0x400` data bytes.
