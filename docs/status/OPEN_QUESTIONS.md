@@ -74,10 +74,11 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `0x1106`), exact `SetICUM` field meanings, and the preconditions/effect of
   payload-free `ValidateICU_S`. See
   [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
-- **Dealer slot-4 provisioning.** RFP exposes ICU-S option, validation, and mode
-  operations but no named key-load API or packaged RH850 provisioning image.
-  Determine whether Toyota/Denso uses an otherwise unnamed ROM primitive, a
-  separately supplied RAM-resident manufacturing payload, a secure key-update
-  package, or a diagnostic provisioning service. A capture of `-fo flags icus`
-  against a compatible sacrificial target would distinguish lifecycle
-  enable/validation from actual slot provisioning.
+- **DID `0x1010` production use and slot-4 package.** Static firmware now
+  recovers a SHE-compatible command-8 key-update service behind WDBI DID
+  `0x1010`; the package carries target slot/AuthID/counter and the ICU returns
+  M4/M5 proof. Capture a legitimate provisioning/rekey session to determine
+  whether Toyota/Denso actually invokes this DID, whether M1 targets slot 4,
+  and which lifecycle/session preconditions exist beyond the recovered
+  extended-session/no-Dcm-SA policy. RFP's `ValidateICU_S` remains a separate
+  lifecycle-validation operation, not this application request.

@@ -51,6 +51,13 @@ table. That is a bounded negative result: an unnamed primitive, target-resident
 provisioning payload, manufacturing-only program, or Toyota/Denso service can
 still exist.
 
+The application firmware now supplies that missing service-side lead:
+WDBI DID `0x1010` reaches MainPE's ICU-S command 8 with the SHE-compatible
+M1/M2/M3 → M4/M5 authenticated key-update envelope. This application request is
+not an RFP serial command and must not be equated with RV40F command `0x70`,
+`0x74`, or `0x75`. RFP remains useful for bringing the chip into the correct
+ICU-S lifecycle state; the application report owns the key-update path.
+
 Nothing in this report proves that an R7F701381/P1M-E accepts every recovered
 command. That requires a live signature/capability query or a captured RFP
 session.
@@ -264,6 +271,11 @@ This supports a chip-lifecycle/configuration interpretation. It does not prove:
 - that standard RFP can export or replace a SecOC key;
 - that Toyota dealer rekeying uses the serial boot protocol.
 
+Separately, the Sienna application exposes a SHE-compatible authenticated
+key-update path behind WDBI DID `0x1010`. That route writes MainPE `ICUSCMD=8`;
+it is not one of these mask-ROM RFP protocol commands. See
+[the canonical key-lifecycle report](../security/secoc/key-storage-and-lifecycle.md).
+
 ## 5. What RFP can contribute
 
 The retained RV40F implementation can guide a reproducible acquisition client
@@ -295,9 +307,13 @@ source of feature key `0x1106`.
 - The exact state transition caused by `ValidateICU_S`, including whether it is
   irreversible and what preconditions it checks.
 - Whether any standard RFP path provisions protected AES slots.
-- How Toyota/Denso dealer tooling replaces the per-vehicle SecOC key.
-- Whether provisioning is a ROM command, RAM-resident manufacturing payload,
-  secure key-update package, or application/bootloader diagnostic service.
+- Whether Toyota/Denso dealer tooling actually invokes application WDBI DID
+  `0x1010`, and what backend supplies its authorized M1–M3 package.
+- Which target slot/AuthID/counter/policy values a legitimate slot-4 update
+  carries, and which lifecycle conditions ICU-S enforces in addition to the
+  recovered application session policy.
 
 These questions must not be collapsed into a claim that command `0x74`,
-`0x75`, or `SetICUM` writes SecOC slot 4.
+`0x75`, or `SetICUM` writes SecOC slot 4. They must also not be collapsed into a
+claim that Toyota's dealer workflow uses DID `0x1010` merely because the
+application makes that service reachable.

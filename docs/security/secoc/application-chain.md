@@ -225,6 +225,47 @@ Verify record 1 is referenced only by the disabled asynchronous KAT body. The
 values `8` and `32` at profile offset `+0x24` are buffer/PDU lengths, not job IDs.
 Thus the live generated receive path reaches the ICU-S command-7 verify adapter.
 
+### 4.1 ICU-S is a local peripheral interface, not a serialized request protocol
+
+The application never sends a CAN-like packet to ICU-S. Startup reaches:
+
+```text
+0x65626 application initialization
+  -> 0x88C4C crypto/ICU initializer
+  -> 0x86DB0 wrapper
+  -> 0x8735E generated driver initialization
+  -> 0x893DE ICU-S hardware/driver initialization
+```
+
+`0x893DE` recovers a stale busy command through `0x8917A`, runs an alternating
+`AAAAAAAA`/`55555555` register-window test at `0x892F2`, clears the driver RAM
+state through `0x89360`, initializes the hardware controls through `0x893B8`,
+and enables the EIINT 292/293 completion pair. The initialized ready state is
+`0xE1`.
+
+Each crypto operation is represented by application RAM pointers, lengths,
+callbacks, and complement-protected driver state. Helpers `0x89424`/`0x8949A`
+write/read one 128-bit block through the ICU-S data registers. The final request
+boundary is an `ICUSCMD` write at `0xFFC5D000`; status comes back through ICU-S
+status registers plus EIINT 292/293. The key is represented by a protected-slot
+selector where the operation requires one. No ICU executable image is copied or
+started by this application path.
+
+The complete recovered `ICUSCMD` writer census includes:
+
+| Command form | Recovered role |
+|---:|---|
+| `0x3F` | abort/recovery while busy |
+| selector `<<16` plus `1` or `3` | bounded 16-byte input/output operation family; exact primitive not named |
+| selector `<<16` plus `5` | MAC generation |
+| selector `<<16` plus `7` | MAC verification |
+| `8` | authenticated key update, described below |
+| `0x7000` / `0x7100` | bounded diagnostic/self-test forms |
+
+These are on-chip application-to-ICU command values. They are unrelated to the
+Renesas Flash Programmer's serial RV40F command numbers, even when a low byte
+happens to match.
+
 ## 5. ICU-S command 5 is the MAC-generation twin
 
 The firmware contains a second two-record lower-driver table at `0x27F78` and a
@@ -361,6 +402,52 @@ A practical signing proxy would still need:
   freshness and cannot simply be reused for forged transmit traffic;
 - latency and contention measurements under normal command-7 receive load.
 
+### 5.4 Command 8 is an authenticated key-update path
+
+A separate diagnostic path reaches ICU-S command 8:
+
+```text
+WDBI DID 0x1010
+  -> 0x96354 fixed 64-byte request / 49-byte status+result contract
+  -> 0x8AA1E -> 0x68E16 diagnostic state machine
+  -> 0x6823C -> 0x88936 command-8 dispatcher
+  -> record 0x28024
+  -> 0x870A8 adapter -> 0x86E62 preparation
+  -> 0x8704C start -> 0x8997A
+  -> ICUSCMD = 8
+```
+
+The lower preparation routine requires exactly 64 input bytes and at least 48
+output bytes. It stages input as `16 + 32 + 16` bytes and completion copies the
+result as `32 + 16` bytes. This exactly matches the AUTOSAR SHE authenticated
+memory-update envelope:
+
+```text
+CPU/backend -> ICU-S: M1[16] || M2[32] || M3[16]
+ICU-S -> CPU/backend: M4[32] || M5[16]
+```
+
+Under SHE, M1 identifies the target slot and authentication key, M2 contains the
+encrypted new key plus counter/flags, and M3 authenticates the request. M4/M5
+prove the update result. Therefore this path does not pass `slot || plaintext
+AES key` to ICU-S, and the absence of a separate CPU-side slot argument is
+expected.
+
+The enabled write-DID record is at `0x26B34`. Its per-DID policy requires
+extended diagnostic session `0x03` and configures no Dcm SecurityAccess level.
+That does **not** make arbitrary rekeying unauthenticated: ICU-S still validates
+the cryptographic M1–M3 authorization package and monotonic update state. The
+firmware result bank is `0xFEBE523A..0xFEBE5269`; the diagnostic state machine
+can return the 48-byte M4/M5-shaped proof after completion.
+
+Command 8 is not statically fixed to slot 4—the target is carried inside M1.
+This establishes a credible in-application mechanism capable of updating slot
+4 when given a valid slot-4 package. Static firmware does not show that Toyota's
+dealer backend actually uses DID `0x1010`, nor does it reveal the authentication
+secret/counter needed to construct an accepted package. The canonical lifecycle
+analysis and revised provisioning experiment are in
+[key-storage-and-lifecycle.md](key-storage-and-lifecycle.md).
+
 ## 6. Why all object-15 copies are invalid
 
 Object 15 remains structurally definitive:
@@ -457,7 +544,30 @@ Monitor for the full test period, including any legitimate provisioning action:
 This identifies the actual diagnostic/RTE caller if provisioning occurs; it does
 not mislabel a generic NvM API as a dealer key-set command.
 
-### 7.4 ICU and CAN correlation
+### 7.4 Authenticated key-update instrumentation
+
+Capture a legitimate dealer/manufacturing rekey without replaying or fabricating
+an update package:
+
+1. Record diagnostic session transitions and any WDBI DID `0x1010` request.
+   A conforming request carries 64 data bytes after the DID.
+2. Correlate entry through `0x96354 → 0x68E16 → 0x6823C → 0x88936 →
+   0x870A8 → 0x86E62 → 0x8997A`.
+3. Snapshot the 64-byte request bank at `0xFEBE51BA` and record the literal
+   `ICUSCMD=8` submission. Treat its fields as opaque M1/M2/M3 until the exact
+   bit layout is independently decoded; do not log or publish live secret
+   material unnecessarily.
+4. On completion, capture the state/status and 48-byte M4/M5 proof from
+   `0xFEBE523A`, then observe whether slot-4 verification behavior changes.
+5. Power-cycle and repeat a known command-7 verification to establish that the
+   update persisted. Correlate any object-15 write separately rather than
+   assuming command 8 mirrors protected storage into CPU-visible NvM.
+
+This distinguishes an application diagnostic key update from the unrelated RFP
+mask-ROM ICU-S enable/validation commands. Static reachability alone does not
+establish that Toyota's dealer backend uses DID `0x1010`.
+
+### 7.5 ICU generation and CAN correlation
 
 1. Confirm that `0x680F8`/`0x682A6` branch directly to their report tails and do
    not submit an ICU job.
@@ -521,8 +631,22 @@ not mislabel a generic NvM API as a dealer key-set command.
 | The stock harness returns generated MAC bytes over CAN | **Disproved** |
 | This calibration has a configured production SecOC transmit path | **Unsupported; configured graph is receive-only** |
 | The initialized application wrapper serializes command 5 with the shared ICU driver | **Recovered** |
+| Startup initializes ICU-S through MainPE driver/SFR code; no ICU executable is loaded | **Recovered** |
+| WDBI DID `0x1010` reaches command 8 with a 64-byte request and 48-byte result | **Definitive structural behavior** |
+| Command 8 is the SHE-compatible authenticated key-update service | **Recovered** |
+| DID `0x1010` is statically fixed to slot 4 | **Disproved; the target is package-carried** |
+| Toyota dealer tooling uses DID `0x1010` to rekey this EPS | **Requires dynamic observation** |
 | The public bootloader payload is a safe application-context signing oracle | **Unsupported** |
 | SecOC handle 0 resolves to lower ICU driver record 0 | **Definitive** |
 | Static CodeFlash determines the donor's live slot-4 key state | **Unsupported** |
 | A provisioned `12000` mirrors the same key in object 15 and ICU slot 4 | **Requires the dynamic experiment** |
 | `0x344` is a protected EPS message in this calibration | **Unsupported** |
+
+## References
+
+- AUTOSAR, *Specification of Secure Hardware Extensions*, §4.9 memory update
+  protocol:
+  <https://www.autosar.org/fileadmin/standards/R21-11/FO/AUTOSAR_TR_SecureHardwareExtensions.pdf>
+- Renesas, *Achieving a Root of Trust ... Part 2* (ICU-S MainPE/SFR
+  architecture):
+  <https://www.renesas.com/en/blogs/achieving-root-trust-secure-boot-automotive-rh850-and-r-car-devices-part-2>

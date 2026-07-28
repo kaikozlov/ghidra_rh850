@@ -6,11 +6,11 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SECOC-003, SECOC-005
+> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SECOC-003, SECOC-005, SECOC-009
 >
 > **Canonical artifacts:** `data/dataflash_nvm_records.csv`
 >
-> **Verification:** `tests/verify_secoc_nvm.py`
+> **Verification:** `tests/verify_secoc_nvm.py`, `tests/verify_icus_key_update.py`
 >
 > **Related:** [application-chain](application-chain.md), [dataflash](../../storage/dataflash.md)
 
@@ -25,7 +25,8 @@ incorrectly generalized that every object was non-key state. The full DataFlash
 map in `../../storage/dataflash.md` shows that object 15 is a 32-byte triplicate object
 whose second half is the field-verified SecOC-key location on related variants.
 The distinct application verification path, ICU-S slot-4 selection, compiled-out
-known-answer vector, command-5 generation family, and provisioned-unit experiment are in
+known-answer vector, command-5 generation family, command-8 authenticated key
+update, and provisioned-unit experiment are in
 `../../security/secoc/application-chain.md`.
 
 `../tests/verify_secoc_nvm.py` verifies the original NvM correction. The broader 16-object
@@ -56,6 +57,14 @@ The report's proposed FEBEF object-0 monitor would capture ordinary persistent
 state, not the SecOC AES key. `0x72F58` is still generic `NvM_ReadBlock`, not a
 key-set operation; however, a block-aware monitor can observe object 15 reads on
 a provisioned variant. In this exact dump object 15 has no valid persistent copy.
+
+A **separate real key-update path** has now been recovered elsewhere in the
+application. Enabled WDBI DID `0x1010` transports a 64-byte authenticated request
+to ICU-S command 8 and returns a 48-byte proof/result. The lower driver splits
+the request as `16+32+16` and the response as `32+16`, exactly matching the
+AUTOSAR SHE M1/M2/M3 → M4/M5 memory-update protocol. This corrects the prior
+claim that the image had no SHE-shaped parser or ICU key-update route. It does
+not rehabilitate the old `0x65CD8 → 0x72F58` NvM misclassification.
 
 ## 1. Conclusive NvM service identification
 
@@ -265,11 +274,59 @@ Pages 480–511 remain strongly consistent with an ICU-S-reserved 2 KiB tail, bu
 that hardware/layout fact no longer supports placing this SecOC key there. Secure
 ICU-S storage may hold other material.
 
-## 8. Injection and refresh implications
+## 8. Injection and refresh: command 8 via WDBI DID `0x1010`
 
-No dealer-triggered update state machine was identified. The traced path is generic
-NvM restore/persistence, but generic does not mean non-key: object 15 is key-bearing
-on field-verified related variants.
+The recovered provisioning candidate is independent of the object-15 NvM path:
+
+```text
+WDBI DID 0x1010
+  -> 0x96354: fixed 64-byte request / 49-byte status+result contract
+  -> 0x8AA1E -> 0x68E16: asynchronous diagnostic state
+  -> 0x6823C -> 0x88936: command-8 driver dispatch
+  -> record 0x28024
+  -> 0x870A8 -> 0x86E62: require 64 input / >=48 output
+  -> 0x8704C -> 0x8997A
+  -> ICUSCMD = 8
+```
+
+Preparation copies the request into ICU staging as:
+
+```text
+M1: 16 bytes
+M2: 32 bytes
+M3: 16 bytes
+```
+
+Successful completion copies:
+
+```text
+M4: 32 bytes
+M5: 16 bytes
+```
+
+Those widths and directions exactly match the AUTOSAR SHE authenticated memory
+update used by `CMD_LOAD_KEY`. M1 identifies the target slot and AuthID; M2
+protects the new key, counter, and flags; M3 authenticates M1/M2; M4/M5 provide
+proof of completion. The target key selector is therefore inside the
+cryptographic package rather than a separate CPU argument. Command 8 is capable
+of targeting slot 4 if M1 names slot 4 and ICU-S accepts the AuthID, counter,
+flags, and lifecycle policy.
+
+The write-DID entry at `0x26B34` is enabled. Its per-DID policy permits only
+extended session `0x03` and has zero Dcm SecurityAccess levels. This is not an
+unauthenticated raw-key write: a caller still needs a valid M1–M3 package
+authorized by a key already known to ICU-S, and replay protection is carried by
+the protected update counter. The application never sees the plaintext new key
+or the authorization key.
+
+The diagnostic result bank at `0xFEBE523A` can return all 48 M4/M5 bytes after
+completion. The 64-byte request bank is `0xFEBE51BA`. The production dealer
+backend, package-generation algorithm inputs, AuthID, and current slot-4 counter
+remain unobserved. Consequently DID `0x1010` is the strongest static candidate
+for dealer rekey, not proof that a particular dealer tool invokes it.
+
+The generic NvM restore/persistence path remains separately relevant because
+object 15 is key-bearing on field-verified related variants:
 
 Consequently:
 
@@ -288,13 +345,19 @@ Consequently:
 
 ### How is the SecOC key injected?
 
-The production provisioning command remains unknown. On related variants the
-result is persisted as object 15's raw/XOR55/XORAA NvM copies. No SHE M1–M5 parser
-or ICU key-set path was established in the functions originally claimed. This
-image's separate application CMAC path selects ICU-S slot 4 without reading
-object 15. The embedded `FF*16` vector is referenced only by two KAT bodies that
-are compiled out by `CodeFlash[0x30EF3]=0x00`, so it does not constrain the live
-slot.
+The image contains a concrete SHE-compatible provisioning candidate: enabled
+WDBI DID `0x1010` submits M1/M2/M3-shaped input to ICU-S command 8 and returns
+M4/M5-shaped proof. A valid package can identify slot 4 without exposing the new
+key to MainPE. Static analysis does not prove that Toyota's dealer workflow
+actually invokes this DID, nor does it reveal the required authorization key,
+slot counter, or accepted policy flags.
+
+On related variants, a usable SecOC key is also persisted in object 15's
+raw/XOR55/XORAA NvM copies. Whether those variants use the same command-8 path
+and then mirror/export the key to object 15 is unknown. This exact image's
+runtime CMAC path selects ICU-S slot 4 without reading object 15. The embedded
+`FF*16` vector is referenced only by two KAT bodies compiled out by
+`CodeFlash[0x30EF3]=0x00`, so it does not constrain the live slot.
 
 The pinned Renesas Flash Programmer host library exposes RV40F commands for
 ICU-S option configuration, validation, and mode selection, but no named
@@ -303,8 +366,10 @@ its only explicit secure-provisioning payload is for RA6B1; no RH850
 target-side provisioning image is shipped. The documented high-level “Enable
 ICU-S” path reaches a payload-free validation command, not a key-bearing
 request. Its legacy `SetICUM` path serializes a structured extended-option
-record rather than `slot || AES key`; this narrows but does not identify the
-Toyota/Denso provisioning mechanism. See
+record rather than `slot || AES key`. Those mask-ROM programming operations are
+separate from the application DID-`0x1010` M1–M5 route recovered here. RFP
+therefore constrains chip lifecycle setup but does not reveal the Toyota/Denso
+backend inputs used to authorize a slot-4 update. See
 [the RFP/RV40F report](../../tooling/renesas-rfp-rv40f.md).
 
 ### How is it derived?
@@ -315,10 +380,14 @@ store the already usable AES key in object 15; this exact dump has no valid copy
 
 ### How is it refreshed?
 
-`0x65CD8/0x66E48/0x67608` can update and persist any configured redundancy object,
-including object 15 when addressed through namespace `0x100`. The diagnostic or
-RTE source that would authorize/populate object 15 was not identified, so a dealer
-rekey trigger remains unknown.
+For protected ICU-S slots, WDBI DID `0x1010` plus command 8 is the recovered
+refresh candidate. Its M1–M3 package carries authorization and a monotonic
+counter; M4/M5 reports completion. Whether production tooling uses it for slot
+4 requires a dynamic diagnostic trace.
+
+Separately, `0x65CD8/0x66E48/0x67608` can update and persist any configured
+redundancy object, including object 15 when addressed through namespace `0x100`.
+No static bridge from command-8 success to object-15 persistence was found.
 
 ### Is it ever in dumpable CPU RAM?
 
@@ -340,15 +409,23 @@ that the RAM field held a valid key at capture time.
 | report's FEBEF/key-set/derivation path is invalid | **Definitive** |
 | final 2 KiB is an ICU-S protected storage tail | **Strong inference** |
 | application CMAC path selects ICU-S slot 4, not object-15 RAM | **Definitive** |
+| WDBI DID `0x1010` reaches literal ICU-S command 8 | **Definitive structural behavior** |
+| command-8 request/result widths are 16+32+16 / 32+16 | **Definitive** |
+| command 8 is a SHE-compatible authenticated memory/key update | **Recovered** |
+| DID `0x1010` per-DID policy is extended session, no Dcm SA level | **Definitive** |
+| command 8 is statically fixed to slot 4 | **Disproved; target is package-carried** |
+| Toyota dealer tooling invokes DID `0x1010` for slot 4 | **Unknown; dynamic trace required** |
 | both slot-4 KAT bodies are compiled out; the `FF*16` vector is latent | **Definitive** |
 | CPU-visible objects 12–15 are invalid/inactive in this snapshot | **Definitive for the captured NvM bank** |
 | protected ICU-S slot 4 is personalized or erased | **Unknown** |
-| exact production provisioning path for a provisioned `8965B4512000` | **Unknown** |
+| exact production backend/AuthID/counter/package for slot 4 | **Unknown** |
 
 ## References
 
 - AUTOSAR, *Specification of NVRAM Manager*:
   <https://www.autosar.org/fileadmin/standards/R22-11/CP/AUTOSAR_SWS_NVRAMManager.pdf>
+- AUTOSAR, *Specification of Secure Hardware Extensions*, §4.9:
+  <https://www.autosar.org/fileadmin/standards/R21-11/FO/AUTOSAR_TR_SecureHardwareExtensions.pdf>
 - Renesas, *RH850/P1M-E Datasheet* (R7F701381 has ICUS):
   <https://www.renesas.com/en/document/dst/rh850p1m-e-datasheet>
 - Renesas, *Achieving a Root of Trust ... Part 2* (ICU-S/SHE architecture):

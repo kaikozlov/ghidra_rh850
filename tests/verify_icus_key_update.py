@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+"""Verify the application ICU-S initialization and authenticated key-update path."""
+from __future__ import annotations
+
+import struct
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
+passed = failed = 0
+
+
+def check(name: str, condition: bool, detail: str = "") -> None:
+    global passed, failed
+    if condition:
+        passed += 1
+        print(f"PASS: {name}")
+    else:
+        failed += 1
+        suffix = f" ({detail})" if detail else ""
+        print(f"FAIL: {name}{suffix}")
+
+
+def u16(address: int) -> int:
+    return struct.unpack_from("<H", CF, address)[0]
+
+
+def u32(address: int) -> int:
+    return struct.unpack_from("<I", CF, address)[0]
+
+
+print("== ICU-S application initialization ==")
+check(
+    "application startup calls crypto/ICU initializer 0x88C4C",
+    CF[0x6566A:0x6566E] == bytes.fromhex("82ffe235"),
+    CF[0x6566A:0x6566E].hex(),
+)
+check(
+    "crypto initializer calls ICU wrapper 0x86DB0",
+    CF[0x88C50:0x88C54] == bytes.fromhex("bfff60e1"),
+    CF[0x88C50:0x88C54].hex(),
+)
+check(
+    "ICU wrapper calls initialized driver entry 0x8735E",
+    CF[0x86DB4:0x86DB8] == bytes.fromhex("80ffaa05"),
+    CF[0x86DB4:0x86DB8].hex(),
+)
+check(
+    "driver initialization reaches hardware init 0x893DE",
+    CF[0x87396:0x8739A] == bytes.fromhex("80ff4820"),
+    CF[0x87396:0x8739A].hex(),
+)
+check(
+    "ICU interrupt pair helper addresses EIINT 292/293",
+    CF[0x89140:0x89144] == bytes.fromhex("e00f49b2")
+    and CF[0x89150:0x89154] == bytes.fromhex("e00f4bb2"),
+)
+
+print("\n== WDBI DID 0x1010 reachability and policy ==")
+WRITE_DID = struct.Struct("<HBBI")
+write_rows = [
+    WRITE_DID.unpack_from(CF, 0x26AEC + index * WRITE_DID.size)
+    for index in range(0x13)
+]
+did_1010 = write_rows[9]
+check(
+    "write-DID entry 9 is enabled DID 0x1010",
+    did_1010 == (0x1010, 0, 1, 0x26680),
+    repr(did_1010),
+)
+check(
+    "DID 0x1010 selects policy index 1",
+    u16(0x26690 + 9 * 2) == 1,
+    hex(u16(0x26690 + 9 * 2)),
+)
+check(
+    "policy 1 has no SecurityAccess-level requirement",
+    CF[0x26420 + 1 * 2] == 0,
+    hex(CF[0x26420 + 1 * 2]),
+)
+check(
+    "policy 1 has one allowed diagnostic session",
+    CF[0x26421 + 1 * 2] == 1,
+    hex(CF[0x26421 + 1 * 2]),
+)
+session_list = u32(0x26680 + 4)
+session_record = u32(session_list)
+check("policy 1 session list is structurally valid", session_list == 0x263B4)
+check("policy 1 resolves to session record 0x2630A", session_record == 0x2630A)
+check(
+    "DID 0x1010 requires extended session 0x03",
+    CF[session_record + 1] == 3,
+    hex(CF[session_record + 1]),
+)
+check(
+    "DID 0x1010 callback fixes 64 input and 49 status/result bytes",
+    CF[0x96360:0x96368] == bytes.fromhex("203e4000204e3100"),
+    CF[0x96360:0x96368].hex(),
+)
+
+print("\n== authenticated key-update envelope ==")
+check(
+    "lower prepare requires exactly 64 input bytes",
+    CF[0x86E78:0x86E7E] == bytes.fromhex("0706c0ffb205"),
+    CF[0x86E78:0x86E7E].hex(),
+)
+check(
+    "lower prepare requires at least 48 output bytes",
+    CF[0x86E86:0x86E90]
+    == bytes.fromhex("000d0106d0ffe30712db"),
+    CF[0x86E86:0x86E90].hex(),
+)
+check(
+    "input is staged as 16 + 32 + 16 bytes",
+    CF[0x86EB8:0x86EDE].count(bytes.fromhex("20461000")) == 2
+    and CF[0x86EB8:0x86EDE].count(bytes.fromhex("20462000")) == 1,
+)
+check(
+    "completion copies result as 32 + 16 bytes",
+    CF[0x86F26:0x86F46].count(bytes.fromhex("20462000")) == 1
+    and CF[0x86F26:0x86F46].count(bytes.fromhex("20461000")) == 1,
+)
+check(
+    "diagnostic state machine submits 64 input / 48 output capacity",
+    bytes.fromhex("200e3000") in CF[0x6823C:0x682A6]
+    and bytes.fromhex("20464000") in CF[0x6823C:0x682A6],
+)
+
+print("\n== command-8 driver record and hardware trigger ==")
+check("command-8 record ID is zero", u16(0x28024) == 0)
+check("command-8 record sentinel is FFFF", u16(0x28026) == 0xFFFF)
+check("command-8 completion callback is 0x6920A", u32(0x28028) == 0x6920A)
+check("command-8 lower adapter is 0x870A8", u32(0x28038) == 0x870A8)
+check("command-8 completion worker is 0x871A0", u32(0x2803C) == 0x871A0)
+check("command-8 record state points to 0x28020", u32(0x28040) == 0x28020)
+check(
+    "hardware engine writes literal command 8 to ICUSCMD",
+    CF[0x89A2A:0x89A32] == bytes.fromhex("080a80070f08a08b"),
+    CF[0x89A2A:0x89A32].hex(),
+)
+check(
+    "successful command-8 callback advances diagnostic state to 0x44",
+    CF[0x6920A:0x69216]
+    == bytes.fromhex("200e6600d832ba05200e4400"),
+    CF[0x6920A:0x69216].hex(),
+)
+
+print(f"\n== RESULT: {passed} passed, {failed} failed ==")
+if failed:
+    sys.exit(1)

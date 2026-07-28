@@ -94,3 +94,23 @@ the mistakes are not re-made.
   consistent with either personalized or unprovisioned hardware state.
 - **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
   §"Compiled-out slot-4 known-answer check"; `tests/verify_secoc_application.py`.
+
+### CORR-010 — No SHE key-update path exists in the application
+
+- **Wrong:** the production image contains no SHE M1–M5 parser, no ICU-S
+  key-update command, and no application diagnostic route capable of
+  provisioning a protected key slot.
+- **Right:** enabled WDBI DID `0x1010` reaches literal `ICUSCMD=8`. The driver
+  requires exactly 64 input bytes, stages them as `16+32+16`, and returns
+  `32+16` bytes—the exact AUTOSAR SHE M1/M2/M3 → M4/M5 authenticated
+  memory-update envelope. The DID's per-DID policy is extended session `0x03`
+  with no Dcm SecurityAccess level; ICU-S package authentication and replay
+  counter enforcement remain the security boundary.
+- **Boundary:** the earlier rejection of `0x65CD8 → 0x72F58` as a key-set path
+  remains correct; that chain is generic NvM. Command 8 is a separate driver
+  and diagnostic subsystem. The package carries its target slot, so static
+  firmware does not prove that Toyota dealer tooling uses DID `0x1010` or that
+  a particular request targets slot 4.
+- **Canonical:**
+  [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md)
+  §"Injection and refresh"; `tests/verify_icus_key_update.py`.

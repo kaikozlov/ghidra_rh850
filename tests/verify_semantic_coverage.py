@@ -35,7 +35,7 @@ HEADER = [
 ]
 
 # Floor from AssertNoUndefinedInFunctions on the current working project.
-MIN_FUNCTIONS = 5858
+MIN_FUNCTIONS = 5865
 CODEFLASH_END = 0x100000
 APPLICATION_BASE = 0x20000
 LOCAL_RAM_START = 0xFEBE0000
@@ -96,6 +96,27 @@ LANDMARKS = {
     },
     0x00087610: {
         "name": "icus_interrupt_channel292_dispatch",
+        "calling_convention": "__stdcall",
+        "evidence_grade": "annotated",
+        "subsystem": "application",
+        "name_source": "USER_DEFINED",
+    },
+    0x00086E62: {
+        "name": "icus_command8_key_update_prepare",
+        "calling_convention": "__stdcall",
+        "evidence_grade": "annotated",
+        "subsystem": "application",
+        "name_source": "USER_DEFINED",
+    },
+    0x0008997A: {
+        "name": "icus_command8_authenticated_key_update",
+        "calling_convention": "__stdcall",
+        "evidence_grade": "annotated",
+        "subsystem": "application",
+        "name_source": "USER_DEFINED",
+    },
+    0x00096354: {
+        "name": "application_wdbi_1010_icus_key_update",
         "calling_convention": "__stdcall",
         "evidence_grade": "annotated",
         "subsystem": "application",

@@ -162,13 +162,14 @@ reproduce the committed statistics.
    `AnnotateApplicationTransmit`, `ApplyCallingConventions`).
 5. `-noanalysis` convention finalizer: re-run `ApplyCallingConventions.java`.
    After the annotate-stage reopen, Ghidra surfaces two additional non-ISR
-   bodies (`0x3b0be`, `0x6f0d0`) that stage 4 never saw (function iterator
-   5856 → 5858); without the finalizer they stay `unknown`.
+   bodies (`0x3b0be`, `0x6f0d0`) that stage 4 never saw; without the finalizer
+   they stay `unknown`. The finalizer also covers explicitly seeded functions
+   added by later subsystem work.
 6. Open the result through the CLI, record statistics, cleanly stop the daemon.
 7. Write `processor_manifest.json` beside the working project and require
    function/instruction/symbol floors plus the six-block memory map.
 
-Landmark rebuild stats: **5,858 functions, 178,611 instructions, 37,641
+Landmark rebuild stats: **5,865 functions, 178,645 instructions, 37,650
 symbols** (floors for gates; semantic checks in `make verify-processor`).
 
 ## CI
