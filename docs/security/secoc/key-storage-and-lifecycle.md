@@ -298,7 +298,11 @@ slot.
 
 The pinned Renesas Flash Programmer host library exposes RV40F commands for
 ICU-S option configuration, validation, and mode selection, but no named
-key-load API. Its legacy `SetICUM` path serializes a structured extended-option
+key-load API. Its packaged `Firmwares/` images are SEGGER probe firmware, and
+its only explicit secure-provisioning payload is for RA6B1; no RH850
+target-side provisioning image is shipped. The documented high-level “Enable
+ICU-S” path reaches a payload-free validation command, not a key-bearing
+request. Its legacy `SetICUM` path serializes a structured extended-option
 record rather than `slot || AES key`; this narrows but does not identify the
 Toyota/Denso provisioning mechanism. See
 [the RFP/RV40F report](../../tooling/renesas-rfp-rv40f.md).

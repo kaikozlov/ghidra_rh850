@@ -14,8 +14,7 @@
 > **Canonical artifacts:** `renesas-rfp.lock.json`,
 > `data/renesas_rfp_rv40f_icu_commands.csv`
 >
-> **Verification:** `tests/verify_renesas_rfp.py` (`make verify-rfp` with the
-> licensed local package)
+> **Verification:** `tests/verify_renesas_rfp.py` (`make verify-rfp`)
 >
 > **Related:** [workflow](../WORKFLOW.md),
 > [SecOC key lifecycle](../security/secoc/key-storage-and-lifecycle.md)
@@ -39,6 +38,13 @@ state. They do **not** expose a demonstrated SecOC key-slot provisioning API:
 - `SetICUM` serializes a structured legacy extended-option record through two
   commands.
 
+The files shipped alongside RFP do not fill that gap. All 68 images under
+`Firmwares/` identify themselves as SEGGER J-Link/J-Trace/Flasher probe
+firmware. Explicit target-resident resources are confined to DA and RA
+families. The only packaged secure-provisioning image is an RA6B1 artifact
+handled by `BootRATZ_B`, and there is no corresponding RH850 resource or
+`BootRV40F::DownloadImage` path.
+
 In particular, `SetICUM` is not shaped as `slot || AES-128 key`. No named
 `BootRV40F` key-load or key-update function is present in the retained symbol
 table. That is a bounded negative result: an unnamed primitive, target-resident
@@ -61,9 +67,9 @@ release 1 July 2026
 platform macos-arm64
 ```
 
-The licensed distribution is intentionally not committed. Exact hashes, sizes,
-function virtual addresses, and function-body hashes are pinned in
-`renesas-rfp.lock.json`. The default local path is:
+The analyzed package snapshot is stored under `Renesas/` and exact hashes,
+sizes, function virtual addresses, function-body hashes, and embedded-data
+prefixes are pinned in `renesas-rfp.lock.json`. The default path is:
 
 ```text
 Renesas/renesas_flash_programmer_macos-arm64/
@@ -75,9 +81,9 @@ Run:
 make verify-rfp
 ```
 
-to require the local distribution and verify it against the lock. Ordinary
-`make verify` validates the committed command model and wire fixtures and
-performs the artifact checks when the package happens to be present.
+to verify the distribution against the lock. Ordinary `make verify` validates
+the committed command model, wire fixtures, package inventory, and analyzed
+function bodies.
 
 ## 2. Device-family split
 
@@ -117,6 +123,39 @@ BootRH850Gen2 read/write/erase/checksum/area operations
 The task names and family split make `BootRV40F` the leading host protocol for
 the generic/older RH850 entry. Applying it specifically to the P1M-E remains
 **bounded** until the device response selects or exhibits this path.
+
+### Shipped firmware and target-resource triage
+
+The package contains three different classes of executable material. They must
+not be conflated:
+
+| Location | Count / example | Recovered role | P1M-E relevance |
+|---|---:|---|---|
+| `Firmwares/*.bin` | 68 | SEGGER J-Link/J-Trace/Flasher **probe** firmware | no RH850 target payload found |
+| `Resources/DA*`, `Resources/RA6W1` | target boot/programming images | DA/RA target-resident loaders | different MCU families |
+| `Resources/ProvisioningSW/RA6B1/provsw_sec_enc.bin` | one `imag` container | encrypted or encrypted+signed RA6B1 provisioning software | architectural analogy only |
+
+The first printable identification in every `Firmwares/*.bin` names J-Link,
+J-Trace, or Flasher hardware. Two large S-records embedded in `libRFP.dylib`,
+`SFD_BfwE20RFP_s @ 0x11D124` and `SFD_BfwE2LRFP_s @ 0x13F7E0`, are also not
+target payloads. `Driver_E1E2::_UpdateEmulator @ 0x37748` selects them according
+to attached E1/E2/E2 Lite hardware and programs them into the emulator.
+
+The embedded symbol `FlashLibrary::SFD_RV40F_CM4_hex @ 0x2F3E12` is another
+misleading name. Its bytes are ARM Thumb code, its suffix is `CM4`, and it is
+selected by `UtilitySWD_A::GetFLMFileName`/`LoadFLM`. It is an SWD Cortex-M4
+flash algorithm, not V850/RH850 code and not an ICU-S agent.
+
+Conversely, when this RFP build needs a secure target-side provisioning program,
+it is explicit: `UtilityRA_B::SetupProvisioningSW @ 0xB1984` loads the RA6B1
+resource and `BootRATZ_B::DownloadImage @ 0x135A8` transfers it. The retained
+RV40F symbol/task census has no analogous provisioning-image setup or download
+function, and the resource tree has no RH850/RV40F/P1M/ICU-named payload.
+
+This is a **bounded negative result**, not proof that no RH850 manufacturing
+agent exists. Such an agent may be supplied separately by Renesas or
+Toyota/Denso, encrypted under an opaque name, embedded without a retained
+symbol, or implemented by target mask ROM.
 
 ## 3. RV40F framing
 
@@ -199,14 +238,28 @@ The exact OEM meanings of its three flags and four 32-bit fields remain unknown.
 
 ### ICU-S enable/validation is separate
 
-The RH850 option-writing task treats “Enable ICU-S” as security flag
-`0x00010000`. If selected, it invokes `ValidateICU_S`. Separately,
-`CheckICUMode` tries mode `0xFF`; on one particular target error it retries with
-`0x00` and records which form succeeded.
+RFP's CLI documentation exposes `-fo flags icus` as “Enable ICU-S.” The RH850
+option-writing task represents that request as security flag `0x00010000`. If
+selected, `Task_WriteOption_RV40F::_WriteOptionRH850 @ 0xC152C` invokes the
+payload-free `ValidateICU_S` command, unless the connection setup already
+recorded the target in the relevant ICU mode.
+
+During setup, `Task_SetupBaudrate_RV40F::Run @ 0xBEF4C` calls `CheckICUMode` only
+when the target capability record advertises feature `0x1106`. `CheckICUMode`
+tries mode `0xFF`; on one particular target error it retries with `0x00` and
+records which form succeeded.
+
+`SetICUSOptionByte` is an exported four-byte primitive, but the Ghidra
+cross-reference census finds no internal code caller in `libRFP`; only its
+external entry and symbol/data references remain. The standard high-level
+RH850 option task recovered above does not call it. This makes command `0x70`,
+not command `0x6E`, the concrete lead for the documented ICU-S enable
+transition in this build.
 
 This supports a chip-lifecycle/configuration interpretation. It does not prove:
 
 - that `ValidateICU_S` loads a key;
+- that the four ICU-S option bytes encode any key-slot contents;
 - that `SetICUM` addresses protected key slot 4;
 - that standard RFP can export or replace a SecOC key;
 - that Toyota dealer rekeying uses the serial boot protocol.
@@ -225,15 +278,22 @@ for:
 7. option-byte and serial-programming protection state;
 8. ICU-S enable/mode configuration.
 
+The shipped payload triage also provides a useful pattern for future artifacts:
+a real RFP-managed secure provisioning agent should have a family-specific
+resource, a setup routine, and a target-image download path comparable to the
+RA6B1 chain. None is present for RV40F in this package.
+
 The next useful static pass is a complete RV40F command census, followed by the
-mode-entry/connection task and the signature capability-field parser.
+mode-entry/connection task, the signature capability-field parser, and the
+source of feature key `0x1106`.
 
 ## 6. What remains unproven
 
 - Whether the R7F701381/P1M-E selects the RV40F path.
 - Which ICU commands the P1M-E mask ROM advertises and permits.
 - The field meanings in the legacy `SetICUM` record.
-- Whether ICU-S enable/validation is reversible.
+- The exact state transition caused by `ValidateICU_S`, including whether it is
+  irreversible and what preconditions it checks.
 - Whether any standard RFP path provisions protected AES slots.
 - How Toyota/Denso dealer tooling replaces the per-vehicle SecOC key.
 - Whether provisioning is a ROM command, RAM-resident manufacturing payload,

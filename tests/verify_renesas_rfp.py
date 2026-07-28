@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Verify the pinned Renesas RFP/RV40F external-source analysis.
 
-The licensed RFP distribution is intentionally not committed.  With no local
-package this suite still validates the committed lock, command model, and wire
-fixtures.  ``--require-package`` additionally verifies the local artifacts,
-Mach-O symbol table, and exact analyzed function bodies.
+With no local package this suite still validates the committed lock, command
+model, and wire fixtures. ``--require-package`` additionally requires and
+verifies the package artifacts, resource inventory, Mach-O symbol table,
+embedded data, and exact analyzed function bodies.
 """
 
 from __future__ import annotations
@@ -202,6 +202,64 @@ def verify_package(root: Path, lock: dict[str, object]) -> None:
             sha256_bytes(body),
         )
 
+    print("\n== embedded firmware/resource triage ==")
+    for symbol, metadata in lock["macho"]["embedded_data"].items():
+        addresses = symbols.get(symbol, [])
+        check(f"{symbol} symbol exists", bool(addresses))
+        if not addresses:
+            continue
+        address = metadata["address"]
+        check(
+            f"{symbol} address",
+            address in addresses,
+            ", ".join(hex(candidate) for candidate in addresses),
+        )
+        if address not in addresses:
+            continue
+        try:
+            offset = address_to_file_offset(address, segments)
+        except ValueError as error:
+            check(f"{symbol} file mapping", False, str(error))
+            continue
+        prefix = bytes.fromhex(metadata["prefix_hex"])
+        check(f"{symbol} byte prefix", library[offset : offset + len(prefix)] == prefix)
+
+    firmware_dir = root / "Firmwares"
+    firmware_files = sorted(firmware_dir.glob("*.bin"))
+    check("68 shipped probe-firmware images", len(firmware_files) == 68, str(len(firmware_files)))
+    probe_markers = (b"J-Link", b"J-Trace", b"Flasher")
+    check(
+        "every Firmwares image identifies as SEGGER probe firmware",
+        all(
+            b"SEGGER" in (data := path.read_bytes())
+            and any(marker in data for marker in probe_markers)
+            for path in firmware_files
+        ),
+    )
+
+    resources_dir = root / "Resources"
+    resource_files = sorted(path for path in resources_dir.rglob("*") if path.is_file())
+    check("31 explicit target-resource files", len(resource_files) == 31, str(len(resource_files)))
+    resource_names = [str(path.relative_to(resources_dir)).lower() for path in resource_files]
+    check(
+        "no explicit RH850/P1M/ICU target resource",
+        not any(
+            token in relative
+            for relative in resource_names
+            for token in ("rh850", "rv40f", "p1m", "icus")
+        ),
+    )
+    provisioning = resources_dir / "ProvisioningSW" / "RA6B1" / "provsw_sec_enc.bin"
+    provisioning_files = sorted(
+        path for path in (resources_dir / "ProvisioningSW").rglob("*") if path.is_file()
+    )
+    check(
+        "only explicit provisioning payload is RA6B1",
+        provisioning_files == [provisioning],
+    )
+    if provisioning.is_file():
+        check("RA6B1 provisioning image has imag header", provisioning.read_bytes()[:4] == b"imag")
+
     rv40f_symbols = [name for name in symbols if "BootRV40F" in name]
     gen2_symbols = [name for name in symbols if "BootRH850Gen2" in name]
     check("substantial BootRV40F API retained", len(rv40f_symbols) >= 40, str(len(rv40f_symbols)))
@@ -211,6 +269,10 @@ def verify_package(root: Path, lock: dict[str, object]) -> None:
         "no named BootRV40F key-loading API",
         not any(token in name.lower() for name in rv40f_symbols for token in forbidden_names),
     )
+    check(
+        "no BootRV40F provisioning-image downloader",
+        not any("Provision" in name or "DownloadImage" in name for name in rv40f_symbols),
+    )
 
     print("\n== device-family routing metadata ==")
     devices = devices_path.read_text(encoding="utf-8-sig")
@@ -218,6 +280,9 @@ def verify_package(root: Path, lock: dict[str, object]) -> None:
     check("generic RH850 uses default mode entry", "<Entry>MODEENTRY_DEFAULT</Entry>" in devices)
     check("RH850/E2x entry is separate", "<DisplayName>RH850/E2x</DisplayName>" in devices)
     check("RH850/U2x entry is separate", "<DisplayName>RH850/U2x</DisplayName>" in devices)
+
+    cli_doc = (root / "docs" / "rfp-cli.md").read_text(encoding="utf-8")
+    check("CLI documents ICU-S enable flag", "|icus|Enable ICU-S|" in cli_doc)
 
 
 def main() -> int:

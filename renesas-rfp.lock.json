@@ -25,6 +25,10 @@
     "docs/rfp-cli.md": {
       "size": 48507,
       "sha256": "8a63f5566703e7db707abaeec37bcbc507e09afe91832d6e9dc513785f87b559"
+    },
+    "Resources/ProvisioningSW/RA6B1/provsw_sec_enc.bin": {
+      "size": 39680,
+      "sha256": "a264c23817d3dc7aaacf83866a33df685c8a72ec611fb92bb19177131c67595c"
     }
   },
   "macho": {
@@ -69,6 +73,50 @@
         "address": 120456,
         "size": 304,
         "sha256": "dd7fd934afa95eedfb282cd211d7e4a988f4d06d424594d973b8a86d413c7b1e"
+      },
+      "__ZN10BootRATZ_B13DownloadImageER14AbstractDriverRKNSt3__16vectorIhNS2_9allocatorIhEEEEbNS_13PswHeaderTypeE": {
+        "address": 79272,
+        "size": 1544,
+        "sha256": "ca8a16e9844ee0daac6ae7cf4ce897f792b9d8330d6a7d2af9ee706127ac27fe"
+      },
+      "__ZN11Driver_E1E215_UpdateEmulatorEb": {
+        "address": 227144,
+        "size": 1680,
+        "sha256": "d37cb8bd62612e0f6f8999b329b6c60281a78a659691504a92d113be9ae51627"
+      },
+      "__ZN11UtilityRA_B19SetupProvisioningSWERK12FlashSession": {
+        "address": 727428,
+        "size": 584,
+        "sha256": "4c483a40aa9deee0c9b8a51443b5b8882b44d556d52fea03a42730b22453552d"
+      },
+      "__ZN22Task_WriteOption_RV40F17_WriteOptionRH850ERK12FlashSession": {
+        "address": 791852,
+        "size": 1960,
+        "sha256": "aa13f8ee6a8837b091167d10d24ad7e70c726faf6d9e38ca712c48f7a3b14625"
+      },
+      "__ZN12UtilitySWD_A14GetFLMFileNameEj": {
+        "address": 802024,
+        "size": 120,
+        "sha256": "9156fd5ecfecace1a633147c5beac06c6b0892bf16d3a961390866d6487817a6"
+      },
+      "__ZN12UtilitySWD_A7LoadFLMERK12FlashSession": {
+        "address": 803180,
+        "size": 1172,
+        "sha256": "09fba8dce7237c1e9e6c2fc16c010484118d02dca0c760ce8355751a84739c95"
+      }
+    },
+    "embedded_data": {
+      "__ZL15SFD_BfwE20RFP_s": {
+        "address": 1167652,
+        "prefix_hex": "5330304530303030343236363737343533323330353234363733323032304530"
+      },
+      "__ZL15SFD_BfwE2LRFP_s": {
+        "address": 1308640,
+        "prefix_hex": "5330304530303030343236363737343533323443353234363733323032304334"
+      },
+      "__ZN12FlashLibraryL17SFD_RV40F_CM4_hexE": {
+        "address": 3096082,
+        "prefix_hex": "1fb58346002003905c466ce02078002869d02679607946ea0026a07946ea0046"
       }
     }
   }
