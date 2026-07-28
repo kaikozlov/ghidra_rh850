@@ -58,7 +58,7 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 | ARCH-003 | Boot validity gate: `0x13B0 → 0x119E`; two retry-bounded phases; markers at `0x17E00`/`0xFFE00` hold `0x5AA5A55A` | Sienna | verified | `verify_boot_trust.py` | [../architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md) |
 | ARCH-004 | Application foreground loop polls TAUJ0 CH3 `EIRF136`; EIINT 133–135 (CH0–2), 187/188 (RSCAN CAN1), 292/293 (ICU-S callbacks) | Sienna | verified | `verify_architecture.py` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
 | ARCH-005 | EIINT 292/293 are active ICU-S crypto-driver callback paths despite generic hardware-table `Reserved` labels | Sienna | recovered | `verify_architecture.py` | [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md) |
-| ARCH-006 | 5,845 functions / 174,783 instructions / 37,001 symbols on the last annotated rebuild; most rows `evidence_grade=recovered` | Sienna | bounded | `make verify-processor` floors | [../tooling/processor-module-audit.md](../tooling/processor-module-audit.md) |
+| ARCH-006 | 5,852 functions / 178,516 instructions / 37,634 symbols on the last annotated rebuild; most rows `evidence_grade=recovered` | Sienna | bounded | `make verify-processor` floors | [../tooling/processor-module-audit.md](../tooling/processor-module-audit.md) |
 
 ## Bootloader security
 
@@ -100,8 +100,9 @@ software ID is `observed`, an inferred MCU is `hypothesis`).
 | SECOC-001 | Six records bind `0x0F/0x2E4/0x131/0x132/0x90/0xD7` to exact RX PDU routes; `0x344` has no receive filter or SecOC record | Sienna | verified | `verify_secoc_application.py` | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
 | SECOC-002 | Classic frames authenticate `DataID_be16 ‖ payload4 ‖ freshness48`; trailer = 4 freshness bits + first 28 CMAC bits; CMAC verify uses CryptoIf handle 0, ICU-S slot 4 | Sienna | verified | `verify_secoc_application.py` | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
 | SECOC-003 | Object 15 (SecOC key): len 32, base block 41, RAM `0xFEBF02E8`; raw `0xFF206E14`, XOR55 `0xFF206D14`, XORAA `0xFF206C14`; all three copies invalid in this snapshot | This exact dump | verified | `verify_dataflash_layout.py` | [../storage/dataflash.md](../storage/dataflash.md) |
-| SECOC-004 | This calibration's slot-4 KAV equals CMAC of 16 zero bytes under `FF*16`; with invalid objects 12–15 this strongly indicates unprovisioned/default key state | This calibration | bounded | `verify_secoc_application.py` | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
+| SECOC-004 | Both slot-4 KAT crypto bodies are compiled out by fixed gate `CodeFlash[0x30EF3]=0x00` (required `0x5A`); the latent `FF*16` vector asserts nothing about the live slot-4 key | This calibration | verified | `verify_secoc_application.py` | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
 | SECOC-005 | Object 15 has no static producer in this calibration (27 direct + 19 wrapper callsites, no AB/BA edge) | Sienna | verified | `generate_object15_reachability.py` census | [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md) |
+| SECOC-006 | ICU-S command 5 is substantially recovered as the MAC-generation twin of command-7 verify: runtime selector, input pointer/length, caller output pointer/length, 16-byte result copy, and paired driver records; slot-4 generation permission remains unobserved | Sienna | recovered | `verify_secoc_application.py` | [../security/secoc/application-chain.md](../security/secoc/application-chain.md) |
 
 ## Storage
 

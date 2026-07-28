@@ -26,7 +26,7 @@ curated.
 | `data/application_diagnostic_map.csv` | Per-SID diagnostic routing, session policy, callbacks/subfunction tables, evidence status (17 SIDs) | `tools/generate_application_diagnostic_map.py` (`make generate-application-diagnostics`) | `tests/verify_application_diagnostics.py` |
 | `data/application_rx_map.csv` | 47 normal Rx I-PDUs, 242 COM signals | `tools/generate_application_rx_map.py` (`make generate-application-receive`) | `tests/verify_application_receive.py` |
 | `data/application_rx_signal_evidence.csv` | RX signal extraction evidence (drives the RX map generator) | `tools/generate_application_rx_signal_evidence.sh` (`make generate-application-receive-evidence`) | `tests/verify_application_receive.py` |
-| `data/semantic_coverage_ledger.csv` | Whole-image recovered-function ledger (5,845 rows) with evidence grades | `tools/generate_semantic_coverage_ledger.sh` (`make generate-semantic-coverage`) | `tests/verify_semantic_coverage.py` |
+| `data/semantic_coverage_ledger.csv` | Whole-image recovered-function ledger (5,852 rows) with evidence grades | `tools/generate_semantic_coverage_ledger.sh` (`make generate-semantic-coverage`) | `tests/verify_semantic_coverage.py` |
 | `data/object15_reachability.csv` | Object-15 caller census | `tools/generate_object15_reachability.py` | `tests/verify_boot_trust.py` |
 | `data/instruction_inventory.csv` | Whole-image instruction inventory emitted during processor verification | `tools/verify_processor.sh` (`make verify-processor`) | `make verify-processor` |
 | `data/switch_table_inventory.csv` | Recovered RH850 `switch` jump-table inventory | `InventorySwitchTables.java` (via rebuild / `make verify-processor`) | `AssertSwitchTables.java` (`make verify-processor`) |

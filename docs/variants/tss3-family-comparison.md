@@ -19,7 +19,7 @@ the CSV holds the populated rows.
 | Application SA secret | recovered at CodeFlash `0x20840` | unknown | Sienna verified |
 | Bootloader payload format | confirmed (AES-CBC + CRC32 + CMAC gate) | unknown | Sienna verified |
 | Diagnostic endpoints | `0x7A1` physical, `0x777` functional, `0x7A0` limited secondary | partially observed in field behavior | Sienna verified |
-| SecOC profile | six RX PDUs, slot 4, unprovisioned/default state | unknown | Sienna verified (this snapshot) |
+| SecOC profile | six RX PDUs; command-7 verify selects slot 4; live key state unknown | unknown | Sienna firmware path verified; slot contents unobserved |
 
 Unobserved fields are recorded as `unknown` in the CSV, never fabricated.
 

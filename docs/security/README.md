@@ -24,6 +24,7 @@ them.
   security level > 0. The machinery is wired and exercised; the policy tables
   are empty. The Corolla is a different calibration and may populate them —
   see [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
-- SecOC findings here are specific to this calibration's unprovisioned/default
-  key state. A provisioned unit must be tested dynamically; see
+- SecOC verifies through ICU-S slot 4, but static CodeFlash does not determine
+  the donor's live key state. The former `FF*16` inference was disproved
+  because the KAT is compiled out; see
   [secoc/key-storage-and-lifecycle.md](secoc/key-storage-and-lifecycle.md).

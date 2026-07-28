@@ -56,9 +56,10 @@ Three independent domains — do not conflate them:
   1 is a compiled stub. Same AES construction shape, different secret
   (`0x20840`) and handlers. See
   [security/application-security-access.md](security/application-security-access.md).
-- **SecOC** — runtime CAN authentication on six RX PDUs. This calibration's
-  slot-4 known-answer vector equals CMAC of 16 zero bytes under an erased
-  `FF*16` key — an unprovisioned/default state. See
+- **SecOC** — runtime CAN authentication on six RX PDUs through ICU-S slot 4.
+  The apparent `FF*16` KAT is compiled out and does not reveal the live key;
+  a paired command-5 MAC-generation family is present but slot-4 permission
+  remains unobserved. See
   [security/secoc/README.md](security/secoc/README.md).
 
 ## Communications
@@ -77,7 +78,7 @@ See [storage/dataflash.md](storage/dataflash.md).
 ## Execution architecture
 
 Application foreground loop at `0x64FCC` polls TAUJ0 CH3; EIINT table at
-`0x20200`; 5,845 recovered functions, most still evidence-grade `recovered`
+`0x20200`; 5,852 recovered functions, most still evidence-grade `recovered`
 rather than behaviorally understood. See
 [architecture/firmware-architecture.md](architecture/firmware-architecture.md)
 and [tooling/processor-module-audit.md](tooling/processor-module-audit.md).

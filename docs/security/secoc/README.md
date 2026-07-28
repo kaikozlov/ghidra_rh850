@@ -4,8 +4,8 @@ Runtime CAN message authentication (AUTOSAR Secure Onboard Communication).
 
 | Report | Scope |
 |---|---|
-| [application-chain.md](application-chain.md) | Application receive profile: the six SecOC-bound RX PDUs, freshness construction, CMAC verify path |
-| [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md) | Corrected NvM object model, object 15, the unprovisioned/default key state, and the provisioned-unit experiment |
+| [application-chain.md](application-chain.md) | Application receive profile: six SecOC-bound RX PDUs, freshness, command-7 verify, disabled KAT, and command-5 generation family |
+| [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md) | Corrected NvM object model, object 15, unresolved live slot state, and the provisioned-unit experiment |
 
 ## Important distinction
 
@@ -18,8 +18,9 @@ key-set/MAC or an ICU command path. The correction is fully documented in
 
 ## Current state
 
-This calibration's slot-4 known-answer vector equals CMAC of 16 zero bytes
-under an erased `FF*16` key, and all three object-15 copies are invalid in
-this exact snapshot. The leading explanation is an unprovisioned/default key
-state. A provisioned unit must be tested dynamically — see the experiment in
-[key-storage-and-lifecycle.md](key-storage-and-lifecycle.md).
+All three object-15 copies are invalid in this exact snapshot, while the live
+SecOC receive path selects protected ICU-S slot 4 without reading object 15.
+The embedded `FF*16` KAT is compiled out and says nothing about the live slot.
+Command 5 is substantially recovered as MAC generation, but slot-4 permission
+requires dynamic testing — see
+[application-chain.md](application-chain.md).

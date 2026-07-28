@@ -55,7 +55,7 @@ public class ApplyP1MSfrTypes extends GhidraScript {
         StructureDataType s = new StructureDataType(CAT, "ICUS_Command", 0);
         s.setPackingEnabled(true);
         s.addBitField(UnsignedIntegerDataType.dataType, 8, "CMD",
-                "Command code (7 = AES-CMAC verify)");
+                "Command code (5 = recovered MAC generate, 7 = AES-CMAC verify)");
         s.addBitField(UnsignedIntegerDataType.dataType, 8, "reserved_8_15", "Reserved/unknown");
         s.addBitField(UnsignedIntegerDataType.dataType, 16, "KEY_SLOT",
                 "ICU-S key-slot selector (SecOC uses slot 4)");

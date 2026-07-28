@@ -325,11 +325,11 @@ It has low entropy and the original report measured zero CMAC matches. Therefore
   in any of the three object-15 copies.
 - **Strong external evidence:** provisioned related Sienna/Yaris/partner EPS
   variants store the operational key in object 15's second field.
-- **Strong inference:** the whole optional 32-byte bank is unprovisioned or
-  inactive in this snapshot. `../security/secoc/application-chain.md` adds that the compiled
-  CMAC path selects ICU-S slot 4 and its known-answer vector corresponds exactly
-  to an erased `FF*16` key. A masked/incomplete acquisition or different runtime
-  policy remains possible, so a provisioned-unit experiment is still required.
+- **Bounded:** the whole optional 32-byte CPU-visible bank is invalid/inactive in
+  this snapshot. `../security/secoc/application-chain.md` establishes that the
+  live CMAC path instead selects ICU-S slot 4. Its apparent `FF*16` KAT is
+  compiled out, so the donor's protected slot state remains unknown and requires
+  a dynamic experiment.
 
 The absence of a matching key in this dump is not evidence that pages 468–479 are
 KDF metadata, nor does it prove per-boot ICU derivation. It only proves absence
@@ -372,7 +372,8 @@ Accordingly:
   mirror field `0xFEBF02F8`;
 - neither is validated as containing a key in this exact snapshot;
 - the separate application verify path selects ICU-S slot 4 without reading the
-  object-15 mirror, and this calibration's known-answer vector expects `FF*16`;
+  object-15 mirror, while the apparent `FF*16` KAT is compiled out and cannot
+  identify the live slot state;
 - the ICU-S tail may exist for other protected material, but it is no longer the
   best-supported location for this SecOC key.
 
@@ -398,7 +399,8 @@ Accordingly:
 | `0x4EAD8` protects the final 2 KiB and optional-object pages 432–443 | **Definitive** |
 | pages 480–511 are the device's ICU-S reservation | **Strong hardware/firmware evidence** |
 | CPU-visible 00/FF tail bytes reveal protected ICU-S contents | **Unsupported** |
-| this snapshot's optional key bank is unprovisioned/inactive | **Strong inference** |
+| this snapshot's optional CPU-visible bank is invalid/inactive | **Definitive** |
+| protected ICU-S slot 4 is personalized or erased | **Unknown** |
 | exact production relation between provisioned object 15 and ICU slot 4 | **Unknown** |
 
 ## 8. References

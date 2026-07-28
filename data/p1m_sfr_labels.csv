@@ -28,7 +28,7 @@ address,name,size,access,comment
 0xFFD24200,CFDTMID16,4,rw,Diagnostic Tx message RAM for buffer n=16 (CAN 0x7A9 path)
 # ICU-S crypto-driver command/status window (docs/security/secoc/application-chain.md).
 # ICUSCMD encoding is verified; companion offsets use firmware-observed roles.
-0xFFC5D000,ICUSCMD,4,rw,ICU-S command register; CMAC verify writes (key_slot<<16)|7
+0xFFC5D000,ICUSCMD,4,rw,ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7
 0xFFC5D004,ICUSDAT,4,rw,ICU-S data/parameter word written beside ICUSCMD (firmware role)
 0xFFC5D00C,ICUSSTS,4,rw,ICU-S status; driver polls bit 0 as busy/ready
 0xFFC5D014,ICUSSTS2,4,rw,ICU-S companion status; driver polls low bits with ICUSSTS

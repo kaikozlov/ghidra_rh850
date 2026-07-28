@@ -12,7 +12,7 @@ explanations reconstructed from them.
 - **Firmware:** `8965B4512000`, MCU `R7F701381` (1 MiB CodeFlash + 32 KiB DataFlash).
 - **Image:** `RH850_P1M-E_Firmware.bin` (`0x108000` bytes, two flash regions —
   see "File layout" below).
-- **Recovery:** 5,845 functions / 174,783 instructions / 37,001 symbols on the
+- **Recovery:** 5,852 functions / 178,516 instructions / 37,634 symbols on the
   last annotated rebuild. Most functions are structurally recovered but not
   behaviorally understood — see the evidence policy below.
 - **Calibration caveat:** findings are specific to this Sienna calibration.

@@ -29,10 +29,12 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## SecOC
 
-- **Provisioned-unit behavior.** This snapshot is consistent with an
-  unprovisioned/default key state. All provisioned-unit questions (real
-  slot-4 key, dealer rekey path, ICU-S reservation contents in pages 480–511)
-  require dynamic testing on a provisioned vehicle. The experiment is
+- **Live slot-4 behavior.** Static CodeFlash proves slot-4 verification but
+  cannot determine the donor's protected key state because the `FF*16` KAT is
+  compiled out. The recovered command-5 generation family still requires a
+  dynamic slot-4 permission and generate/verify round-trip test. Dealer rekey
+  and ICU-S reservation contents in pages 480–511 also remain unknown. The
+  experiment is
   specified in
   [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md).
 - **Object-15 producer.** No static producer exists in this calibration.
@@ -50,6 +52,6 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Tooling
 
-- **Semantic coverage.** 5,845 functions recovered; most remain evidence-grade
+- **Semantic coverage.** 5,852 functions recovered; most remain evidence-grade
   `recovered` rather than behaviorally understood. Closing this is a
   long-tail effort, not a single task.

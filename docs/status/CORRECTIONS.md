@@ -77,3 +77,20 @@ the mistakes are not re-made.
 - **Right:** bootloader `F181` synthesizes `02 ‖ 32*0x21` — a placeholder. The
   real software ID comes from the *application* `F181` callback.
 - **Canonical:** [../diagnostics/bootloader-dids.md](../diagnostics/bootloader-dids.md).
+
+### CORR-009 — Slot-4 `FF*16` KAT proves an erased/default live key
+
+- **Wrong:** the embedded `B290FA2E…E540` vector is an active slot-4
+  known-answer test and, together with invalid objects 12–15, strongly
+  indicates an erased/default live SecOC key.
+- **Right:** both functions that reference the vector gate their crypto bodies
+  on fixed `CodeFlash[0x30EF3] == 0x5A`. This calibration stores `0x00`, so
+  both branch directly to report-only tails and never submit command 7. The
+  `FF*16` vector is latent dead data and places no constraint on protected
+  slot 4.
+- **Physical check:** no production application path has been identified that
+  reloads slot 4 on every boot. An unconditional `FF*16` KAT would therefore
+  be incompatible with a personalized nonvolatile slot; compiling it out is
+  consistent with either personalized or unprovisioned hardware state.
+- **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
+  §"Compiled-out slot-4 known-answer check"; `tests/verify_secoc_application.py`.

@@ -24,8 +24,8 @@ SecOC-associated objects. The initial analysis decoded only objects 0–3 and
 incorrectly generalized that every object was non-key state. The full DataFlash
 map in `../../storage/dataflash.md` shows that object 15 is a 32-byte triplicate object
 whose second half is the field-verified SecOC-key location on related variants.
-The distinct application verification path, ICU-S slot-4 selection, erased-key
-known-answer vector, freshness format, and provisioned-unit experiment are in
+The distinct application verification path, ICU-S slot-4 selection, compiled-out
+known-answer vector, command-5 generation family, and provisioned-unit experiment are in
 `../../security/secoc/application-chain.md`.
 
 `../tests/verify_secoc_nvm.py` verifies the original NvM correction. The broader 16-object
@@ -292,7 +292,9 @@ The production provisioning command remains unknown. On related variants the
 result is persisted as object 15's raw/XOR55/XORAA NvM copies. No SHE M1–M5 parser
 or ICU key-set path was established in the functions originally claimed. This
 image's separate application CMAC path selects ICU-S slot 4 without reading
-object 15; its embedded known-answer tag corresponds to an erased `FF*16` slot.
+object 15. The embedded `FF*16` vector is referenced only by two KAT bodies that
+are compiled out by `CodeFlash[0x30EF3]=0x00`, so it does not constrain the live
+slot.
 
 ### How is it derived?
 
@@ -327,8 +329,9 @@ that the RAM field held a valid key at capture time.
 | report's FEBEF/key-set/derivation path is invalid | **Definitive** |
 | final 2 KiB is an ICU-S protected storage tail | **Strong inference** |
 | application CMAC path selects ICU-S slot 4, not object-15 RAM | **Definitive** |
-| slot-4 known-answer vector in this calibration corresponds to `FF*16` | **Definitive** |
-| unprovisioned/inactive state explains the invalid 32-byte bank | **Strong inference** |
+| both slot-4 KAT bodies are compiled out; the `FF*16` vector is latent | **Definitive** |
+| CPU-visible objects 12–15 are invalid/inactive in this snapshot | **Definitive for the captured NvM bank** |
+| protected ICU-S slot 4 is personalized or erased | **Unknown** |
 | exact production provisioning path for a provisioned `8965B4512000` | **Unknown** |
 
 ## References
