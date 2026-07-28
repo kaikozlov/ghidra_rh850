@@ -12,6 +12,7 @@ VERIFY_SUITES := \
 	tests/verify_secoc_application.py \
 	tests/verify_secoc_security_properties.py \
 	tests/verify_icus_key_recovery_surface.py \
+	tests/verify_icus_software_paths.py \
 	tests/verify_icus_key_update.py \
 	tests/verify_icus_trace_decoder.py \
 	tests/verify_dataflash_layout.py \

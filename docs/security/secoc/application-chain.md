@@ -376,13 +376,18 @@ wrapper arbitrates the same lower device used by command-7 verification and
 handles busy/completion state, so an application-resident payload should use
 the wrapper rather than write ICU registers directly.
 
-No existing diagnostic upload route supplies that execution context. Application
-SIDs `0x34/0x36/0x37` have null callbacks and simple responses, and the recovered
-`0xAB` routine table has no edge to the test-bank activator or ICU generation
-dispatcher. The public bootloader callback payload instead runs with different
-GP/TP, RAM, interrupt, and peripheral-driver state. It is therefore not a safe
-substitute for an application-resident hook without reproducing initialization
-and excluding driver contention.
+No existing **application diagnostic** upload route supplies that execution
+context. Application SIDs `0x34/0x36/0x37` have null callbacks and simple
+responses, and the recovered `0xAB` routine table has no edge to the test-bank
+activator or ICU generation dispatcher. However, the authenticated bootloader
+callback is constructible from repository-known gate material and already has a
+CAN output transport. It is the preferred non-persistent direct-command
+experiment. Because it runs with different GP/TP, RAM, interrupt, lifecycle,
+and peripheral-driver state, rejection there is not a safe substitute for an
+application-context result. The same authorized flash path can in principle
+install a restorable application hook because boot validity is unkeyed
+CRC/marker consistency. See
+[software-path-assessment.md](software-path-assessment.md).
 
 ### 5.3 No configured SecOC transmit path
 
@@ -396,7 +401,8 @@ SecOC transmit path to repurpose.
 A practical signing proxy would still need:
 
 - a live proof that protected slot 4 permits command-5 generation;
-- an application-context execution foothold;
+- an application-context execution foothold (the constructible bootloader
+  callback is a bridge, but a persistent/restorable hook is not yet built);
 - a new result transport or an in-EPS frame-transmit hook;
 - sender-side freshness state and scheduling; the recovered state is receiver
   freshness and cannot simply be reused for forged transmit traffic;
@@ -717,8 +723,10 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 2. At `ICU MAC verify @ 0x897F4`, record command, key-slot selector, authenticated
    input pointer/bit length, received-tag pointer/bit length, and result. The
    expected selector is 4; ICU key bytes are not CPU-readable through this API.
-3. Establish an application-resident hook only after startup has initialized
-   the ICU driver. Submit a chosen message through upper dispatcher `0x88350`,
+3. First use a one-shot authenticated bootloader payload for raw command/status
+   characterization. If lifecycle or initialization differs, establish a
+   restorable application-resident hook only after startup has initialized the
+   ICU driver. Submit a chosen message through upper dispatcher `0x88350`,
    lower record 0, type 1, selector 4, output capacity 16. Do not call
    `0x89630` directly. Wait for the normal callback and record immediate status,
    completion status, full output, latency, and any command-7 contention.

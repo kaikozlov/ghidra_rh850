@@ -12,9 +12,11 @@
 > interpretation, and untested physical-attack hypotheses are kept separate
 >
 > **Verification:** `tests/verify_icus_key_recovery_surface.py`,
-> `tests/verify_secoc_application.py`, `tests/verify_secoc_security_properties.py`
+> `tests/verify_icus_software_paths.py`, `tests/verify_secoc_application.py`,
+> `tests/verify_secoc_security_properties.py`
 >
-> **Related:** [application chain](application-chain.md),
+> **Related:** [software-path assessment](software-path-assessment.md),
+> [application chain](application-chain.md),
 > [key storage/lifecycle](key-storage-and-lifecycle.md),
 > [DataFlash](../../storage/dataflash.md),
 > [RFP/RV40F](../../tooling/renesas-rfp-rv40f.md)
@@ -45,10 +47,20 @@ forward camera is the leading candidate for the steering-related traffic, but
 message ownership must be established by an in-vehicle capture or isolation
 test rather than assumed from network role.
 
-The **best direct attack on this EPS's existing slot 4** is power or EM
-side-channel analysis of repeated command-7 verifications. It does not depend on
-command-5 generation permission. The stock CAN-FD receive profiles provide an
-especially useful chosen-input surface:
+The **best first direct experiment on this EPS's existing slot 4** is now a
+software-only ICU command harness inside the already-authenticated 4 KiB
+bootloader callback. Repository-known gate material constructs accepted payloads,
+the pinned CAN-dump payloads already provide output transport, and each leaves
+more than `0xE00` bytes before its callback trailer. This can characterize known
+`RAM_KEY`, command 13, selector 4, status, and output without a persistent patch.
+A negative bootloader-context result does not close application lifecycle
+behavior; the fallback is a restorable application hook installed through the
+same authorized flash path.
+
+The **best characterized physical fallback** is power or EM side-channel
+analysis of repeated command-7 verifications. It does not depend on command-5
+generation permission. The stock CAN-FD receive profiles provide an especially
+useful chosen-input surface:
 
 ```text
 authenticated input = DataID_be16 || payload[28] || full_freshness[6]
@@ -62,15 +74,17 @@ remain unresolved, exhaustive completion is only `2^16`; one legitimate
 28-bit SecOC tag has fewer than `1/4000` expected false completions, and two or
 more captured frames remove practical ambiguity.
 
-Before building a large trace set, characterize command 13 with a known
-caller-loaded volatile key and directly test its selector-4 behavior and any
-non-destructive slot-to-`RAM_KEY` copy/alias candidate. Also test slot-4
-permissions for command 5 and the generic command-1/3 AES wrapper after normal
-application initialization. If command 5 is allowed, it offers a cleaner
-full-tag CMAC oracle. If command 1 is allowed, it offers an ideal
-chosen-plaintext AES oracle and is cryptographically sufficient to synthesize
-CMAC without learning the key. None of these hardware outcomes should be
-assumed from the stock call graph.
+Before building a large trace set, use the bootloader payload to characterize
+command 13 with a known caller-loaded volatile key and directly test its
+selector-4 behavior and any non-destructive slot-to-`RAM_KEY` copy/alias
+candidate. If lifecycle or initialization blocks that context, move the same
+experiment into a restorable application hook. Also test slot-4 permissions for
+command 5 and the generic command-1/3 AES wrapper after normal application
+initialization. If command 5 is allowed, it offers a cleaner full-tag CMAC
+oracle. If command 1 is allowed, it offers an ideal chosen-plaintext AES oracle
+and is cryptographically sufficient to synthesize CMAC without learning the
+key. None of these hardware outcomes should be assumed from the stock call
+graph.
 
 Fault injection against serial read-range checks or ICU-S policy is a later
 fallback, not the first experiment. Public P1M-E work proves that RH850 serial
@@ -183,8 +197,8 @@ key irreversibly.
 | Rank | Method | Expected value | Cost/risk | Current evidence |
 |---:|---|---|---|---|
 | 1 | Extract from a same-vehicle producer/peer ECU | Highest overall: may reduce the problem to ordinary flash/RAM analysis | Requires identifying and acquiring the exact peer; peer may also use an HSM | **Hypothesis**, compelled by shared signing capability but producer/storage unobserved |
-| 2 | Characterize command 13 and test `slot 4 -> RAM_KEY -> export` | First direct experiment: cheap discriminator that could expose an undocumented copy/export capability | Requires a custom application-context harness and careful command/output characterization | **Hardware behavior unknown; valid hypothesis** |
-| 3 | Power/EM SCA on EPS command 7 | Best characterized direct slot-4 recovery path; unlimited chosen-input verifications are structurally available | Lab equipment, trace alignment, possible masking/noise | **Recovered attack surface**, leakage unobserved |
+| 2 | Characterize command 13 and test `slot 4 -> RAM_KEY -> export` | First direct experiment: cheap discriminator that could expose an undocumented copy/export capability | Start with a constructible one-shot bootloader CAN payload; use a restorable application hook only if lifecycle/context requires it | **Software foothold verified; hardware behavior unknown** |
+| 3 | Power/EM SCA on EPS command 7 | Best characterized physical slot-4 recovery path; unlimited chosen-input verifications are structurally available | Lab equipment, trace alignment, possible masking/noise | **Recovered attack surface**, leakage unobserved |
 | 4 | Test command 5 and command 1 under selector 4 | Can yield cleaner SCA stimulus or a usable in-ECU oracle | Requires application-context harness; slot policy may reject | **Verified software support**, hardware permission unknown |
 | 5 | Capture factory/dealer provisioning ecosystem | A tool/backend or manufacturing station may expose plaintext or authorization material | Opportunistic and access-dependent; M1-M5 capture alone is insufficient | **Recovered command-8 route**, production use unknown |
 | 6 | Fault serial protected-tail read or ICU-S access check | Could work if protection is a skip-able software range check | Destructive tuning; hardware blanking may still return `00/FF` | **Public P1M-E FI precedent**, no protected-key read precedent |
@@ -332,9 +346,12 @@ number alone.
 
 ## 5. Oracle-permission experiment before SCA
 
-Run this only on an isolated, recoverable bench unit after the stock application
-has initialized ICU-S. A bootloader-context call may see different lifecycle,
-interrupt, global-pointer, and driver state.
+Run this only on an isolated, recoverable bench unit. Start with a one-shot
+authenticated bootloader payload that polls ICU-S directly and reports raw output
+over its existing CAN transport. Treat bootloader lifecycle as a discriminator,
+not a definitive negative. If an operation rejects or initialization differs,
+repeat from a restorable hook after the stock application has initialized ICU-S;
+that context has different interrupts, global pointers, RAM, and driver state.
 
 ### 5.1 Required tests
 
@@ -368,8 +385,8 @@ output shape or entropy is not sufficient.
 
 ### 5.2 Command-13 experiment controls
 
-1. Run after normal application ICU-S initialization, not only from bootloader
-   context.
+1. Run first from a non-persistent bootloader payload, then repeat after normal
+   application ICU-S initialization when bootloader behavior rejects or differs.
 2. Establish the candidate command's behavior first with a known volatile key
    loaded through the corresponding non-persistent operation, if that operation
    can be identified safely.
@@ -473,12 +490,12 @@ Have exact-vehicle protected CAN capture and identified producer?
            |
            +-- no candidate / peer also protected
                    |
-                   +-- characterize known RAM_KEY + candidate command 13
+                   +-- one-shot boot payload: known RAM_KEY + candidate command 13
                    |      |
                    |      +-- selector 4/copy produces useful output
                    |      |       -> validate against stock SecOC frames
-                   |      +-- rejected/ordinary RAM-only behavior
-                   |              -> bench-test command 5 and command 1
+                   |      +-- boot-context rejection / ordinary RAM-only behavior
+                   |              -> repeat in application context; test command 5 and command 1
                    |                    +-- command 1 -> AES oracle/SCA
                    |                    +-- command 5 -> CMAC oracle/SCA
                    |                    +-- both reject -> command-7 FD path
@@ -520,6 +537,9 @@ recovery. A changed slot-4 key is rekeying, not recovery of the original.
 | slot 4 verifies all configured protected RX profiles | **verified** | firmware-static/test |
 | all nine application `ICUSCMD` writers are accounted for | **verified** | firmware-static/test |
 | no stock application writer invokes command 13 or persistent-slot plaintext export | **verified, scoped to this image** | firmware-static/test |
+| accepted 4 KiB bootloader payloads provide a constructible callback and existing CAN transport with more than `0xE00` bytes spare | **verified** | firmware-static/fixtures/test |
+| application SIDs `0x23/0x34/0x36/0x37` are null-callback responses and WDBI input sizing is exact (maximum 67-byte request) | **verified, scoped to this image** | firmware-static/test |
+| command-5 preserves selector plumbing for a candidate command-ID substitution; DID `0x1010` preserves output transport but has fixed command-8 block shape and no selector | **verified structure; untested patch** | firmware-static/test |
 | command 13's exact Renesas operation, selector semantics, and output format | **unknown** | restricted manual or bench required |
 | an internal slot-4-to-`RAM_KEY` copy/alias exists | **unknown; not disproved** | restricted manual or bench required |
 | command 13 can return useful slot-4 material after such a copy/alias | **unknown; not disproved** | bench required |

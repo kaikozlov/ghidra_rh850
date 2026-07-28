@@ -39,11 +39,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md).
 - **Command 13 and `RAM_KEY`.** The stock application never issues command 13,
   but that does not determine direct hardware behavior. Obtain the restricted
-  ICU-S/ICUSE command specification or characterize a custom application-context
-  harness: establish behavior with a known caller-loaded `RAM_KEY`, vary command
-  selectors including 4, record raw status/output, and test whether any
-  non-destructive operation copies or aliases slot 4 into `RAM_KEY`. The proposed
-  copy-then-export chain is untested, not disproved.
+  ICU-S/ICUSE command specification or first characterize it in a constructible,
+  non-persistent bootloader CAN payload: establish behavior with a known
+  caller-loaded `RAM_KEY`, vary selectors including 4 and 14, and record raw
+  status/output. If bootloader lifecycle rejects or differs, repeat through a
+  restorable application-context hook. Test whether any non-destructive
+  operation copies or aliases slot 4 into `RAM_KEY`. The proposed
+  copy-then-export chain is untested, not disproved. See
+  [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md).
 - **Same-vehicle producer key storage.** Identify the physical producers of the
   protected IDs, beginning with but not assuming the forward camera, then dump
   exact-part peers and validate all 16-byte candidates against synchronized
@@ -64,11 +67,13 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   public P1M-E fault injection proves ordinary flash readout, not key-array
   access.
 - **Application-resident signing proxy.** The initialized command-5 wrapper is
-  structurally usable and arbitrates the shared ICU driver, but there is no
-  configured application upload/execution foothold, no stock output transport,
-  and no production SecOC transmit path. A dynamic prototype must establish
-  application-context execution, slot-4 permission, output transport,
-  sender-side freshness, latency, and command-7 contention.
+  structurally usable and arbitrates the shared ICU driver. There is no
+  configured **application diagnostic** upload path, stock output transport, or
+  production SecOC transmit path; however, repository-known bootloader gate
+  material provides a constructible callback and an authorized bridge to a
+  possible persistent/restorable application hook. A dynamic prototype must
+  still establish application-context execution, slot-4 permission, output
+  transport, sender-side freshness, latency, and command-7 contention.
 - **Dormant crypto-test activation.** CAN `0x01B..0x01F` provide the test
   selector/message/expected result only after bank activator `0x69018` runs.
   No caller or function-pointer entry reaches that activator in the recovered

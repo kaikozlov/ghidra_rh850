@@ -8,7 +8,7 @@ them.
 |---|---|---|
 | Bootloader SecurityAccess + payload gate | Unlock programming services; authenticated download | [bootloader-payload-gate.md](bootloader-payload-gate.md) |
 | Application SecurityAccess | Extended-session level 2 unlock | [application-security-access.md](application-security-access.md) |
-| SecOC | Runtime CAN message authentication | [secoc/README.md](secoc/README.md) |
+| SecOC | Runtime CAN message authentication and ICU-S software-path assessment | [secoc/README.md](secoc/README.md) |
 
 ## Important distinctions
 
@@ -28,5 +28,9 @@ them.
   the donor's live key state. The former `FF*16` inference was disproved
   because the KAT is compiled out. A paired generation primitive exists, but
   its only configured caller is a dormant test harness and there is no
-  production SecOC transmit path; see
-  [secoc/application-chain.md](secoc/application-chain.md).
+  production SecOC transmit path. This does not make the software layer a
+  boundary: recovered bootloader gate material constructs authenticated RAM
+  callbacks, providing a software-only direct-command experiment and a possible
+  bridge to an application hook. See
+  [secoc/application-chain.md](secoc/application-chain.md) and
+  [secoc/software-path-assessment.md](secoc/software-path-assessment.md).

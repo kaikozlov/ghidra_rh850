@@ -61,7 +61,9 @@ Three independent domains — do not conflate them:
   a paired command-5 MAC-generation primitive accepts selector 4 in software,
   but its only configured caller is a dormant CAN-fed test harness rather than
   a SecOC transmit path. Hardware slot permission and a practical
-  application-resident signing proxy remain dynamic questions. See
+  application-resident signing proxy remain dynamic questions, but recovered
+  bootloader gate material provides a constructible software-only direct-command
+  experiment and possible bridge to an application hook. See
   [security/secoc/README.md](security/secoc/README.md).
 
 ## Communications
