@@ -296,3 +296,27 @@ Thus the payload-build secret is a genuine code-execution gate. The CRC is only
 an integrity/format check; CMAC provides the cryptographic authorization. The
 critical execution primitive is the overlap between the allowed 4 KiB download
 window and the flash driver's callback slot at offset `0xFD0`.
+
+### Persistent-trust consequence
+
+The boot-time application handoff does not establish OEM code provenance. It
+checks CRC32 descriptors and fixed `0x5AA5A55A` markers for the two CodeFlash
+regions. The high region covers application entry/vector code, but neither the
+startup CRC nor the marker is keyed or signed.
+
+Consequently, once the model-wide SecurityAccess and payload-build secrets have
+been compromised and the authenticated RAM callback is executing, the remaining
+boot boundary is consistency rather than authenticity. The payload executes in
+the same CPU privilege domain as the boot flash sequencer, and the firmware
+contains program/erase/marker machinery for the application-covered region. A
+payload that obtains a durable CodeFlash write and recomputes the CRC fields and
+markers can in principle install an application-resident hook that survives
+reset. This repository has not built or bench-tested such a persistent patch;
+the conclusion is a recovered trust-chain property, not an operational flashing
+procedure.
+
+This distinction is central to a comma design. A one-shot boot callback is in the
+wrong GP/TP/RAM/interrupt context for the initialized ICU and CAN application
+drivers. A persistent application hook would solve that context mismatch, but it
+would also replace an OEM safety boundary and must be engineered and validated as
+safety-critical firmware.

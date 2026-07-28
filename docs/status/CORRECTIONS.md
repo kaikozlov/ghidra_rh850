@@ -131,3 +131,16 @@ the mistakes are not re-made.
   [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md)
   §"Exact diagnostic transport contract";
   `tests/verify_icus_key_update.py`, `tests/verify_icus_trace_decoder.py`.
+
+### CORR-012 — Short classic-CAN SecOC frame bypass
+
+- **Wrong:** because the SecOC worker checks only that the received length covers
+  the trailer, a short `0x2E4`/`0x131`/`0x132` frame can reach CMAC verification
+  and preserve stale authentic-payload bytes in COM.
+- **Right:** the earlier CanIf callback at `0x7FF52` enforces configured minimum
+  DLC and physical maximum DLC. All classic secured routes configure 8 and the
+  classic maximum is 8, so they require exact DLC 8. FD routes configure 32,
+  accept physical DLC 48/64, and are then clamped to 32; the suffix is ignored
+  rather than delivered as stale authenticated payload.
+- **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
+  §"DLC canonicalization"; `tests/verify_secoc_security_properties.py`.

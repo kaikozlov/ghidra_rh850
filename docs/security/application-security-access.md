@@ -213,6 +213,38 @@ populate the same security-level fields. The algorithm, secret location
 pattern, and consumer machinery identified here are the template to check
 against when Corolla firmware becomes available.
 
+## 6.1 Security impact of the empty policy tables
+
+The empty policy is not merely dead SecurityAccess UI. Several live application
+operations remain reachable after session checks with no cryptographic tester
+authorization:
+
+- **CommunicationControl (`0x28`)** is available in extended session. Its real
+  callback `0x93C62 → 0x93B56/0x95154` applies generated communication-mode
+  updates; this is not one of the null-callback echo services. No speed gate is
+  recovered in that service path. A bus-local tester can therefore exercise a
+  safety-relevant communication availability surface without unlocking SID
+  `0x27`.
+- **Programming handoff (`0x10 02`)** is not SA-gated. It is constrained by
+  vehicle speed, supply, transition phase, and handoff state, so it is not an
+  unrestricted at-speed reset primitive. At permitted conditions it can still
+  reset the EPS into its boot transition without proving tester identity.
+- **All 19 WDBI records** are free of Dcm SA levels. The generated lower-request
+  hook at `0x8A01C` is compiled to `return 0`, so there is no second external
+  authorization manager behind the Dcm policy. Most callbacks remain only
+  structurally classified. DID `0x1010` is safer than the Dcm table suggests
+  because ICU-S independently authenticates its SHE M1–M3 package and counter.
+- **ControlDTCSetting and proprietary `0xAB`** are also session-only. The
+  recovered `0xAB` callbacks include speed gates for some RIDs and state/config
+  writes for others; their exact motor-control effect remains bounded and should
+  be treated as an attack surface rather than assumed harmless.
+
+For a comma integration this policy weakness is not a clean control interface.
+It is primarily an availability/configuration surface, and the unknown WDBI/AB
+semantics make it too fragile for steering control. A purpose-built,
+authenticated, bounded application interface would be safer than depending on
+these diagnostic side effects.
+
 ## 7. `0xAB` RID callback analysis
 
 The 13 RID callback pairs (at `0x25768`, RIDs `0x0204`..`0x2014`), the

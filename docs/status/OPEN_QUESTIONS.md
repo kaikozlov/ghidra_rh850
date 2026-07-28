@@ -51,6 +51,23 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **Object-15 producer.** No static producer exists in this calibration.
   Where a provisioned unit writes object 15 from is unknown (dealer tool path
   hypothesis only).
+- **Reset-window replay.** Receiver freshness is zeroed at SecOC initialization,
+  so a captured positive synchronization value is structurally forward after
+  reset. A cold-boot bench capture must determine sync cadence, whether an old
+  authenticated sync can win the startup race, which early ordinary frames can
+  then replay, and how quickly legitimate sync closes the window.
+- **Tag-guess and saturation rate.** The static profile exposes 28 CMAC bits,
+  does not advance freshness on failure, and has no recovered authentication
+  failure lockout. Measure command-7 throughput, queue replacement, `0xE07`
+  polling latency, watchdog load, legitimate-frame loss, and whether bus error
+  behavior makes online guessing or only denial of service practical.
+- **Future-sync recovery.** A valid sync can jump arbitrarily forward. Verify on
+  a bench whether a far-future signed sync blocks lower legitimate epochs until
+  receiver reset, whether any external freshness manager repairs it, and which
+  diagnostic/status signals expose the desynchronization.
+- **FD ignored-suffix behavior.** CAN-FD DLC 48/64 is accepted then clamped to 32.
+  Confirm whether gateways or peer ECUs interpret the suffix differently; the
+  Sienna EPS itself does not pass it to SecOC/COM.
 
 ## Variants
 

@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** —
 >
-> **Verification:** `tests/verify_secoc_application.py`
+> **Verification:** `tests/verify_secoc_application.py`, `tests/verify_secoc_security_properties.py`
 >
 > **Related:** [key-storage](key-storage-and-lifecycle.md), [dataflash](../../storage/dataflash.md)
 
@@ -451,6 +451,142 @@ secret/counter needed to construct an accepted package. The canonical lifecycle
 analysis and revised provisioning experiment are in
 [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md).
 
+## 5.5 Security-boundary audit: what fails closed
+
+The receive path does **not** contain a simple “bad MAC still reaches COM”
+bypass. ICU-S writes the verification result to `0xFEBE555C`; post-verification
+worker `0x8E67A` converts that byte to a boolean and passes the same boolean to
+the freshness-commit callback. Only the true branch delivers the authentic PDU
+to the upper router. The false branch reports the failure and releases the
+queued PDU without advancing receiver freshness.
+
+This negative result matters: patching a tag, freshness nibble, or payload byte
+cannot exploit an error-code inversion in the recovered chain. Any bypass must
+instead compromise the key/use boundary, modify application code/state, exploit
+a separate parser/control-flow defect, or find an ICU-S policy failure.
+
+`tests/verify_secoc_security_properties.py` pins the relevant worker bodies and
+exact result-branch instructions.
+
+## 5.6 Volatile freshness creates a reset-window replay boundary
+
+`secoc_rx_init @ 0x8DB84` unconditionally reaches `0x8E7D4 → 0x8E9FC`.
+Those functions zero the current and pending synchronization state and all five
+ordinary-message freshness windows. The complete Ghidra xref set for current
+trip/reset words `0xFEBE5568/0xFEBE556C` contains only initialization,
+reconstruction, commit, and integrity-check functions; no NvM restore writes
+those words. Receiver freshness is therefore **RAM-only in this calibration**.
+
+The synchronization monotonicity check at `0x8EF9E` then accepts, subject to a
+valid slot-4 CMAC:
+
+```text
+new_trip > old_trip
+or (new_trip == old_trip and new_reset > old_reset)
+or configured 16-bit trip wrap
+```
+
+The wrap threshold is `0x0F`: an old trip at least `0xFFF0` may advance to a
+nonzero trip no greater than `0x10`. There is no maximum forward delta for the
+ordinary case. Consequences:
+
+1. After SecOC initialization, retained state is `(trip=0, reset=0)`. Any
+   previously captured, correctly authenticated synchronization frame with a
+   positive freshness value is structurally forward and can be accepted again.
+2. Replaying useful ordinary protected frames after that sync is narrower: the
+   receiver reconstructs message counters from only four transmitted freshness
+   bits and its zeroed per-PDU window. Captures near the beginning of the replayed
+   epoch are the leading candidates; arbitrary late-epoch replay is not implied.
+3. A valid **far-future** synchronization frame can move the receiver forward by
+   an arbitrary amount. Lower legitimate synchronization values are then rejected
+   until reset or eventual counter wrap. This is a desynchronization/availability
+   primitive for any party that can produce a valid slot-4 tag.
+4. Practical reset replay still requires control of startup timing and suppression
+   or racing of the legitimate sync sender. That bus-level feasibility is a
+   **hypothesis requiring a cold-boot bench capture**, not a completed exploit.
+
+The static reset, ordering predicate, and unbounded forward-jump behavior are
+firmware-static/recovered; the live attack window is unobserved.
+
+## 5.7 Twenty-eight-bit tags and an unthrottled online oracle
+
+Every profile computes a full 128-bit CMAC but transmits and verifies only 28
+bits. A blind forgery therefore has mean work factor `2^27 = 134,217,728`
+independent attempts for a fixed authenticated input.
+
+The failure path does not commit freshness and has no recovered per-source or
+per-PDU authentication-failure lockout. This lets repeated guesses continue to
+target the same candidate until a legitimate authenticated frame advances state.
+The upper CryptoIf wrapper also waits synchronously for completion with a fixed
+`0xE07`-iteration polling budget. Thus malformed-but-well-shaped protected
+traffic has two distinct effects:
+
+- **authenticity pressure:** a theoretical online 28-bit forgery oracle;
+- **availability pressure:** repeated ICU command-7 work and foreground busy
+  polling can consume the shared crypto/CPU path and delay legitimate protected
+  traffic.
+
+This is not yet a claim of practical steering-frame forgery. CAN arbitration,
+ECU queue behavior, ICU-S throughput, error reporting, legitimate traffic, and
+watchdog effects determine the real attempt rate. Those must be measured on a
+bench. The static firmware nevertheless proves the tag width, unchanged
+freshness on failure, absence of a recovered lockout in this path, and bounded
+busy-poll loop.
+
+## 5.8 DLC canonicalization: classic is exact, FD has ignored suffix aliases
+
+The CanIf callback at `0x7FF52` enforces configured minimum DLC and physical
+maximum DLC. This closes an initially plausible short-frame/stale-tail theory:
+all classic secured profiles configure length 8 and classic maximum is 8, so
+`0x2E4`, `0x131`, `0x132`, and sync `0x00F` require exact DLC 8 before SecOC.
+There is no short-classic SecOC bypass here.
+
+The FD profiles configure 32 bytes while the physical maximum is 64. DLC 48 or
+64 is therefore accepted by CanIf, after which `0x8E0BE` clamps the secured PDU
+to 32 bytes before authentication. Bytes beyond 32 are ignored and
+unauthenticated. They do not reach this EPS's COM consumers, so this is not an
+EPS payload-malleability result. It is a bounded **non-canonical frame alias**:
+another ECU or gateway that interprets the suffix could disagree with this EPS
+about the semantic contents of the same physical frame.
+
+## 5.9 Comma/openpilot architectural implications
+
+For this firmware, `0x2E4` is an **incoming EPS PDU**. Making the EPS compute a
+CMAC and then transmit `0x2E4` back onto its own bus is therefore architecturally
+backwards: the configured production transmit graph does not contain that ID,
+and controller self-reception/loopback is not established. There are three
+conceptually different designs:
+
+1. **Remote signing proxy:** comma sends an authenticated-input request to
+   application-resident EPS code; the EPS runs command 5 and returns the tag;
+   comma sends the final CAN frame. This preserves the stock SecOC receive path
+   but adds two transport legs, an asynchronous ICU operation, sender-freshness
+   state, and contention with command-7 verification. It is the highest-latency
+   and most fragile design.
+2. **In-EPS frame construction/transmit:** application-resident code runs command
+   5 and submits a complete protected frame through a new transmit route. This
+   still needs sender freshness and does not solve the fact that the intended
+   consumer is the same EPS unless hardware loopback or another gateway role is
+   deliberately established.
+3. **Patched local command ingress:** a persistent application modification
+   accepts a separate comma-to-EPS command and feeds a bounded internal control
+   interface without forging the stock SecOC frame. Technically this avoids the
+   crypto round trip, but it replaces an OEM safety/security boundary and must be
+   treated as a new safety-critical controller: strict torque/rate/angle limits,
+   authenticated source, freshness, watchdog timeout, stock-command arbitration,
+   fail-silent behavior, and bench/HIL validation are mandatory.
+
+The stock firmware implements none of these. The public bootloader payload runs
+in the wrong GP/TP/interrupt context for option 1 or 2. A durable design requires
+an application-context foothold or a persistent application update; simply
+calling the ICU engine from the boot callback is not equivalent.
+
+Absolute feasibility cannot be decided statically because the foreground tick
+period and ICU completion latency remain uncalibrated. A safe bench prototype
+should first measure command-5 permission for slot 4, end-to-end completion
+latency and jitter, command-5/7 contention, queue saturation, watchdog margin,
+and behavior when sync or legitimate protected traffic advances concurrently.
+
 ## 6. Why all object-15 copies are invalid
 
 Object 15 remains structurally definitive:
@@ -648,6 +784,15 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 | Static CodeFlash determines the donor's live slot-4 key state | **Unsupported** |
 | A provisioned `12000` mirrors the same key in object 15 and ICU slot 4 | **Requires the dynamic experiment** |
 | `0x344` is a protected EPS message in this calibration | **Unsupported** |
+| CMAC failure reaches COM or commits freshness | **Disproved; the recovered path fails closed** |
+| Current/pending sync and ordinary receive windows are zeroed at SecOC init | **Verified firmware structure** |
+| A positive captured sync is structurally forward after receiver reinitialization | **Recovered; live replay timing unobserved** |
+| Authenticated sync accepts an arbitrary forward trip/reset jump | **Verified firmware structure** |
+| A far-future signed sync is a practical persistent desynchronization attack | **Hypothesis pending bench timing/recovery tests** |
+| CMAC failures advance freshness or trigger a recovered lockout | **Disproved for this path** |
+| Repeated fixed-input guesses face a 28-bit transmitted-tag boundary | **Verified; practical attempt rate unobserved** |
+| Classic secured frames admit short DLC | **Disproved; configured minimum and physical maximum both force DLC 8** |
+| FD DLC 48/64 is accepted then truncated to configured 32 bytes | **Verified; cross-ECU semantic impact bounded** |
 
 ## References
 
