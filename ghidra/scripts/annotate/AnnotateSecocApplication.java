@@ -58,8 +58,12 @@ public class AnnotateSecocApplication extends GhidraScript {
             "Submit the 64-byte diagnostic key-update envelope through driver record 0 and provide a 48-byte result buffer. Success advances the state from 0x22 to 0x33 while completion is pending.");
         rename(0x6920AL,"icus_key_update_completion_callback",
             "Command-8 diagnostic completion callback. Hardware success advances the active key-update bank to state 0x44; failure advances it to 0x66.");
-        rename(0x6922CL,"icus_command13_test_completion",
-            "Asynchronous completion callback for the neighboring command-1/3 test record.");
+        rename(0x6922CL,"icus_command1_3_test_completion",
+            "Asynchronous completion callback for the neighboring command-1/3 AES test record; this is not a command-13 persistent-key export path.");
+        rename(0x8783CL,"icus_command1_3_test_submit",
+            "Submit the dormant command-1/3 AES test record through the shared ICU-S driver and arm its asynchronous completion state.");
+        rename(0x8954CL,"icus_command1_3_aes_transform",
+            "Low-level ICU-S AES wrapper: accept selector 0..14, map operation flag 0/1 to command 1/3, stream caller input/output, and write (selector << 16) | command to ICUSCMD. Slot policy remains hardware-enforced.");
         rename(0x69246L,"icus_command7_test_completion",
             "Asynchronous command-7 test completion callback; record failure and advance the generated test state.");
         rename(0x6926AL,"icus_command5_test_completion",

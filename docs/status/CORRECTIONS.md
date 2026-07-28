@@ -144,3 +144,20 @@ the mistakes are not re-made.
   rather than delivered as stale authenticated payload.
 - **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
   §"DLC canonicalization"; `tests/verify_secoc_security_properties.py`.
+
+### CORR-013 — `0x6922C` as command-13 key-export completion
+
+- **Wrong:** the historical Ghidra label `icus_command13_test_completion`
+  identified `0x6922C` as completion of an ICU-S command-13/RAM-key-export
+  path and therefore as a possible persistent-slot export lead.
+- **Right:** `0x6922C` belongs to the neighboring command-1/3 AES test record.
+  The low-level wrapper at `0x8954C` constrains its operation flag to literal
+  command 1 or 3 and its selector to `0..14`. The complete nine-site
+  `ICUSCMD` census contains no **stock application** command-13 invocation.
+  That corrects the function label only: without the restricted Renesas ICU-S
+  manual or a bench test, it does not establish direct command-13 semantics or
+  disprove a slot-4-to-`RAM_KEY` copy/alias followed by export.
+- **Canonical:**
+  [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
+  §"Complete application command-writer census";
+  `tests/verify_icus_key_recovery_surface.py`.

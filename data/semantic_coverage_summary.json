@@ -5,14 +5,14 @@
   },
   "csv": "semantic_coverage_ledger.csv",
   "evidence_grade_counts": {
-    "annotated": 436,
-    "recovered": 5352,
+    "annotated": 438,
+    "recovered": 5350,
     "thunk": 77
   },
   "function_count": 5865,
   "name_source_counts": {
-    "DEFAULT": 5429,
-    "USER_DEFINED": 436
+    "DEFAULT": 5427,
+    "USER_DEFINED": 438
   },
   "root_kind_counts": {
     "interrupt": 24,

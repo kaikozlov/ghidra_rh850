@@ -29,14 +29,40 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## SecOC
 
-- **Live slot-4 behavior.** Static CodeFlash proves slot-4 verification but
-  cannot determine the donor's protected key state because the `FF*16` KAT is
-  compiled out. Command 5 accepts software selectors `0..14`, including 4, but
-  the protected slot's generation permission still requires a dynamic
-  generate/verify round trip. Dealer rekey and ICU-S reservation contents in
-  pages 480–511 also remain unknown. The experiment is
-  specified in
-  [../security/secoc/application-chain.md](../security/secoc/application-chain.md).
+- **Live slot-4 operation permissions.** Static CodeFlash proves slot-4
+  verification but cannot determine the provisioned usage flags. Command 5 and
+  the generic command-1/3 AES wrapper accept software selectors `0..14`,
+  including 4, but ICU-S may reject generation or encipher/decipher for this
+  slot. Test command 7 good/bad controls and then command 5/1 after normal
+  application initialization; record status, output, latency, jitter, and
+  debug-attached behavior. See
+  [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md).
+- **Command 13 and `RAM_KEY`.** The stock application never issues command 13,
+  but that does not determine direct hardware behavior. Obtain the restricted
+  ICU-S/ICUSE command specification or characterize a custom application-context
+  harness: establish behavior with a known caller-loaded `RAM_KEY`, vary command
+  selectors including 4, record raw status/output, and test whether any
+  non-destructive operation copies or aliases slot 4 into `RAM_KEY`. The proposed
+  copy-then-export chain is untested, not disproved.
+- **Same-vehicle producer key storage.** Identify the physical producers of the
+  protected IDs, beginning with but not assuming the forward camera, then dump
+  exact-part peers and validate all 16-byte candidates against synchronized
+  stock frames. A producer must have the shared key or equivalent signing
+  capability, but its MCU, HSM, slot, and CPU-visible storage are unknown.
+- **Command-7 power/EM leakage.** FD IDs `0x090`/`0x0D7` provide 14 chosen bytes
+  in CMAC's first AES block. Run fixed-vs-random leakage detection, establish a
+  stable trigger, attempt CPA for key bytes 2..15, and complete the two fixed
+  Data-ID-aligned bytes by `2^16` search against multiple stock tags. ICU-S
+  masking, byte order, trace count, and attainable SNR are unobserved.
+- **Physical power topology.** Confirm the chip marking and measure the actual
+  core rail before power analysis or glitching. Renesas lists `R7F701381` as a
+  DPS part with VDD pins 11/66/98, while a public same-part-number report
+  describes VCL/eVR pins 11/66.
+- **Protected-tail serial read.** Determine whether a faulted serial read of
+  `0x1007800..0x1007FFF` bypasses only a mask-ROM range check or also exposes
+  nonblank ICU-S storage. The current CPU-visible dump contains only `00/FF`;
+  public P1M-E fault injection proves ordinary flash readout, not key-array
+  access.
 - **Application-resident signing proxy.** The initialized command-5 wrapper is
   structurally usable and arbitrates the shared ICU driver, but there is no
   configured application upload/execution foothold, no stock output transport,

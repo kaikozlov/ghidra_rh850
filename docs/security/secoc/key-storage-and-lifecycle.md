@@ -270,9 +270,33 @@ that reflects product policy, provisioning state, a masked/incomplete snapshot,
 or another operational source. The exact key source for this captured image is
 therefore unknown.
 
-Pages 480–511 remain strongly consistent with an ICU-S-reserved 2 KiB tail, but
-that hardware/layout fact no longer supports placing this SecOC key there. Secure
-ICU-S storage may hold other material.
+Pages 480–511 remain strongly consistent with an ICU-S-reserved 2 KiB tail. In
+this capture the entire tail exposes only `00/FF` readback. That supports a
+protected-storage boundary; it does not expose plaintext slot bytes or prove the
+physical encoding beneath the read filter.
+
+The complete application `ICUSCMD` writer census also closes the normal
+software-export lead. Nine direct writers cover abort/reset, initialization,
+diagnostic self-test, command 1/3 AES, command 5 MAC generation, command 7 CMAC
+verification, command 8 authenticated update, and command 11. The dynamic
+wrappers constrain their selectors/operation IDs, and no stock application
+writer invokes command 13 or a recovered persistent-slot export command.
+
+That negative result is scoped to the firmware's existing call graph. The
+restricted Renesas ICU-S/ICUSE command manual is unavailable, so it does not
+establish command 13's exact semantics or rule out a custom harness invoking an
+undocumented selector, slot-to-`RAM_KEY` copy/alias, or export behavior. Public
+AUTOSAR SHE descriptions of volatile `RAM_KEY` are architectural evidence, not
+proof that direct command 13 on this implementation cannot involve slot 4. The
+proposed `slot 4 -> RAM_KEY -> command 13` sequence remains an explicit bench
+question.
+
+This leaves peer-ECU extraction, direct command characterization, and physical
+leakage as the leading existing-key routes. In particular, the CAN-FD
+command-7 path authenticates
+`DataID_be16 || payload[28] || freshness[6]`, placing 14 chosen payload bytes in
+CMAC's first AES block. The ranked methods and isolated-bench plan are canonical
+in [the key-recovery assessment](key-recovery-assessment.md).
 
 ## 8. Injection and refresh: command 8 via WDBI DID `0x1010`
 
@@ -517,6 +541,12 @@ that the RAM field held a valid key at capture time.
 | report's FEBEF/key-set/derivation path is invalid | **Definitive** |
 | final 2 KiB is an ICU-S protected storage tail | **Strong inference** |
 | application CMAC path selects ICU-S slot 4, not object-15 RAM | **Definitive** |
+| all nine application `ICUSCMD` writers are accounted for | **Definitive** |
+| stock application invokes command 13 or a plaintext persistent-slot export | **Disproved for this image** |
+| direct command 13 semantics and selector-4 behavior | **Unknown; not constrained by the writer census** |
+| an undocumented slot-4-to-`RAM_KEY` copy/alias exists | **Unknown; bench/restricted manual required** |
+| command-1/3 software accepts selectors `0..14`; slot-4 hardware permission | **Definitive / unknown** |
+| FD command-7 input places 14 chosen payload bytes in CMAC block 1 | **Definitive** |
 | WDBI DID `0x1010` reaches literal ICU-S command 8 | **Definitive structural behavior** |
 | command-8 request/result widths are 16+32+16 / 32+16 | **Definitive** |
 | DID `0x1010` wire contract is selector-1 start plus selector-3 result read | **Definitive structural behavior** |
@@ -540,5 +570,7 @@ that the RAM field held a valid key at capture time.
   <https://www.renesas.com/en/document/dst/rh850p1m-e-datasheet>
 - Renesas, *Achieving a Root of Trust ... Part 2* (ICU-S/SHE architecture):
   <https://www.renesas.com/en/blogs/achieving-root-trust-secure-boot-automotive-rh850-and-r-car-devices-part-2>
+- Detailed existing-key recovery assessment and physical experiment plan:
+  [key-recovery-assessment.md](key-recovery-assessment.md)
 - FlashRunner RH850 programming note (ICU-S reserves final 1/2 KiB DataFlash):
   <https://smh-tech.com/remos_docs_remoto/Interfacing%20FlashRunner%20with%20RH850%20family%20MCUs.pdf>
