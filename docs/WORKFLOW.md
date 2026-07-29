@@ -96,7 +96,7 @@ pointers and collapses disassembly.
 
 ```bash
 uv sync --locked      # one-time
-make verify           # twenty-two firmware suites (no Ghidra)
+make verify           # deterministic firmware suites (no Ghidra)
 make verify-sleigh    # SLEIGH compile + isolated install
 make verify-processor # fixtures + working-project audits
 make verify-ghidra    # all of the above

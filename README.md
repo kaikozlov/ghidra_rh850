@@ -12,7 +12,7 @@ explanations reconstructed from them.
 - **Firmware:** `8965B4512000`, MCU `R7F701381` (1 MiB CodeFlash + 32 KiB DataFlash).
 - **Image:** `RH850_P1M-E_Firmware.bin` (`0x108000` bytes, two flash regions —
   see "File layout" below).
-- **Recovery:** 5,858 functions / 178,611 instructions / 37,641 symbols on the
+- **Recovery:** 5,865 functions / 178,645 instructions / 37,650 symbols on the
   last annotated rebuild. Most functions are structurally recovered but not
   behaviorally understood — see the evidence policy below.
 - **Calibration caveat:** findings are specific to this Sienna calibration.
@@ -32,8 +32,9 @@ explanations reconstructed from them.
   level 1 is a compiled stub; keygen is deterministic and attacker-controlled;
   this calibration has **no configured Dcm security gating**.
   → [docs/security/application-security-access.md](docs/security/application-security-access.md)
-- **SecOC receive profile recovered.** Six RX PDUs; this calibration is
-  consistent with an unprovisioned/default key state.
+- **SecOC receive profile recovered.** Six RX PDUs are configured for
+  verification with ICU-S slot 4. All object-15 copies are invalid in this
+  dump; the live slot contents and provisioning state remain unknown.
   → [docs/security/secoc/](docs/security/secoc/README.md)
 - **Complete DataFlash map.** 122 physical records; triplicate bank +
   checkpoint ring; pages 432–479 are the SecOC object bank.
@@ -65,7 +66,7 @@ ghidra --projects-dir "$PWD/build/project" --project rh850_p1me_mapped \
 
 ```bash
 uv sync --locked
-make verify            # twenty-two firmware suites (no Ghidra)
+make verify            # deterministic firmware suites (no Ghidra)
 ```
 
 ### Rebuild from firmware
