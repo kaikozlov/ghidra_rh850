@@ -7,5 +7,4 @@ build/
 
 # Locally installed Renesas Flash Programmer distribution.  Keep the licensed
 # vendor package out of Git; renesas-rfp.lock.json pins the analyzed artifacts.
-# Disabled for now. Private Repo. Will Remediate Later Before Public
-# Renesas/
+Renesas/
