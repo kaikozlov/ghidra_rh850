@@ -71,9 +71,13 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   configured **application diagnostic** upload path, stock output transport, or
   production SecOC transmit path; however, repository-known bootloader gate
   material provides a constructible callback and an authorized bridge to a
-  possible persistent/restorable application hook. A dynamic prototype must
-  still establish application-context execution, slot-4 permission, output
-  transport, sender-side freshness, latency, and command-7 contention.
+  possible persistent/restorable application hook. Authenticated-input and
+  trailer packing are no longer open questions: pinned opendbc code and the
+  independent local stateless signer reproduce them. A dynamic prototype must
+  still establish key availability, application-context execution, slot-4
+  permission, output transport, runtime freshness scheduling, latency, and
+  command-7 contention. See
+  [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md).
 - **Dormant crypto-test activation.** CAN `0x01B..0x01F` provide the test
   selector/message/expected result only after bank activator `0x69018` runs.
   No caller or function-pointer entry reaches that activator in the recovered

@@ -97,6 +97,26 @@
       "repository": "opendbc",
       "path": "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
       "sha256": "2d680b1b73102d1c88bd735da7683f9379c98f39e1ad608618b94bf037c76119"
+    },
+    {
+      "repository": "opendbc",
+      "path": "opendbc/car/secoc.py",
+      "sha256": "62ce41680ab05db11807d73370806372ad0623015e2f23b41d7167d00280b13c"
+    },
+    {
+      "repository": "opendbc",
+      "path": "opendbc/car/toyota/carcontroller.py",
+      "sha256": "57cc1cb138b7d257128b33b17e45e4bbda119610f8827c676b5c56125785dc95"
+    },
+    {
+      "repository": "opendbc",
+      "path": "opendbc/car/toyota/toyotacan.py",
+      "sha256": "aac2d2fe4785f337c9b412a2a358082c57907091522bf092d336735a08dc89b2"
+    },
+    {
+      "repository": "opendbc",
+      "path": "opendbc/car/toyota/values.py",
+      "sha256": "acef77680fdfb8ea58396f66d834556b7f8049ecdb91c4050950bf7c6ef3a7af"
     }
   ]
 }

@@ -557,6 +557,12 @@ about the semantic contents of the same physical frame.
 
 ## 5.9 Comma/openpilot architectural implications
 
+Pinned opendbc source provides an actual external sender implementation for
+`0x2E4`, `0x131`, and vehicle-level `0x183`; the last ID is handled by a
+different receiving ECU and is not a route in this EPS. The algorithm,
+counter orchestration, evidence boundary, and independent local signer are
+canonical in [sender-implementation.md](sender-implementation.md).
+
 For this firmware, `0x2E4` is an **incoming EPS PDU**. Making the EPS compute a
 CMAC and then transmit `0x2E4` back onto its own bus is therefore architecturally
 backwards: the configured production transmit graph does not contain that ID,

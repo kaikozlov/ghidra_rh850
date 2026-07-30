@@ -5,6 +5,7 @@ Runtime CAN message authentication (AUTOSAR Secure Onboard Communication).
 | Report | Scope |
 |---|---|
 | [application-chain.md](application-chain.md) | Application receive profile: six SecOC-bound RX PDUs, freshness, command-7 verify, disabled KAT, and command-5 generation family |
+| [sender-implementation.md](sender-implementation.md) | Pinned opendbc sender analysis, direction/ID boundaries, and the independent local classic-CAN signer |
 | [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md) | Corrected NvM object model, object 15, protected slot state, and command-8 provisioning |
 | [key-recovery-assessment.md](key-recovery-assessment.md) | Ranked existing-key recovery routes: peer ECU, software command experiments, command permissions, side channels, provisioning capture, and fault injection |
 | [software-path-assessment.md](software-path-assessment.md) | Software-first audit: diagnostic/CAN bounds, constructible bootloader code execution, dormant ICU state, and command-5/DID-1010 reuse templates |

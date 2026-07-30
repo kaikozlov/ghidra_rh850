@@ -32,5 +32,6 @@ them.
   boundary: recovered bootloader gate material constructs authenticated RAM
   callbacks, providing a software-only direct-command experiment and a possible
   bridge to an application hook. See
-  [secoc/application-chain.md](secoc/application-chain.md) and
+  [secoc/application-chain.md](secoc/application-chain.md),
+  [secoc/sender-implementation.md](secoc/sender-implementation.md), and
   [secoc/software-path-assessment.md](secoc/software-path-assessment.md).

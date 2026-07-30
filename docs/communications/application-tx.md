@@ -67,9 +67,12 @@ separate ICU-S command-5 MAC-generation dispatcher has exactly one recovered
 caller, a dormant receive-fed crypto-test harness, and its 16-byte result is
 compared locally rather than passed to the PDU router. Using the EPS as a
 signing proxy would therefore require new application-resident code, an output
-or in-EPS transmit route, and sender-side freshness handling; no existing
-production SecOC Tx stack is available to repurpose. See
-[SecOC application chain](../security/secoc/application-chain.md).
+or in-EPS transmit route, and sender-side freshness handling; no production
+SecOC Tx stack in this firmware is available to repurpose. This stock-EPS
+boundary does not imply that no external sender exists: pinned opendbc code and
+the independent local stateless signer implement the accepted classic frame
+format. See the [SecOC application chain](../security/secoc/application-chain.md)
+and [sender implementation](../security/secoc/sender-implementation.md).
 
 ## 2. Generated configuration tables
 

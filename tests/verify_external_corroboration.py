@@ -111,6 +111,10 @@ def main() -> int:
         roots["calvinpark_openpilot"] / "tsk/COROLLA_INVESTIGATION.md",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
+        roots["opendbc"] / "opendbc/car/secoc.py",
+        roots["opendbc"] / "opendbc/car/toyota/carcontroller.py",
+        roots["opendbc"] / "opendbc/car/toyota/toyotacan.py",
+        roots["opendbc"] / "opendbc/car/toyota/values.py",
     ]
     if any(not path.is_file() for path in semantic_inputs):
         print("source-level corroboration skipped because a pinned input is missing")
@@ -134,6 +138,18 @@ def main() -> int:
     toyota_secoc_dbc = (
         roots["opendbc"]
         / "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc"
+    ).read_text(encoding="utf-8")
+    opendbc_secoc = (
+        roots["opendbc"] / "opendbc/car/secoc.py"
+    ).read_text(encoding="utf-8")
+    opendbc_toyota_controller = (
+        roots["opendbc"] / "opendbc/car/toyota/carcontroller.py"
+    ).read_text(encoding="utf-8")
+    opendbc_toyotacan = (
+        roots["opendbc"] / "opendbc/car/toyota/toyotacan.py"
+    ).read_text(encoding="utf-8")
+    opendbc_toyota_values = (
+        roots["opendbc"] / "opendbc/car/toyota/values.py"
     ).read_text(encoding="utf-8")
 
     p203 = extract.find("write_data_by_identifier(0x203")
@@ -174,6 +190,57 @@ def main() -> int:
     check(
         "pinned CAN 0x262 DBC places checksum in final byte",
         "SG_ CHECKSUM : 63|8@0+" in toyota_secoc_dbc,
+    )
+
+    print("\n== pinned opendbc SecOC sender ==")
+    check(
+        "opendbc authenticates DataID_be16 plus payload4 plus freshness48",
+        "struct.pack('>H', addr) + payload + freshness_value" in opendbc_secoc,
+    )
+    check(
+        "opendbc packs trip16/reset20/message8/reset-low2 freshness",
+        "(reset_cnt << 12) | ((msg_cnt & 0xff) << 4) | (reset_flag << 2)"
+        in opendbc_secoc,
+    )
+    check(
+        "opendbc transmits the first 28 CMAC bits",
+        "cmac.digest().hex()[:7]" in opendbc_secoc,
+    )
+    check(
+        "opendbc synchronization authenticator defaults to DataID 0x00F",
+        "def build_sync_mac(key, trip_cnt, reset_cnt, id_=0xf):" in opendbc_secoc,
+    )
+    check(
+        "Toyota controller signs three independent output streams",
+        opendbc_toyota_controller.count("add_mac(self.secoc_key") == 3,
+    )
+    for counter in (
+        "secoc_lka_message_counter",
+        "secoc_lta_message_counter",
+        "secoc_acc_message_counter",
+    ):
+        check(f"Toyota controller tracks {counter}", counter in opendbc_toyota_controller)
+    check(
+        "Toyota controller checks the synchronization authenticator",
+        "expected_mac = build_sync_mac(" in opendbc_toyota_controller,
+    )
+    for message_name in ("STEERING_LKA", "STEERING_LTA_2", "ACC_CONTROL_2"):
+        check(
+            f"Toyota CAN builder constructs {message_name}",
+            f'make_can_msg("{message_name}"' in opendbc_toyotacan,
+        )
+    for can_id, message_name in (
+        (740, "STEERING_LKA"),
+        (305, "STEERING_LTA_2"),
+        (387, "ACC_CONTROL_2"),
+    ):
+        check(
+            f"SecOC DBC binds {message_name} to CAN {can_id:#x}",
+            f"BO_ {can_id} {message_name}: 8" in toyota_secoc_dbc,
+        )
+    check(
+        "opendbc marks fourth-generation Sienna as a SecOC platform",
+        "TOYOTA_SIENNA_4TH_GEN = ToyotaSecOCPlatformConfig(" in opendbc_toyota_values,
     )
 
     print(f"\n== RESULT: {passed} passed, {failed} failed ==")
