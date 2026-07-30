@@ -539,37 +539,22 @@ check("proprietary AB keeps FEBF48EC in r6 for primary 0/4/8/C stores",
 
 print("\n== proprietary 0xAB semantics ==")
 # AB shared worker 0x96918 dispatches by selector (subfunction & 0x0F).
-# Selector 1: request data length must be 0 (start/initialize)
-# Selector 2: request data length must be 2 (reset/clear)
-# Selector 3: request data length must be 4 (configure with two u16 params)
+# Selector 1: request data length must be 0 (active-ID list)
+# Selector 2: request data length must be 2 (one event ID)
+# Selector 3: request data length must be 4 (event ID + detail selector)
 # The worker copies 28 bytes of request context to FEBE5E0C.
 check("AB shared worker 0x96918 copies request context to FEBE5E0C",
       bytes.fromhex("0ca6") in CF[0x96918:0x96A34])  # GP-disp to FEBE5E0C (-0x59F4)
-# Selector dispatch: subfn 2 calls 0x8CD9C (reset), others call 0x8CDA8 (configure)
-check("AB subfn-2 path calls reset 0x8CD9C via 0x96B3A",
+# 0x96B3A has an internal phase-2 reset branch, but the ordinary wire-selector
+# caller passes phase 0; this branch is not the AB 02 request path.
+check("AB internal phase-2 helper can call reset 0x8CD9C via 0x96B3A",
       CF[0x96B3A:0x96B3C] == bytes.fromhex("8007") and  # prepare
       CF[0x96B56:0x96B5A] == bytes.fromhex("40063f00"))  # dispose
-# Control block at FEBF45D0: configure writes params, reset clears all fields
-check("AB configure 0x8CDA8 stores params to FEBF45D0/FEBF45D2",
+# Control block at FEBF45D0: query setup writes params; reset helper clears fields.
+check("AB query setup 0x8CDA8 stores params to FEBF45D0/FEBF45D2",
       bytes.fromhex("d045") in CF[0x8CDA8:0x8CDC8])  # absolute ref to FEBF45D0
-check("AB reset 0x8CD2A sets mode 0x300 at FEBF45D6",
+check("AB internal reset helper 0x8CD2A sets mode 0x300 at FEBF45D6",
       bytes.fromhex("0003") in CF[0x8CD2A:0x8CF84])  # 0x300 immediate
-# RID table entries 0..12 with start callbacks — lock the full list
-ROUTINE = struct.Struct("<HHII")
-ab_rids = [ROUTINE.unpack_from(CF, 0x25768 + i * ROUTINE.size) for i in range(13)]
-expected_ab_rids = [
-    0x0204, 0x2001, 0x2002, 0x2005, 0x2006, 0x2007, 0x2008,
-    0x2009, 0x200D, 0x2010, 0x2012, 0x2013, 0x2014,
-]
-check("AB RID table covers 13 entries (0x0204 through 0x2014)",
-      ab_rids[0][0] == 0x0204 and ab_rids[12][0] == 0x2014 and len(ab_rids) == 13)
-check("AB RID sequence is exactly the 13 expected RIDs",
-      [r[0] for r in ab_rids] == expected_ab_rids,
-      repr([f"0x{r[0]:04X}" for r in ab_rids]))
-check("AB all 13 RID start callbacks are non-zero",
-      all(r[2] != 0 for r in ab_rids))
-check("AB all 13 RID result callbacks are non-zero",
-      all(r[3] != 0 for r in ab_rids))
 # Secondary endpoint: group 4 record at 0x26040 routes AB over 0x7A0->0x7A8
 ab_secondary = struct.unpack_from("<IIBBBBIII", CF, 0x26040)
 check("secondary AB record at 0x26040 has SID 0xAB",

@@ -211,6 +211,7 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -postScript AnnotateDidModel.java \
   -postScript AnnotateCanTransport.java \
   -postScript AnnotateApplicationDiagnostics.java \
+  -postScript AnnotateControlPartition.java \
   -postScript AnnotateBootloaderDiagnostics.java \
   -postScript RecoverVectorHandlers.java \
   -postScript RecoverSwitchTables.java \

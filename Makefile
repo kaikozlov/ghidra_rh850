@@ -33,7 +33,8 @@ VERIFY_SUITES := \
 	tests/verify_control_partition.py \
 	tests/verify_tss3_variant_matrix.py \
 	tests/verify_security_consumers.py \
-	tests/verify_ab_rid_callbacks.py \
+	tests/verify_application_ab_service.py \
+	tests/verify_application_routine_id_callbacks.py \
 	tests/verify_renesas_rfp.py \
 	tests/verify_doc_links.py
 

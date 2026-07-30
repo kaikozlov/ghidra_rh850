@@ -161,3 +161,50 @@ the mistakes are not re-made.
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
   §"Complete application command-writer census";
   `tests/verify_icus_key_recovery_surface.py`.
+
+### CORR-014 — SID `0xAB` as RID-based calibration/flash control
+
+- **Wrong:** proprietary SID `0xAB` consumes the 13 RID callback pairs at
+  `0x25768`; subfunction `02` resets its control block; the service may be
+  calibration/flash control with unresolved indirect security paths.
+- **Right:** `0xAB` is a structurally recovered event-record service. Its three
+  selectors list active event IDs and query per-ID state/detail through the
+  64-slot catalogue at `0x2AD10`. Selector `02` supplies one event ID; it does
+  not invoke the reset helper. The configured indirect closure is 75 snapshot
+  descriptors plus six detail descriptors, with no flash, NvM, crypto, ICU-S,
+  SecOC, or security-policy target.
+- **Separation:** the RID lookup at `0x8D3CC` has one direct caller at
+  `0x8A50C`, in a separate routine worker. It has no function-pointer literal
+  and no edge from `0xAB`. SID `0x31`, which would ordinarily host
+  RoutineControl, has a null callback and is excluded from the application's
+  subfunction path. The worker wrappers are instead structurally configured in
+  generic SID `0x28` control ranges `0x0201..0x02FF` and
+  `0x2001..0x20FF`; those ranges remain stock-wire gated because SID `0x28`
+  admits only subfunctions `00/01/03`.
+- **State-mediated boundary:** the RID callbacks have no direct sensitive
+  target, but several result callbacks arm asynchronous namespace-`0x100` NvM
+  persistence. RID `2001` submits object `0x101`, RID `2002` submits `0x102`,
+  and RIDs `2005/2006/2007/2008/2009/200D` submit `0x103`, all through
+  `0xFF09C → secoc_nvm_object_update @ 0x65CD8`. These are SecOC-associated
+  state objects, not object 15 or a key/crypto operation.
+- **Canonical:** [../diagnostics/application.md](../diagnostics/application.md)
+  §"Proprietary `AB` event-record service";
+  `tests/verify_application_ab_service.py`,
+  `tests/verify_application_routine_id_callbacks.py`.
+
+### CORR-015 — Crypto-test cyclics misidentified as motor control
+
+- **Wrong:** the foreground callees at `0x68C0C` and `0x68DE6` formed a
+  motor-control state machine and continuation, while `0x57AC2` was only
+  configuration/parameter management.
+- **Right:** descendant decompilation identifies the `0x68C0C` and `0x68DE6`
+  state cluster as the three dormant CAN-controlled crypto-test banks;
+  `0x68BC2` and `0x68D0E` are the recovered bank-1 command-5 state/finalization
+  paths. The actual foreground route into the steering-command conditioner is
+  `0x57AC2 -> 0xFDD40 -> 0xBEC4C -> 0xBA43A -> 0xCBA72 -> 0xCB86E ->
+  0xC853A/0xC85B6`.
+- **Impact:** removes unsupported motor semantics from the dormant crypto-test
+  harness and establishes the first firmware-backed protected `0x2E4`
+  torque-command handoff without claiming a downstream current/PWM mapping.
+- **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md);
+  `tests/verify_control_partition.py`.

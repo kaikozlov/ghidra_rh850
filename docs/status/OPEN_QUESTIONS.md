@@ -15,10 +15,10 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Application
 
-- **`0xAB` service purpose.** Bounded: 13 RID callbacks traced, no direct
-  crypto/NvM/SecOC references found. 'Calibration/flash control' remains a
-  **hypothesis**, not proven. Indirect calls through wrappers or
-  GP-displacement RAM access not yet traced remain a residual possibility.
+- **`0xAB` event-record naming.** The configured graph is closed and its
+  list/per-ID/detail structure is recovered, but the OEM service name and exact
+  meanings of the event catalogue's encoded upper ID bits and record-kind
+  values remain unknown.
 - **97 configured-unresolved RX signals** (see `data/application_rx_signal_evidence.csv`).
   Bounds are known; exact runtime producers are not statically recovered.
 - **Three configured TX signals without recovered runtime producers** (see

@@ -38,7 +38,7 @@ curated.
 |---|---|---|
 | `data/application_tx_map.csv` | 58-row application TX signal map | `tests/verify_application_transmit.py` |
 | `data/application_security_consumers.csv` | Application security-consumer scan results backing the "no configured gating" finding | `tests/verify_security_consumers.py` |
-| `data/application_ab_rid_callbacks.csv` | The 13 `0xAB` RID callbacks and their call-target census | `tests/verify_ab_rid_callbacks.py` |
+| `data/application_routine_id_callbacks.csv` | The 13-entry stock-gated control-ID subset, direct-target census, and state-mediated object-`0x101/102/103` persistence boundary; distinct from SID `0xAB` | `tests/verify_application_routine_id_callbacks.py` |
 | `data/control_partition.csv` | Control/safety cyclic-partition map | `tests/verify_control_partition.py` |
 | `data/tss3_eps_variant_matrix.csv` | Sienna/Corolla and TSS 3 EPS variant comparison (evidence-graded; `unknown` for unobserved) | `tests/verify_tss3_variant_matrix.py` |
 | `data/p1m_sfr_labels.csv` | P1M-E SFR labels used by the device profile | `make verify-processor` |

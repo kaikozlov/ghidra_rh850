@@ -6,7 +6,7 @@ Findings (all scoped to this Sienna calibration 8965B4512000):
 - All 242 readable DIDs: no security level > 0 found in bounded policy scan
 - All 19 writable DIDs: security flag present but level_count=0
 - Security machinery is wired up and exercised but policy tables are empty
-- 0xAB callback/state-machine analysis is in verify_ab_rid_callbacks.py
+- 0xAB event-record closure is in verify_application_ab_service.py
 """
 from pathlib import Path
 import csv
@@ -167,8 +167,8 @@ check("no writable DIDs require security level > 0",
 # ═══════════════════════════════════════════════════════════════════
 # 5. 0xAB CALLBACK SECURITY ANALYSIS
 # ═══════════════════════════════════════════════════════════════════
-# The firmware-derived 0xAB callback + state-machine scan is in
-# verify_ab_rid_callbacks.py (jarl/jr decoder, 3 ranges, 39 targets).
+# The firmware-derived 0xAB direct/indirect callback closure is in
+# verify_application_ab_service.py.
 # This suite does not duplicate that check.
 
 # ═══════════════════════════════════════════════════════════════════

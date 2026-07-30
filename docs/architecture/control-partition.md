@@ -10,7 +10,7 @@
 >
 > **Canonical artifacts:** `data/control_partition.csv`
 >
-> **Verification:** `tests/verify_architecture.py`
+> **Verification:** `tests/verify_architecture.py`, `tests/verify_control_partition.py`
 >
 > **Related:** [firmware-architecture](firmware-architecture.md), [application-tx](../communications/application-tx.md)
 
@@ -34,12 +34,12 @@ which is itself step 5 of the foreground cycle documented in
 
 | Addr | Inferred subsystem | State root(s) | Key outputs | Evidence grade |
 |---:|---|---|---|---|
-| `0x68c0c` | Motor control state machine | `0xFEBE508D`, `0xFEBE508E` | RAM state flags; calls 6 sub-handlers | bounded |
+| `0x68c0c` | Dormant crypto-test bank scheduler | `0xFEBE508D`..`0xFEBE508F` | Calls three CAN-controlled test-bank state machines | recovered |
 | `0x791c4` | Communication manager | `0xFEBE3DF2` | CAN TX via `application_com_tx_main`; ~20 COM calls | bounded |
 | `0x96bac` | Safety diagnostics | `0xFEBE5E28` | calls 3 diagnostic handlers | bounded |
-| `0x68de6` | Motor control continuation | `0xFEBE5085` | calls 4 sub-handlers | bounded |
-| `0x57ac2` | Configuration and parameter management | `0xFEBE8BBA` | RAM validity/E2E state; reconciliation | bounded |
-| `0x6547c` | Timer and PWM reload | none | MMIO writes to `0xFFE20000`/`0xFFE21000`/`0xFFE50000` | recovered |
+| `0x68de6` | Dormant crypto-test continuation | `0xFEBE5085`, `0xFEBE508A`, `0xFEBE508F` | Test-bank result/finalization handlers | recovered |
+| `0x57ac2` | System-mode and control dispatcher | `0xFEBE8BBA`, `0xFEBEACEE` | Full/reduced control pipelines | recovered |
+| `0x6547c` | Timer/peripheral reload | none | MMIO writes to `0xFFE20000`/`0xFFE21000`/`0xFFE50000` | recovered |
 
 A seventh row covers the `0x7F7` special receive callback:
 
@@ -47,52 +47,27 @@ A seventh row covers the `0x7F7` special receive callback:
 |---:|---|---|---|
 | `0x7ff86` | Application CAN special RX demux | Separate receive callback for acceptance rule 50 / CAN ID `0x7F7` | bounded |
 
-## 2. Motor control state machine — `0x68c0c`
+## 2. Dormant crypto-test bank scheduler — `0x68c0c`
 
-### Input flags and state roots
+The earlier “motor control state machine” label was wrong. Decompiling the
+descendants identifies the `0xFEBE5085..0xFEBE508F` cluster as the three dormant
+CAN-controlled crypto-test banks documented in
+`../security/secoc/application-chain.md`, not torque state.
 
-The primary state byte is at `0xFEBE508D` (`DAT_febe508d`, GP `-0x6773`). A
-secondary state byte at `0xFEBE508E` (`DAT_febe508e`, GP `-0x6772`) drives an
-alternative branch. Four flag bytes gate the sub-handlers:
+`0x68c0c` dispatches the bank state machines in fixed order. The last gated
+branch calls `crypto_test_bank1_state_step` at `0x68bc2`, whose command-5 path
+uses the ICU-S wrapper. The preceding handlers at `0x67fce`, `0x680d4`,
+`0x68198`, `0x682f8`, and `0x686ea` belong to the neighboring test banks and
+their state transitions. The `0xA5` and `0x5A` markers are state-machine
+sentinels; they are not motor-mode values.
 
-| Flag | GP offset | Absolute | Meaning (bounded) |
-|---|---|---|---|
-| gate flag | `-0x677b` | `0xFEBE5085` | nonzero → invoke `FUN_000682f8` |
-| phase flag | `-0x6777` | `0xFEBE5089` | `'Z'` (0x5A) → complete phase and clear |
-| mode flag | `-0x6776` | `0xFEBE508A` | `0x01` → invoke `FUN_000686ea` |
-| mode flag | `-0x6771` | `0xFEBE508F` | `0x01` → invoke `FUN_00068bc2` |
+The function has no direct actuator or timer write. Its output is the same RAM
+test-bank state consumed by `0x68de6` later in the foreground group.
 
-### Dispatch
+### Evidence grade: recovered
 
-When `0xFEBE508D == 0xA5` (`-0x5b` as signed byte), the function calls
-`FUN_00067fce`; when `0xFEBE508E == 0xA5`, it calls `FUN_000680d4`.
-`FUN_00068198` is called unconditionally. The four flag-gated handlers
-(`FUN_000682f8`, `FUN_000686ea`, `FUN_00068bc2`, and a phase-completion path via
-`FUN_00067f14`) run based on their respective flags. On phase completion, the
-function clears flags at `0xFEBE5085`, `0xFEBE5086`, `0xFEBE5086+2`, and
-`0xFEBE5089`.
-
-### Output effects
-
-RAM state writes to the GP `-0x677x` flag cluster; the current state byte is
-latched to `0xFEBE508E` (`*(char*)(GP-0x6772) = cVar1`) at function exit. No
-direct MMIO or CAN TX writes are visible in this function body; all physical
-effects are mediated through the sub-handlers.
-
-### Cross-rate interfaces
-
-The flag at `0xFEBE5085` (GP `-0x677b`) is also the state root consumed by
-`0x68de6` (the motor control continuation), establishing a producer-consumer
-link between the two motor-control cyclics. The sub-handlers
-(`FUN_00067fce`, `FUN_000680d4`, `FUN_00068198`, `FUN_000682f8`, `FUN_000686ea`,
-`FUN_00068bc2`) are not decomposed further in this report.
-
-### Evidence grade: bounded
-
-The state-machine structure, flag locations, and dispatch tree are recovered
-from decompilation. The OEM-level meaning of each state value (beyond the
-`0xA5`/`0x5A` markers) and the physical motor-control behavior of each
-sub-handler are not claimed.
+The dispatch targets and shared state are directly reconstructed from firmware.
+No motor or torque semantics are assigned to this branch.
 
 ## 3. Communication manager — `0x791c4`
 
@@ -163,77 +138,48 @@ directly feed the communication manager's TX path.
 The enable flag and call set are recovered. The diagnostic checks performed by
 the three handlers are not claimed.
 
-## 5. Motor control continuation — `0x68de6`
+## 5. Dormant crypto-test continuation — `0x68de6`
 
-### Input flags and state roots
+This is the result/finalization half of the same dormant crypto-test cluster as
+`0x68c0c`. It consumes state bytes at `0xFEBE5085`, `0xFEBE508A`, and
+`0xFEBE508F`, conditionally calls `0x68c86`, `0x68cd2`, and `0x68d0e`, then
+always calls `0x68d3c`. The `0x68d0e` descendant is the recovered bank-1
+command-5 finalizer.
 
-Consumes the flag at `0xFEBE5085` (`DAT_febe5085`, GP `-0x677b`) — the same
-flag produced by `0x68c0c` — as its primary gate. Two additional flags at
-GP `-0x6776` (`0xFEBE508A`) and `-0x6771` (`0xFEBE508F`) gate conditional calls.
+### Evidence grade: recovered
 
-### Dispatch
+The function is not a motor-control continuation. Its state and descendants are
+the crypto-test harness; no actuator semantics are claimed.
 
-- `0xFEBE5085 == 0x01` → `FUN_00068c86`
-- `GP-0x6776 == 0x01` → `FUN_00068cd2`
-- `GP-0x6771 == 0x01` → `FUN_00068d0e`
-- `FUN_00068d3c` called unconditionally
+## 6. Foreground system-mode and control dispatcher — `0x57ac2`
 
-### Cross-rate interfaces
+`0x57ac2` does validate an E2E-protected version/state block, but treating it as
+mere “configuration management” hid the real control path. Once the `0xA55A`
+marker and version/complement checks pass, it selects one of two system-mode
+pipelines:
 
-This is the continuation half of the motor-control cyclic pair (`0x68c0c` →
-`0x68de6`). It reads flags written by `0x68c0c` and is therefore strictly
-downstream in execution order within the same foreground cycle.
+```text
+changed/full path:    0x57AC2 -> 0xFDD40 -> 0xBEC4C
+unchanged/reduced:    0x57AC2 -> 0xFDD54 -> 0xBF17E
+```
 
-### Evidence grade: bounded
+The full dispatcher reaches `system_mode_telemetry_snapshot` at `0xBA43A`.
+That function snapshots and scales runtime inputs, then calls `0xCBA72`, whose
+callee `0xCB86E` executes a large control pipeline. This is the first
+firmware-backed route from the six-function foreground group into the recovered
+steering-command conditioner described below.
 
-The flag consumption and call set are recovered. The roles of the four callees
-are not claimed.
+The E2E helpers (`0x6f71c`, `0x6f6a6`, `0x6f97a`), version reconciliation, and
+rolling state at `0xFEBE8BC9/0xFEBE8BCB` remain valid structural observations.
+They are gate/setup logic around the control dispatch, not the torque algorithm
+itself.
 
-## 6. Configuration and parameter management — `0x57ac2`
+### Evidence grade: recovered
 
-### Input flags and state roots
+The call graph and version gates are deterministic. The exact semantics of the
+full versus reduced system modes remain bounded.
 
-Validates a calibration block using the marker `0xA55A` (i.e.
-`*(short*)(GP-0x2C46) == 0x5AA5` after complement) stored at `0xFEBE8BBA`
-(GP `-0x2C46`). Uses an object pointer at GP `-0xB11` (`0xFEBEACEF`) and
-complement at GP `-0xB0F` (`0xFEBEACF1`).
-
-### E2E protection
-
-Invokes three E2E (end-to-end) protection functions on the calibration data:
-`FUN_0006f71c` (validate), `FUN_0006f6a6` (check), `FUN_0006f97a` (protect/
-propagate). These guard the parameter block against corruption.
-
-### Dispatch
-
-On successful E2E validation (`iVar4 == 0` and marker re-check passes), calls
-five handlers: `FUN_000577d0`, `FUN_000578de`, `FUN_00057980`, `FUN_00057a7e`,
-`FUN_000fdd68`.
-
-### Output effects
-
-Performs parameter reconciliation: compares a current version (`GP-0xB12`) with
-its complement (`GP-0xB0F`); on mismatch, copies the candidate (`GP+0xC33`)
-and writes a new version via `thunk_FUN_000b0974`. On version change, calls
-`FUN_0005db6e`/`FUN_000fdd40`/`FUN_0005e3c6` with the new parameters; otherwise
-calls `FUN_0005e572`/`FUN_000fdd54`/`FUN_0005e886`.
-
-Maintains a rolling byte counter at GP `-0x2C37` (`0xFEBE8BC9`) and writes a
-derived state byte to GP `-0x2C35` (`0xFEBE8BCB`).
-
-### Cross-rate interfaces
-
-Produces calibrated parameters consumed by the motor-control and safety
-subsystems. The E2E-protected parameter block is the cross-rate bridge between
-configuration validity and runtime motor behavior.
-
-### Evidence grade: bounded
-
-The calibration marker, E2E validation chain, reconciliation logic, and handler
-call set are recovered from decompilation. The specific parameter semantics are
-not claimed.
-
-## 7. Timer and PWM reload — `0x6547c`
+## 7. Timer and peripheral reload — `0x6547c`
 
 ### Input flags and state roots
 
@@ -242,8 +188,8 @@ cycle.
 
 ### Output effects — MMIO writes
 
-Writes motor PWM/timer register blocks from calibration tables, with interrupts
-disabled. The interrupt-disable wrapper is `FUN_0006f134(0xFFC0)` /
+Writes three timer/peripheral register blocks from calibration tables, with
+interrupts disabled. The interrupt-disable wrapper is `FUN_0006f134(0xFFC0)` /
 `FUN_0006f15a(restore)`.
 
 | MMIO region | Registers written | Calibration source |
@@ -262,11 +208,11 @@ typically `count - 1`).
 | Address | Used for |
 |---:|---|
 | `0x30F9C` | TAU reload (TAUJ0); also drives `0xFFE20020`/`0xFFE20038` |
-| `0x30FA0` | PWM period/reload for `0xFFE20004`/`0xFFE21004` |
-| `0x30FA4` | PWM value for `0xFFE20004+8`/`0xFFE21004+8` |
-| `0x30FA8` | PWM value for `+0x0C` |
-| `0x30FAC` | PWM value for `+0x14` |
-| `0x30F7C/84/8C/94` | Timer function pointers for `0xFFE50000` block |
+| `0x30FA0` | period/reload value for `0xFFE20004`/`0xFFE21004` |
+| `0x30FA4` | paired reload value for `0xFFE2000C`/`0xFFE2100C` |
+| `0x30FA8` | reload value for `+0x0C` |
+| `0x30FAC` | reload value for `+0x14` |
+| `0x30F7C/84/8C/94` | values for the `0xFFE50000` block |
 
 ### Cross-rate interfaces
 
@@ -278,9 +224,85 @@ the hardware timer period that governs the overall foreground tick rate.
 
 The MMIO addresses, calibration table addresses, interrupt-disable wrapper, and
 `-1` reload encoding are all directly recovered from the decompiled body. This
-is the highest-confidence subsystem in the partition.
+this is the highest-confidence subsystem in the partition. The exact peripheral
+channel ownership and any motor-PWM role remain unproven.
 
-## 8. CAN 0x7F7 special receive callback — `0x7ff86`
+## 8. Protected steering-command ingress and conditioning
+
+This is the first defensible torque-path handoff recovered from firmware. The
+static producer/consumer chain is:
+
+```text
+authenticated CAN 0x2E4 / PDU 6
+  -> application_unpack_can_2e4 @ 0x4A244
+  -> signal 61: signed BE16 B1..B2 @ 0xFEBE7F94
+  -> application_rx_signal_consumer_56fc2
+  -> 0xFEBEF184
+  -> system_mode_telemetry_snapshot @ 0xBA43A
+       scale by 0x100 / 100
+  -> 0xFEBEAE20
+  -> 0xC853A clamp + mode-indexed gain
+  -> 0xFEBEBF80
+  -> 0xC85B6 signed saturation + rate limit
+  -> 0xFEBEBF9A and 0xFEBEBF84
+```
+
+### Firmware-static evidence
+
+- `0x4A244` extracts signal 61 into `0xFEBE7F94`; the generated RX map records
+  it as signed big-endian B1..B2 under protected PDU 6.
+- `0x57138` loads `0xFEBE7F94`, and `0x57148` stores the same halfword to
+  `0xFEBEF184`.
+- `0xBA4B8` loads `0xFEBEF184`, invokes signed scaling helper `0xCBB74` with
+  numerator `0x100` and denominator `100`, and `0xBA808` commits the result to
+  `0xFEBEAE20`.
+- `0xC853A` clamps that signed value to calibration `+/-0x1BD80`, chooses a gain
+  from tables at `0xD603C`/`0xD607C`, and writes the adjusted command to
+  `0xFEBEBF80`.
+- `0xC85B6` converts `0xFEBEBF80` to signed 16-bit range, rate-limits it against
+  prior value `0xFEBEBF9A` using calibration `0x1BD8E`, and writes conditioned
+  values at `0xFEBEBF9A` and `0xFEBEBF84`.
+
+The conditioning stages execute under the CH3-polled foreground domain, not in
+the TAUJ0 CH0/CH2 ISR bodies:
+
+```text
+foreground loop 0x64FCC polls TAUJ0 CH3 EIRF136
+  -> 0x65750
+  -> 0x57AC2
+  -> 0xFDD40 -> 0xBEC4C -> 0xBA43A
+  -> 0xCBA72 -> 0xCB86E -> 0xC853A / 0xC85B6
+```
+
+TAUJ0 CH0 and CH2 are separate interrupt domains:
+
+```text
+CH0 ISR 0x64F18 -> 0x6424C -> 0x656F0
+CH2 ISR 0x64F90 -> 0x64376 -> 0x65720
+```
+
+### External-source corroboration
+
+The pinned opendbc `toyota_secoc_pt.dbc` names CAN decimal 740 (`0x2E4`)
+`STEERING_LKA` and names bits `15|16@0-` — the same B1..B2 signed field —
+`STEER_TORQUE_CMD`. This label is external evidence; the RAM and call chain
+above are firmware-static evidence.
+
+### Boundary
+
+The chain proves authenticated steering-torque-command ingress and bounded
+conditioning. It does **not** yet prove which downstream state becomes phase
+current, PWM duty, or gate-driver output. `0xFEBEBF84/0xFEBEBF9A` are the first
+recovered conditioned torque-command handoff, not a claimed motor-current
+command.
+
+### Evidence grade: recovered
+
+The producer/consumer addresses and arithmetic are deterministically checked by
+`tests/verify_control_partition.py`; the OEM field label is checked separately
+against the pinned external DBC.
+
+## 9. CAN 0x7F7 special receive callback — `0x7ff86`
 
 ### Structure
 
@@ -310,7 +332,7 @@ name is invented. CAN `0x7F8` (the single active special-class Tx route per
 `../communications/application-tx.md`) is a separate endpoint and is not claimed to
 be the response pair without further evidence.
 
-## 9. Tx signal producer closure — signals 9, 37, 57
+## 10. Tx signal producer closure — signals 9, 37, 57
 
 The three configured-but-unresolved Tx signals have been checked against their
 respective packer decompilations:
@@ -331,7 +353,7 @@ callback, a different cyclic, or not at all in this calibration. The signals
 remain **configured-unresolved** with packer evidence now recorded in
 `data/application_tx_map.csv`.
 
-## 10. Evidence boundaries
+## 11. Evidence boundaries
 
 Core conclusions — function addresses, call sequences, GP-relative flag
 locations, MMIO register writes, calibration table references, packer signal
@@ -340,9 +362,11 @@ committed Ghidra project.
 
 The following are **not** claimed:
 
-- OEM-level names for the motor-control states or diagnostic checks;
-- The physical motor-control behavior of the individual sub-handlers;
-- The specific parameter semantics managed by `0x57ac2`;
+- A downstream mapping from conditioned command state to phase current, duty,
+  PWM compare, or gate-driver output;
+- OEM-level names for the remaining system-mode states or diagnostic checks;
+- Exact full/reduced mode semantics under `0x57ac2`;
+- Motor/PWM ownership for every MMIO region written by `0x6547c`;
 - The upper-protocol identity of CAN `0x7F7`;
 - A response-pairing between `0x7F7` (RX) and `0x7F8` (TX);
 - Runtime producers for signals 9, 37, and 57 beyond the packer exclusion.

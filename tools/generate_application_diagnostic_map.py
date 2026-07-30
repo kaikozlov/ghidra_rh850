@@ -182,15 +182,15 @@ SEMANTICS = {
         "async_worker": "",
         "security_policy": "none at service level (b10=0)",
         "nrcs": "shared gate NRC 0x7F when session not allowed",
-        "side_effects": "none from SID dispatch; RID table consumed only by 0xAB callback 0x8D3CC",
+        "side_effects": "none from SID dispatch; separate routine worker reaches RID lookup 0x8D3CC but has no stock diagnostic entry",
         "config_tables": f"routine-ID table 0x{ROUTINE_TABLE:X} count {ROUTINE_COUNT}",
-        "evidence_status": "resolved; simple-response-only (RID table for AB consumer)",
+        "evidence_status": "resolved; simple-response-only (RID worker dormant)",
         "notes": (
             "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
             "byte[9]==0 selects simple-response path. SID 0x31 also excluded from subfn "
-            "path by gate check (SID==0x31=ASCII '1'). The 32-entry RID table at 0x25768 "
-            "is consumed only by the 0xAB callback (0x8D3CC scans entries 0..12). SID 0x31 "
-            "itself echoes SID|0x40 without dispatching routines."
+            "path by gate check (SID==0x31=ASCII '1'). A separate worker at 0x8A630 "
+            "can reach lookup 0x8D3CC for entries 0..12, but no stock diagnostic path "
+            "reaches that worker. SID 0x31 echoes SID|0x40 without dispatching routines."
         ),
     },
     0x34: {
@@ -262,35 +262,32 @@ SEMANTICS = {
             "subfn wrappers 0x96A34/0x96A56/0x96A78"
         ),
         "async_worker": (
-            "0x96918 shared worker; subfn 1=start(0 data bytes), "
-            "2=reset/clear(2 bytes, calls 0x8CD9C), 3=configure(4 bytes, calls 0x8CDA8); "
+            "0x96918 shared worker; subfn 1=active-ID list (0 data bytes), "
+            "2=single event query (2-byte ID), 3=event detail query (ID + selector); "
             "pending 10 posts event 0x16"
         ),
         "security_policy": "none at service level; subfn sessions [1,3]",
-        "nrcs": "0x13 length; 0x31 lookup miss; vendor byte from worker",
+        "nrcs": "0x13 length; vendor byte from worker",
         "side_effects": (
             "absolute mov 0xFEBF48EC; primary mirror at FEBF48EC; secondary at "
             "FEBF493C via st.w 0x50[r1]; copies 28-byte request context to FEBE5E0C; "
-            "writes control block at FEBF45D0 (params, mode 0x300 on reset); "
-            "may invoke routine-ID entries 0..12 (RIDs 0x0204..0x2014)"
+            "writes query control block at FEBF45D0; lists checkpoint-backed active "
+            "event IDs and reads per-ID state/detail"
         ),
         "config_tables": (
-            "subfn 0x25CD0 (01/02/03); routine-ID table head used by 0x8D3CC; "
-            "control block FEBF45D0; response data at CodeFlash 0x2FD8C"
+            "subfn 0x25CD0 (01/02/03); event catalogue 0x2AD10; snapshot descriptors "
+            "0x2A504; detail descriptors 0x2AC0C; control block FEBF45D0"
         ),
         "evidence_status": "recovered",
         "notes": (
-            "Proprietary asynchronous control service operating a parameterized "
-            "state block (FEBF45D0) and dispatching a bounded set of routine "
-            "callback pairs. Subfn 1=start, 2=reset (clears block, sets mode "
-            "0x300), 3=configure (writes two u16 params). "
+            "Proprietary asynchronous event-record service. Subfn 1 lists active IDs, "
+            "2 queries one ID, and 3 queries ID detail/snapshot data. Its configured "
+            "indirect closure has 75 snapshot descriptors and six detail descriptors. "
             "Secondary 0x7A0->0x7A8 endpoint routes through same subfn wrappers; "
             "its record callback/trailing fields are CAN routing IDs (0x7A1/0x7A0), "
             "not code pointers. "
-            "Response includes vendor byte from FEBF493C. "
-            "'Calibration/flash control' is a hypothesis (circumstantial: generic "
-            "control block, start/reset/configure pattern); RID callback semantics "
-            "and the state machine at 0x8CF84 have not been decoded."
+            "Response includes vendor byte from FEBF493C. The RID table at 0x25768 is "
+            "a separate dormant RoutineControl subsystem with no edge from 0xAB."
         ),
     },
     0xBA: {
@@ -416,7 +413,7 @@ def main() -> None:
     fieldnames = list(rows[0].keys())
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=fieldnames)
+        writer = csv.DictWriter(fh, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     print(f"Wrote {len(rows)} service rows to {args.output}")

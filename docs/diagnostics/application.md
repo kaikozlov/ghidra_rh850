@@ -72,15 +72,15 @@ through `w3`.
 | `22` | ReadDataByIdentifier | `1/2/3` | callback `0x948AA` | 242-DID table `0x2941C`; NRC `0x31`/`0x33`/`0x78` | recovered |
 | `23` | ReadMemoryByAddress | `3` | null callback; simple-response (byte[9]==0) | echoes `63`+request; no memory read | resolved |
 | `27` | SecurityAccess | `2/3` | subfn `0x25C30` | levels `1/2`, 16-byte seed/key; NRC `0x35`/`0x36`/`0x37` | recovered |
-| `28` | CommunicationControl | `3` | subfn `0x25C70` + callback `0x93C62` | subfn `00/01/03`; mode updates via `0x95154` | recovered |
+| `28` | CommunicationControl | `3` | subfn `0x25C70` + callback `0x93C62` | subfn `00/01/03`; mode updates via `0x95154`; generic-control ranges `02xx/20xx` are stock-gated | recovered |
 | `2E` | WriteDataByIdentifier | `2/3` | callback `0x95DCE` | 19 write-DIDs at `0x26AEC`; NRC `0x12`/`0x31`/`0x33` | recovered |
-| `31` | RoutineControl | `1/2/3` | null callback; simple-response (byte[9]==0); excluded from subfn path | echoes `71`+request; RID table for AB consumer only | resolved |
+| `31` | RoutineControl | `1/2/3` | null callback; simple-response (byte[9]==0); excluded from subfn path | echoes `71`+request; separate control-ID table is not attached here | resolved |
 | `34` | RequestDownload | `2` | null callback; simple-response (byte[9]==0) | echoes `74`+request; no download setup | resolved |
 | `36` | TransferData | `2` | null callback; simple-response (byte[9]==0) | echoes `76`+request; no data transfer | resolved |
 | `37` | RequestTransferExit | `2` | null callback; simple-response (byte[9]==0) | echoes `77`+request; no transfer exit | resolved |
 | `3E` | TesterPresent | `1/2/3` | subfn `0x25CA0` | zero-length ack only; no S3 timer | recovered |
 | `85` | ControlDTCSetting | `3` | subfn `0x25CB0` | settings `01/02`; absolute store `FEBF45A8` | recovered |
-| `AB` | proprietary | `1/3` | subfn `0x25CD0` + callback `0x8D344` | async control: start(01), reset(02), configure(03); state block `FEBF45D0`; RID `0..12` | recovered |
+| `AB` | proprietary | `1/3` | subfn `0x25CD0` + callback `0x8D344` | event-record queries: list(01), per-ID state(02), per-ID detail(03) | recovered |
 | `BA` | proprietary | `3` | null callback; simple-response (byte[9]==0) | echoes `FA`+request; no proprietary processing | resolved |
 
 No primary service record carries a non-zero service-level security allow-count
@@ -421,16 +421,14 @@ The 16-byte secret at CodeFlash `0x20840` is:
   setting byte. The same function also copies a `0x1C`-byte request mirror to
   `FEBF45A8+0xC`. Not GP/TP-relative.
 
-### RoutineControl table and proprietary `AB`/`BA`
-
-`application_routine_id_table @ 0x25768` holds 32 records
-`(RID:u16, flags:u16, start_cb:u32, result_cb:u32)` from `0x0204` through
-`0x110D`. SID `0x31` itself has a **null** service callback, so the Dcm DSP bind
-from SID to this table is not statically recovered. AB-adjacent
-`application_routine_id_lookup @ 0x8D3CC` scans only entries `0..12`.
+### Proprietary `AB` event-record service
 
 Proprietary `0xAB` uses callback `0x8D344` and subfunctions `01/02/03` at
-`0x25CD0` (`0x96A34`/`0x96A56`/`0x96A78`). No OEM service name is assigned.
+`0x25CD0` (`0x96A34`/`0x96A56`/`0x96A78`). Its recovered data path enumerates
+and reads event/DTC-like records. No OEM service name is assigned, but the old
+"calibration/flash control" hypothesis is disproved: the complete configured
+indirect-callback closure reaches event-state/snapshot data handlers, not flash,
+NvM, crypto, ICU-S, or SecOC functions.
 
 #### Wire format and typed structure
 
@@ -439,9 +437,9 @@ enforces exact request-data lengths:
 
 | Subfn | Selector | Request shape | Data length | Operation |
 |---:|---:|---|---:|---|
-| `01` | 1 | `AB 01` | 0 | **start/initialize** — no parameters |
-| `02` | 2 | `AB 02 XX XX` | 2 | **reset/clear** — clears control block, data bytes unused |
-| `03` | 3 | `AB 03 XX XX YY YY` | 4 | **configure** — two `u16` params written to control block |
+| `01` | 1 | `AB 01` | 0 | enumerate active event identifiers |
+| `02` | 2 | `AB 02 ID ID` | 2 | query one event identifier |
+| `03` | 3 | `AB 03 ID ID SS SS` | 4 | query event detail/snapshot selector `SS` |
 
 Length violations produce NRC `0x13`.
 
@@ -461,39 +459,112 @@ The worker copies 28 bytes (7 dwords) of request context to RAM `0xFEBE5E0C`.
 
 The three subfunctions operate on a shared control block at RAM `0xFEBF45D0`:
 
-- **Subfn 01 (start)**: calls `0x8CDA8` with `params=0xFFFF,0xFFFF`, stores the
+- **Subfn 01 (list)**: calls `0x8CDA8` with `params=0xFFFF,0xFFFF`, stores the
   selector to `FEBF45DC`, then calls `0x4F8AE` which propagates the selector
   and params to `FEBE8165`/`FEBE8172`/`FEBE8174`.
-- **Subfn 02 (reset)**: calls `0x8CD9C` → `0x8CD2A`, which clears the entire
-  block: `FEBF45D0=0, FEBF45D2=0, FEBF45D4=0, FEBF45D6=0x300,
-  FEBF45DD=1, FEBF45DF=1, FEBF45E2=0xFF, FEBF45E3=1` (others zeroed).
-- **Subfn 03 (configure)**: calls `0x8CDA8` with the two `u16` params from the
-  request, storing them to `FEBF45D0` and `FEBF45D2`.
+- **Subfn 02 (single event)**: calls `0x8CDA8` with the request's event ID and
+  second parameter `0xFFFF`, storing them at `FEBF45D0` and `FEBF45D2`.
+- **Subfn 03 (event detail)**: calls `0x8CDA8` with both request `u16` values,
+  storing the event ID and secondary selector at those addresses.
+
+`0x8CD2A` is a real control-block reset helper, but the ordinary selector-2
+request does **not** call it. The prior interpretation of `AB 02` as reset/clear
+conflated `0x96B3A`'s internal phase argument with the wire selector.
 
 After the control block update, the worker calls `0x968A6` (poll/finalize),
-which invokes `0x96B5A` → `0x8CF84`, a large state machine that may return
-pending (event `0x16`).
+which invokes `0x96B5A` → `0x8CF84`, a state machine that may return pending
+(event `0x16`). `0x4F8BA` implements its three selector modes:
 
-#### RID table interaction
+- selector 1 calls `0x54748` to enumerate the lower 16 bits of active IDs;
+- selector 2 calls `0x548B0` for per-ID state/index data;
+- selector 3 calls `0x54BF2` for per-ID detail/snapshot data.
 
-`application_routine_id_lookup @ 0x8D3CC` scans entries `0..12` of the
-32-entry RID table at `0x25768`. The 13 accessible RIDs are:
+#### Event catalogue and indirect-callback closure
+
+The event catalogue at `0x2AD10` contains 64 eight-byte slots, of which slots
+1..51 are populated. Each populated record carries an encoded identifier, a
+record-kind byte, and a bound byte; enumeration emits the identifier's lower
+16 bits. The active-slot bitmap at `0xFEBE89BC` is reconstructed from checkpoint
+object `0x11` by `0x53AB0` and updated by event-state writers `0x54150` and
+`0x54228`. This is event persistence, not calibration storage.
+
+Selector 3 has two statically configured indirect tables:
+
+- `0x2A504`: 75 snapshot descriptors, resolving to 35 non-null data callbacks
+  in `0x54C64..0x551C2`;
+- `0x2AC0C`: six detail descriptors, resolving to data callbacks
+  `0x551CA/0x55204/0x5522E/0x5524E/0x5525E/0x5526E`; all six optional gate
+  callback fields are null.
+
+The resolved callback block has exactly seven direct descendants
+(`0x524B6`, `0x5258C`, `0x5260A`, `0x694CC`, `0x694E4`, `0x6951C`, `0x6F080`).
+None is a known AES/CMAC, ICU-S, SecOC, NvM read/write, or security-policy
+function, and the block contains neither application-GP displacement for the
+SecOC key buffers. This closes the configured indirect-call residual for this
+calibration.
+
+#### Operation-F1 handoff
+
+The outer callback uses generic asynchronous operation `0xF1`. Its record at
+`0x28098` is `(F1,06,00,0C,0,0x34B74,0x34B9A)`. Start callback `0x34B74`
+checks the five-byte token `JTEKM` and reaches the state gate at `0xB201A` via
+thunk `0xFE024`; result callback `0x34B9A` reaches `0xB209C` via thunk
+`0xFE150`. The result records a status marker in RAM. This handoff also has no
+flash/crypto path.
+
+#### Separate stock-gated control-ID table
+
+`application_routine_id_table @ 0x25768` holds 32 records
+`(RID:u16, flags:u16, start_cb:u32, result_cb:u32)` from `0x0204` through
+`0x110D`. `application_routine_id_lookup @ 0x8D3CC` scans entries `0..12`; the
+13 RIDs in that bounded subset are:
 
 ```text
 0x0204, 0x2001, 0x2002, 0x2005, 0x2006, 0x2007, 0x2008,
 0x2009, 0x200D, 0x2010, 0x2012, 0x2013, 0x2014
 ```
 
-Each entry has `start_cb` and `result_cb` pointers. The lookup matches the RID
-from the request and invokes the start callback. This table is shared with SID
-`0x31`'s configuration, but `0x31` itself does not dispatch routines (see the
-DSP dispatch resolution above).
+Each entry has `start_cb` and `result_cb` pointers. The lookup's sole direct
+caller is `0x8A482` at `0x8A50C`; no function-pointer literal for `0x8D3CC`
+exists. That caller belongs to worker `0x8A630`, reached by wrappers
+`0x936AA/0x936D6`. Those wrappers are the fourth callbacks in the generic
+control records at `0x2622C` and `0x26264`, covering selectors
+`0x0201..0x02FF` and `0x2001..0x20FF` beneath the SID `0x28` machinery.
 
-#### Response format
+The stock wire gate still makes the worker dormant in this calibration:
+SID `0x28` admits only subfunctions `00/01/03`, while the worker-bearing
+selector ranges begin with `02/20`. SID `0x31` has a null callback and is also
+excluded from the subfunction path. The table is therefore structurally linked
+under generic CommunicationControl machinery, but no admitted stock selector
+reaches it.
+
+There is no call or data edge from SID `0xAB` to `0x8D3CC` or to these 13
+callback pairs. Their direct target census is therefore not evidence about
+`0xAB`.
+
+The callback closure is nevertheless security-relevant if an internal or
+variant-specific producer bypasses the stock subfunction gate. No callback has
+a **direct** edge to flash, crypto, ICU-S, SecOC verification, or NvM services,
+but successful result callbacks arm asynchronous persistence state machines:
+
+| Result callbacks | State producer | State consumer | Persisted selector |
+|---|---:|---:|---:|
+| RID `2001` | `0xB47A6` via `0xFE060` | `0xB44CA → 0xB4484` | `0x101` |
+| RID `2002` | `0xB5D0C` via `0xFDE58` | `0xB5C3E → 0xB5C16` | `0x102` |
+| RID `2005/2006/2007/2008/2009/200D` | `0xB55C4` via `0xFE0C4` | `0xB535E → 0xB52DA` | `0x103` |
+
+Each update helper calls thin wrapper `0xFF09C`, which forwards to
+`secoc_nvm_object_update @ 0x65CD8`. These are namespace-`0x100`
+SecOC-associated **state objects**, not evidence of a key update, object 15,
+or crypto execution. The remaining RIDs (`0204/2010/2012/2013/2014`) have no
+recovered state-mediated NvM submission in this bounded trace.
+
+#### Generic response handoff
 
 On success, `0x8D2B2` returns:
 - `**(param_1+8) = *FEBF493C` — vendor byte from the secondary mirror
-- `*(param_1+0xC) = 0x2FD8C + offset` — response data pointer into CodeFlash
+- `*(param_1+0xC) = 0x2FD8C + offset` — response data pointer into the generic
+  operation-result map
 
 #### Secondary `0x7A0 → 0x7A8` endpoint
 
@@ -570,9 +641,10 @@ All seven null-callback SIDs have `byte[9] == 0x00` and `callback == 0`:
 | `0xBA` | `3` | `FA` + request echo (no proprietary processing) |
 
 SID `0x31` is also explicitly excluded from the subfunction path by the gate
-check `SID != '1'` (0x31 = ASCII `'1'`). The 32-entry RID table at `0x25768` is
-consumed only by the proprietary `0xAB` callback (`0x8D3CC` scans entries
-`0..12`), not by SID `0x31` dispatch.
+check `SID != '1'` (0x31 = ASCII `'1'`). The separate routine worker at
+`0x8A630` can reach the 32-entry RID table's bounded 13-entry lookup, but no
+stock diagnostic-dispatch path reaches that worker. SID `0xAB` does not use
+the RID table.
 
 The Corolla's observed `0x34`-silent / `0x36`→NRC `0x7F` / `0x37`→NRC `0x7F`
 behavior cannot be explained by a hidden DSP handler in this image. These
@@ -871,11 +943,11 @@ Those require successful bootloader capture or a firmware image from part
 | application SA secret key at CodeFlash 0x20840 | **Definitive** |
 | application SA attempt counter and delay are RAM-only | **Definitive** |
 | application SA unlock state is a 2-dword bitmask | **Definitive** |
-| SID `0x31` DSP binding to routine-ID table | **Unknown / generated indirection** |
+| SID `0x31` DSP binding to routine-ID table | **Definitively absent in this calibration** |
 | null-callback SIDs `14`/`23`/`31`/`34`/`36`/`37`/`BA` receive simple positive responses (no service-specific DSP) | **Definitive** |
 | generated Dcm DSP start-phase globally disabled (flag @0x25DCC=0) | **Definitive** |
-| SID `0x31` excluded from subfunction path; RID table consumed only by `0xAB` callback | **Definitive** |
-| proprietary SID `0xAB` OEM name/purpose | **Asynchronous control service (calibration/flash is a hypothesis, not proven)** |
+| SID `0x31` excluded from subfunction path; bounded RID worker has no stock diagnostic entry | **Definitive** |
+| proprietary SID `0xAB` structure | **Recovered event-record list/state/detail service; exact OEM name unknown** |
 | reset reaches the bootloader rather than returning directly to application | **Strong inference** |
 | bootloader `0x614A` queues valid transitions instead of responding directly | **Definitive** |
 | `0x4776` state is cleared by the main-loop task and is not per-boot one-shot | **Definitive** |

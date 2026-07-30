@@ -191,6 +191,14 @@ def main() -> int:
         "pinned CAN 0x262 DBC places checksum in final byte",
         "SG_ CHECKSUM : 63|8@0+" in toyota_secoc_dbc,
     )
+    check(
+        "pinned Toyota SecOC DBC names CAN 0x2E4 STEERING_LKA",
+        "BO_ 740 STEERING_LKA: 8" in toyota_secoc_dbc,
+    )
+    check(
+        "pinned CAN 0x2E4 DBC identifies signed B1..B2 torque command",
+        "SG_ STEER_TORQUE_CMD : 15|16@0-" in toyota_secoc_dbc,
+    )
 
     print("\n== pinned opendbc SecOC sender ==")
     check(

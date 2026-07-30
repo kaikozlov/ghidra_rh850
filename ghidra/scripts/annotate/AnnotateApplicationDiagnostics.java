@@ -244,15 +244,39 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
         fn(0x8CCFAL,"application_control_dtc_setting_subfunction_02",
             "ControlDTCSetting subfunction 0x02 wrapper; require zero-length request data then store setting 2.");
         fn(0x8D344L,"application_proprietary_ab_callback",
-            "Proprietary SID 0xAB service callback. Phase 0 mirrors the request and enters 0x8D2B2; OEM name unknown.");
+            "Proprietary SID 0xAB event-record callback. Phase 0 mirrors the request and enters asynchronous operation F1 through 0x8D2B2; OEM name unknown.");
         fn(0x96A34L,"application_proprietary_ab_subfunction_01",
-            "Proprietary SID 0xAB subfunction 0x01 wrapper into shared worker 0x96918 with selector 1.");
+            "Proprietary SID 0xAB subfunction 0x01: request the active event-ID list through shared worker 0x96918.");
         fn(0x96A56L,"application_proprietary_ab_subfunction_02",
-            "Proprietary SID 0xAB subfunction 0x02 wrapper into shared worker 0x96918 with selector 2.");
+            "Proprietary SID 0xAB subfunction 0x02: query one 16-bit event ID through shared worker 0x96918. This is not the control-block reset path.");
         fn(0x96A78L,"application_proprietary_ab_subfunction_03",
-            "Proprietary SID 0xAB subfunction 0x03 wrapper into shared worker 0x96918 with selector 3.");
-        fn(0x8D3CCL,"application_routine_id_lookup",
-            "Scan routine-ID table entries 0..12 at 0x25768 and invoke the matching start callback. Used from the proprietary 0xAB path.");
+            "Proprietary SID 0xAB subfunction 0x03: query event detail using a 16-bit event ID and 16-bit secondary selector.");
+        fn(0x96918L,"application_proprietary_ab_selector_worker",
+            "Validate AB selector payload lengths, copy request context, and configure the event-record query worker for active-list, single-ID, or detail mode.");
+        fn(0x8CF84L,"application_proprietary_ab_event_worker",
+            "Advance the AB event-record query state machine and dispatch modes 1/2/3 through 0x4F8BA; no edge to the routine-ID table.");
+        fn(0x4F8BAL,"application_event_record_query",
+            "Query the checkpoint-backed event catalogue: mode 1 lists active IDs, mode 2 reads per-ID state, and mode 3 reads detail/snapshot data.");
+        fn(0x54748L,"application_event_active_id_list",
+            "Enumerate active IDs from the 64-slot event catalogue at 0x2AD10 using the bitmap at FEBE89BC.");
+        fn(0x548B0L,"application_event_state_query",
+            "Resolve one event ID in the 64-slot catalogue and return its type-specific state data.");
+        fn(0x54BF2L,"application_event_detail_query",
+            "Resolve one event ID and secondary selector through the 75 snapshot and six detail descriptors.");
+        fn(0x34B74L,"application_proprietary_ab_f1_start",
+            "Operation-F1 start callback selected by the AB asynchronous handoff. Check the JTEKM token and enter operation state 3 through the B201A veneer.");
+        fn(0x34B9AL,"application_proprietary_ab_f1_result",
+            "Operation-F1 result callback selected by the AB asynchronous handoff; read operation state 3 through the B209C veneer.");
+        fn(0x8A482L,"application_routine_start_dispatch",
+            "Resolve one of the first 13 control-ID records and invoke its start callback through lookup 0x8D3CC. SID 0x28 records link the worker structurally, but stock subfunctions gate its 02xx/20xx selectors.");
+        fn(0x8A542L,"application_routine_result_dispatch",
+            "Resolve one of the first 13 control-ID records and invoke its result callback through lookup 0x8D416. Some results arm asynchronous NvM updates for objects 0x101/0x102/0x103.");
+        fn(0x8A630L,"application_routine_worker",
+            "Stock-gated start/poll worker reached by SID 0x28 generic-control wrappers 0x936AA/0x936D6 for selector ranges 02xx/20xx. Separate from SID 0xAB and unattached to null-callback SID 0x31.");
+        fn(0x8D3CCL,"application_routine_start_callback_lookup",
+            "Scan control-ID table entries 0..12 at 0x25768 and invoke the matching start callback. Sole direct caller is 0x8A50C in the stock-gated worker.");
+        fn(0x8D416L,"application_routine_result_callback_lookup",
+            "Scan control-ID table entries 0..12 at 0x25768 and invoke the matching result callback. Separate from SID 0xAB; selected results arm objects 0x101/0x102/0x103.");
         fn(0x4F928L,"application_did_table_getter",
             "Return the application DID table base 0x2941C and count 0xF2 (242).");
         fn(0x93910L,"application_uds_negative_response",
@@ -265,7 +289,21 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
         label(0x26AECL,"application_write_did_table",
             "19 x 8-byte write-DID descriptors used by application WDBI. Binary-searched from 0x9545C.");
         label(0x25768L,"application_routine_id_table",
-            "32 x 12-byte routine-ID records (RID, flags, start_cb, result_cb). SID 0x31 has a null service callback; AB lookup 0x8D3CC consumes entries 0..12.");
+            "32 x 12-byte control-ID records (ID, flags, start_cb, result_cb). A stock-gated SID 0x28 worker consumes entries 0..12; SID 0x31 has a null callback and SID 0xAB has no edge here.");
+        label(0x28094L,"application_operation_descriptor_count",
+            "Ten generic asynchronous operation descriptors follow at 0x28098. SID 0xAB uses operation F1.");
+        label(0x28098L,"application_operation_descriptor_table",
+            "Ten 16-byte asynchronous operation descriptors F1..FB. F1 selects AB callbacks 0x34B74/0x34B9A.");
+        label(0x2AD10L,"application_event_record_catalogue",
+            "64 x 8-byte event-record slots used by SID 0xAB; 51 slots are populated. Each record carries an encoded ID and type/shape bytes.");
+        label(0x2A504L,"application_event_snapshot_descriptor_table",
+            "75 x 24-byte event snapshot descriptors. 35 non-null callback pointers resolve to 0x54C64..0x551C2.");
+        label(0x2AC0CL,"application_event_detail_descriptor_table",
+            "Six x 16-byte event detail descriptors with six data callbacks and no configured gate callbacks.");
+        label(0xFEBE89BCL,"application_event_active_bitmap",
+            "Two-word active-event bitmap restored through checkpoint object 0x11 and enumerated by 0x54748 for AB selector 1.");
+        label(0xFEBF45D0L,"application_ab_query_control",
+            "AB event-query control block: selector, event ID, secondary selector, worker state, and result length/status fields.");
         label(0x25BF0L,"application_read_dtc_subfunction_table",
             "ReadDTCInformation subfunction records 0x01..0x04 with callbacks 0x8B5AA/0x8BA2A/0x8BD94/0x8C326.");
         label(0x25C30L,"application_security_access_subfunction_table",

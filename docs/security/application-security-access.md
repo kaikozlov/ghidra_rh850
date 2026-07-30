@@ -178,17 +178,17 @@ On failure, the worker returns `0x22` (conditionsNotCorrect).
 ## 6. Security-level consumers (what the unlock gates)
 
 **No configured SecurityAccess gating was found at the service, RDBI, or WDBI
-policy layers in this Sienna calibration.** No direct sensitive call was
-identified in the 13 `0xAB` RID callback bodies or the traced state-machine
-path (`0x8CF84` + `0x4F8BA`). The security-state machinery is wired up and
-exercised, but the policy tables are empty.
+policy layers in this Sienna calibration.** The complete configured `0xAB`
+event-record graph likewise contains no direct sensitive target. The
+security-state machinery is wired up and exercised, but the policy tables are
+empty.
 
 | Scope | Check | Result |
 |---|---|---|
 | All 17 services (Dcm dispatch layer) | `sec_count=0` at `0x25E28 + i*0x18 + 0x12` | No service is security-gated |
 | All 242 readable DIDs (RDBI) | Policy table at `0x261A4`, bounded scan of recognized policy records | No DID requires level > 0 |
 | All 19 writable DIDs (WDBI) | Policy table at `0x26420`, flag at `0x26B8D` | All have `level_count=0` |
-| All 13 `0xAB` RID callbacks + `0x8CF84` + `0x4F8BA` | Firmware-derived jarl/jr scan (39 unique targets across 3 ranges) | Zero matches to crypto/NvM/ICU-S/SecOC |
+| `0xAB` operation-F1, event worker, 75 snapshot descriptors, six detail descriptors | Resolve configured indirect tables, then census direct descendants and GP key displacements | Zero matches to crypto/NvM/ICU-S/SecOC/security-policy targets |
 
 The architecture is:
 
@@ -234,41 +234,31 @@ authorization:
   authorization manager behind the Dcm policy. Most callbacks remain only
   structurally classified. DID `0x1010` is safer than the Dcm table suggests
   because ICU-S independently authenticates its SHE M1–M3 package and counter.
-- **ControlDTCSetting and proprietary `0xAB`** are also session-only. The
-  recovered `0xAB` callbacks include speed gates for some RIDs and state/config
-  writes for others; their exact motor-control effect remains bounded and should
-  be treated as an attack surface rather than assumed harmless.
+- **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB`
+  exposes event-record list/state/detail reads through an asynchronous worker;
+  the recovered graph does not perform the formerly hypothesized motor-control,
+  calibration, flash, or provisioning writes.
 
 For a comma integration this policy weakness is not a clean control interface.
-It is primarily an availability/configuration surface, and the unknown WDBI/AB
+It is primarily an availability/configuration surface, and the unknown WDBI
 semantics make it too fragile for steering control. A purpose-built,
 authenticated, bounded application interface would be safer than depending on
 these diagnostic side effects.
 
-## 7. `0xAB` RID callback analysis
+## 7. `0xAB` event-record closure
 
-The 13 RID callback pairs (at `0x25768`, RIDs `0x0204`..`0x2014`), the
-state machine at `0x8CF84`, and worker `FUN_0x4F8BA` were scanned for
-direct branches using the RH850 `addr22` encoding with the SLEIGH
-`op1616=0` constraint (classifying `jarl` calls and `jr` jumps
-separately). The firmware-derived branch-target set contains 39 unique
-valid addresses across three ranges; zero match sensitive functions
-(AES, CMAC/CSM, ICU-S, NvM, security-state reader, SecOC key material).
+`0xAB` is structurally recovered as an event-record service. Selector 1 lists
+active IDs from a checkpoint-backed 64-slot catalogue; selectors 2 and 3 query
+per-ID state and detail. The complete configured indirect closure consists of
+75 snapshot descriptors and six detail descriptors. It contains no known
+crypto, NvM, ICU-S, SecOC, flash, or security-policy target and no GP-relative
+SecOC key-buffer access.
 
-The callbacks are three categories of mundane operations:
-
-| Category | RIDs | Behavior |
-|---|---|---|
-| Vehicle-speed gates | `0x0204`, `0x2002`, `0x2006`, `0x2007`, `0x2008` | Check speed < threshold, return NRC 0x05 if exceeded |
-| Handoff/session writers | `0x2001`, `0x2013`, `0x2014` | Write flags to FEBF45D0 area |
-| State-block configure | `0x2005`, `0x2009`, `0x200D`, `0x2010` | Write u16 parameters to state block |
-
-The state machine at `0x8CF84` manages byte-stream processing through
-`FUN_0004f8ba` with no identified crypto or provisioning calls.
-
-Based on direct call analysis, `0xAB` is not identified as a SecOC
-provisioning or key-update interface. Indirect calls through wrappers or
-GP-displacement RAM access not yet traced remain a residual possibility.
+The 13 RID callback pairs at `0x25768` are separate. Their lookup's only direct
+caller belongs to a dormant RoutineControl worker; stock SID `0x31` has a null
+callback, and there is no edge from `0xAB` to the RID lookup. The canonical
+control-flow and table evidence is in
+[the application diagnostics report](../diagnostics/application.md).
 
 ## 8. Hardware-validation status
 
@@ -305,5 +295,5 @@ the first UDS request or include explicit padding bytes.
 | Services: all sec_count=0 | `verify_security_consumers.py`: 17 service-table checks |
 | RDBI: no DIDs require level > 0 | `verify_security_consumers.py`: 242-DID bounded policy scan |
 | WDBI: all level_count=0 | `verify_security_consumers.py`: 19 write-DID checks |
-| 0xAB callbacks + state machine: no sensitive targets | `verify_ab_rid_callbacks.py`: firmware-derived jarl/jr scan (39 targets, 3 ranges) |
+| `0xAB` configured direct/indirect closure: no sensitive targets | `verify_application_ab_service.py`: operation-F1, event-catalogue, 75-record snapshot table, six-record detail table, and callback-target assertions |
 | Consumer set is exhaustive | `verify_security_consumers.py`: exact address-set assertion (11 addresses) |

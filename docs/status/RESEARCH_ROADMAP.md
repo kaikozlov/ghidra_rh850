@@ -6,16 +6,12 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Near-term (static, this repo)
 
-1. **Close the `0xAB` hypothesis.** Finish tracing indirect calls through
-   wrappers and GP-displacement RAM access in the 13 RID callbacks and the
-   `0x8CF84` state machine. Either confirm 'calibration/flash control' or
-   re-grade. Canonical: [../diagnostics/application.md](../diagnostics/application.md).
-2. **Resolve the 97 configured-unresolved RX signals.** Bounded but not
+1. **Resolve the 97 configured-unresolved RX signals.** Bounded but not
    producer-mapped. Canonical: [../communications/application-rx.md](../communications/application-rx.md).
-3. **Motor-control cluster behavioral analysis.** The `0x47C3C/0x32B80/0xB98BC`
+2. **Motor-control cluster behavioral analysis.** The `0x47C3C/0x32B80/0xB98BC`
    cluster is structurally mapped only. Relevant to openpilot torque-path
    understanding. Canonical: [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md).
-4. **Semantic coverage long-tail.** Move `recovered` rows in
+3. **Semantic coverage long-tail.** Move `recovered` rows in
    `data/semantic_coverage_ledger.csv` toward behaviorally understood where
    they intersect security, diagnostics, or torque.
 
@@ -45,3 +41,11 @@ What to investigate next, in rough priority order. Completed items move to
    inconsistency easier to find.
 9. ~~**Link checking** in CI for `docs/` internal cross-references.~~ **Done** —
    `tests/verify_doc_links.py` runs in `make verify`.
+
+## Completed static investigations
+
+- **SID `0xAB` closure (2026-07-30).** Disproved the RID-based
+  calibration/flash hypothesis. `0xAB` is an event-record service with a closed
+  configured indirect graph; the separate 13-entry RID worker has no stock
+  diagnostic entry. Canonical:
+  [../diagnostics/application.md](../diagnostics/application.md).
