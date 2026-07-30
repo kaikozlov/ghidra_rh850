@@ -552,8 +552,183 @@ recovery. A changed slot-4 key is rekeying, not recovery of the original.
 | serial read fault can expose ICU-S key storage | **hypothesis** | public FI reaches ordinary flash only |
 | command 8 or M1-M5 discloses the current key | **disproved** | recovered data flow/SHE contract |
 
+## 11. Strategic framework: two independent layers and cross-ECU attack surface
+
+> **Document type:** strategic analysis, not a verified firmware finding.
+> Synthesizes the recovery methods above with external evidence to frame the
+> broader research direction. This section is scoped as **hypothesis** unless a
+> specific claim references a FINDINGS-grade result. It does not modify or
+> supersede the carefully bounded conclusions in
+> [sender-implementation.md](sender-implementation.md) or
+> [variants/](../../variants/).
+
+### 11.1 The two layers are independent
+
+The vehicle's SecOC system presents two independent security layers. They do
+not have to fail together on the same ECU, and the cheapest path to a shared
+SecOC key may target different layers on different ECUs:
+
+| Layer | Mechanism | Secret | Scope | Evidence |
+|---|---|---|---|---|
+| **1 — Bootloader payload gate** | Denso RH850/P1M-E UDS download, AES-CBC/CMAC, CRC32, callback execution | `PAYLOAD_BUILD_SECRET` | This image deterministically accepts the same pinned payload used by public tooling for several EPS versions; operation on those other versions is reported externally. **Untested across ECU types** (camera, sonar, gateway, clearance warning). | **verified** (this image); **external-source** (other listed EPS versions); **hypothesis** (cross-ECU) |
+| **2 — SecOC key storage** | Per-ECU firmware generation: plain DataFlash, RAM, or ICU-S hardware boundary | Vehicle-specific 16-byte AES-128 | Storage differs across related EPS variants/calibrations. | **verified** (`12000` has no valid object-15 copy); **external-source/observed** (`14000` key); **hypothesis** (non-EPS ECUs) |
+
+Layer 1 is a Denso AUTOSAR bootloader mechanism with no ICU-S involvement. It
+gates *code execution* — the ability to upload and run arbitrary shellcode on
+the target ECU. Layer 2 gates *key access* — whether that shellcode can read
+the SecOC key from the ECU's memory.
+
+We observe layer-2 variation *within* the EPS family: the `8965B4514000`
+exposes a key candidate at CPU-visible DataFlash object 15 (`0xFF206E14`),
+while this `12000` calibration has **no valid key copy** in object 15. The
+three triplicate copies are uncommitted/invalid (raw field:
+`00000000040000808202000000000000`), not erased-blank, and the runtime
+verification path selects ICU-S slot 4 (SECOC-002/003). The exact production
+relationship between object 15 and the live slot-4 key remains unknown.
+Whether similar variation exists across different ECU types on the same vehicle
+is **hypothesis** — no non-EPS ECU has been analyzed.
+
+### 11.2 Cross-ECU payload portability: untested hypothesis
+
+If layer 1's `PAYLOAD_BUILD_SECRET` is shared across ECU types (not just EPS
+part variants), all Denso RH850/P1M-E ECUs on the vehicle bus are potential
+code-execution targets, not just the EPS.
+
+The optskug community timeline reports a TechInfo-derived list of ECU types
+covered by the "ECU Security Key" procedure for the RAV4 Prime (forward camera,
+clearance warning ECU, No. 2 skid control ECU, combination meter, etc.). That
+secondary report does not by itself prove SecOC message authentication, nor
+does it confirm the same bootloader payload format or the same
+`PAYLOAD_BUILD_SECRET`. Those are separate, untested claims.
+
+**No public test has been identified** in which a payload signed with the EPS
+`PAYLOAD_BUILD_SECRET` was uploaded to a non-EPS ECU. Such an experiment would
+be the cheapest discriminator: acquire an inexpensive donor ECU, attempt the
+existing signed payload, and observe whether routine `0x10F0` accepts it.
+Acceptance by one ECU type would demonstrate portability **to that ECU only** —
+it would not establish compatible bootloaders across all ECU types, nor would
+it prove weak key storage on that ECU.
+
+### 11.3 Key-sharing topology: external evidence, not firmware proof
+
+Pinned opendbc's sender uses a single `self.secoc_key` field for both steering
+(`0x2E4`, `0x131`) and acceleration (`0x183`) output streams. This is an
+implementation interface that **treats** those streams as sharing one key, but
+it is external-source evidence with a placeholder key (`b"00" * 16`), not a
+firmware-derived proof of production key topology. See
+[sender-implementation.md](sender-implementation.md) §1.2–1.3 for the bounded
+opendbc analysis.
+
+The I-CAN-Hack report concerns the RAV4 Prime EPS and states that its extracted
+SecOC key enabled sending messages to other ECUs and controlling LKA, ACC, and
+AEB. That is **external-source** evidence consistent with one key serving
+multiple control paths on that RAV4 Prime, but it is not a firmware-static proof
+that one key opens every protected PDU on every Toyota SecOC vehicle.
+
+For this Sienna EPS, the firmware verifies that all six configured receive
+profiles select ICU-S slot 4 (SECOC-001/002), which is **firmware-verified**
+evidence of a single key slot for the profiles this ECU receives. It does not
+constrain the key topology of PDUs this ECU does not receive.
+
+### 11.4 EPS as native SecOC signing oracle: conditional on unknowns
+
+If ICU-S slot 4 permits MAC generation via command 5 (not just verification via
+command 7), then authenticated code execution on this EPS could turn it into a
+native SecOC signing oracle without plaintext key recovery. This is a
+**hypothesis gated by two unknowns**, not an established capability:
+
+1. **Does ICU-S slot 4 permit MAC generation?** Command 5's software plumbing
+   accepts selector 4 and handles output (SECOC-006, **verified structure**).
+   Hardware slot-4 generation permission is **unobserved** — ICU-S may reject
+   generation for a key provisioned for verification only.
+2. **Is ICU-S operational in bootloader context?** The authenticated callback
+   runs before application init. Whether ICU-S is initialized and slot 4 is
+   loaded at that point is unknown. A restorable application-context hook is
+   the fallback (SEC-BOOT-008, **recovered** but not bench-tested).
+
+The remaining supporting elements are independently verified:
+
+- **Code execution**: the authenticated bootloader callback path
+  (SEC-BOOT-005/006) is **verified** and constructible from repository-known
+  material.
+- **CAN TX**: proven by the pinned CAN-dump payloads, which transmit data over
+  CAN. This is a **verified** transport mechanism.
+- **Input format**: the authenticated-input and trailer packing for ordinary
+  classic frames is **verified** from both firmware and the independent signer
+  ([sender-implementation.md](sender-implementation.md)).
+
+### 11.5 Sender freshness is a separate unsolved problem
+
+A signing oracle based on this EPS needs independent *sender* counters
+synchronized to the intended receiving ECU. The EPS tracks freshness only as a
+*receiver* — SECOC-012 describes receive-window initialization and sync
+acceptance for this EPS's inbound paths, not a transmit-side freshness manager.
+
+A sender must:
+
+- maintain per-PDU message counters;
+- consume the synchronization frame (`0x00F`) to align trip/reset counters;
+- increment the correct counter after each protected send;
+- handle reset-counter changes as state transitions.
+
+These requirements are identical to those documented for the opendbc sender
+in [sender-implementation.md](sender-implementation.md) §1.1, which notes that
+"separate protected PDUs need separate message-counter state, and a stale or
+unauthenticated sync must not silently replace the active sender epoch." That
+analysis applies equally here.
+
+The receiver-freshness observation in SECOC-012 (initialization zeroes windows,
+accepts forward sync) describes what the EPS would accept as a *receiver*. It
+does not by itself establish that a compromised EPS can *originate* valid
+sender freshness. The startup-race dynamics described in OPEN_QUESTIONS
+("reset-window replay") remain open for the sender case as well.
+
+The latency-contention constraint (OPEN_QUESTIONS: "command-7 contention")
+also applies: command-5 generation and command-7 verification share the same
+ICU-S engine.
+
+### 11.6 Implications for recovery strategy
+
+If the shared-key hypothesis holds and cross-ECU payload portability is
+confirmed, the recovery effort broadens from "extract the key from this
+hardened EPS" to "find the cheapest path to the shared key or an equivalent
+signing capability across the vehicle's SecOC ecosystem." The ranked methods
+in §2 can then be evaluated against the full vehicle surface rather than this
+one ECU.
+
+These are **hypotheses**, not established facts. The framework motivates
+specific experiments:
+
+1. Test whether the EPS `PAYLOAD_BUILD_SECRET` is accepted by an inexpensive
+   non-EPS donor ECU (§11.2).
+2. Test whether command 5 with selector 4 produces output after normal
+   application initialization (§11.4, already the rank-4 method in §2).
+3. If command 5 succeeds, prototype a sender that maintains independent
+   per-PDU freshness and validates against a live receiver (§11.5).
+
+Variant-specific outcomes should be recorded in [docs/variants/](../../variants/),
+not here.
+
 ## References
 
+Firmware-internal:
+- [sender-implementation.md](sender-implementation.md) — opendbc sender analysis
+- [application-chain.md](application-chain.md) — receive-chain and freshness boundary
+- [docs/variants/](../../variants/) — variant-specific comparison
+
+External (cited in §11):
+- Willem Melching, *Extracting SecOC keys from a 2021 Toyota RAV4 Prime*:
+  <https://icanhack.nl/blog/secoc-key-extraction/>
+- Willem Melching, *Bypassing the Renesas RH850/P1M-E read protection using
+  fault injection*:
+  <https://icanhack.nl/blog/rh850-glitch/>
+- commaai/opendbc SecOC sender (pinned commit
+  `c9b31d21bc396e8958891e271936bdbdf1a6ca93`):
+  <https://github.com/commaai/opendbc/blob/c9b31d21bc396e8958891e271936bdbdf1a6ca93/opendbc/car/secoc.py>
+- optskug/docs community timeline (accessed 2026-07-30):
+  <https://github.com/optskug/docs>
+
+Hardware/reference manuals:
 - Renesas, *RH850/P1M-E Datasheet*:
   <https://www.renesas.com/en/document/dst/rh850p1m-e-datasheet>
 - Renesas, *RH850/P1M-E User's Manual: Hardware*:
