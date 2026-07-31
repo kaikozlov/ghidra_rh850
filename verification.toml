@@ -153,3 +153,11 @@ paths = ["tools/toyota_secoc_signer.py"]
 [suite.tss3_variant_matrix]
 tests = ["tests/verify_tss3_variant_matrix.py"]
 paths = ["data/tss3_eps_variant_matrix.csv", "docs/variants/"]
+
+[suite.techstream_rks]
+tests = ["tests/verify_techstream_rks.py"]
+paths = ["docs/tooling/techstream.md"]
+# External-tree suite: verifies TMS-009 (CUW RKS / two-layer reflash
+# authorization). SKIPs cleanly (exit 0) when the gitignored Techstream/
+# unpacked tree is absent, so it never breaks core verify. Run on a host
+# where Techstream/unpacked/ is populated, or via: make verify-one SUITE=techstream_rks

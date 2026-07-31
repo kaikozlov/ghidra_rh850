@@ -254,3 +254,22 @@ the mistakes are not re-made.
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
   §1.3; `tests/verify_secoc_application.py`;
   `build/reference-text/AUTOSAR_TR_SecureHardwareExtensions.txt` §4.4.1.5/§4.4.2.4.
+
+### CORR-018 — Techstream online portal as an "immobilizer/MAC" path
+
+- **Wrong:** `docs/tooling/techstream.md` §5.1 and §8.3 stated the online
+  portal (`ReprogrammingSecurity` / `MACKey_Login`) is "only invoked for
+  immobilizer resets and MAC key management, not for routine ECU reflashing."
+- **Right:** The portal is the RKS (Reprogramming Key System) reprogramming-key
+  authorization — `CUWAccessRKS.dll` / `CUWAccessRKSWrapper.dll` (.NET) drive
+  an embedded IE to the TIS portal to obtain a VIN+license-bound `Signature`,
+  validated only by regex `^[0-9a-zA-Z]+$` (no client-side crypto; signing is
+  server-side). There is no immobilizer code path in this installer (zero
+  "immobilizer"/"theft" strings across the 6,826-file tree). The portal does
+  not supply the ECU crypto key — Layer B's key remains in the calibration
+  file.
+- **Consequence of the error:** conflated the portal with immobilizer/SecOC
+  provisioning, overstating its relationship to the firmware SecOC findings.
+- **Canonical:**
+  [../tooling/techstream.md](../tooling/techstream.md) §5.3; TMS-009;
+  `tests/verify_techstream_rks.py`.

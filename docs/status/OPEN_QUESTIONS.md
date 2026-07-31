@@ -196,3 +196,11 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `FUKUMORIYOSIYAMA` key is only for runtime ADS/PCS FFD access. To recover
   the actual EPS reflash key, obtain a Sienna EPS `.cuw` calibration file from
   Toyota's TechInfo portal and extract the `SeedKey`/`ServiceAuthKey` fields.
+- **RKS authorization vs. EPS reflash (Layer A).** The TIS portal RKS flow
+  (TMS-009) is a CUW-side VIN+license permission gate, distinct from the
+  cal-file crypto key (Layer B). Open: whether it is *mandatory* for every EPS
+  reflash or optional/regional/offline-bypassable, and the exact source of its
+  `SeedValue` (bounded — generation is in native `Cuw.exe`, but its
+  independence from the ECU SA seed is established). It does not touch the ECU
+  or any of the three firmware secrets. See
+  [../tooling/techstream.md](../tooling/techstream.md) §5.3.
