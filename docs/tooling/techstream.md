@@ -413,24 +413,23 @@ Windows CryptoAPI (`CryptEncrypt`/`CryptDecrypt`/`CryptImportKey`/
 §4.5 `CalcSeedKey` cipher object. The FlashWriter merely frames and ships key
 bytes; it does no cryptography.
 
-> **Residual (bounded).** CUW-side resolved: at the FOREST call site
-> (`FUN_10001200`), `arg3` (`0x37`–`0x39`) = `CalibrationFile::GetNonce(nodeIdx)`
-> and `arg4` (`0x3a`–`0x3c`) = `CalibrationFile::GetSeedKey(nodeIdx)` — both thin
-> accessors into a per-node cal-file record (node size `0xae9c`; SeedKey @
-> `+0x110`, Nonce @ `+0x114`), returning pointers to two distinct 16-byte blobs,
-> shipped verbatim. The FOREST flash sequence (`CheckIDWithWaitOfSFs` →
-> `SendNonceAndSeedKey` → `GetMemoryInfo` → `DetectFalsify` →
-> `FinishReprogramming` → `ChangeNextCpu`) contains **no `0x27` SA and no
-> `WriteDataByIdentifier`** — the `0x27` SA (SEC-BOOT-003) is the separate
-> PrepareWriter step (§4.5), and the payload-gate keys come via these VFOREST
-> frames, not DID writes. The remaining question is firmware-side: does the
-> bootloader's `0x37`–`0x3c` handler route `GetNonce`/`GetSeedKey` into the
-> `DID_0x201`/`0x202` storage (SEC-BOOT-005/006/007), and which blob is the
-> AES-CBC key vs. the IV? Naming suggests `GetSeedKey`→key/`0x201`,
-> `GetNonce`→IV/`0x202`, but that is `hypothesis` pending a `ptshim32` capture
-> or firmware decompile. The structural finding (key-material transfer, not
-> SA; `0x37`–`0x3c` are block-seq bytes, not SIDs; arg3=GetNonce, arg4=GetSeedKey)
-> is `verified` by decompilation.
+> **Resolved (firmware-side, CORR-021).** The Sienna `8965B4512000` bootloader
+> speaks **standard UDS only**: its 20-entry service table at `0x8E54` implements
+> `0x10/0x11/0x22/0x27/0x28/0x2E/0x31/0x34/0x36/0x37/0x3E/0x85` and maps
+> `0x14/0x19/0x23/0x2C/0x2F/0xAB/0xBA/0xBB` to `uds_unsupported_service_handler`
+> (`0x69B0`); every other SID returns NRC `0x11` (`uds_service_dispatch` @
+> `0x5222`). There is **no proprietary / VFOREST SID handler**, and the
+> payload-gate key storage (`DID 0x201` @ `0xFEBF2D08`, `DID 0x202` @
+> `0xFEBF2CF8`) is written **only** by `bootloader_did_direct_ram_copy @ 0x6D3A`
+> (the `0x2E` path) — sole writer confirmed by x-ref. Therefore the CUW VFOREST
+> `SendNonceAndSeedKey` path (`0x37`–`0x3c` proprietary frames) **does not apply
+> to the Sienna** — those frames would be rejected (NRC 0x11). The Sienna is
+> reflashed via standard UDS (`0x2E` DID writes for `0x201`/`0x202`, normally
+> zero, then `0x34/0x36/0x37` + `0x31`); the VFOREST writer targets a **different**
+> RH850 ECU that speaks the proprietary protocol. The CUW-side structural
+> finding (key-material transfer, not SA; `0x37`–`0x3c` are block-seq bytes, not
+> SIDs; `arg3=GetNonce`, `arg4=GetSeedKey`) stands, but its target ECU is not
+> `8965B4512000`.
 
 ## 5. Calibration Update Wizard (CUW)
 

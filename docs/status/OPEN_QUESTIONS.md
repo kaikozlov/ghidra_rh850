@@ -204,15 +204,16 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   independence from the ECU SA seed is established). It does not touch the ECU
   or any of the three firmware secrets. See
   [../tooling/techstream.md](../tooling/techstream.md) §5.3.
-- **VFOREST key-material transfer vs. SEC-BOOT-003 — resolved (TMS-010 /
-  CORR-020).** The CUW's `SendNonce`/`SendSeedKey`/`SendNonceAndSeedKey`
+- **VFOREST key-material transfer vs. SEC-BOOT-003 — fully resolved (TMS-010 /
+  CORR-020 / CORR-021).** The CUW's `SendNonce`/`SendSeedKey`/`SendNonceAndSeedKey`
   (`CCanCommonFlashWriter`) are NOT SecurityAccess — they transfer two
-  16-byte payload-gate keys plus a nonce prefix in sequenced frames whose
-  `0x37`–`0x3c` bytes are a per-frame block sequence at `Data[4]`, not UDS
-  SIDs (`0x39`–`0x3c` are not UDS services). The keys come verbatim from
-  `CalibrationFile::GetSeedKey` and feed the firmware bootloader payload gate
-  (SEC-BOOT-005/006/007), not the SA. There is no `0x27`-vs-`0x37` conflict.
-  Residual (bounded): the exact mapping of the two 16-byte keys to firmware
-  `DID_0x201`/`0x202` (payload-encryption vs. CMAC) needs a `ptshim32` live
-  capture or a `.cuw` calibration file. See
+  16-byte keys plus a nonce prefix in sequenced frames whose `0x37`–`0x3c`
+  bytes are a per-frame block sequence at `Data[4]`, not UDS SIDs. There is no
+  `0x27`-vs-`0x37` conflict. **Crucially, this VFOREST path does NOT apply to
+  the Sienna `8965B4512000` at all**: the bootloader service table (`0x8E54`)
+  is standard-UDS-only (no proprietary/VFOREST handler; non-standard SIDs →
+  NRC `0x11`), and `DID 0x201`/`0x202` storage is written only by the `0x2E`
+  path (`bootloader_did_direct_ram_copy @ 0x6D3A`). The Sienna is reflashed
+  via standard UDS (`0x2E` DID zeros + `0x34/0x36/0x37` + `0x31`); the VFOREST
+  writer targets a different RH850 ECU. See
   [../tooling/techstream.md](../tooling/techstream.md) §4.6.

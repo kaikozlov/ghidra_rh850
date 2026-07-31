@@ -320,3 +320,29 @@ the mistakes are not re-made.
   sub-claim is unchanged and correct.
 - **Canonical:**
   [../tooling/techstream.md](../tooling/techstream.md) §4.6; TMS-010.
+
+### CORR-021 — VFOREST writer assumed to reflash the Sienna EPS
+
+- **Wrong:** TMS-010 / §4.6 (commits `a2412ae`/`1b3a42a`/`a261e7e`) framed the
+  CUW `TCUWCanSecurityVFORESTFlashWriter` `SendNonceAndSeedKey` path as
+  delivering "payload-gate key material (SEC-BOOT-005/006/007)" to the Sienna
+  EPS — implicitly assuming VFOREST = the Sienna's reflash writer.
+- **Right:** Firmware verification shows the Sienna `8965B4512000` bootloader
+  speaks **standard UDS only**. The service table at `0x8E54` (walked by
+  `uds_service_dispatch @ 0x5222`) implements
+  `0x10/0x11/0x22/0x27/0x28/0x2E/0x31/0x34/0x36/0x37/0x3E/0x85`; eight more SIDs
+  (`0x14/0x19/0x23/0x2C/0x2F/0xAB/0xBA/0xBB`) map to
+  `uds_unsupported_service_handler @ 0x69B0`; every other SID returns NRC `0x11`.
+  There is **no proprietary/VFOREST SID handler**, and the payload-gate key
+  storage (`DID 0x201` @ `0xFEBF2D08`, `DID 0x202` @ `0xFEBF2CF8`) is written
+  **only** by `bootloader_did_direct_ram_copy @ 0x6D3A` (the `0x2E` path — sole
+  writer, x-ref confirmed). The VFOREST `0x37`–`0x3c` proprietary frames would
+  be rejected (NRC 0x11). The VFOREST writer therefore targets a **different**
+  RH850 ECU; the Sienna is reflashed via standard UDS (`0x2E` DID zeros +
+  `0x34/0x36/0x37` + `0x31`).
+- **What stands:** the CUW-side mechanism (key-material transfer, not SA;
+  `0x37`–`0x3c` are block-seq bytes at `Data[4]`; `arg3=GetNonce`,
+  `arg4=GetSeedKey`; no AES in any CUW DLL/EXE) is unchanged and correct — only
+  its attribution to the Sienna is corrected.
+- **Canonical:**
+  [../tooling/techstream.md](../tooling/techstream.md) §4.6; TMS-010.
