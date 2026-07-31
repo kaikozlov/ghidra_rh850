@@ -40,6 +40,7 @@ VERIFY_SUITES := \
 	tests/verify_doc_links.py
 
 .PHONY: sync verify verify-core verify-external verify-rfp verify-sleigh verify-processor verify-ghidra \
+	ghidra-cli \
 	generate-dataflash generate-application-diagnostics \
 	generate-application-receive-evidence generate-application-receive \
 	generate-processor-fixture generate-semantic-coverage \
@@ -47,6 +48,10 @@ VERIFY_SUITES := \
 
 sync:
 	$(UV) sync --locked
+
+# Build the vendored ghidra-cli (ghidra/ghidra-cli) into build/ghidra-cli/.
+ghidra-cli:
+	tools/build_ghidra_cli.sh
 
 verify: verify-core
 

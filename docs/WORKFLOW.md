@@ -7,7 +7,12 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
 
 - [Astral UV](https://docs.astral.sh/uv/) for the locked Python environment.
 - Ghidra **12.1.2** (tested Homebrew location `/opt/homebrew/opt/ghidra/libexec`).
-- Rust `ghidra` CLI **0.2.1** (`ghidra doctor` must pass).
+- Rust `ghidra` CLI **0.2.1** (`ghidra doctor` must pass). The CLI source is
+  **vendored in-tree** at `ghidra/ghidra-cli/` (fork of
+  `akiselev/ghidra-cli`). Run `make ghidra-cli` to build it into
+  `build/ghidra-cli/`; the repo's tool scripts automatically prefer the
+  vendored build over any `ghidra` on `PATH`. See
+  `ghidra/ghidra-cli/README.md` and `PROVENANCE.json`.
 - The Renesas v850/RH850 processor module, **vendored in-tree** at
   `ghidra/ghidra_v850/` (fork of `esaulenka/ghidra_v850` at commit
   `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see

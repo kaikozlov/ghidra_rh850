@@ -1,0 +1,93 @@
+[package]
+name = "ghidra-cli"
+version = "0.2.1"
+edition = "2021"
+authors = ["Alexander Kiselev"]
+description = "Rust CLI to run Ghidra headless for reverse engineering with Claude Code and other agents"
+license = "GPL-3.0"
+repository = "https://github.com/akiselev/ghidra-cli"
+
+[dependencies]
+# CLI framework
+clap = { version = "4.5", features = ["derive", "env", "cargo"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+
+# Parsing
+pest = "2.7"
+pest_derive = "2.7"
+
+# Output formatting
+tabled = "0.15"
+comfy-table = "7.1"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+env_logger = "0.11"
+log = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+
+# Async runtime (only needed for setup command's HTTP downloads)
+tokio = { version = "1.35", features = ["rt", "io-util", "time", "net"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Hashing
+md5 = "0.7"
+
+# File system & paths
+dirs = "5.0"
+tempfile = "3.8"
+walkdir = "2.4"
+
+# Process management
+which = "6.0"
+libc = "0.2"
+
+# Regex
+regex = "1.10"
+lazy_static = "1.4"
+
+# CSV/TSV
+csv = "1.3"
+
+# String similarity (for fuzzy matching)
+strsim = "0.11"
+
+# Cross-platform support
+dunce = "1.0" # Windows path handling
+
+# Setup command dependencies
+reqwest = { version = "0.11", features = ["json", "stream", "rustls-tls"] }
+zip = "0.6"
+futures-util = "0.3"
+indicatif = "0.17"
+
+
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "3.0"
+tempfile = "3.8"
+serial_test = "3.0"
+uuid = { version = "1.6", features = ["v4"] }
+# Snapshot testing - captures full output and detects regressions
+insta = { version = "1.40", features = ["json", "redactions"] }
+# Property-based testing - exhaustive edge case coverage
+proptest = "1.4"
+
+[lib]
+name = "ghidra_cli"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ghidra"
+path = "src/main.rs"

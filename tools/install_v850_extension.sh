@@ -4,7 +4,7 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-GHIDRA_HOME=$("$ROOT/tools/resolve_ghidra_home.sh")
+GHIDRA_HOME="$("$ROOT/tools/resolve_ghidra_home.sh")"
 VENDOR="$ROOT/ghidra/ghidra_v850"
 BUILD_EXT="$ROOT/build/processor-extension-src/Renesas_v850"
 LANG="$BUILD_EXT/data/languages"
@@ -20,14 +20,23 @@ GHIDRA_VERSION=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOM
   exit 1
 }
 CLI_VERSION="missing"
-if command -v ghidra >/dev/null 2>&1; then
+GHIDRA_CLI_BIN=""
+if [[ -x "$ROOT/build/ghidra-cli/ghidra" ]]; then
+  GHIDRA_CLI_BIN="$ROOT/build/ghidra-cli/ghidra"
+  CLI_VERSION=$("$GHIDRA_CLI_BIN" --version | awk 'NR == 1 { print $2 }')
+  [[ "$CLI_VERSION" == "0.2.1" ]] || {
+    echo "vendored ghidra CLI version mismatch (found $CLI_VERSION)" >&2
+    exit 1
+  }
+elif command -v ghidra >/dev/null 2>&1; then
+  GHIDRA_CLI_BIN=$(command -v ghidra)
   CLI_VERSION=$(ghidra --version | awk 'NR == 1 { print $2 }')
   [[ "$CLI_VERSION" == "0.2.1" ]] || {
-    echo "ghidra CLI 0.2.1 is required when present (found ${CLI_VERSION})" >&2
+    echo "ghidra CLI 0.2.1 is required when present (found $CLI_VERSION)" >&2
     exit 1
   }
 else
-  echo "NOTE: ghidra CLI not on PATH; SLEIGH compile will still proceed" >&2
+  echo "NOTE: ghidra CLI not built or on PATH; SLEIGH compile will still proceed" >&2
 fi
 
 command -v rsync >/dev/null 2>&1 || { echo "rsync is required" >&2; exit 1; }

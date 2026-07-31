@@ -1,0 +1,36 @@
+WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
+
+// Main expression
+expr = { logical_expr }
+
+// Logical expressions
+logical_expr = { logical_term ~ (logical_op ~ logical_term)* }
+logical_term = { logical_not | "(" ~ logical_expr ~ ")" | comparison }
+logical_not = { ("NOT" | "!") ~ logical_term }
+logical_op = { "AND" | "OR" | "&&" | "||" }
+
+// Comparison expressions
+comparison = { field ~ compare_op ~ value | field ~ string_op ~ string_value | existence_check | in_check }
+
+// Operators
+compare_op = { ">=" | "<=" | "!=" | "=" | ">" | "<" }
+string_op = { "=~" | "~" | "^" | "$" }
+
+// Existence checks
+existence_check = { field ~ ("EXISTS" | "EMPTY" | "NULL") }
+
+// IN operator
+in_check = { field ~ "IN" ~ "[" ~ value_list ~ "]" }
+value_list = { value ~ ("," ~ value)* }
+
+// Field access (including nested fields and arrays)
+field = @{ identifier ~ ("." ~ identifier | "[" ~ number ~ "]")* }
+identifier = @{ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+// Values
+value = { hex_number | number | boolean | quoted_string | identifier }
+string_value = { quoted_string | identifier }
+number = @{ "-"? ~ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
+hex_number = @{ "0x" ~ ASCII_HEX_DIGIT+ }
+boolean = { "true" | "false" | "TRUE" | "FALSE" }
+quoted_string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" | "'" ~ (!"'" ~ ANY)* ~ "'" }

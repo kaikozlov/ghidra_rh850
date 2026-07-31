@@ -42,7 +42,11 @@ done
   echo "run 'make rebuild-project' (fresh build) or 'make work-project' (copy from snapshot) first" >&2
   exit 1
 }
-command -v ghidra >/dev/null 2>&1 || { echo "ghidra CLI is required" >&2; exit 1; }
+command -v cargo >/dev/null 2>&1 || { echo "cargo is required (to build vendored ghidra-cli)" >&2; exit 1; }
+if [[ ! -x "$ROOT/build/ghidra-cli/ghidra" ]]; then
+  "$ROOT/tools/build_ghidra_cli.sh"
+fi
+GHIDRA_CLI="$ROOT/build/ghidra-cli/ghidra"
 command -v rsync >/dev/null 2>&1 || { echo "rsync is required" >&2; exit 1; }
 [[ -d "$SNAPSHOT_DIR" ]] || { echo "snapshot dir does not exist: $SNAPSHOT_DIR" >&2; exit 1; }
 
@@ -65,8 +69,8 @@ SNAPSHOT_DIR=$(cd "$SNAPSHOT_DIR" && pwd)
 CLI_ARGS=(--projects-dir "$PROJECT_DIR" --project "$PROJECT_NAME" --program "$PROGRAM_NAME")
 
 echo "Verifying working project stats before snapshot..."
-STATS_OUTPUT=$(ghidra "${CLI_ARGS[@]}" stats)
-ghidra "${CLI_ARGS[@]}" stop >/dev/null 2>&1 || true
+STATS_OUTPUT=$("$GHIDRA_CLI" "${CLI_ARGS[@]}" stats)
+"$GHIDRA_CLI" "${CLI_ARGS[@]}" stop >/dev/null 2>&1 || true
 # Wait for the daemon to fully exit before touching any files.
 for _ in 1 2 3 4 5; do
   pgrep -f "$DAEMON_RE" >/dev/null 2>&1 || break

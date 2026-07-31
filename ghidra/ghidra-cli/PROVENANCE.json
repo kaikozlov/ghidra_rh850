@@ -1,0 +1,22 @@
+{
+  "name": "ghidra-cli",
+  "version": "0.2.1",
+  "language": "Rust",
+  "upstream": {
+    "url": "https://github.com/kaikozlov/ghidra-cli",
+    "fork_of": "https://github.com/akiselev/ghidra-cli",
+    "baseline_commit": "0d094a38a1c6d4043b44dcd31d1c9537dfedfc77",
+    "baseline_branch": "fix/script-run-compiler-errors",
+    "notes": "Vendored in-tree from Kai's fork. The fix branch carries one unreleased commit on top of 0.2.1 (surface real compiler errors in `script run`). Maintained alongside the RH850 analysis work."
+  },
+  "binary": {
+    "crate_name": "ghidra-cli",
+    "bin_name": "ghidra",
+    "build_command": "tools/build_ghidra_cli.sh",
+    "output_dir": "build/ghidra-cli"
+  },
+  "ghidra": {
+    "required_version": "12.1.2",
+    "cli_required_version": "0.2.1"
+  }
+}

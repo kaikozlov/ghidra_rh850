@@ -74,13 +74,18 @@ GHIDRA_HOME=$(cd "$GHIDRA_HOME" 2>/dev/null && pwd) || {
 }
 ANALYZE_HEADLESS="$GHIDRA_HOME/support/analyzeHeadless"
 [[ -x "$ANALYZE_HEADLESS" ]] || { echo "missing analyzeHeadless: $ANALYZE_HEADLESS" >&2; exit 1; }
-command -v ghidra >/dev/null 2>&1 || { echo "ghidra CLI is required" >&2; exit 1; }
+command -v cargo >/dev/null 2>&1 || { echo "cargo is required (to build vendored ghidra-cli)" >&2; exit 1; }
+# Prefer the vendored ghidra-cli build; build it if missing.
+if [[ ! -x "$ROOT/build/ghidra-cli/ghidra" ]]; then
+  "$ROOT/tools/build_ghidra_cli.sh"
+fi
+GHIDRA_CLI="$ROOT/build/ghidra-cli/ghidra"
 GHIDRA_VERSION=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
 [[ "$GHIDRA_VERSION" == "12.1.2" ]] || {
   echo "Ghidra 12.1.2 is required (found ${GHIDRA_VERSION:-unknown})" >&2
   exit 1
 }
-GHIDRA_CLI_VERSION=$(ghidra --version | awk 'NR == 1 { print $2 }')
+GHIDRA_CLI_VERSION=$("$GHIDRA_CLI" --version | awk 'NR == 1 { print $2 }')
 [[ "$GHIDRA_CLI_VERSION" == "0.2.1" ]] || {
   echo "ghidra CLI 0.2.1 is required (found ${GHIDRA_CLI_VERSION:-unknown})" >&2
   exit 1
@@ -246,15 +251,15 @@ CLI_ARGS=(
 BRIDGE_STARTED=0
 cleanup() {
   if ((BRIDGE_STARTED)); then
-    ghidra "${CLI_ARGS[@]}" stop >/dev/null 2>&1 || true
+    "$GHIDRA_CLI" "${CLI_ARGS[@]}" stop >/dev/null 2>&1 || true
   fi
 }
 trap cleanup EXIT INT TERM
 
 BRIDGE_STARTED=1
-STATS_OUTPUT=$(ghidra "${CLI_ARGS[@]}" stats)
+STATS_OUTPUT=$("$GHIDRA_CLI" "${CLI_ARGS[@]}" stats)
 printf '%s\n' "$STATS_OUTPUT"
-ghidra "${CLI_ARGS[@]}" stop
+"$GHIDRA_CLI" "${CLI_ARGS[@]}" stop
 BRIDGE_STARTED=0
 trap - EXIT INT TERM
 
