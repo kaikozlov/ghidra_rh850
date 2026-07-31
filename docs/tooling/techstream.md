@@ -413,11 +413,24 @@ Windows CryptoAPI (`CryptEncrypt`/`CryptDecrypt`/`CryptImportKey`/
 §4.5 `CalcSeedKey` cipher object. The FlashWriter merely frames and ships key
 bytes; it does no cryptography.
 
-> **Residual (bounded).** The exact mapping of the two 16-byte keys (arg3,
-> arg4) to firmware `DID_0x201`/`0x202` vs. the payload vs. CMAC keys is a
-> corroboration detail that needs a `ptshim32` capture or a `.cuw`
-> calibration file. The structural finding (key-material transfer, not SA;
-> `0x37`–`0x3c` are block-seq bytes, not SIDs) is `verified` by decompilation.
+> **Residual (bounded).** CUW-side resolved: at the FOREST call site
+> (`FUN_10001200`), `arg3` (`0x37`–`0x39`) = `CalibrationFile::GetNonce(nodeIdx)`
+> and `arg4` (`0x3a`–`0x3c`) = `CalibrationFile::GetSeedKey(nodeIdx)` — both thin
+> accessors into a per-node cal-file record (node size `0xae9c`; SeedKey @
+> `+0x110`, Nonce @ `+0x114`), returning pointers to two distinct 16-byte blobs,
+> shipped verbatim. The FOREST flash sequence (`CheckIDWithWaitOfSFs` →
+> `SendNonceAndSeedKey` → `GetMemoryInfo` → `DetectFalsify` →
+> `FinishReprogramming` → `ChangeNextCpu`) contains **no `0x27` SA and no
+> `WriteDataByIdentifier`** — the `0x27` SA (SEC-BOOT-003) is the separate
+> PrepareWriter step (§4.5), and the payload-gate keys come via these VFOREST
+> frames, not DID writes. The remaining question is firmware-side: does the
+> bootloader's `0x37`–`0x3c` handler route `GetNonce`/`GetSeedKey` into the
+> `DID_0x201`/`0x202` storage (SEC-BOOT-005/006/007), and which blob is the
+> AES-CBC key vs. the IV? Naming suggests `GetSeedKey`→key/`0x201`,
+> `GetNonce`→IV/`0x202`, but that is `hypothesis` pending a `ptshim32` capture
+> or firmware decompile. The structural finding (key-material transfer, not
+> SA; `0x37`–`0x3c` are block-seq bytes, not SIDs; arg3=GetNonce, arg4=GetSeedKey)
+> is `verified` by decompilation.
 
 ## 5. Calibration Update Wizard (CUW)
 

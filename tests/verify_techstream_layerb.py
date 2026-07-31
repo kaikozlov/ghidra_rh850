@@ -85,8 +85,14 @@ for sym in [b"?SendNonce@CCanCommonFlashWriter@@QAEXABVCBytes@@0PBEI@Z",
 # --- Layer B: seed-key comes verbatim from the calibration file --------------
 check("CalibrationFile::GetSeedKey(int) export present",
       has(calfile, b"?GetSeedKey@CalibrationFile@@QAEPBEH@Z"))
+check("CalibrationFile::GetNonce(int) export present (arg3 of SendNonceAndSeedKey)",
+      has(calfile, b"?GetNonce@CalibrationFile@@QAEPBEH@Z"))
 check("CalibrationFile::GetServiceAuthKey(int) export present",
       has(calfile, b"?GetServiceAuthKey@CalibrationFile@@QAEPBEH@Z"))
+check("VFOREST FlashWriter references CalibrationFile::GetSeedKey (call site)",
+      has(vforest, b"GetSeedKey"))
+check("VFOREST FlashWriter references CalibrationFile::GetNonce (call site)",
+      has(vforest, b"GetNonce"))
 
 # --- Layer B: the PrepareWriter CalcSeedKey path is a SEPARATE mechanism -----
 check("CCanCommonPrepareWriter::CalcSeedKey present (separate from FlashWriter)",
