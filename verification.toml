@@ -27,6 +27,13 @@ paths = ["docs/diagnostics/bootloader.md", "docs/diagnostics/bootloader-dids.md"
 tests = ["tests/verify_findings.py"]
 paths = ["docs/security/"]
 
+[suite.findcrypt_database]
+tests = ["tests/verify_findcrypt_database.py"]
+paths = [
+  "ghidra/ghidra-findcrypt/data/database.json",
+  "ghidra/ghidra-findcrypt/PROVENANCE.json",
+]
+
 [suite.can_transport]
 tests = ["tests/verify_can_transport.py"]
 paths = ["docs/communications/"]

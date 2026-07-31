@@ -98,6 +98,11 @@ GHIDRA_CLI_VERSION=$("$GHIDRA_CLI" --version | awk 'NR == 1 { print $2 }')
 # shellcheck disable=SC1091
 source "$ROOT/build/ghidra-processor.env"
 
+# --- Vendored GhidraFindcrypt analysis extension (isolated) ------------------
+# Prebuilt Ghidra extension that labels crypto constants during auto-analysis.
+# Same isolated-user-home pattern as the v850 processor module.
+"$ROOT/tools/install_findcrypt_extension.sh"
+
 if pgrep -f 'AnalyzeHeadless.*rh850_p1me_mapped' >/dev/null 2>&1; then
   echo "an RH850 AnalyzeHeadless process is already running; stop it before rebuilding" >&2
   pgrep -af 'AnalyzeHeadless.*rh850_p1me_mapped' >&2 || true

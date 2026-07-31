@@ -1,0 +1,20 @@
+{
+    "name": "ghidra-findcrypt",
+    "version": "3.1.9",
+    "language": "Java",
+    "upstream": {
+        "url": "https://github.com/antoniovazquezblanco/ghidra-findcrypt",
+        "fork_of": "https://github.com/TorgoTorgo/ghidra-findcrypt",
+        "baseline_commit": "bdccc2250c1d025e8b7f56cdba8969be805045dd",
+        "baseline_branch": "main",
+        "notes": "Full prebuilt Ghidra extension (v3.1.9 for Ghidra 12.1.2) vendored from the upstream release. The extension runs as an auto-analyzer, labeling crypto constants in the listing during analysis. The signature database (data/database.json) is also used directly by GhidraCliBridge.handleFindCrypto() for CLI-based queries."
+    },
+    "vendored_files": [
+        "data/database.json",
+        "ghidra_12.1.2_PUBLIC_20260608_GhidraFindcrypt.zip"
+    ],
+    "ghidra": {
+        "required_version": "12.1.2"
+    },
+    "license": "GPL-3.0"
+}

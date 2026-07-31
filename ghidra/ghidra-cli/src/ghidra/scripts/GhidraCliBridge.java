@@ -2854,34 +2854,108 @@ public class GhidraCliBridge extends GhidraScript {
             Memory memory = currentProgram.getMemory();
             JsonArray results = new JsonArray();
 
-            String[][] cryptoPatterns = {
-                {"AES S-box", "637c777bf26b6fc53001672bfed7ab76"},
-                {"SHA-256", "428a2f98d728ae227137449123ef65cd"},
-                {"MD5", "d76aa478e8c7b756242070db01234567"}
-            };
+            // Load the findcrypt signature database.
+            // The database.json is written alongside the bridge script by the Rust
+            // launcher. Use getSourceFile() to find the script's own directory.
+            java.io.File dbFile = null;
+            try {
+                ResourceFile scriptSrc = getSourceFile();
+                if (scriptSrc != null) {
+                    ResourceFile scriptDir = scriptSrc.getParentFile();
+                    if (scriptDir != null) {
+                        dbFile = new java.io.File(scriptDir.getAbsolutePath(), "database.json");
+                    }
+                }
+            } catch (Exception ignored) {
+                // getSourceFile() may not be available in all run modes
+            }
 
-            for (String[] cp : cryptoPatterns) {
-                String name = cp[0];
-                String hexPattern = cp[1];
+            if (dbFile == null || !dbFile.exists()) {
+                return errorResult("findcrypt database.json not found. Expected at: "
+                    + (dbFile != null ? dbFile.getAbsolutePath() : "(script dir unavailable)"));
+            }
+
+            // Parse database.json — array of {"name": "...", "hexBytes": "..."}
+            com.google.gson.JsonParser parser = new com.google.gson.JsonParser();
+            com.google.gson.JsonElement root = parser.parse(new java.io.FileReader(dbFile));
+            if (!root.isJsonArray()) {
+                return errorResult("findcrypt database.json is not a JSON array");
+            }
+            com.google.gson.JsonArray signatures = root.getAsJsonArray();
+
+            // Scan for every signature, finding ALL occurrences
+            int totalHits = 0;
+            for (int si = 0; si < signatures.size(); si++) {
+                com.google.gson.JsonObject sig = signatures.get(si).getAsJsonObject();
+                String name = sig.has("name") ? sig.get("name").getAsString() : "unknown";
+                String hexPattern = sig.get("hexBytes").getAsString();
+
+                // Convert hex string to byte array
                 byte[] searchBytes = new byte[hexPattern.length() / 2];
                 for (int i = 0; i < searchBytes.length; i++) {
-                    searchBytes[i] = (byte) Integer.parseInt(hexPattern.substring(i * 2, i * 2 + 2), 16);
+                    searchBytes[i] = (byte) Integer.parseInt(
+                        hexPattern.substring(i * 2, i * 2 + 2), 16);
                 }
 
-                Address addr = memory.getMinAddress();
-                Address found = memory.findBytes(addr, searchBytes, null, true, monitor);
-                if (found != null) {
+                // Find ALL occurrences (not just the first)
+                Address searchFrom = memory.getMinAddress();
+                while (searchFrom != null) {
+                    Address found = memory.findBytes(searchFrom, searchBytes, null, true, monitor);
+                    if (found == null) break;
+
                     JsonObject item = new JsonObject();
                     item.addProperty("type", name);
                     item.addProperty("address", found.toString());
-                    item.addProperty("pattern", hexPattern);
+                    item.addProperty("pattern_length", searchBytes.length);
                     results.add(item);
+                    totalHits++;
+
+                    // Advance past this hit to find the next occurrence
+                    searchFrom = found.add(searchBytes.length);
+                }
+
+                // Also scan with 32-bit-word byte-swapped variant.
+                // AES T-tables and similar crypto constants may be stored in
+                // a different endianness than the database's canonical form.
+                // This catches the common RH850/Denso case where standard
+                // big-endian AES tables appear byte-swapped in firmware.
+                if (searchBytes.length >= 4 && searchBytes.length % 4 == 0) {
+                    byte[] swappedBytes = new byte[searchBytes.length];
+                    for (int i = 0; i < searchBytes.length; i += 4) {
+                        swappedBytes[i]     = searchBytes[i + 3];
+                        swappedBytes[i + 1] = searchBytes[i + 2];
+                        swappedBytes[i + 2] = searchBytes[i + 1];
+                        swappedBytes[i + 3] = searchBytes[i];
+                    }
+                    // Skip if swap is identical to original (palindromic)
+                    boolean differs = false;
+                    for (int i = 0; i < searchBytes.length; i++) {
+                        if (swappedBytes[i] != searchBytes[i]) { differs = true; break; }
+                    }
+                    if (differs) {
+                        searchFrom = memory.getMinAddress();
+                        while (searchFrom != null) {
+                            Address found = memory.findBytes(searchFrom, swappedBytes, null, true, monitor);
+                            if (found == null) break;
+
+                            JsonObject item = new JsonObject();
+                            item.addProperty("type", name + " (byte-swapped)");
+                            item.addProperty("address", found.toString());
+                            item.addProperty("pattern_length", swappedBytes.length);
+                            item.addProperty("endian_swap", true);
+                            results.add(item);
+                            totalHits++;
+
+                            searchFrom = found.add(swappedBytes.length);
+                        }
+                    }
                 }
             }
 
             JsonObject result = new JsonObject();
             result.add("results", results);
-            result.addProperty("count", results.size());
+            result.addProperty("count", totalHits);
+            result.addProperty("signatures_scanned", signatures.size());
             return result;
         } catch (Exception e) {
             return errorResult("Failed to find crypto: " + e.getMessage());

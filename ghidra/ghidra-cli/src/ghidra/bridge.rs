@@ -26,6 +26,11 @@ pub enum BridgeStartMode {
 /// Embedded Java bridge script
 const JAVA_BRIDGE_SCRIPT: &str = include_str!("scripts/GhidraCliBridge.java");
 
+/// Embedded findcrypt signature database (130 crypto constant signatures from
+/// antoniovazquezblanco/ghidra-findcrypt v3.1.9). Written to the scripts dir
+/// alongside the bridge script and loaded by handleFindCrypto() at runtime.
+const FINDCRYPT_DATABASE: &str = include_str!("../../../ghidra-findcrypt/data/database.json");
+
 /// Grace period for a bridge to drain accepted program jobs and let Ghidra
 /// close the project cleanly before the CLI falls back to process termination.
 const DEFAULT_SHUTDOWN_TIMEOUT_SECS: u64 = 300;
@@ -445,6 +450,9 @@ pub fn start_bridge(
     std::fs::create_dir_all(&scripts_dir)?;
     let java_script_path = scripts_dir.join("GhidraCliBridge.java");
     std::fs::write(&java_script_path, JAVA_BRIDGE_SCRIPT)?;
+    // Write the findcrypt database next to the bridge script so Java can find it
+    let db_path = scripts_dir.join("database.json");
+    std::fs::write(&db_path, FINDCRYPT_DATABASE)?;
 
     // Find analyzeHeadless
     let headless_script = find_headless_script(ghidra_install_dir)?;
