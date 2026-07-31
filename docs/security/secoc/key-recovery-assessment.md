@@ -159,11 +159,32 @@ result. Command 5, if permitted, returns a 16-byte MAC. Command 1/3, if
 permitted, returns transformed data. Those services expose cryptographic
 capability but not the 16 key bytes.
 
-Their policy is a hardware question. Software acceptance of selector 4 proves
-only that MainPE will form the command. ICU-S can still reject the operation
-based on the slot's provisioned usage flags. In a SHE-like policy, a SecOC MAC
-key may permit MAC verification while generation is disabled; an AES
-encipher/decipher request may also be incompatible with the key's usage class.
+Their policy is a hardware question, but the AUTOSAR SHE specification sets a
+strong prior. SHE key-slot usage is governed by a single binary flag,
+`KEY_USAGE` (spec §4.4.1.5 "Key usage determination" and §4.4.2.4 `KEY_<n>`):
+a key is either an **encryption/decryption** key or a **MAC generation/verification**
+key — there is no separate "verify but not generate" permission. The five
+provisionable security flags (spec §4.9, the key-update `FID` field) are
+`WRITE_PROTECTION | BOOT_PROTECTION | DEBUGGER_PROTECTION | KEY_USAGE | WILDCARD`;
+no verify-only bit exists, and a disallowed operation returns `ERC_KEY_INVALID`
+(spec §4.8.4).
+
+Slot 4 is a MAC-usage key (it is used for `CMD_VERIFY_MAC`/command 7, SECOC-002),
+so under SHE semantics it may run **both** `CMD_GENERATE_MAC` (command 5) and
+`CMD_VERIFY_MAC` (command 7). The earlier statement that "a SecOC MAC key may
+permit MAC verification while generation is disabled" is **not supported by the
+SHE specification** and is retracted (CORR-017). The polarity is the reverse of
+the prior AES-oracle fallback: it is command 1/3 (raw encipher/decipher) that a
+MAC-usage slot would reject, while command 5 (MAC generation) is the
+spec-permitted primitive — which makes a command-5 signing oracle the
+SHE-aligned path, not a likely-denied one.
+
+Caveat, kept separate: this is the AUTOSAR SHE architectural reference. The
+Renesas ICU-S is a vendor core and the restricted `ICUSE` manual is unobtained
+(SECOC-018), so this does not prove ICU-S follows SHE exactly — only that the
+default expectation is "command 5 is permitted on slot 4," and a denial would
+require Renesas to have added a non-standard verify-only restriction. Confirm
+generation behavior with a single bench probe.
 
 ### 1.4 DataFlash, debug, and serial programming
 

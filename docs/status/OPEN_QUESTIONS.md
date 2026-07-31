@@ -47,13 +47,16 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 ## SecOC
 
 - **Live slot-4 operation permissions.** Static CodeFlash proves slot-4
-  verification but cannot determine the provisioned usage flags. Command 5 and
-  the generic command-1/3 AES wrapper accept software selectors `0..14`,
-  including 4, but ICU-S may reject generation or encipher/decipher for this
-  slot. Test command 7 good/bad controls and then command 5/1 after normal
-  application initialization; record status, output, latency, jitter, and
-  debug-attached behavior. See
-  [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md).
+  verification (command 7). The AUTOSAR SHE spec governs usage by a single
+  binary `KEY_USAGE` flag (enc/dec ⊕ MAC-generate+verify; no verify-only
+  facility — SECOC-023, CORR-017), so under SHE a MAC-usage slot 4 *permits*
+  command-5 generation and would *reject* command 1/3 enc/dec. The remaining
+  open question is therefore narrower: does the Renesas ICU-S deviate from SHE
+  (a non-standard verify-only restriction, or debug/lifecycle gating)? Bench-test
+  command 7 good/bad controls then command 5 after normal application
+  initialization; record status, output, latency, jitter, and debug-attached
+  behavior. See
+  [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md) §1.3.
 - **Command 13 and `RAM_KEY`.** The stock application never issues command 13,
   but that does not determine direct hardware behavior. Obtain the restricted
   ICU-S/ICUSE command specification or first characterize it in a constructible,

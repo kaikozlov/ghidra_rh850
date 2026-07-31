@@ -274,5 +274,14 @@ check("SecOC handle 0 resolves to lower ICU driver record 0",
 check("SecOC worker loads handle from record+0x20",
       CF[0x8E5F8:0x8E600] == bytes.fromhex("fd372100233e1c00"))
 
+print("\n== CORR-017 regression: SHE slot-4 usage determination ==")
+_kr = (REPO / "docs" / "security" / "secoc" / "key-recovery-assessment.md").read_text(encoding="utf-8").lower()
+check("key-recovery §1.3 records the SHE binary KEY_USAGE flag",
+      "key_usage" in _kr and "no verify-only bit exists" in _kr)
+check("key-recovery §1.3 retracts the verify-only generation-disabled claim",
+      "is retracted" in _kr and "not supported by the" in _kr)
+check("key-recovery §1.3 names command 5 as the spec-permitted slot-4 oracle",
+      "spec-permitted primitive" in _kr)
+
 print(f"\nSummary: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

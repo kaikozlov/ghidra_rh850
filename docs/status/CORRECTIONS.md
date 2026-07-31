@@ -227,3 +227,30 @@ the mistakes are not re-made.
   §"Independent phase-current control to physical PWM boundary";
   `tests/verify_motor_actuation_boundary.py`,
   `ghidra/scripts/verify/AssertMotorActuationBoundary.java`.
+
+### CORR-017 — SHE "verify-only" slot-4 generation restriction
+
+- **Wrong:** the key-recovery assessment stated that "in a SHE-like policy, a
+  SecOC MAC key may permit MAC verification while generation is disabled," and
+  treated command-5 generation on slot 4 as likely-denied (with command-1/3 raw
+  AES as the fallback oracle).
+- **Right:** the AUTOSAR SHE specification governs per-key usage by a single
+  binary `KEY_USAGE` flag (§4.4.1.5 "Key usage determination", §4.4.2.4
+  `KEY_<n>`): a key is either an encryption/decryption key or a MAC
+  generation/verification key. There is no separate verify-only permission; the
+  five provisionable flags (§4.9 `FID`) are
+  `WRITE_PROTECTION | BOOT_PROTECTION | DEBUGGER_PROTECTION | KEY_USAGE |
+  WILDCARD`, and a disallowed operation returns `ERC_KEY_INVALID` (§4.8.4).
+  Slot 4 is MAC-usage (command-7 verify), so under SHE it permits command-5
+  generation; command 1/3 (raw enc/dec) is the operation a MAC-usage slot would
+  reject. The polarity of the earlier AES-oracle fallback was therefore
+  reversed — command 5 is the spec-aligned oracle, not command 1.
+- **Boundary:** this is the AUTOSAR SHE architectural reference (external
+  source). The Renesas ICU-S is a vendor core and the restricted `ICUSE` manual
+  is unobtained (SECOC-018), so ICU-S could in principle deviate. The default
+  expectation is now "command 5 is permitted on slot 4"; denial would require a
+  non-standard Renesas restriction, not standard SHE policy.
+- **Canonical:**
+  [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
+  §1.3; `tests/verify_secoc_application.py`;
+  `build/reference-text/AUTOSAR_TR_SecureHardwareExtensions.txt` §4.4.1.5/§4.4.2.4.
