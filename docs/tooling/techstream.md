@@ -329,6 +329,24 @@ Techstream DLL tree (each with its own static S-box): `CommandCommon.dll`,
 `UtilityExNK2.dll`. `Cuw.exe` is the only crypto-using binary without a static
 S-box — it delegates to Windows CryptoAPI via its Borland `Caes` class.
 
+Tracing the callers of each AES implementation recovered **three unique
+hardcoded AES-128 keys** across the diagnostic tree:
+
+| Key (hex) | ASCII | DLLs | SA path |
+|---|---|---|---|
+| `46554B554D4F5249594F534959414D41` | `FUKUMORIYOSIYAMA` | CommandCommon (inverted), UtilityEx2TY (plaintext) | ADS/PCS runtime SA |
+| `5622E4993876DE4F15F2E166E7CD24C6` | (binary) | CommandCommon (inverted), DS2ComNK, UtilityExNK2, UtilityEx2TY (all plaintext) | Central Gateway SA |
+| `6243566141516E4133664E644467646C` | `bCVaAQnA3fNdDgdl` | IT3UtilityNeoNK only | IT3 Neo utility SA |
+
+None of these keys match the firmware bootloader secret `SEED_KEY_SECRET`
+(`f05f36b7...`) or the application secret at `0x20840`. All three serve
+non-EPS SA paths (ADS, PCS, Central Gateway, IT3 Neo). The EPS reflash SA
+key remains calibration-file-only.
+
+`IT3ACNK.dll` has an AES S-box but no recoverable key — it may use a
+different calling convention or serve a non-SA purpose (e.g., certificate
+validation).
+
 **EMPS V850E PS2** uses a **static password** SA (key bytes `5A 5A 00 00`,
 no seed/key derivation). This is an older EPS generation on V850E, not RH850.
 
