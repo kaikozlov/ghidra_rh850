@@ -315,11 +315,19 @@ object the caller passes. Key findings from the binary:
 
 | Evidence | Finding |
 |---|---|
-| No AES S-box in `Cuw.exe` | The AES table is not statically linked |
-| `Cuw.exe` imports `CRYPT32.dll` | AES operations likely via Windows CryptoAPI |
+| No AES S-box in `Cuw.exe` (findcrypt scan) | AES table is not statically linked |
+| `Cuw.exe` Borland exports `@@Caes@Initialize`/`@@Caes@Finalize` | Delphi AES wrapper class present |
+| `Cuw.exe` Borland exports `@@Csha256@Initialize`/`@@Csha256@Finalize` | SHA-256 for firmware verification |
+| `Cuw.exe` imports `CryptEncrypt`, `CryptDecrypt`, `CryptImportKey` | Windows CryptoAPI (Wincrypt) used for AES |
 | No hardcoded SA key in `Cuw.exe` | Key material comes from calibration file at runtime |
 | `FUKUMORIYOSIYAMA` not present | CUW does not use the `CommandCommon.dll` AES key |
 | `SEED_KEY_SECRET` (`f05f36b7...`) not present | Firmware secret is not embedded in CUW |
+
+findcrypt also discovered **six independent AES-128 implementations** across the
+Techstream DLL tree (each with its own static S-box): `CommandCommon.dll`,
+`DS2ComNK.dll`, `IT3ACNK.dll`, `IT3UtilityNeoNK.dll`, `UtilityEx2TY.dll`, and
+`UtilityExNK2.dll`. `Cuw.exe` is the only crypto-using binary without a static
+S-box — it delegates to Windows CryptoAPI via its Borland `Caes` class.
 
 **EMPS V850E PS2** uses a **static password** SA (key bytes `5A 5A 00 00`,
 no seed/key derivation). This is an older EPS generation on V850E, not RH850.
@@ -369,9 +377,12 @@ calibration file that specifies:
 
 The seed/key comes from `CalibrationFile::GetSeedKey()` and
 `CalibrationFile::GetServiceAuthKey()` — **embedded in the calibration file
-itself, not fetched online**. The online portal (`ReprogrammingSecurity` URL)
-is only invoked for immobilizer resets and MAC key management, not for
-routine ECU reflashing.
+itself**. This is *Layer B* (the per-ECU cryptographic unlock, §5.3). It is
+distinct from *Layer A*, the TIS portal's reprogramming-key authorization
+(RKS / `ReproKey`), which gates CUW's *permission* to reflash a given VIN but
+does not supply the ECU crypto key. The full RKS flow is documented in §5.3;
+it is **not** an immobilizer path (this installer contains no immobilizer
+code).
 
 ### 5.2 Flash-write phase
 
@@ -388,6 +399,97 @@ ECU-specific flash writers include:
 (unified), `TCUWCanSecurityVFORESTFlashWriter` (FOREST/RH850 security),
 `TCUWCanPowerTrainFlashWriter`, and variants for airbag, chassis, body, HINO,
 M16C, MMC, PSA, and SBR ECUs.
+
+### 5.3 Reprogramming-key authorization (RKS / TIS portal) — Layer A
+
+The reflash passes through two independent authorization layers that never
+exchange material:
+
+| | Layer A — TIS portal (RKS) | Layer B — per-ECU SecurityAccess |
+|---|---|---|
+| What it gates | CUW's *permission* to reflash this VIN | The ECU's cryptographic unlock |
+| Lives in | `Cuw.exe` + .NET RKS components (this section) | Flash writers (§4.5, §5.1) |
+| Binding | VIN + GTS license + registration | ECU seed/key (calibration file) |
+| Client-side crypto | **None** (regex only) | AES (maps to SEC-BOOT-003) |
+| Reaches the ECU? | No | Yes |
+
+Layer B is the cryptographic gate (writer `CalcSeedKey`/`CollateSeedKey`,
+§4.5). This section documents Layer A — CUW's online permission gate.
+
+**Components** (CLR-header check + .NET metadata of `CUWAccessRKS.dll` and
+`CUWAccessRKSWrapper.dll`; `Cuw.exe` is native x86):
+
+- `Cuw.exe` — orchestrator; runs the `StartRequestReproKey` →
+  `RequestingReproKey` → `ImportReproKey` wizard, plus an
+  `OfflineImportReproKey` path.
+- `CUWAccessRKSWrapper.dll` (.NET; exported to native via C++ name mangling) —
+  `SetDataForReproKey`, `ExportDataForReproKey`, `RequestReproKey`,
+  `GetWatchingResult`, `ImportReproKey`.
+- `CUWAccessRKS.dll` (.NET) — `AccessRKS` class + `DataForReproKey` data class.
+
+**Request data** (`DataForReproKey`, exact fields from .NET metadata):
+`IsStored, XVersion, GTSSoftwareID, GTSSoftwareVersion, GTSLicenseKey, VIN,
+RequesterKind, KeypairID, SeedValue`.
+
+**XML payload** (exact, from the .NET `#US` string heap):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<ReproKeyRequest X-Version="…">
+  <TerminalInfo>
+    <SoftwareID/><SoftwareVersion/><LicenseKey/>
+    <VehicleIdentificationNumber/><RequesterKind/>
+  </TerminalInfo>
+  <KeypairID/><SeedValue/>
+</ReproKeyRequest>
+```
+
+**Mechanism (online):** `GetInstanceOfIEMatchingProtectMode` launches/finds an
+Internet Explorer via CLSID `0002DF01-0000-0000-C000-000000000046`
+(`InternetExplorer.Application`) or `Shell.Application`/`Windows`; `Navigate`
+to the TIS page; poll `ReadyState` → `READYSTATE_COMPLETE`; `PasteSeedData`
+fills form fields via `document.getElementsByTagName("textarea")` → `.name` /
+`.set_value()`; the portal signs server-side (keypair selected by `KeypairID`);
+`GetWatchingResult` polls until `result_code == "0"`; `ImportReproKey` scrapes
+the returned **`Signature`** textarea and validates it with
+`Regex.IsMatch("^[0-9a-zA-Z]+$")`.
+
+**Offline variant:** `OfflineImportReproKey` imports a `Signature` obtained
+earlier on a connected machine (`.xml`), enabling reflashes on an offline bench.
+
+**Binding:** VIN is mandatory ("VIN is required to perform ECU reprogramming"),
+read from the vehicle via `CSilVinReader::GetVIN`/`GetVIN_OBD2`; CUW must be
+registered (`ApplicationRegistration`, `CRegistration::GetGtsExpirationDate`).
+
+**No client-side cryptography.** The `MemberRef` table of `CUWAccessRKS.dll`
+contains no `RSACryptoServiceProvider`, no signature-verify call, no
+certificate, and no embedded public key. The only check on the returned
+`Signature` is the alphanumeric regex. Signing is entirely server-side; the
+client trusts the `Signature` purely on receipt through the authenticated IE
+session. `KeypairID` is a selector for the portal's signing key, not a client
+key.
+
+**Layer A↔B independence (verified):** the `Signature` never reaches any flash
+writer — `TCUWCanSecurityVFORESTFlashWriter`, `TCUWCanUnifiedFlashWriter`, and
+`TCUWCanCommonPrepareWriter` contain zero `reprokey`/`tagrepro`/`setrepro`
+references (ASCII and UTF-16). Layer A is a CUW-side permission token; it does
+not touch the ECU, the writer crypto, or any of the three firmware secrets.
+This is why none of the firmware secrets appear anywhere in the 6,826-file
+installer tree — they live in the calibration file (Layer B), not the installer.
+
+> **Bounded.** The exact generation of `SeedValue` lives in native `Cuw.exe`
+> (not decompiled here; Borland Delphi binary). Its independence from the ECU
+> SA seed is established — the `GetSeed`/`CalcSeedKey` symbols are all in the
+> per-ECU-utils context, not the ReproKey path — but the precise source
+> (registration seed vs. random nonce) is unconfirmed. Low priority: it never
+> reaches the ECU.
+
+> **Correction of an earlier characterization.** This section previously
+> (and §8.3) described the online portal as "immobilizer resets and MAC key
+> management." That is inaccurate for this installer: there is no immobilizer
+> code path, and the portal is the RKS reprogramming-key authorization
+> described here. The portal does not supply the ECU crypto key (Layer B's key
+> remains in the calibration file). Recorded in `docs/status/CORRECTIONS.md`.
 
 ## 6. ptshim32.dll — J2534 traffic logger
 
@@ -443,7 +545,7 @@ runtime by the `CommandDataLib` / `CommandAPI` DLL layer.
 | Firmware finding | Techstream corroboration |
 |---|---|
 | SEC-BOOT-003: AES-128-ECB SA construction | `CSecurityAccessAES128::AES_128_ECB` implements the same cipher |
-| SEC-APP-001: Application SA level 2 with AES-128 | `CSecurityAccessAES128` is the TSS 3.0 SA class |
+| SEC-APP-001: Application SA level 2 with AES-128 | Shape only: `CSecurityAccessAES128` shares the AES-128 / level-03-04 / 16-byte *form*, but its key `FUKUMORIYOSIYAMA` and single-stage construction differ from the EPS two-stage + per-calibration secret (§4.0 resolves the routing: FUKU serves ADS/PCS runtime, not EPS) |
 | DIAG-APP-003: Programming handoff gates | CUW prepare-write implements the same session/speed/phase sequence |
 | Bootloader diagnostic `0x7A1` / `0x777` | Gateway routing (`07E0`/`07DF` → ECU-specific physical address) |
 
@@ -462,7 +564,7 @@ runtime by the `CommandDataLib` / `CommandAPI` DLL layer.
 |---|---|
 | `ptshim32.dll` CAN logger | Capture a real Techstream↔EPS session for transcript validation |
 | `CSecurityAccessAES128` source paths | PDB/source-tree context for the KGProject diagnostic framework |
-| `ReprogrammingSecurity` / `MACKey_Login` URLs | Toyota online portals for SA authorization (immobilizer/MAC only) |
+| TIS portal RKS flow (`CUWAccessRKS.dll`, §5.3) | OEM reprogramming-key authorization (Layer A) — VIN+license bound, IE-automated, no client crypto; independent of the cal-file crypto key (Layer B). Not immobilizer. |
 | `TCUWControlCommPhase.dll` parameters | Exact timing values for SA seed/key exchange during reflash |
 | `[ISTA_T3_Login]` credentials | Hardcoded hex credentials in `uspublic.ini` for Toyota ISTA portal |
 
