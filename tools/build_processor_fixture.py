@@ -79,7 +79,7 @@ def enc_jarl_disp22(disp22: int, r2: int) -> bytes:
 
 
 def enc_jarl_indirect(r1: int, r3: int) -> bytes:
-    # RH850G3K Format XI:
+    # RH850G3M Format XI:
     #   15..0  = 11000111111RRRRR
     #   31..16 = WWWWW00101100000
     return u16(0xC7E0 | (r1 & 0x1F)) + u16(((r3 & 0x1F) << 11) | 0x160)

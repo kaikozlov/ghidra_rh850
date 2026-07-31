@@ -41,6 +41,13 @@ manual install step is otherwise required.
    ([link](https://www.renesas.com/us/en/document/mas/rh850g3kh-users-manual-software),
    R01US0165EJ0120).
 
+> **Core identity (G3M, not G3KH).** The R7F701381 target core is **RH850G3M**:
+> the P1M-E datasheet (R01DS0505ED0100) states the device "contains two
+> RH850G3Ms" in a lockstep master/checker arrangement, and the `.sinc` sources
+> cite the G3M software manual as the authoritative ISA reference. The G3KH
+> manual above is the upstream's original comparative reference, retained for
+> history — it is not the target's core.
+
 ## Local modifications
 
 See the git history of this repo for the changes made on top of the fork

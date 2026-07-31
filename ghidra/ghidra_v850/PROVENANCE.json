@@ -10,7 +10,7 @@
   "target": {
     "mcu": "R7F701381",
     "family": "RH850/P1M-E",
-    "core": "RH850G3K"
+    "core": "RH850G3M"
   },
   "ghidra": {
     "required_version": "12.1.2",
