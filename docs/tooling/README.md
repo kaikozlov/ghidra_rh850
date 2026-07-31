@@ -6,6 +6,7 @@ The analysis toolchain: processor module, scripts, verification.
 |---|---|
 | [processor-module-audit.md](processor-module-audit.md) | Audit of the vendored `ghidra_v850` processor module: SLEIGH semantics, semantic coverage ledger, calling-convention model |
 | [renesas-rfp-rv40f.md](renesas-rfp-rv40f.md) | External-source recovery of the Renesas Flash Programmer RV40F serial protocol and its bounded ICU-S configuration interface |
+| [techstream.md](techstream.md) | External-source recovery of Toyota Techstream V18.00.008: J2534 diagnostic architecture, SecurityAccess implementations, CUW reflash flow, and the ptshim32 CAN traffic logger |
 
 ## Operating manual
 

@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "distribution": {
+    "name": "Toyota Techstream",
+    "version": "V18.00.008",
+    "vendor": "DENSO CORPORATION",
+    "build_date": "2015-09-14",
+    "installer": {
+      "filename": "Techstream/Techstream_Setup_V18.00.008.exe",
+      "size": 271533864,
+      "sha256": "3a799de327e9ef46dffae8a066ad000ee899a0e1bbedbd9bd090dd690186bc46",
+      "format": "InstallScript Setup Launcher Unicode (Flexera IS 22.0.330)",
+      "product_version": "18.0.8.0"
+    },
+    "unpacked_archive": {
+      "filename": "Techstream/unpacked.7z",
+      "sha256": "dcd71b4c74fad554f2eadb1fa704421cddca02b7b1457991e4ce24f4321520c6",
+      "file_count": 6703,
+      "uncompressed_size": 608220263
+    },
+    "installation_path": "C:\\Program Files\\Toyota Diagnostics\\Techstream\\"
+  },
+  "ini_obfuscation": {
+    "scheme": "byte-complement",
+    "formula": "decoded[i] = 0xFF - encoded[i]",
+    "applies_to": "all .ini files in bin/, Env/, NA/Env/, EU/Env/, JP/Env/, OT/Env/, SUW/",
+    "exception": "files starting with printable ASCII (;, [, etc.) are plaintext"
+  },
+  "artifacts": {
+    "ptshim32.dll": {
+      "path": "Techstream/bin/ptshim32.dll",
+      "sha256": "c8d960e84981d761981706e85004ab31dc8263cea740c9afd5bc47dfdadafb8a",
+      "size": 10124800,
+      "description": "J2534 PassThru API interceptor/logger shim (v04.04)",
+      "pdb": "C:\\kgproject\\Control\\J2534Logger\\ptshim32\\Release\\ptshim32.pdb",
+      "role": "Transparently proxies all PassThru* calls while logging CAN traffic"
+    },
+    "ptshim32_0500.dll": {
+      "path": "Techstream/bin/ptshim32_0500.dll",
+      "sha256": "e6e56a20763e03eddaf7f868537738cf314705e3f27742244a6456fbc73f5202",
+      "size": 18766192,
+      "description": "J2534 PassThru API interceptor/logger shim (v05.00 variant)"
+    },
+    "J2534Ctrl.dll": {
+      "path": "Techstream/bin/J2534Ctrl.dll",
+      "sha256": "aa371b09b28eeb9aca5c7d948829f94475c7606e70ef34852c77fbea547a8a7a",
+      "size": 114688,
+      "role": "J2534 device management layer (open/close/connect/disconnect)"
+    },
+    "CommandCommon.dll": {
+      "path": "Techstream/bin/CommandCommon.dll",
+      "sha256": "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7",
+      "size": 1028096,
+      "role": "UDS command implementations including all SecurityAccess variants",
+      "source_paths": [
+        "C:\\Files\\Develop\\Git\\DiagTool\\KGProject\\Control\\Command\\Common\\SecurityAccess.cpp",
+        "C:\\Files\\Develop\\Git\\DiagTool\\KGProject\\Control\\Command\\Common\\SecurityAccessAES128.cpp",
+        "C:\\Files\\Develop\\Git\\DiagTool\\KGProject\\Control\\Command\\Common\\SecurityAccessCGW_DK.cpp",
+        "C:\\Files\\Develop\\Git\\DiagTool\\KGProject\\Control\\Command\\Common\\SecurityAccess_SUBARU.cpp",
+        "C:\\Files\\Develop\\Git\\DiagTool\\KGProject\\Control\\Command\\Common\\SecurityAccessDES.cpp"
+      ]
+    },
+    "CommandAPI.dll": {
+      "path": "Techstream/bin/CommandAPI.dll",
+      "sha256": "43913a3baeef678b70dd3f7a533575824d9d88e2acb61acb23702983e5b337f3",
+      "size": 1257472,
+      "role": "High-level diagnostic command API and ECU enumeration"
+    },
+    "TCUWControlCommPhase.dll": {
+      "path": "Calibration Update Wizard/TCUWControlCommPhase.dll",
+      "sha256": "8c8d03d3e8ff9b32dcccf0b5ef5249304d720f19aed070b18894f1a78a3fabca",
+      "size": 89600,
+      "role": "CUW communication-phase parameter engine (timing, addresses, security config)"
+    },
+    "TCUWCanCommonPrepareWriter.dll": {
+      "path": "Calibration Update Wizard/TCUWCanCommonPrepareWriter.dll",
+      "sha256": "0dc5cd195f2febe8b4140bb1ef8a06aeebe3eb0bbc0c989077fc76b2e05a5e31",
+      "size": 24064,
+      "role": "CUW CAN prepare-write phase (session control + SecurityAccess)"
+    },
+    "TCUWUnifiedUtils.dll": {
+      "path": "Calibration Update Wizard/TCUWUnifiedUtils.dll",
+      "sha256": "bc357c49d52911bd85e97b9c89b6dd29df1d967a0dfa43d657e3c851b2c1a130",
+      "size": 36864,
+      "role": "CUW unified ECU reflash utilities (seed/key calculation)"
+    },
+    "COMM_INFO_EFI_P4CAN_FUNC.ini": {
+      "path": "Techstream/bin/COMM_INFO_EFI_P4CAN_FUNC.ini",
+      "sha256": "402c5711b329a0ebf1301309b8ed1f4b79c3a117143b909f191e346a1af3612a",
+      "size": 2681,
+      "decoded": true,
+      "description": "CAN communication config: ISO15765, 500kbps, Phys 07E0/07E8, Func 07DF"
+    },
+    "System.ini": {
+      "path": "Techstream/bin/System.ini",
+      "sha256": "965290beda15be23866310c8e8671f3f3da58fc07d1137cb5005913462bb0f6a",
+      "size": 177,
+      "decoded": true,
+      "description": "Memory read ranges for Denso CPU families (FOREST=RH850)"
+    },
+    "uspublic.ini": {
+      "path": "Techstream/NA/Env/SI/uspublic.ini",
+      "sha256": "dfafd85972bdf53ebd1d96fef4249f6a14c430af55a8112a01cf72ca73d81d1e",
+      "size": 33961,
+      "decoded": true,
+      "description": "NA dealer configuration with reprogramming/MAC key/immobilizer URLs"
+    },
+    "EPS_P4DK3.ddb": {
+      "path": "Techstream/NA/DB/EPS_P4DK3.ddb",
+      "sha256": "3ed3d2a1d4f72e32fcc98289508e580d8657637c11ef0ec30940548a4dafbbf6",
+      "size": 6588,
+      "description": "EPS Phase-4 CAN diagnostic database (Denso proprietary binary format)"
+    },
+    "Security_P4.ddb": {
+      "path": "Techstream/NA/DB/Security_P4.ddb",
+      "sha256": "d642840c0899252b4404650aa4dd96da11bdacd4a48dc8c63e366979d681037e",
+      "size": 13084,
+      "description": "Phase-4 SecurityAccess diagnostic database"
+    },
+    "EPS_CAN_P4DK.ddb": {
+      "path": "Techstream/NA/DB/EPS_CAN_P4DK.ddb",
+      "sha256": "e922e3ea4702537d7e069c874f715661131e800b17d8a7ae7a2c5cb2dd62f580",
+      "size": 10724,
+      "description": "EPS Phase-4 CAN functional diagnostic database"
+    }
+  }
+}

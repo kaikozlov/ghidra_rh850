@@ -173,3 +173,25 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   cadence/deadlines, and which lifecycle preconditions exist beyond the
   recovered extended-session/no-Dcm-SA policy. RFP's `ValidateICU_S` remains a
   separate lifecycle-validation operation, not this application request.
+- **Techstream live-session capture.** `ptshim32.dll` (TMS-005) is a J2534
+  PassThru interceptor/logger that can capture a complete Techstream↔EPS UDS
+  transcript. Install it as the J2534 DLL shim on a Windows machine connected
+  to a bench Sienna EPS, perform a diagnostic or reflash session, and compare
+  the captured SA seed/key exchange, DID reads, session transitions, and
+  programming handoff against the static firmware findings (SEC-BOOT-003,
+  SEC-APP-001, DIAG-APP-001/003). The log format is unknown (export/PDB
+  analysis only); reverse the writer or capture empirically. See
+  [../tooling/techstream.md](../tooling/techstream.md) §6.
+- **Techstream `.ddb` format.** The diagnostic databases (`EPS_P4DK3.ddb`,
+  `Security_P4.ddb`, `Toyota.ddb`) use a proprietary `DiagTool DataCtrl` binary
+  format with a 32-byte header and offset tables. The record structures
+  (DID definitions, DTC mappings, SA level configurations, ECU enumeration
+  data) are not decoded. Full parsing would extract the complete ECU-specific
+  diagnostic vocabulary that Techstream applies at runtime. See
+  [../tooling/techstream.md](../tooling/techstream.md) §7.
+- **`CSecurityAccessAES128` key source.** The AES-128 SA class (TMS-003)
+  corroborates our firmware SA construction, but the shared secret it uses is
+  not visible in the DLL binary — it is loaded at runtime from the ECU
+  definition or calibration data. Determine whether the key material travels
+  with the `.ddb` files, the calibration files, or is fetched from Toyota's
+  `ReprogrammingSecurity` portal for EPS-specific operations.

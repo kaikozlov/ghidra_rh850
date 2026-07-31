@@ -95,3 +95,15 @@ and [tooling/processor-module-audit.md](tooling/processor-module-audit.md).
 The Corolla (`8965F1208000`) is a different calibration of the same family.
 The algorithm template, secret location, and consumer machinery carry over as
 hypotheses, not facts. See [variants/README.md](variants/README.md).
+
+## External tooling
+
+Three external tools have been analyzed for their relationship to the
+firmware:
+
+- **Renesas Flash Programmer (RFP)** — host-side serial-programming protocol.
+  See [tooling/renesas-rfp-rv40f.md](tooling/renesas-rfp-rv40f.md).
+- **Toyota Techstream** — factory diagnostic software. Confirms our
+  SecurityAccess model, provides a CAN traffic logger (`ptshim32.dll`), but
+  does not interact with SecOC or the motor-control path.
+  See [tooling/techstream.md](tooling/techstream.md).
