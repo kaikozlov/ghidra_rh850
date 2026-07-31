@@ -472,12 +472,43 @@ fills form fields via `document.getElementsByTagName("textarea")` → `.name` /
 the returned **`Signature`** textarea and validates it with
 `Regex.IsMatch("^[0-9a-zA-Z]+$")`.
 
-**Offline variant:** `OfflineImportReproKey` imports a `Signature` obtained
-earlier on a connected machine (`.xml`), enabling reflashes on an offline bench.
+**Three authorization modes** (from the English UI source strings in
+`locale/en/LC_MESSAGES/default.mo`), chosen at reprogramming start:
 
-**Binding:** VIN is mandatory ("VIN is required to perform ECU reprogramming"),
-read from the vehicle via `CSilVinReader::GetVIN`/`GetVIN_OBD2`; CUW must be
-registered (`ApplicationRegistration`, `CRegistration::GetGtsExpirationDate`).
+- **Online (default):** the reprogramming PC is internet-connected → embedded
+  IE → TIS portal → "Signature Request" → download `Signature`. Requires IE
+  installed, the account holds *"Signature Request is allowed in used account
+  for communication,"* and *"Browser is not closed before downloading Signature."*
+- **Offline:** *"Press 'Offline' to perform Signature Request offline"* opens a
+  dedicated **"Read Signature (offline)"** page. The procedure string is *"Following
+  Signature file retrieve sequence in offline environment, retrieve Signature
+  file,"* then *"Press 'Next' to display the Signature file reading dialog."* The
+  model is sneaker-net: a **Signature file** is produced by the retrieve sequence
+  on a separate internet-connected computer and then read/imported on the
+  offline reprogramming PC (`pstrImportFilePath`,
+  `CReproKeyServerAccessCtrlr::CheckReproKeyFormat`).
+- **Paperwork fallback:** *"If the operation using the computer connected to the
+  internet is not possible, process implementation report will be required."*
+
+A separate **Flash Recovery** subsystem (`CFlashRecoveryInfo`, *"A recovery
+file for the previous vehicle has been created"*) stores vehicle/ECU-specific
+state to resume an interrupted reflash (*"ECU is at risk of being broken if
+Flash Recovery is performed for ECU other than the above"*) — unrelated to the
+portal `Signature`.
+
+**VIN — six uses (the identity spine):** (1) **mandatory gate** — *"VIN is
+required to perform ECU reprogramming"*; (2) **read from the vehicle** via
+`CSilVinReader::GetVIN`/`GetVIN_OBD2`, `ER_GetVinCode`; (3) **format-validated** —
+must be 17 chars (*"The VIN input does not have 17 characters"*) with a valid
+**check digit** (*"Check the check digit of the entered VIN"*); (4) **cross-ECU
+consistency** — the `ErrorVINMismatch` page (`StringGrid_ErrorVINMismatch_VINList`)
+reads the VIN from every ECU/system and requires agreement (*"Check the stored
+VINs in each System"*); (5) **written to the vehicle** — the `RequestWriteVINForRKS`
+wizard (*"write a VIN to the vehicle using TD3 or GTS"*) writes the VIN to the
+reflashed ECU (anti-theft VIN binding); (6) **sent to the portal** as
+`<VehicleIdentificationNumber>` in the `<ReproKeyRequest>` XML. Separately, CUW
+must be registered (`ApplicationRegistration`,
+`CRegistration::GetGtsExpirationDate`).
 
 **No client-side cryptography.** The `MemberRef` table of `CUWAccessRKS.dll`
 contains no `RSACryptoServiceProvider`, no signature-verify call, no
@@ -496,7 +527,7 @@ This is why none of the firmware secrets appear anywhere in the 6,826-file
 installer tree — they live in the calibration file (Layer B), not the installer.
 
 > **Bounded.** The exact generation of `SeedValue` lives in native `Cuw.exe`
-> (not decompiled here; Borland Delphi binary). Its independence from the ECU
+> (not decompiled here; CodeGear C++Builder 2007 binary — `CodeGear C++ - Copyright 2007 CodeGear`). Its independence from the ECU
 > SA seed is established — the `GetSeed`/`CalcSeedKey` symbols are all in the
 > per-ECU-utils context, not the ReproKey path — but the precise source
 > (registration seed vs. random nonce) is unconfirmed. Low priority: it never

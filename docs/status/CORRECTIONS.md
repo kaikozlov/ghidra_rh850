@@ -273,3 +273,28 @@ the mistakes are not re-made.
 - **Canonical:**
   [../tooling/techstream.md](../tooling/techstream.md) §5.3; TMS-009;
   `tests/verify_techstream_rks.py`.
+
+### CORR-019 — RKS offline mode and VIN usage imprecisely characterized
+
+- **Wrong:** `docs/tooling/techstream.md` §5.3 (commit `00fb27a`) described the
+  offline path as "`OfflineImportReproKey` imports a `Signature` obtained earlier
+  on a connected machine (`.xml`)" and the VIN binding as just "mandatory, read
+  from the vehicle."
+- **Right:** The RKS authorization has **three modes** (from the English UI
+  source strings in `locale/en/LC_MESSAGES/default.mo`): online (IE→TIS portal,
+  downloads `Signature`), offline (a "Signature file" produced by a defined
+  retrieve sequence on a separate internet-connected computer, then read/imported
+  on the offline PC via `OfflineImportReproKey` + `CheckReproKeyFormat`), and a
+  paperwork fallback ("process implementation report") when no internet-connected
+  computer is possible. The ReproKey is a **Signature file**, not necessarily
+  `.xml`. VIN is the **identity spine** with six uses: mandatory gate; read from
+  vehicle (`CSilVinReader`); 17-char + check-digit validation; cross-ECU
+  consistency check (`ErrorVINMismatch`); written to the reflashed ECU
+  (`RequestWriteVINForRKS`); and sent to the portal in the `<ReproKeyRequest>`
+  XML. Also: `Cuw.exe` is CodeGear C++Builder 2007, not Borland Delphi.
+- **Consequence of the error:** understated the offline mechanism (a three-mode
+  authorization, not a single import) and the VIN's role (it gates, validates,
+  consistency-checks across ECUs, is written to the ECU, and is bound into the
+  portal request — not merely "read").
+- **Canonical:**
+  [../tooling/techstream.md](../tooling/techstream.md) §5.3; TMS-009.
