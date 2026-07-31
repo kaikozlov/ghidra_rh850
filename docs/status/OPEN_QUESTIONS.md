@@ -189,11 +189,10 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   data) are not decoded. Full parsing would extract the complete ECU-specific
   diagnostic vocabulary that Techstream applies at runtime. See
   [../tooling/techstream.md](../tooling/techstream.md) §7.
-- **`CSecurityAccessAES128` key mismatch.** The hardcoded key in
-  `CSecurityAccessAES128` is ASCII `FUKUMORIYOSIYAMA`, not the firmware
-  bootloader secret (`f05f36b7...`) or the application secret at `0x20840`.
-  Determine which path Techstream uses for the Sienna EPS specifically: the
-  `CSecurityAccessAES128` class (used by ADS/PCS), the CUW's
-  `CalcSeedKey`/`GetSeedKey` (which reads from the calibration file), or the
-  legacy `CSecurityAccess` Feistel cipher. A live capture via `ptshim32.dll`
-  (TMS-005) with a known seed is the fastest way to resolve this.
+- **`CSecurityAccessAES128` key is for ADS/PCS, not EPS.** Resolved (TMS-007):
+  the dispatch tree shows EPS uses `CCanEMPS_V850E_PS2FlashWriter` in the CUW
+  reflash path, which reads seed/key from `CalibrationFile::GetSeedKey()` —
+  data embedded in the `.cuw` calibration file, not hardcoded in any DLL. The
+  `FUKUMORIYOSIYAMA` key is only for runtime ADS/PCS FFD access. To recover
+  the actual EPS reflash key, obtain a Sienna EPS `.cuw` calibration file from
+  Toyota's TechInfo portal and extract the `SeedKey`/`ServiceAuthKey` fields.

@@ -130,7 +130,58 @@ during analysis.
 The obfuscation was identified by matching encoded byte `0xF2` to plaintext
 `\r` (0x0D), confirming `0xFF − 0x0D = 0xF2`.
 
-## 4. SecurityAccess implementations (decompiled)
+## 4. SecurityAccess dispatch — which path each ECU uses
+
+Techstream V18 supports many ECU generations. The SA path is not uniform — it
+is selected by a two-level dispatch:
+
+### 4.0 Decision tree
+
+```text
+RUNTIME DIAGNOSTICS (DTC read, data monitor, FFD access):
+│
+├─ DS2/KW protocol ECUs (older Denso):
+│   CPubEFI  → SecurityAccess  (Feistel cipher, §4.2)
+│   CPubIMB  → SecurityAccess  (Feistel cipher)
+│   CPubKFS  → SecurityAccess  (Feistel cipher)
+│   CPubEPS  → NO SecurityAccess  ← EPS has no SA in the DS2 path
+│
+├─ UDS Phase-4/5 CAN ECUs (UtilityExNK2.dll dispatch by ECU abbreviation):
+│   Ex2ADS_11_*  → CSecurityAccessAES128  (key="FUKUMORIYOSIYAMA", §4.1)
+│   Ex2CSP_06_*  → CSecurityAccess
+│   Ex2PCM_01/02/03_*  → CSecurityAccess
+│   Ex2SSU_08_*  → CSecurityAccessSUBARU
+│   Ex2SVI_01_*  → CSecurityAccessAES128
+│   Ex2_PSAVC_*  → CSecurityAccess
+│   (no EPS entry — EPS does not require SA for runtime diagnostics)
+│
+└─ Central Gateway:
+    Ex2ComSecurityAccessCGW → CSecurityAccessCGW_DK (§4.3)
+
+REFLASHING (CUW / Calibration Update Wizard):
+│
+├─ Flash writer class selected by calibration file metadata:
+│
+│   EPS (V850E)  → CCanEMPS_V850E_PS2FlashWriter
+│                   └─ CollateSeedKey uses CalibrationFile::GetSeedKey()
+│                      (key embedded in .cuw file, NOT hardcoded in DLL)
+│
+│   EPS (older)  → CSilEMPS_V850E_PS1_2FlashWriter
+│   Airbag       → CCanAirbagFlashWriter
+│   Body         → CCanBodyFlashWriter
+│   Chassis      → CCanChassisShrinkFlashWriter
+│   EPB          → CCanEPBFlashWriter
+│   FOREST/RH850 → CCanVFORESTFlashWriter (no SA — direct write/erase)
+│   P5 CAN       → CP5CanFlashWriter
+│   EPC          → CCanElectricPowerControlFlashWriter
+│   ...          → (20+ writer classes total)
+```
+
+**Key implication for the Sienna EPS:** the `FUKUMORIYOSIYAMA` key in
+`CSecurityAccessAES128` (§4.1) is for runtime ADS/PCS FFD access, not for EPS
+reflashing. The EPS reflash seed/key pair is embedded in the calibration file
+downloaded from Toyota's TechInfo portal and consumed at runtime by
+`CalibrationFile::GetSeedKey()`. It is not hardcoded in any DLL.
 
 `CommandCommon.dll` contains four independent SA implementations. All were
 decompiled with the vendored Ghidra CLI against the imported PE (project
