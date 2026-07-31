@@ -61,16 +61,44 @@ bit 5 and TransferData compares tester bytes against existing CodeFlash in
 ## 1. Policy bytes and request addressing
 
 The bootloader service-table records are `SID:u8, addressing_mask:u8,
-reserved:u16, handler:u32`. The relevant entries are:
+reserved:u16, handler:u32` — 20 entries at `0x8E54`, walked by
+`uds_service_dispatch @ 0x5222`. The complete table:
 
 ```text
-0x8E54  SID 10  mask 03  handler 614A
-0x8E5C  SID 11  mask 02  handler 60C2
-0x8E6C  SID 28  mask 01  handler 688A
-0x8E74  SID 3E  mask 01  handler 4FF8
-0x8E7C  SID 85  mask 01  handler 693A
-0x8EBC  SID 31  mask 02  handler 567E
+0x8E54  SID 10  mask 03  handler 614A  DiagnosticSessionControl
+0x8E5C  SID 11  mask 02  handler 60C2  ECUReset
+0x8E64  SID 27  mask 02  handler 5516  SecurityAccess
+0x8E6C  SID 28  mask 01  handler 688A  CommunicationControl
+0x8E74  SID 3E  mask 01  handler 4FF8  TesterPresent
+0x8E7C  SID 85  mask 01  handler 693A  ControlDTCSetting
+0x8E84  SID 22  mask 02  handler 5FB8  ReadDataByIdentifier
+0x8E8C  SID 23  mask 03  handler 69B0  ReadMemoryByAddress         (unsupported)
+0x8E94  SID 2C  mask 03  handler 69B0  DynamicallyDefineDataIdentifier (unsupported)
+0x8E9C  SID 2E  mask 02  handler 4948  WriteDataByIdentifier
+0x8EA4  SID 14  mask 02  handler 69B0  ClearDiagnosticInformation (unsupported)
+0x8EAC  SID 19  mask 03  handler 69B0  ReadDTCInformation         (unsupported)
+0x8EB4  SID 2F  mask 03  handler 69B0  InputOutputControlByIdentifier (unsupported)
+0x8EBC  SID 31  mask 02  handler 567E  RoutineControl
+0x8EC4  SID 34  mask 02  handler 5D68  RequestDownload
+0x8ECC  SID 36  mask 02  handler 4DBA  TransferData
+0x8ED4  SID 37  mask 02  handler 5C92  RequestTransferExit
+0x8EDC  SID AB  mask 03  handler 69B0  (proprietary — unsupported)
+0x8EE4  SID BA  mask 03  handler 69B0  (proprietary — unsupported)
+0x8EEC  SID BB  mask 03  handler 69B0  (proprietary — unsupported)
 ```
+
+The bootloader speaks **standard UDS only**. Twelve SIDs are implemented
+(`0x10/0x11/0x22/0x27/0x28/0x2E/0x31/0x34/0x36/0x37/0x3E/0x85`); eight are
+explicitly routed to `uds_unsupported_service_handler @ 0x69B0` (five standard
+UDS SIDs the firmware declines — `0x14/0x19/0x23/0x2C/0x2F` — plus three
+non-standard `0xAB/0xBA/0xBB`, presumably Toyota/DENSO proprietary opcodes
+this calibration rejects). Any SID not in the table falls through to
+`FUN_000051fa(sid, 0x11)` → NRC `0x11` (serviceNotSupported). **There is no
+proprietary/VFOREST protocol handler** — the reflash path is entirely standard
+UDS (`0x2E` DID writes → `0x34/0x36/0x37` → `0x31`), which is why the CUW
+VFOREST `SendNonceAndSeedKey` frames (`0x37`–`0x3c` block-seq) cannot apply to
+this calibration (see [../tooling/techstream.md](../tooling/techstream.md) §4.6,
+CORR-021).
 
 Mask `0x02` is physical-only (`0x7A1`), mask `0x01` is functional-only
 (`0x777`), and mask `0x03` permits both. These masks are independent of the

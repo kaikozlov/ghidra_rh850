@@ -71,6 +71,33 @@ expected_services = {
 for sid, expected in expected_services.items():
     check(f"SID {sid:02X} mask/reserved/handler", services[sid] == expected, repr(services[sid]))
 
+# DIAG-BOOT-003: complete service-table enumeration + standard-UDS-only negative.
+implemented = {
+    0x10: 0x614A, 0x11: 0x60C2, 0x22: 0x5FB8, 0x27: 0x5516, 0x28: 0x688A,
+    0x2E: 0x4948, 0x31: 0x567E, 0x34: 0x5D68, 0x36: 0x4DBA, 0x37: 0x5C92,
+    0x3E: 0x4FF8, 0x85: 0x693A,
+}
+unsupported = (0x14, 0x19, 0x23, 0x2C, 0x2F, 0xAB, 0xBA, 0xBB)
+for sid, h in implemented.items():
+    check(
+        f"DIAG-BOOT-003 SID 0x{sid:02X} implemented -> handler 0x{h:X}",
+        services.get(sid, (0, 0, 0))[2] == h,
+    )
+for sid in unsupported:
+    check(
+        f"DIAG-BOOT-003 SID 0x{sid:02X} routed to uds_unsupported_service_handler 0x69B0",
+        services.get(sid, (0, 0, 0))[2] == 0x69B0,
+    )
+check(
+    "DIAG-BOOT-003 table is exactly 12 implemented + 8 unsupported (20 entries)",
+    set(services) == set(implemented) | set(unsupported),
+    f"{len(services)} entries",
+)
+check(
+    "DIAG-BOOT-003 no proprietary/VFOREST handler (all handlers are standard UDS or 0x69B0)",
+    all(h == 0x69B0 or s in implemented for s, (_, _, h) in services.items()),
+)
+
 check("ECUReset requires configured session 2", CF[TP + 0x858] == 2)
 check("CommunicationControl requires configured session 3", CF[TP + 0x85A] == 3)
 check("ControlDTCSetting requires configured session 3", CF[TP + 0x85B] == 3)
