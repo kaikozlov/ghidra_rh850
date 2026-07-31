@@ -8,3 +8,6 @@ build/
 # Locally installed Renesas Flash Programmer distribution.  Keep the licensed
 # vendor package out of Git; renesas-rfp.lock.json pins the analyzed artifacts.
 Renesas/
+
+# Ignore Techstream distribution
+Techstream/
