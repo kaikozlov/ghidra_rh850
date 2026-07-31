@@ -31,6 +31,7 @@ jobs:
     outputs:
       processor: ${{ steps.filter.outputs.processor }}
       rebuild: ${{ steps.filter.outputs.rebuild }}
+      cli: ${{ steps.filter.outputs.cli }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -50,6 +51,10 @@ jobs:
               - 'data/processor_unimpl_allowlist.txt'
               - 'data/processor_manifest.baseline.json'
               - 'data/decompiler_signatures.baseline.csv'
+            cli:
+              - 'ghidra/ghidra-cli/**'
+              - 'tools/build_ghidra_cli.sh'
+              - 'tools/g'
             rebuild:
               - 'ghidra/ghidra_v850/**'
               - 'ghidra/scripts/import/**'
@@ -109,6 +114,27 @@ jobs:
             data/instruction_inventory.csv
             tests/fixtures/processor/
           if-no-files-found: ignore
+
+  cli:
+    name: ghidra-cli unit tests
+    needs: [changes]
+    if: >-
+      always() && (
+        github.event_name == 'schedule' ||
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'pull_request' && needs.changes.outputs.cli == 'true') ||
+        (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Compile-check all tests (catches compile errors in Ghidra-backed tests too)
+        run: cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --no-run
+      - name: Run Ghidra-free unit tests
+        run: |
+          cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --lib
+          cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --test batch_tests
 
   rebuild-parity:
     name: Four-stage rebuild parity

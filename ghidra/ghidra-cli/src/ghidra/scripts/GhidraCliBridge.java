@@ -109,6 +109,11 @@ public class GhidraCliBridge extends GhidraScript {
     private volatile String currentProgramNameSnapshot;
     private volatile String projectNameSnapshot;
     private volatile int programCountSnapshot;
+    // Volatile program-state snapshots — refreshed on the program thread after
+    // every job, open, save, or close. Control-plane status reads only these.
+    private volatile boolean programDirtySnapshot;
+    private volatile long programLastModifiedSnapshot;
+    private volatile boolean activeTransactionSnapshot;
 
     private static final Pattern NAMED_HEX_ADDRESS_PATTERN =
         Pattern.compile("(?i)^(?:FUN|SUB|LAB|DAT)_([0-9a-f]+)$");
@@ -663,13 +668,14 @@ public class GhidraCliBridge extends GhidraScript {
                 return new HandleResult(errorResponse("Unknown command: " + command), false);
             }
 
-            // A handler may return a pre-formed structured error response (see
-            // errorResponse(code, message, diagnostics)) by storing it under the
-            // "error_struct" key. Pass it through as the wire response directly
-            // so the structured {status,error:{code,message,diagnostics}} shape
-            // is preserved instead of being flattened to a string.
-            if (result.has("error_struct")) {
-                return new HandleResult(result.getAsJsonObject("error_struct"), false);
+            // A handler may return a pre-formed structured wire response (one
+            // with a top-level "status" key, e.g. errorResponse(code, message,
+            // diagnostics)). Pass it through directly so the structured
+            // {status,error:{code,message,diagnostics}} shape is preserved
+            // instead of being flattened to a string.
+            if (result.has("status") &&
+                "error".equals(result.get("status").getAsString())) {
+                return new HandleResult(result, false);
             }
 
             if (result.has("error")) {
@@ -766,7 +772,149 @@ public class GhidraCliBridge extends GhidraScript {
             case "batch":           return handleBatch(args);
             // Memory read
             case "read_memory":     return handleReadMemory(args);
+            // Compound inspection — atomic single-job read of all sections
+            case "inspect":         return handleInspect(args);
             default:                return null;
+        }
+    }
+
+    /**
+     * Compound inspection of a single function: metadata + decompilation +
+     * callers + callees + xrefs (to and from) + disassembly, all read from one
+     * consistent program snapshot inside one queued job (no interleaving with
+     * other clients).
+     *
+     * <p>Args: {@code target} (address/name/FUN_hex); boolean flags
+     * {@code decompile}, {@code callers}, {@code callees}, {@code xrefs};
+     * {@code disasm} (number of instructions to disassemble, or absent to skip).
+     * When no flags are set, ALL sections are emitted.
+     *
+     * <p>If the base function cannot be resolved the whole call is an error.
+     * If metadata resolves but a later section fails, that section is replaced
+     * with {@code {"error": "..."}} and the overall result is still a success.
+     */
+    private JsonObject handleInspect(JsonObject args) {
+        if (currentProgram == null) {
+            return errorResult("No program loaded");
+        }
+
+        String target = getArgString(args, "target");
+        if (target == null || target.isEmpty()) {
+            target = getArgString(args, "address");
+        }
+        if (target == null || target.isEmpty()) {
+            return errorResult("No target provided");
+        }
+
+        // Determine which sections to emit. Default to ALL when none requested.
+        boolean wantDecompile = getArgBool(args, "decompile", false);
+        boolean wantCallers = getArgBool(args, "callers", false);
+        boolean wantCallees = getArgBool(args, "callees", false);
+        boolean wantXrefs = getArgBool(args, "xrefs", false);
+        boolean hasDisasm = args != null && args.has("disasm") && !args.get("disasm").isJsonNull();
+        boolean wantAll = !wantDecompile && !wantCallers && !wantCallees && !wantXrefs && !hasDisasm;
+        if (wantAll) {
+            wantDecompile = true;
+            wantCallers = true;
+            wantCallees = true;
+            wantXrefs = true;
+            hasDisasm = true;
+        }
+        int disasmCount = hasDisasm
+            ? getArgInt(args, "disasm", 40)
+            : 40;
+
+        // Resolve target to a function up front — this is a hard error, not
+        // partial. Use the same resolveAddress + getFunctionContaining pattern
+        // as handleDecompile so target may be an entry point, mid-function addr,
+        // symbol, or FUN_<hex> auto-name.
+        Address addr = resolveAddress(target);
+        if (addr == null) {
+            return errorResult(buildFunctionTargetHint(target));
+        }
+        FunctionManager fm = currentProgram.getFunctionManager();
+        Function func = fm.getFunctionContaining(addr);
+        if (func == null) {
+            // getFunctionContaining misses exact entry points that aren't the
+            // start of a body range; fall back to an exact match.
+            func = fm.getFunctionAt(addr);
+        }
+        if (func == null) {
+            return errorResult("No function at target " + target);
+        }
+
+        // Entry-point string for downstream handlers (they re-resolve, but a
+        // concrete address avoids ambiguity from bare names).
+        String entryPoint = func.getEntryPoint().toString();
+
+        JsonObject result = new JsonObject();
+
+        // --- function metadata (always emitted) ---
+        runSection(result, "function", () -> handleGetFunction(makeArg("address", entryPoint)));
+
+        // --- decompilation ---
+        if (wantDecompile) {
+            JsonObject decompArgs = makeArg("address", entryPoint);
+            decompArgs.addProperty("with_vars", true);
+            decompArgs.addProperty("with_params", true);
+            runSection(result, "decompilation", () -> handleDecompile(decompArgs));
+        }
+
+        // --- callers ---
+        if (wantCallers) {
+            JsonObject callersArgs = makeArg("function", entryPoint);
+            callersArgs.addProperty("depth", 1);
+            runSection(result, "callers", () -> handleGraphCallers(callersArgs));
+        }
+
+        // --- callees ---
+        if (wantCallees) {
+            JsonObject calleesArgs = makeArg("function", entryPoint);
+            calleesArgs.addProperty("depth", 1);
+            runSection(result, "callees", () -> handleGraphCallees(calleesArgs));
+        }
+
+        // --- xrefs to + xrefs from ---
+        if (wantXrefs) {
+            runSection(result, "xrefs_to",
+                () -> handleXrefsTo(makeArg("address", entryPoint)));
+            runSection(result, "xrefs_from",
+                () -> handleXrefsFrom(makeArg("address", entryPoint)));
+        }
+
+        // --- disassembly ---
+        if (hasDisasm) {
+            JsonObject disasmArgs = makeArg("address", entryPoint);
+            disasmArgs.addProperty("count", Math.max(1, disasmCount));
+            runSection(result, "disassembly", () -> handleDisasm(disasmArgs));
+        }
+
+        return result;
+    }
+
+    /** Build a single-key {@link JsonObject}. */
+    private JsonObject makeArg(String key, String value) {
+        JsonObject o = new JsonObject();
+        o.addProperty(key, value);
+        return o;
+    }
+
+    /**
+     * Run a section producer and store its result under {@code key}. On failure
+     * store {@code {"error": message}} so one bad section never aborts the rest.
+     */
+    private void runSection(JsonObject result, String key, java.util.function.Supplier<JsonObject> producer) {
+        try {
+            JsonObject section = producer.get();
+            if (section != null && section.has("error")) {
+                result.add(key, section); // already {"error": "..."}
+            } else if (section != null) {
+                result.add(key, section);
+            } else {
+                result.add(key, errorResult("handler returned null"));
+            }
+        } catch (Exception e) {
+            result.add(key, errorResult(e.getMessage() != null ? e.getMessage() : e.toString()));
         }
     }
 
@@ -957,47 +1105,26 @@ public class GhidraCliBridge extends GhidraScript {
     }
 
     /**
-     * Enrich a status/info object with current-program fields: program name,
-     * dirty flag, last-modified time from the backing DomainFile, whether a
-     * transaction is currently open, and the program queue depth.
+     * Enrich a status/info object with current-program fields from volatile
+     * snapshots. Reads only snapshot fields — never dereferences Ghidra objects
+     * — so it is safe from the control-plane (status) thread.
      */
     private void addProgramStatus(JsonObject result) {
-        Program program = currentProgram;
-        if (program == null) {
+        if (currentProgramNameSnapshot == null) {
             result.add("program", JsonNull.INSTANCE);
             result.addProperty("has_program", false);
             result.add("dirty", JsonNull.INSTANCE);
             result.add("last_modified", JsonNull.INSTANCE);
             result.add("active_transaction", JsonNull.INSTANCE);
-            result.add("queued_jobs", JsonNull.INSTANCE);
             return;
         }
 
         result.addProperty("has_program", true);
-        result.addProperty("program", program.getName());
-        result.addProperty("dirty", program.isChanged());
-
-        // Last-modified time from the backing DomainFile (ms epoch), if available.
-        try {
-            DomainFile df = program.getDomainFile();
-            if (df != null) {
-                result.addProperty("last_modified", df.getLastModifiedTime());
-            } else {
-                result.add("last_modified", JsonNull.INSTANCE);
-            }
-        } catch (Exception e) {
-            result.add("last_modified", JsonNull.INSTANCE);
-        }
-
-        // Whether a transaction is currently open on this program.
-        try {
-            result.addProperty("active_transaction", program.getCurrentTransaction() != null);
-        } catch (Exception e) {
-            result.add("active_transaction", JsonNull.INSTANCE);
-        }
-
-        // Number of program jobs waiting in the queue.
-        result.addProperty("queued_jobs", queuedJobCount());
+        result.addProperty("program", currentProgramNameSnapshot);
+        result.addProperty("dirty", programDirtySnapshot);
+        result.addProperty("last_modified", programLastModifiedSnapshot);
+        result.addProperty("active_transaction", activeTransactionSnapshot);
+        result.addProperty("queued_job_count", queuedJobCount());
     }
 
     private JsonObject handleJobStatus(JsonObject args) {
@@ -1188,6 +1315,31 @@ public class GhidraCliBridge extends GhidraScript {
             } catch (Exception ignored) {
                 programCountSnapshot = 0;
             }
+        }
+
+        // Snapshot volatile program-state fields on the program thread so
+        // control-plane status reads never dereference Ghidra objects.
+        if (program != null) {
+            try {
+                programDirtySnapshot = program.isChanged();
+            } catch (Exception ignored) {
+                programDirtySnapshot = false;
+            }
+            try {
+                DomainFile df = program.getDomainFile();
+                programLastModifiedSnapshot = df != null ? df.getLastModifiedTime() : 0;
+            } catch (Exception ignored) {
+                programLastModifiedSnapshot = 0;
+            }
+            try {
+                activeTransactionSnapshot = program.getCurrentTransaction() != null;
+            } catch (Exception ignored) {
+                activeTransactionSnapshot = false;
+            }
+        } else {
+            programDirtySnapshot = false;
+            programLastModifiedSnapshot = 0;
+            activeTransactionSnapshot = false;
         }
     }
 

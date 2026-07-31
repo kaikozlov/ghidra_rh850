@@ -15,8 +15,9 @@
 #   tools/g inspect 0xc853a --decompile --callers --callees --xrefs --disasm 40
 #
 # Environment:
-#   GHIDRA_AGENT=1   Force compact JSON output (for scripted/agent consumption).
-#   GHIDRA_PROJECT   Override the working project directory (default: build/project).
+#   GHIDRA_AGENT=1            Force compact JSON output (for scripted/agent consumption).
+#   GHIDRA_PROJECT            Override the working project directory (default: build/project).
+#   GHIDRA_ALLOW_SYSTEM_CLI=1 Allow falling back to a system-installed ghidra binary.
 #
 set -euo pipefail
 
@@ -30,18 +31,28 @@ PROJECT_DIR="${GHIDRA_PROJECT:-$ROOT/build/project}"
 
 if [[ -x "$ROOT/build/ghidra-cli/ghidra" ]]; then
   GHIDRA_CLI="$ROOT/build/ghidra-cli/ghidra"
-elif command -v ghidra >/dev/null 2>&1; then
+elif [[ "${GHIDRA_ALLOW_SYSTEM_CLI:-0}" == "1" ]] && command -v ghidra >/dev/null 2>&1; then
   GHIDRA_CLI=$(command -v ghidra)
 else
-  echo "ghidra CLI not found. Run 'make ghidra-cli' to build the vendored copy," >&2
-  echo "or install ghidra-cli 0.2.1 on PATH." >&2
-  exit 1
+  # Vendored binary is missing — try to build it automatically.
+  if [[ -x "$ROOT/tools/build_ghidra_cli.sh" ]] && command -v cargo >/dev/null 2>&1; then
+    echo "Vendored ghidra CLI not found — building automatically..." >&2
+    "$ROOT/tools/build_ghidra_cli.sh" >&2
+    GHIDRA_CLI="$ROOT/build/ghidra-cli/ghidra"
+  else
+    echo "ghidra CLI not found. Run 'make ghidra-cli' to build the vendored copy." >&2
+    echo "(Set GHIDRA_ALLOW_SYSTEM_CLI=1 to fall back to a system ghidra on PATH.)" >&2
+    exit 1
+  fi
 fi
 
 # --- Guard against committed project/ ----------------------------------------
 
-# Resolve to absolute and check if it's inside the committed snapshot.
-ABS_PROJECT_DIR=$(cd "$PROJECT_DIR" 2>/dev/null && pwd || echo "$PROJECT_DIR")
+# Resolve to an absolute canonical path WITHOUT requiring the directory to exist
+# (python3 Path.resolve(strict=False) follows symlinks and collapses .. without
+# needing the path to be present on disk). The old `cd ... && pwd` approach
+# failed open when the cd failed, leaving the path uncanonicalized.
+ABS_PROJECT_DIR=$(python3 -c "from pathlib import Path; print(Path('$PROJECT_DIR').resolve(strict=False))")
 case "$ABS_PROJECT_DIR" in
   "$SNAPSHOT_DIR"|"$SNAPSHOT_DIR"/*)
     echo "REFUSING: working project resolves inside committed snapshot ($SNAPSHOT_DIR)." >&2
@@ -73,6 +84,26 @@ if ((NEEDS_PROJECT)) && [[ ! -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
   mkdir -p "$PROJECT_DIR"
   cp -R "$SNAPSHOT_DIR/." "$PROJECT_DIR/"
   echo "Ready: $PROJECT_DIR" >&2
+
+  # Verify the processor manifest fingerprint after copy, mirroring
+  # `make work-project`. This catches stale/incorrect processor sources
+  # that would silently produce wrong decompilation.
+  if [[ -f "$PROJECT_DIR/processor_manifest.json" ]]; then
+    MANIFEST="$PROJECT_DIR/processor_manifest.json"
+  elif [[ -f "$SNAPSHOT_DIR/processor_manifest.json" ]]; then
+    MANIFEST="$SNAPSHOT_DIR/processor_manifest.json"
+  else
+    MANIFEST=""
+  fi
+  if [[ -n "$MANIFEST" ]]; then
+    if ! python3 "$ROOT/tools/fingerprint_processor.py" --source-only --expect "$MANIFEST" >&2; then
+      echo "ERROR: processor manifest fingerprint mismatch after materializing working project." >&2
+      echo "The vendored processor sources do not match the committed snapshot." >&2
+      exit 1
+    fi
+  else
+    echo "NOTE: no processor_manifest.json yet; run rebuild-project to create one." >&2
+  fi
 fi
 
 # --- Build CLI args -----------------------------------------------------------

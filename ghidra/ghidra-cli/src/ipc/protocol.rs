@@ -212,4 +212,146 @@ mod tests {
         assert!(err.message.is_none());
         assert!(err.diagnostics.is_none());
     }
+
+    // ---- CommandError::from_response() ----
+
+    #[test]
+    fn test_command_error_from_structured_response() {
+        // New format: error object should populate code/message/diagnostics.
+        let json = r#"{
+            "status":"error",
+            "error":{
+                "code":"script_compile_failed",
+                "message":"Script failed to compile",
+                "diagnostics":"Foo.java:3: error: ';' expected"
+            }
+        }"#;
+        let response: BridgeResponse = serde_json::from_str(json).unwrap();
+        let err = CommandError::from_response(&response);
+        assert_eq!(err.code.as_deref(), Some("script_compile_failed"));
+        assert_eq!(err.message, "Script failed to compile");
+        assert_eq!(
+            err.diagnostics.as_deref(),
+            Some("Foo.java:3: error: ';' expected")
+        );
+    }
+
+    #[test]
+    fn test_command_error_from_legacy_response() {
+        // Old format: flat message only — code and diagnostics must be None.
+        let json = r#"{"status":"error","message":"Something went wrong"}"#;
+        let response: BridgeResponse = serde_json::from_str(json).unwrap();
+        let err = CommandError::from_response(&response);
+        assert!(err.code.is_none());
+        assert_eq!(err.message, "Something went wrong");
+        assert!(err.diagnostics.is_none());
+    }
+
+    #[test]
+    fn test_command_error_falls_back_to_top_level_message() {
+        // Edge case: error object present but message missing inside it —
+        // should fall back to the top-level message field.
+        let json = r#"{
+            "status":"error",
+            "message":"top level fallback",
+            "error":{"code":"no_inner_message"}
+        }"#;
+        let response: BridgeResponse = serde_json::from_str(json).unwrap();
+        let err = CommandError::from_response(&response);
+        assert_eq!(err.code.as_deref(), Some("no_inner_message"));
+        assert_eq!(err.message, "top level fallback");
+    }
+
+    #[test]
+    fn test_command_error_no_message_anywhere() {
+        // Neither error.message nor top-level message present.
+        let json = r#"{"status":"error","error":{"code":"bare"}}"#;
+        let response: BridgeResponse = serde_json::from_str(json).unwrap();
+        let err = CommandError::from_response(&response);
+        assert_eq!(err.code.as_deref(), Some("bare"));
+        assert_eq!(err.message, "Unknown error");
+    }
+
+    // ---- CommandError::to_json() ----
+
+    #[test]
+    fn test_command_error_to_json_full() {
+        let err = CommandError {
+            code: Some("script_compile_failed".to_string()),
+            message: "Script failed to compile".to_string(),
+            diagnostics: Some("Foo.java:3: error".to_string()),
+        };
+        let json = err.to_json();
+        assert_eq!(json["status"], "error");
+        assert_eq!(json["error"]["code"], "script_compile_failed");
+        assert_eq!(json["error"]["message"], "Script failed to compile");
+        assert_eq!(json["error"]["diagnostics"], "Foo.java:3: error");
+    }
+
+    #[test]
+    fn test_command_error_to_json_no_code_no_diagnostics() {
+        // Legacy-format error: only message present.
+        let err = CommandError {
+            code: None,
+            message: "Something went wrong".to_string(),
+            diagnostics: None,
+        };
+        let json = err.to_json();
+        assert_eq!(json["status"], "error");
+        assert_eq!(json["error"]["message"], "Something went wrong");
+        // code and diagnostics should be absent from the object.
+        assert!(json["error"].get("code").is_none());
+        assert!(json["error"].get("diagnostics").is_none());
+    }
+
+    #[test]
+    fn test_command_error_to_json_roundtrip_shape() {
+        // The to_json() output must have exactly {"status":"error","error":{...}}.
+        let err = CommandError {
+            code: Some("e1".to_string()),
+            message: "m".to_string(),
+            diagnostics: None,
+        };
+        let json = err.to_json();
+        let obj = json.as_object().expect("to_json returns an object");
+        assert_eq!(obj.len(), 2, "exactly status + error keys");
+        assert!(obj.contains_key("status"));
+        assert!(obj.contains_key("error"));
+        let error_obj = json["error"].as_object().unwrap();
+        assert_eq!(error_obj.len(), 2, "code + message, no diagnostics");
+    }
+
+    // ---- CommandError Display ----
+
+    #[test]
+    fn test_command_error_display_with_code() {
+        let err = CommandError {
+            code: Some("e1".to_string()),
+            message: "boom".to_string(),
+            diagnostics: None,
+        };
+        assert_eq!(format!("{}", err), "[e1] boom");
+    }
+
+    #[test]
+    fn test_command_error_display_without_code() {
+        let err = CommandError {
+            code: None,
+            message: "boom".to_string(),
+            diagnostics: None,
+        };
+        assert_eq!(format!("{}", err), "boom");
+    }
+
+    #[test]
+    fn test_command_error_display_with_diagnostics() {
+        let err = CommandError {
+            code: Some("e1".to_string()),
+            message: "boom".to_string(),
+            diagnostics: Some("line 5: broken".to_string()),
+        };
+        let rendered = format!("{}", err);
+        assert!(rendered.contains("[e1] boom"));
+        assert!(rendered.contains("line 5: broken"));
+    }
 }

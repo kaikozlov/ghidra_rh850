@@ -1,6 +1,6 @@
 {
   "name": "ghidra-cli",
-  "version": "0.2.1",
+  "version": "0.2.1-rh850",
   "language": "Rust",
   "upstream": {
     "url": "https://github.com/kaikozlov/ghidra-cli",
@@ -8,6 +8,20 @@
     "baseline_commit": "0d094a38a1c6d4043b44dcd31d1c9537dfedfc77",
     "baseline_branch": "fix/script-run-compiler-errors",
     "notes": "Vendored in-tree from Kai's fork. The fix branch carries one unreleased commit on top of 0.2.1 (surface real compiler errors in `script run`). Maintained alongside the RH850 analysis work."
+  },
+  "downstream_patches": {
+    "version_suffix": "rh850",
+    "summary": "Agent-ergonomics patches applied in-tree after vendoring. Not upstream.",
+    "changes": [
+      "Structured error protocol: BridgeError{code,message,diagnostics}, CommandError type, JSON stderr rendering in JSON mode",
+      "Batch fix: shlex parsing, fail-fast default, --continue-on-error, JSON array input with token-vector preservation",
+      "Durable save: program save --message, stop --save, script run --save, bridge handleProgramSave",
+      "Compound inspect command: single bridge-side atomic job (decompile+xrefs+callers+callees+disasm+metadata)",
+      "Script check: compile-only Java script via handleScriptCheck (no execute())",
+      "Enriched bridge status: dirty/last_modified/active_transaction/queued_job_count via volatile snapshots (thread-safe)",
+      "Structured errorResponse(code, message, diagnostics) overload in Java bridge",
+      "executeProgramRequest: pass-through for pre-formed structured wire responses"
+    ]
   },
   "binary": {
     "crate_name": "ghidra-cli",

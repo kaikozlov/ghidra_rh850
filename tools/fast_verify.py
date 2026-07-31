@@ -9,6 +9,7 @@ Reads verification.toml and supports three modes:
 Usage:
   uv run --locked python tools/fast_verify.py --suite control_partition
   uv run --locked python tools/fast_verify.py --changed
+  uv run --locked python tools/fast_verify.py --changed --base main
   uv run --locked python tools/fast_verify.py --agent [--out-dir build/verify]
 """
 from __future__ import annotations
@@ -20,7 +21,10 @@ import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-VENV_PYTHON = str(ROOT / ".venv/bin/python")
+PYTHON = sys.executable
+
+# Directory for full failure logs (verify-one / verify-changed).
+VERIFY_LOG_DIR = ROOT / "build" / "verify"
 
 
 def load_ownership() -> dict:
@@ -36,7 +40,7 @@ def run_suite(test_path: str) -> dict:
         return {"test": test_path, "status": "missing", "detail": "file not found"}
 
     proc = subprocess.run(
-        [VENV_PYTHON, str(full)],
+        [PYTHON, str(full)],
         capture_output=True,
         text=True,
         timeout=300,
@@ -45,9 +49,35 @@ def run_suite(test_path: str) -> dict:
         "test": test_path,
         "status": "pass" if proc.returncode == 0 else "fail",
         "exit_code": proc.returncode,
-        "stdout": proc.stdout[-4000:] if proc.stdout else "",
-        "stderr": proc.stderr[-2000:] if proc.stderr else "",
+        "stdout": proc.stdout,
+        "stderr": proc.stderr,
     }
+
+
+def write_full_log(result: dict) -> Path | None:
+    """Write the complete stdout+stderr to build/verify/<suite>.log on failure."""
+    if result["status"] != "fail":
+        return None
+    VERIFY_LOG_DIR.mkdir(parents=True, exist_ok=True)
+    suite = result.get("suite", Path(result["test"]).stem)
+    log_file = VERIFY_LOG_DIR / f"{suite}.log"
+    log_file.write_text(
+        f"=== STDOUT ===\n{result.get('stdout', '')}"
+        f"\n=== STDERR ===\n{result.get('stderr', '')}\n"
+    )
+    return log_file
+
+
+def print_failure(result: dict, suite: str | None = None) -> None:
+    """Print both stdout and stderr for a failed test."""
+    label = f"{suite} / {result['test']}" if suite else result["test"]
+    print(f"\n--- FAILED: {label} ---", file=sys.stderr)
+    if result.get("stdout"):
+        print("--- stdout ---", file=sys.stderr)
+        print(result["stdout"], file=sys.stderr)
+    if result.get("stderr"):
+        print("--- stderr ---", file=sys.stderr)
+        print(result["stderr"], file=sys.stderr)
 
 
 def verify_one(suite_name: str) -> int:
@@ -72,17 +102,20 @@ def verify_one(suite_name: str) -> int:
             print(f"  [PASS] {test}")
         else:
             print(f"  [FAIL] {test}")
-            if result.get("stderr"):
-                print(result["stderr"], file=sys.stderr)
+            result["suite"] = suite_name
+            log_path = write_full_log(result)
+            if log_path:
+                print(f"  Full log: {log_path}", file=sys.stderr)
+            print_failure(result, suite=suite_name)
             failed += 1
 
     return 1 if failed else 0
 
 
-def verify_changed() -> int:
-    # Get changed files (staged + unstaged vs HEAD).
+def verify_changed(base: str = "HEAD") -> int:
+    # Get changed files (staged + unstaged vs the base ref).
     proc = subprocess.run(
-        ["git", "diff", "--name-only", "HEAD"],
+        ["git", "diff", "--name-only", base],
         capture_output=True,
         text=True,
         cwd=ROOT,
@@ -112,9 +145,13 @@ def verify_changed() -> int:
                     break
 
     if not matched_suites:
-        print(f"No suites matched changed files: {', '.join(sorted(changed))}")
-        print("(If you changed tools/scripts without a suite mapping, run 'make verify' for the full gate.)")
-        return 0
+        print(f"No suites matched changed files: {', '.join(sorted(changed))}", file=sys.stderr)
+        print(
+            "(If you changed tools/scripts without a suite mapping, "
+            "run 'make verify' for the full gate.)",
+            file=sys.stderr,
+        )
+        return 2
 
     print(f"Changed files: {len(changed)}")
     print(f"Matched suites: {', '.join(sorted(matched_suites))}")
@@ -130,8 +167,11 @@ def verify_changed() -> int:
                 print(f"  [PASS] {suite_name}: {test}")
             else:
                 print(f"  [FAIL] {suite_name}: {test}")
-                if result.get("stderr"):
-                    print(result["stderr"], file=sys.stderr)
+                result["suite"] = suite_name
+                log_path = write_full_log(result)
+                if log_path:
+                    print(f"  Full log: {log_path}", file=sys.stderr)
+                print_failure(result, suite=suite_name)
                 failed += 1
 
     return 1 if failed else 0
@@ -161,8 +201,8 @@ def verify_agent(out_dir: str | None = None) -> int:
                 # Write full log for failures.
                 log_file = resolved_out / f"{suite_name}.log"
                 log_file.write_text(
-                    f"=== STDOUT ===\n{result.get('stdout', '')}\n"
-                    f"=== STDERR ===\n{result.get('stderr', '')}\n"
+                    f"=== STDOUT ===\n{result.get('stdout', '')}"
+                    f"\n=== STDERR ===\n{result.get('stderr', '')}\n"
                 )
 
     summary = {
@@ -178,11 +218,10 @@ def verify_agent(out_dir: str | None = None) -> int:
     # Print compact JSON summary to stdout.
     print(json.dumps(summary, indent=2))
 
-    # Print full output only for failures.
+    # Print full output (both streams) for failures.
     for r in results:
         if r["status"] == "fail":
-            print(f"\n--- FAILED: {r['suite']} / {r['test']} ---", file=sys.stderr)
-            print(r.get("stderr", ""), file=sys.stderr)
+            print_failure(r, suite=r["suite"])
 
     return 1 if failed else 0
 
@@ -195,13 +234,14 @@ def main() -> int:
     group.add_argument("--suite", help="Run a single suite by name")
     group.add_argument("--changed", action="store_true", help="Run suites matching git changes")
     group.add_argument("--agent", action="store_true", help="Run all suites with compact JSON output")
+    parser.add_argument("--base", default="HEAD", help="Git ref to compare against for --changed (default: HEAD)")
     parser.add_argument("--out-dir", help="Directory for verify-agent logs (default: build/verify)")
     args = parser.parse_args()
 
     if args.suite:
         return verify_one(args.suite)
     elif args.changed:
-        return verify_changed()
+        return verify_changed(base=args.base)
     elif args.agent:
         return verify_agent(args.out_dir)
     return 0

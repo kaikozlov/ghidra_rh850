@@ -50,6 +50,11 @@ durable on disk until the daemon shuts down cleanly**.
    (the teardown commit races the JVM kill). Treat `stop` as the only reliable
    persist. For a guaranteed-durable rebuild, use a raw
    `analyzeHeadless -process -commit` one-shot instead of the daemon.
+   The vendored CLI adds `program save --message` and `stop --save` for explicit
+   persistence boundaries (see `ghidra program save --help`). Until save-and-
+   reopen tests exist for this project, continue to treat `stop` as the
+   authoritative boundary and use explicit `program save` as a belt-and-suspenders
+   extra commit.
 
 ## Working copy vs. committed snapshot
 

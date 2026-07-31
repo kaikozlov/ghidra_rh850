@@ -1,3 +1,4 @@
+mod batch;
 mod cli;
 mod config;
 mod error;
@@ -1303,57 +1304,18 @@ fn execute_via_bridge(
             let content = std::fs::read_to_string(&args.script_file)
                 .map_err(|e| anyhow::anyhow!("Failed to read batch file: {}", e))?;
 
-            // JSON input mode: a JSON array of {"command": "...", "args": [...]}
-            // objects. Detected by the trimmed content starting with '['.
-            let commands: Vec<String> = if content.trim_start().starts_with('[') {
-                let entries: Vec<serde_json::Value> = serde_json::from_str(&content)
-                    .map_err(|e| anyhow::anyhow!("Failed to parse batch file as JSON: {}", e))?;
-                entries
-                    .iter()
-                    .map(|entry| {
-                        let cmd = entry
-                            .get("command")
-                            .and_then(|v| v.as_str())
-                            .ok_or_else(|| anyhow::anyhow!("Each JSON entry needs a \"command\" string"))?;
-                        let mut parts = vec![cmd.to_string()];
-                        if let Some(extra) = entry.get("args").and_then(|v| v.as_array()) {
-                            for a in extra {
-                                if let Some(s) = a.as_str() {
-                                    parts.push(s.to_string());
-                                }
-                            }
-                        }
-                        Ok(parts.join(" "))
-                    })
-                    .collect::<anyhow::Result<Vec<String>>>()?
-            } else {
-                // Plain-text mode: one command per line, '#' comments and blank
-                // lines skipped. Lines are preserved verbatim so the shell-word
-                // splitter below sees the original quoting.
-                content
-                    .lines()
-                    .map(|l| l.trim_end())
-                    .filter(|l| !l.trim().is_empty() && !l.trim().starts_with('#'))
-                    .map(|l| l.trim().to_string())
-                    .collect()
-            };
+            // Parse batch content (JSON array or plain-text, one command per
+            // line). The parsing logic lives in the shared `batch` module so it
+            // can be unit-tested without a running bridge — see
+            // src/batch.rs and tests/batch_tests.rs. Token boundaries are
+            // preserved exactly (no re-splitting) in JSON mode.
+            let commands = batch::parse_batch(&content)?;
 
             let mut results = Vec::new();
-            for line in &commands {
-                // Shell-aware splitting keeps quoted arguments intact.
-                let parts = match shlex::split(line) {
-                    Some(parts) if !parts.is_empty() => parts,
-                    _ => {
-                        let err = anyhow::anyhow!("Could not parse command line: {:?}", line);
-                        results.push(json!({"command": line, "error": err.to_string()}));
-                        if !args.continue_on_error {
-                            return Err(err);
-                        }
-                        continue;
-                    }
-                };
-                let words: Vec<&str> =
-                    std::iter::once("ghidra").chain(parts.iter().map(|s| s.as_str())).collect();
+            for cmd in &commands {
+                let words: Vec<&str> = std::iter::once("ghidra")
+                    .chain(cmd.argv.iter().map(|s| s.as_str()))
+                    .collect();
                 let sub_result = match Cli::try_parse_from(&words) {
                     Ok(sub_cli) => {
                         execute_via_bridge(client, &sub_cli.command, true, default_limit)
@@ -1361,9 +1323,10 @@ fn execute_via_bridge(
                     Err(e) => Err(anyhow::anyhow!("{}", e)),
                 };
                 match &sub_result {
-                    Ok(val) => results.push(json!({"command": line, "result": val})),
+                    Ok(val) => results.push(json!({"command": cmd.display, "result": val})),
                     Err(e) => {
-                        results.push(json!({"command": line, "error": e.to_string()}));
+                        results
+                            .push(json!({"command": cmd.display, "error": e.to_string()}));
                         if !args.continue_on_error {
                             // Fail-fast: surface the first error and exit non-zero.
                             return Err(anyhow::anyhow!("{}", e));
@@ -1381,119 +1344,20 @@ fn execute_via_bridge(
         Commands::Rename(args) => client.symbol_rename(&args.old_name, &args.new_name),
         Commands::Inspect(args) => {
             let target = args.resolved_target().to_string();
-
-            // Default to ALL sections when no flags are specified
             let want_all = !args.decompile
                 && !args.callers
                 && !args.callees
                 && !args.xrefs
                 && args.disasm.is_none();
-            let want_decompile = want_all || args.decompile;
-            let want_callers = want_all || args.callers;
-            let want_callees = want_all || args.callees;
-            let want_xrefs = want_all || args.xrefs;
-            let want_disasm = args.disasm.or(if want_all { Some(40) } else { None });
-
-            let mut result = serde_json::Map::new();
-
-            // Always fetch function metadata first
-            match client.send_command(
-                "get_function",
-                Some(json!({ "address": target })),
-            ) {
-                Ok(func) => {
-                    result.insert("function".to_string(), func);
-                }
-                Err(e) => {
-                    result.insert(
-                        "function".to_string(),
-                        json!({ "error": e.to_string() }),
-                    );
-                }
-            }
-
-            if want_decompile {
-                match client.decompile(target.clone(), true, true) {
-                    Ok(decomp) => {
-                        result.insert("decompilation".to_string(), decomp);
-                    }
-                    Err(e) => {
-                        result.insert(
-                            "decompilation".to_string(),
-                            json!({ "error": e.to_string() }),
-                        );
-                    }
-                }
-            }
-
-            if want_callers {
-                match client.graph_callers(&target, None) {
-                    Ok(callers) => {
-                        result.insert("callers".to_string(), callers);
-                    }
-                    Err(e) => {
-                        result.insert(
-                            "callers".to_string(),
-                            json!({ "error": e.to_string() }),
-                        );
-                    }
-                }
-            }
-
-            if want_callees {
-                match client.graph_callees(&target, None) {
-                    Ok(callees) => {
-                        result.insert("callees".to_string(), callees);
-                    }
-                    Err(e) => {
-                        result.insert(
-                            "callees".to_string(),
-                            json!({ "error": e.to_string() }),
-                        );
-                    }
-                }
-            }
-
-            if want_xrefs {
-                match client.xrefs_to(target.clone()) {
-                    Ok(xrefs) => {
-                        result.insert("xrefs_to".to_string(), xrefs);
-                    }
-                    Err(e) => {
-                        result.insert(
-                            "xrefs_to".to_string(),
-                            json!({ "error": e.to_string() }),
-                        );
-                    }
-                }
-                match client.xrefs_from(target.clone()) {
-                    Ok(xrefs) => {
-                        result.insert("xrefs_from".to_string(), xrefs);
-                    }
-                    Err(e) => {
-                        result.insert(
-                            "xrefs_from".to_string(),
-                            json!({ "error": e.to_string() }),
-                        );
-                    }
-                }
-            }
-
-            if let Some(n) = want_disasm {
-                match client.disasm(&target, Some(n)) {
-                    Ok(disasm_val) => {
-                        result.insert("disassembly".to_string(), disasm_val);
-                    }
-                    Err(e) => {
-                        result.insert(
-                            "disassembly".to_string(),
-                            json!({ "error": e.to_string() }),
-                        );
-                    }
-                }
-            }
-
-            Ok(serde_json::Value::Object(result))
+            let payload = json!({
+                "target": target,
+                "decompile": args.decompile || want_all,
+                "callers": args.callers || want_all,
+                "callees": args.callees || want_all,
+                "xrefs": args.xrefs || want_all,
+                "disasm": if want_all { Some(40) } else { args.disasm },
+            });
+            client.send_command("inspect", Some(payload))
         }
         _ => anyhow::bail!("Command not supported"),
     }
@@ -1519,7 +1383,7 @@ fn handle_bridge_command(cli: Cli) -> anyhow::Result<()> {
                 let proj_path = resolve_project_path(&project.clone().or(global_project.clone()), &config)?;
                 if let Some(port) = bridge::is_bridge_running(&proj_path) {
                     let client = BridgeClient::new(port);
-                    let _ = client.program_save(Some("Pre-stop save"));
+                    client.program_save(Some("Pre-stop save"))?;
                 }
             }
             handle_bridge_stop(project.or(global_project), &projects_dir)
