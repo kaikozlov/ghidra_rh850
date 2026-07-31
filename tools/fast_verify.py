@@ -113,21 +113,42 @@ def verify_one(suite_name: str) -> int:
 
 
 def verify_changed(base: str = "HEAD") -> int:
-    # Get changed files (staged + unstaged vs the base ref).
-    proc = subprocess.run(
-        ["git", "diff", "--name-only", base],
-        capture_output=True,
-        text=True,
-        cwd=ROOT,
-    )
+    # Get changed files vs the base ref. Check git's return code so a
+    # misspelled/unavailable base ref doesn't silently produce empty output.
+    try:
+        proc = subprocess.run(
+            ["git", "diff", "--name-only", base],
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired:
+        print(f"git diff --name-only {base} timed out", file=sys.stderr)
+        return 1
+    if proc.returncode != 0:
+        print(
+            f"git diff --name-only {base} failed (exit {proc.returncode}):",
+            file=sys.stderr,
+        )
+        print(proc.stderr.strip(), file=sys.stderr)
+        return 1
     changed = set(proc.stdout.strip().split("\n")) if proc.stdout.strip() else set()
     # Also include untracked files.
-    proc = subprocess.run(
-        ["git", "ls-files", "--others", "--exclude-standard"],
-        capture_output=True,
-        text=True,
-        cwd=ROOT,
-    )
+    try:
+        proc = subprocess.run(
+            ["git", "ls-files", "--others", "--exclude-standard"],
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+            timeout=30,
+        )
+    except subprocess.TimeoutExpired:
+        print("git ls-files timed out", file=sys.stderr)
+        return 1
+    if proc.returncode != 0:
+        print(f"git ls-files failed (exit {proc.returncode})", file=sys.stderr)
+        return 1
     if proc.stdout.strip():
         changed.update(proc.stdout.strip().split("\n"))
 

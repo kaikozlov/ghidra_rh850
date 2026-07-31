@@ -29,21 +29,35 @@ PROJECT_DIR="${GHIDRA_PROJECT:-$ROOT/build/project}"
 
 # --- Resolve the ghidra CLI binary -------------------------------------------
 
-if [[ -x "$ROOT/build/ghidra-cli/ghidra" ]]; then
-  GHIDRA_CLI="$ROOT/build/ghidra-cli/ghidra"
+VENDOR_SRC="$ROOT/ghidra/ghidra-cli/src"
+VENDOR_BIN="$ROOT/build/ghidra-cli/ghidra"
+
+# Rebuild if the binary is missing or stale (source newer than binary).
+if [[ -d "$VENDOR_SRC" ]]; then
+  NEED_BUILD=0
+  if [[ ! -x "$VENDOR_BIN" ]]; then
+    NEED_BUILD=1
+  else
+    # Check if any .rs or .java source file is newer than the binary.
+    if find "$VENDOR_SRC" -type f \( -name '*.rs' -o -name '*.java' \) \
+         -newer "$VENDOR_BIN" -print -quit 2>/dev/null | grep -q .; then
+      NEED_BUILD=1
+    fi
+  fi
+  if ((NEED_BUILD)) && [[ -x "$ROOT/tools/build_ghidra_cli.sh" ]] && command -v cargo >/dev/null 2>&1; then
+    echo "Vendored ghidra CLI is missing or stale — rebuilding..." >&2
+    "$ROOT/tools/build_ghidra_cli.sh" >&2
+  fi
+fi
+
+if [[ -x "$VENDOR_BIN" ]]; then
+  GHIDRA_CLI="$VENDOR_BIN"
 elif [[ "${GHIDRA_ALLOW_SYSTEM_CLI:-0}" == "1" ]] && command -v ghidra >/dev/null 2>&1; then
   GHIDRA_CLI=$(command -v ghidra)
 else
-  # Vendored binary is missing — try to build it automatically.
-  if [[ -x "$ROOT/tools/build_ghidra_cli.sh" ]] && command -v cargo >/dev/null 2>&1; then
-    echo "Vendored ghidra CLI not found — building automatically..." >&2
-    "$ROOT/tools/build_ghidra_cli.sh" >&2
-    GHIDRA_CLI="$ROOT/build/ghidra-cli/ghidra"
-  else
-    echo "ghidra CLI not found. Run 'make ghidra-cli' to build the vendored copy." >&2
-    echo "(Set GHIDRA_ALLOW_SYSTEM_CLI=1 to fall back to a system ghidra on PATH.)" >&2
-    exit 1
-  fi
+  echo "ghidra CLI not found. Run 'make ghidra-cli' to build the vendored copy." >&2
+  echo "(Set GHIDRA_ALLOW_SYSTEM_CLI=1 to fall back to a system ghidra on PATH.)" >&2
+  exit 1
 fi
 
 # --- Guard against committed project/ ----------------------------------------

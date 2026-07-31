@@ -494,8 +494,18 @@ public class GhidraCliBridge extends GhidraScript {
             } else {
                 record.state = "error".equals(responseStatus) ? "failed" : "complete";
             }
-            if ("error".equals(responseStatus) && result.response.has("message")) {
-                record.error = result.response.get("message").getAsString();
+            if ("error".equals(responseStatus)) {
+                // Support both legacy {message:"..."} and structured
+                // {error:{message:"...",code:"...",diagnostics:"..."}}.
+                if (result.response.has("message")) {
+                    record.error = result.response.get("message").getAsString();
+                } else if (result.response.has("error")
+                    && result.response.get("error").isJsonObject()) {
+                    JsonObject errObj = result.response.getAsJsonObject("error");
+                    if (errObj.has("message")) {
+                        record.error = errObj.get("message").getAsString();
+                    }
+                }
             }
         } catch (Exception e) {
             record.state = record.monitor.isCancelled() ? "cancelled" : "failed";
@@ -1332,7 +1342,7 @@ public class GhidraCliBridge extends GhidraScript {
                 programLastModifiedSnapshot = 0;
             }
             try {
-                activeTransactionSnapshot = program.getCurrentTransaction() != null;
+                activeTransactionSnapshot = program.getCurrentTransactionInfo() != null;
             } catch (Exception ignored) {
                 activeTransactionSnapshot = false;
             }

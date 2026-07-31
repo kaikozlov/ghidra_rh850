@@ -16,7 +16,7 @@ command -v cargo >/dev/null 2>&1 || {
 mkdir -p "$OUT_DIR"
 
 echo "Building vendored ghidra-cli (release)..."
-cargo build --release --manifest-path "$VENDOR/Cargo.toml"
+cargo build --locked --release --manifest-path "$VENDOR/Cargo.toml"
 
 # Copy the binary into the isolated output dir.
 BIN_SRC="$VENDOR/target/release/ghidra"
