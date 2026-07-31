@@ -149,9 +149,68 @@ def main() -> int:
         "0x60DDC", "TSG30CMPWE", "0x35960", "0x36902", "0x36A44",
         "0xFEBEAE16", "0xFEBEE8CA", "command-to-current-reference gap",
         "data/motor_actuation_path.csv",
+        "0x37712", "producer cone", "0xB8C1A", "command-disconnected",
     ):
         check(f"report contains {token}", token.lower() in report.lower())
 
+    print("\n== d/q reference producer cone (command-to-current gap) ==")
+    # The d/q current references FEBE6D28/FEBE6D2A are the FOC torque/flux
+    # setpoints the PI loops (0x36902/0x36A44) track. Their sole producer is
+    # dual_motor_dq_current_reference at 0x37712 (entry 0x3770e). The apparent
+    # second writer in autosar_os_task_signal_dispatch (entry 0x58404) at
+    # instruction 0x5ae28 is a buffer clear: it zeroes FEBE6D24..6D2E with r0
+    # then calls the constructor. It is not a copy of conditioned command state.
+    check("dispatch zeroes the d/q block then calls the constructor",
+          codeflash[0x5ae28:0x5ae3c] == bytes.fromhex(
+              "24f624b5"   # movea -0x4adc,gp,ep  -> ep = FEBE6D24
+              "8004"       # sst.h 0x0,ep,r0       -> FEBE6D24 = 0
+              "8104"       # sst.h 0x2,ep,r0       -> FEBE6D26 = 0
+              "8204"       # sst.h 0x4,ep,r0       -> FEBE6D28 = 0  (x-ref WRITE)
+              "8304"       # sst.h 0x6,ep,r0       -> FEBE6D2A = 0
+              "8404"       # sst.h 0x8,ep,r0       -> FEBE6D2C = 0
+              "8504"       # sst.h 0xa,ep,r0       -> FEBE6D2E = 0
+              "bdffd6c8"))  # jarl 0x3770e        -> dual_motor_dq_current_reference
+    check("the dispatch write site calls the constructor, not a command copy",
+          decode_branch(0x5ae38, codeflash)[1] == 0x3770e)
+    # Constructor 0x37712 reads only motor-block inputs. The two GP-relative
+    # halfword loads below resolve to FEBE6D7E and FEBE6D70; later ep-relative
+    # loads read FEBE6D4E/6D50/6D52/6D54. No conditioned-command location
+    # (FEBE7F94/EF184/AE20/BF80/BF84/BF9A/BFA2/AE16) is read anywhere in the
+    # producer cone (0x37712 + 0x3795e + 0x37b5a + 0x37cd4).
+    check("constructor reads motor-block FEBE6D7E, not command state",
+          codeflash[0x37712:0x37716] == bytes.fromhex("24977eb5"))  # ld.h -0x4a82,gp,r18
+    check("constructor reads motor-block FEBE6D70, not command state",
+          codeflash[0x3771a:0x3771e] == bytes.fromhex("249f70b5"))  # ld.h -0x4a90,gp,r19
+
+    # Full negative: scan every gp-relative instruction in the producer cone
+    # and assert none targets a conditioned-command location.  This closes the
+    # gap between the spot-checks above and the doc claim that the cone is
+    # "clean two levels deep" with no command-state access.
+    GP = 0xFEBEB800
+    COMMAND_STATE_LOCS = frozenset({
+        0xFEBE7F94, 0xFEBEF184, 0xFEBEAE20, 0xFEBEBF80,
+        0xFEBEBF84, 0xFEBEBF9A, 0xFEBEBFA2, 0xFEBEAE16,
+    })
+    PRODUCER_CONE_RANGES = [
+        (0x37712, 0x3778A),   # dual_motor_dq_current_reference (120B)
+        (0x3795E, 0x37B56),   # FUN_0003795e (504B)
+        (0x37B5A, 0x37B8E),   # FUN_00037b5a (52B)
+        (0x37CD4, 0x37CFA),   # FUN_00037cd4 (38B)
+    ]
+    cmd_hits: list[str] = []
+    for fstart, fend in PRODUCER_CONE_RANGES:
+        for off in range(fstart + 2, fend, 2):
+            w1 = struct.unpack_from("<H", codeflash, off)[0]
+            w0 = struct.unpack_from("<H", codeflash, off - 2)[0]
+            reg1 = (w0 >> 11) & 0x1F
+            if reg1 != 4:  # not gp-relative
+                continue
+            disp = w1 - 0x10000 if w1 >= 0x8000 else w1
+            target = (GP + disp) & 0xFFFFFFFF
+            if target in COMMAND_STATE_LOCS:
+                cmd_hits.append(f"0x{target:08X} accessed at 0x{off:X}")
+    check("no gp-relative access to conditioned-command state in producer cone",
+          not cmd_hits, "; ".join(cmd_hits))
     print(f"\nSummary: {passed} passed, {failed} failed")
     return 1 if failed else 0
 

@@ -421,6 +421,53 @@ No recovered static data-flow edge joins those endpoints. That exact
 **command-to-current-reference gap** is the strongest defensible static
 actuation boundary for this image.
 
+The gap is now hardened, not merely open. The producer cone of
+`0xFEBE6D28`/`0xFEBE6D2A` is enumerated and motor-internal:
+
+- `dual_motor_dq_current_reference` at `0x37712` (entry `0x3770e`) builds both
+  references from `0xFEBE6D4E`/`0xFEBE6D50`/`0xFEBE6D70`/`0xFEBE6D7E`
+  (summed and saturated) plus `0xFEBE6D52`/`0xFEBE6D54` and calibration
+  `0x1842C`/`0x1842E`. Every input lives in the `0xFEBE6D**` motor block.
+- Those inputs are produced by `0x3795E`, `0x37B5A`, and `0x37CD4`, which
+  reference only `0xFEBE5F**`/`0xFEBE6D**` addresses. No conditioned-command
+  location (`0xFEBE7F94`/`0xFEBEF184`/`0xFEBEAE20`/`0xFEBEBF80`/
+  `0xFEBEBF84`/`0xFEBEBF9A`/`0xFEBEBFA2`/`0xFEBEAE16`) appears anywhere in the
+  producer cone.
+- The apparent second writer, `autosar_os_task_signal_dispatch`
+  (function entry `0x58404`), at instruction `0x5AE28`, is a buffer-clear
+  idiom, not a producer: it sets `ep = 0xFEBE6D24`, stores zero (`r0`) to
+  `0xFEBE6D24..0xFEBE6D2E`, then calls `0x3770e`. It does not copy command
+  state.
+
+This is still a bounded static negative — a table-driven, computed, or
+runtime-only handoff (e.g. an AUTOSAR RTE outer-loop join not visible to the
+static call graph) is not excluded. But the producer cone is now enumerated and
+clean two levels deep, so the gap is materially stronger than "no edge found."
+
+### Torque-limit and plausibility layers are command-disconnected
+
+The SWEEP-004 torque-limit selector `0xB8C1A` (branches on a `0x55AAAA55`
+calibration-profile marker between two table sets) does not gate the
+conditioned `0x2E4` command. It operates on a separate `0xFEBEB5**` region
+populated by the `0xB89CC`/`0xB8A12`/`0xB8B10` cluster, none of which read any
+command-state location; that cluster is the EPS's internal assist-torque path,
+not the external LKA command. The only torque limiting applied to the
+authenticated command itself is inside its own conditioning chain: the
+`0xC853A` clamp (`±0x1BD80`, gain tables `0xD603C`/`0xD607C`) and `0xC85B6`
+rate limit (`0x1BD8E`), already documented in section 8.
+
+The conditioned-command export `0xFEBEAE16` has only snapshot/transport
+consumers: `0xBAFB2` packs it (with ~40 other state fields) into an event
+record handed to `FUN_000FF09C` selector `9` (the `0xAB`/diagnostic snapshot
+worker); `application_input_snapshot_update`; and `0xFD49E`/`0xFD562`
+transport. No recovered reader forwards it into the high-rate motor loop.
+
+Implication for an external signer: a correctly authenticated `0x2E4` frame is
+SecOC-accepted (the receive chain fails closed otherwise) and conditioned, but
+static analysis cannot prove it reaches motor actuation. Correct signing is
+**necessary but not statically provable sufficient** for actuation; that must
+be confirmed dynamically on a bench with a valid key.
+
 ### Evidence grade: recovered; physical register boundary verified
 
 The call order, RAM transitions, transform/controller structure, and compare

@@ -24,10 +24,18 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **Three configured TX signals without recovered runtime producers** (see
   [../communications/application-tx.md](../communications/application-tx.md)).
 - **Authenticated command to d/q current reference.** The high-rate
-  phase-current-control-to-TSG3-PWM chain is recovered, but no static reader
-  joins command-derived `0xFEBEBF84/0xFEBEBF9A/0xFEBEBFA2/0xFEBEAE16` (or
-  snapshot copies) to current references `0xFEBE6D28/0xFEBE6D2A`. Computed,
-  table-driven, or runtime-only transfer remains possible.
+  phase-current-control-to-TSG3-PWM chain is recovered, and the d/q-reference
+  producer cone is now enumerated clean two levels deep: `0x37712` builds
+  `0xFEBE6D28/6D2A` from `0xFEBE6D4E/6D50/6D70/6D7E/6D52/6D54`, whose producers
+  (`0x3795E/0x37B5A/0x37CD4`) reference only `0xFEBE5F**/6D**`. No
+  command-derived location (`0xFEBEBF84/0xFEBEBF9A/0xFEBEBFA2/0xFEBEAE16` or
+  snapshot copies) appears in the cone; the apparent `autosar_os_task_signal_dispatch`
+  (entry `0x58404`) writer at instruction `0x5AE28` is a buffer-clear idiom, not a producer.
+  So no static reader joins the conditioned command to the current references. If the join exists it is
+  purely runtime/computed (AUTOSAR RTE outer-loop or function-pointer dispatch,
+  invisible to the static call graph). Consequently a correctly signed `0x2E4` is
+  SecOC-accepted and conditioned but not statically provable to reach motor
+  actuation — signing is necessary but not statically sufficient; confirm on a bench.
 - **Phase-sample acquisition peripheral names.** Firmware reads six indexed
   result locations in each `0xFEEF81E0` and `0xFEEF8A20` window and clears the
   consumed low halfwords. Their use as upstream phase-current samples is
