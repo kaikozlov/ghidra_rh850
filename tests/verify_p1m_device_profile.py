@@ -15,6 +15,7 @@ WINDOWS = {
     "SFR_ICUS": (0xFFC5D000, 0x1000),
     "SFR_CLKGEN": (0xFFF88000, 0x2000),
     "SFR_FCU": (0xFFD62000, 0x100),
+    "SFR_TSG3": (0xFFE70000, 0x2000),
 }
 
 # Landmarks that must remain labeled for day-to-day analysis.
@@ -34,6 +35,12 @@ REQUIRED = {
     0xFFD24200: ("CFDTMID16", 4),
     0xFFC5D000: ("ICUSCMD", 4),
     0xFFC5D00C: ("ICUSSTS", 4),
+    0xFFE70180: ("TSG30CMPWE", 4),
+    0xFFE70184: ("TSG30CMPVE", 4),
+    0xFFE70188: ("TSG30CMPUE", 4),
+    0xFFE71180: ("TSG31CMPWE", 4),
+    0xFFE71184: ("TSG31CMPVE", 4),
+    0xFFE71188: ("TSG31CMPUE", 4),
 }
 
 passed = 0

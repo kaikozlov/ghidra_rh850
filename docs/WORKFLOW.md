@@ -167,9 +167,9 @@ reproduce the committed statistics.
    added by later subsystem work.
 6. Open the result through the CLI, record statistics, cleanly stop the daemon.
 7. Write `processor_manifest.json` beside the working project and require
-   function/instruction/symbol floors plus the six-block memory map.
+   function/instruction/symbol floors plus the nine-block memory map.
 
-Landmark rebuild stats: **5,865 functions, 178,645 instructions, 37,650
+Landmark rebuild stats: **5,913 functions, 179,048 instructions, 37,755
 symbols** (floors for gates; semantic checks in `make verify-processor`).
 
 ## CI

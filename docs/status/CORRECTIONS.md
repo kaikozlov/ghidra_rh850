@@ -208,3 +208,22 @@ the mistakes are not re-made.
   torque-command handoff without claiming a downstream current/PWM mapping.
 - **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md);
   `tests/verify_control_partition.py`.
+
+### CORR-016 — `0x47C3C` as calibration-transition-only conditioning
+
+- **Wrong:** `0x47C3C` was a `motor_phase_conditioning_calib_handler` reached
+  only when an E2E-protected calibration version changed, so it could not be a
+  runtime actuator function.
+- **Right:** the complete caller graph has both transition dispatcher
+  `0x5CC08` and steady dispatcher `0x5CE0C` beneath TAUJ0 CH0. `0x47C3C`
+  offset/gain-conditions two U/V/W phase-current sample sets every steady
+  high-rate cycle, with saturation and missing-phase reconstruction. Its output
+  reaches rotating-frame feedback, d/q current PI-like loops, inverse
+  transforms, phase-duty staging, and TSG30/31 HT-PWM compare writes.
+- **Boundary:** this correction proves a physical current-control/PWM chain but
+  does not fill the separate data-flow gap from authenticated CAN `0x2E4`
+  command state into the d/q current references.
+- **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md)
+  §"Independent phase-current control to physical PWM boundary";
+  `tests/verify_motor_actuation_boundary.py`,
+  `ghidra/scripts/verify/AssertMotorActuationBoundary.java`.

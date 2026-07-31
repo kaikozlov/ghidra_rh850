@@ -11,11 +11,11 @@ import sys
 #
 # Memory blocks: CodeFlash + DataFlash + LocalRAM + verified SFR windows
 # (SFR_EIC 0x1000 + SFR_RSCFD 0x10000 + SFR_ICUS 0x1000 + SFR_CLKGEN 0x2000
-# + SFR_FCU 0x100). The full peripheral range stays volatile in v850.pspec
+# + SFR_FCU 0x100 + SFR_TSG3 0x2000). The full peripheral range stays volatile in v850.pspec
 # but is not mapped as one block (that made CodeFlash immediates look like
 # valid SFR pointers and collapsed disassembly).
-_MEMORY_SIZE = 0x100000 + 0x8000 + 0x20000 + 0x1000 + 0x10000 + 0x1000 + 0x2000 + 0x100
-_SECTIONS = 8  # CodeFlash, DataFlash, LocalRAM, SFR_EIC, SFR_RSCFD, SFR_ICUS, SFR_CLKGEN, SFR_FCU
+_MEMORY_SIZE = 0x100000 + 0x8000 + 0x20000 + 0x1000 + 0x10000 + 0x1000 + 0x2000 + 0x100 + 0x2000
+_SECTIONS = 9  # CodeFlash, DataFlash, LocalRAM, EIC, RSCFD, ICUS, CLKGEN, FCU, TSG3
 
 EXPECTED_MIN = {
     "functions": 5560,

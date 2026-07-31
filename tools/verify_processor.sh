@@ -78,6 +78,7 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     -postScript AssertSystemRegisterNames.java \
     -postScript AssertProjectInvariants.java "$ROOT/data/checkpoint_payload_map.csv" \
     -postScript AssertApplicationReceiveMap.java "$ROOT/data/application_rx_map.csv" \
+    -postScript AssertMotorActuationBoundary.java \
     -postScript AssertSwitchTables.java \
     -postScript AssertDecompilerInvariants.java "$DECOMPILER_REPORT" \
     -postScript InventoryUsedInstructions.java "$INV_OUT" "$ROOT/data/processor_unimpl_allowlist.txt" \

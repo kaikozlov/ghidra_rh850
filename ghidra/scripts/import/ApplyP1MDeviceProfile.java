@@ -165,6 +165,9 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         // FCU command/protection window (enable key 0xA5), 0xFFD60000/0xFFD61000
         // DataFlash bank control.
         ensureUninitBlock("SFR_FCU", 0xFFD62000L, 0x100L, true, true, false, true);
+        // TSG30/31 motor-control timer windows. The CH0 commit worker at 0x60DDC
+        // writes extended HT-PWM W/V/U compare registers at offsets 0x180/184/188.
+        ensureUninitBlock("SFR_TSG3", 0xFFE70000L, 0x2000L, true, true, false, true);
 
         // Boot code occupies low CodeFlash; application starts at 0x20000.
         // GP/TP are constant within each region after startup.

@@ -8,9 +8,9 @@
 >
 > **Evidence profile:** mixed — claims carry individual grades; see FINDINGS ARCH-004, COM-003 (cyclic partition + TX)
 >
-> **Canonical artifacts:** `data/control_partition.csv`
+> **Canonical artifacts:** `data/control_partition.csv`, `data/motor_actuation_path.csv`
 >
-> **Verification:** `tests/verify_architecture.py`, `tests/verify_control_partition.py`
+> **Verification:** `tests/verify_architecture.py`, `tests/verify_control_partition.py`, `tests/verify_motor_actuation_boundary.py`, `ghidra/scripts/verify/AssertMotorActuationBoundary.java`
 >
 > **Related:** [firmware-architecture](firmware-architecture.md), [application-tx](../communications/application-tx.md)
 
@@ -21,7 +21,7 @@ CAN `0x7F7` special receive callback class and closes the Tx-signal producer
 investigation for signals 9, 37, and 57.
 
 Addresses are CodeFlash virtual addresses unless they begin with `0xFEBE` (local
-RAM) or `0xFFE2`/`0xFFE5` (peripheral MMIO). The application GP base is
+RAM) or `0xFFE2`/`0xFFE5`/`0xFFE7` (peripheral MMIO). The application GP base is
 `0xFEBEB800`. The machine-readable partition table is
 `data/control_partition.csv`; the self-contained verification is in
 `tests/verify_control_partition.py`.
@@ -291,18 +291,144 @@ above are firmware-static evidence.
 ### Boundary
 
 The chain proves authenticated steering-torque-command ingress and bounded
-conditioning. It does **not** yet prove which downstream state becomes phase
-current, PWM duty, or gate-driver output. `0xFEBEBF84/0xFEBEBF9A` are the first
-recovered conditioned torque-command handoff, not a claimed motor-current
-command.
+conditioning. `0xC85B6` also derives `0xFEBEBFA2`; `0xCB700` scales that state
+into application export `0xFEBEAE16`. Snapshot and transport functions copy it
+to `0xFEBEE8CA`, `0xFEBEEB1C`, and `0xFEBEEBA4`.
+
+The expanded reader/writer census does **not** turn any of those locations into
+a motor-current command:
+
+- `0xFEBEBF84` has writes only;
+- `0xFEBEBF9A` is read only by `0xC85B6` as its own prior rate-limit state;
+- `0xFEBEAE16` is read by `0xBAFB2`, `0xBCB3A`, `0xFD49E`, and `0xFD562`, which
+  perform initialization/snapshot/export movement rather than the high-rate
+  current-control computation;
+- the three `0xFEBEE8CA/0xFEBEEB1C/0xFEBEEBA4` destinations have no recovered
+  readers.
+
+The processor audit locks those exact direct-reference sets. Whole-program
+decompiler-text, high-p-code, and GP-displacement/scalar scans were also used to
+look for indirect consumers. They found no recovered path into the proved d/q
+current references at `0xFEBE6D28/0xFEBE6D2A`. This is a bounded static negative,
+not proof that no table-driven, computed, or runtime-only handoff can exist.
 
 ### Evidence grade: recovered
 
 The producer/consumer addresses and arithmetic are deterministically checked by
-`tests/verify_control_partition.py`; the OEM field label is checked separately
-against the pinned external DBC.
+`tests/verify_control_partition.py`; the expanded stopping-boundary census is
+checked by `AssertMotorActuationBoundary.java`; the OEM field label is checked
+separately against the pinned external DBC.
 
-## 9. CAN 0x7F7 special receive callback — `0x7ff86`
+## 9. Independent phase-current control to physical PWM boundary
+
+Reverse-slicing from firmware-used hardware registers establishes a separate,
+high-rate motor-control chain under TAUJ0 CH0:
+
+```text
+indexed peripheral result windows FEEF81E0 / FEEF8A20
+  -> 0x61068 / 0x610A8 -> CH0 sample snapshot 0x6578E
+  -> phase-sample publish 0x4FB02
+  -> dual U/V/W phase-current conditioning 0x47C3C
+  -> dual Clarke/Park-like feedback transform 0x35960
+  -> feedback filtering/combination 0x37FB6 / 0x37644
+  -> d/q current references 0x37712 at FEBE6D28 / FEBE6D2A
+  -> PI-like current loops 0x36902 / 0x36A44
+  -> bounded rotating-frame command preparation 0x36200 / 0x3650C / 0x36742
+  -> inverse rotating-frame transforms 0x38464 / 0x38554
+  -> phase-command limiting and publication 0x35F6C / 0x3601A / 0x3802A / 0x38134 / 0x3875A
+  -> output slot 0 via 0x56B18
+  -> phase-duty slot selection 0x569A8
+  -> TSG3 compare conversion 0x56D3E / 0x60BFA
+  -> staged compare RAM FEBE38A2..FEBE38AE
+  -> TSG3 commit 0x60DDC
+  -> TSG30/31 CMPWE/CMPVE/CMPUE
+```
+
+The machine-readable stage map is `data/motor_actuation_path.csv`.
+
+### Phase feedback and current control
+
+`0x47C3C` was previously mislabeled a calibration-only handler. Its complete
+caller census proves both a version-transition path (`0x5CC08`) and a steady
+path (`0x5CE0C`) beneath the TAUJ0 CH0 worker. It conditions two three-phase
+sample sets at `0xFEBE81E4..0xFEBE81FA`, applying per-phase offset/gain,
+saturation, and missing-phase reconstruction into `0xFEBE7DE6..0xFEBE7DF0`.
+
+`0x35960` applies two three-phase-to-rotating-frame transforms using angle
+coefficient pairs `0xFEBE7CEE/0xFEBE7CF0` and
+`0xFEBE7CFA/0xFEBE7CFC`. Its fixed-point constants `0x3441` and `0x5A82`, the
+three-input structure, and the downstream reference-minus-feedback loops
+support the bounded Clarke/Park classification. `0x37FB6` and `0x37644`
+filter/combine the result into feedback at `0xFEBE6D18/0xFEBE6D1C`.
+
+`0x37712` independently constructs d/q current-reference state at
+`0xFEBE6D28/0xFEBE6D2A`. `0x36902` computes
+`0xFEBE6D2A - 0xFEBE6D1C`; `0x36A44` computes
+`0xFEBE6D28 - 0xFEBE6D18`. Both contain gain selection, accumulated state,
+signed saturation, and calibrated output limits: PI-like current-control
+structure rather than a bare diagnostic comparison. Their outputs pass through
+the bounded command/limit stages and into rotating-frame command pairs at
+`0xFEBE6BE8..0xFEBE6BEE`.
+
+`0x38464` and `0x38554` rotate those two command pairs back into two bounded
+three-phase command triplets. Subsequent common-mode/limit stages publish two
+three-phase banks through arbitration slot 0 and `0x569A8` selects the active
+bank for each motor output.
+
+### TSG3 physical output
+
+The P1M-E User's Manual supplies the hardware names:
+
+- section 25.1.2: `TSG30_base = 0xFFE70000`,
+  `TSG31_base = 0xFFE71000`;
+- sections 25.3.48–50: 32-bit extended HT-PWM W/V/U compare registers at
+  offsets `0x180`, `0x184`, and `0x188`.
+
+| Address | Register | Firmware writer |
+|---:|---|---:|
+| `0xFFE70180` | `TSG30CMPWE` | `0x60DDC` |
+| `0xFFE70184` | `TSG30CMPVE` | `0x60DDC` |
+| `0xFFE70188` | `TSG30CMPUE` | `0x60DDC` |
+| `0xFFE71180` | `TSG31CMPWE` | `0x60DDC` |
+| `0xFFE71184` | `TSG31CMPVE` | `0x60DDC` |
+| `0xFFE71188` | `TSG31CMPUE` | `0x60DDC` |
+
+The manual states that one extended-compare write updates the paired compare
+state used for symmetric triangular HT-PWM generation. The exact store bytes
+at `0x60DFE/0x60E06/0x60E0E` are asserted by
+`tests/verify_motor_actuation_boundary.py`.
+
+Scheduling order matters: `0x656F0` calls `0x60DDC` before dispatching
+`0x5784C`, so each CH0 invocation commits the previously staged compare bank
+and then computes the next current-control/compare state. The result-window
+addresses `0xFEEF81E0/0xFEEF8A20` are firmware-static observations; their exact
+peripheral-module/register names remain unresolved and are not labeled as ADC
+SFRs.
+
+### Command-to-current-reference gap
+
+This chain proves phase feedback, d/q current control, inverse transforms,
+three-phase duty staging, and writes to physical motor-control PWM registers.
+It does **not** prove that authenticated CAN `0x2E4` controls those writes. The
+two proved chains stop at:
+
+```text
+command side:  FEBEBF84 / FEBEBF9A -> FEBEBFA2 -> FEBEAE16 and snapshots
+actuator side: independent d/q current references FEBE6D28 / FEBE6D2A -> PWM
+```
+
+No recovered static data-flow edge joins those endpoints. That exact
+**command-to-current-reference gap** is the strongest defensible static
+actuation boundary for this image.
+
+### Evidence grade: recovered; physical register boundary verified
+
+The call order, RAM transitions, transform/controller structure, and compare
+pipeline are recovered from firmware-static evidence. The six TSG3 register
+addresses and exact stores are verified against deterministic tests and the
+P1M-E manual. The missing command bridge remains bounded.
+
+## 10. CAN 0x7F7 special receive callback — `0x7ff86`
 
 ### Structure
 
@@ -332,7 +458,7 @@ name is invented. CAN `0x7F8` (the single active special-class Tx route per
 `../communications/application-tx.md`) is a separate endpoint and is not claimed to
 be the response pair without further evidence.
 
-## 10. Tx signal producer closure — signals 9, 37, 57
+## 11. Tx signal producer closure — signals 9, 37, 57
 
 The three configured-but-unresolved Tx signals have been checked against their
 respective packer decompilations:
@@ -353,7 +479,7 @@ callback, a different cyclic, or not at all in this calibration. The signals
 remain **configured-unresolved** with packer evidence now recorded in
 `data/application_tx_map.csv`.
 
-## 11. Evidence boundaries
+## 12. Evidence boundaries
 
 Core conclusions — function addresses, call sequences, GP-relative flag
 locations, MMIO register writes, calibration table references, packer signal
@@ -362,8 +488,10 @@ committed Ghidra project.
 
 The following are **not** claimed:
 
-- A downstream mapping from conditioned command state to phase current, duty,
-  PWM compare, or gate-driver output;
+- A static data-flow bridge from conditioned authenticated command state into
+  the independently proved d/q current references or PWM pipeline;
+- Physical inverter switch/gate-driver behavior beyond the TSG3 HT-PWM compare
+  register writes;
 - OEM-level names for the remaining system-mode states or diagnostic checks;
 - Exact full/reduced mode semantics under `0x57ac2`;
 - Motor/PWM ownership for every MMIO region written by `0x6547c`;

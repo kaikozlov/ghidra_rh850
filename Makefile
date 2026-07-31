@@ -31,6 +31,7 @@ VERIFY_SUITES := \
 	tests/verify_scheduler_timing.py \
 	tests/verify_semantic_coverage.py \
 	tests/verify_control_partition.py \
+	tests/verify_motor_actuation_boundary.py \
 	tests/verify_tss3_variant_matrix.py \
 	tests/verify_security_consumers.py \
 	tests/verify_application_ab_service.py \

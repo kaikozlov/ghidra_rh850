@@ -139,18 +139,18 @@ public class AnnotateLargeFunctions extends GhidraScript {
             "peripherals. Called by application_startup_coordinator. Writes 0xCF to " +
             "multiple FFFEEAxx port configuration registers.");
 
-        // ── Hand-written OEM motor control (calibration-change handlers) ──
-        // These run only when the E2E-protected calibration block version transitions,
-        // not every motor-control tick. They recompute conditioning parameters.
+        // ── Hand-written OEM motor control ─────────────────────────────
+        // 0x47C3C has transition and steady CH0 dispatchers; the two following
+        // functions remain calibration-transition handlers.
 
-        renameFunction(0x47C3CL, "motor_phase_conditioning_calib_handler",
-            "Hand-written OEM 3-phase conditioning calibration handler (1632 bytes). " +
+        renameFunction(0x47C3CL, "dual_motor_phase_current_conditioning",
+            "Hand-written OEM dual-motor 3-phase current conditioning step (1632 bytes). " +
             "Contains real fixed-point math: 60 longlong multiplies with saturation " +
             "to 0x7FFF/-0x7FFF, 91 conditional branches, per-phase gain selection. " +
             "Reads 3-phase values from 0xFEBE81E4-0xFEBE81F4, gain table from " +
             "0xFEBE68DE-0xFEBE6900, thresholds from calibration block at CodeFlash " +
-            "0x1875x. Only called when E2E-protected calibration version changes " +
-            "(dispatched via FUN_0005cc08 from TAUJ0 CH0 ISR).");
+            "0x1875x. Reached through transition dispatcher 0x5CC08 and steady " +
+            "dispatcher 0x5CE0C from the TAUJ0 CH0 high-rate path.");
 
         renameFunction(0x32B80L, "motor_coord_transform_calib_handler",
             "Hand-written OEM coordinate-transform/filter calibration handler (1560 bytes). " +

@@ -8,10 +8,16 @@ What to investigate next, in rough priority order. Completed items move to
 
 1. **Resolve the 97 configured-unresolved RX signals.** Bounded but not
    producer-mapped. Canonical: [../communications/application-rx.md](../communications/application-rx.md).
-2. **Motor-control cluster behavioral analysis.** The `0x47C3C/0x32B80/0xB98BC`
-   cluster is structurally mapped only. Relevant to openpilot torque-path
-   understanding. Canonical: [../architecture/firmware-architecture.md](../architecture/firmware-architecture.md).
-3. **Semantic coverage long-tail.** Move `recovered` rows in
+2. **Resolve the command-to-current-reference edge.** The independent d/q
+   current-control-to-TSG3-PWM path is recovered, but authenticated command
+   exports and snapshots have no recovered static consumer in the current
+   reference generator. Focus on computed/table-driven transfer and scheduler
+   handoffs around `0x37712`, not broad arithmetic-function naming. Canonical:
+   [../architecture/control-partition.md](../architecture/control-partition.md).
+3. **Resolve exact phase-sample acquisition SFR names.** The indexed
+   `0xFEEF81E0`/`0xFEEF8A20` result windows feed the current pipeline, but their
+   exact P1M-E module/register identity is bounded.
+4. **Semantic coverage long-tail.** Move `recovered` rows in
    `data/semantic_coverage_ledger.csv` toward behaviorally understood where
    they intersect security, diagnostics, or torque.
 

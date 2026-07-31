@@ -261,19 +261,23 @@ Copy A and B run under the E2E config-management cyclic (`0x57AC2`) inside
 critical sections (interrupt masks `0xFF00`/`0xFFC0`). Copy C runs from both
 the TAUJ0 CH2 ISR and the foreground cyclic.
 
-## 9. Motor control calibration-change handlers
+## 9. Motor-control calibration ingress
 
-Three functions are hand-written OEM motor-control code, but they are
-**calibration-version-change handlers**, not per-tick cyclic runnables. They
-only execute when the E2E-protected calibration block version transitions.
-The actual per-tick fast-loop motor control lives in sibling callees of
-`FUN_000656F0` and `FUN_00065720`.
+Three hand-written OEM motor-control functions sit beneath calibration ingress,
+but the complete caller graph corrects an earlier overgeneralization: only
+`0x32B80` and `0xB98BC` remain calibration-transition-only. `0x47C3C` also has a
+steady TAUJ0 CH0 caller and is part of the per-tick phase-current pipeline.
 
-| Function | Size | Role | Calibration block |
+| Function | Size | Runtime role | Calibration block |
 |---|---:|---|---|
-| `motor_phase_conditioning_calib_handler` (`0x47C3C`) | 1632 B | 3-phase u/v/w conditioning with gain multiplication (60 `longlong` multiplies, 103 saturations) | CodeFlash `0x1875x` |
-| `motor_coord_transform_calib_handler` (`0x32B80`) | 1560 B | 6-channel d/q axis transform + Q15 rescale + low-pass filter | CodeFlash `0x3103x` |
-| `motor_rotor_observer_calib_handler` (`0xB98BC`) | 1040 B | Rotor position/speed observer with atan2/sqrt, interpolation, DTCs | CodeFlash `0x1A12x-0x1A15x` |
+| `dual_motor_phase_current_conditioning` (`0x47C3C`) | 1632 B | Steady and transition CH0 phase-current conditioning with offset/gain multiplication, saturation, and missing-phase reconstruction | CodeFlash `0x1875x` |
+| `motor_coord_transform_calib_handler` (`0x32B80`) | 1560 B | Calibration-transition handler; exact runtime consumer semantics remain bounded | CodeFlash `0x3103x` |
+| `motor_rotor_observer_calib_handler` (`0xB98BC`) | 1040 B | Calibration-transition handler with atan2/sqrt, interpolation, and DTC state | CodeFlash `0x1A12x-0x1A15x` |
+
+The runtime current-control and TSG3 PWM chain is canonical in
+[../architecture/control-partition.md](../architecture/control-partition.md)
+§"Independent phase-current control to physical PWM boundary". CORR-016 records
+the superseded calibration-only classification.
 
 ## 10. Hardware register access helper
 

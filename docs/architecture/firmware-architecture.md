@@ -427,7 +427,7 @@ docs rather than duplicated here:
 | COM deadline monitors | `0x69824`, `0x6AD24`, `0x69DEC`, `0x6A28A` | `../communications/application-rx.md` |
 | RTE staging copies | `0x5C666`, `0x5C0B6`, `0x5B9C4` | `../communications/application-rx.md` |
 | Boot/shutdown/init | `0xBD10E`, `0x57BFE`, `0x61DD4`, `0x7059E` | This doc §7-8 and `../architecture/system-mode-cluster.md` |
-| Motor control (OEM) | `0x47C3C`, `0x32B80`, `0xB98BC` | `../communications/application-rx.md` (calibration handlers) |
+| Motor control (OEM) | `0x47C3C`, `0x35960`, `0x36902`, `0x36A44`, `0x38464`, `0x38554`, `0x3875A`, `0x60BFA`, `0x60DDC`; calibration handlers `0x32B80`, `0xB98BC` | `control-partition.md` (current control and TSG3 PWM); `../communications/application-rx.md` (calibration ingress) |
 | System mode | `0xBA43A`, `0xBEC4C`, `0xCBCC8` | `../architecture/system-mode-cluster.md` |
 | Hardware | `0x1F2`, `0x48312` | This doc §2 and `../communications/application-rx.md` |
 - `../storage/dataflash.md` for persistent storage architecture.

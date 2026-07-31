@@ -23,9 +23,18 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   Bounds are known; exact runtime producers are not statically recovered.
 - **Three configured TX signals without recovered runtime producers** (see
   [../communications/application-tx.md](../communications/application-tx.md)).
-- **Motor-control calibration handlers.** Large OEM motor-control functions
-  (`0x47C3C`, `0x32B80`, `0xB98BC` cluster) are mapped structurally but not
-  behaviorally understood.
+- **Authenticated command to d/q current reference.** The high-rate
+  phase-current-control-to-TSG3-PWM chain is recovered, but no static reader
+  joins command-derived `0xFEBEBF84/0xFEBEBF9A/0xFEBEBFA2/0xFEBEAE16` (or
+  snapshot copies) to current references `0xFEBE6D28/0xFEBE6D2A`. Computed,
+  table-driven, or runtime-only transfer remains possible.
+- **Phase-sample acquisition peripheral names.** Firmware reads six indexed
+  result locations in each `0xFEEF81E0` and `0xFEEF8A20` window and clears the
+  consumed low halfwords. Their use as upstream phase-current samples is
+  recovered; exact P1M-E module/register names remain bounded.
+- **Remaining motor calibration cluster.** `0x47C3C` is behaviorally recovered
+  as the steady phase-current conditioner. The separate `0x32B80` and
+  `0xB98BC` calibration-transition handlers remain only structurally bounded.
 
 ## SecOC
 
@@ -115,7 +124,7 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Tooling
 
-- **Semantic coverage.** 5,865 functions recovered; most remain evidence-grade
+- **Semantic coverage.** 5,913 functions recovered; most remain evidence-grade
   `recovered` rather than behaviorally understood. Closing this is a
   long-tail effort, not a single task.
 - **RFP/P1M-E serial-protocol transfer.** The pinned Renesas host library

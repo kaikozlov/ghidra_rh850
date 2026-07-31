@@ -57,3 +57,12 @@ address,name,size,access,comment
 0xFFD6203C,FCU_CMD_SEQUENCE_2,4,rw,FCU command sequence slot 2 (alternate sequence)
 0xFFD62040,FKEY,4,w,FCU enable key register; write 0xA5 before FCU command sequences
 0xFFD62044,FSTS,1,r,FCU status readback; polled after each command sequence
+# TSG3 motor-control timer extended HT-PWM compare registers. P1M-E manual
+# section 25.1.2 gives bases FFE70000/FFE71000; sections 25.3.48-50 define
+# 32-bit U/V/W extended compare registers at offsets 0x188/0x184/0x180.
+0xFFE70180,TSG30CMPWE,4,rw,TSG30 bit-extended HT-PWM W-phase compare register
+0xFFE70184,TSG30CMPVE,4,rw,TSG30 bit-extended HT-PWM V-phase compare register
+0xFFE70188,TSG30CMPUE,4,rw,TSG30 bit-extended HT-PWM U-phase compare register
+0xFFE71180,TSG31CMPWE,4,rw,TSG31 bit-extended HT-PWM W-phase compare register
+0xFFE71184,TSG31CMPVE,4,rw,TSG31 bit-extended HT-PWM V-phase compare register
+0xFFE71188,TSG31CMPUE,4,rw,TSG31 bit-extended HT-PWM U-phase compare register
