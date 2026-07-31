@@ -293,9 +293,53 @@ Two key derivation paths selected by a version field (`this+4`):
   table at `DAT_100B3AE8` (each entry: 4-byte ecu_id + 2 bytes params + 16-byte key)
 - `response = AES-128-ECB-encrypt(seed, ~conversion_key)`
 
-**Path B (version != 2):** custom DES-like cipher
-- Uses a hardcoded 32-byte table (16 `ushort` values, bitwise-inverted at runtime)
-- `response = DES_like_cipher(~table, seed)` via `FUN_100934B0`
+### 4.5 CalcSeedKey analysis (CUW reflash cipher)
+
+The CUW's `CalcSeedKey` (at `0x45A1B0` in `Cuw.exe`) is a generic cipher
+dispatch function. Decompiled from the Borland Delphi binary via forced
+function creation:
+
+```text
+CalcSeedKey(cipher_obj, key_material, seed, output):
+    copy 64 DWORDs from key_material to local CBytes object
+    copy count and flags from key_material+0x104
+    for i in 0..3:
+        block_ptr = seed + i * 0x10c
+        cipher_obj->vtable[4](cipher_obj, local_obj, block_ptr, temp_output)
+        log(temp_output)
+    copy result to output
+```
+
+The actual cipher is a **virtual dispatch** — it depends on which cipher
+object the caller passes. Key findings from the binary:
+
+| Evidence | Finding |
+|---|---|
+| No AES S-box in `Cuw.exe` | The AES table is not statically linked |
+| `Cuw.exe` imports `CRYPT32.dll` | AES operations likely via Windows CryptoAPI |
+| No hardcoded SA key in `Cuw.exe` | Key material comes from calibration file at runtime |
+| `FUKUMORIYOSIYAMA` not present | CUW does not use the `CommandCommon.dll` AES key |
+| `SEED_KEY_SECRET` (`f05f36b7...`) not present | Firmware secret is not embedded in CUW |
+
+**EMPS V850E PS2** uses a **static password** SA (key bytes `5A 5A 00 00`,
+no seed/key derivation). This is an older EPS generation on V850E, not RH850.
+
+**FOREST/RH850** (`CCanVFORESTFlashWriter`) has no `CollateSeedKey` or
+`CalcSeedKey` in its own methods — it only implements `FlashWrite`,
+`WriteWithErase`, and `VerifyCompData`. SA is handled by its companion
+`PrepareWriter` (separate object in the CUW's two-phase architecture).
+
+The FOREST PrepareWriter presumably calls the generic `CalcSeedKey`
+with an AES cipher object backed by Windows CryptoAPI, using key material
+from `CalibrationFile::GetSeedKey()`. This would match the firmware
+bootloader SA construction (SEC-BOOT-003:
+`expected = AES-ENC(AES-DEC(SEED_KEY_SECRET, data_record), ecu_seed)`).
+
+> **Residual uncertainty.** The virtual dispatch through `vtable[4]` cannot
+> be statically resolved in the Borland binary without full RTTI analysis.
+> The cipher identity (AES-128 vs. custom) is inferred from the CryptoAPI
+> import and the firmware match, not directly confirmed by decompilation.
+> A live capture or calibration file analysis would confirm definitively.
 
 ## 5. Calibration Update Wizard (CUW)
 
