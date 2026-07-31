@@ -213,6 +213,35 @@ public. Random command-8 probing is specifically excluded from the initial bench
 plan because a valid or faulted update may alter counters, flags, or the live
 key irreversibly.
 
+### 1.6 Community extraction toolchain and the RAM-mirror route
+
+The repository pins two working SecOC-key-extraction-by-CAN implementations
+(`external-references.lock.json`: I-CAN-hack/secoc, Bk2ol/tsk_extraction_by_can_log).
+Their authenticated-RAM-exec bootstrap is exactly this image's SEC-BOOT-005/006/007
+gate on the identical `SEED_KEY_SECRET` (`f05f36b7…`, CodeFlash `0xBFE8`,
+`verify_findings.py`) — cross-validated, so the foothold is a solved, reusable
+toolchain across the `8965B4x` family, not something to rebuild (SECOC-024).
+
+Neither tool issues any ICU-S command. Both read a CPU-visible key copy via the
+RAM-exec payload and transmit it over CAN:
+
+- **I-CAN-hack/secoc (Technique A)** dumps a RAM mirror of the SHE key-slot table
+  at `0xFEBE6E34` on `8965B4209/B4233/B4509100`: 704 bytes of 32-byte structs
+  (key@0x0C, checksum@0x1D), KEY_1 (master) at `0xFEBE6E60`, KEY_4 (SecOC) at
+  `0xFEBE6EC0`.
+- **Bk2ol (Technique B)** dumps DataFlash `0xFF1FF000..0xFF209000` and brute-scans
+  for a CMAC-verifying 16-byte window. It is `8965B4514000`-only (its README excludes
+  `8965B4512000`); it depends on the object-15 CPU-visible leak that is absent here.
+
+This confirms §1.3 operationally: no SHE command can exfiltrate slot 4 (SECOC-025 —
+`CMD_EXPORT_RAM_KEY` is `RAM_KEY`-only/plain-only; no non-volatile KEY has an export
+or copy command). Extraction is necessarily a privileged memory read of a CPU-visible
+key copy. For `8965B4512000` the decisive open question is therefore whether this
+firmware maintains a runtime RAM key-slot mirror like the siblings' `0xFEBE6E**`
+table (at a different, GP-relative address) — the static object-15-blank result
+(SECOC-003) says nothing about runtime RAM (SECOC-026). If a mirror exists, extraction
+is a toolchain reuse; otherwise the fallback is a bus-level read or SCA.
+
 ## 2. Ranked recovery methods
 
 | Rank | Method | Expected value | Cost/risk | Current evidence |

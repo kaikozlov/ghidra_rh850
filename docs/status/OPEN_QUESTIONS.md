@@ -57,16 +57,22 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   initialization; record status, output, latency, jitter, and debug-attached
   behavior. See
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md) §1.3.
-- **Command 13 and `RAM_KEY`.** The stock application never issues command 13,
-  but that does not determine direct hardware behavior. Obtain the restricted
-  ICU-S/ICUSE command specification or first characterize it in a constructible,
-  non-persistent bootloader CAN payload: establish behavior with a known
-  caller-loaded `RAM_KEY`, vary selectors including 4 and 14, and record raw
-  status/output. If bootloader lifecycle rejects or differs, repeat through a
-  restorable application-context hook. Test whether any non-destructive
-  operation copies or aliases slot 4 into `RAM_KEY`. The proposed
-  copy-then-export chain is untested, not disproved. See
+- **Command 13 and `RAM_KEY`.** The SHE spec now disproves the slot-4→`RAM_KEY`→export
+  extraction route (SECOC-025): `CMD_EXPORT_RAM_KEY` is `RAM_KEY`-only/plain-only and no
+  non-volatile KEY has an export or copy command (§4.7). So command-13 opcode identity is
+  moot for extraction — no SHE command can pull slot 4. The remaining value of characterizing
+  command 13 is narrow (confirming the opcode table / Renesas deviation) and lower priority
+  than the RAM-mirror check below. See
   [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md).
+- **Runtime RAM key-slot mirror on `8965B4512000`.** Community extraction reads a CPU-visible
+  RAM mirror of the SHE key-slot table (`0xFEBE6E**` on sibling calibrations, 32-byte structs
+  with KEY_1=master/KEY_4=SecOC — SECOC-026). Our `8965B4512000` has no literal CodeFlash ref
+  to that region (different RAM map) and object 15 is blank (SECOC-003), but neither rules out a
+  GP-relative runtime mirror populated by the ICU-S/crypto driver. Trace our ICU-S init
+  (`0x893DE`/`0x893B8`) and crypto driver for a key-slot shadow table, or run the (cross-validated,
+  SECOC-024) RAM-exec payload adapted to dump a wide PE1-RAM window and scan for the
+  struct pattern. If a mirror exists, extraction is a solved-toolchain reuse; if not, fall back to a
+  bus-level read or SCA.
 - **Same-vehicle producer key storage.** Identify the physical producers of the
   protected IDs, beginning with but not assuming the forward camera, then dump
   exact-part peers and validate all 16-byte candidates against synchronized
