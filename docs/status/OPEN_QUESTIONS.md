@@ -204,3 +204,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   independence from the ECU SA seed is established). It does not touch the ECU
   or any of the three firmware secrets. See
   [../tooling/techstream.md](../tooling/techstream.md) §5.3.
+- **VFOREST flash SA vs. SEC-BOOT-003 reconciliation (Layer B).** The CUW EPS
+  flash-writer path uses `CCanCommonFlashWriter::SendNonceAndSeedKey` (TMS-010,
+  §4.6): a two-frame `0x37`/`0x38` exchange carrying a nonce + the cal-file
+  seed-key, with **no tester-side AES** (distinct from the §4.5 PrepareWriter
+  `CalcSeedKey` + Windows-CryptoAPI path). Firmware SEC-BOOT-003 is documented
+  as UDS `27 01/02` two-stage AES with `SEED_KEY_SECRET` @ `0xBFE8`. The two
+  do not obviously describe the same exchange. Resolve on the firmware side:
+  does the bootloader dispatch `0x37`/`0x38` VFOREST frames, and how do they
+  relate to the `0x27` gate? The exact on-wire role of `0x37`/`0x38` (UDS SID
+  vs. envelope field) is `bounded` pending a `ptshim32` live capture. See
+  [../tooling/techstream.md](../tooling/techstream.md) §4.6.

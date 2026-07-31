@@ -161,3 +161,11 @@ paths = ["docs/tooling/techstream.md"]
 # authorization). SKIPs cleanly (exit 0) when the gitignored Techstream/
 # unpacked tree is absent, so it never breaks core verify. Run on a host
 # where Techstream/unpacked/ is populated, or via: make verify-one SUITE=techstream_rks
+
+[suite.techstream_layerb]
+tests = ["tests/verify_techstream_layerb.py"]
+paths = ["docs/tooling/techstream.md"]
+# External-tree suite: verifies TMS-010 (VFOREST flash-writer SA transmission /
+# SendNonceAndSeedKey; no static AES in the CUW reflash toolchain). SKIPs
+# cleanly (exit 0) when the gitignored Techstream/unpacked tree is absent, so
+# it never breaks core verify. Run via: make verify-one SUITE=techstream_layerb
