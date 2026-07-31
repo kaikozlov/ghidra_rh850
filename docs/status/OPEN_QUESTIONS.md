@@ -64,15 +64,15 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   command 13 is narrow (confirming the opcode table / Renesas deviation) and lower priority
   than the RAM-mirror check below. See
   [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md).
-- **Runtime RAM key-slot mirror on `8965B4512000`.** Community extraction reads a CPU-visible
-  RAM mirror of the SHE key-slot table (`0xFEBE6E**` on sibling calibrations, 32-byte structs
-  with KEY_1=master/KEY_4=SecOC — SECOC-026). Our `8965B4512000` has no literal CodeFlash ref
-  to that region (different RAM map) and object 15 is blank (SECOC-003), but neither rules out a
-  GP-relative runtime mirror populated by the ICU-S/crypto driver. Trace our ICU-S init
-  (`0x893DE`/`0x893B8`) and crypto driver for a key-slot shadow table, or run the (cross-validated,
-  SECOC-024) RAM-exec payload adapted to dump a wide PE1-RAM window and scan for the
-  struct pattern. If a mirror exists, extraction is a solved-toolchain reuse; if not, fall back to a
-  bus-level read or SCA.
+- **Runtime RAM key-slot mirror on `8965B4512000` (resolved negative).** Traced and
+  closed (SECOC-027): the ICU-S driver is a selector-based hardware-accelerator
+  interface (key SELECTOR to `0xFFC5D004`, never a key value; register footprint exactly
+  `0xFFC5D000-0xFFC5D0FF`, no key-RAM window), the sibling mirror addresses `0xFEBE6E**`
+  hold motor-signal data here, and per SHE (SECOC-025) the firmware has no command to read
+  a non-volatile slot key to cache. Community Technique A does not transfer. Residual
+  (non-static): a hardware-only key-RAM window not referenced by firmware, or a transient
+  runtime copy, can only be excluded by a wide bench RAM dump — low priority given the
+  selector-based driver and the SHE read-prohibition.
 - **Same-vehicle producer key storage.** Identify the physical producers of the
   protected IDs, beginning with but not assuming the forward camera, then dump
   exact-part peers and validate all 16-byte candidates against synchronized

@@ -242,6 +242,15 @@ table (at a different, GP-relative address) — the static object-15-blank resul
 (SECOC-003) says nothing about runtime RAM (SECOC-026). If a mirror exists, extraction
 is a toolchain reuse; otherwise the fallback is a bus-level read or SCA.
 
+**Resolution for `8965B4512000` (SECOC-027).** Traced: this firmware has no such mirror.
+The ICU-S driver is a selector-based hardware-accelerator interface — the key reaches the
+engine only as a SELECTOR written to `0xFFC5D004`, never as a value; AES blocks move through
+`0xFFC5D008`/`0x090-BC`; driver state at `0xFEBF13**` is callback/command/status only. The
+ICU-S register footprint is exactly `0xFFC5D000-0xFFC5D0FF` with no key-RAM window, and the
+sibling mirror addresses `0xFEBE6E**` hold motor-signal data here (`FUN_000389C0`/`FUN_0003926E`),
+not keys. Combined with the SHE read-prohibition (SECOC-025), the slot-4 key is ICU-S-only on
+this calibration: extraction requires a bus-level/hardware read or SCA, or a weaker peer ECU.
+
 ## 2. Ranked recovery methods
 
 | Rank | Method | Expected value | Cost/risk | Current evidence |
