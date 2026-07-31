@@ -204,14 +204,15 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   independence from the ECU SA seed is established). It does not touch the ECU
   or any of the three firmware secrets. See
   [../tooling/techstream.md](../tooling/techstream.md) §5.3.
-- **VFOREST flash SA vs. SEC-BOOT-003 reconciliation (Layer B).** The CUW EPS
-  flash-writer path uses `CCanCommonFlashWriter::SendNonceAndSeedKey` (TMS-010,
-  §4.6): a two-frame `0x37`/`0x38` exchange carrying a nonce + the cal-file
-  seed-key, with **no tester-side AES** (distinct from the §4.5 PrepareWriter
-  `CalcSeedKey` + Windows-CryptoAPI path). Firmware SEC-BOOT-003 is documented
-  as UDS `27 01/02` two-stage AES with `SEED_KEY_SECRET` @ `0xBFE8`. The two
-  do not obviously describe the same exchange. Resolve on the firmware side:
-  does the bootloader dispatch `0x37`/`0x38` VFOREST frames, and how do they
-  relate to the `0x27` gate? The exact on-wire role of `0x37`/`0x38` (UDS SID
-  vs. envelope field) is `bounded` pending a `ptshim32` live capture. See
+- **VFOREST key-material transfer vs. SEC-BOOT-003 — resolved (TMS-010 /
+  CORR-020).** The CUW's `SendNonce`/`SendSeedKey`/`SendNonceAndSeedKey`
+  (`CCanCommonFlashWriter`) are NOT SecurityAccess — they transfer two
+  16-byte payload-gate keys plus a nonce prefix in sequenced frames whose
+  `0x37`–`0x3c` bytes are a per-frame block sequence at `Data[4]`, not UDS
+  SIDs (`0x39`–`0x3c` are not UDS services). The keys come verbatim from
+  `CalibrationFile::GetSeedKey` and feed the firmware bootloader payload gate
+  (SEC-BOOT-005/006/007), not the SA. There is no `0x27`-vs-`0x37` conflict.
+  Residual (bounded): the exact mapping of the two 16-byte keys to firmware
+  `DID_0x201`/`0x202` (payload-encryption vs. CMAC) needs a `ptshim32` live
+  capture or a `.cuw` calibration file. See
   [../tooling/techstream.md](../tooling/techstream.md) §4.6.

@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Deterministic verification of the Techstream Layer-B / VFOREST flash-SA
-finding (TMS-010).
+"""Deterministic verification of the Techstream Layer-B / VFOREST flash
+key-material transfer finding (TMS-010).
 
-The EPS/VFOREST reflash SA transmission runs through the flash-writer side,
-not the PrepareWriter's CalcSeedKey. Specifically:
+The EPS/VFOREST reflash **key-material transfer** runs through the
+flash-writer side, not the PrepareWriter's CalcSeedKey. Specifically:
 
   * `TCUWCanSecurityVFORESTFlashWriter.dll` IMPORTS
     `CCanCommonFlashWriter::SendNonceAndSeedKey` (delegates; has no
     `CalcSeedKey`/`CollateSeedKey` of its own).
-  * `CCanCommonFlashWriter::SendNonceAndSeedKey` (@0x10001820) builds a
-    two-frame 0x37/0x38 exchange carrying a nonce + the cal-file seed-key,
-    transmitted via CJ2534IF (J2534). Seed-key from
-    `CalibrationFile::GetSeedKey(int)`, verbatim.
+  * `SendNonce`/`SendSeedKey`/`SendNonceAndSeedKey` frame J2534 PASSTHRU_MSG
+    buffers and ship two 16-byte keys + a nonce prefix in sequenced frames
+    (block-seq bytes 0x37..0x3c at Data[4] — NOT UDS SIDs) via CJ2534IF::WriteMsgs.
+    Key bytes come verbatim from `CalibrationFile::GetSeedKey(int)`.
+    This is NOT SecurityAccess; it feeds the firmware payload gate
+    (SEC-BOOT-005/006/007), so there is no 0x27-vs-0x37 conflict.
   * No AES S-box in ANY CUW DLL/EXE (full-tree scan). AES exists only in the
     diagnostic-app DLLs (CommandCommon/UtilityEx2TY/IT3*/DS2Com*, the six of
     TMS-008) and via `Cuw.exe`'s Windows CryptoAPI (the §4.5 CalcSeedKey path).

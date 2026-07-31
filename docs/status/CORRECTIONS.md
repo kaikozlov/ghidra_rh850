@@ -298,3 +298,25 @@ the mistakes are not re-made.
   portal request — not merely "read").
 - **Canonical:**
   [../tooling/techstream.md](../tooling/techstream.md) §5.3; TMS-009.
+
+### CORR-020 — `SendNonceAndSeedKey` misread as a SecurityAccess transmission
+
+- **Wrong:** `docs/tooling/techstream.md` §4.6 / FINDINGS TMS-010 (commit
+  `a2412ae`) characterized `CCanCommonFlashWriter::SendNonceAndSeedKey` as the
+  "EPS/VFOREST SA transmission" building a "two-frame `0x37`/`0x38` exchange,"
+  and flagged a `0x27`-vs-`0x37` reconciliation with SEC-BOOT-003 as open.
+- **Right:** A clean decompile (typed `PASSTHRU_MSG`) shows
+  `SendNonce`/`SendSeedKey`/`SendNonceAndSeedKey` are the VFOREST **flash
+  key-material transfer**, not SA: six sequenced frames (`0x37`→`0x3c`) where
+  the byte is a per-frame block sequence at `Data[4]`, not a UDS SID
+  (`0x39`–`0x3c` are not UDS services at all). Each frame is
+  `[4-byte nonce][1-byte block-seq][6-byte key chunk]` shipped via J2534
+  `WriteMsgs`+`Sleep`+`ReceiveAck`; two 16-byte keys (from
+  `CalibrationFile::GetSeedKey`, verbatim) feed the firmware payload gate
+  (SEC-BOOT-005/006/007), not the SA. There is **no `0x27`-vs-`0x37`
+  conflict**; the reconciliation is resolved.
+- **What stands:** the "no AES S-box in any CUW DLL/EXE; AES only in the
+  diagnostic-app DLLs (TMS-008) + `Cuw.exe` Windows CryptoAPI (§4.5)"
+  sub-claim is unchanged and correct.
+- **Canonical:**
+  [../tooling/techstream.md](../tooling/techstream.md) §4.6; TMS-010.

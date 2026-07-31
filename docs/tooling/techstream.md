@@ -367,55 +367,57 @@ bootloader SA construction (SEC-BOOT-003:
 > import and the firmware match, not directly confirmed by decompilation.
 > A live capture or calibration file analysis would confirm definitively.
 
-### 4.6 SendNonceAndSeedKey — VFOREST flash-writer SA transmission
+### 4.6 SendNonce / SendSeedKey — VFOREST flash-writer key-material transfer
 
-Complementary to §4.5 (the PrepareWriter `CalcSeedKey` dispatch in
-`Cuw.exe`), the **flash-writer side** has its own SA transmission path that
-does not route through `CalcSeedKey`. This was recovered by decompiling the
-native `CCanCommonFlashWriter` methods (Ghidra's auto-analysis missed the
-`.text` cascade in these C++Builder PEs; recovered via forced disassembly +
-capstone at the symbol addresses).
+Decompiling the native `CCanCommonFlashWriter` methods resolves the role of
+the routines the FOREST writer imports. (Ghidra's first auto-analysis missed
+the `.text` cascade in these C++Builder PEs; a fresh import disassembled
+cleanly and yielded typed `PASSTHRU_MSG` locals, and the two called IAT
+entries were resolved: `[0x100050e8]` = `TCUWJ2534DeviceIF.dll!CJ2534IF::WriteMsgs`,
+`[0x10005038]` = `KERNEL32!Sleep`.)
 
-The FOREST/RH850 writer **delegates** rather than overrides:
 `TCUWCanSecurityVFORESTFlashWriter.dll` imports
-`?SendNonceAndSeedKey@CCanCommonFlashWriter@@...` and contains no
-`CalcSeedKey`/`CollateSeedKey` of its own. The EPS SA transmission therefore
-runs through the base `CCanCommonFlashWriter` method.
+`CCanCommonFlashWriter::SendNonceAndSeedKey` (delegates; has no
+`CalcSeedKey`/`CollateSeedKey` of its own). These routines are **not
+SecurityAccess** — they are the VFOREST **flash key-material transfer**:
 
-`CCanCommonFlashWriter::SendNonceAndSeedKey(CBytes const&, CBytes const&,
-byte const*, byte const*, uint)` at file `0x10001820` builds a two-frame
-exchange:
+| Routine | Addr | Transfers | Block-seq bytes |
+|---|---|---|---|
+| `SendNonce` | `0x100014c0` | one 16-byte key (arg3), 3 frames | `0x37, 0x38, 0x39` |
+| `SendSeedKey` | `0x10001670` | one 16-byte key (arg3), 3 frames | `0x3a, 0x3b, 0x3c` |
+| `SendNonceAndSeedKey` | `0x10001820` | two 16-byte keys (arg3 + arg4), 6 frames | `0x37 → 0x3c` |
 
-| Frame | Built from | Transmitted via |
-|---|---|---|
-| 1 | 4 nonce bytes + byte `0x37` + seed-key bytes, length `0x0b` (11) | `CJ2534IF` method (`call [0x100050e8]` → J2534 `WriteMsgs`) |
-| 2 | byte `0x38` + remaining key bytes | same |
+Each frame is a J2534 `PASSTHRU_MSG` (`ProtocolID=1`, `DataSize` 11; the final
+chunk of each key is 9) transmitted via `CJ2534IF::WriteMsgs`, followed by
+`Sleep`, and the sequence ends with `ReceiveAck`. The on-wire `Data[]` layout
+is `[4-byte nonce prefix][1-byte block-seq][6-byte key chunk]` (a 4-byte chunk
+in the final frame of each key).
 
-The seed-key bytes come straight from `CalibrationFile::GetSeedKey(int)` —
-**ferried verbatim, not transformed**. `SendNonce` (`0x100014c0`) and
-`SendSeedKey` (`0x10001670`) are the single-frame variants; `SendNonce` in
-fact issues the same two-frame `0x37`/`0x38` sequence.
+**The `0x37`–`0x3c` bytes are a per-frame block sequence stored at
+`Data[4]`, not UDS service IDs** — they increment monotonically across the
+six frames, and `0x39`–`0x3c` are not UDS services at all. This routine
+therefore does **not** conflict with firmware SEC-BOOT-003 (UDS `27 01/02`):
+it is a different operation entirely. The key material it ferries (from
+`CalibrationFile::GetSeedKey(int)`, verbatim, no transform) is what the
+firmware bootloader **payload gate** consumes — SEC-BOOT-005 `RequestDownload`,
+006 `TransferData` AES-CBC, 007 `RoutineControl 0x10F0` CMAC — i.e. the
+payload-encryption and authentication keys, **not** the SA secret. The SA
+itself (SEC-BOOT-003) is the separate §4.5 PrepareWriter `CalcSeedKey` +
+Windows-CryptoAPI step.
 
-**No AES in this path.** A full tree scan finds the AES forward S-box
-(`63 7c 77 7b f2 6b 6f c5`) in zero CUW DLLs or EXEs; it appears only in the
-*diagnostic* app binaries (`CommandCommon.dll`, `UtilityEx2TY.dll`,
-`IT3UtilityNeoNK.dll`, `IT3ACNK.dll`, `DS2ComNK.dll`, `UtilityExNK2.dll` —
-the six of TMS-008). `Cuw.exe` alone uses Windows CryptoAPI
-(`CryptEncrypt`/`CryptDecrypt`/`CryptImportKey`/`CryptAcquireContextA` from
-`ADVAPI32.DLL`, independently verified) — that is the §4.5 `CalcSeedKey`
-cipher object, not the FlashWriter `SendNonceAndSeedKey` path.
+**No AES in the FlashWriter path.** A full tree scan finds the AES forward
+S-box (`63 7c 77 7b f2 6b 6f c5`) in zero CUW DLLs/EXEs; it appears only in
+the *diagnostic*-app binaries (the six of TMS-008). `Cuw.exe` alone uses
+Windows CryptoAPI (`CryptEncrypt`/`CryptDecrypt`/`CryptImportKey`/
+`CryptAcquireContextA` from `ADVAPI32.DLL`, independently verified) — the
+§4.5 `CalcSeedKey` cipher object. The FlashWriter merely frames and ships key
+bytes; it does no cryptography.
 
-> **Reconciliation open (TMS-010 / OPEN_QUESTIONS).** This flash-writer
-> exchange uses observed service bytes `0x37`/`0x38` carrying a nonce and the
-> cal-file seed-key, with no tester-side AES. Firmware SEC-BOOT-003 is
-> documented as UDS `27 01/02` two-stage AES (`AES-ENC(AES-DEC(SEED_KEY_SECRET,
-> data_record), seed)`, secret `f05f36b7…` @ `0xBFE8`). The two do not
-> obviously describe the same exchange. Whether the bootloader dispatches the
-> `0x37`/`0x38` VFOREST frames (and how they relate to the `0x27` gate and the
-> §4.5 `CalcSeedKey`+CryptoAPI path) must be resolved on the firmware side.
-> The exact on-wire role of the `0x37`/`0x38` bytes (UDS SID vs. envelope
-> field) is `bounded` — confirmed as immediate values stored into the message
-> struct, but the framing semantics need a live capture.
+> **Residual (bounded).** The exact mapping of the two 16-byte keys (arg3,
+> arg4) to firmware `DID_0x201`/`0x202` vs. the payload vs. CMAC keys is a
+> corroboration detail that needs a `ptshim32` capture or a `.cuw`
+> calibration file. The structural finding (key-material transfer, not SA;
+> `0x37`–`0x3c` are block-seq bytes, not SIDs) is `verified` by decompilation.
 
 ## 5. Calibration Update Wizard (CUW)
 
