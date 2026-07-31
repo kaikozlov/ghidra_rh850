@@ -125,8 +125,19 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 ## Tooling
 
 - **Semantic coverage.** 5,913 functions recovered; most remain evidence-grade
-  `recovered` rather than behaviorally understood. Closing this is a
-  long-tail effort, not a single task.
+  `recovered` rather than behaviorally understood. A systematic interest-scored
+  sweep (40 highest-signal functions decompiled, call graphs traced) found no
+  additional subsystems in its sample, bounded the crypto surface to the two
+  known AES consumers of `0x23E28` (SWEEP-001), and confirmed the nine-site
+  `ICUSCMD` store-encoding census (SWEEP-002). These are sample- and
+  pattern-bounded results, not whole-image negatives: the sweep does not
+  exclude ciphers on different tables, stores through other addressing modes,
+  or subsystems in unsampled functions. The sampled functions cluster into
+  seven clear subsystem bands. The highest-value remaining unknown is the
+  motor-control/safety cluster at `0x30000`–`0x4C000` and
+  `0xB0000`–`0xC0000` — the d/q current-reference join and the isolated safety
+  interlocks (`0x43A78`/`0x43716`/`0x438C6`) called via function-pointer tables.
+  Closing this is a long-tail effort, not a single task.
 - **RFP/P1M-E serial-protocol transfer.** The pinned Renesas host library
   substantially exposes the RV40F protocol, but a live R7F701381 signature and
   capability query has not yet shown which commands the P1M-E mask ROM accepts.

@@ -378,6 +378,82 @@ This is the application configuration, distinct from the bootloader's already-do
 
 `../communications/application-tx.md` completes the application transmit side. It proves 11 active CanIf routes, including six COM I-PDUs on CAN IDs `0x260`, `0x262`, `0x351`, `0x394`, `0x4A3`, and `0x4C8`. Those six I-PDUs contain 58 generated COM signal IDs with exact wire fields, RAM sources where statically recoverable, cyclic counts, and the channel-1 confirmation path. Unsupported OEM field names and three configured signals without recovered runtime producers remain explicitly unresolved.
 
+## 5.5 Foreground system-mode dispatch
+
+`application_foreground_system_mode_dispatch` (already named in the annotated
+project) is the function that fans the foreground tick into parallel subsystem
+pipelines. Its structure was recovered during a systematic sweep of the 5,317
+evidence-grade `recovered` functions (see OPEN_QUESTIONS §"Semantic coverage").
+
+The function gates on an E2E-protected version counter: it reads a 16-bit value
+at `GP - 0x2C46` and checks it against the bitwise complement of the stored
+counter at `GP - 0xB0F`. If the counter has advanced (`uVar2 != uVar1`), it
+calls a thunk (`thunk_FUN_000b0974`) to read the new mode, then dispatches the
+**full-mode path** through four callees in sequence:
+
+```
+application_foreground_system_mode_dispatch
+  ├─ autosar_com_rx_dispatch_group_a   (mode_byte, new_mode, old_mode)
+  ├─ FUN_000fdd40 → 0xBEC4C             (system-mode full dispatcher)
+  ├─ FUN_0005e3c6                       (TX task dispatcher: packs CAN 260/262/394/4A3/351/4C8)
+  └─ [fall-through to tail]
+```
+
+If the counter has **not** advanced (steady-state), it dispatches the
+**reduced-mode path** through three callees:
+
+```
+  ├─ FUN_0005e572   (788B, 136 callees — foreground task dispatcher;
+  │                  calls application_unpack_can_2e4 and ~100 signal processors)
+  ├─ FUN_000fdd54 → 0xBF17E  (system-mode fast dispatcher)
+  └─ FUN_0005e886  (178B, 28 callees — reduced TX dispatcher)
+```
+
+Both paths call `application_rx_signal_consumer_56fc2` as a downstream consumer
+(also reached from `autosar_com_rx_dispatch_group_a` and `autosar_os_task_signal_dispatch`).
+
+The mode byte (`bVar11`) is derived from a rolling counter at `GP - 0x2C37`
+using `~old & (old + 2) & 0x3E | 1` — a monotonic transition marker. The E2E
+version counter and its complement are written atomically on each mode change.
+
+**Evidence grade: `recovered`** — the dispatch structure, E2E gate, and
+pipeline fan-out are decompilation-derived; the E2E counter semantics
+(threshold, fault behavior) are not fully bounded.
+
+### Sweep findings
+
+A systematic interest-scored sweep decompiled the 40 highest-signal `recovered`
+functions and traced call graphs for major hubs. Key results:
+
+- **Crypto surface bounded to known tables.** The AES S-box at `0x23E28` has
+  exactly two consumers: `FUN_000865D4` (the application SA key schedule) and
+  `app_aes128_encrypt_round` (the application AES-128 encrypt round function,
+  called from `0x852B0`). This x-ref census is exhaustive only for code using
+  these known tables; a cipher built on different tables would not be visible
+  to it.
+- **No hidden ICU-S writers via the direct store encoding.** The byte-pattern
+  census of the `ICUSCMD` store encoding (`80 07 0F 08 A0 8B`) finds exactly
+  nine writer sites in the image — exhaustive for that encoding. Ghidra's
+  static x-ref analysis recovers seven of them (all except two sites it fails
+  to disassemble: `0x89A8A` and `0x89BB0`). A store through a different
+  addressing mode would not match this census. Matches SECOC-015.
+- **No obfuscated control flow or self-modifying code observed in the
+  40-function sample.** The rest of the image is not covered by this check.
+- **`0x865D4`** (1022B) is a hand-rolled AES-128 key schedule + block cipher
+  (S-box `0x23E28`, round constants `0x23615`–`0x2361E`). Called from the SA
+  send_key path (`0x86A84 → 0x8C7BC/0x8C7F6`). This is the internal
+  implementation of SEC-APP-001, previously known only by its external
+  behavior.
+- **`0x55AAAA55` calibration variant selector** at `FUN_000B8C1A`: a motor
+  torque limit mapper branches on this marker, selecting between two
+  calibration table sets. Same pattern family as the boot validity markers
+  (`0x5AA5A55A`), suggesting a config-profile system.
+- **Three isolated safety interlocks** (`0x43A78`, `0x43716`, `0x438C6`): fully
+  isolated functions (no static callers, no callees) that check sensor validity
+  and speed thresholds. `0x43A78` returns `0x22` (pass) or `0x33`/`0x11` (fail);
+  the other two follow the same pattern. Likely called via function pointer
+  tables (AUTOSAR RTE pattern).
+
 ## 6. Evidence boundaries
 
 The following are checked directly from the committed CodeFlash image:
