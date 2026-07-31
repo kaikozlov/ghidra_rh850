@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+#
+# tools/pe — ghidra CLI wrapper for x86 PE analysis (Techstream DLLs, etc.)
+#
+# Like tools/g but for arbitrary PE binaries. Uses a separate project under
+# build/pe-project/ so it never touches the committed RH850 snapshot.
+#
+# Usage:
+#   tools/pe import <path/to/file.dll>
+#   tools/pe analyze
+#   tools/pe decompile 0x10001234
+#   tools/pe strings --search SecurityAccess
+#   tools/pe stop
+#
+# Environment:
+#   GHIDRA_AGENT=1   Force compact JSON output.
+#   PE_PROJECT       Override project name (default: pe_dlls)
+#   PE_PROGRAM       Override program name (default: CommandCommon.dll)
+
+set -euo pipefail
+
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+PROJECT_NAME="${PE_PROJECT:-pe_dlls}"
+PROGRAM_NAME="${PE_PROGRAM:-CommandCommon.dll}"
+PROJECT_DIR="$ROOT/build/pe-project"
+mkdir -p "$PROJECT_DIR"
+
+VENDOR_SRC="$ROOT/ghidra/ghidra-cli/src"
+VENDOR_BIN="$ROOT/build/ghidra-cli/ghidra"
+
+if [[ ! -x "$VENDOR_BIN" ]]; then
+  if [[ -x "$ROOT/tools/build_ghidra_cli.sh" ]] && command -v cargo >/dev/null 2>&1; then
+    echo "Vendored ghidra CLI not found — rebuilding..." >&2
+    "$ROOT/tools/build_ghidra_cli.sh" >&2
+  else
+    echo "ghidra CLI not found. Run 'make ghidra-cli'." >&2
+    exit 1
+  fi
+fi
+
+GHIDRA_CLI="$VENDOR_BIN"
+
+CLI_ARGS=(
+  --projects-dir "$PROJECT_DIR"
+  --project "$PROJECT_NAME"
+  --program "$PROGRAM_NAME"
+)
+
+if [[ "${GHIDRA_AGENT:-}" == "1" ]]; then
+  CLI_ARGS+=(--json)
+fi
+
+exec "$GHIDRA_CLI" "${CLI_ARGS[@]}" "$@"

@@ -189,9 +189,11 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   data) are not decoded. Full parsing would extract the complete ECU-specific
   diagnostic vocabulary that Techstream applies at runtime. See
   [../tooling/techstream.md](../tooling/techstream.md) §7.
-- **`CSecurityAccessAES128` key source.** The AES-128 SA class (TMS-003)
-  corroborates our firmware SA construction, but the shared secret it uses is
-  not visible in the DLL binary — it is loaded at runtime from the ECU
-  definition or calibration data. Determine whether the key material travels
-  with the `.ddb` files, the calibration files, or is fetched from Toyota's
-  `ReprogrammingSecurity` portal for EPS-specific operations.
+- **`CSecurityAccessAES128` key mismatch.** The hardcoded key in
+  `CSecurityAccessAES128` is ASCII `FUKUMORIYOSIYAMA`, not the firmware
+  bootloader secret (`f05f36b7...`) or the application secret at `0x20840`.
+  Determine which path Techstream uses for the Sienna EPS specifically: the
+  `CSecurityAccessAES128` class (used by ADS/PCS), the CUW's
+  `CalcSeedKey`/`GetSeedKey` (which reads from the calibration file), or the
+  legacy `CSecurityAccess` Feistel cipher. A live capture via `ptshim32.dll`
+  (TMS-005) with a known seed is the fastest way to resolve this.

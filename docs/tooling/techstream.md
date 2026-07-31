@@ -130,60 +130,121 @@ during analysis.
 The obfuscation was identified by matching encoded byte `0xF2` to plaintext
 `\r` (0x0D), confirming `0xFF − 0x0D = 0xF2`.
 
-## 4. SecurityAccess implementations
+## 4. SecurityAccess implementations (decompiled)
 
-`CommandCommon.dll` (source: `SecurityAccess*.cpp` from the KGProject tree)
-contains four independent SA implementations:
+`CommandCommon.dll` contains four independent SA implementations. All were
+decompiled with the vendored Ghidra CLI against the imported PE (project
+`pe_dlls` in `build/pe-project/`). The full algorithms follow.
 
-### 4.1 CSecurityAccess (legacy)
+### 4.1 CSecurityAccessAES128 (TSS 3.0) — ★ matches firmware SA
 
-The base class for non-security ECUs. Key methods:
+**Algorithm:** `key_response = AES-128-ECB-encrypt(seed, KEY)`
 
-| Method | C++ symbol | Role |
+| Step | Function | Address |
 |---|---|---|
-| `GetSeedData` | `?GetKey@CSecurityAccess@@IAEKKGPAV?$CCmdList@@PAE@Z` | Request seed (UDS `27 01`) |
-| `GetKey` | `?GetKey@CSecurityAccess@@IAEKKGPAV...PAE@Z` | Compute key from seed |
-| `Encrypt` | `?Encrypt@CSecurityAccess@@IAEXPAK0@Z` | Key derivation transform |
-| `F` | `?F@CSecurityAccess@@IAEKK@Z` | Internal round function |
-| `SndKeyData` | (inlined into `GetKey`) | Send key (UDS `27 02`) |
-| `SetCommonKey` | `?SetCommonKey@CSecurityAccess@@IAEKKG@Z` | Load the shared secret |
+| 1. Request seed | `GetSeedData` (`0x10090E30`) → extracts 16 bytes from UDS response (frame ID `0x109`) | |
+| 2. Check seed non-zero | All 16 seed bytes must not be `0x00` | |
+| 3. Derive key | `~local_50` → inverts the hardcoded obfuscated key bytes | |
+| 4. AES encrypt | `FUN_100914B0` (key schedule `0x10091580`, block cipher `0x100918D0`) | |
+| 5. Send key | `SndKeyData` (`0x10091180`) → sends 16-byte response (frame ID `0x10A`) | |
 
-Uses a custom (non-AES) transform with internal `Encrypt` and `F` round
-functions. Applied to older Denso ECUs.
+The SA subfunctions are `27 03` (request seed) / `27 04` (send key) — SA
+level 2 in UDS numbering, matching SEC-APP-001.
 
-### 4.2 CSecurityAccessAES128 (TSS 3.0 family)
+**Hardcoded key** (stored bitwise-inverted in the binary at `0x10090C40`):
 
-**This is the implementation that matches our firmware findings.** Key methods:
+```text
+Obfuscated bytes:  B9 AA B4 AA B2 B0 AD B6 A6 B0 AC B6 A6 BE B2 BE
+Inverted (~):       46 55 4B 55 4D 4F 52 49 59 4F 53 49 59 41 4D 41
+ASCII:              F U K U M O R I Y O S I Y A M A
+```
 
-| Method | C++ symbol | Role |
+The AES S-box is at `DAT_100B3B7C` (standard FIPS-197 S-box). The cipher is a
+standard AES-128 block encryption: key expansion → AddRoundKey → 9×
+(SubBytes/ShiftRows/MixColumns/AddRoundKey) → final round
+(SubBytes/ShiftRows/AddRoundKey).
+
+> **Important discrepancy.** This Techstream key `FUKUMORIYOSIYAMA` is NOT the
+> same as the firmware bootloader secret `SEED_KEY_SECRET` at CodeFlash `0xBFE8`
+> (`f05f36b7...`) or the application secret at `0x20840`. The firmware SA
+> construction (SEC-BOOT-003) is a two-stage AES:
+> `expected = AES-ENC(AES-DEC(SEED_KEY_SECRET, data_record), ecu_seed)`.
+> Techstream's AES128 class does a single-stage:
+> `response = AES-ENC(KEY="FUKUMORIYOSIYAMA", seed)`.
+>
+> This means either (a) Techstream V18.00.008 targets a different ECU
+> generation or calibration than the `8965B4512000` Sienna, or (b) the
+> `CSecurityAccessAES128` class is used for a subset of ECUs (ADS/PCS) and a
+> different path handles the EPS specifically. The CUW's `CalcSeedKey` (§5.1)
+> may use the calibration-file-provided key rather than this hardcoded one.
+> Resolving this requires a live capture or matching against a known seed/key
+> pair from the Sienna EPS.
+
+### 4.2 CSecurityAccess (base / legacy) — custom Feistel cipher
+
+**Algorithm:** 16-round Feistel network with S-box round function
+
+| Step | Function | Address |
 |---|---|---|
-| `GetSeedData` | `?GetSeedData@CSecurityAccessAES128@@IAEK...` | Request seed (UDS `27 01`) |
-| `AES_128_ECB` | `?AES_128_ECB@CSecurityAccessAES128@@QAEKPAE00@Z` | Single-block AES-128-ECB |
-| `SndKeyData` | `?SndKeyData@CSecurityAccessAES128@@IAEK...` | Send computed key (UDS `27 02`) |
-| `CancelSecurity` | `?CancelSecurity@CSecurityAccessAES128@@QAEK...PAVCCommCachePlusP5@@K@Z` | SA teardown |
+| 1. Request seed | Uses `CommCacheSndRcv` with frame ID `0xEB`/`0xED` (level 3/0x14) | |
+| 2. Load ECU keys | `SetCommonKey(ecu_id, level)` (`0x1008EE30`) | |
+| 3. Encrypt seed | `Encrypt` (`0x1008F020`) — 16-round Feistel | |
+| 4. Send key | `CommCacheSndRcv` with frame ID `0xEC`/`0xEE` | |
 
-This class uses AES-128-ECB for the seed/key derivation, matching the
-construction recovered from both bootloader firmware (SEC-BOOT-003:
-`expected = AES-ENC(AES-DEC(SEED_KEY_SECRET, data_record), ecu_seed)`) and
-application firmware (SEC-APP-001: 16-byte secret at CodeFlash `0x20840`).
+The seed is 8 bytes (two 32-bit big-endian words). The Feistel round function
+`F(x)` at `0x1008F080`:
 
-Techstream must compute the same key the firmware expects, which means the
-AES-128 secret is either embedded in the calibration/ECU-definition data or
-fetched from Toyota's online portal. The `CSecurityAccessAES128` class is used
-by ADS (advanced driving) and PCS (pre-collision system) operations — the TSS
-3.0 family that includes the Sienna EPS.
+```text
+F(x) = (S[x >> 24] + S[(x >> 16) & 0xFF] ^ S[(x >> 8) & 0xFF]) + S[x & 0xFF]
+```
 
-### 4.3 CSecurityAccessCGW_DK
+where `S` is a 256-entry (×4-byte) lookup table loaded per ECU. The cipher:
 
-Central Gateway variant using Denso/KW protocol. Has its own
-`StartDiagSession`, `EndDiagSession`, `GetCurrentLevel`, `ConnectChk`, and
-`CancelSecurityMain_DK` methods. Not directly relevant to the EPS.
+```text
+for round in 0..15:
+    temp = hi ^ round_key[round]
+    f    = F(temp)
+    hi   = f ^ lo
+    lo   = temp
+response_hi = whitening_key[0] ^ lo
+response_lo = whitening_key[1] ^ hi
+```
 
-### 4.4 CSecurityAccessSUBARU
+`SetCommonKey` selects from 7 ECU-specific key sets by `ecu_id` (`0x353`–`0x359`)
+and `level` (`3` or `0x14`). Each set has 18 DWORDs (round keys + whitening)
+plus 256 DWORDs (S-box table), loaded from `DAT_100B1CE8` through
+`DAT_100B3AE0`.
 
-Separate implementation for Subaru-shared platform vehicles. Has `GenerateKey`,
-`GetConversionKey`, `ChangeKeyData`, `ChangeSeedData`, and DES-based
-derivation (`CalcSeedKeyForDES`). Not relevant to Toyota EPS.
+### 4.3 CSecurityAccessCGW_DK — Central Gateway AES-128
+
+**Algorithm:** `key_response = AES-128-ECB-encrypt(seed, KEY)` with session
+management wrapper.
+
+Uses its own AES code copy (S-box at `DAT_100B0760` — also standard FIPS-197)
+and a separate hardcoded key:
+
+```text
+Obfuscated:  A9 DD 1B 66 C7 89 21 B0 EA 0D 1E 99 18 32 DB 39
+Inverted:    56 22 E4 99 38 76 DE 4F 15 F2 E1 66 E7 CD 24 C6
+```
+
+The wrapper (`CancelSecurity` at `0x10091FB0`) adds:
+- `EndDiagSession` → `StartDiagSession` session cycling before SA
+- 3 retry attempts with 10-second sleep between
+- 2 key-send attempts per seed
+
+### 4.4 CSecurityAccessSUBARU — dual-path (AES or custom)
+
+Two key derivation paths selected by a version field (`this+4`):
+
+**Path A (version == 2):** AES-128-ECB
+- `GetConversionKey(ecu_id, b, c)` → looks up a 16-byte key from a 6-entry
+  table at `DAT_100B3AE8` (each entry: 4-byte ecu_id + 2 bytes params + 16-byte key)
+- `response = AES-128-ECB-encrypt(seed, ~conversion_key)`
+
+**Path B (version != 2):** custom DES-like cipher
+- Uses a hardcoded 32-byte table (16 `ushort` values, bitwise-inverted at runtime)
+- `response = DES_like_cipher(~table, seed)` via `FUN_100934B0`
 
 ## 5. Calibration Update Wizard (CUW)
 
