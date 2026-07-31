@@ -57,6 +57,9 @@ libc = "0.2"
 regex = "1.10"
 lazy_static = "1.4"
 
+# Shell-style word splitting for batch command parsing
+shlex = "1.3"
+
 # CSV/TSV
 csv = "1.3"
 

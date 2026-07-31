@@ -39,7 +39,7 @@ VERIFY_SUITES := \
 	tests/verify_renesas_rfp.py \
 	tests/verify_doc_links.py
 
-.PHONY: sync verify verify-core verify-external verify-rfp verify-sleigh verify-processor verify-ghidra \
+.PHONY: sync verify verify-core verify-one verify-changed verify-agent verify-external verify-rfp verify-sleigh verify-processor verify-ghidra \
 	ghidra-cli \
 	generate-dataflash generate-application-diagnostics \
 	generate-application-receive-evidence generate-application-receive \
@@ -61,6 +61,17 @@ verify-core:
 		$(PYTHON) "$$suite"; \
 		echo; \
 	done
+
+# Fast verification targets (see verification.toml for ownership map).
+verify-one:
+	@if [ -z "$(SUITE)" ]; then echo "Usage: make verify-one SUITE=<name>" >&2; exit 2; fi
+	$(PYTHON) tools/fast_verify.py --suite "$(SUITE)"
+
+verify-changed:
+	$(PYTHON) tools/fast_verify.py --changed
+
+verify-agent:
+	$(PYTHON) tools/fast_verify.py --agent
 
 verify-external:
 	$(PYTHON) tests/verify_external_corroboration.py --repos-dir "$(EXTERNAL_REPOS_DIR)"

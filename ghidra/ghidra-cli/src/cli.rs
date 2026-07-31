@@ -170,6 +170,9 @@ pub enum Commands {
         /// Project path
         #[arg(long)]
         project: Option<String>,
+        /// Save the program before stopping the bridge
+        #[arg(long)]
+        save: bool,
     },
 
     /// Restart the bridge
@@ -220,6 +223,39 @@ pub enum Commands {
     /// Rename a symbol (shortcut for `symbol rename`)
     #[command(alias = "mv")]
     Rename(RenameArgs),
+
+    /// Compound inspection of a function (decompile + xrefs + callers + callees + disasm + metadata)
+    Inspect(InspectArgs),
+}
+
+#[derive(Args, Clone, Serialize, Deserialize, Debug)]
+pub struct InspectArgs {
+    // target: name | 0xaddr | FUN_<hex> (same pattern as DecompileArgs)
+    #[arg(value_name = "TARGET", required_unless_present = "target")]
+    pub positional_target: Option<String>,
+    #[arg(long = "target", value_name = "TARGET")]
+    pub target: Option<String>,
+    #[arg(long)]
+    pub decompile: bool,
+    #[arg(long)]
+    pub callers: bool,
+    #[arg(long)]
+    pub callees: bool,
+    #[arg(long)]
+    pub xrefs: bool, // includes both xrefs_to and xrefs_from
+    #[arg(long)]
+    pub disasm: Option<usize>, // number of instructions (None = skip)
+    #[command(flatten)]
+    pub options: QueryOptions,
+}
+
+impl InspectArgs {
+    pub fn resolved_target(&self) -> &str {
+        self.target
+            .as_deref()
+            .or(self.positional_target.as_deref())
+            .expect("clap should ensure target is provided")
+    }
 }
 
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]
@@ -303,10 +339,23 @@ pub enum ProgramCommands {
     Info(ProgramTargetArgs),
     /// Export program
     Export(ExportArgs),
+    /// Save the current program durably (explicit persistence boundary)
+    Save(ProgramSaveArgs),
 }
 
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]
 pub struct ProgramTargetArgs {
+    #[arg(long)]
+    pub program: Option<String>,
+    #[arg(long)]
+    pub project: Option<String>,
+}
+
+#[derive(Args, Clone, Serialize, Deserialize, Debug)]
+pub struct ProgramSaveArgs {
+    /// Commit message for the save (recorded in the program's change history)
+    #[arg(long)]
+    pub message: Option<String>,
     #[arg(long)]
     pub program: Option<String>,
     #[arg(long)]
@@ -1069,6 +1118,8 @@ pub struct PatchExportArgs {
 pub enum ScriptCommands {
     /// Run a script file
     Run(ScriptRunArgs),
+    /// Compile a Java script without executing it (checks for errors)
+    Check(ScriptCheckArgs),
     /// Execute inline Python code
     Python(ScriptInlineArgs),
     /// Execute inline Java code
@@ -1091,9 +1142,22 @@ pub struct ScriptRunArgs {
     /// Allow an expected artifact to exist but be empty.
     #[arg(long)]
     pub allow_empty: bool,
+    /// Save the program after the script completes successfully.
+    #[arg(long)]
+    pub save: bool,
     /// Script arguments (after --)
     #[arg(last = true)]
     pub args: Vec<String>,
+}
+
+#[derive(Args, Clone, Serialize, Deserialize, Debug)]
+pub struct ScriptCheckArgs {
+    /// Script file to compile (without executing)
+    pub script_path: String,
+    #[arg(long)]
+    pub program: Option<String>,
+    #[arg(long)]
+    pub project: Option<String>,
 }
 
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]
@@ -1114,6 +1178,12 @@ pub struct BatchArgs {
 
     #[arg(long)]
     pub program: Option<String>,
+
+    /// Continue running remaining commands after a failure instead of
+    /// stopping at the first error. By default the batch stops on the
+    /// first error and exits non-zero.
+    #[arg(long)]
+    pub continue_on_error: bool,
 }
 
 #[derive(Subcommand, Clone, Serialize, Deserialize, Debug)]

@@ -11,7 +11,7 @@ use anyhow::Result;
 use serde_json::json;
 use tracing::debug;
 
-use super::protocol::{BridgeRequest, BridgeResponse};
+use super::protocol::{BridgeRequest, BridgeResponse, CommandError};
 
 /// Default socket read timeout for short, interactive commands, in seconds.
 ///
@@ -227,10 +227,12 @@ impl BridgeClient {
         match response.status.as_str() {
             "success" => Ok(response.data.unwrap_or(json!({}))),
             "error" => {
-                let msg = response
-                    .message
-                    .unwrap_or_else(|| "Unknown error".to_string());
-                anyhow::bail!("{}", msg)
+                // Normalize the error into a CommandError, preserving any
+                // structured fields (code/diagnostics) from the new bridge
+                // format while remaining compatible with the legacy
+                // {message:"..."} format. The error is returned via anyhow
+                // but callers can downcast to CommandError for JSON rendering.
+                Err(CommandError::from_response(&response).into())
             }
             "shutdown" => Ok(json!({"status": "shutdown"})),
             _ => Ok(response.data.unwrap_or(json!({}))),
@@ -598,8 +600,18 @@ impl BridgeClient {
     pub fn program_export(&self, format: &str, output: Option<&str>) -> Result<serde_json::Value> {
         self.send_command(
             "program_export",
-            Some(json!({"format": format, "output": output})),
+            Some(json!({ "format": format, "output": output })),
         )
+    }
+
+    /// Save the current program durably.
+    pub fn program_save(&self, message: Option<&str>) -> Result<serde_json::Value> {
+        self.send_command("program_save", Some(json!({ "message": message })))
+    }
+
+    /// Compile a Java script without executing it.
+    pub fn script_check(&self, script_path: &str) -> Result<serde_json::Value> {
+        self.send_command("script_check", Some(json!({ "path": script_path })))
     }
 }
 

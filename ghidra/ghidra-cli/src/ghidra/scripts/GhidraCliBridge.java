@@ -663,6 +663,15 @@ public class GhidraCliBridge extends GhidraScript {
                 return new HandleResult(errorResponse("Unknown command: " + command), false);
             }
 
+            // A handler may return a pre-formed structured error response (see
+            // errorResponse(code, message, diagnostics)) by storing it under the
+            // "error_struct" key. Pass it through as the wire response directly
+            // so the structured {status,error:{code,message,diagnostics}} shape
+            // is preserved instead of being flattened to a string.
+            if (result.has("error_struct")) {
+                return new HandleResult(result.getAsJsonObject("error_struct"), false);
+            }
+
             if (result.has("error")) {
                 return new HandleResult(errorResponse(result.get("error").getAsString()), false);
             }
@@ -697,6 +706,7 @@ public class GhidraCliBridge extends GhidraScript {
             case "program_close":   return handleProgramClose();
             case "program_delete":  return handleProgramDelete(args);
             case "program_export":  return handleProgramExport(args);
+            case "program_save":    return handleProgramSave(args);
             // Find commands
             case "find_string":     return handleFindString(args);
             case "find_bytes":      return handleFindBytes(args);
@@ -748,6 +758,7 @@ public class GhidraCliBridge extends GhidraScript {
             case "stats":           return handleStats();
             // Script commands
             case "script_run":      return handleScriptRun(args);
+            case "script_check":    return handleScriptCheck(args);
             case "script_java":     return handleScriptJava(args);
             case "script_python":   return handleScriptPython(args);
             case "script_list":     return handleScriptList();
@@ -772,6 +783,29 @@ public class GhidraCliBridge extends GhidraScript {
         JsonObject resp = new JsonObject();
         resp.addProperty("status", "error");
         resp.addProperty("message", message);
+        return resp;
+    }
+
+    /**
+     * Structured error response with a stable machine-readable {@code code}
+     * and optional {@code diagnostics} payload (e.g. compiler output).
+     * Produces:
+     * <pre>
+     * {"status":"error","error":{"code":"...","message":"...","diagnostics":"..."}}
+     * </pre>
+     * The single-arg {@link #errorResponse(String)} is retained for backward
+     * compatibility; handlers migrate gradually.
+     */
+    private JsonObject errorResponse(String code, String message, String diagnostics) {
+        JsonObject resp = new JsonObject();
+        resp.addProperty("status", "error");
+        JsonObject err = new JsonObject();
+        if (code != null) err.addProperty("code", code);
+        err.addProperty("message", message);
+        if (diagnostics != null && !diagnostics.isEmpty()) {
+            err.addProperty("diagnostics", diagnostics);
+        }
+        resp.add("error", err);
         return resp;
     }
 
@@ -917,8 +951,53 @@ public class GhidraCliBridge extends GhidraScript {
         JsonObject result = new JsonObject();
         result.addProperty("protocol_version", 2);
         result.addProperty("uptime_ms", System.currentTimeMillis() - startTime);
+        addProgramStatus(result);
         addQueueSummary(result, true);
         return result;
+    }
+
+    /**
+     * Enrich a status/info object with current-program fields: program name,
+     * dirty flag, last-modified time from the backing DomainFile, whether a
+     * transaction is currently open, and the program queue depth.
+     */
+    private void addProgramStatus(JsonObject result) {
+        Program program = currentProgram;
+        if (program == null) {
+            result.add("program", JsonNull.INSTANCE);
+            result.addProperty("has_program", false);
+            result.add("dirty", JsonNull.INSTANCE);
+            result.add("last_modified", JsonNull.INSTANCE);
+            result.add("active_transaction", JsonNull.INSTANCE);
+            result.add("queued_jobs", JsonNull.INSTANCE);
+            return;
+        }
+
+        result.addProperty("has_program", true);
+        result.addProperty("program", program.getName());
+        result.addProperty("dirty", program.isChanged());
+
+        // Last-modified time from the backing DomainFile (ms epoch), if available.
+        try {
+            DomainFile df = program.getDomainFile();
+            if (df != null) {
+                result.addProperty("last_modified", df.getLastModifiedTime());
+            } else {
+                result.add("last_modified", JsonNull.INSTANCE);
+            }
+        } catch (Exception e) {
+            result.add("last_modified", JsonNull.INSTANCE);
+        }
+
+        // Whether a transaction is currently open on this program.
+        try {
+            result.addProperty("active_transaction", program.getCurrentTransaction() != null);
+        } catch (Exception e) {
+            result.add("active_transaction", JsonNull.INSTANCE);
+        }
+
+        // Number of program jobs waiting in the queue.
+        result.addProperty("queued_jobs", queuedJobCount());
     }
 
     private JsonObject handleJobStatus(JsonObject args) {
@@ -1136,6 +1215,29 @@ public class GhidraCliBridge extends GhidraScript {
         result.addProperty("function_count", fm.getFunctionCount());
 
         return result;
+    }
+
+    /**
+     * Persist the current program to its backing DomainFile. Uses the same
+     * {@code Program.save(comment, monitor)} pattern as {@link #handleAnalyze}.
+     * An optional {@code message} arg overrides the default save comment.
+     */
+    private JsonObject handleProgramSave(JsonObject args) {
+        if (currentProgram == null) return errorResult("No program loaded");
+        String message = getArgString(args, "message");
+        if (message == null || message.isEmpty()) message = "CLI save";
+        try {
+            boolean wasDirty = currentProgram.isChanged();
+            currentProgram.save(message, monitor);
+            JsonObject result = new JsonObject();
+            result.addProperty("program", currentProgram.getName());
+            result.addProperty("saved", true);
+            result.addProperty("was_dirty", wasDirty);
+            result.addProperty("timestamp", System.currentTimeMillis());
+            return result;
+        } catch (Exception e) {
+            return errorResult("Failed to save program: " + e.getMessage());
+        }
     }
 
     private JsonObject handleListFunctions(JsonObject args) {
@@ -4357,6 +4459,65 @@ public class GhidraCliBridge extends GhidraScript {
 
     // --- Script Handlers ---
 
+    /**
+     * Compile a Java script without executing it. Uses the same bundle-host
+     * registration + getScriptInstance path as handleScriptRun, but never calls
+     * script.execute(). Returns success if the script compiles, or a structured
+     * error with compiler diagnostics if it fails.
+     */
+    private JsonObject handleScriptCheck(JsonObject args) {
+        String scriptPath = getArgString(args, "path");
+        if (scriptPath == null) return errorResult("Script path required");
+
+        File scriptFile = new File(scriptPath).getAbsoluteFile();
+        if (!scriptFile.exists()) return errorResult("Script not found: " + scriptFile.getPath());
+
+        ResourceFile source = new ResourceFile(scriptFile);
+        ResourceFile sourceDir = source.getParentFile();
+
+        StringWriter buffer = new StringWriter();
+        PrintWriter out = new PrintWriter(buffer);
+        try {
+            Object bundleHost = GhidraScriptUtil.class
+                .getMethod("getBundleHost").invoke(null);
+            if (bundleHost == null) return errorResult("Ghidra script bundle host unavailable");
+            Class<?> bhClass = bundleHost.getClass();
+            Object existing = bhClass
+                .getMethod("getExistingGhidraBundle", ResourceFile.class)
+                .invoke(bundleHost, sourceDir);
+            if (existing == null) {
+                bhClass.getMethod("add", ResourceFile.class, boolean.class, boolean.class)
+                    .invoke(bundleHost, sourceDir, true, false);
+            }
+
+            GhidraScriptProvider provider = GhidraScriptUtil.getProvider(source);
+            if (provider == null) {
+                return errorResult("No script provider for " + scriptFile.getName()
+                    + " (unsupported script type)");
+            }
+
+            // getScriptInstance compiles the source. We don't call execute().
+            GhidraScript script = provider.getScriptInstance(source, out);
+            out.flush();
+
+            JsonObject result = new JsonObject();
+            result.addProperty("script", scriptFile.getName());
+            result.addProperty("path", scriptFile.getAbsolutePath());
+            result.addProperty("compiled", true);
+            result.addProperty("class", script.getClass().getName());
+            return result;
+        } catch (GhidraScriptLoadException e) {
+            out.flush();
+            String diag = buffer.toString().trim();
+            String msg = "Script failed to compile: " + e.getMessage();
+            return errorResponse("script_compile_failed", msg,
+                diag.isEmpty() ? null : diag);
+        } catch (Exception e) {
+            out.flush();
+            return errorResult("Script check failed: " + e.getMessage());
+        }
+    }
+
     private JsonObject handleScriptRun(JsonObject args) {
         String scriptPath = getArgString(args, "path");
         if (scriptPath == null) return errorResult("Script path required");
@@ -4433,17 +4594,12 @@ public class GhidraCliBridge extends GhidraScript {
             // real javac error (e.g. "cannot find symbol" at a line) behind a
             // generic "The class could not be found ... not found by <bundle>"
             // message. The bundle compiler writes javac output to `out`; fold it
-            // into the error message (the only field the CLI renders on error)
-            // and also attach it as "stdout" for callers that read it directly.
+            // into the structured error response.
             out.flush();
             String diag = buffer.toString().trim();
             String msg = "Script failed to compile: " + e.getMessage();
-            if (!diag.isEmpty()) {
-                msg += "\n\nCompiler output:\n" + diag;
-            }
-            JsonObject err = errorResult(msg);
-            err.addProperty("stdout", diag);
-            return err;
+            return errorResponse("script_compile_failed", msg,
+                diag.isEmpty() ? null : diag);
         } catch (CancelledException e) {
             return errorResult("Script cancelled");
         } catch (Exception e) {

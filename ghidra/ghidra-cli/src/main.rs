@@ -60,6 +60,12 @@ fn main() {
         .with(stdout_layer)
         .init();
 
+    // Compute JSON output mode up front, before `cli` is moved into a command
+    // handler. This lets the error path in main() render structured JSON errors
+    // for the same conditions (--json/--pretty/--format json/piped) that would
+    // have produced JSON on success.
+    let json_mode = is_json_output_mode(&cli);
+
     let result = match &cli.command {
         Commands::Setup(_) => {
             // Setup needs async for downloading
@@ -80,7 +86,25 @@ fn main() {
     };
 
     if let Err(e) = result {
-        eprintln!("Error: {}", e);
+        // In JSON mode, emit a structured JSON error object to stderr so
+        // machine consumers (piped/--json/--pretty) can parse the failure.
+        // This preserves structured fields (code, diagnostics) from the bridge
+        // that would otherwise be collapsed into a flat string.
+        if json_mode {
+            if let Some(cmd_err) = e.downcast_ref::<ipc::protocol::CommandError>() {
+                eprintln!("{}", serde_json::to_string(&cmd_err.to_json()).unwrap());
+            } else {
+                eprintln!(
+                    "{}",
+                    serde_json::json!({
+                        "status": "error",
+                        "error": { "message": format!("{}", e) }
+                    })
+                );
+            }
+        } else {
+            eprintln!("Error: {}", e);
+        }
         std::process::exit(1);
     }
 }
@@ -97,6 +121,37 @@ fn apply_global_env_overrides(cli: &Cli) {
     if let Some(jh) = &cli.java_home {
         std::env::set_var("GHIDRA_CLI_JAVA_HOME", jh);
     }
+}
+
+/// Determine whether error output should be JSON (machine-readable) rather than
+/// human-readable text.
+///
+/// Mirrors the format-selection logic in [`run_with_bridge`]: any explicit
+/// `--format` JSON variant, `--json`, `--pretty`, or a piped (non-TTY) stdout
+/// means we are in JSON mode. This ensures errors are parseable by automated
+/// consumers in exactly the situations where stdout would have been JSON.
+fn is_json_output_mode(cli: &Cli) -> bool {
+    use std::io::IsTerminal;
+
+    // Per-command --format that resolves to a JSON variant.
+    if let Some(opts) = extract_query_options(&cli.command) {
+        if let Some(fmt) = &opts.format {
+            if let Ok(fmt) = OutputFormat::from_str(fmt) {
+                if matches!(fmt, OutputFormat::Json | OutputFormat::JsonCompact | OutputFormat::JsonStream) {
+                    return true;
+                }
+            }
+        }
+        if opts.json {
+            return true;
+        }
+    }
+    // Global flags.
+    if cli.pretty || cli.json {
+        return true;
+    }
+    // Piped output: auto-detects to JSON compact for machine consumption.
+    !std::io::stdout().is_terminal()
 }
 
 /// Run a command, starting the bridge if needed.
@@ -126,6 +181,7 @@ fn requires_bridge(command: &Commands) -> bool {
             | Commands::Analyze(_)
             | Commands::Query(_)
             | Commands::Decompile(_)
+            | Commands::Inspect(_)
             | Commands::Function(_)
             | Commands::Strings(_)
             | Commands::Memory(_)
@@ -156,6 +212,7 @@ fn extract_project_from_command(command: &Commands) -> Option<String> {
         Commands::Query(args) => args.project.clone(),
         Commands::Summary(args) => args.options.project.clone(),
         Commands::Decompile(args) => args.options.project.clone(),
+        Commands::Inspect(args) => args.options.project.clone(),
         Commands::Function(cmd) => match cmd {
             cli::FunctionCommands::List(opts) => opts.project.clone(),
             cli::FunctionCommands::Decompile(args) => args.options.project.clone(),
@@ -242,6 +299,7 @@ fn extract_project_from_command(command: &Commands) -> Option<String> {
             cli::ScriptCommands::Run(args) => args.project.clone(),
             cli::ScriptCommands::Python(args) => args.project.clone(),
             cli::ScriptCommands::Java(args) => args.project.clone(),
+            cli::ScriptCommands::Check(args) => args.project.clone(),
             cli::ScriptCommands::List => None,
         },
         Commands::Program(cmd) => match cmd {
@@ -251,6 +309,7 @@ fn extract_project_from_command(command: &Commands) -> Option<String> {
             cli::ProgramCommands::Delete(args) => args.project.clone(),
             cli::ProgramCommands::Info(args) => args.project.clone(),
             cli::ProgramCommands::Export(args) => args.project.clone(),
+            cli::ProgramCommands::Save(args) => args.project.clone(),
         },
         Commands::Diff(cmd) => match cmd {
             cli::DiffCommands::Programs(args) => args.project.clone(),
@@ -271,6 +330,7 @@ fn extract_program_from_command(command: &Commands) -> Option<String> {
         Commands::Query(args) => args.program.clone(),
         Commands::Summary(args) => args.options.program.clone(),
         Commands::Decompile(args) => args.options.program.clone(),
+        Commands::Inspect(args) => args.options.program.clone(),
         Commands::Function(cmd) => match cmd {
             cli::FunctionCommands::List(opts) => opts.program.clone(),
             cli::FunctionCommands::Decompile(args) => args.options.program.clone(),
@@ -357,6 +417,7 @@ fn extract_program_from_command(command: &Commands) -> Option<String> {
             cli::ScriptCommands::Run(args) => args.program.clone(),
             cli::ScriptCommands::Python(args) => args.program.clone(),
             cli::ScriptCommands::Java(args) => args.program.clone(),
+            cli::ScriptCommands::Check(args) => args.program.clone(),
             cli::ScriptCommands::List => None,
         },
         Commands::Program(cmd) => match cmd {
@@ -366,6 +427,7 @@ fn extract_program_from_command(command: &Commands) -> Option<String> {
             cli::ProgramCommands::Delete(args) => args.program.clone(),
             cli::ProgramCommands::Info(args) => args.program.clone(),
             cli::ProgramCommands::Export(args) => args.program.clone(),
+            cli::ProgramCommands::Save(args) => args.program.clone(),
         },
         Commands::Batch(args) => args.program.clone(),
         Commands::Rename(args) => args.program.clone(),
@@ -390,6 +452,7 @@ fn extract_query_options(command: &Commands) -> Option<QueryOptions> {
         }),
         Commands::Summary(args) => Some(args.options.clone()),
         Commands::Decompile(args) => Some(args.options.clone()),
+        Commands::Inspect(args) => Some(args.options.clone()),
         Commands::Disasm(args) => Some(args.options.clone()),
         Commands::Stats(args) => Some(args.options.clone()),
         Commands::Function(cmd) => match cmd {
@@ -1056,6 +1119,9 @@ fn execute_via_bridge(
                 ProgramCommands::Export(args) => {
                     client.program_export(&args.format, args.output.as_deref())
                 }
+                ProgramCommands::Save(args) => {
+                    client.program_save(args.message.as_deref())
+                }
             }
         }
         Commands::Symbol(cmd) => {
@@ -1213,7 +1279,18 @@ fn execute_via_bridge(
                         .unwrap_or_else(|_| args.script_path.clone());
                     let expect: Vec<serde_json::Value> =
                         args.expect.iter().map(|s| parse_expect_spec(s)).collect();
-                    client.script_run(&path, &args.args, &expect, args.allow_empty)
+                    let result = client.script_run(&path, &args.args, &expect, args.allow_empty)?;
+                    // Save after successful script execution if requested.
+                    if args.save {
+                        client.program_save(Some(&format!("Script: {}", args.script_path)))?;
+                    }
+                    Ok(result)
+                }
+                ScriptCommands::Check(args) => {
+                    let path = std::fs::canonicalize(&args.script_path)
+                        .map(|p| p.to_string_lossy().into_owned())
+                        .unwrap_or_else(|_| args.script_path.clone());
+                    client.script_check(&path)
                 }
                 ScriptCommands::Python(args) => client.script_python(&args.code),
                 ScriptCommands::Java(args) => client.script_java(&args.code),
@@ -1222,38 +1299,202 @@ fn execute_via_bridge(
         }
         Commands::Disasm(args) => client.disasm(args.resolved_target(), args.num_instructions),
         Commands::Batch(args) => {
-            // Read batch file and execute each command locally
+            // Read batch file and execute each command locally.
             let content = std::fs::read_to_string(&args.script_file)
                 .map_err(|e| anyhow::anyhow!("Failed to read batch file: {}", e))?;
-            let lines: Vec<&str> = content
-                .lines()
-                .filter(|l| !l.trim().is_empty() && !l.trim().starts_with('#'))
-                .collect();
+
+            // JSON input mode: a JSON array of {"command": "...", "args": [...]}
+            // objects. Detected by the trimmed content starting with '['.
+            let commands: Vec<String> = if content.trim_start().starts_with('[') {
+                let entries: Vec<serde_json::Value> = serde_json::from_str(&content)
+                    .map_err(|e| anyhow::anyhow!("Failed to parse batch file as JSON: {}", e))?;
+                entries
+                    .iter()
+                    .map(|entry| {
+                        let cmd = entry
+                            .get("command")
+                            .and_then(|v| v.as_str())
+                            .ok_or_else(|| anyhow::anyhow!("Each JSON entry needs a \"command\" string"))?;
+                        let mut parts = vec![cmd.to_string()];
+                        if let Some(extra) = entry.get("args").and_then(|v| v.as_array()) {
+                            for a in extra {
+                                if let Some(s) = a.as_str() {
+                                    parts.push(s.to_string());
+                                }
+                            }
+                        }
+                        Ok(parts.join(" "))
+                    })
+                    .collect::<anyhow::Result<Vec<String>>>()?
+            } else {
+                // Plain-text mode: one command per line, '#' comments and blank
+                // lines skipped. Lines are preserved verbatim so the shell-word
+                // splitter below sees the original quoting.
+                content
+                    .lines()
+                    .map(|l| l.trim_end())
+                    .filter(|l| !l.trim().is_empty() && !l.trim().starts_with('#'))
+                    .map(|l| l.trim().to_string())
+                    .collect()
+            };
 
             let mut results = Vec::new();
-            for line in &lines {
-                let words: Vec<&str> = std::iter::once("ghidra")
-                    .chain(line.split_whitespace())
-                    .collect();
+            for line in &commands {
+                // Shell-aware splitting keeps quoted arguments intact.
+                let parts = match shlex::split(line) {
+                    Some(parts) if !parts.is_empty() => parts,
+                    _ => {
+                        let err = anyhow::anyhow!("Could not parse command line: {:?}", line);
+                        results.push(json!({"command": line, "error": err.to_string()}));
+                        if !args.continue_on_error {
+                            return Err(err);
+                        }
+                        continue;
+                    }
+                };
+                let words: Vec<&str> =
+                    std::iter::once("ghidra").chain(parts.iter().map(|s| s.as_str())).collect();
                 let sub_result = match Cli::try_parse_from(&words) {
                     Ok(sub_cli) => {
                         execute_via_bridge(client, &sub_cli.command, true, default_limit)
                     }
                     Err(e) => Err(anyhow::anyhow!("{}", e)),
                 };
-                match sub_result {
-                    Ok(val) => results.push(json!({"command": line.trim(), "result": val})),
-                    Err(e) => results.push(json!({"command": line.trim(), "error": e.to_string()})),
+                match &sub_result {
+                    Ok(val) => results.push(json!({"command": line, "result": val})),
+                    Err(e) => {
+                        results.push(json!({"command": line, "error": e.to_string()}));
+                        if !args.continue_on_error {
+                            // Fail-fast: surface the first error and exit non-zero.
+                            return Err(anyhow::anyhow!("{}", e));
+                        }
+                    }
                 }
             }
 
             Ok(json!({
-                "commands_parsed": lines.len(),
+                "commands_parsed": commands.len(),
                 "results": results
             }))
         }
         Commands::Stats(_) => client.stats(),
         Commands::Rename(args) => client.symbol_rename(&args.old_name, &args.new_name),
+        Commands::Inspect(args) => {
+            let target = args.resolved_target().to_string();
+
+            // Default to ALL sections when no flags are specified
+            let want_all = !args.decompile
+                && !args.callers
+                && !args.callees
+                && !args.xrefs
+                && args.disasm.is_none();
+            let want_decompile = want_all || args.decompile;
+            let want_callers = want_all || args.callers;
+            let want_callees = want_all || args.callees;
+            let want_xrefs = want_all || args.xrefs;
+            let want_disasm = args.disasm.or(if want_all { Some(40) } else { None });
+
+            let mut result = serde_json::Map::new();
+
+            // Always fetch function metadata first
+            match client.send_command(
+                "get_function",
+                Some(json!({ "address": target })),
+            ) {
+                Ok(func) => {
+                    result.insert("function".to_string(), func);
+                }
+                Err(e) => {
+                    result.insert(
+                        "function".to_string(),
+                        json!({ "error": e.to_string() }),
+                    );
+                }
+            }
+
+            if want_decompile {
+                match client.decompile(target.clone(), true, true) {
+                    Ok(decomp) => {
+                        result.insert("decompilation".to_string(), decomp);
+                    }
+                    Err(e) => {
+                        result.insert(
+                            "decompilation".to_string(),
+                            json!({ "error": e.to_string() }),
+                        );
+                    }
+                }
+            }
+
+            if want_callers {
+                match client.graph_callers(&target, None) {
+                    Ok(callers) => {
+                        result.insert("callers".to_string(), callers);
+                    }
+                    Err(e) => {
+                        result.insert(
+                            "callers".to_string(),
+                            json!({ "error": e.to_string() }),
+                        );
+                    }
+                }
+            }
+
+            if want_callees {
+                match client.graph_callees(&target, None) {
+                    Ok(callees) => {
+                        result.insert("callees".to_string(), callees);
+                    }
+                    Err(e) => {
+                        result.insert(
+                            "callees".to_string(),
+                            json!({ "error": e.to_string() }),
+                        );
+                    }
+                }
+            }
+
+            if want_xrefs {
+                match client.xrefs_to(target.clone()) {
+                    Ok(xrefs) => {
+                        result.insert("xrefs_to".to_string(), xrefs);
+                    }
+                    Err(e) => {
+                        result.insert(
+                            "xrefs_to".to_string(),
+                            json!({ "error": e.to_string() }),
+                        );
+                    }
+                }
+                match client.xrefs_from(target.clone()) {
+                    Ok(xrefs) => {
+                        result.insert("xrefs_from".to_string(), xrefs);
+                    }
+                    Err(e) => {
+                        result.insert(
+                            "xrefs_from".to_string(),
+                            json!({ "error": e.to_string() }),
+                        );
+                    }
+                }
+            }
+
+            if let Some(n) = want_disasm {
+                match client.disasm(&target, Some(n)) {
+                    Ok(disasm_val) => {
+                        result.insert("disassembly".to_string(), disasm_val);
+                    }
+                    Err(e) => {
+                        result.insert(
+                            "disassembly".to_string(),
+                            json!({ "error": e.to_string() }),
+                        );
+                    }
+                }
+            }
+
+            Ok(serde_json::Value::Object(result))
+        }
         _ => anyhow::bail!("Command not supported"),
     }
 }
@@ -1271,7 +1512,18 @@ fn handle_bridge_command(cli: Cli) -> anyhow::Result<()> {
             program.or(global_program),
             &projects_dir,
         ),
-        Commands::Stop { project } => handle_bridge_stop(project.or(global_project), &projects_dir),
+        Commands::Stop { project, save } => {
+            if save {
+                // Save the program before stopping the bridge.
+                let config = load_config(&projects_dir)?;
+                let proj_path = resolve_project_path(&project.clone().or(global_project.clone()), &config)?;
+                if let Some(port) = bridge::is_bridge_running(&proj_path) {
+                    let client = BridgeClient::new(port);
+                    let _ = client.program_save(Some("Pre-stop save"));
+                }
+            }
+            handle_bridge_stop(project.or(global_project), &projects_dir)
+        }
         Commands::Restart { project, program } => {
             let proj = project.or(global_project);
             let prog = program.or(global_program);

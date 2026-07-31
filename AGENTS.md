@@ -41,16 +41,41 @@ decompiling is slop. Verify claims from firmware gate code, not spec knowledge.
 - **`legacy/flat-import/` is historical only.** Do not use it for current
   results.
 
+## Snapshot policy
+
+Direct CLI mutations are exploratory. Any persistent rename, function
+creation, signature, type, comment, or overlay must be represented in a
+seed/annotation script before snapshotting. Only the designated integration
+task updates `project/` (via `make snapshot-project`).
+
 ## Standard commands
 
 ```bash
 uv sync --locked          # one-time environment
 make verify               # firmware evidence, no Ghidra — run this first
+make verify-one SUITE=control_partition  # one subsystem suite (fast iteration)
+make verify-changed       # suites matching git changes only
+make verify-agent         # all suites, compact JSON summary
+make ghidra-cli           # build the vendored ghidra CLI into build/ghidra-cli/
 make verify-sleigh        # SLEIGH compile + isolated install
-make work-project         # materialize build/project/ from committed snapshot
 make verify-processor     # fixtures + asserting audits on build/project/
 make snapshot-project     # the ONLY path that mutates committed project/
 ```
+
+### Interactive Ghidra via tools/g
+
+```bash
+tools/g decompile 0x8db22
+tools/g x-ref to 0x8db22
+tools/g inspect 0xc853a --decompile --callers --callees --xrefs --disasm 40
+tools/g script run ghidra/scripts/investigate/Foo.java -- arg1
+tools/g stop
+```
+
+`tools/g` resolves the repo root, materializes the working project if absent,
+selects the pinned CLI binary, and injects `--projects-dir/--project/--program`.
+It refuses to operate against committed `project/`. Set `GHIDRA_AGENT=1` for
+compact JSON output.
 
 Interactive work only against `$PWD/build/project` with an **absolute**
 `--projects-dir` (Ghidra 12.1+ rejects path components starting with `.`).

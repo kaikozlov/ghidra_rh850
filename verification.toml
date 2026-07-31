@@ -1,0 +1,148 @@
+# Verification ownership map.
+#
+# Maps subsystem suites to the files that own them, enabling:
+#   make verify-one SUITE=<name>    — run a single suite
+#   make verify-changed             — run suites affected by git changes
+#   make verify-agent               — compact JSON summary, full logs on failure
+#
+# This is a hand-maintained mapping. Add entries when you create new suites.
+
+[suite.architecture]
+tests = ["tests/verify_architecture.py"]
+paths = [
+  "docs/architecture/",
+  "data/ram_overlay_map.csv",
+  "data/control_partition.csv",
+]
+
+[suite.boot_trust]
+tests = ["tests/verify_boot_trust.py"]
+paths = ["docs/security/bootloader-payload-gate.md"]
+
+[suite.bootloader_diagnostics]
+tests = ["tests/verify_bootloader_diagnostics.py"]
+paths = ["docs/diagnostics/bootloader.md", "docs/diagnostics/bootloader-dids.md"]
+
+[suite.bootloader_secrets]
+tests = ["tests/verify_findings.py"]
+paths = ["docs/security/"]
+
+[suite.can_transport]
+tests = ["tests/verify_can_transport.py"]
+paths = ["docs/communications/"]
+
+[suite.control_partition]
+tests = ["tests/verify_control_partition.py"]
+paths = [
+  "data/control_partition.csv",
+  "docs/architecture/control-partition.md",
+  "ghidra/scripts/annotate/AnnotateControlPartition.java",
+]
+
+[suite.dataflash_layout]
+tests = ["tests/verify_dataflash_layout.py"]
+paths = ["docs/storage/dataflash.md", "tools/generate_dataflash_layout.py"]
+
+[suite.dataflash_semantics]
+tests = ["tests/verify_dataflash_semantics.py"]
+paths = ["docs/storage/dataflash.md"]
+
+[suite.did_model]
+tests = ["tests/verify_did_model.py"]
+paths = ["docs/diagnostics/"]
+
+[suite.doc_links]
+tests = ["tests/verify_doc_links.py"]
+paths = ["docs/"]
+
+[suite.application_ab_service]
+tests = ["tests/verify_application_ab_service.py"]
+paths = ["docs/security/application-security-access.md", "tools/sienna_application_sa_keygen.py"]
+
+[suite.application_diagnostics]
+tests = ["tests/verify_application_diagnostics.py"]
+paths = ["docs/diagnostics/application.md", "data/application_diagnostic_map.csv"]
+
+[suite.application_receive]
+tests = ["tests/verify_application_receive.py"]
+paths = ["docs/communications/application-rx.md", "data/application_rx_map.csv"]
+
+[suite.application_routine_id_callbacks]
+tests = ["tests/verify_application_routine_id_callbacks.py"]
+paths = ["data/application_routine_id_callbacks.csv"]
+
+[suite.application_security_access]
+tests = ["tests/verify_security_gate.py"]
+paths = ["docs/security/application-security-access.md"]
+
+[suite.application_transmit]
+tests = ["tests/verify_application_transmit.py"]
+paths = ["docs/communications/application-tx.md", "data/application_tx_map.csv"]
+
+[suite.iceps_key_recovery_surface]
+tests = ["tests/verify_icus_key_recovery_surface.py"]
+paths = ["docs/security/secoc/"]
+
+[suite.iceps_key_update]
+tests = ["tests/verify_icus_key_update.py"]
+paths = ["docs/security/secoc/"]
+
+[suite.iceps_software_paths]
+tests = ["tests/verify_icus_software_paths.py"]
+paths = ["docs/security/secoc/"]
+
+[suite.iceps_trace_decoder]
+tests = ["tests/verify_icus_trace_decoder.py"]
+paths = ["tools/decode_icus_key_update_trace.py"]
+
+[suite.motor_actuation_boundary]
+tests = ["tests/verify_motor_actuation_boundary.py"]
+paths = ["data/motor_actuation_path.csv"]
+
+[suite.p1m_device_profile]
+tests = ["tests/verify_p1m_device_profile.py"]
+paths = ["data/p1m_sfr_labels.csv"]
+
+[suite.payload_gate]
+tests = ["tests/verify_payload_gate.py"]
+paths = ["docs/security/bootloader-payload-gate.md"]
+
+[suite.ram_overlays]
+tests = ["tests/verify_ram_overlays.py"]
+paths = ["data/ram_overlay_map.csv"]
+
+[suite.renesas_rfp]
+tests = ["tests/verify_renesas_rfp.py"]
+paths = ["docs/tooling/renesas-rfp-rv40f.md", "data/renesas_rfp_rv40f_icu_commands.csv"]
+
+[suite.scheduler_timing]
+tests = ["tests/verify_scheduler_timing.py"]
+paths = ["data/scheduler_periods.csv"]
+
+[suite.semantic_coverage]
+tests = ["tests/verify_semantic_coverage.py"]
+paths = ["data/semantic_coverage_ledger.csv", "data/semantic_coverage_summary.json"]
+
+[suite.secoc_application]
+tests = ["tests/verify_secoc_application.py"]
+paths = ["docs/security/secoc/application-chain.md"]
+
+[suite.secoc_nvm]
+tests = ["tests/verify_secoc_nvm.py"]
+paths = ["docs/security/secoc/key-storage-and-lifecycle.md"]
+
+[suite.secoc_security_properties]
+tests = ["tests/verify_secoc_security_properties.py"]
+paths = ["docs/security/secoc/"]
+
+[suite.security_consumers]
+tests = ["tests/verify_security_consumers.py"]
+paths = ["data/application_security_consumers.csv"]
+
+[suite.toyota_secoc_signer]
+tests = ["tests/verify_toyota_secoc_signer.py"]
+paths = ["tools/toyota_secoc_signer.py"]
+
+[suite.tss3_variant_matrix]
+tests = ["tests/verify_tss3_variant_matrix.py"]
+paths = ["data/tss3_eps_variant_matrix.csv", "docs/variants/"]

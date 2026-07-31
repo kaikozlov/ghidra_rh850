@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+#
+# tools/g — repo-local ghidra CLI wrapper.
+#
+# Removes the ceremony of remembering --projects-dir/--project/--program on
+# every invocation. Resolves the repo root, materializes the working project
+# if absent, selects the pinned vendored CLI binary, and refuses to operate
+# against the committed project/ snapshot.
+#
+# Usage:
+#   tools/g decompile 0x8db22
+#   tools/g x-ref to 0x8db22
+#   tools/g script run ghidra/scripts/investigate/Foo.java -- arg1
+#   tools/g stop
+#   tools/g inspect 0xc853a --decompile --callers --callees --xrefs --disasm 40
+#
+# Environment:
+#   GHIDRA_AGENT=1   Force compact JSON output (for scripted/agent consumption).
+#   GHIDRA_PROJECT   Override the working project directory (default: build/project).
+#
+set -euo pipefail
+
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+PROJECT_NAME="rh850_p1me_mapped"
+PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
+SNAPSHOT_DIR="$ROOT/project"
+PROJECT_DIR="${GHIDRA_PROJECT:-$ROOT/build/project}"
+
+# --- Resolve the ghidra CLI binary -------------------------------------------
+
+if [[ -x "$ROOT/build/ghidra-cli/ghidra" ]]; then
+  GHIDRA_CLI="$ROOT/build/ghidra-cli/ghidra"
+elif command -v ghidra >/dev/null 2>&1; then
+  GHIDRA_CLI=$(command -v ghidra)
+else
+  echo "ghidra CLI not found. Run 'make ghidra-cli' to build the vendored copy," >&2
+  echo "or install ghidra-cli 0.2.1 on PATH." >&2
+  exit 1
+fi
+
+# --- Guard against committed project/ ----------------------------------------
+
+# Resolve to absolute and check if it's inside the committed snapshot.
+ABS_PROJECT_DIR=$(cd "$PROJECT_DIR" 2>/dev/null && pwd || echo "$PROJECT_DIR")
+case "$ABS_PROJECT_DIR" in
+  "$SNAPSHOT_DIR"|"$SNAPSHOT_DIR"/*)
+    echo "REFUSING: working project resolves inside committed snapshot ($SNAPSHOT_DIR)." >&2
+    echo "Use build/project (the default) or set GHIDRA_PROJECT to a disposable path." >&2
+    exit 1
+    ;;
+esac
+
+# --- Materialize the working project if absent --------------------------------
+
+# Skip for bridge management commands that don't need a project open.
+NEEDS_PROJECT=1
+case "${1:-}" in
+  stop|status|ping|jobs|cancel|version|doctor|setup|init|config)
+    # These work on the daemon lifecycle, not the project dir — but we still
+    # want the project flags so 'stop'/'status' target the right daemon.
+    if [[ ! -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
+      NEEDS_PROJECT=0
+    fi
+    ;;
+esac
+
+if ((NEEDS_PROJECT)) && [[ ! -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
+  if [[ ! -d "$SNAPSHOT_DIR/$PROJECT_NAME.rep" ]]; then
+    echo "No committed snapshot found at $SNAPSHOT_DIR — run 'make rebuild-project' first." >&2
+    exit 1
+  fi
+  echo "Materializing working project from committed snapshot..." >&2
+  mkdir -p "$PROJECT_DIR"
+  cp -R "$SNAPSHOT_DIR/." "$PROJECT_DIR/"
+  echo "Ready: $PROJECT_DIR" >&2
+fi
+
+# --- Build CLI args -----------------------------------------------------------
+
+CLI_ARGS=(
+  --projects-dir "$PROJECT_DIR"
+  --project "$PROJECT_NAME"
+  --program "$PROGRAM_NAME"
+)
+
+# Force compact JSON when used as an agent tool.
+if [[ "${GHIDRA_AGENT:-}" == "1" ]]; then
+  CLI_ARGS+=(--json)
+fi
+
+# --- Dispatch -----------------------------------------------------------------
+
+# Pass all remaining args through to the ghidra CLI.
+exec "$GHIDRA_CLI" "${CLI_ARGS[@]}" "$@"
