@@ -51,7 +51,7 @@ sync:
 	$(UV) sync --locked
 
 # Build the vendored ghidra-cli (ghidra/ghidra-cli) into build/ghidra-cli/.
-	ghidra-cli:
+ghidra-cli:
 	tools/build_ghidra_cli.sh
 
 verify: verify-core

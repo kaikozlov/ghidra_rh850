@@ -1,7 +1,7 @@
 {
   "firmware_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
   "techstream_distribution": "V18.00.008",
-  "generated_at": "2026-08-01T01:21:08.690112+00:00",
+  "generated_at": "2026-08-01T16:14:36.603101+00:00",
   "ecu": {
     "family": "EPS",
     "software_id": "8965B4512000",
@@ -24,26 +24,28 @@
     "write_did_table": {
       "base": "0x26AEC",
       "count": 19
+    },
+    "dtc_table": {
+      "base": "0x30A28",
+      "end": "0x30C40",
+      "record_size": 8
     }
   },
   "summary": {
-    "total_mappings": 312,
+    "total_mappings": 324,
     "by_kind": {
-      "did": 12,
+      "did": 11,
       "dtc": 54,
       "monitor": 120,
-      "active_test": 36,
       "service": 17,
-      "utility_procedure": 73
+      "utility_procedure": 122
     },
     "by_grade": {
-      "exact": 33,
-      "family": 193,
-      "candidate": 45,
-      "structural": 41
+      "exact": 34,
+      "family": 290
     },
-    "auto_apply_count": 8,
-    "comment_only_count": 304
+    "auto_apply_count": 16,
+    "comment_only_count": 308
   },
   "mappings": [
     {
@@ -94,19 +96,6 @@
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
-    {
-      "kind": "did",
-      "identifier": 256,
-      "oem_name": "DID 0x0100",
-      "match_grade": "exact",
-      "firmware_table_index": 0,
-      "firmware_callback": "0x4E99E",
-      "firmware_flags": "0x0020",
-      "firmware_table_base": "0x2941C",
-      "source_db": "EPS_CAN_P4DK",
-      "annotation_action": "name_callback",
-      "note": "Exact DID match. Firmware callback 0x4E99E at table index 0."
     },
     {
       "kind": "did",
@@ -197,61 +186,50 @@
       "code": "C1511",
       "dtc_identifier": 21777,
       "oem_name": "Torque Sensor",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_offsets": [
-        "0x2E346",
-        "0x30A2D",
-        "0x30A35",
-        "0xB4A12",
-        "0xB5092"
+        "0x30A28",
+        "0x30A30"
       ],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1511 (0x5511) found at 5 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1511 (0x5511) found in firmware DTC table at 2 location(s): 0x30A28, 0x30A30"
     },
     {
       "kind": "dtc",
       "code": "C1512",
       "dtc_identifier": 21778,
       "oem_name": "Torque Sensor",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_offsets": [
-        "0x30A3D",
-        "0x30A45",
-        "0x64812",
-        "0x64932"
+        "0x30A38",
+        "0x30A40"
       ],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1512 (0x5512) found at 4 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1512 (0x5512) found in firmware DTC table at 2 location(s): 0x30A38, 0x30A40"
     },
     {
       "kind": "dtc",
       "code": "C1513",
       "dtc_identifier": 21779,
       "oem_name": "Torque Sensor",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0xB4A14",
-        "0xB50A0"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1513 (0x5513) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1513 (0x5513) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1514",
       "dtc_identifier": 21780,
       "oem_name": "Torque Sensor Power Supply",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x64818",
-        "0x64938"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1514 (0x5514) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1514 (0x5514) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
@@ -260,151 +238,122 @@
       "oem_name": "Torque Sensor Zero Point Adjustment Undone",
       "match_grade": "exact",
       "firmware_offsets": [
-        "0x30A4D",
-        "0x30A55",
-        "0x389B8",
-        "0x472FC",
-        "0x473F2",
-        "0xB4A22",
-        "0xB50AE"
+        "0x30A48",
+        "0x30A50"
       ],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1515 (0x5515) found at 7 location(s)"
+      "note": "DTC C1515 (0x5515) found in firmware DTC table at 2 location(s): 0x30A48, 0x30A50"
     },
     {
       "kind": "dtc",
       "code": "C1516",
       "dtc_identifier": 21782,
       "oem_name": "Torque Sensor Zero Point Adjustment Incomplete",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x08E68",
-        "0x6481E",
-        "0x6493E"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1516 (0x5516) found at 3 location(s)"
+      "note": "DTC C1516 (0x5516) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1517",
       "dtc_identifier": 21783,
       "oem_name": "Torque Hold",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0xB4A30",
-        "0xB50BC"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1517 (0x5517) found at 2 location(s)"
+      "note": "DTC C1517 (0x5517) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1521",
       "dtc_identifier": 21793,
       "oem_name": "Motor",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x70250",
-        "0xB4A88"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1521 (0x5521) found at 2 location(s)"
+      "note": "DTC C1521 (0x5521) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1523",
       "dtc_identifier": 21795,
       "oem_name": "Motor",
-      "match_grade": "candidate",
+      "match_grade": "family",
       "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1523 (0x5523) not found in CodeFlash — may be diagnostic-only or cross-generation. Multiple conflicting descriptions across databases."
+      "note": "DTC C1523 (0x5523) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1524",
       "dtc_identifier": 21796,
       "oem_name": "Motor",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x64848",
-        "0x72EB0"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1524 (0x5524) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1524 (0x5524) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1531",
       "dtc_identifier": 21809,
       "oem_name": "ECU Malfunction",
-      "match_grade": "candidate",
+      "match_grade": "family",
       "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1531 (0x5531) not found in CodeFlash — may be diagnostic-only or cross-generation. Multiple conflicting descriptions across databases."
+      "note": "DTC C1531 (0x5531) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1532",
       "dtc_identifier": 21810,
       "oem_name": "ECU Malfunction",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x39C48",
-        "0x64872"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1532 (0x5532) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1532 (0x5532) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1533",
       "dtc_identifier": 21811,
       "oem_name": "ECU Malfunction",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x237C2",
-        "0x23FC0",
-        "0x243C1",
-        "0x2EB1E"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1533 (0x5533) found at 4 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1533 (0x5533) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1534",
       "dtc_identifier": 21812,
       "oem_name": "ECU Malfunction",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x249D3",
-        "0x64878"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1534 (0x5534) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1534 (0x5534) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1541",
       "dtc_identifier": 21825,
       "oem_name": "Vehicle Speed Signal",
-      "match_grade": "candidate",
+      "match_grade": "family",
       "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1541 (0x5541) not found in CodeFlash — may be diagnostic-only or cross-generation. Multiple conflicting descriptions across databases."
+      "note": "DTC C1541 (0x5541) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
@@ -415,7 +364,7 @@
       "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1544 (0x5544) not found in CodeFlash — may be diagnostic-only or cross-generation."
+      "note": "DTC C1544 (0x5544) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
@@ -426,297 +375,235 @@
       "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1551 (0x5551) not found in CodeFlash — may be diagnostic-only or cross-generation."
+      "note": "DTC C1551 (0x5551) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1552",
       "dtc_identifier": 21842,
       "oem_name": "PIG Power Supply Voltage",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x39C28",
-        "0x5D668"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1552 (0x5552) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1552 (0x5552) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1554",
       "dtc_identifier": 21844,
       "oem_name": "Power Supply Relay Failure",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x7FDAE"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1554 (0x5554) found at 1 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1554 (0x5554) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1555",
       "dtc_identifier": 21845,
       "oem_name": "Motor Relay Welding Failure",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x006D0",
-        "0x006D1",
-        "0x006D2",
-        "0x00E68",
-        "0x00E69",
-        "0x00E6A",
-        "0x1A1C5",
-        "0x239DD",
-        "0x23DDE",
-        "0x245DC"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1555 (0x5555) found at 10 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1555 (0x5555) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1557",
       "dtc_identifier": 21847,
       "oem_name": "Continuous Overheat Preventive Control",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x034F7",
-        "0x2384B",
-        "0xC70CB"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1557 (0x5557) found at 3 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1557 (0x5557) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1571",
       "dtc_identifier": 21873,
       "oem_name": "Vehicle Speed Signal",
-      "match_grade": "candidate",
+      "match_grade": "family",
       "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1571 (0x5571) not found in CodeFlash — may be diagnostic-only or cross-generation. Multiple conflicting descriptions across databases."
+      "note": "DTC C1571 (0x5571) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1573",
       "dtc_identifier": 21875,
       "oem_name": "Engine Revolution System",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x63DFC"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1573 (0x5573) found at 1 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1573 (0x5573) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1581",
       "dtc_identifier": 21889,
       "oem_name": "Assist Map Number Un-Writing",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_offsets": [
-        "0x30B75",
-        "0x80F2A"
+        "0x30B70"
       ],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1581 (0x5581) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1581 (0x5581) found in firmware DTC table at 1 location(s): 0x30B70"
     },
     {
       "kind": "dtc",
       "code": "C0051",
       "dtc_identifier": 16465,
       "oem_name": "Steering sensor signal malfunction",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x06AF3",
-        "0x183F1",
-        "0x44BA5",
-        "0x44BB5",
-        "0x64107",
-        "0x73875",
-        "0x76D8D",
-        "0x81FDF",
-        "0x97501",
-        "0xCB303"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C0051 (0x4051) found at 10 location(s)"
+      "note": "DTC C0051 (0x4051) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1511",
       "dtc_identifier": 21777,
       "oem_name": "Torque sensor1",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_offsets": [
-        "0x2E346",
-        "0x30A2D",
-        "0x30A35",
-        "0xB4A12",
-        "0xB5092"
+        "0x30A28",
+        "0x30A30"
       ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1511 (0x5511) found at 5 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1511 (0x5511) found in firmware DTC table at 2 location(s): 0x30A28, 0x30A30"
     },
     {
       "kind": "dtc",
       "code": "C1512",
       "dtc_identifier": 21778,
       "oem_name": "Torque sensor2",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_offsets": [
-        "0x30A3D",
-        "0x30A45",
-        "0x64812",
-        "0x64932"
+        "0x30A38",
+        "0x30A40"
       ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1512 (0x5512) found at 4 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1512 (0x5512) found in firmware DTC table at 2 location(s): 0x30A38, 0x30A40"
     },
     {
       "kind": "dtc",
       "code": "C1513",
       "dtc_identifier": 21779,
       "oem_name": "Torque sensor deviation excessive",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0xB4A14",
-        "0xB50A0"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1513 (0x5513) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1513 (0x5513) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1514",
       "dtc_identifier": 21780,
       "oem_name": "Torque sensor power supply abnormal",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x64818",
-        "0x64938"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1514 (0x5514) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1514 (0x5514) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1523",
       "dtc_identifier": 21795,
       "oem_name": "Motor terminal abnormality 1",
-      "match_grade": "candidate",
+      "match_grade": "family",
       "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1523 (0x5523) not found in CodeFlash — may be diagnostic-only or cross-generation. Multiple conflicting descriptions across databases."
+      "note": "DTC C1523 (0x5523) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1524",
       "dtc_identifier": 21796,
       "oem_name": "Motor terminal abnormality 2",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x64848",
-        "0x72EB0"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1524 (0x5524) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1524 (0x5524) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1531",
       "dtc_identifier": 21809,
       "oem_name": "CPU malfunction",
-      "match_grade": "candidate",
+      "match_grade": "family",
       "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1531 (0x5531) not found in CodeFlash — may be diagnostic-only or cross-generation. Multiple conflicting descriptions across databases."
+      "note": "DTC C1531 (0x5531) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1532",
       "dtc_identifier": 21810,
       "oem_name": "ECU malfunction",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x39C48",
-        "0x64872"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1532 (0x5532) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1532 (0x5532) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1533",
       "dtc_identifier": 21811,
       "oem_name": "Temperature sensor malfunction",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x237C2",
-        "0x23FC0",
-        "0x243C1",
-        "0x2EB1E"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1533 (0x5533) found at 4 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1533 (0x5533) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1534",
       "dtc_identifier": 21812,
       "oem_name": "EEPROM error",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x249D3",
-        "0x64878"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1534 (0x5534) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1534 (0x5534) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1541",
       "dtc_identifier": 21825,
       "oem_name": "Vehicle speed abnormality",
-      "match_grade": "candidate",
+      "match_grade": "family",
       "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1541 (0x5541) not found in CodeFlash — may be diagnostic-only or cross-generation. Multiple conflicting descriptions across databases."
+      "note": "DTC C1541 (0x5541) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1552",
       "dtc_identifier": 21842,
       "oem_name": "PIG voltage abnormality",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x39C28",
-        "0x5D668"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1552 (0x5552) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1552 (0x5552) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
@@ -727,234 +614,163 @@
       "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1553 (0x5553) not found in CodeFlash — may be diagnostic-only or cross-generation."
+      "note": "DTC C1553 (0x5553) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1554",
       "dtc_identifier": 21844,
       "oem_name": "Power supply relay failure",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x7FDAE"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1554 (0x5554) found at 1 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1554 (0x5554) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1555",
       "dtc_identifier": 21845,
       "oem_name": "Motor relay failure",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x006D0",
-        "0x006D1",
-        "0x006D2",
-        "0x00E68",
-        "0x00E69",
-        "0x00E6A",
-        "0x1A1C5",
-        "0x239DD",
-        "0x23DDE",
-        "0x245DC"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1555 (0x5555) found at 10 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1555 (0x5555) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1557",
       "dtc_identifier": 21847,
       "oem_name": "Overheat preventive control current limit history",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x034F7",
-        "0x2384B",
-        "0xC70CB"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1557 (0x5557) found at 3 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1557 (0x5557) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1571",
       "dtc_identifier": 21873,
       "oem_name": "Vehicle speed test not completed",
-      "match_grade": "candidate",
+      "match_grade": "family",
       "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1571 (0x5571) not found in CodeFlash — may be diagnostic-only or cross-generation. Multiple conflicting descriptions across databases."
+      "note": "DTC C1571 (0x5571) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1573",
       "dtc_identifier": 21875,
       "oem_name": "Engine speed test not completed",
-      "match_grade": "candidate",
-      "firmware_offsets": [
-        "0x63DFC"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1573 (0x5573) found at 1 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1573 (0x5573) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "C1581",
       "dtc_identifier": 21889,
       "oem_name": "Assist map un-writing",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_offsets": [
-        "0x30B75",
-        "0x80F2A"
+        "0x30B70"
       ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1581 (0x5581) found at 2 location(s) Multiple conflicting descriptions across databases."
+      "note": "DTC C1581 (0x5581) found in firmware DTC table at 1 location(s): 0x30B70"
     },
     {
       "kind": "dtc",
       "code": "U0100",
       "dtc_identifier": 49408,
       "oem_name": "CAN communication error (EFI)",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x02155",
-        "0x0245B",
-        "0x02805",
-        "0x03A21",
-        "0x03AA9",
-        "0x03AC5",
-        "0x03F63",
-        "0x03FB9",
-        "0x05691",
-        "0x056A1"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0100 (0xC100) found at 10 location(s)"
+      "note": "DTC U0100 (0xC100) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "U0121",
       "dtc_identifier": 49441,
       "oem_name": "CAN communication error (ABS/VSC)",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x8FBA5",
-        "0x8FBE3",
-        "0x8FC45",
-        "0x8FC7F",
-        "0x8FCAD",
-        "0x8FCF9",
-        "0x8FD2D",
-        "0x8FD7B",
-        "0x8FF0D",
-        "0x90405"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0121 (0xC121) found at 10 location(s)"
+      "note": "DTC U0121 (0xC121) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "U0126",
       "dtc_identifier": 49446,
       "oem_name": "CAN communication error (steering sensor)",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x2EA01",
-        "0x2FA0D",
-        "0x30C55",
-        "0x30C5D",
-        "0x4D3C0"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0126 (0xC126) found at 5 location(s)"
+      "note": "DTC U0126 (0xC126) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "U0155",
       "dtc_identifier": 49493,
       "oem_name": "CAN communication error (meter)",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x842FD"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0155 (0xC155) found at 1 location(s)"
+      "note": "DTC U0155 (0xC155) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "U023A",
       "dtc_identifier": 49722,
       "oem_name": "CAN communication error (SCM)",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x30CBD",
-        "0x30CC5",
-        "0x4CB5D",
-        "0x690C3",
-        "0x7DB1B",
-        "0x7DBF1",
-        "0x7FE93",
-        "0x8232D",
-        "0x82395",
-        "0x823E5"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U023A (0xC23A) found at 10 location(s)"
+      "note": "DTC U023A (0xC23A) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "U0243",
       "dtc_identifier": 49731,
       "oem_name": "CAN communication error (IPA)",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x2D2D1"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0243 (0xC243) found at 1 location(s)"
+      "note": "DTC U0243 (0xC243) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "U0293",
       "dtc_identifier": 49811,
       "oem_name": "CAN communication error (TRM)",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x30CDD",
-        "0x30CE5",
-        "0x7FB09"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0293 (0xC293) found at 3 location(s)"
+      "note": "DTC U0293 (0xC293) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "U0294",
       "dtc_identifier": 49812,
       "oem_name": "CAN communication error (EHV)",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x44412",
-        "0x8129F",
-        "0x816A5"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0294 (0xC294) found at 3 location(s)"
+      "note": "DTC U0294 (0xC294) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
@@ -965,170 +781,161 @@
       "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0416 (0xC416) not found in CodeFlash — may be diagnostic-only or cross-generation."
+      "note": "DTC U0416 (0xC416) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "dtc",
       "code": "U1103",
       "dtc_identifier": 53507,
       "oem_name": "CAN communication error (IDS)",
-      "match_grade": "exact",
-      "firmware_offsets": [
-        "0x30D6D",
-        "0x30D75",
-        "0x4B9FD",
-        "0x5B365",
-        "0xBB0EB",
-        "0xBDFC3",
-        "0xCB7F5",
-        "0xCDCC1"
-      ],
+      "match_grade": "family",
+      "firmware_offsets": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U1103 (0xD103) found at 8 location(s)"
+      "note": "DTC U1103 (0xD103) not in firmware DTC table — may be diagnostic-only or cross-generation."
     },
     {
       "kind": "monitor",
       "identifier": 257,
       "oem_name": "Diagnosis codes when FFD stored",
       "oem_symbol": "diagnosis_codes_when_ffd_stored",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_table_index": 1,
       "firmware_callback": "0x4E98E",
       "firmware_flags": "0x0020",
       "source_db": "EPS_CAN_P4DK",
       "can_variant_name": "Diagnosis codes when FFD stored",
       "kwp_variant_name": "Torque Sensor 1 Output",
-      "annotation_action": "comment",
-      "note": "Monitor seq 1 → DID 0x0101, callback 0x4E98E. CAN name: 'Diagnosis codes when FFD stored''. KWP conflict: 'Torque Sensor 1 Output'."
+      "annotation_action": "name_callback",
+      "note": "Monitor seq 1 → DID 0x0101, callback 0x4E98E. CAN name: 'Diagnosis codes when FFD stored'. KWP name: 'Torque Sensor 1 Output' (different protocol, expected)."
     },
     {
       "kind": "monitor",
       "identifier": 258,
       "oem_name": "Vehicle speed",
       "oem_symbol": "vehicle_speed",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_table_index": 2,
       "firmware_callback": "0x4CBFC",
       "firmware_flags": "0x0007",
       "source_db": "EPS_CAN_P4DK",
       "can_variant_name": "Vehicle speed",
       "kwp_variant_name": "Meter Vehicle Velocity",
-      "annotation_action": "comment",
+      "annotation_action": "name_callback",
       "ram_source": "DAT_FEBEE90C (vehicle_speed_2B), DAT_FEBEE896 (speed_signal_2B), DAT_FEBEE815 (speed_flag_1B)",
-      "note": "Monitor seq 2 → DID 0x0102, callback 0x4CBFC. CAN name: 'Vehicle speed''. KWP conflict: 'Meter Vehicle Velocity'. RAM: DAT_FEBEE90C (vehicle_speed_2B), DAT_FEBEE896 (speed_signal_2B), DAT_FEBEE815 (speed_flag_1B)."
+      "note": "Monitor seq 2 → DID 0x0102, callback 0x4CBFC. CAN name: 'Vehicle speed'. KWP name: 'Meter Vehicle Velocity' (different protocol, expected). RAM: DAT_FEBEE90C (vehicle_speed_2B), DAT_FEBEE896 (speed_signal_2B), DAT_FEBEE815 (speed_flag_1B)."
     },
     {
       "kind": "monitor",
       "identifier": 259,
       "oem_name": "Engine revolution speed",
       "oem_symbol": "engine_revolution_speed",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_table_index": 3,
       "firmware_callback": "0x4CC76",
       "firmware_flags": "0x0004",
       "source_db": "EPS_CAN_P4DK",
       "can_variant_name": "Engine revolution speed",
       "kwp_variant_name": "Torque Sensor 2 Output",
-      "annotation_action": "comment",
+      "annotation_action": "name_callback",
       "ram_source": "DAT_FEBEE910 (engine_rpm_ptr), DAT_FEBEE814 (rpm_flag_1B); returns 0 when rpm < 100000 (0xF4240)",
-      "note": "Monitor seq 3 → DID 0x0103, callback 0x4CC76. CAN name: 'Engine revolution speed''. KWP conflict: 'Torque Sensor 2 Output'. RAM: DAT_FEBEE910 (engine_rpm_ptr), DAT_FEBEE814 (rpm_flag_1B); returns 0 when rpm < 100000 (0xF4240)."
+      "note": "Monitor seq 3 → DID 0x0103, callback 0x4CC76. CAN name: 'Engine revolution speed'. KWP name: 'Torque Sensor 2 Output' (different protocol, expected). RAM: DAT_FEBEE910 (engine_rpm_ptr), DAT_FEBEE814 (rpm_flag_1B); returns 0 when rpm < 100000 (0xF4240)."
     },
     {
       "kind": "monitor",
       "identifier": 261,
       "oem_name": "Motor instruction current",
       "oem_symbol": "motor_instruction_current",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_table_index": 4,
       "firmware_callback": "0x4CCC4",
       "firmware_flags": "0x000C",
       "source_db": "EPS_CAN_P4DK",
       "can_variant_name": "Motor instruction current",
       "kwp_variant_name": "Motor Actual Current",
-      "annotation_action": "comment",
+      "annotation_action": "name_callback",
       "ram_source": "checkpoint_object 0x204 (10B, magic 0xA55A5AA5), descriptor at CodeFlash 0x212F8",
-      "note": "Monitor seq 5 → DID 0x0105, callback 0x4CCC4. CAN name: 'Motor instruction current''. KWP conflict: 'Motor Actual Current'. RAM: checkpoint_object 0x204 (10B, magic 0xA55A5AA5), descriptor at CodeFlash 0x212F8."
+      "note": "Monitor seq 5 → DID 0x0105, callback 0x4CCC4. CAN name: 'Motor instruction current'. KWP name: 'Motor Actual Current' (different protocol, expected). RAM: checkpoint_object 0x204 (10B, magic 0xA55A5AA5), descriptor at CodeFlash 0x212F8."
     },
     {
       "kind": "monitor",
       "identifier": 265,
       "oem_name": "Steering torque",
       "oem_symbol": "steering_torque",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_table_index": 5,
       "firmware_callback": "0x4CD38",
       "firmware_flags": "0x0006",
       "source_db": "EPS_CAN_P4DK",
       "can_variant_name": "Steering torque",
       "kwp_variant_name": "PIG Power Supply",
-      "annotation_action": "comment",
+      "annotation_action": "name_callback",
       "ram_source": "DAT_FEBEE867..FEBEE86C (6B steering_torque_raw); returns 0xFF fill when invalid (DAT_FEBEE813 != 'Z')",
-      "note": "Monitor seq 9 → DID 0x0109, callback 0x4CD38. CAN name: 'Steering torque''. KWP conflict: 'PIG Power Supply'. RAM: DAT_FEBEE867..FEBEE86C (6B steering_torque_raw); returns 0xFF fill when invalid (DAT_FEBEE813 != 'Z')."
+      "note": "Monitor seq 9 → DID 0x0109, callback 0x4CD38. CAN name: 'Steering torque'. KWP name: 'PIG Power Supply' (different protocol, expected). RAM: DAT_FEBEE867..FEBEE86C (6B steering_torque_raw); returns 0xFF fill when invalid (DAT_FEBEE813 != 'Z')."
     },
     {
       "kind": "monitor",
       "identifier": 267,
       "oem_name": "Output of torque sensor 2",
       "oem_symbol": "output_of_torque_sensor_2",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_table_index": 6,
       "firmware_callback": "0x4CD74",
       "firmware_flags": "0x0010",
       "source_db": "EPS_CAN_P4DK",
       "can_variant_name": "Output of torque sensor 2",
       "kwp_variant_name": "TRQ1 Zero Point Value",
-      "annotation_action": "comment",
+      "annotation_action": "name_callback",
       "ram_source": "checkpoint_object 0x20A (16B, magic 0xA55A5AA5), descriptor at CodeFlash 0x21308",
-      "note": "Monitor seq 11 → DID 0x010B, callback 0x4CD74. CAN name: 'Output of torque sensor 2''. KWP conflict: 'TRQ1 Zero Point Value'. RAM: checkpoint_object 0x20A (16B, magic 0xA55A5AA5), descriptor at CodeFlash 0x21308."
+      "note": "Monitor seq 11 → DID 0x010B, callback 0x4CD74. CAN name: 'Output of torque sensor 2'. KWP name: 'TRQ1 Zero Point Value' (different protocol, expected). RAM: checkpoint_object 0x20A (16B, magic 0xA55A5AA5), descriptor at CodeFlash 0x21308."
     },
     {
       "kind": "monitor",
       "identifier": 272,
       "oem_name": "IG switch status",
       "oem_symbol": "ig_switch_status",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_table_index": 7,
       "firmware_callback": "0x4CDD4",
       "firmware_flags": "0x0004",
       "source_db": "EPS_CAN_P4DK",
       "can_variant_name": "IG switch status",
       "kwp_variant_name": "IG Power Supply Status",
-      "annotation_action": "comment",
+      "annotation_action": "name_callback",
       "ram_source": "FUN_0006909A() result + GP[-0xB99] (FEBEE664); IG_switch_counter arithmetic",
-      "note": "Monitor seq 16 → DID 0x0110, callback 0x4CDD4. CAN name: 'IG switch status''. KWP conflict: 'IG Power Supply Status'. RAM: FUN_0006909A() result + GP[-0xB99] (FEBEE664); IG_switch_counter arithmetic."
+      "note": "Monitor seq 16 → DID 0x0110, callback 0x4CDD4. CAN name: 'IG switch status'. KWP name: 'IG Power Supply Status' (different protocol, expected). RAM: FUN_0006909A() result + GP[-0xB99] (FEBEE664); IG_switch_counter arithmetic."
     },
     {
       "kind": "monitor",
       "identifier": 273,
       "oem_name": "Torque sensor power supply",
       "oem_symbol": "torque_sensor_power_supply",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_table_index": 8,
       "firmware_callback": "0x4CDFC",
       "firmware_flags": "0x0004",
       "source_db": "EPS_CAN_P4DK",
       "can_variant_name": "Torque sensor power supply",
       "kwp_variant_name": "Torque Sensor 3 Output",
-      "annotation_action": "comment",
+      "annotation_action": "name_callback",
       "ram_source": "stub: returns 0 without reading any state",
-      "note": "Monitor seq 17 → DID 0x0111, callback 0x4CDFC. CAN name: 'Torque sensor power supply''. KWP conflict: 'Torque Sensor 3 Output'. RAM: stub: returns 0 without reading any state."
+      "note": "Monitor seq 17 → DID 0x0111, callback 0x4CDFC. CAN name: 'Torque sensor power supply'. KWP name: 'Torque Sensor 3 Output' (different protocol, expected). RAM: stub: returns 0 without reading any state."
     },
     {
       "kind": "monitor",
       "identifier": 274,
       "oem_name": "No. of diagnosis codes",
       "oem_symbol": "no_of_diagnosis_codes",
-      "match_grade": "candidate",
+      "match_grade": "exact",
       "firmware_table_index": 9,
       "firmware_callback": "0x4CE00",
       "firmware_flags": "0x0004",
       "source_db": "EPS_CAN_P4DK",
       "can_variant_name": "No. of diagnosis codes",
       "kwp_variant_name": "Motor Overheat Record",
-      "annotation_action": "comment",
+      "annotation_action": "name_callback",
       "ram_source": "DAT_FEBE8AB0 + DAT_FEBE89A4 (diagnostic_code_count arithmetic)",
-      "note": "Monitor seq 18 → DID 0x0112, callback 0x4CE00. CAN name: 'No. of diagnosis codes''. KWP conflict: 'Motor Overheat Record'. RAM: DAT_FEBE8AB0 + DAT_FEBE89A4 (diagnostic_code_count arithmetic)."
+      "note": "Monitor seq 18 → DID 0x0112, callback 0x4CE00. CAN name: 'No. of diagnosis codes'. KWP name: 'Motor Overheat Record' (different protocol, expected). RAM: DAT_FEBE8AB0 + DAT_FEBE89A4 (diagnostic_code_count arithmetic)."
     },
     {
       "kind": "monitor",
@@ -3684,402 +3491,6 @@
       "note": "Techstream Data List monitor 'Torque sensor power supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
-      "kind": "active_test",
-      "oem_name": "Dummy",
-      "oem_symbol": "dummy",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'Dummy' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "OFF",
-      "oem_symbol": "off",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'OFF' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "ON",
-      "oem_symbol": "on",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'ON' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "Unrec",
-      "oem_symbol": "unrec",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'Unrec' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "Rec",
-      "oem_symbol": "rec",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'Rec' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "-",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test '-' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "IG",
-      "oem_symbol": "ig",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'IG' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "ACC",
-      "oem_symbol": "acc",
-      "subfunction": 2,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'ACC' subfunction 0x0002 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "+B",
-      "oem_symbol": "b",
-      "subfunction": 3,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test '+B' subfunction 0x0003 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "-",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test '-' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "IG",
-      "oem_symbol": "ig",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'IG' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "-",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test '-' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "Mirror Up/Down",
-      "oem_symbol": "mirror_up_down",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'Mirror Up/Down' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "-",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test '-' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "Slide Roof",
-      "oem_symbol": "slide_roof",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_P4DK3",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'Slide Roof' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "Dummy",
-      "oem_symbol": "dummy",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'Dummy' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "unnamed",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'unnamed' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "unnamed",
-      "oem_symbol": "unnamed",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'unnamed' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "unnamed",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'unnamed' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "unnamed",
-      "oem_symbol": "unnamed",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'unnamed' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "unnamed",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'unnamed' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "unnamed",
-      "oem_symbol": "unnamed",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'unnamed' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "OFF",
-      "oem_symbol": "off",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'OFF' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "IGON",
-      "oem_symbol": "igon",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'IGON' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "Normal",
-      "oem_symbol": "normal",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'Normal' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "Check",
-      "oem_symbol": "check",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'Check' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "-",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test '-' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "IG",
-      "oem_symbol": "ig",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'IG' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "ACC",
-      "oem_symbol": "acc",
-      "subfunction": 2,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'ACC' subfunction 0x0002 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "+B",
-      "oem_symbol": "b",
-      "subfunction": 3,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test '+B' subfunction 0x0003 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "-",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test '-' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "IG",
-      "oem_symbol": "ig",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'IG' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "-",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test '-' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "Mirror Up/Down",
-      "oem_symbol": "mirror_up_down",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'Mirror Up/Down' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "-",
-      "oem_symbol": "unnamed",
-      "subfunction": 0,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test '-' subfunction 0x0000 has no direct firmware table match."
-    },
-    {
-      "kind": "active_test",
-      "oem_name": "Slide Roof",
-      "oem_symbol": "slide_roof",
-      "subfunction": 1,
-      "match_grade": "family",
-      "source_db": "EPS_CAN_P4DK",
-      "firmware_ref": null,
-      "annotation_action": "vocabulary",
-      "note": "Active test 'Slide Roof' subfunction 0x0001 has no direct firmware table match."
-    },
-    {
       "kind": "service",
       "sid": 16,
       "oem_name": "DiagnosticSessionControl",
@@ -4285,783 +3696,513 @@
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Learning of Stroke Sensor Zero Point",
-      "oem_symbol": "learning_of_stroke_sensor_zero_point",
-      "match_grade": "structural",
-      "string_index": 633,
+      "oem_name": "Control Mode Change has failed.",
+      "oem_symbol": "control_mode_change_has_failed",
+      "match_grade": "family",
+      "string_index": 17,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Learning of Stroke Sensor Zero Point' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"RR wheel\" in above steps as \"FL wheel\".)",
-      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_fl_wheel_read_rr_wheel_in_above_steps_as_fl_wheel",
+      "oem_name": "Increase Line",
+      "oem_symbol": "increase_line",
+      "match_grade": "family",
+      "string_index": 221,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following 3 steps.",
+      "oem_symbol": "perform_the_following_3_steps",
+      "match_grade": "family",
+      "string_index": 277,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following 4 steps.",
+      "oem_symbol": "perform_the_following_4_steps",
+      "match_grade": "family",
+      "string_index": 280,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following 4 steps.",
+      "oem_symbol": "perform_the_following_4_steps",
+      "match_grade": "family",
+      "string_index": 294,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following 4 steps.",
+      "oem_symbol": "perform_the_following_4_steps",
+      "match_grade": "family",
+      "string_index": 311,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following 4 steps.",
+      "oem_symbol": "perform_the_following_4_steps",
+      "match_grade": "family",
+      "string_index": 316,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following 3 steps.",
+      "oem_symbol": "perform_the_following_3_steps",
+      "match_grade": "family",
+      "string_index": 330,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following 4 steps.",
+      "oem_symbol": "perform_the_following_4_steps",
+      "match_grade": "family",
+      "string_index": 337,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following 4 steps.",
+      "oem_symbol": "perform_the_following_4_steps",
+      "match_grade": "family",
+      "string_index": 355,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following 4 steps.",
+      "oem_symbol": "perform_the_following_4_steps",
+      "match_grade": "family",
+      "string_index": 360,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "1: Depress the brake pedal several times.",
+      "oem_symbol": "1_depress_the_brake_pedal_several_times",
+      "match_grade": "family",
+      "string_index": 524,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "1: Depress the brake pedal several times.",
+      "oem_symbol": "1_depress_the_brake_pedal_several_times",
+      "match_grade": "family",
+      "string_index": 549,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "1: Depress the brake pedal several times.",
+      "oem_symbol": "1_depress_the_brake_pedal_several_times",
+      "match_grade": "family",
+      "string_index": 552,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Learning of Stroke Sensor Zero Point",
+      "oem_symbol": "learning_of_stroke_sensor_zero_point",
+      "match_grade": "family",
+      "string_index": 633,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "4: Perform above steps of 1 to 3 for FL wheel.",
+      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_fl_wheel",
       "match_grade": "family",
       "string_index": 672,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure '4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"RR wheel\" in above steps as \"FL wheel\".)'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"FR wheel\" in above steps as \"RL wheel\".)",
-      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_rl_wheel_read_fr_wheel_in_above_steps_as_rl_wheel",
+      "oem_name": "4: Perform above steps of 1 to 3 for RL wheel.",
+      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_rl_wheel",
       "match_grade": "family",
       "string_index": 673,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure '4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"FR wheel\" in above steps as \"RL wheel\".)'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)",
-      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_fl_wheel_read_fr_wheel_in_above_steps_as_fl_wheel",
+      "oem_name": "4: Perform above steps of 1 to 3 for FL wheel.",
+      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_fl_wheel",
       "match_grade": "family",
       "string_index": 681,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure '4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)",
-      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_rl_wheel_read_rr_wheel_in_above_steps_as_rl_wheel",
+      "oem_name": "4: Perform above steps of 1 to 3 for RL wheel.",
+      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_rl_wheel",
       "match_grade": "family",
       "string_index": 683,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure '4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "8: Perform above steps of 1 to 7 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)",
-      "oem_symbol": "8_perform_above_steps_of_1_to_7_for_rl_wheel_read_rr_wheel_in_above_steps_as_rl_wheel",
+      "oem_name": "8: Perform above steps of 1 to 7 for RL wheel.",
+      "oem_symbol": "8_perform_above_steps_of_1_to_7_for_rl_wheel",
       "match_grade": "family",
       "string_index": 702,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure '8: Perform above steps of 1 to 7 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "8: Perform above steps of 1 to 7 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)",
-      "oem_symbol": "8_perform_above_steps_of_1_to_7_for_fl_wheel_read_fr_wheel_in_above_steps_as_fl_wheel",
+      "oem_name": "8: Perform above steps of 1 to 7 for FL wheel.",
+      "oem_symbol": "8_perform_above_steps_of_1_to_7_for_fl_wheel",
       "match_grade": "family",
       "string_index": 703,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure '8: Perform above steps of 1 to 7 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "This function is used to calibrate zero point of the sensor and store system information.",
+      "oem_symbol": "this_function_is_used_to_calibrate_zero_point_of_the_sensor_and_store_system_information",
+      "match_grade": "family",
+      "string_index": 743,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Learning of Stroke Sensor Zero Point",
       "oem_symbol": "learning_of_stroke_sensor_zero_point",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 783,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Learning of Stroke Sensor Zero Point' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "This function is used to calibrate zero point of the sensor and store system information.",
+      "oem_symbol": "this_function_is_used_to_calibrate_zero_point_of_the_sensor_and_store_system_information",
+      "match_grade": "family",
+      "string_index": 1314,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Zero Point of Stroke Sensor Learning Status",
       "oem_symbol": "zero_point_of_stroke_sensor_learning_status",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 1316,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Zero Point of Stroke Sensor Learning Status' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Zero Point of G Sensor Learning Status",
       "oem_symbol": "zero_point_of_g_sensor_learning_status",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 1320,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Zero Point of G Sensor Learning Status' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Zero Point of Yaw Rate Sensor Learning Status",
       "oem_symbol": "zero_point_of_yaw_rate_sensor_learning_status",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 1321,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Zero Point of Yaw Rate Sensor Learning Status' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Memorize the steering angle zero point.\r\n\r\nPress Next to proceed.",
-      "oem_symbol": "memorize_the_steering_angle_zero_point_press_next_to_proceed",
-      "match_grade": "structural",
+      "oem_name": "Memorize the steering angle zero point.",
+      "oem_symbol": "memorize_the_steering_angle_zero_point",
+      "match_grade": "family",
       "string_index": 4353,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Memorize the steering angle zero point.\r\n\r\nPress Next to proceed.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Press Next to proceed after Oil Pressure Sensor Zero Point Learning is complete.",
       "oem_symbol": "press_next_to_proceed_after_oil_pressure_sensor_zero_point_learning_is_complete",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6159,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Press Next to proceed after Oil Pressure Sensor Zero Point Learning is complete.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following operations.",
+      "oem_symbol": "perform_the_following_operations",
+      "match_grade": "family",
+      "string_index": 6160,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "2. Oil Pressure Sensor Zero Point Learning",
       "oem_symbol": "2_oil_pressure_sensor_zero_point_learning",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6161,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure '2. Oil Pressure Sensor Zero Point Learning' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Line Pressure/Belt Clamping Pressure Learning has failed because Oil Pressure Sensor Zero Point Learning has not been co",
+      "oem_symbol": "line_pressure_belt_clamping_pressure_learning_has_failed_because_oil_pressure_sensor_zero_point_learning_has_not_been_co",
+      "match_grade": "family",
+      "string_index": 6175,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "2. Oil Pressure Sensor Zero Point Learning",
       "oem_symbol": "2_oil_pressure_sensor_zero_point_learning",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6190,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure '2. Oil Pressure Sensor Zero Point Learning' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "3. G Sensor Zero Point Learning",
       "oem_symbol": "3_g_sensor_zero_point_learning",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6192,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure '3. G Sensor Zero Point Learning' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Press Next to start G Sensor Zero Point Learning.",
       "oem_symbol": "press_next_to_start_g_sensor_zero_point_learning",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6193,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Press Next to start G Sensor Zero Point Learning.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "3. G Sensor Zero Point Learning",
       "oem_symbol": "3_g_sensor_zero_point_learning",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6195,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure '3. G Sensor Zero Point Learning' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Perform the following operations.",
+      "oem_symbol": "perform_the_following_operations",
+      "match_grade": "family",
+      "string_index": 6197,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "3. G Sensor Zero Point Learning",
       "oem_symbol": "3_g_sensor_zero_point_learning",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6198,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure '3. G Sensor Zero Point Learning' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "G Sensor Zero Point Learning has failed.",
+      "oem_symbol": "g_sensor_zero_point_learning_has_failed",
+      "match_grade": "family",
+      "string_index": 6204,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Press Next after Oil Pressure Sensor Zero Point Learning is complete.",
       "oem_symbol": "press_next_after_oil_pressure_sensor_zero_point_learning_is_complete",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6205,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Press Next after Oil Pressure Sensor Zero Point Learning is complete.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Torque Sensor Writing",
       "oem_symbol": "torque_sensor_writing",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6585,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Writing' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Torque Sensor Writing",
       "oem_symbol": "torque_sensor_writing",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6586,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Writing' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment has failed.",
+      "oem_symbol": "torque_sensor_adjustment_has_failed",
+      "match_grade": "family",
+      "string_index": 6590,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Writing is completed.",
+      "oem_symbol": "torque_sensor_writing_is_completed",
+      "match_grade": "family",
+      "string_index": 6591,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment has failed.",
+      "oem_symbol": "torque_sensor_adjustment_has_failed",
+      "match_grade": "family",
+      "string_index": 6593,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment has failed.",
+      "oem_symbol": "torque_sensor_adjustment_has_failed",
+      "match_grade": "family",
+      "string_index": 6597,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Error Torque Sensor Adjustment",
       "oem_symbol": "error_torque_sensor_adjustment",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6598,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Error Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Turn the ignition switch ON.\r\n\r\nPress Next to perform Torque Sensor Writing.",
-      "oem_symbol": "turn_the_ignition_switch_on_press_next_to_perform_torque_sensor_writing",
-      "match_grade": "structural",
+      "oem_name": "Turn the ignition switch ON.",
+      "oem_symbol": "turn_the_ignition_switch_on",
+      "match_grade": "family",
       "string_index": 6599,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Turn the ignition switch ON.\r\n\r\nPress Next to perform Torque Sensor Writing.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Torque Sensor Adjustment",
       "oem_symbol": "torque_sensor_adjustment",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6600,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Torque Sensor Initialization ",
+      "oem_name": "Welcome to the Torque Sensor Adjustment wizard.",
+      "oem_symbol": "welcome_to_the_torque_sensor_adjustment_wizard",
+      "match_grade": "family",
+      "string_index": 6601,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Initialization",
       "oem_symbol": "torque_sensor_initialization",
       "match_grade": "family",
       "string_index": 6604,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Initialization '"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5070,550 +4211,288 @@
       "match_grade": "family",
       "string_index": 6605,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Press Next to perform Torque Sensor Initialization.'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Torque Sensor Initialization ",
+      "oem_name": "Torque Sensor Initialization",
       "oem_symbol": "torque_sensor_initialization",
       "match_grade": "family",
       "string_index": 6606,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Initialization '"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Initialization is completed.",
+      "oem_symbol": "torque_sensor_initialization_is_completed",
+      "match_grade": "family",
+      "string_index": 6607,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Torque Sensor Writing",
       "oem_symbol": "torque_sensor_writing",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6609,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Writing' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Torque Sensor Adjustment",
       "oem_symbol": "torque_sensor_adjustment",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6611,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment has failed.",
+      "oem_symbol": "torque_sensor_adjustment_has_failed",
+      "match_grade": "family",
+      "string_index": 6662,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment has failed.",
+      "oem_symbol": "torque_sensor_adjustment_has_failed",
+      "match_grade": "family",
+      "string_index": 6666,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Torque Sensor Writing",
       "oem_symbol": "torque_sensor_writing",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6667,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Writing' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment has failed.",
+      "oem_symbol": "torque_sensor_adjustment_has_failed",
+      "match_grade": "family",
+      "string_index": 6670,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Torque Sensor Writing",
       "oem_symbol": "torque_sensor_writing",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6671,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Writing' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Writing is completed.",
+      "oem_symbol": "torque_sensor_writing_is_completed",
+      "match_grade": "family",
+      "string_index": 6673,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Torque Sensor Adjustment",
       "oem_symbol": "torque_sensor_adjustment",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6674,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Torque Sensor Adjustment",
       "oem_symbol": "torque_sensor_adjustment",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 6676,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Welcome to the Torque Sensor Adjustment wizard.",
+      "oem_symbol": "welcome_to_the_torque_sensor_adjustment_wizard",
+      "match_grade": "family",
+      "string_index": 6679,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Initialization is completed.",
+      "oem_symbol": "torque_sensor_initialization_is_completed",
+      "match_grade": "family",
+      "string_index": 6684,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Welcome to the Torque Sensor Adjustment Utility.",
+      "oem_symbol": "welcome_to_the_torque_sensor_adjustment_utility",
+      "match_grade": "family",
+      "string_index": 12121,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Do you want to exit Torque Sensor Adjustment ?",
       "oem_symbol": "do_you_want_to_exit_torque_sensor_adjustment",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 12122,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Do you want to exit Torque Sensor Adjustment ?' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Torque Sensor Adjustment has failed.\r\nEMPS ECU malfunction occurred.\r\nRefer to the repair manual.",
-      "oem_symbol": "torque_sensor_adjustment_has_failed_emps_ecu_malfunction_occurred_refer_to_the_repair_manual",
-      "match_grade": "structural",
+      "oem_name": "Torque Sensor Adjustment has failed.",
+      "oem_symbol": "torque_sensor_adjustment_has_failed",
+      "match_grade": "family",
+      "string_index": 12124,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment has failed.",
+      "oem_symbol": "torque_sensor_adjustment_has_failed",
+      "match_grade": "family",
       "string_index": 12125,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Adjustment has failed.\r\nEMPS ECU malfunction occurred.\r\nRefer to the repair manual.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Torque Sensor Adjustment Complete.\r\n\r\nConfirm the PS warning light is OFF.",
-      "oem_symbol": "torque_sensor_adjustment_complete_confirm_the_ps_warning_light_is_off",
-      "match_grade": "structural",
+      "oem_name": "Torque Sensor Adjustment Complete.",
+      "oem_symbol": "torque_sensor_adjustment_complete",
+      "match_grade": "family",
       "string_index": 12126,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Torque Sensor Adjustment Complete.\r\n\r\nConfirm the PS warning light is OFF.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment has failed.",
+      "oem_symbol": "torque_sensor_adjustment_has_failed",
+      "match_grade": "family",
+      "string_index": 12127,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Error Torque Sensor Adjustment",
       "oem_symbol": "error_torque_sensor_adjustment",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 12131,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x2005",
-          "start_callback": "0x4ED2C",
-          "result_callback": "0x4ED40"
-        },
-        {
-          "routine_id": "0x2006",
-          "start_callback": "0x4ED76",
-          "result_callback": "0x4ED8A"
-        },
-        {
-          "routine_id": "0x2007",
-          "start_callback": "0x4EDC0",
-          "result_callback": "0x4EDD4"
-        },
-        {
-          "routine_id": "0x2008",
-          "start_callback": "0x4EE0A",
-          "result_callback": "0x4EE1E"
-        },
-        {
-          "routine_id": "0x2009",
-          "start_callback": "0x4EE54",
-          "result_callback": "0x4EE68"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Error Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Do you want to exit the Power Steering ECU Initial Setting Utility?",
       "oem_symbol": "do_you_want_to_exit_the_power_steering_ecu_initial_setting_utility",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 12272,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        },
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Do you want to exit the Power Steering ECU Initial Setting Utility?' → firmware routines: 0x0204, 0x1000, 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Power Steering ECU Initial Setting",
       "oem_symbol": "power_steering_ecu_initial_setting",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 12274,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        },
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Power Steering ECU Initial Setting' → firmware routines: 0x0204, 0x1000, 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Power Steering ECU Initial Setting has failed.",
+      "oem_symbol": "power_steering_ecu_initial_setting_has_failed",
+      "match_grade": "family",
+      "string_index": 12275,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Power Steering ECU Initial Setting is complete.",
       "oem_symbol": "power_steering_ecu_initial_setting_is_complete",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 12277,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        },
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Power Steering ECU Initial Setting is complete.' → firmware routines: 0x0204, 0x1000, 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "This function is used to perform the initial setting of the Power Steering ECU.",
+      "oem_symbol": "this_function_is_used_to_perform_the_initial_setting_of_the_power_steering_ecu",
+      "match_grade": "family",
+      "string_index": 12280,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Power Steering ECU Initial Setting",
       "oem_symbol": "power_steering_ecu_initial_setting",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 12281,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        },
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Power Steering ECU Initial Setting' → firmware routines: 0x0204, 0x1000, 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Error Power Steering ECU Initial Setting",
       "oem_symbol": "error_power_steering_ecu_initial_setting",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 12282,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        },
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Error Power Steering ECU Initial Setting' → firmware routines: 0x0204, 0x1000, 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5622,9 +4501,8 @@
       "match_grade": "family",
       "string_index": 16257,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Power Steering System'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5633,9 +4511,8 @@
       "match_grade": "family",
       "string_index": 16259,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Power Steering System'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5644,9 +4521,8 @@
       "match_grade": "family",
       "string_index": 16314,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Power Steering System'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5655,31 +4531,38 @@
       "match_grade": "family",
       "string_index": 16421,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Power Steering System'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Factory initial setting",
       "oem_symbol": "factory_initial_setting",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 18034,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Factory initial setting' → firmware routines: 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Clear the Assist Map of Electric Power Steering.",
+      "oem_symbol": "clear_the_assist_map_of_electric_power_steering",
+      "match_grade": "family",
+      "string_index": 18383,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "ECU abnormal",
+      "oem_symbol": "ecu_abnormal",
+      "match_grade": "family",
+      "string_index": 18385,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5688,9 +4571,8 @@
       "match_grade": "family",
       "string_index": 19921,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Lost Communication With Power Steering Control Module'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5699,141 +4581,88 @@
       "match_grade": "family",
       "string_index": 19931,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Software Incompatibility with Power Steering Control Module'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "INITIAL SETTING",
       "oem_symbol": "initial_setting",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 24035,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'INITIAL SETTING' → firmware routines: 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Do you want to exit the Steering Actuator ECU Initial Setting Utility?",
       "oem_symbol": "do_you_want_to_exit_the_steering_actuator_ecu_initial_setting_utility",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 24036,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Do you want to exit the Steering Actuator ECU Initial Setting Utility?' → firmware routines: 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Steering Actuator ECU Initial Setting is complete.",
       "oem_symbol": "steering_actuator_ecu_initial_setting_is_complete",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 24038,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Actuator ECU Initial Setting is complete.' → firmware routines: 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Actuator ECU Initial Setting has failed.",
+      "oem_symbol": "steering_actuator_ecu_initial_setting_has_failed",
+      "match_grade": "family",
+      "string_index": 24040,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "This function is used to perform the initial setting of the Steering Actuator ECU.",
+      "oem_symbol": "this_function_is_used_to_perform_the_initial_setting_of_the_steering_actuator_ecu",
+      "match_grade": "family",
+      "string_index": 24042,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Error Steering Actuator ECU Initial Setting",
       "oem_symbol": "error_steering_actuator_ecu_initial_setting",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 24043,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Error Steering Actuator ECU Initial Setting' → firmware routines: 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Steering Actuator ECU Initial Setting",
       "oem_symbol": "steering_actuator_ecu_initial_setting",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 24044,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Actuator ECU Initial Setting' → firmware routines: 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
       "oem_name": "Steering Actuator ECU Initial Setting",
       "oem_symbol": "steering_actuator_ecu_initial_setting",
-      "match_grade": "structural",
+      "match_grade": "family",
       "string_index": 24045,
       "source_db": "U_English",
-      "firmware_routines": [
-        {
-          "routine_id": "0x0204",
-          "start_callback": "0x4EC16",
-          "result_callback": "0x4EC2A"
-        },
-        {
-          "routine_id": "0x1000",
-          "start_callback": "0x4F054",
-          "result_callback": "0x4F060"
-        }
-      ],
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Actuator ECU Initial Setting' → firmware routines: 0x0204, 0x1000"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5842,20 +4671,38 @@
       "match_grade": "family",
       "string_index": 24048,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Do you want to exit the Steering Torque Actuator Adjust 1 Utility?'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Steering Torque Actuator Adjust 1 is finished.\r\nTurn the engine/power switch OFF and ON.",
-      "oem_symbol": "steering_torque_actuator_adjust_1_is_finished_turn_the_engine_power_switch_off_and_on",
+      "oem_name": "Steering Torque Actuator Adjust 1 has failed.",
+      "oem_symbol": "steering_torque_actuator_adjust_1_has_failed",
+      "match_grade": "family",
+      "string_index": 24049,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 1 has failed.",
+      "oem_symbol": "steering_torque_actuator_adjust_1_has_failed",
+      "match_grade": "family",
+      "string_index": 24050,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 1 is finished.",
+      "oem_symbol": "steering_torque_actuator_adjust_1_is_finished",
       "match_grade": "family",
       "string_index": 24051,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Torque Actuator Adjust 1 is finished.\r\nTurn the engine/power switch OFF and ON.'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5864,20 +4711,18 @@
       "match_grade": "family",
       "string_index": 24055,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Torque Actuator Adjust 1'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Steering Torque Actuator Adjust 1 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.",
-      "oem_symbol": "steering_torque_actuator_adjust_1_is_complete_turn_the_engine_power_switch_off_and_on",
+      "oem_name": "Steering Torque Actuator Adjust 1 is complete.",
+      "oem_symbol": "steering_torque_actuator_adjust_1_is_complete",
       "match_grade": "family",
       "string_index": 24056,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Torque Actuator Adjust 1 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5886,9 +4731,18 @@
       "match_grade": "family",
       "string_index": 24057,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Error Steering Torque Actuator Adjust 1'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "This function is used to set the value of the steering torque actuator.",
+      "oem_symbol": "this_function_is_used_to_set_the_value_of_the_steering_torque_actuator",
+      "match_grade": "family",
+      "string_index": 24058,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5897,20 +4751,18 @@
       "match_grade": "family",
       "string_index": 24061,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Torque Actuator Adjust 1'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Steering Torque Actuator Adjust 2 is finished.\r\nTurn the engine/power switch OFF and ON.",
-      "oem_symbol": "steering_torque_actuator_adjust_2_is_finished_turn_the_engine_power_switch_off_and_on",
+      "oem_name": "Steering Torque Actuator Adjust 2 is finished.",
+      "oem_symbol": "steering_torque_actuator_adjust_2_is_finished",
       "match_grade": "family",
       "string_index": 24065,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Torque Actuator Adjust 2 is finished.\r\nTurn the engine/power switch OFF and ON.'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5919,20 +4771,38 @@
       "match_grade": "family",
       "string_index": 24069,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Do you want to exit the Steering Torque Actuator Adjust 2 Utility?'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
-      "oem_name": "Steering Torque Actuator Adjust 2 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.",
-      "oem_symbol": "steering_torque_actuator_adjust_2_is_complete_turn_the_engine_power_switch_off_and_on",
+      "oem_name": "Steering Torque Actuator Adjust 2 has failed.",
+      "oem_symbol": "steering_torque_actuator_adjust_2_has_failed",
+      "match_grade": "family",
+      "string_index": 24070,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 2 is complete.",
+      "oem_symbol": "steering_torque_actuator_adjust_2_is_complete",
       "match_grade": "family",
       "string_index": 24071,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Torque Actuator Adjust 2 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "This function is used to adjust the steering torque actuator.",
+      "oem_symbol": "this_function_is_used_to_adjust_the_steering_torque_actuator",
+      "match_grade": "family",
+      "string_index": 24074,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5941,9 +4811,8 @@
       "match_grade": "family",
       "string_index": 24075,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Error Steering Torque Actuator Adjust 2'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5952,9 +4821,8 @@
       "match_grade": "family",
       "string_index": 24076,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Torque Actuator Adjust 2'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5963,9 +4831,38 @@
       "match_grade": "family",
       "string_index": 24077,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Steering Torque Actuator Adjust 2'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust is performed.",
+      "oem_symbol": "steering_torque_actuator_adjust_is_performed",
+      "match_grade": "family",
+      "string_index": 24078,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjustment Value Clear is complete.",
+      "oem_symbol": "steering_torque_actuator_adjustment_value_clear_is_complete",
+      "match_grade": "family",
+      "string_index": 24080,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjustment Value Clear has failed.",
+      "oem_symbol": "steering_torque_actuator_adjustment_value_clear_has_failed",
+      "match_grade": "family",
+      "string_index": 24081,
+      "source_db": "U_English",
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5974,9 +4871,8 @@
       "match_grade": "family",
       "string_index": 25057,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Lost Communication With Power Steering Control Module'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5985,9 +4881,8 @@
       "match_grade": "family",
       "string_index": 25065,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Invalid Data Received From Power Steering Control Module'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -5996,9 +4891,8 @@
       "match_grade": "family",
       "string_index": 25428,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Lost Communication With Power Steering Control Module'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -6007,9 +4901,8 @@
       "match_grade": "family",
       "string_index": 25516,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Lost Communication With Power Steering Control Module'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     },
     {
       "kind": "utility_procedure",
@@ -6018,9 +4911,8 @@
       "match_grade": "family",
       "string_index": 25534,
       "source_db": "U_English",
-      "firmware_routines": null,
-      "annotation_action": "comment",
-      "note": "Utility procedure 'Lost Communication With Power Steering Control Module'"
+      "annotation_action": "vocabulary",
+      "note": "Utility procedure text from Techstream dealer service wizard. OEM-facing instruction, not firmware-identified."
     }
   ]
 }

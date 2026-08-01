@@ -160,34 +160,6 @@ def extract_monitors(
     return entries
 
 
-def extract_active_tests(
-    db: ECUDataBase, dbs: dict[str, StringDataBase]
-) -> list[dict]:
-    """Extract active test/routine records from section type 14 (24-byte records)."""
-    entries = []
-    if 14 not in db.sections:
-        return entries
-    sec = db.sections[14]
-    rec_size = 24
-    for i in range(sec.header.record_count):
-        raw = sec.raw_data[i * rec_size : (i + 1) * rec_size]
-        name_idx = struct.unpack_from("<H", raw, 0)[0]
-        subfunc = struct.unpack_from("<H", raw, 4)[0]
-        resolutions = resolve_all(name_idx, dbs)
-        entries.append(
-            {
-                "kind": "active_test",
-                "record_index": i,
-                "name_string_index": name_idx,
-                "resolved_name": resolutions.get("M_English"),
-                "resolutions": resolutions,
-                "subfunction": subfunc,
-                "source_db": db.name,
-            }
-        )
-    return entries
-
-
 def extract_utility_procedures(
     u_db: StringDataBase,
 ) -> list[dict]:
@@ -250,24 +222,28 @@ def build_catalog() -> dict:
         entries.extend(extract_dtcs(db, dbs))
         entries.extend(extract_dids(db))
         entries.extend(extract_monitors(db, dbs))
-        entries.extend(extract_active_tests(db, dbs))
 
     # Load U_English utility procedures
     if "U_English" in dbs:
         entries.extend(extract_utility_procedures(dbs["U_English"]))
 
-    # Deduplicate
+    # Deduplicate. DIDs are keyed by identifier alone (same DID across DDB
+    # variants is the same diagnostic concept). DTCs and monitors keep
+    # source_db in the key since KWP and CAN use different names.
     seen = set()
     deduped = []
     for e in entries:
-        key = (
-            e["kind"],
-            e.get("code"),
-            e.get("identifier"),
-            e.get("record_index"),
-            e.get("source_db"),
-            e.get("string_index"),
-        )
+        if e["kind"] == "did":
+            key = (e["kind"], e.get("identifier"))
+        else:
+            key = (
+                e["kind"],
+                e.get("code"),
+                e.get("identifier"),
+                e.get("record_index"),
+                e.get("source_db"),
+                e.get("string_index"),
+            )
         if key not in seen:
             seen.add(key)
             deduped.append(e)

@@ -4,10 +4,16 @@
 Verifies that:
   1. The correlation engine produces the expected vocabulary artifact.
   2. Every "exact" DID match has a real callback address in the firmware DID table.
-  3. Every DTC offset is a real 2-byte match in CodeFlash.
+  3. Every DTC "exact" match is in the firmware DTC table (structural, not byte search).
   4. Every "exact" service match references a real callback in the service table.
   5. The firmware SHA256 in the vocabulary matches the actual firmware hash.
   6. No auto-applied (symbol rename) mapping has grade < exact.
+  7. Monitor→DID bridges use CAN-authoritative grading (not candidate for KWP differences).
+  8. Utility procedures are family-only (no keyword slop to firmware routines).
+  9. Active tests are NOT extracted (section 14 is PID display config, not active tests).
+
+Independently verifies DDB parsing against raw bytes — does not trust the
+correlation engine's own output for DDB field offsets.
 
 No Ghidra required — all checks use raw firmware bytes and the generated JSON.
 """
@@ -20,8 +26,6 @@ import sys
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 FW_SHA = hashlib.sha256(CF).hexdigest()
-
-VOCAB_PATH = REPO / "data" / "generated" / "21140bbd65e530a9" / "diagnostic_vocabulary.json"
 
 passed = 0
 failed = 0
@@ -43,7 +47,7 @@ def check(name, cond, detail=""):
 
 sys.path.insert(0, str(REPO / "tools" / "diagnostics"))
 sys.path.insert(0, str(REPO / "tools" / "techstream"))
-from correlate_vocabulary import build_vocabulary  # noqa: E402
+from correlate_vocabulary import build_vocabulary, scan_firmware_dtc_table  # noqa: E402
 from firmware_tables import extract_all, DID_TABLE_BASE, DID_TABLE_COUNT  # noqa: E402
 
 vocab = build_vocabulary()
@@ -66,16 +70,18 @@ check("vocabulary firmware service table count is 23",
       vocab["firmware_tables"]["service_table"]["count"] == 23)
 check("vocabulary firmware routine table count is 32",
       vocab["firmware_tables"]["routine_table"]["count"] == 32)
+check("vocabulary has DTC table metadata", "dtc_table" in vocab["firmware_tables"])
 check("vocabulary has summary with grade counts", "by_grade" in vocab["summary"])
 check("vocabulary has mappings list", len(mappings) > 0)
 
 
 print("\n== DID correlations ==")
 did_mappings = [m for m in mappings if m["kind"] == "did"]
-check("exactly 12 DID mappings", len(did_mappings) == 12,
-      f"got {len(did_mappings)}")
+# DIDs are now deduplicated by identifier across DDB variants
+check("DID mappings are unique by identifier",
+      len(did_mappings) == len({m["identifier"] for m in did_mappings}),
+      f"{len(did_mappings)} mappings, {len({m['identifier'] for m in did_mappings})} unique")
 
-# All Techstream DIDs must be within the firmware DID range
 fw_did_ids = {d.identifier for d in tables.dids}
 check("all firmware DIDs unique", len(fw_did_ids) == len(tables.dids))
 
@@ -97,24 +103,41 @@ for m in did_mappings:
                   fw_did.flags == int(m["firmware_flags"], 16))
 
 
-print("\n== DTC correlations ==")
+print("\n== DTC correlations (structural table match) ==")
 dtc_mappings = [m for m in mappings if m["kind"] == "dtc"]
-check("DTC mapping count is 54", len(dtc_mappings) == 54,
-      f"got {len(dtc_mappings)}")
 
-dtc_found = [m for m in dtc_mappings if m["firmware_offsets"]]
-check("at least 25 DTCs found in firmware", len(dtc_found) >= 25,
-      f"got {len(dtc_found)}")
+# Independently scan the firmware DTC table
+fw_dtcs = scan_firmware_dtc_table(CF)
+fw_dtc_ids = set(fw_dtcs.keys())
 
-# Verify every claimed DTC offset is a real 2-byte match
-for m in dtc_found:
+dtc_exact = [m for m in dtc_mappings if m["match_grade"] == "exact"]
+dtc_family = [m for m in dtc_mappings if m["match_grade"] == "family"]
+check("DTC exact matches are non-zero", len(dtc_exact) > 0, f"got {len(dtc_exact)}")
+check("DTC family matches exist (diagnostic-only)", len(dtc_family) > 0, f"got {len(dtc_family)}")
+
+# Every "exact" DTC must be in the firmware DTC table
+for m in dtc_exact:
     dtc_id = m["dtc_identifier"]
-    pattern = struct.pack("<H", dtc_id)
-    for off_str in m["firmware_offsets"][:3]:  # verify first 3
+    check(f"DTC {m['code']} (0x{dtc_id:04X}) exact match is in firmware DTC table",
+          dtc_id in fw_dtc_ids,
+          f"not found in table at 0x30A28-0x30C40")
+
+    # Verify each firmware offset actually contains the DTC ID at byte offset 5
+    for off_str in m["firmware_offsets"][:3]:
         offset = int(off_str, 16)
-        check(f"DTC {m['code']} offset 0x{offset:X} contains 0x{dtc_id:04X}",
-              CF[offset:offset + 2] == pattern,
-              f"actual={CF[offset:offset+2].hex()}")
+        if offset + 7 < len(CF):
+            actual_id = struct.unpack_from("<H", CF, offset + 5)[0]
+            check(f"DTC {m['code']} offset 0x{offset:X} has ID 0x{dtc_id:04X} at byte 5",
+                  actual_id == dtc_id,
+                  f"actual=0x{actual_id:04X}")
+
+# No "exact" DTC should come from a blind byte search outside the table
+for m in dtc_exact:
+    for off_str in m["firmware_offsets"]:
+        offset = int(off_str, 16)
+        in_table = 0x30A28 <= offset < 0x30C40
+        check(f"DTC {m['code']} offset 0x{offset:X} is within DTC table bounds",
+              in_table, "false positive from blind byte search")
 
 
 print("\n== service correlations ==")
@@ -131,8 +154,6 @@ check("all standard SIDs present in service mappings",
       expected_sids <= found_sids)
 
 # Service callbacks must match firmware service table.
-# Only compare against primary-table entries (indices 0–16); the extra records
-# (17–22) are shared entries for functional/secondary groups.
 fw_services = {s.sid: s for s in tables.services if s.table_index < 17}
 for m in svc_mappings:
     sid = m["sid"]
@@ -158,15 +179,15 @@ check("all family-grade mappings use comment/vocabulary action",
 
 candidate_mappings = [m for m in mappings if m["match_grade"] == "candidate"]
 check("candidate-grade mappings note their conflict",
-      all("conflict" in m.get("note", "").lower() for m in candidate_mappings),
+      all("conflict" in m.get("note", "").lower() or "multiple" in m.get("note", "").lower()
+          for m in candidate_mappings),
       f"{[m.get('note','')[:50] for m in candidate_mappings[:3]]}")
 
 
 print("\n== monitor vocabulary ==")
 monitor_mappings = [m for m in mappings if m["kind"] == "monitor"]
 
-# Monitors now split into two classes: those bridged to firmware DIDs
-# (via DID = 0x0100 + seq), and remaining family-grade vocabulary.
+# Bridged monitors have firmware_callback set
 bridged = [m for m in monitor_mappings if "firmware_callback" in m]
 check("at least 9 monitors bridged to firmware DIDs", len(bridged) >= 9,
       f"got {len(bridged)}")
@@ -195,22 +216,28 @@ check("at least 7 bridged monitors have RAM source annotations",
 
 # Verify the motor-control RAM sources are present
 ram_text = " ".join(m.get("ram_source", "") for m in ram_sourced)
-check("DID 0x0105 (Motor Actual Current) references checkpoint 0x204",
+check("DID 0x0105 references checkpoint 0x204",
       "checkpoint_object 0x204" in ram_text)
-check("DID 0x0109 (Steering torque) references DAT_FEBEE867",
+check("DID 0x0109 references DAT_FEBEE867",
       "DAT_FEBEE867" in ram_text)
-check("DID 0x010B (torque sensor 2) references checkpoint 0x20A",
+check("DID 0x010B references checkpoint 0x20A",
       "checkpoint_object 0x20A" in ram_text)
 
-# Spot-check key motor-control monitor names are present in bridged monitors
+# Verify CAN-authoritative naming: bridged monitors use CAN names, not KWP
+for m in bridged:
+    can_name = m.get("can_variant_name")
+    if can_name:
+        check(f"DID 0x{m['identifier']:04X} uses CAN name '{can_name}'",
+              m["oem_name"] == can_name)
+
+# Key monitor names (using CAN-authoritative names)
 bridged_names = {m["oem_name"].lower() for m in bridged}
-for expected_name in ("motor actual current", "steering torque",
-                      "thermistor temperature", "pig power supply"):
-    # These may be in either bridged or family depending on KWP/CAN variant
-    all_monitor_names = {m["oem_name"].lower() for m in named_monitors}
-    check(f"monitor '{expected_name}' present in vocabulary",
-          expected_name in all_monitor_names,
-          f"searched {len(all_monitor_names)} names")
+all_monitor_names = {m["oem_name"].lower() for m in named_monitors}
+for expected_name in ("motor instruction current", "steering torque",
+                      "vehicle speed", "engine revolution speed"):
+    check(f"monitor '{expected_name}' present in bridged vocabulary",
+          expected_name in bridged_names,
+          f"searched {len(bridged_names)} bridged names")
 
 
 print("\n== utility procedures ==")
@@ -218,25 +245,21 @@ proc_mappings = [m for m in mappings if m["kind"] == "utility_procedure"]
 check("at least 50 utility procedure mappings", len(proc_mappings) >= 50,
       f"got {len(proc_mappings)}")
 
-structural_procs = [m for m in proc_mappings if m["match_grade"] == "structural"]
-check("at least 10 structural procedure-to-routine matches",
-      len(structural_procs) >= 10, f"got {len(structural_procs)}")
+# Utility procedures must ALL be family grade — no keyword-to-routine matching
+check("all utility procedures are family grade",
+      all(m["match_grade"] == "family" for m in proc_mappings),
+      f"found non-family: {[m['match_grade'] for m in proc_mappings if m['match_grade'] != 'family'][:5]}")
 
-# Verify "Torque Sensor Writing" maps to firmware routines
-ts_writing = [m for m in proc_mappings if "torque sensor writing" in m["oem_name"].lower()]
-check("'Torque Sensor Writing' procedure is present", len(ts_writing) >= 1)
-if ts_writing:
-    check("'Torque Sensor Writing' has structural grade",
-          ts_writing[0]["match_grade"] == "structural")
-    check("'Torque Sensor Writing' references routine 0x2005",
-          any(r["routine_id"] == "0x2005" for r in ts_writing[0].get("firmware_routines", [])))
+check("no utility procedure references firmware routines",
+      all(m.get("firmware_routines") is None for m in proc_mappings))
 
-# Verify "Power Steering ECU Initial Setting" maps to firmware routines
-ps_init = [m for m in proc_mappings if "power steering ecu initial setting" in m["oem_name"].lower()]
-check("'Power Steering ECU Initial Setting' procedure is present", len(ps_init) >= 1)
-if ps_init:
-    check("'Power Steering ECU Initial Setting' references routine 0x0204",
-          any(r["routine_id"] == "0x0204" for r in ps_init[0].get("firmware_routines", [])))
+
+print("\n== active tests removed ==")
+# Section 14 is PID display configuration, NOT active tests.
+# The EPS .ddb files do not contain active test definitions.
+at_mappings = [m for m in mappings if m["kind"] == "active_test"]
+check("no active_test mappings exist (section 14 is PID display config)",
+      len(at_mappings) == 0, f"got {len(at_mappings)}")
 
 
 print("\n== idempotency ==")
@@ -247,9 +270,43 @@ check("rebuild produces same grade distribution",
       vocab2["summary"]["by_grade"] == vocab["summary"]["by_grade"])
 
 
+print("\n== independent DDB field verification ==")
+# Independently verify DTC record layout (section 5, 28 bytes)
+# without trusting the parser's field offsets.
+sys.path.insert(0, str(REPO / "tools" / "techstream"))
+from parse_ddb import DDBParser  # noqa: E402
+
+DB_PATH = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
+parser = DDBParser()
+
+# Verify DTC section 5 records: name index at offset 12 must be u32
+eps_can = parser.parse_ecu_db(DB_PATH / "EPS_CAN_P4DK.ddb")
+sec5 = eps_can.sections[5]
+raw0 = sec5.raw_data[0:28]
+name_idx_u32 = struct.unpack_from("<I", raw0, 12)[0]
+check("DTC name index is u32 at offset 12 (C0051 case)",
+      name_idx_u32 > 65535,
+      f"got {name_idx_u32}")
+
+# Verify monitor section 10: name index at offset 48 must be u32
+sec10 = eps_can.sections[10]
+rec_sz = int(sec10.record_size)
+raw_m0 = sec10.raw_data[0:rec_sz]
+mon_name_idx = struct.unpack_from("<I", raw_m0, 48)[0]
+check("monitor name index is u32 at offset 48",
+      mon_name_idx > 0)
+
+# Verify DID section 3: identifier at offset 4 (u16)
+sec3 = eps_can.sections[3]
+raw_d0 = sec3.raw_data[0:8]
+did_val = struct.unpack_from("<H", raw_d0, 4)[0]
+check("DID identifier is u16 at offset 4 in section 3",
+      did_val == 0x0100,
+      f"got 0x{did_val:04X}")
+
+
 print("\n== three-DB string resolution ==")
-# Verify all three DBs are loaded in the catalog
-cat_path = REPO / "data" / "generated" / "21140bbd65e530a9" / "diagnostic_annotations.json"
+cat_path = REPO / "data" / "generated" / FW_SHA[:16] / "diagnostic_annotations.json"
 catalog = json.loads(cat_path.read_text())
 check("catalog loaded all three string DBs",
       set(catalog["string_databases"].keys()) == {"M_English", "V_English", "U_English"})

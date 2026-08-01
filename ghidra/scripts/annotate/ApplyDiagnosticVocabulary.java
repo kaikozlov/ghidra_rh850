@@ -2,9 +2,10 @@
 //@category Analysis
 // Apply Techstream OEM diagnostic vocabulary to the annotated Ghidra project.
 //
-// Consumes data/generated/<sha>/diagnostic_vocabulary.json — the output of
+// Consumes diagnostic_vocabulary.json — the output of
 // tools/diagnostics/correlate_vocabulary.py — and applies OEM names and
-// comments to DID callbacks, service callbacks, and RAM/data locations.
+// comments to DID callbacks, service callbacks, monitor callbacks, and
+// DTC locations.
 //
 // Match-grade policy:
 //   exact / structural → rename functions, label data, apply full comments
@@ -17,6 +18,7 @@
 // USER_DEFINED name, the OEM name is appended as a comment, not a rename.
 //
 // Run after AnnotateApplicationDiagnostics in the Stage 4 post-analysis pass.
+// The vocabulary path is passed as the first script argument.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.*;
@@ -25,29 +27,18 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.ArrayList;
 
 public class ApplyDiagnosticVocabulary extends GhidraScript {
 
+    private String vocabPath;
+
     private String loadVocabularyPath() throws Exception {
-        // The vocabulary JSON lives at a deterministic path relative to the
-        // project.  In the headless rebuild we pass it via a script argument;
-        // in interactive mode we default to the repo-relative location.
         String[] args = getScriptArgs();
-        if (args != null && args.length > 0) {
+        if (args != null && args.length > 0 && !args[0].isEmpty()) {
             return args[0];
         }
-        // Default: resolve relative to the program's project directory
-        Path p = Path.of("data/generated/21140bbd65e530a9/diagnostic_vocabulary.json");
-        if (!Files.exists(p)) {
-            // Try relative to home
-            p = Path.of(System.getProperty("user.home"),
-                "dev/inspect/repos/ghidra_rh850_analysis",
-                "data/generated/21140bbd65e530a9/diagnostic_vocabulary.json");
-        }
-        if (!Files.exists(p)) {
-            throw new Exception("diagnostic_vocabulary.json not found");
-        }
-        return p.toString();
+        throw new Exception("diagnostic_vocabulary.json path must be passed as the first script argument");
     }
 
     private void addComment(long addr, String text) throws Exception {
@@ -83,109 +74,113 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
         println(a + " → " + symbol + " (Techstream OEM)");
     }
 
-    private void nameDataIfUnnamed(long addr, String oemName, String suffix) throws Exception {
-        Address a = toAddr(addr);
-        SymbolTable st = currentProgram.getSymbolTable();
-        Symbol s = st.getPrimarySymbol(a);
-        if (s != null && !s.getName().startsWith("DAT_")) {
-            addComment(addr, "[Techstream OEM] " + oemName + " (" + suffix + ")");
-            return;
-        }
-        String symbol = oemName.toLowerCase().replaceAll("[^a-z0-9]+", "_") + "_" + suffix;
-        if (s != null) {
-            if (!s.getName().equals(symbol))
-                s.setName(symbol, SourceType.USER_DEFINED);
-        } else {
-            s = st.createLabel(a, symbol, SourceType.USER_DEFINED);
-        }
-        println(a + " → " + symbol + " (Techstream OEM data)");
-    }
-
     @Override
     public void run() throws Exception {
-        String vocabPath = loadVocabularyPath();
+        vocabPath = loadVocabularyPath();
         String json = Files.readString(Path.of(vocabPath));
         println("Loading diagnostic vocabulary from: " + vocabPath);
 
         int applied = 0, commented = 0, skipped = 0;
 
-        // ── Apply DID callback names (exact matches only) ────────────────────
-        // Parse the JSON manually — we only need a few fields per entry.
-        // Using simple string scanning avoids a JSON library dependency.
+        // Parse the "mappings" array and process each entry.
+        JsonParser parser = new JsonParser(json);
+        JsonArray mappings = parser.getObject().getArray("mappings");
 
-        // Find all DID mappings with exact grade and a callback address
-        int idx = 0;
-        while (true) {
-            int kindPos = json.indexOf("\"kind\"", idx);
-            if (kindPos < 0) break;
-            idx = kindPos + 1;
+        for (int i = 0; i < mappings.size(); i++) {
+            JsonObject entry = mappings.getObject(i);
 
-            // Extract the kind value
-            int kindStart = json.indexOf('"', kindPos + 6) + 1;
-            int kindEnd = json.indexOf('"', kindStart);
-            String kind = json.substring(kindStart, kindEnd);
+            String kind = entry.getString("kind", "");
+            String grade = entry.getString("match_grade", "");
+            String action = entry.getString("annotation_action", "");
+            String oemName = entry.getString("oem_name", null);
 
-            // Find the enclosing object to get all fields
-            int objStart = json.lastIndexOf('{', kindPos);
-            int objEnd = findMatchingBrace(json, objStart);
-            if (objEnd < 0) break;
-            String obj = json.substring(objStart, objEnd + 1);
-
-            String grade = extractStringField(obj, "match_grade");
-            String action = extractStringField(obj, "annotation_action");
-            String oemName = extractStringField(obj, "oem_name");
-            if (oemName == null) oemName = extractStringField(obj, "oem_symbol");
-            if (oemName == null) continue;
-
-            if (grade == null || grade.equals("rejected")) {
+            if (grade.equals("rejected")) {
+                skipped++;
+                continue;
+            }
+            if (oemName == null) {
                 skipped++;
                 continue;
             }
 
-            String cbStr = extractStringField(obj, "firmware_callback");
+            // ── DID, Service, and Monitor callbacks ────────────────────────
+            // All three carry a firmware_callback hex string.
+            if ((kind.equals("did") || kind.equals("service") || kind.equals("monitor"))
+                    && grade.equals("exact")) {
 
-            // ── DID and Service callbacks ────────────────────────────────────
-            if ((kind.equals("did") || kind.equals("service")) && cbStr != null) {
+                String cbStr = entry.getString("firmware_callback", null);
+                if (cbStr == null) {
+                    skipped++;
+                    continue;
+                }
                 long cbAddr = parseHexAddr(cbStr);
-                if (cbAddr == 0) continue;
+                if (cbAddr == 0) {
+                    skipped++;
+                    continue;
+                }
 
-                String suffix = kind.equals("did")
-                    ? "did_" + extractStringField(obj, "identifier")
-                    : "sid_" + extractStringField(obj, "sid");
-
-                if (grade.equals("exact") || grade.equals("structural")) {
-                    if (action != null && action.equals("name_callback")) {
-                        nameFunctionIfUnnamed(cbAddr, oemName, suffix);
-                        applied++;
-                    } else {
-                        addComment(cbAddr, "[Techstream OEM] " + oemName + " (" + suffix + ")");
-                        commented++;
-                    }
-                } else if (grade.equals("family")) {
-                    addComment(cbAddr, "[Techstream OEM candidate] " + oemName
-                        + " (" + suffix + ", grade: family)");
-                    commented++;
+                // Build the suffix from the identifier or SID.
+                // These are numeric in the JSON (integers, not strings).
+                String suffix;
+                if (kind.equals("did") || kind.equals("monitor")) {
+                    long id = entry.getLong("identifier", 0);
+                    suffix = "did_" + String.format("%04X", id);
                 } else {
-                    addComment(cbAddr, "[Techstream OEM CONFLICT] " + oemName
-                        + " (" + suffix + ", grade: candidate — multiple descriptions)");
+                    long sid = entry.getLong("sid", 0);
+                    suffix = "sid_" + String.format("%02X", sid);
+                }
+
+                if (action != null && action.equals("name_callback")) {
+                    nameFunctionIfUnnamed(cbAddr, oemName, suffix);
+                    applied++;
+                } else {
+                    addComment(cbAddr, "[Techstream OEM] " + oemName + " (" + suffix + ")");
                     commented++;
+                }
+
+                // Attach RAM source comment for monitors that have one
+                if (kind.equals("monitor")) {
+                    String ramSource = entry.getString("ram_source", null);
+                    if (ramSource != null) {
+                        addComment(cbAddr, "[RAM source] " + ramSource);
+                    }
                 }
                 continue;
             }
 
-            // ── DTC offsets ──────────────────────────────────────────────────
+            // Family/candidate grade callbacks — comment only
+            if (kind.equals("did") || kind.equals("service") || kind.equals("monitor")) {
+                String cbStr = entry.getString("firmware_callback", null);
+                if (cbStr != null) {
+                    long cbAddr = parseHexAddr(cbStr);
+                    if (cbAddr != 0) {
+                        String tag = grade.equals("candidate")
+                            ? "[Techstream OEM CONFLICT] "
+                            : "[Techstream OEM candidate] ";
+                        addComment(cbAddr, tag + oemName + " (grade: " + grade + ")");
+                        commented++;
+                        continue;
+                    }
+                }
+                skipped++;
+                continue;
+            }
+
+            // ── DTC offsets ──────────────────────────────────────────────
             if (kind.equals("dtc")) {
-                String code = extractStringField(obj, "code");
-                String idStr = extractStringField(obj, "dtc_identifier");
-                // Firmware offsets are a JSON array of hex strings
-                String offsetsStr = extractArrayField(obj, "firmware_offsets");
-                if (offsetsStr == null) continue;
-                for (String off : offsetsStr.split(",")) {
-                    off = off.trim();
+                String code = entry.getString("code", "?");
+                long dtcId = entry.getLong("dtc_identifier", 0);
+                JsonArray offsets = entry.getArray("firmware_offsets");
+                if (offsets == null || offsets.size() == 0) {
+                    skipped++;
+                    continue;
+                }
+                for (int j = 0; j < offsets.size(); j++) {
+                    String off = offsets.getString(j);
                     long addr = parseHexAddr(off);
                     if (addr == 0) continue;
                     String comment = "[Techstream DTC] " + code
-                        + " (0x" + idStr + ") " + oemName;
+                        + " (0x" + String.format("%04X", dtcId) + ") " + oemName;
                     if (grade.equals("candidate"))
                         comment += " — conflicting descriptions";
                     appendPlateComment(addr, comment);
@@ -194,9 +189,8 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
                 continue;
             }
 
-            // ── Monitors and active tests (vocabulary-only) ──────────────────
-            // These don't have firmware addresses yet — they are recorded for
-            // future callback analysis.  No Ghidra application at this stage.
+            // Everything else (utility_procedure, active_test vocabulary)
+            // has no firmware target — skip.
             skipped++;
         }
 
@@ -205,31 +199,6 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
         println("  Symbols renamed: " + applied);
         println("  Comments added: " + commented);
         println("  Skipped (no target / rejected): " + skipped);
-    }
-
-    // ── Minimal JSON field extractors ────────────────────────────────────────
-
-    private String extractStringField(String json, String field) {
-        String needle = "\"" + field + "\"";
-        int pos = json.indexOf(needle);
-        if (pos < 0) return null;
-        pos = json.indexOf('"', pos + needle.length());
-        if (pos < 0) return null;
-        int end = json.indexOf('"', pos + 1);
-        if (end < 0) return null;
-        return json.substring(pos + 1, end);
-    }
-
-    private String extractArrayField(String json, String field) {
-        String needle = "\"" + field + "\"";
-        int pos = json.indexOf(needle);
-        if (pos < 0) return null;
-        int start = json.indexOf('[', pos);
-        if (start < 0) return null;
-        int end = json.indexOf(']', start);
-        if (end < 0) return null;
-        String content = json.substring(start + 1, end);
-        return content.isEmpty() ? null : content;
     }
 
     private long parseHexAddr(String s) {
@@ -242,16 +211,199 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
         }
     }
 
-    private int findMatchingBrace(String json, int openPos) {
-        int depth = 0;
-        for (int i = openPos; i < json.length(); i++) {
-            char c = json.charAt(i);
-            if (c == '{') depth++;
-            else if (c == '}') {
-                depth--;
-                if (depth == 0) return i;
-            }
+    // ── Minimal JSON parser (no external dependencies) ────────────────────
+    // Ghidra does not ship Gson or javax.json. This parser correctly handles
+    // numeric and string values, arrays, nested objects, and escape sequences.
+
+    static class JsonParser {
+        private final String s;
+        private int pos;
+
+        JsonParser(String s) { this.s = s; this.pos = 0; }
+
+        JsonObject getObject() {
+            skipWs();
+            expect('{');
+            return parseObject();
         }
-        return -1;
+
+        private JsonObject parseObject() {
+            JsonObject obj = new JsonObject();
+            skipWs();
+            if (peek() == '}') { pos++; return obj; }
+            while (true) {
+                skipWs();
+                String key = parseString();
+                skipWs();
+                expect(':');
+                skipWs();
+                char c = peek();
+                if (c == '"') {
+                    obj.setString(key, parseString());
+                } else if (c == '{') {
+                    pos++;
+                    obj.setObject(key, parseObject());
+                } else if (c == '[') {
+                    pos++;
+                    obj.setArray(key, parseArray());
+                } else if (c == 't' || c == 'f') {
+                    obj.setBool(key, parseBool());
+                } else if (c == 'n') {
+                    pos += 4; // null
+                } else {
+                    obj.setNumber(key, parseNumber());
+                }
+                skipWs();
+                char sep = peek();
+                if (sep == ',') { pos++; continue; }
+                if (sep == '}') { pos++; break; }
+                break;
+            }
+            return obj;
+        }
+
+        private JsonArray parseArray() {
+            JsonArray arr = new JsonArray();
+            skipWs();
+            if (peek() == ']') { pos++; return arr; }
+            while (true) {
+                skipWs();
+                char c = peek();
+                if (c == '"') {
+                    arr.addString(parseString());
+                } else if (c == '{') {
+                    pos++;
+                    arr.addObject(parseObject());
+                } else if (c == 'n') {
+                    pos += 4; // null
+                    arr.addString(null);
+                } else {
+                    arr.addNumber(parseNumber());
+                }
+                skipWs();
+                char sep = peek();
+                if (sep == ',') { pos++; continue; }
+                if (sep == ']') { pos++; break; }
+                break;
+            }
+            return arr;
+        }
+
+        private String parseString() {
+            expect('"');
+            StringBuilder sb = new StringBuilder();
+            while (pos < s.length()) {
+                char c = s.charAt(pos++);
+                if (c == '"') break;
+                if (c == '\\') {
+                    if (pos >= s.length()) break;
+                    char e = s.charAt(pos++);
+                    switch (e) {
+                        case '"': sb.append('"'); break;
+                        case '\\': sb.append('\\'); break;
+                        case '/': sb.append('/'); break;
+                        case 'n': sb.append('\n'); break;
+                        case 'r': sb.append('\r'); break;
+                        case 't': sb.append('\t'); break;
+                        case 'u':
+                            if (pos + 4 <= s.length()) {
+                                String hex = s.substring(pos, pos + 4);
+                                sb.append((char) Integer.parseInt(hex, 16));
+                                pos += 4;
+                            }
+                            break;
+                        default: sb.append(e);
+                    }
+                } else {
+                    sb.append(c);
+                }
+            }
+            return sb.toString();
+        }
+
+        private double parseNumber() {
+            int start = pos;
+            if (peek() == '-') pos++;
+            while (pos < s.length()) {
+                char c = s.charAt(pos);
+                if ((c >= '0' && c <= '9') || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-') {
+                    pos++;
+                } else {
+                    break;
+                }
+            }
+            return Double.parseDouble(s.substring(start, pos));
+        }
+
+        private boolean parseBool() {
+            if (s.charAt(pos) == 't') { pos += 4; return true; }
+            pos += 5; return false;
+        }
+
+        private char peek() {
+            if (pos >= s.length()) return '\0';
+            return s.charAt(pos);
+        }
+
+        private void skipWs() {
+            while (pos < s.length() && Character.isWhitespace(s.charAt(pos))) pos++;
+        }
+
+        private void expect(char c) {
+            if (peek() != c)
+                throw new RuntimeException("Expected '" + c + "' at pos " + pos + ", got '" + peek() + "'");
+            pos++;
+        }
+    }
+
+    static class JsonObject {
+        java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+
+        void setString(String k, String v) { map.put(k, v); }
+        void setNumber(String k, double v) { map.put(k, v); }
+        void setBool(String k, boolean v) { map.put(k, v); }
+        void setObject(String k, JsonObject v) { map.put(k, v); }
+        void setArray(String k, JsonArray v) { map.put(k, v); }
+
+        String getString(String k, String def) {
+            Object v = map.get(k);
+            return v instanceof String ? (String) v : def;
+        }
+
+        long getLong(String k, long def) {
+            Object v = map.get(k);
+            if (v instanceof Double) return ((Double) v).longValue();
+            return def;
+        }
+
+        JsonArray getArray(String k) {
+            Object v = map.get(k);
+            return v instanceof JsonArray ? (JsonArray) v : null;
+        }
+
+        JsonObject getObject(String k) {
+            Object v = map.get(k);
+            return v instanceof JsonObject ? (JsonObject) v : null;
+        }
+    }
+
+    static class JsonArray {
+        private List<Object> items = new ArrayList<>();
+
+        void addString(String s) { items.add(s); }
+        void addNumber(double n) { items.add(n); }
+        void addObject(JsonObject o) { items.add(o); }
+
+        int size() { return items.size(); }
+
+        String getString(int i) {
+            Object v = items.get(i);
+            return v instanceof String ? (String) v : null;
+        }
+
+        JsonObject getObject(int i) {
+            Object v = items.get(i);
+            return v instanceof JsonObject ? (JsonObject) v : null;
+        }
     }
 }

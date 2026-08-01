@@ -30,8 +30,12 @@ Three new tools implement the extraction pipeline:
 | `tools/techstream/extract_catalog.py` | Build `diagnostic_annotations.json` from DDB corpus |
 | `tools/pe` (modified) | Fixed `import` to use `analyzeHeadless` for full PE analysis |
 
-Output: `data/generated/<firmware-sha>/diagnostic_annotations.json` — 213
-entries (54 DTCs with descriptions, 12 DIDs, 111 monitors, 36 active tests).
+Output: `data/generated/<firmware-sha>/diagnostic_annotations.json` — 298
+entries (54 DTCs with descriptions, 11 DIDs, 111 monitors, 122 utility procedures).
+
+Section 14 (24-byte records) is PID display-option configuration (value
+enums per PID group), not active test definitions. Active test / utility
+procedure text lives in `U_English.ddb`, extracted separately.
 
 ## .ddb file format
 
@@ -69,8 +73,8 @@ Section types observed in EPS databases:
 | 5 | 24 | 28 B | DTCs (code + name index + identifier) |
 | 6 | 29 | 8 B | Sub-function definitions |
 | 10 | 36 | 84 B | Data monitors (PID name + scaling) |
-| 13 | 17 | 24 B | Active test definitions |
-| 14 | 15 | 24 B | Active test descriptions |
+| 13 | 17 | 24 B | PID group metadata |
+| 14 | 15 | 24 B | PID display-option configuration (value enums) |
 | 15–16 | — | — | Additional monitor/test metadata |
 
 ### DTC record format (section type 5, 28 bytes)
@@ -156,10 +160,11 @@ match), 183,244 string entries.
 
 - **54 DTCs** — all with OEM descriptions (e.g. "Torque sensor deviation
   excessive", "Motor relay failure", "CAN communication error (ABS/VSC)")
-- **12 DIDs** — all within firmware DID table range (0x0100–0xF18C)
+- **11 DIDs** — all within firmware DID table range (0x0100–0xF18C),
+  deduplicated by identifier across DDB variants
 - **111 monitors** — names like "Torque Sensor 1 Output", "Motor Actual
   Current", "Steering Angle Velocity", "Thermistor Temperature"
-- **36 active tests** — test descriptions and subfunction IDs
+- **122 utility procedures** — OEM wizard/dialog text from U_English
 
 ### DTC cross-reference
 
@@ -229,22 +234,25 @@ symbol renames in Ghidra. `family` adds comment-only annotations.
 
 ### Correlation results
 
-Current output (239 mappings):
+Current output (324 mappings):
 
-| Kind | Count | Exact | Candidate | Family |
-|---|---|---|---|---|
-| DIDs | 12 | 12 | — | — |
-| DTCs | 54 | 16 | 18 | 20 |
-| Monitors | 120 | — | 9 | 111 |
-| Active tests | 36 | — | — | 36 |
-| Services | 17 | 5 | — | 12 |
+| Kind | Count | Exact | Family |
+|---|---|---|---|
+| DIDs | 11 | 1 | 10 |
+| DTCs | 54 | 7 | 47 |
+| Monitors | 120 | 9 | 111 |
+| Services | 17 | 6 | 11 |
+| Utility procedures | 122 | — | 122 |
 
 DID correlation is exact by construction: every Techstream DID is looked up
 in the 242-entry firmware DID table, and the firmware callback address is
-attached. DTC correlation finds the 2-byte little-endian representation of
-each DTC identifier in CodeFlash — 42 of 54 DTCs have at least one firmware
-location. Monitors are recorded as family-grade vocabulary for future callback
-analysis.
+attached. DTC correlation uses a structural scan of the firmware DTC table
+(8-byte records at `0x30A28`–`0x30C40`) — only DTC IDs found within this
+table are "exact"; blind byte searches elsewhere in CodeFlash are rejected
+as false positives (immediate values, instruction bytes). 7 of 54 Techstream
+DTCs are active in the firmware; the remaining 47 are diagnostic-only or
+cross-generation. Monitors with seq < 100 bridge to firmware DIDs; the
+remaining monitors are recorded as family-grade vocabulary.
 
 ### Monitor→DID bridge
 
@@ -256,13 +264,17 @@ For monitors with seq < 100, DID = 0x0100 + seq hits the firmware DID table
 exactly.  The EPS_CAN_P4DK variant (UDS/CAN) is authoritative for this
 firmware; EPS_P4DK3 (KWP) uses different naming for the same DIDs.
 
-9 monitors bridge to firmware DIDs with full callback and RAM source data:
+9 monitors bridge to firmware DIDs with full callback and RAM source data.
+EPS_CAN_P4DK (UDS/CAN) is authoritative for this firmware — KWP (EPS_P4DK3)
+uses different naming because it is a different protocol generation, which
+is expected and does not downgrade the grade:
 
 | DID | OEM name (CAN) | Callback | RAM source |
 |---|---|---|---|
+| 0x0101 | Diagnosis codes when FFD stored | 0x4E98E | — |
 | 0x0102 | Vehicle speed | 0x4CBFC | FEBEE90C, FEBEE896, FEBEE815 |
 | 0x0103 | Engine revolution speed | 0x4CC76 | FEBEE910, FEBEE814 |
-| 0x0105 | **Motor Actual Current** | 0x4CCC4 | checkpoint obj 0x204 |
+| 0x0105 | **Motor instruction current** | 0x4CCC4 | checkpoint obj 0x204 |
 | 0x0109 | **Steering torque** | 0x4CD38 | FEBEE867–86C (6B) |
 | 0x010B | **Output of torque sensor 2** | 0x4CD74 | checkpoint obj 0x20A |
 | 0x0110 | IG switch status | 0x4CDD4 | FUN_0006909A + GP[-0xB99] |
@@ -299,8 +311,15 @@ Stage 4, after analysis:
   run ApplyDiagnosticVocabulary.java      (OEM vocabulary layer)
 
 Verification:
-  tests/verify_diagnostic_vocabulary.py (158 checks against raw firmware)
+  tests/verify_diagnostic_vocabulary.py (112 checks against raw firmware)
 ```
+
+The Java script (`ApplyDiagnosticVocabulary.java`) includes a self-contained
+JSON parser (Ghidra does not ship Gson or javax.json).  The parser correctly
+handles numeric fields (`identifier`, `sid`, `dtc_identifier` are JSON
+numbers, not strings) and applies OEM names to DID, service, and monitor
+callbacks.  The vocabulary path is passed as a script argument — no hardcoded
+paths or firmware SHA prefixes.
 
 ## tools/pe fix
 
