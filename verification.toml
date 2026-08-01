@@ -199,3 +199,10 @@ paths = ["docs/tooling/techstream.md"]
 # SendNonceAndSeedKey; no static AES in the CUW reflash toolchain). SKIPs
 # cleanly (exit 0) when the gitignored Techstream/unpacked tree is absent, so
 # it never breaks core verify. Run via: make verify-one SUITE=techstream_layerb
+
+[suite.community_tooling]
+tests = ["tests/verify_community_tooling.py"]
+paths = ["community/", "external-references.lock.json"]
+# Cross-validates community exploit tooling (blurbdust/@yc flash patcher,
+# egg-hunter shellcode, CUW decryptor) against repository findings SEC-BOOT-002..007,
+# SECOC-024, SECOC-028. Verifies SHA-256 integrity of committed artifacts.

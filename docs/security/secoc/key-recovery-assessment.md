@@ -251,6 +251,41 @@ sibling mirror addresses `0xFEBE6E**` hold motor-signal data here (`FUN_000389C0
 not keys. Combined with the SHE read-prohibition (SECOC-025), the slot-4 key is ICU-S-only on
 this calibration: extraction requires a bus-level/hardware read or SCA, or a weaker peer ECU.
 
+### 1.7 Independent corroboration: persistent CodeFlash SecOC bypass toolchain (SECOC-028)
+
+A second community toolchain (blurbdust/@yc, comma Discord, 2026-08-01;
+`community/blurbdust_secoc_flash_patcher/`) independently re-implements the
+authenticated-RAM-exec bootstrap and extends it into a **persistent CodeFlash
+patch** — the first community tool we've seen that makes the SecOC bypass
+survive reboot rather than living only in volatile RAM. Its three components:
+
+- **`flash_patcher.py`** — host tool. Structurally identical to the
+  I-CAN-hack/Bk2ol bootstrap: same `SEED_KEY_SECRET`, same `0x203→0x201→0x202`
+  DID order, same `0xFEBF0000` download window, same `0x10F0`/`0xFF00` routine
+  triggers, all-zero data_record protocol. Its version table covers
+  `8965B4209000`, `8965B4233100`, `8965B4509100`, and new parts
+  `8965F3401200` (dual-CPU), `8965F4207000`, `8965F4201000`. The structural
+  cross-validation is pinned in `verify_community_tooling.py` (28 assertions).
+
+- **`main.c`** — egg-hunter shellcode. After gaining boot-context execution via
+  the `0xFF00` callback, it uses the Flash Control Unit (FACI registers at
+  `0xFFA1xxxx`) to scan CodeFlash for an 8-byte marker, patch the SecOC MAC
+  verification function to unconditionally pass (`0x007f5201`), and fix the
+  bootloader CRC32 at `0xFFDEC` to keep the validity check happy. This is a
+  new attack path for this repository — we documented RAM-exec without
+  re-auth (MEM-SAFE-001) but not persistent CodeFlash modification.
+
+- **`decrypt.T-0035-22.py`** — CUW decryption. Documents the per-byte
+  SeedKey/Nonce obfuscation (`out[i] = (raw[i] − i) mod 256` → ASCII hex →
+  16 bytes) and the `AES-ECB(BL_KEY, DID_201)` key derivation matching
+  SEC-BOOT-003.
+
+The author notes this is "largely untested." The cross-validation value is
+structural — it confirms our gate analysis from independent authorship and
+extends the version map. It does not prove the FCU patch path works on the
+Sienna `8965B4512000` specifically. The 8965F3 dual-CPU part is a new family
+that may differ in flash controller geometry or callback layout.
+
 ## 2. Ranked recovery methods
 
 | Rank | Method | Expected value | Cost/risk | Current evidence |

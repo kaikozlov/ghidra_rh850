@@ -116,7 +116,33 @@
     {
       "repository": "opendbc",
       "path": "opendbc/car/toyota/values.py",
-      "sha256": "acef77680fdfb8ea58396f66d834556b7f8049ecdb91c4050950bf7c6ef3a7af"
+      "sha256": "acef77680fdfb8ea58396f66d83455b6f78049ecdb91c4050950bf7c6ef3a7af"
+    }
+  ],
+  "community_artifacts": [
+    {
+      "source": "blurbdust (@yc), comma Discord, 2026-08-01",
+      "path": "community/blurbdust_secoc_flash_patcher/flash_patcher.py",
+      "size": 9955,
+      "sha256": "8a56f3dc833dd059f79117c0c0f2a2efce504354728e88e3b68530196b34f19c",
+      "provenance": "Discord attachment, no canonical git source",
+      "notes": "SecOC flash patcher host tool; cross-validates SEC-BOOT-002..007/SECOC-024"
+    },
+    {
+      "source": "blurbdust (@yc), comma Discord, 2026-08-01",
+      "path": "community/blurbdust_secoc_flash_patcher/main.c",
+      "size": 10228,
+      "sha256": "5fa6ef897e928e3f9cacc13a5eac59a5708791a0ae1a32f17a6cf2a7781f505a",
+      "provenance": "Discord attachment, no canonical git source",
+      "notes": "Egg-hunter shellcode for persistent CodeFlash MAC-verify bypass via FCU"
+    },
+    {
+      "source": "blurbdust (@yc), comma Discord, 2026-08-01",
+      "path": "community/blurbdust_secoc_flash_patcher/decrypt.T-0035-22.py",
+      "size": 6172,
+      "sha256": "86b628b5cf75ac39c200edcc099f9604d82a2d2efff2df02b48f4d29ebd5cae2",
+      "provenance": "Discord attachment, no canonical git source",
+      "notes": "CUW SeedKey/Nonce deobfuscation and payload decryption"
     }
   ]
 }
