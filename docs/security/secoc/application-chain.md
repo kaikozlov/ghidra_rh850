@@ -808,7 +808,7 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 | Classic secured frames admit short DLC | **Disproved; configured minimum and physical maximum both force DLC 8** |
 | FD DLC 48/64 is accepted then truncated to configured 32 bytes | **Verified; cross-ECU semantic impact bounded** |
 
-## 7. SecOC acceptance-gate recovery (SECOC-029)
+## 9. SecOC acceptance-gate recovery (SECOC-029)
 
 > **Verification:** `tests/verify_secoc_acceptance_gate.py` (28 assertions);
 > pre-existing `tests/verify_secoc_security_properties.py` (pins the FEBE555C
@@ -857,10 +857,15 @@ separate outputs:
 | MAC verification result | `0xFEBE555C` | nonzero=match, 0=mismatch | Gate 2 via `ld.bu` at `0x8E69E` |
 
 The plumbing: `secoc_submit_cmac_verify @ 0x8E3EA` passes `gp - 0x62A4`
-(= `0xFEBE555C`) as the fourth argument to `cryptoif_job_finish @ 0x88BA8`.
-The crypto driver writes the MAC result to that address via the ICU-S
-command-7 completion path. The return value of `cryptoif_job_finish`
-reflects only whether the operation completed, not whether the MAC matched.
+(= `0xFEBE555C`) as the fourth argument to `cryptoif_job_finish @ 0x88BA8`
+(recovered from decompiler output; the argument setup and driver dispatch
+involve indirect calls through the crypto driver record table that cannot
+be fully verified from raw bytes alone). The first two arguments are the
+received tag (`FEBE554C`) and its bit length (`FEBE5548`) — inputs to
+command 7, not outputs. Only the fourth argument (`FEBE555C`) is an output:
+the MAC verification result written by the driver via the ICU-S command-7
+completion path. The return value of `cryptoif_job_finish` reflects only
+whether the operation completed, not whether the MAC matched.
 
 ### 7.2 Complete receive-to-delivery decision path
 
@@ -876,7 +881,8 @@ FUN_0008DD78 (periodic task)
       │     └── Phase 2: CMAC verification
       │       → secoc_submit_cmac_verify @ 0x8E3EA
       │         → cryptoif_job_finish @ 0x88BA8
-      │           args: (handle, tag_out@FEBE554C, bitlen_out@FEBE5548,
+      │           args: (handle, received_tag@FEBE554C,
+      │                  received_tag_bit_length@FEBE5548,
       │                  verify_result@FEBE555C)
       │           → crypto_driver_dispatch @ 0x88556 → ICU-S command 7
       │           ← completion polled at gp+0x5BBE (FEBF13BE)
@@ -900,7 +906,7 @@ FUN_0008DD78 (periodic task)
             └── MAC MISMATCH (FEBE555C == 0):
                 → FUN_0008E646 (commit freshness without auth bit)
                 → FUN_0008E244 (failure notification)
-                → FUN_0008E2BA (release stale PDU, no freshness advance)
+                → FUN_0008E2BA (release path; outcome unresolved — see §7.5)
                 → FUN_0008E482 (cleanup)
 ```
 
@@ -909,7 +915,7 @@ FUN_0008DD78 (periodic task)
 | Condition | Gate 1 | Gate 2 (FEBE555C) | State byte | Outcome |
 |---|---|---|---|---|
 | Valid MAC + valid freshness | pass (worker ret 0) | nonzero (match) | 0xC3 → 0xB4 | Authenticated delivery via FUN_0008E382 (deferred, freshness committed) |
-| Invalid MAC + valid freshness | pass (worker ret 0) | 0 (mismatch) | 0xC3 | Unauthenticated release via FUN_0008E2BA (immediate, no freshness advance) |
+| Invalid MAC + valid freshness | pass (worker ret 0) | 0 (mismatch) | 0xC3 | Enters failure/release path via `FUN_0008E2BA`; freshness not advanced. Whether this forwards stale data, emits failure indication only, or releases the buffer is unresolved (§7.5) |
 | Valid MAC + invalid freshness | skip (worker ret 0x201) | — | 0xB4 | PDU discarded; freshness not committed |
 | ICU-S error/timeout | skip (worker ret 0x202) | — | 0xB4 | PDU retained; retry on next cycle |
 | Payload too short | skip (worker ret 0x100) | — | 0xA5 | PDU discarded |
@@ -960,16 +966,36 @@ match/mismatch decision. This is the critical correction from the
 provisional SECOC-029 model, which incorrectly placed the MAC decision
 at Gate 1.
 
-### 7.5 Remaining ambiguity
+### 7.5 Remaining ambiguities
 
-The `bVar1 = DAT_FEBE555C != 0` value selects between authenticated
-delivery (match → `FUN_0008E382`, state `0xB4`) and unauthenticated
-release (mismatch → `FUN_0008E2BA`, stale PDU). The exact conditions
-under which the mismatch path's `FUN_0008E2BA` delivers to PduR/COM
-versus discards — specifically, whether the COM layer treats the released
-stale PDU differently from an authenticated PDU — is not fully determined
-from static analysis. Resolving this requires either tracing the COM
-signal dispatch path or a dynamic experiment.
+**FUN_0008E2BA outcome on MAC mismatch.** When Gate 2 reads a mismatch
+(`FEBE555C == 0`), `FUN_0008E67A` calls `FUN_0008E2BA`. Whether this function
+forwards previously authenticated/stale data to PduR/COM, emits only a failure
+indication, or solely releases the queued buffer is not resolved from static
+analysis. The function calls `FUN_0008D9A4` (PDU extraction) and then
+`FUN_0008E7C6` (which Ghidra resolves to `FUN_00080BBA`, a COM dispatch
+function), but the exact effect — whether the COM layer treats the released
+PDU as valid signal data or discards it — requires either tracing the COM
+signal dispatch path or a dynamic experiment. Until resolved, the mismatch
+outcome is stated only as "enters the failure/release path; freshness is not
+advanced."
+
+**Result-pointer plumbing.** The claim that `secoc_submit_cmac_verify` passes
+`FEBE555C` as the output pointer to `cryptoif_job_finish` is recovered from
+decompiler output. The argument setup instructions and the lower driver's write
+through that pointer involve indirect calls through the crypto driver record
+table. These cannot be fully verified from raw bytes alone without resolving
+the function-pointer dispatch. The GP-relative offset `-0x62A4 = FEBE555C` is
+arithmetic-verified, and the unique load at `0x8E69E` is byte-verified, but
+the write path is decompiler-only.
+
+**Profile routing.** The six profile records contain the expected CAN IDs, but
+the test does not prove all six route through `FUN_0008E700` from
+configuration-pointer or call-path evidence. The dispatch loop in
+`FUN_0008DD38` processes pending PDUs from a queue (`FUN_0008D772`), and the
+profile index is passed through to the verify worker. The shared-gate
+conclusion is based on the dispatch structure, not per-profile configuration
+tracing.
 
 ## References
 
