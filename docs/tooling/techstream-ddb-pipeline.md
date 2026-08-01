@@ -7,7 +7,7 @@
 >
 > **Status:** active — DDB parser and catalog extractor implemented
 >
-> **Evidence source:** external-source (Techstream V18.00.008 DLL decompilation)
+> **Evidence source:** external-source (Techstream V18.00.003 DLL decompilation)
 >
 > **Verification:** deterministic catalog generation
 > (`tools/techstream/extract_catalog.py`)
@@ -141,7 +141,7 @@ match), 183,244 string entries.
 ```json
 {
   "firmware_sha256": "21140bbd...",
-  "techstream_distribution": "V18.00.008",
+  "techstream_distribution": "V18.00.003",
   "ecu": { "family": "EPS", "software_id": "8965B4512000", "protocol": "P4CAN" },
   "entries": [
     {
@@ -335,10 +335,15 @@ After: 157 functions, 6,848 instructions.
 ## P4DK4 cross-variant template
 
 `EPS_P4DK4.ddb` (JP region only) is the richest EPS database in the Techstream
-V18 corpus. It represents a newer EPS generation than the NA databases
-(`EPS_CAN_P4DK`, `EPS_P4DK3`) currently used as the Sienna diagnostic template,
-making it a better vocabulary template for newer-generation calibrations like
-the Corolla `8965F1208000`.
+V18 corpus: 26 unique DTCs (45 records with dual naming), 89 monitors, 85
+subfunction definitions. It is a JP-market diagnostic variant, not a later
+release — the Techstream V18.00.003 distribution is dated December 2022 and
+predates both the 2023 Sienna and the 2025 Corolla. P4DK4's larger monitor
+count reflects JP-market feature differences (e.g. torque sensor 3, backup
+power supply), not a temporal generation gap. It is a useful supplementary
+vocabulary source because its 13 extra bridged DIDs cover EPS state variables
+absent from the NA database, giving the correlation engine more matches to
+work with when Corolla firmware arrives.
 
 ### Corpus comparison
 
@@ -372,8 +377,8 @@ P4DK4 adds 13 bridged DIDs absent from the NA database:
 | 73 | 0x0149 | (unnamed) |
 | 74 | 0x014A | (unnamed) |
 
-The torque-sensor-3 and backup-power-supply monitors are consistent with a
-newer EPS generation adding sensor redundancy and backup-power diagnostics.
+The torque-sensor-3 and backup-power-supply monitors are JP-market EPS
+features not present in the NA diagnostic variant.
 
 ### Extraction tool
 

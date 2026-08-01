@@ -2,9 +2,20 @@
   "schema_version": 1,
   "distribution": {
     "name": "Toyota Techstream",
-    "version": "V18.00.008",
+    "version": "V18.00.003",
     "vendor": "DENSO CORPORATION",
-    "build_date": "2015-09-14",
+    "build_date": "2022-12-08",
+    "version_provenance": {
+      "installer_pe_product_version": "18.0.8.0 (Flexera IS wrapper version)",
+      "app_module": "18.00.003 (VerApp.ini, 2022/11/22)",
+      "cmd_module": "18.00.003 (VerCmd.ini, 2022/12/08)",
+      "uty_module": "18.00.002 (VerUty.ini, 2022/11/30)",
+      "env_module": "18.00.000 (VerEnv.ini, 2022/10/19)",
+      "vehicle_data_last_modified": "2022/10/07",
+      "ddb_files_dated": "2022-12-07/08",
+      "model_year_coverage": "up to 2022"
+    },
+    "note": "Installer filename is V18.00.008 but internal module versions are 18.00.003. The '008' is the Flexera IS installer wrapper build number, not the Techstream application version. The previously-recorded '2015-09-14' build_date was the Flexera IS toolchain version, not the software build date.",
     "installer": {
       "filename": "Techstream/Techstream_Setup_V18.00.008.exe",
       "size": 271533864,

@@ -1,6 +1,11 @@
 # Toyota Techstream diagnostic software
 
-> **Scope:** Toyota Techstream V18.00.008 (DENSO)
+> **Scope:** Toyota Techstream V18.00.003 (DENSO) — internal module version
+> from `VerApp.ini`/`VerCmd.ini` (dated 2022-11-22 / 2022-12-08). The
+> installer filename says V18.00.008, but the "008" is the Flexera IS
+> wrapper build number, not the application version. DDB files are dated
+> 2022-12-07/08. Model-year coverage extends to 2022 (VehicleData.ini last
+> modified 2022/10/07).
 >
 > **Document type:** external-source reverse engineering
 >
@@ -52,10 +57,12 @@ The analyzed distribution identifies itself as:
 
 ```text
 Toyota Techstream
-version V18.00.008
+version V18.00.003 (internal module version)
+installer PE product version 18.0.8.0
 vendor DENSO CORPORATION
 installer InstallScript Setup Launcher Unicode (Flexera IS 22.0.330)
-build date 2015-09-14
+app module build date 2022-11-22 (VerApp.ini)
+cmd module build date 2022-12-08 (VerCmd.ini)
 product version 18.0.8.0
 ```
 
@@ -223,7 +230,7 @@ standard AES-128 block encryption: key expansion → AddRoundKey → 9×
 > Techstream's AES128 class does a single-stage:
 > `response = AES-ENC(KEY="FUKUMORIYOSIYAMA", seed)`.
 >
-> This means either (a) Techstream V18.00.008 targets a different ECU
+> This means either (a) Techstream V18.00.003 targets a different ECU
 > generation or calibration than the `8965B4512000` Sienna, or (b) the
 > `CSecurityAccessAES128` class is used for a subset of ECUs (ADS/PCS) and a
 > different path handles the EPS specifically. The CUW's `CalcSeedKey` (§5.1)

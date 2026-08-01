@@ -23,7 +23,7 @@ the CSV holds the populated rows.
 | `0xBA` semantics | inert echo (null callback, no-op) | present (field), semantics inferred from Sienna | Sienna verified; Corolla hypothesis |
 | `0x34` application behavior | no-op echo (real handler bootloader-only) | silent (field), consistent with application mode | Sienna verified; Corolla hypothesis |
 | Diagnostic endpoints | `0x7A1` physical, `0x777` functional, `0x7A0` limited secondary | partially observed in field behavior | Sienna verified |
-| DDB vocabulary template | NA `EPS_CAN_P4DK` (30 DTCs, 75 monitors) | JP `EPS_P4DK4` likely closer (45 DTCs, 89 monitors) | Sienna verified; P4DK4 is newer generation |
+| DDB vocabulary template | NA `EPS_CAN_P4DK` (30 DTCs, 75 monitors) | JP `EPS_P4DK4` has 13 extra bridged DIDs (JP-market features) | Sienna verified; P4DK4 is JP-market variant, not newer generation |
 | SecOC profile | six RX PDUs; command-7 verify selects slot 4; live key state unknown | unknown | Sienna firmware path verified; slot contents unobserved |
 
 Unobserved fields are recorded as `unknown` in the CSV, never fabricated.

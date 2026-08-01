@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Extract a P4DK4 diagnostic vocabulary template for newer-generation EPS.
+"""Extract P4DK4 diagnostic vocabulary for cross-variant EPS analysis.
 
 ``EPS_P4DK4.ddb`` (JP region only) is the richest EPS database in the
-Techstream V18 corpus: 45 DTCs, 89 monitors, 85 subfunction definitions.
-It represents a newer EPS generation than the NA databases (EPS_CAN_P4DK,
-EPS_P4DK3) currently used as the Sienna diagnostic template.
+Techstream V18 corpus: 26 unique DTCs (45 records with dual naming),
+89 monitors, 85 subfunction definitions. It is a JP-market diagnostic
+variant, not a later release — the Techstream V18.00.003 distribution
+(December 2022) predates both the 2023 Sienna and the 2025 Corolla.
 
-This script produces a standalone vocabulary artifact intended for
-**cross-variant** use — specifically as a search template for the Corolla
-``8965F1208000`` and other newer-generation Denso RH850 EPS calibrations
-where the P4DK4 generation may be a closer match than the NA databases.
+This script produces a standalone vocabulary artifact for cross-variant
+use — its 13 extra bridged DIDs (relative to the NA database) cover EPS
+state variables that give the correlation engine more matches to work
+with when new firmware arrives.
 
 The artifact is NOT Sienna-specific (no firmware DID-table correlation).
 It is a pure OEM vocabulary extraction, analogous to what
@@ -177,7 +178,7 @@ def main() -> None:
             "Denso RH850 EPS calibrations (e.g. Corolla 8965F1208000). "
             "Not firmware-correlated; pure OEM vocabulary extraction."
         ),
-        "techstream_distribution": "V18.00.008",
+        "techstream_distribution": "V18.00.003",
         "source_file": P4DK4_PATH,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "summary": {

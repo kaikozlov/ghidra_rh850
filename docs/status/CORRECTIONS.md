@@ -346,3 +346,20 @@ the mistakes are not re-made.
   its attribution to the Sienna is corrected.
 - **Canonical:**
   [../tooling/techstream.md](../tooling/techstream.md) §4.6; TMS-010.
+
+### CORR-022 — Techstream version and build date
+
+- **Wrong:** Techstream version "V18.00.008" with build date "2015-09-14".
+- **Right:** Internal module version is **V18.00.003** (VerApp.ini dated
+  2022/11/22, VerCmd.ini dated 2022/12/08). The "008" in the installer
+  filename is the Flexera IS wrapper build number, not the application
+  version. The "2015-09-14" was the Flexera IS toolchain version, not the
+  software build date. DDB files are dated 2022-12-07/08. VehicleData.ini
+  was last modified 2022/10/07. Model-year coverage extends to 2022 — the
+  database predates both the 2023 Sienna and the 2025 Corolla.
+- **Consequence of the error:** the "newer generation" framing of P4DK4
+  was built on the false premise that the database might temporally
+  bracket the Corolla. It does not — both vehicles postdate it.
+- **Canonical:**
+  [../tooling/techstream.md](../tooling/techstream.md) §1;
+  `techstream.lock.json` `version_provenance`.

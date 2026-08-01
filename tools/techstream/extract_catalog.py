@@ -260,7 +260,7 @@ def build_catalog() -> dict:
 
     catalog = {
         "firmware_sha256": CODEFLASH_SHA256,
-        "techstream_distribution": "V18.00.008",
+        "techstream_distribution": "V18.00.003",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "ecu": {
             "family": "EPS",
