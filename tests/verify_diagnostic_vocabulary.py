@@ -213,6 +213,32 @@ for expected_name in ("motor actual current", "steering torque",
           f"searched {len(all_monitor_names)} names")
 
 
+print("\n== utility procedures ==")
+proc_mappings = [m for m in mappings if m["kind"] == "utility_procedure"]
+check("at least 50 utility procedure mappings", len(proc_mappings) >= 50,
+      f"got {len(proc_mappings)}")
+
+structural_procs = [m for m in proc_mappings if m["match_grade"] == "structural"]
+check("at least 10 structural procedure-to-routine matches",
+      len(structural_procs) >= 10, f"got {len(structural_procs)}")
+
+# Verify "Torque Sensor Writing" maps to firmware routines
+ts_writing = [m for m in proc_mappings if "torque sensor writing" in m["oem_name"].lower()]
+check("'Torque Sensor Writing' procedure is present", len(ts_writing) >= 1)
+if ts_writing:
+    check("'Torque Sensor Writing' has structural grade",
+          ts_writing[0]["match_grade"] == "structural")
+    check("'Torque Sensor Writing' references routine 0x2005",
+          any(r["routine_id"] == "0x2005" for r in ts_writing[0].get("firmware_routines", [])))
+
+# Verify "Power Steering ECU Initial Setting" maps to firmware routines
+ps_init = [m for m in proc_mappings if "power steering ecu initial setting" in m["oem_name"].lower()]
+check("'Power Steering ECU Initial Setting' procedure is present", len(ps_init) >= 1)
+if ps_init:
+    check("'Power Steering ECU Initial Setting' references routine 0x0204",
+          any(r["routine_id"] == "0x0204" for r in ps_init[0].get("firmware_routines", [])))
+
+
 print("\n== idempotency ==")
 vocab2 = build_vocabulary()
 check("rebuild produces same mapping count",

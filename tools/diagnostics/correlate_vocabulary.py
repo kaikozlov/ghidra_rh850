@@ -436,7 +436,66 @@ def correlate_services(
     return matches
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+def correlate_utility_procedures(
+    catalog: dict, tables: FirmwareTables
+) -> list[dict]:
+    """Correlate U_English utility procedures with firmware routines.
+
+    Maps OEM procedure names ("Torque Sensor Writing", "Power Steering ECU
+    Initial Setting") to firmware routine IDs in the control-ID table.
+    """
+    # Map known procedure names to firmware routine ID ranges
+    PROCEDURE_ROUTINE_MAP = {
+        "torque sensor writing": [0x2005, 0x2006, 0x2007, 0x2008, 0x2009],
+        "torque sensor adjustment": [0x2005, 0x2006, 0x2007, 0x2008, 0x2009],
+        "power steering ecu initial setting": [0x0204, 0x1000],
+        "initial setting": [0x0204, 0x1000],
+        "zero point": [0x2005, 0x2006, 0x2007, 0x2008, 0x2009],
+        "calibration": [0x2005, 0x2006, 0x2007, 0x2008, 0x2009],
+    }
+
+    fw_routines = tables.routine_by_id
+    procedures = [e for e in catalog["entries"] if e["kind"] == "utility_procedure"]
+    titles = [p for p in procedures if p.get("is_title")]
+
+    matches = []
+    for proc in titles:
+        text_lower = proc["text"].lower()
+        matched_routines = []
+        for proc_key, routine_ids in PROCEDURE_ROUTINE_MAP.items():
+            if proc_key in text_lower:
+                for rid in routine_ids:
+                    if rid in fw_routines:
+                        r = fw_routines[rid]
+                        matched_routines.append({
+                            "routine_id": f"0x{rid:04X}",
+                            "start_callback": f"0x{r.start_callback:05X}",
+                            "result_callback": f"0x{r.result_callback:05X}",
+                        })
+
+        grade = "family"
+        action = "comment"
+        note = f"Utility procedure '{proc['text']}'"
+
+        if matched_routines:
+            grade = "structural"
+            action = "comment"
+            rids = [r["routine_id"] for r in matched_routines]
+            note += f" → firmware routines: {', '.join(rids)}"
+
+        matches.append({
+            "kind": "utility_procedure",
+            "oem_name": proc["text"],
+            "oem_symbol": slug(proc["text"]),
+            "match_grade": grade,
+            "string_index": proc["string_index"],
+            "source_db": "U_English",
+            "firmware_routines": matched_routines if matched_routines else None,
+            "annotation_action": action,
+            "note": note,
+        })
+
+    return matches
 
 def build_vocabulary() -> dict:
     catalog = json.loads(CATALOG_PATH.read_text())
@@ -455,6 +514,7 @@ def build_vocabulary() -> dict:
     all_matches.extend(correlate_monitors(catalog, tables))
     all_matches.extend(correlate_active_tests(catalog, tables))
     all_matches.extend(correlate_services(catalog, tables))
+    all_matches.extend(correlate_utility_procedures(catalog, tables))
 
     # Summarize by grade
     by_grade: dict[str, int] = {}

@@ -1,7 +1,7 @@
 {
   "firmware_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
   "techstream_distribution": "V18.00.008",
-  "generated_at": "2026-08-01T00:50:25.610577+00:00",
+  "generated_at": "2026-08-01T01:10:06.674012+00:00",
   "ecu": {
     "family": "EPS",
     "software_id": "8965B4512000",
@@ -23,12 +23,13 @@
     ]
   },
   "summary": {
-    "total_entries": 213,
+    "total_entries": 335,
     "by_kind": {
       "dtc": 54,
       "did": 12,
       "monitor": 111,
-      "active_test": 36
+      "active_test": 36,
+      "utility_procedure": 122
     },
     "dids_in_firmware": 12
   },
@@ -3383,6 +3384,860 @@
       "resolved_name": "Slide Roof",
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 17,
+      "text": "Control Mode Change has failed.\r\n\r\nPlease perform the steps below to change to Normal Mode.\r\n1.Turn the engine/power switch OFF.\r\n\r\n2.Turn the engine/power switch ON(Engine ON/Ready ON).\r\n\r\nDo you want to try again?",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 221,
+      "text": "Increase Line\r\n(FR / FL / RR / RL)\r\n\r\n1. Depress and hold the brake pedal.\r\n2. Loosen the bleeder plug.\r\n   (Until air stops coming out)\r\n3. Tighten the bleeder plug.\r\n4. Release the brake pedal.\r\nRepeat steps of 1 to 4 10 times or more.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 277,
+      "text": "Perform the following 3 steps.\r\n\r\n1.Turn the ignition switch OFF.\r\nNote: Wait for 2 minutes or more after ignition switch OFF. While waiting, please DO NOT press on the brake pedal or open/close the doors.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 280,
+      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of FL wheel.\r\n2.Depress the brake pedal several times, then loosen the bleeder plug with the pedal held down.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 294,
+      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of FR wheel.\r\n2.Depress the brake pedal several times, then loosen the bleeder plug with the pedal held down.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 311,
+      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of FL wheel.\r\n2.Depress the brake pedal several times, then loosen the bleeder plug with the pedal held down.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 316,
+      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of RL wheel.\r\n2.Depress the brake pedal.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 330,
+      "text": "Perform the following 3 steps.\r\n\r\n1.Turn the ignition switch OFF.\r\n2.Remove the 2 ABS motor relays.\r\nNote: This procedure is not required if the ABS motor relays are already removed.\r\n3.Turn the ignition switch ON.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 337,
+      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of FL wheel.\r\n2.Depress the brake pedal several times, then loosen the bleeder plug with the pedal held down.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 355,
+      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of FR wheel.\r\n2.Depress the brake pedal several times, then loosen the bleeder plug with the pedal held down.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 360,
+      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of RR wheel.\r\n2.Depress the brake pedal.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 524,
+      "text": "1: Depress the brake pedal several times.\r\n2: Loosen the bleeder plug of the FL wheel with the brake pedal held down.\r\n3: After fluid bleeding stops, tighten the bleeder plug of the FL wheel and release the brake pedal.\r\n4: Repeat steps 1 to 3 above until the air or the old fluid stops coming out.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 549,
+      "text": "1: Depress the brake pedal several times.\r\n2: Loosen the bleeder plug of the stroke simulator with the brake pedal held down.\r\n3: After fluid bleeding stops, tighten the bleeder plug of the stroke simulator and release the brake pedal.\r\n4: Repeat steps 1 to 3 above until the air stops coming out.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 552,
+      "text": "1: Depress the brake pedal several times.\r\n2: Loosen the bleeder plug of the FR wheel with the brake pedal held down.\r\n3: After fluid bleeding stops, tighten the bleeder plug of the FR wheel and release the brake pedal.\r\n4: Repeat steps 1 to 3 above until the air or the old fluid stops coming out.",
+      "is_title": false,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 633,
+      "text": "Learning of Stroke Sensor Zero Point",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 672,
+      "text": "4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"RR wheel\" in above steps as \"FL wheel\".)",
+      "is_title": true,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 673,
+      "text": "4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"FR wheel\" in above steps as \"RL wheel\".)",
+      "is_title": true,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 681,
+      "text": "4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)",
+      "is_title": true,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 683,
+      "text": "4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)",
+      "is_title": true,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 702,
+      "text": "8: Perform above steps of 1 to 7 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)",
+      "is_title": true,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 703,
+      "text": "8: Perform above steps of 1 to 7 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)",
+      "is_title": true,
+      "search_term": "eps"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 743,
+      "text": "This function is used to calibrate zero point of the sensor and store system information.\r\n\r\nConfirm the following conditions.\r\n- The vehicle is on a flat surface.\r\n- The vehicle is stopped.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Shift in P\r\n- The steering wheel is centered.\r\n\r\nPress Next to proceed.",
+      "is_title": false,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 783,
+      "text": "Learning of Stroke Sensor Zero Point",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 1314,
+      "text": "This function is used to calibrate zero point of the sensor and store system information.\r\n\r\nConfirm the following conditions.\r\n- The vehicle is on a flat surface.\r\n- The vehicle is stopped.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Shift in P\r\n- The steering wheel is centered.\r\n\r\nPress Next to proceed.",
+      "is_title": false,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 1316,
+      "text": "Zero Point of Stroke Sensor Learning Status",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 1320,
+      "text": "Zero Point of G Sensor Learning Status",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 1321,
+      "text": "Zero Point of Yaw Rate Sensor Learning Status",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 4353,
+      "text": "Memorize the steering angle zero point.\r\n\r\nPress Next to proceed.",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6159,
+      "text": "Press Next to proceed after Oil Pressure Sensor Zero Point Learning is complete.",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6160,
+      "text": "Perform the following operations.\r\n\r\n1. Turn the engine/power switch ON (Engine OFF/Ready OFF) with the shift in P.\r\n2. Wait until Oil Pressure Sensor Zero Point Learning is complete. (Approximately 3 to 15 seconds)\r\n(During the learning, the D range light or CVT warning light blinks irregularly.)\r\n(After the learning is complete, the D range light or CVT warning light blinks quickly.)\r\n\r\nNote:\r\nIf the D range light or CVT warning light does not blink irregularly, turn the engine/power switch OFF and wait for 10 seconds, then turn the engine/power switch ON (Engine OFF/Ready OFF) again.\r\nIf it is not complete even after 30 seconds has passed, confirm the following conditions.\r\n- Battery voltage is between 10.5V and 16V.\r\n- CVT oil temperature is between 0 and 100 degrees.",
+      "is_title": false,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6161,
+      "text": "2. Oil Pressure Sensor Zero Point Learning",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6175,
+      "text": "Line Pressure/Belt Clamping Pressure Learning has failed because Oil Pressure Sensor Zero Point Learning has not been complete.\r\nPlease try again.",
+      "is_title": false,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6190,
+      "text": "2. Oil Pressure Sensor Zero Point Learning",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6192,
+      "text": "3. G Sensor Zero Point Learning",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6193,
+      "text": "Press Next to start G Sensor Zero Point Learning.",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6195,
+      "text": "3. G Sensor Zero Point Learning",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6197,
+      "text": "Perform the following operations.\r\n1. The shift lever is in P and turn the engine/power switch ON (Engine OFF/Ready OFF).\r\n2. Wait until Oil Pressure Sensor Zero Point Learning is  complete. (approximately 3 to 15 seconds)\r\n(\"D\" position light blinks irregularly after the learning is complete.)\r\nNote: \r\nIf the \"D\" position light does not blink irregularly, turn the engine/power switch OFF and wait for 10 seconds and  then turn the engine/power switch ON (Engine OFF/Ready OFF) again. \r\nIf it is not complete even after 30 seconds has passed, confirm the following conditions.\r\n- Battery voltage is 10V or more.\r\n- CVT Oil temperature is between -5 and 100 degrees. ",
+      "is_title": false,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6198,
+      "text": "3. G Sensor Zero Point Learning",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6204,
+      "text": "G Sensor Zero Point Learning has failed.\r\nConfirm the following conditions.\r\n\r\n- The vehicle is on a flat surface.\r\n- The vehicle is stopped and stabled.\r\n- DTCs are not detected.",
+      "is_title": false,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6205,
+      "text": "Press Next after Oil Pressure Sensor Zero Point Learning is complete.",
+      "is_title": true,
+      "search_term": "zero point"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6585,
+      "text": "Torque Sensor Writing",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6586,
+      "text": "Torque Sensor Writing",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6590,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTCs other than C1515 / C1516 are present.  \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "is_title": false,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6591,
+      "text": "Torque Sensor Writing is completed.\r\n\r\nPerform the following operations.\r\n1. Confirm the EPS W/L is OFF.\r\n2. Run vehicles and perform a test mode , after engine switch is ON. \r\n3. Confirm the EPS W/L is OFF again.",
+      "is_title": false,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6593,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC is present. \r\n\r\nPlease try again in the state the  DTCs are not detected.",
+      "is_title": false,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6597,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC C1515 / C1516 is present again.\r\nConfirm the following conditions.\r\n1. Vehicle state, Operation procedure.\r\n2. The steering gear assembly.\r\n3. The EPS ECU.\r\n\r\nTry again ?",
+      "is_title": false,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6598,
+      "text": "Error Torque Sensor Adjustment",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6599,
+      "text": "Turn the ignition switch ON.\r\n\r\nPress Next to perform Torque Sensor Writing.",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6600,
+      "text": "Torque Sensor Adjustment",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6601,
+      "text": "Welcome to the Torque Sensor Adjustment wizard.\r\n\r\nThis function is used to center the steering wheel if:\r\n-The EPS ECU has been replaced.\r\n-The steering column assembly has been replaced.",
+      "is_title": false,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6604,
+      "text": "Torque Sensor Initialization ",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6605,
+      "text": "Press Next to perform Torque Sensor Initialization.",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6606,
+      "text": "Torque Sensor Initialization ",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6607,
+      "text": "Torque Sensor Initialization is completed.\r\nTurn the ignition switch OFF.\r\n\r\nWhen it is finished only by Initialization, then press Cancel.",
+      "is_title": false,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6609,
+      "text": "Torque Sensor Writing",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6611,
+      "text": "Torque Sensor Adjustment",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6662,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC is present. \r\n\r\nPlease try again in the state the  DTCs are not detected.",
+      "is_title": false,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6666,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTCs other than C1515 / C1516 are present.  \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "is_title": false,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6667,
+      "text": "Torque Sensor Writing",
+      "is_title": true,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6670,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC C1515 / C1516 is present again.\r\nConfirm the following conditions.\r\n1. Vehicle state, Operation procedure.\r\n2. The steering gear assembly.\r\n3. The EPS ECU.\r\n\r\nTry again ?",
+      "is_title": false,
+      "search_term": "torque sensor"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6671,
+      "text": "Torque Sensor Writing",
+      "is_title": true,
+      "search_term": "torque sensor writing"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6673,
+      "text": "Torque Sensor Writing is completed.\r\n\r\nPerform the following operations.\r\n1. Confirm the EPS W/L is OFF.\r\n2. Run vehicles and perform a test mode , after engine is ON. \r\n3. Confirm the EPS W/L is OFF again.",
+      "is_title": false,
+      "search_term": "torque sensor writing"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6674,
+      "text": "Torque Sensor Adjustment",
+      "is_title": true,
+      "search_term": "torque sensor adjustment"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6676,
+      "text": "Torque Sensor Adjustment",
+      "is_title": true,
+      "search_term": "torque sensor adjustment"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6679,
+      "text": "Welcome to the Torque Sensor Adjustment wizard.\r\n\r\nThis function is used to center the steering wheel if:\r\n-The EPS ECU has been replaced.\r\n-The steering column assembly has been replaced.",
+      "is_title": false,
+      "search_term": "torque sensor adjustment"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 6684,
+      "text": "Torque Sensor Initialization is completed.\r\n\r\nWhen it is finished only by Initialization, then press Cancel.\r\n\r\nPress Next to perform Torque Sensor Writing.",
+      "is_title": false,
+      "search_term": "torque sensor writing"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12121,
+      "text": "Welcome to the Torque Sensor Adjustment Utility.\r\n\r\nThis function is used to center the steering wheel if any of the following has been replaced:\r\n\r\nEMPS ECU\r\nSteering Wheel\r\nTilt Steering Column\r\nSteering Gear Assembly\r\n\r\nPress Next to proceed.",
+      "is_title": false,
+      "search_term": "torque sensor adjustment"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12122,
+      "text": "Do you want to exit Torque Sensor Adjustment ?",
+      "is_title": true,
+      "search_term": "torque sensor adjustment"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12124,
+      "text": "Torque Sensor Adjustment has failed.\r\nConfirm the following:\r\n1. The IG was cycled per the screen instructions.\r\nDo you want to try again?",
+      "is_title": false,
+      "search_term": "torque sensor adjustment"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12125,
+      "text": "Torque Sensor Adjustment has failed.\r\nEMPS ECU malfunction occurred.\r\nRefer to the repair manual.",
+      "is_title": true,
+      "search_term": "torque sensor adjustment"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12126,
+      "text": "Torque Sensor Adjustment Complete.\r\n\r\nConfirm the PS warning light is OFF.",
+      "is_title": true,
+      "search_term": "torque sensor adjustment"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12127,
+      "text": " Torque Sensor Adjustment has failed.\r\n DTCs other than C1515 or C1581 are detected.\r\n Diagnose them prior to the Torque Sensor Adjustment.",
+      "is_title": false,
+      "search_term": "torque sensor adjustment"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12131,
+      "text": "Error Torque Sensor Adjustment",
+      "is_title": true,
+      "search_term": "torque sensor adjustment"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12272,
+      "text": "Do you want to exit the Power Steering ECU Initial Setting Utility?",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12274,
+      "text": "Power Steering ECU Initial Setting",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12275,
+      "text": "Power Steering ECU Initial Setting has failed.\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n- There is no DTC.\r\n\r\nPerform the steps below to change to Normal Mode.\r\n1.Turn the engine/power switch OFF.\r\n2.Turn the engine/power switch ON (Engine OFF/Ready OFF).",
+      "is_title": false,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12277,
+      "text": "Power Steering ECU Initial Setting is complete.",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12280,
+      "text": "This function is used to perform the initial setting of the Power Steering ECU.\r\n\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n- Steering wheel is centered.\r\n\r\nNote: Do NOT touch the steering wheel during this procedure.\r\n\r\nPress Next to proceed.",
+      "is_title": false,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12281,
+      "text": "Power Steering ECU Initial Setting",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 12282,
+      "text": "Error Power Steering ECU Initial Setting",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 16257,
+      "text": "Power Steering System",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 16259,
+      "text": "Power Steering System",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 16314,
+      "text": "Power Steering System",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 16421,
+      "text": "Power Steering System",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 18034,
+      "text": "Factory initial setting",
+      "is_title": true,
+      "search_term": "initial setting"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 18383,
+      "text": "Clear the Assist Map of Electric Power Steering.\r\nPlease execute it after confirming that the vehicle is stopped.\r\nReturn to the first screen after you press the Cancel button.",
+      "is_title": false,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 18385,
+      "text": "ECU abnormal\r\n\r\nBecause of an abnormality in the Electric Power Steering ECU, it was not possible to erase the Assist Map.\r\n\r\nAfter turn the engine/power switch OFF and ON (Engine OFF/Ready OFF), check the trouble codes, please troubleshooting procedures.",
+      "is_title": false,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 19921,
+      "text": "Lost Communication With Power Steering Control Module",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 19931,
+      "text": "Software Incompatibility with Power Steering Control Module",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24035,
+      "text": "INITIAL SETTING",
+      "is_title": true,
+      "search_term": "initial setting"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24036,
+      "text": "Do you want to exit the Steering Actuator ECU Initial Setting Utility?",
+      "is_title": true,
+      "search_term": "initial setting"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24038,
+      "text": "Steering Actuator ECU Initial Setting is complete.",
+      "is_title": true,
+      "search_term": "initial setting"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24040,
+      "text": "Steering Actuator ECU Initial Setting has failed.\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n- There is no DTC.\r\n\r\nPerform the steps below to change to Normal Mode.\r\n1.Turn the engine/power switch OFF.\r\n2.Turn the engine/power switch ON (Engine OFF/Ready OFF).",
+      "is_title": false,
+      "search_term": "initial setting"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24042,
+      "text": "This function is used to perform the initial setting of the Steering Actuator ECU.\r\n\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n- Steering wheel is centered.\r\n\r\nNote: Do NOT touch the steering wheel during this procedure.\r\n\r\nPress Next to proceed.",
+      "is_title": false,
+      "search_term": "initial setting"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24043,
+      "text": "Error Steering Actuator ECU Initial Setting",
+      "is_title": true,
+      "search_term": "initial setting"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24044,
+      "text": "Steering Actuator ECU Initial Setting",
+      "is_title": true,
+      "search_term": "initial setting"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24045,
+      "text": "Steering Actuator ECU Initial Setting",
+      "is_title": true,
+      "search_term": "initial setting"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24048,
+      "text": "Do you want to exit the Steering Torque Actuator Adjust 1 Utility?",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24049,
+      "text": "Steering Torque Actuator Adjust 1 has failed.\r\nThe inputted value is assumed to be outside of the adaptation range.\r\nTurn the engine/power switch OFF and ON.\r\n\r\nDo you want to try again?",
+      "is_title": false,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24050,
+      "text": "Steering Torque Actuator Adjust 1 has failed.\r\nTurn the engine/power switch OFF and ON.\r\n\r\nDo you want to try again?",
+      "is_title": false,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24051,
+      "text": "Steering Torque Actuator Adjust 1 is finished.\r\nTurn the engine/power switch OFF and ON.",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24055,
+      "text": "Steering Torque Actuator Adjust 1",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24056,
+      "text": "Steering Torque Actuator Adjust 1 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24057,
+      "text": "Error Steering Torque Actuator Adjust 1",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24058,
+      "text": "This function is used to set the value of the steering torque actuator.\r\n\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n\r\nPress Next to proceed.",
+      "is_title": false,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24061,
+      "text": "Steering Torque Actuator Adjust 1",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24065,
+      "text": "Steering Torque Actuator Adjust 2 is finished.\r\nTurn the engine/power switch OFF and ON.",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24069,
+      "text": "Do you want to exit the Steering Torque Actuator Adjust 2 Utility?",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24070,
+      "text": "Steering Torque Actuator Adjust 2 has failed.\r\nTurn the engine/power switch OFF and ON.\r\n\r\nDo you want to try again?",
+      "is_title": false,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24071,
+      "text": "Steering Torque Actuator Adjust 2 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24074,
+      "text": "This function is used to adjust the steering torque actuator.\r\n\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n\r\nPress Next to proceed.",
+      "is_title": false,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24075,
+      "text": "Error Steering Torque Actuator Adjust 2",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24076,
+      "text": "Steering Torque Actuator Adjust 2",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24077,
+      "text": "Steering Torque Actuator Adjust 2",
+      "is_title": true,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24078,
+      "text": "Steering Torque Actuator Adjust is performed.\r\n\r\nAdjust so that the steering wheel becomes level, and hold the steering wheel.\r\n\r\nPress Next to proceed.",
+      "is_title": false,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24080,
+      "text": "Steering Torque Actuator Adjustment Value Clear is complete.\r\n\r\nTurn the engine/power switch OFF and ON.",
+      "is_title": false,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 24081,
+      "text": "Steering Torque Actuator Adjustment Value Clear has failed.\r\nTurn the engine/power switch OFF and ON.\r\n\r\nDo you want to try again?",
+      "is_title": false,
+      "search_term": "steering torque"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 25057,
+      "text": "Lost Communication With Power Steering Control Module",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 25065,
+      "text": "Invalid Data Received From Power Steering Control Module",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 25428,
+      "text": "Lost Communication With Power Steering Control Module",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 25516,
+      "text": "Lost Communication With Power Steering Control Module",
+      "is_title": true,
+      "search_term": "power steering"
+    },
+    {
+      "kind": "utility_procedure",
+      "string_index": 25534,
+      "text": "Lost Communication With Power Steering Control Module",
+      "is_title": true,
+      "search_term": "power steering"
     }
   ]
 }

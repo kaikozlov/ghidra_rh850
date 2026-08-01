@@ -247,12 +247,16 @@ class DDBParser:
         self._validate_header(data)
 
         # String DBs have a single LZSS-compressed section.
-        # Section header at 0x28: type=0, compression=1.
-        header = TableDataHead.read(data, 0x28)
+        # Format 0x04/0x05 (M/V English): section header at 0x28.
+        # Format 0x06 (U_English): different header layout, section at 0x34.
+        format_version = data[8]
+        section_offset = 0x34 if format_version == 0x06 else 0x28
+
+        header = TableDataHead.read(data, section_offset)
         assert header.compression == 1, f"expected LZSS, got compression={header.compression}"
 
         # The _DataDecode block starts right after the 10-byte section header.
-        block_offset = 0x28 + TableDataHead.HEADER_SIZE
+        block_offset = section_offset + TableDataHead.HEADER_SIZE
         compressed = data[block_offset : block_offset + header.payload_size]
         decompressed = lzss_decompress(compressed)
 
@@ -270,7 +274,8 @@ class DDBParser:
     def _validate_header(data: bytes) -> None:
         if len(data) < 0x30:
             raise ValueError("file too short for .ddb header")
-        if data[0:8] != MAGIC:
+        # Format 0x06 (U_English) has a different magic but same signature.
+        if data[8] != 0x06 and data[0:8] != MAGIC:
             raise ValueError(f"bad magic: {data[0:8].hex()}")
         sig_end = data.find(b"\x00", 0x0A)
         sig = data[0x0A:sig_end]

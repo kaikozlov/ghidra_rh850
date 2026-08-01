@@ -1,7 +1,7 @@
 {
   "firmware_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
   "techstream_distribution": "V18.00.008",
-  "generated_at": "2026-08-01T00:50:26.596988+00:00",
+  "generated_at": "2026-08-01T01:10:07.641259+00:00",
   "ecu": {
     "family": "EPS",
     "software_id": "8965B4512000",
@@ -27,21 +27,23 @@
     }
   },
   "summary": {
-    "total_mappings": 239,
+    "total_mappings": 312,
     "by_kind": {
       "did": 12,
       "dtc": 54,
       "monitor": 120,
       "active_test": 36,
-      "service": 17
+      "service": 17,
+      "utility_procedure": 73
     },
     "by_grade": {
       "exact": 33,
-      "family": 161,
-      "candidate": 45
+      "family": 193,
+      "candidate": 45,
+      "structural": 41
     },
     "auto_apply_count": 8,
-    "comment_only_count": 231
+    "comment_only_count": 304
   },
   "mappings": [
     {
@@ -4280,6 +4282,1745 @@
       "firmware_table_base": "0x25E30",
       "annotation_action": "comment",
       "note": "UDS SID 0xBA (ProprietaryService_BA)."
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Learning of Stroke Sensor Zero Point",
+      "oem_symbol": "learning_of_stroke_sensor_zero_point",
+      "match_grade": "structural",
+      "string_index": 633,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Learning of Stroke Sensor Zero Point' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"RR wheel\" in above steps as \"FL wheel\".)",
+      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_fl_wheel_read_rr_wheel_in_above_steps_as_fl_wheel",
+      "match_grade": "family",
+      "string_index": 672,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure '4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"RR wheel\" in above steps as \"FL wheel\".)'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"FR wheel\" in above steps as \"RL wheel\".)",
+      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_rl_wheel_read_fr_wheel_in_above_steps_as_rl_wheel",
+      "match_grade": "family",
+      "string_index": 673,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure '4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"FR wheel\" in above steps as \"RL wheel\".)'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)",
+      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_fl_wheel_read_fr_wheel_in_above_steps_as_fl_wheel",
+      "match_grade": "family",
+      "string_index": 681,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure '4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)",
+      "oem_symbol": "4_perform_above_steps_of_1_to_3_for_rl_wheel_read_rr_wheel_in_above_steps_as_rl_wheel",
+      "match_grade": "family",
+      "string_index": 683,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure '4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "8: Perform above steps of 1 to 7 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)",
+      "oem_symbol": "8_perform_above_steps_of_1_to_7_for_rl_wheel_read_rr_wheel_in_above_steps_as_rl_wheel",
+      "match_grade": "family",
+      "string_index": 702,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure '8: Perform above steps of 1 to 7 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "8: Perform above steps of 1 to 7 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)",
+      "oem_symbol": "8_perform_above_steps_of_1_to_7_for_fl_wheel_read_fr_wheel_in_above_steps_as_fl_wheel",
+      "match_grade": "family",
+      "string_index": 703,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure '8: Perform above steps of 1 to 7 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Learning of Stroke Sensor Zero Point",
+      "oem_symbol": "learning_of_stroke_sensor_zero_point",
+      "match_grade": "structural",
+      "string_index": 783,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Learning of Stroke Sensor Zero Point' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Zero Point of Stroke Sensor Learning Status",
+      "oem_symbol": "zero_point_of_stroke_sensor_learning_status",
+      "match_grade": "structural",
+      "string_index": 1316,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Zero Point of Stroke Sensor Learning Status' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Zero Point of G Sensor Learning Status",
+      "oem_symbol": "zero_point_of_g_sensor_learning_status",
+      "match_grade": "structural",
+      "string_index": 1320,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Zero Point of G Sensor Learning Status' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Zero Point of Yaw Rate Sensor Learning Status",
+      "oem_symbol": "zero_point_of_yaw_rate_sensor_learning_status",
+      "match_grade": "structural",
+      "string_index": 1321,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Zero Point of Yaw Rate Sensor Learning Status' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Memorize the steering angle zero point.\r\n\r\nPress Next to proceed.",
+      "oem_symbol": "memorize_the_steering_angle_zero_point_press_next_to_proceed",
+      "match_grade": "structural",
+      "string_index": 4353,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Memorize the steering angle zero point.\r\n\r\nPress Next to proceed.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Press Next to proceed after Oil Pressure Sensor Zero Point Learning is complete.",
+      "oem_symbol": "press_next_to_proceed_after_oil_pressure_sensor_zero_point_learning_is_complete",
+      "match_grade": "structural",
+      "string_index": 6159,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Press Next to proceed after Oil Pressure Sensor Zero Point Learning is complete.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "2. Oil Pressure Sensor Zero Point Learning",
+      "oem_symbol": "2_oil_pressure_sensor_zero_point_learning",
+      "match_grade": "structural",
+      "string_index": 6161,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure '2. Oil Pressure Sensor Zero Point Learning' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "2. Oil Pressure Sensor Zero Point Learning",
+      "oem_symbol": "2_oil_pressure_sensor_zero_point_learning",
+      "match_grade": "structural",
+      "string_index": 6190,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure '2. Oil Pressure Sensor Zero Point Learning' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "3. G Sensor Zero Point Learning",
+      "oem_symbol": "3_g_sensor_zero_point_learning",
+      "match_grade": "structural",
+      "string_index": 6192,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure '3. G Sensor Zero Point Learning' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Press Next to start G Sensor Zero Point Learning.",
+      "oem_symbol": "press_next_to_start_g_sensor_zero_point_learning",
+      "match_grade": "structural",
+      "string_index": 6193,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Press Next to start G Sensor Zero Point Learning.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "3. G Sensor Zero Point Learning",
+      "oem_symbol": "3_g_sensor_zero_point_learning",
+      "match_grade": "structural",
+      "string_index": 6195,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure '3. G Sensor Zero Point Learning' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "3. G Sensor Zero Point Learning",
+      "oem_symbol": "3_g_sensor_zero_point_learning",
+      "match_grade": "structural",
+      "string_index": 6198,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure '3. G Sensor Zero Point Learning' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Press Next after Oil Pressure Sensor Zero Point Learning is complete.",
+      "oem_symbol": "press_next_after_oil_pressure_sensor_zero_point_learning_is_complete",
+      "match_grade": "structural",
+      "string_index": 6205,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Press Next after Oil Pressure Sensor Zero Point Learning is complete.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Writing",
+      "oem_symbol": "torque_sensor_writing",
+      "match_grade": "structural",
+      "string_index": 6585,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Writing' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Writing",
+      "oem_symbol": "torque_sensor_writing",
+      "match_grade": "structural",
+      "string_index": 6586,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Writing' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Error Torque Sensor Adjustment",
+      "oem_symbol": "error_torque_sensor_adjustment",
+      "match_grade": "structural",
+      "string_index": 6598,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Error Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Turn the ignition switch ON.\r\n\r\nPress Next to perform Torque Sensor Writing.",
+      "oem_symbol": "turn_the_ignition_switch_on_press_next_to_perform_torque_sensor_writing",
+      "match_grade": "structural",
+      "string_index": 6599,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Turn the ignition switch ON.\r\n\r\nPress Next to perform Torque Sensor Writing.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment",
+      "oem_symbol": "torque_sensor_adjustment",
+      "match_grade": "structural",
+      "string_index": 6600,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Initialization ",
+      "oem_symbol": "torque_sensor_initialization",
+      "match_grade": "family",
+      "string_index": 6604,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Initialization '"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Press Next to perform Torque Sensor Initialization.",
+      "oem_symbol": "press_next_to_perform_torque_sensor_initialization",
+      "match_grade": "family",
+      "string_index": 6605,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Press Next to perform Torque Sensor Initialization.'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Initialization ",
+      "oem_symbol": "torque_sensor_initialization",
+      "match_grade": "family",
+      "string_index": 6606,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Initialization '"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Writing",
+      "oem_symbol": "torque_sensor_writing",
+      "match_grade": "structural",
+      "string_index": 6609,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Writing' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment",
+      "oem_symbol": "torque_sensor_adjustment",
+      "match_grade": "structural",
+      "string_index": 6611,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Writing",
+      "oem_symbol": "torque_sensor_writing",
+      "match_grade": "structural",
+      "string_index": 6667,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Writing' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Writing",
+      "oem_symbol": "torque_sensor_writing",
+      "match_grade": "structural",
+      "string_index": 6671,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Writing' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment",
+      "oem_symbol": "torque_sensor_adjustment",
+      "match_grade": "structural",
+      "string_index": 6674,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment",
+      "oem_symbol": "torque_sensor_adjustment",
+      "match_grade": "structural",
+      "string_index": 6676,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Do you want to exit Torque Sensor Adjustment ?",
+      "oem_symbol": "do_you_want_to_exit_torque_sensor_adjustment",
+      "match_grade": "structural",
+      "string_index": 12122,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Do you want to exit Torque Sensor Adjustment ?' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment has failed.\r\nEMPS ECU malfunction occurred.\r\nRefer to the repair manual.",
+      "oem_symbol": "torque_sensor_adjustment_has_failed_emps_ecu_malfunction_occurred_refer_to_the_repair_manual",
+      "match_grade": "structural",
+      "string_index": 12125,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Adjustment has failed.\r\nEMPS ECU malfunction occurred.\r\nRefer to the repair manual.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Torque Sensor Adjustment Complete.\r\n\r\nConfirm the PS warning light is OFF.",
+      "oem_symbol": "torque_sensor_adjustment_complete_confirm_the_ps_warning_light_is_off",
+      "match_grade": "structural",
+      "string_index": 12126,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Torque Sensor Adjustment Complete.\r\n\r\nConfirm the PS warning light is OFF.' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Error Torque Sensor Adjustment",
+      "oem_symbol": "error_torque_sensor_adjustment",
+      "match_grade": "structural",
+      "string_index": 12131,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x2005",
+          "start_callback": "0x4ED2C",
+          "result_callback": "0x4ED40"
+        },
+        {
+          "routine_id": "0x2006",
+          "start_callback": "0x4ED76",
+          "result_callback": "0x4ED8A"
+        },
+        {
+          "routine_id": "0x2007",
+          "start_callback": "0x4EDC0",
+          "result_callback": "0x4EDD4"
+        },
+        {
+          "routine_id": "0x2008",
+          "start_callback": "0x4EE0A",
+          "result_callback": "0x4EE1E"
+        },
+        {
+          "routine_id": "0x2009",
+          "start_callback": "0x4EE54",
+          "result_callback": "0x4EE68"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Error Torque Sensor Adjustment' → firmware routines: 0x2005, 0x2006, 0x2007, 0x2008, 0x2009"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Do you want to exit the Power Steering ECU Initial Setting Utility?",
+      "oem_symbol": "do_you_want_to_exit_the_power_steering_ecu_initial_setting_utility",
+      "match_grade": "structural",
+      "string_index": 12272,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        },
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Do you want to exit the Power Steering ECU Initial Setting Utility?' → firmware routines: 0x0204, 0x1000, 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Power Steering ECU Initial Setting",
+      "oem_symbol": "power_steering_ecu_initial_setting",
+      "match_grade": "structural",
+      "string_index": 12274,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        },
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Power Steering ECU Initial Setting' → firmware routines: 0x0204, 0x1000, 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Power Steering ECU Initial Setting is complete.",
+      "oem_symbol": "power_steering_ecu_initial_setting_is_complete",
+      "match_grade": "structural",
+      "string_index": 12277,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        },
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Power Steering ECU Initial Setting is complete.' → firmware routines: 0x0204, 0x1000, 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Power Steering ECU Initial Setting",
+      "oem_symbol": "power_steering_ecu_initial_setting",
+      "match_grade": "structural",
+      "string_index": 12281,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        },
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Power Steering ECU Initial Setting' → firmware routines: 0x0204, 0x1000, 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Error Power Steering ECU Initial Setting",
+      "oem_symbol": "error_power_steering_ecu_initial_setting",
+      "match_grade": "structural",
+      "string_index": 12282,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        },
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Error Power Steering ECU Initial Setting' → firmware routines: 0x0204, 0x1000, 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Power Steering System",
+      "oem_symbol": "power_steering_system",
+      "match_grade": "family",
+      "string_index": 16257,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Power Steering System'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Power Steering System",
+      "oem_symbol": "power_steering_system",
+      "match_grade": "family",
+      "string_index": 16259,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Power Steering System'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Power Steering System",
+      "oem_symbol": "power_steering_system",
+      "match_grade": "family",
+      "string_index": 16314,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Power Steering System'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Power Steering System",
+      "oem_symbol": "power_steering_system",
+      "match_grade": "family",
+      "string_index": 16421,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Power Steering System'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Factory initial setting",
+      "oem_symbol": "factory_initial_setting",
+      "match_grade": "structural",
+      "string_index": 18034,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Factory initial setting' → firmware routines: 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Lost Communication With Power Steering Control Module",
+      "oem_symbol": "lost_communication_with_power_steering_control_module",
+      "match_grade": "family",
+      "string_index": 19921,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Lost Communication With Power Steering Control Module'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Software Incompatibility with Power Steering Control Module",
+      "oem_symbol": "software_incompatibility_with_power_steering_control_module",
+      "match_grade": "family",
+      "string_index": 19931,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Software Incompatibility with Power Steering Control Module'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "INITIAL SETTING",
+      "oem_symbol": "initial_setting",
+      "match_grade": "structural",
+      "string_index": 24035,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'INITIAL SETTING' → firmware routines: 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Do you want to exit the Steering Actuator ECU Initial Setting Utility?",
+      "oem_symbol": "do_you_want_to_exit_the_steering_actuator_ecu_initial_setting_utility",
+      "match_grade": "structural",
+      "string_index": 24036,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Do you want to exit the Steering Actuator ECU Initial Setting Utility?' → firmware routines: 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Actuator ECU Initial Setting is complete.",
+      "oem_symbol": "steering_actuator_ecu_initial_setting_is_complete",
+      "match_grade": "structural",
+      "string_index": 24038,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Actuator ECU Initial Setting is complete.' → firmware routines: 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Error Steering Actuator ECU Initial Setting",
+      "oem_symbol": "error_steering_actuator_ecu_initial_setting",
+      "match_grade": "structural",
+      "string_index": 24043,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Error Steering Actuator ECU Initial Setting' → firmware routines: 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Actuator ECU Initial Setting",
+      "oem_symbol": "steering_actuator_ecu_initial_setting",
+      "match_grade": "structural",
+      "string_index": 24044,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Actuator ECU Initial Setting' → firmware routines: 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Actuator ECU Initial Setting",
+      "oem_symbol": "steering_actuator_ecu_initial_setting",
+      "match_grade": "structural",
+      "string_index": 24045,
+      "source_db": "U_English",
+      "firmware_routines": [
+        {
+          "routine_id": "0x0204",
+          "start_callback": "0x4EC16",
+          "result_callback": "0x4EC2A"
+        },
+        {
+          "routine_id": "0x1000",
+          "start_callback": "0x4F054",
+          "result_callback": "0x4F060"
+        }
+      ],
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Actuator ECU Initial Setting' → firmware routines: 0x0204, 0x1000"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Do you want to exit the Steering Torque Actuator Adjust 1 Utility?",
+      "oem_symbol": "do_you_want_to_exit_the_steering_torque_actuator_adjust_1_utility",
+      "match_grade": "family",
+      "string_index": 24048,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Do you want to exit the Steering Torque Actuator Adjust 1 Utility?'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 1 is finished.\r\nTurn the engine/power switch OFF and ON.",
+      "oem_symbol": "steering_torque_actuator_adjust_1_is_finished_turn_the_engine_power_switch_off_and_on",
+      "match_grade": "family",
+      "string_index": 24051,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Torque Actuator Adjust 1 is finished.\r\nTurn the engine/power switch OFF and ON.'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 1",
+      "oem_symbol": "steering_torque_actuator_adjust_1",
+      "match_grade": "family",
+      "string_index": 24055,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Torque Actuator Adjust 1'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 1 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.",
+      "oem_symbol": "steering_torque_actuator_adjust_1_is_complete_turn_the_engine_power_switch_off_and_on",
+      "match_grade": "family",
+      "string_index": 24056,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Torque Actuator Adjust 1 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Error Steering Torque Actuator Adjust 1",
+      "oem_symbol": "error_steering_torque_actuator_adjust_1",
+      "match_grade": "family",
+      "string_index": 24057,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Error Steering Torque Actuator Adjust 1'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 1",
+      "oem_symbol": "steering_torque_actuator_adjust_1",
+      "match_grade": "family",
+      "string_index": 24061,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Torque Actuator Adjust 1'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 2 is finished.\r\nTurn the engine/power switch OFF and ON.",
+      "oem_symbol": "steering_torque_actuator_adjust_2_is_finished_turn_the_engine_power_switch_off_and_on",
+      "match_grade": "family",
+      "string_index": 24065,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Torque Actuator Adjust 2 is finished.\r\nTurn the engine/power switch OFF and ON.'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Do you want to exit the Steering Torque Actuator Adjust 2 Utility?",
+      "oem_symbol": "do_you_want_to_exit_the_steering_torque_actuator_adjust_2_utility",
+      "match_grade": "family",
+      "string_index": 24069,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Do you want to exit the Steering Torque Actuator Adjust 2 Utility?'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 2 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.",
+      "oem_symbol": "steering_torque_actuator_adjust_2_is_complete_turn_the_engine_power_switch_off_and_on",
+      "match_grade": "family",
+      "string_index": 24071,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Torque Actuator Adjust 2 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Error Steering Torque Actuator Adjust 2",
+      "oem_symbol": "error_steering_torque_actuator_adjust_2",
+      "match_grade": "family",
+      "string_index": 24075,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Error Steering Torque Actuator Adjust 2'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 2",
+      "oem_symbol": "steering_torque_actuator_adjust_2",
+      "match_grade": "family",
+      "string_index": 24076,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Torque Actuator Adjust 2'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Steering Torque Actuator Adjust 2",
+      "oem_symbol": "steering_torque_actuator_adjust_2",
+      "match_grade": "family",
+      "string_index": 24077,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Steering Torque Actuator Adjust 2'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Lost Communication With Power Steering Control Module",
+      "oem_symbol": "lost_communication_with_power_steering_control_module",
+      "match_grade": "family",
+      "string_index": 25057,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Lost Communication With Power Steering Control Module'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Invalid Data Received From Power Steering Control Module",
+      "oem_symbol": "invalid_data_received_from_power_steering_control_module",
+      "match_grade": "family",
+      "string_index": 25065,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Invalid Data Received From Power Steering Control Module'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Lost Communication With Power Steering Control Module",
+      "oem_symbol": "lost_communication_with_power_steering_control_module",
+      "match_grade": "family",
+      "string_index": 25428,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Lost Communication With Power Steering Control Module'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Lost Communication With Power Steering Control Module",
+      "oem_symbol": "lost_communication_with_power_steering_control_module",
+      "match_grade": "family",
+      "string_index": 25516,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Lost Communication With Power Steering Control Module'"
+    },
+    {
+      "kind": "utility_procedure",
+      "oem_name": "Lost Communication With Power Steering Control Module",
+      "oem_symbol": "lost_communication_with_power_steering_control_module",
+      "match_grade": "family",
+      "string_index": 25534,
+      "source_db": "U_English",
+      "firmware_routines": null,
+      "annotation_action": "comment",
+      "note": "Utility procedure 'Lost Communication With Power Steering Control Module'"
     }
   ]
 }

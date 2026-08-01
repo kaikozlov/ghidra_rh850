@@ -53,6 +53,18 @@ EPS_DDB_FILES = ["EPS_P4DK3.ddb", "EPS_CAN_P4DK.ddb"]
 # String indices in DTC records resolve to M_English, not V_English.
 STRING_DB_FILE = "M_English.ddb"
 
+# U_English.ddb is the utility-procedure string database (format 0x06).
+# It contains wizard/dialog text for dealer service procedures like
+# "Torque Sensor Writing" and "Power Steering ECU Initial Setting".
+UTILITY_DB_FILE = "U_English.ddb"
+
+# Search terms for EPS-relevant utility procedures in U_English.
+EPS_PROCEDURE_TERMS = [
+    "torque sensor", "power steering", "eps",
+    "initial setting", "zero point", "steering torque",
+    "torque sensor writing", "torque sensor adjustment",
+]
+
 
 # ── Extractors ────────────────────────────────────────────────────────────────
 
@@ -171,6 +183,43 @@ def extract_active_tests(
     return entries
 
 
+def extract_utility_procedures(
+    u_db: StringDataBase,
+) -> list[dict]:
+    """Extract EPS-relevant utility procedures from U_English.
+
+    U_English (format 0x06) contains wizard/dialog text for dealer service
+    procedures.  We search for EPS-relevant terms and return matching entries.
+    """
+    import struct as _struct
+
+    entries: list[dict] = []
+    seen_indices: set[int] = set()
+
+    for term in EPS_PROCEDURE_TERMS:
+        results = u_db.search(term, limit=20)
+        for pool_offset, text in results:
+            target_rel = pool_offset - u_db.pool_offset
+            for i in range(u_db.entry_count):
+                entry_off = i * 6
+                if _struct.unpack_from("<I", u_db.decompressed, entry_off)[0] == target_rel:
+                    idx = i + 1
+                    if idx not in seen_indices:
+                        seen_indices.add(idx)
+                        is_title = len(text) < 100
+                        entries.append({
+                            "kind": "utility_procedure",
+                            "string_index": idx,
+                            "text": text,
+                            "is_title": is_title,
+                            "search_term": term,
+                        })
+                    break
+
+    entries.sort(key=lambda e: e["string_index"])
+    return entries
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def build_catalog() -> dict:
@@ -193,6 +242,12 @@ def build_catalog() -> dict:
         entries.extend(extract_monitors(db, strings))
         entries.extend(extract_active_tests(db, strings))
 
+    # Load U_English and extract EPS utility procedures
+    u_path = TECHSTREAM_DB / UTILITY_DB_FILE
+    if u_path.exists():
+        u_db = parser.load_string_db(u_path)
+        entries.extend(extract_utility_procedures(u_db))
+
     # Deduplicate
     seen = set()
     deduped = []
@@ -203,6 +258,7 @@ def build_catalog() -> dict:
             e.get("identifier"),
             e.get("record_index"),
             e.get("source_db"),
+            e.get("string_index"),  # for utility procedures
         )
         if key not in seen:
             seen.add(key)
