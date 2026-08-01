@@ -49,8 +49,11 @@ FW_DID_RANGE_END = 0xF18C
 EPS_DDB_FILES = ["EPS_P4DK3.ddb", "EPS_CAN_P4DK.ddb"]
 
 # M_English.ddb is the OEM description string database (DTC names, monitor
-# names, etc.).  V_English.ddb is the UI/active-test description database.
-# String indices in DTC records resolve to M_English, not V_English.
+# names, active-test enum values).  All EPS DDB string indices resolve
+# through M_English — verified across DTC, monitor, and active-test sections.
+# V_English.ddb is a separate ECU family's UI table sharing the same index
+# space; it resolves EPS indices to unrelated content (e.g. index 53644 =
+# "Torque sensor1" in M but "Engine position after correction point 14" in V).
 STRING_DB_FILE = "M_English.ddb"
 
 # U_English.ddb is the utility-procedure string database (format 0x06).
