@@ -1,0 +1,3144 @@
+{
+  "description": "P4DK4 EPS diagnostic vocabulary template for newer-generation Denso RH850 EPS calibrations (e.g. Corolla 8965F1208000). Not firmware-correlated; pure OEM vocabulary extraction.",
+  "techstream_distribution": "V18.00.008",
+  "source_file": "JP/DB/EPS_P4DK4.ddb",
+  "generated_at": "2026-08-01T16:41:10.646098+00:00",
+  "summary": {
+    "dtcs": 26,
+    "unique_dtc_identifiers": 26,
+    "dids": 8,
+    "monitors": 89,
+    "bridged_monitors": 78,
+    "bridged_did_count": 62,
+    "subfunctions": 85
+  },
+  "string_databases": {
+    "M_English": {
+      "entry_count": 183244,
+      "decompressed_size": 12889266
+    },
+    "V_English": {
+      "entry_count": 140602,
+      "decompressed_size": 10089890
+    }
+  },
+  "bridged_monitors": [
+    {
+      "seq": 1,
+      "did": "0x0101",
+      "name": "Freeze frame DTC"
+    },
+    {
+      "seq": 49,
+      "did": "0x0131",
+      "name": "DTC that caused FFD 2"
+    },
+    {
+      "seq": 2,
+      "did": "0x0102",
+      "name": "PIG power supply"
+    },
+    {
+      "seq": 3,
+      "did": "0x0103",
+      "name": "Power supply"
+    },
+    {
+      "seq": 4,
+      "did": "0x0104",
+      "name": "IG SW"
+    },
+    {
+      "seq": 5,
+      "did": "0x0105",
+      "name": "Torque sensor power supply"
+    },
+    {
+      "seq": 6,
+      "did": "0x0106",
+      "name": "Torque sensor main input"
+    },
+    {
+      "seq": 7,
+      "did": "0x0107",
+      "name": "Torque sensor sub input"
+    },
+    {
+      "seq": 8,
+      "did": "0x0108",
+      "name": "Control torque value"
+    },
+    {
+      "seq": 9,
+      "did": "0x0109",
+      "name": "Motor 1 terminal volt"
+    },
+    {
+      "seq": 10,
+      "did": "0x010A",
+      "name": "Motor 2 terminal volt"
+    },
+    {
+      "seq": 11,
+      "did": "0x010B",
+      "name": "Motor actual current"
+    },
+    {
+      "seq": 12,
+      "did": "0x010C",
+      "name": "Command value current"
+    },
+    {
+      "seq": 13,
+      "did": "0x010D",
+      "name": "Substrate temperature"
+    },
+    {
+      "seq": 14,
+      "did": "0x010E",
+      "name": "Meter vehicle velocity"
+    },
+    {
+      "seq": 15,
+      "did": "0x010F",
+      "name": "Engine revolution"
+    },
+    {
+      "seq": 57,
+      "did": "0x0139",
+      "name": null
+    },
+    {
+      "seq": 16,
+      "did": "0x0110",
+      "name": null
+    },
+    {
+      "seq": 58,
+      "did": "0x013A",
+      "name": null
+    },
+    {
+      "seq": 59,
+      "did": "0x013B",
+      "name": "Motor overheat record"
+    },
+    {
+      "seq": 60,
+      "did": "0x013C",
+      "name": "Motor lo power record"
+    },
+    {
+      "seq": 17,
+      "did": "0x0111",
+      "name": null
+    },
+    {
+      "seq": 18,
+      "did": "0x0112",
+      "name": null
+    },
+    {
+      "seq": 19,
+      "did": "0x0113",
+      "name": null
+    },
+    {
+      "seq": 20,
+      "did": "0x0114",
+      "name": null
+    },
+    {
+      "seq": 21,
+      "did": "0x0115",
+      "name": null
+    },
+    {
+      "seq": 22,
+      "did": "0x0116",
+      "name": null
+    },
+    {
+      "seq": 23,
+      "did": "0x0117",
+      "name": null
+    },
+    {
+      "seq": 24,
+      "did": "0x0118",
+      "name": null
+    },
+    {
+      "seq": 25,
+      "did": "0x0119",
+      "name": null
+    },
+    {
+      "seq": 26,
+      "did": "0x011A",
+      "name": null
+    },
+    {
+      "seq": 27,
+      "did": "0x011B",
+      "name": null
+    },
+    {
+      "seq": 28,
+      "did": "0x011C",
+      "name": null
+    },
+    {
+      "seq": 29,
+      "did": "0x011D",
+      "name": null
+    },
+    {
+      "seq": 30,
+      "did": "0x011E",
+      "name": "The number of DTCs"
+    },
+    {
+      "seq": 31,
+      "did": "0x011F",
+      "name": null
+    },
+    {
+      "seq": 32,
+      "did": "0x0120",
+      "name": "Test mode status"
+    },
+    {
+      "seq": 71,
+      "did": "0x0147",
+      "name": "Assist. map state"
+    },
+    {
+      "seq": 72,
+      "did": "0x0148",
+      "name": null
+    },
+    {
+      "seq": 73,
+      "did": "0x0149",
+      "name": null
+    },
+    {
+      "seq": 74,
+      "did": "0x014A",
+      "name": null
+    },
+    {
+      "seq": 33,
+      "did": "0x0121",
+      "name": null
+    },
+    {
+      "seq": 34,
+      "did": "0x0122",
+      "name": null
+    },
+    {
+      "seq": 35,
+      "did": "0x0123",
+      "name": null
+    },
+    {
+      "seq": 36,
+      "did": "0x0124",
+      "name": null
+    },
+    {
+      "seq": 37,
+      "did": "0x0125",
+      "name": null
+    },
+    {
+      "seq": 38,
+      "did": "0x0126",
+      "name": "Output of torque sensor 1"
+    },
+    {
+      "seq": 1,
+      "did": "0x0101",
+      "name": "DTC that caused FFD 1"
+    },
+    {
+      "seq": 40,
+      "did": "0x0128",
+      "name": "Meter vehicle speed"
+    },
+    {
+      "seq": 41,
+      "did": "0x0129",
+      "name": "Output of torque sensor 2"
+    },
+    {
+      "seq": 42,
+      "did": "0x012A",
+      "name": "Engine revolution speed"
+    },
+    {
+      "seq": 43,
+      "did": "0x012B",
+      "name": "Motor actual current"
+    },
+    {
+      "seq": 44,
+      "did": "0x012C",
+      "name": "Motor instruction current"
+    },
+    {
+      "seq": 45,
+      "did": "0x012D",
+      "name": "Steering angle speed"
+    },
+    {
+      "seq": 46,
+      "did": "0x012E",
+      "name": "Thermistor temperature"
+    },
+    {
+      "seq": 47,
+      "did": "0x012F",
+      "name": "PIG power supply"
+    },
+    {
+      "seq": 48,
+      "did": "0x0130",
+      "name": "IG power supply"
+    },
+    {
+      "seq": 2,
+      "did": "0x0102",
+      "name": null
+    },
+    {
+      "seq": 3,
+      "did": "0x0103",
+      "name": null
+    },
+    {
+      "seq": 4,
+      "did": "0x0104",
+      "name": null
+    },
+    {
+      "seq": 5,
+      "did": "0x0105",
+      "name": "Torque SSR 1(0-point val.)"
+    },
+    {
+      "seq": 6,
+      "did": "0x0106",
+      "name": "Torque SSR 2(0-point val.)"
+    },
+    {
+      "seq": 7,
+      "did": "0x0107",
+      "name": "Steering torque"
+    },
+    {
+      "seq": 8,
+      "did": "0x0108",
+      "name": null
+    },
+    {
+      "seq": 9,
+      "did": "0x0109",
+      "name": null
+    },
+    {
+      "seq": 10,
+      "did": "0x010A",
+      "name": null
+    },
+    {
+      "seq": 11,
+      "did": "0x010B",
+      "name": null
+    },
+    {
+      "seq": 12,
+      "did": "0x010C",
+      "name": "Motor terminal voltage (+)"
+    },
+    {
+      "seq": 13,
+      "did": "0x010D",
+      "name": "Motor terminal voltage (-)"
+    },
+    {
+      "seq": 14,
+      "did": "0x010E",
+      "name": null
+    },
+    {
+      "seq": 15,
+      "did": "0x010F",
+      "name": "IG (ON/OFF)"
+    },
+    {
+      "seq": 56,
+      "did": "0x0138",
+      "name": "Torque sensor 3 output"
+    },
+    {
+      "seq": 61,
+      "did": "0x013D",
+      "name": "Battery voltage gradual change count"
+    },
+    {
+      "seq": 64,
+      "did": "0x0140",
+      "name": "Backup power supply voltage"
+    },
+    {
+      "seq": 66,
+      "did": "0x0142",
+      "name": "Torque sensor power supply"
+    },
+    {
+      "seq": 67,
+      "did": "0x0143",
+      "name": "Internal pressor power supply"
+    },
+    {
+      "seq": 68,
+      "did": "0x0144",
+      "name": "Power supply monitor value"
+    },
+    {
+      "seq": 32,
+      "did": "0x0120",
+      "name": null
+    }
+  ],
+  "dtcs": [
+    {
+      "kind": "dtc",
+      "code": "C1511",
+      "dtc_identifier": 21777,
+      "name_string_index": 124240,
+      "resolved_name": "Torque sensor 1 malfunction",
+      "alternate_names": [
+        "Torque sensor 1 abnormal detect"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1512",
+      "dtc_identifier": 21778,
+      "name_string_index": 124241,
+      "resolved_name": "Torque sensor 2 malfunction",
+      "alternate_names": [
+        "Torque sensor 2 abnormal detect"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1513",
+      "dtc_identifier": 21779,
+      "name_string_index": 124242,
+      "resolved_name": "Torque sensor deviation excessive",
+      "alternate_names": [
+        "Torque sensor excess deviation"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1514",
+      "dtc_identifier": 21780,
+      "name_string_index": 124243,
+      "resolved_name": "Torque sensor power supply voltage malfunction",
+      "alternate_names": [
+        "Abnormal torque sensor power"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1515",
+      "dtc_identifier": 21781,
+      "name_string_index": 76758,
+      "resolved_name": "Not memorize the zero point of torque sensor"
+    },
+    {
+      "kind": "dtc",
+      "code": "C1516",
+      "dtc_identifier": 21782,
+      "name_string_index": 76752,
+      "resolved_name": "Memorize the zero point of torque sensor failed"
+    },
+    {
+      "kind": "dtc",
+      "code": "C1517",
+      "dtc_identifier": 21783,
+      "name_string_index": 76733,
+      "resolved_name": "Abnormality of torque hold continuation"
+    },
+    {
+      "kind": "dtc",
+      "code": "C1521",
+      "dtc_identifier": 21793,
+      "name_string_index": 76753,
+      "resolved_name": "Motor abnormality 1"
+    },
+    {
+      "kind": "dtc",
+      "code": "C1523",
+      "dtc_identifier": 21795,
+      "name_string_index": 124181,
+      "resolved_name": "Motor circuit malfunction 1",
+      "alternate_names": [
+        "Motor open wire"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1524",
+      "dtc_identifier": 21796,
+      "name_string_index": 124182,
+      "resolved_name": "Motor circuit malfunction 2",
+      "alternate_names": [
+        "Motor terminal volt short"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1531",
+      "dtc_identifier": 21809,
+      "name_string_index": 124102,
+      "resolved_name": "ECU malfunction 1",
+      "alternate_names": [
+        "ECU abnormality 1"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1532",
+      "dtc_identifier": 21810,
+      "name_string_index": 124103,
+      "resolved_name": "ECU malfunction 2",
+      "alternate_names": [
+        "ECU abnormality 2"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1533",
+      "dtc_identifier": 21811,
+      "name_string_index": 124218,
+      "resolved_name": "Temperature sensor circuit is low or high",
+      "alternate_names": [
+        "Circuit board temperature sensor abnormal"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1534",
+      "dtc_identifier": 21812,
+      "name_string_index": 124104,
+      "resolved_name": "EEPROM malfunction",
+      "alternate_names": [
+        "EEPROM abnormal"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1541",
+      "dtc_identifier": 21825,
+      "name_string_index": 124207,
+      "resolved_name": "Speed sensor malfunction",
+      "alternate_names": [
+        "Vehicle speed signal abnormal 1"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1544",
+      "dtc_identifier": 21828,
+      "name_string_index": 124129,
+      "resolved_name": "High engine revolution signal",
+      "alternate_names": [
+        "Engine speed abnormal 2"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1551",
+      "dtc_identifier": 21841,
+      "name_string_index": 76748,
+      "resolved_name": "IG power supply abnormal detect"
+    },
+    {
+      "kind": "dtc",
+      "code": "C1552",
+      "dtc_identifier": 21842,
+      "name_string_index": 124198,
+      "resolved_name": "PIG power supply voltage malfunction",
+      "alternate_names": [
+        "Motor power supply volt abnormal"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1553",
+      "dtc_identifier": 21843,
+      "name_string_index": 124197,
+      "resolved_name": "PIG power supply overvoltage",
+      "alternate_names": [
+        "Voltage over"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1554",
+      "dtc_identifier": 21844,
+      "name_string_index": 53600,
+      "resolved_name": "Power supply relay failure",
+      "alternate_names": [
+        "Power supply relay abnormal detect"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1555",
+      "dtc_identifier": 21845,
+      "name_string_index": 53601,
+      "resolved_name": "Motor relay failure",
+      "alternate_names": [
+        "Motor relay abnormal detect"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1557",
+      "dtc_identifier": 21847,
+      "name_string_index": 53602,
+      "resolved_name": "Overheat preventive control current limit history",
+      "alternate_names": [
+        "Overheat prevent control history"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1571",
+      "dtc_identifier": 21873,
+      "name_string_index": 53603,
+      "resolved_name": "Vehicle speed test not completed",
+      "alternate_names": [
+        "Vehicle speed signal 1 check"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1573",
+      "dtc_identifier": 21875,
+      "name_string_index": 53604,
+      "resolved_name": "Engine speed test not completed",
+      "alternate_names": [
+        "Engine speed signal 1 check"
+      ]
+    },
+    {
+      "kind": "dtc",
+      "code": "C1575",
+      "dtc_identifier": 21877,
+      "name_string_index": 124032,
+      "resolved_name": "Backup power supply volt check"
+    },
+    {
+      "kind": "dtc",
+      "code": "C1581",
+      "dtc_identifier": 21889,
+      "name_string_index": 76734,
+      "resolved_name": "Assist map writing not done"
+    }
+  ],
+  "dids": [
+    256,
+    544,
+    576,
+    608,
+    640,
+    672,
+    704,
+    736
+  ],
+  "monitors": [
+    {
+      "kind": "monitor",
+      "record_index": 0,
+      "seq": 1,
+      "bridged_did": "0x0101",
+      "name_string_index": 123890,
+      "resolved_name": "Freeze frame DTC",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 1,
+      "seq": 49,
+      "bridged_did": "0x0131",
+      "name_string_index": 76669,
+      "resolved_name": "DTC that caused FFD 2",
+      "resolved_desc": "Torque Converter Clutch Pressure Control Solenoid Control Circuit Stuck ON",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 2,
+      "seq": 2,
+      "bridged_did": "0x0102",
+      "name_string_index": 53484,
+      "resolved_name": "PIG power supply",
+      "resolved_desc": "Light1",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 3,
+      "seq": 3,
+      "bridged_did": "0x0103",
+      "name_string_index": 123937,
+      "resolved_name": "Power supply",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 4,
+      "seq": 4,
+      "bridged_did": "0x0104",
+      "name_string_index": 9078,
+      "resolved_name": "IG SW",
+      "resolved_desc": "EV ECU Intermittent Problems",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 5,
+      "seq": 5,
+      "bridged_did": "0x0105",
+      "name_string_index": 53495,
+      "resolved_name": "Torque sensor power supply",
+      "resolved_desc": "7.5s",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 6,
+      "seq": 6,
+      "bridged_did": "0x0106",
+      "name_string_index": 123991,
+      "resolved_name": "Torque sensor main input",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 7,
+      "seq": 7,
+      "bridged_did": "0x0107",
+      "name_string_index": 123992,
+      "resolved_name": "Torque sensor sub input",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 8,
+      "seq": 8,
+      "bridged_did": "0x0108",
+      "name_string_index": 123843,
+      "resolved_name": "Control torque value",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        65405,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 9,
+      "seq": 9,
+      "bridged_did": "0x0109",
+      "name_string_index": 123913,
+      "resolved_name": "Motor 1 terminal volt",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 10,
+      "seq": 10,
+      "bridged_did": "0x010A",
+      "name_string_index": 123914,
+      "resolved_name": "Motor 2 terminal volt",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 11,
+      "seq": 11,
+      "bridged_did": "0x010B",
+      "name_string_index": 123915,
+      "resolved_name": "Motor actual current",
+      "resolved_desc": "BBC failure(Transponder communication)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        65409,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 12,
+      "seq": 12,
+      "bridged_did": "0x010C",
+      "name_string_index": 123840,
+      "resolved_name": "Command value current",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        65409,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 13,
+      "seq": 13,
+      "bridged_did": "0x010D",
+      "name_string_index": 123975,
+      "resolved_name": "Substrate temperature",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        65408,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 14,
+      "seq": 14,
+      "bridged_did": "0x010E",
+      "name_string_index": 123911,
+      "resolved_name": "Meter vehicle velocity",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 15,
+      "seq": 15,
+      "bridged_did": "0x010F",
+      "name_string_index": 123854,
+      "resolved_name": "Engine revolution",
+      "resolved_desc": "Immobilizer condition",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 16,
+      "seq": 57,
+      "bridged_did": "0x0139",
+      "name_string_index": 41915,
+      "resolved_name": null,
+      "resolved_desc": "Internal Control Module Engine RPM Performance",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 17,
+      "seq": 16,
+      "bridged_did": "0x0110",
+      "name_string_index": 41915,
+      "resolved_name": null,
+      "resolved_desc": "Internal Control Module Engine RPM Performance",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 18,
+      "seq": 58,
+      "bridged_did": "0x013A",
+      "name_string_index": 41916,
+      "resolved_name": null,
+      "resolved_desc": "Fuel Pump Control Circuit / Open",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 19,
+      "seq": 59,
+      "bridged_did": "0x013B",
+      "name_string_index": 76705,
+      "resolved_name": "Motor overheat record",
+      "resolved_desc": "Lost Communication With Side Airbag Sensor LH",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 20,
+      "seq": 60,
+      "bridged_did": "0x013C",
+      "name_string_index": 124003,
+      "resolved_name": "Motor lo power record",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 21,
+      "seq": 17,
+      "bridged_did": "0x0111",
+      "name_string_index": 46793,
+      "resolved_name": null,
+      "resolved_desc": "Fuel Pump System Malfunction (No Pressure/Activate pressure limitter)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 22,
+      "seq": 18,
+      "bridged_did": "0x0112",
+      "name_string_index": 46794,
+      "resolved_name": null,
+      "resolved_desc": "Intake Shutter Control Circuit",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 23,
+      "seq": 19,
+      "bridged_did": "0x0113",
+      "name_string_index": 46795,
+      "resolved_name": null,
+      "resolved_desc": "Differential pressure sensor circuit",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 24,
+      "seq": 20,
+      "bridged_did": "0x0114",
+      "name_string_index": 46796,
+      "resolved_name": null,
+      "resolved_desc": "Differential pressure sensor (Installation)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 25,
+      "seq": 21,
+      "bridged_did": "0x0115",
+      "name_string_index": 46797,
+      "resolved_name": null,
+      "resolved_desc": "Accel. Position Sensor Circuit (IDL SW/Range)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 26,
+      "seq": 22,
+      "bridged_did": "0x0116",
+      "name_string_index": 46798,
+      "resolved_name": null,
+      "resolved_desc": "SCV Stick Detected (Close)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 27,
+      "seq": 23,
+      "bridged_did": "0x0117",
+      "name_string_index": 46799,
+      "resolved_name": null,
+      "resolved_desc": "A/F Sensor Circuit Range/Performance (Bank 2 Sensor 1)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 28,
+      "seq": 24,
+      "bridged_did": "0x0118",
+      "name_string_index": 46800,
+      "resolved_name": null,
+      "resolved_desc": "A/F Sensor Circuit Low (Bank 2 Sensor 1)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        65408,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 29,
+      "seq": 25,
+      "bridged_did": "0x0119",
+      "name_string_index": 46808,
+      "resolved_name": null,
+      "resolved_desc": "Diesel Throttle Position Sensor Circuit",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        65408,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 30,
+      "seq": 26,
+      "bridged_did": "0x011A",
+      "name_string_index": 46809,
+      "resolved_name": null,
+      "resolved_desc": "Common Rail System Malfunction (Pressure does not change)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 31,
+      "seq": 27,
+      "bridged_did": "0x011B",
+      "name_string_index": 46810,
+      "resolved_name": null,
+      "resolved_desc": "Differential pressure sensor circuit Low",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 32,
+      "seq": 28,
+      "bridged_did": "0x011C",
+      "name_string_index": 46811,
+      "resolved_name": null,
+      "resolved_desc": "Differential pressure sensor circuit High",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 33,
+      "seq": 29,
+      "bridged_did": "0x011D",
+      "name_string_index": 46812,
+      "resolved_name": null,
+      "resolved_desc": "Engine Stop Switch Circuit",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 34,
+      "seq": 30,
+      "bridged_did": "0x011E",
+      "name_string_index": 7079,
+      "resolved_name": "The number of DTCs",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 35,
+      "seq": 9900,
+      "bridged_did": null,
+      "name_string_index": 13269,
+      "resolved_name": "Key Cycle",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 36,
+      "seq": 9901,
+      "bridged_did": null,
+      "name_string_index": 13270,
+      "resolved_name": "IG-ON Elapsed Time",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 37,
+      "seq": 9902,
+      "bridged_did": null,
+      "name_string_index": 13271,
+      "resolved_name": "Clock Type",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 38,
+      "seq": 9903,
+      "bridged_did": null,
+      "name_string_index": 13272,
+      "resolved_name": "IG-ON Elapsed Time for Independent",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 39,
+      "seq": 9913,
+      "bridged_did": null,
+      "name_string_index": 131445,
+      "resolved_name": "Absolute Time (Second)",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 40,
+      "seq": 9914,
+      "bridged_did": null,
+      "name_string_index": 131443,
+      "resolved_name": "Absolute Time (Minute)",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 41,
+      "seq": 9915,
+      "bridged_did": null,
+      "name_string_index": 131442,
+      "resolved_name": "Absolute Time (Hour)",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 42,
+      "seq": 9916,
+      "bridged_did": null,
+      "name_string_index": 131444,
+      "resolved_name": "Absolute Time (Month)",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 43,
+      "seq": 9917,
+      "bridged_did": null,
+      "name_string_index": 131441,
+      "resolved_name": "Absolute Time (Day)",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 44,
+      "seq": 9918,
+      "bridged_did": null,
+      "name_string_index": 131446,
+      "resolved_name": "Absolute Time (Year)",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        63551,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 45,
+      "seq": 9919,
+      "bridged_did": null,
+      "name_string_index": 13271,
+      "resolved_name": "Clock Type",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 46,
+      "seq": 31,
+      "bridged_did": "0x011F",
+      "name_string_index": 41989,
+      "resolved_name": null,
+      "resolved_desc": "P1266",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 47,
+      "seq": 32,
+      "bridged_did": "0x0120",
+      "name_string_index": 123979,
+      "resolved_name": "Test mode status",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 48,
+      "seq": 71,
+      "bridged_did": "0x0147",
+      "name_string_index": 76654,
+      "resolved_name": "Assist. map state",
+      "resolved_desc": "Oxygen Sensor Circuit No Activity Detected (Bank 1 Sensor 1)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 49,
+      "seq": 72,
+      "bridged_did": "0x0148",
+      "name_string_index": 41991,
+      "resolved_name": null,
+      "resolved_desc": "P1276",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 50,
+      "seq": 73,
+      "bridged_did": "0x0149",
+      "name_string_index": 41991,
+      "resolved_name": null,
+      "resolved_desc": "P1276",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 51,
+      "seq": 74,
+      "bridged_did": "0x014A",
+      "name_string_index": 41992,
+      "resolved_name": null,
+      "resolved_desc": "P1277",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 52,
+      "seq": 33,
+      "bridged_did": "0x0121",
+      "name_string_index": 41991,
+      "resolved_name": null,
+      "resolved_desc": "P1276",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 53,
+      "seq": 34,
+      "bridged_did": "0x0122",
+      "name_string_index": 41991,
+      "resolved_name": null,
+      "resolved_desc": "P1276",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 54,
+      "seq": 35,
+      "bridged_did": "0x0123",
+      "name_string_index": 46813,
+      "resolved_name": null,
+      "resolved_desc": "Rack Sensor Circuit",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 55,
+      "seq": 36,
+      "bridged_did": "0x0124",
+      "name_string_index": 46814,
+      "resolved_name": null,
+      "resolved_desc": "VVT Sensor/Camshaft Position Sensor Circuit Range/Performance (Bank 2)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 56,
+      "seq": 37,
+      "bridged_did": "0x0125",
+      "name_string_index": 41990,
+      "resolved_name": null,
+      "resolved_desc": "P1271",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 57,
+      "seq": 38,
+      "bridged_did": "0x0126",
+      "name_string_index": 53487,
+      "resolved_name": "Output of torque sensor 1",
+      "resolved_desc": "Light 1",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 58,
+      "seq": 1,
+      "bridged_did": "0x0101",
+      "name_string_index": 76668,
+      "resolved_name": "DTC that caused FFD 1",
+      "resolved_desc": "Pressure Control Solenoid \"D\" Control Circuit High",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 59,
+      "seq": 40,
+      "bridged_did": "0x0128",
+      "name_string_index": 76698,
+      "resolved_name": "Meter vehicle speed",
+      "resolved_desc": "P Seat Airbag Active Mode Indicator",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 60,
+      "seq": 41,
+      "bridged_did": "0x0129",
+      "name_string_index": 53489,
+      "resolved_name": "Output of torque sensor 2",
+      "resolved_desc": "DARK1",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 61,
+      "seq": 42,
+      "bridged_did": "0x012A",
+      "name_string_index": 38526,
+      "resolved_name": "Engine revolution speed",
+      "resolved_desc": "Japanes",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 62,
+      "seq": 43,
+      "bridged_did": "0x012B",
+      "name_string_index": 53481,
+      "resolved_name": "Motor actual current",
+      "resolved_desc": "1.0 s",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        32736,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 63,
+      "seq": 44,
+      "bridged_did": "0x012C",
+      "name_string_index": 53482,
+      "resolved_name": "Motor instruction current",
+      "resolved_desc": "Dark2",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        32736,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 64,
+      "seq": 45,
+      "bridged_did": "0x012D",
+      "name_string_index": 76713,
+      "resolved_name": "Steering angle speed",
+      "resolved_desc": "Short in Air Outlet Damper Position Sensor Circuit",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        32768,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 65,
+      "seq": 46,
+      "bridged_did": "0x012E",
+      "name_string_index": 76717,
+      "resolved_name": "Thermistor temperature",
+      "resolved_desc": "Driver Side Motor Malfunction",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 66,
+      "seq": 47,
+      "bridged_did": "0x012F",
+      "name_string_index": 76708,
+      "resolved_name": "PIG power supply",
+      "resolved_desc": "Open in D Squib (Dual Stage - 2nd Step) Circuit",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 67,
+      "seq": 48,
+      "bridged_did": "0x0130",
+      "name_string_index": 76681,
+      "resolved_name": "IG power supply",
+      "resolved_desc": "Starter Relay Circuit Low",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 68,
+      "seq": 2,
+      "bridged_did": "0x0102",
+      "name_string_index": 42435,
+      "resolved_name": null,
+      "resolved_desc": "Hydraulic Control System Malfunction",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 69,
+      "seq": 3,
+      "bridged_did": "0x0103",
+      "name_string_index": 46829,
+      "resolved_name": null,
+      "resolved_desc": "Communication Error from Engine ECU to Distance Control ECU",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 70,
+      "seq": 4,
+      "bridged_did": "0x0104",
+      "name_string_index": 46830,
+      "resolved_name": null,
+      "resolved_desc": "Distance Control ECU",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 71,
+      "seq": 5,
+      "bridged_did": "0x0105",
+      "name_string_index": 76722,
+      "resolved_name": "Torque SSR 1(0-point val.)",
+      "resolved_desc": "Passenger Side Glass Position Initialization Incomplete",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 72,
+      "seq": 6,
+      "bridged_did": "0x0106",
+      "name_string_index": 76723,
+      "resolved_name": "Torque SSR 2(0-point val.)",
+      "resolved_desc": "Stopped",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 73,
+      "seq": 7,
+      "bridged_did": "0x0107",
+      "name_string_index": 53486,
+      "resolved_name": "Steering torque",
+      "resolved_desc": "Light 2",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        64836,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 74,
+      "seq": 8,
+      "bridged_did": "0x0108",
+      "name_string_index": 46788,
+      "resolved_name": null,
+      "resolved_desc": "Air Temperature Circuit",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        65405,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 75,
+      "seq": 9,
+      "bridged_did": "0x0109",
+      "name_string_index": 46789,
+      "resolved_name": null,
+      "resolved_desc": "Accel. Position Sensor Circuit (Open/Short)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 76,
+      "seq": 10,
+      "bridged_did": "0x010A",
+      "name_string_index": 46790,
+      "resolved_name": null,
+      "resolved_desc": "Step Motor for Turbocharger Control Circuit (Open/Short)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 77,
+      "seq": 11,
+      "bridged_did": "0x010B",
+      "name_string_index": 46791,
+      "resolved_name": null,
+      "resolved_desc": "Turbocharger Stick Detected (Close)",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        65409,
+        65535
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 78,
+      "seq": 12,
+      "bridged_did": "0x010C",
+      "name_string_index": 76707,
+      "resolved_name": "Motor terminal voltage (+)",
+      "resolved_desc": "Side No. 2 Airbag Sensor RH Malfunction",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 79,
+      "seq": 13,
+      "bridged_did": "0x010D",
+      "name_string_index": 76706,
+      "resolved_name": "Motor terminal voltage (-)",
+      "resolved_desc": "Side Airbag Sensor LH Initialization Incomplete",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 80,
+      "seq": 14,
+      "bridged_did": "0x010E",
+      "name_string_index": 3584,
+      "resolved_name": null,
+      "resolved_desc": "Accelerator POS No.2",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 81,
+      "seq": 15,
+      "bridged_did": "0x010F",
+      "name_string_index": 124008,
+      "resolved_name": "IG (ON/OFF)",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 82,
+      "seq": 56,
+      "bridged_did": "0x0138",
+      "name_string_index": 124016,
+      "resolved_name": "Torque sensor 3 output",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 83,
+      "seq": 61,
+      "bridged_did": "0x013D",
+      "name_string_index": 124005,
+      "resolved_name": "Battery voltage gradual change count",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 84,
+      "seq": 64,
+      "bridged_did": "0x0140",
+      "name_string_index": 76666,
+      "resolved_name": "Backup power supply voltage",
+      "resolved_desc": "Starter Request Circuit",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 85,
+      "seq": 66,
+      "bridged_did": "0x0142",
+      "name_string_index": 124017,
+      "resolved_name": "Torque sensor power supply",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 86,
+      "seq": 67,
+      "bridged_did": "0x0143",
+      "name_string_index": 124009,
+      "resolved_name": "Internal pressor power supply",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 87,
+      "seq": 68,
+      "bridged_did": "0x0144",
+      "name_string_index": 124012,
+      "resolved_name": "Power supply monitor value",
+      "resolved_desc": null,
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "kind": "monitor",
+      "record_index": 88,
+      "seq": 32,
+      "bridged_did": "0x0120",
+      "name_string_index": 41758,
+      "resolved_name": null,
+      "resolved_desc": "Diesel Particulate Filter Differential Pressure Too Low",
+      "scaling_raw": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "subfunctions": [
+    {
+      "kind": "subfunction",
+      "record_index": 0,
+      "raw_hex": "0000000400000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 1,
+      "raw_hex": "0000020200000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 2,
+      "raw_hex": "0000100100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 3,
+      "raw_hex": "0000110100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 4,
+      "raw_hex": "0000120100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 5,
+      "raw_hex": "0000130100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 6,
+      "raw_hex": "0000140100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 7,
+      "raw_hex": "0000150100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 8,
+      "raw_hex": "0000160100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 9,
+      "raw_hex": "0000170100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 10,
+      "raw_hex": "0000180100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 11,
+      "raw_hex": "0000190100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 12,
+      "raw_hex": "00001a0100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 13,
+      "raw_hex": "00001b0100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 14,
+      "raw_hex": "00001c0100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 15,
+      "raw_hex": "00001d0100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 16,
+      "raw_hex": "0000200400000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 17,
+      "raw_hex": "0000300100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 18,
+      "raw_hex": "0000400400000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 19,
+      "raw_hex": "0000600400000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 20,
+      "raw_hex": "0000700200000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 21,
+      "raw_hex": "0000710100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 22,
+      "raw_hex": "0000720100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 23,
+      "raw_hex": "0000730100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 24,
+      "raw_hex": "0000740100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 25,
+      "raw_hex": "0000750100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 26,
+      "raw_hex": "0000760100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 27,
+      "raw_hex": "0000770100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 28,
+      "raw_hex": "0000780100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 29,
+      "raw_hex": "0000790100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 30,
+      "raw_hex": "00007a0100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 31,
+      "raw_hex": "00007b0100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 32,
+      "raw_hex": "00007c0100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 33,
+      "raw_hex": "0000800400000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 34,
+      "raw_hex": "0000a00400000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 35,
+      "raw_hex": "0000c00400000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 36,
+      "raw_hex": "0000e00400000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 37,
+      "raw_hex": "0000e10100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 38,
+      "raw_hex": "0000e20500000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 39,
+      "raw_hex": "0000e30100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 40,
+      "raw_hex": "0000f00e00000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 41,
+      "raw_hex": "0000f10e00000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 42,
+      "raw_hex": "0000f20400000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 43,
+      "raw_hex": "0000f30100000000"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 44,
+      "raw_hex": "f902000400000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 45,
+      "raw_hex": "f902010100000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 46,
+      "raw_hex": "f902020200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 47,
+      "raw_hex": "f902030200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 48,
+      "raw_hex": "f902040100000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 49,
+      "raw_hex": "f902060200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 50,
+      "raw_hex": "f902070200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 51,
+      "raw_hex": "f902080200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 52,
+      "raw_hex": "f902090200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 53,
+      "raw_hex": "f9020a0200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 54,
+      "raw_hex": "f9020b0200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 55,
+      "raw_hex": "f9020c0200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 56,
+      "raw_hex": "f9020e0100000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 57,
+      "raw_hex": "f902130200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 58,
+      "raw_hex": "f902140200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 59,
+      "raw_hex": "f902150200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 60,
+      "raw_hex": "f9021a0200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 61,
+      "raw_hex": "f9021b0200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 62,
+      "raw_hex": "f9021d0100000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 63,
+      "raw_hex": "f902200400000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 64,
+      "raw_hex": "f902230100000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 65,
+      "raw_hex": "f902290200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 66,
+      "raw_hex": "f902400400000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 67,
+      "raw_hex": "f902410200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 68,
+      "raw_hex": "f902420100000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 69,
+      "raw_hex": "f902440100000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 70,
+      "raw_hex": "f902480200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 71,
+      "raw_hex": "f9025b0200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 72,
+      "raw_hex": "f9025c0200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 73,
+      "raw_hex": "f9025d0200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 74,
+      "raw_hex": "f9025e0200000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 75,
+      "raw_hex": "f902600400000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 76,
+      "raw_hex": "f902800400000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 77,
+      "raw_hex": "f902a00400000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 78,
+      "raw_hex": "f902c00400000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 79,
+      "raw_hex": "f902e00400000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 80,
+      "raw_hex": "f902e10100000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 81,
+      "raw_hex": "f902e20500000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 82,
+      "raw_hex": "f902e40100000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 83,
+      "raw_hex": "f902e80600000200"
+    },
+    {
+      "kind": "subfunction",
+      "record_index": 84,
+      "raw_hex": "f902e90600000200"
+    }
+  ]
+}

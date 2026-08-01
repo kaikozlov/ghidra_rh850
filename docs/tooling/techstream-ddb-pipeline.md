@@ -332,6 +332,65 @@ project), then all other subcommands use the bridge for interactive queries.
 Before: `DataCompress_DT.DLL` — 0 functions, 0 instructions.
 After: 157 functions, 6,848 instructions.
 
+## P4DK4 cross-variant template
+
+`EPS_P4DK4.ddb` (JP region only) is the richest EPS database in the Techstream
+V18 corpus. It represents a newer EPS generation than the NA databases
+(`EPS_CAN_P4DK`, `EPS_P4DK3`) currently used as the Sienna diagnostic template,
+making it a better vocabulary template for newer-generation calibrations like
+the Corolla `8965F1208000`.
+
+### Corpus comparison
+
+| Database | Region | DTCs | DIDs | Monitors | Subfns |
+|---|---|---|---|---|---|
+| `EPS_CAN_P4DK` | NA | 30 | 8 | 75 | 32 |
+| `EPS_P4DK3` | NA | 24 | 4 | 36 | 29 |
+| `EPS_P4DK4` | JP | 26 (45 records) | 8 | 89 | 85 |
+
+P4DK4's 45 DTC records carry dual naming (formal + alternate name per DTC),
+yielding 26 unique DTC identifiers. Its 89 monitors include 78 with seq < 100
+(bridged to firmware DIDs via `DID = 0x0100 + seq`), compared to 64 in NA.
+
+### New monitors not in the NA template
+
+P4DK4 adds 13 bridged DIDs absent from the NA database:
+
+| seq | DID | OEM name |
+|---|---|---|
+| 19 | 0x0113 | (unnamed in M_English) |
+| 20 | 0x0114 | (unnamed) |
+| 21 | 0x0115 | (unnamed) |
+| 49 | 0x0131 | DTC that caused FFD 2 |
+| 56 | 0x0138 | Torque sensor 3 output |
+| 64 | 0x0140 | Backup power supply voltage |
+| 66 | 0x0142 | Torque sensor power supply |
+| 67 | 0x0143 | Internal pressor power supply |
+| 68 | 0x0144 | Power supply monitor value |
+| 71 | 0x0147 | Assist. map state |
+| 72 | 0x0148 | (unnamed) |
+| 73 | 0x0149 | (unnamed) |
+| 74 | 0x014A | (unnamed) |
+
+The torque-sensor-3 and backup-power-supply monitors are consistent with a
+newer EPS generation adding sensor redundancy and backup-power diagnostics.
+
+### Extraction tool
+
+`tools/techstream/extract_p4dk4_catalog.py` — produces
+`data/generated/p4dk4_template/p4dk4_vocabulary.json`, a standalone
+vocabulary artifact (not firmware-correlated). Intended for use as a search
+template when Corolla firmware arrives: run the existing correlation engine
+(`correlate_vocabulary.py`) against P4DK4 vocabulary instead of the NA catalog
+to match DTC/DID/monitor names against the newer calibration's diagnostic
+tables.
+
+### Regional DDB access
+
+The DDB parser now accepts all regional variants (NA/JP/EU). Bytes 6–7 of the
+file magic carry a region/version tag (NA: `00 39`, JP: `01 1b`, EU: `00 14`);
+only the first 6 bytes and the `DiagTool DataCtrl` signature are constant.
+
 ## RE provenance
 
 | Finding | Source DLL | Function | Method |
