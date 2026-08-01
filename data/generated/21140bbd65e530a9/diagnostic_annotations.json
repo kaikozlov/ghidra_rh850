@@ -1,7 +1,7 @@
 {
   "firmware_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
   "techstream_distribution": "V18.00.008",
-  "generated_at": "2026-08-01T16:14:35.667446+00:00",
+  "generated_at": "2026-08-01T16:26:53.164668+00:00",
   "ecu": {
     "family": "EPS",
     "software_id": "8965B4512000",

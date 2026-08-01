@@ -37,7 +37,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import BinaryIO
 
-MAGIC = b"\x40\x00\x0c\x16\x0c\x08\x00\x39"
+# First 6 bytes are constant across all regions. Bytes 6-7 vary by region
+# (NA: 00 39, JP: 01 1b, EU: 00 14) — they carry a region/version tag or
+# checksum, not a format identifier.
+MAGIC_PREFIX = b"\x40\x00\x0c\x16\x0c\x08"
+MAGIC = b"\x40\x00\x0c\x16\x0c\x08\x00\x39"  # NA variant, kept for compat
 SIGNATURE = b"DiagTool DataCtrl\x00"
 
 
@@ -275,8 +279,9 @@ class DDBParser:
         if len(data) < 0x30:
             raise ValueError("file too short for .ddb header")
         # Format 0x06 (U_English) has a different magic but same signature.
-        if data[8] != 0x06 and data[0:8] != MAGIC:
-            raise ValueError(f"bad magic: {data[0:8].hex()}")
+        # Only the first 6 bytes are constant; bytes 6-7 vary by region.
+        if data[8] != 0x06 and data[0:6] != MAGIC_PREFIX:
+            raise ValueError(f"bad magic prefix: {data[0:8].hex()}")
         sig_end = data.find(b"\x00", 0x0A)
         sig = data[0x0A:sig_end]
         if sig != b"DiagTool DataCtrl":

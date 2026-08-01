@@ -18,7 +18,12 @@ the CSV holds the populated rows.
 | Application SA levels | level 2 (`03/04`) functional; level 1 stub | suspected same template | Sienna verified; Corolla hypothesis |
 | Application SA secret | recovered at CodeFlash `0x20840` | unknown | Sienna verified |
 | Bootloader payload format | confirmed (AES-CBC + CRC32 + CMAC gate) | unknown | Sienna verified |
+| Application service table | 17 SIDs (incl. proprietary `0xAB`/`0xBA`) | 13 SIDs answering (subset); `0xAB`/`0xBA` present | Sienna verified; Corolla field-confirmed |
+| `0xAB` semantics | event-record service (3 subfns, checkpoint-backed) | present (field), semantics inferred from Sienna | Sienna verified; Corolla hypothesis |
+| `0xBA` semantics | inert echo (null callback, no-op) | present (field), semantics inferred from Sienna | Sienna verified; Corolla hypothesis |
+| `0x34` application behavior | no-op echo (real handler bootloader-only) | silent (field), consistent with application mode | Sienna verified; Corolla hypothesis |
 | Diagnostic endpoints | `0x7A1` physical, `0x777` functional, `0x7A0` limited secondary | partially observed in field behavior | Sienna verified |
+| DDB vocabulary template | NA `EPS_CAN_P4DK` (30 DTCs, 75 monitors) | JP `EPS_P4DK4` likely closer (45 DTCs, 89 monitors) | Sienna verified; P4DK4 is newer generation |
 | SecOC profile | six RX PDUs; command-7 verify selects slot 4; live key state unknown | unknown | Sienna firmware path verified; slot contents unobserved |
 
 Unobserved fields are recorded as `unknown` in the CSV, never fabricated.
