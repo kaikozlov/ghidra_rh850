@@ -1,7 +1,7 @@
 {
   "firmware_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
   "techstream_distribution": "V18.00.008",
-  "generated_at": "2026-08-01T01:10:06.674012+00:00",
+  "generated_at": "2026-08-01T01:21:07.707041+00:00",
   "ecu": {
     "family": "EPS",
     "software_id": "8965B4512000",
@@ -12,7 +12,11 @@
       "NA/DB/EPS_P4DK3.ddb",
       "NA/DB/EPS_CAN_P4DK.ddb"
     ],
-    "string_database": "NA/DB/M_English.ddb"
+    "string_databases": [
+      "NA/DB/M_English.ddb",
+      "NA/DB/V_English.ddb",
+      "NA/DB/U_English.ddb"
+    ]
   },
   "firmware_did_table": {
     "base": "0x2941C",
@@ -33,11 +37,25 @@
     },
     "dids_in_firmware": 12
   },
-  "string_database": {
-    "file": "M_English.ddb",
-    "entry_count": 183244,
-    "pool_offset": 1099464,
-    "decompressed_size": 12889266
+  "string_databases": {
+    "M_English": {
+      "file": "M_English.ddb",
+      "entry_count": 183244,
+      "pool_offset": 1099464,
+      "decompressed_size": 12889266
+    },
+    "V_English": {
+      "file": "V_English.ddb",
+      "entry_count": 140602,
+      "pool_offset": 843612,
+      "decompressed_size": 10089890
+    },
+    "U_English": {
+      "file": "U_English.ddb",
+      "entry_count": 25957,
+      "pool_offset": 155742,
+      "decompressed_size": 3032332
+    }
   },
   "entries": [
     {
@@ -46,6 +64,11 @@
       "dtc_identifier": 21777,
       "name_string_index": 24118,
       "resolved_name": "Torque Sensor",
+      "resolutions": {
+        "M_English": "Torque Sensor",
+        "V_English": "Cancel",
+        "U_English": "<Introduction>\r\nThis function is used to send vehicle information to the server after Reprogramming Implement."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -54,6 +77,11 @@
       "dtc_identifier": 21778,
       "name_string_index": 24118,
       "resolved_name": "Torque Sensor",
+      "resolutions": {
+        "M_English": "Torque Sensor",
+        "V_English": "Cancel",
+        "U_English": "<Introduction>\r\nThis function is used to send vehicle information to the server after Reprogramming Implement."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -62,6 +90,11 @@
       "dtc_identifier": 21779,
       "name_string_index": 24118,
       "resolved_name": "Torque Sensor",
+      "resolutions": {
+        "M_English": "Torque Sensor",
+        "V_English": "Cancel",
+        "U_English": "<Introduction>\r\nThis function is used to send vehicle information to the server after Reprogramming Implement."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -70,6 +103,11 @@
       "dtc_identifier": 21780,
       "name_string_index": 24119,
       "resolved_name": "Torque Sensor Power Supply",
+      "resolutions": {
+        "M_English": "Torque Sensor Power Supply",
+        "V_English": "Input",
+        "U_English": "This function is used to send Vehicle Information.\r\nWhen you press \"Next\", GTS starts communication with the vehicle and sends Vehicle Information. "
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -78,6 +116,11 @@
       "dtc_identifier": 21781,
       "name_string_index": 24120,
       "resolved_name": "Torque Sensor Zero Point Adjustment Undone",
+      "resolutions": {
+        "M_English": "Torque Sensor Zero Point Adjustment Undone",
+        "V_English": "All Readiness (%s)",
+        "U_English": "Please wait..."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -86,6 +129,11 @@
       "dtc_identifier": 21782,
       "name_string_index": 24121,
       "resolved_name": "Torque Sensor Zero Point Adjustment Incomplete",
+      "resolutions": {
+        "M_English": "Torque Sensor Zero Point Adjustment Incomplete",
+        "V_English": "BS",
+        "U_English": "Vehicle Information has been sent to the server.\r\nThis function has completed successfully."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -94,6 +142,11 @@
       "dtc_identifier": 21783,
       "name_string_index": 24122,
       "resolved_name": "Torque Hold",
+      "resolutions": {
+        "M_English": "Torque Hold",
+        "V_English": "Cancel",
+        "U_English": "Failed to send Vehicle Information.\r\n\r\nWould you like to try again?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -102,6 +155,11 @@
       "dtc_identifier": 21793,
       "name_string_index": 24123,
       "resolved_name": "Motor",
+      "resolutions": {
+        "M_English": "Motor",
+        "V_English": "Clear",
+        "U_English": "Failed to launch browser.\r\nPlease confirm the following requirement.\r\n -Using Internet Explorer\r\n -The version of Internet Explorer is not older than 11\r\n\r\nWould you like to try again?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -110,6 +168,11 @@
       "dtc_identifier": 21795,
       "name_string_index": 24123,
       "resolved_name": "Motor",
+      "resolutions": {
+        "M_English": "Motor",
+        "V_English": "Clear",
+        "U_English": "Failed to launch browser.\r\nPlease confirm the following requirement.\r\n -Using Internet Explorer\r\n -The version of Internet Explorer is not older than 11\r\n\r\nWould you like to try again?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -118,6 +181,11 @@
       "dtc_identifier": 21796,
       "name_string_index": 24123,
       "resolved_name": "Motor",
+      "resolutions": {
+        "M_English": "Motor",
+        "V_English": "Clear",
+        "U_English": "Failed to launch browser.\r\nPlease confirm the following requirement.\r\n -Using Internet Explorer\r\n -The version of Internet Explorer is not older than 11\r\n\r\nWould you like to try again?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -126,6 +194,11 @@
       "dtc_identifier": 21809,
       "name_string_index": 24124,
       "resolved_name": "ECU Malfunction",
+      "resolutions": {
+        "M_English": "ECU Malfunction",
+        "V_English": "Input DTC",
+        "U_English": "Failed to send data to the server.\r\n\r\nWould you like to try again?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -134,6 +207,11 @@
       "dtc_identifier": 21810,
       "name_string_index": 24124,
       "resolved_name": "ECU Malfunction",
+      "resolutions": {
+        "M_English": "ECU Malfunction",
+        "V_English": "Input DTC",
+        "U_English": "Failed to send data to the server.\r\n\r\nWould you like to try again?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -142,6 +220,11 @@
       "dtc_identifier": 21811,
       "name_string_index": 24124,
       "resolved_name": "ECU Malfunction",
+      "resolutions": {
+        "M_English": "ECU Malfunction",
+        "V_English": "Input DTC",
+        "U_English": "Failed to send data to the server.\r\n\r\nWould you like to try again?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -150,6 +233,11 @@
       "dtc_identifier": 21812,
       "name_string_index": 24124,
       "resolved_name": "ECU Malfunction",
+      "resolutions": {
+        "M_English": "ECU Malfunction",
+        "V_English": "Input DTC",
+        "U_English": "Failed to send data to the server.\r\n\r\nWould you like to try again?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -158,6 +246,11 @@
       "dtc_identifier": 21825,
       "name_string_index": 19443,
       "resolved_name": "Vehicle Speed Signal",
+      "resolutions": {
+        "M_English": "Vehicle Speed Signal",
+        "V_English": "AF1 Test",
+        "U_English": "Reset Memory is complete."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -166,6 +259,11 @@
       "dtc_identifier": 21828,
       "name_string_index": 24125,
       "resolved_name": "Engine Revolution System",
+      "resolutions": {
+        "M_English": "Engine Revolution System",
+        "V_English": "OK",
+        "U_English": "The following updates are required to be the latest version.\r\nPlease press \"Detail\" button to confirm details."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -174,6 +272,11 @@
       "dtc_identifier": 21841,
       "name_string_index": 24126,
       "resolved_name": "IG Power Supply Voltage",
+      "resolutions": {
+        "M_English": "IG Power Supply Voltage",
+        "V_English": "B",
+        "U_English": "Failed to send Vehicle Information.\r\nError Code is described above.\r\n\r\nWould you like to try again?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -182,6 +285,11 @@
       "dtc_identifier": 21842,
       "name_string_index": 24127,
       "resolved_name": "PIG Power Supply Voltage",
+      "resolutions": {
+        "M_English": "PIG Power Supply Voltage",
+        "V_English": "C",
+        "U_English": "Please perform IG OFF first then IG ON, and press Next to proceed."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -190,6 +298,11 @@
       "dtc_identifier": 21844,
       "name_string_index": 24128,
       "resolved_name": "Power Supply Relay Failure",
+      "resolutions": {
+        "M_English": "Power Supply Relay Failure",
+        "V_English": "P",
+        "U_English": "The read file is invalid.\r\nPlease start from the beginning."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -198,6 +311,11 @@
       "dtc_identifier": 21845,
       "name_string_index": 24129,
       "resolved_name": "Motor Relay Welding Failure",
+      "resolutions": {
+        "M_English": "Motor Relay Welding Failure",
+        "V_English": "U",
+        "U_English": "Please wait..."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -206,6 +324,11 @@
       "dtc_identifier": 21847,
       "name_string_index": 24130,
       "resolved_name": "Continuous Overheat Preventive Control",
+      "resolutions": {
+        "M_English": "Continuous Overheat Preventive Control",
+        "V_English": "OK",
+        "U_English": "This process has been cancelled.\r\n\r\nWould you like to try again?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -214,6 +337,11 @@
       "dtc_identifier": 21873,
       "name_string_index": 19443,
       "resolved_name": "Vehicle Speed Signal",
+      "resolutions": {
+        "M_English": "Vehicle Speed Signal",
+        "V_English": "AF1 Test",
+        "U_English": "Reset Memory is complete."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -222,6 +350,11 @@
       "dtc_identifier": 21875,
       "name_string_index": 24125,
       "resolved_name": "Engine Revolution System",
+      "resolutions": {
+        "M_English": "Engine Revolution System",
+        "V_English": "OK",
+        "U_English": "The following updates are required to be the latest version.\r\nPlease press \"Detail\" button to confirm details."
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -230,6 +363,11 @@
       "dtc_identifier": 21889,
       "name_string_index": 24131,
       "resolved_name": "Assist Map Number Un-Writing",
+      "resolutions": {
+        "M_English": "Assist Map Number Un-Writing",
+        "V_English": "The input value was incorrect.\r\nPlease input the value correctly.",
+        "U_English": "Executing ECU Security Key function is needed.\r\nWould you like to launch ECU Security Key function?"
+      },
       "source_db": "EPS_P4DK3"
     },
     {
@@ -261,8 +399,18 @@
       "record_index": 0,
       "name_string_index": 10469,
       "resolved_name": "Torque Sensor 1 Output",
+      "name_resolutions": {
+        "M_English": "Torque Sensor 1 Output",
+        "V_English": "Position Memory Status",
+        "U_English": "Mileage since last NSC exchange"
+      },
       "desc_string_index": 12977,
       "resolved_desc": "Pilot Injection Volume MIN",
+      "desc_resolutions": {
+        "M_English": "Pilot Injection Volume MIN",
+        "V_English": "Air Outlet Servo Pulse (D)",
+        "U_English": "Tank Shut Valve is closed due to the tank temperature decrease."
+      },
       "scaling_raw": [
         0,
         0,
@@ -284,8 +432,18 @@
       "record_index": 1,
       "name_string_index": 10470,
       "resolved_name": "Meter Vehicle Velocity",
+      "name_resolutions": {
+        "M_English": "Meter Vehicle Velocity",
+        "V_English": "Destination Information",
+        "U_English": "NSC ageing factor"
+      },
       "desc_string_index": 12978,
       "resolved_desc": "Pilot Injection Timing MAX",
+      "desc_resolutions": {
+        "M_English": "Pilot Injection Timing MAX",
+        "V_English": "Air Outlet Servo Actu Pulse(D)",
+        "U_English": "Press Next to open the Tank Shut Valve."
+      },
       "scaling_raw": [
         0,
         0,
@@ -307,8 +465,18 @@
       "record_index": 2,
       "name_string_index": 10471,
       "resolved_name": "Torque Sensor 2 Output",
+      "name_resolutions": {
+        "M_English": "Torque Sensor 2 Output",
+        "V_English": "Headrest Limit Switch",
+        "U_English": "Learning Values Confirmation"
+      },
       "desc_string_index": 12979,
       "resolved_desc": "Pilot Injection Timing MIN",
+      "desc_resolutions": {
+        "M_English": "Pilot Injection Timing MIN",
+        "V_English": "Air Inlet Damper Targ Pulse",
+        "U_English": "Exiting Temporary Leak Check.\r\nAccording to the repair manual, release Nitrogen in the pipe.\r\nRefer to the repair manual for details."
+      },
       "scaling_raw": [
         0,
         0,
@@ -330,8 +498,18 @@
       "record_index": 3,
       "name_string_index": 3331,
       "resolved_name": "Engine Revolution",
+      "name_resolutions": {
+        "M_English": "Engine Revolution",
+        "V_English": null,
+        "U_English": "Key Lock-In Prevention Function (Battery Remove) is not completed.\r\nPerform Auxiliary Battery Position Configuration."
+      },
       "desc_string_index": 5023,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "TRQ3 Zero Point Value",
+        "U_English": "Now adjusting.\r\nPlease wait."
+      },
       "scaling_raw": [
         0,
         0,
@@ -353,8 +531,18 @@
       "record_index": 4,
       "name_string_index": 10472,
       "resolved_name": "Motor Actual Current",
+      "name_resolutions": {
+        "M_English": "Motor Actual Current",
+        "V_English": "Buckle Switch",
+        "U_English": "Error Learning Values Confirmation"
+      },
       "desc_string_index": 12980,
       "resolved_desc": "Secondary Air Control VSV",
+      "desc_resolutions": {
+        "M_English": "Secondary Air Control VSV",
+        "V_English": "Air Inlet Damper Actual Pulse",
+        "U_English": "Restarting Temporary Leak Check."
+      },
       "scaling_raw": [
         0,
         0,
@@ -376,8 +564,18 @@
       "record_index": 5,
       "name_string_index": 10599,
       "resolved_name": "Command Value Current",
+      "name_resolutions": {
+        "M_English": "Command Value Current",
+        "V_English": "Ignition (Direct Signal)",
+        "U_English": "-"
+      },
       "desc_string_index": 13127,
       "resolved_desc": "Slide Pos Mem No4",
+      "desc_resolutions": {
+        "M_English": "Slide Pos Mem No4",
+        "V_English": "Half/Full-latch Switch",
+        "U_English": "The cancel button has been pressed.\r\nDo you want to stop the processing?"
+      },
       "scaling_raw": [
         0,
         0,
@@ -399,8 +597,18 @@
       "record_index": 6,
       "name_string_index": 10600,
       "resolved_name": "Steering Angle Velocity",
+      "name_resolutions": {
+        "M_English": "Steering Angle Velocity",
+        "V_English": "Ignition (MPX)",
+        "U_English": "°C"
+      },
       "desc_string_index": 13128,
       "resolved_desc": "Slide Pos Mem No5",
+      "desc_resolutions": {
+        "M_English": "Slide Pos Mem No5",
+        "V_English": "Closer Stop Switch",
+        "U_English": "NG"
+      },
       "scaling_raw": [
         0,
         0,
@@ -422,8 +630,18 @@
       "record_index": 7,
       "name_string_index": 10601,
       "resolved_name": "Thermistor Temperature",
+      "name_resolutions": {
+        "M_English": "Thermistor Temperature",
+        "V_English": "Key Off Permission",
+        "U_English": "F"
+      },
       "desc_string_index": 13129,
       "resolved_desc": "Slide Pos Mem No6",
+      "desc_resolutions": {
+        "M_English": "Slide Pos Mem No6",
+        "V_English": "Rear Door Sunshade Status",
+        "U_English": "OK"
+      },
       "scaling_raw": [
         0,
         0,
@@ -445,8 +663,18 @@
       "record_index": 8,
       "name_string_index": 10602,
       "resolved_name": "PIG Power Supply",
+      "name_resolutions": {
+        "M_English": "PIG Power Supply",
+        "V_English": "Door Courtesy",
+        "U_English": "V"
+      },
       "desc_string_index": 13130,
       "resolved_desc": "Slide Pos Mem No7",
+      "desc_resolutions": {
+        "M_English": "Slide Pos Mem No7",
+        "V_English": "Rear Door Sunshade Stop Status",
+        "U_English": "Front Side Radar \"B\""
+      },
       "scaling_raw": [
         0,
         0,
@@ -468,8 +696,18 @@
       "record_index": 9,
       "name_string_index": 10603,
       "resolved_name": "IG Power Supply",
+      "name_resolutions": {
+        "M_English": "IG Power Supply",
+        "V_English": "Door Key Open Operation",
+        "U_English": "kPa"
+      },
       "desc_string_index": 13131,
       "resolved_desc": "Slide Pos Mem No8",
+      "desc_resolutions": {
+        "M_English": "Slide Pos Mem No8",
+        "V_English": "Rear Door Sunshade",
+        "U_English": "NG"
+      },
       "scaling_raw": [
         0,
         0,
@@ -491,8 +729,18 @@
       "record_index": 10,
       "name_string_index": 10604,
       "resolved_name": "TRQ1 Zero Point Value",
+      "name_resolutions": {
+        "M_English": "TRQ1 Zero Point Value",
+        "V_English": "Door Key Close Operation",
+        "U_English": "Standby"
+      },
       "desc_string_index": 13132,
       "resolved_desc": "RL Height Control Sensor",
+      "desc_resolutions": {
+        "M_English": "RL Height Control Sensor",
+        "V_English": "PSD Touch Sensor",
+        "U_English": "Online Axis Adjusting"
+      },
       "scaling_raw": [
         0,
         0,
@@ -514,8 +762,18 @@
       "record_index": 11,
       "name_string_index": 10605,
       "resolved_name": "TRQ2 Zero Point Value",
+      "name_resolutions": {
+        "M_English": "TRQ2 Zero Point Value",
+        "V_English": "Horn SW",
+        "U_English": "Intake Air Temperature"
+      },
       "desc_string_index": 13133,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "Handle Switch1",
+        "U_English": "Blind Spot Monitor \"B\""
+      },
       "scaling_raw": [
         0,
         0,
@@ -537,8 +795,18 @@
       "record_index": 12,
       "name_string_index": 10606,
       "resolved_name": "Steering Wheel Torque",
+      "name_resolutions": {
+        "M_English": "Steering Wheel Torque",
+        "V_English": "Audio Power SW",
+        "U_English": "NG"
+      },
       "desc_string_index": 13134,
       "resolved_desc": "Stop Light SW 1",
+      "desc_resolutions": {
+        "M_English": "Stop Light SW 1",
+        "V_English": "Handle Switch2",
+        "U_English": "Blind Spot Monitor \"A\""
+      },
       "scaling_raw": [
         0,
         0,
@@ -560,8 +828,18 @@
       "record_index": 13,
       "name_string_index": 10607,
       "resolved_name": "Motor Terminal Volt(+)",
+      "name_resolutions": {
+        "M_English": "Motor Terminal Volt(+)",
+        "V_English": "Spch Recognition Hook SW",
+        "U_English": "Injector Pilot Quantity Learning"
+      },
       "desc_string_index": 13135,
       "resolved_desc": "Engine Stop Signal",
+      "desc_resolutions": {
+        "M_English": "Engine Stop Signal",
+        "V_English": "Key Switch",
+        "U_English": "-"
+      },
       "scaling_raw": [
         0,
         0,
@@ -583,8 +861,18 @@
       "record_index": 14,
       "name_string_index": 10608,
       "resolved_name": "Motor Terminal Volt(-)",
+      "name_resolutions": {
+        "M_English": "Motor Terminal Volt(-)",
+        "V_English": "Wireless Open Operation",
+        "U_English": "Actuator Pilot Quantity Learning"
+      },
       "desc_string_index": 13136,
       "resolved_desc": "Cool Air Bypass Pulse",
+      "desc_resolutions": {
+        "M_English": "Cool Air Bypass Pulse",
+        "V_English": "Table Right Turn Switch",
+        "U_English": "Front Side Radar \"B\""
+      },
       "scaling_raw": [
         0,
         0,
@@ -606,8 +894,18 @@
       "record_index": 15,
       "name_string_index": 10609,
       "resolved_name": "IG Power Supply Status",
+      "name_resolutions": {
+        "M_English": "IG Power Supply Status",
+        "V_English": "Wireless Close Operation",
+        "U_English": "Temperature Pilot Quantity Learning"
+      },
       "desc_string_index": 13137,
       "resolved_desc": "Air Outlet Servo Pulse (P)",
+      "desc_resolutions": {
+        "M_English": "Air Outlet Servo Pulse (P)",
+        "V_English": "Table Left Turn Switch",
+        "U_English": "Front Side Radar \"A\""
+      },
       "scaling_raw": [
         0,
         0,
@@ -629,8 +927,18 @@
       "record_index": 16,
       "name_string_index": 10610,
       "resolved_name": "Torque Sensor 3 Output",
+      "name_resolutions": {
+        "M_English": "Torque Sensor 3 Output",
+        "V_English": "Hall IC1 Pulse",
+        "U_English": "Catalyst Pilot Quantity Learning"
+      },
       "desc_string_index": 13138,
       "resolved_desc": "Rear Door Curtsey SW",
+      "desc_resolutions": {
+        "M_English": "Rear Door Curtsey SW",
+        "V_English": "Lifter Switch Up",
+        "U_English": "Front Recognition Camera"
+      },
       "scaling_raw": [
         0,
         0,
@@ -652,8 +960,18 @@
       "record_index": 17,
       "name_string_index": 10611,
       "resolved_name": "Motor Overheat Record",
+      "name_resolutions": {
+        "M_English": "Motor Overheat Record",
+        "V_English": "Hall IC1 Status",
+        "U_English": "Pilot Quantity Learning"
+      },
       "desc_string_index": 13139,
       "resolved_desc": "P Door Curtsey SW",
+      "desc_resolutions": {
+        "M_English": "P Door Curtsey SW",
+        "V_English": "Lifter Switch Down",
+        "U_English": "This screen will be switched automatically after the processing is completed.\r\nPlease wait."
+      },
       "scaling_raw": [
         0,
         0,
@@ -675,8 +993,18 @@
       "record_index": 18,
       "name_string_index": 10612,
       "resolved_name": "Motor Lo Power Record",
+      "name_resolutions": {
+        "M_English": "Motor Lo Power Record",
+        "V_English": "Hall IC2 Pulse",
+        "U_English": "Atmospheric Pressure"
+      },
       "desc_string_index": 13140,
       "resolved_desc": "D Door Curtsey SW",
+      "desc_resolutions": {
+        "M_English": "D Door Curtsey SW",
+        "V_English": "Lumbar Switch UP",
+        "U_English": "Online Axis Alignment is completed for the part which execution result of Online Axis Alignment is \"OK\".\r\n\r\nIf the part which result is other than \"OK\" exists, Online Axis Alignment is not completed.  Therefore, Please execute again after exiting this function."
+      },
       "scaling_raw": [
         0,
         0,
@@ -698,8 +1026,18 @@
       "record_index": 19,
       "name_string_index": 10613,
       "resolved_name": "Battery Voltage Lo Record",
+      "name_resolutions": {
+        "M_English": "Battery Voltage Lo Record",
+        "V_English": "Hall IC2 Status",
+        "U_English": "Fuel Return Temperature"
+      },
       "desc_string_index": 13141,
       "resolved_desc": "Evaporator Fin Thermistor",
+      "desc_resolutions": {
+        "M_English": "Evaporator Fin Thermistor",
+        "V_English": null,
+        "U_English": "Please implement the following procedure.\r\n\r\n1.Turn the engine/power switch OFF.\r\n2.Turn the engine/power switch ON (Engine OFF/Ready OFF).\r\n\r\nAfter implementing above procedure, press Next."
+      },
       "scaling_raw": [
         0,
         0,
@@ -721,8 +1059,18 @@
       "record_index": 20,
       "name_string_index": 3343,
       "resolved_name": "Battery Voltage",
+      "name_resolutions": {
+        "M_English": "Battery Voltage",
+        "V_English": "ECB Solenoid (SMC1)",
+        "U_English": "Number of registered key:"
+      },
       "desc_string_index": 5042,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "Elec Angle Position",
+        "U_English": "Please wait."
+      },
       "scaling_raw": [
         0,
         0,
@@ -744,8 +1092,18 @@
       "record_index": 21,
       "name_string_index": 10614,
       "resolved_name": "TRQ Sensor Power Supply",
+      "name_resolutions": {
+        "M_English": "TRQ Sensor Power Supply",
+        "V_English": "Slide Close Signal",
+        "U_English": "Coolant Temperature"
+      },
       "desc_string_index": 13142,
       "resolved_desc": "Driver Seat Blower Level",
+      "desc_resolutions": {
+        "M_English": "Driver Seat Blower Level",
+        "V_English": null,
+        "U_English": "Do you want to remove the diagnostic tool?\r\n\r\nWhen removing the diagnostic tool, press \"Yes\" and then remove the diagnostic tool.\r\n\r\nCAUTION: \r\nOnline Axis Alignment Mode automatically ends when IG OFF."
+      },
       "scaling_raw": [
         0,
         0,
@@ -767,8 +1125,18 @@
       "record_index": 22,
       "name_string_index": 10615,
       "resolved_name": "Motor Voltage",
+      "name_resolutions": {
+        "M_English": "Motor Voltage",
+        "V_English": "Rotary Switch",
+        "U_English": "Please wait with engine idling.\r\nWhen the pre-conditions are met, this screen changes automatically."
+      },
       "desc_string_index": 13143,
       "resolved_desc": "Fr-Passenger Seat Blower Level",
+      "desc_resolutions": {
+        "M_English": "Fr-Passenger Seat Blower Level",
+        "V_English": null,
+        "U_English": "CAUTION:\r\nOnline Axis Alignment Mode automatically ends when IG OFF."
+      },
       "scaling_raw": [
         0,
         0,
@@ -790,8 +1158,18 @@
       "record_index": 23,
       "name_string_index": 10616,
       "resolved_name": "System Power Supply",
+      "name_resolutions": {
+        "M_English": "System Power Supply",
+        "V_English": "Door Key Related (Open)",
+        "U_English": "This function is used to Pilot Quantity Learning.\r\n\r\nConfirm the following conditions.\r\n- Engine is idling.\r\n- Refer to the repair manual to confirm pre-conditions of each item in next screen.\r\n\r\nNote: After pressing Next the Glow light will start blinking to indicate the vehicle has enabled Learning Mode.\r\n\r\nPress Next to proceed."
+      },
       "desc_string_index": 13144,
       "resolved_desc": "Pre-Collision Brake Control Req",
+      "desc_resolutions": {
+        "M_English": "Pre-Collision Brake Control Req",
+        "V_English": null,
+        "U_English": "Adjusting(Slow)"
+      },
       "scaling_raw": [
         0,
         0,
@@ -813,8 +1191,18 @@
       "record_index": 24,
       "name_string_index": 10617,
       "resolved_name": "The Number of DTCs",
+      "name_resolutions": {
+        "M_English": "The Number of DTCs",
+        "V_English": "Steer Shiftmatic Down SW",
+        "U_English": "Error Pilot Quantity Learning"
+      },
       "desc_string_index": 13145,
       "resolved_desc": "Pre-Collision Safety Brake Ind",
+      "desc_resolutions": {
+        "M_English": "Pre-Collision Safety Brake Ind",
+        "V_English": null,
+        "U_English": "NG"
+      },
       "scaling_raw": [
         0,
         0,
@@ -836,8 +1224,18 @@
       "record_index": 25,
       "name_string_index": 13269,
       "resolved_name": "Key Cycle",
+      "name_resolutions": {
+        "M_English": "Key Cycle",
+        "V_English": "ECM Load",
+        "U_English": "Please input the yaw angle and the pitch angle of the recognition camera."
+      },
       "desc_string_index": 15895,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "IPA Creep up Rate",
+        "U_English": "This function is used to register vehicle information to the ECU.\r\n\r\nConfirm the following condition.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n\r\nPress Next to start."
+      },
       "scaling_raw": [
         0,
         0,
@@ -859,8 +1257,18 @@
       "record_index": 26,
       "name_string_index": 13270,
       "resolved_name": "IG-ON Elapsed Time",
+      "name_resolutions": {
+        "M_English": "IG-ON Elapsed Time",
+        "V_English": "Converter Voltage",
+        "U_English": "lateral : Value written in the repair manual."
+      },
       "desc_string_index": 15896,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "Accelerator Info for DSS",
+        "U_English": "Vehicle Information Registration"
+      },
       "scaling_raw": [
         0,
         0,
@@ -882,8 +1290,18 @@
       "record_index": 27,
       "name_string_index": 13271,
       "resolved_name": "Clock Type",
+      "name_resolutions": {
+        "M_English": "Clock Type",
+        "V_English": "Outside Back Door P/W Down SW",
+        "U_English": "Input"
+      },
       "desc_string_index": 15897,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "Auto Hold Ctrl Sys Status",
+        "U_English": "Vehicle Information Registration"
+      },
       "scaling_raw": [
         0,
         0,
@@ -905,8 +1323,18 @@
       "record_index": 28,
       "name_string_index": 13272,
       "resolved_name": "IG-ON Elapsed Time for Independent",
+      "name_resolutions": {
+        "M_English": "IG-ON Elapsed Time for Independent",
+        "V_English": "Ignition Switch",
+        "U_English": "yaw angle : Value written in the repair manual.\r\npitch angle : Value written in the repair manual."
+      },
       "desc_string_index": 15898,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "Torque for Cornering Drag",
+        "U_English": "Vehicle Information Registration has failed.\r\nPlease verify the following condition.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n\r\nDo you want to try again?"
+      },
       "scaling_raw": [
         0,
         0,
@@ -926,10 +1354,20 @@
     {
       "kind": "monitor",
       "record_index": 29,
-      "name_string_index": 373,
-      "resolved_name": "Mirror Fold/Return",
-      "desc_string_index": 6244,
+      "name_string_index": 131445,
+      "resolved_name": "Absolute Time (Second)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Second)",
+        "V_English": "Steering Angle Signal Speed (CL Bus)",
+        "U_English": null
+      },
+      "desc_string_index": 71780,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Introduction>\r\nThis function is used to register additional Smart Keys.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -949,10 +1387,20 @@
     {
       "kind": "monitor",
       "record_index": 30,
-      "name_string_index": 371,
-      "resolved_name": "Mirror Heater",
-      "desc_string_index": 6242,
+      "name_string_index": 131443,
+      "resolved_name": "Absolute Time (Minute)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Minute)",
+        "V_English": "Steering Angle Signal (C2 Bus)",
+        "U_English": null
+      },
+      "desc_string_index": 71778,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Introduction>\r\nThis function is used to turn the Ignition (IG) ON (Engine OFF/Ready OFF) without a registered smart key.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -972,10 +1420,20 @@
     {
       "kind": "monitor",
       "record_index": 31,
-      "name_string_index": 370,
-      "resolved_name": "Ashtray Light",
-      "desc_string_index": 6241,
+      "name_string_index": 131442,
+      "resolved_name": "Absolute Time (Hour)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Hour)",
+        "V_English": "Steering Angle LSB Enhancing Signal (C2 Bus)",
+        "U_English": null
+      },
+      "desc_string_index": 71777,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Introduction>\r\nThis function is used to switch ON and OFF the Engine Oil Maintenance Monitor.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -995,10 +1453,20 @@
     {
       "kind": "monitor",
       "record_index": 32,
-      "name_string_index": 372,
-      "resolved_name": "Foot Light",
-      "desc_string_index": 6243,
+      "name_string_index": 131444,
+      "resolved_name": "Absolute Time (Month)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Month)",
+        "V_English": "Steering Angle Signal (CL Bus)",
+        "U_English": null
+      },
+      "desc_string_index": 71779,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Introduction>\r\nThis function is used to erase the registration information of the Smart Keys and register the Smart Keys.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1018,10 +1486,20 @@
     {
       "kind": "monitor",
       "record_index": 33,
-      "name_string_index": 369,
-      "resolved_name": "P Manual SW LED",
-      "desc_string_index": 6240,
+      "name_string_index": 131441,
+      "resolved_name": "Absolute Time (Day)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Day)",
+        "V_English": "Status of the Stop Lamp Switch Function /OFF or ON",
+        "U_English": null
+      },
+      "desc_string_index": 71776,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Introduction>\r\nThis function is used to reset TPMS.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1041,10 +1519,20 @@
     {
       "kind": "monitor",
       "record_index": 34,
-      "name_string_index": 374,
-      "resolved_name": "Mirror Right/Left",
-      "desc_string_index": 6245,
+      "name_string_index": 131446,
+      "resolved_name": "Absolute Time (Year)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Year)",
+        "V_English": "Steering Angle Zero Point Operation Value",
+        "U_English": null
+      },
+      "desc_string_index": 71781,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "OK",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1066,8 +1554,18 @@
       "record_index": 35,
       "name_string_index": 13271,
       "resolved_name": "Clock Type",
+      "name_resolutions": {
+        "M_English": "Clock Type",
+        "V_English": "Outside Back Door P/W Down SW",
+        "U_English": "Input"
+      },
       "desc_string_index": 15897,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "Auto Hold Ctrl Sys Status",
+        "U_English": "Vehicle Information Registration"
+      },
       "scaling_raw": [
         0,
         0,
@@ -1089,6 +1587,11 @@
       "record_index": 0,
       "name_string_index": 25786,
       "resolved_name": "Dummy",
+      "resolutions": {
+        "M_English": "Dummy",
+        "V_English": "Full Screen",
+        "U_English": "Do you want to exit the History Clear utility?"
+      },
       "subfunction": 1,
       "source_db": "EPS_P4DK3"
     },
@@ -1097,6 +1600,11 @@
       "record_index": 1,
       "name_string_index": 25445,
       "resolved_name": "OFF",
+      "resolutions": {
+        "M_English": "OFF",
+        "V_English": "80%",
+        "U_English": "Transmission Fluid Pressure Sensor/Switch \"B\" Circuit High"
+      },
       "subfunction": 0,
       "source_db": "EPS_P4DK3"
     },
@@ -1105,6 +1613,11 @@
       "record_index": 2,
       "name_string_index": 25547,
       "resolved_name": "ON",
+      "resolutions": {
+        "M_English": "ON",
+        "V_English": "Test Description",
+        "U_English": "O2 Sensor Reference Voltage Circuit/Open - Bank 1, Sensor 1"
+      },
       "subfunction": 1,
       "source_db": "EPS_P4DK3"
     },
@@ -1113,6 +1626,11 @@
       "record_index": 3,
       "name_string_index": 26016,
       "resolved_name": "Unrec",
+      "resolutions": {
+        "M_English": "Unrec",
+        "V_English": "Note Visible button",
+        "U_English": null
+      },
       "subfunction": 0,
       "source_db": "EPS_P4DK3"
     },
@@ -1121,6 +1639,11 @@
       "record_index": 4,
       "name_string_index": 26017,
       "resolved_name": "Rec",
+      "resolutions": {
+        "M_English": "Rec",
+        "V_English": "Cancel",
+        "U_English": null
+      },
       "subfunction": 1,
       "source_db": "EPS_P4DK3"
     },
@@ -1129,6 +1652,11 @@
       "record_index": 5,
       "name_string_index": 29354,
       "resolved_name": "-",
+      "resolutions": {
+        "M_English": "-",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 0,
       "source_db": "EPS_P4DK3"
     },
@@ -1137,6 +1665,11 @@
       "record_index": 6,
       "name_string_index": 29355,
       "resolved_name": "IG",
+      "resolutions": {
+        "M_English": "IG",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 1,
       "source_db": "EPS_P4DK3"
     },
@@ -1145,6 +1678,11 @@
       "record_index": 7,
       "name_string_index": 29356,
       "resolved_name": "ACC",
+      "resolutions": {
+        "M_English": "ACC",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 2,
       "source_db": "EPS_P4DK3"
     },
@@ -1153,6 +1691,11 @@
       "record_index": 8,
       "name_string_index": 29357,
       "resolved_name": "+B",
+      "resolutions": {
+        "M_English": "+B",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 3,
       "source_db": "EPS_P4DK3"
     },
@@ -1161,6 +1704,11 @@
       "record_index": 9,
       "name_string_index": 29354,
       "resolved_name": "-",
+      "resolutions": {
+        "M_English": "-",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 0,
       "source_db": "EPS_P4DK3"
     },
@@ -1169,6 +1717,11 @@
       "record_index": 10,
       "name_string_index": 29355,
       "resolved_name": "IG",
+      "resolutions": {
+        "M_English": "IG",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 1,
       "source_db": "EPS_P4DK3"
     },
@@ -1177,6 +1730,11 @@
       "record_index": 11,
       "name_string_index": 29354,
       "resolved_name": "-",
+      "resolutions": {
+        "M_English": "-",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 0,
       "source_db": "EPS_P4DK3"
     },
@@ -1185,6 +1743,11 @@
       "record_index": 12,
       "name_string_index": 375,
       "resolved_name": "Mirror Up/Down",
+      "resolutions": {
+        "M_English": "Mirror Up/Down",
+        "V_English": "This test activates the Wiper Deicer ON/OFF.",
+        "U_English": "Press Next to proceed."
+      },
       "subfunction": 1,
       "source_db": "EPS_P4DK3"
     },
@@ -1193,6 +1756,11 @@
       "record_index": 13,
       "name_string_index": 29354,
       "resolved_name": "-",
+      "resolutions": {
+        "M_English": "-",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 0,
       "source_db": "EPS_P4DK3"
     },
@@ -1201,6 +1769,11 @@
       "record_index": 14,
       "name_string_index": 835,
       "resolved_name": "Slide Roof",
+      "resolutions": {
+        "M_English": "Slide Roof",
+        "V_English": "This test will turn the ES Start Light ON/OFF.",
+        "U_English": "Anteroposterior plumbing Air Bleeding\r\nPlease follow the instructions on the screen, and check boxes after performing each step.\r\n Note:\r\n  - Ensure that brake fluid level is maintained between MIN/MAX level."
+      },
       "subfunction": 1,
       "source_db": "EPS_P4DK3"
     },
@@ -1210,6 +1783,11 @@
       "dtc_identifier": 16465,
       "name_string_index": 98744,
       "resolved_name": "Steering sensor signal malfunction",
+      "resolutions": {
+        "M_English": "Steering sensor signal malfunction",
+        "V_English": "306",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1218,6 +1796,11 @@
       "dtc_identifier": 21777,
       "name_string_index": 53644,
       "resolved_name": "Torque sensor1",
+      "resolutions": {
+        "M_English": "Torque sensor1",
+        "V_English": "Engine position after correction point 14 (Distribution motor)",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1226,6 +1809,11 @@
       "dtc_identifier": 21778,
       "name_string_index": 53645,
       "resolved_name": "Torque sensor2",
+      "resolutions": {
+        "M_English": "Torque sensor2",
+        "V_English": "Engine position after correction point 14 (Mixing motor)",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1234,6 +1822,11 @@
       "dtc_identifier": 21779,
       "name_string_index": 140946,
       "resolved_name": "Torque sensor deviation excessive",
+      "resolutions": {
+        "M_English": "Torque sensor deviation excessive",
+        "V_English": null,
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1242,6 +1835,11 @@
       "dtc_identifier": 21780,
       "name_string_index": 140947,
       "resolved_name": "Torque sensor power supply abnormal",
+      "resolutions": {
+        "M_English": "Torque sensor power supply abnormal",
+        "V_English": null,
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1250,6 +1848,11 @@
       "dtc_identifier": 21795,
       "name_string_index": 53648,
       "resolved_name": "Motor terminal abnormality 1",
+      "resolutions": {
+        "M_English": "Motor terminal abnormality 1",
+        "V_English": "Engine position after correction point 15 (Mixing motor)",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1258,6 +1861,11 @@
       "dtc_identifier": 21796,
       "name_string_index": 53649,
       "resolved_name": "Motor terminal abnormality 2",
+      "resolutions": {
+        "M_English": "Motor terminal abnormality 2",
+        "V_English": "Engine position after correction point 16 (Air inlet motor)",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1266,6 +1874,11 @@
       "dtc_identifier": 21809,
       "name_string_index": 53650,
       "resolved_name": "CPU malfunction",
+      "resolutions": {
+        "M_English": "CPU malfunction",
+        "V_English": "Engine position after correction point 16 (Distribution motor)",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1274,6 +1887,11 @@
       "dtc_identifier": 21810,
       "name_string_index": 53651,
       "resolved_name": "ECU malfunction",
+      "resolutions": {
+        "M_English": "ECU malfunction",
+        "V_English": "Engine position after correction point 16 (Mixing motor)",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1282,6 +1900,11 @@
       "dtc_identifier": 21811,
       "name_string_index": 53652,
       "resolved_name": "Temperature sensor malfunction",
+      "resolutions": {
+        "M_English": "Temperature sensor malfunction",
+        "V_English": "Engine position after correction point 17 (Air inlet motor)",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1290,6 +1913,11 @@
       "dtc_identifier": 21812,
       "name_string_index": 53653,
       "resolved_name": "EEPROM error",
+      "resolutions": {
+        "M_English": "EEPROM error",
+        "V_English": "Engine position after correction point 17 (Distribution motor)",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1298,6 +1926,11 @@
       "dtc_identifier": 21825,
       "name_string_index": 53654,
       "resolved_name": "Vehicle speed abnormality",
+      "resolutions": {
+        "M_English": "Vehicle speed abnormality",
+        "V_English": "Engine position after correction point 17 (Mixing motor)",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1306,6 +1939,11 @@
       "dtc_identifier": 21842,
       "name_string_index": 53598,
       "resolved_name": "PIG voltage abnormality",
+      "resolutions": {
+        "M_English": "PIG voltage abnormality",
+        "V_English": "ANTI_CLIQUETIS_CYL2_ZONE3",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1314,6 +1952,11 @@
       "dtc_identifier": 21843,
       "name_string_index": 53599,
       "resolved_name": "Overvoltage",
+      "resolutions": {
+        "M_English": "Overvoltage",
+        "V_English": "ANTI_CLIQUETIS_CYL2_ZONE4",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1322,6 +1965,11 @@
       "dtc_identifier": 21844,
       "name_string_index": 53600,
       "resolved_name": "Power supply relay failure",
+      "resolutions": {
+        "M_English": "Power supply relay failure",
+        "V_English": "ANTI_CLIQUETIS_CYL2_ZONE5",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1330,6 +1978,11 @@
       "dtc_identifier": 21845,
       "name_string_index": 53601,
       "resolved_name": "Motor relay failure",
+      "resolutions": {
+        "M_English": "Motor relay failure",
+        "V_English": "ANTI_CLIQUETIS_CYL2_ZONE6",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1338,6 +1991,11 @@
       "dtc_identifier": 21847,
       "name_string_index": 53602,
       "resolved_name": "Overheat preventive control current limit history",
+      "resolutions": {
+        "M_English": "Overheat preventive control current limit history",
+        "V_English": "ANTI_CLIQUETIS_CYL2_ZONE7",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1346,6 +2004,11 @@
       "dtc_identifier": 21873,
       "name_string_index": 53603,
       "resolved_name": "Vehicle speed test not completed",
+      "resolutions": {
+        "M_English": "Vehicle speed test not completed",
+        "V_English": "ANTI_CLIQUETIS_CYL2_ZONE8",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1354,6 +2017,11 @@
       "dtc_identifier": 21875,
       "name_string_index": 53604,
       "resolved_name": "Engine speed test not completed",
+      "resolutions": {
+        "M_English": "Engine speed test not completed",
+        "V_English": "ANTI_CLIQUETIS_CYL2_ZONE9",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1362,6 +2030,11 @@
       "dtc_identifier": 21889,
       "name_string_index": 53605,
       "resolved_name": "Assist map un-writing",
+      "resolutions": {
+        "M_English": "Assist map un-writing",
+        "V_English": "ANTI_CLIQUETIS_CYL3_ZONE1",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1370,6 +2043,11 @@
       "dtc_identifier": 49408,
       "name_string_index": 53606,
       "resolved_name": "CAN communication error (EFI)",
+      "resolutions": {
+        "M_English": "CAN communication error (EFI)",
+        "V_English": "ANTI_CLIQUETIS_CYL3_ZONE10",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1378,6 +2056,11 @@
       "dtc_identifier": 49441,
       "name_string_index": 53607,
       "resolved_name": "CAN communication error (ABS/VSC)",
+      "resolutions": {
+        "M_English": "CAN communication error (ABS/VSC)",
+        "V_English": "ANTI_CLIQUETIS_CYL3_ZONE11",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1386,6 +2069,11 @@
       "dtc_identifier": 49446,
       "name_string_index": 95159,
       "resolved_name": "CAN communication error (steering sensor)",
+      "resolutions": {
+        "M_English": "CAN communication error (steering sensor)",
+        "V_English": "Left Side D-Pillar Satellite Sensor",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1394,6 +2082,11 @@
       "dtc_identifier": 49493,
       "name_string_index": 53608,
       "resolved_name": "CAN communication error (meter)",
+      "resolutions": {
+        "M_English": "CAN communication error (meter)",
+        "V_English": "ANTI_CLIQUETIS_CYL3_ZONE12",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1402,6 +2095,11 @@
       "dtc_identifier": 49722,
       "name_string_index": 140823,
       "resolved_name": "CAN communication error (SCM)",
+      "resolutions": {
+        "M_English": "CAN communication error (SCM)",
+        "V_English": null,
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1410,6 +2108,11 @@
       "dtc_identifier": 49731,
       "name_string_index": 140822,
       "resolved_name": "CAN communication error (IPA)",
+      "resolutions": {
+        "M_English": "CAN communication error (IPA)",
+        "V_English": null,
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1418,6 +2121,11 @@
       "dtc_identifier": 49811,
       "name_string_index": 177509,
       "resolved_name": "CAN communication error (TRM)",
+      "resolutions": {
+        "M_English": "CAN communication error (TRM)",
+        "V_English": null,
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1426,6 +2134,11 @@
       "dtc_identifier": 49812,
       "name_string_index": 181643,
       "resolved_name": "CAN communication error (EHV)",
+      "resolutions": {
+        "M_English": "CAN communication error (EHV)",
+        "V_English": null,
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1434,6 +2147,11 @@
       "dtc_identifier": 50198,
       "name_string_index": 109981,
       "resolved_name": "CAN communication error (VSC)",
+      "resolutions": {
+        "M_English": "CAN communication error (VSC)",
+        "V_English": "D(D4) Range(MRB1e)",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1442,6 +2160,11 @@
       "dtc_identifier": 53507,
       "name_string_index": 53609,
       "resolved_name": "CAN communication error (IDS)",
+      "resolutions": {
+        "M_English": "CAN communication error (IDS)",
+        "V_English": "ANTI_CLIQUETIS_CYL3_ZONE2",
+        "U_English": null
+      },
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -1497,8 +2220,18 @@
       "record_index": 0,
       "name_string_index": 53480,
       "resolved_name": "Diagnosis codes when FFD stored",
+      "name_resolutions": {
+        "M_English": "Diagnosis codes when FFD stored",
+        "V_English": "Heater Core Water Pump",
+        "U_English": null
+      },
       "desc_string_index": 32424,
       "resolved_desc": "LIGHT2",
+      "desc_resolutions": {
+        "M_English": "LIGHT2",
+        "V_English": "AVC-LAN Start Sound Resp",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1520,8 +2253,18 @@
       "record_index": 1,
       "name_string_index": 38527,
       "resolved_name": "Vehicle speed",
+      "name_resolutions": {
+        "M_English": "Vehicle speed",
+        "V_English": "Oper Permission (Brake Master Pressure 0 Point)",
+        "U_English": null
+      },
       "desc_string_index": 20504,
       "resolved_desc": "Collision Sensor Low Input",
+      "desc_resolutions": {
+        "M_English": "Collision Sensor Low Input",
+        "V_English": "S&S Enable(Sport Mode SW)",
+        "U_English": "The ECU has not received a signal from the wheel transmitter module."
+      },
       "scaling_raw": [
         0,
         0,
@@ -1541,10 +2284,20 @@
     {
       "kind": "monitor",
       "record_index": 2,
-      "name_string_index": 46231,
-      "resolved_name": null,
-      "desc_string_index": 35549,
-      "resolved_desc": null,
+      "name_string_index": 177303,
+      "resolved_name": "Ready ON Status",
+      "name_resolutions": {
+        "M_English": "Ready ON Status",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 101085,
+      "resolved_desc": "ACTIVE TRC Indicator",
+      "desc_resolutions": {
+        "M_English": "ACTIVE TRC Indicator",
+        "V_English": "Function to unlock the doors when the vehicle reaches below certain speed.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1566,8 +2319,18 @@
       "record_index": 3,
       "name_string_index": 38526,
       "resolved_name": "Engine revolution speed",
+      "name_resolutions": {
+        "M_English": "Engine revolution speed",
+        "V_English": "Oper Permission (Starter Check Complete)",
+        "U_English": null
+      },
       "desc_string_index": 32059,
       "resolved_desc": "Japanes",
+      "desc_resolutions": {
+        "M_English": "Japanes",
+        "V_English": null,
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1589,8 +2352,18 @@
       "record_index": 4,
       "name_string_index": 53481,
       "resolved_name": "Motor actual current",
+      "name_resolutions": {
+        "M_English": "Motor actual current",
+        "V_English": "LH Motor",
+        "U_English": null
+      },
       "desc_string_index": 32425,
       "resolved_desc": "1.0 s",
+      "desc_resolutions": {
+        "M_English": "1.0 s",
+        "V_English": "AVC-LAN Finish Sound Resp",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1612,8 +2385,18 @@
       "record_index": 5,
       "name_string_index": 53482,
       "resolved_name": "Motor instruction current",
+      "name_resolutions": {
+        "M_English": "Motor instruction current",
+        "V_English": "RH Motor",
+        "U_English": null
+      },
       "desc_string_index": 32426,
       "resolved_desc": "Dark2",
+      "desc_resolutions": {
+        "M_English": "Dark2",
+        "V_English": "Continuous Bus Off",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1635,8 +2418,18 @@
       "record_index": 6,
       "name_string_index": 53483,
       "resolved_name": "Thermistor temperature",
-      "desc_string_index": 5441,
-      "resolved_desc": "Transmission Variant",
+      "name_resolutions": {
+        "M_English": "Thermistor temperature",
+        "V_English": "Number of Oper Prohibition (Electromagnetic Oil Pump)",
+        "U_English": null
+      },
+      "desc_string_index": 70977,
+      "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Back",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1658,8 +2451,18 @@
       "record_index": 7,
       "name_string_index": 53484,
       "resolved_name": "PIG power supply",
+      "name_resolutions": {
+        "M_English": "PIG power supply",
+        "V_English": "Status of the Battery Type /Specified or Other",
+        "U_English": null
+      },
       "desc_string_index": 32428,
       "resolved_desc": "Light1",
+      "desc_resolutions": {
+        "M_English": "Light1",
+        "V_English": "ACC Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1681,8 +2484,18 @@
       "record_index": 8,
       "name_string_index": 53485,
       "resolved_name": "IG power supply",
+      "name_resolutions": {
+        "M_English": "IG power supply",
+        "V_English": "Status of the Communication Error with D Seat Module Switch /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32429,
       "resolved_desc": "Light2",
+      "desc_resolutions": {
+        "M_English": "Light2",
+        "V_English": "IG Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1704,8 +2517,18 @@
       "record_index": 9,
       "name_string_index": 53486,
       "resolved_name": "Steering torque",
+      "name_resolutions": {
+        "M_English": "Steering torque",
+        "V_English": "Status of the Electromagnetic Oil Pump Abnormal When Drive /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32430,
       "resolved_desc": "Light 2",
+      "desc_resolutions": {
+        "M_English": "Light 2",
+        "V_English": "Camera Select SW Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1727,8 +2550,18 @@
       "record_index": 10,
       "name_string_index": 53487,
       "resolved_name": "Output of torque sensor 1",
+      "name_resolutions": {
+        "M_English": "Output of torque sensor 1",
+        "V_English": "Status of the Electromagnetic Oil Pump Abnormal When Non Drive /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32431,
       "resolved_desc": "Light 1",
+      "desc_resolutions": {
+        "M_English": "Light 1",
+        "V_English": "Rev Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1750,8 +2583,18 @@
       "record_index": 11,
       "name_string_index": 53489,
       "resolved_name": "Output of torque sensor 2",
+      "name_resolutions": {
+        "M_English": "Output of torque sensor 2",
+        "V_English": "Status of the Electromagnetic Oil Pump Drive Request /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32433,
       "resolved_desc": "DARK1",
+      "desc_resolutions": {
+        "M_English": "DARK1",
+        "V_English": "APGS Select SW Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1773,8 +2616,18 @@
       "record_index": 12,
       "name_string_index": 53490,
       "resolved_name": "Motor voltage (+)",
+      "name_resolutions": {
+        "M_English": "Motor voltage (+)",
+        "V_English": "Status of the Electromagnetic Oil Pump Preliminarily Check Request /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32434,
       "resolved_desc": "DARK2",
+      "desc_resolutions": {
+        "M_English": "DARK2",
+        "V_English": "CS Main SW Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1796,8 +2649,18 @@
       "record_index": 13,
       "name_string_index": 53491,
       "resolved_name": "Motor voltage (-)",
+      "name_resolutions": {
+        "M_English": "Motor voltage (-)",
+        "V_English": "Status of the Heater Core Water Pump Status /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32435,
       "resolved_desc": "NORMAL",
+      "desc_resolutions": {
+        "M_English": "NORMAL",
+        "V_English": "H Sens Signal Output Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1819,8 +2682,18 @@
       "record_index": 14,
       "name_string_index": 53492,
       "resolved_name": "Control mode (main)",
+      "name_resolutions": {
+        "M_English": "Control mode (main)",
+        "V_English": "Status of the Stop and Start Learning Status /OFF or ON or Unset",
+        "U_English": null
+      },
       "desc_string_index": 32436,
       "resolved_desc": "LIGHT2",
+      "desc_resolutions": {
+        "M_English": "LIGHT2",
+        "V_English": "H Sens PWR Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1842,8 +2715,18 @@
       "record_index": 15,
       "name_string_index": 53493,
       "resolved_name": "Control mode (sub)",
+      "name_resolutions": {
+        "M_English": "Control mode (sub)",
+        "V_English": "Battery Type",
+        "U_English": null
+      },
       "desc_string_index": 32437,
       "resolved_desc": "LIGHT1",
+      "desc_resolutions": {
+        "M_English": "LIGHT1",
+        "V_English": "H Sens Signal Input Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1865,8 +2748,18 @@
       "record_index": 16,
       "name_string_index": 53494,
       "resolved_name": "IG switch status",
+      "name_resolutions": {
+        "M_English": "IG switch status",
+        "V_English": "Communication Error with D Seat Module Switch",
+        "U_English": null
+      },
       "desc_string_index": 32438,
       "resolved_desc": "15s",
+      "desc_resolutions": {
+        "M_English": "15s",
+        "V_English": "Mirror Storage Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1888,8 +2781,18 @@
       "record_index": 17,
       "name_string_index": 53495,
       "resolved_name": "Torque sensor power supply",
+      "name_resolutions": {
+        "M_English": "Torque sensor power supply",
+        "V_English": "Electromagnetic Oil Pump Abnormal When Drive",
+        "U_English": null
+      },
       "desc_string_index": 32439,
       "resolved_desc": "7.5s",
+      "desc_resolutions": {
+        "M_English": "7.5s",
+        "V_English": "Lost Engine Torque Ratio",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1911,8 +2814,18 @@
       "record_index": 18,
       "name_string_index": 53496,
       "resolved_name": "No. of diagnosis codes",
+      "name_resolutions": {
+        "M_English": "No. of diagnosis codes",
+        "V_English": "Electromagnetic Oil Pump Abnormal When Non Drive",
+        "U_English": null
+      },
       "desc_string_index": 32440,
       "resolved_desc": "30s",
+      "desc_resolutions": {
+        "M_English": "30s",
+        "V_English": "Sensor Serial Number Upper",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -1934,8 +2847,18 @@
       "record_index": 19,
       "name_string_index": 13269,
       "resolved_name": "Key Cycle",
+      "name_resolutions": {
+        "M_English": "Key Cycle",
+        "V_English": "ECM Load",
+        "U_English": "Please input the yaw angle and the pitch angle of the recognition camera."
+      },
       "desc_string_index": 15895,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "IPA Creep up Rate",
+        "U_English": "This function is used to register vehicle information to the ECU.\r\n\r\nConfirm the following condition.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n\r\nPress Next to start."
+      },
       "scaling_raw": [
         0,
         0,
@@ -1957,8 +2880,18 @@
       "record_index": 20,
       "name_string_index": 13270,
       "resolved_name": "IG-ON Elapsed Time",
+      "name_resolutions": {
+        "M_English": "IG-ON Elapsed Time",
+        "V_English": "Converter Voltage",
+        "U_English": "lateral : Value written in the repair manual."
+      },
       "desc_string_index": 15896,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "Accelerator Info for DSS",
+        "U_English": "Vehicle Information Registration"
+      },
       "scaling_raw": [
         0,
         0,
@@ -1980,8 +2913,18 @@
       "record_index": 21,
       "name_string_index": 13271,
       "resolved_name": "Clock Type",
+      "name_resolutions": {
+        "M_English": "Clock Type",
+        "V_English": "Outside Back Door P/W Down SW",
+        "U_English": "Input"
+      },
       "desc_string_index": 15897,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "Auto Hold Ctrl Sys Status",
+        "U_English": "Vehicle Information Registration"
+      },
       "scaling_raw": [
         0,
         0,
@@ -2003,8 +2946,18 @@
       "record_index": 22,
       "name_string_index": 13272,
       "resolved_name": "IG-ON Elapsed Time for Independent",
+      "name_resolutions": {
+        "M_English": "IG-ON Elapsed Time for Independent",
+        "V_English": "Ignition Switch",
+        "U_English": "yaw angle : Value written in the repair manual.\r\npitch angle : Value written in the repair manual."
+      },
       "desc_string_index": 15898,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "Torque for Cornering Drag",
+        "U_English": "Vehicle Information Registration has failed.\r\nPlease verify the following condition.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n\r\nDo you want to try again?"
+      },
       "scaling_raw": [
         0,
         0,
@@ -2024,10 +2977,20 @@
     {
       "kind": "monitor",
       "record_index": 23,
-      "name_string_index": 373,
-      "resolved_name": "Mirror Fold/Return",
-      "desc_string_index": 6244,
+      "name_string_index": 131445,
+      "resolved_name": "Absolute Time (Second)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Second)",
+        "V_English": "Steering Angle Signal Speed (CL Bus)",
+        "U_English": null
+      },
+      "desc_string_index": 71780,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Introduction>\r\nThis function is used to register additional Smart Keys.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2047,10 +3010,20 @@
     {
       "kind": "monitor",
       "record_index": 24,
-      "name_string_index": 371,
-      "resolved_name": "Mirror Heater",
-      "desc_string_index": 6242,
+      "name_string_index": 131443,
+      "resolved_name": "Absolute Time (Minute)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Minute)",
+        "V_English": "Steering Angle Signal (C2 Bus)",
+        "U_English": null
+      },
+      "desc_string_index": 71778,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Introduction>\r\nThis function is used to turn the Ignition (IG) ON (Engine OFF/Ready OFF) without a registered smart key.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2070,10 +3043,20 @@
     {
       "kind": "monitor",
       "record_index": 25,
-      "name_string_index": 370,
-      "resolved_name": "Ashtray Light",
-      "desc_string_index": 6241,
+      "name_string_index": 131442,
+      "resolved_name": "Absolute Time (Hour)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Hour)",
+        "V_English": "Steering Angle LSB Enhancing Signal (C2 Bus)",
+        "U_English": null
+      },
+      "desc_string_index": 71777,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Introduction>\r\nThis function is used to switch ON and OFF the Engine Oil Maintenance Monitor.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2093,10 +3076,20 @@
     {
       "kind": "monitor",
       "record_index": 26,
-      "name_string_index": 372,
-      "resolved_name": "Foot Light",
-      "desc_string_index": 6243,
+      "name_string_index": 131444,
+      "resolved_name": "Absolute Time (Month)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Month)",
+        "V_English": "Steering Angle Signal (CL Bus)",
+        "U_English": null
+      },
+      "desc_string_index": 71779,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Introduction>\r\nThis function is used to erase the registration information of the Smart Keys and register the Smart Keys.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2116,10 +3109,20 @@
     {
       "kind": "monitor",
       "record_index": 27,
-      "name_string_index": 369,
-      "resolved_name": "P Manual SW LED",
-      "desc_string_index": 6240,
+      "name_string_index": 131441,
+      "resolved_name": "Absolute Time (Day)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Day)",
+        "V_English": "Status of the Stop Lamp Switch Function /OFF or ON",
+        "U_English": null
+      },
+      "desc_string_index": 71776,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "<Introduction>\r\nThis function is used to reset TPMS.",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2139,10 +3142,20 @@
     {
       "kind": "monitor",
       "record_index": 28,
-      "name_string_index": 374,
-      "resolved_name": "Mirror Right/Left",
-      "desc_string_index": 6245,
+      "name_string_index": 131446,
+      "resolved_name": "Absolute Time (Year)",
+      "name_resolutions": {
+        "M_English": "Absolute Time (Year)",
+        "V_English": "Steering Angle Zero Point Operation Value",
+        "U_English": null
+      },
+      "desc_string_index": 71781,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "OK",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2164,8 +3177,18 @@
       "record_index": 29,
       "name_string_index": 13271,
       "resolved_name": "Clock Type",
+      "name_resolutions": {
+        "M_English": "Clock Type",
+        "V_English": "Outside Back Door P/W Down SW",
+        "U_English": "Input"
+      },
       "desc_string_index": 15897,
       "resolved_desc": null,
+      "desc_resolutions": {
+        "M_English": null,
+        "V_English": "Auto Hold Ctrl Sys Status",
+        "U_English": "Vehicle Information Registration"
+      },
       "scaling_raw": [
         0,
         0,
@@ -2187,8 +3210,18 @@
       "record_index": 30,
       "name_string_index": 53497,
       "resolved_name": "Support mode information",
+      "name_resolutions": {
+        "M_English": "Support mode information",
+        "V_English": "Electromagnetic Oil Pump Abnormal When Preliminarily Check",
+        "U_English": null
+      },
       "desc_string_index": 32441,
       "resolved_desc": "Old",
+      "desc_resolutions": {
+        "M_English": "Old",
+        "V_English": "Sensor Serial Number Lower",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2210,8 +3243,18 @@
       "record_index": 31,
       "name_string_index": 53498,
       "resolved_name": "Diagnosis mode",
+      "name_resolutions": {
+        "M_English": "Diagnosis mode",
+        "V_English": "Electromagnetic Oil Pump Drive Request",
+        "U_English": null
+      },
       "desc_string_index": 32442,
       "resolved_desc": "Light2",
+      "desc_resolutions": {
+        "M_English": "Light2",
+        "V_English": "Deceleration Sensor",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2231,10 +3274,20 @@
     {
       "kind": "monitor",
       "record_index": 32,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2254,10 +3307,20 @@
     {
       "kind": "monitor",
       "record_index": 33,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2277,10 +3340,20 @@
     {
       "kind": "monitor",
       "record_index": 34,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2300,10 +3373,20 @@
     {
       "kind": "monitor",
       "record_index": 35,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2323,10 +3406,20 @@
     {
       "kind": "monitor",
       "record_index": 36,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2346,10 +3439,20 @@
     {
       "kind": "monitor",
       "record_index": 37,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2369,10 +3472,20 @@
     {
       "kind": "monitor",
       "record_index": 38,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2392,10 +3505,20 @@
     {
       "kind": "monitor",
       "record_index": 39,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2415,10 +3538,20 @@
     {
       "kind": "monitor",
       "record_index": 40,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2438,10 +3571,20 @@
     {
       "kind": "monitor",
       "record_index": 41,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2461,10 +3604,20 @@
     {
       "kind": "monitor",
       "record_index": 42,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2484,10 +3637,20 @@
     {
       "kind": "monitor",
       "record_index": 43,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2507,10 +3670,20 @@
     {
       "kind": "monitor",
       "record_index": 44,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2530,10 +3703,20 @@
     {
       "kind": "monitor",
       "record_index": 45,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2553,10 +3736,20 @@
     {
       "kind": "monitor",
       "record_index": 46,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2576,10 +3769,20 @@
     {
       "kind": "monitor",
       "record_index": 47,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2599,10 +3802,20 @@
     {
       "kind": "monitor",
       "record_index": 48,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2622,10 +3835,20 @@
     {
       "kind": "monitor",
       "record_index": 49,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2645,10 +3868,20 @@
     {
       "kind": "monitor",
       "record_index": 50,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2668,10 +3901,20 @@
     {
       "kind": "monitor",
       "record_index": 51,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2691,10 +3934,20 @@
     {
       "kind": "monitor",
       "record_index": 52,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2714,10 +3967,20 @@
     {
       "kind": "monitor",
       "record_index": 53,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2737,10 +4000,20 @@
     {
       "kind": "monitor",
       "record_index": 54,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2760,10 +4033,20 @@
     {
       "kind": "monitor",
       "record_index": 55,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2783,10 +4066,20 @@
     {
       "kind": "monitor",
       "record_index": 56,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2806,10 +4099,20 @@
     {
       "kind": "monitor",
       "record_index": 57,
-      "name_string_index": 46054,
-      "resolved_name": "Mobile#2 Bluetooth Address(High)",
-      "desc_string_index": 35372,
-      "resolved_desc": "C Code Difference",
+      "name_string_index": 177126,
+      "resolved_name": "Advanced information",
+      "name_resolutions": {
+        "M_English": "Advanced information",
+        "V_English": null,
+        "U_English": null
+      },
+      "desc_string_index": 100908,
+      "resolved_desc": "Charging Lid Switch Status",
+      "desc_resolutions": {
+        "M_English": "Charging Lid Switch Status",
+        "V_English": "Passenger Door Courtesy Switch Signal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2831,8 +4134,18 @@
       "record_index": 58,
       "name_string_index": 53500,
       "resolved_name": "Main CPU mask ID",
+      "name_resolutions": {
+        "M_English": "Main CPU mask ID",
+        "V_English": "Heater Core Water Pump Status",
+        "U_English": null
+      },
       "desc_string_index": 32444,
       "resolved_desc": "Dark1",
+      "desc_resolutions": {
+        "M_English": "Dark1",
+        "V_English": "Rader Cruise",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2854,8 +4167,18 @@
       "record_index": 59,
       "name_string_index": 53501,
       "resolved_name": "Sub CPU mask ID",
+      "name_resolutions": {
+        "M_English": "Sub CPU mask ID",
+        "V_English": "ID 1 Initial Threshold of Low-pressure",
+        "U_English": null
+      },
       "desc_string_index": 32445,
       "resolved_desc": "Dark2",
+      "desc_resolutions": {
+        "M_English": "Dark2",
+        "V_English": "TRC(TRAC)/VSC Solenoid (SRM2)",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2877,8 +4200,18 @@
       "record_index": 60,
       "name_string_index": 53502,
       "resolved_name": "Main CPU ROM sum",
+      "name_resolutions": {
+        "M_English": "Main CPU ROM sum",
+        "V_English": "ID 2 Initial Threshold of Low-pressure",
+        "U_English": null
+      },
       "desc_string_index": 32446,
       "resolved_desc": "OFF",
+      "desc_resolutions": {
+        "M_English": "OFF",
+        "V_English": "TRC(TRAC)/VSC Solenoid (SRM1)",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2900,8 +4233,18 @@
       "record_index": 61,
       "name_string_index": 53503,
       "resolved_name": "Sub CPU ROM sum",
+      "name_resolutions": {
+        "M_English": "Sub CPU ROM sum",
+        "V_English": "ID 3 Initial Threshold of Low-pressure",
+        "U_English": null
+      },
       "desc_string_index": 32447,
       "resolved_desc": "Automatic",
+      "desc_resolutions": {
+        "M_English": "Automatic",
+        "V_English": "TRC(TRAC)/VSC Solenoid (SRC2)",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2923,8 +4266,18 @@
       "record_index": 62,
       "name_string_index": 53499,
       "resolved_name": "Assist map select",
+      "name_resolutions": {
+        "M_English": "Assist map select",
+        "V_English": "Electromagnetic Oil Pump Preliminarily Check Request",
+        "U_English": null
+      },
       "desc_string_index": 32443,
       "resolved_desc": "Light1",
+      "desc_resolutions": {
+        "M_English": "Light1",
+        "V_English": "Driving Information",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2946,8 +4299,18 @@
       "record_index": 63,
       "name_string_index": 53481,
       "resolved_name": "Motor actual current",
+      "name_resolutions": {
+        "M_English": "Motor actual current",
+        "V_English": "LH Motor",
+        "U_English": null
+      },
       "desc_string_index": 32425,
       "resolved_desc": "1.0 s",
+      "desc_resolutions": {
+        "M_English": "1.0 s",
+        "V_English": "AVC-LAN Finish Sound Resp",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2969,8 +4332,18 @@
       "record_index": 64,
       "name_string_index": 53482,
       "resolved_name": "Motor instruction current",
+      "name_resolutions": {
+        "M_English": "Motor instruction current",
+        "V_English": "RH Motor",
+        "U_English": null
+      },
       "desc_string_index": 32426,
       "resolved_desc": "Dark2",
+      "desc_resolutions": {
+        "M_English": "Dark2",
+        "V_English": "Continuous Bus Off",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -2992,8 +4365,18 @@
       "record_index": 65,
       "name_string_index": 53481,
       "resolved_name": "Motor actual current",
+      "name_resolutions": {
+        "M_English": "Motor actual current",
+        "V_English": "LH Motor",
+        "U_English": null
+      },
       "desc_string_index": 32425,
       "resolved_desc": "1.0 s",
+      "desc_resolutions": {
+        "M_English": "1.0 s",
+        "V_English": "AVC-LAN Finish Sound Resp",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -3015,8 +4398,18 @@
       "record_index": 66,
       "name_string_index": 53482,
       "resolved_name": "Motor instruction current",
+      "name_resolutions": {
+        "M_English": "Motor instruction current",
+        "V_English": "RH Motor",
+        "U_English": null
+      },
       "desc_string_index": 32426,
       "resolved_desc": "Dark2",
+      "desc_resolutions": {
+        "M_English": "Dark2",
+        "V_English": "Continuous Bus Off",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -3038,8 +4431,18 @@
       "record_index": 67,
       "name_string_index": 53484,
       "resolved_name": "PIG power supply",
+      "name_resolutions": {
+        "M_English": "PIG power supply",
+        "V_English": "Status of the Battery Type /Specified or Other",
+        "U_English": null
+      },
       "desc_string_index": 32428,
       "resolved_desc": "Light1",
+      "desc_resolutions": {
+        "M_English": "Light1",
+        "V_English": "ACC Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -3061,8 +4464,18 @@
       "record_index": 68,
       "name_string_index": 53485,
       "resolved_name": "IG power supply",
+      "name_resolutions": {
+        "M_English": "IG power supply",
+        "V_English": "Status of the Communication Error with D Seat Module Switch /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32429,
       "resolved_desc": "Light2",
+      "desc_resolutions": {
+        "M_English": "Light2",
+        "V_English": "IG Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -3084,8 +4497,18 @@
       "record_index": 69,
       "name_string_index": 53486,
       "resolved_name": "Steering torque",
+      "name_resolutions": {
+        "M_English": "Steering torque",
+        "V_English": "Status of the Electromagnetic Oil Pump Abnormal When Drive /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32430,
       "resolved_desc": "Light 2",
+      "desc_resolutions": {
+        "M_English": "Light 2",
+        "V_English": "Camera Select SW Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -3107,8 +4530,18 @@
       "record_index": 70,
       "name_string_index": 53487,
       "resolved_name": "Output of torque sensor 1",
+      "name_resolutions": {
+        "M_English": "Output of torque sensor 1",
+        "V_English": "Status of the Electromagnetic Oil Pump Abnormal When Non Drive /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32431,
       "resolved_desc": "Light 1",
+      "desc_resolutions": {
+        "M_English": "Light 1",
+        "V_English": "Rev Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -3130,8 +4563,18 @@
       "record_index": 71,
       "name_string_index": 53489,
       "resolved_name": "Output of torque sensor 2",
+      "name_resolutions": {
+        "M_English": "Output of torque sensor 2",
+        "V_English": "Status of the Electromagnetic Oil Pump Drive Request /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32433,
       "resolved_desc": "DARK1",
+      "desc_resolutions": {
+        "M_English": "DARK1",
+        "V_English": "APGS Select SW Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -3153,8 +4596,18 @@
       "record_index": 72,
       "name_string_index": 53490,
       "resolved_name": "Motor voltage (+)",
+      "name_resolutions": {
+        "M_English": "Motor voltage (+)",
+        "V_English": "Status of the Electromagnetic Oil Pump Preliminarily Check Request /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32434,
       "resolved_desc": "DARK2",
+      "desc_resolutions": {
+        "M_English": "DARK2",
+        "V_English": "CS Main SW Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -3176,8 +4629,18 @@
       "record_index": 73,
       "name_string_index": 53491,
       "resolved_name": "Motor voltage (-)",
+      "name_resolutions": {
+        "M_English": "Motor voltage (-)",
+        "V_English": "Status of the Heater Core Water Pump Status /OFF or ON",
+        "U_English": null
+      },
       "desc_string_index": 32435,
       "resolved_desc": "NORMAL",
+      "desc_resolutions": {
+        "M_English": "NORMAL",
+        "V_English": "H Sens Signal Output Terminal",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -3199,8 +4662,18 @@
       "record_index": 74,
       "name_string_index": 53495,
       "resolved_name": "Torque sensor power supply",
+      "name_resolutions": {
+        "M_English": "Torque sensor power supply",
+        "V_English": "Electromagnetic Oil Pump Abnormal When Drive",
+        "U_English": null
+      },
       "desc_string_index": 32439,
       "resolved_desc": "7.5s",
+      "desc_resolutions": {
+        "M_English": "7.5s",
+        "V_English": "Lost Engine Torque Ratio",
+        "U_English": null
+      },
       "scaling_raw": [
         0,
         0,
@@ -3222,6 +4695,11 @@
       "record_index": 0,
       "name_string_index": 25786,
       "resolved_name": "Dummy",
+      "resolutions": {
+        "M_English": "Dummy",
+        "V_English": "Full Screen",
+        "U_English": "Do you want to exit the History Clear utility?"
+      },
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3230,6 +4708,11 @@
       "record_index": 1,
       "name_string_index": 25485,
       "resolved_name": null,
+      "resolutions": {
+        "M_English": null,
+        "V_English": "Caution (%s)",
+        "U_English": "Shift Solenoid \"D\" Electrical"
+      },
       "subfunction": 0,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3238,6 +4721,11 @@
       "record_index": 2,
       "name_string_index": 44894,
       "resolved_name": null,
+      "resolutions": {
+        "M_English": null,
+        "V_English": "Function to operate rear left seat heater during fixed time after IG ON.",
+        "U_English": null
+      },
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3246,6 +4734,11 @@
       "record_index": 3,
       "name_string_index": 25629,
       "resolved_name": null,
+      "resolutions": {
+        "M_English": null,
+        "V_English": "No",
+        "U_English": "Lost Communication With Body Control Module"
+      },
       "subfunction": 0,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3254,6 +4747,11 @@
       "record_index": 4,
       "name_string_index": 47332,
       "resolved_name": null,
+      "resolutions": {
+        "M_English": null,
+        "V_English": "Voltage Maintenance Device Status1",
+        "U_English": null
+      },
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3262,6 +4760,11 @@
       "record_index": 5,
       "name_string_index": 25629,
       "resolved_name": null,
+      "resolutions": {
+        "M_English": null,
+        "V_English": "No",
+        "U_English": "Lost Communication With Body Control Module"
+      },
       "subfunction": 0,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3270,6 +4773,11 @@
       "record_index": 6,
       "name_string_index": 28909,
       "resolved_name": null,
+      "resolutions": {
+        "M_English": null,
+        "V_English": "mmHg",
+        "U_English": null
+      },
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3278,6 +4786,11 @@
       "record_index": 7,
       "name_string_index": 25454,
       "resolved_name": "OFF",
+      "resolutions": {
+        "M_English": "OFF",
+        "V_English": "Reset",
+        "U_English": "Shift Time Error"
+      },
       "subfunction": 0,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3286,6 +4799,11 @@
       "record_index": 8,
       "name_string_index": 53686,
       "resolved_name": "IGON",
+      "resolutions": {
+        "M_English": "IGON",
+        "V_English": "Engine position after correction point 8 (Distribution motor)",
+        "U_English": null
+      },
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3294,6 +4812,11 @@
       "record_index": 9,
       "name_string_index": 25554,
       "resolved_name": "Normal",
+      "resolutions": {
+        "M_English": "Normal",
+        "V_English": "OK",
+        "U_English": "Exhaust Gas Temperature Too High Bank 1"
+      },
       "subfunction": 0,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3302,6 +4825,11 @@
       "record_index": 10,
       "name_string_index": 28719,
       "resolved_name": "Check",
+      "resolutions": {
+        "M_English": "Check",
+        "V_English": "System Check Information (%s)",
+        "U_English": null
+      },
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3310,6 +4838,11 @@
       "record_index": 11,
       "name_string_index": 29354,
       "resolved_name": "-",
+      "resolutions": {
+        "M_English": "-",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 0,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3318,6 +4851,11 @@
       "record_index": 12,
       "name_string_index": 29355,
       "resolved_name": "IG",
+      "resolutions": {
+        "M_English": "IG",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3326,6 +4864,11 @@
       "record_index": 13,
       "name_string_index": 29356,
       "resolved_name": "ACC",
+      "resolutions": {
+        "M_English": "ACC",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 2,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3334,6 +4877,11 @@
       "record_index": 14,
       "name_string_index": 29357,
       "resolved_name": "+B",
+      "resolutions": {
+        "M_English": "+B",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 3,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3342,6 +4890,11 @@
       "record_index": 15,
       "name_string_index": 29354,
       "resolved_name": "-",
+      "resolutions": {
+        "M_English": "-",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 0,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3350,6 +4903,11 @@
       "record_index": 16,
       "name_string_index": 29355,
       "resolved_name": "IG",
+      "resolutions": {
+        "M_English": "IG",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3358,6 +4916,11 @@
       "record_index": 17,
       "name_string_index": 29354,
       "resolved_name": "-",
+      "resolutions": {
+        "M_English": "-",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 0,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3366,6 +4929,11 @@
       "record_index": 18,
       "name_string_index": 375,
       "resolved_name": "Mirror Up/Down",
+      "resolutions": {
+        "M_English": "Mirror Up/Down",
+        "V_English": "This test activates the Wiper Deicer ON/OFF.",
+        "U_English": "Press Next to proceed."
+      },
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3374,6 +4942,11 @@
       "record_index": 19,
       "name_string_index": 29354,
       "resolved_name": "-",
+      "resolutions": {
+        "M_English": "-",
+        "V_English": "The inconsistency error occurred.",
+        "U_English": null
+      },
       "subfunction": 0,
       "source_db": "EPS_CAN_P4DK"
     },
@@ -3382,6 +4955,11 @@
       "record_index": 20,
       "name_string_index": 835,
       "resolved_name": "Slide Roof",
+      "resolutions": {
+        "M_English": "Slide Roof",
+        "V_English": "This test will turn the ES Start Light ON/OFF.",
+        "U_English": "Anteroposterior plumbing Air Bleeding\r\nPlease follow the instructions on the screen, and check boxes after performing each step.\r\n Note:\r\n  - Ensure that brake fluid level is maintained between MIN/MAX level."
+      },
       "subfunction": 1,
       "source_db": "EPS_CAN_P4DK"
     },

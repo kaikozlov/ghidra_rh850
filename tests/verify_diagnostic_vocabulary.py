@@ -247,5 +247,44 @@ check("rebuild produces same grade distribution",
       vocab2["summary"]["by_grade"] == vocab["summary"]["by_grade"])
 
 
+print("\n== three-DB string resolution ==")
+# Verify all three DBs are loaded in the catalog
+cat_path = REPO / "data" / "generated" / "21140bbd65e530a9" / "diagnostic_annotations.json"
+catalog = json.loads(cat_path.read_text())
+check("catalog loaded all three string DBs",
+      set(catalog["string_databases"].keys()) == {"M_English", "V_English", "U_English"})
+
+# Verify entries carry multi-DB resolutions
+sample_monitors = [e for e in catalog["entries"] if e["kind"] == "monitor"]
+check("monitor entries have name_resolutions dict",
+      all("name_resolutions" in m for m in sample_monitors))
+
+sample_dtcs = [e for e in catalog["entries"] if e["kind"] == "dtc"]
+check("DTC entries have resolutions dict",
+      all("resolutions" in d for d in sample_dtcs))
+
+# Verify M and V resolve differently for EPS (confirming they are distinct DBs)
+dtc_with_both = [d for d in sample_dtcs
+                 if d["resolutions"].get("M_English")
+                 and d["resolutions"].get("V_English")
+                 and d["resolutions"]["M_English"] != d["resolutions"]["V_English"]]
+check("at least one DTC where M and V differ (distinct DBs)",
+      len(dtc_with_both) > 0,
+      f"{len(dtc_with_both)} DTCs with differing M/V")
+
+# Verify u32 string index fix: monitors with index > 65535 now resolve correctly
+large_idx_monitors = [m for m in sample_monitors if m["name_string_index"] > 65535]
+check("at least 10 monitors with string index > 65535",
+      len(large_idx_monitors) >= 10, f"got {len(large_idx_monitors)}")
+check("all large-index monitors have M_English names",
+      all(m["resolved_name"] for m in large_idx_monitors),
+      f"{sum(1 for m in large_idx_monitors if not m['resolved_name'])} missing")
+
+# Specifically verify "Ready ON Status" (index 177303) resolves correctly
+ready_mon = [m for m in large_idx_monitors if m["resolved_name"] == "Ready ON Status"]
+check("'Ready ON Status' (index 177303) resolves correctly via u32",
+      len(ready_mon) >= 1)
+
+
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 sys.exit(1 if failed else 0)

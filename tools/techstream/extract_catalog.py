@@ -4,14 +4,10 @@
 Produces ``diagnostic_annotations.json`` — a generated artifact that
 correlates Techstream diagnostic vocabulary with firmware identifiers.
 
-The catalog is the first layer of the annotation pipeline described in
-``docs/tooling/techstream-ddb-pipeline.md``::
-
-    Techstream .ddb → extract_catalog.py → diagnostic_annotations.json
-                                                        ↓
-                                       ApplyDiagnosticVocabulary.java
-                                                        ↓
-                                           annotated Ghidra project
+The catalog resolves every string index against ALL three OEM string
+databases (M_English, V_English, U_English) and records all resolutions.
+The Techstream runtime selects which DB to use per-context; we record all
+three so the correlation engine can pick the right one without hardcoding.
 
 Usage::
 
@@ -48,18 +44,11 @@ FW_DID_RANGE_END = 0xF18C
 # EPS .ddb files to process (DS2/KWP and UDS/CAN variants)
 EPS_DDB_FILES = ["EPS_P4DK3.ddb", "EPS_CAN_P4DK.ddb"]
 
-# M_English.ddb is the OEM description string database (DTC names, monitor
-# names, active-test enum values).  All EPS DDB string indices resolve
-# through M_English — verified across DTC, monitor, and active-test sections.
-# V_English.ddb is a separate ECU family's UI table sharing the same index
-# space; it resolves EPS indices to unrelated content (e.g. index 53644 =
-# "Torque sensor1" in M but "Engine position after correction point 14" in V).
-STRING_DB_FILE = "M_English.ddb"
-
-# U_English.ddb is the utility-procedure string database (format 0x06).
-# It contains wizard/dialog text for dealer service procedures like
-# "Torque Sensor Writing" and "Power Steering ECU Initial Setting".
-UTILITY_DB_FILE = "U_English.ddb"
+# All three OEM string databases.  Techstream loads these separately and
+# selects per-context at runtime (the DLL is agnostic — it resolves against
+# whatever CDbStringTable pointer it's given).  We load all three and resolve
+# every index against each, recording all results.
+STRING_DBS = ["M_English.ddb", "V_English.ddb", "U_English.ddb"]
 
 # Search terms for EPS-relevant utility procedures in U_English.
 EPS_PROCEDURE_TERMS = [
@@ -69,10 +58,19 @@ EPS_PROCEDURE_TERMS = [
 ]
 
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def resolve_all(
+    index: int, dbs: dict[str, StringDataBase]
+) -> dict[str, str | None]:
+    """Resolve a string index against all loaded DBs."""
+    return {name: db.get_string(index) for name, db in dbs.items()}
+
+
 # ── Extractors ────────────────────────────────────────────────────────────────
 
 def extract_dtcs(
-    db: ECUDataBase, veng: StringDataBase
+    db: ECUDataBase, dbs: dict[str, StringDataBase]
 ) -> list[dict]:
     """Extract DTC records from section type 5.
 
@@ -88,14 +86,15 @@ def extract_dtcs(
         code = raw[0:12].decode("utf-16-le", errors="replace").rstrip("\x00")
         name_idx = struct.unpack_from("<I", raw, 12)[0]
         dtc_id = struct.unpack_from("<H", raw, 20)[0]
-        name = veng.get_string(name_idx)
+        resolutions = resolve_all(name_idx, dbs)
         entries.append(
             {
                 "kind": "dtc",
                 "code": code,
                 "dtc_identifier": dtc_id,
                 "name_string_index": name_idx,
-                "resolved_name": name,
+                "resolved_name": resolutions.get("M_English"),
+                "resolutions": resolutions,
                 "source_db": db.name,
             }
         )
@@ -125,11 +124,12 @@ def extract_dids(db: ECUDataBase) -> list[dict]:
 
 
 def extract_monitors(
-    db: ECUDataBase, veng: StringDataBase
+    db: ECUDataBase, dbs: dict[str, StringDataBase]
 ) -> list[dict]:
     """Extract data monitor records from section type 10 (84-byte records).
 
-    Each record has name/description string indices at offsets 48 and 52.
+    String indices at offsets 48 and 52 are u32 (not u16 — indices above
+    65535 are valid and appear in this data).
     """
     entries = []
     if 10 not in db.sections:
@@ -138,20 +138,21 @@ def extract_monitors(
     rec_size = int(sec.record_size)
     for i in range(sec.header.record_count):
         raw = sec.raw_data[i * rec_size : (i + 1) * rec_size]
-        name_idx = struct.unpack_from("<H", raw, 48)[0]
-        desc_idx = struct.unpack_from("<H", raw, 52)[0]
-        name = veng.get_string(name_idx)
-        desc = veng.get_string(desc_idx)
-        # Scaling/min/max fields from the first 24 bytes
+        name_idx = struct.unpack_from("<I", raw, 48)[0]
+        desc_idx = struct.unpack_from("<I", raw, 52)[0]
+        name_res = resolve_all(name_idx, dbs)
+        desc_res = resolve_all(desc_idx, dbs)
         scaling = [struct.unpack_from("<H", raw, j)[0] for j in range(0, 24, 2)]
         entries.append(
             {
                 "kind": "monitor",
                 "record_index": i,
                 "name_string_index": name_idx,
-                "resolved_name": name,
+                "resolved_name": name_res.get("M_English"),
+                "name_resolutions": name_res,
                 "desc_string_index": desc_idx,
-                "resolved_desc": desc,
+                "resolved_desc": desc_res.get("M_English"),
+                "desc_resolutions": desc_res,
                 "scaling_raw": scaling,
                 "source_db": db.name,
             }
@@ -160,7 +161,7 @@ def extract_monitors(
 
 
 def extract_active_tests(
-    db: ECUDataBase, veng: StringDataBase
+    db: ECUDataBase, dbs: dict[str, StringDataBase]
 ) -> list[dict]:
     """Extract active test/routine records from section type 14 (24-byte records)."""
     entries = []
@@ -172,13 +173,14 @@ def extract_active_tests(
         raw = sec.raw_data[i * rec_size : (i + 1) * rec_size]
         name_idx = struct.unpack_from("<H", raw, 0)[0]
         subfunc = struct.unpack_from("<H", raw, 4)[0]
-        name = veng.get_string(name_idx)
+        resolutions = resolve_all(name_idx, dbs)
         entries.append(
             {
                 "kind": "active_test",
                 "record_index": i,
                 "name_string_index": name_idx,
-                "resolved_name": name,
+                "resolved_name": resolutions.get("M_English"),
+                "resolutions": resolutions,
                 "subfunction": subfunc,
                 "source_db": db.name,
             }
@@ -228,8 +230,13 @@ def extract_utility_procedures(
 def build_catalog() -> dict:
     parser = DDBParser()
 
-    # Load OEM description string database (M_English)
-    strings = parser.load_string_db(TECHSTREAM_DB / STRING_DB_FILE)
+    # Load all three string databases
+    dbs: dict[str, StringDataBase] = {}
+    for fname in STRING_DBS:
+        path = TECHSTREAM_DB / fname
+        if path.exists():
+            name = fname.replace(".ddb", "")
+            dbs[name] = parser.load_string_db(path)
 
     # Load all EPS databases
     eps_dbs = []
@@ -240,16 +247,14 @@ def build_catalog() -> dict:
 
     entries = []
     for db in eps_dbs:
-        entries.extend(extract_dtcs(db, strings))
+        entries.extend(extract_dtcs(db, dbs))
         entries.extend(extract_dids(db))
-        entries.extend(extract_monitors(db, strings))
-        entries.extend(extract_active_tests(db, strings))
+        entries.extend(extract_monitors(db, dbs))
+        entries.extend(extract_active_tests(db, dbs))
 
-    # Load U_English and extract EPS utility procedures
-    u_path = TECHSTREAM_DB / UTILITY_DB_FILE
-    if u_path.exists():
-        u_db = parser.load_string_db(u_path)
-        entries.extend(extract_utility_procedures(u_db))
+    # Load U_English utility procedures
+    if "U_English" in dbs:
+        entries.extend(extract_utility_procedures(dbs["U_English"]))
 
     # Deduplicate
     seen = set()
@@ -261,7 +266,7 @@ def build_catalog() -> dict:
             e.get("identifier"),
             e.get("record_index"),
             e.get("source_db"),
-            e.get("string_index"),  # for utility procedures
+            e.get("string_index"),
         )
         if key not in seen:
             seen.add(key)
@@ -288,7 +293,7 @@ def build_catalog() -> dict:
         },
         "source_files": {
             "ecu_databases": [f"NA/DB/{f}" for f in EPS_DDB_FILES],
-            "string_database": f"NA/DB/{STRING_DB_FILE}",
+            "string_databases": [f"NA/DB/{f}" for f in STRING_DBS],
         },
         "firmware_did_table": {
             "base": f"0x{FW_DID_TABLE_BASE:X}",
@@ -300,11 +305,14 @@ def build_catalog() -> dict:
             "by_kind": by_kind,
             "dids_in_firmware": len(firmware_dids),
         },
-        "string_database": {
-            "file": STRING_DB_FILE,
-            "entry_count": strings.entry_count,
-            "pool_offset": strings.pool_offset,
-            "decompressed_size": len(strings.decompressed),
+        "string_databases": {
+            name: {
+                "file": f"{name}.ddb",
+                "entry_count": db.entry_count,
+                "pool_offset": db.pool_offset,
+                "decompressed_size": len(db.decompressed),
+            }
+            for name, db in dbs.items()
         },
         "entries": deduped,
     }
@@ -324,6 +332,7 @@ def main() -> None:
     for kind, count in sorted(catalog["summary"]["by_kind"].items()):
         print(f"    {kind}: {count}")
     print(f"  DIDs in firmware table: {catalog['summary']['dids_in_firmware']}")
+    print(f"  String DBs loaded: {', '.join(catalog['string_databases'].keys())}")
 
 
 if __name__ == "__main__":
