@@ -469,6 +469,7 @@ No CAN-reachable ISO-TP OOB read/write was found.
   minimum.
 - Classic secured routes require **exactly** DLC 8.
 - FD secured routes accept DLC 32, 48, 64 but clamp to 32 bytes before SecOC.
+  The suffix is ignored, producing an **ignored-suffix alias**, not an overflow.
 
 No stale-tail, short-frame, or pointer-rewind vulnerability exists in the CAN
 receive path.
@@ -487,6 +488,11 @@ receive path.
 
 The hypothesized short-frame/stale-tail/rewind pattern does **not** occur in the
 recovered SecOC path.
+
+### TransferExit
+
+`TransferExit @ 0x5C92` requires exact request length 1 and remaining count
+zero. No length mismatch or state-reuse vulnerability was found.
 
 ### Bootloader WDBI
 
@@ -531,3 +537,163 @@ decompilation, disassembly, x-ref, and raw CodeFlash bytes against
 All primary-evidence findings were independently verified by the parent session
 against decompiled functions before documentation. The findings are scoped
 strictly to Sienna `8965B4512000`; no Corolla/Camry projection.
+
+## Appendix: instruction-level evidence
+
+This appendix records the granular address-level evidence from the audit so a
+future rebuild can cross-validate without re-deriving it.
+
+### MEM-SAFE-001: bootloader download/decrypt/execute chain
+
+| Stage | Function | Addresses | Evidence |
+|---|---|---|---|
+| TransferData length gate | `FUN_00004B7C` | `0x4BF0–0x4C24` | Accepts final chunk 1–0x400, no 16-byte alignment check |
+| Decrypt enqueue | `FUN_00004B7C` → `payload_decrypt_enqueue` | `0x4C6E–0x4C72` | `payload_decrypt_enqueue(uVar6, iVar5, iVar5)` — source=dest=request_ptr+2 |
+| Block count computation | `payload_decrypt_transfer_task` | `0x6BEA–0x6BFE` | `min(len,16) >> 4` = floor(len/16); zero iterations for len 1–15 |
+| Completion marking | `payload_decrypt_transfer_task` | `0x6C3C–0x6C4A` | Subtracts full len from remaining, marks done |
+| Raw byte copy to dest | periodic task → `FUN_0000153a` | `0x4F7E–0x4F84` (memcpy call), `0x4F88–0x4F92` (target advance) | Copies unmodified request bytes to download destination |
+| `0x10F0` auth bit set | `routine_verify_crc_cmac_task` | `0x59E0/0x59E4` | Sets authorization bit 0 for class-1 region |
+| Subsequent RequestDownload | `uds_request_download` | `0x5E70–0x5E78` | Rejects state `0x81` only; accepts authorized `0x01` |
+| `0xFF00` accept | `routine_erase_task` | `0x58A2–0x58B0` | Accepts `0x01` or `0x81`; sets `0x81`, starts erase |
+| `0xFF00` erase start | `routine_erase_task` | `0x58B4–0x58C8` | Begins flash erase operation |
+| Callback load | flash engine | `0x434C/0x4350` | `movhi 0xFEBF / ld.w 0x0FD0` → loads `*(uint32_t*)0xFEBF0FD0` |
+| Callback call | flash engine | `0x435E` | `jarl r29, lp` — indirect call |
+| Second callback path | flash engine | `0x4402/0x440E` | Second load/call of same pointer |
+
+### MEM-SAFE-002: CMAC verify OOB read
+
+| Stage | Function | Addresses | Evidence |
+|---|---|---|---|
+| Endpoint computation | `payload_cmac_verify_setup` | `0x7160–0x7166` | `end = start + length - 16` stored to state |
+| Final-block check | `payload_cmac_verify_step` | `0x7174–0x7192` | Block is final only when `current == end` |
+| CMAC engine read | `payload_cmac_verify_step` | `0x719C–0x71B0` | Reads 16 bytes per block through AES engine |
+| Continue return | `payload_cmac_verify_step` | `0x71E0` | Returns 2 (continue) for non-final blocks |
+| Step driver | `FUN_00006EE0` | — | Repeatedly calls step while it returns 2 |
+
+### MEM-SAFE-003: CodeFlash equality oracle
+
+| Stage | Function | Addresses | Evidence |
+|---|---|---|---|
+| State 8 set | `0x10F3` handler | `0x5924` | Sets transfer state 8 (compare mode) |
+| Operation bit 5 | `uds_request_download` | `0x5EC0–0x5ECC` | Armed compare-mode selects bit 5 |
+| Compare queue | `transfer_data_compare_request` | `0x4EC2–0x4ECC` | Queues (tester_source, CodeFlash_target, length) |
+| Byte comparison | `memory_compare_task` | `0x6CAE–0x6CBE` | Byte-by-byte equality check |
+| Positive response | TransferData handler | `0x4B5A` | Equality → `76 blockSequenceCounter` |
+| Mismatch detection | TransferData handler | `0x4EF8` | Mismatch detected |
+| NRC 0x10 | TransferData handler | `0x4F0A` | Mismatch → NRC 0x10, state 15 |
+
+### CAN receive dispatch chain
+
+| Stage | Function | Address | Evidence |
+|---|---|---|---|
+| DLC decode | lower CAN RX | `0x82C50` | 4-bit hardware DLC indexes table at `0x22F10` |
+| Frame enqueue | `0x7FA56` | `0x7FA56` | Routes to copy routine |
+| Payload copy | `0x7F95E` | `0x7F95E` | Copies in 32-bit increments; logical length preserved |
+| Route demux | `application_can_normal_rx_demux` | `0x80006` | Calls validator `0x7FF52` before delivery |
+| Route delivery | demux | `0x7FF86` | Only invoked after validator success |
+| Length validation | `canif_validate_rx_length` | `0x7FF52` | Checks `actual <= physical_max` and `actual >= configured_min` |
+| COM RX copy | `application_com_rx_indication` | `0x7C640` | Copies `min(actual_length, configured_COM_length)` |
+
+### SecOC receive chain
+
+| Stage | Function | Address | Evidence |
+|---|---|---|---|
+| SecOC entry | `secoc_rx_indication` | `0x8DC64` | Entry point from COM |
+| Profile lookup | — | `0x8E024` | Selects SecOC profile by route index |
+| Queue/copy | — | `0x8E0BE` | Enqueues frame for verification |
+| Lower-bound check | `secoc_rx_verify_worker` | `0x8E510–0x8E51A` | `total_length >= trailer_length` before any subtraction |
+| Trailer split | `secoc_rx_split_freshness_and_tag` | `0x8E1A8` | Independent `total >= trailer` check, then `trailer_start = base + total - trailer` |
+| Ordinary freshness unpack | — | `0x8EBC2` | 4-bit mode reads 1 byte; 46-bit mode reads 6 bytes |
+| Sync freshness unpack | — | `0x8EC82` | Unpacks sync frame freshness field |
+| Freshness reconstruction | — | `0x8E8E6` | Reconstructs full freshness from truncated value |
+| Freshness commit | — | `0x8E942` | Commits accepted freshness after verify |
+| Post-verification | — | `0x8E67A` | Commit/delivery only on successful verification |
+| MAC input builder | `secoc_build_authenticated_input` | `0x8DB22` | Checks `2 + payload + freshness <= capacity` before copy |
+| Tag workspace | split helper | — | 20-byte local; configured tag/freshness widths ≤ 16 and 6 bytes |
+
+### SecOC profile configuration
+
+SecOC receive records at `0x25970`, stride `0x50`, six profiles:
+
+| Profile | Secured length | Trailer length | Payload type |
+|---|---|---|---|
+| 0–3 (classic) | 8 | 8/4/4/4 | 4-byte ordinary + FV4/CMAC28 |
+| 4–5 (FD) | 32 | 4/4 | 28-byte ordinary + FV4/CMAC28 |
+
+Sync profile: 8-byte envelope = FV36 + CMAC28, no authentic payload.
+
+Configured authenticated lengths: sync 7, ordinary classic 12, ordinary FD 36.
+FD workspace capacity is 36 bytes — largest input fits exactly.
+
+SecOC key configuration at `0x25950` selects slot 4.
+
+### ICU-S command wrapper bounds
+
+| Command | Prepare | Engine | Result | Input/output bounds |
+|---|---|---|---|---|
+| AES 1/3 (enc/dec) | `0x8768E` | `0x8954C` | `0x87712` | Exactly 16-byte input; result copy bounded to 16 |
+| CMAC gen 5 | `0x87A94` | `0x89630` | `0x87B46` | Input ≤ 0x50 bytes; staging 80 bytes; result `min(capacity,16)` |
+| CMAC verify 7 | `0x87ED0` | `0x897F4` | `0x897A8` (FIFO) | Message ≤ 0x50; tag ≤ 128 bits; one 32-bit result word |
+| Key update 8 | `0x86E62` | `0x8997A` | `0x86EE8` | Exactly 64-byte M1/M2/M3; success copies 32+16 |
+
+Command-5 word at `0x89734–0x8973A`: `(selector << 16) | 5`.
+Command-7 SecOC result pointer is fixed RAM target `FEBE555C`, not wire-controlled.
+Pointer and callback fields checked against stored bitwise complements before use.
+
+### MEM-SAFE-004: command-8 failure path
+
+| Stage | Address | Evidence |
+|---|---|---|
+| Prepare (any cap ≥ 48) | `0x86E62` | Accepts without clamping stored capacity |
+| Success: copy 32 | `0x86F32` | Copies 32 bytes of M4 |
+| Success: copy 16 | `0x86F42` | Copies 16 bytes of M5 |
+| Success: set length | `0x86F46–0x86F4A` | Sets returned length to 48 |
+| Failure: load original len | `0x86F50` | Loads unbounded caller capacity |
+| Failure: zero-fill | `0x86F54` | Calls `0x89044` with unbounded length |
+
+Configured command-8 worker `0x6828A` supplies fixed 48-byte buffer/length.
+
+### ICU-S transfer mechanism
+
+| Component | Address | Evidence |
+|---|---|---|
+| One-block input FIFO callback | `0x89448` | CPU source pointer, block index/count |
+| One-block output FIFO callback | `0x894BE` | CPU destination pointer, block index/count |
+| Completion/command-ID check | `0x89DE6` | Rejects submitted/tracked command mismatch |
+| Common driver dispatcher | `0x89E20` | Interrupt-driven progress; one 16-byte block per callback |
+
+Software state: CPU source/destination pointer, 128-bit block index/count,
+callback pointer plus complement. No audited command programs a DMAC source,
+destination, or wire-controlled descriptor size. No separate DMA descriptor
+attack surface in this call graph.
+
+### SecOC oracle/availability surface
+
+- All ordinary profiles expose 28-bit truncated CMAC.
+- Failed command-7 verification: does not commit freshness, does not deliver
+  PDU, does not trigger per-source failure lockout.
+- Synchronous CryptoIf path polls up to `0xE07` iterations.
+- Raw command-7 result word is not returned on CAN.
+
+### Command-5 dormant test bank
+
+| Component | Address | Evidence |
+|---|---|---|
+| Input collector | `0x6875E` | Collects stable COM inputs (3 identical updates required) |
+| Command-5 submit | `0x68B42` | Selects command 5 when mode byte is 1 |
+| Bank activator | `0x69018` | Sets `FEBE508F=1`; no CodeFlash function-pointer reference |
+| Result compare | `0x6926A` → `0x69068` | Compares 16 generated bytes locally; does not transmit |
+| Command-5 dispatcher | `0x88350` | No CodeFlash function-pointer reference |
+
+CAN inputs: `0x01B` (signals 95/96: selector/mode), `0x01C/0x01D` (97/98: 16-byte
+message), `0x01E/0x01F` (99/100: 16-byte expected result). Update counters 20–24.
+
+### ICUSCMD store census (nine sites)
+
+```text
+0x8919C, 0x89628, 0x8973A, 0x8990C, 0x89A2C,
+0x89A8A, 0x89BB0, 0x89BF8, 0x89DDC
+```
+
+Account for: dynamic command 1/3, commands 5, 7, 8, 11, 0x22, abort 0x3F,
+diagnostic 0x7000/0x7100. No command-13 writer exists in the application.
