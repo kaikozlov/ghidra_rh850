@@ -11,7 +11,8 @@ PDU is delivered as authenticated or unauthenticated:
 
   Gate 2 (0x8E69E): MAC verification result from FEBE555C
     — "did the MAC actually match?"
-    — the REAL acceptance gate for authenticated delivery
+    — the REAL acceptance gate for authenticated delivery versus the
+      failure/release path
 
 Pre-existing evidence in verify_secoc_security_properties.py already pins:
   - The unique load of FEBE555C at 0x8E69E (instruction bytes)
@@ -25,12 +26,10 @@ This test adds:
   - The distinction between job-completion polling (FEBF13BE/BF) and
     MAC result (FEBE555C)
 
-NOTE: The full result-pointer plumbing from secoc_submit_cmac_verify through
-the crypto driver to the FEBE555C write involves indirect calls that cannot
-be fully verified from raw bytes alone. The pointer setup (param_4 = gp-0x62A4)
-is recovered from decompiler output; the actual write happens inside the ICU-S
-command-7 completion path resolved through indirect dispatch. See §7.1 of
-application-chain.md for the full discussion.
+NOTE: The current deterministic test does not yet pin the complete argument
+and indirect-dispatch dataflow from secoc_submit_cmac_verify through the
+crypto driver to the FEBE555C write; this portion remains recovered from
+Ghidra decompilation. See §9.1 of application-chain.md for discussion.
 """
 from __future__ import annotations
 
@@ -179,32 +178,30 @@ check("profiles cover 0x2E4/0x131/0x132/0x090/0x0D7/0x00F",
 
 
 # =====================================================================
-# 6. Limitation: result-pointer plumbing not fully pinned from raw bytes
+# 6. Limitations (not counted as pass/fail assertions)
 # =====================================================================
 print("\n== 6. limitations ==")
 
 # The plumbing from secoc_submit_cmac_verify's arguments through the crypto
 # driver to the FEBE555C write involves indirect calls (function pointers
-# resolved through the crypto driver record table). The argument setup and
-# driver dispatch cannot be fully verified from raw bytes alone.
+# resolved through the crypto driver record table). The current deterministic
+# test does not yet pin the complete argument and indirect-dispatch dataflow;
+# this portion remains recovered from Ghidra decompilation.
 #
-# What IS verified:
-#   - Gate 2 loads FEBE555C (instruction bytes pinned in §2)
-#   - The GP-relative offset -0x62A4 = FEBE555C (arithmetic)
+# What IS pinned by this test and the pre-existing security-properties test:
+#   - Gate 2 loads FEBE555C via unique ld.bu instruction (§2)
+#   - Gate 1 instruction bytes at 0x8E726 (§1)
+#   - Call edges in the dispatch path (§4)
+#   - Profile CAN IDs (§5)
 #
-# What is NOT verified from raw bytes:
-#   - That param_4 of cryptoif_job_finish = gp-0x62A4 (decompiler output only)
-#   - That the crypto driver writes the MAC result through that pointer
-#   - That invalid MAC produces verify_worker return != 0 (it produces 0;
-#     the mismatch is only visible via FEBE555C at Gate 2)
+# What is NOT yet pinned by deterministic tests:
+#   - The ABI argument setup placing gp-0x62A4 into the param_4 register
+#   - The crypto driver record's indirect target and retained result pointer
+#   - The completion instruction that writes match/mismatch through that pointer
+#   - The exact effect of FUN_0008E2BA on MAC mismatch (§9.5)
 
-check("GP-relative offset -0x62A4 resolves to FEBE555C",
-      GP - 0x62A4 == 0xFEBE555C)
-
-# Document the limitation honestly
-check("result-pointer plumbing from decompiler, not raw bytes (documented limitation)",
-      True,  # acknowledged limitation, not a firmware fact
-      )
+print("  result-pointer plumbing: recovered from Ghidra decompilation,")
+print("  not yet pinned by deterministic raw-byte tests (see §9.1)")
 
 
 print(f"\n== RESULT: {ok} passed, {bad} failed ==")

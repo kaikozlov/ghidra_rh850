@@ -810,7 +810,7 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 
 ## 9. SecOC acceptance-gate recovery (SECOC-029)
 
-> **Verification:** `tests/verify_secoc_acceptance_gate.py` (28 assertions);
+> **Verification:** `tests/verify_secoc_acceptance_gate.py` (20 assertions);
 > pre-existing `tests/verify_secoc_security_properties.py` (pins the FEBE555C
 > load and branch at 0x8E69E/0x8E6C4)
 >
@@ -823,7 +823,7 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 > ICU-S command 7 to `0xFEBE555C`, and the ranked candidate patch points
 > derived from the corrected model.
 
-### 7.1 Two-level gate structure
+### 9.1 Two-level gate structure
 
 The SecOC receive chain has **two independent gates** that must both pass
 for authenticated delivery:
@@ -845,7 +845,7 @@ Gate 2 (0x8E69E): MAC verification result from 0xFEBE555C
               through secoc_submit_cmac_verify → cryptoif_job_finish →
               crypto_driver_dispatch → ICU-S command 7
   Distinguishes: authenticated delivery (match) from
-                unauthenticated release (mismatch)
+                the failure/release path (mismatch)
 ```
 
 Gate 1 and Gate 2 are independent because `cryptoif_job_finish` has two
@@ -858,16 +858,15 @@ separate outputs:
 
 The plumbing: `secoc_submit_cmac_verify @ 0x8E3EA` passes `gp - 0x62A4`
 (= `0xFEBE555C`) as the fourth argument to `cryptoif_job_finish @ 0x88BA8`
-(recovered from decompiler output; the argument setup and driver dispatch
-involve indirect calls through the crypto driver record table that cannot
-be fully verified from raw bytes alone). The first two arguments are the
+(recovered from decompiler output; the current deterministic test does
+not yet pin the complete argument and indirect-dispatch dataflow). The first two arguments are the
 received tag (`FEBE554C`) and its bit length (`FEBE5548`) — inputs to
 command 7, not outputs. Only the fourth argument (`FEBE555C`) is an output:
 the MAC verification result written by the driver via the ICU-S command-7
 completion path. The return value of `cryptoif_job_finish` reflects only
 whether the operation completed, not whether the MAC matched.
 
-### 7.2 Complete receive-to-delivery decision path
+### 9.2 Complete receive-to-delivery decision path
 
 ```text
 FUN_0008DD78 (periodic task)
@@ -906,16 +905,16 @@ FUN_0008DD78 (periodic task)
             └── MAC MISMATCH (FEBE555C == 0):
                 → FUN_0008E646 (commit freshness without auth bit)
                 → FUN_0008E244 (failure notification)
-                → FUN_0008E2BA (release path; outcome unresolved — see §7.5)
+                → FUN_0008E2BA (release path; outcome unresolved — see §9.5)
                 → FUN_0008E482 (cleanup)
 ```
 
-### 7.3 State-transition table
+### 9.3 State-transition table
 
 | Condition | Gate 1 | Gate 2 (FEBE555C) | State byte | Outcome |
 |---|---|---|---|---|
 | Valid MAC + valid freshness | pass (worker ret 0) | nonzero (match) | 0xC3 → 0xB4 | Authenticated delivery via FUN_0008E382 (deferred, freshness committed) |
-| Invalid MAC + valid freshness | pass (worker ret 0) | 0 (mismatch) | 0xC3 | Enters failure/release path via `FUN_0008E2BA`; freshness not advanced. Whether this forwards stale data, emits failure indication only, or releases the buffer is unresolved (§7.5) |
+| Invalid MAC + valid freshness | pass (worker ret 0) | 0 (mismatch) | 0xC3 | Enters failure/release path via `FUN_0008E2BA`; freshness not advanced. Whether this forwards stale data, emits failure indication only, or releases the buffer is unresolved (§9.5) |
 | Valid MAC + invalid freshness | skip (worker ret 0x201) | — | 0xB4 | PDU discarded; freshness not committed |
 | ICU-S error/timeout | skip (worker ret 0x202) | — | 0xB4 | PDU retained; retry on next cycle |
 | Payload too short | skip (worker ret 0x100) | — | 0xA5 | PDU discarded |
@@ -926,7 +925,7 @@ FUN_0008DD78 (periodic task)
 The actual MAC match/mismatch is a separate output at `FEBE555C` tested
 by Gate 2.
 
-### 7.4 Candidate semantic patch points (not implemented)
+### 9.4 Candidate semantic patch points (not implemented)
 
 Ranked by narrowness. **No patch is implemented or recommended.**
 
@@ -966,7 +965,7 @@ match/mismatch decision. This is the critical correction from the
 provisional SECOC-029 model, which incorrectly placed the MAC decision
 at Gate 1.
 
-### 7.5 Remaining ambiguities
+### 9.5 Remaining ambiguities
 
 **FUN_0008E2BA outcome on MAC mismatch.** When Gate 2 reads a mismatch
 (`FEBE555C == 0`), `FUN_0008E67A` calls `FUN_0008E2BA`. Whether this function
@@ -982,12 +981,13 @@ advanced."
 
 **Result-pointer plumbing.** The claim that `secoc_submit_cmac_verify` passes
 `FEBE555C` as the output pointer to `cryptoif_job_finish` is recovered from
-decompiler output. The argument setup instructions and the lower driver's write
-through that pointer involve indirect calls through the crypto driver record
-table. These cannot be fully verified from raw bytes alone without resolving
-the function-pointer dispatch. The GP-relative offset `-0x62A4 = FEBE555C` is
-arithmetic-verified, and the unique load at `0x8E69E` is byte-verified, but
-the write path is decompiler-only.
+decompiler output. The current deterministic test does not yet pin the complete
+argument and indirect-dispatch dataflow — the ABI argument setup, driver-record
+contents, indirect target, retained pointer, and eventual write can all
+potentially be verified instruction-by-instruction against the firmware, but
+this work has not yet been done. The GP-relative offset `-0x62A4 = FEBE555C`
+is arithmetic-verified, and the unique load at `0x8E69E` is byte-verified, but
+the write path remains decompiler-only.
 
 **Profile routing.** The six profile records contain the expected CAN IDs, but
 the test does not prove all six route through `FUN_0008E700` from
