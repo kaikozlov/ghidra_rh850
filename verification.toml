@@ -206,3 +206,7 @@ paths = ["community/", "external-references.lock.json"]
 # Cross-validates community exploit tooling (blurbdust/@yc flash patcher,
 # egg-hunter shellcode, CUW decryptor) against repository findings SEC-BOOT-002..007,
 # SECOC-024, SECOC-028. Verifies SHA-256 integrity of committed artifacts.
+
+[suite.secoc_acceptance_gate]
+tests = ["tests/verify_secoc_acceptance_gate.py"]
+paths = ["docs/security/secoc/application-chain.md", "firmware/"]
