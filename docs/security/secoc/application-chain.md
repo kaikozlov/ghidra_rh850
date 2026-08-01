@@ -810,7 +810,8 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 
 ## 9. SecOC acceptance-gate recovery (SECOC-029)
 
-> **Verification:** `tests/verify_secoc_acceptance_gate.py` (20 assertions);
+> **Verification:** `tests/verify_secoc_acceptance_gate.py` (20 assertions:
+> 18 firmware-backed and 2 structural/address-arithmetic checks);
 > pre-existing `tests/verify_secoc_security_properties.py` (pins the FEBE555C
 > load and branch at 0x8E69E/0x8E6C4)
 >

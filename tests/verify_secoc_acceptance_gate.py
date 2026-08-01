@@ -2,7 +2,7 @@
 """Deterministic verification of the SecOC acceptance gate structure.
 
 This suite pins the TWO-LEVEL gate structure that controls whether a secured
-PDU is delivered as authenticated or unauthenticated:
+PDU is delivered as authenticated or enters the failure/release path:
 
   Gate 1 (0x8E726): verify_worker completion status
     — "did the verification worker run without error?"
