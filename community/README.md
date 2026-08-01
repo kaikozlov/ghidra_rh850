@@ -1,16 +1,14 @@
 # Community exploit tooling — provenance and status
 
-This directory holds exploit/analysis code received from the comma community
+This directory holds analysis code received from the comma community
 that independently corroborates or extends this repository's findings. Unlike
 the git-pinned repositories in `external-references.lock.json` (I-CAN-hack,
-Bk2ol, calvinpark), these artifacts were distributed via Discord and have no
-canonical git source. They are committed in-tree with SHA-256 hashes and
-provenance metadata in `../external-references.lock.json` under
-`community_artifacts`.
+Bk2ol, calvinpark), they are committed in-tree with SHA-256 hashes and
+provenance metadata in `../external-references.lock.json` under `community_artifacts`.
 
 ## `blurbdust_secoc_flash_patcher/`
 
-**Author:** blurbdust (`@yc`)
+**Author:** blurbdust 
 **Channel:** comma Discord, EPS/SecOC discussion, 2026-08-01
 **Status per author:** "largely untested so don't go out and flash everyone's
 cars" — verification checks forced to always return true, which also accepts

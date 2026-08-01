@@ -223,15 +223,6 @@ if egg_matches:
     # PIN: exact address is 0x3485A
     check("egg address is VA 0x3485A", egg_va == 0x3485A, hex(egg_va))
 
-    # PIN: exact egg bytes at that address
-    check("egg bytes match at 0x3485A", CF[0x3485A:0x3485A + 8] == EGG)
-
-    # The egg starts FUN_0003485A — a bounded memcmp returning 1=match / 0=mismatch.
-    # Confirm the instruction encoding matches what we decompiled:
-    #   +0: 8800   zxb r8        (zero-extend length param)
-    #   +2: 0152   mov 1, r10    (default return = 1 "match")
-    #   +4: 000a   mov 0, r1     (loop counter)
-    #   +6: e50d   br <forward>  (jump to loop condition)
     check("egg encodes known memcmp prologue", CF[egg_va:egg_va + 8] == EGG)
 
     # PIN: the two 0xAB callers that reference this function
@@ -269,11 +260,8 @@ if egg_matches:
     #   +0: 0152   mov 1, r10    (return = 1)
     #   +2: 7f00   jmp [lp]      (return immediately)
     # This makes the function always return "match" — corrupting 0xAB dispatch,
-    # not SecOC.
-    check(
-        "patch bytes (01 52 7f 00) would short-circuit memcmp, not SecOC",
-        True,
-    )
+    # not SecOC. The effect is documented but not asserted here as a firmware
+    # fact (it's an analysis of the hypothetical patch, not a byte check).
 
     # The actual SecOC MAC verification function is secoc_rx_verify_worker at 0x8E4BA.
     # Its prologue bytes are completely different.

@@ -810,136 +810,166 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 
 ## 7. SecOC acceptance-gate recovery (SECOC-029)
 
-> **Verification:** `tests/verify_secoc_acceptance_gate.py` (30 assertions)
+> **Verification:** `tests/verify_secoc_acceptance_gate.py` (28 assertions);
+> pre-existing `tests/verify_secoc_security_properties.py` (pins the FEBE555C
+> load and branch at 0x8E69E/0x8E6C4)
 >
 > **Evidence grade:** recovered (firmware-static decompilation + raw-byte
-> verification of all call edges)
+> verification of call edges and instruction sequences)
+>
+> **Relationship to §5.5:** §5.5 established that the receive path fails
+> closed and that `0xFEBE555C` controls authentic delivery. This section
+> provides the complete two-level gate structure, the plumbing from
+> ICU-S command 7 to `0xFEBE555C`, and the ranked candidate patch points
+> derived from the corrected model.
 
-### 7.1 Complete receive-to-delivery decision path
+### 7.1 Two-level gate structure
 
-The entire SecOC receive chain — from PDU arrival to COM delivery or discard —
-flows through a single shared dispatch that is identical for all six configured
-profiles (CAN `0x2E4`, `0x131`, `0x132`, `0x090`, `0x0D7`, `0x00F`):
+The SecOC receive chain has **two independent gates** that must both pass
+for authenticated delivery:
+
+```text
+Gate 1 (0x8E726): verify_worker completion status
+  "Did the verification worker run without error?"
+  Located in FUN_0008E700 (the outer dispatcher)
+  Tests: return value of secoc_rx_verify_worker
+  Filters out: format errors (0x100), ICU-S submit failures (0x101),
+               timeouts (0x202), freshness failures (0x201)
+  Does NOT distinguish: MAC match from mismatch
+
+Gate 2 (0x8E69E): MAC verification result from 0xFEBE555C
+  "Did the MAC actually match?"
+  Located in FUN_0008E67A (the acceptance/delivery function)
+  Tests: byte at 0xFEBE555C (ICU-S verification result)
+  Written by: crypto driver via the output pointer (param_4) passed
+              through secoc_submit_cmac_verify → cryptoif_job_finish →
+              crypto_driver_dispatch → ICU-S command 7
+  Distinguishes: authenticated delivery (match) from
+                unauthenticated release (mismatch)
+```
+
+Gate 1 and Gate 2 are independent because `cryptoif_job_finish` has two
+separate outputs:
+
+| Output | Address | Meaning | Consumed by |
+|---|---|---|---|
+| Job completion status | return value (0/1/2) | 0=operation completed, 1=dispatch error, 2=timeout | Gate 1 via verify_worker return |
+| MAC verification result | `0xFEBE555C` | nonzero=match, 0=mismatch | Gate 2 via `ld.bu` at `0x8E69E` |
+
+The plumbing: `secoc_submit_cmac_verify @ 0x8E3EA` passes `gp - 0x62A4`
+(= `0xFEBE555C`) as the fourth argument to `cryptoif_job_finish @ 0x88BA8`.
+The crypto driver writes the MAC result to that address via the ICU-S
+command-7 completion path. The return value of `cryptoif_job_finish`
+reflects only whether the operation completed, not whether the MAC matched.
+
+### 7.2 Complete receive-to-delivery decision path
 
 ```text
 FUN_0008DD78 (periodic task)
   → FUN_0008DD38 (loop until 0x300 = idle)
-    → FUN_0008E700 (central dispatch — THE acceptance gate)
+    → FUN_0008E700 (central dispatch)
       │
       ├── FUN_0008D772(1, 0, &profile) → get next pending secured PDU
       │
-      ├── secoc_rx_verify_worker @ 0x8E4BA (verify the PDU)
-      │     │
-      │     ├── Phase 1: freshness verification
-      │     │   → secoc_get_rx_freshness callback
-      │     │   return 0x22 → error 0x100 (format)
-      │     │   return 0x23 → error 0x201 (freshness fail)
-      │     │   return 0x24 → special handling
-      │     │   return 0    → proceed to Phase 2
-      │     │
+      ├── secoc_rx_verify_worker @ 0x8E4BA
+      │     ├── Phase 1: freshness verification (callbacks)
       │     └── Phase 2: CMAC verification
-      │       → secoc_build_authenticated_input @ 0x8DB22
       │       → secoc_submit_cmac_verify @ 0x8E3EA
-      │         → cryptoif_job_finish @ 0x88BA8 (polls ICU-S)
+      │         → cryptoif_job_finish @ 0x88BA8
+      │           args: (handle, tag_out@FEBE554C, bitlen_out@FEBE5548,
+      │                  verify_result@FEBE555C)
       │           → crypto_driver_dispatch @ 0x88556 → ICU-S command 7
-      │           ← completion at gp+0x5BBE, result at gp+0x5BBF
-      │         ← returns 0=match, 1=mismatch, 2=timeout
-      │       ← CMAC result determines worker return:
-      │         0 → success (default uVar6, unchanged)
-      │         2 → FUN_0008E426 (async pending, retry)
-      │         _ → 0x101 + cleanup (mismatch)
+      │           ← completion polled at gp+0x5BBE (FEBF13BE)
+      │           ← job status at gp+0x5BBF (FEBF13BF)
+      │         ← returns 0=completed, 1=error, 2=timeout
+      │         ← MAC result written to FEBE555C by driver
+      │     ← worker returns 0 on normal completion (regardless of MAC)
       │
-      ├── ACCEPTANCE GATE at 0x8E726:
-      │     cmp r0, r10        ; is verify_worker return == 0?
-      │     bne 0x8E734        ; if nonzero, skip delivery
+      ├── GATE 1 at 0x8E726: cmp r0, r10; bne
+      │     If worker returned nonzero → skip delivery (error)
+      │     If worker returned 0 → enter FUN_0008E67A
       │
-      ├── If verify returned 0 → FUN_0008E67A (acceptance/delivery)
-      │     → FUN_0008DF76 (mode check: DAT_FEBE54F6 == 0xD2)
-      │     → FUN_0008E646 (commit freshness)
-      │     → FUN_0008E2BA (extract PDU + deliver)
-      │       → FUN_0008D9A4 (extract payload from receive buffer)
-      │       → FUN_0008E7C6 → FUN_00080BBA (PduR/COM signal dispatch)
-      │     → FUN_0008E482 (cleanup)
-      │
-      └── If verify returned nonzero → return error code (NO DELIVERY)
+      └── FUN_0008E67A (acceptance/delivery)
+            ├── GATE 2 at 0x8E69E: ld.bu FEBE555C → booleanize → branch
+            │
+            ├── MAC MATCH (FEBE555C != 0):
+            │   → FUN_0008E646 (commit freshness with auth bit)
+            │   → FUN_0008E382 (authenticated delivery, state 0xB4)
+            │   → FUN_0008E482 (cleanup)
+            │
+            └── MAC MISMATCH (FEBE555C == 0):
+                → FUN_0008E646 (commit freshness without auth bit)
+                → FUN_0008E244 (failure notification)
+                → FUN_0008E2BA (release stale PDU, no freshness advance)
+                → FUN_0008E482 (cleanup)
 ```
 
-### 7.2 State-transition table
+### 7.3 State-transition table
 
-| Condition | verify_worker return | State byte | Outcome |
-|---|---|---|---|
-| Valid MAC + valid freshness | 0x000 | 0xC3 → delivery | PDU delivered to PduR/COM via `FUN_0008E2BA` |
-| Invalid MAC + valid freshness | 0x101 | set to 0x96 | PDU discarded; `FUN_0008E30A` cleanup; conditional stale-PDU delivery if config permits |
-| Valid MAC + invalid freshness | 0x201 | set to 0xB4 | PDU discarded; freshness not committed |
-| ICU-S error/timeout (async) | 0x202 | set to 0xB4 | PDU retained; retry on next task cycle |
-| Payload too short (format) | 0x100 | set to 0xA5 | PDU discarded; `FUN_0008E30A` cleanup |
-| No PDU / already processed | 0x103 | unchanged | No action |
+| Condition | Gate 1 | Gate 2 (FEBE555C) | State byte | Outcome |
+|---|---|---|---|---|
+| Valid MAC + valid freshness | pass (worker ret 0) | nonzero (match) | 0xC3 → 0xB4 | Authenticated delivery via FUN_0008E382 (deferred, freshness committed) |
+| Invalid MAC + valid freshness | pass (worker ret 0) | 0 (mismatch) | 0xC3 | Unauthenticated release via FUN_0008E2BA (immediate, no freshness advance) |
+| Valid MAC + invalid freshness | skip (worker ret 0x201) | — | 0xB4 | PDU discarded; freshness not committed |
+| ICU-S error/timeout | skip (worker ret 0x202) | — | 0xB4 | PDU retained; retry on next cycle |
+| Payload too short | skip (worker ret 0x100) | — | 0xA5 | PDU discarded |
+| Format/DLC error | skip (worker ret 0x103) | — | unchanged | No action |
 
-### 7.3 Candidate semantic patch points (not implemented)
+**Key distinction from the disproved model:** "worker returns 0" means
+"the verification operation completed normally," **not** "the MAC matched."
+The actual MAC match/mismatch is a separate output at `FEBE555C` tested
+by Gate 2.
 
-These are ranked by narrowness. **No patch is implemented or recommended in
-this phase.** Each candidate states its exact hypothetical effect.
+### 7.4 Candidate semantic patch points (not implemented)
 
-#### Candidate A — force `cryptoif_job_finish` return to 0 (narrowest MAC bypass)
+Ranked by narrowness. **No patch is implemented or recommended.**
 
-- **Address:** `0x88BA8` (return value `uVar3`)
-- **Mechanism:** force the ICU-S completion result to always read as "match"
-  (gp+0x5BBF always nonzero, or patch the return).
-- **Effect:** treats all CMAC results as match. Freshness verification,
-  format checks, and DLC enforcement remain active.
-- **Callers:** `secoc_submit_cmac_verify` (live SecOC path) and
-  `secoc_icus_slot4_kat_disabled_sync` (compiled-out KAT). Effectively
-  SecOC-only.
-- **Cross-profile coverage:** all six profiles share the same submission path.
-- **Risk:** lowest — preserves freshness anti-replay, preserves format checks.
+#### Candidate A — force `FEBE555C` to nonzero at Gate 2 (narrowest MAC bypass)
+
+- **Address:** `0x8E69E` (the `ld.bu -0x62A4[gp], r1` instruction)
+- **Mechanism:** patch the load or the booleanization to always produce
+  nonzero (match), regardless of what the ICU-S command-7 result wrote.
+- **Effect:** treats all MAC results as match. Freshness verification,
+  format checks, DLC enforcement, and Gate 1 all remain active.
+- **Cross-profile coverage:** all six profiles share Gate 2.
+- **Risk:** lowest — preserves freshness anti-replay, format checks.
   Accepts replayed frames with valid freshness but wrong MAC.
-- **Preservation:** freshness bookkeeping, parsing, async cleanup, and buffer
+- **Preservation:** freshness bookkeeping, parsing, cleanup, and buffer
   ownership all preserved.
 
 #### Candidate B — force `secoc_rx_verify_worker` return to 0
 
 - **Address:** `0x8E4BA` (return value `uVar6`)
-- **Effect:** accepts all structurally valid PDUs regardless of MAC, freshness,
-  or ICU-S errors. Bypasses both Phase 1 (freshness) and Phase 2 (CMAC).
-- **Risk:** high — enables replay acceptance and disables freshness
-  bookkeeping. Freshness state may become inconsistent.
-- **Preservation:** format/DLC check still active (it precedes the return).
-  Async cleanup (`FUN_0008E482`) still runs.
+- **Effect:** passes Gate 1 for all PDUs, but Gate 2 (`FEBE555C`) still
+  distinguishes match from mismatch. A bad MAC would pass Gate 1 but
+  still take the mismatch path in `FUN_0008E67A`.
+- **Risk:** does NOT bypass MAC verification by itself. It only suppresses
+  format/freshness/submission errors. **This is NOT equivalent to
+  Candidate A.**
 
-#### Candidate C — force `FUN_0008E700` acceptance branch
+#### Candidate C — force Gate 1 branch to always enter delivery
 
-- **Address:** `0x8E726` (the `cmp r0, r10; bne` at the acceptance gate)
-- **Effect:** always delivers regardless of any verification result.
-- **Risk:** highest — accepts completely malformed PDUs, bypasses all
-  verification and format checks that occur inside the verify worker.
-- **Preservation:** none of the verification-phase side effects occur.
+- **Address:** `0x8E726` (the `cmp r0, r10; bne`)
+- **Effect:** same as Candidate B — enters `FUN_0008E67A` regardless of
+  worker status, but Gate 2 still gates on `FEBE555C`.
+- **Risk:** same as B — does NOT bypass MAC verification.
 
-### 7.4 Remaining ambiguity
+**Candidates B and C do not bypass MAC verification.** Only Candidate A
+(patching Gate 2's load of `FEBE555C`) directly changes the MAC
+match/mismatch decision. This is the critical correction from the
+provisional SECOC-029 model, which incorrectly placed the MAC decision
+at Gate 1.
 
-The `bVar1 = DAT_FEBE555C != 0` flag in `FUN_0008E67A` selects between
-immediate delivery (`bVar1 == false` → `FUN_0008E2BA`) and a state-transition
-path (`bVar1 == true` → `FUN_0008E382` with code 0x200, which sets state to
-0xB4 = "pending delivery"). The exact conditions under which `DAT_FEBE555C`
-is set or cleared are not fully recovered from static analysis alone — it
-appears to be written by the freshness verification phase, but the specific
-assignment site within the freshness callback chain was not uniquely
-identified. Resolving this requires either deeper tracing of the freshness
-callback's internal state machine or a dynamic experiment that observes the
-byte's value before and after verification with known-valid and known-invalid
-MACs.
+### 7.5 Remaining ambiguity
 
-### 7.5 Relationship to §5.5
-
-Section 5.5 documented that the receive path fails closed — no simple
-"bad MAC still reaches COM" bypass exists in the recovered chain. This
-section (§7) provides the complete address-level decision path that
-underlies that conclusion, and identifies the exact points where a
-persistent CodeFlash patch (as opposed to a protocol-level exploit) would
-need to act. The conclusion of §5.5 holds: no protocol-level bypass
-(tag, freshness, or payload manipulation) can exploit an error-code
-inversion. A CodeFlash patch targeting Candidate A would be the narrowest
-firmware modification that bypasses MAC verification while preserving all
-other checks.
+The `bVar1 = DAT_FEBE555C != 0` value selects between authenticated
+delivery (match → `FUN_0008E382`, state `0xB4`) and unauthenticated
+release (mismatch → `FUN_0008E2BA`, stale PDU). The exact conditions
+under which the mismatch path's `FUN_0008E2BA` delivers to PduR/COM
+versus discards — specifically, whether the COM layer treats the released
+stale PDU differently from an authenticated PDU — is not fully determined
+from static analysis. Resolving this requires either tracing the COM
+signal dispatch path or a dynamic experiment.
 
 ## References
 
