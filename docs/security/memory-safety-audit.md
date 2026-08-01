@@ -471,8 +471,8 @@ No CAN-reachable ISO-TP OOB read/write was found.
 - FD secured routes accept DLC 32, 48, 64 but clamp to 32 bytes before SecOC.
   The suffix is ignored, producing an **ignored-suffix alias**, not an overflow.
 
-No stale-tail, short-frame, or pointer-rewind vulnerability exists in the CAN
-receive path.
+No stale-tail, short-frame, or pointer-rewind vulnerability was identified in
+the CAN receive path.
 
 ### SecOC receive chain
 
@@ -696,4 +696,4 @@ message), `0x01E/0x01F` (99/100: 16-byte expected result). Update counters 20–
 ```
 
 Account for: dynamic command 1/3, commands 5, 7, 8, 11, 0x22, abort 0x3F,
-diagnostic 0x7000/0x7100. No command-13 writer exists in the application.
+diagnostic 0x7000/0x7100. No command-13 writer was identified in the application.
