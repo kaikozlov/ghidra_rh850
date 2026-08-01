@@ -38,6 +38,7 @@ VERIFY_SUITES := \
 	tests/verify_application_routine_id_callbacks.py \
 	tests/verify_diagnostic_vocabulary.py \
 	tests/verify_techstream_mackey.py \
+	tests/verify_memory_safety.py \
 	tests/verify_renesas_rfp.py \
 	tests/verify_doc_links.py
 

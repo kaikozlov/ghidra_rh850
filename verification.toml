@@ -134,6 +134,10 @@ paths = ["data/p1m_sfr_labels.csv"]
 tests = ["tests/verify_payload_gate.py"]
 paths = ["docs/security/bootloader-payload-gate.md"]
 
+[suite.memory_safety]
+tests = ["tests/verify_memory_safety.py"]
+paths = ["docs/security/memory-safety-audit.md"]
+
 [suite.ram_overlays]
 tests = ["tests/verify_ram_overlays.py"]
 paths = ["data/ram_overlay_map.csv"]

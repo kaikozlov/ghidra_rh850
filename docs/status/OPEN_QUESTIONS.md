@@ -217,3 +217,22 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   via standard UDS (`0x2E` DID zeros + `0x34/0x36/0x37` + `0x31`); the VFOREST
   writer targets a different RH850 ECU. See
   [../tooling/techstream.md](../tooling/techstream.md) §4.6.
+- **MEM-SAFE-001 transfer to newer SecOC/TSK targets.** The partial-AES-block
+  raw-write primitive (MEM-SAFE-001) upgrades a prior authenticated payload into
+  arbitrary RAM-code execution without repeating CMAC. Whether the same
+  bootloader gate structure (4 KiB download window, callback pointer at
+  `0xFEBF0FD0`, `payload_decrypt_transfer_task` floor-division block count,
+  authorization persistence) exists in a newer target's CodeFlash is the
+  decisive check. If it transfers, the primitive provides a repeatable
+  code-execution foothold for application-context ICU-S command-5 signing-oracle
+  experiments. If the target uses different download window sizes, callback
+  offsets, or alignment requirements, the primitive may not apply. See
+  [../security/memory-safety-audit.md](../security/memory-safety-audit.md).
+- **MEM-SAFE-003 equality-oracle reachability for variant identification.** The
+  `0x10F3` byte-compare oracle can read application CodeFlash at
+  `0x10000..0xFFDFF` without dumping the full image. It could be used on a newer
+  target to check whether the same crypto routines, SecOC profiles, or callback
+  structures are present before attempting a full exploit. Determine whether the
+  oracle's re-arm cost (256 worst case per byte) is acceptable for identifying
+  known function signatures. See
+  [../security/memory-safety-audit.md](../security/memory-safety-audit.md).
