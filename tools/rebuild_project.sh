@@ -200,6 +200,15 @@ run_headless "seed-uds" "$PROJECT_DIR" "$PROJECT_NAME" \
   -commit "Seed UDS service table and handlers"
 
 echo "[4/4] Seed missed functions, analyze, and apply every annotation"
+
+# Generate the Techstream diagnostic vocabulary before annotation so that
+# ApplyDiagnosticVocabulary.java can consume it during this stage.
+if [ -d "$ROOT/Techstream" ]; then
+  echo "  Generating Techstream diagnostic vocabulary..."
+  ( cd "$ROOT/tools/techstream" && python3 extract_catalog.py )
+  ( cd "$ROOT/tools/diagnostics" && python3 correlate_vocabulary.py )
+fi
+
 run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -process "$PROGRAM_NAME" \
   "${COMMON_ARGS[@]}" \
@@ -221,6 +230,7 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -postScript AnnotateDidModel.java \
   -postScript AnnotateCanTransport.java \
   -postScript AnnotateApplicationDiagnostics.java \
+  -postScript ApplyDiagnosticVocabulary.java "$ROOT/data/generated/21140bbd65e530a9/diagnostic_vocabulary.json" \
   -postScript AnnotateControlPartition.java \
   -postScript AnnotateBootloaderDiagnostics.java \
   -postScript RecoverVectorHandlers.java \

@@ -179,6 +179,98 @@ variant provides the most detailed descriptions:
 | C1555 | Motor relay failure | Motor relay |
 | U0121 | CAN communication error (ABS/VSC) | CAN bus |
 
+## Correlation engine
+
+The catalog is the first layer. The second layer — `tools/diagnostics/correlate_vocabulary.py`
+— correlates the Techstream vocabulary with firmware diagnostic tables extracted
+by `tools/diagnostics/firmware_tables.py`, producing a richer artifact:
+`diagnostic_vocabulary.json`.
+
+### Pipeline architecture
+
+```
+Techstream .ddb → extract_catalog.py → diagnostic_annotations.json
+                                                      ↓
+firmware bytes  → firmware_tables.py → FirmwareTables
+                                                      ↓
+                                     correlate_vocabulary.py
+                                                      ↓
+                                       diagnostic_vocabulary.json
+                                                      ↓
+                                       ApplyDiagnosticVocabulary.java
+                                                      ↓
+                                           annotated Ghidra project
+```
+
+The key design choice is the neutral intermediate representation. The Ghidra
+script does not understand `.ddb`; it consumes a deterministic generated artifact.
+
+### New tools
+
+| Tool | Purpose |
+|---|---|
+| `tools/diagnostics/firmware_tables.py` | Extract DID/service/routine/write-DID structures from raw CodeFlash |
+| `tools/diagnostics/correlate_vocabulary.py` | Match Techstream catalog with firmware tables, emit graded vocabulary |
+| `ghidra/scripts/annotate/ApplyDiagnosticVocabulary.java` | Apply OEM names/comments to Ghidra project |
+| `tests/verify_diagnostic_vocabulary.py` | Deterministic verification of every correlation |
+
+### Match grades
+
+Every mapping carries a confidence grade. Only `exact` and `structural` trigger
+symbol renames in Ghidra. `family` adds comment-only annotations.
+
+| Grade | Meaning | Annotation action |
+|---|---|---|
+| `exact` | Identifier exists in both firmware and an EPS database | Rename function / label data |
+| `structural` | Identifier + payload/session/service context match | Rename function / label data |
+| `family` | Identifier matches an EPS database for the same protocol generation | Comment only |
+| `candidate` | Identifier matches but descriptions conflict across databases | Comment with conflict warning |
+| `rejected` | Techstream constraints contradict firmware evidence | Skip |
+
+### Correlation results
+
+Current output (230 mappings):
+
+| Kind | Count | Exact | Candidate | Family |
+|---|---|---|---|---|
+| DIDs | 12 | 12 | — | — |
+| DTCs | 54 | 16 | 18 | 20 |
+| Monitors | 111 | — | — | 111 |
+| Active tests | 36 | — | — | 36 |
+| Services | 17 | 5 | — | 12 |
+
+DID correlation is exact by construction: every Techstream DID is looked up
+in the 242-entry firmware DID table, and the firmware callback address is
+attached. DTC correlation finds the 2-byte little-endian representation of
+each DTC identifier in CodeFlash — 42 of 54 DTCs have at least one firmware
+location. Monitors are recorded as family-grade vocabulary for future callback
+analysis.
+
+### Preserve two namespaces
+
+OEM labels from Techstream are never conflated with recovered implementation
+semantics. A function named by `AnnotateApplicationDiagnostics` keeps its
+recovered-behavior name; the OEM label is appended as a comment. Only unnamed
+functions (`FUN_*` / `LAB_*`) receive OEM-name renames from this pipeline.
+
+### Entry into the rebuild
+
+The vocabulary is generated before Stage 4 annotation and applied after
+`AnnotateApplicationDiagnostics`:
+
+```
+Stage 4, before analysis:
+  generate diagnostic_annotations.json (extract_catalog.py)
+  generate diagnostic_vocabulary.json (correlate_vocabulary.py)
+
+Stage 4, after analysis:
+  run AnnotateApplicationDiagnostics.java (firmware-recovered names)
+  run ApplyDiagnosticVocabulary.java      (OEM vocabulary layer)
+
+Verification:
+  tests/verify_diagnostic_vocabulary.py (144 checks against raw firmware)
+```
+
 ## tools/pe fix
 
 `tools/pe import` previously used the Ghidra CLI bridge's built-in import,

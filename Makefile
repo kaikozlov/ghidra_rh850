@@ -36,12 +36,13 @@ VERIFY_SUITES := \
 	tests/verify_security_consumers.py \
 	tests/verify_application_ab_service.py \
 	tests/verify_application_routine_id_callbacks.py \
+	tests/verify_diagnostic_vocabulary.py \
 	tests/verify_renesas_rfp.py \
 	tests/verify_doc_links.py
 
 .PHONY: sync verify verify-core verify-one verify-changed verify-agent verify-external verify-rfp verify-sleigh verify-processor verify-ghidra \
 	ghidra-cli \
-	generate-dataflash generate-application-diagnostics \
+	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary \
 	generate-application-receive-evidence generate-application-receive \
 	generate-processor-fixture generate-semantic-coverage \
 	rebuild-project work-project snapshot-project
@@ -50,7 +51,7 @@ sync:
 	$(UV) sync --locked
 
 # Build the vendored ghidra-cli (ghidra/ghidra-cli) into build/ghidra-cli/.
-ghidra-cli:
+	ghidra-cli:
 	tools/build_ghidra_cli.sh
 
 verify: verify-core
@@ -94,6 +95,10 @@ generate-dataflash:
 
 generate-application-diagnostics:
 	$(PYTHON) tools/generate_application_diagnostic_map.py
+
+generate-diagnostic-vocabulary:
+	cd tools/techstream && $(PYTHON) extract_catalog.py
+	cd tools/diagnostics && $(PYTHON) correlate_vocabulary.py
 
 generate-application-receive-evidence:
 	tools/generate_application_rx_signal_evidence.sh
