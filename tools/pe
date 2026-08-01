@@ -7,10 +7,14 @@
 #
 # Usage:
 #   tools/pe import <path/to/file.dll>
-#   tools/pe analyze
 #   tools/pe decompile 0x10001234
-#   tools/pe strings --search SecurityAccess
+#   tools/pe query functions --count
 #   tools/pe stop
+#
+# `import` uses analyzeHeadless for a full auto-analysis pass (the bridge's
+# built-in import does a shallow analysis that misses most functions in
+# MSVC-compiled C++ PEs). After import, all other subcommands run through the
+# ghidra CLI bridge as normal.
 #
 # Environment:
 #   GHIDRA_AGENT=1   Force compact JSON output.
@@ -21,7 +25,6 @@ set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 PROJECT_NAME="${PE_PROJECT:-pe_dlls}"
-PROGRAM_NAME="${PE_PROGRAM:-CommandCommon.dll}"
 PROJECT_DIR="$ROOT/build/pe-project"
 mkdir -p "$PROJECT_DIR"
 
@@ -39,6 +42,40 @@ if [[ ! -x "$VENDOR_BIN" ]]; then
 fi
 
 GHIDRA_CLI="$VENDOR_BIN"
+
+# --- Subcommand dispatch ------------------------------------------------------
+#
+# `import` is special: it runs analyzeHeadless directly to get full auto-analysis.
+# The bridge's `import` command starts a daemon and runs analysis in-process,
+# but the resulting analysis is shallow (0 instructions, 0 functions for many
+# MSVC PEs).  analyzeHeadless runs the complete analysis pipeline (Aggressive
+# Instruction Finder, decompiler, etc.) and saves durably.
+if [[ "${1:-}" == "import" ]]; then
+  shift  # remove "import"
+  if [[ $# -lt 1 ]]; then
+    echo "Usage: tools/pe import <path/to/file.dll>" >&2
+    exit 1
+  fi
+  BINARY="$1"
+  shift
+  PROGRAM_NAME="$(basename "$BINARY")"
+
+  GHIDRA_HOME="$("$ROOT/tools/resolve_ghidra_home.sh")"
+  ANALYZE_HEADLESS="$GHIDRA_HOME/support/analyzeHeadless"
+  [[ -x "$ANALYZE_HEADLESS" ]] || { echo "missing analyzeHeadless: $ANALYZE_HEADLESS" >&2; exit 1; }
+
+  echo "Importing $PROGRAM_NAME via analyzeHeadless..." >&2
+  "$ANALYZE_HEADLESS" "$PROJECT_DIR" "$PROJECT_NAME" \
+    -import "$BINARY" \
+    -overwrite \
+    -analysisTimeoutPerFile 300 \
+    "$@" 2>&1 | grep -E 'INFO|ERROR' | tail -5
+  echo "Done. Use PE_PROGRAM=$PROGRAM_NAME tools/pe <subcommand> to query." >&2
+  exit 0
+fi
+
+# --- All other subcommands: route through the bridge -------------------------
+PROGRAM_NAME="${PE_PROGRAM:-CommandCommon.dll}"
 
 CLI_ARGS=(
   --projects-dir "$PROJECT_DIR"

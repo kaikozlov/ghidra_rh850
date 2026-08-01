@@ -9,5 +9,9 @@ build/
 # vendor package out of Git; renesas-rfp.lock.json pins the analyzed artifacts.
 Renesas/
 
-# Ignore Techstream distribution
-Techstream/
+# Ignore Techstream distribution (proprietary installer + unpacked contents)
+Techstream/unpacked/
+Techstream/unpacked.7z
+Techstream/extracted/
+Techstream/decoded/
+Techstream/*.exe
