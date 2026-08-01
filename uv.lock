@@ -3,15 +3,51 @@ revision = 3
 requires-python = ">=3.11"
 
 [[package]]
+name = "dncil"
+version = "1.0.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/53/79/498fc2e7e7e132bb7930a28cd075f3b3e77de3b4be5f38a9340a866f9802/dncil-1.0.2.tar.gz", hash = "sha256:1557675c2d1351d3260509881cff0383309f81cda4944ed2c3f5cc352953aa15", size = 19318, upload-time = "2022-12-12T19:09:29.322Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5b/2d/f6e3fa0832ce1d934a851757058235c9ec5741cff0129cfcf205a9359489/dncil-1.0.2-py3-none-any.whl", hash = "sha256:69d389e9b850fa9afa2e37ca252b01476379991eee88fd33ab76f924d36dd68d", size = 27010, upload-time = "2022-12-12T19:09:27.582Z" },
+]
+
+[[package]]
+name = "dnfile"
+version = "0.18.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pefile" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/01/c3/89dbe3a48dfa303060d59b74b97b8401cc70b9b4d4c24982202861fd82e9/dnfile-0.18.0.tar.gz", hash = "sha256:24eec63d65535b702236001e648bbf2fa139d1a7bea191fdca17c3be337eb4db", size = 51519, upload-time = "2026-01-31T05:09:11.212Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/39/ad/4f945155a78800cea02cb258bc0b7704c43cf94f50f75c808f0618694153/dnfile-0.18.0-py3-none-any.whl", hash = "sha256:7579fe2d6bb1d854aa154929c309fbf34e70b622053a043a51d42f079fad1772", size = 48044, upload-time = "2026-01-31T05:09:09.703Z" },
+]
+
+[[package]]
 name = "ghidra-rh850-analysis-verification"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "dncil" },
+    { name = "dnfile" },
     { name = "pycryptodome" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pycryptodome", specifier = "==3.23.0" }]
+requires-dist = [
+    { name = "dncil", specifier = "==1.0.2" },
+    { name = "dnfile", specifier = "==0.18.0" },
+    { name = "pycryptodome", specifier = "==3.23.0" },
+]
+
+[[package]]
+name = "pefile"
+version = "2024.8.26"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/03/4f/2750f7f6f025a1507cd3b7218691671eecfd0bbebebe8b39aa0fe1d360b8/pefile-2024.8.26.tar.gz", hash = "sha256:3ff6c5d8b43e8c37bb6e6dd5085658d658a7a0bdcd20b6a07b1fcfc1c4e9d632", size = 76008, upload-time = "2024-08-26T20:58:38.155Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/54/16/12b82f791c7f50ddec566873d5bdd245baa1491bac11d15ffb98aecc8f8b/pefile-2024.8.26-py3-none-any.whl", hash = "sha256:76f8b485dcd3b1bb8166f1128d395fa3d87af26360c2358fb75b80019b957c6f", size = 74766, upload-time = "2024-08-26T21:01:02.632Z" },
+]
 
 [[package]]
 name = "pycryptodome"

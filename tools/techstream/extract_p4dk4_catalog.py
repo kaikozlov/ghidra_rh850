@@ -28,7 +28,6 @@ from __future__ import annotations
 import json
 import struct
 from pathlib import Path
-from datetime import datetime, timezone
 
 from parse_ddb import DDBParser
 
@@ -126,7 +125,7 @@ def extract_subfunctions(db):
     return entries
 
 
-def main() -> None:
+def build_p4dk4_catalog() -> dict:
     parser = DDBParser()
 
     # Load string databases
@@ -174,13 +173,12 @@ def main() -> None:
 
     catalog = {
         "description": (
-            "P4DK4 EPS diagnostic vocabulary template for newer-generation "
-            "Denso RH850 EPS calibrations (e.g. Corolla 8965F1208000). "
-            "Not firmware-correlated; pure OEM vocabulary extraction."
+            "P4DK4 EPS diagnostic vocabulary from a co-shipped Techstream V18 "
+            "database. Not firmware-correlated and not evidence that the "
+            "database targets a newer EPS generation."
         ),
         "techstream_distribution": "V18.00.003",
         "source_file": P4DK4_PATH,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
         "summary": {
             "dtcs": len(dtcs_deduped),
             "unique_dtc_identifiers": len({d["dtc_identifier"] for d in dtcs_deduped}),
@@ -203,6 +201,11 @@ def main() -> None:
         "monitors": monitors,
         "subfunctions": subfns,
     }
+    return catalog
+
+
+def main() -> None:
+    catalog = build_p4dk4_catalog()
 
     out_dir = REPO_ROOT / "data" / "generated" / "p4dk4_template"
     out_dir.mkdir(parents=True, exist_ok=True)

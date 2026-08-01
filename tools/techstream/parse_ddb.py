@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Parse Techstream .ddb diagnostic database files.
 
-Two file types share the "DiagTool DataCtrl" magic:
+The supported modern layouts carry the "DiagTool DataCtrl" signature:
 
-1. **ECU databases** (EPS_P4DK3.ddb, EPS_CAN_P4DK.ddb, ...) — per-ECU
-   diagnostic tables: DTCs, DIDs, data monitors, active tests, routines.
-   Stored as sequential sections, each with a 10-byte TABLE_DATA_HEAD header.
-   Sections are uncompressed (compression_flag = 0).
+1. **Type-2 ECU databases** (EPS_P4DK3.ddb, EPS_CAN_P4DK.ddb, ...) — per-ECU
+   diagnostic tables. A type-indexed pointer directory references sections,
+   each with a 10-byte TABLE_DATA_HEAD header. Sections are uncompressed.
 
-2. **String databases** (V_English.ddb, V_Spanish.ddb, ...) — the global OEM
-   string table referenced by all ECU databases via string indices.
-   Stored as one LZSS-compressed block (compression_flag = 1).
+2. **Modern type-4/5/6 string databases** (M/V/U language files) — global OEM
+   strings referenced by ECU records. M/V carry one LZSS-compressed section;
+   U carries strings plus a parallel compressed resource-metadata section.
+
+Type-1 Toyota master, type-3 Viewer, and legacy type-4 layouts are distinct and
+intentionally rejected by these APIs rather than silently misparsed.
 
 Format details recovered by decompiling DataCompress_DT.DLL!_DataDecode@12
 (LZSS algorithm) and KgpDataCtrl.dll!CDbTableRead::CreateTable (file format).
@@ -40,8 +42,9 @@ from typing import BinaryIO
 # First 6 bytes are constant across all regions. Bytes 6-7 vary by region
 # (NA: 00 39, JP: 01 1b, EU: 00 14) — they carry a region/version tag or
 # checksum, not a format identifier.
-MAGIC_PREFIX = b"\x40\x00\x0c\x16\x0c\x08"
-MAGIC = b"\x40\x00\x0c\x16\x0c\x08\x00\x39"  # NA variant, kept for compat
+MAGIC_PREFIX = bytes.fromhex("40 00 0c 16 0c 08")
+U_MAGIC_PREFIX = bytes.fromhex("39 00 0c 16 0b 15 0f")
+U_LANGUAGE_TAGS = frozenset(range(0x16, 0x1B))
 SIGNATURE = b"DiagTool DataCtrl\x00"
 
 
@@ -92,7 +95,12 @@ def lzss_decompress(data: bytes) -> bytes:
                 window[win_pos] = bv
                 win_pos = (win_pos + 1) & 0xFFF
 
-    return bytes(out[:decompressed_size])
+    if len(out) != decompressed_size:
+        raise ValueError(
+            f"truncated LZSS stream: expected {decompressed_size} bytes, "
+            f"decoded {len(out)}"
+        )
+    return bytes(out)
 
 
 # ── Data structures ───────────────────────────────────────────────────────────
@@ -109,6 +117,11 @@ class TableDataHead:
 
     @classmethod
     def read(cls, data: bytes, offset: int) -> "TableDataHead":
+        if offset < 0 or offset + cls.HEADER_SIZE > len(data):
+            raise ValueError(
+                f"section header at 0x{offset:X} extends past file size "
+                f"0x{len(data):X}"
+            )
         table_type = data[offset]
         compression = data[offset + 1]
         record_count = struct.unpack_from("<I", data, offset + 2)[0]
@@ -124,10 +137,19 @@ class Section:
     raw_data: bytes       # the payload bytes
 
     @property
-    def record_size(self) -> float:
+    def record_size(self) -> int:
         if self.header.record_count == 0:
             return 0
-        return self.header.payload_size / self.header.record_count
+        size, remainder = divmod(
+            self.header.payload_size, self.header.record_count
+        )
+        if remainder:
+            raise ValueError(
+                f"section {self.header.table_type} payload size "
+                f"{self.header.payload_size} is not divisible by record count "
+                f"{self.header.record_count}"
+            )
+        return size
 
 
 @dataclass
@@ -152,12 +174,21 @@ class ECUDataBase:
 
 
 @dataclass
+class StringMetadataEntry:
+    """One U_English type-1 identifier record, aligned by string index."""
+
+    identifier: str
+    auxiliary_value: int
+
+
+@dataclass
 class StringDataBase:
     """Parsed OEM string database (V_English.ddb etc.)."""
     path: Path
     entry_count: int
     decompressed: bytes
     pool_offset: int      # byte offset where string data begins (after offset table)
+    metadata: list[StringMetadataEntry] | None = None
 
     def get_string(self, index: int) -> str | None:
         """Resolve a 1-based string index to text.
@@ -182,6 +213,12 @@ class StringDataBase:
         return self.decompressed[str_abs : str_abs + str_length].decode(
             "utf-16-le", errors="replace"
         ).rstrip("\x00")
+
+    def get_metadata(self, index: int) -> StringMetadataEntry | None:
+        """Return the U_English identifier record for a 1-based string index."""
+        if self.metadata is None or index == 0 or index > len(self.metadata):
+            return None
+        return self.metadata[index - 1]
 
     def search(self, term: str, limit: int = 20) -> list[tuple[int, str]]:
         """Full-text search for a term in the string pool (case-insensitive)."""
@@ -229,19 +266,61 @@ class DDBParser:
         self._validate_header(data)
 
         format_version = data[8]
+        if format_version != 0x02:
+            raise ValueError(
+                f"expected ECU database format 0x02, got 0x{format_version:02X}"
+            )
         db = ECUDataBase(path=path, format_version=format_version)
 
         # Section directory: u32 offsets starting at file offset 0x24.
-        # Zero entries are gaps; valid offsets point to TABLE_DATA_HEAD headers.
-        for i in range(0x24, min(0x68, len(data)), 4):
+        # The slot index is the section type. The directory extends to the
+        # first section payload (0x280 in V18), not merely through type 16;
+        # newer schemas use types as high as 91.
+        directory_end = None
+        for i in range(0x24, len(data) - 3, 4):
             offset = struct.unpack_from("<I", data, i)[0]
-            if 0 < offset < len(data):
-                header = TableDataHead.read(data, offset)
-                data_start = offset + TableDataHead.HEADER_SIZE
-                raw = data[data_start : data_start + header.payload_size]
-                db.sections[header.table_type] = Section(
-                    header=header, data_offset=data_start, raw_data=raw,
+            if offset:
+                directory_end = offset
+                break
+        if directory_end is None:
+            raise ValueError(f"no section offsets in {path.name}")
+        if directory_end <= 0x24 or directory_end > len(data):
+            raise ValueError(
+                f"invalid section-directory boundary in {path.name}: "
+                f"0x{directory_end:X}"
+            )
+
+        for i in range(0x24, directory_end, 4):
+            offset = struct.unpack_from("<I", data, i)[0]
+            if offset == 0:
+                continue
+            if offset + TableDataHead.HEADER_SIZE > len(data):
+                raise ValueError(
+                    f"section directory entry at 0x{i:X} points outside "
+                    f"{path.name}: 0x{offset:X}"
                 )
+            header = TableDataHead.read(data, offset)
+            expected_type = (i - 0x24) // 4
+            if header.table_type != expected_type:
+                raise ValueError(
+                    f"directory slot {expected_type} in {path.name} points to "
+                    f"section type {header.table_type}"
+                )
+            data_start = offset + TableDataHead.HEADER_SIZE
+            data_end = data_start + header.payload_size
+            if data_end > len(data):
+                raise ValueError(
+                    f"section {header.table_type} payload in {path.name} ends at "
+                    f"0x{data_end:X}, past file size 0x{len(data):X}"
+                )
+            if header.table_type in db.sections:
+                raise ValueError(
+                    f"duplicate section type {header.table_type} in {path.name}"
+                )
+            raw = data[data_start:data_end]
+            db.sections[header.table_type] = Section(
+                header=header, data_offset=data_start, raw_data=raw,
+            )
         return db
 
     def load_string_db(self, path: str | Path) -> StringDataBase:
@@ -254,33 +333,98 @@ class DDBParser:
         # Format 0x04/0x05 (M/V English): section header at 0x28.
         # Format 0x06 (U_English): different header layout, section at 0x34.
         format_version = data[8]
+        if format_version not in (0x04, 0x05, 0x06):
+            raise ValueError(
+                f"expected string database format 0x04/0x05/0x06, got "
+                f"0x{format_version:02X}"
+            )
         section_offset = 0x34 if format_version == 0x06 else 0x28
 
         header = TableDataHead.read(data, section_offset)
-        assert header.compression == 1, f"expected LZSS, got compression={header.compression}"
+        if header.compression != 1:
+            raise ValueError(
+                f"expected LZSS string section, got compression={header.compression}"
+            )
 
         # The _DataDecode block starts right after the 10-byte section header.
         block_offset = section_offset + TableDataHead.HEADER_SIZE
+        if block_offset + header.payload_size > len(data):
+            raise ValueError(
+                f"compressed string block in {path.name} extends past EOF"
+            )
         compressed = data[block_offset : block_offset + header.payload_size]
         decompressed = lzss_decompress(compressed)
 
         entry_count = header.record_count
         pool_offset = entry_count * 6
+        if pool_offset > len(decompressed):
+            raise ValueError(
+                f"string offset table in {path.name} is larger than decoded data"
+            )
+
+        metadata = None
+        if format_version == 0x06:
+            metadata_offset = struct.unpack_from("<I", data, 0x28)[0]
+            if metadata_offset == 0:
+                raise ValueError(f"missing U_English metadata section in {path.name}")
+            metadata_header = TableDataHead.read(data, metadata_offset)
+            if (
+                metadata_header.table_type != 1
+                or metadata_header.compression != 1
+                or metadata_header.record_count != entry_count
+            ):
+                raise ValueError(
+                    f"invalid U_English metadata header in {path.name}: "
+                    f"{metadata_header}"
+                )
+            metadata_block = metadata_offset + TableDataHead.HEADER_SIZE
+            metadata_end = metadata_block + metadata_header.payload_size
+            if metadata_end > len(data):
+                raise ValueError(
+                    f"U_English metadata block in {path.name} extends past EOF"
+                )
+            metadata_data = lzss_decompress(data[metadata_block:metadata_end])
+            record_size, remainder = divmod(len(metadata_data), entry_count)
+            if remainder or record_size != 164:
+                raise ValueError(
+                    f"unexpected U_English metadata shape in {path.name}: "
+                    f"{len(metadata_data)} bytes / {entry_count} records"
+                )
+            metadata = []
+            for index in range(entry_count):
+                record = metadata_data[index * record_size : (index + 1) * record_size]
+                identifier = record[:160].decode(
+                    "utf-16-le", errors="strict"
+                ).split("\x00", 1)[0]
+                metadata.append(
+                    StringMetadataEntry(
+                        identifier=identifier,
+                        auxiliary_value=struct.unpack_from("<I", record, 160)[0],
+                    )
+                )
 
         return StringDataBase(
             path=path,
             entry_count=entry_count,
             decompressed=decompressed,
             pool_offset=pool_offset,
+            metadata=metadata,
         )
 
     @staticmethod
     def _validate_header(data: bytes) -> None:
         if len(data) < 0x30:
             raise ValueError("file too short for .ddb header")
-        # Format 0x06 (U_English) has a different magic but same signature.
-        # Only the first 6 bytes are constant; bytes 6-7 vary by region.
-        if data[8] != 0x06 and data[0:6] != MAGIC_PREFIX:
+        # Format 0x06 has a distinct seven-byte prefix followed by a language
+        # tag (0x16 English through 0x1A Turkish in the pinned corpus).
+        # Standard files share six prefix bytes while bytes 6-7 vary by region.
+        if data[8] == 0x06:
+            valid_magic = (
+                data[0:7] == U_MAGIC_PREFIX and data[7] in U_LANGUAGE_TAGS
+            )
+        else:
+            valid_magic = data[0:6] == MAGIC_PREFIX
+        if not valid_magic:
             raise ValueError(f"bad magic prefix: {data[0:8].hex()}")
         sig_end = data.find(b"\x00", 0x0A)
         sig = data[0x0A:sig_end]

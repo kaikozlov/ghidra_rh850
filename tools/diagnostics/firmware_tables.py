@@ -12,7 +12,7 @@ Record layouts (all little-endian, struct codes in parentheses):
 
 DID record (16 bytes, ``<HHIII``):
     [0:2]  DID identifier
-    [2:4]  access flags (bit 0=read, 1=write, etc.)
+    [2:4]  response-size/attribute field (not access flags)
     [4:8]  read callback address (0 = none)
     [8:12] extra pointer 1 (source record / config address)
     [12:16] extra pointer 2
@@ -21,12 +21,12 @@ UDS service record (24 bytes, ``<IIBBBBIII``):
     [0:4]   session-allow-list pointer
     [4:8]   subfunction-table pointer
     [8]     SID
-    [9]     session-allow-list length
+    [9]     subfunction-routing mode/attribute
     [10]    security-allow-list length
-    [11]    reserved
-    [12:16] reserved
-    [16:20] reserved
-    [20:24] service callback address (0 = subfunction-table driven)
+    [11]    session-allow-list length
+    [12:16] subfunction count/attribute
+    [16:20] service callback address (0 = subfunction-table driven)
+    [20:24] auxiliary callback/pointer
 
 Routine/control-ID record (12 bytes, ``<HHII``):
     [0:2]  routine/control ID
@@ -86,19 +86,12 @@ WRITE_DID_RECORD = struct.Struct("<HBBI")  # did, pad, enable, extra_ptr
 class DidEntry:
     """One DID record from the firmware table."""
     identifier: int
-    flags: int
+    response_size_or_attribute: int
     callback: int
     extra1: int
     extra2: int
     table_index: int
 
-    @property
-    def is_readable(self) -> bool:
-        return bool(self.flags & 0x0001)
-
-    @property
-    def is_writable(self) -> bool:
-        return bool(self.flags & 0x0002)
 
     @property
     def has_callback(self) -> bool:
@@ -111,19 +104,14 @@ class ServiceEntry:
     session_list_ptr: int
     subfunc_table_ptr: int
     sid: int
+    subfunction_mode: int
     session_count: int
     security_count: int
-    reserved: int
+    subfunction_count: int
     callback: int
+    auxiliary: int
+    sessions: list[int]
     table_index: int
-
-    @property
-    def sessions(self) -> list[int]:
-        """Resolve session allow-list bytes from firmware."""
-        if self.session_list_ptr == 0 or self.session_count == 0:
-            return []
-        data = CODEFLASH_PATH.read_bytes()
-        return list(data[self.session_list_ptr:self.session_list_ptr + self.session_count])
 
 
 @dataclass
@@ -180,9 +168,10 @@ def extract_dids(cf: bytes | None = None) -> list[DidEntry]:
     entries = []
     for i in range(DID_TABLE_COUNT):
         offset = DID_TABLE_BASE + i * DID_RECORD.size
-        did, flags, callback, extra1, extra2 = DID_RECORD.unpack_from(cf, offset)
+        did, attribute, callback, extra1, extra2 = DID_RECORD.unpack_from(cf, offset)
         entries.append(DidEntry(
-            identifier=did, flags=flags, callback=callback,
+            identifier=did, response_size_or_attribute=attribute,
+            callback=callback,
             extra1=extra1, extra2=extra2, table_index=i,
         ))
     return entries
@@ -193,22 +182,40 @@ def extract_services(cf: bytes | None = None) -> list[ServiceEntry]:
     if cf is None:
         cf = CODEFLASH_PATH.read_bytes()
     entries = []
+
+    def decode(row: tuple[int, ...], table_index: int) -> ServiceEntry:
+        session_ptr = row[0]
+        session_count = row[5]
+        if session_ptr + session_count > len(cf):
+            raise ValueError(
+                f"service 0x{row[2]:02X} session list extends past firmware"
+            )
+        sessions = (
+            list(cf[session_ptr:session_ptr + session_count])
+            if session_ptr and session_count else []
+        )
+        return ServiceEntry(
+            session_list_ptr=session_ptr,
+            subfunc_table_ptr=row[1],
+            sid=row[2],
+            subfunction_mode=row[3],
+            security_count=row[4],
+            session_count=session_count,
+            subfunction_count=row[6],
+            callback=row[7],
+            auxiliary=row[8],
+            sessions=sessions,
+            table_index=table_index,
+        )
+
     for i in range(SERVICE_TABLE_COUNT):
         offset = SERVICE_TABLE_BASE + i * SERVICE_RECORD.size
         row = SERVICE_RECORD.unpack_from(cf, offset)
-        entries.append(ServiceEntry(
-            session_list_ptr=row[0], subfunc_table_ptr=row[1], sid=row[2],
-            session_count=row[3], security_count=row[4], reserved=row[5],
-            callback=row[7], table_index=i,
-        ))
+        entries.append(decode(row, i))
     for i in range(EXTRA_SERVICE_COUNT):
         offset = EXTRA_SERVICE_TABLE_BASE + i * SERVICE_RECORD.size
         row = SERVICE_RECORD.unpack_from(cf, offset)
-        entries.append(ServiceEntry(
-            session_list_ptr=row[0], subfunc_table_ptr=row[1], sid=row[2],
-            session_count=row[3], security_count=row[4], reserved=row[5],
-            callback=row[7], table_index=SERVICE_TABLE_COUNT + i,
-        ))
+        entries.append(decode(row, SERVICE_TABLE_COUNT + i))
     return entries
 
 
@@ -257,10 +264,8 @@ def main() -> None:
     tables = extract_all()
 
     print(f"DID table: {len(tables.dids)} entries")
-    readable = sum(1 for d in tables.dids if d.is_readable)
-    writable = sum(1 for d in tables.dids if d.is_writable)
     with_cb = sum(1 for d in tables.dids if d.has_callback)
-    print(f"  readable: {readable}, writable: {writable}, with callback: {with_cb}")
+    print(f"  with callback: {with_cb}")
 
     print(f"\nService table: {len(tables.services)} entries")
     for s in tables.services:

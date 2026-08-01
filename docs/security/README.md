@@ -10,6 +10,12 @@ them.
 | Application SecurityAccess | Extended-session level 2 unlock | [application-security-access.md](application-security-access.md) |
 | SecOC | Runtime CAN message authentication and ICU-S software-path assessment | [secoc/README.md](secoc/README.md) |
 
+Dealer/tooling key-provisioning evidence is separate from those firmware
+domains. Start with [key-provisioning.md](key-provisioning.md); the recovered
+Techstream online flow is in
+[mackey-registration.md](mackey-registration.md). Its relationship to SecOC is
+not yet proven.
+
 ## Important distinctions
 
 - Bootloader SA uses `SEED_KEY_SECRET` (`0xBFE8`) and

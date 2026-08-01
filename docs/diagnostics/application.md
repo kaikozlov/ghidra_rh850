@@ -99,20 +99,22 @@ or retains the same payload-build secrets and routines.
 
 ## 1. Application identification DIDs
 
-Three 16-byte records begin at `0x2A30C`. Their proven fields are the DID, flags,
-and first callback pointer; the remaining two words are zero for these records:
+Three 16-byte records begin at `0x2A30C`. The second halfword is a response
+length/size attribute, not read/write flags: its values `0x11`, `0x01`, and
+`0x14` equal the response widths produced by the three callbacks. The separate
+19-row table at `0x26AEC` controls configured WDBI membership.
 
 ```c
 struct application_did_record {
     uint16_t did;
-    uint16_t flags;
+    uint16_t response_length;
     uint32_t read_callback;
     uint32_t auxiliary_1;
     uint32_t auxiliary_2;
 };
 ```
 
-| Record | DID | Flags | Callback | Result |
+| Record | DID | Response length | Callback | Result |
 |---:|---:|---:|---:|---|
 | `0x2A30C` | `F181` | `0x0011` | `0x4E8E4` | application software identification |
 | `0x2A31C` | `F186` | `0x0001` | `0x4E90A` | active diagnostic session |
@@ -154,6 +156,13 @@ Seventeen 24-byte records begin at `0x25E30`. The SID is byte 8 of each record.
 Several pointer and policy fields remain unnamed, so the report deliberately does
 not assign AUTOSAR types to every byte. The complete SID sequence is definitive:
 
+The raw layout also corrects an extractor bug: byte 11, not byte 9, is the
+session-allow-list count. Byte 9 is retained separately as a subfunction-routing
+mode/attribute; the word at offset 12 tracks subfunction count/attributes, the
+service callback is at offset 16, and the final word is auxiliary. Resolving
+session bytes from a caller-supplied firmware image is now eager, so analysis of
+another image cannot silently reread the global Sienna binary.
+
 | Index | Record | SID | Selected configured pointer |
 |---:|---:|---:|---:|
 | 0 | `0x25E30` | `10` | subfunction table `0x25BC0` |
@@ -183,6 +192,27 @@ The service-group directory at `0x25DE0` resolves the records after the primary 
 | 4 | `0x25E1C`, five entries `18..22` | secondary physical `0x7A0` | `0x7A8` | `10,19,22,3E,AB` |
 
 The six extra 24-byte records at `0x25FC8..0x26057` supply the unique records needed by groups 3 and 4. They are not a fourth free-standing service table: the functional group reuses five primary records, while the secondary physical group uses five extra records. The application CAN demultiplexer maps `0x7A1/0x777/0x7A0` in that order to upper PDU IDs `0x0800..0x0802`; the generated Dcm group keys are correspondingly `2/3/4`. The transmit configuration supplies paired transport routes on `0x7A9` and `0x7A8`.
+
+### DTC status table (`0x309DC`)
+
+`FUN_0005159e` walks exactly `0xA0` enabled dwords from `0x309E0` with an
+8-byte stride; `FUN_000517b4` reads the corresponding identifier records based
+at `0x309DC`. Each 8-byte record is:
+
+```c
+struct ApplicationDtcStatusRecord {
+    uint8_t  status_flags;
+    uint16_t dtc_id;
+    uint8_t  zero_pad;
+    uint32_t enabled;       // active when equal to 1
+};
+```
+
+The raw table spans `0x309DC`–`0x30EDC`; 127 records are enabled and all pad
+bytes are zero. An earlier vocabulary scan used only `0x30A28`–`0x30C40` and
+therefore missed enabled CAN-communication DTCs through `0x30D74`, including
+`U0100`, `U0126`, `U023A`, `U0293`, and `U1103`. The complete bound is asserted
+against the raw records in `tests/verify_diagnostic_vocabulary.py`.
 
 This limited `0x7A0 -> 0x7A8` diagnostic endpoint is therefore real, but its intended external tester or manufacturing role and the OEM meaning of SID `0xAB` remain unresolved. The primary application table must not be confused with the bootloader table at `0x8E54`.
 For example, bootloader SIDs `14`, `19`, `23`, `AB`, and `BA` all point to

@@ -1,7 +1,6 @@
 {
   "firmware_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
   "techstream_distribution": "V18.00.003",
-  "generated_at": "2026-08-01T16:58:16.149715+00:00",
   "ecu": {
     "family": "EPS",
     "software_id": "8965B4512000",
@@ -27,33 +26,35 @@
     ]
   },
   "summary": {
-    "total_entries": 298,
+    "total_entries": 353,
     "by_kind": {
       "dtc": 54,
       "did": 11,
       "monitor": 111,
-      "utility_procedure": 122
-    },
-    "dids_in_firmware": 11
+      "utility_string": 177
+    }
   },
   "string_databases": {
     "M_English": {
       "file": "M_English.ddb",
       "entry_count": 183244,
       "pool_offset": 1099464,
-      "decompressed_size": 12889266
+      "decompressed_size": 12889266,
+      "metadata_entry_count": 0
     },
     "V_English": {
       "file": "V_English.ddb",
       "entry_count": 140602,
       "pool_offset": 843612,
-      "decompressed_size": 10089890
+      "decompressed_size": 10089890,
+      "metadata_entry_count": 0
     },
     "U_English": {
       "file": "U_English.ddb",
       "entry_count": 25957,
       "pool_offset": 155742,
-      "decompressed_size": 3032332
+      "decompressed_size": 3032332,
+      "metadata_entry_count": 25957
     }
   },
   "entries": [
@@ -372,25 +373,21 @@
     {
       "kind": "did",
       "identifier": 256,
-      "in_firmware_table": true,
       "source_db": "EPS_P4DK3"
     },
     {
       "kind": "did",
       "identifier": 288,
-      "in_firmware_table": true,
       "source_db": "EPS_P4DK3"
     },
     {
       "kind": "did",
       "identifier": 320,
-      "in_firmware_table": true,
       "source_db": "EPS_P4DK3"
     },
     {
       "kind": "did",
       "identifier": 480,
-      "in_firmware_table": true,
       "source_db": "EPS_P4DK3"
     },
     {
@@ -410,6 +407,7 @@
         "V_English": "Air Outlet Servo Pulse (D)",
         "U_English": "Tank Shut Valve is closed due to the tank temperature decrease."
       },
+      "monitor_seq": 1,
       "scaling_raw": [
         0,
         0,
@@ -443,6 +441,7 @@
         "V_English": "Air Outlet Servo Actu Pulse(D)",
         "U_English": "Press Next to open the Tank Shut Valve."
       },
+      "monitor_seq": 2,
       "scaling_raw": [
         0,
         0,
@@ -476,6 +475,7 @@
         "V_English": "Air Inlet Damper Targ Pulse",
         "U_English": "Exiting Temporary Leak Check.\r\nAccording to the repair manual, release Nitrogen in the pipe.\r\nRefer to the repair manual for details."
       },
+      "monitor_seq": 3,
       "scaling_raw": [
         0,
         0,
@@ -509,6 +509,7 @@
         "V_English": "TRQ3 Zero Point Value",
         "U_English": "Now adjusting.\r\nPlease wait."
       },
+      "monitor_seq": 4,
       "scaling_raw": [
         0,
         0,
@@ -542,6 +543,7 @@
         "V_English": "Air Inlet Damper Actual Pulse",
         "U_English": "Restarting Temporary Leak Check."
       },
+      "monitor_seq": 5,
       "scaling_raw": [
         0,
         0,
@@ -575,6 +577,7 @@
         "V_English": "Half/Full-latch Switch",
         "U_English": "The cancel button has been pressed.\r\nDo you want to stop the processing?"
       },
+      "monitor_seq": 6,
       "scaling_raw": [
         0,
         0,
@@ -608,6 +611,7 @@
         "V_English": "Closer Stop Switch",
         "U_English": "NG"
       },
+      "monitor_seq": 7,
       "scaling_raw": [
         0,
         0,
@@ -641,6 +645,7 @@
         "V_English": "Rear Door Sunshade Status",
         "U_English": "OK"
       },
+      "monitor_seq": 8,
       "scaling_raw": [
         0,
         0,
@@ -674,6 +679,7 @@
         "V_English": "Rear Door Sunshade Stop Status",
         "U_English": "Front Side Radar \"B\""
       },
+      "monitor_seq": 9,
       "scaling_raw": [
         0,
         0,
@@ -707,6 +713,7 @@
         "V_English": "Rear Door Sunshade",
         "U_English": "NG"
       },
+      "monitor_seq": 10,
       "scaling_raw": [
         0,
         0,
@@ -740,6 +747,7 @@
         "V_English": "PSD Touch Sensor",
         "U_English": "Online Axis Adjusting"
       },
+      "monitor_seq": 11,
       "scaling_raw": [
         0,
         0,
@@ -773,6 +781,7 @@
         "V_English": "Handle Switch1",
         "U_English": "Blind Spot Monitor \"B\""
       },
+      "monitor_seq": 12,
       "scaling_raw": [
         0,
         0,
@@ -806,6 +815,7 @@
         "V_English": "Handle Switch2",
         "U_English": "Blind Spot Monitor \"A\""
       },
+      "monitor_seq": 13,
       "scaling_raw": [
         0,
         0,
@@ -839,6 +849,7 @@
         "V_English": "Key Switch",
         "U_English": "-"
       },
+      "monitor_seq": 14,
       "scaling_raw": [
         0,
         0,
@@ -872,6 +883,7 @@
         "V_English": "Table Right Turn Switch",
         "U_English": "Front Side Radar \"B\""
       },
+      "monitor_seq": 15,
       "scaling_raw": [
         0,
         0,
@@ -905,6 +917,7 @@
         "V_English": "Table Left Turn Switch",
         "U_English": "Front Side Radar \"A\""
       },
+      "monitor_seq": 16,
       "scaling_raw": [
         0,
         0,
@@ -938,6 +951,7 @@
         "V_English": "Lifter Switch Up",
         "U_English": "Front Recognition Camera"
       },
+      "monitor_seq": 17,
       "scaling_raw": [
         0,
         0,
@@ -971,6 +985,7 @@
         "V_English": "Lifter Switch Down",
         "U_English": "This screen will be switched automatically after the processing is completed.\r\nPlease wait."
       },
+      "monitor_seq": 18,
       "scaling_raw": [
         0,
         0,
@@ -1004,6 +1019,7 @@
         "V_English": "Lumbar Switch UP",
         "U_English": "Online Axis Alignment is completed for the part which execution result of Online Axis Alignment is \"OK\".\r\n\r\nIf the part which result is other than \"OK\" exists, Online Axis Alignment is not completed.  Therefore, Please execute again after exiting this function."
       },
+      "monitor_seq": 19,
       "scaling_raw": [
         0,
         0,
@@ -1037,6 +1053,7 @@
         "V_English": null,
         "U_English": "Please implement the following procedure.\r\n\r\n1.Turn the engine/power switch OFF.\r\n2.Turn the engine/power switch ON (Engine OFF/Ready OFF).\r\n\r\nAfter implementing above procedure, press Next."
       },
+      "monitor_seq": 20,
       "scaling_raw": [
         0,
         0,
@@ -1070,6 +1087,7 @@
         "V_English": "Elec Angle Position",
         "U_English": "Please wait."
       },
+      "monitor_seq": 21,
       "scaling_raw": [
         0,
         0,
@@ -1103,6 +1121,7 @@
         "V_English": null,
         "U_English": "Do you want to remove the diagnostic tool?\r\n\r\nWhen removing the diagnostic tool, press \"Yes\" and then remove the diagnostic tool.\r\n\r\nCAUTION: \r\nOnline Axis Alignment Mode automatically ends when IG OFF."
       },
+      "monitor_seq": 22,
       "scaling_raw": [
         0,
         0,
@@ -1136,6 +1155,7 @@
         "V_English": null,
         "U_English": "CAUTION:\r\nOnline Axis Alignment Mode automatically ends when IG OFF."
       },
+      "monitor_seq": 23,
       "scaling_raw": [
         0,
         0,
@@ -1169,6 +1189,7 @@
         "V_English": null,
         "U_English": "Adjusting(Slow)"
       },
+      "monitor_seq": 24,
       "scaling_raw": [
         0,
         0,
@@ -1202,6 +1223,7 @@
         "V_English": null,
         "U_English": "NG"
       },
+      "monitor_seq": 25,
       "scaling_raw": [
         0,
         0,
@@ -1235,6 +1257,7 @@
         "V_English": "IPA Creep up Rate",
         "U_English": "This function is used to register vehicle information to the ECU.\r\n\r\nConfirm the following condition.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n\r\nPress Next to start."
       },
+      "monitor_seq": 9900,
       "scaling_raw": [
         0,
         0,
@@ -1268,6 +1291,7 @@
         "V_English": "Accelerator Info for DSS",
         "U_English": "Vehicle Information Registration"
       },
+      "monitor_seq": 9901,
       "scaling_raw": [
         0,
         0,
@@ -1301,6 +1325,7 @@
         "V_English": "Auto Hold Ctrl Sys Status",
         "U_English": "Vehicle Information Registration"
       },
+      "monitor_seq": 9902,
       "scaling_raw": [
         0,
         0,
@@ -1334,6 +1359,7 @@
         "V_English": "Torque for Cornering Drag",
         "U_English": "Vehicle Information Registration has failed.\r\nPlease verify the following condition.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n\r\nDo you want to try again?"
       },
+      "monitor_seq": 9903,
       "scaling_raw": [
         0,
         0,
@@ -1367,6 +1393,7 @@
         "V_English": "<Introduction>\r\nThis function is used to register additional Smart Keys.",
         "U_English": null
       },
+      "monitor_seq": 9913,
       "scaling_raw": [
         0,
         0,
@@ -1400,6 +1427,7 @@
         "V_English": "<Introduction>\r\nThis function is used to turn the Ignition (IG) ON (Engine OFF/Ready OFF) without a registered smart key.",
         "U_English": null
       },
+      "monitor_seq": 9914,
       "scaling_raw": [
         0,
         0,
@@ -1433,6 +1461,7 @@
         "V_English": "<Introduction>\r\nThis function is used to switch ON and OFF the Engine Oil Maintenance Monitor.",
         "U_English": null
       },
+      "monitor_seq": 9915,
       "scaling_raw": [
         0,
         0,
@@ -1466,6 +1495,7 @@
         "V_English": "<Introduction>\r\nThis function is used to erase the registration information of the Smart Keys and register the Smart Keys.",
         "U_English": null
       },
+      "monitor_seq": 9916,
       "scaling_raw": [
         0,
         0,
@@ -1499,6 +1529,7 @@
         "V_English": "<Introduction>\r\nThis function is used to reset TPMS.",
         "U_English": null
       },
+      "monitor_seq": 9917,
       "scaling_raw": [
         0,
         0,
@@ -1532,6 +1563,7 @@
         "V_English": "OK",
         "U_English": null
       },
+      "monitor_seq": 9918,
       "scaling_raw": [
         0,
         0,
@@ -1565,6 +1597,7 @@
         "V_English": "Auto Hold Ctrl Sys Status",
         "U_English": "Vehicle Information Registration"
       },
+      "monitor_seq": 9919,
       "scaling_raw": [
         0,
         0,
@@ -1974,43 +2007,36 @@
     {
       "kind": "did",
       "identifier": 544,
-      "in_firmware_table": true,
       "source_db": "EPS_CAN_P4DK"
     },
     {
       "kind": "did",
       "identifier": 576,
-      "in_firmware_table": true,
       "source_db": "EPS_CAN_P4DK"
     },
     {
       "kind": "did",
       "identifier": 608,
-      "in_firmware_table": true,
       "source_db": "EPS_CAN_P4DK"
     },
     {
       "kind": "did",
       "identifier": 640,
-      "in_firmware_table": true,
       "source_db": "EPS_CAN_P4DK"
     },
     {
       "kind": "did",
       "identifier": 672,
-      "in_firmware_table": true,
       "source_db": "EPS_CAN_P4DK"
     },
     {
       "kind": "did",
       "identifier": 704,
-      "in_firmware_table": true,
       "source_db": "EPS_CAN_P4DK"
     },
     {
       "kind": "did",
       "identifier": 736,
-      "in_firmware_table": true,
       "source_db": "EPS_CAN_P4DK"
     },
     {
@@ -2030,6 +2056,7 @@
         "V_English": "AVC-LAN Start Sound Resp",
         "U_English": null
       },
+      "monitor_seq": 1,
       "scaling_raw": [
         0,
         0,
@@ -2063,6 +2090,7 @@
         "V_English": "S&S Enable(Sport Mode SW)",
         "U_English": "The ECU has not received a signal from the wheel transmitter module."
       },
+      "monitor_seq": 2,
       "scaling_raw": [
         0,
         0,
@@ -2096,6 +2124,7 @@
         "V_English": "Function to unlock the doors when the vehicle reaches below certain speed.",
         "U_English": null
       },
+      "monitor_seq": 63,
       "scaling_raw": [
         0,
         0,
@@ -2129,6 +2158,7 @@
         "V_English": null,
         "U_English": null
       },
+      "monitor_seq": 3,
       "scaling_raw": [
         0,
         0,
@@ -2162,6 +2192,7 @@
         "V_English": "AVC-LAN Finish Sound Resp",
         "U_English": null
       },
+      "monitor_seq": 4,
       "scaling_raw": [
         0,
         0,
@@ -2195,6 +2226,7 @@
         "V_English": "Continuous Bus Off",
         "U_English": null
       },
+      "monitor_seq": 5,
       "scaling_raw": [
         0,
         0,
@@ -2228,6 +2260,7 @@
         "V_English": "<Back",
         "U_English": null
       },
+      "monitor_seq": 6,
       "scaling_raw": [
         0,
         0,
@@ -2261,6 +2294,7 @@
         "V_English": "ACC Terminal",
         "U_English": null
       },
+      "monitor_seq": 7,
       "scaling_raw": [
         0,
         0,
@@ -2294,6 +2328,7 @@
         "V_English": "IG Terminal",
         "U_English": null
       },
+      "monitor_seq": 8,
       "scaling_raw": [
         0,
         0,
@@ -2327,6 +2362,7 @@
         "V_English": "Camera Select SW Terminal",
         "U_English": null
       },
+      "monitor_seq": 9,
       "scaling_raw": [
         0,
         0,
@@ -2360,6 +2396,7 @@
         "V_English": "Rev Terminal",
         "U_English": null
       },
+      "monitor_seq": 10,
       "scaling_raw": [
         0,
         0,
@@ -2393,6 +2430,7 @@
         "V_English": "APGS Select SW Terminal",
         "U_English": null
       },
+      "monitor_seq": 11,
       "scaling_raw": [
         0,
         0,
@@ -2426,6 +2464,7 @@
         "V_English": "CS Main SW Terminal",
         "U_English": null
       },
+      "monitor_seq": 12,
       "scaling_raw": [
         0,
         0,
@@ -2459,6 +2498,7 @@
         "V_English": "H Sens Signal Output Terminal",
         "U_English": null
       },
+      "monitor_seq": 13,
       "scaling_raw": [
         0,
         0,
@@ -2492,6 +2532,7 @@
         "V_English": "H Sens PWR Terminal",
         "U_English": null
       },
+      "monitor_seq": 14,
       "scaling_raw": [
         0,
         0,
@@ -2525,6 +2566,7 @@
         "V_English": "H Sens Signal Input Terminal",
         "U_English": null
       },
+      "monitor_seq": 15,
       "scaling_raw": [
         0,
         0,
@@ -2558,6 +2600,7 @@
         "V_English": "Mirror Storage Signal",
         "U_English": null
       },
+      "monitor_seq": 16,
       "scaling_raw": [
         0,
         0,
@@ -2591,6 +2634,7 @@
         "V_English": "Lost Engine Torque Ratio",
         "U_English": null
       },
+      "monitor_seq": 17,
       "scaling_raw": [
         0,
         0,
@@ -2624,6 +2668,7 @@
         "V_English": "Sensor Serial Number Upper",
         "U_English": null
       },
+      "monitor_seq": 18,
       "scaling_raw": [
         0,
         0,
@@ -2657,6 +2702,7 @@
         "V_English": "IPA Creep up Rate",
         "U_English": "This function is used to register vehicle information to the ECU.\r\n\r\nConfirm the following condition.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n\r\nPress Next to start."
       },
+      "monitor_seq": 9900,
       "scaling_raw": [
         0,
         0,
@@ -2690,6 +2736,7 @@
         "V_English": "Accelerator Info for DSS",
         "U_English": "Vehicle Information Registration"
       },
+      "monitor_seq": 9901,
       "scaling_raw": [
         0,
         0,
@@ -2723,6 +2770,7 @@
         "V_English": "Auto Hold Ctrl Sys Status",
         "U_English": "Vehicle Information Registration"
       },
+      "monitor_seq": 9902,
       "scaling_raw": [
         0,
         0,
@@ -2756,6 +2804,7 @@
         "V_English": "Torque for Cornering Drag",
         "U_English": "Vehicle Information Registration has failed.\r\nPlease verify the following condition.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n\r\nDo you want to try again?"
       },
+      "monitor_seq": 9903,
       "scaling_raw": [
         0,
         0,
@@ -2789,6 +2838,7 @@
         "V_English": "<Introduction>\r\nThis function is used to register additional Smart Keys.",
         "U_English": null
       },
+      "monitor_seq": 9913,
       "scaling_raw": [
         0,
         0,
@@ -2822,6 +2872,7 @@
         "V_English": "<Introduction>\r\nThis function is used to turn the Ignition (IG) ON (Engine OFF/Ready OFF) without a registered smart key.",
         "U_English": null
       },
+      "monitor_seq": 9914,
       "scaling_raw": [
         0,
         0,
@@ -2855,6 +2906,7 @@
         "V_English": "<Introduction>\r\nThis function is used to switch ON and OFF the Engine Oil Maintenance Monitor.",
         "U_English": null
       },
+      "monitor_seq": 9915,
       "scaling_raw": [
         0,
         0,
@@ -2888,6 +2940,7 @@
         "V_English": "<Introduction>\r\nThis function is used to erase the registration information of the Smart Keys and register the Smart Keys.",
         "U_English": null
       },
+      "monitor_seq": 9916,
       "scaling_raw": [
         0,
         0,
@@ -2921,6 +2974,7 @@
         "V_English": "<Introduction>\r\nThis function is used to reset TPMS.",
         "U_English": null
       },
+      "monitor_seq": 9917,
       "scaling_raw": [
         0,
         0,
@@ -2954,6 +3008,7 @@
         "V_English": "OK",
         "U_English": null
       },
+      "monitor_seq": 9918,
       "scaling_raw": [
         0,
         0,
@@ -2987,6 +3042,7 @@
         "V_English": "Auto Hold Ctrl Sys Status",
         "U_English": "Vehicle Information Registration"
       },
+      "monitor_seq": 9919,
       "scaling_raw": [
         0,
         0,
@@ -3020,6 +3076,7 @@
         "V_English": "Sensor Serial Number Lower",
         "U_English": null
       },
+      "monitor_seq": 22,
       "scaling_raw": [
         0,
         0,
@@ -3053,6 +3110,7 @@
         "V_English": "Deceleration Sensor",
         "U_English": null
       },
+      "monitor_seq": 23,
       "scaling_raw": [
         0,
         0,
@@ -3086,6 +3144,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 24,
       "scaling_raw": [
         0,
         0,
@@ -3119,6 +3178,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 25,
       "scaling_raw": [
         0,
         0,
@@ -3152,6 +3212,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 26,
       "scaling_raw": [
         0,
         0,
@@ -3185,6 +3246,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 27,
       "scaling_raw": [
         0,
         0,
@@ -3218,6 +3280,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 28,
       "scaling_raw": [
         0,
         0,
@@ -3251,6 +3314,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 29,
       "scaling_raw": [
         0,
         0,
@@ -3284,6 +3348,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 30,
       "scaling_raw": [
         0,
         0,
@@ -3317,6 +3382,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 31,
       "scaling_raw": [
         0,
         0,
@@ -3350,6 +3416,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 32,
       "scaling_raw": [
         0,
         0,
@@ -3383,6 +3450,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 33,
       "scaling_raw": [
         0,
         0,
@@ -3416,6 +3484,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 34,
       "scaling_raw": [
         0,
         0,
@@ -3449,6 +3518,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 35,
       "scaling_raw": [
         0,
         0,
@@ -3482,6 +3552,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 36,
       "scaling_raw": [
         0,
         0,
@@ -3515,6 +3586,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 37,
       "scaling_raw": [
         0,
         0,
@@ -3548,6 +3620,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 38,
       "scaling_raw": [
         0,
         0,
@@ -3581,6 +3654,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 39,
       "scaling_raw": [
         0,
         0,
@@ -3614,6 +3688,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 40,
       "scaling_raw": [
         0,
         0,
@@ -3647,6 +3722,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 41,
       "scaling_raw": [
         0,
         0,
@@ -3680,6 +3756,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 42,
       "scaling_raw": [
         0,
         0,
@@ -3713,6 +3790,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 43,
       "scaling_raw": [
         0,
         0,
@@ -3746,6 +3824,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 57,
       "scaling_raw": [
         0,
         0,
@@ -3779,6 +3858,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 58,
       "scaling_raw": [
         0,
         0,
@@ -3812,6 +3892,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 59,
       "scaling_raw": [
         0,
         0,
@@ -3845,6 +3926,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 60,
       "scaling_raw": [
         0,
         0,
@@ -3878,6 +3960,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 61,
       "scaling_raw": [
         0,
         0,
@@ -3911,6 +3994,7 @@
         "V_English": "Passenger Door Courtesy Switch Signal",
         "U_English": null
       },
+      "monitor_seq": 62,
       "scaling_raw": [
         0,
         0,
@@ -3944,6 +4028,7 @@
         "V_English": "Rader Cruise",
         "U_English": null
       },
+      "monitor_seq": 44,
       "scaling_raw": [
         0,
         0,
@@ -3977,6 +4062,7 @@
         "V_English": "TRC(TRAC)/VSC Solenoid (SRM2)",
         "U_English": null
       },
+      "monitor_seq": 45,
       "scaling_raw": [
         0,
         0,
@@ -4010,6 +4096,7 @@
         "V_English": "TRC(TRAC)/VSC Solenoid (SRM1)",
         "U_English": null
       },
+      "monitor_seq": 46,
       "scaling_raw": [
         0,
         0,
@@ -4043,6 +4130,7 @@
         "V_English": "TRC(TRAC)/VSC Solenoid (SRC2)",
         "U_English": null
       },
+      "monitor_seq": 47,
       "scaling_raw": [
         0,
         0,
@@ -4076,6 +4164,7 @@
         "V_English": "Driving Information",
         "U_English": null
       },
+      "monitor_seq": 48,
       "scaling_raw": [
         0,
         0,
@@ -4109,6 +4198,7 @@
         "V_English": "AVC-LAN Finish Sound Resp",
         "U_English": null
       },
+      "monitor_seq": 4,
       "scaling_raw": [
         0,
         0,
@@ -4142,6 +4232,7 @@
         "V_English": "Continuous Bus Off",
         "U_English": null
       },
+      "monitor_seq": 5,
       "scaling_raw": [
         0,
         0,
@@ -4175,6 +4266,7 @@
         "V_English": "AVC-LAN Finish Sound Resp",
         "U_English": null
       },
+      "monitor_seq": 4,
       "scaling_raw": [
         0,
         0,
@@ -4208,6 +4300,7 @@
         "V_English": "Continuous Bus Off",
         "U_English": null
       },
+      "monitor_seq": 5,
       "scaling_raw": [
         0,
         0,
@@ -4241,6 +4334,7 @@
         "V_English": "ACC Terminal",
         "U_English": null
       },
+      "monitor_seq": 7,
       "scaling_raw": [
         0,
         0,
@@ -4274,6 +4368,7 @@
         "V_English": "IG Terminal",
         "U_English": null
       },
+      "monitor_seq": 8,
       "scaling_raw": [
         0,
         0,
@@ -4307,6 +4402,7 @@
         "V_English": "Camera Select SW Terminal",
         "U_English": null
       },
+      "monitor_seq": 9,
       "scaling_raw": [
         0,
         0,
@@ -4340,6 +4436,7 @@
         "V_English": "Rev Terminal",
         "U_English": null
       },
+      "monitor_seq": 10,
       "scaling_raw": [
         0,
         0,
@@ -4373,6 +4470,7 @@
         "V_English": "APGS Select SW Terminal",
         "U_English": null
       },
+      "monitor_seq": 11,
       "scaling_raw": [
         0,
         0,
@@ -4406,6 +4504,7 @@
         "V_English": "CS Main SW Terminal",
         "U_English": null
       },
+      "monitor_seq": 12,
       "scaling_raw": [
         0,
         0,
@@ -4439,6 +4538,7 @@
         "V_English": "H Sens Signal Output Terminal",
         "U_English": null
       },
+      "monitor_seq": 13,
       "scaling_raw": [
         0,
         0,
@@ -4472,6 +4572,7 @@
         "V_English": "Lost Engine Torque Ratio",
         "U_English": null
       },
+      "monitor_seq": 17,
       "scaling_raw": [
         0,
         0,
@@ -4489,858 +4590,1789 @@
       "source_db": "EPS_CAN_P4DK"
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 17,
-      "text": "Control Mode Change has failed.\r\n\r\nPlease perform the steps below to change to Normal Mode.\r\n1.Turn the engine/power switch OFF.\r\n\r\n2.Turn the engine/power switch ON(Engine ON/Ready ON).\r\n\r\nDo you want to try again?",
-      "is_title": false,
-      "search_term": "eps"
+      "kind": "utility_string",
+      "string_index": 588,
+      "text": "VSC Sensor Neutral Memorization has failed.\r\nThe position of Steering angle sensor is not within the appropriate range.\r\nPlease try again after referring to the Repair Manual.",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_ABS_09_002_TEXT",
+      "resource_auxiliary_value": 439
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 221,
-      "text": "Increase Line\r\n(FR / FL / RR / RL)\r\n\r\n1. Depress and hold the brake pedal.\r\n2. Loosen the bleeder plug.\r\n   (Until air stops coming out)\r\n3. Tighten the bleeder plug.\r\n4. Release the brake pedal.\r\nRepeat steps of 1 to 4 10 times or more.",
-      "is_title": false,
-      "search_term": "eps"
+      "kind": "utility_string",
+      "string_index": 1943,
+      "text": "Steering Angle Sensor Initialization is complete.",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_ADS_02_003_001LISTTEXT1",
+      "resource_auxiliary_value": 1784
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 277,
-      "text": "Perform the following 3 steps.\r\n\r\n1.Turn the ignition switch OFF.\r\nNote: Wait for 2 minutes or more after ignition switch OFF. While waiting, please DO NOT press on the brake pedal or open/close the doors.",
-      "is_title": false,
-      "search_term": "eps"
+      "kind": "utility_string",
+      "string_index": 1945,
+      "text": "Steering Angle Sensor Initialization failed.\r\nConfirm the following conditions:\r\n- Vehicle is stopped.\r\n- Engine is running.\r\n- Steering wheel is centered.\r\nDo you want to try again?",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_ADS_02_003_001LISTTEXT3",
+      "resource_auxiliary_value": 1786
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 280,
-      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of FL wheel.\r\n2.Depress the brake pedal several times, then loosen the bleeder plug with the pedal held down.",
-      "is_title": false,
-      "search_term": "eps"
+      "kind": "utility_string",
+      "string_index": 1946,
+      "text": "Do you want to exit the Steering Angle Sensor Initialization?",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_ADS_02_003_001LISTTEXT4",
+      "resource_auxiliary_value": 1787
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 294,
-      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of FR wheel.\r\n2.Depress the brake pedal several times, then loosen the bleeder plug with the pedal held down.",
-      "is_title": false,
-      "search_term": "eps"
+      "kind": "utility_string",
+      "string_index": 1948,
+      "text": "Welcome to the Steering Angle Sensor Initialization utility.\r\n\r\nThis function is used to initialize the center point of the steering angle sensor when: \r\n\r\n- The battery has been disconnected.\r\n- The steering angle sensor is replaced.\r\n- The AFS ECU is replaced.",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_ADS_02_003_003LISTTEXT1",
+      "resource_auxiliary_value": 1789
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 311,
-      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of FL wheel.\r\n2.Depress the brake pedal several times, then loosen the bleeder plug with the pedal held down.",
-      "is_title": false,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 316,
-      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of RL wheel.\r\n2.Depress the brake pedal.",
-      "is_title": false,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 330,
-      "text": "Perform the following 3 steps.\r\n\r\n1.Turn the ignition switch OFF.\r\n2.Remove the 2 ABS motor relays.\r\nNote: This procedure is not required if the ABS motor relays are already removed.\r\n3.Turn the ignition switch ON.",
-      "is_title": false,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 337,
-      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of FL wheel.\r\n2.Depress the brake pedal several times, then loosen the bleeder plug with the pedal held down.",
-      "is_title": false,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 355,
-      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of FR wheel.\r\n2.Depress the brake pedal several times, then loosen the bleeder plug with the pedal held down.",
-      "is_title": false,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 360,
-      "text": "Perform the following 4 steps.\r\n\r\n1.Connect the vinyl tube to the bleeder plug of RR wheel.\r\n2.Depress the brake pedal.",
-      "is_title": false,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 524,
-      "text": "1: Depress the brake pedal several times.\r\n2: Loosen the bleeder plug of the FL wheel with the brake pedal held down.\r\n3: After fluid bleeding stops, tighten the bleeder plug of the FL wheel and release the brake pedal.\r\n4: Repeat steps 1 to 3 above until the air or the old fluid stops coming out.",
-      "is_title": false,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 549,
-      "text": "1: Depress the brake pedal several times.\r\n2: Loosen the bleeder plug of the stroke simulator with the brake pedal held down.\r\n3: After fluid bleeding stops, tighten the bleeder plug of the stroke simulator and release the brake pedal.\r\n4: Repeat steps 1 to 3 above until the air stops coming out.",
-      "is_title": false,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 552,
-      "text": "1: Depress the brake pedal several times.\r\n2: Loosen the bleeder plug of the FR wheel with the brake pedal held down.\r\n3: After fluid bleeding stops, tighten the bleeder plug of the FR wheel and release the brake pedal.\r\n4: Repeat steps 1 to 3 above until the air or the old fluid stops coming out.",
-      "is_title": false,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 633,
-      "text": "Learning of Stroke Sensor Zero Point",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 672,
-      "text": "4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"RR wheel\" in above steps as \"FL wheel\".)",
-      "is_title": true,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 673,
-      "text": "4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"FR wheel\" in above steps as \"RL wheel\".)",
-      "is_title": true,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 681,
-      "text": "4: Perform above steps of 1 to 3 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)",
-      "is_title": true,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 683,
-      "text": "4: Perform above steps of 1 to 3 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)",
-      "is_title": true,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 702,
-      "text": "8: Perform above steps of 1 to 7 for RL wheel.\r\n(Read \"RR wheel\" in above steps as \"RL wheel\".)",
-      "is_title": true,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 703,
-      "text": "8: Perform above steps of 1 to 7 for FL wheel.\r\n(Read \"FR wheel\" in above steps as \"FL wheel\".)",
-      "is_title": true,
-      "search_term": "eps"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 743,
-      "text": "This function is used to calibrate zero point of the sensor and store system information.\r\n\r\nConfirm the following conditions.\r\n- The vehicle is on a flat surface.\r\n- The vehicle is stopped.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Shift in P\r\n- The steering wheel is centered.\r\n\r\nPress Next to proceed.",
-      "is_title": false,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 783,
-      "text": "Learning of Stroke Sensor Zero Point",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 1314,
-      "text": "This function is used to calibrate zero point of the sensor and store system information.\r\n\r\nConfirm the following conditions.\r\n- The vehicle is on a flat surface.\r\n- The vehicle is stopped.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Shift in P\r\n- The steering wheel is centered.\r\n\r\nPress Next to proceed.",
-      "is_title": false,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 1316,
-      "text": "Zero Point of Stroke Sensor Learning Status",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 1320,
-      "text": "Zero Point of G Sensor Learning Status",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 1321,
-      "text": "Zero Point of Yaw Rate Sensor Learning Status",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 4353,
-      "text": "Memorize the steering angle zero point.\r\n\r\nPress Next to proceed.",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6159,
-      "text": "Press Next to proceed after Oil Pressure Sensor Zero Point Learning is complete.",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6160,
-      "text": "Perform the following operations.\r\n\r\n1. Turn the engine/power switch ON (Engine OFF/Ready OFF) with the shift in P.\r\n2. Wait until Oil Pressure Sensor Zero Point Learning is complete. (Approximately 3 to 15 seconds)\r\n(During the learning, the D range light or CVT warning light blinks irregularly.)\r\n(After the learning is complete, the D range light or CVT warning light blinks quickly.)\r\n\r\nNote:\r\nIf the D range light or CVT warning light does not blink irregularly, turn the engine/power switch OFF and wait for 10 seconds, then turn the engine/power switch ON (Engine OFF/Ready OFF) again.\r\nIf it is not complete even after 30 seconds has passed, confirm the following conditions.\r\n- Battery voltage is between 10.5V and 16V.\r\n- CVT oil temperature is between 0 and 100 degrees.",
-      "is_title": false,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6161,
-      "text": "2. Oil Pressure Sensor Zero Point Learning",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6175,
-      "text": "Line Pressure/Belt Clamping Pressure Learning has failed because Oil Pressure Sensor Zero Point Learning has not been complete.\r\nPlease try again.",
-      "is_title": false,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6190,
-      "text": "2. Oil Pressure Sensor Zero Point Learning",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6192,
-      "text": "3. G Sensor Zero Point Learning",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6193,
-      "text": "Press Next to start G Sensor Zero Point Learning.",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6195,
-      "text": "3. G Sensor Zero Point Learning",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6197,
-      "text": "Perform the following operations.\r\n1. The shift lever is in P and turn the engine/power switch ON (Engine OFF/Ready OFF).\r\n2. Wait until Oil Pressure Sensor Zero Point Learning is  complete. (approximately 3 to 15 seconds)\r\n(\"D\" position light blinks irregularly after the learning is complete.)\r\nNote: \r\nIf the \"D\" position light does not blink irregularly, turn the engine/power switch OFF and wait for 10 seconds and  then turn the engine/power switch ON (Engine OFF/Ready OFF) again. \r\nIf it is not complete even after 30 seconds has passed, confirm the following conditions.\r\n- Battery voltage is 10V or more.\r\n- CVT Oil temperature is between -5 and 100 degrees. ",
-      "is_title": false,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6198,
-      "text": "3. G Sensor Zero Point Learning",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6204,
-      "text": "G Sensor Zero Point Learning has failed.\r\nConfirm the following conditions.\r\n\r\n- The vehicle is on a flat surface.\r\n- The vehicle is stopped and stabled.\r\n- DTCs are not detected.",
-      "is_title": false,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
-      "string_index": 6205,
-      "text": "Press Next after Oil Pressure Sensor Zero Point Learning is complete.",
-      "is_title": true,
-      "search_term": "zero point"
-    },
-    {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6585,
       "text": "Torque Sensor Writing",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_02_003_TITLE",
+      "resource_auxiliary_value": 6490
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6586,
       "text": "Torque Sensor Writing",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_02_004_TEXT",
+      "resource_auxiliary_value": 6499
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6590,
       "text": "Torque Sensor Adjustment has failed.\r\nDTCs other than C1515 / C1516 are present.  \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
-      "is_title": false,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_02_DLGTITLE1",
+      "resource_auxiliary_value": 6488
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6591,
       "text": "Torque Sensor Writing is completed.\r\n\r\nPerform the following operations.\r\n1. Confirm the EPS W/L is OFF.\r\n2. Run vehicles and perform a test mode , after engine switch is ON. \r\n3. Confirm the EPS W/L is OFF again.",
-      "is_title": false,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_02_DLGTITLE2",
+      "resource_auxiliary_value": 6495
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6593,
       "text": "Torque Sensor Adjustment has failed.\r\nDTC is present. \r\n\r\nPlease try again in the state the  DTCs are not detected.",
-      "is_title": false,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_02_SUBTITLE",
+      "resource_auxiliary_value": 6497
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6597,
       "text": "Torque Sensor Adjustment has failed.\r\nDTC C1515 / C1516 is present again.\r\nConfirm the following conditions.\r\n1. Vehicle state, Operation procedure.\r\n2. The steering gear assembly.\r\n3. The EPS ECU.\r\n\r\nTry again ?",
-      "is_title": false,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_04_004_TEXT",
+      "resource_auxiliary_value": 6507
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6598,
       "text": "Error Torque Sensor Adjustment",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_04_005_TEXT",
+      "resource_auxiliary_value": 6509
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6599,
       "text": "Turn the ignition switch ON.\r\n\r\nPress Next to perform Torque Sensor Writing.",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_04_006_TEXT",
+      "resource_auxiliary_value": 6510
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6600,
       "text": "Torque Sensor Adjustment",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_04_007_TEXT",
+      "resource_auxiliary_value": 6511
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 6601,
+      "kind": "utility_string",
+      "string_index": 6602,
       "text": "Welcome to the Torque Sensor Adjustment wizard.\r\n\r\nThis function is used to center the steering wheel if:\r\n-The EPS ECU has been replaced.\r\n-The steering column assembly has been replaced.",
-      "is_title": false,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_04_DLGTITLE2",
+      "resource_auxiliary_value": 6503
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6604,
       "text": "Torque Sensor Initialization ",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_04_SUBTITLE",
+      "resource_auxiliary_value": 6512
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6605,
       "text": "Press Next to perform Torque Sensor Initialization.",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_06_001_OPERATIONTEXT",
+      "resource_auxiliary_value": 6519
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6606,
       "text": "Torque Sensor Initialization ",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_06_001_TEXT",
+      "resource_auxiliary_value": 6518
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6607,
       "text": "Torque Sensor Initialization is completed.\r\nTurn the ignition switch OFF.\r\n\r\nWhen it is finished only by Initialization, then press Cancel.",
-      "is_title": false,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_06_002_TEXT",
+      "resource_auxiliary_value": 6520
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6609,
       "text": "Torque Sensor Writing",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_06_003_TEXT",
+      "resource_auxiliary_value": 6521
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6611,
       "text": "Torque Sensor Adjustment",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_06_005_TEXT",
+      "resource_auxiliary_value": 6524
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 6649,
+      "text": "1. Start the engine.\r\n2. Run the vehicle at a speed of approximately 20km/h or faster.\r\n3. If no diagnosis codes exist, the EPS warning lamp goes out and the Test mode code will be erased.",
+      "matched_patterns": [
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_12_002_TEXT",
+      "resource_auxiliary_value": 6564
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 6658,
+      "text": "Current mode is Test\r\nNOTE: \r\nWhile the Test mode is carried out, the EPS warning lamp shows the test mode code.\r\n(Test mode code: Illuminates for 2 seconds and then blink at 0.25 seconds intervals continuously)",
+      "matched_patterns": [
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_13_001_TEXT",
+      "resource_auxiliary_value": 6577
+    },
+    {
+      "kind": "utility_string",
       "string_index": 6662,
       "text": "Torque Sensor Adjustment has failed.\r\nDTC is present. \r\n\r\nPlease try again in the state the  DTCs are not detected.",
-      "is_title": false,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_13_002_WHITEAREATEXT",
+      "resource_auxiliary_value": 6582
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6666,
       "text": "Torque Sensor Adjustment has failed.\r\nDTCs other than C1515 / C1516 are present.  \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
-      "is_title": false,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_13_004_BUTTONTEXT",
+      "resource_auxiliary_value": 6572
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6667,
       "text": "Torque Sensor Writing",
-      "is_title": true,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_13_004_TEXT",
+      "resource_auxiliary_value": 6573
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6670,
       "text": "Torque Sensor Adjustment has failed.\r\nDTC C1515 / C1516 is present again.\r\nConfirm the following conditions.\r\n1. Vehicle state, Operation procedure.\r\n2. The steering gear assembly.\r\n3. The EPS ECU.\r\n\r\nTry again ?",
-      "is_title": false,
-      "search_term": "torque sensor"
+      "matched_patterns": [
+        "\\btorque sensor\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_13_007_TEXT",
+      "resource_auxiliary_value": 6569
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6671,
       "text": "Torque Sensor Writing",
-      "is_title": true,
-      "search_term": "torque sensor writing"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_13_009_TEXT",
+      "resource_auxiliary_value": 6567
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 6672,
+      "text": "Torque Sensor Initialization ",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_13_010_TEXT",
+      "resource_auxiliary_value": 6568
+    },
+    {
+      "kind": "utility_string",
       "string_index": 6673,
       "text": "Torque Sensor Writing is completed.\r\n\r\nPerform the following operations.\r\n1. Confirm the EPS W/L is OFF.\r\n2. Run vehicles and perform a test mode , after engine is ON. \r\n3. Confirm the EPS W/L is OFF again.",
-      "is_title": false,
-      "search_term": "torque sensor writing"
+      "matched_patterns": [
+        "\\btorque sensor\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_13_DLGTITLE",
+      "resource_auxiliary_value": 6575
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 6674,
       "text": "Torque Sensor Adjustment",
-      "is_title": true,
-      "search_term": "torque sensor adjustment"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_13_ERRTITLE",
+      "resource_auxiliary_value": 6576
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 6675,
+      "text": "Press Next to perform Torque Sensor Initialization.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EFI_13_SUBTITLE",
+      "resource_auxiliary_value": 6566
+    },
+    {
+      "kind": "utility_string",
       "string_index": 6676,
       "text": "Torque Sensor Adjustment",
-      "is_title": true,
-      "search_term": "torque sensor adjustment"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EPS_01_001_OPERATIONTEXT",
+      "resource_auxiliary_value": 6603
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 6679,
+      "kind": "utility_string",
+      "string_index": 6680,
       "text": "Welcome to the Torque Sensor Adjustment wizard.\r\n\r\nThis function is used to center the steering wheel if:\r\n-The EPS ECU has been replaced.\r\n-The steering column assembly has been replaced.",
-      "is_title": false,
-      "search_term": "torque sensor adjustment"
+      "matched_patterns": [
+        "\\btorque sensor\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_D_EPS_01_002_TEXT",
+      "resource_auxiliary_value": 6610
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 6683,
+      "text": "Torque Sensor Initialization ",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EPS_01_003_TEXT",
+      "resource_auxiliary_value": 6607
+    },
+    {
+      "kind": "utility_string",
       "string_index": 6684,
       "text": "Torque Sensor Initialization is completed.\r\n\r\nWhen it is finished only by Initialization, then press Cancel.\r\n\r\nPress Next to perform Torque Sensor Writing.",
-      "is_title": false,
-      "search_term": "torque sensor writing"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_EPS_01_003_TITLE",
+      "resource_auxiliary_value": 6606
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 7574,
+      "text": "Steering angle sensor ECU CAN communications fault",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_D_T_HV_09_012_001LISTTEXT1",
+      "resource_auxiliary_value": 7495
+    },
+    {
+      "kind": "utility_string",
       "string_index": 12121,
       "text": "Welcome to the Torque Sensor Adjustment Utility.\r\n\r\nThis function is used to center the steering wheel if any of the following has been replaced:\r\n\r\nEMPS ECU\r\nSteering Wheel\r\nTilt Steering Column\r\nSteering Gear Assembly\r\n\r\nPress Next to proceed.",
-      "is_title": false,
-      "search_term": "torque sensor adjustment"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_54_DLGTITLE",
+      "resource_auxiliary_value": 11937
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12122,
       "text": "Do you want to exit Torque Sensor Adjustment ?",
-      "is_title": true,
-      "search_term": "torque sensor adjustment"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_54_ERRTITLE",
+      "resource_auxiliary_value": 11943
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12124,
       "text": "Torque Sensor Adjustment has failed.\r\nConfirm the following:\r\n1. The IG was cycled per the screen instructions.\r\nDo you want to try again?",
-      "is_title": false,
-      "search_term": "torque sensor adjustment"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_55_001_TEXT",
+      "resource_auxiliary_value": 11952
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12125,
       "text": "Torque Sensor Adjustment has failed.\r\nEMPS ECU malfunction occurred.\r\nRefer to the repair manual.",
-      "is_title": true,
-      "search_term": "torque sensor adjustment"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_55_002_TEXT",
+      "resource_auxiliary_value": 11951
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12126,
       "text": "Torque Sensor Adjustment Complete.\r\n\r\nConfirm the PS warning light is OFF.",
-      "is_title": true,
-      "search_term": "torque sensor adjustment"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_55_003_OPERATIONTEXT",
+      "resource_auxiliary_value": 11947
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12127,
       "text": " Torque Sensor Adjustment has failed.\r\n DTCs other than C1515 or C1581 are detected.\r\n Diagnose them prior to the Torque Sensor Adjustment.",
-      "is_title": false,
-      "search_term": "torque sensor adjustment"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_55_003_TEXT",
+      "resource_auxiliary_value": 11950
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12131,
       "text": "Error Torque Sensor Adjustment",
-      "is_title": true,
-      "search_term": "torque sensor adjustment"
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_55_DLGTITLE",
+      "resource_auxiliary_value": 11954
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 12132,
+      "text": "Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_55_ERRTITLE",
+      "resource_auxiliary_value": 11953
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12135,
+      "text": "Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_55_SUBTITLE",
+      "resource_auxiliary_value": 11955
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12165,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTCs are present. \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_57_GR1_01WHITEAREATEXT4",
+      "resource_auxiliary_value": 11982
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12168,
+      "text": "Do you want to exit Torque Sensor Adjustment ?",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_001_TEXT",
+      "resource_auxiliary_value": 12015
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12169,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC C1525 / C1526 is present. \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_002_TEXT",
+      "resource_auxiliary_value": 12033
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12170,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC C1516 is present. \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_003_OPERATIONTEXT",
+      "resource_auxiliary_value": 12011
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12171,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC C1581 is present. \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_003_RADIOTEXT1",
+      "resource_auxiliary_value": 12019
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12172,
+      "text": "Torque Sensor Adjustment failed.\r\nThere was a communication error.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_003_RADIOTEXT2",
+      "resource_auxiliary_value": 12020
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12173,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTCs other than C1515 / C1525 / C1581 are present. \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_003_TEXT",
+      "resource_auxiliary_value": 12017
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12180,
+      "text": "Welcome to the Torque Sensor Adjustment wizard.\r\n\r\nThis function is used to center the steering wheel if:\r\n-The EPS ECU has been replaced.\r\n-The steering gear assembly has been replaced.\r\n-There is a difference in turning force when turning right or left.",
+      "matched_patterns": [
+        "\\btorque sensor\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_011_COLORTEXT1",
+      "resource_auxiliary_value": 12024
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12181,
+      "text": "Torque Sensor Adjustment is Complete.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_011_COLORTEXT2",
+      "resource_auxiliary_value": 12026
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12183,
+      "text": "Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_011_TEXT2",
+      "resource_auxiliary_value": 12027
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12184,
+      "text": "Error Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_012_OPERATIONTEXT",
+      "resource_auxiliary_value": 12031
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12189,
+      "text": "Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_014_TEXT",
+      "resource_auxiliary_value": 11991
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12196,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTCs other than C1515 / C1581 are present.  \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_020_COLORTEXT",
+      "resource_auxiliary_value": 11997
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12198,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC C1525 / C1526 is present. \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_021_TEXT",
+      "resource_auxiliary_value": 12005
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12199,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC C1515 / C1516 is present.\r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_022_TEXT",
+      "resource_auxiliary_value": 11999
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12200,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTCs are present. \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_023_TEXT",
+      "resource_auxiliary_value": 12016
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12201,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC C1581 is present. \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_024_TEXT",
+      "resource_auxiliary_value": 12002
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12202,
+      "text": "Torque Sensor Adjustment failed.\r\nThere was a communication error.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_025_TEXT",
+      "resource_auxiliary_value": 12010
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12203,
+      "text": "Do you want to exit Torque Sensor Adjustment ?",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_026_TEXT",
+      "resource_auxiliary_value": 12004
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12204,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTCs other than C1515 / C1525 / C1581 are present.\r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_58_027_TEXT",
+      "resource_auxiliary_value": 11998
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12212,
+      "text": "Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_001_TEXT",
+      "resource_auxiliary_value": 12052
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12213,
+      "text": "Torque Sensor Adjustment is Complete.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_002_TEXT1",
+      "resource_auxiliary_value": 12061
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12214,
+      "text": "Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_003_TEXT1",
+      "resource_auxiliary_value": 12037
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12215,
+      "text": "Error Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_004_TEXT",
+      "resource_auxiliary_value": 12041
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12216,
+      "text": "Welcome to the Torque Sensor Adjustment wizard.\r\n\r\nThis function is used to center the steering wheel if:\r\n-The EPS ECU has been replaced.\r\n-The steering gear assembly has been replaced.\r\n-There is a difference in turning force when turning right or left.",
+      "matched_patterns": [
+        "\\btorque sensor\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_005_TEXT",
+      "resource_auxiliary_value": 12042
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12229,
+      "text": "Torque Sensor Adjustment is Complete.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_GR1_LISTTEXT6",
+      "resource_auxiliary_value": 12057
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12231,
+      "text": "Do you want to exit Torque Sensor Adjustment ?",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_GR1_LISTTEXT8",
+      "resource_auxiliary_value": 12059
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12232,
+      "text": "Torque Sensor Adjustment has failed.\r\nEPS ECU malfunction occurred.\r\nRefer to the repair manual.",
+      "matched_patterns": [
+        "\\btorque sensor\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_GR1_LISTTEXT9",
+      "resource_auxiliary_value": 12060
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12233,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC C1515 / C1516 is present.\r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_GR1_STATUSTEXT1",
+      "resource_auxiliary_value": 12046
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12234,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTCs are present.\r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_GR1_STATUSTEXT2",
+      "resource_auxiliary_value": 12038
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12235,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTC C1581 is present. \r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_GR1_STATUSTEXT3",
+      "resource_auxiliary_value": 12039
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12236,
+      "text": "Torque Sensor Adjustment has failed.\r\nDTCs other than C1515 / C1581 are present.\r\nDiagnose and clear other DTCs prior to performing the Torque Sensor Adjustment.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_GR1_STATUSTEXT4",
+      "resource_auxiliary_value": 12036
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12239,
+      "text": "Torque Sensor Adjustment failed.\r\nThere was a communication error.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_59_SUBTITLE",
+      "resource_auxiliary_value": 12054
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12240,
+      "text": "Error Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_61_001_TEXT",
+      "resource_auxiliary_value": 12071
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12242,
+      "text": "Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_61_003_TEXT",
+      "resource_auxiliary_value": 12064
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12244,
+      "text": "Welcome to the Torque Sensor Adjustment wizard.\r\nThis function is used to center the steering wheel if:\r\n\r\n-The EPS ECU has been replaced.\r\n-The steering gear assembly has been replaced.\r\n-There is a difference in turning force when turning right or left.",
+      "matched_patterns": [
+        "\\btorque sensor\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_EFI_61_005_LISTTEXT1",
+      "resource_auxiliary_value": 12063
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12250,
+      "text": "Torque Sensor Adjustment",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_EFI_62_001_TEXT",
+      "resource_auxiliary_value": 12084
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12251,
+      "text": "Assist Map Confirmation/Clear has failed.\r\nThere is a malfunction in EMPS ECU.\r\n\r\nPerform the following operations.\r\n1. Turn the engine/power switch OFF.\r\n2. Turn the engine/power switch ON (Engine OFF/Ready OFF).\r\n3. Confirm the DTC.\r\n\r\nRefer to the repair manual for details.",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EFI_62_002_RADIOTEXT1",
+      "resource_auxiliary_value": 12082
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12253,
+      "text": "Do you want to exit Assist Map Confirmation/Clear Utility?",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EFI_62_002_TEXT",
+      "resource_auxiliary_value": 12083
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12254,
+      "text": "Assist Map Confirmation/Clear has failed.\r\nVehicle is not stopped.\r\n\r\nConfirm the following condition, then clear the assist map again.\r\n - The vehicle is stopped.\r\n\r\nDo you want to try again?",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EFI_62_003_TEXT",
+      "resource_auxiliary_value": 12072
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12256,
+      "text": "Assist Map Confirmation/Clear has failed.\r\nDTC C1581 or C1534 is present. \r\nRefer to the repair manual for details.",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EFI_62_004_TEXT",
+      "resource_auxiliary_value": 12078
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12257,
+      "text": "Assist Map Clear is complete.\r\n\r\nThe PS warning light turns on until the new assist map is set.",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EFI_62_005_COLORTEXT",
+      "resource_auxiliary_value": 12077
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12258,
+      "text": "Current assist map is above.\r\n\r\nIf the incorrect assist map is stored, press Back to clear the assist map.",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EFI_62_005_TEXT",
+      "resource_auxiliary_value": 12076
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12261,
+      "text": "This function is used to confirm and clear the assist map for EMPS. \r\nRefer to the repair manual when you use this function.\r\n\r\nConfirm the following conditions:\r\n - The engine/power switch is ON (Engine OFF/Ready OFF).\r\n - The vehicle is stopped.\r\n\r\nPress Next to proceed.",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EFI_62_008_TEXT",
+      "resource_auxiliary_value": 12080
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12263,
+      "text": "Assist Map Confirmation/Clear",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EFI_62_DLGTITLE",
+      "resource_auxiliary_value": 12085
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12264,
+      "text": "Error Assist Map Confirmation/Clear",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EFI_62_ERRTITLE",
+      "resource_auxiliary_value": 12087
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12266,
+      "text": "Confirm the Assist Map",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EKDSS_01_001_TEXT",
+      "resource_auxiliary_value": 12102
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12267,
+      "text": "Clear the Assist Map",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EKDSS_01_002_CHECKTEXT1",
+      "resource_auxiliary_value": 12103
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 12271,
+      "text": "Assist Map Confirmation/Clear",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_EKDSS_01_002_TEXT",
+      "resource_auxiliary_value": 12099
+    },
+    {
+      "kind": "utility_string",
       "string_index": 12272,
       "text": "Do you want to exit the Power Steering ECU Initial Setting Utility?",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_EKDSS_01_003_BUTTONTEXT1",
+      "resource_auxiliary_value": 12092
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12274,
       "text": "Power Steering ECU Initial Setting",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_EKDSS_01_003_OPERATIONTEXT",
+      "resource_auxiliary_value": 12094
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12275,
       "text": "Power Steering ECU Initial Setting has failed.\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n- There is no DTC.\r\n\r\nPerform the steps below to change to Normal Mode.\r\n1.Turn the engine/power switch OFF.\r\n2.Turn the engine/power switch ON (Engine OFF/Ready OFF).",
-      "is_title": false,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_EKDSS_01_003_TEXT",
+      "resource_auxiliary_value": 12089
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12277,
       "text": "Power Steering ECU Initial Setting is complete.",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_EKDSS_01_003_WHITEAREATEXT2",
+      "resource_auxiliary_value": 12100
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12280,
       "text": "This function is used to perform the initial setting of the Power Steering ECU.\r\n\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n- Steering wheel is centered.\r\n\r\nNote: Do NOT touch the steering wheel during this procedure.\r\n\r\nPress Next to proceed.",
-      "is_title": false,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_EKDSS_01_003_WHITEAREATEXT5",
+      "resource_auxiliary_value": 12090
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12281,
       "text": "Power Steering ECU Initial Setting",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_EKDSS_01_003_WHITEAREATEXT6",
+      "resource_auxiliary_value": 12091
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 12282,
       "text": "Error Power Steering ECU Initial Setting",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_EKDSS_01_004_TEXT",
+      "resource_auxiliary_value": 12098
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 16200,
+      "text": "Steering Angle Sensor",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_LDR_02_005_TEXT",
+      "resource_auxiliary_value": 16018
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 16201,
+      "text": "EPS",
+      "matched_patterns": [
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_LDR_02_006_TEXT1",
+      "resource_auxiliary_value": 16019
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 16236,
+      "text": "Steering Angle Sensor",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_LDR_05_007_TEXT",
+      "resource_auxiliary_value": 16047
+    },
+    {
+      "kind": "utility_string",
       "string_index": 16257,
       "text": "Power Steering System",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_LDR_06_006_003LISTTEXT1",
+      "resource_auxiliary_value": 16074
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 16259,
       "text": "Power Steering System",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_LDR_06_006_TEXT1",
+      "resource_auxiliary_value": 16082
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 16260,
+      "text": "Steering Angle Sensor",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_LDR_06_006_TEXT2",
+      "resource_auxiliary_value": 16079
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 16266,
+      "text": "Steering Angle Sensor",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_LDR_06_008_TEXT2",
+      "resource_auxiliary_value": 16078
+    },
+    {
+      "kind": "utility_string",
       "string_index": 16314,
       "text": "Power Steering System",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_LDR_12_003_TEXT",
+      "resource_auxiliary_value": 16133
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 16315,
+      "text": "Steering Angle Sensor",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_LDR_12_004_TEXT",
+      "resource_auxiliary_value": 16136
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 16353,
+      "text": "Steering Angle Sensor",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_LKA_02_010_TEXT",
+      "resource_auxiliary_value": 16168
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 16375,
+      "text": "EPS",
+      "matched_patterns": [
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_MAC_01_001B_RADIOTEXT3",
+      "resource_auxiliary_value": 16355
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 16420,
+      "text": "Steering Angle Sensor",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_MAC_01_003_001LISTTEXT8",
+      "resource_auxiliary_value": 16373
+    },
+    {
+      "kind": "utility_string",
       "string_index": 16421,
       "text": "Power Steering System",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_MAC_01_003_001LISTTEXT9",
+      "resource_auxiliary_value": 16372
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 18034,
-      "text": "Factory initial setting",
-      "is_title": true,
-      "search_term": "initial setting"
+      "kind": "utility_string",
+      "string_index": 16430,
+      "text": "EPS",
+      "matched_patterns": [
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_MAC_01_007_TITLE",
+      "resource_auxiliary_value": 16338
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 17871,
+      "text": "Zero Setting Mode of VDC Sensor has failed.\r\nThe position of steering angle sensor is not within the appropriate range.",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_MMT_06_015_COLORTEXT",
+      "resource_auxiliary_value": 17684
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18371,
+      "text": "Torque sensor 0 point compensation will be performed.\r\nConfirm that the PS warning lamp is lighted and then press Next to proceed.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_REASON",
+      "resource_auxiliary_value": 18237
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18373,
+      "text": "The sensor compensation value will be initialized.\r\n\r\nConfirm the following conditions.\r\n(Torque sensor 0 point compensation is performed in the following state.)\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n- Steering wheel is centered.\r\n\r\nPress Next to proceed.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_0_0_22",
+      "resource_auxiliary_value": 18220
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18374,
+      "text": "This function is used to perform Torque sensor 0 point compensation.\r\n\r\nPerform this operation at the following times.\r\n- When the Column Assy has been replaced.\r\n- When the GR BOX or intermediate shaft has been replaced.\r\n- When there is a difference between left and right steering force.\r\n\r\nPress Next to proceed.",
+      "matched_patterns": [
+        "\\btorque sensor\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_0_1_21",
+      "resource_auxiliary_value": 18209
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18379,
+      "text": "This function is used to confirm and clear the Assist Map for EMPS.\r\n\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n\r\nPress Next to proceed.",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_0_6_12",
+      "resource_auxiliary_value": 18204
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18381,
+      "text": "Trouble codes have been recorded.\r\nPlease check correct Assist Map has been set.",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_1_0_35",
+      "resource_auxiliary_value": 18218
+    },
+    {
+      "kind": "utility_string",
       "string_index": 18383,
       "text": "Clear the Assist Map of Electric Power Steering.\r\nPlease execute it after confirming that the vehicle is stopped.\r\nReturn to the first screen after you press the Cancel button.",
-      "is_title": false,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b",
+        "\\belectric power steering\\b",
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_1_2_33",
+      "resource_auxiliary_value": 18216
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 18384,
+      "text": "Vehicle Speed Error\r\n\r\nBecause an error has occurred, it was not able to enforce the Assist Map erasure.\r\n\r\nPlease execute again after confirming that the vehicle is stopped.",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_1_3_32",
+      "resource_auxiliary_value": 18215
+    },
+    {
+      "kind": "utility_string",
       "string_index": 18385,
       "text": "ECU abnormal\r\n\r\nBecause of an abnormality in the Electric Power Steering ECU, it was not possible to erase the Assist Map.\r\n\r\nAfter turn the engine/power switch OFF and ON (Engine OFF/Ready OFF), check the trouble codes, please troubleshooting procedures.",
-      "is_title": false,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b",
+        "\\belectric power steering\\b",
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_1_4_31",
+      "resource_auxiliary_value": 18214
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 18388,
+      "text": "Do you want to exit the Related Assist Map Selection Utility?",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_1_7_23",
+      "resource_auxiliary_value": 18211
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18389,
+      "text": "Assist Map erasure was successful.\r\n\r\nEPS Warning Lamp turns on until Assist Map is set again.",
+      "matched_patterns": [
+        "\\bassist map\\b",
+        "\\bEPS\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_0_52",
+      "resource_auxiliary_value": 18222
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18390,
+      "text": "This vehicle has excluded \"Assist Map Selection\".",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_1_51",
+      "resource_auxiliary_value": 18190
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18391,
+      "text": "Error Related Assist Map Selection",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_2_46",
+      "resource_auxiliary_value": 18189
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18393,
+      "text": "Assist Map Confirmation",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_4_44",
+      "resource_auxiliary_value": 18187
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18394,
+      "text": "Related Assist Map Selection",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_5_43",
+      "resource_auxiliary_value": 18210
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18396,
+      "text": "Assist Map Clear",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_2_7_41",
+      "resource_auxiliary_value": 18194
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 18401,
+      "text": "Related Assist Map Selection",
+      "matched_patterns": [
+        "\\bassist map\\b"
+      ],
+      "resource_identifier": "IDS_MS2EFI_01_004_TEXT_SID1061_3_4_63",
+      "resource_auxiliary_value": 18193
+    },
+    {
+      "kind": "utility_string",
       "string_index": 19921,
       "text": "Lost Communication With Power Steering Control Module",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_PCM_05_003_002LISTTEXT156",
+      "resource_auxiliary_value": 19890
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 19931,
       "text": "Software Incompatibility with Power Steering Control Module",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_PCM_05_003_002LISTTEXT165",
+      "resource_auxiliary_value": 19953
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 24035,
-      "text": "INITIAL SETTING",
-      "is_title": true,
-      "search_term": "initial setting"
+      "kind": "utility_string",
+      "string_index": 20200,
+      "text": "Steering Angle Sensor Calibration is complete.\r\n\r\nPlease clear the DTC and confirm that there is no DTC.",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_PSAABS_02_001_TEXT",
+      "resource_auxiliary_value": 20205
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 24036,
-      "text": "Do you want to exit the Steering Actuator ECU Initial Setting Utility?",
-      "is_title": true,
-      "search_term": "initial setting"
+      "kind": "utility_string",
+      "string_index": 20201,
+      "text": "Steering Angle Sensor Calibration",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_PSAABS_02_002_TEXT",
+      "resource_auxiliary_value": 20207
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 24038,
-      "text": "Steering Actuator ECU Initial Setting is complete.",
-      "is_title": true,
-      "search_term": "initial setting"
+      "kind": "utility_string",
+      "string_index": 20202,
+      "text": "Steering Angle Sensor Calibration Utility has failed.\r\nConfirm the following conditions.\r\n- IG is ON\r\n- Vehicle is on a bench or on a flat track\r\n- The pressure of all four tires are not deflate\r\n- All wheel is upright\r\n- Vehicle is stopped\r\n- Steering wheel is center\r\n- Do not overload the vehicle: only the driver must be in the vehicle.\r\n\r\nDo you want to try again?",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_PSAABS_02_003_TEXT",
+      "resource_auxiliary_value": 20204
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 24040,
-      "text": "Steering Actuator ECU Initial Setting has failed.\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n- There is no DTC.\r\n\r\nPerform the steps below to change to Normal Mode.\r\n1.Turn the engine/power switch OFF.\r\n2.Turn the engine/power switch ON (Engine OFF/Ready OFF).",
-      "is_title": false,
-      "search_term": "initial setting"
+      "kind": "utility_string",
+      "string_index": 20203,
+      "text": "Do you want to exit the Steering Angle Sensor Calibration Utility?",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_PSAABS_02_004_TEXT",
+      "resource_auxiliary_value": 20203
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 24042,
-      "text": "This function is used to perform the initial setting of the Steering Actuator ECU.\r\n\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n- Steering wheel is centered.\r\n\r\nNote: Do NOT touch the steering wheel during this procedure.\r\n\r\nPress Next to proceed.",
-      "is_title": false,
-      "search_term": "initial setting"
+      "kind": "utility_string",
+      "string_index": 20205,
+      "text": "This function is used to calibrate the steering angle sensor.\r\n\r\nThe calibration of the steering angle sensor is necessary in following cases.\r\n- ABS ECU has been changed\r\n- Steering angle sensor has been changed\r\n- Steering angle sensor is a failure\r\n\r\nPress Next to proceed.",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_PSAABS_02_006_TEXT",
+      "resource_auxiliary_value": 20202
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 24043,
-      "text": "Error Steering Actuator ECU Initial Setting",
-      "is_title": true,
-      "search_term": "initial setting"
+      "kind": "utility_string",
+      "string_index": 20206,
+      "text": "Steering Angle Sensor Calibration",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_PSAABS_02_DLGTITLE",
+      "resource_auxiliary_value": 20206
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 24044,
-      "text": "Steering Actuator ECU Initial Setting",
-      "is_title": true,
-      "search_term": "initial setting"
+      "kind": "utility_string",
+      "string_index": 20208,
+      "text": "Error Steering Angle Sensor Calibration",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_PSAABS_02_SUBTITLE",
+      "resource_auxiliary_value": 20201
     },
     {
-      "kind": "utility_procedure",
-      "string_index": 24045,
-      "text": "Steering Actuator ECU Initial Setting",
-      "is_title": true,
-      "search_term": "initial setting"
-    },
-    {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24048,
       "text": "Do you want to exit the Steering Torque Actuator Adjust 1 Utility?",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_02_002_TEXT",
+      "resource_auxiliary_value": 24059
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24049,
       "text": "Steering Torque Actuator Adjust 1 has failed.\r\nThe inputted value is assumed to be outside of the adaptation range.\r\nTurn the engine/power switch OFF and ON.\r\n\r\nDo you want to try again?",
-      "is_title": false,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_02_003_OPERATIONTEXT",
+      "resource_auxiliary_value": 24062
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24050,
       "text": "Steering Torque Actuator Adjust 1 has failed.\r\nTurn the engine/power switch OFF and ON.\r\n\r\nDo you want to try again?",
-      "is_title": false,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_02_003_TEXT",
+      "resource_auxiliary_value": 24047
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24051,
       "text": "Steering Torque Actuator Adjust 1 is finished.\r\nTurn the engine/power switch OFF and ON.",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_02_003_TITLE",
+      "resource_auxiliary_value": 24060
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24055,
       "text": "Steering Torque Actuator Adjust 1",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_02_007_TEXT",
+      "resource_auxiliary_value": 24053
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24056,
       "text": "Steering Torque Actuator Adjust 1 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_02_008_TEXT",
+      "resource_auxiliary_value": 24052
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24057,
       "text": "Error Steering Torque Actuator Adjust 1",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_02_009_TEXT",
+      "resource_auxiliary_value": 24051
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24058,
       "text": "This function is used to set the value of the steering torque actuator.\r\n\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n\r\nPress Next to proceed.",
-      "is_title": false,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_02_010_TEXT",
+      "resource_auxiliary_value": 24050
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24061,
       "text": "Steering Torque Actuator Adjust 1",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_02_ERRTITLE",
+      "resource_auxiliary_value": 24057
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24065,
       "text": "Steering Torque Actuator Adjust 2 is finished.\r\nTurn the engine/power switch OFF and ON.",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_03_003_TEXT",
+      "resource_auxiliary_value": 24069
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24069,
       "text": "Do you want to exit the Steering Torque Actuator Adjust 2 Utility?",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_03_007_TEXT",
+      "resource_auxiliary_value": 24065
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24070,
       "text": "Steering Torque Actuator Adjust 2 has failed.\r\nTurn the engine/power switch OFF and ON.\r\n\r\nDo you want to try again?",
-      "is_title": false,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_03_008_TEXT",
+      "resource_auxiliary_value": 24070
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24071,
       "text": "Steering Torque Actuator Adjust 2 is complete.\r\n\r\nTurn the engine/power switch OFF and ON.",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_03_009_TEXT",
+      "resource_auxiliary_value": 24073
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24074,
       "text": "This function is used to adjust the steering torque actuator.\r\n\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n\r\nPress Next to proceed.",
-      "is_title": false,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_03_013_TEXT",
+      "resource_auxiliary_value": 24078
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24075,
       "text": "Error Steering Torque Actuator Adjust 2",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_03_014_TEXT",
+      "resource_auxiliary_value": 24064
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24076,
       "text": "Steering Torque Actuator Adjust 2",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_03_DLGTITLE",
+      "resource_auxiliary_value": 24076
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24077,
       "text": "Steering Torque Actuator Adjust 2",
-      "is_title": true,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_03_ERRTITLE",
+      "resource_auxiliary_value": 24075
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24078,
       "text": "Steering Torque Actuator Adjust is performed.\r\n\r\nAdjust so that the steering wheel becomes level, and hold the steering wheel.\r\n\r\nPress Next to proceed.",
-      "is_title": false,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_03_SUBTITLE",
+      "resource_auxiliary_value": 24077
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24080,
       "text": "Steering Torque Actuator Adjustment Value Clear is complete.\r\n\r\nTurn the engine/power switch OFF and ON.",
-      "is_title": false,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_04_002_TEXT",
+      "resource_auxiliary_value": 24080
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 24081,
       "text": "Steering Torque Actuator Adjustment Value Clear has failed.\r\nTurn the engine/power switch OFF and ON.\r\n\r\nDo you want to try again?",
-      "is_title": false,
-      "search_term": "steering torque"
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_04_003_TEXT",
+      "resource_auxiliary_value": 24089
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
+      "string_index": 24082,
+      "text": "Steering Torque Actuator Adjustment Value Clear is finished.\r\nTurn the engine/power switch OFF and ON.",
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_04_004_TEXT",
+      "resource_auxiliary_value": 24084
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 24085,
+      "text": "This function is used to clear the adjustment value of the steering torque actuator.\r\n\r\nConfirm the following conditions.\r\n- The engine/power switch is ON (Engine OFF/Ready OFF).\r\n- Vehicle is stopped.\r\n\r\nPress Next to clear the adjustment value.",
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_04_007_TEXT",
+      "resource_auxiliary_value": 24082
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 24086,
+      "text": "Error Steering Torque Actuator Adjustment Value Clear",
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_04_008_TEXT",
+      "resource_auxiliary_value": 24081
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 24087,
+      "text": "Steering Torque Actuator Adjustment Value Clear",
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_04_DLGTITLE",
+      "resource_auxiliary_value": 24087
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 24088,
+      "text": "Steering Torque Actuator Adjustment Value Clear",
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_04_ERRTITLE",
+      "resource_auxiliary_value": 24086
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 24089,
+      "text": "Do you want to exit the Steering Torque Actuator Adjustment Value Clear Utility?",
+      "matched_patterns": [
+        "\\bsteering torque\\b"
+      ],
+      "resource_identifier": "IDS_STRACT_04_SUBTITLE",
+      "resource_auxiliary_value": 24088
+    },
+    {
+      "kind": "utility_string",
       "string_index": 25057,
       "text": "Lost Communication With Power Steering Control Module",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT278",
+      "resource_auxiliary_value": 25462
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 25065,
       "text": "Invalid Data Received From Power Steering Control Module",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT285",
+      "resource_auxiliary_value": 25517
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 25428,
       "text": "Lost Communication With Power Steering Control Module",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT611",
+      "resource_auxiliary_value": 25147
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 25516,
       "text": "Lost Communication With Power Steering Control Module",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT691",
+      "resource_auxiliary_value": 25089
     },
     {
-      "kind": "utility_procedure",
+      "kind": "utility_string",
       "string_index": 25534,
       "text": "Lost Communication With Power Steering Control Module",
-      "is_title": true,
-      "search_term": "power steering"
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT707",
+      "resource_auxiliary_value": 25055
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 25621,
+      "text": "Lost Communication With Power Steering Control Module",
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_UT_08_004_002LISTTEXT92",
+      "resource_auxiliary_value": 25324
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 25633,
+      "text": "Software Incompatibility with Power Steering Control Module",
+      "matched_patterns": [
+        "\\bpower steering\\b"
+      ],
+      "resource_identifier": "IDS_UT_08_ERRTITLE",
+      "resource_auxiliary_value": 25436
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 25832,
+      "text": "Welcome to the Steering Angle Adjustment Wizard.\r\n\r\nThis function is used to center the steering wheel if:\r\n-The VGRS actuator has been replaced.\r\n-The VGRS ECU has been replaced.\r\n-Steering column or gear has been disconnected.\r\n-The steering wheel is still off-center after completing the steering angle sensor initialization.",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_VGRS_01_001_TEXT",
+      "resource_auxiliary_value": 25832
+    },
+    {
+      "kind": "utility_string",
+      "string_index": 25892,
+      "text": "Welcome to the Steering Angle Adjustment Wizard.\r\n\r\nThis function is used to center the steering wheel if:\r\n-The VGRS actuator has been replaced.\r\n-The VGRS ECU has been replaced.\r\n-Steering column or gear has been disconnected.\r\n-The steering wheel is still off-center after completing the steering angle sensor initialization.",
+      "matched_patterns": [
+        "\\bsteering angle sensor\\b"
+      ],
+      "resource_identifier": "IDS_VGRS_03_DLGTITLE",
+      "resource_auxiliary_value": 25884
     }
   ]
 }

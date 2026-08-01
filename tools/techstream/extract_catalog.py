@@ -19,10 +19,10 @@ Output: ``data/generated/<firmware-sha>/diagnostic_annotations.json``
 from __future__ import annotations
 
 import json
+import re
 import struct
 import hashlib
 from pathlib import Path
-from datetime import datetime, timezone
 
 from parse_ddb import DDBParser, ECUDataBase, StringDataBase
 
@@ -50,11 +50,20 @@ EPS_DDB_FILES = ["EPS_P4DK3.ddb", "EPS_CAN_P4DK.ddb"]
 # every index against each, recording all results.
 STRING_DBS = ["M_English.ddb", "V_English.ddb", "U_English.ddb"]
 
-# Search terms for EPS-relevant utility procedures in U_English.
-EPS_PROCEDURE_TERMS = [
-    "torque sensor", "power steering", "eps",
-    "initial setting", "zero point", "steering torque",
-    "torque sensor writing", "torque sensor adjustment",
+# U_English has no structural ECU/procedure linkage. Keep only strings with
+# explicit steering anchors. Broad terms such as "initial setting" and the old
+# substring search for "eps" pulled unrelated text (including "steps").
+EPS_UTILITY_PATTERNS = [
+    re.compile(pattern, re.IGNORECASE)
+    for pattern in (
+        r"\btorque sensor\b",
+        r"\bpower steering\b",
+        r"\belectric power steering\b",
+        r"\bsteering torque\b",
+        r"\bsteering angle sensor\b",
+        r"\bassist map\b",
+        r"\bEPS\b",
+    )
 ]
 
 
@@ -111,12 +120,10 @@ def extract_dids(db: ECUDataBase) -> list[dict]:
     for i in range(sec.header.record_count):
         raw = sec.raw_data[i * rec_size : (i + 1) * rec_size]
         did = struct.unpack_from("<H", raw, 4)[0]
-        in_firmware = FW_DID_RANGE_START <= did <= FW_DID_RANGE_END
         entries.append(
             {
                 "kind": "did",
                 "identifier": did,
-                "in_firmware_table": in_firmware,
                 "source_db": db.name,
             }
         )
@@ -140,6 +147,7 @@ def extract_monitors(
         raw = sec.raw_data[i * rec_size : (i + 1) * rec_size]
         name_idx = struct.unpack_from("<I", raw, 48)[0]
         desc_idx = struct.unpack_from("<I", raw, 52)[0]
+        monitor_seq = struct.unpack_from("<I", raw, 56)[0]
         name_res = resolve_all(name_idx, dbs)
         desc_res = resolve_all(desc_idx, dbs)
         scaling = [struct.unpack_from("<H", raw, j)[0] for j in range(0, 24, 2)]
@@ -153,6 +161,7 @@ def extract_monitors(
                 "desc_string_index": desc_idx,
                 "resolved_desc": desc_res.get("M_English"),
                 "desc_resolutions": desc_res,
+                "monitor_seq": monitor_seq,
                 "scaling_raw": scaling,
                 "source_db": db.name,
             }
@@ -160,40 +169,39 @@ def extract_monitors(
     return entries
 
 
-def extract_utility_procedures(
+def extract_utility_strings(
     u_db: StringDataBase,
 ) -> list[dict]:
-    """Extract EPS-relevant utility procedures from U_English.
+    """Extract steering-anchored strings from U_English.
 
     U_English (format 0x06) contains wizard/dialog text for dealer service
-    procedures.  We search for EPS-relevant terms and return matching entries.
+    procedures. Its parallel type-1 section supplies stable resource
+    identifiers, but still does not establish ECU ownership or a firmware
+    routine binding. These are family-level candidates, not procedure records.
     """
-    import struct as _struct
-
     entries: list[dict] = []
-    seen_indices: set[int] = set()
-
-    for term in EPS_PROCEDURE_TERMS:
-        results = u_db.search(term, limit=20)
-        for pool_offset, text in results:
-            target_rel = pool_offset - u_db.pool_offset
-            for i in range(u_db.entry_count):
-                entry_off = i * 6
-                if _struct.unpack_from("<I", u_db.decompressed, entry_off)[0] == target_rel:
-                    idx = i + 1
-                    if idx not in seen_indices:
-                        seen_indices.add(idx)
-                        is_title = len(text) < 100
-                        entries.append({
-                            "kind": "utility_procedure",
-                            "string_index": idx,
-                            "text": text,
-                            "is_title": is_title,
-                            "search_term": term,
-                        })
-                    break
-
-    entries.sort(key=lambda e: e["string_index"])
+    for idx in range(1, u_db.entry_count + 1):
+        text = u_db.get_string(idx)
+        if not text:
+            continue
+        matched = [
+            pattern.pattern for pattern in EPS_UTILITY_PATTERNS
+            if pattern.search(text)
+        ]
+        if matched:
+            metadata = u_db.get_metadata(idx)
+            entries.append({
+                "kind": "utility_string",
+                "string_index": idx,
+                "text": text,
+                "matched_patterns": matched,
+                "resource_identifier": (
+                    metadata.identifier if metadata is not None else None
+                ),
+                "resource_auxiliary_value": (
+                    metadata.auxiliary_value if metadata is not None else None
+                ),
+            })
     return entries
 
 
@@ -201,21 +209,24 @@ def extract_utility_procedures(
 
 def build_catalog() -> dict:
     parser = DDBParser()
+    required = [TECHSTREAM_DB / name for name in (*STRING_DBS, *EPS_DDB_FILES)]
+    missing = [path for path in required if not path.is_file()]
+    if missing:
+        names = ", ".join(str(path) for path in missing)
+        raise FileNotFoundError(f"required Techstream catalog sources missing: {names}")
 
     # Load all three string databases
     dbs: dict[str, StringDataBase] = {}
     for fname in STRING_DBS:
         path = TECHSTREAM_DB / fname
-        if path.exists():
-            name = fname.replace(".ddb", "")
-            dbs[name] = parser.load_string_db(path)
+        name = fname.replace(".ddb", "")
+        dbs[name] = parser.load_string_db(path)
 
     # Load all EPS databases
     eps_dbs = []
     for fname in EPS_DDB_FILES:
         path = TECHSTREAM_DB / fname
-        if path.exists():
-            eps_dbs.append(parser.parse_ecu_db(path))
+        eps_dbs.append(parser.parse_ecu_db(path))
 
     entries = []
     for db in eps_dbs:
@@ -223,9 +234,10 @@ def build_catalog() -> dict:
         entries.extend(extract_dids(db))
         entries.extend(extract_monitors(db, dbs))
 
-    # Load U_English utility procedures
-    if "U_English" in dbs:
-        entries.extend(extract_utility_procedures(dbs["U_English"]))
+    # Load steering-anchored U_English strings. Resource identifiers group UI
+    # strings but do not bind them to this ECU or a firmware routine, so these
+    # remain family-level vocabulary only.
+    entries.extend(extract_utility_strings(dbs["U_English"]))
 
     # Deduplicate. DIDs are keyed by identifier alone (same DID across DDB
     # variants is the same diagnostic concept). DTCs and monitors keep
@@ -253,15 +265,9 @@ def build_catalog() -> dict:
     for e in deduped:
         by_kind[e["kind"]] = by_kind.get(e["kind"], 0) + 1
 
-    # DIDs that appear in both Techstream and firmware
-    firmware_dids = [
-        e for e in deduped if e["kind"] == "did" and e.get("in_firmware_table")
-    ]
-
     catalog = {
         "firmware_sha256": CODEFLASH_SHA256,
         "techstream_distribution": "V18.00.003",
-        "generated_at": datetime.now(timezone.utc).isoformat(),
         "ecu": {
             "family": "EPS",
             "software_id": "8965B4512000",
@@ -279,7 +285,6 @@ def build_catalog() -> dict:
         "summary": {
             "total_entries": len(deduped),
             "by_kind": by_kind,
-            "dids_in_firmware": len(firmware_dids),
         },
         "string_databases": {
             name: {
@@ -287,6 +292,9 @@ def build_catalog() -> dict:
                 "entry_count": db.entry_count,
                 "pool_offset": db.pool_offset,
                 "decompressed_size": len(db.decompressed),
+                "metadata_entry_count": (
+                    len(db.metadata) if db.metadata is not None else 0
+                ),
             }
             for name, db in dbs.items()
         },
@@ -307,7 +315,6 @@ def main() -> None:
     print(f"  {catalog['summary']['total_entries']} entries")
     for kind, count in sorted(catalog["summary"]["by_kind"].items()):
         print(f"    {kind}: {count}")
-    print(f"  DIDs in firmware table: {catalog['summary']['dids_in_firmware']}")
     print(f"  String DBs loaded: {', '.join(catalog['string_databases'].keys())}")
 
 

@@ -1,8 +1,7 @@
 {
-  "description": "P4DK4 EPS diagnostic vocabulary for cross-variant analysis. JP-market variant (not a newer generation — Techstream V18.00.003, December 2022, predates both the Sienna and Corolla). Not firmware-correlated; pure OEM vocabulary extraction.",
+  "description": "P4DK4 EPS diagnostic vocabulary from a co-shipped Techstream V18 database. Not firmware-correlated and not evidence that the database targets a newer EPS generation.",
   "techstream_distribution": "V18.00.003",
   "source_file": "JP/DB/EPS_P4DK4.ddb",
-  "generated_at": "2026-08-01T16:58:17.821041+00:00",
   "summary": {
     "dtcs": 26,
     "unique_dtc_identifiers": 26,

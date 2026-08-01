@@ -33,6 +33,10 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
 
     private String vocabPath;
 
+    private enum FunctionEffect {
+        RENAMED, COMMENTED, UNCHANGED, MISSING
+    }
+
     private String loadVocabularyPath() throws Exception {
         String[] args = getScriptArgs();
         if (args != null && args.length > 0 && !args[0].isEmpty()) {
@@ -41,37 +45,44 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
         throw new Exception("diagnostic_vocabulary.json path must be passed as the first script argument");
     }
 
-    private void addComment(long addr, String text) throws Exception {
+    private boolean addComment(long addr, String text) throws Exception {
         Address a = toAddr(addr);
         String existing = currentProgram.getListing().getComment(CodeUnit.PRE_COMMENT, a);
         if (existing == null) existing = "";
-        if (existing.contains("Techstream")) return; // don't duplicate
+        if (existing.contains(text)) return false;
         String prefix = existing.isEmpty() ? "" : existing + "\n";
         currentProgram.getListing().setComment(a, CodeUnit.PRE_COMMENT, prefix + text);
+        return true;
     }
 
-    private void appendPlateComment(long addr, String text) throws Exception {
+    private boolean appendPlateComment(long addr, String text) throws Exception {
         Address a = toAddr(addr);
         String existing = currentProgram.getListing().getComment(CodeUnit.PLATE_COMMENT, a);
         if (existing == null) existing = "";
-        if (existing.contains(text)) return;
+        if (existing.contains(text)) return false;
         String prefix = existing.isEmpty() ? "" : existing + "\n";
         currentProgram.getListing().setComment(a, CodeUnit.PLATE_COMMENT, prefix + text);
+        return true;
     }
 
-    private void nameFunctionIfUnnamed(long addr, String oemName, String suffix) throws Exception {
+    private FunctionEffect nameFunctionIfUnnamed(
+            long addr, String oemName, String suffix) throws Exception {
         Address a = toAddr(addr);
         Function f = currentProgram.getFunctionManager().getFunctionAt(a);
-        if (f == null) return;
+        if (f == null) return FunctionEffect.MISSING;
         String current = f.getName();
         // Don't overwrite an existing meaningful name (from AnnotateApplicationDiagnostics)
-        if (!current.startsWith("FUN_") && !current.startsWith("LAB_")) {
-            addComment(addr, "[Techstream OEM] " + oemName + " (" + suffix + ")");
-            return;
+        boolean genericDidSeed = current.matches("did_[0-9a-fA-F]{4}_callback");
+        if (!current.startsWith("FUN_") && !current.startsWith("LAB_")
+                && !genericDidSeed) {
+            return addComment(
+                addr, "[Techstream OEM] " + oemName + " (" + suffix + ")"
+            ) ? FunctionEffect.COMMENTED : FunctionEffect.UNCHANGED;
         }
         String symbol = oemName.toLowerCase().replaceAll("[^a-z0-9]+", "_") + "_" + suffix;
         f.setName(symbol, SourceType.USER_DEFINED);
         println(a + " → " + symbol + " (Techstream OEM)");
+        return FunctionEffect.RENAMED;
     }
 
     @Override
@@ -80,7 +91,7 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
         String json = Files.readString(Path.of(vocabPath));
         println("Loading diagnostic vocabulary from: " + vocabPath);
 
-        int applied = 0, commented = 0, skipped = 0;
+        int applied = 0, commented = 0, unchanged = 0, skipped = 0;
 
         // Parse the "mappings" array and process each entry.
         JsonParser parser = new JsonParser(json);
@@ -106,7 +117,7 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
             // ── DID, Service, and Monitor callbacks ────────────────────────
             // All three carry a firmware_callback hex string.
             if ((kind.equals("did") || kind.equals("service") || kind.equals("monitor"))
-                    && grade.equals("exact")) {
+                    && (grade.equals("exact") || grade.equals("structural"))) {
 
                 String cbStr = entry.getString("firmware_callback", null);
                 if (cbStr == null) {
@@ -131,18 +142,37 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
                 }
 
                 if (action != null && action.equals("name_callback")) {
-                    nameFunctionIfUnnamed(cbAddr, oemName, suffix);
-                    applied++;
+                    FunctionEffect effect = nameFunctionIfUnnamed(cbAddr, oemName, suffix);
+                    if (effect == FunctionEffect.MISSING) {
+                        throw new Exception(
+                            "missing " + grade + " callback function at " + toAddr(cbAddr)
+                            + " for " + kind + " " + oemName
+                        );
+                    } else if (effect == FunctionEffect.RENAMED) {
+                        applied++;
+                    } else if (effect == FunctionEffect.COMMENTED) {
+                        commented++;
+                    } else {
+                        unchanged++;
+                    }
                 } else {
-                    addComment(cbAddr, "[Techstream OEM] " + oemName + " (" + suffix + ")");
-                    commented++;
+                    if (addComment(
+                            cbAddr, "[Techstream OEM] " + oemName + " (" + suffix + ")")) {
+                        commented++;
+                    } else {
+                        unchanged++;
+                    }
                 }
 
                 // Attach RAM source comment for monitors that have one
                 if (kind.equals("monitor")) {
                     String ramSource = entry.getString("ram_source", null);
                     if (ramSource != null) {
-                        addComment(cbAddr, "[RAM source] " + ramSource);
+                        if (addComment(cbAddr, "[RAM source] " + ramSource)) {
+                            commented++;
+                        } else {
+                            unchanged++;
+                        }
                     }
                 }
                 continue;
@@ -157,8 +187,12 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
                         String tag = grade.equals("candidate")
                             ? "[Techstream OEM CONFLICT] "
                             : "[Techstream OEM candidate] ";
-                        addComment(cbAddr, tag + oemName + " (grade: " + grade + ")");
-                        commented++;
+                        if (addComment(
+                                cbAddr, tag + oemName + " (grade: " + grade + ")")) {
+                            commented++;
+                        } else {
+                            unchanged++;
+                        }
                         continue;
                     }
                 }
@@ -183,8 +217,11 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
                         + " (0x" + String.format("%04X", dtcId) + ") " + oemName;
                     if (grade.equals("candidate"))
                         comment += " — conflicting descriptions";
-                    appendPlateComment(addr, comment);
-                    commented++;
+                    if (appendPlateComment(addr, comment)) {
+                        commented++;
+                    } else {
+                        unchanged++;
+                    }
                 }
                 continue;
             }
@@ -198,6 +235,7 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
         println("Diagnostic vocabulary application complete:");
         println("  Symbols renamed: " + applied);
         println("  Comments added: " + commented);
+        println("  Already applied: " + unchanged);
         println("  Skipped (no target / rejected): " + skipped);
     }
 

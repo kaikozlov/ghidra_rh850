@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "Reproducible verification tooling for the RH850/P1M-E firmware analysis"
 requires-python = ">=3.11"
 dependencies = [
+    "dncil==1.0.2",
+    "dnfile==0.18.0",
     "pycryptodome==3.23.0",
 ]
 

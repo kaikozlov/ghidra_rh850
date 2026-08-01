@@ -45,7 +45,6 @@ import json
 import struct
 import hashlib
 from pathlib import Path
-from datetime import datetime, timezone
 
 # These imports work because the script runs from the repo root and
 # tools/techstream is on sys.path via the extract_catalog import chain.
@@ -58,14 +57,17 @@ from firmware_tables import extract_all, FirmwareTables, DidEntry  # noqa: E402
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CODEFLASH_PATH = REPO_ROOT / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 
-# Firmware DTC table (structurally recovered).  Each 8-byte record:
-#   [u32:0x00000001] [u8:flags] [u16:dtc_id_LE] [u8:0x00]
-# The DTC identifier is at byte offset 5 within the record.
+# Firmware DTC table used by FUN_0005159e/FUN_000517b4. The callbacks walk 0xA0
+# records with an 8-byte stride: identifiers are based at 0x309DC and enabled
+# dwords at 0x309E0. Each record is:
+# [u8:flags] [u16:dtc_id_LE] [u8:0x00] [u32:enabled]
+# The DTC identifier is at byte offset 1 within the record.
 # Only matches within this table are "exact"; blind byte searches elsewhere
 # in CodeFlash are false positives (immediate values, instruction bytes).
-DTC_TABLE_START = 0x30A28
-DTC_TABLE_END = 0x30C40  # exclusive
+DTC_TABLE_START = 0x309DC
+DTC_TABLE_COUNT = 0xA0
 DTC_RECORD_SIZE = 8
+DTC_TABLE_END = DTC_TABLE_START + DTC_TABLE_COUNT * DTC_RECORD_SIZE
 
 # RAM source mapping for monitor-bridged DIDs, recovered by decompiling each
 # DID callback (via SeedDidCallbacks.java).  These identify the RAM variable or
@@ -115,13 +117,8 @@ def scan_firmware_dtc_table(cf: bytes) -> dict[int, list[tuple[int, int]]]:
     entries: dict[int, list[tuple[int, int]]] = {}
     end = min(DTC_TABLE_END, len(cf))
     for off in range(DTC_TABLE_START, end, DTC_RECORD_SIZE):
-        marker = struct.unpack_from("<I", cf, off)[0]
-        if marker != 1:
-            continue
-        flags = cf[off + 4]
-        dtc_id = struct.unpack_from("<H", cf, off + 5)[0]
-        pad = cf[off + 7]
-        if pad != 0:
+        flags, dtc_id, pad, enabled = struct.unpack_from("<BHBI", cf, off)
+        if enabled != 1 or pad != 0 or dtc_id == 0:
             continue
         entries.setdefault(dtc_id, []).append((off, flags))
     return entries
@@ -162,7 +159,7 @@ def correlate_dids(
                 "match_grade": "family",
                 "firmware_table_index": None,
                 "firmware_callback": None,
-                "firmware_flags": None,
+                "firmware_response_size_or_attribute": None,
                 "source_db": ts_did["source_db"],
                 "annotation_action": "comment",
                 "note": "DID exists in Techstream EPS database but not in "
@@ -178,10 +175,14 @@ def correlate_dids(
             "match_grade": "exact",
             "firmware_table_index": fw.table_index,
             "firmware_callback": f"0x{fw.callback:05X}",
-            "firmware_flags": f"0x{fw.flags:04X}",
+            "firmware_response_size_or_attribute": (
+                f"0x{fw.response_size_or_attribute:04X}"
+            ),
             "firmware_table_base": "0x2941C",
             "source_db": ts_did["source_db"],
-            "annotation_action": "name_callback" if fw.has_callback else "comment",
+            # The DDB record supplies only the numeric identifier here; it
+            # does not recover a semantic OEM name for the callback.
+            "annotation_action": "comment",
             "note": f"Exact DID match. Firmware callback 0x{fw.callback:05X} "
                     f"at table index {fw.table_index}.",
         })
@@ -194,8 +195,8 @@ def correlate_dtcs(
 ) -> list[dict]:
     """Correlate Techstream DTCs with the firmware DTC table.
 
-    Uses a structural scan of the firmware DTC table (8-byte records at
-    0x30A28-0x30C40) rather than a blind byte search.  Only DTC IDs found
+    Uses a structural scan of the firmware DTC table (0xA0 8-byte records at
+    0x309DC-0x30EDC) rather than a blind byte search.  Only DTC IDs found
     within this table are "exact"; others are "family" (diagnostic-only or
     cross-generation).
 
@@ -322,19 +323,23 @@ def correlate_monitors(
         can_names = sorted(set(names_by_db.get("EPS_CAN_P4DK.ddb", [])))
         kwp_names = sorted(set(names_by_db.get("EPS_P4DK3.ddb", [])))
 
-        # CAN variant is authoritative for this UDS firmware.
+        # Prefer the CAN-family label over the KWP-family label. This chooses
+        # vocabulary; it does not prove calibration-specific semantics.
         oem_name = can_names[0] if can_names else (kwp_names[0] if kwp_names else "unnamed")
-
-        # Grade: exact if a single CAN name exists (authoritative for UDS).
-        # KWP differences are expected (different protocol) and do NOT
-        # downgrade the grade.  Only multiple conflicting CAN names would.
-        if len(can_names) <= 1:
-            grade = "exact"
-        else:
-            grade = "candidate"
 
         # Attach decompiled RAM source information for the bridged DIDs.
         ram_source = MONITOR_RAM_SOURCES.get(did)
+
+        # The seq bridge and firmware membership establish structure, not OEM
+        # semantics by themselves. Auto-name only when callback decompilation
+        # independently recovers a meaningful RAM source. DID 0x0111 is a stub
+        # and 0x0101 has no recovered source, so both remain family vocabulary.
+        if len(can_names) > 1:
+            grade = "candidate"
+        elif ram_source and not ram_source.startswith("stub:"):
+            grade = "structural"
+        else:
+            grade = "family"
 
         match = {
             "kind": "monitor",
@@ -344,11 +349,13 @@ def correlate_monitors(
             "match_grade": grade,
             "firmware_table_index": fw.table_index,
             "firmware_callback": f"0x{fw.callback:05X}",
-            "firmware_flags": f"0x{fw.flags:04X}",
+            "firmware_response_size_or_attribute": (
+                f"0x{fw.response_size_or_attribute:04X}"
+            ),
             "source_db": "EPS_CAN_P4DK" if can_names else "EPS_P4DK3",
             "can_variant_name": can_names[0] if can_names else None,
             "kwp_variant_name": kwp_names[0] if kwp_names else None,
-            "annotation_action": "name_callback" if grade == "exact" else "comment",
+            "annotation_action": "name_callback" if grade == "structural" else "comment",
         }
         if ram_source:
             match["ram_source"] = ram_source
@@ -365,8 +372,13 @@ def correlate_monitors(
         match["note"] = " ".join(parts)
         matches.append(match)
 
-    # Remaining monitors that don't map to firmware DIDs stay as family vocabulary
+    # Remaining monitors that don't map to firmware DIDs stay as family
+    # vocabulary. Do not append source records for a bridge already emitted
+    # above; the old logic duplicated every bridged monitor as exact and family.
     for mon in [e for e in catalog["entries"] if e["kind"] == "monitor"]:
+        seq = mon.get("monitor_seq")
+        if seq is not None and 0x0100 + seq in seen_dids:
+            continue
         name = mon.get("resolved_name") or "unnamed"
         matches.append({
             "kind": "monitor",
@@ -374,6 +386,7 @@ def correlate_monitors(
             "oem_symbol": slug(name),
             "match_grade": "family",
             "source_db": mon["source_db"],
+            "monitor_seq": seq,
             "scaling_raw": mon.get("scaling_raw"),
             "annotation_action": "vocabulary",
             "note": (f"Techstream Data List monitor '{name}'. No firmware DID "
@@ -441,35 +454,36 @@ def correlate_services(
     return matches
 
 
-def correlate_utility_procedures(
+def correlate_utility_strings(
     catalog: dict, tables: FirmwareTables
 ) -> list[dict]:
-    """Correlate U_English utility procedures with firmware routines.
+    """Carry steering-anchored U_English strings as family-only evidence.
 
-    Utility procedure text is OEM-facing wizard/dialog text from Techstream's
-    dealer service procedures.  These texts do not contain firmware identifiers
-    (routine IDs, DIDs) — they are human-readable instructions.  Therefore all
-    utility procedures are graded "family" (vocabulary-only).  No keyword-based
-    matching to firmware routine IDs is performed, as such matching produces
-    false correlations (e.g. "Zero Point" appearing in unrelated procedures
-    for G-sensor, yaw-rate, oil-pressure sensors).
+    U_English provides resource identifiers but not ECU ownership or a firmware
+    procedure relationship. The extractor uses explicit steering anchors only;
+    no firmware routine mapping is attempted.
     """
-    procedures = [e for e in catalog["entries"] if e["kind"] == "utility_procedure"]
+    procedures = [e for e in catalog["entries"] if e["kind"] == "utility_string"]
 
     matches = []
     for proc in procedures:
         text = proc.get("text", "")
         name = text.strip().split("\r\n")[0][:120] if text else "unnamed"
         matches.append({
-            "kind": "utility_procedure",
+            "kind": "utility_string",
             "oem_name": name,
+            "text": text,
             "oem_symbol": slug(name),
             "match_grade": "family",
             "string_index": proc.get("string_index"),
+            "matched_patterns": proc.get("matched_patterns", []),
+            "resource_identifier": proc.get("resource_identifier"),
+            "resource_auxiliary_value": proc.get("resource_auxiliary_value"),
             "source_db": "U_English",
             "annotation_action": "vocabulary",
-            "note": (f"Utility procedure text from Techstream dealer service "
-                     f"wizard. OEM-facing instruction, not firmware-identified."),
+            "note": "Steering-anchored text from U_English.ddb. Resource IDs "
+                    "group UI text but do not establish ECU/procedure linkage; family-level "
+                    "vocabulary only, with no firmware routine mapping.",
         })
 
     return matches
@@ -492,7 +506,7 @@ def build_vocabulary() -> dict:
     all_matches.extend(correlate_dtcs(catalog, cf))
     all_matches.extend(correlate_monitors(catalog, tables))
     all_matches.extend(correlate_services(catalog, tables))
-    all_matches.extend(correlate_utility_procedures(catalog, tables))
+    all_matches.extend(correlate_utility_strings(catalog, tables))
 
     # Summarize by grade
     by_grade: dict[str, int] = {}
@@ -504,7 +518,6 @@ def build_vocabulary() -> dict:
     return {
         "firmware_sha256": sha,
         "techstream_distribution": catalog["techstream_distribution"],
-        "generated_at": datetime.now(timezone.utc).isoformat(),
         "ecu": catalog["ecu"],
         "source_catalog": str(cat_path.relative_to(REPO_ROOT)),
         "firmware_tables": {
@@ -515,6 +528,7 @@ def build_vocabulary() -> dict:
             "dtc_table": {
                 "base": f"0x{DTC_TABLE_START:X}",
                 "end": f"0x{DTC_TABLE_END:X}",
+                "count": DTC_TABLE_COUNT,
                 "record_size": DTC_RECORD_SIZE,
             },
         },

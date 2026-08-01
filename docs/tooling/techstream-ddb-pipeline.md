@@ -30,38 +30,59 @@ Three new tools implement the extraction pipeline:
 | `tools/techstream/extract_catalog.py` | Build `diagnostic_annotations.json` from DDB corpus |
 | `tools/pe` (modified) | Fixed `import` to use `analyzeHeadless` for full PE analysis |
 
-Output: `data/generated/<firmware-sha>/diagnostic_annotations.json` — 298
-entries (54 DTCs with descriptions, 11 DIDs, 111 monitors, 122 utility procedures).
+Calibration-focused output:
+`data/generated/<firmware-sha>/diagnostic_annotations.json` — 353 entries
+(54 DTCs with descriptions, 11 DIDs, 111 monitors, 177 steering-anchored
+`U_English` strings). The complete regional output is
+`data/generated/techstream_v18/steering_diagnostic_corpus.json`: 35 source
+files, 25 full-section semantic variants, 129 unique DTC IDs, 16 unique DIDs, and 1257
+monitor records.
 
 Section 14 (24-byte records) is PID display-option configuration (value
-enums per PID group), not active test definitions. Active test / utility
-procedure text lives in `U_English.ddb`, extracted separately.
+enums per PID group), not active test definitions. Dealer wizard/dialog text
+lives in `U_English.ddb`, extracted separately with
+its parallel resource identifiers. Those identifiers group UI resources but do
+not by themselves bind a string to this ECU or to a firmware routine.
 
 ## .ddb file format
 
-All `.ddb` files share the magic `40 00 0C 16 0C 08 00 39` followed by the
-null-terminated signature `"DiagTool DataCtrl"`. Byte 8 encodes the format
-variant:
+Modern formats 1–5 share the six-byte prefix `40 00 0C 16 0C 08`; bytes 6–7
+vary by region. Format 6 uses the seven-byte prefix
+`39 00 0C 16 0B 15 0F`; byte 7 is a language tag (`0x16` English through
+`0x1A` Turkish in this corpus). Both families carry the null-terminated
+signature `"DiagTool DataCtrl"`, and byte 8 encodes the format variant:
 
 | Byte 8 | Type | Example files |
 |---|---|---|
 | `0x02` | ECU database (uncompressed sections) | `EPS_P4DK3.ddb` |
 | `0x04` | OEM description string database | `M_English.ddb` |
-| `0x05` | UI/active-test string database | `V_English.ddb` |
-| `0x06` | Utility string database (different header) | `U_English.ddb` |
+| `0x05` | UI string database | `V_English.ddb` |
+| `0x06` | Dealer wizard/dialog string database (different header) | `U_English.ddb` |
+
+Coverage is explicit rather than silent: `parse_ecu_db()` handles all 1,368
+format-`0x02` ECU databases (25,361 sections), and `load_string_db()` handles
+the modern sectioned format-`0x04/05/06` string databases. Type-`0x01`
+`Toyota.ddb`, type-`0x03` `Viewer.ddb`, and nine legacy type-`0x04` files have
+distinct schemas and are rejected by these APIs; they are inventoried but not
+misrepresented as parsed ECU/string content.
 
 ### ECU databases
 
-ECU `.ddb` files store diagnostic tables as sequential sections. Each section
-begins with a 10-byte `TABLE_DATA_HEAD`:
+ECU `.ddb` files expose a type-indexed directory of little-endian `u32` section
+offsets beginning at `0x24` and ending at the first section payload. Every
+nonzero directory slot points to a section beginning with a 10-byte
+`TABLE_DATA_HEAD`; section payloads are not discovered by assuming they were
+appended in type order:
 
 ```
 [u8 table_type] [u8 compression] [u32 record_count] [u32 payload_size]
 ```
 
-A section directory at file offset `0x24` lists `u32` offsets to each section.
-Additional sections may be appended after the directory-listed ones (sequential
-scan from the end of the last listed section).
+A section directory at file offset `0x24` lists `u32` offsets indexed by
+section type and extends to the first section payload (`0x280` in the V18 ECU
+files). The former parser stopped at slot 16 and silently dropped 10,659 of
+25,361 sections across the type-2 corpus. The parser now follows the complete
+directory and checks that each pointed header's type equals its slot.
 
 Section types observed in EPS databases:
 
@@ -76,6 +97,7 @@ Section types observed in EPS databases:
 | 13 | 17 | 24 B | PID group metadata |
 | 14 | 15 | 24 B | PID display-option configuration (value enums) |
 | 15–16 | — | — | Additional monitor/test metadata |
+| 18–91 (steering corpus) | — | — | Additional schema tables; preserved and inventoried, semantics mostly bounded |
 
 ### DTC record format (section type 5, 28 bytes)
 
@@ -164,7 +186,11 @@ match), 183,244 string entries.
   deduplicated by identifier across DDB variants
 - **111 monitors** — names like "Torque Sensor 1 Output", "Motor Actual
   Current", "Steering Angle Velocity", "Thermistor Temperature"
-- **122 utility procedures** — OEM wizard/dialog text from U_English
+- **177 `utility_string` entries** — exhaustive strings with explicit steering
+  anchors from `U_English`; family vocabulary only. The parallel type-1 section
+  supplies 25,957 stable resource identifiers aligned with the string indices,
+  but does not encode ECU ownership or firmware routine linkage, so these are
+  not recovered procedures.
 
 ### DTC cross-reference
 
@@ -221,8 +247,10 @@ script does not understand `.ddb`; it consumes a deterministic generated artifac
 
 ### Match grades
 
-Every mapping carries a confidence grade. Only `exact` and `structural` trigger
-symbol renames in Ghidra. `family` adds comment-only annotations.
+Every mapping carries a confidence grade. `exact` and `structural` mappings are
+eligible for renaming only when the artifact explicitly emits
+`annotation_action: name_callback`; a numeric DID match without a recovered
+semantic name remains comment-only. `family` is always comment-only.
 
 | Grade | Meaning | Annotation action |
 |---|---|---|
@@ -234,25 +262,28 @@ symbol renames in Ghidra. `family` adds comment-only annotations.
 
 ### Correlation results
 
-Current output (324 mappings):
+Current output (356 mappings):
 
-| Kind | Count | Exact | Family |
-|---|---|---|---|
-| DIDs | 11 | 1 | 10 |
-| DTCs | 54 | 7 | 47 |
-| Monitors | 120 | 9 | 111 |
-| Services | 17 | 6 | 11 |
-| Utility procedures | 122 | — | 122 |
+| Kind | Count | Exact | Structural | Family |
+|---|---:|---:|---:|---:|
+| DIDs | 11 | 1 | — | 10 |
+| DTCs | 54 | 12 | — | 42 |
+| Monitors | 97 | — | 7 | 90 |
+| Services | 17 | 17 | — | — |
+| Utility strings | 177 | — | — | 177 |
 
-DID correlation is exact by construction: every Techstream DID is looked up
-in the 242-entry firmware DID table, and the firmware callback address is
-attached. DTC correlation uses a structural scan of the firmware DTC table
-(8-byte records at `0x30A28`–`0x30C40`) — only DTC IDs found within this
-table are "exact"; blind byte searches elsewhere in CodeFlash are rejected
-as false positives (immediate values, instruction bytes). 7 of 54 Techstream
-DTCs are active in the firmware; the remaining 47 are diagnostic-only or
-cross-generation. Monitors with seq < 100 bridge to firmware DIDs; the
-remaining monitors are recorded as family-grade vocabulary.
+DID correlation uses actual membership in the sparse 242-entry firmware DID
+table. Only one catalog DID is present; the other ten remain family-level.
+The neutral catalog no longer infers membership merely because an identifier
+falls between the table's minimum and maximum values.
+DTC correlation structurally scans all `0xA0` 8-byte records used by
+`FUN_0005159e`/`FUN_000517b4`, at `0x309DC`–`0x30EDC`; blind byte matches elsewhere in
+CodeFlash are rejected. Twelve of 54 Techstream DTC records match enabled
+firmware entries, including five CAN-communication records (`U0100`, `U0126`,
+`U023A`, `U0293`, `U1103`) beyond the old truncated `0x30C40` bound. The
+remaining 42 are diagnostic-only or cross-generation. Monitors whose
+seq-derived DID is actually present bridge to firmware callbacks; the rest
+remain family vocabulary.
 
 ### Monitor→DID bridge
 
@@ -260,14 +291,15 @@ The key structural discovery: monitor record field at offset 56 (the "seq"
 number) maps to firmware DIDs via **DID = 0x0100 + seq**.  This is not in the
 .ddb section 0/1 lookup tables — those use proprietary PIDs (0x2711+).
 
-For monitors with seq < 100, DID = 0x0100 + seq hits the firmware DID table
-exactly.  The EPS_CAN_P4DK variant (UDS/CAN) is authoritative for this
-firmware; EPS_P4DK3 (KWP) uses different naming for the same DIDs.
+For nine monitors with seq < 100, `DID = 0x0100 + seq` hits the firmware DID
+table exactly. The EPS_CAN_P4DK variant (UDS/CAN) supplies the selected family
+name; EPS_P4DK3 (KWP) uses different naming for the same DIDs.
 
-9 monitors bridge to firmware DIDs with full callback and RAM source data.
-EPS_CAN_P4DK (UDS/CAN) is authoritative for this firmware — KWP (EPS_P4DK3)
-uses different naming because it is a different protocol generation, which
-is expected and does not downgrade the grade:
+Nine monitors bridge to firmware DIDs. Seven have independently decompiled,
+meaningful RAM sources and are structural/auto-named. DID `0x0101` lacks an
+independent source recovery and DID `0x0111` is a stub; both remain family
+comment-only. The CAN-family label is preferred over the KWP-family label as a
+vocabulary choice, not as proof of calibration-specific semantics:
 
 | DID | OEM name (CAN) | Callback | RAM source |
 |---|---|---|---|
@@ -285,9 +317,11 @@ The motor-current and torque-sensor values come from checkpoint objects —
 persistent NvM-backed snapshots validated by a magic number (0xA55A5AA5).
 This bridges OEM diagnostic vocabulary to specific firmware state variables,
 enabling the "semantic recovery amplifier" described in the pipeline
-architecture: a monitor name like "Motor Actual Current" now resolves to a
-specific checkpoint object and RAM layout, which can be traced backward
-through the control graph.
+architecture: a monitor name like "Motor instruction current" now resolves to a
+specific DataFlash-backed 10-byte object in firmware.
+`ghidra/scripts/verify/AssertDiagnosticVocabulary.java` independently asserts
+the seven structural callbacks' RAM/checkpoint references and decompiler
+landmarks; the generated source descriptions are not their own test oracle.
 
 ### Preserve two namespaces
 
@@ -305,21 +339,28 @@ The vocabulary is generated before Stage 4 annotation and applied after
 Stage 4, before analysis:
   generate diagnostic_annotations.json (extract_catalog.py)
   generate diagnostic_vocabulary.json (correlate_vocabulary.py)
+  seed all 196 unique callbacks referenced by the 242-row DID table
+
+Clean-checkout fallback:
+  if the ignored Techstream source tree is absent, consume the tracked
+  firmware-SHA-keyed diagnostic_vocabulary.json instead
 
 Stage 4, after analysis:
   run AnnotateApplicationDiagnostics.java (firmware-recovered names)
   run ApplyDiagnosticVocabulary.java      (OEM vocabulary layer)
 
 Verification:
-  tests/verify_diagnostic_vocabulary.py (112 checks against raw firmware)
+  tests/verify_diagnostic_vocabulary.py (190+ checks against raw artifacts)
 ```
 
 The Java script (`ApplyDiagnosticVocabulary.java`) includes a self-contained
 JSON parser (Ghidra does not ship Gson or javax.json).  The parser correctly
 handles numeric fields (`identifier`, `sid`, `dtc_identifier` are JSON
-numbers, not strings) and applies OEM names to DID, service, and monitor
-callbacks.  The vocabulary path is passed as a script argument — no hardcoded
-paths or firmware SHA prefixes.
+numbers, not strings) and applies OEM names/comments to service and monitor
+callbacks. Missing exact/structural callback functions now fail the rebuild;
+actual rename/comment/already-applied effects are counted separately. The
+vocabulary path is passed as a script argument — no hardcoded paths or firmware
+SHA prefixes.
 
 ## tools/pe fix
 
@@ -339,8 +380,9 @@ V18 corpus: 26 unique DTCs (45 records with dual naming), 89 monitors, 85
 subfunction definitions. It is a JP-market diagnostic variant, not a later
 release — the Techstream V18.00.003 distribution is dated December 2022 and
 predates both the 2023 Sienna and the 2025 Corolla. P4DK4's larger monitor
-count reflects JP-market feature differences (e.g. torque sensor 3, backup
-power supply), not a temporal generation gap. It is a useful supplementary
+count proves a vocabulary/configuration difference (e.g. torque sensor 3,
+backup power supply), not a temporal or hardware-generation gap. It is a useful
+supplementary
 vocabulary source because its 13 extra bridged DIDs cover EPS state variables
 absent from the NA database, giving the correlation engine more matches to
 work with when Corolla firmware arrives.
@@ -377,18 +419,19 @@ P4DK4 adds 13 bridged DIDs absent from the NA database:
 | 73 | 0x0149 | (unnamed) |
 | 74 | 0x014A | (unnamed) |
 
-The torque-sensor-3 and backup-power-supply monitors are JP-market EPS
-features not present in the NA diagnostic variant.
+The torque-sensor-3 and backup-power-supply labels are vocabulary present in
+the JP diagnostic variant and absent from the NA one. That does not prove a
+market-specific hardware feature in any firmware calibration.
 
 ### Extraction tool
 
 `tools/techstream/extract_p4dk4_catalog.py` — produces
 `data/generated/p4dk4_template/p4dk4_vocabulary.json`, a standalone
 vocabulary artifact (not firmware-correlated). Intended for use as a search
-template when Corolla firmware arrives: run the existing correlation engine
-(`correlate_vocabulary.py`) against P4DK4 vocabulary instead of the NA catalog
-to match DTC/DID/monitor names against the newer calibration's diagnostic
-tables.
+template when Corolla firmware arrives. Its schema is intentionally not an
+input to the Sienna-only `correlate_vocabulary.py`; a variant-specific adapter
+must select and grade P4DK4 records against that firmware's own tables before
+they can become annotation mappings.
 
 ### Regional DDB access
 

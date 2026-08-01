@@ -204,13 +204,24 @@ echo "[4/4] Seed missed functions, analyze, and apply every annotation"
 # Generate the Techstream diagnostic vocabulary before annotation so that
 # ApplyDiagnosticVocabulary.java can consume it during this stage.
 VOCAB_PATH=""
-if [ -d "$ROOT/Techstream" ]; then
+FW_SHA=$(shasum -a 256 "$ROOT/firmware/RH850_P1M-E_CodeFlash.bin" | cut -d' ' -f1)
+TRACKED_VOCAB="$ROOT/data/generated/${FW_SHA:0:16}/diagnostic_vocabulary.json"
+if [ -f "$ROOT/Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/EPS_P4DK3.ddb" ]; then
   echo "  Generating Techstream diagnostic vocabulary..."
   ( cd "$ROOT/tools/techstream" && python3 extract_catalog.py )
   ( cd "$ROOT/tools/diagnostics" && python3 correlate_vocabulary.py )
-  # Resolve the generated vocabulary path from the firmware SHA.
-  FW_SHA=$(shasum -a 256 "$ROOT/firmware/RH850_P1M-E_CodeFlash.bin" | cut -d' ' -f1)
-  VOCAB_PATH="$ROOT/data/generated/${FW_SHA:0:16}/diagnostic_vocabulary.json"
+  VOCAB_PATH="$TRACKED_VOCAB"
+elif [ -f "$TRACKED_VOCAB" ]; then
+  echo "  Techstream source absent; using tracked diagnostic vocabulary artifact."
+  VOCAB_PATH="$TRACKED_VOCAB"
+fi
+
+VOCAB_SCRIPT_ARGS=()
+if [ -n "$VOCAB_PATH" ]; then
+  VOCAB_SCRIPT_ARGS=(
+    -postScript ApplyDiagnosticVocabulary.java "$VOCAB_PATH"
+    -postScript AssertDiagnosticVocabulary.java
+  )
 fi
 
 run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
@@ -222,6 +233,7 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -preScript SeedSecocApplicationFunctions.java \
   -preScript SeedDataFlashSemanticsFunctions.java \
   -preScript SeedApplicationDiagnosticFunctions.java \
+  -preScript SeedDidCallbacks.java \
   -preScript SeedBootloaderDiagnosticFunctions.java \
   -preScript SeedArchitectureFunctions.java \
   -preScript SeedApplicationTransmitFunctions.java \
@@ -234,7 +246,7 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -postScript AnnotateDidModel.java \
   -postScript AnnotateCanTransport.java \
   -postScript AnnotateApplicationDiagnostics.java \
-  -postScript ApplyDiagnosticVocabulary.java "$VOCAB_PATH" \
+  "${VOCAB_SCRIPT_ARGS[@]}" \
   -postScript AnnotateControlPartition.java \
   -postScript AnnotateBootloaderDiagnostics.java \
   -postScript RecoverVectorHandlers.java \

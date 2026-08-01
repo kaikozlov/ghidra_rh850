@@ -363,3 +363,86 @@ the mistakes are not re-made.
 - **Canonical:**
   [../tooling/techstream.md](../tooling/techstream.md) §1;
   `techstream.lock.json` `version_provenance`.
+
+### CORR-023 — Techstream DDB pipeline coverage and U_English ownership
+
+- **Wrong:** the generated Sienna catalog was treated as a broad EPS corpus,
+  and 122 keyword hits in `U_English.ddb` were labeled "utility procedures."
+- **Right:** the calibration catalog loaded only two NA EPS databases while the
+  pinned distribution contains 35 regional `EPS*`/`EMPS*` files representing
+  25 full-section semantic variants. The old parser stopped at directory slot
+  16 and dropped 10,659 of 25,361 type-2 sections. The utility extractor used raw substring
+  search (`eps` matched `steps`), broad unscoped terms such as "initial
+  setting," and a 20-hit limit per term. `U_English` has 25,957 aligned
+  resource identifiers that group UI text, but no encoded ECU ownership or
+  firmware routine linkage, so those hits were not recovered procedures.
+- **Fix:** the pipeline now emits a complete deterministic steering corpus
+  (129 unique DTC IDs, 16 unique DIDs, 1257 monitor records), uses exhaustive
+  explicit steering anchors for family-only `utility_string` vocabulary,
+  removes duplicate exact/family monitor mappings, and fails closed on
+  malformed LZSS, wrong file types, bad format-6 magic, and malformed section layouts.
+- **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.1;
+  TMS-013; `tests/verify_diagnostic_vocabulary.py`.
+
+### CORR-024 — MACKey `$36` interpreted as a diagnostic identifier
+
+- **Wrong:** `$36` in a previously quoted login URL was treated as DID
+  `0x0036`, and the untracked query-parameter name `ecuMacId` was promoted to a
+  pinned-artifact fact.
+- **Right:** managed
+  `MAC_01_020_bgDoWork_UserType2_3` calls
+  `GetMacKeyResId_FromRev`, converts the returned pointer to a string, and
+  immediately executes `login_url.Replace("$36", returned_id)`. `$36` is a
+  URL-template token for the server request ID, not a DID. The exact parameter
+  name and former literal endpoint are absent from the currently pinned tree,
+  so they remain unverified rather than being repeated.
+- **Consequence:** MACKey Registration is still a real online ECU exchange-key
+  workflow, but the old `ecuMacId`/DID rationale was false. Its relationship to
+  SecOC remains open until the native `CMAC_01_*` write path is recovered.
+- **Canonical:**
+  [../security/mackey-registration.md](../security/mackey-registration.md);
+  TMS-011; `tests/verify_techstream_mackey.py`.
+
+### CORR-025 — Application DID and service record fields misnamed
+
+- **Wrong:** `tools/diagnostics/firmware_tables.py` treated the second DID
+  halfword as read/write access flags and service-record byte 9 as the session
+  count. It also resolved session bytes by rereading the global Sienna image,
+  even when the caller supplied different firmware bytes.
+- **Right:** callback response widths identify the DID halfword as length/size
+  metadata (`F181/F186/F18C = 0x11/0x01/0x14`); service byte 11 contains the
+  session count, while byte 9 is a separate subfunction-routing attribute.
+  Session lists now resolve from the supplied image.
+- **Consequence:** generated vocabulary no longer emits the false
+  `firmware_flags` field, and alternate-image analysis cannot silently mix in
+  Sienna session policy.
+- **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
+  DIAG-APP-007; `tests/verify_diagnostic_vocabulary.py`.
+
+### CORR-026 — Firmware DTC-table correlation range truncated
+
+- **Wrong (2026-08-01, same-day pipeline pass):** Scan only
+  `0x30A28..0x30C40` and grade seven of 54 Techstream DTC rows exact.
+- **Right:** each record is `[u8 flags][u16 DTC][u8 zero][u32 enabled]` at base
+  `0x309DC`. `FUN_0005159e` reads the enabled dwords from `0x309E0 + i*8`, and
+  `FUN_000517b4` reads identifiers from `0x309DC + i*8`; the table ends at
+  `0x30EDC`. The old scanner was both partial and rotated four bytes early.
+- **Evidence:** both decompilations show the paired bases, stride 8, bound
+  `0xA0`, and `enabled == 1`; raw-byte verification confirms 160 aligned
+  records, 127 enabled entries, and zero pad bytes. Regenerated correlation now
+  finds 12 exact Techstream DTC rows, including `U0100`, `U0126`, `U023A`,
+  `U0293`, and `U1103`.
+- **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
+  DIAG-APP-008; `tests/verify_diagnostic_vocabulary.py`.
+
+### CORR-027 — Format-6 magic treated the English language tag as fixed
+
+- **Wrong (2026-08-01, same-day parser hardening):** Require the full English
+  header `39 00 0C 16 0B 15 0F 16` for every format-6 string database.
+- **Right:** the common prefix is seven bytes (`39 00 0C 16 0B 15 0F`); byte 7
+  is a language tag from `0x16` through `0x1A` in the pinned corpus.
+- **Evidence:** all 13 regional/language `U_*.ddb` files decode to 25,957
+  strings plus 25,957 aligned metadata records. The deterministic suite now
+  parses all 13 and asserts the complete observed language-tag set.
+- **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.1;
+  TMS-013; `tests/verify_diagnostic_vocabulary.py`.

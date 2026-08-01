@@ -70,6 +70,26 @@ paths = ["docs/diagnostics/application.md"]
 tests = ["tests/verify_application_diagnostics.py"]
 paths = ["docs/diagnostics/application.md", "data/application_diagnostic_map.csv"]
 
+[suite.diagnostic_vocabulary]
+tests = ["tests/verify_diagnostic_vocabulary.py"]
+paths = [
+  "tools/techstream/parse_ddb.py",
+  "tools/techstream/extract_catalog.py",
+  "tools/techstream/extract_p4dk4_catalog.py",
+  "tools/techstream/extract_steering_corpus.py",
+  "tools/diagnostics/firmware_tables.py",
+  "tools/diagnostics/correlate_vocabulary.py",
+  "ghidra/scripts/annotate/ApplyDiagnosticVocabulary.java",
+  "ghidra/scripts/seed/SeedDidCallbacks.java",
+  "ghidra/scripts/verify/AssertDiagnosticVocabulary.java",
+  "ghidra/scripts/verify/AssertDecompilerInvariants.java",
+  "tools/rebuild_project.sh",
+  "data/generated/21140bbd65e530a9/",
+  "data/generated/p4dk4_template/",
+  "data/generated/techstream_v18/",
+  "docs/tooling/techstream-ddb-pipeline.md",
+]
+
 [suite.application_receive]
 tests = ["tests/verify_application_receive.py"]
 paths = ["docs/communications/application-rx.md", "data/application_rx_map.csv"]
@@ -161,6 +181,12 @@ paths = ["docs/tooling/techstream.md"]
 # authorization). SKIPs cleanly (exit 0) when the gitignored Techstream/
 # unpacked tree is absent, so it never breaks core verify. Run on a host
 # where Techstream/unpacked/ is populated, or via: make verify-one SUITE=techstream_rks
+
+[suite.techstream_mackey]
+tests = ["tests/verify_techstream_mackey.py"]
+paths = ["docs/security/mackey-registration.md", "docs/tooling/techstream.md", "tools/techstream/inspect_dotnet_il.py"]
+# External-tree suite: verifies TMS-011 against native exports/imports and the
+# managed IT3UtilityRevNK IL. SKIPs cleanly when Techstream/unpacked is absent.
 
 [suite.techstream_layerb]
 tests = ["tests/verify_techstream_layerb.py"]

@@ -640,7 +640,7 @@ seed/key exchange, DID reads, session transitions, and programming handoff —
 which can be diffed against our static firmware analysis to validate or
 correct recovered claims.
 
-## 7. Diagnostic databases (.ddb)
+### 6.1 Diagnostic databases (.ddb)
 
 Techstream ships ECU-specific diagnostic databases in a proprietary binary
 format (`DiagTool DataCtrl` magic). The EPS-relevant databases:
@@ -653,134 +653,60 @@ format (`DiagTool DataCtrl` magic). The EPS-relevant databases:
 | `Security_P4.ddb` | NA/EU | 13 KiB | Phase-4 SecurityAccess definitions |
 | `Toyota.ddb` | all | 13.0 MiB | Master ECU enumeration (part numbers, calibrations) |
 
-The binary format uses a 32-byte header (`40 00 0c 16 0c 08 00 39 02 97` +
-`"DiagTool DataCtrl\0"`) followed by offset tables and structured diagnostic
-records. The format is not yet fully decoded; the records are consumed at
-runtime by the `CommandDataLib` / `CommandAPI` DLL layer.
+The repository parser now decodes the section directory, DTC records, DID
+records, Data List monitors, and all three OEM string databases. Run
+`make generate-diagnostic-vocabulary` to rebuild the calibration-focused
+annotations plus the complete regional steering corpus.
+
+The calibration-focused correlation still uses `EPS_P4DK3.ddb` and
+`EPS_CAN_P4DK.ddb` as bounded family vocabulary for the Sienna. A separate
+artifact, `data/generated/techstream_v18/steering_diagnostic_corpus.json`,
+prevents that selection from hiding the rest of the distribution: it discovers
+all **35** regional `EPS*`/`EMPS*` files, groups them into **25** full-section semantic
+variants, and recovers **129** unique DTC identifiers, **16** unique DIDs, and
+**1257** monitor records. The former parser stopped at directory slot 16 and
+silently omitted 10,659 of 25,361 type-2 sections.
+
+The generated artifacts are deterministic. Tests compare committed JSON to a
+fresh in-memory rebuild, reject malformed LZSS streams, wrong format dispatch,
+bad format-6 magic, and fractional record layouts, and independently verify all
+raw section-directory entries. `U_English.ddb` also carries 25,957 aligned
+resource identifiers; those group UI text but do not encode ECU ownership or
+firmware routine linkage. Its former 122
+"utility procedure" records were produced by substring search (including
+`eps` inside `steps`) and per-term truncation. They are now explicitly labeled
+steering-anchored `utility_string` vocabulary, never recovered procedures.
 
 ## 7. MACKey Registration — ECU authentication key provisioning
 
-Techstream contains a complete ECU MAC key registration utility that was not
-part of the original SecurityAccess analysis. It is a separate subsystem from
-both the diagnostic SA path (§4) and the CUW reflash path (§5).
+The canonical report is
+[security/mackey-registration.md](../security/mackey-registration.md). Managed
+IL now recovers the complete online request flow and corrects the former `$36`
+interpretation:
 
-### 7.1 Overview
+- the request XML contains VIN, master/slave `SafekeyNumber`, `MACM1`,
+  `MACM2`, `MACM3`, and a deterministic SHA-256 `HashValue`;
+- native `IT3UtilityNK.dll` bridges to
+  `CWebService::TisServiceSendMacKey` / `TisServiceGetMacKeyInfo`;
+- the returned request ID replaces `$36` in the configured login URL, then the
+  client polls by `request_id` plus `SHA256(request_id)` and stores the returned
+  exchange-key XML as `Memg/MAC_01_WriteData.xml`;
+- `$36` is therefore **not DID `0x0036`**. The former `ecuMacId` URL claim came
+  from an untracked configuration example and is not repeated as pinned fact;
+- 24 native `CMAC_01_*` RTTI classes consume the result, but the exact
+  vehicle-facing read/write command sequence is still bounded.
 
-`Techstream.exe` exposes a `MACKeyRegistration` utility through its main menu
-(`OnButtonMACKeyRegistration`, `CMainMenuView`). The entry point is
-`CCommandDataManager::StartUtilityMACKeyRegistration`, which invokes
-`CMACKeyRegistrationFuncProc`. The log prefix `[AP-MK(%s)]` suggests
-"Application MAC Key."
+This remains distinct from UDS SecurityAccess. A relationship to SecOC key
+provisioning is plausible but **not proven** by the static artifacts.
 
-This subsystem registers or replaces ECU authentication keys via Toyota's
-online TIS portal. It is **not** SecOC — Techstream does not interact with
-SecOC at all (§8.2, TMS-006) — but it is a MAC key *management* path that
-provisions the kind of key material SecOC consumes at runtime.
+### 7.1 Full-tree secret census
 
-### 7.2 EVBBroker architecture
-
-The MACKey registration (and two other utilities: `CBestInfoWrite` and
-`SendVehicleInformation`) shares an `EVBBroker` plugin dispatch layer. All
-three `ExcuteEVBBroker()` methods call the same sequence of dynamically-loaded
-exports from a broker DLL in the Techstream `bin/` directory:
-
-```
-EbStart → EbOpenPara → EbSetData/EbSetString/EbSetPara
-       → EbGetPara/EbReadPara/EbWritePara
-       → EbClosePara → EbEnd → EbKill
-```
-
-The broker DLL name is resolved at runtime via `ER_GetFolder` +
-`LoadLibrary` — it is not statically linked. The Eb* API is a
-parameter-passing protocol: the caller sets input data/strings, the broker
-executes, and the caller reads output parameters. This is the same
-architecture as the IT3 diagnostic utilities (it shares the
-`IT3UtilityNeoCtrlNK.dll` script engine, which has `SCRIPT_ENG_TSK_ID_CMD`
-references).
-
-### 7.3 Configuration
-
-The MACKey Registration function is configured through decoded SI/*.ini files
-present in all regional distributions (NA, EU, JP, OT). The US public
-configuration (`uspublic.ini`):
-
-```ini
-[MACKeyFunction]
-Display=1
-
-[MACKey_upload]
-URL=https://t3services.toyota.com/t3webservices/service/ws1/scantool/ScantoolMilIService.jws
-
-[MACKey_Login]
-URL=https://techinfo.toyota.com/t3Portal/scantool?l=tis_ecu_mac&ecuMacId=$36
-
-[MACKey_ProcessType]
-Type=2
-```
-
-International regions use `MACKey_Login_substitute` instead of
-`MACKey_Login`, with a different portal endpoint.
-
-The upload URL is a SOAP web service (`ScantoolMilIService.jws`). The login
-URL references `ecuMacId` as a URL parameter, confirming this path targets a
-specific ECU's MAC key.
-
-### 7.4 CMAC_01 procedure classes
-
-`IT3UtilityNK.dll` contains 24 `CMAC_01_*` RTTI subclasses:
-
-```
-CMAC_01          CMAC_01_000      CMAC_01_000A     CMAC_01_000_S
-CMAC_01_001A     CMAC_01_001B     CMAC_01_001C     CMAC_01_001C_S
-CMAC_01_001D     CMAC_01_001E     CMAC_01_001F     CMAC_01_001F_S
-CMAC_01_009A     CMAC_01_009A_S   CMAC_01_009B     CMAC_01_009B_S
-CMAC_01_015      CMAC_01_017      CMAC_01_025_S    CMAC_01_028_S
-CMAC_01_031_S    CMAC_01_036_S    CMAC_01_038_S    CMAC_01_039_S
-```
-
-These are diagnostic procedure classes for CMAC-related utility operations,
-indexed by procedure ID. The `_S` suffix likely denotes a sub-procedure
-variant.
-
-### 7.5 Relationship to firmware findings
-
-The MACKey Registration path is **orthogonal** to the firmware SecOC analysis:
-
-- It does not use UDS `SecurityAccess` (no `0x27` in its path).
-- It does not touch the firmware secrets (`SEED_KEY_SECRET`, application
-  SA secret at `0x20840`, payload-gate keys).
-- It uploads to Toyota's TIS portal via SOAP, not to the ECU directly via CAN.
-- The CMAC_01 classes are diagnostic procedures, not the SecOC frame
-  verification path (which lives entirely in firmware).
-
-**Practical implication:** if the Corolla's SecOC key is dealer-provisioned
-rather than factory-locked, this is the path that would do it. The
-`ecuMacId` parameter and the `ScantoolMilIService` upload suggest the portal
-generates or authorizes an ECU MAC key and the EVBBroker writes it to the
-vehicle. This is a lead worth investigating if the firmware-side key
-extraction path stalls.
-
-### 7.6 Full-tree secret census
-
-A binary sweep of all 6620 files in the Techstream tree for firmware secrets
-and SA key material found:
-
-| Secret | Present? | Location |
-|---|---|---|
-| `SEED_KEY_SECRET` (`f05f36b7…`, plaintext) | **Absent** | — |
-| `SEED_KEY_SECRET` (bitwise-inverted) | **Absent** | — |
-| Application SA secret (`893e0841…`, plaintext) | **Absent** | — |
-| Application SA secret (bitwise-inverted) | **Absent** | — |
-| `FUKUMORIYOSIYAMA` | Yes | UtilityEx2TY.dll (plaintext), CommandCommon.dll (inverted) |
-| CGW key (`5622e499…`) | Yes | UtilityEx2TY.dll, DS2ComNK.dll, UtilityExNK2.dll (plaintext), CommandCommon.dll (inverted) |
-| IT3 Neo key (`bCVaAQnA3fNdDgdl`) | Yes | IT3UtilityNeoNK.dll, IT3ACNK.dll (plaintext) |
-| SecOC / VehSec references | **Absent** | Zero across entire tree |
-| TSK (Toyota Security Key) | **Absent** | All byte matches are random compressed data |
-
-The three firmware secrets are completely absent — neither in plaintext nor
-in the bitwise-inverted storage form used by CommandCommon.dll. This confirms
-that the EPS reflash key is calibration-file-only (TMS-007) and the SecOC
-key is not managed by Techstream (TMS-006).
+The exhaustive binary sweep found none of the Sienna bootloader or application
+SecurityAccess secrets in plaintext or bitwise-inverted form. It did find the
+three separately mapped Techstream keys (`FUKUMORIYOSIYAMA`, the Central
+Gateway key, and the IT3 Neo key), all on non-EPS paths. It also found no
+`SecOC`/`VehSec` references. This negative constrains the pinned V18.00.003
+tree; it does not identify the domain served by MACKey Registration.
 
 ## 8. Relationship to firmware findings
 
@@ -809,7 +735,7 @@ key is not managed by Techstream (TMS-006).
 | `ptshim32.dll` CAN logger | Capture a real Techstream↔EPS session for transcript validation |
 | `CSecurityAccessAES128` source paths | PDB/source-tree context for the KGProject diagnostic framework |
 | TIS portal RKS flow (`CUWAccessRKS.dll`, §5.3) | OEM reprogramming-key authorization (Layer A) — VIN+license bound, IE-automated, no client crypto; independent of the cal-file crypto key (Layer B). Not immobilizer. |
-| MACKey Registration (`CMACKeyRegistrationFuncProc`, §7) | Online ECU MAC key provisioning path — uploads to TIS portal via SOAP (`ScantoolMilIService.jws`), references `ecuMacId`. Not SecOC, but a MAC key *management* path relevant to understanding ECU key provisioning. 24 CMAC_01 RTTI subclasses in IT3UtilityNK.dll. |
+| MACKey Registration (§7) | Online exchange-key provisioning path: VIN + master/slave safe-key/MAC fields → hashed `ECUExchangeKey` XML → native TIS web-service bridge → returned exchange-key XML → 24 `CMAC_01_*` native procedure classes. `$36` is the server request ID, not a DID. Exact ECU write protocol and any SecOC relationship remain open. |
 | `TCUWControlCommPhase.dll` parameters | Exact timing values for SA seed/key exchange during reflash |
 | `[ISTA_T3_Login]` credentials | Hardcoded hex credentials in `uspublic.ini` for Toyota ISTA portal |
 
@@ -821,8 +747,9 @@ Techstream on a vehicle or bench. The findings describe the *capability* and
 
 - The SA key computation in `CSecurityAccessAES128` was identified by symbol
   analysis, not by executing the cipher against a known seed/key pair.
-- The `.ddb` binary format is structurally identified but its diagnostic
-  record contents are not fully decoded.
+- The `.ddb` pipeline decodes DTC, DID, and monitor records but not every
+  section type. The complete steering corpus prevents source-file omission;
+  unknown sections remain explicitly inventoried rather than interpreted.
 - The `ptshim32.dll` logger is described by export/PDB analysis; its actual
   log format and capture behavior are untested.
 - No live UDS transcript has been captured to validate against firmware
