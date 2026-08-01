@@ -271,9 +271,23 @@ survive reboot rather than living only in volatile RAM. Its three components:
   the `0xFF00` callback, it uses the Flash Control Unit (FACI registers at
   `0xFFA1xxxx`) to scan CodeFlash for an 8-byte marker, patch the SecOC MAC
   verification function to unconditionally pass (`0x007f5201`), and fix the
-  bootloader CRC32 at `0xFFDEC` to keep the validity check happy. This is a
-  new attack path for this repository — we documented RAM-exec without
-  re-auth (MEM-SAFE-001) but not persistent CodeFlash modification.
+  bootloader CRC32 at `0xFFDEC` to keep the validity check happy. The CRC
+  repair geometry matches `8965B4512000` exactly: CRC range `0x18000..0xFFDF0`,
+  adjustment word at `0xFFDEC` (4 bytes before range end), marker at `0xFFE00`,
+  all verified by `verify_community_tooling.py` §7 and consistent with
+  `verify_boot_trust.py` region-1 assertions. However, **the 8-byte egg
+  (`88 00 01 52 00 0a e5 0d`) is a false positive on `8965B4512000`**: it
+  matches exactly once at VA `0x3485A`, which is the prologue of
+  `FUN_0003485A` — a 5-byte `memcmp` helper in the `0xAB` event-record
+  dispatch path (callers: `FUN_00034882` at `0x34882`,
+  `application_proprietary_ab_f1_start` at `0x34B74`). The actual SecOC
+  verification function is `secoc_rx_verify_worker` at `0x8E4BA`, ~0x59C60
+  bytes away, with a completely different prologue (`a4 07 e1 f0 c6 00 e6 ee`).
+  Patching the egg on this image would force the event-token matcher to always
+  return "match," corrupting `0xAB` dispatch — not bypassing SecOC. The egg
+  was designed for an `8965F3`/`8965F4` calibration where it presumably does
+  mark the verify function; on the Sienna image the same byte pattern occurs
+  coincidentally in unrelated code.
 
 - **`decrypt.T-0035-22.py`** — CUW decryption. Documents the per-byte
   SeedKey/Nonce obfuscation (`out[i] = (raw[i] − i) mod 256` → ASCII hex →

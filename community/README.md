@@ -37,8 +37,14 @@ repository findings:
 
 - **Persistent CodeFlash patching via FCU** — the shellcode uses Flash
   Control Unit registers (FACI at 0xFFA1xxxx) to erase/reprogram CodeFlash
-  blocks, making the MAC bypass survive reboot. The FCU patch path is not
-  documented in this repository.
+  blocks. The CRC repair geometry (range `0x18000..0xFFDF0`, adjustment word
+  at `0xFFDEC`, marker at `0xFFE00`) matches the Sienna boot layout exactly.
+  However, the 8-byte egg marker is a **false positive** on `8965B4512000`:
+  it matches a 5-byte `memcmp` helper in the `0xAB` event-record dispatch
+  path (`FUN_0003485A` at VA `0x3485A`), not the SecOC verify function
+  (`secoc_rx_verify_worker` at `0x8E4BA`). The egg was designed for the
+  `8965F3`/`8965F4` family; it does not transfer to this calibration.
+  See SECOC-028 and `verify_community_tooling.py` §6–7.
 - **Extended version family** — targets 8965F3401200 (dual-CPU),
   8965F4207000, 8965F4201000, 8965B4209000, 8965B4233100, 8965B4509100.
   The 8965F3 dual-CPU part is a new family.

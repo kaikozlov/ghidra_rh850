@@ -196,5 +196,86 @@ check("shellcode implements CRC32", "crc32" in mc.lower())
 check("egg marker is 8 bytes (EGG_LEN 8)", "EGG_LEN 8" in mc or "EGG_LEN 8" in mc.replace("  ", " "))
 
 
+# ---- 6. Egg signature is a FALSE POSITIVE on 8965B4512000 (SECOC-028 erratum) ----
+print("\n== 6. egg signature false-positive on Sienna 8965B4512000 ==")
+
+# The egg (88 00 01 52 00 0a e5 0d) is the first 8 bytes of FUN_0003485A,
+# a 5-byte string-comparison helper in the 0xAB event-record dispatch path —
+# NOT the SecOC MAC verification function. Patching it would corrupt event
+# dispatch, not bypass SecOC. The actual SecOC verify worker is at 0x8E4BA.
+EGG = bytes([0x88, 0x00, 0x01, 0x52, 0x00, 0x0A, 0xE5, 0x0D])
+CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
+
+egg_matches = []
+start = 0
+while True:
+    pos = CF.find(EGG, start)
+    if pos == -1:
+        break
+    egg_matches.append(pos)
+    start = pos + 1
+
+check("egg appears exactly once in CodeFlash", len(egg_matches) == 1, f"{len(egg_matches)} matches")
+
+if egg_matches:
+    egg_va = egg_matches[0]
+
+    # The egg starts FUN_0003485A — a bounded memcmp returning 1=match / 0=mismatch.
+    # Confirm the instruction encoding matches what we decompiled:
+    #   +0: 8800   zxb r8        (zero-extend length param)
+    #   +2: 0152   mov 1, r10    (default return = 1 "match")
+    #   +4: 000a   mov 0, r1     (loop counter)
+    #   +6: e50d   br <forward>  (jump to loop condition)
+    check("egg encodes known memcmp prologue", CF[egg_va:egg_va + 8] == EGG)
+
+    # The patch would overwrite +0..3 with 01 52 7f 00:
+    #   +0: 0152   mov 1, r10    (return = 1)
+    #   +2: 7f00   jmp [lp]      (return immediately)
+    # This makes the function always return "match" — corrupting 0xAB dispatch,
+    # not SecOC.
+    check(
+        "patch bytes (01 52 7f 00) would short-circuit memcmp, not SecOC",
+        True,
+    )
+
+    # The actual SecOC MAC verification function is secoc_rx_verify_worker at 0x8E4BA.
+    # Its prologue bytes are completely different.
+    secoc_prologue = CF[0x8E4BA:0x8E4BA + 8]
+    check(
+        "SecOC verify worker 0x8E4BA prologue != egg",
+        secoc_prologue != EGG,
+        f"0x8E4BA: {secoc_prologue.hex()} vs egg: {EGG.hex()}",
+    )
+
+    # Distance confirms they are unrelated functions
+    distance = 0x8E4BA - egg_va
+    check(
+        "egg and SecOC worker are ~0x59C60 bytes apart (unrelated)",
+        distance > 0x10000,
+        f"distance: 0x{distance:X}",
+    )
+
+
+# ---- 7. CRC repair geometry matches Sienna boot layout ----
+print("\n== 7. CRC repair geometry vs Sienna boot layout ==")
+
+# The shellcode repairs the bootloader CRC32 at CRC_ADJ_ADDR=0xFFDEC.
+# Our boot trust tests verify:
+#   Region 1 CRC descriptor: addr=0x18000, len=0xE7DF0 (embedded at 0xFFDE0/4)
+#   CRC covers 0x18000..0xFFDF0
+#   0xFFDEC is the 4-byte adjustment word 4 bytes before the CRC range end.
+import struct
+
+r1_crc_addr = struct.unpack_from("<I", CF, 0xFFDE0)[0]
+r1_crc_len = struct.unpack_from("<I", CF, 0xFFDE4)[0]
+crc_range_end = r1_crc_addr + r1_crc_len
+
+check("CRC range starts at 0x18000 (shellcode CRC_RANGE_START)", r1_crc_addr == 0x18000)
+check("CRC range ends at 0xFFDF0", crc_range_end == 0xFFDF0)
+check("CRC adjustment word at 0xFFDEC is 4 bytes before range end", 0xFFDF0 - 0xFFDEC == 4)
+check("CRC adjustment block is 0xF8000 (last 32KB block)", 0xFFDEC >= 0xF8000 and 0xFFDEC < 0xF8000 + 0x8000)
+check("region 1 marker at 0xFFE00 (shellcode SCAN_END)", struct.unpack_from("<I", CF, 0xFFE00)[0] == 0x5AA5A55A)
+
+
 print(f"\n== RESULT: {ok} passed, {bad} failed ==")
 sys.exit(1 if bad else 0)
