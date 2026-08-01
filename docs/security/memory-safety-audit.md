@@ -299,6 +299,150 @@ callback pointer via MEM-SAFE-001) supplied a caller-controlled output
 pointer/length. It is documented to prevent regression and to flag the risk
 for variant analysis.
 
+## Bug-class taxonomy
+
+The audit searched for five vulnerability patterns common in embedded
+input-handling code:
+
+1. **Short-frame stale-tail use** — receive N bytes into a larger buffer, leave
+   residual bytes from a previous frame, then process the full buffer length.
+2. **Length underflow** — compute `payload_len = received_len - trailer_len`
+   without first proving `received_len >= trailer_len`.
+3. **Parser differential** — transport layer accepts one length, service layer
+   assumes another.
+4. **Reject-path cursor corruption** — on error, roll back by the expected
+   length rather than the bytes actually consumed.
+5. **Unchecked sink** — caller validates capacity, callee blindly copies, and
+   some alternate caller bypasses the validation.
+
+Each externally reachable path was checked against this taxonomy.
+
+## Specific audited paths (safe primitives with caller-gated reachability)
+
+### Application diagnostic Rx blind copy (`0x920D2`)
+
+`FUN_000920D2` blindly copies application diagnostic Rx data from the request
+buffer to a route-specific destination and subtracts the chunk length from
+remaining. It performs no bounds check itself. However, its sole caller
+`FUN_0009043C @ 0x9043C` checks `*(ushort *)(param_2 + 4) <= remaining` (via
+`FUN_00092398`) before invoking the copy. No alternate caller bypasses this
+validation — this is an unchecked-sink pattern that is currently closed by
+caller gating.
+
+### Bootloader request-prefix copy (`0x67B0`)
+
+`FUN_000067B0` copies `param_2 & 0xffff` bytes from `DAT_febf30c0` (the 4 KiB
+Dcm request buffer at `0xFEBF30C0`) to a caller-supplied destination. This is
+used by WDBI, RequestDownload, and RoutineControl to copy fixed-size request
+prefixes (19/13/14 bytes) before the handler validates the full request
+length. The copy stays inside the 4 KiB buffer and may consume stale bytes
+from a previous transaction, but all audited handlers enforce exact request
+lengths before those prefix bytes affect any sensitive operation. No
+stale-data response or memory escape was found through this path.
+
+### TransferData ignored range-check return (`0x4B7C`)
+
+`FUN_00004B7C` (the ordinary TransferData handler) calls
+`boot_memory_range_check_access @ 0x32D2` but ignores its return value. It then
+reads `acStack_d[0]` — the output class byte — which is only initialized if the
+range check passed. On a failed range check, this byte would be uninitialized.
+
+However, the address and remaining-length state were already validated by the
+prior `RequestDownload @ 0x5D68`, which performs its own range check against
+the same table. No external sequence was found that breaks this invariant: the
+download address is set once by RequestDownload and cannot be changed by
+TransferData alone. This is a real code-quality defect (missing error handling)
+but not currently an externally reachable corruption primitive.
+
+### SecOC trailer subtraction (`0x8E4BA`)
+
+`secoc_rx_verify_worker @ 0x8E4BA` performs the length subtraction that
+initially appeared vulnerable to a stale-tail or underflow attack: received
+length minus the configured authentication trailer. However, the worker
+explicitly rejects frames shorter than the trailer before any subtraction, and
+`canif_validate_rx_length @ 0x7FF52` rejects frames below the configured PDU
+minimum. Classic protected frames require DLC 8; FD protected frames require
+at least 32 bytes; longer FD frames are clamped to 32 before SecOC. The
+hypothesized short-frame/stale-tail pattern does not bypass these gates.
+
+### Range checker wraparound rejection (`0x32D2`)
+
+`boot_memory_range_check_access @ 0x32D2` explicitly validates
+`start <= start + length - 1` before accepting a range, rejecting integer
+wraparound. It also rejects zero length and ranges outside the three
+configured windows. This is a well-designed bounds primitive.
+
+## Memory-map geometry: why MainPE OOB reads cannot reach ICU-S
+
+An ordinary MainPE out-of-bounds read cannot reveal ICU-S key-slot contents.
+ICU-S key slots are not represented as CPU-addressable bytes — they live in
+isolated hardware key storage accessible only through ICU-S command registers.
+
+The CPU-visible ICU-S MMIO register window is at `0xFFC5D000`. MainPE RAM tops
+out at `0xFEBFFFFF`. The gap between them is `0x10_6D_001` bytes (≈16.4 MiB).
+A length underflow starting from any `0xFEBFxxxx` address can reach at most
+`0xFEBFFFFF` — it cannot bridge to `0xFFC5D000`.
+
+Even if the MMIO were reached, the ICU-S command/verify-result registers do
+not contain raw key material. CPU-visible ICU-S products are limited to:
+CMAC output (16 bytes), verification status (one 32-bit word), and command-8
+M4/M5 proof (48 bytes).
+
+SHE provides no command for exporting a nonvolatile key slot such as slot 4
+(SECOC-025). Key extraction therefore requires a privileged memory read of a
+CPU-visible key copy, not an OOB read into ICU-S address space.
+
+## Strategic assessment: the signing-oracle path
+
+**Key extraction is unnecessary for the comma goal.** The useful primitive is a
+CMAC signing oracle: invoke ICU-S command 5 (MAC generation) with selector 4
+(slot 4 = SecOC key) and attacker-chosen input, then return the 16-byte
+generated MAC.
+
+Four potential routes to this oracle:
+
+1. **Overwrite the dormant command-5 test-bank activation/state** — the
+   crypto-test bank at `FEBE508F` is the sole configured command-5 caller, but
+   its activator `0x69018` has no recovered CodeFlash caller. A data-only
+   corruption that sets `FEBE508F=1` could arm the bank through ordinary CAN
+   traffic on `0x01B..0x01F`.
+2. **Redirect an existing asynchronous callback** — point an existing ICU-S
+   or diagnostic callback at the command-5 dispatcher `0x88350`.
+3. **Corrupt a diagnostic output pointer/length** — so the 16-byte ICU result
+   from a command-5 invocation is returned over CAN/diagnostics.
+4. **Application-context code execution** — call command 5 directly via the
+   authenticated bootloader RAM callback (SECOC-019) or a persistent
+   application-context hook.
+
+Route 4 is the most direct: the authenticated bootloader callback already
+provides code execution on the `8965B4x` family, and MEM-SAFE-001 makes it
+repeatable without re-authentication. The bootloader callback runs in the wrong
+context (boot GP/TP/RAM/interrupts) for the initialized application ICU, so a
+persistent application hook or an application-context execution path is the
+remaining gap.
+
+## Next attack priorities for newer targets
+
+The Sienna image identifies vulnerable shapes but cannot prove bugs in code we
+don't possess. The following priorities apply when a newer target's CodeFlash
+becomes available:
+
+1. **CanIf DLC gate → PduR/CanTp copy path** — check for short-frame
+   stale-tail or DLC/length differential between layers.
+2. **SecOC queue → trailer split → authenticated-input builder → COM delivery**
+   — look for lengths validated against different constants between layers
+   (the N-vs-M byte differential).
+3. **Diagnostic response construction** — especially multi-DID/DTC/event
+   responses exceeding the 256-byte application route buffer.
+4. **Asynchronous WDBI/RoutineControl callbacks** — where request buffers are
+   reused after the original transaction.
+5. **Malformed ISO-TP final frames, aborts, retransmissions, and re-entry** —
+   not just oversized First Frames.
+
+The core insight: **the real prize is making one layer authenticate or validate
+N bytes while the next layer consumes M bytes.** That differential is enough to
+own the control path without ever reading the ICU-S key.
+
 ## Negative findings: paths that reject safely
 
 The following externally reachable paths were audited and found to reject

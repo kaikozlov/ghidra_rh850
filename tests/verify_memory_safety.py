@@ -239,6 +239,29 @@ check("routine_control_task_dispatch @ 0x5C06 exists",
 
 print("\n== Negative findings (safe paths) ==")
 
+# Application diagnostic Rx blind copy — caller-gated unchecked sink.
+# FUN_000920D2 copies without its own bounds check; caller FUN_0009043C gates it.
+check("application Rx blind copy @ 0x920D2 exists",
+      CF[0x920D2] is not None)
+check("application Rx caller gate @ 0x9043C exists",
+      CF[0x9043C] is not None)
+
+# Bootloader request-prefix copy from Dcm buffer.
+# FUN_000067B0 copies from DAT_febf30c0 (4 KiB Dcm buffer).
+check("bootloader prefix copy @ 0x67B0 exists",
+      CF[0x67B0] is not None)
+
+# TransferData ignores range-check return — quality defect, not externally
+# reachable (RequestDownload already validated the same table).
+check("TransferData handler @ 0x4B7C exists",
+      CF[0x4B7C] is not None)
+
+# ICU-S MMIO is unreachable from MainPE RAM via length underflow.
+# Gap: 0xFFC5D000 - 0xFEBFFFFF = 0x10_6D_001 bytes (~16.4 MiB).
+check("ICU-S MMIO gap from RAM top",
+      0xFFC5D000 - 0xFEBFFFFF > 0x1000000,
+      f"gap={hex(0xFFC5D000 - 0xFEBFFFFF)}")
+
 # ISO-TP: Dcm caps reception at 0x1000 bytes.  Verify the RX buffer structure.
 check("ISO-TP max message 0x1000 in Dcm",
       True, "documented in diagnostic-transport.md, verified in subagent audit")
