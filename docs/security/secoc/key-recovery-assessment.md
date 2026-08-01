@@ -251,54 +251,85 @@ sibling mirror addresses `0xFEBE6E**` hold motor-signal data here (`FUN_000389C0
 not keys. Combined with the SHE read-prohibition (SECOC-025), the slot-4 key is ICU-S-only on
 this calibration: extraction requires a bus-level/hardware read or SCA, or a weaker peer ECU.
 
-### 1.7 Independent corroboration: persistent CodeFlash SecOC bypass toolchain (SECOC-028)
+### 1.7 Independent corroboration: persistent CodeFlash patching toolchain (SECOC-028)
 
 A second community toolchain (blurbdust/@yc, comma Discord, 2026-08-01;
 `community/blurbdust_secoc_flash_patcher/`) independently re-implements the
-authenticated-RAM-exec bootstrap and extends it into a **persistent CodeFlash
-patch** — the first community tool we've seen that makes the SecOC bypass
-survive reboot rather than living only in volatile RAM. Its three components:
+authenticated-RAM-exec bootstrap and extends it toward **persistent CodeFlash
+patching** — the first community tool we've seen that targets a reboot-surviving
+SecOC bypass rather than a volatile RAM payload. The import splits cleanly into
+two layers: infrastructure that transfers strongly, and an exploit signature
+that does not transfer to this calibration.
+
+#### Infrastructure (transfers strongly)
 
 - **`flash_patcher.py`** — host tool. Structurally identical to the
   I-CAN-hack/Bk2ol bootstrap: same `SEED_KEY_SECRET`, same `0x203→0x201→0x202`
   DID order, same `0xFEBF0000` download window, same `0x10F0`/`0xFF00` routine
-  triggers, all-zero data_record protocol. Its version table covers
-  `8965B4209000`, `8965B4233100`, `8965B4509100`, and new parts
-  `8965F3401200` (dual-CPU), `8965F4207000`, `8965F4201000`. The structural
-  cross-validation is pinned in `verify_community_tooling.py` (28 assertions).
-
-- **`main.c`** — egg-hunter shellcode. After gaining boot-context execution via
-  the `0xFF00` callback, it uses the Flash Control Unit (FACI registers at
-  `0xFFA1xxxx`) to scan CodeFlash for an 8-byte marker, patch the SecOC MAC
-  verification function to unconditionally pass (`0x007f5201`), and fix the
-  bootloader CRC32 at `0xFFDEC` to keep the validity check happy. The CRC
-  repair geometry matches `8965B4512000` exactly: CRC range `0x18000..0xFFDF0`,
+  triggers, all-zero data_record protocol. The structural cross-validation is
+  pinned in `verify_community_tooling.py` §1–5 (28 assertions). Its version
+  table covers `8965B4209000`, `8965B4233100`, `8965B4509100`, and new parts
+  `8965F3401200` (dual-CPU), `8965F4207000`, `8965F4201000`.
+- **Flash RMW + CRC repair geometry** — `main.c` uses FCU registers
+  (`FACI` at `0xFFA1xxxx`) for 32 KiB read-modify-write of CodeFlash blocks,
+  then repairs the bootloader CRC32 so the patched image passes boot validity.
+  The geometry matches `8965B4512000` exactly: CRC range `0x18000..0xFFDF0`,
   adjustment word at `0xFFDEC` (4 bytes before range end), marker at `0xFFE00`,
   all verified by `verify_community_tooling.py` §7 and consistent with
-  `verify_boot_trust.py` region-1 assertions. However, **the 8-byte egg
-  (`88 00 01 52 00 0a e5 0d`) is a false positive on `8965B4512000`**: it
-  matches exactly once at VA `0x3485A`, which is the prologue of
-  `FUN_0003485A` — a 5-byte `memcmp` helper in the `0xAB` event-record
-  dispatch path (callers: `FUN_00034882` at `0x34882`,
-  `application_proprietary_ab_f1_start` at `0x34B74`). The actual SecOC
-  verification function is `secoc_rx_verify_worker` at `0x8E4BA`, ~0x59C60
-  bytes away, with a completely different prologue (`a4 07 e1 f0 c6 00 e6 ee`).
-  Patching the egg on this image would force the event-token matcher to always
-  return "match," corrupting `0xAB` dispatch — not bypassing SecOC. The egg
-  was designed for an `8965F3`/`8965F4` calibration where it presumably does
-  mark the verify function; on the Sienna image the same byte pattern occurs
-  coincidentally in unrelated code.
-
+  `verify_boot_trust.py` region-1 assertions.
 - **`decrypt.T-0035-22.py`** — CUW decryption. Documents the per-byte
   SeedKey/Nonce obfuscation (`out[i] = (raw[i] − i) mod 256` → ASCII hex →
   16 bytes) and the `AES-ECB(BL_KEY, DID_201)` key derivation matching
   SEC-BOOT-003.
 
-The author notes this is "largely untested." The cross-validation value is
-structural — it confirms our gate analysis from independent authorship and
-extends the version map. It does not prove the FCU patch path works on the
-Sienna `8965B4512000` specifically. The 8965F3 dual-CPU part is a new family
-that may differ in flash controller geometry or callback layout.
+#### Exploit signature (does NOT transfer — cross-calibration collision)
+
+`main.c` performs no semantic validation: it scans for the 8-byte egg
+(`88 00 01 52 00 0A E5 0D`), requires exactly one occurrence, replaces its first
+4 bytes with an immediate-success return (`01 52 7F 00` = `mov 1, r10; jmp [lp]`),
+and assumes the patched function is the SecOC MAC verifier.
+
+On `8965B4512000` the egg matches exactly once at VA `0x3485A` (verified).
+But firmware analysis identifies that address as the prologue of
+`FUN_0003485A` — a 5-byte string comparator in the proprietary SID `0xAB`
+event-record token-comparison path:
+
+- Caller `FUN_00034882 @ 0x34882` compares a parameter against the token bank
+  `"BAENAJTEKMTMPCLJTRM1JTRM2BADISBAENATZCLRJTRM3VSPDASINC"` (5 chars at a time).
+- Caller `application_proprietary_ab_f1_start @ 0x34B74` is the operation-F1
+  callback, confirmed in the `0xAB` graph.
+
+The `0xAB` service is structurally classified as an event-record service (list,
+per-ID state, per-ID detail) — not a SecOC service. The closed `0xAB` graph has
+no static edge to `secoc_rx_verify_worker @ 0x8E4BA`, the ICU-S command-7
+verification chain, or any crypto/SecOC target (verified by
+`verify_application_ab_service.py`). The actual SecOC verify function's prologue
+is `a4 07 e1 f0 c6 00 e6 ee` — completely different from the egg.
+
+Applying the supplied patch would make the event-token comparator always return
+"match," distorting `0xAB` dispatch. It would not alter SecOC verification.
+
+This is a **cross-calibration signature collision**: the egg was designed for
+an `8965F3`/`8965F4` calibration where it presumably marks the MAC verify
+function. The same compiler-generated instruction sequence begins an unrelated
+function on the Sienna image. The flash RMW and CRC-repair mechanism remains
+structurally applicable, but a Sienna-specific patch point must be independently
+recovered and verified.
+
+#### Evidence grading
+
+| Claim | Source | Grade |
+|---|---|---|
+| Egg count (1) and address (`0x3485A`) | firmware-static | verified |
+| Function semantics (5-byte comparator) | firmware-static (decompilation) | verified |
+| `0xAB` membership and callers | firmware-static (x-ref + `verify_application_ab_service.py`) | verified |
+| No static edge to SecOC chain | firmware-static (`verify_application_ab_service.py` closed graph) | verified |
+| CRC repair geometry matches Sienna | firmware-static (`verify_boot_trust.py` + `verify_community_tooling.py` §7) | verified |
+| Intended egg meaning on `8965F3/F4` | external-source (patcher version table) | external-source |
+| Direct transfer of egg-based patch to `8965B4512000` | firmware-static | disproved |
+
+The author notes this is "largely untested." The 8965F3 dual-CPU part is a new
+family that may differ in flash controller geometry or callback layout.
 
 ## 2. Ranked recovery methods
 
