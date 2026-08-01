@@ -1,7 +1,7 @@
 {
   "firmware_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
   "techstream_distribution": "V18.00.008",
-  "generated_at": "2026-08-01T00:33:57.181731+00:00",
+  "generated_at": "2026-08-01T00:50:26.596988+00:00",
   "ecu": {
     "family": "EPS",
     "software_id": "8965B4512000",
@@ -27,21 +27,21 @@
     }
   },
   "summary": {
-    "total_mappings": 230,
+    "total_mappings": 239,
     "by_kind": {
       "did": 12,
       "dtc": 54,
-      "monitor": 111,
+      "monitor": 120,
       "active_test": 36,
       "service": 17
     },
     "by_grade": {
       "exact": 33,
       "family": 161,
-      "candidate": 36
+      "candidate": 45
     },
     "auto_apply_count": 8,
-    "comment_only_count": 222
+    "comment_only_count": 231
   },
   "mappings": [
     {
@@ -987,6 +987,149 @@
     },
     {
       "kind": "monitor",
+      "identifier": 257,
+      "oem_name": "Diagnosis codes when FFD stored",
+      "oem_symbol": "diagnosis_codes_when_ffd_stored",
+      "match_grade": "candidate",
+      "firmware_table_index": 1,
+      "firmware_callback": "0x4E98E",
+      "firmware_flags": "0x0020",
+      "source_db": "EPS_CAN_P4DK",
+      "can_variant_name": "Diagnosis codes when FFD stored",
+      "kwp_variant_name": "Torque Sensor 1 Output",
+      "annotation_action": "comment",
+      "note": "Monitor seq 1 → DID 0x0101, callback 0x4E98E. CAN name: 'Diagnosis codes when FFD stored''. KWP conflict: 'Torque Sensor 1 Output'."
+    },
+    {
+      "kind": "monitor",
+      "identifier": 258,
+      "oem_name": "Vehicle speed",
+      "oem_symbol": "vehicle_speed",
+      "match_grade": "candidate",
+      "firmware_table_index": 2,
+      "firmware_callback": "0x4CBFC",
+      "firmware_flags": "0x0007",
+      "source_db": "EPS_CAN_P4DK",
+      "can_variant_name": "Vehicle speed",
+      "kwp_variant_name": "Meter Vehicle Velocity",
+      "annotation_action": "comment",
+      "ram_source": "DAT_FEBEE90C (vehicle_speed_2B), DAT_FEBEE896 (speed_signal_2B), DAT_FEBEE815 (speed_flag_1B)",
+      "note": "Monitor seq 2 → DID 0x0102, callback 0x4CBFC. CAN name: 'Vehicle speed''. KWP conflict: 'Meter Vehicle Velocity'. RAM: DAT_FEBEE90C (vehicle_speed_2B), DAT_FEBEE896 (speed_signal_2B), DAT_FEBEE815 (speed_flag_1B)."
+    },
+    {
+      "kind": "monitor",
+      "identifier": 259,
+      "oem_name": "Engine revolution speed",
+      "oem_symbol": "engine_revolution_speed",
+      "match_grade": "candidate",
+      "firmware_table_index": 3,
+      "firmware_callback": "0x4CC76",
+      "firmware_flags": "0x0004",
+      "source_db": "EPS_CAN_P4DK",
+      "can_variant_name": "Engine revolution speed",
+      "kwp_variant_name": "Torque Sensor 2 Output",
+      "annotation_action": "comment",
+      "ram_source": "DAT_FEBEE910 (engine_rpm_ptr), DAT_FEBEE814 (rpm_flag_1B); returns 0 when rpm < 100000 (0xF4240)",
+      "note": "Monitor seq 3 → DID 0x0103, callback 0x4CC76. CAN name: 'Engine revolution speed''. KWP conflict: 'Torque Sensor 2 Output'. RAM: DAT_FEBEE910 (engine_rpm_ptr), DAT_FEBEE814 (rpm_flag_1B); returns 0 when rpm < 100000 (0xF4240)."
+    },
+    {
+      "kind": "monitor",
+      "identifier": 261,
+      "oem_name": "Motor instruction current",
+      "oem_symbol": "motor_instruction_current",
+      "match_grade": "candidate",
+      "firmware_table_index": 4,
+      "firmware_callback": "0x4CCC4",
+      "firmware_flags": "0x000C",
+      "source_db": "EPS_CAN_P4DK",
+      "can_variant_name": "Motor instruction current",
+      "kwp_variant_name": "Motor Actual Current",
+      "annotation_action": "comment",
+      "ram_source": "checkpoint_object 0x204 (10B, magic 0xA55A5AA5), descriptor at CodeFlash 0x212F8",
+      "note": "Monitor seq 5 → DID 0x0105, callback 0x4CCC4. CAN name: 'Motor instruction current''. KWP conflict: 'Motor Actual Current'. RAM: checkpoint_object 0x204 (10B, magic 0xA55A5AA5), descriptor at CodeFlash 0x212F8."
+    },
+    {
+      "kind": "monitor",
+      "identifier": 265,
+      "oem_name": "Steering torque",
+      "oem_symbol": "steering_torque",
+      "match_grade": "candidate",
+      "firmware_table_index": 5,
+      "firmware_callback": "0x4CD38",
+      "firmware_flags": "0x0006",
+      "source_db": "EPS_CAN_P4DK",
+      "can_variant_name": "Steering torque",
+      "kwp_variant_name": "PIG Power Supply",
+      "annotation_action": "comment",
+      "ram_source": "DAT_FEBEE867..FEBEE86C (6B steering_torque_raw); returns 0xFF fill when invalid (DAT_FEBEE813 != 'Z')",
+      "note": "Monitor seq 9 → DID 0x0109, callback 0x4CD38. CAN name: 'Steering torque''. KWP conflict: 'PIG Power Supply'. RAM: DAT_FEBEE867..FEBEE86C (6B steering_torque_raw); returns 0xFF fill when invalid (DAT_FEBEE813 != 'Z')."
+    },
+    {
+      "kind": "monitor",
+      "identifier": 267,
+      "oem_name": "Output of torque sensor 2",
+      "oem_symbol": "output_of_torque_sensor_2",
+      "match_grade": "candidate",
+      "firmware_table_index": 6,
+      "firmware_callback": "0x4CD74",
+      "firmware_flags": "0x0010",
+      "source_db": "EPS_CAN_P4DK",
+      "can_variant_name": "Output of torque sensor 2",
+      "kwp_variant_name": "TRQ1 Zero Point Value",
+      "annotation_action": "comment",
+      "ram_source": "checkpoint_object 0x20A (16B, magic 0xA55A5AA5), descriptor at CodeFlash 0x21308",
+      "note": "Monitor seq 11 → DID 0x010B, callback 0x4CD74. CAN name: 'Output of torque sensor 2''. KWP conflict: 'TRQ1 Zero Point Value'. RAM: checkpoint_object 0x20A (16B, magic 0xA55A5AA5), descriptor at CodeFlash 0x21308."
+    },
+    {
+      "kind": "monitor",
+      "identifier": 272,
+      "oem_name": "IG switch status",
+      "oem_symbol": "ig_switch_status",
+      "match_grade": "candidate",
+      "firmware_table_index": 7,
+      "firmware_callback": "0x4CDD4",
+      "firmware_flags": "0x0004",
+      "source_db": "EPS_CAN_P4DK",
+      "can_variant_name": "IG switch status",
+      "kwp_variant_name": "IG Power Supply Status",
+      "annotation_action": "comment",
+      "ram_source": "FUN_0006909A() result + GP[-0xB99] (FEBEE664); IG_switch_counter arithmetic",
+      "note": "Monitor seq 16 → DID 0x0110, callback 0x4CDD4. CAN name: 'IG switch status''. KWP conflict: 'IG Power Supply Status'. RAM: FUN_0006909A() result + GP[-0xB99] (FEBEE664); IG_switch_counter arithmetic."
+    },
+    {
+      "kind": "monitor",
+      "identifier": 273,
+      "oem_name": "Torque sensor power supply",
+      "oem_symbol": "torque_sensor_power_supply",
+      "match_grade": "candidate",
+      "firmware_table_index": 8,
+      "firmware_callback": "0x4CDFC",
+      "firmware_flags": "0x0004",
+      "source_db": "EPS_CAN_P4DK",
+      "can_variant_name": "Torque sensor power supply",
+      "kwp_variant_name": "Torque Sensor 3 Output",
+      "annotation_action": "comment",
+      "ram_source": "stub: returns 0 without reading any state",
+      "note": "Monitor seq 17 → DID 0x0111, callback 0x4CDFC. CAN name: 'Torque sensor power supply''. KWP conflict: 'Torque Sensor 3 Output'. RAM: stub: returns 0 without reading any state."
+    },
+    {
+      "kind": "monitor",
+      "identifier": 274,
+      "oem_name": "No. of diagnosis codes",
+      "oem_symbol": "no_of_diagnosis_codes",
+      "match_grade": "candidate",
+      "firmware_table_index": 9,
+      "firmware_callback": "0x4CE00",
+      "firmware_flags": "0x0004",
+      "source_db": "EPS_CAN_P4DK",
+      "can_variant_name": "No. of diagnosis codes",
+      "kwp_variant_name": "Motor Overheat Record",
+      "annotation_action": "comment",
+      "ram_source": "DAT_FEBE8AB0 + DAT_FEBE89A4 (diagnostic_code_count arithmetic)",
+      "note": "Monitor seq 18 → DID 0x0112, callback 0x4CE00. CAN name: 'No. of diagnosis codes''. KWP conflict: 'Motor Overheat Record'. RAM: DAT_FEBE8AB0 + DAT_FEBE89A4 (diagnostic_code_count arithmetic)."
+    },
+    {
+      "kind": "monitor",
       "oem_name": "Torque Sensor 1 Output",
       "oem_symbol": "torque_sensor_1_output",
       "match_grade": "family",
@@ -1006,7 +1149,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Torque Sensor 1 Output'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Torque Sensor 1 Output'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1029,7 +1172,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Meter Vehicle Velocity'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Meter Vehicle Velocity'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1052,7 +1195,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Torque Sensor 2 Output'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Torque Sensor 2 Output'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1075,7 +1218,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Engine Revolution'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Engine Revolution'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1098,7 +1241,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor Actual Current'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor Actual Current'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1121,7 +1264,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Command Value Current'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Command Value Current'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1144,7 +1287,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Steering Angle Velocity'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Steering Angle Velocity'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1167,7 +1310,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Thermistor Temperature'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Thermistor Temperature'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1190,7 +1333,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'PIG Power Supply'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'PIG Power Supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1213,7 +1356,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'IG Power Supply'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'IG Power Supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1236,7 +1379,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'TRQ1 Zero Point Value'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'TRQ1 Zero Point Value'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1259,7 +1402,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'TRQ2 Zero Point Value'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'TRQ2 Zero Point Value'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1282,7 +1425,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Steering Wheel Torque'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Steering Wheel Torque'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1305,7 +1448,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor Terminal Volt(+)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor Terminal Volt(+)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1328,7 +1471,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor Terminal Volt(-)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor Terminal Volt(-)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1351,7 +1494,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'IG Power Supply Status'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'IG Power Supply Status'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1374,7 +1517,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Torque Sensor 3 Output'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Torque Sensor 3 Output'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1397,7 +1540,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor Overheat Record'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor Overheat Record'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1420,7 +1563,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor Lo Power Record'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor Lo Power Record'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1443,7 +1586,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Battery Voltage Lo Record'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Battery Voltage Lo Record'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1466,7 +1609,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Battery Voltage'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Battery Voltage'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1489,7 +1632,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'TRQ Sensor Power Supply'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'TRQ Sensor Power Supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1512,7 +1655,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor Voltage'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor Voltage'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1535,7 +1678,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'System Power Supply'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'System Power Supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1558,7 +1701,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'The Number of DTCs'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'The Number of DTCs'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1581,7 +1724,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Key Cycle'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Key Cycle'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1604,7 +1747,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'IG-ON Elapsed Time'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'IG-ON Elapsed Time'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1627,7 +1770,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Clock Type'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Clock Type'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1650,7 +1793,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'IG-ON Elapsed Time for Independent'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'IG-ON Elapsed Time for Independent'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1673,7 +1816,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mirror Fold/Return'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mirror Fold/Return'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1696,7 +1839,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mirror Heater'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mirror Heater'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1719,7 +1862,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Ashtray Light'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Ashtray Light'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1742,7 +1885,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Foot Light'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Foot Light'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1765,7 +1908,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'P Manual SW LED'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'P Manual SW LED'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1788,7 +1931,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mirror Right/Left'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mirror Right/Left'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1811,7 +1954,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Clock Type'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Clock Type'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1834,7 +1977,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Diagnosis codes when FFD stored'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Diagnosis codes when FFD stored'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1857,7 +2000,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Vehicle speed'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Vehicle speed'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1880,7 +2023,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'unnamed'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'unnamed'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1903,7 +2046,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Engine revolution speed'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Engine revolution speed'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1926,7 +2069,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor actual current'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor actual current'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1949,7 +2092,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor instruction current'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor instruction current'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1972,7 +2115,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Thermistor temperature'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Thermistor temperature'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -1995,7 +2138,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'PIG power supply'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'PIG power supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2018,7 +2161,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'IG power supply'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'IG power supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2041,7 +2184,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Steering torque'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Steering torque'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2064,7 +2207,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Output of torque sensor 1'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Output of torque sensor 1'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2087,7 +2230,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Output of torque sensor 2'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Output of torque sensor 2'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2110,7 +2253,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor voltage (+)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor voltage (+)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2133,7 +2276,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor voltage (-)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor voltage (-)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2156,7 +2299,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Control mode (main)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Control mode (main)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2179,7 +2322,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Control mode (sub)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Control mode (sub)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2202,7 +2345,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'IG switch status'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'IG switch status'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2225,7 +2368,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Torque sensor power supply'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Torque sensor power supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2248,7 +2391,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'No. of diagnosis codes'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'No. of diagnosis codes'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2271,7 +2414,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Key Cycle'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Key Cycle'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2294,7 +2437,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'IG-ON Elapsed Time'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'IG-ON Elapsed Time'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2317,7 +2460,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Clock Type'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Clock Type'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2340,7 +2483,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'IG-ON Elapsed Time for Independent'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'IG-ON Elapsed Time for Independent'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2363,7 +2506,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mirror Fold/Return'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mirror Fold/Return'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2386,7 +2529,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mirror Heater'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mirror Heater'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2409,7 +2552,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Ashtray Light'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Ashtray Light'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2432,7 +2575,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Foot Light'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Foot Light'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2455,7 +2598,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'P Manual SW LED'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'P Manual SW LED'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2478,7 +2621,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mirror Right/Left'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mirror Right/Left'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2501,7 +2644,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Clock Type'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Clock Type'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2524,7 +2667,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Support mode information'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Support mode information'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2547,7 +2690,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Diagnosis mode'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Diagnosis mode'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2570,7 +2713,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2593,7 +2736,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2616,7 +2759,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2639,7 +2782,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2662,7 +2805,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2685,7 +2828,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2708,7 +2851,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2731,7 +2874,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2754,7 +2897,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2777,7 +2920,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2800,7 +2943,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2823,7 +2966,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2846,7 +2989,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2869,7 +3012,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2892,7 +3035,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2915,7 +3058,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2938,7 +3081,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2961,7 +3104,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -2984,7 +3127,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3007,7 +3150,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3030,7 +3173,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3053,7 +3196,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3076,7 +3219,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3099,7 +3242,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3122,7 +3265,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3145,7 +3288,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Mobile#2 Bluetooth Address(High)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3168,7 +3311,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Main CPU mask ID'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Main CPU mask ID'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3191,7 +3334,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Sub CPU mask ID'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Sub CPU mask ID'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3214,7 +3357,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Main CPU ROM sum'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Main CPU ROM sum'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3237,7 +3380,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Sub CPU ROM sum'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Sub CPU ROM sum'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3260,7 +3403,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Assist map select'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Assist map select'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3283,7 +3426,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor actual current'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor actual current'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3306,7 +3449,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor instruction current'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor instruction current'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3329,7 +3472,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor actual current'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor actual current'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3352,7 +3495,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor instruction current'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor instruction current'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3375,7 +3518,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'PIG power supply'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'PIG power supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3398,7 +3541,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'IG power supply'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'IG power supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3421,7 +3564,7 @@
         65535
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Steering torque'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Steering torque'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3444,7 +3587,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Output of torque sensor 1'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Output of torque sensor 1'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3467,7 +3610,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Output of torque sensor 2'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Output of torque sensor 2'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3490,7 +3633,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor voltage (+)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor voltage (+)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3513,7 +3656,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Motor voltage (-)'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Motor voltage (-)'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "monitor",
@@ -3536,7 +3679,7 @@
         0
       ],
       "annotation_action": "vocabulary",
-      "note": "Techstream Data List monitor 'Torque sensor power supply'. Not directly correlated to a firmware DID — requires callback analysis to identify the source RAM variable."
+      "note": "Techstream Data List monitor 'Torque sensor power supply'. No firmware DID match (seq >= 100 or not in DID table)."
     },
     {
       "kind": "active_test",

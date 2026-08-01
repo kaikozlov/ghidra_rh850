@@ -229,13 +229,13 @@ symbol renames in Ghidra. `family` adds comment-only annotations.
 
 ### Correlation results
 
-Current output (230 mappings):
+Current output (239 mappings):
 
 | Kind | Count | Exact | Candidate | Family |
 |---|---|---|---|---|
 | DIDs | 12 | 12 | — | — |
 | DTCs | 54 | 16 | 18 | 20 |
-| Monitors | 111 | — | — | 111 |
+| Monitors | 120 | — | 9 | 111 |
 | Active tests | 36 | — | — | 36 |
 | Services | 17 | 5 | — | 12 |
 
@@ -245,6 +245,37 @@ attached. DTC correlation finds the 2-byte little-endian representation of
 each DTC identifier in CodeFlash — 42 of 54 DTCs have at least one firmware
 location. Monitors are recorded as family-grade vocabulary for future callback
 analysis.
+
+### Monitor→DID bridge
+
+The key structural discovery: monitor record field at offset 56 (the "seq"
+number) maps to firmware DIDs via **DID = 0x0100 + seq**.  This is not in the
+.ddb section 0/1 lookup tables — those use proprietary PIDs (0x2711+).
+
+For monitors with seq < 100, DID = 0x0100 + seq hits the firmware DID table
+exactly.  The EPS_CAN_P4DK variant (UDS/CAN) is authoritative for this
+firmware; EPS_P4DK3 (KWP) uses different naming for the same DIDs.
+
+9 monitors bridge to firmware DIDs with full callback and RAM source data:
+
+| DID | OEM name (CAN) | Callback | RAM source |
+|---|---|---|---|
+| 0x0102 | Vehicle speed | 0x4CBFC | FEBEE90C, FEBEE896, FEBEE815 |
+| 0x0103 | Engine revolution speed | 0x4CC76 | FEBEE910, FEBEE814 |
+| 0x0105 | **Motor Actual Current** | 0x4CCC4 | checkpoint obj 0x204 |
+| 0x0109 | **Steering torque** | 0x4CD38 | FEBEE867–86C (6B) |
+| 0x010B | **Output of torque sensor 2** | 0x4CD74 | checkpoint obj 0x20A |
+| 0x0110 | IG switch status | 0x4CDD4 | FUN_0006909A + GP[-0xB99] |
+| 0x0111 | Torque sensor power supply | 0x4CDFC | stub (returns 0) |
+| 0x0112 | No. of diagnosis codes | 0x4CE00 | FEBE8AB0 + FEBE89A4 |
+
+The motor-current and torque-sensor values come from checkpoint objects —
+persistent NvM-backed snapshots validated by a magic number (0xA55A5AA5).
+This bridges OEM diagnostic vocabulary to specific firmware state variables,
+enabling the "semantic recovery amplifier" described in the pipeline
+architecture: a monitor name like "Motor Actual Current" now resolves to a
+specific checkpoint object and RAM layout, which can be traced backward
+through the control graph.
 
 ### Preserve two namespaces
 
@@ -268,7 +299,7 @@ Stage 4, after analysis:
   run ApplyDiagnosticVocabulary.java      (OEM vocabulary layer)
 
 Verification:
-  tests/verify_diagnostic_vocabulary.py (144 checks against raw firmware)
+  tests/verify_diagnostic_vocabulary.py (158 checks against raw firmware)
 ```
 
 ## tools/pe fix

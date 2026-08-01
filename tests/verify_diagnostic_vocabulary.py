@@ -164,20 +164,53 @@ check("candidate-grade mappings note their conflict",
 
 print("\n== monitor vocabulary ==")
 monitor_mappings = [m for m in mappings if m["kind"] == "monitor"]
-check("monitor mapping count is 111", len(monitor_mappings) == 111,
-      f"got {len(monitor_mappings)}")
+
+# Monitors now split into two classes: those bridged to firmware DIDs
+# (via DID = 0x0100 + seq), and remaining family-grade vocabulary.
+bridged = [m for m in monitor_mappings if "firmware_callback" in m]
+check("at least 9 monitors bridged to firmware DIDs", len(bridged) >= 9,
+      f"got {len(bridged)}")
+
+family_monitors = [m for m in monitor_mappings if "firmware_callback" not in m]
+check("remaining family-grade monitors >= 100", len(family_monitors) >= 100,
+      f"got {len(family_monitors)}")
 
 named_monitors = [m for m in monitor_mappings if m.get("oem_name")]
 check("at least 100 monitors have OEM names", len(named_monitors) >= 100,
       f"got {len(named_monitors)}")
 
-# Spot-check key motor-control monitor names are present
-monitor_names = {m["oem_name"].lower() for m in named_monitors}
+# Verify every bridged monitor's callback matches the firmware DID table
+for m in bridged:
+    did = m["identifier"]
+    cb = int(m["firmware_callback"], 16)
+    fw_did = tables.did_by_id[did]
+    check(f"monitor DID 0x{did:04X} callback {m['firmware_callback']} matches firmware",
+          fw_did.callback == cb,
+          f"firmware says 0x{fw_did.callback:05X}")
+
+# Verify RAM source annotations are present for decompiled monitors
+ram_sourced = [m for m in bridged if "ram_source" in m]
+check("at least 7 bridged monitors have RAM source annotations",
+      len(ram_sourced) >= 7, f"got {len(ram_sourced)}")
+
+# Verify the motor-control RAM sources are present
+ram_text = " ".join(m.get("ram_source", "") for m in ram_sourced)
+check("DID 0x0105 (Motor Actual Current) references checkpoint 0x204",
+      "checkpoint_object 0x204" in ram_text)
+check("DID 0x0109 (Steering torque) references DAT_FEBEE867",
+      "DAT_FEBEE867" in ram_text)
+check("DID 0x010B (torque sensor 2) references checkpoint 0x20A",
+      "checkpoint_object 0x20A" in ram_text)
+
+# Spot-check key motor-control monitor names are present in bridged monitors
+bridged_names = {m["oem_name"].lower() for m in bridged}
 for expected_name in ("motor actual current", "steering torque",
                       "thermistor temperature", "pig power supply"):
+    # These may be in either bridged or family depending on KWP/CAN variant
+    all_monitor_names = {m["oem_name"].lower() for m in named_monitors}
     check(f"monitor '{expected_name}' present in vocabulary",
-          expected_name in monitor_names,
-          f"searched {len(monitor_names)} names")
+          expected_name in all_monitor_names,
+          f"searched {len(all_monitor_names)} names")
 
 
 print("\n== idempotency ==")

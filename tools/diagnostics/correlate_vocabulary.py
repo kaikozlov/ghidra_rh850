@@ -58,6 +58,21 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 CATALOG_PATH = REPO_ROOT / "data" / "generated" / "21140bbd65e530a9" / "diagnostic_annotations.json"
 CODEFLASH_PATH = REPO_ROOT / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 
+# RAM source mapping for monitor-bridged DIDs, recovered by decompiling each
+# DID callback (via SeedDidCallbacks.java).  These identify the RAM variable or
+# checkpoint object that each monitor reads — the semantic bridge from OEM
+# vocabulary to firmware state.
+MONITOR_RAM_SOURCES = {
+    0x0102: "DAT_FEBEE90C (vehicle_speed_2B), DAT_FEBEE896 (speed_signal_2B), DAT_FEBEE815 (speed_flag_1B)",
+    0x0103: "DAT_FEBEE910 (engine_rpm_ptr), DAT_FEBEE814 (rpm_flag_1B); returns 0 when rpm < 100000 (0xF4240)",
+    0x0105: "checkpoint_object 0x204 (10B, magic 0xA55A5AA5), descriptor at CodeFlash 0x212F8",
+    0x0109: "DAT_FEBEE867..FEBEE86C (6B steering_torque_raw); returns 0xFF fill when invalid (DAT_FEBEE813 != 'Z')",
+    0x010B: "checkpoint_object 0x20A (16B, magic 0xA55A5AA5), descriptor at CodeFlash 0x21308",
+    0x0110: "FUN_0006909A() result + GP[-0xB99] (FEBEE664); IG_switch_counter arithmetic",
+    0x0111: "stub: returns 0 without reading any state",
+    0x0112: "DAT_FEBE8AB0 + DAT_FEBE89A4 (diagnostic_code_count arithmetic)",
+}
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -197,22 +212,102 @@ def correlate_dtcs(
 def correlate_monitors(
     catalog: dict, tables: FirmwareTables
 ) -> list[dict]:
-    """Extract monitor names from the Techstream catalog.
+    """Correlate Techstream monitors with firmware DID records.
 
-    Monitors (Data List values) don't share a numeric identifier space with
-    firmware DIDs — they are accessed through service 0x22 using proprietary
-    PIDs that Techstream resolves through its own section 0/1 lookup tables.
+    The key discovery: monitor record field at offset 56 (the "seq" number)
+    maps to firmware DIDs via ``DID = 0x0100 + seq``.  This is not in the
+    .ddb section 0/1 lookup tables — those use proprietary PIDs (0x2711+).
 
-    The value here is the OEM semantic label: "Motor Actual Current",
-    "Steering Torque", etc.  These names can be matched to firmware DID
-    callbacks heuristically (by analyzing what each callback reads from RAM),
-    but that deeper analysis is a second-tier task.  This correlation records
-    the available vocabulary for later use.
+    For monitors with seq < 100, DID = 0x0100 + seq hits the firmware DID
+    table exactly, giving us OEM names like "Motor Actual Current",
+    "Steering Torque", "Thermistor Temperature" for firmware callbacks.
+
+    EPS_CAN_P4DK (the UDS/CAN variant) is authoritative for this firmware's
+    DID semantics.  EPS_P4DK3 (the KWP variant) uses different naming — when
+    they conflict, we grade as candidate.
     """
-    matches = []
-    monitors = [e for e in catalog["entries"] if e["kind"] == "monitor"]
+    # Build per-DID name sets from each DDB variant by re-reading the raw
+    # section 10 records (the catalog doesn't carry the seq number).
+    import struct
+    from parse_ddb import DDBParser
 
-    for mon in monitors:
+    DB = REPO_ROOT / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
+    parser = DDBParser()
+    strings = parser.load_string_db(DB / "M_English.ddb")
+
+    monitor_names_by_did: dict[int, dict[str, list[str]]] = {}
+    for fname in ["EPS_CAN_P4DK.ddb", "EPS_P4DK3.ddb"]:
+        db = parser.parse_ecu_db(DB / fname)
+        if 10 not in db.sections:
+            continue
+        sec10 = db.sections[10]
+        rec_sz = int(sec10.record_size)
+        for i in range(sec10.header.record_count):
+            raw = sec10.raw_data[i * rec_sz:(i + 1) * rec_sz]
+            seq = struct.unpack_from("<I", raw, 56)[0]
+            name_idx = struct.unpack_from("<I", raw, 48)[0]
+            name = strings.get_string(name_idx)
+            if not name or seq >= 100:
+                continue
+            did = 0x0100 + seq
+            monitor_names_by_did.setdefault(did, {}).setdefault(fname, []).append(name)
+
+    fw_dids = tables.did_by_id
+    seen_dids: set[int] = set()
+    matches: list[dict] = []
+
+    # First: monitors that map to firmware DIDs (the high-value bridge)
+    for did, names_by_db in sorted(monitor_names_by_did.items()):
+        if did not in fw_dids:
+            continue
+        seen_dids.add(did)
+        fw = fw_dids[did]
+        can_names = sorted(set(names_by_db.get("EPS_CAN_P4DK.ddb", [])))
+        kwp_names = sorted(set(names_by_db.get("EPS_P4DK3.ddb", [])))
+
+        # CAN variant is authoritative for this UDS firmware
+        oem_name = can_names[0] if can_names else (kwp_names[0] if kwp_names else "unnamed")
+
+        # Grade: exact if CAN names agree, candidate if CAN/KWP conflict
+        all_can_same = len(can_names) <= 1
+        no_kwp_conflict = not kwp_names or set(can_names) == set(kwp_names)
+        if all_can_same and no_kwp_conflict:
+            grade = "exact"
+        elif all_can_same:
+            grade = "candidate"
+        else:
+            grade = "candidate"
+
+        # Attach decompiled RAM source information for the bridged DIDs.
+        # Recovered from SeedDidCallbacks.java decompilation of the callbacks.
+        ram_source = MONITOR_RAM_SOURCES.get(did)
+
+        match = {
+            "kind": "monitor",
+            "identifier": did,
+            "oem_name": oem_name,
+            "oem_symbol": slug(oem_name),
+            "match_grade": grade,
+            "firmware_table_index": fw.table_index,
+            "firmware_callback": f"0x{fw.callback:05X}",
+            "firmware_flags": f"0x{fw.flags:04X}",
+            "source_db": "EPS_CAN_P4DK" if can_names else "EPS_P4DK3",
+            "can_variant_name": can_names[0] if can_names else None,
+            "kwp_variant_name": kwp_names[0] if kwp_names else None,
+            "annotation_action": "name_callback" if grade == "exact" else "comment",
+        }
+        if ram_source:
+            match["ram_source"] = ram_source
+        match["note"] = (
+            f"Monitor seq {did - 0x0100} → DID 0x{did:04X}, callback "
+            f"0x{fw.callback:05X}. CAN name: '{can_names[0] if can_names else '?'}'"
+            + ("'. KWP conflict: '" + kwp_names[0] + "'." if kwp_names and set(can_names) != set(kwp_names) else ".")
+            + (" RAM: " + ram_source + "." if ram_source else "")
+        )
+        matches.append(match)
+
+    # Remaining monitors that don't map to firmware DIDs stay as family vocabulary
+    for mon in [e for e in catalog["entries"] if e["kind"] == "monitor"]:
         name = mon.get("resolved_name") or "unnamed"
         matches.append({
             "kind": "monitor",
@@ -222,9 +317,8 @@ def correlate_monitors(
             "source_db": mon["source_db"],
             "scaling_raw": mon.get("scaling_raw"),
             "annotation_action": "vocabulary",
-            "note": (f"Techstream Data List monitor '{name}'. Not directly "
-                     f"correlated to a firmware DID — requires callback "
-                     f"analysis to identify the source RAM variable."),
+            "note": (f"Techstream Data List monitor '{name}'. No firmware DID "
+                     f"match (seq >= 100 or not in DID table)."),
         })
 
     return matches
