@@ -220,6 +220,12 @@ check("egg appears exactly once in CodeFlash", len(egg_matches) == 1, f"{len(egg
 if egg_matches:
     egg_va = egg_matches[0]
 
+    # PIN: exact address is 0x3485A
+    check("egg address is VA 0x3485A", egg_va == 0x3485A, hex(egg_va))
+
+    # PIN: exact egg bytes at that address
+    check("egg bytes match at 0x3485A", CF[0x3485A:0x3485A + 8] == EGG)
+
     # The egg starts FUN_0003485A — a bounded memcmp returning 1=match / 0=mismatch.
     # Confirm the instruction encoding matches what we decompiled:
     #   +0: 8800   zxb r8        (zero-extend length param)
@@ -227,6 +233,37 @@ if egg_matches:
     #   +4: 000a   mov 0, r1     (loop counter)
     #   +6: e50d   br <forward>  (jump to loop condition)
     check("egg encodes known memcmp prologue", CF[egg_va:egg_va + 8] == EGG)
+
+    # PIN: the two 0xAB callers that reference this function
+    # FUN_00034882 at 0x34882 calls 0x3485A from 0x34898 (jarl)
+    # application_proprietary_ab_f1_start at 0x34B74 calls 0x3485A from 0x34B80 (jarl)
+    import struct as _struct
+
+    def jarl_target(call_site):
+        """Decode an RH850 jarl instruction's target address.
+
+        jarl is a 32-bit (2-halfword) instruction. The 13-bit signed
+        displacement is in bits 12:0 of the second halfword (no shift —
+        RH850 instructions are 16-bit aligned but the displacement is in
+        raw bytes here)."""
+        hw1 = _struct.unpack_from("<H", CF, call_site)[0]
+        if hw1 != 0xFFBF:
+            return None
+        hw2 = _struct.unpack_from("<H", CF, call_site + 2)[0]
+        disp = hw2 & 0x1FFF
+        if disp & 0x1000:
+            disp -= 0x2000
+        return call_site + disp
+
+    t1 = jarl_target(0x34898)
+    check("FUN_00034882 calls egg at 0x34898",
+          t1 == 0x3485A,
+          hex(t1) if t1 is not None else "not a jarl")
+
+    t2 = jarl_target(0x34B80)
+    check("application_proprietary_ab_f1_start calls egg at 0x34B80",
+          t2 == 0x3485A,
+          hex(t2) if t2 is not None else "not a jarl")
 
     # The patch would overwrite +0..3 with 01 52 7f 00:
     #   +0: 0152   mov 1, r10    (return = 1)

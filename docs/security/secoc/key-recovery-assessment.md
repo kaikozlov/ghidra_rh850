@@ -287,7 +287,7 @@ that does not transfer to this calibration.
 `main.c` performs no semantic validation: it scans for the 8-byte egg
 (`88 00 01 52 00 0A E5 0D`), requires exactly one occurrence, replaces its first
 4 bytes with an immediate-success return (`01 52 7F 00` = `mov 1, r10; jmp [lp]`),
-and assumes the patched function is the SecOC MAC verifier.
+and treats the matched function as the patch target.
 
 On `8965B4512000` the egg matches exactly once at VA `0x3485A` (verified).
 But firmware analysis identifies that address as the prologue of
@@ -310,11 +310,22 @@ Applying the supplied patch would make the event-token comparator always return
 "match," distorting `0xAB` dispatch. It would not alter SecOC verification.
 
 This is a **cross-calibration signature collision**: the egg was designed for
-an `8965F3`/`8965F4` calibration where it presumably marks the MAC verify
-function. The same compiler-generated instruction sequence begins an unrelated
-function on the Sienna image. The flash RMW and CRC-repair mechanism remains
-structurally applicable, but a Sienna-specific patch point must be independently
-recovered and verified.
+an `8965F3`/`8965F4` calibration where the authors report that forcing the
+matched predicate to succeed bypasses a packet-verification check. The available
+files establish an effective behavioral patch point on those calibrations, but
+do not establish that the matched function is itself the cryptographic MAC
+verifier — it could be a status translator, a combined authentication/freshness
+predicate, a downstream acceptance gate, or a generic comparison helper used by
+the SecOC path. The same compiler-generated instruction sequence begins the
+unrelated `0xAB` event-record token comparator on the Sienna image. The flash
+RMW and CRC-repair mechanism remains structurally applicable, but a Sienna-specific
+patch point must be independently recovered from control flow and callers.
+
+A patch point may be empirically effective without being semantically identified.
+"Forcing this predicate to succeed causes protected frames to pass" is distinct
+from "this function performs the cryptographic MAC verification." Raw byte
+signatures must therefore be re-established from control flow and callers for
+every calibration.
 
 #### Evidence grading
 
@@ -325,7 +336,8 @@ recovered and verified.
 | `0xAB` membership and callers | firmware-static (x-ref + `verify_application_ab_service.py`) | verified |
 | No static edge to SecOC chain | firmware-static (`verify_application_ab_service.py` closed graph) | verified |
 | CRC repair geometry matches Sienna | firmware-static (`verify_boot_trust.py` + `verify_community_tooling.py` §7) | verified |
-| Intended egg meaning on `8965F3/F4` | external-source (patcher version table) | external-source |
+| Reported behavioral effect of the patch on `8965F3/F4` | external-source (author statement + version table) | external-source |
+| Semantic identity of the patched function on `8965F3/F4` | — | not established (available files do not identify the function) |
 | Direct transfer of egg-based patch to `8965B4512000` | firmware-static | disproved |
 
 The author notes this is "largely untested." The 8965F3 dual-CPU part is a new
