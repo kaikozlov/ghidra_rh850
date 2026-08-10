@@ -37,6 +37,11 @@ while (($#)); do
   esac
 done
 
+[[ ! -L "$ROOT/project" ]] || {
+  echo "REFUSING: committed repository project root must not be a symlink: $ROOT/project" >&2
+  exit 2
+}
+
 EXPECTED_SNAPSHOT_DIR=$(python3 - "$ROOT/project" <<'PY'
 from pathlib import Path
 import sys

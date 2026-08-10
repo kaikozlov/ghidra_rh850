@@ -218,6 +218,23 @@ with tempfile.TemporaryDirectory() as td:
     )
 
 with tempfile.TemporaryDirectory() as td:
+    inherited_override = Path(td) / "inherited-projects"
+    result = run(
+        ["bash", str(REPO / "tools" / "g"), "status"],
+        env={
+            "GHIDRA_NO_BOOTSTRAP": "1",
+            "GHIDRA_PROJECT_DIR": str(inherited_override),
+        },
+        timeout=10,
+    )
+    output = result.stdout + result.stderr
+    check(
+        "inherited GHIDRA_PROJECT_DIR cannot redirect tools/g",
+        str(inherited_override) not in output,
+        output,
+    )
+
+with tempfile.TemporaryDirectory() as td:
     result = run(
         [
             "bash", str(REPO / "tools" / "snapshot_project.sh"),
@@ -369,6 +386,10 @@ snap_content = (REPO / "tools" / "snapshot_project.sh").read_text()
 check(
     "snapshot_project.sh clears mutation marker",
     ".ghidra_session_dirty" in snap_content and "rm -f" in snap_content,
+)
+check(
+    "snapshot promotion rejects a symlinked repository project root",
+    '[[ ! -L "$ROOT/project" ]]' in snap_content,
 )
 check(
     "snapshot installs exit cleanup before stats can fail",

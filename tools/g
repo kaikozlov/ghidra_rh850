@@ -330,6 +330,11 @@ fi
 
 # --- Build CLI args -----------------------------------------------------------
 
+# The vendored CLI gives this environment variable precedence over the
+# wrapper-supplied --projects-dir. Do not let inherited process state redirect
+# an otherwise guarded invocation.
+unset GHIDRA_PROJECT_DIR
+
 CLI_ARGS=(
   --projects-dir "$ABS_PROJECT_DIR"
   --project "$PROJECT_NAME"
