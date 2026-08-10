@@ -489,4 +489,56 @@ absent from the application RX map. No 2024-RAV4 physical ownership is inferred
 from those Sienna facts.
 
 - finding: `SECOC-037`
-- commit: pending
+- commit: `261eae6ed01a99db15b8c7b7694085f9518ed18e analysis: complete RAV4 Prime forced profile matrix`
+
+## Completion C — Techstream `0x87` semantics and U023A87 monitor context (original item 5)
+
+Techstream's P5 section type 65 is now decoded as a 68-byte DTC/failure table.
+The recovered fields include full UTF-16 DTC code, packed base+failure byte,
+base-description string index, failure-description string index, and enabled
+word. Scanning all 131 P5 databases with that record shape proves:
+
+```text
+0x81 -> Invalid Serial Data Received
+0x82 -> Alive / Sequence Counter Incorrect / Not Updated
+0x83 -> Value of Signal Protection Calculation Incorrect
+0x84 -> Signal Below Allowable Range
+0x85 -> Signal Above Allowable Range
+0x86 -> Signal Invalid
+0x87 -> Missing Message
+0x88 -> Bus Off
+```
+
+For `0x87`, 1,519 records use the canonical `M_English` index 64829 = `Missing
+Message`; all 20 enabled `U023A87` P5 records resolve to Missing Message. The
+exact `EMPS_P5` row combines `Lost Communication with Image Processing Module
+"A"` with `Missing Message`, so the field-reported suffix is now statically
+proved by Techstream rather than inherited from the screenshot.
+
+The comparative Sienna firmware can also map four of its five U023A87 events to
+specific missing receive monitors through the 11-entry table at `0x28278`:
+
+```text
+0xB0  -> Rx selector 0 -> unpacker 0x4A244 -> CAN 0x2E4
+0x138 -> Rx selector 7 -> unpacker 0x4A5A2 -> CAN 0x131
+0x13C -> Rx selector 6 -> unpacker 0x4A4BC -> CAN 0x191
+0x13D -> Rx selector 8 -> unpacker 0x4A68A -> CAN 0x2FD
+0xB3  -> configured for U023A87 but absent from this monitor table
+```
+
+The direct/thunk reporter census did not yield a defensible static PDU identity
+for `0xB3`, so it remains explicitly configured-unresolved rather than guessed.
+These are `4512000` monitor assignments and are not projected onto the 2024
+RAV4.
+
+Durable outputs:
+
+- `data/generated/techstream_v18/dtc_failure_types.json`
+- `data/generated/u023a87_monitor_map.json`
+- `generate_dtc_failure_types.py`
+- `generate_u023a87_monitor_map.py`
+- failure-entry support in `parse_ddb.py`
+- focused verifiers for both artifacts
+- finding `TMS-015`
+
+Commit: pending

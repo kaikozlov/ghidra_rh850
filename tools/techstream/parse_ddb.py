@@ -162,6 +162,31 @@ class DTCEntry:
 
 
 @dataclass
+class DTCFailureEntry:
+    """A P5 DTC/failure-type record from section type 65 (68 bytes).
+
+    The recovered fields are deliberately narrower than the full record:
+    UTF-16 code at 0x00, packed 24-bit DTC+failure byte at 0x2C, base DTC
+    description string index at 0x30, failure-type description string index at
+    0x34, and the enable word at 0x40. Bytes 0x38..0x3F remain uninterpreted.
+    """
+    code: str
+    packed_dtc: int
+    description_string_index: int
+    failure_string_index: int
+    enabled: int
+    raw: bytes = b""
+
+    @property
+    def failure_type(self) -> int:
+        return self.packed_dtc & 0xFF
+
+    @property
+    def base_dtc(self) -> int:
+        return (self.packed_dtc >> 8) & 0xFFFF
+
+
+@dataclass
 class ECUDataBase:
     """Parsed ECU diagnostic database (.ddb file)."""
     path: Path
@@ -453,6 +478,37 @@ class DDBParser:
                 raw=raw,
             ))
         return dtcs
+
+    @staticmethod
+    def extract_dtc_failure_entries(section: Section) -> list[DTCFailureEntry]:
+        """Extract P5 DTC failure-type records from section type 65.
+
+        Pinned V18 P5 databases use 68-byte records. The first 44 bytes hold a
+        UTF-16LE code such as ``U023A87``. The packed value at 0x2C is the same
+        code as ``base_dtc << 8 | failure_type``; 0x30 and 0x34 are 1-based
+        indices into M_English for the base description and failure-type text.
+        """
+        if section.header.table_type != 65 or section.record_size != 68:
+            raise ValueError(
+                f"expected section 65 with 68-byte records, got type "
+                f"{section.header.table_type} size {section.record_size}"
+            )
+        entries = []
+        for i in range(section.header.record_count):
+            off = i * 68
+            raw = section.raw_data[off : off + 68]
+            if len(raw) < 68:
+                break
+            code = raw[0:44].decode("utf-16-le", errors="replace").rstrip("\x00")
+            entries.append(DTCFailureEntry(
+                code=code,
+                packed_dtc=struct.unpack_from("<I", raw, 44)[0],
+                description_string_index=struct.unpack_from("<I", raw, 48)[0],
+                failure_string_index=struct.unpack_from("<I", raw, 52)[0],
+                enabled=struct.unpack_from("<I", raw, 64)[0],
+                raw=raw,
+            ))
+        return entries
 
     @staticmethod
     def extract_dids(section: Section) -> list[int]:

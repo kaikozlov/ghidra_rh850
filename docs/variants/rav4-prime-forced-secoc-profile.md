@@ -136,9 +136,13 @@ closely related labels:
   **Lost Communication with Image Processing Module "A"**
 
 The field report supplied the full `U023A87` code and the `Missing Message`
-rendering. The current Techstream DDB parser directly establishes the base DTC
-vocabulary; the repository does not yet claim a recovered Techstream table
-mapping failure-type byte `0x87` to that exact suffix text.
+rendering. Techstream's P5 section-65 DTC/failure table now independently proves
+that suffix: the record stores packed `0xC23A87` and resolves failure byte
+`0x87` through `M_English` to **Missing Message**. Across the complete pinned P5
+corpus, 1,519 failure-`0x87` records use the canonical `Missing Message` string
+index and all 20 enabled `U023A87` records resolve to that text. `EMPS_P5.ddb`
+contains the exact combination `Lost Communication with Image Processing Module
+"A"` + `Missing Message`.
 
 ### 3.2 Exact `U023A87` exists in `8965B4512000`
 
@@ -181,9 +185,29 @@ This does **not** prove that the RAV4 Prime uses identical Dem event IDs or
 identical PDU monitors. It establishes that `U023A87` is a concrete configured
 failure subtype in the analyzed Denso EPS family rather than a UI-only suffix.
 
-The exact meaning of the five Sienna event IDs remains bounded; no static
-mapping from those event IDs to individual missing CAN IDs has yet been
-recovered.
+Four of the five Sienna event IDs can now be taken one step further through the
+11-entry communication-monitor table at `0x28278`. Each table row carries a Dem
+event ID at `+2` and an Rx-state selector at `+5`; the same selector is consumed
+by `FUN_00048e4c`, and the corresponding COM unpackers bind it to concrete CAN
+IDs:
+
+| U023A87 Dem event | monitor row | Rx-state selector | unpacker | CAN ID |
+|---:|---:|---:|---:|---:|
+| `0xB0` | 6 | 0 | `0x4A244` | **`0x2E4`** |
+| `0x138` | 8 | 7 | `0x4A5A2` | **`0x131`** |
+| `0x13C` | 7 | 6 | `0x4A4BC` | **`0x191`** |
+| `0x13D` | 9 | 8 | `0x4A68A` | **`0x2FD`** |
+| `0xB3` | — | — | — | configured-unresolved |
+
+This is a useful comparative Sienna result: U023A87 can be raised by missing
+traffic in a group that includes both protected steering streams (`0x2E4`,
+`0x131`), ordinary `0x191`, and `0x2FD`. It does **not** mean the 2024 RAV4 uses
+identical event-to-PDU assignments. Event `0xB3` is configured for the same DTC
+but is absent from this recovered monitor table; its specific reporter remains
+bounded rather than guessed.
+
+Machine-readable evidence:
+`data/generated/u023a87_monitor_map.json`.
 
 ## 4. What the live failure does and does not show
 

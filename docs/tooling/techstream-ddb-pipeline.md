@@ -109,6 +109,47 @@ Section types observed in EPS databases:
 [22:28] additional flags
 ```
 
+### P5 DTC failure-type record format (section type 65, 68 bytes)
+
+Techstream's P5 databases carry a second, richer DTC table in section type 65.
+Across 131 pinned V18 databases this section has a stable 68-byte record shape:
+
+```text
+[0x00:0x2C] UTF-16LE full code, e.g. "U023A87"
+[0x2C:0x30] u32 packed_dtc = (base_dtc << 8) | failure_type
+[0x30:0x34] u32 base-description string index in M_English
+[0x34:0x38] u32 failure-type string index in M_English
+[0x38:0x40] additional fields, semantics not yet assigned
+[0x40:0x44] u32 enabled/status word
+```
+
+`tools/techstream/generate_dtc_failure_types.py` scans all such records and
+emits `data/generated/techstream_v18/dtc_failure_types.json`. The corpus gives a
+direct Toyota/Techstream mapping for standard failure-type bytes:
+
+| failure byte | dominant Techstream text |
+|---:|---|
+| `0x81` | Invalid Serial Data Received |
+| `0x82` | Alive / Sequence Counter Incorrect / Not Updated |
+| `0x83` | Value of Signal Protection Calculation Incorrect |
+| `0x84` | Signal Below Allowable Range |
+| `0x85` | Signal Above Allowable Range |
+| `0x86` | Signal Invalid |
+| **`0x87`** | **Missing Message** |
+| `0x88` | Bus Off |
+
+The `0x87` mapping is especially strong: 1,519 section-65 records point to
+`M_English` index 64829, exactly `Missing Message`; another 27 records use the
+same text with alternate string indices/case, while the remaining 130 records
+carry only raw `87`/`$87` labels. For `U023A87` specifically, all 20 enabled P5
+records resolve the failure text to `Missing Message`. `EMPS_P5.ddb` record 125
+is an exact example: packed `0xC23A87`, base description `Lost Communication
+with Image Processing Module "A"`, failure string `Missing Message`.
+
+This closes the earlier ambiguity around the field-reported RAV4 Prime code:
+Techstream itself statically defines the `0x87` suffix as **Missing Message**;
+it is not an inferred UI paraphrase.
+
 ### String databases
 
 String databases (`M_English.ddb`, `V_English.ddb`) store one LZSS-compressed

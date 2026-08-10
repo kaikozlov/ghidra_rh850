@@ -1,0 +1,207 @@
+{
+  "boundary": "The four recovered mappings are comparative 8965B4512000 receive monitors. Event 0xB3 is configured for U023A87 but is not present in this monitor table; its specific reporter/PDU remains unresolved.",
+  "communication_monitor_table": {
+    "address": "0x28278",
+    "count": 11,
+    "dispatch_index_offset": 4,
+    "event_id_offset": 2,
+    "record_size": 8,
+    "rows": [
+      {
+        "address": "0x28278",
+        "dispatch_index": 0,
+        "event_id": "0xAD",
+        "mode": "0xA5",
+        "monitor_index": 0,
+        "peer": 11,
+        "raw": "0600ad000015a50b",
+        "rx_state_selector": 21
+      },
+      {
+        "address": "0x28280",
+        "dispatch_index": 1,
+        "event_id": "0xAA",
+        "mode": "0xA5",
+        "monitor_index": 1,
+        "peer": 11,
+        "raw": "0700aa00011ca50b",
+        "rx_state_selector": 28
+      },
+      {
+        "address": "0x28288",
+        "dispatch_index": 2,
+        "event_id": "0xAC",
+        "mode": "0xA5",
+        "monitor_index": 2,
+        "peer": 11,
+        "raw": "0000ac000210a50b",
+        "rx_state_selector": 16
+      },
+      {
+        "address": "0x28290",
+        "dispatch_index": 3,
+        "event_id": "0xE0",
+        "mode": "0xA5",
+        "monitor_index": 3,
+        "peer": 11,
+        "raw": "0000e0000309a50b",
+        "rx_state_selector": 9
+      },
+      {
+        "address": "0x28298",
+        "dispatch_index": 4,
+        "event_id": "0x141",
+        "mode": "0xA5",
+        "monitor_index": 4,
+        "peer": 11,
+        "raw": "000041010416a50b",
+        "rx_state_selector": 22
+      },
+      {
+        "address": "0x282A0",
+        "dispatch_index": 5,
+        "event_id": "0x0",
+        "mode": "0xA5",
+        "monitor_index": 5,
+        "peer": 11,
+        "raw": "080000000501a50b",
+        "rx_state_selector": 1
+      },
+      {
+        "address": "0x282A8",
+        "can_ids": [
+          "0x2E4"
+        ],
+        "dispatch_index": 6,
+        "event_id": "0xB0",
+        "mode": "0xA5",
+        "monitor_index": 6,
+        "peer": 11,
+        "raw": "0000b0000600a50b",
+        "rx_state_selector": 0,
+        "unpacker": "0x4A244"
+      },
+      {
+        "address": "0x282B0",
+        "can_ids": [
+          "0x191"
+        ],
+        "dispatch_index": 7,
+        "event_id": "0x13C",
+        "mode": "0xA5",
+        "monitor_index": 7,
+        "peer": 11,
+        "raw": "00003c010706a50b",
+        "rx_state_selector": 6,
+        "unpacker": "0x4A4BC"
+      },
+      {
+        "address": "0x282B8",
+        "can_ids": [
+          "0x131"
+        ],
+        "dispatch_index": 8,
+        "event_id": "0x138",
+        "mode": "0xA5",
+        "monitor_index": 8,
+        "peer": 11,
+        "raw": "000038010807a50b",
+        "rx_state_selector": 7,
+        "unpacker": "0x4A5A2"
+      },
+      {
+        "address": "0x282C0",
+        "can_ids": [
+          "0x2FD"
+        ],
+        "dispatch_index": 9,
+        "event_id": "0x13D",
+        "mode": "0xA5",
+        "monitor_index": 9,
+        "peer": 11,
+        "raw": "00003d010908a50b",
+        "rx_state_selector": 8,
+        "unpacker": "0x4A68A"
+      },
+      {
+        "address": "0x282C8",
+        "dispatch_index": 10,
+        "event_id": "0xAE",
+        "mode": "0xA5",
+        "monitor_index": 10,
+        "peer": 11,
+        "raw": "0000ae000a19a50b",
+        "rx_state_selector": 25
+      }
+    ],
+    "rx_state_selector_offset": 5
+  },
+  "event_mappings": [
+    {
+      "can_ids": [
+        "0x2E4"
+      ],
+      "dtc_table_index": 93,
+      "event_id": "0xB0",
+      "monitor_index": 6,
+      "rx_state_selector": 0,
+      "status": "recovered",
+      "unpacker": "0x4A244"
+    },
+    {
+      "dtc_table_index": 93,
+      "event_id": "0xB3",
+      "note": "event is not present in the recovered 11-entry communication-monitor table",
+      "status": "configured-unresolved"
+    },
+    {
+      "can_ids": [
+        "0x131"
+      ],
+      "dtc_table_index": 93,
+      "event_id": "0x138",
+      "monitor_index": 8,
+      "rx_state_selector": 7,
+      "status": "recovered",
+      "unpacker": "0x4A5A2"
+    },
+    {
+      "can_ids": [
+        "0x191"
+      ],
+      "dtc_table_index": 93,
+      "event_id": "0x13C",
+      "monitor_index": 7,
+      "rx_state_selector": 6,
+      "status": "recovered",
+      "unpacker": "0x4A4BC"
+    },
+    {
+      "can_ids": [
+        "0x2FD"
+      ],
+      "dtc_table_index": 93,
+      "event_id": "0x13D",
+      "monitor_index": 9,
+      "rx_state_selector": 8,
+      "status": "recovered",
+      "unpacker": "0x4A68A"
+    }
+  ],
+  "firmware_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+  "schema_version": 1,
+  "u023a87": {
+    "base_dtc": "0xC23A",
+    "dtc_table_index": 93,
+    "event_ids": [
+      "0xB0",
+      "0xB3",
+      "0x138",
+      "0x13C",
+      "0x13D"
+    ],
+    "failure_type": "0x87",
+    "full_code": "U023A87",
+    "record_address": "0x30CC4"
+  }
+}
