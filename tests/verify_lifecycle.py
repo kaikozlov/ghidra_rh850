@@ -23,6 +23,7 @@ Requires: bash, git, python3. Does NOT require Ghidra.
 """
 from __future__ import annotations
 
+import atexit
 import os
 import shutil
 import subprocess
@@ -64,6 +65,18 @@ def run(cmd: list[str], env: dict | None = None, timeout: int = 30) -> subproces
 
 MARKER = REPO / "build" / ".ghidra_session_dirty"
 ENV_HELPER = REPO / "tools" / "lib" / "ghidra_env.sh"
+ORIGINAL_MARKER = MARKER.read_bytes() if MARKER.is_file() else None
+
+
+def restore_original_marker() -> None:
+    if ORIGINAL_MARKER is None:
+        MARKER.unlink(missing_ok=True)
+    else:
+        MARKER.parent.mkdir(parents=True, exist_ok=True)
+        MARKER.write_bytes(ORIGINAL_MARKER)
+
+
+atexit.register(restore_original_marker)
 
 
 def marker_exists() -> bool:
@@ -475,6 +488,28 @@ check(
     rebuild_unsafe.returncode != 0 and "outside" in rebuild_unsafe.stderr,
     rebuild_unsafe.stderr,
 )
+
+if os.environ.get("VERIFY_LIFECYCLE_PRESERVATION_CHILD") != "1":
+    marker_before_probe = MARKER.read_bytes() if MARKER.is_file() else None
+    preservation_sentinel = b"pre-existing-dirty-marker\n"
+    MARKER.parent.mkdir(parents=True, exist_ok=True)
+    MARKER.write_bytes(preservation_sentinel)
+    child = run(
+        [sys.executable, str(Path(__file__).resolve())],
+        env={"VERIFY_LIFECYCLE_PRESERVATION_CHILD": "1"},
+        timeout=120,
+    )
+    check(
+        "lifecycle suite preserves a pre-existing dirty marker",
+        child.returncode == 0
+        and MARKER.is_file()
+        and MARKER.read_bytes() == preservation_sentinel,
+        child.stderr,
+    )
+    if marker_before_probe is None:
+        MARKER.unlink(missing_ok=True)
+    else:
+        MARKER.write_bytes(marker_before_probe)
 
 # Cleanup
 remove_marker()
