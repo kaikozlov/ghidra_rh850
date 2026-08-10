@@ -25,6 +25,11 @@
       "url": "https://github.com/commaai/opendbc.git",
       "directory": "opendbc",
       "commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93"
+    },
+    "vance_sienna_2024": {
+      "url": "https://github.com/Vance425/ToyotaSienna2024OpenpilotAnalysis-_Note.git",
+      "directory": "ToyotaSienna2024OpenpilotAnalysis-_Note",
+      "commit": "3333453f10c09a27df265156458ce976cc9ce25a"
     }
   },
   "artifacts": [
@@ -116,7 +121,55 @@
     {
       "repository": "opendbc",
       "path": "opendbc/car/toyota/values.py",
-      "sha256": "acef77680fdfb8ea58396f66d83455b6f78049ecdb91c4050950bf7c6ef3a7af"
+      "sha256": "acef77680fdfb8ea58396f66d834556b7f8049ecdb91c4050950bf7c6ef3a7af"
+    },
+    {
+      "repository": "vance_sienna_2024",
+      "path": "docs/tss3-secoc-key-recovery-20260608-zh.md",
+      "size": 8374,
+      "sha256": "da61dae7cdf6497abfc454a5d942afb41b7bfb7dc59b754bc5e4512ede1ac8f6"
+    },
+    {
+      "repository": "vance_sienna_2024",
+      "path": "docs/secoc-key-final-analysis-method-zh.md",
+      "size": 8231,
+      "sha256": "fac21f12a35ebff5a9424dfa876fad56e67946827107990a79480f6c058cf259"
+    },
+    {
+      "repository": "vance_sienna_2024",
+      "path": "docs/secoc-20260522-steering-lka-key-validation-full-zh.md",
+      "size": 12077,
+      "sha256": "38bf9c1198cb34d6a2758d5cfd1f109e7746ea7685424451969de2d8f91de3bd"
+    },
+    {
+      "repository": "vance_sienna_2024",
+      "path": "docs/post-secoc-key-remaining-checklist-zh.md",
+      "size": 7468,
+      "sha256": "8488180ea543881bf84604036be19de859567aa99a9bdbfebe0cfb0c87538869"
+    },
+    {
+      "repository": "vance_sienna_2024",
+      "path": "scripts/secoc/20260531_othersienna_secoc_bundle.zip",
+      "size": 27578,
+      "sha256": "0f1708717331caf76f0201acdc28ed45a21439919b93354479dd54b63688378a"
+    },
+    {
+      "repository": "vance_sienna_2024",
+      "path": "scripts/secoc/20260531_othersienna_secoc_bundle_v2.zip",
+      "size": 27745,
+      "sha256": "6d6d552fc28933d5e20c4e7340208946079041d9d4a9627eb62c814332f2a93d"
+    },
+    {
+      "repository": "vance_sienna_2024",
+      "path": "scripts/secoc/20260531_othersienna_secoc_bundle_v3.zip",
+      "size": 29707,
+      "sha256": "dea6d6e0b242f287725b117231d39dcddbc8823680cbc628ab17cd2bbdb3e4e4"
+    },
+    {
+      "repository": "vance_sienna_2024",
+      "path": "scripts/secoc/TSS3_Capture_20260601.zip",
+      "size": 9117,
+      "sha256": "16a5c483333f6304beb028f7a8a26132996905b1baa7879b941f2c9d8b609762"
     }
   ],
   "community_artifacts": [
