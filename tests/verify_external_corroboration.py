@@ -45,6 +45,16 @@ def git_head(path: Path) -> str:
     ).stdout.strip()
 
 
+def dbc_message(dbc: str, can_id: int, name: str) -> str:
+    """Return one DBC message block, excluding following BO_ definitions."""
+    marker = f"BO_ {can_id} {name}:"
+    start = dbc.find(marker)
+    if start < 0:
+        return ""
+    end = dbc.find("\nBO_ ", start + len(marker))
+    return dbc[start:] if end < 0 else dbc[start:end]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -110,11 +120,14 @@ def main() -> int:
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/car/uds.py",
         roots["calvinpark_openpilot"] / "tsk/COROLLA_INVESTIGATION.md",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
+        roots["opendbc"] / "opendbc/dbc/generator/toyota/_toyota_adas_standard.dbc",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
         roots["opendbc"] / "opendbc/car/secoc.py",
         roots["opendbc"] / "opendbc/car/toyota/carcontroller.py",
         roots["opendbc"] / "opendbc/car/toyota/toyotacan.py",
         roots["opendbc"] / "opendbc/car/toyota/values.py",
+        roots["vance_sienna_2024"] / "docs/tss3-secoc-key-recovery-20260608-zh.md",
+        roots["vance_sienna_2024"] / "docs/secoc-20260522-steering-lka-key-validation-full-zh.md",
     ]
     if any(not path.is_file() for path in semantic_inputs):
         print("source-level corroboration skipped because a pinned input is missing")
@@ -135,6 +148,10 @@ def main() -> int:
         roots["opendbc"]
         / "opendbc/dbc/generator/toyota/_toyota_2017.dbc"
     ).read_text(encoding="utf-8")
+    toyota_adas_dbc = (
+        roots["opendbc"]
+        / "opendbc/dbc/generator/toyota/_toyota_adas_standard.dbc"
+    ).read_text(encoding="utf-8")
     toyota_secoc_dbc = (
         roots["opendbc"]
         / "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc"
@@ -151,6 +168,17 @@ def main() -> int:
     opendbc_toyota_values = (
         roots["opendbc"] / "opendbc/car/toyota/values.py"
     ).read_text(encoding="utf-8")
+    vance_final = (
+        roots["vance_sienna_2024"]
+        / "docs/tss3-secoc-key-recovery-20260608-zh.md"
+    ).read_text(encoding="utf-8").lower()
+    vance_may = (
+        roots["vance_sienna_2024"]
+        / "docs/secoc-20260522-steering-lka-key-validation-full-zh.md"
+    ).read_text(encoding="utf-8").lower()
+    variant_page = (
+        REPO / "docs/variants/sienna-8965B4514000.md"
+    ).read_text(encoding="utf-8").lower()
 
     p203 = extract.find("write_data_by_identifier(0x203")
     p201 = extract.find("write_data_by_identifier(0x201")
@@ -249,6 +277,54 @@ def main() -> int:
     check(
         "opendbc marks fourth-generation Sienna as a SecOC platform",
         "TOYOTA_SIENNA_4TH_GEN = ToyotaSecOCPlatformConfig(" in opendbc_toyota_values,
+    )
+
+    print("\n== pinned opendbc CAN 0x344 provenance ==")
+    secoc_344 = dbc_message(toyota_secoc_dbc, 836, "PRE_COLLISION_2")
+    check(
+        "pinned Toyota SecOC DBC names CAN 0x344 PRE_COLLISION_2 with logical DSU node",
+        "BO_ 836 PRE_COLLISION_2: 8 DSU" in secoc_344,
+    )
+    for signal in ("AUTHENTICATOR", "RESET_FLAG", "MSG_CNT_LOWER"):
+        check(f"pinned CAN 0x344 SecOC block contains {signal}", signal in secoc_344)
+    legacy_344 = dbc_message(toyota_adas_dbc, 836, "PRE_COLLISION_2")
+    check(
+        "pinned legacy CAN 0x344 DBC preserves logical DSU node",
+        "BO_ 836 PRE_COLLISION_2: 8 DSU" in legacy_344,
+    )
+    for signal in ("DSS1GDRV", "PCSALM", "IBTRGR", "PBATRGR", "PREFILL", "AVSTRGR"):
+        check(f"pinned legacy CAN 0x344 block contains PCS signal {signal}", signal in legacy_344)
+
+    print("\n== pinned Vance 8965B4514000 field report ==")
+    for token, label in (
+        ("8965b4514000", "application software ID"),
+        ("0xff200000 - 0xff208000", "32 KiB DataFlash range"),
+        ("0xff206e14", "candidate absolute address"),
+        ("`28180`", "candidate offset"),
+        ("1d1c53a6d634016a", "public key SHA-256 prefix"),
+        ("`0x7a1`", "physical diagnostic TX"),
+        ("`0x7a9`", "physical diagnostic RX"),
+        ("`1024/1024`", "corrected synchronization result"),
+        ("`226/226`", "CAN 0x131 validation count"),
+        ("`225/225`", "CAN 0x2E4 validation count"),
+        ("`112/113`", "CAN 0x344 validation count"),
+        ("`563/564`", "protected-frame aggregate"),
+        ("`730/750`", "later end-to-end protected result"),
+    ):
+        check(f"Vance final report contains {label}", token in vance_final)
+    check(
+        "Vance May report records the superseded sync mismatch",
+        "0x0f sync mac match = 0/512" in vance_may,
+    )
+    check(
+        "local variant page marks the May sync conclusion superseded",
+        "may" in variant_page and "superseded" in variant_page
+        and "1024/1024" in variant_page,
+    )
+    check(
+        "local variant page keeps 4514000 runtime architecture unresolved",
+        "bounded but unresolved" in variant_page
+        and "missing codeflash/runtime access" in variant_page,
     )
 
     print(f"\n== RESULT: {passed} passed, {failed} failed ==")

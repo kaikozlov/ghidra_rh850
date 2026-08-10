@@ -42,32 +42,47 @@ vehicles = [r["vehicle"] for r in rows]
 check("Sienna row present", any("Sienna" in v for v in vehicles))
 check("Corolla row present", any("Corolla" in v for v in vehicles))
 
-sienna = next((r for r in rows if "Sienna" in r["vehicle"]), None)
+sienna_4512000 = next(
+    (r for r in rows if r["application_software_id"] == "8965B4512000"),
+    None,
+)
+sienna_4514000 = next(
+    (r for r in rows if r["application_software_id"] == "8965B4514000"),
+    None,
+)
 corolla = next((r for r in rows if "Corolla" in r["vehicle"]), None)
 
-# ── Sienna row: firmware-derived facts ──────────────────────────
-if sienna:
-    check("Sienna evidence_grade is definitive", sienna["evidence_grade"] == "definitive")
-    check("Sienna secoc_sync_id is 0x0F (not 0x2E4)",
-          sienna["secoc_sync_id"].strip() == "0x0F",
-          repr(sienna["secoc_sync_id"]))
-    check("Sienna secured_can_ids does not include 0x0F as a protected profile",
-          "0x0F" not in sienna["secured_can_ids"],
-          repr(sienna["secured_can_ids"]))
-    check("Sienna secured_can_ids includes 0x2E4",
-          "0x2E4" in sienna["secured_can_ids"])
-    check("Sienna physical request is 0x7A1", sienna["physical_request"] == "0x7A1")
-    check("Sienna physical response is 0x7A9", sienna["physical_response"] == "0x7A9")
-    check("Sienna functional request is 0x777", sienna["functional_request"] == "0x777")
-    check("Sienna MCU is RH850/P1M-E",
-          "RH850" in sienna["mcu"] and "R7F701381" in sienna["mcu"])
-    check("Sienna application_software_id is 8965B4512000",
-          sienna["application_software_id"] == "8965B4512000")
-    check("Sienna SA level 1 stub documented",
-          "stub" in sienna["security_levels"].lower())
+# ── Sienna 4512000 row: firmware-derived facts ──────────────────
+check("Sienna 4512000 row present", sienna_4512000 is not None)
+if sienna_4512000:
+    check("Sienna 4512000 evidence_grade is definitive",
+          sienna_4512000["evidence_grade"] == "definitive")
+    check("Sienna 4512000 secoc_sync_id is 0x0F (not 0x2E4)",
+          sienna_4512000["secoc_sync_id"].strip() == "0x0F",
+          repr(sienna_4512000["secoc_sync_id"]))
+    check("Sienna 4512000 secured_can_ids does not include 0x0F as a protected profile",
+          "0x0F" not in sienna_4512000["secured_can_ids"],
+          repr(sienna_4512000["secured_can_ids"]))
+    check("Sienna 4512000 secured_can_ids includes 0x2E4",
+          "0x2E4" in sienna_4512000["secured_can_ids"])
+    check("Sienna 4512000 secured_can_ids excludes 0x344",
+          "0x344" not in sienna_4512000["secured_can_ids"],
+          repr(sienna_4512000["secured_can_ids"]))
+    check("Sienna 4512000 physical request is 0x7A1",
+          sienna_4512000["physical_request"] == "0x7A1")
+    check("Sienna 4512000 physical response is 0x7A9",
+          sienna_4512000["physical_response"] == "0x7A9")
+    check("Sienna 4512000 functional request is 0x777",
+          sienna_4512000["functional_request"] == "0x777")
+    check("Sienna 4512000 MCU is RH850/P1M-E",
+          "RH850" in sienna_4512000["mcu"] and "R7F701381" in sienna_4512000["mcu"])
+    check("Sienna 4512000 SA level 1 stub documented",
+          "stub" in sienna_4512000["security_levels"].lower())
 
     # Cross-check against CodeFlash: the 17-SID set
-    sids_in_csv = set(s.strip() for s in sienna["application_sid_set"].split(","))
+    sids_in_csv = set(
+        s.strip() for s in sienna_4512000["application_sid_set"].split(",")
+    )
     expected_sids = {
         "10", "11", "14", "19", "22", "23", "27", "28", "2E",
         "31", "34", "36", "37", "3E", "85", "AB", "BA",
@@ -78,6 +93,31 @@ if sienna:
     secoc_doc = (REPO / "docs" / "security" / "secoc" / "application-chain.md").read_text()
     check("Sienna sync ID 0x0F corroborated by SECOC doc",
           "0x00F" in secoc_doc or "0x0F" in secoc_doc)
+
+# ── Sienna 4514000 row: external field evidence only ────────────
+check("Sienna 4514000 row present", sienna_4514000 is not None)
+if sienna_4514000:
+    check("Sienna 4514000 evidence_grade is inference",
+          sienna_4514000["evidence_grade"] == "inference",
+          repr(sienna_4514000["evidence_grade"]))
+    check("Sienna 4514000 is not marked firmware-available",
+          sienna_4514000["firmware_available"] == "no",
+          repr(sienna_4514000["firmware_available"]))
+    check("Sienna 4514000 physical request is 0x7A1",
+          sienna_4514000["physical_request"] == "0x7A1")
+    check("Sienna 4514000 physical response is 0x7A9",
+          sienna_4514000["physical_response"] == "0x7A9")
+    check("Sienna 4514000 secoc_sync_id is 0x0F",
+          sienna_4514000["secoc_sync_id"].strip() == "0x0F",
+          repr(sienna_4514000["secoc_sync_id"]))
+    for can_id in ("0x131", "0x2E4", "0x344"):
+        check(f"Sienna 4514000 external secured IDs include {can_id}",
+              can_id in sienna_4514000["secured_can_ids"])
+    check("Sienna 4514000 IDs are labeled external validation, not an EPS RX census",
+          "external key validation" in sienna_4514000["secured_can_ids"]
+          and "not an EPS RX census" in sienna_4514000["secured_can_ids"])
+    check("Sienna 4514000 source pins the Vance commit",
+          "3333453f10c09a27df265156458ce976cc9ce25a" in sienna_4514000["source"])
 
 # ── Corolla row: field-probe observations ───────────────────────
 if corolla:
