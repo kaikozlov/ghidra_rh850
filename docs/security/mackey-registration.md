@@ -1,169 +1,190 @@
 # Techstream MACKey Registration
 
-## Scope and confidence
+## Scope and evidence
 
-This report covers the MACKey Registration utility shipped in the pinned
-Techstream V18.00.003 distribution. The primary artifacts are
-`Techstream.exe`, native `IT3UtilityNK.dll`, managed `IT3UtilityRevNK.dll`, and
-`eVbBroker.dll` under the gitignored unpacked Techstream tree. The deterministic
-checks are in `tests/verify_techstream_mackey.py`.
+This report covers the MACKey Registration workflow in pinned Techstream
+V18.00.003. The primary artifacts are `Techstream.exe`, `IT3UtilityNK.dll`,
+`IT3UtilityRevNK.dll`, `eVbBroker.dll`, `td3webapi.dll`, and the newly joined
+native companion `UtilityExNK2.dll`. The last file has SHA-256
+`8d9623f028f23876f69cb02baa10e1881c01fa01a4f906013bd36266f7e0fb33`.
 
-The online request/response flow and request XML construction are **recovered**
-from managed IL and native imports/exports. The final ECU write protocol remains
-**bounded**: the native utility clearly parses returned exchange-key XML and has
-24 `CMAC_01_*` procedure classes, but the exact CAN/UDS command transcript has
-not yet been reconstructed or captured dynamically.
+The end-to-end vehicle/server/vehicle data flow is **recovered** from managed
+IL, native PE bytes, imports/exports, RTTI, parser bodies, and diagnostic helper
+bodies. It is verified deterministically by
+`tests/verify_techstream_mackey.py`; generated evidence lives in
+`data/generated/techstream_v18/mackey_vehicle_protocol.json` and
+`mackey_state_machine.csv`. Applicability to the Sienna `8965B4512000` EPS is
+**bounded**: the cryptographic envelope matches, but the diagnostic service and
+procedure do not.
 
-## What the subsystem is
+## End-to-end flow
 
-`Techstream.exe` exposes a MACKey Registration utility and passes configuration
-and session data through the EVB broker interface. The executable dynamically
-loads `evbbroker.dll` and resolves the `EbStart`, `EbOpenPara`, `EbSetPara`,
-`EbSetString`, `EbSetData`, `EbGetPara`, `EbReadPara`, `EbWritePara`,
-`EbClosePara`, `EbEnd`, and `EbKill` exports. The concrete file in the pinned
-installation is `eVbBroker.dll` (Windows filename matching is case-insensitive).
+```text
+master ECU 0x763
+  22 F1 90 -> VIN[17]
+  22 10 2E -> MACM1[16] || MACM2[32] || MACM3[16]
+  22 10 10 -> master SafekeyNumber[16]
+  topology discovery -> slave ECU addresses
+each slave
+  22 10 10 -> slave SafekeyNumber[16]
+        |
+        v
+shared memory -> ECUExchangeKey XML -> Toyota MACKey service
+        |
+        v
+ExchangeKeyList XML -> identity match by SafekeyNumber
+        |
+        v
+each selected master/slave ECU
+  31 01 30 02 || M1[16] || M2[32] || M3[16]
+  31 03 30 02 -> state[2] and, when complete, M4[32] || M5[16]
+```
 
-This is not the ordinary UDS `SecurityAccess` seed/key implementation. It is an
-online ECU exchange-key provisioning workflow. It may provision material used
-by another authentication domain, but the static artifacts do **not** prove
-that its keys are the Sienna or Corolla SecOC slot keys. Keep that relationship
-as a hypothesis until the native write procedure or a vehicle transcript joins
-them.
+The vehicle-facing layer is in `UtilityExNK2.dll`, reached through twelve named
+`Ex2MAC_01_*` imports in `IT3UtilityNK.dll`. This closes the former unnamed
+companion-DLL boundary.
 
-## Request data recovered from shared memory
+## Vehicle request producers
 
-Managed `CS_MODULE.SharedMemory::read_xmldata_MAC01` reads this packed payload:
+The exact diagnostic operations are:
+
+| Purpose | Request | Required response | Output |
+|---|---|---:|---|
+| VIN | `22 F1 90` | at least 20 bytes | bytes 3–19, 17-byte VIN |
+| master MAC tuple | `22 10 2E` | at least 67 bytes | bytes 3–66 as 16+32+16 |
+| safe-key identity | `22 10 10` | at least 19 bytes | bytes 3–18, 16 bytes |
+| update SA seed | `27 41` | 18 bytes | 16-byte seed |
+| update SA key | `27 42 || key[16]` | positive `67 42` | unlock result |
+| read topology | `22 10 33` | at least 28 bytes | 25-byte topology |
+| write topology | `2E 10 35 || topology[25]` | positive `6E 10 35` | acknowledgement |
+| start update | `31 01 30 02 || M1 || M2 || M3` | positive prefix | accepted package |
+| poll update | `31 03 30 02` | at least 6 bytes; 54 when complete | 16-bit state, M4/M5 |
+
+Additional setup/status helpers issue `10 4F`, `22 10 3A`, and `22 10 3B`.
+The master connection helper selects request ID `0x763`; a related gateway
+check uses `0x7A2`. The connection wrapper accepts discovered slave addresses,
+so slave operations are not hard-coded to one CAN identifier.
+
+Techstream forwards the VIN, MAC tuple, and safe-key bytes without endian or
+cryptographic transformation. It validates positive service/DID prefixes and
+minimum lengths. The master MAC tuple comes only from DID `0x102E`; each
+`SafekeyNumber` comes only from DID `0x1010`.
+
+## Master/slave discovery and association
+
+The native discovery routine starts at the master, reads topology DID `0x1033`
+and DID groups `0x1100`–`0x1105`, `0x1107`, and `0x1108`, then resolves the
+reported endpoints. It supports eight in-memory ECU records. Record order is
+assigned from the recovered topology bitmap; record 0 is the master and later
+records are slaves.
+
+After the server response is parsed, `decode_exchange_records` matches each
+returned record to an active vehicle record by the raw 16-byte
+`SafekeyNumber`. The update loop reconnects to the corresponding endpoint and
+performs routine `0x3002`; one Toyota transaction can therefore supply packages
+for one master and several slaves. Static evidence does not identify those
+ECUs as a Sienna SecOC domain.
+
+## Shared memory and online request
+
+Managed `SharedMemory::read_xmldata_MAC01` reads:
 
 | Offset | Size | Meaning |
 |---:|---:|---|
-| `0x00` | 2 | process type (`uint16`) |
+| `0x00` | 2 | process type |
 | `0x02` | 17 | VIN |
 | `0x13` | 16 | master `SafekeyNumber` |
 | `0x23` | 16 | `MACM1` |
 | `0x33` | 32 | `MACM2` |
 | `0x53` | 16 | `MACM3` |
-| `0x63` | 2 | slave ECU count (`uint16`) |
-| `0x65` | `16 × count` | slave `SafekeyNumber` values |
+| `0x63` | 2 | slave count |
+| `0x65` | `16 × count` | slave safe-key identities |
 
-`MAC_01_CommonProcess::MAC_01_CreateXML` serializes those fields into an
-`ECUExchangeKey` request:
+`MAC_01_CreateXML` serializes `ECUExchangeKey` with VIN, one master, and a
+slave list. `HashValue` is SHA-256 over raw VIN followed by uppercase ASCII hex
+for master safe key, M1, M2, M3, and every slave safe key. The preimage is
+`177 + 32 × slave_count` bytes.
 
-- `X-Version = 1`
-- `GTS/{SoftwareID, SoftwareVersion, LicenseKey}`
-- optional `ServicePlantFlag` for user type 2
-- `HashValue`
-- `VehicleIdentificationNumber`
-- `MasterECU SafekeyNumber=.../{MACM1, MACM2, MACM3}`
-- `SlaveECUList/SlaveECU SafekeyNumber=...`
+For online user types 2/3, Techstream sends this document through
+`TisServiceSendMacKey`, receives a request ID, substitutes that ID for `$36` in
+the login URL, and polls `TisServiceGetMacKeyInfo(request_id,
+SHA256(request_id))`. `$36` is not a diagnostic identifier. Successful output
+is saved to `Memg/MAC_01_WriteData.xml`.
 
-The request hash is SHA-256 over the concatenation of:
+## Response parser and vehicle write
 
-1. the raw 17 VIN bytes;
-2. uppercase ASCII hex for the 16-byte master safe key;
-3. uppercase ASCII hex for `MACM1` (16 bytes), `MACM2` (32 bytes), and
-   `MACM3` (16 bytes);
-4. uppercase ASCII hex for every 16-byte slave safe key.
+Native parsers at `0x10238B60` and `0x1023B660` parse standard and shorter
+product variants, bounded to 28 and 8 exchange records respectively. Each
+`ExchangeKey` requires a 32-character safe-key identity and carries `MACM1`,
+`MACM2`, `MACM3`, and `MACK4`. The parser removes spaces, hex-decodes the
+fields, and associates them by `SafekeyNumber`; it does not associate records
+by XML position alone.
 
-The preimage is therefore `177 + 32 × slave_count` bytes. The resulting digest
-is rendered as uppercase hex without separators. A timestamped copy of the
-request is written beneath `Techstream/ECUSecurityKey/`.
+The selected record's M1/M2/M3 values become the 64-byte payload of Routine
+Control `31 01 30 02`. Techstream polls with `31 03 30 02`; completion state 2
+requires a 54-byte response and copies a 32-byte M4 plus 16-byte M5 proof. The
+server-side `MACK4` field is retained in the native exchange record, while the
+wire start operation itself contains only M1/M2/M3. No raw AES key crosses this
+interface.
 
-`LicenseKey` is not a secret recovered from the ECU in this method. The request
-writes one of two 46-character sentinel strings (`00…00` or `11…11`) according
-to the process type.
+## `SafekeyNumber` versus MCU identity
 
-## Online flow
+Exact recovered equivalence is:
 
-`IT3UtilityRevNK.dll` contains two user-mode branches in
-`MAC_01_020_Load`.
+```text
+SafekeyNumber = the unmodified 16-byte positive-response payload of DID 0x1010
+```
 
-### User type 1
+The pinned Techstream tree contains no `MCUID`, `MCU ID`, or transformation
+edge that names those bytes as a silicon identifier. Techstream validates only
+service/DID/length before forwarding and later uses the value as the response
+association key. Therefore equivalence to a physical MCU ID is **bounded**, not
+established. The precise missing edge is a target-ECU implementation or a
+captured response that assigns semantics to DID `0x1010`; no unpinned community
+claim is used as proof here.
 
-`MAC_01_020_bgDoWork_UserType1` opens the configured MACKey URL in Internet
-Explorer. `MAC_01_IEThreadFuncLow` / `MAC_01_IEThreadFuncMed` locate an HTML
-element named `ECUExchangeKey` and set its value to the formatted request XML.
-The code then waits for a non-empty field value or a five-minute timeout.
+## `CMAC_01_*` classes and S324 procedure codes
 
-### User types 2 and 3
+The native DLL contains exactly 24 RTTI classes: base `CMAC_01` plus 23 product
+variants. Their complete-object locators, vtable addresses, entry counts,
+vtable hashes, displayed S324 codes, and recovered operation selectors are
+generated from PE bytes in `mackey_vehicle_protocol.json`. The CSV records all
+51 distinct embedded `S324-*` procedure/UI codes and every class/state
+association.
 
-`MAC_01_020_bgDoWork_UserType2_3` dynamically loads `IT3UtilityNK.dll` and
-resolves these native exports:
+These strings are procedure/display codes distributed across variant virtual
+methods, not one serialized state-variable table. Class-local operation calls
+and success/error branches are recovered, but the final cross-class successor
+is selected by the outer Techstream UI/controller callback. Consequently the
+CSV marks predecessor/successor edges **bounded** at that caller-selected
+boundary instead of inventing a linear `00 -> 01 -> ...` graph. This remaining
+UI transition boundary does not obscure any vehicle request or response edge.
 
-- `CallTisSendMacKey_FromRev`
-- `CallTisGetMacKeyInfo_FromRev`
-- `GetMacKeyResId_FromRev`
-- `GetMacKeyResFile_FromRev`
-- `GetMacKeyResResult_FromRev`
-- the corresponding length accessors and `GetSoapFault_FromRev`
+## Comparison with Sienna firmware DID `0x1010`
 
-The native bridge imports
-`CWebService::TisServiceSendMacKey` and
-`CWebService::TisServiceGetMacKeyInfo` from `td3webapi.dll`.
+The firmware was independently reopened through `tools/g`. Its application
+WDBI callback routes a 64-byte request into ICU-S command 8 and returns a
+48-byte M4/M5 result. The exact comparison is:
 
-The recovered sequence is:
+| Property | Techstream MACKey | Sienna `8965B4512000` |
+|---|---|---|
+| Start | `31 01 30 02 || M1[16] || M2[32] || M3[16]` | `2E 01 10 10 || M1[16] || M2[32] || M3[16]` |
+| Poll | `31 03 30 02` | `2E 03 10 10` |
+| Result | state plus `M4[32] || M5[16]` | status plus `M4[32] || M5[16]` |
+| Engine evidence | ECU-side routine, implementation absent | literal ICU-S command 8 at `0x8997A` |
 
-1. Call `TisSendMacKey` with the request XML file path, an explicit UTC
-   timestamp (`yyyy/MM/dd HH:mm:ss:fffffff`), and the GTS software ID.
-2. Require bridge result string `"0"` and read the returned request ID through
-   `GetMacKeyResId_FromRev`.
-3. Replace the literal `$36` token in the configured login URL with that
-   returned request ID, then launch the URL.
-4. Compute uppercase `SHA256(request_id)`.
-5. Poll `TisGetMacKeyInfo(request_id, sha256_hex)`. Result values `2` and `3`
-   continue polling; `0` is success; `1` and `4` terminate as errors. The loop
-   has a five-minute timeout.
-6. Read the response file through `GetMacKeyResFile_FromRev` and write it as
-   `Memg/MAC_01_WriteData.xml`. The subsequent reader/call edge from that path
-   into a particular native procedure has not yet been recovered.
+Conclusion: **same SHE-compatible cryptographic architecture, different
+diagnostic service/procedure; no exact join**. The Techstream read of DID
+`0x1010` is a separate 16-byte safe-key identity read, not the Sienna's
+selector-1 64-byte WDBI package. Static evidence does not prove that this
+Techstream utility targets the analyzed EPS or provisions its slot 4.
 
-### The `$36` correction
+## Remaining dynamic questions
 
-`$36` is **not DID `0x0036`**. Managed IL proves that it is replaced with the
-server-returned request ID immediately after `GetMacKeyResId_FromRev`. Earlier
-documentation inferred DID semantics from the digits and from an untracked URL
-example; that inference was wrong. The exact query-parameter name is not
-recoverable from the currently pinned artifacts, so this report does not repeat
-the former `ecuMacId` claim as fact.
+- Which ECU families assign MCU-ID semantics to read DID `0x1010`?
+- Does a real Sienna provisioning session use application WDBI `0x1010`,
+  Routine `0x3002`, or neither?
+- What timing/retry behavior appears on a live master/slave network?
 
-## Response and native procedure layer
-
-`IT3UtilityNK.dll` contains 24 MSVC RTTI classes in the `CMAC_01_*` family and
-response-parser vocabulary including:
-
-- `ExchangeKeyList`, `ExchangeKey`, `ECUExchangeKey`
-- `VehicleIdentificationNumber`, `HashValue`, `ResultCode`, `X-RequestID`,
-  `X-Version`
-- `MACK4`, `MACM1`, `MACM2`, `MACM3`, and `SafekeyNumber`
-
-The managed layer obtains and stores the response XML. The native library also
-contains `CMAC_01_*` state/procedure classes associated with the vehicle-facing
-workflow. Their class census and vtables are reproducible from the MSVC RTTI,
-but the direct response-file consumer and the diagnostic operations represented
-by each state (`S324-00` through `S324-43`) still need method-by-method
-decompilation.
-
-## What this establishes—and what it does not
-
-Established:
-
-- Techstream collects VIN plus master/slave safe-key and MAC fields from a
-  vehicle-facing shared-memory procedure.
-- It hashes that request deterministically, submits it through Toyota's web API
-  bridge, polls by a returned request ID, and receives exchange-key XML.
-- The response is stored as `Memg/MAC_01_WriteData.xml`; native `CMAC_01_*`
-  procedures coexist in the same subsystem, but the direct handoff is not yet
-  proven.
-
-Not yet established:
-
-- the exact DID/routine/service IDs used to read `SafekeyNumber` and
-  `MACM1/2/3`;
-- the exact ECU write command and location for `MACK4`/exchange keys;
-- whether this subsystem provisions SecOC, immobilizer, another MAC domain, or
-  several product-specific domains;
-- whether the Sienna `8965B4512000` or Corolla `8965F1208000` calibration uses
-  this exact utility path.
-
-The next useful static step is to label the `CMAC_01_*` RTTI vtables and
-decompile the handful of overridden methods per state. The decisive dynamic
-step is a `ptshim32.dll` capture of a real MACKey Registration session.
+Those require target firmware or a capture. They no longer block the recovered
+Techstream V18 vehicle protocol.

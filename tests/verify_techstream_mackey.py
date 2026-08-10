@@ -4,7 +4,10 @@
 from __future__ import annotations
 
 import hashlib
+import csv
+import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -76,6 +79,7 @@ expected_hashes = {
     "IT3UtilityNK.dll": "d973ddd452c3405fa38691bebe9b3a809c694e8c2159c28b685082ff168e3653",
     "IT3UtilityRevNK.dll": "8109eac3b3f163111a258f92f87e5e60f114f2da16187307cc9369e0b18c4f0b",
     "eVbBroker.dll": "5d5c937650e6452350ae0bd4ef54dffcc3199e80544612032b1f19ae8f4f6e00",
+    "UtilityExNK2.dll": "8d9623f028f23876f69cb02baa10e1881c01fa01a4f906013bd36266f7e0fb33",
 }
 for name, expected in expected_hashes.items():
     check(f"{name} SHA-256", sha256(BIN / name) == expected)
@@ -240,6 +244,125 @@ check("shared-memory request fields have 17/16/16/32/16-byte shapes",
       f"got {array_sizes[:5]}")
 check("shared-memory reader starts payload at offset 2",
       any(opcode == "ldc.i4.2" for opcode, _ in shared))
+
+
+print("\n== generated native vehicle protocol ==")
+generator = REPO / "tools/generate_techstream_mackey_protocol.py"
+generated_json = REPO / "data/generated/techstream_v18/mackey_vehicle_protocol.json"
+generated_csv = REPO / "data/generated/techstream_v18/mackey_state_machine.csv"
+result = subprocess.run(
+    [sys.executable, str(generator), "--check"], cwd=REPO,
+    text=True, capture_output=True, check=False,
+)
+check("generated MACKey evidence is current", result.returncode == 0,
+      (result.stdout + result.stderr).strip())
+protocol = json.loads(generated_json.read_text())
+with generated_csv.open(newline="") as stream:
+    state_rows = list(csv.DictReader(stream))
+
+classes = protocol["rtti_classes"]
+check("generated RTTI census names all 24 classes", len(classes) == 24)
+check("native bridge pins all twelve UtilityEx MACKey imports",
+      len(protocol["companion_imports"]) == 12
+      and all("Ex2MAC_01" in name for name in protocol["companion_imports"]))
+expected_vtables = {
+    "CMAC_01": ("0x103ceb10", 84),
+    "CMAC_01_000": ("0x103cec64", 118),
+    "CMAC_01_000_S": ("0x103cee40", 118),
+    "CMAC_01_000A": ("0x103cf01c", 118),
+    "CMAC_01_001A": ("0x103cf1f8", 118),
+    "CMAC_01_001B": ("0x103cf3d4", 113),
+    "CMAC_01_001C": ("0x103cf59c", 118),
+    "CMAC_01_001C_S": ("0x103cf778", 118),
+    "CMAC_01_001D": ("0x103cf954", 118),
+    "CMAC_01_001E": ("0x103cfb30", 113),
+    "CMAC_01_001F": ("0x103cfcf8", 118),
+    "CMAC_01_001F_S": ("0x103cfed4", 118),
+    "CMAC_01_009A": ("0x103d00b0", 118),
+    "CMAC_01_009A_S": ("0x103d028c", 118),
+    "CMAC_01_009B": ("0x103d0468", 118),
+    "CMAC_01_009B_S": ("0x103d0644", 118),
+    "CMAC_01_015": ("0x103d0820", 118),
+    "CMAC_01_017": ("0x103d09fc", 118),
+    "CMAC_01_025_S": ("0x103d0bd8", 113),
+    "CMAC_01_028_S": ("0x103d0da0", 118),
+    "CMAC_01_031_S": ("0x103d0f7c", 118),
+    "CMAC_01_036_S": ("0x103d1158", 118),
+    "CMAC_01_038_S": ("0x103d1334", 118),
+    "CMAC_01_039_S": ("0x103d1510", 113),
+}
+actual_vtables = {
+    item["name"]: (item["vtable_va"], item["vtable_entries"])
+    for item in classes
+}
+check("all native vtable locations and widths are pinned",
+      actual_vtables == expected_vtables)
+expected_states = {
+    f"S324-{state}"
+    for item in classes for state in item["states"]
+}
+check("all 51 distinct S324 procedure codes are represented",
+      len(expected_states) == 51
+      and expected_states
+      == {value.decode("ascii") for value in re.findall(rb"S324-[0-9A-F]+", native_bytes)},
+      f"got {len(expected_states)}")
+check("state-machine CSV covers every class/state association",
+      len([row for row in state_rows if row["row_kind"] == "state"])
+      == sum(len(item["states"]) for item in classes))
+
+expected_body_hashes = {
+    "decode_exchange_records": "b8e4a3b44251c8b172053f363947bb95fdbafc9c894d137f3ed53ba93c338334",
+    "discover_master_slaves": "7c0d3814f5e81441b19959ad966fc7fa0650845af865376075b290b45d5230cb",
+    "parse_exchange_key_entry": "bd71fb24d3ed5bf8d1fba70ca76470be542ec7c1676034d3740e59155a75da43",
+    "poll_key_update_3002": "35857d4c2eb7e266fa6a096fc444c3576909e4964797b9ae55295e5ffc7a2093",
+    "read_mac_tuple_102e": "a903c56eb8fa3df66435962d9bbeb2551bbcbb6b3ecfe8c6b77d51ad0908c014",
+    "read_safekey_1010": "2b95a7bfc3bc8639f12ecf776d931a1144bcf51fca4f711d81b6a80c32748b54",
+    "read_vin_f190": "d4b9e46e17cef3e2916415df61b55b0c9a0d3e98e99fb4420cac74e1605a715f",
+    "security_key_2742": "f630da58c41f2357a282c40029d7b543a209ffa3cccd72888e779e30886543c4",
+    "security_seed_2741": "bc8f0c4b9d856d5682f520a4b5cfca0b3ac2fb13dcb9a41067afccef2d16fff8",
+    "start_key_update_3002": "79acd1a60e651c19900f8af5f65a51e3383016450fc062662f3ffb957d5fef43",
+    "write_topology_1035": "48356f7d4fa78eff9c55c3a32907b1087753d4326d78ff28983c2b8aee3b7f50",
+}
+actual_body_hashes = {
+    name: details["sha256"] for name, details in protocol["function_bodies"].items()
+    if name in expected_body_hashes
+}
+check("critical parser and diagnostic method bodies are pinned",
+      actual_body_hashes == expected_body_hashes)
+
+commands = {item["name"]: item for item in protocol["commands"]}
+check("vehicle reads VIN through DID F190",
+      commands["read VIN"]["request"] == "22 f1 90"
+      and commands["read VIN"]["destination"] == "VIN[17]")
+check("vehicle reads M1/M2/M3 through DID 102E",
+      commands["read MAC tuple"]["request"] == "22 10 2e"
+      and commands["read MAC tuple"]["response_length"] == ">=67")
+check("SafekeyNumber is the raw 16-byte DID 1010 payload",
+      commands["read SafekeyNumber"]["request"] == "22 10 10"
+      and commands["read SafekeyNumber"]["destination"] == "SafekeyNumber[16]")
+check("Techstream sends the server M1-M3 package through routine 3002",
+      commands["start key update"]["request"]
+      == "31 01 30 02 || M1[16] || M2[32] || M3[16]"
+      and commands["start key update"]["request_length"] == 68)
+check("Techstream polls routine 3002 for the 32+16-byte proof",
+      commands["poll key update"]["request"] == "31 03 30 02"
+      and commands["poll key update"]["destination"]
+      == "state[2], M4[32], M5[16]")
+check("Techstream and Sienna DID 1010 are not an exact diagnostic join",
+      protocol["firmware_join"]["conclusion"]
+      == "same cryptographic envelope; different service/procedure")
+
+response = protocol["response_parser"]
+check("response parser iterates bounded exchange-record lists",
+      response["maximum_exchange_records"] == {"short_variant": 8, "standard": 28})
+check("response parser preserves all M1-M4 field widths",
+      response["record_fields"]
+      == {"MACM1": 16, "MACM2": 32, "MACM3": 16, "MACK4": 32,
+          "SafekeyNumber": 16})
+check("master/slave association uses the raw safe-key identity",
+      protocol["vehicle_architecture"]["association_key"]
+      == "raw 16-byte SafekeyNumber"
+      and protocol["vehicle_architecture"]["maximum_ecu_records"] == 8)
 
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")

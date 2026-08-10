@@ -61,7 +61,7 @@ was searched separately. No search traversed unrelated personal storage.
 
 - [x] Stage 0 — bootstrap, baseline verification, and living sweep journal
 - [x] Stage 1 — fully reverse Vance `candidate-f05`
-- [ ] Stage 2 — recover the complete Techstream MACKey vehicle-side protocol
+- [x] Stage 2 — recover the complete Techstream MACKey vehicle-side protocol
 - [ ] Stage 3 — close remaining high-value Techstream static leads
 - [ ] Stage 4 — complete the Renesas RV40F host-protocol static census
 - [ ] Stage 5 — close the application COM receive/transmit long tail
@@ -256,5 +256,115 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Commit
 
-- Pending Stage 1 commit; its immutable SHA will be recorded at the next
-  journal update because a commit cannot contain its own final object ID.
+- `ed7ba4fe67f60d49fa3d255f52d41d0025fbdca2 analysis: recover Vance candidate-f05 payload semantics`
+
+## Stage 2 — recover the complete Techstream MACKey vehicle-side protocol
+
+### Starting state
+
+- HEAD: `ed7ba4fe67f60d49fa3d255f52d41d0025fbdca2`
+- Relevant prior finding: `TMS-011`; firmware comparison: command-8 WDBI DID
+  `0x1010` at `0x95DCE`/`0x6823C`/`0x86E62`/`0x8997A`
+- Relevant artifacts: pinned `Techstream.exe`, `IT3UtilityNK.dll`,
+  `IT3UtilityRevNK.dll`, `eVbBroker.dll`, `td3webapi.dll`, and newly joined
+  `UtilityExNK2.dll`
+- Verification baseline: Stage 1 gates pass; Techstream PE working project is
+  disposable under `build/pe-project/`
+
+### Questions
+
+1. Which exact vehicle operations produce VIN, M1/M2/M3, and master/slave
+   `SafekeyNumber` fields?
+2. How are response records parsed, associated, and written back to ECUs?
+3. Is `SafekeyNumber` demonstrably an MCU identity?
+4. Does the recovered Techstream flow exactly invoke the Sienna WDBI DID
+   `0x1010` command-8 contract?
+5. What can be deterministically recovered across all 24 `CMAC_01_*` classes
+   and their S324 procedure codes?
+
+### Work performed
+
+- Imported the pinned companion `UtilityExNK2.dll` into the disposable PE
+  project through `tools/run_headless`; decompiled the twelve named
+  `Ex2MAC_01_*` bridge exports, operation-selector dispatch, vehicle worker
+  threads, diagnostic helpers, discovery routine, response parsers, and
+  exchange-record decoder.
+- Recovered the MSVC RTTI complete-object-locator chain and all 24 vtables
+  directly from PE bytes; mapped all 51 distinct embedded S324 procedure/UI
+  codes and class associations.
+- Independently reopened the Sienna firmware through `tools/g` and inspected
+  the WDBI service callback, 64/48-byte command-8 submission and staging, and
+  literal ICU-S command-8 trigger before comparing contracts.
+- Searched the pinned Techstream tree for MCU/MCUID naming and transformations;
+  only the safe-key diagnostic path supplies the 16-byte identity.
+
+### Findings
+
+- The request producers are exact: `22 F1 90` -> VIN[17], `22 10 2E` ->
+  M1[16]/M2[32]/M3[16], and `22 10 10` -> raw `SafekeyNumber[16]`. Update
+  security uses `27 41/42`; topology uses DIDs `0x1033`, `0x1035`, and the
+  `0x1100` family — source: external pinned PE bodies, grade: **verified**.
+- Master endpoint `0x763` plus discovered slave endpoints populate up to eight
+  ECU records. Returned records are matched by raw 16-byte `SafekeyNumber`, so
+  one server transaction can carry master and multiple slave packages —
+  source: external pinned PE bodies, grade: **recovered**.
+- Native XML readers bound `ExchangeKeyList` iteration to 28 or 8 records,
+  parse `SafekeyNumber`, M1, M2, M3, and MACK4, and hex-decode the matched
+  record — source: external pinned PE parser bodies, grade: **verified**.
+- Vehicle writes use `31 01 30 02 || M1[16] || M2[32] || M3[16]`; polling uses
+  `31 03 30 02` and returns a 16-bit state plus M4[32]/M5[16] on completion —
+  source: external pinned PE bodies, grade: **verified**.
+- `SafekeyNumber` is exactly the unmodified DID-`0x1010` payload. Equivalence
+  to a physical MCU ID is not present in the pinned artifacts; the missing
+  semantic edge is target firmware or a legitimate capture — grade:
+  **bounded**.
+- Techstream and Sienna use the same M1–M5 envelope but no exact diagnostic
+  join: Routine `0x3002` versus WDBI `2E 01/03 10 10`. Target-EPS/SecOC-slot
+  applicability remains unproven — source: external PE plus firmware-static,
+  grade: **verified comparison; bounded transfer**.
+
+### Negative/bounded results
+
+- The 51 S324 strings are distributed procedure/UI codes, not a serialized
+  central state table. Class-local selectors and branches are recovered, while
+  final cross-class successors are chosen by the outer UI/controller callback;
+  the generated CSV localizes that bounded edge instead of imposing a false
+  linear state order.
+- No MCU/MCUID label or transformation proves a silicon-identity meaning for
+  safe-key DID `0x1010`.
+- The pinned Techstream path does not issue the analyzed Sienna's application
+  WDBI command-8 request.
+
+### Documentation/tests changed
+
+- Replaced the bounded native section in canonical
+  `docs/security/mackey-registration.md` with the recovered end-to-end flow.
+- Updated `docs/tooling/techstream.md`, `TMS-011`, the open-question boundary,
+  and completed-static roadmap.
+- Added deterministic PE generator
+  `tools/generate_techstream_mackey_protocol.py`, JSON/CSV evidence, companion
+  hash, full RTTI/vtable census, critical function-body locks, and exact
+  command/parser/field assertions to `verify_techstream_mackey.py`.
+
+### Verification
+
+- `uv run python tools/generate_techstream_mackey_protocol.py --check` -> pass
+- `uv run python tests/verify_techstream_mackey.py` -> pass (51/51 after the
+  complete 51-code census)
+- `make verify-changed` -> pass (7 matched suites, 11 test files; rerun after
+  stopping both disposable Ghidra daemons)
+- `EXTERNAL_REPOS_DIR=/Users/kai/dev/inspect/repos uv run --locked python
+  tests/verify_external_corroboration.py` -> pass (175/175)
+- firmware evidence independently inspected through `tools/g`; main working
+  project snapshot is unchanged
+
+### Remaining blockers
+
+- Physical MCU-ID semantics of DID `0x1010`, actual product applicability, and
+  live retry/timing behavior require target firmware or a legitimate capture.
+  They do not block the recovered pinned-Techstream protocol.
+
+### Commit
+
+- Pending Stage 2 commit; its immutable SHA will be recorded at the next
+  journal update.

@@ -193,8 +193,17 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `tools/decode_icus_key_update_trace.py` to determine whether Toyota/Denso
   actually invokes this DID, whether M1 targets slot 4, observed polling
   cadence/deadlines, and which lifecycle preconditions exist beyond the
-  recovered extended-session/no-Dcm-SA policy. RFP's `ValidateICU_S` remains a
-  separate lifecycle-validation operation, not this application request.
+  recovered extended-session/no-Dcm-SA policy. Techstream V18 MACKey
+  Registration is no longer a candidate exact static join: it reads a separate
+  16-byte identity from DID `0x1010`, but writes M1–M3 through Routine
+  `0x3002`. RFP's `ValidateICU_S` is likewise a separate
+  lifecycle-validation operation.
+- **MACKey `SafekeyNumber` physical meaning.** Techstream forwards the raw
+  16-byte payload of `22 10 10` unchanged and uses it to associate returned
+  exchange records with master/slave ECUs. The pinned binaries contain no
+  `MCUID` naming or derivation edge. Resolve whether this DID is a silicon MCU
+  identity only from target ECU firmware or a legitimate vehicle transcript;
+  do not equate the names from community descriptions alone.
 - **Techstream live-session capture.** `ptshim32.dll` (TMS-005) is a J2534
   PassThru interceptor/logger that can capture a complete Techstream↔EPS UDS
   transcript. Install it as the J2534 DLL shim on a Windows machine connected

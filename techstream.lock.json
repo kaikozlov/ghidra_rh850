@@ -38,6 +38,12 @@
     "exception": "files starting with printable ASCII (;, [, etc.) are plaintext"
   },
   "artifacts": {
+    "UtilityExNK2.dll": {
+      "path": "Techstream/bin/UtilityExNK2.dll",
+      "sha256": "8d9623f028f23876f69cb02baa10e1881c01fa01a4f906013bd36266f7e0fb33",
+      "size": 1425408,
+      "role": "Native MACKey vehicle-protocol companion reached by IT3UtilityNK.dll Ex2MAC_01 imports"
+    },
     "ptshim32.dll": {
       "path": "Techstream/bin/ptshim32.dll",
       "sha256": "c8d960e84981d761981706e85004ab31dc8263cea740c9afd5bc47dfdadafb8a",

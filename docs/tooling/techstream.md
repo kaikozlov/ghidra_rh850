@@ -681,8 +681,8 @@ steering-anchored `utility_string` vocabulary, never recovered procedures.
 
 The canonical report is
 [security/mackey-registration.md](../security/mackey-registration.md). Managed
-IL now recovers the complete online request flow and corrects the former `$36`
-interpretation:
+IL plus native `IT3UtilityNK.dll`/`UtilityExNK2.dll` now recover the complete
+online and vehicle-facing flow:
 
 - the request XML contains VIN, master/slave `SafekeyNumber`, `MACM1`,
   `MACM2`, `MACM3`, and a deterministic SHA-256 `HashValue`;
@@ -693,11 +693,21 @@ interpretation:
   exchange-key XML as `Memg/MAC_01_WriteData.xml`;
 - `$36` is therefore **not DID `0x0036`**. The former `ecuMacId` URL claim came
   from an untracked configuration example and is not repeated as pinned fact;
-- 24 native `CMAC_01_*` RTTI classes consume the result, but the exact
-  vehicle-facing read/write command sequence is still bounded.
+- `UtilityExNK2.dll` reads VIN with `22 F1 90`, the 16+32+16-byte MAC tuple
+  with `22 10 2E`, and master/slave 16-byte `SafekeyNumber` values with
+  `22 10 10`;
+- the response parser matches returned records by raw `SafekeyNumber`, then
+  writes each selected ECU through `31 01 30 02 || M1 || M2 || M3` and polls
+  with `31 03 30 02` for state plus `M4[32] || M5[16]`;
+- all 24 `CMAC_01_*` RTTI classes, vtables, 51 embedded `S324-*` procedure
+  codes, critical body hashes, and command shapes are pinned in generated
+  evidence. Cross-class UI successors remain caller-selected and bounded.
 
-This remains distinct from UDS SecurityAccess. A relationship to SecOC key
-provisioning is plausible but **not proven** by the static artifacts.
+This remains distinct from ordinary UDS SecurityAccess. It uses the same
+M1–M5 cryptographic architecture as the Sienna command-8 path, but it is not an
+exact diagnostic join: Techstream uses Routine `0x3002`, while the Sienna uses
+WDBI DID `0x1010` selectors `01/03`. A relationship to that EPS or its SecOC
+slot 4 is therefore **not proven**.
 
 ### 7.1 Full-tree secret census
 
@@ -735,7 +745,7 @@ tree; it does not identify the domain served by MACKey Registration.
 | `ptshim32.dll` CAN logger | Capture a real Techstream↔EPS session for transcript validation |
 | `CSecurityAccessAES128` source paths | PDB/source-tree context for the KGProject diagnostic framework |
 | TIS portal RKS flow (`CUWAccessRKS.dll`, §5.3) | OEM reprogramming-key authorization (Layer A) — VIN+license bound, IE-automated, no client crypto; independent of the cal-file crypto key (Layer B). Not immobilizer. |
-| MACKey Registration (§7) | Online exchange-key provisioning path: VIN + master/slave safe-key/MAC fields → hashed `ECUExchangeKey` XML → native TIS web-service bridge → returned exchange-key XML → 24 `CMAC_01_*` native procedure classes. `$36` is the server request ID, not a DID. Exact ECU write protocol and any SecOC relationship remain open. |
+| MACKey Registration (§7) | Recovered exchange-key provisioning path: `22 F190/102E/1010` vehicle reads → VIN + master/slave safe-key/MAC fields → hashed `ECUExchangeKey` XML → native TIS bridge → identity-matched response → per-ECU Routine `0x3002` M1–M3 write and M4/M5 poll. `$36` is the server request ID. This shares the Sienna command-8 envelope but is not its WDBI DID-`0x1010` service. |
 | `TCUWControlCommPhase.dll` parameters | Exact timing values for SA seed/key exchange during reflash |
 | `[ISTA_T3_Login]` credentials | Hardcoded hex credentials in `uspublic.ini` for Toyota ISTA portal |
 

@@ -1,0 +1,680 @@
+{
+  "artifacts": {
+    "IT3UtilityNK.dll": "d973ddd452c3405fa38691bebe9b3a809c694e8c2159c28b685082ff168e3653",
+    "UtilityExNK2.dll": "8d9623f028f23876f69cb02baa10e1881c01fa01a4f906013bd36266f7e0fb33"
+  },
+  "commands": [
+    {
+      "api": "UDS ReadDataByIdentifier",
+      "destination": "VIN[17]",
+      "grade": "recovered",
+      "name": "read VIN",
+      "request": "22 f1 90",
+      "request_length": 3,
+      "response_length": ">=20",
+      "source": "ECU 0x763"
+    },
+    {
+      "api": "UDS ReadDataByIdentifier",
+      "destination": "MACM1[16] || MACM2[32] || MACM3[16]",
+      "grade": "recovered",
+      "name": "read MAC tuple",
+      "request": "22 10 2e",
+      "request_length": 3,
+      "response_length": ">=67",
+      "source": "ECU 0x763"
+    },
+    {
+      "api": "UDS ReadDataByIdentifier",
+      "destination": "SafekeyNumber[16]",
+      "grade": "recovered",
+      "name": "read SafekeyNumber",
+      "request": "22 10 10",
+      "request_length": 3,
+      "response_length": ">=19",
+      "source": "master/slave ECU"
+    },
+    {
+      "api": "UDS SecurityAccess",
+      "destination": "seed[16]",
+      "grade": "recovered",
+      "name": "request seed",
+      "request": "27 41",
+      "request_length": 2,
+      "response_length": "18",
+      "source": "selected ECU"
+    },
+    {
+      "api": "UDS SecurityAccess",
+      "destination": "selected ECU",
+      "grade": "recovered",
+      "name": "send key",
+      "request": "27 42 || key[16]",
+      "request_length": 18,
+      "response_length": ">=2",
+      "source": "derived key[16]"
+    },
+    {
+      "api": "UDS WriteDataByIdentifier",
+      "destination": "ECU 0x763",
+      "grade": "recovered",
+      "name": "write ECU topology",
+      "request": "2e 10 35 || topology[25]",
+      "request_length": 28,
+      "response_length": ">=3",
+      "source": "discovered ECU map"
+    },
+    {
+      "api": "UDS RoutineControl start",
+      "destination": "each selected ECU",
+      "grade": "recovered",
+      "name": "start key update",
+      "request": "31 01 30 02 || M1[16] || M2[32] || M3[16]",
+      "request_length": 68,
+      "response_length": ">=4",
+      "source": "server exchange record"
+    },
+    {
+      "api": "UDS RoutineControl results",
+      "destination": "state[2], M4[32], M5[16]",
+      "grade": "recovered",
+      "name": "poll key update",
+      "request": "31 03 30 02",
+      "request_length": 4,
+      "response_length": ">=6; >=54 when complete",
+      "source": "each selected ECU"
+    },
+    {
+      "api": "UDS ReadDataByIdentifier",
+      "destination": "topology[25]",
+      "grade": "recovered",
+      "name": "read ECU topology",
+      "request": "22 10 33",
+      "request_length": 3,
+      "response_length": ">=28",
+      "source": "ECU 0x763"
+    }
+  ],
+  "companion_imports": [
+    "Ex2MAC_01_ComProcess",
+    "Ex2MAC_01_S_ChgSessionDefaultNoChk",
+    "Ex2MAC_01_S_ConfEnginePowerSwitch",
+    "Ex2MAC_01_S_ReadSafeKeyNumber",
+    "Ex2MAC_01_S_SecAccReqSeedUpdate",
+    "Ex2MAC_01_S_SecAccReqSeedValidation",
+    "Ex2MAC_01_S_UpDownLoadAfterGetSeed",
+    "Ex2MAC_01_S_UpDownLoadAfterSendKey",
+    "Ex2MAC_01_S_UpDownLoadEcuList",
+    "Ex2MAC_01_S_UpdateVehicleSts",
+    "Ex2MAC_01_S_ValidationEcuSecKey",
+    "Ex2MAC_01_S_ValidationVehicleSts"
+  ],
+  "firmware_join": {
+    "conclusion": "same cryptographic envelope; different service/procedure",
+    "sienna_4512000": {
+      "poll": "2e 03 10 10",
+      "result": "status || M4[32] || M5[16]",
+      "start": "2e 01 10 10 || M1[16] || M2[32] || M3[16]"
+    },
+    "techstream": {
+      "poll": "31 03 30 02",
+      "result": "M4[32] || M5[16]",
+      "start": "31 01 30 02 || M1[16] || M2[32] || M3[16]"
+    }
+  },
+  "function_bodies": {
+    "decode_exchange_records": {
+      "dll": "IT3UtilityNK.dll",
+      "rva": "0x23bd90",
+      "sha256": "b8e4a3b44251c8b172053f363947bb95fdbafc9c894d137f3ed53ba93c338334",
+      "size": 1323,
+      "va": "0x1023bd90"
+    },
+    "discover_master_slaves": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xec4c0",
+      "sha256": "7c0d3814f5e81441b19959ad966fc7fa0650845af865376075b290b45d5230cb",
+      "size": 1004,
+      "va": "0x100ec4c0"
+    },
+    "mackey_com_process": {
+      "dll": "IT3UtilityNK.dll",
+      "rva": "0x237970",
+      "sha256": "ad21a0079070f1b10bed7ca41ff8c3699416d400a1f7a8a70808d8b1be4a52f8",
+      "size": 300,
+      "va": "0x10237970"
+    },
+    "parse_exchange_key_entry": {
+      "dll": "IT3UtilityNK.dll",
+      "rva": "0x2397c0",
+      "sha256": "bd71fb24d3ed5bf8d1fba70ca76470be542ec7c1676034d3740e59155a75da43",
+      "size": 1201,
+      "va": "0x102397c0"
+    },
+    "parse_response_xml_28": {
+      "dll": "IT3UtilityNK.dll",
+      "rva": "0x238b60",
+      "sha256": "ceae7659cb9323e0b9e5e66094aac4661e15c65d453d313629e86c33d2348e63",
+      "size": 1756,
+      "va": "0x10238b60"
+    },
+    "parse_response_xml_8": {
+      "dll": "IT3UtilityNK.dll",
+      "rva": "0x23b660",
+      "sha256": "9e03bed665a21160a89c736e9ad54b6060a4dd22f8574a98c7ec74f014397e54",
+      "size": 1756,
+      "va": "0x1023b660"
+    },
+    "poll_key_update_3002": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xec1d0",
+      "sha256": "35857d4c2eb7e266fa6a096fc444c3576909e4964797b9ae55295e5ffc7a2093",
+      "size": 256,
+      "va": "0x100ec1d0"
+    },
+    "read_mac_tuple_102e": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xebe30",
+      "sha256": "a903c56eb8fa3df66435962d9bbeb2551bbcbb6b3ecfe8c6b77d51ad0908c014",
+      "size": 155,
+      "va": "0x100ebe30"
+    },
+    "read_safekey_1010": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xebed0",
+      "sha256": "2b95a7bfc3bc8639f12ecf776d931a1144bcf51fca4f711d81b6a80c32748b54",
+      "size": 167,
+      "va": "0x100ebed0"
+    },
+    "read_security_version_103a": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xeb690",
+      "sha256": "dd1c2947cae68f4b759fe69e02d3175ef2d26ac8a5b9d443b2b5cfe89e298b31",
+      "size": 165,
+      "va": "0x100eb690"
+    },
+    "read_topology_1033": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xec2d0",
+      "sha256": "240f08011b9cbb250430d306b989eaa70e9a33905c16191f86c801cdbea1cd16",
+      "size": 156,
+      "va": "0x100ec2d0"
+    },
+    "read_vehicle_status_103b": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xeb740",
+      "sha256": "4b375dcaa634deccb8012bd860bc0e4e919f2c58943e7fb1f826a64548ddb247",
+      "size": 146,
+      "va": "0x100eb740"
+    },
+    "read_vin_f190": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xebd80",
+      "sha256": "d4b9e46e17cef3e2916415df61b55b0c9a0d3e98e99fb4420cac74e1605a715f",
+      "size": 174,
+      "va": "0x100ebd80"
+    },
+    "security_key_2742": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xeb910",
+      "sha256": "f630da58c41f2357a282c40029d7b543a209ffa3cccd72888e779e30886543c4",
+      "size": 158,
+      "va": "0x100eb910"
+    },
+    "security_seed_2741": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xeb850",
+      "sha256": "bc8f0c4b9d856d5682f520a4b5cfca0b3ac2fb13dcb9a41067afccef2d16fff8",
+      "size": 191,
+      "va": "0x100eb850"
+    },
+    "session_104f": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xeb7e0",
+      "sha256": "d6db798d68772ebf4940bc7efea2c19eba3027ae4456c97b0e6f318ceb7e53fa",
+      "size": 105,
+      "va": "0x100eb7e0"
+    },
+    "start_key_update_3002": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xec0e0",
+      "sha256": "79acd1a60e651c19900f8af5f65a51e3383016450fc062662f3ffb957d5fef43",
+      "size": 226,
+      "va": "0x100ec0e0"
+    },
+    "validation_ecu_sec_key_wrapper": {
+      "dll": "IT3UtilityNK.dll",
+      "rva": "0x23d4d0",
+      "sha256": "0756649f2b505ed33c3fe641b710647b78d5cbabf3a6dca974fead40e3c51bf0",
+      "size": 57,
+      "va": "0x1023d4d0"
+    },
+    "write_topology_1035": {
+      "dll": "UtilityExNK2.dll",
+      "rva": "0xeb9b0",
+      "sha256": "48356f7d4fa78eff9c55c3a32907b1087753d4326d78ff28983c2b8aee3b7f50",
+      "size": 151,
+      "va": "0x100eb9b0"
+    }
+  },
+  "operation_selectors": {
+    "0": "update_vehicle_status",
+    "1": "security_access_seed_update",
+    "2": "read_safekey_and_mac",
+    "3": "upload_after_get_seed",
+    "4": "upload_after_send_key",
+    "5": "upload_ecu_list",
+    "6": "change_default_session",
+    "7": "read_safekey_variant"
+  },
+  "response_parser": {
+    "identity_match": "32 hexadecimal characters decoded to 16 raw bytes",
+    "maximum_exchange_records": {
+      "short_variant": 8,
+      "standard": 28
+    },
+    "record_fields": {
+      "MACK4": 32,
+      "MACM1": 16,
+      "MACM2": 32,
+      "MACM3": 16,
+      "SafekeyNumber": 16
+    },
+    "tags": {
+      "<ExchangeKey": "0x104988a0",
+      "<ExchangeKeyList>": "0x104988b0",
+      "<MACK4>": "0x104989f8",
+      "<MACM1>": "0x10498a34",
+      "<MACM2>": "0x10498a20",
+      "<MACM3>": "0x10498a0c",
+      "SafekeyNumber": "0x10498a4c",
+      "\\Memg\\MAC_01_WriteData.xml": "0x10498b0c"
+    }
+  },
+  "rtti_classes": [
+    {
+      "first_method_va": "0x10235660",
+      "name": "CMAC_01",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498798",
+      "states": [
+        "02",
+        "03A",
+        "03B",
+        "04",
+        "05",
+        "06",
+        "10",
+        "11A",
+        "11B",
+        "12A",
+        "13A",
+        "13B",
+        "13C",
+        "14B",
+        "16",
+        "18",
+        "40",
+        "43",
+        "24",
+        "26",
+        "27",
+        "29",
+        "30",
+        "32",
+        "33",
+        "34",
+        "35",
+        "37"
+      ],
+      "vtable_entries": 84,
+      "vtable_sha256": "ec607670f56d68272e3392bfd9dfc32f1cc92f6739bb4cc16abd5e8bf54fe0a8",
+      "vtable_va": "0x103ceb10"
+    },
+    {
+      "first_method_va": "0x1023d580",
+      "name": "CMAC_01_000",
+      "operation_selectors": [
+        1,
+        2,
+        4,
+        5,
+        6
+      ],
+      "rtti_string_va": "0x10498af0",
+      "states": [
+        "00"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "10d874a5c12b8f9e156bf3b05e7ab3111b4e066d1144c90e2ee7086082b326bc",
+      "vtable_va": "0x103cec64"
+    },
+    {
+      "first_method_va": "0x1023e140",
+      "name": "CMAC_01_000_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498b38",
+      "states": [
+        "15"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "a3a6a1112aa03a04ac17d290743f4430387968c39ce4d9deac8a66ef55fe0e34",
+      "vtable_va": "0x103cee40"
+    },
+    {
+      "first_method_va": "0x1023e710",
+      "name": "CMAC_01_000A",
+      "operation_selectors": [
+        1,
+        2
+      ],
+      "rtti_string_va": "0x10498b58",
+      "states": [
+        "00A"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "a766d2b92bca7683aead637f60d7341c059e717c97c43ebf2408c0ff1156bdd5",
+      "vtable_va": "0x103cf01c"
+    },
+    {
+      "first_method_va": "0x1023e9e0",
+      "name": "CMAC_01_001A",
+      "operation_selectors": [
+        1,
+        2,
+        4
+      ],
+      "rtti_string_va": "0x10498b80",
+      "states": [
+        "01A",
+        "08"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "826c536463879316eb834b91eb592609f62335f3af25805ed8d414cc9182fa52",
+      "vtable_va": "0x103cf1f8"
+    },
+    {
+      "first_method_va": "0x1023ef80",
+      "name": "CMAC_01_001B",
+      "operation_selectors": [
+        2,
+        3,
+        4
+      ],
+      "rtti_string_va": "0x10498bb0",
+      "states": [
+        "01B"
+      ],
+      "vtable_entries": 113,
+      "vtable_sha256": "ab8ddb60d210f47dc000a2353fd91968994074d3ff11b4448aca80f3965495fd",
+      "vtable_va": "0x103cf3d4"
+    },
+    {
+      "first_method_va": "0x1023f710",
+      "name": "CMAC_01_001C",
+      "operation_selectors": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "rtti_string_va": "0x10498bd8",
+      "states": [
+        "01C",
+        "41",
+        "42"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "a5f9cd8047848a3779f416b51d4d46a9b6e2f93fe71a67614d7538ad85cfdd39",
+      "vtable_va": "0x103cf59c"
+    },
+    {
+      "first_method_va": "0x10240fe0",
+      "name": "CMAC_01_001C_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498c10",
+      "states": [
+        "01C"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "e5c1f257e4afd640ae86d9e7060b700bac0302d33deb1785a0d13ec8eb1ea35e",
+      "vtable_va": "0x103cf778"
+    },
+    {
+      "first_method_va": "0x10241110",
+      "name": "CMAC_01_001D",
+      "operation_selectors": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "rtti_string_va": "0x10498c30",
+      "states": [
+        "01D",
+        "19"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "cc245d2905ed62df35fd98d0b05b08798e79f138a10405905c594550bcb61648",
+      "vtable_va": "0x103cf954"
+    },
+    {
+      "first_method_va": "0x102418e0",
+      "name": "CMAC_01_001E",
+      "operation_selectors": [
+        1,
+        2,
+        4
+      ],
+      "rtti_string_va": "0x10498c60",
+      "states": [
+        "01E",
+        "07"
+      ],
+      "vtable_entries": 113,
+      "vtable_sha256": "346b7cb870a93dca776e4295f30b43b964d26601871e5aa3eaf72ece36e5c3b6",
+      "vtable_va": "0x103cfb30"
+    },
+    {
+      "first_method_va": "0x10242120",
+      "name": "CMAC_01_001F",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498c90",
+      "states": [
+        "01F"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "fa8f261606248f532d4e4d2cf55ccc07285222490f84732dd6a7ab207e193abc",
+      "vtable_va": "0x103cfcf8"
+    },
+    {
+      "first_method_va": "0x102421c0",
+      "name": "CMAC_01_001F_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498cb8",
+      "states": [
+        "01F"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "f17eb844ab155313b8138557c70d6ba203fcc7b251090827b42544f868b72fac",
+      "vtable_va": "0x103cfed4"
+    },
+    {
+      "first_method_va": "0x102422b0",
+      "name": "CMAC_01_009A",
+      "operation_selectors": [
+        4,
+        5,
+        6
+      ],
+      "rtti_string_va": "0x10498cd8",
+      "states": [
+        "09A"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "0e66357041b059d3993525448c83bc83821f4f4a9a944e0c2a3d583d007f4db3",
+      "vtable_va": "0x103d00b0"
+    },
+    {
+      "first_method_va": "0x10242940",
+      "name": "CMAC_01_009A_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498d00",
+      "states": [
+        "09A"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "cd3a63ee6ae84518a21d444dbf0d27cff0c6b77486a23e91e0e1e8cf2c1109e2",
+      "vtable_va": "0x103d028c"
+    },
+    {
+      "first_method_va": "0x10242c30",
+      "name": "CMAC_01_009B",
+      "operation_selectors": [
+        1,
+        2,
+        4,
+        6
+      ],
+      "rtti_string_va": "0x10498d20",
+      "states": [
+        "09B"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "9c3f02aa6c6d19482ece7967fa51daa7dcaaafabc6959424327163160fbb8a72",
+      "vtable_va": "0x103d0468"
+    },
+    {
+      "first_method_va": "0x102433f0",
+      "name": "CMAC_01_009B_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498d48",
+      "states": [
+        "09B"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "72fd5ceefa80e175494474ea5bed979be5290d95219e98a67e7bf263a8c4a1d8",
+      "vtable_va": "0x103d0644"
+    },
+    {
+      "first_method_va": "0x102436f0",
+      "name": "CMAC_01_015",
+      "operation_selectors": [
+        7
+      ],
+      "rtti_string_va": "0x10498d68",
+      "states": [
+        "15"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "c318e7d744d4ee375a521ad9df40ad32e313463944ec52754e78ce7bbd7c9c22",
+      "vtable_va": "0x103d0820"
+    },
+    {
+      "first_method_va": "0x10243af0",
+      "name": "CMAC_01_017",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498d88",
+      "states": [
+        "17"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "830f606fc82836568e7ad39d466667ad1145fb2967fbe9b9c0f9b45c2c5255d0",
+      "vtable_va": "0x103d09fc"
+    },
+    {
+      "first_method_va": "0x10243bd0",
+      "name": "CMAC_01_025_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498db0",
+      "states": [
+        "25"
+      ],
+      "vtable_entries": 113,
+      "vtable_sha256": "9885c45dbad89b134bf5d83aae14c871930390826859655ab58d4f2a17099919",
+      "vtable_va": "0x103d0bd8"
+    },
+    {
+      "first_method_va": "0x10244100",
+      "name": "CMAC_01_028_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498dd8",
+      "states": [
+        "28"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "73eb0274ecbee965197de7b2832d4ed51a1468b5b722e54e822e2df86787436f",
+      "vtable_va": "0x103d0da0"
+    },
+    {
+      "first_method_va": "0x10244fc0",
+      "name": "CMAC_01_031_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498e00",
+      "states": [
+        "31"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "e1e8921683c328bab7a778a80dc0d7f00830a41171d9016d93fe9892a1d03dc2",
+      "vtable_va": "0x103d0f7c"
+    },
+    {
+      "first_method_va": "0x10245050",
+      "name": "CMAC_01_036_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498e28",
+      "states": [
+        "36"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "e57eebec33b5e93e1d531c0742d103bad413efc43b81482b0f0c3487f0682423",
+      "vtable_va": "0x103d1158"
+    },
+    {
+      "first_method_va": "0x102452c0",
+      "name": "CMAC_01_038_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498e50",
+      "states": [
+        "38"
+      ],
+      "vtable_entries": 118,
+      "vtable_sha256": "ea734e11dcb9ee96b58e3fe5ef6f6aa4aafabedb49b00f37e8f00cf61f01fe5b",
+      "vtable_va": "0x103d1334"
+    },
+    {
+      "first_method_va": "0x102453e0",
+      "name": "CMAC_01_039_S",
+      "operation_selectors": [],
+      "rtti_string_va": "0x10498e78",
+      "states": [
+        "39"
+      ],
+      "vtable_entries": 113,
+      "vtable_sha256": "bb6862023877f5b23b4f1af80b0009997e01e069ce9707a8bdd1140bc5d045d9",
+      "vtable_va": "0x103d1510"
+    }
+  ],
+  "schema": 1,
+  "vehicle_architecture": {
+    "association_key": "raw 16-byte SafekeyNumber",
+    "discovery_dids": [
+      "0x1100",
+      "0x1101",
+      "0x1102",
+      "0x1103",
+      "0x1104",
+      "0x1105",
+      "0x1107",
+      "0x1108",
+      "0x1033",
+      "0x1035"
+    ],
+    "gateway_check_id": "0x7a2",
+    "master_request_id": "0x763",
+    "maximum_ecu_records": 8
+  }
+}

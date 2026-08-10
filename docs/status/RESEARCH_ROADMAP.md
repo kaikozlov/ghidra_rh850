@@ -50,6 +50,11 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Completed static investigations
 
+- **Techstream MACKey vehicle protocol (2026-08-10).** Recovered the VIN,
+  MAC-tuple, safe-key identity, master/slave discovery, response association,
+  Routine-`0x3002` M1–M3 write, and M4/M5 poll. It shares the Sienna command-8
+  envelope but is not an exact WDBI-DID-`0x1010` join. Canonical:
+  [../security/mackey-registration.md](../security/mackey-registration.md).
 - **Vance candidate-f05 payload (2026-08-10).** Recovered as a full 32 KiB
   DataFlash dump with unchanged CAN `0x7A9` word-frame transport and a post-dump
   reset call, not an ICU-S/key-slot probe. Canonical:
