@@ -114,7 +114,34 @@ firmware in this repository is one receiving ECU. Conversely, this EPS also
 accepts protected `0x132`, `0x090`, and `0x0D7`; opendbc's controller does not
 send those streams.
 
-### 1.3 Key boundary
+### 1.3 Full pinned classic-SecOC message family
+
+The pinned Toyota SecOC DBC is broader than the three streams currently signed
+by opendbc's controller. It defines the same classic 28-bit-authenticator trailer
+on eight ordinary IDs:
+
+| CAN ID | DBC name |
+|---:|---|
+| `0x116` | `GAS_PEDAL` |
+| `0x131` | `STEERING_LTA_2` |
+| `0x177` | `PCM_CRUISE_3` |
+| `0x183` | `ACC_CONTROL_2` |
+| `0x24D` | `PCM_CRUISE_4` |
+| `0x283` | `PRE_COLLISION` |
+| `0x2E4` | `STEERING_LKA` |
+| `0x344` | `PRE_COLLISION_2` |
+
+`0x00F` is the companion synchronization message. Every ordinary block carries
+`AUTHENTICATOR`, `RESET_FLAG`, and `MSG_CNT_LOWER`; the common sender formula is
+DataID-generic. This establishes a useful **known Toyota classic-SecOC profile**,
+not a claim that every listed ID appears on every vehicle or belongs to the same
+receiving ECU/key domain.
+
+The machine-readable profile is `data/toyota_classic_secoc_profile.csv`, and the
+community-extractor implications are canonical in
+[community-dataflash-secoc.md](../../tooling/community-dataflash-secoc.md).
+
+### 1.4 Key boundary
 
 The public algorithm requires raw key bytes supplied by its integration. The
 pinned source does not recover the key from the vehicle, provision ICU-S, or
@@ -181,13 +208,33 @@ uv run --locked python tools/toyota_secoc_signer.py sync \
 These are synthetic deterministic vectors, not captured vehicle material.
 The tool prints candump-compatible text but does not send it.
 
-## 3. Evidence and applicability boundaries
+## 3. Generic capture and DataFlash oracle
+
+`tools/toyota_secoc_oracle.py` extends the independent implementation from frame
+construction into offline verification. Unlike the current pinned community
+DataFlash verifier, it does not assume steering IDs or Panda buses 0/2. It:
+
+- tracks `0x00F` synchronization independently per observed bus;
+- recognizes the full pinned classic-SecOC profile by default;
+- verifies candidate keys separately for sync and every protected ID present;
+- derives the 64 possible full message counters consistent with the transmitted
+  two counter bits rather than brute-forcing unrelated counter values;
+- scans every sliding 16-byte DataFlash window with a sync-CMAC prefilter; and
+- reports only candidate offset/address hashes and match counts, not raw keys.
+
+`tests/verify_toyota_secoc_oracle.py` includes a synthetic bus-1 capture with
+`0x116` and `0x24D` specifically to prevent regression to the Sienna-only
+`0x131/0x2E4/0x344` assumption.
+
+## 4. Evidence and applicability boundaries
 
 | Claim | Source | Confidence |
 |---|---|---|
 | This Sienna EPS accepts the documented classic authenticated-input and trailer format | firmware-static | verified by `verify_secoc_application.py` |
 | Pinned opendbc independently implements the same ordinary and sync formulas | external-source | recovered from pinned source; hashes checked by optional external verification |
 | The local signer reproduces fixed ordinary and sync known answers | generated-artifact | verified by `verify_toyota_secoc_signer.py` |
+| The pinned DBC defines eight ordinary classic protected IDs (`0x116/0x131/0x177/0x183/0x24D/0x283/0x2E4/0x344`) with the same trailer field family | external-source | verified by optional pinned-source checks |
+| The generic local oracle accepts arbitrary observed buses and verifies `0x116`/`0x24D` independently of steering IDs | generated-artifact | verified by `verify_toyota_secoc_oracle.py` |
 | Pinned opendbc signs `0x2E4`, `0x131`, and `0x183` with separate counters | external-source | recovered from pinned controller/DBC source |
 | `0x183` is a SecOC input to this exact EPS | firmware-static | disproved by the six-record census; it belongs to a different receiving ECU |
 | The local signer recovers, exports, or proves possession of the live slot-4 key | — | disproved; a key is an explicit input |

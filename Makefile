@@ -17,6 +17,7 @@ VERIFY_SUITES := \
 	tests/verify_secoc_application.py \
 	tests/verify_secoc_security_properties.py \
 	tests/verify_toyota_secoc_signer.py \
+	tests/verify_toyota_secoc_oracle.py \
 	tests/verify_icus_key_recovery_surface.py \
 	tests/verify_icus_software_paths.py \
 	tests/verify_icus_key_update.py \

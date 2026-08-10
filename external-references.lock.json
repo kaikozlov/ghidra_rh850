@@ -95,6 +95,24 @@
     },
     {
       "repository": "toyota_dataflash_secoc_setup",
+      "path": "steps/step_eps_probe.py",
+      "size": 3828,
+      "sha256": "3f534c4bea4a09255ef7ae425ea3b0d1a7f1834f5b8db81b46cb2a39bce0f4e5"
+    },
+    {
+      "repository": "toyota_dataflash_secoc_setup",
+      "path": "steps/step_extract_verify_key.py",
+      "size": 11998,
+      "sha256": "76973ee7ead61e87d9ad04e56d763ce975690bbbb797d5d1bc268cded3d7701f"
+    },
+    {
+      "repository": "toyota_dataflash_secoc_setup",
+      "path": "steps/step_collect_can.py",
+      "size": 5286,
+      "sha256": "ebe713d83dc5148490cc36148aa3d2526e42eb63f820a176c2c70e99ddd893ea"
+    },
+    {
+      "repository": "toyota_dataflash_secoc_setup",
       "path": "payload_source/shellcode/main_ff1ff000_ff209000.c",
       "sha256": "2564a97342dd269f2113b53ed58ca1d74bc5ded7e2219b75003212c37b848431"
     },

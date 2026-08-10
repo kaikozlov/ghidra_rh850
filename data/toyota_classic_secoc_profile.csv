@@ -1,0 +1,10 @@
+can_id,name,kind,wire_bytes,authenticator_bits,reset_flag_bits,msg_counter_flag_bits
+0x00F,SECOC_SYNCHRONIZATION,sync,8,28,0,0
+0x116,GAS_PEDAL,protected,8,28,2,2
+0x131,STEERING_LTA_2,protected,8,28,2,2
+0x177,PCM_CRUISE_3,protected,8,28,2,2
+0x183,ACC_CONTROL_2,protected,8,28,2,2
+0x24D,PCM_CRUISE_4,protected,8,28,2,2
+0x283,PRE_COLLISION,protected,8,28,2,2
+0x2E4,STEERING_LKA,protected,8,28,2,2
+0x344,PRE_COLLISION_2,protected,8,28,2,2

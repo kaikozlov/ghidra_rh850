@@ -1,0 +1,136 @@
+# Community DataFlash/SecOC extraction tooling — static audit and generic oracle
+
+> **Scope:** pinned `Bk2ol/tsk_extraction_by_can_log` commit
+> `db453752beeb7cdd024a1a9c38c6711c981e75ad`, pinned commaai/opendbc SecOC
+> profile, and repository-local analysis tooling
+>
+> **Status:** active
+>
+> **Evidence source:** external-source plus generated-artifact
+>
+> **Verification:** `tests/verify_toyota_secoc_oracle.py`; optional pinned-source
+> verification `tests/verify_external_corroboration.py`
+>
+> **Canonical local tool:** `tools/toyota_secoc_oracle.py`
+
+The community DataFlash extractor is valuable because it reuses the solved
+Toyota/Denso authenticated-RAM-execution bootstrap and can recover a complete
+32 KiB DataFlash dump. Its current capture/key-verification layer is narrower
+than that bootstrap, however: several assumptions are hardcoded for the Sienna
+traffic profile and Panda routing used by its authors.
+
+Those assumptions matter when interpreting a negative result on another Toyota
+variant. In particular, a report such as `0 protected` is only a statement about
+the IDs and buses that the current script counted. It is **not** evidence that
+the vehicle has no SecOC traffic.
+
+## 1. Pinned hardcoded assumptions
+
+The following are pinned in `external-references.lock.json` and asserted by the
+optional external-source verifier:
+
+| File | Static assumption |
+|---|---|
+| `steps/step_dump_dataflash.py` | EPS diagnostic endpoint `0x7A1 -> 0x7A9`; Panda `BUS = 0`; `set_safety_mode(3)` |
+| `steps/step_eps_probe.py` | Panda `BUS = 0` |
+| `steps/step_collect_can.py` | oracle buses exactly `{0, 2}` |
+| `steps/step_collect_can.py` | oracle IDs exactly `{0x00F, 0x131, 0x2E4, 0x344}` |
+| `steps/step_extract_verify_key.py` | protected IDs exactly `{0x131, 0x2E4, 0x344}` |
+| `steps/step_extract_verify_key.py` | verification buses exactly `{0, 2}` |
+
+The DataFlash dumping bootstrap itself is not tied to those three protected
+CAN IDs; they are only used later to validate candidate key material against a
+capture.
+
+Therefore, on a variant whose protected traffic uses another known Toyota
+classic-SecOC ID such as `0x116` or `0x24D`, the current verifier can produce
+zero protected samples even while a valid synchronization stream and valid
+protected traffic are present.
+
+## 2. Full pinned Toyota classic-SecOC profile
+
+Pinned `toyota_secoc_pt.dbc` defines the following eight ordinary protected
+classic-CAN messages plus synchronization:
+
+| CAN ID | DBC name | Kind |
+|---:|---|---|
+| `0x00F` | `SECOC_SYNCHRONIZATION` | synchronization |
+| `0x116` | `GAS_PEDAL` | protected |
+| `0x131` | `STEERING_LTA_2` | protected |
+| `0x177` | `PCM_CRUISE_3` | protected |
+| `0x183` | `ACC_CONTROL_2` | protected |
+| `0x24D` | `PCM_CRUISE_4` | protected |
+| `0x283` | `PRE_COLLISION` | protected |
+| `0x2E4` | `STEERING_LKA` | protected |
+| `0x344` | `PRE_COLLISION_2` | protected |
+
+Each ordinary DBC block carries the same `AUTHENTICATOR`, `RESET_FLAG`, and
+`MSG_CNT_LOWER` trailer fields. Pinned `opendbc/car/secoc.py` independently
+implements the common authenticating construction:
+
+```text
+DataID_be16 || payload4 || freshness48
+```
+
+with a 28-bit truncated AES-CMAC. This is the same classic wire construction
+independently recovered from the analyzed Sienna EPS, but the **set of IDs used
+by a particular vehicle or receiving ECU must still be established per
+variant**.
+
+The machine-readable repository profile is
+`data/toyota_classic_secoc_profile.csv`.
+
+## 3. Repository-local generic oracle
+
+`tools/toyota_secoc_oracle.py` removes the Sienna-specific analytical
+assumptions without modifying the pinned external checkout.
+
+It:
+
+- accepts synchronization and protected traffic on any observed Panda bus;
+- tracks synchronization state independently per bus;
+- recognizes the complete pinned classic-SecOC ID profile by default;
+- can be restricted to explicit buses or IDs for a controlled experiment;
+- never associates a protected frame with synchronization state from another
+  bus;
+- verifies a supplied 16-byte key independently for synchronization and each
+  protected CAN ID;
+- reconstructs the full message-counter candidate set from the transmitted
+  low-two counter bits and reset-low-two bits;
+- scans every sliding 16-byte window in a dump after a synchronization-CMAC
+  prefilter;
+- reports candidate address/hash and per-ID match counts without printing raw
+  key bytes.
+
+Synthetic tests deliberately place `0x00F`, `0x116`, and `0x24D` on **bus 1**
+and prove that the local oracle verifies them while refusing to associate an
+orphan `0x2E4` frame from bus 2.
+
+### Example
+
+```bash
+uv run --locked python tools/toyota_secoc_oracle.py scan \
+  --capture can.ndjson \
+  --dump dump_ff200000_ff208000.bin
+```
+
+The result separates:
+
+- synchronization matches;
+- `0x116` matches;
+- `0x24D` matches;
+- every other protected ID actually present in the capture.
+
+This makes a future Corolla DataFlash/capture pair a direct cryptographic test
+rather than another heuristic entropy search.
+
+## 4. Current evidence boundary
+
+The static audit proves only what the pinned tools count and what the pinned
+DBC/sender define. It does **not** prove that a specific 2023 Corolla uses every
+message in the DBC profile, that its SecOC key is CPU-visible in DataFlash, or
+that the same key authenticates synchronization and all protected domains.
+Those questions require the actual dump and capture.
+
+It does prove that a `0 protected` result from the unmodified community verifier
+cannot be generalized beyond `{0x131, 0x2E4, 0x344}` on Panda buses `{0,2}`.

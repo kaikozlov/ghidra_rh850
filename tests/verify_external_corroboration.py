@@ -123,6 +123,9 @@ def main() -> int:
         roots["icanhack_secoc"] / "extract_keys.py",
         roots["icanhack_secoc"] / "shellcode/main.c",
         roots["toyota_dataflash_secoc_setup"] / "steps/step_dump_dataflash.py",
+        roots["toyota_dataflash_secoc_setup"] / "steps/step_collect_can.py",
+        roots["toyota_dataflash_secoc_setup"] / "steps/step_extract_verify_key.py",
+        roots["toyota_dataflash_secoc_setup"] / "steps/step_eps_probe.py",
         roots["toyota_dataflash_secoc_setup"]
         / "payload_source/shellcode/main_ff1ff000_ff209000.c",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/car/uds.py",
@@ -147,6 +150,15 @@ def main() -> int:
     shellcode = (roots["icanhack_secoc"] / "shellcode/main.c").read_text(encoding="utf-8").lower()
     dump_step = (
         roots["toyota_dataflash_secoc_setup"] / "steps/step_dump_dataflash.py"
+    ).read_text(encoding="utf-8").lower()
+    collect_step = (
+        roots["toyota_dataflash_secoc_setup"] / "steps/step_collect_can.py"
+    ).read_text(encoding="utf-8").lower()
+    verify_key_step = (
+        roots["toyota_dataflash_secoc_setup"] / "steps/step_extract_verify_key.py"
+    ).read_text(encoding="utf-8").lower()
+    eps_probe_step = (
+        roots["toyota_dataflash_secoc_setup"] / "steps/step_eps_probe.py"
     ).read_text(encoding="utf-8").lower()
     dump_shellcode_source = (
         roots["toyota_dataflash_secoc_setup"]
@@ -200,6 +212,24 @@ def main() -> int:
     check("Willem tooling transmits to CAN 0x7A1", "addr = 0x7a1" in extract_lower)
     check("DataFlash tooling uses TX 0x7A1", "tx_addr = 0x7a1" in dump_step)
     check("DataFlash tooling expects RX 0x7A9", "rx_addr = 0x7a9" in dump_step)
+    check("DataFlash tooling hardcodes Panda bus 0", "bus = 0" in dump_step)
+    check("EPS probe independently hardcodes Panda bus 0", "bus = 0" in eps_probe_step)
+    check(
+        "current CAN collector restricts oracle buses to 0 and 2",
+        "oracle_buses = {0, 2}" in collect_step,
+    )
+    check(
+        "current CAN collector recognizes only sync plus Sienna protected IDs",
+        "oracle_addrs = {0x0f, 0x131, 0x2e4, 0x344}" in collect_step,
+    )
+    check(
+        "current key verifier likewise restricts protected IDs",
+        "protected_addrs = {0x131, 0x2e4, 0x344}" in verify_key_step,
+    )
+    check(
+        "current key verifier likewise restricts buses to 0 and 2",
+        "buses = {0, 2}" in verify_key_step,
+    )
     check("dump shellcode transmits CAN 0x7A9", "= 0x7a9;" in shellcode)
     for address in (
         "0xffd20250", "0xffd202d0", "0xffd24000", "0xffd24004",
@@ -253,6 +283,26 @@ def main() -> int:
         "pinned CAN 0x2E4 DBC identifies signed B1..B2 torque command",
         "SG_ STEER_TORQUE_CMD : 15|16@0-" in toyota_secoc_dbc,
     )
+    for can_id, message_name in (
+        (278, "GAS_PEDAL"),
+        (305, "STEERING_LTA_2"),
+        (375, "PCM_CRUISE_3"),
+        (387, "ACC_CONTROL_2"),
+        (589, "PCM_CRUISE_4"),
+        (643, "PRE_COLLISION"),
+        (740, "STEERING_LKA"),
+        (836, "PRE_COLLISION_2"),
+    ):
+        block = dbc_message(toyota_secoc_dbc, can_id, message_name)
+        check(
+            f"classic SecOC profile contains {message_name} at CAN {can_id:#x}",
+            bool(block),
+        )
+        for signal in ("AUTHENTICATOR", "RESET_FLAG", "MSG_CNT_LOWER"):
+            check(
+                f"CAN {can_id:#x} {message_name} carries {signal}",
+                signal in block,
+            )
 
     print("\n== pinned opendbc SecOC sender ==")
     check(
