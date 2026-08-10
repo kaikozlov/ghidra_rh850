@@ -7,11 +7,17 @@ external checkout. Run this suite explicitly with ``make verify-external``.
 from __future__ import annotations
 
 import argparse
+import binascii
 import hashlib
 import json
+import struct
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
+
+from Crypto.Cipher import AES
+from Crypto.Hash import CMAC
 
 REPO = Path(__file__).resolve().parents[1]
 LOCK_PATH = REPO / "external-references.lock.json"
@@ -325,6 +331,93 @@ def main() -> int:
         "local variant page keeps 4514000 runtime architecture unresolved",
         "bounded but unresolved" in variant_page
         and "missing codeflash/runtime access" in variant_page,
+    )
+
+    print("\n== pinned Vance deployment-bundle payloads ==")
+    bundle_v3 = (
+        roots["vance_sienna_2024"]
+        / "scripts/secoc/20260531_othersienna_secoc_bundle_v3.zip"
+    )
+    with zipfile.ZipFile(bundle_v3) as archive:
+        member_names = set(archive.namelist())
+        standard_ciphertext = archive.read("payload_dataflash_ff200000_ff208000.bin")
+        candidate_ciphertext = archive.read(
+            "payload_candidate_f05_dataflash_ff200000_ff208000.bin"
+        )
+        bundle_readme = archive.read(
+            "README_other_sienna_secoc_bundle_zh.md"
+        ).decode("utf-8")
+
+    check(
+        "bundle standard payload matches committed DataFlash fixture",
+        standard_ciphertext
+        == (REPO / "tests/fixtures/payloads/dataflash_dump_payload.bin").read_bytes(),
+    )
+    check(
+        "bundle candidate-f05 ciphertext SHA-256",
+        hashlib.sha256(candidate_ciphertext).hexdigest()
+        == "296d87d2e89b9c7e800122e4c7f6d3b9c876362e52586530cdd53c86ba1116f5",
+    )
+
+    codeflash = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()
+    zero = bytes(16)
+
+    def decode_payload(ciphertext: bytes, build_secret: bytes) -> tuple[bytes, bool, bool]:
+        derived = AES.new(build_secret, AES.MODE_ECB).encrypt(zero)
+        plaintext = AES.new(derived, AES.MODE_CBC, zero).decrypt(ciphertext)
+        cmac = CMAC.new(derived, ciphermod=AES)
+        cmac.update(zero + plaintext[:0xFF0])
+        cmac_ok = cmac.digest() == plaintext[0xFF0:]
+        crc_ok = binascii.crc32(plaintext[:0xFF0]) % (1 << 32) == 0xFFFFFFFF
+        return plaintext, cmac_ok, crc_ok
+
+    standard_plain, standard_cmac, standard_crc = decode_payload(
+        standard_ciphertext, codeflash[0xBFD8:0xBFE8]
+    )
+    candidate_normal_plain, candidate_normal_cmac, candidate_normal_crc = decode_payload(
+        candidate_ciphertext, codeflash[0xBFD8:0xBFE8]
+    )
+    candidate_f05_plain, candidate_f05_cmac, candidate_f05_crc = decode_payload(
+        candidate_ciphertext, codeflash[0xBFE8:0xBFF8]
+    )
+    check("bundle standard payload authenticates with payload-build secret",
+          standard_cmac and standard_crc)
+    check("candidate-f05 does not authenticate with payload-build secret",
+          not candidate_normal_cmac and not candidate_normal_crc)
+    check("candidate-f05 authenticates with SecurityAccess secret as build secret",
+          candidate_f05_cmac and candidate_f05_crc)
+    check(
+        "candidate-f05 has valid callback and CRC descriptor",
+        struct.unpack_from("<I", candidate_f05_plain, 0xFD0)[0] == 0xFEBF0000
+        and struct.unpack_from("<II", candidate_f05_plain, 0xFE0)
+        == (0xFEBF0000, 0xFF0),
+    )
+    check(
+        "candidate-f05 plaintext materially differs from standard payload",
+        sum(a != b for a, b in zip(standard_plain, candidate_f05_plain)) == 380
+        and sum(a != b for a, b in zip(standard_plain[:0xFD0], candidate_f05_plain[:0xFD0]))
+        == 360,
+    )
+    check(
+        "bundle README labels candidate-f05 retained and not default",
+        "保留候選 payload，預設不使用" in bundle_readme,
+    )
+    completed_outputs = {
+        "metadata.json", "transcript.jsonl", "frames.csv", "frames.jsonl",
+        "protected_frames.jsonl", "sync_frames.jsonl",
+        "secoc_key_probe_results.json", "secoc_key_probe_results.csv",
+    }
+    check(
+        "bundle contains no completed partner dump/capture outputs",
+        not any(
+            Path(name).name in completed_outputs
+            or Path(name).name.startswith("dump_")
+            for name in member_names
+        ),
+    )
+    check(
+        "wrong-key candidate plaintext is structurally invalid",
+        struct.unpack_from("<I", candidate_normal_plain, 0xFD0)[0] != 0xFEBF0000,
     )
 
     print(f"\n== RESULT: {passed} passed, {failed} failed ==")
