@@ -4,7 +4,7 @@
 Verifies that:
   1. The correlation engine produces the expected vocabulary artifact.
   2. Every "exact" DID match has a real callback address in the firmware DID table.
-  3. Every DTC "exact" match is in the firmware DTC table (structural, not byte search).
+  3. Every DTC "exact" match is in the firmware DTC table, preserving the UDS failure-type byte and Dem-event links.
   4. Every "exact" service match references a real callback in the service table.
   5. The firmware SHA256 in the vocabulary matches the actual firmware hash.
   6. Auto-applied mappings are exact or independently recovered structural matches.
@@ -50,9 +50,12 @@ def check(name, cond, detail=""):
 sys.path.insert(0, str(REPO / "tools" / "diagnostics"))
 sys.path.insert(0, str(REPO / "tools" / "techstream"))
 from correlate_vocabulary import (  # noqa: E402
+    DTC_EVENT_TABLE_COUNT,
+    DTC_EVENT_TABLE_START,
     DTC_TABLE_END,
     DTC_TABLE_START,
     build_vocabulary,
+    scan_firmware_dtc_event_links,
     scan_firmware_dtc_table,
 )
 import extract_catalog as extract_catalog_module  # noqa: E402
@@ -115,6 +118,15 @@ check("firmware DTC table metadata covers 0xA0 records from 0x309DC",
           "end": "0x30EDC",
           "count": 0xA0,
           "record_size": 8,
+          "failure_type_offset": 0,
+          "dtc_identifier_offset": 1,
+      })
+check("vocabulary has Dem event table metadata",
+      vocab["firmware_tables"]["dtc_event_table"] == {
+          "base": "0x2FDDC",
+          "count": 0x180,
+          "record_size": 8,
+          "dtc_table_index_offset": 2,
       })
 check("vocabulary has summary with grade counts", "by_grade" in vocab["summary"])
 check("vocabulary has mappings list", len(mappings) > 0)
@@ -212,7 +224,28 @@ check("raw DTC table is 0xA0 aligned records at 0x309DC",
               for _flags, _dtc_id, pad, enabled in raw_dtc_records))
 check("raw DTC table contains enabled entries beyond old 0x30C40 bound",
       any(enabled == 1 and dtc_id == 0xC100
-          for _flags, dtc_id, _pad, enabled in raw_dtc_records))
+          for _failure_type, dtc_id, _pad, enabled in raw_dtc_records))
+check("U023A base record is index 92 with failure type 0x00",
+      raw_dtc_records[92] == (0x00, 0xC23A, 0x00, 1),
+      f"got {raw_dtc_records[92]}")
+check("U023A87 record is index 93 with failure type 0x87",
+      raw_dtc_records[93] == (0x87, 0xC23A, 0x00, 1),
+      f"got {raw_dtc_records[93]}")
+
+raw_event_links = scan_firmware_dtc_event_links(CF)
+check("firmware Dem event table covers 0x180 records",
+      DTC_EVENT_TABLE_COUNT == 0x180 and DTC_EVENT_TABLE_START == 0x2FDDC)
+check("no configured Dem event maps directly to base U023A record index 92",
+      raw_event_links.get(92, []) == [],
+      f"got {raw_event_links.get(92, [])}")
+check("five configured Dem events map specifically to U023A87 record index 93",
+      raw_event_links.get(93, []) == [0xB0, 0xB3, 0x138, 0x13C, 0x13D],
+      f"got {raw_event_links.get(93, [])}")
+for event_id in [0xB0, 0xB3, 0x138, 0x13C, 0x13D]:
+    off = DTC_EVENT_TABLE_START + event_id * 8
+    check(f"Dem event 0x{event_id:X} raw record points to DTC index 93",
+          CF[off + 2] == 93,
+          f"record={CF[off:off + 8].hex()}")
 
 check("catalog has no wall-clock generated_at field", "generated_at" not in committed_catalog)
 check("vocabulary has no wall-clock generated_at field", "generated_at" not in committed_vocab)
@@ -268,6 +301,18 @@ exact_dtc_codes = {mapping["code"] for mapping in dtc_exact}
 check("full DTC table recovers five CAN-communication DTCs beyond old bound",
       {"U0100", "U0126", "U023A", "U0293", "U1103"} <= exact_dtc_codes,
       f"exact codes={sorted(exact_dtc_codes)}")
+
+u023a = next(m for m in dtc_exact if m["code"] == "U023A" and m["source_db"] == "EPS_CAN_P4DK")
+check("U023A mapping preserves two enabled firmware subtype variants",
+      [v["failure_type"] for v in u023a["firmware_variants"]] == [0x00, 0x87],
+      f"got {u023a['firmware_variants']}")
+check("U023A subtype labels include exact U023A87",
+      [v["full_code"] for v in u023a["firmware_variants"]] == ["U023A", "U023A87"])
+check("U023A87 mapping carries its five concrete Dem event IDs",
+      u023a["firmware_variants"][1]["event_ids"]
+      == ["0xB0", "0xB3", "0x138", "0x13C", "0x13D"])
+check("base U023A mapping has no direct Dem event",
+      u023a["firmware_variants"][0]["event_ids"] == [])
 
 # Every "exact" DTC must be in the firmware DTC table
 for m in dtc_exact:

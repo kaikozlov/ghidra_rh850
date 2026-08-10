@@ -34,8 +34,8 @@ No vehicle-specific conclusion is promoted from those screenshots alone.
   classic-Toyota offline oracle
 - [x] Step 2 — statically resolve Panda ELM327/bus-routing assumptions and build
   a non-destructive bus-discovery plan/tool
-- [ ] Step 3 — statically audit the forced RAV4 Prime openpilot profile and
-  decode the `U023A87` Techstream context
+- [x] Step 3 — statically audit the forced RAV4 Prime openpilot profile and
+  decode the `U023A87` Techstream/firmware context
 - [ ] Step 4 — prepare an automated F3/F4 community patch-predicate analyzer
 - [ ] Step 5 — split the new 2023 US Corolla evidence from the existing
   `8965F1208000` variant and reconcile status/requests
@@ -176,6 +176,80 @@ writes a DID, downloads code, starts a routine, or resets the ECU.
 The next live routing experiment can now be a read-only `(ELM327 param, logical
 bus) -> F181 response` matrix rather than another harness repin. Programming
 behavior should only be retested after the physical/logical route is known.
+
+### Commit
+
+- `cafcf32e04f3de04dde4133027e8c2bd2fa28505 analysis: resolve Panda Toyota diagnostic routing`
+
+## Step 3 — forced RAV4 Prime profile and U023A87
+
+### Primary/pinned inputs
+
+- current pinned opendbc Toyota SecOC platform/controller/DBC sources
+- Calvin Park pinned Toyota safety and generic Panda safety forwarding sources
+- Techstream V18 P4-family DDB corpus
+- `8965B4512000` DTC table and generated Dem-event table
+
+### Static findings
+
+The existing `TOYOTA_RAV4_PRIME` profile is explicitly the 2021–23 SecOC
+platform. With stock longitudinal, Toyota safety authorizes generated bus-0
+messages `0x191`, `0x412`, `0x2E4`, and `0x131` with `check_relay=true`.
+Generic Panda bus-2→0 forwarding blocks stock frames whose address matches such
+a destination transmit entry. Toyota has no custom forward hook that undoes
+that behavior. Therefore forcing this profile substitutes an old camera
+steering/HUD message family; it is not a single `0x2E4` MAC experiment.
+
+`0x183 ACC_CONTROL_2` belongs to the SecOC openpilot-longitudinal transmit set,
+not the reported stock-longitudinal experiment. The sender still derives
+TRIP/RESET state from the live `0x00F` synchronization frame even when the
+configured key is wrong; the dummy key invalidates the generated MACs but does
+not make trip/reset freshness arbitrary.
+
+Techstream uses base U023A for front-camera/image-processing communication loss
+across P4-family databases. More importantly, the analyzed Sienna firmware
+itself contains adjacent enabled records:
+
+```text
+DTC index 92 @ 0x30CBC: failure type 00, base C23A -> U023A
+DTC index 93 @ 0x30CC4: failure type 87, base C23A -> U023A87
+```
+
+The generated 0x180-entry Dem-event table maps no configured event directly to
+index 92. Five events map specifically to index 93:
+
+```text
+0xB0, 0xB3, 0x138, 0x13C, 0x13D
+```
+
+`FUN_00050f56` and `FUN_00051268` independently establish that event-record
+byte 2 selects the DTC-table index. The exact event-to-PDU meanings remain
+unresolved.
+
+The diagnostic vocabulary generator previously collapsed byte 0 as an opaque
+flag. It now preserves `failure_type`, emits full subtype names such as
+`U023A87`, and follows Dem-event links.
+
+### Durable work
+
+- `docs/variants/rav4-prime-forced-secoc-profile.md`
+- failure-type/Dem-event support in `tools/diagnostics/correlate_vocabulary.py`
+- regenerated `diagnostic_vocabulary.json`
+- expanded `verify_diagnostic_vocabulary.py`
+- pinned source assertions for the forced-profile substitution boundary
+- finding: `SECOC-034`
+
+### Verification
+
+- `tests/verify_diagnostic_vocabulary.py` — 243/243 pass
+- optional pinned-source `verify_external_corroboration.py` — 264/264 pass
+
+### Boundary
+
+The reported RAV4 `U023A87` is compatible with a profile/network substitution
+failure independently of EPS MAC acceptance. Without that vehicle's firmware or
+capture, it cannot identify the actual missing RAV4 message or prove/disprove
+the persistent patch's MAC behavior.
 
 ### Commit
 

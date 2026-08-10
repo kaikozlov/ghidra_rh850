@@ -278,10 +278,16 @@ The neutral catalog no longer infers membership merely because an identifier
 falls between the table's minimum and maximum values.
 DTC correlation structurally scans all `0xA0` 8-byte records used by
 `FUN_0005159e`/`FUN_000517b4`, at `0x309DC`–`0x30EDC`; blind byte matches elsewhere in
-CodeFlash are rejected. Twelve of 54 Techstream DTC records match enabled
-firmware entries, including five CAN-communication records (`U0100`, `U0126`,
-`U023A`, `U0293`, `U1103`) beyond the old truncated `0x30C40` bound. The
-remaining 42 are diagnostic-only or cross-generation. Monitors whose
+CodeFlash are rejected. The record's byte 0 is now preserved as the UDS
+failure-type/subtype byte rather than collapsed into an opaque flag. The
+correlator also follows the generated 0x180-entry Dem-event table at `0x2FDDC`,
+whose byte 2 selects a DTC-table index. This exposes, for example, adjacent
+enabled `U023A` (`0x00`) and **`U023A87`** (`0x87`) records: no configured event
+maps directly to the base record, while events `0xB0`, `0xB3`, `0x138`, `0x13C`,
+and `0x13D` map specifically to `U023A87`. Twelve of 54 Techstream DTC records
+match enabled firmware entries, including five CAN-communication records
+(`U0100`, `U0126`, `U023A`, `U0293`, `U1103`) beyond the old truncated
+`0x30C40` bound. The remaining 42 are diagnostic-only or cross-generation. Monitors whose
 seq-derived DID is actually present bridge to firmware callbacks; the rest
 remain family vocabulary.
 

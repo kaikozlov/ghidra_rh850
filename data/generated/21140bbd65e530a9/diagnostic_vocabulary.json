@@ -28,7 +28,15 @@
       "base": "0x309DC",
       "end": "0x30EDC",
       "count": 160,
-      "record_size": 8
+      "record_size": 8,
+      "failure_type_offset": 0,
+      "dtc_identifier_offset": 1
+    },
+    "dtc_event_table": {
+      "base": "0x2FDDC",
+      "count": 384,
+      "record_size": 8,
+      "dtc_table_index_offset": 2
     }
   },
   "summary": {
@@ -192,9 +200,29 @@
         "0x30A2C",
         "0x30A34"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 10,
+          "offset": "0x30A2C",
+          "failure_type": 98,
+          "full_code": "C151162",
+          "event_ids": [
+            "0x160"
+          ]
+        },
+        {
+          "table_index": 11,
+          "offset": "0x30A34",
+          "failure_type": 135,
+          "full_code": "C151187",
+          "event_ids": [
+            "0x155"
+          ]
+        }
+      ],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1511 (0x5511) found in firmware DTC table at 2 location(s): 0x30A2C, 0x30A34"
+      "note": "DTC C1511 (0x5511) found in firmware DTC table with 2 enabled subtype record(s): C151162@0x30A2C events=['0x160'], C151187@0x30A34 events=['0x155']"
     },
     {
       "kind": "dtc",
@@ -206,9 +234,29 @@
         "0x30A3C",
         "0x30A44"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 12,
+          "offset": "0x30A3C",
+          "failure_type": 98,
+          "full_code": "C151262",
+          "event_ids": [
+            "0x166"
+          ]
+        },
+        {
+          "table_index": 13,
+          "offset": "0x30A44",
+          "failure_type": 135,
+          "full_code": "C151287",
+          "event_ids": [
+            "0x15A"
+          ]
+        }
+      ],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1512 (0x5512) found in firmware DTC table at 2 location(s): 0x30A3C, 0x30A44"
+      "note": "DTC C1512 (0x5512) found in firmware DTC table with 2 enabled subtype record(s): C151262@0x30A3C events=['0x166'], C151287@0x30A44 events=['0x15A']"
     },
     {
       "kind": "dtc",
@@ -217,6 +265,7 @@
       "oem_name": "Torque Sensor",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1513 (0x5513) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -228,6 +277,7 @@
       "oem_name": "Torque Sensor Power Supply",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1514 (0x5514) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -242,9 +292,31 @@
         "0x30A4C",
         "0x30A54"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 14,
+          "offset": "0x30A4C",
+          "failure_type": 81,
+          "full_code": "C151551",
+          "event_ids": [
+            "0xE"
+          ]
+        },
+        {
+          "table_index": 15,
+          "offset": "0x30A54",
+          "failure_type": 84,
+          "full_code": "C151554",
+          "event_ids": [
+            "0x30",
+            "0x31",
+            "0x32"
+          ]
+        }
+      ],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1515 (0x5515) found in firmware DTC table at 2 location(s): 0x30A4C, 0x30A54"
+      "note": "DTC C1515 (0x5515) found in firmware DTC table with 2 enabled subtype record(s): C151551@0x30A4C events=['0xE'], C151554@0x30A54 events=['0x30', '0x31', '0x32']"
     },
     {
       "kind": "dtc",
@@ -253,6 +325,7 @@
       "oem_name": "Torque Sensor Zero Point Adjustment Incomplete",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1516 (0x5516) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -264,6 +337,7 @@
       "oem_name": "Torque Hold",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1517 (0x5517) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -275,6 +349,7 @@
       "oem_name": "Motor",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1521 (0x5521) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -286,6 +361,7 @@
       "oem_name": "Motor",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1523 (0x5523) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -297,6 +373,7 @@
       "oem_name": "Motor",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1524 (0x5524) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -308,6 +385,7 @@
       "oem_name": "ECU Malfunction",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1531 (0x5531) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -319,6 +397,7 @@
       "oem_name": "ECU Malfunction",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1532 (0x5532) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -330,6 +409,7 @@
       "oem_name": "ECU Malfunction",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1533 (0x5533) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -341,6 +421,7 @@
       "oem_name": "ECU Malfunction",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1534 (0x5534) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -352,6 +433,7 @@
       "oem_name": "Vehicle Speed Signal",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1541 (0x5541) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -363,6 +445,7 @@
       "oem_name": "Engine Revolution System",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1544 (0x5544) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -374,6 +457,7 @@
       "oem_name": "IG Power Supply Voltage",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1551 (0x5551) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -385,6 +469,7 @@
       "oem_name": "PIG Power Supply Voltage",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1552 (0x5552) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -396,6 +481,7 @@
       "oem_name": "Power Supply Relay Failure",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1554 (0x5554) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -407,6 +493,7 @@
       "oem_name": "Motor Relay Welding Failure",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1555 (0x5555) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -418,6 +505,7 @@
       "oem_name": "Continuous Overheat Preventive Control",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1557 (0x5557) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -429,6 +517,7 @@
       "oem_name": "Vehicle Speed Signal",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1571 (0x5571) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -440,6 +529,7 @@
       "oem_name": "Engine Revolution System",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
       "note": "DTC C1573 (0x5573) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -453,9 +543,20 @@
       "firmware_offsets": [
         "0x30B74"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 51,
+          "offset": "0x30B74",
+          "failure_type": 81,
+          "full_code": "C158151",
+          "event_ids": [
+            "0xBE"
+          ]
+        }
+      ],
       "source_db": "EPS_P4DK3",
       "annotation_action": "comment",
-      "note": "DTC C1581 (0x5581) found in firmware DTC table at 1 location(s): 0x30B74"
+      "note": "DTC C1581 (0x5581) found in firmware DTC table with 1 enabled subtype record(s): C158151@0x30B74 events=['0xBE']"
     },
     {
       "kind": "dtc",
@@ -464,6 +565,7 @@
       "oem_name": "Steering sensor signal malfunction",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C0051 (0x4051) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -478,9 +580,29 @@
         "0x30A2C",
         "0x30A34"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 10,
+          "offset": "0x30A2C",
+          "failure_type": 98,
+          "full_code": "C151162",
+          "event_ids": [
+            "0x160"
+          ]
+        },
+        {
+          "table_index": 11,
+          "offset": "0x30A34",
+          "failure_type": 135,
+          "full_code": "C151187",
+          "event_ids": [
+            "0x155"
+          ]
+        }
+      ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1511 (0x5511) found in firmware DTC table at 2 location(s): 0x30A2C, 0x30A34"
+      "note": "DTC C1511 (0x5511) found in firmware DTC table with 2 enabled subtype record(s): C151162@0x30A2C events=['0x160'], C151187@0x30A34 events=['0x155']"
     },
     {
       "kind": "dtc",
@@ -492,9 +614,29 @@
         "0x30A3C",
         "0x30A44"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 12,
+          "offset": "0x30A3C",
+          "failure_type": 98,
+          "full_code": "C151262",
+          "event_ids": [
+            "0x166"
+          ]
+        },
+        {
+          "table_index": 13,
+          "offset": "0x30A44",
+          "failure_type": 135,
+          "full_code": "C151287",
+          "event_ids": [
+            "0x15A"
+          ]
+        }
+      ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1512 (0x5512) found in firmware DTC table at 2 location(s): 0x30A3C, 0x30A44"
+      "note": "DTC C1512 (0x5512) found in firmware DTC table with 2 enabled subtype record(s): C151262@0x30A3C events=['0x166'], C151287@0x30A44 events=['0x15A']"
     },
     {
       "kind": "dtc",
@@ -503,6 +645,7 @@
       "oem_name": "Torque sensor deviation excessive",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1513 (0x5513) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -514,6 +657,7 @@
       "oem_name": "Torque sensor power supply abnormal",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1514 (0x5514) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -525,6 +669,7 @@
       "oem_name": "Motor terminal abnormality 1",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1523 (0x5523) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -536,6 +681,7 @@
       "oem_name": "Motor terminal abnormality 2",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1524 (0x5524) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -547,6 +693,7 @@
       "oem_name": "CPU malfunction",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1531 (0x5531) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -558,6 +705,7 @@
       "oem_name": "ECU malfunction",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1532 (0x5532) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -569,6 +717,7 @@
       "oem_name": "Temperature sensor malfunction",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1533 (0x5533) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -580,6 +729,7 @@
       "oem_name": "EEPROM error",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1534 (0x5534) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -591,6 +741,7 @@
       "oem_name": "Vehicle speed abnormality",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1541 (0x5541) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -602,6 +753,7 @@
       "oem_name": "PIG voltage abnormality",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1552 (0x5552) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -613,6 +765,7 @@
       "oem_name": "Overvoltage",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1553 (0x5553) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -624,6 +777,7 @@
       "oem_name": "Power supply relay failure",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1554 (0x5554) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -635,6 +789,7 @@
       "oem_name": "Motor relay failure",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1555 (0x5555) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -646,6 +801,7 @@
       "oem_name": "Overheat preventive control current limit history",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1557 (0x5557) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -657,6 +813,7 @@
       "oem_name": "Vehicle speed test not completed",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1571 (0x5571) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -668,6 +825,7 @@
       "oem_name": "Engine speed test not completed",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC C1573 (0x5573) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -681,9 +839,20 @@
       "firmware_offsets": [
         "0x30B74"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 51,
+          "offset": "0x30B74",
+          "failure_type": 81,
+          "full_code": "C158151",
+          "event_ids": [
+            "0xBE"
+          ]
+        }
+      ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC C1581 (0x5581) found in firmware DTC table at 1 location(s): 0x30B74"
+      "note": "DTC C1581 (0x5581) found in firmware DTC table with 1 enabled subtype record(s): C158151@0x30B74 events=['0xBE']"
     },
     {
       "kind": "dtc",
@@ -695,9 +864,28 @@
         "0x30C44",
         "0x30C4C"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 77,
+          "offset": "0x30C44",
+          "failure_type": 0,
+          "full_code": "U0100",
+          "event_ids": []
+        },
+        {
+          "table_index": 78,
+          "offset": "0x30C4C",
+          "failure_type": 135,
+          "full_code": "U010087",
+          "event_ids": [
+            "0xAF",
+            "0x105"
+          ]
+        }
+      ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0100 (0xC100) found in firmware DTC table at 2 location(s): 0x30C44, 0x30C4C"
+      "note": "DTC U0100 (0xC100) found in firmware DTC table with 2 enabled subtype record(s): U0100@0x30C44, U010087@0x30C4C events=['0xAF', '0x105']"
     },
     {
       "kind": "dtc",
@@ -706,6 +894,7 @@
       "oem_name": "CAN communication error (ABS/VSC)",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC U0121 (0xC121) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -720,9 +909,27 @@
         "0x30C54",
         "0x30C5C"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 79,
+          "offset": "0x30C54",
+          "failure_type": 0,
+          "full_code": "U0126",
+          "event_ids": []
+        },
+        {
+          "table_index": 80,
+          "offset": "0x30C5C",
+          "failure_type": 135,
+          "full_code": "U012687",
+          "event_ids": [
+            "0x141"
+          ]
+        }
+      ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0126 (0xC126) found in firmware DTC table at 2 location(s): 0x30C54, 0x30C5C"
+      "note": "DTC U0126 (0xC126) found in firmware DTC table with 2 enabled subtype record(s): U0126@0x30C54, U012687@0x30C5C events=['0x141']"
     },
     {
       "kind": "dtc",
@@ -731,6 +938,7 @@
       "oem_name": "CAN communication error (meter)",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC U0155 (0xC155) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -745,9 +953,31 @@
         "0x30CBC",
         "0x30CC4"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 92,
+          "offset": "0x30CBC",
+          "failure_type": 0,
+          "full_code": "U023A",
+          "event_ids": []
+        },
+        {
+          "table_index": 93,
+          "offset": "0x30CC4",
+          "failure_type": 135,
+          "full_code": "U023A87",
+          "event_ids": [
+            "0xB0",
+            "0xB3",
+            "0x138",
+            "0x13C",
+            "0x13D"
+          ]
+        }
+      ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U023A (0xC23A) found in firmware DTC table at 2 location(s): 0x30CBC, 0x30CC4"
+      "note": "DTC U023A (0xC23A) found in firmware DTC table with 2 enabled subtype record(s): U023A@0x30CBC, U023A87@0x30CC4 events=['0xB0', '0xB3', '0x138', '0x13C', '0x13D']"
     },
     {
       "kind": "dtc",
@@ -756,6 +986,7 @@
       "oem_name": "CAN communication error (IPA)",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC U0243 (0xC243) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -770,9 +1001,28 @@
         "0x30CDC",
         "0x30CE4"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 96,
+          "offset": "0x30CDC",
+          "failure_type": 0,
+          "full_code": "U0293",
+          "event_ids": []
+        },
+        {
+          "table_index": 97,
+          "offset": "0x30CE4",
+          "failure_type": 135,
+          "full_code": "U029387",
+          "event_ids": [
+            "0x103",
+            "0x107"
+          ]
+        }
+      ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U0293 (0xC293) found in firmware DTC table at 2 location(s): 0x30CDC, 0x30CE4"
+      "note": "DTC U0293 (0xC293) found in firmware DTC table with 2 enabled subtype record(s): U0293@0x30CDC, U029387@0x30CE4 events=['0x103', '0x107']"
     },
     {
       "kind": "dtc",
@@ -781,6 +1031,7 @@
       "oem_name": "CAN communication error (EHV)",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC U0294 (0xC294) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -792,6 +1043,7 @@
       "oem_name": "CAN communication error (VSC)",
       "match_grade": "family",
       "firmware_offsets": [],
+      "firmware_variants": [],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
       "note": "DTC U0416 (0xC416) not in firmware DTC table — may be diagnostic-only or cross-generation."
@@ -806,9 +1058,25 @@
         "0x30D6C",
         "0x30D74"
       ],
+      "firmware_variants": [
+        {
+          "table_index": 114,
+          "offset": "0x30D6C",
+          "failure_type": 0,
+          "full_code": "U1103",
+          "event_ids": []
+        },
+        {
+          "table_index": 115,
+          "offset": "0x30D74",
+          "failure_type": 135,
+          "full_code": "U110387",
+          "event_ids": []
+        }
+      ],
       "source_db": "EPS_CAN_P4DK",
       "annotation_action": "comment",
-      "note": "DTC U1103 (0xD103) found in firmware DTC table at 2 location(s): 0x30D6C, 0x30D74"
+      "note": "DTC U1103 (0xD103) found in firmware DTC table with 2 enabled subtype record(s): U1103@0x30D6C, U110387@0x30D74"
     },
     {
       "kind": "monitor",

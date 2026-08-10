@@ -130,6 +130,8 @@ def main() -> int:
         / "payload_source/shellcode/main_ff1ff000_ff209000.c",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/car/uds.py",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/safety/modes/elm327.h",
+        roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/safety/modes/toyota.h",
+        roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/safety/safety.h",
         roots["calvinpark_openpilot"] / "panda/board/main.c",
         roots["calvinpark_openpilot"] / "panda/board/boards/tres.h",
         roots["calvinpark_openpilot"] / "panda/board/drivers/can_common.h",
@@ -176,6 +178,14 @@ def main() -> int:
     elm327_safety = (
         roots["calvinpark_openpilot"]
         / "opendbc_repo/opendbc/safety/modes/elm327.h"
+    ).read_text(encoding="utf-8")
+    calvin_toyota_safety = (
+        roots["calvinpark_openpilot"]
+        / "opendbc_repo/opendbc/safety/modes/toyota.h"
+    ).read_text(encoding="utf-8")
+    calvin_safety_core = (
+        roots["calvinpark_openpilot"]
+        / "opendbc_repo/opendbc/safety/safety.h"
     ).read_text(encoding="utf-8")
     panda_main = (
         roots["calvinpark_openpilot"] / "panda/board/main.c"
@@ -411,6 +421,67 @@ def main() -> int:
     check(
         "opendbc marks fourth-generation Sienna as a SecOC platform",
         "TOYOTA_SIENNA_4TH_GEN = ToyotaSecOCPlatformConfig(" in opendbc_toyota_values,
+    )
+    check(
+        "opendbc marks 2021-23 RAV4 Prime as a SecOC platform",
+        "TOYOTA_RAV4_PRIME = ToyotaSecOCPlatformConfig(" in opendbc_toyota_values
+        and 'ToyotaSecOcCarDocs("Toyota RAV4 Prime 2021-23"' in opendbc_toyota_values,
+    )
+    check(
+        "Toyota SecOC controller derives outbound freshness from live synchronization",
+        "CS.secoc_synchronization['TRIP_CNT']" in opendbc_toyota_controller
+        and "CS.secoc_synchronization['RESET_CNT']" in opendbc_toyota_controller,
+    )
+    check(
+        "wrong sync MAC is logged but does not directly abort controller update",
+        'carlog.error("SecOC synchronization MAC mismatch, wrong key?")' in opendbc_toyota_controller,
+    )
+    check(
+        "ACC_CONTROL_2 signing is gated by openpilot longitudinal control",
+        "if self.CP.openpilotLongitudinalControl:" in opendbc_toyota_controller
+        and "acc_cmd_2 = add_mac(self.secoc_key" in opendbc_toyota_controller,
+    )
+
+    print("\n== pinned forced RAV4 Prime SecOC safety substitution ==")
+    check(
+        "stock-longitudinal SecOC safety whitelist includes camera replacement 0x2E4 and 0x131",
+        "TOYOTA_COMMON_SECOC_TX_MSGS" in calvin_toyota_safety
+        and "{0x2E4, 0, 8, .check_relay = true}" in calvin_toyota_safety
+        and "{0x131, 0, 8, .check_relay = true}" in calvin_toyota_safety,
+    )
+    check(
+        "base Toyota safety whitelist also replaces 0x191 and 0x412",
+        "{0x191, 0, 8, .check_relay = true}" in calvin_toyota_safety
+        and "{0x412, 0, 8, .check_relay = true}" in calvin_toyota_safety,
+    )
+    check(
+        "SecOC openpilot-long whitelist adds authenticated 0x183",
+        "{0x183, 0, 8, .check_relay = true}" in calvin_toyota_safety,
+    )
+    check(
+        "stock-longitudinal SecOC selects the whitelist without 0x183",
+        "if (toyota_secoc)" in calvin_toyota_safety
+        and "if (toyota_stock_longitudinal)" in calvin_toyota_safety
+        and "SET_TX_MSGS(TOYOTA_SECOC_TX_MSGS, ret);" in calvin_toyota_safety
+        and "SET_TX_MSGS(TOYOTA_SECOC_LONG_TX_MSGS, ret);" in calvin_toyota_safety,
+    )
+    check(
+        "generic Panda safety forwarding is bus 0<->2",
+        "if (bus_num == 0)" in calvin_safety_core
+        and "destination_bus = 2;" in calvin_safety_core
+        and "else if (bus_num == 2)" in calvin_safety_core
+        and "destination_bus = 0;" in calvin_safety_core,
+    )
+    check(
+        "generic forwarding blocks stock frames matching destination check_relay TX entries",
+        "m->check_relay" in calvin_safety_core
+        and "m->addr == addr" in calvin_safety_core
+        and "m->bus == (unsigned int)destination_bus" in calvin_safety_core
+        and "blocked = true;" in calvin_safety_core,
+    )
+    check(
+        "Toyota safety has no custom forward hook overriding the generic substitution",
+        ".fwd =" not in calvin_toyota_safety,
     )
 
     print("\n== pinned opendbc CAN 0x344 provenance ==")

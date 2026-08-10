@@ -125,6 +125,18 @@
       "sha256": "aeb7c7a763d422cad072d1982585dab190a97593cc729cb528ac3e669241925e"
     },
     {
+      "repository": "calvinpark_openpilot",
+      "path": "opendbc_repo/opendbc/safety/modes/toyota.h",
+      "size": 17034,
+      "sha256": "5f248ef75fc269b087282e6434a63c2918a2e4ae350741796f40365576d6ac34"
+    },
+    {
+      "repository": "calvinpark_openpilot",
+      "path": "opendbc_repo/opendbc/safety/safety.h",
+      "size": 19112,
+      "sha256": "d36c69ec9b0f5634726aa327cd8be69d48e69ad0fa851d49c24c3888bbdce8c0"
+    },
+    {
       "repository": "toyota_dataflash_secoc_setup",
       "path": "steps/step_dump_dataflash.py",
       "sha256": "ddf902816d4f5dcb978857f2d17c9fb23baa83dbfad2da3eb4d4a17bb4d102d8"

@@ -60,14 +60,23 @@ CODEFLASH_PATH = REPO_ROOT / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 # Firmware DTC table used by FUN_0005159e/FUN_000517b4. The callbacks walk 0xA0
 # records with an 8-byte stride: identifiers are based at 0x309DC and enabled
 # dwords at 0x309E0. Each record is:
-# [u8:flags] [u16:dtc_id_LE] [u8:0x00] [u32:enabled]
-# The DTC identifier is at byte offset 1 within the record.
+# [u8:failure_type] [u16:dtc_id_LE] [u8:0x00] [u32:enabled]
+# The DTC identifier is at byte offset 1 within the record. Byte 0 is the UDS
+# failure-type/subtype byte: e.g. U023A has both 0x00 and 0x87 records in this
+# image, producing full DTCs U023A and U023A87 respectively.
 # Only matches within this table are "exact"; blind byte searches elsewhere
 # in CodeFlash are false positives (immediate values, instruction bytes).
 DTC_TABLE_START = 0x309DC
 DTC_TABLE_COUNT = 0xA0
 DTC_RECORD_SIZE = 8
 DTC_TABLE_END = DTC_TABLE_START + DTC_TABLE_COUNT * DTC_RECORD_SIZE
+
+# Generated diagnostic-event table consumed by FUN_00050f56/FUN_00051268.
+# Byte 2 of each 8-byte record is the DTC-table index. This provides the durable
+# link between a concrete Dem event and a full DTC record, including subtype.
+DTC_EVENT_TABLE_START = 0x2FDDC
+DTC_EVENT_TABLE_COUNT = 0x180
+DTC_EVENT_RECORD_SIZE = 8
 
 # RAM source mapping for monitor-bridged DIDs, recovered by decompiling each
 # DID callback (via SeedDidCallbacks.java).  These identify the RAM variable or
@@ -107,20 +116,39 @@ def firmware_sha256() -> str:
     return hashlib.sha256(CODEFLASH_PATH.read_bytes()).hexdigest()
 
 
-def scan_firmware_dtc_table(cf: bytes) -> dict[int, list[tuple[int, int]]]:
-    """Scan the firmware DTC table structurally.
+def scan_firmware_dtc_event_links(cf: bytes) -> dict[int, list[int]]:
+    """Return ``{dtc_table_index: [event_id, ...]}`` from the Dem event table."""
+    links: dict[int, list[int]] = {}
+    for event_id in range(DTC_EVENT_TABLE_COUNT):
+        off = DTC_EVENT_TABLE_START + event_id * DTC_EVENT_RECORD_SIZE
+        if off + DTC_EVENT_RECORD_SIZE > len(cf):
+            break
+        dtc_index = cf[off + 2]
+        if dtc_index < DTC_TABLE_COUNT:
+            links.setdefault(dtc_index, []).append(event_id)
+    return links
 
-    Returns ``{dtc_id: [(offset, flags), ...]}``.  Only records matching the
-    known 8-byte layout (marker u32=1, pad byte=0) within the table address
-    range are accepted.  This avoids false positives from blind byte searches.
+
+def scan_firmware_dtc_table(cf: bytes) -> dict[int, list[dict]]:
+    """Scan the firmware DTC table structurally without losing failure type.
+
+    Returns ``{dtc_id: [{index, offset, failure_type, event_ids}, ...]}``.
+    Only enabled records matching the known 8-byte layout are accepted.  The
+    event IDs are resolved through the generated 0x180-entry Dem event table.
     """
-    entries: dict[int, list[tuple[int, int]]] = {}
+    entries: dict[int, list[dict]] = {}
+    event_links = scan_firmware_dtc_event_links(cf)
     end = min(DTC_TABLE_END, len(cf))
-    for off in range(DTC_TABLE_START, end, DTC_RECORD_SIZE):
-        flags, dtc_id, pad, enabled = struct.unpack_from("<BHBI", cf, off)
+    for index, off in enumerate(range(DTC_TABLE_START, end, DTC_RECORD_SIZE)):
+        failure_type, dtc_id, pad, enabled = struct.unpack_from("<BHBI", cf, off)
         if enabled != 1 or pad != 0 or dtc_id == 0:
             continue
-        entries.setdefault(dtc_id, []).append((off, flags))
+        entries.setdefault(dtc_id, []).append({
+            "index": index,
+            "offset": off,
+            "failure_type": failure_type,
+            "event_ids": event_links.get(index, []),
+        })
     return entries
 
 
@@ -219,12 +247,29 @@ def correlate_dtcs(
 
         fw_entries = fw_dtcs.get(dtc_id)
         if fw_entries:
-            offsets = [f"0x{off:05X}" for off, _ in fw_entries]
+            offsets = [f"0x{entry['offset']:05X}" for entry in fw_entries]
+            variants = []
+            for entry in fw_entries:
+                failure_type = entry["failure_type"]
+                full_code = ts_dtc["code"] if failure_type == 0 else f"{ts_dtc['code']}{failure_type:02X}"
+                variants.append({
+                    "table_index": entry["index"],
+                    "offset": f"0x{entry['offset']:05X}",
+                    "failure_type": failure_type,
+                    "full_code": full_code,
+                    "event_ids": [f"0x{event_id:X}" for event_id in entry["event_ids"]],
+                })
             grade = "exact"
+            variant_text = ", ".join(
+                f"{variant['full_code']}@{variant['offset']}"
+                + (f" events={variant['event_ids']}" if variant["event_ids"] else "")
+                for variant in variants[:3]
+            )
             note = (f"DTC {ts_dtc['code']} (0x{dtc_id:04X}) found in firmware "
-                    f"DTC table at {len(offsets)} location(s): {', '.join(offsets[:3])}")
+                    f"DTC table with {len(variants)} enabled subtype record(s): {variant_text}")
         else:
             offsets = []
+            variants = []
             grade = "family"
             note = (f"DTC {ts_dtc['code']} (0x{dtc_id:04X}) not in firmware DTC "
                     f"table — may be diagnostic-only or cross-generation.")
@@ -236,6 +281,7 @@ def correlate_dtcs(
             "oem_name": ts_dtc.get("resolved_name", "unknown"),
             "match_grade": grade,
             "firmware_offsets": offsets,
+            "firmware_variants": variants,
             "source_db": ts_dtc["source_db"],
             "annotation_action": "comment",
             "note": note,
@@ -530,6 +576,14 @@ def build_vocabulary() -> dict:
                 "end": f"0x{DTC_TABLE_END:X}",
                 "count": DTC_TABLE_COUNT,
                 "record_size": DTC_RECORD_SIZE,
+                "failure_type_offset": 0,
+                "dtc_identifier_offset": 1,
+            },
+            "dtc_event_table": {
+                "base": f"0x{DTC_EVENT_TABLE_START:X}",
+                "count": DTC_EVENT_TABLE_COUNT,
+                "record_size": DTC_EVENT_RECORD_SIZE,
+                "dtc_table_index_offset": 2,
             },
         },
         "summary": {
