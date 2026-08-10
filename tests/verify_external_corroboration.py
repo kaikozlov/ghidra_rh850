@@ -129,6 +129,11 @@ def main() -> int:
         roots["toyota_dataflash_secoc_setup"]
         / "payload_source/shellcode/main_ff1ff000_ff209000.c",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/car/uds.py",
+        roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/safety/modes/elm327.h",
+        roots["calvinpark_openpilot"] / "panda/board/main.c",
+        roots["calvinpark_openpilot"] / "panda/board/boards/tres.h",
+        roots["calvinpark_openpilot"] / "panda/board/drivers/can_common.h",
+        roots["calvinpark_openpilot"] / "panda/examples/query_fw_versions.py",
         roots["calvinpark_openpilot"] / "tsk/COROLLA_INVESTIGATION.md",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/_toyota_adas_standard.dbc",
@@ -167,6 +172,22 @@ def main() -> int:
     uds = (
         roots["calvinpark_openpilot"]
         / "opendbc_repo/opendbc/car/uds.py"
+    ).read_text(encoding="utf-8")
+    elm327_safety = (
+        roots["calvinpark_openpilot"]
+        / "opendbc_repo/opendbc/safety/modes/elm327.h"
+    ).read_text(encoding="utf-8")
+    panda_main = (
+        roots["calvinpark_openpilot"] / "panda/board/main.c"
+    ).read_text(encoding="utf-8")
+    panda_tres = (
+        roots["calvinpark_openpilot"] / "panda/board/boards/tres.h"
+    ).read_text(encoding="utf-8")
+    panda_can_common = (
+        roots["calvinpark_openpilot"] / "panda/board/drivers/can_common.h"
+    ).read_text(encoding="utf-8")
+    panda_query_fw = (
+        roots["calvinpark_openpilot"] / "panda/examples/query_fw_versions.py"
     ).read_text(encoding="utf-8")
     toyota_2017_dbc = (
         roots["opendbc"]
@@ -229,6 +250,43 @@ def main() -> int:
     check(
         "current key verifier likewise restricts buses to 0 and 2",
         "buses = {0, 2}" in verify_key_step,
+    )
+    check(
+        "DataFlash tooling selects ELM327 without an explicit nonzero routing parameter",
+        "panda.set_safety_mode(3)" in dump_step,
+    )
+
+    print("\n== pinned Panda ELM327 and harness routing ==")
+    check(
+        "ELM327 safety source documents param 0 bus-1 OBD multiplexing",
+        "if safety_param == 0, bus 1 is multiplexed to the obd-ii port" in elm327_safety.lower(),
+    )
+    check(
+        "Panda firmware selects OBD CAN2 mode when ELM327 param is zero",
+        "if (param == 0u)" in panda_main.lower()
+        and "set_can_mode(can_mode_obd_can2)" in panda_main.lower(),
+    )
+    check(
+        "Panda firmware selects normal CAN mode for nonzero ELM327 param",
+        "else" in panda_main.lower()
+        and "set_can_mode(can_mode_normal)" in panda_main.lower(),
+    )
+    check(
+        "Panda query_fw_versions exposes the same no-OBD routing switch",
+        "set_safety_mode(carparams.safetymodel.elm327, 1 if args.no_obd else 0)"
+        in panda_query_fw.lower(),
+    )
+    check(
+        "Panda logical bus orientation swaps buses 0 and 2 only",
+        "bus_config[0].bus_lookup = flipped ? 2u : 0u" in panda_can_common.lower()
+        and "bus_config[2].bus_lookup = flipped ? 0u : 2u" in panda_can_common.lower(),
+    )
+    check(
+        "Tres OBD mode changes the FDCAN2 physical pin/transceiver selection",
+        "case can_mode_obd_can2:" in panda_tres.lower()
+        and "gpio_af9_fdcan2" in panda_tres.lower()
+        and "enable_can_transceiver(2u, true)" in panda_tres.lower()
+        and "enable_can_transceiver(4u, true)" in panda_tres.lower(),
     )
     check("dump shellcode transmits CAN 0x7A9", "= 0x7a9;" in shellcode)
     for address in (

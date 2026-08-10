@@ -32,7 +32,7 @@ No vehicle-specific conclusion is promoted from those screenshots alone.
 
 - [x] Step 1 — audit the current DataFlash/SecOC extractor and build a generic
   classic-Toyota offline oracle
-- [ ] Step 2 — statically resolve Panda ELM327/bus-routing assumptions and build
+- [x] Step 2 — statically resolve Panda ELM327/bus-routing assumptions and build
   a non-destructive bus-discovery plan/tool
 - [ ] Step 3 — statically audit the forced RAV4 Prime openpilot profile and
   decode the `U023A87` Techstream context
@@ -111,6 +111,71 @@ The tool is now ready to process a future Corolla dump/capture, but no Corolla
 key/storage conclusion is possible without those artifacts. The eight-ID DBC
 profile is a known Toyota classic-SecOC vocabulary, not proof that every listed
 ID appears on the 2023 Corolla or shares one production key.
+
+### Commit
+
+- `64f582f9426cc4095aa6e278035fc32c4738d1b1 analysis: generalize Toyota SecOC offline oracle`
+
+## Step 2 — Panda ELM327 and Toyota diagnostic bus routing
+
+### Primary/pinned inputs
+
+- Calvin Park openpilot/Panda checkout at
+  `eeb87f4f9cbcba2ee9c358c8d93015a513c1f822`
+- `panda/board/main.c`
+- `panda/board/boards/tres.h`
+- `panda/board/drivers/can_common.h`
+- `opendbc_repo/opendbc/safety/modes/elm327.h`
+- Bk2ol probe/dump source from Step 1
+
+### Static findings
+
+Pinned safety/Panda source establishes:
+
+```text
+ELM327 param 0     -> CAN_MODE_OBD_CAN2
+                    -> logical bus 1 multiplexed to OBD-II CAN
+ELM327 param != 0  -> CAN_MODE_NORMAL
+harness flipped    -> logical bus 0/2 orientation swaps
+logical bus 1      -> remains MCU CAN2
+```
+
+Tres/Red board code additionally shows that `CAN_MODE_NORMAL` versus
+`CAN_MODE_OBD_CAN2` changes the physical FDCAN2 pin/transceiver selection. The
+current Bk2ol dumper combines implicit ELM327 parameter 0 with hardcoded logical
+bus 0; changing only its `BUS` constant does not keep the physical-routing
+context fixed.
+
+This is enough to reject a premature conclusion that the observed bus-1
+programming timeout is necessarily ECU behavior. It is **not** enough to prove
+that software configuration can replace the physical repin, because live ACK,
+reset, gateway, and harness behavior remain unmeasured.
+
+### Durable work
+
+Added:
+
+- `docs/tooling/panda-toyota-routing.md`
+- `tools/toyota_eps_bus_probe.py`
+- `tests/verify_toyota_eps_bus_probe.py`
+
+The probe defaults to a dry run. With explicit `--execute`, it selects ELM327
+parameter 1 (normal routing) and sends only `22 F1 81` to `0x7A1 -> 0x7A9` on
+logical buses 0/1/2. It never enters programming, requests SecurityAccess,
+writes a DID, downloads code, starts a routine, or resets the ECU.
+
+### Verification
+
+- `tests/verify_toyota_eps_bus_probe.py` — 17/17 pass
+- optional pinned-source `verify_external_corroboration.py` — 247/247 pass;
+  locks Panda ELM327, CAN orientation, Tres mux, and Bk2ol call-site semantics
+- finding: `SECOC-033`
+
+### Boundary
+
+The next live routing experiment can now be a read-only `(ELM327 param, logical
+bus) -> F181 response` matrix rather than another harness repin. Programming
+behavior should only be retested after the physical/logical route is known.
 
 ### Commit
 

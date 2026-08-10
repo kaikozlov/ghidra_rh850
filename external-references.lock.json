@@ -89,6 +89,42 @@
       "sha256": "688f9af41c7dbf48bace98d683a67ac9d69cd74af270c58a034a00da391e65de"
     },
     {
+      "repository": "calvinpark_openpilot",
+      "path": "panda/board/main.c",
+      "size": 11530,
+      "sha256": "6afdb8a8ef1b78717ac4f3b724d59f11adf8d9fc778164638387c7740903bd6d"
+    },
+    {
+      "repository": "calvinpark_openpilot",
+      "path": "panda/board/boards/tres.h",
+      "size": 5102,
+      "sha256": "64f2cbe98c8262635053ddf8049337958f1e79d9977dace1fd2148aa4f2ea70d"
+    },
+    {
+      "repository": "calvinpark_openpilot",
+      "path": "panda/board/drivers/can_common.h",
+      "size": 6117,
+      "sha256": "d67254ba8bce391ce3ebb6c7e80a409eb4421600772c7a2c25539984ca4ba700"
+    },
+    {
+      "repository": "calvinpark_openpilot",
+      "path": "panda/examples/query_fw_versions.py",
+      "size": 4794,
+      "sha256": "dce58977ffda566dd1041c2d0d33d3cd04e958e0865525a7db95250cca0f5669"
+    },
+    {
+      "repository": "calvinpark_openpilot",
+      "path": "panda/python/__init__.py",
+      "size": 26572,
+      "sha256": "e80ee3e6271bfafb6b63bf5aeb1f1e5ca4dde8f0d822812e8637ade5cea06c4b"
+    },
+    {
+      "repository": "calvinpark_openpilot",
+      "path": "opendbc_repo/opendbc/safety/modes/elm327.h",
+      "size": 1158,
+      "sha256": "aeb7c7a763d422cad072d1982585dab190a97593cc729cb528ac3e669241925e"
+    },
+    {
       "repository": "toyota_dataflash_secoc_setup",
       "path": "steps/step_dump_dataflash.py",
       "sha256": "ddf902816d4f5dcb978857f2d17c9fb23baa83dbfad2da3eb4d4a17bb4d102d8"
