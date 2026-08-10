@@ -6,9 +6,12 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Bootloader
 
-- **Payload provenance.** The two pinned public payload fixtures verify the
-  gate, but the original payload-generation toolchain (who built them, against
-  which secret distribution) is not established.
+- **Payload provenance.** Candidate-f05 semantics and community source family
+  are closed (SECOC-031): it is a full DataFlash dump with post-dump reset,
+  authenticated under `SEED_KEY_SECRET`. The remaining provenance boundary is
+  exact authorship/build invocation/toolchain and why that secret was selected;
+  the original RAM/DataFlash fixture builders are likewise not established by
+  retained history.
 - **Bootloader DID `0203` semantics.** It ignores its five bytes and only arms
   state 0 → 1. Whether any field ever carried meaning in other calibrations is
   unknown.

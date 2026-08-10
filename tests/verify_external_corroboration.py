@@ -123,6 +123,8 @@ def main() -> int:
         roots["icanhack_secoc"] / "extract_keys.py",
         roots["icanhack_secoc"] / "shellcode/main.c",
         roots["toyota_dataflash_secoc_setup"] / "steps/step_dump_dataflash.py",
+        roots["toyota_dataflash_secoc_setup"]
+        / "payload_source/shellcode/main_ff1ff000_ff209000.c",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/car/uds.py",
         roots["calvinpark_openpilot"] / "tsk/COROLLA_INVESTIGATION.md",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
@@ -145,6 +147,10 @@ def main() -> int:
     shellcode = (roots["icanhack_secoc"] / "shellcode/main.c").read_text(encoding="utf-8").lower()
     dump_step = (
         roots["toyota_dataflash_secoc_setup"] / "steps/step_dump_dataflash.py"
+    ).read_text(encoding="utf-8").lower()
+    dump_shellcode_source = (
+        roots["toyota_dataflash_secoc_setup"]
+        / "payload_source/shellcode/main_ff1ff000_ff209000.c"
     ).read_text(encoding="utf-8").lower()
     uds = (
         roots["calvinpark_openpilot"]
@@ -200,6 +206,20 @@ def main() -> int:
         "0xffd24008", "0xffd2400c", "0xffd24010",
     ):
         check(f"dump shellcode independently uses RSCFD {address}", address in shellcode)
+        check(
+            f"DataFlash source independently uses RSCFD {address}",
+            address in dump_shellcode_source,
+        )
+    check(
+        "DataFlash source uses the candidate's CAN 0x7A9 word-frame expression",
+        "((int)addr << 8) | 0x07" in dump_shellcode_source
+        and "= *addr;" in dump_shellcode_source
+        and "= 0x7a9;" in dump_shellcode_source,
+    )
+    check(
+        "DataFlash source carries the candidate's boot-reset target",
+        "0x0000157e" in dump_shellcode_source and "bl_reset();" in dump_shellcode_source,
+    )
     check(
         "public extraction tooling does not name functional 0x777",
         "0x777" not in extract_lower and "0x777" not in dump_step and "0x777" not in shellcode,
@@ -357,6 +377,29 @@ def main() -> int:
         "bundle candidate-f05 ciphertext SHA-256",
         hashlib.sha256(candidate_ciphertext).hexdigest()
         == "296d87d2e89b9c7e800122e4c7f6d3b9c876362e52586530cdd53c86ba1116f5",
+    )
+    check(
+        "bundle candidate-f05 matches committed fixture",
+        candidate_ciphertext
+        == (REPO / "tests/fixtures/payloads/candidate_f05_dataflash_payload.bin").read_bytes(),
+    )
+    candidate_bundle_members = []
+    for bundle_name in (
+        "20260531_othersienna_secoc_bundle.zip",
+        "20260531_othersienna_secoc_bundle_v2.zip",
+        "20260531_othersienna_secoc_bundle_v3.zip",
+    ):
+        with zipfile.ZipFile(
+            roots["vance_sienna_2024"] / "scripts/secoc" / bundle_name
+        ) as candidate_bundle:
+            candidate_bundle_members.append(
+                candidate_bundle.read(
+                    "payload_candidate_f05_dataflash_ff200000_ff208000.bin"
+                )
+            )
+    check(
+        "all three Vance deployment bundles carry the identical candidate-f05",
+        all(payload == candidate_ciphertext for payload in candidate_bundle_members),
     )
 
     codeflash = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()

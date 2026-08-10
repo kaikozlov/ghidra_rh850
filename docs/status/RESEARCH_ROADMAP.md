@@ -50,6 +50,10 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Completed static investigations
 
+- **Vance candidate-f05 payload (2026-08-10).** Recovered as a full 32 KiB
+  DataFlash dump with unchanged CAN `0x7A9` word-frame transport and a post-dump
+  reset call, not an ICU-S/key-slot probe. Canonical:
+  [../security/secoc/candidate-f05-payload.md](../security/secoc/candidate-f05-payload.md).
 - **SID `0xAB` closure (2026-07-30).** Disproved the RID-based
   calibration/flash hypothesis. `0xAB` is an event-record service with a closed
   configured indirect graph; the separate 13-entry RID worker has no stock

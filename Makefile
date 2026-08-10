@@ -11,6 +11,7 @@ override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.b
 VERIFY_SUITES := \
 	tests/verify_findings.py \
 	tests/verify_payload_gate.py \
+	tests/verify_candidate_f05_payload.py \
 	tests/verify_security_gate.py \
 	tests/verify_secoc_nvm.py \
 	tests/verify_secoc_application.py \

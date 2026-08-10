@@ -134,6 +134,16 @@ paths = ["data/p1m_sfr_labels.csv"]
 tests = ["tests/verify_payload_gate.py"]
 paths = ["docs/security/bootloader-payload-gate.md"]
 
+[suite.candidate_f05]
+tests = ["tests/verify_candidate_f05_payload.py"]
+paths = [
+  "tests/fixtures/payloads/candidate_f05_dataflash_payload.bin",
+  "tools/generate_candidate_f05_semantics.py",
+  "data/generated/candidate_f05_payload.json",
+  "docs/security/secoc/candidate-f05-payload.md",
+  "docs/variants/sienna-8965B4514000.md",
+]
+
 [suite.memory_safety]
 tests = ["tests/verify_memory_safety.py"]
 paths = ["docs/security/memory-safety-audit.md"]

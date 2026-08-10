@@ -94,6 +94,11 @@
       "sha256": "ddf902816d4f5dcb978857f2d17c9fb23baa83dbfad2da3eb4d4a17bb4d102d8"
     },
     {
+      "repository": "toyota_dataflash_secoc_setup",
+      "path": "payload_source/shellcode/main_ff1ff000_ff209000.c",
+      "sha256": "2564a97342dd269f2113b53ed58ca1d74bc5ded7e2219b75003212c37b848431"
+    },
+    {
       "repository": "opendbc",
       "path": "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
       "sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48"

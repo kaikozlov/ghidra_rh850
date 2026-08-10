@@ -9,6 +9,7 @@ Runtime CAN message authentication (AUTOSAR Secure Onboard Communication).
 | [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md) | Corrected NvM object model, object 15, protected slot state, and command-8 provisioning |
 | [key-recovery-assessment.md](key-recovery-assessment.md) | Ranked existing-key recovery routes: peer ECU, software command experiments, command permissions, side channels, provisioning capture, and fault injection |
 | [software-path-assessment.md](software-path-assessment.md) | Software-first audit: diagnostic/CAN bounds, constructible bootloader code execution, dormant ICU state, and command-5/DID-1010 reuse templates |
+| [candidate-f05-payload.md](candidate-f05-payload.md) | Vance candidate-f05 DataFlash-dump semantics, standard-payload diff, reset behavior, and provenance boundary |
 
 ## Important distinction
 

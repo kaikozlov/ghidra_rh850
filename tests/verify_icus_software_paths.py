@@ -151,11 +151,20 @@ check(
     and CF[0x435E:0x4362] == bytes.fromhex("fdc760f9"),
 )
 
-derived_key = AES.new(PAYLOAD_BUILD_SECRET, AES.MODE_ECB).encrypt(bytes(16))
+payload_secrets = {
+    "candidate_f05_dataflash_payload.bin": CF[0xBFE8:0xBFF8],
+    "dataflash_dump_payload.bin": PAYLOAD_BUILD_SECRET,
+    "ram_dump_payload.bin": PAYLOAD_BUILD_SECRET,
+}
 for path in sorted((REPO / "tests" / "fixtures" / "payloads").glob("*.bin")):
     ciphertext = path.read_bytes()
-    plaintext = AES.new(derived_key, AES.MODE_CBC, bytes(16)).decrypt(ciphertext)
-    cmac = CMAC.new(derived_key, ciphermod=AES)
+    secret = payload_secrets.get(path.name)
+    check(f"{path.name}: build-secret mapping exists", secret is not None)
+    if secret is None:
+        continue
+    fixture_derived_key = AES.new(secret, AES.MODE_ECB).encrypt(bytes(16))
+    plaintext = AES.new(fixture_derived_key, AES.MODE_CBC, bytes(16)).decrypt(ciphertext)
+    cmac = CMAC.new(fixture_derived_key, ciphermod=AES)
     cmac.update(bytes(16) + plaintext[:0xFF0])
     nonzero_code = [index for index, value in enumerate(plaintext[:0xFD0]) if value]
     check(f"{path.name}: accepted payload size", len(ciphertext) == 0x1000)

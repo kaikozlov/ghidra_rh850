@@ -60,7 +60,7 @@ was searched separately. No search traversed unrelated personal storage.
 ## Stage checklist
 
 - [x] Stage 0 — bootstrap, baseline verification, and living sweep journal
-- [ ] Stage 1 — fully reverse Vance `candidate-f05`
+- [x] Stage 1 — fully reverse Vance `candidate-f05`
 - [ ] Stage 2 — recover the complete Techstream MACKey vehicle-side protocol
 - [ ] Stage 3 — close remaining high-value Techstream static leads
 - [ ] Stage 4 — complete the Renesas RV40F host-protocol static census
@@ -150,6 +150,111 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Commit
 
-- Pending Stage 0 commit; its immutable SHA will be recorded at the next
-  journal update because a commit cannot contain its own final object ID.
+- `cf07d4e79d7668abbcf455d072d36e66f1210289 docs: start comprehensive static-analysis sweep`
 
+## Stage 1 — fully reverse Vance `candidate-f05`
+
+### Starting state
+
+- HEAD: `cf07d4e79d7668abbcf455d072d36e66f1210289`
+- Relevant prior finding IDs: `SEC-BOOT-001`–`SEC-BOOT-006`, `SECOC-024`,
+  `SECOC-030`
+- Relevant artifacts: pinned Vance v1/v2/v3 deployment bundles; standard
+  DataFlash payload; candidate-f05 ciphertext; committed CodeFlash secrets;
+  pinned I-CAN-hack and Bk2ol shellcode sources
+- Verification baseline: Stage 0 full and external gates pass; Ghidra daemon
+  stopped and main working project clean
+
+### Questions
+
+1. Which key/authentication construction produces a valid candidate plaintext?
+2. What are every function, basic block, absolute reference, memory range,
+   loop, call, and terminal behavior in the changed code?
+3. Does candidate-f05 dump, scan, probe, or expose a different result protocol?
+4. Is any `f05` identifier present beyond payload authentication/filename?
+5. What source family and exact provenance does retained history support?
+
+### Work performed
+
+- Commands/tools: independent OpenSSL AES-ECB/AES-CBC/CMAC reproduction;
+  independent CRC32/diff census; raw `v850e3:LE:32:default` Ghidra imports at
+  `0xFEBF0000`; full entry/trampoline/epilogue disassembly and decompilation;
+  exact source/byte searches across all pinned community checkouts; Vance ZIP
+  member/hash/time census and Git-history audit.
+- Functions/files inspected: candidate `0xFEBF0000..0xFEBF01B1`; standard
+  `0xFEBF0000..0xFEBF0189`; local reset trampoline `0xFEBF019C`; candidate
+  return epilogue `0xFEBF01A0`; I-CAN-hack `shellcode/main.c`; Bk2ol
+  `main_ff1ff000_ff209000.c`; all three Vance deployment archives and v3
+  README/manifest.
+- Generated artifacts: `data/generated/candidate_f05_payload.json`.
+
+### Findings
+
+- Candidate-f05 is a sequential full DataFlash dump over
+  `0xFF200000..0xFF207FFF`, four bytes per iteration and 8,192 frames total —
+  source: external payload bytes/Ghidra, grade: **verified** (SECOC-031).
+- Its output is unchanged classic CAN `0x7A9` through RSCFD slot 16 with bytes
+  `07 || address_low24_le || word_le32` — source: external payload bytes,
+  grade: **verified**.
+- It has no ICU-S, RAM/key-mirror, CodeFlash, special object-15, scan, or oracle
+  path. Object-15 DataFlash is read only incidentally inside the full dump —
+  source: complete body/reference/CFG census, grade: **verified**.
+- The material control-flow delta is terminal behavior: candidate calls boot
+  reset `0x157E`; standard spins forever. Saving `lp`, shifted stack locals,
+  relocated branches, a call trampoline, and epilogue account for the broad
+  byte churn — source: external payload bytes/Ghidra, grade: **verified**.
+- Candidate-f05 authenticates only when `SEED_KEY_SECRET @ 0xBFE8` is used as
+  the payload-build secret; it embeds no secret, derived key, ASCII `f05`, or
+  runtime `f05` signature — source: committed firmware plus external payload,
+  grade: **verified**.
+- The statement-level source family is the pinned I-CAN-hack/Bk2ol RSCFD dump
+  loop. Exact compiler/source revision, human author, build command, selection
+  intent, and vehicle execution are not retained — source: pinned Git history,
+  grade: **bounded**.
+
+### Negative/bounded results
+
+- The candidate is not an alternate RAM/CodeFlash/ICU-S dump or key-structure
+  search; the prior mystery is closed as a DataFlash-dump build variant.
+- Identical ciphertext occurs in all three Vance archives. ZIP metadata dates
+  the member 2026-05-11 and Git attributes the three archive uploads to
+  Vance425 on 2026-05-31, but neither establishes who built the inner payload.
+- Filename prefix `f05` plus exclusive authentication under
+  `f05f36b7...` makes deliberate key selection plausible, not provable. No
+  exact build source or invocation exists in the pinned history.
+
+### Documentation/tests changed
+
+- Added canonical `docs/security/secoc/candidate-f05-payload.md` and linked it
+  from the SecOC index and `4514000` variant summary.
+- Added finding `SECOC-031`; narrowed the payload-provenance open question;
+  recorded Stage 1 under completed static roadmap work. No prior material claim
+  was disproved, so `CORRECTIONS.md` does not require a new entry.
+- Added the immutable candidate fixture, deterministic 42-check verifier,
+  generated semantic JSON, generator, Ghidra raw-payload seed helper, external
+  fixture/source corroboration, and verification ownership mapping.
+
+### Verification
+
+- `uv run --locked python tools/generate_candidate_f05_semantics.py` -> pass
+- `uv run --locked python tests/verify_candidate_f05_payload.py` -> pass
+  (42/42)
+- `make verify-one SUITE=candidate_f05` -> pass
+- `make verify-external EXTERNAL_REPOS_DIR=/Users/kai/dev/inspect/repos` ->
+  pass (175/175)
+- `uv run --locked python tests/verify_icus_software_paths.py` -> pass
+  (45/45); the first changed-suite run exposed that this older fixture census
+  assumed every payload used `PAYLOAD_BUILD_SECRET`, so it now pins each
+  fixture's actual build-secret source.
+- `make verify-changed` -> pass (10 matched suites, 14 test files)
+
+### Remaining blockers
+
+- Exact human authorship, compiler/build invocation, reason for selecting
+  `SEED_KEY_SECRET`, and live ECU acceptance are unavailable in retained static
+  artifacts. These no longer block semantic recovery.
+
+### Commit
+
+- Pending Stage 1 commit; its immutable SHA will be recorded at the next
+  journal update because a commit cannot contain its own final object ID.
