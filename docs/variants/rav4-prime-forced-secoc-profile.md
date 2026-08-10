@@ -85,6 +85,44 @@ profile's camera steering/HUD message family across the harness boundary. A
 2024 TSS3 network may differ in message presence, cadence, payload semantics,
 or dependencies independently of the EPS SecOC acceptance predicate.
 
+### 2.1 Exhaustive relevant-message matrix
+
+The machine-readable source of truth is
+`data/rav4_prime_forced_profile_matrix.csv`, verified by
+`tests/verify_rav4_prime_forced_profile_matrix.py` plus pinned-source assertions.
+It covers the complete relevant control/SecOC set rather than only the four
+blocked camera messages:
+
+| ID | stock bus2→0 | openpilot TX with stock longitudinal | cadence | SecOC | comparative receiver boundary |
+|---:|---|---|---|---|---|
+| `0x00F` | forwarded | none | — | synchronization consumed for TRIP/RESET | Sienna EPS sync input |
+| `0x191` | **blocked/replaced** | yes | every 2 frames | no | Sienna EPS ordinary RX |
+| `0x412` | **blocked/replaced** | yes | every 20 frames or UI edge | no | not recovered as Sienna EPS RX |
+| `0x2E4` | **blocked/replaced** | yes | every frame | 28-bit CMAC | Sienna EPS protected RX |
+| `0x131` | **blocked/replaced** | yes | every 2 frames | 28-bit CMAC | Sienna EPS protected RX |
+| `0x343` | forwarded | cancel-only | on cancel | no | not Sienna EPS SecOC RX |
+| `0x1D2` | forwarded | no on this RAV4 Prime branch | — | no | not Sienna EPS SecOC RX |
+| `0x183` | forwarded | **no** with stock longitudinal | every 3 frames only with openpilot longitudinal | 28-bit CMAC when active | external receiving ECU; absent from Sienna EPS RX |
+| `0x344` | forwarded | none | — | known classic SecOC vocabulary, no controller signing here | absent from Sienna EPS RX |
+| `0x116` | forwarded | none | — | received by SecOC safety checks | external input |
+
+RAV4 Prime's `ToyotaSecOCPlatformConfig` sets `TSS2 | NO_DSU | SECOC` but does
+not add `UNSUPPORTED_DSU`. Therefore the stock-longitudinal cancel branch uses
+`ACC_CONTROL` (`0x343`) rather than `PCM_CRUISE` (`0x1D2`), even though both
+addresses are allowed by the safety whitelist.
+
+The matrix also distinguishes **wire-shape conversion** from mere replacement:
+classic non-SecOC Toyota uses 5-byte `0x2E4`, while the SecOC platform sends an
+8-byte `0x2E4` containing the protected trailer. `0x131` is an additional
+8-byte protected steering companion on the SecOC path. `0x183` is the third
+signed stream in opendbc, but is absent from the longitudinal-disabled field
+experiment.
+
+This exhausts the relevant static forwarding/transmit boundary available from
+the pinned source. Physical 2024 RAV4 ownership is not projected from the
+comparative Sienna column; only the two steering protected IDs have direct EPS
+receiver proof in the analyzed firmware.
+
 ## 3. `U023A87` in Toyota/firmware evidence
 
 ### 3.1 Techstream vocabulary

@@ -501,6 +501,41 @@ def main() -> int:
         "Toyota safety has no custom forward hook overriding the generic substitution",
         ".fwd =" not in calvin_toyota_safety,
     )
+    check(
+        "RAV4 Prime SecOC platform flags do not include UNSUPPORTED_DSU",
+        "TOYOTA_RAV4_PRIME = ToyotaSecOCPlatformConfig(" in opendbc_toyota_values
+        and "flags=ToyotaFlags.UNSUPPORTED_DSU" not in opendbc_toyota_values[opendbc_toyota_values.index("TOYOTA_RAV4_PRIME = ToyotaSecOCPlatformConfig("):opendbc_toyota_values.index("TOYOTA_YARIS =", opendbc_toyota_values.index("TOYOTA_RAV4_PRIME = ToyotaSecOCPlatformConfig("))],
+    )
+    check(
+        "SecOC platform base flags are TSS2 NO_DSU SECOC",
+        "self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC" in opendbc_toyota_values,
+    )
+    check(
+        "STEERING_LKA is always generated and SecOC-signed when the platform flag is set",
+        "steer_command = toyotacan.create_steer_command" in opendbc_toyota_controller
+        and "steer_command = add_mac(self.secoc_key" in opendbc_toyota_controller,
+    )
+    check(
+        "STEERING_LTA and LTA_2 are generated on frame mod 2",
+        "if self.frame % 2 == 0 and self.CP.carFingerprint in TSS2_CAR:" in opendbc_toyota_controller
+        and "create_lta_steer_command_2" in opendbc_toyota_controller,
+    )
+    check(
+        "LKAS HUD is generated on frame mod 20 or UI edge",
+        "if self.frame % 20 == 0 or send_ui:" in opendbc_toyota_controller
+        and "create_ui_command" in opendbc_toyota_controller,
+    )
+    check(
+        "stock-long cancel chooses ACC_CONTROL unless UNSUPPORTED_DSU",
+        "if self.CP.carFingerprint in UNSUPPORTED_DSU_CAR:" in opendbc_toyota_controller
+        and "create_acc_cancel_command" in opendbc_toyota_controller
+        and "create_accel_command(self.packer, 0, pcm_cancel_cmd" in opendbc_toyota_controller,
+    )
+    check(
+        "ACC_CONTROL_2 is generated only inside openpilot longitudinal branch",
+        "if self.CP.openpilotLongitudinalControl:" in opendbc_toyota_controller
+        and "acc_cmd_2 = toyotacan.create_accel_command_2" in opendbc_toyota_controller,
+    )
 
     print("\n== pinned opendbc CAN 0x344 provenance ==")
     secoc_344 = dbc_message(toyota_secoc_dbc, 836, "PRE_COLLISION_2")

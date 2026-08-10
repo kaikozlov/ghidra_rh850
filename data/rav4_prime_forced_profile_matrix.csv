@@ -1,0 +1,11 @@
+can_id,name,wire_shape,stock_bus2_to_bus0,openpilot_tx_stock_long,tx_cadence,secoc_behavior,comparative_receiver_domain,notes
+0x00F,SECOC_SYNCHRONIZATION,8-byte classic,forwarded,none,none,consumed for TRIP/RESET and sync-MAC check,Sienna EPS SecOC sync input,wrong-key sync MAC logs error but does not abort controller update
+0x191,STEERING_LTA,8-byte classic,blocked-and-replaced,yes,every 2 control frames,not SecOC-signed,Sienna EPS ordinary RX,old-profile LTA command suppressed from stock camera by check_relay and regenerated
+0x412,LKAS_HUD,8-byte classic,blocked-and-replaced,yes,every 20 control frames or UI edge,not SecOC-signed,not recovered as Sienna EPS RX,old-profile HUD command suppressed from stock camera and regenerated
+0x2E4,STEERING_LKA,8-byte classic SecOC,blocked-and-replaced,yes,every control frame,AES-CMAC 28-bit using live TRIP/RESET and local LKA counter,Sienna EPS protected RX,classic 5-byte non-SecOC shape is replaced by 8-byte SecOC shape on SecOC platforms
+0x131,STEERING_LTA_2,8-byte classic SecOC,blocked-and-replaced,yes,every 2 control frames,AES-CMAC 28-bit using live TRIP/RESET and local LTA counter,Sienna EPS protected RX,generated only on TSS2 SecOC path
+0x343,ACC_CONTROL,8-byte classic,forwarded,conditional cancel only,on cancel request,not SecOC-signed,not Sienna EPS SecOC RX,RAV4 Prime lacks UNSUPPORTED_DSU flag so stock-long cancel uses ACC_CONTROL path
+0x1D2,PCM_CRUISE,8-byte classic,forwarded,no for RAV4 Prime stock-long,none,not SecOC-signed,not Sienna EPS SecOC RX,whitelisted but RAV4 Prime cancel branch does not select it
+0x183,ACC_CONTROL_2,8-byte classic SecOC,forwarded,no in stock-long; yes only with openpilot longitudinal,every 3 control frames when openpilot-long,AES-CMAC 28-bit with separate ACC counter when active,external receiving ECU; absent from Sienna EPS RX/SecOC profile,not part of reported longitudinal-disabled experiment
+0x344,PRE_COLLISION_2,8-byte classic SecOC vocabulary,forwarded,none,none,no controller signing path in reported profile,absent from Sienna EPS RX profile,not replaced by Toyota stock-long SecOC safety whitelist
+0x116,GAS_PEDAL,8-byte classic SecOC vocabulary,forwarded,none,none,received by Toyota SecOC safety checks; controller does not sign it,external input to openpilot safety,does not belong to camera replacement set

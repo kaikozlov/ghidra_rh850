@@ -50,6 +50,7 @@ VERIFY_SUITES := \
 	tests/verify_community_patch_target_analyzer.py \
 	tests/verify_corolla_2023_public_route_summary.py \
 	tests/verify_toyota_secoc_session.py \
+	tests/verify_rav4_prime_forced_profile_matrix.py \
 	tests/verify_secoc_acceptance_gate.py \
 	tests/verify_renesas_rfp.py \
 	tests/verify_lifecycle.py \
