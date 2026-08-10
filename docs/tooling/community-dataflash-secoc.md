@@ -124,7 +124,53 @@ The result separates:
 This makes a future Corolla DataFlash/capture pair a direct cryptographic test
 rather than another heuristic entropy search.
 
-## 4. Current evidence boundary
+## 4. Explicit cross-variant research session
+
+`tools/toyota_secoc_session.py` turns the remaining implicit workflow
+assumptions into durable session state without performing ECU mutation. It
+records:
+
+- EPS UDS endpoint (`0x7A1 -> 0x7A9` by default);
+- diagnostic Panda logical bus once discovered;
+- explicit ELM327 routing parameter (default `1`, normal CAN routing);
+- oracle buses (default `0/1/2`);
+- the complete configurable protected-ID profile;
+- target openpilot car enum for review-only fingerprint planning;
+- observed F181/software identity;
+- per-bus/per-ID capture counts and retained oracle location.
+
+The session consumes execution output from the existing read-only
+`toyota_eps_bus_probe.py`. A unique F181 responder is persisted as the diagnostic
+bus; multiple responders fail closed unless the analyst explicitly selects one.
+It can then ingest a full NDJSON CAN capture, retain the configured sync/protected
+profile across any selected buses, and hand the resulting oracle to
+`toyota_secoc_oracle.py`.
+
+Example:
+
+```bash
+uv run --locked python tools/toyota_secoc_session.py init session \
+  --target-car CAR.TOYOTA_COROLLA_TSS2
+
+uv run --locked python tools/toyota_eps_bus_probe.py --execute > probe.json
+uv run --locked python tools/toyota_secoc_session.py record-probe session probe.json
+uv run --locked python tools/toyota_secoc_session.py ingest-can session all_can.ndjson
+uv run --locked python tools/toyota_secoc_session.py fingerprint-plan session
+uv run --locked python tools/toyota_secoc_session.py oracle-plan session --dump dump.bin
+```
+
+The fingerprint step is deliberately a **plan**, not an automatic source patch:
+it records the observed EPS address/F181 against the selected target car so an
+analyst can review the appropriate openpilot fingerprint entry without silently
+injecting Sienna defaults into another vehicle.
+
+`tests/verify_toyota_secoc_session.py` proves that the manager contains no
+programming-session, SecurityAccess, DID-write, RequestDownload, RoutineControl,
+CAN-send, or Panda-safety mutation path. Device-side mutating dump behavior
+remains in the separately pinned community tooling; the repository-local
+cross-variant layer is read-only/offline.
+
+## 5. Current evidence boundary
 
 The static audit proves only what the pinned tools count and what the pinned
 DBC/sender define. It does **not** prove that a specific 2023 Corolla uses every

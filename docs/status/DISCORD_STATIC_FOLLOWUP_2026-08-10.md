@@ -439,3 +439,33 @@ are now cleanly separated into missing-artifact or live-behavior boundaries:
 Final repository verification before closure: `make verify` = **440 assertions,
 0 failures**. The interrupted ptshim Stage-3 files remain untracked and
 untouched for the original `/goal` continuation.
+
+# Original-eight completion pass
+
+A later audit against the original eight-item static plan found four scopes that
+needed further closure. This section records that completion work without
+redefining the original goal.
+
+## Completion A — explicit cross-variant TSK/SecOC session (original item 1)
+
+The earlier work generalized the offline cryptographic oracle but did not make
+all workflow assumptions durable. `tools/toyota_secoc_session.py` now records:
+
+- EPS endpoint;
+- diagnostic bus (`auto` until the read-only F181 probe resolves it);
+- explicit ELM327 routing parameter, defaulting to normal routing;
+- oracle buses 0/1/2;
+- the complete configurable classic protected-ID profile;
+- target car for fingerprint review;
+- F181 identity;
+- per-bus/per-ID capture counts.
+
+It consumes `toyota_eps_bus_probe.py --execute` output, fails closed when more
+than one F181 responder exists unless explicitly disambiguated, filters a full
+capture without dropping bus 1 or `0x116/0x24D`, and produces a review-only
+fingerprint plan plus an offline oracle command. It contains no ECU-mutating
+UDS/Panda operation.
+
+- focused verification: `verify_toyota_secoc_session.py` — 33/33 pass
+- finding: `SECOC-036`
+- commit: pending
