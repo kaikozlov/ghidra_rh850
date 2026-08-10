@@ -53,6 +53,7 @@ VERIFY_SUITES := \
 	tests/verify_rav4_prime_forced_profile_matrix.py \
 	tests/verify_techstream_dtc_failure_types.py \
 	tests/verify_u023a87_monitor_map.py \
+	tests/verify_toyota_dataflash_analyzer.py \
 	tests/verify_secoc_acceptance_gate.py \
 	tests/verify_renesas_rfp.py \
 	tests/verify_lifecycle.py \

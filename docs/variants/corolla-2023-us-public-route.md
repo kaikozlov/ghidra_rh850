@@ -208,6 +208,11 @@ For this specimen the highest-yield request is now only:
 
 A new CAN capture is not required to test the DataFlash key hypothesis: the
 public route already supplies substantial `0x00F` + `0x116` + `0x24D` oracle
-traffic. If the dump arrives, `tools/toyota_secoc_oracle.py` can test every
-sliding 16-byte DataFlash window against that classic traffic after export to
-its NDJSON input format.
+traffic. The complete offline path is now prepared in
+[`toyota-dataflash-analysis.md`](../tooling/toyota-dataflash-analysis.md):
+`tools/analyze_toyota_dataflash.py` tests every sliding 16-byte window, recovers
+known raw/XOR55/XORAA triplicate consensus and object-15 geometry, applies the
+proven storage-index/`AAAAAAAA` physical validity model, and independently
+classifies synchronization, `0x116`, and `0x24D` key domains. The second physical
+header word remains deliberately opaque because no checksum/CRC semantic has
+been proved.

@@ -38,10 +38,14 @@ What to investigate next, in rough priority order. Completed items move to
    for the structured checklist.
 7. **Test the separate 2023-US public-route specimen's DataFlash.** The CAN
    oracle is already public and recovered (`0x00F` + protected-family
-   `0x116`/`0x24D` on bus 1). Acquire only the already-reported completed 32 KiB
-   DataFlash dump plus exact EPS `F181`, then run the generic sliding-window
-   oracle rather than collecting another CAN trace. Canonical:
-   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md).
+   `0x116`/`0x24D` on bus 1), and the complete offline analyzer is ready:
+   all-window entropy ranking, known NvM physical validity, raw/XOR55/XORAA
+   redundant-object consensus, object-15 geometry comparison, and independent
+   sync/per-ID key-domain classification. Acquire only the already-reported
+   completed 32 KiB DataFlash dump plus exact EPS `F181`; no new CAN trace is
+   required for the initial cryptographic test. Canonical:
+   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md),
+   [../tooling/toyota-dataflash-analysis.md](../tooling/toyota-dataflash-analysis.md).
 8. **Populate the TSS 3.0 family matrix.** Extend
    `data/tss3_eps_variant_matrix.csv` as additional variant firmware becomes
    available. Canonical: [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).

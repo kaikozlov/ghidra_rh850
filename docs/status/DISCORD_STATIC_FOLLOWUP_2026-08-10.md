@@ -541,4 +541,40 @@ Durable outputs:
 - focused verifiers for both artifacts
 - finding `TMS-015`
 
-Commit: pending
+Commit: `4aa492e7a9b5e38ebf7c7d3cade647849adc643b analysis: resolve Techstream U023A87 semantics`
+
+## Completion D — full Corolla/DataFlash structural and key-domain analyzer (original item 7)
+
+`tools/analyze_toyota_dataflash.py` now closes the remaining pre-artifact
+DataFlash work:
+
+- ranks every sliding 16-byte window, not only aligned candidates;
+- uses the generated physical NvM record map to evaluate the proved validity
+  rule (storage-index header + `AAAAAAAA` trailer);
+- retains the second physical header word as opaque because its checksum/CRC
+  semantics remain unproved;
+- decodes every enabled raw/XOR55/XORAA triplicate object and reports physical
+  validity, decoded-copy agreement, majority consensus, and valid-copy
+  consensus;
+- makes the complete object-15 geometry explicit (`FF206E14`, `FF206D14`,
+  `FF206C14`, restored `FEBF02F8`) and records alignment with the related
+  `4514000` field without claiming runtime equivalence;
+- can independently scan every unique high-entropy 16-byte window against sync
+  and each protected CAN ID rather than requiring one universal key;
+- emits explicit classifications including `sync only`, `0x116 only`, `0x24D
+  only`, shared `0x116+0x24D`, and shared `sync+protected`;
+- reports only candidate hashes/addresses, not raw key bytes.
+
+The committed `4512000` reference artifact reproduces six valid triplicate
+consensuses (`0/1/2/3/5/6`) and zero valid copies for `4/12/13/14/15`. A
+synthetic provisioned object 15 proves correct raw/XOR55/XORAA reconstruction,
+and synthetic captures prove all requested independent/shared key-domain
+classifications.
+
+The public Corolla route already supplies `0x00F/0x116/0x24D`, so the initial
+Corolla key/storage experiment is now reduced to the missing 32 KiB DataFlash
+artifact plus F181 identity; another CAN capture is unnecessary.
+
+- focused verification: `verify_toyota_dataflash_analyzer.py` — 35/35 pass
+- finding: `SECOC-038`
+- commit: pending
