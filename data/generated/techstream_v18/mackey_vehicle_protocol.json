@@ -257,6 +257,16 @@
       "va": "0x100eb9b0"
     }
   },
+  "mack4_disposition": {
+    "appears_in_managed": false,
+    "appears_in_utilityexnk2": false,
+    "conclusion": "MACK4 is parsed, stored, matched, and destroyed \u2014 but never reaches any diagnostic wire operation. It is a dead-stored server response field retained for potential host-side validation that this binary does not implement.",
+    "consumed_by_vehicle_write": false,
+    "non_parse_refs": "std::string destructors only",
+    "parsed_at": "IT3UtilityNK.dll parse_exchange_key_entry +0x439",
+    "start_key_update_payload": "header(4) + M1(16) + M2(32) + M3(16) = 68 bytes",
+    "struct_offset": "0x18f0"
+  },
   "operation_selectors": {
     "0": "update_vehicle_status",
     "1": "security_access_seed_update",
@@ -658,7 +668,183 @@
       "vtable_va": "0x103d1510"
     }
   ],
-  "schema": 1,
+  "schema": 2,
+  "state_reference_model": {
+    "meaning": "S324 string-reference census; no per-state operation ownership",
+    "reference_associations": 61,
+    "references": {
+      "00": [
+        "0x1023d510",
+        "0x1023e0c0"
+      ],
+      "00A": [
+        "0x1023e6b0"
+      ],
+      "01A": [
+        "0x1023e980"
+      ],
+      "01B": [
+        "0x1023ef10"
+      ],
+      "01C": [
+        "0x1023f6a0",
+        "0x10240f80"
+      ],
+      "01D": [
+        "0x102410b0"
+      ],
+      "01E": [
+        "0x10241870"
+      ],
+      "01F": [
+        "0x102420c0",
+        "0x10242160"
+      ],
+      "02": [
+        "0x10235ca0"
+      ],
+      "03A": [
+        "0x10235d60"
+      ],
+      "03B": [
+        "0x102360d0"
+      ],
+      "04": [
+        "0x102362d0"
+      ],
+      "05": [
+        "0x10236370"
+      ],
+      "06": [
+        "0x10236410"
+      ],
+      "07": [
+        "0x10241ed0",
+        "0x102443c0"
+      ],
+      "08": [
+        "0x1023ed20",
+        "0x1023f490",
+        "0x10241650"
+      ],
+      "09A": [
+        "0x10242240",
+        "0x102428c0"
+      ],
+      "09B": [
+        "0x10242bb0",
+        "0x10243370"
+      ],
+      "10": [
+        "0x102364c0"
+      ],
+      "11A": [
+        "0x10236580"
+      ],
+      "11B": [
+        "0x102366d0"
+      ],
+      "12A": [
+        "0x10236820"
+      ],
+      "13A": [
+        "0x10236a10"
+      ],
+      "13B": [
+        "0x10236d80"
+      ],
+      "13C": [
+        "0x10237020"
+      ],
+      "14B": [
+        "0x102372c0"
+      ],
+      "15": [
+        "0x1023dfc0",
+        "0x10243670"
+      ],
+      "16": [
+        "0x102374f0"
+      ],
+      "17": [
+        "0x10243a90"
+      ],
+      "18": [
+        "0x10237590"
+      ],
+      "19": [
+        "0x10241650"
+      ],
+      "24": [
+        "0x1023c530",
+        "0x1023c7d0"
+      ],
+      "25": [
+        "0x10243b60"
+      ],
+      "26": [
+        "0x1023c980"
+      ],
+      "27": [
+        "0x1023ca20"
+      ],
+      "28": [
+        "0x10244080"
+      ],
+      "29": [
+        "0x1023cac0"
+      ],
+      "30": [
+        "0x1023cb60"
+      ],
+      "31": [
+        "0x10244f60"
+      ],
+      "32": [
+        "0x1023cc00"
+      ],
+      "33": [
+        "0x1023cde0"
+      ],
+      "34": [
+        "0x1023cf90"
+      ],
+      "35": [
+        "0x1023d030"
+      ],
+      "36": [
+        "0x10244ff0"
+      ],
+      "37": [
+        "0x1023d230"
+      ],
+      "38": [
+        "0x10245260"
+      ],
+      "39": [
+        "0x10245370"
+      ],
+      "40": [
+        "0x10237650"
+      ],
+      "41": [
+        "0x1023f900"
+      ],
+      "42": [
+        "0x10240db0"
+      ],
+      "43": [
+        "0x102376f0"
+      ]
+    },
+    "shared_reference_functions": {
+      "0x10241650": [
+        "08",
+        "19"
+      ]
+    },
+    "unique_reference_functions": 60
+  },
   "vehicle_architecture": {
     "association_key": "raw 16-byte SafekeyNumber",
     "discovery_dids": [

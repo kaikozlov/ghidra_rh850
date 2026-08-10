@@ -54,8 +54,11 @@ CLASS_STATES = {
 }
 
 # Function starts containing references to each displayed S324 procedure code.
-# Multiple starts are retained where variant classes reuse a procedure code.
-STATE_HANDLERS = {
+# These are string-reference sites, NOT one-handler-per-state ownership. A
+# function may reference more than one S324 label (0x10241650 references both
+# S324-08 and S324-19), and one code may be referenced from multiple functions.
+# Keep this evidence separate from class-wide ComProcess operation recovery.
+STATE_REFERENCE_FUNCTIONS = {
     "02": [0x10235CA0], "03A": [0x10235D60], "03B": [0x102360D0],
     "04": [0x102362D0], "05": [0x10236370], "06": [0x10236410],
     "10": [0x102364C0], "11A": [0x10236580], "11B": [0x102366D0],
@@ -78,8 +81,9 @@ STATE_HANDLERS = {
     "36": [0x10244FF0], "38": [0x10245260], "39": [0x10245370],
 }
 
-# Operation selector calls made by each product class's methods. These selectors
-# feed Ex2MAC_01_ComProcess; their meaning is resolved by the UtilityEx dispatch.
+# Operation selectors observed across all methods of each product class. These
+# are class-wide and were the previous basis for the CSV. They are retained for
+# cross-reference but must NOT be mistaken for per-state attributions.
 CLASS_OPERATIONS = {
     "CMAC_01_000": [1, 2, 4, 5, 6], "CMAC_01_000A": [1, 2],
     "CMAC_01_001A": [1, 2, 4], "CMAC_01_001B": [2, 3, 4],
@@ -87,6 +91,29 @@ CLASS_OPERATIONS = {
     "CMAC_01_001D": [1, 2, 3, 4], "CMAC_01_001E": [1, 2, 4],
     "CMAC_01_009A": [4, 5, 6], "CMAC_01_009B": [1, 2, 4, 6],
     "CMAC_01_015": [7],
+}
+
+# MACK4 disposition: the server-side MACK4 field (32 bytes) is parsed and
+# stored in the native exchange record at struct offset +0x18f0, read by
+# decode_exchange_records on SafekeyNumber match (same path as M1/M2/M3),
+# and destroyed on cleanup. But no diagnostic operation ever transmits it:
+# start_key_update_3002 sends exactly 68 bytes (header + M1/M2/M3); MACK4 is
+# absent from UtilityExNK2.dll and the managed layer entirely. All +0x18f0
+# references outside parse/decode are std::string destructors.
+MACK4_DISPOSITION = {
+    "parsed_at": "IT3UtilityNK.dll parse_exchange_key_entry +0x439",
+    "struct_offset": "0x18f0",
+    "consumed_by_vehicle_write": False,
+    "start_key_update_payload": "header(4) + M1(16) + M2(32) + M3(16) = 68 bytes",
+    "appears_in_managed": False,
+    "appears_in_utilityexnk2": False,
+    "non_parse_refs": "std::string destructors only",
+    "conclusion": (
+        "MACK4 is parsed, stored, matched, and destroyed — but never reaches "
+        "any diagnostic wire operation. It is a dead-stored server response "
+        "field retained for potential host-side validation that this binary "
+        "does not implement."
+    ),
 }
 
 OPERATION_MEANINGS = {
@@ -251,12 +278,33 @@ def make_outputs() -> tuple[dict[str, object], list[dict[str, object]]]:
     )
 
     evidence = {
-        "schema": 1,
+        "schema": 2,
         "artifacts": {name: sha256(view.data) for name, view in views.items()},
         "rtti_classes": classes,
         "function_bodies": bodies,
         "companion_imports": companion_imports,
         "operation_selectors": {str(key): value for key, value in OPERATION_MEANINGS.items()},
+        "state_reference_model": {
+            "meaning": "S324 string-reference census; no per-state operation ownership",
+            "references": {
+                state: [f"0x{va:08x}" for va in vas]
+                for state, vas in sorted(STATE_REFERENCE_FUNCTIONS.items())
+            },
+            "reference_associations": sum(len(vas) for vas in STATE_REFERENCE_FUNCTIONS.values()),
+            "unique_reference_functions": len({
+                va for vas in STATE_REFERENCE_FUNCTIONS.values() for va in vas
+            }),
+            "shared_reference_functions": {
+                f"0x{va:08x}": sorted(states)
+                for va in sorted({
+                    va for vas in STATE_REFERENCE_FUNCTIONS.values() for va in vas
+                })
+                if len(states := [
+                    state for state, vas in STATE_REFERENCE_FUNCTIONS.items() if va in vas
+                ]) > 1
+            },
+        },
+        "mack4_disposition": MACK4_DISPOSITION,
         "response_parser": {
             "tags": tags,
             "maximum_exchange_records": {"standard": 28, "short_variant": 8},
@@ -292,35 +340,38 @@ def make_outputs() -> tuple[dict[str, object], list[dict[str, object]]]:
     for item in classes:
         class_name = str(item["name"])
         states = list(item["states"])
-        for index, state in enumerate(states):
-            handlers = STATE_HANDLERS[state]
+        for state in states:
+            references = STATE_REFERENCE_FUNCTIONS[state]
             rows.append({
                 "row_kind": "state",
                 "class_state": f"{class_name}/S324-{state}",
-                "method_rva": "|".join(f"0x{va - native.base:x}" for va in handlers),
+                "state_code_reference_rvas": "|".join(
+                    f"0x{va - native.base:x}" for va in references
+                ),
                 "predecessor": "caller-selected class entry/branch",
                 "successor": "handler-specific success/failure; cross-class edge caller-selected",
-                "command_api_invoked": (
-                    "Ex2MAC_01_ComProcess "
-                    + "/".join(
-                        f"{selector}:{OPERATION_MEANINGS[selector]}"
-                        for selector in item["operation_selectors"]
+                "class_operations": (
+                    "Ex2MAC_01_ComProcess " + "/".join(
+                        f"{s}:{OPERATION_MEANINGS[s]}"
+                        for s in item["operation_selectors"]
                     )
                     if item["operation_selectors"]
-                    else "none recovered"
+                    else "none"
                 ),
-                "request_length": "class/selector dependent",
-                "response_length": "class/selector dependent",
-                "source_field": "CMAC_01 class-local procedure state",
+                "source_field": "CMAC_01 class-local procedure/display state",
                 "destination_field": f"displayed procedure code S324-{state}",
-                "interpretation": "procedure/UI state; cross-class transition remains caller-selected",
+                "interpretation": (
+                    "procedure/UI label; reference RVAs are all native functions "
+                    "that reference this code and do not imply operation ownership"
+                ),
                 "evidence_grade": "bounded",
             })
     for name, api, request, request_length, response_length, source, destination, grade in COMMAND_ROWS:
         rows.append({
-            "row_kind": "vehicle_command", "class_state": name, "method_rva": "see protocol JSON",
+            "row_kind": "vehicle_command", "class_state": name,
+            "state_code_reference_rvas": "see protocol JSON",
             "predecessor": "vehicle connection/session", "successor": "positive response or error branch",
-            "command_api_invoked": f"{api}: {request}", "request_length": request_length,
+            "class_operations": f"{api}: {request}", "request_length": request_length,
             "response_length": response_length, "source_field": source, "destination_field": destination,
             "interpretation": name, "evidence_grade": grade,
         })
@@ -333,8 +384,9 @@ def main() -> None:
     args = parser.parse_args()
     evidence, rows = make_outputs()
     json_text = json.dumps(evidence, indent=2, sort_keys=True) + "\n"
-    fieldnames = ["row_kind", "class_state", "method_rva", "predecessor", "successor",
-                  "command_api_invoked", "request_length", "response_length", "source_field",
+    fieldnames = ["row_kind", "class_state", "state_code_reference_rvas",
+                  "predecessor", "successor", "class_operations",
+                  "request_length", "response_length", "source_field",
                   "destination_field", "interpretation", "evidence_grade"]
     from io import StringIO
     stream = StringIO(newline="")

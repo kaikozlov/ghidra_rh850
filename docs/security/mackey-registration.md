@@ -123,9 +123,15 @@ by XML position alone.
 The selected record's M1/M2/M3 values become the 64-byte payload of Routine
 Control `31 01 30 02`. Techstream polls with `31 03 30 02`; completion state 2
 requires a 54-byte response and copies a 32-byte M4 plus 16-byte M5 proof. The
-server-side `MACK4` field is retained in the native exchange record, while the
-wire start operation itself contains only M1/M2/M3. No raw AES key crosses this
-interface.
+server-side `MACK4` field is retained in the native exchange record at struct
+offset `+0x18f0`, read by `decode_exchange_records` on `SafekeyNumber` match
+(same path as M1/M2/M3), but **never reaches any diagnostic wire operation**.
+The `start_key_update_3002` frame is exactly 68 bytes: the 4-byte `31 01 30 02`
+header plus M1/M2/M3. The `MACK4` string is absent from `UtilityExNK2.dll` and
+the managed layer entirely; all other `+0x18f0` code references in the native
+DLL are `std::string` destructors. MACK4 is a dead-stored server field,
+retained for potential host-side validation that this binary does not
+implement (TMS-014).
 
 ## `SafekeyNumber` versus MCU identity
 
@@ -146,19 +152,36 @@ claim is used as proof here.
 ## `CMAC_01_*` classes and S324 procedure codes
 
 The native DLL contains exactly 24 RTTI classes: base `CMAC_01` plus 23 product
-variants. Their complete-object locators, vtable addresses, entry counts,
-vtable hashes, displayed S324 codes, and recovered operation selectors are
-generated from PE bytes in `mackey_vehicle_protocol.json`. The CSV records all
-51 distinct embedded `S324-*` procedure/UI codes and every class/state
-association.
+variants. Their complete-object locators, vtable addresses, entry counts, and
+vtable hashes are generated directly from PE bytes in
+`mackey_vehicle_protocol.json`. The same artifact records the 51 distinct
+embedded `S324-*` procedure/UI codes and every class/state association.
+Class-wide `Ex2MAC_01_ComProcess` selector sets are retained as separately
+scoped recovered evidence; they are **not** assigned to individual S324 codes.
 
-These strings are procedure/display codes distributed across variant virtual
-methods, not one serialized state-variable table. Class-local operation calls
-and success/error branches are recovered, but the final cross-class successor
-is selected by the outer Techstream UI/controller callback. Consequently the
-CSV marks predecessor/successor edges **bounded** at that caller-selected
-boundary instead of inventing a linear `00 -> 01 -> ...` graph. This remaining
-UI transition boundary does not obscure any vehicle request or response edge.
+The S324 strings are procedure/display labels distributed across variant
+methods, not one serialized state-variable table and not one-handler-per-state
+identifiers. The reference census contains 61 state-code/function associations
+across 60 unique native functions. One function, `0x10241650`, references both
+`S324-08` and `S324-19` and selects which label to display on different
+branches. Conversely, some S324 codes are referenced by multiple functions.
+That structure makes per-state diagnostic-operation ownership unsound.
+
+A review patch briefly tried to infer per-handler `ComProcess` counts/selectors
+from wider code regions; that attribution was invalid. For example,
+`S324-41`'s actual reference function at `0x1023F900` contains exactly **one**
+direct call to `mackey_com_process`, not 19. The generated CSV therefore no
+longer has `handler_comprocess_calls` or `handler_operations` columns. It
+carries `state_code_reference_rvas` (all native functions that reference that
+label) and a deliberately separate `class_operations` column. The latter is
+class-wide only and must not be read as state ownership (TMS-014).
+
+Class-local operation calls and success/error branches remain recovered, but
+the final cross-class successor is selected by the outer Techstream
+UI/controller callback. Consequently predecessor/successor edges stay
+**bounded** at that caller-selected boundary instead of inventing a linear
+`00 -> 01 -> ...` graph. This UI transition boundary does not obscure the
+vehicle request/response protocol recovered above.
 
 ## Comparison with Sienna firmware DID `0x1010`
 

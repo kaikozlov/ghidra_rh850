@@ -7,6 +7,7 @@ import hashlib
 import csv
 import json
 import re
+import struct
 import subprocess
 import sys
 from pathlib import Path
@@ -43,6 +44,27 @@ def check(name: str, condition: bool, detail: str = "") -> None:
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def pe_body(pe: pefile.PE, data: bytes, va: int, size: int) -> bytes:
+    offset = pe.get_offset_from_rva(va - pe.OPTIONAL_HEADER.ImageBase)
+    return data[offset:offset + size]
+
+
+def count_rel32_calls(body: bytes, body_va: int, target_va: int) -> int:
+    count = 0
+    for offset in range(max(0, len(body) - 4)):
+        if body[offset] != 0xE8:
+            continue
+        displacement = struct.unpack_from("<i", body, offset + 1)[0]
+        if body_va + offset + 5 + displacement == target_va:
+            count += 1
+    return count
+
+
+def ascii_va(pe: pefile.PE, data: bytes, value: bytes) -> int:
+    offset = data.index(value + b"\x00")
+    return pe.OPTIONAL_HEADER.ImageBase + pe.get_rva_from_offset(offset)
 
 
 def method_ops(
@@ -363,6 +385,73 @@ check("master/slave association uses the raw safe-key identity",
       protocol["vehicle_architecture"]["association_key"]
       == "raw 16-byte SafekeyNumber"
       and protocol["vehicle_architecture"]["maximum_ecu_records"] == 8)
+
+
+print("\n== MACK4 disposition (negative finding) ==")
+mack4 = protocol["mack4_disposition"]
+check("MACK4 is parsed but never reaches a vehicle write",
+      mack4["consumed_by_vehicle_write"] is False)
+check("MACK4 start_key_update payload is 68 bytes (header+M1+M2+M3 only)",
+      mack4["start_key_update_payload"]
+      == "header(4) + M1(16) + M2(32) + M3(16) = 68 bytes")
+check("MACK4 does not appear in UtilityExNK2.dll",
+      mack4["appears_in_utilityexnk2"] is False)
+check("MACK4 does not appear in the managed layer",
+      mack4["appears_in_managed"] is False)
+check("MACK4 non-parse references are destructors only",
+      mack4["non_parse_refs"] == "std::string destructors only")
+check("MACK4 string appears exactly once in native DLL bytes",
+      native_bytes.count(b"<MACK4>") == 1)
+check("MACK4 string is absent from UtilityExNK2.dll",
+      b"MACK4" not in (BIN / "UtilityExNK2.dll").read_bytes())
+managed_bytes = (BIN / "IT3UtilityRevNK.dll").read_bytes()
+check("MACK4 literal is absent from managed IT3UtilityRevNK.dll",
+      b"MACK4" not in managed_bytes and "MACK4".encode("utf-16-le") not in managed_bytes)
+
+
+print("\n== S324 state-reference evidence model ==")
+state_model = protocol["state_reference_model"]
+check("state model explicitly disclaims per-state operation ownership",
+      state_model["meaning"]
+      == "S324 string-reference census; no per-state operation ownership")
+check("state-reference census has 61 associations across 60 unique functions",
+      state_model["reference_associations"] == 61
+      and state_model["unique_reference_functions"] == 60)
+check("0x10241650 is the sole shared state-reference function",
+      state_model["shared_reference_functions"]
+      == {"0x10241650": ["08", "19"]})
+check("S324-08 and S324-19 both record the shared 0x10241650 reference",
+      "0x10241650" in state_model["references"]["08"]
+      and state_model["references"]["19"] == ["0x10241650"])
+
+csv_s324_41 = [
+    row for row in state_rows
+    if row["row_kind"] == "state" and row["class_state"] == "CMAC_01_001C/S324-41"
+]
+check("state CSV keeps state-code references separate from class operations",
+      csv_s324_41
+      and csv_s324_41[0]["state_code_reference_rvas"] == "0x23f900"
+      and "handler_operations" not in csv_s324_41[0]
+      and "handler_comprocess_calls" not in csv_s324_41[0]
+      and "0:update_vehicle_status" in csv_s324_41[0]["class_operations"])
+
+# The old review patch incorrectly treated wider class-region call counts as if
+# they belonged to one displayed S324 state. Pin two primary counterexamples:
+# S324-41's actual reference function has one direct ComProcess call, and a
+# single native function references both S324-08 and S324-19 while making one
+# direct operation-4 call. This is why operation ownership is not projected
+# from S324 labels in the generated CSV.
+body_41 = pe_body(native, native_bytes, 0x1023F900, 291)
+check("S324-41 reference function has exactly one direct mackey_com_process call",
+      count_rel32_calls(body_41, 0x1023F900, 0x10237970) == 1)
+body_08_19 = pe_body(native, native_bytes, 0x10241650, 499)
+check("shared S324-08/S324-19 reference function has one direct ComProcess call",
+      count_rel32_calls(body_08_19, 0x10241650, 0x10237970) == 1)
+check("shared function contains references to both S324-08 and S324-19 strings",
+      struct.pack("<I", ascii_va(native, native_bytes, b"S324-08")) in body_08_19
+      and struct.pack("<I", ascii_va(native, native_bytes, b"S324-19")) in body_08_19)
+check("shared S324-08/S324-19 function's direct operation is selector 4",
+      b"\x6a\x04\x50\xe8" in body_08_19)
 
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
