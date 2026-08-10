@@ -577,4 +577,29 @@ artifact plus F181 identity; another CAN capture is unnecessary.
 
 - focused verification: `verify_toyota_dataflash_analyzer.py` — 35/35 pass
 - finding: `SECOC-038`
-- commit: pending
+- commit: `015d79f692708da329fb619206910e8642862bde analysis: complete Toyota DataFlash domain analyzer`
+
+## Literal original-eight reconciliation
+
+The original eight-item plan is now closed at the static/offline boundary:
+
+| # | Original scope | Final static status | Remaining non-static/artifact boundary |
+|---:|---|---|---|
+| 1 | Generalize TSK extraction assumptions | **Complete for repository-local static/read-only/offline research:** bus auto-discovery is read-only, diagnostic bus/ELM routing/profile/target identity are durable session properties, all-bus/all-ID capture ingestion is generic, fingerprint handling is review-only, and the generic oracle consumes the result | The external community tool's programming/download implementation remains external rather than being automatically rewritten by this repository |
+| 2 | Generic Toyota classic-SecOC oracle | **Complete**: full pinned eight-ID classic profile + `0x00F`, arbitrary buses, independent sync/per-ID verification, all-window scan | Actual vehicle key result needs dump/capture material |
+| 3 | Toyota-B bus/pin-swap software side | **Complete statically**: ELM327 param-0 OBD-CAN2 mux, normal-routing alternative, bus0/2 harness orientation, and read-only F181 discovery are recovered/tested | Whether software routing fully eliminates physical repinning needs one live read-only routing matrix |
+| 4 | Forced RAV4 Prime profile audit | **Complete statically**: exhaustive receive/forward/replace/transmit/cadence/SecOC/comparative-receiver matrix | 2024 RAV4 physical message ownership/actual fault cause needs its capture/firmware or a controlled live test |
+| 5 | Techstream `U023A87` | **Complete to a bounded residual**: P5 corpus proves `0x87 = Missing Message`; four of five comparative Sienna U023A87 events map to concrete CAN monitors (`2E4/131/191/2FD`) | Sienna event `0xB3` remains configured-unresolved; 2024 RAV4 event assignments cannot be inferred from Sienna |
+| 6 | F3/F4 patch predicate preparation | **Complete pre-acquisition**: raw egg triage + instruction-aware Ghidra target/caller/callee/ICU-S classification; known Sienna false positive is pinned | Exact F3/F4 predicate needs one F3/F4 CodeFlash image |
+| 7 | Corolla DataFlash analysis pipeline | **Complete pre-acquisition**: every sliding window, entropy ranking, known NvM validity, raw/XOR55/XORAA redundancy/consensus, object-15 geometry, independent sync/per-ID domain scan and requested classification states | Actual Corolla storage/key conclusion needs the already-produced 32 KiB dump |
+| 8 | Corolla variant model | **Complete**: 2023-US public-route specimen is separate from `8965F1208000`; public route itself is recovered/pinned, genuine vs returned traffic is resolved, and requests are narrowed | Exact physical calibration still needs F181 |
+
+The only intentionally bounded item inside the static corpus itself is event
+`0xB3`; its DTC association is proved but no defensible event-to-PDU reporter
+was recovered after direct, thunked, variable-argument, and communication-table
+censuses. It remains unresolved rather than receiving a guessed CAN identity.
+
+The full repository gate after all analytical stages is `make verify` = **448
+assertions, 0 failures**. The Ghidra daemon is stopped and the committed project
+snapshot is unchanged. The three interrupted ptshim Stage-3 paths remain the
+only untracked files and were not modified by this completion pass.
