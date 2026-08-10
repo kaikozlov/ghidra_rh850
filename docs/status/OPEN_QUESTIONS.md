@@ -73,11 +73,25 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   (non-static): a hardware-only key-RAM window not referenced by firmware, or a transient
   runtime copy, can only be excluded by a wide bench RAM dump — low priority given the
   selector-based driver and the SHE read-prohibition.
-- **Same-vehicle producer key storage.** Identify the physical producers of the
-  protected IDs, beginning with but not assuming the forward camera, then dump
-  exact-part peers and validate all 16-byte candidates against synchronized
-  stock frames. A producer must have the shared key or equivalent signing
-  capability, but its MCU, HSM, slot, and CPU-visible storage are unknown.
+- **`8965B4514000` runtime object-15 key path.** Vance's external field report
+  places a CMAC-validating candidate in the structural object-15 second field
+  at `0xFF206E14`, but no `4514000` CodeFlash or runtime trace was available.
+  Obtain that image or instrument initialization to distinguish direct software
+  CMAC, object-15-to-ICU-S provisioning followed by selector/command-7 use,
+  independent hardware-slot provisioning, or mixed use. See
+  [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md).
+- **Same-vehicle `0x344` producer and key storage.** The same `4514000` partner
+  key reportedly validates `PRE_COLLISION_2` (`0x344`) `112/113`, while
+  `4512000` EPS has no `0x344` receive profile. Identify the physical producer
+  by multi-segment capture, candidate-ECU isolation/reset, or candidate firmware
+  analysis, then test it as a peer key-recovery target. OpenDBC's inherited
+  `DS1`/`DSU` logical node is not physical-source proof; a gateway mirror must
+  be excluded.
+- **SecOC key uniqueness across vehicles/calibrations.** Collect hash-only
+  records with vehicle/sample pseudonym, software ID, region/build, validated
+  CAN IDs, match counts, and source. One `4514000` partner observation cannot
+  distinguish a per-vehicle key from calibration-, model-, region-, or
+  fleet-shared provisioning.
 - **Command-7 power/EM leakage.** FD IDs `0x090`/`0x0D7` provide 14 chosen bytes
   in CMAC's first AES block. Run fixed-vs-random leakage detection, establish a
   stable trigger, attempt CPA for key bytes 2..15, and complete the two fixed
@@ -132,6 +146,11 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Variants
 
+- **Sienna `8965B4514000`.** Acquire CodeFlash and completed partner
+  dump/capture outputs. The object-15 field and CMAC counts are pinned external
+  observations, but runtime crypto architecture, `0x344` EPS direction/owner,
+  mismatch clustering, and key uniqueness remain open. See
+  [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md).
 - **Corolla `8965F1208000`.** Essentially everything: MCU confirmation, SA
   levels, secret location, payload format, diagnostic endpoints, SecOC
   profile. See [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).

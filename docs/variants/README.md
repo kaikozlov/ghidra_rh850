@@ -1,12 +1,13 @@
 # Variants
 
-Sienna is the analyzed calibration. The Corolla and the wider TSS 3.0 EPS
-family are related variants — findings transfer as **hypotheses to check**,
-not facts.
+Sienna `8965B4512000` is the analyzed calibration. Sienna `8965B4514000`, the
+Corolla, and the wider TSS 3.0 EPS family are related variants — findings
+transfer as **hypotheses to check**, not facts.
 
 | Variant | Firmware | Status | Report |
 |---|---|---|---|
 | Sienna (China) | `8965B4512000` | Fully analyzed (this repo) | [sienna-8965B4512000.md](sienna-8965B4512000.md) |
+| Sienna (Vance partner) | `8965B4514000` | External field report pinned; firmware/raw outputs unavailable | [sienna-8965B4514000.md](sienna-8965B4514000.md) |
 | Corolla | `8965F1208000` | Field probes done; firmware not yet in hand | [corolla-8965F1208000.md](corolla-8965F1208000.md) |
 | TSS 3.0 family | various | Partial comparison matrix | [tss3-family-comparison.md](tss3-family-comparison.md) |
 
