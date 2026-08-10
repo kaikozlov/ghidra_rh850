@@ -418,4 +418,24 @@ input format.
 
 ### Commit
 
-- pending
+- `614123e671c3664b8e7b2fd685dba9d9c453c6b4 analysis: recover 2023 Corolla public route evidence`
+
+## Final static closure
+
+All five Discord-derived static stages are complete. The remaining questions
+are now cleanly separated into missing-artifact or live-behavior boundaries:
+
+- 2023-US-Corolla key/storage result: needs the already-produced 32 KiB
+  DataFlash dump; the CAN oracle is public and already recovered.
+- 2023-US-Corolla physical calibration identity: needs exact EPS `F181`.
+- F3/F4 persistent-patch predicate semantics: needs one F3/F4 CodeFlash image;
+  pre/post patch are both usable because the original egg bytes are known.
+- Toyota-B physical-repin replacement: needs one read-only live routing matrix
+  using the prepared F181 probe before any programming-session test.
+- RAV4 Prime patch efficacy versus profile mismatch: needs a controlled live
+  test or vehicle capture after preserving the stock/new-TSS3 message set; the
+  old-profile substitution confounder is now statically established.
+
+Final repository verification before closure: `make verify` = **440 assertions,
+0 failures**. The interrupted ptshim Stage-3 files remain untracked and
+untouched for the original `/goal` continuation.
