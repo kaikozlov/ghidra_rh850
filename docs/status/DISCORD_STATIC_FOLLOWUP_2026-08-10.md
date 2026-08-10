@@ -37,8 +37,8 @@ No vehicle-specific conclusion is promoted from those screenshots alone.
 - [x] Step 3 — statically audit the forced RAV4 Prime openpilot profile and
   decode the `U023A87` Techstream/firmware context
 - [x] Step 4 — prepare an automated F3/F4 community patch-predicate analyzer
-- [ ] Step 5 — split the new 2023 US Corolla evidence from the existing
-  `8965F1208000` variant and reconcile status/requests
+- [x] Step 5 — recover the public 2023-US-Corolla route, split it from the
+  existing `8965F1208000` variant, and narrow the remaining artifact request
 
 ## Step 1 — community extractor and generic SecOC oracle
 
@@ -302,6 +302,119 @@ direct ICU-S refs: 0
 The F3/F4 semantic question is now reduced to a missing-image blocker. Once a
 CodeFlash image arrives, raw target discovery and instruction-aware semantic
 triage can be run immediately without inventing meaning from the egg.
+
+### Commit
+
+- `331d5aa41441d3134cdece52b9a2cf5a605a9278 analysis: prepare F3 F4 patch target triage`
+
+## Step 5 — public 2023 US Corolla route
+
+### Public source recovered
+
+The route ID posted in the Discord discussion is still public:
+
+```text
+a74eba85c97eaf67|00000004--555953f500
+```
+
+The route API exposed 29 qlogs and 29 rlogs. All 29 qlog hashes and one full
+segment-0 rlog hash are pinned in `external-references.lock.json`; expiring
+signed download URLs are intentionally not retained.
+
+The route's own `initData` identifies the generating software as sunnypilot
+`2026.002.001`, branch `release-mici`, commit
+`af744c85e7c971e7bfbc8e6ee9e2bd75452a6f00`.
+
+### Metadata boundary
+
+The active and persistent `carParams` are deliberately forced:
+
+```text
+carFingerprint = TOYOTA_COROLLA_TSS2
+fingerprintSource = fixed
+carFw = []
+VIN = placeholder zeros
+secOcRequired = false
+secOcKeyAvailable = false
+```
+
+The previous-route CarParams is `MOCK`, also with no firmware inventory. The
+route therefore cannot identify the physical EPS F181/calibration or
+independently prove the Discord-reported model year.
+
+### Genuine versus returned CAN traffic
+
+Full segment-0 rlog analysis recovers genuine bus-1 traffic:
+
+```text
+0x00F  DLC8   588 frames
+0x116  DLC8  2499 frames
+0x24D  DLC8    59 frames
+```
+
+and genuine 64-byte CAN-FD `0x183` traffic on buses 0 and 2. The 64-byte DLC is
+itself a discriminator from the classic 8-byte `ACC_CONTROL_2` definition.
+
+Apparent steering traffic is instead predominantly Panda-returned output:
+
+```text
+sendcan bus0 0x191 DLC8   2519
+returned src128 0x191     2512
+rejected src192 0x191        6
+
+sendcan bus0 0x2E4 DLC5   5037
+returned src128 0x2E4     5025
+rejected src192 0x2E4       11
+```
+
+Pinned pandad source defines returned source offset `0x80` and rejected offset
+`0xC0`, so these are not stock camera frames. No genuine incoming classic
+`0x131` or `0x2E4` is claimed by the pinned segment summary.
+
+### Classic SecOC structural check
+
+Pinned opendbc already classifies `0x116` and `0x24D` as classic Toyota
+protected messages. Relative to the latest bus-1 `0x00F` reset state, the
+transmitted trailer reset-low2 bits align on:
+
+```text
+0x116: 2476 / 2496 eligible frames (>99%)
+0x24D:   59 /   59 eligible frames
+```
+
+This is structural freshness evidence, not cryptographic key proof.
+
+### Consequence for the reported `0 protected`
+
+The public route plus Step 1 closes the interpretation: the current Bk2ol
+verifier ignores bus 1 and only recognizes `0x131/0x2E4/0x344` as protected,
+while this route's genuine classic protected-family traffic is bus-1
+`0x116/0x24D`. The reported `0 protected` is therefore a tool-profile false
+negative, not evidence of SecOC absence.
+
+### Durable work
+
+- `data/generated/corolla_2023_public_route_summary.json`
+- route/hash provenance in `external-references.lock.json`
+- `tests/verify_corolla_2023_public_route_summary.py`
+- `docs/variants/corolla-2023-us-public-route.md`
+- explicit cross-specimen warning in `corolla-8965F1208000.md`
+- pinned pandad returned/rejected source semantics
+- finding: `VAR-004`
+- updated open questions and roadmap
+
+### Narrow remaining request
+
+A separate CAN capture is no longer necessary for the basic key-oracle test.
+The remaining high-value ask is only:
+
+1. the already-reported completed 32 KiB DataFlash dump;
+2. the exact EPS `F181` response / software identity;
+3. optionally the setup state recording the successful diagnostic bus route.
+
+The generic oracle from Step 1 is ready to test the dump immediately against
+public `0x00F/0x116/0x24D` traffic once the capture is exported to its NDJSON
+input format.
 
 ### Commit
 

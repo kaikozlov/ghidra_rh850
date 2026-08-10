@@ -29,23 +29,30 @@ What to investigate next, in rough priority order. Completed items move to
    data. Specified in
    [../security/secoc/key-storage-and-lifecycle.md](../security/secoc/key-storage-and-lifecycle.md).
 
-## Requires Corolla firmware
+## Requires Corolla artifacts
 
-6. **Confirm/deny the Sienna template on `8965F1208000`.** MCU, SA levels,
-   secret location, payload format, diagnostic endpoints, SecOC profile. See
-   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md)
+6. **Confirm/deny the Sienna template on `8965F1208000` firmware.** MCU, SA
+   implementation/secret location, payload format, and SecOC implementation.
+   Direct field diagnostics are already mapped; do not repeat those probes.
+   See [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md)
    for the structured checklist.
-7. **Populate the TSS 3.0 family matrix.** Extend
+7. **Test the separate 2023-US public-route specimen's DataFlash.** The CAN
+   oracle is already public and recovered (`0x00F` + protected-family
+   `0x116`/`0x24D` on bus 1). Acquire only the already-reported completed 32 KiB
+   DataFlash dump plus exact EPS `F181`, then run the generic sliding-window
+   oracle rather than collecting another CAN trace. Canonical:
+   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md).
+8. **Populate the TSS 3.0 family matrix.** Extend
    `data/tss3_eps_variant_matrix.csv` as additional variant firmware becomes
    available. Canonical: [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).
 
 ## Tooling
 
-8. **Documentation site** (optional, after this reorganization). Material for
+9. **Documentation site** (optional, after this reorganization). Material for
    MkDocs: explicit navigation, section index pages, search. Do only after
    canonical ownership is stable — search over duplicated docs just makes the
    inconsistency easier to find.
-9. ~~**Link checking** in CI for `docs/` internal cross-references.~~ **Done** —
+10. ~~**Link checking** in CI for `docs/` internal cross-references.~~ **Done** —
    `tests/verify_doc_links.py` runs in `make verify`.
 
 ## Completed static investigations

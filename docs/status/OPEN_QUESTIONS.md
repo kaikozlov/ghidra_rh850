@@ -154,9 +154,21 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   observations, but runtime crypto architecture, `0x344` EPS direction/owner,
   mismatch clustering, and key uniqueness remain open. See
   [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md).
-- **Corolla `8965F1208000`.** Essentially everything: MCU confirmation, SA
-  levels, secret location, payload format, diagnostic endpoints, SecOC
-  profile. See [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
+- **Corolla `8965F1208000`.** Firmware-static confirmation remains blocked:
+  MCU identity, SA implementation/secret location, bootloader payload gate,
+  bootloader secrets, and SecOC implementation must be checked against the
+  actual CodeFlash. Direct field probing has already established the software
+  IDs, physical diagnostic endpoint, responding SIDs, level-`0x03` seed
+  behavior, and observed SecOC traffic; do not describe those as unknown. See
+  [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
+- **Separate 2023 US Corolla public-route specimen.** The public route now
+  supplies enough genuine `0x00F`/`0x116`/`0x24D` traffic to serve as the CAN
+  oracle and disproves the earlier interpretation of returned `0x191`/`0x2E4`
+  as stock camera traffic. The remaining high-value artifact gap is narrow:
+  obtain the already-reported completed 32 KiB DataFlash dump plus the exact EPS
+  `F181` response. Route metadata is forced `TOYOTA_COROLLA_TSS2` with no
+  `carFw`, so it cannot identify the physical calibration. See
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md).
 - **TSS 3.0 family breadth.** Which Sienna findings generalize across the
   family (Camry, RAV4, etc.) is unmapped. See
   [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).

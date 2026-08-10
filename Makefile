@@ -48,6 +48,7 @@ VERIFY_SUITES := \
 	tests/verify_memory_safety.py \
 	tests/verify_community_tooling.py \
 	tests/verify_community_patch_target_analyzer.py \
+	tests/verify_corolla_2023_public_route_summary.py \
 	tests/verify_secoc_acceptance_gate.py \
 	tests/verify_renesas_rfp.py \
 	tests/verify_lifecycle.py \

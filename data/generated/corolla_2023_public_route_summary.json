@@ -1,0 +1,313 @@
+{
+  "boundaries": [
+    "The route metadata is forced to TOYOTA_COROLLA_TSS2 and contains no carFw, so it does not identify the physical EPS F181/calibration.",
+    "The route proves incoming bus-1 0x00F/0x116/0x24D traffic and distinguishes returned/rejected openpilot 0x191/0x2E4 traffic using Panda source offsets.",
+    "Freshness-field alignment is structural SecOC evidence, not cryptographic key validation.",
+    "The Discord-described successful DataFlash dump is not contained in this route and remains a separate external-source observation."
+  ],
+  "car_params": {
+    "brand": "toyota",
+    "car_fingerprint": "TOYOTA_COROLLA_TSS2",
+    "car_fw_count": 0,
+    "fingerprint_source": "fixed",
+    "flags": 1304,
+    "network_location": "fwdCamera",
+    "openpilot_longitudinal_control": true,
+    "secoc_key_available": false,
+    "secoc_required": false,
+    "vin_is_placeholder": true
+  },
+  "classic_freshness_structure": {
+    "0x116": {
+      "eligible_frames": 2496,
+      "match_fraction": 0.9919871794871795,
+      "reset_low2_matches": 2476
+    },
+    "0x24D": {
+      "eligible_frames": 59,
+      "match_fraction": 1.0,
+      "reset_low2_matches": 59
+    },
+    "method": "for each genuine bus-1 protected frame after a bus-1 0x00F, compare trailer high-nibble low2 bits to current reset-counter low2 bits"
+  },
+  "qlogs": [
+    {
+      "segment": 0,
+      "sha256": "2ffcdf926fca9f184b825f93b875de44441364b84752849375e5c89f08e34f27",
+      "size": 375572
+    },
+    {
+      "segment": 1,
+      "sha256": "7a13b9f216146fa1dcbf58f1f4cadc6c7e57ca0163c67db0a988c5396bd88855",
+      "size": 419384
+    },
+    {
+      "segment": 2,
+      "sha256": "6b9b0d66b8c8c38f426f1ecd04fd7e16f5cc506e45d24cbdd559a2a359671f7a",
+      "size": 417908
+    },
+    {
+      "segment": 3,
+      "sha256": "4d47429dad30ba6a49f3ebc9b510980c182f7f61671a02301434ec0390cd98b3",
+      "size": 418284
+    },
+    {
+      "segment": 4,
+      "sha256": "03c9151503383e0c0e84293ef6dfc3e3db6faeac934cfdd1ef17cf75b46c617e",
+      "size": 422517
+    },
+    {
+      "segment": 5,
+      "sha256": "51fa6552134e7679e68e54c93b63fabcd43221e2264c1d859c50925a87b27749",
+      "size": 423896
+    },
+    {
+      "segment": 6,
+      "sha256": "86627173a95c94868dfe60603ddf73248c1c499e92283f7dd35933260ac094a6",
+      "size": 422073
+    },
+    {
+      "segment": 7,
+      "sha256": "e8db43afdbb9466317ed13b5d6fd3a50c46dd764d7a1231f839e54e91c52dc10",
+      "size": 421156
+    },
+    {
+      "segment": 8,
+      "sha256": "7b81d6100a232bf7105b1a2472b623a844e42a484fccc6654956b42f34040942",
+      "size": 421613
+    },
+    {
+      "segment": 9,
+      "sha256": "c8ec5ca6508f2848c79e5e49330da437849c4baea42514ee44270b8701820281",
+      "size": 421045
+    },
+    {
+      "segment": 10,
+      "sha256": "22ce95bd696c5e300fbdc9a5025e3378727e1dc84e822eff2b3a2a54e362b57f",
+      "size": 424923
+    },
+    {
+      "segment": 11,
+      "sha256": "3903f350917b104fd0657970e61f7e05845bd00c0617d33449a73f683abf53c8",
+      "size": 419697
+    },
+    {
+      "segment": 12,
+      "sha256": "b5c3bc927970a9e74967c48d2a8b3e74a87a82d27a520f715747f4515e4c7346",
+      "size": 387644
+    },
+    {
+      "segment": 13,
+      "sha256": "85fc52137aefa7322dc82cc30d9776a01742c0ba5124ce5d036b64a0c5eac888",
+      "size": 418752
+    },
+    {
+      "segment": 14,
+      "sha256": "7ab61cb154149bb0641c24dd85d01bd1db49c61ce159dbaf0724191838ec638d",
+      "size": 413773
+    },
+    {
+      "segment": 15,
+      "sha256": "7f6a43a7a50c2a1ad05551507ede37423b707360756f9b775763408c34536301",
+      "size": 423783
+    },
+    {
+      "segment": 16,
+      "sha256": "47c41d3c1ccd86a1435a484c5912c7a51e9b2cb9c947b8f45c48b4667dd1f1e5",
+      "size": 421147
+    },
+    {
+      "segment": 17,
+      "sha256": "11c419b949eb97bbcadd9dc7c2e443cb3944200e3a640563f2f8b4aee4b52fa7",
+      "size": 415535
+    },
+    {
+      "segment": 18,
+      "sha256": "90f4f94d916d92eaa778b029056b39934857a6cc89fa2779b4f79c5be9dc7ce3",
+      "size": 424345
+    },
+    {
+      "segment": 19,
+      "sha256": "09ee27f46d1e7a2d40f8f86a2da684f9e3f08fcd15542504b6591600f770ae26",
+      "size": 370877
+    },
+    {
+      "segment": 20,
+      "sha256": "d56fa0e7598e2d61d5341408069d1edf40863bdd76535b69a58d5967fa6a8bda",
+      "size": 361072
+    },
+    {
+      "segment": 21,
+      "sha256": "a7d8eab64e8184a2cb3928d3b5bc1ded39579d830b5b0e3863de415d3de75426",
+      "size": 352686
+    },
+    {
+      "segment": 22,
+      "sha256": "634b64100fe4fed009ac6f52398a0dc39d07279b4616579d7fa6fc7db893266d",
+      "size": 353523
+    },
+    {
+      "segment": 23,
+      "sha256": "d93109ea137e5029429e21a2330d26ffd4a6296df8cef261733bb84781b505ab",
+      "size": 379081
+    },
+    {
+      "segment": 24,
+      "sha256": "8dc2e2541c2667321d4908c8af2a92895b46e7b3dfef10b1f4606d2fb2713810",
+      "size": 406930
+    },
+    {
+      "segment": 25,
+      "sha256": "b372b2848a479bbebcb7a1cd0d18c23494bebef6883dd8c3e591aa28c89306e8",
+      "size": 405816
+    },
+    {
+      "segment": 26,
+      "sha256": "cbe52334834218122d0b45834459cfa50b15690a59d046196805989239a251d2",
+      "size": 419233
+    },
+    {
+      "segment": 27,
+      "sha256": "3216289bfa21cc89fe638b21891accb14e6bf68b046c766e9822484688d04f16",
+      "size": 402695
+    },
+    {
+      "segment": 28,
+      "sha256": "775bd3c90ac23631a72089dd7eca8368a742abab5fb8a663a3b226d96ab9dd11",
+      "size": 315392
+    }
+  ],
+  "rlog0_selected_can_counts": [
+    {
+      "can_id": "0x00F",
+      "count": 588,
+      "dlc": 8,
+      "kind": "incoming",
+      "src": 1
+    },
+    {
+      "can_id": "0x116",
+      "count": 2499,
+      "dlc": 8,
+      "kind": "incoming",
+      "src": 1
+    },
+    {
+      "can_id": "0x24D",
+      "count": 59,
+      "dlc": 8,
+      "kind": "incoming",
+      "src": 1
+    },
+    {
+      "can_id": "0x183",
+      "count": 1221,
+      "dlc": 64,
+      "kind": "incoming",
+      "src": 0
+    },
+    {
+      "can_id": "0x183",
+      "count": 216,
+      "dlc": 64,
+      "kind": "incoming",
+      "src": 2
+    },
+    {
+      "can_id": "0x191",
+      "count": 2512,
+      "dlc": 8,
+      "kind": "returned",
+      "src": 128
+    },
+    {
+      "can_id": "0x2E4",
+      "count": 5025,
+      "dlc": 5,
+      "kind": "returned",
+      "src": 128
+    },
+    {
+      "can_id": "0x183",
+      "count": 1005,
+      "dlc": 64,
+      "kind": "returned",
+      "src": 130
+    },
+    {
+      "can_id": "0x191",
+      "count": 6,
+      "dlc": 8,
+      "kind": "rejected",
+      "src": 192
+    },
+    {
+      "can_id": "0x2E4",
+      "count": 11,
+      "dlc": 5,
+      "kind": "rejected",
+      "src": 192
+    },
+    {
+      "can_id": "0x191",
+      "count": 2519,
+      "dlc": 8,
+      "kind": "sendcan",
+      "src": 0
+    },
+    {
+      "can_id": "0x2E4",
+      "count": 5037,
+      "dlc": 5,
+      "kind": "sendcan",
+      "src": 0
+    }
+  ],
+  "rlog_samples": [
+    {
+      "segment": 0,
+      "sha256": "d246a55988889253c8d155f04b132b1bb443fdd74f1e6bad68eef8879a5c477b",
+      "size": 9125881
+    }
+  ],
+  "route": "a74eba85c97eaf67|00000004--555953f500",
+  "route_file_inventory_observed": {
+    "cameras": 28,
+    "dcameras": 27,
+    "ecameras": 29,
+    "qcameras": 29,
+    "qlogs": 29,
+    "rlogs": 29
+  },
+  "sample_frames": {
+    "0x00F": [
+      "0ce9000e0b3e61d5",
+      "0ce9000e179bb15e"
+    ],
+    "0x116": [
+      "00000011cae9d0a5",
+      "00000011064dcdaf",
+      "0000001148686e71"
+    ],
+    "0x24D": [
+      "00fb008052b1a741",
+      "00fb0080777f764d",
+      "00fb008071eaab7d"
+    ],
+    "returned_0x191": [
+      "8c000030640000ba",
+      "8e000030640000bc"
+    ],
+    "returned_0x2E4": [
+      "9600000081",
+      "9800000083"
+    ]
+  },
+  "schema_version": 1,
+  "software_provenance": {
+    "branch": "release-mici",
+    "commit": "af744c85e7c971e7bfbc8e6ee9e2bd75452a6f00",
+    "remote": "https://github.com/sunnypilot/openpilot.git",
+    "version": "2026.002.001"
+  }
+}

@@ -136,6 +136,8 @@ def main() -> int:
         roots["calvinpark_openpilot"] / "panda/board/boards/tres.h",
         roots["calvinpark_openpilot"] / "panda/board/drivers/can_common.h",
         roots["calvinpark_openpilot"] / "panda/examples/query_fw_versions.py",
+        roots["calvinpark_openpilot"] / "openpilot/selfdrive/pandad/panda.h",
+        roots["calvinpark_openpilot"] / "openpilot/selfdrive/pandad/panda.cc",
         roots["calvinpark_openpilot"] / "tsk/COROLLA_INVESTIGATION.md",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
         roots["opendbc"] / "opendbc/dbc/generator/toyota/_toyota_adas_standard.dbc",
@@ -198,6 +200,12 @@ def main() -> int:
     ).read_text(encoding="utf-8")
     panda_query_fw = (
         roots["calvinpark_openpilot"] / "panda/examples/query_fw_versions.py"
+    ).read_text(encoding="utf-8")
+    pandad_header = (
+        roots["calvinpark_openpilot"] / "openpilot/selfdrive/pandad/panda.h"
+    ).read_text(encoding="utf-8")
+    pandad_source = (
+        roots["calvinpark_openpilot"] / "openpilot/selfdrive/pandad/panda.cc"
     ).read_text(encoding="utf-8")
     toyota_2017_dbc = (
         roots["opendbc"]
@@ -290,6 +298,16 @@ def main() -> int:
         "Panda logical bus orientation swaps buses 0 and 2 only",
         "bus_config[0].bus_lookup = flipped ? 2u : 0u" in panda_can_common.lower()
         and "bus_config[2].bus_lookup = flipped ? 0u : 2u" in panda_can_common.lower(),
+    )
+    check(
+        "pandad marks returned CAN with source offset 0x80",
+        "#define CAN_RETURNED_BUS_OFFSET 0x80U" in pandad_header
+        and "canData.src += CAN_RETURNED_BUS_OFFSET" in pandad_source,
+    )
+    check(
+        "pandad marks rejected CAN with source offset 0xC0",
+        "#define CAN_REJECTED_BUS_OFFSET   0xC0U" in pandad_header
+        and "canData.src += CAN_REJECTED_BUS_OFFSET" in pandad_source,
     )
     check(
         "Tres OBD mode changes the FDCAN2 physical pin/transceiver selection",
