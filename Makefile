@@ -47,6 +47,7 @@ VERIFY_SUITES := \
 	tests/verify_techstream_mackey.py \
 	tests/verify_memory_safety.py \
 	tests/verify_community_tooling.py \
+	tests/verify_community_patch_target_analyzer.py \
 	tests/verify_secoc_acceptance_gate.py \
 	tests/verify_renesas_rfp.py \
 	tests/verify_lifecycle.py \

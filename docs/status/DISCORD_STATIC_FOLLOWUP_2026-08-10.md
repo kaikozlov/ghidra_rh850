@@ -36,7 +36,7 @@ No vehicle-specific conclusion is promoted from those screenshots alone.
   a non-destructive bus-discovery plan/tool
 - [x] Step 3 — statically audit the forced RAV4 Prime openpilot profile and
   decode the `U023A87` Techstream/firmware context
-- [ ] Step 4 — prepare an automated F3/F4 community patch-predicate analyzer
+- [x] Step 4 — prepare an automated F3/F4 community patch-predicate analyzer
 - [ ] Step 5 — split the new 2023 US Corolla evidence from the existing
   `8965F1208000` variant and reconcile status/requests
 
@@ -250,6 +250,58 @@ The reported RAV4 `U023A87` is compatible with a profile/network substitution
 failure independently of EPS MAC acceptance. Without that vehicle's firmware or
 capture, it cannot identify the actual missing RAV4 message or prove/disprove
 the persistent patch's MAC behavior.
+
+### Commit
+
+- `aec04e7cb0aea77f006cfb508645228c17b42e0b analysis: explain forced-profile U023A87 failure`
+
+## Step 4 — future F3/F4 patch-target analyzer
+
+### Static/tooling result
+
+The community egg remains a location signature only. A raw triage tool now
+reports every egg occurrence, bounded context, image identity, and the exact
+`01 52 7F 00` immediate-success replacement, but deliberately refuses to infer
+function ownership or callers from raw halfwords.
+
+That boundary was validated during implementation: a naive short-JARL scan of
+the Sienna bytes produced 11 apparent candidates, while Ghidra's
+instruction-aware reference manager proves exactly two real call references to
+`0x3485A`. Raw callsite attribution was therefore removed rather than retained
+as weak evidence.
+
+The companion read-only Ghidra script reports the containing function, true
+callers/callees, direct `0xFFC5D000..0xFFC5D0FF` ICU-S references, and a full
+decompilation. Against `4512000` it reproduces the known false-positive result:
+
+```text
+FUN_0003485a @ 0x3485A
+callers: FUN_00034882, application_proprietary_ab_f1_start
+callees: 0
+direct ICU-S refs: 0
+```
+
+### Durable work
+
+- `tools/analyze_secoc_patch_target.py`
+- `ghidra/scripts/investigate/AnalyzeCommunityPatchTarget.java`
+- `data/generated/community_patch_target_4512000.json`
+- `tests/verify_community_patch_target_analyzer.py`
+- `docs/tooling/community-patch-target-analysis.md`
+- finding: `SECOC-035`
+
+### Verification
+
+- raw/tool contract verifier — 27/27 pass
+- Ghidra Java script compiles successfully
+- Ghidra execution on the known Sienna target reports exactly two callers and
+  zero direct ICU-S refs
+
+### Boundary
+
+The F3/F4 semantic question is now reduced to a missing-image blocker. Once a
+CodeFlash image arrives, raw target discovery and instruction-aware semantic
+triage can be run immediately without inventing meaning from the egg.
 
 ### Commit
 

@@ -1,0 +1,31 @@
+{
+  "egg": "88000152000ae50d",
+  "egg_match_count": 1,
+  "file": "firmware/RH850_P1M-E_CodeFlash.bin",
+  "image_base": 0,
+  "known_image": {
+    "actual_secoc_rx_verify_worker": 582842,
+    "classification": "known false positive: proprietary 0xAB event-token comparator",
+    "expected_false_positive_va": 215130,
+    "name": "8965B4512000"
+  },
+  "matches": [
+    {
+      "context": {
+        "end_offset": 215170,
+        "hex": "0a307f52c20de051b6059de703001c382346010081ff0480440724a76006ff1088000152000ae50d01f00198c6f1c799939f01006090f391b20500527f00410a8100e809a1f57f00",
+        "start_offset": 215098
+      },
+      "file_offset": 215130,
+      "patch_semantics": "mov 1,r10; jmp [lp] (immediate return with r10=1)",
+      "patched_first_4_bytes": "01527f00",
+      "virtual_address": 215130
+    }
+  ],
+  "next_step": "Run AnalyzeCommunityPatchTarget.java in the imported image's Ghidra project.",
+  "patch": "01527f00",
+  "patch_semantics": "mov 1,r10; jmp [lp] (immediate return with r10=1)",
+  "semantic_warning": "An egg match is only a patch-location candidate. It does not establish that the containing function performs MAC verification; recover the containing function, callers, and SecOC/ICU data flow independently.",
+  "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+  "size": 1048576
+}

@@ -343,6 +343,14 @@ every calibration.
 The author notes this is "largely untested." The 8965F3 dual-CPU part is a new
 family that may differ in flash controller geometry or callback layout.
 
+A fail-closed pre-acquisition workflow is now tracked in
+[community-patch-target-analysis.md](../../tooling/community-patch-target-analysis.md).
+`tools/analyze_secoc_patch_target.py` performs raw egg/context triage only;
+`AnalyzeCommunityPatchTarget.java` owns instruction-aware caller/callee/ICU-S
+classification after a future F3/F4 image is imported. Raw halfword scanning is
+explicitly not used for caller attribution because it overcounted the known
+Sienna target (11 apparent JARLs versus 2 real Ghidra call references).
+
 ## 2. Ranked recovery methods
 
 | Rank | Method | Expected value | Cost/risk | Current evidence |
