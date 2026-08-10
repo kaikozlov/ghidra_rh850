@@ -60,25 +60,41 @@ make ghidra-cli           # build the vendored ghidra CLI into build/ghidra-cli/
 make verify-sleigh        # SLEIGH compile + isolated install
 make verify-processor     # fixtures + asserting audits on build/project/
 make snapshot-project     # the ONLY path that mutates committed project/
+make finalize-project     # stop daemon, verify, snapshot, print diff (end-of-session)
 ```
 
 ### Interactive Ghidra via tools/g
+
+`tools/g` is fully self-contained — it bootstraps the isolated processor
+environment internally. **Never** `source build/ghidra-processor.env` manually;
+the wrapper handles it.
 
 ```bash
 tools/g decompile 0x8db22
 tools/g x-ref to 0x8db22
 tools/g inspect 0xc853a --decompile --callers --callees --xrefs --disasm 40
 tools/g script run ghidra/scripts/investigate/Foo.java -- arg1
+tools/g session-status
 tools/g stop
 ```
 
-`tools/g` resolves the repo root, materializes the working project if absent,
-selects the pinned CLI binary, and injects `--projects-dir/--project/--program`.
-It refuses to operate against committed `project/`. Set `GHIDRA_AGENT=1` for
-compact JSON output.
+`tools/g` resolves the repo root, bootstraps the isolated Ghidra environment
+(processor extension, Java options, fingerprint check), materializes the
+working project if absent, selects the pinned CLI binary, and injects
+`--projects-dir/--project/--program`. It refuses to operate against committed
+`project/`. Set `GHIDRA_AGENT=1` for compact JSON output.
 
-Interactive work only against `$PWD/build/project` with an **absolute**
-`--projects-dir` (Ghidra 12.1+ rejects path components starting with `.`).
+`tools/g session-status` reports daemon state, project path, processor
+fingerprint, mutation marker, and snapshot diff — useful before deciding
+whether to promote.
+
+`tools/g stop` persists working-copy edits only. To deliberately promote a
+finished working copy into the committed snapshot, use `make finalize-project`.
+
+All repository one-shot Ghidra execution goes through `tools/run_headless`,
+which owns environment setup, path rejection, script paths, logging, and script
+error detection. The only intentional raw `analyzeHeadless` call is the
+negative regression in `tools/verify_sleigh.sh` proving `project/` cannot open.
 
 ## Evidence language
 

@@ -9,7 +9,6 @@ PROJECT_DIR="${PROJECT_DIR:-$ROOT/build/project}"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 OUT="${1:-$ROOT/data/application_rx_signal_evidence.csv}"
-SCRIPT_PATH="$ROOT/ghidra/scripts/verify;$ROOT/ghidra/scripts/investigate;$ROOT/ghidra/scripts/import;$ROOT/ghidra/scripts/annotate;$ROOT/ghidra/scripts/seed"
 
 PROJECT_DIR=$(python3 - "$PROJECT_DIR" <<'PY'
 from pathlib import Path
@@ -40,12 +39,10 @@ case "$PROJECT_DIR" in
     ;;
 esac
 
-"$ROOT/tools/install_v850_extension.sh" >/dev/null
+# Shared environment setup: resolve Ghidra, install processor extension,
+# source env file.
 # shellcheck disable=SC1091
-source "$ROOT/build/ghidra-processor.env"
-
-ANALYZE="$GHIDRA_HOME/support/analyzeHeadless"
-[[ -x "$ANALYZE" ]] || { echo "missing analyzeHeadless: $ANALYZE" >&2; exit 1; }
+source "$ROOT/tools/lib/ghidra_env.sh" none
 
 mkdir -p "$(dirname "$OUT")" "$ROOT/build"
 LOG="$ROOT/build/generate-application-rx-signal-evidence.log"
@@ -53,22 +50,17 @@ LOG="$ROOT/build/generate-application-rx-signal-evidence.log"
 echo "Exporting Rx signal evidence from $PROJECT_DIR"
 echo "CSV: $OUT"
 
-set +e
-"$ANALYZE" "$PROJECT_DIR" "$PROJECT_NAME" \
+"$ROOT/tools/run_headless" \
+  --project-dir "$PROJECT_DIR" \
+  --project "$PROJECT_NAME" \
+  --label application-rx-signal-evidence \
+  --log "$LOG" \
+  --quiet \
+  -- \
   -process "$PROGRAM_NAME" \
   -noanalysis \
   -readOnly \
-  -scriptPath "$SCRIPT_PATH" \
-  -postScript ExportApplicationRxSignalEvidence.java "$OUT" \
-  >"$LOG" 2>&1
-rc=$?
-set -e
-
-if ((rc != 0)) || rg -q 'REPORT SCRIPT ERROR|IllegalStateException' "$LOG"; then
-  echo "Rx signal evidence export failed (rc=$rc) — see $LOG" >&2
-  rg -n 'SCRIPT ERROR|IllegalStateException|ExportApplicationRx|ERROR' "$LOG" | tail -40 >&2 || true
-  exit 1
-fi
+  -postScript ExportApplicationRxSignalEvidence.java "$OUT"
 rg -q 'ExportApplicationRxSignalEvidence: wrote' "$LOG" || {
   echo "exporter did not report success — see $LOG" >&2
   exit 1

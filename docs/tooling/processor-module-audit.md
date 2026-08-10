@@ -254,11 +254,28 @@ Instruction inventory for this firmware is committed as
 `data/instruction_inventory.csv` (regenerate via
 `InventoryUsedInstructions.java` after a rebuild if coverage changes).
 
+## Exact project parity
+
+The current pinned rebuild has **5,921 functions, 179,223 instructions, and
+37,785 CLI-reported symbols**. Aggregate floors remain useful as a fast collapse
+detector, but they cannot detect equal-count substitutions. The deterministic
+`ExportProjectInventory.java` exporter therefore records path-free Ghidra and
+program identity, every memory mapping, function entry/body/signature/parameter
+storage, user-defined symbol, listing/function comment, bookmark, and aggregate
+map in `data/ghidra_project_inventory.baseline.jsonl`.
+
+`make verify-project-parity` exports the working project and compares every
+normalized row. `make update-project-baseline PROJECT_DIR_A=... PROJECT_DIR_B=...`
+is the explicit update path and requires two independent rebuilds to agree;
+ordinary verification never mutates the baseline. The parity gate caught both
+a stale 5,913-function snapshot and a Ghidra script-path hazard that added 194
+spurious functions when `ghidra/scripts/investigate` was present.
+
 ## Semantic coverage ledger
 
 Whole-image recovered-function inventory (not full semantic understanding):
 
-- Exporter: `ghidra/scripts/investigate/ExportSemanticCoverageLedger.java`
+- Exporter: `ghidra/scripts/verify/ExportSemanticCoverageLedger.java`
   (read-only headless against `build/project/` only).
 - Generator: `make generate-semantic-coverage` /
   `tools/generate_semantic_coverage_ledger.sh`
@@ -283,7 +300,7 @@ DATA reference into CodeFlash that is not a function entry (scalars included),
 not a table-only classifier. The ledger deliberately does **not** claim that
 every function is behaviorally understood — the majority remain `recovered`.
 
-Generated ledger row count on the current working project: **5865** functions.
+Generated ledger row count on the current working project: **5921** functions.
 `tests/verify_semantic_coverage.py` independently enforces a floor of 5865
 (aligned with AssertNoUndefined). Older hand-maintained counts elsewhere in
 this doc may lag; prefer the generated ledger/summary for the live boundary.

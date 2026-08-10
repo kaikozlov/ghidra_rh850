@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# Centralized, fail-closed wrapper for Ghidra analyzeHeadless.
+set -euo pipefail
+
+ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+PROJECT_DIR=""
+PROJECT_NAME=""
+LOG=""
+LABEL="headless"
+QUIET=0
+
+usage() {
+  cat <<'EOF'
+Usage: tools/run_headless --project-dir DIR --project NAME [options] -- ARGS...
+
+Options:
+  --project-dir DIR  Project directory (canonicalized; committed project/ rejected)
+  --project NAME     Ghidra project name
+  --log PATH         Durable complete log (default: temporary log)
+  --label TEXT       Stage label used in diagnostics
+  --quiet            Do not replay successful output to stdout
+  -h, --help         Show this help
+
+The runner owns the isolated processor environment, canonical semicolon-separated
+scriptPath, analysis timeout, CPU limit, logging, and script-error detection.
+Callers must not pass -scriptPath, -analysisTimeoutPerFile, or -max-cpu.
+EOF
+}
+
+while (($#)); do
+  case "$1" in
+    --project-dir) PROJECT_DIR=${2:?missing --project-dir value}; shift 2 ;;
+    --project) PROJECT_NAME=${2:?missing --project value}; shift 2 ;;
+    --log) LOG=${2:?missing --log value}; shift 2 ;;
+    --label) LABEL=${2:?missing --label value}; shift 2 ;;
+    --quiet) QUIET=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    --) shift; break ;;
+    *) echo "unknown runner option: $1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+[[ -n "$PROJECT_DIR" ]] || { echo "ERROR: --project-dir is required" >&2; exit 2; }
+[[ -n "$PROJECT_NAME" ]] || { echo "ERROR: --project is required" >&2; exit 2; }
+(($#)) || { echo "ERROR: analyzeHeadless arguments are required after --" >&2; exit 2; }
+
+for arg in "$@"; do
+  case "$arg" in
+    -scriptPath|-analysisTimeoutPerFile|-max-cpu)
+      echo "ERROR: caller-supplied $arg is forbidden; tools/run_headless owns it" >&2
+      exit 2
+      ;;
+  esac
+done
+
+PROJECT_DIR=$(python3 - "$PROJECT_DIR" "$ROOT/project" <<'PY'
+from pathlib import Path
+import sys
+path = Path(sys.argv[1]).expanduser().resolve(strict=False)
+snapshot = Path(sys.argv[2]).resolve(strict=False)
+if path == snapshot or snapshot in path.parents:
+    raise SystemExit(f"ERROR: refusing committed snapshot path: {path}")
+if any(part.startswith(".") for part in path.parts if part not in (".", "..")):
+    raise SystemExit(f"ERROR: Ghidra rejects dot-prefixed path components: {path}")
+print(path)
+PY
+)
+mkdir -p "$PROJECT_DIR"
+
+if [[ "${GHIDRA_NO_BOOTSTRAP:-0}" != "1" ]]; then
+  # shellcheck disable=SC1091
+  source "$ROOT/tools/lib/ghidra_env.sh" none
+fi
+[[ -n "${GHIDRA_HOME:-}" ]] || { echo "ERROR: GHIDRA_HOME is unset" >&2; exit 1; }
+ANALYZE="$GHIDRA_HOME/support/analyzeHeadless"
+[[ -x "$ANALYZE" ]] || { echo "ERROR: missing analyzeHeadless: $ANALYZE" >&2; exit 1; }
+
+SCRIPT_PATH=$(printf '%s;' \
+  "$ROOT/ghidra/scripts/import" \
+  "$ROOT/ghidra/scripts/seed" \
+  "$ROOT/ghidra/scripts/annotate" \
+  "$ROOT/ghidra/scripts/verify")
+SCRIPT_PATH=${SCRIPT_PATH%;}
+
+TEMP_LOG=0
+if [[ -z "$LOG" ]]; then
+  mkdir -p "$ROOT/build/headless-logs"
+  safe_label=$(printf '%s' "$LABEL" | tr -c '[:alnum:]_.-' '_')
+  LOG=$(mktemp "$ROOT/build/headless-logs/${safe_label}.XXXXXX.log")
+  TEMP_LOG=1
+else
+  LOG=$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).expanduser().resolve())' "$LOG")
+  mkdir -p "$(dirname "$LOG")"
+fi
+
+set +e
+"$ANALYZE" "$PROJECT_DIR" "$PROJECT_NAME" \
+  -scriptPath "$SCRIPT_PATH" \
+  -analysisTimeoutPerFile "${GHIDRA_ANALYSIS_TIMEOUT:-1800}" \
+  -max-cpu "${GHIDRA_MAX_CPU:-4}" \
+  "$@" >"$LOG" 2>&1
+rc=$?
+set -e
+
+script_error=0
+if grep -E 'REPORT SCRIPT ERROR|IllegalStateException' "$LOG" >/dev/null 2>&1; then
+  script_error=1
+fi
+
+if ((rc != 0 || script_error)); then
+  echo "ERROR: headless stage failed: $LABEL (rc=$rc, script_error=$script_error)" >&2
+  echo "full log: $LOG" >&2
+  grep -En 'REPORT SCRIPT ERROR|SCRIPT ERROR|IllegalStateException|ASSERT|ERROR' "$LOG" >&2 || true
+  exit 1
+fi
+
+if ((QUIET == 0)); then
+  cat "$LOG"
+fi
+if ((TEMP_LOG)); then
+  rm -f "$LOG"
+fi

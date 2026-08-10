@@ -1,18 +1,18 @@
 {
   "calling_convention_counts": {
     "__interrupt": 24,
-    "__stdcall": 5889
+    "__stdcall": 5897
   },
   "csv": "semantic_coverage_ledger.csv",
   "evidence_grade_counts": {
-    "annotated": 510,
-    "recovered": 5317,
+    "annotated": 517,
+    "recovered": 5318,
     "thunk": 86
   },
-  "function_count": 5913,
+  "function_count": 5921,
   "name_source_counts": {
-    "DEFAULT": 5396,
-    "USER_DEFINED": 517
+    "DEFAULT": 5397,
+    "USER_DEFINED": 524
   },
   "root_kind_counts": {
     "interrupt": 24,
@@ -20,7 +20,7 @@
   },
   "schema_version": 1,
   "subsystem_counts": {
-    "application": 5530,
+    "application": 5538,
     "boot": 382
   }
 }

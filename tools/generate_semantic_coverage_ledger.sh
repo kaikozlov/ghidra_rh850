@@ -10,7 +10,6 @@ PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 CSV_OUT="${CSV_OUT:-$ROOT/data/semantic_coverage_ledger.csv}"
 SUMMARY_OUT="${SUMMARY_OUT:-$ROOT/data/semantic_coverage_summary.json}"
-SCRIPT_PATH="$ROOT/ghidra/scripts/investigate;$ROOT/ghidra/scripts/verify"
 
 PROJECT_DIR=$(python3 - "$PROJECT_DIR" <<'PY'
 from pathlib import Path
@@ -42,12 +41,10 @@ case "$PROJECT_DIR" in
     ;;
 esac
 
-"$ROOT/tools/install_v850_extension.sh"
+# Shared environment setup: resolve Ghidra, install processor extension,
+# source env file.
 # shellcheck disable=SC1091
-source "$ROOT/build/ghidra-processor.env"
-
-ANALYZE="$GHIDRA_HOME/support/analyzeHeadless"
-[[ -x "$ANALYZE" ]] || { echo "missing analyzeHeadless: $ANALYZE" >&2; exit 1; }
+source "$ROOT/tools/lib/ghidra_env.sh" none
 
 mkdir -p "$(dirname "$CSV_OUT")" "$(dirname "$SUMMARY_OUT")" "$ROOT/build"
 LOG="$ROOT/build/generate-semantic-coverage.log"
@@ -55,22 +52,17 @@ LOG="$ROOT/build/generate-semantic-coverage.log"
 echo "Exporting semantic coverage ledger from $PROJECT_DIR"
 echo "CSV: $CSV_OUT"
 
-set +e
-"$ANALYZE" "$PROJECT_DIR" "$PROJECT_NAME" \
+"$ROOT/tools/run_headless" \
+  --project-dir "$PROJECT_DIR" \
+  --project "$PROJECT_NAME" \
+  --label semantic-coverage \
+  --log "$LOG" \
+  --quiet \
+  -- \
   -process "$PROGRAM_NAME" \
   -noanalysis \
   -readOnly \
-  -scriptPath "$SCRIPT_PATH" \
-  -postScript ExportSemanticCoverageLedger.java "$CSV_OUT" \
-  >"$LOG" 2>&1
-rc=$?
-set -e
-
-if ((rc != 0)) || rg -q 'REPORT SCRIPT ERROR|IllegalStateException' "$LOG"; then
-  echo "semantic coverage export failed (rc=$rc) — see $LOG" >&2
-  rg -n 'SCRIPT ERROR|IllegalStateException|ExportSemantic|ERROR' "$LOG" | tail -40 >&2 || true
-  exit 1
-fi
+  -postScript ExportSemanticCoverageLedger.java "$CSV_OUT"
 rg -q 'ExportSemanticCoverageLedger: wrote ' "$LOG" || {
   echo "exporter did not report success — see $LOG" >&2
   exit 1

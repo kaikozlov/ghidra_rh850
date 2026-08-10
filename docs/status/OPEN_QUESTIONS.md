@@ -141,7 +141,7 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Tooling
 
-- **Semantic coverage.** 5,913 functions recovered; most remain evidence-grade
+- **Semantic coverage.** 5,921 functions recovered; most remain evidence-grade
   `recovered` rather than behaviorally understood. A systematic interest-scored
   sweep (40 highest-signal functions decompiled, call graphs traced) found no
   additional subsystems in its sample, bounded the crypto surface to the two

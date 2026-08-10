@@ -1662,6 +1662,13 @@ entry_addr,body_bytes,name,name_source,is_thunk,calling_convention,caller_count,
 0x0004cb4c,62,FUN_0004cb4c,DEFAULT,false,__stdcall,1,1,,0,0,0,0,application,recovered
 0x0004cb8a,52,FUN_0004cb8a,DEFAULT,false,__stdcall,1,1,,1,0,0,0,application,recovered
 0x0004cbbe,62,FUN_0004cbbe,DEFAULT,false,__stdcall,1,1,,0,0,0,0,application,recovered
+0x0004cbfc,122,vehicle_speed_did_0102,USER_DEFINED,false,__stdcall,0,5,,4,0,1,0,application,annotated
+0x0004cc76,78,engine_revolution_speed_did_0103,USER_DEFINED,false,__stdcall,0,2,,3,0,0,0,application,annotated
+0x0004ccc4,116,motor_instruction_current_did_0105,USER_DEFINED,false,__stdcall,0,1,,0,0,2,0,application,annotated
+0x0004cd38,60,steering_torque_did_0109,USER_DEFINED,false,__stdcall,0,0,,7,0,0,0,application,annotated
+0x0004cd74,96,output_of_torque_sensor_2_did_010B,USER_DEFINED,false,__stdcall,0,1,,0,0,2,0,application,annotated
+0x0004cdd4,40,ig_switch_status_did_0110,USER_DEFINED,false,__stdcall,0,2,,1,0,0,0,application,annotated
+0x0004ce00,38,no_of_diagnosis_codes_did_0112,USER_DEFINED,false,__stdcall,0,1,,2,0,0,0,application,annotated
 0x0004e8e4,38,application_read_f181,USER_DEFINED,false,__stdcall,0,0,,0,0,2,1,application,annotated
 0x0004e90a,14,application_read_f186,USER_DEFINED,false,__stdcall,0,1,,0,0,0,0,application,annotated
 0x0004e918,118,application_read_f18c,USER_DEFINED,false,__stdcall,0,1,,0,0,2,0,application,annotated
@@ -2424,7 +2431,7 @@ entry_addr,body_bytes,name,name_source,is_thunk,calling_convention,caller_count,
 0x00065c84,84,secoc_nvm_restore_request,USER_DEFINED,false,__stdcall,0,4,,3,0,0,0,application,annotated
 0x00065cd8,92,secoc_nvm_object_update,USER_DEFINED,false,__stdcall,21,4,,3,0,0,0,application,annotated
 0x00065d34,50,FUN_00065d34,DEFAULT,false,__stdcall,10,3,,0,0,0,0,application,recovered
-0x00065d66,50,checkpoint_object_restore_read,USER_DEFINED,false,__stdcall,34,3,,0,0,0,0,application,annotated
+0x00065d66,50,checkpoint_object_restore_read,USER_DEFINED,false,__stdcall,36,3,,0,0,0,0,application,annotated
 0x00065d98,34,FUN_00065d98,DEFAULT,false,__stdcall,4,0,,0,0,0,0,application,recovered
 0x00065dba,44,FUN_00065dba,DEFAULT,false,__stdcall,2,0,,0,0,0,0,application,recovered
 0x00065de6,120,FUN_00065de6,DEFAULT,false,__stdcall,1,1,,0,0,0,0,application,recovered
@@ -2544,7 +2551,7 @@ entry_addr,body_bytes,name,name_source,is_thunk,calling_convention,caller_count,
 0x00069042,38,FUN_00069042,DEFAULT,false,__stdcall,1,0,,4,0,0,0,application,recovered
 0x00069068,38,icus_command5_test_result_compare,USER_DEFINED,false,__stdcall,1,0,,4,0,0,0,application,annotated
 0x00069094,6,FUN_00069094,DEFAULT,false,__stdcall,1,0,,1,0,0,0,application,recovered
-0x0006909a,6,FUN_0006909a,DEFAULT,false,__stdcall,1,0,,1,0,0,0,application,recovered
+0x0006909a,6,FUN_0006909a,DEFAULT,false,__stdcall,2,0,,1,0,0,0,application,recovered
 0x000690a0,14,FUN_000690a0,DEFAULT,false,__stdcall,1,0,,1,0,0,0,application,recovered
 0x000690ae,6,FUN_000690ae,DEFAULT,false,__stdcall,1,0,,1,0,0,0,application,recovered
 0x000690b4,6,FUN_000690b4,DEFAULT,false,__stdcall,1,0,,1,0,0,0,application,recovered
@@ -2575,8 +2582,8 @@ entry_addr,body_bytes,name,name_source,is_thunk,calling_convention,caller_count,
 0x00069434,94,FUN_00069434,DEFAULT,false,__stdcall,18,0,,2,0,0,0,application,recovered
 0x00069492,26,FUN_00069492,DEFAULT,false,__stdcall,3,0,,0,0,1,0,application,recovered
 0x000694ae,28,FUN_000694ae,DEFAULT,false,__stdcall,0,0,,0,0,0,0,application,recovered
-0x000694cc,24,FUN_000694cc,DEFAULT,false,__stdcall,0,0,,0,0,0,0,application,recovered
-0x000694e4,12,FUN_000694e4,DEFAULT,false,__stdcall,6,0,,0,0,0,0,application,recovered
+0x000694cc,24,FUN_000694cc,DEFAULT,false,__stdcall,4,0,,0,0,0,0,application,recovered
+0x000694e4,12,FUN_000694e4,DEFAULT,false,__stdcall,7,0,,0,0,0,0,application,recovered
 0x0006951c,12,FUN_0006951c,DEFAULT,false,__stdcall,0,0,,0,0,0,0,application,recovered
 0x0006953c,44,FUN_0006953c,DEFAULT,false,__stdcall,1,0,,0,0,0,0,application,recovered
 0x0006956a,40,FUN_0006956a,DEFAULT,false,__stdcall,2,0,,0,0,2,0,application,recovered
@@ -2606,8 +2613,9 @@ entry_addr,body_bytes,name,name_source,is_thunk,calling_convention,caller_count,
 0x0006f0ae,18,FUN_0006f0ae,DEFAULT,false,__stdcall,1,0,,0,0,0,0,application,recovered
 0x0006f0c2,12,FUN_0006f0c2,DEFAULT,false,__stdcall,1,0,,0,0,0,0,application,recovered
 0x0006f0d0,12,FUN_0006f0d0,DEFAULT,false,__stdcall,1,0,,0,0,0,0,application,recovered
-0x0006f0de,16,FUN_0006f0de,DEFAULT,false,__stdcall,0,0,,0,0,0,0,application,recovered
-0x0006f0f0,16,FUN_0006f0f0,DEFAULT,false,__stdcall,0,0,,0,0,0,0,application,recovered
+0x0006f0de,16,FUN_0006f0de,DEFAULT,false,__stdcall,2,0,,0,0,0,0,application,recovered
+0x0006f0f0,16,FUN_0006f0f0,DEFAULT,false,__stdcall,1,0,,0,0,0,0,application,recovered
+0x0006f102,12,FUN_0006f102,DEFAULT,false,__stdcall,1,0,,0,0,0,0,application,recovered
 0x0006f110,6,FUN_0006f110,DEFAULT,false,__stdcall,4,0,,0,0,0,0,application,recovered
 0x0006f116,30,FUN_0006f116,DEFAULT,false,__stdcall,4,0,,0,0,0,0,application,recovered
 0x0006f134,38,FUN_0006f134,DEFAULT,false,__stdcall,55,0,,0,0,0,0,application,recovered

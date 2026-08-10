@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Processor semantic gate: SLEIGH compile, synthetic fixture checks, and
-# (when a working project exists) full-program audits via analyzeHeadless so
+# (when a working project exists) full-program audits via tools/run_headless so
 # the isolated extension is used without mutating GHIDRA_HOME.
 set -euo pipefail
 
@@ -12,40 +12,33 @@ FIXTURE_DIR="$ROOT/tests/fixtures/processor"
 FIXTURE_PROJECT_DIR="$ROOT/build/processor-fixture-project"
 mkdir -p "$ROOT/build"
 
-"$ROOT/tools/install_v850_extension.sh"
+# Shared environment setup: resolve Ghidra, install processor extension,
+# source env file, validate fingerprint.
 # shellcheck disable=SC1091
-source "$ROOT/build/ghidra-processor.env"
+source "$ROOT/tools/lib/ghidra_env.sh" full
 
 python3 "$ROOT/tools/build_processor_fixture.py" --out-dir "$FIXTURE_DIR"
 MANIFEST="$FIXTURE_DIR/manifest.json"
 BINARY="$FIXTURE_DIR/rh850_semantic_fixture.bin"
-ANALYZE="$GHIDRA_HOME/support/analyzeHeadless"
-SCRIPT_PATH="$ROOT/ghidra/scripts/verify;$ROOT/ghidra/scripts/investigate;$ROOT/ghidra/scripts/import;$ROOT/ghidra/scripts/annotate"
-
-fail_if_script_error() {
-  local log=$1
-  local label=$2
-  if grep -E 'REPORT SCRIPT ERROR|IllegalStateException' "$log" >/dev/null; then
-    echo "$label failed — see $log" >&2
-    exit 1
-  fi
-}
 
 echo "==> Synthetic fixture project"
 rm -rf "$FIXTURE_PROJECT_DIR"
 mkdir -p "$FIXTURE_PROJECT_DIR"
 FIXTURE_LOG="$ROOT/build/verify-processor-fixture.log"
-"$ANALYZE" "$FIXTURE_PROJECT_DIR" rh850_fixture \
+"$ROOT/tools/run_headless" \
+  --project-dir "$FIXTURE_PROJECT_DIR" \
+  --project rh850_fixture \
+  --label processor-fixture \
+  --log "$FIXTURE_LOG" \
+  --quiet \
+  -- \
   -import "$BINARY" \
   -processor v850e3:LE:32:default \
   -loader BinaryLoader \
   -loader-baseAddr 0x0 \
   -noanalysis \
-  -scriptPath "$SCRIPT_PATH" \
   -postScript AssertProcessorFixtureSemantics.java "$MANIFEST" \
-  -deleteProject \
-  2>&1 | tee "$FIXTURE_LOG"
-fail_if_script_error "$FIXTURE_LOG" "synthetic fixture verification"
+  -deleteProject
 grep -q 'ASSERT processor-fixture: all .* cases passed' "$FIXTURE_LOG" || {
   echo "synthetic fixture did not report success" >&2
   exit 1
@@ -69,11 +62,16 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
   PROJECT_LOG="$ROOT/build/verify-processor-project.log"
 
   # Use durable headless -process so GHIDRA_JAVA_OPTIONS/-Duser.home applies.
-  "$ANALYZE" "$PROJECT_DIR" "$PROJECT_NAME" \
+  "$ROOT/tools/run_headless" \
+    --project-dir "$PROJECT_DIR" \
+    --project "$PROJECT_NAME" \
+    --label processor-project-audits \
+    --log "$PROJECT_LOG" \
+    --quiet \
+    -- \
     -process "$PROGRAM_NAME" \
     -noanalysis \
     -readOnly \
-    -scriptPath "$SCRIPT_PATH" \
     -postScript AssertNoUndefinedInFunctions.java \
     -postScript AssertSystemRegisterNames.java \
     -postScript AssertProjectInvariants.java "$ROOT/data/checkpoint_payload_map.csv" \
@@ -81,9 +79,7 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     -postScript AssertMotorActuationBoundary.java \
     -postScript AssertSwitchTables.java \
     -postScript AssertDecompilerInvariants.java "$DECOMPILER_REPORT" \
-    -postScript InventoryUsedInstructions.java "$INV_OUT" "$ROOT/data/processor_unimpl_allowlist.txt" \
-    2>&1 | tee "$PROJECT_LOG"
-  fail_if_script_error "$PROJECT_LOG" "processor project audits"
+    -postScript InventoryUsedInstructions.java "$INV_OUT" "$ROOT/data/processor_unimpl_allowlist.txt"
   if ! cmp -s "$ROOT/data/decompiler_signatures.baseline.csv" "$DECOMPILER_REPORT"; then
     echo "decompiler signature baseline mismatch:" >&2
     diff -u "$ROOT/data/decompiler_signatures.baseline.csv" "$DECOMPILER_REPORT" >&2 || true
@@ -91,6 +87,8 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
   fi
 
   echo "Wrote instruction inventory: $INV_OUT"
+  grep -E 'ASSERT (processor-fixture|undefined-in-functions|system-register-ops|project-invariants|application-rx-map|motor-actuation-boundary|switch-tables|decompiler-invariants|processor-userops)' \
+    "$FIXTURE_LOG" "$PROJECT_LOG" || true
 else
   echo "NOTE: $PROJECT_DIR missing; skipped full-program processor audits"
   echo "      run 'make work-project' or 'make rebuild-project' first"

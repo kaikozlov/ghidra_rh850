@@ -3,6 +3,10 @@ PYTHON ?= $(UV) run --locked python
 EXTERNAL_REPOS_DIR ?= $(abspath ..)
 PROJECT_DIR ?= $(CURDIR)/build/project
 SNAPSHOT_DIR ?= $(CURDIR)/project
+# Canonical parity paths are not command-line overrides: allowing the current
+# output to alias the tracked baseline would turn verification into self-compare.
+override PROJECT_INVENTORY := $(CURDIR)/build/ghidra_project_inventory.jsonl
+override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.baseline.jsonl
 
 VERIFY_SUITES := \
 	tests/verify_findings.py \
@@ -42,14 +46,20 @@ VERIFY_SUITES := \
 	tests/verify_community_tooling.py \
 	tests/verify_secoc_acceptance_gate.py \
 	tests/verify_renesas_rfp.py \
+	tests/verify_lifecycle.py \
+	tests/verify_project_layout.py \
+	tests/verify_headless_runner.py \
+	tests/verify_ghidra_env.py \
+	tests/verify_project_inventory.py \
 	tests/verify_doc_links.py
 
 .PHONY: sync verify verify-core verify-one verify-changed verify-agent verify-external verify-rfp verify-sleigh verify-processor verify-ghidra \
 	ghidra-cli \
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive \
-	generate-processor-fixture generate-semantic-coverage \
-	rebuild-project work-project snapshot-project
+	generate-processor-fixture generate-semantic-coverage generate-project-inventory \
+	verify-project-parity update-project-baseline \
+	rebuild-project work-project snapshot-project finalize-project
 
 sync:
 	$(UV) sync --locked
@@ -90,8 +100,8 @@ verify-sleigh:
 verify-processor:
 	tools/verify_processor.sh
 
-# Full local gate: firmware suites + SLEIGH + processor audits.
-verify-ghidra: verify-core verify-sleigh verify-processor
+# Full local gate: firmware suites + SLEIGH + processor audits + exact parity.
+verify-ghidra: verify-core verify-sleigh verify-processor verify-project-parity
 
 generate-dataflash:
 	$(PYTHON) tools/generate_dataflash_layout.py
@@ -120,6 +130,39 @@ generate-processor-fixture:
 generate-semantic-coverage:
 	tools/generate_semantic_coverage_ledger.sh
 
+generate-project-inventory:
+	tools/generate_project_inventory.sh "$(PROJECT_INVENTORY)"
+
+# Exact normalized parity: aggregate floors remain the fast collapse detector;
+# this catches substitutions and metadata drift that equal totals cannot.
+verify-project-parity:
+	tools/generate_project_inventory.sh "$(PROJECT_INVENTORY)"
+	$(PYTHON) tools/project_inventory.py compare \
+		"$(PROJECT_INVENTORY_BASELINE)" "$(PROJECT_INVENTORY)"
+
+# Deliberately separate from ordinary verification. The baseline can only move
+# when two independently rebuilt projects export byte-identical inventories.
+update-project-baseline:
+	@if [ -z "$(PROJECT_DIR_A)" ] || [ -z "$(PROJECT_DIR_B)" ]; then \
+		echo "Usage: make update-project-baseline PROJECT_DIR_A=/abs/rebuild-a PROJECT_DIR_B=/abs/rebuild-b" >&2; \
+		exit 2; \
+	fi
+	@if [ "$$($(PYTHON) -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).resolve())' "$(PROJECT_DIR_A)")" = \
+	      "$$($(PYTHON) -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).resolve())' "$(PROJECT_DIR_B)")" ]; then \
+		echo "PROJECT_DIR_A and PROJECT_DIR_B must be independent rebuilds" >&2; \
+		exit 2; \
+	fi
+	PROJECT_DIR="$(PROJECT_DIR_A)" tools/generate_project_inventory.sh \
+		"$(CURDIR)/build/ghidra_project_inventory.rebuild-a.jsonl"
+	PROJECT_DIR="$(PROJECT_DIR_B)" tools/generate_project_inventory.sh \
+		"$(CURDIR)/build/ghidra_project_inventory.rebuild-b.jsonl"
+	$(PYTHON) tools/project_inventory.py update \
+		"$(CURDIR)/build/ghidra_project_inventory.rebuild-a.jsonl" \
+		"$(CURDIR)/build/ghidra_project_inventory.rebuild-b.jsonl" \
+		"$(PROJECT_INVENTORY_BASELINE)"
+	@echo "Updated $(PROJECT_INVENTORY_BASELINE); review with:"
+	@echo "  git diff -- data/ghidra_project_inventory.baseline.jsonl"
+
 rebuild-project:
 	tools/rebuild_project.sh --project-dir "$(PROJECT_DIR)"
 
@@ -132,8 +175,10 @@ work-project:
 		echo "Working project already exists: $(PROJECT_DIR)"; \
 	else \
 		echo "Materializing working project from committed snapshot..."; \
-		mkdir -p "$(PROJECT_DIR)"; \
-		cp -R "$(SNAPSHOT_DIR)/." "$(PROJECT_DIR)/"; \
+		$(PYTHON) tools/project_layout.py materialize \
+			--snapshot-dir "$(SNAPSHOT_DIR)" \
+			--project-dir "$(PROJECT_DIR)" \
+			--project-name rh850_p1me_mapped; \
 		echo "Ready: $(PROJECT_DIR)"; \
 	fi
 	@if [ -f "$(PROJECT_DIR)/processor_manifest.json" ]; then \
@@ -149,3 +194,11 @@ work-project:
 # Verifies exact stats first and refuses if a daemon is still running.
 snapshot-project:
 	tools/snapshot_project.sh --project-dir "$(PROJECT_DIR)" --snapshot-dir "$(SNAPSHOT_DIR)"
+
+# Deliberate end-of-session promotion: stops the daemon, waits for exit,
+# verifies the working project, invokes the snapshot path, and prints the
+# staged diff. Distinct from `tools/g stop` (which only persists working-copy
+# edits) and from `snapshot-project` (which promotes without orchestrating an
+# existing interactive daemon lifecycle).
+finalize-project:
+	tools/finalize_project.sh

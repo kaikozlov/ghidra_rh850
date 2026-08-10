@@ -48,8 +48,8 @@ durable on disk until the daemon shuts down cleanly**.
    why the committed snapshot must never be daemon-opened.
 4. **The `analyze` command's save is silently swallowed** by the bridge
    (the teardown commit races the JVM kill). Treat `stop` as the only reliable
-   persist. For a guaranteed-durable rebuild, use a raw
-   `analyzeHeadless -process -commit` one-shot instead of the daemon.
+   persist. For a guaranteed-durable rebuild, use a `tools/run_headless`
+   `-process -commit` one-shot instead of the daemon.
    The vendored CLI adds `program save --message` and `stop --save` for explicit
    persistence boundaries (see `ghidra program save --help`). Until save-and-
    reopen tests exist for this project, continue to treat `stop` as the
@@ -58,33 +58,42 @@ durable on disk until the daemon shuts down cleanly**.
 
 ## Working copy vs. committed snapshot
 
-`project/` is a **committed snapshot** — a durable annotated reference. Rule 3
-above means it must **never be opened directly by a `ghidra` daemon**. All
+`project/` is a **committed snapshot** — a durable annotated reference. Its
+database is physically stored as `rh850_p1me_mapped.gpr.snapshot` and
+`rh850_p1me_mapped.rep.snapshot`; raw Ghidra cannot recognize those names.
+`make verify-sleigh` asserts that a direct `analyzeHeadless` open fails. All
 interactive work happens in the gitignored working copy at `build/project/`:
 
-- `make work-project` — materialize `build/project/` from the committed
-  snapshot (fast local copy) if it does not already exist.
+- `make work-project` — materialize live `.gpr` / `.rep` names under
+  `build/project/` from the committed non-live snapshot.
 - `make rebuild-project` — fresh from-scratch rebuild into `build/project/`.
 - `make snapshot-project` — the **only** path that mutates committed
-  `project/`. Verifies exact stats on the working copy, rsyncs
-  `build/project/ → project/`, and stages it.
+  `project/`. Verifies floors, processor fingerprint, and exact normalized
+  inventory; packs the working project back to non-live snapshot names; stages
+  it.
+- `make finalize-project` — orchestrated end-of-session promotion: stops the
+  daemon, waits for exit, verifies the working project, invokes the snapshot
+  path, and prints the staged project diff summary. Use this instead of
+  manually running `tools/g stop` + `make snapshot-project`.
 
 ## Opening the working project
 
-Use `build/project/` (run `make work-project` first if missing) with an
-**absolute** `--projects-dir`: Ghidra 12.1+ rejects any path component
-starting with `.`, so `./build/project` fails.
+`tools/g` is fully self-contained. It validates the cached isolated Ghidra
+environment (processor extension, Java options, fingerprint) and rebuilds it
+only when missing or stale — you never need to source
+`build/ghidra-processor.env`.
 
 ```bash
 make work-project   # one-time: copy snapshot -> build/project
-ghidra --projects-dir "$PWD/build/project" --project rh850_p1me_mapped \
-       --program RH850_P1M-E_CodeFlash.bin <subcommand>
+tools/g decompile 0x8db22
+tools/g x-ref to 0x8db22
 # e.g. ... stats | decompile 0x6fec | x-ref to 0xbfe8 | symbol list
 ```
 
 If you re-run `analyze` or any `script run` and want to keep the result in the
-working copy, run `ghidra ... stop` afterward. To promote a finished working
-copy into the committed snapshot, run `make snapshot-project`.
+working copy, run `tools/g stop` afterward. To promote a finished working copy
+into the committed snapshot, run `make finalize-project` (which orchestrates
+daemon stop, verification, snapshot, and diff).
 
 Expected memory map after the P1M-E device profile is applied:
 
@@ -109,6 +118,7 @@ uv sync --locked      # one-time
 make verify           # deterministic firmware suites (no Ghidra)
 make verify-sleigh    # SLEIGH compile + isolated install
 make verify-processor # fixtures + working-project audits
+make verify-project-parity # exact working-project inventory vs baseline
 make verify-ghidra    # all of the above
 ```
 
@@ -136,13 +146,28 @@ Combined   0bba74d0e443f9dd3da33e3a28c3511ec31e35e8303acef7e0117fbdc91d5a86
 
 ```bash
 make rebuild-project                                  # into build/project/
-make rebuild-project PROJECT_DIR=/absolute/path      # elsewhere
+make rebuild-project PROJECT_DIR="$PWD/build/parity-project"  # disposable sibling
 ```
 
-To replace an existing disposable working build:
+Rebuild destinations are deliberately constrained to dedicated directories
+below `build/`; this keeps `--force` incapable of deleting committed or
+unrelated trees. To replace an existing disposable working build:
 `tools/rebuild_project.sh --project-dir "$PWD/build/project" --force`.
 Never point the rebuild at committed `project/`; promote only with
 `make snapshot-project`.
+
+Rebuilds consume the tracked diagnostic-vocabulary artifact by default; an
+ignored local Techstream tree is never an implicit input. To deliberately
+refresh that artifact first, pass `--refresh-diagnostic-vocabulary` and review
+its tracked diff before promotion.
+
+All repository one-shot Ghidra jobs go through `tools/run_headless`. It owns
+the isolated environment, canonical project-path guard, canonical script path,
+CPU/time limits, logs, and `REPORT SCRIPT ERROR` detection. Do not duplicate a
+raw `analyzeHeadless` command in another script. The canonical script path
+deliberately excludes `ghidra/scripts/investigate`: including that directory was
+measured to change the recovered graph by 194 functions. Deterministic exporters
+used by tooling live under `ghidra/scripts/verify` instead.
 
 ### The four-stage analysis (do not collapse)
 
@@ -178,8 +203,21 @@ reproduce the committed statistics.
 6. Open the result through the CLI, record statistics, cleanly stop the daemon.
 7. Write `processor_manifest.json` beside the working project and require
    function/instruction/symbol floors plus the nine-block memory map.
+8. Export canonical compact JSONL to `build/ghidra_project_inventory.jsonl`
+   and compare every semantic record with
+   `data/ghidra_project_inventory.baseline.jsonl`. The path-free inventory
+   covers tool/program identity, memory mappings, complete function bodies and
+   signatures/storage, user symbols, comments, bookmarks, and aggregate maps;
+   it catches equal-count substitutions and annotation drift that floors miss.
 
-Landmark rebuild stats: **5,913 functions, 179,048 instructions, 37,755
+When a deliberate seed/annotation change alters the inventory, run
+`make update-project-baseline PROJECT_DIR_A=/abs/rebuild-a
+PROJECT_DIR_B=/abs/rebuild-b`. The update fails unless two independent fresh
+rebuilds produce byte-identical canonical inventories. Review the tracked diff,
+then rerun `make verify-project-parity`. Ordinary verification never updates the
+baseline.
+
+Landmark rebuild stats: **5,921 functions, 179,223 instructions, 37,785
 symbols** (floors for gates; semantic checks in `make verify-processor`).
 
 ## CI
@@ -188,5 +226,5 @@ CI (`.github/workflows/ci.yml`) always runs `make verify`. Processor-path
 changes run SLEIGH, synthetic fixtures, and committed-project audits on macOS
 with pinned Ghidra 12.1.2 / ghidra CLI 0.2.1. Processor, script, and snapshot
 changes — plus `main`, manual, and nightly runs — execute the full four-stage
-rebuild (plus convention finalizer) and project invariants, and upload
-normalized audit artifacts.
+rebuild (plus convention finalizer), project invariants, and exact normalized
+inventory comparison, then upload the generated inventory and audit artifacts.

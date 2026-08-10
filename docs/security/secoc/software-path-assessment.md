@@ -88,8 +88,8 @@ signing proxy is recorded as a separate capability.
 - Opened this report before deeper analysis so hypotheses, negative results, and
   evidence boundaries survive session compaction.
 - Opened only the disposable `build/project/` through the repository's isolated
-  V850 extension environment. The current pinned rebuild reports 5,913
-  functions, 179,048 instructions, and 37,755 symbols.
+  V850 extension environment. The current pinned rebuild reports 5,921
+  functions, 179,223 instructions, and 37,785 symbols.
 - The first bridge attempt used the default Ghidra user home and failed before
   loading the program because `v850e3:LE:32:default` was unavailable. Retrying
   with `-Duser.home=build/ghidra-home` loaded the expected processor module.

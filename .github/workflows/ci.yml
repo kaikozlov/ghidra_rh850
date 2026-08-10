@@ -39,23 +39,41 @@ jobs:
         with:
           filters: |
             processor:
+              - 'Makefile'
+              - 'verification.toml'
               - 'ghidra/ghidra_v850/**'
               - 'tools/install_v850_extension.sh'
               - 'tools/verify_sleigh.sh'
               - 'tools/verify_processor.sh'
+              - 'tools/run_headless'
+              - 'tools/lib/ghidra_env.sh'
+              - 'tools/project_layout.py'
+              - 'tools/project_inventory.py'
+              - 'tools/generate_project_inventory.sh'
+              - 'tools/snapshot_project.sh'
+              - 'tools/finalize_project.sh'
               - 'tools/fingerprint_processor.py'
               - 'tools/build_processor_fixture.py'
               - 'tools/rebuild_project.sh'
               - 'ghidra/scripts/verify/**'
               - 'tests/fixtures/processor/**'
+              - 'tests/verify_lifecycle.py'
+              - 'tests/verify_project_layout.py'
+              - 'tests/verify_headless_runner.py'
+              - 'tests/verify_ghidra_env.py'
+              - 'tests/verify_project_inventory.py'
               - 'data/processor_unimpl_allowlist.txt'
               - 'data/processor_manifest.baseline.json'
               - 'data/decompiler_signatures.baseline.csv'
+              - 'data/ghidra_project_inventory.baseline.jsonl'
+              - 'project/**'
             cli:
               - 'ghidra/ghidra-cli/**'
               - 'tools/build_ghidra_cli.sh'
               - 'tools/g'
             rebuild:
+              - 'Makefile'
+              - 'verification.toml'
               - 'ghidra/ghidra_v850/**'
               - 'ghidra/scripts/import/**'
               - 'ghidra/scripts/seed/**'
@@ -63,12 +81,25 @@ jobs:
               - 'ghidra/scripts/verify/**'
               - 'tools/rebuild_project.sh'
               - 'tools/snapshot_project.sh'
+              - 'tools/finalize_project.sh'
+              - 'tools/run_headless'
+              - 'tools/lib/ghidra_env.sh'
+              - 'tools/project_layout.py'
+              - 'tools/project_inventory.py'
+              - 'tools/generate_project_inventory.sh'
+              - 'tests/verify_lifecycle.py'
+              - 'tests/verify_project_layout.py'
+              - 'tests/verify_headless_runner.py'
+              - 'tests/verify_ghidra_env.py'
+              - 'tests/verify_project_inventory.py'
               - 'tools/verify_ghidra_stats.py'
               - 'tools/install_v850_extension.sh'
               - 'tools/fingerprint_processor.py'
               - 'data/p1m_sfr_labels.csv'
               - 'data/processor_unimpl_allowlist.txt'
               - 'data/decompiler_signatures.baseline.csv'
+              - 'data/ghidra_project_inventory.baseline.jsonl'
+              - 'data/generated/21140bbd65e530a9/diagnostic_vocabulary.json'
               - 'project/**'
 
   verify-processor:
@@ -102,6 +133,7 @@ jobs:
       - run: make verify-sleigh
       - run: make work-project
       - run: make verify-processor
+      - run: make verify-project-parity
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -111,6 +143,7 @@ jobs:
             build/processor_manifest.json
             build/verify-processor-*.log
             build/decompiler-signatures.txt
+            build/ghidra_project_inventory.jsonl
             data/instruction_inventory.csv
             tests/fixtures/processor/
           if-no-files-found: ignore
@@ -166,6 +199,7 @@ jobs:
           test "$(ghidra --version | awk 'NR == 1 { print $2 }')" = "0.2.1"
       - run: make rebuild-project
       - run: make verify-processor
+      - run: make verify-project-parity
       - name: Compare rebuilt processor manifest with snapshot
         run: cmp build/project/processor_manifest.json project/processor_manifest.json
       - uses: actions/upload-artifact@v4
@@ -178,5 +212,6 @@ jobs:
             build/project/processor_manifest.json
             build/verify-processor-*.log
             build/decompiler-signatures.txt
+            build/ghidra_project_inventory.jsonl
             data/instruction_inventory.csv
           if-no-files-found: ignore

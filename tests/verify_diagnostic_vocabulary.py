@@ -153,8 +153,9 @@ check("rebuild asserts applied vocabulary against decompiler landmarks",
       "-postScript AssertDiagnosticVocabulary.java" in rebuild_source
       and "[RAM source]" in assertion_source
       and "LANDMARKS" in assertion_source)
-check("clean rebuild falls back to tracked vocabulary without proprietary source",
-      "using tracked diagnostic vocabulary artifact" in rebuild_source)
+check("clean rebuild uses tracked vocabulary without proprietary source",
+      "Using tracked diagnostic vocabulary artifact" in rebuild_source
+      and "REFRESH_DIAGNOSTIC_VOCABULARY" in rebuild_source)
 check("durable DID seed is limited to seven independently verified callbacks",
       "STRUCTURAL_CALLBACKS.length" in seed_source
       and all(f"0x{address:x}L" in seed_source

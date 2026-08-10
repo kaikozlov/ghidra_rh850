@@ -210,3 +210,31 @@ paths = ["community/", "external-references.lock.json"]
 [suite.secoc_acceptance_gate]
 tests = ["tests/verify_secoc_acceptance_gate.py"]
 paths = ["docs/security/secoc/application-chain.md", "firmware/"]
+
+[suite.lifecycle]
+tests = [
+  "tests/verify_lifecycle.py",
+  "tests/verify_project_layout.py",
+  "tests/verify_headless_runner.py",
+  "tests/verify_ghidra_env.py",
+  "tests/verify_project_inventory.py",
+]
+paths = [
+  "tools/g",
+  "tools/run_headless",
+  "tools/project_layout.py",
+  "tools/project_inventory.py",
+  "tools/lib/",
+  "tools/finalize_project.sh",
+  "tools/generate_project_inventory.sh",
+  "tools/snapshot_project.sh",
+  "tools/rebuild_project.sh",
+  "tools/verify_processor.sh",
+  "tools/verify_sleigh.sh",
+  "ghidra/scripts/verify/ExportProjectInventory.java",
+  "data/ghidra_project_inventory.baseline.jsonl",
+  "project/",
+  "Makefile",
+  "verification.toml",
+  ".github/workflows/ci.yml",
+]

@@ -2,23 +2,26 @@
 #
 # tools/g — repo-local ghidra CLI wrapper.
 #
-# Removes the ceremony of remembering --projects-dir/--project/--program on
-# every invocation. Resolves the repo root, materializes the working project
-# if absent, selects the pinned vendored CLI binary, and refuses to operate
-# against the committed project/ snapshot.
+# Fully self-contained: resolves the repo root, bootstraps the isolated Ghidra
+# environment (processor extension, Java options, fingerprint), materializes the
+# working project if absent, selects the pinned vendored CLI binary, and refuses
+# to operate against the committed project/ snapshot.
+#
+# You never need to `source build/ghidra-processor.env` before running this.
 #
 # Usage:
 #   tools/g decompile 0x8db22
 #   tools/g x-ref to 0x8db22
-#   tools/g script run ghidra/scripts/investigate/Foo.java -- arg1
-#   tools/g stop
 #   tools/g inspect 0xc853a --decompile --callers --callees --xrefs --disasm 40
+#   tools/g script run ghidra/scripts/investigate/Foo.java -- arg1
+#   tools/g session-status
+#   tools/g stop
 #
 # Environment:
 #   GHIDRA_AGENT=1            Force compact JSON output (for scripted/agent consumption).
 #   GHIDRA_PROJECT            Override the working project directory (default: build/project).
 #   GHIDRA_ALLOW_SYSTEM_CLI=1 Allow falling back to a system-installed ghidra binary.
-#
+#   GHIDRA_NO_BOOTSTRAP=1     Skip processor env bootstrap (assumes env already sourced).
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
@@ -26,8 +29,66 @@ PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 SNAPSHOT_DIR="$ROOT/project"
 PROJECT_DIR="${GHIDRA_PROJECT:-$ROOT/build/project}"
+DAEMON_RE='AnalyzeHeadless.*rh850_p1me_mapped'
+MUTATION_MARKER="$ROOT/build/.ghidra_session_dirty"
 
-# --- Resolve the ghidra CLI binary -------------------------------------------
+# --- Canonicalize PROJECT_DIR -------------------------------------------------
+
+ABS_PROJECT_DIR=$(python3 - "$PROJECT_DIR" <<'PY'
+from pathlib import Path
+import sys
+
+print(Path(sys.argv[1]).expanduser().resolve(strict=False))
+PY
+)
+
+# --- Guard against committed project/ -----------------------------------------
+
+case "$ABS_PROJECT_DIR" in
+  "$SNAPSHOT_DIR"|"$SNAPSHOT_DIR"/*)
+    echo "REFUSING: working project resolves inside committed snapshot ($SNAPSHOT_DIR)." >&2
+    echo "Use build/project (the default) or set GHIDRA_PROJECT to a disposable path." >&2
+    exit 1
+    ;;
+esac
+
+# Project/program selection and Java location are owned by this wrapper. The
+# CLI accepts global options after subcommands, so appending one later would
+# otherwise bypass the committed-snapshot guard above.
+for arg in "$@"; do
+  case "$arg" in
+    --projects-dir|--projects-dir=*|--project|--project=*|--program|--program=*|--java-home|--java-home=*)
+      echo "REFUSING: $arg is a tools/g-managed option; use GHIDRA_PROJECT for a safe working-copy override." >&2
+      exit 2
+      ;;
+  esac
+done
+
+# Locate the command and action independent of leading/interspersed global
+# flags (`--json`, `--pretty`, `-v`, ...). clap accepts those flags globally,
+# so raw `$1`/`$2` checks are not a security boundary.
+CLI_POSITIONALS=()
+for arg in "$@"; do
+  case "$arg" in
+    --) break ;;
+    -*) continue ;;
+    *)
+      CLI_POSITIONALS+=("$arg")
+      if ((${#CLI_POSITIONALS[@]} == 2)); then break; fi
+      ;;
+  esac
+done
+USER_SUBCMD="${CLI_POSITIONALS[0]:-}"
+USER_ACTION="${CLI_POSITIONALS[1]:-}"
+
+# Project create/delete operates outside the one fixed working project and does
+# not belong in this safety wrapper.
+if [[ "$USER_SUBCMD" == "project" ]]; then
+  echo "REFUSING: project management is not supported through tools/g." >&2
+  exit 2
+fi
+
+# --- Resolve and build the ghidra CLI binary ----------------------------------
 
 VENDOR_SRC="$ROOT/ghidra/ghidra-cli/src"
 VENDOR_BIN="$ROOT/build/ghidra-cli/ghidra"
@@ -38,7 +99,6 @@ if [[ -d "$VENDOR_SRC" ]]; then
   if [[ ! -x "$VENDOR_BIN" ]]; then
     NEED_BUILD=1
   else
-    # Check if any .rs or .java source file is newer than the binary.
     if find "$VENDOR_SRC" -type f \( -name '*.rs' -o -name '*.java' \) \
          -newer "$VENDOR_BIN" -print -quit 2>/dev/null | grep -q .; then
       NEED_BUILD=1
@@ -60,50 +120,145 @@ else
   exit 1
 fi
 
-# --- Guard against committed project/ ----------------------------------------
+# --- Bootstrap the isolated Ghidra environment --------------------------------
+#
+# The helper validates a cached isolated processor environment and only rebuilds
+# it when missing or stale. tools/g never requires a manual env-file source.
 
-# Resolve to an absolute canonical path WITHOUT requiring the directory to exist
-# (python3 Path.resolve(strict=False) follows symlinks and collapses .. without
-# needing the path to be present on disk). The old `cd ... && pwd` approach
-# failed open when the cd failed, leaving the path uncanonicalized.
-ABS_PROJECT_DIR=$(python3 -c "from pathlib import Path; print(Path('$PROJECT_DIR').resolve(strict=False))")
-case "$ABS_PROJECT_DIR" in
-  "$SNAPSHOT_DIR"|"$SNAPSHOT_DIR"/*)
-    echo "REFUSING: working project resolves inside committed snapshot ($SNAPSHOT_DIR)." >&2
-    echo "Use build/project (the default) or set GHIDRA_PROJECT to a disposable path." >&2
-    exit 1
-    ;;
-esac
+if [[ "${GHIDRA_NO_BOOTSTRAP:-0}" != "1" ]]; then
+  # shellcheck disable=SC1091
+  source "$ROOT/tools/lib/ghidra_env.sh" none
+fi
 
-# --- Materialize the working project if absent --------------------------------
+# --- Special commands ---------------------------------------------------------
 
-# Skip for bridge management commands that don't need a project open.
+cmd_session_status() {
+  local daemon_pid="" daemon_state="stopped"
+  if daemon_pid=$(pgrep -f "$DAEMON_RE" 2>/dev/null | head -1); then
+    daemon_state="running"
+  fi
+
+  local project_state="missing"
+  if [[ -d "$ABS_PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
+    project_state="present"
+  fi
+
+  local fingerprint_state="unknown"
+  local manifest=""
+  if [[ -f "$ABS_PROJECT_DIR/processor_manifest.json" ]]; then
+    manifest="$ABS_PROJECT_DIR/processor_manifest.json"
+  elif [[ -f "$SNAPSHOT_DIR/processor_manifest.json" ]]; then
+    manifest="$SNAPSHOT_DIR/processor_manifest.json"
+  fi
+  if [[ -n "$manifest" && -n "${GHIDRA_HOME:-}" ]]; then
+    if python3 "$ROOT/tools/fingerprint_processor.py" \
+         --source-only --expect "$manifest" >/dev/null 2>&1; then
+      fingerprint_state="matching"
+    else
+      fingerprint_state="mismatched"
+    fi
+  elif [[ -n "$manifest" ]]; then
+    fingerprint_state="not-checked (no env)"
+  fi
+
+  local mutation_state="clean"
+  if [[ -f "$MUTATION_MARKER" ]]; then
+    mutation_state="potentially-mutated"
+  fi
+
+  local snapshot_state="unknown"
+  if git -C "$ROOT" diff --quiet -- "$SNAPSHOT_DIR/" 2>/dev/null \
+     && git -C "$ROOT" diff --cached --quiet -- "$SNAPSHOT_DIR/" 2>/dev/null; then
+    if [[ -f "$MUTATION_MARKER" ]]; then
+      snapshot_state="unchanged"  # mutations not yet promoted
+    else
+      snapshot_state="unchanged"
+    fi
+  else
+    snapshot_state="different"
+    if git -C "$ROOT" diff --cached --quiet -- "$SNAPSHOT_DIR/" 2>/dev/null; then
+      snapshot_state="different (unstaged)"
+    elif git -C "$ROOT" diff --quiet -- "$SNAPSHOT_DIR/" 2>/dev/null; then
+      snapshot_state="staged"
+    else
+      snapshot_state="staged+unstaged"
+    fi
+  fi
+
+  # Machine-readable output.
+  if [[ "${GHIDRA_AGENT:-}" == "1" ]]; then
+    python3 - \
+      "$daemon_state" "$daemon_pid" "$DAEMON_RE" \
+      "$ABS_PROJECT_DIR" "$project_state" "$fingerprint_state" \
+      "$mutation_state" "$snapshot_state" <<'PY'
+import json, sys
+(
+    daemon_state, daemon_pid, daemon_pattern,
+    project_path, project_state, fingerprint_state,
+    mutation_state, snapshot_state,
+) = sys.argv[1:]
+daemon = {
+    'state': daemon_state,
+    'pattern': daemon_pattern,
+}
+if daemon_pid:
+    daemon['pid'] = int(daemon_pid)
+print(json.dumps({
+    'daemon': {
+        **daemon,
+    },
+    'project': {
+        'path': project_path,
+        'state': project_state,
+    },
+    'processor_fingerprint': fingerprint_state,
+    'working_session': mutation_state,
+    'snapshot': snapshot_state,
+}, indent=2))
+PY
+  else
+    echo "daemon:              $daemon_state${daemon_pid:+ (pid $daemon_pid)}"
+    echo "project:             $ABS_PROJECT_DIR ($project_state)"
+    echo "processor fingerprint: $fingerprint_state"
+    echo "working session:     $mutation_state"
+    echo "snapshot:            $snapshot_state"
+  fi
+}
+
+# Handle session-status before any project materialization.
+if [[ "${1:-}" == "session-status" ]]; then
+  cmd_session_status
+  exit 0
+fi
+
+# --- Determine if the command needs a project ---------------------------------
+
 NEEDS_PROJECT=1
 case "${1:-}" in
   stop|status|ping|jobs|cancel|version|doctor|setup|init|config)
-    # These work on the daemon lifecycle, not the project dir — but we still
-    # want the project flags so 'stop'/'status' target the right daemon.
-    if [[ ! -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
+    if [[ ! -d "$ABS_PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
       NEEDS_PROJECT=0
     fi
     ;;
 esac
 
-if ((NEEDS_PROJECT)) && [[ ! -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
-  if [[ ! -d "$SNAPSHOT_DIR/$PROJECT_NAME.rep" ]]; then
+# --- Materialize the working project if absent --------------------------------
+
+if ((NEEDS_PROJECT)) && [[ ! -d "$ABS_PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
+  if [[ ! -d "$SNAPSHOT_DIR/$PROJECT_NAME.rep.snapshot" ]]; then
     echo "No committed snapshot found at $SNAPSHOT_DIR — run 'make rebuild-project' first." >&2
     exit 1
   fi
   echo "Materializing working project from committed snapshot..." >&2
-  mkdir -p "$PROJECT_DIR"
-  cp -R "$SNAPSHOT_DIR/." "$PROJECT_DIR/"
-  echo "Ready: $PROJECT_DIR" >&2
+  python3 "$ROOT/tools/project_layout.py" materialize \
+    --snapshot-dir "$SNAPSHOT_DIR" \
+    --project-dir "$ABS_PROJECT_DIR" \
+    --project-name "$PROJECT_NAME"
+  echo "Ready: $ABS_PROJECT_DIR" >&2
 
-  # Verify the processor manifest fingerprint after copy, mirroring
-  # `make work-project`. This catches stale/incorrect processor sources
-  # that would silently produce wrong decompilation.
-  if [[ -f "$PROJECT_DIR/processor_manifest.json" ]]; then
-    MANIFEST="$PROJECT_DIR/processor_manifest.json"
+  # Validate processor manifest fingerprint after copy.
+  if [[ -f "$ABS_PROJECT_DIR/processor_manifest.json" ]]; then
+    MANIFEST="$ABS_PROJECT_DIR/processor_manifest.json"
   elif [[ -f "$SNAPSHOT_DIR/processor_manifest.json" ]]; then
     MANIFEST="$SNAPSHOT_DIR/processor_manifest.json"
   else
@@ -115,15 +270,68 @@ if ((NEEDS_PROJECT)) && [[ ! -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
       echo "The vendored processor sources do not match the committed snapshot." >&2
       exit 1
     fi
-  else
-    echo "NOTE: no processor_manifest.json yet; run rebuild-project to create one." >&2
   fi
+fi
+
+# --- Write mutation marker for mutation-capable commands -----------------------
+#
+# These commands can modify the working project. We write a marker so
+# session-status can warn that the working copy may have uncommitted edits.
+# The marker is cleared by `make finalize-project` (snapshot promotion).
+
+SUBCMD="$USER_SUBCMD"
+ACTION="$USER_ACTION"
+# clap aliases are accepted by the vendored CLI, so lifecycle accounting must
+# normalize them before classifying mutations.
+case "$SUBCMD" in
+  prog|programs) SUBCMD=program ;;
+  fn|func|functions) SUBCMD=function ;;
+  sym|symbols) SUBCMD=symbol ;;
+  mem) SUBCMD=memory ;;
+  types) SUBCMD=type ;;
+  comments) SUBCMD=comment ;;
+  scripts) SUBCMD=script ;;
+  analysis) SUBCMD=analyze ;;
+  mv) SUBCMD=rename ;;
+esac
+case "$ACTION" in
+  rm) ACTION=delete ;;
+  mv) ACTION=rename ;;
+esac
+MUTATES=0
+case "$SUBCMD" in
+  analyze|import|rename|batch) MUTATES=1 ;;
+  script)
+    case "$ACTION" in
+      run|python|java) MUTATES=1 ;;
+    esac
+    ;;
+  program) if [[ "$ACTION" == "delete" || "$ACTION" == "save" ]]; then MUTATES=1; fi ;;
+  function)
+    case "$ACTION" in
+      rename|create|delete|set-signature|set-return-type|set-calling-convention|set-var-type)
+        MUTATES=1 ;;
+    esac
+    ;;
+  symbol)  if [[ "$ACTION" == "create" || "$ACTION" == "delete" || "$ACTION" == "rename" ]]; then MUTATES=1; fi ;;
+  memory)  if [[ "$ACTION" == "write" ]]; then MUTATES=1; fi ;;
+  type)
+    case "$ACTION" in
+      create|apply|delete|rename|create-enum|typedef|add-field|del-field) MUTATES=1 ;;
+    esac
+    ;;
+  comment) if [[ "$ACTION" == "set" || "$ACTION" == "delete" ]]; then MUTATES=1; fi ;;
+  patch)   if [[ "$ACTION" == "bytes" || "$ACTION" == "nop" ]]; then MUTATES=1; fi ;;
+esac
+if ((MUTATES)); then
+  mkdir -p "$(dirname "$MUTATION_MARKER")"
+  echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$MUTATION_MARKER"
 fi
 
 # --- Build CLI args -----------------------------------------------------------
 
 CLI_ARGS=(
-  --projects-dir "$PROJECT_DIR"
+  --projects-dir "$ABS_PROJECT_DIR"
   --project "$PROJECT_NAME"
   --program "$PROGRAM_NAME"
 )
@@ -135,5 +343,4 @@ fi
 
 # --- Dispatch -----------------------------------------------------------------
 
-# Pass all remaining args through to the ghidra CLI.
 exec "$GHIDRA_CLI" "${CLI_ARGS[@]}" "$@"

@@ -23,7 +23,7 @@ Usage: tools/snapshot_project.sh [options]
 
 Options:
   --project-dir DIR    Working project to snapshot from (default: build/project)
-  --snapshot-dir DIR   Committed snapshot to write (default: project)
+  --snapshot-dir DIR   Committed snapshot to write; must resolve to repository project/
   -h, --help           Show this help
 EOF
 }
@@ -36,6 +36,23 @@ while (($#)); do
     *) echo "unknown argument: $1" >&2; usage >&2; exit 2 ;;
   esac
 done
+
+EXPECTED_SNAPSHOT_DIR=$(python3 - "$ROOT/project" <<'PY'
+from pathlib import Path
+import sys
+print(Path(sys.argv[1]).resolve(strict=False))
+PY
+)
+SNAPSHOT_DIR=$(python3 - "$SNAPSHOT_DIR" <<'PY'
+from pathlib import Path
+import sys
+print(Path(sys.argv[1]).resolve(strict=False))
+PY
+)
+if [[ "$SNAPSHOT_DIR" != "$EXPECTED_SNAPSHOT_DIR" ]]; then
+  echo "REFUSING: snapshot destination must be the committed repository snapshot: $EXPECTED_SNAPSHOT_DIR" >&2
+  exit 2
+fi
 
 [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]] || {
   echo "working project not found: $PROJECT_DIR" >&2
@@ -50,11 +67,11 @@ GHIDRA_CLI="$ROOT/build/ghidra-cli/ghidra"
 command -v rsync >/dev/null 2>&1 || { echo "rsync is required" >&2; exit 1; }
 [[ -d "$SNAPSHOT_DIR" ]] || { echo "snapshot dir does not exist: $SNAPSHOT_DIR" >&2; exit 1; }
 
-# Compile the current processor in isolation so the project manifest is checked
-# against source, generated SLA, and pinned tool versions before promotion.
-"$ROOT/tools/install_v850_extension.sh"
+# Shared environment setup: resolve Ghidra, install processor extension,
+# source env file, validate fingerprint. This replaces the old manual
+# install + source dance.
 # shellcheck disable=SC1091
-source "$ROOT/build/ghidra-processor.env"
+source "$ROOT/tools/lib/ghidra_env.sh" full
 
 DAEMON_RE='AnalyzeHeadless.*rh850_p1me_mapped'
 if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then
@@ -68,18 +85,27 @@ PROJECT_DIR=$(cd "$PROJECT_DIR" && pwd)
 SNAPSHOT_DIR=$(cd "$SNAPSHOT_DIR" && pwd)
 CLI_ARGS=(--projects-dir "$PROJECT_DIR" --project "$PROJECT_NAME" --program "$PROGRAM_NAME")
 
+STOP_REQUIRED=0
+stop_cli_daemon() {
+  ((STOP_REQUIRED)) || return 0
+  "$GHIDRA_CLI" "${CLI_ARGS[@]}" stop >/dev/null 2>&1 || true
+  for _ in 1 2 3 4 5; do
+    pgrep -f "$DAEMON_RE" >/dev/null 2>&1 || break
+    sleep 1
+  done
+  if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then
+    echo "daemon did not stop cleanly; aborting snapshot" >&2
+    return 1
+  fi
+  STOP_REQUIRED=0
+}
+
 echo "Verifying working project stats before snapshot..."
+trap stop_cli_daemon EXIT
+STOP_REQUIRED=1
 STATS_OUTPUT=$("$GHIDRA_CLI" "${CLI_ARGS[@]}" stats)
-"$GHIDRA_CLI" "${CLI_ARGS[@]}" stop >/dev/null 2>&1 || true
-# Wait for the daemon to fully exit before touching any files.
-for _ in 1 2 3 4 5; do
-  pgrep -f "$DAEMON_RE" >/dev/null 2>&1 || break
-  sleep 1
-done
-if pgrep -f "$DAEMON_RE" >/dev/null 2>&1; then
-  echo "daemon did not stop cleanly; aborting snapshot" >&2
-  exit 1
-fi
+stop_cli_daemon
+trap - EXIT
 printf '%s\n' "$STATS_OUTPUT" | python3 "$ROOT/tools/verify_ghidra_stats.py"
 
 # Processor fingerprint must match the sources that built this working copy.
@@ -94,17 +120,37 @@ else
   exit 1
 fi
 
-echo "Syncing $PROJECT_DIR -> $SNAPSHOT_DIR (committed snapshot)"
-# --delete removes stale db versions from the previous snapshot. Exclude
-# transient Ghidra files and any nested .git so the snapshot stays clean.
-rsync -a --delete \
-  --exclude '.git' \
-  --exclude '*.lock' --exclude '*.lock~' \
-  --exclude 'tmp*' --exclude '*~journal*' \
-  "$PROJECT_DIR/" "$SNAPSHOT_DIR/"
+echo "Verifying exact normalized project parity before snapshot..."
+PROJECT_DIR="$PROJECT_DIR" \
+  "$ROOT/tools/generate_project_inventory.sh" "$ROOT/build/ghidra_project_inventory.snapshot.jsonl"
+python3 "$ROOT/tools/project_inventory.py" compare \
+  "$ROOT/data/ghidra_project_inventory.baseline.jsonl" \
+  "$ROOT/build/ghidra_project_inventory.snapshot.jsonl"
+
+PACKED_DIR=$(mktemp -d "$ROOT/build/project-snapshot-pack.XXXXXX")
+cleanup_packed() { rm -rf "$PACKED_DIR"; }
+trap cleanup_packed EXIT
+
+echo "Packing live project under non-openable snapshot names..."
+python3 "$ROOT/tools/project_layout.py" pack \
+  --project-dir "$PROJECT_DIR" \
+  --snapshot-dir "$PACKED_DIR" \
+  --project-name "$PROJECT_NAME"
+
+echo "Syncing packed snapshot -> $SNAPSHOT_DIR (committed snapshot)"
+# --delete removes stale DB versions and the former live .gpr/.rep names.
+rsync -a --delete "$PACKED_DIR/" "$SNAPSHOT_DIR/"
+python3 "$ROOT/tools/project_layout.py" validate-snapshot \
+  --snapshot-dir "$SNAPSHOT_DIR" \
+  --project-name "$PROJECT_NAME"
 
 echo "Staging $SNAPSHOT_DIR"
 git -C "$ROOT" add "$SNAPSHOT_DIR/"
+
+# Clear the session mutation marker — the working copy is now promoted.
+rm -f "$ROOT/build/.ghidra_session_dirty"
+trap - EXIT
+cleanup_packed
 
 echo
 echo "Snapshot staged. Review and commit, e.g.:"
