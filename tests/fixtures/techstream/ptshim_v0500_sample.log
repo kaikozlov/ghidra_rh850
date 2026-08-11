@@ -1,0 +1,10 @@
+1.000s >> PTQueueMsgs(11, 0x0022F010, 0x0022F020, 250)
+  Msg[ 2] CAN. 42 Handle, 6 bytes. TxF=0x00000000
+  \__000007df1001
+  queued 1 of 1 messages
+  1.001s STATUS_NOERROR
+1.500s << PTReadMsgs(11, 0x0022F110, 0x0022F120, 250)
+  Msg[ 3] 98.765432s. ISO15765. 42 Handle, Actual data 7 of 9 bytes. RxS=0x00000000
+  \__000007e81014300200
+  read 1 of 1 messages
+  1.501s STATUS_NOERROR

@@ -381,7 +381,7 @@ the mistakes are not re-made.
   explicit steering anchors for family-only `utility_string` vocabulary,
   removes duplicate exact/family monitor mappings, and fails closed on
   malformed LZSS, wrong file types, bad format-6 magic, and malformed section layouts.
-- **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.1;
+- **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.2;
   TMS-013; `tests/verify_diagnostic_vocabulary.py`.
 
 ### CORR-024 — MACKey `$36` interpreted as a diagnostic identifier
@@ -444,5 +444,5 @@ the mistakes are not re-made.
 - **Evidence:** all 13 regional/language `U_*.ddb` files decode to 25,957
   strings plus 25,957 aligned metadata records. The deterministic suite now
   parses all 13 and asserts the complete observed language-tag set.
-- **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.1;
+- **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.2;
   TMS-013; `tests/verify_diagnostic_vocabulary.py`.

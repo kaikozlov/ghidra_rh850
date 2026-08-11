@@ -62,7 +62,7 @@ was searched separately. No search traversed unrelated personal storage.
 - [x] Stage 0 — bootstrap, baseline verification, and living sweep journal
 - [x] Stage 1 — fully reverse Vance `candidate-f05`
 - [x] Stage 2 — recover the complete Techstream MACKey vehicle-side protocol
-- [ ] Stage 3 — close remaining high-value Techstream static leads
+- [x] Stage 3 — close remaining high-value Techstream static leads
 - [ ] Stage 4 — complete the Renesas RV40F host-protocol static census
 - [ ] Stage 5 — close the application COM receive/transmit long tail
 - [ ] Stage 6 — tighten the motor-control and safety static boundary
@@ -366,5 +366,140 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Commit
 
-- Pending Stage 2 commit; its immutable SHA will be recorded at the next
-  journal update.
+- `c440d272efee7afbc91890f93892eb4758aed644 analysis: recover Techstream MACKey vehicle protocol`
+- Follow-up evidence correction before Stage 3 resumed:
+  `1b244ebe62c89346c8be1b76cb7eacb033036ea2 analysis: correct Techstream MACKey state evidence`
+
+## Stage 3 — close remaining high-value Techstream static leads
+
+### Starting state
+
+- HEAD: `73392f38991278c58191e6c2a86c72b7d1dd0588`
+- Relevant prior finding IDs: `TMS-005`, `TMS-009`, `TMS-013`–`TMS-015`
+- Relevant artifacts: pinned `ptshim32.dll`, `ptshim32_0500.dll`,
+  `J2534Ctrl.dll`, native `Cuw.exe`, `CUWAccessRKS*.dll`, `Security_P4.ddb`,
+  the complete regional steering DDB corpus, and type-1 `Toyota.ddb`
+- Verification baseline: the repository had accumulated a separate, fully
+  committed Discord-derived static follow-up after Stage 2. Those commits were
+  preserved. The only uncommitted Stage-3 work at resumption was the interrupted
+  `ptshim` parser/verifier/fixture set; the full repository gate at current HEAD
+  was 448 assertions, 0 failures.
+
+### Questions
+
+1. What exact record, timing, encoding, save-path, and cross-version contracts
+   define the shipped `ptshim32` log files?
+2. Which DDB questions are genuinely still open after the later complete
+   directory/corpus work, and do `Security_P4` unknowns hide identity or key
+   provisioning material?
+3. What exactly becomes RKS `SeedValue`, and is it generated in the request
+   path or merely forwarded?
+4. Has a matching Sienna calibration/variant artifact appeared in the bounded
+   local research corpus since Stage 0?
+
+### Work performed
+
+- Decompiled both pinned shim variants plus `J2534Ctrl.dll` in the disposable
+  PE project, traced `PassThruSaveLog`, timestamp helpers, buffer drains,
+  controller save-event handling, and exact path construction.
+- Completed `tools/techstream/parse_ptshim_log.py` and synthetic v04/v05
+  fixtures; added body/hash/string locks against the pinned external binaries.
+- Re-audited the complete 35-file steering DDB corpus and performed a targeted
+  semantic pass over the previously suspicious high-value `Security_P4`
+  sections. Kept the separate type-1 `Toyota.ddb` schema bounded rather than
+  expanding into generic format archaeology.
+- Decompiled the native CUW RKS request builder and hex encoder and joined them
+  to the managed `SetDataForReproKey` field offsets.
+- Repeated the bounded artifact search below `/Users/kai/dev/inspect/repos` for
+  Sienna/`8965B4512*`/`8965B4514*` calibration or firmware-shaped files.
+
+### Findings
+
+- The shipped ptshim log format is line-oriented text. Both versions record
+  API elapsed time/direction/name/arguments, ChannelID where applicable,
+  per-message protocol/index/size/flags, Rx message timestamps, raw `\\__`
+  bytes, summary counts, and final status. v05 adds a decimal per-message
+  handle and uses `PTQueueMsgs` where v04 uses `PTWriteMsgs` — source: pinned
+  PE bodies/format strings, grade: **verified** (`TMS-005`).
+- Both shims derive elapsed seconds from `QueryPerformanceCounter /
+  QueryPerformanceFrequency` relative to the first initialized counter.
+  Explicit `PassThruSaveLog` drains wide-character buffered text to UTF-8;
+  v04 opens append mode and v05 opens truncate/write mode — source: pinned PE
+  bodies, grade: **verified** (`TMS-005`).
+- `J2534Ctrl.dll` owns normal Techstream filename/save orchestration. It uses
+  local wall-clock time and the exact pattern
+  `...\\Techstream\\ErrorReport\\j2534_MMDDYYYYhhmmss.log`, with named SAVE and
+  FINISH events around the shim save call. No size-based rotation grammar or
+  separate session-record marker was recovered — source: pinned PE body/string
+  evidence, grade: **recovered/bounded** (`TMS-005`).
+- The old broad DDB-open-question wording is stale. All 35 steering type-2
+  databases are structurally parsed through their complete section-type union.
+  A targeted `Security_P4` pass resolves type 35 as `Security Alarm Operation`
+  and type 37 as a 50-record alarm-condition table rather than a
+  Safekey/MACKey provisioning structure — source: pinned DDB bytes/string DB,
+  grade: **verified** (`TMS-013`).
+- The distinct type-1 `Toyota.ddb` master-enumeration schema remains a real
+  format residual, but the recovered MACKey flow no longer depends on decoding
+  it. It is now a targeted future identity/routing artifact rather than a
+  blocker to Techstream protocol recovery — source: pinned DDB bytes, grade:
+  **bounded**.
+- Managed `SetDataForReproKey` maps native request buffer `+0x78` directly to
+  `SeedValue`. Native `Cuw.exe` passes a pre-existing 16-byte input to the RKS
+  request builder and serializes it as 32 uppercase hexadecimal characters
+  plus NUL; no RNG/time transform occurs in that request-building edge —
+  source: pinned native PE + managed IL, grade: **verified structure / bounded
+  provenance** (`TMS-009`).
+
+### Negative/bounded results
+
+- The producer of the 16-byte RKS `SeedValue` input remains one indirect
+  controller edge upstream of the recovered request builder. Continuing would
+  fan into unrelated native UI/registration machinery, satisfying the handoff's
+  bounded-pass stop condition; Layer A still never reaches the ECU.
+- `Security_P4`'s targeted high-value unknowns do not expose Safekey, MCU-ID,
+  MACM*, MACK4, or keypair vocabulary. Unknown low-value DDB section semantics
+  remain intentionally unnamed.
+- No matching Sienna EPS `.cuw`/`.cwe`, `4514000` CodeFlash, or named
+  Sienna/`8965B4512*`/`8965B4514*` firmware-shaped artifact appeared in the
+  bounded local search. This is a local-availability result, not a global
+  public-availability claim.
+
+### Documentation/tests changed
+
+- Added the cross-version `ptshim` parser and synthetic fixtures; expanded the
+  verifier to pin both shim versions and `J2534Ctrl.dll` save/timestamp logic.
+- Added a focused DDB residual verifier covering the complete steering section
+  census, `Security_P4` alarm-domain interpretation, and type-1 `Toyota.ddb`
+  boundary.
+- Extended the existing RKS verifier with managed/native `SeedValue` field,
+  width, body-hash, and uppercase-hex assertions.
+- Updated canonical Techstream/DDB tooling docs, FINDINGS, OPEN_QUESTIONS,
+  ROADMAP, lock metadata, verification ownership, and this journal.
+- No `CORRECTIONS.md` entry is required: the superseded DDB and SeedValue
+  statements were explicitly unresolved/bounded rather than false promoted
+  findings.
+
+### Verification
+
+- `uv run python tests/verify_techstream_ptshim.py` -> pass (35/35)
+- `uv run python tests/verify_techstream_ddb_residuals.py` -> pass (14/14)
+- `uv run python tests/verify_techstream_rks.py` -> pass (54/54)
+- `make verify-changed` -> pass (8 matched suites, 12 test files)
+- `make verify` -> pass (449 assertions, 0 failures); the tracked ptshim
+  synthetic-fixture verifier is now part of the core gate, while the DDB/RKS
+  external-tree checks are additionally pinned by their focused runs above
+
+### Remaining blockers
+
+- A legitimate Techstream↔EPS capture remains dynamic-only; the log parser is
+  now ready for it.
+- The exact upstream producer of RKS's 16-byte SeedValue input is bounded and
+  low priority.
+- Type-1 `Toyota.ddb` is available but only worth deeper decoding for a future
+  concrete master-enumeration/identity/routing question.
+- Matching Sienna `.cuw` and `4514000` CodeFlash remain unavailable locally.
+
+### Commit
+
+- Pending Stage 3 commit; immutable SHA will be reported after the pre-commit
+  verification boundary.

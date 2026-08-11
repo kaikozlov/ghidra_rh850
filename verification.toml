@@ -190,11 +190,23 @@ paths = ["data/tss3_eps_variant_matrix.csv", "docs/variants/"]
 
 [suite.techstream_rks]
 tests = ["tests/verify_techstream_rks.py"]
-paths = ["docs/tooling/techstream.md"]
+paths = ["docs/tooling/techstream.md", "techstream.lock.json"]
 # External-tree suite: verifies TMS-009 (CUW RKS / two-layer reflash
 # authorization). SKIPs cleanly (exit 0) when the gitignored Techstream/
 # unpacked tree is absent, so it never breaks core verify. Run on a host
 # where Techstream/unpacked/ is populated, or via: make verify-one SUITE=techstream_rks
+
+[suite.techstream_ptshim]
+tests = ["tests/verify_techstream_ptshim.py"]
+paths = ["docs/tooling/techstream.md", "tools/techstream/parse_ptshim_log.py", "tests/fixtures/techstream/", "techstream.lock.json"]
+# Synthetic fixtures always exercise the parser; binary body/path/timestamp
+# locks are additionally checked when the gitignored Techstream tree is present.
+
+[suite.techstream_ddb_residuals]
+tests = ["tests/verify_techstream_ddb_residuals.py"]
+paths = ["docs/tooling/techstream.md", "docs/tooling/techstream-ddb-pipeline.md", "tools/techstream/parse_ddb.py", "techstream.lock.json"]
+# Bounded current-state audit: Security_P4 high-value unknowns plus the separate
+# Toyota.ddb type-1 master-enumeration schema. SKIPs when the external tree is absent.
 
 [suite.techstream_mackey]
 tests = ["tests/verify_techstream_mackey.py"]

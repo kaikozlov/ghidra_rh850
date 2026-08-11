@@ -61,6 +61,17 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Completed static investigations
 
+- **Techstream Stage-3 static residuals (2026-08-10).** Recovered both shipped
+  `ptshim32` J2534 log formats plus Techstream's timestamped save orchestration
+  and added a cross-version parser; reconciled the DDB status so the complete
+  type-2 structural corpus is no longer described as undecoded, bounded
+  `Security_P4`'s previously suspicious high-value tables to alarm/security
+  vocabulary, and isolated type-1 `Toyota.ddb` as the remaining master-schema
+  residual; traced RKS `SeedValue` to uppercase-hex serialization of a
+  pre-existing 16-byte native CUW input, with only its indirect upstream
+  producer unresolved. A bounded local calibration/variant search still found
+  no matching Sienna `.cuw`/`.cwe`, `4514000` CodeFlash, or Corolla firmware.
+  Canonical: [../tooling/techstream.md](../tooling/techstream.md).
 - **Techstream MACKey vehicle protocol (2026-08-10).** Recovered the VIN,
   MAC-tuple, safe-key identity, master/slave discovery, response association,
   Routine-`0x3002` M1–M3 write, and M4/M5 poll. It shares the Sienna command-8

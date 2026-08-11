@@ -216,22 +216,30 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `MCUID` naming or derivation edge. Resolve whether this DID is a silicon MCU
   identity only from target ECU firmware or a legitimate vehicle transcript;
   do not equate the names from community descriptions alone.
-- **Techstream live-session capture.** `ptshim32.dll` (TMS-005) is a J2534
-  PassThru interceptor/logger that can capture a complete Techstream↔EPS UDS
-  transcript. Install it as the J2534 DLL shim on a Windows machine connected
-  to a bench Sienna EPS, perform a diagnostic or reflash session, and compare
-  the captured SA seed/key exchange, DID reads, session transitions, and
-  programming handoff against the static firmware findings (SEC-BOOT-003,
-  SEC-APP-001, DIAG-APP-001/003). The log format is unknown (export/PDB
-  analysis only); reverse the writer or capture empirically. See
+- **Techstream live-session capture.** `ptshim32.dll`/`ptshim32_0500.dll`
+  (TMS-005) can capture a complete Techstream↔EPS J2534 transcript, and the log
+  format is no longer a blocker. Both shipped text formats, performance-counter
+  timestamps, address/data lines, save modes, and `J2534Ctrl.dll`'s timestamped
+  `Techstream\\ErrorReport\\j2534_....log` save path/event handshake are
+  statically recovered; `tools/techstream/parse_ptshim_log.py` normalizes both.
+  The remaining question is purely dynamic: capture a legitimate diagnostic or
+  reflash session on a bench Sienna EPS and compare SA seed/key exchange, DID
+  reads, session transitions, and programming handoff against SEC-BOOT-003,
+  SEC-APP-001, and DIAG-APP-001/003. See
   [../tooling/techstream.md](../tooling/techstream.md) §6.
-- **Techstream `.ddb` format.** The diagnostic databases (`EPS_P4DK3.ddb`,
-  `Security_P4.ddb`, `Toyota.ddb`) use a proprietary `DiagTool DataCtrl` binary
-  format with a 32-byte header and offset tables. The record structures
-  (DID definitions, DTC mappings, SA level configurations, ECU enumeration
-  data) are not decoded. Full parsing would extract the complete ECU-specific
-  diagnostic vocabulary that Techstream applies at runtime. See
-  [../tooling/techstream.md](../tooling/techstream.md) §7.
+- **Techstream `.ddb` residuals.** The old blanket “record structures are not
+  decoded” question is closed for the type-2 ECU corpus: all 1,368 ECU files
+  and all 35 regional steering `EPS*`/`EMPS*` files are structurally parsed
+  through their complete section directories; DTC, DID, monitor, P5 failure,
+  and several other tables have recovered semantics. The Stage-3 targeted pass
+  also resolves `Security_P4` type 35/37 as vehicle alarm/security-system
+  vocabulary rather than a Safekey/MACKey provisioning table. Unknown semantic
+  section classes remain intentionally bounded and should be decoded only when
+  a concrete security/identity/routing question points to them. The one
+  high-value format residual is the distinct type-1 `Toyota.ddb` master ECU
+  enumeration schema; decode it only if future artifact identification or
+  routing work needs information not already available from the recovered
+  Techstream protocol. See [../tooling/techstream-ddb-pipeline.md](../tooling/techstream-ddb-pipeline.md).
 - **`CSecurityAccessAES128` key is for ADS/PCS, not EPS.** Resolved (TMS-007):
   the dispatch tree shows EPS uses `CCanEMPS_V850E_PS2FlashWriter` in the CUW
   reflash path, which reads seed/key from `CalibrationFile::GetSeedKey()` —
@@ -242,10 +250,13 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **RKS authorization vs. EPS reflash (Layer A).** The TIS portal RKS flow
   (TMS-009) is a CUW-side VIN+license permission gate, distinct from the
   cal-file crypto key (Layer B). Open: whether it is *mandatory* for every EPS
-  reflash or optional/regional/offline-bypassable, and the exact source of its
-  `SeedValue` (bounded — generation is in native `Cuw.exe`, but its
-  independence from the ECU SA seed is established). It does not touch the ECU
-  or any of the three firmware secrets. See
+  reflash or optional/regional/offline-bypassable. `SeedValue` itself is now
+  statically bounded: `CUWAccessRKSWrapper` reads native buffer `+0x78`, and
+  `Cuw.exe` serializes a pre-existing **16-byte** native input into 32 uppercase
+  hex characters plus NUL with no RNG/time transform in the request-building
+  edge. Only the producer of those 16 bytes one indirect controller edge
+  upstream remains unknown; resolving it is low priority because Layer A never
+  reaches the ECU or any of the three firmware secrets. See
   [../tooling/techstream.md](../tooling/techstream.md) §5.3.
 - **VFOREST key-material transfer vs. SEC-BOOT-003 — fully resolved (TMS-010 /
   CORR-020 / CORR-021).** The CUW's `SendNonce`/`SendSeedKey`/`SendNonceAndSeedKey`

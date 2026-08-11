@@ -15,3 +15,11 @@ Repository URLs, exact commits, upstream paths, and source-file hashes are in
 [`../../external-references.lock.json`](../../external-references.lock.json).
 `make verify-external` confirms that pinned external checkouts still match these
 fixtures and re-runs the source-level corroboration checks.
+
+`techstream/` contains small **synthetic** cross-version `ptshim32` log samples.
+They are not vehicle captures and contain no real ECU data; they exercise the
+recovered v04.04 `PTWriteMsgs` and v05.00 `PTQueueMsgs` grammars, including
+ChannelID, Tx/Rx headers, flags, timestamps, raw address/data bytes, status,
+extra-data boundaries, and the v05 per-message handle. Pinned external shim
+binaries provide the independent format/body evidence when the ignored
+Techstream tree is present.

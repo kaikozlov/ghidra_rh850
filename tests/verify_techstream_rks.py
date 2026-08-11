@@ -21,8 +21,11 @@ The Techstream distribution tree is NOT committed (gitignored). If it is
 absent the suite SKIPs (exit 0) so `make verify` stays green on a clean
 checkout. Run on a machine where Techstream/unpacked/ is populated.
 """
-import struct, sys
+import hashlib
+import struct, subprocess, sys
 from pathlib import Path
+
+import pefile
 
 REPO = Path(__file__).resolve().parents[1]
 UNPACKED = REPO / "Techstream" / "unpacked" / "toyota" / "Toyota Diagnostics"
@@ -31,6 +34,7 @@ BIN = UNPACKED / "Techstream" / "bin"
 
 RKS = CUW / "CUWAccessRKS.dll"
 RKS_WRAPPER = CUW / "CUWAccessRKSWrapper.dll"
+CUW_EXE = CUW / "Cuw.exe"
 VFOREST = CUW / "TCUWCanSecurityVFORESTFlashWriter.dll"
 UNIFIED = CUW / "TCUWCanUnifiedFlashWriter.dll"
 COMMON_PREP = CUW / "TCUWCanCommonPrepareWriter.dll"
@@ -69,12 +73,15 @@ def is_dotnet(data):
 
 rks_b = read(RKS)
 wrap_b = read(RKS_WRAPPER)
+cuw_b = read(CUW_EXE)
 vforest_b = read(VFOREST)
 unified_b = read(UNIFIED)
 commonprep_b = read(COMMON_PREP)
 
 check("CUWAccessRKS.dll is a .NET assembly (CLR header)", is_dotnet(rks_b))
 check("CUWAccessRKSWrapper.dll is a .NET assembly", is_dotnet(wrap_b))
+check("Cuw.exe is pinned", hashlib.sha256(cuw_b).hexdigest()
+      == "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b")
 check("TCUWCanSecurityVFORESTFlashWriter.dll is native (NOT .NET)",
       not is_dotnet(vforest_b))
 check("TCUWCanCommonPrepareWriter.dll is native (NOT .NET)",
@@ -112,6 +119,46 @@ for api in crypto_apis:
           f"found at {idx}" if idx >= 0 else "")
 check("no VerifySignature/VerifyData call string",
       rks_b.find(b"VerifySignature") < 0 and rks_b.find(b"VerifyData") < 0)
+
+# --- Layer A: SeedValue native boundary --------------------------------------
+# CUWAccessRKSWrapper maps native request-buffer +0x78 to mstrSeedValue.
+il_tool = REPO / "tools/techstream/inspect_dotnet_il.py"
+wrapper_il = subprocess.check_output(
+    [sys.executable, str(il_tool), str(RKS_WRAPPER),
+     "--type", r"<Module>", "--method", "SetDataForReproKey"],
+    text=True,
+)
+check("wrapper maps native +0x78 to SeedValue",
+      "ldc.i4.s       0x78" in wrapper_il
+      and "set_mstrSeedValue" in wrapper_il)
+
+# Native Cuw.exe builds that field from the request builder's second argument:
+# it preserves EDX at [EBP-0x44], passes those 16 bytes as the fourth argument
+# to FUN_0047fb24, copies exactly 16 bytes, and renders 32 uppercase hex digits
+# plus NUL into request_buffer+0x78 (outer-object offset +0x28D).
+pe = pefile.PE(str(CUW_EXE), fast_load=True)
+image_base = pe.OPTIONAL_HEADER.ImageBase
+body_pins = {
+    (0x0049BCFE, 989): "0f2427fa1323a5d20f781ce0f32013f8ad77b25acf3833165d9be7205d6e0aba",
+    (0x0047FB24, 565): "7e6a8d5d7d3e74bc02cbfcad07ee9f6650943bef0789c7b8285a76c6411051fd",
+    (0x0041A01C, 104): "e00ded4e0bf0f3f3da6dcb7998a4ddd95f20cb6775814cefb2734b75bf40e87a",
+}
+for (address, size), expected in body_pins.items():
+    body = pe.get_data(address - image_base, size)
+    check(f"Cuw.exe RKS body {address:#x}/{size}", hashlib.sha256(body).hexdigest() == expected)
+
+request_builder = pe.get_data(0x0049BCFE - image_base, 989)
+request_copy = pe.get_data(0x0047FB24 - image_base, 565)
+hex_encoder = pe.get_data(0x0041A01C - image_base, 104)
+check("RKS builder preserves its second argument for SeedValue",
+      b"\x89\x55\xbc" in request_builder and b"\x8b\x55\xbc\x52" in request_builder)
+check("SeedValue consumes exactly 16 input bytes",
+      b"\x6a\x10\x8b\x45\x08\x50" in request_copy)
+check("SeedValue writes a 33-byte hex string at native offset +0x78",
+      b"\x6a\x21\x8d\x8b\x8d\x02\x00\x00" in request_copy)
+check("SeedValue encoder is uppercase hexadecimal",
+      b"\x80\x04\x1e\x30" in hex_encoder
+      and b"\x80\x04\x1e\x37" in hex_encoder)
 
 # --- Layer A <-> Layer B independence ----------------------------------------
 # The returned Signature must never reach a flash writer. Native writers store

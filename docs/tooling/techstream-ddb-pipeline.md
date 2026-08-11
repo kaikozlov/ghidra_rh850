@@ -66,6 +66,18 @@ the modern sectioned format-`0x04/05/06` string databases. Type-`0x01`
 distinct schemas and are rejected by these APIs; they are inventoried but not
 misrepresented as parsed ECU/string content.
 
+The 2026-08-10 high-value residual audit further narrows the security-relevant
+unknowns. All 35 regional `EPS*`/`EMPS*` type-2 files are structurally covered
+through their complete section-type union (up to type 91). In
+`Security_P4.ddb`, type 35 resolves to `Security Alarm Operation` and type 37
+is a 50-record alarm-condition table (`Battery Desorption`, `Hood Open`,
+`Luggage Open`, `Door Open`, etc.), so those previously opaque sections are not
+promoted as SecurityAccess/key-provisioning structures merely because of the
+filename. The remaining high-value format gap is the separate type-1
+`Toyota.ddb` master-enumeration schema; broad decoding is deferred until a
+specific identity/routing question requires it. This boundary is pinned by
+`tests/verify_techstream_ddb_residuals.py`.
+
 ### ECU databases
 
 ECU `.ddb` files expose a type-indexed directory of little-endian `u32` section

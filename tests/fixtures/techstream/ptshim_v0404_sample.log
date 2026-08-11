@@ -1,0 +1,12 @@
+0.125s >> PTWriteMsgs(7, 0x0012F010, 0x0012F020, 100)
+  Msg[ 0] ISO15765. 8 bytes. TxF=0x00000040
+  TxFlags: ISO15765_FRAME_PAD
+  \__000007e022f19000
+  sent 1 of 1 messages
+  0.126s STATUS_NOERROR
+0.250s << PTReadMsgs(7, 0x0012F110, 0x0012F120, 100)
+  Msg[ 0] 12.345678s. ISO15765. Actual data 7 of 8 bytes. RxS=0x00000100
+  RxStatus: ISO15765_ADDR_TYPE
+  \__000007e862f190ff
+  read 1 of 1 messages
+  0.251s ERR_TIMEOUT

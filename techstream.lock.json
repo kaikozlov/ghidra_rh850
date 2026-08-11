@@ -62,7 +62,13 @@
       "path": "Techstream/bin/J2534Ctrl.dll",
       "sha256": "aa371b09b28eeb9aca5c7d948829f94475c7606e70ef34852c77fbea547a8a7a",
       "size": 114688,
-      "role": "J2534 device management layer (open/close/connect/disconnect)"
+      "role": "J2534 device management layer (open/close/connect/disconnect and timestamped ptshim log-save orchestration)"
+    },
+    "Cuw.exe": {
+      "path": "Calibration Update Wizard/Cuw.exe",
+      "sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "size": 4065080,
+      "role": "Native Calibration Update Wizard executable; constructs the RKS request buffer and serializes the 16-byte SeedValue input"
     },
     "CommandCommon.dll": {
       "path": "Techstream/bin/CommandCommon.dll",
@@ -132,7 +138,13 @@
       "path": "Techstream/NA/DB/Security_P4.ddb",
       "sha256": "d642840c0899252b4404650aa4dd96da11bdacd4a48dc8c63e366979d681037e",
       "size": 13084,
-      "description": "Phase-4 SecurityAccess diagnostic database"
+      "description": "Phase-4 security-system diagnostic database; Stage-3 residual audit separates alarm/event vocabulary from cryptographic SecurityAccess semantics"
+    },
+    "Toyota.ddb": {
+      "path": "Techstream/NA/DB/Toyota.ddb",
+      "sha256": "63ee18391421a7b02996eef282bc8ea3251889981d9cf9e1722e89f4952cb19e",
+      "size": 13646849,
+      "description": "Toyota master ECU enumeration database; distinct format-type-1 schema retained as a bounded high-value routing/identity residual"
     },
     "EPS_CAN_P4DK.ddb": {
       "path": "Techstream/NA/DB/EPS_CAN_P4DK.ddb",
