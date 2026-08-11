@@ -311,9 +311,48 @@ paths = ["docs/tooling/techstream.md", "tools/techstream/parse_ptshim_log.py", "
 
 [suite.techstream_ddb_residuals]
 tests = ["tests/verify_techstream_ddb_residuals.py"]
-paths = ["docs/tooling/techstream.md", "docs/tooling/techstream-ddb-pipeline.md", "tools/techstream/parse_ddb.py", "techstream.lock.json"]
+paths = [
+  "docs/tooling/techstream.md",
+  "docs/tooling/techstream-ddb-pipeline.md",
+  "tools/techstream/parse_ddb.py",
+  "tools/techstream/extract_factory_table_map.py",
+  "data/generated/techstream_v18/ddb_factory_table_map.json",
+  "techstream.lock.json",
+]
 # Bounded current-state audit: Security_P4 high-value unknowns plus the separate
 # Toyota.ddb type-1 master-enumeration schema. SKIPs when the external tree is absent.
+
+[suite.techstream_master_routes]
+tests = ["tests/verify_techstream_master_routes.py"]
+paths = [
+  "tools/techstream/parse_ddb.py",
+  "tools/techstream/extract_toyota_master_routes.py",
+  "data/generated/techstream_v18/toyota_master_routes.json",
+  "docs/tooling/techstream.md",
+  "docs/tooling/techstream-ddb-pipeline.md",
+]
+
+[suite.techstream_priority_ddb_semantics]
+tests = ["tests/verify_techstream_priority_ddb_semantics.py"]
+paths = [
+  "tools/techstream/parse_ddb.py",
+  "tools/techstream/extract_priority_ddb_semantics.py",
+  "data/generated/techstream_v18/priority_steering_ddb_semantics.json",
+  "docs/tooling/techstream.md",
+  "docs/tooling/techstream-ddb-pipeline.md",
+]
+
+[suite.techstream_dtc_failure_types]
+tests = ["tests/verify_techstream_dtc_failure_types.py"]
+paths = [
+  "tools/techstream/parse_ddb.py",
+  "tools/techstream/generate_dtc_failure_types.py",
+  "data/generated/techstream_v18/dtc_failure_types.json",
+  "tests/fixtures/techstream/ddb/emps_p5_u023a87_record.hex",
+  "docs/tooling/techstream-ddb-pipeline.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+]
 
 [suite.techstream_mackey]
 tests = ["tests/verify_techstream_mackey.py"]

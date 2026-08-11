@@ -28,6 +28,9 @@ Three new tools implement the extraction pipeline:
 |---|---|
 | `tools/techstream/parse_ddb.py` | Parse `.ddb` binary format: sections, LZSS decompression, string resolution |
 | `tools/techstream/extract_catalog.py` | Build `diagnostic_annotations.json` from DDB corpus |
+| `tools/techstream/extract_factory_table_map.py` | Derive both table-class maps from PE switch targets and constructor exports |
+| `tools/techstream/extract_toyota_master_routes.py` | Join priority master categories to regional DLL/function/detail rows |
+| `tools/techstream/extract_priority_ddb_semantics.py` | Emit consumer-proven priority fields while retaining all raw bytes |
 | `tools/pe` (modified) | Fixed `import` to use `analyzeHeadless` for full PE analysis |
 
 Calibration-focused output:
@@ -36,7 +39,7 @@ Calibration-focused output:
 monitors, 177 steering-anchored
 `U_English` strings). The complete regional output is
 `data/generated/techstream_v18/steering_diagnostic_corpus.json`: 35 source
-files, 25 full-section semantic variants, 129 unique DTC IDs, one actual
+files, 25 structural payload variants, 129 unique DTC IDs, one actual
 `CDbDidTable` record, 146 `CDbSupPidTable` records with 16 unique raw keys, and
 1,257 freeze-data monitor records.
 
@@ -81,11 +84,16 @@ filename. KgpDataCtrl's two pinned table factories now identify the relevant
 type-1/type-2 section classes. All three regional type-1 `Toyota.ddb`
 directories are fully covered structurally and expose, among others, CAN communication, ECU
 category/function/description, DLL, communication-DID, and communication-RID
-tables. Its exact bytes contain no `8965B4512000` identifier; record-level
-decoding remains demand-driven. Compressed EU master payloads remain on-disk
-bytes, and the parser rejects record-size access for them rather than treating
-compressed length as a decoded layout. This boundary is pinned by
-`tests/verify_techstream_ddb_residuals.py`.
+tables. The generated factory map independently resolves all 89 format-1 and
+151 format-2 cases from executable switch targets to constructor exports.
+Priority master routing is decoded further: section-16 record 294 maps category
+317 to `EPS_P4DK3.ddb`, while record 496 maps category 581 to
+`EPS_CAN_P4DK.ddb`; category IDs join to type-19 DLL and type-26/27
+function/detail rows across the regions where those databases exist. Exact
+source bytes and unresolved communication-DID/RID category edges remain in
+`toyota_master_routes.json`. Its exact bytes still contain no
+`8965B4512000` identifier, so the result is a family route, not a calibration
+identity match.
 
 ### ECU databases
 
@@ -121,6 +129,15 @@ Section types observed in EPS databases:
 | 15–16 | — | — | `CDbUnitTable` / `CDbTriggerListTable` |
 | 18–91 (steering corpus) | — | — | Factory-classified and structurally inventoried; field semantics selectively bounded |
 
+The selective decode is reproducible rather than label-only. Exported
+KgpDataCtrl lookup, string-resolution, variable-resolution, and sort methods
+prove field offsets for types 6/11/12/61/62/63/80/87/88/90/91. The generated
+priority artifact covers 32 steering files, 76 section instances, and 6,521
+records. Each named field carries its consumer RVA and method-prefix hash, and
+each record retains complete `raw_hex`; unknown bytes remain unknown. See
+`data/generated/techstream_v18/priority_steering_ddb_semantics.json` and
+`tests/verify_techstream_priority_ddb_semantics.py`.
+
 ### DTC record format (section type 5, 28 bytes)
 
 ```
@@ -142,7 +159,7 @@ Across 131 pinned V18 databases this section has a stable 68-byte record shape:
 [0x30:0x34] u32 base-description string index in M_English
 [0x34:0x38] u32 failure-type string index in M_English
 [0x38:0x40] additional fields, semantics not yet assigned
-[0x40:0x44] u32 enabled/status word
+[0x40:0x44] u32 tail word (extracted; semantics not attributed)
 ```
 
 `tools/techstream/generate_dtc_failure_types.py` scans all such records and
@@ -163,14 +180,18 @@ direct Toyota/Techstream mapping for standard failure-type bytes:
 The `0x87` mapping is especially strong: 1,519 section-65 records point to
 `M_English` index 64829, exactly `Missing Message`; another 27 records use the
 same text with alternate string indices/case, while the remaining 130 records
-carry only raw `87`/`$87` labels. For `U023A87` specifically, all 20 enabled P5
-records resolve the failure text to `Missing Message`. `EMPS_P5.ddb` record 125
+carry only raw `87`/`$87` labels. For `U023A87` specifically, all 20 records
+whose `+0x40` tail word is nonzero resolve the failure text to `Missing Message`.
+No pinned accessor names that word as an enable flag. `EMPS_P5.ddb` record 125
 is an exact example: packed `0xC23A87`, base description `Lost Communication
 with Image Processing Module "A"`, failure string `Missing Message`.
 
 This closes the earlier ambiguity around the field-reported RAV4 Prime code:
 Techstream itself statically defines the `0x87` suffix as **Missing Message**;
-it is not an inferred UI paraphrase.
+it is not an inferred UI paraphrase. The verifier independently walks the raw
+directory, matches an immutable 68-byte fixture, and pins the exported consumer
+extents proving `+0x2C`, `+0x30`, and `+0x34`; swapping the parser string-index
+offsets therefore fails independently.
 
 ### String databases
 

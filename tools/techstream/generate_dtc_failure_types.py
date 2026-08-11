@@ -29,7 +29,7 @@ def build(db_root: Path) -> dict:
     strings = parser.load_string_db(db_root / "M_English.ddb")
     suffix_map: dict[int, Counter[tuple[int, str | None]]] = defaultdict(Counter)
     u023a_records: list[dict] = []
-    databases = records = enabled_records = 0
+    databases = records = nonzero_tail_records = 0
 
     for path in sorted(db_root.glob("*.ddb"), key=lambda p: p.name.lower()):
         try:
@@ -44,7 +44,7 @@ def build(db_root: Path) -> dict:
             if not entry.code:
                 continue
             records += 1
-            enabled_records += int(entry.enabled != 0)
+            nonzero_tail_records += int(entry.tail_word != 0)
             failure_text = strings.get_string(entry.failure_string_index)
             suffix_map[entry.failure_type][(entry.failure_string_index, failure_text)] += 1
             if entry.code.upper().startswith("U023A"):
@@ -59,7 +59,7 @@ def build(db_root: Path) -> dict:
                     "description": strings.get_string(entry.description_string_index),
                     "failure_string_index": entry.failure_string_index,
                     "failure_text": failure_text,
-                    "enabled": bool(entry.enabled),
+                    "tail_word": entry.tail_word,
                     "raw_sha256": __import__("hashlib").sha256(entry.raw).hexdigest(),
                 })
 
@@ -77,7 +77,7 @@ def build(db_root: Path) -> dict:
         ]
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "source": {
             "db_root": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB",
             "string_database": "M_English.ddb",
@@ -88,13 +88,13 @@ def build(db_root: Path) -> dict:
                 "packed_dtc": "0x2C",
                 "description_string_index": "0x30",
                 "failure_string_index": "0x34",
-                "enabled": "0x40",
+                "tail_word": "0x40 (deterministic extraction; semantic attribution bounded)",
             },
         },
         "counts": {
             "databases_with_section65_68": databases,
             "nonempty_records": records,
-            "enabled_records": enabled_records,
+            "nonzero_tail_records": nonzero_tail_records,
         },
         "failure_types": suffixes,
         "u023a_records": u023a_records,

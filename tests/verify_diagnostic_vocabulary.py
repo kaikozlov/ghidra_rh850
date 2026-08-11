@@ -757,8 +757,8 @@ check("committed steering corpus exactly matches deterministic rebuild",
 summary = committed_corpus["summary"]
 check("all 35 regional EPS/EMPS files are inventoried",
       summary["source_files"] == 35)
-check("regional corpus has 25 full-section semantic variants",
-      summary["semantic_variants"] == 25)
+check("regional corpus has 25 structural payload variants",
+      summary["structural_payload_variants"] == 25)
 check("regional corpus recovers 129 unique DTC identifiers",
       summary["unique_dtc_identifiers"] == 129)
 check("regional corpus has one real CDbDidTable record",
@@ -777,7 +777,7 @@ check("corpus source list equals raw filesystem discovery",
       committed_corpus["source_files"] == raw_sources)
 variant_sections_by_source = {
     source: {int(type_id) for type_id in variant["sections"]}
-    for variant in committed_corpus["semantic_variants"]
+    for variant in committed_corpus["structural_payload_variants"]
     for source in variant["source_files"]
 }
 check("corpus section inventories equal independent raw directory walk",

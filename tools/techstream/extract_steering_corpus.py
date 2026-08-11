@@ -4,7 +4,7 @@
 The Sienna correlation pipeline intentionally uses two NA EPS databases for
 firmware annotation.  This companion artifact inventories and decodes every
 EPS/EMPS database across NA, JP, and EU so variant evidence is not silently
-lost.  Byte-identical semantic variants are grouped while preserving all source
+lost. Byte-identical structural payload variants are grouped while preserving all source
 paths.
 """
 
@@ -27,8 +27,8 @@ OUTPUT_PATH = (
 )
 
 
-def semantic_hash(db: ECUDataBase) -> str:
-    """Hash parsed section metadata and payloads, ignoring regional file tags."""
+def structural_payload_hash(db: ECUDataBase) -> str:
+    """Hash section metadata and raw payloads without implying full semantics."""
     digest = hashlib.sha256()
     digest.update(bytes([db.format_version]))
     for section_type, section in sorted(db.sections.items()):
@@ -151,12 +151,12 @@ def build_steering_corpus() -> dict:
     groups: dict[str, dict] = {}
     for path in source_paths:
         db = parser.parse_ecu_db(path)
-        digest = semantic_hash(db)
+        digest = structural_payload_hash(db)
         relative_path = path.relative_to(TECHSTREAM_ROOT).as_posix()
         group = groups.get(digest)
         if group is None:
             group = {
-                "semantic_sha256": digest,
+                "structural_payload_sha256": digest,
                 "representative_file": relative_path,
                 "source_files": [],
                 "format_version": db.format_version,
@@ -196,7 +196,8 @@ def build_steering_corpus() -> dict:
     return {
         "description": (
             "Complete regional Techstream V18 EPS/EMPS diagnostic corpus. "
-            "Semantic duplicates are grouped; no firmware-calibration match is implied."
+            "Byte-identical structural payloads are grouped; no complete semantic "
+            "decode or firmware-calibration match is implied."
         ),
         "techstream_distribution": "V18.00.003",
         "string_database": {
@@ -206,7 +207,7 @@ def build_steering_corpus() -> dict:
         },
         "summary": {
             "source_files": len(source_paths),
-            "semantic_variants": len(variants),
+            "structural_payload_variants": len(variants),
             "dtc_records": sum(len(variant["dtcs"]) for variant in variants),
             "unique_dtc_identifiers": len(dtc_ids),
             "did_records": sum(len(variant["dids"]) for variant in variants),
@@ -222,7 +223,7 @@ def build_steering_corpus() -> dict:
         "source_files": [
             path.relative_to(TECHSTREAM_ROOT).as_posix() for path in source_paths
         ],
-        "semantic_variants": variants,
+        "structural_payload_variants": variants,
     }
 
 
@@ -234,7 +235,7 @@ def main() -> None:
     print(f"Wrote {OUTPUT_PATH}")
     print(
         f"  {summary['source_files']} files, "
-        f"{summary['semantic_variants']} semantic variants"
+        f"{summary['structural_payload_variants']} structural payload variants"
     )
     print(
         f"  {summary['unique_dtc_identifiers']} unique DTC IDs, "

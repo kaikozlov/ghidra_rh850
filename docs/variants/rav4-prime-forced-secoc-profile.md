@@ -140,7 +140,8 @@ rendering. Techstream's P5 section-65 DTC/failure table now independently proves
 that suffix: the record stores packed `0xC23A87` and resolves failure byte
 `0x87` through `M_English` to **Missing Message**. Across the complete pinned P5
 corpus, 1,519 failure-`0x87` records use the canonical `Missing Message` string
-index and all 20 enabled `U023A87` records resolve to that text. `EMPS_P5.ddb`
+index and all 20 nonzero-tail `U023A87` records resolve to that text. The
+`+0x40` tail word is not attributed as an enable flag. `EMPS_P5.ddb`
 contains the exact combination `Lost Communication with Image Processing Module
 "A"` + `Missing Message`.
 

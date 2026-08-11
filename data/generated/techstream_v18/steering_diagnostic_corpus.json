@@ -1,5 +1,5 @@
 {
-  "description": "Complete regional Techstream V18 EPS/EMPS diagnostic corpus. Semantic duplicates are grouped; no firmware-calibration match is implied.",
+  "description": "Complete regional Techstream V18 EPS/EMPS diagnostic corpus. Byte-identical structural payloads are grouped; no complete semantic decode or firmware-calibration match is implied.",
   "techstream_distribution": "V18.00.003",
   "string_database": {
     "file": "NA/DB/M_English.ddb",
@@ -8,7 +8,7 @@
   },
   "summary": {
     "source_files": 35,
-    "semantic_variants": 25,
+    "structural_payload_variants": 25,
     "dtc_records": 883,
     "unique_dtc_identifiers": 129,
     "did_records": 1,
@@ -54,9 +54,9 @@
     "NA/DB/EPS_CAN_P4DK.ddb",
     "NA/DB/EPS_P4DK3.ddb"
   ],
-  "semantic_variants": [
+  "structural_payload_variants": [
     {
-      "semantic_sha256": "7620a008b70f33c0b948facbbaf30688922bb926a2f4c1202f1300891fc11b47",
+      "structural_payload_sha256": "7620a008b70f33c0b948facbbaf30688922bb926a2f4c1202f1300891fc11b47",
       "representative_file": "EU/DB/EMPS2_P5.ddb",
       "source_files": [
         "EU/DB/EMPS2_P5.ddb",
@@ -156,7 +156,7 @@
       "monitors": []
     },
     {
-      "semantic_sha256": "e0754add4a74794aa2cda1d1c705f64bf28ce831e64e274afeddb7b46f5f102f",
+      "structural_payload_sha256": "e0754add4a74794aa2cda1d1c705f64bf28ce831e64e274afeddb7b46f5f102f",
       "representative_file": "EU/DB/EMPS_P3.ddb",
       "source_files": [
         "EU/DB/EMPS_P3.ddb",
@@ -1356,7 +1356,7 @@
       ]
     },
     {
-      "semantic_sha256": "857580a6810b916d1969d29bee30f166277d5270fc616a6e1b70c90fe1f04a43",
+      "structural_payload_sha256": "857580a6810b916d1969d29bee30f166277d5270fc616a6e1b70c90fe1f04a43",
       "representative_file": "EU/DB/EMPS_P4.ddb",
       "source_files": [
         "EU/DB/EMPS_P4.ddb"
@@ -3340,7 +3340,7 @@
       ]
     },
     {
-      "semantic_sha256": "31a5bd38212029a366169071fad3396df91e9d30bc4896cabf25a1ca6baefdf3",
+      "structural_payload_sha256": "31a5bd38212029a366169071fad3396df91e9d30bc4896cabf25a1ca6baefdf3",
       "representative_file": "EU/DB/EMPS_P4FHI.ddb",
       "source_files": [
         "EU/DB/EMPS_P4FHI.ddb",
@@ -4512,7 +4512,7 @@
       ]
     },
     {
-      "semantic_sha256": "2b31779a93ebf98179eaadc7efa45431629abe3af03c5c8e90321cf1ddaa8682",
+      "structural_payload_sha256": "2b31779a93ebf98179eaadc7efa45431629abe3af03c5c8e90321cf1ddaa8682",
       "representative_file": "EU/DB/EMPS_P5.ddb",
       "source_files": [
         "EU/DB/EMPS_P5.ddb"
@@ -4611,7 +4611,7 @@
       "monitors": []
     },
     {
-      "semantic_sha256": "7457b6ffec0adc4617efadebeee3d4fbb02c9c4a5024dca2b3da159186d19a6b",
+      "structural_payload_sha256": "7457b6ffec0adc4617efadebeee3d4fbb02c9c4a5024dca2b3da159186d19a6b",
       "representative_file": "EU/DB/EMPS_Pri_P3.ddb",
       "source_files": [
         "EU/DB/EMPS_Pri_P3.ddb",
@@ -4631,7 +4631,7 @@
       "monitors": []
     },
     {
-      "semantic_sha256": "b779a62d4820e737653607519c50fba146c274125dac103a115f48a6f14b0a5d",
+      "structural_payload_sha256": "b779a62d4820e737653607519c50fba146c274125dac103a115f48a6f14b0a5d",
       "representative_file": "EU/DB/EPS_CAN_P4DK.ddb",
       "source_files": [
         "EU/DB/EPS_CAN_P4DK.ddb",
@@ -5740,7 +5740,7 @@
       ]
     },
     {
-      "semantic_sha256": "82c96d2d9017c686f24f42aa38f02a3e81a207267c12e651f57a2f31eb62109c",
+      "structural_payload_sha256": "82c96d2d9017c686f24f42aa38f02a3e81a207267c12e651f57a2f31eb62109c",
       "representative_file": "EU/DB/EPS_P4DK.ddb",
       "source_files": [
         "EU/DB/EPS_P4DK.ddb"
@@ -6409,7 +6409,7 @@
       ]
     },
     {
-      "semantic_sha256": "d67f0e56443e6b04e082ce5c8b0f4938c2960fd84d9c4b14b7a8a883aed73026",
+      "structural_payload_sha256": "d67f0e56443e6b04e082ce5c8b0f4938c2960fd84d9c4b14b7a8a883aed73026",
       "representative_file": "EU/DB/EPS_P4DK3.ddb",
       "source_files": [
         "EU/DB/EPS_P4DK3.ddb",
@@ -7065,7 +7065,7 @@
       ]
     },
     {
-      "semantic_sha256": "8be3c691673ce4bcd4451bfb07016d78450cb7b0a9469469ca294e6f1344ab46",
+      "structural_payload_sha256": "8be3c691673ce4bcd4451bfb07016d78450cb7b0a9469469ca294e6f1344ab46",
       "representative_file": "EU/DB/EPS_PSA.ddb",
       "source_files": [
         "EU/DB/EPS_PSA.ddb"
@@ -7581,7 +7581,7 @@
       ]
     },
     {
-      "semantic_sha256": "5ef1b41848ff9a0acf63615dada6d6334ea619687e55dee9f21118432cb56f0f",
+      "structural_payload_sha256": "5ef1b41848ff9a0acf63615dada6d6334ea619687e55dee9f21118432cb56f0f",
       "representative_file": "JP/DB/EMPS_P3.ddb",
       "source_files": [
         "JP/DB/EMPS_P3.ddb"
@@ -8632,7 +8632,7 @@
       ]
     },
     {
-      "semantic_sha256": "149e19c3c1ccb2eded913df4c5333fcfd944484e4564cb03cc03f83321f4a14e",
+      "structural_payload_sha256": "149e19c3c1ccb2eded913df4c5333fcfd944484e4564cb03cc03f83321f4a14e",
       "representative_file": "JP/DB/EMPS_P3_2.ddb",
       "source_files": [
         "JP/DB/EMPS_P3_2.ddb",
@@ -9680,7 +9680,7 @@
       ]
     },
     {
-      "semantic_sha256": "65b325d3f967c59b43f87304048860c15d1e42b64297e6026b2f43b7b4bcc016",
+      "structural_payload_sha256": "65b325d3f967c59b43f87304048860c15d1e42b64297e6026b2f43b7b4bcc016",
       "representative_file": "JP/DB/EMPS_P4.ddb",
       "source_files": [
         "JP/DB/EMPS_P4.ddb"
@@ -11665,7 +11665,7 @@
       ]
     },
     {
-      "semantic_sha256": "65bf081402191e184775b7319f776e1e7f0535d0315ba46d8587dd24471e9fe5",
+      "structural_payload_sha256": "65bf081402191e184775b7319f776e1e7f0535d0315ba46d8587dd24471e9fe5",
       "representative_file": "JP/DB/EMPS_P4_2.ddb",
       "source_files": [
         "JP/DB/EMPS_P4_2.ddb"
@@ -13645,7 +13645,7 @@
       ]
     },
     {
-      "semantic_sha256": "c229bd557fdab1352169ee915a1b3edb52094df6d749fadb541db4ee2b4d6893",
+      "structural_payload_sha256": "c229bd557fdab1352169ee915a1b3edb52094df6d749fadb541db4ee2b4d6893",
       "representative_file": "JP/DB/EMPS_P5.ddb",
       "source_files": [
         "JP/DB/EMPS_P5.ddb"
@@ -13744,7 +13744,7 @@
       "monitors": []
     },
     {
-      "semantic_sha256": "21a84ea77a6798b7feaff6cc9e862016281c7494f6b082dcb07ee2854d07ad91",
+      "structural_payload_sha256": "21a84ea77a6798b7feaff6cc9e862016281c7494f6b082dcb07ee2854d07ad91",
       "representative_file": "JP/DB/EMPS_Pri_P3.ddb",
       "source_files": [
         "JP/DB/EMPS_Pri_P3.ddb"
@@ -14019,7 +14019,7 @@
       "monitors": []
     },
     {
-      "semantic_sha256": "9924eda1acdc29ef7e503fc88e536caabdf4d31f6839e41d3b2092800e7cd4d2",
+      "structural_payload_sha256": "9924eda1acdc29ef7e503fc88e536caabdf4d31f6839e41d3b2092800e7cd4d2",
       "representative_file": "JP/DB/EPSNEW_KWPDK.ddb",
       "source_files": [
         "JP/DB/EPSNEW_KWPDK.ddb"
@@ -14878,7 +14878,7 @@
       ]
     },
     {
-      "semantic_sha256": "25c77c70c046df142729f921c285932476ac040af2c3edd043bd429355456350",
+      "structural_payload_sha256": "25c77c70c046df142729f921c285932476ac040af2c3edd043bd429355456350",
       "representative_file": "JP/DB/EPS_CAN_P4DK2.ddb",
       "source_files": [
         "JP/DB/EPS_CAN_P4DK2.ddb"
@@ -15923,7 +15923,7 @@
       ]
     },
     {
-      "semantic_sha256": "1eab224112c080c70eaac3b7b495541253d1bc3ef3bdf37defbccf0d4b6c7c25",
+      "structural_payload_sha256": "1eab224112c080c70eaac3b7b495541253d1bc3ef3bdf37defbccf0d4b6c7c25",
       "representative_file": "JP/DB/EPS_P3DK.ddb",
       "source_files": [
         "JP/DB/EPS_P3DK.ddb"
@@ -16663,7 +16663,7 @@
       ]
     },
     {
-      "semantic_sha256": "76076b701caf83f3f64f50a9cfaf2773c1c6c12193c6dd4a5821d7ff411c3cc8",
+      "structural_payload_sha256": "76076b701caf83f3f64f50a9cfaf2773c1c6c12193c6dd4a5821d7ff411c3cc8",
       "representative_file": "JP/DB/EPS_P4DK.ddb",
       "source_files": [
         "JP/DB/EPS_P4DK.ddb"
@@ -17472,7 +17472,7 @@
       ]
     },
     {
-      "semantic_sha256": "d2c06189edee1bac678a405da8a8f0c94db1bd725f0ca1f9768b09b41554b67b",
+      "structural_payload_sha256": "d2c06189edee1bac678a405da8a8f0c94db1bd725f0ca1f9768b09b41554b67b",
       "representative_file": "JP/DB/EPS_P4DK2.ddb",
       "source_files": [
         "JP/DB/EPS_P4DK2.ddb"
@@ -18239,7 +18239,7 @@
       ]
     },
     {
-      "semantic_sha256": "56d2803bfb4c85242adff8a3e169bf359b7fb6a50d3258fd651342d4185da153",
+      "structural_payload_sha256": "56d2803bfb4c85242adff8a3e169bf359b7fb6a50d3258fd651342d4185da153",
       "representative_file": "JP/DB/EPS_P4DK4.ddb",
       "source_files": [
         "JP/DB/EPS_P4DK4.ddb"
@@ -19631,7 +19631,7 @@
       ]
     },
     {
-      "semantic_sha256": "9a5c4172107f523ec6bfab24d8fce48a3627b21543bdc0a4389260fa0abd740b",
+      "structural_payload_sha256": "9a5c4172107f523ec6bfab24d8fce48a3627b21543bdc0a4389260fa0abd740b",
       "representative_file": "NA/DB/EMPS2_P5.ddb",
       "source_files": [
         "NA/DB/EMPS2_P5.ddb"
@@ -19730,7 +19730,7 @@
       "monitors": []
     },
     {
-      "semantic_sha256": "8953813d4befdbf56369de770872ade13ecf4110a1c325822cd74232acd398c5",
+      "structural_payload_sha256": "8953813d4befdbf56369de770872ade13ecf4110a1c325822cd74232acd398c5",
       "representative_file": "NA/DB/EMPS_P4.ddb",
       "source_files": [
         "NA/DB/EMPS_P4.ddb"
@@ -21714,7 +21714,7 @@
       ]
     },
     {
-      "semantic_sha256": "6cabf85b7a39a89ef92959479cb04fea618ae3fd3baaad50546b725d3adff353",
+      "structural_payload_sha256": "6cabf85b7a39a89ef92959479cb04fea618ae3fd3baaad50546b725d3adff353",
       "representative_file": "NA/DB/EMPS_P5.ddb",
       "source_files": [
         "NA/DB/EMPS_P5.ddb"

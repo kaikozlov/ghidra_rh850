@@ -1,8 +1,8 @@
 {
   "counts": {
     "databases_with_section65_68": 131,
-    "enabled_records": 13068,
-    "nonempty_records": 15564
+    "nonempty_records": 15564,
+    "nonzero_tail_records": 13068
   },
   "failure_types": {
     "0x00": [
@@ -2401,15 +2401,15 @@
       }
     ]
   },
-  "schema_version": 1,
+  "schema_version": 2,
   "source": {
     "db_root": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB",
     "field_offsets": {
       "code_utf16": "0x00..0x2B",
       "description_string_index": "0x30",
-      "enabled": "0x40",
       "failure_string_index": "0x34",
-      "packed_dtc": "0x2C"
+      "packed_dtc": "0x2C",
+      "tail_word": "0x40 (deterministic extraction; semantic attribution bounded)"
     },
     "record_size": 68,
     "section_type": 65,
@@ -2422,13 +2422,13 @@
       "database": "A_B_CAN_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 414
+      "record_index": 414,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2436,13 +2436,13 @@
       "database": "ADS_Eth_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 30
+      "record_index": 30,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2450,13 +2450,13 @@
       "database": "BCM_P5MMC.ddb",
       "description": "Lost Communication With Image Processing Module A",
       "description_string_index": 92577,
-      "enabled": true,
       "failure_string_index": 0,
       "failure_text": null,
       "failure_type": "0x00",
       "packed_dtc": "0xC23A00",
       "raw_sha256": "de5c5ff2e0132ab5bbf9bc2386d5fe2d1e39dba3130b0244802e031b5c54c694",
-      "record_index": 47
+      "record_index": 47,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2464,13 +2464,13 @@
       "database": "CMCCM_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 33
+      "record_index": 33,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2478,13 +2478,13 @@
       "database": "CMU_P5MMC.ddb",
       "description": "Lost Communication With Image Processing Module A",
       "description_string_index": 92577,
-      "enabled": true,
       "failure_string_index": 0,
       "failure_text": null,
       "failure_type": "0x00",
       "packed_dtc": "0xC23A00",
       "raw_sha256": "de5c5ff2e0132ab5bbf9bc2386d5fe2d1e39dba3130b0244802e031b5c54c694",
-      "record_index": 45
+      "record_index": 45,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2492,13 +2492,13 @@
       "database": "DMC_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 15
+      "record_index": 15,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2506,13 +2506,13 @@
       "database": "DSSystem_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 18
+      "record_index": 18,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2520,13 +2520,13 @@
       "database": "EMPS2_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 134
+      "record_index": 134,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2534,13 +2534,13 @@
       "database": "EMPS_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\" (System 2) Missing Message",
       "description_string_index": 154137,
-      "enabled": true,
       "failure_string_index": 0,
       "failure_text": null,
       "failure_type": "0x00",
       "packed_dtc": "0xC23A00",
       "raw_sha256": "a88e3fb727452e081a61d308985be84709a735b11d848c6de065ae46cdd04bbd",
-      "record_index": 124
+      "record_index": 124,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2548,13 +2548,13 @@
       "database": "EMPS_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 125
+      "record_index": 125,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2562,13 +2562,13 @@
       "database": "HeadUpDisp_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 100159,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "3132216251372b28b900736e5266095e194acb546ef5b479c4941249fa95c901",
-      "record_index": 12
+      "record_index": 12,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2576,13 +2576,13 @@
       "database": "HV_CCS_P5.ddb",
       "description": "U023A",
       "description_string_index": 160791,
-      "enabled": false,
       "failure_string_index": 128541,
       "failure_text": "$87",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "ec74ee203fe0538d5ed236275d7b6a32d885edd3c78021f326ad27d638d745ab",
-      "record_index": 760
+      "record_index": 760,
+      "tail_word": 0
     },
     {
       "base_dtc": "0xC23A",
@@ -2590,13 +2590,13 @@
       "database": "HV_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 751
+      "record_index": 751,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2604,13 +2604,13 @@
       "database": "IC_P5MMC.ddb",
       "description": "Lost Communication With Image Processing Module A",
       "description_string_index": 92577,
-      "enabled": true,
       "failure_string_index": 0,
       "failure_text": null,
       "failure_type": "0x00",
       "packed_dtc": "0xC23A00",
       "raw_sha256": "de5c5ff2e0132ab5bbf9bc2386d5fe2d1e39dba3130b0244802e031b5c54c694",
-      "record_index": 17
+      "record_index": 17,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2618,13 +2618,13 @@
       "database": "IFBox_Eth_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 16
+      "record_index": 16,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2632,13 +2632,13 @@
       "database": "IPA_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 53
+      "record_index": 53,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2646,13 +2646,13 @@
       "database": "JBUnity_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 142
+      "record_index": 142,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2660,13 +2660,13 @@
       "database": "LAMP_Main_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 35
+      "record_index": 35,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2674,13 +2674,13 @@
       "database": "LAMP_Sub_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 21
+      "record_index": 21,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2688,13 +2688,13 @@
       "database": "LDA_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 15
+      "record_index": 15,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2702,13 +2702,13 @@
       "database": "Meter_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 100159,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "3132216251372b28b900736e5266095e194acb546ef5b479c4941249fa95c901",
-      "record_index": 53
+      "record_index": 53,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2716,13 +2716,13 @@
       "database": "PCS2_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 13
+      "record_index": 13,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2730,13 +2730,13 @@
       "database": "RCS2_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 7
+      "record_index": 7,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2744,13 +2744,13 @@
       "database": "SIS_Eth_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 16
+      "record_index": 16,
+      "tail_word": 1
     },
     {
       "base_dtc": "0xC23A",
@@ -2758,13 +2758,13 @@
       "database": "Stop&Start_P5.ddb",
       "description": "Lost Communication with Image Processing Module \"A\"",
       "description_string_index": 120724,
-      "enabled": true,
       "failure_string_index": 64829,
       "failure_text": "Missing Message",
       "failure_type": "0x87",
       "packed_dtc": "0xC23A87",
       "raw_sha256": "d5ffa0e4f2a2998f33f0ad7861a44c290584a4ee6c3254f8a5d2d15e8ab437e9",
-      "record_index": 155
+      "record_index": 155,
+      "tail_word": 1
     }
   ]
 }

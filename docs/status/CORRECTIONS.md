@@ -605,3 +605,21 @@ the mistakes are not re-made.
 - **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §§5.1–5.2;
   `data/generated/techstream_v18/cuw_writer_inventory.json`;
   `tests/verify_techstream_cuw_writer_routes.py`.
+
+### CORR-036 — DDB structural hashes and the P5 tail word were overnamed
+
+- **Wrong:** TMS-013 and the steering corpus called raw full-section hashes
+  “semantic variants” even though many included sections were only
+  structurally inventoried. TMS-015 called the type-65 word at `+0x40`
+  “enabled” without a pinned consumer proving that attribution.
+- **Right:** the schema now says `structural_payload_sha256` and
+  `structural_payload_variants`. Priority sections name only fields used by
+  pinned lookup/string/variable/sort consumers and retain every raw byte. For
+  type 65, exported consumers prove packed code `+0x2C` and string indices
+  `+0x30/+0x34`; `+0x40` remains a deterministic `tail_word`. The 20 relevant
+  `U023A87` rows are therefore described as nonzero-tail records, not enabled
+  records. The `0x87 = Missing Message` mapping is unchanged.
+- **Canonical:** [../tooling/techstream-ddb-pipeline.md](../tooling/techstream-ddb-pipeline.md);
+  `data/generated/techstream_v18/priority_steering_ddb_semantics.json`;
+  `tests/verify_techstream_priority_ddb_semantics.py`;
+  `tests/verify_techstream_dtc_failure_types.py`.

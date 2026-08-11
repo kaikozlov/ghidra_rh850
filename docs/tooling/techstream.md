@@ -776,19 +776,41 @@ leading string resolves to **`Security Alarm Operation`**; section type 37 is
 explanations in the companion string field. This high-signal residual is
 therefore vehicle-security/alarm diagnostic vocabulary, not a recovered
 Safekey/MCU-ID/MACKey provisioning table. Other section classes retain their
-factory-derived names and are not assigned field semantics without evidence.
+factory-derived names. The factory map is now itself generated from executable
+evidence: both x86 switch tables are walked from case target to direct
+constructor export, yielding all 89 format-1 and 151 format-2 identities.
+Parser constants are checked against that independent map rather than against a
+duplicated hand-maintained table.
 
 `Toyota.ddb` is a distinct format-type-1 master schema, but it is no longer an
 unknown directory. `parse_master_db()` covers all three regional directories
 (67 NA, 67 EU, and 76 JP sections), and the
 pinned KgpDataCtrl type-1 factory identifies CAN communication, ECU
 category/function/description, DLL, communication-DID, and communication-RID
-tables. Exact Sienna identifier `8965B4512000` is absent. Compressed EU master
-payloads remain bounded on-disk data and cannot be queried for record size as
-if decoded. Record-level semantics remain demand-driven because the recovered
-MACKey protocol does not depend on them.
-`tests/verify_techstream_ddb_residuals.py` pins this boundary and the
-`Security_P4` alarm-domain interpretation.
+tables. Consumer-derived record layouts then close the priority category join:
+
+| Region | section-16 record | Database | category ID | DLL / function / detail rows |
+|---|---:|---|---:|---:|
+| NA, EU | 294 | `EPS_P4DK3.ddb` | 317 | 9 / 3 / 6 |
+| NA, EU, JP | 496 | `EPS_CAN_P4DK.ddb` | 581 | 10 / 5 / 6 |
+
+Every joined row retains its exact decoded bytes, record index, logical offset,
+on-disk offset where uncompressed, regional source hash, string indices, and
+resolved names. Types 62/88 are also decoded to their consumer-proven primary
+and secondary lookup keys, but expose no category-ID field; their onward
+category join remains explicitly unresolved. Exact Sienna identifier
+`8965B4512000` is absent, which does not erase the independently proven family
+routing above. `toyota_master_routes.json` and
+`verify_techstream_master_routes.py` pin the join across NA/EU/JP.
+
+The highest-value steering residuals are likewise decoded only to fields used
+by exported consumers. Across 32 files / 76 section instances / 6,521 records,
+the artifact covers classic PID and active-test types 6/11/12 plus P5 types
+61/62/63/80/87/88/90/91. For example, type 62 proves its name index at `+0x18`,
+monitor lookup key at `+0x24`, and sort key at `+0x30`; type 88 proves its name
+index at `+0x18`, behavior key at `+0x24`, and sort key at `+0x2E`. Complete
+`raw_hex` is retained for every record, so unnamed bytes are not silently
+promoted to semantics. No numeric P5-field → Sienna-firmware join is claimed.
 
 The repository parser now decodes section directories, DTC records,
 factory-identified supported-PID/PID/DID table classes, freeze-data monitor
@@ -802,8 +824,8 @@ The calibration-focused correlation still uses `EPS_P4DK3.ddb` and
 `EPS_CAN_P4DK.ddb` as bounded family vocabulary for the Sienna. A separate
 artifact, `data/generated/techstream_v18/steering_diagnostic_corpus.json`,
 prevents that selection from hiding the rest of the distribution: it discovers
-all **35** regional `EPS*`/`EMPS*` files, groups them into **25** full-section semantic
-variants, and recovers **129** unique DTC identifiers, one actual
+all **35** regional `EPS*`/`EMPS*` files, groups them into **25** byte-identical
+structural payload variants, and recovers **129** unique DTC identifiers, one actual
 `CDbDidTable` record, 146 supported-PID records with 16 unique raw keys, and
 **1,257** freeze-data monitor records. The former parser stopped at directory slot 16 and
 silently omitted 10,659 of 25,361 type-2 sections.

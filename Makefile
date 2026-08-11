@@ -52,6 +52,8 @@ VERIFY_SUITES := \
 	tests/verify_techstream_mackey.py \
 	tests/verify_techstream_ptshim.py \
 	tests/verify_techstream_ddb_residuals.py \
+	tests/verify_techstream_master_routes.py \
+	tests/verify_techstream_priority_ddb_semantics.py \
 	tests/verify_techstream_artifact_lock.py \
 	tests/verify_techstream_crypto_inventory.py \
 	tests/verify_techstream_cuw_writer_routes.py \
@@ -137,6 +139,10 @@ generate-application-diagnostics:
 generate-techstream-corpus:
 	cd tools/techstream && $(PYTHON) extract_steering_corpus.py
 	cd tools/techstream && $(PYTHON) extract_p4dk4_catalog.py
+	$(PYTHON) tools/techstream/extract_factory_table_map.py
+	$(PYTHON) tools/techstream/extract_toyota_master_routes.py
+	$(PYTHON) tools/techstream/extract_priority_ddb_semantics.py
+	$(PYTHON) tools/techstream/generate_dtc_failure_types.py
 
 generate-diagnostic-vocabulary: generate-techstream-corpus
 	cd tools/techstream && $(PYTHON) extract_catalog.py

@@ -510,7 +510,8 @@ word. Scanning all 131 P5 databases with that record shape proves:
 ```
 
 For `0x87`, 1,519 records use the canonical `M_English` index 64829 = `Missing
-Message`; all 20 enabled `U023A87` P5 records resolve to Missing Message. The
+Message`; all 20 nonzero-tail `U023A87` P5 records resolve to Missing Message.
+No pinned consumer proves the `+0x40` tail word is an enable flag. The
 exact `EMPS_P5` row combines `Lost Communication with Image Processing Module
 "A"` with `Missing Message`, so the field-reported suffix is now statically
 proved by Techstream rather than inherited from the screenshot.

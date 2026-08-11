@@ -223,6 +223,11 @@ class Section:
     raw_data: bytes       # the payload bytes
 
     @property
+    def decoded_data(self) -> bytes:
+        """Return the logical table bytes, decompressing a type-1 payload."""
+        return lzss_decompress(self.raw_data) if self.header.compression else self.raw_data
+
+    @property
     def record_size(self) -> int:
         if self.header.compression != 0:
             raise ValueError(
@@ -238,6 +243,20 @@ class Section:
             raise ValueError(
                 f"section {self.header.table_type} payload size "
                 f"{self.header.payload_size} is not divisible by record count "
+                f"{self.header.record_count}"
+            )
+        return size
+
+    @property
+    def decoded_record_size(self) -> int:
+        """Record size after decompression, with integral-shape validation."""
+        if self.header.record_count == 0:
+            return 0
+        size, remainder = divmod(len(self.decoded_data), self.header.record_count)
+        if remainder:
+            raise ValueError(
+                f"decoded section {self.header.table_type} size "
+                f"{len(self.decoded_data)} is not divisible by record count "
                 f"{self.header.record_count}"
             )
         return size
@@ -265,7 +284,7 @@ class DTCFailureEntry:
     packed_dtc: int
     description_string_index: int
     failure_string_index: int
-    enabled: int
+    tail_word: int
     raw: bytes = b""
 
     @property
@@ -275,6 +294,56 @@ class DTCFailureEntry:
     @property
     def base_dtc(self) -> int:
         return (self.packed_dtc >> 8) & 0xFFFF
+
+
+@dataclass
+class MasterEcuCategoryEntry:
+    database_name: str
+    ecu_short_name: str
+    ecu_name_string_index: int
+    category_id: int
+    generation: int
+    raw: bytes
+
+
+@dataclass
+class MasterDllEntry:
+    dll_name: str
+    category_id: int
+    dll_role_id: int
+    raw: bytes
+
+
+@dataclass
+class MasterFunctionEntry:
+    name_string_index: int
+    description_string_index: int
+    category_id: int
+    function_id: int
+    sort_key: int
+    raw: bytes
+
+
+@dataclass
+class MasterFunctionDetailEntry:
+    name_string_index: int
+    category_id: int
+    function_id: int
+    detail_id: int
+    raw: bytes
+
+
+@dataclass
+class PriorityRecord:
+    """Field-proven subset of a priority ECU-table record.
+
+    ``fields`` contains only offsets used by an exported KgpDataCtrl consumer.
+    ``raw`` intentionally retains every byte whose semantics remain unknown.
+    """
+
+    table_type: int
+    fields: dict[str, int | str]
+    raw: bytes
 
 
 @dataclass
@@ -368,6 +437,28 @@ def _extract_utf16le(data: bytes, offset: int, max_len: int = 500) -> str:
             break
         end += 2
     return data[offset:end].decode("utf-16-le", errors="replace")
+
+
+def _fixed_utf16le(data: bytes) -> str:
+    """Decode a fixed-width UTF-16LE field through its first NUL."""
+    return data.decode("utf-16-le", errors="strict").split("\x00", 1)[0]
+
+
+def _records(section: Section, expected_type: int, expected_size: int) -> list[bytes]:
+    if section.header.table_type != expected_type:
+        raise ValueError(
+            f"expected section {expected_type}, got {section.header.table_type}"
+        )
+    data = section.decoded_data
+    if section.decoded_record_size != expected_size:
+        raise ValueError(
+            f"section {expected_type} decoded record size is "
+            f"{section.decoded_record_size}, expected {expected_size}"
+        )
+    return [
+        data[index * expected_size : (index + 1) * expected_size]
+        for index in range(section.header.record_count)
+    ]
 
 
 # ── Parser ────────────────────────────────────────────────────────────────────
@@ -565,6 +656,137 @@ class DDBParser:
     # ── Section-type decoders ─────────────────────────────────────────────────
 
     @staticmethod
+    def extract_master_ecu_categories(section: Section) -> list[MasterEcuCategoryEntry]:
+        """Decode format-1 type 16 fields used by CDbEcuCategory consumers."""
+        return [
+            MasterEcuCategoryEntry(
+                database_name=_fixed_utf16le(raw[0:40]),
+                ecu_short_name=_fixed_utf16le(raw[40:60]),
+                ecu_name_string_index=struct.unpack_from("<I", raw, 60)[0],
+                category_id=struct.unpack_from("<H", raw, 68)[0],
+                generation=struct.unpack_from("<I", raw, 72)[0],
+                raw=raw,
+            )
+            for raw in _records(section, 16, 76)
+        ]
+
+    @staticmethod
+    def extract_master_dlls(section: Section) -> list[MasterDllEntry]:
+        """Decode type 19 filename and its two factory-consumed lookup keys."""
+        return [
+            MasterDllEntry(
+                dll_name=_fixed_utf16le(raw[0:80]),
+                category_id=struct.unpack_from("<H", raw, 80)[0],
+                dll_role_id=raw[86],
+                raw=raw,
+            )
+            for raw in _records(section, 19, 88)
+        ]
+
+    @staticmethod
+    def extract_master_functions(section: Section) -> list[MasterFunctionEntry]:
+        """Decode type 26 string references, category/function keys, and sort key."""
+        return [
+            MasterFunctionEntry(
+                name_string_index=struct.unpack_from("<I", raw, 0)[0],
+                description_string_index=struct.unpack_from("<I", raw, 4)[0],
+                category_id=struct.unpack_from("<H", raw, 8)[0],
+                function_id=struct.unpack_from("<H", raw, 10)[0],
+                sort_key=struct.unpack_from("<H", raw, 20)[0],
+                raw=raw,
+            )
+            for raw in _records(section, 26, 24)
+        ]
+
+    @staticmethod
+    def extract_master_function_details(
+        section: Section,
+    ) -> list[MasterFunctionDetailEntry]:
+        """Decode the three-part type 27 lookup key and its name string index."""
+        return [
+            MasterFunctionDetailEntry(
+                name_string_index=struct.unpack_from("<I", raw, 0)[0],
+                category_id=struct.unpack_from("<H", raw, 4)[0],
+                function_id=struct.unpack_from("<H", raw, 6)[0],
+                detail_id=struct.unpack_from("<H", raw, 8)[0],
+                raw=raw,
+            )
+            for raw in _records(section, 27, 24)
+        ]
+
+    @staticmethod
+    def extract_priority_records(section: Section) -> list[PriorityRecord]:
+        """Decode only consumer-proven fields of priority steering sections.
+
+        Field provenance is pinned in ``extract_priority_ddb_semantics.py``.
+        Unknown/reserved bytes are never discarded because every result carries
+        the complete immutable record in ``raw``.
+        """
+        layouts = {
+            6: (8, lambda r: {"pid_key_u8": r[2]}),
+            11: (
+                92,
+                lambda r: {
+                    "active_test_name_string_index": struct.unpack_from("<I", r, 32)[0],
+                    "secondary_key_u16": struct.unpack_from("<H", r, 56)[0],
+                    "primary_key_u8": r[82],
+                },
+            ),
+            12: (24, lambda r: {"pattern_key_u16": struct.unpack_from("<H", r, 0)[0]}),
+            61: (8, lambda r: {"data_id_u16": struct.unpack_from("<H", r, 2)[0]}),
+            62: (
+                64,
+                lambda r: {
+                    "name_string_index": struct.unpack_from("<I", r, 24)[0],
+                    "monitor_key_u16": struct.unpack_from("<H", r, 36)[0],
+                    "sort_key_u16": struct.unpack_from("<H", r, 48)[0],
+                },
+            ),
+            63: (
+                16,
+                lambda r: {
+                    "lookup_key_u16": struct.unpack_from("<H", r, 0)[0],
+                    "variable_index_u16": struct.unpack_from("<H", r, 2)[0],
+                },
+            ),
+            80: (
+                12,
+                lambda r: {
+                    "lookup_key_u16": struct.unpack_from("<H", r, 0)[0],
+                    "variable_index_u16": struct.unpack_from("<H", r, 2)[0],
+                },
+            ),
+            87: (
+                28,
+                lambda r: {
+                    "behavior_signature": _fixed_utf16le(r[0:12]),
+                    "name_string_index": struct.unpack_from("<I", r, 12)[0],
+                    "comment_string_index": struct.unpack_from("<I", r, 16)[0],
+                },
+            ),
+            88: (
+                60,
+                lambda r: {
+                    "name_string_index": struct.unpack_from("<I", r, 24)[0],
+                    "behavior_key_u16": struct.unpack_from("<H", r, 36)[0],
+                    "sort_key_u16": struct.unpack_from("<H", r, 46)[0],
+                },
+            ),
+            90: (8, lambda r: {"data_id_u16": struct.unpack_from("<H", r, 2)[0]}),
+            91: (12, lambda r: {"behavior_key_u16": struct.unpack_from("<H", r, 0)[0]}),
+        }
+        try:
+            record_size, decoder = layouts[section.header.table_type]
+        except KeyError as exc:
+            raise ValueError(
+                f"section {section.header.table_type} is not a priority decoded layout"
+            ) from exc
+        return [
+            PriorityRecord(section.header.table_type, decoder(raw), raw)
+            for raw in _records(section, section.header.table_type, record_size)
+        ]
+
+    @staticmethod
     def extract_dtcs(section: Section) -> list[DTCEntry]:
         """Extract DTC records from section type 5 (28-byte records)."""
         dtcs = []
@@ -611,7 +833,7 @@ class DDBParser:
                 packed_dtc=struct.unpack_from("<I", raw, 44)[0],
                 description_string_index=struct.unpack_from("<I", raw, 48)[0],
                 failure_string_index=struct.unpack_from("<I", raw, 52)[0],
-                enabled=struct.unpack_from("<I", raw, 64)[0],
+                tail_word=struct.unpack_from("<I", raw, 64)[0],
                 raw=raw,
             ))
         return entries
