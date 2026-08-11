@@ -1,0 +1,591 @@
+{
+  "aes_sbox_hits": [
+    {
+      "artifact": "PCS Data Viewer/C1.C1Pdf.4.dll",
+      "artifact_sha256": "1616fa9421f799d237be0b8661eb14e469fee6f99135d55ab8a218f85f5ed44e",
+      "confidence": "implementation-evidence-not-key-evidence",
+      "file_offset": 315842,
+      "rva": 330178,
+      "va": 285542850
+    },
+    {
+      "artifact": "PCS Data Viewer/C1.C1Report.4.dll",
+      "artifact_sha256": "83fab0fbf497502397f09c8798dff402e4dce94cef6492cf37dfbab2c5c3c83c",
+      "confidence": "implementation-evidence-not-key-evidence",
+      "file_offset": 1870344,
+      "rva": 1884680,
+      "va": 287097352
+    },
+    {
+      "artifact": "Techstream/bin/CommandCommon.dll",
+      "artifact_sha256": "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7",
+      "confidence": "implementation-evidence-not-key-evidence",
+      "file_offset": 722784,
+      "rva": 722784,
+      "va": 269158240
+    },
+    {
+      "artifact": "Techstream/bin/CommandCommon.dll",
+      "artifact_sha256": "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7",
+      "confidence": "implementation-evidence-not-key-evidence",
+      "file_offset": 736124,
+      "rva": 736124,
+      "va": 269171580
+    },
+    {
+      "artifact": "Techstream/bin/DS2ComNK.dll",
+      "artifact_sha256": "266a69d9986d1d7620285424002c4e6b457e775ca779e39db2994fb260c1a4ac",
+      "confidence": "implementation-evidence-not-key-evidence",
+      "file_offset": 229740,
+      "rva": 229740,
+      "va": 268665196
+    },
+    {
+      "artifact": "Techstream/bin/IT3ACNK.dll",
+      "artifact_sha256": "801ac26d0982b7fbf25ac8607d7bfc23d0dbc6229d487b3d2fb55a804dbc4098",
+      "confidence": "implementation-evidence-not-key-evidence",
+      "file_offset": 24808,
+      "rva": 24808,
+      "va": 268460264
+    },
+    {
+      "artifact": "Techstream/bin/IT3UtilityNeoNK.dll",
+      "artifact_sha256": "1953edf8821af8c7df612c383c756b87febb3ce7ba055744305ca5db4c2f37a6",
+      "confidence": "implementation-evidence-not-key-evidence",
+      "file_offset": 196444,
+      "rva": 196444,
+      "va": 268631900
+    },
+    {
+      "artifact": "Techstream/bin/UtilityEx2TY.dll",
+      "artifact_sha256": "79fc495c68eb099a7ebc0d1eefe0eafd80101ac0bc09a58d3f603ed556c84762",
+      "confidence": "implementation-evidence-not-key-evidence",
+      "file_offset": 896676,
+      "rva": 896676,
+      "va": 269332132
+    },
+    {
+      "artifact": "Techstream/bin/UtilityExNK2.dll",
+      "artifact_sha256": "8d9623f028f23876f69cb02baa10e1881c01fa01a4f906013bd36266f7e0fb33",
+      "confidence": "implementation-evidence-not-key-evidence",
+      "file_offset": 1166680,
+      "rva": 1166680,
+      "va": 269602136
+    }
+  ],
+  "constructed_immediate_hits": [
+    {
+      "anchors": {
+        "0x90c43": "b0aa",
+        "0x90c4e": "b0a6",
+        "0x90c59": "b0be",
+        "0x90c67": "b2b0",
+        "0x90c6d": "b1b6",
+        "0x90cac": "b3b2",
+        "0x90cc2": "c644240cb9",
+        "0x90cc9": "c644240eb4",
+        "0x90cce": "c6442412ad",
+        "0x90cd3": "c6442416ac"
+      },
+      "anchors_valid": true,
+      "artifact": "Techstream/bin/CommandCommon.dll",
+      "artifact_sha256": "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7",
+      "confidence": "recovered-key-consumption",
+      "decoded_value": "FUKUMORIYOSIYAMA",
+      "function": "CSecurityAccessAES128::CancelSecurity",
+      "function_rva": 592960,
+      "representation": "x86_adjacent_byte_immediate_reconstruction_then_bitwise_inversion",
+      "stored_value_hex": "b9aab4aab2b0adb6a6b0acb6a6beb2be"
+    },
+    {
+      "anchors": {
+        "0x92026": "c6442414a9",
+        "0x9202b": "c6442415dd",
+        "0x92030": "c64424161b",
+        "0x92035": "c644241766",
+        "0x9203a": "c6442418c7",
+        "0x9203f": "c644241989",
+        "0x92044": "c644241a21",
+        "0x92049": "c644241bb0",
+        "0x9204e": "c644241cea",
+        "0x92053": "c644241d0d",
+        "0x92058": "c644241e1e",
+        "0x9205d": "c644241f99",
+        "0x92062": "c644242018",
+        "0x92067": "c644242132",
+        "0x9206c": "c6442422db",
+        "0x92071": "c644242339"
+      },
+      "anchors_valid": true,
+      "artifact": "Techstream/bin/CommandCommon.dll",
+      "artifact_sha256": "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7",
+      "confidence": "recovered-key-consumption",
+      "decoded_value": "5622e4993876de4f15f2e166e7cd24c6",
+      "function": "CSecurityAccessCGW_DK::CancelSecurity",
+      "function_rva": 597936,
+      "representation": "x86_adjacent_byte_immediate_reconstruction_then_bitwise_inversion",
+      "stored_value_hex": "a9dd1b66c78921b0ea0d1e991832db39"
+    }
+  ],
+  "distribution": "Toyota Techstream V18.00.003",
+  "hits": [
+    {
+      "artifact": "Techstream/bin/DS2ComNK.dll",
+      "artifact_sha256": "266a69d9986d1d7620285424002c4e6b457e775ca779e39db2994fb260c1a4ac",
+      "confidence": "representation-hit",
+      "containing_export": "??_7CPubMG@@6B@",
+      "decoded_ascii": null,
+      "decoded_hex": "5622e4993876de4f15f2e166e7cd24c6",
+      "file_offset": 209216,
+      "references": [
+        {
+          "containing_export": "?T_HV_08_ReadBatteryChargeSts@CPubT_HV@@QAEKXZ",
+          "file_offset": 34010,
+          "reference_kind": "push_imm32",
+          "rva": 34010,
+          "va": 268469466
+        }
+      ],
+      "representation": "raw",
+      "rva": 209216,
+      "va": 268644672,
+      "value_id": "CENTRAL_GATEWAY"
+    },
+    {
+      "artifact": "Techstream/bin/IT3ACNK.dll",
+      "artifact_sha256": "801ac26d0982b7fbf25ac8607d7bfc23d0dbc6229d487b3d2fb55a804dbc4098",
+      "confidence": "bounded-unreferenced-constant",
+      "containing_export": "GenerateSecurityKey6Byte",
+      "decoded_ascii": "bCVaAQnA3fNdDgdl",
+      "decoded_hex": "6243566141516e4133664e644467646c",
+      "file_offset": 32800,
+      "references": [],
+      "representation": "ascii_plaintext",
+      "rva": 32800,
+      "va": 268468256,
+      "value_id": "BCVA_IT3"
+    },
+    {
+      "artifact": "Techstream/bin/IT3ACNK.dll",
+      "artifact_sha256": "801ac26d0982b7fbf25ac8607d7bfc23d0dbc6229d487b3d2fb55a804dbc4098",
+      "confidence": "bounded-unreferenced-constant",
+      "containing_export": "GenerateSecurityKey6Byte",
+      "decoded_ascii": "bCVaAQnA3fNdDgdl",
+      "decoded_hex": "6243566141516e4133664e644467646c",
+      "file_offset": 32800,
+      "references": [],
+      "representation": "raw",
+      "rva": 32800,
+      "va": 268468256,
+      "value_id": "BCVA_IT3"
+    },
+    {
+      "artifact": "Techstream/bin/IT3ACNK.dll",
+      "artifact_sha256": "801ac26d0982b7fbf25ac8607d7bfc23d0dbc6229d487b3d2fb55a804dbc4098",
+      "confidence": "recovered-key-consumption",
+      "containing_export": "GenerateSecurityKey6Byte",
+      "decoded_ascii": "FUKUMORIYOSIYAMA",
+      "decoded_hex": "46554b554d4f5249594f534959414d41",
+      "file_offset": 33612,
+      "references": [
+        {
+          "containing_export": "EncryptAds",
+          "file_offset": 11233,
+          "reference_kind": "push_imm32",
+          "rva": 11233,
+          "va": 268446689
+        }
+      ],
+      "representation": "hex_ascii_upper",
+      "rva": 33612,
+      "va": 268469068,
+      "value_id": "FUKUMORIYOSIYAMA"
+    },
+    {
+      "artifact": "Techstream/bin/IT3UtilityNeoNK.dll",
+      "artifact_sha256": "1953edf8821af8c7df612c383c756b87febb3ce7ba055744305ca5db4c2f37a6",
+      "confidence": "representation-hit",
+      "containing_export": "EntranceDLL",
+      "decoded_ascii": "bCVaAQnA3fNdDgdl",
+      "decoded_hex": "6243566141516e4133664e644467646c",
+      "file_offset": 239572,
+      "references": [
+        {
+          "containing_export": "EntranceDLL",
+          "file_offset": 147260,
+          "reference_kind": "absolute_imm32",
+          "rva": 147260,
+          "va": 268582716
+        },
+        {
+          "containing_export": "EntranceDLL",
+          "file_offset": 147290,
+          "reference_kind": "push_imm32",
+          "rva": 147290,
+          "va": 268582746
+        }
+      ],
+      "representation": "ascii_plaintext",
+      "rva": 239572,
+      "va": 268675028,
+      "value_id": "BCVA_IT3"
+    },
+    {
+      "artifact": "Techstream/bin/IT3UtilityNeoNK.dll",
+      "artifact_sha256": "1953edf8821af8c7df612c383c756b87febb3ce7ba055744305ca5db4c2f37a6",
+      "confidence": "representation-hit",
+      "containing_export": "EntranceDLL",
+      "decoded_ascii": "bCVaAQnA3fNdDgdl",
+      "decoded_hex": "6243566141516e4133664e644467646c",
+      "file_offset": 239572,
+      "references": [
+        {
+          "containing_export": "EntranceDLL",
+          "file_offset": 147260,
+          "reference_kind": "absolute_imm32",
+          "rva": 147260,
+          "va": 268582716
+        },
+        {
+          "containing_export": "EntranceDLL",
+          "file_offset": 147290,
+          "reference_kind": "push_imm32",
+          "rva": 147290,
+          "va": 268582746
+        }
+      ],
+      "representation": "raw",
+      "rva": 239572,
+      "va": 268675028,
+      "value_id": "BCVA_IT3"
+    },
+    {
+      "artifact": "Techstream/bin/UtilityEx2TY.dll",
+      "artifact_sha256": "79fc495c68eb099a7ebc0d1eefe0eafd80101ac0bc09a58d3f603ed556c84762",
+      "confidence": "representation-hit",
+      "containing_export": "_Ex2ComEndDiagSessionCGW@0",
+      "decoded_ascii": null,
+      "decoded_hex": "5622e4993876de4f15f2e166e7cd24c6",
+      "file_offset": 893400,
+      "references": [
+        {
+          "containing_export": "Ex2_GetLogIF",
+          "file_offset": 67170,
+          "reference_kind": "push_imm32",
+          "rva": 67170,
+          "va": 268502626
+        }
+      ],
+      "representation": "raw",
+      "rva": 893400,
+      "va": 269328856,
+      "value_id": "CENTRAL_GATEWAY"
+    },
+    {
+      "artifact": "Techstream/bin/UtilityEx2TY.dll",
+      "artifact_sha256": "79fc495c68eb099a7ebc0d1eefe0eafd80101ac0bc09a58d3f603ed556c84762",
+      "confidence": "representation-hit",
+      "containing_export": "_Ex2ComEndDiagSessionCGW@0",
+      "decoded_ascii": "FUKUMORIYOSIYAMA",
+      "decoded_hex": "46554b554d4f5249594f534959414d41",
+      "file_offset": 1017800,
+      "references": [
+        {
+          "containing_export": "_Ex2ComEndDiagSessionCGW@0",
+          "file_offset": 825341,
+          "reference_kind": "push_imm32",
+          "rva": 825341,
+          "va": 269260797
+        }
+      ],
+      "representation": "ascii_plaintext",
+      "rva": 1017800,
+      "va": 269453256,
+      "value_id": "FUKUMORIYOSIYAMA"
+    },
+    {
+      "artifact": "Techstream/bin/UtilityEx2TY.dll",
+      "artifact_sha256": "79fc495c68eb099a7ebc0d1eefe0eafd80101ac0bc09a58d3f603ed556c84762",
+      "confidence": "representation-hit",
+      "containing_export": "_Ex2ComEndDiagSessionCGW@0",
+      "decoded_ascii": "FUKUMORIYOSIYAMA",
+      "decoded_hex": "46554b554d4f5249594f534959414d41",
+      "file_offset": 1017800,
+      "references": [
+        {
+          "containing_export": "_Ex2ComEndDiagSessionCGW@0",
+          "file_offset": 825341,
+          "reference_kind": "push_imm32",
+          "rva": 825341,
+          "va": 269260797
+        }
+      ],
+      "representation": "raw",
+      "rva": 1017800,
+      "va": 269453256,
+      "value_id": "FUKUMORIYOSIYAMA"
+    },
+    {
+      "artifact": "Techstream/bin/UtilityEx2TY.dll",
+      "artifact_sha256": "79fc495c68eb099a7ebc0d1eefe0eafd80101ac0bc09a58d3f603ed556c84762",
+      "confidence": "representation-hit",
+      "containing_export": "_Ex2ComEndDiagSessionCGW@0",
+      "decoded_ascii": "FUKUMORIYOSIYAMA",
+      "decoded_hex": "46554b554d4f5249594f534959414d41",
+      "file_offset": 1017816,
+      "references": [
+        {
+          "containing_export": "_Ex2ComEndDiagSessionCGW@0",
+          "file_offset": 827297,
+          "reference_kind": "push_imm32",
+          "rva": 827297,
+          "va": 269262753
+        }
+      ],
+      "representation": "ascii_plaintext",
+      "rva": 1017816,
+      "va": 269453272,
+      "value_id": "FUKUMORIYOSIYAMA"
+    },
+    {
+      "artifact": "Techstream/bin/UtilityEx2TY.dll",
+      "artifact_sha256": "79fc495c68eb099a7ebc0d1eefe0eafd80101ac0bc09a58d3f603ed556c84762",
+      "confidence": "representation-hit",
+      "containing_export": "_Ex2ComEndDiagSessionCGW@0",
+      "decoded_ascii": "FUKUMORIYOSIYAMA",
+      "decoded_hex": "46554b554d4f5249594f534959414d41",
+      "file_offset": 1017816,
+      "references": [
+        {
+          "containing_export": "_Ex2ComEndDiagSessionCGW@0",
+          "file_offset": 827297,
+          "reference_kind": "push_imm32",
+          "rva": 827297,
+          "va": 269262753
+        }
+      ],
+      "representation": "raw",
+      "rva": 1017816,
+      "va": 269453272,
+      "value_id": "FUKUMORIYOSIYAMA"
+    },
+    {
+      "artifact": "Techstream/bin/UtilityExNK2.dll",
+      "artifact_sha256": "8d9623f028f23876f69cb02baa10e1881c01fa01a4f906013bd36266f7e0fb33",
+      "confidence": "representation-hit",
+      "containing_export": "_Ex2ComEndDiagSessionCGW@0",
+      "decoded_ascii": null,
+      "decoded_hex": "5622e4993876de4f15f2e166e7cd24c6",
+      "file_offset": 1163576,
+      "references": [
+        {
+          "containing_export": "Ex2VGRS_EraseErrorHistory",
+          "file_offset": 84995,
+          "reference_kind": "absolute_imm32",
+          "rva": 84995,
+          "va": 268520451
+        },
+        {
+          "containing_export": "Ex2VGRS_EraseErrorHistory",
+          "file_offset": 86834,
+          "reference_kind": "push_imm32",
+          "rva": 86834,
+          "va": 268522290
+        }
+      ],
+      "representation": "raw",
+      "rva": 1163576,
+      "va": 269599032,
+      "value_id": "CENTRAL_GATEWAY"
+    }
+  ],
+  "it3acnk_analysis": {
+    "artifact_sha256": "801ac26d0982b7fbf25ac8607d7bfc23d0dbc6229d487b3d2fb55a804dbc4098",
+    "exports": [
+      {
+        "classification": "string-key transform using ASCII constant EnerGizerreLayXT; exact cipher helper semantics bounded",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "0a04d5af71536d139937957f06d66ae148a28700c72807ad73bb8aabd7832a91",
+        "extent_size": 144,
+        "name": "EncryptSecretKeyC",
+        "rva": 8128,
+        "va": 268443584
+      },
+      {
+        "classification": "string-key transform using ASCII constant WgvbMXxN3pHsSndg; exact cipher helper semantics bounded",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "726a24945054eef8be2c6407441802ee1790cfb9d3d91540d75c42bc1126df3d",
+        "extent_size": 144,
+        "name": "EncryptSecretKeyN",
+        "rva": 8272,
+        "va": 268443728
+      },
+      {
+        "classification": "fixed-table version-1 security transform (Smrt); not the AES host-key path",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "390b572a29665a54641ac5451a4f1c03affb66479cf17295af372574795021b8",
+        "extent_size": 32,
+        "name": "EncryptSecurityVer1Smrt",
+        "rva": 8416,
+        "va": 268443872
+      },
+      {
+        "classification": "fixed-table version-1 security transform (Str); not the AES host-key path",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "30fee41cb8333bbb9d492844427e088245ed85d49cbbd5a737e0ee7289a2217e",
+        "extent_size": 32,
+        "name": "EncryptSecurityVer1Str",
+        "rva": 8448,
+        "va": 268443904
+      },
+      {
+        "classification": "six-byte version-2 custom security transform through helper RVA 0x47A0",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "552bc35db6654209a3a7244a8d31eb0870324d701024006ed8bc82cf29b1bb2d",
+        "extent_size": 80,
+        "name": "EncryptSecurityVer2Smrt",
+        "rva": 8480,
+        "va": 268443936
+      },
+      {
+        "classification": "six-byte version-2 custom security transform through helper RVA 0x4A70",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "91d95f7128da34e4b3b971105fd2dcf3a40dddb5361d94f2ae8380640e34d1a4",
+        "extent_size": 80,
+        "name": "EncryptSecurityVer2Str",
+        "rva": 8560,
+        "va": 268444016
+      },
+      {
+        "classification": "TD3 block transform using hex-ASCII constant at RVA 0x8324 and software block-cipher helper",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "7fed40c329dacb898942a5d237a2729ecb827b511ac13ea4a1b6060cbddf277a",
+        "extent_size": 720,
+        "name": "EncryptTd3",
+        "rva": 8640,
+        "va": 268444096
+      },
+      {
+        "classification": "TD3 inverse block transform using hex-ASCII constant at RVA 0x8324",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "4510bbe9ac0c8986a463ed67498356801911c71ad389f77fa2f58caa3cda3796",
+        "extent_size": 544,
+        "name": "DecryptTd3",
+        "rva": 9360,
+        "va": 268444816
+      },
+      {
+        "classification": "caller-supplied key/input block encryption path through software block-cipher helper RVA 0x3070",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "2c2c735e9d3b8bcf1313fc8c06538cd9f374d7cfafb113fe1d3c947605aec889",
+        "extent_size": 1280,
+        "name": "EncryptCM",
+        "rva": 9904,
+        "va": 268445360
+      },
+      {
+        "classification": "hex-decodes FUKUMORIYOSIYAMA from RVA 0x834C and passes it to software block-cipher helper RVA 0x3070",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "f4c5f84343e03aed8441545278e688e75f6b1eb03f595f1be5543374d83303c9",
+        "extent_size": 320,
+        "name": "EncryptAds",
+        "rva": 11184,
+        "va": 268446640
+      },
+      {
+        "classification": "caller-input key-generation/block-transform path; no fixed key reference recovered",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "33f59db38bc78a080de77088083a226b4a68d7e13b5ff16579b04d274cad4165",
+        "extent_size": 512,
+        "name": "GenerateKeyS",
+        "rva": 11504,
+        "va": 268446960
+      },
+      {
+        "classification": "six-byte custom security-key generator; separate from the 16-byte AES host-key exports",
+        "extent_basis": "to next export (includes any padding/internal tail)",
+        "extent_sha256": "db0f094f60c3084baeb48a54e069c9fbffaec7e97899c4d05b977a797e249d48",
+        "extent_size": 11366,
+        "name": "GenerateSecurityKey6Byte",
+        "rva": 12016,
+        "va": 268447472
+      }
+    ],
+    "image_base": 268435456,
+    "known_constants": [
+      {
+        "file_offset": 32800,
+        "role": "unreferenced printable constant; key use not established",
+        "rva": 32800,
+        "value": "bCVaAQnA3fNdDgdl"
+      },
+      {
+        "file_offset": 32816,
+        "role": "adjacent unreferenced printable constant; key use not established",
+        "rva": 32816,
+        "value": "s2Cjar5er8iwP4Xz"
+      },
+      {
+        "file_offset": 33532,
+        "role": "directly referenced by EncryptSecretKeyC",
+        "rva": 33532,
+        "value": "EnerGizerreLayXT"
+      },
+      {
+        "file_offset": 33552,
+        "role": "directly referenced by EncryptSecretKeyN",
+        "rva": 33552,
+        "value": "WgvbMXxN3pHsSndg"
+      },
+      {
+        "file_offset": 33572,
+        "role": "hex-ASCII key material directly referenced by EncryptTd3/DecryptTd3",
+        "rva": 33572,
+        "value": "41668F1FFE83E0FE0CAFDF4676102660"
+      },
+      {
+        "decoded": "FUKUMORIYOSIYAMA",
+        "file_offset": 33612,
+        "role": "hex-ASCII AES key directly referenced by EncryptAds",
+        "rva": 33612,
+        "value": "46554B554D4F5249594F534959414D41"
+      }
+    ]
+  },
+  "scan_boundary": {
+    "file_count": 6620,
+    "limitations": "No general symbolic execution or arbitrary runtime decoding; absence is bounded to enumerated representations.",
+    "pe_file_count": 670,
+    "representations": [
+      "ascii_plaintext",
+      "bitwise_inverted_ascii_plaintext",
+      "bitwise_inverted_hex_ascii_lower",
+      "bitwise_inverted_hex_ascii_upper",
+      "bitwise_inverted_raw",
+      "bitwise_inverted_utf16le_hex_lower",
+      "bitwise_inverted_utf16le_hex_upper",
+      "bitwise_inverted_utf16le_plaintext",
+      "hex_ascii_lower",
+      "hex_ascii_upper",
+      "raw",
+      "utf16le_hex_lower",
+      "utf16le_hex_upper",
+      "utf16le_plaintext"
+    ],
+    "root": "Techstream/unpacked/toyota/Toyota Diagnostics",
+    "x86_immediates": "known constructed byte-immediate sequences plus direct imm32 references to discovered constants"
+  },
+  "schema_version": 1,
+  "search_values": {
+    "BCVA_IT3": "6243566141516e4133664e644467646c",
+    "CENTRAL_GATEWAY": "5622e4993876de4f15f2e166e7cd24c6",
+    "FUKUMORIYOSIYAMA": "46554b554d4f5249594f534959414d41",
+    "SIENNA_APPLICATION_SA_SECRET": "893e08418c741ffa2a9c044bffa55813",
+    "SIENNA_BOOT_SEED_KEY_SECRET": "f05f36b7d78c03e24ab4faef2a57d044"
+  },
+  "sienna_secret_absence": {
+    "SIENNA_APPLICATION_SA_SECRET": true,
+    "SIENNA_BOOT_SEED_KEY_SECRET": true
+  },
+  "source": "external-source"
+}
