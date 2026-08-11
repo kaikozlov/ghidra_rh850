@@ -248,3 +248,141 @@ DataFlash verifier, it does not assume steering IDs or Panda buses 0/2. It:
   <https://github.com/commaai/opendbc/blob/c9b31d21bc396e8958891e271936bdbdf1a6ca93/opendbc/car/secoc.py>
 - opendbc Toyota controller:
   <https://github.com/commaai/opendbc/blob/c9b31d21bc396e8958891e271936bdbdf1a6ca93/opendbc/car/toyota/carcontroller.py>
+
+## 5. Application-resident command-5 signing proxy — static engineering design
+
+Stage 7 closes the software architecture for an EPS-resident signing proxy
+without implementing a persistent exploit or claiming that slot 4 permits
+command 5 on live Renesas ICU-S hardware.
+
+### 5.1 Use the stock serialized command-5 path
+
+The safest statically justified entry is **not** `ICUSCMD` and not the low-level
+engine `0x89630`. The generated crypto-test harness already proves the complete
+calling convention:
+
+```text
+icus_crypto_test_submit @ 0x68B42
+  -> crypto_generate_driver_dispatch @ 0x88350
+  -> driver record 1 at 0x27F8C / 0x27FAC
+  -> icus_command5_mac_generate_adapter @ 0x87CCC
+  -> shared ICU driver
+  -> command 5
+```
+
+For mode 1, `0x68B42` constructs a configuration record whose first word is
+`1` and whose selector byte at `+4` is runtime-controlled, supplies a message
+buffer, sets output capacity to `0x10`, and requests a 16-byte result. A proxy
+therefore substitutes **selector 4** while retaining this exact stock
+serialized path. The lower engine accepts selectors `0..14`; no plaintext key
+crosses MainPE.
+
+For classic protected `0x2E4` or `0x131`, the command-5 message is the already
+recovered 12-byte authenticated input:
+
+```text
+DataID_be16 || payload[0:4] || freshness48
+```
+
+The proxy keeps the full 16-byte CMAC result internally and uses its first 28
+bits when constructing the four-byte Toyota SecOC trailer. This is an
+engineering composition of already recovered primitives, not evidence that
+slot 4 has been observed generating a MAC.
+
+### 5.2 Arbitration and command-7 contention
+
+Command 5 and the production SecOC **command-7 contention** path share the same
+serialized ICU driver state (`FEBF1190/FEBF136C`) and interrupt machinery. A
+proxy must therefore obey the stock adapter result rather than bypass
+arbitration:
+
+1. submit command 5 only through `crypto_generate_driver_dispatch`;
+2. if the driver reports busy, defer the signing request;
+3. never abort or replace a production command-7 verification merely to obtain
+   a signing slot;
+4. allow the stock asynchronous completion path to release the shared driver;
+5. impose a bounded application-side queue so incoming signing requests cannot
+   starve SecOC receive verification.
+
+This makes command-7 receive verification the conservative priority. Actual
+latency and whether the workload is schedulable at vehicle message cadence are
+dynamic measurements.
+
+### 5.3 Foreground hook placement
+
+`application_foreground_cyclic_loop @ 0x64FCC` runs on the polled TAUJ0 CH3
+foreground schedule. Its wrapper `0x65750` contains two calls to the dormant
+crypto-test subsystem:
+
+- `0x65754 -> application_crypto_test_cyclic_step @ 0x68C0C`;
+- `0x65760 -> application_crypto_test_cyclic_finalize @ 0x68DE6`.
+
+Those two call slots are the minimum statically justified place for a small
+proxy submit/completion scheduler: they already belong to dormant crypto-test
+work, execute in initialized application context, and are outside the TAUJ0 CH0
+motor-current ISR. This identifies a hook architecture only; no patch bytes or
+persistent installer are supplied here.
+
+### 5.4 Freshness state for `0x2E4` and `0x131`
+
+A stateful proxy cannot sign arbitrary payloads with a stateless CMAC call. It
+must preserve the sender rules already pinned in §1:
+
+- accept an authenticated `0x00F` synchronization epoch containing the current
+  trip counter and reset counter;
+- retain separate 8-bit message counters for `0x2E4` and `0x131`;
+- reset each PDU counter when the accepted reset epoch changes;
+- build the full six-byte freshness value before command 5;
+- increment only the corresponding PDU counter after a signed frame is
+  committed for transmission; and
+- fail closed on stale/unverified synchronization instead of silently changing
+  epochs.
+
+The stock EPS receiver is not the source of `0x00F`, so a proxy that signs on
+behalf of an external controller must obtain the same live synchronization
+state that controller would otherwise consume.
+
+### 5.5 Existing CAN Tx primitive
+
+`application_canif_transmit @ 0x7EE0C` is a usable existing application Tx
+primitive, but it resolves only configured generated PDU routes. The cleanest
+non-COM demonstration route already present is the special wrapper `0x8206C`,
+which forces generated class `0xF800`; that class resolves to **CAN `0x7F8`**.
+It can carry a proxy response on an isolated bench without inventing a new
+lower-driver interface.
+
+`0x7F8` is **not an unused production ID**: Stage 5 proved it is the Tx half of
+the existing `0x7F7/0x7F8` special channel whose service semantics remain
+unnamed. Therefore production integration must either allocate and verify a
+new CanIf route or separately audit a direct enqueue design; repurposing
+`0x7F8` is justified only as a controlled bench transport with the stock
+special service disabled/not in use.
+
+Likewise, the stock CanIf table has no configured `0x2E4` or `0x131` Tx route.
+An EPS-resident proxy that directly transmits those secured frames needs a new
+route (or a separately reviewed lower-level enqueue record). A simpler proxy
+returns the 16-byte CMAC to an external sender, which then constructs and sends
+the protected frame.
+
+### 5.6 Error handling and teardown
+
+Normal **teardown** should remain inside the recovered asynchronous wrapper:
+completion copies the result only on status zero, timeout/error finishes through
+the no-copy path, and the shared driver returns to ready state. The proxy should
+not call the `0x3F` abort path to preempt command 7. Its application state can be
+cleared only after the configured completion callback has run or the stock
+worker has completed its own timeout/recovery sequence.
+
+A reversible experiment can disable the two foreground proxy hooks and clear
+only proxy-owned queue/freshness RAM; it does not need to alter ICU key state.
+Command 8 is explicitly outside the design. Dynamic acceptance criteria are:
+slot-4 command-5 success, bounded latency without command-7 starvation, correct
+CMAC against independently known frames, and clean recovery after forced busy /
+timeout cases.
+
+### Evidence boundary
+
+The addresses, call shapes, scheduler placement, arbitration, and existing Tx
+route are firmware-static. Slot-4 command-5 permission, timing, actual vehicle
+freshness cadence, and safe production use of any Tx route are not established
+statically.

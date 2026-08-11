@@ -52,6 +52,7 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Completed static investigations
 
+- **SecOC software-path closure (Stage 7, 2026-08-10).** Closed the ICU stale-result/FIFO software surface as a bounded negative, strengthened dormant crypto-test activation from "no caller" to a whole-image entry/interior-pointer/state-writer negative, specified the minimum application-context selector-4 command-5 signing-proxy architecture including command-7 arbitration/freshness/Tx/teardown, and bounded candidate-f05 provenance to its earliest public Vance artifact plus later source-family corroboration. Remaining slot-4 permission, latency, command behavior, and physical/fault questions are dynamic/hardware-only. Canonical: [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md), [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.
 - **Motor-control/safety boundary (Stage 6, 2026-08-10).** Resolved the
   phase-sample source as `ADCG0/1 DIR00 → DMAC → Global RAM A` rings, hardened
   the authenticated-command→d/q search into a bounded static negative after

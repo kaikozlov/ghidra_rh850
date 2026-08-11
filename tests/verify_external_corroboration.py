@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import binascii
 import hashlib
+import io
 import json
 import struct
 import subprocess
@@ -643,6 +644,59 @@ def main() -> int:
         "all three Vance deployment bundles carry the identical candidate-f05",
         all(payload == candidate_ciphertext for payload in candidate_bundle_members),
     )
+
+    print("\n== candidate-f05 historical provenance ==")
+    vance_root = roots["vance_sienna_2024"]
+    earliest_commit = "97ba3d1d9e77a6e047887da04767538fe81fc674"
+    earliest_meta = subprocess.run(
+        ["git", "-C", str(vance_root), "show", "-s", "--format=%H|%ai|%an", earliest_commit],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    check(
+        "earliest public Vance bundle commit metadata",
+        earliest_meta
+        == f"{earliest_commit}|2026-05-31 20:26:27 +0800|Vance425",
+        earliest_meta,
+    )
+    earliest_zip = subprocess.run(
+        ["git", "-C", str(vance_root), "show",
+         f"{earliest_commit}:scripts/secoc/20260531_othersienna_secoc_bundle.zip"],
+        check=True, capture_output=True,
+    ).stdout
+    with zipfile.ZipFile(io.BytesIO(earliest_zip)) as archive:
+        earliest_candidate = archive.read("payload_candidate_f05_dataflash_ff200000_ff208000.bin")
+        earliest_manifest = json.loads(archive.read("manifest_sha256.json").decode("utf-8-sig"))
+        earliest_readme = archive.read("README_other_sienna_secoc_bundle_zh.md").decode("utf-8")
+    check("earliest public bundle already contains identical candidate-f05",
+          earliest_candidate == candidate_ciphertext)
+    check("earliest public bundle README gives candidate-only bounded description",
+          "保留候選 payload，預設不使用" in earliest_readme)
+    manifest_text = json.dumps(earliest_manifest, ensure_ascii=False)
+    check("earliest public manifest pins candidate ciphertext SHA",
+          "296d87d2e89b9c7e800122e4c7f6d3b9c876362e52586530cdd53c86ba1116f5" in manifest_text)
+
+    patch_commit = "abc871308b0933c13a2551852857c350ea0f5386"
+    patch_source = subprocess.run(
+        ["git", "-C", str(vance_root), "show",
+         f"{patch_commit}:scripts/secoc/patch_secoc_payload_dump_range.py"],
+        check=True, capture_output=True, text=True,
+    ).stdout
+    check("May-28 Vance helper is range-patch/reseal, not shellcode compiler",
+          "replace_exact" in patch_source and "old_start" in patch_source
+          and "old_end" in patch_source and "v850-elf-gcc" not in patch_source)
+
+    bk_root = roots["toyota_dataflash_secoc_setup"]
+    bk_first = subprocess.run(
+        ["git", "-C", str(bk_root), "log", "--diff-filter=A", "--format=%H|%ai",
+         "--", "payload_source/shellcode/main_ff1ff000_ff209000.c"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip().splitlines()
+    check("Bk2ol public source first appears after Vance candidate",
+          bk_first == ["db453752beeb7cdd024a1a9c38c6711c981e75ad|2026-07-11 18:29:18 -0500"],
+          repr(bk_first))
+    bk_build = (bk_root / "payload_source/shellcode/build.sh").read_text(encoding="utf-8")
+    check("later Bk2ol source family uses v850 gcc plus objcopy",
+          "v850-elf-gcc" in bk_build and "v850-elf-objcopy" in bk_build)
 
     codeflash = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()
     zero = bytes(16)

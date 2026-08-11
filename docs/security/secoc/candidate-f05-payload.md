@@ -160,3 +160,43 @@ plausible, but it remains **bounded**, not a provenance fact.
 - Machine-readable record: `data/generated/candidate_f05_payload.json`
 - Deterministic verifier: `tests/verify_candidate_f05_payload.py`
 - Ghidra raw-payload seeder: `ghidra/scripts/investigate/SeedRawPayload.java`
+
+## Historical provenance boundary
+
+The pinned Vance Git history now gives an exact **earliest public artifact**
+boundary. `payload_candidate_f05_dataflash_ff200000_ff208000.bin` first appears
+inside `scripts/secoc/20260531_othersienna_secoc_bundle.zip` at commit
+`97ba3d1d9e77a6e047887da04767538fe81fc674`, authored by `Vance425` at
+**2026-05-31 20:26:27 +0800**. The archive manifest records the same ciphertext
+SHA-256 already pinned here:
+`296d87d2e89b9c7e800122e4c7f6d3b9c876362e52586530cdd53c86ba1116f5`.
+V2 and V3 were uploaded later that evening and retain byte-identical candidate
+ciphertext.
+
+The archive's internal file timestamp for the candidate is 2026-05-11, but a
+ZIP member timestamp is not source-control provenance and is not used to assign
+author/build date. The contemporaneous README describes it only as a retained
+candidate that is not the default payload. The bundled uploader selects the
+opaque file and contains `SEED_KEY_SECRET`; it does not contain candidate
+shellcode source or a compiler invocation.
+
+A Vance helper committed May 28,
+`patch_secoc_payload_dump_range.py`, can decrypt an old payload, replace exactly
+two dump-range constants, repair CRC/CMAC, and re-encrypt it. That mechanism
+cannot explain candidate-f05's hundreds of changed pre-trailer bytes or its
+new post-dump reset call, so it is not the candidate's build recipe.
+
+The closest later public source family is Bk2ol's full DataFlash shellcode plus
+`v850-elf-gcc`/`objcopy` build script and `build_payload.py`. In the pinned
+history those sources first appear at
+`db453752beeb7cdd024a1a9c38c6711c981e75ad` on **2026-07-11**, after the Vance
+artifact was already public. They corroborate the implementation family and
+explain why a recompiled DataFlash loop with `0x157E` reset is plausible, but
+they cannot establish candidate-f05's original author, source commit, compiler
+version/flags, or exact build invocation.
+
+**Stage-7 provenance conclusion:** retained public history can establish the
+first public binary/hash and later source-family corroboration. It **cannot establish**
+the original candidate-f05 author/build environment or why `SEED_KEY_SECRET`
+was deliberately used as the payload-build secret. That is now a bounded
+provenance negative rather than an open static-analysis task.

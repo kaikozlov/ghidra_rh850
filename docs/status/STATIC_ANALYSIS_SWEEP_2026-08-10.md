@@ -66,7 +66,7 @@ was searched separately. No search traversed unrelated personal storage.
 - [x] Stage 4 — complete the Renesas RV40F host-protocol static census
 - [x] Stage 5 — close the application COM receive/transmit long tail
 - [x] Stage 6 — tighten the motor-control and safety static boundary
-- [ ] Stage 7 — close remaining useful security-side static questions
+- [x] Stage 7 — close remaining useful security-side static questions
 - [ ] Stage 8 — bounded external-reference and missing-artifact acquisition sweep
 - [ ] Stage 9 — status reconciliation and final Ghidra project integration
 
@@ -952,4 +952,169 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Commit
 
-- Pending Stage 6 commit; immutable SHA will be recorded after final verification.
+- `87e891e21f06f452f8db424c3e0241e2d81475ab analysis: tighten motor-control and safety boundary`
+
+
+## Stage 7 — close remaining useful security-side static questions
+
+### Starting state
+
+- HEAD: `87e891e21f06f452f8db424c3e0241e2d81475ab`
+- Relevant prior finding IDs: `SECOC-015`, `SECOC-019`–`SECOC-028`,
+  `SECOC-031`; Stage-7 additions `SECOC-039`–`SECOC-041`
+- Canonical starting reports: `software-path-assessment.md`,
+  `key-recovery-assessment.md`, `sender-implementation.md`, and
+  `candidate-f05-payload.md`
+- Static boundary: do not repeat the completed memory-safety audit and do not
+  spend this stage on live slot-4 command-5 permission, command-13 hardware
+  semantics, physical leakage/fault injection, reset replay, guessing
+  throughput, future-sync behavior, or FD ignored-suffix experiments.
+
+### Questions
+
+1. Can commands 1/3, 5, 7, or 8 expose stale ICU output after error, timeout,
+   abort/reset, command replacement, or interrupt-completion races?
+2. Can any normal static code/data/lifecycle route reach dormant bank-1
+   activator `0x69018`, or emulate its `FEBE508F=1` activation write?
+3. What is the minimum statically justified application-context command-5
+   signing proxy, including selector 4, shared-driver arbitration, a non-CH0
+   hook, sender freshness, Tx, and teardown?
+4. How far can retained public history establish Vance candidate-f05 authorship
+   and build provenance?
+
+### Work performed
+
+- Decompilation traced command-specific prepare/result/completion paths for ICU
+  commands 1/3, 5, 7, and 8 plus common FIFO handlers, tracked-command check,
+  finalizer, timeout workers, interrupt dispatcher, state initializer, and
+  abort/replacement command `0x3F`.
+- Mapped private result staging and every direct outward reader:
+  `FEBF11C4` (1/3), `FEBF1274` (5), `FEBF12B4` (7), and
+  `FEBF113C/FEBF115C` (8).
+- Checked success/error/timeout behavior, wrapper output caps, callback clearing,
+  active-command serialization, command-ID mismatch handling, and the one
+  residual hardware-sequencing assumption in the common finalizer.
+- Exhaustively queried Ghidra references for every two-byte address in
+  `0x69018..0x69041`, scanned the complete CodeFlash bytewise for 32-bit
+  pointers into that body, and enumerated the exact `FEBE508F` reference/writer
+  set.
+- Traced the stock crypto-test generation call shape from
+  `icus_crypto_test_submit @ 0x68B42` through
+  `crypto_generate_driver_dispatch @ 0x88350` to the command-5 adapter,
+  including runtime selector location and 16-byte result capacity.
+- Identified foreground wrapper `0x65750`'s dormant crypto-test step/finalize
+  calls as the minimum non-CH0 application hook architecture and joined it to
+  existing CanIf Tx machinery (`0x7EE0C`, special `0x8206C -> 0xF800 -> 0x7F8`).
+- Reused the already-proved classic sender format to specify `0x2E4/0x131`
+  per-PDU counters and authenticated `0x00F` synchronization requirements.
+- Searched pinned Vance/Bk2ol Git history for the earliest candidate-f05
+  artifact, contemporaneous bundle metadata/helper scripts, and later source
+  build recipes rather than inferring provenance from filenames.
+- Added a firmware-only Stage-7 verifier and a read-only Ghidra exact-reference
+  audit; no Ghidra project mutation or snapshot update was required.
+
+### Findings
+
+- **No software-controlled stale ICU result disclosure was recovered**
+  (`SECOC-039`). Commands 1/3/5/7 can leave old bytes resident in private
+  staging, but their only outward result wrappers are **status-zero gated**.
+  Command 8 returns fixed 48 bytes on success, zero-fills caller output on
+  failure, and clears both its 64-byte input and 48-byte result staging after
+  success/failure. Active requests serialize through the shared driver;
+  command-ID mismatch returns `0x12` before output dispatch; abort/replacement
+  nulls input/output callbacks before issuing `0x3F`; timeout workers complete
+  through no-copy error status. Grade: **verified structure / bounded software
+  negative**.
+- Residual stale-result boundary is hardware-only: common finalizer `0x89510`
+  trusts ICU clean-completion/error signaling and does not separately assert the
+  expected output-ready count. A fault/undocumented hardware sequence that
+  reports success without delivering required output blocks is not excluded by
+  static MainPE software analysis.
+- **Dormant bank-1 activation is a whole-image bounded static negative**
+  (`SECOC-040`). No external Ghidra reference reaches `0x69018` or any interior
+  address; CodeFlash contains no 32-bit pointer into its 42-byte body; and the
+  exact `FEBE508F` census shows startup clear, activator set-to-1, scheduled
+  reads, and finalizer terminal writes only. Normal CAN `0x01B..0x01F`, startup,
+  lifecycle, and recovered function-pointer tables cannot arm it. External
+  debug/fault/runtime-corruption activation is not disproved.
+- **The application signing-proxy software architecture is closed**
+  (`SECOC-041`). Stock `0x68B42` proves the selector-bearing serialized
+  command-5 call shape, so selector 4 does not require direct `ICUSCMD`
+  manipulation. `0x65750` provides dormant foreground step/finalize slots
+  outside the CH0 motor ISR. Proxy generation must defer while production
+  command 7 owns the shared ICU driver. Sender state consumes authenticated
+  `0x00F` and maintains separate `0x2E4/0x131` counters. Existing special class
+  `0xF800 -> CAN 0x7F8` is viable only as an isolated-bench result transport
+  because it is already an occupied special route; stock CanIf has no
+  `0x2E4/0x131` Tx route, so direct secured-frame transmission needs a new
+  separately audited route. Minimal design returns the 16-byte CMAC to an
+  external sender.
+- **Candidate-f05 provenance is bounded and no longer a static open task.** The
+  earliest retained public artifact is Vance commit
+  `97ba3d1d9e77a6e047887da04767538fe81fc674`, timestamp
+  `2026-05-31 20:26:27 +0800`; its initial bundle manifest pins ciphertext SHA
+  `296d87d2e89b9c7e800122e4c7f6d3b9c876362e52586530cdd53c86ba1116f5`.
+  The contemporaneous README gives no author/build recipe, and the May-28 Vance
+  helper only patches two range constants in an existing payload. Bk2ol's
+  closest public C source + `v850-elf-gcc`/`objcopy` + payload builder first
+  appear later at `db453752beeb7cdd024a1a9c38c6711c981e75ad` on 2026-07-11,
+  corroborating the implementation family but not original authorship/compiler
+  invocation or the reason `SEED_KEY_SECRET` was selected.
+
+### Negative/bounded results
+
+- Resident stale bytes in internal ICU staging are not equated with disclosure.
+- Static activator unreachability is not a claim that debugger/fault/hardware
+  state can never set the activation byte.
+- The proxy is an engineering architecture, not a live signing capability:
+  slot-4 command-5 permission and performance remain dynamic.
+- `0x7F8` is explicitly not claimed as an unused production transport.
+- Candidate-f05 ZIP member timestamps are not treated as source-control
+  provenance; original author/toolchain remain unestablished and further
+  static inference is stopped.
+- Hardware-only Stage-7 exclusions from the handoff remain deferred rather than
+  relabeled as unresolved static work.
+
+### Documentation/tests changed
+
+- Added `tests/verify_icus_stage7_static.py` to the core verification matrix.
+- Added read-only `AssertIcusStage7Static.java` to processor audits, locking
+  activator entry/interior refs, activation-state refs, ICU result staging, and
+  the SecOC command-7 result byte.
+- Updated `software-path-assessment.md` with the stale-result and activator
+  closures plus the static proxy boundary.
+- Updated `key-recovery-assessment.md` with Stage-7 software closure and
+  reconciled its signing-oracle language with the SHE `KEY_USAGE` correction.
+- Added sender report §5 with the application-resident command-5 proxy design.
+- Expanded candidate-f05 provenance with exact historical commit/timestamp and
+  later source-family boundary.
+- Added `SECOC-039`–`SECOC-041`, narrowed OPEN_QUESTIONS to dynamic proxy work,
+  removed payload provenance/dormant activation from open static questions, and
+  recorded Stage 7 in the roadmap/journal.
+
+### Verification
+
+- `uv run --locked python tests/verify_icus_stage7_static.py` -> pass (51/51)
+- `make verify-processor` -> pass; `AssertIcusStage7Static` reports 28 exact
+  reference censuses, 0 failures
+- `make verify-changed` -> pass (9 matched suites; 13 test files including
+  lifecycle sub-suites)
+- `EXTERNAL_REPOS_DIR=/Users/kai/dev/inspect/repos uv run --locked python
+  tests/verify_external_corroboration.py --repos-dir /Users/kai/dev/inspect/repos`
+  -> pass (287/287), including historical Vance/Bk2ol provenance assertions
+- `make verify-ghidra` -> pass (full core + SLEIGH + processor audits + exact
+  project parity; final doc-link suite 464/464)
+
+### Remaining blockers
+
+- None for the four named Stage-7 static questions.
+- Live slot-4 command-5 permission, latency/jitter/contention, and hardware
+  command/fault behavior require dynamic or hardware work and are intentionally
+  outside another static sweep.
+- Candidate-f05 original author/build environment is absent from retained public
+  history; treat that as a bounded provenance negative unless a new artifact is
+  acquired in Stage 8.
+
+### Commit
+
+- Pending Stage 7 commit; immutable SHA will be recorded after final verification.

@@ -129,6 +129,15 @@ paths = ["docs/security/secoc/"]
 tests = ["tests/verify_icus_software_paths.py"]
 paths = ["docs/security/secoc/"]
 
+[suite.icus_stage7_static]
+tests = ["tests/verify_icus_stage7_static.py"]
+paths = [
+  "docs/security/secoc/",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "ghidra/scripts/verify/AssertIcusStage7Static.java",
+]
+
 [suite.icus_trace_decoder]
 tests = ["tests/verify_icus_trace_decoder.py"]
 paths = ["tools/decode_icus_key_update_trace.py"]

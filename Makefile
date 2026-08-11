@@ -21,6 +21,7 @@ VERIFY_SUITES := \
 	tests/verify_toyota_eps_bus_probe.py \
 	tests/verify_icus_key_recovery_surface.py \
 	tests/verify_icus_software_paths.py \
+	tests/verify_icus_stage7_static.py \
 	tests/verify_icus_key_update.py \
 	tests/verify_icus_trace_decoder.py \
 	tests/verify_dataflash_layout.py \

@@ -6,8 +6,8 @@
 > expose slot 4, or provide an equivalent signing/key-recovery capability without
 > physical fault injection or side-channel analysis?
 >
-> **Status:** active; software execution foothold recovered, command-13 hardware
-> behavior untested
+> **Status:** Stage-7 static software-path questions closed; hardware command
+> semantics, live slot permissions, and dynamic proxy behavior remain untested
 >
 > **Primary evidence:** firmware bytes and disposable working-project Ghidra
 > analysis in `build/project/`; existing reports are navigation aids, not proof
@@ -72,10 +72,10 @@ signing proxy is recorded as a separate capability.
 | Service `0xAB` | UDS RID payload | indirect arbitrary call/write | bounded by prior branch census; semantics incomplete | no sensitive direct/jump-register targets in 13 callback pairs; shared state machine remains long-tail work |
 | WDBI DID `0x1010` | 64-byte opaque package | corrupt command-8 staging or async result banks | bounded for request/copy sizes | exact 67-byte total request and fixed 49-byte result contract; semantic command abuse remains possible |
 | Normal CAN/ISO-TP parsers | CAN frames | overflow/index corruption | bounded at application transport layer | declared length is capped by 256-byte Dcm route buffers; each fragment is checked against remaining length |
-| Dormant crypto-test bank | CAN `0x01B..0x01F` plus state | command 5/7 oracle and output | bounded stock activation negative | activator has no caller/pointer edge; CAN collector does not set active byte |
+| Dormant crypto-test bank | CAN `0x01B..0x01F` plus state | command 5/7 oracle and output | strong bounded static activation negative | no external x-ref to entry/interior, no CodeFlash pointer into the 42-byte activator, and only the activator writes active value `1`; external debug/hardware activation is not excluded |
 | ICU callback/driver records | corruption of writable RAM | arbitrary call or command submission | bounded for stock writers | callback/complement pairs receive fixed CodeFlash targets; no request-derived pointer writer recovered |
 | Command-word substitution | bootloader payload or restorable application patch | change intended command to 13 | software structure recovered; hardware untested | command-5 and command-8 tracked/submitted ID sites are exact; command shape still unknown |
-| Stale FIFO/result exposure | diagnostics or copied RAM | disclose prior ICU output/key material | unassessed | map buffers and all outward copies under abort/error races |
+| Stale FIFO/result exposure | diagnostics or copied RAM | disclose prior ICU output/key material | bounded static negative | commands 1/3/5/7 retain internal staging but outward copies are status-zero gated; command 8 clears its staging on success/failure; abort replacement nulls FIFO callbacks; malformed hardware success sequencing remains outside software-static proof |
 | Direct command 13 | constructible software execution foothold | characterize `RAM_KEY` export / selector 4 | hardware-unknown | one-shot polling bootloader payload is the next discriminator; repeat in app context if lifecycle differs |
 
 ## Investigation log
@@ -89,7 +89,7 @@ signing proxy is recorded as a separate capability.
   evidence boundaries survive session compaction.
 - Opened only the disposable `build/project/` through the repository's isolated
   V850 extension environment. The current pinned rebuild reports 5,921
-  functions, 179,223 instructions, and 37,785 symbols.
+  functions, 179,223 instructions, and 37,818 symbols.
 - The first bridge attempt used the default Ghidra user home and failed before
   loading the program because `v850e3:LE:32:default` was unavailable. Retrying
   with `-Duser.home=build/ghidra-home` loaded the expected processor module.
@@ -320,14 +320,89 @@ restricted ICU-S/ICUSE specification or bench behavior remains authoritative.
 5. Validate any 16-byte candidate against multiple stock SecOC frames; otherwise
    classify the result as metadata, protected envelope, oracle, or rejection.
 
+## 2026-08-10 — Stage-7 stale FIFO/result exposure closure
+
+The command-specific output paths are now traced through success, hardware
+error, timeout, abort/replacement, and asynchronous completion:
+
+| ICU command | Internal result staging | Normal outward result | Failure/timeout behavior | Internal clear |
+|---|---|---|---|---|
+| 1 / 3 | `FEBF11C4` | at most **16 bytes**, only when completion status is zero | wrapper `0x87712` does not copy | no routine clear recovered |
+| 5 | `FEBF1274` | at most **16 bytes**, only when completion status is zero | wrapper `0x87B46` does not copy | no routine clear recovered |
+| 7 | `FEBF12B4` | one verification-result byte, only when completion status is zero | wrapper `0x87F7C` does not copy | no routine clear recovered |
+| 8 | `FEBF113C` + `FEBF115C` | fixed **48 bytes** on success | caller output is zero-filled on failure | 64-byte input and 48-byte result staging are cleared after both success and failure |
+
+The absence of routine clearing for commands 1/3/5/7 means old output can
+remain **resident in private driver RAM**. That is not itself an exposure. The
+complete direct-reference census finds no diagnostic or unrelated reader of
+those staging areas; the only outward readers are the command-specific result
+wrappers above.
+
+The shared driver also closes the obvious cross-command race:
+
+- command engines serialize through shared state at `FEBF1190/FEBF136C`; a new
+  adapter cannot simply replace an active command;
+- `FUN_00089DE6` compares the hardware command ID with the tracked software ID
+  and returns `0x12` on mismatch before an output callback is dispatched;
+- abort/replacement `0x89BB8` sets both input and output FIFO callbacks to zero
+  before issuing command `0x3F`;
+- command-5/7/8 timeout workers finish through status `1`, so the normal result
+  wrappers take their no-copy/error branches; and
+- caller-provided output lengths are clamped by the wrappers rather than used
+  as lower FIFO block counts.
+
+**Stage-7 conclusion:** no request-controlled software path was recovered that
+returns stale ICU output across error, timeout, abort, or command replacement.
+This is a bounded static negative, not a proof about impossible **hardware sequencing** behavior. `icus_command_finalize @ 0x89510` checks the ICU error/status result
+but does not independently assert in software that every expected output block
+was observed before accepting a hardware-reported clean completion. A hardware
+fault or undocumented sequencing violation that reports success without the
+specified output-ready events is therefore outside this software-static proof.
+
+Deterministic coverage is in `tests/verify_icus_stage7_static.py` and
+`AssertIcusStage7Static.java`.
+
+## 2026-08-10 — dormant bank-1 activator closure
+
+The former "no caller" observation for `crypto_test_bank1_activate @ 0x69018`
+is now a whole-image static reachability result:
+
+- Ghidra has no external code or data reference to `0x69018` or any interior
+  instruction in `0x69018..0x69041`; the sole interior reference is the
+  activator's own conditional branch `0x69022 -> 0x6903E`;
+- a bytewise scan of all CodeFlash finds no little-endian 32-bit pointer to the
+  entry or any interior address, covering ordinary function-pointer tables;
+- the complete `FEBE508F` reference set has exactly three writers: startup
+  initialization `0x68006` clears it, the activator `0x69026` writes active
+  value `1`, and `crypto_test_bank1_finalize @ 0x68D0E` writes terminal state
+  `0x02` or `0xFF`; no second function emulates activation;
+- the periodic test-bank step/finalize functions are genuinely scheduled by
+  foreground wrapper `0x65750`, but both merely consume an already-active bank;
+  and
+- registered command-5/7 test completion callbacks exist elsewhere in
+  CodeFlash tables, demonstrating that the absence of an activator pointer is
+  not a generic failure to recover callback tables.
+
+Thus normal CAN `0x01B..0x01F`, startup/lifecycle code, and recovered static
+function-pointer dispatch cannot arm bank 1. A debugger, fault, runtime memory
+corruption originating from an as-yet-unknown primitive, or other hardware
+mechanism could still set `FEBE508F=1`; those are not disproved by static
+reachability.
+
+## 2026-08-10 — application signing-proxy static boundary
+
+The minimum application-resident command-5 architecture is now fully specified
+from existing firmware components. The canonical engineering design is in
+[sender-implementation.md](sender-implementation.md) §5. Static analysis does
+**not** implement the persistent hook or claim live slot-4 command-5 permission.
+The important software result is that no invented direct-ICU protocol is
+needed: the stock harness at `0x68B42` already proves the serialized
+command-5 argument/configuration shape, the foreground scheduler offers a
+non-CH0 hook site, and the application has existing CanIf transmit machinery.
+
 ## Current conclusion
 
-The software layer is not a closed boundary. Repository-known gate material
-provides arbitrary bootloader-context execution and a practical software-only
-way to characterize direct ICU commands using an existing CAN payload. A persistent
-application hook is also possible in principle because boot validity is CRC and
-marker consistency, not a signature. No static evidence yet proves command 13
-exports slot 4, but physical fault injection is not the next required step.
+The useful **static software** questions in this report are now closed. Repository-known gate material still provides arbitrary bootloader-context execution, and the application has a fully specified serialized command-5 proxy architecture. The dormant stock bank has no recovered static activation route, and the ICU result path has no recovered software-controlled stale-output disclosure. Hardware-only behavior remains separate: live slot-4 command-5 permission, undocumented ICU commands, physical leakage, and fault-induced sequencing require dynamic work rather than another broad static pass.
 
 ## External references
 

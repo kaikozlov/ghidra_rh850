@@ -6,12 +6,6 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Bootloader
 
-- **Payload provenance.** Candidate-f05 semantics and community source family
-  are closed (SECOC-031): it is a full DataFlash dump with post-dump reset,
-  authenticated under `SEED_KEY_SECRET`. The remaining provenance boundary is
-  exact authorship/build invocation/toolchain and why that secret was selected;
-  the original RAM/DataFlash fixture builders are likewise not established by
-  retained history.
 - **Bootloader DID `0203` semantics.** It ignores its five bytes and only arms
   state 0 → 1. Whether any field ever carried meaning in other calibrations is
   unknown.
@@ -94,23 +88,17 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   nonblank ICU-S storage. The current CPU-visible dump contains only `00/FF`;
   public P1M-E fault injection proves ordinary flash readout, not key-array
   access.
-- **Application-resident signing proxy.** The initialized command-5 wrapper is
-  structurally usable and arbitrates the shared ICU driver. There is no
-  configured **application diagnostic** upload path, stock output transport, or
-  production SecOC transmit path; however, repository-known bootloader gate
-  material provides a constructible callback and an authorized bridge to a
-  possible persistent/restorable application hook. Authenticated-input and
-  trailer packing are no longer open questions: pinned opendbc code and the
-  independent local stateless signer reproduce them. A dynamic prototype must
-  still establish key availability, application-context execution, slot-4
-  permission, output transport, runtime freshness scheduling, latency, and
-  command-7 contention. See
-  [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md).
-- **Dormant crypto-test activation.** CAN `0x01B..0x01F` provide the test
-  selector/message/expected result only after bank activator `0x69018` runs.
-  No caller or function-pointer entry reaches that activator in the recovered
-  graph; whether an unrecovered lifecycle or external debug path can arm it is
-  unknown.
+- **Application-resident signing proxy — dynamic discriminator only.** Stage 7
+  closes the static architecture (SECOC-041): stock `0x68B42 -> 0x88350 ->
+  0x87CCC` supplies selector-4 command-5 plumbing; `0x65750` provides a
+  foreground non-CH0 hook slot; command-7 contention is handled by deferring on
+  the shared serialized driver; sender freshness and a controlled `0x7F8`
+  bench egress are specified. Remaining questions are dynamic: does live slot 4
+  actually permit command 5, what latency/jitter does it have under real
+  command-7 load, and does a provisioned isolated bench produce CMACs matching
+  independently known frames? Production Tx integration also requires a new
+  audited route because stock CanIf has no `0x2E4/0x131` Tx entry. See
+  [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.
 - **Object-15 producer.** No static producer exists in this calibration.
   Where a provisioned unit writes object 15 from is unknown (dealer tool path
   hypothesis only).

@@ -351,6 +351,36 @@ classification after a future F3/F4 image is imported. Raw halfword scanning is
 explicitly not used for caller attribution because it overcounted the known
 Sienna target (11 apparent JARLs versus 2 real Ghidra call references).
 
+### 1.8 Stage-7 software-path closure
+
+Two remaining software-side extraction ideas are now statically bounded rather
+than left open:
+
+- **Stale ICU result/FIFO reuse:** commands 1/3, 5, and 7 can leave prior result
+  bytes resident in their private staging buffers, but every recovered outward
+  wrapper copies only on completion status zero. Command 8 additionally clears
+  its 64-byte input and 48-byte result staging after success or failure. Shared
+  driver serialization, command-ID matching, and callback-nullification before
+  abort command `0x3F` prevent the obvious cross-command replacement path. No
+  diagnostic/unrelated reader of the result staging was recovered. This is a
+  bounded software negative; abnormal hardware sequencing that reports clean
+  completion without delivering the specified output blocks is outside the
+  static software model. Canonical: [software-path-assessment.md](software-path-assessment.md).
+- **Dormant command-5 test activation:** the `0x69018` activator has no external
+  reference to its entry or interior, no ordinary CodeFlash pointer into its
+  42-byte body, and is the only recovered function that writes active value `1`
+  to `FEBE508F`. Startup clears the byte and the bank finalizer writes terminal
+  state rather than activation. Thus stock CAN/test lifecycle cannot arm it in
+  the recovered graph. Debugger/fault/runtime-corruption activation remains a
+  separate dynamic possibility.
+
+These negatives do **not** remove the signing-oracle route. The application
+already contains a serialized command-5 path and a viable foreground hook
+architecture; [sender-implementation.md](sender-implementation.md) §5 specifies
+the minimum design, including selector 4, command-7 contention, freshness, Tx,
+and teardown. What remains unknown is live hardware permission and runtime
+performance, not basic software plumbing.
+
 ## 2. Ranked recovery methods
 
 | Rank | Method | Expected value | Cost/risk | Current evidence |
@@ -798,8 +828,7 @@ native SecOC signing oracle without plaintext key recovery. This is a
 
 1. **Does ICU-S slot 4 permit MAC generation?** Command 5's software plumbing
    accepts selector 4 and handles output (SECOC-006, **verified structure**).
-   Hardware slot-4 generation permission is **unobserved** — ICU-S may reject
-   generation for a key provisioned for verification only.
+   Hardware slot-4 generation permission is **unobserved**. Under standard SHE semantics the same MAC-usage flag permits generation and verification (SECOC-023/CORR-017); a rejection would therefore indicate a Renesas-specific restriction or lifecycle condition, not a standard "verification-only" key policy.
 2. **Is ICU-S operational in bootloader context?** The authenticated callback
    runs before application init. Whether ICU-S is initialized and slot 4 is
    loaded at that point is unknown. A restorable application-context hook is
@@ -842,9 +871,7 @@ does not by itself establish that a compromised EPS can *originate* valid
 sender freshness. The startup-race dynamics described in OPEN_QUESTIONS
 ("reset-window replay") remain open for the sender case as well.
 
-The latency-contention constraint (OPEN_QUESTIONS: "command-7 contention")
-also applies: command-5 generation and command-7 verification share the same
-ICU-S engine.
+Stage 7 now makes the latency/contention architecture concrete: command-5 generation and command-7 verification share the same serialized ICU-S driver. The proxy design therefore treats a busy result as defer, never preempts a production verify with the abort path, and bounds its own queue. Whether this arbitration meets live message cadence remains dynamic.
 
 ### 11.6 Implications for recovery strategy
 
