@@ -1,0 +1,15 @@
+{
+  "adjudication_state_counts": {
+    "unresolved": 2031,
+    "unresolved-reviewed": 60
+  },
+  "candidate_class_counts": {
+    "orphan-decoded-run": 854,
+    "pointer-referenced-code-run": 1237
+  },
+  "candidate_count": 2091,
+  "csv": "outside_function_candidates.csv",
+  "decoded_byte_count": 73008,
+  "decoded_instruction_count": 25768,
+  "schema_version": 1
+}

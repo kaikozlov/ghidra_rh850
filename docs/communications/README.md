@@ -7,6 +7,7 @@ CAN and ISO-TP transport, and the application receive/transmit maps.
 | [diagnostic-transport.md](diagnostic-transport.md) | Bootloader CAN/ISO-TP diagnostic transport path |
 | [application-rx.md](application-rx.md) | Application receive map: 47 normal Rx I-PDUs, 242 COM signals, acceptance rules |
 | [application-tx.md](application-tx.md) | Application transmit map: 11 active CanIf routes, 6 COM I-PDUs, 58 COM signals |
+| [xcp-command-dispatch.md](xcp-command-dispatch.md) | Application calibration-command table and recovered callback family |
 
 ## Machine-readable canonical maps
 

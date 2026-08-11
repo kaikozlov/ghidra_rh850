@@ -221,6 +221,10 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -preScript SeedArchitectureFunctions.java \
   -preScript SeedApplicationTransmitFunctions.java \
   -preScript SeedApplicationReceiveFunctions.java \
+  -preScript SeedRecoveredCallbackTables.java \
+  -preScript SeedDispatchProvenFunctionTables.java \
+  -preScript SeedBoundedPointerWrappers.java \
+  -preScript SeedDirectCallTargets.java \
   -postScript AnnotateBootloaderSecrets.java \
   -postScript AnnotatePayloadGate.java \
   -postScript AnnotateSecocNvmCorrection.java \
@@ -238,6 +242,7 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -postScript AnnotateApplicationTransmit.java \
   -postScript AnnotateApplicationReceive.java \
   -postScript AnnotateLargeFunctions.java \
+  -postScript SeedDirectCallTargets.java \
   -postScript ApplyCallingConventions.java \
   -commit "Complete reproducible RH850 analysis"
 

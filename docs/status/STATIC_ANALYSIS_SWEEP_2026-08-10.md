@@ -14,6 +14,28 @@ documents are used only for navigation.
 - Ghidra working project: `build/project/`
 - Committed `project/` opened by daemon: no
 
+## 2026-08-11 reproducibility correction
+
+The earlier sweep's prose descriptions of “high-signal” functions are not an
+authoritative selection oracle. The current function graph is first repaired
+by callback-table and direct-call seeds, then exported into
+`data/semantic_coverage_ledger.csv`. The deterministic formula in
+`tools/generate_semantic_interest_ranking.py` produces the canonical ranking at
+`data/generated/semantic_interest_ranking.csv` and pins the exact scalar top 40
+in `tests/verify_semantic_interest_ranking.py`.
+
+The scalar score gives positive weight to function size, caller/callee fanout,
+indirect references, RAM references and RAM read/write density, MMIO,
+CodeFlash data, strings, and unreviewed status. It applies no zero-caller
+penalty. A separate selected cohort preserves boot/application, RAM-heavy,
+table-heavy, high-fanout, zero-caller, indirect-callback, ISR-rooted,
+largest-body, and cutoff-neighbor strata. The previously noted stateful/cutoff
+routines are explicitly dispositioned: `0x35B86`/`0x35D1E` are a mirrored pair
+of saturated calibration-driven state calculators; `0x5BEA6` and `0xBE8E6`
+are bounded bulk RAM snapshot/copy routines; and `0x916E2` is a bounded
+multi-state protocol/event dispatcher whose exact service semantics remain
+unnamed. These are firmware-static review results, not OEM field names.
+
 ## Baseline verification
 
 | Command | Result |

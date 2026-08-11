@@ -1,0 +1,2 @@
+source_start,source_end_exclusive,source_sha256,candidate_class,adjudication_state,expected_candidate_count,rationale,evidence
+0x00027c88,0x00027d78,53d8c3f4dd2de0354cadac93118c67ef2485d4b3a22d1c5d9cae82de918d9a78,pointer-referenced-code-run,unresolved-reviewed,60,"Dense array of 60 valid standalone entry-shaped CodeFlash pointers, including 0x27D08..0x27D54; no executable table walker or computed-call consumer is referenced in this image, so pointer shape alone cannot prove dispatch.",firmware-static:xrefs-and-table-bytes
