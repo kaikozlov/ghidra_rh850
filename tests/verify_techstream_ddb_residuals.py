@@ -8,11 +8,18 @@ import struct
 import sys
 from pathlib import Path
 
+import pefile
+
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "tools/techstream"))
-from parse_ddb import DDBParser  # noqa: E402
+from parse_ddb import (  # noqa: E402
+    DDBParser,
+    ECU_TABLE_CLASS_NAMES,
+    MASTER_TABLE_CLASS_NAMES,
+)
 
 ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+BIN = ROOT / "bin"
 
 passed = 0
 failed = 0
@@ -35,6 +42,7 @@ if not ROOT.exists():
 parser = DDBParser()
 security = ROOT / "NA/DB/Security_P4.ddb"
 toyota = ROOT / "NA/DB/Toyota.ddb"
+kgp = BIN / "KgpDataCtrl.dll"
 m_strings = parser.load_string_db(ROOT / "NA/DB/M_English.ddb")
 
 print("== pinned residual-audit sources ==")
@@ -48,6 +56,28 @@ check(
     hashlib.sha256(toyota.read_bytes()).hexdigest()
     == "63ee18391421a7b02996eef282bc8ea3251889981d9cf9e1722e89f4952cb19e",
 )
+check(
+    "KgpDataCtrl.dll hash",
+    hashlib.sha256(kgp.read_bytes()).hexdigest()
+    == "e5235bc0c241c6a450fe461031eed0915675032b1db994bd54d98818fac88aa9",
+)
+
+kgp_pe = pefile.PE(str(kgp), fast_load=True)
+image_base = kgp_pe.OPTIONAL_HEADER.ImageBase
+factory_body = kgp_pe.get_data(0x1001ECCB - image_base, 14551)
+check(
+    "format-2 table factory body pin",
+    hashlib.sha256(factory_body).hexdigest()
+    == "bc2b0b27e6e81abbea2b94ebc021ac9882466497e5b4c6c5bd5511557a45b996",
+)
+check("factory maps section 3 to CDbSupPidTable",
+      ECU_TABLE_CLASS_NAMES[3] == "CDbSupPidTable")
+check("factory maps section 7 to CDbDidTable",
+      ECU_TABLE_CLASS_NAMES[7] == "CDbDidTable")
+check("factory maps section 6 to CDbPidTable",
+      ECU_TABLE_CLASS_NAMES[6] == "CDbPidTable")
+check("factory maps section 10 to CDbFreezeTable",
+      ECU_TABLE_CLASS_NAMES[10] == "CDbFreezeTable")
 
 print("\n== Security_P4 structural audit ==")
 sec = parser.parse_ecu_db(security)
@@ -56,6 +86,9 @@ expected_types = {
     35, 36, 37, 43, 44, 45, 46, 57, 58, 59,
 }
 check("Security_P4 complete section-type set", set(sec.sections) == expected_types)
+check("Security_P4 section 3 is supported-PID metadata, not a DID table",
+      ECU_TABLE_CLASS_NAMES[sec.sections[3].header.table_type]
+      == "CDbSupPidTable")
 check("Security_P4 type 35 is one 28-byte record",
       sec.sections[35].header.record_count == 1 and sec.sections[35].record_size == 28)
 check("Security_P4 type 37 is fifty 20-byte records",
@@ -113,13 +146,52 @@ check(
 print("\n== Toyota master database boundary ==")
 toyota_bytes = toyota.read_bytes()
 check("Toyota.ddb is distinct format type 1", toyota_bytes[8] == 0x01)
+master = parser.parse_master_db(toyota)
+expected_master_types = {
+    0, 2, 4, 5, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+    25, 26, 27, 28, 29, 32, 33, 34, 35, 36, 41, 42, 43, 44, 46, 47,
+    48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 62, 63, 64,
+    65, 68, 69, 72, 73, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85,
+    86, 87, 88,
+}
+check("Toyota master structural parser covers all 67 NA sections",
+      set(master.sections) == expected_master_types)
+regional_masters = {
+    region: parser.parse_master_db(ROOT / region / "DB/Toyota.ddb")
+    for region in ("NA", "EU", "JP")
+}
+check("all three regional Toyota masters parse structurally",
+      {region: len(db.sections) for region, db in regional_masters.items()}
+      == {"NA": 67, "EU": 67, "JP": 76})
+eu_section4 = regional_masters["EU"].sections[4]
+try:
+    _ = eu_section4.record_size
+except ValueError as exc:
+    check("compressed master payloads cannot masquerade as decoded records",
+          "compressed" in str(exc))
+else:
+    check("compressed master payloads cannot masquerade as decoded records", False)
+check("master factory identifies CAN, ECU, DLL, DID, and RID tables",
+      {key: MASTER_TABLE_CLASS_NAMES[key] for key in (14, 16, 19, 26, 56, 62, 88)}
+      == {
+          14: "CDbCommInfoCanTable",
+          16: "CDbEcuCategoryTable",
+          19: "CDbDllTable",
+          26: "CDbEcuFuncInfoTable",
+          56: "CDbEcuDescriptionTable",
+          62: "CDbCommDidDataTable",
+          88: "CDbCommRidDataTable",
+      })
+check("Toyota master contains no exact Sienna calibration identifier",
+      b"8965B4512000" not in toyota_bytes
+      and "8965B4512000".encode("utf-16-le") not in toyota_bytes)
 try:
     parser.parse_ecu_db(toyota)
 except ValueError as exc:
-    check("type-2 ECU parser rejects Toyota master schema", "expected ECU database" in str(exc))
+    check("type-2 ECU API still rejects Toyota master schema",
+          "expected ECU database" in str(exc))
 else:
-    check("type-2 ECU parser rejects Toyota master schema", False)
-check("Toyota master database remains large separate schema", len(toyota_bytes) > 10_000_000)
+    check("type-2 ECU API still rejects Toyota master schema", False)
 
 print(f"\n{passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

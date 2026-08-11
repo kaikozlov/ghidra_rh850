@@ -3,16 +3,20 @@
 
 The supported modern layouts carry the "DiagTool DataCtrl" signature:
 
-1. **Type-2 ECU databases** (EPS_P4DK3.ddb, EPS_CAN_P4DK.ddb, ...) — per-ECU
+1. **Type-1 Toyota master database** (Toyota.ddb) — global routing and ECU
+   enumeration tables.  It uses the same section directory/header grammar,
+   but a different factory/table-class namespace.
+
+2. **Type-2 ECU databases** (EPS_P4DK3.ddb, EPS_CAN_P4DK.ddb, ...) — per-ECU
    diagnostic tables. A type-indexed pointer directory references sections,
    each with a 10-byte TABLE_DATA_HEAD header. Sections are uncompressed.
 
-2. **Modern type-4/5/6 string databases** (M/V/U language files) — global OEM
+3. **Modern type-4/5/6 string databases** (M/V/U language files) — global OEM
    strings referenced by ECU records. M/V carry one LZSS-compressed section;
    U carries strings plus a parallel compressed resource-metadata section.
 
-Type-1 Toyota master, type-3 Viewer, and legacy type-4 layouts are distinct and
-intentionally rejected by these APIs rather than silently misparsed.
+Type-3 Viewer and legacy type-4 layouts are distinct and intentionally rejected
+by these APIs rather than silently misparsed.
 
 Format details recovered by decompiling DataCompress_DT.DLL!_DataDecode@12
 (LZSS algorithm) and KgpDataCtrl.dll!CDbTableRead::CreateTable (file format).
@@ -46,6 +50,88 @@ MAGIC_PREFIX = bytes.fromhex("40 00 0c 16 0c 08")
 U_MAGIC_PREFIX = bytes.fromhex("39 00 0c 16 0b 15 0f")
 U_LANGUAGE_TAGS = frozenset(range(0x16, 0x1B))
 SIGNATURE = b"DiagTool DataCtrl\x00"
+
+# Table identities recovered from the two KgpDataCtrl.dll factories selected
+# by CDbTableRead::MakeTable (0x100228D1).  These names are not heuristic:
+# FUN_1001C9D0 constructs format-1 tables and FUN_1001ECCB constructs format-2
+# tables.  The subset below covers every table used by the steering/security
+# audit plus the high-value Toyota master routing/identity tables.
+ECU_TABLE_CLASS_NAMES = {
+    0: "CDbSignalGroupTable",
+    1: "CDbSignalCheckTable",
+    2: "CDbSupFreezeTable",
+    3: "CDbSupPidTable",
+    4: "CDbSupDidTable",
+    5: "CDbDiagCodeTable",
+    6: "CDbPidTable",
+    7: "CDbDidTable",
+    10: "CDbFreezeTable",
+    11: "CDbActTestTable",
+    12: "CDbActTestPatternTable",
+    13: "CDbPhyDataTable",
+    14: "CDbPatDispTable",
+    15: "CDbUnitTable",
+    16: "CDbTriggerListTable",
+    18: "CDbStandardInfoTable",
+    19: "CDbTriggerAnalyzeRetrievalTable",
+    32: "CDbDTCGroupRetrieveTable",
+    35: "CDbWorkFactorSignalListTable",
+    36: "CDbWorkFactorItemTable",
+    37: "CDbWorkFactorPatternTable",
+    38: "CDbCommEcuDataTable",
+    43: "CDbBdidTable",
+    44: "CDbSupBdidTable",
+    45: "CDbBehaviorDataRecordTable",
+    46: "CDbBehaviorSignalCheckTable",
+    55: "CDbPidAdditionFrameTable",
+    57: "CDbBdidTable",
+    58: "CDbSupBdidTable",
+    59: "CDbBehaviorDataRecordTable",
+    61: "CDbDataIdForDmTable",
+    62: "CDbDatamonitorP5Table",
+    63: "CDbDataIdBitForDmTable",
+    65: "CDbDiagCodeP5Table",
+    66: "CDbDTCStatusMaskTable",
+    80: "CDbDataIdBitForFfdTable",
+    87: "CDbBehaviorCodeTable",
+    88: "CDbBehaviorDataRecordP5Table",
+    90: "CDbDataIdForRobTable",
+    91: "CDbBehaviorSignalCheckTable",
+}
+
+MASTER_TABLE_CLASS_NAMES = {
+    0: "CDbVariableTable",
+    2: "CDbProtJudgeTable",
+    3: "CDbExceptionFindIdTable",
+    4: "CDbExceptionProcessIdTable",
+    5: "CDbEcuGroupTable",
+    13: "CDbProtInfoTable",
+    14: "CDbCommInfoCanTable",
+    15: "CDbCommInfoIsoTable",
+    16: "CDbEcuCategoryTable",
+    17: "CDbCommFrameTable",
+    18: "CDbFuncCommFrameTable",
+    19: "CDbDllTable",
+    23: "CDbSubSystemTable",
+    24: "CDbUtilityListTable",
+    26: "CDbEcuFuncInfoTable",
+    27: "CDbEcuFuncDetailsTable",
+    28: "CDbEcuAddInfoTable",
+    41: "CDbVehicleDecisionTable",
+    43: "CDbVehicleNameTable",
+    44: "CDbInstallingEcuListTable",
+    56: "CDbEcuDescriptionTable",
+    59: "CDbVinVehicleDecisionTable",
+    62: "CDbCommDidDataTable",
+    75: "CDbCanBusCarIdTable",
+    77: "CDbCanBusOptionTable",
+    78: "CDbCanBusComponentTable",
+    79: "CDbCanBusNameTable",
+    82: "CDbVehicleSetTable",
+    85: "CDbCommInfoEthernetTable",
+    86: "CDbCommInfoSwEcuTable",
+    88: "CDbCommRidDataTable",
+}
 
 
 # ── LZSS decompression ────────────────────────────────────────────────────────
@@ -138,6 +224,11 @@ class Section:
 
     @property
     def record_size(self) -> int:
+        if self.header.compression != 0:
+            raise ValueError(
+                f"section {self.header.table_type} is compressed; record size "
+                "is unavailable for its on-disk payload"
+            )
         if self.header.record_count == 0:
             return 0
         size, remainder = divmod(
@@ -286,14 +377,29 @@ class DDBParser:
 
     def parse_ecu_db(self, path: str | Path) -> ECUDataBase:
         """Parse an ECU .ddb file (uncompressed sections)."""
+        return self._parse_sectioned_db(path, expected_format=0x02, label="ECU")
+
+    def parse_master_db(self, path: str | Path) -> ECUDataBase:
+        """Parse the structural section directory of type-1 ``Toyota.ddb``.
+
+        Compressed payloads remain in their on-disk form; this API establishes
+        complete table coverage and factory identities without pretending that
+        every master-table record layout has been decoded.
+        """
+        return self._parse_sectioned_db(path, expected_format=0x01, label="master")
+
+    def _parse_sectioned_db(
+        self, path: str | Path, expected_format: int, label: str
+    ) -> ECUDataBase:
         path = Path(path)
         data = path.read_bytes()
         self._validate_header(data)
 
         format_version = data[8]
-        if format_version != 0x02:
+        if format_version != expected_format:
             raise ValueError(
-                f"expected ECU database format 0x02, got 0x{format_version:02X}"
+                f"expected {label} database format 0x{expected_format:02X}, "
+                f"got 0x{format_version:02X}"
             )
         db = ECUDataBase(path=path, format_version=format_version)
 
@@ -512,10 +618,15 @@ class DDBParser:
 
     @staticmethod
     def extract_dids(section: Section) -> list[int]:
-        """Extract DID identifiers from section type 3 (8-byte records).
+        """Extract bounded DID record keys from type-7 ``CDbDidTable`` rows.
 
-        Returns the DID values (e.g. 0x0100, 0x0120, 0x0140, 0x01E0).
+        This helper must only be passed section 7.  Section 3 is
+        ``CDbSupPidTable`` and must never be promoted as DID evidence.
         """
+        if section.header.table_type != 7:
+            raise ValueError(
+                f"expected CDbDidTable section 7, got {section.header.table_type}"
+            )
         dids = []
         rec_size = 8
         for i in range(section.header.record_count):
@@ -526,3 +637,24 @@ class DDBParser:
             did = struct.unpack_from("<H", raw, 4)[0]
             dids.append(did)
         return dids
+
+    @staticmethod
+    def extract_supported_pid_records(section: Section) -> list[bytes]:
+        """Return raw type-3 ``CDbSupPidTable`` records.
+
+        The two bytes at offsets 4–5 were formerly mislabeled as a little-
+        endian DID.  Preserve the complete record until its support-mask field
+        semantics are independently recovered.
+        """
+        if section.header.table_type != 3:
+            raise ValueError(
+                f"expected CDbSupPidTable section 3, got {section.header.table_type}"
+            )
+        if section.record_size != 8:
+            raise ValueError(
+                f"CDbSupPidTable record size is {section.record_size}, expected 8"
+            )
+        return [
+            section.raw_data[index * 8 : (index + 1) * 8]
+            for index in range(section.header.record_count)
+        ]

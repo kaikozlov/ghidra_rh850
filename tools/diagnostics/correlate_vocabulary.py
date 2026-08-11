@@ -78,10 +78,10 @@ DTC_EVENT_TABLE_START = 0x2FDDC
 DTC_EVENT_TABLE_COUNT = 0x180
 DTC_EVENT_RECORD_SIZE = 8
 
-# RAM source mapping for monitor-bridged DIDs, recovered by decompiling each
-# DID callback (via SeedDidCallbacks.java).  These identify the RAM variable or
-# checkpoint object that each monitor reads — the semantic bridge from OEM
-# vocabulary to firmware state.
+# RAM source mapping for seq-derived candidate firmware DIDs, recovered by
+# decompiling each DID callback (via SeedDidCallbacks.java).  These identify
+# the RAM variable or checkpoint object that each monitor reads and provide the
+# independent evidence needed to promote the candidate semantic bridge.
 MONITOR_RAM_SOURCES = {
     0x0102: "DAT_FEBEE90C (vehicle_speed_2B), DAT_FEBEE896 (speed_signal_2B), DAT_FEBEE815 (speed_flag_1B)",
     0x0103: "DAT_FEBEE910 (engine_rpm_ptr), DAT_FEBEE814 (rpm_flag_1B); returns 0 when rpm < 100000 (0xF4240)",
@@ -316,16 +316,16 @@ def correlate_monitors(
 ) -> list[dict]:
     """Correlate Techstream monitors with firmware DID records.
 
-    The key discovery: monitor record field at offset 56 (the "seq" number)
-    maps to firmware DIDs via ``DID = 0x0100 + seq``.  This is not in the
-    .ddb section 0/1 lookup tables — those use proprietary PIDs (0x2711+).
+    Monitor record field 56 (the "seq" number) supplies a structural candidate
+    via ``DID = 0x0100 + seq``. This is not a DDB DID-table relationship;
+    promotion requires independent firmware callback/data-source evidence.
 
-    For monitors with seq < 100, DID = 0x0100 + seq hits the firmware DID
-    table exactly, giving us OEM names like "Motor Instruction Current",
-    "Steering Torque", "Thermistor Temperature" for firmware callbacks.
+    For some monitors with seq < 100, the candidate exists in the firmware DID
+    table. OEM names such as "Motor Instruction Current" and "Steering Torque"
+    become structural only where callback decompilation independently agrees.
 
     EPS_CAN_P4DK (the UDS/CAN variant) is authoritative for this firmware's
-    DID semantics.  EPS_P4DK3 (the KWP variant) uses different naming because
+    monitor vocabulary. EPS_P4DK3 (the KWP variant) uses different naming because
     it is a different protocol generation — KWP/CAN differences are EXPECTED
     and do not indicate a conflict.  Only disagreements WITHIN the CAN variant
     itself would trigger a candidate grade.
@@ -360,7 +360,7 @@ def correlate_monitors(
     seen_dids: set[int] = set()
     matches: list[dict] = []
 
-    # First: monitors that map to firmware DIDs (the high-value bridge)
+    # First: seq-derived monitor candidates that coincide with firmware DIDs.
     for did, names_by_db in sorted(monitor_names_by_did.items()):
         if did not in fw_dids:
             continue
@@ -373,7 +373,7 @@ def correlate_monitors(
         # vocabulary; it does not prove calibration-specific semantics.
         oem_name = can_names[0] if can_names else (kwp_names[0] if kwp_names else "unnamed")
 
-        # Attach decompiled RAM source information for the bridged DIDs.
+        # Attach independent decompiled RAM evidence for candidate DIDs.
         ram_source = MONITOR_RAM_SOURCES.get(did)
 
         # The seq bridge and firmware membership establish structure, not OEM
@@ -418,7 +418,7 @@ def correlate_monitors(
         match["note"] = " ".join(parts)
         matches.append(match)
 
-    # Remaining monitors that don't map to firmware DIDs stay as family
+    # Remaining monitors without a matching firmware candidate stay as family
     # vocabulary. Do not append source records for a bridge already emitted
     # above; the old logic duplicated every bridged monitor as exact and family.
     for mon in [e for e in catalog["entries"] if e["kind"] == "monitor"]:

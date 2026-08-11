@@ -49,6 +49,7 @@ VERIFY_SUITES := \
 	tests/verify_diagnostic_vocabulary.py \
 	tests/verify_techstream_mackey.py \
 	tests/verify_techstream_ptshim.py \
+	tests/verify_techstream_ddb_residuals.py \
 	tests/verify_memory_safety.py \
 	tests/verify_community_tooling.py \
 	tests/verify_community_patch_target_analyzer.py \

@@ -717,7 +717,7 @@ format (`DiagTool DataCtrl` magic). The EPS-relevant databases:
 | `EPS_CAN_P4DK.ddb` | NA | 10.5 KiB | EPS Phase-4 CAN functional diagnostics |
 | `EPS_CAN_P4DK.ddb` | EU/JP | 10.5+ KiB | Same, regional variant |
 | `Security_P4.ddb` | NA/EU/JP | 13 KiB | Phase-4 security-system diagnostics; not itself proof of a SecurityAccess/key table |
-| `Toyota.ddb` | all | 13.0 MiB | Master ECU enumeration corpus; separate format-type-1 schema, not decoded by the type-2 ECU parser |
+| `Toyota.ddb` | all | 13.0 MiB | Master routing/ECU enumeration corpus; type-1 directory structurally parsed separately |
 
 The Stage-3 residual audit removes the older blanket statement that the DDB
 record structures are unknown. Every one of the **35 steering `EPS*`/`EMPS*`
@@ -732,19 +732,26 @@ leading string resolves to **`Security Alarm Operation`**; section type 37 is
 `Battery Desorption`, `Hood Open`, `Luggage Open`, and `Door Open`, with alarm
 explanations in the companion string field. This high-signal residual is
 therefore vehicle-security/alarm diagnostic vocabulary, not a recovered
-Safekey/MCU-ID/MACKey provisioning table. Other unknown section classes remain
-structurally inventoried and are not assigned semantics without evidence.
+Safekey/MCU-ID/MACKey provisioning table. Other section classes retain their
+factory-derived names and are not assigned field semantics without evidence.
 
-The one still-high-value DDB-format residual is `Toyota.ddb`: it is a distinct
-format-type-1, multi-megabyte master-enumeration schema and is deliberately
-rejected by the type-2 parser. It may improve ECU identity/routing/catalog
-recovery, but the already-recovered MACKey vehicle protocol does not depend on
-it, so a generic type-1 reverse-engineering project is deferred rather than
-expanded inside this sweep. `tests/verify_techstream_ddb_residuals.py` pins this
-boundary and the `Security_P4` alarm-domain interpretation.
+`Toyota.ddb` is a distinct format-type-1 master schema, but it is no longer an
+unknown directory. `parse_master_db()` covers all three regional directories
+(67 NA, 67 EU, and 76 JP sections), and the
+pinned KgpDataCtrl type-1 factory identifies CAN communication, ECU
+category/function/description, DLL, communication-DID, and communication-RID
+tables. Exact Sienna identifier `8965B4512000` is absent. Compressed EU master
+payloads remain bounded on-disk data and cannot be queried for record size as
+if decoded. Record-level semantics remain demand-driven because the recovered
+MACKey protocol does not depend on them.
+`tests/verify_techstream_ddb_residuals.py` pins this boundary and the
+`Security_P4` alarm-domain interpretation.
 
-The repository parser now decodes the section directory, DTC records, DID
-records, Data List monitors, and all three OEM string databases. Run
+The repository parser now decodes section directories, DTC records,
+factory-identified supported-PID/PID/DID table classes, freeze-data monitor
+vocabulary, and all three OEM string databases. Section 3 is
+`CDbSupPidTable`, not a DID table; the two selected P4 EPS databases therefore
+provide no direct database-DID correlation. Run
 `make generate-diagnostic-vocabulary` to rebuild the calibration-focused
 annotations plus the complete regional steering corpus.
 
@@ -753,8 +760,9 @@ The calibration-focused correlation still uses `EPS_P4DK3.ddb` and
 artifact, `data/generated/techstream_v18/steering_diagnostic_corpus.json`,
 prevents that selection from hiding the rest of the distribution: it discovers
 all **35** regional `EPS*`/`EMPS*` files, groups them into **25** full-section semantic
-variants, and recovers **129** unique DTC identifiers, **16** unique DIDs, and
-**1257** monitor records. The former parser stopped at directory slot 16 and
+variants, and recovers **129** unique DTC identifiers, one actual
+`CDbDidTable` record, 146 supported-PID records with 16 unique raw keys, and
+**1,257** freeze-data monitor records. The former parser stopped at directory slot 16 and
 silently omitted 10,659 of 25,361 type-2 sections.
 
 The generated artifacts are deterministic. Tests compare committed JSON to a

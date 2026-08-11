@@ -79,7 +79,7 @@ public class SeedDidCallbacks extends GhidraScript {
         }
         println("Seeded " + seen.size() + " unique DID callbacks");
 
-        // Decompile the monitor-bridged DIDs
+        // Decompile seq-derived candidate DIDs for independent semantic evidence.
         decompileAndPrint(0x4E98EL, "DID 0x0101 (Diagnosis codes when FFD stored)");
         decompileAndPrint(0x4CBFCL, "DID 0x0102 (Vehicle speed)");
         decompileAndPrint(0x4CC76L, "DID 0x0103 (Engine revolution speed)");

@@ -3,14 +3,15 @@
 
 ``EPS_P4DK4.ddb`` (JP region only) is the richest EPS database in the
 Techstream V18 corpus: 26 unique DTCs (45 records with dual naming),
-89 monitors, 85 subfunction definitions. It is a JP-market diagnostic
-variant, not a later release — the Techstream V18.00.003 distribution
+89 monitors, and 85 raw ``CDbPidTable`` records. It is a JP-market diagnostic
+variant with 85 raw ``CDbPidTable`` rows, not a later release — the
+Techstream V18.00.003 distribution
 (December 2022) predates both the 2023 Sienna and the 2025 Corolla.
 
 This script produces a standalone vocabulary artifact for cross-variant
-use — its 13 extra bridged DIDs (relative to the NA database) cover EPS
-state variables that give the correlation engine more matches to work
-with when new firmware arrives.
+use — its 13 extra seq-derived candidate firmware-DID bridges (relative to the
+NA database) cover EPS state variables that give the correlation engine more
+matches to test when new firmware arrives. They are not ``CDbDidTable`` rows.
 
 The artifact is NOT Sienna-specific (no firmware DID-table correlation).
 It is a pure OEM vocabulary extraction, analogous to what
@@ -40,8 +41,9 @@ TECHSTREAM_DB = REPO_ROOT / "Techstream/unpacked/toyota/Toyota Diagnostics/Techs
 P4DK4_PATH = "JP/DB/EPS_P4DK4.ddb"
 STRING_DBS = ["NA/DB/M_English.ddb", "NA/DB/V_English.ddb"]
 
-# The monitor→DID bridge: monitor record field at offset 56 ("seq") maps to
-# UDS DIDs via DID = 0x0100 + seq (recovered from correlate_vocabulary.py).
+# Structural monitor→firmware-DID candidate used by correlate_vocabulary.py:
+# monitor field offset 56 ("seq") yields candidate DID = 0x0100 + seq.  This
+# is not a CDbDidTable identity and requires independent firmware evidence.
 MONITOR_SEQ_OFFSET = 56
 MONITOR_BRIDGE_BASE = 0x0100
 
@@ -67,14 +69,17 @@ def extract_dtcs(db, strings_m, strings_v):
     return entries
 
 
-def extract_dids(db):
+def extract_supported_pid_records(db):
+    """Preserve section-3 CDbSupPidTable rows as bounded raw records."""
     entries = []
     sec = db.sections[3]
-    rec_size = 8
-    for i in range(sec.header.record_count):
-        raw = sec.raw_data[i * rec_size:(i + 1) * rec_size]
-        did = struct.unpack_from("<H", raw, 4)[0]
-        entries.append({"kind": "did", "identifier": did, "record_index": i})
+    for i, raw in enumerate(DDBParser.extract_supported_pid_records(sec)):
+        entries.append({
+            "kind": "supported_pid_record",
+            "record_index": i,
+            "raw_hex": raw.hex(),
+            "support_key_hex": raw[4:6].hex(),
+        })
     return entries
 
 
@@ -90,13 +95,16 @@ def extract_monitors(db, strings_m):
         name = strings_m.get_string(name_idx) or ""
         desc = strings_m.get_string(desc_idx) or ""
 
-        bridged_did = MONITOR_BRIDGE_BASE + seq if seq < 100 else None
+        candidate_did = MONITOR_BRIDGE_BASE + seq if seq < 100 else None
 
         entries.append({
             "kind": "monitor",
+            "source_table_class": "CDbFreezeTable",
             "record_index": i,
             "seq": seq,
-            "bridged_did": f"0x{bridged_did:04X}" if bridged_did else None,
+            "candidate_firmware_did": (
+                f"0x{candidate_did:04X}" if candidate_did else None
+            ),
             "name_string_index": name_idx,
             "resolved_name": name or None,
             "resolved_desc": desc or None,
@@ -105,12 +113,11 @@ def extract_monitors(db, strings_m):
     return entries
 
 
-def extract_subfunctions(db):
-    """Extract section 6 subfunction definitions.
+def extract_pid_records(db):
+    """Extract raw section-6 ``CDbPidTable`` records.
 
-    Each 8-byte record appears to encode a subfunction ID (byte 2) and
-    a count/type field (byte 3). The structure is not fully decoded;
-    we record raw bytes for structural comparison.
+    The structure is not fully decoded; preserve raw bytes for structural
+    comparison without the former unsupported "subfunction" interpretation.
     """
     entries = []
     sec = db.sections[6]
@@ -118,7 +125,7 @@ def extract_subfunctions(db):
     for i in range(sec.header.record_count):
         raw = sec.raw_data[i * rec_size:(i + 1) * rec_size]
         entries.append({
-            "kind": "subfunction",
+            "kind": "pid_record",
             "record_index": i,
             "raw_hex": raw.hex(),
         })
@@ -139,19 +146,26 @@ def build_p4dk4_catalog() -> dict:
 
     # Extract all record types
     dtcs = extract_dtcs(db, dbs["M_English"], dbs.get("V_English"))
-    dids = extract_dids(db)
+    supported_pid_records = extract_supported_pid_records(db)
     monitors = extract_monitors(db, dbs["M_English"])
-    subfns = extract_subfunctions(db)
+    pid_records = extract_pid_records(db)
 
-    # Build the bridged monitor summary (seq < 100 → DID)
+    # Build the structural candidate summary (seq < 100 → firmware DID label).
     bridged = [
-        {"seq": m["seq"], "did": m["bridged_did"], "name": m["resolved_name"]}
+        {
+            "seq": m["seq"],
+            "candidate_firmware_did": m["candidate_firmware_did"],
+            "name": m["resolved_name"],
+        }
         for m in monitors
-        if m["bridged_did"]
+        if m["candidate_firmware_did"]
     ]
 
-    # Unique DIDs from bridged monitors
-    bridged_dids = sorted({int(m["bridged_did"], 16) for m in monitors if m["bridged_did"]})
+    candidate_dids = sorted({
+        int(m["candidate_firmware_did"], 16)
+        for m in monitors
+        if m["candidate_firmware_did"]
+    })
 
     # Deduplicate DTCs by (code, identifier), merging alternate name strings.
     # P4DK4 carries dual naming for most DTCs: a formal name and a short/
@@ -175,18 +189,19 @@ def build_p4dk4_catalog() -> dict:
         "description": (
             "P4DK4 EPS diagnostic vocabulary from a co-shipped Techstream V18 "
             "database. Not firmware-correlated and not evidence that the "
-            "database targets a newer EPS generation."
+            "database targets a newer EPS generation. Seq-derived candidate "
+            "firmware-DID labels are structural and are not CDbDidTable rows."
         ),
         "techstream_distribution": "V18.00.003",
         "source_file": P4DK4_PATH,
         "summary": {
             "dtcs": len(dtcs_deduped),
             "unique_dtc_identifiers": len({d["dtc_identifier"] for d in dtcs_deduped}),
-            "dids": len({d["identifier"] for d in dids}),
+            "supported_pid_records": len(supported_pid_records),
             "monitors": len(monitors),
-            "bridged_monitors": len(bridged),
-            "bridged_did_count": len(bridged_dids),
-            "subfunctions": len(subfns),
+            "structural_monitor_bridges": len(bridged),
+            "candidate_firmware_did_count": len(candidate_dids),
+            "pid_records": len(pid_records),
         },
         "string_databases": {
             name: {
@@ -195,11 +210,11 @@ def build_p4dk4_catalog() -> dict:
             }
             for name, db_sdb in dbs.items()
         },
-        "bridged_monitors": bridged,
+        "structural_monitor_bridges": bridged,
         "dtcs": dtcs_deduped,
-        "dids": sorted({d["identifier"] for d in dids}),
+        "supported_pid_records": supported_pid_records,
         "monitors": monitors,
-        "subfunctions": subfns,
+        "pid_records": pid_records,
     }
     return catalog
 
@@ -214,9 +229,13 @@ def main() -> None:
     out_path.write_text(json.dumps(catalog, indent=2, ensure_ascii=False))
     print(f"Wrote {out_path}")
     print(f"  DTCs: {catalog['summary']['dtcs']} ({catalog['summary']['unique_dtc_identifiers']} unique IDs)")
-    print(f"  DIDs: {catalog['summary']['dids']}")
-    print(f"  Monitors: {catalog['summary']['monitors']} ({catalog['summary']['bridged_monitors']} bridged to DIDs)")
-    print(f"  Subfunctions: {catalog['summary']['subfunctions']}")
+    print(f"  Supported-PID records: {catalog['summary']['supported_pid_records']}")
+    print(
+        f"  Monitors: {catalog['summary']['monitors']} "
+        f"({catalog['summary']['structural_monitor_bridges']} structural "
+        "firmware-DID candidates)"
+    )
+    print(f"  PID records: {catalog['summary']['pid_records']}")
 
 
 if __name__ == "__main__":

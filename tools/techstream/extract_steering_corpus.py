@@ -72,22 +72,39 @@ def extract_dtcs(db: ECUDataBase, strings: StringDataBase) -> list[dict]:
     return entries
 
 
-def extract_dids(db: ECUDataBase) -> list[dict]:
+def extract_supported_pid_records(db: ECUDataBase) -> list[dict]:
     section = db.sections.get(3)
     if section is None:
         return []
-    if section.record_size != 8:
-        raise ValueError(
-            f"{db.path.name} DID record size is {section.record_size}, expected 8"
-        )
     return [
         {
             "record_index": index,
-            "identifier": struct.unpack_from(
-                "<H", section.raw_data, index * 8 + 4
-            )[0],
+            "raw_hex": raw.hex(),
+            "support_key_hex": raw[4:6].hex(),
         }
+        for index, raw in enumerate(DDBParser.extract_supported_pid_records(section))
+    ]
+
+
+def extract_dids(db: ECUDataBase) -> list[dict]:
+    """Preserve real type-7 ``CDbDidTable`` rows with bounded key semantics."""
+    section = db.sections.get(7)
+    if section is None:
+        return []
+    records = [
+        section.raw_data[index * 8 : (index + 1) * 8]
         for index in range(section.header.record_count)
+    ]
+    return [
+        {
+            "record_index": index,
+            "identifier_u16_le": identifier,
+            "identifier_bytes_hex": raw[4:6].hex(),
+            "raw_hex": raw.hex(),
+        }
+        for index, (identifier, raw) in enumerate(
+            zip(DDBParser.extract_dids(section), records)
+        )
     ]
 
 
@@ -111,6 +128,7 @@ def extract_monitors(db: ECUDataBase, strings: StringDataBase) -> list[dict]:
             {
                 "record_index": index,
                 "record_size": record_size,
+                "source_table_class": "CDbFreezeTable",
                 "monitor_seq": struct.unpack_from("<I", raw, 56)[0],
                 "name_string_index": name_index,
                 "resolved_name": strings.get_string(name_index),
@@ -151,6 +169,7 @@ def build_steering_corpus() -> dict:
                     for section_type, section in sorted(db.sections.items())
                 },
                 "dtcs": extract_dtcs(db, strings),
+                "supported_pid_records": extract_supported_pid_records(db),
                 "dids": extract_dids(db),
                 "monitors": extract_monitors(db, strings),
             }
@@ -165,9 +184,14 @@ def build_steering_corpus() -> dict:
         if entry["dtc_identifier"]
     }
     did_ids = {
-        entry["identifier"]
+        entry["identifier_bytes_hex"]
         for variant in variants
         for entry in variant["dids"]
+    }
+    supported_pid_keys = {
+        entry["support_key_hex"]
+        for variant in variants
+        for entry in variant["supported_pid_records"]
     }
     return {
         "description": (
@@ -186,7 +210,11 @@ def build_steering_corpus() -> dict:
             "dtc_records": sum(len(variant["dtcs"]) for variant in variants),
             "unique_dtc_identifiers": len(dtc_ids),
             "did_records": sum(len(variant["dids"]) for variant in variants),
-            "unique_did_identifiers": len(did_ids),
+            "unique_did_record_keys": len(did_ids),
+            "supported_pid_records": sum(
+                len(variant["supported_pid_records"]) for variant in variants
+            ),
+            "unique_supported_pid_record_keys": len(supported_pid_keys),
             "monitor_records": sum(
                 len(variant["monitors"]) for variant in variants
             ),
@@ -210,7 +238,8 @@ def main() -> None:
     )
     print(
         f"  {summary['unique_dtc_identifiers']} unique DTC IDs, "
-        f"{summary['unique_did_identifiers']} unique DIDs, "
+        f"{summary['did_records']} CDbDidTable records, "
+        f"{summary['unique_supported_pid_record_keys']} supported-PID keys, "
         f"{summary['monitor_records']} monitor records"
     )
 

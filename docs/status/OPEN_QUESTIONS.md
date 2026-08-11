@@ -209,19 +209,6 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   reads, session transitions, and programming handoff against SEC-BOOT-003,
   SEC-APP-001, and DIAG-APP-001/003. See
   [../tooling/techstream.md](../tooling/techstream.md) §6.
-- **Techstream `.ddb` residuals.** The old blanket “record structures are not
-  decoded” question is closed for the type-2 ECU corpus: all 1,368 ECU files
-  and all 35 regional steering `EPS*`/`EMPS*` files are structurally parsed
-  through their complete section directories; DTC, DID, monitor, P5 failure,
-  and several other tables have recovered semantics. The Stage-3 targeted pass
-  also resolves `Security_P4` type 35/37 as vehicle alarm/security-system
-  vocabulary rather than a Safekey/MACKey provisioning table. Unknown semantic
-  section classes remain intentionally bounded and should be decoded only when
-  a concrete security/identity/routing question points to them. The one
-  high-value format residual is the distinct type-1 `Toyota.ddb` master ECU
-  enumeration schema; decode it only if future artifact identification or
-  routing work needs information not already available from the recovered
-  Techstream protocol. See [../tooling/techstream-ddb-pipeline.md](../tooling/techstream-ddb-pipeline.md).
 - **Sienna EPS reflash calibration-file key.** TMS-007 already resolves the
   host-side distinction: `FUKUMORIYOSIYAMA` is ADS/PCS runtime SA, while the EPS
   CUW writer reads its seed/key material from `CalibrationFile::GetSeedKey()`.

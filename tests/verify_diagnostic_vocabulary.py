@@ -253,14 +253,19 @@ check("neutral catalog does not infer sparse DID-table membership from bounds",
       "dids_in_firmware" not in committed_catalog["summary"]
       and all("in_firmware_table" not in entry
               for entry in committed_catalog["entries"]))
+catalog_supported_pids = [
+    entry for entry in committed_catalog["entries"]
+    if entry["kind"] == "supported_pid_record"
+]
+check("catalog preserves all 12 selected CDbSupPidTable rows",
+      len(catalog_supported_pids) == 12)
+check("catalog contains no database-derived DID claims",
+      not any(entry["kind"] == "did" for entry in committed_catalog["entries"]))
 
 
 print("\n== DID correlations ==")
 did_mappings = [m for m in mappings if m["kind"] == "did"]
-# DIDs are now deduplicated by identifier across DDB variants
-check("DID mappings are unique by identifier",
-      len(did_mappings) == len({m["identifier"] for m in did_mappings}),
-      f"{len(did_mappings)} mappings, {len({m['identifier'] for m in did_mappings})} unique")
+check("no false section-3 DIDs reach firmware correlation", did_mappings == [])
 
 fw_did_ids = {d.identifier for d in tables.dids}
 check("all firmware DIDs unique", len(fw_did_ids) == len(tables.dids))
@@ -506,7 +511,13 @@ if not HAS_TECHSTREAM_SOURCE:
 # Independently verify DTC record layout (section 5, 28 bytes)
 # without trusting the parser's field offsets.
 sys.path.insert(0, str(REPO / "tools" / "techstream"))
-from parse_ddb import DDBParser, Section, TableDataHead, lzss_decompress  # noqa: E402
+from parse_ddb import (  # noqa: E402
+    DDBParser,
+    ECU_TABLE_CLASS_NAMES,
+    Section,
+    TableDataHead,
+    lzss_decompress,
+)
 
 DB_PATH = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB"
 parser = DDBParser()
@@ -528,13 +539,18 @@ mon_name_idx = struct.unpack_from("<I", raw_m0, 48)[0]
 check("monitor name index is u32 at offset 48",
       mon_name_idx > 0)
 
-# Verify DID section 3: identifier at offset 4 (u16)
+# Factory identity is authoritative: section 3 is supported-PID metadata, not
+# a DID table.  The old pipeline reinterpreted bytes 4-5 as a little-endian DID.
 sec3 = eps_can.sections[3]
 raw_d0 = sec3.raw_data[0:8]
-did_val = struct.unpack_from("<H", raw_d0, 4)[0]
-check("DID identifier is u16 at offset 4 in section 3",
-      did_val == 0x0100,
-      f"got 0x{did_val:04X}")
+check("section 3 factory class is CDbSupPidTable",
+      ECU_TABLE_CLASS_NAMES[3] == "CDbSupPidTable")
+check("section 7 factory class is CDbDidTable",
+      ECU_TABLE_CLASS_NAMES[7] == "CDbDidTable")
+check("former 0x0100 DID bytes are retained as supported-PID raw evidence",
+      raw_d0.hex() == "0000000000010000")
+check("selected EPS_CAN_P4DK database has no CDbDidTable section",
+      7 not in eps_can.sections)
 
 # Walk the raw directory independently of DDBParser. Directory slot N is
 # section type N and extends to the first section pointer (0x280 in V18).
@@ -745,8 +761,11 @@ check("regional corpus has 25 full-section semantic variants",
       summary["semantic_variants"] == 25)
 check("regional corpus recovers 129 unique DTC identifiers",
       summary["unique_dtc_identifiers"] == 129)
-check("regional corpus recovers all 16 steering DIDs",
-      summary["unique_did_identifiers"] == 16)
+check("regional corpus has one real CDbDidTable record",
+      summary["did_records"] == 1 and summary["unique_did_record_keys"] == 1)
+check("former 146 DID rows are classified as supported-PID records",
+      summary["supported_pid_records"] == 146
+      and summary["unique_supported_pid_record_keys"] == 16)
 check("regional corpus recovers 1257 monitor records",
       summary["monitor_records"] == 1257)
 raw_sources = sorted(
@@ -775,6 +794,20 @@ check("P4DK4 artifact is deterministic (no generated_at)",
 check("P4DK4 description does not call it a newer generation",
       "co-shipped" in p4["description"].lower()
       and "not evidence" in p4["description"].lower())
+check("P4DK4 seq-derived DID labels are explicitly structural candidates",
+      p4["summary"]["structural_monitor_bridges"] == 78
+      and p4["summary"]["candidate_firmware_did_count"] == 62
+      and "bridged_did_count" not in p4["summary"]
+      and all("candidate_firmware_did" in entry
+              for entry in p4["structural_monitor_bridges"]))
+check("P4DK4 section-3 rows are supported-PID records, not DIDs",
+      p4["summary"]["supported_pid_records"] == 16
+      and "dids" not in p4["summary"]
+      and "dids" not in p4)
+check("P4DK4 section-6 rows are PID records, not subfunctions",
+      p4["summary"]["pid_records"] == 85
+      and "subfunctions" not in p4["summary"]
+      and all(entry["kind"] == "pid_record" for entry in p4["pid_records"]))
 
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")

@@ -110,20 +110,24 @@ def extract_dtcs(
     return entries
 
 
-def extract_dids(db: ECUDataBase) -> list[dict]:
-    """Extract DID identifiers from section type 3 (8-byte records)."""
+def extract_supported_pid_records(db: ECUDataBase) -> list[dict]:
+    """Preserve section-3 ``CDbSupPidTable`` records without mislabeling them.
+
+    KgpDataCtrl's format-2 factory maps section 3 to ``CDbSupPidTable`` and
+    section 7 to ``CDbDidTable``.  Neither selected P4 EPS database carries
+    section 7, so this catalog has no database-derived DID records.
+    """
     entries = []
     if 3 not in db.sections:
         return entries
     sec = db.sections[3]
-    rec_size = 8
-    for i in range(sec.header.record_count):
-        raw = sec.raw_data[i * rec_size : (i + 1) * rec_size]
-        did = struct.unpack_from("<H", raw, 4)[0]
+    for i, raw in enumerate(DDBParser.extract_supported_pid_records(sec)):
         entries.append(
             {
-                "kind": "did",
-                "identifier": did,
+                "kind": "supported_pid_record",
+                "record_index": i,
+                "raw_hex": raw.hex(),
+                "support_key_hex": raw[4:6].hex(),
                 "source_db": db.name,
             }
         )
@@ -133,10 +137,12 @@ def extract_dids(db: ECUDataBase) -> list[dict]:
 def extract_monitors(
     db: ECUDataBase, dbs: dict[str, StringDataBase]
 ) -> list[dict]:
-    """Extract data monitor records from section type 10 (84-byte records).
+    """Extract freeze-data monitor rows from type-10 ``CDbFreezeTable``.
 
     String indices at offsets 48 and 52 are u32 (not u16 — indices above
-    65535 are valid and appear in this data).
+    65535 are valid and appear in this data). KgpDataCtrl exposes these names
+    through ``CDbFreezeResRecords::GetDataMonitorName``; they are diagnostic
+    vocabulary, not records from ``CDbDidTable``.
     """
     entries = []
     if 10 not in db.sections:
@@ -154,6 +160,7 @@ def extract_monitors(
         entries.append(
             {
                 "kind": "monitor",
+                "source_table_class": "CDbFreezeTable",
                 "record_index": i,
                 "name_string_index": name_idx,
                 "resolved_name": name_res.get("M_English"),
@@ -231,7 +238,7 @@ def build_catalog() -> dict:
     entries = []
     for db in eps_dbs:
         entries.extend(extract_dtcs(db, dbs))
-        entries.extend(extract_dids(db))
+        entries.extend(extract_supported_pid_records(db))
         entries.extend(extract_monitors(db, dbs))
 
     # Load steering-anchored U_English strings. Resource identifiers group UI
@@ -239,23 +246,20 @@ def build_catalog() -> dict:
     # remain family-level vocabulary only.
     entries.extend(extract_utility_strings(dbs["U_English"]))
 
-    # Deduplicate. DIDs are keyed by identifier alone (same DID across DDB
-    # variants is the same diagnostic concept). DTCs and monitors keep
-    # source_db in the key since KWP and CAN use different names.
+    # DTCs, monitors, and supported-PID records keep source_db in the key since
+    # KWP and CAN variants carry different structures.
     seen = set()
     deduped = []
     for e in entries:
-        if e["kind"] == "did":
-            key = (e["kind"], e.get("identifier"))
-        else:
-            key = (
-                e["kind"],
-                e.get("code"),
-                e.get("identifier"),
-                e.get("record_index"),
-                e.get("source_db"),
-                e.get("string_index"),
-            )
+        key = (
+            e["kind"],
+            e.get("code"),
+            e.get("identifier"),
+            e.get("record_index"),
+            e.get("source_db"),
+            e.get("string_index"),
+            e.get("raw_hex"),
+        )
         if key not in seen:
             seen.add(key)
             deduped.append(e)

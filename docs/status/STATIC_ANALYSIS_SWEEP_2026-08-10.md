@@ -406,8 +406,9 @@ was searched separately. No search traversed unrelated personal storage.
   fixtures; added body/hash/string locks against the pinned external binaries.
 - Re-audited the complete 35-file steering DDB corpus and performed a targeted
   semantic pass over the previously suspicious high-value `Security_P4`
-  sections. Kept the separate type-1 `Toyota.ddb` schema bounded rather than
-  expanding into generic format archaeology.
+  sections. At this stage the separate type-1 `Toyota.ddb` schema remained
+  bounded; the post-completion audit below later closed its structural
+  directory and factory-class boundary.
 - Decompiled the native CUW RKS request builder and hex encoder and joined them
   to the managed `SetDataForReproKey` field offsets.
 - Repeated the bounded artifact search below `/Users/kai/dev/inspect/repos` for
@@ -438,11 +439,11 @@ was searched separately. No search traversed unrelated personal storage.
   and type 37 as a 50-record alarm-condition table rather than a
   Safekey/MACKey provisioning structure — source: pinned DDB bytes/string DB,
   grade: **verified** (`TMS-013`).
-- The distinct type-1 `Toyota.ddb` master-enumeration schema remains a real
-  format residual, but the recovered MACKey flow no longer depends on decoding
-  it. It is now a targeted future identity/routing artifact rather than a
-  blocker to Techstream protocol recovery — source: pinned DDB bytes, grade:
-  **bounded**.
+- At Stage 3, the distinct type-1 `Toyota.ddb` master-enumeration schema
+  remained a format residual. The post-completion audit below supersedes that
+  status by structurally parsing all three regional masters and pinning their
+  high-value factory class identities; individual compressed record layouts
+  remain intentionally undecoded.
 - Managed `SetDataForReproKey` maps native request buffer `+0x78` directly to
   `SeedValue`. Native `Cuw.exe` passes a pre-existing 16-byte input to the RKS
   request builder and serializes it as 32 uppercase hexadecimal characters
@@ -469,8 +470,8 @@ was searched separately. No search traversed unrelated personal storage.
 - Added the cross-version `ptshim` parser and synthetic fixtures; expanded the
   verifier to pin both shim versions and `J2534Ctrl.dll` save/timestamp logic.
 - Added a focused DDB residual verifier covering the complete steering section
-  census, `Security_P4` alarm-domain interpretation, and type-1 `Toyota.ddb`
-  boundary.
+  census, `Security_P4` alarm-domain interpretation, and the then-bounded
+  type-1 `Toyota.ddb` boundary; the post-completion audit later expanded it.
 - Extended the existing RKS verifier with managed/native `SeedValue` field,
   width, body-hash, and uppercase-hex assertions.
 - Updated canonical Techstream/DDB tooling docs, FINDINGS, OPEN_QUESTIONS,
@@ -495,8 +496,9 @@ was searched separately. No search traversed unrelated personal storage.
   now ready for it.
 - The exact upstream producer of RKS's 16-byte SeedValue input is bounded and
   low priority.
-- Type-1 `Toyota.ddb` is available but only worth deeper decoding for a future
-  concrete master-enumeration/identity/routing question.
+- Type-1 `Toyota.ddb` record-layout decoding is only worth extending for a
+  future concrete master-enumeration/identity/routing question; its complete
+  regional section directories and high-value table classes are now bounded.
 - Matching Sienna `.cuw` and `4514000` CodeFlash remain unavailable locally.
 
 ### Commit
@@ -1425,3 +1427,64 @@ The final documentation commit uses subject
 `docs: finalize comprehensive static-analysis sweep`. Its immutable SHA is
 reported in the completion response rather than embedded here: a Git object
 cannot contain its own hash without changing that hash.
+
+## Post-completion audit — origin reconciliation and DDB correction
+
+The completion audit began after upstream `origin/main` moved. A fresh fetch
+and ancestry/identity check established that local `main`, `origin/main`, and
+the authoritative handoff baseline were identical at
+`05622a2b310d80a92529017935f93bcd06525b8e`; no stage commit was missing or
+superseded.
+
+The audit then rechecked the generated Techstream vocabulary against the
+pinned external binary rather than trusting the completed narrative. Ghidra
+decompilation of `KgpDataCtrl.dll` SHA-256
+`e5235bc0c241c6a450fe461031eed0915675032b1db994bd54d98818fac88aa9`
+showed that `CDbTableRead::MakeTable @ 0x100228D1` selects the format-2 factory
+at `0x1001ECCB`, whose exact 14,551-byte body is pinned by SHA-256
+`bc2b0b27e6e81abbea2b94ebc021ac9882466497e5b4c6c5bd5511557a45b996`.
+That factory constructs `CDbSupPidTable` for section 3, `CDbPidTable` for
+section 6, `CDbDidTable` for section 7, and `CDbFreezeTable` for section 10.
+
+This disproved a completed-pipeline interpretation: section-3 supported-PID
+rows had been emitted as DIDs, producing a false direct `0x0100`
+DDB-to-firmware join, and P4DK4 section-6 PID rows had been called
+subfunctions. The canonical correction is
+[CORR-031](CORRECTIONS.md#corr-031--techstream-supported-pid-rows-were-mislabeled-as-dids),
+with the corrected finding in `TMS-013` and full evidence in
+[the DDB pipeline report](../tooling/techstream-ddb-pipeline.md).
+
+The corrected generators now preserve section-3 rows as raw
+`supported_pid_record` evidence, decode DIDs only from section 7, classify
+section 6 as `pid_record`, and label the monitor-sequence relationship as a
+structural candidate rather than a DDB DID-table identity. Regeneration yields
+354 selected-catalog entries, 345 firmware-vocabulary mappings, one real
+section-7 record across the 35-file steering corpus, 146 supported-PID rows
+with 16 unique raw keys, and 1,257 freeze-data monitor rows. The seven durable
+monitor callback names remain structural because independent firmware
+decompilation recovers agreeing RAM/data sources.
+
+The companion format-1 factory also removed the stale type-1 residual:
+`parse_master_db()` now covers all three regional `Toyota.ddb` directories
+(67 NA, 67 EU, and 76 JP sections) and assigns only factory-proved high-value
+table classes. Compressed EU payloads remain explicitly undecoded, and the
+parser refuses to expose a record size for compressed on-disk bytes.
+
+### Audit verification
+
+- `make generate-diagnostic-vocabulary` -> pass; all four JSON artifacts
+  regenerated deterministically with the corrected table identities.
+- `uv run python tests/verify_techstream_ddb_residuals.py` -> pass (25/25).
+- `uv run python tests/verify_diagnostic_vocabulary.py` -> pass (249/249).
+- `make verify-changed` -> pass (10 matched suites, 14 test files).
+- `make verify-agent` -> pass (52/52 suites).
+- `make verify` -> pass; final documentation-link suite 473/473.
+- `EXTERNAL_REPOS_DIR=/Users/kai/dev/inspect/repos make verify-external` ->
+  pass (297/297) against all seven pinned external repositories/artifacts.
+- `make verify-ghidra` -> pass: core verification, isolated SLEIGH install,
+  processor fixtures/audits, and exact project-inventory parity. The processor
+  audit remains 5,921 functions with zero undefined bytes, 324 named
+  system-register operations, 252 decoded switches, and all 20 real switches
+  recovered.
+- No Ghidra snapshot promotion is warranted: this audit changes parsers,
+  generated vocabulary, tests, and documentation only.

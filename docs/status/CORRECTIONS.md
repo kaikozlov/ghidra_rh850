@@ -377,10 +377,12 @@ the mistakes are not re-made.
   resource identifiers that group UI text, but no encoded ECU ownership or
   firmware routine linkage, so those hits were not recovered procedures.
 - **Fix:** the pipeline now emits a complete deterministic steering corpus
-  (129 unique DTC IDs, 16 unique DIDs, 1257 monitor records), uses exhaustive
+  (129 unique DTC IDs and 1,257 freeze-data monitor records), uses exhaustive
   explicit steering anchors for family-only `utility_string` vocabulary,
   removes duplicate exact/family monitor mappings, and fails closed on
   malformed LZSS, wrong file types, bad format-6 magic, and malformed section layouts.
+- **Later refinement:** CORR-031 corrects section 3 from DIDs to
+  `CDbSupPidTable`; the regional corpus has one actual type-7 DID row.
 - **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.2;
   TMS-013; `tests/verify_diagnostic_vocabulary.py`.
 
@@ -502,3 +504,28 @@ the mistakes are not re-made.
 - **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md)
   §9.6; `data/motor_calibration_handlers.csv`;
   `tests/verify_motor_calibration_handlers.py`.
+
+### CORR-031 — Techstream supported-PID rows were mislabeled as DIDs
+
+- **Wrong:** type-2 DDB section 3 was described and generated as a DID table;
+  its bytes at offsets 4–5 produced 11 selected-catalog “DIDs,” an alleged
+  exact `0x0100` firmware join, 16 regional unique DIDs, and P4DK4
+  “subfunctions” from section 6.
+- **Right:** the pinned `KgpDataCtrl.dll` format-2 factory at `0x1001ECCB`
+  constructs `CDbSupPidTable` for section 3, `CDbPidTable` for section 6,
+  `CDbDidTable` for section 7, and `CDbFreezeTable` for section 10. The two
+  selected P4 EPS files have no section 7, so the direct DDB→firmware DID
+  correlation count is zero. Across all 35 steering files there is exactly one
+  real section-7 row (EU `EPS_PSA`); the former 146 “DID” rows are supported-PID
+  records with 16 unique raw keys. Section-10 names remain useful freeze-data
+  monitor vocabulary because its record API exposes `GetDataMonitorName`, but
+  the seq-derived firmware DID bridge is structural/semantic—not a DID-table
+  identity join. P4DK4 section 6 contains 85 PID records, not subfunctions.
+- **Additional closure:** the companion format-1 factory classifies the
+  high-value `Toyota.ddb` master tables, and `parse_master_db()` structurally
+  covers all three regional directories (67 NA, 67 EU, and 76 JP sections).
+  Compressed EU payloads remain explicitly undecoded. Exact `8965B4512000` is
+  absent.
+- **Canonical:** [../tooling/techstream-ddb-pipeline.md](../tooling/techstream-ddb-pipeline.md);
+  TMS-013; `tests/verify_diagnostic_vocabulary.py`;
+  `tests/verify_techstream_ddb_residuals.py`.

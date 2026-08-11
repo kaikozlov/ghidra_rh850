@@ -18,9 +18,9 @@
 ## Executive summary
 
 The `.ddb` corpus functions as an OEM semantic symbol server for the firmware.
-It lacks code addresses, but contains the identifiers and human meaning needed
-to turn recovered diagnostic tables into named services, DTCs, monitor values,
-and active tests.
+It lacks code addresses, but contains diagnostic vocabulary useful for naming
+services, DTCs, and freeze-data monitor values. Table identity comes from the
+runtime factory, not from numeric-pattern guesses.
 
 Three new tools implement the extraction pipeline:
 
@@ -31,12 +31,14 @@ Three new tools implement the extraction pipeline:
 | `tools/pe` (modified) | Fixed `import` to use `analyzeHeadless` for full PE analysis |
 
 Calibration-focused output:
-`data/generated/<firmware-sha>/diagnostic_annotations.json` — 353 entries
-(54 DTCs with descriptions, 11 DIDs, 111 monitors, 177 steering-anchored
+`data/generated/<firmware-sha>/diagnostic_annotations.json` — 354 entries
+(54 DTCs with descriptions, 12 supported-PID records, 111 freeze-data
+monitors, 177 steering-anchored
 `U_English` strings). The complete regional output is
 `data/generated/techstream_v18/steering_diagnostic_corpus.json`: 35 source
-files, 25 full-section semantic variants, 129 unique DTC IDs, 16 unique DIDs, and 1257
-monitor records.
+files, 25 full-section semantic variants, 129 unique DTC IDs, one actual
+`CDbDidTable` record, 146 `CDbSupPidTable` records with 16 unique raw keys, and
+1,257 freeze-data monitor records.
 
 Section 14 (24-byte records) is PID display-option configuration (value
 enums per PID group), not active test definitions. Dealer wizard/dialog text
@@ -54,17 +56,19 @@ signature `"DiagTool DataCtrl"`, and byte 8 encodes the format variant:
 
 | Byte 8 | Type | Example files |
 |---|---|---|
+| `0x01` | Toyota master routing/enumeration database | `Toyota.ddb` |
 | `0x02` | ECU database (uncompressed sections) | `EPS_P4DK3.ddb` |
 | `0x04` | OEM description string database | `M_English.ddb` |
 | `0x05` | UI string database | `V_English.ddb` |
 | `0x06` | Dealer wizard/dialog string database (different header) | `U_English.ddb` |
 
-Coverage is explicit rather than silent: `parse_ecu_db()` handles all 1,368
+Coverage is explicit rather than silent: `parse_master_db()` structurally
+parses all three regional `Toyota.ddb` directories (67 NA, 67 EU, and 76 JP
+sections), `parse_ecu_db()` handles all 1,368
 format-`0x02` ECU databases (25,361 sections), and `load_string_db()` handles
-the modern sectioned format-`0x04/05/06` string databases. Type-`0x01`
-`Toyota.ddb`, type-`0x03` `Viewer.ddb`, and nine legacy type-`0x04` files have
-distinct schemas and are rejected by these APIs; they are inventoried but not
-misrepresented as parsed ECU/string content.
+the modern sectioned format-`0x04/05/06` string databases. Type-`0x03`
+`Viewer.ddb` and nine legacy type-`0x04` files have distinct schemas and are
+rejected rather than misrepresented as parsed ECU/string content.
 
 The 2026-08-10 high-value residual audit further narrows the security-relevant
 unknowns. All 35 regional `EPS*`/`EMPS*` type-2 files are structurally covered
@@ -73,9 +77,14 @@ through their complete section-type union (up to type 91). In
 is a 50-record alarm-condition table (`Battery Desorption`, `Hood Open`,
 `Luggage Open`, `Door Open`, etc.), so those previously opaque sections are not
 promoted as SecurityAccess/key-provisioning structures merely because of the
-filename. The remaining high-value format gap is the separate type-1
-`Toyota.ddb` master-enumeration schema; broad decoding is deferred until a
-specific identity/routing question requires it. This boundary is pinned by
+filename. KgpDataCtrl's two pinned table factories now identify the relevant
+type-1/type-2 section classes. All three regional type-1 `Toyota.ddb`
+directories are fully covered structurally and expose, among others, CAN communication, ECU
+category/function/description, DLL, communication-DID, and communication-RID
+tables. Its exact bytes contain no `8965B4512000` identifier; record-level
+decoding remains demand-driven. Compressed EU master payloads remain on-disk
+bytes, and the parser rejects record-size access for them rather than treating
+compressed length as a decoded layout. This boundary is pinned by
 `tests/verify_techstream_ddb_residuals.py`.
 
 ### ECU databases
@@ -100,16 +109,17 @@ Section types observed in EPS databases:
 
 | Type | Records | Size/rec | Content |
 |---|---|---|---|
-| 0 | 11 | 12 B | PID/monitor lookup table |
-| 1 | 11 | 8 B | PID/monitor index pairs |
-| 3 | 4 | 8 B | DID identifiers |
-| 5 | 24 | 28 B | DTCs (code + name index + identifier) |
-| 6 | 29 | 8 B | Sub-function definitions |
-| 10 | 36 | 84 B | Data monitors (PID name + scaling) |
-| 13 | 17 | 24 B | PID group metadata |
-| 14 | 15 | 24 B | PID display-option configuration (value enums) |
-| 15–16 | — | — | Additional monitor/test metadata |
-| 18–91 (steering corpus) | — | — | Additional schema tables; preserved and inventoried, semantics mostly bounded |
+| 0 | 11 | 12 B | `CDbSignalGroupTable` |
+| 1 | 11 | 8 B | `CDbSignalCheckTable` |
+| 3 | 4 | 8 B | `CDbSupPidTable` (supported-PID metadata) |
+| 5 | 24 | 28 B | `CDbDiagCodeTable` (DTCs) |
+| 6 | 29 | 8 B | `CDbPidTable` (PID records; not subfunctions) |
+| 7 | varies | 8 B | `CDbDidTable` (only one steering row, in EU `EPS_PSA`) |
+| 10 | 36 | 84 B | `CDbFreezeTable`; names exposed by `GetDataMonitorName` |
+| 13 | 17 | 24 B | `CDbPhyDataTable` |
+| 14 | 15 | 24 B | `CDbPatDispTable` (display options/value enums) |
+| 15–16 | — | — | `CDbUnitTable` / `CDbTriggerListTable` |
+| 18–91 (steering corpus) | — | — | Factory-classified and structurally inventoried; field semantics selectively bounded |
 
 ### DTC record format (section type 5, 28 bytes)
 
@@ -235,9 +245,9 @@ match), 183,244 string entries.
 
 - **54 DTCs** — all with OEM descriptions (e.g. "Torque sensor deviation
   excessive", "Motor relay failure", "CAN communication error (ABS/VSC)")
-- **11 DIDs** — all within firmware DID table range (0x0100–0xF18C),
-  deduplicated by identifier across DDB variants
-- **111 monitors** — names like "Torque Sensor 1 Output", "Motor Actual
+- **12 supported-PID records** — raw section-3 `CDbSupPidTable` rows from the
+  two selected P4 databases; they are not DIDs and are not firmware-correlated
+- **111 freeze-data monitors** — type-10 `CDbFreezeTable` names like "Torque Sensor 1 Output", "Motor Actual
   Current", "Steering Angle Velocity", "Thermistor Temperature"
 - **177 `utility_string` entries** — exhaustive strings with explicit steering
   anchors from `U_English`; family vocabulary only. The parallel type-1 section
@@ -315,20 +325,18 @@ semantic name remains comment-only. `family` is always comment-only.
 
 ### Correlation results
 
-Current output (356 mappings):
+Current output (345 mappings):
 
 | Kind | Count | Exact | Structural | Family |
 |---|---:|---:|---:|---:|
-| DIDs | 11 | 1 | — | 10 |
 | DTCs | 54 | 12 | — | 42 |
-| Monitors | 97 | — | 7 | 90 |
+| Freeze-data monitors | 97 | — | 7 | 90 |
 | Services | 17 | 17 | — | — |
 | Utility strings | 177 | — | — | 177 |
 
-DID correlation uses actual membership in the sparse 242-entry firmware DID
-table. Only one catalog DID is present; the other ten remain family-level.
-The neutral catalog no longer infers membership merely because an identifier
-falls between the table's minimum and maximum values.
+No selected P4 database carries a type-7 `CDbDidTable`; consequently there are
+no direct DDB→firmware DID correlations. The previous eleven were a disproved
+reinterpretation of type-3 `CDbSupPidTable` bytes (CORR-030).
 DTC correlation structurally scans all `0xA0` 8-byte records used by
 `FUN_0005159e`/`FUN_000517b4`, at `0x309DC`–`0x30EDC`; blind byte matches elsewhere in
 CodeFlash are rejected. The record's byte 0 is now preserved as the UDS
@@ -344,15 +352,20 @@ match enabled firmware entries, including five CAN-communication records
 seq-derived DID is actually present bridge to firmware callbacks; the rest
 remain family vocabulary.
 
-### Monitor→DID bridge
+### Freeze-data monitor→firmware-DID bridge
 
-The key structural discovery: monitor record field at offset 56 (the "seq"
-number) maps to firmware DIDs via **DID = 0x0100 + seq**.  This is not in the
-.ddb section 0/1 lookup tables — those use proprietary PIDs (0x2711+).
+The type-10 runtime class is `CDbFreezeTable`, and its record API explicitly
+exposes `GetDataMonitorName`/`GetDataMonitorShortName`. A bounded structural
+bridge uses the row field at offset 56 (the "seq" number) as
+**candidate firmware DID = 0x0100 + seq**. This is not a `CDbDidTable` join;
+confidence comes from the independent firmware callback/data-source recovery
+and semantic agreement for the seven auto-named rows.
 
 For nine monitors with seq < 100, `DID = 0x0100 + seq` hits the firmware DID
 table exactly. The EPS_CAN_P4DK variant (UDS/CAN) supplies the selected family
-name; EPS_P4DK3 (KWP) uses different naming for the same DIDs.
+name; EPS_P4DK3 (KWP) supplies alternate monitor vocabulary for the same
+seq-derived candidate identifiers. This numerical coincidence alone remains
+family-grade.
 
 Nine monitors bridge to firmware DIDs. Seven have independently decompiled,
 meaningful RAM sources and are structural/auto-named. DID `0x0101` lacks an
@@ -436,31 +449,33 @@ After: 157 functions, 6,848 instructions.
 
 `EPS_P4DK4.ddb` (JP region only) is the richest EPS database in the Techstream
 V18 corpus: 26 unique DTCs (45 records with dual naming), 89 monitors, 85
-subfunction definitions. It is a JP-market diagnostic variant, not a later
+raw `CDbPidTable` records. It is a JP-market diagnostic variant, not a later
 release — the Techstream V18.00.003 distribution is dated December 2022 and
-predates both the 2023 Sienna and the 2025 Corolla. P4DK4's larger monitor
+predates both the 2023 Sienna and the 2025 Corolla. P4DK4's larger freeze-data monitor
 count proves a vocabulary/configuration difference (e.g. torque sensor 3,
 backup power supply), not a temporal or hardware-generation gap. It is a useful
 supplementary
-vocabulary source because its 13 extra bridged DIDs cover EPS state variables
+vocabulary source because its 13 extra candidate bridges cover EPS state variables
 absent from the NA database, giving the correlation engine more matches to
 work with when Corolla firmware arrives.
 
 ### Corpus comparison
 
-| Database | Region | DTCs | DIDs | Monitors | Subfns |
+| Database | Region | DTCs | Supported-PID rows | Freeze-data monitors | PID rows |
 |---|---|---|---|---|---|
 | `EPS_CAN_P4DK` | NA | 30 | 8 | 75 | 32 |
 | `EPS_P4DK3` | NA | 24 | 4 | 36 | 29 |
-| `EPS_P4DK4` | JP | 26 (45 records) | 8 | 89 | 85 |
+| `EPS_P4DK4` | JP | 26 (45 records) | 16 | 89 | 85 |
 
 P4DK4's 45 DTC records carry dual naming (formal + alternate name per DTC),
-yielding 26 unique DTC identifiers. Its 89 monitors include 78 with seq < 100
-(bridged to firmware DIDs via `DID = 0x0100 + seq`), compared to 64 in NA.
+yielding 26 unique DTC identifiers. Its 89 freeze-data monitors include 78 with
+seq < 100 (candidate bridge `DID = 0x0100 + seq`), compared to 64 in NA.
 
-### New monitors not in the NA template
+### New freeze-data monitor candidates not in the NA template
 
-P4DK4 adds 13 bridged DIDs absent from the NA database:
+P4DK4 adds 13 seq-derived candidate firmware-DID labels absent from the NA
+database. These are structural correlation candidates, not `CDbDidTable`
+records:
 
 | seq | DID | OEM name |
 |---|---|---|

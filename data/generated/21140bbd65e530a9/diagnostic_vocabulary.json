@@ -40,156 +40,22 @@
     }
   },
   "summary": {
-    "total_mappings": 356,
+    "total_mappings": 345,
     "by_kind": {
-      "did": 11,
       "dtc": 54,
       "monitor": 97,
       "service": 17,
       "utility_string": 177
     },
     "by_grade": {
-      "exact": 30,
-      "family": 319,
+      "exact": 29,
+      "family": 309,
       "structural": 7
     },
     "auto_apply_count": 13,
-    "comment_only_count": 343
+    "comment_only_count": 332
   },
   "mappings": [
-    {
-      "kind": "did",
-      "identifier": 256,
-      "oem_name": "DID 0x0100",
-      "match_grade": "exact",
-      "firmware_table_index": 0,
-      "firmware_callback": "0x4E99E",
-      "firmware_response_size_or_attribute": "0x0020",
-      "firmware_table_base": "0x2941C",
-      "source_db": "EPS_P4DK3",
-      "annotation_action": "comment",
-      "note": "Exact DID match. Firmware callback 0x4E99E at table index 0."
-    },
-    {
-      "kind": "did",
-      "identifier": 288,
-      "oem_name": "DID 0x0120 (Techstream only)",
-      "match_grade": "family",
-      "firmware_table_index": null,
-      "firmware_callback": null,
-      "firmware_response_size_or_attribute": null,
-      "source_db": "EPS_P4DK3",
-      "annotation_action": "comment",
-      "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
-    {
-      "kind": "did",
-      "identifier": 320,
-      "oem_name": "DID 0x0140 (Techstream only)",
-      "match_grade": "family",
-      "firmware_table_index": null,
-      "firmware_callback": null,
-      "firmware_response_size_or_attribute": null,
-      "source_db": "EPS_P4DK3",
-      "annotation_action": "comment",
-      "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
-    {
-      "kind": "did",
-      "identifier": 480,
-      "oem_name": "DID 0x01E0 (Techstream only)",
-      "match_grade": "family",
-      "firmware_table_index": null,
-      "firmware_callback": null,
-      "firmware_response_size_or_attribute": null,
-      "source_db": "EPS_P4DK3",
-      "annotation_action": "comment",
-      "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
-    {
-      "kind": "did",
-      "identifier": 544,
-      "oem_name": "DID 0x0220 (Techstream only)",
-      "match_grade": "family",
-      "firmware_table_index": null,
-      "firmware_callback": null,
-      "firmware_response_size_or_attribute": null,
-      "source_db": "EPS_CAN_P4DK",
-      "annotation_action": "comment",
-      "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
-    {
-      "kind": "did",
-      "identifier": 576,
-      "oem_name": "DID 0x0240 (Techstream only)",
-      "match_grade": "family",
-      "firmware_table_index": null,
-      "firmware_callback": null,
-      "firmware_response_size_or_attribute": null,
-      "source_db": "EPS_CAN_P4DK",
-      "annotation_action": "comment",
-      "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
-    {
-      "kind": "did",
-      "identifier": 608,
-      "oem_name": "DID 0x0260 (Techstream only)",
-      "match_grade": "family",
-      "firmware_table_index": null,
-      "firmware_callback": null,
-      "firmware_response_size_or_attribute": null,
-      "source_db": "EPS_CAN_P4DK",
-      "annotation_action": "comment",
-      "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
-    {
-      "kind": "did",
-      "identifier": 640,
-      "oem_name": "DID 0x0280 (Techstream only)",
-      "match_grade": "family",
-      "firmware_table_index": null,
-      "firmware_callback": null,
-      "firmware_response_size_or_attribute": null,
-      "source_db": "EPS_CAN_P4DK",
-      "annotation_action": "comment",
-      "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
-    {
-      "kind": "did",
-      "identifier": 672,
-      "oem_name": "DID 0x02A0 (Techstream only)",
-      "match_grade": "family",
-      "firmware_table_index": null,
-      "firmware_callback": null,
-      "firmware_response_size_or_attribute": null,
-      "source_db": "EPS_CAN_P4DK",
-      "annotation_action": "comment",
-      "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
-    {
-      "kind": "did",
-      "identifier": 704,
-      "oem_name": "DID 0x02C0 (Techstream only)",
-      "match_grade": "family",
-      "firmware_table_index": null,
-      "firmware_callback": null,
-      "firmware_response_size_or_attribute": null,
-      "source_db": "EPS_CAN_P4DK",
-      "annotation_action": "comment",
-      "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
-    {
-      "kind": "did",
-      "identifier": 736,
-      "oem_name": "DID 0x02E0 (Techstream only)",
-      "match_grade": "family",
-      "firmware_table_index": null,
-      "firmware_callback": null,
-      "firmware_response_size_or_attribute": null,
-      "source_db": "EPS_CAN_P4DK",
-      "annotation_action": "comment",
-      "note": "DID exists in Techstream EPS database but not in the firmware DID table — may be inactive or cross-generation."
-    },
     {
       "kind": "dtc",
       "code": "C1511",

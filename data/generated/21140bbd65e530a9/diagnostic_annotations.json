@@ -26,10 +26,10 @@
     ]
   },
   "summary": {
-    "total_entries": 353,
+    "total_entries": 354,
     "by_kind": {
       "dtc": 54,
-      "did": 11,
+      "supported_pid_record": 12,
       "monitor": 111,
       "utility_string": 177
     }
@@ -371,27 +371,36 @@
       "source_db": "EPS_P4DK3"
     },
     {
-      "kind": "did",
-      "identifier": 256,
+      "kind": "supported_pid_record",
+      "record_index": 0,
+      "raw_hex": "0000000000010000",
+      "support_key_hex": "0001",
       "source_db": "EPS_P4DK3"
     },
     {
-      "kind": "did",
-      "identifier": 288,
+      "kind": "supported_pid_record",
+      "record_index": 1,
+      "raw_hex": "0000000020010000",
+      "support_key_hex": "2001",
       "source_db": "EPS_P4DK3"
     },
     {
-      "kind": "did",
-      "identifier": 320,
+      "kind": "supported_pid_record",
+      "record_index": 2,
+      "raw_hex": "0000000040010000",
+      "support_key_hex": "4001",
       "source_db": "EPS_P4DK3"
     },
     {
-      "kind": "did",
-      "identifier": 480,
+      "kind": "supported_pid_record",
+      "record_index": 3,
+      "raw_hex": "00000000e0010000",
+      "support_key_hex": "e001",
       "source_db": "EPS_P4DK3"
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 0,
       "name_string_index": 10469,
       "resolved_name": "Torque Sensor 1 Output",
@@ -426,6 +435,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 1,
       "name_string_index": 10470,
       "resolved_name": "Meter Vehicle Velocity",
@@ -460,6 +470,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 2,
       "name_string_index": 10471,
       "resolved_name": "Torque Sensor 2 Output",
@@ -494,6 +505,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 3,
       "name_string_index": 3331,
       "resolved_name": "Engine Revolution",
@@ -528,6 +540,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 4,
       "name_string_index": 10472,
       "resolved_name": "Motor Actual Current",
@@ -562,6 +575,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 5,
       "name_string_index": 10599,
       "resolved_name": "Command Value Current",
@@ -596,6 +610,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 6,
       "name_string_index": 10600,
       "resolved_name": "Steering Angle Velocity",
@@ -630,6 +645,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 7,
       "name_string_index": 10601,
       "resolved_name": "Thermistor Temperature",
@@ -664,6 +680,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 8,
       "name_string_index": 10602,
       "resolved_name": "PIG Power Supply",
@@ -698,6 +715,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 9,
       "name_string_index": 10603,
       "resolved_name": "IG Power Supply",
@@ -732,6 +750,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 10,
       "name_string_index": 10604,
       "resolved_name": "TRQ1 Zero Point Value",
@@ -766,6 +785,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 11,
       "name_string_index": 10605,
       "resolved_name": "TRQ2 Zero Point Value",
@@ -800,6 +820,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 12,
       "name_string_index": 10606,
       "resolved_name": "Steering Wheel Torque",
@@ -834,6 +855,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 13,
       "name_string_index": 10607,
       "resolved_name": "Motor Terminal Volt(+)",
@@ -868,6 +890,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 14,
       "name_string_index": 10608,
       "resolved_name": "Motor Terminal Volt(-)",
@@ -902,6 +925,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 15,
       "name_string_index": 10609,
       "resolved_name": "IG Power Supply Status",
@@ -936,6 +960,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 16,
       "name_string_index": 10610,
       "resolved_name": "Torque Sensor 3 Output",
@@ -970,6 +995,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 17,
       "name_string_index": 10611,
       "resolved_name": "Motor Overheat Record",
@@ -1004,6 +1030,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 18,
       "name_string_index": 10612,
       "resolved_name": "Motor Lo Power Record",
@@ -1038,6 +1065,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 19,
       "name_string_index": 10613,
       "resolved_name": "Battery Voltage Lo Record",
@@ -1072,6 +1100,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 20,
       "name_string_index": 3343,
       "resolved_name": "Battery Voltage",
@@ -1106,6 +1135,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 21,
       "name_string_index": 10614,
       "resolved_name": "TRQ Sensor Power Supply",
@@ -1140,6 +1170,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 22,
       "name_string_index": 10615,
       "resolved_name": "Motor Voltage",
@@ -1174,6 +1205,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 23,
       "name_string_index": 10616,
       "resolved_name": "System Power Supply",
@@ -1208,6 +1240,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 24,
       "name_string_index": 10617,
       "resolved_name": "The Number of DTCs",
@@ -1242,6 +1275,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 25,
       "name_string_index": 13269,
       "resolved_name": "Key Cycle",
@@ -1276,6 +1310,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 26,
       "name_string_index": 13270,
       "resolved_name": "IG-ON Elapsed Time",
@@ -1310,6 +1345,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 27,
       "name_string_index": 13271,
       "resolved_name": "Clock Type",
@@ -1344,6 +1380,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 28,
       "name_string_index": 13272,
       "resolved_name": "IG-ON Elapsed Time for Independent",
@@ -1378,6 +1415,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 29,
       "name_string_index": 131445,
       "resolved_name": "Absolute Time (Second)",
@@ -1412,6 +1450,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 30,
       "name_string_index": 131443,
       "resolved_name": "Absolute Time (Minute)",
@@ -1446,6 +1485,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 31,
       "name_string_index": 131442,
       "resolved_name": "Absolute Time (Hour)",
@@ -1480,6 +1520,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 32,
       "name_string_index": 131444,
       "resolved_name": "Absolute Time (Month)",
@@ -1514,6 +1555,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 33,
       "name_string_index": 131441,
       "resolved_name": "Absolute Time (Day)",
@@ -1548,6 +1590,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 34,
       "name_string_index": 131446,
       "resolved_name": "Absolute Time (Year)",
@@ -1582,6 +1625,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 35,
       "name_string_index": 13271,
       "resolved_name": "Clock Type",
@@ -2005,42 +2049,64 @@
       "source_db": "EPS_CAN_P4DK"
     },
     {
-      "kind": "did",
-      "identifier": 544,
+      "kind": "supported_pid_record",
+      "record_index": 0,
+      "raw_hex": "0000000000010000",
+      "support_key_hex": "0001",
       "source_db": "EPS_CAN_P4DK"
     },
     {
-      "kind": "did",
-      "identifier": 576,
+      "kind": "supported_pid_record",
+      "record_index": 1,
+      "raw_hex": "0000000020020000",
+      "support_key_hex": "2002",
       "source_db": "EPS_CAN_P4DK"
     },
     {
-      "kind": "did",
-      "identifier": 608,
+      "kind": "supported_pid_record",
+      "record_index": 2,
+      "raw_hex": "0000000040020000",
+      "support_key_hex": "4002",
       "source_db": "EPS_CAN_P4DK"
     },
     {
-      "kind": "did",
-      "identifier": 640,
+      "kind": "supported_pid_record",
+      "record_index": 3,
+      "raw_hex": "0000000060020000",
+      "support_key_hex": "6002",
       "source_db": "EPS_CAN_P4DK"
     },
     {
-      "kind": "did",
-      "identifier": 672,
+      "kind": "supported_pid_record",
+      "record_index": 4,
+      "raw_hex": "0000000080020000",
+      "support_key_hex": "8002",
       "source_db": "EPS_CAN_P4DK"
     },
     {
-      "kind": "did",
-      "identifier": 704,
+      "kind": "supported_pid_record",
+      "record_index": 5,
+      "raw_hex": "00000000a0020000",
+      "support_key_hex": "a002",
       "source_db": "EPS_CAN_P4DK"
     },
     {
-      "kind": "did",
-      "identifier": 736,
+      "kind": "supported_pid_record",
+      "record_index": 6,
+      "raw_hex": "00000000c0020000",
+      "support_key_hex": "c002",
+      "source_db": "EPS_CAN_P4DK"
+    },
+    {
+      "kind": "supported_pid_record",
+      "record_index": 7,
+      "raw_hex": "00000000e0020000",
+      "support_key_hex": "e002",
       "source_db": "EPS_CAN_P4DK"
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 0,
       "name_string_index": 53480,
       "resolved_name": "Diagnosis codes when FFD stored",
@@ -2075,6 +2141,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 1,
       "name_string_index": 38527,
       "resolved_name": "Vehicle speed",
@@ -2109,6 +2176,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 2,
       "name_string_index": 177303,
       "resolved_name": "Ready ON Status",
@@ -2143,6 +2211,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 3,
       "name_string_index": 38526,
       "resolved_name": "Engine revolution speed",
@@ -2177,6 +2246,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 4,
       "name_string_index": 53481,
       "resolved_name": "Motor actual current",
@@ -2211,6 +2281,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 5,
       "name_string_index": 53482,
       "resolved_name": "Motor instruction current",
@@ -2245,6 +2316,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 6,
       "name_string_index": 53483,
       "resolved_name": "Thermistor temperature",
@@ -2279,6 +2351,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 7,
       "name_string_index": 53484,
       "resolved_name": "PIG power supply",
@@ -2313,6 +2386,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 8,
       "name_string_index": 53485,
       "resolved_name": "IG power supply",
@@ -2347,6 +2421,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 9,
       "name_string_index": 53486,
       "resolved_name": "Steering torque",
@@ -2381,6 +2456,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 10,
       "name_string_index": 53487,
       "resolved_name": "Output of torque sensor 1",
@@ -2415,6 +2491,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 11,
       "name_string_index": 53489,
       "resolved_name": "Output of torque sensor 2",
@@ -2449,6 +2526,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 12,
       "name_string_index": 53490,
       "resolved_name": "Motor voltage (+)",
@@ -2483,6 +2561,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 13,
       "name_string_index": 53491,
       "resolved_name": "Motor voltage (-)",
@@ -2517,6 +2596,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 14,
       "name_string_index": 53492,
       "resolved_name": "Control mode (main)",
@@ -2551,6 +2631,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 15,
       "name_string_index": 53493,
       "resolved_name": "Control mode (sub)",
@@ -2585,6 +2666,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 16,
       "name_string_index": 53494,
       "resolved_name": "IG switch status",
@@ -2619,6 +2701,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 17,
       "name_string_index": 53495,
       "resolved_name": "Torque sensor power supply",
@@ -2653,6 +2736,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 18,
       "name_string_index": 53496,
       "resolved_name": "No. of diagnosis codes",
@@ -2687,6 +2771,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 19,
       "name_string_index": 13269,
       "resolved_name": "Key Cycle",
@@ -2721,6 +2806,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 20,
       "name_string_index": 13270,
       "resolved_name": "IG-ON Elapsed Time",
@@ -2755,6 +2841,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 21,
       "name_string_index": 13271,
       "resolved_name": "Clock Type",
@@ -2789,6 +2876,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 22,
       "name_string_index": 13272,
       "resolved_name": "IG-ON Elapsed Time for Independent",
@@ -2823,6 +2911,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 23,
       "name_string_index": 131445,
       "resolved_name": "Absolute Time (Second)",
@@ -2857,6 +2946,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 24,
       "name_string_index": 131443,
       "resolved_name": "Absolute Time (Minute)",
@@ -2891,6 +2981,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 25,
       "name_string_index": 131442,
       "resolved_name": "Absolute Time (Hour)",
@@ -2925,6 +3016,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 26,
       "name_string_index": 131444,
       "resolved_name": "Absolute Time (Month)",
@@ -2959,6 +3051,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 27,
       "name_string_index": 131441,
       "resolved_name": "Absolute Time (Day)",
@@ -2993,6 +3086,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 28,
       "name_string_index": 131446,
       "resolved_name": "Absolute Time (Year)",
@@ -3027,6 +3121,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 29,
       "name_string_index": 13271,
       "resolved_name": "Clock Type",
@@ -3061,6 +3156,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 30,
       "name_string_index": 53497,
       "resolved_name": "Support mode information",
@@ -3095,6 +3191,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 31,
       "name_string_index": 53498,
       "resolved_name": "Diagnosis mode",
@@ -3129,6 +3226,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 32,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3163,6 +3261,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 33,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3197,6 +3296,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 34,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3231,6 +3331,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 35,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3265,6 +3366,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 36,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3299,6 +3401,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 37,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3333,6 +3436,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 38,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3367,6 +3471,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 39,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3401,6 +3506,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 40,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3435,6 +3541,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 41,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3469,6 +3576,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 42,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3503,6 +3611,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 43,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3537,6 +3646,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 44,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3571,6 +3681,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 45,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3605,6 +3716,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 46,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3639,6 +3751,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 47,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3673,6 +3786,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 48,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3707,6 +3821,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 49,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3741,6 +3856,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 50,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3775,6 +3891,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 51,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3809,6 +3926,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 52,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3843,6 +3961,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 53,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3877,6 +3996,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 54,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3911,6 +4031,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 55,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3945,6 +4066,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 56,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -3979,6 +4101,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 57,
       "name_string_index": 177126,
       "resolved_name": "Advanced information",
@@ -4013,6 +4136,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 58,
       "name_string_index": 53500,
       "resolved_name": "Main CPU mask ID",
@@ -4047,6 +4171,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 59,
       "name_string_index": 53501,
       "resolved_name": "Sub CPU mask ID",
@@ -4081,6 +4206,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 60,
       "name_string_index": 53502,
       "resolved_name": "Main CPU ROM sum",
@@ -4115,6 +4241,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 61,
       "name_string_index": 53503,
       "resolved_name": "Sub CPU ROM sum",
@@ -4149,6 +4276,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 62,
       "name_string_index": 53499,
       "resolved_name": "Assist map select",
@@ -4183,6 +4311,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 63,
       "name_string_index": 53481,
       "resolved_name": "Motor actual current",
@@ -4217,6 +4346,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 64,
       "name_string_index": 53482,
       "resolved_name": "Motor instruction current",
@@ -4251,6 +4381,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 65,
       "name_string_index": 53481,
       "resolved_name": "Motor actual current",
@@ -4285,6 +4416,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 66,
       "name_string_index": 53482,
       "resolved_name": "Motor instruction current",
@@ -4319,6 +4451,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 67,
       "name_string_index": 53484,
       "resolved_name": "PIG power supply",
@@ -4353,6 +4486,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 68,
       "name_string_index": 53485,
       "resolved_name": "IG power supply",
@@ -4387,6 +4521,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 69,
       "name_string_index": 53486,
       "resolved_name": "Steering torque",
@@ -4421,6 +4556,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 70,
       "name_string_index": 53487,
       "resolved_name": "Output of torque sensor 1",
@@ -4455,6 +4591,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 71,
       "name_string_index": 53489,
       "resolved_name": "Output of torque sensor 2",
@@ -4489,6 +4626,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 72,
       "name_string_index": 53490,
       "resolved_name": "Motor voltage (+)",
@@ -4523,6 +4661,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 73,
       "name_string_index": 53491,
       "resolved_name": "Motor voltage (-)",
@@ -4557,6 +4696,7 @@
     },
     {
       "kind": "monitor",
+      "source_table_class": "CDbFreezeTable",
       "record_index": 74,
       "name_string_index": 53495,
       "resolved_name": "Torque sensor power supply",
