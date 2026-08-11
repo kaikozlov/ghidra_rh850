@@ -33,11 +33,13 @@ three generated routing classes:
 - four transport/diagnostic routes on `0x7A9`, `0x7A9`, `0x7A8`, and `0x7A8`;
 - one special route on `0x7F8`.
 
-The six COM I-PDUs contain **58 configured signal IDs, 0 through 57**. Firmware
-packing code gives exact wire positions and RAM sources for 55. Signals 9, 37,
-and 57 are present in the generated signal-to-PDU map and initial buffers but
-have no statically recovered pack call. They are retained as configured but
-runtime-unresolved rather than assigned guessed producers.
+The six COM I-PDUs contain **58 configured signal IDs, 0 through 57**. The
+static producer boundary is now closed for all 58. Generated packers directly
+produce 55 fields; signals **9** (`0x260 B7`) and **37** (`0x262 B7`) are filled
+after COM packing by the CanIf checksum callback at `0x7FEAC`; signal **57**
+(`0x4C8 B4..B7`) is initial/default zero only in this calibration, with no
+enabled packer, COM pre-transmit transform, CanIf post-packer transform, or
+lower-stack writer.
 
 The application transmit chain is:
 
@@ -52,6 +54,8 @@ application output staging at 0xFEBE8094..0xFEBE8110
   -> application_pdu_transmit_router        @ 0x809C6
   -> application_canif_transmit             @ 0x7EE0C
   -> application_can_tx_enqueue             @ 0x7EC5A
+       -> controller-0 pre-enqueue hook      @ 0x800D2
+          -> additive checksum callback      @ 0x7FEAC  (PDU 0/1 only)
   -> software transmit queue
   -> application_rscfd_write_dispatch       @ 0x84022
   -> application_rscfd_write_classic        @ 0x842BA
@@ -83,7 +87,11 @@ Application `tp` is `0x23EE4`. The relevant generated tables are:
 | `0x21A68` | six routing-class counts: `6, 0, 4, 0, 0, 1` |
 | `0x21F78` | six COM CanIf Tx records |
 | `0x21FA8` | four transport/diagnostic CanIf Tx records |
-| `0x21F68` | active special CanIf Tx record |
+| `0x21F68` | active special CanIf Tx record (`0x7F8`) |
+| `0x21F70` | class-5 special Rx match record (`0x7F7`) |
+| `0x21A2C` | receive-class descriptor pointer table; class 5 -> `0x21AC4` |
+| `0x21FE0` | COM-to-CanIf post-packer route flags; first six = `1,1,0,0,0,0` |
+| `0x21900` / `0x2194C` | controller-0 pre-enqueue hook `0x800D2` / checksum callback `0x7FEAC` |
 | `0x221DC` | initial COM I-PDU data image |
 | `0x223B8` | 300-byte COM signal type/property array |
 | `0x224E4` | 300-entry `signal_id -> COM I-PDU` map |
@@ -118,12 +126,17 @@ the transport class is `0x0800..0x0803` and the special class is `0xF800`.
 | `0x0801` | `0x7A9` | 2 | transport/diagnostic route 1 |
 | `0x0802` | `0x7A8` | 2 | transport/diagnostic route 2 |
 | `0x0803` | `0x7A8` | 2 | transport/diagnostic route 3 |
-| `0xF800` | `0x7F8` | 5 | special generated route; upper protocol semantics unresolved |
+| `0xF800` | `0x7F8` | 5 | special bidirectional channel Tx route |
 
-An additional eight-byte-looking record for CAN `0x7F7` follows the active
-`0x7F8` record at `0x21F70`, but class 5 has count one and its table pointer is
-`0x21F68`. `0x7F7` is therefore outside the active indexed Tx set in this
-calibration. This is distinct from the configured `0x7F7` receive rule.
+The adjacent record at `0x21F70` is **not** a second active Tx record. It is the
+match table selected by receive-class descriptor `0x21AC4`, whose upper callback
+is `0x82042`; acceptance rule 50 supplies CAN `0x7F7`. That callback reaches the
+special protocol receive path through `0x81FE4 -> 0x81F00`. On the transmit
+side, the same protocol state machinery calls `0x8206C`, which explicitly ORs
+source PDU class `0xF800` and calls `application_canif_transmit`; class 5 has one
+active Tx record, `0x21F68 -> CAN 0x7F8`. This proves a paired **Rx `0x7F7` / Tx
+`0x7F8` special transport channel**. The application-level service semantics of
+that channel remain unnamed.
 
 ## 3. Six COM transmit I-PDUs
 
@@ -182,11 +195,14 @@ remaining status-bit semantics are not projected from another calibration.
 | 6 | `B1..B2` | `0xFEBE810A` | `STEER_TORQUE_DRIVER` (public DBC match) |
 | 7 | `B3..B4` | `0xFEBE810E` | `STEER_ANGLE` (public DBC match) |
 | 8 | `B5..B6` | `0xFEBE8110` | `STEER_TORQUE_EPS` (public DBC match) |
-| 9 | `B7` | unresolved | public DBC calls this `CHECKSUM`; no static producer recovered |
+| 9 | `B7` | `0x7FEAC` post-packer callback | additive Toyota checksum |
 
 The producer at `0x4B66C` independently scales and clamps the signal-6 value to
 `-700..700` and derives the signal-8 value through a separate signed scaling
-path, supporting their torque-like roles.
+path, supporting their torque-like roles. Signal 9 is intentionally absent from
+`application_pack_can_260`: after the packed eight-byte buffer reaches CanIf,
+PDU-0 route flag `1` selects `0x800D2 -> 0x7FEAC`, which overwrites the final
+byte with the additive checksum described in §4.7.
 
 ### 4.2 CAN `0x262` / COM PDU 1
 
@@ -203,7 +219,7 @@ B3: s23[7] s24[6] s25[5] s26[4] s27[3] s28[2] s29[1] s30[0]
 B4: s31[7] s32[6] s33[5] s34[1:0] at bits [4:3], bits [2:0] reserved
 B5: s35
 B6: s36
-B7: s37 (configured; public DBC calls this CHECKSUM; producer unresolved)
+B7: s37 (post-packer additive checksum from 0x7FEAC)
 ```
 
 Signals 10–12, 14–21, and 23–36 use the exact RAM sources listed in the CSV.
@@ -252,11 +268,36 @@ packer with widths of eight bits. OEM field semantics remain unresolved.
 | 54 | `B0` | constant `0x09` |
 | 55 | `B1[7]` | constant zero |
 | 56 | `B2..B3` | constant zero 16-bit value |
-| 57 | `B4..B7` | configured signal, initialized zero; runtime producer unresolved |
+| 57 | `B4..B7` | initial/default zero only |
 
-Signal 57 is assigned to PDU 5 by the raw signal map, but no static pack call was
-found. Its four-byte placement is the only unoccupied portion of the PDU and is
-recorded as a bounded layout conclusion, not an OEM semantic claim.
+Signal 57 is assigned to PDU 5 by the raw signal map, but the generated packer
+`0x4BC54` writes only signals 54..56. The PDU descriptor flags are `0x03`, so
+neither COM pre-transmit transform class (`0x10/0x20`) is enabled; the PDU-5
+CanIf route flag at `0x21FE0+5` is zero, so the lower post-packer callback is also
+skipped; the subsequent queue/driver path copies rather than synthesizes data.
+The initial bytes `B4..B7` are all zero. Therefore signal 57 is **default-only
+zero in this calibration**. This does not claim the generated configuration
+could never be used by another calibration.
+
+### 4.7 Post-packer checksum callback (`0x260` / `0x262`)
+
+`application_can_tx_enqueue @ 0x7EC5A` invokes controller-0 hook `0x800D2`
+before placing the frame on the software queue. The six COM route flags at
+`0x21FE0` are exactly `1,1,0,0,0,0`; only PDU 0 (`0x260`) and PDU 1 (`0x262`)
+therefore dispatch through controller callback `0x7FEAC`. Its 70-byte body is
+pinned by SHA-256
+`0e077cd8d1f3c22b7fe2c1478e98a44e2d05f0c7febfa45e9385a5181607c8f1`.
+
+For a standard CAN frame, the callback computes:
+
+```text
+checksum = (DLC + sum(CAN_ID bytes) + sum(payload[0:DLC-1])) & 0xFF
+payload[DLC-1] = checksum
+```
+
+That is independently the checksum function used by the pinned Toyota opendbc
+source. In this firmware it resolves configured signals **9** and **37** as
+lower-stack checksum fields rather than ordinary COM packer outputs.
 
 ## 5. Confirmation path
 
@@ -287,8 +328,8 @@ committed CodeFlash and do not require an external checkout.
 
 The names `STEER_TORQUE_SENSOR`, `STEER_OVERRIDE`,
 `STEER_ANGLE_INITIALIZING`, `STEER_TORQUE_DRIVER`, `STEER_ANGLE`,
-`STEER_TORQUE_EPS`, `EPS_STATUS`, and `CHECKSUM` are optional corroboration from
-commaai/opendbc at pinned commit
+`STEER_TORQUE_EPS`, `EPS_STATUS`, and `CHECKSUM`, plus the checksum arithmetic,
+are optional corroboration from commaai/opendbc at pinned commit
 `c9b31d21bc396e8958891e271936bdbdf1a6ca93`. They are used only where the public
 bit layout agrees. All other generated signals remain explicitly anonymous.
 
@@ -296,5 +337,5 @@ No claim is made that:
 
 - the raw cycle counts are milliseconds;
 - CAN `0x351`, `0x394`, `0x4A3`, or `0x4C8` have recovered OEM message names;
-- the three configured-but-unpacked fields have identified runtime producers;
-- the inactive adjacent `0x7F7` record is an active transmit route.
+- signal 57 has an OEM semantic beyond its recovered default-zero behavior;
+- the `0x7F7/0x7F8` special channel has a recovered Toyota service/protocol name.

@@ -40,7 +40,13 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
     private static final long OPAQUE_SID_TABLE = 0x25902L;
     private static final long OPAQUE_OFF_TABLE = 0x2591eL;
     private static final long COM_PDU = 0x2273cL;
+    private static final long SIG2PDU = 0x224e4L;
+    private static final long ACCEPTANCE = 0x231a0L;
+    private static final long SECOC_RECORDS = 0x25970L;
+    private static final int SECOC_RECORD_SIZE = 0x50;
     private static final int OPAQUE_COUNT = 14;
+    private static final int RX_SIGNAL_FIRST = 58;
+    private static final int SIGNAL_COUNT = 300;
 
     private static final String HEADER = String.join(",",
             "signal_id",
@@ -57,7 +63,9 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
             "dest_width",
             "first_consumer",
             "window_lo",
-            "window_hi");
+            "window_hi",
+            "classification",
+            "classification_basis");
 
     private static final Pattern IMM = Pattern.compile("(-?0x[0-9a-fA-F]+|-?\\d+)");
 
@@ -77,6 +85,8 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
         String firstConsumer;
         long windowLo;
         long windowHi;
+        String classification;
+        String classificationBasis;
     }
 
     @Override
@@ -95,7 +105,7 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
         rows.addAll(exportOpaqueRows());
         rows.sort(Comparator.comparingInt(r -> r.signalId));
 
-        // Keep one row per signal_id (first call site wins; duplicates are errors).
+        // Keep one positive row per signal_id (first equivalent call site wins).
         Map<Integer, Row> bySid = new TreeMap<>();
         for (Row r : rows) {
             Row prev = bySid.putIfAbsent(r.signalId, r);
@@ -106,16 +116,34 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
             }
         }
 
+        // Classify every configured Rx signal. A negative row means the signal ID is
+        // present in generated COM configuration but absent from the complete stock
+        // receive-signal/group-byte extraction census. This is intentionally a COM
+        // extraction negative, not a claim that the corresponding wire bits are unused
+        // by every possible direct-buffer consumer.
+        Map<Integer, Boolean> pduHasExtraction = new HashMap<>();
+        for (Row r : bySid.values()) {
+            int pdu = readU16(SIG2PDU + 2L * r.signalId);
+            pduHasExtraction.put(pdu, true);
+        }
+        for (int sid = RX_SIGNAL_FIRST; sid < SIGNAL_COUNT; sid++) {
+            if (bySid.containsKey(sid)) continue;
+            int pdu = readU16(SIG2PDU + 2L * sid);
+            Row r = negativeRow(sid, pdu, Boolean.TRUE.equals(pduHasExtraction.get(pdu)));
+            bySid.put(sid, r);
+        }
+
         Files.createDirectories(out.getParent());
         try (PrintWriter w = new PrintWriter(Files.newBufferedWriter(out, StandardCharsets.UTF_8))) {
             w.println(HEADER);
             for (Row r : bySid.values()) {
                 w.printf(Locale.ROOT,
-                        "%d,%s,0x%X,%d,%s,0x%X,%d,%d,%d,%d,%s,%d,%s,0x%X,0x%X%n",
+                        "%d,%s,0x%X,%d,%s,0x%X,%d,%d,%d,%d,%s,%d,%s,0x%X,0x%X,%s,%s%n",
                         r.signalId, r.extractKind, r.unpacker, r.bodySize, r.bodySha,
                         r.callSite, r.bufOff, r.bitLen, r.startArg, r.signed,
                         r.dest, r.destWidth, csvEscape(r.firstConsumer),
-                        r.windowLo, r.windowHi);
+                        r.windowLo, r.windowHi, r.classification,
+                        csvEscape(r.classificationBasis));
             }
         }
         println("ExportApplicationRxSignalEvidence: wrote " + bySid.size()
@@ -181,9 +209,11 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
             r.signed = 0;
             r.dest = String.format("COM+0x%X/opaque-shadow", bufOff);
             r.destWidth = comLen;
-            r.firstConsumer = "configured-unresolved; bound=opaque PDU shadow compare; no stable per-signal RAM dest";
+            r.firstConsumer = "opaque PDU bytes consumed by crypto-test shadow/stability logic; no stable per-signal RAM dest";
             r.windowLo = OPAQUE_SID_TABLE;
             r.windowHi = OPAQUE_OFF_TABLE + 2L * OPAQUE_COUNT;
+            r.classification = "extracted_group_bytes";
+            r.classificationBasis = "signal-ID/offset tables 0x25902/0x2591E plus application_com_receive_signal_group_bytes callers";
             rows.add(r);
         }
         return rows;
@@ -271,7 +301,58 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
         r.firstConsumer = firstConsumer(dest, entry);
         r.windowLo = windowLo;
         r.windowHi = windowHi;
+        r.classification = "extracted_bitfield";
+        r.classificationBasis = "direct application_com_receive_signal call with recoverable immediate signal/offset/width/destination arguments";
         return r;
+    }
+
+    private Row negativeRow(int sid, int pdu, boolean pduHasExtraction) throws Exception {
+        Row r = new Row();
+        r.signalId = sid;
+        r.extractKind = "none";
+        r.unpacker = 0;
+        r.bodySize = 0;
+        r.bodySha = "none";
+        r.callSite = 0;
+        r.bufOff = readU16(0x228e4L + 2L * pdu);
+        r.bitLen = 0;
+        r.startArg = 0;
+        r.signed = 0;
+        r.dest = "none";
+        r.destWidth = 0;
+        r.windowLo = SIG2PDU + 2L * sid;
+        r.windowHi = r.windowLo + 2;
+        if (pduHasExtraction) {
+            r.classification = "configured_not_extracted_by_pdu_handler";
+            r.classificationBasis = "same PDU has recovered generated extraction calls, but this configured signal ID is absent from the complete receive-signal/group-byte API census";
+            r.firstConsumer = "none as configured COM signal; PDU handler extracts other signal IDs";
+        } else if (isSecocPdu(pdu)) {
+            r.classification = "configured_no_com_unpacker_secoc_pdu";
+            r.classificationBasis = "PDU has no generated COM unpacker; its CAN ID is present in the six-record SecOC receive table";
+            r.firstConsumer = "none as configured COM signal; containing PDU is consumed by SecOC path";
+        } else {
+            r.classification = "configured_no_com_unpacker";
+            r.classificationBasis = "PDU has no recovered COM receive-signal/group-byte extraction caller";
+            r.firstConsumer = "none as configured COM signal; no PDU unpacker recovered";
+        }
+        return r;
+    }
+
+    private boolean isSecocPdu(int pdu) throws Exception {
+        if (pdu < 6 || pdu >= 53) return false;
+        long canId = readU32(ACCEPTANCE + 16L * (pdu - 6)) & 0x7ffL;
+        for (int i = 0; i < 6; i++) {
+            if ((readU16(SECOC_RECORDS + (long)i * SECOC_RECORD_SIZE + 0x0a) & 0x7ffL) == canId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private long readU32(long addr) throws MemoryAccessException {
+        byte[] b = new byte[4];
+        currentProgram.getMemory().getBytes(toAddr(addr), b);
+        return (b[0] & 0xffL) | ((b[1] & 0xffL) << 8) | ((b[2] & 0xffL) << 16) | ((b[3] & 0xffL) << 24);
     }
 
     private String firstConsumer(long dest, long unpackerEntry) {

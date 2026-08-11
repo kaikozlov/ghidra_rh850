@@ -67,7 +67,7 @@ VERIFY_SUITES := \
 .PHONY: sync verify verify-core verify-one verify-changed verify-agent verify-external verify-rfp verify-sleigh verify-processor verify-ghidra \
 	ghidra-cli \
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
-	generate-application-receive-evidence generate-application-receive \
+	generate-application-receive-evidence generate-application-receive generate-application-transmit \
 	generate-processor-fixture generate-semantic-coverage generate-project-inventory \
 	verify-project-parity update-project-baseline \
 	rebuild-project work-project snapshot-project finalize-project
@@ -134,6 +134,9 @@ generate-application-receive-evidence:
 
 generate-application-receive: generate-application-receive-evidence
 	$(PYTHON) tools/generate_application_rx_map.py
+
+generate-application-transmit:
+	$(PYTHON) tools/generate_application_tx_map.py
 
 generate-processor-fixture:
 	$(PYTHON) tools/build_processor_fixture.py

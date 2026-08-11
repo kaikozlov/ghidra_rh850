@@ -243,18 +243,26 @@ def main() -> int:
         with TX_MAP_PATH.open(newline="", encoding="utf-8") as fh:
             tx_rows = list(csv.DictReader(fh))
         sig_rows = {int(r["signal_id"]): r for r in tx_rows}
-        for sig_id, packer in [(9, "0x4BCEE"), (37, "0x4BE24"), (57, "0x4BC54")]:
+        expected = {
+            9: ("canif_checksum", "0x7FEAC", "0x4BCEE", "checksum"),
+            37: ("canif_checksum", "0x7FEAC", "0x4BE24", "checksum"),
+            57: ("default_only", "0", "0x4BC54", "default zero"),
+        }
+        for sig_id, (kind, source, packer, role_word) in expected.items():
             row = sig_rows.get(sig_id)
             check(f"signal {sig_id} exists in TX map", row is not None)
             if row is None:
                 continue
-            check(f"signal {sig_id} is configured-unresolved",
-                  row["source_kind"] == "configured-unresolved",
-                  row["source_kind"])
-            # Packer evidence should mention the packer address in static_role.
-            check(f"signal {sig_id} static_role documents packer exclusion",
-                  packer.lower() in row["static_role"].lower(),
-                  row["static_role"][:80])
+            check(f"signal {sig_id} producer class is closed",
+                  row["source_kind"] == kind, row["source_kind"])
+            check(f"signal {sig_id} producer/source is exact",
+                  row["source"].lower() == source.lower(), row["source"])
+            check(f"signal {sig_id} remains assigned to its generated PDU packer",
+                  row["packer"].lower() == packer.lower(), row["packer"])
+            check(f"signal {sig_id} static role records recovered producer boundary",
+                  role_word in row["static_role"].lower(), row["static_role"][:100])
+        check("no configured-unresolved TX signals remain",
+              all(r["source_kind"] != "configured-unresolved" for r in tx_rows))
 
     print(f"\nSummary: {passed} passed, {failed} failed")
     return 1 if failed else 0

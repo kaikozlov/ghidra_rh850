@@ -25,7 +25,8 @@ curated.
 | `data/checkpoint_payload_map.csv` | All 32 checkpoint descriptors, direct writers, structural layouts, evidence limits | `tools/generate_checkpoint_payload_map.py` (`make generate-dataflash`) | `tests/verify_dataflash_semantics.py` |
 | `data/application_diagnostic_map.csv` | Per-SID diagnostic routing, session policy, callbacks/subfunction tables, evidence status (17 SIDs) | `tools/generate_application_diagnostic_map.py` (`make generate-application-diagnostics`) | `tests/verify_application_diagnostics.py` |
 | `data/application_rx_map.csv` | 47 normal Rx I-PDUs, 242 COM signals | `tools/generate_application_rx_map.py` (`make generate-application-receive`) | `tests/verify_application_receive.py` |
-| `data/application_rx_signal_evidence.csv` | RX signal extraction evidence (drives the RX map generator) | `tools/generate_application_rx_signal_evidence.sh` (`make generate-application-receive-evidence`) | `tests/verify_application_receive.py` |
+| `data/application_rx_signal_evidence.csv` | Complete RX signal extraction/classification evidence (drives the RX map generator) | `tools/generate_application_rx_signal_evidence.sh` (`make generate-application-receive-evidence`) | `tests/verify_application_receive.py` |
+| `data/application_tx_map.csv` | 58-row application TX signal map including post-packer/default-only closure | `tools/generate_application_tx_map.py` (`make generate-application-transmit`) | `tests/verify_application_transmit.py` |
 | `data/semantic_coverage_ledger.csv` | Whole-image recovered-function ledger (5,921 rows) with evidence grades | `tools/generate_semantic_coverage_ledger.sh` (`make generate-semantic-coverage`) | `tests/verify_semantic_coverage.py` |
 | `data/object15_reachability.csv` | Object-15 caller census | `tools/generate_object15_reachability.py` | `tests/verify_boot_trust.py` |
 | `data/instruction_inventory.csv` | Whole-image instruction inventory emitted during processor verification | `tools/verify_processor.sh` (`make verify-processor`) | `make verify-processor` |
@@ -37,7 +38,6 @@ curated.
 
 | Artifact | Contents | Verified by |
 |---|---|---|
-| `data/application_tx_map.csv` | 58-row application TX signal map | `tests/verify_application_transmit.py` |
 | `data/application_security_consumers.csv` | Application security-consumer scan results backing the "no configured gating" finding | `tests/verify_security_consumers.py` |
 | `data/application_routine_id_callbacks.csv` | The 13-entry stock-gated control-ID subset, direct-target census, and state-mediated object-`0x101/102/103` persistence boundary; distinct from SID `0xAB` | `tests/verify_application_routine_id_callbacks.py` |
 | `data/control_partition.csv` | Control/safety cyclic-partition map | `tests/verify_control_partition.py` |

@@ -8,7 +8,7 @@ tx_pdu_id,can_id,message_name,length,cycle_ticks,signal_id,wire_field,source_kin
 0,0x260,STEER_TORQUE_SENSOR,8,4,6,B1..B2 BE16,ram,0xFEBE810A,STEER_TORQUE_DRIVER (public Toyota DBC match),0x4BCEE
 0,0x260,STEER_TORQUE_SENSOR,8,4,7,B3..B4 BE16,ram,0xFEBE810E,STEER_ANGLE (public Toyota DBC match),0x4BCEE
 0,0x260,STEER_TORQUE_SENSOR,8,4,8,B5..B6 BE16,ram,0xFEBE8110,STEER_TORQUE_EPS (public Toyota DBC match),0x4BCEE
-0,0x260,STEER_TORQUE_SENSOR,8,4,9,B7,configured-unresolved,none,CHECKSUM in public Toyota DBC; runtime producer unresolved; packer 0x4BCEE confirmed to pack only signals 0..8 and not touch B7,none
+0,0x260,STEER_TORQUE_SENSOR,8,4,9,B7,canif_checksum,0x7FEAC,Toyota additive checksum: post-packer CanIf callback sums CAN-ID bytes + DLC + payload[0:-1] into final byte,0x4BCEE
 1,0x262,EPS_STATUS,8,8,10,B0[7],ram,0xFEBE809C,unresolved status bit,0x4BE24
 1,0x262,EPS_STATUS,8,8,11,B0[6],ram,0xFEBE80B4,unresolved status bit,0x4BE24
 1,0x262,EPS_STATUS,8,8,12,B0[5],ram,0xFEBE809D,unresolved status bit,0x4BE24
@@ -36,7 +36,7 @@ tx_pdu_id,can_id,message_name,length,cycle_ticks,signal_id,wire_field,source_kin
 1,0x262,EPS_STATUS,8,8,34,B4[4:3],ram,0xFEBE80B1,unresolved two-bit status,0x4BE24
 1,0x262,EPS_STATUS,8,8,35,B5,ram,0xFEBE80B2,unresolved byte,0x4BE24
 1,0x262,EPS_STATUS,8,8,36,B6,ram,0xFEBE80B3,unresolved byte,0x4BE24
-1,0x262,EPS_STATUS,8,8,37,B7,configured-unresolved,none,CHECKSUM in public Toyota DBC; runtime producer unresolved; packer 0x4BE24 confirmed to pack only signals 10..36 and not touch B7,none
+1,0x262,EPS_STATUS,8,8,37,B7,canif_checksum,0x7FEAC,Toyota additive checksum: post-packer CanIf callback sums CAN-ID bytes + DLC + payload[0:-1] into final byte,0x4BE24
 2,0x351,APP_TX_351,4,200,38,B2[7:5],ram,0xFEBE80B8,unresolved three-bit status,0x4C25C
 2,0x351,APP_TX_351,4,200,39,B2[4],ram,0xFEBE80B9,unresolved status bit,0x4C25C
 3,0x394,APP_TX_394,3,60,40,B0[6:4],ram,0xFEBE80BA,unresolved three-bit status,0x4C158
@@ -56,4 +56,4 @@ tx_pdu_id,can_id,message_name,length,cycle_ticks,signal_id,wire_field,source_kin
 5,0x4C8,APP_TX_4C8,8,196,54,B0,constant,9,constant 0x09,0x4BC54
 5,0x4C8,APP_TX_4C8,8,196,55,B1[7],constant,0,constant zero,0x4BC54
 5,0x4C8,APP_TX_4C8,8,196,56,B2..B3 BE16,constant,0,constant zero,0x4BC54
-5,0x4C8,APP_TX_4C8,8,196,57,B4..B7,configured-unresolved,none,configured signal initialized to zero; runtime producer unresolved; packer 0x4BC54 confirmed to pack only signals 54..56 and not touch B4..B7,none
+5,0x4C8,APP_TX_4C8,8,196,57,B4..B7,default_only,0,initial/default zero only in this calibration; packer omits field and all enabled pre/post-transmit transforms are absent for PDU 5,0x4BC54

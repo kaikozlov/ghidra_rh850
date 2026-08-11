@@ -22,10 +22,6 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   list/per-ID/detail structure is recovered, but the OEM service name and exact
   meanings of the event catalogue's encoded upper ID bits and record-kind
   values remain unknown.
-- **97 configured-unresolved RX signals** (see `data/application_rx_signal_evidence.csv`).
-  Bounds are known; exact runtime producers are not statically recovered.
-- **Three configured TX signals without recovered runtime producers** (see
-  [../communications/application-tx.md](../communications/application-tx.md)).
 - **Authenticated command to d/q current reference.** The high-rate
   phase-current-control-to-TSG3-PWM chain is recovered, and the d/q-reference
   producer cone is now enumerated clean two levels deep: `0x37712` builds

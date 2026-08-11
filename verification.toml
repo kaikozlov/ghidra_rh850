@@ -92,7 +92,14 @@ paths = [
 
 [suite.application_receive]
 tests = ["tests/verify_application_receive.py"]
-paths = ["docs/communications/application-rx.md", "data/application_rx_map.csv"]
+paths = [
+  "docs/communications/application-rx.md",
+  "data/application_rx_map.csv",
+  "data/application_rx_signal_evidence.csv",
+  "tools/generate_application_rx_map.py",
+  "tools/generate_application_rx_signal_evidence.sh",
+  "ghidra/scripts/verify/ExportApplicationRxSignalEvidence.java",
+]
 
 [suite.application_routine_id_callbacks]
 tests = ["tests/verify_application_routine_id_callbacks.py"]
@@ -104,7 +111,11 @@ paths = ["docs/security/application-security-access.md"]
 
 [suite.application_transmit]
 tests = ["tests/verify_application_transmit.py"]
-paths = ["docs/communications/application-tx.md", "data/application_tx_map.csv"]
+paths = [
+  "docs/communications/application-tx.md",
+  "data/application_tx_map.csv",
+  "tools/generate_application_tx_map.py",
+]
 
 [suite.icus_key_recovery_surface]
 tests = ["tests/verify_icus_key_recovery_surface.py"]

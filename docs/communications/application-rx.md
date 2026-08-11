@@ -36,12 +36,21 @@ audits destination WRITE / consumer READ ownership under `make verify-processor`
 | Diagnostic/special acceptance | 4 | **Excluded** — `0x7A1`/`0x777`/`0x7A0`/`0x7F7` use separate demux classes |
 | CAN `0x344` | 0 | **Absent** from acceptance, descriptors, and the CSV |
 
-Recovered vs bounded (this calibration):
+Static extraction/classification closure (this calibration):
 
-| Evidence status | Signals |
+| Evidence class | Signals |
 |---|---:|
-| recovered (unpacker + wire/dest) | 145 |
-| configured-unresolved | 97 |
+| extracted bitfield | 131 |
+| extracted group/opaque bytes | 14 |
+| configured ID omitted by an otherwise-active PDU handler | 93 |
+| configured ID on no-COM-unpacker SecOC PDU (`0x00F`) | 3 |
+| configured ID on ordinary no-COM-unpacker PDU (`0x2E8`) | 1 |
+
+Thus all **242/242** configured Rx signal IDs are classified. The final 97 are
+negative COM-extraction results, not guessed bit layouts: the stock firmware has
+no signal-level extraction call for those IDs. This does **not** claim that every
+wire bit in the containing PDU is globally unused by direct-buffer or security
+logic.
 
 No OEM message names, physical scaling, or DBC field names are assigned. Signal
 numbers are the generated COM IDs present in this image.
@@ -154,23 +163,44 @@ For each recovered signal the CSV records:
 - unpacker address
 - wire field, bit length, start argument, signedness
 - destination RAM (or COM opaque shadow expression) and width
-- first non-unpacker READ consumer when Ghidra xrefs prove one, else a bounded
-  `configured-unresolved` string
+- first non-unpacker READ consumer when Ghidra xrefs prove one; lack of a
+  downstream semantic consumer remains a separate bound from extraction
+- for configured IDs with no stock COM extraction, an explicit negative
+  classification and structural basis instead of fabricated wire fields
 
-### 5.1 Known vs configured-unresolved
+### 5.1 Complete extraction census and the 97 negative rows
 
-**Known (145):** machine-exported call-site evidence in
-`data/application_rx_signal_evidence.csv` (131 bitfield calls to `0x7C03E` plus
-14 opaque table rows). Tests re-hash every distinct unpacker body and re-check
-signal-ID / buffer / length / signedness immediates and GP-relative destinations
-against CodeFlash; they do not reimport a generator overlay.
+**Positive extraction evidence (145):** the exporter records 131 bitfield
+extractions through `application_com_receive_signal @ 0x7C03E` plus 14
+property-class-4 group/opaque signals from the tables at `0x25902/0x2591E` and
+`application_com_receive_signal_group_bytes @ 0x7D63E`. Tests re-hash every
+distinct unpacker body and re-check signal-ID / buffer / length / signedness
+immediates and GP-relative destinations against CodeFlash.
 
-**Configured-unresolved (97):** signal exists in `0x224E4` / property table, but
-no exportable unpack call or opaque-table row proves extraction parameters.
-Bound language is stored in `first_consumer` / `notes`.
+The negative side is now deterministic rather than residual. The
+`signal_id -> PDU` table at `0x224E4` has only four code readers in the image:
+`application_com_receive_signal`, `application_com_send_signal`,
+`application_com_pack_big_endian_signal`, and
+`application_com_receive_signal_group_bytes`. On the Rx side, the complete
+`application_com_receive_signal` xref census contains 133 call references: 131
+ordinary generated bitfield calls plus two table-driven calls inside the known
+crypto-test collector. The byte-group helper has exactly 12 call references,
+all in the two already-modeled opaque/test-bank collectors. There is no third
+generic COM signal-extraction API.
 
-Example: COM PDU 11 / CAN `0x00F` has three configured signals and no COM
-unpacker in this image; SecOC still processes the frame.
+The remaining **97 configured IDs therefore have no stock COM extraction**:
+
+- **93** are omitted by generated PDU handlers that do extract other configured
+  IDs from the same PDU;
+- signals **84, 85, 86** belong to COM PDU 11 / CAN `0x00F`, which has no COM
+  unpacker but is consumed as the SecOC synchronization envelope;
+- signal **217** belongs to COM PDU 39 / CAN `0x2E8`, the sole ordinary PDU with
+  a configured signal but no recovered COM unpacker.
+
+These rows are emitted as `classified-no-com-extraction` with `wire_field=n/a`
+and no invented destination. The claim is deliberately signal-API scoped: it
+excludes a configured COM extraction of that signal ID, not every possible
+direct read of the containing PDU buffer.
 
 ### 5.2 Processor audit coverage
 
@@ -291,7 +321,8 @@ register-level I/O for peripheral configuration during signal processing.
 Core conclusions—47/242 counts, table addresses, CAN IDs, lengths, PDU
 ownership, `0x344` absence, SecOC inclusion (cross-checked to records at
 `0x25970`), diagnostic exclusion, COM roots from GP immediates
-(`GP=0xFEBEB800` → `0xFEBE4A49`/`0xFEBE52CC`/`0xFEBE532C`), recovered unpack
-parameters from the evidence CSV, and consumer xrefs—come from committed
-CodeFlash plus read-only Ghidra export/audit. No claim assigns OEM signal names,
-engineering units, or physical scaling.
+(`GP=0xFEBEB800` → `0xFEBE4A49`/`0xFEBE52CC`/`0xFEBE532C`), all 145 positive
+extractions, the complete signal-API xref boundary behind the 97 negative
+classifications, and consumer xrefs—come from committed CodeFlash plus read-only
+Ghidra export/audit. No claim assigns OEM signal names, engineering units, or
+physical scaling.

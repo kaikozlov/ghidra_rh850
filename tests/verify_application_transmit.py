@@ -7,11 +7,14 @@ import csv
 import hashlib
 from pathlib import Path
 import struct
+import subprocess
 import sys
+import tempfile
 
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 CSV_PATH = REPO / "data" / "application_tx_map.csv"
+GEN = REPO / "tools" / "generate_application_tx_map.py"
 
 passed = failed = 0
 
@@ -27,6 +30,10 @@ def check(name: str, condition: object, detail: str = "") -> None:
 
 def u16(offset: int) -> int:
     return struct.unpack_from("<H", CF, offset)[0]
+
+
+def u32(offset: int) -> int:
+    return struct.unpack_from("<I", CF, offset)[0]
 
 
 def sha256_region(offset: int, size: int) -> str:
@@ -52,8 +59,17 @@ check("four class-2 routes use 7A9/7A9/7A8/7A8",
 check("class-2 routes select controller zero", all(row[1:3] == (0, 0) for row in diag_tx))
 check("class-2 confirmation routes split 0/0/1/1",
       [row[3] for row in diag_tx] == [0, 0, 1, 1])
-check("sole indexed class-5 route is CAN 0x7F8", special_tx == (0x7F8, 0, 0, 0), repr(special_tx))
-check("adjacent 0x7F7 record is outside class-5 count one", TX.unpack_from(CF, 0x21F70)[0] == 0x7F7 and class_counts[5] == 1)
+check("sole indexed class-5 Tx route is CAN 0x7F8", special_tx == (0x7F8, 0, 0, 0), repr(special_tx))
+check("class-5 Rx descriptor points at adjacent CAN 0x7F7 record",
+      u32(0x21A40) == 0x21AC4 and u32(0x21AC4) == 0x21F70
+      and TX.unpack_from(CF, 0x21F70)[0] == 0x7F7)
+check("class-5 Rx upper callback is 0x82042", u32(0x21AC8) == 0x82042)
+check("special protocol Tx function is 0x8206C", u32(0x22B90) == 0x8206C)
+check("special Tx wrapper injects PduR class 0xF800 and calls CanIf",
+      CF[0x82078:0x82082] == bytes.fromhex("863600f80338bfff8ecd"))
+check("special Rx callback reaches the paired protocol receive path",
+      CF[0x82062:0x82066] == bytes.fromhex("bfff82ff")
+      and CF[0x8203A:0x8203E] == bytes.fromhex("bfffc6fe"))
 check("CAN 0x344 is absent from every active Tx route",
       0x344 not in [row[0] for row in com_tx + diag_tx] + [special_tx[0]])
 
@@ -118,29 +134,37 @@ check("CSV PDU summaries match raw tables", summary == {
     5: (0x4C8, 8, 196),
 }, repr(summary))
 check("each PDU has one recovered generated packer", {
-    pdu: {row["packer"] for row in rows if int(row["tx_pdu_id"]) == pdu and row["packer"] != "none"}
+    pdu: {row["packer"] for row in rows if int(row["tx_pdu_id"]) == pdu}
     for pdu in range(6)
 } == {
     0: {"0x4BCEE"}, 1: {"0x4BE24"}, 2: {"0x4C25C"},
     3: {"0x4C158"}, 4: {"0x4BB1E"}, 5: {"0x4BC54"},
 })
-check("only configured signals 9/37/57 lack recovered packers",
-      [int(row["signal_id"]) for row in rows if row["packer"] == "none"] == [9, 37, 57])
+check("all 58 configured signals are assigned to their generated PDU packer",
+      all(row["packer"] != "none" for row in rows))
+check("signals 9 and 37 are post-packer CanIf checksums",
+      [(int(r["signal_id"]), r["source_kind"], r["source"]) for r in rows if int(r["signal_id"]) in (9, 37)]
+      == [(9, "canif_checksum", "0x7FEAC"), (37, "canif_checksum", "0x7FEAC")])
+check("signal 57 is classified default-only zero",
+      next(r for r in rows if r["signal_id"] == "57")["source_kind"] == "default_only"
+      and next(r for r in rows if r["signal_id"] == "57")["source"] == "0")
+check("no configured-unresolved Tx rows remain",
+      all(r["source_kind"] != "configured-unresolved" for r in rows))
 check("RAM-backed signal sources are application addresses",
       all(0xFEBE8094 <= int(row["source"], 0) <= 0xFEBE8110
           for row in rows if row["source_kind"] == "ram"))
 expected_sources = [
     "0xFEBE8094", "0xFEBE8096", "0xFEBE8098", "0xFEBE8099", "0xFEBE809A",
-    "0xFEBE809B", "0xFEBE810A", "0xFEBE810E", "0xFEBE8110", "none",
+    "0xFEBE809B", "0xFEBE810A", "0xFEBE810E", "0xFEBE8110", "0x7FEAC",
     "0xFEBE809C", "0xFEBE80B4", "0xFEBE809D", "0", "0xFEBE809E", "0xFEBE809F",
     "0xFEBE80A0", "0xFEBE80A4", "0xFEBE80A6", "0xFEBE80A8", "0xFEBE80AA",
     "0xFEBE80AC", "0", "0xFEBE80A1", "0xFEBE80A2", "0xFEBE80A3", "0xFEBE80A5",
     "0xFEBE80A7", "0xFEBE80A9", "0xFEBE80AB", "0xFEBE80AD", "0xFEBE80AE",
-    "0xFEBE80AF", "0xFEBE80B0", "0xFEBE80B1", "0xFEBE80B2", "0xFEBE80B3", "none",
+    "0xFEBE80AF", "0xFEBE80B0", "0xFEBE80B1", "0xFEBE80B2", "0xFEBE80B3", "0x7FEAC",
     "0xFEBE80B8", "0xFEBE80B9", "0xFEBE80BA", "0xFEBE80C2", "0xFEBE80BD",
     "0xFEBE80BE", "0xFEBE80BF", "0xFEBE80C1", "0xFEBE80C3", "0xFEBE80C4",
     "0xFEBE80C5", "0xFEBE80C6", "0xFEBE80C7", "0xFEBE80C8", "0xFEBE80C9",
-    "0xFEBE80CA", "9", "0", "0", "none",
+    "0xFEBE80CA", "9", "0", "0", "0",
 ]
 check("all 58 CSV source fields match the recovered packers",
       [row["source"] for row in rows] == expected_sources)
@@ -157,6 +181,21 @@ expected_wire = [
 ]
 check("all 58 CSV wire fields match the recovered packing layout",
       [row["wire_field"] for row in rows] == expected_wire)
+
+
+print("\n== post-packer checksum/default-only closure ==")
+check("CanIf post-packer flags select only COM PDU 0/1",
+      list(CF[0x21FE0:0x21FE6]) == [1, 1, 0, 0, 0, 0])
+check("controller-0 CanIf pre-enqueue hook is 0x800D2", u32(0x21900) == 0x800D2)
+check("controller-0 post-packer callback is 0x7FEAC", u32(0x2194C) == 0x7FEAC)
+check("0x7FEAC checksum callback body is pinned",
+      sha256_region(0x7FEAC, 0x46) == "0e077cd8d1f3c22b7fe2c1478e98a44e2d05f0c7febfa45e9385a5181607c8f1")
+check("checksum callback stores accumulated byte at payload[length-1]",
+      CF[0x7FEEA:0x7FEF2] == bytes.fromhex("12f0d1f1800b7f00"))
+check("all six COM descriptors disable COM-level 0x10/0x20 transforms",
+      [row[5] for row in com_pdu] == [3] * 6)
+check("CAN 0x4C8 initial B4..B7 are zero",
+      CF[0x221DC + 31 + 4:0x221DC + 31 + 8] == bytes(4))
 
 print("\n== raw packer bodies and call-chain evidence ==")
 packer_hashes = {
@@ -176,6 +215,13 @@ check("CanIf transmit invokes software enqueue 0x7EC5A", CF[0x7EEA4:0x7EEA8] == 
 check("queue drain invokes RSCFD dispatch 0x84022", CF[0x7F12E:0x7F132] == bytes.fromhex("80fff44e"))
 check("RSCFD dispatch invokes classic writer 0x842BA", CF[0x8407C:0x84080] == bytes.fromhex("80ff3203"))
 check("CAN1 Tx ISR body invokes confirmation dispatch 0x84710", CF[0x84754:0x84758] == bytes.fromhex("bfffbcff"))
+
+print("\n== generator determinism ==")
+with tempfile.NamedTemporaryFile("w+", delete=False, suffix=".csv") as tmp:
+    tmp_path = Path(tmp.name)
+subprocess.check_call([sys.executable, str(GEN), "--output", str(tmp_path)], cwd=REPO)
+check("generator regenerates Tx map byte-for-byte", tmp_path.read_bytes() == CSV_PATH.read_bytes())
+tmp_path.unlink(missing_ok=True)
 
 print(f"\nSummary: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

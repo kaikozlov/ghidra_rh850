@@ -169,6 +169,8 @@ def load_evidence(path: Path) -> dict[int, dict]:
                 "first_consumer": row["first_consumer"],
                 "window_lo": row["window_lo"],
                 "window_hi": row["window_hi"],
+                "classification": row.get("classification", "extracted_bitfield"),
+                "classification_basis": row.get("classification_basis", "legacy positive extraction row"),
             }
     return out
 
@@ -184,7 +186,8 @@ def build_rows(evidence: dict[int, dict]) -> list[dict[str, str]]:
 
     pdu_unpacker: dict[int, str] = {}
     for sid, info in evidence.items():
-        pdu_unpacker.setdefault(s2p[sid], info["unpacker"])
+        if info["classification"].startswith("extracted_"):
+            pdu_unpacker.setdefault(s2p[sid], info["unpacker"])
 
     rows: list[dict[str, str]] = []
     for index in range(NORMAL_COUNT):
@@ -198,8 +201,8 @@ def build_rows(evidence: dict[int, dict]) -> list[dict[str, str]]:
         unpacker = pdu_unpacker.get(pdu_id, "none")
         if unpacker == "none":
             pdu_consumer = (
-                "configured-unresolved; bound=no generated COM unpacker watching "
-                f"update counter FEBE532C[{pdu_id}]; frame still copied by RxIndication"
+                "classified-no-com-unpacker; frame still copied by RxIndication and "
+                f"tracked by update counter FEBE532C[{pdu_id}]"
             )
         else:
             pdu_consumer = unpacker
@@ -207,6 +210,8 @@ def build_rows(evidence: dict[int, dict]) -> list[dict[str, str]]:
         sigs = [sid for sid in range(RX_SIGNAL_FIRST, SIGNAL_COUNT) if s2p[sid] == pdu_id]
         for sid in sigs:
             info = evidence.get(sid)
+            if info is None:
+                raise ValueError(f"evidence artifact does not classify configured signal {sid}")
             base = {
                 "row_kind": "signal",
                 "rx_pdu_id": str(pdu_id),
@@ -234,26 +239,22 @@ def build_rows(evidence: dict[int, dict]) -> list[dict[str, str]]:
                     f"shares PDU update counter 0x{UPDATE_COUNTER_RAM + pdu_id:X}"
                 ),
             }
-            if info is None:
+            if info["classification"].startswith("configured_"):
                 base.update({
-                    "wire_field": "configured-unresolved",
-                    "endianness": "configured-unresolved",
-                    "bit_length": "configured-unresolved",
-                    "start_arg": "configured-unresolved",
-                    "signed": "configured-unresolved",
-                    "dest_kind": "configured-unresolved",
-                    "dest": "configured-unresolved",
-                    "dest_width": "configured-unresolved",
-                    "first_consumer": (
-                        "configured-unresolved; bound=absent from "
-                        "application_rx_signal_evidence.csv "
-                        "(no parseable 0x7C03E call / opaque table row)"
-                    ),
-                    "evidence_status": "configured-unresolved",
+                    "wire_field": "n/a (no stock COM extraction)",
+                    "endianness": "n/a",
+                    "bit_length": "n/a",
+                    "start_arg": "n/a",
+                    "signed": "n/a",
+                    "dest_kind": "none",
+                    "dest": "none",
+                    "dest_width": "0",
+                    "first_consumer": info["first_consumer"],
+                    "evidence_status": "classified-no-com-extraction",
                     "call_site": "",
                     "notes": (
-                        "Signal present in 0x224E4 map and property table; "
-                        "no committed extraction evidence row"
+                        f"classification={info['classification']}; "
+                        f"basis={info['classification_basis']}"
                     ),
                 })
             else:
@@ -320,10 +321,10 @@ def main() -> None:
     n_sig = sum(1 for r in rows if r["row_kind"] == "signal")
     n_pdu = len({int(r["rx_pdu_id"]) for r in rows})
     n_rec = sum(1 for r in rows if r["evidence_status"] == "recovered")
-    n_unres = sum(1 for r in rows if r["evidence_status"] == "configured-unresolved")
+    n_classified = sum(1 for r in rows if r["evidence_status"] == "classified-no-com-extraction")
     print(
         f"Wrote {args.output} rows={len(rows)} pdus={n_pdu} signals={n_sig} "
-        f"recovered={n_rec} configured-unresolved={n_unres} "
+        f"extracted={n_rec} classified-no-com-extraction={n_classified} "
         f"evidence={len(evidence)}"
     )
 

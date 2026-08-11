@@ -362,6 +362,16 @@ def main() -> int:
         "SG_ CHECKSUM : 63|8@0+" in toyota_secoc_dbc,
     )
     check(
+        "pinned Toyota checksum source matches recovered additive algorithm",
+        "def toyota_checksum(address: int, sig, d: bytearray) -> int:" in opendbc_toyotacan
+        and "s = len(d)" in opendbc_toyotacan
+        and "while addr:" in opendbc_toyotacan
+        and "s += addr & 0xFF" in opendbc_toyotacan
+        and "for i in range(len(d) - 1):" in opendbc_toyotacan
+        and "s += d[i]" in opendbc_toyotacan
+        and "return s & 0xFF" in opendbc_toyotacan,
+    )
+    check(
         "pinned Toyota SecOC DBC names CAN 0x2E4 STEERING_LKA",
         "BO_ 740 STEERING_LKA: 8" in toyota_secoc_dbc,
     )

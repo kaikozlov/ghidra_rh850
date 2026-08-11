@@ -194,10 +194,19 @@ print("\n== evidence artifact ==")
 check("evidence CSV exists", EVIDENCE_PATH.is_file())
 with EVIDENCE_PATH.open(newline="", encoding="utf-8") as stream:
     evidence = list(csv.DictReader(stream))
+check("evidence has exactly 242 classified signal IDs", len(evidence) == 242)
 check("evidence has unique signal IDs", len(evidence) == len({int(r["signal_id"]) for r in evidence}))
-check("evidence signal IDs are within 58..299",
-      all(58 <= int(r["signal_id"]) <= 299 for r in evidence))
+check("evidence signal IDs are exactly 58..299",
+      [int(r["signal_id"]) for r in evidence] == list(range(58, 300)))
 by_sid = {int(r["signal_id"]): r for r in evidence}
+class_counts = Counter(r["classification"] for r in evidence)
+check("evidence classification partition is exact", class_counts == {
+    "extracted_bitfield": 131,
+    "extracted_group_bytes": 14,
+    "configured_not_extracted_by_pdu_handler": 93,
+    "configured_no_com_unpacker_secoc_pdu": 3,
+    "configured_no_com_unpacker": 1,
+}, repr(class_counts))
 
 print("\n== generated CSV agreement ==")
 with CSV_PATH.open(newline="", encoding="utf-8") as stream:
@@ -222,15 +231,21 @@ check("CSV keeps CAN 0x344 absent",
       all(int(r["can_id"], 0) != 0x344 for r in rows))
 
 recovered = [r for r in rows if r["evidence_status"] == "recovered"]
-unresolved = [r for r in rows if r["evidence_status"] == "configured-unresolved"]
-check("recovered + unresolved partition all 242 signals",
-      len(recovered) + len(unresolved) == 242, f"{len(recovered)}+{len(unresolved)}")
-check("recovered CSV rows equal evidence cardinality",
-      len(recovered) == len(evidence), f"{len(recovered)} vs {len(evidence)}")
-check("every recovered CSV signal_id has an evidence row",
-      all(int(r["signal_id"]) in by_sid for r in recovered))
-check("every unresolved row keeps explicit bound language",
-      all("configured-unresolved" in r["first_consumer"] for r in unresolved))
+classified = [r for r in rows if r["evidence_status"] == "classified-no-com-extraction"]
+check("recovered + classified partition all 242 signals",
+      len(recovered) + len(classified) == 242, f"{len(recovered)}+{len(classified)}")
+check("145 configured signals have positive extraction evidence", len(recovered) == 145, str(len(recovered)))
+check("97 configured signals have deterministic no-COM-extraction classifications",
+      len(classified) == 97, str(len(classified)))
+check("no configured-unresolved Rx rows remain",
+      not any(r["evidence_status"] == "configured-unresolved" for r in rows))
+check("every CSV signal_id has an evidence/classification row",
+      all(int(r["signal_id"]) in by_sid for r in rows))
+check("three no-unpacker signals belong to SecOC sync CAN 0x00F",
+      [int(r["signal_id"]) for r in evidence if r["classification"] == "configured_no_com_unpacker_secoc_pdu"] == [84, 85, 86])
+check("sole ordinary no-unpacker signal is 217 / CAN 0x2E8",
+      [int(r["signal_id"]) for r in evidence if r["classification"] == "configured_no_com_unpacker"] == [217]
+      and next(r for r in rows if r["signal_id"] == "217")["can_id"] == "0x2E8")
 
 print("\n== per-unpacker body hashes and per-signal immediates ==")
 unpacker_meta: dict[int, tuple[int, str]] = {}
@@ -238,6 +253,17 @@ body_hash_ok = True
 immediate_ok = True
 dest_ok = True
 for ev in evidence:
+    kind = ev["extract_kind"]
+    sid = int(ev["signal_id"])
+    if kind == "none":
+        # Negative rows are anchored by signal-to-PDU table bytes rather than a
+        # nonexistent unpacker body.
+        check_pdu = u16(0x224E4 + 2 * sid)
+        if check_pdu != s2p[sid]:
+            immediate_ok = False
+            print(f"  NEGATIVE FAIL signal {sid} signal-to-PDU anchor")
+        continue
+
     unp = int(ev["unpacker"], 0)
     size = int(ev["body_size"])
     digest = ev["body_sha256"]
@@ -247,8 +273,6 @@ for ev in evidence:
         print(f"  HASH FAIL unpacker {unp:#x} size={size}")
     unpacker_meta[unp] = (size, digest)
 
-    kind = ev["extract_kind"]
-    sid = int(ev["signal_id"])
     if kind == "bitfield":
         window_lo = int(ev["window_lo"], 0)
         window_hi = int(ev["window_hi"], 0)
@@ -315,8 +339,14 @@ check("all distinct unpacker bodies match evidence sha256", body_hash_ok,
 check("all recovered bitfield/opaque immediates match CodeFlash", immediate_ok)
 check("all recovered RAM destinations match GP-relative encodings", dest_ok)
 check(
-    "CSV recovered set equals evidence set",
-    {int(r["signal_id"]) for r in recovered} == set(by_sid),
+    "CSV recovered set equals positive extraction evidence set",
+    {int(r["signal_id"]) for r in recovered}
+    == {int(e["signal_id"]) for e in evidence if e["classification"].startswith("extracted_")},
+)
+check(
+    "CSV classified set equals negative evidence set",
+    {int(r["signal_id"]) for r in classified}
+    == {int(e["signal_id"]) for e in evidence if e["classification"].startswith("configured_")},
 )
 
 # Landmark bodies still locked.
@@ -332,7 +362,8 @@ check(
 )
 check(
     "every evidence unpacker body hash is unique to its (addr,size)",
-    len({(int(e["unpacker"], 0), int(e["body_size"]), e["body_sha256"]) for e in evidence})
+    len({(int(e["unpacker"], 0), int(e["body_size"]), e["body_sha256"])
+         for e in evidence if e["extract_kind"] != "none"})
     >= len(unpacker_meta),
 )
 
@@ -349,5 +380,5 @@ check(
 )
 tmp_path.unlink(missing_ok=True)
 
-print(f"\nSummary: {passed} passed, {failed} failed; recovered={len(recovered)} unresolved={len(unresolved)}")
+print(f"\nSummary: {passed} passed, {failed} failed; extracted={len(recovered)} classified-no-extraction={len(classified)}")
 sys.exit(1 if failed else 0)

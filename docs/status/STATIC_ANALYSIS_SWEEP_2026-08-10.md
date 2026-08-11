@@ -64,7 +64,7 @@ was searched separately. No search traversed unrelated personal storage.
 - [x] Stage 2 — recover the complete Techstream MACKey vehicle-side protocol
 - [x] Stage 3 — close remaining high-value Techstream static leads
 - [x] Stage 4 — complete the Renesas RV40F host-protocol static census
-- [ ] Stage 5 — close the application COM receive/transmit long tail
+- [x] Stage 5 — close the application COM receive/transmit long tail
 - [ ] Stage 6 — tighten the motor-control and safety static boundary
 - [ ] Stage 7 — close remaining useful security-side static questions
 - [ ] Stage 8 — bounded external-reference and missing-artifact acquisition sweep
@@ -658,4 +658,142 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Commit
 
-- Pending Stage 4 commit; immutable SHA will be recorded after final verification.
+- `64e2d46734154bfbadab91960480bf48eff853c8 analysis: complete Renesas RV40F host protocol census`
+
+
+## Stage 5 — close the application COM receive/transmit long tail
+
+### Starting state
+
+- HEAD: `64e2d46734154bfbadab91960480bf48eff853c8`
+- Relevant prior finding IDs: `COM-001`–`COM-003`
+- Relevant artifacts: `data/application_rx_map.csv`,
+  `data/application_rx_signal_evidence.csv`, `data/application_tx_map.csv`, the
+  read-only Ghidra Rx exporter, six generated COM Tx packers, and the complete
+  CanIf/PduR tables
+- Static boundary: classify configured COM signal IDs and their stock firmware
+  extraction/production paths. Absence of a configured COM extraction is not
+  promoted into a claim that every corresponding wire bit is globally unused.
+
+### Questions
+
+1. Are the 97 Rx `configured-unresolved` rows missed ordinary bitfields,
+   opaque/group paths, special/security-only configuration, indirect helpers,
+   or configured-but-not-extracted IDs?
+2. What produces Tx signal 9 (`0x260 B7`), signal 37 (`0x262 B7`), and signal
+   57 (`0x4C8 B4..B7`) after the generated packers omit them?
+3. Does the special acceptance rule for CAN `0x7F7` join the active class-5 Tx
+   route on `0x7F8`, and if so how far can that channel be named statically?
+
+### Work performed
+
+- Enumerated every code reader of the 300-entry signal-to-PDU table at
+  `0x224E4` and every direct xref to `application_com_receive_signal @ 0x7C03E`
+  and `application_com_receive_signal_group_bytes @ 0x7D63E`.
+- Extended the read-only Ghidra Rx exporter to emit one evidence/classification
+  row for every configured Rx signal ID `58..299`, including negative rows
+  anchored to the raw signal map and containing-PDU class.
+- Regenerated both Rx evidence and final Rx map; updated the generator to reject
+  any configured signal lacking an evidence/classification row.
+- Traced the complete Tx path below COM packing through PduR, CanIf enqueue,
+  controller pre-enqueue hooks, software queue, RSCFD writer, and confirmation.
+- Recovered the controller-0 post-packer callback at `0x7FEAC`, its route flags,
+  body hash, and final-byte checksum algorithm.
+- Performed a complete transform/writer boundary for PDU 5 / CAN `0x4C8` and
+  recovered signal 57 as initial/default-only zero in this calibration.
+- Added a deterministic Tx-map generator that validates the six packer bodies,
+  COM descriptor flags, CanIf route flags/pointers, checksum callback body, and
+  PDU-5 initial bytes before emitting the 58-row map.
+- Traced class-5 receive configuration (`0x7F7`) and special protocol receive
+  callbacks into the same state/callback family whose Tx wrapper emits PduR
+  class `0xF800`, resolving the sole active class-5 Tx record to `0x7F8`.
+
+### Findings
+
+- All **242/242 configured Rx signal IDs are now classified**. Positive
+  extraction evidence remains 145 signals: 131 direct bitfields plus 14
+  group/opaque byte signals. The former 97 residuals are deterministic
+  no-COM-extraction rows: **93** are omitted by otherwise-active generated PDU
+  handlers; **84/85/86** belong to no-COM-unpacker SecOC sync CAN `0x00F`; and
+  **217** is the sole ordinary no-unpacker signal on CAN `0x2E8` — source:
+  signal-map reader census + complete receive API callers + generated tables,
+  grade: **verified positive / bounded-negative classification** (`COM-002`).
+- The signal-map table has only four code readers. On Rx, only
+  `application_com_receive_signal` and the group-byte helper resolve configured
+  signal IDs. `receive_signal` has 133 direct call refs: 131 ordinary generated
+  bitfield calls plus two table-driven calls inside the already-modeled crypto
+  test collector. The group-byte helper has exactly 12 callers, all inside the
+  two known opaque/test collectors. No third generic stock COM extraction path
+  remains — grade: **verified structural negative**.
+- Tx signals **9** and **37** are final-byte checksums, not dead configured
+  fields. COM PDU route flags are `1,1,0,0,0,0`; PDU 0/1 pass through
+  `0x800D2 -> 0x7FEAC` after packing and before queueing. `0x7FEAC` sums DLC,
+  CAN-ID bytes, and payload bytes except the final byte, then writes the low
+  byte of the sum to `payload[DLC-1]`. Pinned opendbc independently implements
+  the same Toyota checksum — grade: **verified firmware-static; externally
+  corroborated** (`COM-003`).
+- Tx signal **57** is **default-only zero in this calibration**. Packer
+  `0x4BC54` writes only signals 54..56; all six COM descriptors use flags
+  `0x03` (no `0x10/0x20` COM transform); PDU-5's CanIf post-packer flag is zero;
+  lower Tx layers only copy; and initial `0x4C8 B4..B7` are zero — grade:
+  **verified bounded negative** (`COM-003`).
+- The special class is a paired bidirectional channel: acceptance CAN `0x7F7`
+  selects class-5 descriptor `0x21AC4` and upper callback `0x82042`, which
+  reaches the special receive protocol path; the same protocol state family
+  transmits through `0x8206C`, which explicitly creates class `0xF800`, and the
+  sole active class-5 Tx record is CAN `0x7F8`. The service/protocol name is not
+  retained and remains intentionally unnamed — grade: **recovered/verified
+  routing join** (`COM-003`).
+
+### Negative/bounded results
+
+- The 97 negative Rx rows do not identify wire bit positions, scaling, or OEM
+  semantics. They establish absence of a stock configured COM signal extraction
+  for those IDs only.
+- Signal 57's default-zero result is calibration-specific; another image could
+  enable a producer or transform for the same generated field.
+- The `0x7F7/0x7F8` channel is paired by generated routing/state flow, but no
+  retained semantic name justifies labeling its upper protocol.
+
+### Documentation/tests changed
+
+- Extended `ExportApplicationRxSignalEvidence.java` and regenerated
+  `data/application_rx_signal_evidence.csv` / `data/application_rx_map.csv`.
+- Added `tools/generate_application_tx_map.py` and regenerated
+  `data/application_tx_map.csv`; moved the Tx map from curated to generated
+  artifact ownership.
+- Expanded `verify_application_receive.py` to enforce the exact
+  `131+14+93+3+1` classification partition and zero unresolved extraction rows.
+- Expanded `verify_application_transmit.py` with raw route/pointer/body checks,
+  checksum/default-only closure, class-5 `0x7F7/0x7F8` routing join, and
+  byte-for-byte Tx generator determinism.
+- Updated canonical Rx/Tx reports, FINDINGS, OPEN_QUESTIONS, ROADMAP, generated
+  artifact ownership, Makefile generation targets, verification ownership, and
+  this journal.
+- No `CORRECTIONS.md` entry is required: the old Rx/Tx rows were explicitly
+  `configured-unresolved`/bounded, not promoted false findings.
+
+### Verification
+
+- `uv run --locked python tests/verify_application_receive.py` -> pass (55/55)
+- `uv run --locked python tests/verify_application_transmit.py` -> pass (58/58)
+- `uv run --locked python tests/verify_control_partition.py` -> pass (98/98) after
+  replacing its stale pre-Stage-5 unresolved-signal assertions with the proved
+  checksum/default-only classifications
+- `make verify-changed` -> pass for every affected application/CAN/docs/lifecycle suite
+- `make verify` -> pass (all core suites green; final doc-link suite 451/451)
+- `EXTERNAL_REPOS_DIR=/Users/kai/dev/inspect/repos uv run --locked python
+  tests/verify_external_corroboration.py` -> pass (280/280), including the pinned
+  opendbc Toyota checksum arithmetic
+
+### Remaining blockers
+
+- None for the Stage-5 COM extraction/production census.
+- Downstream behavioral semantics of anonymous recovered RAM-backed signals are
+  a separate semantic-coverage problem, not an unresolved COM mapping problem.
+- The special `0x7F7/0x7F8` channel's OEM protocol/service name remains unknown
+  and is not needed to close its routing relationship.
+
+### Commit
+
+- Pending Stage 5 commit; immutable SHA will be recorded after final verification.
