@@ -111,6 +111,30 @@ def main() -> int:
             if fixture.is_file():
                 check(f"{label} equals committed fixture", path.read_bytes() == fixture.read_bytes())
 
+    print("\n== pinned Stage-8 optskug evidence ==")
+    optskug_readme = (roots["optskug_docs"] / "README.md").read_text(encoding="utf-8")
+    check(
+        "optskug records MCU ID + VIN as required official rekey inputs",
+        "requires uploading both the MCU ID and VIN" in optskug_readme
+        and "refuses to provide a key update when only the VIN is supplied" in optskug_readme,
+    )
+    check(
+        "optskug keeps MCU-ID cryptographic role bounded",
+        "does not yet establish the exact calculation" in optskug_readme,
+    )
+    check(
+        "optskug records physical Toyota-B CAN0/CAN1 swap anomaly",
+        "after physically swapping CAN 0 and CAN 1 at the harness, they were able to dump the firmware" in optskug_readme,
+    )
+    check(
+        "optskug records the first 2023-US-Corolla public route",
+        "a74eba85c97eaf67/00000004--555953f500/0" in optskug_readme,
+    )
+    check(
+        "optskug records failed 2024 RAV4 Prime persistent-patch field test",
+        "Techstream reported EPMS code `U023A87`" in optskug_readme,
+    )
+
     print("\n== original combined image reconstruction ==")
     combined = roots["rh850_p1me_original"] / "RH850_P1M-E_Firmware.bin"
     split = (

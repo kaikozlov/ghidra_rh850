@@ -67,7 +67,7 @@ was searched separately. No search traversed unrelated personal storage.
 - [x] Stage 5 — close the application COM receive/transmit long tail
 - [x] Stage 6 — tighten the motor-control and safety static boundary
 - [x] Stage 7 — close remaining useful security-side static questions
-- [ ] Stage 8 — bounded external-reference and missing-artifact acquisition sweep
+- [x] Stage 8 — bounded external-reference and missing-artifact acquisition sweep
 - [ ] Stage 9 — status reconciliation and final Ghidra project integration
 
 ## Stage 0 — bootstrap, baseline verification, and living sweep journal
@@ -1117,4 +1117,145 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Commit
 
-- Pending Stage 7 commit; immutable SHA will be recorded after final verification.
+- `9afca67c58d0cd91b9dffabf5e6e3988f0644439 analysis: close remaining SecOC software-path static questions`
+
+## Stage 8 — bounded external-reference and missing-artifact acquisition sweep
+
+### Starting state
+
+- HEAD: `9afca67c58d0cd91b9dffabf5e6e3988f0644439`
+- Relevant prior findings/questions: `TMS-011`, `TMS-014`, `SECOC-030`,
+  `SECOC-038`; missing `8965B4514000` CodeFlash/partner outputs,
+  `8965F1208000` firmware, matching Sienna EPS `.cuw`, and a physical
+  protected-traffic producer remained the named acquisition blockers.
+- Existing external evidence pins: RH850/P1M-E original, I-CAN-hack SecOC,
+  Calvin `span`, Bk2ol main, comma `opendbc`, and Vance public-safe Note.
+- Scope boundary: refresh only the named high-value sources/artifacts; do not
+  turn a negative search into an open-ended literature review or begin full
+  second-firmware reverse engineering without a newly acquired image.
+
+### Questions
+
+1. Have any named upstream research sources acquired a material rekey, MCU-ID,
+   SecOC, DataFlash, firmware-dump, Corolla/Camry/Sienna, or flash-patcher delta
+   since the repository's pinned revisions?
+2. Has `8965B4514000` CodeFlash or its completed partner DataFlash/CAN corpus
+   become publicly obtainable?
+3. Has `8965F1208000` Corolla firmware or a matching Sienna EPS `.cuw` become
+   publicly obtainable?
+4. Has firmware or other hard evidence surfaced for a same-vehicle protected
+   traffic producer or the physical source of CAN `0x344`?
+5. Does any newly surfaced external evidence materially narrow the Techstream
+   MACKey `SafekeyNumber` / MCU-ID question?
+
+### Work performed
+
+- Fetched all six already-pinned public repositories and compared each tracked
+  research branch against its immutable evidence revision.
+- Filtered comma `opendbc`'s 51-commit delta by Toyota/SecOC paths and content,
+  rather than advancing its pin merely because `master` moved.
+- Added a dedicated current checkout of `optskug/docs`, inspected its July/August
+  2026 Toyota-security delta, and pinned exact commit `2c718412...` plus README
+  size/hash after finding a material rekey claim.
+- Checked high-signal non-default branches: Bk2ol `research`, I-CAN-hack
+  `tundra`, and Calvin `tskm`/related branches. Calvin's current `tskm` tree was
+  additionally inspected for generalized CodeFlash/DataFlash/Global-RAM/
+  Local-RAM dump payloads and range tooling.
+- Searched GitHub by exact part number, path, and firmware-shaped extensions;
+  searched repositories and issues/PRs; inspected releases and fork trees for
+  the Vance/Bk2ol/I-CAN-hack sources; and separately inspected Vance's public
+  English repository tree/history for large dump/capture/firmware artifacts.
+- Repeated the acquisition check for `4514000` completed partner outputs,
+  `8965F1208000`, matching Sienna EPS `.cuw`, same-vehicle producer firmware,
+  and a physical `0x344` attribution artifact.
+- Wrote the durable search/evidence matrix in
+  `docs/status/EXTERNAL_REFERENCE_REFRESH_2026-08-10.md` instead of treating
+  transient shell/search output as a finding.
+
+### Findings
+
+- Five of the six existing tracked research sources are still exactly at their
+  pinned upstream revisions: RH850/P1M-E `main`, I-CAN-hack `main`, Calvin
+  `span`, Bk2ol `main`, and Vance Note `main` — grade: **verified upstream
+  revision comparison**.
+- `opendbc` advanced 51 commits, but the pinned SecOC implementation
+  (`opendbc/car/secoc.py`), Toyota SecOC DBC, and `toyotacan.py` are unchanged;
+  the relevant controller changes are flag/FW-query refactors. The existing
+  SecOC evidence pin therefore remains the correct revision — grade:
+  **verified source diff**.
+- Newly pinned `optskug/docs @ 2c718412...` reports that Toyota's official
+  key-configuration flow requires **both MCU ID and VIN** and rejects a
+  VIN-only key-update request. This independently establishes MCU identity as a
+  distinct required server-side rekey input. It does **not** join that value to
+  Techstream's raw 16-byte DID `0x1010` `SafekeyNumber`; `SafekeyNumber == MCU
+  ID` remains bounded pending a labeled official transcript or target
+  implementation (`TMS-016`) — grade: **external-source corroboration with
+  explicit identity boundary**.
+- Calvin's non-default `tskm @ 28ff8452...` branch contains generalized
+  authenticated dump tooling/payloads for CodeFlash, extended CodeFlash,
+  DataFlash, Global RAM, and Local RAM. This can improve future bench
+  acquisition but contains no missing target dump itself — grade:
+  **external-source tooling lead**.
+- **No Stage-8 high-value binary quietly became available in the bounded
+  public/indexed corpus.** No `8965B4514000` CodeFlash, completed partner
+  DataFlash/CAN corpus, `8965F1208000` firmware, matching Sienna EPS `.cuw`, or
+  attributable protected-traffic producer firmware was recovered — grade:
+  **bounded acquisition negative**.
+- No public artifact converts inherited DBC/logical-node labeling for CAN
+  `0x344` into physical-source proof. Isolation/capture or producer firmware is
+  still required — grade: **bounded acquisition negative**.
+
+### Negative/bounded results
+
+- Exact GitHub/public-source search failure is not a global claim that an
+  artifact cannot exist or cannot be privately held.
+- Vance's separate English repository contains useful reports/scripts/context
+  logs and a June-1 capture archive, but not the completed partner dump/capture
+  corpus or `4514000` CodeFlash required for independent runtime analysis.
+- Bk2ol `research` is source/build archaeology already incorporated in earlier
+  candidate/DataFlash work; I-CAN-hack `tundra` is a different HSM target.
+- The `4514000` handoff exception was not triggered, so no speculative second
+  Ghidra program/differential RE was started.
+- The external `MCU ID + VIN` requirement does not license renaming DID
+  `0x1010` or `SafekeyNumber` as MCU ID.
+
+### Documentation/tests changed
+
+- Added `optskug_docs` and its README as immutable external evidence in
+  `external-references.lock.json`.
+- Extended `verify_external_corroboration.py` with exact assertions for the
+  MCU-ID/VIN rekey boundary and corroborating August entries.
+- Added `docs/status/EXTERNAL_REFERENCE_REFRESH_2026-08-10.md` as the canonical
+  Stage-8 acquisition/upstream-delta record.
+- Added `TMS-016` and refined `mackey-registration.md` / OPEN_QUESTIONS around
+  the still-unproved `SafekeyNumber == MCU ID` identity join.
+- Updated the `4514000` and `F1208000` variant records to state that current
+  public acquisition was rechecked and remains blocked.
+- Recorded Stage 8 as completed bounded work in the research roadmap.
+
+### Verification
+
+- `python3 -m json.tool external-references.lock.json` -> pass
+- `EXTERNAL_REPOS_DIR=/Users/kai/dev/inspect/repos uv run --locked python
+  tests/verify_external_corroboration.py --repos-dir /Users/kai/dev/inspect/repos`
+  -> pass (297/297), including the new optskug revision/hash and five Stage-8
+  external-evidence assertions
+- `make verify-changed` -> pass (7 matched suites, including Techstream MACKey,
+  community tooling, variant matrix, Stage-7 ICU boundary, and doc links)
+- `make verify` -> pass (all core suites; final doc-link suite 470/470)
+- `git diff --check` -> pass
+
+### Remaining blockers
+
+- `8965B4514000` CodeFlash and completed partner DataFlash/CAN outputs.
+- `8965F1208000` CodeFlash.
+- Matching Sienna EPS `.cuw` / calibration file.
+- Firmware or physical isolation evidence for a same-vehicle protected-traffic
+  producer / CAN `0x344` source.
+- Labeled official rekey transcript or target implementation joining the
+  externally named MCU ID to Techstream DID `0x1010`, if they are in fact the
+  same value.
+
+### Commit
+
+- Pending Stage 8 commit; immutable SHA will be recorded after final verification.

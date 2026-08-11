@@ -30,6 +30,11 @@
       "url": "https://github.com/Vance425/ToyotaSienna2024OpenpilotAnalysis-_Note.git",
       "directory": "ToyotaSienna2024OpenpilotAnalysis-_Note",
       "commit": "3333453f10c09a27df265156458ce976cc9ce25a"
+    },
+    "optskug_docs": {
+      "url": "https://github.com/optskug/docs.git",
+      "directory": "optskug-docs",
+      "commit": "2c7184122d3f1644dfc9f32e98daaa45df653098"
     }
   },
   "artifacts": [
@@ -253,6 +258,12 @@
       "path": "scripts/secoc/TSS3_Capture_20260601.zip",
       "size": 9117,
       "sha256": "16a5c483333f6304beb028f7a8a26132996905b1baa7879b941f2c9d8b609762"
+    },
+    {
+      "repository": "optskug_docs",
+      "path": "README.md",
+      "size": 195395,
+      "sha256": "ffd48e30cf430083cdeca522a1455b1a0ff5d77c3af3a5176d15830db5c7886a"
     }
   ],
   "community_artifacts": [

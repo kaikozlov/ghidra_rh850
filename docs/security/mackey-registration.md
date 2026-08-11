@@ -145,9 +145,21 @@ The pinned Techstream tree contains no `MCUID`, `MCU ID`, or transformation
 edge that names those bytes as a silicon identifier. Techstream validates only
 service/DID/length before forwarding and later uses the value as the response
 association key. Therefore equivalence to a physical MCU ID is **bounded**, not
-established. The precise missing edge is a target-ECU implementation or a
-captured response that assigns semantics to DID `0x1010`; no unpinned community
-claim is used as proof here.
+established.
+
+Stage 8 adds one independently pinned external observation without collapsing
+that boundary. `optskug/docs @ 2c7184122d3f1644dfc9f32e98daaa45df653098`
+records a July 2026 official-key-configuration experiment in which Toyota's
+server-side flow reportedly requires **both MCU ID and VIN** and rejects a
+VIN-only key-update request. This establishes that an MCU identity is a distinct
+required input in the observed official rekey workflow, but it does not identify
+which vehicle diagnostic field supplies that value. No retained transcript
+labels the response to `22 10 10` as `MCU ID`.
+
+The precise missing edge is therefore narrower: join a labeled MCU-ID value from
+an official rekey transcript or target-ECU implementation to the raw DID
+`0x1010` response. Until that join exists, `SafekeyNumber == MCU ID` remains a
+plausible hypothesis rather than a recovered equivalence (TMS-016).
 
 ## `CMAC_01_*` classes and S324 procedure codes
 
@@ -204,7 +216,9 @@ Techstream utility targets the analyzed EPS or provisions its slot 4.
 
 ## Remaining dynamic questions
 
-- Which ECU families assign MCU-ID semantics to read DID `0x1010`?
+- Is the raw DID `0x1010` `SafekeyNumber` the same MCU ID that the pinned
+  external rekey report says Toyota requires alongside VIN? A labeled official
+  transcript or target implementation is still required.
 - Does a real Sienna provisioning session use application WDBI `0x1010`,
   Routine `0x3002`, or neither?
 - What timing/retry behavior appears on a live master/slave network?

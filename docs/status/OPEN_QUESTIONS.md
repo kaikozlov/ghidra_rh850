@@ -57,11 +57,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   selector-based driver and the SHE read-prohibition.
 - **`8965B4514000` runtime object-15 key path.** Vance's external field report
   places a CMAC-validating candidate in the structural object-15 second field
-  at `0xFF206E14`, but no `4514000` CodeFlash or runtime trace was available.
-  Obtain that image or instrument initialization to distinguish direct software
-  CMAC, object-15-to-ICU-S provisioning followed by selector/command-7 use,
-  independent hardware-slot provisioning, or mixed use. See
-  [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md).
+  at `0xFF206E14`, but no `4514000` CodeFlash or runtime trace is public in the
+  bounded Stage-8 acquisition corpus. Exact identifier/path/extension searches,
+  source/fork/release scans, and the separate Vance English tree still yielded
+  no target image. Obtain that image or instrument initialization to distinguish
+  direct software CMAC, object-15-to-ICU-S provisioning followed by
+  selector/command-7 use, independent hardware-slot provisioning, or mixed use.
+  See [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md)
+  and [EXTERNAL_REFERENCE_REFRESH_2026-08-10.md](EXTERNAL_REFERENCE_REFRESH_2026-08-10.md).
 - **Same-vehicle `0x344` producer and key storage.** The same `4514000` partner
   key reportedly validates `PRE_COLLISION_2` (`0x344`) `112/113`, while
   `4512000` EPS has no `0x344` receive profile. Identify the physical producer
@@ -123,16 +126,20 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 ## Variants
 
 - **Sienna `8965B4514000`.** Acquire CodeFlash and completed partner
-  dump/capture outputs. The object-15 field and CMAC counts are pinned external
+  dump/capture outputs. Stage 8 re-ran exact public/local acquisition searches
+  and found neither, so this remains missing-artifact blocked rather than
+  quietly unblocked. The object-15 field and CMAC counts are pinned external
   observations, but runtime crypto architecture, `0x344` EPS direction/owner,
   mismatch clustering, and key uniqueness remain open. See
   [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md).
 - **Corolla `8965F1208000`.** Firmware-static confirmation remains blocked:
-  MCU identity, SA implementation/secret location, bootloader payload gate,
-  bootloader secrets, and SecOC implementation must be checked against the
-  actual CodeFlash. Direct field probing has already established the software
-  IDs, physical diagnostic endpoint, responding SIDs, level-`0x03` seed
-  behavior, and observed SecOC traffic; do not describe those as unknown. See
+  Stage 8 found no public CodeFlash artifact under the exact identifier or
+  firmware-shaped path variants. MCU identity, SA implementation/secret
+  location, bootloader payload gate, bootloader secrets, and SecOC
+  implementation must therefore still be checked against the actual CodeFlash.
+  Direct field probing has already established the software IDs, physical
+  diagnostic endpoint, responding SIDs, level-`0x03` seed behavior, and
+  observed SecOC traffic; do not describe those as unknown. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 - **Separate 2023 US Corolla public-route specimen.** The public route now
   supplies enough genuine `0x00F`/`0x116`/`0x24D` traffic to serve as the CAN
@@ -191,10 +198,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   lifecycle-validation operation.
 - **MACKey `SafekeyNumber` physical meaning.** Techstream forwards the raw
   16-byte payload of `22 10 10` unchanged and uses it to associate returned
-  exchange records with master/slave ECUs. The pinned binaries contain no
-  `MCUID` naming or derivation edge. Resolve whether this DID is a silicon MCU
-  identity only from target ECU firmware or a legitimate vehicle transcript;
-  do not equate the names from community descriptions alone.
+  exchange records with master/slave ECUs. Stage 8 now pins an external official
+  rekey observation that Toyota requires both an **MCU ID and VIN** and rejects
+  VIN-only requests (TMS-016), independently proving that an MCU identity is a
+  required input somewhere in the rekey flow. The Techstream binaries still
+  contain no `MCUID` naming/derivation edge and no retained transcript labels
+  DID `0x1010` as that value. Resolve the final identity join only from target
+  ECU firmware or a labeled legitimate vehicle transcript; do not equate the
+  two fields from naming similarity alone.
 - **Techstream live-session capture.** `ptshim32.dll`/`ptshim32_0500.dll`
   (TMS-005) can capture a complete Techstream↔EPS J2534 transcript, and the log
   format is no longer a blocker. Both shipped text formats, performance-counter
