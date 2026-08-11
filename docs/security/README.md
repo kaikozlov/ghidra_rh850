@@ -33,12 +33,13 @@ not yet proven.
   see [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 - SecOC verifies through ICU-S slot 4, but static CodeFlash does not determine
   the donor's live key state. The former `FF*16` inference was disproved
-  because the KAT is compiled out. A paired generation primitive exists, but
-  its only configured caller is a dormant test harness and there is no
-  production SecOC transmit path. This does not make the software layer a
-  boundary: recovered bootloader gate material constructs authenticated RAM
-  callbacks, providing a software-only direct-command experiment and a possible
-  bridge to an application hook. See
+  because the KAT is compiled out. A paired command-5 generation primitive
+  exists; its only configured stock caller is a dormant test harness, and
+  Stage 7 strengthens that harness's activator to a whole-image bounded static
+  negative. The stock graph has no production SecOC transmit path. Separately,
+  the initialized application exposes serialized command-5 plumbing and a
+  foreground hook location sufficient to specify a minimum signing proxy;
+  live slot-4 permission and performance remain dynamic. See
   [secoc/application-chain.md](secoc/application-chain.md),
   [secoc/sender-implementation.md](secoc/sender-implementation.md), and
   [secoc/software-path-assessment.md](secoc/software-path-assessment.md).

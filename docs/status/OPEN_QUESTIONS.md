@@ -39,22 +39,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   initialization; record status, output, latency, jitter, and debug-attached
   behavior. See
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md) §1.3.
-- **Command 13 and `RAM_KEY`.** The SHE spec now disproves the slot-4→`RAM_KEY`→export
-  extraction route (SECOC-025): `CMD_EXPORT_RAM_KEY` is `RAM_KEY`-only/plain-only and no
-  non-volatile KEY has an export or copy command (§4.7). So command-13 opcode identity is
-  moot for extraction — no SHE command can pull slot 4. The remaining value of characterizing
-  command 13 is narrow (confirming the opcode table / Renesas deviation) and lower priority
-  than the RAM-mirror check below. See
+- **Command 13 vendor semantics.** The SHE spec disproves the normal
+  slot-4→`RAM_KEY`→export extraction route (SECOC-025): `CMD_EXPORT_RAM_KEY` is
+  `RAM_KEY`-only/plain-only and no nonvolatile KEY has an export or copy command.
+  Command-13 opcode identity is therefore moot for standard SHE extraction. Its
+  remaining value is narrow: determine whether Renesas implements an undocumented
+  deviation in opcode/selector/lifecycle behavior. This is lower priority than
+  the live command-5 permission test. See
   [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md).
-- **Runtime RAM key-slot mirror on `8965B4512000` (resolved negative).** Traced and
-  closed (SECOC-027): the ICU-S driver is a selector-based hardware-accelerator
-  interface (key SELECTOR to `0xFFC5D004`, never a key value; register footprint exactly
-  `0xFFC5D000-0xFFC5D0FF`, no key-RAM window), the sibling mirror addresses `0xFEBE6E**`
-  hold motor-signal data here, and per SHE (SECOC-025) the firmware has no command to read
-  a non-volatile slot key to cache. Community Technique A does not transfer. Residual
-  (non-static): a hardware-only key-RAM window not referenced by firmware, or a transient
-  runtime copy, can only be excluded by a wide bench RAM dump — low priority given the
-  selector-based driver and the SHE read-prohibition.
 - **`8965B4514000` runtime object-15 key path.** Vance's external field report
   places a CMAC-validating candidate in the structural object-15 second field
   at `0xFF206E14`, but no `4514000` CodeFlash or runtime trace is public in the
@@ -230,13 +222,12 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   enumeration schema; decode it only if future artifact identification or
   routing work needs information not already available from the recovered
   Techstream protocol. See [../tooling/techstream-ddb-pipeline.md](../tooling/techstream-ddb-pipeline.md).
-- **`CSecurityAccessAES128` key is for ADS/PCS, not EPS.** Resolved (TMS-007):
-  the dispatch tree shows EPS uses `CCanEMPS_V850E_PS2FlashWriter` in the CUW
-  reflash path, which reads seed/key from `CalibrationFile::GetSeedKey()` —
-  data embedded in the `.cuw` calibration file, not hardcoded in any DLL. The
-  `FUKUMORIYOSIYAMA` key is only for runtime ADS/PCS FFD access. To recover
-  the actual EPS reflash key, obtain a Sienna EPS `.cuw` calibration file from
-  Toyota's TechInfo portal and extract the `SeedKey`/`ServiceAuthKey` fields.
+- **Sienna EPS reflash calibration-file key.** TMS-007 already resolves the
+  host-side distinction: `FUKUMORIYOSIYAMA` is ADS/PCS runtime SA, while the EPS
+  CUW writer reads its seed/key material from `CalibrationFile::GetSeedKey()`.
+  The remaining artifact need is the matching Sienna EPS `.cuw`: obtain it and
+  extract the `SeedKey`/`ServiceAuthKey` fields to recover the actual EPS reflash
+  key for that calibration.
 - **RKS authorization vs. EPS reflash (Layer A).** The TIS portal RKS flow
   (TMS-009) is a CUW-side VIN+license permission gate, distinct from the
   cal-file crypto key (Layer B). Open: whether it is *mandatory* for every EPS
@@ -248,19 +239,6 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   upstream remains unknown; resolving it is low priority because Layer A never
   reaches the ECU or any of the three firmware secrets. See
   [../tooling/techstream.md](../tooling/techstream.md) §5.3.
-- **VFOREST key-material transfer vs. SEC-BOOT-003 — fully resolved (TMS-010 /
-  CORR-020 / CORR-021).** The CUW's `SendNonce`/`SendSeedKey`/`SendNonceAndSeedKey`
-  (`CCanCommonFlashWriter`) are NOT SecurityAccess — they transfer two
-  16-byte keys plus a nonce prefix in sequenced frames whose `0x37`–`0x3c`
-  bytes are a per-frame block sequence at `Data[4]`, not UDS SIDs. There is no
-  `0x27`-vs-`0x37` conflict. **Crucially, this VFOREST path does NOT apply to
-  the Sienna `8965B4512000` at all**: the bootloader service table (`0x8E54`)
-  is standard-UDS-only (no proprietary/VFOREST handler; non-standard SIDs →
-  NRC `0x11`), and `DID 0x201`/`0x202` storage is written only by the `0x2E`
-  path (`bootloader_did_direct_ram_copy @ 0x6D3A`). The Sienna is reflashed
-  via standard UDS (`0x2E` DID zeros + `0x34/0x36/0x37` + `0x31`); the VFOREST
-  writer targets a different RH850 ECU. See
-  [../tooling/techstream.md](../tooling/techstream.md) §4.6.
 - **MEM-SAFE-001 transfer to newer SecOC/TSK targets.** The partial-AES-block
   raw-write primitive (MEM-SAFE-001) upgrades a prior authenticated payload into
   arbitrary RAM-code execution without repeating CMAC. Whether the same

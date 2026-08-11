@@ -89,7 +89,7 @@ Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`
 (asserting companion: `ghidra/scripts/verify/AssertNoUndefinedInFunctions.java`).
 
 The firmware disassembles completely: **zero** undefined bytes occur inside
-any of the 5560 function bodies. A SLEIGH decode failure would leave a hole
+any of the 5,921 recovered functions. A SLEIGH decode failure would leave a hole
 inside a function; none exists, so the module decodes every instruction the
 compiler emitted.
 
@@ -194,7 +194,7 @@ then:
 ### Why the prefix bound is the only trusted trigger (measured, not asserted)
 
 `InventorySwitchTables.java` runs the recovery's bound+validation logic against
-**all 251** decoded `switch` opcodes in this image (not just the in-function
+**all 252** decoded `switch` opcodes in this image (not just the in-function
 ones) and emits `data/switch_table_inventory.csv`. The result:
 
 | Class | Count | Bound | Verdict |

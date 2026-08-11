@@ -31,14 +31,15 @@ operations. The final 2 KiB of captured DataFlash exposes only `00/FF`
 readback, and neither normal MainPE memory access nor a serial/debug-protection
 bypass is evidence that the underlying ICU-S key array becomes readable.
 
-That firmware-static result does **not** determine the behavior of a command
-issued directly by a custom harness. In particular, the restricted Renesas
-ICU-S/ICUSE command manual is unavailable, so command 13's exact semantics,
-selector handling, output format, lifecycle restrictions, and any undocumented
-slot-to-`RAM_KEY` operation remain unknown. The proposed sequence “copy slot 4
-to `RAM_KEY`, then invoke command 13/export” is therefore an untested hardware
-hypothesis—not a path established by the firmware, but also not disproved by
-the writer census or public SHE semantics.
+That firmware-static result does **not** determine the behavior of an otherwise
+unused Renesas command issued directly by a custom harness. However, the
+standard SHE architecture does settle the normal extraction question: its
+export primitive operates only on a caller-loaded volatile `RAM_KEY`, and SHE
+provides no command that copies or exports a nonvolatile key slot. The former
+“slot 4 -> RAM_KEY -> export” route is therefore **disproved under SHE**
+(SECOC-025). Because the restricted Renesas ICU-S/ICUSE command manual is
+unavailable, command 13 remains worth characterizing only as a possible
+vendor-specific undocumented deviation in opcode/selector/lifecycle behavior.
 
 The **best overall recovery route** is therefore to acquire and dump a weaker
 ECU from the same vehicle that produces one of the messages this EPS verifies.
@@ -47,15 +48,14 @@ forward camera is the leading candidate for the steering-related traffic, but
 message ownership must be established by an in-vehicle capture or isolation
 test rather than assumed from network role.
 
-The **best first direct experiment on this EPS's existing slot 4** is now a
-software-only ICU command harness inside the already-authenticated 4 KiB
-bootloader callback. Repository-known gate material constructs accepted payloads,
-the pinned CAN-dump payloads already provide output transport, and each leaves
-more than `0xE00` bytes before its callback trailer. This can characterize known
-`RAM_KEY`, command 13, selector 4, status, and output without a persistent patch.
-A negative bootloader-context result does not close application lifecycle
-behavior; the fallback is a restorable application hook installed through the
-same authorized flash path.
+The **best first direct experiment on this EPS's existing slot 4** is the
+application-context command-5 permission test specified in
+`sender-implementation.md`: the stock serialized wrapper already provides the
+selector-4 call shape, so no direct ICU command-word manipulation is required.
+Record status, CMAC output, latency, and contention against command 7. The
+recovered authenticated 4 KiB bootloader callback remains useful for lower-level
+ICU characterization, but command 13 is no longer the default key-extraction
+route; use it only to test for a Renesas-specific deviation from SHE.
 
 The **best characterized physical fallback** is power or EM side-channel
 analysis of repeated command-7 verifications. It does not depend on command-5
@@ -74,17 +74,16 @@ remain unresolved, exhaustive completion is only `2^16`; one legitimate
 28-bit SecOC tag has fewer than `1/4000` expected false completions, and two or
 more captured frames remove practical ambiguity.
 
-Before building a large trace set, use the bootloader payload to characterize
-command 13 with a known caller-loaded volatile key and directly test its
-selector-4 behavior and any non-destructive slot-to-`RAM_KEY` copy/alias
-candidate. If lifecycle or initialization blocks that context, move the same
-experiment into a restorable application hook. Also test slot-4 permissions for
-command 5 and the generic command-1/3 AES wrapper after normal application
-initialization. If command 5 is allowed, it offers a cleaner full-tag CMAC
-oracle. If command 1 is allowed, it offers an ideal chosen-plaintext AES oracle
-and is cryptographically sufficient to synthesize CMAC without learning the
-key. None of these hardware outcomes should be assumed from the stock call
-graph.
+Before building a large trace set, test slot-4 command-5 permission after normal
+application initialization. Under SHE's `KEY_USAGE` model, a slot already used
+for MAC verification should also permit MAC generation; a denial would be a
+Renesas-specific policy deviation worth recording. The generic command-1/3 AES
+wrapper is expected to be rejected for a MAC-usage slot under SHE. Separately,
+a bootloader or application harness may characterize command 13 with a known
+caller-loaded `RAM_KEY` to identify Renesas opcode behavior, but any useful
+persistent-slot copy/export effect would be an undocumented vendor deviation,
+not a standard SHE capability. None of these hardware outcomes should be
+assumed from the stock call graph.
 
 Fault injection against serial read-range checks or ICU-S policy is a later
 fallback, not the first experiment. Public P1M-E work proves that RH850 serial
@@ -124,33 +123,29 @@ stock application invocation of command 13 or another recovered plaintext
 persistent-slot export operation. It says nothing about what ICU-S would do if
 a custom application-context harness wrote an otherwise-unused command word.
 
-### 1.2 Command-13 and `RAM_KEY` uncertainty
+### 1.2 Command-13 and `RAM_KEY` boundary
 
 Public AUTOSAR SHE material describes a volatile `RAM_KEY`, a caller-supplied
-plain-key load operation, and a protected RAM-key export operation. That is a
-useful architectural reference, not proof of this Renesas implementation's
-command numbering or behavior. The public P1M-E hardware manual intentionally
-omits the ICU-S command specification, and the restricted ICUSE manual has not
-been obtained.
+plain-key load operation, and a protected **RAM-key** export operation. It does
+**not** define an export or copy operation for a nonvolatile `KEY_<n>` slot.
+Therefore the previously proposed standard-SHE chain
+`slot 4 -> RAM_KEY -> export` is disproved (SECOC-025): normal SHE cannot pull a
+persistent slot into `RAM_KEY` for exfiltration.
 
-Consequently, static analysis has not established:
+The remaining uncertainty is vendor-specific. The public P1M-E hardware manual
+omits the ICU-S command specification and the restricted ICUSE manual has not
+been obtained, so static analysis has not established:
 
-- that ICU-S command 13 is exactly the SHE RAM-key export primitive;
-- whether command 13 consumes the command word's high selector bits;
-- whether selector 4 is rejected, ignored, interpreted as a source slot, or
-  accepted in a lifecycle/test mode;
-- whether any documented or undocumented operation can copy/alias persistent
-  slot 4 into `RAM_KEY` without exposing it through MainPE;
-- whether a successful command-13 result is plaintext, a protected envelope,
-  metadata, or another implementation-specific form; or
-- whether debug, manufacturing, validation, or faulted lifecycle state changes
-  those semantics.
+- that Renesas command 13 maps to the SHE RAM-key export primitive at all;
+- its input/output block shape or command-word selector semantics;
+- whether debug/manufacturing/faulted lifecycle implements any undocumented
+  persistent-slot copy/alias behavior; or
+- whether Renesas intentionally deviates from SHE in a way useful for slot 4.
 
-The proposed `slot 4 -> RAM_KEY -> command 13` chain is therefore a valid bench
-experiment. It has two independent unknowns: obtaining an internal copy/alias,
-and obtaining useful export output. Observing normal SHE behavior with a known,
-caller-loaded `RAM_KEY` would characterize the interface but would not by itself
-resolve the slot-4 source question.
+A direct command-13 bench experiment can still characterize that vendor surface.
+A known caller-loaded `RAM_KEY` is the correct baseline. Any later effect that
+copies or exports persistent slot 4 must be reported explicitly as a **Renesas
+extension/deviation**, not as expected SHE behavior.
 
 ### 1.3 The available operations are oracles, not key reads
 
@@ -234,15 +229,13 @@ RAM-exec payload and transmit it over CAN:
   `8965B4512000`); it depends on the object-15 CPU-visible leak that is absent here.
 
 This confirms §1.3 operationally: no SHE command can exfiltrate slot 4 (SECOC-025 —
-`CMD_EXPORT_RAM_KEY` is `RAM_KEY`-only/plain-only; no non-volatile KEY has an export
-or copy command). Extraction is necessarily a privileged memory read of a CPU-visible
-key copy. For `8965B4512000` the decisive open question is therefore whether this
-firmware maintains a runtime RAM key-slot mirror like the siblings' `0xFEBE6E**`
-table (at a different, GP-relative address) — the static object-15-blank result
-(SECOC-003) says nothing about runtime RAM (SECOC-026). If a mirror exists, extraction
-is a toolchain reuse; otherwise the fallback is a bus-level read or SCA.
+`CMD_EXPORT_RAM_KEY` is `RAM_KEY`-only/plain-only; no nonvolatile KEY has an export
+or copy command). Community Technique A therefore succeeds only where firmware or
+its runtime environment exposes a CPU-visible key copy (SECOC-026).
 
-**Resolution for `8965B4512000` (SECOC-027).** Traced: this firmware has no such mirror.
+**Resolution for `8965B4512000` (SECOC-027).** The formerly open transfer check is
+closed negative: this firmware has no firmware-maintained sibling-style RAM key-slot
+mirror.
 The ICU-S driver is a selector-based hardware-accelerator interface — the key reaches the
 engine only as a SELECTOR written to `0xFFC5D004`, never as a value; AES blocks move through
 `0xFFC5D008`/`0x090-BC`; driver state at `0xFEBF13**` is callback/command/status only. The

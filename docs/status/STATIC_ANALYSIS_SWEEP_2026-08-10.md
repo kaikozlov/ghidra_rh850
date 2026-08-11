@@ -68,7 +68,7 @@ was searched separately. No search traversed unrelated personal storage.
 - [x] Stage 6 — tighten the motor-control and safety static boundary
 - [x] Stage 7 — close remaining useful security-side static questions
 - [x] Stage 8 — bounded external-reference and missing-artifact acquisition sweep
-- [ ] Stage 9 — status reconciliation and final Ghidra project integration
+- [x] Stage 9 — status reconciliation and final Ghidra project integration
 
 ## Stage 0 — bootstrap, baseline verification, and living sweep journal
 
@@ -1258,4 +1258,170 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Commit
 
-- Pending Stage 8 commit; immutable SHA will be recorded after final verification.
+- `a9f9fed27b469298bbc7a31dbc14c942d2ac65ee docs: refresh static research targets and external evidence`
+
+
+## Stage 9 — status reconciliation and final Ghidra project integration
+
+### Starting state
+
+- HEAD: `a9f9fed27b469298bbc7a31dbc14c942d2ac65ee`
+- Stages 0–8 complete; worktree clean; Ghidra working project clean and exact
+  snapshot parity already established after the Stage-6 annotation promotion.
+- Stage-9 objective: make the repository internally coherent, regenerate every
+  owned tracked artifact, remove resolved-only open questions, and finish the
+  sweep without manufacturing a second Ghidra snapshot churn commit.
+
+### Questions
+
+1. Do FINDINGS/CORRECTIONS/OPEN_QUESTIONS/ROADMAP/OVERVIEW and subsystem indexes
+   still contain conclusions superseded by Stages 1–8?
+2. Do all repository-owned generators reproduce the tracked artifacts after the
+   Stage-6 project annotation/memory-map integration?
+3. Did any `8965B4514000` observation leak into `8965B4512000` as firmware fact,
+   or any dynamic/hardware hypothesis become phrased as a static conclusion?
+4. Does the current working Ghidra project require another snapshot promotion?
+
+### Work performed
+
+- Audited the status ledgers, top-level overview, all subsystem index pages, and
+  canonical SecOC/variant reports with targeted stale-language/count searches.
+- Re-ran all repository-owned tracked generators used by the current analysis:
+  DataFlash/checkpoint maps, application diagnostics, Techstream diagnostic
+  corpus/vocabulary, application Rx evidence/map, application Tx map,
+  candidate-f05 semantics, object-15 reachability, Techstream MACKey protocol,
+  U023A87 monitor map, Techstream P5 failure-type corpus, and semantic coverage.
+- Re-ran processor verification, which also regenerated the processor fixture
+  and instruction inventory, then checked exact project-inventory parity.
+- Reconciled the top-level SecOC summary with Stage 7: dormant bank-1 activation
+  is a whole-image bounded static negative, while the separate serialized
+  application-context command-5 proxy is statically specified and awaits only
+  live permission/performance testing.
+- Reconciled command-13/RAM_KEY language across the SecOC index,
+  `key-recovery-assessment.md`, `software-path-assessment.md`, FINDINGS, and
+  OPEN_QUESTIONS: standard SHE disproves nonvolatile slot→RAM_KEY→export;
+  command 13 now remains only as a possible Renesas-specific deviation to
+  characterize, not the default extraction path.
+- Removed resolved-only RAM-mirror and VFOREST bullets from OPEN_QUESTIONS;
+  renamed the EPS reflash item around the actual remaining `.cuw` artifact need.
+- Updated stale project cardinalities in OVERVIEW, the `4512000` variant record,
+  FINDINGS, and the processor audit.
+- Corrected the Stage-8 journal commit placeholder to immutable SHA
+  `a9f9fed27b469298bbc7a31dbc14c942d2ac65ee`.
+
+### Reconciliation findings
+
+- **Generated semantic coverage had one legitimate stale artifact.** The Stage-6
+  Ghidra promotion had already added 16 user-defined function names, but the
+  semantic ledger had not subsequently been regenerated. Regeneration keeps
+  5,921 functions and 86 thunks unchanged while moving from 517→533 annotated
+  and 5,318→5,302 recovered functions. Data-reference counts around the
+  acquisition code also increase as expected from the Stage-6 ADCG/DMAC/Global
+  RAM mappings. Every other owned generator reproduced its tracked output.
+- **Top-level function count was stale.** OVERVIEW and the `4512000` variant page
+  still said 5,865; both now use the verified 5,921-function project.
+- **Processor documentation had two stale cardinalities.** The undefined-byte
+  audit now covers all 5,921 recovered functions, and the complete decoded
+  `switch` census is 252 (20 real + 5 packed-case0 false positives + 227 other),
+  not 251. The 20 recovered real switches are unchanged.
+- **SECOC-026 was historical, not open.** The sibling CPU-visible key-table
+  technique is retained as external evidence, but transfer to `4512000` is now
+  explicitly described as superseded by the SECOC-027 negative.
+- **No variant leakage was found.** `4514000` observations remain explicitly
+  external/variant-scoped, and Corolla firmware-template claims remain
+  hypothesis-grade pending `8965F1208000` bytes.
+- **No new Ghidra snapshot integration is required.** Stage 6 already promoted
+  the persistent annotations through the guarded two-rebuild/parity path.
+  Stages 7–9 made no new persistent project edits; current working project is
+  clean and snapshot parity is exact.
+
+### Complete sweep commit map
+
+| Stage / related closure | Commit |
+|---|---|
+| Stage 0 bootstrap | `cf07d4e79d7668abbcf455d072d36e66f1210289` |
+| Stage 1 candidate-f05 | `ed7ba4fe67f60d49fa3d255f52d41d0025fbdca2` |
+| Stage 2 MACKey protocol | `c440d272efee7afbc91890f93892eb4758aed644` |
+| Stage 2 state-evidence correction | `1b244ebe62c89346c8be1b76cb7eacb033036ea2` |
+| Inter-stage Toyota/SecOC oracle | `64f582f9426cc4095aa6e278035fc32c4738d1b1` |
+| Inter-stage Panda routing | `cafcf32d76815730ae29af312db53d1ead6d0667` |
+| Inter-stage RAV4 U023A87 | `aec04e7cb0aea77f006cfb508645228c17b42e0b` |
+| Inter-stage F3/F4 patch triage | `331d5aa41441d3134cdece52b9a2cf5a605a9278` |
+| Inter-stage 2023-US Corolla route | `614123e671c3664b8e7b2fd685dba9d9c453c6b4` |
+| Discord follow-up journal | `8bb8b8969cd1982269bed151666b78fe69ea77f1` |
+| Inter-stage session assumptions | `063edd29238514002c9dfd17b8c33499f71ef4a3` |
+| Inter-stage RAV4 profile matrix | `261eae6ed01a99db15b8c7b7694085f9518ed18e` |
+| Inter-stage U023A87 semantics | `4aa492e7a9b5e38ebf7c7d3cade647849adc643b` |
+| Inter-stage DataFlash analyzer | `015d79f692708da329fb619206910e8642862bde` |
+| Original-eight static closure | `73392f38991278c58191e6c2a86c72b7d1dd0588` |
+| Stage 3 Techstream residuals | `ee0a460d3f1050853e3272dc0cffb7fcbfdeec79` |
+| Stage 4 Renesas RFP | `64e2d46734154bfbadab91960480bf48eff853c8` |
+| Stage 5 application COM | `a01bc5f9ae32dd574f6fbf296ef7d2c3a6cebf40` |
+| Stage 6 motor/safety + Ghidra promotion | `87e891e21f06f452f8db424c3e0241e2d81475ab` |
+| Stage 7 remaining SecOC static | `9afca67c58d0cd91b9dffabf5e6e3988f0644439` |
+| Stage 8 external/acquisition refresh | `a9f9fed27b469298bbc7a31dbc14c942d2ac65ee` |
+
+### Newly unblocked dynamic work
+
+- **Application-context slot-4 command-5 test.** Static architecture is complete:
+  use the stock serialized wrapper and Stage-7 foreground hook design; measure
+  permission, returned CMAC, latency, jitter, and command-7 contention.
+- **Authenticated-command actuation correlation.** Stage 6 exhausted the useful
+  static join classes; a provisioned isolated bench can now correlate valid
+  `0x2E4` with d/q/current/PWM state without another broad static search.
+- **Techstream live-session capture.** The ptshim formats/save lifecycle and
+  parser are recovered; a legitimate session can now resolve actual SA/rekey
+  service sequencing and potentially join labeled MCU ID to DID `0x1010`.
+- **Generic DataFlash/CAN oracle on new specimens.** The session manager and
+  all-window analyzer are ready for a completed 2023-US Corolla dump/F181 pair
+  or other compatible classic-SecOC specimen.
+- **P1M-E serial-boot target characterization.** The RFP host side is closed;
+  a legitimate R7F701381 capture/bench target can now answer actual advertised
+  capabilities and `ValidateICU_S` target effects.
+
+### Remaining blockers / artifact needs
+
+- `8965B4514000` CodeFlash and completed partner DataFlash/CAN outputs.
+- `8965F1208000` Corolla CodeFlash.
+- Matching Sienna EPS `.cuw` calibration for the actual CUW seed/service key.
+- Completed 2023-US Corolla 32 KiB DataFlash plus exact EPS `F181`.
+- Firmware or physical-isolation evidence for the same-vehicle `0x344`
+  protected-traffic producer.
+- Labeled legitimate rekey transcript/target implementation joining Toyota's
+  externally named MCU ID to Techstream DID `0x1010`, if they are identical.
+- Dynamic/hardware-only items remain dynamic: slot-4 command permission,
+  actuation coupling, serial protected-tail behavior, reset replay/timing,
+  guessing/saturation, future-sync recovery, FD ignored-suffix peer behavior,
+  power/EM leakage, fault injection, and physical power topology.
+
+### Verification
+
+- All repository-owned tracked generators were rerun. Every output reproduced
+  byte-for-byte except the intentionally stale semantic-coverage ledger/summary,
+  which now reflect the already-promoted Stage-6 annotations: 5,921 total =
+  533 annotated + 5,302 recovered + 86 thunks.
+- `tools/g stop || true` -> daemon already stopped / no bridge running.
+- `make verify-changed` -> pass (11 matched suites after reconciliation).
+- `make verify-agent` -> pass (**52/52** agent suites).
+- `make verify-ghidra` -> pass: full core verification + SLEIGH + processor
+  audits + exact project parity. Processor audit reports 5,921 functions / zero
+  undefined bytes, 324 named system-register operations, application Rx 145
+  recovered signals with zero audit failures, motor boundary 16 call edges + 20
+  exact reference censuses with zero failures, Stage-7 ICU 28 reference censuses
+  with zero failures, and 252 decoded switches / 20 real / 20 recovered.
+- Final core documentation-link suite -> **471/471**.
+- `EXTERNAL_REPOS_DIR=/Users/kai/dev/inspect/repos make verify-external` -> pass
+  (**297/297**) against all seven pinned external repositories/artifacts.
+- `git diff --check` -> pass.
+- Final `tools/g session-status` -> daemon stopped; processor fingerprint
+  matching; working session clean; committed snapshot unchanged.
+- No Stage-9 Ghidra snapshot commit is warranted: exact parity already includes
+  the Stage-6 promoted annotations and Stages 7–9 made no persistent project
+  mutation.
+
+### Final commit
+
+The final documentation commit uses subject
+`docs: finalize comprehensive static-analysis sweep`. Its immutable SHA is
+reported in the completion response rather than embedded here: a Git object
+cannot contain its own hash without changing that hash.

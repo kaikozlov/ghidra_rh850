@@ -57,17 +57,17 @@ Three independent domains — do not conflate them:
   (`0x20840`) and handlers. See
   [security/application-security-access.md](security/application-security-access.md).
 - **SecOC** — runtime CAN authentication on six RX PDUs through ICU-S slot 4.
-  The apparent `FF*16` KAT is compiled out and does not reveal the live key;
-  a paired command-5 MAC-generation primitive accepts selector 4 in software,
-  but its only configured caller is a dormant CAN-fed test harness rather than
-  a SecOC transmit path. Classic frame construction is resolved: pinned opendbc
-  sender code and the independent local stateless signer reproduce ordinary and
-  synchronization frames. Key availability, hardware slot permission, runtime
-  freshness integration, and a practical application-resident signing proxy
-  remain dynamic questions; recovered bootloader gate material provides a
-  constructible software-only direct-command experiment and possible bridge to
-  an application hook. See [security/secoc/README.md](security/secoc/README.md)
-  and [security/secoc/sender-implementation.md](security/secoc/sender-implementation.md).
+  The apparent `FF*16` KAT is compiled out and does not reveal the live key.
+  Command 5 is recovered as the paired MAC-generation primitive and accepts
+  selector 4 in software. Its sole configured stock caller is a dormant CAN-fed
+  test harness whose activator is now a whole-image bounded static negative; the
+  stock graph still has no production SecOC transmit path. Classic sender
+  construction and freshness are resolved, and Stage 7 specifies a minimum
+  foreground application-context signing proxy through the serialized ICU
+  driver. Remaining questions are dynamic: live slot-4 command-5 permission,
+  latency/jitter/contention, and bench validation. See
+  [security/secoc/README.md](security/secoc/README.md) and
+  [security/secoc/sender-implementation.md](security/secoc/sender-implementation.md).
 
 ## Communications
 
@@ -85,21 +85,21 @@ See [storage/dataflash.md](storage/dataflash.md).
 ## Execution architecture
 
 Application foreground loop at `0x64FCC` polls TAUJ0 CH3; EIINT table at
-`0x20200`; 5,865 recovered functions, most still evidence-grade `recovered`
+`0x20200`; 5,921 recovered functions, most still evidence-grade `recovered`
 rather than behaviorally understood. See
 [architecture/firmware-architecture.md](architecture/firmware-architecture.md)
 and [tooling/processor-module-audit.md](tooling/processor-module-audit.md).
 
 ## Variants
 
-The Corolla (`8965F1208000`) is a different calibration of the same family.
-The algorithm template, secret location, and consumer machinery carry over as
-hypotheses, not facts. See [variants/README.md](variants/README.md).
+The Corolla (`8965F1208000`) is tracked as a related Toyota EPS variant.
+Field probes establish its software IDs and diagnostic behavior, but MCU/family,
+algorithm-template, secret-location, and SecOC-mechanism transfer remain
+hypotheses until its firmware bytes are acquired. See [variants/README.md](variants/README.md).
 
 ## External tooling
 
-Three external tools have been analyzed for their relationship to the
-firmware:
+External tooling has been analyzed for its relationship to the firmware:
 
 - **Renesas Flash Programmer (RFP)** — host-side serial-programming protocol.
   See [tooling/renesas-rfp-rv40f.md](tooling/renesas-rfp-rv40f.md).
@@ -107,3 +107,6 @@ firmware:
   SecurityAccess model, provides a CAN traffic logger (`ptshim32.dll`), but
   does not interact with SecOC or the motor-control path.
   See [tooling/techstream.md](tooling/techstream.md).
+- **Community Toyota/SecOC tooling** — authenticated RAM-exec, DataFlash
+  extraction/oracle, Panda routing, and persistent-patch workflows are pinned
+  and audited separately. See [tooling/README.md](tooling/README.md).

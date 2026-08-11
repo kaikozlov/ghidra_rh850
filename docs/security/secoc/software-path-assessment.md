@@ -76,7 +76,7 @@ signing proxy is recorded as a separate capability.
 | ICU callback/driver records | corruption of writable RAM | arbitrary call or command submission | bounded for stock writers | callback/complement pairs receive fixed CodeFlash targets; no request-derived pointer writer recovered |
 | Command-word substitution | bootloader payload or restorable application patch | change intended command to 13 | software structure recovered; hardware untested | command-5 and command-8 tracked/submitted ID sites are exact; command shape still unknown |
 | Stale FIFO/result exposure | diagnostics or copied RAM | disclose prior ICU output/key material | bounded static negative | commands 1/3/5/7 retain internal staging but outward copies are status-zero gated; command 8 clears its staging on success/failure; abort replacement nulls FIFO callbacks; malformed hardware success sequencing remains outside software-static proof |
-| Direct command 13 | constructible software execution foothold | characterize `RAM_KEY` export / selector 4 | hardware-unknown | one-shot polling bootloader payload is the next discriminator; repeat in app context if lifecycle differs |
+| Direct command 13 | constructible software execution foothold | characterize possible Renesas-specific opcode/selector deviation | hardware-unknown; standard SHE slot export disproved | use a known caller-loaded `RAM_KEY` baseline; any persistent-slot copy/export effect would be a vendor extension, not expected SHE behavior |
 
 ## Investigation log
 
@@ -310,15 +310,15 @@ restricted ICU-S/ICUSE specification or bench behavior remains authoritative.
 
 1. Adapt the existing C/Docker **non-persistent** bootloader payload using the
    recovered payload gate and CAN transport.
-2. Establish a known volatile-key baseline before selector 4: candidate plain
-   load, RAM selector behavior, output block count, reset persistence.
-3. Test direct selector 4 and record all status/output without interpreting
-   entropy as a key.
-4. If bootloader lifecycle rejects it, use the authorized flash capability to
-   install a restorable application-context hook and reuse the initialized
-   command-5/DID-`0x1010` machinery.
-5. Validate any 16-byte candidate against multiple stock SecOC frames; otherwise
-   classify the result as metadata, protected envelope, oracle, or rejection.
+2. Use the initialized application wrapper to test slot-4 command-5 generation
+   permission first; record status/output/latency without bypassing serialization.
+3. For command-13 characterization, establish a known caller-loaded `RAM_KEY`
+   baseline and treat any persistent-slot effect as a Renesas-specific deviation.
+4. If bootloader lifecycle blocks lower-level characterization, use the authorized
+   flash capability to install a restorable application-context hook and reuse the
+   initialized command-5/DID-`0x1010` machinery.
+5. Validate any candidate output against multiple stock SecOC frames; otherwise
+   classify it as metadata, protected envelope, oracle, or rejection.
 
 ## 2026-08-10 — Stage-7 stale FIFO/result exposure closure
 

@@ -26,11 +26,14 @@ All three object-15 copies are invalid in this exact snapshot, while the live
 SecOC receive path selects protected ICU-S slot 4 without reading object 15.
 The embedded `FF*16` KAT is compiled out and says nothing about the live slot.
 Command 5 is substantially recovered as MAC generation and accepts selector 4
-in software. Its sole configured caller is a dormant CAN-fed crypto-test bank;
-the stock bank compares the result locally, has no recovered activation edge,
-and is not a production SecOC transmit path. The generic command-1/3 wrapper
-also accepts selectors `0..14`, but neither its slot-4 AES permission nor
-command-5 generation permission is known.
+in software. Its sole configured stock caller is a dormant CAN-fed crypto-test
+bank; the stock bank compares the result locally and is not a production SecOC
+transmit path. Stage 7 strengthens the old "no recovered activation edge" result
+to a whole-image bounded static negative: no external entry/interior reference,
+no CodeFlash pointer into the activator body, and no second writer that arms its
+active state. Separately, the initialized application exposes serialized
+command-5 plumbing suitable for a foreground signing proxy. Live slot-4
+command-5 permission and performance remain dynamic.
 
 For existing-key recovery, the best overall lead remains a weaker same-vehicle
 producer ECU. The next direct step is now explicitly software-first: recovered
@@ -41,9 +44,13 @@ application lifecycle behavior; the same trust chain can in principle install a
 restorable application hook because boot validity is CRC/marker consistency, not
 a signature.
 
-Command 13 remains unresolved: the stock application never invokes it and the
-restricted ICU-S manual is unavailable, so selector-4 behavior and a possible
-slot-4-to-`RAM_KEY` copy/alias are not statically established. Chosen-input
-power/EM analysis remains a later characterized fallback, not the assumed next
-step. See [software-path-assessment.md](software-path-assessment.md) and
+Command 13's exact Renesas opcode semantics remain unresolved, but its value for
+standard SHE key extraction is now sharply bounded. SHE exposes only a
+caller-loaded volatile `RAM_KEY`; its export primitive is RAM_KEY-only and
+provides no nonvolatile-key copy/export operation, so the former
+`slot 4 -> RAM_KEY -> export` route is disproved under SHE (SECOC-025). A direct
+command-13 experiment is therefore useful only to characterize a Renesas-specific
+undocumented deviation, not as the default extraction path. Chosen-input
+power/EM analysis remains a characterized fallback. See
+[software-path-assessment.md](software-path-assessment.md) and
 [key-recovery-assessment.md](key-recovery-assessment.md).
