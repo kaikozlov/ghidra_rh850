@@ -88,10 +88,11 @@ Two points worth recording:
 Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`
 (asserting companion: `ghidra/scripts/verify/AssertNoUndefinedInFunctions.java`).
 
-The firmware disassembles completely: **zero** undefined bytes occur inside
-any of the 5,921 recovered functions. A SLEIGH decode failure would leave a hole
-inside a function; none exists, so the module decodes every instruction the
-compiler emitted.
+The current function bodies disassemble completely: **zero** undefined bytes
+occur inside any of the 6,037 functions. A SLEIGH decode failure would leave a hole
+inside a function; none exists, so the module decodes every instruction listed
+inside those current bodies. This does not establish that every executable body
+or compiler-emitted instruction has been discovered.
 
 That alone does **not** prove every decoded instruction has correct p-code.
 Semantic fixtures under `tests/fixtures/processor/` and the asserting scripts
@@ -256,8 +257,8 @@ Instruction inventory for this firmware is committed as
 
 ## Exact project parity
 
-The current pinned rebuild has **5,921 functions, 179,223 instructions, and
-37,785 CLI-reported symbols**. Aggregate floors remain useful as a fast collapse
+The corrected reproducible rebuild has **6,037 functions, 180,262
+instructions, and 38,069 CLI-reported symbols**. Aggregate floors remain useful as a fast collapse
 detector, but they cannot detect equal-count substitutions. The deterministic
 `ExportProjectInventory.java` exporter therefore records path-free Ghidra and
 program identity, every memory mapping, function entry/body/signature/parameter
@@ -273,7 +274,7 @@ spurious functions when `ghidra/scripts/investigate` was present.
 
 ## Semantic coverage ledger
 
-Whole-image recovered-function inventory (not full semantic understanding):
+Whole-image structural function inventory (not full semantic understanding):
 
 - Exporter: `ghidra/scripts/verify/ExportSemanticCoverageLedger.java`
   (read-only headless against `build/project/` only).
@@ -283,31 +284,46 @@ Whole-image recovered-function inventory (not full semantic understanding):
   `data/semantic_coverage_summary.json`
 - Gate: `tests/verify_semantic_coverage.py` (registered in `make verify`)
 
-Each CSV row is one recovered function, sorted by entry address, with Ghidra
-name-source provenance (`USER_DEFINED` / `DEFAULT` / …), calling convention,
-caller/callee counts, and a conservative evidence grade:
+Each CSV row is one discovered function, sorted by entry address, with Ghidra
+discovery and name provenance, calling convention, caller/callee counts,
+structural reference metrics, curated review state, semantic evidence grade,
+verification source, oracle class, and execution status. These dimensions are
+independent:
 
-| Grade | Meaning |
+| Review state | Meaning |
 |---|---|
-| `annotated` | `USER_DEFINED` name from seed/annotate scripts (role label only) |
-| `recovered` | Function body recovered; auto/analysis name; no semantic claim |
-| `thunk` | Ghidra thunk |
+| `unreviewed` | structurally discovered; no semantic review recorded |
+| `reviewed_unknown` | decompiled/reviewed, but exact semantics remain unknown |
+| `structurally_bounded` | structure constrained without an exact semantic identity |
+| `semantically_identified` | a concrete role is supported by the cited evidence |
 
-Optional columns (`root_kind`, RAM/MMIO/`codeflash_data`/string reference
+Evidence grade is blank unless a curated review supports `bounded`,
+`recovered`, or `verified`. A user-defined name, body hash, generated
+self-check, or successful decompilation does not create a semantic grade.
+Optional structural columns (`root_kind`, RAM/MMIO/`codeflash_data`/string reference
 counts, coarse `boot`/`application` subsystem) are filled only from reliable
 program facts; otherwise empty or zero. `codeflash_data_ref_count` is every
 DATA reference into CodeFlash that is not a function entry (scalars included),
 not a table-only classifier. The ledger deliberately does **not** claim that
-every function is behaviorally understood — the majority remain `recovered`.
+every function is behaviorally understood.
 
-Generated ledger row count on the current working project: **5921** functions.
-`tests/verify_semantic_coverage.py` independently enforces a floor of 5865
-(aligned with AssertNoUndefined). Older hand-maintained counts elsewhere in
-this doc may lag; prefer the generated ledger/summary for the live boundary.
+The corrected ledger contains **6,037** functions: 5,928 `unreviewed`, 88
+`reviewed_unknown`, 3 `structurally_bounded`, and 18
+`semantically_identified`. Only 21 rows carry a semantic evidence grade (3
+bounded, 11 recovered, 7 verified). The reproducible selected sweep and
+corrected-graph negative re-audit are recorded in
+[../status/CORRECTED_GRAPH_REAUDIT_2026-08-11.md](../status/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
+
+This in-function inventory is not an executable denominator. The separate
+outside-function exporter currently records 2,091 conservative candidate runs
+containing 25,768 decoded instructions; 2,031 remain unresolved and 60 remain
+reviewed-unresolved. Those candidates are not automatically promoted from
+plausible decoding or pointer shape.
 
 ## What these audits do *not* claim
 
-- Zero undefined bytes inside functions proves decode coverage, not every
+- Zero undefined bytes inside the current functions proves in-body decode
+  coverage, not discovery of every executable body and not every
   p-code edge case (FP rounding, hypervisor ops, unexercised arithmetic forms, …).
 - Exact function/instruction counts are smoke signals; prefer the asserting
   invariant scripts and the generated semantic coverage ledger for coverage

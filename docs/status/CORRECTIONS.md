@@ -623,3 +623,25 @@ the mistakes are not re-made.
   `data/generated/techstream_v18/priority_steering_ddb_semantics.json`;
   `tests/verify_techstream_priority_ddb_semantics.py`;
   `tests/verify_techstream_dtc_failure_types.py`.
+
+### CORR-037 — In-function decode coverage was presented as an executable census
+
+- **Wrong:** zero undefined bytes inside Ghidra's then-known functions was
+  summarized as though every compiler-emitted instruction, callback, and
+  executable body had been discovered. Naming provenance was also used as a
+  proxy for semantic understanding.
+- **Right:** the corrected function-discovery pass recovered omitted
+  direct-call and dispatch-proven callback functions, increasing the
+  reproducible graph from 5,921 to 6,037 functions. A separate conservative
+  outside-function inventory still contains 25,768 decoded instructions in
+  2,091 candidate runs; 2,031 remain unresolved and 60 pointer-referenced
+  targets remain explicitly reviewed-unresolved. Zero undefined bytes is now
+  claimed only inside the 6,037 current function bodies. Structural discovery,
+  review state, semantic grade, oracle class, and execution status are separate
+  fields; 5,928 functions remain unreviewed.
+- **Canonical:** [../tooling/processor-module-audit.md](../tooling/processor-module-audit.md);
+  [CORRECTED_GRAPH_REAUDIT_2026-08-11.md](CORRECTED_GRAPH_REAUDIT_2026-08-11.md);
+  `data/outside_function_candidates.csv`;
+  `data/semantic_coverage_summary.json`;
+  `tests/verify_function_discovery.py`;
+  `tests/verify_semantic_coverage.py`.

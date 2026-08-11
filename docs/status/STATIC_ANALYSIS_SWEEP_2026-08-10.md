@@ -5,6 +5,11 @@ Living execution journal for the staged sweep defined by
 the pinned external artifacts are the evidence sources; existing narrative
 documents are used only for navigation.
 
+Counts inside the dated stage entries are historical run state. The corrected
+6,037-function denominator and current review/negative disposition supersede
+them; see
+[CORRECTED_GRAPH_REAUDIT_2026-08-11.md](CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
+
 ## Run identity
 
 - Branch: `main`

@@ -25,6 +25,20 @@ paths = [
   "data/control_partition.csv",
 ]
 
+[suite.analysis_status]
+tests = ["tests/verify_analysis_status.py"]
+oracle = "generated_self_check"
+paths = [
+  "docs/status/ANALYSIS_STATUS.md",
+  "docs/status/FINDINGS.md",
+  "data/ghidra_project_inventory.baseline.jsonl",
+  "data/outside_function_summary.json",
+  "data/semantic_coverage_summary.json",
+  "data/generated/semantic_interest_ranking.csv",
+  "data/generated/techstream_v18/priority_steering_ddb_semantics.json",
+  "techstream.lock.json",
+]
+
 [suite.boot_trust]
 tests = ["tests/verify_boot_trust.py"]
 paths = ["docs/security/bootloader-payload-gate.md"]

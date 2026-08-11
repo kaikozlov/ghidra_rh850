@@ -230,8 +230,22 @@ rebuilds produce byte-identical canonical inventories. Review the tracked diff,
 then rerun `make verify-project-parity`. Ordinary verification never updates the
 baseline.
 
-Landmark rebuild stats: **5,921 functions, 179,223 instructions, 37,785
-symbols** (floors for gates; semantic checks in `make verify-processor`).
+Corrected rebuild stats: **6,037 functions, 180,262 instructions, 38,069
+CLI-reported symbols** (floors are collapse detectors; semantic checks live in
+`make verify-processor`, exact identity in `make verify-project-parity`).
+
+After a graph-changing rebuild, regenerate the structural semantic ledger and
+the reproducible review cohort from a disposable project:
+
+```bash
+PROJECT_DIR=build/rebuild-a make generate-semantic-coverage
+uv run --locked python tools/generate_semantic_interest_ranking.py
+make generate-semantic-sweep PROJECT_DIR=build/rebuild-a
+uv run --locked python tests/verify_semantic_sweep.py
+```
+
+The semantic sweep records selection and decompilation, not semantic proof.
+Rows that remain `reviewed_unknown` carry no evidence grade.
 
 ## CI
 

@@ -1,7 +1,8 @@
 # Generated artifacts
 
-The CSVs under `data/` are the machine-readable canonical maps. The Markdown
-reports explain how to read them; the CSVs enumerate exact rows.
+The CSV and JSON/JSONL files under `data/` are the machine-readable canonical
+maps. The Markdown reports explain how to read them; the artifacts enumerate
+exact rows or records.
 
 There are **two classes** of `data/` CSV, with opposite editing rules:
 
@@ -12,8 +13,8 @@ There are **two classes** of `data/` CSV, with opposite editing rules:
   validate with the associated test. These capture evidence (field probes,
   external sources, manual baselines) that no generator can produce.
 
-This page is an exhaustive inventory of every committed `data/` CSV. If you
-are unsure which class a CSV belongs to, check whether a `tools/generate_*`
+This page inventories the committed analysis tables and their paired summaries.
+If you are unsure which class an artifact belongs to, check whether a `tools/generate_*`
 script or `tools/verify_processor.sh` writes it. If yes → generated. If no →
 curated.
 

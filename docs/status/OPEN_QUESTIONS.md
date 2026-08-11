@@ -147,20 +147,16 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Tooling
 
-- **Semantic coverage.** 5,921 functions recovered; most remain evidence-grade
-  `recovered` rather than behaviorally understood. A systematic interest-scored
-  sweep (40 highest-signal functions decompiled, call graphs traced) found no
-  additional subsystems in its sample, bounded the crypto surface to the two
-  known AES consumers of `0x23E28` (SWEEP-001), and confirmed the nine-site
-  `ICUSCMD` store-encoding census (SWEEP-002). These are sample- and
-  pattern-bounded results, not whole-image negatives: the sweep does not
-  exclude ciphers on different tables, stores through other addressing modes,
-  or subsystems in unsampled functions. The sampled functions cluster into
-  seven clear subsystem bands. Stage 6 has now closed the named motor/safety
-  static leads: the d/q join search is a bounded negative, ADCG/DMAC sample
-  acquisition is exact, and the former isolated interlocks resolve to a
-  nine-channel registered plausibility/deadline monitor family. Remaining
-  semantic-coverage work should be lead-driven rather than another broad sweep.
+- **Semantic coverage.** The corrected graph has 6,037 structurally discovered
+  functions. A reproducible ranked sweep decompiled 100 entries, including all
+  mandatory callback/dispatcher families, but 88 selected entries remain
+  `reviewed_unknown`; across the whole ledger 5,928 functions remain
+  unreviewed and only 21 carry a semantic grade. This is an open semantic
+  denominator, not evidence of hidden subsystems. New work should remain
+  lead-driven and record an explicit disposition without upgrading successful
+  decompilation into semantic confidence. The selection artifact and current
+  boundary are in
+  [CORRECTED_GRAPH_REAUDIT_2026-08-11.md](CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 - **RFP/P1M-E serial-protocol transfer.** The generic RV40F **host-side static
   work is closed** (RFP-001..008): all 52 ordinary command IDs are censused,
   both connection/setup variants are recovered, the 8-byte `GetDeviceType`

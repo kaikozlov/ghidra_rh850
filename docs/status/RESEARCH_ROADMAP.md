@@ -52,7 +52,18 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Completed static investigations
 
-- **Comprehensive static-analysis sweep reconciliation (Stage 9, 2026-08-10).** Regenerated every owned tracked artifact, reconciled status/index/canonical SecOC language, removed resolved-only open questions, refreshed semantic coverage to 533 annotated / 5,302 recovered / 86 thunks across 5,921 functions, and confirmed the Stage-6 Ghidra snapshot remains exact-parity with no further promotion required. Canonical run journal: [STATIC_ANALYSIS_SWEEP_2026-08-10.md](STATIC_ANALYSIS_SWEEP_2026-08-10.md).
+- **Corrected-graph whole-image re-audit (2026-08-11).** Two independent
+  four-stage rebuilds agree exactly on the 6,037-function graph. All named
+  caller/consumer negative families were rerun, the 100-function semantic
+  cohort is reproducible, and 88 selected entries remain honestly
+  `reviewed_unknown`. Canonical:
+  [CORRECTED_GRAPH_REAUDIT_2026-08-11.md](CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
+- **Historical comprehensive sweep reconciliation (Stage 9, 2026-08-10).** At
+  that snapshot, regenerated artifacts reported 533 annotated / 5,302 default
+  recovered / 86 thunks across 5,921 functions. Those historical dimensions
+  and the then-current “no further promotion” conclusion are superseded by the
+  corrected-graph entry above. Run journal:
+  [STATIC_ANALYSIS_SWEEP_2026-08-10.md](STATIC_ANALYSIS_SWEEP_2026-08-10.md).
 - **External-reference / missing-artifact refresh (Stage 8, 2026-08-10).** Fetched and compared every named pinned research source, filtered the 51-commit `opendbc` delta to confirm no SecOC core/DBC change, inspected high-signal non-default branches/releases/forks, and re-ran exact public searches for `8965B4514000` CodeFlash, completed partner outputs, `8965F1208000` firmware, a Sienna EPS `.cuw`, and a physical `0x344` producer artifact. None surfaced. Newly pinned `optskug/docs @ 2c718412...` adds one useful refinement: an official Toyota rekey flow reportedly requires both MCU ID and VIN, independently establishing MCU identity as a required input but not proving Techstream DID `0x1010` `SafekeyNumber == MCU ID` (TMS-016). Canonical: [EXTERNAL_REFERENCE_REFRESH_2026-08-10.md](EXTERNAL_REFERENCE_REFRESH_2026-08-10.md).
 - **SecOC software-path closure (Stage 7, 2026-08-10).** Closed the ICU stale-result/FIFO software surface as a bounded negative, strengthened dormant crypto-test activation from "no caller" to a whole-image entry/interior-pointer/state-writer negative, specified the minimum application-context selector-4 command-5 signing-proxy architecture including command-7 arbitration/freshness/Tx/teardown, and bounded candidate-f05 provenance to its earliest public Vance artifact plus later source-family corroboration. Remaining slot-4 permission, latency, command behavior, and physical/fault questions are dynamic/hardware-only. Canonical: [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md), [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.
 - **Motor-control/safety boundary (Stage 6, 2026-08-10).** Resolved the

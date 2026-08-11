@@ -31,8 +31,8 @@ entry_addr,review_state,evidence_grade,verification_source,oracle_class,executio
 0x000336ca,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 39 (cutoff-neighbor); decompiled successfully; exact semantics not independently established
 0x00033b08,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 20 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x0003413a,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 23 (scalar-top-40); decompiled successfully; exact semantics not independently established
-0x00035b86,semantically_identified,recovered,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,First of a mirrored pair of saturated calibration-driven state/reference calculators
-0x00035d1e,semantically_identified,recovered,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,Second mirrored saturated calibration-driven state/reference calculator
+0x00035b86,semantically_identified,recovered,firmware-static Ghidra inspection,cfg_dataflow,unavailable,2026-08-11,First of a mirrored pair of saturated calibration-driven state/reference calculators
+0x00035d1e,semantically_identified,recovered,firmware-static Ghidra inspection,cfg_dataflow,unavailable,2026-08-11,Second mirrored saturated calibration-driven state/reference calculator
 0x0003728e,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 14 (table-heavy); decompiled successfully; exact semantics not independently established
 0x00047c3c,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 30 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x00048312,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 33 (scalar-top-40); decompiled successfully; exact semantics not independently established
@@ -49,7 +49,7 @@ entry_addr,review_state,evidence_grade,verification_source,oracle_class,executio
 0x0005b662,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 21 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x0005b740,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 10 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x0005b9c4,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 9 (scalar-top-40); decompiled successfully; exact semantics not independently established
-0x0005bea6,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,Bulk RAM snapshot/copy into FEBE62xx through FEBE64xx state; downstream field semantics unnamed
+0x0005bea6,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,unavailable,2026-08-11,Bulk RAM snapshot/copy into FEBE62xx through FEBE64xx state; downstream field semantics unnamed
 0x0005c0b6,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 8 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x0005c56a,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 22 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x0005c666,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 7 (scalar-top-40); decompiled successfully; exact semantics not independently established
@@ -83,7 +83,7 @@ entry_addr,review_state,evidence_grade,verification_source,oracle_class,executio
 0x0008997a,semantically_identified,verified,tests/verify_icus_key_update.py,cfg_dataflow,passed,2026-08-11,Authenticated key-update command path identified
 0x0008ffcc,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 3410 (mandatory-graph-reaudit); decompiled successfully; exact semantics not independently established
 0x00090d9a,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 36 (scalar-top-40); decompiled successfully; exact semantics not independently established
-0x000916e2,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,Multi-state protocol/event dispatcher over states 10/11/20/23/24/25/30; exact service semantics unnamed
+0x000916e2,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,unavailable,2026-08-11,Multi-state protocol/event dispatcher over states 10/11/20/23/24/25/30; exact service semantics unnamed
 0x00096354,semantically_identified,verified,tests/verify_icus_key_update.py,cfg_dataflow,passed,2026-08-11,Application WDBI key-update entry identified
 0x0009729a,semantically_identified,recovered,ghidra/scripts/verify/AssertRecoveredCallbackTables.java,cfg_dataflow,passed,2026-08-11,XCP-shaped selector FB response handler recovered
 0x000972fa,semantically_identified,recovered,ghidra/scripts/verify/AssertRecoveredCallbackTables.java,cfg_dataflow,passed,2026-08-11,XCP-shaped selector FA indexed response handler recovered
@@ -101,7 +101,7 @@ entry_addr,review_state,evidence_grade,verification_source,oracle_class,executio
 0x000bd10e,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 2 (application;largest-body;ram-heavy); decompiled successfully; exact semantics not independently established
 0x000be6ea,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 42 (cutoff-neighbor); decompiled successfully; exact semantics not independently established
 0x000be804,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 32 (scalar-top-40); decompiled successfully; exact semantics not independently established
-0x000be8e6,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,Bulk RAM snapshot/copy into FEBEAFxx/FEBEB0xx state; downstream field semantics unnamed
+0x000be8e6,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,unavailable,2026-08-11,Bulk RAM snapshot/copy into FEBEAFxx/FEBEB0xx state; downstream field semantics unnamed
 0x000bec4c,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 191 (high-fanout); decompiled successfully; exact semantics not independently established
 0x000c3a90,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 37 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000c8ab0,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 29 (scalar-top-40); decompiled successfully; exact semantics not independently established

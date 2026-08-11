@@ -20,7 +20,8 @@
     "verified": 7
   },
   "execution_status_counts": {
-    "passed": 104
+    "passed": 104,
+    "unavailable": 5
   },
   "function_count": 6037,
   "name_source_counts": {
