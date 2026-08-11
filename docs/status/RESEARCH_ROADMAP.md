@@ -61,6 +61,16 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Completed static investigations
 
+- **Renesas RFP RV40F host protocol (2026-08-10).** Completed the retained
+  `BootRV40F` host-side static census at 52 ordinary command IDs / 61 symbols,
+  recovered the generic connection and both setup variants, traced the 8-byte
+  `GetDeviceType` capability word including `0x1106`, bounded legacy `SetICUM`
+  to its exact structural 20-byte option record, and pinned
+  `CheckICUMode`/`ValidateICU_S` host sequencing. The complete security/config
+  surface contains no dedicated 64-byte SHE M1/M2/M3 request or ICU
+  `slot || key[16]` primitive; remaining applicability/lifecycle questions now
+  require a P1M-E target or legitimate serial-boot capture. Canonical:
+  [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
 - **Techstream Stage-3 static residuals (2026-08-10).** Recovered both shipped
   `ptshim32` J2534 log formats plus Techstream's timestamped save orchestration
   and added a cross-version parser; reconciled the DDB status so the complete

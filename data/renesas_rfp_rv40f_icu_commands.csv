@@ -1,7 +1,0 @@
-command,name,request_payload,response_payload,host_function,address,confidence,interpretation
-0x6E,SetICUSOptionByte,4 bytes,status,BootRV40F::SetICUSOptionByte,0x1C4DC,recovered,ICU-S option/security configuration; not a key payload
-0x6F,GetICUSOptionByte,none,4 bytes,BootRV40F::GetICUSOptionByte,0x1CA90,recovered,reads the ICU-S option value
-0x70,ValidateICU_S,none,status,BootRV40F::ValidateICU_S,0x1D5E8,recovered,validates or commits ICU-S configuration; exact target-side effect remains unknown
-0x71,CheckICUMode,1 byte,status,BootRV40F::CheckICUMode,0x1D688,recovered,probes mode values 0xFF then 0x00
-0x74,SetICUM main,15 bytes,status,BootRV40F::SetICUM,0x1C5AC,recovered,writes the main structured legacy extended-option record
-0x75,SetICUM auxiliary,4 bytes,status,BootRV40F::SetICUM,0x1C5AC,recovered,writes the auxiliary 32-bit legacy extended-option field

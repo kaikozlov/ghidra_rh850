@@ -189,14 +189,20 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `0xB0000`–`0xC0000` — the d/q current-reference join and the isolated safety
   interlocks (`0x43A78`/`0x43716`/`0x438C6`) called via function-pointer tables.
   Closing this is a long-tail effort, not a single task.
-- **RFP/P1M-E serial-protocol transfer.** The pinned Renesas host library
-  substantially exposes the RV40F protocol, but a live R7F701381 signature and
-  capability query has not yet shown which commands the P1M-E mask ROM accepts.
-  Remaining static work includes the complete RV40F command census,
-  mode-entry/reset sequence, capability-field parser (including feature
-  `0x1106`), exact `SetICUM` field meanings, and the preconditions/effect of
-  payload-free `ValidateICU_S`. See
-  [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
+- **RFP/P1M-E serial-protocol transfer.** The generic RV40F **host-side static
+  work is closed** (RFP-001..008): all 52 ordinary command IDs are censused,
+  both connection/setup variants are recovered, the 8-byte `GetDeviceType`
+  capability word and key `0x1106` are decoded, legacy `SetICUM` is bounded to
+  its exact 20-byte structural option record, and `CheckICUMode`/payload-free
+  `ValidateICU_S` host sequencing is pinned. The remaining question is target
+  transfer only: obtain a legitimate R7F701381/P1M-E serial-boot capture (or
+  query a bench target) to learn which commands/capabilities its mask ROM
+  actually advertises, what target-side transition `ValidateICU_S` causes, and
+  whether any manufacturing-only provisioning path exists outside the standard
+  RFP distribution. The four `SetICUM` integer fields and three flags lack
+  retained human-readable enum names, but further generic host archaeology is
+  not justified without a target observation that makes those labels material.
+  See [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
 - **DID `0x1010` production use and slot-4 package.** Static firmware now
   recovers a SHE-compatible command-8 key-update service behind WDBI DID
   `0x1010`; selector `01` starts the 64-byte M1–M3 update and selector `03`

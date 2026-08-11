@@ -19,7 +19,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 LOCK_PATH = REPO / "renesas-rfp.lock.json"
-COMMANDS_PATH = REPO / "data" / "renesas_rfp_rv40f_icu_commands.csv"
+COMMANDS_PATH = REPO / "data" / "renesas_rfp_rv40f_commands.csv"
+CAPABILITIES_PATH = REPO / "data" / "renesas_rfp_rv40f_capabilities.csv"
 
 LC_SEGMENT_64 = 0x19
 LC_SYMTAB = 0x2
@@ -114,21 +115,64 @@ def address_to_file_offset(address: int, segments: list[tuple[int, int, int]]) -
 
 
 def verify_committed_model(lock: dict[str, object]) -> None:
-    print("== committed RFP command model ==")
+    print("== complete committed RFP command model ==")
     with COMMANDS_PATH.open(newline="", encoding="utf-8") as stream:
         rows = list(csv.DictReader(stream))
+    with CAPABILITIES_PATH.open(newline="", encoding="utf-8") as stream:
+        capabilities = list(csv.DictReader(stream))
 
     commands = {row["command"]: row for row in rows}
-    check("six ICU-related RV40F command rows", len(rows) == 6)
-    check(
-        "command census is 0x6E/0x6F/0x70/0x71/0x74/0x75",
-        set(commands) == {"0x6E", "0x6F", "0x70", "0x71", "0x74", "0x75"},
-    )
-    check("all command rows are recovered", all(row["confidence"] == "recovered" for row in rows))
-    check(
-        "command model makes no key-load claim",
-        all("key payload" not in row["interpretation"].lower() or "not a key payload" in row["interpretation"].lower() for row in rows),
-    )
+    expected_commands = {
+        "0x00", "0x10", "0x12", "0x13", "0x14", "0x15", "0x16", "0x18", "0x1C",
+        "0x20", "0x21", "0x22", "0x23", "0x26", "0x27", "0x28", "0x29", "0x2A",
+        "0x2B", "0x2C", "0x2D", "0x2E", "0x30", "0x32", "0x34", "0x36", "0x38",
+        "0x3A", "0x3C", "0x48", "0x49", "0x4A", "0x4B", "0x4D", "0x4E", "0x4F",
+        "0x50", "0x51", "0x52", "0x53", "0x54", "0x56", "0x57", "0x6E", "0x6F",
+        "0x70", "0x71", "0x74", "0x75", "0x78", "0x79", "0x7A",
+    }
+    check("52 distinct RV40F command rows", len(rows) == 52)
+    check("complete recovered command-ID census", set(commands) == expected_commands)
+    check("every command has a host method", all(row["host_methods"] for row in rows))
+    check("every command records request and response layouts",
+          all(row["request_layout"] and row["response_layout"] for row in rows))
+    check("every command records task/precondition/result evidence",
+          all(row["calling_tasks"] and row["capability_or_preconditions"] and row["result_handling"] for row in rows))
+    check("command confidence is verified/recovered only",
+          all(row["confidence"] in {"verified", "recovered"} for row in rows))
+
+    print("\n== security/configuration negative boundary ==")
+    security_config_ids = {
+        "0x20", "0x21", "0x22", "0x23", "0x26", "0x27", "0x28", "0x29", "0x2A",
+        "0x2B", "0x2C", "0x2D", "0x2E", "0x30", "0x48", "0x49", "0x4A", "0x4B",
+        "0x4E", "0x4F", "0x56", "0x57", "0x6E", "0x6F", "0x70", "0x71", "0x74",
+        "0x75", "0x78", "0x79", "0x7A",
+    }
+    check("all security/configuration commands are represented",
+          security_config_ids <= set(commands))
+    check("no security/configuration command has a fixed 64-byte request",
+          not any(commands[c]["request_payload_length"] == "64" for c in security_config_ids))
+    check("CheckPassword is selector + 32 + 32, not SHE M1/M2/M3",
+          commands["0x78"]["request_payload_length"] == "65"
+          and commands["0x78"]["request_layout"] == "selector_u8 || valueA[32] || valueB[32]")
+    check("WriteConfig is address/config + 16 bytes, not a dedicated key-load primitive",
+          commands["0x79"]["request_payload_length"] == "20"
+          and commands["0x79"]["request_layout"] == "config_or_address_be32 || data[16]")
+    check("legacy SetICUM is split 4 + 15 bytes",
+          commands["0x75"]["request_payload_length"] == "4"
+          and commands["0x74"]["request_payload_length"] == "15")
+
+    print("\n== capability-word model ==")
+    cap = {row["key"]: row for row in capabilities}
+    check("capability table covers 0x1001..0x1212 recovered keys", len(capabilities) == 22)
+    check("0x1106 is a bits48..50 predicate",
+          cap["0x1106"]["normal_8byte_typecode_projection"] == "bits48..50 in {1,4}")
+    check("0x1109 is bit51", cap["0x1109"]["normal_8byte_typecode_projection"] == "bit51")
+    check("0x1205 recovers the legacy 20-byte option width",
+          "20 if bits48..50==2" in cap["0x1205"]["normal_8byte_typecode_projection"])
+    check("phase2 low-byte 0x30 promotes only 0x1108 in 0x110x family",
+          cap["0x1108"]["phase2_low_byte_0x30"] == "phase2: 1"
+          and all(cap[key]["phase2_low_byte_0x30"] == "phase2: 0"
+                  for key in ("0x1101", "0x1102", "0x1103", "0x1104", "0x1105", "0x1106", "0x1107", "0x1109", "0x110A")))
 
     print("\n== recovered RV40F wire fixtures ==")
     check("ValidateICU_S frame", request_frame(0x70).hex() == "010001708f03")
@@ -142,9 +186,14 @@ def verify_committed_model(lock: dict[str, object]) -> None:
         "SetICUM auxiliary fixture",
         request_frame(0x75, bytes.fromhex("01020304")).hex() == "01000575010203047c03",
     )
+    check("CheckPassword fixture has 65-byte payload",
+          len(request_frame(0x78, bytes(65))) == 71)
 
     package = lock["package"]
-    check("lock schema version", lock["schema_version"] == 1)
+    scope = lock["analysis_scope"]
+    check("lock schema version", lock["schema_version"] == 2)
+    check("lock records 52-command scope", scope["bootrv40f_command_count"] == 52)
+    check("lock records 61-symbol BootRV40F surface", scope["bootrv40f_symbol_count"] == 61)
     check("pinned RFP package version", package["package_version"] == "V3.24.00")
     check("pinned package platform", package["platform"] == "macos-arm64")
 
@@ -262,7 +311,7 @@ def verify_package(root: Path, lock: dict[str, object]) -> None:
 
     rv40f_symbols = [name for name in symbols if "BootRV40F" in name]
     gen2_symbols = [name for name in symbols if "BootRH850Gen2" in name]
-    check("substantial BootRV40F API retained", len(rv40f_symbols) >= 40, str(len(rv40f_symbols)))
+    check("complete BootRV40F symbol census", len(rv40f_symbols) == 61, str(len(rv40f_symbols)))
     check("separate BootRH850Gen2 API retained", len(gen2_symbols) >= 10, str(len(gen2_symbols)))
     forbidden_names = ("setkey", "loadkey", "keyupdate", "provisionkey")
     check(

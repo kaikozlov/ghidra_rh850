@@ -63,7 +63,7 @@ was searched separately. No search traversed unrelated personal storage.
 - [x] Stage 1 — fully reverse Vance `candidate-f05`
 - [x] Stage 2 — recover the complete Techstream MACKey vehicle-side protocol
 - [x] Stage 3 — close remaining high-value Techstream static leads
-- [ ] Stage 4 — complete the Renesas RV40F host-protocol static census
+- [x] Stage 4 — complete the Renesas RV40F host-protocol static census
 - [ ] Stage 5 — close the application COM receive/transmit long tail
 - [ ] Stage 6 — tighten the motor-control and safety static boundary
 - [ ] Stage 7 — close remaining useful security-side static questions
@@ -501,5 +501,161 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Commit
 
-- Pending Stage 3 commit; immutable SHA will be reported after the pre-commit
-  verification boundary.
+- `ee0a460d3f1050853e3272dc0cffb7fcbfdeec79 analysis: close remaining high-value Techstream static leads`
+
+## Stage 4 — complete the Renesas RV40F host-protocol static census
+
+### Starting state
+
+- HEAD: `ee0a460d3f1050853e3272dc0cffb7fcbfdeec79`
+- Relevant prior finding IDs: `RFP-001`–`RFP-006`
+- Relevant artifacts: pinned RFP V3.24.00 `macos-arm64` package,
+  `libRFP.dylib`, `Devices.xml`, CLI documentation, existing six-command ICU
+  table, and the package/resource lock
+- Static boundary: this stage analyzes the retained **host library**. It does
+  not promote generic RV40F support into a claim about the R7F701381/P1M-E
+  mask ROM without target evidence.
+
+### Questions
+
+1. What is the complete `BootRV40F` ordinary command-ID surface, including
+   methods that manually build frames instead of calling `ProcessCommand`?
+2. What exact host connection/setup sequence reaches device type, inquiry,
+   authentication, signature/area discovery, baud/frequency, and ICU checks?
+3. Where does internal capability key `0x1106` come from, and what does the
+   neighboring capability/size-key parser actually compute?
+4. What is the exact structural layout and dispatch condition of legacy
+   `SetICUM`?
+5. What are the host-side preconditions, fallback, retries, and state handling
+   around `CheckICUMode` and `ValidateICU_S`?
+6. Does the **complete retained standard RV40F host surface** expose a dedicated
+   arbitrary 16-byte ICU key load or a 64-byte SHE M1/M2/M3 request?
+
+### Work performed
+
+- Enumerated all 61 retained `BootRV40F` symbols from the pinned ARM64 Mach-O
+  and cross-referenced every call from the RV40F task layer.
+- Disassembled the entire library and separately modeled both command-construction
+  styles: the common `ProcessCommand` helper and older/manual `SendRecvFrame`
+  constructors/data phases.
+- Recovered request/response shapes, calling tasks, capability/precondition
+  gates, and result handling for every distinct ordinary command ID.
+- Traced generic serial-mode family routing into `_ConnectRV40F`, both
+  `Task_SetupBaudrate_RV40F` variants, clock/password setup, and the
+  signature/area-discovery branches.
+- Recovered the 8-byte capability vector source and fully decoded
+  `UtilityRV40F::GetRV40FInfo` plus its phase-2 fallback.
+- Traced every branch of `SetOptionByteEx`, the legacy `SetICUM` record, and
+  the `CheckICUMode`/`ValidateICU_S` lifecycle sequence.
+- Replaced the six-row ICU-only artifact with a complete command table and a
+  separate capability-decoder table; added body locks for the newly critical
+  connection/setup/parser functions.
+
+### Findings
+
+- The retained protocol contains **52 distinct ordinary command IDs** across
+  the 61-symbol `BootRV40F` surface. The machine-readable census spans inquiry,
+  memory read/write/verify/erase, checksum, protection/authentication, option
+  data, frequency/baud, device/signature discovery, configuration, area/OCD,
+  ICU, password, and CCC-config families — source: pinned Mach-O constructors
+  and task callers, grade: **verified** (`RFP-002`).
+- Normal requests use `01 || length_be16 || command || payload || checksum ||
+  03`; responses begin `0x81`. `SendRecvFrame` bounds/validates the packet and
+  `ProcessCommand` additionally enforces the exact expected response-payload
+  size before copying output — grade: **verified** (`RFP-001`).
+- `_ConnectRV40F` begins with `GetDeviceType (0x38)`. Its 24-byte response is
+  split into an **8-byte TypeCode/capability vector** plus four BE32 frequency
+  range fields. The capability vector is copied into `DeviceInfo+0x30` and is
+  the exact input to `UtilityRV40F::GetRV40FInfo` — grade: **verified**.
+- Internal key `0x1106` is true iff packed capability-word bits `48..50` are
+  `1` or `4`; neighboring `0x110x` keys are explicit bit projections and
+  `0x120x` keys are derived widths/sizes. `GetSignature (0x3A)` is a separate
+  58/72-byte device/memory descriptor consulted **alongside** that preloaded
+  capability vector, not its source — grade: **verified** (`RFP-007`).
+- Generic serial entry is now bounded precisely before RV40F family routing:
+  a configuration-selected `uint16` pattern is passed to the driver's named
+  `RunModeEntry`, then entry selector 1/2 selects 9600 baud + 1 ms +
+  `ZeroTransmission(true/false)`, selector 3 selects 10000 baud, selector 4 has
+  no extra serial action, and selector 5 selects 250000 baud before
+  `GetBootCode`. Concrete reset/boot-pin electrical behavior remains behind the
+  driver/configuration. The classic RV40F setup then performs `GetDeviceType`,
+  optional target+host baud change, `Inquiry`, `GetIDAuth`, bounded
+  `CheckIDAuth` retry, signature discovery, and capability-dependent
+  version/T-memory/ICU checks. The RV40F2 variant substitutes
+  `GetAreaNum/GetAreaInfo` for signature memory discovery; clock setup
+  separately performs password checks and `SetFrequency` when required —
+  grade: **recovered/verified host sequence; target entry bounded** (`RFP-008`).
+- `SetICUM` is only the legacy fallback when capability predicates `0x1002` and
+  `0x1109` are both false. Its 20-byte source record has byte 0 unused by this
+  routine, three threshold-normalized flag bytes, three raw u32 fields, and one
+  raw u32 auxiliary field; `0x75` sends the auxiliary four bytes first and
+  `0x74` sends the reordered 15-byte main record. No retained label supports a
+  slot/key semantic — grade: **recovered structural semantics** (`RFP-003`).
+- `CheckICUMode` sends `0x71 FF`; **only** result `0xE1000010` causes a fallback
+  `0x71 00`. Successful first/fallback requests cache host mode `FF`/`00`.
+  `ValidateICU_S` sends payload-free `0x70` once with no internal retry or key
+  material; the high-level ICU-S option task calls it only when cached state
+  says validation remains necessary — grade: **verified host sequence / target
+  effect bounded** (`RFP-006`).
+- Across the complete security/configuration subset there is **no dedicated
+  fixed 64-byte request with SHE M1[16]/M2[32]/M3[16] shape and no ICU
+  `slot || arbitrary_key[16]` primitive**. `CheckPassword` is 65 bytes
+  (`selector+32+32`), `WriteConfig`/`VerifyConfig` are 20 (`BE32+16`), and
+  legacy `SetICUM` is 4+15. Generic flash/config data phases can carry arbitrary
+  bytes and are intentionally excluded from this dedicated-key negative —
+  grade: **verified host-surface negative; target transfer bounded** (`RFP-004`).
+
+### Negative/bounded results
+
+- The four integer fields and three flags in the legacy `SetICUM` record have
+  no retained human-readable enum names; they remain structural rather than
+  guessed.
+- `ValidateICU_S` host behavior does not reveal the target-side lifecycle
+  transition, permanence, or mask-ROM checks.
+- `Devices.xml` still has no P1M-E/R7F701381-specific route. A live target or
+  legitimate capture is required to prove which of the 52 commands and
+  capability bits apply to the Toyota/Denso MCU.
+- Package triage remains negative for an RH850 provisioning agent: all 68
+  `Firmwares/*.bin` files are SEGGER probe firmware; explicit target resources
+  are DA/RA-only; the sole provisioning payload is RA6B1-only.
+
+### Documentation/tests changed
+
+- Replaced `data/renesas_rfp_rv40f_icu_commands.csv` with the complete
+  `data/renesas_rfp_rv40f_commands.csv` and added
+  `data/renesas_rfp_rv40f_capabilities.csv`.
+- Rewrote the canonical RFP report around the complete protocol/state-machine
+  boundary and strengthened `RFP-001`–`RFP-006`; added `RFP-007`/`RFP-008`.
+- Updated `OPEN_QUESTIONS` so RFP generic static work is closed and only
+  target/capture transfer remains; added this stage to completed-static roadmap.
+- Expanded `renesas-rfp.lock.json` with critical setup/parser body locks and
+  the completed 52-command/61-symbol analysis scope.
+- Expanded `verify_renesas_rfp.py` to assert the exact command-ID set,
+  capability projections, security/configuration negative, wire fixtures, and
+  all newly pinned function bodies.
+- No `CORRECTIONS.md` entry is required: prior RFP rows explicitly said
+  “recovered so far”/bounded. The intermediate analysis assumption that the
+  capability vector came from `GetSignature` was corrected before being
+  promoted into repository evidence; the bytes prove it comes from
+  `GetDeviceType`.
+
+### Verification
+
+- `make verify-rfp` -> pass (145/145 against the pinned local package)
+- `make verify-changed` -> pass (3 matched suites, 7 test files)
+- `make verify` -> pass (all core suites green; final doc-link suite 451/451)
+
+### Remaining blockers
+
+- A legitimate P1M-E serial-boot capture/bench query is required to establish
+  the target's actual `GetDeviceType`/capability response and accepted command
+  subset.
+- The target-side effect and reversibility of `ValidateICU_S` cannot be learned
+  from the host library alone.
+- Any manufacturing-only ICU key-provisioning agent outside this standard RFP
+  distribution remains a possible external artifact, not a static lead in the
+  current package.
+
+### Commit
+
+- Pending Stage 4 commit; immutable SHA will be recorded after final verification.

@@ -1,0 +1,23 @@
+key,result_type,normal_8byte_typecode_projection,phase2_low_byte_0x30,static_role,confidence
+0x1001,bool,(word & 0xF0) == 0x20,phase2: 1,format-family predicate,recovered
+0x1002,bool,low_byte == 0x11,phase2: 0,format-family predicate used by clock/option paths,recovered
+0x1003,u32,12 if low_byte==0x11 else (11 if bit8 else 10),phase2: 14,derived layout/count value,recovered
+0x1101,bool,bit16,phase2: 0,capability bit,verified
+0x1102,bool,bit17,phase2: 0,capability bit,verified
+0x1103,bool,bit30,phase2: 0,capability bit used by option/OTP paths,verified
+0x1104,bool,bit24,phase2: 0,capability bit used by config/OFS path,verified
+0x1105,bool,bit8,phase2: 0,capability bit used by read/verify task,verified
+0x1106,bool,"bits48..50 in {1,4}",phase2: 0,capability predicate gating CheckICUMode,verified
+0x1107,bool,bit54,phase2: 0,capability bit gating version/T-memory paths,verified
+0x1108,bool,bit9,phase2: 1,capability bit / phase2 marker,verified
+0x1109,bool,bit51,phase2: 0,capability bit gating ICU-S extended-option path,verified
+0x110A,bool,bit10,phase2: 0,capability bit gating OCD state path,verified
+0x1201,u32,1 << bits40..43,phase2: 0,derived memory-layout value,verified
+0x1202,u32,1 << bits44..46,phase2: 0,derived memory-layout value,verified
+0x1203,u32,32 if low_byte==0x11 else 16,phase2: 16,ID-code width,verified
+0x1204,u32,16 if (word & 0xF0)==0x20 else 32,phase2: 0,option-byte width,verified
+0x1205,u32,32 if low_byte==0x11; else 8 if bit51; else 20 if bits48..50==2; else 0,phase2: 0,legacy/extended option record width,verified
+0x1206..0x120F,u32,0,phase2: 0,unimplemented/default in retained parser,verified
+0x1210,u32,1024 if bits48..50==1; 2048 if ==4; else 0,phase2: 0,derived size value,verified
+0x1211,u32,32 if low_byte==0x11 else 0,phase2: 0,password field width A,verified
+0x1212,u32,32 if low_byte==0x11 else 0,phase2: 0,password field width B,verified

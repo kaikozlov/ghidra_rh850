@@ -1,18 +1,16 @@
-# Renesas Flash Programmer RV40F interface
+# Renesas Flash Programmer RV40F host protocol
 
 > **Scope:** Renesas Flash Programmer V3.24.00 `macos-arm64`
 >
 > **Document type:** external-source reverse engineering
 >
-> **Status:** active
+> **Status:** recovered host protocol; target applicability bounded
 >
-> **Evidence source:** external-source
->
-> **Evidence profile:** recovered/bounded — each claim below is scoped to the
-> pinned host library, not the Sienna firmware or a live R7F701381
+> **Evidence source:** pinned `libRFP.dylib` and package resources
 >
 > **Canonical artifacts:** `renesas-rfp.lock.json`,
-> `data/renesas_rfp_rv40f_icu_commands.csv`
+> `data/renesas_rfp_rv40f_commands.csv`,
+> `data/renesas_rfp_rv40f_capabilities.csv`
 >
 > **Verification:** `tests/verify_renesas_rfp.py` (`make verify-rfp`)
 >
@@ -21,48 +19,49 @@
 
 ## Executive conclusion
 
-The Renesas Flash Programmer (RFP) package is a useful primary source for the
-host side of the RH850 serial-programming protocol. Its `libRFP.dylib` retains
-C++ symbols for a large older/common `BootRV40F` implementation and a separate
-`BootRH850Gen2` implementation. The former contains connection, frequency,
-baud-rate, signature, memory-area, read, write, erase, checksum, authentication,
-option-byte, protection, and ICU-S-related operations.
+The pinned Renesas Flash Programmer (RFP) package is now a substantially
+complete primary source for the **host side** of the retained `BootRV40F`
+serial-programming protocol. The Mach-O contains 61 `BootRV40F` symbols and a
+complete static census recovers **52 distinct command IDs** covering connection,
+clock/baud negotiation, memory operations, protection/authentication, option
+configuration, area discovery, OCD state, and ICU lifecycle handling.
 
-The ICU-S functions recovered so far configure and validate chip security
-state. They do **not** expose a demonstrated SecOC key-slot provisioning API:
+The ordinary request envelope is:
 
-- `SetICUSOptionByte` carries four bytes;
-- `GetICUSOptionByte` returns four bytes;
-- `ValidateICU_S` has no payload;
-- `CheckICUMode` probes one-byte mode values;
-- `SetICUM` serializes a structured legacy extended-option record through two
-  commands.
+```text
+01 || length_be16 || command || payload || checksum || 03
+```
 
-The files shipped alongside RFP do not fill that gap. All 68 images under
-`Firmwares/` identify themselves as SEGGER J-Link/J-Trace/Flasher probe
-firmware. Explicit target-resident resources are confined to DA and RA
-families. The only packaged secure-provisioning image is an RA6B1 artifact
-handled by `BootRATZ_B`, and there is no corresponding RH850 resource or
-`BootRV40F::DownloadImage` path.
+where `length = 1 + payload_length` and the checksum is the two's-complement
+byte sum of `length_be16 || command || payload`. `SendRecvFrame` requires the
+response to start with `0x81`, bounds the response length below `0x402`, obtains
+the remaining bytes, and validates the packet against the request command.
+`ProcessCommand` additionally performs an exact response-payload-length check
+before copying returned data.
 
-In particular, `SetICUM` is not shaped as `slot || AES-128 key`. No named
-`BootRV40F` key-load or key-update function is present in the retained symbol
-table. That is a bounded negative result: an unnamed primitive, target-resident
-provisioning payload, manufacturing-only program, or Toyota/Denso service can
-still exist.
+The ICU-specific result is now stronger than the earlier six-command survey.
+Across the **complete retained command-constructor surface**, there is no
+dedicated RV40F security/configuration request shaped as a SHE M1/M2/M3 package
+(`16 + 32 + 16 = 64` bytes), and no named or structurally recovered command that
+loads an arbitrary 16-byte key into an ICU slot. The nearby large security
+requests have different meanings and shapes: `CheckPassword` is
+`selector || 32 || 32` (65 bytes), short/long ID operations are 16/32/96-byte
+authentication or identity fields, and `WriteConfig` is `be32 || 16` (20
+bytes). The legacy `SetICUM` path is a fixed 20-byte option record split into
+4-byte and 15-byte commands.
 
-The application firmware now supplies that missing service-side lead:
-WDBI DID `0x1010` reaches MainPE's ICU-S command 8 with the SHE-compatible
-M1/M2/M3 → M4/M5 authenticated key-update envelope. This application request is
-not an RFP serial command and must not be equated with RV40F command `0x70`,
-`0x74`, or `0x75`. RFP remains useful for bringing the chip into the correct
-ICU-S lifecycle state; the application report owns the key-update path.
+That negative is deliberately scoped. Generic write/data-transfer commands can
+transport arbitrary program bytes to an allowed target address range; this is
+not evidence of a dedicated ICU key-provisioning primitive. Nothing here proves
+which commands an R7F701381/P1M-E mask ROM advertises, nor that standard RFP is
+the manufacturing path used for Toyota/Denso SecOC provisioning.
 
-Nothing in this report proves that an R7F701381/P1M-E accepts every recovered
-command. That requires a live signature/capability query or a captured RFP
-session.
+The Sienna application has a separate, directly recovered key-update service:
+WDBI DID `0x1010` drives MainPE ICU command 8 with a SHE-compatible
+M1/M2/M3 → M4/M5 envelope. That application service is **not** any of the RFP
+serial commands below.
 
-## 1. Pinned source
+## 1. Pinned source and family boundary
 
 The analyzed distribution identifies itself as:
 
@@ -74,246 +73,400 @@ release 1 July 2026
 platform macos-arm64
 ```
 
-The analyzed package snapshot is stored under `Renesas/` and exact hashes,
-sizes, function virtual addresses, function-body hashes, and embedded-data
-prefixes are pinned in `renesas-rfp.lock.json`. The default path is:
-
-```text
-Renesas/renesas_flash_programmer_macos-arm64/
-```
-
-Run:
+Exact package hashes, function virtual addresses/body hashes, embedded-data
+prefixes, and the completed analysis scope are pinned by
+`renesas-rfp.lock.json`. Verify the local licensed package with:
 
 ```bash
 make verify-rfp
 ```
 
-to verify the distribution against the lock. Ordinary `make verify` validates
-the committed command model, wire fixtures, package inventory, and analyzed
-function bodies.
+`Devices.xml` exposes generic `RH850`, `RH850/E2x`, and `RH850/U2x` entries but
+contains no P1M-E/R7F701381-specific device record. The library also retains a
+separate `BootRH850Gen2` implementation. Therefore `BootRV40F` is strong host
+protocol evidence for the generic/older RH850 route, **not** proof that the
+analyzed Toyota P1M-E selects it.
 
-## 2. Device-family split
+The package's executable-resource inventory does not supply a hidden P1M-E
+agent. All 68 `Firmwares/*.bin` images identify as SEGGER probe firmware;
+explicit target-resident resources are DA/RA-family files; and the only shipped
+secure-provisioning payload is the RA6B1 image used by `BootRATZ_B`. There is no
+RH850/RV40F/P1M/ICU-named target resource or `BootRV40F::DownloadImage` path.
 
-`Devices.xml` defines three distinct user-facing RH850 entries:
+## 2. Wire protocol and complete command census
 
-| Entry | Mode entry | Interfaces |
-|---|---|---|
-| `RH850` | `MODEENTRY_DEFAULT` | UART1/UART2 through E2/E2 Lite/E1/E20; UART2 through COM |
-| `RH850/E2x` | `MODEENTRY_RH850_E2` | CSI/UART2 |
-| `RH850/U2x` | `MODEENTRY_RH850_E2` | CSI/UART2 |
+### 2.1 Common request/response behavior
 
-The host library separately retains:
-
-```text
-BootRV40F::Inquiry
-BootRV40F::SetFrequency
-BootRV40F::SetBaudrate
-BootRV40F::GetSignature
-BootRV40F::Read / ReadEX
-BootRV40F::Erase / AreaErase
-BootRV40F::WriteCommand / WriteData
-BootRV40F::CheckCRC / CheckSum
-BootRV40F::CheckIDAuth / CheckPassword
-BootRV40F option, protection, and ICU-S families
-```
-
-and:
-
-```text
-BootRH850Gen2::Inquiry
-BootRH850Gen2::SetFrequency
-BootRH850Gen2::SetBaudrate
-BootRH850Gen2::GetSignature
-BootRH850Gen2 read/write/erase/checksum/area operations
-```
-
-The task names and family split make `BootRV40F` the leading host protocol for
-the generic/older RH850 entry. Applying it specifically to the P1M-E remains
-**bounded** until the device response selects or exhibits this path.
-
-### Shipped firmware and target-resource triage
-
-The package contains three different classes of executable material. They must
-not be conflated:
-
-| Location | Count / example | Recovered role | P1M-E relevance |
-|---|---:|---|---|
-| `Firmwares/*.bin` | 68 | SEGGER J-Link/J-Trace/Flasher **probe** firmware | no RH850 target payload found |
-| `Resources/DA*`, `Resources/RA6W1` | target boot/programming images | DA/RA target-resident loaders | different MCU families |
-| `Resources/ProvisioningSW/RA6B1/provsw_sec_enc.bin` | one `imag` container | encrypted or encrypted+signed RA6B1 provisioning software | architectural analogy only |
-
-The first printable identification in every `Firmwares/*.bin` names J-Link,
-J-Trace, or Flasher hardware. Two large S-records embedded in `libRFP.dylib`,
-`SFD_BfwE20RFP_s @ 0x11D124` and `SFD_BfwE2LRFP_s @ 0x13F7E0`, are also not
-target payloads. `Driver_E1E2::_UpdateEmulator @ 0x37748` selects them according
-to attached E1/E2/E2 Lite hardware and programs them into the emulator.
-
-The embedded symbol `FlashLibrary::SFD_RV40F_CM4_hex @ 0x2F3E12` is another
-misleading name. Its bytes are ARM Thumb code, its suffix is `CM4`, and it is
-selected by `UtilitySWD_A::GetFLMFileName`/`LoadFLM`. It is an SWD Cortex-M4
-flash algorithm, not V850/RH850 code and not an ICU-S agent.
-
-Conversely, when this RFP build needs a secure target-side provisioning program,
-it is explicit: `UtilityRA_B::SetupProvisioningSW @ 0xB1984` loads the RA6B1
-resource and `BootRATZ_B::DownloadImage @ 0x135A8` transfers it. The retained
-RV40F symbol/task census has no analogous provisioning-image setup or download
-function, and the resource tree has no RH850/RV40F/P1M/ICU-named payload.
-
-This is a **bounded negative result**, not proof that no RH850 manufacturing
-agent exists. Such an agent may be supplied separately by Renesas or
-Toyota/Denso, encrypted under an opaque name, embedded without a retained
-symbol, or implemented by target mask ROM.
-
-## 3. RV40F framing
-
-`ProcessCommand @ libRFP 0x19C94` constructs the common request:
+`ProcessCommand @ 0x19C94` builds the normal request:
 
 ```text
 01 || length_be16 || command || payload || checksum || 03
 ```
 
-where:
+with:
 
 ```text
 length   = 1 + payload_length
 checksum = -sum(length_be16 || command || payload) mod 256
 ```
 
-`SendRecvFrame @ libRFP 0x1B37C` requires the received frame to begin with
-`0x81`, parses its big-endian length, reads the remaining bytes, and validates
-the packet against the command byte.
+After the normal request succeeds, `ProcessCommand` uses a command-matched
+control/receive frame and requires the returned payload length to equal the
+caller's expected length before copying it.
 
-Examples pinned by `verify_renesas_rfp.py`:
+`SendRecvFrame @ 0x1B37C` is the lower-level packet primitive. It requires a
+request of at least six bytes, receives the first six response bytes, checks
+`response[0] == 0x81`, parses a big-endian length below `0x402`, receives any
+remaining response bytes, and calls the common packet validator using the
+request command.
 
-```text
-ValidateICU_S:
-01 00 01 70 8F 03
+Several older/high-throughput methods construct the same framing manually
+rather than calling `ProcessCommand`; the complete census therefore covers both
+paths. `WriteData`, `VerifyData`, `Read`/`ReadEX`, and the RX-style configuration
+methods also use command-specific **data-phase** frames after their setup
+request. `AbortSendData` is a separate `0x81` control frame and is not counted as
+one of the 52 ordinary request command IDs.
 
-CheckICUMode(FF):
-01 00 02 71 FF 8E 03
+### 2.2 Command families
 
-CheckICUMode(00):
-01 00 02 71 00 8D 03
+The exact per-command request length/layout, response length/layout, host method,
+calling task, preconditions, result handling, and confidence are in
+`data/renesas_rfp_rv40f_commands.csv`. The recovered command-ID set is:
 
-SetICUSOptionByte(11 22 33 44):
-01 00 05 6E 11 22 33 44 E3 03
+| Family | Commands |
+|---|---|
+| inquiry / memory | `00 10 12 13 14 15 16 18 1C` |
+| protection / auth / option | `20 21 22 23 26 27 28 29 2A 2B 2C 2D 2E 30` |
+| clock / identity | `32 34 36 38 3A 3C` |
+| configuration | `48 49 4A 4B 4D 4E 4F 50 51 52 53 54 56 57` |
+| ICU lifecycle/options | `6E 6F 70 71 74 75` |
+| password / CCC config | `78 79 7A` |
 
-SetICUM auxiliary(01 02 03 04):
-01 00 05 75 01 02 03 04 7C 03
-```
+High-signal layouts include:
 
-These are host-library frames, not Toyota UDS messages.
-
-## 4. ICU-related command family
-
-The machine-readable census is
-`data/renesas_rfp_rv40f_icu_commands.csv`.
-
-| Command | Host function | Recovered request |
+| Command | Host method | Recovered shape |
 |---:|---|---|
-| `0x6E` | `SetICUSOptionByte @ 0x1C4DC` | four option bytes |
-| `0x6F` | `GetICUSOptionByte @ 0x1CA90` | no payload; four-byte result |
-| `0x70` | `ValidateICU_S @ 0x1D5E8` | no payload |
-| `0x71` | `CheckICUMode @ 0x1D688` | one mode byte |
-| `0x74` | `SetICUM @ 0x1C5AC` | 15-byte main record |
-| `0x75` | `SetICUM @ 0x1C5AC` | four-byte auxiliary field |
+| `0x38` | `GetDeviceType` | response 24 = `TypeCode[8]` + four BE32 frequency-range fields |
+| `0x3A` | `GetSignature` | response 58 or 72 bytes, parsed into device/memory geometry |
+| `0x30` | `CheckIDAuth` | request 16 or 32 authentication bytes |
+| `0x78` | `CheckPassword` | request 65 = selector + 32 + 32 |
+| `0x79/0x7A` | `WriteConfig` / `VerifyConfig` | request 20 = BE32 selector/address + 16 bytes |
+| `0x22/0x2D` | `SetLockBit` / `SetOTP` | request 98-byte option structures |
+| `0x26/0x27` | set/get option byte | 16/17/32-byte layout variants |
+| `0x53/0x54` | area discovery | count + 17-byte per-area descriptor |
+| `0x6E/0x6F` | ICU-S option | four-byte set/get value |
+| `0x70` | `ValidateICU_S` | no request payload |
+| `0x71` | `CheckICUMode` | one-byte probe |
+| `0x74/0x75` | legacy `SetICUM` | 15-byte main + 4-byte auxiliary |
 
-### `SetICUM` structure
+Program/write data are intentionally distinguished from configuration
+primitives. Command `0x13` starts with an 8-byte start/end range and then
+accepts raw data chunks under command `0x13`; `GetWriteDataSize` selects `0x400`
+or `0x4000` depending on driver mode. Command `0x16` similarly carries verify
+data. Those generic memory streams can naturally contain arbitrary byte
+patterns, including 16 or 64 bytes, but they are not slot/key commands.
 
-`SetOptionByteEx @ 0x1C164` calls `SetICUM` only in its legacy format branch.
-The caller obtains this input as option type `2`, the host's extended-option
-record.
+## 3. Connection and setup state machine
 
-`SetICUM` consumes the record as follows:
+The retained host path separates **generic mode entry**, **RV40F connection**,
+**baud/auth/signature setup**, and **clock negotiation**.
+
+### 3.1 Generic serial entry → RV40F selection
+
+`Task_Connect_Generic::_RunInternal @ 0xAAEF4` obtains the configured serial
+entry selector from the driver/session, then calls
+`_RunModeEntry_SerialBoot @ 0xAB578` before any RV40F command is issued.
+`_GetModeEntryPattern @ 0xABD70` chooses a fixed `uint16` mode-entry pattern from
+the configured device/mode/interface tuple and the task delegates that pattern
+to the driver's virtual `RunModeEntry` implementation (`Driver_COM`,
+`Driver_E1E2`, `Driver_JLink`, `Driver_USB`, or wrapper implementations retain
+that named method).
+
+After a successful driver mode-entry operation, the host performs a
+selector-dependent serial transition:
+
+| Entry selector | Host action after mode-entry pattern |
+|---:|---|
+| `1` | set 9600 baud → wait 1 ms → `BootGeneric::ZeroTransmission(..., true)` |
+| `2` | set 9600 baud → wait 1 ms → `BootGeneric::ZeroTransmission(..., false)` |
+| `3` | set 10000 baud |
+| `4` | no additional baud/zero-transmission operation in this routine |
+| `5` | set 250000 baud |
+| other | return the generic mode-entry error path |
+
+For driver-kind values `0x0A..0x0D`, the routine also obtains a driver status
+structure after `RunModeEntry` and rejects a zero status byte before continuing.
+The host then calls `BootGeneric::GetBootCode`; `_RunInternal` stores that code
+and dispatches through its family jump table, reaching `_ConnectRV40F @
+0xAB91C` for the retained RV40F family.
+
+This is the exact **host orchestration** around mode entry. The selected
+`uint16` pattern is configuration/interface dependent, and the concrete reset
+pin/boot-pin electrical behavior lives behind each driver's `RunModeEntry`
+implementation. Without a P1M-E session we therefore do not assign one of
+these generic patterns/selectors to R7F701381.
+
+`_ConnectRV40F` immediately executes:
 
 ```text
-command 0x75 payload:
-    input[0x10:0x14]                        # four bytes
-
-command 0x74 payload:
-    FF if input[3] > EF else 00            # one flag-like byte
-    input[0x08:0x0C]                       # four bytes
-    input[0x0C:0x10]                       # four bytes
-    input[0x04:0x08]                       # four bytes
-    FF if input[2] > EF else 00            # one flag-like byte
-    FF if input[1] > EF else 00            # one flag-like byte
+GetDeviceType (0x38)
 ```
 
-This is a structured option/configuration record. It does not transport an
-arbitrary contiguous 16-byte AES key, and it carries no recovered slot selector.
-The exact OEM meanings of its three flags and four 32-bit fields remain unknown.
+The 24-byte response is important for later capability decisions:
 
-### ICU-S enable/validation is separate
+- bytes `0..7` are copied as an 8-byte `TypeCode`/capability vector into
+  `DeviceInfo+0x30`;
+- bytes `8..23` are four big-endian 32-bit fields copied into the frequency
+  range information structure.
 
-RFP's CLI documentation exposes `-fo flags icus` as “Enable ICU-S.” The RH850
-option-writing task represents that request as security flag `0x00010000`. If
-selected, `Task_WriteOption_RV40F::_WriteOptionRH850 @ 0xC152C` invokes the
-payload-free `ValidateICU_S` command, unless the connection setup already
-recorded the target in the relevant ICU mode.
+If device information is not already loaded, `_ConnectRV40F` materializes the
+8-byte vector in `DeviceInfo`; if a cached device record exists it compares the
+new value against it. This is the origin of the capability word decoded in §4.
+It is **not** sourced from `GetSignature`.
 
-During setup, `Task_SetupBaudrate_RV40F::Run @ 0xBEF4C` calls `CheckICUMode` only
-when the target capability record advertises feature `0x1106`. `CheckICUMode`
-tries mode `0xFF`; on one particular target error it retries with `0x00` and
-records which form succeeded.
+### 3.2 `Task_SetupBaudrate_RV40F`
 
-`SetICUSOptionByte` is an exported four-byte primitive, but the Ghidra
-cross-reference census finds no internal code caller in `libRFP`; only its
-external entry and symbol/data references remain. The standard high-level
-RH850 option task recovered above does not call it. This makes command `0x70`,
-not command `0x6E`, the concrete lead for the documented ICU-S enable
-transition in this build.
+The classic setup task performs, subject to driver/config branches:
 
-This supports a chip-lifecycle/configuration interpretation. It does not prove:
+```text
+optional SetBaudrate (0x34)
+→ host baud reconfiguration / delay
+→ Inquiry (0x00)
+→ GetIDAuth (0x2C)
+→ temporary long timeout
+```
 
-- that `ValidateICU_S` loads a key;
-- that the four ICU-S option bytes encode any key-slot contents;
-- that `SetICUM` addresses protected key slot 4;
-- that standard RFP can export or replace a SecOC key;
-- that Toyota dealer rekeying uses the serial boot protocol.
+If authentication is required, it obtains the configured ID and calls
+`CheckIDAuth (0x30)`. The task retries the specific target result `0xE1000007`
+up to **10** times and emits warning `0x83000001` while retrying; other errors
+fail normally.
 
-Separately, the Sienna application exposes a SHE-compatible authenticated
-key-update path behind WDBI DID `0x1010`. That route writes MainPE `ICUSCMD=8`;
-it is not one of these mask-ROM RFP protocol commands. See
-[the canonical key-lifecycle report](../security/secoc/key-storage-and-lifecycle.md).
+If the target does not require that ID challenge, the task calls
+`GetSignature (0x3A)` and `_SetSignatureToDeviceInfo`. That parser consumes the
+58/72-byte signature to recover device/memory geometry while consulting the
+already-populated 8-byte capability vector for layout decisions.
 
-## 5. What RFP can contribute
+Additional capability-dependent setup then includes:
 
-The retained RV40F implementation can guide a reproducible acquisition client
-for:
+- `0x1107` → `GetVersion (0x3C)` / `GetTMemory (0x4F)` paths;
+- `0x1106` → `CheckICUMode (0x71)`, whose successful result is cached in
+  `DeviceInfo` for later option-writing decisions.
 
-1. boot-mode entry and synchronization;
-2. oscillator/frequency and baud-rate negotiation;
-3. device signature and capability discovery;
-4. ID-code authentication;
-5. CodeFlash/DataFlash area discovery;
-6. blank check, read, erase, program, verify, and checksum;
-7. option-byte and serial-programming protection state;
-8. ICU-S enable/mode configuration.
+### 3.3 RV40F2 area-discovery variant
 
-The shipped payload triage also provides a useful pattern for future artifacts:
-a real RFP-managed secure provisioning agent should have a family-specific
-resource, a setup routine, and a target-image download path comparable to the
-RA6B1 chain. None is present for RV40F in this package.
+`Task_SetupBaudrate_RV40F2::Run @ 0xC2E6C` has the same broad baud → inquiry →
+ID-auth structure, but its non-authenticated discovery path uses:
 
-The next useful static pass is a complete RV40F command census, followed by the
-mode-entry/connection task, the signature capability-field parser, and the
-source of feature key `0x1106`.
+```text
+GetAreaNum (0x53)
+→ GetAreaInfo (0x54) for each area
+```
 
-## 6. What remains unproven
+instead of the classic signature-based memory-geometry path. Its ID-auth retry
+rule is the same bounded ten-attempt treatment of `0xE1000007`.
 
-- Whether the R7F701381/P1M-E selects the RV40F path.
-- Which ICU commands the P1M-E mask ROM advertises and permits.
-- The field meanings in the legacy `SetICUM` record.
-- The exact state transition caused by `ValidateICU_S`, including whether it is
-  irreversible and what preconditions it checks.
-- Whether any standard RFP path provisions protected AES slots.
-- Whether Toyota/Denso dealer tooling actually invokes application WDBI DID
-  `0x1010`, and what backend supplies its authorized M1–M3 package.
-- Which target slot/AuthID/counter/policy values a legitimate slot-4 update
-  carries, and which lifecycle conditions ICU-S enforces in addition to the
-  recovered application session policy.
+### 3.4 Clock/password setup
 
-These questions must not be collapsed into a claim that command `0x74`,
-`0x75`, or `SetICUM` writes SecOC slot 4. They must also not be collapsed into a
-claim that Toyota's dealer workflow uses DID `0x1010` merely because the
-application makes that service reachable.
+`Task_SetupClock_RV40F::Run @ 0xBFC9C` consults capability `0x1002`. On that
+format family it obtains derived widths `0x1211` and `0x1212` (32 bytes each in
+the recovered normal case), obtains the corresponding values, and performs
+`CheckPassword (0x78)` with selector 1 and then the second configured selector.
+One selector-2 failure path is downgraded to warning `0x83000003` rather than
+being treated as a generic fatal error.
+
+The task then calls `SetFrequency (0x32)`, delays briefly, stores the returned
+negotiation values, and updates host driver timing/baud state.
+
+This is a **host state machine** only. It does not establish the exact physical
+reset pin timing or mask-ROM behavior of the P1M-E without a target capture.
+
+## 4. Device-type capability word
+
+`UtilityRV40F::GetRV40FInfo @ 0xC2528` accepts a vector only when its length is
+exactly **8 bytes**, loads it as one packed 64-bit word, and projects internal
+keys from that word. The complete recovered projection is in
+`data/renesas_rfp_rv40f_capabilities.csv`.
+
+This corrects a tempting but wrong interpretation: feature key `0x1106` does
+**not** originate in the `0x3A GetSignature` payload. The 8-byte word originates
+in the first eight bytes of `0x38 GetDeviceType` and is copied into
+`DeviceInfo+0x30`; the signature parser later consults it.
+
+Important normal-format projections are:
+
+| Key | Structural interpretation |
+|---:|---|
+| `0x1001` | `(low_byte & 0xF0) == 0x20` |
+| `0x1002` | `low_byte == 0x11` |
+| `0x1003` | derived layout value: 12, 11, or 10 |
+| `0x1101` | bit 16 |
+| `0x1102` | bit 17 |
+| `0x1103` | bit 30 |
+| `0x1104` | bit 24 |
+| `0x1105` | bit 8 |
+| `0x1106` | `bits[50:48] == 1 or 4` |
+| `0x1107` | bit 54 |
+| `0x1108` | bit 9 |
+| `0x1109` | bit 51 |
+| `0x110A` | bit 10 |
+
+Selected derived-size keys are:
+
+| Key | Structural interpretation |
+|---:|---|
+| `0x1201` | `1 << bits[43:40]` |
+| `0x1202` | `1 << bits[46:44]` |
+| `0x1203` | ID width: 32 if low byte is `0x11`, else 16 |
+| `0x1204` | option width: 16 for `0x2x` family, else 32 |
+| `0x1205` | 32 for `0x11`; else 8 if bit51; else **20** when bits48..50 == 2; else 0 |
+| `0x1210` | 1024 when bits48..50 == 1; 2048 when == 4; else 0 |
+| `0x1211/0x1212` | 32 when low byte == `0x11`, else 0 |
+
+A separate phase-2 path is selected when the low byte is `0x30`. In that path
+`0x1001=1`, `0x1002=0`, `0x1003=14`, `0x1108=1`, `0x1203=16`, and the other
+recovered `0x110x`/derived fields default to zero.
+
+These keys are internal RFP structural capabilities. Human-readable Renesas
+enum names were not retained, so the repository uses bit/field definitions and
+observed call-site roles rather than assigning speculative silicon feature
+names.
+
+## 5. ICU option/lifecycle behavior
+
+### 5.1 Extended option dispatch
+
+`SetOptionByteEx @ 0x1C164` receives two capability-derived booleans corresponding
+to `0x1002` and `0x1109` and selects four layouts:
+
+- `0x1002 && 0x1109`: send `0x6E` with four bytes from the extended option
+  record, then command `0x26` selector 3 with 16 option bytes;
+- `0x1002 && !0x1109`: use command `0x26` selectors 2 and 3 for two 16-byte
+  halves;
+- `!0x1002 && 0x1109`: send only `0x6E` with four ICU-S option bytes;
+- `!0x1002 && !0x1109`: use the legacy `SetICUM` path.
+
+Thus `SetICUM` is specifically a legacy fallback, not the universal ICU-S
+configuration method.
+
+### 5.2 Exact `SetICUM` structural record
+
+On the legacy path the derived `0x1205` width is 20 bytes. `SetICUM @ 0x1C5AC`
+uses that 20-byte source record as follows:
+
+```text
+source[0]      unused by SetICUM
+source[1..3]   three flag-like bytes, normalized: > 0xEF -> 0xFF, else 0x00
+source[4..7]   raw u32 field A
+source[8..11]  raw u32 field B
+source[12..15] raw u32 field C
+source[16..19] raw u32 auxiliary field
+```
+
+Wire order:
+
+```text
+command 0x75 payload (4):
+    source[16:20]
+
+command 0x74 payload (15):
+    normalized(source[3])
+    source[8:12]
+    source[12:16]
+    source[4:8]
+    normalized(source[2])
+    normalized(source[1])
+```
+
+The package contains no device XML, retained enum, or nearby string that gives
+those four integer fields or three flags trustworthy semantic names. They are
+therefore kept **structural**. This pass does establish that the record is not
+`slot || AES-128 key`, does not contain a recovered slot selector, and is not a
+64-byte M1/M2/M3 envelope.
+
+### 5.3 `CheckICUMode` and `ValidateICU_S`
+
+`CheckICUMode @ 0x1D688` is gated by capability `0x1106` during classic setup.
+Its exact host algorithm is:
+
+```text
+send 0x71 payload FF
+if result == E1000010:
+    send 0x71 payload 00
+    if success: output_mode = 00
+else if first request succeeds:
+    output_mode = FF
+otherwise:
+    return the error
+```
+
+The successful mode is cached in `DeviceInfo`; later option-read/write tasks
+consult that cached state.
+
+`ValidateICU_S @ 0x1D5E8` is simpler: it sends payload-free command `0x70` once
+and returns the packet result. It contains **no internal retry loop**, no key
+payload, and no independently recovered persistent-state write in the host.
+`Task_WriteOption_RV40F::_WriteOptionRH850` invokes it from the high-level ICU-S
+security-option path when the cached state says validation is still required.
+The CLI documents that high-level option as `-fo flags icus` / “Enable ICU-S.”
+
+This proves the host precondition/sequence, not the target-side effect. Static
+RFP code alone cannot establish whether validation burns an irreversible
+lifecycle bit, what the mask ROM checks internally, or whether a specific
+P1M-E permits the command.
+
+`SetICUSOptionByte @ 0x1C4DC` and `GetICUSOptionByte @ 0x1CA90` remain valid
+four-byte host primitives. The direct exported helpers have no recovered
+ordinary internal code callers; `SetOptionByteEx` independently constructs the
+same `0x6E` four-byte command in its extended-option branches. The documented
+high-level ICU-S enable transition concretely reaches `ValidateICU_S`, not a
+secret key-load operation.
+
+## 6. Complete key-provisioning negative
+
+The completed 52-command census allows a stronger scoped conclusion than the
+old symbol-name search.
+
+For the security/configuration commands (`0x20..0x30`, `0x48..0x4F`,
+`0x56/0x57`, `0x6E..0x75`, `0x78..0x7A`):
+
+- no fixed request payload is 64 bytes;
+- no command has the SHE `M1[16] || M2[32] || M3[16]` shape;
+- no ICU command accepts a standalone arbitrary 16-byte key plus slot selector;
+- `0x78` is explicitly a password check with `1 + 32 + 32` bytes;
+- `0x79/0x7A` are config write/verify with `4 + 16` bytes;
+- `0x74/0x75` consume the structural 20-byte legacy option record above;
+- the retained `BootRV40F` symbol surface has no `SetKey`, `LoadKey`,
+  `KeyUpdate`, or provisioning-image download method.
+
+This is a **complete negative for dedicated key provisioning in the retained
+standard RV40F host command surface**, not a universal negative for the silicon.
+It does not exclude:
+
+- generic flash writes carrying arbitrary bytes to an address that a particular
+  mask ROM exposes;
+- an undocumented command omitted from this library build;
+- a manufacturing-only or target-resident provisioning program distributed
+  separately;
+- Toyota/Denso-specific software or application diagnostics;
+- a target-internal key derivation/provisioning action behind a structurally
+  ordinary option command.
+
+The Sienna's recovered DID-`0x1010` command-8 path remains the only static path
+in the current project that actually has the SHE M1/M2/M3 shape.
+
+## 7. Remaining dynamic boundary
+
+The useful static RFP questions from the earlier roadmap are now closed. The
+remaining RFP/P1M-E questions require a target or a legitimate capture:
+
+- Does R7F701381/P1M-E select this `BootRV40F` family after mode entry?
+- What exact 24-byte `GetDeviceType` response and 8-byte capability word does it
+  return?
+- Which of the 52 commands are accepted, rejected, or lifecycle-gated?
+- What target-side state transition does `ValidateICU_S` cause, and is it
+  reversible?
+- Does a manufacturing-only provisioning path exist outside this standard RFP
+  distribution?
+
+Until those are observed, host support must not be promoted into a claim about
+P1M-E mask-ROM capabilities.

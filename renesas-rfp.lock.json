@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "package": {
     "name": "Renesas Flash Programmer",
     "cli_version": "V1.17",
@@ -74,6 +74,66 @@
         "size": 304,
         "sha256": "dd7fd934afa95eedfb282cd211d7e4a988f4d06d424594d973b8a86d413c7b1e"
       },
+      "__ZN9BootRV40F13GetDeviceTypeER14AbstractDriverPNS_8TypeCodeEPNS_13FreqRangeInfoE": {
+        "address": 105460,
+        "size": 160,
+        "sha256": "3811a90ab80e7a16d5c0e8e78560b230a6a6bf05606adaa577886efc5d3fbda8"
+      },
+      "__ZN9BootRV40F12GetSignatureER14AbstractDriverPNS_9SignatureEb": {
+        "address": 106916,
+        "size": 172,
+        "sha256": "3313f453224e73fbcd48f837253274df9292e0008b25996604bf6b91a4a54094"
+      },
+      "__ZN20Task_Connect_Generic12_RunInternalERK12FlashSession": {
+        "address": 700148,
+        "size": 972,
+        "sha256": "1735bcdd8d2bbdc2e73fd085f3c9d8998fcb4797e546d8c237a144e914b154fb"
+      },
+      "__ZN20Task_Connect_Generic24_RunModeEntry_SerialBootERK12FlashSessionjj": {
+        "address": 701816,
+        "size": 672,
+        "sha256": "8f4fbd7d349444f17cbce65c7bd7ad971ce1c436f46026f879112d0d5cbfadfe"
+      },
+      "__ZN20Task_Connect_Generic20_GetModeEntryPatternEPtjjj": {
+        "address": 703856,
+        "size": 648,
+        "sha256": "d1d408b2ecb4fb238fc032ff066d945e415709503a5656920fc64cfa5aff6dab"
+      },
+      "__ZN20Task_Connect_Generic13_ConnectRV40FERK12FlashSession": {
+        "address": 702748,
+        "size": 1108,
+        "sha256": "6d347a0106612ff4884983e7ba59147900f710019d140091b53a1309ba2a6290"
+      },
+      "__ZN24Task_SetupBaudrate_RV40F3RunERK12FlashSession": {
+        "address": 782156,
+        "size": 1104,
+        "sha256": "9da5ca0c45f775211110210eb93633a2578d52dd00a8a2d0f6a64329f514af1e"
+      },
+      "__ZN24Task_SetupBaudrate_RV40F25_SetSignatureToDeviceInfoERK12FlashSessionRKN9BootRV40F9SignatureE": {
+        "address": 783324,
+        "size": 2240,
+        "sha256": "b1d6fc8b39a2432e0a9dbc26045fe68a30ead642544e48675ce490fb0188665b"
+      },
+      "__ZN21Task_SetupClock_RV40F3RunERK12FlashSession": {
+        "address": 785564,
+        "size": 1020,
+        "sha256": "e1645f28f6ec9143682ed8e56b30a1e9c3ca263928c2eded2dff05d1ab0b04ad"
+      },
+      "__ZN25Task_SetupBaudrate_RV40F23RunERK12FlashSession": {
+        "address": 798316,
+        "size": 804,
+        "sha256": "640f27adb35e9bb8833f16a0a26744e5cd178f546c1b54f3b3a7315615d61b9f"
+      },
+      "__ZN12UtilityRV40F12GetRV40FInfoEPKNSt3__16vectorIhNS0_9allocatorIhEEEENS_13RV40FInfoTypeE": {
+        "address": 795944,
+        "size": 536,
+        "sha256": "12b461d2cc3c995978f96e8237cea9cfd3753451d7a658a49f7806d794935277"
+      },
+      "__ZN12UtilityRV40F19GetRV40FInfo_Phase2ENS_13RV40FInfoTypeE": {
+        "address": 796480,
+        "size": 160,
+        "sha256": "75a1e7161de3793d0caa619374fe579e2c5c2e4ca5dab5fe8af21d7aeb79b6c0"
+      },
       "__ZN10BootRATZ_B13DownloadImageER14AbstractDriverRKNSt3__16vectorIhNS2_9allocatorIhEEEEbNS_13PswHeaderTypeE": {
         "address": 79272,
         "size": 1544,
@@ -119,5 +179,11 @@
         "prefix_hex": "1fb58346002003905c466ce02078002869d02679607946ea0026a07946ea0046"
       }
     }
+  },
+  "analysis_scope": {
+    "bootrv40f_command_count": 52,
+    "bootrv40f_symbol_count": 61,
+    "command_table": "data/renesas_rfp_rv40f_commands.csv",
+    "capability_table": "data/renesas_rfp_rv40f_capabilities.csv"
   }
 }

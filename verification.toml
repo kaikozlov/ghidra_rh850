@@ -154,7 +154,12 @@ paths = ["data/ram_overlay_map.csv"]
 
 [suite.renesas_rfp]
 tests = ["tests/verify_renesas_rfp.py"]
-paths = ["docs/tooling/renesas-rfp-rv40f.md", "data/renesas_rfp_rv40f_icu_commands.csv"]
+paths = [
+  "docs/tooling/renesas-rfp-rv40f.md",
+  "data/renesas_rfp_rv40f_commands.csv",
+  "data/renesas_rfp_rv40f_capabilities.csv",
+  "renesas-rfp.lock.json",
+]
 
 [suite.scheduler_timing]
 tests = ["tests/verify_scheduler_timing.py"]
