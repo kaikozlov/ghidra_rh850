@@ -529,3 +529,25 @@ the mistakes are not re-made.
 - **Canonical:** [../tooling/techstream-ddb-pipeline.md](../tooling/techstream-ddb-pipeline.md);
   TMS-013; `tests/verify_diagnostic_vocabulary.py`;
   `tests/verify_techstream_ddb_residuals.py`.
+
+### CORR-032 — ELM Toyota-B routing was described as active 0↔2 software forwarding
+
+- **Wrong (2026-08-10, initial SECOC-033 routing pass):** describe the successful
+  physical repin primarily as moving EPS onto a "relay-backed" bus-0/2 path and
+  leave the impression that ELM diagnostics depend on Panda's generic 0↔2
+  software forwarder.
+- **Right:** `SAFETY_ELM327` explicitly calls `set_intercept_relay(false,false)`,
+  while its `nooutput_init` returns `disable_forwarding=true`. The harness is
+  therefore physically pass-through in ELM mode and generic 0↔2 software
+  forwarding is inactive. The decisive missing state is instead the independent
+  FDCAN2 physical mux: ELM param 0 routes logical bus 1/FDCAN2 to OBD, while
+  param 1 routes it to the normal harness. Comma 4/Cuatro inherits the exact
+  Tres GPIO/transceiver mux. `UdsClient.bus` selects only the logical queue.
+- **Consequence:** for yc's reported stock Toyota-B CAN0/CAN1 repin experiment,
+  the static software-equivalence candidate is `set_safety_mode(3,1)` plus UDS
+  logical bus 1. Changing only `BUS=1` while retaining implicit ELM param 0
+  exercises the OBD physical path and is not an equivalent test. Live
+  programming-session confirmation remains required.
+- **Canonical:** [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md);
+  SECOC-033; `tests/verify_toyota_eps_bus_probe.py`; optional
+  `tests/verify_external_corroboration.py`.

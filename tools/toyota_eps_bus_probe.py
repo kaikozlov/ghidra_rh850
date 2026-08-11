@@ -26,6 +26,26 @@ APPLICATION_SOFTWARE_ID_DID = 0xF181
 ELM327_SAFETY_MODE = 3
 DEFAULT_ELM327_PARAM = 1  # nonzero -> CAN_MODE_NORMAL in pinned Panda firmware
 DEFAULT_BUSES = (0, 1, 2)
+TOYOTA_B_REPIN_CANDIDATE_BUS = 1
+
+
+@dataclass(frozen=True)
+class Fdcan2Route:
+    """Pinned Cuatro/Tres FDCAN2 physical-route model.
+
+    Panda logical bus 1 always targets MCU FDCAN2.  The ELM327 safety parameter
+    selects NORMAL versus OBD_CAN2 board mode; detected harness orientation then
+    decides which FDCAN2 GPIO bank/transceiver implements that semantic route.
+    """
+
+    elm327_param: int
+    harness_flipped: bool
+    logical_bus: int
+    mcu_controller: str
+    can_mode: str
+    semantic_path: str
+    gpio_pair: str
+    transceiver: int
 
 
 @dataclass(frozen=True)
@@ -37,6 +57,25 @@ class ProbePlan:
     elm327_safety_mode: int
     elm327_param: int
     mutating_services: tuple[str, ...] = ()
+
+
+def fdcan2_route(elm327_param: int, harness_flipped: bool) -> Fdcan2Route:
+    """Model ``tres_set_can_mode`` as inherited by comma 4/Cuatro."""
+    if not 0 <= elm327_param <= 0xFFFF:
+        raise ValueError("ELM327 safety parameter must fit uint16")
+
+    normal_mode = elm327_param != 0
+    use_pb5_pb6 = normal_mode != harness_flipped
+    return Fdcan2Route(
+        elm327_param=elm327_param,
+        harness_flipped=harness_flipped,
+        logical_bus=1,
+        mcu_controller="FDCAN2",
+        can_mode="CAN_MODE_NORMAL" if normal_mode else "CAN_MODE_OBD_CAN2",
+        semantic_path="normal-harness" if normal_mode else "obd",
+        gpio_pair="PB5/PB6" if use_pb5_pb6 else "PB12/PB13",
+        transceiver=2 if use_pb5_pb6 else 4,
+    )
 
 
 def build_plan(buses: tuple[int, ...], elm327_param: int) -> ProbePlan:
@@ -146,10 +185,20 @@ def main() -> int:
 
     output: dict[str, object] = {
         "plan": asdict(plan),
+        "fdcan2_routes": [
+            asdict(fdcan2_route(plan.elm327_param, harness_flipped=False)),
+            asdict(fdcan2_route(plan.elm327_param, harness_flipped=True)),
+        ],
         "routing_note": (
-            "elm327_param=0 selects OBD CAN2 mux for logical bus 1; "
-            "nonzero preserves normal CAN routing in the pinned Panda firmware"
+            "elm327_param=0 selects the OBD physical path for logical bus 1/FDCAN2; "
+            "nonzero selects the normal-harness physical path. Harness orientation "
+            "changes which GPIO/transceiver implements that semantic path, not the logical bus."
         ),
+        "toyota_b_repin_candidate": {
+            "elm327_param": 1,
+            "bus": TOYOTA_B_REPIN_CANDIDATE_BUS,
+            "status": "static-equivalence candidate; programming-transition confirmation required",
+        },
         "mode": "execute" if args.execute else "dry-run",
     }
     if args.execute:

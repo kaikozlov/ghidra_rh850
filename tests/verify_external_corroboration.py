@@ -158,14 +158,22 @@ def main() -> int:
         roots["toyota_dataflash_secoc_setup"]
         / "payload_source/shellcode/main_ff1ff000_ff209000.c",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/car/uds.py",
+        roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/car/panda_runner.py",
+        roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/safety/modes/defaults.h",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/safety/modes/elm327.h",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/safety/modes/toyota.h",
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/safety/safety.h",
+        roots["calvinpark_openpilot"] / "panda/board/can_comms.h",
         roots["calvinpark_openpilot"] / "panda/board/main.c",
+        roots["calvinpark_openpilot"] / "panda/board/main_comms.h",
         roots["calvinpark_openpilot"] / "panda/board/boards/tres.h",
         roots["calvinpark_openpilot"] / "panda/board/boards/cuatro.h",
         roots["calvinpark_openpilot"] / "panda/board/drivers/can_common.h",
+        roots["calvinpark_openpilot"] / "panda/board/drivers/fdcan.h",
+        roots["calvinpark_openpilot"] / "panda/board/drivers/harness.h",
+        roots["calvinpark_openpilot"] / "panda/python/__init__.py",
         roots["calvinpark_openpilot"] / "panda/examples/query_fw_versions.py",
+        roots["calvinpark_openpilot"] / "panda/scripts/can_printer.py",
         roots["calvinpark_openpilot"] / "openpilot/selfdrive/pandad/panda.h",
         roots["calvinpark_openpilot"] / "openpilot/selfdrive/pandad/panda.cc",
         roots["calvinpark_openpilot"] / "tsk/COROLLA_INVESTIGATION.md",
@@ -207,6 +215,14 @@ def main() -> int:
         roots["calvinpark_openpilot"]
         / "opendbc_repo/opendbc/car/uds.py"
     ).read_text(encoding="utf-8")
+    panda_runner = (
+        roots["calvinpark_openpilot"]
+        / "opendbc_repo/opendbc/car/panda_runner.py"
+    ).read_text(encoding="utf-8")
+    default_safety = (
+        roots["calvinpark_openpilot"]
+        / "opendbc_repo/opendbc/safety/modes/defaults.h"
+    ).read_text(encoding="utf-8")
     elm327_safety = (
         roots["calvinpark_openpilot"]
         / "opendbc_repo/opendbc/safety/modes/elm327.h"
@@ -219,8 +235,14 @@ def main() -> int:
         roots["calvinpark_openpilot"]
         / "opendbc_repo/opendbc/safety/safety.h"
     ).read_text(encoding="utf-8")
+    panda_can_comms = (
+        roots["calvinpark_openpilot"] / "panda/board/can_comms.h"
+    ).read_text(encoding="utf-8")
     panda_main = (
         roots["calvinpark_openpilot"] / "panda/board/main.c"
+    ).read_text(encoding="utf-8")
+    panda_main_comms = (
+        roots["calvinpark_openpilot"] / "panda/board/main_comms.h"
     ).read_text(encoding="utf-8")
     panda_tres = (
         roots["calvinpark_openpilot"] / "panda/board/boards/tres.h"
@@ -231,8 +253,20 @@ def main() -> int:
     panda_can_common = (
         roots["calvinpark_openpilot"] / "panda/board/drivers/can_common.h"
     ).read_text(encoding="utf-8")
+    panda_fdcan = (
+        roots["calvinpark_openpilot"] / "panda/board/drivers/fdcan.h"
+    ).read_text(encoding="utf-8")
+    panda_harness = (
+        roots["calvinpark_openpilot"] / "panda/board/drivers/harness.h"
+    ).read_text(encoding="utf-8")
+    panda_python = (
+        roots["calvinpark_openpilot"] / "panda/python/__init__.py"
+    ).read_text(encoding="utf-8")
     panda_query_fw = (
         roots["calvinpark_openpilot"] / "panda/examples/query_fw_versions.py"
+    ).read_text(encoding="utf-8")
+    panda_can_printer = (
+        roots["calvinpark_openpilot"] / "panda/scripts/can_printer.py"
     ).read_text(encoding="utf-8")
     pandad_header = (
         roots["calvinpark_openpilot"] / "openpilot/selfdrive/pandad/panda.h"
@@ -306,6 +340,14 @@ def main() -> int:
         "DataFlash tooling selects ELM327 without an explicit nonzero routing parameter",
         "panda.set_safety_mode(3)" in dump_step,
     )
+    check(
+        "EPS probe also selects implicit ELM327 param 0",
+        "panda.set_safety_mode(3)" in eps_probe_step,
+    )
+    check(
+        "CAN collector also selects implicit ELM327 param 0",
+        "panda.set_safety_mode(3)" in collect_step,
+    )
 
     print("\n== pinned Panda ELM327 and harness routing ==")
     check(
@@ -328,6 +370,35 @@ def main() -> int:
         in panda_query_fw.lower(),
     )
     check(
+        "Panda can_printer's pseudo bus 3 is actually OBD-muxed logical bus 1",
+        'if canbus == "3":' in panda_can_printer
+        and "p.set_obd(True)" in panda_can_printer
+        and 'canbus = "1"' in panda_can_printer,
+    )
+    check(
+        "normal openpilot PandaRunner establishes ELM param 1 before fingerprinting",
+        "self.p.set_safety_mode(carparams.safetymodel.elm327, 1)" in panda_runner.lower()
+        and "self.p.set_obd" in panda_runner.lower(),
+    )
+    check(
+        "ELM safety-policy init ignores the routing parameter",
+        ".init = nooutput_init" in elm327_safety
+        and "SAFETY_UNUSED(param);" in default_safety,
+    )
+    elm_tx_body = elm327_safety.split("static bool elm327_tx_hook", 1)[1].split("// If safety_param", 1)[0]
+    check("ELM transmit policy itself has no safety-param branch", "param" not in elm_tx_body.lower())
+    check(
+        "ELM diagnostic whitelist admits EPS request 0x7A1",
+        "((msg->addr & 0x1FFFFF00U) != 0x700U)" in elm327_safety
+        and (0x7A1 & 0x1FFFFF00) == 0x700,
+    )
+    check(
+        "ELM mode disables software forwarding while leaving the harness relay unintercepted",
+        "return (safety_config){NULL, 0, NULL, 0, true}" in default_safety
+        and "case SAFETY_ELM327:" in panda_main
+        and "set_intercept_relay(false, false);" in panda_main,
+    )
+    check(
         "Panda logical bus orientation swaps buses 0 and 2 only",
         "bus_config[0].bus_lookup = flipped ? 2u : 0u" in panda_can_common.lower()
         and "bus_config[2].bus_lookup = flipped ? 0u : 2u" in panda_can_common.lower(),
@@ -339,6 +410,37 @@ def main() -> int:
         and "else if (bus_num == 2)" in calvin_safety_core.lower()
         and "destination_bus = 0" in calvin_safety_core.lower()
         and "destination_bus = -1" in calvin_safety_core.lower(),
+    )
+    check(
+        "harness default and ELM both keep the physical intercept relay closed/pass-through",
+        "set_intercept_relay(false, false);" in panda_harness
+        and panda_main.count("set_intercept_relay(false, false);") >= 3,
+    )
+    check(
+        "harness orientation changes reapply the remembered safety mode and parameter",
+        "can_set_orientation(harness.status == HARNESS_STATUS_FLIPPED);" in panda_main
+        and "set_safety_mode(current_safety_mode, current_safety_param);" in panda_main,
+    )
+    obd_handler = panda_main_comms.split("// **** 0xdb: set OBD CAN multiplexing mode", 1)[1].split("// **** 0xdc: set safety mode", 1)[0]
+    safety_handler = panda_main_comms.split("// **** 0xdc: set safety mode", 1)[1].split("// **** 0xdd:", 1)[0]
+    check(
+        "Panda set_obd USB request changes board CAN mode without updating remembered safety param",
+        "current_board->set_can_mode" in obd_handler and "current_safety_param" not in obd_handler,
+    )
+    check(
+        "Panda set_safety_mode USB request updates the persistent safety state through set_safety_mode",
+        "set_safety_mode(req->param1, (uint16_t)req->param2);" in safety_handler
+        and "current_safety_param = param;" in calvin_safety_core,
+    )
+    check(
+        "Python set_obd and set_safety_mode are distinct USB controls",
+        "controlWrite(Panda.REQUEST_OUT, 0xdb, int(obd), 0, b'')" in panda_python
+        and "controlWrite(Panda.REQUEST_OUT, 0xdc, mode, param, b'')" in panda_python,
+    )
+    check(
+        "Panda constructor defaults to disabling heartbeat checks for standalone scripts",
+        "disable_checks: bool = True" in panda_python
+        and "self.set_heartbeat_disabled()" in panda_python,
     )
     check(
         "pandad marks returned CAN with source offset 0x80",
@@ -358,6 +460,11 @@ def main() -> int:
         and "enable_can_transceiver(4u, true)" in panda_tres.lower(),
     )
     check(
+        "Tres normal/OBD selection is explicitly coupled to harness orientation",
+        "(bool)(mode == CAN_MODE_NORMAL) != (bool)(harness.status == HARNESS_STATUS_FLIPPED)"
+        in panda_tres,
+    )
+    check(
         "comma 4 Cuatro inherits the Tres FDCAN2 physical-routing implementation",
         ".set_can_mode = tres_set_can_mode" in panda_cuatro.lower(),
     )
@@ -365,6 +472,17 @@ def main() -> int:
         "UdsClient bus selection only feeds CAN send and receive-bus filtering",
         "self.tx(self.tx_addr, msg, self.bus)" in uds
         and "return bus == self.bus and addr == self.rx_addr" in uds,
+    )
+    check(
+        "Panda CAN send path maps the UDS logical bus through bus_config into an MCU CAN controller",
+        "can_send(&to_push, to_push.bus, false);" in panda_can_comms
+        and "process_can(CAN_NUM_FROM_BUS_NUM(bus_number));" in panda_can_common
+        and "uint8_t bus_number = BUS_NUM_FROM_CAN_NUM(can_number);" in panda_fdcan,
+    )
+    check(
+        "FDCAN2 mux error recovery explicitly accounts for ACK errors while switching physical paths",
+        "while multiplexing between buses 1 and 3 we are getting ACK errors" in panda_fdcan
+        and "can_clear_send(FDCANx, can_number);" in panda_fdcan,
     )
     check("dump shellcode transmits CAN 0x7A9", "= 0x7a9;" in shellcode)
     for address in (

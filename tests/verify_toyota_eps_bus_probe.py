@@ -18,8 +18,10 @@ from tools.toyota_eps_bus_probe import (
     DEFAULT_ELM327_PARAM,
     ELM327_SAFETY_MODE,
     RX_ADDR,
+    TOYOTA_B_REPIN_CANDIDATE_BUS,
     TX_ADDR,
     build_plan,
+    fdcan2_route,
 )
 
 passed = failed = 0
@@ -43,6 +45,20 @@ check("probe defaults to all three logical Panda buses", plan.buses == (0, 1, 2)
 check("probe uses ELM327 safety mode", plan.elm327_safety_mode == ELM327_SAFETY_MODE == 3)
 check("probe defaults to nonzero ELM327 param", plan.elm327_param == DEFAULT_ELM327_PARAM == 1)
 check("probe declares no mutating services", plan.mutating_services == ())
+check("Toyota-B repin-equivalence candidate uses logical bus 1", TOYOTA_B_REPIN_CANDIDATE_BUS == 1)
+
+print("\n== pinned Cuatro/Tres FDCAN2 route model ==")
+normal = fdcan2_route(1, harness_flipped=False)
+normal_flipped = fdcan2_route(1, harness_flipped=True)
+obd = fdcan2_route(0, harness_flipped=False)
+obd_flipped = fdcan2_route(0, harness_flipped=True)
+check("ELM param 1 selects normal-harness semantic path", normal.semantic_path == normal_flipped.semantic_path == "normal-harness")
+check("ELM param 0 selects OBD semantic path", obd.semantic_path == obd_flipped.semantic_path == "obd")
+check("logical bus 1 remains MCU FDCAN2 in every route", all(r.logical_bus == 1 and r.mcu_controller == "FDCAN2" for r in (normal, normal_flipped, obd, obd_flipped)))
+check("normal orientation + normal mode uses PB5/PB6 transceiver 2", (normal.gpio_pair, normal.transceiver) == ("PB5/PB6", 2))
+check("normal orientation + OBD mode uses PB12/PB13 transceiver 4", (obd.gpio_pair, obd.transceiver) == ("PB12/PB13", 4))
+check("flipped orientation reverses the implementing FDCAN2 GPIO/transceiver", (normal_flipped.gpio_pair, normal_flipped.transceiver) == ("PB12/PB13", 4) and (obd_flipped.gpio_pair, obd_flipped.transceiver) == ("PB5/PB6", 2))
+check("orientation never changes normal-vs-OBD semantic route", normal.can_mode == normal_flipped.can_mode == "CAN_MODE_NORMAL" and obd.can_mode == obd_flipped.can_mode == "CAN_MODE_OBD_CAN2")
 
 print("\n== CLI dry-run ==")
 script = REPO / "tools" / "toyota_eps_bus_probe.py"
@@ -60,6 +76,9 @@ check("dry-run reports buses 0/1/2", output["plan"]["buses"] == [0, 1, 2])
 check("dry-run reports F181", output["plan"]["did"] == 0xF181)
 check("dry-run reports normal-routing ELM327 param", output["plan"]["elm327_param"] == 1)
 check("routing note distinguishes OBD mux", "param=0" in output["routing_note"] and "logical bus 1" in output["routing_note"])
+check("dry-run emits both harness-orientation implementations", len(output["fdcan2_routes"]) == 2)
+check("dry-run records the software repin candidate as param1 + bus1", output["toyota_b_repin_candidate"]["elm327_param"] == 1 and output["toyota_b_repin_candidate"]["bus"] == 1)
+check("dry-run keeps candidate dynamically unconfirmed", "confirmation required" in output["toyota_b_repin_candidate"]["status"])
 
 custom = subprocess.run(
     [sys.executable, str(script), "--bus", "1", "--elm327-param", "0"],
