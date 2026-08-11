@@ -4,8 +4,11 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import struct
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pefile
@@ -20,6 +23,7 @@ from parse_ddb import (  # noqa: E402
 
 ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
 BIN = ROOT / "bin"
+FACTORY_ARTIFACT = REPO / "data/generated/techstream_v18/ddb_factory_table_map.json"
 
 passed = 0
 failed = 0
@@ -63,6 +67,9 @@ check(
 )
 
 kgp_pe = pefile.PE(str(kgp), fast_load=True)
+kgp_pe.parse_data_directories(
+    directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_EXPORT"]]
+)
 image_base = kgp_pe.OPTIONAL_HEADER.ImageBase
 factory_body = kgp_pe.get_data(0x1001ECCB - image_base, 14551)
 check(
@@ -78,6 +85,62 @@ check("factory maps section 6 to CDbPidTable",
       ECU_TABLE_CLASS_NAMES[6] == "CDbPidTable")
 check("factory maps section 10 to CDbFreezeTable",
       ECU_TABLE_CLASS_NAMES[10] == "CDbFreezeTable")
+
+print("\n== independently derived factory maps ==")
+factory_artifact = json.loads(FACTORY_ARTIFACT.read_text())
+exports = {}
+for symbol in kgp_pe.DIRECTORY_ENTRY_EXPORT.symbols:
+    if not symbol.name:
+        continue
+    decorated = symbol.name.decode("ascii")
+    if decorated.startswith("??0") and "@@QAE@EE@Z" in decorated:
+        exports[image_base + symbol.address] = decorated[3:].split("@@", 1)[0]
+
+def independent_factory_map(jump_table_va: int, maximum_type: int) -> dict[int, str]:
+    raw_table = kgp_pe.get_data(jump_table_va - image_base, (maximum_type + 1) * 4)
+    cases = struct.unpack("<" + "I" * (maximum_type + 1), raw_table)
+    result = {}
+    for table_type, case_va in enumerate(cases):
+        body = kgp_pe.get_data(case_va - image_base, 0x80)
+        targets = []
+        for offset, opcode in enumerate(body[:-4]):
+            if opcode != 0xE8:
+                continue
+            target = case_va + offset + 5 + struct.unpack_from("<i", body, offset + 1)[0]
+            if target in exports:
+                targets.append(exports[target])
+        if targets:
+            result[table_type] = targets[0]
+    return result
+
+raw_master_map = independent_factory_map(0x1001EB67, 0x58)
+raw_ecu_map = independent_factory_map(0x100225A2, 0x96)
+check("raw factories resolve all 89 format-1 and 151 format-2 cases",
+      len(raw_master_map) == 89 and len(raw_ecu_map) == 151)
+check("parser master names are a strict match to executable constructors",
+      all(raw_master_map[key] == value for key, value in MASTER_TABLE_CLASS_NAMES.items()))
+check("parser ECU names are a strict match to executable constructors",
+      all(raw_ecu_map[key] == value for key, value in ECU_TABLE_CLASS_NAMES.items()))
+artifact_maps = {
+    factory["format_version"]: {
+        row["table_type"]: row["class_name"]
+        for row in factory["records"] if row["status"] == "constructed"
+    }
+    for factory in factory_artifact["factories"]
+}
+check("generated format-1 map equals independent executable walk",
+      artifact_maps[1] == raw_master_map)
+check("generated format-2 map equals independent executable walk",
+      artifact_maps[2] == raw_ecu_map)
+with tempfile.TemporaryDirectory() as temp_dir:
+    rebuilt_path = Path(temp_dir) / "factory.json"
+    proc = subprocess.run(
+        [sys.executable, str(REPO / "tools/techstream/extract_factory_table_map.py"),
+         "--output", str(rebuilt_path)], capture_output=True, text=True,
+    )
+    check("factory-map generator succeeds", proc.returncode == 0, proc.stderr.strip())
+    check("factory-map regeneration is byte-identical",
+          proc.returncode == 0 and rebuilt_path.read_bytes() == FACTORY_ARTIFACT.read_bytes())
 
 print("\n== Security_P4 structural audit ==")
 sec = parser.parse_ecu_db(security)
