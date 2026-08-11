@@ -10,7 +10,9 @@
 >
 > **Canonical artifacts:** committed CodeFlash bytes, decompiled functions
 >
-> **Verification:** `tests/verify_memory_safety.py`
+> **Verification:** `tests/verify_memory_safety.py`,
+> `tests/verify_memory_safety_mutations.py`, and
+> `ghidra/scripts/verify/AssertMemorySafetyPaths.java`
 >
 > **Related:** [bootloader payload gate](bootloader-payload-gate.md), [SecOC application chain](secoc/application-chain.md)
 
@@ -34,6 +36,34 @@ primitive, and applicability to the target ECU generation.
 | MEM-SAFE-002 | Malformed RoutineControl lengths cause OOB CMAC reads | OOB read (no exfiltration consumer found) | Post-auth (needs prior CRC success) | verified |
 | MEM-SAFE-003 | RID 0x10F3 provides byte-granular CodeFlash equality oracle | Constrained CodeFlash read-back | Post-auth (SA + DID sequence) | verified |
 | MEM-SAFE-004 | ICU-S command-8 failure path zero-fills unbounded caller length | memset primitive | Not remotely controllable in this image | verified (latent) |
+| MEM-SAFE-005 | No corruption found in the enumerated CAN/ISO-TP/SecOC receive boundary | Bounded negative | Calibration-specific enumerated graph | bounded |
+
+## Claim-to-proof matrix
+
+The curated [proof matrix](../../data/memory_safety_proof_matrix.csv) records,
+for every claim, its entry functions, decisive arithmetic and branches, state
+fields, source/destination pointers, controlling table rows, reachability
+chain, exploitability assumptions, negative boundary, and verifier. The two
+verification layers are deliberately independent:
+
+- `tools/memory_safety_semantics.py` reads the committed firmware directly and
+  pins only decisive instruction encodings and table values—not whole-body
+  hashes or generated Ghidra artifacts.
+- `AssertMemorySafetyPaths.java` independently checks live Ghidra instruction
+  mnemonics/operands, basic-block flows, call/reference censuses, and table
+  bytes in a rebuilt project.
+
+The mutation suite zeros every load-bearing body and separately changes the
+shift amount, endpoint subtraction, 16-byte increment, equality branch,
+compare response, zero-fill length source, and both range-check branches. Each
+mutant must fail its named proposition. An unrelated-byte mutant must still
+pass. An independent arithmetic model covers lengths `0`, `1`, `15`, `16`,
+`17`, and `0x400`.
+
+`verified` below means the decisive static firmware propositions are now
+deterministically asserted. It does not mean an exploit has been dynamically
+demonstrated. MEM-SAFE-005 remains `bounded` because an enumerated negative is
+not proof that an unknown indirect consumer cannot exist.
 
 ## MEM-SAFE-001: partial AES-block chunks produce raw RAM writes
 
@@ -184,13 +214,15 @@ range — eventually beyond mapped LocalRAM.
 For `length < 16`, the endpoint underflows below `start`, causing immediate
 OOB reads.
 
-### No exfiltration consumer
+### No direct exfiltration consumer in the bounded step graph
 
-The OOB bytes feed only internal CMAC state through the AES engine. The
-malformed walk never reaches final-tag comparison (because the endpoint is
-never matched), so no comparison result is returned to the caller. Expected
-external result: no completed UDS response, followed by a hang, exception,
-watchdog reset, or hard reset depending on RH850 unmapped-read handling.
+The exact direct-callee census for `payload_cmac_verify_step @ 0x7170` contains
+only the CMAC primitive at `0x7E0C`. The OOB bytes therefore have no direct
+response-buffer consumer in that bounded function graph. The malformed walk
+never reaches final-tag comparison because the endpoint is never matched.
+Expected external behavior is a hypothesis—hang, exception, or reset depends
+on RH850 unmapped-read handling and has not been dynamically probed. This
+negative does not exclude hardware timing or fault side channels.
 
 ### Reachability constraint
 
@@ -289,10 +321,15 @@ failure.
 
 ### Why it is not exploitable here
 
-The configured command-8 worker around `0x6828A` supplies a fixed 48-byte
+The configured command-8 worker at `0x6823C` supplies a fixed 48-byte
 result buffer and length. DID `0x1010` enforces an exact 64-byte request and a
 49-byte status/result response. No diagnostic or CAN sender can control the
 output pointer or expand the zero length.
+
+The bounded caller census is exact in the rebuilt graph: command-8 prepare
+`0x86E62` is called at `0x870DC` and `0x87142`; result copy `0x86EE8` is called
+at `0x86FB4` and `0x871B2`; and driver dispatch `0x88936` has the single
+configured call at `0x6828A`.
 
 The defect would become exploitable if a future callback (or a corrupted
 callback pointer via MEM-SAFE-001) supplied a caller-controlled output
@@ -315,7 +352,8 @@ input-handling code:
 5. **Unchecked sink** — caller validates capacity, callee blindly copies, and
    some alternate caller bypasses the validation.
 
-Each externally reachable path was checked against this taxonomy.
+Each path in the explicit proof-matrix boundary was checked against this
+taxonomy. This is not an unqualified whole-image absence claim.
 
 ## Specific audited paths (safe primitives with caller-gated reachability)
 
@@ -443,10 +481,12 @@ The core insight: **the real prize is making one layer authenticate or validate
 N bytes while the next layer consumes M bytes.** That differential is enough to
 own the control path without ever reading the ICU-S key.
 
-## Negative findings: paths that reject safely
+## MEM-SAFE-005: bounded negative findings
 
-The following externally reachable paths were audited and found to reject
-malformed input correctly:
+The following enumerated externally reachable paths were audited and found to
+reject malformed input correctly. The grade is `bounded`: the assertion covers
+the named sinks, callers, tables, and branches, not every possible unknown
+indirect consumer in the image.
 
 ### ISO-TP reassembly
 
