@@ -1,318 +1,186 @@
 #!/usr/bin/env python3
-"""Verify the committed semantic coverage ledger against its schema and floors.
-
-The ledger is a recovered-function inventory, not a claim that every function is
-semantically understood. Most rows must remain evidence_grade=recovered.
-"""
+"""Validate the committed semantic ledger and its curated evidence boundary."""
 from __future__ import annotations
 
 import csv
 import json
+import subprocess
 import sys
+import tempfile
 from collections import Counter
 from pathlib import Path
 
+
 REPO = Path(__file__).resolve().parents[1]
-CSV_PATH = REPO / "data" / "semantic_coverage_ledger.csv"
-SUMMARY_PATH = REPO / "data" / "semantic_coverage_summary.json"
-
+LEDGER = REPO / "data" / "semantic_coverage_ledger.csv"
+SUMMARY = REPO / "data" / "semantic_coverage_summary.json"
+REVIEWS = REPO / "data" / "semantic_review_status.csv"
+MERGER = REPO / "tools" / "apply_semantic_review_status.py"
 HEADER = [
-    "entry_addr",
-    "body_bytes",
-    "name",
-    "name_source",
-    "is_thunk",
-    "calling_convention",
-    "caller_count",
-    "callee_count",
-    "root_kind",
-    "ram_ref_count",
-    "mmio_ref_count",
-    "codeflash_data_ref_count",
-    "string_ref_count",
-    "subsystem",
-    "evidence_grade",
+    "entry_addr", "body_bytes", "name", "discovery_source",
+    "discovery_provenance", "name_source", "is_thunk", "calling_convention",
+    "caller_count", "callee_count", "indirect_reference_count", "root_kind",
+    "ram_ref_count", "ram_read_ref_count", "ram_write_ref_count",
+    "mmio_ref_count", "codeflash_data_ref_count", "string_ref_count",
+    "subsystem", "review_state", "evidence_grade", "verification_source",
+    "oracle_class", "execution_status", "review_date", "review_result",
 ]
-
-# Floor from AssertNoUndefinedInFunctions on the current working project.
-MIN_FUNCTIONS = 5865
-CODEFLASH_END = 0x100000
-APPLICATION_BASE = 0x20000
-LOCAL_RAM_START = 0xFEBE0000
-LOCAL_RAM_END = 0xFEC00000  # exclusive
-ALLOWED_GRADES = {"annotated", "recovered", "thunk"}
-ALLOWED_SOURCES = {
-    "USER_DEFINED",
-    "DEFAULT",
-    "ANALYSIS",
-    "IMPORTED",
-    "CALCULATED",
-    "UNKNOWN",
+SEMANTIC_FIELDS = [
+    "evidence_grade", "verification_source", "oracle_class", "execution_status",
+    "review_date", "review_result",
+]
+DISCOVERY = {
+    "auto-analysis", "direct-call seed", "callback-table seed", "vector seed",
+    "manual/other",
 }
-ALLOWED_ROOTS = {"", "interrupt", "scheduler"}
-ALLOWED_SUBSYSTEMS = {"", "boot", "application"}
-
-
-def in_mapped_image(addr: int) -> bool:
-    return (0 <= addr < CODEFLASH_END) or (LOCAL_RAM_START <= addr < LOCAL_RAM_END)
-
-# Documented landmarks: name / convention / grade / subsystem / optional root.
-LANDMARKS = {
-    0x000001B0: {
-        "name": "boot_reset_startup",
-        "calling_convention": "__stdcall",
-        "evidence_grade": "annotated",
-        "subsystem": "boot",
-        "name_source": "USER_DEFINED",
-    },
-    0x00006FEC: {
-        "name": "security_access_derive_stage1_key",
-        "calling_convention": "__stdcall",
-        "evidence_grade": "annotated",
-        "subsystem": "boot",
-        "name_source": "USER_DEFINED",
-    },
-    0x00007068: {
-        "name": "payload_build_derive_key",
-        "calling_convention": "__stdcall",
-        "evidence_grade": "annotated",
-        "subsystem": "boot",
-        "name_source": "USER_DEFINED",
-    },
-    0x00020880: {
-        "name": "application_entry",
-        "calling_convention": "__stdcall",
-        "evidence_grade": "annotated",
-        "subsystem": "application",
-        "name_source": "USER_DEFINED",
-    },
-    0x00064FCC: {
-        "name": "application_foreground_cyclic_loop",
-        "calling_convention": "__stdcall",
-        "evidence_grade": "annotated",
-        "subsystem": "application",
-        "name_source": "USER_DEFINED",
-        "root_kind": "scheduler",
-    },
-    0x00087610: {
-        "name": "icus_interrupt_channel292_dispatch",
-        "calling_convention": "__stdcall",
-        "evidence_grade": "annotated",
-        "subsystem": "application",
-        "name_source": "USER_DEFINED",
-    },
-    0x00086E62: {
-        "name": "icus_command8_key_update_prepare",
-        "calling_convention": "__stdcall",
-        "evidence_grade": "annotated",
-        "subsystem": "application",
-        "name_source": "USER_DEFINED",
-    },
-    0x0008997A: {
-        "name": "icus_command8_authenticated_key_update",
-        "calling_convention": "__stdcall",
-        "evidence_grade": "annotated",
-        "subsystem": "application",
-        "name_source": "USER_DEFINED",
-    },
-    0x00096354: {
-        "name": "application_wdbi_1010_start_key_update",
-        "calling_convention": "__stdcall",
-        "evidence_grade": "annotated",
-        "subsystem": "application",
-        "name_source": "USER_DEFINED",
-    },
+REVIEW_STATES = {
+    "unreviewed", "reviewed_unknown", "structurally_bounded",
+    "semantically_identified",
 }
+GRADES = {"", "verified", "observed", "recovered", "bounded", "hypothesis", "disproved"}
+ORACLES = {
+    "", "raw_bytes", "instruction_semantics", "cfg_dataflow", "dynamic_trace",
+    "independent_external_artifact", "generated_self_check", "identity_hash",
+    "documentation_lint",
+}
+INDEPENDENT = {
+    "raw_bytes", "instruction_semantics", "cfg_dataflow", "dynamic_trace",
+    "independent_external_artifact",
+}
+EXECUTION = {"", "passed", "failed", "unavailable"}
 
 passed = 0
 failed = 0
 
 
-def check(name: str, cond: bool, detail: str = "") -> None:
+def check(name: str, condition: bool, detail: str = "") -> None:
     global passed, failed
-    if cond:
-        passed += 1
-        mark = "PASS"
-    else:
-        failed += 1
-        mark = "FAIL"
+    passed += bool(condition)
+    failed += not condition
     suffix = f" ({detail})" if detail else ""
-    print(f"[{mark}] {name}{suffix}")
+    print(f"[{'PASS' if condition else 'FAIL'}] {name}{suffix}")
 
 
-def parse_addr(text: str) -> int:
-    return int(text, 0)
+def counts(rows: list[dict[str, str]], field: str, *, include_blank: bool = True) -> dict[str, int]:
+    result = Counter(row[field] for row in rows if include_blank or row[field])
+    return dict(sorted(result.items()))
+
+
+def merger_rejects(rows: list[dict[str, str]], reviews: list[dict[str, str]], expected: str) -> bool:
+    with tempfile.TemporaryDirectory(prefix="semantic-review-negative-") as directory:
+        root = Path(directory)
+        ledger = root / "ledger.csv"
+        review = root / "reviews.csv"
+        with ledger.open("w", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=HEADER, lineterminator="\n")
+            writer.writeheader()
+            structural_rows = []
+            for row in rows:
+                structural = dict(row)
+                for field in HEADER[19:]:
+                    structural[field] = ""
+                structural_rows.append(structural)
+            writer.writerows(structural_rows)
+        with review.open("w", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=["entry_addr", *HEADER[19:]], lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(reviews)
+        result = subprocess.run(
+            [sys.executable, str(MERGER), "--ledger", str(ledger), "--reviews", str(review)],
+            text=True, capture_output=True, check=False,
+        )
+        return result.returncode != 0 and expected in (result.stdout + result.stderr)
 
 
 def main() -> int:
-    print("== semantic coverage ledger ==")
-    check("CSV exists", CSV_PATH.is_file(), str(CSV_PATH))
-    check("summary JSON exists", SUMMARY_PATH.is_file(), str(SUMMARY_PATH))
-    if not CSV_PATH.is_file():
-        print(f"\nSummary: {passed} passed, {failed} failed")
+    print("== semantic coverage artifact ==")
+    check("ledger exists", LEDGER.is_file(), str(LEDGER))
+    check("summary exists", SUMMARY.is_file(), str(SUMMARY))
+    check("curated reviews exist", REVIEWS.is_file(), str(REVIEWS))
+    if not all(path.is_file() for path in (LEDGER, SUMMARY, REVIEWS)):
         return 1
 
-    with CSV_PATH.open(newline="") as fh:
-        reader = csv.DictReader(fh)
-        check("header matches schema", reader.fieldnames == HEADER, repr(reader.fieldnames))
+    with LEDGER.open(newline="") as handle:
+        reader = csv.DictReader(handle)
+        check("ledger schema is exact", reader.fieldnames == HEADER, repr(reader.fieldnames))
         rows = list(reader)
-
-    check("function floor", len(rows) >= MIN_FUNCTIONS, f"{len(rows)} >= {MIN_FUNCTIONS}")
-    check("at least one row", len(rows) > 0)
-
-    addrs: list[int] = []
-    grades: Counter[str] = Counter()
-    sources: Counter[str] = Counter()
-    conventions: Counter[str] = Counter()
-    by_addr: dict[int, dict[str, str]] = {}
-
-    prev = -1
-    for i, row in enumerate(rows):
+    addresses: list[int] = []
+    errors: list[str] = []
+    for index, row in enumerate(rows):
         try:
-            addr = parse_addr(row["entry_addr"])
-            body = int(row["body_bytes"])
-            callers = int(row["caller_count"])
-            callees = int(row["callee_count"])
-            for key in (
-                "ram_ref_count",
-                "mmio_ref_count",
-                "codeflash_data_ref_count",
-                "string_ref_count",
+            address = int(row["entry_addr"], 0)
+            for field in (
+                "body_bytes", "caller_count", "callee_count", "indirect_reference_count",
+                "ram_ref_count", "ram_read_ref_count", "ram_write_ref_count",
+                "mmio_ref_count", "codeflash_data_ref_count", "string_ref_count",
             ):
-                int(row[key])
-        except (KeyError, ValueError) as exc:
-            check(f"row {i} parses", False, str(exc))
+                if int(row[field]) < 0:
+                    raise ValueError(f"negative {field}")
+        except (KeyError, ValueError) as error:
+            errors.append(f"row {index}: {error}")
             continue
+        addresses.append(address)
+        if row["discovery_source"] not in DISCOVERY:
+            errors.append(f"0x{address:x}: discovery_source={row['discovery_source']}")
+        if not row["discovery_provenance"]:
+            errors.append(f"0x{address:x}: blank discovery provenance")
+        if row["review_state"] not in REVIEW_STATES:
+            errors.append(f"0x{address:x}: review_state={row['review_state']}")
+        if row["evidence_grade"] not in GRADES or row["oracle_class"] not in ORACLES:
+            errors.append(f"0x{address:x}: grade/oracle vocabulary")
+        if row["execution_status"] not in EXECUTION:
+            errors.append(f"0x{address:x}: execution_status={row['execution_status']}")
+        if row["review_state"] == "unreviewed" and any(row[field] for field in SEMANTIC_FIELDS):
+            errors.append(f"0x{address:x}: unreviewed row carries semantic evidence")
+        if row["evidence_grade"] in {"verified", "observed", "recovered", "bounded", "disproved"}:
+            if row["oracle_class"] not in INDEPENDENT or not row["verification_source"]:
+                errors.append(f"0x{address:x}: grade exceeds oracle")
+        if row["ram_read_ref_count"] and int(row["ram_read_ref_count"]) > int(row["ram_ref_count"]):
+            errors.append(f"0x{address:x}: RAM read unique count exceeds total")
+        if row["ram_write_ref_count"] and int(row["ram_write_ref_count"]) > int(row["ram_ref_count"]):
+            errors.append(f"0x{address:x}: RAM write unique count exceeds total")
 
-        addrs.append(addr)
-        by_addr[addr] = row
-        grades[row["evidence_grade"]] += 1
-        sources[row["name_source"]] += 1
-        conventions[row["calling_convention"]] += 1
-
-        if addr <= prev:
-            check("rows sorted unique by address", False, f"0x{addr:08x} after 0x{prev:08x}")
-            break
-        prev = addr
-
-        if not in_mapped_image(addr):
-            check("entry in CodeFlash or LocalRAM", False, row["entry_addr"])
-        if body <= 0:
-            check("body_bytes positive", False, f"{row['entry_addr']} body={body}")
-        if callers < 0 or callees < 0:
-            check("caller/callee non-negative", False, row["entry_addr"])
-        if row["is_thunk"] not in ("true", "false"):
-            check("is_thunk boolean", False, row["is_thunk"])
-        if row["evidence_grade"] not in ALLOWED_GRADES:
-            check("evidence_grade allowed", False, row["evidence_grade"])
-        if row["name_source"] not in ALLOWED_SOURCES:
-            check("name_source allowed", False, row["name_source"])
-        if row["root_kind"] not in ALLOWED_ROOTS:
-            check("root_kind allowed", False, row["root_kind"])
-        if row["subsystem"] not in ALLOWED_SUBSYSTEMS:
-            check("subsystem allowed", False, row["subsystem"])
-        if row["subsystem"] == "boot" and not (0 <= addr < APPLICATION_BASE):
-            check("boot subsystem address", False, row["entry_addr"])
-        if row["subsystem"] == "application" and not (
-            APPLICATION_BASE <= addr < CODEFLASH_END
-        ):
-            check("application subsystem address", False, row["entry_addr"])
-        if addr >= CODEFLASH_END and row["subsystem"] != "":
-            check("non-CodeFlash subsystem empty", False,
-                  f"{row['entry_addr']} subsystem={row['subsystem']}")
-        if row["is_thunk"] == "true" and row["evidence_grade"] != "thunk":
-            check("thunk grade", False, row["entry_addr"])
-        if (
-            row["is_thunk"] == "false"
-            and row["name_source"] == "USER_DEFINED"
-            and row["evidence_grade"] != "annotated"
-        ):
-            check("USER_DEFINED grade", False, f"{row['entry_addr']} -> {row['evidence_grade']}")
-        if (
-            row["is_thunk"] == "false"
-            and row["name_source"] != "USER_DEFINED"
-            and row["evidence_grade"] != "recovered"
-        ):
-            check("auto-name grade", False, f"{row['entry_addr']} -> {row['evidence_grade']}")
-    else:
-        check("rows sorted unique by address", len(addrs) == len(set(addrs)), len(addrs))
-        check(
-            "CodeFlash-resident majority",
-            sum(1 for a in addrs if a < CODEFLASH_END) >= MIN_FUNCTIONS - 8,
-            f"codeflash={sum(1 for a in addrs if a < CODEFLASH_END)}",
-        )
-
+    check("all rows satisfy structural/semantic rules", not errors, repr(errors[:8]))
+    check("addresses are sorted and unique", addresses == sorted(set(addresses)), str(len(addresses)))
+    check("ledger is nonempty", bool(rows))
     check(
-        "not all functions annotated",
-        grades.get("annotated", 0) < len(rows),
-        f"annotated={grades.get('annotated', 0)} / {len(rows)}",
+        "a user-defined name does not imply semantic review",
+        any(row["name_source"] == "USER_DEFINED" and row["review_state"] == "unreviewed"
+            and not row["evidence_grade"] for row in rows),
     )
-    check(
-        "majority still recovered",
-        grades.get("recovered", 0) > len(rows) // 2,
-        f"recovered={grades.get('recovered', 0)} / {len(rows)}",
-    )
-    check("has annotated landmarks", grades.get("annotated", 0) > 0)
-    check("has recovered functions", grades.get("recovered", 0) > 0)
+    by_address = {int(row["entry_addr"], 0): row for row in rows}
+    for address in (0x9729A, 0x972FA, 0x97432, 0x97546, 0x975EE, 0x97668, 0x976F4):
+        row = by_address.get(address)
+        check(f"callback 0x{address:08x} present", row is not None)
+        if row:
+            check(f"callback 0x{address:08x} discovery source", row["discovery_source"] == "callback-table seed")
+            check(f"callback 0x{address:08x} reviewed semantics", row["review_state"] == "semantically_identified")
+    check("direct-call seed represented", any(row["discovery_source"] == "direct-call seed" for row in rows))
 
-    print("\n== landmarks ==")
-    for addr, expect in sorted(LANDMARKS.items()):
-        row = by_addr.get(addr)
-        check(f"landmark 0x{addr:08x} present", row is not None)
-        if row is None:
-            continue
-        for key, value in expect.items():
-            check(
-                f"landmark 0x{addr:08x} {key}",
-                row.get(key) == value,
-                f"{row.get(key)!r} == {value!r}",
-            )
+    summary = json.loads(SUMMARY.read_text())
+    reviewed = sum(row["review_state"] != "unreviewed" for row in rows)
+    bounded = sum(row["review_state"] in {"structurally_bounded", "semantically_identified"} for row in rows)
+    verified = sum(row["evidence_grade"] == "verified" and row["execution_status"] == "passed" for row in rows)
+    check("summary schema version", summary.get("schema_version") == 2)
+    check("summary discovered count", summary.get("discovered_function_count") == len(rows))
+    check("summary reviewed count", summary.get("reviewed_function_count") == reviewed)
+    check("summary bounded semantics count", summary.get("bounded_semantics_count") == bounded)
+    check("summary deterministic verified count", summary.get("deterministically_verified_count") == verified)
+    check("summary discovery counts", summary.get("discovery_source_counts") == counts(rows, "discovery_source"))
+    check("summary review counts", summary.get("review_state_counts") == counts(rows, "review_state"))
+    check("summary grade counts", summary.get("evidence_grade_counts") == counts(rows, "evidence_grade", include_blank=False))
 
-    # Known ISR wrappers from RecoverVectorHandlers / AssertDecompilerInvariants.
-    for addr in (0x650AC, 0x650EE):
-        row = by_addr.get(addr)
-        check(f"ISR 0x{addr:08x} present", row is not None)
-        if row is None:
-            continue
-        check(
-            f"ISR 0x{addr:08x} convention",
-            row["calling_convention"] == "__interrupt",
-            row["calling_convention"],
-        )
-        check(
-            f"ISR 0x{addr:08x} root_kind",
-            row["root_kind"] == "interrupt",
-            row["root_kind"],
-        )
-
-    print("\n== summary JSON ==")
-    if SUMMARY_PATH.is_file():
-        summary = json.loads(SUMMARY_PATH.read_text())
-        check("summary function_count", summary.get("function_count") == len(rows),
-              f"{summary.get('function_count')} == {len(rows)}")
-        check(
-            "summary grade counts",
-            summary.get("evidence_grade_counts") == dict(sorted(grades.items())),
-            repr(summary.get("evidence_grade_counts")),
-        )
-        check(
-            "summary name_source counts",
-            summary.get("name_source_counts") == dict(sorted(sources.items())),
-        )
-        check(
-            "summary calling_convention counts",
-            summary.get("calling_convention_counts") == dict(sorted(conventions.items())),
-        )
-        check("summary schema_version", summary.get("schema_version") == 1)
-
-    print("\n== grade census ==")
-    for grade, count in sorted(grades.items()):
-        print(f"  {grade}: {count}")
-    print(f"  total: {len(rows)}")
+    with REVIEWS.open(newline="") as handle:
+        review_rows = list(csv.DictReader(handle))
+    check("curated addresses are unique", len(review_rows) == len({row["entry_addr"] for row in review_rows}))
+    unknown = dict(review_rows[0])
+    unknown["entry_addr"] = "0x00ffffff"
+    check("merger rejects unknown addresses", merger_rejects(rows, [unknown], "unknown function"))
+    check("merger rejects duplicate entries", merger_rejects(rows, [review_rows[0], review_rows[0]], "duplicate semantic review"))
 
     print(f"\nSummary: {passed} passed, {failed} failed")
     return 1 if failed else 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

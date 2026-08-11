@@ -68,6 +68,10 @@ rg -q 'ExportSemanticCoverageLedger: wrote ' "$LOG" || {
   exit 1
 }
 
+python3 "$ROOT/tools/apply_semantic_review_status.py" \
+  --ledger "$CSV_OUT" \
+  --reviews "$ROOT/data/semantic_review_status.csv"
+
 python3 - "$CSV_OUT" "$SUMMARY_OUT" <<'PY'
 import csv
 import json
@@ -81,18 +85,29 @@ expected = [
     "entry_addr",
     "body_bytes",
     "name",
+    "discovery_source",
+    "discovery_provenance",
     "name_source",
     "is_thunk",
     "calling_convention",
     "caller_count",
     "callee_count",
+    "indirect_reference_count",
     "root_kind",
     "ram_ref_count",
+    "ram_read_ref_count",
+    "ram_write_ref_count",
     "mmio_ref_count",
     "codeflash_data_ref_count",
     "string_ref_count",
     "subsystem",
+    "review_state",
     "evidence_grade",
+    "verification_source",
+    "oracle_class",
+    "execution_status",
+    "review_date",
+    "review_result",
 ]
 with csv_path.open(newline="") as fh:
     reader = csv.DictReader(fh)
@@ -101,14 +116,35 @@ with csv_path.open(newline="") as fh:
     rows = list(reader)
 
 grades = Counter(r["evidence_grade"] for r in rows)
+grades.pop("", None)
+discovery = Counter(r["discovery_source"] for r in rows)
+review_states = Counter(r["review_state"] for r in rows)
+oracles = Counter(r["oracle_class"] for r in rows if r["oracle_class"])
+execution = Counter(r["execution_status"] for r in rows if r["execution_status"])
 sources = Counter(r["name_source"] for r in rows)
 conventions = Counter(r["calling_convention"] for r in rows)
 subsystems = Counter(r["subsystem"] for r in rows if r["subsystem"])
 roots = Counter(r["root_kind"] for r in rows if r["root_kind"])
 summary = {
-    "schema_version": 1,
+    "schema_version": 2,
     "function_count": len(rows),
+    "discovered_function_count": len(rows),
+    "reviewed_function_count": sum(
+        count for state, count in review_states.items() if state != "unreviewed"
+    ),
+    "bounded_semantics_count": sum(
+        count for state, count in review_states.items()
+        if state in {"structurally_bounded", "semantically_identified"}
+    ),
+    "deterministically_verified_count": sum(
+        1 for row in rows
+        if row["evidence_grade"] == "verified" and row["execution_status"] == "passed"
+    ),
+    "discovery_source_counts": dict(sorted(discovery.items())),
+    "review_state_counts": dict(sorted(review_states.items())),
     "evidence_grade_counts": dict(sorted(grades.items())),
+    "oracle_class_counts": dict(sorted(oracles.items())),
+    "execution_status_counts": dict(sorted(execution.items())),
     "name_source_counts": dict(sorted(sources.items())),
     "calling_convention_counts": dict(sorted(conventions.items())),
     "subsystem_counts": dict(sorted(subsystems.items())),

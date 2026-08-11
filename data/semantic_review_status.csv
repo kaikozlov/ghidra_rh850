@@ -1,0 +1,22 @@
+entry_addr,review_state,evidence_grade,verification_source,oracle_class,execution_status,review_date,review_result
+0x000001b0,semantically_identified,verified,tests/verify_architecture.py,instruction_semantics,passed,2026-08-11,Reset entry and initialization role deterministically asserted
+0x00006fec,semantically_identified,verified,tests/verify_findings.py,instruction_semantics,passed,2026-08-11,SecurityAccess stage-1 key derivation identified
+0x00007068,semantically_identified,verified,tests/verify_findings.py,instruction_semantics,passed,2026-08-11,Payload-build key derivation identified
+0x00020880,semantically_identified,verified,tests/verify_architecture.py,cfg_dataflow,passed,2026-08-11,Application entry and initialization chain identified
+0x00035b86,semantically_identified,recovered,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,First of a mirrored pair of saturated calibration-driven state/reference calculators
+0x00035d1e,semantically_identified,recovered,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,Second mirrored saturated calibration-driven state/reference calculator
+0x0005bea6,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,Bulk RAM snapshot/copy into FEBE62xx through FEBE64xx state; downstream field semantics unnamed
+0x00064fcc,semantically_identified,recovered,tests/verify_architecture.py,cfg_dataflow,passed,2026-08-11,Foreground scheduler role and major dispatch edges recovered
+0x00086e62,semantically_identified,verified,tests/verify_icus_key_update.py,cfg_dataflow,passed,2026-08-11,ICU-S command-8 key-update preparation identified
+0x00087610,semantically_identified,recovered,ghidra/scripts/verify/AssertIcusStage7Static.java,cfg_dataflow,passed,2026-08-11,ICU-S interrupt-channel dispatcher recovered
+0x0008997a,semantically_identified,verified,tests/verify_icus_key_update.py,cfg_dataflow,passed,2026-08-11,Authenticated key-update command path identified
+0x000916e2,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,Multi-state protocol/event dispatcher over states 10/11/20/23/24/25/30; exact service semantics unnamed
+0x00096354,semantically_identified,verified,tests/verify_icus_key_update.py,cfg_dataflow,passed,2026-08-11,Application WDBI key-update entry identified
+0x0009729a,semantically_identified,recovered,ghidra/scripts/verify/AssertRecoveredCallbackTables.java,cfg_dataflow,passed,2026-08-11,XCP-shaped selector FB response handler recovered
+0x000972fa,semantically_identified,recovered,ghidra/scripts/verify/AssertRecoveredCallbackTables.java,cfg_dataflow,passed,2026-08-11,XCP-shaped selector FA indexed response handler recovered
+0x00097432,semantically_identified,recovered,ghidra/scripts/verify/AssertRecoveredCallbackTables.java,cfg_dataflow,passed,2026-08-11,XCP-shaped selector F5 bounded upload handler recovered
+0x00097546,semantically_identified,recovered,ghidra/scripts/verify/AssertRecoveredCallbackTables.java,cfg_dataflow,passed,2026-08-11,XCP-shaped selector F3 checksum handler recovered
+0x000975ee,semantically_identified,recovered,ghidra/scripts/verify/AssertRecoveredCallbackTables.java,cfg_dataflow,passed,2026-08-11,XCP-shaped selector EB page-state writer recovered
+0x00097668,semantically_identified,recovered,ghidra/scripts/verify/AssertRecoveredCallbackTables.java,cfg_dataflow,passed,2026-08-11,XCP-shaped selector EA page-state reader recovered
+0x000976f4,semantically_identified,recovered,ghidra/scripts/verify/AssertRecoveredCallbackTables.java,cfg_dataflow,passed,2026-08-11,XCP-shaped selector E4 guarded page-copy handler recovered
+0x000be8e6,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,Bulk RAM snapshot/copy into FEBEAFxx/FEBEB0xx state; downstream field semantics unnamed

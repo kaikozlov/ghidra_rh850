@@ -1,26 +1,49 @@
 {
+  "bounded_semantics_count": 21,
   "calling_convention_counts": {
     "__interrupt": 24,
-    "__stdcall": 5897
+    "__stdcall": 6013
   },
   "csv": "semantic_coverage_ledger.csv",
+  "deterministically_verified_count": 7,
+  "discovered_function_count": 6037,
+  "discovery_source_counts": {
+    "auto-analysis": 5274,
+    "callback-table seed": 91,
+    "direct-call seed": 135,
+    "manual/other": 515,
+    "vector seed": 22
+  },
   "evidence_grade_counts": {
-    "annotated": 533,
-    "recovered": 5302,
-    "thunk": 86
+    "bounded": 3,
+    "recovered": 11,
+    "verified": 7
   },
-  "function_count": 5921,
+  "execution_status_counts": {
+    "passed": 16
+  },
+  "function_count": 6037,
   "name_source_counts": {
-    "DEFAULT": 5381,
-    "USER_DEFINED": 540
+    "DEFAULT": 5276,
+    "USER_DEFINED": 761
   },
+  "oracle_class_counts": {
+    "cfg_dataflow": 18,
+    "instruction_semantics": 3
+  },
+  "review_state_counts": {
+    "semantically_identified": 18,
+    "structurally_bounded": 3,
+    "unreviewed": 6016
+  },
+  "reviewed_function_count": 21,
   "root_kind_counts": {
     "interrupt": 24,
     "scheduler": 1
   },
-  "schema_version": 1,
+  "schema_version": 2,
   "subsystem_counts": {
-    "application": 5538,
-    "boot": 382
+    "application": 5653,
+    "boot": 383
   }
 }
