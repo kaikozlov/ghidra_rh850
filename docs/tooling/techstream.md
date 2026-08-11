@@ -747,7 +747,8 @@ uv run python tools/techstream/parse_ptshim_log.py j2534_....log -o session.json
 
 The normalized transcript can then be diffed against the static firmware
 analysis for SA seed/key exchange, DID reads, session transitions, and
-programming handoff.
+programming handoff. The six-operation evidence and privacy procedure is
+[techstream-capture-procedure.md](techstream-capture-procedure.md).
 
 ### 6.2 Diagnostic databases (.ddb)
 

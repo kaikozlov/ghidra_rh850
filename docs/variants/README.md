@@ -12,6 +12,7 @@ transfer as **hypotheses to check**, not facts.
 | Corolla (2023 US public-route specimen) | exact F181 pending | Public route recovered: genuine bus-1 `0x00F/0x116/0x24D`; forced TSS2 metadata has no carFw; DataFlash dump still external | [corolla-2023-us-public-route.md](corolla-2023-us-public-route.md) |
 | RAV4 Prime (2024 field experiment) | exact F181 pending | Live persistent-patch/openpilot experiment reported; static forced-profile interpretation only | [rav4-prime-forced-secoc-profile.md](rav4-prime-forced-secoc-profile.md) |
 | TSS 3.0 family | various | Partial comparison matrix | [tss3-family-comparison.md](tss3-family-comparison.md) |
+| Newer TSK target | exact part pending | Artifact/capture contract only; all transfer claims remain hypothesis | [newer-tsk-target-evidence.md](newer-tsk-target-evidence.md) |
 
 ## The transfer rule
 

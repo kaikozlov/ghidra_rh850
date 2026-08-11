@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "target": {
+    "calibration_part_number": null,
+    "f181_response_hex": null,
+    "region": null,
+    "pseudonymous_session_id": "UNASSIGNED-TARGET-001"
+  },
+  "artifacts": {
+    "codeflash": {"status": "missing", "sha256": null, "size_bytes": null, "version_or_identity": null, "provenance": null, "private_local_path": null},
+    "dataflash": {"status": "missing", "sha256": null, "size_bytes": null, "version_or_identity": null, "provenance": null, "private_local_path": null},
+    "techstream": {"status": "missing", "sha256": null, "size_bytes": null, "version_or_identity": null, "provenance": null, "private_local_path": null},
+    "regional_ddb_set": {"status": "missing", "sha256": null, "size_bytes": null, "version_or_identity": null, "provenance": null, "private_local_path": null},
+    "cuw": {"status": "missing", "sha256": null, "size_bytes": null, "version_or_identity": null, "provenance": null, "private_local_path": null}
+  },
+  "captures": {
+    "health_check": {"status": "missing", "operation_label": "health check", "raw_log_sha256": null, "normalized_sha256": null, "start_utc": null, "end_utc": null, "channels_protocols": [], "private_local_path": null, "committed_derivative_path": null, "redaction_review": "pending", "notes": null},
+    "data_list": {"status": "missing", "operation_label": "data list", "raw_log_sha256": null, "normalized_sha256": null, "start_utc": null, "end_utc": null, "channels_protocols": [], "private_local_path": null, "committed_derivative_path": null, "redaction_review": "pending", "notes": null},
+    "active_test_customization": {"status": "missing", "operation_label": "active test/customization", "raw_log_sha256": null, "normalized_sha256": null, "start_utc": null, "end_utc": null, "channels_protocols": [], "private_local_path": null, "committed_derivative_path": null, "redaction_review": "pending", "notes": null},
+    "mackey_registration": {"status": "missing", "operation_label": "MACKey Registration", "raw_log_sha256": null, "normalized_sha256": null, "start_utc": null, "end_utc": null, "channels_protocols": [], "private_local_path": null, "committed_derivative_path": null, "redaction_review": "pending", "notes": null},
+    "cuw_preparation": {"status": "missing", "operation_label": "CUW preparation", "raw_log_sha256": null, "normalized_sha256": null, "start_utc": null, "end_utc": null, "channels_protocols": [], "private_local_path": null, "committed_derivative_path": null, "redaction_review": "pending", "notes": null},
+    "reflash_authorization_programming": {"status": "missing", "operation_label": "reflash authorization/programming", "raw_log_sha256": null, "normalized_sha256": null, "start_utc": null, "end_utc": null, "channels_protocols": [], "private_local_path": null, "committed_derivative_path": null, "redaction_review": "pending", "notes": null}
+  },
+  "privacy": {
+    "vin_stored_in_git": false,
+    "account_identifiers_stored_in_git": false,
+    "server_session_identifiers_stored_in_git": false,
+    "raw_logs_stored_in_git": false,
+    "pseudonym_salt_stored_in_git": false
+  }
+}

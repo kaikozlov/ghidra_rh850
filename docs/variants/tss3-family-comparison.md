@@ -46,3 +46,7 @@ software-continuity evidence. They do **not** prove:
 2. If the firmware is in hand, create a `variants/<name>-<partnumber>.md`
    using the Corolla page as the template.
 3. Update this page's summary matrix.
+
+For an unidentified newer-TSK target, do not add a speculative matrix row.
+First satisfy the identity/artifact contract in
+[newer-tsk-target-evidence.md](newer-tsk-target-evidence.md).

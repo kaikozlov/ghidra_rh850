@@ -200,11 +200,13 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   timestamps, address/data lines, save modes, and `J2534Ctrl.dll`'s timestamped
   `Techstream\\ErrorReport\\j2534_....log` save path/event handshake are
   statically recovered; `tools/techstream/parse_ptshim_log.py` normalizes both.
-  The remaining question is purely dynamic: capture a legitimate diagnostic or
-  reflash session on a bench Sienna EPS and compare SA seed/key exchange, DID
-  reads, session transitions, and programming handoff against SEC-BOOT-003,
-  SEC-APP-001, and DIAG-APP-001/003. See
-  [../tooling/techstream.md](../tooling/techstream.md) §6.
+  The remaining question is purely dynamic. Capture health check, data list,
+  active-test/customization, MACKey Registration, CUW preparation, and reflash
+  authorization/programming as six separate labeled operations, then compare
+  SA seed/key exchange, DID reads, session transitions, and programming handoff
+  against SEC-BOOT-003, SEC-APP-001, and DIAG-APP-001/003. Preserve raw logs
+  privately and commit only reviewed/redacted derivatives or hashes. See
+  [../tooling/techstream-capture-procedure.md](../tooling/techstream-capture-procedure.md).
 - **Sienna EPS CUW route and calibration material.** TMS-004/TMS-007 recover the
   V18 controller's decoded parameter-row factory and the standard/unified
   command builders, but the installation contains no `.cuw` or `.cal` payload.
@@ -243,3 +245,9 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   oracle's re-arm cost (256 worst case per byte) is acceptable for identifying
   known function signatures. See
   [../security/memory-safety-audit.md](../security/memory-safety-audit.md).
+- **Newer-TSK exact target bundle.** No exact target identity currently exists.
+  Acquire the part/calibration number plus `F181`, complete CodeFlash and
+  DataFlash, matching Techstream/regional DDB set, exact `.cuw`, and the six
+  synchronized labeled captures above. Use the redacted manifest schema in
+  [../variants/newer-tsk-target-evidence.md](../variants/newer-tsk-target-evidence.md);
+  until then every Sienna→newer-TSK transfer remains hypothesis.

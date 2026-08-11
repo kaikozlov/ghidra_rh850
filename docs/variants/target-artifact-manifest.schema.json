@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/ghidra-rh850/target-artifact-manifest.schema.json",
+  "title": "Newer-TSK EPS target artifact manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "target", "artifacts", "captures", "privacy"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["calibration_part_number", "f181_response_hex", "region", "pseudonymous_session_id"],
+      "properties": {
+        "calibration_part_number": {"type": ["string", "null"]},
+        "f181_response_hex": {"type": ["string", "null"], "pattern": "^[0-9A-Fa-f]*$"},
+        "region": {"type": ["string", "null"]},
+        "pseudonymous_session_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["codeflash", "dataflash", "techstream", "regional_ddb_set", "cuw"],
+      "properties": {
+        "codeflash": {"$ref": "#/$defs/artifact"},
+        "dataflash": {"$ref": "#/$defs/artifact"},
+        "techstream": {"$ref": "#/$defs/artifact"},
+        "regional_ddb_set": {"$ref": "#/$defs/artifact"},
+        "cuw": {"$ref": "#/$defs/artifact"}
+      }
+    },
+    "captures": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "health_check", "data_list", "active_test_customization",
+        "mackey_registration", "cuw_preparation",
+        "reflash_authorization_programming"
+      ],
+      "properties": {
+        "health_check": {"$ref": "#/$defs/capture"},
+        "data_list": {"$ref": "#/$defs/capture"},
+        "active_test_customization": {"$ref": "#/$defs/capture"},
+        "mackey_registration": {"$ref": "#/$defs/capture"},
+        "cuw_preparation": {"$ref": "#/$defs/capture"},
+        "reflash_authorization_programming": {"$ref": "#/$defs/capture"}
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "vin_stored_in_git", "account_identifiers_stored_in_git",
+        "server_session_identifiers_stored_in_git", "raw_logs_stored_in_git",
+        "pseudonym_salt_stored_in_git"
+      ],
+      "properties": {
+        "vin_stored_in_git": {"const": false},
+        "account_identifiers_stored_in_git": {"const": false},
+        "server_session_identifiers_stored_in_git": {"const": false},
+        "raw_logs_stored_in_git": {"const": false},
+        "pseudonym_salt_stored_in_git": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "sha256", "size_bytes", "version_or_identity", "provenance", "private_local_path"],
+      "properties": {
+        "status": {"enum": ["available", "missing", "not_applicable"]},
+        "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "size_bytes": {"type": ["integer", "null"], "minimum": 0},
+        "version_or_identity": {"type": ["string", "null"]},
+        "provenance": {"type": ["string", "null"]},
+        "private_local_path": {"type": ["string", "null"]}
+      }
+    },
+    "capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status", "operation_label", "raw_log_sha256", "normalized_sha256",
+        "start_utc", "end_utc", "channels_protocols", "private_local_path",
+        "committed_derivative_path", "redaction_review", "notes"
+      ],
+      "properties": {
+        "status": {"enum": ["available", "missing", "not_applicable"]},
+        "operation_label": {"type": "string", "minLength": 1},
+        "raw_log_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "normalized_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "start_utc": {"type": ["string", "null"]},
+        "end_utc": {"type": ["string", "null"]},
+        "channels_protocols": {"type": "array", "items": {"type": "string"}},
+        "private_local_path": {"type": ["string", "null"]},
+        "committed_derivative_path": {"type": ["string", "null"]},
+        "redaction_review": {"enum": ["pending", "passed", "not_applicable"]},
+        "notes": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

@@ -338,6 +338,17 @@ paths = ["tools/toyota_secoc_signer.py"]
 tests = ["tests/verify_tss3_variant_matrix.py"]
 paths = ["data/tss3_eps_variant_matrix.csv", "docs/variants/"]
 
+[suite.target_artifact_manifest]
+tests = ["tests/verify_target_artifact_manifest.py"]
+oracle = "documentation_lint"
+paths = [
+  "docs/variants/newer-tsk-target-evidence.md",
+  "docs/variants/target-artifact-manifest.schema.json",
+  "docs/variants/target-artifact-manifest.example.json",
+  "docs/tooling/techstream-capture-procedure.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
 [suite.techstream_rks]
 tests = ["tests/verify_techstream_rks.py"]
 paths = ["docs/tooling/techstream.md", "techstream.lock.json"]
