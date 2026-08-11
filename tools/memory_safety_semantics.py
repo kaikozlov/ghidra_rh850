@@ -43,6 +43,15 @@ def _secoc_rows(image: bytes) -> list[int]:
     return [0x25970 + 0x50 * i for i in range(6)]
 
 
+def _gp_auth_field_encodings(image: bytes) -> list[tuple[int, str]]:
+    """Census direct gp-relative references to gp-0x6cef (0xFEBF2B11)."""
+    return [
+        (offset, image[offset:offset + 4].hex())
+        for offset in range(len(image) - 3)
+        if image[offset + 2:offset + 4] == bytes.fromhex("1193")
+    ]
+
+
 def analyze(image: bytes) -> dict[str, object]:
     """Return claim-specific proposition results for a CodeFlash image."""
     routines = _routine_rows(image)
@@ -94,6 +103,23 @@ def analyze(image: bytes) -> dict[str, object]:
             ),
             "second_download_accepts_state_one": _exact(
                 image, 0x5E70, "a40f119301067fff d205".replace(" ", "")
+            ),
+            "ff00_accepts_state_one_or_0x81_and_starts_erase": (
+                _exact(image, 0x58A2, "a40f1193610ac20501067fffaa15")
+                and _exact(image, 0x58B0, "1d301c38bfff2ce9e051ca0d")
+                and _exact(image, 0x58BC, "200e81ff0132440f1193020a440f1793bfff94e9")
+            ),
+            "authorization_field_direct_reference_census": (
+                _gp_auth_field_encodings(image)
+                == [
+                    (0x509E, "44071193"), (0x50FC, "44071193"),
+                    (0x51A4, "44071193"), (0x5842, "44071193"),
+                    (0x58A2, "a40f1193"), (0x58C2, "440f1193"),
+                    (0x5998, "44071193"), (0x59BA, "44071193"),
+                    (0x59D8, "24f61193"), (0x59EC, "44071193"),
+                    (0x5E70, "a40f1193"),
+                ]
+                and _exact(image, 0x59E4, "800b")
             ),
             "callback_pointer_is_indirectly_consumed": _exact(
                 image, 0x434C, "40eebffe3defd10f0ad81c380142234e0300fdc760f9"

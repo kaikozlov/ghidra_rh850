@@ -78,6 +78,7 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
     -postScript AssertApplicationReceiveMap.java "$ROOT/data/application_rx_map.csv" \
     -postScript AssertRecoveredCallbackTables.java \
     -postScript AssertFunctionDiscoveryFloor.java --mutation-self-test \
+    -postScript AssertReviewedPointerClusters.java \
     -postScript AssertMemorySafetyPaths.java \
     -postScript AssertMotorActuationBoundary.java \
     -postScript AssertIcusStage7Static.java \
@@ -91,7 +92,7 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
   fi
 
   echo "Wrote instruction inventory: $INV_OUT"
-  grep -E 'ASSERT (processor-fixture|undefined-in-functions|system-register-ops|project-invariants|application-rx-map|function-discovery-floor|memory-safety-paths|motor-actuation-boundary|icus-stage7|switch-tables|decompiler-invariants|processor-userops)|AssertRecoveredCallbackTables: PASS' \
+  grep -E 'ASSERT (processor-fixture|undefined-in-functions|system-register-ops|project-invariants|application-rx-map|function-discovery-floor|reviewed-pointer-clusters|memory-safety-paths|motor-actuation-boundary|icus-stage7|switch-tables|decompiler-invariants|processor-userops)|AssertRecoveredCallbackTables: PASS' \
     "$FIXTURE_LOG" "$PROJECT_LOG" || true
 else
   echo "NOTE: $PROJECT_DIR missing; skipped full-program processor audits"

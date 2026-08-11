@@ -9,6 +9,7 @@ failure until the reproducible seed stage creates it.
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import struct
 import sys
@@ -51,6 +52,14 @@ KNOWN_RECORDS = [
     (0xEA, 0x97668),
     (0xE4, 0x976F4),
 ]
+REVIEWED_CLUSTER_START = 0x27C88
+REVIEWED_CLUSTER_END = 0x27D78
+REVIEWED_CLUSTER_DESCRIPTOR = 0x27D84
+REVIEWED_CLUSTER_SHA256 = "53d8c3f4dd2de0354cadac93118c67ef2485d4b3a22d1c5d9cae82de918d9a78"
+BOOT_ROUTINE_CONTROL_POINTER = 0x8EC0
+BOOT_ROUTINE_CONTROL_ENTRY = 0x567E
+BOOT_ROUTINE_CONTROL_END = 0x5936
+BOOT_ROUTINE_CONTROL_PROLOGUE = bytes.fromhex("8a07e170")
 ALLOWED_CLASSES = {
     "direct-call-target",
     "table-callback-target",
@@ -110,6 +119,27 @@ def main() -> int:
         [(selector, target) for _, selector, target in observed] == KNOWN_RECORDS,
         repr([(hex(selector), hex(target)) for _, selector, target in observed]),
     )
+
+    image = FIRMWARE.read_bytes()
+    cluster = image[REVIEWED_CLUSTER_START:REVIEWED_CLUSTER_END]
+    cluster_targets = [struct.unpack_from("<I", cluster, offset)[0]
+                       for offset in range(0, len(cluster), 4)]
+    check("0x27C88 cluster byte hash matches firmware",
+          hashlib.sha256(cluster).hexdigest() == REVIEWED_CLUSTER_SHA256)
+    check("0x27C88 cluster contains 60 valid CodeFlash pointers",
+          len(cluster_targets) == 60 and len(set(cluster_targets)) == 60
+          and all(target <= 0xFFFFF and target % 2 == 0 for target in cluster_targets))
+    base_literal = struct.pack("<I", REVIEWED_CLUSTER_START)
+    literal_offsets = [offset for offset in range(len(image) - 3)
+                       if image[offset:offset + 4] == base_literal]
+    check("cluster base has one raw literal descriptor",
+          literal_offsets == [REVIEWED_CLUSTER_DESCRIPTOR], repr(literal_offsets))
+    check("boot SID 0x31 service pointer is authoritative entry 0x567E",
+          struct.unpack_from("<I", image, BOOT_ROUTINE_CONTROL_POINTER)[0]
+          == BOOT_ROUTINE_CONTROL_ENTRY)
+    check("boot SID 0x31 entry starts with complete four-byte prepare",
+          image[BOOT_ROUTINE_CONTROL_ENTRY:BOOT_ROUTINE_CONTROL_ENTRY + 4]
+          == BOOT_ROUTINE_CONTROL_PROLOGUE)
 
     print("\n== generated outside-function ledger ==")
     check("candidate CSV exists", CANDIDATES.is_file(), str(CANDIDATES))
@@ -172,12 +202,18 @@ def main() -> int:
     check("all candidate flags are booleans", not bad_booleans, repr(bad_booleans[:10]))
 
     check("candidate addresses are sorted and unique", addresses == sorted(set(addresses)))
+    routine_control_orphans = [
+        row["target_addr"] for row in rows
+        if BOOT_ROUTINE_CONTROL_ENTRY <= parse_int(row["target_addr"]) < BOOT_ROUTINE_CONTROL_END
+    ]
+    check("boot SID 0x31 body has no outside-function candidates",
+          not routine_control_orphans, repr(routine_control_orphans))
 
     reviewed_cluster = [
         row
         for row in rows
         if any(
-            0x27C88 <= parse_int(pointer) < 0x27D78
+            REVIEWED_CLUSTER_START <= parse_int(pointer) < REVIEWED_CLUSTER_END
             for pointer in row["source_pointer_addrs"].split(";")
             if pointer
         )

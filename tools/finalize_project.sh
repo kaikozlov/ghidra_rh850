@@ -13,7 +13,7 @@
 # Usage: tools/finalize_project.sh [--dry-run]
 #
 # Exit codes:
-#   0  finalization succeeded (or nothing to promote)
+#   0  finalization succeeded
 #   1  operational error (daemon won't stop, verification fails, etc.)
 set -euo pipefail
 
@@ -33,23 +33,21 @@ SNAPSHOT_DIR="$ROOT/project"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 DAEMON_RE='AnalyzeHeadless.*rh850_p1me_mapped'
-MUTATION_MARKER="$ROOT/build/.ghidra_session_dirty"
+
+PROJECT_DIR=$(python3 - "$PROJECT_DIR" <<'PY'
+from pathlib import Path
+import sys
+print(Path(sys.argv[1]).expanduser().resolve(strict=False))
+PY
+)
 
 echo "=== finalize-project: lifecycle orchestration ==="
 echo
 
-# --- Step 0: Check whether there is anything to promote ----------------------
-
-if [[ ! -f "$MUTATION_MARKER" ]] \
-   && git -C "$ROOT" diff --quiet -- "$SNAPSHOT_DIR/" 2>/dev/null \
-   && git -C "$ROOT" diff --cached --quiet -- "$SNAPSHOT_DIR/" 2>/dev/null; then
-  echo "No mutation marker and no snapshot diff — nothing to promote."
-  echo "(Use 'tools/g script run ...' to make working-copy edits before finalizing.)"
-  exit 0
-fi
-
 if ((DRY_RUN)); then
-  echo "Dry run: promotion is required; no daemon, project, or Git state was changed."
+  echo "Dry run: explicit promotion would stop the project daemon, verify exact parity, and snapshot:"
+  echo "  $PROJECT_DIR"
+  echo "No daemon, project, or Git state was changed."
   exit 0
 fi
 
@@ -58,7 +56,7 @@ fi
 daemon_pids=$(pgrep -f "$DAEMON_RE" || true)
 if [[ -n "$daemon_pids" ]]; then
   echo "==> [1/5] Stopping interactive daemon..."
-  "$ROOT/tools/g" stop || true
+  GHIDRA_PROJECT="$PROJECT_DIR" "$ROOT/tools/g" stop || true
 else
   echo "==> [1/5] No daemon running."
 fi

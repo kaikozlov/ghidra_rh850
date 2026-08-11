@@ -36,7 +36,10 @@ SEMANTIC_ORACLES = {
     "dynamic_trace",
     "independent_external_artifact",
 }
-ASSERTION_RE = re.compile(r"^\[(PASS|FAIL)\](?:\[([a-z_]+)\])?", re.MULTILINE)
+ASSERTION_RE = re.compile(
+    r"^(?:\[(PASS|FAIL)\](?:\[([a-z_]+)\])?|(PASS|FAIL):)",
+    re.MULTILINE,
+)
 
 
 def load_manifest(path: Path) -> dict:
@@ -71,7 +74,8 @@ def missing_requirements(manifest: dict, root: Path, entry: dict,
 def assertion_counts(output: str, default_oracle: str) -> tuple[dict, dict]:
     passed: Counter[str] = Counter()
     failed: Counter[str] = Counter()
-    for status, tagged_oracle in ASSERTION_RE.findall(output):
+    for bracket_status, tagged_oracle, legacy_status in ASSERTION_RE.findall(output):
+        status = bracket_status or legacy_status
         oracle = tagged_oracle or default_oracle
         if oracle not in ORACLE_CLASSES:
             oracle = default_oracle
@@ -97,6 +101,7 @@ def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
             "status": status,
             "exit_code": 1 if require_external else SKIP_EXIT_CODE,
             "detail": detail,
+            "oracle": default_oracle,
             "assertions": {"passed": {}, "failed": {}},
             "semantic_status": "not_executed",
         }
@@ -106,6 +111,7 @@ def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
             "status": "fail",
             "exit_code": 1,
             "detail": "test file not found",
+            "oracle": default_oracle,
             "assertions": {"passed": {}, "failed": {}},
             "semantic_status": "not_executed",
         }
@@ -119,10 +125,23 @@ def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
             timeout=entry.get("timeout", 300),
         )
         exit_code = proc.returncode
-        status = "skip" if exit_code == SKIP_EXIT_CODE else (
-            "pass" if exit_code == 0 else "fail"
-        )
         passed, failed = assertion_counts(proc.stdout + "\n" + proc.stderr, default_oracle)
+        failed_assertions = sum(failed.values())
+        if exit_code == SKIP_EXIT_CODE:
+            status = "fail" if require_external else "skip"
+            detail = (
+                "required external suite reported skip (exit 77)"
+                if require_external else "suite reported skip (exit 77)"
+            )
+        elif exit_code != 0 or failed_assertions:
+            status = "fail"
+            detail = (
+                f"suite printed {failed_assertions} failed assertion(s) with exit 0"
+                if exit_code == 0 else f"suite exited with status {exit_code}"
+            )
+        else:
+            status = "pass"
+            detail = ""
         semantic_count = sum(passed.get(name, 0) for name in SEMANTIC_ORACLES)
         semantic_status = (
             "verified" if status == "pass" and semantic_count
@@ -135,6 +154,8 @@ def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
             "exit_code": exit_code,
             "stdout": proc.stdout,
             "stderr": proc.stderr,
+            **({"detail": detail} if detail else {}),
+            "oracle": default_oracle,
             "assertions": {"passed": passed, "failed": failed},
             "semantic_status": semantic_status,
         }
@@ -144,6 +165,7 @@ def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
             "status": "fail",
             "exit_code": 1,
             "detail": f"timed out after {entry.get('timeout', 300)} seconds",
+            "oracle": default_oracle,
             "stdout": error.stdout or "",
             "stderr": error.stderr or "",
             "assertions": {"passed": {}, "failed": {}},
@@ -206,6 +228,7 @@ def summarize(results: list[dict], mode: str) -> dict:
                 "suite": item["suite"],
                 "test": item["test"],
                 "status": item["status"],
+                "oracle": item["oracle"],
                 "semantic_status": item["semantic_status"],
                 "assertions": item["assertions"],
                 **({"detail": item["detail"]} if item.get("detail") else {}),

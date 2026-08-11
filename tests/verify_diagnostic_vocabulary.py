@@ -31,6 +31,7 @@ FW_SHA = hashlib.sha256(CF).hexdigest()
 
 passed = 0
 failed = 0
+oracle = "generated_self_check"
 
 
 def check(name, cond, detail=""):
@@ -42,7 +43,7 @@ def check(name, cond, detail=""):
         failed += 1
         mark = "FAIL"
     suffix = f" ({detail})" if detail else ""
-    print(f"[{mark}] {name}{suffix}")
+    print(f"[{mark}][{oracle}] {name}{suffix}")
 
 
 # ── Regenerate the vocabulary on the fly ──────────────────────────────────────
@@ -178,6 +179,7 @@ check("durable DID seed does not create all 242 table callbacks",
 
 
 print("\n== independent firmware-table field semantics ==")
+oracle = "raw_bytes"
 did_by_id = tables.did_by_id
 check("DID 0x0100 response-size/attribute is 0x20",
       did_by_id[0x0100].response_size_or_attribute == 0x20)

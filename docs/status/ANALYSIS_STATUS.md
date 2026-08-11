@@ -6,8 +6,8 @@ for claim scope and confidence, [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) for
 blockers, and subsystem reports for interpretation.
 
 Snapshot date: **2026-08-11**. Corrected normalized project-inventory SHA-256:
-`7b7873b64cf07470bda2903cd22dc1d37be0af1c1ac7e13eb224a0d2da2f7100`.
-The inventory was produced byte-identically by two independent four-stage
+`2c13a2a8d06e38ab5c673dfa1c53f9d5dde3052bf534c307b5fe4de951a12a88`.
+The inventory was produced byte-identically by two separately invoked four-stage
 rebuilds. Committed-project promotion is a separate final lifecycle gate.
 
 ## Firmware and graph coverage
@@ -16,11 +16,11 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 |---|---:|---|
 | Firmware bytes mapped | CodeFlash 1,048,576 B; DataFlash 32,768 B | Exact committed binaries; SHA-256 `21140bbd…fde` and `81d87b67…ecb8`; project inventory records 14 memory blocks including mapped overlays |
 | Decoded CodeFlash instructions | 180,262 | Ghidra listing total in `data/ghidra_project_inventory.baseline.jsonl`; this is decode coverage, not semantic coverage |
-| Decoded instructions outside functions | 25,768 instructions / 73,008 bytes | `data/outside_function_summary.json`; conservative runs can include data decoded as instructions |
+| Decoded instructions outside functions | 22,514 instructions / 63,982 bytes | `data/outside_function_summary.json`; conservative runs can include data decoded as instructions |
 | Known function entries | 6,037 | Byte-identical two-rebuild project inventory; zero undefined bytes applies inside these function bodies only |
 | Validated indirect callback tables | 7 tables / 87 nonzero target pointers | `AssertFunctionDiscoveryFloor.java` against firmware bytes; includes the seven-entry `0x2B3F0` XCP table |
 | Bounded pointer wrappers | 6 | Processor function-discovery assertion; structural wrapper references, not callback semantics |
-| Unresolved outside-function candidates | 2,091 total: 854 orphan decoded runs, 1,237 pointer-referenced runs | `data/outside_function_summary.json`; adjudication is 2,031 `unresolved` plus 60 `unresolved-reviewed` |
+| Unresolved outside-function candidates | 2,061 total: 831 orphan decoded runs, 1,230 pointer-referenced runs | `data/outside_function_summary.json`; adjudication is 2,001 `unresolved` plus 60 `unresolved-reviewed` |
 | Indirect-dispatch resolution | 87 targets in the seven proven tables are inside exact functions; direct-call gaps 0 | Processor assertion. This is not a denominator for every possible computed call in the image |
 | Dense `0x27C88` pointer cluster | 60 targets remain unresolved-reviewed | No executable walker/computed-call consumer is evidenced; they are not promoted from pointer shape alone |
 
@@ -28,14 +28,14 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 
 | Dimension | Current value | Evidence boundary and source |
 |---|---:|---|
-| Functions reviewed | 109 / 6,037 | `data/semantic_coverage_summary.json`; review does not imply understanding |
-| Functions semantically identified | 18 | Curated `semantically_identified` state; 3 more are `structurally_bounded` |
-| Functions with a semantic evidence grade | 21 | 3 bounded, 11 recovered, 7 verified; 6,016 carry no semantic grade |
-| Functions still unreviewed | 5,928 | Structural denominator from the semantic coverage ledger |
+| Functions reviewed | 110 / 6,037 | `data/semantic_coverage_summary.json`; review does not imply understanding |
+| Functions semantically identified | 19 | Curated `semantically_identified` state; 3 more are `structurally_bounded` |
+| Functions with a semantic evidence grade | 22 | 3 bounded, 11 recovered, 8 verified; 6,015 carry no semantic grade |
+| Functions still unreviewed | 5,927 | Structural denominator from the semantic coverage ledger |
 | Reproducible selected sweep | 100 functions | Scalar top 40 plus structural strata and mandatory graph families; two decompilation artifacts are byte-identical |
 | Selected sweep without semantic conclusion | 88 | `reviewed_unknown`, no evidence grade; successful decompilation is a generated self-check only |
-| Per-function claim execution status | 104 `passed`, 5 `unavailable`, 0 `failed` | `data/semantic_review_status.csv`; `unavailable` marks manual CFG reviews with no automated execution gate |
-| Strongest independent oracle per reviewed function | 18 CFG/data-flow, 3 instruction semantics, 88 none | The 88 have only a generated self-check, which is recorded separately and confers no semantic grade |
+| Per-function claim execution status | 105 `passed`, 5 `unavailable`, 0 `failed` | `data/semantic_review_status.csv`; `unavailable` marks manual CFG reviews with no automated execution gate |
+| Strongest independent oracle per reviewed function | 19 CFG/data-flow, 3 instruction semantics, 88 none | The 88 have only a generated self-check, which is recorded separately and confers no semantic grade |
 | Findings with exact `verified` grade | 48 | Exact-grade rows in `FINDINGS.md`; qualified/mixed/partial-grade rows are not included in this scalar |
 | Findings dynamically observed | 2 | SECOC-030 external partner observation and VAR-001 Corolla field probes; neither is promoted to Sienna `4512000` firmware fact |
 
@@ -63,7 +63,7 @@ artifact is absent and `required-external` converts that absence to failure.
 ## Interpretation
 
 The largest remaining gap is semantic, not disassembly: 6,037 function entries
-are known, but 5,928 have no curated review and only 21 have a semantic grade.
+are known, but 5,927 have no curated review and only 22 have a semantic grade.
 The outside-function ledger also prevents the known-function count from being
 presented as a complete executable denominator. On the external side, static
 Techstream and DDB coverage is broad and reproducible when the pinned corpus is

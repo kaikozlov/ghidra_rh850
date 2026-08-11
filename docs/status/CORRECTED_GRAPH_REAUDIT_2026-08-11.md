@@ -7,7 +7,7 @@ the subsystem reports that own those findings.
 
 ## Rebuild identity
 
-Two independent working projects were built with the unchanged four-stage
+Two separately invoked working projects were built in distinct directories with the unchanged four-stage
 workflow plus calling-convention finalizer. Their normalized project
 inventories were byte-identical:
 
@@ -17,19 +17,27 @@ inventories were byte-identical:
 | Instructions | 180,262 | 180,262 |
 | Symbols | 38,069 | 38,069 |
 | Memory sections | 14 | 14 |
-| Inventory SHA-256 | `7b7873b64cf07470bda2903cd22dc1d37be0af1c1ac7e13eb224a0d2da2f7100` | same |
+| Inventory SHA-256 | `2c13a2a8d06e38ab5c673dfa1c53f9d5dde3052bf534c307b5fe4de951a12a88` | same |
 
-The guarded two-rebuild updater produced
+The updater's machine guard proves distinct resolved project paths and distinct
+inventory files; the two fresh four-stage invocations are operator-attested by
+this Phase-I record rather than cryptographically distinguishable from copied
+projects. The final pair was rebuilt again after the end-stage self-review found
+that the authoritative bootloader SID `0x31` pointer at `0x8EC0` targets
+`0x567E`, while stage-2 analysis had decoded a conflicting instruction at
+`0x5680`. The UDS seed now clears only that competing `+2` code unit and requires
+`0x567E` to disassemble. Both rebuilds therefore recover
+`uds_routine_control @ 0x567E` as a 696-byte body through `0x5935`, rather than
+the former one-byte function shell; the stale Bad Instruction bookmark at
+`0x567E` disappears. Those runs produced
 `data/ghidra_project_inventory.baseline.jsonl`. Processor verification then
-passed with 6,037 functions and zero undefined function bytes. The only
-decompiler-baseline delta was `0x8B1F0`: its direct callee acquired the durable
-seed name `direct_call_target_0008b1d4`; control flow was unchanged. Promotion
-of the working project into committed `project/` remains deliberately deferred
-to the final snapshot gate.
+passed with 6,037 functions and zero undefined function bytes. Promotion of the
+working project into committed `project/` remains deliberately deferred to the
+final snapshot gate.
 
-The regenerated outside-function inventory contains 2,091 conservative
-candidates: 854 orphan decoded runs and 1,237 pointer-referenced code runs.
-2,031 remain `unresolved`; 60 pointer targets at `0x74BC4..0x74E64` remain
+The regenerated outside-function inventory contains 2,061 conservative
+candidates: 831 orphan decoded runs and 1,230 pointer-referenced code runs.
+2,001 remain `unresolved`; 60 pointer targets at `0x74BC4..0x74E64` remain
 `unresolved-reviewed`. Those 60 targets are not promoted to functions because
 the image still provides no executable table walker or computed-call consumer
 for the dense `0x27C88` pointer cluster. Plausible decoding and pointer shape
@@ -69,21 +77,24 @@ mere function-presence checks:
 |---|---|---:|
 | Boot trust and callback paths | `verify_boot_trust.py` | 54 |
 | Application key/secret consumers | `verify_security_consumers.py` | 58 |
-| Memory-safety reachability and destructive sensitivity | `verify_memory_safety.py`, `verify_memory_safety_mutations.py` | 59 |
+| Memory-safety reachability and destructive sensitivity | `verify_memory_safety.py`, `verify_memory_safety_mutations.py` | 64 |
 | SecOC writers, consumers, and dormant paths | `verify_secoc_application.py`, `verify_secoc_nvm.py`, `verify_secoc_security_properties.py` | 189 |
 | ICU-S Stage-7 paths and consumer boundaries | `verify_icus_key_recovery_surface.py`, `verify_icus_key_update.py`, `verify_icus_software_paths.py`, `verify_icus_stage7_static.py` | 167 |
-| Motor/control joins | `verify_motor_actuation_boundary.py`, `verify_control_partition.py` | 114 |
+| Motor/control joins | `verify_motor_actuation_boundary.py`, `verify_control_partition.py` | 156 |
 | Diagnostic SID/RID/DID callbacks | `verify_application_diagnostics.py`, `verify_application_routine_id_callbacks.py`, `verify_did_model.py` | 417 |
 | Scheduler, receive, transmit roots | `verify_scheduler_timing.py`, `verify_application_receive.py`, `verify_application_transmit.py` | 157 |
-| Function-discovery floor and callback dispatch | `verify_function_discovery.py` | 24 |
+| Function-discovery floor and callback dispatch | `verify_function_discovery.py` | 30 |
 
-All 1,239 Python assertions passed; the processor's Ghidra-side callback-table
+All 1,292 Python assertions passed; the processor's Ghidra-side callback-table,
+reviewed-pointer-cluster,
 and function-discovery assertions also passed. No reviewed whole-image negative was invalidated by
 the corrected graph. Existing claims remain subject to their already-published
 boundaries: representation-bounded byte searches are not runtime-absence
 proofs, enumerated memory-safety negatives are not whole-image absence claims,
 and the authenticated-command-to-motor join remains a bounded static negative.
-No new `disproved` entry is therefore required for this phase.
+No reviewed whole-image negative was invalidated. The late SID-31 body repair
+did, however, correct a structural/function-attribution error in the published
+MEM-SAFE-001 path; that correction is recorded as CORR-038.
 
 ## Reproducible semantic sweep
 
@@ -93,9 +104,11 @@ the scalar top 40, structural strata, the five previously mandated stateful
 routines, all starting functions above, and all seven XCP handlers. The exact
 selected set and reasons are pinned by `tests/verify_semantic_interest_ranking.py`.
 
-`tools/generate_semantic_sweep.py` decompiled all 100 entries from both
-independent rebuilds. The two JSONL artifacts were byte-identical with SHA-256
-`231c41d409e126eecee883b054f82494af7cfe9d4ee97a8942c83a1ea7480bc2`.
+`tools/generate_semantic_sweep.py` first exports and compares each selected
+live project's normalized inventory against the committed baseline, then
+decompiles all 100 entries. The two separately invoked Phase-I rebuilds yielded
+byte-identical JSONL artifacts with SHA-256
+`df59f523e8b64396a485fb824fbb1e189888761ac79ef55ce30611317e90997c`.
 Every selected function has a curated disposition:
 
 | Review state | Selected functions | Meaning |
@@ -106,13 +119,13 @@ Every selected function has a curated disposition:
 
 The 88 `reviewed_unknown` rows deliberately carry no evidence grade. Their
 `generated_self_check` oracle proves reproducible selection and decompilation,
-not semantic understanding. Whole-ledger totals are 109 reviewed functions,
-21 with bounded or identified semantics, and 5,928 unreviewed functions.
+not semantic understanding. Whole-ledger totals are 110 reviewed functions,
+22 with bounded or identified semantics, and 5,927 unreviewed functions.
 
 ## Result
 
 Source: firmware-static plus generated-artifact. Confidence: **verified** for
-the two-rebuild identity, selected-set/decompilation reproducibility, callback
+the observed two-run identity, selected-set/decompilation reproducibility, callback
 dispatch structure, and regression execution; **bounded** for negative search
 conclusions at their named scopes. Canonical subsystem meanings remain in the
 linked `FINDINGS.md` reports.

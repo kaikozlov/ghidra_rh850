@@ -88,6 +88,9 @@ fi
 # Resolve absolute paths for Ghidra (rejects dot-prefixed components).
 PROJECT_DIR=$(cd "$PROJECT_DIR" && pwd)
 SNAPSHOT_DIR=$(cd "$SNAPSHOT_DIR" && pwd)
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/project_marker.sh"
+MUTATION_MARKER=$(project_mutation_marker "$ROOT" "$PROJECT_DIR")
 CLI_ARGS=(--projects-dir "$PROJECT_DIR" --project "$PROJECT_NAME" --program "$PROGRAM_NAME")
 
 STOP_REQUIRED=0
@@ -152,8 +155,9 @@ python3 "$ROOT/tools/project_layout.py" validate-snapshot \
 echo "Staging $SNAPSHOT_DIR"
 git -C "$ROOT" add "$SNAPSHOT_DIR/"
 
-# Clear the session mutation marker — the working copy is now promoted.
-rm -f "$ROOT/build/.ghidra_session_dirty"
+# Clear only this working project's mutation marker. Markers for other
+# disposable projects must survive an unrelated promotion.
+rm -f "$MUTATION_MARKER"
 trap - EXIT
 cleanup_packed
 

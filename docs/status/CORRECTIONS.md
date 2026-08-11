@@ -561,7 +561,7 @@ the mistakes are not re-made.
   also presented an enumerated negative as an unqualified verified absence.
 - **Right:** the raw-byte verifier now asserts 36 decisive arithmetic, branch,
   table, data-flow, and reachability propositions; an independent Ghidra script
-  asserts 95 instruction/edge/census propositions; and destructive/focused
+  asserts 107 instruction/edge/census propositions; and destructive/focused
   mutation tests prove sensitivity. MEM-SAFE-001–004 retain `verified` only for
   their statically asserted propositions. MEM-SAFE-005 is `bounded` to the
   named CAN/ISO-TP/SecOC/application-copy/range-check graph.
@@ -633,15 +633,40 @@ the mistakes are not re-made.
 - **Right:** the corrected function-discovery pass recovered omitted
   direct-call and dispatch-proven callback functions, increasing the
   reproducible graph from 5,921 to 6,037 functions. A separate conservative
-  outside-function inventory still contains 25,768 decoded instructions in
-  2,091 candidate runs; 2,031 remain unresolved and 60 pointer-referenced
+  outside-function inventory still contains 22,514 decoded instructions in
+  2,061 candidate runs; 2,001 remain unresolved and 60 pointer-referenced
   targets remain explicitly reviewed-unresolved. Zero undefined bytes is now
   claimed only inside the 6,037 current function bodies. Structural discovery,
   review state, semantic grade, oracle class, and execution status are separate
-  fields; 5,928 functions remain unreviewed.
+  fields; 5,927 functions remain unreviewed.
 - **Canonical:** [../tooling/processor-module-audit.md](../tooling/processor-module-audit.md);
   [CORRECTED_GRAPH_REAUDIT_2026-08-11.md](CORRECTED_GRAPH_REAUDIT_2026-08-11.md);
   `data/outside_function_candidates.csv`;
   `data/semantic_coverage_summary.json`;
   `tests/verify_function_discovery.py`;
   `tests/verify_semantic_coverage.py`.
+
+### CORR-038 — Bootloader SID 0x31 was a one-byte function shell and the FF00 gate was attributed to its worker
+
+- **Wrong:** the durable UDS seed named `uds_routine_control @ 0x567E`, but the
+  committed Ghidra graph contained only the single byte at `0x567E`; stage-2
+  analysis had already decoded `0x5680`, splitting the four-byte RH850
+  `prepare 8A 07 E1 70`. The resulting Bad Instruction bookmark left
+  `0x5680..0x5935` outside every function. MEM-SAFE-001 consequently described
+  the `0x58A2..0x58CC` FF00 authorization/erase-start logic as belonging to
+  `routine_erase_task @ 0x5B70`.
+- **Right:** the bootloader service-table pointer at `0x8EC0` independently fixes
+  SID `0x31` to entry `0x567E`. The UDS seed now resolves the competing `+2`
+  code unit before disassembly and fails closed if the authoritative target
+  cannot decode. Two fresh four-stage rebuilds recover a 696-byte
+  `uds_routine_control @ 0x567E..0x5935`. Its FF00 branch accepts authorization
+  `0x01` or `0x81`, calls `flash_erase_start @ 0x41E0`, then records state
+  `0x81/0x02`; `routine_erase_task @ 0x5B70` is only the later asynchronous
+  completion worker. Recovering the body removes 30 conservative
+  outside-function candidate runs.
+- **Canonical:** [../security/memory-safety-audit.md](../security/memory-safety-audit.md);
+  [../tooling/processor-module-audit.md](../tooling/processor-module-audit.md);
+  `ghidra/scripts/seed/SeedUdsServiceTable.java`;
+  `ghidra/scripts/verify/AssertMemorySafetyPaths.java`;
+  `tests/verify_bootloader_diagnostics.py`;
+  `tests/verify_function_discovery.py`.

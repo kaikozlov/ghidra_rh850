@@ -58,7 +58,24 @@ public class SeedUdsServiceTable extends GhidraScript {
             if (containing!=null && !containing.getMinAddress().equals(target)) {
                 listing.clearCodeUnits(containing.getMinAddress(),containing.getMaxAddress(),false);
             }
-            if (listing.getInstructionAt(target)==null) disassemble(target);
+            if (listing.getInstructionAt(target)==null) {
+                // A valid 32-bit RH850 instruction can start two bytes before an
+                // already-decoded 16/32-bit instruction.  Stage-2 auto-analysis
+                // historically decoded 0x5680 before the authoritative SID-31
+                // entry at 0x567e, splitting its `prepare` and leaving the whole
+                // RoutineControl body outside the function.  The service-table
+                // pointer is primary evidence for the exact entry, so clear only
+                // the immediately competing +2 code unit and retry from target.
+                Instruction plusTwo=listing.getInstructionAt(target.add(2));
+                if (plusTwo!=null) {
+                    listing.clearCodeUnits(plusTwo.getMinAddress(),plusTwo.getMaxAddress(),false);
+                }
+                disassemble(target);
+            }
+            if (listing.getInstructionAt(target)==null) {
+                throw new IllegalStateException(String.format(
+                    "failed to disassemble authoritative SID 0x%02x handler at %s", sid, target));
+            }
             Function f=currentProgram.getFunctionManager().getFunctionAt(target);
             if (f==null) {
                 f=createFunction(target,name);

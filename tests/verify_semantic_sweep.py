@@ -11,6 +11,7 @@ REPO = Path(__file__).resolve().parents[1]
 RANKING = REPO / "data/generated/semantic_interest_ranking.csv"
 INVENTORY = REPO / "data/ghidra_project_inventory.baseline.jsonl"
 ARTIFACT = REPO / "data/generated/semantic_sweep_decompilations.jsonl"
+GENERATOR = REPO / "tools/generate_semantic_sweep.py"
 REVIEWS = REPO / "data/semantic_review_status.csv"
 passed = failed = 0
 
@@ -33,6 +34,11 @@ records = [json.loads(line) for line in ARTIFACT.read_text(encoding="utf-8").spl
 metadata, functions = records[0], records[1:]
 
 print("== semantic sweep provenance ==")
+generator_source = GENERATOR.read_text(encoding="utf-8")
+check("generator exports and compares the selected live project inventory",
+      "generate_project_inventory.sh" in generator_source
+      and '"compare"' in generator_source
+      and "live project does not match" in generator_source)
 check("metadata schema", metadata == {
     "record": "metadata",
     "schema_version": 1,

@@ -30,7 +30,6 @@ PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 SNAPSHOT_DIR="$ROOT/project"
 PROJECT_DIR="${GHIDRA_PROJECT:-$ROOT/build/project}"
 DAEMON_RE='AnalyzeHeadless.*rh850_p1me_mapped'
-MUTATION_MARKER="$ROOT/build/.ghidra_session_dirty"
 
 # --- Canonicalize PROJECT_DIR -------------------------------------------------
 
@@ -41,6 +40,10 @@ import sys
 print(Path(sys.argv[1]).expanduser().resolve(strict=False))
 PY
 )
+
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/project_marker.sh"
+MUTATION_MARKER=$(project_mutation_marker "$ROOT" "$ABS_PROJECT_DIR")
 
 # --- Guard against committed project/ -----------------------------------------
 
@@ -324,8 +327,7 @@ case "$SUBCMD" in
   patch)   if [[ "$ACTION" == "bytes" || "$ACTION" == "nop" ]]; then MUTATES=1; fi ;;
 esac
 if ((MUTATES)); then
-  mkdir -p "$(dirname "$MUTATION_MARKER")"
-  echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$MUTATION_MARKER"
+  write_project_mutation_marker "$MUTATION_MARKER" "$ABS_PROJECT_DIR"
 fi
 
 # --- Build CLI args -----------------------------------------------------------

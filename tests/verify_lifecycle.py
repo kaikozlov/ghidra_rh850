@@ -12,9 +12,8 @@ Scope (no Ghidra required):
   3. Mutation marker is written for `analyze` subcommands.
   4. Mutation marker is NOT written for read-only commands (decompile, x-ref).
   5. tools/g refuses to operate against committed project/ via GHIDRA_PROJECT.
-  6. finalize_project.sh exits 0 when there's nothing to promote (no marker,
-     clean snapshot).
-  7. finalize_project.sh detects the mutation marker in side-effect-free mode.
+  6. finalize_project.sh treats explicit marker-free promotion as required.
+  7. Mutation markers and daemon stop commands are project-affine.
   8. snapshot_project.sh clears the mutation marker on success.
   9. ghidra_env.sh fails closed on unknown fingerprint mode.
   10. tools/lib/ghidra_env.sh exists and is executable.
@@ -24,6 +23,7 @@ Requires: bash, git, python3. Does NOT require Ghidra.
 from __future__ import annotations
 
 import atexit
+import hashlib
 import os
 import shutil
 import subprocess
@@ -63,7 +63,15 @@ def run(cmd: list[str], env: dict | None = None, timeout: int = 30) -> subproces
     )
 
 
-MARKER = REPO / "build" / ".ghidra_session_dirty"
+DEFAULT_PROJECT = (REPO / "build" / "project").resolve()
+
+
+def marker_for(project: Path) -> Path:
+    key = hashlib.sha256(str(project.resolve()).encode()).hexdigest()
+    return REPO / "build" / "ghidra-session-dirty" / f"{key}.marker"
+
+
+MARKER = marker_for(DEFAULT_PROJECT)
 ENV_HELPER = REPO / "tools" / "lib" / "ghidra_env.sh"
 ORIGINAL_MARKER = MARKER.read_bytes() if MARKER.is_file() else None
 
@@ -85,7 +93,7 @@ def marker_exists() -> bool:
 
 def write_marker() -> None:
     MARKER.parent.mkdir(parents=True, exist_ok=True)
-    MARKER.write_text("2026-01-01T00:00:00Z\n")
+    MARKER.write_text(f"project={DEFAULT_PROJECT}\ntimestamp=2026-01-01T00:00:00Z\n")
 
 
 def remove_marker() -> None:
@@ -290,7 +298,7 @@ check(
     True,  # decompile is not in the mutation-trigger list by design
 )
 
-mutation_marker = REPO / "build" / ".ghidra_session_dirty"
+mutation_marker = MARKER
 saved_marker = mutation_marker.read_bytes() if mutation_marker.is_file() else None
 mutation_marker.unlink(missing_ok=True)
 result = run(
@@ -323,6 +331,26 @@ for alias_args in (
 if saved_marker is not None:
     mutation_marker.write_bytes(saved_marker)
 
+with tempfile.TemporaryDirectory(dir=REPO / "build", prefix="lifecycle-alt-project-") as td:
+    alternate_project = Path(td).resolve()
+    alternate_marker = marker_for(alternate_project)
+    alternate_marker.unlink(missing_ok=True)
+    default_before = mutation_marker.read_bytes() if mutation_marker.is_file() else None
+    result = run(
+        ["bash", str(REPO / "tools" / "g"), "function", "rename", "--help"],
+        env={"GHIDRA_NO_BOOTSTRAP": "1", "GHIDRA_PROJECT": str(alternate_project)},
+        timeout=10,
+    )
+    check(
+        "alternate-project mutation writes only its project-affine marker",
+        result.returncode == 0 and alternate_marker.is_file()
+        and f"project={alternate_project}" in alternate_marker.read_text()
+        and ((default_before is None and not mutation_marker.exists())
+             or (default_before is not None and mutation_marker.read_bytes() == default_before)),
+        result.stderr,
+    )
+    alternate_marker.unlink(missing_ok=True)
+
 # --- Test 5: Refuses committed project/ via GHIDRA_PROJECT --------------------
 result = run(
     ["bash", str(REPO / "tools" / "g"), "decompile", "0x0"],
@@ -347,58 +375,39 @@ check(
     f"rc={result.returncode}, stderr={result.stderr[:200]}",
 )
 
-# --- Test 6: finalize_project.sh exits 0 when nothing to promote -------------
-# Remove marker and ensure snapshot is clean (git stash won't work since we
-# don't want to modify state). We just check the script's nothing-to-promote
-# path by running with no marker and a clean git tree.
+# --- Test 6: explicit finalization cannot skip a marker-free rebuild ----------
 remove_marker()
-# Check if git tree is clean for project/
-git_clean = run(
-    ["git", "diff", "--quiet", "--", "project/"],
-    timeout=5,
-)
-git_cached = run(
-    ["git", "diff", "--cached", "--quiet", "--", "project/"],
-    timeout=5,
-)
-if git_clean.returncode == 0 and git_cached.returncode == 0:
-    result = run(
-        ["bash", str(REPO / "tools" / "finalize_project.sh")],
-        env={"GHIDRA_NO_BOOTSTRAP": "1"},  # skip env for this logic test
-        timeout=10,
-    )
-    check(
-        "finalize-project: nothing to promote -> exit 0",
-        result.returncode == 0 and "nothing to promote" in result.stdout.lower(),
-        f"rc={result.returncode}, stdout={result.stdout[:200]}",
-    )
-else:
-    print("[SKIP] finalize-project nothing-to-promote (git tree not clean for project/)")
-
-# --- Test 7: finalize_project.sh detects mutation marker ---------------------
-# Write a marker, then use the side-effect-free dry run to prove finalization
-# detects it without ever touching a real project or Git index.
-write_marker()
+divergent_project = (REPO / "build" / "phase-i-rebuild-a").resolve()
 result = run(
     ["bash", str(REPO / "tools" / "finalize_project.sh"), "--dry-run"],
-    env={"GHIDRA_NO_BOOTSTRAP": "1"},
+    env={"GHIDRA_NO_BOOTSTRAP": "1", "PROJECT_DIR": str(divergent_project)},
     timeout=10,
 )
-# It should NOT exit with "nothing to promote" message. It should get to the
-# daemon check at least.
 check(
-    "finalize-project: detects mutation marker",
-    result.returncode == 0 and "dry run: promotion is required" in result.stdout.lower(),
+    "finalize-project: marker-free explicit rebuild promotion is not skipped",
+    result.returncode == 0
+    and "explicit promotion would" in result.stdout.lower()
+    and str(divergent_project) in result.stdout
+    and "nothing to promote" not in result.stdout.lower(),
     f"rc={result.returncode}, stdout={result.stdout[:200]}",
 )
-remove_marker()
+
+finalize_content = (REPO / "tools" / "finalize_project.sh").read_text()
+check(
+    "finalize-project stops the selected project daemon",
+    'GHIDRA_PROJECT="$PROJECT_DIR" "$ROOT/tools/g" stop' in finalize_content,
+)
+check(
+    "finalize-project has no marker-based early success",
+    "nothing to promote" not in finalize_content.lower(),
+)
 
 # --- Test 8: snapshot_project.sh clears marker on success ---------------------
 # We verify the clearing logic exists in the script (can't run it without Ghidra).
 snap_content = (REPO / "tools" / "snapshot_project.sh").read_text()
 check(
     "snapshot_project.sh clears mutation marker",
-    ".ghidra_session_dirty" in snap_content and "rm -f" in snap_content,
+    "project_mutation_marker" in snap_content and 'rm -f "$MUTATION_MARKER"' in snap_content,
 )
 check(
     "snapshot promotion rejects a symlinked repository project root",

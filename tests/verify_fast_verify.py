@@ -94,6 +94,17 @@ with tempfile.TemporaryDirectory(prefix="verify-runner-") as directory:
     (root / "tests/identity.py").write_text(
         "print('[PASS] identity only')\n", encoding="utf-8"
     )
+    (root / "tests/legacy.py").write_text(
+        "print('PASS: legacy assertion')\n", encoding="utf-8"
+    )
+    (root / "tests/printed_fail.py").write_text(
+        "print('[FAIL][cfg_dataflow] decisive assertion')\n", encoding="utf-8"
+    )
+    (root / "tests/late_skip.py").write_text(
+        "print('[SKIP] artifact-level prerequisite unavailable')\n"
+        "raise SystemExit(77)\n",
+        encoding="utf-8",
+    )
     synthetic_manifest = root / "verification.toml"
     synthetic_manifest.write_text(
         """[verification]
@@ -114,11 +125,28 @@ tests = ["tests/identity.py"]
 paths = ["tests/identity.py"]
 oracle = "identity_hash"
 
+[suite.legacy]
+tests = ["tests/legacy.py"]
+paths = ["tests/legacy.py"]
+oracle = "raw_bytes"
+
+[suite.printed_fail]
+tests = ["tests/printed_fail.py"]
+paths = ["tests/printed_fail.py"]
+oracle = "raw_bytes"
+modes = []
+
 [suite.external]
 tests = ["tests/pass.py"]
 paths = ["external/"]
 requires_external = ["techstream_v18"]
 oracle = "raw_bytes"
+
+[suite.external_late_skip]
+tests = ["tests/late_skip.py"]
+paths = ["external/"]
+requires_external = ["techstream_v18"]
+oracle = "independent_external_artifact"
 """,
         encoding="utf-8",
     )
@@ -133,7 +161,7 @@ oracle = "raw_bytes"
     core_missing = run("--core")
     check("repository-only mode succeeds with absent optional source", core_missing.returncode == 0)
     check("absent external source is a skip, not a pass",
-          "[SKIP] external" in core_missing.stdout and "1 skipped" in core_missing.stdout)
+          "[SKIP] external" in core_missing.stdout and "2 skipped" in core_missing.stdout)
 
     required_missing = run("--required-external")
     check("required-external mode fails for the same missing source",
@@ -145,9 +173,13 @@ oracle = "raw_bytes"
     local_present = run("--agent", "--external-root", str(external_root))
     summary = json.loads(local_present.stdout)
     external_result = next(item for item in summary["results"] if item["suite"] == "external")
+    late_skip_result = next(
+        item for item in summary["results"] if item["suite"] == "external_late_skip"
+    )
     identity_result = next(item for item in summary["results"] if item["suite"] == "identity")
     check("available local source executes and passes",
-          local_present.returncode == 0 and external_result["status"] == "pass")
+          local_present.returncode == 0 and external_result["status"] == "pass"
+          and late_skip_result["status"] == "skip")
     check("available source reports nonzero raw assertions",
           external_result["assertions"]["passed"].get("raw_bytes", 0) > 0)
     check("identity hashes are counted separately",
@@ -156,8 +188,27 @@ oracle = "raw_bytes"
           identity_result["semantic_status"] == "not_semantic")
     check("raw-byte suite can claim semantic verification",
           external_result["semantic_status"] == "verified")
+    check("aggregate retains each suite's declared default oracle",
+          external_result["oracle"] == "raw_bytes"
+          and identity_result["oracle"] == "identity_hash")
     check("aggregate lists pass/fail/skip separately",
           all(key in summary for key in ("passed", "failed", "skipped")))
+
+    legacy = run("--suite", "legacy")
+    check("legacy PASS: assertions are counted with the declared oracle",
+          legacy.returncode == 0 and '"raw_bytes": 1' in legacy.stdout)
+
+    printed_fail = run("--suite", "printed_fail")
+    check("printed FAIL assertion overrides a zero process exit",
+          printed_fail.returncode == 1
+          and "printed 1 failed assertion" in printed_fail.stderr)
+
+    required_late_skip = run(
+        "--required-external", "--external-root", str(external_root)
+    )
+    check("required mode rejects a test-level exit-77 skip",
+          required_late_skip.returncode == 1
+          and "required external suite reported skip" in required_late_skip.stderr)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

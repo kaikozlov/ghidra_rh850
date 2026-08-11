@@ -73,8 +73,18 @@ interactive work happens in the gitignored working copy at `build/project/`:
   it.
 - `make finalize-project` — orchestrated end-of-session promotion: stops the
   daemon, waits for exit, verifies the working project, invokes the snapshot
-  path, and prints the staged project diff summary. Use this instead of
+  path, and prints the staged project diff summary. This is an explicit
+  promotion command: it always verifies and snapshots the selected working
+  project, even if no mutation marker exists. Use this instead of
   manually running `tools/g stop` + `make snapshot-project`.
+
+Mutation markers are project-affine records under
+`build/ghidra-session-dirty/`; each records the canonical working-project path.
+`GHIDRA_PROJECT=/path/to/build-copy tools/g ...` therefore cannot mark or clear
+another working project, and finalization propagates its `PROJECT_DIR` to the
+daemon stop and snapshot steps. Markers are warnings about mutation-capable
+commands, not the authority for deciding whether a rebuilt project needs
+promotion.
 
 ## Opening the working project
 

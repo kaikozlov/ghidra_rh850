@@ -45,6 +45,7 @@ for address, size, claims in (
     (0x6C8E, 116, ("MEM-SAFE-003",)),
     (0x86EE8, 174, ("MEM-SAFE-004",)),
     (0x32D2, 70, ("MEM-SAFE-001", "MEM-SAFE-005")),
+    (0x58A2, 40, ("MEM-SAFE-001",)),
 ):
     result = mutate(address, bytes(size))
     for claim in claims:
@@ -60,6 +61,8 @@ for label, address, replacement, claim, proposition in (
     ("compare mismatch NRC", 0x4F0A, b"\x00\x00\x00\x00", "MEM-SAFE-003", "response_distinguishes_equal_and_mismatch"),
     ("command-8 original length load", 0x86F50, b"\x00\x00\x00\x00", "MEM-SAFE-004", "failure_branch_loads_original_length_and_zero_fills"),
     ("range zero-length branch", 0x32D8, b"\x00\x00", "MEM-SAFE-001", "range_checker_rejects_zero_and_wrap"),
+    ("FF00 authorization-state branch", 0x58A6, b"\x00\x00", "MEM-SAFE-001", "ff00_accepts_state_one_or_0x81_and_starts_erase"),
+    ("FF00 erase start", 0x58B4, b"\x00\x00\x00\x00", "MEM-SAFE-001", "ff00_accepts_state_one_or_0x81_and_starts_erase"),
     ("range wrap branch", 0x32E2, b"\x00\x00", "MEM-SAFE-005", "range_checker_zero_and_wrap_boundary"),
 ):
     result = mutate(address, replacement)

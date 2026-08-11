@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -51,6 +52,31 @@ def main() -> int:
                     if row["selected_for_sweep"] == "true"]
     environment = os.environ.copy()
     environment.update({"GHIDRA_AGENT": "1", "GHIDRA_PROJECT": str(project_dir)})
+    # Refuse to attribute the committed inventory hash to an unrelated live
+    # project.  Export and compare the selected project before decompiling it.
+    with tempfile.TemporaryDirectory(prefix="semantic-sweep-inventory-", dir=REPO / "build") as tmp:
+        live_inventory = Path(tmp) / "live-project.jsonl"
+        inventory_env = environment.copy()
+        inventory_env["PROJECT_DIR"] = str(project_dir)
+        exported = subprocess.run(
+            [str(REPO / "tools/generate_project_inventory.sh"), str(live_inventory)],
+            cwd=REPO, env=inventory_env, capture_output=True, text=True,
+        )
+        if exported.returncode:
+            raise SystemExit(
+                "live project inventory export failed:\n"
+                + exported.stdout + "\n" + exported.stderr
+            )
+        compared = subprocess.run(
+            [sys.executable, str(REPO / "tools/project_inventory.py"), "compare",
+             str(INVENTORY), str(live_inventory)],
+            cwd=REPO, capture_output=True, text=True,
+        )
+        if compared.returncode:
+            raise SystemExit(
+                f"live project does not match {INVENTORY.relative_to(REPO)}:\n"
+                + compared.stdout + "\n" + compared.stderr
+            )
     records = []
     try:
         for index, row in enumerate(selected, 1):

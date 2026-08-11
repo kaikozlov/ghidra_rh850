@@ -37,13 +37,13 @@ check("project totals", totals["record"] == "totals" and totals["functions"] == 
 check("inventory hash published", inventory_sha in text, inventory_sha)
 
 outside = json.loads((REPO / "data/outside_function_summary.json").read_text())
-check("outside-function totals", outside["candidate_count"] == 2091
-      and outside["decoded_instruction_count"] == 25768
-      and outside["decoded_byte_count"] == 73008)
+check("outside-function totals", outside["candidate_count"] == 2061
+      and outside["decoded_instruction_count"] == 22514
+      and outside["decoded_byte_count"] == 63982)
 check("outside-function classes", outside["candidate_class_counts"]
-      == {"orphan-decoded-run": 854, "pointer-referenced-code-run": 1237})
+      == {"orphan-decoded-run": 831, "pointer-referenced-code-run": 1230})
 check("outside-function adjudication", outside["adjudication_state_counts"]
-      == {"unresolved": 2031, "unresolved-reviewed": 60})
+      == {"unresolved": 2001, "unresolved-reviewed": 60})
 
 table_specs = [
     (0x2B3F0, 7, 8, (4,)), (0x22C30, 18, 4, (0,)),
@@ -62,16 +62,16 @@ check("dispatch denominator published", "7 tables / 87 nonzero target pointers" 
 
 summary = json.loads((REPO / "data/semantic_coverage_summary.json").read_text())
 check("semantic review totals", summary["function_count"] == 6037
-      and summary["reviewed_function_count"] == 109
-      and summary["bounded_semantics_count"] == 21)
+      and summary["reviewed_function_count"] == 110
+      and summary["bounded_semantics_count"] == 22)
 check("semantic state totals", summary["review_state_counts"] == {
-    "reviewed_unknown": 88, "semantically_identified": 18,
-    "structurally_bounded": 3, "unreviewed": 5928,
+    "reviewed_unknown": 88, "semantically_identified": 19,
+    "structurally_bounded": 3, "unreviewed": 5927,
 })
 check("semantic grade totals", summary["evidence_grade_counts"]
-      == {"bounded": 3, "recovered": 11, "verified": 7})
+      == {"bounded": 3, "recovered": 11, "verified": 8})
 check("execution totals explicit", summary["execution_status_counts"]
-      == {"passed": 104, "unavailable": 5})
+      == {"passed": 105, "unavailable": 5})
 
 with (REPO / "data/generated/semantic_interest_ranking.csv").open(newline="") as stream:
     selected = [row for row in csv.DictReader(stream) if row["selected_for_sweep"] == "true"]
@@ -105,7 +105,7 @@ check("exact verified finding denominator", len(verified_findings) == 48)
 check("dynamic observation denominator", observed_findings == ["SECOC-030", "VAR-001"])
 
 required_tokens = [
-    "104 `passed`, 5 `unavailable`, 0 `failed`",
+    "105 `passed`, 5 `unavailable`, 0 `failed`",
     "Live official Techstream↔`8965B4512000` flows captured | 0",
     "Exact cross-variant/target-generation transfers verified | 0",
 ]

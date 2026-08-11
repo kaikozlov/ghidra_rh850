@@ -86,6 +86,31 @@ imports = {(lib.dll.decode("latin1"), symbol.name.decode("latin1"))
 check("controller imports LoadLibraryA", ("KERNEL32.dll", "LoadLibraryA") in imports)
 check("controller imports GetProcAddress", ("KERNEL32.dll", "GetProcAddress") in imports)
 
+# Pin the exact controller references that connect INI field names to the two
+# dynamic factory entry points.  RVAs below are operand or instruction starts
+# in the pinned PE, not inferred strings found elsewhere in the image.
+prepare_key_va = (0x10000000 + 0x116D8).to_bytes(4, "little")
+flash_key_va = (0x10000000 + 0x116F8).to_bytes(4, "little")
+for rva in (0x7178, 0x98D9):
+    check(f"controller code references prepare-writer field at RVA {rva:#x}",
+          control_pe.get_data(rva, 4) == prepare_key_va)
+for rva in (0x8B28, 0x8DC4, 0xA361):
+    check(f"controller code references flash-writer field at RVA {rva:#x}",
+          control_pe.get_data(rva, 4) == flash_key_va)
+
+load_library_iat = (0x100163F8).to_bytes(4, "little")
+get_proc_iat = (0x1001643C).to_bytes(4, "little")
+check("prepare factory calls LoadLibraryA through pinned IAT",
+      control_pe.get_data(0x1C44, 6) == b"\xff\x15" + load_library_iat)
+check("prepare factory pushes StartPrepareWrite and calls GetProcAddress",
+      control_pe.get_data(0x1C76, 12)
+      == b"\x68" + (0x10011F8C).to_bytes(4, "little") + b"\x50\xff\x15" + get_proc_iat)
+check("flash factory calls LoadLibraryA through pinned IAT",
+      control_pe.get_data(0x1DA4, 6) == b"\xff\x15" + load_library_iat)
+check("flash factory pushes StartFlashWrite before GetProcAddress call",
+      control_pe.get_data(0x1DDD, 8)
+      == b"\x68" + (0x1001205C).to_bytes(4, "little") + b"\x50\xff\xd6")
+
 print("\n== raw writer exports, imports, and command builders ==")
 required_exports = {
     "TCUWCanReproStdPrepareWriter.dll": "StartPrepareWrite",

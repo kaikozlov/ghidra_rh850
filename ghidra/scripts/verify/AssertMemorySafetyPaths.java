@@ -92,6 +92,17 @@ public class AssertMemorySafetyPaths extends GhidraScript {
         }
     }
 
+    private void assertFunctionOwns(long entry, long address) {
+        assertions++;
+        Function function = getFunctionContaining(toAddr(address));
+        if (function == null || function.getEntryPoint().getOffset() != entry) {
+            fail(String.format(Locale.ROOT,
+                    "0x%x expected function owner 0x%x actual=%s",
+                    address, entry,
+                    function == null ? "none" : String.format(Locale.ROOT, "0x%x", function.getEntryPoint().getOffset())));
+        }
+    }
+
     private void assertExactCallees(long entry, long... expected) throws Exception {
         assertions++;
         Function function = getFunctionAt(toAddr(entry));
@@ -145,6 +156,8 @@ public class AssertMemorySafetyPaths extends GhidraScript {
                 "00000100ff7d01003300000000000000" +
                 "00800100fffd0f003300000000000000" +
                 "0000bffeff0fbffe3300000001000000");
+        assertInsn(0x567eL, "prepare", "r25", "r26", "r27", "r28", "r29", "lp", "0x5");
+        assertFunctionOwns(0x567eL, 0x58ccL);
         assertInsn(0x59d2L, "mov", "0x1", "r1");
         assertInsn(0x59d8L, "movea", "-0x6cef", "gp", "ep");
         assertInsn(0x59dcL, "shl", "r19", "r1", "r19");
@@ -153,6 +166,18 @@ public class AssertMemorySafetyPaths extends GhidraScript {
         assertInsn(0x5e70L, "ld.bu", "-0x6cef", "gp", "r1");
         assertInsn(0x5e74L, "addi", "-0x81", "r1", "r0");
         assertFlow(0x5e78L, 0x5e82L);
+        assertInsn(0x58a2L, "ld.bu", "-0x6cef", "gp", "r1");
+        assertInsn(0x58a6L, "cmp", "0x1", "r1");
+        assertFlow(0x58a8L, 0x58b0L);
+        assertInsn(0x58aaL, "addi", "-0x81", "r1", "r0");
+        assertFlow(0x58aeL, 0x58d2L);
+        assertFlow(0x58b4L, 0x41e0L);
+        assertInsn(0x58bcL, "movea", "-0x7f", "r0", "r1");
+        assertInsn(0x58c2L, "st.b", "r1", "-0x6cef", "gp");
+        assertFlow(0x58ccL, 0x4260L);
+        assertBytes(0x58a2L,
+                "a40f1193610ac20501067fffaa151d301c38bfff2ce9e051ca0d" +
+                "200e81ff0132440f1193020a440f1793bfff94e9");
         assertInsn(0x434cL, "movhi", "-0x141", "r0", "r29");
         assertInsn(0x4350L, "ld.w", "0xfd0", "r29", "r29");
         assertInsn(0x435eL, "jarl", "r29", "lp");

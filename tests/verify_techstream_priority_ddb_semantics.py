@@ -68,8 +68,26 @@ for table_type, schema in artifact["schemas"].items():
         check(f"type {table_type} consumer {consumer['method']}",
               hashlib.sha256(prefix).hexdigest() == consumer["prefix_sha256"])
 
-print("\n== raw records and field offsets ==")
+# Prefix identities only pin which methods were inspected.  These exact x86
+# operand bytes independently pin the load-bearing record offsets used by the
+# priority monitor/behavior field claims.
 oracle = "instruction_semantics"
+field_loads = {
+    0x10041DDB: bytes.fromhex("8a4202"),       # type 6: byte +0x02
+    0x100287CB: bytes.fromhex("668b4224"),     # type 62: word +0x24
+    0x1002851D: bytes.fromhex("668b5130"),     # type 62: word +0x30 lhs
+    0x1002852C: bytes.fromhex("668b4830"),     # type 62: word +0x30 rhs
+    0x100085CD: bytes.fromhex("668b512e"),     # type 88: word +0x2e lhs
+    0x100085DC: bytes.fromhex("668b482e"),     # type 88: word +0x2e rhs
+    0x10028643: bytes.fromhex("8b4218"),       # type 62: dword +0x18
+    0x10025642: bytes.fromhex("668b4802"),     # type 63: word +0x02
+}
+for va, expected in field_loads.items():
+    actual = pe.get_data(va - image_base, len(expected))
+    check(f"field consumer operand at {va:#x}", actual == expected, actual.hex())
+
+print("\n== raw records and field offsets ==")
+oracle = "raw_bytes"
 section_instances = decoded_records = 0
 for source in artifact["sources"]:
     path = ROOT / source["relative_path"]

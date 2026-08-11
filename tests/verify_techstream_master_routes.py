@@ -12,8 +12,6 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO / "tools/techstream"))
-from parse_ddb import lzss_decompress  # noqa: E402
 
 ARTIFACT = REPO / "data/generated/techstream_v18/toyota_master_routes.json"
 TECHSTREAM_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
@@ -34,6 +32,46 @@ def check(name: str, condition: object, detail: str = "") -> None:
     print(f"[{'PASS' if ok else 'FAIL'}][{oracle}] {name}" + (f" ({detail})" if detail else ""))
 
 
+def independent_lzss_decode(block: bytes) -> bytes:
+    """Decode the DDB stream without importing the production parser."""
+    if len(block) < 5:
+        raise ValueError("compressed DDB section is shorter than its header")
+    wanted = int.from_bytes(block[:4], "little")
+    source = memoryview(block)[5:]
+    ring = [0] * 4096
+    cursor = 0xFEE
+    source_index = 0
+    output = bytearray()
+    while source_index < len(source) and len(output) < wanted:
+        flags = int(source[source_index])
+        source_index += 1
+        for bit in range(8):
+            if source_index >= len(source) or len(output) >= wanted:
+                break
+            if flags & (1 << bit):
+                value = int(source[source_index])
+                source_index += 1
+                output.append(value)
+                ring[cursor] = value
+                cursor = (cursor + 1) & 0xFFF
+            else:
+                if source_index + 1 >= len(source):
+                    raise ValueError("truncated DDB LZSS back-reference")
+                low, high = int(source[source_index]), int(source[source_index + 1])
+                source_index += 2
+                match = low | ((high & 0xF0) << 4)
+                for distance in range((high & 0x0F) + 3):
+                    value = ring[(match + distance) & 0xFFF]
+                    output.append(value)
+                    ring[cursor] = value
+                    cursor = (cursor + 1) & 0xFFF
+                    if len(output) == wanted:
+                        break
+    if len(output) != wanted:
+        raise ValueError(f"decoded {len(output)} bytes, expected {wanted}")
+    return bytes(output)
+
+
 def raw_section(data: bytes, table_type: int) -> dict:
     directory_slot = 0x24 + table_type * 4
     section_offset = struct.unpack_from("<I", data, directory_slot)[0]
@@ -44,7 +82,7 @@ def raw_section(data: bytes, table_type: int) -> dict:
     if actual_type != table_type:
         raise AssertionError((actual_type, table_type))
     on_disk = data[section_offset + 10:section_offset + 10 + payload_size]
-    decoded = lzss_decompress(on_disk) if compression else on_disk
+    decoded = independent_lzss_decode(on_disk) if compression else on_disk
     record_size, remainder = divmod(len(decoded), count)
     if remainder:
         raise AssertionError((table_type, len(decoded), count))

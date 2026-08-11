@@ -132,10 +132,13 @@ across subsequent downloads:
 - a subsequent RAM `RequestDownload` only rejects state `0x81` (not authorized
   state `0x01`) at `0x5E70–0x5E78`;
 - SIDs `0x34/0x36/0x37` never clear this byte;
-- `0xFF00` (`routine_erase_task @ 0x5B70`) accepts both `0x01` and `0x81`,
-  then loads and calls the callback pointer at `*(uint32_t *)0xFEBF0FD0`.
+- the `0xFF00` request path inside `uds_routine_control @ 0x567E` accepts both
+  `0x01` and `0x81` at `0x58A2–0x58B0`, calls `flash_erase_start @ 0x41E0`,
+  then stores authorization state `0x81` and operation state `0x02` at
+  `0x58C2–0x58C8`. `routine_erase_task @ 0x5B70` is the later asynchronous
+  completion worker, not the request/authorization gate.
 
-The callback invocation is direct and unvalidated:
+The downstream flash-engine callback invocation is direct and unvalidated:
 
 ```text
 0x434C  movhi  0xFEBF, r0, r29
@@ -594,8 +597,8 @@ future rebuild can cross-validate without re-deriving it.
 | Raw byte copy to dest | periodic task → `FUN_0000153a` | `0x4F7E–0x4F84` (memcpy call), `0x4F88–0x4F92` (target advance) | Copies unmodified request bytes to download destination |
 | `0x10F0` auth bit set | `routine_verify_crc_cmac_task` | `0x59E0/0x59E4` | Sets authorization bit 0 for class-1 region |
 | Subsequent RequestDownload | `uds_request_download` | `0x5E70–0x5E78` | Rejects state `0x81` only; accepts authorized `0x01` |
-| `0xFF00` accept | `routine_erase_task` | `0x58A2–0x58B0` | Accepts `0x01` or `0x81`; sets `0x81`, starts erase |
-| `0xFF00` erase start | `routine_erase_task` | `0x58B4–0x58C8` | Begins flash erase operation |
+| `0xFF00` accept | `uds_routine_control` | `0x58A2–0x58B0` | Accepts authorization `0x01` or `0x81` |
+| `0xFF00` erase start/state | `uds_routine_control` → `flash_erase_start` | `0x58B4–0x58CC` | Starts the flash erase, then stores authorization `0x81`, operation state `0x02`, and launch flag `1`; `routine_erase_task @ 0x5B70` is the later asynchronous worker |
 | Callback load | flash engine | `0x434C/0x4350` | `movhi 0xFEBF / ld.w 0x0FD0` → loads `*(uint32_t*)0xFEBF0FD0` |
 | Callback call | flash engine | `0x435E` | `jarl r29, lp` — indirect call |
 | Second callback path | flash engine | `0x4402/0x440E` | Second load/call of same pointer |

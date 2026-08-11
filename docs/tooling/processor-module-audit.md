@@ -307,17 +307,20 @@ DATA reference into CodeFlash that is not a function entry (scalars included),
 not a table-only classifier. The ledger deliberately does **not** claim that
 every function is behaviorally understood.
 
-The corrected ledger contains **6,037** functions: 5,928 `unreviewed`, 88
-`reviewed_unknown`, 3 `structurally_bounded`, and 18
-`semantically_identified`. Only 21 rows carry a semantic evidence grade (3
-bounded, 11 recovered, 7 verified). The reproducible selected sweep and
+The corrected ledger contains **6,037** functions: 5,927 `unreviewed`, 88
+`reviewed_unknown`, 3 `structurally_bounded`, and 19
+`semantically_identified`. Only 22 rows carry a semantic evidence grade (3
+bounded, 11 recovered, 8 verified). The reproducible selected sweep and
 corrected-graph negative re-audit are recorded in
 [../status/CORRECTED_GRAPH_REAUDIT_2026-08-11.md](../status/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 
 This in-function inventory is not an executable denominator. The separate
-outside-function exporter currently records 2,091 conservative candidate runs
-containing 25,768 decoded instructions; 2,031 remain unresolved and 60 remain
-reviewed-unresolved. Those candidates are not automatically promoted from
+outside-function exporter currently records 2,061 conservative candidate runs
+containing 22,514 decoded instructions; 2,001 remain unresolved and 60 remain
+reviewed-unresolved. The reduction comes from repairing the authoritative
+bootloader SID `0x31` entry at `0x567E`: stage-2 analysis had split its four-byte
+`prepare` at `0x5680`, leaving the real 696-byte RoutineControl body outside the
+function until the UDS seed corrected the conflicting code unit. Those candidates are not automatically promoted from
 plausible decoding or pointer shape.
 
 ## What these audits do *not* claim
