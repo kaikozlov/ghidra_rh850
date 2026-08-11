@@ -134,6 +134,10 @@ def main() -> int:
         "optskug records failed 2024 RAV4 Prime persistent-patch field test",
         "Techstream reported EPMS code `U023A87`" in optskug_readme,
     )
+    check(
+        "optskug records Toyota-B physical bus assignment can move the relay onto bus 1",
+        "the relay ends up on bus 1 instead of bus 0/2" in optskug_readme.lower(),
+    )
 
     print("\n== original combined image reconstruction ==")
     combined = roots["rh850_p1me_original"] / "RH850_P1M-E_Firmware.bin"
@@ -159,6 +163,7 @@ def main() -> int:
         roots["calvinpark_openpilot"] / "opendbc_repo/opendbc/safety/safety.h",
         roots["calvinpark_openpilot"] / "panda/board/main.c",
         roots["calvinpark_openpilot"] / "panda/board/boards/tres.h",
+        roots["calvinpark_openpilot"] / "panda/board/boards/cuatro.h",
         roots["calvinpark_openpilot"] / "panda/board/drivers/can_common.h",
         roots["calvinpark_openpilot"] / "panda/examples/query_fw_versions.py",
         roots["calvinpark_openpilot"] / "openpilot/selfdrive/pandad/panda.h",
@@ -219,6 +224,9 @@ def main() -> int:
     ).read_text(encoding="utf-8")
     panda_tres = (
         roots["calvinpark_openpilot"] / "panda/board/boards/tres.h"
+    ).read_text(encoding="utf-8")
+    panda_cuatro = (
+        roots["calvinpark_openpilot"] / "panda/board/boards/cuatro.h"
     ).read_text(encoding="utf-8")
     panda_can_common = (
         roots["calvinpark_openpilot"] / "panda/board/drivers/can_common.h"
@@ -325,6 +333,14 @@ def main() -> int:
         and "bus_config[2].bus_lookup = flipped ? 0u : 2u" in panda_can_common.lower(),
     )
     check(
+        "Panda generic harness forwarding is a bus-0/bus-2 pair and excludes bus 1",
+        "if (bus_num == 0)" in calvin_safety_core.lower()
+        and "destination_bus = 2" in calvin_safety_core.lower()
+        and "else if (bus_num == 2)" in calvin_safety_core.lower()
+        and "destination_bus = 0" in calvin_safety_core.lower()
+        and "destination_bus = -1" in calvin_safety_core.lower(),
+    )
+    check(
         "pandad marks returned CAN with source offset 0x80",
         "#define CAN_RETURNED_BUS_OFFSET 0x80U" in pandad_header
         and "canData.src += CAN_RETURNED_BUS_OFFSET" in pandad_source,
@@ -340,6 +356,15 @@ def main() -> int:
         and "gpio_af9_fdcan2" in panda_tres.lower()
         and "enable_can_transceiver(2u, true)" in panda_tres.lower()
         and "enable_can_transceiver(4u, true)" in panda_tres.lower(),
+    )
+    check(
+        "comma 4 Cuatro inherits the Tres FDCAN2 physical-routing implementation",
+        ".set_can_mode = tres_set_can_mode" in panda_cuatro.lower(),
+    )
+    check(
+        "UdsClient bus selection only feeds CAN send and receive-bus filtering",
+        "self.tx(self.tx_addr, msg, self.bus)" in uds
+        and "return bus == self.bus and addr == self.rx_addr" in uds,
     )
     check("dump shellcode transmits CAN 0x7A9", "= 0x7a9;" in shellcode)
     for address in (

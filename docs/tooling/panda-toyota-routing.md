@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence source:** external-source and local generated tooling
+> **Evidence source:** firmware-static, pinned external-source, and local tooling
 >
 > **Verification:** optional `tests/verify_external_corroboration.py` and
 > `tests/verify_toyota_eps_bus_probe.py`
@@ -59,9 +59,25 @@ Bus 1 remains attached to MCU CAN2.
 For Tres/Red Panda hardware, `CAN_MODE_NORMAL` versus `CAN_MODE_OBD_CAN2`
 changes which physical GPIO pair is configured as FDCAN2 and which CAN
 transceiver is enabled. The exact selected pair also depends on detected harness
-orientation. Therefore a script that changes only its `UdsClient(..., bus=...)`
-argument is not necessarily testing the same physical wires as another script
-or safety-parameter setting.
+orientation. Comma 4 uses the Cuatro board definition, and pinned `cuatro.h`
+assigns `.set_can_mode = tres_set_can_mode`, so the same FDCAN2 physical mux
+logic applies there as well.
+
+The pinned `UdsClient` implementation does something much narrower with its
+`bus` argument: transmit calls pass `self.bus` to `panda.can_send`, and receive
+filtering requires the returned bus to equal `self.bus`. It does not reconfigure
+the board CAN mode. Therefore changing only `UdsClient(..., bus=...)` is **not**
+the electrical equivalent of changing the ELM327 routing parameter or physically
+repinning harness CAN pairs.
+
+There is a second hardware distinction in the same direction. Panda's generic
+harness topology treats buses 0 and 2 as the two relay/forwarding sides; bus 1 is
+not part of that 0<->2 pair, and harness orientation swaps only 0 and 2. The
+pinned optskug history records an earlier Toyota-B/TSS3 field observation that an
+incorrect CAN assignment put "the relay ... on bus 1 instead of bus 0/2" and
+that physically flipping the buses restored EPS interaction. That observation is
+not proof of yc's exact transition failure, but it demonstrates why a physical
+CAN0/CAN1 repin can alter network topology in a way a client-bus number cannot.
 
 ## 3. Current community extractor configuration
 
@@ -74,31 +90,86 @@ UdsClient(..., BUS=0)      # probe/dump target fixed to logical bus 0
 
 The capture layer separately ignores logical bus 1.
 
-This means the current workflow does **not** perform diagnostic-bus discovery,
-and changing only `BUS = 1` while retaining ELM327 parameter 0 changes both the
-logical UDS target and the physical CAN2 mux context relative to a normal-routing
-probe.
+This means the current workflow does **not** perform diagnostic-bus discovery.
+More importantly for the yc experiment, changing only `BUS = 1` while retaining
+ELM327 parameter 0 changes the logical UDS queue but leaves the Panda in the
+OBD-CAN2 physical mux state. That "software swap" is therefore not equivalent
+to physically swapping the harness CAN pairs.
 
-## 4. What static analysis does and does not establish
+## 4. EPS-side controller continuity across programming mode
 
-Static source proves:
+The `8965B4512000` firmware rules out a second tempting explanation: the EPS does
+**not** move its `0x7A1/0x7A9` diagnostic endpoint to another RSCFD controller
+when it enters the boot/programming environment.
 
-1. ELM327 parameter 0 and nonzero parameters select different Panda CAN routing.
-2. The Bk2ol dumper does not explicitly request normal routing and does not
-   discover the responding bus.
-3. Panda logical bus 1 is the controller affected by the OBD CAN2 mux.
-4. Physical harness orientation separately swaps logical buses 0 and 2.
+### Application
 
-Static source does **not** prove why a particular Toyota EPS stops answering when
-entering programming mode. Remaining possibilities include physical topology,
-ACK behavior across ECU reset, gateway behavior, transceiver/routing state, or
-variant-specific ECU behavior.
+The application EIINT table at `0x20200` installs only the CAN1 pair:
 
-Accordingly, the current evidence supports the hypothesis that the physical
-CAN-pair repin can be replaced by correct software routing, but does not yet
-prove it.
+```text
+EIINT 184 CAN0 RX -> 0x61D88 default handler
+EIINT 185 CAN0 TX -> 0x61D88 default handler
+EIINT 187 CAN1 RX -> application_can1_rx_isr @ 0x6506A
+EIINT 188 CAN1 TX -> application_can1_tx_isr @ 0x65028
+EIINT 192 CAN2 RX -> 0x61D88 default handler
+EIINT 193 CAN2 TX -> 0x61D88 default handler
+```
 
-## 5. Non-destructive discovery helper
+The application RX/TX interrupt bodies at `0x82E40` and `0x8474E` both
+hard-code RSCFD channel `1` into their generic handlers.
+
+### Boot/programming environment
+
+The boot CanIf configuration is independently channel-1-specific for the EPS
+endpoint:
+
+- receive filter 0 at `0x8920` matches request CAN ID `0x7A1`;
+- the HRH route table at `0x898C` exposes that filter only through HRHs `0x10`
+  and `0x13`; both encode RSCFD channel 1;
+- channel-0 HRHs `0x00..0x0F` and channel-2 HRHs `0x20..0x2F` have no active
+  receive filter;
+- the sole diagnostic Tx PDU config at `0x8948` uses response CAN ID `0x7A9`
+  and HTH `0x13`, which also encodes RSCFD channel 1.
+
+`tests/verify_toyota_eps_bus_probe.py` pins these bytes and vector/config-table
+relationships directly from CodeFlash.
+
+Therefore the observed transition-time timeout cannot be explained by an
+application-to-boot switch from EPS CAN1 to CAN0/CAN2. The routing discontinuity,
+if any, is outside that ECU-controller selection.
+
+## 5. What static analysis does and does not establish
+
+Static analysis now proves two distinct points:
+
+1. **Why the reported bus-only software swap was not equivalent to the physical
+   repin:** `UdsClient.bus` selects a logical Panda bus, while ELM327 parameter 0
+   separately keeps FDCAN2 physically multiplexed to the OBD path. Comma 4 uses
+   the same mux implementation. Separately, Panda's harness relay/forwarding
+   topology is the 0<->2 pair, not bus 1; a Toyota-B CAN0/CAN1 repin can therefore
+   move a vehicle network onto or off the relay-backed harness path, which a
+   `UdsClient` bus change cannot reproduce.
+2. **The EPS does not itself change diagnostic CAN controller at programming
+   transition:** both the application and boot `0x7A1/0x7A9` paths are RSCFD
+   channel 1 on `8965B4512000`.
+
+Static evidence still does **not** prove why yc's OBD-muxed/logical-bus path
+specifically stops working at the programming transition. With an EPS
+controller switch ruled out, the strongest remaining explanation is that the
+stock path reaches the EPS through a different physical network segment (for
+example an OBD/gateway path), while the repin places Panda on the direct
+relay-backed harness segment that remains reachable after the EPS enters boot.
+That mechanism fits both the Panda topology and the observed app-success /
+programming-timeout boundary, but a transition capture is still required to
+separate gateway reachability from ACK availability or another physical-network
+effect. Calvin's opposite field result is consistent with setup-dependent
+topology and is a reason not to promote the gateway mechanism itself to fact.
+
+A correct software replacement for the physical repin must reproduce the same
+**physical Panda pin/transceiver route**, not merely change the `UdsClient` bus
+number.
+
+## 6. Non-destructive discovery helper
 
 `tools/toyota_eps_bus_probe.py` is designed to settle the first routing question
 without entering a programming session.
