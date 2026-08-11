@@ -27,12 +27,20 @@ curated.
 | `data/application_rx_map.csv` | 47 normal Rx I-PDUs, 242 COM signals | `tools/generate_application_rx_map.py` (`make generate-application-receive`) | `tests/verify_application_receive.py` |
 | `data/application_rx_signal_evidence.csv` | Complete RX signal extraction/classification evidence (drives the RX map generator) | `tools/generate_application_rx_signal_evidence.sh` (`make generate-application-receive-evidence`) | `tests/verify_application_receive.py` |
 | `data/application_tx_map.csv` | 58-row application TX signal map including post-packer/default-only closure | `tools/generate_application_tx_map.py` (`make generate-application-transmit`) | `tests/verify_application_transmit.py` |
-| `data/semantic_coverage_ledger.csv` | Whole-image recovered-function ledger (5,921 rows) with evidence grades | `tools/generate_semantic_coverage_ledger.sh` (`make generate-semantic-coverage`) | `tests/verify_semantic_coverage.py` |
+| `data/outside_function_candidates.csv` | Conservative decoded-CodeFlash runs outside known functions, including evidence class and adjudication state | `tools/generate_outside_function_candidates.sh` (`make generate-function-discovery`) | `tests/verify_function_discovery.py` |
+| `data/semantic_coverage_ledger.csv` | Whole-image structural function ledger (6,037 rows) with review state kept separate from evidence grade | `tools/generate_semantic_coverage_ledger.sh` (`make generate-semantic-coverage`) | `tests/verify_semantic_coverage.py`, `tests/verify_semantic_coverage_live.py` |
+| `data/generated/semantic_interest_ranking.csv` | Deterministic all-function interest ranking plus exact selected sweep cohort and selection strata | `tools/generate_semantic_interest_ranking.py` | `tests/verify_semantic_interest_ranking.py` |
+| `data/generated/semantic_sweep_decompilations.jsonl` | Normalized decompilations and selection provenance for all 100 selected functions | `tools/generate_semantic_sweep.py` (`make generate-semantic-sweep PROJECT_DIR=…`) | `tests/verify_semantic_sweep.py` |
 | `data/object15_reachability.csv` | Object-15 caller census | `tools/generate_object15_reachability.py` | `tests/verify_boot_trust.py` |
 | `data/instruction_inventory.csv` | Whole-image instruction inventory emitted during processor verification | `tools/verify_processor.sh` (`make verify-processor`) | `make verify-processor` |
 | `data/ghidra_project_inventory.baseline.jsonl` | Canonical path-free project identity: tool/program metadata, memory mappings, complete function signatures/storage, user symbols, comments, bookmarks, and totals | `tools/generate_project_inventory.sh`; two independent rebuilds required by `make update-project-baseline` | `make verify-project-parity` |
 | `data/switch_table_inventory.csv` | Recovered RH850 `switch` jump-table inventory | `InventorySwitchTables.java` (via rebuild / `make verify-processor`) | `AssertSwitchTables.java` (`make verify-processor`) |
 | `data/ram_overlay_map.csv` | LocalRAM overlay inventory | generated at import (`ApplyRamTypes.java`) | `make verify-processor` |
+
+Generated JSON summaries paired with the tables above include
+`data/outside_function_summary.json` and
+`data/semantic_coverage_summary.json`; their corresponding table verifiers
+check both files.
 
 ## Curated evidence tables (edit intentionally; validate with tests)
 
@@ -48,6 +56,7 @@ curated.
 | `data/p1m_sfr_labels.csv` | P1M-E SFR labels used by the device profile | `make verify-processor` |
 | `data/scheduler_periods.csv` | Cyclic-task scheduler period evidence | `tests/verify_scheduler_timing.py` |
 | `data/decompiler_signatures.baseline.csv` | Decompiler-signature baseline diffed against the working project | `tools/verify_processor.sh` (`make verify-processor`) |
+| `data/semantic_review_status.csv` | Per-function curated semantic dispositions; `reviewed_unknown` records review without conferring an evidence grade | `tests/verify_semantic_coverage.py`, `tests/verify_semantic_sweep.py` |
 | `data/renesas_rfp_rv40f_commands.csv` | Complete 52-ID RV40F host-command census: request/response layouts, callers, preconditions, and result handling | `tests/verify_renesas_rfp.py` |
 | `data/renesas_rfp_rv40f_capabilities.csv` | Structural decoder for the 8-byte `GetDeviceType` capability/type-code vector and internal `0x1001..0x1212` keys | `tests/verify_renesas_rfp.py` |
 

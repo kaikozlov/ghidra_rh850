@@ -1,5 +1,5 @@
 entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_thunk,calling_convention,caller_count,callee_count,indirect_reference_count,root_kind,ram_ref_count,ram_read_ref_count,ram_write_ref_count,mmio_ref_count,codeflash_data_ref_count,string_ref_count,subsystem,review_state,evidence_grade,verification_source,oracle_class,execution_status,review_date,review_result
-0x00000030,8,boot_default_exception_handler,auto-analysis,Ghidra auto-analysis,DEFAULT,true,__interrupt,0,0,3,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
+0x00000030,8,boot_default_exception_handler,auto-analysis,Ghidra auto-analysis,DEFAULT,true,__interrupt,0,0,3,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5215 (isr-rooted); decompiled successfully; exact semantics not independently established
 0x000001b0,66,boot_reset_startup,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,0,,0,0,0,0,0,0,boot,semantically_identified,verified,tests/verify_architecture.py,instruction_semantics,passed,2026-08-11,Reset entry and initialization role deterministically asserted
 0x000001f2,1360,boot_reset_startup,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,1,0,,2,0,2,3,1,0,boot,unreviewed,,,,,,
 0x00000748,12,boot_eiint_dispatch,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
@@ -14,7 +14,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000008c8,166,FUN_000008c8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,1,0,boot,unreviewed,,,,,,
 0x0000096e,740,FUN_0000096e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,1,0,boot,unreviewed,,,,,,
 0x00000c52,72,FUN_00000c52,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,1,0,boot,unreviewed,,,,,,
-0x00000c9a,442,boot_peripheral_init,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,2,33,0,boot,unreviewed,,,,,,
+0x00000c9a,442,boot_peripheral_init,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,2,33,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 803 (table-heavy); decompiled successfully; exact semantics not independently established
 0x00000e54,300,boot_key_mirror_init,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,18,0,18,5,0,0,boot,unreviewed,,,,,,
 0x00000f80,324,boot_flash_sequencer_init,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,15,0,0,boot,unreviewed,,,,,,
 0x000010c4,2,FUN_000010c4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
@@ -45,7 +45,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0000167c,32,FUN_0000167c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x0000169c,86,FUN_0000169c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,2,0,boot,unreviewed,,,,,,
 0x000016f2,214,FUN_000016f2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,5,0,,0,0,0,0,6,0,boot,unreviewed,,,,,,
-0x000017c8,1014,FUN_000017c8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,239,2,0,boot,unreviewed,,,,,,
+0x000017c8,1014,FUN_000017c8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,239,2,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 162 (boot); decompiled successfully; exact semantics not independently established
 0x00001bbe,98,FUN_00001bbe,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,0,0,0,4,0,0,boot,unreviewed,,,,,,
 0x00001c20,64,FUN_00001c20,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,2,0,boot,unreviewed,,,,,,
 0x00001c60,64,FUN_00001c60,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,1,0,boot,unreviewed,,,,,,
@@ -54,22 +54,22 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00001d0e,6,FUN_00001d0e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00001d24,8,FUN_00001d24,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,13,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00001d2c,42,direct_call_target_00001d2c,direct-call seed,SeedDirectCallTargets.java,USER_DEFINED,false,__stdcall,1,2,0,,1,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001d58,24,FUN_00001d58,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__interrupt,0,1,0,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
+0x00001d58,24,FUN_00001d58,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__interrupt,0,1,0,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5232 (isr-rooted); decompiled successfully; exact semantics not independently established
 0x00001d70,14,FUN_00001d70,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,7,0,0,,1,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00001d9a,106,direct_call_target_00001d9a,direct-call seed,SeedDirectCallTargets.java,USER_DEFINED,false,__stdcall,1,4,0,,4,4,1,0,4,0,boot,unreviewed,,,,,,
 0x00001e04,12,direct_call_target_00001e04,direct-call seed,SeedDirectCallTargets.java,USER_DEFINED,false,__stdcall,1,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00001e10,14,FUN_00001e10,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001e1e,8,boot_default_exception_handler,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001e2a,12,boot_secondary_exception_handler,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,0,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001e36,14,boot_fatal_exception_trap,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,0,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001e44,12,boot_tauj0_ch2_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001e50,14,boot_can0_rx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001e5e,14,boot_can0_tx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001e6c,14,boot_can1_rx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001e7a,14,boot_can1_tx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001e88,14,boot_can2_rx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001e96,14,boot_can2_tx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00001ea4,14,boot_unexpected_eiint_trap,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,unreviewed,,,,,,
+0x00001e1e,8,boot_default_exception_handler,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5253 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00001e2a,12,boot_secondary_exception_handler,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,0,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5372 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00001e36,14,boot_fatal_exception_trap,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,0,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5331 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00001e44,12,boot_tauj0_ch2_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5094 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00001e50,14,boot_can0_rx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5007 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00001e5e,14,boot_can0_tx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5008 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00001e6c,14,boot_can1_rx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5009 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00001e7a,14,boot_can1_tx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5010 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00001e88,14,boot_can2_rx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5011 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00001e96,14,boot_can2_tx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5012 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00001ea4,14,boot_unexpected_eiint_trap,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,1,interrupt,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5013 (isr-rooted); decompiled successfully; exact semantics not independently established
 0x00001ec0,30,cantp_canif_transmit,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,6,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00001ede,16,FUN_00001ede,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00001eee,30,cantp_rx_indication_callback,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
@@ -106,7 +106,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00002ecc,80,direct_call_target_00002ecc,direct-call seed,SeedDirectCallTargets.java,USER_DEFINED,false,__stdcall,1,3,0,,6,5,1,0,1,0,boot,unreviewed,,,,,,
 0x00002f1c,156,CanTp_TxConfirmation,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,6,0,,3,3,1,0,3,0,boot,unreviewed,,,,,,
 0x00002fb8,72,FUN_00002fb8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,2,2,1,0,0,0,boot,unreviewed,,,,,,
-0x00003000,210,FUN_00003000,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,7,,2,2,1,0,3,0,boot,unreviewed,,,,,,
+0x00003000,210,FUN_00003000,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,7,,2,2,1,0,3,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 201 (indirect-callback); decompiled successfully; exact semantics not independently established
 0x000030d2,82,FUN_000030d2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,0,2,3,,3,1,0,0,2,0,boot,unreviewed,,,,,,
 0x000032d2,70,boot_memory_range_check_access,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,0,0,,0,0,0,0,8,0,boot,unreviewed,,,,,,
 0x00003318,70,boot_memory_range_get_auth_bit,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,0,,0,0,0,0,8,0,boot,unreviewed,,,,,,
@@ -154,7 +154,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00003ad6,30,FUN_00003ad6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,1,0,0,boot,unreviewed,,,,,,
 0x00003af4,44,FUN_00003af4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,1,0,0,boot,unreviewed,,,,,,
 0x00003b20,28,FUN_00003b20,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,1,0,0,boot,unreviewed,,,,,,
-0x00003b3c,736,FUN_00003b3c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,21,0,,2,0,2,5,13,0,boot,unreviewed,,,,,,
+0x00003b3c,736,FUN_00003b3c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,21,0,,2,0,2,5,13,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 31 (boot); decompiled successfully; exact semantics not independently established
 0x00003e1c,44,direct_call_target_00003e1c,direct-call seed,SeedDirectCallTargets.java,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,4,0,0,boot,unreviewed,,,,,,
 0x00003e48,22,direct_call_target_00003e48,direct-call seed,SeedDirectCallTargets.java,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,1,0,0,boot,unreviewed,,,,,,
 0x00003e5e,34,direct_call_target_00003e5e,direct-call seed,SeedDirectCallTargets.java,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,1,0,0,boot,unreviewed,,,,,,
@@ -204,7 +204,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000048d2,38,FUN_000048d2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00004900,20,uds_write_did_negative_response,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00004914,52,uds_write_did_positive_response,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,1,0,,4,1,3,0,1,0,boot,unreviewed,,,,,,
-0x00004948,328,uds_write_data_by_identifier,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,1,,6,4,4,0,4,0,boot,unreviewed,,,,,,
+0x00004948,328,uds_write_data_by_identifier,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,1,,6,4,4,0,4,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 341 (zero-caller); decompiled successfully; exact semantics not independently established
 0x00004a90,10,uds_write_did_state_reset,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,2,0,2,0,0,0,boot,unreviewed,,,,,,
 0x00004a9a,68,uds_write_did_completion_task,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,3,0,,4,4,1,0,0,0,boot,unreviewed,,,,,,
 0x00004ae2,86,FUN_00004ae2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,4,4,3,0,0,0,boot,unreviewed,,,,,,
@@ -235,7 +235,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000051fa,40,FUN_000051fa,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,14,1,0,,4,1,3,0,0,0,boot,unreviewed,,,,,,
 0x00005222,72,uds_service_dispatch,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,3,0,,1,1,0,0,6,0,boot,unreviewed,,,,,,
 0x0000526a,22,FUN_0000526a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00005280,2,FUN_00005280,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,15,,0,0,0,0,0,0,boot,unreviewed,,,,,,
+0x00005280,2,FUN_00005280,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,15,,0,0,0,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 4295 (indirect-callback); decompiled successfully; exact semantics not independently established
 0x00005282,2,FUN_00005282,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00005284,2,FUN_00005284,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00005286,32,program_region_validity_marker,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
@@ -264,7 +264,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00005d2a,2,FUN_00005d2a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00005d2c,20,FUN_00005d2c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00005d40,40,FUN_00005d40,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,4,0,4,0,0,0,boot,unreviewed,,,,,,
-0x00005d68,468,uds_request_download,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,10,1,,9,6,4,0,1,0,boot,unreviewed,,,,,,
+0x00005d68,468,uds_request_download,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,10,1,,9,6,4,0,1,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 254 (zero-caller); decompiled successfully; exact semantics not independently established
 0x00005f3c,2,FUN_00005f3c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00005f3e,42,bootloader_read_did_fill_placeholder,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,0,,1,0,0,0,1,0,boot,unreviewed,,,,,,
 0x00005f68,20,uds_read_did_negative_response,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
@@ -293,7 +293,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0000666c,82,direct_call_target_0000666c,direct-call seed,SeedDirectCallTargets.java,USER_DEFINED,false,__stdcall,1,3,0,,4,4,1,0,0,0,boot,unreviewed,,,,,,
 0x000066be,60,Dcm_TpTxConfirmation,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,5,2,4,0,0,0,boot,unreviewed,,,,,,
 0x000066fa,80,Dcm_CopyTxData,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,3,3,1,0,0,0,boot,unreviewed,,,,,,
-0x0000674a,102,Dcm_TransmitResponse,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,12,3,0,,9,4,6,0,1,0,boot,unreviewed,,,,,,
+0x0000674a,102,Dcm_TransmitResponse,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,12,3,0,,9,4,6,0,1,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 115 (boot); decompiled successfully; exact semantics not independently established
 0x000067b0,32,FUN_000067b0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,10,0,0,,2,1,1,0,0,0,boot,unreviewed,,,,,,
 0x000067d0,10,FUN_000067d0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,0,,2,0,1,0,0,0,boot,unreviewed,,,,,,
 0x000067da,28,bootloader_reset_after_response,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,2,1,1,0,0,0,boot,unreviewed,,,,,,
@@ -307,7 +307,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0000693a,96,uds_control_dtc_setting,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,3,1,,2,1,1,0,1,0,boot,unreviewed,,,,,,
 0x0000699a,2,FUN_0000699a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x0000699c,20,FUN_0000699c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,1,1,0,0,0,0,boot,unreviewed,,,,,,
-0x000069b0,34,uds_unsupported_service_handler,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,2,8,,1,0,1,0,0,0,boot,unreviewed,,,,,,
+0x000069b0,34,uds_unsupported_service_handler,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,2,8,,1,0,1,0,0,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 2037 (indirect-callback); decompiled successfully; exact semantics not independently established
 0x000069d2,52,FUN_000069d2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,1,0,1,0,0,0,boot,unreviewed,,,,,,
 0x00006a06,28,bootloader_service_periodic_wrapper,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,1,1,0,0,0,0,boot,unreviewed,,,,,,
 0x00006a22,138,FUN_00006a22,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,11,0,,5,1,4,0,0,0,boot,unreviewed,,,,,,
@@ -440,14 +440,14 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00032802,2,FUN_00032802,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00032804,2,FUN_00032804,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00032806,98,FUN_00032806,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,5,5,4,0,0,0,application,unreviewed,,,,,,
-0x00032868,792,FUN_00032868,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,32,28,30,0,5,0,application,unreviewed,,,,,,
-0x00032b80,1560,motor_coord_transform_calib_handler,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,44,40,30,0,5,0,application,unreviewed,,,,,,
-0x00033198,1004,FUN_00033198,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,61,48,36,0,6,0,application,unreviewed,,,,,,
+0x00032868,792,FUN_00032868,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,32,28,30,0,5,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 58 (mandatory-graph-reaudit); decompiled successfully; exact semantics not independently established
+0x00032b80,1560,motor_coord_transform_calib_handler,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,44,40,30,0,5,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 38 (cutoff-neighbor); decompiled successfully; exact semantics not independently established
+0x00033198,1004,FUN_00033198,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,61,48,36,0,6,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 13 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x00033584,14,FUN_00033584,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,0,2,0,0,0,application,unreviewed,,,,,,
 0x00033592,2,FUN_00033592,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00033594,2,FUN_00033594,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00033596,308,FUN_00033596,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,54,54,0,0,0,0,application,unreviewed,,,,,,
-0x000336ca,174,FUN_000336ca,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,54,27,27,0,0,0,application,unreviewed,,,,,,
+0x000336ca,174,FUN_000336ca,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,54,27,27,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 39 (cutoff-neighbor); decompiled successfully; exact semantics not independently established
 0x00033778,68,FUN_00033778,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,27,0,27,0,0,0,application,unreviewed,,,,,,
 0x000337bc,84,FUN_000337bc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,4,0,,4,4,2,0,0,0,application,unreviewed,,,,,,
 0x00033810,2,FUN_00033810,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -460,11 +460,11 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00033a8a,28,FUN_00033a8a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,9,0,9,0,0,0,application,unreviewed,,,,,,
 0x00033aa6,16,FUN_00033aa6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,1,,3,0,3,0,0,0,application,unreviewed,,,,,,
 0x00033ab6,82,FUN_00033ab6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00033b08,954,FUN_00033b08,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,6,0,,19,19,10,0,13,0,application,unreviewed,,,,,,
+0x00033b08,954,FUN_00033b08,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,6,0,,19,19,10,0,13,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 20 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x00033ee6,2,FUN_00033ee6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00033ee8,236,FUN_00033ee8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,27,0,27,0,3,0,application,unreviewed,,,,,,
 0x00033fd4,358,FUN_00033fd4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,27,27,0,0,10,0,application,unreviewed,,,,,,
-0x0003413a,88,FUN_0003413a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,27,0,27,0,3,0,application,unreviewed,,,,,,
+0x0003413a,88,FUN_0003413a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,27,0,27,0,3,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 23 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x00034192,26,FUN_00034192,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000341ac,36,FUN_000341ac,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,3,0,3,0,0,0,application,unreviewed,,,,,,
 0x000341d0,178,FUN_000341d0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,8,0,,5,0,5,0,1,0,application,unreviewed,,,,,,
@@ -621,7 +621,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00037188,112,FUN_00037188,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,18,0,18,0,8,0,application,unreviewed,,,,,,
 0x000371f8,102,FUN_000371f8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,7,7,1,0,2,0,application,unreviewed,,,,,,
 0x0003725e,48,FUN_0003725e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,2,1,0,1,0,application,unreviewed,,,,,,
-0x0003728e,438,FUN_0003728e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,31,19,28,0,37,0,application,unreviewed,,,,,,
+0x0003728e,438,FUN_0003728e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,31,19,28,0,37,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 14 (table-heavy); decompiled successfully; exact semantics not independently established
 0x00037444,2,FUN_00037444,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00037446,2,FUN_00037446,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00037448,406,FUN_00037448,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,13,7,6,0,5,0,application,unreviewed,,,,,,
@@ -1407,11 +1407,11 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00047bf0,36,FUN_00047bf0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,5,4,1,0,0,0,application,unreviewed,,,,,,
 0x00047c14,2,FUN_00047c14,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00047c16,38,FUN_00047c16,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,12,0,12,0,0,0,application,unreviewed,,,,,,
-0x00047c3c,1632,dual_motor_phase_current_conditioning,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,0,0,,84,53,47,0,2,0,application,unreviewed,,,,,,
+0x00047c3c,1632,dual_motor_phase_current_conditioning,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,0,0,,84,53,47,0,2,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 30 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x0004829c,2,FUN_0004829c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0004829e,22,FUN_0004829e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,6,0,6,0,0,0,application,unreviewed,,,,,,
 0x000482b4,94,FUN_000482b4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,14,8,6,0,1,0,application,unreviewed,,,,,,
-0x00048312,2044,hardware_register_access_helper,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,2,0,,54,36,18,0,1,0,application,unreviewed,,,,,,
+0x00048312,2044,hardware_register_access_helper,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,2,0,,54,36,18,0,1,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 33 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x00048b0e,2,FUN_00048b0e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00048b10,18,FUN_00048b10,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,6,0,6,0,0,0,application,unreviewed,,,,,,
 0x00048b22,134,FUN_00048b22,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,13,7,6,0,0,0,application,unreviewed,,,,,,
@@ -1463,7 +1463,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000498cc,78,FUN_000498cc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,1,,5,5,0,0,4,0,application,unreviewed,,,,,,
 0x0004991a,78,FUN_0004991a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,1,,5,5,0,0,4,0,application,unreviewed,,,,,,
 0x00049968,8,FUN_00049968,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,3,,1,0,1,0,0,0,application,unreviewed,,,,,,
-0x00049970,10,FUN_00049970,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,7,,2,0,2,0,0,0,application,unreviewed,,,,,,
+0x00049970,10,FUN_00049970,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,7,,2,0,2,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 610 (indirect-callback); decompiled successfully; exact semantics not independently established
 0x0004997a,8,FUN_0004997a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,3,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x00049982,16,FUN_00049982,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,1,,2,0,2,0,0,0,application,unreviewed,,,,,,
 0x00049992,16,FUN_00049992,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,1,,2,0,2,0,0,0,application,unreviewed,,,,,,
@@ -1653,7 +1653,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0004bcee,306,application_pack_can_260,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,5,0,,19,10,9,0,0,0,application,unreviewed,,,,,,
 0x0004be20,2,FUN_0004be20,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0004be22,2,FUN_0004be22,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x0004be24,816,application_pack_can_262,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,5,0,,53,26,27,0,0,0,application,unreviewed,,,,,,
+0x0004be24,816,application_pack_can_262,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,5,0,,53,26,27,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 41 (cutoff-neighbor); decompiled successfully; exact semantics not independently established
 0x0004c154,2,FUN_0004c154,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0004c156,2,FUN_0004c156,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0004c158,256,application_pack_can_394,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,5,0,,13,7,6,0,0,0,application,unreviewed,,,,,,
@@ -1796,7 +1796,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0005014e,82,FUN_0005014e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,7,3,0,0,2,0,application,unreviewed,,,,,,
 0x000501a0,74,FUN_000501a0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,7,7,0,0,0,0,application,unreviewed,,,,,,
 0x000501ea,126,FUN_000501ea,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,8,7,5,0,0,0,application,unreviewed,,,,,,
-0x00050268,472,FUN_00050268,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,5,0,,28,22,10,0,67,0,application,unreviewed,,,,,,
+0x00050268,472,FUN_00050268,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,5,0,,28,22,10,0,67,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 11 (table-heavy); decompiled successfully; exact semantics not independently established
 0x00050440,214,FUN_00050440,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,9,9,9,0,1,0,application,unreviewed,,,,,,
 0x00050516,56,FUN_00050516,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,15,0,15,0,3,0,application,unreviewed,,,,,,
 0x0005054e,10,FUN_0005054e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,1,,1,0,1,0,0,0,application,unreviewed,,,,,,
@@ -1822,7 +1822,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00050b22,24,FUN_00050b22,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00050b3a,50,FUN_00050b3a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,1,0,application,unreviewed,,,,,,
 0x00050b6c,102,FUN_00050b6c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,0,0,0,0,2,0,application,unreviewed,,,,,,
-0x00050bea,144,FUN_00050bea,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,26,7,1,,3,3,1,0,3,0,application,unreviewed,,,,,,
+0x00050bea,144,FUN_00050bea,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,26,7,1,,3,3,1,0,3,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 40 (cutoff-neighbor); decompiled successfully; exact semantics not independently established
 0x00050c7a,66,FUN_00050c7a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,6,2,1,,2,2,0,0,0,0,application,unreviewed,,,,,,
 0x00050cbc,38,FUN_00050cbc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,2,1,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00050ce2,84,FUN_00050ce2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,9,3,1,,1,1,0,0,1,0,application,unreviewed,,,,,,
@@ -1856,7 +1856,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00051a58,104,FUN_00051a58,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,9,3,3,0,0,0,application,unreviewed,,,,,,
 0x00051ac0,176,FUN_00051ac0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,4,4,4,0,0,0,application,unreviewed,,,,,,
 0x00051b70,180,checkpoint_monitor_state_bank_persist,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,3,0,,10,7,6,0,1,0,application,unreviewed,,,,,,
-0x00051c24,260,FUN_00051c24,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,69,33,36,0,0,0,application,unreviewed,,,,,,
+0x00051c24,260,FUN_00051c24,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,69,33,36,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 27 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x00051d28,64,FUN_00051d28,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,2,2,2,0,2,0,application,unreviewed,,,,,,
 0x00051d68,24,FUN_00051d68,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,4,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00051d80,28,FUN_00051d80,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -2110,13 +2110,13 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00056e02,8,FUN_00056e02,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x00056e0a,64,FUN_00056e0a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,4,3,1,0,4,0,application,unreviewed,,,,,,
 0x00056e4a,2,FUN_00056e4a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00056e4e,206,FUN_00056e4e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,0,0,,63,29,34,0,0,0,application,unreviewed,,,,,,
+0x00056e4e,206,FUN_00056e4e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,0,0,,63,29,34,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 16 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x00056f1c,2,FUN_00056f1c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00056f20,88,FUN_00056f20,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,0,0,,28,13,15,0,0,0,application,unreviewed,,,,,,
+0x00056f20,88,FUN_00056f20,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,0,0,,28,13,15,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 34 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x00056f78,2,FUN_00056f78,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00056f7c,66,FUN_00056f7c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,0,0,,21,9,12,0,0,0,application,unreviewed,,,,,,
 0x00056fbe,2,FUN_00056fbe,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00056fc2,1956,application_rx_signal_consumer_56fc2,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,5,0,0,,633,209,424,0,1,0,application,unreviewed,,,,,,
+0x00056fc2,1956,application_rx_signal_consumer_56fc2,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,5,0,0,,633,209,424,0,1,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 3 (application;ram-heavy); decompiled successfully; exact semantics not independently established
 0x00057766,2,FUN_00057766,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00057768,16,FUN_00057768,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00057778,20,FUN_00057778,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -2135,34 +2135,34 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00057be8,6,FUN_00057be8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00057bee,6,FUN_00057bee,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00057bf4,6,FUN_00057bf4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
-0x00057bfe,2054,application_ram_default_init,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,602,0,602,0,2,0,application,unreviewed,,,,,,
-0x00058404,12894,autosar_os_task_signal_dispatch,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,352,0,,3057,510,2903,0,18,0,application,unreviewed,,,,,,
-0x0005b662,222,FUN_0005b662,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,73,28,45,0,0,0,application,unreviewed,,,,,,
-0x0005b740,644,FUN_0005b740,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,198,99,99,0,0,0,application,unreviewed,,,,,,
-0x0005b9c4,1250,rte_input_staging_copy_c,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,384,192,192,0,0,0,application,unreviewed,,,,,,
+0x00057bfe,2054,application_ram_default_init,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,602,0,602,0,2,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 6 (ram-heavy); decompiled successfully; exact semantics not independently established
+0x00058404,12894,autosar_os_task_signal_dispatch,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,352,0,,3057,510,2903,0,18,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 1 (application;high-fanout;largest-body;ram-heavy); decompiled successfully; exact semantics not independently established
+0x0005b662,222,FUN_0005b662,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,73,28,45,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 21 (scalar-top-40); decompiled successfully; exact semantics not independently established
+0x0005b740,644,FUN_0005b740,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,198,99,99,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 10 (scalar-top-40); decompiled successfully; exact semantics not independently established
+0x0005b9c4,1250,rte_input_staging_copy_c,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,384,192,192,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 9 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x0005bea6,528,FUN_0005bea6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,166,83,83,0,0,0,application,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,Bulk RAM snapshot/copy into FEBE62xx through FEBE64xx state; downstream field semantics unnamed
-0x0005c0b6,1204,rte_input_staging_copy_b,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,378,189,189,0,0,0,application,unreviewed,,,,,,
-0x0005c56a,252,FUN_0005c56a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,78,39,39,0,0,0,application,unreviewed,,,,,,
-0x0005c666,1442,rte_input_staging_copy_a,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,440,220,220,0,0,0,application,unreviewed,,,,,,
+0x0005c0b6,1204,rte_input_staging_copy_b,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,378,189,189,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 8 (scalar-top-40); decompiled successfully; exact semantics not independently established
+0x0005c56a,252,FUN_0005c56a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,78,39,39,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 22 (scalar-top-40); decompiled successfully; exact semantics not independently established
+0x0005c666,1442,rte_input_staging_copy_a,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,440,220,220,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 7 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x0005cc08,388,FUN_0005cc08,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,32,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005cd8c,128,FUN_0005cd8c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,11,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005ce0c,156,FUN_0005ce0c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,16,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005cea8,60,FUN_0005cea8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,6,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005cee4,2,FUN_0005cee4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x0005cee6,676,FUN_0005cee6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,73,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x0005cee6,676,FUN_0005cee6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,73,0,,0,0,0,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 481 (mandatory-graph-reaudit); decompiled successfully; exact semantics not independently established
 0x0005d18a,2,FUN_0005d18a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005d18c,216,tauj0_ch0_motor_control_worker,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,37,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005d264,180,FUN_0005d264,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,19,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005d318,60,FUN_0005d318,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,5,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005d354,86,FUN_0005d354,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,10,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005d3aa,36,FUN_0005d3aa,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x0005d3ce,1078,autosar_com_rx_dispatch_group_b,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,147,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x0005d3ce,1078,autosar_com_rx_dispatch_group_b,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,147,0,,0,0,0,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 232 (high-fanout); decompiled successfully; exact semantics not independently established
 0x0005d804,330,FUN_0005d804,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,45,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005d94e,412,FUN_0005d94e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,74,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005daea,132,FUN_0005daea,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,23,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x0005db6e,2136,autosar_com_rx_dispatch_group_a,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,271,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x0005db6e,2136,autosar_com_rx_dispatch_group_a,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,271,0,,0,0,0,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 83 (high-fanout); decompiled successfully; exact semantics not independently established
 0x0005e3c6,428,FUN_0005e3c6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,55,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x0005e572,788,FUN_0005e572,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,136,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x0005e572,788,FUN_0005e572,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,136,0,,0,0,0,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 297 (high-fanout); decompiled successfully; exact semantics not independently established
 0x0005e886,178,FUN_0005e886,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,28,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0005e938,60,FUN_0005e938,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,8,0,,1,1,0,0,1,0,application,unreviewed,,,,,,
 0x0005e9a4,74,FUN_0005e9a4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -2312,7 +2312,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00061cc0,8,FUN_00061cc0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00061cc8,146,FUN_00061cc8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,4,0,1,0,14,3,application,unreviewed,,,,,,
 0x00061d5a,34,FUN_00061d5a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,3,0,0,0,0,0,application,unreviewed,,,,,,
-0x00061d88,38,application_default_exception_handler,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,373,interrupt,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x00061d88,38,application_default_exception_handler,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,1,373,interrupt,0,0,0,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 348 (indirect-callback;isr-rooted;table-heavy;zero-caller); decompiled successfully; exact semantics not independently established
 0x00061dae,38,FUN_00061dae,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00061dd4,1096,application_peripheral_init,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,0,0,0,241,2,0,application,unreviewed,,,,,,
 0x0006221c,22,FUN_0006221c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,0,2,0,0,0,application,unreviewed,,,,,,
@@ -2388,16 +2388,16 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00064376,54,FUN_00064376,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,3,0,0,0,3,0,application,unreviewed,,,,,,
 0x000643ac,22,FUN_000643ac,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,1,0,0,0,1,0,application,unreviewed,,,,,,
 0x000643c2,82,FUN_000643c2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00064414,848,FUN_00064414,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x00064414,848,FUN_00064414,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 2603 (mandatory-graph-reaudit); decompiled successfully; exact semantics not independently established
 0x00064764,88,FUN_00064764,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000647bc,24,FUN_000647bc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x000647d4,244,FUN_000647d4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,34,0,application,unreviewed,,,,,,
+0x000647d4,244,FUN_000647d4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,34,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 1247 (table-heavy); decompiled successfully; exact semantics not independently established
 0x000648c8,38,FUN_000648c8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,2,0,1,0,1,0,application,unreviewed,,,,,,
 0x000648ee,116,FUN_000648ee,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,11,0,0,,0,0,0,0,16,0,application,unreviewed,,,,,,
 0x00064962,200,FUN_00064962,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00064a2a,138,FUN_00064a2a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,8,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00064ab4,138,FUN_00064ab4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,8,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00064b3e,144,application_vector_0x90_handler,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,3,1,interrupt,2,1,1,0,1,0,application,unreviewed,,,,,,
+0x00064b3e,144,application_vector_0x90_handler,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,3,1,interrupt,2,1,1,0,1,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 1725 (isr-rooted); decompiled successfully; exact semantics not independently established
 0x00064bce,36,FUN_00064bce,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x00064bf2,82,FUN_00064bf2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,3,1,0,application,unreviewed,,,,,,
 0x00064c44,58,FUN_00064c44,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,1,1,1,0,1,0,application,unreviewed,,,,,,
@@ -2415,11 +2415,11 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00064f54,60,application_tauj0_ch1_body,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,4,0,,1,1,1,0,1,0,application,unreviewed,,,,,,
 0x00064f90,60,application_tauj0_ch2_body,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,4,0,,1,1,1,0,1,0,application,unreviewed,,,,,,
 0x00064fcc,92,application_foreground_cyclic_loop,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,8,0,scheduler,1,1,1,1,1,0,application,semantically_identified,recovered,tests/verify_architecture.py,cfg_dataflow,passed,2026-08-11,Foreground scheduler role and major dispatch edges recovered
-0x00065028,66,application_can1_tx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,6,1,interrupt,0,0,0,0,1,0,application,unreviewed,,,,,,
-0x0006506a,66,application_can1_rx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,6,1,interrupt,0,0,0,0,1,0,application,unreviewed,,,,,,
-0x000650ac,66,application_icus_ch292_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,6,1,interrupt,0,0,0,0,1,0,application,unreviewed,,,,,,
-0x000650ee,66,application_icus_ch293_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,6,1,interrupt,0,0,0,0,1,0,application,unreviewed,,,,,,
-0x00065130,54,application_flash_end_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,5,1,interrupt,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x00065028,66,application_can1_tx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,6,1,interrupt,0,0,0,0,1,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 2780 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x0006506a,66,application_can1_rx_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,6,1,interrupt,0,0,0,0,1,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 2781 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x000650ac,66,application_icus_ch292_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,6,1,interrupt,0,0,0,0,1,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 2782 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x000650ee,66,application_icus_ch293_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,6,1,interrupt,0,0,0,0,1,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 2783 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00065130,54,application_flash_end_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,5,1,interrupt,0,0,0,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 3407 (isr-rooted); decompiled successfully; exact semantics not independently established
 0x00065166,224,FUN_00065166,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,14,0,application,unreviewed,,,,,,
 0x00065246,192,FUN_00065246,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,12,0,application,unreviewed,,,,,,
 0x00065306,164,FUN_00065306,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,12,0,application,unreviewed,,,,,,
@@ -2554,7 +2554,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00067edc,56,FUN_00067edc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,0,,11,0,11,0,0,0,application,unreviewed,,,,,,
 0x00067f14,54,FUN_00067f14,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,6,0,0,,4,0,0,0,0,0,application,unreviewed,,,,,,
 0x00067f4a,132,FUN_00067f4a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,26,0,26,0,0,0,application,unreviewed,,,,,,
-0x00067fce,232,FUN_00067fce,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,44,0,44,0,0,0,application,unreviewed,,,,,,
+0x00067fce,232,FUN_00067fce,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,44,0,44,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 35 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000680b6,14,FUN_000680b6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,0,2,0,0,0,application,unreviewed,,,,,,
 0x000680c4,16,FUN_000680c4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,4,0,0,,0,0,0,0,1,0,application,unreviewed,,,,,,
 0x000680d4,36,FUN_000680d4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -2565,9 +2565,9 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0006823c,106,icus_key_update_submit,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,3,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x000682a6,82,secoc_icus_slot4_kat_disabled_async,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,1,0,,1,0,1,0,4,0,application,unreviewed,,,,,,
 0x000682f8,112,FUN_000682f8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,3,2,3,0,1,0,application,unreviewed,,,,,,
-0x00068368,898,application_com_opaque_rx_shadow_bank0,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,34,31,19,0,25,0,application,unreviewed,,,,,,
+0x00068368,898,application_com_opaque_rx_shadow_bank0,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,34,31,19,0,25,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 28 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000686ea,116,FUN_000686ea,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,0,,3,2,3,0,1,0,application,unreviewed,,,,,,
-0x0006875e,996,crypto_test_bank1_can_input_collect,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,40,33,26,0,24,0,application,unreviewed,,,,,,
+0x0006875e,996,crypto_test_bank1_can_input_collect,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,40,33,26,0,24,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 18 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x00068b42,128,icus_crypto_test_submit,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,7,2,2,0,0,0,application,unreviewed,,,,,,
 0x00068bc2,74,crypto_test_bank1_state_step,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,2,2,2,0,1,0,application,unreviewed,,,,,,
 0x00068c0c,122,application_crypto_test_cyclic_step,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,7,0,,8,6,5,0,0,0,application,unreviewed,,,,,,
@@ -2676,14 +2676,14 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00070292,84,FUN_00070292,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000702e8,32,FUN_000702e8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,1,0,0,0,2,0,application,unreviewed,,,,,,
 0x00070308,24,FUN_00070308,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,0,0,0,0,1,0,application,unreviewed,,,,,,
-0x00070320,170,application_tauj0_ch0_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,4,1,interrupt,2,0,0,0,2,0,application,unreviewed,,,,,,
-0x000703ca,172,application_tauj0_ch1_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,4,1,interrupt,2,0,0,0,2,0,application,unreviewed,,,,,,
-0x00070476,172,application_tauj0_ch2_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,4,1,interrupt,2,0,0,0,2,0,application,unreviewed,,,,,,
+0x00070320,170,application_tauj0_ch0_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,4,1,interrupt,2,0,0,0,2,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 1487 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x000703ca,172,application_tauj0_ch1_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,4,1,interrupt,2,0,0,0,2,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 1479 (isr-rooted); decompiled successfully; exact semantics not independently established
+0x00070476,172,application_tauj0_ch2_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,4,1,interrupt,2,0,0,0,2,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 1480 (isr-rooted); decompiled successfully; exact semantics not independently established
 0x00070524,44,application_cpu_context_init,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00070550,46,FUN_00070550,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00070580,30,FUN_00070580,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x0007059e,1200,boot_shutdown_reset_path,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,1,,1,1,1,4,0,0,application,unreviewed,,,,,,
-0x00070a54,352,application_ecm_maskable_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,4,1,interrupt,1,0,0,0,1,0,application,unreviewed,,,,,,
+0x00070a54,352,application_ecm_maskable_isr,vector seed,vector recovery/annotation script,USER_DEFINED,false,__interrupt,0,4,1,interrupt,1,0,0,0,1,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 1460 (isr-rooted); decompiled successfully; exact semantics not independently established
 0x00070bb8,30,FUN_00070bb8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00070bd8,22,FUN_00070bd8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,36,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00070c10,64,FUN_00070c10,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,5,0,5,0,2,0,application,unreviewed,,,,,,
@@ -3868,9 +3868,9 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00084874,24,FUN_00084874,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,1,0,application,unreviewed,,,,,,
 0x0008488c,44,FUN_0008488c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000848b8,180,FUN_000848b8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x0008496c,2372,app_aes128_encrypt_round,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,0,4,0,application,unreviewed,,,,,,
+0x0008496c,2372,app_aes128_encrypt_round,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,0,4,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 1149 (largest-body); decompiled successfully; exact semantics not independently established
 0x000852b0,318,FUN_000852b0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x000853ee,4582,app_aes128_ecb_decrypt_block,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,0,5,0,application,unreviewed,,,,,,
+0x000853ee,4582,app_aes128_ecb_decrypt_block,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,0,0,0,0,5,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 713 (largest-body); decompiled successfully; exact semantics not independently established
 0x000865d4,1022,FUN_000865d4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,0,,0,0,0,0,11,0,application,unreviewed,,,,,,
 0x000869d2,178,FUN_000869d2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00086a84,204,FUN_00086a84,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -3915,7 +3915,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00087c14,92,icus_command5_interrupt_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,4,1,,4,1,4,0,0,0,application,unreviewed,,,,,,
 0x00087c70,92,icus_command5_mac_generate_start,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,1,,6,1,5,0,0,0,application,unreviewed,,,,,,
 0x00087ccc,260,icus_command5_mac_generate_adapter,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,6,2,,7,1,7,0,0,0,application,unreviewed,,,,,,
-0x00087dd0,186,icus_command5_mac_generate_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,2,,8,6,7,0,0,0,application,unreviewed,,,,,,
+0x00087dd0,186,icus_command5_mac_generate_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,2,,8,6,7,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 410 (zero-caller); decompiled successfully; exact semantics not independently established
 0x00087e8a,24,FUN_00087e8a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00087ea2,46,FUN_00087ea2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,4,0,2,0,0,0,application,unreviewed,,,,,,
 0x00087ed0,172,icus_cmac_verify_prepare,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,12,0,9,0,0,0,application,unreviewed,,,,,,
@@ -3924,7 +3924,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00088028,88,icus_command7_interrupt_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,4,0,,4,1,4,0,0,0,application,unreviewed,,,,,,
 0x00088080,92,icus_cmac_verify_start,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,1,,6,1,5,0,1,0,application,unreviewed,,,,,,
 0x000880dc,256,icus_cmac_verify_adapter,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,6,2,,7,1,7,0,0,0,application,unreviewed,,,,,,
-0x000881dc,186,icus_cmac_verify_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,2,,8,6,7,0,0,0,application,unreviewed,,,,,,
+0x000881dc,186,icus_cmac_verify_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,2,,8,6,7,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 411 (zero-caller); decompiled successfully; exact semantics not independently established
 0x00088296,24,FUN_00088296,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x000882ae,44,FUN_000882ae,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,2,,5,0,5,0,0,0,application,unreviewed,,,,,,
 0x000882da,40,FUN_000882da,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,1,1,1,0,0,0,application,unreviewed,,,,,,
@@ -4299,7 +4299,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0008ff6c,16,FUN_0008ff6c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,5,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0008ff7c,64,packet_low_selector_41_callback,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,6,1,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0008ffbc,16,FUN_0008ffbc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x0008ffcc,50,FUN_0008ffcc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x0008ffcc,50,FUN_0008ffcc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,0,0,0,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 3410 (mandatory-graph-reaudit); decompiled successfully; exact semantics not independently established
 0x0008fffe,1,FUN_0008fffe,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0009000a,28,timer_expiry_02_callback,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,2,1,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0009006a,100,timer_expiry_04_callback,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,12,1,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -4367,7 +4367,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00090d5e,18,FUN_00090d5e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00090d70,22,FUN_00090d70,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,15,2,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x00090d86,20,FUN_00090d86,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,6,2,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00090d9a,116,FUN_00090d9a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,8,1,0,,24,2,24,0,0,0,application,unreviewed,,,,,,
+0x00090d9a,116,FUN_00090d9a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,8,1,0,,24,2,24,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 36 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x00090e0e,16,FUN_00090e0e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x00090e1e,22,FUN_00090e1e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,14,2,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00090e34,28,FUN_00090e34,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -5005,7 +5005,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000b5ffa,20,FUN_000b5ffa,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,3,0,3,0,0,0,application,unreviewed,,,,,,
 0x000b600e,26,FUN_000b600e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b6028,18,FUN_000b6028,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,1,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x000b603a,840,FUN_000b603a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,6,0,,22,22,15,0,8,0,application,unreviewed,,,,,,
+0x000b603a,840,FUN_000b603a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,6,0,,22,22,15,0,8,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 26 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000b6382,2,FUN_000b6382,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b6384,18,FUN_000b6384,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,6,0,6,0,0,0,application,unreviewed,,,,,,
 0x000b6396,204,FUN_000b6396,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,11,11,6,0,3,0,application,unreviewed,,,,,,
@@ -5175,7 +5175,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000b85ba,2,FUN_000b85ba,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b85bc,32,FUN_000b85bc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,9,0,9,0,1,0,application,unreviewed,,,,,,
 0x000b85dc,56,FUN_000b85dc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,5,5,2,0,1,0,application,unreviewed,,,,,,
-0x000b8614,556,FUN_000b8614,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,6,0,,20,20,7,0,15,0,application,unreviewed,,,,,,
+0x000b8614,556,FUN_000b8614,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,6,0,,20,20,7,0,15,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 25 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000b8840,2,FUN_000b8840,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b8842,10,FUN_000b8842,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,0,1,0,1,0,application,unreviewed,,,,,,
 0x000b884c,210,FUN_000b884c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,3,3,1,0,9,0,application,unreviewed,,,,,,
@@ -5224,7 +5224,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000b986e,6,FUN_000b986e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,1,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x000b9874,2,FUN_000b9874,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b9876,70,FUN_000b9876,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,16,0,16,0,5,0,application,unreviewed,,,,,,
-0x000b98bc,1040,motor_rotor_observer_calib_handler,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,6,0,,24,24,16,0,25,0,application,unreviewed,,,,,,
+0x000b98bc,1040,motor_rotor_observer_calib_handler,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,6,0,,24,24,16,0,25,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 15 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000b9ccc,6,FUN_000b9ccc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,1,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x000b9cd2,2,FUN_000b9cd2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000b9cd4,2,FUN_000b9cd4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -5246,12 +5246,12 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000ba166,12,FUN_000ba166,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000ba172,12,FUN_000ba172,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000ba17e,306,FUN_000ba17e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,28,15,13,0,0,0,application,unreviewed,,,,,,
-0x000ba2b0,298,FUN_000ba2b0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,92,46,46,0,0,0,application,unreviewed,,,,,,
+0x000ba2b0,298,FUN_000ba2b0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,92,46,46,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 19 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000ba3da,20,FUN_000ba3da,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,3,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000ba3ee,12,FUN_000ba3ee,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000ba3fa,20,FUN_000ba3fa,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,2,1,1,0,0,0,application,unreviewed,,,,,,
 0x000ba40e,44,FUN_000ba40e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,1,1,1,0,0,0,application,unreviewed,,,,,,
-0x000ba43a,2732,system_mode_telemetry_snapshot,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,6,0,,612,306,307,0,1,0,application,unreviewed,,,,,,
+0x000ba43a,2732,system_mode_telemetry_snapshot,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,6,0,,612,306,307,0,1,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 4 (largest-body;ram-heavy); decompiled successfully; exact semantics not independently established
 0x000baee6,80,FUN_000baee6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,5,0,5,0,2,0,application,unreviewed,,,,,,
 0x000baf36,16,FUN_000baf36,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
 0x000baf46,60,FUN_000baf46,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,5,4,1,0,0,0,application,unreviewed,,,,,,
@@ -5394,21 +5394,21 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000bcaca,2,FUN_000bcaca,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000bcace,104,FUN_000bcace,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,31,14,17,0,0,0,application,unreviewed,,,,,,
 0x000bcb36,2,FUN_000bcb36,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x000bcb3a,1396,application_input_snapshot_update,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,0,0,,400,192,208,0,10,0,application,unreviewed,,,,,,
+0x000bcb3a,1396,application_input_snapshot_update,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,0,0,,400,192,208,0,10,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 5 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000bd0ae,2,FUN_000bd0ae,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000bd0b2,92,FUN_000bd0b2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,31,0,31,0,0,0,application,unreviewed,,,,,,
-0x000bd10e,5404,eps_subsystem_init_orchestrator,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,101,0,,1743,109,1682,0,9,0,application,unreviewed,,,,,,
+0x000bd10e,5404,eps_subsystem_init_orchestrator,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,101,0,,1743,109,1682,0,9,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 2 (application;largest-body;ram-heavy); decompiled successfully; exact semantics not independently established
 0x000be62a,96,FUN_000be62a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,30,15,15,0,0,0,application,unreviewed,,,,,,
 0x000be68a,96,FUN_000be68a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,30,15,15,0,0,0,application,unreviewed,,,,,,
-0x000be6ea,186,FUN_000be6ea,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,56,28,28,0,0,0,application,unreviewed,,,,,,
+0x000be6ea,186,FUN_000be6ea,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,56,28,28,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 42 (cutoff-neighbor); decompiled successfully; exact semantics not independently established
 0x000be7a4,96,FUN_000be7a4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,30,15,15,0,0,0,application,unreviewed,,,,,,
-0x000be804,226,FUN_000be804,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,66,33,33,0,0,0,application,unreviewed,,,,,,
+0x000be804,226,FUN_000be804,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,66,33,33,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 32 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000be8e6,404,FUN_000be8e6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,122,61,61,0,0,0,application,structurally_bounded,bounded,firmware-static Ghidra inspection,cfg_dataflow,,2026-08-11,Bulk RAM snapshot/copy into FEBEAFxx/FEBEB0xx state; downstream field semantics unnamed
 0x000bea7a,134,FUN_000bea7a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,13,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000beb00,68,FUN_000beb00,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,7,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000beb44,178,FUN_000beb44,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,17,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000bebf6,86,FUN_000bebf6,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,9,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x000bec4c,1330,system_mode_per_tick_dispatcher,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,159,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
+0x000bec4c,1330,system_mode_per_tick_dispatcher,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,159,0,,0,0,0,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 191 (high-fanout); decompiled successfully; exact semantics not independently established
 0x000bf17e,504,FUN_000bf17e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,80,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000bf376,66,FUN_000bf376,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,13,0,13,0,2,0,application,unreviewed,,,,,,
 0x000bf3b8,150,FUN_000bf3b8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,4,4,0,0,9,0,application,unreviewed,,,,,,
@@ -5576,7 +5576,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000c39cc,142,FUN_000c39cc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,8,7,5,0,4,0,application,unreviewed,,,,,,
 0x000c3a5a,16,FUN_000c3a5a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000c3a6a,38,FUN_000c3a6a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,4,2,2,0,0,0,application,unreviewed,,,,,,
-0x000c3a90,234,FUN_000c3a90,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,54,0,54,0,2,0,application,unreviewed,,,,,,
+0x000c3a90,234,FUN_000c3a90,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,54,0,54,0,2,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 37 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000c3b7a,140,FUN_000c3b7a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,14,4,10,0,2,0,application,unreviewed,,,,,,
 0x000c3c06,58,FUN_000c3c06,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,6,3,3,0,0,0,application,unreviewed,,,,,,
 0x000c3c40,16,FUN_000c3c40,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,3,2,1,0,0,0,application,unreviewed,,,,,,
@@ -5724,7 +5724,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000c8a84,40,FUN_000c8a84,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,3,2,1,0,2,0,application,unreviewed,,,,,,
 0x000c8aac,2,FUN_000c8aac,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000c8aae,2,FUN_000c8aae,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x000c8ab0,390,FUN_000c8ab0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,94,0,94,0,0,0,application,unreviewed,,,,,,
+0x000c8ab0,390,FUN_000c8ab0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,94,0,94,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 29 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000c8c36,158,FUN_000c8c36,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,10,6,7,0,8,0,application,unreviewed,,,,,,
 0x000c8cd4,90,FUN_000c8cd4,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,6,5,3,0,0,0,application,unreviewed,,,,,,
 0x000c8d2e,52,FUN_000c8d2e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,3,1,2,0,5,0,application,unreviewed,,,,,,
@@ -5854,7 +5854,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000cb5dc,156,FUN_000cb5dc,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,22,0,,3,2,3,0,0,0,application,unreviewed,,,,,,
 0x000cb678,120,FUN_000cb678,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,28,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000cb6f0,16,FUN_000cb6f0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x000cb700,366,steering_command_export_scale,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,82,24,58,0,2,0,application,unreviewed,,,,,,
+0x000cb700,366,steering_command_export_scale,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,1,0,,82,24,58,0,2,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 17 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000cb86e,424,steering_control_cycle_pipeline,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,94,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x000cba16,16,FUN_000cba16,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000cba26,16,FUN_000cba26,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -5914,8 +5914,8 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000fd426,30,FUN_000fd426,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,8,4,4,0,0,0,application,unreviewed,,,,,,
 0x000fd444,18,FUN_000fd444,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,4,2,2,0,0,0,application,unreviewed,,,,,,
 0x000fd456,72,FUN_000fd456,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,22,11,11,0,0,0,application,unreviewed,,,,,,
-0x000fd49e,196,FUN_000fd49e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,54,23,31,0,9,0,application,unreviewed,,,,,,
-0x000fd562,204,FUN_000fd562,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,62,31,31,0,0,0,application,unreviewed,,,,,,
+0x000fd49e,196,FUN_000fd49e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,54,23,31,0,9,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 12 (scalar-top-40); decompiled successfully; exact semantics not independently established
+0x000fd562,204,FUN_000fd562,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,0,0,,62,31,31,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 24 (scalar-top-40); decompiled successfully; exact semantics not independently established
 0x000fdc00,12,FUN_000fdc00,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000fdc14,12,FUN_000fdc14,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000fdc28,12,FUN_000fdc28,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,

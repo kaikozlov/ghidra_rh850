@@ -13,6 +13,7 @@ override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.b
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
 	generate-processor-fixture generate-function-discovery generate-semantic-coverage generate-project-inventory \
+	generate-semantic-sweep \
 	verify-project-parity update-project-baseline \
 	rebuild-project work-project snapshot-project finalize-project
 
@@ -99,6 +100,9 @@ generate-function-discovery:
 
 generate-semantic-coverage:
 	tools/generate_semantic_coverage_ledger.sh
+
+generate-semantic-sweep:
+	$(PYTHON) tools/generate_semantic_sweep.py --project-dir "$(PROJECT_DIR)"
 
 generate-project-inventory:
 	tools/generate_project_inventory.sh "$(PROJECT_INVENTORY)"

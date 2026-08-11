@@ -270,6 +270,17 @@ paths = [
   "docs/status/STATIC_ANALYSIS_SWEEP_2026-08-10.md",
 ]
 
+[suite.semantic_sweep]
+tests = ["tests/verify_semantic_sweep.py"]
+oracle = "generated_self_check"
+paths = [
+  "data/generated/semantic_interest_ranking.csv",
+  "data/generated/semantic_sweep_decompilations.jsonl",
+  "data/semantic_review_status.csv",
+  "data/ghidra_project_inventory.baseline.jsonl",
+  "tools/generate_semantic_sweep.py",
+]
+
 [suite.function_discovery]
 tests = ["tests/verify_function_discovery.py"]
 paths = [

@@ -20,7 +20,7 @@
     "verified": 7
   },
   "execution_status_counts": {
-    "passed": 16
+    "passed": 104
   },
   "function_count": 6037,
   "name_source_counts": {
@@ -29,14 +29,16 @@
   },
   "oracle_class_counts": {
     "cfg_dataflow": 18,
+    "generated_self_check": 88,
     "instruction_semantics": 3
   },
   "review_state_counts": {
+    "reviewed_unknown": 88,
     "semantically_identified": 18,
     "structurally_bounded": 3,
-    "unreviewed": 6016
+    "unreviewed": 5928
   },
-  "reviewed_function_count": 21,
+  "reviewed_function_count": 109,
   "root_kind_counts": {
     "interrupt": 24,
     "scheduler": 1

@@ -4,7 +4,8 @@
 The scalar score is a weighted sum of log-normalized structural components:
 body bytes .18, callers .10, callees .10, indirect references .14, unique RAM
 references .14, RAM read/write density .12, MMIO .08, CodeFlash data .06,
-strings .03, and an unreviewed bonus .05. No zero-caller penalty exists;
+strings .03, and an unresolved-semantics bonus .05. ``reviewed_unknown`` rows
+retain that bonus because decompilation alone did not establish semantics. No zero-caller penalty exists;
 indirect/table callbacks receive their own positive component.
 """
 from __future__ import annotations
@@ -18,7 +19,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 TOP_N = 40
 SELECTION_DATE = "2026-08-11"
-MANDATED = {0x35B86, 0x35D1E, 0x5BEA6, 0xBE8E6, 0x916E2}
+MANDATED_STATEFUL = {0x35B86, 0x35D1E, 0x5BEA6, 0xBE8E6, 0x916E2}
+MANDATORY_GRAPH_REAUDIT = {
+    0x17C8, 0x64414, 0xB603A, 0x32868, 0x35B86, 0x35D1E, 0x5E572,
+    0x5CEE6, 0x5B740, 0x5BEA6, 0xBE8E6, 0x916E2, 0x8FFCC,
+    0x9729A, 0x972FA, 0x97432, 0x97546, 0x975EE, 0x97668, 0x976F4,
+}
 WEIGHTS = {
     "size": 0.18,
     "callers": 0.10,
@@ -97,7 +103,10 @@ def main() -> int:
         "mmio": [float(row["mmio_ref_count"]) for row in rows],
         "codeflash_data": [float(row["codeflash_data_ref_count"]) for row in rows],
         "strings": [float(row["string_ref_count"]) for row in rows],
-        "unreviewed": [1.0 if row["review_state"] == "unreviewed" else 0.0 for row in rows],
+        "unreviewed": [
+            1.0 if row["review_state"] in {"unreviewed", "reviewed_unknown"} else 0.0
+            for row in rows
+        ],
     }
     normalized = {name: log_normalize(values) for name, values in component_values.items()}
     for index, row in enumerate(rows):
@@ -125,7 +134,8 @@ def main() -> int:
     mark({int(row["address"]) for row in rows if row["root_kind"] == "interrupt"}, "isr-rooted")
     mark(top(rows, lambda row: int(row["function_bytes"])), "largest-body")
     mark({int(row["address"]) for row in ranked if 38 <= int(row["rank"]) <= 42}, "cutoff-neighbor")
-    mark(MANDATED, "mandated-cutoff-stateful")
+    mark(MANDATED_STATEFUL, "mandated-cutoff-stateful")
+    mark(MANDATORY_GRAPH_REAUDIT, "mandatory-graph-reaudit")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", newline="") as handle:

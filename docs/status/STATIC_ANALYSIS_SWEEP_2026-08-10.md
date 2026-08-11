@@ -36,6 +36,14 @@ are bounded bulk RAM snapshot/copy routines; and `0x916E2` is a bounded
 multi-state protocol/event dispatcher whose exact service semantics remain
 unnamed. These are firmware-static review results, not OEM field names.
 
+The corrected-graph follow-up now supersedes the earlier untracked sample as a
+review oracle. It reproducibly selects and decompiles 100 functions, including
+all named graph-review starters and the seven computed-call XCP handlers, from
+two byte-identical 6,037-function rebuilds. Eighty-eight selected entries remain
+honestly `reviewed_unknown` with no semantic grade. The whole-image negative
+recheck and exact boundaries are recorded in
+[CORRECTED_GRAPH_REAUDIT_2026-08-11.md](CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
+
 ## Baseline verification
 
 | Command | Result |
