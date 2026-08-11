@@ -1,77 +1,160 @@
 #!/usr/bin/env python3
-"""Fast verification helper.
+"""Authoritative repository verification runner.
 
-Reads verification.toml and supports three modes:
-  verify-one SUITE=<name>      Run a single suite's test(s)
-  verify-changed               Map git-changed paths to suites, run matching tests
-  verify-agent                 Run all suites, capture output, emit compact JSON
-
-Usage:
-  uv run --locked python tools/fast_verify.py --suite control_partition
-  uv run --locked python tools/fast_verify.py --changed
-  uv run --locked python tools/fast_verify.py --changed --base main
-  uv run --locked python tools/fast_verify.py --agent [--out-dir build/verify]
+``verification.toml`` owns every gate, its change paths, external inputs, and
+its default evidence-oracle class.  Exit code 77 is the machine-readable skip
+contract for optional prerequisites.
 """
 from __future__ import annotations
 
+import argparse
 import json
+import os
+import re
 import subprocess
 import sys
 import tomllib
+from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-PYTHON = sys.executable
+DEFAULT_ROOT = Path(__file__).resolve().parent.parent
+SKIP_EXIT_CODE = 77
+ORACLE_CLASSES = {
+    "identity_hash",
+    "documentation_lint",
+    "generated_self_check",
+    "raw_bytes",
+    "instruction_semantics",
+    "cfg_dataflow",
+    "dynamic_trace",
+    "independent_external_artifact",
+}
+SEMANTIC_ORACLES = {
+    "raw_bytes",
+    "instruction_semantics",
+    "cfg_dataflow",
+    "dynamic_trace",
+    "independent_external_artifact",
+}
+ASSERTION_RE = re.compile(r"^\[(PASS|FAIL)\](?:\[([a-z_]+)\])?", re.MULTILINE)
 
-# Directory for full failure logs (verify-one / verify-changed).
-VERIFY_LOG_DIR = ROOT / "build" / "verify"
+
+def load_manifest(path: Path) -> dict:
+    with path.open("rb") as stream:
+        return tomllib.load(stream)
 
 
-def load_ownership() -> dict:
-    with open(ROOT / "verification.toml", "rb") as f:
-        data = tomllib.load(f)
-    return data.get("suite", {})
+def requirement_path(manifest: dict, root: Path, name: str,
+                     external_root: Path | None = None) -> Path:
+    item = manifest.get("external", {}).get(name)
+    if not item:
+        raise ValueError(f"suite references unknown external requirement {name!r}")
+    if external_root is not None:
+        return external_root
+    env_name = item.get("env")
+    if env_name and os.environ.get(env_name):
+        return Path(os.environ[env_name]).expanduser()
+    path = Path(item["path"])
+    return path if path.is_absolute() else root / path
 
 
-def run_suite(test_path: str) -> dict:
-    """Run a single test file, returning structured result."""
-    full = ROOT / test_path
-    if not full.exists():
-        return {"test": test_path, "status": "missing", "detail": "file not found"}
+def missing_requirements(manifest: dict, root: Path, entry: dict,
+                         external_root: Path | None = None) -> list[dict]:
+    missing = []
+    for name in entry.get("requires_external", []):
+        path = requirement_path(manifest, root, name, external_root)
+        if not path.exists():
+            missing.append({"name": name, "path": str(path)})
+    return missing
 
-    proc = subprocess.run(
-        [PYTHON, str(full)],
-        capture_output=True,
-        text=True,
-        timeout=300,
+
+def assertion_counts(output: str, default_oracle: str) -> tuple[dict, dict]:
+    passed: Counter[str] = Counter()
+    failed: Counter[str] = Counter()
+    for status, tagged_oracle in ASSERTION_RE.findall(output):
+        oracle = tagged_oracle or default_oracle
+        if oracle not in ORACLE_CLASSES:
+            oracle = default_oracle
+        (passed if status == "PASS" else failed)[oracle] += 1
+    return dict(sorted(passed.items())), dict(sorted(failed.items()))
+
+
+def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
+             *, require_external: bool = False,
+             external_root: Path | None = None) -> dict:
+    full = root / test_path
+    default_oracle = entry.get(
+        "oracle", manifest.get("verification", {}).get("default_oracle", "raw_bytes")
     )
-    return {
-        "test": test_path,
-        "status": "pass" if proc.returncode == 0 else "fail",
-        "exit_code": proc.returncode,
-        "stdout": proc.stdout,
-        "stderr": proc.stderr,
-    }
+    missing = missing_requirements(manifest, root, entry, external_root)
+    if missing:
+        status = "fail" if require_external else "skip"
+        detail = "missing external prerequisite(s): " + ", ".join(
+            f"{item['name']}={item['path']}" for item in missing
+        )
+        return {
+            "test": test_path,
+            "status": status,
+            "exit_code": 1 if require_external else SKIP_EXIT_CODE,
+            "detail": detail,
+            "assertions": {"passed": {}, "failed": {}},
+            "semantic_status": "not_executed",
+        }
+    if not full.is_file():
+        return {
+            "test": test_path,
+            "status": "fail",
+            "exit_code": 1,
+            "detail": "test file not found",
+            "assertions": {"passed": {}, "failed": {}},
+            "semantic_status": "not_executed",
+        }
+
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(full), *entry.get("args", [])],
+            capture_output=True,
+            text=True,
+            cwd=root,
+            timeout=entry.get("timeout", 300),
+        )
+        exit_code = proc.returncode
+        status = "skip" if exit_code == SKIP_EXIT_CODE else (
+            "pass" if exit_code == 0 else "fail"
+        )
+        passed, failed = assertion_counts(proc.stdout + "\n" + proc.stderr, default_oracle)
+        semantic_count = sum(passed.get(name, 0) for name in SEMANTIC_ORACLES)
+        semantic_status = (
+            "verified" if status == "pass" and semantic_count
+            else "not_semantic" if status == "pass"
+            else "not_executed"
+        )
+        return {
+            "test": test_path,
+            "status": status,
+            "exit_code": exit_code,
+            "stdout": proc.stdout,
+            "stderr": proc.stderr,
+            "assertions": {"passed": passed, "failed": failed},
+            "semantic_status": semantic_status,
+        }
+    except subprocess.TimeoutExpired as error:
+        return {
+            "test": test_path,
+            "status": "fail",
+            "exit_code": 1,
+            "detail": f"timed out after {entry.get('timeout', 300)} seconds",
+            "stdout": error.stdout or "",
+            "stderr": error.stderr or "",
+            "assertions": {"passed": {}, "failed": {}},
+            "semantic_status": "not_executed",
+        }
 
 
-def write_full_log(result: dict) -> Path | None:
-    """Write the complete stdout+stderr to build/verify/<suite>.log on failure."""
-    if result["status"] != "fail":
-        return None
-    VERIFY_LOG_DIR.mkdir(parents=True, exist_ok=True)
-    suite = result.get("suite", Path(result["test"]).stem)
-    log_file = VERIFY_LOG_DIR / f"{suite}.log"
-    log_file.write_text(
-        f"=== STDOUT ===\n{result.get('stdout', '')}"
-        f"\n=== STDERR ===\n{result.get('stderr', '')}\n"
-    )
-    return log_file
-
-
-def print_failure(result: dict, suite: str | None = None) -> None:
-    """Print both stdout and stderr for a failed test."""
-    label = f"{suite} / {result['test']}" if suite else result["test"]
-    print(f"\n--- FAILED: {label} ---", file=sys.stderr)
+def print_failure(result: dict) -> None:
+    print(f"\n--- FAILED: {result['suite']} / {result['test']} ---", file=sys.stderr)
+    if result.get("detail"):
+        print(result["detail"], file=sys.stderr)
     if result.get("stdout"):
         print("--- stdout ---", file=sys.stderr)
         print(result["stdout"], file=sys.stderr)
@@ -80,193 +163,185 @@ def print_failure(result: dict, suite: str | None = None) -> None:
         print(result["stderr"], file=sys.stderr)
 
 
-def verify_one(suite_name: str) -> int:
-    ownership = load_ownership()
-    if suite_name not in ownership:
-        print(f"Unknown suite: {suite_name}", file=sys.stderr)
-        print(f"Available: {', '.join(sorted(ownership))}", file=sys.stderr)
-        return 2
-
-    entry = ownership[suite_name]
-    tests = entry.get("tests", [])
-    if not tests:
-        print(f"Suite '{suite_name}' has no tests", file=sys.stderr)
-        return 1
-
-    print(f"==> {suite_name} ({len(tests)} test file(s))")
-    failed = 0
-    for test in tests:
-        result = run_suite(test)
-        status = result["status"]
-        if status == "pass":
-            print(f"  [PASS] {test}")
-        else:
-            print(f"  [FAIL] {test}")
-            result["suite"] = suite_name
-            log_path = write_full_log(result)
-            if log_path:
-                print(f"  Full log: {log_path}", file=sys.stderr)
-            print_failure(result, suite=suite_name)
-            failed += 1
-
-    return 1 if failed else 0
+def write_failure_log(root: Path, result: dict, out_dir: Path | None = None) -> None:
+    directory = out_dir or root / "build" / "verify"
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / f"{result['suite']}.log").write_text(
+        f"=== DETAIL ===\n{result.get('detail', '')}\n"
+        f"=== STDOUT ===\n{result.get('stdout', '')}\n"
+        f"=== STDERR ===\n{result.get('stderr', '')}\n",
+        encoding="utf-8",
+    )
 
 
-def verify_changed(base: str = "HEAD") -> int:
-    # Get changed files vs the base ref. Check git's return code so a
-    # misspelled/unavailable base ref doesn't silently produce empty output.
-    try:
-        proc = subprocess.run(
-            ["git", "diff", "--name-only", base],
-            capture_output=True,
-            text=True,
-            cwd=ROOT,
-            timeout=30,
-        )
-    except subprocess.TimeoutExpired:
-        print(f"git diff --name-only {base} timed out", file=sys.stderr)
-        return 1
-    if proc.returncode != 0:
-        print(
-            f"git diff --name-only {base} failed (exit {proc.returncode}):",
-            file=sys.stderr,
-        )
-        print(proc.stderr.strip(), file=sys.stderr)
-        return 1
-    changed = set(proc.stdout.strip().split("\n")) if proc.stdout.strip() else set()
-    # Also include untracked files.
-    try:
-        proc = subprocess.run(
-            ["git", "ls-files", "--others", "--exclude-standard"],
-            capture_output=True,
-            text=True,
-            cwd=ROOT,
-            timeout=30,
-        )
-    except subprocess.TimeoutExpired:
-        print("git ls-files timed out", file=sys.stderr)
-        return 1
-    if proc.returncode != 0:
-        print(f"git ls-files failed (exit {proc.returncode})", file=sys.stderr)
-        return 1
-    if proc.stdout.strip():
-        changed.update(proc.stdout.strip().split("\n"))
-
-    if not changed:
-        print("No changes detected — nothing to verify.")
-        return 0
-
-    ownership = load_ownership()
-    matched_suites = set()
-    for suite_name, entry in ownership.items():
-        for pattern in entry.get("paths", []):
-            for changed_file in changed:
-                if changed_file.startswith(pattern.rstrip("/")):
-                    matched_suites.add(suite_name)
-                    break
-
-    if not matched_suites:
-        print(f"No suites matched changed files: {', '.join(sorted(changed))}", file=sys.stderr)
-        print(
-            "(If you changed tools/scripts without a suite mapping, "
-            "run 'make verify' for the full gate.)",
-            file=sys.stderr,
-        )
-        return 2
-
-    print(f"Changed files: {len(changed)}")
-    print(f"Matched suites: {', '.join(sorted(matched_suites))}")
-    print()
-
-    failed = 0
-    for suite_name in sorted(matched_suites):
-        entry = ownership[suite_name]
-        for test in entry.get("tests", []):
-            result = run_suite(test)
-            status = result["status"]
-            if status == "pass":
-                print(f"  [PASS] {suite_name}: {test}")
-            else:
-                print(f"  [FAIL] {suite_name}: {test}")
-                result["suite"] = suite_name
-                log_path = write_full_log(result)
-                if log_path:
-                    print(f"  Full log: {log_path}", file=sys.stderr)
-                print_failure(result, suite=suite_name)
-                failed += 1
-
-    return 1 if failed else 0
+def selected_suites(manifest: dict, mode: str) -> list[str]:
+    suites = manifest.get("suite", {})
+    if mode == "required-external":
+        return sorted(name for name, entry in suites.items() if entry.get("requires_external"))
+    return sorted(
+        name for name, entry in suites.items()
+        if mode in entry.get("modes", ["core", "local"])
+    )
 
 
-def verify_agent(out_dir: str | None = None) -> int:
-    resolved_out = Path(out_dir) if out_dir else (ROOT / "build" / "verify")
-    resolved_out.mkdir(parents=True, exist_ok=True)
-
-    ownership = load_ownership()
-    results = []
-    total = 0
-    passed = 0
-    failed = 0
-
-    for suite_name in sorted(ownership):
-        entry = ownership[suite_name]
-        for test in entry.get("tests", []):
-            total += 1
-            result = run_suite(test)
-            result["suite"] = suite_name
-            results.append(result)
-            if result["status"] == "pass":
-                passed += 1
-            else:
-                failed += 1
-                # Write full log for failures.
-                log_file = resolved_out / f"{suite_name}.log"
-                log_file.write_text(
-                    f"=== STDOUT ===\n{result.get('stdout', '')}"
-                    f"\n=== STDERR ===\n{result.get('stderr', '')}\n"
-                )
-
-    summary = {
-        "total": total,
-        "passed": passed,
-        "failed": failed,
+def summarize(results: list[dict], mode: str) -> dict:
+    statuses = Counter(item["status"] for item in results)
+    oracle_passed: Counter[str] = Counter()
+    oracle_failed: Counter[str] = Counter()
+    for item in results:
+        oracle_passed.update(item["assertions"]["passed"])
+        oracle_failed.update(item["assertions"]["failed"])
+    return {
+        "mode": mode,
+        "total": len(results),
+        "passed": statuses["pass"],
+        "failed": statuses["fail"],
+        "skipped": statuses["skip"],
+        "assertions": {
+            "passed_by_oracle": {name: oracle_passed[name] for name in sorted(ORACLE_CLASSES)},
+            "failed_by_oracle": {name: oracle_failed[name] for name in sorted(ORACLE_CLASSES)},
+        },
         "results": [
-            {"suite": r["suite"], "test": r["test"], "status": r["status"]}
-            for r in results
+            {
+                "suite": item["suite"],
+                "test": item["test"],
+                "status": item["status"],
+                "semantic_status": item["semantic_status"],
+                "assertions": item["assertions"],
+                **({"detail": item["detail"]} if item.get("detail") else {}),
+            }
+            for item in results
         ],
     }
 
-    # Print compact JSON summary to stdout.
-    print(json.dumps(summary, indent=2))
 
-    # Print full output (both streams) for failures.
-    for r in results:
-        if r["status"] == "fail":
-            print_failure(r, suite=r["suite"])
+def execute_suites(root: Path, manifest: dict, suite_names: list[str], *,
+                   mode: str, require_external: bool = False,
+                   external_root: Path | None = None,
+                   out_dir: Path | None = None, compact: bool = False) -> int:
+    results = []
+    suites = manifest.get("suite", {})
+    for suite_name in suite_names:
+        entry = suites[suite_name]
+        for test in entry.get("tests", []):
+            result = run_test(
+                root, test, entry, manifest,
+                require_external=require_external,
+                external_root=external_root,
+            )
+            result["suite"] = suite_name
+            results.append(result)
+            if not compact:
+                print(f"[{result['status'].upper()}] {suite_name}: {test}")
+                if result.get("detail"):
+                    print(f"  {result['detail']}")
+            if result["status"] == "fail":
+                write_failure_log(root, result, out_dir)
 
-    return 1 if failed else 0
+    summary = summarize(results, mode)
+    if compact:
+        print(json.dumps(summary, indent=2))
+    else:
+        print(
+            f"\nSummary: {summary['passed']} passed, {summary['failed']} failed, "
+            f"{summary['skipped']} skipped"
+        )
+        print("Assertion passes by oracle: " + json.dumps(
+            summary["assertions"]["passed_by_oracle"], sort_keys=True
+        ))
+    for result in results:
+        if result["status"] == "fail":
+            print_failure(result)
+    return 1 if summary["failed"] else 0
+
+
+def changed_paths(root: Path, base: str) -> tuple[set[str] | None, str | None]:
+    commands = (
+        ["git", "diff", "--name-only", base],
+        ["git", "ls-files", "--others", "--exclude-standard"],
+    )
+    changed: set[str] = set()
+    for command in commands:
+        try:
+            proc = subprocess.run(command, cwd=root, capture_output=True, text=True, timeout=30)
+        except subprocess.TimeoutExpired:
+            return None, f"{' '.join(command)} timed out"
+        if proc.returncode:
+            return None, f"{' '.join(command)} failed: {proc.stderr.strip()}"
+        changed.update(line for line in proc.stdout.splitlines() if line)
+    return changed, None
 
 
 def main() -> int:
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Fast verification helper")
+    parser = argparse.ArgumentParser(description="Authoritative verification runner")
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("--suite", help="Run a single suite by name")
-    group.add_argument("--changed", action="store_true", help="Run suites matching git changes")
-    group.add_argument("--agent", action="store_true", help="Run all suites with compact JSON output")
-    parser.add_argument("--base", default="HEAD", help="Git ref to compare against for --changed (default: HEAD)")
-    parser.add_argument("--out-dir", help="Directory for verify-agent logs (default: build/verify)")
+    group.add_argument("--suite")
+    group.add_argument("--changed", action="store_true")
+    group.add_argument("--core", action="store_true")
+    group.add_argument("--local", action="store_true")
+    group.add_argument("--required-external", action="store_true")
+    group.add_argument("--agent", action="store_true")
+    parser.add_argument("--base", default="HEAD")
+    parser.add_argument("--manifest", type=Path)
+    parser.add_argument("--repo-root", type=Path)
+    parser.add_argument("--external-root", type=Path)
+    parser.add_argument("--out-dir", type=Path)
     args = parser.parse_args()
 
+    root = (args.repo_root or DEFAULT_ROOT).resolve()
+    manifest_path = (args.manifest or root / "verification.toml").resolve()
+    manifest = load_manifest(manifest_path)
+    suites = manifest.get("suite", {})
+
     if args.suite:
-        return verify_one(args.suite)
+        if args.suite not in suites:
+            print(f"Unknown suite: {args.suite}", file=sys.stderr)
+            return 2
+        names, mode, required, compact = [args.suite], "suite", False, False
     elif args.changed:
-        return verify_changed(base=args.base)
+        changed, error = changed_paths(root, args.base)
+        if error:
+            print(error, file=sys.stderr)
+            return 1
+        if not changed:
+            print("No changes detected — nothing to verify.")
+            return 0
+        names = sorted({
+            name for name, entry in suites.items()
+            if any(path.startswith(pattern.rstrip("/"))
+                   for pattern in (*entry.get("paths", []), *entry.get("tests", []))
+                   for path in changed)
+        })
+        if not names:
+            print("No suites matched changed files: " + ", ".join(sorted(changed)), file=sys.stderr)
+            return 2
+        mode, required, compact = "changed", False, False
+    elif args.required_external:
+        names, mode, required, compact = (
+            selected_suites(manifest, "required-external"), "required-external", True, False
+        )
+        missing = {
+            (item["name"], item["path"])
+            for name in names
+            for item in missing_requirements(
+                manifest, root, suites[name], args.external_root
+            )
+        }
+        if missing:
+            detail = ", ".join(f"{name}={path}" for name, path in sorted(missing))
+            print(f"Required external prerequisite missing: {detail}", file=sys.stderr)
+            return 1
     elif args.agent:
-        return verify_agent(args.out_dir)
-    return 0
+        names, mode, required, compact = selected_suites(manifest, "local"), "local", False, True
+    else:
+        mode = "core" if args.core else "local"
+        names, required, compact = selected_suites(manifest, mode), False, False
+
+    return execute_suites(
+        root, manifest, names, mode=mode, require_external=required,
+        external_root=args.external_root, out_dir=args.out_dir, compact=compact,
+    )
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

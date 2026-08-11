@@ -20,7 +20,7 @@ flash-writer side, not the PrepareWriter's CalcSeedKey. Specifically:
 
 This test verifies those claims directly from the binaries. It is stdlib-only.
 The Techstream distribution tree is NOT committed (gitignored); if absent the
-suite SKIPs (exit 0) so `make verify` stays green on a clean checkout. Run on
+suite SKIPs (exit 77) so the aggregate verifier reports it honestly. Run on
 a machine where Techstream/unpacked/ is populated.
 """
 import struct, sys
@@ -56,7 +56,7 @@ if not COMMON_FLASH.exists():
           f"{COMMON_FLASH.relative_to(REPO)}).")
     print("      This suite verifies TMS-010 only where Techstream/unpacked/ "
           "is populated; no action on a clean checkout.")
-    sys.exit(0)
+    sys.exit(77)
 
 def read(p): return p.read_bytes()
 def has(hay, needle): return hay.find(needle if isinstance(needle, bytes) else needle.encode()) >= 0

@@ -22,7 +22,12 @@ ARTIFACT = REPO / "data/generated/techstream_v18/dtc_failure_types.json"
 FIXTURE = REPO / "tests/fixtures/techstream/ddb/emps_p5_u023a87_record.hex"
 KGP = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll"
 
+if not DB_ROOT.is_dir() or not KGP.is_file():
+    print("[SKIP] pinned Techstream V18 tree is unavailable")
+    raise SystemExit(77)
+
 passed = failed = 0
+oracle = "generated_self_check"
 
 
 def check(name: str, condition: object, detail: str = "") -> None:
@@ -31,7 +36,7 @@ def check(name: str, condition: object, detail: str = "") -> None:
     passed += int(ok)
     failed += int(not ok)
     suffix = f" ({detail})" if detail else ""
-    print(f"[{'PASS' if ok else 'FAIL'}] {name}{suffix}")
+    print(f"[{'PASS' if ok else 'FAIL'}][{oracle}] {name}{suffix}")
 
 
 print("== deterministic artifact ==")
@@ -42,6 +47,7 @@ check("P5 section-65 corpus spans 131 databases", rebuilt["counts"]["databases_w
 check("corpus has 15564 nonempty records", rebuilt["counts"]["nonempty_records"] == 15564)
 
 print("\n== section 65 field layout ==")
+oracle = "raw_bytes"
 # Walk the type-2 directory and parse the target record without DDBParser. This
 # is deliberately redundant with the parser-under-test so an offset swap in
 # ``extract_dtc_failure_entries`` cannot validate itself.
@@ -95,6 +101,7 @@ check("EMPS_P5 failure description resolves exactly to Missing Message",
 check("canonical Missing Message string index is 64829", u023a87.failure_string_index == 64829)
 
 print("\n== executable field provenance ==")
+oracle = "instruction_semantics"
 kgp = pefile.PE(str(KGP), fast_load=True)
 image_base = kgp.OPTIONAL_HEADER.ImageBase
 consumer_extents = {
@@ -119,6 +126,7 @@ check("no pinned DTC-P5 accessor attributes +0x40 semantics",
       "reported as tail_word, not enabled")
 
 print("\n== corpus-wide failure byte semantics ==")
+oracle = "raw_bytes"
 ft = rebuilt["failure_types"]
 check("0x81 maps to Invalid Serial Data Received", ft["0x81"][0]["text"] == "Invalid Serial Data Received")
 check("0x82 maps to alive/sequence counter failure", "sequence counter" in ft["0x82"][0]["text"].lower())

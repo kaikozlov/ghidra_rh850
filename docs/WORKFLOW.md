@@ -114,16 +114,29 @@ pointers and collapses disassembly.
 ## Verification
 
 ```bash
-uv sync --locked      # one-time
-make verify           # deterministic firmware suites (no Ghidra)
-make verify-sleigh    # SLEIGH compile + isolated install
-make verify-processor # fixtures + working-project audits
+uv sync --locked             # one-time
+make verify                  # repository/core gate; unavailable external suites SKIP
+make verify-changed          # suites owning the current git diff
+make verify-local            # every locally available manifest suite
+make verify-required-external # require the pinned Techstream V18 corpus
+make verify-agent            # compact JSON, including pass/fail/skip and oracle counts
+make verify-sleigh           # SLEIGH compile + isolated install
+make verify-processor        # fixtures + working-project audits
 make verify-project-parity # exact working-project inventory vs baseline
-make verify-ghidra    # all of the above
+make verify-ghidra           # core + Ghidra gates
 ```
 
-`make verify` reads only tracked files. Optional checks against pinned public
-repositories are separate:
+`verification.toml` is the sole suite manifest. It owns each
+`tests/verify_*.py` gate exactly once, records changed-file routing and external
+prerequisites, and assigns the default evidence-oracle class. The runner uses
+exit code 77 for an unavailable optional artifact; required-external mode turns
+that same absence into a concise failure. Its machine summary keeps
+`identity_hash`, `documentation_lint`, and `generated_self_check` counts
+separate from `raw_bytes`, `instruction_semantics`, `cfg_dataflow`,
+`dynamic_trace`, and `independent_external_artifact`, so a drift or report-only
+gate cannot be reported as semantic verification.
+
+Optional checks against pinned public repositories remain separate:
 
 ```bash
 make verify-external EXTERNAL_REPOS_DIR=/path/containing/the/checkouts

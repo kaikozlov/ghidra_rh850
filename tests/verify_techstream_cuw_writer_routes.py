@@ -20,6 +20,7 @@ ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics"
 CUW = ROOT / "Calibration Update Wizard"
 INVENTORY = REPO / "data/generated/techstream_v18/cuw_writer_inventory.json"
 passed = failed = 0
+oracle = "raw_bytes"
 
 
 def check(name: str, condition: object, detail: str = "") -> None:
@@ -27,12 +28,12 @@ def check(name: str, condition: object, detail: str = "") -> None:
     ok = bool(condition)
     passed += int(ok)
     failed += int(not ok)
-    print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f" ({detail})" if detail else ""))
+    print(f"[{'PASS' if ok else 'FAIL'}][{oracle}] {name}" + (f" ({detail})" if detail else ""))
 
 
 if not ROOT.is_dir():
     print("[SKIP] pinned Techstream V18 tree is unavailable")
-    raise SystemExit(0)
+    raise SystemExit(77)
 
 
 def independently_decode(data: bytes) -> bytes:
@@ -74,6 +75,7 @@ check("security VFOREST is a distinct factory route",
       == ("TCUWP5CanSecurityPowerTrainPrepareWriter.dll", "TCUWCanSecurityVFORESTFlashWriter.dll"))
 
 print("\n== controller dynamic factory anchors ==")
+oracle = "cfg_dataflow"
 control = (CUW / "TCUWControlCommPhase.dll").read_bytes()
 for value in (b"DLLFileNameForPrepareWrite", b"DLLFileNameForFlashWrite",
               b"StartPrepareWrite", b"StartFlashWrite"):
@@ -144,6 +146,7 @@ check("standard TransferExit constructs 37/77", imm_store(std_te, 0x37) and imm_
 check("standard reset constructs 11 01 / 51 01", imm_store(std_reset, 0x11) and imm_store(std_reset, 0x51))
 
 print("\n== inventory identity and live regeneration ==")
+oracle = "identity_hash"
 inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
 check("inventory covers all 201 encoded INIs and 196 factory rows",
       inventory["route_stats"] == {"encoded_ini_files_decoded": 201, "factory_rows": 196})
@@ -160,6 +163,7 @@ for artifact in inventory["artifacts"]:
         check(f"{Path(artifact['path']).name}:{method['name']}: body identity",
               hashlib.sha256(body).hexdigest() == method["identity_sha256"])
 
+oracle = "raw_bytes"
 firmware = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()
 services = {struct.unpack_from("<BBHI", firmware, 0x8E54 + index * 8)[0]
             for index in range(20)}
@@ -170,6 +174,7 @@ check("Sienna bootloader DID table contains unified 0201/0202/0203 names",
       boot_dids == [0xF181, 0x0201, 0x0202, 0x0203])
 
 with tempfile.TemporaryDirectory() as tmp:
+    oracle = "generated_self_check"
     regenerated = Path(tmp) / "inventory.json"
     result = subprocess.run([
         sys.executable, str(REPO / "tools/techstream/generate_cuw_writer_inventory.py"),

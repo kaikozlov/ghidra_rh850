@@ -18,7 +18,7 @@ checked via PE CLR-header detection and byte-level string search across both
 the #Strings (ASCII identifiers) and #US (UTF-16LE literals) heaps.
 
 The Techstream distribution tree is NOT committed (gitignored). If it is
-absent the suite SKIPs (exit 0) so `make verify` stays green on a clean
+absent the suite SKIPs (exit 77) so `make verify` can report the prerequisite
 checkout. Run on a machine where Techstream/unpacked/ is populated.
 """
 import hashlib
@@ -41,12 +41,12 @@ COMMON_PREP = CUW / "TCUWCanCommonPrepareWriter.dll"
 
 ok = 0
 bad = 0
-def check(name, cond, detail=""):
+def check(name, cond, detail="", oracle_class="cfg_dataflow"):
     global ok, bad
     status = "PASS" if cond else "FAIL"
     if cond: ok += 1
     else: bad += 1
-    print(f"[{status}] {name}" + (f"  ({detail})" if detail else ""))
+    print(f"[{status}][{oracle_class}] {name}" + (f"  ({detail})" if detail else ""))
 
 # --- Skip if the (gitignored) Techstream tree is absent -----------------------
 if not RKS.exists():
@@ -54,7 +54,7 @@ if not RKS.exists():
           f"(looked for {RKS.relative_to(REPO)}).")
     print("      This suite verifies TMS-009 only where Techstream/unpacked/ "
           "is populated; no action on a clean checkout.")
-    sys.exit(0)
+    sys.exit(77)
 
 
 def read(path):
@@ -81,7 +81,8 @@ commonprep_b = read(COMMON_PREP)
 check("CUWAccessRKS.dll is a .NET assembly (CLR header)", is_dotnet(rks_b))
 check("CUWAccessRKSWrapper.dll is a .NET assembly", is_dotnet(wrap_b))
 check("Cuw.exe is pinned", hashlib.sha256(cuw_b).hexdigest()
-      == "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b")
+      == "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      oracle_class="identity_hash")
 check("TCUWCanSecurityVFORESTFlashWriter.dll is native (NOT .NET)",
       not is_dotnet(vforest_b))
 check("TCUWCanCommonPrepareWriter.dll is native (NOT .NET)",
@@ -145,7 +146,8 @@ body_pins = {
 }
 for (address, size), expected in body_pins.items():
     body = pe.get_data(address - image_base, size)
-    check(f"Cuw.exe RKS body {address:#x}/{size}", hashlib.sha256(body).hexdigest() == expected)
+    check(f"Cuw.exe RKS body {address:#x}/{size}", hashlib.sha256(body).hexdigest() == expected,
+          oracle_class="identity_hash")
 
 request_builder = pe.get_data(0x0049BCFE - image_base, 989)
 request_copy = pe.get_data(0x0047FB24 - image_base, 565)

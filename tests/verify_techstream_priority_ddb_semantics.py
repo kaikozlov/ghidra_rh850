@@ -17,7 +17,12 @@ REPO = Path(__file__).resolve().parents[1]
 ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
 ARTIFACT = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
 
+if not ROOT.is_dir():
+    print("[SKIP] pinned Techstream V18 tree is unavailable")
+    raise SystemExit(77)
+
 passed = failed = 0
+oracle = "identity_hash"
 
 
 def check(name: str, condition: object, detail: str = "") -> None:
@@ -25,7 +30,7 @@ def check(name: str, condition: object, detail: str = "") -> None:
     ok = bool(condition)
     passed += int(ok)
     failed += int(not ok)
-    print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f" ({detail})" if detail else ""))
+    print(f"[{'PASS' if ok else 'FAIL'}][{oracle}] {name}" + (f" ({detail})" if detail else ""))
 
 
 def raw_section(data: bytes, table_type: int) -> tuple[int, list[bytes]]:
@@ -64,6 +69,7 @@ for table_type, schema in artifact["schemas"].items():
               hashlib.sha256(prefix).hexdigest() == consumer["prefix_sha256"])
 
 print("\n== raw records and field offsets ==")
+oracle = "instruction_semantics"
 section_instances = decoded_records = 0
 for source in artifact["sources"]:
     path = ROOT / source["relative_path"]
@@ -107,6 +113,7 @@ check("every schema explicitly preserves unknown bytes",
           for schema in artifact["schemas"].values()))
 
 print("\n== deterministic regeneration ==")
+oracle = "generated_self_check"
 with tempfile.TemporaryDirectory() as temp_dir:
     rebuilt = Path(temp_dir) / "priority.json"
     proc = subprocess.run(

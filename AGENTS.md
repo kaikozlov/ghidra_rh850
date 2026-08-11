@@ -56,6 +56,7 @@ make verify               # firmware evidence, no Ghidra — run this first
 make verify-one SUITE=control_partition  # one subsystem suite (fast iteration)
 make verify-changed       # suites matching git changes only
 make verify-agent         # all suites, compact JSON summary
+make verify-required-external # require the pinned Techstream corpus
 make ghidra-cli           # build the vendored ghidra CLI into build/ghidra-cli/
 make verify-sleigh        # SLEIGH compile + isolated install
 make verify-processor     # fixtures + asserting audits on build/project/

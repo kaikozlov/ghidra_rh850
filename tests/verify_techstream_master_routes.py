@@ -16,8 +16,14 @@ sys.path.insert(0, str(REPO / "tools/techstream"))
 from parse_ddb import lzss_decompress  # noqa: E402
 
 ARTIFACT = REPO / "data/generated/techstream_v18/toyota_master_routes.json"
+TECHSTREAM_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
+
+if not TECHSTREAM_ROOT.is_dir():
+    print("[SKIP] pinned Techstream V18 tree is unavailable")
+    raise SystemExit(77)
 
 passed = failed = 0
+oracle = "raw_bytes"
 
 
 def check(name: str, condition: object, detail: str = "") -> None:
@@ -25,7 +31,7 @@ def check(name: str, condition: object, detail: str = "") -> None:
     ok = bool(condition)
     passed += int(ok)
     failed += int(not ok)
-    print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f" ({detail})" if detail else ""))
+    print(f"[{'PASS' if ok else 'FAIL'}][{oracle}] {name}" + (f" ({detail})" if detail else ""))
 
 
 def raw_section(data: bytes, table_type: int) -> dict:
@@ -122,6 +128,7 @@ for region in artifact["regions"]:
                       for row in region[key]))
 
 print("\n== deterministic regeneration ==")
+oracle = "generated_self_check"
 with tempfile.TemporaryDirectory() as temp_dir:
     rebuilt = Path(temp_dir) / "routes.json"
     proc = subprocess.run(

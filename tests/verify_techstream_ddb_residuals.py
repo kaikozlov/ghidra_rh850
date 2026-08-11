@@ -27,21 +27,22 @@ FACTORY_ARTIFACT = REPO / "data/generated/techstream_v18/ddb_factory_table_map.j
 
 passed = 0
 failed = 0
+oracle = "identity_hash"
 
 
 def check(name: str, condition: bool, detail: str = "") -> None:
     global passed, failed
     if condition:
         passed += 1
-        print(f"[PASS] {name}" + (f" ({detail})" if detail else ""))
+        print(f"[PASS][{oracle}] {name}" + (f" ({detail})" if detail else ""))
     else:
         failed += 1
-        print(f"[FAIL] {name}" + (f" ({detail})" if detail else ""))
+        print(f"[FAIL][{oracle}] {name}" + (f" ({detail})" if detail else ""))
 
 
 if not ROOT.exists():
     print("SKIP: ignored Techstream tree is not present")
-    raise SystemExit(0)
+    raise SystemExit(77)
 
 parser = DDBParser()
 security = ROOT / "NA/DB/Security_P4.ddb"
@@ -87,6 +88,7 @@ check("factory maps section 10 to CDbFreezeTable",
       ECU_TABLE_CLASS_NAMES[10] == "CDbFreezeTable")
 
 print("\n== independently derived factory maps ==")
+oracle = "instruction_semantics"
 factory_artifact = json.loads(FACTORY_ARTIFACT.read_text())
 exports = {}
 for symbol in kgp_pe.DIRECTORY_ENTRY_EXPORT.symbols:
@@ -132,6 +134,7 @@ check("generated format-1 map equals independent executable walk",
       artifact_maps[1] == raw_master_map)
 check("generated format-2 map equals independent executable walk",
       artifact_maps[2] == raw_ecu_map)
+oracle = "generated_self_check"
 with tempfile.TemporaryDirectory() as temp_dir:
     rebuilt_path = Path(temp_dir) / "factory.json"
     proc = subprocess.run(
@@ -143,6 +146,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
           proc.returncode == 0 and rebuilt_path.read_bytes() == FACTORY_ARTIFACT.read_bytes())
 
 print("\n== Security_P4 structural audit ==")
+oracle = "raw_bytes"
 sec = parser.parse_ecu_db(security)
 expected_types = {
     0, 1, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16,

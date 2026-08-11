@@ -8,75 +8,7 @@ SNAPSHOT_DIR ?= $(CURDIR)/project
 override PROJECT_INVENTORY := $(CURDIR)/build/ghidra_project_inventory.jsonl
 override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.baseline.jsonl
 
-VERIFY_SUITES := \
-	tests/verify_findings.py \
-	tests/verify_payload_gate.py \
-	tests/verify_candidate_f05_payload.py \
-	tests/verify_security_gate.py \
-	tests/verify_secoc_nvm.py \
-	tests/verify_secoc_application.py \
-	tests/verify_secoc_security_properties.py \
-	tests/verify_toyota_secoc_signer.py \
-	tests/verify_toyota_secoc_oracle.py \
-	tests/verify_toyota_eps_bus_probe.py \
-	tests/verify_icus_key_recovery_surface.py \
-	tests/verify_icus_software_paths.py \
-	tests/verify_icus_stage7_static.py \
-	tests/verify_icus_key_update.py \
-	tests/verify_icus_trace_decoder.py \
-	tests/verify_dataflash_layout.py \
-	tests/verify_dataflash_semantics.py \
-	tests/verify_did_model.py \
-	tests/verify_application_diagnostics.py \
-	tests/verify_bootloader_diagnostics.py \
-	tests/verify_boot_trust.py \
-	tests/verify_can_transport.py \
-	tests/verify_architecture.py \
-	tests/verify_application_transmit.py \
-	tests/verify_application_receive.py \
-	tests/verify_p1m_device_profile.py \
-	tests/verify_ram_overlays.py \
-	tests/verify_scheduler_timing.py \
-	tests/verify_function_discovery.py \
-	tests/verify_semantic_coverage.py \
-	tests/verify_semantic_interest_ranking.py \
-	tests/verify_control_partition.py \
-	tests/verify_motor_actuation_boundary.py \
-	tests/verify_motor_safety_monitors.py \
-	tests/verify_motor_calibration_handlers.py \
-	tests/verify_tss3_variant_matrix.py \
-	tests/verify_security_consumers.py \
-	tests/verify_application_ab_service.py \
-	tests/verify_application_routine_id_callbacks.py \
-	tests/verify_diagnostic_vocabulary.py \
-	tests/verify_techstream_mackey.py \
-	tests/verify_techstream_ptshim.py \
-	tests/verify_techstream_ddb_residuals.py \
-	tests/verify_techstream_master_routes.py \
-	tests/verify_techstream_priority_ddb_semantics.py \
-	tests/verify_techstream_artifact_lock.py \
-	tests/verify_techstream_crypto_inventory.py \
-	tests/verify_techstream_cuw_writer_routes.py \
-	tests/verify_memory_safety.py \
-	tests/verify_memory_safety_mutations.py \
-	tests/verify_community_tooling.py \
-	tests/verify_community_patch_target_analyzer.py \
-	tests/verify_corolla_2023_public_route_summary.py \
-	tests/verify_toyota_secoc_session.py \
-	tests/verify_rav4_prime_forced_profile_matrix.py \
-	tests/verify_techstream_dtc_failure_types.py \
-	tests/verify_u023a87_monitor_map.py \
-	tests/verify_toyota_dataflash_analyzer.py \
-	tests/verify_secoc_acceptance_gate.py \
-	tests/verify_renesas_rfp.py \
-	tests/verify_lifecycle.py \
-	tests/verify_project_layout.py \
-	tests/verify_headless_runner.py \
-	tests/verify_ghidra_env.py \
-	tests/verify_project_inventory.py \
-	tests/verify_doc_links.py
-
-.PHONY: sync verify verify-core verify-one verify-changed verify-agent verify-external verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
+.PHONY: sync verify verify-core verify-local verify-one verify-changed verify-agent verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
 	ghidra-cli \
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
@@ -94,11 +26,10 @@ ghidra-cli:
 verify: verify-core
 
 verify-core:
-	@set -e; for suite in $(VERIFY_SUITES); do \
-		echo "==> $$suite"; \
-		$(PYTHON) "$$suite"; \
-		echo; \
-	done
+	$(PYTHON) tools/fast_verify.py --core
+
+verify-local:
+	$(PYTHON) tools/fast_verify.py --local
 
 # Fast verification targets (see verification.toml for ownership map).
 verify-one:
@@ -111,7 +42,10 @@ verify-changed:
 verify-agent:
 	$(PYTHON) tools/fast_verify.py --agent
 
-verify-external:
+verify-required-external:
+	$(PYTHON) tools/fast_verify.py --required-external
+
+verify-external verify-corroboration:
 	$(PYTHON) tests/verify_external_corroboration.py --repos-dir "$(EXTERNAL_REPOS_DIR)"
 
 verify-rfp:

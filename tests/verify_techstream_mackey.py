@@ -23,7 +23,7 @@ BIN = (
 )
 if not (BIN / "IT3UtilityRevNK.dll").exists():
     print("[SKIP] Techstream unpacked tree is not present")
-    raise SystemExit(0)
+    raise SystemExit(77)
 
 sys.path.insert(0, str(REPO / "tools/techstream"))
 from inspect_dotnet_il import MethodBodyReader, format_operand  # noqa: E402
@@ -32,14 +32,15 @@ passed = 0
 failed = 0
 
 
-def check(name: str, condition: bool, detail: str = "") -> None:
+def check(name: str, condition: bool, detail: str = "",
+          oracle_class: str = "cfg_dataflow") -> None:
     global passed, failed
     if condition:
         passed += 1
-        print(f"[PASS] {name}" + (f" ({detail})" if detail else ""))
+        print(f"[PASS][{oracle_class}] {name}" + (f" ({detail})" if detail else ""))
     else:
         failed += 1
-        print(f"[FAIL] {name}" + (f" ({detail})" if detail else ""))
+        print(f"[FAIL][{oracle_class}] {name}" + (f" ({detail})" if detail else ""))
 
 
 def sha256(path: Path) -> str:
@@ -104,7 +105,8 @@ expected_hashes = {
     "UtilityExNK2.dll": "8d9623f028f23876f69cb02baa10e1881c01fa01a4f906013bd36266f7e0fb33",
 }
 for name, expected in expected_hashes.items():
-    check(f"{name} SHA-256", sha256(BIN / name) == expected)
+    check(f"{name} SHA-256", sha256(BIN / name) == expected,
+          oracle_class="identity_hash")
 
 
 print("\n== native web-service bridge ==")
@@ -350,7 +352,8 @@ actual_body_hashes = {
     if name in expected_body_hashes
 }
 check("critical parser and diagnostic method bodies are pinned",
-      actual_body_hashes == expected_body_hashes)
+      actual_body_hashes == expected_body_hashes,
+      oracle_class="identity_hash")
 
 commands = {item["name"]: item for item in protocol["commands"]}
 check("vehicle reads VIN through DID F190",

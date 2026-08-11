@@ -5,7 +5,17 @@
 #   make verify-changed             — run suites affected by git changes
 #   make verify-agent               — compact JSON summary, full logs on failure
 #
-# This is a hand-maintained mapping. Add entries when you create new suites.
+# This is the authoritative suite manifest. Add each gate exactly once.
+
+[verification]
+default_oracle = "raw_bytes"
+skip_exit_code = 77
+gate_glob = "tests/verify_*.py"
+
+[external.techstream_v18]
+path = "Techstream/unpacked/toyota/Toyota Diagnostics"
+env = "TECHSTREAM_UNPACKED_ROOT"
+description = "Pinned proprietary Techstream V18 extracted distribution"
 
 [suite.architecture]
 tests = ["tests/verify_architecture.py"]
@@ -61,6 +71,7 @@ paths = ["docs/diagnostics/"]
 [suite.doc_links]
 tests = ["tests/verify_doc_links.py"]
 paths = ["docs/"]
+oracle = "documentation_lint"
 
 [suite.application_ab_service]
 tests = ["tests/verify_application_ab_service.py"]
@@ -72,6 +83,7 @@ paths = ["docs/diagnostics/application.md", "data/application_diagnostic_map.csv
 
 [suite.diagnostic_vocabulary]
 tests = ["tests/verify_diagnostic_vocabulary.py"]
+oracle = "generated_self_check"
 paths = [
   "tools/techstream/parse_ddb.py",
   "tools/techstream/extract_catalog.py",
@@ -202,6 +214,7 @@ paths = [
   "tools/memory_safety_semantics.py",
   "ghidra/scripts/verify/AssertMemorySafetyPaths.java",
 ]
+oracle = "cfg_dataflow"
 
 [suite.ram_overlays]
 tests = ["tests/verify_ram_overlays.py"]
@@ -222,6 +235,7 @@ paths = ["data/scheduler_periods.csv"]
 
 [suite.semantic_coverage]
 tests = ["tests/verify_semantic_coverage.py"]
+oracle = "generated_self_check"
 paths = [
   "data/semantic_coverage_ledger.csv",
   "data/semantic_coverage_summary.json",
@@ -233,6 +247,9 @@ paths = [
 
 [suite.semantic_coverage_live]
 tests = ["tests/verify_semantic_coverage_live.py"]
+modes = ["local"]
+args = ["--project-dir", "build/project"]
+oracle = "cfg_dataflow"
 paths = [
   "data/semantic_coverage_ledger.csv",
   "data/semantic_coverage_summary.json",
@@ -244,6 +261,7 @@ paths = [
 
 [suite.semantic_interest_ranking]
 tests = ["tests/verify_semantic_interest_ranking.py"]
+oracle = "generated_self_check"
 paths = [
   "data/semantic_coverage_ledger.csv",
   "data/semantic_review_status.csv",
@@ -298,9 +316,11 @@ paths = ["data/tss3_eps_variant_matrix.csv", "docs/variants/"]
 [suite.techstream_rks]
 tests = ["tests/verify_techstream_rks.py"]
 paths = ["docs/tooling/techstream.md", "techstream.lock.json"]
+requires_external = ["techstream_v18"]
+oracle = "cfg_dataflow"
 # External-tree suite: verifies TMS-009 (CUW RKS / two-layer reflash
 # authorization). SKIPs cleanly (exit 0) when the gitignored Techstream/
-# unpacked tree is absent, so it never breaks core verify. Run on a host
+# unpacked tree is absent (exit 77), so core reports a skip. Run on a host
 # where Techstream/unpacked/ is populated, or via: make verify-one SUITE=techstream_rks
 
 [suite.techstream_ptshim]
@@ -311,6 +331,8 @@ paths = ["docs/tooling/techstream.md", "tools/techstream/parse_ptshim_log.py", "
 
 [suite.techstream_ddb_residuals]
 tests = ["tests/verify_techstream_ddb_residuals.py"]
+requires_external = ["techstream_v18"]
+oracle = "raw_bytes"
 paths = [
   "docs/tooling/techstream.md",
   "docs/tooling/techstream-ddb-pipeline.md",
@@ -324,6 +346,8 @@ paths = [
 
 [suite.techstream_master_routes]
 tests = ["tests/verify_techstream_master_routes.py"]
+requires_external = ["techstream_v18"]
+oracle = "raw_bytes"
 paths = [
   "tools/techstream/parse_ddb.py",
   "tools/techstream/extract_toyota_master_routes.py",
@@ -334,6 +358,8 @@ paths = [
 
 [suite.techstream_priority_ddb_semantics]
 tests = ["tests/verify_techstream_priority_ddb_semantics.py"]
+requires_external = ["techstream_v18"]
+oracle = "instruction_semantics"
 paths = [
   "tools/techstream/parse_ddb.py",
   "tools/techstream/extract_priority_ddb_semantics.py",
@@ -344,6 +370,8 @@ paths = [
 
 [suite.techstream_dtc_failure_types]
 tests = ["tests/verify_techstream_dtc_failure_types.py"]
+requires_external = ["techstream_v18"]
+oracle = "instruction_semantics"
 paths = [
   "tools/techstream/parse_ddb.py",
   "tools/techstream/generate_dtc_failure_types.py",
@@ -357,11 +385,15 @@ paths = [
 [suite.techstream_mackey]
 tests = ["tests/verify_techstream_mackey.py"]
 paths = ["docs/security/mackey-registration.md", "docs/tooling/techstream.md", "tools/techstream/inspect_dotnet_il.py"]
+requires_external = ["techstream_v18"]
+oracle = "cfg_dataflow"
 # External-tree suite: verifies TMS-011 against native exports/imports and the
-# managed IT3UtilityRevNK IL. SKIPs cleanly when Techstream/unpacked is absent.
+# managed IT3UtilityRevNK IL. Exits 77 when Techstream/unpacked is absent.
 
 [suite.techstream_crypto_inventory]
 tests = ["tests/verify_techstream_crypto_inventory.py"]
+requires_external = ["techstream_v18"]
+oracle = "generated_self_check"
 paths = [
   "tools/techstream/generate_crypto_inventory.py",
   "data/generated/techstream_v18/crypto_inventory.json",
@@ -374,9 +406,13 @@ paths = [
 [suite.techstream_artifact_lock]
 tests = ["tests/verify_techstream_artifact_lock.py"]
 paths = ["techstream.lock.json"]
+requires_external = ["techstream_v18"]
+oracle = "identity_hash"
 
 [suite.techstream_cuw_writer_routes]
 tests = ["tests/verify_techstream_cuw_writer_routes.py"]
+requires_external = ["techstream_v18"]
+oracle = "cfg_dataflow"
 paths = [
   "tools/techstream/generate_cuw_writer_inventory.py",
   "data/generated/techstream_v18/cuw_writer_inventory.json",
@@ -387,10 +423,12 @@ paths = [
 [suite.techstream_layerb]
 tests = ["tests/verify_techstream_layerb.py"]
 paths = ["docs/tooling/techstream.md"]
+requires_external = ["techstream_v18"]
+oracle = "instruction_semantics"
 # External-tree suite: verifies TMS-010 (VFOREST flash-writer SA transmission /
 # SendNonceAndSeedKey; no static AES in the CUW reflash toolchain). SKIPs
-# cleanly (exit 0) when the gitignored Techstream/unpacked tree is absent, so
-# it never breaks core verify. Run via: make verify-one SUITE=techstream_layerb
+# cleanly (exit 77) when the gitignored Techstream/unpacked tree is absent, so
+# core reports a skip. Run via: make verify-one SUITE=techstream_layerb
 
 [suite.community_tooling]
 tests = ["tests/verify_community_tooling.py"]
@@ -430,3 +468,51 @@ paths = [
   "verification.toml",
   ".github/workflows/ci.yml",
 ]
+
+[suite.community_patch_target_analyzer]
+tests = ["tests/verify_community_patch_target_analyzer.py"]
+paths = ["community/", "tools/"]
+
+[suite.corolla_2023_public_route_summary]
+tests = ["tests/verify_corolla_2023_public_route_summary.py"]
+paths = ["docs/variants/", "data/"]
+
+[suite.external_corroboration]
+tests = ["tests/verify_external_corroboration.py"]
+paths = ["external-references.lock.json", "docs/status/"]
+modes = ["local"]
+args = ["--repos-dir", "../"]
+oracle = "independent_external_artifact"
+
+[suite.fast_verify]
+tests = ["tests/verify_fast_verify.py"]
+paths = ["tools/fast_verify.py", "verification.toml", "Makefile"]
+oracle = "raw_bytes"
+
+[suite.icus_register_footprint]
+tests = ["tests/verify_icus_register_footprint.py"]
+paths = ["docs/security/secoc/", "data/"]
+
+[suite.rav4_prime_forced_profile_matrix]
+tests = ["tests/verify_rav4_prime_forced_profile_matrix.py"]
+paths = ["docs/variants/rav4-prime-forced-secoc-profile.md", "data/"]
+
+[suite.toyota_dataflash_analyzer]
+tests = ["tests/verify_toyota_dataflash_analyzer.py"]
+paths = ["tools/toyota_dataflash_analyzer.py", "tests/fixtures/"]
+
+[suite.toyota_eps_bus_probe]
+tests = ["tests/verify_toyota_eps_bus_probe.py"]
+paths = ["tools/toyota_eps_bus_probe.py", "tests/fixtures/"]
+
+[suite.toyota_secoc_oracle]
+tests = ["tests/verify_toyota_secoc_oracle.py"]
+paths = ["tools/toyota_secoc_oracle.py", "tests/fixtures/"]
+
+[suite.toyota_secoc_session]
+tests = ["tests/verify_toyota_secoc_session.py"]
+paths = ["tools/toyota_secoc_session.py", "tests/fixtures/"]
+
+[suite.u023a87_monitor_map]
+tests = ["tests/verify_u023a87_monitor_map.py"]
+paths = ["data/u023a87_monitor_map.csv", "docs/"]

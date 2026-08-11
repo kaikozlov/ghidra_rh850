@@ -140,4 +140,4 @@ else:
     print("\n[SKIP] external Techstream tree unavailable; committed artifact checks still ran")
 
 print(f"\nResults: {passed} passed, {failed} failed")
-raise SystemExit(1 if failed else 0)
+raise SystemExit(1 if failed else (0 if TREE.is_dir() else 77))
