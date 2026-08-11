@@ -1,0 +1,3 @@
+handler,handler_size,handler_sha256,inner_dispatch,outer_dispatch,execution_domain,version_gate,static_role,evidence_grade
+0x32B80,1560,a56daa7d87959cf1fbed59507c949c91456fe67c2638b4a105f1b5f4d5e6f767,0x33198,0x5784C,TAUJ0 CH0,"0x512 or 0x600; transition and steady dispatchers both reach inner state machine","stage 0x33 of six-channel coordinate-transform/filter calibration state machine; calibration block 0x3103x",recovered
+0xB98BC,1040,7c4b961616c76b6f2100d1c819d4f8ee5f764bd129daea4d3fdc643a257c7209,0xBEB44/0xBEBF6,0x579B4,TAUJ0 CH2,"current version in 0x200..0x522; transition wrapper BEB44 and steady wrapper BEBF6","rotor observer/state recalculation using 0x1A12x..0x1A15x calibration and FEBEB5C4..B5EC observer state",recovered

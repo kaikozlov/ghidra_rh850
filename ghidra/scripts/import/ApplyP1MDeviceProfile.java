@@ -143,14 +143,25 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
     @Override
     public void run() throws Exception {
         // R7F701381 memory map (P1M-E hardware manual):
-        //   CodeFlash  0x00000000-0x000FFFFF  (already imported)
-        //   DataFlash  0xFF200000-0xFF207FFF  (already imported)
-        //   Local RAM  0xFEBE0000-0xFEBFFFFF
+        //   CodeFlash    0x00000000-0x000FFFFF  (already imported)
+        //   DataFlash    0xFF200000-0xFF207FFF  (already imported)
+        //   Local RAM    0xFEBE0000-0xFEBFFFFF
+        //   Global RAM A 0xFEEF8000-0xFEEFFFFF
+        //   Global RAM B 0xFEF00000-0xFEF07FFF
         // Peripheral SFRs are volatile in v850.pspec for the full 0xFF600000..
         // 0xFFFFFFFF window, but only verified peripheral *windows* are mapped
         // as memory blocks. Mapping the entire 10 MiB SFR range makes random
         // CodeFlash immediates look like valid pointers and collapses disassembly.
         ensureUninitBlock("LocalRAM", 0xFEBE0000L, 0x20000L, true, true, false, false);
+        ensureUninitBlock("GlobalRAM_A", 0xFEEF8000L, 0x8000L, true, true, false, false);
+        ensureUninitBlock("GlobalRAM_B", 0xFEF00000L, 0x8000L, true, true, false, false);
+        // The CH0 sample path uses two 432-entry DMA rings in Global RAM A.
+        // Firmware DMA descriptors source ADCG0DIR00/ADCG1DIR00 and target these
+        // addresses; names are structural and do not claim physical ADC pins.
+        label(0xFEEF81E0L, "ADCG0_DMA_SAMPLE_RING",
+                "432-entry x32-bit Global RAM ring fed from ADCG0DIR00 by DMAC");
+        label(0xFEEF8A20L, "ADCG1_DMA_SAMPLE_RING",
+                "432-entry x32-bit Global RAM ring fed from ADCG1DIR00 by DMAC");
         // EIC / interrupt-control SFRs (EIC136, EIC292, EIC293, …).
         ensureUninitBlock("SFR_EIC", 0xFFFFB000L, 0x1000L, true, true, false, true);
         // RSCFD / RSCAN channel register window used by application CAN.
@@ -165,6 +176,11 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         // FCU command/protection window (enable key 0xA5), 0xFFD60000/0xFFD61000
         // DataFlash bank control.
         ensureUninitBlock("SFR_FCU", 0xFFD62000L, 0x100L, true, true, false, true);
+        // ADCG0/1 windows supplying the DMA-backed phase-sample rings.
+        ensureUninitBlock("SFR_ADCG0", 0xFFF91000L, 0x1000L, true, true, false, true);
+        ensureUninitBlock("SFR_ADCG1", 0xFFF92000L, 0x1000L, true, true, false, true);
+        // DMAC channel-master settings used by the sample-transfer setup.
+        ensureUninitBlock("SFR_DMAC_CM", 0xFFFF8100L, 0x40L, true, true, false, true);
         // TSG30/31 motor-control timer windows. The CH0 commit worker at 0x60DDC
         // writes extended HT-PWM W/V/U compare registers at offsets 0x180/184/188.
         ensureUninitBlock("SFR_TSG3", 0xFFE70000L, 0x2000L, true, true, false, true);

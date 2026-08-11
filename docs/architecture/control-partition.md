@@ -319,14 +319,78 @@ The producer/consumer addresses and arithmetic are deterministically checked by
 checked by `AssertMotorActuationBoundary.java`; the OEM field label is checked
 separately against the pinned external DBC.
 
-## 9. Independent phase-current control to physical PWM boundary
+## 9. Motor-control, acquisition, and plausibility boundary
 
-Reverse-slicing from firmware-used hardware registers establishes a separate,
-high-rate motor-control chain under TAUJ0 CH0:
+Reverse-slicing from the physical TSG3 PWM registers establishes an independent
+high-rate current-control chain under TAUJ0 CH0. Stage 6 also closes three
+previously loose boundaries: the phase-sample source is now identified as an
+ADCG→DMAC→Global-RAM path, the conditioned `0x2E4` command branch has been
+traced through its deeper foreground staging, and the three alleged "isolated
+safety interlocks" are now placed inside a registered nine-channel
+plausibility/deadline monitor family.
+
+Machine-readable evidence:
+
+- `data/motor_actuation_path.csv` — acquisition through physical PWM plus the
+  bounded command/current-reference negative;
+- `data/motor_safety_monitors.csv` — all nine registered monitor channels;
+- `data/motor_calibration_handlers.csv` — version-domain boundaries for
+  `0x32B80` and `0xB98BC`.
+
+### 9.1 ADCG → DMAC → Global-RAM phase-sample acquisition
+
+The old description of `0xFEEF81E0` and `0xFEEF8A20` as peripheral/SFR result
+windows was wrong. The authoritative Renesas **RH850/P1M-E User's Manual:
+Hardware**, R01UH0585EJ0120 Rev.1.20, maps:
 
 ```text
-indexed peripheral result windows FEEF81E0 / FEEF8A20
-  -> 0x61068 / 0x610A8 -> CH0 sample snapshot 0x6578E
+FEEF8000..FEEFFFFF  Global RAM (Bank A), 32 KiB
+FEF00000..FEF07FFF  Global RAM (Bank B), 32 KiB
+```
+
+Both sample bases are therefore ordinary Global RAM A, not MMIO. Firmware DMA
+descriptors identify the hardware source:
+
+| Descriptor | Source | Manual name | Destination | Consumer |
+|---:|---:|---|---:|---:|
+| `0x312B0` / `0x312C0` | `0xFFF91200` | `ADCG0DIR00` | `0xFEEF81E0` | `0x5F5E0` |
+| `0x31378` / `0x31388` | `0xFFF92200` | `ADCG1DIR00` | `0xFEEF8A20` | `0x5F68A` |
+
+The manual names `ADCG0DIR00` / `ADCG1DIR00` "Data supplementary information
+register 00." The adjacent DMA setup writes the DMAC channel-master register
+bank; the two channel-0 landmarks are `DM00CM @ 0xFFFF8100` and
+`DM10CM @ 0xFFFF8120`.
+
+`0x5F5E0` and `0x5F68A` each bound the index below `0x1B0` (432), read a
+32-bit ring entry, extract the sample field from bits `14:3`, clear the
+consumed low halfword, and return the scaled sample. `0x61068` and `0x610A8`
+collect six samples from each ring; `0x610E8` calls both; and
+`tauj0_ch0_sample_snapshot @ 0x6578E` publishes the resulting twelve samples
+into `0xFEBE5EA0..0xFEBE5EB6`.
+
+The proved acquisition boundary is therefore:
+
+```text
+ADCG0DIR00 @ FFF91200                    ADCG1DIR00 @ FFF92200
+          \                                     /
+           -> DMAC channel setup / transfer ->
+              Global RAM A rings
+              FEEF81E0 / FEEF8A20
+                -> 5F5E0 / 5F68A
+                -> 61068 / 610A8 / 610E8
+                -> TAUJ0 CH0 snapshot 6578E
+```
+
+The exact external ADC pins/analog channels represented by `DIR00` are not
+claimed. The source-register identity, DMA descriptor pairing, Global-RAM
+identity, and software consumers are verified.
+
+### 9.2 Independent phase-current control to physical PWM
+
+From the DMA-backed sample snapshot forward, the high-rate path is:
+
+```text
+ADCG/DMAC Global-RAM sample rings
   -> phase-sample publish 0x4FB02
   -> dual U/V/W phase-current conditioning 0x47C3C
   -> dual Clarke/Park-like feedback transform 0x35960
@@ -335,54 +399,30 @@ indexed peripheral result windows FEEF81E0 / FEEF8A20
   -> PI-like current loops 0x36902 / 0x36A44
   -> bounded rotating-frame command preparation 0x36200 / 0x3650C / 0x36742
   -> inverse rotating-frame transforms 0x38464 / 0x38554
-  -> phase-command limiting and publication 0x35F6C / 0x3601A / 0x3802A / 0x38134 / 0x3875A
+  -> phase-command limiting/publication 0x35F6C / 0x3601A / 0x3802A / 0x38134 / 0x3875A
   -> output slot 0 via 0x56B18
-  -> phase-duty slot selection 0x569A8
+  -> phase-duty selection 0x569A8
   -> TSG3 compare conversion 0x56D3E / 0x60BFA
   -> staged compare RAM FEBE38A2..FEBE38AE
   -> TSG3 commit 0x60DDC
   -> TSG30/31 CMPWE/CMPVE/CMPUE
 ```
 
-The machine-readable stage map is `data/motor_actuation_path.csv`.
+`0x47C3C` conditions two three-phase sample sets at
+`0xFEBE81E4..0xFEBE81FA`, applying per-phase offset/gain, saturation, and
+missing-phase reconstruction into `0xFEBE7DE6..0xFEBE7DF0`.
+`0x35960` applies two three-phase-to-rotating-frame transforms using coefficient
+pairs `0xFEBE7CEE/7CF0` and `0xFEBE7CFA/7CFC`. `0x37644` combines the
+feedback into `0xFEBE6D18/0xFEBE6D1C`.
 
-### Phase feedback and current control
-
-`0x47C3C` was previously mislabeled a calibration-only handler. Its complete
-caller census proves both a version-transition path (`0x5CC08`) and a steady
-path (`0x5CE0C`) beneath the TAUJ0 CH0 worker. It conditions two three-phase
-sample sets at `0xFEBE81E4..0xFEBE81FA`, applying per-phase offset/gain,
-saturation, and missing-phase reconstruction into `0xFEBE7DE6..0xFEBE7DF0`.
-
-`0x35960` applies two three-phase-to-rotating-frame transforms using angle
-coefficient pairs `0xFEBE7CEE/0xFEBE7CF0` and
-`0xFEBE7CFA/0xFEBE7CFC`. Its fixed-point constants `0x3441` and `0x5A82`, the
-three-input structure, and the downstream reference-minus-feedback loops
-support the bounded Clarke/Park classification. `0x37FB6` and `0x37644`
-filter/combine the result into feedback at `0xFEBE6D18/0xFEBE6D1C`.
-
-`0x37712` independently constructs d/q current-reference state at
-`0xFEBE6D28/0xFEBE6D2A`. `0x36902` computes
-`0xFEBE6D2A - 0xFEBE6D1C`; `0x36A44` computes
+`dual_motor_dq_current_reference @ 0x37712` constructs the d/q reference state
+at `0xFEBE6D28/0xFEBE6D2A`. `dq_current_pi_axis_a @ 0x36902` computes
+`0xFEBE6D2A - 0xFEBE6D1C`; `dq_current_pi_axis_b @ 0x36A44` computes
 `0xFEBE6D28 - 0xFEBE6D18`. Both contain gain selection, accumulated state,
-signed saturation, and calibrated output limits: PI-like current-control
-structure rather than a bare diagnostic comparison. Their outputs pass through
-the bounded command/limit stages and into rotating-frame command pairs at
-`0xFEBE6BE8..0xFEBE6BEE`.
+signed saturation, and calibrated output limits. `0x38464` / `0x38554` then
+rotate the bounded command pairs back into two three-phase triplets.
 
-`0x38464` and `0x38554` rotate those two command pairs back into two bounded
-three-phase command triplets. Subsequent common-mode/limit stages publish two
-three-phase banks through arbitration slot 0 and `0x569A8` selects the active
-bank for each motor output.
-
-### TSG3 physical output
-
-The P1M-E User's Manual supplies the hardware names:
-
-- section 25.1.2: `TSG30_base = 0xFFE70000`,
-  `TSG31_base = 0xFFE71000`;
-- sections 25.3.48–50: 32-bit extended HT-PWM W/V/U compare registers at
-  offsets `0x180`, `0x184`, and `0x188`.
+The physical output names are manual-backed:
 
 | Address | Register | Firmware writer |
 |---:|---|---:|
@@ -393,87 +433,143 @@ The P1M-E User's Manual supplies the hardware names:
 | `0xFFE71184` | `TSG31CMPVE` | `0x60DDC` |
 | `0xFFE71188` | `TSG31CMPUE` | `0x60DDC` |
 
-The manual states that one extended-compare write updates the paired compare
-state used for symmetric triangular HT-PWM generation. The exact store bytes
-at `0x60DFE/0x60E06/0x60E0E` are asserted by
-`tests/verify_motor_actuation_boundary.py`.
-
 Scheduling order matters: `0x656F0` calls `0x60DDC` before dispatching
-`0x5784C`, so each CH0 invocation commits the previously staged compare bank
-and then computes the next current-control/compare state. The result-window
-addresses `0xFEEF81E0/0xFEEF8A20` are firmware-static observations; their exact
-peripheral-module/register names remain unresolved and are not labeled as ADC
-SFRs.
+`0x5784C`, so a CH0 invocation commits the previously staged compare bank and
+then computes the next current-control/compare state.
 
-### Command-to-current-reference gap
+### 9.3 Conditioned `0x2E4` command branch and the d/q join
 
-This chain proves phase feedback, d/q current control, inverse transforms,
-three-phase duty staging, and writes to physical motor-control PWM registers.
-It does **not** prove that authenticated CAN `0x2E4` controls those writes. The
-two proved chains stop at:
+The command side is deeper than the earlier report showed. The recovered branch
+now includes:
 
 ```text
-command side:  FEBEBF84 / FEBEBF9A -> FEBEBFA2 -> FEBEAE16 and snapshots
-actuator side: independent d/q current references FEBE6D28 / FEBE6D2A -> PWM
+0x2E4 signal 61
+  -> FEBE7F94 -> FEBEF184 -> FEBEAE20
+  -> FEBEBF80 -> FEBEBF9A / FEBEBF84 -> FEBEBFA2
+  -> steering_command_mode_select_stage @ 0xCA6B8 -> FEBEC144
+  -> steering_command_slew_gain_limit_stage @ 0xCA75E -> FEBEC170
+       -> steering_command_export_scale @ 0xCB700 -> FEBEAE16 / FEBEAE6E
+       -> steering_command_secondary_select_stage @ 0xCAC14 -> FEBEC1B8
+          -> steering_command_secondary_gain_clip @ 0xCAC6A
+             -> FEBEC1B4 / FEBEC1BC
 ```
 
-No recovered static data-flow edge joins those endpoints. That exact
-**command-to-current-reference gap** is the strongest defensible static
-actuation boundary for this image.
+This hidden `C144/C170/C1B8` branch does **not** produce a d/q reference. Its
+read/write census remains entirely in the foreground steering-command/export
+state, and `FEBEAE16`/`FEBEAE6E` flow into snapshot/structure builders.
 
-The gap is now hardened, not merely open. The producer cone of
-`0xFEBE6D28`/`0xFEBE6D2A` is enumerated and motor-internal:
+The actuator-side producer cone is separately closed:
 
-- `dual_motor_dq_current_reference` at `0x37712` (entry `0x3770e`) builds both
-  references from `0xFEBE6D4E`/`0xFEBE6D50`/`0xFEBE6D70`/`0xFEBE6D7E`
-  (summed and saturated) plus `0xFEBE6D52`/`0xFEBE6D54` and calibration
-  `0x1842C`/`0x1842E`. Every input lives in the `0xFEBE6D**` motor block.
-- Those inputs are produced by `0x3795E`, `0x37B5A`, and `0x37CD4`, which
-  reference only `0xFEBE5F**`/`0xFEBE6D**` addresses. No conditioned-command
-  location (`0xFEBE7F94`/`0xFEBEF184`/`0xFEBEAE20`/`0xFEBEBF80`/
-  `0xFEBEBF84`/`0xFEBEBF9A`/`0xFEBEBFA2`/`0xFEBEAE16`) appears anywhere in the
-  producer cone.
-- The apparent second writer, `autosar_os_task_signal_dispatch`
-  (function entry `0x58404`), at instruction `0x5AE28`, is a buffer-clear
-  idiom, not a producer: it sets `ep = 0xFEBE6D24`, stores zero (`r0`) to
-  `0xFEBE6D24..0xFEBE6D2E`, then calls `0x3770e`. It does not copy command
-  state.
+- `0x37712` reads `FEBE6D4E/6D50/6D52/6D54/6D70/6D7E` and writes
+  `FEBE6D28/6D2A`;
+- `0x3795E`, `0x37B5A`, and `0x37CD4` produce those direct inputs from the same
+  motor-state domain;
+- the complete static xref/writer census over `FEBE6D00..FEBE6DFF` finds only
+  motor-control writers plus explicit initialization/reinitialization writes;
+- RTE staging copies that touch the d/q block are **readers**, not writers;
+- a bytewise CodeFlash scan finds **zero absolute 32-bit pointers** into
+  `FEBE6D00..FEBE6DFF`;
+- generic `memcpy @ 0x153A` has exactly one direct caller, bootloader transfer
+  code at `0x4F84`, and no application caller;
+- the apparent second d/q-reference writer in
+  `autosar_os_task_signal_dispatch @ 0x58404` is a zero-clear/reinitialization
+  sequence over `FEBE6D24..6D2E` followed by the normal reference constructor,
+  not a command copy. That routine is used at startup and on foreground
+  version/state reinitialization.
 
-This is still a bounded static negative — a table-driven, computed, or
-runtime-only handoff (e.g. an AUTOSAR RTE outer-loop join not visible to the
-static call graph) is not excluded. But the producer cone is now enumerated and
-clean two levels deep, so the gap is materially stronger than "no edge found."
+Accordingly, Stage 6 closes the **static search** for the command-to-current
+join with a bounded negative: no direct, table-pointer, generic-memcpy, RTE-copy,
+or recovered computed-GP transfer joins authenticated command state to the
+proved d/q reference cone. This is stronger than "no edge found," but it is not
+proof of physical independence. A runtime-only mechanism invisible to the
+static model remains logically possible; dynamic bench observation is still
+required to prove how a valid signed command changes physical actuation.
 
-### Torque-limit and plausibility layers are command-disconnected
+### 9.4 Torque-limit and command-side plausibility branches
 
-The SWEEP-004 torque-limit selector `0xB8C1A` (branches on a `0x55AAAA55`
-calibration-profile marker between two table sets) does not gate the
-conditioned `0x2E4` command. It operates on a separate `0xFEBEB5**` region
-populated by the `0xB89CC`/`0xB8A12`/`0xB8B10` cluster, none of which read any
-command-state location; that cluster is the EPS's internal assist-torque path,
-not the external LKA command. The only torque limiting applied to the
-authenticated command itself is inside its own conditioning chain: the
-`0xC853A` clamp (`±0x1BD80`, gain tables `0xD603C`/`0xD607C`) and `0xC85B6`
-rate limit (`0x1BD8E`), already documented in section 8.
+The `0x55AAAA55` calibration-profile selector at `0xB8C1A` remains disconnected
+from the authenticated command branch. It operates on a separate `0xFEBEB5**`
+assist-torque region populated by the `0xB89CC/0xB8A12/0xB8B10` cluster. The
+command itself is bounded by its own `0xC853A` clamp and `0xC85B6` rate-limit
+stages before the deeper `CA6B8/CA75E` branch above.
 
-The conditioned-command export `0xFEBEAE16` has only snapshot/transport
-consumers: `0xBAFB2` packs it (with ~40 other state fields) into an event
-record handed to `FUN_000FF09C` selector `9` (the `0xAB`/diagnostic snapshot
-worker); `application_input_snapshot_update`; and `0xFD49E`/`0xFD562`
-transport. No recovered reader forwards it into the high-rate motor loop.
+### 9.5 Nine-channel registered plausibility/deadline monitor family
 
-Implication for an external signer: a correctly authenticated `0x2E4` frame is
-SecOC-accepted (the receive chain fails closed otherwise) and conditioned, but
-static analysis cannot prove it reaches motor actuation. Correct signing is
-**necessary but not statically provable sufficient** for actuation; that must
-be confirmed dynamically on a bench with a valid key.
+The former SWEEP-006 description of `0x43A78`, `0x43716`, and `0x438C6` as
+"fully isolated safety interlocks" is superseded. They are helper predicates
+inside a **nine-channel registered monitor family** driven by
+`com_signal_deadline_monitor_c @ 0x69DEC`.
 
-### Evidence grade: recovered; physical register boundary verified
+Each channel owns a 12-byte monitor state, a two-u16 threshold/timing record, a
+callback table, and one slot in the shared status vector `FEBE797C..FEBE7984`.
+The complete map is in `data/motor_safety_monitors.csv`. Representative rows:
 
-The call order, RAM transitions, transform/controller structure, and compare
-pipeline are recovered from firmware-static evidence. The six TSG3 register
-addresses and exact stores are verified against deterministic tests and the
-P1M-E manual. The missing command bridge remains bounded.
+| Step | State | Callback table | Primary callback | Status index |
+|---:|---:|---:|---:|---:|
+| `0x436BC` | `FEBE7928` | `0x289EC` | `0x43784` → `0x43716` | 3 |
+| `0x4386C` | `FEBE7934` | `0x28A20` | `0x43934` → `0x438C6` | 4 |
+| `0x43A1C` | `FEBE7940` | `0x28A54` | `0x43B16` → `0x43A78` ×2 | 0 |
+
+The other six channels use the same monitor engine and tables
+`0x28984/0x289B8/0x28A88/0x28ABC/0x28AF0/0x28B24`. `0x440DC` bounds the
+status index below nine and publishes each channel state into the shared
+vector.
+
+The old return-value interpretation also needed correction. `0x43716` and
+`0x438C6` are predicate helpers returning `0` or `0x5A`; `0x43A78` participates
+in the `0x11/0x22/0x33` lifecycle vocabulary consumed by its wrapper. The
+wrappers convert those raw predicate results into the monitor engine's
+`0x11/0x22/0x33/0x44` state vocabulary.
+
+`plausibility_monitor_status_aggregate @ 0x43F28` consumes all nine channel
+states, combines lifecycle conditions, calls the shared selector/event
+aggregator `0x3BFD8` and status helper `0x52080`, and publishes aggregate
+`FEBE7985`. RTE staging copies that through `FEBEEE01` to `FEBEB065`.
+The sole downstream reader, `plausibility_fault_debounce_monitor @ 0xB9D36`,
+uses the aggregate as one precondition in a debounced event-state machine,
+writes only `FEBEB5F4..B5FE`, and calls event/status helpers `0x53562`,
+`0x536A8`, and `0x50C7A`.
+
+No direct current-reference or PWM write is recovered from `0x43F28` or
+`0xB9D36`. The defensible classification is therefore **registered
+plausibility/deadline/fault monitoring with event-state output**, not a proved
+motor-inhibit/interlock path. An indirect safety policy elsewhere could still
+consume its event state; this trace does not claim the monitors are irrelevant
+to safety.
+
+### 9.6 Calibration/version-domain handlers
+
+The two remaining calibration handlers are no longer merely
+"calibration-transition-only" unknowns.
+
+`motor_coord_transform_calib_handler @ 0x32B80` is state `0x33` of the
+six-channel calibration state machine at `0x33198`. Under TAUJ0 CH0,
+transition dispatcher `0x5CC08` and steady dispatcher `0x5CE0C` both reach
+`0x33198` when the current version domain is `0x512` or `0x600`; the `0x600`
+path also runs `0x33B08`. The handler performs fixed-point transform/filter
+recalculation against the `0x3103x` calibration block. This is a concrete
+state-machine role, although the OEM calibration semantic name remains unknown.
+
+`motor_rotor_observer_calib_handler @ 0xB98BC` belongs to the TAUJ0 CH2
+version domain. `0x579B4` maintains a cached version plus complement and uses
+transition wrapper `0xBEB44` (via `0xFDD18`) when the version changes and steady
+wrapper `0xBEBF6` (via `0xFDD2C`) otherwise. Both reach `0xB98BC` for current
+versions in `0x200..0x522`. The handler consumes roughly twenty calibration
+values from `0x1A12x..0x1A15x`, updates observer state
+`FEBEB5C4..FEBEB5EC`, and calls math/event helpers.
+
+These routines are now structurally bounded by their execution/version domains;
+no claim assigns an OEM calibration name or makes either routine the missing
+`0x2E4`→d/q join.
+
+### Evidence grade: recovered/verified with bounded actuation join
+
+The ADCG register identities, Global-RAM geometry, DMAC register identities,
+TSG3 register names, and deterministic firmware descriptor/store relationships
+are verified against the retained P1M-E manual plus CodeFlash. Motor-control,
+monitor, calibration, and command-conditioning roles are recovered from
+firmware-static structure and call/data-flow. The absence of a static
+authenticated-command→d/q transfer is a deliberately bounded negative.
 
 ## 10. CAN 0x7F7 special receive callback — `0x7ff86`
 

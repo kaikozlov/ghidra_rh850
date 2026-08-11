@@ -41,6 +41,9 @@ curated.
 | `data/application_security_consumers.csv` | Application security-consumer scan results backing the "no configured gating" finding | `tests/verify_security_consumers.py` |
 | `data/application_routine_id_callbacks.csv` | The 13-entry stock-gated control-ID subset, direct-target census, and state-mediated object-`0x101/102/103` persistence boundary; distinct from SID `0xAB` | `tests/verify_application_routine_id_callbacks.py` |
 | `data/control_partition.csv` | Control/safety cyclic-partition map | `tests/verify_control_partition.py` |
+| `data/motor_actuation_path.csv` | Motor acquisition/current/PWM path and bounded authenticated-command→d/q join census | `tests/verify_motor_actuation_boundary.py` |
+| `data/motor_safety_monitors.csv` | Nine-channel plausibility/deadline monitor registration and status-vector map | `tests/verify_motor_safety_monitors.py` |
+| `data/motor_calibration_handlers.csv` | CH0/CH2 calibration-handler version-domain map | `tests/verify_motor_calibration_handlers.py` |
 | `data/tss3_eps_variant_matrix.csv` | Sienna/Corolla and TSS 3 EPS variant comparison (evidence-graded; `unknown` for unobserved) | `tests/verify_tss3_variant_matrix.py` |
 | `data/p1m_sfr_labels.csv` | P1M-E SFR labels used by the device profile | `make verify-processor` |
 | `data/scheduler_periods.csv` | Cyclic-task scheduler period evidence | `tests/verify_scheduler_timing.py` |

@@ -9,13 +9,27 @@ import sys
 # totals relative to the pre-profile snapshot. Exact equality is enforced only
 # for identity fields; numeric floors catch catastrophic analysis collapse.
 #
-# Memory blocks: CodeFlash + DataFlash + LocalRAM + verified SFR windows
-# (SFR_EIC 0x1000 + SFR_RSCFD 0x10000 + SFR_ICUS 0x1000 + SFR_CLKGEN 0x2000
-# + SFR_FCU 0x100 + SFR_TSG3 0x2000). The full peripheral range stays volatile in v850.pspec
-# but is not mapped as one block (that made CodeFlash immediates look like
-# valid SFR pointers and collapsed disassembly).
-_MEMORY_SIZE = 0x100000 + 0x8000 + 0x20000 + 0x1000 + 0x10000 + 0x1000 + 0x2000 + 0x100 + 0x2000
-_SECTIONS = 9  # CodeFlash, DataFlash, LocalRAM, EIC, RSCFD, ICUS, CLKGEN, FCU, TSG3
+# Memory blocks: CodeFlash + DataFlash + LocalRAM + Global RAM A/B + verified
+# SFR windows. Stage 6 adds only the manual-backed blocks needed by the proved
+# phase-acquisition path: ADCG0/1 and the DMAC channel-master slice. The full
+# peripheral range stays volatile in v850.pspec but is not mapped as one block
+# (that made CodeFlash immediates look like valid SFR pointers and collapsed
+# disassembly).
+_MEMORY_SIZE = (
+    0x100000  # CodeFlash
+    + 0x8000  # DataFlash
+    + 0x20000  # LocalRAM
+    + 0x8000 + 0x8000  # GlobalRAM_A / GlobalRAM_B
+    + 0x1000  # SFR_EIC
+    + 0x10000  # SFR_RSCFD
+    + 0x1000  # SFR_ICUS
+    + 0x2000  # SFR_CLKGEN
+    + 0x100  # SFR_FCU
+    + 0x1000 + 0x1000  # SFR_ADCG0 / SFR_ADCG1
+    + 0x40  # SFR_DMAC_CM
+    + 0x2000  # SFR_TSG3
+)
+_SECTIONS = 14  # Code/Data/Local + 2 Global RAM + 9 targeted SFR blocks
 
 EXPECTED_MIN = {
     "functions": 5560,

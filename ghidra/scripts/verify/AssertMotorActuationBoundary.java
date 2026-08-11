@@ -66,17 +66,26 @@ public class AssertMotorActuationBoundary extends GhidraScript {
         }
     }
 
-    private void assertSfr(long address, String expectedName) {
+    private void assertMappedLabel(long address, String expectedBlock, boolean expectedVolatile,
+                                   String expectedName) {
         Address target = toAddr(address);
         MemoryBlock block = currentProgram.getMemory().getBlock(target);
-        if (block == null || !"SFR_TSG3".equals(block.getName()) || !block.isVolatile()) {
-            fail(String.format(Locale.ROOT, "0x%x is not in volatile SFR_TSG3", address));
+        if (block == null || !expectedBlock.equals(block.getName())
+                || block.isVolatile() != expectedVolatile) {
+            fail(String.format(Locale.ROOT,
+                    "0x%x block expected=%s volatile=%s actual=%s",
+                    address, expectedBlock, expectedVolatile,
+                    block == null ? "<none>" : block.getName() + "/" + block.isVolatile()));
         }
         Symbol symbol = currentProgram.getSymbolTable().getPrimarySymbol(target);
         if (symbol == null || !expectedName.equals(symbol.getName())) {
             fail(String.format(Locale.ROOT, "0x%x label expected=%s actual=%s",
                     address, expectedName, symbol == null ? "<none>" : symbol.getName()));
         }
+    }
+
+    private void assertSfr(long address, String expectedBlock, String expectedName) {
+        assertMappedLabel(address, expectedBlock, true, expectedName);
     }
 
     @Override
@@ -105,12 +114,21 @@ public class AssertMotorActuationBoundary extends GhidraScript {
         assertNamedFunction(0x36a44L, "dq_current_pi_axis_b");
         assertNamedFunction(0x60ddcL, "tsg3_pwm_compare_commit");
 
-        assertSfr(0xffe70180L, "TSG30CMPWE");
-        assertSfr(0xffe70184L, "TSG30CMPVE");
-        assertSfr(0xffe70188L, "TSG30CMPUE");
-        assertSfr(0xffe71180L, "TSG31CMPWE");
-        assertSfr(0xffe71184L, "TSG31CMPVE");
-        assertSfr(0xffe71188L, "TSG31CMPUE");
+        assertSfr(0xffe70180L, "SFR_TSG3", "TSG30CMPWE");
+        assertSfr(0xffe70184L, "SFR_TSG3", "TSG30CMPVE");
+        assertSfr(0xffe70188L, "SFR_TSG3", "TSG30CMPUE");
+        assertSfr(0xffe71180L, "SFR_TSG3", "TSG31CMPWE");
+        assertSfr(0xffe71184L, "SFR_TSG3", "TSG31CMPVE");
+        assertSfr(0xffe71188L, "SFR_TSG3", "TSG31CMPUE");
+
+        // Stage-6 acquisition correction: FEEF81E0/FEEF8A20 are Global RAM A
+        // DMA rings, not peripheral SFRs. Their DMA sources are ADCG0/1 DIR00.
+        assertMappedLabel(0xfeef81e0L, "GlobalRAM_A", false, "ADCG0_DMA_SAMPLE_RING");
+        assertMappedLabel(0xfeef8a20L, "GlobalRAM_A", false, "ADCG1_DMA_SAMPLE_RING");
+        assertSfr(0xfff91200L, "SFR_ADCG0", "ADCG0DIR00");
+        assertSfr(0xfff92200L, "SFR_ADCG1", "ADCG1DIR00");
+        assertSfr(0xffff8100L, "SFR_DMAC_CM", "DM00CM");
+        assertSfr(0xffff8120L, "SFR_DMAC_CM", "DM10CM");
 
         // Exact direct-reference census for the command-side stopping boundary.
         // BF84 has writes only; BF9A has a self-history read inside its producer.
@@ -129,6 +147,41 @@ public class AssertMotorActuationBoundary extends GhidraScript {
                 "000bce3e:WRITE", "000be52c:WRITE");
         assertExactRefs(0xfebeeb1cL, "000fd540:WRITE");
         assertExactRefs(0xfebeeba4L, "000fd5fc:WRITE");
+
+        // Hidden command-conditioning branch recovered in Stage 6. It stays in
+        // foreground command/export state rather than writing the FEBE6Dxx d/q block.
+        assertExactRefs(0xfebec144L,
+                "000ca4ea:WRITE", "000ca6fa:WRITE", "000ca776:READ");
+        assertExactRefs(0xfebec170L,
+                "000ca50a:WRITE", "000ca77e:READ", "000ca7e6:WRITE",
+                "000cb7b0:READ", "000cac40:READ");
+        assertExactRefs(0xfebec1b8L,
+                "000cac0e:WRITE", "000cac64:WRITE", "000cac7a:READ");
+        assertExactRefs(0xfebeae6eL,
+                "000bce0a:READ", "000be2c6:WRITE", "000cb80e:WRITE",
+                "000bb69e:READ", "000bb762:READ", "000bb826:READ");
+
+        // Complete direct-reference lock for the d/q-reference feeder state.
+        // Only motor-runtime functions and explicit init/reinit writes own these
+        // locations; RTE copies appear as READs only.
+        assertExactRefs(0xfebe6d4eL,
+                "0005ae16:WRITE", "00037b4a:WRITE", "00037726:READ");
+        assertExactRefs(0xfebe6d50L,
+                "0005ae18:WRITE", "00037b4c:WRITE", "0003772a:READ");
+        assertExactRefs(0xfebe6d52L,
+                "0005ae1a:WRITE", "00037b4e:WRITE", "00037770:READ");
+        assertExactRefs(0xfebe6d54L,
+                "0005ae1c:WRITE", "00037b50:WRITE", "0003777c:READ");
+        assertExactRefs(0xfebe6d70L,
+                "0005add6:WRITE", "00037966:READ", "00037b84:WRITE",
+                "00037cd8:READ", "0003771a:READ");
+        assertExactRefs(0xfebe6d7eL,
+                "0005adee:WRITE", "00037962:READ", "00037cf4:WRITE",
+                "00037712:READ");
+
+        // Generic memcpy cannot provide a hidden application transfer into the
+        // d/q state: its sole direct caller belongs to bootloader transfer code.
+        assertExactRefs(0x153aL, "00004f84:UNCONDITIONAL_CALL");
 
         // The proved current-reference state is independently produced in the
         // CH0 worker; none of the command snapshot owners above writes it.

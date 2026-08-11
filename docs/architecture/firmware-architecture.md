@@ -448,11 +448,17 @@ functions and traced call graphs for major hubs. Key results:
   torque limit mapper branches on this marker, selecting between two
   calibration table sets. Same pattern family as the boot validity markers
   (`0x5AA5A55A`), suggesting a config-profile system.
-- **Three isolated safety interlocks** (`0x43A78`, `0x43716`, `0x438C6`): fully
-  isolated functions (no static callers, no callees) that check sensor validity
-  and speed thresholds. `0x43A78` returns `0x22` (pass) or `0x33`/`0x11` (fail);
-  the other two follow the same pattern. Likely called via function pointer
-  tables (AUTOSAR RTE pattern).
+- **Nine-channel registered plausibility/deadline monitor family**: the old
+  "three isolated safety interlocks" interpretation is superseded. Setup steps
+  `0x43558/0x4360A/0x436BC/0x4386C/0x43A1C/0x43C0C/0x43CBA/0x43D68/0x43E56`
+  pass callback tables `0x28984..0x28B24` into `com_signal_deadline_monitor_c @
+  0x69DEC` and publish a shared nine-byte status vector at `FEBE797C..7984`.
+  The three formerly isolated helpers are reached through concrete callback
+  pointers (`0x43784→0x43716`, `0x43934→0x438C6`, `0x43B16→0x43A78`).
+  Aggregate `0x43F28` feeds event/status bookkeeping and a debounced monitor at
+  `0xB9D36`; no direct d/q-current or PWM write was recovered. Canonical details
+  and the complete table live in `control-partition.md` §9.5 and
+  `data/motor_safety_monitors.csv`.
 
 ## 6. Evidence boundaries
 

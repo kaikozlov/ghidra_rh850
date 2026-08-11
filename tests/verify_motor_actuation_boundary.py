@@ -14,7 +14,7 @@ CODEFLASH_PATH = ROOT / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 SFR_PATH = ROOT / "data" / "p1m_sfr_labels.csv"
 
 EXPECTED_STAGES = {
-    "phase_result_window_read",
+    "phase_adc_dma_ring_read",
     "ch0_sample_snapshot",
     "phase_sample_publish",
     "phase_current_conditioning",
@@ -29,6 +29,7 @@ EXPECTED_STAGES = {
     "tsg3_compare_stage",
     "tsg3_pwm_commit",
     "conditioned_2e4_boundary",
+    "conditioned_2e4_internal_stage",
     "conditioned_2e4_export",
     "command_to_current_gap",
 }
@@ -87,7 +88,8 @@ def main() -> int:
     check("command/current gap remains bounded",
           any(row["stage"] == "command_to_current_gap"
               and row["evidence_grade"] == "bounded"
-              and "not" in row["hardware_or_calibration"] for row in rows))
+              and ("not" in row["hardware_or_calibration"] or "no recovered" in row["output_state"])
+              for row in rows))
 
     codeflash = CODEFLASH_PATH.read_bytes()
     print("\n== TAUJ0 CH0 execution order ==")
@@ -101,6 +103,35 @@ def main() -> int:
           0x47C3C in branch_targets(codeflash, 0x5CE0C, 0x5CEA8))
     check("steady transform dispatch reaches Clarke/Park stage",
           0x35960 in branch_targets(codeflash, 0x5CEA8, 0x5CEE4))
+
+    print("\n== ADCG -> DMAC -> Global RAM sample acquisition ==")
+    # P1M-E memory map identifies FEEF8000..FEEFFFFF as Global RAM A, not SFR.
+    # Firmware DMA descriptors pair ADCG0/1 DIR00 with the two 432-entry rings.
+    dmac0 = struct.unpack_from("<III", codeflash, 0x312B0)
+    dmac0_dup = struct.unpack_from("<III", codeflash, 0x312C0)
+    dmac1 = struct.unpack_from("<III", codeflash, 0x31378)
+    dmac1_dup = struct.unpack_from("<III", codeflash, 0x31388)
+    check("ADCG0 DMA descriptor targets Global-RAM ring FEEF81E0",
+          dmac0[1:] == (0xFFF91200, 0xFEEF81E0), repr(dmac0))
+    check("ADCG0 descriptor is duplicated for the paired DMA setup",
+          dmac0_dup[1:] == (0xFFF91200, 0xFEEF81E0), repr(dmac0_dup))
+    check("ADCG1 DMA descriptor targets Global-RAM ring FEEF8A20",
+          dmac1[1:] == (0xFFF92200, 0xFEEF8A20), repr(dmac1))
+    check("ADCG1 descriptor is duplicated for the paired DMA setup",
+          dmac1_dup[1:] == (0xFFF92200, 0xFEEF8A20), repr(dmac1_dup))
+    check("ADCG0 ring reader bounds index to 432 entries",
+          bytes.fromhex("060650fe") in codeflash[0x5F5E0:0x5F68A])
+    check("ADCG1 ring reader bounds index to 432 entries",
+          bytes.fromhex("060650fe") in codeflash[0x5F68A:0x5F778])
+    with SFR_PATH.open(newline="", encoding="utf-8") as fh:
+        sample_sfr_rows = {row["address"].lower(): row for row in csv.DictReader(
+            line for line in fh if not line.startswith("#"))}
+    for address, name in {
+        "0xfff91200": "ADCG0DIR00", "0xfff92200": "ADCG1DIR00",
+        "0xffff8100": "DM00CM", "0xffff8120": "DM10CM",
+    }.items():
+        row = sample_sfr_rows.get(address)
+        check(f"{address} labeled {name}", row is not None and row["name"] == name)
 
     print("\n== phase-current control pipeline ==")
     motor_targets = branch_targets(codeflash, 0x5D18C, 0x5D264)
@@ -147,9 +178,11 @@ def main() -> int:
     report = REPORT_PATH.read_text(encoding="utf-8")
     for token in (
         "0x60DDC", "TSG30CMPWE", "0x35960", "0x36902", "0x36A44",
-        "0xFEBEAE16", "0xFEBEE8CA", "command-to-current-reference gap",
+        "0xFEBEAE16", "0xFEBEE8CA", "command-to-current",
         "data/motor_actuation_path.csv",
-        "0x37712", "producer cone", "0xB8C1A", "command-disconnected",
+        "0x37712", "producer cone", "0xB8C1A",
+        "ADCG0DIR00", "ADCG1DIR00", "Global RAM", "0xFEEF81E0", "0xFEEF8A20",
+        "0xCA6B8", "FEBEC170",
     ):
         check(f"report contains {token}", token.lower() in report.lower())
 
@@ -211,6 +244,34 @@ def main() -> int:
                 cmd_hits.append(f"0x{target:08X} accessed at 0x{off:X}")
     check("no gp-relative access to conditioned-command state in producer cone",
           not cmd_hits, "; ".join(cmd_hits))
+
+    # Exhaust the two static transfer classes most likely to defeat an xref-only
+    # search. There are no absolute 32-bit pointers into the complete FEBE6Dxx
+    # motor-state page anywhere in CodeFlash, and the generic memcpy helper has
+    # only the bootloader transfer caller.
+    ptr_hits: list[tuple[int, int]] = []
+    for off in range(0, len(codeflash) - 3):
+        value = struct.unpack_from("<I", codeflash, off)[0]
+        if 0xFEBE6D00 <= value <= 0xFEBE6DFF:
+            ptr_hits.append((off, value))
+    check("CodeFlash contains no absolute pointer into FEBE6D00..FEBE6DFF",
+          not ptr_hits, repr([(hex(a), hex(v)) for a, v in ptr_hits]))
+    memcpy_callers = []
+    for off in range(0, len(codeflash) - 3, 2):
+        decoded = decode_branch(off, codeflash)
+        if decoded is not None and decoded == ("jarl", 0x153A):
+            memcpy_callers.append(off)
+    check("generic memcpy 0x153A has only bootloader caller 0x4F84",
+          memcpy_callers == [0x4F84], repr([hex(x) for x in memcpy_callers]))
+
+    # The deeper conditioned-command branch discovered in Stage 6 stays in the
+    # foreground command domain: BFA2 -> C144 -> C170 -> C1B8/C1B4/C1BC and
+    # BFA2/C170 -> AE16/AE6E. None of these addresses is in FEBE6Dxx. The Java
+    # project audit independently pins their DATA/READ/WRITE ownership.
+    command_stage = next(r for r in rows if r["stage"] == "conditioned_2e4_internal_stage")
+    check("internal command-stage artifact records C144/C170/C1B8",
+          all(tok in command_stage["output_state"] for tok in
+              ("0xFEBEC144", "0xFEBEC170", "0xFEBEC1B8")))
     print(f"\nSummary: {passed} passed, {failed} failed")
     return 1 if failed else 0
 

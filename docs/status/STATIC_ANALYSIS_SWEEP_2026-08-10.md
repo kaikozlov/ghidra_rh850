@@ -65,7 +65,7 @@ was searched separately. No search traversed unrelated personal storage.
 - [x] Stage 3 — close remaining high-value Techstream static leads
 - [x] Stage 4 — complete the Renesas RV40F host-protocol static census
 - [x] Stage 5 — close the application COM receive/transmit long tail
-- [ ] Stage 6 — tighten the motor-control and safety static boundary
+- [x] Stage 6 — tighten the motor-control and safety static boundary
 - [ ] Stage 7 — close remaining useful security-side static questions
 - [ ] Stage 8 — bounded external-reference and missing-artifact acquisition sweep
 - [ ] Stage 9 — status reconciliation and final Ghidra project integration
@@ -796,4 +796,160 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Commit
 
-- Pending Stage 5 commit; immutable SHA will be recorded after final verification.
+- `a01bc5f9ae32dd574f6fbf296ef7d2c3a6cebf40 analysis: close application COM signal long tail`
+
+
+## Stage 6 — tighten the motor-control and safety static boundary
+
+### Starting state
+
+- HEAD: `a01bc5f9ae32dd574f6fbf296ef7d2c3a6cebf40`
+- Relevant prior finding IDs: `ARCH-007`–`ARCH-009`, `SWEEP-004`,
+  `SWEEP-006`, `CORR-015`, `CORR-016`
+- Relevant artifacts: `data/motor_actuation_path.csv`, the existing control
+  partition report/Ghidra audit, retained P1M-E hardware manual, and the
+  previously bounded `0x32B80` / `0xB98BC` calibration handlers
+- Static boundary: exhaust plausible hidden transfer classes around the
+  authenticated-command→d/q gap, resolve the phase-sample acquisition source,
+  recover registration/output semantics for the alleged safety interlocks, and
+  bound the remaining named motor-calibration handlers without inventing OEM
+  semantics.
+
+### Questions
+
+1. Does a table-driven, pointer/struct-copy, computed-GP, RTE, scheduler, or
+   function-pointer handoff join conditioned `0x2E4` command state to the
+   `0x37712` d/q-reference cone?
+2. What exactly are `0xFEEF81E0` and `0xFEEF8A20`, and what hardware source
+   feeds them?
+3. How are `0x43A78`, `0x43716`, and `0x438C6` actually registered and what do
+   their outputs control?
+4. When do `0x32B80` and `0xB98BC` execute, beyond the old generic
+   "calibration-transition" label?
+
+### Work performed
+
+- Reconstructed the complete direct producer cone for `FEBE6D28/6D2A` and
+  performed a whole-`FEBE6D00..6DFF` static xref/writer census.
+- Searched CodeFlash bytewise for absolute pointers into the d/q state page,
+  censused every direct caller of generic `memcpy @ 0x153A`, checked RTE copy
+  direction, and reclassified `0x58404` d/q writes as startup/version-reset
+  clearing rather than command transfer.
+- Followed the previously missed command branch
+  `BFA2 → C144 → C170 → C1B8/C1B4/C1BC` and the `AE16/AE6E` export path to
+  their bounded snapshot/foreground consumers.
+- Resolved the phase-sample addresses against the retained Renesas P1M-E
+  hardware manual, then traced firmware DMA descriptors and sample-ring
+  consumers back to ADCG0/ADCG1 and DMAC.
+- Expanded the P1M-E device profile with only the manual-backed Global-RAM,
+  ADCG0/1, and DMAC-channel-master windows needed by this proved path; added
+  exact SFR/ring labels and rebuilt the project twice independently.
+- Recovered all nine monitor setup records, callback tables, status indices,
+  aggregate path, and final debounced event/status consumer around the three
+  former SWEEP-006 candidates.
+- Traced the CH0/CH2 cached-version dispatchers around `0x32B80` and `0xB98BC`,
+  including transition and steady wrappers and their concrete version domains.
+- Updated the reproducible Ghidra annotations and strengthened the project audit
+  so future rebuilds preserve these boundaries.
+
+### Findings
+
+- **Phase acquisition is ADCG→DMAC→Global RAM, not SFR-window polling.** The
+  P1M-E manual maps `0xFEEF8000..0xFEEFFFFF` as 32 KiB Global RAM A. Firmware
+  descriptors `0x312B0/0x312C0` pair `ADCG0DIR00 @ 0xFFF91200` with ring
+  `0xFEEF81E0`; `0x31378/0x31388` pair `ADCG1DIR00 @ 0xFFF92200` with ring
+  `0xFEEF8A20`. `0x5F5E0/0x5F68A` consume 432-entry x32-bit rings and feed the
+  CH0 sample snapshot. DMAC channel-master setup includes `DM00CM @ 0xFFFF8100`
+  and `DM10CM @ 0xFFFF8120` — source: P1M-E manual + CodeFlash descriptors,
+  grade: **verified** (`ARCH-008`, `CORR-028`).
+- The authenticated-command branch is deeper than previously documented:
+  `FEBEBFA2 → 0xCA6B8/FEBEC144 → 0xCA75E/FEBEC170`, then either
+  `0xCB700 → FEBEAE16/FEBEAE6E` or `0xCAC14/0xCAC6A →
+  FEBEC1B8/C1B4/C1BC`. None of those states writes the `FEBE6Dxx` motor block —
+  grade: **recovered**.
+- The **static command→d/q search is closed as a bounded negative**. The direct
+  feeder cone is motor-internal; every recovered write in `FEBE6D00..6DFF` is
+  motor-control or explicit init/reinit; RTE staging is read-only for the block;
+  CodeFlash contains zero absolute 32-bit pointers into the block; generic
+  `memcpy @ 0x153A` has only bootloader caller `0x4F84`; and no recovered
+  computed-GP access in the producer cone reaches conditioned command state.
+  This does not prove physical independence; dynamic bench observation remains
+  the discriminator — grade: **bounded static negative** (`ARCH-008`).
+- SWEEP-006 is corrected: `0x43A78`, `0x43716`, and `0x438C6` are not isolated
+  interlocks. They are helpers inside a **nine-channel registered
+  plausibility/deadline monitor family** using `com_signal_deadline_monitor_c @
+  0x69DEC`, callback tables `0x28984..0x28B24`, and status vector
+  `FEBE797C..7984`. Concrete edges include `0x43784→0x43716`,
+  `0x43934→0x438C6`, and `0x43B16→0x43A78×2`. Aggregate `0x43F28` feeds
+  event/status machinery and debounced monitor `0xB9D36`; no direct d/q/PWM
+  write is recovered — grade: **recovered/verified registration, bounded
+  downstream safety role** (`SWEEP-006`, `CORR-029`).
+- `0x43716`/`0x438C6` return `0/0x5A`; the old statement that they followed
+  `0x43A78`'s `0x11/0x22/0x33` lifecycle pattern was false. Their wrappers
+  translate predicate results into the monitor-state vocabulary.
+- `motor_coord_transform_calib_handler @ 0x32B80` is state `0x33` of the
+  six-channel `0x33198` calibration state machine and is reached in CH0 through
+  transition and steady dispatch for version domains `0x512`/`0x600`.
+  `motor_rotor_observer_calib_handler @ 0xB98BC` is reached in CH2 through
+  transition `0xBEB44` and steady `0xBEBF6` wrappers for current version
+  `0x200..0x522` — grade: **recovered execution/version domains** (`CORR-030`).
+
+### Negative/bounded results
+
+- No static transfer from valid-command state to the d/q reference cone was
+  recovered even after exhausting the named hidden-transfer classes. This is
+  deliberately not promoted to "CAN command cannot actuate"; a runtime-only
+  coupling remains logically possible.
+- The nine-channel monitor family reaches fault/event bookkeeping in the
+  recovered downstream trace, not direct motor output. This does not prove its
+  state can never participate indirectly in a broader safety policy.
+- ADCG `DIR00` source-register identity is exact; the external analog pins or
+  physical current-sensor channel assignment are not claimed.
+- The calibration handlers now have precise execution/version domains, but OEM
+  calibration names and higher-level physical meanings remain unnamed.
+
+### Documentation/tests changed
+
+- Added `data/motor_safety_monitors.csv` and
+  `tests/verify_motor_safety_monitors.py`.
+- Added `data/motor_calibration_handlers.csv` and
+  `tests/verify_motor_calibration_handlers.py`.
+- Expanded `data/motor_actuation_path.csv` and
+  `tests/verify_motor_actuation_boundary.py` for exact ADCG/DMAC acquisition,
+  hidden command staging, pointer/memcpy negatives, and the bounded join.
+- Expanded the P1M-E device profile, SFR labels, stats invariant, and project
+  audit; regenerated two independent projects and updated normalized project
+  inventory through the guarded two-rebuild path.
+- Rewrote the canonical control-partition §9 and reconciled firmware
+  architecture, application Rx, FINDINGS, OPEN_QUESTIONS, ROADMAP, generated
+  artifact ownership, and `CORRECTIONS.md` (`CORR-028`–`CORR-030`).
+- Rebuilt and promoted the annotated Ghidra snapshot through the verified
+  `snapshot-project` lifecycle; no committed snapshot was daemon-opened.
+
+### Verification
+
+- `uv run --locked python tests/verify_motor_actuation_boundary.py` -> pass (58/58)
+- `uv run --locked python tests/verify_motor_safety_monitors.py` -> pass (56/56)
+- `uv run --locked python tests/verify_motor_calibration_handlers.py` -> pass (26/26)
+- `uv run --locked python tests/verify_p1m_device_profile.py` -> pass (317/317)
+- two independent full Ghidra rebuilds -> identical normalized inventories;
+  both exact at 5,921 functions / 179,223 instructions / 37,818 symbols /
+  1,376,576 mapped bytes / 14 memory blocks
+- `make verify-processor` -> pass; Stage-6 motor audit reports 16 call edges,
+  20 exact reference censuses, 0 failures
+- `make verify-project-parity` -> pass before snapshot promotion
+- `make verify-changed` -> pass (10 matched suites, including all new Stage-6 motor/profile suites)
+- `make verify-ghidra` -> pass (core + SLEIGH + processor audits + exact project parity; final doc-link suite 455/455)
+
+### Remaining blockers
+
+- None for the named Stage-6 static questions.
+- Proving how a valid authenticated steering command affects physical actuation
+  now requires dynamic correlation on an isolated provisioned bench; repeating
+  the same broad static join search without a new lead is low value.
+- External ADC pin/current-sensor assignment and OEM names for the monitor and
+  calibration channels remain outside the recovered static evidence.
+
+### Commit
+
+- Pending Stage 6 commit; immutable SHA will be recorded after final verification.

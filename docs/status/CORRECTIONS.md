@@ -446,3 +446,59 @@ the mistakes are not re-made.
   parses all 13 and asserts the complete observed language-tag set.
 - **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.2;
   TMS-013; `tests/verify_diagnostic_vocabulary.py`.
+
+### CORR-028 — Phase-sample rings misclassified as peripheral/SFR windows
+
+- **Wrong:** `0xFEEF81E0` and `0xFEEF8A20` were treated as indexed peripheral
+  result/SFR windows whose exact P1M-E module identity remained unknown.
+- **Right:** the P1M-E hardware manual maps `0xFEEF8000..0xFEEFFFFF` as 32 KiB
+  **Global RAM Bank A**. Firmware DMA descriptors at `0x312B0/0x312C0` pair
+  `ADCG0DIR00 @ 0xFFF91200` with destination `0xFEEF81E0`; descriptors at
+  `0x31378/0x31388` pair `ADCG1DIR00 @ 0xFFF92200` with `0xFEEF8A20`.
+  `0x5F5E0/0x5F68A` consume those 432-entry x32-bit rings. The adjacent DMAC
+  setup uses channel-master registers including `DM00CM @ 0xFFFF8100` and
+  `DM10CM @ 0xFFFF8120`.
+- **Impact:** closes the acquisition peripheral/source question and corrects the
+  address-space model. The exact external ADC pins represented by DIR00 remain
+  outside the static evidence.
+- **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md)
+  §9.1; `tests/verify_motor_actuation_boundary.py`;
+  `ghidra/scripts/verify/AssertMotorActuationBoundary.java`.
+
+### CORR-029 — Three "isolated safety interlocks" are registered monitor callbacks
+
+- **Wrong:** `0x43A78`, `0x43716`, and `0x438C6` were fully isolated
+  no-caller/no-callee safety interlocks, probably reached by an unrecovered RTE
+  function-pointer table; `0x43716/0x438C6` were described as following the
+  `0x11/0x22/0x33` return pattern of `0x43A78`.
+- **Right:** concrete CodeFlash callback tables are recovered. `0x43784` from
+  table `0x289EC` calls `0x43716`; `0x43934` from `0x28A20` calls `0x438C6`;
+  `0x43B16` from `0x28A54` calls `0x43A78` twice. They are three members of a
+  **nine-channel** family using `com_signal_deadline_monitor_c @ 0x69DEC` and
+  publishing `FEBE797C..7984`. `0x43716/0x438C6` return `0/0x5A`; their
+  wrappers translate into the monitor lifecycle vocabulary. Aggregate
+  `0x43F28` reaches event/status bookkeeping and debounced monitor `0xB9D36`;
+  no direct d/q or PWM write is recovered.
+- **Impact:** replaces an inferred safety-actuation role with the proved
+  plausibility/deadline/fault-monitor architecture. This does not claim the
+  monitor states can never participate indirectly in safety policy.
+- **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md)
+  §9.5; `data/motor_safety_monitors.csv`;
+  `tests/verify_motor_safety_monitors.py`.
+
+### CORR-030 — Remaining motor calibration handlers were called transition-only
+
+- **Wrong:** `0x32B80` and `0xB98BC` remained generic
+  calibration-transition-only handlers with unresolved runtime context.
+- **Right:** `0x32B80` is state `0x33` of the `0x33198` six-channel calibration
+  state machine and is reached through both CH0 transition (`0x5CC08`) and
+  steady (`0x5CE0C`) dispatch for version domains `0x512`/`0x600`.
+  `0xB98BC` is reached in TAUJ0 CH2 for current versions `0x200..0x522` through
+  transition wrapper `0xBEB44` and steady wrapper `0xBEBF6`, under outer cached
+  version/complement dispatcher `0x579B4`.
+- **Impact:** the two handlers now have concrete state/version/execution-domain
+  bounds. Their OEM calibration names and any relation to the missing
+  authenticated-command→d/q join are not invented.
+- **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md)
+  §9.6; `data/motor_calibration_handlers.csv`;
+  `tests/verify_motor_calibration_handlers.py`.

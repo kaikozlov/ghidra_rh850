@@ -6,22 +6,15 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Near-term (static, this repo)
 
-1. **Resolve the command-to-current-reference edge.** The independent d/q
-   current-control-to-TSG3-PWM path is recovered, but authenticated command
-   exports and snapshots have no recovered static consumer in the current
-   reference generator. Focus on computed/table-driven transfer and scheduler
-   handoffs around `0x37712`, not broad arithmetic-function naming. Canonical:
-   [../architecture/control-partition.md](../architecture/control-partition.md).
-2. **Resolve exact phase-sample acquisition SFR names.** The indexed
-   `0xFEEF81E0`/`0xFEEF8A20` result windows feed the current pipeline, but their
-   exact P1M-E module/register identity is bounded.
-3. **Semantic coverage long-tail.** Move `recovered` rows in
-   `data/semantic_coverage_ledger.csv` toward behaviorally understood where
-   they intersect security, diagnostics, or torque.
+1. **Semantic coverage long-tail.** Move `recovered` rows in
+   `data/semantic_coverage_ledger.csv` toward behaviorally understood only when
+   they intersect a concrete security, diagnostics, or torque lead. Stage 6
+   closed the previously named motor/safety static cluster; do not repeat a
+   broad command→d/q or phase-SFR search without new evidence.
 
 ## Requires a provisioned Sienna (dynamic)
 
-4. **Run the SecOC provisioned-unit experiment.** Filter NvM blocks 41/45/49,
+2. **Run the SecOC provisioned-unit experiment.** Filter NvM blocks 41/45/49,
    observe async completion, compare RAM mirror and post-write DataFlash,
    instrument ICU slot 4, validate candidates against synchronized CAN oracle
    data. Specified in
@@ -29,12 +22,12 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Requires Corolla artifacts
 
-5. **Confirm/deny the Sienna template on `8965F1208000` firmware.** MCU, SA
+3. **Confirm/deny the Sienna template on `8965F1208000` firmware.** MCU, SA
    implementation/secret location, payload format, and SecOC implementation.
    Direct field diagnostics are already mapped; do not repeat those probes.
    See [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md)
    for the structured checklist.
-6. **Test the separate 2023-US public-route specimen's DataFlash.** The CAN
+4. **Test the separate 2023-US public-route specimen's DataFlash.** The CAN
    oracle is already public and recovered (`0x00F` + protected-family
    `0x116`/`0x24D` on bus 1), and the complete offline analyzer is ready:
    all-window entropy ranking, known NvM physical validity, raw/XOR55/XORAA
@@ -44,21 +37,28 @@ What to investigate next, in rough priority order. Completed items move to
    required for the initial cryptographic test. Canonical:
    [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md),
    [../tooling/toyota-dataflash-analysis.md](../tooling/toyota-dataflash-analysis.md).
-7. **Populate the TSS 3.0 family matrix.** Extend
+5. **Populate the TSS 3.0 family matrix.** Extend
    `data/tss3_eps_variant_matrix.csv` as additional variant firmware becomes
    available. Canonical: [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).
 
 ## Tooling
 
-8. **Documentation site** (optional, after this reorganization). Material for
+6. **Documentation site** (optional, after this reorganization). Material for
    MkDocs: explicit navigation, section index pages, search. Do only after
    canonical ownership is stable — search over duplicated docs just makes the
    inconsistency easier to find.
-9. ~~**Link checking** in CI for `docs/` internal cross-references.~~ **Done** —
+7. ~~**Link checking** in CI for `docs/` internal cross-references.~~ **Done** —
    `tests/verify_doc_links.py` runs in `make verify`.
 
 ## Completed static investigations
 
+- **Motor-control/safety boundary (Stage 6, 2026-08-10).** Resolved the
+  phase-sample source as `ADCG0/1 DIR00 → DMAC → Global RAM A` rings, hardened
+  the authenticated-command→d/q search into a bounded static negative after
+  pointer/memcpy/RTE/hidden-command-branch censuses, recovered the former three
+  "isolated interlocks" as members of a nine-channel registered
+  plausibility/deadline monitor family, and bounded `0x32B80`/`0xB98BC` to their
+  CH0/CH2 version domains. Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.
 - **Application COM long-tail closure (2026-08-10).** Classified all 242 Rx
   signal IDs (145 positive extractions + 97 deterministic no-COM-extraction
   rows), recovered the post-packer Toyota checksum producer for Tx signals

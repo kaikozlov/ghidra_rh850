@@ -293,21 +293,20 @@ the TAUJ0 CH2 ISR and the foreground cyclic.
 
 ## 9. Motor-control calibration ingress
 
-Three hand-written OEM motor-control functions sit beneath calibration ingress,
-but the complete caller graph corrects an earlier overgeneralization: only
-`0x32B80` and `0xB98BC` remain calibration-transition-only. `0x47C3C` also has a
-steady TAUJ0 CH0 caller and is part of the per-tick phase-current pipeline.
+Three hand-written OEM motor-control/calibration functions sit beneath this
+application ingress. Stage 6 now bounds all three by their execution domains:
 
 | Function | Size | Runtime role | Calibration block |
 |---|---:|---|---|
-| `dual_motor_phase_current_conditioning` (`0x47C3C`) | 1632 B | Steady and transition CH0 phase-current conditioning with offset/gain multiplication, saturation, and missing-phase reconstruction | CodeFlash `0x1875x` |
-| `motor_coord_transform_calib_handler` (`0x32B80`) | 1560 B | Calibration-transition handler; exact runtime consumer semantics remain bounded | CodeFlash `0x3103x` |
-| `motor_rotor_observer_calib_handler` (`0xB98BC`) | 1040 B | Calibration-transition handler with atan2/sqrt, interpolation, and DTC state | CodeFlash `0x1A12x-0x1A15x` |
+| `dual_motor_phase_current_conditioning` (`0x47C3C`) | 1632 B | Steady and transition TAUJ0 CH0 phase-current conditioning with offset/gain multiplication, saturation, and missing-phase reconstruction | CodeFlash `0x1875x` |
+| `motor_coord_transform_calib_handler` (`0x32B80`) | 1560 B | State `0x33` of `0x33198`; reached by CH0 transition and steady dispatch when version domain is `0x512` or `0x600` | CodeFlash `0x3103x` |
+| `motor_rotor_observer_calib_handler` (`0xB98BC`) | 1040 B | Observer/state recalculation in TAUJ0 CH2 version domain `0x200..0x522`, reached through transition `0xBEB44` and steady `0xBEBF6` wrappers | CodeFlash `0x1A12x-0x1A15x` |
 
-The runtime current-control and TSG3 PWM chain is canonical in
-[../architecture/control-partition.md](../architecture/control-partition.md)
-§"Independent phase-current control to physical PWM boundary". CORR-016 records
-the superseded calibration-only classification.
+The runtime acquisition/current-control/TSG3 PWM chain and the version-domain
+proof are canonical in [../architecture/control-partition.md](../architecture/control-partition.md)
+§9 and `data/motor_calibration_handlers.csv`. CORR-016 records the earlier
+`0x47C3C` correction; Stage-6 corrections record the remaining stale handler
+and phase-acquisition interpretations.
 
 ## 10. Hardware register access helper
 

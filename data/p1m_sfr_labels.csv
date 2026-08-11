@@ -57,6 +57,15 @@ address,name,size,access,comment
 0xFFD6203C,FCU_CMD_SEQUENCE_2,4,rw,FCU command sequence slot 2 (alternate sequence)
 0xFFD62040,FKEY,4,w,FCU enable key register; write 0xA5 before FCU command sequences
 0xFFD62044,FSTS,1,r,FCU status readback; polled after each command sequence
+# ADCG result-source registers and DMAC channel-master settings used by the
+# TAUJ0 CH0 phase-sample acquisition path. P1M-E manual register table maps
+# ADCG0DIR00/ADCG1DIR00 at FFF91200/FFF92200 and DM00CM/DM10CM at
+# FFFF8100/FFFF8120. Firmware DMA descriptors pair those ADCG sources with
+# Global RAM destinations FEEF81E0/FEEF8A20.
+0xFFF91200,ADCG0DIR00,4,r,ADCG0 data supplementary information register 00; DMA source for sample ring
+0xFFF92200,ADCG1DIR00,4,r,ADCG1 data supplementary information register 00; DMA source for sample ring
+0xFFFF8100,DM00CM,4,rw,DMAC0 channel 0 channel master setting register
+0xFFFF8120,DM10CM,4,rw,DMAC1 channel 0 channel master setting register
 # TSG3 motor-control timer extended HT-PWM compare registers. P1M-E manual
 # section 25.1.2 gives bases FFE70000/FFE71000; sections 25.3.48-50 define
 # 32-bit U/V/W extended compare registers at offsets 0x188/0x184/0x180.

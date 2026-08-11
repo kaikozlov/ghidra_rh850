@@ -135,11 +135,36 @@ paths = ["tools/decode_icus_key_update_trace.py"]
 
 [suite.motor_actuation_boundary]
 tests = ["tests/verify_motor_actuation_boundary.py"]
-paths = ["data/motor_actuation_path.csv"]
+paths = [
+  "data/motor_actuation_path.csv",
+  "docs/architecture/control-partition.md",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+]
+
+[suite.motor_safety_monitors]
+tests = ["tests/verify_motor_safety_monitors.py"]
+paths = [
+  "data/motor_safety_monitors.csv",
+  "docs/architecture/control-partition.md",
+  "docs/architecture/firmware-architecture.md",
+]
+
+[suite.motor_calibration_handlers]
+tests = ["tests/verify_motor_calibration_handlers.py"]
+paths = [
+  "data/motor_calibration_handlers.csv",
+  "docs/architecture/control-partition.md",
+  "docs/communications/application-rx.md",
+  "ghidra/scripts/annotate/AnnotateLargeFunctions.java",
+]
 
 [suite.p1m_device_profile]
 tests = ["tests/verify_p1m_device_profile.py"]
-paths = ["data/p1m_sfr_labels.csv"]
+paths = [
+  "data/p1m_sfr_labels.csv",
+  "ghidra/scripts/import/ApplyP1MDeviceProfile.java",
+  "tools/verify_ghidra_stats.py",
+]
 
 [suite.payload_gate]
 tests = ["tests/verify_payload_gate.py"]

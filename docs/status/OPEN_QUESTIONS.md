@@ -22,26 +22,15 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   list/per-ID/detail structure is recovered, but the OEM service name and exact
   meanings of the event catalogue's encoded upper ID bits and record-kind
   values remain unknown.
-- **Authenticated command to d/q current reference.** The high-rate
-  phase-current-control-to-TSG3-PWM chain is recovered, and the d/q-reference
-  producer cone is now enumerated clean two levels deep: `0x37712` builds
-  `0xFEBE6D28/6D2A` from `0xFEBE6D4E/6D50/6D70/6D7E/6D52/6D54`, whose producers
-  (`0x3795E/0x37B5A/0x37CD4`) reference only `0xFEBE5F**/6D**`. No
-  command-derived location (`0xFEBEBF84/0xFEBEBF9A/0xFEBEBFA2/0xFEBEAE16` or
-  snapshot copies) appears in the cone; the apparent `autosar_os_task_signal_dispatch`
-  (entry `0x58404`) writer at instruction `0x5AE28` is a buffer-clear idiom, not a producer.
-  So no static reader joins the conditioned command to the current references. If the join exists it is
-  purely runtime/computed (AUTOSAR RTE outer-loop or function-pointer dispatch,
-  invisible to the static call graph). Consequently a correctly signed `0x2E4` is
-  SecOC-accepted and conditioned but not statically provable to reach motor
-  actuation — signing is necessary but not statically sufficient; confirm on a bench.
-- **Phase-sample acquisition peripheral names.** Firmware reads six indexed
-  result locations in each `0xFEEF81E0` and `0xFEEF8A20` window and clears the
-  consumed low halfwords. Their use as upstream phase-current samples is
-  recovered; exact P1M-E module/register names remain bounded.
-- **Remaining motor calibration cluster.** `0x47C3C` is behaviorally recovered
-  as the steady phase-current conditioner. The separate `0x32B80` and
-  `0xB98BC` calibration-transition handlers remain only structurally bounded.
+- **Dynamic authenticated-command actuation discriminator.** Stage 6 closes
+  the static join search as a bounded negative: the complete `FEBE6D00..6DFF`
+  writer/xref census, producer cone, absolute-pointer scan, generic-memcpy
+  census, RTE-copy direction audit, and deeper `BFA2→C144→C170→C1B8/AE16/AE6E`
+  command branch reveal no transfer into `FEBE6D28/6D2A`. This does not prove
+  physical independence. A provisioned isolated bench should correlate a valid
+  signed `0x2E4` command with d/q-reference/current/PWM state to determine the
+  runtime coupling. Static broad searching should not be repeated without a new
+  concrete lead. Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3.
 
 ## SecOC
 
@@ -180,11 +169,11 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   pattern-bounded results, not whole-image negatives: the sweep does not
   exclude ciphers on different tables, stores through other addressing modes,
   or subsystems in unsampled functions. The sampled functions cluster into
-  seven clear subsystem bands. The highest-value remaining unknown is the
-  motor-control/safety cluster at `0x30000`–`0x4C000` and
-  `0xB0000`–`0xC0000` — the d/q current-reference join and the isolated safety
-  interlocks (`0x43A78`/`0x43716`/`0x438C6`) called via function-pointer tables.
-  Closing this is a long-tail effort, not a single task.
+  seven clear subsystem bands. Stage 6 has now closed the named motor/safety
+  static leads: the d/q join search is a bounded negative, ADCG/DMAC sample
+  acquisition is exact, and the former isolated interlocks resolve to a
+  nine-channel registered plausibility/deadline monitor family. Remaining
+  semantic-coverage work should be lead-driven rather than another broad sweep.
 - **RFP/P1M-E serial-protocol transfer.** The generic RV40F **host-side static
   work is closed** (RFP-001..008): all 52 ordinary command IDs are censused,
   both connection/setup variants are recovered, the 8-byte `GetDeviceType`

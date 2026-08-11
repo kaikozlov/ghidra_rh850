@@ -140,8 +140,9 @@ public class AnnotateLargeFunctions extends GhidraScript {
             "multiple FFFEEAxx port configuration registers.");
 
         // ── Hand-written OEM motor control ─────────────────────────────
-        // 0x47C3C has transition and steady CH0 dispatchers; the two following
-        // functions remain calibration-transition handlers.
+        // 0x47C3C has transition and steady CH0 dispatchers. Stage 6 further
+        // recovered the exact version-domain dispatch around the two calibration
+        // handlers below; neither is "transition-only".
 
         renameFunction(0x47C3CL, "dual_motor_phase_current_conditioning",
             "Hand-written OEM dual-motor 3-phase current conditioning step (1632 bytes). " +
@@ -158,15 +159,18 @@ public class AnnotateLargeFunctions extends GhidraScript {
             "and saturation, d/q axis decomposition pattern, Q15 rescale (/ 0x8000), " +
             "low-pass filter with coefficient from calibration at CodeFlash 0x31044. " +
             "Outputs 12 transformed channels + 3 filtered values. Calibration block " +
-            "at 0x3103x. Called on calibration version change from TAUJ0 CH0 ISR.");
+            "at 0x3103x. Reached as state 0x33 of the 0x33198 six-channel calibration " +
+            "state machine; CH0 transition/steady dispatchers select that state machine " +
+            "for version domains 0x512 and 0x600.");
 
         renameFunction(0xB98BCL, "motor_rotor_observer_calib_handler",
             "Hand-written OEM rotor position/speed observer calibration handler (1040 bytes). " +
             "Heavy calibration dependence: ~20 values from CodeFlash 0x1A12x-0x1A15x " +
             "(thresholds, gains, filter coefficients, limits). Calls atan2/sqrt (0xCCCAx), " +
             "abs/clip (0xCBABA), interpolation (0xCC638), and DTC setters. Outputs observer " +
-            "state to 0xFEBEB5C4-0xFEBEB5EC. Called on calibration version change from " +
-            "TAUJ0 CH2 ISR via 0xFDD18/0xFDD2C.");
+            "state to 0xFEBEB5C4-0xFEBEB5EC. Reached from TAUJ0 CH2 in version domain " +
+            "0x200..0x522 through both transition wrapper 0xBEB44 (via 0xFDD18) and " +
+            "steady wrapper 0xBEBF6 (via 0xFDD2C).");
 
         // ── System mode coordination ──────────────────────────────────
 
