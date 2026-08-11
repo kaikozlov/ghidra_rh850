@@ -38,11 +38,113 @@
     "exception": "files starting with printable ASCII (;, [, etc.) are plaintext"
   },
   "artifacts": {
+    "IT3ACNK.dll": {
+      "path": "Techstream/bin/IT3ACNK.dll",
+      "sha256": "801ac26d0982b7fbf25ac8607d7bfc23d0dbc6229d487b3d2fb55a804dbc4098",
+      "size": 45056,
+      "product_version": "1, 28, 10, 0",
+      "file_version": "1, 28, 10, 0",
+      "purpose": "Native IT3 crypto exports and representation-aware constant/reference analysis",
+      "claims_tests": ["TMS-008", "TMS-012", "verify_techstream_crypto_inventory.py"]
+    },
+    "IT3UtilityNK.dll": {
+      "path": "Techstream/bin/IT3UtilityNK.dll",
+      "sha256": "d973ddd452c3405fa38691bebe9b3a809c694e8c2159c28b685082ff168e3653",
+      "size": 5816320,
+      "product_version": "1, 56, 12, 0",
+      "file_version": "1, 56, 12, 0",
+      "purpose": "Native Techstream utility and MACKey protocol bridge",
+      "claims_tests": ["TMS-011", "TMS-014", "verify_techstream_mackey.py"]
+    },
+    "IT3UtilityRevNK.dll": {
+      "path": "Techstream/bin/IT3UtilityRevNK.dll",
+      "sha256": "8109eac3b3f163111a258f92f87e5e60f114f2da16187307cc9369e0b18c4f0b",
+      "size": 939008,
+      "product_version": "1.25.10.0",
+      "file_version": "1.25.10.0",
+      "purpose": "Managed MACKey online workflow and response processing",
+      "claims_tests": ["TMS-011", "TMS-014", "verify_techstream_mackey.py"]
+    },
+    "IT3UtilityNeoNK.dll": {
+      "path": "Techstream/bin/IT3UtilityNeoNK.dll",
+      "sha256": "1953edf8821af8c7df612c383c756b87febb3ce7ba055744305ca5db4c2f37a6",
+      "size": 274432,
+      "product_version": "1, 9, 10, 0",
+      "file_version": "1, 9, 10, 0",
+      "purpose": "IT3 Neo utility host for the directly referenced bCVa constant",
+      "claims_tests": ["TMS-008", "TMS-012", "verify_techstream_crypto_inventory.py"]
+    },
+    "Techstream.exe": {
+      "path": "Techstream/bin/Techstream.exe",
+      "sha256": "e6b7ab884c99a941d603251fb856a77a515639fdcd1d266e875cbd1abceb5e54",
+      "size": 35852288,
+      "product_version": "18, 0, 0, 3",
+      "file_version": "18, 0, 0, 3",
+      "purpose": "Primary diagnostic UI/controller and Techstream configuration consumer",
+      "claims_tests": ["TMS-001", "TMS-006", "TMS-011", "verify_techstream_mackey.py"]
+    },
+    "KgpDataCtrl.dll": {
+      "path": "Techstream/bin/KgpDataCtrl.dll",
+      "sha256": "e5235bc0c241c6a450fe461031eed0915675032b1db994bd54d98818fac88aa9",
+      "size": 721008,
+      "product_version": "61, 0, 10, 0",
+      "file_version": "61, 0, 10, 0",
+      "purpose": "DDB format-1/format-2 table factories and record consumers",
+      "claims_tests": ["TMS-013", "TMS-015", "verify_techstream_ddb_residuals.py"]
+    },
+    "DataCompress_DT.DLL": {
+      "path": "Techstream/bin/DataCompress_DT.DLL",
+      "sha256": "469d28871f46c291e8772576965c902ee2996246e9765e0c409e042bcda4eed1",
+      "size": 49152,
+      "product_version": "8, 0, 10, 0",
+      "file_version": "8, 0, 10, 0",
+      "purpose": "DDB payload decompression dependency",
+      "claims_tests": ["TMS-013", "TMS-015", "verify_techstream_ddb_residuals.py"]
+    },
+    "CUWAccessRKS.dll": {
+      "path": "Calibration Update Wizard/CUWAccessRKS.dll",
+      "sha256": "f5628faf55f987233b07105ddab493abd0de734825b8ad66fb1a7d6d9dcad7a1",
+      "size": 16384,
+      "product_version": "1.2.0.0",
+      "file_version": "1.2.0.0",
+      "purpose": "Native reprogramming-key-service request/response bridge",
+      "claims_tests": ["TMS-009", "verify_techstream_rks.py"]
+    },
+    "CUWAccessRKSWrapper.dll": {
+      "path": "Calibration Update Wizard/CUWAccessRKSWrapper.dll",
+      "sha256": "dfce5f1043abf21b9522decdb7306812bb84948607a94271968e79374f14b457",
+      "size": 38912,
+      "product_version": "1.1.0.0",
+      "file_version": "1.1.0.0",
+      "purpose": "Managed RKS XML/browser wrapper",
+      "claims_tests": ["TMS-009", "verify_techstream_rks.py"]
+    },
     "UtilityExNK2.dll": {
       "path": "Techstream/bin/UtilityExNK2.dll",
       "sha256": "8d9623f028f23876f69cb02baa10e1881c01fa01a4f906013bd36266f7e0fb33",
       "size": 1425408,
-      "role": "Native MACKey vehicle-protocol companion reached by IT3UtilityNK.dll Ex2MAC_01 imports"
+      "product_version": "1, 56, 12, 0",
+      "file_version": "1, 56, 12, 0",
+      "purpose": "Native MACKey vehicle protocol and Central Gateway key host",
+      "claims_tests": ["TMS-008", "TMS-011", "TMS-014", "verify_techstream_mackey.py", "verify_techstream_crypto_inventory.py"]
+    },
+    "DS2ComNK.dll": {
+      "path": "Techstream/bin/DS2ComNK.dll",
+      "sha256": "266a69d9986d1d7620285424002c4e6b457e775ca779e39db2994fb260c1a4ac",
+      "size": 290816,
+      "product_version": "1, 24, 10, 0",
+      "file_version": "1, 24, 10, 0",
+      "purpose": "Legacy diagnostic command host for Central Gateway AES material",
+      "claims_tests": ["TMS-007", "TMS-008", "verify_techstream_crypto_inventory.py"]
+    },
+    "UtilityEx2TY.dll": {
+      "path": "Techstream/bin/UtilityEx2TY.dll",
+      "sha256": "79fc495c68eb099a7ebc0d1eefe0eafd80101ac0bc09a58d3f603ed556c84762",
+      "size": 1077248,
+      "product_version": "1, 138, 12, 0",
+      "file_version": "1, 138, 12, 0",
+      "purpose": "Runtime diagnostic host for FUKUMORI and Central Gateway AES material",
+      "claims_tests": ["TMS-008", "TMS-012", "verify_techstream_crypto_inventory.py"]
     },
     "ptshim32.dll": {
       "path": "Techstream/bin/ptshim32.dll",
@@ -68,13 +170,19 @@
       "path": "Calibration Update Wizard/Cuw.exe",
       "sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
       "size": 4065080,
-      "role": "Native Calibration Update Wizard executable; constructs the RKS request buffer and serializes the 16-byte SeedValue input"
+      "product_version": "8.35.0.1",
+      "file_version": "8.35.0.1",
+      "purpose": "Native Calibration Update Wizard executable; constructs RKS input and selects writer objects",
+      "claims_tests": ["TMS-004", "TMS-007", "TMS-009", "TMS-010", "verify_techstream_rks.py", "verify_techstream_cuw_writer_routes.py"]
     },
     "CommandCommon.dll": {
       "path": "Techstream/bin/CommandCommon.dll",
       "sha256": "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7",
       "size": 1028096,
-      "role": "UDS command implementations including all SecurityAccess variants",
+      "product_version": "59, 0, 12, 0",
+      "file_version": "59, 0, 12, 0",
+      "purpose": "UDS command implementations including all SecurityAccess variants and constructed AES keys",
+      "claims_tests": ["TMS-003", "TMS-008", "TMS-012", "verify_techstream_crypto_inventory.py"],
       "source_paths": [
         "C:\\Files\\Develop\\Git\\DiagTool\\KGProject\\Control\\Command\\Common\\SecurityAccess.cpp",
         "C:\\Files\\Develop\\Git\\DiagTool\\KGProject\\Control\\Command\\Common\\SecurityAccessAES128.cpp",
@@ -93,13 +201,119 @@
       "path": "Calibration Update Wizard/TCUWControlCommPhase.dll",
       "sha256": "8c8d03d3e8ff9b32dcccf0b5ef5249304d720f19aed070b18894f1a78a3fabca",
       "size": 89600,
-      "role": "CUW communication-phase parameter engine (timing, addresses, security config)"
+      "role": "CUW communication-phase parameter engine (timing, addresses, security config)",
+      "product_version": "1.0.0018.0",
+      "file_version": "1.0.0018.0",
+      "purpose": "Dynamic writer factory: selects encoded parameter row, loads writer DLL, and resolves its entry point",
+      "claims_tests": ["TMS-004", "TMS-007", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWParameterForVC.dll": {
+      "path": "Calibration Update Wizard/TCUWParameterForVC.dll",
+      "sha256": "e68ebd863f1e2c9e77bacfcfaf1ff34af28cfeb284334340ead1dc87f100f6d3",
+      "size": 30208,
+      "product_version": "1.0.0003.0",
+      "file_version": "1.0.0003.0",
+      "purpose": "Decoder and CSV accessor for CUW protocol/factory parameter INIs",
+      "claims_tests": ["TMS-004", "TMS-007", "verify_techstream_cuw_writer_routes.py"]
     },
     "TCUWCanCommonPrepareWriter.dll": {
       "path": "Calibration Update Wizard/TCUWCanCommonPrepareWriter.dll",
       "sha256": "0dc5cd195f2febe8b4140bb1ef8a06aeebe3eb0bbc0c989077fc76b2e05a5e31",
       "size": 24064,
-      "role": "CUW CAN prepare-write phase (session control + SecurityAccess)"
+      "product_version": "1.0.0008.0",
+      "file_version": "1.0.0008.0",
+      "purpose": "CUW common CAN prepare-write phase (session control and SecurityAccess)",
+      "claims_tests": ["TMS-004", "TMS-007", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWCalibrationFile.dll": {
+      "path": "Calibration Update Wizard/TCUWCalibrationFile.dll",
+      "sha256": "8ea3d0e516056040456a79c700a2b46e9ba2273e42c415cdf285f6232e839a96",
+      "size": 43520,
+      "product_version": "1.0.0019.0",
+      "file_version": "1.0.0019.0",
+      "purpose": "Calibration metadata, node, nonce, seed-key, and writer-selection getters",
+      "claims_tests": ["TMS-004", "TMS-007", "TMS-010", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWCanCommonFlashWriter.dll": {
+      "path": "Calibration Update Wizard/TCUWCanCommonFlashWriter.dll",
+      "sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "size": 27136,
+      "product_version": "1.0.0007.0",
+      "file_version": "1.0.0007.0",
+      "purpose": "Common CAN flash-writing and nonce/seed-key transport primitives",
+      "claims_tests": ["TMS-010", "verify_techstream_layerb.py", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWCanReproStdPrepareWriter.dll": {
+      "path": "Calibration Update Wizard/TCUWCanReproStdPrepareWriter.dll",
+      "sha256": "ae2d15b8c55027dab1e54343fa179829e41ac69d0c9efa7b7feb1f8d6024022b",
+      "size": 19968,
+      "product_version": "1.0.0005.0",
+      "file_version": "1.0.0005.0",
+      "purpose": "Standard/reproduction UDS prepare-writer candidate",
+      "claims_tests": ["TMS-004", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWCanReproStdFlashWriter.dll": {
+      "path": "Calibration Update Wizard/TCUWCanReproStdFlashWriter.dll",
+      "sha256": "82b99c43a2d30ecddb57942eb82019a0f4b997a55e569f8055f648a0f54ea4ef",
+      "size": 25088,
+      "product_version": "1.0.0006.0",
+      "file_version": "1.0.0006.0",
+      "purpose": "Standard/reproduction UDS flash-writer candidate",
+      "claims_tests": ["TMS-004", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWCanUnifiedPrepareWriter.dll": {
+      "path": "Calibration Update Wizard/TCUWCanUnifiedPrepareWriter.dll",
+      "sha256": "0314ca168c63342f4d4e26251ae9e8c700dae35b7144c63254296fc331375db8",
+      "size": 17408,
+      "product_version": "1.0.0010.0",
+      "file_version": "1.0.0010.0",
+      "purpose": "Unified-protocol prepare writer",
+      "claims_tests": ["TMS-004", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWCanUnifiedFlashWriter.dll": {
+      "path": "Calibration Update Wizard/TCUWCanUnifiedFlashWriter.dll",
+      "sha256": "091eb414be13fd24cc0a9c52853e6e02a3b417c5851c765d2d45263f475718a1",
+      "size": 18432,
+      "product_version": "1.0.0004.0",
+      "file_version": "1.0.0004.0",
+      "purpose": "Unified-protocol flash writer",
+      "claims_tests": ["TMS-004", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWCanUnifiedFlashWriterEachArea.dll": {
+      "path": "Calibration Update Wizard/TCUWCanUnifiedFlashWriterEachArea.dll",
+      "sha256": "95c5ec26bc10c5227bc830c142eb86093aa3709606b108b33051f9b982f9ae3e",
+      "size": 17408,
+      "product_version": "1.0.0002.0",
+      "file_version": "1.0.0002.0",
+      "purpose": "Unified per-area flash writer",
+      "claims_tests": ["TMS-004", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWCanSecurityVFORESTFlashWriter.dll": {
+      "path": "Calibration Update Wizard/TCUWCanSecurityVFORESTFlashWriter.dll",
+      "sha256": "905ae71d648161b3f5d6c188dc3a2d7a147ae6b90694e2f8e80b0ffa7a260645",
+      "size": 20480,
+      "product_version": "1.0.0002.0",
+      "file_version": "1.0.0002.0",
+      "purpose": "Security VFOREST flash writer and common key-material transport consumer",
+      "claims_tests": ["TMS-010", "verify_techstream_layerb.py", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWP4CanVFORESTFlashWriter.dll": {
+      "path": "Calibration Update Wizard/TCUWP4CanVFORESTFlashWriter.dll",
+      "sha256": "0721243b7f9649b72b830a0a2a58b44b81b3aed681a351ef0e8ae14cc75c12b0",
+      "size": 19968,
+      "product_version": "1.0.0003.0",
+      "file_version": "1.0.0003.0",
+      "purpose": "Phase-4 VFOREST flash writer contrast path",
+      "claims_tests": ["TMS-010", "verify_techstream_cuw_writer_routes.py"]
+    },
+    "TCUWP5CanSecurityPowerTrainPrepareWriter.dll": {
+      "path": "Calibration Update Wizard/TCUWP5CanSecurityPowerTrainPrepareWriter.dll",
+      "sha256": "07c6f2e162e347cacd0acea92f4925309f1c4e658456d0e99068034c3c1212b1",
+      "size": 16384,
+      "product_version": "1.0.0001.0",
+      "file_version": "1.0.0001.0",
+      "purpose": "Phase-5 security prepare-writer contrast path",
+      "claims_tests": ["TMS-004", "verify_techstream_cuw_writer_routes.py"]
     },
     "TCUWUnifiedUtils.dll": {
       "path": "Calibration Update Wizard/TCUWUnifiedUtils.dll",
@@ -132,25 +346,75 @@
       "path": "Techstream/NA/DB/EPS_P4DK3.ddb",
       "sha256": "3ed3d2a1d4f72e32fcc98289508e580d8657637c11ef0ec30940548a4dafbbf6",
       "size": 6588,
-      "description": "EPS Phase-4 CAN diagnostic database (Denso proprietary binary format)"
+      "description": "EPS Phase-4 CAN diagnostic database (Denso proprietary binary format)",
+      "purpose": "Representative P4 steering diagnostic catalog and firmware-vocabulary comparison",
+      "claims_tests": ["TMS-013", "verify_diagnostic_vocabulary.py"]
     },
     "Security_P4.ddb": {
       "path": "Techstream/NA/DB/Security_P4.ddb",
       "sha256": "d642840c0899252b4404650aa4dd96da11bdacd4a48dc8c63e366979d681037e",
       "size": 13084,
-      "description": "Phase-4 security-system diagnostic database; Stage-3 residual audit separates alarm/event vocabulary from cryptographic SecurityAccess semantics"
+      "description": "Phase-4 security-system diagnostic database; Stage-3 residual audit separates alarm/event vocabulary from cryptographic SecurityAccess semantics",
+      "purpose": "Bounded Security_P4 residual and section-semantic evidence",
+      "claims_tests": ["TMS-013", "verify_techstream_ddb_residuals.py"]
     },
     "Toyota.ddb": {
       "path": "Techstream/NA/DB/Toyota.ddb",
       "sha256": "63ee18391421a7b02996eef282bc8ea3251889981d9cf9e1722e89f4952cb19e",
       "size": 13646849,
-      "description": "Toyota master ECU enumeration database; distinct format-type-1 schema retained as a bounded high-value routing/identity residual"
+      "description": "Toyota master ECU enumeration database; distinct format-type-1 schema retained as a bounded high-value routing/identity residual",
+      "purpose": "North-American master ECU routing database",
+      "claims_tests": ["TMS-013", "verify_techstream_ddb_residuals.py"]
+    },
+    "Toyota_EU.ddb": {
+      "path": "Techstream/EU/DB/Toyota.ddb",
+      "sha256": "284041de59b6932e2ab1e5b299bb22f7f006463760379566fabc46c7107b309b",
+      "size": 7841216,
+      "purpose": "European master ECU routing database",
+      "claims_tests": ["TMS-013", "verify_techstream_ddb_residuals.py"]
+    },
+    "Toyota_JP.ddb": {
+      "path": "Techstream/JP/DB/Toyota.ddb",
+      "sha256": "0440d1f062eb3ba687d9e67fa2d4f964fff730a53fd9d7a4adc62e9c31321a86",
+      "size": 11044987,
+      "purpose": "Japanese master ECU routing database",
+      "claims_tests": ["TMS-013", "verify_techstream_ddb_residuals.py"]
+    },
+    "M_English.ddb": {
+      "path": "Techstream/NA/DB/M_English.ddb",
+      "sha256": "d88b131e2f56c71cdb60b353f410f877e0889635ec2b5df0becf4e0002aebf96",
+      "size": 3003919,
+      "purpose": "Canonical English DDB string database for DTC/failure-type semantics",
+      "claims_tests": ["TMS-013", "TMS-015", "verify_techstream_dtc_failure_types.py"]
+    },
+    "EMPS_P5.ddb": {
+      "path": "Techstream/NA/DB/EMPS_P5.ddb",
+      "sha256": "1e5ffc4f998570458fa86dd0d563949006f9e0781f15d118d01e80656fadd199",
+      "size": 49042,
+      "purpose": "Primary P5 steering DTC/failure-type and semantic-section evidence",
+      "claims_tests": ["TMS-015", "verify_techstream_dtc_failure_types.py"]
+    },
+    "EMPS2_P5.ddb": {
+      "path": "Techstream/NA/DB/EMPS2_P5.ddb",
+      "sha256": "e80d722f3b80077e3f7bdc4b815c2035b21a51cefb6cd26dc6de3ada20939312",
+      "size": 44790,
+      "purpose": "Secondary P5 steering DTC/failure-type and semantic-section evidence",
+      "claims_tests": ["TMS-015", "verify_techstream_dtc_failure_types.py"]
+    },
+    "PCS2_P5.ddb": {
+      "path": "Techstream/NA/DB/PCS2_P5.ddb",
+      "sha256": "69a74be891efe19208ad862bfd21b3a63ee1b9bcd596a48bea6f4173c2815f4b",
+      "size": 14304,
+      "purpose": "Comparative P5 U023A87 failure-type evidence",
+      "claims_tests": ["TMS-015", "verify_techstream_dtc_failure_types.py"]
     },
     "EPS_CAN_P4DK.ddb": {
       "path": "Techstream/NA/DB/EPS_CAN_P4DK.ddb",
       "sha256": "e922e3ea4702537d7e069c874f715661131e800b17d8a7ae7a2c5cb2dd62f580",
       "size": 10724,
-      "description": "EPS Phase-4 CAN functional diagnostic database"
+      "description": "EPS Phase-4 CAN functional diagnostic database",
+      "purpose": "Representative P4 steering functional-diagnostic catalog and vocabulary comparison",
+      "claims_tests": ["TMS-013", "verify_diagnostic_vocabulary.py"]
     }
   }
 }

@@ -209,12 +209,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   reads, session transitions, and programming handoff against SEC-BOOT-003,
   SEC-APP-001, and DIAG-APP-001/003. See
   [../tooling/techstream.md](../tooling/techstream.md) §6.
-- **Sienna EPS reflash calibration-file key.** TMS-007 already resolves the
-  host-side distinction: `FUKUMORIYOSIYAMA` is ADS/PCS runtime SA, while the EPS
-  CUW writer reads its seed/key material from `CalibrationFile::GetSeedKey()`.
-  The remaining artifact need is the matching Sienna EPS `.cuw`: obtain it and
-  extract the `SeedKey`/`ServiceAuthKey` fields to recover the actual EPS reflash
-  key for that calibration.
+- **Sienna EPS CUW route and calibration material.** TMS-004/TMS-007 recover the
+  V18 controller's decoded parameter-row factory and the standard/unified
+  command builders, but the installation contains no `.cuw` or `.cal` payload.
+  Obtain the matching `8965B4512000` payload or a labeled transcript to select
+  the exact factory identifier and recover its `ServiceAuthKey`, `ECUAuthKey`,
+  `SeedKey`, `Nonce`, `OffsetAddress`, download ranges, data-format fields, and
+  routine choices. Firmware support for the same UDS SIDs/DIDs is only a
+  bounded compatibility join, not proof of which host builder was selected.
 - **RKS authorization vs. EPS reflash (Layer A).** The TIS portal RKS flow
   (TMS-009) is a CUW-side VIN+license permission gate, distinct from the
   cal-file crypto key (Layer B). Open: whether it is *mandatory* for every EPS

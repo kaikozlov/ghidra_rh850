@@ -190,8 +190,18 @@ paths = [
 ]
 
 [suite.memory_safety]
-tests = ["tests/verify_memory_safety.py"]
-paths = ["docs/security/memory-safety-audit.md"]
+tests = [
+  "tests/verify_memory_safety.py",
+  "tests/verify_memory_safety_mutations.py",
+]
+paths = [
+  "docs/security/memory-safety-audit.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "data/memory_safety_proof_matrix.csv",
+  "tools/memory_safety_semantics.py",
+  "ghidra/scripts/verify/AssertMemorySafetyPaths.java",
+]
 
 [suite.ram_overlays]
 tests = ["tests/verify_ram_overlays.py"]
@@ -212,7 +222,54 @@ paths = ["data/scheduler_periods.csv"]
 
 [suite.semantic_coverage]
 tests = ["tests/verify_semantic_coverage.py"]
-paths = ["data/semantic_coverage_ledger.csv", "data/semantic_coverage_summary.json"]
+paths = [
+  "data/semantic_coverage_ledger.csv",
+  "data/semantic_coverage_summary.json",
+  "data/semantic_review_status.csv",
+  "ghidra/scripts/verify/ExportSemanticCoverageLedger.java",
+  "tools/apply_semantic_review_status.py",
+  "tools/generate_semantic_coverage_ledger.sh",
+]
+
+[suite.semantic_coverage_live]
+tests = ["tests/verify_semantic_coverage_live.py"]
+paths = [
+  "data/semantic_coverage_ledger.csv",
+  "data/semantic_coverage_summary.json",
+  "data/semantic_review_status.csv",
+  "ghidra/scripts/verify/ExportSemanticCoverageLedger.java",
+  "tools/apply_semantic_review_status.py",
+  "tools/generate_semantic_coverage_ledger.sh",
+]
+
+[suite.semantic_interest_ranking]
+tests = ["tests/verify_semantic_interest_ranking.py"]
+paths = [
+  "data/semantic_coverage_ledger.csv",
+  "data/semantic_review_status.csv",
+  "data/generated/semantic_interest_ranking.csv",
+  "tools/generate_semantic_interest_ranking.py",
+  "docs/status/STATIC_ANALYSIS_SWEEP_2026-08-10.md",
+]
+
+[suite.function_discovery]
+tests = ["tests/verify_function_discovery.py"]
+paths = [
+  "data/outside_function_candidates.csv",
+  "data/outside_function_summary.json",
+  "data/function_discovery_reviewed_clusters.csv",
+  "data/recovered_callback_tables.csv",
+  "ghidra/scripts/seed/SeedRecoveredCallbackTables.java",
+  "ghidra/scripts/seed/SeedDispatchProvenFunctionTables.java",
+  "ghidra/scripts/seed/SeedBoundedPointerWrappers.java",
+  "ghidra/scripts/seed/SeedDirectCallTargets.java",
+  "ghidra/scripts/verify/AssertRecoveredCallbackTables.java",
+  "ghidra/scripts/verify/AssertFunctionDiscoveryFloor.java",
+  "ghidra/scripts/verify/ExportOutsideFunctionCandidates.java",
+  "tools/apply_function_discovery_adjudications.py",
+  "tools/generate_outside_function_candidates.sh",
+  "tools/rebuild_project.sh",
+]
 
 [suite.secoc_application]
 tests = ["tests/verify_secoc_application.py"]
@@ -263,6 +320,30 @@ tests = ["tests/verify_techstream_mackey.py"]
 paths = ["docs/security/mackey-registration.md", "docs/tooling/techstream.md", "tools/techstream/inspect_dotnet_il.py"]
 # External-tree suite: verifies TMS-011 against native exports/imports and the
 # managed IT3UtilityRevNK IL. SKIPs cleanly when Techstream/unpacked is absent.
+
+[suite.techstream_crypto_inventory]
+tests = ["tests/verify_techstream_crypto_inventory.py"]
+paths = [
+  "tools/techstream/generate_crypto_inventory.py",
+  "data/generated/techstream_v18/crypto_inventory.json",
+  "docs/tooling/techstream.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "techstream.lock.json",
+]
+
+[suite.techstream_artifact_lock]
+tests = ["tests/verify_techstream_artifact_lock.py"]
+paths = ["techstream.lock.json"]
+
+[suite.techstream_cuw_writer_routes]
+tests = ["tests/verify_techstream_cuw_writer_routes.py"]
+paths = [
+  "tools/techstream/generate_cuw_writer_inventory.py",
+  "data/generated/techstream_v18/cuw_writer_inventory.json",
+  "tests/verify_techstream_cuw_writer_routes.py",
+  "techstream.lock.json",
+]
 
 [suite.techstream_layerb]
 tests = ["tests/verify_techstream_layerb.py"]

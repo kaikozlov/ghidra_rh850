@@ -551,3 +551,57 @@ the mistakes are not re-made.
 - **Canonical:** [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md);
   SECOC-033; `tests/verify_toyota_eps_bus_probe.py`; optional
   `tests/verify_external_corroboration.py`.
+
+### CORR-033 — Memory-safety “verified” grades were backed by vacuous checks
+
+- **Wrong:** MEM-SAFE-001–005 were labeled `verified` while
+  `tests/verify_memory_safety.py` mostly checked that bytes existed at named
+  addresses; two advertised semantic checks were literal `True`. The suite
+  still passed after zeroing its load-bearing function bodies. MEM-SAFE-005
+  also presented an enumerated negative as an unqualified verified absence.
+- **Right:** the raw-byte verifier now asserts 36 decisive arithmetic, branch,
+  table, data-flow, and reachability propositions; an independent Ghidra script
+  asserts 95 instruction/edge/census propositions; and destructive/focused
+  mutation tests prove sensitivity. MEM-SAFE-001–004 retain `verified` only for
+  their statically asserted propositions. MEM-SAFE-005 is `bounded` to the
+  named CAN/ISO-TP/SecOC/application-copy/range-check graph.
+- **Canonical:** [../security/memory-safety-audit.md](../security/memory-safety-audit.md);
+  `data/memory_safety_proof_matrix.csv`; `tests/verify_memory_safety.py`;
+  `tests/verify_memory_safety_mutations.py`;
+  `ghidra/scripts/verify/AssertMemorySafetyPaths.java`.
+
+### CORR-034 — IT3ACNK was wrongly called keyless and host-key maps were incomplete
+
+- **Wrong:** TMS-008 said `IT3ACNK.dll` had an AES S-box but no recoverable
+  key, mapped `FUKUMORIYOSIYAMA` only to CommandCommon/UtilityEx2TY, and mapped
+  `bCVaAQnA3fNdDgdl` only to IT3UtilityNeoNK. TMS-012 called the limited raw
+  sweep exhaustive and the host maps complete.
+- **Right:** pinned IT3ACNK bytes contain raw `bCVaAQnA3fNdDgdl` at
+  file offset/RVA `0x8020` and hex-ASCII `FUKUMORIYOSIYAMA` at `0x834C`.
+  `EncryptAds @ 0x2BB0` directly pushes the latter at `0x2BE1`, hex-decodes it,
+  and reaches the software block-cipher helper. The bCVa constant has no direct
+  IT3ACNK reference and is therefore recorded as bounded presence, not proven
+  key use. TMS-012 is now limited to fourteen enumerated representation classes
+  plus known x86 constructions/direct references; it makes no general
+  constant-propagation or complete-absence claim.
+- **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §§4.5, 7.1;
+  `data/generated/techstream_v18/crypto_inventory.json`;
+  `tests/verify_techstream_crypto_inventory.py`.
+
+### CORR-035 — Sienna CUW writer selection was inferred from class names
+
+- **Wrong:** TMS-007 assigned EPS reflashing to the older
+  `CCanEMPS_V850E_PS2FlashWriter`/`CollateSeedKey` symbol family, while TMS-010
+  promoted the Sienna firmware's UDS table into a specific host transcript
+  with zero-valued DID writes. Neither claim followed the V18 factory edge.
+- **Right:** all 201 encoded parameter INIs decode to 196 factory rows.
+  `TCUWControlCommPhase.dll` selects one from `CalibrationFile` kind/contact/CPU
+  metadata, loads the named DLL pair, and resolves its exported phase entry
+  points. Standard and unified request builders are recovered independently;
+  unified WDBI uses calibration-derived `OffsetAddress`, `SeedKey`, and `Nonce`,
+  not intrinsic zeros. The local tree has no `.cuw`/`.cal`, so the exact Sienna
+  row, values, address ranges, and routine choices remain unresolved. Firmware
+  tables prove protocol compatibility and exclude VFOREST, not factory choice.
+- **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §§5.1–5.2;
+  `data/generated/techstream_v18/cuw_writer_inventory.json`;
+  `tests/verify_techstream_cuw_writer_routes.py`.

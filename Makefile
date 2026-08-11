@@ -37,7 +37,9 @@ VERIFY_SUITES := \
 	tests/verify_p1m_device_profile.py \
 	tests/verify_ram_overlays.py \
 	tests/verify_scheduler_timing.py \
+	tests/verify_function_discovery.py \
 	tests/verify_semantic_coverage.py \
+	tests/verify_semantic_interest_ranking.py \
 	tests/verify_control_partition.py \
 	tests/verify_motor_actuation_boundary.py \
 	tests/verify_motor_safety_monitors.py \
@@ -50,7 +52,11 @@ VERIFY_SUITES := \
 	tests/verify_techstream_mackey.py \
 	tests/verify_techstream_ptshim.py \
 	tests/verify_techstream_ddb_residuals.py \
+	tests/verify_techstream_artifact_lock.py \
+	tests/verify_techstream_crypto_inventory.py \
+	tests/verify_techstream_cuw_writer_routes.py \
 	tests/verify_memory_safety.py \
+	tests/verify_memory_safety_mutations.py \
 	tests/verify_community_tooling.py \
 	tests/verify_community_patch_target_analyzer.py \
 	tests/verify_corolla_2023_public_route_summary.py \
@@ -68,11 +74,11 @@ VERIFY_SUITES := \
 	tests/verify_project_inventory.py \
 	tests/verify_doc_links.py
 
-.PHONY: sync verify verify-core verify-one verify-changed verify-agent verify-external verify-rfp verify-sleigh verify-processor verify-ghidra \
+.PHONY: sync verify verify-core verify-one verify-changed verify-agent verify-external verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
 	ghidra-cli \
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
-	generate-processor-fixture generate-semantic-coverage generate-project-inventory \
+	generate-processor-fixture generate-function-discovery generate-semantic-coverage generate-project-inventory \
 	verify-project-parity update-project-baseline \
 	rebuild-project work-project snapshot-project finalize-project
 
@@ -116,7 +122,10 @@ verify-processor:
 	tools/verify_processor.sh
 
 # Full local gate: firmware suites + SLEIGH + processor audits + exact parity.
-verify-ghidra: verify-core verify-sleigh verify-processor verify-project-parity
+verify-semantic-coverage-live:
+	$(PYTHON) tests/verify_semantic_coverage_live.py --project-dir "$(PROJECT_DIR)"
+
+verify-ghidra: verify-core verify-sleigh verify-processor verify-semantic-coverage-live verify-project-parity
 
 generate-dataflash:
 	$(PYTHON) tools/generate_dataflash_layout.py
@@ -144,6 +153,9 @@ generate-application-transmit:
 
 generate-processor-fixture:
 	$(PYTHON) tools/build_processor_fixture.py
+
+generate-function-discovery:
+	tools/generate_outside_function_candidates.sh
 
 generate-semantic-coverage:
 	tools/generate_semantic_coverage_ledger.sh

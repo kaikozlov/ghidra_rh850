@@ -167,28 +167,29 @@ RUNTIME DIAGNOSTICS (DTC read, data monitor, FFD access):
 
 REFLASHING (CUW / Calibration Update Wizard):
 │
-├─ Flash writer class selected by calibration file metadata:
+├─ CalibrationFile KindOfECU/ContactType/CPUType selects an encoded
+│  parameter INI; TCUWParameterForVC decodes it, then
+│  TCUWControlCommPhase reads DLLFileNameForPrepareWrite/FlashWrite and
+│  resolves StartPrepareWrite/StartFlashWrite with LoadLibrary/GetProcAddress.
 │
-│   EPS (V850E)  → CCanEMPS_V850E_PS2FlashWriter
-│                   └─ CollateSeedKey uses CalibrationFile::GetSeedKey()
-│                      (key embedded in .cuw file, NOT hardcoded in DLL)
+├─ Example recovered factory rows:
+│   P5-Unified04        → ReproStdPrepare + ReproStdFlash
+│   P5-Unified10        → UnifiedPrepare + UnifiedFlashEachArea
+│   P5-Unified          → UnifiedPrepare + UnifiedFlash
+│   0P5-CAN(SECURITY)302 → P5SecurityPowerTrainPrepare + SecurityVFORESTFlash
 │
-│   EPS (older)  → CSilEMPS_V850E_PS1_2FlashWriter
-│   Airbag       → CCanAirbagFlashWriter
-│   Body         → CCanBodyFlashWriter
-│   Chassis      → CCanChassisShrinkFlashWriter
-│   EPB          → CCanEPBFlashWriter
-│   FOREST/RH850 → CCanVFORESTFlashWriter (no SA — direct write/erase)
-│   P5 CAN       → CP5CanFlashWriter
-│   EPC          → CCanElectricPowerControlFlashWriter
-│   ...          → (20+ writer classes total)
+└─ Exact 8965B4512000 row: unresolved (no .cuw/.cal payload in V18 tree)
 ```
 
 **Key implication for the Sienna EPS:** the `FUKUMORIYOSIYAMA` key in
 `CSecurityAccessAES128` (§4.1) is for runtime ADS/PCS FFD access, not for EPS
-reflashing. The EPS reflash seed/key pair is embedded in the calibration file
-downloaded from Toyota's TechInfo portal and consumed at runtime by
-`CalibrationFile::GetSeedKey()`. It is not hardcoded in any DLL.
+reflashing. CUW prepare writers obtain service-auth material through
+`CalibrationFile::GetServiceAuthKey()` (and unified prepare also supplies
+`GetECUAuthKey()` in the seed request). Unified flash separately obtains
+`GetSeedKey()`, `GetNonce()`, and `GetOffsetAddress()` for its predownload DID
+writes. Those getters establish calibration-file provenance, but this V18 tree
+contains no `.cuw` or `.cal` payload and therefore does not reveal which route
+or values apply to `8965B4512000`.
 
 `CommandCommon.dll` contains four independent SA implementations. All were
 decompiled with the vendored Ghidra CLI against the imported PE (project
@@ -330,29 +331,44 @@ object the caller passes. Key findings from the binary:
 | `FUKUMORIYOSIYAMA` not present | CUW does not use the `CommandCommon.dll` AES key |
 | `SEED_KEY_SECRET` (`f05f36b7...`) not present | Firmware secret is not embedded in CUW |
 
-findcrypt also discovered **six independent AES-128 implementations** across the
-Techstream DLL tree (each with its own static S-box): `CommandCommon.dll`,
-`DS2ComNK.dll`, `IT3ACNK.dll`, `IT3UtilityNeoNK.dll`, `UtilityEx2TY.dll`, and
-`UtilityExNK2.dll`. `Cuw.exe` is the only crypto-using binary without a static
-S-box — it delegates to Windows CryptoAPI via its Borland `Caes` class.
+The reproducible representation-aware census now enumerates all 6,620 files
+(670 PE candidates) in the extracted distribution. It finds nine exact AES
+S-box byte sequences: seven across the six diagnostic DLL implementations
+(`CommandCommon.dll` contains two) and two incidental copies in reporting
+libraries. An S-box is implementation evidence, never key evidence. `Cuw.exe`
+has no static S-box and delegates its Borland `Caes` path to Windows CryptoAPI.
 
-Tracing the callers of each AES implementation recovered **three unique
-hardcoded AES-128 keys** across the diagnostic tree:
+Constant/reference tracing recovers three previously known 16-byte key values,
+but their representations and host mappings are not uniform:
 
 | Key (hex) | ASCII | DLLs | SA path |
 |---|---|---|---|
-| `46554B554D4F5249594F534959414D41` | `FUKUMORIYOSIYAMA` | CommandCommon (inverted), UtilityEx2TY (plaintext) | ADS/PCS runtime SA |
+| `46554B554D4F5249594F534959414D41` | `FUKUMORIYOSIYAMA` | CommandCommon (constructed inverted bytes), UtilityEx2TY (plaintext), **IT3ACNK (hex-ASCII, direct `EncryptAds` reference)** | ADS/PCS/IT3 ADS crypto paths |
 | `5622E4993876DE4F15F2E166E7CD24C6` | (binary) | CommandCommon (inverted), DS2ComNK, UtilityExNK2, UtilityEx2TY (all plaintext) | Central Gateway SA |
-| `6243566141516E4133664E644467646C` | `bCVaAQnA3fNdDgdl` | IT3UtilityNeoNK only | IT3 Neo utility SA |
+| `6243566141516E4133664E644467646C` | `bCVaAQnA3fNdDgdl` | IT3UtilityNeoNK (direct references); **IT3ACNK (raw at `0x8020`, no direct reference)** | IT3 Neo key use recovered; IT3ACNK role bounded |
 
 None of these keys match the firmware bootloader secret `SEED_KEY_SECRET`
-(`f05f36b7...`) or the application secret at `0x20840`. All three serve
-non-EPS SA paths (ADS, PCS, Central Gateway, IT3 Neo). The EPS reflash SA
-key remains calibration-file-only.
+(`f05f36b7...`) or the application secret at `0x20840`. Their recovered uses
+are in ADS, PCS, Central Gateway, and IT3 paths. The CUW prepare-writer SA
+material is read through calibration-file getters; the missing matching
+payload prevents identification of the Sienna value.
 
-`IT3ACNK.dll` has an AES S-box but no recoverable key — it may use a
-different calling convention or serve a non-SA purpose (e.g., certificate
-validation).
+The former `IT3ACNK.dll` “no recoverable key” statement is disproved.
+`EncryptAds @ RVA 0x2BB0` directly pushes `0x1000834C` at RVA `0x2BE1`;
+that object is the 32-character hex encoding of `FUKUMORIYOSIYAMA`. The export
+hex-decodes it and passes the resulting 16-byte value into the software block-
+cipher helper at RVA `0x3070`. `bCVaAQnA3fNdDgdl` is separately present raw at
+file offset/RVA `0x8020`, adjacent to `s2Cjar5er8iwP4Xz`, but neither constant
+has a recovered direct code reference in this DLL. Presence is therefore
+recorded without promoting either one to an IT3ACNK key.
+
+All twelve IT3ACNK crypto exports are classified and extent-hashed in
+`data/generated/techstream_v18/crypto_inventory.json`. Besides `EncryptAds`,
+the direct constant consumers are `EncryptSecretKeyC` (`EnerGizerreLayXT`),
+`EncryptSecretKeyN` (`WgvbMXxN3pHsSndg`), and TD3 encrypt/decrypt (hex material
+at RVA `0x8324`). Version-1/version-2 and six-byte generators remain bounded to
+their concrete helper paths; the report does not relabel their table material
+as AES keys without data-flow proof.
 
 **EMPS V850E PS2** uses a **static password** SA (key bytes `5A 5A 00 00`,
 no seed/key derivation). This is an older EPS generation on V850E, not RH850.
@@ -362,17 +378,11 @@ no seed/key derivation). This is an older EPS generation on V850E, not RH850.
 `WriteWithErase`, and `VerifyCompData`. SA is handled by its companion
 `PrepareWriter` (separate object in the CUW's two-phase architecture).
 
-The FOREST PrepareWriter presumably calls the generic `CalcSeedKey`
-with an AES cipher object backed by Windows CryptoAPI, using key material
-from `CalibrationFile::GetSeedKey()`. This would match the firmware
-bootloader SA construction (SEC-BOOT-003:
-`expected = AES-ENC(AES-DEC(SEED_KEY_SECRET, data_record), ecu_seed)`).
-
-> **Residual uncertainty.** The virtual dispatch through `vtable[4]` cannot
-> be statically resolved in the Borland binary without full RTTI analysis.
-> The cipher identity (AES-128 vs. custom) is inferred from the CryptoAPI
-> import and the firmware match, not directly confirmed by decompilation.
-> A live capture or calibration file analysis would confirm definitively.
+The recovered standard and unified prepare writers both call
+`CUnifiedUtils::CalcSeedKey` with `CalibrationFile::GetServiceAuthKey()` and
+the 16-byte ECU seed. Unified prepare additionally prefixes the `27 01`
+request with `GetECUAuthKey()[16]`. This establishes the host data flow, but
+does not identify the cipher internals or prove the exact Sienna factory row.
 
 ### 4.6 SendNonce / SendSeedKey — VFOREST flash-writer key-material transfer
 
@@ -404,13 +414,11 @@ in the final frame of each key).
 `Data[4]`, not UDS service IDs** — they increment monotonically across the
 six frames, and `0x39`–`0x3c` are not UDS services at all. This routine
 therefore does **not** conflict with firmware SEC-BOOT-003 (UDS `27 01/02`):
-it is a different operation entirely. The key material it ferries (from
-`CalibrationFile::GetSeedKey(int)`, verbatim, no transform) is what the
-firmware bootloader **payload gate** consumes — SEC-BOOT-005 `RequestDownload`,
-006 `TransferData` AES-CBC, 007 `RoutineControl 0x10F0` CMAC — i.e. the
-payload-encryption and authentication keys, **not** the SA secret. The SA
-itself (SEC-BOOT-003) is the separate §4.5 PrepareWriter `CalcSeedKey` +
-Windows-CryptoAPI step.
+it is a different operation entirely. At the VFOREST call site, the two blobs
+come from `CalibrationFile::GetNonce(int)` and `GetSeedKey(int)`, verbatim.
+Their semantic relationship to any Sienna payload-gate state is unproven
+because VFOREST is a different factory route. The SA itself is a separate
+prepare-writer operation.
 
 **No AES in the FlashWriter path.** A full tree scan finds the AES forward
 S-box (`63 7c 77 7b f2 6b 6f c5`) in zero CUW DLLs/EXEs; it appears only in
@@ -430,29 +438,50 @@ bytes; it does no cryptography.
 > `0xFEBF2CF8`) is written **only** by `bootloader_did_direct_ram_copy @ 0x6D3A`
 > (the `0x2E` path) — sole writer confirmed by x-ref. Therefore the CUW VFOREST
 > `SendNonceAndSeedKey` path (`0x37`–`0x3c` proprietary frames) **does not apply
-> to the Sienna** — those frames would be rejected (NRC 0x11). The Sienna is
-> reflashed via standard UDS (`0x2E` DID writes for `0x201`/`0x202`, normally
-> zero, then `0x34/0x36/0x37` + `0x31`); the VFOREST writer targets a **different**
-> RH850 ECU that speaks the proprietary protocol. The CUW-side structural
+> to the Sienna** — those frames would be rejected (NRC 0x11). The firmware
+> therefore constrains any matching Sienna host route to its implemented UDS
+> vocabulary. The recovered standard and unified CUW builders both use that
+> vocabulary, and the unified builder writes calibration-derived values to
+> DIDs `0x0203`, `0x0201`, and `0x0202`; however, the absent matching
+> calibration payload prevents selecting between those builders or asserting
+> an exact Sienna transcript. The CUW-side structural
 > finding (key-material transfer, not SA; `0x37`–`0x3c` are block-seq bytes, not
 > SIDs; `arg3=GetNonce`, `arg4=GetSeedKey`) stands, but its target ECU is not
 > `8965B4512000`.
 
 ## 5. Calibration Update Wizard (CUW)
 
-The CUW (`Calibration Update Wizard/Cuw.exe`) is the ECU reflashing tool. It
-implements a two-phase write sequence through a family of ECU-specific DLLs.
+The CUW (`Calibration Update Wizard/Cuw.exe`) is the ECU reflashing tool. A
+reproducible inventory decodes all 201 parameter INIs into 196 factory rows.
+`TCUWControlCommPhase.dll` selects the row from calibration metadata, loads the
+named DLLs, and resolves the two phase entry points dynamically. The full
+route table, PE identities, pinned method bodies, command templates, and
+blocker are in `data/generated/techstream_v18/cuw_writer_inventory.json`.
+
+| Factory identifier | Prepare writer | Flash writer |
+|---|---|---|
+| `P5-Unified04` | `TCUWCanReproStdPrepareWriter.dll` | `TCUWCanReproStdFlashWriter.dll` |
+| `P5-Unified10` | `TCUWCanUnifiedPrepareWriter.dll` | `TCUWCanUnifiedFlashWriterEachArea.dll` |
+| `P5-Unified` | `TCUWCanUnifiedPrepareWriter.dll` | `TCUWCanUnifiedFlashWriter.dll` |
+| `0P5-CAN(SECURITY)302` | `TCUWP5CanSecurityPowerTrainPrepareWriter.dll` | `TCUWCanSecurityVFORESTFlashWriter.dll` |
+
+These examples prove that “P5,” “unified,” and “VFOREST” are factory choices,
+not sufficient identifiers for this EPS. Exact selection requires the missing
+matching Sienna `.cuw`/`.cal` payload.
 
 ### 5.1 Prepare-write phase
 
-`CCanCommonPrepareWriter` (base) and its P4/P5/unified subclasses execute the
-pre-flash authentication and mode transition:
+The standard and unified prepare writers expose `StartPrepareWrite` and
+execute the pre-flash authentication and mode transition. Their exact UDS
+builders recover:
 
-1. **Diagnostic session control** — enter extended/programming session
-2. **SecurityAccess** — `CalcSeedKey(seed)` computes the key from the seed
-   using the calibration file's embedded seed/key pair
-3. **CommunicationControl** — suppress normal ECU traffic
-4. **RoutineControl** — enter programming mode (on central gateway ECUs)
+1. **Programming session** — `10 02`, requiring `50 02`.
+2. **Standard SecurityAccess** — `27 01`, require `67 01 || seed[16]`, then
+   `27 02 || CalcSeedKey(GetServiceAuthKey(node), seed)` and require `67 02`.
+3. **Unified SecurityAccess** — the same exchange except the seed request is
+   `27 01 || GetECUAuthKey(node)[16]`.
+4. **Route-specific transitions** — communication, gateway, and timing steps
+   remain selected by the parameter/calibration data.
 
 Timing parameters are configured through `TCUWControlCommPhase.dll` using a
 calibration file that specifies:
@@ -464,9 +493,9 @@ calibration file that specifies:
 - `CANCommunicationSpeedAddress` — baud rate register address
 - `PasswordCheckIDAddress` / `PasswordAddress` — ECU-specific addresses
 
-The seed/key comes from `CalibrationFile::GetSeedKey()` and
-`CalibrationFile::GetServiceAuthKey()` — **embedded in the calibration file
-itself**. This is *Layer B* (the per-ECU cryptographic unlock, §5.3). It is
+The SA input comes from `CalibrationFile::GetServiceAuthKey()`; unified prepare
+also reads `GetECUAuthKey()`. This is *Layer B* (the per-ECU cryptographic
+unlock, §5.3). It is
 distinct from *Layer A*, the TIS portal's reprogramming-key authorization
 (RKS / `ReproKey`), which gates CUW's *permission* to reflash a given VIN but
 does not supply the ECU crypto key. The full RKS flow is documented in §5.3;
@@ -475,19 +504,33 @@ code).
 
 ### 5.2 Flash-write phase
 
-`CUnifiedUtils` and ECU-specific flash writers execute:
+The standard and unified flash writers expose `StartFlashWrite`. Both enforce
+positive-response templates and execute:
 
-1. **RequestDownload** (UDS `0x34`) — negotiate transfer with address/length
-2. **TransferData** (UDS `0x36`) — stream flash data blocks
-3. **RoutineControl** (UDS `0x31`) — erase and verify
-4. **TransferExit** (UDS `0x37`) — end transfer
-5. **ECUReset** (UDS `0x11`) — reboot into new firmware
+1. **Predownload data** — standard uses calibration-selected WDBI tables;
+   unified sends `2E 02 03 || OffsetAddress[5]`, `2E 02 01 || SeedKey[16]`,
+   and `2E 02 02 || Nonce[16]`, requiring the corresponding `6E` responses.
+2. **RequestDownload** — standard builds `34 || dataFormat || 44 ||
+   address[4] || size[4]`; unified builds `34 || compressionFlag || areaFlag ||
+   46 || (offset[5]+areaAddress) || areaSize`. Both parse `74` and cap the
+   negotiated block length at `0x0FFF` before subtracting two header bytes.
+3. **TransferData / TransferExit** — `36 || counter || data` / `76 || counter`,
+   then `37` / `77`.
+4. **RoutineControl** — standard constructs routine IDs `F510`, `00FF`, and
+   `F610`; unified constructs `F010`, `00FF`, `F110`, and `F210`, with
+   calibration-derived range/hash or offset-adjusted area fields.
+5. **ECUReset** — `11 01`, requiring `51 01` (180 ms reset timeout).
 
 ECU-specific flash writers include:
 `TCUWCanReproStdFlashWriter` (standard CAN), `TCUWCanUnifiedFlashWriter`
 (unified), `TCUWCanSecurityVFORESTFlashWriter` (FOREST/RH850 security),
 `TCUWCanPowerTrainFlashWriter`, and variants for airbag, chassis, body, HINO,
 M16C, MMC, PSA, and SBR ECUs.
+
+The local V18 distribution contains zero `.cuw` and zero `.cal` files. It can
+therefore prove the factory mechanism and request builders, but not the exact
+`8965B4512000` factory identifier, keys/nonces, address ranges, data-format
+values, or routine choices.
 
 ### 5.3 Reprogramming-key authorization (RKS / TIS portal) — Layer A
 
@@ -807,14 +850,23 @@ exact diagnostic join: Techstream uses Routine `0x3002`, while the Sienna uses
 WDBI DID `0x1010` selectors `01/03`. A relationship to that EPS or its SecOC
 slot 4 is therefore **not proven**.
 
-### 7.1 Full-tree secret census
+### 7.1 Representation-bounded secret census
 
-The exhaustive binary sweep found none of the Sienna bootloader or application
-SecurityAccess secrets in plaintext or bitwise-inverted form. It did find the
-three separately mapped Techstream keys (`FUKUMORIYOSIYAMA`, the Central
-Gateway key, and the IT3 Neo key), all on non-EPS paths. It also found no
-`SecOC`/`VehSec` references. This negative constrains the pinned V18.00.003
-tree; it does not identify the domain served by MACKey Registration.
+The generated census searches each of 6,620 files for raw bytes, printable
+ASCII, upper/lower hex ASCII, UTF-16LE plaintext/hex, and the bitwise inversion
+of every applicable representation. It additionally resolves direct x86
+imm32 references to discovered PE constants and pins the two known
+CommandCommon byte-immediate constructions. Within those explicit classes it
+finds neither the Sienna bootloader SecurityAccess secret
+`f05f36b7d78c03e24ab4faef2a57d044` nor the application secret
+`893e08418c741ffa2a9c044bffa55813`.
+
+This is a representation-bounded negative, not proof of complete absence:
+there is no general constant propagation, symbolic execution, encrypted-blob
+recovery, or arbitrary runtime decoding. The same artifact corrects the host
+maps above and records every hit with artifact SHA-256, file offset, RVA/VA,
+representation, direct references, containing export where recoverable, and
+confidence.
 
 ## 8. Relationship to firmware findings
 
