@@ -202,9 +202,15 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   statically recovered; `tools/techstream/parse_ptshim_log.py` normalizes both.
   The remaining question is purely dynamic. Capture health check, data list,
   active-test/customization, MACKey Registration, CUW preparation, and reflash
-  authorization/programming as six separate labeled operations, then compare
-  SA seed/key exchange, DID reads, session transitions, and programming handoff
-  against SEC-BOOT-003, SEC-APP-001, and DIAG-APP-001/003. Preserve raw logs
+  authorization/programming as six separate labeled operations. In the Data List
+  capture, explicitly record `Command Value Torque` (monitor 402),
+  `Cooperation Control State` (60), and `Control State Information` (403): the
+  static P5 metadata now proves 402 is 16-bit/`Nm`, 60 has the binary
+  cooperation-control display, and 403 is 16-bit/unitless, but a live transcript
+  is needed to identify their UDS data IDs and compare values/timing against the
+  recovered CAN/application states. Then compare SA seed/key exchange, DID reads,
+  session transitions, and programming handoff against SEC-BOOT-003,
+  SEC-APP-001, and DIAG-APP-001/003. Preserve raw logs
   privately and commit only reviewed/redacted derivatives or hashes. See
   [../tooling/techstream-capture-procedure.md](../tooling/techstream-capture-procedure.md).
 - **Sienna EPS CUW route and calibration material.** TMS-004/TMS-007 recover the

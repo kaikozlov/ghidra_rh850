@@ -57,6 +57,8 @@ artifact is absent and `required-external` converts that absence to failure.
 | Steering corpus structurally inventoried | 35 files / 25 structural payload variants | `data/generated/techstream_v18/steering_diagnostic_corpus.json`; “variant” is raw structural identity, not semantic identity |
 | Priority section classes with consumer-backed fields | 11 classes; 76 section instances / 6,521 records | `data/generated/techstream_v18/priority_steering_ddb_semantics.json`; unknown bytes remain in `raw_hex` |
 | Factory identities recovered | 89 format-1 and 151 format-2 cases | `data/generated/techstream_v18/ddb_factory_table_map.json`, independently extracted from executable switch targets |
+| Priority steering master routes recovered | 3 named families | `EPS_P4DK3` record 294/category 317, `EMPS_P5` record 374/category 405/generation 20, `EPS_CAN_P4DK` record 496/category 581; exact DLL/function/detail joins in `toyota_master_routes.json` |
+| Targeted application-interface correlations | 1 accepted / 1 ambiguous / 1 rejected-direct-name | `application_interface_correlations.json`: monitor 402 `Command Value Torque` accepted for command-domain corroboration; monitor 60 ambiguous; monitor 403 rejected as a direct CAN-field name |
 | Live official Techstream↔`8965B4512000` flows captured | 0 | Matching vehicle/calibration session unavailable; static host/firmware intersections are bounded, not a transcript |
 | Exact cross-variant/target-generation transfers verified | 0 | No `4514000` or Corolla CodeFlash and no newer-TSK target artifact; all transfers remain observed, bounded, or hypothesis as recorded per finding |
 
@@ -67,5 +69,8 @@ are known, but 5,927 have no curated review and only 22 have a semantic grade.
 The outside-function ledger also prevents the known-function count from being
 presented as a complete executable denominator. On the external side, static
 Techstream and DDB coverage is broad and reproducible when the pinned corpus is
-available, while exact target transcripts and newer-generation transfer remain
-at zero.
+available. One command-domain correlation now exceeds family-name similarity by
+matching master route, 16-bit width, `Nm` unit, public DBC geometry, and recovered
+firmware data flow; it remains external corroboration rather than a live target
+transcript. Exact target transcripts and newer-generation transfer remain at
+zero.

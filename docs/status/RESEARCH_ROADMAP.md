@@ -73,13 +73,22 @@ What to investigate next, in rough priority order. Completed items move to
   "isolated interlocks" as members of a nine-channel registered
   plausibility/deadline monitor family, and bounded `0x32B80`/`0xB98BC` to their
   CH0/CH2 version domains. Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.
-- **Application COM long-tail closure (2026-08-10).** Classified all 242 Rx
-  signal IDs (145 positive extractions + 97 deterministic no-COM-extraction
-  rows), recovered the post-packer Toyota checksum producer for Tx signals
-  9/37, closed signal 57 as default-only zero in this calibration, and joined
-  the special class-5 Rx `0x7F7` / Tx `0x7F8` transport channel without
-  inventing service semantics. Canonical: [../communications/application-rx.md](../communications/application-rx.md),
-  [../communications/application-tx.md](../communications/application-tx.md).
+- **Application interface semantic closure (2026-08-11).** Extended the prior
+  COM inventory into producer/consumer semantics. All 50 RAM-backed Tx signals
+  now have an exact non-default producer census; CAN `0x260`, `0x262`, `0x351`,
+  `0x394`, `0x4A3`, and `0x4C8` are producer-closed with bounded structural
+  roles. The former 25 unresolved Rx-consumer rows split deterministically into
+  7 unpacker-local post-process inputs and 18 store-only scalar destinations,
+  with a whole-bank pointer census closing normal memcpy/RTE alias forms.
+  Cross-interface joins now include `0x025/0x64F -> 0x4A3` and authenticated
+  `0x2E4` command state contributing to `0x262 LKA_STATE` bit4. Techstream
+  `EMPS_P5` monitor 402 `Command Value Torque` adds verified 16-bit/`Nm`
+  corroboration for the command domain while monitor 60 remains ambiguous and
+  monitor 403 is rejected as a direct CAN-field name. Canonical:
+  [../communications/application-rx.md](../communications/application-rx.md),
+  [../communications/application-tx.md](../communications/application-tx.md),
+  [../architecture/control-partition.md](../architecture/control-partition.md),
+  [../tooling/techstream.md](../tooling/techstream.md) §6.2.1.
 - **Renesas RFP RV40F host protocol (2026-08-10).** Completed the retained
   `BootRV40F` host-side static census at 52 ordinary command IDs / 61 symbols,
   recovered the generic connection and both setup variants, traced the 8-byte
@@ -90,17 +99,20 @@ What to investigate next, in rough priority order. Completed items move to
   `slot || key[16]` primitive; remaining applicability/lifecycle questions now
   require a P1M-E target or legitimate serial-boot capture. Canonical:
   [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
-- **Techstream Stage-3 static residuals (2026-08-10).** Recovered both shipped
-  `ptshim32` J2534 log formats plus Techstream's timestamped save orchestration
-  and added a cross-version parser; reconciled the DDB status so the complete
-  type-2 structural corpus is no longer described as undecoded, bounded
-  `Security_P4`'s previously suspicious high-value tables to alarm/security
-  vocabulary, and isolated type-1 `Toyota.ddb` as the remaining master-schema
-  residual; traced RKS `SeedValue` to uppercase-hex serialization of a
-  pre-existing 16-byte native CUW input, with only its indirect upstream
-  producer unresolved. A bounded local calibration/variant search still found
-  no matching Sienna `.cuw`/`.cwe`, `4514000` CodeFlash, or Corolla firmware.
-  Canonical: [../tooling/techstream.md](../tooling/techstream.md).
+- **Techstream Stage-3/static route residuals (2026-08-10 through 2026-08-11).**
+  Recovered both shipped `ptshim32` J2534 log formats plus Techstream's
+  timestamped save orchestration and added a cross-version parser; reconciled
+  the DDB status so the complete type-2 structural corpus is no longer described
+  as undecoded; bounded `Security_P4` to alarm/security vocabulary; and decoded
+  priority type-1 master routes for `EPS_P4DK3`, `EPS_CAN_P4DK`, and now
+  `EMPS_P5` (record 374 / category 405 / generation 20) with exact DLL/function
+  joins. The targeted P5 signal-info consumer further recovers monitor
+  physical-data, bit-range, unit, and pattern-display metadata used by the
+  application-interface correlation. Communication-DID/RID category ownership,
+  exact `8965B4512000` master/calibration identity, and matching `.cuw/.cal`
+  payload remain unresolved. RKS `SeedValue` is still bounded to uppercase-hex
+  serialization of a pre-existing 16-byte native CUW input. Canonical:
+  [../tooling/techstream.md](../tooling/techstream.md).
 - **Techstream MACKey vehicle protocol (2026-08-10).** Recovered the VIN,
   MAC-tuple, safe-key identity, master/slave discovery, response association,
   Routine-`0x3002` M1–M3 write, and M4/M5 poll. It shares the Sienna command-8
