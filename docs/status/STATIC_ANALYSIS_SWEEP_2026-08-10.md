@@ -1523,3 +1523,87 @@ parser refuses to expose a record size for compressed on-disk bytes.
   recovered.
 - No Ghidra snapshot promotion is warranted: this audit changes parsers,
   generated vocabulary, tests, and documentation only.
+
+## Post-completion persistent-pseudocode follow-up — protected steering and CAN-FD semantics
+
+A follow-up on 2026-08-11 used the newly persistent 6,037-function decompiler
+corpus as the primary reasoning surface rather than restarting from byte-level
+searches. The work intentionally stayed lead-driven: it extended the protected
+steering command cones, classified every application SecOC receive profile, and
+then used the pinned Techstream V18 corpus to resolve the remaining CAN-FD
+sensor semantics where independent evidence converged.
+
+### Durable commits
+
+- `f989388` — `Fix portable Ghidra project snapshots`
+- `c0daacc` — `Map protected steering command modes`
+- `5edbdd3` — `Classify all SecOC receive profiles`
+- `5fa9ba3` — `Resolve protected CAN-FD sensor semantics`
+
+### Static closure added by this follow-up
+
+- Protected `0x2E4` torque/LKA and protected `0x131` LTA-angle control are two
+  distinct authenticated steering-command modes. `0x131` has its own
+  feedback/gain/rate-limit controller and the two modes converge at
+  `FEBEC144` before a common late conditioning/plausibility cone.
+- The common command cone was extended through
+  `C170/C1B8/C1BC/C1D4 -> FEBEB788 -> FEBEB87E` and its monitor/adaptation
+  consumers. Together with the complete `FEBE6D00..6DFF` writer/xref census,
+  producer cone, pointer scan, memcpy census, and RTE-copy audit, no static
+  transfer into d/q references `FEBE6D28/6D2A` is recovered. Repeating broad
+  static searching is no longer justified without a new concrete edge.
+- All six application SecOC Rx profiles now have downstream-role
+  classifications: `0x00F` synchronization; `0x2E4` torque command; `0x131`
+  LTA-angle command; `0x132` bounded snapshot-only state; `0x090` protected
+  rear-wheel-speed/steering-angle-speed/validity state; and `0x0D7` protected
+  SP1 vehicle-speed/validity state.
+- The application-Rx evidence exporter was corrected for `0x0D7` signal 280:
+  the generated unpacker receives through a stack temporary and then persists
+  to `FEBE8076`; signal 284 independently owns `FEBE8072`.
+- Techstream `EMPS2_P5` supplies a three-region physical-semantic correlation:
+  monitors 303/304 are RR/RL rear-wheel speed (`km/h`), 305 is `CAN Vehicle
+  Speed (SP1)` (`km/h`), and 306 is `CAN Steering Angle Speed (SSAV)`
+  (`deg/s`). Firmware independently matches the shapes. In particular,
+  `0x0D7` signal 283 is clamped at raw 30000 before becoming
+  `application_vehicle_speed_raw`, exactly matching the Techstream SP1 range
+  word. `0x090` signals 270/273 are therefore the unordered RR/RL pair and
+  signal 276 is SSAV. Static evidence still does not prove which of 270/273 is
+  right versus left.
+
+### Reproducibility and verification
+
+The semantic promotions were applied through annotation scripts and rebuilt in
+two independent project directories. Their normalized inventories were
+byte-identical before the project baseline moved. The portable snapshot fix was
+proved by a real full-project pack -> materialize -> reopen -> exact-inventory
+round trip, eliminating the former orphaned-checkout/hijacked-project failure.
+The canonical snapshot, semantic coverage, 100-function sweep, and full
+6,037-function pseudocode corpus were regenerated from the reproducible build.
+
+Final gate after commit `5fa9ba3`:
+
+- `make verify-ghidra` -> pass
+- core verification -> **84/84** suites
+- isolated SLEIGH verification -> pass
+- processor project audit -> 6,037 functions, zero undefined bytes in known
+  functions, all project invariants pass
+- `AssertSecocRxControlSurface` -> 20 exact censuses / 1 call edge / 0 failures
+- `AssertMotorActuationBoundary` -> 23 call edges / 44 reference censuses / 0
+  failures
+- live semantic-coverage regeneration -> exact tracked parity
+- normalized project inventory -> exact tracked parity
+- `verify_secoc_fd_sensor_correlations.py` -> 23/23
+
+### Remaining boundary after the follow-up
+
+No further unblocked lead-driven static question was found in the scope of this
+follow-up. The two directly adjacent unknowns are intentionally retained:
+
+1. authenticated steering-command -> physical motor actuation coupling is now a
+   dynamic discriminator on a provisioned isolated bench; and
+2. individual RR-versus-RL ordering for `0x090` signals 270/273 requires an
+   exact DBC, labeled CAN correlation, or equivalent independent evidence.
+
+Other entries in `OPEN_QUESTIONS.md` remain blocked by missing target firmware,
+matching calibration material, legitimate vehicle transcripts, or hardware
+behavior rather than by an unsearched static path in the current image.
