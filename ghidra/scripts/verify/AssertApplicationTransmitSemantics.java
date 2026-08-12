@@ -299,6 +299,93 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
         assertInstruction(0x4b926L, "sst.b", "0x1e", "ep", "r1");
         assertInstruction(0x4b928L, "sst.b", "0x1f", "ep", "r1");
 
+        // Remaining normal Tx packets are owned by the same foreground staging
+        // orchestrator.  0x351 goes through wrapper 0x4B8A4; 0x394 and 0x4A3
+        // are direct producers.
+        assertCall(0x4ba8cL, 0x4b8a4L);
+        assertCall(0x4ba8cL, 0x4b8b6L);
+        assertCall(0x4ba8cL, 0x4b7baL);
+        assertCall(0x4b8a4L, 0x4b82cL);
+        assertCall(0x4b8a4L, 0x4b882L);
+
+        // CAN 0x351: plausibility_fault_debounce_monitor writes FEBEB5F8;
+        // application_input_snapshot_update copies it to FEBEE82B; 0x4B82C
+        // filters/holds that value before 0x4B882 exports a 3-bit code + gate.
+        assertExactRefs(0xfebeb5f8L,
+                "000b9d2c:WRITE", "000b9e8e:WRITE", "000bcd4a:READ",
+                "000bdbb0:WRITE", "000b9cea:READ");
+        assertExactRefs(0xfebe80b8L,
+                "0004b82c:READ", "0004b89e:WRITE", "0004c268:READ", "0005816c:WRITE");
+        assertExactRefs(0xfebe80b9L,
+                "0004b8a0:WRITE", "0004c276:READ", "0005816a:WRITE");
+        assertInstruction(0x4b892L, "mov", "0x7", "r6");
+        assertInstruction(0x4b894L, "mov", "0x1", "r1");
+
+        // CAN 0x394: FUN_50268 selects one of 17 five-byte table rows and
+        // writes the selected tuple plus its 1..16 state. 0x4B8B6 converts the
+        // state to a coarse class and maps tuple bytes into the six Tx fields.
+        assertExactRefs(0xfebe8258L,
+                "0004b8b6:READ", "00050430:WRITE", "00057c72:WRITE");
+        assertExactRefs(0xfebe8262L,
+                "0004b8ec:READ", "0005041a:WRITE", "00057c70:WRITE");
+        assertExactRefs(0xfebe8263L,
+                "0004b8f2:READ", "00050420:WRITE", "00057c84:WRITE");
+        assertExactRefs(0xfebe8264L,
+                "0004b8f8:READ", "00050426:WRITE", "00057c86:WRITE");
+        assertExactRefs(0xfebe8265L,
+                "0004b8e6:READ", "00050434:WRITE", "00057c88:WRITE");
+        assertExactRefs(0xfebe8266L,
+                "0004b8e0:READ", "00050414:WRITE", "00057c76:WRITE");
+        assertExactRefs(0xfebe80baL,
+                "0004b8e4:WRITE", "0004c164:READ", "00058168:WRITE");
+        assertExactRefs(0xfebe80c2L,
+                "0004b8de:WRITE", "0004c172:READ", "00058158:WRITE");
+        assertExactRefs(0xfebe80bdL,
+                "0004b8ea:WRITE", "0004c178:READ", "00058162:WRITE");
+        assertExactRefs(0xfebe80beL,
+                "0004b8f0:WRITE", "0004c17e:READ", "00058160:WRITE");
+        assertExactRefs(0xfebe80bfL,
+                "0004b8f6:WRITE", "0004c184:READ", "0005815e:WRITE");
+        assertExactRefs(0xfebe80c1L,
+                "0004b8fc:WRITE", "0004c18a:READ", "0005815a:WRITE");
+        assertInstruction(0x5040aL, "mov", "0x2a33c", "r19");
+        assertInstruction(0x50406L, "mulhi", "0x5", "r1", "ep");
+
+        // CAN 0x4A3: mixed steering telemetry. B1/B2 mirror incoming CAN 0x025
+        // signal 221; B3/B4 carry its clamped difference from incoming CAN
+        // 0x64F signal 289; B5 derives from the 0x260 driver-torque staging;
+        // B6/B7 mirror the 0x260 EPS-torque staging word.
+        assertExactRefs(0xfebe80c3L,
+                "0004b7de:WRITE", "0004bb2a:READ", "00058156:WRITE");
+        assertExactRefs(0xfebe80c4L,
+                "0004b7e8:WRITE", "0004bb38:READ", "00058154:WRITE");
+        assertExactRefs(0xfebe80c5L,
+                "0004b7d8:WRITE", "0004bb3e:READ", "00058152:WRITE");
+        assertExactRefs(0xfebe80c6L,
+                "0004b806:WRITE", "0004bb44:READ", "00058150:WRITE");
+        assertExactRefs(0xfebe80c7L,
+                "0004b800:WRITE", "0004bb4a:READ", "0005814e:WRITE");
+        assertExactRefs(0xfebe80c8L,
+                "0004b81e:WRITE", "0004bb50:READ", "0005814c:WRITE");
+        assertExactRefs(0xfebe80c9L,
+                "0004b824:WRITE", "0004bb56:READ", "0005814a:WRITE");
+        assertExactRefs(0xfebe80caL,
+                "0004b826:WRITE", "0004bb5c:READ", "00058148:WRITE");
+        assertExactRefs(0xfebe801cL,
+                "00047046:READ", "0004adac:DATA", "0004b7be:READ",
+                "00057318:READ", "00057ec2:WRITE");
+        assertExactRefs(0xfebe807cL,
+                "0004704a:READ", "0004b4b4:DATA", "00057326:READ", "00057e02:WRITE");
+        assertExactRefs(0xfebe7ce6L,
+                "00047074:WRITE", "0004b7cc:READ", "00051d12:READ",
+                "00052e10:READ", "00053056:READ", "0005329e:READ",
+                "00055314:READ", "000554ae:READ", "000590f0:WRITE");
+        assertCall(0x4703eL, 0x6956aL);
+        assertCall(0x4b7baL, 0x6f080L);
+        assertCall(0x4b7baL, 0x6953cL);
+        assertInstruction(0x4706aL, "sub", "r1", "r6");
+        assertInstruction(0x4b7daL, "ori", "0x20", "r1", "r1");
+
         println("ASSERT application-tx-semantics: call_edges=" + callEdges
                 + " reference_censuses=" + referenceCensuses
                 + " instruction_checks=" + instructionChecks

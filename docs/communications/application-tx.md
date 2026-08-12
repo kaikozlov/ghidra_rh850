@@ -334,39 +334,88 @@ state-source relationships against the live Ghidra project.
 
 ### 4.3 CAN `0x351` / COM PDU 2
 
-Only two configured signals are packed:
+Only two configured signals are packed, but their producer is now joined to the
+already-recovered plausibility/debounce monitor family:
 
-| Signal | Wire field | Source |
-|---:|---|---:|
-| 38 | `B2[7:5]` | `0xFEBE80B8` |
-| 39 | `B2[4]` | `0xFEBE80B9` |
+| Signal | Wire field | Source | Firmware-first role |
+|---:|---|---:|---|
+| 38 | `B2[7:5]` | `0xFEBE80B8` | filtered plausibility-monitor status code; system-gated override value `7` |
+| 39 | `B2[4]` | `0xFEBE80B9` | system-gated override flag |
 
-Bytes 0, 1, and 3 initialize to zero. Their runtime semantics remain unresolved.
+`plausibility_fault_debounce_monitor` writes its final boolean status at
+`0xFEBEB5F8`; `application_input_snapshot_update` copies that byte to
+`0xFEBEE82B`; and `0x4B82C` applies a seven-count hold/filter before passing the
+result to `0x4B882`. Under the normal gate this yields the filtered monitor
+state. If `(0xFEBE673C & 3) != 0` and `0xFEBE80FB != 0`, `0x4B882` instead forces
+signal 38 to `7` and signal 39 to `1`; otherwise signal 39 is zero.
+`0xFEBE80FB` is itself set to the marker `0x5A` when bit `0x8000` is present in
+the system input consumed by `0x3BE82`. The exact OEM meaning of that gate is
+not recovered, so the packet is described structurally rather than named from
+speculation. Bytes 0, 1, and 3 remain zero.
 
 ### 4.4 CAN `0x394` / COM PDU 3
 
-| Signal | Wire field | Source |
-|---:|---|---:|
-| 40 | `B0[6:4]` | `0xFEBE80BA` |
-| 41 | `B0[1:0]` | `0xFEBE80C2` |
-| 42 | `B1[7:6]` | `0xFEBE80BD` |
-| 43 | `B1[2:0]` | `0xFEBE80BE` |
-| 44 | `B2[3:1]` | `0xFEBE80BF` |
-| 45 | `B2[0]` | `0xFEBE80C1` |
+All six fields are generated from a table-driven internal status state:
 
-Unassigned bits remain at their initialized zero values unless another runtime
-path changes the buffer; no such static producer was recovered.
+| Signal | Wire field | Source | Firmware-first role |
+|---:|---|---:|---|
+| 40 | `B0[6:4]` | `0xFEBE80BA` | state-table tuple byte 0 |
+| 41 | `B0[1:0]` | `0xFEBE80C2` | coarse internal-state class code |
+| 42 | `B1[7:6]` | `0xFEBE80BD` | state-table tuple byte 4 |
+| 43 | `B1[2:0]` | `0xFEBE80BE` | state-table tuple byte 1 |
+| 44 | `B2[3:1]` | `0xFEBE80BF` | state-table tuple byte 2 |
+| 45 | `B2[0]` | `0xFEBE80C1` | state-table tuple byte 3 |
+
+`FUN_00050268` evaluates a fault/status decision tree into an internal state
+stored at `0xFEBE8258`, normally in the range **1..16**. It indexes the exact
+17×5-byte table at `0x2A33C` with `state * 5` and writes the selected tuple to
+`0xFEBE8266/8262/8263/8264/8265`. `0x4B8B6` then maps those five tuple bytes to
+signals 40 and 42–45 and compresses the state itself into signal 41:
+
+```text
+state 5       -> class 1
+state 15      -> class 2
+other 1..16   -> class 3
+0 / >16       -> class 0
+```
+
+The table values and state-class arithmetic are pinned directly from CodeFlash.
+The legacy Toyota reference DBC also contains decimal CAN 916 (`0x394`) as the
+one-byte CGW message `EPS1S90`; that is not structurally the same three-byte EPS
+packet and is therefore **not** used to name these fields. Unassigned wire bits
+remain zero.
 
 ### 4.5 CAN `0x4A3` / COM PDU 4
 
-Signals 46–53 are eight direct bytes:
+This packet is a compact mixed steering-telemetry export rather than eight
+opaque bytes:
 
-```text
-B0..B7 <- 0xFEBE80C3..0xFEBE80CA
-```
+| Signal | Wire field | Firmware-first role |
+|---:|---|---|
+| 46 | `B0` | CAN `0x260` initialization/validity staging flag OR `0x20` |
+| 47 | `B1` | incoming CAN `0x025` signal 221, signed 12-bit mirror bits 11:8 |
+| 48 | `B2` | incoming CAN `0x025` signal 221 mirror bits 7:0 |
+| 49 | `B3` | clamped signed-12 delta `(0x025 s221 - 0x64F s289)` bits 11:8 |
+| 50 | `B4` | same delta bits 7:0 |
+| 51 | `B5` | signed-byte conversion of CAN `0x260` driver-torque staging / 10 |
+| 52 | `B6` | CAN `0x260` EPS-torque staging mirror, high byte |
+| 53 | `B7` | CAN `0x260` EPS-torque staging mirror, low byte |
 
-The packer at `0x4BB1E` copies each source byte and invokes the COM big-endian
-packer with widths of eight bits. OEM field semantics remain unresolved.
+The two incoming fields are already independently mapped by the Rx pipeline:
+signal 221 is a signed 12-bit field from FD CAN `0x025` into `0xFEBE801C`, and
+signal 289 is a signed 12-bit field from classic CAN `0x64F` into
+`0xFEBE807C`. `FUN_0004703E` computes `s221 - s289`, saturates the intermediate,
+and stores it at `0xFEBE7CE6`; the `0x4B7BA` Tx producer clamps that value again
+to **-2048..2047** before packing B3/B4. B1/B2 re-encode signal 221 directly.
+This is therefore an explicit verified **Rx→Tx state join**, not merely a shared
+RAM-address coincidence.
+
+The same producer also reuses states recovered for `0x260`: B5 derives from the
+driver-torque staging word after division by 10 and signed-byte saturation,
+while B6/B7 are the exact high/low bytes of the EPS-torque staging word. No
+matching modern Toyota `0x4A3` definition was found in the pinned public DBC
+corpus, so these fields keep firmware-derived structural descriptions rather
+than invented OEM names.
 
 ### 4.6 CAN `0x4C8` / COM PDU 5
 

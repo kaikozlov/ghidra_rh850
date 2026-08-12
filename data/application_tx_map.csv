@@ -37,22 +37,22 @@ tx_pdu_id,can_id,message_name,length,cycle_ticks,signal_id,wire_field,source_kin
 1,0x262,EPS_STATUS,8,8,35,B5,ram,0xFEBE80B2,constant 0xFF byte in runtime producer,0x4BE24
 1,0x262,EPS_STATUS,8,8,36,B6,ram,0xFEBE80B3,constant 0xFF byte in runtime producer,0x4BE24
 1,0x262,EPS_STATUS,8,8,37,B7,canif_checksum,0x7FEAC,Toyota additive checksum: post-packer CanIf callback sums CAN-ID bytes + DLC + payload[0:-1] into final byte,0x4BE24
-2,0x351,APP_TX_351,4,200,38,B2[7:5],ram,0xFEBE80B8,unresolved three-bit status,0x4C25C
-2,0x351,APP_TX_351,4,200,39,B2[4],ram,0xFEBE80B9,unresolved status bit,0x4C25C
-3,0x394,APP_TX_394,3,60,40,B0[6:4],ram,0xFEBE80BA,unresolved three-bit status,0x4C158
-3,0x394,APP_TX_394,3,60,41,B0[1:0],ram,0xFEBE80C2,unresolved two-bit status,0x4C158
-3,0x394,APP_TX_394,3,60,42,B1[7:6],ram,0xFEBE80BD,unresolved two-bit status,0x4C158
-3,0x394,APP_TX_394,3,60,43,B1[2:0],ram,0xFEBE80BE,unresolved three-bit status,0x4C158
-3,0x394,APP_TX_394,3,60,44,B2[3:1],ram,0xFEBE80BF,unresolved three-bit status,0x4C158
-3,0x394,APP_TX_394,3,60,45,B2[0],ram,0xFEBE80C1,unresolved status bit,0x4C158
-4,0x4A3,APP_TX_4A3,8,100,46,B0,ram,0xFEBE80C3,unresolved byte,0x4BB1E
-4,0x4A3,APP_TX_4A3,8,100,47,B1,ram,0xFEBE80C4,unresolved byte,0x4BB1E
-4,0x4A3,APP_TX_4A3,8,100,48,B2,ram,0xFEBE80C5,unresolved byte,0x4BB1E
-4,0x4A3,APP_TX_4A3,8,100,49,B3,ram,0xFEBE80C6,unresolved byte,0x4BB1E
-4,0x4A3,APP_TX_4A3,8,100,50,B4,ram,0xFEBE80C7,unresolved byte,0x4BB1E
-4,0x4A3,APP_TX_4A3,8,100,51,B5,ram,0xFEBE80C8,unresolved byte,0x4BB1E
-4,0x4A3,APP_TX_4A3,8,100,52,B6,ram,0xFEBE80C9,unresolved byte,0x4BB1E
-4,0x4A3,APP_TX_4A3,8,100,53,B7,ram,0xFEBE80CA,unresolved byte,0x4BB1E
+2,0x351,APP_TX_351,4,200,38,B2[7:5],ram,0xFEBE80B8,filtered plausibility-monitor status code; system-gated override=7,0x4C25C
+2,0x351,APP_TX_351,4,200,39,B2[4],ram,0xFEBE80B9,system-gated plausibility-status override flag,0x4C25C
+3,0x394,APP_TX_394,3,60,40,B0[6:4],ram,0xFEBE80BA,state-table tuple byte0,0x4C158
+3,0x394,APP_TX_394,3,60,41,B0[1:0],ram,0xFEBE80C2,coarse 1..16 internal-state class code,0x4C158
+3,0x394,APP_TX_394,3,60,42,B1[7:6],ram,0xFEBE80BD,state-table tuple byte4,0x4C158
+3,0x394,APP_TX_394,3,60,43,B1[2:0],ram,0xFEBE80BE,state-table tuple byte1,0x4C158
+3,0x394,APP_TX_394,3,60,44,B2[3:1],ram,0xFEBE80BF,state-table tuple byte2,0x4C158
+3,0x394,APP_TX_394,3,60,45,B2[0],ram,0xFEBE80C1,state-table tuple byte3,0x4C158
+4,0x4A3,APP_TX_4A3,8,100,46,B0,ram,0xFEBE80C3,initialization/validity flag OR 0x20,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,47,B1,ram,0xFEBE80C4,CAN 0x025 signal221 signed12 mirror bits11:8,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,48,B2,ram,0xFEBE80C5,CAN 0x025 signal221 signed12 mirror bits7:0,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,49,B3,ram,0xFEBE80C6,clamped signed12 delta (CAN 0x025 s221 - CAN 0x64F s289) bits11:8,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,50,B4,ram,0xFEBE80C7,clamped signed12 delta (CAN 0x025 s221 - CAN 0x64F s289) bits7:0,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,51,B5,ram,0xFEBE80C8,signed-byte conversion of CAN 0x260 driver-torque staging / 10,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,52,B6,ram,0xFEBE80C9,CAN 0x260 EPS-torque staging mirror high byte,0x4BB1E
+4,0x4A3,APP_TX_4A3,8,100,53,B7,ram,0xFEBE80CA,CAN 0x260 EPS-torque staging mirror low byte,0x4BB1E
 5,0x4C8,APP_TX_4C8,8,196,54,B0,constant,9,constant 0x09,0x4BC54
 5,0x4C8,APP_TX_4C8,8,196,55,B1[7],constant,0,constant zero,0x4BC54
 5,0x4C8,APP_TX_4C8,8,196,56,B2..B3 BE16,constant,0,constant zero,0x4BC54
