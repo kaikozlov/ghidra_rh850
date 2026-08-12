@@ -76,16 +76,37 @@ Storage indexes `1..122` pack contiguously and backwards from page 479 to page
 256. Job 1 is non-persistent; jobs 0 and 2 both alias storage index 1; jobs
 3–123 map to indexes 2–122.
 
-In this captured image a committed/valid-looking record has these observable
-properties:
+In this captured image the outer committed-record markers are:
 
 - its first `uint16_t` equals the storage index;
 - the final 32-bit word of its allocation is `0xAAAAAAAA`.
 
 68 of 122 configured physical records meet both conditions. The remaining 54
-read as erased, uncommitted, stale, masked, or otherwise invalid records. The
-second header word varies and is intentionally left unnamed; it was not proven
-to be a CRC.
+read as erased, uncommitted, stale, masked, or otherwise invalid records.
+
+The second header word at `+2` is now recovered as a **short-block additive
+checksum**, not a CRC. `FUN_000762c6 @ 0x762C6` is an unsigned byte-sum loop.
+For NvM payload lengths below `0x21`, writer `FUN_000765D0 @ 0x765D0` writes the
+16-bit accumulated sum at `+2`, and reader `FUN_0007668A @ 0x7668A` recomputes
+and compares it, returning `0xFFFC` on mismatch. Across every committed short
+record in both the `4512000` image and the independent albinoelephant Corolla
+specimen, the on-flash value simplifies exactly to:
+
+```text
+header_u16_at_+2 = 0xC000
+                 + sum(0xAAAAAAAA commit-marker bytes)   # 0x2A8
+                 + sum(storage_index encoded little-endian as 2 bytes)
+                 + sum(encoded NvM payload bytes)
+                 mod 2^16
+
+# for a committed record: 0xC000 + 0x2A8 = 0xC2A8
+```
+
+All 27 committed short/triplicate records across those two images satisfy this
+formula. For payload lengths `>= 0x21`, the writer formats `+2` as zero and the
+reader skips this short-block comparison; checkpoint payloads instead have the
+separate generation/complement integrity described below. All 101 committed
+checkpoint records across the two images have `+2 == 0x0000`.
 
 The complete per-record CSV includes storage index, NvM jobs, page allocation,
 virtual range, payload length, header/trailer state, validity, logical ownership,

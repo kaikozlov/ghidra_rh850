@@ -34,22 +34,43 @@ sliding windows are covered, not merely 16-byte-aligned fields.
 ## 2. Physical NvM validity model
 
 The analyzer consumes the independently generated physical record map in
-`data/dataflash_nvm_records.csv`. For every configured record it evaluates only
-the two validity properties already proved by firmware/layout analysis:
+`data/dataflash_nvm_records.csv`. The outer committed-record markers are:
 
 ```text
 first u16 == configured storage index
 final u32 == 0xAAAAAAAA
 ```
 
-A record satisfying both is reported as `observable_valid`.
+Firmware-static follow-up recovered the previously opaque header word at `+2`
+for short records. `0x762C6` sums unsigned bytes; writer `0x765D0` uses that sum
+for NvM payload lengths below `0x21`, and reader `0x7668A` recomputes the value
+and returns `0xFFFC` on mismatch. Every committed short record across the
+`4512000` reference and the independent albinoelephant Corolla dump satisfies:
 
-The second 16-bit physical header word is retained in output as
-`opaque_header_word1`. **It is not called a checksum or CRC.** The current
-firmware analysis has not established that semantic identity. This distinction
-is important for cross-variant work: the tool detects the known physical
-commit/validity structure without inventing an integrity algorithm that has not
-been recovered.
+```text
+header_u16_at_+2 = 0xC000
+                 + sum(0xAAAAAAAA commit-marker bytes)   # 0x2A8
+                 + sum(storage-index bytes)
+                 + sum(encoded payload bytes)
+                 mod 2^16
+
+# committed-record shorthand: base = 0xC2A8
+```
+
+The analyzer therefore requires this reader-enforced checksum for a short
+record to be `observable_valid`. It reports the stored value, expected value,
+comparison result, and whether the read path enforces it. For payload lengths
+`>= 0x21`, writer `0x765D0` formats `+2` as zero while reader `0x7668A` skips the
+short-record comparison; format-specific checks such as checkpoint
+`generation/~generation` remain separate.
+
+The generated report also applies the complete `4512000` reference owner map to
+the target without silently transferring semantics. `reference_nvm_geometry`
+reports committed records by owner class and validates checkpoint
+`generation/~generation` envelopes at reference descriptor offsets;
+`reference_region_statistics` characterizes the lower, checkpoint, triplicate,
+and protected-tail page ranges. Reference owner names/data lengths remain
+explicitly provisional on a foreign calibration.
 
 ## 3. Raw / XOR55 / XORAA redundant-object reconstruction
 

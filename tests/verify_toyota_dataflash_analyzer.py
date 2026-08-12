@@ -21,6 +21,7 @@ from tools.analyze_toyota_dataflash import (  # noqa: E402
     entropy_ranked_windows,
     scan_key_domains,
     sha256,
+    short_block_additive_checksum,
 )
 from tools.toyota_secoc_oracle import load_capture  # noqa: E402
 from tools.toyota_secoc_signer import sign_classic_frame, sign_sync_frame  # noqa: E402
@@ -59,7 +60,15 @@ check("object15 XOR55 key field geometry is FF206D14", obj15["known_key_field_ge
 check("object15 XORAA key field geometry is FF206C14", obj15["known_key_field_geometry"]["xoraa"] == "0xFF206C14")
 check("object15 geometry aligns with related 4514000 observation", obj15["known_key_field_geometry"]["geometry_alignment"] is True)
 check("object15 runtime key equivalence is not invented", obj15["known_key_field_geometry"]["runtime_key_equivalence"] == "unproven")
-check("opaque header word is not mislabeled checksum", "not named as CRC/checksum" in rebuilt["physical_validity_model"]["opaque_field"])
+check(
+    "short-block additive checksum is reader-enforced",
+    "0x7668A" in rebuilt["physical_validity_model"]["short_block_integrity"]
+    and rebuilt["physical_validity_model"]["short_block_mismatch_result"] == "0xFFFC",
+)
+check(
+    "long blocks remain outside the short-block checksum rule",
+    "skips the short-block checksum" in rebuilt["physical_validity_model"]["long_block_header"],
+)
 
 print("\n== synthetic valid object15 triplicate ==")
 layout = list(csv.DictReader((REPO / "data/dataflash_nvm_records.csv").open()))
@@ -74,9 +83,10 @@ for row in layout:
     alloc = int(row["allocation_bytes"])
     storage = int(row["storage_index"])
     reference[start:start+2] = storage.to_bytes(2,"little")
-    reference[start+2:start+4] = b"\x12\x34"  # opaque: validity does not depend on naming it.
     mask = masks[row["copy_encoding"]]
-    reference[start+4:start+36] = bytes(value ^ mask for value in payload)
+    encoded_payload = bytes(value ^ mask for value in payload)
+    reference[start+4:start+36] = encoded_payload
+    reference[start+2:start+4] = short_block_additive_checksum(storage, encoded_payload).to_bytes(2,"little")
     reference[start+36:start+alloc-4] = bytes([mask]) * (alloc-40)
     reference[start+alloc-4:start+alloc] = b"\xaa"*4
 synthetic_objects = {row["object"]: row for row in analyze_triplicate_objects(bytes(reference))}
@@ -85,7 +95,8 @@ check("synthetic object15 recognizes all three physical copies as valid", s15["v
 check("synthetic object15 decodes raw/XOR55/XORAA to one payload", s15["all_decoded_copies_equal"] and s15["valid_consensus"])
 check("synthetic object15 consensus hash matches decoded payload", s15["consensus_payload_sha256"] == sha256(payload))
 check("all three decoded object15 second fields hash to the same key", len({copy["second_field_sha256"] for copy in s15["copies"]}) == 1 and s15["copies"][0]["second_field_sha256"] == sha256(key))
-check("opaque header word does not affect observable validity", all(copy["opaque_header_word1"] == "0x3412" for copy in s15["copies"]))
+check("synthetic object15 short checksums validate", all(copy["header_word1_matches_expected"] for copy in s15["copies"]))
+check("synthetic object15 marks the short checksum as reader-enforced", all(copy["header_word1_reader_enforced"] for copy in s15["copies"]))
 
 print("\n== key-domain classification ==")
 TRIP, RESET = 0x1234, 0x56789

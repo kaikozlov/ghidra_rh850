@@ -27,14 +27,16 @@ What to investigate next, in rough priority order. Completed items move to
    Direct field diagnostics are already mapped; do not repeat those probes.
    See [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md)
    for the structured checklist.
-4. **Test the separate 2023-US public-route specimen's DataFlash.** The CAN
-   oracle is already public and recovered (`0x00F` + protected-family
-   `0x116`/`0x24D` on bus 1), and the complete offline analyzer is ready:
-   all-window entropy ranking, known NvM physical validity, raw/XOR55/XORAA
-   redundant-object consensus, object-15 geometry comparison, and independent
-   sync/per-ID key-domain classification. Acquire only the already-reported
-   completed 32 KiB DataFlash dump plus exact EPS `F181`; no new CAN trace is
-   required for the initial cryptographic test. Canonical:
+4. **Close the remaining identity/runtime-key boundary on the separate 2023-US
+   public-route specimen.** The completed 32 KiB DataFlash is now analyzed: no
+   raw key matches the local TSKM `0x00F` oracle, no public-route protected-domain
+   raw key matches, 60 committed records fit the reference physical map, and an
+   active 117/118 checkpoint ring occupies a `4512000`-disabled slot. The local
+   capture (`TRIP 0xD0D`) and dump are separate TSKM jobs, and the dump performs
+   a programming/SecurityAccess/RAM-exec transition; the older public route is
+   `TRIP 0xCE9`. Acquire exact EPS `F181` and CodeFlash; if revisiting the car,
+   capture full-bus sync/protected traffic immediately before the dump transition
+   and again after recovery/reset to establish key continuity. Canonical:
    [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md),
    [../tooling/toyota-dataflash-analysis.md](../tooling/toyota-dataflash-analysis.md).
 5. **Populate the TSS 3.0 family matrix.** Extend

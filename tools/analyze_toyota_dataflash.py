@@ -42,12 +42,17 @@ from tools.toyota_secoc_oracle import (  # noqa: E402
 
 DEFAULT_BASE = 0xFF200000
 LAYOUT_CSV = REPO / "data/dataflash_nvm_records.csv"
+CHECKPOINT_PAYLOAD_CSV = REPO / "data/checkpoint_payload_map.csv"
 REFERENCE_DUMP = REPO / "firmware/RH850_P1M-E_DataFlash.bin"
 REFERENCE_OUTPUT = REPO / "data/generated/dataflash_structural_analysis_4512000.json"
 OBJECT15_RELATED_VARIANT_ADDRESS = 0xFF206E14
 OBJECT15_RELATED_VARIANT_SHA256_PREFIX = "1d1c53a6d634016a"
 
 ENCODING_MASKS = {"raw": 0x00, "xor55": 0x55, "xoraa": 0xAA}
+COMMIT_MARKER = b"\xAA" * 4
+SHORT_BLOCK_CHECKSUM_LIMIT = 0x21
+SHORT_BLOCK_CHECKSUM_BIAS = 0xC000
+SHORT_BLOCK_CHECKSUM_BASE = SHORT_BLOCK_CHECKSUM_BIAS + sum(COMMIT_MARKER)  # 0xC2A8
 
 
 def sha256(data: bytes) -> str:
@@ -78,29 +83,193 @@ def record_bytes(dump: bytes, row: dict[str, str], base_address: int) -> bytes:
     return dump[start : start + allocation]
 
 
+def short_block_additive_checksum(storage_index: int, encoded_payload: bytes) -> int:
+    """Reproduce the reader-enforced +2 checksum used by NvM payloads shorter than 0x21 bytes.
+
+    Firmware helper 0x762C6 sums unsigned bytes. The committed-record path first
+    validates/accumulates the four 0xAA trailer bytes (sum 0x2A8), then the two
+    storage-index bytes and encoded payload, with a 0xC000 bias before the +2
+    comparison. Cross-image validation yields the equivalent formula below for
+    every committed short record in the 4512000 and albinoelephant dumps.
+    """
+    index_bytes = storage_index.to_bytes(2, "little", signed=False)
+    return (SHORT_BLOCK_CHECKSUM_BASE + sum(index_bytes) + sum(encoded_payload)) & 0xFFFF
+
+
 def analyze_physical_record(dump: bytes, row: dict[str, str], base_address: int) -> dict[str, object]:
     raw = record_bytes(dump, row, base_address)
     expected_index = int(row["storage_index"])
+    payload_length = int(row["payload_length"])
     header_index = int.from_bytes(raw[0:2], "little")
     header_word1 = int.from_bytes(raw[2:4], "little")
     trailer = raw[-4:]
-    valid = header_index == expected_index and trailer == b"\xAA" * 4
+    marker_valid = header_index == expected_index and trailer == COMMIT_MARKER
+
+    short_block = payload_length < SHORT_BLOCK_CHECKSUM_LIMIT
+    checksum_expected: int | None = None
+    checksum_matches: bool | None = None
+    if short_block:
+        checksum_expected = short_block_additive_checksum(
+            expected_index, raw[4 : 4 + payload_length]
+        )
+        checksum_matches = header_word1 == checksum_expected
+
+    # The short-block checksum is explicitly checked by the firmware read path
+    # (0x7668A -> 0xFFFC on mismatch). Longer records skip that comparison; their
+    # internal formats can impose separate integrity checks (for example the
+    # checkpoint generation/complement envelope).
+    valid = marker_valid and (checksum_matches is not False)
     return {
         "storage_index": expected_index,
         "va_start": row["va_start"],
         "allocation_bytes": len(raw),
-        "payload_length": int(row["payload_length"]),
+        "payload_length": payload_length,
         "header_index": f"0x{header_index:04X}",
         "expected_header_index": f"0x{expected_index:04X}",
         "header_index_matches": header_index == expected_index,
-        "opaque_header_word1": f"0x{header_word1:04X}",
+        "header_word1": f"0x{header_word1:04X}",
+        "header_word1_role": (
+            "reader-enforced additive checksum" if short_block
+            else "writer-formatted zero; short-block checksum path not used"
+        ),
+        "header_word1_expected": (
+            f"0x{checksum_expected:04X}" if checksum_expected is not None else "0x0000"
+        ),
+        "header_word1_matches_expected": (
+            checksum_matches if short_block else header_word1 == 0
+        ),
+        "header_word1_reader_enforced": short_block,
         "trailer": trailer.hex(),
-        "trailer_committed_marker": trailer == b"\xAA" * 4,
+        "trailer_committed_marker": trailer == COMMIT_MARKER,
         "observable_valid": valid,
         "integrity_boundary": (
-            "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum"
+            "short payloads (<0x21 bytes) require the additive +2 checksum on the firmware read path; "
+            "longer records skip that read-side checksum and may have format-specific integrity"
         ),
     }
+
+
+def load_checkpoint_data_lengths(path: Path = CHECKPOINT_PAYLOAD_CSV) -> dict[int, int]:
+    with path.open(newline="", encoding="utf-8") as stream:
+        return {
+            int(row["object_index"]): int(row["data_length"])
+            for row in csv.DictReader(stream)
+        }
+
+
+def analyze_reference_nvm_geometry(dump: bytes, base_address: int = DEFAULT_BASE) -> dict[str, object]:
+    """Apply the 4512000 physical owner map without promoting its semantics to the target.
+
+    The storage/page extents and owner indexes are reference geometry. A target image can
+    independently corroborate that geometry by satisfying the outer commit markers and,
+    for checkpoint-shaped records, the generation/complement envelope at the reference
+    descriptor's inverse offset.
+    """
+    rows = load_layout()
+    checkpoint_lengths = load_checkpoint_data_lengths()
+    committed_by_class: Counter[str] = Counter()
+    checkpoint_records = []
+
+    for row in rows:
+        physical = analyze_physical_record(dump, row, base_address)
+        if not physical["observable_valid"]:
+            continue
+        committed_by_class[row["owner_class"]] += 1
+        if row["owner_class"] != "checkpoint":
+            continue
+
+        raw = record_bytes(dump, row, base_address)
+        owner_index = int(row["owner_index"])
+        reference_data_length = checkpoint_lengths[owner_index]
+        inverse_offset = 8 + max(reference_data_length, 56)
+        generation = int.from_bytes(raw[4:8], "little")
+        inverse = int.from_bytes(raw[inverse_offset : inverse_offset + 4], "little")
+        envelope_valid = inverse == (~generation & 0xFFFFFFFF)
+        checkpoint_records.append({
+            "storage_index": int(row["storage_index"]),
+            "va_start": row["va_start"],
+            "reference_owner_index": owner_index,
+            "reference_owner_enabled": row["owner_enabled"] == "yes",
+            "reference_owner_slot": int(row["owner_slot"]),
+            "reference_data_length": reference_data_length,
+            "generation": f"0x{generation:08X}",
+            "inverse_generation": f"0x{inverse:08X}",
+            "inverse_offset": inverse_offset,
+            "generation_complement_valid": envelope_valid,
+            "nonzero_bytes_after_reference_data_before_inverse": sum(
+                value != 0 for value in raw[8 + reference_data_length : inverse_offset]
+            ),
+        })
+
+    disabled = [
+        row for row in checkpoint_records
+        if not row["reference_owner_enabled"] and row["generation_complement_valid"]
+    ]
+    return {
+        "reference": "8965B4512000 data/dataflash_nvm_records.csv + checkpoint_payload_map.csv",
+        "semantic_transfer": "unproven; owner indexes and data lengths are reference labels",
+        "configured_physical_records": len(rows),
+        "committed_records": sum(committed_by_class.values()),
+        "committed_by_reference_owner_class": dict(sorted(committed_by_class.items())),
+        "checkpoint_committed_records": len(checkpoint_records),
+        "checkpoint_generation_complement_valid": sum(
+            row["generation_complement_valid"] for row in checkpoint_records
+        ),
+        "reference_enabled_checkpoint_envelopes": sum(
+            row["reference_owner_enabled"] and row["generation_complement_valid"]
+            for row in checkpoint_records
+        ),
+        "reference_disabled_checkpoint_envelopes": disabled,
+        "checkpoint_records": checkpoint_records,
+    }
+
+
+def reference_region_statistics(dump: bytes) -> list[dict[str, object]]:
+    """Describe the four page ranges established by the 4512000 DataFlash geometry."""
+    regions = (
+        ("lower_unallocated_reference", 0x0000, 0x4000),
+        ("checkpoint_reference", 0x4000, 0x6C00),
+        ("triplicate_reference", 0x6C00, 0x7800),
+        ("tail_protected_reference", 0x7800, 0x8000),
+    )
+    output = []
+    for name, start, end in regions:
+        region = dump[start:end]
+        page_classes: Counter[str] = Counter()
+        for offset in range(0, len(region), 64):
+            page = region[offset : offset + 64]
+            if page == b"\x00" * len(page):
+                page_classes["all_00"] += 1
+            elif page == b"\xFF" * len(page):
+                page_classes["all_ff"] += 1
+            elif set(page) <= {0x00, 0xFF}:
+                page_classes["00_ff_only"] += 1
+            else:
+                page_classes["mixed"] += 1
+        word_classes: Counter[str] = Counter()
+        for offset in range(0, len(region), 4):
+            word = region[offset : offset + 4]
+            if word == b"\x00" * 4:
+                word_classes["all_00"] += 1
+            elif word == b"\xFF" * 4:
+                word_classes["all_ff"] += 1
+            else:
+                word_classes["mixed"] += 1
+        zero_bytes = region.count(0)
+        ff_bytes = region.count(0xFF)
+        output.append({
+            "name": name,
+            "offset_start": start,
+            "offset_end_exclusive": end,
+            "size": len(region),
+            "page_classes": dict(sorted(page_classes.items())),
+            "word_classes": dict(sorted(word_classes.items())),
+            "zero_bytes": zero_bytes,
+            "ff_bytes": ff_bytes,
+            "other_bytes": len(region) - zero_bytes - ff_bytes,
+            "distinct_byte_values": len(set(region)),
+        })
+    return output
 
 
 def decode_triplicate_payload(dump: bytes, row: dict[str, str], base_address: int) -> tuple[bytes, dict[str, object]]:
@@ -312,16 +481,31 @@ def analyze(
     except ValueError:
         display_dump = str(dump_path.resolve())
     result: dict[str, object] = {
-        "schema_version": 1,
+        "schema_version": 2,
         "dump": display_dump,
         "dump_sha256": sha256(dump),
         "base_address": f"0x{base_address:08X}",
         "size": len(dump),
         "entropy_windows": entropy_ranked_windows(dump, base_address, rank_limit),
+        "reference_region_statistics": reference_region_statistics(dump),
+        "reference_nvm_geometry": analyze_reference_nvm_geometry(dump, base_address),
         "triplicate_objects": analyze_triplicate_objects(dump, base_address),
         "physical_validity_model": {
-            "valid_when": "first u16 == configured storage index AND final u32 == 0xAAAAAAAA",
-            "opaque_field": "record header u16 at +2 is retained but not named as CRC/checksum",
+            "committed_marker_rule": "first u16 == configured storage index AND final u32 == 0xAAAAAAAA",
+            "short_block_integrity": (
+                "for payload_length < 0x21, the read path accumulates the 0xAAAAAAAA trailer, "
+                "storage-index bytes, and encoded payload, then 0x7668A requires header +2 == "
+                "(0xC000 + sum(trailer bytes) + sum(storage-index bytes) + "
+                "sum(encoded payload bytes)) mod 2^16; committed trailers reduce this to base 0xC2A8"
+            ),
+            "short_block_mismatch_result": "0xFFFC",
+            "long_block_header": (
+                "writer 0x765D0 formats header +2 as zero for payload_length >= 0x21; "
+                "reader 0x7668A skips the short-block checksum comparison"
+            ),
+            "observable_valid_when": (
+                "committed marker rule, plus the reader-enforced additive checksum for short blocks"
+            ),
         },
     }
     if capture_path is not None:

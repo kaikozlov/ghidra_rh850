@@ -145,13 +145,21 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   diagnostic endpoint, responding SIDs, level-`0x03` seed behavior, and
   observed SecOC traffic; do not describe those as unknown. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
-- **Separate 2023 US Corolla public-route specimen.** The public route now
-  supplies enough genuine `0x00F`/`0x116`/`0x24D` traffic to serve as the CAN
-  oracle and disproves the earlier interpretation of returned `0x191`/`0x2E4`
-  as stock camera traffic. The remaining high-value artifact gap is narrow:
-  obtain the already-reported completed 32 KiB DataFlash dump plus the exact EPS
-  `F181` response. Route metadata is forced `TOYOTA_COROLLA_TSS2` with no
-  `carFw`, so it cannot identify the physical calibration. See
+- **Separate 2023 US Corolla public-route specimen.** The completed 32 KiB
+  DataFlash and its sync-only TSKM oracle are now retained and analyzed. No raw
+  dump window matches the local `0x00F` oracle; however CAN capture and dumping
+  are separate TSKM jobs and the dump performs a programming/SecurityAccess/
+  RAM-exec transition, so identical runtime-key epoch is not proven. The older
+  public-route `0x116`/`0x24D` oracle also gives zero raw key matches and is
+  definitely a different freshness epoch (`TRIP 0xCE9` versus local `0xD0D`).
+  The full `4512000` physical map finds 60 committed records, including a
+  coherent 117/118 checkpoint ring in a reference-disabled slot, proving shared
+  geometry with variant-specific provisioning. Remaining high-value gaps are
+  exact EPS `F181`, CodeFlash, and—if the vehicle is revisited—a controlled
+  full-bus capture immediately before the dump transition and again after
+  recovery/reset to establish runtime-key continuity.
+  Route metadata is forced `TOYOTA_COROLLA_TSS2` with no `carFw`, so it cannot
+  identify the physical calibration. See
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md).
 - **TSS 3.0 family breadth.** Which Sienna findings generalize across the
   family (Camry, RAV4, etc.) is unmapped. See

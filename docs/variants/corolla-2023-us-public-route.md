@@ -166,7 +166,7 @@ and prevents interpreting that failure as evidence about EPS SecOC acceptance.
 
 ## 5. Why TSKM reported insufficient protected traffic
 
-The contributor supplied the actual TSKM output from the successful dump run:
+The contributor supplied the actual TSKM CAN output from the same successful dump investigation:
 
 ```text
 community/albinoelephant/can_oracle.ndjson
@@ -175,7 +175,13 @@ community/albinoelephant/can_oracle.ndjson
 It contains exactly 1,232 rows, all CAN `0x00F` synchronization frames: 616 on
 Panda bus 0 and the same 616 on bus 2. There are **zero protected-message rows**.
 That directly explains the TSKM matcher failure without making any statement
-about whether the car itself emits protected traffic.
+about whether the car itself emits protected traffic. All supplied TSKM sync
+frames decode to `TRIP_CNT=0xD0D`. The oracle came from the same TSKM
+investigation as the dump, but it is **not proven to be the same EPS runtime
+epoch**: CAN collection and DataFlash dumping are separate mutually-exclusive
+jobs, and the dump path enters programming mode, performs SecurityAccess,
+uploads code, and executes it. Treat `0xD0D` as the closest local
+synchronization-key oracle, not as a same-session guarantee.
 
 The public route independently supplies the missing genuine bus-1 traffic:
 `0x00F`, `0x116`, and `0x24D`. The repository therefore retains a compact
@@ -186,10 +192,14 @@ community/albinoelephant/public_route_secoc_oracle.ndjson
 ```
 
 It contains 588 `0x00F`, 2,499 `0x116`, and 59 `0x24D` frames; only three initial
-`0x116` frames precede the first observed synchronization frame. This replaces
-the old interpretation of `0 protected` with direct evidence: the local TSKM
-capture was sync-only while the separately logged vehicle traffic contains the
-classic protected-family IDs that TSKM's Sienna-shaped filter did not retain.
+`0x116` frames precede the first observed synchronization frame. Its sync frames
+have `TRIP_CNT=0xCE9`, so the public route is a **different ignition freshness
+epoch** from the local TSKM capture (`0xD0D`). This replaces the old
+interpretation of `0 protected` with direct evidence: the local TSKM capture was
+sync-only while the separately logged vehicle traffic contains the classic
+protected-family IDs that TSKM's Sienna-shaped filter did not retain. It also
+means protected-key conclusions made by pairing the public route with the dump
+carry an explicit cross-session key-stability assumption.
 
 ## 6. Supplied DataFlash result
 
@@ -209,19 +219,51 @@ synchronization, `0x116`, and `0x24D` independently.
 
 **Result: zero candidate matches in any domain.**
 
-This is a bounded but strong cryptographic negative for a raw CPU-visible key in
-this DataFlash snapshot. It does not prove that the ECU lacks SecOC, that the
-key is absent from every other storage region, or that ICU-S/HSM cannot own or
-derive it internally.
+The same 23,277 unique raw windows were also scanned against the supplied local
+TSKM `0x00F` oracle and again produced **zero synchronization-key matches**.
+This is closer evidence than the older public route, but it still cannot prove
+runtime-key continuity across the separate CAN-capture and programming/dump
+jobs. It therefore excludes a static raw DataFlash value equal to the locally
+observed synchronization key, not a session-derived key. The `0x116`/`0x24D`
+protected-domain negative uses the older public-route session and carries an
+even wider key-stability boundary.
+
+As a bounded derivation check, all 23,277 unique dump windows were also tested
+after each of six simple transformations — XOR55, XORAA, bitwise NOT, complete
+16-byte reversal, per-32-bit byte swap, and per-16-bit byte swap — against the
+public-route domains. None survived even the first cryptographic probe. This
+rules out those obvious representations, not arbitrary KDF/encryption schemes.
+
+The result is therefore a strong cryptographic negative for a **static raw
+CPU-visible synchronization key** in this DataFlash snapshot, with strong but
+cross-session evidence against a raw protected key. It does not prove that the ECU lacks
+SecOC, that the key is absent from every other storage region, or that ICU-S/HSM
+cannot own or derive it internally.
 
 ### Shared NvM structure, different provisioning state
 
-Applying the physical NvM geometry recovered from `8965B4512000` also produces
-a non-random structural result on this Corolla dump. At the same physical
-locations, objects 0, 2, and 5 each have all three committed raw/XOR55/XORAA
-copies and decode to one consensus payload. Objects 1, 3, 4, 6, 12, 13, 14, and
-15 have no valid copy under the proved storage-index + `0xAAAAAAAA` validity
-rule.
+Applying the complete physical NvM geometry recovered from `8965B4512000`
+produces a much stronger cross-family result than the initial triplicate-only
+pass. The Corolla dump has **60 committed records** at the 122 reference
+extents: 9 triplicate records and **51 checkpoint records**. All 51 committed
+checkpoint records also satisfy the expected `generation/~generation` envelope
+at the inverse location predicted by the reference descriptor geometry.
+Forty-nine map to reference-enabled checkpoint owners.
+
+The two exceptions are storage indexes **117** (`0xFF204280`) and **118**
+(`0xFF204200`), which the `4512000` map assigns to disabled checkpoint owner 28.
+In the Corolla dump they form a coherent two-slot ring: generations `0x25` and
+`0x24`, exact complements at physical offset `+0x40`, and committed
+`0xAAAAAAAA` trailers. Both contain nonzero data well beyond the reference
+owner-28 8-byte payload boundary. This is strong evidence that the physical
+storage geometry transfers while Corolla descriptor/provisioning semantics do
+not exactly match `4512000`.
+
+At the same triplicate locations, objects 0, 2, and 5 each have all three
+committed raw/XOR55/XORAA copies and decode to one consensus payload. Objects
+1, 3, 4, 6, 12, 13, 14, and 15 have no valid copy. The previously opaque second
+header word is now recovered as a reader-enforced short-record additive
+checksum, and all nine committed Corolla triplicate records satisfy it.
 
 Two consensus payloads are byte-identical by hash to `4512000`:
 
@@ -255,13 +297,19 @@ The vehicle attribution therefore remains external until F181 is obtained.
 
 ## 8. Narrow artifact request after DataFlash closure
 
-For this specimen the DataFlash and CAN-oracle requests are now closed. The
-highest-yield remaining asks are:
+For this specimen the existing artifacts are substantially analyzed, but the
+cross-session boundary reopens one narrow dynamic request. Highest-yield next
+evidence is:
 
 1. **the exact EPS F181 response** (and secondary software ID if present);
-2. **CodeFlash**, if a safe/reliable acquisition path becomes available.
+2. **CodeFlash**, if a safe/reliable acquisition path becomes available;
+3. if the vehicle is revisited, a **controlled paired capture around the dump**:
+   full-bus synchronization/protected CAN immediately before the programming
+   transition, then repeat after recovery/reset and retain the resulting
+   DataFlash dump plus exact `F181`.
 
-No additional CAN capture is required for the current DataFlash-key question:
-the retained public-route oracle already supplies substantial `0x00F` +
-`0x116` + `0x24D` traffic, and the actual dump has now been exhaustively scanned
-against it at every raw 16-byte offset.
+The existing local TSKM oracle is useful but was collected as a separate job.
+A controlled paired recapture would establish whether synchronization and
+protected keys survive the programming/reset transition instead of assuming
+runtime-key continuity. An unrelated additional CAN capture would not close
+that boundary.
