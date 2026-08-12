@@ -30,7 +30,15 @@ public class AssertApplicationReceiveMap extends GhidraScript {
     private int failures = 0;
     private int checkedWrites = 0;
     private int checkedReads = 0;
+    private int localPostprocess = 0;
+    private int storedNoDirectConsumer = 0;
     private int boundedExceptions = 0;
+
+    private static final Set<Integer> EXPECTED_LOCAL_POSTPROCESS = Set.of(
+            231, 233, 235, 237, 270, 273, 276);
+    private static final Set<Integer> EXPECTED_STORED_NO_DIRECT_CONSUMER = Set.of(
+            62, 70, 107, 115, 144, 173, 177, 194, 197,
+            256, 257, 261, 262, 263, 278, 286, 291, 292);
 
     private static final long RECEIVE_SIGNAL = 0x7c03eL;
 
@@ -94,6 +102,8 @@ public class AssertApplicationReceiveMap extends GhidraScript {
 
         println("ASSERT application-rx-map: write_checks=" + checkedWrites
                 + " read_checks=" + checkedReads
+                + " local_postprocess=" + localPostprocess
+                + " stored_no_direct_consumer=" + storedNoDirectConsumer
                 + " bounded_exceptions=" + boundedExceptions
                 + " failures=" + failures);
         if (failures != 0) {
@@ -126,11 +136,13 @@ public class AssertApplicationReceiveMap extends GhidraScript {
 
             boolean unpackerTargets = false;
             boolean consumerReads = false;
+            int directRefCount = 0;
             Set<Long> writeOwners = new HashSet<>();
             Set<Long> readOwners = new HashSet<>();
             ReferenceIterator rit = currentProgram.getReferenceManager().getReferencesTo(destA);
             while (rit.hasNext()) {
                 Reference ref = rit.next();
+                directRefCount++;
                 RefType rt = ref.getReferenceType();
                 Function fn = getFunctionContaining(ref.getFromAddress());
                 long ea = fn == null ? -1L : fn.getEntryPoint().getOffset();
@@ -173,6 +185,43 @@ public class AssertApplicationReceiveMap extends GhidraScript {
             }
 
             if (consumer.startsWith("configured-unresolved")) {
+                if (EXPECTED_LOCAL_POSTPROCESS.contains(signalId)) {
+                    if (!readOwners.equals(Set.of(unpacker))) {
+                        fail(String.format(Locale.ROOT,
+                                "signal %d expected unpacker-local READ only, got owners=%s",
+                                signalId, readOwners));
+                    }
+                    if (!writeOwners.equals(Set.of(0x57bfeL))) {
+                        fail(String.format(Locale.ROOT,
+                                "signal %d local-postprocess WRITE owners changed: %s",
+                                signalId, writeOwners));
+                    }
+                    if (directRefCount != 3) {
+                        fail(String.format(Locale.ROOT,
+                                "signal %d local-postprocess direct-ref count expected=3 actual=%d",
+                                signalId, directRefCount));
+                    }
+                    localPostprocess++;
+                } else if (EXPECTED_STORED_NO_DIRECT_CONSUMER.contains(signalId)) {
+                    if (!readOwners.isEmpty()) {
+                        fail(String.format(Locale.ROOT,
+                                "signal %d expected no direct READ, got owners=%s",
+                                signalId, readOwners));
+                    }
+                    if (!writeOwners.equals(Set.of(0x57bfeL))) {
+                        fail(String.format(Locale.ROOT,
+                                "signal %d store-only WRITE owners changed: %s",
+                                signalId, writeOwners));
+                    }
+                    if (directRefCount != 2) {
+                        fail(String.format(Locale.ROOT,
+                                "signal %d store-only direct-ref count expected=2 actual=%d",
+                                signalId, directRefCount));
+                    }
+                    storedNoDirectConsumer++;
+                } else {
+                    fail("unexpected configured-unresolved signal " + signalId);
+                }
                 boundedExceptions++;
                 continue;
             }

@@ -130,6 +130,35 @@ The 28-bit value occupies the low nibble of byte 4 and bytes 5–7 in an eight-b
 frame. This matches the independent CAN oracle, but the static evidence above is
 sufficient to establish the configured widths and bit extraction.
 
+### 2.1 Post-verification COM field use
+
+The application COM audit now separates authentication from downstream scalar
+use. Nine extracted fields on SecOC PDUs previously lacked a non-unpacker direct
+READ consumer. A dedicated live-project audit plus raw-CodeFlash checks split
+them into two exact classes:
+
+- CAN-FD `0x090` signals **270/273/276** are immediately re-read inside their
+  unpacker as unsigned 10-bit halfwords, normalized by `FUN_0004A49C` with
+  offset `0x0200`, and emitted as derived halfwords at
+  `0xFEBE8060/8062/8064`; those derived values are consumed downstream by
+  `application_rx_signal_consumer_56fc2`;
+- six scalar destinations are **stored with no direct software READ** in the
+  current graph: `0x2E4` signal **62**, `0x131` signal **115**, `0x132` signals
+  **194/197**, `0x090` signal **278**, and `0x0D7` signal **286**. Each has
+  exactly one unpacker DATA target plus its default initializer WRITE, no direct
+  READ owner, and no outside `PARAM` pointer into that unpacker's exact
+  destination range. Sibling fields in every one of those unpackers do have
+  consumers, so these are selective omissions rather than dead unpackers.
+
+This consumer result does **not** weaken SecOC protection. Signals 62, 194, and
+197 lie in the authentic payload. Signals 115, 278, and 286 occupy the
+transmitted-freshness nibble at the start of the SecOC trailer; changing them
+changes reconstructed freshness and therefore the verification input/state.
+The bounded negative is only about the post-unpack scalar destinations after a
+secured PDU is accepted. See
+[application-rx.md](../../communications/application-rx.md) §5.2 for the full
+25-row consumer denominator and search boundary.
+
 ## 3. Freshness representation
 
 `0x8EA4C` packs normal full freshness into six bytes as 46 meaningful bits followed

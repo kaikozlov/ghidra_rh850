@@ -117,14 +117,22 @@ paths = [
 ]
 
 [suite.application_receive]
-tests = ["tests/verify_application_receive.py"]
+tests = [
+  "tests/verify_application_receive.py",
+  "tests/verify_application_rx_consumer_audit.py",
+]
 paths = [
   "docs/communications/application-rx.md",
+  "docs/security/secoc/application-chain.md",
   "data/application_rx_map.csv",
   "data/application_rx_signal_evidence.csv",
+  "data/application_rx_consumer_audit.csv",
   "tools/generate_application_rx_map.py",
   "tools/generate_application_rx_signal_evidence.sh",
+  "tools/generate_application_rx_consumer_audit.sh",
   "ghidra/scripts/verify/ExportApplicationRxSignalEvidence.java",
+  "ghidra/scripts/verify/ExportApplicationRxConsumerAudit.java",
+  "ghidra/scripts/verify/AssertApplicationReceiveMap.java",
 ]
 
 [suite.application_routine_id_callbacks]

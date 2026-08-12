@@ -217,12 +217,58 @@ recovered CSV rows against Ghidra refs:
 |---|---:|
 | Recovered rows audited | 145 |
 | Concrete dest DATA/WRITE ownership (unpacker targets dest) | 131 |
-| Concrete first-consumer READ ownership | 106 |
-| Bounded exceptions (14 opaque dest + 25 unresolved consumer) | 39 |
+| Concrete non-unpacker first-consumer READ ownership | 106 |
+| Unpacker-local post-process inputs | 7 |
+| Stored scalar destinations with no direct READ consumer | 18 |
+| Opaque/group destinations | 14 |
 
 Indirect stores through `receive_signal` are proved by unpacker DATA refs to the
 destination. Explicit WRITE co-owners `0x1404` (boot BSS clear) and `0x57bfe`
-(app default-init) are allowlisted; unexpected WRITE/READ owners fail.
+(app default-init) are allowlisted; unexpected WRITE/READ owners fail. The old
+25-row `configured-unresolved` consumer bucket is no longer treated as one
+undifferentiated exception. `data/application_rx_consumer_audit.csv` regenerates
+that exact denominator from the live project and splits it into **7 local
+post-process inputs** and **18 store-only direct-reference shapes**.
+
+The seven local inputs are deterministic generated conversions rather than dead
+fields. CAN `0x0AA` signals **231/233/235/237** are unsigned 15-bit halfwords;
+each raw value is immediately re-read by the same unpacker and passed through
+`FUN_0004A49C` with offset `0x1A6F`, producing the derived halfwords at
+`0xFEBE8032/8034/8036/8038`. SecOC CAN-FD `0x090` signals
+**270/273/276** are unsigned 10-bit halfwords normalized the same way with
+offset `0x0200`, producing `0xFEBE8060/8062/8064`. All seven derived outputs
+have downstream reads in `application_rx_signal_consumer_56fc2`; several of the
+`0x0AA` results also feed additional state consumers.
+
+The other **18** destinations have an exact two-reference scalar shape in the
+current graph: one DATA target from their generated unpacker and one default
+initializer WRITE, with **no direct READ**. The read-only consumer audit also
+finds no outside `PARAM` pointer into the exact destination range owned by the
+same unpacker. As a separate whole-bank check, **no `PARAM` or plain `DATA`
+address-taking reference into `0xFEBE7F94..0xFEBE8084` originates outside the
+generated unpacker cluster**; this excludes the Ghidra-visible pointer forms a
+generic memcpy/RTE-style whole-bank consumer would normally require. Sixteen of
+those 18 are selective omissions inside unpackers whose sibling fields do have
+downstream consumers; only CAN `0x020` signals **291/292** form an entire
+two-signal unpacker with no scalar consumer. This remains a bounded static
+result, not a proof against a representation that creates neither a direct
+READ nor a Ghidra `PARAM`/plain-`DATA` address reference.
+
+For SecOC specifically, the nine formerly direct-read-unresolved fields split
+as follows:
+
+- **local post-process:** CAN `0x090` signals **270/273/276**;
+- **stored-no-direct-consumer:** CAN `0x2E4` signal **62**, CAN `0x131` signal
+  **115**, CAN `0x132` signals **194/197**, CAN `0x090` signal **278**, and CAN
+  `0x0D7` signal **286**.
+
+The latter six are still inside the SecOC-protected envelope. Signals 62,
+194, and 197 occupy authentic-payload bits; signals 115, 278, and 286 occupy the
+transmitted-freshness nibble at the start of the trailer, which affects full
+freshness reconstruction and therefore verification. Thus
+"stored-no-direct-consumer" means the recovered post-unpack scalar has no
+direct software consumer; it does **not** mean those wire bits bypass SecOC or
+can be changed without satisfying freshness/MAC verification.
 
 ### 5.3 Signals 95..100 form a dormant crypto-test input bank
 
