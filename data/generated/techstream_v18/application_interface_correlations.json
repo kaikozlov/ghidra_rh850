@@ -1,0 +1,623 @@
+{
+  "schema_version": 1,
+  "source": "Techstream V18.00.003 + pinned Toyota opendbc",
+  "artifacts": {
+    "kgp_data_ctrl": {
+      "relative_path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll",
+      "sha256": "e5235bc0c241c6a450fe461031eed0915675032b1db994bd54d98818fac88aa9"
+    },
+    "p5_signal_info": {
+      "relative_path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetDatMonSignalInfoP5_DT.dll",
+      "sha256": "8f9e6149fca5e4fe6d9827f394f43019e6ee415c6f0ffc3b381ce6ca4c298f2a"
+    }
+  },
+  "master_routes": [
+    {
+      "region": "NA",
+      "master_sha256": "63ee18391421a7b02996eef282bc8ea3251889981d9cf9e1722e89f4952cb19e",
+      "record_index": 374,
+      "category_id": 405,
+      "generation": 20,
+      "resolved_ecu_name": "EMPS",
+      "database_name": "EMPS_P5.ddb",
+      "dlls": [
+        {
+          "dll_role_id": 5,
+          "dll_name": "GetDatMonListP5_DT.dll"
+        },
+        {
+          "dll_role_id": 25,
+          "dll_name": "DelDiagCodeP4.dll"
+        },
+        {
+          "dll_role_id": 41,
+          "dll_name": "JudgeDiagStatusP5_DT.dll"
+        },
+        {
+          "dll_role_id": 65,
+          "dll_name": "GetDatMonSignalInfoP5_DT.dll"
+        },
+        {
+          "dll_role_id": 82,
+          "dll_name": "GetCID_SID22_DT.dll"
+        },
+        {
+          "dll_role_id": 103,
+          "dll_name": "GetSupportP5_DT.dll"
+        },
+        {
+          "dll_role_id": 160,
+          "dll_name": "GetRoBP5_DT.dll"
+        },
+        {
+          "dll_role_id": 161,
+          "dll_name": "DelRoBP5_DT.dll"
+        }
+      ]
+    },
+    {
+      "region": "EU",
+      "master_sha256": "284041de59b6932e2ab1e5b299bb22f7f006463760379566fabc46c7107b309b",
+      "record_index": 374,
+      "category_id": 405,
+      "generation": 20,
+      "resolved_ecu_name": "EMPS",
+      "database_name": "EMPS_P5.ddb",
+      "dlls": [
+        {
+          "dll_role_id": 5,
+          "dll_name": "GetDatMonListP5_DT.dll"
+        },
+        {
+          "dll_role_id": 25,
+          "dll_name": "DelDiagCodeP4.dll"
+        },
+        {
+          "dll_role_id": 41,
+          "dll_name": "JudgeDiagStatusP5_DT.dll"
+        },
+        {
+          "dll_role_id": 65,
+          "dll_name": "GetDatMonSignalInfoP5_DT.dll"
+        },
+        {
+          "dll_role_id": 82,
+          "dll_name": "GetCID_SID22_DT.dll"
+        },
+        {
+          "dll_role_id": 103,
+          "dll_name": "GetSupportP5_DT.dll"
+        },
+        {
+          "dll_role_id": 160,
+          "dll_name": "GetRoBP5_DT.dll"
+        },
+        {
+          "dll_role_id": 161,
+          "dll_name": "DelRoBP5_DT.dll"
+        }
+      ]
+    },
+    {
+      "region": "JP",
+      "master_sha256": "0440d1f062eb3ba687d9e67fa2d4f964fff730a53fd9d7a4adc62e9c31321a86",
+      "record_index": 374,
+      "category_id": 405,
+      "generation": 20,
+      "resolved_ecu_name": "EMPS",
+      "database_name": "EMPS_P5.ddb",
+      "dlls": [
+        {
+          "dll_role_id": 5,
+          "dll_name": "GetDatMonListP5_DT.dll"
+        },
+        {
+          "dll_role_id": 25,
+          "dll_name": "DelDiagCodeP4.dll"
+        },
+        {
+          "dll_role_id": 41,
+          "dll_name": "JudgeDiagStatusP5_DT.dll"
+        },
+        {
+          "dll_role_id": 65,
+          "dll_name": "GetDatMonSignalInfoP5_DT.dll"
+        },
+        {
+          "dll_role_id": 82,
+          "dll_name": "GetCID_SID22_DT.dll"
+        },
+        {
+          "dll_role_id": 103,
+          "dll_name": "GetSupportP5_DT.dll"
+        },
+        {
+          "dll_role_id": 160,
+          "dll_name": "GetRoBP5_DT.dll"
+        },
+        {
+          "dll_role_id": 161,
+          "dll_name": "DelRoBP5_DT.dll"
+        }
+      ]
+    }
+  ],
+  "monitors": {
+    "60": [
+      {
+        "region": "NA",
+        "database": "EMPS_P5.ddb",
+        "database_sha256": "1e5ffc4f998570458fa86dd0d563949006f9e0781f15d118d01e80656fadd199",
+        "monitor": {
+          "record_index": 19,
+          "raw_hex": "000000000100000000000000010000000000000000000000d8390200f6390100030000003c00000000000100000007003c00160000006a106a30010000000000",
+          "key": 60,
+          "name_string_index": 145880,
+          "name": "Cooperation Control State",
+          "physical_data_key": 1,
+          "bit_start": 0,
+          "bit_end": 7,
+          "bit_width": 8,
+          "sort_key": 60,
+          "pattern_display_key": 22
+        },
+        "physical_data": {
+          "record_index": 0,
+          "raw_hex": "010000000100000000000000010000000000000000000000",
+          "key": 1,
+          "unit_key": 0
+        },
+        "unit": {
+          "record_index": 0,
+          "raw_hex": "000000000000000000000000",
+          "key": 0,
+          "string_index": 0,
+          "text": null
+        },
+        "pattern_display": [
+          {
+            "record_index": 63,
+            "raw_hex": "fc3902000000000000000000160001000000000000000100",
+            "raw_value_u32": 0,
+            "display_string_index": 145916,
+            "display": "Cooperation Control"
+          },
+          {
+            "record_index": 64,
+            "raw_hex": "ca3c02000100000000000000160002000000000000000100",
+            "raw_value_u32": 1,
+            "display_string_index": 146634,
+            "display": "Other than Cooperation Control"
+          }
+        ],
+        "related_table_hits": [
+          {
+            "table_type": 88,
+            "field": "behavior_key_u16",
+            "record_index": 23,
+            "raw_hex": "000000000000000000000000000000000000000000000000733d0200a73b0100000000003c0000000100000007003c00000000006a50020000000000",
+            "resolved_name": "Cooperation Control State"
+          }
+        ],
+        "active_test_exact_name_hits": []
+      },
+      {
+        "region": "EU",
+        "database": "EMPS_P5.ddb",
+        "database_sha256": "7bcac199a8faac0126175e3037309cc44d7957d425c7aafd17c1d45bc9228564",
+        "monitor": {
+          "record_index": 19,
+          "raw_hex": "000000000100000000000000010000000000000000000000d8390200f6390100030000003c00000000000100000007003c00160000006a106a30010000000000",
+          "key": 60,
+          "name_string_index": 145880,
+          "name": "Cooperation Control State",
+          "physical_data_key": 1,
+          "bit_start": 0,
+          "bit_end": 7,
+          "bit_width": 8,
+          "sort_key": 60,
+          "pattern_display_key": 22
+        },
+        "physical_data": {
+          "record_index": 0,
+          "raw_hex": "010000000100000000000000010000000000000000000000",
+          "key": 1,
+          "unit_key": 0
+        },
+        "unit": {
+          "record_index": 0,
+          "raw_hex": "000000000000000000000000",
+          "key": 0,
+          "string_index": 0,
+          "text": null
+        },
+        "pattern_display": [
+          {
+            "record_index": 63,
+            "raw_hex": "fc3902000000000000000000160001000000000000000100",
+            "raw_value_u32": 0,
+            "display_string_index": 145916,
+            "display": "Cooperation Control"
+          },
+          {
+            "record_index": 64,
+            "raw_hex": "ca3c02000100000000000000160002000000000000000100",
+            "raw_value_u32": 1,
+            "display_string_index": 146634,
+            "display": "Other than Cooperation Control"
+          }
+        ],
+        "related_table_hits": [
+          {
+            "table_type": 88,
+            "field": "behavior_key_u16",
+            "record_index": 23,
+            "raw_hex": "000000000000000000000000000000000000000000000000733d0200a73b0100000000003c0000000100000007003c00000000006a50020000000000",
+            "resolved_name": "Cooperation Control State"
+          }
+        ],
+        "active_test_exact_name_hits": []
+      },
+      {
+        "region": "JP",
+        "database": "EMPS_P5.ddb",
+        "database_sha256": "350ee7b1ee9313306b6086b47116892f75b283581e2dee52aab33dc7638cd288",
+        "monitor": {
+          "record_index": 19,
+          "raw_hex": "000000000100000000000000010000000000000000000000d8390200f6390100030000003c00000000000100000007003c00160000006a106a30010000000000",
+          "key": 60,
+          "name_string_index": 145880,
+          "name": "Cooperation Control State",
+          "physical_data_key": 1,
+          "bit_start": 0,
+          "bit_end": 7,
+          "bit_width": 8,
+          "sort_key": 60,
+          "pattern_display_key": 22
+        },
+        "physical_data": {
+          "record_index": 0,
+          "raw_hex": "010000000100000000000000010000000000000000000000",
+          "key": 1,
+          "unit_key": 0
+        },
+        "unit": {
+          "record_index": 0,
+          "raw_hex": "000000000000000000000000",
+          "key": 0,
+          "string_index": 0,
+          "text": null
+        },
+        "pattern_display": [
+          {
+            "record_index": 63,
+            "raw_hex": "fc3902000000000000000000160001000000000000000100",
+            "raw_value_u32": 0,
+            "display_string_index": 145916,
+            "display": "Cooperation Control"
+          },
+          {
+            "record_index": 64,
+            "raw_hex": "ca3c02000100000000000000160002000000000000000100",
+            "raw_value_u32": 1,
+            "display_string_index": 146634,
+            "display": "Other than Cooperation Control"
+          }
+        ],
+        "related_table_hits": [
+          {
+            "table_type": 88,
+            "field": "behavior_key_u16",
+            "record_index": 23,
+            "raw_hex": "000000000000000000000000000000000000000000000000733d0200a73b0100000000003c0000000100000007003c00000000006a50020000000000",
+            "resolved_name": "Cooperation Control State"
+          }
+        ],
+        "active_test_exact_name_hits": []
+      }
+    ],
+    "402": [
+      {
+        "region": "NA",
+        "database": "EMPS_P5.ddb",
+        "database_sha256": "1e5ffc4f998570458fa86dd0d563949006f9e0781f15d118d01e80656fadd199",
+        "monitor": {
+          "record_index": 99,
+          "raw_hex": "e0b1ffff204e0000e0b1ffff204e0000e0b1ffff000000000fec0100360b010003000000920100000000150000000f00920100000000021c023c020200000000",
+          "key": 402,
+          "name_string_index": 125967,
+          "name": "Command Value Torque",
+          "physical_data_key": 21,
+          "bit_start": 0,
+          "bit_end": 15,
+          "bit_width": 16,
+          "sort_key": 402,
+          "pattern_display_key": 0
+        },
+        "physical_data": {
+          "record_index": 20,
+          "raw_hex": "010000000100000000000000150032000000000001020000",
+          "key": 21,
+          "unit_key": 50
+        },
+        "unit": {
+          "record_index": 8,
+          "raw_hex": "6c0000003200000000000000",
+          "key": 50,
+          "string_index": 108,
+          "text": "Nm"
+        },
+        "pattern_display": [],
+        "related_table_hits": [],
+        "active_test_exact_name_hits": []
+      },
+      {
+        "region": "EU",
+        "database": "EMPS_P5.ddb",
+        "database_sha256": "7bcac199a8faac0126175e3037309cc44d7957d425c7aafd17c1d45bc9228564",
+        "monitor": {
+          "record_index": 99,
+          "raw_hex": "e0b1ffff204e0000e0b1ffff204e0000e0b1ffff000000000fec0100360b010003000000920100000000150000000f00920100000000021c023c020200000000",
+          "key": 402,
+          "name_string_index": 125967,
+          "name": "Command Value Torque",
+          "physical_data_key": 21,
+          "bit_start": 0,
+          "bit_end": 15,
+          "bit_width": 16,
+          "sort_key": 402,
+          "pattern_display_key": 0
+        },
+        "physical_data": {
+          "record_index": 20,
+          "raw_hex": "010000000100000000000000150032000000000001020000",
+          "key": 21,
+          "unit_key": 50
+        },
+        "unit": {
+          "record_index": 8,
+          "raw_hex": "6c0000003200000000000000",
+          "key": 50,
+          "string_index": 108,
+          "text": "Nm"
+        },
+        "pattern_display": [],
+        "related_table_hits": [],
+        "active_test_exact_name_hits": []
+      },
+      {
+        "region": "JP",
+        "database": "EMPS_P5.ddb",
+        "database_sha256": "350ee7b1ee9313306b6086b47116892f75b283581e2dee52aab33dc7638cd288",
+        "monitor": {
+          "record_index": 99,
+          "raw_hex": "e0b1ffff204e0000e0b1ffff204e0000e0b1ffff000000000fec0100360b010003000000920100000000150000000f00920100000000021c023c020200000000",
+          "key": 402,
+          "name_string_index": 125967,
+          "name": "Command Value Torque",
+          "physical_data_key": 21,
+          "bit_start": 0,
+          "bit_end": 15,
+          "bit_width": 16,
+          "sort_key": 402,
+          "pattern_display_key": 0
+        },
+        "physical_data": {
+          "record_index": 20,
+          "raw_hex": "010000000100000000000000150032000000000001020000",
+          "key": 21,
+          "unit_key": 50
+        },
+        "unit": {
+          "record_index": 8,
+          "raw_hex": "6c0000003200000000000000",
+          "key": 50,
+          "string_index": 108,
+          "text": "Nm"
+        },
+        "pattern_display": [],
+        "related_table_hits": [],
+        "active_test_exact_name_hits": []
+      }
+    ],
+    "403": [
+      {
+        "region": "NA",
+        "database": "EMPS_P5.ddb",
+        "database_sha256": "1e5ffc4f998570458fa86dd0d563949006f9e0781f15d118d01e80656fadd199",
+        "monitor": {
+          "record_index": 100,
+          "raw_hex": "00000000ffff000000000000ffff0000000000000000000012ec0100390b010003000000930100000000010000000f00930100000000031c033c030000000000",
+          "key": 403,
+          "name_string_index": 125970,
+          "name": "Control State Information",
+          "physical_data_key": 1,
+          "bit_start": 0,
+          "bit_end": 15,
+          "bit_width": 16,
+          "sort_key": 403,
+          "pattern_display_key": 0
+        },
+        "physical_data": {
+          "record_index": 0,
+          "raw_hex": "010000000100000000000000010000000000000000000000",
+          "key": 1,
+          "unit_key": 0
+        },
+        "unit": {
+          "record_index": 0,
+          "raw_hex": "000000000000000000000000",
+          "key": 0,
+          "string_index": 0,
+          "text": null
+        },
+        "pattern_display": [],
+        "related_table_hits": [],
+        "active_test_exact_name_hits": []
+      },
+      {
+        "region": "EU",
+        "database": "EMPS_P5.ddb",
+        "database_sha256": "7bcac199a8faac0126175e3037309cc44d7957d425c7aafd17c1d45bc9228564",
+        "monitor": {
+          "record_index": 100,
+          "raw_hex": "00000000ffff000000000000ffff0000000000000000000012ec0100390b010003000000930100000000010000000f00930100000000031c033c030000000000",
+          "key": 403,
+          "name_string_index": 125970,
+          "name": "Control State Information",
+          "physical_data_key": 1,
+          "bit_start": 0,
+          "bit_end": 15,
+          "bit_width": 16,
+          "sort_key": 403,
+          "pattern_display_key": 0
+        },
+        "physical_data": {
+          "record_index": 0,
+          "raw_hex": "010000000100000000000000010000000000000000000000",
+          "key": 1,
+          "unit_key": 0
+        },
+        "unit": {
+          "record_index": 0,
+          "raw_hex": "000000000000000000000000",
+          "key": 0,
+          "string_index": 0,
+          "text": null
+        },
+        "pattern_display": [],
+        "related_table_hits": [],
+        "active_test_exact_name_hits": []
+      },
+      {
+        "region": "JP",
+        "database": "EMPS_P5.ddb",
+        "database_sha256": "350ee7b1ee9313306b6086b47116892f75b283581e2dee52aab33dc7638cd288",
+        "monitor": {
+          "record_index": 100,
+          "raw_hex": "00000000ffff000000000000ffff0000000000000000000012ec0100390b010003000000930100000000010000000f00930100000000031c033c030000000000",
+          "key": 403,
+          "name_string_index": 125970,
+          "name": "Control State Information",
+          "physical_data_key": 1,
+          "bit_start": 0,
+          "bit_end": 15,
+          "bit_width": 16,
+          "sort_key": 403,
+          "pattern_display_key": 0
+        },
+        "physical_data": {
+          "record_index": 0,
+          "raw_hex": "010000000100000000000000010000000000000000000000",
+          "key": 1,
+          "unit_key": 0
+        },
+        "unit": {
+          "record_index": 0,
+          "raw_hex": "000000000000000000000000",
+          "key": 0,
+          "string_index": 0,
+          "text": null
+        },
+        "pattern_display": [],
+        "related_table_hits": [],
+        "active_test_exact_name_hits": []
+      }
+    ]
+  },
+  "firmware_command_side": {
+    "firmware_rx_signal": {
+      "signal_id": 61,
+      "can_id": "0x2E4",
+      "wire_field": "B1..B2 BE16",
+      "bit_length": 16,
+      "signed": true,
+      "secoc_envelope": true,
+      "destination": "0xFEBE7F94",
+      "command_chain": "0xFEBE7F94 -> 0xFEBEF184 -> 0xFEBEAE20 -> steering command conditioning/status paths"
+    },
+    "public_dbc": {
+      "relative_path": "REFERENCE/opendbc/opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
+      "sha256": "2d680b1b73102d1c88bd735da7683f9379c98f39e1ad608618b94bf037c76119",
+      "message_can_id": "0x2E4",
+      "message_name": "STEERING_LKA",
+      "signal_name": "STEER_TORQUE_CMD",
+      "bit_length": 16,
+      "signed": true,
+      "scale": 1,
+      "offset": 0
+    }
+  },
+  "correlations": [
+    {
+      "id": "APP-COR-001",
+      "disposition": "accepted-corroboration",
+      "firmware_concept": "authenticated CAN 0x2E4 signal 61 steering command domain",
+      "techstream_monitor_key": 402,
+      "techstream_name": "Command Value Torque",
+      "matching_constraints": [
+        "EMPS_P5 category 405 / generation 20",
+        "P5 data-monitor routing includes GetDatMonListP5_DT.dll and GetDatMonSignalInfoP5_DT.dll",
+        "Techstream monitor width is 16 bits",
+        "Techstream physical-data/unit chain resolves to Nm",
+        "firmware signal 61 is authenticated signed 16-bit CAN 0x2E4 B1..B2",
+        "pinned public Toyota DBC independently calls the same 0x2E4 16-bit field STEER_TORQUE_CMD",
+        "firmware command-conditioning chain from signal 61 is independently recovered"
+      ],
+      "boundary": "Strong external vocabulary/shape/unit corroboration for the recovered steering-command domain; no claim that Techstream monitor 402 reads the CAN 0x2E4 COM destination directly."
+    },
+    {
+      "id": "APP-COR-002",
+      "disposition": "ambiguous",
+      "firmware_concept": "externally visible 0x262 LTA/LKA steering-state aggregates",
+      "techstream_monitor_key": 60,
+      "techstream_name": "Cooperation Control State",
+      "matching_constraints": [
+        "EMPS_P5 steering category",
+        "8-bit diagnostic monitor",
+        "display pattern is binary Cooperation Control / Other than Cooperation Control",
+        "same key/name also appears in P5 behavior-data section 88"
+      ],
+      "blocking_difference": "No firmware-static diagnostic-monitor-to-CAN-status edge identifies which, if any, 0x262 LTA/LKA bit or aggregate carries this diagnostic state."
+    },
+    {
+      "id": "APP-COR-003",
+      "disposition": "rejected-direct-name",
+      "firmware_concept": "specific 0x262 LTA_STATE/LKA_STATE field or bit",
+      "techstream_monitor_key": 403,
+      "techstream_name": "Control State Information",
+      "matching_constraints": [
+        "EMPS_P5 steering category",
+        "16-bit unitless diagnostic monitor"
+      ],
+      "rejection_reason": "The generic 16-bit diagnostic state has no recovered route to one specific 0x262 aggregate/bit, so using this name for a CAN field would be lexical projection."
+    }
+  ],
+  "negative_search": {
+    "consumer_proven_related_tables_checked": [
+      61,
+      63,
+      80,
+      88,
+      90,
+      91
+    ],
+    "monitor_402_related_hits": [],
+    "monitor_403_related_hits": [],
+    "monitor_60_related_hits": [
+      {
+        "table_type": 88,
+        "field": "behavior_key_u16",
+        "record_index": 23,
+        "raw_hex": "000000000000000000000000000000000000000000000000733d0200a73b0100000000003c0000000100000007003c00000000006a50020000000000",
+        "resolved_name": "Cooperation Control State"
+      }
+    ],
+    "active_test_exact_name_hits": {
+      "60": [],
+      "402": [],
+      "403": []
+    },
+    "boundary": "No key 402/403 join was found in the consumer-proven P5 data-ID-bit/freeze-bit/behavior/RoB tables listed above. Type-65 DTC layout is not included because its key schema is not consumer-proven here. Absence is not a whole-diagnostic-system negative."
+  }
+}

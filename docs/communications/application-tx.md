@@ -479,8 +479,18 @@ status*, not `status = command`: `0xC8072` has additional state inputs. It does,
 however, establish a firmware-static authenticated-command→external-status edge.
 The raw path is pinned by `verify_application_interface_state_joins.py`; the
 exact live-project reference sets are pinned by
-`AssertApplicationInterfaceStateJoins.java`. The underlying command-conditioning
-ownership remains canonical in
+`AssertApplicationInterfaceStateJoins.java`.
+
+Techstream supplies independent vocabulary/shape corroboration for the command
+side, but not a new firmware edge. Master-routed `EMPS_P5.ddb` monitor 402 is
+`Command Value Torque`, is 16 bits wide, and resolves to unit `Nm`; this is
+accepted as corroboration for the recovered authenticated steering-command
+domain. `Cooperation Control State` (monitor 60) remains ambiguous relative to
+the `0x262` LTA/LKA bits, and generic 16-bit `Control State Information`
+(monitor 403) is explicitly rejected as a direct name for any specific Tx
+field. See [techstream.md](../tooling/techstream.md) §6.2.1 and the deterministic
+`application_interface_correlations.json` artifact. The underlying command-
+conditioning ownership remains canonical in
 [control-partition.md](../architecture/control-partition.md) §8.
 
 ## 5. Confirmation path

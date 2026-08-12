@@ -31,6 +31,7 @@ Three new tools implement the extraction pipeline:
 | `tools/techstream/extract_factory_table_map.py` | Derive both table-class maps from PE switch targets and constructor exports |
 | `tools/techstream/extract_toyota_master_routes.py` | Join priority master categories to regional DLL/function/detail rows |
 | `tools/techstream/extract_priority_ddb_semantics.py` | Emit consumer-proven priority fields while retaining all raw bytes |
+| `tools/techstream/extract_application_interface_correlations.py` | Join targeted EMPS_P5 monitor metadata to recovered Sienna interface concepts with explicit accepted/ambiguous/rejected dispositions |
 | `tools/pe` (modified) | Fixed `import` to use `analyzeHeadless` for full PE analysis |
 
 Calibration-focused output:
@@ -87,13 +88,16 @@ category/function/description, DLL, communication-DID, and communication-RID
 tables. The generated factory map independently resolves all 89 format-1 and
 151 format-2 cases from executable switch targets to constructor exports.
 Priority master routing is decoded further: section-16 record 294 maps category
-317 to `EPS_P4DK3.ddb`, while record 496 maps category 581 to
-`EPS_CAN_P4DK.ddb`; category IDs join to type-19 DLL and type-26/27
-function/detail rows across the regions where those databases exist. Exact
-source bytes and unresolved communication-DID/RID category edges remain in
-`toyota_master_routes.json`. Its exact bytes still contain no
-`8965B4512000` identifier, so the result is a family route, not a calibration
-identity match.
+317 to `EPS_P4DK3.ddb`, record 496 maps category 581 to `EPS_CAN_P4DK.ddb`, and
+record **374** maps category **405**, generation **20**, to `EMPS_P5.ddb` in all
+three regions. The EMPS route has eight DLL roles including
+`GetDatMonListP5_DT.dll` and `GetDatMonSignalInfoP5_DT.dll`, which are the exact
+P5 monitor-list/signal-info consumers used by the interface-correlation pass.
+Category IDs join to type-19 DLL and type-26/27 function/detail rows across the
+regions where those databases exist. Exact source bytes and unresolved
+communication-DID/RID category edges remain in `toyota_master_routes.json`.
+Its exact bytes still contain no `8965B4512000` identifier, so the result is a
+family route, not a calibration identity match.
 
 ### ECU databases
 
@@ -137,6 +141,19 @@ records. Each named field carries its consumer RVA and method-prefix hash, and
 each record retains complete `raw_hex`; unknown bytes remain unknown. See
 `data/generated/techstream_v18/priority_steering_ddb_semantics.json` and
 `tests/verify_techstream_priority_ddb_semantics.py`.
+
+A narrower P5 signal-info pass additionally follows fields consumed by
+`GetDatMonSignalInfoP5_DT.dll`, without promoting them into the broad priority
+schema. For type 62, that DLL reads raw `+0x2A` as a `CDbPhyDataTable` key
+(kind `0x020D`), raw `+0x2C/+0x2E` as the monitor bit start/end, and raw
+`+0x32` as a `CDbPatDispTable` key (kind `0x020E`). The selected physical-data
+record is keyed at raw `+0x0C`; its raw `+0x0E` selects `CDbUnitTable`
+(kind `0x020F`). Unit records are 12 bytes, keyed at `+0x04`, with the unit
+string index at `+0x00`. Pattern-display records are 24 bytes, keyed at
+`+0x0C`; `FindDbItem2` compares the represented value at `+0x04`, and
+`SetRecString` resolves the display string index at `+0x00`. Every one of those
+offsets is pinned by x86 operand bytes in
+`tests/verify_application_interface_correlations.py`.
 
 ### DTC record format (section type 5, 28 bytes)
 

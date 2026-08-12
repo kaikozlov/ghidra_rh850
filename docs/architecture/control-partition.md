@@ -309,8 +309,14 @@ CH2 ISR 0x64F90 -> 0x64376 -> 0x65720
 
 The pinned opendbc `toyota_secoc_pt.dbc` names CAN decimal 740 (`0x2E4`)
 `STEERING_LKA` and names bits `15|16@0-` — the same B1..B2 signed field —
-`STEER_TORQUE_CMD`. This label is external evidence; the RAM and call chain
-above are firmware-static evidence.
+`STEER_TORQUE_CMD`. A second independent external source now constrains the same
+command domain: Techstream V18 `EMPS_P5.ddb` monitor **402** is master-routed
+through category 405 / generation 20, is named **`Command Value Torque`**, uses
+a 16-bit monitor range (`0..15`), and resolves through its physical-data/unit
+records to **`Nm`**. The metadata is byte-identical across NA/EU/JP. This is
+strong corroborating vocabulary/dimensional evidence for the recovered command
+domain, not proof that Techstream monitor 402 reads the CAN COM destination
+itself. The RAM and call chain above remain firmware-static evidence.
 
 ### Boundary
 
@@ -341,9 +347,10 @@ not proof that no table-driven, computed, or runtime-only handoff can exist.
 The producer/consumer addresses and arithmetic are deterministically checked by
 `tests/verify_control_partition.py`; the command-to-visible-status extension is
 checked independently by `tests/verify_application_interface_state_joins.py`
-and `AssertApplicationInterfaceStateJoins.java`; the expanded stopping-boundary
-census is checked by `AssertMotorActuationBoundary.java`; the OEM field label is
-checked separately against the pinned external DBC.
+and `AssertApplicationInterfaceStateJoins.java`; the Techstream/DBC correlation
+is independently checked by `tests/verify_application_interface_correlations.py`;
+the expanded stopping-boundary census is checked by
+`AssertMotorActuationBoundary.java`.
 
 ## 9. Motor-control, acquisition, and plausibility boundary
 

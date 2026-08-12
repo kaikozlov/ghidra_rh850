@@ -46,10 +46,14 @@ firmware:
    Techstream and the VCI. This is the highest-value practical artifact for
    bench validation of firmware findings.
 
-3. **No new SecOC or motor-control information.** Techstream operates entirely
-   through UDS diagnostics; it neither sends nor receives SecOC-secured
-   runtime frames. The torque-command control path (CAN `0x2E4` → SecOC →
-   motor actuation) is invisible to Techstream.
+3. **No direct SecOC runtime interaction, but useful steering-command diagnostic vocabulary.**
+   Techstream operates through UDS diagnostics and neither sends nor receives
+   SecOC-secured runtime frames. However, the conventional `EMPS_P5.ddb`
+   diagnostic corpus contains a master-routed 16-bit `Command Value Torque`
+   monitor whose physical-data/unit chain resolves to `Nm`. That is strong
+   independent corroboration for the already-recovered authenticated steering-
+   command domain, while remaining distinct from direct observation or control
+   of CAN `0x2E4`, SecOC verification, or the downstream d/q actuation path.
 
 ## 1. Pinned source
 
@@ -760,6 +764,7 @@ format (`DiagTool DataCtrl` magic). The EPS-relevant databases:
 | `EPS_P4DK3.ddb` | NA | 6.6 KiB | EPS Phase-4 CAN DK3 diagnostic table |
 | `EPS_CAN_P4DK.ddb` | NA | 10.5 KiB | EPS Phase-4 CAN functional diagnostics |
 | `EPS_CAN_P4DK.ddb` | EU/JP | 10.5+ KiB | Same, regional variant |
+| `EMPS_P5.ddb` | NA/EU/JP | 47.9 KiB | Conventional Phase-5 EMPS diagnostics; master category 405 / generation 20 |
 | `Security_P4.ddb` | NA/EU/JP | 13 KiB | Phase-4 security-system diagnostics; not itself proof of a SecurityAccess/key table |
 | `Toyota.ddb` | all | 13.0 MiB | Master routing/ECU enumeration corpus; type-1 directory structurally parsed separately |
 
@@ -793,6 +798,7 @@ tables. Consumer-derived record layouts then close the priority category join:
 | Region | section-16 record | Database | category ID | DLL / function / detail rows |
 |---|---:|---|---:|---:|
 | NA, EU | 294 | `EPS_P4DK3.ddb` | 317 | 9 / 3 / 6 |
+| NA, EU, JP | 374 | `EMPS_P5.ddb` | 405 | 8 / 4 / 7 |
 | NA, EU, JP | 496 | `EPS_CAN_P4DK.ddb` | 581 | 10 / 5 / 6 |
 
 Every joined row retains its exact decoded bytes, record index, logical offset,
@@ -811,7 +817,48 @@ the artifact covers classic PID and active-test types 6/11/12 plus P5 types
 monitor lookup key at `+0x24`, and sort key at `+0x30`; type 88 proves its name
 index at `+0x18`, behavior key at `+0x24`, and sort key at `+0x2E`. Complete
 `raw_hex` is retained for every record, so unnamed bytes are not silently
-promoted to semantics. No numeric P5-field → Sienna-firmware join is claimed.
+promoted to semantics.
+
+#### 6.2.1 EMPS_P5 application-interface correlation
+
+A targeted pass now closes one previously useful-but-unproven diagnostic
+vocabulary join without projecting names from text alone. The `EMPS_P5.ddb`
+master route is section-16 record **374**, category **405**, generation **20**,
+identical in NA/EU/JP. Its eight DLL roles include
+`GetDatMonListP5_DT.dll` and `GetDatMonSignalInfoP5_DT.dll`. The latter provides
+the consumer proof for additional type-62 monitor metadata: physical-data key
+at `+0x2A`, bit range at `+0x2C/+0x2E`, and pattern-display key at `+0x32`.
+The physical-data record then selects a unit-table record.
+
+Three steering monitors were tested against the recovered firmware state, with
+explicit dispositions in
+`data/generated/techstream_v18/application_interface_correlations.json`:
+
+| Key | Techstream monitor | P5 shape | Disposition against Sienna firmware |
+|---:|---|---|---|
+| 402 | `Command Value Torque` | 16-bit; physical-data/unit chain resolves to **`Nm`** | **accepted corroboration** for the authenticated steering-command domain |
+| 60 | `Cooperation Control State` | 8-bit; pattern 22 maps `0 → Cooperation Control`, `1 → Other than Cooperation Control` | **ambiguous** relative to the externally visible `0x262` LTA/LKA state bits |
+| 403 | `Control State Information` | 16-bit, unitless | **rejected as a direct name** for any specific `0x262` field/bit |
+
+Monitor 402 is materially stronger than a lexical match. The same metadata is
+byte-identical across NA/EU/JP; the firmware independently receives authenticated
+CAN `0x2E4` signal 61 as a signed 16-bit value and carries it through the
+recovered steering-command conditioning chain; and the pinned public Toyota DBC
+independently calls that exact `0x2E4` 16-bit field `STEER_TORQUE_CMD`.
+Techstream's diagnostic monitor is therefore accepted as external vocabulary
+and dimensional corroboration for the **command domain**. It is **not** proof
+that monitor 402 reads the COM destination directly, and it does not expose the
+SecOC MAC, freshness state, or downstream d/q current reference.
+
+The state-monitor candidates do not meet that bar. Key 60's binary cooperation
+encoding is real, and the same key/name also occurs once in P5 behavior-data
+section 88, but no firmware-static edge identifies one `0x262` LTA/LKA bit as
+that diagnostic state. Key 403 is a generic 16-bit state word with no recovered
+route to a specific Tx aggregate. Those names therefore remain diagnostic
+vocabulary, not CAN signal names. Consumer-proven P5 tables 61/63/80/88/90/91
+contain no key-402 or key-403 join; neither target name appears as an exact
+active-test name. This is a bounded search, not a whole-diagnostic-system
+absence claim.
 
 The repository parser now decodes section directories, DTC records,
 factory-identified supported-PID/PID/DID table classes, freeze-data monitor
@@ -900,15 +947,16 @@ confidence.
 | SEC-BOOT-003: AES-128-ECB SA construction | `CSecurityAccessAES128::AES_128_ECB` implements the same cipher |
 | SEC-APP-001: Application SA level 2 with AES-128 | Shape only: `CSecurityAccessAES128` shares the AES-128 / level-03-04 / 16-byte *form*, but its key `FUKUMORIYOSIYAMA` and single-stage construction differ from the EPS two-stage + per-calibration secret (§4.0 resolves the routing: FUKU serves ADS/PCS runtime, not EPS) |
 | DIAG-APP-003: Programming handoff gates | CUW prepare-write implements the same session/speed/phase sequence |
+| ARCH-007 / authenticated steering-command domain | `EMPS_P5` monitor 402 `Command Value Torque` is master-routed, 16-bit, and resolves to `Nm`; public Toyota DBC independently names CAN `0x2E4`'s signed 16-bit field `STEER_TORQUE_CMD` |
 | Bootloader diagnostic `0x7A1` / `0x777` | Gateway routing (`07E0`/`07DF` → ECU-specific physical address) |
 
 ### 8.2 Not addressed
 
 | Open question | Techstream relevance |
 |---|---|
-| SecOC slot-4 key extraction | None — Techstream does not interact with SecOC |
-| Motor actuation join (`0x2E4` → d/q current) | None — Techstream uses UDS diagnostics, not runtime control |
-| Runtime RAM key-slot mirror | None — Techstream reads DIDs, not raw RAM |
+| SecOC slot-4 key extraction | None — Techstream does not interact with SecOC runtime verification/key slots |
+| Motor actuation join (`0x2E4` → d/q current) | Techstream now corroborates the **steering-command domain** through monitor 402, but still provides no direct SecOC or d/q-current join |
+| Runtime RAM key-slot mirror | None — Techstream reads diagnostic values, not raw RAM |
 | ICU-S command 5/13 characterization | None — Techstream does not issue ICU-S commands |
 
 ### 8.3 New leads

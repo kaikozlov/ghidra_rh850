@@ -155,6 +155,22 @@ paths = [
   "ghidra/scripts/verify/AssertApplicationInterfaceStateJoins.java",
 ]
 
+[suite.application_interface_correlation]
+tests = ["tests/verify_application_interface_correlations.py"]
+requires_external = ["techstream_v18"]
+oracle = "instruction_semantics"
+paths = [
+  "tools/techstream/extract_application_interface_correlations.py",
+  "data/generated/techstream_v18/application_interface_correlations.json",
+  "data/application_rx_map.csv",
+  "docs/architecture/control-partition.md",
+  "docs/communications/application-tx.md",
+  "docs/tooling/techstream.md",
+  "docs/tooling/techstream-ddb-pipeline.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+]
+
 [suite.application_transmit]
 tests = [
   "tests/verify_application_transmit.py",

@@ -111,6 +111,7 @@ check("NA category table is 2002 x 76 bytes",
 for record_index, expected_name, expected_id in (
     (294, "EPS_P4DK3.ddb", 317),
     (496, "EPS_CAN_P4DK.ddb", 581),
+    (374, "EMPS_P5.ddb", 405),
 ):
     raw = category["records"][record_index]
     check(f"section-16 record {record_index} database name",
@@ -123,6 +124,16 @@ for record_index, expected_name, expected_id in (
     check(f"generated route {expected_name} retains exact file offset",
           route["category"]["on_disk_record_offset"]
           == category["data_offset"] + record_index * 76)
+
+emps = next(item for item in na["routes"] if item["database_name"] == "EMPS_P5.ddb")
+check("EMPS_P5 master generation is 20", emps["category"]["generation"] == 20)
+check("EMPS_P5 master display name is EMPS", emps["category"]["resolved_ecu_name"] == "EMPS")
+check(
+    "EMPS_P5 master route contains the P5 data-monitor DLL pair",
+    {row["dll_name"] for row in emps["dlls"]}
+    >= {"GetDatMonListP5_DT.dll", "GetDatMonSignalInfoP5_DT.dll"},
+)
+check("EMPS_P5 master route has exactly eight DLL roles", len(emps["dlls"]) == 8)
 
 print("\n== every generated join points to exact source bytes ==")
 for region in artifact["regions"]:

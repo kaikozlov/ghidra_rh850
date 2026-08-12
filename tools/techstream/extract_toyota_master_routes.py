@@ -15,7 +15,7 @@ from parse_ddb import DDBParser
 REPO = Path(__file__).resolve().parents[2]
 DEFAULT_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
 DEFAULT_OUTPUT = REPO / "data/generated/techstream_v18/toyota_master_routes.json"
-TARGET_DATABASES = ("EPS_P4DK3.ddb", "EPS_CAN_P4DK.ddb")
+TARGET_DATABASES = ("EPS_P4DK3.ddb", "EPS_CAN_P4DK.ddb", "EMPS_P5.ddb")
 
 
 def sha256(data: bytes) -> str:
@@ -244,7 +244,11 @@ def build(root: Path) -> dict:
         route["database_name"]: route["category"]["record_index"]
         for route in result["regions"][0]["routes"]
     }
-    if na_routes != {"EPS_P4DK3.ddb": 294, "EPS_CAN_P4DK.ddb": 496}:
+    if na_routes != {
+        "EPS_P4DK3.ddb": 294,
+        "EPS_CAN_P4DK.ddb": 496,
+        "EMPS_P5.ddb": 374,
+    }:
         raise ValueError(f"NA priority anchors diverged: {na_routes}")
     return result
 

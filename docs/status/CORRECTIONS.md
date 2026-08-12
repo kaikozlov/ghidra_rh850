@@ -670,3 +670,25 @@ the mistakes are not re-made.
   `ghidra/scripts/verify/AssertMemorySafetyPaths.java`;
   `tests/verify_bootloader_diagnostics.py`;
   `tests/verify_function_discovery.py`.
+
+### CORR-039 — Techstream was said to have no torque-command information
+
+- **Wrong:** TMS-006 and the Techstream executive summary said the entire
+  `0x2E4` torque-command control path was "invisible to Techstream." The narrow
+  claim that Techstream does not send/receive SecOC runtime frames was valid,
+  but the wording incorrectly excluded diagnostic visibility of the same
+  steering-command domain.
+- **Right:** Techstream V18 `EMPS_P5.ddb` is master-routed as category 405 /
+  generation 20 and contains monitor 402 **`Command Value Torque`**. The P5
+  signal-info consumer proves its field is 16 bits wide; its physical-data →
+  unit-table chain resolves to **`Nm`**; and the exact metadata is identical in
+  NA/EU/JP. Combined with the independently recovered authenticated signed-16
+  CAN `0x2E4` command chain and pinned public Toyota DBC
+  `STEER_TORQUE_CMD`, this is strong external corroboration for the steering-
+  command domain. Techstream still does not prove that monitor 402 reads the
+  CAN COM destination directly, does not participate in SecOC MAC/freshness
+  handling, and provides no new command→d/q-current edge.
+- **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §6.2.1;
+  [../architecture/control-partition.md](../architecture/control-partition.md) §8;
+  `data/generated/techstream_v18/application_interface_correlations.json`;
+  `tests/verify_application_interface_correlations.py`.
