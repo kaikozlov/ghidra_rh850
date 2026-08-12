@@ -101,14 +101,18 @@ cross-function reasoning before dropping to individual CLI calls:
 tools/pseudo 0x6fec
 tools/pseudo security_access --list
 tools/pseudo secoc --all
+tools/pseudo --data-ref 0xfebef02a # canonical RAM xrefs, independent of decompiler aliases
 make pseudocode                    # materialize build/pseudocode/*.c from the tracked corpus
 rg 'ICUSCMD' build/pseudocode
 ```
 
 `data/generated/decompilations.jsonl` is derived evidence, provenance-locked to
-`data/ghidra_project_inventory.baseline.jsonl`. It is not firmware truth. Use
-pseudocode for understanding, xrefs/dataflow for tracing, and disassembly/bytes
-for proof. After any graph, naming, type, calling-convention, or processor
+`data/ghidra_project_inventory.baseline.jsonl`. Each function also carries the
+canonical non-flow instruction/data-reference graph exported by Ghidra. Use
+`tools/pseudo --data-ref ADDRESS` instead of grepping decompiler spelling when a
+RAM byte may appear as `DAT_base._n_m_` or `LAB_base + offset`. It is not firmware
+truth. Use pseudocode for understanding, xrefs/dataflow for tracing, and
+disassembly/bytes for proof. After any graph, naming, type, calling-convention, or processor
 semantic change, regenerate it with `make generate-decompiler-corpus` against a
 fresh rebuilt project that exactly matches the canonical inventory (not merely
 a snapshot-materialized project that Ghidra may report as hijacked).

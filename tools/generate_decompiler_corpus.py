@@ -185,6 +185,39 @@ def canonicalize_records(
         if not completed or not code.strip():
             failures.append(f"{entry} {raw.get('name', '')}: {error or 'empty decompilation'}")
 
+        raw_refs = raw.get("data_references", [])
+        if not isinstance(raw_refs, list):
+            identity_errors.append(f"{entry}: data_references is not a list")
+            raw_refs = []
+        data_references: list[dict[str, Any]] = []
+        for ref_index, ref in enumerate(raw_refs):
+            if not isinstance(ref, dict):
+                identity_errors.append(f"{entry}: data reference {ref_index} is not an object")
+                continue
+            try:
+                from_addr = f"0x{int(str(ref['from_addr']), 16):08x}"
+                to_addr = f"0x{int(str(ref['to_addr']), 16):08x}"
+                operand_index = int(ref["operand_index"])
+                to_space = str(ref["to_space"])
+                ref_type = str(ref["ref_type"])
+            except (KeyError, TypeError, ValueError) as exc:
+                identity_errors.append(f"{entry}: invalid data reference {ref_index}: {exc}")
+                continue
+            if not to_space or not ref_type:
+                identity_errors.append(f"{entry}: empty data-reference identity at {ref_index}")
+                continue
+            data_references.append({
+                "from_addr": from_addr,
+                "to_addr": to_addr,
+                "to_space": to_space,
+                "ref_type": ref_type,
+                "operand_index": operand_index,
+            })
+        data_references.sort(key=lambda ref: (
+            int(ref["from_addr"], 16), int(ref["to_addr"], 16),
+            ref["to_space"], ref["ref_type"], ref["operand_index"],
+        ))
+
         records.append({
             "record": "function",
             "entry_addr": entry,
@@ -196,6 +229,7 @@ def canonicalize_records(
             "is_thunk": raw.get("is_thunk"),
             "decompile_completed": completed,
             "decompile_error": error,
+            "data_references": data_references,
             "decompiled_c_sha256": hashlib.sha256(code.encode()).hexdigest(),
             "decompiled_c": code,
         })
@@ -223,7 +257,7 @@ def write_corpus(
 ) -> dict[str, Any]:
     metadata = {
         "record": "metadata",
-        "schema_version": 1,
+        "schema_version": 2,
         "function_count": len(records),
         "decompiled_count": sum(record["decompile_completed"] for record in records),
         "failed_count": sum(not record["decompile_completed"] for record in records),
@@ -285,6 +319,7 @@ def materialize_view(view_dir: Path, records: list[dict[str, Any]], metadata: di
                 f" * signature: {record['signature'] or ''}\n"
                 f" * calling_convention: {record['calling_convention']}\n"
                 f" * project_inventory_sha256: {metadata['project_inventory_sha256']}\n"
+                f" * data_reference_count: {len(record.get('data_references', []))}\n"
                 f" * decompiled_c_sha256: {record['decompiled_c_sha256']}\n"
                 " */\n\n"
             )

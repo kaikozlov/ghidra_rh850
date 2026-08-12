@@ -66,6 +66,33 @@ def print_listing(records: list[dict[str, Any]]) -> None:
         print(f"{record['entry_addr']}\t{record['name']}\t{signature}")
 
 
+def find_data_reference_matches(address: str, functions: list[dict[str, Any]]) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    canonical = normalize_address(address)
+    if canonical is None:
+        raise SystemExit(f"invalid data-reference address: {address!r}")
+    matches: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    for function in functions:
+        for reference in function.get("data_references", []):
+            if reference.get("to_addr") == canonical:
+                matches.append((function, reference))
+    return matches
+
+
+def print_data_references(matches: list[tuple[dict[str, Any], dict[str, Any]]]) -> None:
+    for function, reference in matches:
+        print(
+            f"{reference['from_addr']}\t{reference['ref_type']}\t{reference['to_addr']}\t"
+            f"{function['entry_addr']}\t{function['name']}\top={reference['operand_index']}"
+        )
+
+
+def unique_functions(matches: list[tuple[dict[str, Any], dict[str, Any]]]) -> list[dict[str, Any]]:
+    by_entry: dict[str, dict[str, Any]] = {}
+    for function, _ in matches:
+        by_entry[function["entry_addr"]] = function
+    return [by_entry[entry] for entry in sorted(by_entry, key=lambda value: int(value, 16))]
+
+
 def print_code(records: list[dict[str, Any]], *, separators: bool) -> None:
     for index, record in enumerate(records):
         if separators:
@@ -81,6 +108,10 @@ def print_code(records: list[dict[str, Any]], *, separators: bool) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("query", nargs="?", help="function address, exact name, or name substring")
+    parser.add_argument(
+        "--data-ref", metavar="ADDRESS",
+        help="find functions whose canonical Ghidra data-reference graph targets ADDRESS",
+    )
     parser.add_argument("--corpus", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--all", action="store_true", help="print pseudocode for every substring match")
     parser.add_argument("--list", action="store_true", help="list matching functions instead of pseudocode")
@@ -95,19 +126,35 @@ def main() -> int:
 
     metadata, functions = load_corpus(args.corpus)
 
+    if args.query is not None and args.data_ref is not None:
+        parser.error("query and --data-ref are mutually exclusive")
+
     if args.materialize:
         materialize_view(args.view_dir, functions, metadata)
         print(f"Materialized {len(functions)} pseudocode files at {args.view_dir.resolve()}")
-        if args.query is None and not args.stats:
+        if args.query is None and args.data_ref is None and not args.stats:
             return 0
 
     if args.stats:
         print(json.dumps(metadata, indent=2, sort_keys=True))
-        if args.query is None:
+        if args.query is None and args.data_ref is None:
             return 0
 
+    if args.data_ref is not None:
+        reference_matches = find_data_reference_matches(args.data_ref, functions)
+        if not reference_matches:
+            raise SystemExit(f"no canonical data references target {args.data_ref!r}")
+        functions_with_ref = unique_functions(reference_matches)
+        if args.all:
+            print_code(functions_with_ref, separators=True)
+        elif args.list:
+            print_listing(functions_with_ref)
+        else:
+            print_data_references(reference_matches)
+        return 0
+
     if args.query is None:
-        parser.error("query is required unless --stats or --materialize is used")
+        parser.error("query is required unless --data-ref, --stats, or --materialize is used")
 
     matches, exact = find_matches(args.query, functions)
     if not matches:

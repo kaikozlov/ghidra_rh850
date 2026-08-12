@@ -4,12 +4,18 @@
 import ghidra.app.decompiler.DecompInterface;
 import ghidra.app.decompiler.DecompileResults;
 import ghidra.app.script.GhidraScript;
+import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.FunctionIterator;
+import ghidra.program.model.listing.Instruction;
+import ghidra.program.model.listing.InstructionIterator;
+import ghidra.program.model.symbol.Reference;
+import ghidra.program.model.symbol.RefType;
 import java.io.BufferedWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.TreeSet;
 
 public class ExportDecompilerCorpus extends GhidraScript {
     private static String jsonString(String value) {
@@ -39,6 +45,51 @@ public class ExportDecompilerCorpus extends GhidraScript {
         String message = error.getMessage();
         if (message == null || message.isBlank()) return error.getClass().getSimpleName();
         return error.getClass().getSimpleName() + ": " + message;
+    }
+
+    private String dataReferencesJson(Function function) {
+        // Persist the instruction/reference graph alongside pseudocode. The
+        // decompiler may render an interior byte as DAT_base._1_1_ or as
+        // LAB_base + offset; Ghidra's reference graph still identifies the
+        // canonical memory address. Keeping these references in the corpus makes
+        // address lookup independent of those textual aliases.
+        TreeSet<String> records = new TreeSet<>();
+        InstructionIterator instructions = currentProgram.getListing().getInstructions(
+            function.getBody(), true
+        );
+        while (instructions.hasNext()) {
+            Instruction instruction = instructions.next();
+            for (Reference reference : instruction.getReferencesFrom()) {
+                Address to = reference.getToAddress();
+                RefType type = reference.getReferenceType();
+                if (to == null || !to.isMemoryAddress() || type.isFlow()) continue;
+
+                Address from = reference.getFromAddress();
+                String fromAddr = String.format("0x%08x", from.getOffset());
+                String toAddr = String.format("0x%08x", to.getOffset());
+                StringBuilder record = new StringBuilder(160);
+                record.append('{');
+                record.append("\"from_addr\":").append(jsonString(fromAddr)).append(',');
+                record.append("\"to_addr\":").append(jsonString(toAddr)).append(',');
+                record.append("\"to_space\":")
+                    .append(jsonString(to.getAddressSpace().getName())).append(',');
+                record.append("\"ref_type\":").append(jsonString(type.getName())).append(',');
+                record.append("\"operand_index\":").append(reference.getOperandIndex());
+                record.append('}');
+                records.add(record.toString());
+            }
+        }
+
+        StringBuilder out = new StringBuilder(records.size() * 96 + 2);
+        out.append('[');
+        boolean first = true;
+        for (String record : records) {
+            if (!first) out.append(',');
+            first = false;
+            out.append(record);
+        }
+        out.append(']');
+        return out.toString();
     }
 
     @Override
@@ -121,6 +172,7 @@ public class ExportDecompilerCorpus extends GhidraScript {
                 record.append("\"is_thunk\":").append(function.isThunk()).append(',');
                 record.append("\"decompile_completed\":").append(completed).append(',');
                 record.append("\"decompile_error\":").append(jsonString(error)).append(',');
+                record.append("\"data_references\":").append(dataReferencesJson(function)).append(',');
                 record.append("\"decompiled_c\":").append(jsonString(code));
                 record.append('}');
                 writer.write(record.toString());

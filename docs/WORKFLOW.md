@@ -110,9 +110,13 @@ daemon stop, verification, snapshot, and diff).
 The canonical project has a tracked decompiler corpus at
 `data/generated/decompilations.jsonl`. It contains one record for every recovered
 function, including entry address, name, signature, calling convention, body
-size, decompiler status, SHA-256 of the rendered C, and the complete decompiled
-C. Its metadata pins the exact canonical project-inventory hash, Ghidra/program
-identity, and the exporter/generator source hashes.
+size, decompiler status, SHA-256 of the rendered C, the complete decompiled C,
+and the canonical non-flow instruction/data references exported by Ghidra. The
+reference graph is deliberately stored separately from the rendered C so a RAM
+byte remains discoverable even when the decompiler spells it as a structured
+interior field (`DAT_base._n_m_`) or a base-relative expression (`LAB_base +
+offset`). Its metadata pins the exact canonical project-inventory hash,
+Ghidra/program identity, and the exporter/generator source hashes.
 
 Use it as the first cognitive/search surface for broad static analysis:
 
@@ -120,6 +124,8 @@ Use it as the first cognitive/search surface for broad static analysis:
 tools/pseudo 0x6fec                     # exact address -> pseudocode
 tools/pseudo security_access --list    # search function names
 tools/pseudo secoc --all               # emit all matching pseudocode
+tools/pseudo --data-ref 0xfebef02a    # canonical RAM references despite text aliases
+tools/pseudo --data-ref 0xfebe8001 --list
 make pseudocode                        # rebuild ignored build/pseudocode/*.c view
 rg 'ICUSCMD' build/pseudocode
 rg 'nvm_object_15' build/pseudocode
@@ -147,8 +153,10 @@ identity drift, timeout, failed decompilation, or empty C aborts the refresh
 instead of silently publishing a partial corpus.
 
 The evidence boundary is deliberate: **pseudocode for understanding ->
-xrefs/dataflow for tracing -> disassembly/firmware bytes for proof**. Decompiled
-C is generated evidence, not the source of truth.
+canonical persisted xrefs/dataflow for tracing -> disassembly/firmware bytes for
+proof**. `--data-ref` is the preferred persisted-xref entry point for RAM state;
+it avoids treating decompiler alias spelling as an address census. Decompiled C
+and the exported reference graph are generated evidence, not the source of truth.
 
 Expected memory map after the P1M-E device profile is applied:
 

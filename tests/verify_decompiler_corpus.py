@@ -48,7 +48,7 @@ metadata, functions = records[0], records[1:]
 print("== whole-image decompiler corpus provenance ==")
 expected_metadata = {
     "record": "metadata",
-    "schema_version": 1,
+    "schema_version": 2,
     "function_count": len(inventory_functions),
     "decompiled_count": len(inventory_functions),
     "failed_count": 0,
@@ -78,7 +78,7 @@ print("\n== function identity and pseudocode integrity ==")
 required_keys = {
     "record", "entry_addr", "address_space", "name", "signature",
     "calling_convention", "body_size", "is_thunk", "decompile_completed",
-    "decompile_error", "decompiled_c_sha256", "decompiled_c",
+    "decompile_error", "data_references", "decompiled_c_sha256", "decompiled_c",
 }
 errors = []
 for record in functions:
@@ -105,7 +105,29 @@ for record in functions:
         errors.append(f"{entry}: empty decompiler identity/output")
     if hashlib.sha256(code.encode()).hexdigest() != record["decompiled_c_sha256"]:
         errors.append(f"{entry}: pseudocode hash")
+    references = record["data_references"]
+    expected_ref_keys = {"from_addr", "to_addr", "to_space", "ref_type", "operand_index"}
+    if not isinstance(references, list):
+        errors.append(f"{entry}: data reference list")
+    else:
+        ref_sort = []
+        for ref in references:
+            if set(ref) != expected_ref_keys:
+                errors.append(f"{entry}: data reference schema")
+                break
+            try:
+                ref_sort.append((int(ref["from_addr"], 16), int(ref["to_addr"], 16),
+                                 ref["to_space"], ref["ref_type"], int(ref["operand_index"])))
+            except (TypeError, ValueError):
+                errors.append(f"{entry}: data reference identity")
+                break
+        if ref_sort != sorted(ref_sort):
+            errors.append(f"{entry}: data reference order")
 check("all function records match the canonical project and hash exactly", not errors, repr(errors[:12]))
+check(
+    "corpus persists a nonempty canonical instruction/data-reference graph",
+    sum(len(record["data_references"]) for record in functions) > 40000,
+)
 
 print("\n== generation safety and browsing interface ==")
 generator_source = GENERATOR.read_text(encoding="utf-8")
@@ -141,6 +163,30 @@ check(
     "tools/pseudo supports semantic name search",
     search.returncode == 0 and "security_access_derive_stage1_key" in search.stdout,
     search.stderr.strip(),
+)
+alias_lookup = subprocess.run(
+    [str(PSEUDO), "--data-ref", "0xfebef02a", "--corpus", str(CORPUS)],
+    cwd=REPO,
+    capture_output=True,
+    text=True,
+)
+check(
+    "tools/pseudo resolves canonical RAM references despite decompiler base aliases",
+    alias_lookup.returncode == 0
+    and "0x000ba7fe\tREAD\t0xfebef02a\t0x000ba43a\tsystem_mode_telemetry_snapshot" in alias_lookup.stdout,
+    alias_lookup.stderr.strip(),
+)
+structured_lookup = subprocess.run(
+    [str(PSEUDO), "--data-ref", "0xfebe8001", "--corpus", str(CORPUS)],
+    cwd=REPO,
+    capture_output=True,
+    text=True,
+)
+check(
+    "tools/pseudo resolves structured/interior-byte aliases to the canonical byte",
+    structured_lookup.returncode == 0
+    and "0x000572b0\tREAD\t0xfebe8001\t0x00056fc2\tapplication_rx_signal_consumer_56fc2" in structured_lookup.stdout,
+    structured_lookup.stderr.strip(),
 )
 
 print(f"\nResults: {passed} passed, {failed} failed")
