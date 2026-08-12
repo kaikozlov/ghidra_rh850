@@ -136,11 +136,18 @@ tests = ["tests/verify_security_gate.py"]
 paths = ["docs/security/application-security-access.md"]
 
 [suite.application_transmit]
-tests = ["tests/verify_application_transmit.py"]
+tests = [
+  "tests/verify_application_transmit.py",
+  "tests/verify_application_tx_producer_evidence.py",
+]
 paths = [
   "docs/communications/application-tx.md",
   "data/application_tx_map.csv",
+  "data/application_tx_producer_evidence.csv",
   "tools/generate_application_tx_map.py",
+  "tools/generate_application_tx_producer_evidence.py",
+  "tools/generate_application_tx_producer_evidence.sh",
+  "ghidra/scripts/verify/ExportApplicationTxProducerRefs.java",
 ]
 
 [suite.icus_key_recovery_surface]

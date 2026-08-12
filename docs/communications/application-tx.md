@@ -8,9 +8,9 @@
 >
 > **Evidence profile:** mixed — claims carry individual grades; see FINDINGS COM-003
 >
-> **Canonical artifacts:** `data/application_tx_map.csv`
+> **Canonical artifacts:** `data/application_tx_map.csv`, `data/application_tx_producer_evidence.csv`
 >
-> **Verification:** `tests/verify_application_transmit.py`
+> **Verification:** `tests/verify_application_transmit.py`, `tests/verify_application_tx_producer_evidence.py`
 >
 > **Related:** [application-rx](application-rx.md), [firmware-architecture](../architecture/firmware-architecture.md)
 
@@ -40,6 +40,19 @@ after COM packing by the CanIf checksum callback at `0x7FEAC`; signal **57**
 (`0x4C8 B4..B7`) is initial/default zero only in this calibration, with no
 enabled packer, COM pre-transmit transform, CanIf post-packer transform, or
 lower-stack writer.
+
+The new producer census in `data/application_tx_producer_evidence.csv` closes a
+more useful structural boundary for semantic work: the **50 RAM-backed Tx
+signals use 50 distinct staging cells**, and each cell has exactly one
+non-default WRITE, one generated-packer READ, and one write from
+`application_ram_default_init @ 0x57BFE`. Those 50 non-default writes collapse
+to only **11 producer functions** (`0x4B66C`, `0x4B754`, `0x4B7BA`, `0x4B882`,
+`0x4B8B6`, `0x4B900`, `0x4B90A`, `0x4B920`, `0x4B93C`, `0x4B976`, `0x4B9CC`).
+Only eight additional direct READ references exist, across signals 1, 6, 8,
+10, and 38. The exporter derives the staging-address set from the six packer
+bodies rather than from documentation, while the verifier independently pins
+every owning-function body hash to raw CodeFlash. This is a producer-census
+claim, not yet a semantic naming claim for the anonymous status fields.
 
 The application transmit chain is:
 
