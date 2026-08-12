@@ -37,14 +37,26 @@ public class AnnotateControlPartition extends GhidraScript {
             "Read protected steering command snapshot FEBEAE20, clamp to calibration +/-1BD80, apply mode-indexed gain, and write gain-adjusted command FEBEBF80.");
         fn(0xC85B6L, "steering_torque_command_rate_limit",
             "Convert FEBEBF80 to signed 16-bit range, rate-limit against prior FEBEBF9A using calibration 1BD8E, and write conditioned command state FEBEBF9A/FEBEBF84 plus derived bounded state FEBEBFA2. No static edge from these states to the independently recovered d/q current references is established.");
+        fn(0xCA354L, "steering_request_source_arbitration",
+            "Arbitrate protected steering request sources. FEBEAD50 is the authenticated 0x131 STEERING_LTA_2 request2 snapshot; FEBEACFF is the authenticated 0x2E4 STEER_REQUEST snapshot. Publish source state FEBEC136/FEBEC137 after common inhibit/validity predicates.");
+        fn(0xCA3B8L, "steering_lta_mode_latch",
+            "Latch protected 0x131 LTA command mode: set FEBEC13A, derive submode state FEBEC13B/13C from authenticated 0x131 snapshot bits FEBEAD52/AD54, and clear torque mode FEBEC13D.");
+        fn(0xCA3F8L, "steering_lka_torque_mode_latch",
+            "Latch protected 0x2E4 torque-command mode: clear FEBEC13A/13B/13C and set FEBEC13D. Reached by source arbitration when the authenticated 0x2E4 request is selected.");
+        fn(0xC8DE0L, "lta_angle_command_smoothing",
+            "Read authenticated 0x131 STEERING_LTA_2 signed angle snapshot FEBEAE60 and smooth/history-condition it into FEBEBFF0 for the LTA controller branch.");
+        fn(0xC8D62L, "lta_internal_command_rate_limit",
+            "Rate-limit/clamp the LTA controller state FEBEC0C8 into alternate steering command FEBEC0D6. CA6B8 selects this state when protected LTA mode FEBEC13A is active.");
         fn(0xCA6B8L, "steering_command_mode_select_stage",
-            "Select conditioned command source into FEBEC144 from FEBEBFA2, alternate FEBEC0D6, or zero according to foreground mode state. Stage-6 tracing found no write from this branch into FEBE6Dxx motor state.");
+            "Converge the two authenticated steering modes into FEBEC144: preserve conditioned 0x2E4 torque command FEBEBFA2 when FEBEC13D is active, or substitute LTA controller output FEBEC0D6 when protected 0x131 mode FEBEC13A is active. Zero when no steering mode is selected.");
         fn(0xCA75EL, "steering_command_slew_gain_limit_stage",
             "Read FEBEC144 and prior FEBEC170, apply slew/gain/limit logic, and update FEBEC170 plus companion C14x/C15x state. Consumers remain in foreground export/secondary command conditioning.");
         fn(0xCAC14L, "steering_command_secondary_select_stage",
             "Select FEBEC170 or alternate foreground state and publish secondary conditioned state FEBEC1B8; no direct d/q-state ownership recovered.");
         fn(0xCAC6AL, "steering_command_secondary_gain_clip",
-            "Gain/clip FEBEC1B8 into FEBEC1B4/FEBEC1BC. This is a bounded foreground command branch, not a recovered motor-current reference transfer.");
+            "Gain/clip FEBEC1B8 into FEBEC1B4/FEBEC1BC. The common command cone continues through CACC0/CAD68/CAD84/CADD6/CAE26 to FEBEC1D4; it is not terminal here.");
+        fn(0xC07FAL, "steering_command_plausibility_monitor",
+            "Sole runtime consumer of FEBEB788, which BF8C4 derives from late common steering command FEBEC1D4. Integrate/bound command-monitor state and publish FEBEB87E qualified validity (0/0x5A); downstream consumers are monitor/adaptation/fault paths, not d/q-reference writers.");
         fn(0xCB700L, "steering_command_export_scale",
             "Scale command-derived FEBEBFA2/FEBEC170 into application exports FEBEAE16/FEBEAE6E. Their consumers are snapshot/structure builders; none writes the independently recovered FEBE6Dxx d/q-reference state.");
 
@@ -59,7 +71,7 @@ public class AnnotateControlPartition extends GhidraScript {
         fn(0x37644L, "dual_motor_dq_feedback_combine",
             "Combine the two transformed feedback banks into bounded d/q feedback state at FEBE6D18/FEBE6D1C and paired intermediate state.");
         fn(0x37712L, "dual_motor_dq_current_reference",
-            "Construct bounded d/q current-reference state at FEBE6D28/FEBE6D2A from upstream CH0 motor state and calibration 1842C/1842E. Stage-6 bounded-negative census found no authenticated-2E4 transfer after direct writer/xref, producer-cone, absolute-pointer, memcpy, RTE-copy-direction, and hidden C144/C170/C1B8 branch checks.");
+            "Construct bounded d/q current-reference state at FEBE6D28/FEBE6D2A from upstream CH0 motor state and calibration 1842C/1842E. Expanded bounded-negative census finds no transfer from either authenticated steering mode (0x2E4 torque or 0x131 LTA angle), including their C144 convergence and complete late C1D4/B788 plausibility-monitor cone.");
         fn(0x36902L, "dq_current_pi_axis_a",
             "PI-like saturated current-control loop over reference FEBE6D2A minus feedback FEBE6D1C, using gain/limit block 18334..18340.");
         fn(0x36A44L, "dq_current_pi_axis_b",

@@ -29,8 +29,14 @@ EXPECTED_STAGES = {
     "tsg3_compare_stage",
     "tsg3_pwm_commit",
     "conditioned_2e4_boundary",
-    "conditioned_2e4_internal_stage",
-    "conditioned_2e4_export",
+    "protected_2e4_request_arbitration",
+    "protected_131_lta_ingress",
+    "protected_131_angle_controller",
+    "steering_command_mode_convergence",
+    "conditioned_common_internal_stage",
+    "conditioned_command_export",
+    "command_plausibility_monitor",
+    "protected_132_snapshot_only",
     "command_to_current_gap",
 }
 
@@ -182,7 +188,8 @@ def main() -> int:
         "data/motor_actuation_path.csv",
         "0x37712", "producer cone", "0xB8C1A",
         "ADCG0DIR00", "ADCG1DIR00", "Global RAM", "0xFEEF81E0", "0xFEEF8A20",
-        "0xCA6B8", "FEBEC170",
+        "0xCA6B8", "FEBEC170", "STEERING_LTA_2", "0xC8DE0",
+        "0xFEBEC0D6", "0xFEBEC1D4", "0xFEBEB788", "0xFEBEB87E", "0x132",
     ):
         check(f"report contains {token}", token.lower() in report.lower())
 
@@ -221,8 +228,16 @@ def main() -> int:
     # "clean two levels deep" with no command-state access.
     GP = 0xFEBEB800
     COMMAND_STATE_LOCS = frozenset({
+        # protected 0x2E4 torque/request ingress
         0xFEBE7F94, 0xFEBEF184, 0xFEBEAE20, 0xFEBEBF80,
-        0xFEBEBF84, 0xFEBEBF9A, 0xFEBEBFA2, 0xFEBEAE16,
+        0xFEBEBF84, 0xFEBEBF9A, 0xFEBEBFA2, 0xFEBEACFF,
+        # protected 0x131 LTA angle/controller ingress
+        0xFEBEAE60, 0xFEBEBFF0, 0xFEBEC0BE, 0xFEBEC0C8, 0xFEBEC0D6,
+        # common post-arbitration command and late plausibility cone
+        0xFEBEC144, 0xFEBEC170, 0xFEBEC1B8, 0xFEBEC1B4, 0xFEBEC1BC,
+        0xFEBEC1D4, 0xFEBEB788, 0xFEBEB87E,
+        # command-side exports
+        0xFEBEAE16, 0xFEBEAE6E,
     })
     PRODUCER_CONE_RANGES = [
         (0x37712, 0x3778A),   # dual_motor_dq_current_reference (120B)
@@ -264,14 +279,40 @@ def main() -> int:
     check("generic memcpy 0x153A has only bootloader caller 0x4F84",
           memcpy_callers == [0x4F84], repr([hex(x) for x in memcpy_callers]))
 
-    # The deeper conditioned-command branch discovered in Stage 6 stays in the
-    # foreground command domain: BFA2 -> C144 -> C170 -> C1B8/C1B4/C1BC and
-    # BFA2/C170 -> AE16/AE6E. None of these addresses is in FEBE6Dxx. The Java
-    # project audit independently pins their DATA/READ/WRITE ownership.
-    command_stage = next(r for r in rows if r["stage"] == "conditioned_2e4_internal_stage")
-    check("internal command-stage artifact records C144/C170/C1B8",
-          all(tok in command_stage["output_state"] for tok in
-              ("0xFEBEC144", "0xFEBEC170", "0xFEBEC1B8")))
+    # The full corpus extends Stage 6 in two directions: 0x131 supplies a
+    # protected LTA/angle controller branch ending at C0D6, which converges with
+    # conditioned 0x2E4 torque state BFA2 at C144; and the common branch
+    # continues beyond C1BC through C1D4 -> B788 -> B87E monitoring/adaptation.
+    # The Java project audit independently pins exact xref ownership for these
+    # stages and for the snapshot-only 0x132 branch.
+    lta = next(r for r in rows if r["stage"] == "protected_131_angle_controller")
+    check("0x131 LTA artifact reaches alternate command C0D6",
+          "0xFEBEC0D6" in lta["output_state"])
+    convergence = next(r for r in rows if r["stage"] == "steering_command_mode_convergence")
+    check("dual protected steering modes converge at C144",
+          "0xFEBEBFA2" in convergence["input_state"]
+          and "0xFEBEC0D6" in convergence["input_state"]
+          and convergence["output_state"] == "0xFEBEC144")
+    late = next(r for r in rows if r["stage"] == "conditioned_common_internal_stage")
+    check("common command-stage artifact records C170/C1B8/C1D4",
+          all(tok in late["output_state"] for tok in
+              ("0xFEBEC170", "0xFEBEC1B8", "0xFEBEC1D4")))
+    monitor_stage = next(r for r in rows if r["stage"] == "command_plausibility_monitor")
+    check("late command monitor records C1D4 -> B788 and B87E",
+          "0xFEBEC1D4 -> 0xFEBEB788" in monitor_stage["input_state"]
+          and "87E" in monitor_stage["output_state"])
+    pdu132 = next(r for r in rows if r["stage"] == "protected_132_snapshot_only")
+    check("0x132 parallel PDU remains snapshot-only bounded negative",
+          pdu132["evidence_grade"] == "bounded"
+          and "zero runtime readers" in pdu132["hardware_or_calibration"])
+
+    # Ordering inside the foreground control pipeline is independently encoded
+    # in CodeFlash: the 0x131 angle smoother/control stages run before the common
+    # CA7F0 selector/conditioner group.
+    steering_targets = [decode_branch(a, codeflash) for a in range(0xCB98E, 0xCB9A2, 4)]
+    check("0x131 controller executes before common steering selector",
+          [x[1] if x else None for x in steering_targets] ==
+          [0xC8DE0, 0xC978E, 0xC97B2, 0xC8DC8, 0xCA7F0])
     print(f"\nSummary: {passed} passed, {failed} failed")
     return 1 if failed else 0
 

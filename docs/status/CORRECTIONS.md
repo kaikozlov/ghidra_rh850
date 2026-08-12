@@ -692,3 +692,28 @@ the mistakes are not re-made.
   [../architecture/control-partition.md](../architecture/control-partition.md) §8;
   `data/generated/techstream_v18/application_interface_correlations.json`;
   `tests/verify_application_interface_correlations.py`.
+
+### CORR-040 — Stage-6 steering-command tracing stopped before the real common cone and omitted the protected LTA mode
+
+- **Wrong/incomplete:** the Stage-6 bounded-negative actuation audit described
+  `BFA2 -> C144 -> C170 -> C1B8/C1B4/C1BC` plus `AE16/AE6E` exports as the
+  deeper authenticated-command branch. That frontier was sufficient for the
+  then-stated direct-xref negative but was not the end of the foreground
+  steering command graph. It also treated `0x131` primarily as another
+  protected verification stream rather than tracing its command semantics.
+- **Right:** the whole-image pseudocode corpus exposed both missing dimensions.
+  Protected `0x131` is the pinned Toyota `STEERING_LTA_2` command; its signed
+  angle runs through `AE60 -> C8DE0 -> BFF0 -> C96D2/C97B2/C8D62 -> C0D6`.
+  Its request bits and the protected `0x2E4` request are arbitrated by
+  `CA354/CA47A`: LTA mode reaches `C13A`, torque mode reaches `C13D`, and
+  `CA6B8` converges `C0D6` or `BFA2` at `C144`. The common command cone then
+  continues beyond the old `C1BC` frontier through `C1D4 -> B788 -> B87E` and
+  monitor/adaptation/fault consumers. Exhausting those consumers still finds no
+  writer into the independently recovered `FEBE6Dxx` d/q-reference cone.
+  Protected `0x132` was checked in parallel; its six recovered post-snapshot
+  scalar destinations have zero runtime readers in this calibration. The prior
+  **conclusion** (no recovered static command-to-d/q transfer) survives, but its
+  evidence boundary is replaced by this larger dual-mode/common-cone audit.
+- **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md) §9.3;
+  `data/motor_actuation_path.csv`; `tests/verify_motor_actuation_boundary.py`;
+  `ghidra/scripts/verify/AssertMotorActuationBoundary.java`.

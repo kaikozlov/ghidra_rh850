@@ -1,7 +1,7 @@
 //@author kaikozlov
 //@category Verification
 // Lock the independently recovered motor-control/PWM chain and the bounded
-// negative between authenticated 0x2E4 command state and d/q current references.
+// negative between both authenticated steering command modes and d/q current references.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Function;
@@ -108,11 +108,27 @@ public class AssertMotorActuationBoundary extends GhidraScript {
         assertCall(0x65944L, 0x60bfaL);
         assertCall(0x659aaL, 0x60bfaL);
 
+        // Protected 0x131 LTA command stages execute before the common selector.
+        assertCall(0xcb86eL, 0xc8de0L);
+        assertCall(0xcb86eL, 0xc978eL);
+        assertCall(0xc978eL, 0xc96d2L);
+        assertCall(0xcb86eL, 0xc97b2L);
+        assertCall(0xcb86eL, 0xc8dc8L);
+        assertCall(0xc8dc8L, 0xc8d62L);
+        assertCall(0xcb86eL, 0xca7f0L);
+
         assertNamedFunction(0x47c3cL, "dual_motor_phase_current_conditioning");
         assertNamedFunction(0x35960L, "dual_motor_clarke_park_feedback");
         assertNamedFunction(0x36902L, "dq_current_pi_axis_a");
         assertNamedFunction(0x36a44L, "dq_current_pi_axis_b");
         assertNamedFunction(0x60ddcL, "tsg3_pwm_compare_commit");
+        assertNamedFunction(0xca354L, "steering_request_source_arbitration");
+        assertNamedFunction(0xca3b8L, "steering_lta_mode_latch");
+        assertNamedFunction(0xca3f8L, "steering_lka_torque_mode_latch");
+        assertNamedFunction(0xc8de0L, "lta_angle_command_smoothing");
+        assertNamedFunction(0xc8d62L, "lta_internal_command_rate_limit");
+        assertNamedFunction(0xca6b8L, "steering_command_mode_select_stage");
+        assertNamedFunction(0xc07faL, "steering_command_plausibility_monitor");
 
         assertSfr(0xffe70180L, "SFR_TSG3", "TSG30CMPWE");
         assertSfr(0xffe70184L, "SFR_TSG3", "TSG30CMPVE");
@@ -160,6 +176,62 @@ public class AssertMotorActuationBoundary extends GhidraScript {
         assertExactRefs(0xfebeae6eL,
                 "000bce0a:READ", "000be2c6:WRITE", "000cb80e:WRITE",
                 "000bb69e:READ", "000bb762:READ", "000bb826:READ");
+
+        // Base-relative decompiler aliases are locked by canonical-address xrefs.
+        // 0x2E4 STEER_REQUEST: F02A is copied by BA43A to ACFF, which CA354 reads.
+        assertExactRefs(0xfebef02aL,
+                "00057126:WRITE", "0005b3b2:WRITE", "000ba7fe:READ");
+        assertExactRefs(0xfebeacffL,
+                "000ba802:WRITE", "000bdfa8:WRITE", "000ca36a:READ");
+
+        // Protected 0x131 STEERING_LTA_2 angle/controller branch.
+        assertExactRefs(0xfebead4fL,
+                "000ba868:WRITE", "000be06e:WRITE", "000c9ef8:READ");
+        assertExactRefs(0xfebead50L,
+                "000ba86e:WRITE", "000be070:WRITE", "000ca360:READ");
+        assertExactRefs(0xfebead52L,
+                "000ba882:WRITE", "000be074:WRITE", "000ca3c0:READ");
+        assertExactRefs(0xfebead53L,
+                "000ba888:WRITE", "000be076:WRITE");
+        assertExactRefs(0xfebead54L,
+                "000ba88e:WRITE", "000be078:WRITE", "000ca3c2:READ");
+        assertExactRefs(0xfebeae60L,
+                "000ba874:WRITE", "000be2ae:WRITE", "000c8de4:READ", "000ca0bc:READ");
+        assertExactRefs(0xfebebff0L,
+                "000c8b0c:WRITE", "000c8e30:WRITE", "000c8ed2:READ", "000c9004:READ");
+        assertExactRefs(0xfebec0beL,
+                "000c8be4:WRITE", "000c9774:WRITE", "000c97b6:READ");
+        assertExactRefs(0xfebec0c8L,
+                "000c8c2c:WRITE", "000c8d62:READ", "000c97e6:WRITE");
+        assertExactRefs(0xfebec0d6L,
+                "000c8c30:WRITE", "000c8dc2:WRITE", "000ca6c8:READ");
+
+        // The common command cone continues beyond the former C1BC stopping point.
+        assertExactRefs(0xfebec1bcL,
+                "000cabb4:WRITE", "000cacba:WRITE", "000caccc:READ", "000cad5a:READ");
+        assertExactRefs(0xfebec1d4L,
+                "000bf8f6:READ", "000cabe8:WRITE", "000cae50:WRITE", "000cb454:READ");
+        assertExactRefs(0xfebeb788L,
+                "000bf7e4:WRITE", "000bf91a:WRITE", "000c081e:READ");
+        assertExactRefs(0xfebeb87eL,
+                "000c02fe:READ", "000c05d4:WRITE", "000c07dc:READ",
+                "000c08c6:WRITE", "000c0d00:WRITE", "000c0ef4:READ");
+
+        // Protected 0x132 parallel-PDU audit: after the BA43A snapshot, all six
+        // recovered scalar destinations have no runtime reader at all.
+        // Signal 196 is a useful decompiler-alias regression: the instruction
+        // graph reads canonical byte FEBE8001 even though pseudocode currently
+        // renders it as DAT_febe8000._1_1_.
+        assertExactRefs(0xfebe8001L,
+                "0004ab90:DATA", "000572b0:READ", "00057d5a:WRITE");
+        assertExactRefs(0xfebef063L,
+                "000572b4:WRITE", "0005b348:WRITE", "000ba8f4:READ");
+        assertExactRefs(0xfebead04L, "000ba8d6:WRITE", "000bdfb2:WRITE");
+        assertExactRefs(0xfebead05L, "000ba8dc:WRITE", "000bdfb4:WRITE");
+        assertExactRefs(0xfebead06L, "000ba8ea:WRITE", "000bdfb6:WRITE");
+        assertExactRefs(0xfebead07L, "000ba8f8:WRITE", "000bdfb8:WRITE");
+        assertExactRefs(0xfebeae28L, "000ba8e2:WRITE", "000be25a:WRITE");
+        assertExactRefs(0xfebeae2aL, "000ba8f0:WRITE", "000be25e:WRITE");
 
         // Complete direct-reference lock for the d/q-reference feeder state.
         // Only motor-runtime functions and explicit init/reinit writes own these

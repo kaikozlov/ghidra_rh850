@@ -270,7 +270,56 @@ freshness reconstruction and therefore verification. Thus
 direct software consumer; it does **not** mean those wire bits bypass SecOC or
 can be changed without satisfying freshness/MAC verification.
 
-### 5.3 Signals 95..100 form a dormant crypto-test input bank
+### 5.3 Protected steering PDU downstream roles
+
+The whole-image decompiler corpus plus canonical-address xrefs closes the three
+classic protected steering-adjacent PDUs more deeply than extraction alone.
+
+**CAN `0x2E4`** is the LKA torque-command mode. Signal 60 B0[0]
+(`STEER_REQUEST` in the pinned Toyota SecOC DBC) follows
+`FEBE7F98 -> FEBEF02A -> FEBEACFF` and enters source arbitration at `0xCA354`;
+signal 61 B1..B2 (`STEER_TORQUE_CMD`) follows
+`FEBE7F94 -> FEBEF184 -> FEBEAE20` and the clamp/rate-limit chain documented in
+[control partition §9.3](../architecture/control-partition.md#93-protected-steering-command-arbitration-and-the-dq-join).
+The request and value meet through torque-mode state `FEBEC13D` at the common
+selector `0xCA6B8`.
+
+**CAN `0x131`** is the second protected steering command mode. The pinned Toyota
+SecOC DBC names it `STEERING_LTA_2`; the firmware mapping is:
+
+| Signal | Wire field | Snapshot state | Downstream role |
+|---:|---|---:|---|
+| 109 | B0[3] / public `STEER_REQUEST` | `FEBEAD54` | LTA request/submode latch |
+| 110 | B0[2] | `FEBEAD53` | snapshot only; no runtime reader |
+| 111 | B0[1] | `FEBEAD52` | additional firmware submode selector; OEM name unresolved |
+| 112 | B0[0] / public `STEER_REQUEST_2` | `FEBEAD50` | source arbitration at `0xCA354` |
+| 113 | B1[5:0] / public `COUNTER` | `FEBEAD4F` | wrapped counter/deadline logic at `0xC9EF4` |
+| 114 | B2..B3 signed16 / public `STEER_ANGLE_CMD` | `FEBEAE60` | LTA controller input |
+| 115 | B4[7:4] | — | stored-no-direct-consumer freshness-envelope field |
+
+The signed angle is not telemetry-only: `0xC8DE0` conditions it into
+`FEBEBFF0`, then `0xC96D2 -> 0xC97B2 -> 0xC8D62` produces alternate command
+`FEBEC0D6`. LTA-mode state `FEBEC13A` makes `0xCA6B8` select `FEBEC0D6` into
+common command state `FEBEC144`. A separate `0xCA0B4` branch reuses
+`FEBEAE60` for command plausibility/range supervision. Thus the protected
+`0x131` stream is both a steering-control and supervision input in this image.
+
+**CAN `0x132`** was checked specifically as a possible parallel actuator path.
+Signals 191/192/193/196/195/198 are copied by `0x56FC2` into
+`FEBEF064/061/062/063/F19C/F19A` respectively and then by `0xBA43A` into
+`FEBEAD06/AD04/AD05/AD07/AE28/AE2A`. All six post-snapshot locations have
+exactly two direct references in the corrected project: the snapshot WRITE and
+an initialization WRITE. They have no runtime READ. Signals 194/197 are already
+in the stored-no-direct-consumer bucket above. Therefore no recovered scalar
+field of protected `0x132` reaches steering actuation in this calibration.
+
+One corpus representation caveat is now pinned explicitly: instruction
+`0x572B0` reads byte `FEBE8001` (signal 196) and `0x572B4` writes `FEBEF063`,
+but the decompiler currently prints that source as `DAT_febe8000._1_1_` because
+Ghidra typed the adjacent bytes as one object. Canonical instruction/data xrefs,
+not the textual composite spelling, are authoritative for this join.
+
+### 5.4 Signals 95..100 form a dormant crypto-test input bank
 
 The consumer at `0x6875E` bounds six previously anonymous generated signals:
 

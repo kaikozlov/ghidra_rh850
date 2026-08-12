@@ -470,26 +470,165 @@ Scheduling order matters: `0x656F0` calls `0x60DDC` before dispatching
 `0x5784C`, so a CH0 invocation commits the previously staged compare bank and
 then computes the next current-control/compare state.
 
-### 9.3 Conditioned `0x2E4` command branch and the d/q join
+### 9.3 Protected steering command arbitration and the d/q join
 
-The command side is deeper than the earlier report showed. The recovered branch
-now includes:
+The full decompiler corpus exposed two omissions in the earlier Stage-6 command
+trace. First, the `0x2E4` `STEER_REQUEST` bit is part of the same steering-mode
+arbiter as the conditioned torque value. Second, protected CAN `0x131` is not
+merely another SecOC verification stream: the pinned Toyota SecOC DBC identifies
+it as `STEERING_LTA_2`, and this firmware feeds its signed angle command through
+an alternate LTA controller before converging with the `0x2E4` torque path.
+
+#### 9.3.1 Protected `0x2E4`: torque-command mode
+
+The value and request bit take parallel ingress paths:
 
 ```text
-0x2E4 signal 61
-  -> FEBE7F94 -> FEBEF184 -> FEBEAE20
-  -> FEBEBF80 -> FEBEBF9A / FEBEBF84 -> FEBEBFA2
-  -> steering_command_mode_select_stage @ 0xCA6B8 -> FEBEC144
-  -> steering_command_slew_gain_limit_stage @ 0xCA75E -> FEBEC170
-       -> steering_command_export_scale @ 0xCB700 -> FEBEAE16 / FEBEAE6E
-       -> steering_command_secondary_select_stage @ 0xCAC14 -> FEBEC1B8
-          -> steering_command_secondary_gain_clip @ 0xCAC6A
-             -> FEBEC1B4 / FEBEC1BC
+0x2E4 signal 61 STEER_TORQUE_CMD, signed BE16 B1..B2
+  -> FEBE7F94 -> FEBEF184
+  -> system_mode_telemetry_snapshot -> FEBEAE20
+  -> steering_torque_command_clamp_gain @ 0xC853A -> FEBEBF80
+  -> steering_torque_command_rate_limit @ 0xC85B6
+  -> FEBEBF9A / FEBEBF84 -> FEBEBFA2
+
+0x2E4 signal 60 STEER_REQUEST, B0[0]
+  -> FEBE7F98 -> FEBEF02A
+  -> base-relative snapshot access LAB_febeb800 + 0x382A
+  -> FEBEACFF
+  -> steering_request_source_arbitration @ 0xCA354 -> FEBEC137
+  -> steering_lka_torque_mode_latch @ 0xCA3F8 -> FEBEC13D = 1
 ```
 
-This hidden `C144/C170/C1B8` branch does **not** produce a d/q reference. Its
-read/write census remains entirely in the foreground steering-command/export
-state, and `FEBEAE16`/`FEBEAE6E` flow into snapshot/structure builders.
+The base-relative `LAB_febeb800 + 0x382A` decompiler expression is the same
+canonical RAM byte `FEBEF02A`; treating these GP/base-relative aliases as
+addresses rather than literal text is what closes the request-bit join.
+
+When torque mode is selected (`FEBEC13D == 1`),
+`steering_command_mode_select_stage @ 0xCA6B8` leaves its initial
+`FEBEC144 = FEBEBFA2` selection intact and records mode `1` in `FEBEC16E`.
+Thus a correctly authenticated `0x2E4` request and its conditioned signed torque
+value reach the common steering-command state together.
+
+#### 9.3.2 Protected `0x131`: SecOC LTA angle-command mode
+
+The application Rx map identifies CAN `0x131` as SecOC-protected PDU 26. The
+pinned Toyota SecOC DBC independently names CAN ID 305 (`0x131`)
+`STEERING_LTA_2` with request bits at B0[3]/B0[0], a 6-bit counter at B1[5:0],
+and signed 16-bit `STEER_ANGLE_CMD` in B2..B3. The recovered firmware ingress is:
+
+| Wire field | COM signal | First RAM | Snapshot RAM | Recovered use |
+|---|---:|---:|---:|---|
+| B0[3] `STEER_REQUEST` | 109 | `FEBE7FC2` | `FEBEAD54` | LTA submode/request latch |
+| B0[2] | 110 | `FEBE7FC3` | `FEBEAD53` | no runtime reader after snapshot |
+| B0[1] | 111 | `FEBE7FC4` | `FEBEAD52` | additional firmware submode selector; OEM name unresolved |
+| B0[0] `STEER_REQUEST_2` | 112 | `FEBE7FC5` | `FEBEAD50` | source arbitration |
+| B1[5:0] `COUNTER` | 113 | `FEBE7FC6` | `FEBEAD4F` | wrapped counter/deadline logic at `0xC9EF4` |
+| B2..B3 signed16 `STEER_ANGLE_CMD` | 114 | `FEBE7FBE` | `FEBEAE60` | LTA angle-controller input |
+| B4[7:4] | 115 | `FEBE7FC7` | — | stored with no direct scalar consumer; SecOC-envelope/freshness region |
+
+`0xCA354` combines `FEBEAD50` with steering validity/inhibit state and publishes
+`FEBEC136`. In the LTA-only case, `0xCA47A -> 0xCA3B8` sets
+`FEBEC13A = 1`, clears torque mode `FEBEC13D`, and derives submode state
+`FEBEC13B/13C` from `FEBEAD52/AD54`.
+
+The signed angle command then enters a real controller chain, not a telemetry
+copy:
+
+```text
+0x131 STEER_ANGLE_CMD
+  -> FEBEAE60
+  -> lta_angle_command_smoothing @ 0xC8DE0 -> FEBEBFF0
+  -> LTA feedback/limit stage 0xC96D2 -> FEBEC0BE
+  -> gain stage 0xC97B2 -> FEBEC0C8
+  -> lta_internal_command_rate_limit @ 0xC8D62 -> FEBEC0D6
+  -> steering_command_mode_select_stage @ 0xCA6B8
+       when FEBEC13A == 1:
+         FEBEC16E = 2
+         FEBEC144 = FEBEC0D6
+```
+
+The call order is pinned in `steering_control_cycle_pipeline @ 0xCB86E`:
+`0xC8DE0 -> 0xC978E` (which calls `0xC96D2`) `-> 0xC97B2 -> 0xC8DC8`
+(which calls `0xC8D62`) `-> 0xCA7F0` (which calls `0xCA6B8`). This makes
+`FEBEC0D6`, rather than the raw angle value, the LTA-mode contribution at the
+common command selector.
+
+#### 9.3.3 Common post-arbitration command cone
+
+The two authenticated steering modes therefore converge at `FEBEC144`. In canonical
+addresses, the shared foreground sequence includes
+`0xFEBEC144 -> 0xFEBEC170 -> 0xFEBEC1B8 -> 0xFEBEC1BC -> 0xFEBEC1D4`,
+while the LTA alternate source is `0xFEBEC0D6`; the late monitor projection is
+`0xFEBEC1D4 -> 0xFEBEB788 -> 0xFEBEB87E`. These are the addresses locked by
+the project-xref verifier below.
+
+```text
+protected 0x2E4 torque mode                    protected 0x131 LTA angle mode
+ BFA2 + C13D=1                                  AE60 -> ... -> C0D6 + C13A=1
+          \                                         /
+           +---- steering mode select CA6B8 -------+
+                              |
+                            C144
+                              |
+                  slew/gain/limit CA75E
+                              |
+                            C170
+                         /         \
+          export CB700 -> AE16/AE6E  secondary select CAC14
+                                             |
+                                            C1B8
+                                             |
+                                       gain/clip CAC6A
+                                             |
+                                         C1B4/C1BC
+                                             |
+                  CACC0 -> C1BE -> CAD68 -> C1D0
+                    -> CAD84 -> C1C0 -> CADD6 -> C1D6
+                    -> CAE26 -> C1D4
+                                             |
+                           BF8C4 scale -> FEBEB788
+                                             |
+                      command plausibility C07FA/C077E
+                                             |
+                         FEBEB87E qualified state (0/0x5A)
+                                             |
+              C02D6 / C0EBA / C0F6A / C1664 -> C134A/C15A6
+                    monitor/adaptation/fault/snapshot state
+```
+
+`FEBEC1D4` has only the expected common-command writer plus reads at `0xBF8C4`
+and `0xCB454`. `0xBF8C4` scales it into `FEBEB788`; `FEBEB788` has exactly one
+runtime reader, `0xC07FA`. The `0xC07FA/0xC077E` pair integrates and bounds the
+value with adjacent steering state and produces `FEBEB87E`, where `0x5A` is the
+qualified-valid state. Exhausting the direct consumers of `FEBEB87E` and its
+`B810/B820/B82C/B82E` descendants reaches calibration selection,
+plausibility/consistency qualification, adaptation, fault bookkeeping, and
+snapshot publication (`0xC03D8`, `0xC0F6A`, `0xC1664 -> 0xC134A/0xC15A6`,
+`0xBFDB6`, `0xC116A`). None writes the d/q-reference page.
+
+This corrects the earlier stopping point at `C1B8/C1BC`: that was not the end of
+the command cone. The stronger late-cone trace still does **not** produce a d/q
+reference.
+
+#### 9.3.4 Protected `0x132` parallel-PDU negative
+
+CAN `0x132` is another SecOC-protected application input (PDU 35), so it was
+also audited as a possible parallel steering command. Its recovered scalar
+payload reaches `FEBEF061/62/63/64/F19A/F19C`, then
+`system_mode_telemetry_snapshot @ 0xBA43A` copies those values to:
+
+```text
+FEBEAD04 / FEBEAD05 / FEBEAD06 / FEBEAD07 / FEBEAE28 / FEBEAE2A
+```
+
+Each of those six post-snapshot locations has only the snapshot writer and an
+initialization writer in the corrected project; none has a runtime reader.
+Configured signals 194/197 are separately classified store-only in the Rx
+consumer audit. `0x132` therefore has no recovered steering-actuation consumer
+in this calibration. This is a calibration-specific bounded negative, not a
+cross-Toyota semantic name for CAN `0x132`.
+
+#### 9.3.5 d/q producer cone remains independently closed
 
 The actuator-side producer cone is separately closed:
 
@@ -507,16 +646,16 @@ The actuator-side producer cone is separately closed:
 - the apparent second d/q-reference writer in
   `autosar_os_task_signal_dispatch @ 0x58404` is a zero-clear/reinitialization
   sequence over `FEBE6D24..6D2E` followed by the normal reference constructor,
-  not a command copy. That routine is used at startup and on foreground
-  version/state reinitialization.
+  not a command copy.
 
-Accordingly, Stage 6 closes the **static search** for the command-to-current
-join with a bounded negative: no direct, table-pointer, generic-memcpy, RTE-copy,
-or recovered computed-GP transfer joins authenticated command state to the
-proved d/q reference cone. This is stronger than "no edge found," but it is not
-proof of physical independence. A runtime-only mechanism invisible to the
-static model remains logically possible; dynamic bench observation is still
-required to prove how a valid signed command changes physical actuation.
+The bounded **command-to-current** static negative is consequently broader than
+the Stage-6 version: no direct, table-pointer, generic-memcpy, RTE-copy,
+recovered GP-relative, or
+late monitor/adaptation transfer joins **either** authenticated steering command
+mode (`0x2E4` torque or `0x131` LTA angle) to `FEBE6D28/6D2A` or their direct
+feeder state. This still does not prove physical independence. A runtime-only
+mechanism invisible to the recovered static model remains logically possible;
+a provisioned bench observation remains the discriminator.
 
 ### 9.4 Torque-limit and command-side plausibility branches
 

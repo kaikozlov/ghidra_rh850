@@ -16,15 +16,20 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   list/per-ID/detail structure is recovered, but the OEM service name and exact
   meanings of the event catalogue's encoded upper ID bits and record-kind
   values remain unknown.
-- **Dynamic authenticated-command actuation discriminator.** Stage 6 closes
-  the static join search as a bounded negative: the complete `FEBE6D00..6DFF`
+- **Dynamic authenticated-command actuation discriminator.** The full-corpus
+  extension closes the static join search more broadly than Stage 6. Protected
+  `0x2E4` torque control (`BFA2`) and protected `0x131` LTA angle control
+  (`AE60 -> ... -> C0D6`) are now proved to converge at `C144`; the common cone
+  has been exhausted through `C170/C1B8/C1BC/C1D4 -> B788 -> B87E` and its
+  monitor/adaptation consumers. Together with the complete `FEBE6D00..6DFF`
   writer/xref census, producer cone, absolute-pointer scan, generic-memcpy
-  census, RTE-copy direction audit, and deeper `BFA2→C144→C170→C1B8/AE16/AE6E`
-  command branch reveal no transfer into `FEBE6D28/6D2A`. This does not prove
-  physical independence. A provisioned isolated bench should correlate a valid
-  signed `0x2E4` command with d/q-reference/current/PWM state to determine the
-  runtime coupling. Static broad searching should not be repeated without a new
-  concrete lead. Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3.
+  census, and RTE-copy audit, no static transfer into `FEBE6D28/6D2A` is
+  recovered. This does not prove physical independence. A provisioned isolated
+  bench should test the two command modes separately: a valid signed `0x2E4`
+  torque request and, where the target supports it, a valid signed `0x131` LTA
+  request/angle command, while observing d/q-reference/current/PWM state. Static
+  broad searching should not be repeated without a new concrete lead.
+  Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3.
 
 ## SecOC
 

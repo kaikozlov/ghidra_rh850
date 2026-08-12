@@ -6,7 +6,7 @@ for claim scope and confidence, [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) for
 blockers, and subsystem reports for interpretation.
 
 Snapshot date: **2026-08-11**. Corrected normalized project-inventory SHA-256:
-`2c13a2a8d06e38ab5c673dfa1c53f9d5dde3052bf534c307b5fe4de951a12a88`.
+`f681165591c915352d209b9bb2da687181067d373094897da252de9b9895f068`.
 The inventory was produced byte-identically by two separately invoked four-stage
 rebuilds. Committed-project promotion is a separate final lifecycle gate.
 
