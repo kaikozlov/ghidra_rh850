@@ -290,6 +290,30 @@
       "sha256": "86b628b5cf75ac39c200edcc099f9604d82a2d2efff2df02b48f4d29ebd5cae2",
       "provenance": "Discord attachment, no canonical git source",
       "notes": "CUW SeedKey/Nonce deobfuscation and payload decryption"
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-12",
+      "path": "community/albinoelephant/dump_ff200000_ff208000.bin",
+      "size": 32768,
+      "sha256": "8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299",
+      "provenance": "Discord attachment; TSKM /cache/tsk/dataflash output from reported 2023 US Corolla investigation",
+      "notes": "Complete 0xFF200000..0xFF207FFF DataFlash dump; exact EPS F181/calibration not yet known"
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-12",
+      "path": "community/albinoelephant/can_oracle.ndjson",
+      "size": 97768,
+      "sha256": "8863398a98875a853e722a6ba83fc10563d5764cea33719c8af34225efa189a3",
+      "provenance": "Discord attachment; TSKM /cache/tsk/can-messages/can_oracle.ndjson from same investigation",
+      "notes": "1232 sync-only CAN 0x00F rows: 616 each on Panda buses 0 and 2; no protected-message rows"
+    },
+    {
+      "source": "public comma route supplied by albinoelephant in comma Discord; repository-derived 2026-08-12",
+      "path": "community/albinoelephant/public_route_secoc_oracle.ndjson",
+      "size": 212536,
+      "sha256": "a9bf3f279001b8b77e96acfc186944a962c59cc7bedf739d902d971ff4b03f15",
+      "provenance": "CAN-only extraction from pinned public-route segment-0 rlog d246a55988889253c8d155f04b132b1bb443fdd74f1e6bad68eef8879a5c477b",
+      "notes": "Genuine bus-1 classic SecOC-family rows only: 0x00F=588, 0x116=2499, 0x24D=59; no route metadata retained"
     }
   ],
   "public_routes": [

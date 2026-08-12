@@ -587,6 +587,17 @@ paths = ["community/", "tools/"]
 tests = ["tests/verify_corolla_2023_public_route_summary.py"]
 paths = ["docs/variants/", "data/"]
 
+[suite.albinoelephant_corolla_dataflash]
+tests = ["tests/verify_albinoelephant_corolla_dataflash.py"]
+paths = [
+  "community/albinoelephant/",
+  "data/generated/corolla_2023_albino_dataflash_analysis.json",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/tooling/community-dataflash-secoc.md",
+  "external-references.lock.json",
+]
+oracle = "raw_bytes"
+
 [suite.external_corroboration]
 tests = ["tests/verify_external_corroboration.py"]
 paths = ["external-references.lock.json", "docs/status/"]

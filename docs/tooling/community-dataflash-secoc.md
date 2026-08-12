@@ -170,13 +170,39 @@ CAN-send, or Panda-safety mutation path. Device-side mutating dump behavior
 remains in the separately pinned community tooling; the repository-local
 cross-variant layer is read-only/offline.
 
-## 5. Current evidence boundary
+## 5. 2023-US-Corolla field closure
 
-The static audit proves only what the pinned tools count and what the pinned
-DBC/sender define. It does **not** prove that a specific 2023 Corolla uses every
-message in the DBC profile, that its SecOC key is CPU-visible in DataFlash, or
-that the same key authenticates synchronization and all protected domains.
-Those questions require the actual dump and capture.
+The previously missing field artifacts are now retained under
+`community/albinoelephant/` for the separately reported 2023 US Corolla
+specimen described in `docs/variants/corolla-2023-us-public-route.md`.
 
-It does prove that a `0 protected` result from the unmodified community verifier
-cannot be generalized beyond `{0x131, 0x2E4, 0x344}` on Panda buses `{0,2}`.
+The contributor's own TSKM oracle is sync-only: 1,232 `0x00F` rows, split as 616
+on Panda bus 0 and 616 on bus 2, with no protected-message rows. That directly
+explains the TSKM matcher failure. A repository-derived CAN-only oracle from the
+contributor's already-pinned public route adds the genuine bus-1 protected
+traffic (`0x116` and `0x24D`) without retaining route metadata.
+
+The complete 32 KiB DataFlash dump was then scanned with
+`tools/analyze_toyota_dataflash.py --domain-scan --min-entropy 0`. All 32,753
+overlapping 16-byte positions are considered (23,277 unique raw windows after
+deduplication), and no candidate passes the synchronization, `0x116`, or
+`0x24D` cryptographic probe.
+
+This closes the raw-DataFlash key hypothesis for this snapshot at the strongest
+current offline boundary: **no raw 16-byte window in the supplied DataFlash is
+a key for any of the three observed classic domains**. It does not exclude an
+ICU-S/HSM-owned key, a key stored outside this 32 KiB range, or a different
+transformation/derivation not represented by a raw window or the known NvM
+triplicate decode.
+
+The same dump independently corroborates part of the `4512000` physical NvM
+layout: objects 0, 2, and 5 have three committed raw/XOR55/XORAA copies at the
+same addresses and decode to valid consensus payloads, while object 15 has no
+valid copy. Thus the related `4514000` CPU-visible object-15 key-storage result
+does not reproduce here even though part of the storage geometry itself does.
+
+Machine-readable result:
+`data/generated/corolla_2023_albino_dataflash_analysis.json`.
+
+The exact EPS F181 and CodeFlash remain unavailable, so this evidence must stay
+separate from the exact `8965F1208000` Corolla calibration investigation.

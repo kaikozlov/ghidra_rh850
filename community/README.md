@@ -52,3 +52,22 @@ repository findings:
 
 These are unverified (author notes "largely untested") and are committed for
 reference and cross-validation, not as proven tooling.
+
+## `albinoelephant/`
+
+**Contributor:** albinoelephant, comma Discord, 2026-08-12
+
+**Vehicle attribution:** reported 2023 US Corolla; exact EPS F181 still unknown
+
+This directory preserves the contributor's complete 32 KiB TSKM DataFlash dump
+and TSKM CAN-oracle output, plus a compact CAN-only oracle derived from the
+already-pinned public route supplied during the same investigation. The raw
+artifacts are immutable evidence inputs rather than tooling.
+
+The contributor's TSKM oracle contains synchronization `0x00F` only, explaining
+the original matcher failure. The derived public-route oracle adds the genuine
+bus-1 `0x116` and `0x24D` protected-family traffic already established in the
+variant report. `tools/analyze_toyota_dataflash.py` can therefore test the
+actual dump against all three observed domains offline. See
+[`albinoelephant/README.md`](albinoelephant/README.md) and
+[`docs/variants/corolla-2023-us-public-route.md`](../docs/variants/corolla-2023-us-public-route.md).

@@ -1,0 +1,1399 @@
+{
+  "base_address": "0xFF200000",
+  "capture": {
+    "path": "community/albinoelephant/public_route_secoc_oracle.ndjson",
+    "protected_samples": 2555,
+    "summary": {
+      "buses_with_sync": [
+        1
+      ],
+      "counts": {
+        "bus1:0x00F": 588,
+        "bus1:0x116": 2499,
+        "bus1:0x24D": 59
+      },
+      "orphan_protected": {
+        "bus1:0x116": 3
+      }
+    },
+    "sync_samples": 588
+  },
+  "dump": "community/albinoelephant/dump_ff200000_ff208000.bin",
+  "dump_sha256": "8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299",
+  "entropy_windows": {
+    "rank_limit": 100,
+    "ranked": [
+      {
+        "address": "0xFF200B19",
+        "entropy": 4.0,
+        "offset": 2841,
+        "sha256": "896cd1083cb87a96eb3da9f04cfbc8cd5ebb6e86966d4f012b3c54f757863140"
+      },
+      {
+        "address": "0xFF200B1A",
+        "entropy": 4.0,
+        "offset": 2842,
+        "sha256": "bbc43281b3f80759ba809ac0a27c30ed14f349f9a654f8c110aaa4bd4e54c5fc"
+      },
+      {
+        "address": "0xFF200B1B",
+        "entropy": 4.0,
+        "offset": 2843,
+        "sha256": "4363cf8949d6e9822a0c3fbeb0b2f7012f8288f2cd1b4882df5754cff70e887e"
+      },
+      {
+        "address": "0xFF200B1C",
+        "entropy": 4.0,
+        "offset": 2844,
+        "sha256": "f2298d2a30f73146e1f4573681c0e3f804e754f2edecd39eee56306948bf9b54"
+      },
+      {
+        "address": "0xFF200B1D",
+        "entropy": 4.0,
+        "offset": 2845,
+        "sha256": "29a0c22ff31434fa5fd0b73f674d9d6d6faa89a0a18f0a98116509f11af59692"
+      },
+      {
+        "address": "0xFF200B1E",
+        "entropy": 4.0,
+        "offset": 2846,
+        "sha256": "f5c5714beb50e36405d573db2d5a6b77f30c63c23dff607455679ab82c86dce2"
+      },
+      {
+        "address": "0xFF200B1F",
+        "entropy": 4.0,
+        "offset": 2847,
+        "sha256": "436c802da172fe956b88222ed245c4f6a5076601b2fb41ce9f231d95ac54769a"
+      },
+      {
+        "address": "0xFF200B20",
+        "entropy": 4.0,
+        "offset": 2848,
+        "sha256": "8d06e89ac00404f5b790a1061fbbcf7f341fe602984dd6e38c72988e7e477194"
+      },
+      {
+        "address": "0xFF200B21",
+        "entropy": 4.0,
+        "offset": 2849,
+        "sha256": "661e5680af84504b4ccc4db998ceb2e58c7a6bf60860554f2e36fb8551859d29"
+      },
+      {
+        "address": "0xFF200EA4",
+        "entropy": 4.0,
+        "offset": 3748,
+        "sha256": "e8be02eb12bd364354f2af74281198002476c6a43128a91cb32082c898a44245"
+      },
+      {
+        "address": "0xFF20190F",
+        "entropy": 4.0,
+        "offset": 6415,
+        "sha256": "c5cf2a7051538a52853f1bc761d83dc210cda7172b8a704da82c5c690638bfc1"
+      },
+      {
+        "address": "0xFF201910",
+        "entropy": 4.0,
+        "offset": 6416,
+        "sha256": "2a985eeccb1babc7f67eca821fe408014867f218996a308bae717a616f6da38b"
+      },
+      {
+        "address": "0xFF201911",
+        "entropy": 4.0,
+        "offset": 6417,
+        "sha256": "20a25c88158c81cca23b5893d575b428a6b72bfa4f00307f78a35b1c9dfa3f66"
+      },
+      {
+        "address": "0xFF20285F",
+        "entropy": 4.0,
+        "offset": 10335,
+        "sha256": "f4a744539119e1b4fac556c23736b53f3d2fd2fbafb9484e5ed0dd46ee8a4780"
+      },
+      {
+        "address": "0xFF202860",
+        "entropy": 4.0,
+        "offset": 10336,
+        "sha256": "9a9d29164dde6d3f743d18d68fdcd08a1e8d2c616552947e628d409b0152e2e4"
+      },
+      {
+        "address": "0xFF202861",
+        "entropy": 4.0,
+        "offset": 10337,
+        "sha256": "a135d7f1f8d964847e8709dbe04219af43986b249ea3821920e311bc34002cf5"
+      },
+      {
+        "address": "0xFF202862",
+        "entropy": 4.0,
+        "offset": 10338,
+        "sha256": "0f536a68f33001599f146694c9227d68b816f4904ca42028875375b104ae05b5"
+      },
+      {
+        "address": "0xFF202863",
+        "entropy": 4.0,
+        "offset": 10339,
+        "sha256": "8d75bd35a732d0fb48c6e5228c7060c20dee70aacb330ac8b3a8a8e36158647a"
+      },
+      {
+        "address": "0xFF202864",
+        "entropy": 4.0,
+        "offset": 10340,
+        "sha256": "efab294682b1fdd47e213ba3b087a7525d5f8035ca458b940d1989a8f511a5ae"
+      },
+      {
+        "address": "0xFF202865",
+        "entropy": 4.0,
+        "offset": 10341,
+        "sha256": "efd8e65ba29b0cf1f743ed2974ea59987322155da55937853ceed34265633bae"
+      },
+      {
+        "address": "0xFF202866",
+        "entropy": 4.0,
+        "offset": 10342,
+        "sha256": "19d510b31e75be120ef16ddc2f3a9d2caba03ca55cce9f378c6178ff4803ca59"
+      },
+      {
+        "address": "0xFF202867",
+        "entropy": 4.0,
+        "offset": 10343,
+        "sha256": "db90394fd8673c1b6a1d8e89d11160369f0a4a3a37efd6de8d3b626ead78f32c"
+      },
+      {
+        "address": "0xFF202868",
+        "entropy": 4.0,
+        "offset": 10344,
+        "sha256": "4c759ca24883c922d351ac62d0ff1c16894d9bfed8fd63c3619da7fef30e4667"
+      },
+      {
+        "address": "0xFF202869",
+        "entropy": 4.0,
+        "offset": 10345,
+        "sha256": "3feda900350d92f7ad4e6f06b14352ed1672fa3eb940025a3dbac2c3ce7d079d"
+      },
+      {
+        "address": "0xFF20286A",
+        "entropy": 4.0,
+        "offset": 10346,
+        "sha256": "13e6e29f3f674cfa3bb145da90579cc88e6a40ac572b4885e271ac95cc45c14b"
+      },
+      {
+        "address": "0xFF20286B",
+        "entropy": 4.0,
+        "offset": 10347,
+        "sha256": "af621f6907e268cf6680d35b0f732802404a8941b3d2beb33a01ea39673a4fcc"
+      },
+      {
+        "address": "0xFF20286C",
+        "entropy": 4.0,
+        "offset": 10348,
+        "sha256": "e6888cc9413c93d7295f20b570382c3ab3e7b0d28c3e3d551dd47b4d13278924"
+      },
+      {
+        "address": "0xFF20286D",
+        "entropy": 4.0,
+        "offset": 10349,
+        "sha256": "c4e890e3d2216fbb4f576e70ecb548c2d286eb283cca0774d854d116569aa354"
+      },
+      {
+        "address": "0xFF202983",
+        "entropy": 4.0,
+        "offset": 10627,
+        "sha256": "d87772b02fb6502b2807a1a3a8701946f5952006c0c6d3c168fd16a0ccf9bdfe"
+      },
+      {
+        "address": "0xFF202984",
+        "entropy": 4.0,
+        "offset": 10628,
+        "sha256": "a022481636685652d0558b1843167e4b0b3ef37393df81485c2632b588a6d491"
+      },
+      {
+        "address": "0xFF202985",
+        "entropy": 4.0,
+        "offset": 10629,
+        "sha256": "d2f8097252263e18ac645f3d5906278794c2b70dc2a522a6364fed54e6162a0d"
+      },
+      {
+        "address": "0xFF202FE5",
+        "entropy": 4.0,
+        "offset": 12261,
+        "sha256": "9354464a522ec108febbb45bec95c861d205fcb086c05af8f0241d3e6f453fab"
+      },
+      {
+        "address": "0xFF202FE6",
+        "entropy": 4.0,
+        "offset": 12262,
+        "sha256": "84fd3e5e71d8eaba5454c76bb5a8f2909f2ce85d394700717541754b25fdb79a"
+      },
+      {
+        "address": "0xFF202FE7",
+        "entropy": 4.0,
+        "offset": 12263,
+        "sha256": "1c1a3b9a2fa2c725f067d81cffaab36c0307989f2cefe4bdcf59d02b880f8fe3"
+      },
+      {
+        "address": "0xFF202FE8",
+        "entropy": 4.0,
+        "offset": 12264,
+        "sha256": "7405e7aae21825c0131ec5751b88e680e4fc01ee69d23c9515841fe2030454db"
+      },
+      {
+        "address": "0xFF205443",
+        "entropy": 4.0,
+        "offset": 21571,
+        "sha256": "184fc2192b820a70e6ce109e722d1d7b6b72bd37597eb2e6763a8ed8c66119a9"
+      },
+      {
+        "address": "0xFF205444",
+        "entropy": 4.0,
+        "offset": 21572,
+        "sha256": "ecf6e659351e2f64765ca81f49f581361d3699703dfe409b230c81c0f22757f5"
+      },
+      {
+        "address": "0xFF200B17",
+        "entropy": 3.875,
+        "offset": 2839,
+        "sha256": "43ab2ea55be4dc9baab5d4fa8bcbe1b0c2ae99094c02286ebc0682855827a6e5"
+      },
+      {
+        "address": "0xFF200B18",
+        "entropy": 3.875,
+        "offset": 2840,
+        "sha256": "b29fdc77c59a67ca86c012eb802934b69604d0e92701229f848d9caf2c05fea3"
+      },
+      {
+        "address": "0xFF200B22",
+        "entropy": 3.875,
+        "offset": 2850,
+        "sha256": "68f68aafb586ffdf1cfe6522cf9b0a3f4dd9d477d02cc2d778d83782a69435bc"
+      },
+      {
+        "address": "0xFF200C79",
+        "entropy": 3.875,
+        "offset": 3193,
+        "sha256": "86dc29a5e2572447482f08f37d314cb5f194747e7e9a221bf13b316cd5c629fa"
+      },
+      {
+        "address": "0xFF200D58",
+        "entropy": 3.875,
+        "offset": 3416,
+        "sha256": "b849ab69ee26afb218fbfe69730a5e57779b8024d7abb35a7cac42875de46d0e"
+      },
+      {
+        "address": "0xFF200D59",
+        "entropy": 3.875,
+        "offset": 3417,
+        "sha256": "1136a2bc6863e1778a2ad0056a2f01132eae6200e275685779bd4bc918139d59"
+      },
+      {
+        "address": "0xFF200EA3",
+        "entropy": 3.875,
+        "offset": 3747,
+        "sha256": "09971847b2622b2213bae03c96421a72a82764531bf30f55a97968415bf3d4f0"
+      },
+      {
+        "address": "0xFF200EA5",
+        "entropy": 3.875,
+        "offset": 3749,
+        "sha256": "4b829f236cc684d2d0da483f27b0400075e6b66f2b51bce071ecaaf3847a6582"
+      },
+      {
+        "address": "0xFF200F10",
+        "entropy": 3.875,
+        "offset": 3856,
+        "sha256": "aa52ea5e6f77c41e21529f078bc634748c66b1acc1336f665417ca73267cb4f2"
+      },
+      {
+        "address": "0xFF20190E",
+        "entropy": 3.875,
+        "offset": 6414,
+        "sha256": "3f7070c7156b0f32693da4fabc4d8ba2020b2f2d7ae4ecf82f3762eac3e277e2"
+      },
+      {
+        "address": "0xFF201912",
+        "entropy": 3.875,
+        "offset": 6418,
+        "sha256": "90308c90aaf523181036f69d717e230d66493afc61328c4bbd76abefb31464fc"
+      },
+      {
+        "address": "0xFF201A41",
+        "entropy": 3.875,
+        "offset": 6721,
+        "sha256": "c01cfb291b11d4f365839d36cabd343f60996b50526c92c8c0cabfc75ac860e7"
+      },
+      {
+        "address": "0xFF20252B",
+        "entropy": 3.875,
+        "offset": 9515,
+        "sha256": "f36f7ee5635e7c9a37838deabddbe73dde8753dac1d6d9744ff34e30fefc1665"
+      },
+      {
+        "address": "0xFF20252C",
+        "entropy": 3.875,
+        "offset": 9516,
+        "sha256": "482704a2f30fbbf7db2fe888a449f2c5d0fe696e72df175b34f1dd9ffce35b58"
+      },
+      {
+        "address": "0xFF20252D",
+        "entropy": 3.875,
+        "offset": 9517,
+        "sha256": "1363d238e29489a0c70da9f6bbc59e0a086ffe58770edc9877350f0f1078305b"
+      },
+      {
+        "address": "0xFF20285E",
+        "entropy": 3.875,
+        "offset": 10334,
+        "sha256": "3518523a63e2eee58e9f2d1bfa2d21a241c382147860aa5ecb1427940d6e64a0"
+      },
+      {
+        "address": "0xFF20286E",
+        "entropy": 3.875,
+        "offset": 10350,
+        "sha256": "1ea6e895a2ecb6f0dc8ac0c8536bff3697b8d1b84d0db337a3da0781d736c205"
+      },
+      {
+        "address": "0xFF202982",
+        "entropy": 3.875,
+        "offset": 10626,
+        "sha256": "cd88b4335a5d4698350f4bbe3f09bb3a0a3edf0ff8b98c6e50d6eadf6f58efd7"
+      },
+      {
+        "address": "0xFF202986",
+        "entropy": 3.875,
+        "offset": 10630,
+        "sha256": "4641bd12a8c572b059748b73c049ec7d0b56fbdb0a8d03eb6908172a9b8e77b0"
+      },
+      {
+        "address": "0xFF202CA6",
+        "entropy": 3.875,
+        "offset": 11430,
+        "sha256": "d8fbfb9852ed402972e0f9cc2ba40d76e4148377855a696f8ffa88d87a9d68e9"
+      },
+      {
+        "address": "0xFF202CA7",
+        "entropy": 3.875,
+        "offset": 11431,
+        "sha256": "390b28bf150979fdf71c2b8e8474f3bd206f37e7ba9a33fa0e7691acf8d6861e"
+      },
+      {
+        "address": "0xFF202CA8",
+        "entropy": 3.875,
+        "offset": 11432,
+        "sha256": "ad5bae2f6cf0cdec3cbd6918d91e36a3656e336c0d2edb0d15d618092b7cc86b"
+      },
+      {
+        "address": "0xFF202CA9",
+        "entropy": 3.875,
+        "offset": 11433,
+        "sha256": "c58fc4d04da99a0196ee30ce188cbd644fb922ac35d6b9dd77f7ec3f812a044e"
+      },
+      {
+        "address": "0xFF202FE4",
+        "entropy": 3.875,
+        "offset": 12260,
+        "sha256": "3a073c0739afb3553df67c38ef581285667ae210d36a4579e8dde86eba9656d5"
+      },
+      {
+        "address": "0xFF202FE9",
+        "entropy": 3.875,
+        "offset": 12265,
+        "sha256": "4a365cb0931e794f1aeb81c3934583c42629144b4c657dc5b05fd7dea5beac30"
+      },
+      {
+        "address": "0xFF202FEA",
+        "entropy": 3.875,
+        "offset": 12266,
+        "sha256": "a1bb22e823c206f0ab0c6e696910efd936ecde43741a74fa13a321e65d728173"
+      },
+      {
+        "address": "0xFF203B68",
+        "entropy": 3.875,
+        "offset": 15208,
+        "sha256": "f2aac3bae10327a8a59e7940755319083e95fa044467c8f8683eda9355c719b2"
+      },
+      {
+        "address": "0xFF203B69",
+        "entropy": 3.875,
+        "offset": 15209,
+        "sha256": "c649b636f50ea4c17d0bf351bf455bb4af11ada9b232bf3a078fadf414001a86"
+      },
+      {
+        "address": "0xFF2040F3",
+        "entropy": 3.875,
+        "offset": 16627,
+        "sha256": "a164ca6b0a4699a11d7da4ad87921c7c01bdab17520ade982d361f5a4329dbdf"
+      },
+      {
+        "address": "0xFF2040F4",
+        "entropy": 3.875,
+        "offset": 16628,
+        "sha256": "11e27a992c556a68c18e5ec1592ac39e529da6bb185487c71231fb361b652d7f"
+      },
+      {
+        "address": "0xFF205442",
+        "entropy": 3.875,
+        "offset": 21570,
+        "sha256": "e5fc8c0bf6da9869ee9edd196015bf4019c91b3623ec1a408ddd1cd6d36b0819"
+      },
+      {
+        "address": "0xFF205445",
+        "entropy": 3.875,
+        "offset": 21573,
+        "sha256": "05c7426b863fdb1725dc3963d017edd809e6d29bf374bc07248ca36af219b303"
+      },
+      {
+        "address": "0xFF2061C0",
+        "entropy": 3.875,
+        "offset": 25024,
+        "sha256": "019edfb14ab2b1fc0aa5685f50f6d224c29aaacd05042ce1e8283a351504e422"
+      },
+      {
+        "address": "0xFF2062C3",
+        "entropy": 3.875,
+        "offset": 25283,
+        "sha256": "2f92b39b853358fd132e113c8e21e68d8a067118e14dba383dc3e0dfacfbc581"
+      },
+      {
+        "address": "0xFF2065F4",
+        "entropy": 3.875,
+        "offset": 26100,
+        "sha256": "eef453c59b41de5934bdd2c25fc8526ba6a01fbcd22859430e32ccb2c1ccc3e5"
+      },
+      {
+        "address": "0xFF2065F5",
+        "entropy": 3.875,
+        "offset": 26101,
+        "sha256": "bea358dac7be5b8129b357d117fe7f2154217de88548b1cbe763a56059a66759"
+      },
+      {
+        "address": "0xFF2065F6",
+        "entropy": 3.875,
+        "offset": 26102,
+        "sha256": "09f85fd2626e78f6a4f8123c244e9895ae94e6f4b487f6c38909ee24f6d5b7b2"
+      },
+      {
+        "address": "0xFF2065F7",
+        "entropy": 3.875,
+        "offset": 26103,
+        "sha256": "5b2ce747d396e8718a24cd61e4a1c91ae7c79fb5d3a50e0fa0e3efd7612d68c1"
+      },
+      {
+        "address": "0xFF2000BA",
+        "entropy": 3.75,
+        "offset": 186,
+        "sha256": "a57d2e99e7c7d3a8db66b57f5fb94a028fa6777d319a927498106fb59d4223e7"
+      },
+      {
+        "address": "0xFF200B14",
+        "entropy": 3.75,
+        "offset": 2836,
+        "sha256": "e9f6500f79a2c3916f99a8a91b162ac4db84200729c0756cd74f4a5eb7c1a651"
+      },
+      {
+        "address": "0xFF200B15",
+        "entropy": 3.75,
+        "offset": 2837,
+        "sha256": "11b1265a0c8d1f9979aea02c5ca751dae815a259cd353b14eaafb37422013303"
+      },
+      {
+        "address": "0xFF200B16",
+        "entropy": 3.75,
+        "offset": 2838,
+        "sha256": "b4a13e0e0f4f87d45bd1746f6cd2dcd2b44cd21e3ad5d14a6063de09ab3ec059"
+      },
+      {
+        "address": "0xFF200C7A",
+        "entropy": 3.75,
+        "offset": 3194,
+        "sha256": "4b9388bf6f60ec5cbf2d7257ccfa1d985d0231f98cefa569ae60f2f3a66f554e"
+      },
+      {
+        "address": "0xFF201290",
+        "entropy": 3.75,
+        "offset": 4752,
+        "sha256": "5e9d4744ddff18cba4f4505b682aa3bd707cdb5a73f814c3358aa5d82f0bf4a4"
+      },
+      {
+        "address": "0xFF201A3F",
+        "entropy": 3.75,
+        "offset": 6719,
+        "sha256": "c09e933dae6c2422e60467aafea36fa8fa781ef9a98f8a58c11e6512b86bf5d2"
+      },
+      {
+        "address": "0xFF201A40",
+        "entropy": 3.75,
+        "offset": 6720,
+        "sha256": "dc35da3b21b52fbc9c5814fd3d2f1678821d1390c6385366b053cf965b7f80c4"
+      },
+      {
+        "address": "0xFF201A42",
+        "entropy": 3.75,
+        "offset": 6722,
+        "sha256": "c2c7ef29a9afeb77f8e00af6cd3f02d9fe56a6ba1d02d950f9bc7c5316c8ad41"
+      },
+      {
+        "address": "0xFF20252A",
+        "entropy": 3.75,
+        "offset": 9514,
+        "sha256": "45d4cc0eef42398ddc2a64bb05221f6c5e6cfc4dc5cef46e448df1a112ba3395"
+      },
+      {
+        "address": "0xFF20252E",
+        "entropy": 3.75,
+        "offset": 9518,
+        "sha256": "733572a726df6c8a6e409c9308e45d51d57c1b2e03e8da3b138199b7e9bd68d1"
+      },
+      {
+        "address": "0xFF202CAA",
+        "entropy": 3.75,
+        "offset": 11434,
+        "sha256": "4f46ab860603a35512c1b3a3c0dc28e33ec0a0a31ad2db89423a6cb282ee72d8"
+      },
+      {
+        "address": "0xFF2030D7",
+        "entropy": 3.75,
+        "offset": 12503,
+        "sha256": "4e22d1207d8343e959004e33922bb34dc8b43a43cc08acdc176e5440b73adf92"
+      },
+      {
+        "address": "0xFF2030D8",
+        "entropy": 3.75,
+        "offset": 12504,
+        "sha256": "6b10716fd85a8a89faafd5b2e85fcf0b7faf6d34d2e5ad49287fae9084de2a18"
+      },
+      {
+        "address": "0xFF2030D9",
+        "entropy": 3.75,
+        "offset": 12505,
+        "sha256": "d4273fb48453cb49afe2e32ac3ac93ba0bc3ec112e4b7cea6db39c83cc2dc2e8"
+      },
+      {
+        "address": "0xFF2030DD",
+        "entropy": 3.75,
+        "offset": 12509,
+        "sha256": "2e7ce472d5c089c8dc11444265f2241ce0978eff2ce40956cfd069479e02c600"
+      },
+      {
+        "address": "0xFF2030DE",
+        "entropy": 3.75,
+        "offset": 12510,
+        "sha256": "d799efd69081892756b845148533e9ae869fb72b930e6dff43846d3d766c15f6"
+      },
+      {
+        "address": "0xFF203285",
+        "entropy": 3.75,
+        "offset": 12933,
+        "sha256": "62649bd38699dd1df212a00a75ce9f18970d723b97742cbdd22d30629f4300cd"
+      },
+      {
+        "address": "0xFF203B67",
+        "entropy": 3.75,
+        "offset": 15207,
+        "sha256": "17537ba2ea3ccc78aadfbd25e12c9658be3986a87ca5a05a522ac63f05b5a7fb"
+      },
+      {
+        "address": "0xFF203B6A",
+        "entropy": 3.75,
+        "offset": 15210,
+        "sha256": "fffd09285af757eaaad4da3c580343bf78cf1a7f5b7f7818a50707842c7c8b7d"
+      },
+      {
+        "address": "0xFF2040F2",
+        "entropy": 3.75,
+        "offset": 16626,
+        "sha256": "e5ab2e8c533a488bb983093aeee8e4fbb83899489ef03f9c116edf2cbd662429"
+      },
+      {
+        "address": "0xFF2040F5",
+        "entropy": 3.75,
+        "offset": 16629,
+        "sha256": "70033455eb2357cfff0de2c719eaf817ee5056b3dce65058cd971daaf8fe2e83"
+      },
+      {
+        "address": "0xFF2048EE",
+        "entropy": 3.75,
+        "offset": 18670,
+        "sha256": "b8e0cf156d723cd18733ab2f9e27af373038f0d5a321d28ab112424cff8adfa7"
+      },
+      {
+        "address": "0xFF205B6E",
+        "entropy": 3.75,
+        "offset": 23406,
+        "sha256": "8f18d2165baa9f0bcd24c30c70cde67903938f5e7f89c58e9dfdb36f86498d12"
+      },
+      {
+        "address": "0xFF2061BF",
+        "entropy": 3.75,
+        "offset": 25023,
+        "sha256": "848cdd0a937e5d5124b2f7be0c0f5200e6b8a59233a23f99f28dd5bb7d40e479"
+      }
+    ],
+    "sliding_window_count": 32753,
+    "unique_window_count": 23277
+  },
+  "key_domain_scan": {
+    "candidates_tested": 23277,
+    "matches": [],
+    "min_entropy": 0.0
+  },
+  "physical_validity_model": {
+    "opaque_field": "record header u16 at +2 is retained but not named as CRC/checksum",
+    "valid_when": "first u16 == configured storage index AND final u32 == 0xAAAAAAAA"
+  },
+  "schema_version": 1,
+  "size": 32768,
+  "triplicate_objects": [
+    {
+      "all_decoded_copies_equal": true,
+      "consensus_payload_sha256": "d6775357ff967f93c5df8467e22fdc622fe0961761464776c7bff27d545cb2dc",
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": 1.75,
+          "decoded_payload_sha256": "d6775357ff967f93c5df8467e22fdc622fe0961761464776c7bff27d545cb2dc",
+          "expected_header_index": "0x0001",
+          "header_index": "0x0001",
+          "header_index_matches": true,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "0;2",
+          "observable_valid": true,
+          "opaque_header_word1": "0xC4C7",
+          "payload_length": 16,
+          "storage_index": 1,
+          "trailer": "aaaaaaaa",
+          "trailer_committed_marker": true,
+          "va_start": "0xFF2077C0"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": 1.75,
+          "decoded_payload_sha256": "d6775357ff967f93c5df8467e22fdc622fe0961761464776c7bff27d545cb2dc",
+          "expected_header_index": "0x0005",
+          "header_index": "0x0005",
+          "header_index_matches": true,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "6",
+          "observable_valid": true,
+          "opaque_header_word1": "0xC8C7",
+          "payload_length": 16,
+          "storage_index": 5,
+          "trailer": "aaaaaaaa",
+          "trailer_committed_marker": true,
+          "va_start": "0xFF2076C0"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": 1.75,
+          "decoded_payload_sha256": "d6775357ff967f93c5df8467e22fdc622fe0961761464776c7bff27d545cb2dc",
+          "expected_header_index": "0x0009",
+          "header_index": "0x0009",
+          "header_index_matches": true,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "10",
+          "observable_valid": true,
+          "opaque_header_word1": "0xCC87",
+          "payload_length": 16,
+          "storage_index": 9,
+          "trailer": "aaaaaaaa",
+          "trailer_committed_marker": true,
+          "va_start": "0xFF2075C0"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 3,
+      "object": 0,
+      "payload_length": 16,
+      "valid_consensus": true,
+      "valid_copy_count": 3,
+      "valid_decoded_consensus_count": 3
+    },
+    {
+      "all_decoded_copies_equal": false,
+      "consensus_payload_sha256": null,
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": 3.375,
+          "decoded_payload_sha256": "3772b01168ceb29fde3665ec2cf397dfa4a2c5f023621150900684fe2c7d42cc",
+          "expected_header_index": "0x0002",
+          "header_index": "0x6DBB",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "3",
+          "observable_valid": false,
+          "opaque_header_word1": "0xBD7E",
+          "payload_length": 16,
+          "storage_index": 2,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF207780"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": 1.311278124459133,
+          "decoded_payload_sha256": "95710b866d0e79441d3968cc7004b8414f06241a999f11e1818f926bac906073",
+          "expected_header_index": "0x0006",
+          "header_index": "0xFB61",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "7",
+          "observable_valid": false,
+          "opaque_header_word1": "0xDFFB",
+          "payload_length": 16,
+          "storage_index": 6,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF207680"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": 1.186278124459133,
+          "decoded_payload_sha256": "c04e3e6e462f31f7f21d59f9ef2ac6ada0fe14d2e3e88e0374069a9853682993",
+          "expected_header_index": "0x000A",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "11",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 16,
+          "storage_index": 10,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF207580"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 1,
+      "object": 1,
+      "payload_length": 16,
+      "valid_consensus": false,
+      "valid_copy_count": 0,
+      "valid_decoded_consensus_count": 0
+    },
+    {
+      "all_decoded_copies_equal": true,
+      "consensus_payload_sha256": "30fb0bb625369311612b4017c23934cf8994c68fef54ccccdf2981e710162bd5",
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": 1.5,
+          "decoded_payload_sha256": "30fb0bb625369311612b4017c23934cf8994c68fef54ccccdf2981e710162bd5",
+          "expected_header_index": "0x0003",
+          "header_index": "0x0003",
+          "header_index_matches": true,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "4",
+          "observable_valid": true,
+          "opaque_header_word1": "0xC4A9",
+          "payload_length": 8,
+          "storage_index": 3,
+          "trailer": "aaaaaaaa",
+          "trailer_committed_marker": true,
+          "va_start": "0xFF207740"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": 1.5,
+          "decoded_payload_sha256": "30fb0bb625369311612b4017c23934cf8994c68fef54ccccdf2981e710162bd5",
+          "expected_header_index": "0x0007",
+          "header_index": "0x0007",
+          "header_index_matches": true,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "8",
+          "observable_valid": true,
+          "opaque_header_word1": "0xC601",
+          "payload_length": 8,
+          "storage_index": 7,
+          "trailer": "aaaaaaaa",
+          "trailer_committed_marker": true,
+          "va_start": "0xFF207640"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": 1.5,
+          "decoded_payload_sha256": "30fb0bb625369311612b4017c23934cf8994c68fef54ccccdf2981e710162bd5",
+          "expected_header_index": "0x000B",
+          "header_index": "0x000B",
+          "header_index_matches": true,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "12",
+          "observable_valid": true,
+          "opaque_header_word1": "0xC759",
+          "payload_length": 8,
+          "storage_index": 11,
+          "trailer": "aaaaaaaa",
+          "trailer_committed_marker": true,
+          "va_start": "0xFF207540"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 3,
+      "object": 2,
+      "payload_length": 8,
+      "valid_consensus": true,
+      "valid_copy_count": 3,
+      "valid_decoded_consensus_count": 3
+    },
+    {
+      "all_decoded_copies_equal": false,
+      "consensus_payload_sha256": null,
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": 3.149397470347699,
+          "decoded_payload_sha256": "69cd691139f210fac188c28e234a2f0332ec2add63635e8b210bff7a9d37977c",
+          "expected_header_index": "0x0004",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "5",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 16,
+          "storage_index": 4,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF207700"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": -0.0,
+          "decoded_payload_sha256": "b1bfaa407f70c80c650379dfeafaa40f29b753b076f9ae8fc7f6eddb1941e904",
+          "expected_header_index": "0x0008",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "9",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 16,
+          "storage_index": 8,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF207600"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": 1.311278124459133,
+          "decoded_payload_sha256": "96457691bbd1b74871d62b311707dca2beca132c051d22bdf7626bd092ea41ee",
+          "expected_header_index": "0x000C",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "13",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 16,
+          "storage_index": 12,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF207500"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 1,
+      "object": 3,
+      "payload_length": 16,
+      "valid_consensus": false,
+      "valid_copy_count": 0,
+      "valid_decoded_consensus_count": 0
+    },
+    {
+      "all_decoded_copies_equal": false,
+      "consensus_payload_sha256": null,
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": 2.0,
+          "decoded_payload_sha256": "301c9f6c4f8fd2acaf1c0e19e631953731a998dd411c0d50a8692d15aee9020a",
+          "expected_header_index": "0x000D",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "14",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 8,
+          "storage_index": 13,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF2074C0"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": 2.0,
+          "decoded_payload_sha256": "703a45f0a9b3e0c84e796e7cad4e2db6d4538c7423d2e8cb59826317376b7279",
+          "expected_header_index": "0x0011",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "18",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 8,
+          "storage_index": 17,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF2073C0"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": 2.0,
+          "decoded_payload_sha256": "1a2653d3863dd43cd7ac70a3a625bbb178ef8848403aabba66131aca197d4cfe",
+          "expected_header_index": "0x0015",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "22",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 8,
+          "storage_index": 21,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF2072C0"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 1,
+      "object": 4,
+      "payload_length": 8,
+      "valid_consensus": false,
+      "valid_copy_count": 0,
+      "valid_decoded_consensus_count": 0
+    },
+    {
+      "all_decoded_copies_equal": true,
+      "consensus_payload_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": -0.0,
+          "decoded_payload_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+          "expected_header_index": "0x000E",
+          "header_index": "0x000E",
+          "header_index_matches": true,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "15",
+          "observable_valid": true,
+          "opaque_header_word1": "0xC2B6",
+          "payload_length": 8,
+          "storage_index": 14,
+          "trailer": "aaaaaaaa",
+          "trailer_committed_marker": true,
+          "va_start": "0xFF207480"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": -0.0,
+          "decoded_payload_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+          "expected_header_index": "0x0012",
+          "header_index": "0x0012",
+          "header_index_matches": true,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "19",
+          "observable_valid": true,
+          "opaque_header_word1": "0xC562",
+          "payload_length": 8,
+          "storage_index": 18,
+          "trailer": "aaaaaaaa",
+          "trailer_committed_marker": true,
+          "va_start": "0xFF207380"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": -0.0,
+          "decoded_payload_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+          "expected_header_index": "0x0016",
+          "header_index": "0x0016",
+          "header_index_matches": true,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "23",
+          "observable_valid": true,
+          "opaque_header_word1": "0xC80E",
+          "payload_length": 8,
+          "storage_index": 22,
+          "trailer": "aaaaaaaa",
+          "trailer_committed_marker": true,
+          "va_start": "0xFF207280"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 3,
+      "object": 5,
+      "payload_length": 8,
+      "valid_consensus": true,
+      "valid_copy_count": 3,
+      "valid_decoded_consensus_count": 3
+    },
+    {
+      "all_decoded_copies_equal": false,
+      "consensus_payload_sha256": null,
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": 2.0,
+          "decoded_payload_sha256": "0f68c7b6959c03e534086656f1f1272856c3eca6127657a7fe26ff475a3a3b4c",
+          "expected_header_index": "0x000F",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "16",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 8,
+          "storage_index": 15,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF207440"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": -0.0,
+          "decoded_payload_sha256": "e0b5711a5b1bed6b8669816f9b4d9e2a92805ef2ec987fc98e6dcf9b93de1b5e",
+          "expected_header_index": "0x0013",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "20",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 8,
+          "storage_index": 19,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF207340"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": -0.0,
+          "decoded_payload_sha256": "6893a08c9c4cc97c22799a6aa7af6f8b8bc22d541a5e4253b180bbc974c9d497",
+          "expected_header_index": "0x0017",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "24",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 8,
+          "storage_index": 23,
+          "trailer": "dfbde5d9",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF207240"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 1,
+      "object": 6,
+      "payload_length": 8,
+      "valid_consensus": false,
+      "valid_copy_count": 0,
+      "valid_decoded_consensus_count": 0
+    },
+    {
+      "all_decoded_copies_equal": false,
+      "consensus_payload_sha256": null,
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": 1.3719873517384964,
+          "decoded_payload_sha256": "9164f432b752e7c039da78e2d407dbd3263c69e3008f486ca48463017b27eb03",
+          "expected_header_index": "0x0025",
+          "header_index": "0x6CA5",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "38",
+          "observable_valid": false,
+          "opaque_header_word1": "0x9FA7",
+          "payload_length": 32,
+          "storage_index": 37,
+          "trailer": "2dffbfb1",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206EC0"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": 2.2987949406953985,
+          "decoded_payload_sha256": "71e4f3dbca0db9899105858f53cbb81401aa8990d4d7570ad4275e8634852695",
+          "expected_header_index": "0x0029",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "42",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 32,
+          "storage_index": 41,
+          "trailer": "5d7fb4fb",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206DC0"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": 1.3719873517384964,
+          "decoded_payload_sha256": "d43ae3c1d26a9a84994bdba6d0c2d2144453880e2bc3021a7298961aa61b441b",
+          "expected_header_index": "0x002D",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "46",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 32,
+          "storage_index": 45,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206CC0"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 1,
+      "object": 12,
+      "payload_length": 32,
+      "valid_consensus": false,
+      "valid_copy_count": 0,
+      "valid_decoded_consensus_count": 0
+    },
+    {
+      "all_decoded_copies_equal": false,
+      "consensus_payload_sha256": null,
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": 1.8716407621868583,
+          "decoded_payload_sha256": "91d61eac47026166195b12df75fb190ecfe83719ea7c26ecb57a3d61daaa6e04",
+          "expected_header_index": "0x0026",
+          "header_index": "0x0DFB",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "39",
+          "observable_valid": false,
+          "opaque_header_word1": "0xED7C",
+          "payload_length": 32,
+          "storage_index": 38,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206E80"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": 2.1175416913014384,
+          "decoded_payload_sha256": "394bee7390b5e7d08e4720a6da0c608890563f5bba5e7782c9ffa034653d0561",
+          "expected_header_index": "0x002A",
+          "header_index": "0xFFBE",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "43",
+          "observable_valid": false,
+          "opaque_header_word1": "0xFFAE",
+          "payload_length": 32,
+          "storage_index": 42,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206D80"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": 2.7264097655573916,
+          "decoded_payload_sha256": "42214e233aec7249bacaa3b3c44e64005c0d88a55f9069bacda546ed6b825a72",
+          "expected_header_index": "0x002E",
+          "header_index": "0xA64C",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "47",
+          "observable_valid": false,
+          "opaque_header_word1": "0xBBFE",
+          "payload_length": 32,
+          "storage_index": 46,
+          "trailer": "f5bfef7b",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206C80"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 1,
+      "object": 13,
+      "payload_length": 32,
+      "valid_consensus": false,
+      "valid_copy_count": 0,
+      "valid_decoded_consensus_count": 0
+    },
+    {
+      "all_decoded_copies_equal": false,
+      "consensus_payload_sha256": null,
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": 2.8285353655857572,
+          "decoded_payload_sha256": "afcb17facd03278d2ff44b54cd57c0763a62dc123c687bdd8c67767828acc249",
+          "expected_header_index": "0x0027",
+          "header_index": "0x8FB1",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "40",
+          "observable_valid": false,
+          "opaque_header_word1": "0xBF7E",
+          "payload_length": 32,
+          "storage_index": 39,
+          "trailer": "6ffb5376",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206E40"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": 1.498778124459133,
+          "decoded_payload_sha256": "812ea9310435e454bd063f978629bc1ac32d00f910bda9123e086770119d764c",
+          "expected_header_index": "0x002B",
+          "header_index": "0x2537",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "44",
+          "observable_valid": false,
+          "opaque_header_word1": "0x3ABF",
+          "payload_length": 32,
+          "storage_index": 43,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206D40"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": 1.561278124459133,
+          "decoded_payload_sha256": "2df974001a980c71673fed604f57028a75267d141c3495074612356a067bfcb6",
+          "expected_header_index": "0x002F",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "48",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 32,
+          "storage_index": 47,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206C40"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 1,
+      "object": 14,
+      "payload_length": 32,
+      "valid_consensus": false,
+      "valid_copy_count": 0,
+      "valid_decoded_consensus_count": 0
+    },
+    {
+      "all_decoded_copies_equal": false,
+      "consensus_payload_sha256": null,
+      "copies": [
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "raw",
+          "decoded_payload_entropy": 2.2987949406953985,
+          "decoded_payload_sha256": "3a214788e545419c570147c5b388fa08c4605a200fed4d4f820e6276400985cd",
+          "expected_header_index": "0x0028",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "41",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 32,
+          "second_field_address": "0xFF206E14",
+          "second_field_entropy": 1.311278124459133,
+          "second_field_sha256": "209780aae8492d741a211a2b213ab114a97e8edd46016dc3480b9950de8c0158",
+          "storage_index": 40,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206E00"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xor55",
+          "decoded_payload_entropy": 2.0550416913014384,
+          "decoded_payload_sha256": "37f11c0d695fe332d537706b7897eb5ed3c7e65a6159fd5e24113c4824ca28b9",
+          "expected_header_index": "0x002C",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "45",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 32,
+          "second_field_address": "0xFF206D14",
+          "second_field_entropy": 0.9933927290103626,
+          "second_field_sha256": "c9f8c4a7d4d075d4a5cd0db90f13d84d652a0db74ee2b72f4948498cf8f8451e",
+          "storage_index": 44,
+          "trailer": "00000000",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206D00"
+        },
+        {
+          "allocation_bytes": 64,
+          "copy_encoding": "xoraa",
+          "decoded_payload_entropy": 1.561278124459133,
+          "decoded_payload_sha256": "9f241a8bf43463de3ee36a236d71fe2b66f86901acfb2197db861772fcc0897f",
+          "expected_header_index": "0x0030",
+          "header_index": "0x0000",
+          "header_index_matches": false,
+          "integrity_boundary": "header word at +2 is retained as opaque; firmware-static work has not proved it is a checksum",
+          "nvm_jobs": "49",
+          "observable_valid": false,
+          "opaque_header_word1": "0x0000",
+          "payload_length": 32,
+          "second_field_address": "0xFF206C14",
+          "second_field_entropy": 1.311278124459133,
+          "second_field_sha256": "28644c9c9a6e0829ec8203207017268c29f6d862cb1b44998b24c8b3d2e9a6ed",
+          "storage_index": 48,
+          "trailer": "6fadf7f7",
+          "trailer_committed_marker": false,
+          "va_start": "0xFF206C00"
+        }
+      ],
+      "copy_count": 3,
+      "decoded_consensus_count": 1,
+      "known_key_field_geometry": {
+        "geometry_alignment": true,
+        "ram_after_restore": "0xFEBF02F8",
+        "raw": "0xFF206E14",
+        "related_8965B4514000_observed_raw_address": "0xFF206E14",
+        "related_8965B4514000_reported_key_sha256_prefix": "1d1c53a6d634016a",
+        "runtime_key_equivalence": "unproven",
+        "xor55": "0xFF206D14",
+        "xoraa": "0xFF206C14"
+      },
+      "object": 15,
+      "payload_length": 32,
+      "valid_consensus": false,
+      "valid_copy_count": 0,
+      "valid_decoded_consensus_count": 0
+    }
+  ]
+}

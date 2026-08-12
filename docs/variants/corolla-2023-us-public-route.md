@@ -5,13 +5,15 @@
 >
 > **Exact EPS F181:** unknown
 >
-> **Status:** route evidence recovered; DataFlash/F181 still artifact-blocked
+> **Status:** route evidence recovered; contributor DataFlash + TSKM oracle acquired;
+> F181/CodeFlash still artifact-blocked
 >
 > **Evidence source:** public logged route + pinned Panda/opendbc source +
-> external Discord vehicle attribution
+> contributor-supplied TSKM artifacts + external Discord vehicle attribution
 >
-> **Machine-readable summary:**
-> `data/generated/corolla_2023_public_route_summary.json`
+> **Machine-readable summaries:**
+> `data/generated/corolla_2023_public_route_summary.json` and
+> `data/generated/corolla_2023_albino_dataflash_analysis.json`
 
 This specimen must remain separate from the earlier
 [`8965F1208000`](corolla-8965F1208000.md) Corolla investigation. The earlier
@@ -162,57 +164,104 @@ CAN ID reuse across a different DLC/protocol family is present in the capture.
 This makes the failure of a forced 2020–22/old-TSS2 Corolla profile unsurprising
 and prevents interpreting that failure as evidence about EPS SecOC acceptance.
 
-## 5. Reinterpretation of the community `0 protected` result
+## 5. Why TSKM reported insufficient protected traffic
 
-The Discord report says the DataFlash workflow later produced a successful dump
-but `0/30 protected` in its verification phase.
+The contributor supplied the actual TSKM output from the successful dump run:
 
-That result is now statically explained without needing the dump:
+```text
+community/albinoelephant/can_oracle.ndjson
+```
 
-- current Bk2ol verification ignores Panda bus 1;
-- it only treats `0x131`, `0x2E4`, and `0x344` as protected;
-- the public route's genuine classic protected-family traffic is on bus 1 and
-  uses `0x116`/`0x24D`;
-- the apparent `0x2E4` is returned openpilot traffic, not a stock protected
-  oracle.
+It contains exactly 1,232 rows, all CAN `0x00F` synchronization frames: 616 on
+Panda bus 0 and the same 616 on bus 2. There are **zero protected-message rows**.
+That directly explains the TSKM matcher failure without making any statement
+about whether the car itself emits protected traffic.
 
-Therefore `0 protected` is a **tool-profile false negative**, not evidence that
-this Corolla lacks SecOC.
+The public route independently supplies the missing genuine bus-1 traffic:
+`0x00F`, `0x116`, and `0x24D`. The repository therefore retains a compact
+CAN-only extraction from its pinned segment-0 rlog at:
 
-The repository-local generic oracle added in SECOC-032 is already prepared for
-this exact capture shape.
+```text
+community/albinoelephant/public_route_secoc_oracle.ndjson
+```
 
-## 6. What the public route does not contain
+It contains 588 `0x00F`, 2,499 `0x116`, and 59 `0x24D` frames; only three initial
+`0x116` frames precede the first observed synchronization frame. This replaces
+the old interpretation of `0 protected` with direct evidence: the local TSKM
+capture was sync-only while the separately logged vehicle traffic contains the
+classic protected-family IDs that TSKM's Sienna-shaped filter did not retain.
 
-The route does **not** provide:
+## 6. Supplied DataFlash result
 
-- the actual 32 KiB DataFlash dump reported in Discord;
+The contributor also supplied the complete TSKM DataFlash artifact:
+
+```text
+community/albinoelephant/dump_ff200000_ff208000.bin
+size:   32768 bytes
+sha256: 8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299
+```
+
+`tools/analyze_toyota_dataflash.py` was run against the contributor's public
+route oracle with `--domain-scan --min-entropy 0`. This removes the normal
+entropy heuristic entirely: all 32,753 overlapping 16-byte windows are
+considered and 23,277 unique raw windows are cryptographically probed against
+synchronization, `0x116`, and `0x24D` independently.
+
+**Result: zero candidate matches in any domain.**
+
+This is a bounded but strong cryptographic negative for a raw CPU-visible key in
+this DataFlash snapshot. It does not prove that the ECU lacks SecOC, that the
+key is absent from every other storage region, or that ICU-S/HSM cannot own or
+derive it internally.
+
+### Shared NvM structure, different provisioning state
+
+Applying the physical NvM geometry recovered from `8965B4512000` also produces
+a non-random structural result on this Corolla dump. At the same physical
+locations, objects 0, 2, and 5 each have all three committed raw/XOR55/XORAA
+copies and decode to one consensus payload. Objects 1, 3, 4, 6, 12, 13, 14, and
+15 have no valid copy under the proved storage-index + `0xAAAAAAAA` validity
+rule.
+
+Two consensus payloads are byte-identical by hash to `4512000`:
+
+- object 0: `d6775357ff967f93c5df8467e22fdc622fe0961761464776c7bff27d545cb2dc`;
+- object 5: `af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc`.
+
+Object 2 is valid at the same geometry but has a different payload. This is
+strong evidence that at least part of the same physical NvM storage scheme is
+present across the family rather than an accidental address coincidence.
+
+Most importantly for the SecOC question, **object 15 has zero valid copies** and
+does not reproduce the related `8965B4514000` CPU-visible key-storage result at
+`0xFF206E14`.
+
+The complete machine-readable result is
+`data/generated/corolla_2023_albino_dataflash_analysis.json`.
+
+## 7. Remaining evidence boundary
+
+The public route and supplied DataFlash still do **not** provide:
+
 - EPS F181 / exact calibration identity;
 - a stock passive `carFw` inventory;
-- a candidate key;
-- cryptographic CMAC validation;
 - CodeFlash;
-- proof that synchronization, `0x116`, and `0x24D` share one key domain.
+- proof of where the synchronization or protected-message key is actually
+  stored/derived;
+- proof that this reported 2023-US specimen is architecturally identical to the
+  separately probed `8965F1208000` Corolla.
 
-The route does, however, remove the need to request a separate CAN capture for
-the basic SecOC-oracle question.
+The vehicle attribution therefore remains external until F181 is obtained.
 
-## 7. Narrow artifact request after static/public-route closure
+## 8. Narrow artifact request after DataFlash closure
 
-For this specimen the highest-yield request is now only:
+For this specimen the DataFlash and CAN-oracle requests are now closed. The
+highest-yield remaining asks are:
 
-1. **the completed 32 KiB DataFlash dump** produced by the successful workflow;
-2. **the exact EPS F181 response** (and secondary software ID if present);
-3. optionally the setup state/output that records which logical/physical bus
-   was used for the successful dump.
+1. **the exact EPS F181 response** (and secondary software ID if present);
+2. **CodeFlash**, if a safe/reliable acquisition path becomes available.
 
-A new CAN capture is not required to test the DataFlash key hypothesis: the
-public route already supplies substantial `0x00F` + `0x116` + `0x24D` oracle
-traffic. The complete offline path is now prepared in
-[`toyota-dataflash-analysis.md`](../tooling/toyota-dataflash-analysis.md):
-`tools/analyze_toyota_dataflash.py` tests every sliding 16-byte window, recovers
-known raw/XOR55/XORAA triplicate consensus and object-15 geometry, applies the
-proven storage-index/`AAAAAAAA` physical validity model, and independently
-classifies synchronization, `0x116`, and `0x24D` key domains. The second physical
-header word remains deliberately opaque because no checksum/CRC semantic has
-been proved.
+No additional CAN capture is required for the current DataFlash-key question:
+the retained public-route oracle already supplies substantial `0x00F` +
+`0x116` + `0x24D` traffic, and the actual dump has now been exhaustively scanned
+against it at every raw 16-byte offset.
