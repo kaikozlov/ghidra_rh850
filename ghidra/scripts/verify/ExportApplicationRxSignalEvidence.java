@@ -379,8 +379,10 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
     }
 
     private static int widthFor(int bitLen) {
+        // application_com_receive_signal @ 0x7C03E stores by extracted width:
+        // <=8 bits -> byte, 9..16 -> halfword, 17..32 -> word.
         if (bitLen <= 8) return 1;
-        if (bitLen % 8 == 0) return bitLen / 8;
+        if (bitLen <= 16) return 2;
         return 4;
     }
 

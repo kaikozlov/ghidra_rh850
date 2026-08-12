@@ -154,8 +154,14 @@ Signals **0..57** are transmit (see `../communications/application-tx.md`). Sign
 
 `application_com_receive_signal @ 0x7C03E` extracts a big-endian bit field from
 the COM buffer. Wire fields use the same `B0[7]` notation as the transmit map.
-Opaque property-class-4 signals copy whole PDU payloads through helpers at
-`0x68368` / `0x6875E` using the tables at `0x25902` / `0x2591E`.
+Its destination store width is determined by the extracted bit length, not by a
+nominal C destination type: **1 byte for 1..8 bits, 2 bytes for 9..16 bits, and
+4 bytes for 17..32 bits**. The raw helper branches at `0x7C0D8..0x7C0EA` are
+pinned by `verify_application_receive.py`; this matters for the 10/12/15-bit
+signals, whose evidence rows are halfword destinations rather than overlapping
+four-byte objects. Opaque property-class-4 signals copy whole PDU payloads
+through helpers at `0x68368` / `0x6875E` using the tables at `0x25902` /
+`0x2591E`.
 
 For each recovered signal the CSV records:
 

@@ -361,6 +361,27 @@ check(
     == "257bfbeca304f7ef650bc7ceee0d5a217e765a0043d48dd1d2527091c69e54a6",
 )
 check(
+    "receive-signal helper stores <=8-bit values as bytes",
+    CF[0x7C0D8:0x7C0DE] == bytes.fromhex("68eabb05800b"),
+)
+check(
+    "receive-signal helper stores 9..16-bit values as halfwords",
+    CF[0x7C0E0:0x7C0E8] == bytes.fromhex("1d06efffb105800c"),
+)
+check(
+    "receive-signal helper stores 17..32-bit values as words",
+    CF[0x7C0EA:0x7C0EC] == bytes.fromhex("010d"),
+)
+check(
+    "generated destination widths match helper store-width policy",
+    all(
+        int(row["dest_width"])
+        == (1 if int(row["bit_length"]) <= 8 else 2 if int(row["bit_length"]) <= 16 else 4)
+        for row in recovered
+        if row["dest_kind"] == "ram" and row["bit_length"] != "n/a"
+    ),
+)
+check(
     "every evidence unpacker body hash is unique to its (addr,size)",
     len({(int(e["unpacker"], 0), int(e["body_size"]), e["body_sha256"])
          for e in evidence if e["extract_kind"] != "none"})
