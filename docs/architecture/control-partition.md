@@ -245,6 +245,20 @@ authenticated CAN 0x2E4 / PDU 6
   -> 0xFEBEBF80
   -> 0xC85B6 signed saturation + rate limit
   -> 0xFEBEBF9A and 0xFEBEBF84
+
+parallel visible-status branch from the same scaled command:
+  0xFEBEAE20
+  -> 0xC8072 command/status discriminator
+  -> 0xFEBEBF74
+  -> 0xC8280 OR with companion status 0xFEBEBF7A
+  -> 0xFEBEBF7B
+  -> steering_command_export_scale @ 0xCB700
+  -> 0xFEBEACF6
+  -> application_input_snapshot_update @ 0xBCD96
+  -> 0xFEBEE844
+  -> 0x4B93C
+  -> 0xFEBE80A3
+  -> CAN 0x262 B3[5] / public LKA_STATE bit4
 ```
 
 ### Firmware-static evidence
@@ -262,7 +276,17 @@ authenticated CAN 0x2E4 / PDU 6
 - `0xC85B6` converts `0xFEBEBF80` to signed 16-bit range, rate-limits it against
   prior value `0xFEBEBF9A` using calibration `0x1BD8E`, and writes conditioned
   values at `0xFEBEBF9A` and `0xFEBEBF84`.
+- The same scaled input `0xFEBEAE20` is independently read by `0xC8072`, whose
+  command/status decision writes `0xFEBEBF74`. `0xC8280` ORs that predicate with
+  companion status `0xFEBEBF7A` into `0xFEBEBF7B`; the command-export/snapshot
+  chain carries it through `0xFEBEACF6 -> 0xFEBEE844 -> 0xFEBE80A3`, which is
+  signal 25 / B3[5] of CAN `0x262` — bit4 of the public seven-bit `LKA_STATE`
+  field. This is a **command-contributes-to-status** edge, not a claim that the
+  Tx bit is a direct copy of command magnitude: `0xC8072` also evaluates other
+  steering-control state.
 
+The machine-readable rows for `0xC8072` and `0xC8280` in
+`data/control_partition.csv` preserve this newly recovered visible-status branch.
 The conditioning stages execute under the CH3-polled foreground domain, not in
 the TAUJ0 CH0/CH2 ISR bodies:
 
@@ -315,9 +339,11 @@ not proof that no table-driven, computed, or runtime-only handoff can exist.
 ### Evidence grade: recovered
 
 The producer/consumer addresses and arithmetic are deterministically checked by
-`tests/verify_control_partition.py`; the expanded stopping-boundary census is
-checked by `AssertMotorActuationBoundary.java`; the OEM field label is checked
-separately against the pinned external DBC.
+`tests/verify_control_partition.py`; the command-to-visible-status extension is
+checked independently by `tests/verify_application_interface_state_joins.py`
+and `AssertApplicationInterfaceStateJoins.java`; the expanded stopping-boundary
+census is checked by `AssertMotorActuationBoundary.java`; the OEM field label is
+checked separately against the pinned external DBC.
 
 ## 9. Motor-control, acquisition, and plausibility boundary
 

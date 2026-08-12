@@ -143,6 +143,18 @@ paths = ["data/application_routine_id_callbacks.csv"]
 tests = ["tests/verify_security_gate.py"]
 paths = ["docs/security/application-security-access.md"]
 
+[suite.application_interface]
+tests = ["tests/verify_application_interface_state_joins.py"]
+paths = [
+  "data/application_interface_state_joins.csv",
+  "data/control_partition.csv",
+  "docs/architecture/control-partition.md",
+  "docs/communications/application-rx.md",
+  "docs/communications/application-tx.md",
+  "docs/security/secoc/application-chain.md",
+  "ghidra/scripts/verify/AssertApplicationInterfaceStateJoins.java",
+]
+
 [suite.application_transmit]
 tests = [
   "tests/verify_application_transmit.py",

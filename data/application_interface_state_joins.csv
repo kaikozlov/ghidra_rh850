@@ -1,0 +1,4 @@
+join_id,source_can,source_signal,source_wire,source_state,transform_chain,sink_can,sink_signal,sink_wire,relationship,evidence_grade
+APP-JOIN-001,0x025,221,signed12,0xFEBE801C,0x4B7BA direct signed12 split,0x4A3,47/48,B1/B2,direct mirror of incoming signed12 field,recovered
+APP-JOIN-002,0x025+0x64F,221+289,signed12+signed12,0xFEBE801C+0xFEBE807C,0x4703E subtract/saturate -> 0xFEBE7CE6 -> 0x4B7BA clamp signed12,0x4A3,49/50,B3/B4,clamped difference of two incoming signed12 fields,verified
+APP-JOIN-003,0x2E4,61,B1..B2 signed16,0xFEBE7F94,0x56FC2 -> 0xFEBEF184 -> 0xBA4B8/0xCBB74 -> 0xFEBEAE20 -> 0xC8072 -> 0xFEBEBF74 -> 0xC8280 -> 0xFEBEBF7B -> 0xCB700 -> 0xFEBEACF6 -> 0xBCD96 -> 0xFEBEE844 -> 0x4B93C,0x262,25,B3[5] / LKA_STATE bit4,authenticated torque-command value feeds a steering-command status/fault predicate exported in LKA_STATE,recovered

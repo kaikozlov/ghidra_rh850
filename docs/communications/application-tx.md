@@ -455,6 +455,34 @@ That is independently the checksum function used by the pinned Toyota opendbc
 source. In this firmware it resolves configured signals **9** and **37** as
 lower-stack checksum fields rather than ordinary COM packer outputs.
 
+### 4.8 Cross-interface Rx→Tx joins
+
+`data/application_interface_state_joins.csv` records the currently proved
+application-facing joins rather than treating the Rx and Tx maps as unrelated
+AUTOSAR plumbing:
+
+1. incoming CAN-FD `0x025` signal **221** (signed 12-bit,
+   `0xFEBE801C`) is repacked directly into CAN `0x4A3` B1/B2;
+2. the same signal minus incoming CAN `0x64F` signal **289** (signed 12-bit,
+   `0xFEBE807C`) is computed/saturated by `0x4703E`, clamped to signed-12 by
+   `0x4B7BA`, and exported in `0x4A3` B3/B4;
+3. authenticated CAN `0x2E4` signal **61** (signed B1..B2) follows the already
+   recovered command-conditioning chain through `0xFEBE7F94 -> 0xFEBEF184 ->
+   0xFEBEAE20`. In parallel with the torque clamp/rate-limit path, `0xC8072`
+   evaluates that scaled command with steering-control state and writes predicate
+   `0xFEBEBF74`; `0xC8280` combines it with companion status into
+   `0xFEBEBF7B`, which is exported through `0xFEBEACF6 -> 0xFEBEE844 ->
+   0xFEBE80A3` to CAN `0x262` B3[5], **bit4 of public `LKA_STATE`**.
+
+The third relation is deliberately phrased as *command contributes to visible
+status*, not `status = command`: `0xC8072` has additional state inputs. It does,
+however, establish a firmware-static authenticated-command→external-status edge.
+The raw path is pinned by `verify_application_interface_state_joins.py`; the
+exact live-project reference sets are pinned by
+`AssertApplicationInterfaceStateJoins.java`. The underlying command-conditioning
+ownership remains canonical in
+[control-partition.md](../architecture/control-partition.md) §8.
+
 ## 5. Confirmation path
 
 The application uses RSCAN CAN1 and EIINT 188, already established in

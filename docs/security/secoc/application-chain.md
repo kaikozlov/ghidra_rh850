@@ -159,6 +159,20 @@ secured PDU is accepted. See
 [application-rx.md](../../communications/application-rx.md) §5.2 for the full
 25-row consumer denominator and search boundary.
 
+The inverse boundary is now also explicit on the transmit side. The MAC
+match/mismatch result byte `0xFEBE555C` has exactly two live-project references:
+its output-pointer use at `0x8E41A` and Gate-2 READ at `0x8E69E`; there is no
+direct Tx-status reader of that result byte. A **successfully accepted** secured
+command can nevertheless affect externally visible application state later:
+CAN `0x2E4` signal 61 reaches scaled command `0xFEBEAE20`, which contributes via
+`0xC8072 -> 0xC8280` to CAN `0x262` `LKA_STATE` bit4. Therefore the static model
+is "MAC result gates delivery; accepted command state can later affect Tx
+status," not "MAC result is itself exported." A rejected/missing command could
+still have timeout-mediated consequences elsewhere; the exact two-reference
+result-byte census does not claim otherwise. See
+[application-tx.md](../../communications/application-tx.md) §4.8 and
+[control-partition.md](../../architecture/control-partition.md) §8.
+
 ## 3. Freshness representation
 
 `0x8EA4C` packs normal full freshness into six bytes as 46 meaningful bits followed
