@@ -64,9 +64,9 @@ public class AssertSecocRxControlSurface extends GhidraScript {
     public void run() throws Exception {
         named(0x4b23cL, "application_unpack_can_090_secoc_fd");
         named(0x4b3aaL, "application_unpack_can_0d7_secoc_fd");
-        named(0xbbf0eL, "fd090_primary_measurement_plausibility");
-        named(0xbc766L, "fd090_third_measurement_plausibility");
-        named(0xbc484L, "fd0d7_vehicle_speed_normalize");
+        named(0xbbf0eL, "fd090_rear_wheel_speed_plausibility");
+        named(0xbc766L, "fd090_steering_angle_speed_plausibility");
+        named(0xbc484L, "fd0d7_sp1_vehicle_speed_normalize");
         named(0xb6396L, "fd0d7_status_fault_monitor");
 
         // 0x090: three postprocessed measurement channels are staged into the

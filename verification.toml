@@ -381,11 +381,14 @@ paths = [
 tests = [
   "tests/verify_secoc_application.py",
   "tests/verify_secoc_rx_control_surface.py",
+  "tests/verify_secoc_fd_sensor_correlations.py",
 ]
 paths = [
   "docs/security/secoc/application-chain.md",
   "docs/communications/application-rx.md",
   "data/secoc_rx_control_surface.csv",
+  "data/generated/techstream_v18/secoc_fd_sensor_correlations.json",
+  "tools/techstream/extract_secoc_fd_sensor_correlations.py",
   "ghidra/scripts/verify/AssertSecocRxControlSurface.java",
 ]
 

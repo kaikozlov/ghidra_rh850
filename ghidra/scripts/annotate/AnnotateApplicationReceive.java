@@ -76,12 +76,12 @@ public class AnnotateApplicationReceive extends GhidraScript {
             "Generated unpacker for SecOC CAN-FD PDU 46 / CAN 0x090. Extracts three centered 10-bit measurement channels and protected status/freshness fields.");
         renameFunction(0x4b3aaL, "application_unpack_can_0d7_secoc_fd",
             "Generated unpacker for SecOC CAN-FD PDU 47 / CAN 0x0D7. Signal 280 uses a stack temporary persisted to FEBE8076; signal 283 supplies the protected vehicle-speed source.");
-        renameFunction(0xbbf0eL, "fd090_primary_measurement_plausibility",
-            "Process the first two protected 0x090 normalized measurement channels and status bits into bounded measurement state FEBEB6AA plus 0/0x5A plausibility flags. Exact physical sensor names remain unresolved.");
-        renameFunction(0xbc766L, "fd090_third_measurement_plausibility",
-            "Process the third protected 0x090 normalized measurement channel and paired status bits into bounded state FEBEB714 plus 0/0x5A plausibility flags. Exact physical sensor name remains unresolved.");
-        renameFunction(0xbc484L, "fd0d7_vehicle_speed_normalize",
-            "Normalize protected CAN-FD 0x0D7 signal 283 from FEBEF1B6 into FEBEB6F2, the shared live source later published as application_vehicle_speed_raw.");
+        renameFunction(0xbbf0eL, "fd090_rear_wheel_speed_plausibility",
+            "Process the protected 0x090 rear-wheel-speed pair (RR/RL ordering unproved) and status bits into bounded speed state FEBEB6AA plus 0/0x5A plausibility flags. Techstream EMPS2_P5 independently names the paired CAN signals RR/RL vehicle speed in km/h.");
+        renameFunction(0xbc766L, "fd090_steering_angle_speed_plausibility",
+            "Process protected 0x090 signal 276 into bounded steering-angle-speed state FEBEB714 plus 0/0x5A plausibility flags. Techstream EMPS2_P5 independently identifies the corresponding CAN quantity as Steering Angle Speed (SSAV), deg/s.");
+        renameFunction(0xbc484L, "fd0d7_sp1_vehicle_speed_normalize",
+            "Normalize protected CAN-FD 0x0D7 signal 283 from FEBEF1B6 into FEBEB6F2, the shared live source later published as application_vehicle_speed_raw. The 30000 raw clamp exactly matches Techstream EMPS2_P5 CAN Vehicle Speed (SP1).");
         renameFunction(0xb6396L, "fd0d7_status_fault_monitor",
             "Monitor protected 0x0D7 status staged at FEBEF094 together with companion validity state; an asserted invalidity while healthy forces the local fault state and raises system-mode event 0x2D.");
         renameFunction(0x68368L, "application_com_opaque_rx_shadow_bank0",

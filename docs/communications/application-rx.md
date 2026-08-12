@@ -332,10 +332,10 @@ COM/staging consumers gives the calibration-specific partition recorded in
 | `0x2E4` | steering command | authenticated LKA torque request/value; selects `FEBEC13D` mode 1 and enters `FEBEC144` from `FEBEBFA2` |
 | `0x131` | steering command | authenticated `STEERING_LTA_2` request/angle; selects `FEBEC13A` mode 2 and enters `FEBEC144` from controller output `FEBEC0D6` |
 | `0x132` | protected snapshot | six recovered post-snapshot scalars have zero runtime readers; bounded non-actuation result |
-| `0x090` | steering measurement / validity prerequisite | three protected measurement channels and protected status bits feed steering-cycle scheduling, filtering, plausibility, and validity gates, but never select `C13A/C13D` command mode |
-| `0x0D7` | vehicle speed / validity | protected speed source becomes `FEBEB6F2` and then `application_vehicle_speed_raw`; protected status can force a fault/event path; remaining fields terminate in snapshot state |
+| `0x090` | rear-wheel speed + steering-angle-speed validity prerequisite | signals 270/273 form the protected RR/RL rear-wheel-speed pair; signal 276 is protected `CAN Steering Angle Speed (SSAV)`; status bits feed steering validity gates; none selects `C13A/C13D` command mode |
+| `0x0D7` | SP1 vehicle speed / validity | signal 283 is protected `CAN Vehicle Speed (SP1)` and becomes `FEBEB6F2` then `application_vehicle_speed_raw`; protected status can force a fault/event path; remaining fields terminate in snapshot state |
 
-#### `0x090`: protected steering measurement and validity domain
+#### `0x090`: protected rear-wheel speed, steering-angle speed, and validity
 
 PDU 46 is a 32-byte SecOC CAN-FD profile with 28 authentic payload bytes. Its
 generated unpacker recovers three unsigned 10-bit channels (signals
@@ -343,12 +343,25 @@ generated unpacker recovers three unsigned 10-bit channels (signals
 around `0x0200`, producing `FEBE8060/8062/8064`; the common staging routine then
 copies those values to `FEBEF1C6/F1C8/F1CA`.
 
-The first two channels are consumed only by
-`fd090_primary_measurement_plausibility @ 0xBBF0E`; the third is consumed only
-by `fd090_third_measurement_plausibility @ 0xBC766`. These routines apply
-calibration scaling/bounds and publish the two numeric states
-`FEBEB6AA/FEBEB714` plus 0/`0x5A` plausibility flags. `BA43A` then promotes the
-numeric states into the steering-cycle snapshot:
+A cross-source Techstream correlation now resolves the physical quantities.
+`EMPS2_P5.ddb` exposes four consecutive CAN monitors, byte-identically in
+NA/EU/JP: key 303 `CAN Vehicle Speed (Speed Sensor RR)` (`km/h`), key 304
+`CAN Vehicle Speed (Speed Sensor RL)` (`km/h`), key 305 `CAN Vehicle Speed
+(SP1)` (`km/h`), and key 306 `CAN Steering Angle Speed (SSAV)` (`deg/s`). The
+firmware independently supplies the same shape: the first two `0x090` channels
+have identical width/scaling and are processed as a redundant pair, while the
+third has a distinct signed-dynamic transform and steering-validity/filter use.
+Accordingly signals 270/273 are promoted as the **unordered RR/RL rear-wheel-
+speed pair**, and signal 276 as **SSAV steering-angle speed**. Static evidence
+does not bind signal 270 versus 273 individually to RR versus RL, so that
+ordering remains explicitly unresolved.
+
+The first two channels are consumed by
+`fd090_rear_wheel_speed_plausibility @ 0xBBF0E`; the third is consumed by
+`fd090_steering_angle_speed_plausibility @ 0xBC766`. These routines apply
+calibration scaling/bounds and publish `FEBEB6AA/FEBEB714` plus 0/`0x5A`
+plausibility flags. `BA43A` then promotes the numeric states into the
+steering-cycle snapshot:
 
 ```text
 0x090 signals 270/273
@@ -362,10 +375,12 @@ numeric states into the steering-cycle snapshot:
   -> BFBA8 (only while aggregate validity B7C4 == 0x5A)
 ```
 
-`FEBEAE02` is therefore a real input to the recovered LTA/steering subsystem,
-not telemetry-only state. The exact physical meanings/axes of the three CAN-FD
-measurements remain unresolved; their shape is insufficient to justify names
-such as torque, yaw, or angle.
+`FEBEAE02` is therefore the selected/conditioned rear-wheel-speed input used by
+the recovered LTA/steering subsystem, not telemetry-only state. The normal
+calibration publishes the second member of the RR/RL pair while retaining the
+first for cross-channel plausibility; an alternate configuration enables a
+combined two-channel calculation. `FEBEAF00` is the conditioned SSAV input.
+Only the individual RR-versus-RL wire ordering remains unresolved.
 
 Protected `0x090` status fields are also steering prerequisites. `BA43A` copies
 two staged status bytes to `FEBEAD71/AD72`, which `BF750` folds into validity
@@ -379,7 +394,7 @@ source.
 
 PDU 47 is the second 32-byte SecOC CAN-FD profile. Its unsigned 16-bit signal
 283 is recovered at `FEBE8070`, staged to `FEBEF1B6`, and normalized by
-`fd0d7_vehicle_speed_normalize @ 0xBC484`:
+`fd0d7_sp1_vehicle_speed_normalize @ 0xBC484`:
 
 ```text
 0x0D7 signal 283
@@ -392,8 +407,11 @@ PDU 47 is the second 32-byte SecOC CAN-FD profile. Its unsigned 16-bit signal
 
 `FEBEB6F2` is consumed throughout low/high-speed thresholds and state machines;
 the named application snapshot is also used by diagnostic-session and routine
-speed guards. This makes signal 283 a high-confidence protected vehicle-speed
-source.
+speed guards. Techstream independently identifies the corresponding family CAN
+quantity as `CAN Vehicle Speed (SP1)`, and its section-62 monitor record carries
+an exact raw upper bound of **30000** in all three regions—the same value
+`0xBC484` uses to clamp signal 283 before conversion. This upgrades signal 283
+to a very-high-confidence protected **SP1 vehicle-speed** source.
 
 Signal 280 is a separate protected B0[7] status/invalidity input. It exposed a
 receiver-evidence bug because this generated unpacker does not pass a

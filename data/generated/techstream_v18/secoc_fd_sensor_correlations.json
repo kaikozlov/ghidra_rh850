@@ -1,0 +1,400 @@
+{
+  "bounded_unknowns": [
+    "The static artifacts do not bind 0x090 signal 270 versus 273 individually to RR versus RL; only the unordered RR/RL pair is promoted.",
+    "EMPS2_P5 is a Toyota family diagnostic database, not an exact 8965B4512000 calibration transcript; correlations require the independent firmware-shape joins recorded above."
+  ],
+  "correlations": [
+    {
+      "basis": "two same-width/same-scale protected 0x090 channels processed as a redundant speed pair; adjacent EMPS2_P5 monitors 303/304 are RR/RL speed in km/h; firmware does not statically bind first versus second wire field to right versus left",
+      "confidence": "high_pair_low_individual_order",
+      "firmware_signals": [
+        270,
+        273
+      ],
+      "semantic": "CAN rear wheel speeds (RR/RL pair)",
+      "techstream_monitor_keys": [
+        303,
+        304
+      ],
+      "unit": "km/h"
+    },
+    {
+      "basis": "unique third protected 0x090 signed-dynamic channel has separate scaling and steering-validity/filter use; EMPS2_P5 monitor 306 is signed16 CAN Steering Angle Speed in deg/s and is adjacent to the RR/RL/SP1 monitor family",
+      "confidence": "high",
+      "firmware_signals": [
+        276
+      ],
+      "semantic": "CAN Steering Angle Speed (SSAV)",
+      "techstream_monitor_keys": [
+        306
+      ],
+      "unit": "deg/s"
+    },
+    {
+      "basis": "firmware independently proves vehicle-speed use and clamps raw signal at exactly 30000; EMPS2_P5 monitor 305 is CAN Vehicle Speed (SP1), km/h, with range word 30000 in all three regions",
+      "confidence": "very_high",
+      "firmware_signals": [
+        283
+      ],
+      "semantic": "CAN Vehicle Speed (SP1)",
+      "techstream_monitor_keys": [
+        305
+      ],
+      "unit": "km/h"
+    }
+  ],
+  "firmware": {
+    "calibration_words": {
+      "0x1A404": 3763,
+      "0x1A430": 51200
+    },
+    "codeflash_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+    "rx_fields": {
+      "270": {
+        "bit_length": 10,
+        "can_id": "0x90",
+        "dest": "0xFEBE805A",
+        "signed": false,
+        "wire_field": "B0/start0/len10"
+      },
+      "273": {
+        "bit_length": 10,
+        "can_id": "0x90",
+        "dest": "0xFEBE805C",
+        "signed": false,
+        "wire_field": "B2/start0/len10"
+      },
+      "276": {
+        "bit_length": 10,
+        "can_id": "0x90",
+        "dest": "0xFEBE805E",
+        "signed": false,
+        "wire_field": "B4/start0/len10"
+      },
+      "283": {
+        "bit_length": 16,
+        "can_id": "0xD7",
+        "dest": "0xFEBE8070",
+        "signed": false,
+        "wire_field": "B1..B2 BE16"
+      }
+    },
+    "transforms": {
+      "rear_wheel_speed_pair": {
+        "center": 512,
+        "gain_denominator": 256,
+        "gain_numerator": 2353,
+        "processor": "0xBBF0E",
+        "published_state": "FEBEB6AA -> FEBEAE02",
+        "signals": [
+          270,
+          273
+        ]
+      },
+      "sp1_vehicle_speed": {
+        "gain_denominator": 4096,
+        "gain_numerator": 5243,
+        "processor": "0xBC484",
+        "published_state": "FEBEB6F2 -> application_vehicle_speed_raw@FEBEE892",
+        "raw_clamp": 30000,
+        "signal": 283
+      },
+      "steering_angle_speed": {
+        "center": 512,
+        "gain_denominator": 256,
+        "gain_numerator": 15991,
+        "processor": "0xBC766",
+        "published_state": "FEBEB714 -> FEBEAF00",
+        "signal": 276
+      }
+    }
+  },
+  "schema_version": 1,
+  "source": "Toyota Techstream V18.00.003 family vocabulary + Sienna 8965B4512000 firmware static analysis",
+  "techstream": {
+    "cross_region_identity_fields": [
+      "name",
+      "bit_start",
+      "bit_end",
+      "range_words_i32",
+      "physical_data_raw_hex",
+      "unit"
+    ],
+    "family": "EMPS2_P5",
+    "regions": {
+      "EU": {
+        "ddb": "EU/DB/EMPS2_P5.ddb",
+        "ddb_sha256": "ce4b73781ea4dbd4cfaa0277c0ac5a3f8e50576cb4c21cfe1f2e496a37184438",
+        "monitors": {
+          "303": {
+            "bit_end": 7,
+            "bit_start": 0,
+            "monitor_index": 70,
+            "monitor_raw_hex": "00000000ff00000000000000ff000000000000000000000002ec0100290b0100030000002f01000000000f00000007002f010000000083118331020000000000",
+            "name": "CAN Vehicle Speed (Speed Sensor RR)",
+            "physical_data_index": 14,
+            "physical_data_key": 15,
+            "physical_data_raw_hex": "0100000001000000000000000f0015000000000000000000",
+            "range_words_i32": [
+              0,
+              255,
+              0,
+              255,
+              0,
+              0
+            ],
+            "unit": "km/h",
+            "unit_index": 5,
+            "unit_key": 21
+          },
+          "304": {
+            "bit_end": 7,
+            "bit_start": 0,
+            "monitor_index": 71,
+            "monitor_raw_hex": "00000000ff00000000000000ff000000000000000000000001ec0100280b0100030000003001000000000f000000070030010000000084118431020000000000",
+            "name": "CAN Vehicle Speed (Speed Sensor RL)",
+            "physical_data_index": 14,
+            "physical_data_key": 15,
+            "physical_data_raw_hex": "0100000001000000000000000f0015000000000000000000",
+            "range_words_i32": [
+              0,
+              255,
+              0,
+              255,
+              0,
+              0
+            ],
+            "unit": "km/h",
+            "unit_index": 5,
+            "unit_key": 21
+          },
+          "305": {
+            "bit_end": 15,
+            "bit_start": 0,
+            "monitor_index": 72,
+            "monitor_raw_hex": "00000000b80b00000000000030750000000000000000000000ec0100270b0100030000003101000000000d0000000f0031010000000085118531020000000000",
+            "name": "CAN Vehicle Speed (SP1)",
+            "physical_data_index": 12,
+            "physical_data_key": 13,
+            "physical_data_raw_hex": "010000000a000000000000000d0015000000000000010000",
+            "range_words_i32": [
+              0,
+              3000,
+              0,
+              30000,
+              0,
+              0
+            ],
+            "unit": "km/h",
+            "unit_index": 5,
+            "unit_key": 21
+          },
+          "306": {
+            "bit_end": 15,
+            "bit_start": 0,
+            "monitor_index": 73,
+            "monitor_raw_hex": "0080ffffff7f00000080ffffff7f00000080ffff00000000ffeb0100260b010003000000320100000000070000000f0032010000000086118631020000000000",
+            "name": "CAN Steering Angle Speed (SSAV)",
+            "physical_data_index": 6,
+            "physical_data_key": 7,
+            "physical_data_raw_hex": "01000000010000000000000007002f000000000001000000",
+            "range_words_i32": [
+              -32768,
+              32767,
+              -32768,
+              32767,
+              -32768,
+              0
+            ],
+            "unit": "deg/s",
+            "unit_index": 7,
+            "unit_key": 47
+          }
+        },
+        "string_db_sha256": "5542ce792f837313b62b357c676902fedc8791dd2cf913b7068be8df8bff8e83"
+      },
+      "JP": {
+        "ddb": "JP/DB/EMPS2_P5.ddb",
+        "ddb_sha256": "dc61d3b2a31dab79a543a58590e32804c5d4e4a9128b0dad688606517a8997c1",
+        "monitors": {
+          "303": {
+            "bit_end": 7,
+            "bit_start": 0,
+            "monitor_index": 70,
+            "monitor_raw_hex": "00000000ff00000000000000ff000000000000000000000002ec0100290b0100030000002f01000000000f00000007002f010000000083118331020000000000",
+            "name": "CAN Vehicle Speed (Speed Sensor RR)",
+            "physical_data_index": 14,
+            "physical_data_key": 15,
+            "physical_data_raw_hex": "0100000001000000000000000f0015000000000000000000",
+            "range_words_i32": [
+              0,
+              255,
+              0,
+              255,
+              0,
+              0
+            ],
+            "unit": "km/h",
+            "unit_index": 5,
+            "unit_key": 21
+          },
+          "304": {
+            "bit_end": 7,
+            "bit_start": 0,
+            "monitor_index": 71,
+            "monitor_raw_hex": "00000000ff00000000000000ff000000000000000000000001ec0100280b0100030000003001000000000f000000070030010000000084118431020000000000",
+            "name": "CAN Vehicle Speed (Speed Sensor RL)",
+            "physical_data_index": 14,
+            "physical_data_key": 15,
+            "physical_data_raw_hex": "0100000001000000000000000f0015000000000000000000",
+            "range_words_i32": [
+              0,
+              255,
+              0,
+              255,
+              0,
+              0
+            ],
+            "unit": "km/h",
+            "unit_index": 5,
+            "unit_key": 21
+          },
+          "305": {
+            "bit_end": 15,
+            "bit_start": 0,
+            "monitor_index": 72,
+            "monitor_raw_hex": "00000000b80b00000000000030750000000000000000000000ec0100270b0100030000003101000000000d0000000f0031010000000085118531020000000000",
+            "name": "CAN Vehicle Speed (SP1)",
+            "physical_data_index": 12,
+            "physical_data_key": 13,
+            "physical_data_raw_hex": "010000000a000000000000000d0015000000000000010000",
+            "range_words_i32": [
+              0,
+              3000,
+              0,
+              30000,
+              0,
+              0
+            ],
+            "unit": "km/h",
+            "unit_index": 5,
+            "unit_key": 21
+          },
+          "306": {
+            "bit_end": 15,
+            "bit_start": 0,
+            "monitor_index": 73,
+            "monitor_raw_hex": "0080ffffff7f00000080ffffff7f00000080ffff00000000ffeb0100260b010003000000320100000000070000000f0032010000000086118631020000000000",
+            "name": "CAN Steering Angle Speed (SSAV)",
+            "physical_data_index": 6,
+            "physical_data_key": 7,
+            "physical_data_raw_hex": "01000000010000000000000007002f000000000001000000",
+            "range_words_i32": [
+              -32768,
+              32767,
+              -32768,
+              32767,
+              -32768,
+              0
+            ],
+            "unit": "deg/s",
+            "unit_index": 7,
+            "unit_key": 47
+          }
+        },
+        "string_db_sha256": "21bd390132a462621b175bcaea145508a7d4ebac48cdf30c784d4041f722d697"
+      },
+      "NA": {
+        "ddb": "NA/DB/EMPS2_P5.ddb",
+        "ddb_sha256": "e80d722f3b80077e3f7bdc4b815c2035b21a51cefb6cd26dc6de3ada20939312",
+        "monitors": {
+          "303": {
+            "bit_end": 7,
+            "bit_start": 0,
+            "monitor_index": 70,
+            "monitor_raw_hex": "00000000ff00000000000000ff000000000000000000000002ec0100290b0100030000002f01000000000f00000007002f010000000083118331020000000000",
+            "name": "CAN Vehicle Speed (Speed Sensor RR)",
+            "physical_data_index": 14,
+            "physical_data_key": 15,
+            "physical_data_raw_hex": "0100000001000000000000000f0015000000000000000000",
+            "range_words_i32": [
+              0,
+              255,
+              0,
+              255,
+              0,
+              0
+            ],
+            "unit": "km/h",
+            "unit_index": 5,
+            "unit_key": 21
+          },
+          "304": {
+            "bit_end": 7,
+            "bit_start": 0,
+            "monitor_index": 71,
+            "monitor_raw_hex": "00000000ff00000000000000ff000000000000000000000001ec0100280b0100030000003001000000000f000000070030010000000084118431020000000000",
+            "name": "CAN Vehicle Speed (Speed Sensor RL)",
+            "physical_data_index": 14,
+            "physical_data_key": 15,
+            "physical_data_raw_hex": "0100000001000000000000000f0015000000000000000000",
+            "range_words_i32": [
+              0,
+              255,
+              0,
+              255,
+              0,
+              0
+            ],
+            "unit": "km/h",
+            "unit_index": 5,
+            "unit_key": 21
+          },
+          "305": {
+            "bit_end": 15,
+            "bit_start": 0,
+            "monitor_index": 72,
+            "monitor_raw_hex": "00000000b80b00000000000030750000000000000000000000ec0100270b0100030000003101000000000d0000000f0031010000000085118531020000000000",
+            "name": "CAN Vehicle Speed (SP1)",
+            "physical_data_index": 12,
+            "physical_data_key": 13,
+            "physical_data_raw_hex": "010000000a000000000000000d0015000000000000010000",
+            "range_words_i32": [
+              0,
+              3000,
+              0,
+              30000,
+              0,
+              0
+            ],
+            "unit": "km/h",
+            "unit_index": 5,
+            "unit_key": 21
+          },
+          "306": {
+            "bit_end": 15,
+            "bit_start": 0,
+            "monitor_index": 73,
+            "monitor_raw_hex": "0080ffffff7f00000080ffffff7f00000080ffff00000000ffeb0100260b010003000000320100000000070000000f0032010000000086118631020000000000",
+            "name": "CAN Steering Angle Speed (SSAV)",
+            "physical_data_index": 6,
+            "physical_data_key": 7,
+            "physical_data_raw_hex": "01000000010000000000000007002f000000000001000000",
+            "range_words_i32": [
+              -32768,
+              32767,
+              -32768,
+              32767,
+              -32768,
+              0
+            ],
+            "unit": "deg/s",
+            "unit_index": 7,
+            "unit_key": 47
+          }
+        },
+        "string_db_sha256": "d88b131e2f56c71cdb60b353f410f877e0889635ec2b5df0becf4e0002aebf96"
+      }
+    }
+  }
+}

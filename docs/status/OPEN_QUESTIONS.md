@@ -33,13 +33,13 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## SecOC
 
-- **Physical semantics of protected CAN-FD `0x090` channels.** Static analysis
-  now closes their software role: three centered 10-bit measurements feed
-  steering-cycle state (`FEBEAE02/FEBEAF00`) and protected status bits feed
-  steering validity gates (`B75F/B7C4`). Their exact physical quantities/axes
-  are not recoverable from the current firmware evidence alone. Do not label
-  them torque, yaw, angle, or acceleration without a DBC, diagnostic vocabulary
-  join, or dynamic correlation. Canonical: [../communications/application-rx.md](../communications/application-rx.md) §5.4.
+- **RR versus RL ordering inside protected CAN-FD `0x090`.** Techstream
+  `EMPS2_P5` plus the firmware consumer shapes now identify signals 270/273 as
+  the protected rear-wheel-speed RR/RL pair and signal 276 as `CAN Steering
+  Angle Speed (SSAV)`. The static artifacts do **not** bind signal 270 versus
+  273 individually to right versus left. Preserve the pair-level semantic until
+  a CAN trace, exact DBC, or independently labeled diagnostic correlation fixes
+  the ordering. Canonical: [../communications/application-rx.md](../communications/application-rx.md) §5.4; `secoc_fd_sensor_correlations.json`.
 - **Live slot-4 operation permissions.** Static CodeFlash proves slot-4
   verification (command 7). The AUTOSAR SHE spec governs usage by a single
   binary `KEY_USAGE` flag (enc/dec ⊕ MAC-generate+verify; no verify-only
