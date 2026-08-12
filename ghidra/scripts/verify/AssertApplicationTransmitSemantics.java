@@ -204,6 +204,101 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
                 "0004b74e:WRITE", "0004b81c:READ", "0004bd2e:READ",
                 "00058198:WRITE");
 
+        // CAN 0x262 / EPS_STATUS uses five producer helpers in the same staging
+        // orchestrator.  The live reference census below makes the RAM-field
+        // partition independent of the generated CSV.
+        assertCall(0x4ba8cL, 0x4b90aL);
+        assertCall(0x4ba8cL, 0x4b920L);
+        assertCall(0x4ba8cL, 0x4b93cL);
+        assertCall(0x4ba8cL, 0x4b754L);
+
+        // B0: all RAM-backed fields are explicitly zeroed by 0x4B90A. Signal
+        // 13 and reserved B0[3] are separately constant-zero in the packer.
+        assertExactRefs(0xfebe809cL,
+                "0004b90e:WRITE", "0004be60:READ", "00057298:READ", "0005819a:WRITE");
+        assertExactRefs(0xfebe80b4L,
+                "0004b912:WRITE", "0004be48:READ", "00058174:WRITE");
+        assertExactRefs(0xfebe809dL,
+                "0004b910:WRITE", "0004be66:READ", "0005819c:WRITE");
+        assertExactRefs(0xfebe809eL,
+                "0004b914:WRITE", "0004be6c:READ", "0005819e:WRITE");
+        assertExactRefs(0xfebe809fL,
+                "0004b916:WRITE", "0004be72:READ", "000581a0:WRITE");
+        assertExactRefs(0xfebe80a0L,
+                "0004b918:WRITE", "0004be78:READ", "000581a2:WRITE");
+        assertInstruction(0x4b90eL, "sst.b", "0x8", "ep", "r0");
+        assertInstruction(0x4b918L, "sst.b", "0xc", "ep", "r0");
+
+        // B1[7:3] is the public five-bit LTA_STATE field. The five staging bits
+        // are independent RAM cells and originate in the steering-control state
+        // machine; the low bit passes through helper 0x4B92C's marker gate.
+        assertExactRefs(0xfebe80a4L,
+                "0004b986:WRITE", "0004be88:READ", "000581aa:WRITE");
+        assertExactRefs(0xfebe80a6L,
+                "0004b98c:WRITE", "0004be94:READ", "000581ae:WRITE");
+        assertExactRefs(0xfebe80a8L,
+                "0004b992:WRITE", "0004bea0:READ", "000581b2:WRITE");
+        assertExactRefs(0xfebe80aaL,
+                "0004b998:WRITE", "0004beac:READ", "000581b6:WRITE");
+        assertExactRefs(0xfebe80acL,
+                "0004b9a6:WRITE", "0004beb8:READ", "00058180:WRITE");
+        assertExactRefs(0xfebec130L,
+                "000c98a4:READ", "000c9972:READ", "000c9e06:WRITE",
+                "000c9ebe:WRITE", "000cb826:READ");
+
+        // B3[7:1] is public LKA_STATE. The high two bits are explicitly zero;
+        // bits 4..0 are state-machine exports, and B3[0] / TYPE is separately
+        // zeroed by 0x4B754.
+        assertExactRefs(0xfebe80a1L,
+                "0004b91a:WRITE", "0004be42:READ", "000581a4:WRITE");
+        assertExactRefs(0xfebe80a2L,
+                "0004b91c:WRITE", "0004be30:READ", "000581a6:WRITE");
+        assertExactRefs(0xfebe80a3L,
+                "0004b952:WRITE", "0004be7e:READ", "000581a8:WRITE");
+        assertExactRefs(0xfebe80a5L,
+                "0004b958:WRITE", "0004be8e:READ", "000581ac:WRITE");
+        assertExactRefs(0xfebe80a7L,
+                "0004b95e:WRITE", "0004be9a:READ", "000581b0:WRITE");
+        assertExactRefs(0xfebe80a9L,
+                "0004b964:WRITE", "0004bea6:READ", "000581b4:WRITE");
+        assertExactRefs(0xfebe80abL,
+                "0004b950:WRITE", "0004beb2:READ", "000581b8:WRITE");
+        assertExactRefs(0xfebe80adL,
+                "0004b7a4:WRITE", "0004bebe:READ", "0005817e:WRITE");
+        assertExactRefs(0xfebebfa9L,
+                "000c82fc:WRITE", "000c8306:READ", "000c86a6:WRITE", "000cb798:READ");
+        assertInstruction(0x4b91aL, "sst.b", "0xd", "ep", "r0");
+        assertInstruction(0x4b91cL, "sst.b", "0xe", "ep", "r0");
+        assertInstruction(0x4b7a4L, "sst.b", "0x19", "ep", "r0");
+
+        // B4 is a proprietary steering-control status nibble assembled from two
+        // limiter/threshold flags and the C0FE/C0FF transition state.
+        assertExactRefs(0xfebe80aeL,
+                "0004b9a8:WRITE", "0004bec4:READ", "0005817c:WRITE");
+        assertExactRefs(0xfebe80afL,
+                "0004b9ae:WRITE", "0004beca:READ", "0005817a:WRITE");
+        assertExactRefs(0xfebe80b0L,
+                "0004b9b4:WRITE", "0004bed0:READ", "00058178:WRITE");
+        assertExactRefs(0xfebe80b1L,
+                "0004b9ba:WRITE", "0004bed6:READ", "00058176:WRITE");
+        assertExactRefs(0xfebec0d8L,
+                "000c8c18:WRITE", "000c964e:READ", "000c9778:WRITE", "000cb82c:READ");
+        assertExactRefs(0xfebec0d9L,
+                "000c8c1c:WRITE", "000c977c:WRITE", "000cb832:READ");
+        assertExactRefs(0xfebec0feL,
+                "000c9bb2:WRITE", "000c9cb6:READ", "000c9d5c:WRITE", "000cb838:READ");
+        assertExactRefs(0xfebec0ffL,
+                "000c9bb6:WRITE", "000c9ccc:READ", "000c9d60:WRITE", "000cb83e:READ");
+
+        // B5/B6 are not opaque dynamic bytes: 0x4B920 writes 0xFF every cycle.
+        assertExactRefs(0xfebe80b2L,
+                "0004b926:WRITE", "0004be50:READ", "000581bc:WRITE");
+        assertExactRefs(0xfebe80b3L,
+                "0004b928:WRITE", "0004be58:READ", "000581ba:WRITE");
+        assertInstruction(0x4b920L, "mov", "-0x1", "r1");
+        assertInstruction(0x4b926L, "sst.b", "0x1e", "ep", "r1");
+        assertInstruction(0x4b928L, "sst.b", "0x1f", "ep", "r1");
+
         println("ASSERT application-tx-semantics: call_edges=" + callEdges
                 + " reference_censuses=" + referenceCensuses
                 + " instruction_checks=" + instructionChecks

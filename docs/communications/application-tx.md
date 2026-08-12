@@ -266,10 +266,9 @@ independently from raw CodeFlash.
 
 ### 4.2 CAN `0x262` / COM PDU 1
 
-Public Toyota DBCs call CAN `0x262` `EPS_STATUS`, but this calibration has a
-richer 28-signal decomposition than the public generic definitions. Only the
-message name and last-byte checksum convention are used as corroboration; OEM
-names are not invented for the remaining fields.
+Public Toyota DBCs call CAN `0x262` `EPS_STATUS`. Here the public field geometry
+is unusually useful because it aligns exactly with the finer generated signal
+split recovered from this image:
 
 ```text
 B0: s10[7] s11[6] s12[5] s13[4]=0 reserved[3] s14[2] s15[1] s16[0]
@@ -282,8 +281,56 @@ B6: s36
 B7: s37 (post-packer additive checksum from 0x7FEAC)
 ```
 
-Signals 10–12, 14–21, and 23–36 use the exact RAM sources listed in the CSV.
-Signals 13 and 22 are explicitly packed from zero-valued staging fields.
+The pinned public DBC defines `IPAS_STATE` as B0[3:0], `LTA_STATE` as B1[7:3],
+`TYPE` as B3[0], and `LKA_STATE` as B3[7:1]. The firmware producer graph now
+supports those aggregate boundaries independently; the public enum strings are
+still treated as corroborating vocabulary rather than primary proof.
+
+**B0 / `IPAS_STATE`.** Runtime producer `0x4B90A` explicitly clears signals
+10–12 and 14–16 on every staging update. Signal 13 is an immediate zero in the
+packer and B0[3] is unassigned/reserved, so the public four-bit `IPAS_STATE`
+field is **0 in this calibration's recovered runtime producer**, and the whole
+packed B0 becomes zero after the first normal staging/pack cycle. This is
+stronger than the power-on image (`0x10`), whose B0[4] default is overwritten by
+the generated packer.
+
+**B1 / `LTA_STATE`.** Signals 17–21 are exactly the public five-bit field,
+ordered bit4..bit0. They are not opaque packet bits: the normal command/state
+export path supplies internal states `FEBEC12E`, `FEBEC0E2`, `FEBEC0E3`,
+`FEBEC12F`, and `FEBEC130`, which are snapshotted and copied into B1[7:3]. The
+producers show distinct roles: bit4 ORs two internal status flags; bit3 is a
+recovery/timeout latch; bit2 is the steering-control active-state latch; bit1
+ORs three condition flags; and bit0 is a base-eligibility predicate requiring
+one source state plus the low nine status bits to be clear. The bit0 value also
+passes through `0x4B92C`, which suppresses it when `0xFEBE7426 == 0x5A`.
+Signal 22 is an immediate-zero 11-bit field covering B1[2:0] and all of B2, so
+B2 is always zero in the recovered normal producer.
+
+**B3 / `LKA_STATE` + `TYPE`.** Signals 23–29 line up exactly with public
+`LKA_STATE` bit6..bit0. The high two bits (signals 23/24) are zeroed every cycle;
+the five dynamic low bits are exported from `FEBEBF7B`, `FEBEBFA7`,
+`FEBEBFA6`, `FEBEBFA5`, and `FEBEBFA9`. Their firmware structure is state-like:
+bit4 is an OR aggregate, bit3 is a timed recovery latch, bit2 is an active-state
+latch, bit1 is a timeout/availability status, and bit0 uses the same
+base-eligibility predicate as the `LTA_STATE` low bit before the same `0x4B92C`
+gate. This bit structure is consistent with the public odd-valued LKA state
+enums (`1/3/5/9/11/17/25`) without using those strings as proof of individual
+internal conditions. Signal 30 is B3[0], exactly the public one-bit `TYPE`
+location, and `0x4B754` writes it **zero** every cycle in this calibration.
+
+**B4–B6.** These bytes are absent from the public generic EPS_STATUS definition,
+but they are also no longer opaque. Signals 31/32 are copied from
+`FEBEC0D8/0D9`, two threshold/limiter flags produced by `0xC96D2`; signals
+33/34 come from `FEBEC0FE/0FF`, a transition latch plus two-bit transition code
+maintained by `0xC9CA8`. B4[2:0] is reserved zero. Finally, `0x4B920` explicitly
+writes `0xFF` to the signal-35 and signal-36 staging bytes every cycle, so B5
+and B6 are constant `FF` in the recovered normal producer.
+
+Signal 37 remains the CanIf additive checksum at B7. The raw verifier
+`verify_application_tx_262_semantics.py` pins the producer instructions and the
+public field geometry, while `AssertApplicationTransmitSemantics.java` now
+locks all 25 RAM-backed `0x262` staging-reference sets plus the decisive
+state-source relationships against the live Ghidra project.
 
 ### 4.3 CAN `0x351` / COM PDU 2
 

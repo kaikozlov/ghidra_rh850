@@ -140,6 +140,7 @@ tests = [
   "tests/verify_application_transmit.py",
   "tests/verify_application_tx_producer_evidence.py",
   "tests/verify_application_tx_260_semantics.py",
+  "tests/verify_application_tx_262_semantics.py",
 ]
 paths = [
   "docs/communications/application-tx.md",

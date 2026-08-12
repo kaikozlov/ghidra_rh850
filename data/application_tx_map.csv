@@ -9,33 +9,33 @@ tx_pdu_id,can_id,message_name,length,cycle_ticks,signal_id,wire_field,source_kin
 0,0x260,STEER_TORQUE_SENSOR,8,4,7,B3..B4 BE16,ram,0xFEBE810E,saturated signed steering-control estimate; public DBC STEER_ANGLE,0x4BCEE
 0,0x260,STEER_TORQUE_SENSOR,8,4,8,B5..B6 BE16,ram,0xFEBE8110,scaled motor-feedback torque estimate; public DBC STEER_TORQUE_EPS,0x4BCEE
 0,0x260,STEER_TORQUE_SENSOR,8,4,9,B7,canif_checksum,0x7FEAC,Toyota additive checksum: post-packer CanIf callback sums CAN-ID bytes + DLC + payload[0:-1] into final byte,0x4BCEE
-1,0x262,EPS_STATUS,8,8,10,B0[7],ram,0xFEBE809C,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,11,B0[6],ram,0xFEBE80B4,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,12,B0[5],ram,0xFEBE809D,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,10,B0[7],ram,0xFEBE809C,constant-zero EPS_STATUS prefix bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,11,B0[6],ram,0xFEBE80B4,constant-zero EPS_STATUS prefix bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,12,B0[5],ram,0xFEBE809D,constant-zero EPS_STATUS prefix bit,0x4BE24
 1,0x262,EPS_STATUS,8,8,13,B0[4],constant,0,constant zero,0x4BE24
-1,0x262,EPS_STATUS,8,8,14,B0[2],ram,0xFEBE809E,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,15,B0[1],ram,0xFEBE809F,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,16,B0[0],ram,0xFEBE80A0,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,17,B1[7],ram,0xFEBE80A4,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,18,B1[6],ram,0xFEBE80A6,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,19,B1[5],ram,0xFEBE80A8,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,20,B1[4],ram,0xFEBE80AA,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,21,B1[3],ram,0xFEBE80AC,unresolved status bit,0x4BE24
+1,0x262,EPS_STATUS,8,8,14,B0[2],ram,0xFEBE809E,IPAS_STATE bit2; constant zero in runtime producer,0x4BE24
+1,0x262,EPS_STATUS,8,8,15,B0[1],ram,0xFEBE809F,IPAS_STATE bit1; constant zero in runtime producer,0x4BE24
+1,0x262,EPS_STATUS,8,8,16,B0[0],ram,0xFEBE80A0,IPAS_STATE bit0; constant zero in runtime producer,0x4BE24
+1,0x262,EPS_STATUS,8,8,17,B1[7],ram,0xFEBE80A4,LTA_STATE bit4; internal status aggregate,0x4BE24
+1,0x262,EPS_STATUS,8,8,18,B1[6],ram,0xFEBE80A6,LTA_STATE bit3; timeout/recovery status,0x4BE24
+1,0x262,EPS_STATUS,8,8,19,B1[5],ram,0xFEBE80A8,LTA_STATE bit2; active-state latch,0x4BE24
+1,0x262,EPS_STATUS,8,8,20,B1[4],ram,0xFEBE80AA,LTA_STATE bit1; multi-condition status aggregate,0x4BE24
+1,0x262,EPS_STATUS,8,8,21,B1[3],ram,0xFEBE80AC,LTA_STATE bit0; gated base-eligibility status,0x4BE24
 1,0x262,EPS_STATUS,8,8,22,B1[2:0] || B2,constant,0,constant zero 11-bit field,0x4BE24
-1,0x262,EPS_STATUS,8,8,23,B3[7],ram,0xFEBE80A1,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,24,B3[6],ram,0xFEBE80A2,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,25,B3[5],ram,0xFEBE80A3,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,26,B3[4],ram,0xFEBE80A5,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,27,B3[3],ram,0xFEBE80A7,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,28,B3[2],ram,0xFEBE80A9,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,29,B3[1],ram,0xFEBE80AB,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,30,B3[0],ram,0xFEBE80AD,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,31,B4[7],ram,0xFEBE80AE,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,32,B4[6],ram,0xFEBE80AF,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,33,B4[5],ram,0xFEBE80B0,unresolved status bit,0x4BE24
-1,0x262,EPS_STATUS,8,8,34,B4[4:3],ram,0xFEBE80B1,unresolved two-bit status,0x4BE24
-1,0x262,EPS_STATUS,8,8,35,B5,ram,0xFEBE80B2,unresolved byte,0x4BE24
-1,0x262,EPS_STATUS,8,8,36,B6,ram,0xFEBE80B3,unresolved byte,0x4BE24
+1,0x262,EPS_STATUS,8,8,23,B3[7],ram,0xFEBE80A1,LKA_STATE bit6; constant zero in runtime producer,0x4BE24
+1,0x262,EPS_STATUS,8,8,24,B3[6],ram,0xFEBE80A2,LKA_STATE bit5; constant zero in runtime producer,0x4BE24
+1,0x262,EPS_STATUS,8,8,25,B3[5],ram,0xFEBE80A3,LKA_STATE bit4; internal status aggregate,0x4BE24
+1,0x262,EPS_STATUS,8,8,26,B3[4],ram,0xFEBE80A5,LKA_STATE bit3; transient recovery latch,0x4BE24
+1,0x262,EPS_STATUS,8,8,27,B3[3],ram,0xFEBE80A7,LKA_STATE bit2; active-state latch,0x4BE24
+1,0x262,EPS_STATUS,8,8,28,B3[2],ram,0xFEBE80A9,LKA_STATE bit1; timeout/availability status,0x4BE24
+1,0x262,EPS_STATUS,8,8,29,B3[1],ram,0xFEBE80AB,LKA_STATE bit0; gated base-eligibility status,0x4BE24
+1,0x262,EPS_STATUS,8,8,30,B3[0],ram,0xFEBE80AD,TYPE; constant zero in runtime producer,0x4BE24
+1,0x262,EPS_STATUS,8,8,31,B4[7],ram,0xFEBE80AE,steering-control threshold status,0x4BE24
+1,0x262,EPS_STATUS,8,8,32,B4[6],ram,0xFEBE80AF,steering-control limiter status,0x4BE24
+1,0x262,EPS_STATUS,8,8,33,B4[5],ram,0xFEBE80B0,steering-control transition latch,0x4BE24
+1,0x262,EPS_STATUS,8,8,34,B4[4:3],ram,0xFEBE80B1,steering-control transition code,0x4BE24
+1,0x262,EPS_STATUS,8,8,35,B5,ram,0xFEBE80B2,constant 0xFF byte in runtime producer,0x4BE24
+1,0x262,EPS_STATUS,8,8,36,B6,ram,0xFEBE80B3,constant 0xFF byte in runtime producer,0x4BE24
 1,0x262,EPS_STATUS,8,8,37,B7,canif_checksum,0x7FEAC,Toyota additive checksum: post-packer CanIf callback sums CAN-ID bytes + DLC + payload[0:-1] into final byte,0x4BE24
 2,0x351,APP_TX_351,4,200,38,B2[7:5],ram,0xFEBE80B8,unresolved three-bit status,0x4C25C
 2,0x351,APP_TX_351,4,200,39,B2[4],ram,0xFEBE80B9,unresolved status bit,0x4C25C
