@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+"""Browse the persistent whole-image Ghidra pseudocode corpus."""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+from generate_decompiler_corpus import DEFAULT_OUTPUT, DEFAULT_VIEW, materialize_view
+
+
+def load_corpus(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    if not path.is_file():
+        raise SystemExit(
+            f"missing pseudocode corpus: {path}\n"
+            "generate it with: make generate-decompiler-corpus"
+        )
+    metadata: dict[str, Any] | None = None
+    functions: list[dict[str, Any]] = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        record = json.loads(line)
+        if line_number == 1:
+            if record.get("record") != "metadata":
+                raise SystemExit(f"invalid corpus metadata record in {path}")
+            metadata = record
+        else:
+            if record.get("record") != "function":
+                raise SystemExit(f"invalid function record at {path}:{line_number}")
+            functions.append(record)
+    if metadata is None:
+        raise SystemExit(f"empty pseudocode corpus: {path}")
+    return metadata, functions
+
+
+def normalize_address(query: str) -> str | None:
+    value = query.strip().lower()
+    try:
+        if value.startswith("0x"):
+            return f"0x{int(value, 16):08x}"
+        if value and all(ch in "0123456789abcdef" for ch in value) and any(ch.isdigit() for ch in value):
+            return f"0x{int(value, 16):08x}"
+    except ValueError:
+        pass
+    return None
+
+
+def find_matches(query: str, functions: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], bool]:
+    address = normalize_address(query)
+    if address is not None:
+        exact = [record for record in functions if record["entry_addr"] == address]
+        if exact:
+            return exact, True
+
+    folded = query.casefold()
+    exact_names = [record for record in functions if str(record["name"]).casefold() == folded]
+    if exact_names:
+        return exact_names, True
+    return [record for record in functions if folded in str(record["name"]).casefold()], False
+
+
+def print_listing(records: list[dict[str, Any]]) -> None:
+    for record in records:
+        signature = record.get("signature") or ""
+        print(f"{record['entry_addr']}\t{record['name']}\t{signature}")
+
+
+def print_code(records: list[dict[str, Any]], *, separators: bool) -> None:
+    for index, record in enumerate(records):
+        if separators:
+            if index:
+                print()
+            print(f"/* ==== {record['entry_addr']} {record['name']} ==== */")
+        code = record["decompiled_c"]
+        sys.stdout.write(code)
+        if not code.endswith("\n"):
+            sys.stdout.write("\n")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("query", nargs="?", help="function address, exact name, or name substring")
+    parser.add_argument("--corpus", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--all", action="store_true", help="print pseudocode for every substring match")
+    parser.add_argument("--list", action="store_true", help="list matching functions instead of pseudocode")
+    parser.add_argument("--stats", action="store_true", help="show corpus provenance and counts")
+    parser.add_argument(
+        "--materialize",
+        action="store_true",
+        help="rebuild build/pseudocode from the tracked corpus without running Ghidra",
+    )
+    parser.add_argument("--view-dir", type=Path, default=DEFAULT_VIEW)
+    args = parser.parse_args()
+
+    metadata, functions = load_corpus(args.corpus)
+
+    if args.materialize:
+        materialize_view(args.view_dir, functions, metadata)
+        print(f"Materialized {len(functions)} pseudocode files at {args.view_dir.resolve()}")
+        if args.query is None and not args.stats:
+            return 0
+
+    if args.stats:
+        print(json.dumps(metadata, indent=2, sort_keys=True))
+        if args.query is None:
+            return 0
+
+    if args.query is None:
+        parser.error("query is required unless --stats or --materialize is used")
+
+    matches, exact = find_matches(args.query, functions)
+    if not matches:
+        raise SystemExit(f"no pseudocode function matches {args.query!r}")
+    if args.list:
+        print_listing(matches)
+        return 0
+    if len(matches) == 1 or exact:
+        print_code(matches, separators=len(matches) > 1)
+        return 0
+    if args.all:
+        print_code(matches, separators=True)
+        return 0
+
+    print(f"{len(matches)} functions match {args.query!r}; refine the query or pass --all:")
+    print_listing(matches)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

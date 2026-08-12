@@ -342,6 +342,19 @@ paths = [
   "tools/generate_semantic_sweep.py",
 ]
 
+[suite.decompiler_corpus]
+tests = ["tests/verify_decompiler_corpus.py"]
+oracle = "generated_self_check"
+paths = [
+  "data/generated/decompilations.jsonl",
+  "data/ghidra_project_inventory.baseline.jsonl",
+  "ghidra/scripts/verify/ExportDecompilerCorpus.java",
+  "tools/generate_decompiler_corpus.py",
+  "tools/pseudo",
+  "docs/WORKFLOW.md",
+  "AGENTS.md",
+]
+
 [suite.function_discovery]
 tests = ["tests/verify_function_discovery.py"]
 paths = [

@@ -13,7 +13,7 @@ override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.b
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
 	generate-processor-fixture generate-function-discovery generate-semantic-coverage generate-project-inventory \
-	generate-semantic-sweep \
+	generate-semantic-sweep generate-decompiler-corpus pseudocode \
 	verify-project-parity update-project-baseline \
 	rebuild-project work-project snapshot-project finalize-project
 
@@ -103,6 +103,12 @@ generate-semantic-coverage:
 
 generate-semantic-sweep:
 	$(PYTHON) tools/generate_semantic_sweep.py --project-dir "$(PROJECT_DIR)"
+
+generate-decompiler-corpus:
+	$(PYTHON) tools/generate_decompiler_corpus.py --project-dir "$(PROJECT_DIR)"
+
+pseudocode:
+	$(PYTHON) tools/pseudo --materialize
 
 generate-project-inventory:
 	tools/generate_project_inventory.sh "$(PROJECT_INVENTORY)"

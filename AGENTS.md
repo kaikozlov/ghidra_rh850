@@ -92,6 +92,27 @@ whether to promote.
 `tools/g stop` persists working-copy edits only. To deliberately promote a
 finished working copy into the committed snapshot, use `make finalize-project`.
 
+### Persistent pseudocode corpus
+
+Use the tracked whole-image decompiler corpus for broad reading, search, and
+cross-function reasoning before dropping to individual CLI calls:
+
+```bash
+tools/pseudo 0x6fec
+tools/pseudo security_access --list
+tools/pseudo secoc --all
+make pseudocode                    # materialize build/pseudocode/*.c from the tracked corpus
+rg 'ICUSCMD' build/pseudocode
+```
+
+`data/generated/decompilations.jsonl` is derived evidence, provenance-locked to
+`data/ghidra_project_inventory.baseline.jsonl`. It is not firmware truth. Use
+pseudocode for understanding, xrefs/dataflow for tracing, and disassembly/bytes
+for proof. After any graph, naming, type, calling-convention, or processor
+semantic change, regenerate it with `make generate-decompiler-corpus` against a
+fresh rebuilt project that exactly matches the canonical inventory (not merely
+a snapshot-materialized project that Ghidra may report as hijacked).
+
 All repository one-shot Ghidra execution goes through `tools/run_headless`,
 which owns environment setup, path rejection, script paths, logging, and script
 error detection. The only intentional raw `analyzeHeadless` call is the

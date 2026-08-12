@@ -105,6 +105,51 @@ working copy, run `tools/g stop` afterward. To promote a finished working copy
 into the committed snapshot, run `make finalize-project` (which orchestrates
 daemon stop, verification, snapshot, and diff).
 
+## Persistent whole-image pseudocode
+
+The canonical project has a tracked decompiler corpus at
+`data/generated/decompilations.jsonl`. It contains one record for every recovered
+function, including entry address, name, signature, calling convention, body
+size, decompiler status, SHA-256 of the rendered C, and the complete decompiled
+C. Its metadata pins the exact canonical project-inventory hash, Ghidra/program
+identity, and the exporter/generator source hashes.
+
+Use it as the first cognitive/search surface for broad static analysis:
+
+```bash
+tools/pseudo 0x6fec                     # exact address -> pseudocode
+tools/pseudo security_access --list    # search function names
+tools/pseudo secoc --all               # emit all matching pseudocode
+make pseudocode                        # rebuild ignored build/pseudocode/*.c view
+rg 'ICUSCMD' build/pseudocode
+rg 'nvm_object_15' build/pseudocode
+```
+
+The `.c` tree is intentionally ignored; it can be reproduced from the tracked
+JSONL without opening Ghidra. The JSONL is generated in one read-only headless
+Ghidra pass rather than thousands of individual CLI calls.
+
+Refresh the corpus only from a fresh rebuilt/disposable project whose exported
+inventory is byte-for-byte equal to
+`data/ghidra_project_inventory.baseline.jsonl`. A project merely materialized
+from the committed snapshot may carry Ghidra version-control state that
+`analyzeHeadless -process` reports as hijacked, so use a fresh rebuild output:
+
+```bash
+make rebuild-project PROJECT_DIR="$PWD/build/corpus-rebuild"
+make generate-decompiler-corpus PROJECT_DIR="$PWD/build/corpus-rebuild"
+uv run --locked python tests/verify_decompiler_corpus.py
+```
+
+The generator stops the selected project's daemon, exports and compares its
+live inventory first, then performs the decompiler pass. Any missing function,
+identity drift, timeout, failed decompilation, or empty C aborts the refresh
+instead of silently publishing a partial corpus.
+
+The evidence boundary is deliberate: **pseudocode for understanding ->
+xrefs/dataflow for tracing -> disassembly/firmware bytes for proof**. Decompiled
+C is generated evidence, not the source of truth.
+
 Expected memory map after the P1M-E device profile is applied:
 
 ```text
