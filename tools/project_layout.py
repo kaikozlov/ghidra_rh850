@@ -8,12 +8,18 @@ raw Ghidra cannot open and compact ``project/``. Working copies use normal
 from __future__ import annotations
 
 import argparse
+import getpass
 import shutil
+import socket
 import sys
+import time
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 DEFAULT_PROJECT_NAME = "rh850_p1me_mapped"
 TRANSIENT_SUFFIXES = (".lock", ".lock~")
+CHECKOUT_FILE = "checkout.dat"
+PORTABLE_CHECKOUT_FILE = "checkout.dat.snapshot"
 
 
 def resolved(path: Path) -> Path:
@@ -72,6 +78,94 @@ def copy_tree(source: Path, destination: Path, renames: dict[str, str]) -> None:
             shutil.copy2(item, target, follow_symlinks=False)
 
 
+
+
+def _read_checkout_xml(path: Path) -> ET.Element:
+    try:
+        root = ET.parse(path).getroot()
+    except (ET.ParseError, OSError) as error:
+        raise ValueError(f"invalid Ghidra checkout metadata {path}: {error}") from error
+    if root.tag != "CHECKOUT_LIST":
+        raise ValueError(f"unexpected checkout metadata root in {path}: {root.tag}")
+    for entry in root:
+        if entry.tag != "CHECKOUT":
+            raise ValueError(f"unexpected checkout metadata entry in {path}: {entry.tag}")
+        for required in ("ID", "VERSION", "EXCLUSIVE"):
+            if required not in entry.attrib:
+                raise ValueError(f"checkout metadata {path} missing {required}")
+    return root
+
+
+def _write_checkout_xml(path: Path, root: ET.Element) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tree = ET.ElementTree(root)
+    ET.indent(tree, space="    ")
+    tree.write(path, encoding="UTF-8", xml_declaration=True)
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write("\n")
+
+
+def _portable_checkout(root: ET.Element) -> ET.Element:
+    portable = ET.Element("CHECKOUT_LIST")
+    if "NEXT_ID" in root.attrib:
+        portable.set("NEXT_ID", root.attrib["NEXT_ID"])
+    for entry in root.findall("CHECKOUT"):
+        out = ET.SubElement(portable, "CHECKOUT")
+        for key in ("ID", "VERSION", "EXCLUSIVE"):
+            out.set(key, entry.attrib[key])
+    return portable
+
+
+def _materialized_checkout(root: ET.Element, project_dir: Path, project_name: str) -> ET.Element:
+    live = ET.Element("CHECKOUT_LIST")
+    if "NEXT_ID" in root.attrib:
+        live.set("NEXT_ID", root.attrib["NEXT_ID"])
+    identity = f"{socket.gethostname()}::{project_dir / project_name}"
+    now = str(int(time.time() * 1000))
+    user = getpass.getuser()
+    for entry in root.findall("CHECKOUT"):
+        out = ET.SubElement(live, "CHECKOUT")
+        out.set("ID", entry.attrib["ID"])
+        out.set("USER", user)
+        out.set("VERSION", entry.attrib["VERSION"])
+        out.set("TIME", now)
+        out.set("PROJECT", identity)
+        out.set("EXCLUSIVE", entry.attrib["EXCLUSIVE"])
+    return live
+
+
+def _snapshot_checkout_metadata(project_dir: Path, snapshot_dir: Path, project_name: str) -> None:
+    live_rep = project_dir / f"{project_name}.rep"
+    packed_rep = snapshot_dir / f"{project_name}.rep.snapshot"
+    for source in live_rep.rglob(CHECKOUT_FILE):
+        relative = source.relative_to(live_rep)
+        target = packed_rep / relative.parent / PORTABLE_CHECKOUT_FILE
+        _write_checkout_xml(target, _portable_checkout(_read_checkout_xml(source)))
+
+
+def _restore_checkout_metadata(project_dir: Path, project_name: str) -> None:
+    live_rep = project_dir / f"{project_name}.rep"
+    for portable in list(live_rep.rglob(PORTABLE_CHECKOUT_FILE)):
+        root = _read_checkout_xml(portable)
+        checkout = portable.with_name(CHECKOUT_FILE)
+        _write_checkout_xml(checkout, _materialized_checkout(root, project_dir, project_name))
+        portable.unlink()
+
+
+def _validate_portable_checkouts(snapshot_dir: Path, project_name: str) -> None:
+    rep = snapshot_dir / f"{project_name}.rep.snapshot"
+    live = list(rep.rglob(CHECKOUT_FILE))
+    if live:
+        raise ValueError(f"snapshot contains machine-specific Ghidra checkout metadata: {live[0]}")
+    for portable in rep.rglob(PORTABLE_CHECKOUT_FILE):
+        root = _read_checkout_xml(portable)
+        for entry in root.findall("CHECKOUT"):
+            forbidden = {"USER", "TIME", "PROJECT"} & set(entry.attrib)
+            if forbidden:
+                raise ValueError(
+                    f"portable checkout metadata contains machine-specific fields {sorted(forbidden)}: {portable}"
+                )
+
 def validate_snapshot(snapshot_dir: Path, project_name: str) -> None:
     reject_symlinks(snapshot_dir)
     gpr_snapshot = snapshot_dir / f"{project_name}.gpr.snapshot"
@@ -88,6 +182,7 @@ def validate_snapshot(snapshot_dir: Path, project_name: str) -> None:
         raise ValueError(f"missing snapshot project file: {gpr_snapshot}")
     if not rep_snapshot.is_dir():
         raise ValueError(f"missing snapshot repository: {rep_snapshot}")
+    _validate_portable_checkouts(snapshot_dir, project_name)
 
 
 def materialize(snapshot_dir: Path, project_dir: Path, project_name: str) -> None:
@@ -101,6 +196,7 @@ def materialize(snapshot_dir: Path, project_dir: Path, project_name: str) -> Non
             f"{project_name}.rep.snapshot": f"{project_name}.rep",
         },
     )
+    _restore_checkout_metadata(project_dir, project_name)
 
 
 def pack(project_dir: Path, snapshot_dir: Path, project_name: str) -> None:
@@ -119,6 +215,7 @@ def pack(project_dir: Path, snapshot_dir: Path, project_name: str) -> None:
             f"{project_name}.rep": f"{project_name}.rep.snapshot",
         },
     )
+    _snapshot_checkout_metadata(project_dir, snapshot_dir, project_name)
     validate_snapshot(snapshot_dir, project_name)
 
 

@@ -64,7 +64,15 @@ with tempfile.TemporaryDirectory() as td:
 
     live_rep = working / f"{NAME}.rep"
     (live_rep / ".lock").write_text("transient")
-    (live_rep / "checkout.dat").write_text("absolute path and timestamp")
+    checkout_dir = live_rep / "versioned" / "00" / "~00000000.db"
+    checkout_dir.mkdir(parents=True)
+    (checkout_dir / "checkout.dat").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<CHECKOUT_LIST NEXT_ID="7">\n'
+        '    <CHECKOUT ID="6" USER="fixture-user" VERSION="5" TIME="123456" '
+        'PROJECT="fixture-host::/absolute/source/project" EXCLUSIVE="true" />\n'
+        '</CHECKOUT_LIST>\n'
+    )
     (live_rep / "tmp123").write_text("transient")
 
     result = run(
@@ -81,7 +89,12 @@ with tempfile.TemporaryDirectory() as td:
     check("pack preserves repository metadata", (packed / "processor_manifest.json").is_file())
     packed_rep = packed / f"{NAME}.rep.snapshot"
     check("pack excludes .lock", not (packed_rep / ".lock").exists())
-    check("pack excludes checkout state", not (packed_rep / "checkout.dat").exists())
+    packed_checkout_dir = packed_rep / "versioned" / "00" / "~00000000.db"
+    check("pack excludes live checkout.dat", not (packed_checkout_dir / "checkout.dat").exists())
+    portable_checkout = packed_checkout_dir / "checkout.dat.snapshot"
+    portable_text = portable_checkout.read_text() if portable_checkout.is_file() else ""
+    check("pack preserves portable checkout identity", portable_checkout.is_file() and 'ID="6"' in portable_text and 'VERSION="5"' in portable_text)
+    check("portable checkout strips user/path/time", all(token not in portable_text for token in ("fixture-user", "fixture-host", "/absolute/source", "123456", "USER=", "PROJECT=", "TIME=")), portable_text)
     check("pack excludes tmp files", not (packed_rep / "tmp123").exists())
 
     result = run(
@@ -90,6 +103,37 @@ with tempfile.TemporaryDirectory() as td:
         "--project-name", NAME,
     )
     check("packed snapshot validates", result.returncode == 0, result.stderr)
+
+    roundtrip = root / "roundtrip"
+    result = run(
+        "materialize",
+        "--snapshot-dir", str(packed),
+        "--project-dir", str(roundtrip),
+        "--project-name", NAME,
+    )
+    check("portable checkout snapshot materializes", result.returncode == 0, result.stderr)
+    roundtrip_checkout = roundtrip / f"{NAME}.rep" / "versioned" / "00" / "~00000000.db" / "checkout.dat"
+    roundtrip_text = roundtrip_checkout.read_text() if roundtrip_checkout.is_file() else ""
+    check("materialize restores live checkout.dat", roundtrip_checkout.is_file())
+    check("materialize binds checkout to destination", f"::{roundtrip / NAME}" in roundtrip_text, roundtrip_text)
+    check("materialize replaces source checkout identity", all(token not in roundtrip_text for token in ("fixture-user", "fixture-host", "/absolute/source", "123456")), roundtrip_text)
+    check("materialize consumes portable marker", not list((roundtrip / f"{NAME}.rep").rglob("checkout.dat.snapshot")))
+
+    # Machine-specific checkout metadata must never be accepted in a snapshot.
+    unsafe_snapshot = root / "unsafe-snapshot"
+    unsafe_snapshot.mkdir()
+    (unsafe_snapshot / f"{NAME}.gpr.snapshot").write_text("")
+    unsafe_rep = unsafe_snapshot / f"{NAME}.rep.snapshot"
+    unsafe_checkout_dir = unsafe_rep / "versioned" / "00" / "~00000000.db"
+    unsafe_checkout_dir.mkdir(parents=True)
+    (unsafe_rep / "project.prp").write_text("fixture")
+    (unsafe_checkout_dir / "checkout.dat").write_text("machine-specific")
+    result = run(
+        "validate-snapshot",
+        "--snapshot-dir", str(unsafe_snapshot),
+        "--project-name", NAME,
+    )
+    check("snapshot validation rejects live checkout metadata", result.returncode != 0 and "machine-specific" in result.stderr, result.stderr)
 
     # A live project in a snapshot directory must fail closed.
     packed.mkdir(exist_ok=True)
