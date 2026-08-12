@@ -717,3 +717,26 @@ the mistakes are not re-made.
 - **Canonical:** [../architecture/control-partition.md](../architecture/control-partition.md) §9.3;
   `data/motor_actuation_path.csv`; `tests/verify_motor_actuation_boundary.py`;
   `ghidra/scripts/verify/AssertMotorActuationBoundary.java`.
+
+### CORR-041 — `0x0D7` signal 280 inherited signal 284's GP destination in generated Rx evidence
+
+- **Wrong:** `application_rx_signal_evidence.csv` and the derived Rx map assigned
+  both SecOC CAN-FD `0x0D7` signals 280 and 284 to `FEBE8072`. The evidence
+  exporter remembered the last `movea imm,gp,r1` seen before a receive call and
+  therefore carried signal 284's direct GP pointer into signal 280.
+- **Right:** signal 280 is the sole generated `application_com_receive_signal`
+  call in this calibration whose destination is a stack temporary. `0x4B402`
+  forms `SP+0x0B`, that pointer is passed in stack argument slot +4, and after
+  the call `0x4B450` reloads the byte and `0x4B45C` stores it to
+  `FEBE8076`. Signal 284 independently owns `FEBE8072`. The exporter now binds
+  the destination only when `r1` is actually placed into the receive API's
+  destination argument and, for an SP-relative destination, recovers a uniquely
+  matching post-call stack-load → GP-store persistence edge. Independent raw
+  CodeFlash tests pin both instruction sequences; the Ghidra ownership verifier
+  bounds all direct `FEBE8076` readers. This correction exposes signal 280's
+  real downstream path `FEBE8076 -> FEBEF094 -> B6396`, where it participates
+  in protected invalidity/fault handling.
+- **Canonical:** [../communications/application-rx.md](../communications/application-rx.md) §5.4;
+  `ghidra/scripts/verify/ExportApplicationRxSignalEvidence.java`;
+  `tests/verify_application_receive.py`; `AssertApplicationReceiveMap.java`;
+  `data/secoc_rx_control_surface.csv`.

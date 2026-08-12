@@ -51,6 +51,12 @@ public class AssertApplicationReceiveMap extends GhidraScript {
     private static final Set<Long> BOUNDED_READ_COOWNERS = Set.of(
             0x4a1e8L,
             0x4b7baL,
+            // CAN-FD 0x0D7 signal 280 persists through FEBE8076 and is
+            // consumed by diagnostic/routine gating plus the normal 56FC2
+            // application staging path. These readers are exact and bounded.
+            0x4ef68L,
+            0x4efacL,
+            0xfcc4eL,
             0x52f82L,
             0x531c8L,
             0x552baL,
@@ -235,8 +241,12 @@ public class AssertApplicationReceiveMap extends GhidraScript {
                     consumerReads = true;
                     continue;
                 }
-                if (BOUNDED_READ_COOWNERS.contains(ea) || ea == -1L) {
-                    // -1: READ site outside a function body (explicitly allowed).
+                if ((signalId == 280 && ea == unpacker)
+                        || BOUNDED_READ_COOWNERS.contains(ea) || ea == -1L) {
+                    // Signal 280's generated stack-temporary persistence first
+                    // reloads FEBE8076 in its own unpacker to preserve the prior
+                    // value when no new update is accepted. -1 is a READ site
+                    // outside a recovered function body (explicitly bounded).
                     continue;
                 }
                 fail(String.format(Locale.ROOT,

@@ -319,7 +319,111 @@ but the decompiler currently prints that source as `DAT_febe8000._1_1_` because
 Ghidra typed the adjacent bytes as one object. Canonical instruction/data xrefs,
 not the textual composite spelling, are authoritative for this join.
 
-### 5.4 Signals 95..100 form a dormant crypto-test input bank
+### 5.4 Complete six-profile SecOC downstream surface
+
+The receive-table fact that a PDU is SecOC-protected does **not** imply that it
+is a steering command. Tracing every configured protected profile through its
+COM/staging consumers gives the calibration-specific partition recorded in
+`data/secoc_rx_control_surface.csv`:
+
+| CAN | Protected role | Recovered downstream semantics |
+|---:|---|---|
+| `0x00F` | synchronization | SecOC trip/reset freshness source; no scalar COM unpacker and no steering command selection |
+| `0x2E4` | steering command | authenticated LKA torque request/value; selects `FEBEC13D` mode 1 and enters `FEBEC144` from `FEBEBFA2` |
+| `0x131` | steering command | authenticated `STEERING_LTA_2` request/angle; selects `FEBEC13A` mode 2 and enters `FEBEC144` from controller output `FEBEC0D6` |
+| `0x132` | protected snapshot | six recovered post-snapshot scalars have zero runtime readers; bounded non-actuation result |
+| `0x090` | steering measurement / validity prerequisite | three protected measurement channels and protected status bits feed steering-cycle scheduling, filtering, plausibility, and validity gates, but never select `C13A/C13D` command mode |
+| `0x0D7` | vehicle speed / validity | protected speed source becomes `FEBEB6F2` and then `application_vehicle_speed_raw`; protected status can force a fault/event path; remaining fields terminate in snapshot state |
+
+#### `0x090`: protected steering measurement and validity domain
+
+PDU 46 is a 32-byte SecOC CAN-FD profile with 28 authentic payload bytes. Its
+generated unpacker recovers three unsigned 10-bit channels (signals
+270/273/276) at `FEBE805A/805C/805E`. The unpacker immediately recenters each
+around `0x0200`, producing `FEBE8060/8062/8064`; the common staging routine then
+copies those values to `FEBEF1C6/F1C8/F1CA`.
+
+The first two channels are consumed only by
+`fd090_primary_measurement_plausibility @ 0xBBF0E`; the third is consumed only
+by `fd090_third_measurement_plausibility @ 0xBC766`. These routines apply
+calibration scaling/bounds and publish the two numeric states
+`FEBEB6AA/FEBEB714` plus 0/`0x5A` plausibility flags. `BA43A` then promotes the
+numeric states into the steering-cycle snapshot:
+
+```text
+0x090 signals 270/273
+  -> 8060/8062 -> F1C6/F1C8 -> BBF0E -> B6AA
+  -> BA43A -> FEBEAE02
+  -> C8F04 / C8F2A / C9106 / C94D0 / C955A / C9632
+
+0x090 signal 276
+  -> 8064 -> F1CA -> BC766 -> B714
+  -> BA43A -> FEBEAF00
+  -> BFBA8 (only while aggregate validity B7C4 == 0x5A)
+```
+
+`FEBEAE02` is therefore a real input to the recovered LTA/steering subsystem,
+not telemetry-only state. The exact physical meanings/axes of the three CAN-FD
+measurements remain unresolved; their shape is insufficient to justify names
+such as torque, yaw, or angle.
+
+Protected `0x090` status fields are also steering prerequisites. `BA43A` copies
+two staged status bytes to `FEBEAD71/AD72`, which `BF750` folds into validity
+state feeding `FEBEB75F`; two more reach `FEBEACE3/ACE4`, which participate in
+the larger all-healthy conjunction at `BF96A -> FEBEB7C4`. `B7C4` in turn gates
+`BFBA8` and is read by additional steering-cycle monitor/filter functions. Thus
+`0x090` can inhibit or qualify steering-control state without being a command
+source.
+
+#### `0x0D7`: protected vehicle speed and invalidity/status
+
+PDU 47 is the second 32-byte SecOC CAN-FD profile. Its unsigned 16-bit signal
+283 is recovered at `FEBE8070`, staged to `FEBEF1B6`, and normalized by
+`fd0d7_vehicle_speed_normalize @ 0xBC484`:
+
+```text
+0x0D7 signal 283
+  -> FEBE8070 -> FEBEF1B6
+  -> BC484 (bound to 30000, scale by 0x147B >> 12)
+  -> FEBEB6F2
+  -> application_input_snapshot_update
+  -> application_vehicle_speed_raw @ FEBEE892
+```
+
+`FEBEB6F2` is consumed throughout low/high-speed thresholds and state machines;
+the named application snapshot is also used by diagnostic-session and routine
+speed guards. This makes signal 283 a high-confidence protected vehicle-speed
+source.
+
+Signal 280 is a separate protected B0[7] status/invalidity input. It exposed a
+receiver-evidence bug because this generated unpacker does not pass a
+GP-relative destination directly: it initializes stack byte `SP+0x0B` from
+`FEBE8076`, passes that stack pointer to `application_com_receive_signal`, then
+reloads the byte and persists it at instruction `0x4B45C` to `FEBE8076`.
+`0x56FC2` stages it into `FEBEF094`. `fd0d7_status_fault_monitor @ 0xB6396`
+reads `FEBEF094`; while its local state is healthy, an asserted status joins
+other invalidity predicates, forces the fault state, invokes the fault helper,
+and raises system-mode event `0x2D`. Additional direct reads of `FEBE8076` are
+bounded to diagnostic/routine status gating and the generated preserve-on-no-
+update read in its own unpacker.
+
+This also corrects the former map entry that assigned both signals 280 and 284
+to `FEBE8072`: signal **284** independently owns `FEBE8072`; signal **280**
+persists to `FEBE8076`. The evidence exporter now reconstructs this generated
+stack-temporary pattern rather than inheriting the previous call's GP pointer.
+
+The other staged `0x0D7` scalar fields close negatively after publication:
+`FEBEAED6`, `FEBEAED8`, `FEBEADE1`, and `FEBEADE2` each have exactly two direct
+references—one `BA43A` snapshot WRITE and one subsystem-initialization WRITE—
+and no runtime READ.
+
+The resulting distinction is operationally important for target bring-up: the
+only recovered SecOC **command** PDUs in this Sienna calibration are `0x2E4`
+and `0x131`. A target can still require other authenticated streams such as
+`0x090` or `0x0D7` as prerequisite sensor/validity state, so key recovery and
+message-profile discovery must not be reduced to checking command IDs alone.
+
+### 5.5 Signals 95..100 form a dormant crypto-test input bank
 
 The consumer at `0x6875E` bounds six previously anonymous generated signals:
 

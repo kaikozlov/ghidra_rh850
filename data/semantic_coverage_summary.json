@@ -8,10 +8,10 @@
   "deterministically_verified_count": 8,
   "discovered_function_count": 6037,
   "discovery_source_counts": {
-    "auto-analysis": 5268,
+    "auto-analysis": 5262,
     "callback-table seed": 91,
     "direct-call seed": 135,
-    "manual/other": 521,
+    "manual/other": 527,
     "vector seed": 22
   },
   "evidence_grade_counts": {
@@ -25,8 +25,8 @@
   },
   "function_count": 6037,
   "name_source_counts": {
-    "DEFAULT": 5270,
-    "USER_DEFINED": 767
+    "DEFAULT": 5264,
+    "USER_DEFINED": 773
   },
   "oracle_class_counts": {
     "cfg_dataflow": 19,

@@ -133,6 +133,7 @@ paths = [
   "ghidra/scripts/verify/ExportApplicationRxSignalEvidence.java",
   "ghidra/scripts/verify/ExportApplicationRxConsumerAudit.java",
   "ghidra/scripts/verify/AssertApplicationReceiveMap.java",
+  "ghidra/scripts/annotate/AnnotateApplicationReceive.java",
 ]
 
 [suite.application_routine_id_callbacks]
@@ -377,8 +378,16 @@ paths = [
 ]
 
 [suite.secoc_application]
-tests = ["tests/verify_secoc_application.py"]
-paths = ["docs/security/secoc/application-chain.md"]
+tests = [
+  "tests/verify_secoc_application.py",
+  "tests/verify_secoc_rx_control_surface.py",
+]
+paths = [
+  "docs/security/secoc/application-chain.md",
+  "docs/communications/application-rx.md",
+  "data/secoc_rx_control_surface.csv",
+  "ghidra/scripts/verify/AssertSecocRxControlSurface.java",
+]
 
 [suite.secoc_nvm]
 tests = ["tests/verify_secoc_nvm.py"]

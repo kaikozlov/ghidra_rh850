@@ -305,10 +305,27 @@ for ev in evidence:
             immediate_ok = False
             print(f"  IMM FAIL signal {sid} bit_len {bit_len}")
         dest = int(ev["dest"], 0)
-        gp_imm = (dest - GP) & 0xFFFF
-        if movea_gp_r1(gp_imm) not in window and struct.pack("<H", gp_imm) not in window:
-            dest_ok = False
-            print(f"  DEST FAIL signal {sid} dest {dest:#x} gp_imm {gp_imm:#x}")
+        if sid == 280:
+            # CAN-FD 0x0D7 signal 280 is the one generated stack-temporary
+            # receive shape in the entire application Rx corpus. The call passes
+            # SP+0x0B as receive_signal's destination, then persists that byte to
+            # FEBE8076 after the PDU's remaining extraction calls. This prevents
+            # the evidence generator from inheriting signal 284's preceding
+            # GP-relative FEBE8072 destination.
+            if dest != 0xFEBE8076:
+                dest_ok = False
+                print(f"  DEST FAIL signal 280 persisted dest {dest:#x}")
+            if CF[0x4B402:0x4B40A] != bytes.fromhex("03f0230e0b000105"):
+                dest_ok = False
+                print("  DEST FAIL signal 280 stack destination setup")
+            if CF[0x4B450:0x4B460] != bytes.fromhex("a30f0b0020361c0044ef7ac8440f76c8"):
+                dest_ok = False
+                print("  DEST FAIL signal 280 stack-to-FEBE8076 persistence")
+        else:
+            gp_imm = (dest - GP) & 0xFFFF
+            if movea_gp_r1(gp_imm) not in window and struct.pack("<H", gp_imm) not in window:
+                dest_ok = False
+                print(f"  DEST FAIL signal {sid} dest {dest:#x} gp_imm {gp_imm:#x}")
         # CSV agreement for recovered fields
         csv_row = next(r for r in recovered if int(r["signal_id"]) == sid)
         if (

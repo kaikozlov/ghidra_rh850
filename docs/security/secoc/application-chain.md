@@ -83,6 +83,38 @@ image. It may be transmitted by another ECU, transmitted by a related EPS, or
 belong to a different calibration, but the external four-ID oracle must not be
 projected onto this firmware as an EPS receive route.
 
+### 1.1 Downstream semantics are not one role
+
+The six profiles share the slot-4 verification machinery but do not share one
+application role. Whole-image COM/staging/consumer tracing gives this exact
+calibration-specific partition (machine-readable in
+`data/secoc_rx_control_surface.csv`):
+
+| CAN | Downstream class | Static result |
+|---:|---|---|
+| `0x00F` | synchronization | freshness/trip/reset source; no scalar COM unpacker |
+| `0x2E4` | steering command | protected LKA torque request/value selects mode 1 and reaches common command `FEBEC144` |
+| `0x131` | steering command | protected `STEERING_LTA_2` request/angle drives an LTA controller, selects mode 2, and reaches `FEBEC144` |
+| `0x132` | protected snapshot | six recovered post-snapshot scalar destinations have zero runtime readers |
+| `0x090` | steering measurement/validity | three protected measurement channels plus status bits feed steering scheduling, filters, plausibility, and validity gates without selecting a steering command mode |
+| `0x0D7` | vehicle speed/validity | signal 283 becomes the shared live vehicle-speed source; signal 280 is a protected invalidity/fault input; remaining staged fields terminate after snapshot publication |
+
+This distinction matters when interpreting key or traffic captures. Successful
+MAC verification on an ID proves the key/profile domain, but it does not imply
+that the PDU is an actuator command. Conversely, non-command protected PDUs can
+still be prerequisites for steering operation. In this image `0x090` contributes
+protected measurement/validity state to the steering cycle and `0x0D7`
+contributes protected speed/status state. The only recovered protected command
+modes are `0x2E4` torque and `0x131` LTA angle.
+
+The `0x0D7` audit also corrected one generated-COM evidence edge. Signal 280 is
+received through stack byte `SP+0x0B` and persisted to `FEBE8076`; signal 284
+independently owns `FEBE8072`. The evidence exporter now recovers that
+stack-temporary persistence pattern instead of inheriting the previous call's
+GP-relative destination. See
+[application receive §5.4](../../communications/application-rx.md#54-complete-six-profile-secoc-downstream-surface)
+for the field-level cones and exact bounds.
+
 ## 2. Receive and authenticated-input data flow
 
 The configured receive path is:

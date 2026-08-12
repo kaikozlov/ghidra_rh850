@@ -231,6 +231,9 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
         Integer startArg = null;
         Integer signed = null;
         Long dest = null;
+        Long r1DirectDest = null;
+        Integer r1StackOffset = null;
+        Integer stackDestOffset = null;
 
         Listing listing = currentProgram.getListing();
         InstructionIterator insts = listing.getInstructions(toAddr(windowLo), true);
@@ -256,7 +259,15 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
                 } else if (op1.equalsIgnoreCase("r0") && op2.equalsIgnoreCase("r8")) {
                     bitLen = imm & 0xff;
                 } else if (op1.equalsIgnoreCase("gp") && op2.equalsIgnoreCase("r1")) {
-                    dest = (GP + (long) imm) & 0xffffffffL;
+                    // Track the current r1 pointer, but do not call it the receive
+                    // destination until generated code stores r1 into stack argument
+                    // slot +4. Otherwise a later stack-temporary call can inherit a
+                    // stale GP pointer from the previous receive_signal call.
+                    r1DirectDest = (GP + (long) imm) & 0xffffffffL;
+                    r1StackOffset = null;
+                } else if (op1.equalsIgnoreCase("sp") && op2.equalsIgnoreCase("r1")) {
+                    r1StackOffset = imm;
+                    r1DirectDest = null;
                 }
             } else if (mnem.equals("mov")) {
                 // mov r8, r9 copies the current bit-length into start_arg.
@@ -273,17 +284,31 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
                     signed = 1;
                 }
             } else if (mnem.equals("sst.w")) {
+                Integer slot = parseImm(op0);
                 // sst.w 0x0, ep, rX  -> signed flag on stack slot 0
-                if (op0.equals("0x0") || op0.equals("0")) {
+                if (slot != null && slot == 0) {
                     if (op2.equalsIgnoreCase("r0")) signed = 0;
                     if (op2.equalsIgnoreCase("r1")) signed = 1;
+                }
+                // Generated receive_signal callers pass the destination pointer in
+                // stack argument slot +4. Capture the pointer value *here*, rather
+                // than using whichever GP-relative movea happened to appear last.
+                if (slot != null && slot == 4 && op2.equalsIgnoreCase("r1")) {
+                    dest = r1DirectDest;
+                    stackDestOffset = r1StackOffset;
                 }
             }
         }
         if (signalId == null || bufOff == null || bitLen == null || startArg == null
-                || signed == null || dest == null) {
+                || signed == null) {
             return null;
         }
+        boolean stackPersisted = false;
+        if (dest == null && stackDestOffset != null) {
+            dest = findPersistedStackDest(fn, callSite, stackDestOffset, widthFor(bitLen));
+            stackPersisted = dest != null;
+        }
+        if (dest == null) return null;
 
         Row r = new Row();
         r.signalId = signalId;
@@ -302,8 +327,61 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
         r.windowLo = windowLo;
         r.windowHi = windowHi;
         r.classification = "extracted_bitfield";
-        r.classificationBasis = "direct application_com_receive_signal call with recoverable immediate signal/offset/width/destination arguments";
+        r.classificationBasis = stackPersisted
+                ? "application_com_receive_signal writes a generated stack temporary that is persisted to a uniquely recovered GP-relative RAM destination"
+                : "direct application_com_receive_signal call with recoverable immediate signal/offset/width/destination arguments";
         return r;
+    }
+
+    private Long findPersistedStackDest(Function fn, long callSite, int stackOffset, int width) {
+        Listing listing = currentProgram.getListing();
+        InstructionIterator insts = listing.getInstructions(fn.getBody(), true);
+        String loadedReg = null;
+        int instructionsSinceLoad = 0;
+        while (insts.hasNext()) {
+            Instruction ins = insts.next();
+            long ea = ins.getAddress().getOffset();
+            if (ea <= callSite) continue;
+
+            String mnem = ins.getMnemonicString().toLowerCase(Locale.ROOT);
+            String op0 = (ins.getNumOperands() > 0) ? ins.getDefaultOperandRepresentation(0) : "";
+            String op1 = (ins.getNumOperands() > 1) ? ins.getDefaultOperandRepresentation(1) : "";
+            String op2 = (ins.getNumOperands() > 2) ? ins.getDefaultOperandRepresentation(2) : "";
+
+            boolean matchingLoad = switch (width) {
+                case 1 -> mnem.equals("ld.b") || mnem.equals("ld.bu");
+                case 2 -> mnem.equals("ld.h") || mnem.equals("ld.hu");
+                case 4 -> mnem.equals("ld.w");
+                default -> false;
+            };
+            Integer loadOff = parseImm(op0);
+            if (matchingLoad && loadOff != null && loadOff == stackOffset
+                    && op1.equalsIgnoreCase("sp")) {
+                loadedReg = op2;
+                instructionsSinceLoad = 0;
+                continue;
+            }
+
+            if (loadedReg == null) continue;
+            instructionsSinceLoad++;
+            if (instructionsSinceLoad > 8) {
+                loadedReg = null;
+                continue;
+            }
+
+            String expectedStore = switch (width) {
+                case 1 -> "st.b";
+                case 2 -> "st.h";
+                case 4 -> "st.w";
+                default -> "";
+            };
+            Integer storeOff = parseImm(op1);
+            if (mnem.equals(expectedStore) && op0.equalsIgnoreCase(loadedReg)
+                    && storeOff != null && op2.equalsIgnoreCase("gp")) {
+                return (GP + (long) storeOff) & 0xffffffffL;
+            }
+        }
+        return null;
     }
 
     private Row negativeRow(int sid, int pdu, boolean pduHasExtraction) throws Exception {
