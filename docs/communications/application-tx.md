@@ -193,29 +193,76 @@ every RAM source address.
 
 ### 4.1 CAN `0x260` / COM PDU 0
 
-Public Toyota DBCs call this message `STEER_TORQUE_SENSOR`. Its established
-three 16-bit fields and two status bits align exactly with this firmware. The
-remaining status-bit semantics are not projected from another calibration.
+Public Toyota DBCs call this message `STEER_TORQUE_SENSOR`. The wire positions
+of the three 16-bit fields and the two legacy named status bits align with this
+firmware, but the producer audit now distinguishes **wire-position
+corroboration** from what this exact calibration actually computes. In
+particular, the public `STEER_OVERRIDE` position is not backed by an active
+threshold producer here: its recovered producer graph is constant-clear.
 
-| Signal | Wire field | Source | Static interpretation |
+| Signal | Wire field | Source | Firmware-first static interpretation |
 |---:|---|---:|---|
-| 0 | `B0[7]` | `0xFEBE8094` | `STEER_OVERRIDE` (public DBC match) |
-| 1 | `B0[4]` | `0xFEBE8096` | `STEER_ANGLE_INITIALIZING` (public DBC match) |
-| 2 | `B0[3]` | `0xFEBE8098` | unresolved status bit |
-| 3 | `B0[2]` | `0xFEBE8099` | unresolved status bit |
-| 4 | `B0[1]` | `0xFEBE809A` | unresolved status bit |
-| 5 | `B0[0]` | `0xFEBE809B` | unresolved status bit |
-| 6 | `B1..B2` | `0xFEBE810A` | `STEER_TORQUE_DRIVER` (public DBC match) |
-| 7 | `B3..B4` | `0xFEBE810E` | `STEER_ANGLE` (public DBC match) |
-| 8 | `B5..B6` | `0xFEBE8110` | `STEER_TORQUE_EPS` (public DBC match) |
+| 0 | `B0[7]` | `0xFEBE8094` | constant-clear in the recovered producer graph; public DBC location is `STEER_OVERRIDE` |
+| 1 | `B0[4]` | `0xFEBE8096` | composite initialization/validity flag; public DBC calls this `STEER_ANGLE_INITIALIZING` |
+| 2 | `B0[3]` | `0xFEBE8098` | debounced steering-control consistency status |
+| 3 | `B0[2]` | `0xFEBE8099` | operational-mode/status inhibit A |
+| 4 | `B0[1]` | `0xFEBE809A` | operational-mode/status inhibit B |
+| 5 | `B0[0]` | `0xFEBE809B` | thresholded motor-feedback magnitude status |
+| 6 | `B1..B2` | `0xFEBE810A` | scaled/clamped sensor torque; public DBC `STEER_TORQUE_DRIVER` |
+| 7 | `B3..B4` | `0xFEBE810E` | saturated signed steering-control estimate; public DBC `STEER_ANGLE` |
+| 8 | `B5..B6` | `0xFEBE8110` | scaled motor-feedback torque estimate; public DBC `STEER_TORQUE_EPS` |
 | 9 | `B7` | `0x7FEAC` post-packer callback | additive Toyota checksum |
 
-The producer at `0x4B66C` independently scales and clamps the signal-6 value to
-`-700..700` and derives the signal-8 value through a separate signed scaling
-path, supporting their torque-like roles. Signal 9 is intentionally absent from
-`application_pack_can_260`: after the packed eight-byte buffer reaches CanIf,
-PDU-0 route flag `1` selects `0x800D2 -> 0x7FEAC`, which overwrites the final
-byte with the additive checksum described in §4.7.
+The status-bit producer graph is compact and explicit. Signal 0 follows
+`FEBEAD33 -> FEBEE830 -> FEBE8094`; `eps_subsystem_init_orchestrator @ 0xBD10E`
+and normal `steering_command_export_scale @ 0xCB700` both write the upstream
+byte as zero, and the live-project reference census finds no other direct
+producer. This is why the legacy `STEER_OVERRIDE` name is retained only as a
+DBC wire-position label, not as a claim that this Sienna emits the historical
+driver-threshold behavior on that bit.
+
+Signal 1 is synthesized in `0x4B66C`: three local validity fields must be zero
+and three snapshotted status bytes are compared against marker `0x22`. That
+firmware behavior independently supports the DBC's initialization/validity
+category without importing an OEM name for the underlying status bytes.
+Signal 2 is sourced from `FEBEC100`, a steering-control consistency state
+initialized asserted and maintained by `0xC9D7C` with an absolute-difference
+threshold of **524** and a **40-count** persistence threshold before export via
+`FEBEAD4B -> FEBEE83A`.
+
+Signals 3 and 4 are separate inhibit predicates generated directly by
+`0x4B66C`. Both mask the current system mode to `0xFF00`, explicitly recognize
+modes `0x400` and `0x500`, special-case transition phase `0x11`, and test the
+low nine bits of `0xFEBE673C`; signal 4 additionally requires
+`0xFEBE6738 == 0` for its non-inhibit state. The exact OEM meanings of those two
+input status objects remain unresolved, so the two output bits are deliberately
+left with bounded structural names.
+
+Signal 5 is not an arbitrary spare bit. Its chain is
+`FEBE6DA8 -> FEBEEC0C -> FEBEAFE0 -> FEBEB725 -> FEBEB724 -> FEBEE848 ->
+FEBE809B`. `0x37F86` derives `FEBE6DA8` from the already recovered d/q-feedback
+state (`FEBE6D20`, `FEBE6D18`) through calibrated lookup/interpolation;
+`0xBC9DC` takes its signed magnitude and compares it against calibration
+thresholds **5120 / 2560**, and `0xBCA28` publishes the resulting threshold
+state. The OEM label for the final bit remains unknown.
+
+The three 16-bit fields now also have firmware-side support independent of the
+DBC. Signal 6 selects between two signed sensor paths before `0x4B66C` scales by
+`100/256` and clamps to **-700..700**. Signal 7 comes from saturated signed
+steering-control difference state `FEBEC0FC`, exported through
+`FEBEAE5C -> FEBEE8BC`. Signal 8 originates in the high-rate motor-feedback
+path above, reaches `FEBE66F0`, and is negated/scaled by `100/128` before
+packing. Those structures support the public driver-torque, steering-angle,
+and EPS-torque roles respectively, while the public names remain corroborating
+vocabulary rather than the primary proof.
+
+Signal 9 is intentionally absent from `application_pack_can_260`: after the
+packed eight-byte buffer reaches CanIf, PDU-0 route flag `1` selects
+`0x800D2 -> 0x7FEAC`, which overwrites the final byte with the additive checksum
+described in §4.7. `AssertApplicationTransmitSemantics.java` pins the live
+reference/call graph, while `verify_application_tx_260_semantics.py` derives
+the decisive predicates, scaling instructions, thresholds, and zero stores
+independently from raw CodeFlash.
 
 ### 4.2 CAN `0x262` / COM PDU 1
 

@@ -139,6 +139,7 @@ paths = ["docs/security/application-security-access.md"]
 tests = [
   "tests/verify_application_transmit.py",
   "tests/verify_application_tx_producer_evidence.py",
+  "tests/verify_application_tx_260_semantics.py",
 ]
 paths = [
   "docs/communications/application-tx.md",
@@ -148,6 +149,7 @@ paths = [
   "tools/generate_application_tx_producer_evidence.py",
   "tools/generate_application_tx_producer_evidence.sh",
   "ghidra/scripts/verify/ExportApplicationTxProducerRefs.java",
+  "ghidra/scripts/verify/AssertApplicationTransmitSemantics.java",
 ]
 
 [suite.icus_key_recovery_surface]
