@@ -104,6 +104,14 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Completed static investigations
 
+- **Exploit follow-up closure (2026-08-13).** MEM-SAFE-001 now has exact
+  repeated-short-download tooling; RID `0x10F3` has a bounded live/simulation
+  oracle; application CommunicationControl has a reversible isolated-bench
+  experiment. The malformed CMAC walker is closed as availability-only in the
+  exact graph (3,840/4,096 nonzero 4 KiB-window lengths walk OOB, no data
+  consumer), and command 8 is latent behind the sole fixed 48-byte caller.
+  Canonical: [../security/memory-safety-audit.md](../security/memory-safety-audit.md)
+  and `exploit/followups/README.md`.
 - **Corrected-graph whole-image re-audit (2026-08-11).** Two independent
   four-stage rebuilds agree exactly on the 6,037-function graph. All named
   caller/consumer negative families were rerun, the 100-function semantic

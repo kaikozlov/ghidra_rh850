@@ -237,6 +237,14 @@ Expected external behavior is a hypothesis—hang, exception, or reset depends
 on RH850 unmapped-read handling and has not been dynamically probed. This
 negative does not exclude hardware timing or fault side channels.
 
+The executable arithmetic census in `exploit/followups/static_closure.py`
+classifies every nonzero length in the 4 KiB window: 256 multiples of 16 reach
+the endpoint and 3,840 lengths walk out of the requested range. It independently
+rechecks the endpoint/increment/callee bytes before reporting. No live malformed
+probe is implemented: absent a concrete fault/timing side channel or a new data
+consumer, the only bounded outcome is availability loss and probing adds no
+exploit predicate.
+
 ### Reachability constraint
 
 The fixed CRC-descriptor stage must first pass. This is achievable without
@@ -357,6 +365,13 @@ The defect would become exploitable if a future callback (or a corrupted
 callback pointer via MEM-SAFE-001) supplied a caller-controlled output
 pointer/length. It is documented to prevent regression and to flag the risk
 for variant analysis.
+
+`exploit/followups/static_closure.py` makes the stop condition mechanical. It
+requires the exact failure zero-fill instructions, fixed 48/64 configured
+arguments, and unique driver-dispatch call site. Random diagnostic command-8
+stimulation cannot alter either CPU-side argument, so no live probe is
+implemented. Reopen this avenue only for a variant caller with capacity above
+48 or independent pointer/length corruption reaching the prepare API.
 
 ## Bug-class taxonomy
 
