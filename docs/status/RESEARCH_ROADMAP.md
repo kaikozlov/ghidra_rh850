@@ -48,10 +48,15 @@ What to investigate next, in rough priority order. Completed items move to
    measure one short known signature first. Prefer the read-only dumper for full
    acquisition; the oracle cannot reach boot secrets and costs up to 256
    re-armed transactions per byte.
+6. **Run the isolated-bench CommunicationControl availability probe.** The
+   static service path and request semantics are closed, and the reversible
+   tool under `exploit/followups/` restores normal Tx in an unconditional cleanup
+   path. Record baseline/disabled/restored counts and require full recovery. Do
+   not treat message suppression as a steering or SecOC primitive.
 
 ## Near-term (static, this repo)
 
-6. **Semantic coverage long-tail.** Move `recovered` rows in
+7. **Semantic coverage long-tail.** Move `recovered` rows in
    `data/semantic_coverage_ledger.csv` toward behaviorally understood only when
    they intersect a concrete security, diagnostics, or torque lead. Stage 6
    closed the previously named motor/safety static cluster; do not repeat a
@@ -59,7 +64,7 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Requires a provisioned Sienna (dynamic)
 
-7. **Run the SecOC provisioned-unit experiment.** Filter NvM blocks 41/45/49,
+8. **Run the SecOC provisioned-unit experiment.** Filter NvM blocks 41/45/49,
    observe async completion, compare RAM mirror and post-write DataFlash,
    instrument ICU slot 4, validate candidates against synchronized CAN oracle
    data. Specified in
@@ -67,12 +72,12 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Requires Corolla artifacts
 
-8. **Confirm/deny the Sienna template on `8965F1208000` firmware.** MCU, SA
+9. **Confirm/deny the Sienna template on `8965F1208000` firmware.** MCU, SA
    implementation/secret location, payload format, and SecOC implementation.
    Direct field diagnostics are already mapped; do not repeat those probes.
    See [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md)
    for the structured checklist.
-9. **Close the remaining identity/runtime-key boundary on the separate 2023-US
+10. **Close the remaining identity/runtime-key boundary on the separate 2023-US
    public-route specimen.** The completed 32 KiB DataFlash is now analyzed: no
    raw key matches the local TSKM `0x00F` oracle, no public-route protected-domain
    raw key matches, 60 committed records fit the reference physical map, and an
@@ -84,17 +89,17 @@ What to investigate next, in rough priority order. Completed items move to
    and again after recovery/reset to establish key continuity. Canonical:
    [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md),
    [../tooling/toyota-dataflash-analysis.md](../tooling/toyota-dataflash-analysis.md).
-10. **Populate the TSS 3.0 family matrix.** Extend
+11. **Populate the TSS 3.0 family matrix.** Extend
    `data/tss3_eps_variant_matrix.csv` as additional variant firmware becomes
    available. Canonical: [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).
 
 ## Tooling
 
-11. **Documentation site** (optional, after this reorganization). Material for
+12. **Documentation site** (optional, after this reorganization). Material for
    MkDocs: explicit navigation, section index pages, search. Do only after
    canonical ownership is stable — search over duplicated docs just makes the
    inconsistency easier to find.
-12. ~~**Link checking** in CI for `docs/` internal cross-references.~~ **Done** —
+13. ~~**Link checking** in CI for `docs/` internal cross-references.~~ **Done** —
    `tests/verify_doc_links.py` runs in `make verify`.
 
 ## Completed static investigations

@@ -313,3 +313,10 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   synchronized labeled captures above. Use the redacted manifest schema in
   [../variants/newer-tsk-target-evidence.md](../variants/newer-tsk-target-evidence.md);
   until then every Sienna→newer-TSK transfer remains hypothesis.
+- **Application CommunicationControl live effect.** Static recovery proves that
+  extended-session SID `0x28` reaches real communication-mode updates without a
+  configured SecurityAccess policy or recovered speed gate. The isolated-bench
+  probe is now ready under `exploit/followups/`; run it to determine which
+  baseline-active EPS application Tx IDs are suppressed by `28 01 01` and prove
+  all recover after `28 00 01`. This is an availability characterization, not a
+  candidate steering interface.

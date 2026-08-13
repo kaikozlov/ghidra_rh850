@@ -442,7 +442,10 @@ The 16-byte secret at CodeFlash `0x20840` is:
 ### CommunicationControl (`0x28`) / TesterPresent (`0x3E`) / ControlDTCSetting (`0x85`)
 
 - `0x28`: callback `0x93C62`; subfunctions `00/01/03` via `0x25C70` → shared start
-  `0x95154`. Not the bootloader acknowledge-only `28 01 01`.
+  `0x95154`. Its one-byte control record uses the high nibble as the configured
+  network selector (`0` all configured networks, `F` current network) and the
+  low nibble as communication type (`1` normal, `2` network-management, `3`
+  both where configured). Not the bootloader acknowledge-only `28 01 01`.
 - `0x3E`: subfunction `00` at `0x25CA0` → `0x93CFE`; zero-length data only; no
   service-local S3 timer.
 - `0x85`: subfunctions `01/02` at `0x25CB0` → `0x8CCDC`/`0x8CCFA` → shared
@@ -450,6 +453,14 @@ The 16-byte secret at CodeFlash `0x20840` is:
   `0x8CC80: mov 0xFEBF45A8, r1` then `0x8CCCA: st.b r6, 0x0[r1]` stores the
   setting byte. The same function also copies a `0x1C`-byte request mirror to
   `FEBF45A8+0xC`. Not GP/TP-relative.
+
+The bounded dynamic experiment is
+`exploit/followups/communication_control_probe.py`. It enters extended session
+without SecurityAccess, counts known EPS application Tx IDs, requests only
+`28 01 01` (receive enabled, normal-message transmit disabled), and restores
+`28 00 01` in `finally` before checking traffic recovery. It requires an
+explicit isolated-bench acknowledgement. Static readiness is verified; live
+suppression/recovery remains unobserved.
 
 ### Proprietary `AB` event-record service
 

@@ -224,7 +224,11 @@ authorization:
   updates; this is not one of the null-callback echo services. No speed gate is
   recovered in that service path. A bus-local tester can therefore exercise a
   safety-relevant communication availability surface without unlocking SID
-  `0x27`.
+  `0x27`. The reversible bench experiment is now implemented under
+  `exploit/followups/communication_control_probe.py`: it uses only
+  enable-Rx/disable-normal-Tx, restores enable-Rx/enable-Tx unconditionally,
+  and requires every baseline-active Tx ID to recover. A live result is still
+  hardware-gated.
 - **Programming handoff (`0x10 02`)** is not SA-gated. It is constrained by
   vehicle speed, supply, transition phase, and handoff state, so it is not an
   unrestricted at-speed reset primitive. At permitted conditions it can still
