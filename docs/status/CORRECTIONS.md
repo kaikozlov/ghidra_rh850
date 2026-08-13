@@ -893,3 +893,23 @@ the mistakes are not re-made.
   image tampering.
 - **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md);
   `exploit/behavioral_proof/README.md`; `validate_trial.py`.
+
+### CORR-048 — RAM payload telemetry did not implement the full RSCFD Tx handshake
+
+- **Wrong:** the patch runtime had an empty busy-status check, and both patcher
+  and dumper treated any nonzero `CFDTMSTS` result as successful transmission.
+  A busy slot could therefore be overwritten, while abort/error results could
+  be acknowledged as if their frames were delivered.
+- **Right:** firmware `rscfd_tx_buffer_submit @ 0x36DE` requires
+  `status & 0x0E == 0`. Its confirmation path extracts
+  `(status & 0x06) >> 1`, treats 2/3 as errors, and clears result bits with
+  `& 0xF9` plus `syncp`; the only nonzero success is result 1. Both payloads now
+  follow that order and service the watchdog while waiting. The dumper also
+  bounds waits/retries and latches an unrecoverable transport fault; the compact
+  patcher halts on a failed result so writes cannot continue without telemetry.
+- **Verification:** the pinned V850 toolchain builds the corrected generic
+  patcher at `0xF50` bytes (below config slot `0xF60`) and the read-only dumper at
+  588 bytes; deterministic suites assert the register-operation ordering and
+  status semantics against the firmware-backed transport tests.
+- **Canonical:** [../communications/diagnostic-transport.md](../communications/diagnostic-transport.md);
+  `exploit/patcher/README.md`; `exploit/dumper/README.md`.

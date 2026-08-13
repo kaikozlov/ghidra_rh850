@@ -134,7 +134,8 @@ words, and writes `0xFF` to CFPCTR to advance the FIFO.
 
 ### Transmit: message buffer
 
-`rscfd_tx_buffer_submit @ 0x36DE` checks `CFDTMSTSn`, then writes:
+`rscfd_tx_buffer_submit @ 0x36DE` accepts a buffer only when both status bit 3
+and result bits 2:1 are clear (`CFDTMSTSn & 0x0E == 0`), then writes:
 
 ```text
 CFDTMIDn     = 0xFFD24000 + 0x20*n
@@ -150,6 +151,14 @@ It finally sets `CFDTMCn.TMTR` bit 0 at instruction `0x3744`. The configured
 HTH `0x13` decodes to channel 1/object 3 and normalizes to message-buffer index
 `n=16`, so the diagnostic response uses message RAM `0xFFD24200` and command
 byte `0xFFD20260`.
+
+The confirmation path at `0x3E48/0x3E5E` extracts result
+`(CFDTMSTSn & 0x06) >> 1` and clears those two bits with `& 0xF9` followed by
+`syncp`. Its caller routes encoded results 2 and 3 to the error callback;
+because confirmation is entered only for a nonzero result, encoded result 1 is
+the successful completion. RAM payloads using slot 16 must therefore wait for
+the complete ready mask, set TMTR only after filling message RAM, wait for a
+nonzero result, accept only result 1, and acknowledge the result bits.
 
 No CAN-FD payload is used despite the FD-capable peripheral: CanIf rejects DLC
 above 8, CanTp always constructs eight-byte frames, and CFDTMFDCTR is cleared.
