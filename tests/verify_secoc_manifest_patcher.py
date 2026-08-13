@@ -127,6 +127,14 @@ bad["patch"]["block_size"] = 0x4000
 rejects("non-P1M-E FCU block size is rejected", bad, "requires 0x8000")
 
 bad = copy.deepcopy(manifest)
+bad["image"]["base"] = "0x8000"
+rejects("nonzero image base is outside the P1M-E backend allowlist", bad, "requires codeflash")
+
+bad = copy.deepcopy(manifest)
+bad["image"]["size"] = 0x200000
+rejects("oversized image is outside the P1M-E backend allowlist", bad, "requires codeflash")
+
+bad = copy.deepcopy(manifest)
 bad["boot_crc"]["fixup_block_base"] = "0xF8001"
 rejects("unaligned CRC block is rejected", bad, "unaligned")
 
@@ -194,6 +202,7 @@ check("preflight computes current full residue", "crc32_flash_range(cfg->crc_sta
 check("validate-only returns to halt before APPLY dispatch", main_c.index("patch_config_validate_only") < main_c.index("run_apply(cfg)"))
 check("payload source contains no reset call", "reset(" not in zero_write_sources and "0x157e" not in zero_write_sources)
 check("runtime halt services watchdog indefinitely", "while (1)" in runtime_c and "feed_watchdog();" in runtime_c)
+check("runtime enforces absolute P1M-E CodeFlash base/size", "patch_backend_flash_base" in runtime_c and "patch_backend_flash_size" in runtime_c)
 ready_wait = runtime_c.index("tx_ready_mask")
 message_write = runtime_c.index("*(tmptr", ready_wait)
 submit = runtime_c.index("*(tmc", message_write)
@@ -206,7 +215,7 @@ check("telemetry clears completion status before checking encoded result", resul
 check("telemetry accepts only encoded RSCFD result 1", "tx_result_success        0x02u" in runtime_c)
 check("telemetry status clear uses the firmware's sync barrier", 'asm("syncp")' in runtime_c)
 header_lower = (REPO / "exploit" / "common" / "patch_config.h").read_text(encoding="utf-8").lower()
-check("runtime config uses fixed plaintext-shellcode offset", "patch_config_offset      0x0f60u" in header_lower and "patch_config_runtime_addr" in header_lower)
+check("runtime config uses fixed plaintext-shellcode offset", "patch_config_offset      0x0f70u" in header_lower and "patch_config_runtime_addr" in header_lower)
 check("runtime config slot remains below bootloader callback boundary", CONFIG_OFFSET + CONFIG_SIZE <= 0xFD0)
 
 print("\n== fail-closed APPLY structure ==")
@@ -242,6 +251,12 @@ apply_dispatch_pos = main_c.index("run_apply(cfg)")
 apply_success_pos = main_c.index("telemetry_stage(stage_success)", apply_dispatch_pos)
 check("success is emitted only after run_apply returns zero", apply_dispatch_pos < main_c.index("if (err == 0u)", apply_dispatch_pos) < apply_success_pos)
 check("flash backend retains reviewed FACI primitive", all(token in flash_c for token in ("faci_erase", "faci_program_page", "faci_fentryr", "faci_fpckar")))
+check("FCU command completion checks timeout and command-lock status", "static int faci_result" in flash_c and "faci_err_timeout" in flash_c and "faci_err_command_lock" in flash_c)
+check("FCU clear-error operation propagates failure", "static int faci_check_clear_errors" in flash_c and "return faci_result();" in flash_c)
+check("FCU enter and exit transitions return checked status", "static int faci_enter_pe_mode" in flash_c and "static int faci_exit_pe_mode" in flash_c)
+check("erase and program completion use full FACI result", flash_c.count("return faci_result();") >= 3)
+check("all post-enter failures converge on P/E cleanup", flash_c.count("goto exit_pe;") >= 3 and "exit_pe:" in flash_c)
+check("FCU errors preserve failing phase in return code", all(token in flash_c for token in ("flash_err_unlock", "flash_err_clear", "flash_err_enter", "flash_err_erase", "flash_err_program", "flash_err_exit")))
 all_generic_c = "\n".join(
     p.read_text(encoding="utf-8").lower()
     for p in (REPO / "exploit").rglob("*.c")

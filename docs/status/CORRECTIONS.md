@@ -785,7 +785,9 @@ the mistakes are not re-made.
   cannot pass routine `0x10F0` authentication.
 - **Right:** the config belongs in the **plaintext shellcode** below the
   bootloader-owned callback slot at `0xFD0`. The corrected generic shellcode
-  template reserves `0xF60..0xFBF` for the 96-byte config, ending at `0xFC0`.
+  template now reserves `0xF70..0xFCF` for the 96-byte config, ending at the
+  callback boundary `0xFD0` (placement updated by CORR-050 after complete FCU
+  error handling increased code size).
   After injection, the host reproduces the proven Bk2ol/Vance package: callback
   at `0xFD0`, authenticated descriptor at `0xFE0`, terminal CRC adjustment over
   `0x000..0xFEF`, CMAC at `0xFF0`, then AES-CBC encryption of all 4096 bytes.
@@ -931,3 +933,26 @@ the mistakes are not re-made.
   `e756229014ad27d62a4e7ab82e6af4d20cd6dfb261d3b3bff82424bd3a26cb3d`.
 - **Canonical:** `exploit/dumper/README.md`;
   `exploit/dumper/audited_build.json`.
+
+### CORR-050 — P1M-E backend accepted relocatable geometry and ignored FCU failures
+
+- **Wrong:** config validation constrained blocks only relative to a
+  caller-supplied `image_base/image_size`; it did not enforce the backend's
+  absolute 1 MiB P1M-E CodeFlash window. The inherited FACI primitive also
+  ignored error-clear, P/E-entry, and P/E-exit wait results and treated ready as
+  sufficient without checking command-lock status after erase/program.
+- **Right:** both host and payload require absolute CodeFlash
+  `0x00000000..0x000FFFFF` plus 32 KiB blocks. FACI completion distinguishes
+  timeout and command-lock/error, and failures are phase-coded across unlock,
+  clear, entry, erase, program, and exit. Every failure after P/E-entry attempt
+  runs exit/lock cleanup before returning.
+- **Size correction:** complete status handling exceeded the former conservative
+  config placement. The generic build now uses link-time size optimization and
+  places the 96-byte config at aligned offset `0xF70..0xFCF`, ending exactly at
+  but not overlapping the callback at `0xFD0`. The pinned build is `0xF6C`
+  bytes, leaving four bytes before the config.
+- **Verification:** host rejection tests cover shifted/oversized images;
+  deterministic C-source checks cover every FACI phase and cleanup edge; the
+  pinned Docker toolchain builds the complete template successfully.
+- **Canonical:** `exploit/patcher/README.md`;
+  `exploit/common/patch_config.h`; `exploit/patcher/flash_backend.c`.
