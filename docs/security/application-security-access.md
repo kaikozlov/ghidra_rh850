@@ -235,9 +235,17 @@ authorization:
   reset the EPS into its boot transition without proving tester identity.
 - **All 19 WDBI records** are free of Dcm SA levels. The generated lower-request
   hook at `0x8A01C` is compiled to `return 0`, so there is no second external
-  authorization manager behind the Dcm policy. Most callbacks remain only
-  structurally classified. DID `0x1010` is safer than the Dcm table suggests
-  because ICU-S independently authenticates its SHE M1–M3 package and counter.
+  authorization manager behind the Dcm policy. The surface is now substantially
+  classified rather than merely structural: 18 records share policy index 0
+  (effective programming/extended access after the outer SID-`0x2E` gate), and
+  `0x110A/0x110C/0x110D` can request internal service modes 2/3/4 and transition
+  the operational coordinator into special submode `0x520` under runtime
+  preconditions. The resulting service-state outputs remain statically separate
+  from the independently proved d/q current/PWM cone, so the supported impact is
+  diagnostic control-state/availability exposure rather than arbitrary steering
+  actuation. DID `0x1010` is safer than the Dcm table suggests because ICU-S
+  independently authenticates its SHE M1–M3 package and counter. See
+  [../diagnostics/application-wdbi-surface.md](../diagnostics/application-wdbi-surface.md).
 - **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB`
   exposes event-record list/state/detail reads through an asynchronous worker;
   the recovered graph does not perform the formerly hypothesized motor-control,

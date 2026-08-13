@@ -266,6 +266,35 @@ public class AssertMotorActuationBoundary extends GhidraScript {
                 "0005bdfe:READ", "0005c52e:READ", "00036930:READ",
                 "00038244:READ", "00038358:READ", "00037778:WRITE");
 
+        // Application WDBI service-mode controls 0x110A/0x110C/0x110D enter
+        // system submode 0x520 and operate on a distinct service-state island.
+        // Pin representative computed outputs and their snapshots so a future
+        // rebuild cannot silently invent a transfer into the proved d/q state
+        // above. These exact censuses bound static dataflow only; they do not
+        // claim anything about unobserved hardware-side effects.
+        assertExactRefs(0xfebeb3e0L,
+                "000b6758:WRITE", "000b6880:WRITE", "000b68b8:WRITE",
+                "000b68d6:WRITE", "000bd8bc:WRITE", "000b6682:READ");
+        assertExactRefs(0xfebeb448L,
+                "000b750a:WRITE", "000b7664:WRITE", "000bd900:WRITE",
+                "000b7686:WRITE", "000b76a4:WRITE", "000b76d4:READ");
+        assertExactRefs(0xfebeb44cL,
+                "000bd916:WRITE", "000bd928:READ", "000be826:READ",
+                "000b777a:WRITE", "000b778c:WRITE", "000b76bc:WRITE",
+                "000b7744:WRITE");
+        assertExactRefs(0xfebeb452L,
+                "000bd914:WRITE", "000bd922:READ", "000be820:READ",
+                "000b7778:WRITE", "000b778a:WRITE", "000b7314:READ",
+                "000b76ba:WRITE", "000b7746:WRITE");
+        assertExactRefs(0xfebeb000L,
+                "000b67de:READ", "000bd8ec:WRITE", "000be81c:WRITE");
+        assertExactRefs(0xfebeb002L,
+                "000bd8de:WRITE", "000be812:WRITE");
+        assertExactRefs(0xfebeb004L,
+                "000b7586:READ", "000bd932:WRITE", "000be82c:WRITE");
+        assertExactRefs(0xfebeb006L,
+                "000bd924:WRITE", "000be822:WRITE");
+
         println("ASSERT motor-actuation-boundary: call_edges=" + callEdges
                 + " reference_censuses=" + referenceCensuses
                 + " failures=" + failures);

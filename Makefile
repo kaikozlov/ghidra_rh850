@@ -70,6 +70,7 @@ generate-dataflash:
 
 generate-application-diagnostics:
 	$(PYTHON) tools/generate_application_diagnostic_map.py
+	$(PYTHON) tools/generate_application_wdbi_surface.py
 
 generate-techstream-corpus:
 	cd tools/techstream && $(PYTHON) extract_steering_corpus.py

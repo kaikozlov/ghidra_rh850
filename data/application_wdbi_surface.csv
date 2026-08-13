@@ -1,0 +1,20 @@
+table_index,did,enabled,policy_index,security_level_count,policy_sessions,effective_wdbi_sessions,selector1_supported,selector2_supported,selector3_supported,selector1_input_bytes,selector1_output_bytes,selector2_input_bytes,selector2_output_bytes,selector3_output_bytes,policy_record_ptr,precondition_callback,action_callback,effect_class,action_summary
+0,0x1000,1,0,0,"1,2,3","2,3",1,0,1,0,32,0,0,1,0x26678,0x4F054,0x4F060,capability_query,selector 1 builds a 32-byte supported-0x10xx WDBI bitmap
+1,0x1001,1,0,0,"1,2,3","2,3",1,0,1,0,32,0,0,1,0x26678,0x4EFFE,0x4F00A,query_or_control,selector 1 returns a 32-byte callback result; deeper OEM meaning unassigned
+2,0x1002,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F0AE,0x4F0EA,stateful_control,selector 1 reaches FUN_00035582 then thunk_B7F7C(0x44); runtime preconditions apply
+3,0x1004,1,0,0,"1,2,3","2,3",1,0,1,2,0,0,0,1,0x26678,0x4F12C,0x4F170,stateful_control,selector 1 accepts a 2-byte input and reaches FUN_00050864; runtime preconditions apply
+4,0x1007,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F1B4,0x4F1EA,stateful_control,selector 1 reaches thunk_B7A36(0); deeper OEM meaning unassigned
+5,0x1008,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F226,0x4F25C,stateful_control,selector 1 reaches direct_call_FDEA8; deeper OEM meaning unassigned
+6,0x1009,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F296,0x4F2C2,stateful_control,selector 1 conditionally reaches direct_call_FE0B0; deeper OEM meaning unassigned
+7,0x100E,1,0,0,"1,2,3","2,3",1,0,0,0,0,0,0,0,0x26678,0x8A768,0x8A774,crypto_test_activation,selector 1 wrapper 0x8A774 calls crypto_test_bank0_activate @ 0x68F92
+8,0x100F,1,0,0,"1,2,3","2,3",1,0,0,0,0,0,0,0,0x26678,0x8A768,0x8A782,crypto_test_activation,selector 1 wrapper 0x8A782 calls crypto_test_bank1_activate @ 0x69018
+9,0x1010,1,1,0,3,3,1,0,1,64,49,0,0,49,0x26680,,,authenticated_key_update,selector 1/3 runs ICU-S command 8 SHE-compatible key update; package is authenticated internally
+10,0x1100,1,0,0,"1,2,3","2,3",1,0,1,0,32,0,0,1,0x26678,0x4F322,0x4F32E,capability_query,selector 1 builds a 32-byte supported-0x11xx WDBI bitmap
+11,0x1103,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F37C,0x4F3C0,stateful_control,selector 1 reaches FUN_00035576; deeper OEM meaning unassigned
+12,0x1106,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F400,0x4F43E,stateful_control,selector 1 reaches thunk_B3974; runtime preconditions apply
+13,0x1108,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F48E,0x4F4BC,stateful_control,selector 1 reaches FUN_00050760; deeper OEM meaning unassigned
+14,0x1109,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F500,0x4F570,stateful_control,"selector 1 reaches thunk_B7D26(0x22,1); runtime preconditions apply"
+15,0x110A,1,0,0,"1,2,3","2,3",1,1,1,0,0,0,0,1,0x26678,0x4F5C4,0x4F630,service_mode_control,selector 1 requests internal mode 2; selector 2 terminates; mode maps to system submode 0x520
+16,0x110B,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F69A,0x4F69E,no_op_or_status,action callback is an immediate-success stub; selector 3 exposes status
+17,0x110C,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F6A2,0x4F702,service_mode_control,selector 1 requests internal mode 3; mode maps to system submode 0x520
+18,0x110D,1,0,0,"1,2,3","2,3",1,1,1,0,0,0,0,1,0x26678,0x4F74A,0x4F7B8,service_mode_control,selector 1 requests internal mode 4; selector 2 terminates; mode maps to system submode 0x520

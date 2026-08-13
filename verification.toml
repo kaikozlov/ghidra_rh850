@@ -96,7 +96,22 @@ paths = ["docs/diagnostics/application.md"]
 
 [suite.application_diagnostics]
 tests = ["tests/verify_application_diagnostics.py"]
-paths = ["docs/diagnostics/application.md", "data/application_diagnostic_map.csv"]
+paths = [
+  "docs/diagnostics/application.md",
+  "data/application_diagnostic_map.csv",
+  "tools/generate_application_diagnostic_map.py",
+]
+
+[suite.application_wdbi_surface]
+tests = ["tests/verify_application_wdbi_surface.py"]
+paths = [
+  "docs/diagnostics/application-wdbi-surface.md",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "data/application_wdbi_surface.csv",
+  "tools/generate_application_wdbi_surface.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+]
 
 [suite.diagnostic_vocabulary]
 tests = ["tests/verify_diagnostic_vocabulary.py"]

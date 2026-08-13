@@ -293,6 +293,23 @@ Writable DIDs are the separate 19-entry table at `0x26AEC` (`0x1000..0x110D`
 class), binary-searched by `0x9545C`. NRCs include `0x12`, `0x13`, `0x31`, and
 `0x33`.
 
+The complete WDBI policy/callback surface is now recovered in
+[application-wdbi-surface.md](application-wdbi-surface.md) and generated as
+`data/application_wdbi_surface.csv`. All 19 records have zero configured Dcm
+SecurityAccess levels. Eighteen use policy index 0 (sessions `1,2,3`, reduced by
+the outer SID-`0x2E` gate to programming/extended); `0x1010` alone uses policy
+index 1 and extended-only session 3. Every DID supports selector 1; only
+`0x110A/0x110D` support selector 2; only `0x100E/0x100F` lack selector 3. Apart
+from two input bytes on `0x1004` and the 64-byte authenticated package on
+`0x1010`, selector-1 actions consume zero data bytes.
+
+Three policy-0 entries are proven service-mode controls: `0x110A`, `0x110C`,
+and `0x110D` request internal modes 2/3/4 and can drive the system-mode
+coordinator into submode `0x520` under their runtime preconditions. Exact xref
+censuses keep the resulting service-state values separate from the proved d/q
+current/PWM cone, so this is a diagnostic control-state/availability surface,
+not a recovered arbitrary steering-current primitive.
+
 Entry 9 is enabled DID `0x1010`. OEM selector `0x01` submits a fixed 64-byte
 request to ICU-S command 8; selector `0x03` reads a one-byte state plus the
 48-byte SHE-compatible proof on success. Its per-DID policy is extended session

@@ -734,6 +734,34 @@ These routines are now structurally bounded by their execution/version domains;
 no claim assigns an OEM calibration name or makes either routine the missing
 `0x2E4`→d/q join.
 
+### 9.7 Diagnostic service submode `0x520` remains outside the d/q producer cone
+
+Application WDBI DIDs `0x110A`, `0x110C`, and `0x110D` can request internal
+service modes 2/3/4 and, under their runtime preconditions, drive the system
+coordinator into submode `0x520`. That submode runs a distinct service-control
+pipeline (`0xB68xx/0xB70xx/0xB74xx/0xB76xx`) containing signed/saturated
+calculations, so those values were explicitly checked rather than inferred to
+be motor commands.
+
+Exact Ghidra reference censuses now pin representative service outputs
+`FEBEB3E0`, `FEBEB448`, `FEBEB44C`, `FEBEB452` and snapshots
+`FEBEB000/2/4/6`. Their readers/writers stay within service-mode functions,
+initialization, and the service snapshot path. None enters the independently
+closed d/q reference state at `FEBE6D28/FEBE6D2A` or the downstream TSG3 PWM
+producer cone.
+
+`FUN_B7054` also clears paired subsystem command slots 0 and 1 through fixed
+slot writer `FUN_562C8`. That is a real control-state side effect, but the slot
+interface must not be conflated with d/q current references: no static transfer
+from these service values to the motor-current producer cone is recovered.
+
+The corresponding security interpretation is therefore bounded: unauthenticated
+Dcm policy exposes special diagnostic service-mode/control-state transitions,
+with availability implications, but the static graph does **not** establish an
+arbitrary steering-torque/current primitive. The complete WDBI access/control
+surface is documented in
+[`../diagnostics/application-wdbi-surface.md`](../diagnostics/application-wdbi-surface.md).
+
 ### Evidence grade: recovered/verified with bounded actuation join
 
 The ADCG register identities, Global-RAM geometry, DMAC register identities,

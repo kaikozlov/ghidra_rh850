@@ -170,12 +170,12 @@ SEMANTICS = {
     0x2E: {
         "service_callback_role": "phase_dispatcher 0=start 0x95C8C; 2=cancel 0x95D7E; 3=poll 0x95DB4",
         "async_worker": "0x95B0C write worker; pending path posts event 6",
-        "security_policy": "per-DID via 0x95556/0x955DC; NRC 0x33 when locked",
+        "security_policy": "all 19 WDBIs have SecurityAccess count 0; 18 use policy 0 with effective sessions 2/3, DID 1010 uses policy 1 session 3",
         "nrcs": "0x13 length; 0x12 subfn/did shape; 0x31 did; 0x33 security",
-        "side_effects": "dispatches through write-DID table callbacks; per-DID RAM/NvM not enumerated here",
-        "config_tables": f"write-DID table 0x{WRITE_DID_TABLE:X} count {WRITE_DID_COUNT}",
+        "side_effects": "19-row callback surface is generated separately; includes crypto-test activation and service-mode controls 110A/110C/110D reaching submode 0x520 under runtime gates",
+        "config_tables": f"write-DID table 0x{WRITE_DID_TABLE:X} count {WRITE_DID_COUNT}; callback table 0x25804; data/application_wdbi_surface.csv",
         "evidence_status": "recovered",
-        "notes": "Write set is a 19-entry subset (1000..110D class), not the full 242-DID read table",
+        "notes": "Write set is a 19-entry subset (1000..110D class), not the full 242-DID read table; see diagnostics/application-wdbi-surface.md",
     },
     0x31: {
         "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
