@@ -138,6 +138,30 @@ source = (REPO / "exploit" / "patcher" / "patch_config.py").read_text(encoding="
 check("serializer has no software-ID routing table", "software_id" not in source and "8965" not in source)
 check("serializer has no known Sienna target/CRC addresses", all(token not in source for token in ("8e6c8", "ffdec", "88000", "f8000")))
 
+print("\n== zero-write preflight structure ==")
+main_c = (REPO / "exploit" / "patcher" / "main.c").read_text(encoding="utf-8").lower()
+preflight_c = (REPO / "exploit" / "patcher" / "preflight.c").read_text(encoding="utf-8").lower()
+runtime_c = (REPO / "exploit" / "common" / "runtime.c").read_text(encoding="utf-8").lower()
+zero_write_sources = "\n".join((main_c, preflight_c, runtime_c))
+for forbidden, label in (
+    ("faci_", "FACI helper"),
+    ("flwl_reg", "flash write-lock register"),
+    ("flwe_reg", "flash write-enable register"),
+    ("flash_block_rmw", "flash block RMW"),
+    ("program_page", "flash programming"),
+    ("erase(", "flash erase"),
+):
+    check(f"validate-only implementation contains no {label}", forbidden not in zero_write_sources)
+check("preflight validates config before live patch read", preflight_c.index("validate_patch_config_runtime") < preflight_c.index("verify_patch_preimage"))
+check("preflight checks exact target preimage", "verify_patch_preimage" in preflight_c and "err_patch_preimage" in preflight_c)
+check("preflight reports stored CRC fixup", "read_le_word(cfg->crc_fixup_va)" in preflight_c)
+check("preflight computes live CRC prefix", "crc32_flash_range(cfg->crc_start, cfg->crc_fixup_va)" in preflight_c)
+check("preflight computes current full residue", "crc32_flash_range(cfg->crc_start, cfg->crc_end)" in preflight_c)
+check("APPLY fails closed until write stage exists", "err_apply_unavailable" in main_c)
+check("payload source contains no reset call", "reset(" not in zero_write_sources and "0x157e" not in zero_write_sources)
+check("runtime halt services watchdog indefinitely", "while (1)" in runtime_c and "feed_watchdog();" in runtime_c)
+check("config slot is a separate fixed linker section", ".patch_config" in (REPO / "exploit" / "patcher" / "config_slot.c").read_text(encoding="utf-8"))
+
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:
     raise SystemExit(1)
