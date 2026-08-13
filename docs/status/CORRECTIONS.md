@@ -829,3 +829,28 @@ the mistakes are not re-made.
   [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md) §7.5;
   `exploit/command5/build_experiment.py`; `exploit/command5/stimulus.py`;
   `tests/verify_secoc_command5_experiment.py`.
+
+### CORR-045 — Toyota static-blocking source was misclassified as unavailable
+
+- **Wrong:** the first Milestone-4 ablation audit concluded that modern Panda
+  sourced Toyota safety from a separate unavailable `panda-safety` repository,
+  so the requested `disable_static_blocking` experiment could not be completed
+  locally. That conclusion came from searching only inside `panda/board/` for
+  the hook implementation.
+- **Right:** Panda `board/main.c` includes `opendbc/safety/safety.h`, and Panda's
+  SCons build adds the local `opendbc_repo` include path. The exact Toyota safety
+  source is therefore already present at
+  `opendbc_repo/opendbc/safety/modes/toyota.h`; `safety_fwd_hook` lives in the
+  same local opendbc safety tree. No external safety repository is required.
+- **Consequence:** the one-off MAC28 experiment was completed locally on
+  `experiment/mac28-ablation`: Panda commit `39e1836884cf275864db763c5945e9c72db498cc`,
+  opendbc commit `1366249dfe44c18a5ea0c4157cdfb57f7449e158`, and superproject
+  commit `6c9d4c27f18209f07124376c73dd7e633154b5d6`. The safety override is
+  narrowed to SecOC Toyota profiles; non-SecOC Toyota forwarding policy remains
+  stock.
+- **Verification:** the Panda firmware builds against the modified local
+  opendbc tree; both SecOC Toyota safety classes pass 62 tests (9 expected
+  skips); the one-off source/scope regression passes 4/4.
+- **Canonical:** `exploit/behavioral_proof/README.md`;
+  `exploit/behavioral_proof/openpilot_ablation_audit.json`;
+  `tests/verify_secoc_mac28_behavioral_proof.py`.

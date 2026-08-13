@@ -21,11 +21,16 @@ What to investigate next, in rough priority order. Completed items move to
    provenance, run `tools/resolve_secoc_patch_image.sh` unchanged, and classify
    the semantic target against the blurbdust egg. Zero/multiple candidates must
    strengthen semantic matching rather than introduce an SWID→offset table.
-3. **Prepare and then run the MAC28-only behavioral proof.** The deployment
-   pipeline can only establish target/CRC persistence. The exploit claim still
-   requires otherwise-stock camera traffic with only the protected `0x2E4/0x131`
-   MAC28 invalidated, compared before/after the semantic Gate-2 patch with raw CAN,
-   DTC, and steering-state evidence.
+3. **Run the prepared MAC28-only Gate-2 behavioral proof on hardware.** Local
+   preparation is complete under `exploit/behavioral_proof/`: the exact one-off
+   openpilot ablation commit is vendored/audited, stock and invalid-MAC forwarding
+   invariants are mechanically checked, read-only raw-CAN/EPS-DTC/steering
+   collectors are implemented, and the trial validator binds every phase to the
+   same EPS/F181 and bus topology. Baseline and pre-patch rejection must use the
+   same stock firmware; pre/post invalid-MAC phases must use the same ablation
+   commit. Only rejection on stock firmware followed by acceptance after the
+   semantic Gate-2 patch can establish the exploit claim; write/reboot persistence
+   remains insufficient.
 4. **Run the prepared application-context command-5 hardware probe.** The local
    depth pass is closed: the smallest recovered experiment is four instruction
    substitutions / 14 bytes in FCU block `0x68000`, using the stock activator,

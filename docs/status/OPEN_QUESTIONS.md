@@ -55,6 +55,16 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   acquired image. This read-only acquisition should precede every live APPLY and
   supplies the exact recovery source image. Canonical:
   `exploit/dumper/README.md`; [EXPLOIT_ENGINEERING_2026-08-12.md](EXPLOIT_ENGINEERING_2026-08-12.md).
+- **Live Gate-2 MAC28 causal proof.** The local hardware-proof harness and the
+  exact one-off openpilot ablation are now complete and committed locally. What
+  remains is hardware-only: on the same EPS/F181 and bus topology, preserve a
+  healthy stock baseline, demonstrate that the exact MAC28-only ablation is
+  rejected on the identical stock firmware image, then apply the semantically
+  resolved Gate-2 patch and demonstrate acceptance with the same ablation
+  commit. Preserve SHA-bound raw CAN, EPS DTC, and steering-state evidence for
+  all three phases. `validate_trial.py` intentionally rejects flash/reboot
+  success as proof. Canonical: `exploit/behavioral_proof/README.md` and
+  [../security/secoc/application-chain.md](../security/secoc/application-chain.md).
 - **RR versus RL ordering inside protected CAN-FD `0x090`.** Techstream
   `EMPS2_P5` plus the firmware consumer shapes now identify signals 270/273 as
   the protected rear-wheel-speed RR/RL pair and signal 276 as `CAN Steering

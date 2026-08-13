@@ -609,6 +609,18 @@ paths = [
   "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
+[suite.secoc_mac28_behavioral_proof]
+tests = ["tests/verify_secoc_mac28_behavioral_proof.py"]
+paths = [
+  "exploit/behavioral_proof/",
+  "tests/verify_secoc_mac28_behavioral_proof.py",
+  "docs/security/secoc/application-chain.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/RESEARCH_ROADMAP.md",
+  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+]
+
 [suite.lifecycle]
 tests = [
   "tests/verify_lifecycle.py",

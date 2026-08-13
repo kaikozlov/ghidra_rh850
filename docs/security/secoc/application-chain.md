@@ -1151,3 +1151,19 @@ repair, and `0x91698386` reconstructed fixup; `tests/verify_community_tooling.py
 - Renesas, *Achieving a Root of Trust ... Part 2* (ICU-S MainPE/SFR
   architecture):
   <https://www.renesas.com/en/blogs/achieving-root-trust-secure-boot-automotive-rh850-and-r-car-devices-part-2>
+
+## Gate-2 dynamic proof: MAC28-only stock-traffic ablation
+
+The static semantic patch is not considered proven by a successful flash write, valid boot CRC, or reboot. The causal proof must hold the camera traffic constant and change only the authenticator:
+
+1. **Baseline stock:** the four camera proof IDs `0x191/0x412/0x2E4/0x131` are forwarded byte-for-byte and the normal steering path is healthy.
+2. **Stock firmware + invalid MAC28:** the same stock camera set is forwarded, but only `0x2E4/0x131` have byte-4 low nibble plus bytes 5–7 cleared; byte-4 high nibble/freshness and every other bit remain stock. The EPS must reject the protected traffic.
+3. **Semantic Gate-2 patch + identical invalid-MAC ablation:** on the same EPS and bus topology, with the same one-off openpilot ablation commit, the formerly rejected protected traffic must be accepted and steering behavior restored.
+
+The one-off experiment is captured under `exploit/behavioral_proof/`. Its vendored openpilot patch makes three bounded changes: mutate only the **forwarded copy** after the forwarding copy and before Panda recomputes its local checksum; disable Toyota static blocking only for the four stock-camera proof IDs; and suppress openpilot-generated copies of those same four IDs so no alternate payload is mixed into the trial.
+
+`analyze_forwarding.py` treats transport correctness as a separate assertion from EPS acceptance. In stock mode all four source→forward pairs must be byte-identical. In invalid-MAC mode `0x191/0x412` remain byte-identical and `0x2E4/0x131` must equal the source frame after exactly the MAC28-zero transform. Any change to the byte-4 high nibble or any bit outside MAC28 fails the trial.
+
+`validate_trial.py` then binds the behavioral claim to SHA-preserved raw CAN, EPS DTC, and steering-state artifacts. Baseline and pre-patch rejection must use the same stock firmware SHA; all phases must identify the same EPS by F181 and use the same source/forward bus topology; pre/post invalid-MAC phases must use the same full openpilot ablation commit; and forwarding reports must hash-bind the exact raw capture they analyze. Only the explicit rejection→acceptance contrast can set `secoc_bypass_proven=true`.
+
+This experiment proves the Gate-2 authentication-bypass effect only. It does not imply that a production SecOC transmit/signing path has been recovered, and it is independent of the selector-4 command-5 application-context experiment.
