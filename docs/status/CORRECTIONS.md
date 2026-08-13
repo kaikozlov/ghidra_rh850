@@ -913,3 +913,21 @@ the mistakes are not re-made.
   status semantics against the firmware-backed transport tests.
 - **Canonical:** [../communications/diagnostic-transport.md](../communications/diagnostic-transport.md);
   `exploit/patcher/README.md`; `exploit/dumper/README.md`.
+
+### CORR-049 — Read-only wrapper accepted any caller-supplied shellcode
+
+- **Wrong:** the live dumper authenticated and uploaded whatever `.text` path
+  the caller supplied. Local CRC/CMAC validation proved packaging integrity but
+  did not prove that the plaintext was the reviewed read-only implementation;
+  its generated build hash was not pinned by a tracked audit.
+- **Right:** `audited_build.json` pins exact `main.c` and builder hashes, Docker
+  image content ID, entry offset, size, and the 588-byte executable SHA-256.
+  The builder records matching source/toolchain metadata. The live wrapper
+  checks all of those bindings before packaging or opening the UDS session and
+  rejects missing/self-authored provenance, source drift, and altered bytes.
+- **Verification:** the dumper suite exercises a complete matching provenance
+  set and rejects executable and toolchain tampering; the pinned Docker rebuild
+  reproduces executable SHA
+  `e756229014ad27d62a4e7ab82e6af4d20cd6dfb261d3b3bff82424bd3a26cb3d`.
+- **Canonical:** `exploit/dumper/README.md`;
+  `exploit/dumper/audited_build.json`.

@@ -30,7 +30,7 @@ from exploit.dumper.protocol import (
     startup_frames,
 )
 from exploit.dumper.reassemble import CodeFlashReassembler, DumpReassemblyError, boot_crc_sanity
-from exploit.dumper.dump_codeflash import LiveDumpCollector
+from exploit.dumper.dump_codeflash import DumpRunError, LiveDumpCollector, load_audited_shellcode
 
 passed = failed = 0
 
@@ -178,10 +178,70 @@ check("read payload bounds ready/completion waits and result retries", all(token
 check("read payload latches terminal Tx fault code/detail in RAM", "runtime_tx_fault" in dumper_c and "runtime_tx_detail" in dumper_c)
 check("dumper compiler disables null-deref deletion", "-fno-delete-null-pointer-checks" in builder_py)
 check("live wrapper authenticates shellcode before RAM upload", "package_shellcode" in wrapper_py and "cmac_valid" in wrapper_py and "crc_residue" in wrapper_py)
+check("live wrapper requires the tracked audited executable identity", "load_audited_shellcode" in wrapper_py and "audited_build.json" in wrapper_py)
 check("live wrapper keeps payload-build and SecurityAccess secrets separate", "load_payload_secret" in wrapper_py and "load_security_secret" in wrapper_py)
 check("live wrapper persists partial acquisition on interrupt", "except keyboardinterrupt" in wrapper_py and "allow_partial=true" in wrapper_py)
 check("complete live dump feeds semantic resolver by default", "resolve_secoc_patch_image.sh" in wrapper_py and "--no-resolve" in wrapper_py)
 check("live wrapper never imports patcher write code", "exploit.patcher" not in wrapper_py)
+
+print("\n== audited executable provenance ==")
+tracked_audit_path = REPO / "exploit" / "dumper" / "audited_build.json"
+tracked_audit = json.loads(tracked_audit_path.read_text(encoding="utf-8"))
+source_bindings = {item["path"]: item["sha256"] for item in tracked_audit["sources"]}
+check("tracked audit is explicitly reviewed read-only", tracked_audit["review_status"] == "audited-read-only")
+check("tracked audit pins a full executable SHA and size", len(tracked_audit["shellcode"]["sha256"]) == 64 and tracked_audit["shellcode"]["size"] > 0)
+check("tracked audit pins exact dumper source", source_bindings["exploit/dumper/main.c"] == hashlib.sha256((REPO / "exploit/dumper/main.c").read_bytes()).hexdigest())
+check("tracked audit pins exact build script", source_bindings["exploit/dumper/build_shellcode.py"] == hashlib.sha256((REPO / "exploit/dumper/build_shellcode.py").read_bytes()).hexdigest())
+check("tracked audit pins Docker image content ID", tracked_audit["toolchain"]["image_id"].startswith("sha256:") and len(tracked_audit["toolchain"]["image_id"]) == 71)
+
+with tempfile.TemporaryDirectory() as td:
+    temp = Path(td)
+    shellcode_path = temp / "dumper.bin"
+    shellcode_path.write_bytes(b"audited deterministic shellcode")
+    binary_sha = hashlib.sha256(shellcode_path.read_bytes()).hexdigest()
+    toolchain = {"backend": "test", "image_id": "sha256:" + "ab" * 32}
+    audit = {
+        "schema": "p1me-codeflash-dumper-audited-build-v1",
+        "review_status": "audited-read-only",
+        "sources": [
+            {"path": "exploit/dumper/main.c", "sha256": hashlib.sha256((REPO / "exploit/dumper/main.c").read_bytes()).hexdigest()},
+            {"path": "exploit/dumper/build_shellcode.py", "sha256": hashlib.sha256((REPO / "exploit/dumper/build_shellcode.py").read_bytes()).hexdigest()},
+        ],
+        "shellcode": {"sha256": binary_sha, "size": shellcode_path.stat().st_size, "entry_offset": 0},
+        "toolchain": toolchain,
+    }
+    audit_path = temp / "audit.json"
+    audit_path.write_text(json.dumps(audit), encoding="utf-8")
+    metadata_path = shellcode_path.with_suffix(".bin.json")
+    metadata = {
+        "schema": "p1me-codeflash-dumper-shellcode-v1",
+        "sha256": binary_sha,
+        "size": shellcode_path.stat().st_size,
+        "entry_offset": 0,
+        "read_only": True,
+        "source": "exploit/dumper/main.c",
+        "source_sha256": audit["sources"][0]["sha256"],
+        "toolchain": toolchain,
+    }
+    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+    loaded, _, _ = load_audited_shellcode(shellcode_path, audit_path=audit_path)
+    check("exact audited executable and provenance are accepted", loaded == shellcode_path.read_bytes())
+    shellcode_path.write_bytes(loaded + b"tamper")
+    try:
+        load_audited_shellcode(shellcode_path, audit_path=audit_path)
+    except DumpRunError as exc:
+        check("executable tampering is rejected before packaging", "executable hash/size" in str(exc), str(exc))
+    else:
+        check("executable tampering is rejected before packaging", False)
+    shellcode_path.write_bytes(loaded)
+    metadata["toolchain"] = {"backend": "different"}
+    metadata_path.write_text(json.dumps(metadata), encoding="utf-8")
+    try:
+        load_audited_shellcode(shellcode_path, audit_path=audit_path)
+    except DumpRunError as exc:
+        check("toolchain provenance mismatch is rejected", "metadata disagrees" in str(exc), str(exc))
+    else:
+        check("toolchain provenance mismatch is rejected", False)
 
 print("\n== live collector start/noise semantics ==")
 with tempfile.TemporaryDirectory() as td:
