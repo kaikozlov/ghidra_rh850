@@ -586,6 +586,14 @@ paths = [
   "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
+[suite.codeflash_dumper]
+tests = ["tests/verify_codeflash_dumper.py"]
+paths = [
+  "exploit/dumper/",
+  "tests/verify_codeflash_dumper.py",
+  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+]
+
 [suite.lifecycle]
 tests = [
   "tests/verify_lifecycle.py",
