@@ -148,8 +148,9 @@ special protocol receive path through `0x81FE4 -> 0x81F00`. On the transmit
 side, the same protocol state machinery calls `0x8206C`, which explicitly ORs
 source PDU class `0xF800` and calls `application_canif_transmit`; class 5 has one
 active Tx record, `0x21F68 -> CAN 0x7F8`. This proves a paired **Rx `0x7F7` / Tx
-`0x7F8` special transport channel**. The application-level service semantics of
-that channel remain unnamed.
+`0x7F8` special transport channel**. Its XCP-shaped command semantics and
+security impact are analyzed in
+[xcp-command-dispatch.md](xcp-command-dispatch.md).
 
 ## 3. Six COM transmit I-PDUs
 
@@ -532,4 +533,4 @@ No claim is made that:
 - the raw cycle counts are milliseconds;
 - CAN `0x351`, `0x394`, `0x4A3`, or `0x4C8` have recovered OEM message names;
 - signal 57 has an OEM semantic beyond its recovered default-zero behavior;
-- the `0x7F7/0x7F8` special channel has a recovered Toyota service/protocol name.
+- the XCP-shaped `0x7F7/0x7F8` channel has a recovered Toyota OEM name.

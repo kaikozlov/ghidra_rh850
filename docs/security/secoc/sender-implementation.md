@@ -351,12 +351,13 @@ which forces generated class `0xF800`; that class resolves to **CAN `0x7F8`**.
 It can carry a proxy response on an isolated bench without inventing a new
 lower-driver interface.
 
-`0x7F8` is **not an unused production ID**: Stage 5 proved it is the Tx half of
-the existing `0x7F7/0x7F8` special channel whose service semantics remain
-unnamed. Therefore production integration must either allocate and verify a
-new CanIf route or separately audit a direct enqueue design; repurposing
-`0x7F8` is justified only as a controlled bench transport with the stock
-special service disabled/not in use.
+`0x7F8` is **not an unused production ID**: it is the Tx half of the existing
+XCP-shaped `0x7F7/0x7F8` channel analyzed in
+[`../../communications/xcp-command-dispatch.md`](../../communications/xcp-command-dispatch.md).
+Therefore production integration must either allocate and verify a new CanIf
+route or separately audit a direct enqueue design; repurposing `0x7F8` is
+justified only as a controlled bench transport with the stock special service
+disabled/not in use.
 
 Likewise, the stock CanIf table has no configured `0x2E4` or `0x131` Tx route.
 An EPS-resident proxy that directly transmits those secured frames needs a new

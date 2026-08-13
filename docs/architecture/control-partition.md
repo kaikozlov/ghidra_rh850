@@ -765,13 +765,13 @@ The function is referenced from four data locations in the `0x21A48..0x21A58`
 range (the pointer table entries), confirming it is a registered callback
 rather than dead code.
 
-### Evidence grade: bounded
+### Evidence grade: verified/recovered
 
-The dispatch structure, pointer table, and registration are recovered. The
-upper-protocol semantics of CAN `0x7F7` are **not** resolved — no OEM protocol
-name is invented. CAN `0x7F8` (the single active special-class Tx route per
-`../communications/application-tx.md`) is a separate endpoint and is not claimed to
-be the response pair without further evidence.
+The dispatch structure, pointer table, registration, and `0x7F7` request /
+`0x7F8` response pairing are verified. The upper protocol is XCP-shaped and its
+unauthenticated read impact is canonical in
+[`../communications/xcp-command-dispatch.md`](../communications/xcp-command-dispatch.md).
+No Toyota OEM protocol name is invented.
 
 ## 11. Tx signal producer closure — signals 9, 37, 57
 
@@ -810,8 +810,7 @@ The following are **not** claimed:
 - OEM-level names for the remaining system-mode states or diagnostic checks;
 - Exact full/reduced mode semantics under `0x57ac2`;
 - Motor/PWM ownership for every MMIO region written by `0x6547c`;
-- The upper-protocol identity of CAN `0x7F7`;
-- A response-pairing between `0x7F7` (RX) and `0x7F8` (TX);
+- A Toyota OEM name for the XCP-shaped `0x7F7/0x7F8` channel;
 - Runtime producers for signals 9, 37, and 57 beyond the packer exclusion.
 
 See also:

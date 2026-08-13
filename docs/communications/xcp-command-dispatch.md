@@ -8,11 +8,13 @@
 >
 > **Evidence source:** firmware-static
 >
-> **Confidence:** verified dispatch structure; recovered handler roles
+> **Confidence:** verified disclosure path; recovered handler roles; bounded
+> write impact
 >
 > **Canonical artifact:** `data/recovered_callback_tables.csv`
 >
 > **Verification:** `tests/verify_function_discovery.py`,
+> `tests/verify_xcp_security.py`, `tests/verify_exploit_followups.py`,
 > `AssertRecoveredCallbackTables.java`, `AssertFunctionDiscoveryFloor.java`
 
 ## Result
@@ -25,6 +27,16 @@ handler bodies and their shared response builder match an XCP-shaped
 calibration command family. That protocol identification is recovered from the
 firmware behavior; no OEM symbol or external specification is used as naming
 evidence.
+
+The same firmware path exposes an unauthenticated memory disclosure on the
+paired CAN `0x7F7` request / `0x7F8` response route. The configured generic
+command map has no GET_SEED (`0xF8`) or UNLOCK (`0xF7`) callback. After CONNECT
+(`0xFF`), SET_MTA (`0xF6`) accepts a tester-supplied 32-bit address without an
+authorization check and the custom UPLOAD command (`0xF5`) returns one to seven
+bytes from permitted LocalRAM. The `0xE4` page-copy command first makes
+CodeFlash `0x10000..0x17DEF` readable by copying it to permitted LocalRAM
+`0xFEBF7C00..0xFEBFF9EF`. Repeated uploads therefore recover 32,240 CodeFlash
+bytes exactly.
 
 | Selector | Pointer field | Handler | Body bytes | Structural role |
 |---:|---:|---:|---:|---|
@@ -41,6 +53,48 @@ bounded return, is not an alternate entry into another function, and is pinned
 by exact body size and SHA-256 in the canonical CSV. The handlers converge on
 the response helper at `0x9724E`, which builds an eight-byte response in RAM at
 `0xFEBE5E94`.
+
+## Security path
+
+All request frames are eight bytes. This is the minimal firmware-static proof
+sequence; the final request is repeated, using a shorter length for the last
+fragment.
+
+| Operation | Request bytes | Effect |
+|---|---|---|
+| CONNECT | `FF 00 00 00 00 00 00 00` | sets the protocol connected state |
+| copy page | `E4 00 00 00 01 00 00 00` | copies CodeFlash `0x10000..0x17DEF` to RAM |
+| SET_MTA | `F6 00 00 00 00 7C BF FE` | selects RAM `0xFEBF7C00` (little-endian) |
+| UPLOAD | `F5 07 00 00 00 00 00 00` | returns seven bytes and advances the MTA |
+
+The `0xF5` range checker permits LocalRAM `0xFEBE0000..0xFEBFFFFF` except five
+inclusive intervals encoded at `0x293F4`:
+
+- `0xFEBE0000..0xFEBE37FF`
+- `0xFEBE5030..0xFEBE529B`
+- `0xFEBF0288..0xFEBF13CB`
+- `0xFEBF4958..0xFEBF4B33`
+- `0xFEBF6C00..0xFEBF78DF`
+
+That leaves 107,924 readable RAM bytes. The checker rejects requests crossing
+an exclusion and rejects address wraparound. The page-copy destination lies
+outside every exclusion.
+
+The copied interval does not contain the bootloader secrets at `0xBFD8` and
+`0xBFE8` or the application SecurityAccess secret at `0x20840`; this finding
+does not claim direct key disclosure. The generic write configuration covers
+the 32 KiB shadow window `0xFEBF7C00..0xFEBFFBFF`, but the recovered graph has
+not joined that window to executable memory, a persistent flash commit,
+callback pointers, or a live motor-control consumer. Write impact is therefore
+bounded to calibration-shadow RAM pending a new data-flow or dynamic result.
+
+Firmware-static evidence proves CAN1 acceptance and response construction, not
+that an external vehicle gateway or diagnostic connector forwards CAN
+`0x7F7/0x7F8`. Any live confirmation belongs on an isolated bench and should
+exercise only the read chain. The default-plan/simulation tool
+[`../../exploit/followups/xcp_read_probe.py`](../../exploit/followups/xcp_read_probe.py)
+operationalizes that bounded proof, requires an F181-bound isolated bench for
+live mode, and implements no generic write command.
 
 ## Reproducibility and remaining boundary
 

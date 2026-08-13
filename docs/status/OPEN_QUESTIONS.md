@@ -16,6 +16,15 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   list/per-ID/detail structure is recovered, but the OEM service name and exact
   meanings of the event catalogue's encoded upper ID bits and record-kind
   values remain unknown.
+- **XCP physical reachability and shadow-RAM consumers.** COM-005 proves the
+  unauthenticated `0x7F7/0x7F8` disclosure path inside this firmware, but not
+  whether a vehicle gateway or diagnostic connector forwards those CAN IDs.
+  The default-safe `exploit/followups/xcp_read_probe.py` can confirm
+  reachability and the 32,240-byte copy/upload result on an isolated bench. Do
+  not exercise the generic write commands on a vehicle.
+  Static write-impact work should resume only with a new consumer, commit, or
+  executable-alias lead. Canonical:
+  [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md).
 - **Dynamic authenticated-command actuation discriminator.** The full-corpus
   extension closes the static join search more broadly than Stage 6. Protected
   `0x2E4` torque control (`BFA2`) and protected `0x131` LTA angle control

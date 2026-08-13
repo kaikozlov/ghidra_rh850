@@ -380,6 +380,16 @@ paths = [
   "tools/rebuild_project.sh",
 ]
 
+[suite.xcp_security]
+tests = ["tests/verify_xcp_security.py"]
+oracle = "cfg_dataflow"
+paths = [
+  "docs/communications/xcp-command-dispatch.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "tests/verify_xcp_security.py",
+]
+
 [suite.secoc_application]
 tests = [
   "tests/verify_secoc_application.py",
@@ -626,6 +636,7 @@ tests = ["tests/verify_exploit_followups.py"]
 paths = [
   "exploit/followups/",
   "tests/verify_exploit_followups.py",
+  "docs/communications/xcp-command-dispatch.md",
   "docs/security/memory-safety-audit.md",
   "docs/security/application-security-access.md",
   "docs/status/FINDINGS.md",
