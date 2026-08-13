@@ -17,7 +17,7 @@ malformed packets.
 | File | Purpose |
 |---|---|
 | `flash_patcher.py` | SecOC flash patcher host tool. Implements the authenticated-RAM-exec bootstrap (SA → WDBI 0x203/0x201/0x202 → RequestDownload 0xFEBF0000 → RoutineControl 0x10F0/0xFF00), uploads shellcode, triggers via `0xE0000` routine, and decodes progress frames over CAN 0x7A9. |
-| `main.c` | Egg-hunter shellcode (C source). Runs from the boot-context callback, scans CodeFlash for an 8-byte egg marker, patches the SecOC MAC verification to always-pass (`0x007f5201`), fixes the bootloader CRC32, and returns over CAN. |
+| `main.c` | Egg-hunter shellcode (C source). Runs from the boot-context callback, scans CodeFlash for an 8-byte egg marker, forces the matched predicate to return success (`0x007f5201`), re-signs the boot CRC from live CodeFlash, and returns over CAN. On `8965B4512000` the egg target does not transfer, but the FCU RMW and CRC-resigning mechanism does. |
 | `decrypt.T-0035-22.py` | CUW (Calibration Update Wizard) decryption tool. Documents the per-byte SeedKey/Nonce obfuscation (`out[i] = raw[i] - i mod 256` → ASCII hex → 16 bytes) and the `AES_ECB(BL_KEY, DID_201)` derivation matching SEC-BOOT-003. |
 
 ### Cross-validation value
@@ -31,18 +31,26 @@ repository findings:
   reusable toolchain across the 8965B4x family.
 - The CUW deobfuscation scheme fills a gap in `docs/tooling/techstream.md`.
 
-### New directions not yet in repository findings
+### Additional community-derived directions
 
-- **Persistent CodeFlash patching via FCU** — the shellcode uses Flash
-  Control Unit registers (FACI at 0xFFA1xxxx) to erase/reprogram CodeFlash
-  blocks. The CRC repair geometry (range `0x18000..0xFFDF0`, adjustment word
-  at `0xFFDEC`, marker at `0xFFE00`) matches the Sienna boot layout exactly.
-  However, the 8-byte egg marker is a **false positive** on `8965B4512000`:
-  it matches a 5-byte `memcmp` helper in the `0xAB` event-record dispatch
-  path (`FUN_0003485A` at VA `0x3485A`), not the SecOC verify function
-  (`secoc_rx_verify_worker` at `0x8E4BA`). The egg was designed for the
-  `8965F3`/`8965F4` family; it does not transfer to this calibration.
-  See SECOC-028 and `verify_community_tooling.py` §6–7.
+- **Persistent CodeFlash patching via FCU + CRC resigning** — the shellcode uses
+  Flash Control Unit registers (FACI at `0xFFA1xxxx`) to erase/reprogram
+  CodeFlash blocks, then recomputes the CRC from the **live** flash prefix and
+  writes its complement at `0xFFDEC`. The geometry (range
+  `0x18000..0xFFDF0`, adjustment word `0xFFDEC`, marker `0xFFE00`) matches the
+  Sienna boot layout exactly. Stock region 0 independently validates the same
+  CRC-32/Ethernet terminal-fixup formula (`CRC(prefix)=0xEC0CD6CF`, stored
+  complement `0x13F32930`, final residue `0xFFFFFFFF`). The published
+  `8965B4512000` region-1 artifact itself has a one-bit anomaly at `0xBB1C4`:
+  `0xA2→0x82` is the **unique** single-bit change that makes its existing
+  `0x0962887F` fixup validate, and also repairs an anomalous `sst.b 0x22,ep,r1`
+  into `sst.b 0x2,ep,r1`, completing a six-byte destination permutation
+  `0..5`. This strongly indicates a one-bit acquisition error in the public
+  dump, not a CRC-algorithm mismatch. The 8-byte egg marker is independently a
+  **false positive** on this calibration: it matches a 5-byte comparator in the
+  `0xAB` event-record dispatch path (`FUN_0003485A` at VA `0x3485A`), not the
+  SecOC Gate-2 control flow. See SECOC-028/043/044, CORR-042, and
+  `verify_community_tooling.py` §6–7.
 - **Extended version family** — targets 8965F3401200 (dual-CPU),
   8965F4207000, 8965F4201000, 8965B4209000, 8965B4233100, 8965B4509100.
   The 8965F3 dual-CPU part is a new family.
@@ -50,8 +58,10 @@ repository findings:
   SAS instead of the EPS, since it uses the same RH850 and is less
   safety-critical.
 
-These are unverified (author notes "largely untested") and are committed for
-reference and cross-validation, not as proven tooling.
+The author notes the complete patcher is "largely untested" on its target
+calibrations. Repository analysis independently verifies the bootstrap,
+CodeFlash/CRC mechanism, and the `4512000` dump anomaly; the raw egg target still
+requires calibration-specific semantic validation.
 
 ## `albinoelephant/`
 

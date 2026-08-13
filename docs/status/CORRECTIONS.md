@@ -740,3 +740,37 @@ the mistakes are not re-made.
   `ghidra/scripts/verify/ExportApplicationRxSignalEvidence.java`;
   `tests/verify_application_receive.py`; `AssertApplicationReceiveMap.java`;
   `data/secoc_rx_control_surface.csv`.
+
+### CORR-042 — Published region-1 CRC mismatch was mistaken for a CRC-algorithm incompatibility
+
+- **Wrong:** the published `8965B4512000` high-CodeFlash region has CRC residue
+  `0x5AA2313A` with stock word `0x0962887F`; treating that artifact mismatch as
+  a validator led to the incorrect conclusion that blurbdust's
+  `crc32_flash_range()` did not match the RH850 boot CRC and that persistent
+  deployment still needed a different DCRA-faithful implementation.
+- **Right:** stock region 0 is already an exact in-image validation of the
+  community construction: CRC(`0x10000..0x17DEB`) = `0xEC0CD6CF`, the stored
+  terminal word is its complement `0x13F32930`, and the full region residue is
+  `0xFFFFFFFF`. The boot routine at `0x47EA` clears DCRA control, seeds COUT,
+  feeds 32-bit words to CIN, and returns complement(COUT), matching this
+  CRC-32/Ethernet terminal-fixup scheme.
+- **Artifact explanation:** CRC-syndrome analysis of the entire 949,744-byte
+  region 1 finds **exactly one** single-bit change that makes the existing stock
+  `0x0962887F` word validate: VA `0xBB1C4`, bit 5, `0xA2→0x82`. Independently,
+  that byte is the displacement byte of `sst.b 0x22,ep,r1`; the correction gives
+  `sst.b 0x2,ep,r1` and turns the six surrounding destination offsets from
+  `1,0x22,0,4,5,3` into the exact permutation `1,2,0,4,5,3`. On the reconstructed
+  image, CRC(prefix) = `0xF69D7780`, whose complement is exactly the already
+  stored `0x0962887F`, and the full region residue is `0xFFFFFFFF`. The unique
+  correction is verified; interpreting it as a one-bit acquisition/readout
+  error in the public dump is a strong inference.
+- **Gate-2 consequence:** after reconstructing `0xBB1C4=0x82` and applying the
+  Sienna Gate-2 patch `0x8E6C8: 0x9A→0x95`, CRC(prefix) becomes `0x6E967C79` and
+  the replacement fixup is `0x91698386`, yielding residue `0xFFFFFFFF`.
+  blurbdust's live shellcode does not need that value hardcoded: it writes the
+  target block first, computes the prefix CRC from actual ECU CodeFlash, then
+  writes its complement.
+- **Canonical:** [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md) §1.7;
+  [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.6;
+  `tests/verify_codeflash_crc_reconstruction.py`; `tests/verify_community_tooling.py`;
+  `tests/verify_secoc_bypass_patch_point.py`.

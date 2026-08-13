@@ -40,8 +40,11 @@ paths = [
 ]
 
 [suite.boot_trust]
-tests = ["tests/verify_boot_trust.py"]
-paths = ["docs/security/bootloader-payload-gate.md"]
+tests = [
+  "tests/verify_boot_trust.py",
+  "tests/verify_codeflash_crc_reconstruction.py",
+]
+paths = ["docs/security/bootloader-payload-gate.md", "firmware/"]
 
 [suite.bootloader_diagnostics]
 tests = ["tests/verify_bootloader_diagnostics.py"]
@@ -545,10 +548,14 @@ tests = ["tests/verify_community_tooling.py"]
 paths = ["community/", "external-references.lock.json"]
 # Cross-validates community exploit tooling (blurbdust/@yc flash patcher,
 # egg-hunter shellcode, CUW decryptor) against repository findings SEC-BOOT-002..007,
-# SECOC-024, SECOC-028. Verifies SHA-256 integrity of committed artifacts.
+# SECOC-024/028/044, including live CRC resigning. Verifies SHA-256 integrity
+# of committed artifacts.
 
 [suite.secoc_acceptance_gate]
-tests = ["tests/verify_secoc_acceptance_gate.py"]
+tests = [
+  "tests/verify_secoc_acceptance_gate.py",
+  "tests/verify_secoc_bypass_patch_point.py",
+]
 paths = ["docs/security/secoc/application-chain.md", "firmware/"]
 
 [suite.lifecycle]

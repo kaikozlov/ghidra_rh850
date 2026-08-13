@@ -14,7 +14,7 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 
 | Dimension | Current value | Evidence boundary and source |
 |---|---:|---|
-| Firmware bytes mapped | CodeFlash 1,048,576 B; DataFlash 32,768 B | Exact committed binaries; SHA-256 `21140bbd…fde` and `81d87b67…ecb8`; project inventory records 14 memory blocks including mapped overlays |
+| Firmware bytes mapped | CodeFlash 1,048,576 B; DataFlash 32,768 B | Exact published/committed binaries; SHA-256 `21140bbd…fde` and `81d87b67…ecb8`; SECOC-044 identifies a unique one-bit CodeFlash region-1 inconsistency at `0xBB1C4 A2→82` whose reconstruction restores the stock boot CRC and local instruction semantics. The committed artifact remains unchanged for provenance; project inventory records 14 memory blocks including mapped overlays |
 | Decoded CodeFlash instructions | 180,262 | Ghidra listing total in `data/ghidra_project_inventory.baseline.jsonl`; this is decode coverage, not semantic coverage |
 | Decoded instructions outside functions | 22,514 instructions / 63,982 bytes | `data/outside_function_summary.json`; conservative runs can include data decoded as instructions |
 | Known function entries | 6,037 | Byte-identical two-rebuild project inventory; zero undefined bytes applies inside these function bodies only |

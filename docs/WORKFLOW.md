@@ -220,6 +220,15 @@ CodeFlash  21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde
 Combined   0bba74d0e443f9dd3da33e3a28c3511ec31e35e8303acef7e0117fbdc91d5a86
 ```
 
+The CodeFlash input is preserved exactly as published. SECOC-044 recovers a
+unique one-bit inconsistency at VA `0xBB1C4` (`0xA2→0x82`) whose analysis-only
+reconstruction restores the existing region-1 boot CRC and repairs the local
+RH850 store semantics; reconstructed CodeFlash SHA-256 is
+`b6f510662c324261dac6fc1504ec77c217d2055dc099096375a91f3fcf7e9916`.
+Do **not** silently patch the committed firmware input or rebuild the canonical
+project from the reconstructed derivative; use the reconstruction only for
+explicit CRC/semantic experiments.
+
 ```bash
 make rebuild-project                                  # into build/project/
 make rebuild-project PROJECT_DIR="$PWD/build/parity-project"  # disposable sibling

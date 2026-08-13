@@ -1077,6 +1077,72 @@ profile index is passed through to the verify worker. The shared-gate
 conclusion is based on the dispatch structure, not per-profile configuration
 tracing.
 
+### 9.6 MAC bypass patch point (verified; persistent CRC resigning recovered)
+
+Candidate A above identifies the Gate-2 load as the narrowest MAC-bypass target
+but does not specify exact patch bytes. The exact one-byte CodeFlash patch point
+is now pinned:
+
+**Patch:** CodeFlash VA `0x8E6C8`, byte `0x9A` → `0x95` (1 byte).
+
+| Property | Value |
+|---|---|
+| Original instruction | `0x0D9A` = `bne 0x8E6DA` (condition NE) |
+| Patched instruction | `0x0D95` = `br 0x8E6DA` (unconditional) |
+| Branch target | `0x8E6DA` → `FUN_0008E382` (authenticated delivery) — unchanged |
+| Bytes changed | 1 (low byte only; high byte `0x0D` is the displacement) |
+| Effect | Forces the shared Gate-2 authenticated-delivery branch regardless of MAC result; the existing §9.5 profile-routing caveat still applies |
+| Freshness | `FUN_0008E646` at `0x8E6C0` still receives the real MAC-derived boolean before the patched branch. The patch does not force a bad-MAC frame to commit authenticated freshness; existing tests pin the false-auth call path rather than claiming freshness advancement |
+| Gate 1 | Unchanged — format, freshness pre-check, and worker-completion filtering remain active |
+| Persistence | Patch VA `0x8E6C8` is inside boot-validity region 1 and therefore requires a replacement CRC adjustment at `0xFFDEC`. The community FCU RMW + CRC-32/Ethernet resigning scheme is valid; on the reconstructed stock image this Gate-2 patch produces adjustment `0x91698386` |
+
+The patch sits at offset `0x8` within the false-path block pinned by
+`verify_secoc_acceptance_gate.py` (bytes `1d30e0d19a0d1a38...`). Only the
+condition code nibble changes (`0xA` → `0x5`); the Bcond opcode and 9-bit
+displacement are unchanged, so the target address is invariant.
+
+This is a **calibration-specific** patch point recovered from Sienna control
+flow — not a raw byte signature. The blurbdust 8-byte egg
+(`88 00 01 52 00 0A E5 0D`) does not locate this function (SECOC-028/035); it
+matches an unrelated `0xAB` event-record comparator. On other calibrations the
+equivalent function must be found by tracing the MAC-result load
+(`FEBE555C` equivalent) and its conditional branch.
+
+The persistent CRC path is now closed statically. `crc32_hardware_compute @
+0x47EA` clears the DCRA control byte, seeds COUT from the caller, feeds 32-bit
+words through CIN, and returns the complement of COUT. Stock CodeFlash region 0
+is an in-image fixture for the same CRC-32/Ethernet terminal-fixup construction
+used by blurbdust: CRC of `0x10000..0x17DEB` is `0xEC0CD6CF`, the stored word at
+`0x17DEC` is its complement `0x13F32930`, and the complete region residue is
+`0xFFFFFFFF`.
+
+The apparent contradiction in published region 1 is a property of the artifact,
+not the algorithm. As committed, `0x18000..0xFFDEF` has residue `0x5AA2313A`
+with stock fixup `0x0962887F`. CRC-syndrome analysis finds exactly one
+single-bit change anywhere in the 949,744-byte region that restores the expected
+residue: CodeFlash `0xBB1C4` bit 5, `0xA2→0x82`. That same correction changes
+`sst.b 0x22,ep,r1` into `sst.b 0x2,ep,r1` inside `FUN_000BB0A2`, turning the
+surrounding destination offsets from `1,0x22,0,4,5,3` into the exact six-byte
+permutation `1,2,0,4,5,3`. On this reconstructed stock image,
+CRC(`0x18000..0xFFDEB`) is `0xF69D7780`, whose complement is exactly the already
+stored `0x0962887F`. The reconstructed region residue is therefore
+`0xFFFFFFFF`. Attribution to an acquisition/readout error is a strong inference;
+the unique CRC solution and instruction-semantic repair are verified
+(SECOC-044/CORR-042).
+
+Applying the Gate-2 byte patch to that reconstructed image changes the prefix
+CRC to `0x6E967C79`, so the replacement word is `0x91698386`; the complete
+region again has residue `0xFFFFFFFF`. This number is useful for offline
+reconstruction only. blurbdust's shellcode patches the target block first, then
+computes CRC directly from the live ECU CodeFlash and derives
+`new_adj = crc_pre_adj ^ 0xFFFFFFFF`, so it naturally uses the actual live flash
+contents rather than a hardcoded calibration-specific CRC.
+
+Verification: `tests/verify_secoc_bypass_patch_point.py` for the Gate-2 patch;
+`tests/verify_codeflash_crc_reconstruction.py` for the boot CRC, one-bit artifact
+repair, and `0x91698386` reconstructed fixup; `tests/verify_community_tooling.py`
+§7 for the community live-resigning implementation.
+
 ## References
 
 - AUTOSAR, *Specification of Secure Hardware Extensions*, §4.9 memory update

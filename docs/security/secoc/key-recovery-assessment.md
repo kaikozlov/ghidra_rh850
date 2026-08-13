@@ -254,7 +254,7 @@ SecOC bypass rather than a volatile RAM payload. The import splits cleanly into
 two layers: infrastructure that transfers strongly, and an exploit signature
 that does not transfer to this calibration.
 
-#### Infrastructure (transfers strongly)
+#### Infrastructure (bootstrap, FCU RMW, and CRC resigning transfer strongly)
 
 - **`flash_patcher.py`** — host tool. Structurally identical to the
   I-CAN-hack/Bk2ol bootstrap: same `SEED_KEY_SECRET`, same `0x203→0x201→0x202`
@@ -263,13 +263,18 @@ that does not transfer to this calibration.
   pinned in `verify_community_tooling.py` §1–5 (28 assertions). Its version
   table covers `8965B4209000`, `8965B4233100`, `8965B4509100`, and new parts
   `8965F3401200` (dual-CPU), `8965F4207000`, `8965F4201000`.
-- **Flash RMW + CRC repair geometry** — `main.c` uses FCU registers
-  (`FACI` at `0xFFA1xxxx`) for 32 KiB read-modify-write of CodeFlash blocks,
-  then repairs the bootloader CRC32 so the patched image passes boot validity.
-  The geometry matches `8965B4512000` exactly: CRC range `0x18000..0xFFDF0`,
-  adjustment word at `0xFFDEC` (4 bytes before range end), marker at `0xFFE00`,
-  all verified by `verify_community_tooling.py` §7 and consistent with
-  `verify_boot_trust.py` region-1 assertions.
+- **Flash RMW + CRC resigning** — `main.c` uses FCU registers (`FACI` at
+  `0xFFA1xxxx`) for 32 KiB read-modify-write of CodeFlash blocks, then computes
+  CRC from the live flash prefix and writes `crc_pre_adj ^ 0xFFFFFFFF` at
+  `0xFFDEC`. The geometry exactly matches the Sienna boot-validity region
+  (`0x18000..0xFFDF0`, marker `0xFFE00`). The CRC algorithm is also verified:
+  stock region 0 uses the identical CRC-32/Ethernet terminal-fixup construction
+  (`0xEC0CD6CF → 0x13F32930 → final 0xFFFFFFFF`). The published region-1
+  mismatch is instead explained by a unique single-bit artifact correction at
+  `0xBB1C4`, `0xA2→0x82`; after that reconstruction, its existing
+  `0x0962887F` fixup validates exactly. The same bit repairs the local RH850
+  store displacement from `0x22` to `0x02`, making six destination stores an
+  exact permutation of offsets `0..5` (SECOC-044/CORR-042).
 - **`decrypt.T-0035-22.py`** — CUW decryption. Documents the per-byte
   SeedKey/Nonce obfuscation (`out[i] = (raw[i] − i) mod 256` → ASCII hex →
   16 bytes) and the `AES-ECB(BL_KEY, DID_201)` key derivation matching
@@ -311,8 +316,10 @@ verifier — it could be a status translator, a combined authentication/freshnes
 predicate, a downstream acceptance gate, or a generic comparison helper used by
 the SecOC path. The same compiler-generated instruction sequence begins the
 unrelated `0xAB` event-record token comparator on the Sienna image. The flash
-RMW and CRC-repair mechanism remains structurally applicable, but a Sienna-specific
-patch point must be independently recovered from control flow and callers.
+RMW and CRC-resigning mechanism does transfer; only the egg-selected semantic
+target does not. The Sienna-specific Gate-2 patch point has now been
+independently recovered from control flow as SECOC-043, and the published
+CodeFlash region-1 CRC anomaly is independently explained by SECOC-044.
 
 A patch point may be empirically effective without being semantically identified.
 "Forcing this predicate to succeed causes protected frames to pass" is distinct
@@ -329,6 +336,8 @@ every calibration.
 | `0xAB` membership and callers | firmware-static (x-ref + `verify_application_ab_service.py`) | verified |
 | No static edge to SecOC chain | firmware-static (`verify_application_ab_service.py` closed graph) | verified |
 | CRC repair geometry matches Sienna | firmware-static (`verify_boot_trust.py` + `verify_community_tooling.py` §7) | verified |
+| Community CRC-32/Ethernet terminal-fixup construction matches boot-validity behavior | stock region-0 fixture + reconstructed region 1 (`verify_codeflash_crc_reconstruction.py`; `verify_community_tooling.py` §7) | verified |
+| Published region-1 mismatch has unique single-bit correction `0xBB1C4 A2→82`, also repairing local store semantics | CRC syndrome + instruction semantics (`verify_codeflash_crc_reconstruction.py`) | verified correction; acquisition-error attribution is strong inference |
 | Reported behavioral effect of the patch on `8965F3/F4` | external-source (author statement + version table) | external-source |
 | Semantic identity of the patched function on `8965F3/F4` | — | not established (available files do not identify the function) |
 | Direct transfer of egg-based patch to `8965B4512000` | firmware-static | disproved |

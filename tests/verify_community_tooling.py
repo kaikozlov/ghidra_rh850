@@ -51,6 +51,16 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def community_crc32(data: bytes) -> int:
+    """Mirror crc32_flash_range() from the committed community main.c."""
+    crc = 0xFFFFFFFF
+    for byte in data:
+        crc ^= byte
+        for _ in range(8):
+            crc = (crc >> 1) ^ 0xEDB88320 if crc & 1 else crc >> 1
+    return crc ^ 0xFFFFFFFF
+
+
 # ---- 0. File integrity vs pinned hashes ----
 print("== 0. community artifact integrity ==")
 
@@ -281,14 +291,9 @@ if egg_matches:
     )
 
 
-# ---- 7. CRC repair geometry matches Sienna boot layout ----
-print("\n== 7. CRC repair geometry vs Sienna boot layout ==")
+# ---- 7. CRC geometry and resigning are valid; public region 1 has a one-bit anomaly ----
+print("\n== 7. CRC geometry, resigning, and published-dump anomaly ==")
 
-# The shellcode repairs the bootloader CRC32 at CRC_ADJ_ADDR=0xFFDEC.
-# Our boot trust tests verify:
-#   Region 1 CRC descriptor: addr=0x18000, len=0xE7DF0 (embedded at 0xFFDE0/4)
-#   CRC covers 0x18000..0xFFDF0
-#   0xFFDEC is the 4-byte adjustment word 4 bytes before the CRC range end.
 import struct
 
 r1_crc_addr = struct.unpack_from("<I", CF, 0xFFDE0)[0]
@@ -300,6 +305,56 @@ check("CRC range ends at 0xFFDF0", crc_range_end == 0xFFDF0)
 check("CRC adjustment word at 0xFFDEC is 4 bytes before range end", 0xFFDF0 - 0xFFDEC == 4)
 check("CRC adjustment block is 0xF8000 (last 32KB block)", 0xFFDEC >= 0xF8000 and 0xFFDEC < 0xF8000 + 0x8000)
 check("region 1 marker at 0xFFE00 (shellcode SCAN_END)", struct.unpack_from("<I", CF, 0xFFE00)[0] == 0x5AA5A55A)
+
+# Region 0 is a stock in-image fixture for the exact community formula:
+# CRC(prefix) ^ 0xFFFFFFFF is stored as the terminal little-endian word, and
+# the complete region then has residue 0xFFFFFFFF.
+r0_pre = community_crc32(CF[0x10000:0x17DEC])
+r0_adj = struct.unpack_from("<I", CF, 0x17DEC)[0]
+check("region 0 prefix CRC is 0xEC0CD6CF", r0_pre == 0xEC0CD6CF)
+check("region 0 stock adjustment equals complemented prefix CRC",
+      r0_adj == (r0_pre ^ 0xFFFFFFFF) == 0x13F32930)
+check("region 0 complete CRC residue is 0xFFFFFFFF",
+      community_crc32(CF[0x10000:0x17DF0]) == 0xFFFFFFFF)
+
+# The public 4512000 high region is anomalous as published, but the mismatch is
+# explained exactly by one bit at 0xBB1C4. Clearing bit 5 (A2 -> 82) makes the
+# existing stock word at 0xFFDEC valid without changing the CRC algorithm.
+check("published region 1 residue is the known anomalous 0x5AA2313A",
+      community_crc32(CF[r1_crc_addr:crc_range_end]) == 0x5AA2313A)
+corrected = bytearray(CF)
+check("published byte at 0xBB1C4 is 0xA2", corrected[0xBB1C4] == 0xA2)
+corrected[0xBB1C4] = 0x82
+corrected_pre = community_crc32(corrected[r1_crc_addr:0xFFDEC])
+stock_adj = struct.unpack_from("<I", corrected, 0xFFDEC)[0]
+check("one-bit reconstruction makes stock fixup exact",
+      corrected_pre == 0xF69D7780
+      and stock_adj == (corrected_pre ^ 0xFFFFFFFF) == 0x0962887F)
+check("one-bit reconstructed region 1 residue is 0xFFFFFFFF",
+      community_crc32(corrected[r1_crc_addr:crc_range_end]) == 0xFFFFFFFF)
+
+# main.c computes the CRC from live CodeFlash after programming the target block,
+# rather than using a calibration-specific hardcoded adjustment.
+patch_write = mc.index("err = flash_block_rmw(block_base);")
+crc_compute = mc.index("unsigned int crc_pre_adj = crc32_flash_range(CRC_RANGE_START, CRC_ADJ_ADDR);")
+check("community patcher computes CRC from live flash after target-block RMW",
+      patch_write < crc_compute)
+check("community patcher derives adjustment as complement of live prefix CRC",
+      "unsigned int new_adj = crc_pre_adj ^ 0xFFFFFFFF;" in mc)
+
+# On the reconstructed stock image, our calibration-specific Gate-2 patch has a
+# deterministic replacement adjustment. The live patcher would derive this from
+# the real ECU contents rather than needing the number hardcoded.
+patched = bytearray(corrected)
+patched[0x8E6C8] = 0x95
+patched_pre_adj = community_crc32(patched[r1_crc_addr:0xFFDEC])
+patched_adj = patched_pre_adj ^ 0xFFFFFFFF
+struct.pack_into("<I", patched, 0xFFDEC, patched_adj)
+check("reconstructed Gate-2 patch adjustment is 0x91698386",
+      patched_pre_adj == 0x6E967C79 and patched_adj == 0x91698386,
+      f"pre=0x{patched_pre_adj:08X} adjustment=0x{patched_adj:08X}")
+check("reconstructed Gate-2 patched region validates to 0xFFFFFFFF",
+      community_crc32(patched[r1_crc_addr:crc_range_end]) == 0xFFFFFFFF)
 
 
 print(f"\n== RESULT: {ok} passed, {bad} failed ==")
