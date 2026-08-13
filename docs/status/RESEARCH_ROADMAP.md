@@ -31,13 +31,15 @@ What to investigate next, in rough priority order. Completed items move to
    commit. Only rejection on stock firmware followed by acceptance after the
    semantic Gate-2 patch can establish the exploit claim; write/reboot persistence
    remains insufficient.
-4. **Run the prepared application-context command-5 hardware probe.** The local
-   depth pass is closed: the smallest recovered experiment is four instruction
-   substitutions / 14 bytes in FCU block `0x68000`, using the stock activator,
-   stock `0x68B42 → 0x88350 → 0x87CCC` command-5 chain, and existing DID `0x1010`
-   selector 3 for generated-result observation. Exact CAN stimulus, boot-CRC
-   resigning, source-image refusal rules, and RESTORE generation are implemented
-   under `exploit/command5/`. The only remaining positive criterion is hardware:
+4. **Run the prepared application-context command-5 hardware probe.** Stock WDBI
+   `2E 01 10 0F` now supplies bank-1 activation through `0x8A782 → 0x69018`, so
+   the smallest recovered experiment is only two diagnostic-observation
+   substitutions / 6 bytes in FCU block `0x68000`: force DID `0x1010` selector 3
+   to copy and redirect its source to `FEBE51AA`. The stock
+   `0x68B42 → 0x88350 → 0x87CCC` command-5 chain and selector-3 status source stay
+   unchanged. Exact CAN stimulus, fresh-boot requirement, boot-CRC resigning,
+   source-image refusal rules, and RESTORE generation are implemented under
+   `exploit/command5/`. The only remaining positive criterion is hardware:
    selector 4 in initialized application context must produce a fresh 16-byte
    result relative to the pre-stimulus diagnostic baseline. Canonical:
    [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md).

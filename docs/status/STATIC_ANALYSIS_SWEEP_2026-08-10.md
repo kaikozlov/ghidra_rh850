@@ -1067,13 +1067,12 @@ was searched separately. No search traversed unrelated personal storage.
   expected output-ready count. A fault/undocumented hardware sequence that
   reports success without delivering required output blocks is not excluded by
   static MainPE software analysis.
-- **Dormant bank-1 activation is a whole-image bounded static negative**
-  (`SECOC-040`). No external Ghidra reference reaches `0x69018` or any interior
-  address; CodeFlash contains no 32-bit pointer into its 42-byte body; and the
-  exact `FEBE508F` census shows startup clear, activator set-to-1, scheduled
-  reads, and finalizer terminal writes only. Normal CAN `0x01B..0x01F`, startup,
-  lifecycle, and recovered function-pointer tables cannot arm it. External
-  debug/fault/runtime-corruption activation is not disproved.
+- **Superseded 2026-08-13 (CORR-052 / corrected SECOC-040):** this sweep's
+  whole-image bank-1 activation negative was over-broad. The raw direct-pointer
+  and `FEBE508F` writer censuses remain true, but WDBI DID `0x100F` points one hop
+  earlier to wrapper `0x8A782`, which directly calls `0x69018`. Stock
+  `2E 01 10 0F` therefore arms bank 1 in an allowed application session. CAN
+  `0x01B..0x01F` alone still cannot arm it.
 - **The application signing-proxy software architecture is closed**
   (`SECOC-041`). Stock `0x68B42` proves the selector-bearing serialized
   command-5 call shape, so selector 4 does not require direct `ICUSCMD`
@@ -1330,10 +1329,11 @@ was searched separately. No search traversed unrelated personal storage.
   U023A87 monitor map, Techstream P5 failure-type corpus, and semantic coverage.
 - Re-ran processor verification, which also regenerated the processor fixture
   and instruction inventory, then checked exact project-inventory parity.
-- Reconciled the top-level SecOC summary with Stage 7: dormant bank-1 activation
-  is a whole-image bounded static negative, while the separate serialized
-  application-context command-5 proxy is statically specified and awaits only
-  live permission/performance testing.
+- **Superseded 2026-08-13 (CORR-052):** this reconciliation inherited the
+  over-broad Stage-7 activation negative. Stock WDBI DID `0x100F` selector 1
+  reaches bank-1 activator `0x69018` through wrapper `0x8A782`; the separate
+  serialized application-context command-5 proxy remains statically specified
+  for production-style integration and awaits live permission/performance testing.
 - Reconciled command-13/RAM_KEY language across the SecOC index,
   `key-recovery-assessment.md`, `software-path-assessment.md`, FINDINGS, and
   OPEN_QUESTIONS: standard SHE disproves nonvolatile slot→RAM_KEY→export;

@@ -43,11 +43,11 @@ public class AnnotateSecocApplication extends GhidraScript {
         rename(0x68F0CL,"crypto_test_bank0_update_counter_snapshot",
             "Snapshot the eight COM update counters used by crypto-test bank 0.");
         rename(0x68F92L,"crypto_test_bank0_activate",
-            "Dormant activator for crypto-test bank 0. It initializes state and update-counter snapshots but has no recovered caller or CodeFlash function-pointer entry.");
+            "Crypto-test bank-0 activator. Application WDBI DID 0x100E reaches it through action wrapper 0x8A774; it initializes state and update-counter snapshots.");
         rename(0x68FC2L,"crypto_test_bank1_update_counter_snapshot",
             "Snapshot the five COM update counters for CAN 0x01B..0x01F before crypto-test bank 1 begins.");
         rename(0x69018L,"crypto_test_bank1_activate",
-            "Dormant activator for crypto-test bank 1. It sets FEBE508F=1, initializes state 0x11, clears bank RAM, and snapshots CAN 0x01B..0x01F update counters. No recovered caller or CodeFlash function-pointer entry reaches it.");
+            "Crypto-test bank-1 activator reached by application WDBI DID 0x100F through action wrapper 0x8A782. It sets FEBE508F=1, initializes state 0x11, clears bank RAM, and snapshots CAN 0x01B..0x01F update counters.");
         rename(0x69068L,"icus_command5_test_result_compare",
             "Compare all 16 command-5 output bytes at FEBE51AA with the expected bytes at FEBE518A; return 0x33 on equality and 0x44 on mismatch.");
         rename(0x68E16L,"icus_key_update_diagnostic_start",
@@ -265,7 +265,7 @@ public class AnnotateSecocApplication extends GhidraScript {
         label(0x25912L,"crypto_test_bank1_signal_ids",
             "Signal IDs 95..100: two scalar selector/mode inputs followed by four opaque eight-byte input/expected-result groups.");
         label(0xFEBE508FL,"crypto_test_bank1_active",
-            "Dormant crypto-test bank-1 activation state. Only activator 0x69018 writes value 1; no recovered caller reaches that activator.");
+            "Crypto-test bank-1 activation state. Activator 0x69018 writes value 1 and is reachable from application WDBI DID 0x100F via wrapper 0x8A782.");
         label(0xFEBE5090L,"crypto_test_bank1_state",
             "Crypto-test bank-1 state/result byte: collect 0x11, submit 0x22, success 0x33, failure 0x44.");
         label(0xFEBE5098L,"crypto_test_runtime_key_selector",

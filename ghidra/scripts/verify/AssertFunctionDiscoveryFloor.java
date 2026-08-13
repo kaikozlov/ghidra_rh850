@@ -34,6 +34,7 @@ public class AssertFunctionDiscoveryFloor extends GhidraScript {
     private static final PointerTable[] TABLES = {
         new PointerTable("xcp_command", 0x2b3f0L, 7, 8, 4),
         new PointerTable("application_command", 0x22c30L, 18, 4, 0),
+        new PointerTable("application_wdbi", 0x25804L, 19, 12, 4, 8),
         new PointerTable("application_operation", 0x28098L, 10, 16, 8, 12),
         new PointerTable("packet_high_selector", 0x26cccL, 8, 4, 0),
         new PointerTable("packet_low_selector", 0x26cecL, 45, 4, 0),

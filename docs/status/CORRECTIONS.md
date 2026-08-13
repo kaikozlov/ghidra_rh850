@@ -807,6 +807,10 @@ the mistakes are not re-made.
 
 ### CORR-044 — Dormant command-5 inputs/output required a new application runner
 
+> **Superseded in part by CORR-052 (2026-08-13):** the CAN input mapping remains
+> correct, but stock WDBI activation removes the activation patch and the host's
+> full-window polling makes the status-source patch unnecessary.
+
 - **Wrong:** treating the property-4 `0x01B` row as permanently opaque and the
   locally compared generated result as requiring a new CAN transmitter or a new
   standalone application command-5 runner for the first probe.
@@ -970,3 +974,36 @@ the mistakes are not re-made.
   transaction ordering, address advancement, reassembly, and RAM-window bounds.
 - **Canonical:** [../security/memory-safety-audit.md](../security/memory-safety-audit.md);
   `exploit/followups/bootloader_primitives.py`.
+
+### CORR-052 — Direct activator-pointer census missed a one-hop WDBI wrapper
+
+- **Wrong:** SECOC-040 promoted two narrow facts—no raw CodeFlash pointer directly
+  into `crypto_test_bank1_activate @ 0x69018`, and no alternate writer of active
+  value `1`—into a whole-image claim that stock software could not reach the
+  activator. That missed indirect dispatch through a wrapper.
+- **Right:** the 19-row application WDBI callback table at `0x25804` row 8 is DID
+  `0x100F`; its action pointer is `0x8A782`, and that wrapper directly calls
+  `0x69018` at `0x8A786`. The paired precheck at `0x8A768` returns success,
+  selector 1 is enabled with zero input fields, policy index 0 has zero configured
+  SecurityAccess levels and session records 1/2/3, and the outer SID-`0x2E` gate
+  permits programming/extended. Stock request `2E 01 10 0F` therefore arms bank
+  1 in an allowed application session. CAN `0x01B..0x01F` alone still cannot arm
+  it.
+- **Experiment consequence:** CORR-044's activation tail-branch is unnecessary.
+  Its status-source substitution is also unnecessary because the live host does
+  not treat the status byte as completion; it polls the full observation window
+  and compares generated-result bytes against the pre-stimulus baseline. The
+  command-5 probe is reduced from four mutations / 14 bytes to two
+  diagnostic-observation mutations / 6 bytes: `0x68ECA: fa05→0000` and
+  `0x68EDE: 24963a9a→2496aa99`. A fresh application boot is required for each
+  deterministic run because the stock activator only arms zero state and the
+  finalizer leaves a terminal value.
+- **Analysis consequence:** both WDBI callback columns are now seeded as
+  dispatch-proven function tables. A clean four-stage Ghidra rebuild therefore
+  recovers wrapper `0x8A782` and its call to `0x69018`, preventing recurrence of
+  the direct-pointer false negative.
+- **Canonical:** [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md);
+  [../security/secoc/application-chain.md](../security/secoc/application-chain.md);
+  `ghidra/scripts/seed/SeedDispatchProvenFunctionTables.java`;
+  `tests/verify_icus_stage7_static.py`;
+  `tests/verify_secoc_command5_experiment.py`.

@@ -30,6 +30,7 @@ from exploit.command5.stimulus import (
     build_input_frames,
     build_stimulus_plan,
     command5_elm327_param,
+    parse_bank1_activation_response,
     parse_selector3_response,
 )
 from tools.build_secoc_patch_manifest import crc32, discover_crc_descriptors
@@ -50,20 +51,39 @@ firmware_path = REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin"
 firmware = firmware_path.read_bytes()
 
 print("== bounded instruction mutations ==")
-check("experiment uses four bounded instruction mutations", len(MUTATIONS) == 4)
+check("experiment uses two observation-only instruction mutations", len(MUTATIONS) == 2)
 check("all experiment mutations fit one 32 KiB FCU block", all(TARGET_BLOCK_BASE <= m.address and m.address + len(m.original) <= TARGET_BLOCK_BASE + FCU_BLOCK_SIZE for m in MUTATIONS))
-check("total changed instruction bytes is 14", sum(len(m.original) for m in MUTATIONS) == 14)
+check("total changed instruction bytes is 6", sum(len(m.original) for m in MUTATIONS) == 6)
 for mutation in MUTATIONS:
     observed = firmware[mutation.address:mutation.address + len(mutation.original)]
     check(f"{mutation.name} preimage matches committed firmware", observed == mutation.original, observed.hex())
 
 by_name = {m.name: m for m in MUTATIONS}
-check("activation patch is exact 4-byte tail branch", by_name["activate-bank1-after-init"].original.hex() == "40063f00" and by_name["activate-bank1-after-init"].replacement.hex() == "8007660f")
 check("diagnostic copy gate patch is two-byte NOP", by_name["did1010-force-copy"].replacement == b"\x00\x00")
 check("diagnostic result source patch points at generated-result buffer encoding", by_name["did1010-result-source"].replacement.hex() == "2496aa99")
-check("diagnostic status source is independent from key-update source encoding", by_name["did1010-status-source"].replacement != by_name["did1010-status-source"].original)
+check("experiment contains no activation or status-source mutation", set(by_name) == {"did1010-force-copy", "did1010-result-source"})
 
-print("\n== static dormant-harness contract ==")
+print("\n== stock WDBI activation contract ==")
+WRITE_DID = struct.Struct("<HBBI")
+did_100f = WRITE_DID.unpack_from(firmware, 0x26AEC + 8 * WRITE_DID.size)
+check("write-DID entry 8 is enabled DID 0x100F", did_100f == (0x100F, 0, 1, 0x26678), repr(did_100f))
+check("DID 0x100F selects policy index 0", struct.unpack_from("<H", firmware, 0x26690 + 8 * 2)[0] == 0)
+check("policy 0 has no SecurityAccess requirement and three sessions", firmware[0x26420:0x26422] == b"\x00\x03")
+session_list = struct.unpack_from("<I", firmware, 0x26678 + 4)[0]
+session_records = [struct.unpack_from("<I", firmware, session_list + i * 4)[0] for i in range(3)]
+check("policy 0 resolves to default/programming/extended sessions",
+      session_list == 0x26668 and [firmware[record + 1] for record in session_records] == [1, 2, 3],
+      repr([hex(record) for record in session_records]))
+did_config = firmware[0x26B8D + 8 * 15:0x26B8D + 9 * 15]
+check("DID 0x100F enables selector 1", did_config[4] == 1, did_config.hex())
+check("DID 0x100F selector 1 consumes zero data fields", firmware[0x26B93 + 8 * 15] == 0)
+callback_row = struct.unpack_from("<HHII", firmware, 0x25804 + 8 * 12)
+check("DID 0x100F callback row selects success precheck and action wrapper",
+      callback_row == (0x100F, 0, 0x8A768, 0x8A782), repr(callback_row))
+check("DID 0x100F action wrapper directly calls crypto_test_bank1_activate",
+      firmware[0x8A786:0x8A78A] == bytes.fromhex("bdff92e8"))
+
+print("\n== static crypto-test harness contract ==")
 check("stable-input threshold is three observations", firmware[0x30FBB] == 3, str(firmware[0x30FBB]))
 # The stock finalizer must not erase the generated-result buffer before the
 # diagnostic shim can observe it.
@@ -137,6 +157,8 @@ check("selector-4/mode-1 frame is 0x01B bytes 04 01 ...", frames[0].address == 0
 check("0x01C/0x01D carry the exact 16-byte command-5 message", frames[1].address == 0x01C and frames[1].data == message[:8] and frames[2].address == 0x01D and frames[2].data == message[8:])
 check("0x01E/0x01F carry the exact 16-byte expected value", frames[3].address == 0x01E and frames[3].data == expected[:8] and frames[4].address == 0x01F and frames[4].data == expected[8:])
 plan = build_stimulus_plan(message, expected=expected)
+check("default plan uses stock WDBI bank-1 activation", plan["activation"]["request"] == "2E 01 10 0F")
+check("default plan requires a fresh application boot per activation", "fresh application boot" in plan["activation"]["lifecycle"])
 check("default plan uses five spaced rounds", plan["rounds"] == DEFAULT_ROUNDS == 5 and plan["round_interval_seconds"] == 0.10)
 check("plan records three required stable observations", plan["stability"]["required_unchanged_observations"] == 3)
 check("bounded Panda parameter encodes flag and selected bus", command5_elm327_param(base_param=1, bus=2) == 0x8201)
@@ -154,7 +176,16 @@ except StimulusError as exc:
 else:
     check("too-few update rounds are rejected", False)
 
-print("\n== DID 0x1010 selector-3 observation parser ==")
+print("\n== diagnostic response parsers ==")
+activation = parse_bank1_activation_response(b"\x6e\x01\x10\x0f")
+check("bank-1 activation parser accepts exact stock WDBI echo", activation["positive_response"] == "6e01100f")
+try:
+    parse_bank1_activation_response(b"\x6e\x01\x10\x0e")
+except StimulusError as exc:
+    check("bank-1 activation parser rejects wrong DID", "unexpected" in str(exc), str(exc))
+else:
+    check("bank-1 activation parser rejects wrong DID", False)
+
 response = b"\x6e\x03\x10\x10" + b"\x10" + bytes(range(16)) + bytes(range(32))
 parsed = parse_selector3_response(response)
 check("selector-3 parser exposes patched status byte", parsed["status"] == 0x10)
@@ -173,6 +204,8 @@ stimulus_source = (REPO / "exploit" / "command5" / "stimulus.py").read_text(enco
 check("experiment patch does not contain SecOC Gate-2 target address", "8e6c8" not in source)
 check("experiment patch does not import production flash backend", "flash_backend" not in source)
 check("stimulus labels result as application-context evidence only", "does not prove production secoc transmit integration" in stimulus_source)
+check("live stimulus activates bank 1 through stock WDBI", "_raw_bank1_activate" in stimulus_source and "\\x01\\x10\\x0f" in stimulus_source)
+check("live stimulus requires a fresh application boot", "fresh application boot" in stimulus_source)
 check("live stimulus keeps pre-stimulus diagnostic baseline", "result_changed_from_pre_stimulus_baseline" in stimulus_source)
 check("live stimulus selects bounded ELM327 command-5 mode", "command5_elm327_param" in stimulus_source)
 check("live stimulus rejects Panda-blocked frames", "safety_tx_blocked" in stimulus_source)

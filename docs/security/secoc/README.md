@@ -26,12 +26,14 @@ All three object-15 copies are invalid in this exact snapshot, while the live
 SecOC receive path selects protected ICU-S slot 4 without reading object 15.
 The embedded `FF*16` KAT is compiled out and says nothing about the live slot.
 Command 5 is substantially recovered as MAC generation and accepts selector 4
-in software. Its sole configured stock caller is a dormant CAN-fed crypto-test
-bank; the stock bank compares the result locally and is not a production SecOC
-transmit path. Stage 7 strengthens the old "no recovered activation edge" result
-to a whole-image bounded static negative: no external entry/interior reference,
-no CodeFlash pointer into the activator body, and no second writer that arms its
-active state. Separately, the initialized application exposes serialized
+in software. Its sole configured stock caller is a CAN-fed crypto-test bank;
+stock application WDBI DID `0x100F` selector 1 activates bank 1 through wrapper
+`0x8A782 -> crypto_test_bank1_activate @ 0x69018`. The stock bank compares the
+result locally and is not a production SecOC transmit path. The earlier Stage-7
+"no recovered activation edge" conclusion was corrected on 2026-08-13: its
+direct-pointer census missed this one-hop WDBI wrapper. The active-state writer
+census remains useful only for showing that CAN input alone cannot arm the bank.
+Separately, the initialized application exposes serialized
 command-5 plumbing suitable for a foreground signing proxy. Live slot-4
 command-5 permission and performance remain dynamic.
 

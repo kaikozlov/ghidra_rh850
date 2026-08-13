@@ -368,13 +368,16 @@ than left open:
   bounded software negative; abnormal hardware sequencing that reports clean
   completion without delivering the specified output blocks is outside the
   static software model. Canonical: [software-path-assessment.md](software-path-assessment.md).
-- **Dormant command-5 test activation:** the `0x69018` activator has no external
-  reference to its entry or interior, no ordinary CodeFlash pointer into its
-  42-byte body, and is the only recovered function that writes active value `1`
-  to `FEBE508F`. Startup clears the byte and the bank finalizer writes terminal
-  state rather than activation. Thus stock CAN/test lifecycle cannot arm it in
-  the recovered graph. Debugger/fault/runtime-corruption activation remains a
-  separate dynamic possibility.
+- **Command-5 test activation (corrected 2026-08-13):** the earlier direct-pointer
+  census missed a one-hop stock diagnostic edge. Application WDBI DID `0x100F`
+  selector 1 points to wrapper `0x8A782`, whose call at `0x8A786` directly invokes
+  `crypto_test_bank1_activate @ 0x69018`. The selector consumes zero data fields;
+  policy 0 has no SecurityAccess-level entries and allows session records 1/2/3,
+  while the outer SID-`0x2E` gate permits programming/extended. Thus
+  `2E 01 10 0F` arms bank 1 in stock application diagnostics. CAN
+  `0x01B..0x01F` still cannot arm it alone. Startup clears `FEBE508F`, while the
+  finalizer leaves a terminal state, so a fresh application boot is required for
+  a deterministic repeat.
 
 These negatives do **not** remove the signing-oracle route. The application
 already contains a serialized command-5 path and a viable foreground hook

@@ -84,18 +84,27 @@ check("abort/replacement submits command 0x3f", bytes.fromhex("3f") in CF[0x89BE
 for token in ("status-zero gated", "16 bytes", "48 bytes", "command replacement", "hardware sequencing"):
     check(f"software-path report records {token}", token.lower() in SOFTWARE_REPORT.read_text(encoding="utf-8").lower())
 
-print("\n== dormant crypto-test activator closure ==")
+print("\n== crypto-test activator reachability closure ==")
 ACT_START, ACT_END = 0x69018, 0x69042
 check("activator body remains pinned", body_hash(ACT_START, ACT_END - ACT_START) == "12088375d109e4753b8e88ffeb0edef82691229791ab8505f4ffab62e106f1fd")
-# Exhaustive raw 32-bit pointer scan catches ordinary function-pointer tables,
-# including pointers to interior instructions/trampolines in the activator body.
+# The WDBI action table does not point directly to 0x69018; DID 0x100F points
+# to wrapper 0x8A782, whose literal call reaches the stock activator. This
+# one-hop indirection is why the earlier direct-pointer census missed it.
+WDBI_100F_ACTION_PTR = 0x25804 + 8 * 12 + 8
+check("WDBI DID 0x100F action pointer selects wrapper 0x8A782",
+      struct.unpack_from("<I", CF, WDBI_100F_ACTION_PTR)[0] == 0x8A782)
+check("WDBI DID 0x100F wrapper directly calls bank-1 activator",
+      decode_long_branch(0x8A786) == ("jarl", 0x69018))
+# Exhaustive raw 32-bit pointer scan remains useful, but it proves only that no
+# table points straight into the activator body; it is not a reachability proof.
 pointer_hits: list[tuple[int, int]] = []
 for off in range(len(CF) - 3):
     value = struct.unpack_from("<I", CF, off)[0]
     if ACT_START <= value < ACT_END:
         pointer_hits.append((off, value))
-check("no CodeFlash pointer targets activator entry/interior", not pointer_hits, repr(pointer_hits[:8]))
-# Direct code/data references, including short branches, are locked by AssertIcusStage7Static.java.
+check("no raw CodeFlash pointer directly targets activator entry/interior", not pointer_hits, repr(pointer_hits[:8]))
+# Direct code/data references, including the WDBI wrapper call, are locked by
+# AssertIcusStage7Static.java.
 check("startup path clears activation byte", CF[0x68006:0x6800A] == bytes.fromhex("44078f98"))
 check("activator uniquely has explicit set-to-one store", CF[0x69024:0x6902A] == bytes.fromhex("010a440f8f98"))
 check("finalizer writes terminal -1 state, not activation 1", CF[0x68D2C:0x68D36] == bytes.fromhex("1f9a44979798449f8f98"))

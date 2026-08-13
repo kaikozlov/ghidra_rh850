@@ -32,8 +32,8 @@ inventory = REPO / "data/ghidra_project_inventory.baseline.jsonl"
 records = [json.loads(line) for line in inventory.read_text(encoding="utf-8").splitlines()]
 totals = records[-1]
 inventory_sha = hashlib.sha256(inventory.read_bytes()).hexdigest()
-check("project totals", totals["record"] == "totals" and totals["functions"] == 6037
-      and totals["instructions"] == 180262 and totals["memory_blocks"] == 14)
+check("project totals", totals["record"] == "totals" and totals["functions"] == 6094
+      and totals["instructions"] == 181203 and totals["memory_blocks"] == 14)
 check("inventory hash published", inventory_sha in text, inventory_sha)
 
 outside = json.loads((REPO / "data/outside_function_summary.json").read_text())
@@ -47,6 +47,7 @@ check("outside-function adjudication", outside["adjudication_state_counts"]
 
 table_specs = [
     (0x2B3F0, 7, 8, (4,)), (0x22C30, 18, 4, (0,)),
+    (0x25804, 19, 12, (4, 8)),
     (0x28098, 10, 16, (8, 12)), (0x26CCC, 8, 4, (0,)),
     (0x26CEC, 45, 4, (0,)), (0x26DA0, 9, 4, (0,)),
     (0x26218, 6, 28, (0,)),
@@ -57,16 +58,16 @@ pointer_count = sum(
     for base, count, stride, offsets in table_specs
     for index in range(count) for offset in offsets
 )
-check("dispatch-proven table denominator", len(table_specs) == 7 and pointer_count == 87)
-check("dispatch denominator published", "7 tables / 87 nonzero target pointers" in text)
+check("dispatch-proven table denominator", len(table_specs) == 8 and pointer_count == 123)
+check("dispatch denominator published", "8 tables / 123 nonzero target pointers" in text)
 
 summary = json.loads((REPO / "data/semantic_coverage_summary.json").read_text())
-check("semantic review totals", summary["function_count"] == 6037
+check("semantic review totals", summary["function_count"] == 6094
       and summary["reviewed_function_count"] == 110
       and summary["bounded_semantics_count"] == 22)
 check("semantic state totals", summary["review_state_counts"] == {
     "reviewed_unknown": 88, "semantically_identified": 19,
-    "structurally_bounded": 3, "unreviewed": 5927,
+    "structurally_bounded": 3, "unreviewed": 5984,
 })
 check("semantic grade totals", summary["evidence_grade_counts"]
       == {"bounded": 3, "recovered": 11, "verified": 8})

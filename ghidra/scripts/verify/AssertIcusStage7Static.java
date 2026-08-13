@@ -38,9 +38,10 @@ public class AssertIcusStage7Static extends GhidraScript {
 
     @Override
     public void run() throws Exception {
-        // No direct code/data reference reaches the activator entry. The only
-        // interior reference is its own conditional branch to 0x6903e.
-        assertExactRefs(0x69018L);
+        // WDBI DID 0x100F action wrapper 0x8A782 directly reaches the bank-1
+        // activator. The only interior reference is the activator's own
+        // conditional branch to 0x6903e.
+        assertExactRefs(0x69018L, "0008a786:UNCONDITIONAL_CALL");
         for (long address = 0x6901aL; address < 0x69042L; address += 2) {
             if (address == 0x6903eL) {
                 assertExactRefs(address, "00069022:CONDITIONAL_JUMP");

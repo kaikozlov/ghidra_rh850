@@ -136,16 +136,19 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   nonblank ICU-S storage. The current CPU-visible dump contains only `00/FF`;
   public P1M-E fault injection proves ordinary flash readout, not key-array
   access.
-- **Application-resident signing proxy — dynamic discriminator only.** Stage 7
-  closes the static architecture (SECOC-041): stock `0x68B42 -> 0x88350 ->
-  0x87CCC` supplies selector-4 command-5 plumbing; `0x65750` provides a
-  foreground non-CH0 hook slot; command-7 contention is handled by deferring on
-  the shared serialized driver; sender freshness and a controlled `0x7F8`
-  bench egress are specified. Remaining questions are dynamic: does live slot 4
-  actually permit command 5, what latency/jitter does it have under real
-  command-7 load, and does a provisioned isolated bench produce CMACs matching
-  independently known frames? Production Tx integration also requires a new
-  audited route because stock CanIf has no `0x2E4/0x131` Tx entry. See
+- **Application command-5 signing capability — dynamic discriminator only.**
+  Stock WDBI `2E 01 10 0F` now supplies bank-1 activation, and stock
+  `0x68B42 -> 0x88350 -> 0x87CCC` supplies selector-4 command-5 plumbing; the
+  minimal bench oracle therefore needs no activation hook, only a bounded
+  observation route for `FEBE51AA`. For a production-resident signing proxy,
+  `0x65750` remains a foreground non-CH0 hook slot; command-7 contention is
+  handled by deferring on the shared serialized driver; sender freshness and a
+  controlled `0x7F8` bench egress are specified. Remaining questions are
+  dynamic: does live slot 4 actually permit command 5, what latency/jitter does
+  it have under real command-7 load, and does a provisioned isolated bench
+  produce CMACs matching independently known frames? Production Tx integration
+  also requires a new audited route because stock CanIf has no `0x2E4/0x131` Tx
+  entry. See
   [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.
 - **Object-15 producer.** No static producer exists in this calibration.
   Where a provisioned unit writes object 15 from is unknown (dealer tool path

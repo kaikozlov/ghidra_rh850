@@ -302,8 +302,9 @@ rebuilds produce byte-identical canonical inventories. Review the tracked diff,
 then rerun `make verify-project-parity`. Ordinary verification never updates the
 baseline.
 
-Corrected rebuild stats: **6,037 functions, 180,262 instructions, 38,069
-CLI-reported symbols** (floors are collapse detectors; semantic checks live in
+Corrected rebuild stats after WDBI callback-table seeding (2026-08-13): **6,094
+functions, 181,203 instructions, 38,300 CLI-reported symbols** (floors are
+collapse detectors; semantic checks live in
 `make verify-processor`, exact identity in `make verify-project-parity`).
 
 After a graph-changing rebuild, regenerate the structural semantic ledger and
