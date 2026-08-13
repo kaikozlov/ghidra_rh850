@@ -1164,6 +1164,18 @@ The one-off experiment is captured under `exploit/behavioral_proof/`. Its vendor
 
 `analyze_forwarding.py` treats transport correctness as a separate assertion from EPS acceptance. In stock mode all four source→forward pairs must be byte-identical. In invalid-MAC mode `0x191/0x412` remain byte-identical and `0x2E4/0x131` must equal the source frame after exactly the MAC28-zero transform. Any change to the byte-4 high nibble or any bit outside MAC28 fails the trial.
 
-`validate_trial.py` then binds the behavioral claim to SHA-preserved raw CAN, EPS DTC, and steering-state artifacts. Baseline and pre-patch rejection must use the same stock firmware SHA; all phases must identify the same EPS by F181 and use the same source/forward bus topology; pre/post invalid-MAC phases must use the same full openpilot ablation commit; and forwarding reports must hash-bind the exact raw capture they analyze. Only the explicit rejection→acceptance contrast can set `secoc_bypass_proven=true`.
+`validate_trial.py` does not trust a phase's `observed_behavior` string or a
+precomputed pass flag. It reprocesses the exact SHA-bound raw capture to prove
+the four-ID forwarding invariant and runs `analyze_acceptance.py` over
+timestamp-aligned stock `0x2E4` command, EPS torque response, `0x262` LKA state,
+and steering fault evidence. Fixed checked-in thresholds yield only
+`accepted`, `rejected`, or `ambiguous`; ambiguity fails closed. The baseline and
+pre-patch phases must use the same exact stock image, the post-patch image must
+be reproduced byte-for-byte from the unique semantic manifest plus dynamic CRC
+fixup, and a completed APPLY run must bind that stock image, manifest, expected
+post-image, and telemetry artifact. DTC snapshots must be positive read-only
+`19 02 FF` results bound to the same F181 identity. Only a recomputed
+accepted→rejected→accepted contrast with all bindings intact can set
+`secoc_bypass_proven=true`.
 
 This experiment proves the Gate-2 authentication-bypass effect only. It does not imply that a production SecOC transmit/signing path has been recovered, and it is independent of the selector-4 command-5 application-context experiment.

@@ -872,3 +872,24 @@ the mistakes are not re-made.
   `exploit/command5/kai-openpilot-command5-safety.json`.
 - **Canonical:** [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md);
   `exploit/command5/stimulus.py`.
+
+### CORR-047 — MAC28 proof trusted declared behavior instead of deriving acceptance
+
+- **Wrong:** the initial three-phase validator treated exact
+  `observed_behavior` strings as the acceptance/rejection predicate. Its raw CAN,
+  steering, firmware, and APPLY references could be placeholder files as long as
+  their hashes matched, so a syntactically complete bundle could claim bypass
+  without causal evidence.
+- **Right:** phase labels are now non-authoritative notes. The validator
+  independently recomputes source→forward transport from raw CAN, derives EPS
+  acceptance from timestamp-aligned stock command/torque, `0x262` LKA state,
+  and fault evidence, validates read-only DTC/F181 snapshots, reproduces the
+  exact patched image from the semantic manifest and stock bytes, and binds the
+  completed APPLY run plus telemetry. Missing, malformed, ambiguous, or
+  inconsistent evidence fails closed.
+- **Verification:** the deterministic trial uses the real Sienna CodeFlash and
+  semantic manifest and includes adversarial cases for relabeling, fake
+  steering, forwarding-report unbinding, phase-image substitution, and patched
+  image tampering.
+- **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md);
+  `exploit/behavioral_proof/README.md`; `validate_trial.py`.

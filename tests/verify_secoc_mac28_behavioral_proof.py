@@ -13,6 +13,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
+from exploit.behavioral_proof.analyze_acceptance import analyze_acceptance
 from exploit.behavioral_proof.analyze_forwarding import analyze, iter_capture
 from exploit.behavioral_proof.mac28 import (
     MAC28_IDS,
@@ -23,6 +24,8 @@ from exploit.behavioral_proof.mac28 import (
     validate_forward_pair,
 )
 from exploit.behavioral_proof.validate_trial import SCHEMA, validate_trial
+from exploit.patcher.build_payload import simulate_apply
+from exploit.patcher.patch_config import config_from_manifest
 
 passed = failed = 0
 
@@ -133,40 +136,31 @@ check("steering evidence records EPS torque/fault fields", all(value in steer_so
 print("\n== complete causal-proof schema ==")
 with tempfile.TemporaryDirectory() as td:
     temp = Path(td)
-    # Reuse a real semantic Gate-2 manifest, copied under the synthetic trial so
-    # every required artifact is local/SHA-bound like a hardware evidence bundle.
     source_manifest = REPO / "data" / "generated" / "secoc_patch_manifest_4512000.json"
     manifest = temp / "manifest.json"
     manifest.write_bytes(source_manifest.read_bytes())
+    manifest_obj = json.loads(manifest.read_text(encoding="utf-8"))
 
-    def artifact(name: str, content: str) -> dict:
+    stock = temp / "stock.bin"
+    stock.write_bytes((REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes())
+    config = config_from_manifest(manifest_obj, mode="apply")
+    patched_bytes, expected_fixup, expected_residue = simulate_apply(stock.read_bytes(), config)
+    patched = temp / "patched.bin"
+    patched.write_bytes(patched_bytes)
+
+    def text_artifact(name: str, content: str) -> dict:
         path = temp / name
         path.write_text(content, encoding="utf-8")
         return {"path": path.name, "sha256": sha(path)}
 
-    f181_hex = "018965B451200000000000"
-
-    def analysis_artifact(name: str, mode: str, raw_sha: str) -> dict:
-        path = temp / name
-        path.write_text(
-            json.dumps(
-                {
-                    "schema": "toyota-secoc-mac28-forwarding-analysis-v1",
-                    "mode": mode,
-                    "pass": True,
-                    "source_bus": 1,
-                    "forward_bus": 2,
-                    "capture": {"sha256": raw_sha},
-                }
-            )
-            + "\n",
-            encoding="utf-8",
-        )
+    def file_artifact(path: Path) -> dict:
         return {"path": path.name, "sha256": sha(path)}
 
+    f181_hex = "018965B451200000000000"
+
     def dtc_artifact(name: str) -> dict:
-        path = temp / name
-        path.write_text(
+        return text_artifact(
+            name,
             json.dumps(
                 {
                     "schema": "toyota-eps-dtc-snapshot-v1",
@@ -176,34 +170,131 @@ with tempfile.TemporaryDirectory() as td:
                 }
             )
             + "\n",
-            encoding="utf-8",
         )
-        return {"path": path.name, "sha256": sha(path)}
+
+    def phase_artifacts(name: str, mode: str, accepted: bool) -> dict:
+        raw_path = temp / f"{name}.can.ndjson"
+        steer_path = temp / f"{name}.steer.ndjson"
+        rows = []
+        steering_rows = []
+        for index in range(30):
+            timestamp = 1_000_000_000 + index * 10_000_000
+            command = (index - 15) * 100
+            payloads = {
+                0x191: bytes((index, 0x22, 0x33, 0x44, 0x50 | (index & 0xF), 0x66, 0x77, 0x88)),
+                0x412: bytes((0x88, index, 0xAA, 0xBB, 0xC0 | (index & 0xF), 0xDD, 0xEE, 0xFF)),
+                0x2E4: bytes((1,)) + command.to_bytes(2, "big", signed=True)
+                + bytes((index, 0xA0 | (index & 0xF), 0x11, 0x22, 0x33)),
+                0x131: bytes((0x10, 0x20, index, 0x40, 0x70 | (index & 0xF), 0x44, 0x55, 0x66)),
+            }
+            for offset, address in enumerate(sorted(STOCK_CAMERA_PROOF_IDS)):
+                source = payloads[address]
+                forwarded = (
+                    invalidate_mac28(source)
+                    if mode == "invalid-mac28" and address in MAC28_IDS
+                    else source
+                )
+                for bus, data, tick in ((1, source, 2 * offset), (2, forwarded, 2 * offset + 1)):
+                    rows.append(
+                        {
+                            "timestamp_ns": timestamp + tick,
+                            "address": f"0x{address:X}",
+                            "bus": bus,
+                            "data": data.hex(),
+                        }
+                    )
+            eps_status = bytearray(8)
+            eps_status[3] = 5 if accepted else 0
+            rows.append(
+                {
+                    "timestamp_ns": timestamp + 9,
+                    "address": "0x262",
+                    "bus": 2,
+                    "data": bytes(eps_status).hex(),
+                }
+            )
+            steering_rows.append(
+                {
+                    "timestamp_ns": timestamp,
+                    "steeringTorqueEps": command / 10 if accepted else 0,
+                    "steerFaultTemporary": not accepted,
+                    "steerFaultPermanent": False,
+                }
+            )
+        raw_path.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
+        steer_path.write_text(
+            "".join(json.dumps(row) + "\n" for row in steering_rows), encoding="utf-8"
+        )
+
+        forward_path = temp / f"{name}.forward.json"
+        forward_report = analyze(iter_capture(raw_path), source_bus=1, forward_bus=2, mode=mode)
+        forward_report["capture"] = {"path": raw_path.name, "sha256": sha(raw_path)}
+        forward_path.write_text(json.dumps(forward_report, sort_keys=True) + "\n", encoding="utf-8")
+
+        acceptance_path = temp / f"{name}.acceptance.json"
+        acceptance_report = analyze_acceptance(raw_path, steer_path, source_bus=1, eps_bus=2)
+        acceptance_path.write_text(
+            json.dumps(acceptance_report, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        return {
+            "raw_can": file_artifact(raw_path),
+            "forwarding_analysis": file_artifact(forward_path),
+            "acceptance_analysis": file_artifact(acceptance_path),
+            "steering": file_artifact(steer_path),
+        }
+
+    telemetry = temp / "apply.telemetry.ndjson"
+    telemetry.write_text(json.dumps({"event": "payload-complete", "success": True}) + "\n")
+    apply_run = temp / "apply.run.json"
+    apply_run.write_text(
+        json.dumps(
+            {
+                "schema": "secoc-patch-run-v1",
+                "mode": "apply",
+                "execute": True,
+                "status": "payload-complete",
+                "image": {"sha256": sha(stock)},
+                "manifest": {"sha256": sha(manifest)},
+                "telemetry": {
+                    "path": telemetry.name,
+                    "sha256": sha(telemetry),
+                    "payload_success": True,
+                },
+                "apply": {
+                    "write_crc_sequence_complete": True,
+                    "expected_post_image_sha256": sha(patched),
+                    "expected_fixup": f"0x{expected_fixup:08X}",
+                    "expected_residue": f"0x{expected_residue:08X}",
+                },
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
     commit = meta["commit"]
     phases = {}
-    for phase, behavior, firmware_sha, mode in (
-        ("baseline_stock", "stock-steering-accepted", "11" * 32, "stock"),
-        ("prepatch_invalid_mac28", "invalid-mac-rejected", "11" * 32, "invalid-mac28"),
-        ("postpatch_invalid_mac28", "invalid-mac-accepted", "33" * 32, "invalid-mac28"),
+    for phase, behavior, firmware_sha, mode, accepted in (
+        ("baseline_stock", "human-note-only", sha(stock), "stock", True),
+        ("prepatch_invalid_mac28", "human-note-only", sha(stock), "invalid-mac28", False),
+        ("postpatch_invalid_mac28", "human-note-only", sha(patched), "invalid-mac28", True),
     ):
-        raw_can = artifact(f"{phase}.can", phase + " raw")
         phases[phase] = {
             "f181_hex": f181_hex,
             "firmware_sha256": firmware_sha,
             "openpilot_ablation_commit": commit if phase != "baseline_stock" else None,
             "observed_behavior": behavior,
-            "raw_can": raw_can,
-            "forwarding_analysis": analysis_artifact(
-                f"{phase}.forward.json", mode, raw_can["sha256"]
-            ),
             "dtc": dtc_artifact(f"{phase}.dtc.json"),
-            "steering": artifact(f"{phase}.steer.ndjson", phase + " steering"),
+            **phase_artifacts(phase, mode, accepted),
         }
     trial = {
         "schema": SCHEMA,
         "f181_hex": f181_hex,
         "openpilot_ablation_commit": commit,
+        "stock_image": file_artifact(stock),
+        "patched_image": file_artifact(patched),
+        "apply_run": file_artifact(apply_run),
         "secoc_patch_manifest": {"path": manifest.name, "sha256": sha(manifest)},
         "phases": phases,
     }
@@ -212,12 +303,27 @@ with tempfile.TemporaryDirectory() as td:
     result = validate_trial(trial_path)
     check("complete three-phase evidence bundle can establish proof", result["secoc_bypass_proven"] is True, repr(result["errors"]))
 
-    bad_trial = json.loads(trial_path.read_text(encoding="utf-8"))
-    bad_trial["phases"]["postpatch_invalid_mac28"]["observed_behavior"] = "write-and-reboot-succeeded"
-    bad_trial_path = temp / "bad-trial.json"
-    bad_trial_path.write_text(json.dumps(bad_trial, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    bad_result = validate_trial(bad_trial_path)
-    check("flash/reboot success cannot substitute for behavioral acceptance", bad_result["secoc_bypass_proven"] is False and any("invalid-mac-accepted" in item for item in bad_result["errors"]))
+    relabeled = json.loads(trial_path.read_text(encoding="utf-8"))
+    relabeled["phases"]["postpatch_invalid_mac28"]["observed_behavior"] = "write-and-reboot-only"
+    relabeled_path = temp / "relabeled.json"
+    relabeled_path.write_text(json.dumps(relabeled, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    relabeled_result = validate_trial(relabeled_path)
+    check("human behavior labels are non-authoritative", relabeled_result["secoc_bypass_proven"] is True)
+
+    fake_acceptance = json.loads(trial_path.read_text(encoding="utf-8"))
+    fake_steering = temp / "fake-accepted.steer.ndjson"
+    fake_steering.write_text("declared accepted\n", encoding="utf-8")
+    fake_acceptance["phases"]["postpatch_invalid_mac28"]["steering"] = file_artifact(fake_steering)
+    fake_acceptance_path = temp / "fake-acceptance.json"
+    fake_acceptance_path.write_text(
+        json.dumps(fake_acceptance, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    fake_acceptance_result = validate_trial(fake_acceptance_path)
+    check(
+        "declared acceptance cannot substitute for parseable causal evidence",
+        fake_acceptance_result["secoc_bypass_proven"] is False
+        and any("malformed evidence" in item for item in fake_acceptance_result["errors"]),
+    )
 
     missing = json.loads(trial_path.read_text(encoding="utf-8"))
     missing["phases"]["prepatch_invalid_mac28"].pop("dtc")
@@ -231,7 +337,7 @@ with tempfile.TemporaryDirectory() as td:
     wrong_stock_path = temp / "wrong-stock.json"
     wrong_stock_path.write_text(json.dumps(wrong_stock, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     wrong_stock_result = validate_trial(wrong_stock_path)
-    check("baseline and prepatch must use identical stock firmware", wrong_stock_result["secoc_bypass_proven"] is False and any("same stock firmware" in item for item in wrong_stock_result["errors"]))
+    check("phase firmware must bind the exact stock artifact", wrong_stock_result["secoc_bypass_proven"] is False and any("exact phase artifact" in item for item in wrong_stock_result["errors"]))
 
     unbound = json.loads(trial_path.read_text(encoding="utf-8"))
     analysis_ref = unbound["phases"]["prepatch_invalid_mac28"]["forwarding_analysis"]
@@ -244,8 +350,24 @@ with tempfile.TemporaryDirectory() as td:
     unbound_path = temp / "unbound.json"
     unbound_path.write_text(json.dumps(unbound, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     unbound_result = validate_trial(unbound_path)
-    check("forwarding report must bind exact raw capture", unbound_result["secoc_bypass_proven"] is False and any("exact raw_can capture" in item for item in unbound_result["errors"]))
+    check("forwarding report must bind exact raw capture", unbound_result["secoc_bypass_proven"] is False and any("exact raw CAN" in item for item in unbound_result["errors"]))
     analysis_path.write_text(original_analysis, encoding="utf-8")
+
+    wrong_patch = json.loads(trial_path.read_text(encoding="utf-8"))
+    tampered_patch = temp / "tampered-patched.bin"
+    tampered = bytearray(patched.read_bytes())
+    tampered[0] ^= 1
+    tampered_patch.write_bytes(tampered)
+    wrong_patch["patched_image"] = file_artifact(tampered_patch)
+    wrong_patch["phases"]["postpatch_invalid_mac28"]["firmware_sha256"] = sha(tampered_patch)
+    wrong_patch_path = temp / "wrong-patch.json"
+    wrong_patch_path.write_text(json.dumps(wrong_patch, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    wrong_patch_result = validate_trial(wrong_patch_path)
+    check(
+        "patched artifact must be the exact semantic patch plus CRC fixup",
+        wrong_patch_result["secoc_bypass_proven"] is False
+        and any("exact manifest patch" in item for item in wrong_patch_result["errors"]),
+    )
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:
