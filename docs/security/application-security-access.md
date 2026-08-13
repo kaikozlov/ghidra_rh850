@@ -210,12 +210,19 @@ protection boundary on this firmware.
 
 The empty RDBI policy therefore exposes a broad read surface, but the recovered
 callback graph now supports a narrower confidentiality boundary than the policy
-scan alone. All 196 unique callbacks are represented as exact functions, and a
-four-hop direct-call audit over selected high-value crypto/SA RAM regions finds
-only four known non-secret workspace/status observations. This does **not**
-prove the full 242-DID corpus contains no privacy, diagnostic-history, or other
-sensitive information; it specifically closes the currently recovered
-key/MAC/SA-buffer disclosure candidates.
+scan alone. All 196 unique callbacks are represented as exact functions. A
+four-hop path-insensitive direct-call audit over selected high-value crypto/SA
+RAM regions reports four observations, but three are statically infeasible:
+DIDs `0105`, `010B`, and `F18C` pass literal checkpoint IDs `0x204`, `0x20A`, and
+`0x207` into `0x65D66`, which routes the `0x2xx` family to `0x66172`; their
+apparent `FEBF0308` hit lies behind the mutually exclusive `0x000` branch
+through `0x668B2`. The actual `0x66172` closure has zero selected sensitive
+references. The only branch-feasible selected observation is DID `0110` reading
+`FEBE5050`, whose exact xrefs bound it to reset/saturating status bookkeeping,
+not key or generated-MAC material. This does **not** prove the full 242-DID
+corpus contains no privacy, diagnostic-history, or other sensitive information;
+it specifically closes the currently recovered key/MAC/SA-buffer disclosure
+candidates.
 
 **Corolla caveat:** The Corolla EPS (`8965F1208000`) is a different
 calibration. Its Dcm configuration tables are generated separately and may

@@ -12,7 +12,8 @@ REPO = Path(__file__).resolve().parents[1]
 PROGRAM = "RH850_P1M-E_CodeFlash.bin"
 EXPECTED = (
     "ASSERT application-rdbi-disclosure-boundary: "
-    "dids=242 unique_callbacks=196 max_depth=4 sensitive_hits=4 unexpected=0"
+    "dids=242 unique_callbacks=196 max_depth=4 conservative_hits=4 "
+    "branch_resolved_hits=1 checkpoint_0x200_hits=0 unexpected=0"
 )
 
 
@@ -60,7 +61,7 @@ def main() -> int:
             print(output[-4000:])
             return 1
 
-    print("[PASS] live RDBI disclosure boundary: 242 DIDs / 196 callbacks / 4-hop bounded negative")
+    print("[PASS] live RDBI disclosure boundary: 4 conservative hits -> 1 branch-resolved benign status hit")
     return 0
 
 

@@ -1,9 +1,11 @@
 //@author kaikozlov
 //@category Verification
 // Read-only bounded audit of unauthenticated application RDBI callbacks.
-// Follows direct calls to depth 4 and requires the only references into the
-// selected security-sensitive RAM neighborhoods to remain the four known,
-// non-secret status/workspace observations below.
+// The conservative direct-call closure is intentionally path-insensitive; three
+// apparent NvM-workspace hits are then discharged with exact literal-callsite
+// and dispatcher evidence because 0x2xx checkpoint IDs cannot enter the 0x000
+// family that owns FEBF0308. The branch-resolved boundary therefore retains
+// only the known non-secret DID-0110 status accumulator.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.*;
@@ -40,11 +42,19 @@ public class AssertApplicationRdbiDisclosureBoundary extends GhidraScript {
 
     @Override
     public void run() throws Exception {
-        Set<String> expected = new TreeSet<>(Arrays.asList(
+        Set<String> expectedConservative = new TreeSet<>(Arrays.asList(
             "0105:000668e0:DATA:febf0308",
             "010B:000668e0:DATA:febf0308",
             "0110:0006909a:READ:febe5050",
             "F18C:000668e0:DATA:febf0308"
+        ));
+        Set<String> infeasibleCheckpointHits = new TreeSet<>(Arrays.asList(
+            "0105:000668e0:DATA:febf0308",
+            "010B:000668e0:DATA:febf0308",
+            "F18C:000668e0:DATA:febf0308"
+        ));
+        Set<String> expectedResolved = new TreeSet<>(Arrays.asList(
+            "0110:0006909a:READ:febe5050"
         ));
         Set<String> actual = new TreeSet<>();
         Set<Long> uniqueCallbacks = new HashSet<>();
@@ -91,22 +101,109 @@ public class AssertApplicationRdbiDisclosureBoundary extends GhidraScript {
         if (uniqueCallbacks.size() != 196) {
             throw new IllegalStateException("RDBI unique callback count changed: " + uniqueCallbacks.size());
         }
-        if (!actual.equals(expected)) {
-            Set<String> missing = new TreeSet<>(expected); missing.removeAll(actual);
-            Set<String> extra = new TreeSet<>(actual); extra.removeAll(expected);
-            throw new IllegalStateException("RDBI disclosure boundary changed; missing="
+        if (!actual.equals(expectedConservative)) {
+            Set<String> missing = new TreeSet<>(expectedConservative); missing.removeAll(actual);
+            Set<String> extra = new TreeSet<>(actual); extra.removeAll(expectedConservative);
+            throw new IllegalStateException("RDBI conservative disclosure boundary changed; missing="
                 + missing + " extra=" + extra);
         }
 
-        // The one crypto-neighborhood hit is a status accumulator, not the
-        // generated command-5 output. Pin its complete xref topology.
+        // Resolve the three path-insensitive FEBF0308 observations. Each RDBI
+        // callback loads a literal 0x2xx checkpoint ID immediately before its
+        // call to 0x65D66. The dispatcher masks 0xFF00 and routes the 0x200
+        // family to 0x66172; FEBF0308 is referenced only through the mutually
+        // exclusive 0x000-family callee 0x668B2. Exact bytes pin both the
+        // caller constants and the relevant dispatcher decision.
+        requireBytes(0x4cce4L, "20360402"); // movea 0x204,r0,r6
+        requireBytes(0x4cce8L, "81ff7e90"); // jarl 0x65D66
+        requireBytes(0x4cd94L, "20360a02"); // movea 0x20A,r0,r6
+        requireBytes(0x4cd98L, "81ffce8f"); // jarl 0x65D66
+        requireBytes(0x4e93cL, "20360702"); // movea 0x207,r0,r6
+        requireBytes(0x4e940L, "81ff2674"); // jarl 0x65D66
+        requireBytes(0x65d6aL, "c60e00ff"); // andi 0xFF00,r6,r1
+        requireBytes(0x65d84L, "010600fe"); // compare normalized family with 0x200
+        requireBytes(0x65d88L, "ca05");     // branch away when not 0x200
+        requireBytes(0x65d8aL, "80ffe803"); // jarl 0x66172
+
+        Set<String> resolved = new TreeSet<>(actual);
+        resolved.removeAll(infeasibleCheckpointHits);
+        if (!resolved.equals(expectedResolved)) {
+            throw new IllegalStateException("RDBI branch-resolved disclosure boundary changed: "
+                + resolved);
+        }
+        Set<String> branch200Hits = collectSensitiveHits(getFunctionAt(toAddr(0x66172L)), 3, 0xffff);
+        if (!branch200Hits.isEmpty()) {
+            throw new IllegalStateException("RDBI 0x200 checkpoint branch gained sensitive refs: "
+                + branch200Hits);
+        }
+
+        // The sole branch-resolved crypto-neighborhood hit is a status
+        // accumulator, not the generated command-5 output. Pin its complete
+        // xref topology.
         assertExactRefs(0xfebe5050L,
             "00068190:WRITE", "00068d52:READ", "00068da4:WRITE",
             "0006909a:READ", "000690e4:WRITE");
 
         println(String.format(
-            "ASSERT application-rdbi-disclosure-boundary: dids=%d unique_callbacks=%d max_depth=%d sensitive_hits=%d unexpected=0",
-            COUNT, uniqueCallbacks.size(), MAX_DEPTH, actual.size()));
+            "ASSERT application-rdbi-disclosure-boundary: dids=%d unique_callbacks=%d max_depth=%d conservative_hits=%d branch_resolved_hits=%d checkpoint_0x200_hits=0 unexpected=0",
+            COUNT, uniqueCallbacks.size(), MAX_DEPTH, actual.size(), resolved.size()));
+    }
+
+    private Set<String> collectSensitiveHits(Function root, int maxDepth, int did) throws Exception {
+        if (root == null) throw new IllegalStateException("missing sensitive-closure root");
+        Set<String> hits = new TreeSet<>();
+        ArrayDeque<Node> queue = new ArrayDeque<>();
+        Set<Address> seen = new HashSet<>();
+        queue.add(new Node(root, 0));
+        seen.add(root.getEntryPoint());
+        while (!queue.isEmpty()) {
+            monitor.checkCancelled();
+            Node node = queue.remove();
+            InstructionIterator instructions = currentProgram.getListing().getInstructions(
+                node.function.getBody(), true);
+            while (instructions.hasNext()) {
+                Instruction instruction = instructions.next();
+                for (Reference reference : instruction.getReferencesFrom()) {
+                    Address target = reference.getToAddress();
+                    if (target == null || !target.isMemoryAddress()) continue;
+                    if (!reference.getReferenceType().isCall() && auditRange(target.getOffset())) {
+                        hits.add(hitKey(did, instruction.getAddress(), reference));
+                    }
+                    if (node.depth < maxDepth && reference.getReferenceType().isCall()) {
+                        Function callee = getFunctionAt(target);
+                        if (callee != null && seen.add(callee.getEntryPoint())) {
+                            queue.add(new Node(callee, node.depth + 1));
+                        }
+                    }
+                }
+            }
+        }
+        return hits;
+    }
+
+    private void requireBytes(long offset, String expectedHex) throws Exception {
+        byte[] expected = hexBytes(expectedHex);
+        byte[] actual = new byte[expected.length];
+        currentProgram.getMemory().getBytes(toAddr(offset), actual);
+        if (!Arrays.equals(actual, expected)) {
+            throw new IllegalStateException(String.format(
+                "bytes changed at %s: expected=%s actual=%s",
+                toAddr(offset), expectedHex, toHex(actual)));
+        }
+    }
+
+    private byte[] hexBytes(String hex) {
+        byte[] out = new byte[hex.length() / 2];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = (byte) Integer.parseInt(hex.substring(i * 2, i * 2 + 2), 16);
+        }
+        return out;
+    }
+
+    private String toHex(byte[] bytes) {
+        StringBuilder out = new StringBuilder();
+        for (byte value : bytes) out.append(String.format("%02x", value & 0xff));
+        return out.toString();
     }
 
     private void assertExactRefs(long targetOffset, String... expectedRefs) {

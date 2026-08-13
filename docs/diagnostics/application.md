@@ -300,12 +300,20 @@ A bounded depth-4 direct-call audit across all 242 RDBI roots finds no reference
 to the recovered command-5 generated-result buffer `FEBE51AA..FEBE51B9`, the
 key-update result bank `FEBE523A..FEBE5269`, payload-derived key material
 `FEBF2D08..FEBF2D17`, or the application SecurityAccess seed/data/temp
-neighborhoods. The only selected security-adjacent hits are generic NvM
-workspace `FEBF0308` for DIDs `0105`, `010B`, and `F18C`, plus DID `0110` reading
-`FEBE5050`. Exact xrefs show `FEBE5050` is initialized/reset and maintained as a
-saturating crypto-test/status accumulator, not the command-5 generated output.
-This is a bounded negative for the currently recovered high-value RAM regions,
-not a claim that every RDBI value is non-sensitive.
+neighborhoods. A path-insensitive closure initially reports four selected
+security-adjacent observations: generic NvM workspace `FEBF0308` for DIDs
+`0105`, `010B`, and `F18C`, plus DID `0110` reading `FEBE5050`. The first three
+are infeasible. Their callbacks load literal checkpoint IDs `0x204`, `0x20A`,
+and `0x207` immediately before `checkpoint_object_restore_read @ 0x65D66`;
+the helper masks `0xFF00` and routes every `0x2xx` ID to `0x66172`, while the
+`FEBF0308` reference belongs to the mutually exclusive `0x000` branch through
+`0x668B2`. The three-hop closure below the actual `0x66172` branch contains
+seven functions and zero selected security-sensitive references. The sole
+branch-feasible selected hit is therefore DID `0110 -> FEBE5050`. Exact xrefs
+show `FEBE5050` is initialized/reset and maintained as a saturating
+crypto-test/status accumulator, not the command-5 generated output. This is a
+bounded negative for the currently recovered high-value RAM regions, not a
+claim that every RDBI value is non-sensitive.
 
 WDBI callback `0x95DCE` phases: start `0x95C8C`, cancel `0x95D7E`, poll `0x95DB4`.
 Writable DIDs are the separate 19-entry table at `0x26AEC` (`0x1000..0x110D`
