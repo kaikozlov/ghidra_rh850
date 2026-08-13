@@ -303,7 +303,7 @@ index 1 and extended-only session 3. Every DID supports selector 1; only
 from two input bytes on `0x1004` and the 64-byte authenticated package on
 `0x1010`, selector-1 actions consume zero data bytes.
 
-Two distinct policy-0 control families are now recovered. `0x1007/0x1008` are
+Three policy-0 lifecycle/service-control shapes are now recovered. `0x1007/0x1008` are
 zero-payload, one-shot live lifecycle reinitializers: their local preconditions
 omit the explicit vehicle-speed check used by `0x1002/0x1106`, and extended
 session entry is not stationary-gated because session policy `0x4C942` applies

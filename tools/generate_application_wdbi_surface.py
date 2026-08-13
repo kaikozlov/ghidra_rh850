@@ -57,7 +57,7 @@ SEMANTICS: dict[int, tuple[str, str]] = {
     0x1004: ("fixed_maintenance_trigger", "selector 1 requires fixed input FFFF then queues internal operation 5; tester value is not consumed by the action"),
     0x1007: ("live_lifecycle_reinit", "zero-payload selector 1 calls B7A36(0), forcing lifecycle groups FEBEB454/455 to state 0x11; no local speed/mode gate; one-shot per boot via FEBE8157"),
     0x1008: ("live_lifecycle_reinit", "zero-payload selector 1 calls diagnostic-only B7AAE, forcing lifecycle group FEBEB456 to state 0x11; no local speed/mode gate; one-shot per boot via FEBE8158"),
-    0x1009: ("stateful_control", "selector 1 conditionally reaches direct_call_FE0B0; deeper OEM meaning unassigned"),
+    0x1009: ("state_gated_live_lifecycle_reinit", "zero-payload selector 1 conditionally calls diagnostic-only B55E2, which forces FEBEB2D5 to lifecycle state 0x11; feature byte 0xAEC5D is enabled; start additionally requires FEBEE958==0; selector 3 can clear FEBE8159 when that aggregate-health condition changes"),
     0x100E: ("crypto_test_activation", "selector 1 wrapper 0x8A774 calls crypto_test_bank0_activate @ 0x68F92"),
     0x100F: ("crypto_test_activation", "selector 1 wrapper 0x8A782 calls crypto_test_bank1_activate @ 0x69018"),
     0x1010: ("authenticated_key_update", "selector 1/3 runs ICU-S command 8 SHE-compatible key update; package is authenticated internally"),

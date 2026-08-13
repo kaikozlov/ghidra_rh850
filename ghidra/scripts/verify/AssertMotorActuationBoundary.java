@@ -320,6 +320,30 @@ public class AssertMotorActuationBoundary extends GhidraScript {
                 "000bedc0:UNCONDITIONAL_CALL", "000bee0a:UNCONDITIONAL_CALL",
                 "000bf208:UNCONDITIONAL_CALL");
 
+        // WDBI 0x1009 is a state-gated variant of the live lifecycle-reinit
+        // surface. Its diagnostic-only B55E2 helper forces FEBEB2D5 to 0x11;
+        // B5254 is serviced through B5526 in the same operational scheduler.
+        // Pin the aggregate-health snapshot/latch and exact topology so this
+        // remains a bounded control-state finding rather than a motor claim.
+        assertExactRefs(0xfebe8159L,
+                "0004f2ac:READ", "0004f2e8:WRITE",
+                "0004f306:WRITE", "0004f30a:READ");
+        assertExactRefs(0xfebeb2d5L,
+                "000b514a:READ", "000b525c:READ", "000b52d2:WRITE",
+                "000b5370:READ", "000bd784:WRITE", "000b55f2:WRITE");
+        assertExactRefs(0xfebeb220L,
+                "000b3952:WRITE", "000bd0a6:READ", "000bd950:WRITE");
+        assertExactRefs(0xfebee958L,
+                "000bd0aa:WRITE", "000be616:WRITE",
+                "0004f444:READ", "0004f2d4:READ",
+                "0004ec80:READ", "0004ecda:READ", "0004ed4a:READ",
+                "0004ed94:READ", "0004edde:READ", "0004ee28:READ",
+                "0004ee72:READ", "0004eec4:READ");
+        assertExactRefs(0xb55e2L, "000fe0b6:COMPUTED_CALL");
+        assertExactRefs(0xb5526L,
+                "000bedfc:UNCONDITIONAL_CALL", "000beea2:UNCONDITIONAL_CALL",
+                "000bf246:UNCONDITIONAL_CALL");
+
         println("ASSERT motor-actuation-boundary: call_edges=" + callEdges
                 + " reference_censuses=" + referenceCensuses
                 + " failures=" + failures);

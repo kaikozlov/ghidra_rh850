@@ -61,6 +61,7 @@ Important recovered effects include:
 | `1004` | `0x4F170` | fixed maintenance trigger: selector 1 requires input `FF FF`, then queues internal operation 5 without consuming a tester-chosen value |
 | `1007` | `0x4F1EA` | one-shot live lifecycle reinitialization of groups `FEBEB454/455`; no local speed/mode gate |
 | `1008` | `0x4F25C` | one-shot diagnostic-only live lifecycle reinitialization of group `FEBEB456`; no local speed/mode gate |
+| `1009` | `0x4F2C2` | state-gated live lifecycle reinitialization: fixed-enabled feature byte, aggregate-health-zero admission, forces `FEBEB2D5=0x11` |
 | `100E` | `0x8A774` | calls crypto-test bank-0 activator `0x68F92` |
 | `100F` | `0x8A782` | calls crypto-test bank-1 activator `0x69018` |
 | `1010` | dedicated path | ICU-S command-8 authenticated key update |
@@ -127,6 +128,30 @@ scheduler. Static evidence does **not** show these lifecycle states joining the
 proved d/q current/PWM producer cone, so this is an availability/control-state
 primitive rather than arbitrary steering actuation.
 
+### `0x1009`: state-gated live lifecycle reinitialization
+
+DID `0x1009` extends the same lifecycle-reinitialization class but with a
+stronger runtime admission condition than `0x1007/0x1008`. It is still a
+policy-0, zero-payload selector-1 action reachable from unauthenticated extended
+session, and its precondition contains no explicit vehicle-speed or system-mode
+read. In this calibration its feature byte at CodeFlash `0xAEC5D` is fixed to
+`0x20`, so the feature gate is enabled.
+
+The action reads `FEBEE958`, a snapshot of aggregate state `FEBEB220`, and only
+calls the diagnostic thunk `0xFE0B0 -> B55E2` when that snapshot is zero.
+`B55E2` invokes two recovery helpers and forces lifecycle state `FEBEB2D5` to
+`0x11`. Worker `B5254` is serviced through wrapper `B5526`, which is called by
+`system_mode_per_tick_dispatcher` in the same `mode > 0x102` operational
+scheduler region as the other lifecycle workers.
+
+The repeatability boundary differs from `0x1007/0x1008`. Selector 1 writes
+latch `FEBE8159=1`, but selector 3 can clear that latch if the feature becomes
+disabled or the aggregate-health snapshot becomes nonzero. Static evidence
+therefore supports a **state-dependent**, not strictly one-shot-per-boot,
+reinitialization primitive. It remains bounded by the aggregate-health-zero
+condition and, like the other lifecycle paths, has no recovered static join into
+the d/q/PWM producer cone.
+
 ## 5. `0x110A/0x110C/0x110D` service-mode chain
 
 These three WDBIs are the strongest state-changing entries recovered in this
@@ -188,11 +213,12 @@ activation: a calibration with a fully implemented SecurityAccess mechanism has
 left the entire 19-entry WDBI set at SecurityAccess level count zero, including
 state-changing factory/service controls.
 
-The strongest recovered consequences are two related availability/control-state
+The strongest recovered consequences are related availability/control-state
 paths: `0x1007/0x1008` can inject one-shot live lifecycle reinitialization into
 normal operational scheduling without the explicit speed gate used by other
-WDBIs, and `0x110A/0x110C/0x110D` can request special EPS service modes under
-their own runtime gates. These are authentication/safety-policy weaknesses, not
+WDBIs; `0x1009` exposes a state-gated variant that forces `FEBEB2D5=0x11` when
+aggregate health is zero; and `0x110A/0x110C/0x110D` can request special EPS
+service modes under their own runtime gates. These are authentication/safety-policy weaknesses, not
 evidence of a clean steering-control primitive.
 
 For comma/openpilot work these WDBIs should not be treated as a production

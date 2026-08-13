@@ -153,6 +153,37 @@ check("normal per-tick dispatcher calls lifecycle scheduler B79E8 on both branch
       CF[0xBEDC0:0xBEDC4] == bytes.fromhex("bfff288c")
       and CF[0xBEE0A:0xBEE0E] == bytes.fromhex("bfffde8b"))
 
+print("\n== state-gated live lifecycle reinitializer 0x1009 ==")
+r1009 = row_by_did(rows, 0x1009)
+check("DID 0x1009 is zero-payload policy-0 selector-1 control",
+      r1009["policy_index"] == "0" and r1009["effective_wdbi_sessions"] == "2,3"
+      and r1009["selector1_input_bytes"] == "0")
+check("0x1009 precondition body is pinned and lacks explicit vehicle-speed read",
+      hashlib.sha256(CF[0x4F296:0x4F2C2]).hexdigest() ==
+      "69be616d770bd0958f8821af689778fb9300a3d622df6c5aa412b52d46e6e3e7"
+      and bytes.fromhex("e40f9330") not in CF[0x4F296:0x4F2C2])
+check("0x1009 feature gate is enabled in this calibration", CF[0xAEC5D] == 0x20)
+check("0x1009 action body is pinned",
+      hashlib.sha256(CF[0x4F2C2:0x4F322]).hexdigest() ==
+      "9fc8a91c178ea9edb9adc1d3d653cc8e65744c9aae03dc0e97cd67e569540808")
+check("0x1009 selector 1 requires nonzero feature and zero aggregate-health snapshot",
+      CF[0x4F2D0:0x4F2E8] == bytes.fromhex(
+          "8affd4ef240f593161e2ea0de051f205e009da058affcced"))
+check("0x1009 diagnostic thunk reaches B55E2",
+      CF[0xFE0B0:0xFE0B8] == bytes.fromhex("2c06e2550b006c00"))
+check("0x1009 reinitializer body is pinned and forces FEBEB2D5 to 0x11",
+      hashlib.sha256(CF[0xB55E2:0xB55FA]).hexdigest() ==
+      "e9f35997e57139f2bba81867526093f65b86784fa070dff983bc173d7a68957d"
+      and CF[0xB55EE:0xB55F6] == bytes.fromhex("200e1100440fd5fa"))
+check("0x1009 lifecycle worker body is pinned",
+      hashlib.sha256(CF[0xB5254:0xB52DA]).hexdigest() ==
+      "14ec5824bf6405b24be0f4aee15f2aa11c6b5ff0232208dca2b7e633b2ce038c")
+check("0x1009 worker wrapper body is pinned",
+      hashlib.sha256(CF[0xB5526:0xB5546]).hexdigest() ==
+      "1103b161b554a7bde0fedb5bcaa05e2ceff8a024ed014437ce6e7b51a3054a7f")
+check("0x1009 selector 3 conditionally clears its diagnostic latch",
+      CF[0x4F2FC:0x4F30E] == bytes.fromhex("0052e099b205e009b2055d070d00bd0f0d00"))
+
 print("\n== stock crypto-test activation routes ==")
 r100e = row_by_did(rows, 0x100E)
 r100f = row_by_did(rows, 0x100F)
