@@ -6,6 +6,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 import struct
 import subprocess
 import sys
@@ -27,9 +28,10 @@ from exploit.patcher.patch_config import (
     VERSION,
     config_from_manifest,
 )
+from exploit.common.payload_package import PAYLOAD_SIZE, inspect_payload, package_shellcode
 from exploit.patcher.build_payload import (
     CONFIG_OFFSET,
-    PAYLOAD_SIZE,
+    TEMPLATE_SIZE,
     PayloadBuildError,
     build_configured_payload,
     inject_config,
@@ -189,10 +191,12 @@ check("preflight checks exact target preimage", "verify_patch_preimage" in prefl
 check("preflight reports stored CRC fixup", "read_le_word(cfg->crc_fixup_va)" in preflight_c)
 check("preflight computes live CRC prefix", "crc32_flash_range(cfg->crc_start, cfg->crc_fixup_va)" in preflight_c)
 check("preflight computes current full residue", "crc32_flash_range(cfg->crc_start, cfg->crc_end)" in preflight_c)
-check("validate-only returns to halt before APPLY dispatch", main_c.index("patch_config_validate_only") < main_c.index("run_apply(&g_patch_config)"))
+check("validate-only returns to halt before APPLY dispatch", main_c.index("patch_config_validate_only") < main_c.index("run_apply(cfg)"))
 check("payload source contains no reset call", "reset(" not in zero_write_sources and "0x157e" not in zero_write_sources)
 check("runtime halt services watchdog indefinitely", "while (1)" in runtime_c and "feed_watchdog();" in runtime_c)
-check("config slot is a separate fixed linker section", ".patch_config" in (REPO / "exploit" / "patcher" / "config_slot.c").read_text(encoding="utf-8"))
+header_lower = (REPO / "exploit" / "common" / "patch_config.h").read_text(encoding="utf-8").lower()
+check("runtime config uses fixed plaintext-shellcode offset", "patch_config_offset      0x0f60u" in header_lower and "patch_config_runtime_addr" in header_lower)
+check("runtime config slot remains below bootloader callback boundary", CONFIG_OFFSET + CONFIG_SIZE <= 0xFD0)
 
 print("\n== fail-closed APPLY structure ==")
 apply_c = (REPO / "exploit" / "patcher" / "apply.c").read_text(encoding="utf-8").lower()
@@ -223,7 +227,7 @@ check("APPLY rejects target readback mismatch", "err_target_readback" in apply_c
 check("APPLY rejects fixup RMW failure", "err_fixup_rmw" in apply_c)
 check("APPLY rejects fixup readback mismatch", "err_fixup_readback" in apply_c)
 check("APPLY rejects final residue mismatch", "err_final_residue" in apply_c)
-apply_dispatch_pos = main_c.index("run_apply(&g_patch_config)")
+apply_dispatch_pos = main_c.index("run_apply(cfg)")
 apply_success_pos = main_c.index("telemetry_stage(stage_success)", apply_dispatch_pos)
 check("success is emitted only after run_apply returns zero", apply_dispatch_pos < main_c.index("if (err == 0u)", apply_dispatch_pos) < apply_success_pos)
 check("flash backend retains reviewed FACI primitive", all(token in flash_c for token in ("faci_erase", "faci_program_page", "faci_fentryr", "faci_fpckar")))
@@ -247,11 +251,23 @@ residue = crc32(blob[validate.crc_start - validate.image_base:validate.crc_end -
 check("offline live-order algorithm reproduces manifest fixup", new_fixup == int(manifest["boot_crc"]["patched_fixup_for_supplied_image"], 0))
 check("offline live-order algorithm reaches expected final residue", residue == EXPECTED_RESIDUE)
 
+print("\n== authenticated RAM payload packaging ==")
+firmware_bytes = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
+payload_build_secret = firmware_bytes[0xBFD8:0xBFE8]
+security_access_secret = firmware_bytes[0xBFE8:0xBFF8]
+community_payload = (REPO / "tests" / "fixtures" / "payloads" / "dataflash_dump_payload.bin").read_bytes()
+community_inspection = inspect_payload(community_payload, secret=payload_build_secret)
+check("community payload decrypts with separate payload-build secret", community_inspection.cmac_valid and community_inspection.crc_residue == 0xFFFFFFFF)
+check("community payload callback is RAM base", community_inspection.callback_address == 0xFEBF0000)
+check("community payload descriptor covers 0xFF0 bytes", community_inspection.descriptor_address == 0xFEBF0000 and community_inspection.descriptor_length == 0xFF0)
+check("packager reproduces committed community ciphertext byte-for-byte", package_shellcode(community_inspection.shellcode_region[:0x18A], secret=payload_build_secret) == community_payload)
+check("payload-build and SecurityAccess secrets are distinct in source firmware", payload_build_secret != security_access_secret)
+
 print("\n== host payload injection and RESTORE artifact ==")
 with tempfile.TemporaryDirectory() as td:
     temp = Path(td)
-    template_path = temp / "generic_payload.bin"
-    template_path.write_bytes(b"\x00" * PAYLOAD_SIZE)
+    template_path = temp / "generic_shellcode_template.bin"
+    template_path.write_bytes(b"\x00" * TEMPLATE_SIZE)
     validate_out = temp / "validate.bin"
     validate_meta = build_configured_payload(
         image_path=REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin",
@@ -259,14 +275,19 @@ with tempfile.TemporaryDirectory() as td:
         template_path=template_path,
         mode="validate-only",
         output_path=validate_out,
+        payload_secret=payload_build_secret,
     )
     built = validate_out.read_bytes()
-    injected = PatchConfigV1.from_bytes(built[CONFIG_OFFSET:CONFIG_OFFSET + CONFIG_SIZE])
-    check("generic template remains exactly 4 KiB after injection", len(built) == PAYLOAD_SIZE)
+    configured_shellcode = Path(validate_meta["configured_shellcode"]["path"]).read_bytes()
+    injected = PatchConfigV1.from_bytes(configured_shellcode[CONFIG_OFFSET:CONFIG_OFFSET + CONFIG_SIZE])
+    packaged = inspect_payload(built, secret=payload_build_secret)
+    check("configured shellcode template stays below callback boundary", len(configured_shellcode) == TEMPLATE_SIZE and TEMPLATE_SIZE <= 0xFD0)
+    check("final authenticated upload remains exactly 4 KiB", len(built) == PAYLOAD_SIZE)
     check("fixed config slot contains serialized validate config", injected.flags == FLAG_VALIDATE_ONLY and injected.patch_va == validate.patch_va)
+    check("ciphertext decrypts to configured shellcode", packaged.shellcode_region[:TEMPLATE_SIZE] == configured_shellcode and packaged.cmac_valid and packaged.crc_residue == 0xFFFFFFFF)
     check("build metadata pins image/manifest/template/payload hashes", all(validate_meta[key].get("sha256") for key in ("image", "manifest", "template", "payload")))
 
-    bad_template = bytearray(b"\x00" * PAYLOAD_SIZE)
+    bad_template = bytearray(b"\x00" * TEMPLATE_SIZE)
     bad_template[CONFIG_OFFSET] = 1
     try:
         inject_config(bytes(bad_template), validate)
@@ -283,6 +304,7 @@ with tempfile.TemporaryDirectory() as td:
             template_path=template_path,
             mode="apply",
             output_path=missing_restore_out,
+            payload_secret=payload_build_secret,
         )
     except PayloadBuildError as exc:
         check("APPLY payload generation refuses missing RESTORE directory", "restore-dir" in str(exc).lower(), str(exc))
@@ -298,6 +320,7 @@ with tempfile.TemporaryDirectory() as td:
         template_path=template_path,
         mode="apply",
         output_path=apply_out,
+        payload_secret=payload_build_secret,
         restore_dir=restore_dir,
     )
     artifact_path = Path(apply_meta["restore_artifact"]["path"])
@@ -306,6 +329,7 @@ with tempfile.TemporaryDirectory() as td:
         image_path=REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin",
         manifest_path=manifest_path,
         template_path=template_path,
+        payload_secret=payload_build_secret,
     )
     restore_cfg = PatchConfigV1.from_bytes((restore_dir / "restore_config.bin").read_bytes())
     check("RESTORE config expects patched bytes", restore_cfg.original == apply_cfg.replacement)
@@ -348,7 +372,7 @@ with tempfile.TemporaryDirectory() as td:
     restore_payload_path.write_bytes(pristine_restore_payload)
 
     wrong_template = temp / "different-template.bin"
-    wrong_template_blob = bytearray(b"\x00" * PAYLOAD_SIZE)
+    wrong_template_blob = bytearray(b"\x00" * TEMPLATE_SIZE)
     wrong_template_blob[0x20] = 1
     wrong_template.write_bytes(wrong_template_blob)
     try:
@@ -359,7 +383,7 @@ with tempfile.TemporaryDirectory() as td:
             template_path=wrong_template,
         )
     except PayloadBuildError as exc:
-        check("RESTORE artifact rejects different generic template", "different generic payload template" in str(exc).lower(), str(exc))
+        check("RESTORE artifact rejects different generic template", "different generic shellcode template" in str(exc).lower(), str(exc))
     else:
         check("RESTORE artifact rejects different generic template", False)
 
@@ -380,8 +404,8 @@ with tempfile.TemporaryDirectory() as td:
     live_manifest["semantic_resolution"]["program_sha256"] = live_manifest["image"]["sha256"]
     live_manifest_path = temp / "manifest.json"
     live_manifest_path.write_text(json.dumps(live_manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    template_path = temp / "generic_payload.bin"
-    template_path.write_bytes(b"\x00" * PAYLOAD_SIZE)
+    template_path = temp / "generic_shellcode_template.bin"
+    template_path.write_bytes(b"\x00" * TEMPLATE_SIZE)
 
     live_validate = config_from_manifest(live_manifest, mode="validate-only")
     expected = expected_preflight(bytes(live_blob), live_validate)
@@ -461,7 +485,9 @@ print("\n== bootstrap/deployer secret and routing discipline ==")
 ram_exec_source = (REPO / "exploit" / "common" / "ram_exec.py").read_text(encoding="utf-8").lower()
 deploy_source = (REPO / "exploit" / "patcher" / "deploy.py").read_text(encoding="utf-8").lower()
 check("shared bootstrap contains no embedded SecurityAccess secret", "f05f36b7d78c03e24ab4faef2a57d044" not in ram_exec_source)
-check("bootstrap takes secret from environment/file", "toyota_eps_boot_secret_hex" in ram_exec_source and "security-secret-file" in deploy_source)
+check("shared bootstrap contains no embedded payload-build secret", payload_build_secret.hex() not in ram_exec_source)
+check("bootstrap takes SecurityAccess secret from environment/file", "toyota_eps_boot_secret_hex" in ram_exec_source and "security-secret-file" in deploy_source)
+check("bootstrap takes separate payload-build secret from environment/file", "toyota_eps_payload_secret_hex" in ram_exec_source and "payload-secret-file" in deploy_source)
 check("bootstrap requires explicit UDS variant", "uds variant must be explicitly 'old' or 'new'" in ram_exec_source)
 check("deployer requires explicit route or recorded session", "--session-dir or explicit --bus and --elm327-param" in deploy_source)
 check("deployer binds APPLY to prior F181 before RAM upload", "expected_f181_hex=preflight.get(\"f181_hex\")" in deploy_source)
@@ -470,8 +496,8 @@ check("deployer does not equate payload completion with SecOC proof", "it is not
 print("\n== deploy CLI fail-closed APPLY gate ==")
 with tempfile.TemporaryDirectory() as td:
     temp = Path(td)
-    template_path = temp / "generic_payload.bin"
-    template_path.write_bytes(b"\x00" * PAYLOAD_SIZE)
+    template_path = temp / "generic_shellcode_template.bin"
+    template_path.write_bytes(b"\x00" * TEMPLATE_SIZE)
     run_dir = temp / "run"
     result = subprocess.run(
         [
@@ -484,6 +510,7 @@ with tempfile.TemporaryDirectory() as td:
             "--apply",
         ],
         cwd=REPO,
+        env={**os.environ, "TOYOTA_EPS_PAYLOAD_SECRET_HEX": payload_build_secret.hex()},
         capture_output=True,
         text=True,
         check=False,

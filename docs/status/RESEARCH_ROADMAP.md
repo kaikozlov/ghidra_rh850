@@ -4,9 +4,39 @@ What to investigate next, in rough priority order. Completed items move to
 [FINDINGS.md](FINDINGS.md); newly-discovered unknowns move to
 [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
+## Near-term exploit engineering
+
+1. **Complete the first live read-only CodeFlash acquisition with the generic
+   pipeline.** The local host/reassembler, authenticated RAM wrapper, and
+   424-byte P1M-E read-only payload are implemented and pinned-toolchain verified.
+   The next missing observation is hardware-only: record `F181`/routing, acquire
+   all 262,144 addressed words, preserve the exact SHA-bound dump, run boot-CRC
+   sanity, and feed it unchanged to the semantic resolver. No live APPLY should
+   precede this acquisition/recovery source. Canonical:
+   `exploit/dumper/README.md` and
+   [EXPLOIT_ENGINEERING_2026-08-12.md](EXPLOIT_ENGINEERING_2026-08-12.md).
+2. **Validate the unchanged semantic resolver on a foreign calibration.** No
+   local `8965F4207000`, `8965F4201000`, `8965F3401200`, or `8965F1208000`
+   CodeFlash artifact is currently present. When one arrives, freeze F181/CPU/SHA
+   provenance, run `tools/resolve_secoc_patch_image.sh` unchanged, and classify
+   the semantic target against the blurbdust egg. Zero/multiple candidates must
+   strengthen semantic matching rather than introduce an SWID→offset table.
+3. **Prepare and then run the MAC28-only behavioral proof.** The deployment
+   pipeline can only establish target/CRC persistence. The exploit claim still
+   requires otherwise-stock camera traffic with only the protected `0x2E4/0x131`
+   MAC28 invalidated, compared before/after the semantic Gate-2 patch with raw CAN,
+   DTC, and steering-state evidence.
+4. **Finish the targeted application-context command-5 harness depth pass now.**
+   This remains locally actionable and should not wait for a foreign image or
+   bench vehicle: recover the smallest reversible activation/input/output change
+   around `0x69018 → 0x68B42 → 0x88350 → 0x87CCC`, plus cyclic/finalize behavior
+   at `0x68C0C/0x68DE6`. Only the eventual selector-4 execution result is
+   hardware-gated. Canonical:
+   [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md).
+
 ## Near-term (static, this repo)
 
-1. **Semantic coverage long-tail.** Move `recovered` rows in
+5. **Semantic coverage long-tail.** Move `recovered` rows in
    `data/semantic_coverage_ledger.csv` toward behaviorally understood only when
    they intersect a concrete security, diagnostics, or torque lead. Stage 6
    closed the previously named motor/safety static cluster; do not repeat a
@@ -14,7 +44,7 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Requires a provisioned Sienna (dynamic)
 
-2. **Run the SecOC provisioned-unit experiment.** Filter NvM blocks 41/45/49,
+6. **Run the SecOC provisioned-unit experiment.** Filter NvM blocks 41/45/49,
    observe async completion, compare RAM mirror and post-write DataFlash,
    instrument ICU slot 4, validate candidates against synchronized CAN oracle
    data. Specified in
@@ -22,12 +52,12 @@ What to investigate next, in rough priority order. Completed items move to
 
 ## Requires Corolla artifacts
 
-3. **Confirm/deny the Sienna template on `8965F1208000` firmware.** MCU, SA
+7. **Confirm/deny the Sienna template on `8965F1208000` firmware.** MCU, SA
    implementation/secret location, payload format, and SecOC implementation.
    Direct field diagnostics are already mapped; do not repeat those probes.
    See [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md)
    for the structured checklist.
-4. **Close the remaining identity/runtime-key boundary on the separate 2023-US
+8. **Close the remaining identity/runtime-key boundary on the separate 2023-US
    public-route specimen.** The completed 32 KiB DataFlash is now analyzed: no
    raw key matches the local TSKM `0x00F` oracle, no public-route protected-domain
    raw key matches, 60 committed records fit the reference physical map, and an
@@ -39,17 +69,17 @@ What to investigate next, in rough priority order. Completed items move to
    and again after recovery/reset to establish key continuity. Canonical:
    [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md),
    [../tooling/toyota-dataflash-analysis.md](../tooling/toyota-dataflash-analysis.md).
-5. **Populate the TSS 3.0 family matrix.** Extend
+9. **Populate the TSS 3.0 family matrix.** Extend
    `data/tss3_eps_variant_matrix.csv` as additional variant firmware becomes
    available. Canonical: [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).
 
 ## Tooling
 
-6. **Documentation site** (optional, after this reorganization). Material for
+10. **Documentation site** (optional, after this reorganization). Material for
    MkDocs: explicit navigation, section index pages, search. Do only after
    canonical ownership is stable — search over duplicated docs just makes the
    inconsistency easier to find.
-7. ~~**Link checking** in CI for `docs/` internal cross-references.~~ **Done** —
+11. ~~**Link checking** in CI for `docs/` internal cross-references.~~ **Done** —
    `tests/verify_doc_links.py` runs in `make verify`.
 
 ## Completed static investigations

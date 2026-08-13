@@ -30,6 +30,7 @@ from exploit.dumper.protocol import (
     startup_frames,
 )
 from exploit.dumper.reassemble import CodeFlashReassembler, DumpReassemblyError, boot_crc_sanity
+from exploit.dumper.dump_codeflash import LiveDumpCollector
 
 passed = failed = 0
 
@@ -44,10 +45,11 @@ def check(name: str, condition: object, detail: str = "") -> None:
 
 
 print("== protocol namespace and framing ==")
-hello, start, length = startup_frames()
+hello, start, length, word_count = startup_frames()
 check("HELLO decodes protocol version", decode_frame(hello).kind is FrameKind.HELLO and decode_frame(hello).value == PROTOCOL_VERSION)
 check("range start decodes", decode_frame(start).kind is FrameKind.RANGE_START and decode_frame(start).value == CODEFLASH_BASE)
 check("range length decodes", decode_frame(length).kind is FrameKind.RANGE_LENGTH and decode_frame(length).value == CODEFLASH_SIZE)
+check("startup announces exact word count", decode_frame(word_count).kind is FrameKind.WORD_COUNT and decode_frame(word_count).value == WORD_COUNT)
 example = encode_data(0x1234, 0xAABBCCDD)
 decoded = decode_frame(example)
 check("data frame round-trips address/value", decoded.kind is FrameKind.DATA and decoded.value == 0x1234 and decoded.data == 0xAABBCCDD)
@@ -97,6 +99,7 @@ r_full = CodeFlashReassembler()
 # Controls can arrive around data; only their values, not sequential placement, matter.
 r_full.feed(startup_frames()[0])
 r_full.feed(startup_frames()[2])
+r_full.feed(startup_frames()[3])
 for sequence, index in enumerate(indices):
     offset = index * 4
     word = struct.unpack_from("<I", firmware, offset)[0]
@@ -153,6 +156,40 @@ dumper_sources = "\n".join(
 check("dumper workstream contains no FACI symbol", "faci_" not in dumper_sources)
 check("dumper workstream does not import flash backend", "flash_backend" not in dumper_sources)
 check("dumper workstream contains no flash erase/program primitive", "flash_block_rmw" not in dumper_sources and "faci_program_page" not in dumper_sources)
+
+print("\n== live payload and wrapper structure ==")
+dumper_c = (REPO / "exploit" / "dumper" / "main.c").read_text(encoding="utf-8").lower()
+wrapper_py = (REPO / "exploit" / "dumper" / "dump_codeflash.py").read_text(encoding="utf-8").lower()
+builder_py = (REPO / "exploit" / "dumper" / "build_shellcode.py").read_text(encoding="utf-8").lower()
+check("read payload advertises exact CodeFlash range", all(token in dumper_c for token in ("0x00000000u", "0x00100000u", "codeflash_words")))
+check("read payload emits addressed words, not sequential naked bytes", "send_frame(address, word)" in dumper_c)
+check("read payload emits word-count and DONE controls", "ctrl_word_count" in dumper_c and "send_frame(ctrl_done, count)" in dumper_c)
+check("read payload services watchdog during long stream", "feed_watchdog();" in dumper_c)
+check("read payload contains no automatic reset", "reset(" not in dumper_c and "0x157e" not in dumper_c)
+check("dumper compiler disables null-deref deletion", "-fno-delete-null-pointer-checks" in builder_py)
+check("live wrapper authenticates shellcode before RAM upload", "package_shellcode" in wrapper_py and "cmac_valid" in wrapper_py and "crc_residue" in wrapper_py)
+check("live wrapper keeps payload-build and SecurityAccess secrets separate", "load_payload_secret" in wrapper_py and "load_security_secret" in wrapper_py)
+check("live wrapper persists partial acquisition on interrupt", "except keyboardinterrupt" in wrapper_py and "allow_partial=true" in wrapper_py)
+check("complete live dump feeds semantic resolver by default", "resolve_secoc_patch_image.sh" in wrapper_py and "--no-resolve" in wrapper_py)
+check("live wrapper never imports patcher write code", "exploit.patcher" not in wrapper_py)
+
+print("\n== live collector start/noise semantics ==")
+with tempfile.TemporaryDirectory() as td:
+    capture = Path(td) / "frames.ndjson"
+    collector = LiveDumpCollector(capture)
+    try:
+        # UDS response chatter on 0x7A9 may precede payload HELLO and must not poison reconstruction.
+        check("collector ignores pre-HELLO non-protocol frame", collector.feed(b"\x03\x7f\x31\x78\x00\x00\x00\x00") is False and collector.ignored_prehello == 1)
+        check("collector starts only on HELLO", collector.feed(startup_frames()[0]) is False and collector.started)
+        for frame in startup_frames()[1:]:
+            collector.feed(frame)
+        collector.feed(encode_data(0, 0x11223344))
+        check("collector records addressed data after HELLO", collector.reassembler.unique_words == 1 and collector.accepted_frames == 5)
+        check("collector stops on DONE even when host later detects incompleteness", collector.feed(encode_control(CTRL_DONE, WORD_COUNT)) is True and not collector.reassembler.complete)
+    finally:
+        collector.close()
+    rows = [json.loads(line) for line in capture.read_text(encoding="utf-8").splitlines()]
+    check("pre-HELLO noise is not persisted as dump data", len(rows) == 6 and rows[0]["data"] == startup_frames()[0].hex())
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:

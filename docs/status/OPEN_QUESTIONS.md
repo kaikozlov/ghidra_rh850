@@ -44,6 +44,17 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   candidates require stronger crypto-result provenance. Do **not** add a
   software-ID offset table as the fallback. Canonical:
   [../tooling/secoc-semantic-patch-resolver.md](../tooling/secoc-semantic-patch-resolver.md).
+- **First live run of the generic read-only CodeFlash acquisition path.** The
+  addressed-word protocol/reassembler and 424-byte RH850 payload are locally
+  complete and pinned-toolchain verified, including authenticated 4 KiB payload
+  packaging, address-zero CodeFlash load retention, partial-dump preservation,
+  SHA/provenance, boot-CRC sanity, and automatic semantic-resolver handoff. What
+  remains is hardware-only: run it on a provisioned EPS over the explicitly
+  recorded Panda bus/ELM/UDS route, preserve `F181`, obtain all 262,144 addressed
+  words, and compare the resulting SHA/CRC descriptors with any independently
+  acquired image. This read-only acquisition should precede every live APPLY and
+  supplies the exact recovery source image. Canonical:
+  `exploit/dumper/README.md`; [EXPLOIT_ENGINEERING_2026-08-12.md](EXPLOIT_ENGINEERING_2026-08-12.md).
 - **RR versus RL ordering inside protected CAN-FD `0x090`.** Techstream
   `EMPS2_P5` plus the firmware consumer shapes now identify signals 270/273 as
   the protected rear-wheel-speed RR/RL pair and signal 276 as `CAN Steering

@@ -774,3 +774,31 @@ the mistakes are not re-made.
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.6;
   `tests/verify_codeflash_crc_reconstruction.py`; `tests/verify_community_tooling.py`;
   `tests/verify_secoc_bypass_patch_point.py`.
+
+### CORR-043 — Runtime patch config was injected into the final 4 KiB upload artifact
+
+- **Wrong:** the first exploit-engineering host implementation treated the
+  bootloader upload as an ordinary flat 4 KiB linked image, reserved a config
+  slot at final-payload offset `0xF80`, and injected the calibration-specific
+  runtime block after linking. That model would mutate bytes *after* the Toyota
+  EPS payload CRC/CMAC/encryption step and therefore produce an upload that
+  cannot pass routine `0x10F0` authentication.
+- **Right:** the config belongs in the **plaintext shellcode** below the
+  bootloader-owned callback slot at `0xFD0`. The corrected generic shellcode
+  template reserves `0xF60..0xFBF` for the 96-byte config, ending at `0xFC0`.
+  After injection, the host reproduces the proven Bk2ol/Vance package: callback
+  at `0xFD0`, authenticated descriptor at `0xFE0`, terminal CRC adjustment over
+  `0x000..0xFEF`, CMAC at `0xFF0`, then AES-CBC encryption of all 4096 bytes.
+- **Secret separation:** `PAYLOAD_BUILD_SECRET` at CodeFlash `0xBFD8` and
+  `SEED_KEY_SECRET` at `0xBFE8` are distinct gates and now have separate host
+  inputs. The former constructs/decrypts/authenticates the RAM image; the latter
+  performs UDS SecurityAccess. Neither value is serialized into run metadata.
+- **Mechanical proof:** `exploit/common/payload_package.py` decrypts the
+  committed standard DataFlash-dump payload with `PAYLOAD_BUILD_SECRET`, verifies
+  its `0xFFFFFFFF` CRC residue and CMAC, and repackages the recovered 0x18A-byte
+  shellcode to the exact same ciphertext byte-for-byte. Regression tests reject
+  post-package config mutation by construction because config injection occurs
+  only in the plaintext template.
+- **Canonical:** [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) §§2–8;
+  `exploit/common/payload_package.py`; `exploit/patcher/build_payload.py`;
+  `tests/verify_secoc_manifest_patcher.py`.
