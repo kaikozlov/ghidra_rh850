@@ -103,6 +103,10 @@ bad["patch"]["block_base"] = "0x88001"
 rejects("unaligned patch block is rejected", bad, "unaligned")
 
 bad = copy.deepcopy(manifest)
+bad["patch"]["block_size"] = 0x4000
+rejects("non-P1M-E FCU block size is rejected", bad, "requires 0x8000")
+
+bad = copy.deepcopy(manifest)
 bad["boot_crc"]["fixup_block_base"] = "0xF8001"
 rejects("unaligned CRC block is rejected", bad, "unaligned")
 
@@ -157,10 +161,63 @@ check("preflight checks exact target preimage", "verify_patch_preimage" in prefl
 check("preflight reports stored CRC fixup", "read_le_word(cfg->crc_fixup_va)" in preflight_c)
 check("preflight computes live CRC prefix", "crc32_flash_range(cfg->crc_start, cfg->crc_fixup_va)" in preflight_c)
 check("preflight computes current full residue", "crc32_flash_range(cfg->crc_start, cfg->crc_end)" in preflight_c)
-check("APPLY fails closed until write stage exists", "err_apply_unavailable" in main_c)
+check("validate-only returns to halt before APPLY dispatch", main_c.index("patch_config_validate_only") < main_c.index("run_apply(&g_patch_config)"))
 check("payload source contains no reset call", "reset(" not in zero_write_sources and "0x157e" not in zero_write_sources)
 check("runtime halt services watchdog indefinitely", "while (1)" in runtime_c and "feed_watchdog();" in runtime_c)
 check("config slot is a separate fixed linker section", ".patch_config" in (REPO / "exploit" / "patcher" / "config_slot.c").read_text(encoding="utf-8"))
+
+print("\n== fail-closed APPLY structure ==")
+apply_c = (REPO / "exploit" / "patcher" / "apply.c").read_text(encoding="utf-8").lower()
+flash_c = (REPO / "exploit" / "patcher" / "flash_backend.c").read_text(encoding="utf-8").lower()
+rmw_positions = []
+pos = 0
+while True:
+    pos = apply_c.find("flash_block_rmw(", pos)
+    if pos < 0:
+        break
+    rmw_positions.append(pos)
+    pos += 1
+check("APPLY performs exactly target and fixup block RMW calls", len(rmw_positions) == 2, repr(rmw_positions))
+if len(rmw_positions) == 2:
+    preimage_pos = apply_c.index("verify_patch_preimage")
+    target_readback_pos = apply_c.index("live_bytes_equal(cfg->patch_va", rmw_positions[0])
+    live_prefix_pos = apply_c.index("crc32_flash_range(cfg->crc_start, cfg->crc_fixup_va)", rmw_positions[0])
+    fixup_readback_pos = apply_c.index("readback = read_le_word(cfg->crc_fixup_va)", rmw_positions[1])
+    final_crc_pos = apply_c.index("crc32_flash_range(cfg->crc_start, cfg->crc_end)", rmw_positions[1])
+    check("APPLY verifies exact preimage before first persistent RMW", preimage_pos < rmw_positions[0])
+    check("APPLY verifies target readback before CRC computation", rmw_positions[0] < target_readback_pos < live_prefix_pos)
+    check("CRC prefix is computed from live flash after target RMW", rmw_positions[0] < live_prefix_pos < rmw_positions[1])
+    check("fixup readback occurs after fixup RMW", rmw_positions[1] < fixup_readback_pos)
+    check("final full-region CRC occurs after fixup readback", fixup_readback_pos < final_crc_pos)
+check("APPLY derives fixup as prefix xor expected residue", "new_fixup = crc_prefix ^ 0xffffffffu" in apply_c)
+check("APPLY rejects target RMW failure", "err_target_rmw" in apply_c)
+check("APPLY rejects target readback mismatch", "err_target_readback" in apply_c)
+check("APPLY rejects fixup RMW failure", "err_fixup_rmw" in apply_c)
+check("APPLY rejects fixup readback mismatch", "err_fixup_readback" in apply_c)
+check("APPLY rejects final residue mismatch", "err_final_residue" in apply_c)
+apply_dispatch_pos = main_c.index("run_apply(&g_patch_config)")
+apply_success_pos = main_c.index("telemetry_stage(stage_success)", apply_dispatch_pos)
+check("success is emitted only after run_apply returns zero", apply_dispatch_pos < main_c.index("if (err == 0u)", apply_dispatch_pos) < apply_success_pos)
+check("flash backend retains reviewed FACI primitive", all(token in flash_c for token in ("faci_erase", "faci_program_page", "faci_fentryr", "faci_fpckar")))
+all_generic_c = "\n".join(
+    p.read_text(encoding="utf-8").lower()
+    for p in (REPO / "exploit").rglob("*.c")
+)
+check("generic payload C embeds no known Sienna patch/CRC addresses", all(token not in all_generic_c for token in ("8e6c8", "ffdec", "88000", "f8000")))
+check("generic payload C contains no automatic reset target", "0x157e" not in all_generic_c and "reset(" not in all_generic_c)
+
+print("\n== offline Sienna APPLY algorithm ==")
+from tools.build_secoc_patch_manifest import crc32
+blob = bytearray((REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes())
+image_off = validate.patch_va - validate.image_base
+check("offline fixture starts at configured preimage", bytes(blob[image_off:image_off + validate.patch_len]) == validate.original)
+blob[image_off:image_off + validate.patch_len] = validate.replacement
+prefix = crc32(blob[validate.crc_start - validate.image_base:validate.crc_fixup_va - validate.image_base])
+new_fixup = prefix ^ EXPECTED_RESIDUE
+struct.pack_into("<I", blob, validate.crc_fixup_va - validate.image_base, new_fixup)
+residue = crc32(blob[validate.crc_start - validate.image_base:validate.crc_end - validate.image_base])
+check("offline live-order algorithm reproduces manifest fixup", new_fixup == int(manifest["boot_crc"]["patched_fixup_for_supplied_image"], 0))
+check("offline live-order algorithm reaches expected final residue", residue == EXPECTED_RESIDUE)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:
