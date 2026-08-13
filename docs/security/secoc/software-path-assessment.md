@@ -321,6 +321,21 @@ restricted ICU-S/ICUSE specification or bench behavior remains authoritative.
 5. Validate any candidate output against multiple stock SecOC frames; otherwise
    classify it as metadata, protected envelope, oracle, or rejection.
 
+#### Bounded live stimulus transport
+
+The first live wrapper incorrectly retained stock Panda ELM327 safety while
+calling `panda.can_send()` for application inputs `0x01B..0x01F`; unmodified
+ELM327 safety permits diagnostic IDs only, so every input would have been
+blocked before reaching the EPS. The corrected local experiment extends ELM327
+with parameter flag `0x8000`: only five eight-byte input IDs on one encoded bus
+are added to the existing diagnostic allowlist. The host selects this mode only
+while sending the five input PDUs, checks `safety_tx_blocked == 0`, and restores
+ordinary ELM327 mode before polling DID `0x1010`. The exact external
+opendbc/superproject commits and patch are pinned under `exploit/command5/`.
+
+This closes the host/Panda transport defect mechanically. It does not replace
+the still-required initialized-application hardware observation.
+
 ## 2026-08-10 — Stage-7 stale FIFO/result exposure closure
 
 The command-specific output paths are now traced through success, hardware

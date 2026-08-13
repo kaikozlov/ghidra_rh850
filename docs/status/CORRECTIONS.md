@@ -854,3 +854,21 @@ the mistakes are not re-made.
 - **Canonical:** `exploit/behavioral_proof/README.md`;
   `exploit/behavioral_proof/openpilot_ablation_audit.json`;
   `tests/verify_secoc_mac28_behavioral_proof.py`.
+
+### CORR-046 — Command-5 live stimulus used diagnostic-only Panda safety
+
+- **Wrong:** the initial application-context command-5 wrapper selected ordinary
+  Panda ELM327 safety and then used raw `can_send()` calls for `0x01B..0x01F`.
+  ELM327 safety accepts diagnostic address ranges, not those application PDUs,
+  so the wrapper would record attempted sends while Panda blocked them.
+- **Right:** the local experiment firmware now uses a bounded ELM327 parameter
+  that adds only eight-byte `0x01B..0x01F` on the encoded diagnostic bus. The
+  wrapper selects it only around stimulus, checks Panda's blocked-Tx counter,
+  fails if any frame was rejected, and restores ordinary ELM327 mode before
+  diagnostic result polling.
+- **Verification:** opendbc's ELM327 suite proves exact ID/bus/DLC scope; the
+  repository command-5 suite proves parameter encoding, blocked-Tx rejection,
+  and mode restoration. External commits and patch provenance are pinned in
+  `exploit/command5/kai-openpilot-command5-safety.json`.
+- **Canonical:** [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md);
+  `exploit/command5/stimulus.py`.

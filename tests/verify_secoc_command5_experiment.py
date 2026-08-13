@@ -29,6 +29,7 @@ from exploit.command5.stimulus import (
     StimulusError,
     build_input_frames,
     build_stimulus_plan,
+    command5_elm327_param,
     parse_selector3_response,
 )
 from tools.build_secoc_patch_manifest import crc32, discover_crc_descriptors
@@ -138,6 +139,14 @@ check("0x01E/0x01F carry the exact 16-byte expected value", frames[3].address ==
 plan = build_stimulus_plan(message, expected=expected)
 check("default plan uses five spaced rounds", plan["rounds"] == DEFAULT_ROUNDS == 5 and plan["round_interval_seconds"] == 0.10)
 check("plan records three required stable observations", plan["stability"]["required_unchanged_observations"] == 3)
+check("bounded Panda parameter encodes flag and selected bus", command5_elm327_param(base_param=1, bus=2) == 0x8201)
+for invalid_param in (0x100, 0x8000, 0x10000):
+    try:
+        command5_elm327_param(base_param=invalid_param, bus=2)
+    except StimulusError:
+        check(f"reserved ELM327 parameter 0x{invalid_param:X} is rejected", True)
+    else:
+        check(f"reserved ELM327 parameter 0x{invalid_param:X} is rejected", False)
 try:
     build_stimulus_plan(message, rounds=3)
 except StimulusError as exc:
@@ -165,6 +174,21 @@ check("experiment patch does not contain SecOC Gate-2 target address", "8e6c8" n
 check("experiment patch does not import production flash backend", "flash_backend" not in source)
 check("stimulus labels result as application-context evidence only", "does not prove production secoc transmit integration" in stimulus_source)
 check("live stimulus keeps pre-stimulus diagnostic baseline", "result_changed_from_pre_stimulus_baseline" in stimulus_source)
+check("live stimulus selects bounded ELM327 command-5 mode", "command5_elm327_param" in stimulus_source)
+check("live stimulus rejects Panda-blocked frames", "safety_tx_blocked" in stimulus_source)
+check("live stimulus restores ordinary ELM327 mode", "restore ordinary diagnostic-only elm mode" in stimulus_source)
+
+print("\n== bounded Panda safety provenance ==")
+safety_patch_path = REPO / "exploit" / "command5" / "kai-openpilot-command5-safety.patch"
+safety_meta_path = REPO / "exploit" / "command5" / "kai-openpilot-command5-safety.json"
+safety_meta = json.loads(safety_meta_path.read_text(encoding="utf-8"))
+check("bounded safety patch is hash-pinned", hashlib.sha256(safety_patch_path.read_bytes()).hexdigest() == safety_meta["patch"]["sha256"])
+check("bounded safety pins full external commits", len(safety_meta["commit"]) == 40 and len(safety_meta["opendbc"]["commit"]) == 40)
+check("bounded safety remains local-only", safety_meta["pushed"] is False)
+safety_patch = safety_patch_path.read_text(encoding="utf-8").lower()
+check("bounded safety allows exact five application IDs", "msg->addr >= 0x01bu" in safety_patch and "msg->addr <= 0x01fu" in safety_patch)
+check("bounded safety binds the selected bus", "msg->bus == elm327_command5_bus" in safety_patch)
+check("bounded safety retains eight-byte gate", "if (len != 8)" in safety_patch)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:
