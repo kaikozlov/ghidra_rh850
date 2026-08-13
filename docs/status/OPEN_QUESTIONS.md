@@ -33,6 +33,17 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## SecOC
 
+- **Cross-calibration semantic patch resolver validation.** SECOC-045 now
+  rediscovers the Sienna authenticated-delivery gate from a fresh unannotated
+  CodeFlash-only import with no target/MAC-result/CRC addresses embedded in the
+  resolver. The highest-value next artifact is any blurbdust-supported
+  `8965F3`/`8965F4` CodeFlash (or the missing Corolla `8965F1208000` image): run
+  `tools/resolve_secoc_patch_image.sh` unchanged and compare its unique semantic
+  target, if any, with the community egg location. Zero candidates means the
+  Level-1 machine shape must be lifted to p-code/CFG data-flow; multiple
+  candidates require stronger crypto-result provenance. Do **not** add a
+  software-ID offset table as the fallback. Canonical:
+  [../tooling/secoc-semantic-patch-resolver.md](../tooling/secoc-semantic-patch-resolver.md).
 - **RR versus RL ordering inside protected CAN-FD `0x090`.** Techstream
   `EMPS2_P5` plus the firmware consumer shapes now identify signals 270/273 as
   the protected rear-wheel-speed RR/RL pair and signal 276 as `CAN Steering

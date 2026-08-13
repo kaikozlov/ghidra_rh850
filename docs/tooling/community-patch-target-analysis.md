@@ -136,13 +136,21 @@ Closed now:
 - robust raw-location triage;
 - instruction-aware semantic-report workflow;
 - known `4512000` false-positive reference result;
-- rule preventing raw-callsite or prologue overinterpretation.
+- rule preventing raw-callsite or prologue overinterpretation;
+- a separate calibration-independent Level-1 semantic resolver that ignores the
+  blurbdust egg entirely and rediscovers the Sienna authenticated-delivery gate
+  from machine/CFG/data-flow structure; see
+  [secoc-semantic-patch-resolver.md](secoc-semantic-patch-resolver.md).
 
 Still blocked on an F3/F4 CodeFlash artifact:
 
 - containing function for `8965F3401200`, `8965F4207000`, or `8965F4201000`;
 - its callers and SecOC/ICU relationship;
-- the exact predicate that the successful live RAV4/bZ4X patch forces true.
+- whether the unchanged semantic resolver finds the same acceptance gate on
+  those images;
+- whether that resolved gate is the same semantic object as the blurbdust egg
+  target, or whether the successful live patch forced a broader/different
+  predicate true.
 
 A post-patch dump is sufficient if the surrounding image is intact: the
 original first four bytes are known from the egg, so the target can be restored

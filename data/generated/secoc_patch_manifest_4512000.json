@@ -1,0 +1,125 @@
+{
+  "backend": "rh850-p1m-e-fcu",
+  "boot_crc": {
+    "descriptor_va": "0x8DE0",
+    "embedded_length_va": "0xFFDE4",
+    "embedded_start_va": "0xFFDE0",
+    "end": "0xFFDF0",
+    "fixup_block_base": "0xF8000",
+    "fixup_va": "0xFFDEC",
+    "length": 949744,
+    "live_policy": "recompute prefix CRC from live CodeFlash after target-block RMW; write complement at discovered fixup VA; require final residue 0xFFFFFFFF",
+    "patched_fixup_for_supplied_image": "0x0C7B0D87",
+    "patched_prefix_crc_for_supplied_image": "0xF384F278",
+    "patched_residue_for_supplied_image": "0xFFFFFFFF",
+    "start": "0x18000",
+    "stock_expected_fixup": "0x9470067E",
+    "stock_prefix_crc": "0x6B8FF981",
+    "stock_region_valid": false,
+    "stock_residue": "0x5AA2313A",
+    "stored_fixup": "0x0962887F",
+    "validated_sibling_descriptor_count": 1,
+    "validity_marker_va": "0xFFE00"
+  },
+  "discovery": {
+    "crc_descriptor_count": 2,
+    "crc_descriptors": [
+      {
+        "descriptor_va": "0x8DD0",
+        "embedded_length_va": "0xFFDD4",
+        "embedded_start_va": "0xFFDD0",
+        "end": "0x17DF0",
+        "expected_fixup": "0x13F32930",
+        "fixup_va": "0x17DEC",
+        "full_crc": "0xFFFFFFFF",
+        "length": 32240,
+        "prefix_crc": "0xEC0CD6CF",
+        "start": "0x10000",
+        "stored_fixup": "0x13F32930",
+        "terminal_fixup_valid": true,
+        "validity_marker_va": "0x17E00"
+      },
+      {
+        "descriptor_va": "0x8DE0",
+        "embedded_length_va": "0xFFDE4",
+        "embedded_start_va": "0xFFDE0",
+        "end": "0xFFDF0",
+        "expected_fixup": "0x9470067E",
+        "fixup_va": "0xFFDEC",
+        "full_crc": "0x5AA2313A",
+        "length": 949744,
+        "prefix_crc": "0x6B8FF981",
+        "start": "0x18000",
+        "stored_fixup": "0x0962887F",
+        "terminal_fixup_valid": false,
+        "validity_marker_va": "0xFFE00"
+      }
+    ]
+  },
+  "image": {
+    "base": "0x0",
+    "path": "firmware/RH850_P1M-E_CodeFlash.bin",
+    "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+    "size": 1048576
+  },
+  "patch": {
+    "address": "0x8E6C8",
+    "block_base": "0x88000",
+    "block_size": 32768,
+    "original": "9a0d",
+    "preimage_verified": true,
+    "replacement": "950d"
+  },
+  "safety": {
+    "fail_closed": true,
+    "requirements": [
+      "semantic resolver produced exactly one candidate",
+      "patch preimage matches supplied image",
+      "exactly one self-describing CRC descriptor covers patch",
+      "target CRC scheme validates directly or via a valid sibling descriptor",
+      "live patcher recomputes CRC from live flash rather than trusting offline fixup"
+    ]
+  },
+  "schema": "toyota-secoc-patch-manifest-v1",
+  "semantic_resolution": {
+    "boolean_materialization": {
+      "register": "r26",
+      "site": "0x0008e6a4"
+    },
+    "candidate_count": 1,
+    "control_flow": {
+      "failure_path_calls": 2,
+      "join": "0x0008e6e2",
+      "success_path_calls": 1,
+      "success_target": "0x0008e6da"
+    },
+    "function": {
+      "entry": "0x0008e67a",
+      "name": "FUN_0008e67a"
+    },
+    "invariants": [
+      "mapped-byte-result-global-is-also-passed-by-address",
+      "zero-test-and-cmovne-materialize-boolean",
+      "same-boolean-survives-through-pre-gate-call",
+      "same-boolean-controls-forward-bne",
+      "failure-and-success-arms-both-call-and-converge",
+      "patch-only-changes-rh850-condition-nibble"
+    ],
+    "mac_result_source": {
+      "address": "0xfebe555c",
+      "load_site": "0x0008e69e",
+      "passed_by_address_elsewhere": true,
+      "resolution": "mapped"
+    },
+    "patch": {
+      "address": "0x0008e6c8",
+      "operation": "bne-to-unconditional-br-preserve-target",
+      "original": "9a0d",
+      "replacement": "950d"
+    },
+    "pre_gate_state_call": "0x0008e6c0",
+    "program_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+    "resolution": "unique",
+    "schema": "toyota-secoc-semantic-target-v1"
+  }
+}

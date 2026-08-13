@@ -98,8 +98,25 @@ with tempfile.TemporaryDirectory() as td:
             REPO / "ghidra/scripts/verify",
         ]
         check("scriptPath uses semicolon separators", script_path == ";".join(map(str, expected_dirs)), script_path)
-        check("analysis-safe scriptPath excludes investigate", "/investigate" not in script_path)
+        check("analysis-safe scriptPath excludes investigate by default", "/investigate" not in script_path)
     check("runner writes complete log", log.is_file() and "fake headless ok" in log.read_text())
+
+    result = invoke(
+        fake_home,
+        "--with-investigate",
+        "--project-dir", str(project_dir),
+        "--project", "fixture",
+        "--log", str(log),
+        "--label", "investigate-run",
+        "--",
+        "-process", "program",
+        extra_env={"FAKE_CAPTURE": str(capture)},
+    )
+    check("runner accepts explicit investigate-script opt-in", result.returncode == 0, result.stderr)
+    args = json.loads(capture.read_text()) if capture.exists() else []
+    if "-scriptPath" in args:
+        script_path = args[args.index("-scriptPath") + 1]
+        check("opt-in scriptPath appends investigate", script_path.endswith(str(REPO / "ghidra/scripts/investigate")), script_path)
 
     # A Ghidra post-script failure must fail even when analyzeHeadless returns 0.
     result = invoke(

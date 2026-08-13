@@ -558,6 +558,25 @@ tests = [
 ]
 paths = ["docs/security/secoc/application-chain.md", "firmware/"]
 
+[suite.secoc_semantic_patch_resolver]
+tests = ["tests/verify_secoc_semantic_patch_resolver.py"]
+paths = [
+  "ghidra/scripts/investigate/ResolveSecocAcceptanceGate.java",
+  "tools/build_secoc_patch_manifest.py",
+  "tools/resolve_secoc_patch.sh",
+  "tools/resolve_secoc_patch_image.sh",
+  "tools/run_headless",
+  "data/generated/secoc_gate_resolution_4512000.json",
+  "data/generated/secoc_gate_resolution_4512000_minimal.json",
+  "data/generated/secoc_patch_manifest_4512000.json",
+  "docs/tooling/secoc-semantic-patch-resolver.md",
+  "docs/tooling/community-patch-target-analysis.md",
+  "docs/tooling/README.md",
+  "docs/reference/generated-artifacts.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
 [suite.lifecycle]
 tests = [
   "tests/verify_lifecycle.py",

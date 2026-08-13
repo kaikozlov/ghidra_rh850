@@ -8,6 +8,7 @@ PROJECT_NAME=""
 LOG=""
 LABEL="headless"
 QUIET=0
+WITH_INVESTIGATE=0
 
 usage() {
   cat <<'EOF'
@@ -19,6 +20,7 @@ Options:
   --log PATH         Durable complete log (default: temporary log)
   --label TEXT       Stage label used in diagnostics
   --quiet            Do not replay successful output to stdout
+  --with-investigate Include ghidra/scripts/investigate in the controlled scriptPath
   -h, --help         Show this help
 
 The runner owns the isolated processor environment, canonical semicolon-separated
@@ -34,6 +36,7 @@ while (($#)); do
     --log) LOG=${2:?missing --log value}; shift 2 ;;
     --label) LABEL=${2:?missing --label value}; shift 2 ;;
     --quiet) QUIET=1; shift ;;
+    --with-investigate) WITH_INVESTIGATE=1; shift ;;
     -h|--help) usage; exit 0 ;;
     --) shift; break ;;
     *) echo "unknown runner option: $1" >&2; usage >&2; exit 2 ;;
@@ -75,11 +78,16 @@ fi
 ANALYZE="$GHIDRA_HOME/support/analyzeHeadless"
 [[ -x "$ANALYZE" ]] || { echo "ERROR: missing analyzeHeadless: $ANALYZE" >&2; exit 1; }
 
-SCRIPT_PATH=$(printf '%s;' \
-  "$ROOT/ghidra/scripts/import" \
-  "$ROOT/ghidra/scripts/seed" \
-  "$ROOT/ghidra/scripts/annotate" \
-  "$ROOT/ghidra/scripts/verify")
+SCRIPT_DIRS=(
+  "$ROOT/ghidra/scripts/import"
+  "$ROOT/ghidra/scripts/seed"
+  "$ROOT/ghidra/scripts/annotate"
+  "$ROOT/ghidra/scripts/verify"
+)
+if ((WITH_INVESTIGATE)); then
+  SCRIPT_DIRS+=("$ROOT/ghidra/scripts/investigate")
+fi
+SCRIPT_PATH=$(printf '%s;' "${SCRIPT_DIRS[@]}")
 SCRIPT_PATH=${SCRIPT_PATH%;}
 
 TEMP_LOG=0
