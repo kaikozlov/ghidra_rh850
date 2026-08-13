@@ -577,6 +577,15 @@ paths = [
   "docs/status/OPEN_QUESTIONS.md",
 ]
 
+[suite.secoc_manifest_patcher]
+tests = ["tests/verify_secoc_manifest_patcher.py"]
+paths = [
+  "exploit/common/patch_config.h",
+  "exploit/patcher/",
+  "tests/verify_secoc_manifest_patcher.py",
+  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+]
+
 [suite.lifecycle]
 tests = [
   "tests/verify_lifecycle.py",
