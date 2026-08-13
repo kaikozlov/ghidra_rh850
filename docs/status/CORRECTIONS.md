@@ -956,3 +956,17 @@ the mistakes are not re-made.
   pinned Docker toolchain builds the complete template successfully.
 - **Canonical:** `exploit/patcher/README.md`;
   `exploit/common/patch_config.h`; `exploit/patcher/flash_backend.c`.
+
+### CORR-051 — Raw substitution requires a fresh short download per chunk
+
+- **Wrong:** the MEM-SAFE-001 exploit sketch described one download of `N ≤ 15`
+  followed by `ceil(N/15)` TransferData blocks, wording that became invalid for
+  substitutions longer than 15 bytes. The handler requires a non-final chunk to
+  be exactly `0x400`, so multiple short blocks cannot share one larger download.
+- **Right:** each 1–15 byte chunk uses its own RequestDownload, block-counter-1
+  TransferData, and RequestTransferExit; the next chunk reopens at the advanced
+  address. The stale `0x10F0` authorization survives those transactions.
+- **Verification:** `verify_exploit_followups.py` proves exact 15/15/10 chunking,
+  transaction ordering, address advancement, reassembly, and RAM-window bounds.
+- **Canonical:** [../security/memory-safety-audit.md](../security/memory-safety-audit.md);
+  `exploit/followups/bootloader_primitives.py`.

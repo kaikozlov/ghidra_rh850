@@ -621,6 +621,19 @@ paths = [
   "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
+[suite.exploit_followups]
+tests = ["tests/verify_exploit_followups.py"]
+paths = [
+  "exploit/followups/",
+  "tests/verify_exploit_followups.py",
+  "docs/security/memory-safety-audit.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/RESEARCH_ROADMAP.md",
+  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+]
+
 [suite.lifecycle]
 tests = [
   "tests/verify_lifecycle.py",

@@ -286,7 +286,9 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   [../tooling/techstream.md](../tooling/techstream.md) §5.3.
 - **MEM-SAFE-001 transfer to newer SecOC/TSK targets.** The partial-AES-block
   raw-write primitive (MEM-SAFE-001) upgrades a prior authenticated payload into
-  arbitrary RAM-code execution without repeating CMAC. Whether the same
+  arbitrary RAM-code execution without repeating CMAC. The exact bounded host
+  transactions are now implemented and tested under `exploit/followups/`; the
+  remaining question is only whether the same
   bootloader gate structure (4 KiB download window, callback pointer at
   `0xFEBF0FD0`, `payload_decrypt_transfer_task` floor-division block count,
   authorization persistence) exists in a newer target's CodeFlash is the
@@ -297,11 +299,13 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   [../security/memory-safety-audit.md](../security/memory-safety-audit.md).
 - **MEM-SAFE-003 equality-oracle reachability for variant identification.** The
   `0x10F3` byte-compare oracle can read application CodeFlash at
-  `0x10000..0xFFDFF` without dumping the full image. It could be used on a newer
+  its two configured ranges without dumping the full image. The re-arm loop,
+  range gates, request budget, simulator, and explicit live mode are now
+  implemented under `exploit/followups/`. It could be used on a newer
   target to check whether the same crypto routines, SecOC profiles, or callback
-  structures are present before attempting a full exploit. Determine whether the
-  oracle's re-arm cost (256 worst case per byte) is acceptable for identifying
-  known function signatures. See
+  structures are present before attempting a full exploit. The remaining
+  unknown is a live timing/reachability measurement; the 256-request worst case
+  makes only small known signatures rational. See
   [../security/memory-safety-audit.md](../security/memory-safety-audit.md).
 - **Newer-TSK exact target bundle.** No exact target identity currently exists.
   Acquire the part/calibration number plus `F181`, complete CodeFlash and

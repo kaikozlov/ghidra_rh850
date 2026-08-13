@@ -157,10 +157,10 @@ A second load/call site exists at `0x4402/0x440E`.
 4. TransferData × 4 (encrypted, 0x400 each)   → authenticated image
 5. RoutineControl 0x10F0                       → CRC + CMAC pass
    → authorization byte set to 0x01
-6. RequestDownload 0xFEBF0000, N (N ≤ 15)     → re-open download (state 0x01 accepted)
-7. TransferData × ceil(N/15)                   → raw bytes written (no decrypt)
-   → overwrite callback pointer at 0xFEBF0FD0
-8. RoutineControl 0xFF00                       → callback executed
+6. RequestDownload target, N (N ≤ 15)          → re-open download (state 0x01 accepted)
+7. TransferData block 1 + RequestTransferExit  → raw bytes written (no decrypt)
+8. Repeat steps 6–7 at target+N for more bytes → overwrite code/config/callback
+9. RoutineControl 0xFF00                       → callback executed
 ```
 
 Step 6–7 replaces the authenticated image — including the callback pointer at
@@ -186,6 +186,16 @@ B4233, Sienna B4512000, B4509100), the same authenticated RAM-exec bootstrap
 primitive that does not require re-deriving the CMAC for each session. For
 newer TSK/SecOC devices, the bootloader gate structure must be verified against
 the target's CodeFlash.
+
+### Operational tooling
+
+`exploit/followups/bootloader_primitives.py` implements the corrected repeated
+download/one-short-block sequence, validates every transaction against the 4 KiB
+RAM window, and refuses execution unless its caller explicitly declares a prior
+successful `0x10F0` in the same session. `raw_substitution_plan.py` emits exact
+wire records without touching hardware. Deterministic tests prove 15-byte
+chunking, exact reconstruction, all bounds, and the explicit authorization
+precondition. A live end-to-end observation remains hardware-gated.
 
 ## MEM-SAFE-002: malformed RoutineControl lengths cause OOB CMAC reads
 
@@ -297,6 +307,15 @@ An equality oracle on application CodeFlash could extract calibration data,
 configuration tables, or function addresses from a target ECU without dumping
 the full image. For the comma goal, this could identify whether a newer target
 uses the same crypto routines, SecOC profiles, or callback structures.
+
+`exploit/followups/oracle_dump.py` now makes that experiment executable. It
+re-arms `0x10F3` for every guess, accepts only NRC `0x10` as inequality, rejects
+the inaccessible boot-secret region and table gap, caps a run at 256 bytes, and
+records identity/request-budget/output provenance. Its simulator recovers bytes
+from the canonical image exactly; live reachability remains hardware-gated. At
+an average 128.5 guesses per byte, a full application image is operationally
+inferior to the read-only RAM-exec dumper, so the supported use is a small
+signature/calibration discriminator.
 
 ## MEM-SAFE-004: latent ICU-S command-8 zero-fill on unbounded length
 
