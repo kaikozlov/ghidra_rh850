@@ -443,22 +443,34 @@ message-profile discovery must not be reduced to checking command IDs alone.
 
 ### 5.5 Signals 95..100 form a dormant crypto-test input bank
 
-The consumer at `0x6875E` bounds six previously anonymous generated signals:
+The consumer at `0x6875E` bounds six previously anonymous generated signals.
+The property-4 descriptor table is separate from the main property-3 table, but
+the decompiler plus raw metadata make the byte layout exact:
 
-| CAN ID | Signal IDs | Recovered structural use |
+| CAN ID | Signal IDs | Exact recovered use |
 |---:|---:|---|
-| `0x01B` | 95, 96 | ICU-S runtime key selector and test mode |
-| `0x01C`, `0x01D` | 97, 98 | 16-byte chosen crypto input |
-| `0x01E`, `0x01F` | 99, 100 | 16-byte expected result |
+| `0x01B` | 95, 96 | byte 0 / COM `0x97` = ICU-S key selector; byte 1 / COM `0x98` = test mode; both are 8-bit |
+| `0x01C`, `0x01D` | 97, 98 | COM `0x9F/0xA7`: exact 16-byte chosen crypto input |
+| `0x01E`, `0x01F` | 99, 100 | COM `0xAF/0xB7`: exact 16-byte expected result |
 
-The collector watches PDU update-counter indices `20..24` and requires three
-identical updates before committing the values. These CAN frames do not expose
-a normally reachable signing service: the periodic consumer runs only after
-the dormant activator at `0x69018` sets the bank active, and no caller or
-CodeFlash function-pointer entry to that activator has been recovered. The
-command-5 result is compared locally with the expected input and is not sent
-back on CAN. The complete ICU interpretation and evidence bounds live in
-[SecOC application chain](../security/secoc/application-chain.md).
+For the selector-4 command-5 probe, `0x01B` therefore begins `04 01`
+(selector 4, mode 1), while `0x01C/0x01D` carry the 16-byte message. The
+collector watches PDU update-counter indices `20..24` and the flash threshold at
+`0x30FBB` is `0x03`: after a changed value updates the shadow, the same value
+must be observed unchanged three times before commit. A dynamic probe should
+therefore send at least four, preferably five, **spaced** identical rounds rather
+than a burst whose updates may collapse into one cyclic observation.
+
+These CAN frames still do not activate the bank by themselves: no stock caller
+or CodeFlash function-pointer entry to `crypto_test_bank1_activate @ 0x69018`
+has been recovered. The minimal application-context experiment now tail-calls
+that stock activator once after the normal crypto-test initializer and otherwise
+leaves the stock command-5 state machine intact. The generated result is not
+stock CAN output, but a three-site diagnostic-only redirection lets existing DID
+`0x1010` selector 3 expose the dormant result buffer without modifying the
+production SecOC path. See [SecOC application chain](../security/secoc/application-chain.md),
+[software-path assessment](../security/secoc/software-path-assessment.md), and
+`exploit/command5/stimulus.py`.
 
 ## 6. Timeout / validity RAM
 

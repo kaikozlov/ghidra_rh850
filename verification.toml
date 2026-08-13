@@ -594,6 +594,21 @@ paths = [
   "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
+[suite.secoc_command5_experiment]
+tests = ["tests/verify_secoc_command5_experiment.py"]
+paths = [
+  "exploit/command5/",
+  "tests/verify_secoc_command5_experiment.py",
+  "docs/communications/application-rx.md",
+  "docs/security/secoc/software-path-assessment.md",
+  "docs/security/secoc/sender-implementation.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/RESEARCH_ROADMAP.md",
+  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+]
+
 [suite.lifecycle]
 tests = [
   "tests/verify_lifecycle.py",

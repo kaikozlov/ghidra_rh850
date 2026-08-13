@@ -802,3 +802,30 @@ the mistakes are not re-made.
 - **Canonical:** [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) §§2–8;
   `exploit/common/payload_package.py`; `exploit/patcher/build_payload.py`;
   `tests/verify_secoc_manifest_patcher.py`.
+
+### CORR-044 — Dormant command-5 inputs/output required a new application runner
+
+- **Wrong:** treating the property-4 `0x01B` row as permanently opaque and the
+  locally compared generated result as requiring a new CAN transmitter or a new
+  standalone application command-5 runner for the first probe.
+- **Right:** decompiler + raw metadata resolve signal 95 and 96 as exact 8-bit
+  bytes at COM offsets `0x97/0x98`; selector 4 / mode 1 is therefore `0x01B =
+  04 01 ...`, with the exact 16-byte message on `0x01C/0x01D`. Data alone still
+  cannot activate the bank, but the missing activation is only the four-byte
+  startup return at `0x680B2`: `40 06 3f 00 → 80 07 66 0f`, a verified tail
+  `jr 0x69018` to the stock activator.
+- **Observation correction:** existing application DID `0x1010` selector 3 can
+  expose the generated result with only three diagnostic-only substitutions:
+  `0x68EAE: a49f8598 → 849f6198` (status source → `FEBE5060`),
+  `0x68ECA: fa05 → 0000` (unconditional copy), and
+  `0x68EDE: 24963a9a → 2496aa99` (48-byte source → `FEBE51AA`). The first 16
+  returned bytes are the generated result; the adjacent 32 bytes are not part of
+  the CMAC.
+- **Bound:** all four mutations total 14 bytes in FCU block `0x68000`; the stock
+  cyclic state machine, command-5 submit/driver path, completion callback, and
+  compare/finalize logic remain intact. Hardware execution remains required to
+  prove selector-4 availability in initialized application context.
+- **Canonical:** [../communications/application-rx.md](../communications/application-rx.md) §5.5;
+  [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md) §7.5;
+  `exploit/command5/build_experiment.py`; `exploit/command5/stimulus.py`;
+  `tests/verify_secoc_command5_experiment.py`.

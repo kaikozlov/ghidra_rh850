@@ -26,12 +26,15 @@ What to investigate next, in rough priority order. Completed items move to
    requires otherwise-stock camera traffic with only the protected `0x2E4/0x131`
    MAC28 invalidated, compared before/after the semantic Gate-2 patch with raw CAN,
    DTC, and steering-state evidence.
-4. **Finish the targeted application-context command-5 harness depth pass now.**
-   This remains locally actionable and should not wait for a foreign image or
-   bench vehicle: recover the smallest reversible activation/input/output change
-   around `0x69018 → 0x68B42 → 0x88350 → 0x87CCC`, plus cyclic/finalize behavior
-   at `0x68C0C/0x68DE6`. Only the eventual selector-4 execution result is
-   hardware-gated. Canonical:
+4. **Run the prepared application-context command-5 hardware probe.** The local
+   depth pass is closed: the smallest recovered experiment is four instruction
+   substitutions / 14 bytes in FCU block `0x68000`, using the stock activator,
+   stock `0x68B42 → 0x88350 → 0x87CCC` command-5 chain, and existing DID `0x1010`
+   selector 3 for generated-result observation. Exact CAN stimulus, boot-CRC
+   resigning, source-image refusal rules, and RESTORE generation are implemented
+   under `exploit/command5/`. The only remaining positive criterion is hardware:
+   selector 4 in initialized application context must produce a fresh 16-byte
+   result relative to the pre-stimulus diagnostic baseline. Canonical:
    [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md).
 
 ## Near-term (static, this repo)
