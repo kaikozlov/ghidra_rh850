@@ -288,6 +288,25 @@ DID lookup uses `application_did_table_getter @ 0x4F928` → table `0x2941C`, co
 `0x92FEE` against the current unlock state from `0x8FDCA`. NRCs include `0x13`,
 `0x31`, `0x33`, and pending `0x78`.
 
+The RDBI table contains 196 unique nonzero callback targets. The actual dispatch
+at `FUN_4CB8A` indexes the 16-byte records, loads the callback field at record
+`+4`, and performs the computed call at `0x4CBB2`. Earlier project snapshots had
+only 10 of those 196 targets represented as function entries; the
+firmware-proven table seed now recovers all 196, plus the direct/constant-veneer
+targets exposed by that graph. Two independent clean rebuilds converge exactly
+at 6,288 functions / 183,183 instructions.
+
+A bounded depth-4 direct-call audit across all 242 RDBI roots finds no reference
+to the recovered command-5 generated-result buffer `FEBE51AA..FEBE51B9`, the
+key-update result bank `FEBE523A..FEBE5269`, payload-derived key material
+`FEBF2D08..FEBF2D17`, or the application SecurityAccess seed/data/temp
+neighborhoods. The only selected security-adjacent hits are generic NvM
+workspace `FEBF0308` for DIDs `0105`, `010B`, and `F18C`, plus DID `0110` reading
+`FEBE5050`. Exact xrefs show `FEBE5050` is initialized/reset and maintained as a
+saturating crypto-test/status accumulator, not the command-5 generated output.
+This is a bounded negative for the currently recovered high-value RAM regions,
+not a claim that every RDBI value is non-sensitive.
+
 WDBI callback `0x95DCE` phases: start `0x95C8C`, cancel `0x95D7E`, poll `0x95DB4`.
 Writable DIDs are the separate 19-entry table at `0x26AEC` (`0x1000..0x110D`
 class), binary-searched by `0x9545C`. NRCs include `0x12`, `0x13`, `0x31`, and

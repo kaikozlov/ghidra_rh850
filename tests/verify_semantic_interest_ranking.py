@@ -47,7 +47,7 @@ def main() -> int:
         return 1
     with ARTIFACT.open(newline="") as handle:
         rows = list(csv.DictReader(handle))
-    check("one row per semantic-ledger function", len(rows) == 6094, str(len(rows)))
+    check("one row per semantic-ledger function", len(rows) == 6288, str(len(rows)))
     addresses = [int(row["entry_addr"], 0) for row in rows]
     check("artifact sorted uniquely by address", addresses == sorted(set(addresses)))
     ranks = sorted(int(row["rank"]) for row in rows)

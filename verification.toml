@@ -388,11 +388,23 @@ paths = [
   "ghidra/scripts/seed/SeedUdsServiceTable.java",
   "ghidra/scripts/verify/AssertRecoveredCallbackTables.java",
   "ghidra/scripts/verify/AssertFunctionDiscoveryFloor.java",
+  "ghidra/scripts/verify/AssertApplicationRdbiDisclosureBoundary.java",
   "ghidra/scripts/verify/AssertReviewedPointerClusters.java",
   "ghidra/scripts/verify/ExportOutsideFunctionCandidates.java",
   "tools/apply_function_discovery_adjudications.py",
   "tools/generate_outside_function_candidates.sh",
   "tools/rebuild_project.sh",
+]
+
+[suite.application_rdbi_disclosure_boundary]
+tests = ["tests/verify_application_rdbi_disclosure_boundary.py"]
+oracle = "cfg_dataflow"
+paths = [
+  "ghidra/scripts/verify/AssertApplicationRdbiDisclosureBoundary.java",
+  "tests/verify_application_rdbi_disclosure_boundary.py",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
 ]
 
 [suite.xcp_security]

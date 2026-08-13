@@ -187,6 +187,7 @@ empty.
 |---|---|---|
 | All 17 services (Dcm dispatch layer) | `sec_count=0` at `0x25E28 + i*0x18 + 0x12` | No service is security-gated |
 | All 242 readable DIDs (RDBI) | Policy table at `0x261A4`, bounded scan of recognized policy records | No DID requires level > 0 |
+| RDBI callback disclosure boundary | Firmware table `0x2941C` (242 rows / 196 unique callbacks), exact dispatch at `0x4CB8A→0x4CBB2`, depth-4 direct-call audit | No recovered path into command-5 output, key-update result bank, payload-derived key material, or application-SA seed/data/temp RAM; selected hits reduce to generic NvM workspace plus status accumulator `FEBE5050` |
 | All 19 writable DIDs (WDBI) | Policy table at `0x26420`, flag at `0x26B8D` | All have `level_count=0` |
 | `0xAB` operation-F1, event worker, 75 snapshot descriptors, six detail descriptors | Resolve configured indirect tables, then census direct descendants and GP key displacements | Zero matches to crypto/NvM/ICU-S/SecOC/security-policy targets |
 
@@ -206,6 +207,15 @@ Sienna 8965B4512000 calibration:
 The algorithm and unlock state are real; the policy tables are empty. The
 unlock may be a dormant platform feature rather than an intentional
 protection boundary on this firmware.
+
+The empty RDBI policy therefore exposes a broad read surface, but the recovered
+callback graph now supports a narrower confidentiality boundary than the policy
+scan alone. All 196 unique callbacks are represented as exact functions, and a
+four-hop direct-call audit over selected high-value crypto/SA RAM regions finds
+only four known non-secret workspace/status observations. This does **not**
+prove the full 242-DID corpus contains no privacy, diagnostic-history, or other
+sensitive information; it specifically closes the currently recovered
+key/MAC/SA-buffer disclosure candidates.
 
 **Corolla caveat:** The Corolla EPS (`8965F1208000`) is a different
 calibration. Its Dcm configuration tables are generated separately and may

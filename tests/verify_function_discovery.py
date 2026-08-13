@@ -43,6 +43,10 @@ HEADER = [
 ]
 
 KNOWN_TABLE = 0x2B3F0
+RDBI_TABLE = 0x2941C
+RDBI_COUNT = 242
+RDBI_STRIDE = 16
+RDBI_TABLE_SHA256 = "4b84c14b28e1518fae9a12de032b935503a22bda2c8797d330011d73ae848520"
 KNOWN_RECORDS = [
     (0xFB, 0x9729A),
     (0xFA, 0x972FA),
@@ -140,6 +144,17 @@ def main() -> int:
     check("boot SID 0x31 entry starts with complete four-byte prepare",
           image[BOOT_ROUTINE_CONTROL_ENTRY:BOOT_ROUTINE_CONTROL_ENTRY + 4]
           == BOOT_ROUTINE_CONTROL_PROLOGUE)
+
+    rdbi_region = image[RDBI_TABLE:RDBI_TABLE + RDBI_COUNT * RDBI_STRIDE]
+    rdbi_callbacks = [
+        struct.unpack_from("<I", rdbi_region, index * RDBI_STRIDE + 4)[0]
+        for index in range(RDBI_COUNT)
+    ]
+    rdbi_targets = {target for target in rdbi_callbacks if target}
+    check("application RDBI table byte hash matches firmware",
+          hashlib.sha256(rdbi_region).hexdigest() == RDBI_TABLE_SHA256)
+    check("application RDBI table has 242 rows and 196 unique callbacks",
+          len(rdbi_callbacks) == 242 and len(rdbi_targets) == 196)
 
     print("\n== generated outside-function ledger ==")
     check("candidate CSV exists", CANDIDATES.is_file(), str(CANDIDATES))
@@ -244,6 +259,12 @@ def main() -> int:
         "dispatch-proven 0x2B3F0 targets are all inside exact functions",
         not remaining,
         "still outside: " + ", ".join(f"0x{x:08x}" for x in sorted(remaining)),
+    )
+    rdbi_remaining = rdbi_targets.intersection(by_addr)
+    check(
+        "all 196 firmware-proven application RDBI callbacks are inside exact functions",
+        not rdbi_remaining,
+        "still outside: " + ", ".join(f"0x{x:08x}" for x in sorted(rdbi_remaining)),
     )
 
     summary = json.loads(SUMMARY.read_text())

@@ -10,6 +10,7 @@ import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.listing.InstructionIterator;
 import ghidra.program.model.symbol.Reference;
 import ghidra.program.model.symbol.SourceType;
+import ghidra.program.model.scalar.Scalar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ public class AssertFunctionDiscoveryFloor extends GhidraScript {
         new PointerTable("xcp_command", 0x2b3f0L, 7, 8, 4),
         new PointerTable("application_command", 0x22c30L, 18, 4, 0),
         new PointerTable("application_wdbi", 0x25804L, 19, 12, 4, 8),
+        new PointerTable("application_rdbi_callback", 0x2941cL, 242, 16, 4),
         new PointerTable("application_operation", 0x28098L, 10, 16, 8, 12),
         new PointerTable("packet_high_selector", 0x26cccL, 8, 4, 0),
         new PointerTable("packet_low_selector", 0x26cecL, 45, 4, 0),
@@ -70,7 +72,7 @@ public class AssertFunctionDiscoveryFloor extends GhidraScript {
             }
         }
         println(String.format(
-            "ASSERT function-discovery-floor: tables=%d pointers=%d bounded_wrappers=%d direct_call_gaps=0%s",
+            "ASSERT function-discovery-floor: tables=%d pointers=%d bounded_wrappers=%d direct_call_gaps=0 constant_veneer_gaps=0%s",
             TABLES.length, pointers, BOUNDED_TARGETS.length,
             mutationSelfTest ? " mutation_self_test=passed" : ""));
     }
@@ -115,6 +117,26 @@ public class AssertFunctionDiscoveryFloor extends GhidraScript {
         while (functions.hasNext()) {
             monitor.checkCancelled();
             Function source = functions.next();
+            if (source.getBody().getNumAddresses() == 8) {
+                Instruction first = getInstructionAt(source.getEntryPoint());
+                Instruction second = first == null ? null : first.getNext();
+                if (first != null && second != null && source.getBody().contains(second.getAddress())
+                        && "mov".equals(first.getMnemonicString())
+                        && "jmp".equals(second.getMnemonicString())) {
+                    Object[] immediate = first.getOpObjects(0);
+                    Object[] jumpOperand = second.getOpObjects(0);
+                    if (immediate.length == 1 && immediate[0] instanceof Scalar
+                            && jumpOperand.length == 1 && "r12".equals(jumpOperand[0].toString())) {
+                        long targetOffset = ((Scalar) immediate[0]).getUnsignedValue();
+                        if ((targetOffset & 1L) == 0 && targetOffset <= 0xfffffL
+                                && getFunctionAt(toAddr(targetOffset)) == null) {
+                            failures.add(String.format(
+                                "constant veneer %s targets missing function %s",
+                                source.getEntryPoint(), toAddr(targetOffset)));
+                        }
+                    }
+                }
+            }
             InstructionIterator instructions = currentProgram.getListing().getInstructions(
                 source.getBody(), true);
             while (instructions.hasNext()) {
