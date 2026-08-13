@@ -58,6 +58,9 @@ Important recovered effects include:
 | DID | Action | Bounded interpretation |
 |---|---:|---|
 | `1000` | `0x4F060` | builds 32-byte supported-`0x10xx` WDBI bitmap |
+| `1004` | `0x4F170` | fixed maintenance trigger: selector 1 requires input `FF FF`, then queues internal operation 5 without consuming a tester-chosen value |
+| `1007` | `0x4F1EA` | one-shot live lifecycle reinitialization of groups `FEBEB454/455`; no local speed/mode gate |
+| `1008` | `0x4F25C` | one-shot diagnostic-only live lifecycle reinitialization of group `FEBEB456`; no local speed/mode gate |
 | `100E` | `0x8A774` | calls crypto-test bank-0 activator `0x68F92` |
 | `100F` | `0x8A782` | calls crypto-test bank-1 activator `0x69018` |
 | `1010` | dedicated path | ICU-S command-8 authenticated key update |
@@ -70,7 +73,61 @@ Several other callbacks are demonstrably stateful but their OEM test names are
 not assigned. The generated CSV records their recovered callees and leaves the
 semantics bounded rather than inventing names from behavior alone.
 
-## 4. `0x110A/0x110C/0x110D` service-mode chain
+## 4. `0x1007/0x1008` ungated live lifecycle reinitialization
+
+DIDs `0x1007` and `0x1008` expose a distinct availability/control-state surface
+that is weaker-gated than several neighboring WDBIs.
+
+Both are policy-0, selector-1, zero-payload requests. Their preconditions call
+shared lifecycle-readiness helper `FUN_B79F8` and then check a dedicated
+one-shot flag (`FEBE8157` or `FEBE8158`). Neither precondition reads
+`application_vehicle_speed_raw @ FEBEE892`, alternate-handoff state, or system
+mode. This is not merely because speed is enforced at a common WDBI layer:
+`0x1002` and `0x1106` explicitly read `FEBEE892` and compare it against the same
+calibration threshold in their own precondition callbacks.
+
+The outer session path does not restore that missing condition. Application
+session policy `0x4C942` applies the vehicle-speed rejection only when the
+requested session is **2** (programming). Requested session **3** (extended)
+returns success through that policy without the speed comparison. Consequently
+the statically recovered wire sequence is:
+
+- `10 03` — enter unauthenticated extended session;
+- `2E 01 10 07` — request the `0x1007` reinitializer; or
+- `2E 01 10 08` — request the `0x1008` reinitializer.
+
+`0x1007` reaches `FUN_B7A36(0)`. That helper forces lifecycle groups
+`FEBEB454/455` to transition state `0x11` and calls dedicated reinitialization
+helpers for subordinate components. `FUN_B7A36` is also used by one internal
+fault/lifecycle-recovery path, so the bounded interpretation is that the WDBI
+exposes a live recovery/reinitialization operation rather than a unique actuator
+primitive.
+
+`0x1008` reaches `FUN_B7AAE`. That helper forces `FEBEB456` to state `0x11` and
+calls five subordinate reinitializers. Its only recovered caller is the
+WDBI-owned thunk at `0xFDEA8`, making this particular group reset
+diagnostic-only in the recovered static graph.
+
+The resulting lifecycle workers (`B7794/B7872/B792A`) are not confined to a
+diagnostic task. Wrapper `B79E8` is called from `system_mode_per_tick_dispatcher`
+whenever current mode is greater than `0x102`; this includes the normal
+operational `0x300/0x400/0x500` mode families. State `0x11` is an in-progress
+transition: the workers wait for subordinate states to converge to `0x22`, or
+resolve to error state `0x44` on failure/timeout.
+
+The requests are **one-shot per application boot**, not an unlimited diagnostic
+DoS loop. `0x1007` writes `FEBE8157=1` and `0x1008` writes `FEBE8158=1`; exact
+xref censuses recover no other writer that clears either byte during runtime.
+Subsequent selector-1 attempts therefore fail their busy check until reset.
+
+This supports a bounded finding: an unauthenticated extended-session client can,
+subject to lifecycle-readiness conditions but without a local or outer
+stationary gate, inject one live subsystem reinitialization into the operational
+scheduler. Static evidence does **not** show these lifecycle states joining the
+proved d/q current/PWM producer cone, so this is an availability/control-state
+primitive rather than arbitrary steering actuation.
+
+## 5. `0x110A/0x110C/0x110D` service-mode chain
 
 These three WDBIs are the strongest state-changing entries recovered in this
 pass.
@@ -96,7 +153,7 @@ therefore does **not** claim that an arbitrary request succeeds at arbitrary
 vehicle speed/state; it establishes the authentication/session boundary and the
 reachable control-state graph when those preconditions are satisfied.
 
-## 5. Motor-actuation boundary
+## 6. Motor-actuation boundary
 
 The `0x520` service pipeline computes signed/saturated values, so those values
 were traced separately from the authentication analysis rather than being
@@ -124,29 +181,32 @@ control-state exposure with bounded availability implications**, not arbitrary
 steering torque/current actuation. Hardware-only effects and indirect physical
 behavior of the service routines remain dynamic questions.
 
-## 6. Security interpretation
+## 7. Security interpretation
 
 The significant issue is broader than the previously recovered crypto-test
 activation: a calibration with a fully implemented SecurityAccess mechanism has
 left the entire 19-entry WDBI set at SecurityAccess level count zero, including
 state-changing factory/service controls.
 
-The strongest recovered consequence is the ability, after an unauthenticated
-allowed diagnostic-session transition and subject to per-action runtime gates,
-to request special EPS service modes and mutate subsystem/service command state.
-That is an authentication-policy weakness and an availability/control-state
-surface. It is not evidence of a clean steering-control primitive.
+The strongest recovered consequences are two related availability/control-state
+paths: `0x1007/0x1008` can inject one-shot live lifecycle reinitialization into
+normal operational scheduling without the explicit speed gate used by other
+WDBIs, and `0x110A/0x110C/0x110D` can request special EPS service modes under
+their own runtime gates. These are authentication/safety-policy weaknesses, not
+evidence of a clean steering-control primitive.
 
 For comma/openpilot work these WDBIs should not be treated as a production
 control interface. Their semantics are factory/service-oriented, their runtime
 conditions are heterogeneous, and the proven motor-current path remains
 separate.
 
-## 7. Verification
+## 8. Verification
 
 - `tests/verify_application_wdbi_surface.py` pins the 19-entry policy, selector,
-  descriptor-width, callback, service-mode, and termination structure directly
-  from firmware bytes.
+  descriptor-width, callback, programming-only session speed gate, contrasting
+  per-DID speed gates, live lifecycle-reinit bodies, one-shot writes, scheduler
+  gate, service-mode chain, and termination structure directly from firmware
+  bytes.
 - `ghidra/scripts/verify/AssertMotorActuationBoundary.java` pins the exact
   service-state reference censuses alongside the independent d/q-current
   reference censuses.

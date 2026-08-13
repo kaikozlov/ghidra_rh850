@@ -303,12 +303,18 @@ index 1 and extended-only session 3. Every DID supports selector 1; only
 from two input bytes on `0x1004` and the 64-byte authenticated package on
 `0x1010`, selector-1 actions consume zero data bytes.
 
-Three policy-0 entries are proven service-mode controls: `0x110A`, `0x110C`,
-and `0x110D` request internal modes 2/3/4 and can drive the system-mode
-coordinator into submode `0x520` under their runtime preconditions. Exact xref
-censuses keep the resulting service-state values separate from the proved d/q
-current/PWM cone, so this is a diagnostic control-state/availability surface,
-not a recovered arbitrary steering-current primitive.
+Two distinct policy-0 control families are now recovered. `0x1007/0x1008` are
+zero-payload, one-shot live lifecycle reinitializers: their local preconditions
+omit the explicit vehicle-speed check used by `0x1002/0x1106`, and extended
+session entry is not stationary-gated because session policy `0x4C942` applies
+its speed rejection only to requested session 2. Their lifecycle workers run in
+the normal per-tick scheduler for modes `>0x102`, including operational
+`0x300/0x400/0x500`. Separately, `0x110A/0x110C/0x110D` request internal modes
+2/3/4 and can drive the system-mode coordinator into submode `0x520` under their
+runtime preconditions. Exact xref censuses keep both state families separate
+from the proved d/q current/PWM cone, so these are diagnostic
+availability/control-state surfaces, not recovered arbitrary steering-current
+primitives.
 
 Entry 9 is enabled DID `0x1010`. OEM selector `0x01` submits a fixed 64-byte
 request to ICU-S command 8; selector `0x03` reads a one-byte state plus the

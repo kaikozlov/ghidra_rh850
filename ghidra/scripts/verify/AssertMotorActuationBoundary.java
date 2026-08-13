@@ -295,6 +295,31 @@ public class AssertMotorActuationBoundary extends GhidraScript {
         assertExactRefs(0xfebeb006L,
                 "000bd924:WRITE", "000be822:WRITE");
 
+        // Policy-0 WDBIs 0x1007/0x1008 expose live lifecycle reinitializers.
+        // Pin their one-shot flags, lifecycle group state, and recovered caller
+        // topology. These groups are serviced by the normal per-tick scheduler
+        // (B79E8) in operational modes, but remain outside the d/q/PWM cone.
+        assertExactRefs(0xfebe8157L,
+                "0004f1c4:READ", "0004f1fc:WRITE", "0004f20e:READ");
+        assertExactRefs(0xfebe8158L,
+                "0004f236:READ", "0004f26c:WRITE", "0004f27e:READ");
+        assertExactRefs(0xfebeb454L,
+                "000b77a0:READ", "000b7864:WRITE", "000b7a00:READ",
+                "000b7a42:READ", "000b7aa2:WRITE", "000bd5cc:WRITE");
+        assertExactRefs(0xfebeb455L,
+                "000b787a:READ", "000b7912:WRITE", "000b7a02:READ",
+                "000b7a3a:READ", "000b7aa4:WRITE", "000bd5cc:WRITE");
+        assertExactRefs(0xfebeb456L,
+                "000b7932:READ", "000b79da:WRITE", "000b7a04:READ",
+                "000b7ab6:READ", "000b7ae0:WRITE");
+        assertExactRefs(0xb7a36L,
+                "000b7ec8:UNCONDITIONAL_CALL", "000fde9a:COMPUTED_CALL");
+        assertExactRefs(0xb7aaeL,
+                "000fdeae:COMPUTED_CALL");
+        assertExactRefs(0xb79e8L,
+                "000bedc0:UNCONDITIONAL_CALL", "000bee0a:UNCONDITIONAL_CALL",
+                "000bf208:UNCONDITIONAL_CALL");
+
         println("ASSERT motor-actuation-boundary: call_edges=" + callEdges
                 + " reference_censuses=" + referenceCensuses
                 + " failures=" + failures);

@@ -92,6 +92,67 @@ check("only 0x1004 and 0x1010 carry selector-1 payload bytes",
 check("DID 0x1010 selector outputs remain 49 bytes",
       r1010["selector1_output_bytes"] == "49" and r1010["selector3_output_bytes"] == "49")
 
+print("\n== ungated live lifecycle reinitializers ==")
+r1007 = row_by_did(rows, 0x1007)
+r1008 = row_by_did(rows, 0x1008)
+check("DIDs 0x1007/0x1008 are zero-payload policy-0 selector-1 actions",
+      all(r["policy_index"] == "0" and r["effective_wdbi_sessions"] == "2,3"
+              and r["selector1_input_bytes"] == "0" for r in (r1007, r1008)))
+# Session 3 is deliberately outside the programming-only speed check. The
+# 30-byte policy body reads speed but branches around the rejection unless the
+# requested session byte is exactly 2.
+check("session-transition policy body is pinned",
+      hashlib.sha256(CF[0x4C942:0x4C960]).hexdigest() ==
+      "59f72ced67bed66bac3837c907af72e235dbf710baa0c4205664622794595373")
+check("session policy compares requested session against 2 before NRC-0x88 rejection",
+      CF[0x4C948:0x4C95C] == bytes.fromhex("623a9a0d409e0200f39fdd81f309b3050b527f00"))
+# 0x1002 and 0x1106 demonstrate that this calibration does add explicit local
+# speed gates to selected WDBIs. 0x1007/0x1008 instead contain only lifecycle
+# readiness + one-shot checks; pin all four callback bodies to keep that contrast exact.
+check("speed-gated WDBI 0x1002 precondition body is pinned",
+      hashlib.sha256(CF[0x4F0AE:0x4F0EA]).hexdigest() ==
+      "4066aeaa40016233deac2b002e9cbe825d79f59b3d149ac9e5290b80831fd360")
+check("speed-gated WDBI 0x1106 precondition body is pinned",
+      hashlib.sha256(CF[0x4F400:0x4F43E]).hexdigest() ==
+      "facfa0d92b28416e68eafc6119759c54b695c7ae3046bee2da5ab1ded58f3812")
+check("WDBIs 0x1002/0x1106 explicitly read application vehicle speed",
+      CF[0x4F0C0:0x4F0C4] == bytes.fromhex("e40f9330")
+      and CF[0x4F412:0x4F416] == bytes.fromhex("e40f9330"))
+check("WDBI 0x1007 precondition body is pinned without that speed-gate shape",
+      hashlib.sha256(CF[0x4F1B4:0x4F1EA]).hexdigest() ==
+      "a63141ad5cced576a3efd97f1473a1804bd4be9f51bc9235ad55befb63ee9437"
+      and bytes.fromhex("e40f9330") not in CF[0x4F1B4:0x4F1EA])
+check("WDBI 0x1008 precondition body is pinned without that speed-gate shape",
+      hashlib.sha256(CF[0x4F226:0x4F25C]).hexdigest() ==
+      "03c50462198611b270a7497a736e0dc2a003d711c2d6c34c63dcb55894506d14"
+      and bytes.fromhex("e40f9330") not in CF[0x4F226:0x4F25C])
+check("0x1007/0x1008 preconditions call shared lifecycle-readiness thunk B79F8",
+      CF[0xFDE80:0xFDE88] == bytes.fromhex("2c06f8790b006c00"))
+check("lifecycle-readiness helper body is pinned",
+      hashlib.sha256(CF[0xB79F8:0xB7A36]).hexdigest() ==
+      "cc7d98099d539e15a75d7bc4b0dc469e5c5dd0e263a5f7ff8d39d123bffc9d6c")
+check("0x1007 action reaches B7A36 and writes one-shot flag",
+      CF[0xFDE94:0xFDE9C] == bytes.fromhex("2c06367a0b006c00")
+      and CF[0x4F1FC:0x4F200] == bytes.fromhex("440f57c9"))
+check("0x1008 action reaches diagnostic-only B7AAE and writes one-shot flag",
+      CF[0xFDEA8:0xFDEB0] == bytes.fromhex("2c06ae7a0b006c00")
+      and CF[0x4F26C:0x4F270] == bytes.fromhex("440f58c9"))
+check("0x1007 reinitializer body is pinned and forces lifecycle state 0x11",
+      hashlib.sha256(CF[0xB7A36:0xB7AAE]).hexdigest() ==
+      "9eaec849349c3a159a1c2b70071fe315cb083cfb92fdad969144af6f1c590209"
+      and CF[0xB7A72:0xB7A76] == bytes.fromhex("20ee1100"))
+check("0x1008 reinitializer body is pinned and forces lifecycle state 0x11",
+      hashlib.sha256(CF[0xB7AAE:0xB7AE8]).hexdigest() ==
+      "d15f8d73af93ecfb3891278dbd27b34fc1670e166eaed9f1a32e5a87a788abda"
+      and CF[0xB7ADC:0xB7AE0] == bytes.fromhex("209e1100"))
+# B79E8 services the lifecycle workers whenever current system mode is >0x102;
+# this includes the normal 0x300/0x400/0x500 operational bands.
+check("normal per-tick dispatcher gates lifecycle scheduler at mode > 0x102",
+      CF[0xBEDAE:0xBEDB6] == bytes.fromhex("1c06fdfee9070501"))
+check("normal per-tick dispatcher calls lifecycle scheduler B79E8 on both branches",
+      CF[0xBEDC0:0xBEDC4] == bytes.fromhex("bfff288c")
+      and CF[0xBEE0A:0xBEE0E] == bytes.fromhex("bfffde8b"))
+
 print("\n== stock crypto-test activation routes ==")
 r100e = row_by_did(rows, 0x100E)
 r100f = row_by_did(rows, 0x100F)

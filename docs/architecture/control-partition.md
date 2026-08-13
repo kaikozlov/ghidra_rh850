@@ -762,6 +762,28 @@ arbitrary steering-torque/current primitive. The complete WDBI access/control
 surface is documented in
 [`../diagnostics/application-wdbi-surface.md`](../diagnostics/application-wdbi-surface.md).
 
+### 9.8 WDBI `0x1007/0x1008` inject live lifecycle reinitialization, not d/q commands
+
+Two additional policy-0 WDBIs operate on lifecycle groups that are serviced by
+normal operational scheduling rather than the `0x520`-only service island.
+`0x1007` reaches `B7A36(0)` and forces top-level lifecycle states
+`FEBEB454/455` to `0x11`; `0x1008` reaches diagnostic-only `B7AAE` and forces
+`FEBEB456` to `0x11`. State `0x11` is consumed by periodic workers
+`B7794/B7872/B792A`, which wait for subordinate components to converge to
+`0x22` or terminate in `0x44` on failure/timeout.
+
+Wrapper `B79E8` invokes those workers from `system_mode_per_tick_dispatcher` on
+the `current_mode > 0x102` path. The lifecycle machinery therefore remains live
+through normal `0x300/0x400/0x500` operational modes. Exact xref closure pins
+the one-shot flags `FEBE8157/8158`, group states `FEBEB454/455/456`, caller
+sets for `B7A36/B7AAE`, and the normal scheduler references to `B79E8`.
+
+This is a real live-state perturbation boundary, but it still does not create a
+recovered d/q command. None of these lifecycle states is a producer of
+`FEBE6D28/FEBE6D2A`, and the previously pinned d/q/PWM cone remains unchanged.
+The security consequence is therefore bounded operational availability/control
+state, not arbitrary steering-current injection.
+
 ### Evidence grade: recovered/verified with bounded actuation join
 
 The ADCG register identities, Global-RAM geometry, DMAC register identities,

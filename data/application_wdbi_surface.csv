@@ -2,9 +2,9 @@ table_index,did,enabled,policy_index,security_level_count,policy_sessions,effect
 0,0x1000,1,0,0,"1,2,3","2,3",1,0,1,0,32,0,0,1,0x26678,0x4F054,0x4F060,capability_query,selector 1 builds a 32-byte supported-0x10xx WDBI bitmap
 1,0x1001,1,0,0,"1,2,3","2,3",1,0,1,0,32,0,0,1,0x26678,0x4EFFE,0x4F00A,query_or_control,selector 1 returns a 32-byte callback result; deeper OEM meaning unassigned
 2,0x1002,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F0AE,0x4F0EA,stateful_control,selector 1 reaches FUN_00035582 then thunk_B7F7C(0x44); runtime preconditions apply
-3,0x1004,1,0,0,"1,2,3","2,3",1,0,1,2,0,0,0,1,0x26678,0x4F12C,0x4F170,stateful_control,selector 1 accepts a 2-byte input and reaches FUN_00050864; runtime preconditions apply
-4,0x1007,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F1B4,0x4F1EA,stateful_control,selector 1 reaches thunk_B7A36(0); deeper OEM meaning unassigned
-5,0x1008,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F226,0x4F25C,stateful_control,selector 1 reaches direct_call_FDEA8; deeper OEM meaning unassigned
+3,0x1004,1,0,0,"1,2,3","2,3",1,0,1,2,0,0,0,1,0x26678,0x4F12C,0x4F170,fixed_maintenance_trigger,selector 1 requires fixed input FFFF then queues internal operation 5; tester value is not consumed by the action
+4,0x1007,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F1B4,0x4F1EA,live_lifecycle_reinit,"zero-payload selector 1 calls B7A36(0), forcing lifecycle groups FEBEB454/455 to state 0x11; no local speed/mode gate; one-shot per boot via FEBE8157"
+5,0x1008,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F226,0x4F25C,live_lifecycle_reinit,"zero-payload selector 1 calls diagnostic-only B7AAE, forcing lifecycle group FEBEB456 to state 0x11; no local speed/mode gate; one-shot per boot via FEBE8158"
 6,0x1009,1,0,0,"1,2,3","2,3",1,0,1,0,0,0,0,1,0x26678,0x4F296,0x4F2C2,stateful_control,selector 1 conditionally reaches direct_call_FE0B0; deeper OEM meaning unassigned
 7,0x100E,1,0,0,"1,2,3","2,3",1,0,0,0,0,0,0,0,0x26678,0x8A768,0x8A774,crypto_test_activation,selector 1 wrapper 0x8A774 calls crypto_test_bank0_activate @ 0x68F92
 8,0x100F,1,0,0,"1,2,3","2,3",1,0,0,0,0,0,0,0,0x26678,0x8A768,0x8A782,crypto_test_activation,selector 1 wrapper 0x8A782 calls crypto_test_bank1_activate @ 0x69018

@@ -237,14 +237,20 @@ authorization:
   hook at `0x8A01C` is compiled to `return 0`, so there is no second external
   authorization manager behind the Dcm policy. The surface is now substantially
   classified rather than merely structural: 18 records share policy index 0
-  (effective programming/extended access after the outer SID-`0x2E` gate), and
-  `0x110A/0x110C/0x110D` can request internal service modes 2/3/4 and transition
-  the operational coordinator into special submode `0x520` under runtime
-  preconditions. The resulting service-state outputs remain statically separate
-  from the independently proved d/q current/PWM cone, so the supported impact is
-  diagnostic control-state/availability exposure rather than arbitrary steering
-  actuation. DID `0x1010` is safer than the Dcm table suggests because ICU-S
-  independently authenticates its SHE M1–M3 package and counter. See
+  (effective programming/extended access after the outer SID-`0x2E` gate).
+  `0x1007/0x1008` are zero-payload, one-shot live lifecycle reinitializers whose
+  local preconditions omit the explicit vehicle-speed check used by neighboring
+  `0x1002/0x1106`; extended-session policy also has no stationary gate because
+  `application_session_transition_policy @ 0x4C942` applies its speed rejection
+  only to requested session 2. Their workers execute in the normal per-tick
+  scheduler for modes `>0x102`, including operational `0x300/0x400/0x500`.
+  Separately, `0x110A/0x110C/0x110D` can request internal service modes 2/3/4
+  and transition the coordinator into special submode `0x520` under runtime
+  preconditions. Exact graph closure keeps both diagnostic state families
+  separate from the independently proved d/q current/PWM cone, so the supported
+  impact is unauthenticated availability/control-state exposure rather than
+  arbitrary steering actuation. DID `0x1010` is safer than the Dcm table suggests
+  because ICU-S independently authenticates its SHE M1–M3 package and counter. See
   [../diagnostics/application-wdbi-surface.md](../diagnostics/application-wdbi-surface.md).
 - **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB`
   exposes event-record list/state/detail reads through an asynchronous worker;
