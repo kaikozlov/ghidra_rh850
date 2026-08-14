@@ -576,10 +576,14 @@ also expose type 2; only `0x100E/0x100F` omit type 3. The complete surface is
 and `data/application_routine_control_surface.csv`.
 
 The lower lifecycle and service-mode findings survive the service correction,
-but with stronger reachability: policy-0 RIDs `0x1007/0x1008/0x1009` and the
-`0x110A/0x110C/0x110D` service-mode controls do not require an extended-session
-transition merely to reach their own preconditions. Their static state remains
-separate from the proved d/q current/PWM cone.
+but with stronger reachability: policy-0 RIDs `0x1007/0x1008/0x1009`, repeatable
+persistent-reset RID `0x1108`, and the `0x110A/0x110C/0x110D` service-mode
+controls do not require an extended-session transition merely to reach their own
+preconditions. `1108` is particularly weak-gated: `31 01 11 08` has no recovered
+vehicle-speed check and starts/queues checkpoint reset operation 2, which
+persists objects 9/11/12/14/15 before selector-10 completion. Its static state,
+and the newly bounded `1002/1103/1106/1109` control cones, remain separate from
+the proved d/q current/PWM cone.
 
 RID `0x1010` control type `01` submits the 64-byte SHE M1/M2/M3 package to ICU-S
 command 8; control type `03` reads status/M4/M5. Its own policy remains extended

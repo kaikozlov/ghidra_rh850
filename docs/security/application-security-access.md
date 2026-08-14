@@ -273,10 +273,16 @@ authorization:
   preconditions omit the explicit vehicle-speed check used by neighboring
   `0x1002/0x1106`; `0x1009` is a state-gated variant. Their workers execute in
   normal per-tick scheduling for modes `>0x102`, including operational
-  `0x300/0x400/0x500`. Separately, `0x110A/0x110C/0x110D` can request internal
-  service modes 2/3/4 and transition the coordinator into special submode
-  `0x520` under runtime preconditions. Exact graph closure keeps both diagnostic
-  state families separate from the independently proved d/q current/PWM cone.
+  `0x300/0x400/0x500`. More importantly, policy-0 RID **`0x1108`** is a zero-
+  payload, repeatable persistent checkpoint-reset trigger whose precondition has
+  no recovered vehicle-speed reference: default-session `31 01 11 08` starts or
+  queues operation 2, whose initializer resets/reinitializes state and persists
+  checkpoint objects 9/11/12/14/15. Selector 10 reports completion; operation 6
+  is coalesced through the same completion helper, so the path is not a narrow
+  queue race. Separately, `0x110A/0x110C/0x110D` can request internal service
+  modes 2/3/4 and transition the coordinator into special submode `0x520` under
+  runtime preconditions. Exact graph closure keeps these diagnostic state
+  families separate from the independently proved d/q current/PWM cone.
   RID `0x1010` is the exception to policy-0 reachability: its own policy is
   extended-session-only, and ICU-S independently authenticates its SHE M1–M3
   package and replay counter. See

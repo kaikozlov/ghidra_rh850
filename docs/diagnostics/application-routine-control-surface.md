@@ -58,6 +58,8 @@ Important recovered effects include:
 | RID | Action | Bounded interpretation |
 |---|---:|---|
 | `1000` | `0x4F060` | builds 32-byte supported-`0x10xx` RoutineControl bitmap |
+| `1001` | `0x4F00A` | 32-byte support/capability bitmap query; no application state machine |
+| `1002` | `0x4F0EA` | vehicle-speed-gated lifecycle normalization/reinitialization via request `FEBEAF47=0x44` |
 | `1004` | `0x4F170` | fixed maintenance trigger: control type 1 requires input `FF FF`, then queues internal operation 5 without consuming a tester-chosen value |
 | `1007` | `0x4F1EA` | one-shot live lifecycle reinitialization of groups `FEBEB454/455`; no local speed/mode gate |
 | `1008` | `0x4F25C` | one-shot diagnostic-only live lifecycle reinitialization of group `FEBEB456`; no local speed/mode gate |
@@ -66,13 +68,17 @@ Important recovered effects include:
 | `100F` | `0x8A782` | calls crypto-test bank-1 activator `0x69018` |
 | `1010` | dedicated path | ICU-S command-8 authenticated key update |
 | `1100` | `0x4F32E` | builds 32-byte supported-`0x11xx` RoutineControl bitmap |
+| `1103` | `0x4F3C0` | runtime-gated internal mode-1 service request |
+| `1106` | `0x4F43E` | vehicle-speed-gated three-group lifecycle reinitialization |
+| `1108` | `0x4F4BC` | **no-speed-gate persistent checkpoint reset** through queue operation 2 |
+| `1109` | `0x4F570` | vehicle-speed/state-gated redundant namespace-`0x100` object-0 update |
 | `110A` | `0x4F630` | service-mode control, internal mode 2; control type 2 termination |
 | `110C` | `0x4F702` | service-mode control, internal mode 3 |
 | `110D` | `0x4F7B8` | service-mode control, internal mode 4; control type 2 termination |
 
-Several other callbacks are demonstrably stateful but their OEM test names are
-not assigned. The generated CSV records their recovered callees and leaves the
-semantics bounded rather than inventing names from behavior alone.
+The remaining policy-0 callback semantics are now bounded as well. The evidence
+names above describe recovered behavior rather than inferred Toyota factory-test
+labels; no OEM display names are assigned where the firmware does not retain them.
 
 ## 4. `0x1007/0x1008` ungated live lifecycle reinitialization
 
@@ -150,7 +156,90 @@ reinitialization primitive. It remains bounded by the aggregate-health-zero
 condition and, like the other lifecycle paths, has no recovered static join into
 the d/q/PWM producer cone.
 
-## 5. `0x110A/0x110C/0x110D` service-mode chain
+## 5. Remaining query/lifecycle/persistence controls
+
+The formerly generic `1001/1002/1103/1106/1108/1109` rows are now closed through
+their application workers and completion states.
+
+- **`0x1001` is a query, not a state-changing routine.** Control type 1 passes a
+  fixed `0x20`-byte output to `0x4C5AE`, which clears the buffer and builds a
+  support bitmap from the configured RoutineControl records, then marks its
+  status complete.
+- **`0x1002` is a speed-gated lifecycle reinitializer.** Its precondition reads
+  `application_vehicle_speed_raw @ FEBEE892`, alternate-handoff state, and its
+  busy byte. Type 1 calls `0x35582`, requests `FEBEAF47=0x44`, and marks selector
+  2 pending. The normal `B7E6E` worker handles request `0x44` without changing
+  the object-7 mode latch; it normalizes companion state `FEBEAF46=0x5A` and can
+  invoke `B79F8(1) -> B7A36(1)` to reinitialize the associated lifecycle group
+  before reporting completion.
+- **`0x1103` is a gated internal mode-1 service request.** Eligibility helper
+  `0x354E6` includes vehicle-speed and state/health conditions. Type 1 sets
+  `FEBE6ABA=0x11`; per-tick worker `0x352A0` later calls the same `B1F34` mode
+  arbiter used by `110A/110C/110D`, but with selector `1`, and selector 8 carries
+  the diagnostic completion state.
+- **`0x1106` is a speed-gated three-group reinitializer.** When its additional
+  `FEBEE958==0` condition is satisfied, `B3974` starts lifecycle states
+  `FEBEB25A/FEBEB325` and companion marker `FEBEB48D`. `B38C0` reports selector
+  9 success only after all three reach `0x44`; intermediate states remain
+  pending and failures report `0x20`.
+- **`0x1109` is a speed/state-gated persistent update.** Type 1 calls
+  `B7D26(0x22,1)`. When the underlying state requires persistence, helper
+  `0x3547E` submits redundant namespace-`0x100` object 0 and the RoutineControl
+  status becomes pending; `B7CC6/B7C4A` later resolves selector 11 success or
+  failure. This report deliberately does not invent a stronger object name.
+
+### `0x1108`: repeatable no-speed-gate persistent checkpoint reset
+
+RID `0x1108` is materially weaker-gated than the neighboring persistent/reset
+controls. It is policy 0, zero-payload, and therefore reachable from the default
+diagnostic session as the four-byte request **`31 01 11 08`**. Its precondition
+reads the alternate-handoff flag and selector-10 busy byte `FEBE815D`, but has
+**no reference to `FEBEE892` or another recovered vehicle-speed quantity**.
+No outer session transition restores a stationary check because SID `0x31` and
+policy 0 already allow sessions `1/2/3`.
+
+Type 1 calls `0x50760`. If the shared queue is idle, that function records
+operation `2`, immediately invokes initializer `0x5070C`, and sets the active
+bit, yielding queue state `0x82`. Otherwise it queues operation 2 unless an
+operation 2 or operation 6 is already active/pending. The initializer resets or
+reinitializes the shared checkpoint/runtime families and the recovered persistence
+join includes objects **9, 11, 12, 14, and 15**:
+
+| Object | Bounded checkpoint meaning |
+|---:|---|
+| `9` | runtime-condition snapshot |
+| `11` | two-channel u16 state |
+| `12` | dual-incident snapshot |
+| `14` | three-entry condition history |
+| `15` | operating-state snapshot |
+
+`0x50A1C` monitors the active queue operation. Once its four status groups leave
+pending/error transitional values, the operation-2 branch reports selector
+`10` with result `0` or `0x20` through `0x4C430`; selector 10 is exactly
+`FEBE815D`, so RoutineControl requestResults observes success/failure. This path
+is **repeatable after completion**, unlike the one-shot-per-boot `1007/1008`
+controls: the start precondition rejects only `FEBE815D==1`, while terminal
+selector states are `2/3`.
+
+Operation 6 is intentionally coalesced into the same completion family.
+`0x50760` suppresses a duplicate operation-2 insertion while 6 is active or
+queued; operation-6 monitor `0x50A1C` calls `0x4C474`, which updates selector 10
+whenever `FEBE815D` is pending. Thus a `1108` request concurrent with operation
+6 does not depend on a narrow race or remain permanently pending.
+
+This is a stronger availability/persistence exposure than the previously
+documented one-shot lifecycle routines: an unauthenticated default-session
+tester can repeatedly request a workflow that deliberately clears/reinitializes
+runtime state and persists multiple checkpoint objects, without a recovered
+vehicle-speed gate. Exact raw/live graph audits still find **no direct reference
+to the conditioned steering-command state or the d/q-current/PWM producer cone**.
+The supported interpretation is therefore persistent maintenance/reset and
+availability-state perturbation, not arbitrary steering-current injection. A
+normal bench probe is intentionally omitted because the routine modifies
+persistent state; dynamic characterization requires a disposable/matching ECU
+with NVM backup/restore and recovery planning.
+
+## 6. `0x110A/0x110C/0x110D` service-mode chain
 
 These three RoutineControl RIDs are the strongest state-changing entries recovered in this
 pass.
@@ -176,7 +265,7 @@ therefore does **not** claim that an arbitrary request succeeds at arbitrary
 vehicle speed/state; it establishes the authentication/session boundary and the
 reachable control-state graph when those preconditions are satisfied.
 
-## 6. Motor-actuation boundary
+## 7. Motor-actuation boundary
 
 The `0x520` service pipeline computes signed/saturated values, so those values
 were traced separately from the authentication analysis rather than being
@@ -204,7 +293,7 @@ control-state exposure with bounded availability implications**, not arbitrary
 steering torque/current actuation. Hardware-only effects and indirect physical
 behavior of the service routines remain dynamic questions.
 
-## 7. Security interpretation
+## 8. Security interpretation
 
 The significant issue is broader than the previously recovered crypto-test
 activation: a calibration with a fully implemented SecurityAccess mechanism has
@@ -214,9 +303,11 @@ state-changing factory/service controls.
 The strongest recovered consequences are related availability/control-state
 paths: `0x1007/0x1008` can inject one-shot live lifecycle reinitialization into
 normal operational scheduling without the explicit speed gate used by other
-RoutineControl RIDs; `0x1009` exposes a state-gated variant that forces `FEBEB2D5=0x11` when
-aggregate health is zero; and `0x110A/0x110C/0x110D` can request special EPS
-service modes under their own runtime gates. These are authentication/safety-policy weaknesses, not
+RoutineControl RIDs; `0x1009` exposes a state-gated variant that forces
+`FEBEB2D5=0x11` when aggregate health is zero; **`0x1108` is a repeatable,
+default-session, no-speed-gate trigger for persistent checkpoint reset operation
+2**; and `0x110A/0x110C/0x110D` can request special EPS service modes under their
+own runtime gates. These are authentication/safety-policy weaknesses, not
 evidence of a clean steering-control primitive.
 
 For comma/openpilot work these RoutineControl RIDs should not be treated as a production
@@ -224,13 +315,20 @@ control interface. Their semantics are factory/service-oriented, their runtime
 conditions are heterogeneous, and the proven motor-current path remains
 separate.
 
-## 8. Verification
+## 9. Verification
 
 - `tests/verify_application_routine_control_surface.py` pins the 19-entry policy, control type,
   descriptor-width, callback, corrected outer SID-0x31 session gate, contrasting
   per-RID speed gates, live lifecycle-reinit bodies, one-shot writes, scheduler
   gate, service-mode chain, and termination structure directly from firmware
   bytes.
+- `tests/verify_application_routine_control_remaining_controls.py` pins the
+  generated classifications and the `1001/1002/1103/1106/1108/1109` bodies,
+  start gates, completion selectors, operation-2 checkpoint set, operation-6
+  coalescing, and bounded direct-actuation negative.
+- `tests/verify_application_routine_control_remaining_controls_live.py` runs
+  `AssertApplicationRoutineRemainingControls.java` against the accepted project
+  to pin exact operation-2/mode/thunk ownership and the direct-state boundary.
 - `ghidra/scripts/verify/AssertMotorActuationBoundary.java` pins the exact
   service-state reference censuses alongside the independent d/q-current
   reference censuses.

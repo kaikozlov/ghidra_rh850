@@ -332,6 +332,15 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   synchronized labeled captures above. Use the redacted manifest schema in
   [../variants/newer-tsk-target-evidence.md](../variants/newer-tsk-target-evidence.md);
   until then every Sienna→newer-TSK transfer remains hypothesis.
+- **RoutineControl `1108` hardware-visible persistent-reset consequence.**
+  Static recovery is closed: unauthenticated default-session `31 01 11 08` has
+  no recovered vehicle-speed gate and repeatedly starts/coalesces queue operation
+  2, which resets/reinitializes runtime state and persists checkpoint objects
+  9/11/12/14/15 before selector-10 completion. Exact static/live closure has no
+  direct conditioned-command/d/q/PWM join. Dynamic characterization is
+  deliberately not packaged as a normal probe because the routine modifies
+  persistent state; use only a disposable/matching ECU with complete NVM
+  backup/restore and recovery procedure.
 - **Application WDBI `0204` hardware-visible maintenance/reset consequence.**
   Static recovery is closed: the write transitions/persists checkpoint object 7,
   and one branch then starts queue operation 6, which resets/reinitializes state

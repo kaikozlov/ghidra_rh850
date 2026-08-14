@@ -123,6 +123,31 @@ paths = [
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
 ]
 
+[suite.application_routine_control_remaining_controls]
+tests = [
+  "tests/verify_application_routine_control_remaining_controls.py",
+  "tests/verify_application_routine_control_remaining_controls_live.py",
+]
+oracle = "cfg_dataflow"
+paths = [
+  "tools/generate_application_routine_control_surface.py",
+  "data/application_routine_control_surface.csv",
+  "data/object15_reachability.csv",
+  "tests/verify_application_routine_control_remaining_controls.py",
+  "tests/verify_application_routine_control_remaining_controls_live.py",
+  "ghidra/scripts/verify/AssertApplicationRoutineRemainingControls.java",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "docs/diagnostics/application-routine-control-surface.md",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/storage/dataflash.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/ANALYSIS_STATUS.md",
+]
+
 [suite.application_read_memory_by_address]
 tests = ["tests/verify_application_read_memory_by_address.py"]
 paths = [
