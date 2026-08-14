@@ -1,0 +1,6 @@
+operation,starter,initializer,active_state,external_owner,external_entry,completion_path,completion_selector,diagnostic_owner,notes
+1,0x50698,0x50660,0x81,ClearDiagnosticInformation SID 0x14,0x4C9DA,0x50A1C -> 0x4C430,0x11,SID 0x14,"shared maintenance/history clear initializer; selector 0x11 is a shared-Dcm selector, so 0x4C430 replaces FEBE816A low byte from 0x10 pending to 0x00/0x20 terminal"
+2,0x50760,0x5070C,0x82,RoutineControl RID 0x1108,0x4F4CA,0x50A1C -> 0x4C430,0x0A,RoutineControl,"persistent checkpoint-reset workflow; operation 6 coalesces selector 10"
+4,0x507EA,0x50660,0x84,internal CAN/RTE recovery helper 0x35658,0x3568C,0x50A1C fallthrough -> 0x50996,,none,"no diagnostic caller and no selector callback; after shared maintenance statuses leave AA/A5 the monitor falls through to replay, which clears the active byte and advances the queue"
+5,0x50864,0x50858 -> 0x5449E,0x85,RoutineControl RID 0x1004,0x4F17E,0x50A1C -> 0x4C430,0x03,RoutineControl,"persistent event-log/history rewrite workflow; operation 6 coalesces selector 3"
+6,0x50922,0x508E6,0x86,WDBI DID 0x0204 completion branch,0x4EC0A,0x50A1C -> 0x4C474,"0x03/0x0A when pending",WDBI + coalesced RoutineControl,"post-WDBI persistent reset workflow; completion helper updates pending selectors 3 and/or 10"

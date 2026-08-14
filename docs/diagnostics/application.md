@@ -250,7 +250,12 @@ session-policy internals including `0x88`.
 requires exactly three request bytes and packs them as a 24-bit `groupOfDTC`.
 The lower operation stages are `0x8AF28` and `0x8B014`; failures map through the
 existing NRC machinery and pending work can return the internal continuation
-value `10`.
+value `10`. The application async-queue census closes the lower completion path:
+`0x4C9C6` starts queue operation 1 and stores `FEBE816A=0x1410`; queue monitor
+`0x50A1C` completes it with selector **`0x11`** through `0x4C430`, which replaces
+the pending low byte `0x10` with `0/0x20`. Thus SID `0x14` is not statically
+stuck response-pending. See
+[application-async-operation-queue.md](application-async-operation-queue.md).
 
 The SID-`0x11` runtime object at `0x25E40` has a null direct callback. In this
 calibration it therefore follows the generic positive-response path rather than
