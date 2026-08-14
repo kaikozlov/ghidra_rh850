@@ -403,8 +403,8 @@ has **zero SecurityAccess levels**. The 13 implemented DIDs divide as follows:
 | `0204` | vehicle speed | queues shared asynchronous diagnostic state `0x2E10` |
 | `2010` | vehicle speed | updates live runtime command-state block `FEBEB48E/49C/4A0` |
 | `2012` | **none** | payload `01` sets `FEBEB18F = 0x5A`; supply-qualified logical transition bit `0x08` inhibits a mode-specific lifecycle block and clears the alternate rotor-observer calibration selector |
-| `2013` | vehicle speed + two state flags clear | writes 16-bit live control parameter `FEBEB434` |
-| `2014` | vehicle speed + two state flags clear | writes live mode flag `FEBEB3EE = 0/0x5A` |
+| `2013` | vehicle speed + two state flags clear | writes 16-bit parameter `FEBEB434`; bounded numeric-control cone reaches motor-worker staging-only `FEBE6DCA/6DCC` |
+| `2014` | vehicle speed + two state flags clear | writes mode flag `FEBEB3EE = 0/0x5A`; changes threshold/mode eligibility and participates in RoutineControl `110A/110C` start gating |
 
 For the eight persistent DIDs, the state consumers construct IDs `0x101/0x102/0x103`
 and call `0xFF09C -> secoc_nvm_object_update`; this is a direct persistence join,
@@ -460,6 +460,43 @@ reference or call edge into the independently proved d/q-reference → current-P
 → TSG3 PWM boundary. That is a bounded graph negative, not a statement that the
 vehicle has no observable effect. Hardware characterization of the inhibit
 remains open.
+
+#### DIDs `2013` and `2014`: bounded control and mode-eligibility cones
+
+DID `2013` stores its two-byte big-endian payload at `FEBEB434`. When local
+state `FEBEB428 == 0x5A`, `B763C` passes that parameter into the stateful
+`B750E` calculation and writes the result to `FEBEB448`; `B76C0` derives
+`FEBEB452`. `B72EC` selects `FEBEB452` only for internal selector states `2`
+and `4`. The selected value is then copied through `FEBEB41A -> FEBEE416`;
+under system mode `0x500` and the surrounding status-selection conditions,
+`0x3572C` can select it into `FEBE6ACE`. `0x37FB6`, which is called inside the
+motor-control worker, copies that value into `FEBE6DCA` and `FEBE6DCC`.
+
+That apparent motor-worker join is bounded by the complete xref topology.
+`FEBE6DCA/6DCC` have only task/RTE staging readers, which copy them into
+`FEBE66CE/66D0` and `FEBE63CE/63D0`; all four mirrors have **zero runtime
+readers** in the accepted project. The `2013` cone therefore reaches the motor
+worker's state block but does not join the independently proved d/q-reference,
+current-PI, or TSG3-PWM consumers. This is a static graph boundary, not a claim
+that changing the parameter has no hardware-visible effect.
+
+DID `2014` maps payload `0/1` to `FEBEB3EE = 0/0x5A`. `B692C` and `B70D0` use
+that flag to choose between calibrated thresholds at `0x1A4BC` and `0x1A4BE`;
+`B692C` updates threshold/state decision `FEBEB3EC`, which participates in
+internal mode state `FEBEB3E7` and can reset local `FEBEB3A4/3A6` calibration
+state. The same threshold logic also crosses diagnostic services: the
+RoutineControl precondition helper `B7114` calls `B70D0` for selector values
+`1` and `2`. RID `0x110A` reaches that helper with selector `1`, and RID
+`0x110C` forces selector `2`, so `2014` participates in their start eligibility.
+RID `0x110D` forces selector `3`; the `B7114` `add -1 / cmp 1 / bh` tail skips
+`B70D0` for that selector, so `2014` does **not** supply this threshold gate for
+`0x110D`.
+
+Exact live xref closure for both DIDs, plus a bounded direct-reference/call audit,
+finds no direct join from either cone into the known d/q-current/PI/PWM
+actuation path. Supported semantics are a speed/state-gated numeric control
+parameter (`2013`) and a speed/state-gated threshold/mode-eligibility selector
+(`2014`), with physical effects still requiring isolated-bench observation.
 
 The 19-entry table at `0x26AEC` belongs to SID `0x31` RoutineControl. Direct
 callback `0x95DCE` uses `0x95C8C/0x95D7E/0x95DB4` for start/cancel/poll.

@@ -340,10 +340,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   unknown is what observable EPS behavior this inhibit produces on an isolated
   matching bench and how it recovers across session exit/reset. Static closure
   has no direct d/q/PWM join, so do not describe it as steering-current control.
-- **Application WDBI `2013/2014` physical consequence.** Both are SecurityAccess-
-  free but retain vehicle-speed plus additional state gates. `2013` writes live
-  16-bit control parameter `FEBEB434`; `2014` writes mode flag `FEBEB3EE`.
-  Their downstream control cones remain to be closed before any dynamic test.
+- **Application WDBI `2013/2014` hardware-visible consequence.** Their static
+  cones are now closed. Both retain the vehicle-speed plus two-state-flag start
+  gate. `2013` reaches motor-worker fields `FEBE6DCA/6DCC` but dead-ends in
+  write-only task/RTE mirrors; `2014` changes threshold/mode eligibility and
+  participates in RoutineControl `110A/110C` start gating. Neither has a
+  recovered direct d/q/PI/PWM join. The remaining question is what observable
+  EPS behavior either write produces on an isolated matching bench and how the
+  state recovers across diagnostic session exit/reset.
 - **Application CommunicationControl live effect.** Static recovery proves that
   extended-session SID `0x28` reaches real communication-mode updates without a
   configured SecurityAccess policy or recovered speed gate. The isolated-bench

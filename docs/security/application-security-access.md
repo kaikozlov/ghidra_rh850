@@ -298,7 +298,15 @@ authorization:
   modes `0x300/0x500` or advances phase in `0x400`. Separately, `2012` can force
   `FEBEB192=0x5A`, which causes `B30E0` to clear the alternate rotor-observer
   selector `FEBEB1D1`. Exact xref closure keeps both branches outside the direct
-  d/q-reference/current-PI/TSG3-PWM producer set. See
+  d/q-reference/current-PI/TSG3-PWM producer set. DIDs `2013/2014` retain the
+  common vehicle-speed plus two-state-flag start gate. `2013` propagates its
+  16-bit parameter through `FEBEB434 -> 448 -> 452 -> 41A -> FEBEE416` and can
+  enter motor-worker fields `FEBE6DCA/6DCC`, but their only readers are
+  task/RTE staging and the resulting `66CE/66D0/63CE/63D0` mirrors are
+  write-only. `2014` selects calibrated thresholds through `FEBEB3EE`; the
+  same `B70D0` threshold result participates in RoutineControl start
+  preconditions for RIDs `110A` and `110C`, while selector `3` used by `110D`
+  skips that helper. Neither cone has a recovered direct d/q/PI/PWM join. See
   `data/application_wdbi_surface.csv` and
   [../diagnostics/application.md](../diagnostics/application.md).
 - **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB` exposes event-record list/state/detail reads through subfunction workers; the recovered graph does not perform the formerly hypothesized motor-control, calibration, flash, or provisioning writes. SID `0xBA` separately owns callback `0x8D344` and the bounded operation-F1 path; its OEM purpose remains open.

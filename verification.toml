@@ -231,6 +231,29 @@ paths = [
   "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
+[suite.application_wdbi_2013_2014_controls]
+tests = [
+  "tests/verify_application_wdbi_2013_2014_controls.py",
+  "tests/verify_application_wdbi_2013_2014_controls_live.py",
+]
+oracle = "cfg_dataflow"
+paths = [
+  "data/application_wdbi_surface.csv",
+  "data/application_routine_control_surface.csv",
+  "tests/verify_application_wdbi_2013_2014_controls.py",
+  "tests/verify_application_wdbi_2013_2014_controls_live.py",
+  "ghidra/scripts/verify/AssertApplicationWdbi2013And2014Controls.java",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "tests/verify_application_routine_control_surface.py",
+  "docs/diagnostics/application.md",
+  "docs/diagnostics/application-routine-control-surface.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+]
+
 [suite.application_security_access]
 tests = ["tests/verify_security_gate.py"]
 paths = ["docs/security/application-security-access.md"]
