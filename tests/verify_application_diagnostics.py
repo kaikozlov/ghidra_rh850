@@ -23,47 +23,50 @@ def check(name, cond, detail=""):
     print(f"[{mark}] {name}{suffix}")
 
 
-print("== application UDS service table ==")
-APP_SERVICE = struct.Struct("<IIBBBBIII")
-app_services = [APP_SERVICE.unpack_from(CF, 0x25E30 + i * APP_SERVICE.size) for i in range(17)]
-app_sids = [row[2] for row in app_services]
+print("== application UDS service objects ==")
+# Runtime dispatch in FUN_8F282 indexes 24-byte service objects from 0x25E28.
+# The old parser began eight bytes late at 0x25E30, shifting callbacks across
+# adjacent services. Pin the instruction-compatible object layout directly.
+APP_SERVICE_BASE = 0x25E28
+APP_SERVICE = struct.Struct("<IIIIBBBBB3x")
+app_services = [APP_SERVICE.unpack_from(CF, APP_SERVICE_BASE + i * APP_SERVICE.size) for i in range(17)]
+app_sids = [row[4] for row in app_services]
 expected_sids = [
     0x10, 0x11, 0x14, 0x19, 0x22, 0x23, 0x27, 0x28, 0x2E,
     0x31, 0x34, 0x36, 0x37, 0x3E, 0x85, 0xAB, 0xBA,
 ]
-check("application service record size is 24 bytes", APP_SERVICE.size == 24)
-check("application service table has 17 records", len(app_services) == 17)
-check("application SID sequence matches", app_sids == expected_sids,
+check("application service object size is 24 bytes", APP_SERVICE.size == 24)
+check("application service table has 17 primary objects", len(app_services) == 17)
+check("application SID sequence matches runtime object layout", app_sids == expected_sids,
       " ".join(f"{sid:02x}" for sid in app_sids))
 check("every expected SID is present exactly once",
       sorted(app_sids) == sorted(expected_sids) and len(set(app_sids)) == 17)
-by_sid = {row[2]: (i, row) for i, row in enumerate(app_services)}
+by_sid = {row[4]: (i, row) for i, row in enumerate(app_services)}
 for sid in expected_sids:
     check(f"SID 0x{sid:02X} exists in primary table", sid in by_sid)
 
 expected_callbacks = {
-    0x11: 0x8B1F0,
-    0x19: 0x945DC,
-    0x22: 0x948AA,
-    0x28: 0x93C62,
-    0x2E: 0x95DCE,
-    0xAB: 0x8D344,
+    0x14: 0x8B1F0,  # ClearDiagnosticInformation
+    0x22: 0x945DC,  # ReadDataByIdentifier
+    0x23: 0x948AA,  # ReadMemoryByAddress
+    0x2E: 0x93C62,  # WriteDataByIdentifier
+    0x31: 0x95DCE,  # RoutineControl
+    0xBA: 0x8D344,  # proprietary BA
 }
-# 0x10/27/3E/85 use subfunction tables rather than a service-level callback.
 for sid, callback in expected_callbacks.items():
-    check(f"SID 0x{sid:02X} config references callback 0x{callback:X}",
-          by_sid[sid][1][7] == callback, hex(by_sid[sid][1][7]))
-for sid in (0x14, 0x23, 0x31, 0x34, 0x36, 0x37, 0xBA):
-    check(f"SID 0x{sid:02X} has null service callback", by_sid[sid][1][7] == 0)
+    check(f"SID 0x{sid:02X} runtime object callback is 0x{callback:X}",
+          by_sid[sid][1][0] == callback, hex(by_sid[sid][1][0]))
+for sid in (0x10, 0x11, 0x19, 0x27, 0x28, 0x34, 0x36, 0x37, 0x3E, 0x85, 0xAB):
+    check(f"SID 0x{sid:02X} has null direct service callback", by_sid[sid][1][0] == 0)
 
 check("SID 0x10 points at application subfunction table 0x25BC0",
-      by_sid[0x10][1][1] == 0x25BC0, hex(by_sid[0x10][1][1]))
-check("SID 0x19 points at subfunction table 0x25BF0", by_sid[0x19][1][1] == 0x25BF0)
-check("SID 0x27 points at subfunction table 0x25C30", by_sid[0x27][1][1] == 0x25C30)
-check("SID 0x28 points at subfunction table 0x25C70", by_sid[0x28][1][1] == 0x25C70)
-check("SID 0x3E points at subfunction table 0x25CA0", by_sid[0x3E][1][1] == 0x25CA0)
-check("SID 0x85 points at subfunction table 0x25CB0", by_sid[0x85][1][1] == 0x25CB0)
-check("SID 0xAB points at subfunction table 0x25CD0", by_sid[0xAB][1][1] == 0x25CD0)
+      by_sid[0x10][1][3] == 0x25BC0, hex(by_sid[0x10][1][3]))
+check("SID 0x19 points at subfunction table 0x25BF0", by_sid[0x19][1][3] == 0x25BF0)
+check("SID 0x27 points at subfunction table 0x25C30", by_sid[0x27][1][3] == 0x25C30)
+check("SID 0x28 points at subfunction table 0x25C70", by_sid[0x28][1][3] == 0x25C70)
+check("SID 0x3E points at subfunction table 0x25CA0", by_sid[0x3E][1][3] == 0x25CA0)
+check("SID 0x85 points at subfunction table 0x25CB0", by_sid[0x85][1][3] == 0x25CB0)
+check("SID 0xAB points at subfunction table 0x25CD0", by_sid[0xAB][1][3] == 0x25CD0)
 
 expected_sessions = {
     0x10: [1, 2, 3],
@@ -86,9 +89,9 @@ expected_sessions = {
 }
 for sid, sessions in expected_sessions.items():
     _index, row = by_sid[sid]
-    allow = list(CF[row[0]: row[0] + row[5]])
+    allow = list(CF[row[2]: row[2] + row[7]])
     check(f"SID 0x{sid:02X} session allow-list matches", allow == sessions, repr(allow))
-    check(f"SID 0x{sid:02X} security allow-count is zero at service level", row[4] == 0)
+    check(f"SID 0x{sid:02X} security allow-count is zero at service level", row[6] == 0)
 
 print("\n== application service groups and secondary endpoint ==")
 SERVICE_GROUP = struct.Struct("<HBBI")
@@ -108,9 +111,9 @@ check("functional group reuses exact six records",
       index_lists[1] == [17, 2, 7, 9, 13, 14], repr(index_lists[1]))
 check("secondary physical group selects extra records 18..22",
       index_lists[2] == list(range(18, 23)), repr(index_lists[2]))
-extra_services = [APP_SERVICE.unpack_from(CF, 0x25FC8 + i * 24) for i in range(6)]
+extra_services = [APP_SERVICE.unpack_from(CF, APP_SERVICE_BASE + (17 + i) * 24) for i in range(6)]
 all_services = app_services + extra_services
-service_sets = [[all_services[index][2] for index in indexes] for indexes in index_lists]
+service_sets = [[all_services[index][4] for index in indexes] for indexes in index_lists]
 check("effective primary/functional/secondary SID sets match",
       service_sets == [expected_sids, [0x10, 0x14, 0x28, 0x31, 0x3E, 0x85],
                        [0x10, 0x19, 0x22, 0x3E, 0xAB]], repr(service_sets))
@@ -623,30 +626,29 @@ check("DSP complete callee 0x8A00C is a prepare/dispose wrapper",
 check("handoff-flag setter 0x4C506 stores to application_alternate_handoff_flag",
       bytes.fromhex("06a6ff") in CF[0x4C506:0x4C540])
 
-# Service record byte[9] is the subfunction/callback processing flag.
-# byte[9]==0x01 -> service routes through subfn dispatch (0x8F750)
-# byte[9]==0x00 -> service routes through simple response (0x8F6FA)
-byte9_subfn = {0x10, 0x19, 0x27, 0x28, 0x3E, 0x85, 0xAB}
-byte9_simple = {0x11, 0x14, 0x22, 0x23, 0x2E, 0x31, 0x34, 0x36, 0x37, 0xBA}
-for sid in byte9_subfn:
-    idx = [i for i in range(17) if app_services[i][2] == sid][0]
-    check(f"SID 0x{sid:02X} byte[9] marks subfn/callback processing",
-          app_services[idx][3] == 0x01)
-for sid in byte9_simple:
-    idx = [i for i in range(17) if app_services[i][2] == sid][0]
-    check(f"SID 0x{sid:02X} byte[9] marks simple-response path",
-          app_services[idx][3] == 0x00)
+# Runtime object byte +0x11 selects subfunction-table dispatch. Services with
+# this flag clear use the direct-service path at 0x8F6FA, which calls object+0
+# when the configured callback is non-null and only falls through to the
+# generic positive response when object+0 is null.
+subfn_services = {0x10, 0x19, 0x27, 0x28, 0x3E, 0x85, 0xAB}
+direct_services = {0x11, 0x14, 0x22, 0x23, 0x2E, 0x31, 0x34, 0x36, 0x37, 0xBA}
+for sid in subfn_services:
+    row = by_sid[sid][1]
+    check(f"SID 0x{sid:02X} runtime object selects subfunction dispatch",
+          row[5] == 0x01 and row[3] != 0 and row[8] != 0)
+for sid in direct_services:
+    row = by_sid[sid][1]
+    check(f"SID 0x{sid:02X} runtime object selects direct-service path", row[5] == 0x00)
 
-# All null-callback SIDs have byte[9]==0x00 -> they take the simple-response
-# path. This is the definitive resolution of the "dsp-indirection-unresolved"
-# status: there is no hidden DSP path; the generated DSP start-phase is globally
-# disabled and these services echo a positive response without service-specific
-# processing.
-for sid in (0x14, 0x23, 0x31, 0x34, 0x36, 0x37, 0xBA):
-    idx = [i for i in range(17) if app_services[i][2] == sid][0]
-    check(f"null-callback SID 0x{sid:02X} takes simple-response path "
-          f"(byte[9]==0 and callback==0)",
-          app_services[idx][3] == 0x00 and app_services[idx][7] == 0)
+# Direct-service callbacks are real service handlers. These six callbacks were
+# previously shifted onto the preceding service by the 0x25E30 parser.
+for sid in (0x14, 0x22, 0x23, 0x2E, 0x31, 0xBA):
+    row = by_sid[sid][1]
+    check(f"direct SID 0x{sid:02X} has a non-null service callback", row[0] != 0)
+# Only the genuinely null direct services use 0x8F6FA as an echo-only path.
+for sid in (0x11, 0x34, 0x36, 0x37):
+    row = by_sid[sid][1]
+    check(f"null direct SID 0x{sid:02X} is simple-response-only", row[0] == 0)
 
 # The main Dcm request processor at 0x8F850 calls the gate, then the DSP
 # dispatcher, then routes to simple-response (0x8F6FA) or subfn dispatch

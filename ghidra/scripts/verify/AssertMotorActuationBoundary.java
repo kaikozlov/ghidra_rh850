@@ -266,7 +266,7 @@ public class AssertMotorActuationBoundary extends GhidraScript {
                 "0005bdfe:READ", "0005c52e:READ", "00036930:READ",
                 "00038244:READ", "00038358:READ", "00037778:WRITE");
 
-        // Application WDBI service-mode controls 0x110A/0x110C/0x110D enter
+        // Application RoutineControl service-mode controls 0x110A/0x110C/0x110D enter
         // system submode 0x520 and operate on a distinct service-state island.
         // Pin representative computed outputs and their snapshots so a future
         // rebuild cannot silently invent a transfer into the proved d/q state
@@ -295,7 +295,7 @@ public class AssertMotorActuationBoundary extends GhidraScript {
         assertExactRefs(0xfebeb006L,
                 "000bd924:WRITE", "000be822:WRITE");
 
-        // Policy-0 WDBIs 0x1007/0x1008 expose live lifecycle reinitializers.
+        // Policy-0 RoutineControl RIDs 0x1007/0x1008 expose live lifecycle reinitializers.
         // Pin their one-shot flags, lifecycle group state, and recovered caller
         // topology. These groups are serviced by the normal per-tick scheduler
         // (B79E8) in operational modes, but remain outside the d/q/PWM cone.
@@ -320,7 +320,7 @@ public class AssertMotorActuationBoundary extends GhidraScript {
                 "000bedc0:UNCONDITIONAL_CALL", "000bee0a:UNCONDITIONAL_CALL",
                 "000bf208:UNCONDITIONAL_CALL");
 
-        // WDBI 0x1009 is a state-gated variant of the live lifecycle-reinit
+        // RoutineControl RID 0x1009 is a state-gated variant of the live lifecycle-reinit
         // surface. Its diagnostic-only B55E2 helper forces FEBEB2D5 to 0x11;
         // B5254 is serviced through B5526 in the same operational scheduler.
         // Pin the aggregate-health snapshot/latch and exact topology so this

@@ -187,16 +187,16 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
             "Asynchronous bootloader session-control state consumed by task 0x6244.");
 
         // Stage-2 primary SID handlers and tables.
-        fn(0x8B1F0L,"application_ecu_reset_callback",
-            "Application ECUReset service callback. Phase 0 starts 0x8B144; nonzero finalizes through 0x8B1D4.");
-        fn(0x8B144L,"application_ecu_reset_request_start",
-            "Require request length 3, pack three request bytes, and enter the lower reset prepare/commit stages.");
-        fn(0x8AF28L,"application_ecu_reset_prepare_stage",
-            "First ECUReset lower stage: issue compiled-stub operation 0x18000000 and map failures to NRC 0x22/0x31.");
-        fn(0x8B014L,"application_ecu_reset_commit_stage",
-            "Second ECUReset lower stage: issue compiled-stub operation 0x18000001; success builds the positive response, pending returns 10.");
-        fn(0x945DCL,"application_read_dtc_callback",
-            "Application ReadDTCInformation service callback. Phase 0 starts 0x944C6; phase 2 completes through 0x9452E.");
+        fn(0x8B1F0L,"application_clear_diagnostic_information_callback",
+            "Application ClearDiagnosticInformation (SID 0x14) callback. Phase 0 starts 0x8B144; nonzero finalizes through 0x8B1D4.");
+        fn(0x8B144L,"application_clear_diagnostic_information_request_start",
+            "Require the three-byte groupOfDTC request, pack it as a 24-bit value, and enter the lower clear operation stages.");
+        fn(0x8AF28L,"application_clear_diagnostic_information_prepare_stage",
+            "First ClearDiagnosticInformation lower stage: issue compiled-stub operation 0x18000000 and map failures to NRC 0x22/0x31.");
+        fn(0x8B014L,"application_clear_diagnostic_information_commit_stage",
+            "Second ClearDiagnosticInformation lower stage: issue compiled-stub operation 0x18000001; success builds the positive response, pending returns 10.");
+        fn(0x945DCL,"application_rdbi_callback",
+            "Application ReadDataByIdentifier (SID 0x22) callback. Phase 0 starts 0x944C6; phase 2 completes through 0x9452E.");
         fn(0x8B5AAL,"application_read_dtc_subfunction_01",
             "ReadDTCInformation subfunction 0x01 wrapper; copy request context and start worker 0x8B532.");
         fn(0x8BA2AL,"application_read_dtc_subfunction_02",
@@ -205,12 +205,14 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
             "ReadDTCInformation subfunction 0x03 wrapper; copy request context and start worker 0x8BD30.");
         fn(0x8C326L,"application_read_dtc_subfunction_04",
             "ReadDTCInformation subfunction 0x04 wrapper; copy request context and start worker 0x8C276.");
-        fn(0x948AAL,"application_rdbi_callback",
-            "Application ReadDataByIdentifier service callback. Phases 0/2/3 start, cancel, and poll DID reads.");
-        fn(0x9479AL,"application_rdbi_request_start",
-            "Validate RDBI request shape, resolve DID policy, enforce per-DID security, then begin/poll the read.");
-        fn(0x946FAL,"application_rdbi_request_poll",
-            "Poll an asynchronous RDBI transfer; pending returns 10, failures emit the worker NRC byte.");
+        fn(0x944C6L,"application_rdbi_request_start",
+            "Validate a one-DID RDBI request, resolve DID policy, and drive the generic configured read-record machinery.");
+        fn(0x948AAL,"application_read_memory_by_address_callback",
+            "Application ReadMemoryByAddress (SID 0x23) callback. Phases 0/2/3 start, cancel, and poll a configured memory read.");
+        fn(0x9479AL,"application_read_memory_by_address_request_start",
+            "Parse addressAndLengthFormatIdentifier, construct address/size, enforce configured memory-range/session/security policy, and begin the read.");
+        fn(0x946FAL,"application_read_memory_by_address_request_poll",
+            "Poll an asynchronous ReadMemoryByAddress transfer; pending returns 10, failures emit the worker NRC byte.");
         fn(0x94E32L,"application_security_access_subfunction_01",
             "SecurityAccess subfunction 0x01 (level-1 requestSeed) wrapper around 0x94CCE.");
         fn(0x94E46L,"application_security_access_subfunction_02",
@@ -223,8 +225,10 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
             "Application requestSeed worker for configured levels 1/2. Emits seed bytes or NRC 0x37 when delay-locked.");
         fn(0x94A72L,"application_security_access_send_key",
             "Application sendKey worker. Success unlocks via 0x900FC; failures map to NRC 0x35/0x36.");
-        fn(0x93C62L,"application_communication_control_callback",
-            "Application CommunicationControl service callback. Phase 0 starts 0x93B56; phase 2 completes 0x93BDE.");
+        fn(0x93C62L,"application_wdbi_callback",
+            "Application WriteDataByIdentifier (SID 0x2E) callback. Phase 0 starts 0x93B56; phase 2 completes 0x93BDE through configured write-record operations.");
+        fn(0x93B56L,"application_wdbi_request_start",
+            "Parse a 16-bit DID, require configured write capability, validate payload/session/security policy, and begin the generic write-record operation.");
         fn(0x9542CL,"application_communication_control_subfunction_00",
             "CommunicationControl subfunction 0x00 wrapper into shared start helper 0x95306.");
         fn(0x9543CL,"application_communication_control_subfunction_01",
@@ -233,18 +237,18 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
             "CommunicationControl subfunction 0x03 wrapper into shared start helper 0x95306.");
         fn(0x95154L,"application_communication_control_request_start",
             "Validate CommunicationControl request length/control type and apply configured communication-mode updates.");
-        fn(0x95DCEL,"application_wdbi_callback",
-            "Application WriteDataByIdentifier service callback. Phases 0/2/3 start, cancel, and poll DID writes.");
-        fn(0x95C8CL,"application_wdbi_request_start",
-            "Validate WDBI DID/security/session policy against the 19-entry write-DID table and begin the write worker.");
+        fn(0x95DCEL,"application_routine_control_callback",
+            "Application RoutineControl (SID 0x31) callback. Phases 0/2/3 start, cancel, and poll the configured 19-RID control surface.");
+        fn(0x95C8CL,"application_routine_control_request_start",
+            "Parse controlType plus 16-bit RID, validate the 19-entry RID policy/selector table, and begin the configured routine worker.");
         fn(0x93CFEL,"application_tester_present_subfunction_00",
             "TesterPresent subfunction 0x00: accept zero-length request data and build the positive acknowledgment.");
         fn(0x8CCDCL,"application_control_dtc_setting_subfunction_01",
             "ControlDTCSetting subfunction 0x01 wrapper; require zero-length request data then store setting 1.");
         fn(0x8CCFAL,"application_control_dtc_setting_subfunction_02",
             "ControlDTCSetting subfunction 0x02 wrapper; require zero-length request data then store setting 2.");
-        fn(0x8D344L,"application_proprietary_ab_callback",
-            "Proprietary SID 0xAB event-record callback. Phase 0 mirrors the request and enters asynchronous operation F1 through 0x8D2B2; OEM name unknown.");
+        fn(0x8D344L,"application_proprietary_ba_callback",
+            "Proprietary SID 0xBA service callback. Phase 0 mirrors request context and enters asynchronous operation F1 through 0x8D2B2; OEM semantics remain unassigned.");
         fn(0x96A34L,"application_proprietary_ab_subfunction_01",
             "Proprietary SID 0xAB subfunction 0x01: request the active event-ID list through shared worker 0x96918.");
         fn(0x96A56L,"application_proprietary_ab_subfunction_02",
@@ -286,8 +290,8 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
 
         label(0x2941CL,"application_did_table",
             "242 x 16-byte application DID records beginning at DID 0x0100 and ending at F18C. Getter 0x4F928 returns count 0xF2.");
-        label(0x26AECL,"application_write_did_table",
-            "19 x 8-byte write-DID descriptors used by application WDBI. Binary-searched from 0x9545C.");
+        label(0x26AECL,"application_routine_control_rid_table",
+            "19 x 8-byte RoutineControl RID descriptors. Parsed by the SID-0x31 worker at 0x95C8C and its lookup helpers.");
         label(0x25768L,"application_routine_id_table",
             "32 x 12-byte control-ID records (ID, flags, start_cb, result_cb). A stock-gated SID 0x28 worker consumes entries 0..12; SID 0x31 has a null callback and SID 0xAB has no edge here.");
         label(0x28094L,"application_operation_descriptor_count",

@@ -59,7 +59,7 @@ key-set operation; however, a block-aware monitor can observe object 15 reads on
 a provisioned variant. In this exact dump object 15 has no valid persistent copy.
 
 A **separate real key-update path** has now been recovered elsewhere in the
-application. Enabled WDBI DID `0x1010` transports a 64-byte authenticated request
+application. Enabled RoutineControl RID `0x1010` transports a 64-byte authenticated request
 to ICU-S command 8 and returns a 48-byte proof/result. The lower driver splits
 the request as `16+32+16` and the response as `32+16`, exactly matching the
 AUTOSAR SHE M1/M2/M3 → M4/M5 memory-update protocol. This corrects the prior
@@ -298,12 +298,12 @@ command-7 path authenticates
 CMAC's first AES block. The ranked methods and isolated-bench plan are canonical
 in [the key-recovery assessment](key-recovery-assessment.md).
 
-## 8. Injection and refresh: command 8 via WDBI DID `0x1010`
+## 8. Injection and refresh: command 8 via RoutineControl RID `0x1010`
 
 The recovered provisioning candidate is independent of the object-15 NvM path:
 
 ```text
-WDBI DID 0x1010
+RoutineControl RID 0x1010
   -> 0x96354: fixed 64-byte request / 49-byte status+result contract
   -> 0x8AA1E -> 0x68E16: asynchronous diagnostic state
   -> 0x6823C -> 0x88936: command-8 driver dispatch
@@ -336,7 +336,7 @@ cryptographic package rather than a separate CPU argument. Command 8 is capable
 of targeting slot 4 if M1 names slot 4 and ICU-S accepts the AuthID, counter,
 flags, and lifecycle policy.
 
-The write-DID entry at `0x26B34` is enabled. Its per-DID policy permits only
+The RoutineControl RID entry at `0x26B34` is enabled. Its per-RID policy permits only
 extended session `0x03` and has zero Dcm SecurityAccess levels. This is not an
 unauthenticated raw-key write: a caller still needs a valid M1–M3 package
 authorized by a key already known to ICU-S, and replay protection is carried by
@@ -345,37 +345,37 @@ or the authorization key.
 
 The diagnostic result bank at `0xFEBE523A` can return all 48 M4/M5 bytes after
 completion. The 64-byte request bank is `0xFEBE51BA`. The application exposes
-these through two selector forms of service `0x2E`: selector `0x01` starts the
-operation and selector `0x03` reads its status/result. The production dealer
+these through two control types of service `0x31`: control type `0x01` starts the
+operation and control type `0x03` reads its status/result. The production dealer
 backend, package-generation algorithm inputs, AuthID, and current slot-4 counter
-remain unobserved. Consequently DID `0x1010` is the strongest static candidate
+remain unobserved. Consequently RID `0x1010` is the strongest static candidate
 for dealer rekey, not proof that a particular dealer tool invokes it.
 
 ### 8.1 Exact diagnostic transport contract
 
-This application does not use the ordinary `2E DID data` shape for this
-operation. Its WDBI dispatcher consumes an OEM selector byte before the DID.
-The DID-`0x1010` configuration enables selectors `0x01` and `0x03`:
+This application uses standard RoutineControl framing for this operation. The
+RID-`0x1010` configuration enables control types `0x01` (startRoutine) and
+`0x03` (requestRoutineResults):
 
 ```text
 start request:
-  2E 01 10 10 || M1[16] || M2[32] || M3[16]       68 UDS bytes
+  31 01 10 10 || M1[16] || M2[32] || M3[16]       68 UDS bytes
 
 start positive response:
-  6E 01 10 10 || status[1] || result[48]            53 UDS bytes
+  71 01 10 10 || status[1] || result[48]            53 UDS bytes
 
 result request:
-  2E 03 10 10                                         4 UDS bytes
+  31 03 10 10                                         4 UDS bytes
 
 result positive response:
-  6E 03 10 10 || status[1] || result[48]            53 UDS bytes
+  71 03 10 10 || status[1] || result[48]            53 UDS bytes
 
 negative response:
-  7F 2E NRC
+  7F 31 NRC
 ```
 
-The static field descriptors prove one 512-bit selector-1 input field and one
-392-bit output field. Selector 3 has the same 392-bit output shape and no input
+The static field descriptors prove one 512-bit control-type-1 input field and one
+392-bit output field. Control type 3 has the same 392-bit output shape and no input
 field. The status values recovered from the operation state machine are:
 
 | Status | Meaning | Following 48 bytes |
@@ -392,8 +392,8 @@ and clears the diagnostic request/result banks after either terminal status
 (`requestSequenceError`); an external inhibit maps to NRC `0x22`
 (`conditionsNotCorrect`).
 
-This is application-level polling, not one long WDBI request that eventually
-returns M4/M5. A trace must retain both selector forms to distinguish acceptance
+This is application-level polling, not one long RoutineControl request that eventually
+returns M4/M5. A trace must retain both control types to distinguish acceptance
 from completion.
 
 The passive decoder implements this exact contract and reassembles normal
@@ -444,7 +444,7 @@ The success state progression is:
 ```
 
 Command failure reaches internal state `0x66`, which maps to diagnostic status
-`0xFF`. The selector-3 result wrapper returns one status byte plus the 48-byte
+`0xFF`. The control-type-3 result wrapper returns one status byte plus the 48-byte
 proof only when status is `0x02`; terminal reads then clear the diagnostic
 request/result banks. No independent operation deadline has yet been recovered
 from this state machine; live timing and any surrounding Dcm/session timeout
@@ -478,7 +478,7 @@ Consequently:
 ### How is the SecOC key injected?
 
 The image contains a concrete SHE-compatible provisioning candidate: enabled
-WDBI DID `0x1010` submits M1/M2/M3-shaped input to ICU-S command 8 and returns
+RoutineControl RID `0x1010` submits M1/M2/M3-shaped input to ICU-S command 8 and returns
 M4/M5-shaped proof. A valid package can identify slot 4 without exposing the new
 key to MainPE. Static analysis does not prove that Toyota's dealer workflow
 actually invokes this DID, nor does it reveal the required authorization key,
@@ -499,7 +499,7 @@ target-side provisioning image is shipped. The documented high-level “Enable
 ICU-S” path reaches a payload-free validation command, not a key-bearing
 request. Its legacy `SetICUM` path serializes a structured extended-option
 record rather than `slot || AES key`. Those mask-ROM programming operations are
-separate from the application DID-`0x1010` M1–M5 route recovered here. RFP
+separate from the application RoutineControl RID-`0x1010` M1–M5 route recovered here. RFP
 therefore constrains chip lifecycle setup but does not reveal the Toyota/Denso
 backend inputs used to authorize a slot-4 update. See
 [the RFP/RV40F report](../../tooling/renesas-rfp-rv40f.md).
@@ -512,8 +512,8 @@ store the already usable AES key in object 15; this exact dump has no valid copy
 
 ### How is it refreshed?
 
-For protected ICU-S slots, WDBI DID `0x1010` plus command 8 is the recovered
-refresh candidate. Selector `0x01` submits the M1–M3 package; selector `0x03`
+For protected ICU-S slots, RoutineControl RID `0x1010` plus command 8 is the recovered
+refresh candidate. Control type `0x01` submits the M1–M3 package; control type `0x03`
 polls the one-byte state and returns M4/M5 on status `0x02`. Whether production
 tooling uses it for slot 4 requires a dynamic diagnostic trace.
 
@@ -547,14 +547,14 @@ that the RAM field held a valid key at capture time.
 | an undocumented slot-4-to-`RAM_KEY` copy/alias exists | **Unknown; bench/restricted manual required** |
 | command-1/3 software accepts selectors `0..14`; slot-4 hardware permission | **Definitive / unknown** |
 | FD command-7 input places 14 chosen payload bytes in CMAC block 1 | **Definitive** |
-| WDBI DID `0x1010` reaches literal ICU-S command 8 | **Definitive structural behavior** |
+| RoutineControl RID `0x1010` reaches literal ICU-S command 8 | **Definitive structural behavior** |
 | command-8 request/result widths are 16+32+16 / 32+16 | **Definitive** |
-| DID `0x1010` wire contract is selector-1 start plus selector-3 result read | **Definitive structural behavior** |
+| RID `0x1010` wire contract is control-type-1 start plus control-type-3 result read | **Definitive structural behavior** |
 | result status `01/02/FF` means pending/complete/failed; proof is exposed only with `02` | **Definitive** |
 | command 8 is a SHE-compatible authenticated memory/key update | **Recovered** |
-| DID `0x1010` per-DID policy is extended session, no Dcm SA level | **Definitive** |
+| RID `0x1010` per-RID policy is extended session, no Dcm SA level | **Definitive** |
 | command 8 is statically fixed to slot 4 | **Disproved; target is package-carried** |
-| Toyota dealer tooling invokes DID `0x1010` for slot 4 | **Unknown; dynamic trace required** |
+| Toyota dealer tooling invokes RoutineControl RID `0x1010` for slot 4 | **Unknown; dynamic trace required** |
 | both slot-4 KAT bodies are compiled out; the `FF*16` vector is latent | **Definitive** |
 | CPU-visible objects 12–15 are invalid/inactive in this snapshot | **Definitive for the captured NvM bank** |
 | protected ICU-S slot 4 is personalized or erased | **Unknown** |

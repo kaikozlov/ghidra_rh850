@@ -259,7 +259,7 @@ public class AssertDecompilerInvariants extends GhidraScript {
         }
 
         // Application ECUReset is the Stage-2 service-callback landmark.
-        Function appReset = requireFunction(0x8b1f0L, "application_ecu_reset_callback");
+        Function appReset = requireFunction(0x8b1f0L, "application_clear_diagnostic_information_callback");
         requireConvention(appReset, "__stdcall");
         if (appReset != null) {
             decompile(appReset);

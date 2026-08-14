@@ -198,20 +198,20 @@ vehicle request/response protocol recovered above.
 ## Comparison with Sienna firmware DID `0x1010`
 
 The firmware was independently reopened through `tools/g`. Its application
-WDBI callback routes a 64-byte request into ICU-S command 8 and returns a
+RoutineControl RID `0x1010` routes a 64-byte request into ICU-S command 8 and returns a
 48-byte M4/M5 result. The exact comparison is:
 
 | Property | Techstream MACKey | Sienna `8965B4512000` |
 |---|---|---|
-| Start | `31 01 30 02 || M1[16] || M2[32] || M3[16]` | `2E 01 10 10 || M1[16] || M2[32] || M3[16]` |
-| Poll | `31 03 30 02` | `2E 03 10 10` |
+| Start | `31 01 30 02 || M1[16] || M2[32] || M3[16]` | `31 01 10 10 || M1[16] || M2[32] || M3[16]` |
+| Poll | `31 03 30 02` | `31 03 10 10` |
 | Result | state plus `M4[32] || M5[16]` | status plus `M4[32] || M5[16]` |
 | Engine evidence | ECU-side routine, implementation absent | literal ICU-S command 8 at `0x8997A` |
 
 Conclusion: **same SHE-compatible cryptographic architecture, different
 diagnostic service/procedure; no exact join**. The Techstream read of DID
 `0x1010` is a separate 16-byte safe-key identity read, not the Sienna's
-selector-1 64-byte WDBI package. Static evidence does not prove that this
+startRoutine 64-byte RoutineControl package. Static evidence does not prove that this
 Techstream utility targets the analyzed EPS or provisions its slot 4.
 
 ## Remaining dynamic questions
@@ -219,7 +219,7 @@ Techstream utility targets the analyzed EPS or provisions its slot 4.
 - Is the raw DID `0x1010` `SafekeyNumber` the same MCU ID that the pinned
   external rekey report says Toyota requires alongside VIN? A labeled official
   transcript or target implementation is still required.
-- Does a real Sienna provisioning session use application WDBI `0x1010`,
+- Does a real Sienna provisioning session use application RoutineControl RID `0x1010`,
   Routine `0x3002`, or neither?
 - What timing/retry behavior appears on a live master/slave network?
 

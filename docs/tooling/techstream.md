@@ -917,7 +917,7 @@ online and vehicle-facing flow:
 This remains distinct from ordinary UDS SecurityAccess. It uses the same
 M1–M5 cryptographic architecture as the Sienna command-8 path, but it is not an
 exact diagnostic join: Techstream uses Routine `0x3002`, while the Sienna uses
-WDBI DID `0x1010` selectors `01/03`. A relationship to that EPS or its SecOC
+RoutineControl RID `0x1010` control types `01/03`. A relationship to that EPS or its SecOC
 slot 4 is therefore **not proven**.
 
 ### 7.1 Representation-bounded secret census
@@ -966,7 +966,7 @@ confidence.
 | `ptshim32.dll` CAN logger | Capture a real Techstream↔EPS session for transcript validation |
 | `CSecurityAccessAES128` source paths | PDB/source-tree context for the KGProject diagnostic framework |
 | TIS portal RKS flow (`CUWAccessRKS.dll`, §5.3) | OEM reprogramming-key authorization (Layer A) — VIN+license bound, IE-automated, no client crypto; independent of the cal-file crypto key (Layer B). Not immobilizer. |
-| MACKey Registration (§7) | Recovered exchange-key provisioning path: `22 F190/102E/1010` vehicle reads → VIN + master/slave safe-key/MAC fields → hashed `ECUExchangeKey` XML → native TIS bridge → identity-matched response → per-ECU Routine `0x3002` M1–M3 write and M4/M5 poll. `$36` is the server request ID. This shares the Sienna command-8 envelope but is not its WDBI DID-`0x1010` service. |
+| MACKey Registration (§7) | Recovered exchange-key provisioning path: `22 F190/102E/1010` vehicle reads → VIN + master/slave safe-key/MAC fields → hashed `ECUExchangeKey` XML → native TIS bridge → identity-matched response → per-ECU Routine `0x3002` M1–M3 write and M4/M5 poll. `$36` is the server request ID. This shares the Sienna command-8 envelope but is not its RoutineControl RID-`0x1010` service. |
 | `TCUWControlCommPhase.dll` parameters | Exact timing values for SA seed/key exchange during reflash |
 | `[ISTA_T3_Login]` credentials | Hardcoded hex credentials in `uspublic.ini` for Toyota ISTA portal |
 

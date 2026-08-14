@@ -1007,3 +1007,65 @@ the mistakes are not re-made.
   `ghidra/scripts/seed/SeedDispatchProvenFunctionTables.java`;
   `tests/verify_icus_stage7_static.py`;
   `tests/verify_secoc_command5_experiment.py`.
+
+### CORR-053 — Application service objects were parsed eight bytes late
+
+- **Wrong:** the application UDS table was parsed as 24-byte records beginning
+  at `0x25E30`. That placed the direct callback at a synthetic `+0x10` field,
+  shifting each non-subfunction callback onto the preceding SID. Consequences
+  included `0x8B1F0` being called ECUReset, `0x948AA` being called RDBI,
+  `0x93C62` being called CommunicationControl, `0x95DCE` being called WDBI,
+  `0x8D344` being assigned to SID `0xAB`, and the 19-row `0x26AEC` table being
+  classified as writable DIDs.
+- **Right:** runtime instructions in `FUN_8F282`, `FUN_8F6FA`, and `FUN_8F750`
+  index **24-byte service objects from `0x25E28`**. The object layout is direct
+  callback `+0x00`, security-list pointer `+0x04`, session-list pointer `+0x08`,
+  subfunction-table pointer `+0x0C`, SID `+0x10`, subfunction flag `+0x11`, and
+  security/session/subfunction counts `+0x12/+0x13/+0x14`. The corrected direct
+  ownership is `SID 14 -> 0x8B1F0` (ClearDiagnosticInformation),
+  `22 -> 0x945DC` (ReadDataByIdentifier), `23 -> 0x948AA`
+  (ReadMemoryByAddress), `2E -> 0x93C62` (WriteDataByIdentifier),
+  `31 -> 0x95DCE` (RoutineControl), and `BA -> 0x8D344`; SID `AB` uses its
+  three-entry subfunction table at `0x25CD0`. Secondary object `0x26008`
+  independently binds SID `22` to `0x945DC`.
+- **Security consequence:** `0x26AEC` is the **19-entry RoutineControl RID
+  surface**, not a WDBI DID table. Eighteen policy-0 RIDs have no configured
+  SecurityAccess levels and are reachable under the corrected SID-`0x31` outer
+  session set `1/2/3`; RID `0x1010` remains policy-1 / extended-only and still
+  relies on ICU-S package authentication. Bank-1 activation is therefore
+  `31 01 10 0F` with positive response `71 01 10 0F`, and RID-`0x1010` result
+  readback is `31 03 10 10` / `71 03 10 10`. The lower lifecycle/service-mode,
+  command-5 activation, and command-8 cryptographic behaviors remain valid;
+  their UDS service framing and effective session boundary were wrong.
+- **Supersedes the framing portions of:** CORR-010, CORR-011, CORR-014, and
+  CORR-052. Their lower-function findings remain useful where not dependent on
+  the shifted service-object interpretation.
+- **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
+  [../diagnostics/application-routine-control-surface.md](../diagnostics/application-routine-control-surface.md);
+  [../security/application-security-access.md](../security/application-security-access.md);
+  `tests/verify_application_diagnostics.py`;
+  `tests/verify_application_routine_control_surface.py`;
+  `tests/verify_icus_key_update.py`;
+  `tests/verify_secoc_command5_experiment.py`.
+
+### CORR-054 — Application SID `0x23` is a real bounded memory-read service
+
+- **Wrong:** Stage-7 software-path analysis treated SIDs `0x23/0x34/0x36/0x37`
+  as the same null-callback/simple-response class and concluded that the
+  application had no arbitrary-address memory-read implementation (old
+  SECOC-020 wording).
+- **Right:** CORR-053's runtime object boundary maps SID `0x23` to direct callback
+  `0x948AA`. `0x9479A` parses address/length format; the only configured ALFID is
+  `0x15`, encoding memory identifier + four-byte address and one-byte size.
+  Memory ID `1` reads `FEBE0000..FEBFFFFF`; memory ID `2` reads
+  `FF200000..FF207FFF`; both read-range records have zero SecurityAccess entries
+  and no write-range configuration. Compiled exclusion checks leave 107,924 RAM
+  bytes and 29,952 DataFlash bytes readable. SIDs `0x34/0x36/0x37` remain null.
+- **Security boundary:** exclusions cover the command-5/key-update result region,
+  application SecurityAccess state, object-15 RAM, DataFlash `0xFF206C00..6EFF`,
+  and the `0xFF207800..7FFF` ICU-S tail. The bootloader payload-derivation buffer
+  `FEBF2D08..2D17` is not excluded, but useful live residue there is not statically
+  proven to survive the required reset/session sequence.
+- **Canonical:** [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md);
+  `tests/verify_application_read_memory_by_address.py`;
+  `exploit/followups/application_rmba_probe.py`.

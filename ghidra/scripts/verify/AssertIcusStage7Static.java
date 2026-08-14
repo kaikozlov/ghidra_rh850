@@ -38,7 +38,7 @@ public class AssertIcusStage7Static extends GhidraScript {
 
     @Override
     public void run() throws Exception {
-        // WDBI DID 0x100F action wrapper 0x8A782 directly reaches the bank-1
+        // RoutineControl RID 0x100F action wrapper 0x8A782 directly reaches the bank-1
         // activator. The only interior reference is the activator's own
         // conditional branch to 0x6903e.
         assertExactRefs(0x69018L, "0008a786:UNCONDITIONAL_CALL");

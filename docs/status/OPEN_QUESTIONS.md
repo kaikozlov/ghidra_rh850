@@ -137,7 +137,7 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   public P1M-E fault injection proves ordinary flash readout, not key-array
   access.
 - **Application command-5 signing capability — dynamic discriminator only.**
-  Stock WDBI `2E 01 10 0F` now supplies bank-1 activation, and stock
+  Stock RoutineControl `31 01 10 0F` now supplies bank-1 activation, and stock
   `0x68B42 -> 0x88350 -> 0x87CCC` supplies selector-4 command-5 plumbing; the
   minimal bench oracle therefore needs no activation hook, only a bounded
   observation route for `FEBE51AA`. For a production-resident signing proxy,
@@ -236,7 +236,7 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   not justified without a target observation that makes those labels material.
   See [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
 - **DID `0x1010` production use and slot-4 package.** Static firmware now
-  recovers a SHE-compatible command-8 key-update service behind WDBI DID
+  recovers a SHE-compatible command-8 key-update service behind RoutineControl RID
   `0x1010`; selector `01` starts the 64-byte M1–M3 update and selector `03`
   reads status `01/02/FF` plus M4/M5 on success. Capture a legitimate
   provisioning/rekey session and process it with

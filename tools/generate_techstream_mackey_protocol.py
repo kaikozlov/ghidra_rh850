@@ -330,8 +330,8 @@ def make_outputs() -> tuple[dict[str, object], list[dict[str, object]]]:
         "firmware_join": {
             "techstream": {"start": "31 01 30 02 || M1[16] || M2[32] || M3[16]",
                            "poll": "31 03 30 02", "result": "M4[32] || M5[16]"},
-            "sienna_4512000": {"start": "2e 01 10 10 || M1[16] || M2[32] || M3[16]",
-                              "poll": "2e 03 10 10", "result": "status || M4[32] || M5[16]"},
+            "sienna_4512000": {"start": "31 01 10 10 || M1[16] || M2[32] || M3[16]",
+                              "poll": "31 03 10 10", "result": "status || M4[32] || M5[16]"},
             "conclusion": "same cryptographic envelope; different service/procedure",
         },
     }

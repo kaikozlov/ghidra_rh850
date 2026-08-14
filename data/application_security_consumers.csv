@@ -1,12 +1,12 @@
 consumer_addr,consumer_name,check_type,required_level,gated_service,gated_did_or_rid,operation,relevance
 0x8F282,FUN_0008f282,service-level dispatch,0 (all count=0),all 17 SIDs,n/a,routing,evidence: service table sec_count=0 for every SID; no service is security-gated
 0x8F344,FUN_0008f344,subfunction-level dispatch,0 (all count=0),subfn dispatch,n/a,routing,evidence: same service table; subfn security uses same count=0 entries
-0x948AA,application_rdbi_request_start,per-DID RDBI,0 (none >0 found),0x22 ReadDataByIdentifier,none of 242 DIDs,read,evidence: 0x92FEE policy scan finds no DID requiring level > 0 in any session
+0x945DC,application_rdbi_callback,per-DID RDBI,0 (none >0 found),0x22 ReadDataByIdentifier,none of 242 DIDs,read,evidence: corrected runtime SID-0x22 callback drives generic DID policy/read machinery; 0x92FEE scan finds no DID requiring level > 0
 0x92FEE,FUN_00092fee,per-DID policy lookup,n/a,0x22 RDBI / 0x2E WDBI,n/a,lookup,policy resolver called by RDBI; uses table at 0x261A4
-0x95556,FUN_00095556,per-DID WDBI,check via 0x26690 table,0x2E WriteDataByIdentifier,19 write DIDs,write,WDBI uses separate policy table at 0x26690; security flag at 0x26B8D
+0x95556,FUN_00095556,per-RID RoutineControl,check via 0x26690 table,0x31 RoutineControl,19 configured RIDs,control,RoutineControl uses the 19-row policy table at 0x26690; enable/security flag at 0x26B8D
 0x9497C,application_security_access_request_seed,SA self-check,current level,0x27 SecurityAccess,n/a,seed reuse,checks if requested level already unlocked; avoids re-seeding
 0x94A72,application_security_access_send_key,SA unlock setter,sets level bit,0x27 SecurityAccess,n/a,unlock,calls 0x900FC(level) on success to set the bitmask
 0x940B6,FUN_000940b6,session+security policy,check 0x11/0x12,0x10 DiagnosticSessionControl / 0x19 ReadDTC,n/a,policy,uses 0x8FDCA + 0x8FDDE + 0x926B8 for session and security policy checks
-0x93A1E,FUN_00093a1e,CommControl policy,check 0x22,0x28 CommunicationControl,n/a,policy,called from 0x93B56 (CommControl callback); uses 0x8FDCA for level
+0x93A1E,FUN_00093a1e,WDBI record policy,check configured policy,0x2E WriteDataByIdentifier,generic DID record,policy,called from corrected WDBI worker 0x93B56; uses 0x8FDCA for configured level checks
 0x90834,FUN_00090834,session transition clearer,revokes,0x10 session change,n/a,revoke,calls 0x900FC(0) to clear unlock on session transition
 0x908C6,FUN_000908c6,timeout revoker,revokes,S3 timer,n/a,revoke,conditionally calls 0x900FC(0) to clear unlock on timeout

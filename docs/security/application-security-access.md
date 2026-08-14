@@ -177,9 +177,7 @@ On failure, the worker returns `0x22` (conditionsNotCorrect).
 
 ## 6. Security-level consumers (what the unlock gates)
 
-**No configured SecurityAccess gating was found at the service, RDBI, or WDBI
-policy layers in this Sienna calibration.** The complete configured `0xAB`
-event-record graph likewise contains no direct sensitive target. The
+**No configured SecurityAccess gating was found at the service, bounded RDBI-policy, or 19-RID RoutineControl policy layers in this Sienna calibration.** The complete configured `0xAB` event-record graph likewise contains no direct sensitive target. The
 security-state machinery is wired up and exercised, but the policy tables are
 empty.
 
@@ -188,8 +186,8 @@ empty.
 | All 17 services (Dcm dispatch layer) | `sec_count=0` at `0x25E28 + i*0x18 + 0x12` | No service is security-gated |
 | All 242 readable DIDs (RDBI) | Policy table at `0x261A4`, bounded scan of recognized policy records | No DID requires level > 0 |
 | RDBI callback disclosure boundary | Firmware table `0x2941C` (242 rows / 196 unique callbacks), exact dispatch at `0x4CB8A→0x4CBB2`, depth-4 direct-call audit | No recovered path into command-5 output, key-update result bank, payload-derived key material, or application-SA seed/data/temp RAM; selected hits reduce to generic NvM workspace plus status accumulator `FEBE5050` |
-| All 19 writable DIDs (WDBI) | Policy table at `0x26420`, flag at `0x26B8D` | All have `level_count=0` |
-| `0xAB` operation-F1, event worker, 75 snapshot descriptors, six detail descriptors | Resolve configured indirect tables, then census direct descendants and GP key displacements | Zero matches to crypto/NvM/ICU-S/SecOC/security-policy targets |
+| All 19 configured RoutineControl RIDs | Policy table at `0x26420`, flag at `0x26B8D` | All have `level_count=0`; 18 policy-0 RIDs are effective in sessions `1/2/3` |
+| SID `0xAB` event worker, 75 snapshot descriptors, six detail descriptors; separate SID `0xBA` operation-F1 path | Resolve corrected service ownership and bounded descendants | Zero direct matches to selected crypto/NvM/ICU-S/SecOC/security-policy targets |
 
 The architecture is:
 
@@ -241,10 +239,10 @@ The empty policy is not merely dead SecurityAccess UI. Several live application
 operations remain reachable after session checks with no cryptographic tester
 authorization:
 
-- **CommunicationControl (`0x28`)** is available in extended session. Its real
-  callback `0x93C62 → 0x93B56/0x95154` applies generated communication-mode
-  updates; this is not one of the null-callback echo services. No speed gate is
-  recovered in that service path. A bus-local tester can therefore exercise a
+- **CommunicationControl (`0x28`)** is available in extended session. It is
+  subfunction-table driven (`0x9542C/0x9543C/0x9544C -> 0x95306 -> 0x95154`)
+  and applies generated communication-mode updates. No speed gate is recovered
+  in that service path. A bus-local tester can therefore exercise a
   safety-relevant communication availability surface without unlocking SID
   `0x27`. The reversible bench experiment is now implemented under
   `exploit/followups/communication_control_probe.py`: it uses only
@@ -255,33 +253,28 @@ authorization:
   vehicle speed, supply, transition phase, and handoff state, so it is not an
   unrestricted at-speed reset primitive. At permitted conditions it can still
   reset the EPS into its boot transition without proving tester identity.
-- **All 19 WDBI records** are free of Dcm SA levels. The generated lower-request
-  hook at `0x8A01C` is compiled to `return 0`, so there is no second external
-  authorization manager behind the Dcm policy. The surface is now substantially
-  classified rather than merely structural: 18 records share policy index 0
-  (effective programming/extended access after the outer SID-`0x2E` gate).
-  `0x1007/0x1008` are zero-payload, one-shot live lifecycle reinitializers whose
-  local preconditions omit the explicit vehicle-speed check used by neighboring
-  `0x1002/0x1106`; extended-session policy also has no stationary gate because
-  `application_session_transition_policy @ 0x4C942` applies its speed rejection
-  only to requested session 2. Their workers execute in the normal per-tick
-  scheduler for modes `>0x102`, including operational `0x300/0x400/0x500`.
-  Separately, `0x110A/0x110C/0x110D` can request internal service modes 2/3/4
-  and transition the coordinator into special submode `0x520` under runtime
-  preconditions. Exact graph closure keeps both diagnostic state families
-  separate from the independently proved d/q current/PWM cone, so the supported
-  impact is unauthenticated availability/control-state exposure rather than
-  arbitrary steering actuation. DID `0x1010` is safer than the Dcm table suggests
-  because ICU-S independently authenticates its SHE M1–M3 package and counter. See
-  [../diagnostics/application-wdbi-surface.md](../diagnostics/application-wdbi-surface.md).
-- **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB`
-  exposes event-record list/state/detail reads through an asynchronous worker;
-  the recovered graph does not perform the formerly hypothesized motor-control,
-  calibration, flash, or provisioning writes.
+- **All 19 configured RoutineControl RIDs** are free of Dcm SA levels. The
+  corrected SID-`0x31` outer service object permits sessions `1/2/3`; therefore
+  the 18 policy-0 RIDs are reachable directly from the default diagnostic
+  session, subject to their individual runtime preconditions. `0x1007/0x1008`
+  are zero-payload, one-shot live lifecycle reinitializers whose local
+  preconditions omit the explicit vehicle-speed check used by neighboring
+  `0x1002/0x1106`; `0x1009` is a state-gated variant. Their workers execute in
+  normal per-tick scheduling for modes `>0x102`, including operational
+  `0x300/0x400/0x500`. Separately, `0x110A/0x110C/0x110D` can request internal
+  service modes 2/3/4 and transition the coordinator into special submode
+  `0x520` under runtime preconditions. Exact graph closure keeps both diagnostic
+  state families separate from the independently proved d/q current/PWM cone.
+  RID `0x1010` is the exception to policy-0 reachability: its own policy is
+  extended-session-only, and ICU-S independently authenticates its SHE M1–M3
+  package and replay counter. See
+  [../diagnostics/application-routine-control-surface.md](../diagnostics/application-routine-control-surface.md).
+- **WriteDataByIdentifier (`0x2E`) is a separate generic DID-record service** at
+  `0x93C62`; it must not be inferred from the `0x26AEC` RoutineControl table.
+- **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB` exposes event-record list/state/detail reads through subfunction workers; the recovered graph does not perform the formerly hypothesized motor-control, calibration, flash, or provisioning writes. SID `0xBA` separately owns callback `0x8D344` and the bounded operation-F1 path; its OEM purpose remains open.
 
 For a comma integration this policy weakness is not a clean control interface.
-It is primarily an availability/configuration surface, and the unknown WDBI
-semantics make it too fragile for steering control. A purpose-built,
+It is primarily an availability/configuration surface, and the partially unnamed RoutineControl/OEM diagnostic semantics make it too fragile for steering control. A purpose-built,
 authenticated, bounded application interface would be safer than depending on
 these diagnostic side effects.
 
@@ -334,6 +327,6 @@ the first UDS request or include explicit padding bytes.
 | Secret at `0x20840` | `verify_application_diagnostics.py`: exact 16-byte assertion |
 | Services: all sec_count=0 | `verify_security_consumers.py`: 17 service-table checks |
 | RDBI: no DIDs require level > 0 | `verify_security_consumers.py`: 242-DID bounded policy scan |
-| WDBI: all level_count=0 | `verify_security_consumers.py`: 19 write-DID checks |
-| `0xAB` configured direct/indirect closure: no sensitive targets | `verify_application_ab_service.py`: operation-F1, event-catalogue, 75-record snapshot table, six-record detail table, and callback-target assertions |
+| RoutineControl: all 19 RIDs level_count=0 | `verify_security_consumers.py`: 19-RID policy checks |
+| `0xAB` event closure and separate `0xBA` operation-F1 boundary: no selected sensitive targets | `verify_application_ab_service.py`: corrected service objects, event catalogue, snapshot/detail tables, and BA operation-F1 assertions |
 | Consumer set is exhaustive | `verify_security_consumers.py`: exact address-set assertion (11 addresses) |

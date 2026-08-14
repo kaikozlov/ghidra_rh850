@@ -8,7 +8,7 @@ Runtime CAN message authentication (AUTOSAR Secure Onboard Communication).
 | [sender-implementation.md](sender-implementation.md) | Pinned opendbc sender analysis, direction/ID boundaries, and the independent local classic-CAN signer |
 | [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md) | Corrected NvM object model, object 15, protected slot state, and command-8 provisioning |
 | [key-recovery-assessment.md](key-recovery-assessment.md) | Ranked existing-key recovery routes: peer ECU, software command experiments, command permissions, side channels, provisioning capture, and fault injection |
-| [software-path-assessment.md](software-path-assessment.md) | Software-first audit: diagnostic/CAN bounds, constructible bootloader code execution, dormant ICU state, and command-5/DID-1010 reuse templates |
+| [software-path-assessment.md](software-path-assessment.md) | Software-first audit: diagnostic/CAN bounds, constructible bootloader code execution, dormant ICU state, and command-5/RoutineControl-RID-1010 reuse templates |
 | [candidate-f05-payload.md](candidate-f05-payload.md) | Vance candidate-f05 DataFlash-dump semantics, standard-payload diff, reset behavior, and provenance boundary |
 
 ## Important distinction
@@ -27,11 +27,11 @@ SecOC receive path selects protected ICU-S slot 4 without reading object 15.
 The embedded `FF*16` KAT is compiled out and says nothing about the live slot.
 Command 5 is substantially recovered as MAC generation and accepts selector 4
 in software. Its sole configured stock caller is a CAN-fed crypto-test bank;
-stock application WDBI DID `0x100F` selector 1 activates bank 1 through wrapper
+stock application RoutineControl RID `0x100F` startRoutine activates bank 1 through wrapper
 `0x8A782 -> crypto_test_bank1_activate @ 0x69018`. The stock bank compares the
 result locally and is not a production SecOC transmit path. The earlier Stage-7
 "no recovered activation edge" conclusion was corrected on 2026-08-13: its
-direct-pointer census missed this one-hop WDBI wrapper. The active-state writer
+direct-pointer census missed this one-hop RoutineControl wrapper. The active-state writer
 census remains useful only for showing that CAN input alone cannot arm the bank.
 Separately, the initialized application exposes serialized
 command-5 plumbing suitable for a foreground signing proxy. Live slot-4

@@ -31,7 +31,7 @@ from exploit.command5.stimulus import (
     build_stimulus_plan,
     command5_elm327_param,
     parse_bank1_activation_response,
-    parse_selector3_response,
+    parse_control_type3_response,
 )
 from tools.build_secoc_patch_manifest import crc32, discover_crc_descriptors
 
@@ -59,28 +59,28 @@ for mutation in MUTATIONS:
     check(f"{mutation.name} preimage matches committed firmware", observed == mutation.original, observed.hex())
 
 by_name = {m.name: m for m in MUTATIONS}
-check("diagnostic copy gate patch is two-byte NOP", by_name["did1010-force-copy"].replacement == b"\x00\x00")
-check("diagnostic result source patch points at generated-result buffer encoding", by_name["did1010-result-source"].replacement.hex() == "2496aa99")
-check("experiment contains no activation or status-source mutation", set(by_name) == {"did1010-force-copy", "did1010-result-source"})
+check("diagnostic copy gate patch is two-byte NOP", by_name["rid1010-force-copy"].replacement == b"\x00\x00")
+check("diagnostic result source patch points at generated-result buffer encoding", by_name["rid1010-result-source"].replacement.hex() == "2496aa99")
+check("experiment contains no activation or status-source mutation", set(by_name) == {"rid1010-force-copy", "rid1010-result-source"})
 
-print("\n== stock WDBI activation contract ==")
-WRITE_DID = struct.Struct("<HBBI")
-did_100f = WRITE_DID.unpack_from(firmware, 0x26AEC + 8 * WRITE_DID.size)
-check("write-DID entry 8 is enabled DID 0x100F", did_100f == (0x100F, 0, 1, 0x26678), repr(did_100f))
-check("DID 0x100F selects policy index 0", struct.unpack_from("<H", firmware, 0x26690 + 8 * 2)[0] == 0)
+print("\n== stock RoutineControl activation contract ==")
+ROUTINE_RID = struct.Struct("<HBBI")
+rid_100f = ROUTINE_RID.unpack_from(firmware, 0x26AEC + 8 * ROUTINE_RID.size)
+check("RoutineControl entry 8 is enabled RID 0x100F", rid_100f == (0x100F, 0, 1, 0x26678), repr(rid_100f))
+check("RID 0x100F selects policy index 0", struct.unpack_from("<H", firmware, 0x26690 + 8 * 2)[0] == 0)
 check("policy 0 has no SecurityAccess requirement and three sessions", firmware[0x26420:0x26422] == b"\x00\x03")
 session_list = struct.unpack_from("<I", firmware, 0x26678 + 4)[0]
 session_records = [struct.unpack_from("<I", firmware, session_list + i * 4)[0] for i in range(3)]
 check("policy 0 resolves to default/programming/extended sessions",
       session_list == 0x26668 and [firmware[record + 1] for record in session_records] == [1, 2, 3],
       repr([hex(record) for record in session_records]))
-did_config = firmware[0x26B8D + 8 * 15:0x26B8D + 9 * 15]
-check("DID 0x100F enables selector 1", did_config[4] == 1, did_config.hex())
-check("DID 0x100F selector 1 consumes zero data fields", firmware[0x26B93 + 8 * 15] == 0)
+rid_config = firmware[0x26B8D + 8 * 15:0x26B8D + 9 * 15]
+check("RID 0x100F enables control type 1", rid_config[4] == 1, rid_config.hex())
+check("RID 0x100F control type 1 consumes zero data fields", firmware[0x26B93 + 8 * 15] == 0)
 callback_row = struct.unpack_from("<HHII", firmware, 0x25804 + 8 * 12)
-check("DID 0x100F callback row selects success precheck and action wrapper",
+check("RID 0x100F callback row selects success precheck and action wrapper",
       callback_row == (0x100F, 0, 0x8A768, 0x8A782), repr(callback_row))
-check("DID 0x100F action wrapper directly calls crypto_test_bank1_activate",
+check("RID 0x100F action wrapper directly calls crypto_test_bank1_activate",
       firmware[0x8A786:0x8A78A] == bytes.fromhex("bdff92e8"))
 
 print("\n== static crypto-test harness contract ==")
@@ -157,7 +157,7 @@ check("selector-4/mode-1 frame is 0x01B bytes 04 01 ...", frames[0].address == 0
 check("0x01C/0x01D carry the exact 16-byte command-5 message", frames[1].address == 0x01C and frames[1].data == message[:8] and frames[2].address == 0x01D and frames[2].data == message[8:])
 check("0x01E/0x01F carry the exact 16-byte expected value", frames[3].address == 0x01E and frames[3].data == expected[:8] and frames[4].address == 0x01F and frames[4].data == expected[8:])
 plan = build_stimulus_plan(message, expected=expected)
-check("default plan uses stock WDBI bank-1 activation", plan["activation"]["request"] == "2E 01 10 0F")
+check("default plan uses stock RoutineControl bank-1 activation", plan["activation"]["request"] == "31 01 10 0F")
 check("default plan requires a fresh application boot per activation", "fresh application boot" in plan["activation"]["lifecycle"])
 check("default plan uses five spaced rounds", plan["rounds"] == DEFAULT_ROUNDS == 5 and plan["round_interval_seconds"] == 0.10)
 check("plan records three required stable observations", plan["stability"]["required_unchanged_observations"] == 3)
@@ -177,26 +177,26 @@ else:
     check("too-few update rounds are rejected", False)
 
 print("\n== diagnostic response parsers ==")
-activation = parse_bank1_activation_response(b"\x6e\x01\x10\x0f")
-check("bank-1 activation parser accepts exact stock WDBI echo", activation["positive_response"] == "6e01100f")
+activation = parse_bank1_activation_response(b"\x71\x01\x10\x0f")
+check("bank-1 activation parser accepts exact stock RoutineControl response", activation["positive_response"] == "7101100f")
 try:
-    parse_bank1_activation_response(b"\x6e\x01\x10\x0e")
+    parse_bank1_activation_response(b"\x71\x01\x10\x0e")
 except StimulusError as exc:
-    check("bank-1 activation parser rejects wrong DID", "unexpected" in str(exc), str(exc))
+    check("bank-1 activation parser rejects wrong RID", "unexpected" in str(exc), str(exc))
 else:
-    check("bank-1 activation parser rejects wrong DID", False)
+    check("bank-1 activation parser rejects wrong RID", False)
 
-response = b"\x6e\x03\x10\x10" + b"\x10" + bytes(range(16)) + bytes(range(32))
-parsed = parse_selector3_response(response)
-check("selector-3 parser exposes patched status byte", parsed["status"] == 0x10)
-check("selector-3 parser extracts exactly first 16 generated-result bytes", parsed["generated_cmac"] == bytes(range(16)))
-check("selector-3 parser quarantines adjacent 32 bytes", parsed["extra"] == bytes(range(32)))
+response = b"\x71\x03\x10\x10" + b"\x10" + bytes(range(16)) + bytes(range(32))
+parsed = parse_control_type3_response(response)
+check("RoutineControl result parser exposes patched status byte", parsed["status"] == 0x10)
+check("RoutineControl result parser extracts exactly first 16 generated-result bytes", parsed["generated_cmac"] == bytes(range(16)))
+check("RoutineControl result parser quarantines adjacent 32 bytes", parsed["extra"] == bytes(range(32)))
 try:
-    parse_selector3_response(b"\x6e\x03\x10\x11" + b"\x00" * 49)
+    parse_control_type3_response(b"\x71\x03\x10\x11" + b"\x00" * 49)
 except StimulusError as exc:
-    check("wrong DID/selector response prefix is rejected", "unexpected" in str(exc), str(exc))
+    check("wrong RID/selector response prefix is rejected", "unexpected" in str(exc), str(exc))
 else:
-    check("wrong DID/selector response prefix is rejected", False)
+    check("wrong RID/selector response prefix is rejected", False)
 
 print("\n== scope and interpretation discipline ==")
 source = (REPO / "exploit" / "command5" / "build_experiment.py").read_text(encoding="utf-8").lower()
@@ -204,7 +204,7 @@ stimulus_source = (REPO / "exploit" / "command5" / "stimulus.py").read_text(enco
 check("experiment patch does not contain SecOC Gate-2 target address", "8e6c8" not in source)
 check("experiment patch does not import production flash backend", "flash_backend" not in source)
 check("stimulus labels result as application-context evidence only", "does not prove production secoc transmit integration" in stimulus_source)
-check("live stimulus activates bank 1 through stock WDBI", "_raw_bank1_activate" in stimulus_source and "\\x01\\x10\\x0f" in stimulus_source)
+check("live stimulus activates bank 1 through stock RoutineControl", "_raw_bank1_activate" in stimulus_source and "service_type.routine_control" in stimulus_source and "rid_bank1_activate" in stimulus_source)
 check("live stimulus requires a fresh application boot", "fresh application boot" in stimulus_source)
 check("live stimulus keeps pre-stimulus diagnostic baseline", "result_changed_from_pre_stimulus_baseline" in stimulus_source)
 check("live stimulus selects bounded ELM327 command-5 mode", "command5_elm327_param" in stimulus_source)

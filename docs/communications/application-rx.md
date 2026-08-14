@@ -462,13 +462,13 @@ therefore send at least four, preferably five, **spaced** identical rounds rathe
 than a burst whose updates may collapse into one cyclic observation.
 
 These CAN frames still do not activate the bank by themselves, but stock
-application diagnostics do: WDBI `2E 01 10 0F` reaches wrapper `0x8A782`, which
+application diagnostics do: RoutineControl `31 01 10 0F` reaches wrapper `0x8A782`, which
 directly calls `crypto_test_bank1_activate @ 0x69018`. The request has no data
 field and requires no configured SecurityAccess level; use programming or
 extended session and a fresh application boot for a deterministic new run. The
 generated result is not stock CAN output, so the minimal application-context
 experiment now needs only two diagnostic-observation substitutions: force DID
-`0x1010` selector 3 to copy and redirect its 48-byte source to `FEBE51AA`. The
+RoutineControl RID `0x1010` requestResults to copy and redirect its 48-byte source to `FEBE51AA`. The
 first 16 returned bytes are the generated result; the adjacent 32 bytes remain
 uninterpreted. See [SecOC application chain](../security/secoc/application-chain.md),
 [software-path assessment](../security/secoc/software-path-assessment.md), and

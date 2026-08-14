@@ -736,7 +736,7 @@ no claim assigns an OEM calibration name or makes either routine the missing
 
 ### 9.7 Diagnostic service submode `0x520` remains outside the d/q producer cone
 
-Application WDBI DIDs `0x110A`, `0x110C`, and `0x110D` can request internal
+Application RoutineControl RIDs `0x110A`, `0x110C`, and `0x110D` can request internal
 service modes 2/3/4 and, under their runtime preconditions, drive the system
 coordinator into submode `0x520`. That submode runs a distinct service-control
 pipeline (`0xB68xx/0xB70xx/0xB74xx/0xB76xx`) containing signed/saturated
@@ -758,19 +758,22 @@ from these service values to the motor-current producer cone is recovered.
 The corresponding security interpretation is therefore bounded: unauthenticated
 Dcm policy exposes special diagnostic service-mode/control-state transitions,
 with availability implications, but the static graph does **not** establish an
-arbitrary steering-torque/current primitive. The complete WDBI access/control
-surface is documented in
-[`../diagnostics/application-wdbi-surface.md`](../diagnostics/application-wdbi-surface.md).
+arbitrary steering-torque/current primitive. The complete RoutineControl access/control surface is documented in
+[`../diagnostics/application-routine-control-surface.md`](../diagnostics/application-routine-control-surface.md).
 
-### 9.8 WDBI `0x1007/0x1008` inject live lifecycle reinitialization, not d/q commands
+### 9.8 RoutineControl `0x1007/0x1008` inject live lifecycle reinitialization, not d/q commands
 
-Two additional policy-0 WDBIs operate on lifecycle groups that are serviced by
+Two additional policy-0 RoutineControl RIDs operate on lifecycle groups that are serviced by
 normal operational scheduling rather than the `0x520`-only service island.
 `0x1007` reaches `B7A36(0)` and forces top-level lifecycle states
 `FEBEB454/455` to `0x11`; `0x1008` reaches diagnostic-only `B7AAE` and forces
 `FEBEB456` to `0x11`. State `0x11` is consumed by periodic workers
 `B7794/B7872/B792A`, which wait for subordinate components to converge to
 `0x22` or terminate in `0x44` on failure/timeout.
+
+The corrected SID-`0x31` service object and policy 0 both permit sessions
+`1/2/3`, so these RIDs are reachable from the default diagnostic session; the
+previously documented `10 03` prerequisite was a service-table parsing error.
 
 Wrapper `B79E8` invokes those workers from `system_mode_per_tick_dispatcher` on
 the `current_mode > 0x102` path. The lifecycle machinery therefore remains live

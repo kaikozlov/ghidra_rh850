@@ -112,9 +112,9 @@
   "firmware_join": {
     "conclusion": "same cryptographic envelope; different service/procedure",
     "sienna_4512000": {
-      "poll": "2e 03 10 10",
+      "poll": "31 03 10 10",
       "result": "status || M4[32] || M5[16]",
-      "start": "2e 01 10 10 || M1[16] || M2[32] || M3[16]"
+      "start": "31 01 10 10 || M1[16] || M2[32] || M3[16]"
     },
     "techstream": {
       "poll": "31 03 30 02",

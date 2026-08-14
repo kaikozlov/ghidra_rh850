@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Verify the application SID 0xAB event-record service from firmware bytes.
 
-The service is distinct from the 13-entry RoutineControl RID table. This suite
-pins the 0xAB selectors, its operation-F1 handoff, the event-record tables, and
-the complete statically configured indirect-callback closure.
+The service is distinct from SID 0xBA and from the separate internal routine
+callback table. This suite pins the 0xAB subfunctions/event-record tables, the
+complete configured event callback closure, and the adjacent 0xBA operation-F1
+boundary so service ownership cannot shift again.
 """
 from pathlib import Path
 import struct
@@ -52,10 +53,15 @@ def direct_targets(start, end):
 
 
 print("== SID 0xAB configuration ==")
-service = 0x25F98
-check("SID 0xAB service byte", CF[service + 8] == 0xAB)
-check("SID 0xAB callback", struct.unpack_from("<I", CF, service + 0x10)[0] == 0x8D344)
-check("SID 0xAB has three selectors", CF[service + 0x0C] == 3)
+service = 0x25F90
+check("SID 0xAB runtime service byte", CF[service + 0x10] == 0xAB)
+check("SID 0xAB has no direct service callback", struct.unpack_from("<I", CF, service)[0] == 0)
+check("SID 0xAB subfunction table is 0x25CD0", struct.unpack_from("<I", CF, service + 0x0C)[0] == 0x25CD0)
+check("SID 0xAB has three subfunctions", CF[service + 0x14] == 3)
+
+ba_service = 0x25FA8
+check("SID 0xBA runtime service byte", CF[ba_service + 0x10] == 0xBA)
+check("SID 0xBA direct callback is 0x8D344", struct.unpack_from("<I", CF, ba_service)[0] == 0x8D344)
 
 selector_table = 0x25CD0
 expected_selectors = [
@@ -76,7 +82,7 @@ for index, (selector, callback, policy) in enumerate(expected_selectors):
         repr(actual),
     )
 
-print("\n== operation-F1 handoff ==")
+print("\n== SID 0xBA operation-F1 handoff ==")
 check("operation dispatch table has ten entries", struct.unpack_from("<I", CF, 0x28094)[0] == 10)
 f1 = CF[0x28098:0x280A8]
 check(
@@ -149,7 +155,7 @@ for displacement, address in ((0x5AE8, 0xFEBF02E8), (0x5AF8, 0xFEBF02F8)):
     hit = CF.find(struct.pack("<h", displacement), 0x54C64, 0x55280)
     check(f"event callbacks do not use GP displacement for 0x{address:08X}", hit < 0, hex(hit))
 
-print("\n== separation from RoutineControl RID callbacks ==")
+print("\n== separation from internal routine callback table ==")
 rid_lookup_callers = []
 for addr in range(0, len(CF) - 3, 2):
     decoded = decode_branch(addr)
@@ -157,7 +163,7 @@ for addr in range(0, len(CF) - 3, 2):
         rid_lookup_callers.append(addr)
 check("RID lookup has one direct caller", rid_lookup_callers == [0x8A50C], repr(rid_lookup_callers))
 check("RID lookup has no function-pointer literal", CF.find(struct.pack("<I", 0x8D3CC)) < 0)
-check("SID 0x31 callback remains null", struct.unpack_from("<I", CF, 0x25F08 + 0x10)[0] == 0)
+check("SID 0x31 direct callback is configured RoutineControl 0x95DCE", struct.unpack_from("<I", CF, 0x25F00)[0] == 0x95DCE)
 
 sensitive_targets = {
     0x865D4, 0x853EE, 0x852B0, 0x8496C,
@@ -168,12 +174,16 @@ sensitive_targets = {
     0x92FEE, 0x900FC,
 }
 ab_targets = set()
-for start, end in ((0x8CF84, 0x8D0F0), (0x4F8BA, 0x4FC00), (0x34B74, 0x34BA8)):
+for start, end in ((0x8CF84, 0x8D0F0), (0x4F8BA, 0x4FC00)):
     ab_targets |= direct_targets(start, end)
 ab_targets |= callback_targets
-check("closed 0xAB call graph has no direct sensitive targets",
+check("closed 0xAB event graph has no direct sensitive targets",
       not (ab_targets & sensitive_targets),
       repr(sorted(hex(x) for x in ab_targets & sensitive_targets)))
+ba_targets = direct_targets(0x34B74, 0x34BA8)
+check("bounded 0xBA operation-F1 path has no direct sensitive targets",
+      not (ba_targets & sensitive_targets),
+      repr(sorted(hex(x) for x in ba_targets & sensitive_targets)))
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:

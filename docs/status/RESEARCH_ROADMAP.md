@@ -31,10 +31,10 @@ What to investigate next, in rough priority order. Completed items move to
    commit. Only rejection on stock firmware followed by acceptance after the
    semantic Gate-2 patch can establish the exploit claim; write/reboot persistence
    remains insufficient.
-4. **Run the prepared application-context command-5 hardware probe.** Stock WDBI
-   `2E 01 10 0F` now supplies bank-1 activation through `0x8A782 → 0x69018`, so
+4. **Run the prepared application-context command-5 hardware probe.** Stock RoutineControl
+   `31 01 10 0F` now supplies bank-1 activation through `0x8A782 → 0x69018`, so
    the smallest recovered experiment is only two diagnostic-observation
-   substitutions / 6 bytes in FCU block `0x68000`: force DID `0x1010` selector 3
+   substitutions / 6 bytes in FCU block `0x68000`: force RoutineControl RID `0x1010` requestResults
    to copy and redirect its source to `FEBE51AA`. The stock
    `0x68B42 → 0x88350 → 0x87CCC` command-5 chain and selector-3 status source stay
    unchanged. Exact CAN stimulus, fresh-boot requirement, boot-CRC resigning,
@@ -178,7 +178,7 @@ What to investigate next, in rough priority order. Completed items move to
 - **Techstream MACKey vehicle protocol (2026-08-10).** Recovered the VIN,
   MAC-tuple, safe-key identity, master/slave discovery, response association,
   Routine-`0x3002` M1–M3 write, and M4/M5 poll. It shares the Sienna command-8
-  envelope but is not an exact WDBI-DID-`0x1010` join. Canonical:
+  envelope but is not an exact RoutineControl-RID-`0x1010` join. Canonical:
   [../security/mackey-registration.md](../security/mackey-registration.md).
 - **Vance candidate-f05 payload (2026-08-10).** Recovered as a full 32 KiB
   DataFlash dump with unchanged CAN `0x7A9` word-frame transport and a post-dump

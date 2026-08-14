@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify passive ISO-TP decoding of the DID 0x1010 key-update workflow."""
+"""Verify passive ISO-TP decoding of the RoutineControl RID 0x1010 key-update workflow."""
 
 from __future__ import annotations
 
@@ -52,14 +52,14 @@ m5 = bytes(range(0x70, 0x80))
 trace = []
 trace += isotp(0x7A1, bytes.fromhex("1003"), 1.0)
 trace += isotp(0x7A9, bytes.fromhex("5003"), 1.1)
-trace += isotp(0x7A1, bytes.fromhex("2e011010") + m1 + m2 + m3, 2.0)
+trace += isotp(0x7A1, bytes.fromhex("31011010") + m1 + m2 + m3, 2.0)
 trace += ["(2.020000) can0 7A9#3000000000000000"]  # ECU flow control
-trace += isotp(0x7A9, bytes.fromhex("6e01101001") + bytes(48), 2.1)
+trace += isotp(0x7A9, bytes.fromhex("7101101001") + bytes(48), 2.1)
 trace += ["(2.120000) can0 7A1#3000000000000000"]  # tester flow control
-trace += isotp(0x7A1, bytes.fromhex("2e031010"), 3.0)
-trace += isotp(0x7A9, bytes.fromhex("6e03101002") + m4 + m5, 3.1)
+trace += isotp(0x7A1, bytes.fromhex("31031010"), 3.0)
+trace += isotp(0x7A9, bytes.fromhex("7103101002") + m4 + m5, 3.1)
 trace += ["(3.120000) can0 7A1#3000000000000000"]
-trace += isotp(0x7A9, bytes.fromhex("7f2e24"), 4.0)
+trace += isotp(0x7A9, bytes.fromhex("7f3124"), 4.0)
 
 events, warnings = decode_trace(trace, show_package=True)
 check("synthetic trace decodes without warnings", warnings == [], repr(warnings))
@@ -80,11 +80,11 @@ check("M3 is exactly 16 bytes", start["m3"] == m3.hex())
 accepted = next(
     event for event in events if event["event"] == "key_update_start_positive"
 )
-check("selector-1 response exposes pending status 0x01", accepted["status"] == 1)
+check("startRoutine response exposes pending status 0x01", accepted["status"] == 1)
 check("pending response does not claim a proof", accepted["proof_present"] is False)
 
 poll = next(event for event in events if event["event"] == "key_update_result_request")
-check("selector-3 result request has no payload", poll["valid_length"] is True)
+check("requestRoutineResults request has no payload", poll["valid_length"] is True)
 
 result = next(
     event for event in events if event["event"] == "key_update_result_positive"
@@ -107,7 +107,7 @@ redacted_start = next(
 check("package bytes are redacted by default", "m1" not in redacted_start)
 check("redacted output retains component hashes", "m1_sha256" in redacted_start)
 
-broken = isotp(0x7A1, bytes.fromhex("2e011010") + m1 + m2 + m3, 5.0)
+broken = isotp(0x7A1, bytes.fromhex("31011010") + m1 + m2 + m3, 5.0)
 broken[1] = broken[1].replace("#21", "#22")
 _, broken_warnings = decode_trace(broken)
 check(

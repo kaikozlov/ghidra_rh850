@@ -6,7 +6,7 @@ for claim scope and confidence, [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) for
 blockers, and subsystem reports for interpretation.
 
 Snapshot date: **2026-08-13**. Corrected normalized project-inventory SHA-256:
-`bd659ac3d07a04a635b8451e4504cfb3e76adbd28bd817e27aecf749cd9c8eba`.
+`aac93622773d9c5c7865d0673de0759b49fa8b99c2fce45ac01199a6aa6508a5`.
 The inventory was produced byte-identically by two separately invoked four-stage
 rebuilds. Committed-project promotion is a separate final lifecycle gate.
 
@@ -18,7 +18,7 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 | Decoded CodeFlash instructions | 183,183 | Ghidra listing total in `data/ghidra_project_inventory.baseline.jsonl`; this is decode coverage, not semantic coverage |
 | Decoded instructions outside functions | 19,724 instructions / 55,170 bytes | `data/outside_function_summary.json`; conservative runs can include data decoded as instructions |
 | Known function entries | 6,288 | Byte-identical two-rebuild project inventory; zero undefined bytes applies inside these function bodies only |
-| Validated indirect callback tables | 9 tables / 365 nonzero target pointers | `AssertFunctionDiscoveryFloor.java` against firmware bytes; includes the seven-entry `0x2B3F0` XCP table, both callback columns of the 19-row application WDBI table at `0x25804`, and the 242-row application RDBI callback table at `0x2941C` |
+| Validated indirect callback tables | 9 tables / 365 nonzero target pointers | `AssertFunctionDiscoveryFloor.java` against firmware bytes; includes the seven-entry `0x2B3F0` XCP table, both callback columns of the 19-row application RoutineControl table at `0x25804`, and the 242-row application RDBI callback table at `0x2941C` |
 | Bounded pointer wrappers | 6 | Processor function-discovery assertion; structural wrapper references, not callback semantics |
 | Unresolved outside-function candidates | 1,858 total: 807 orphan decoded runs, 1,051 pointer-referenced runs | `data/outside_function_summary.json`; adjudication is 1,798 `unresolved` plus 60 `unresolved-reviewed` |
 | Indirect-dispatch resolution | 365 nonzero pointers in the nine proven tables resolve to exact function entries; direct-call gaps 0 and constant-veneer target gaps 0 | Processor assertion. This is not a denominator for every possible computed call in the image |
@@ -36,7 +36,7 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 | Selected sweep without semantic conclusion | 88 | `reviewed_unknown`, no evidence grade; successful decompilation is a generated self-check only |
 | Per-function claim execution status | 105 `passed`, 5 `unavailable`, 0 `failed` | `data/semantic_review_status.csv`; `unavailable` marks manual CFG reviews with no automated execution gate |
 | Strongest independent oracle per reviewed function | 19 CFG/data-flow, 3 instruction semantics, 88 none | The 88 have only a generated self-check, which is recorded separately and confers no semantic grade |
-| Findings with exact `verified` grade | 49 | Exact-grade rows in `FINDINGS.md`; qualified/mixed/partial-grade rows are not included in this scalar |
+| Findings with exact `verified` grade | 50 | Exact-grade rows in `FINDINGS.md`; qualified/mixed/partial-grade rows are not included in this scalar |
 | Findings dynamically observed | 2 | SECOC-030 external partner observation and VAR-001 Corolla field probes; neither is promoted to Sienna `4512000` firmware fact |
 
 For material findings, `FINDINGS.md` identifies the claim-specific gate in its

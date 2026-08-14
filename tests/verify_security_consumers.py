@@ -4,7 +4,7 @@
 Findings (all scoped to this Sienna calibration 8965B4512000):
 - All 17 services: sec_count=0 at the Dcm service-dispatch layer
 - All 242 readable DIDs: no security level > 0 found in bounded policy scan
-- All 19 writable DIDs: security flag present but level_count=0
+- All 19 configured RoutineControl RIDs: level_count=0
 - Security machinery is wired up and exercised but policy tables are empty
 - 0xAB event-record closure is in verify_application_ab_service.py
 """
@@ -52,13 +52,13 @@ check("CSV header schema", set(rows[0].keys()) == expected_cols,
 EXPECTED_CONSUMERS = {
     0x8F282,   # Dcm DSP service dispatch
     0x8F344,   # Dcm DSP subfunction dispatch
-    0x948AA,   # RDBI request start
+    0x945DC,   # RDBI service callback
     0x92FEE,   # per-DID policy lookup
-    0x95556,   # WDBI security checker
+    0x95556,   # RoutineControl per-RID security checker
     0x9497C,   # SA request seed
     0x94A72,   # SA send key
     0x940B6,   # session/DTC policy
-    0x93A1E,   # CommControl policy
+    0x93A1E,   # WDBI generic record policy
     0x90834,   # session transition clearer
     0x908C6,   # timeout revoker
 }
@@ -145,24 +145,24 @@ check(f"no readable DIDs require security level > 0 ({valid_entries} valid polic
       rdbi_secure_count == 0, f"{rdbi_secure_count} DIDs with security")
 
 # ═══════════════════════════════════════════════════════════════════
-# 4. WDBI per-DID: all 19 write DIDs, level_count=0
+# 4. RoutineControl per-RID: all 19 configured RIDs, level_count=0
 # ═══════════════════════════════════════════════════════════════════
-print("\n== WDBI per-DID security (19 write DIDs) ==")
-WDBI_COUNT = struct.unpack_from("<H", CF, 0x26666)[0]
-check("WDBI DID count at 0x26666 is 19", WDBI_COUNT == 19, str(WDBI_COUNT))
+print("\n== RoutineControl per-RID security (19 configured RIDs) ==")
+ROUTINE_RID_COUNT = struct.unpack_from("<H", CF, 0x26666)[0]
+check("RoutineControl RID count at 0x26666 is 19", ROUTINE_RID_COUNT == 19, str(ROUTINE_RID_COUNT))
 
-wdbi_secure_count = 0
-for i in range(WDBI_COUNT):
+routine_secure_count = 0
+for i in range(ROUTINE_RID_COUNT):
     sec_flag = CF[0x26B8D + i * 0xF]
     sec_idx = struct.unpack_from("<H", CF, 0x26690 + i * 2)[0]
     level_count = CF[0x26420 + sec_idx * 2] if sec_idx < 100 else 0xFF
     if level_count > 0:
-        wdbi_secure_count += 1
-    check(f"WDBI DID[{i:2d}] has level_count=0 (flag=0x{sec_flag:02X}, idx={sec_idx})",
+        routine_secure_count += 1
+    check(f"RoutineControl RID[{i:2d}] has level_count=0 (flag=0x{sec_flag:02X}, idx={sec_idx})",
           level_count == 0, f"level_count={level_count}")
 
-check("no writable DIDs require security level > 0",
-      wdbi_secure_count == 0, f"{wdbi_secure_count} WDBI DIDs with security")
+check("no configured RoutineControl RIDs require SecurityAccess level > 0",
+      routine_secure_count == 0, f"{routine_secure_count} RoutineControl RIDs with security")
 
 # ═══════════════════════════════════════════════════════════════════
 # 5. 0xAB CALLBACK SECURITY ANALYSIS

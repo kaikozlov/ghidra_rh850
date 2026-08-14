@@ -16,18 +16,20 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 
-SERVICE_TABLE = 0x25E30
+SERVICE_TABLE = 0x25E28
 SERVICE_COUNT = 17
-SERVICE = struct.Struct("<IIBBBBIII")
+# callback, security-list ptr, session-list ptr, subfunction-table ptr,
+# SID, has-subfunction-table, security-count, session-count, subfunction-count.
+SERVICE = struct.Struct("<IIIIBBBBB3x")
 SUBFN = struct.Struct("<IIIHH")
 DID = struct.Struct("<HHIII")
-WRITE_DID = struct.Struct("<HBBI")
+ROUTINE_CONTROL = struct.Struct("<HBBI")
 ROUTINE = struct.Struct("<HHII")
 
 DID_TABLE = 0x2941C
 DID_COUNT = 0xF2
-WRITE_DID_TABLE = 0x26AEC
-WRITE_DID_COUNT = 0x13
+ROUTINE_CONTROL_TABLE = 0x26AEC
+ROUTINE_CONTROL_COUNT = 0x13
 ROUTINE_TABLE = 0x25768
 ROUTINE_COUNT = 32
 SA_SLOT0 = 0x26338
@@ -67,64 +69,54 @@ SEMANTICS = {
         "notes": "See existing session/handoff analysis in docs/diagnostics/application.md",
     },
     0x11: {
-        "service_callback_role": "phase_dispatcher 0=start 0x8B144; nonzero=cancel/finalize 0x8B1D4",
-        "async_worker": "0x8AF28/0x8B014 lower reset stages via stub ops 0x18000000/0x18000001",
-        "security_policy": "none at service level (b10=0)",
-        "nrcs": "0x13 wrong length; 0x22/0x31/0x72 from lower-stage mapper",
-        "side_effects": "packs 3 request bytes; queues lower reset ops; pending value 10",
-        "config_tables": "none beyond service record; session allow [2]",
-        "evidence_status": "recovered",
-        "notes": "Requires request length 3; not bootloader hardReset-only shape",
+        "service_callback_role": "null direct callback; generic positive-response path",
+        "async_worker": "",
+        "security_policy": "none at service level; programming session only",
+        "nrcs": "generic session rejection outside programming",
+        "side_effects": "no service-specific callback recovered from runtime object",
+        "config_tables": "session allow [2] only",
+        "evidence_status": "verified null-direct service",
+        "notes": "The prior 0x8B1F0 ECUReset attribution was an 8-byte service-object parsing error; 0x8B1F0 belongs to SID 0x14.",
     },
     0x14: {
-        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
-        "async_worker": "",
-        "security_policy": "none at service level (b10=0)",
-        "nrcs": "generic session NRC 0x7F via dispatcher when session not allowed",
-        "side_effects": "none; simple positive response (SID|0x40 + request echo) via 0x8F6FA",
-        "config_tables": "session allow [1,3] only in service record",
-        "evidence_status": "resolved; simple-response-only",
-        "notes": (
-            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
-            "byte[9]==0 selects simple-response path. Service echoes SID|0x40 + request "
-            "without service-specific processing. No hidden DSP handler."
-        ),
+        "service_callback_role": "direct callback 0x8B1F0; phase 0 starts 0x8B144",
+        "async_worker": "0x8AF28/0x8B014 lower clear stages; nonzero callback phase finalizes via 0x8B1D4",
+        "security_policy": "none at service level; sessions [1,3]",
+        "nrcs": "0x13 wrong length; 0x22/0x31/0x72 from lower-stage mapper",
+        "side_effects": "requires and packs the three-byte groupOfDTC, then executes the configured clear operation",
+        "config_tables": "runtime service object 0x25E58",
+        "evidence_status": "recovered",
+        "notes": "Request shape is ClearDiagnosticInformation, not ECUReset.",
     },
     0x19: {
-        "service_callback_role": "phase_dispatcher 0=start 0x944C6; 2=complete 0x9452E",
+        "service_callback_role": "subfunction_table_only",
         "async_worker": "subfn workers 0x8B532/0x8B99A/0x8BD30/0x8C276; pending returns 10",
         "security_policy": "none at service level; subfn sessions [1,3]",
-        "nrcs": "0x13 length; 0x14 responseTooLong; internal 0x21 mapped via 0x93910",
-        "side_effects": (
-            "request-context mirrors via absolute mov: "
-            "FEBF3BFC/3F24/4248/457C (subfn 01..04); structure opaque"
-        ),
+        "nrcs": "0x13 length; report-specific worker failures",
+        "side_effects": "read/report operations only in recovered subfunction graph",
         "config_tables": "subfn table 0x25BF0 (01..04)",
         "evidence_status": "recovered",
-        "notes": "Subfunctions 01..04 are report-style DTC readers; OEM report names not assigned",
+        "notes": "The prior 0x945DC service-level attribution was shifted; 0x945DC is SID 0x22 RDBI.",
     },
     0x22: {
-        "service_callback_role": "phase_dispatcher 0=start 0x9479A; 2=cancel 0x9486C; 3=poll 0x946FA",
-        "async_worker": "0x946FA poll may return pending 10 / NRC 0x78 path",
-        "security_policy": "per-DID via 0x92FEE against session security state from 0x8FDCA",
-        "nrcs": "0x13 length; 0x31 did; 0x33 security; 0x78 pending",
-        "side_effects": "reads through DID table callbacks; per-DID storage not enumerated here",
+        "service_callback_role": "direct callback 0x945DC; phase 0=0x944C6, phase 2=0x9452E",
+        "async_worker": "0x94426/0x9429E drive generic configured DID-record reads through 0x92810/0x929B0",
+        "security_policy": "per-DID/session/security through generic DID capability and record policy",
+        "nrcs": "0x13 request shape; 0x31 DID/policy; 0x14 responseTooLong; pending supported",
+        "side_effects": "reads through the 242-row DID table; disclosure and side-effect boundaries verified separately",
         "config_tables": f"DID table 0x{DID_TABLE:X} count {DID_COUNT} (getter 0x4F928)",
         "evidence_status": "recovered",
-        "notes": "242 DID records; F181/F186/F18C previously documented",
+        "notes": "Runtime object 0x25E88 and secondary object 0x26008 both bind SID 0x22 to 0x945DC.",
     },
     0x23: {
-        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
-        "async_worker": "",
-        "security_policy": "none at service level (b10=0)",
-        "nrcs": "generic session NRC 0x7F when not in extended",
-        "side_effects": "none; simple positive response (SID|0x40 + request echo) via 0x8F6FA",
-        "config_tables": "session allow [3] only",
-        "evidence_status": "resolved; simple-response-only",
-        "notes": (
-            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
-            "byte[9]==0 selects simple-response path. No memory-range table or read handler."
-        ),
+        "service_callback_role": "direct callback 0x948AA; phases 0/2/3 start/cancel/poll through 0x9479A/0x9486C/0x946FA",
+        "async_worker": "0x9479A parses addressAndLengthFormatIdentifier; 0x8C456/0x4EB1C execute configured memory reads",
+        "security_policy": "extended-session outer gate plus configured memory-range/session/security checks via 0x92ECC/0x92FAE/0x92FEE",
+        "nrcs": "0x13 malformed length; 0x31 unsupported range/format; 0x33 security",
+        "side_effects": "bounded configured memory read",
+        "config_tables": "generic memory-range policy rooted through PTR_PTR_00026208",
+        "evidence_status": "recovered",
+        "notes": "The prior simple-response/RDBI attribution was caused by the 8-byte-shifted service parser.",
     },
     0x27: {
         "service_callback_role": "subfunction_table_only",
@@ -158,40 +150,34 @@ SEMANTICS = {
         ),
     },
     0x28: {
-        "service_callback_role": "phase_dispatcher 0=start 0x93B56; 2=complete 0x93BDE",
-        "async_worker": "subfn wrappers -> 0x95154; may post events 0x11/0x12/0x13",
-        "security_policy": "none at service level; subfn sessions [3]",
-        "nrcs": "0x13 length; 0x31 out-of-range control",
-        "side_effects": "0x95154 jarls helpers 0x94F8E/0x9505C (mode apply); no typed RAM root claimed",
+        "service_callback_role": "subfunction_table_only; wrappers 0x9542C/0x9543C/0x9544C",
+        "async_worker": "0x95306 -> 0x95154 shared CommunicationControl request worker",
+        "security_policy": "none at service level; subfunctions allowed in extended session",
+        "nrcs": "0x13 length; 0x31 unsupported control",
+        "side_effects": "configured communication-mode updates through 0x94F8E/0x9505C",
         "config_tables": "subfn 0x25C70 (00/01/03); mode bytes at tp+0x249B",
         "evidence_status": "recovered",
-        "notes": "Subfunctions 0/1/3 only; not the bootloader acknowledge-only 28 01 01",
+        "notes": "0x93C62 is not CommunicationControl; it is the direct SID 0x2E WDBI callback.",
     },
     0x2E: {
-        "service_callback_role": "phase_dispatcher 0=start 0x95C8C; 2=cancel 0x95D7E; 3=poll 0x95DB4",
-        "async_worker": "0x95B0C write worker; pending path posts event 6",
-        "security_policy": "all 19 WDBIs have SecurityAccess count 0; 18 use policy 0 with effective sessions 2/3, DID 1010 uses policy 1 session 3",
-        "nrcs": "0x13 length; 0x12 subfn/did shape; 0x31 did; 0x33 security",
-        "side_effects": "19-row callback surface is generated separately; includes crypto-test activation and service-mode controls 110A/110C/110D reaching submode 0x520 under runtime gates",
-        "config_tables": f"write-DID table 0x{WRITE_DID_TABLE:X} count {WRITE_DID_COUNT}; callback table 0x25804; data/application_wdbi_surface.csv",
+        "service_callback_role": "direct callback 0x93C62; phase 0=0x93B56, phase 2=0x93BDE",
+        "async_worker": "generic write-record operations via 0x93AF2/0x93A1E/0x9395E -> 0x92A70",
+        "security_policy": "generic DID write capability/session/security policy; not the 19-entry 0x26AEC table",
+        "nrcs": "0x13 length; 0x31 DID/write capability; 0x33 security; configured worker NRC",
+        "side_effects": "writes only DIDs carrying configured write capability in the generic DID model",
+        "config_tables": f"generic DID table 0x{DID_TABLE:X} count {DID_COUNT}; record-operation tables near 0x26210",
         "evidence_status": "recovered",
-        "notes": "Write set is a 19-entry subset (1000..110D class), not the full 242-DID read table; see diagnostics/application-wdbi-surface.md",
+        "notes": "The prior 19-entry WDBI surface was actually RoutineControl RID configuration.",
     },
     0x31: {
-        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
-        "async_worker": "",
-        "security_policy": "none at service level (b10=0)",
-        "nrcs": "shared gate NRC 0x7F when session not allowed",
-        "side_effects": "none from SID dispatch; separate routine worker reaches RID lookup 0x8D3CC but has no stock diagnostic entry",
-        "config_tables": f"routine-ID table 0x{ROUTINE_TABLE:X} count {ROUTINE_COUNT}",
-        "evidence_status": "resolved; simple-response-only (RID worker dormant)",
-        "notes": (
-            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
-            "byte[9]==0 selects simple-response path. SID 0x31 also excluded from subfn "
-            "path by gate check (SID==0x31=ASCII '1'). A separate worker at 0x8A630 "
-            "can reach lookup 0x8D3CC for entries 0..12, but no stock diagnostic path "
-            "reaches that worker. SID 0x31 echoes SID|0x40 without dispatching routines."
-        ),
+        "service_callback_role": "direct callback 0x95DCE; phases 0/2/3 start/cancel/poll via 0x95C8C/0x95D7E/0x95DB4",
+        "async_worker": "0x95B0C configured RoutineControl worker; 19-RID surface at 0x26AEC",
+        "security_policy": "19 RID records have their own policy/session configuration; service outer sessions are 1/2/3",
+        "nrcs": "0x13 length; 0x12 unsupported controlType; 0x31 RID; 0x33 policy/security",
+        "side_effects": "configured RID actions include crypto-test bank activation, key update, lifecycle reinitialization, and service-mode controls",
+        "config_tables": f"RoutineControl RID table 0x{ROUTINE_CONTROL_TABLE:X} count {ROUTINE_CONTROL_COUNT}; callback table 0x25804",
+        "evidence_status": "recovered",
+        "notes": "Request shape is controlType + 16-bit RID. The separate 0x25768 callback table is a distinct dormant/internal routine subsystem.",
     },
     0x34: {
         "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
@@ -257,52 +243,24 @@ SEMANTICS = {
         "notes": "on/off style settings 1 and 2; not bootloader acknowledge-only 85 02",
     },
     0xAB: {
-        "service_callback_role": (
-            "phase_dispatcher 0x8D344 copies request then 0x8D2B2; "
-            "subfn wrappers 0x96A34/0x96A56/0x96A78"
-        ),
-        "async_worker": (
-            "0x96918 shared worker; subfn 1=active-ID list (0 data bytes), "
-            "2=single event query (2-byte ID), 3=event detail query (ID + selector); "
-            "pending 10 posts event 0x16"
-        ),
+        "service_callback_role": "subfunction_table_only; wrappers 0x96A34/0x96A56/0x96A78",
+        "async_worker": "0x96918 shared event-record query worker; pending path posts event 0x16",
         "security_policy": "none at service level; subfn sessions [1,3]",
         "nrcs": "0x13 length; vendor byte from worker",
-        "side_effects": (
-            "absolute mov 0xFEBF48EC; primary mirror at FEBF48EC; secondary at "
-            "FEBF493C via st.w 0x50[r1]; copies 28-byte request context to FEBE5E0C; "
-            "writes query control block at FEBF45D0; lists checkpoint-backed active "
-            "event IDs and reads per-ID state/detail"
-        ),
-        "config_tables": (
-            "subfn 0x25CD0 (01/02/03); event catalogue 0x2AD10; snapshot descriptors "
-            "0x2A504; detail descriptors 0x2AC0C; control block FEBF45D0"
-        ),
+        "side_effects": "lists checkpoint-backed active event IDs and reads per-ID state/detail",
+        "config_tables": "subfn 0x25CD0 (01/02/03); event catalogue 0x2AD10; snapshot/detail descriptors",
         "evidence_status": "recovered",
-        "notes": (
-            "Proprietary asynchronous event-record service. Subfn 1 lists active IDs, "
-            "2 queries one ID, and 3 queries ID detail/snapshot data. Its configured "
-            "indirect closure has 75 snapshot descriptors and six detail descriptors. "
-            "Secondary 0x7A0->0x7A8 endpoint routes through same subfn wrappers; "
-            "its record callback/trailing fields are CAN routing IDs (0x7A1/0x7A0), "
-            "not code pointers. "
-            "Response includes vendor byte from FEBF493C. The RID table at 0x25768 is "
-            "a separate dormant RoutineControl subsystem with no edge from 0xAB."
-        ),
+        "notes": "SID 0xAB does not own callback 0x8D344; 0x8D344 belongs to SID 0xBA.",
     },
     0xBA: {
-        "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
-        "async_worker": "",
-        "security_policy": "none at service level (b10=0)",
-        "nrcs": "shared gate NRC 0x7F outside extended",
-        "side_effects": "none; simple positive response (SID|0x40 + request echo) via 0x8F6FA",
-        "config_tables": "session allow [3] only",
-        "evidence_status": "resolved; simple-response-only",
-        "notes": (
-            "DSP dispatch resolved: start-phase DSP globally disabled (flag @0x25DCC=0), "
-            "byte[9]==0 selects simple-response path. No OEM service handler; "
-            "service echoes positive response without service-specific processing."
-        ),
+        "service_callback_role": "direct callback 0x8D344; phase 0 mirrors request context then enters 0x8D2B2",
+        "async_worker": "0x8D2B2/0x8D32E operation-F1 state machine",
+        "security_policy": "none at service level; extended session only",
+        "nrcs": "worker-defined; OEM semantics not yet assigned",
+        "side_effects": "asynchronous proprietary operation; exact OEM purpose remains open",
+        "config_tables": "runtime service object 0x25FA8",
+        "evidence_status": "structurally recovered; semantics open",
+        "notes": "Previously mislabeled as SID 0xAB event-record callback by the shifted service parser.",
     },
 }
 
@@ -338,16 +296,16 @@ def format_subfunctions(rows: list[dict[str, int | str]]) -> str:
 
 
 def build_rows() -> list[dict[str, str]]:
-    # Sanity: DID/write/routine tables parse cleanly.
+    # Sanity: DID / configured RoutineControl / separate internal routine tables parse cleanly.
     dids = [DID.unpack_from(CF, DID_TABLE + i * DID.size) for i in range(DID_COUNT)]
     if dids[0][0] != 0x0100 or dids[-1][0] != 0xF18C:
         raise SystemExit("DID table bounds mismatch")
-    write_dids = [
-        WRITE_DID.unpack_from(CF, WRITE_DID_TABLE + i * WRITE_DID.size)
-        for i in range(WRITE_DID_COUNT)
+    control_rids = [
+        ROUTINE_CONTROL.unpack_from(CF, ROUTINE_CONTROL_TABLE + i * ROUTINE_CONTROL.size)
+        for i in range(ROUTINE_CONTROL_COUNT)
     ]
-    if write_dids[0][0] != 0x1000 or write_dids[-1][0] != 0x110D:
-        raise SystemExit("write-DID table bounds mismatch")
+    if control_rids[0][0] != 0x1000 or control_rids[-1][0] != 0x110D:
+        raise SystemExit("RoutineControl RID table bounds mismatch")
     routines = [
         ROUTINE.unpack_from(CF, ROUTINE_TABLE + i * ROUTINE.size) for i in range(ROUTINE_COUNT)
     ]
@@ -357,7 +315,7 @@ def build_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     for index in range(SERVICE_COUNT):
         offset = SERVICE_TABLE + index * SERVICE.size
-        session_ptr, subfn_ptr, sid, has_subfn, sec_count, session_count, subfn_count, callback, word4 = (
+        callback, security_ptr, session_ptr, subfn_ptr, sid, has_subfn, sec_count, session_count, subfn_count = (
             SERVICE.unpack_from(CF, offset)
         )
         sessions = list(CF[session_ptr : session_ptr + session_count])
@@ -386,15 +344,15 @@ def build_rows() -> list[dict[str, str]]:
                 "nrcs": sem["nrcs"],
                 "side_effects": sem["side_effects"],
                 "config_tables": sem["config_tables"],
-                "trailing_word": f"0x{word4:X}",
+                "security_allow_ptr": f"0x{security_ptr:X}" if security_ptr else "",
                 "evidence_status": sem["evidence_status"],
                 "notes": sem["notes"],
                 "did_table_addr": f"0x{DID_TABLE:X}" if sid in (0x22,) else "",
                 "did_table_count": str(DID_COUNT) if sid in (0x22,) else "",
-                "write_did_table_addr": f"0x{WRITE_DID_TABLE:X}" if sid in (0x2E,) else "",
-                "write_did_table_count": str(WRITE_DID_COUNT) if sid in (0x2E,) else "",
-                "routine_table_addr": f"0x{ROUTINE_TABLE:X}" if sid in (0x31, 0xAB) else "",
-                "routine_table_count": str(ROUTINE_COUNT) if sid in (0x31, 0xAB) else "",
+                "routine_control_table_addr": f"0x{ROUTINE_CONTROL_TABLE:X}" if sid == 0x31 else "",
+                "routine_control_table_count": str(ROUTINE_CONTROL_COUNT) if sid == 0x31 else "",
+                "internal_routine_table_addr": f"0x{ROUTINE_TABLE:X}" if sid == 0x31 else "",
+                "internal_routine_table_count": str(ROUTINE_COUNT) if sid == 0x31 else "",
             }
         )
     return rows

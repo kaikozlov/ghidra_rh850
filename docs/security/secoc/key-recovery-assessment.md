@@ -369,12 +369,12 @@ than left open:
   completion without delivering the specified output blocks is outside the
   static software model. Canonical: [software-path-assessment.md](software-path-assessment.md).
 - **Command-5 test activation (corrected 2026-08-13):** the earlier direct-pointer
-  census missed a one-hop stock diagnostic edge. Application WDBI DID `0x100F`
-  selector 1 points to wrapper `0x8A782`, whose call at `0x8A786` directly invokes
+  census missed a one-hop stock diagnostic edge. Application RoutineControl RID `0x100F`
+  startRoutine points to wrapper `0x8A782`, whose call at `0x8A786` directly invokes
   `crypto_test_bank1_activate @ 0x69018`. The selector consumes zero data fields;
   policy 0 has no SecurityAccess-level entries and allows session records 1/2/3,
   while the outer SID-`0x2E` gate permits programming/extended. Thus
-  `2E 01 10 0F` arms bank 1 in stock application diagnostics. CAN
+  `31 01 10 0F` arms bank 1 in stock application diagnostics, including default session. CAN
   `0x01B..0x01F` still cannot arm it alone. Startup clears `FEBE508F`, while the
   finalizer leaves a terminal state, so a fresh application boot is required for
   a deterministic repeat.
@@ -732,7 +732,7 @@ recovery. A changed slot-4 key is rekeying, not recovery of the original.
 | all nine application `ICUSCMD` writers are accounted for | **verified** | firmware-static/test |
 | no stock application writer invokes command 13 or persistent-slot plaintext export | **verified, scoped to this image** | firmware-static/test |
 | accepted 4 KiB bootloader payloads provide a constructible callback and existing CAN transport with more than `0xE00` bytes spare | **verified** | firmware-static/fixtures/test |
-| application SIDs `0x23/0x34/0x36/0x37` are null-callback responses and WDBI input sizing is exact (maximum 67-byte request) | **verified, scoped to this image** | firmware-static/test |
+| application SID `0x23` is a verified bounded RMBA disclosure; SIDs `0x34/0x36/0x37` remain null direct callbacks; RoutineControl sizing is exact (maximum 67 bytes after SID) | **verified, scoped to this image** | firmware-static/test |
 | command-5 preserves selector plumbing for a candidate command-ID substitution; DID `0x1010` preserves output transport but has fixed command-8 block shape and no selector | **verified structure; untested patch** | firmware-static/test |
 | command 13's exact Renesas operation, selector semantics, and output format | **unknown** | restricted manual or bench required |
 | an internal slot-4-to-`RAM_KEY` copy/alias exists | **unknown; not disproved** | restricted manual or bench required |

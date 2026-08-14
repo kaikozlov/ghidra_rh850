@@ -43,17 +43,17 @@ public class AnnotateSecocApplication extends GhidraScript {
         rename(0x68F0CL,"crypto_test_bank0_update_counter_snapshot",
             "Snapshot the eight COM update counters used by crypto-test bank 0.");
         rename(0x68F92L,"crypto_test_bank0_activate",
-            "Crypto-test bank-0 activator. Application WDBI DID 0x100E reaches it through action wrapper 0x8A774; it initializes state and update-counter snapshots.");
+            "Crypto-test bank-0 activator. Application RoutineControl RID 0x100E startRoutine reaches it through action wrapper 0x8A774; it initializes state and update-counter snapshots.");
         rename(0x68FC2L,"crypto_test_bank1_update_counter_snapshot",
             "Snapshot the five COM update counters for CAN 0x01B..0x01F before crypto-test bank 1 begins.");
         rename(0x69018L,"crypto_test_bank1_activate",
-            "Crypto-test bank-1 activator reached by application WDBI DID 0x100F through action wrapper 0x8A782. It sets FEBE508F=1, initializes state 0x11, clears bank RAM, and snapshots CAN 0x01B..0x01F update counters.");
+            "Crypto-test bank-1 activator reached by application RoutineControl RID 0x100F startRoutine through action wrapper 0x8A782. It sets FEBE508F=1, initializes state 0x11, clears bank RAM, and snapshots CAN 0x01B..0x01F update counters.");
         rename(0x69068L,"icus_command5_test_result_compare",
             "Compare all 16 command-5 output bytes at FEBE51AA with the expected bytes at FEBE518A; return 0x33 on equality and 0x44 on mismatch.");
         rename(0x68E16L,"icus_key_update_diagnostic_start",
-            "Selector-1 diagnostic start: accept the fixed 64-byte command-8 envelope, report status 0x01, clear the 48-byte result bank, and arm key-update state 0x22. A second start while pending returns internal result 8.");
+            "RoutineControl control-type-1 diagnostic start: accept the fixed 64-byte command-8 envelope, report status 0x01, clear the 48-byte result bank, and arm key-update state 0x22. A second start while pending returns internal result 8.");
         rename(0x68EA8L,"icus_key_update_diagnostic_read_result",
-            "Selector-3 diagnostic result read: return status 0x01/0x02/0xFF and 48 bytes from FEBE523A only for 0x02; zero-fill otherwise and clear request/result banks after terminal 0x02 or 0xFF is read.");
+            "RoutineControl control-type-3 diagnostic result read: return status 0x01/0x02/0xFF and 48 bytes from FEBE523A only for 0x02; zero-fill otherwise and clear request/result banks after terminal 0x02 or 0xFF is read.");
         rename(0x6823CL,"icus_key_update_submit",
             "Submit the 64-byte diagnostic key-update envelope through driver record 0 and provide a 48-byte result buffer. Success advances the state from 0x22 to 0x33 while completion is pending.");
         rename(0x6920AL,"icus_key_update_completion_callback",
@@ -174,29 +174,29 @@ public class AnnotateSecocApplication extends GhidraScript {
         rename(0x88C4CL,"crypto_icus_initialize",
             "Application startup initializer for the generated crypto stack and ICU-S lower driver.");
         rename(0x8A6C8L,"icus_key_update_operation_reset",
-            "Reset the generated DID-1010 operation wrapper and clear its request/result scratch banks.");
+            "Reset the generated RID-1010 operation wrapper and clear its request/result scratch banks.");
         rename(0x8A860L,"icus_key_update_result_read_wrapper",
-            "Generated selector-3 wrapper: request 49 status/result bytes from 0x68EA8 and copy them to the Dcm output field.");
+            "Generated RoutineControl result wrapper: request 49 status/result bytes from 0x68EA8 and copy them to the Dcm output field.");
         rename(0x8A93CL,"icus_key_update_result_operation",
-            "Run the selector-3 result-read wrapper and translate generated operation results to the application Dcm return/NRC convention.");
+            "Run the RoutineControl result-read wrapper and translate generated operation results to the application Dcm return/NRC convention.");
         rename(0x8AA1EL,"icus_key_update_start_wrapper",
-            "Generated selector-1 wrapper: clamp input/output to 64/49 bytes, invoke 0x68E16, and copy its immediate status/result field to Dcm.");
+            "Generated RoutineControl start wrapper: clamp input/output to 64/49 bytes, invoke 0x68E16, and copy its immediate status/result field to Dcm.");
         rename(0x8AB5AL,"icus_key_update_start_operation",
-            "Run the selector-1 start wrapper after generated readiness handling and translate its result to Dcm return/NRC convention.");
-        rename(0x955DCL,"application_wdbi_selector_supported",
-            "Validate OEM WDBI selector 1, 2, or 3 against the selected DID's generated configuration.");
-        rename(0x95624L,"application_wdbi_input_length_invalid",
-            "Compute the configured selector/DID input-field width plus the three-byte selector/DID header and reject unequal request length.");
-        rename(0x956C6L,"application_wdbi_output_capacity_invalid",
-            "Compute the configured selector/DID output-field width plus the three-byte selector/DID header and reject insufficient response capacity.");
-        rename(0x95F82L,"application_wdbi_1010_read_result",
-            "Selector-3 DID-1010 callback. Request exactly 49 bytes from the key-update status/result operation; non-start phases reset the generated wrapper.");
-        rename(0x96354L,"application_wdbi_1010_start_key_update",
-            "Selector-1 DID-1010 callback. Submit exactly 64 M1/M2/M3 bytes and return a 49-byte status/result field; non-start phases reset the generated wrapper.");
-        rename(0x965CEL,"application_wdbi_selector3_dispatch",
-            "Dispatch OEM WDBI selector 3 callbacks by write-DID table index; entry 9 routes to the DID-1010 status/result read.");
-        rename(0x96764L,"application_wdbi_selector1_dispatch",
-            "Dispatch OEM WDBI selector 1 callbacks by write-DID table index; entry 9 routes to the DID-1010 authenticated key-update start.");
+            "Run the RoutineControl start wrapper after generated readiness handling and translate its result to Dcm return/NRC convention.");
+        rename(0x955DCL,"application_routine_control_type_supported",
+            "Validate RoutineControl control type 1, 2, or 3 against the selected RID's generated configuration.");
+        rename(0x95624L,"application_routine_control_input_length_invalid",
+            "Compute the configured control-type/RID input-field width plus the three-byte control-type/RID header and reject unequal request length.");
+        rename(0x956C6L,"application_routine_control_output_capacity_invalid",
+            "Compute the configured control-type/RID output-field width plus the three-byte control-type/RID header and reject insufficient response capacity.");
+        rename(0x95F82L,"application_routine_control_1010_read_result",
+            "RoutineControl control-type-3 RID-1010 callback. Request exactly 49 bytes from the key-update status/result operation; non-start phases reset the generated wrapper.");
+        rename(0x96354L,"application_routine_control_1010_start_key_update",
+            "RoutineControl control-type-1 RID-1010 callback. Submit exactly 64 M1/M2/M3 bytes and return a 49-byte status/result field; non-start phases reset the generated wrapper.");
+        rename(0x965CEL,"application_routine_control_type3_dispatch",
+            "Dispatch RoutineControl control type 3 callbacks by RoutineControl RID table index; entry 9 routes to the RID-1010 status/result read.");
+        rename(0x96764L,"application_routine_control_type1_dispatch",
+            "Dispatch RoutineControl control type 1 callbacks by RoutineControl RID table index; entry 9 routes to the RID-1010 authenticated key-update start.");
 
         rename(0x87ED0L,"icus_cmac_verify_prepare",
             "Prepare ICU-S CMAC verification: copy message/tag, retain bit lengths, and read the key-slot selector from config+4.");
@@ -248,14 +248,14 @@ public class AnnotateSecocApplication extends GhidraScript {
             "Command-5 lower-driver record 1: application-test callback 0x6926A, adapter 0x87CCC, worker 0x87DD0.");
         label(0x28024L,"icus_key_update_driver_record",
             "Command-8 record ID 0: completion callback 0x6920A, lower adapter 0x870A8, completion worker 0x871A0, state root 0x28020.");
-        label(0x26B34L,"application_wdbi_1010_record",
-            "Enabled application WriteDataByIdentifier record for DID 0x1010. Extended session 0x03, no Dcm SecurityAccess level; selector 1 starts and selector 3 reads status/result.");
-        label(0x2670CL,"application_wdbi_1010_selector3_output",
-            "Selector-3 DID-1010 output descriptor: one 392-bit (49-byte) status/result field.");
-        label(0x26790L,"application_wdbi_1010_selector1_input",
-            "Selector-1 DID-1010 input descriptor: one 512-bit (64-byte) M1/M2/M3 field.");
-        label(0x267B4L,"application_wdbi_1010_selector1_output",
-            "Selector-1 DID-1010 output descriptor: one 392-bit (49-byte) immediate status/result field.");
+        label(0x26B34L,"application_routine_control_1010_record",
+            "Enabled application RoutineControl record for RID 0x1010. Extended session 0x03, no Dcm SecurityAccess level; control type 1 starts and control type 3 reads status/result.");
+        label(0x2670CL,"application_routine_control_1010_type3_output",
+            "RoutineControl control-type-3 RID-1010 output descriptor: one 392-bit (49-byte) status/result field.");
+        label(0x26790L,"application_routine_control_1010_type1_input",
+            "RoutineControl control-type-1 RID-1010 input descriptor: one 512-bit (64-byte) M1/M2/M3 field.");
+        label(0x267B4L,"application_routine_control_1010_type1_output",
+            "RoutineControl control-type-1 RID-1010 output descriptor: one 392-bit (49-byte) immediate status/result field.");
         label(0xFEBE51BAL,"icus_key_update_m1_m2_m3",
             "Sixty-four-byte diagnostic command-8 input bank, staged as 16+32+16 bytes (SHE-compatible M1/M2/M3 shape).");
         label(0xFEBE523AL,"icus_key_update_m4_m5",
@@ -265,7 +265,7 @@ public class AnnotateSecocApplication extends GhidraScript {
         label(0x25912L,"crypto_test_bank1_signal_ids",
             "Signal IDs 95..100: two scalar selector/mode inputs followed by four opaque eight-byte input/expected-result groups.");
         label(0xFEBE508FL,"crypto_test_bank1_active",
-            "Crypto-test bank-1 activation state. Activator 0x69018 writes value 1 and is reachable from application WDBI DID 0x100F via wrapper 0x8A782.");
+            "Crypto-test bank-1 activation state. Activator 0x69018 writes value 1 and is reachable from application RoutineControl RID 0x100F via startRoutine wrapper 0x8A782.");
         label(0xFEBE5090L,"crypto_test_bank1_state",
             "Crypto-test bank-1 state/result byte: collect 0x11, submit 0x22, success 0x33, failure 0x44.");
         label(0xFEBE5098L,"crypto_test_runtime_key_selector",

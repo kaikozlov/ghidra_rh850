@@ -57,20 +57,20 @@ check(
     and CF[0x89150:0x89154] == bytes.fromhex("e00f4bb2"),
 )
 
-print("\n== WDBI DID 0x1010 reachability and policy ==")
-WRITE_DID = struct.Struct("<HBBI")
+print("\n== RoutineControl RID 0x1010 reachability and policy ==")
+ROUTINE_RID = struct.Struct("<HBBI")
 write_rows = [
-    WRITE_DID.unpack_from(CF, 0x26AEC + index * WRITE_DID.size)
+    ROUTINE_RID.unpack_from(CF, 0x26AEC + index * ROUTINE_RID.size)
     for index in range(0x13)
 ]
-did_1010 = write_rows[9]
+rid_1010 = write_rows[9]
 check(
-    "write-DID entry 9 is enabled DID 0x1010",
-    did_1010 == (0x1010, 0, 1, 0x26680),
-    repr(did_1010),
+    "RoutineControl entry 9 is enabled RID 0x1010",
+    rid_1010 == (0x1010, 0, 1, 0x26680),
+    repr(rid_1010),
 )
 check(
-    "DID 0x1010 selects policy index 1",
+    "RID 0x1010 selects policy index 1",
     u16(0x26690 + 9 * 2) == 1,
     hex(u16(0x26690 + 9 * 2)),
 )
@@ -89,44 +89,44 @@ session_record = u32(session_list)
 check("policy 1 session list is structurally valid", session_list == 0x263B4)
 check("policy 1 resolves to session record 0x2630A", session_record == 0x2630A)
 check(
-    "DID 0x1010 requires extended session 0x03",
+    "RID 0x1010 requires extended session 0x03",
     CF[session_record + 1] == 3,
     hex(CF[session_record + 1]),
 )
 check(
-    "DID 0x1010 callback fixes 64 input and 49 status/result bytes",
+    "RID 0x1010 callback fixes 64 input and 49 status/result bytes",
     CF[0x96360:0x96368] == bytes.fromhex("203e4000204e3100"),
     CF[0x96360:0x96368].hex(),
 )
 check(
-    "application service table binds SID 0x2E to callback 0x95DCE",
-    CF[0x25EF8] == 0x2E and u32(0x25F00) == 0x95DCE,
+    "runtime service object binds SID 0x31 to callback 0x95DCE",
+    CF[0x25F10] == 0x31 and u32(0x25F00) == 0x95DCE,
 )
-did_config = CF[0x26B8D + 9 * 15 : 0x26B8D + 10 * 15]
+rid_config = CF[0x26B8D + 9 * 15 : 0x26B8D + 10 * 15]
 check(
-    "DID 0x1010 enables selector 1 with one input and one output field",
-    did_config[4] == 1 and did_config[6] == 1 and did_config[8] == 1,
-    did_config.hex(),
-)
-check(
-    "DID 0x1010 enables selector 3 with one output field",
-    did_config[1] == 1 and did_config[3] == 1,
-    did_config.hex(),
+    "RID 0x1010 enables control type 1 with one input and one output field",
+    rid_config[4] == 1 and rid_config[6] == 1 and rid_config[8] == 1,
+    rid_config.hex(),
 )
 check(
-    "selector-1 input descriptor is one 512-bit byte-array field",
+    "RID 0x1010 enables control type 3 with one output field",
+    rid_config[1] == 1 and rid_config[3] == 1,
+    rid_config.hex(),
+)
+check(
+    "control-type-1 input descriptor is one 512-bit byte-array field",
     u32(0x2686C + 9 * 4) == 0x26790
     and CF[0x26791] == 7
     and u16(0x26792) == 512,
 )
 check(
-    "selector-1 output descriptor is one 392-bit byte-array field",
+    "control-type-1 output descriptor is one 392-bit byte-array field",
     u32(0x268BC + 9 * 4) == 0x267B4
     and CF[0x267B5] == 7
     and u16(0x267B6) == 392,
 )
 check(
-    "selector-3 output descriptor is the same 392-bit status/result shape",
+    "control-type-3 output descriptor is the same 392-bit status/result shape",
     u32(0x267CC + 9 * 4) == 0x2670C
     and CF[0x2670D] == 7
     and u16(0x2670E) == 392,

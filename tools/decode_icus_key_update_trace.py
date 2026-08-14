@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Decode the application DID 0x1010 ICU-S key-update exchange from candump.
+"""Decode the application RoutineControl RID 0x1010 ICU-S key-update exchange from candump.
 
-The application uses an OEM selector byte inside service 0x2E:
+The application uses standard RoutineControl framing on service 0x31:
 
-    2E 01 10 10 || M1[16] || M2[32] || M3[16]   start
-    2E 03 10 10                                  read status/result
+    31 01 10 10 || M1[16] || M2[32] || M3[16]   startRoutine
+    31 03 10 10                                  requestRoutineResults
 
-Positive replies carry the selector, DID, a one-byte status, and 48 result
+Positive replies carry the control type, RID, a one-byte status, and 48 result
 bytes.  The decoder is passive: it reassembles ISO-TP and never transmits.
 Package bytes are hashed by default because captures are vehicle-specific.
 Use --show-package only when the output can be handled as sensitive material.
@@ -25,7 +25,7 @@ from pathlib import Path
 
 REQUEST_ID = 0x7A1
 RESPONSE_ID = 0x7A9
-DID = 0x1010
+RID = 0x1010
 
 STATUS_NAMES = {
     0x01: "pending",
@@ -200,27 +200,27 @@ def decode_uds(
             "uds_length": len(pdu),
         }
 
-    if can_id == response_id and len(pdu) >= 3 and pdu[:2] == b"\x7f\x2e":
+    if can_id == response_id and len(pdu) >= 3 and pdu[:2] == b"\x7f\x31":
         nrc = pdu[2]
         return {
             "event": "key_update_negative",
-            "request_sid": 0x2E,
+            "request_sid": 0x31,
             "nrc": nrc,
             "nrc_name": NRC_NAMES.get(nrc, "unknown"),
             "uds_length": len(pdu),
         }
 
-    if can_id == request_id and pdu[0] == 0x2E:
-        if len(pdu) < 4 or int.from_bytes(pdu[2:4], "big") != DID:
+    if can_id == request_id and pdu[0] == 0x31:
+        if len(pdu) < 4 or int.from_bytes(pdu[2:4], "big") != RID:
             return None
-        selector = pdu[1] & 0x7F
+        control_type = pdu[1] & 0x7F
         common: dict[str, object] = {
-            "selector": selector,
+            "control_type": control_type,
             "suppress_positive_response": bool(pdu[1] & 0x80),
-            "did": f"0x{DID:04X}",
+            "rid": f"0x{RID:04X}",
             "uds_length": len(pdu),
         }
-        if selector == 1:
+        if control_type == 1:
             event = {"event": "key_update_start", **common}
             package = pdu[4:]
             event["valid_length"] = len(package) == 64
@@ -233,28 +233,28 @@ def decode_uds(
                 _component(event, "m2", m2, show_package)
                 _component(event, "m3", m3, show_package)
             return event
-        if selector == 3:
+        if control_type == 3:
             return {
                 "event": "key_update_result_request",
                 **common,
                 "valid_length": len(pdu) == 4,
             }
-        return {"event": "key_update_unknown_selector", **common}
+        return {"event": "key_update_unknown_control_type", **common}
 
-    if can_id == response_id and pdu[0] == 0x6E:
-        if len(pdu) < 4 or int.from_bytes(pdu[2:4], "big") != DID:
+    if can_id == response_id and pdu[0] == 0x71:
+        if len(pdu) < 4 or int.from_bytes(pdu[2:4], "big") != RID:
             return None
-        selector = pdu[1] & 0x7F
+        control_type = pdu[1] & 0x7F
         event = {
             "event": (
                 "key_update_start_positive"
-                if selector == 1
+                if control_type == 1
                 else "key_update_result_positive"
-                if selector == 3
-                else "key_update_positive_unknown_selector"
+                if control_type == 3
+                else "key_update_positive_unknown_control_type"
             ),
-            "selector": selector,
-            "did": f"0x{DID:04X}",
+            "control_type": control_type,
+            "rid": f"0x{RID:04X}",
             "uds_length": len(pdu),
             "valid_length": len(pdu) == 53,
         }
@@ -325,7 +325,7 @@ def _human(event: dict[str, object]) -> str:
     details: list[str] = []
     for key in (
         "session",
-        "selector",
+        "control_type",
         "target_slot",
         "auth_slot",
         "status_name",

@@ -102,15 +102,26 @@ paths = [
   "tools/generate_application_diagnostic_map.py",
 ]
 
-[suite.application_wdbi_surface]
-tests = ["tests/verify_application_wdbi_surface.py"]
+[suite.application_routine_control_surface]
+tests = ["tests/verify_application_routine_control_surface.py"]
 paths = [
-  "docs/diagnostics/application-wdbi-surface.md",
+  "docs/diagnostics/application-routine-control-surface.md",
   "docs/diagnostics/application.md",
   "docs/security/application-security-access.md",
-  "data/application_wdbi_surface.csv",
-  "tools/generate_application_wdbi_surface.py",
+  "data/application_routine_control_surface.csv",
+  "tools/generate_application_routine_control_surface.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+]
+
+[suite.application_read_memory_by_address]
+tests = ["tests/verify_application_read_memory_by_address.py"]
+paths = [
+  "tests/verify_application_read_memory_by_address.py",
+  "docs/diagnostics/application.md",
+  "docs/security/secoc/software-path-assessment.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "exploit/followups/application_rmba_probe.py",
 ]
 
 [suite.diagnostic_vocabulary]

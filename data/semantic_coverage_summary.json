@@ -10,8 +10,8 @@
   "discovery_source_counts": {
     "auto-analysis": 5262,
     "callback-table seed": 91,
-    "direct-call seed": 155,
-    "manual/other": 758,
+    "direct-call seed": 153,
+    "manual/other": 760,
     "vector seed": 22
   },
   "evidence_grade_counts": {

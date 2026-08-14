@@ -223,13 +223,15 @@ public class AssertProjectInvariants extends GhidraScript {
         requireFunction(0x70d4L, "payload_crypto_initialize");
 
         // Stage-2 application UDS landmarks (stable subset of the 17-SID map).
-        requireFunction(0x8b1f0L, "application_ecu_reset_callback");
-        requireFunction(0x948aaL, "application_rdbi_callback");
+        requireFunction(0x8b1f0L, "application_clear_diagnostic_information_callback");
+        requireFunction(0x945dcL, "application_rdbi_callback");
+        requireFunction(0x948aaL, "application_read_memory_by_address_callback");
         requireFunction(0x94e32L, "application_security_access_subfunction_01");
-        requireFunction(0x95dceL, "application_wdbi_callback");
-        requireFunction(0x8d344L, "application_proprietary_ab_callback");
+        requireFunction(0x93c62L, "application_wdbi_callback");
+        requireFunction(0x95dceL, "application_routine_control_callback");
+        requireFunction(0x8d344L, "application_proprietary_ba_callback");
         requireLabel(0x2941cL, "application_did_table");
-        requireLabel(0x26aecl, "application_write_did_table");
+        requireLabel(0x26aecl, "application_routine_control_rid_table");
         requireLabel(0x25768L, "application_routine_id_table");
 
         // Stage-3 application receive landmarks.
