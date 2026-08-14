@@ -332,14 +332,18 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   synchronized labeled captures above. Use the redacted manifest schema in
   [../variants/newer-tsk-target-evidence.md](../variants/newer-tsk-target-evidence.md);
   until then every Sienna→newer-TSK transfer remains hypothesis.
-- **Application WDBI `2012/2013/2014` physical consequence.** Static recovery
-  proves that extended-session SID `0x2E` reaches these live application state
-  variables without SecurityAccess; `2012` additionally lacks both a local
-  vehicle-speed gate and an extended-session-entry speed gate. The exact effect
-  on steering/control behavior is not yet established. Any dynamic validation
-  must be isolated-bench only, start from read-only state capture, exercise one
-  DID/value at a time, and prove reset/session recovery before broader testing.
-  Do not treat the static state joins as a steering-control claim.
+- **Application WDBI `2012` hardware-visible lifecycle-inhibit consequence.**
+  Static recovery now closes the software cone: after the scaled-supply snapshot
+  reaches `0x0900`, `2012` suppresses the mode-specific transition block that
+  normally performs task-signal clearing / NvM default-reset actions, and it
+  also clears an alternate rotor-observer calibration selector. The remaining
+  unknown is what observable EPS behavior this inhibit produces on an isolated
+  matching bench and how it recovers across session exit/reset. Static closure
+  has no direct d/q/PWM join, so do not describe it as steering-current control.
+- **Application WDBI `2013/2014` physical consequence.** Both are SecurityAccess-
+  free but retain vehicle-speed plus additional state gates. `2013` writes live
+  16-bit control parameter `FEBEB434`; `2014` writes mode flag `FEBEB3EE`.
+  Their downstream control cones remain to be closed before any dynamic test.
 - **Application CommunicationControl live effect.** Static recovery proves that
   extended-session SID `0x28` reaches real communication-mode updates without a
   configured SecurityAccess policy or recovered speed gate. The isolated-bench

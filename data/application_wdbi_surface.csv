@@ -9,6 +9,6 @@ did,payload_len,start_callback,result_callback,sessions,security_access_required
 0x2009,1,0x4EE54,0x4EE68,"2,3",0,1,,persistent_nvm_state,0x103,"FEBEB2D6=0x11; selector=7; value=payload","arms object-0x103 selected-byte update"
 0x200D,1,0x4EEA6,0x4EEBA,"2,3",0,1,,persistent_nvm_state,0x103,"FEBEB2D6=0x11; selector=8; value=payload","arms object-0x103 selected-byte update"
 0x2010,1,0x4EEF0,0x4EF04,"2,3",0,1,,runtime_command_state,,"FEBEB48E=0x44; FEBEB49C/FEBEB4A0=encoded payload","live state block; no direct NvM-object update join recovered"
-0x2012,1,0x4EF4A,0x4EF4E,"2,3",0,0,,live_override_flag,,"payload 0x01 -> FEBEB18F=0x5A","sole implemented WDBI with no vehicle-speed gate; flag has multiple operational consumers"
+0x2012,1,0x4EF4A,0x4EF4E,"2,3",0,0,,lifecycle_inhibit,,"payload 0x01 -> FEBEB18F=0x5A","sole implemented WDBI with no vehicle-speed gate; supply>=0x0900 promotes logical transition mask bit 0x08, whose XOR-0xAA encoded copy clears FEBEB18E bit3 and skips the mode-specific lifecycle block; also clears alternate rotor-observer selector via FEBEB192/FEBEB1D1"
 0x2013,2,0x4EF68,0x4EF90,"2,3",0,1,"FEBE807B==0 and FEBE8076==0",live_control_parameter,,"FEBEB434=payload_be16","feeds B763C/B750E control calculation and application input snapshot"
 0x2014,1,0x4EFAC,0x4EFD4,"2,3",0,1,"FEBE807B==0 and FEBE8076==0",live_control_mode,,"payload 0/1 -> FEBEB3EE=0/0x5A","feeds B692C/B70D0 threshold/state gating and application input snapshot"

@@ -402,7 +402,7 @@ has **zero SecurityAccess levels**. The 13 implemented DIDs divide as follows:
 | `2005/2006/2007/2008/2009/200D` | vehicle speed | arm selected-byte updates under NvM object `0x103` |
 | `0204` | vehicle speed | queues shared asynchronous diagnostic state `0x2E10` |
 | `2010` | vehicle speed | updates live runtime command-state block `FEBEB48E/49C/4A0` |
-| `2012` | **none** | payload `01` sets live override flag `FEBEB18F = 0x5A` |
+| `2012` | **none** | payload `01` sets `FEBEB18F = 0x5A`; supply-qualified logical transition bit `0x08` inhibits a mode-specific lifecycle block and clears the alternate rotor-observer calibration selector |
 | `2013` | vehicle speed + two state flags clear | writes 16-bit live control parameter `FEBEB434` |
 | `2014` | vehicle speed + two state flags clear | writes live mode flag `FEBEB3EE = 0/0x5A` |
 
@@ -413,10 +413,53 @@ case: its start callback at `0x4EF4A` is unconditional, while session-transition
 policy `0x4C942` applies the vehicle-speed limit only to requested session `02`,
 not extended session `03`. Thus the static path `10 03` followed by
 `2E 20 12 01` requires neither SecurityAccess nor a recovered vehicle-speed
-gate. `FEBEB18F` is read by multiple operational state machines and the input
-snapshot; the exact physical consequence of toggling it remains a separate
-hardware/control-cone question and is not promoted beyond that proven state
-boundary. The complete matrix is `data/application_wdbi_surface.csv`.
+gate. The complete matrix is `data/application_wdbi_surface.csv`.
+
+#### DID `2012`: supply-qualified transition/lifecycle inhibit
+
+The `2012` control cone is now bounded past the first live flag. `B2642` reads
+`FEBEB18F` together with a snapshot at `FEBEB084`. That snapshot is copied from
+`FEBEEE20`, whose producer `0x56E4E` reads `FEBE7D52`; the same upstream word is
+independently staged by `rte_input_staging_copy_a` into typed RAM field
+`application_supply_value_raw @ FEBE6692`. When this value reaches calibration
+`AEF10 = 0x0900`, `FEBEB18F == 0x5A` is one of the conditions that forces logical
+transition-mask bit `0x08`.
+
+The shared triplet encoder `0xCCFCE` does **not** store that logical mask directly
+in `FEBEB18E`: the third redundant copy is `mask ^ 0xAA`. Consequently logical
+bit `0x08 = 1` clears physical bit 3 in `FEBEB18E`. In the same per-tick system
+mode dispatcher, `B2642` runs immediately before
+`application_system_transition_phase_step @ 0xB2912`. That worker reads
+`FEBEB18E`, shifts right by four, and branches on carry; a cleared encoded bit 3
+takes the `bnc` path past the mode-specific lifecycle block. Thus DID `2012`
+**inhibits** that transition block under the supply qualifier rather than
+triggering it.
+
+The skipped block is operationally meaningful. If entered normally it performs:
+
+- mode `0x500`: clear shared task/signal-vector slots 0 and 1, submit NvM/default
+  paths for objects `5`, `6`, `9`, and conditionally `8`, then set transition
+  phase `0x11`;
+- mode `0x300`: submit objects `5`, `6`, conditionally `8`, and raise system-mode
+  event `0x23`;
+- mode `0x400`: set transition phase `0x11`.
+
+There is a separate calibration-state branch. Under the same supply qualifier,
+`B24BE` can set `FEBEB192=0x5A` from `FEBEB18F`; `B30E0` then conditionally
+forces outgoing `FEBEB1D1` to zero. `motor_rotor_observer_calib_handler` uses
+`FEBEB1D1==0x5A` to choose alternate observer coefficients, so `2012` disables
+that alternate selector. The observer publishes its indexed result through
+`B8E0C` to `FEBEB54C`; the exact project xref topology for `FEBEB54C` contains
+only init/snapshot consumers.
+
+This is an unauthenticated **operational lifecycle/transition inhibit plus
+calibration-mode normalization**, not a recovered steering-current command.
+Exact xref closure for `FEBEB18F`, `18E`, `192`, `1D1`, `54C`, and the shared
+signal vector is pinned, and the lifecycle/calibration functions have no direct
+reference or call edge into the independently proved d/q-reference → current-PI
+→ TSG3 PWM boundary. That is a bounded graph negative, not a statement that the
+vehicle has no observable effect. Hardware characterization of the inhibit
+remains open.
 
 The 19-entry table at `0x26AEC` belongs to SID `0x31` RoutineControl. Direct
 callback `0x95DCE` uses `0x95C8C/0x95D7E/0x95DB4` for start/cancel/poll.

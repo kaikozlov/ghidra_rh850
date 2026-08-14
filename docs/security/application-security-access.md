@@ -289,9 +289,17 @@ authorization:
   starts have a vehicle-speed gate. DID `2012` is the exception: its start
   callback is unconditional, payload `01` sets `FEBEB18F=0x5A`, and extended
   session entry itself is not speed-gated because `0x4C942` checks speed only
-  for requested programming session `02`. Its multiple operational consumers
-  establish a live override/state boundary, but not yet a physical steering
-  effect. See `data/application_wdbi_surface.csv` and
+  for requested programming session `02`. The downstream effect is now bounded:
+  once the shared scaled-supply source reaches `0x0900`, `2012` forces logical
+  transition-mask bit `0x08`; redundant encoding `mask^0xAA` clears physical
+  bit 3 in `FEBEB18E`, and the same-tick transition worker takes `bnc` past the
+  mode-specific lifecycle block. That inhibits the block that otherwise clears
+  task/signal slots and submits object `5/6/8/9` reset/default NvM actions in
+  modes `0x300/0x500` or advances phase in `0x400`. Separately, `2012` can force
+  `FEBEB192=0x5A`, which causes `B30E0` to clear the alternate rotor-observer
+  selector `FEBEB1D1`. Exact xref closure keeps both branches outside the direct
+  d/q-reference/current-PI/TSG3-PWM producer set. See
+  `data/application_wdbi_surface.csv` and
   [../diagnostics/application.md](../diagnostics/application.md).
 - **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB` exposes event-record list/state/detail reads through subfunction workers; the recovered graph does not perform the formerly hypothesized motor-control, calibration, flash, or provisioning writes. SID `0xBA` separately owns callback `0x8D344` and the bounded operation-F1 path; its OEM purpose remains open.
 
