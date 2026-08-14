@@ -1,4 +1,4 @@
-rid,start_cb,result_cb,start_size_bytes,result_size_bytes,call_targets,evidence
+did,start_cb,result_cb,start_size_bytes,result_size_bytes,call_targets,evidence
 0x0204,0x4EC16,0x4EC2A,20,28,none,vehicle-speed gate (ld.hu 0x3092[gp]); no recovered persistence path
 0x2001,0x4EC46,0x4EC78,20,68,0x4EC68;0xFE04C;0xFE060,result conditionally reaches B47A6 and arms namespace-0x100 object 0x101 persistence
 0x2002,0x4ECBC,0x4ECD0,20,76,0x4EC68;0xFDE58,vehicle-speed-gated result reaches B5D0C and arms namespace-0x100 object 0x102 persistence

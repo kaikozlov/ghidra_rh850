@@ -52,7 +52,8 @@ check both files.
 | Artifact | Contents | Verified by |
 |---|---|---|
 | `data/application_security_consumers.csv` | Application security-consumer scan results backing the "no configured gating" finding | `tests/verify_security_consumers.py` |
-| `data/application_routine_id_callbacks.csv` | The 13-entry stock-gated control-ID subset, direct-target census, and state-mediated object-`0x101/102/103` persistence boundary; distinct from SID `0xAB` | `tests/verify_application_routine_id_callbacks.py` |
+| `data/application_wdbi_callbacks.csv` | The 13-entry active SID-`0x2E` callback table, direct-target census, and state-mediated object-`0x101/102/103` persistence boundary | `tests/verify_application_wdbi_callbacks.py` |
+| `data/application_wdbi_surface.csv` | WDBI membership, payload width, session/SA/speed gates, callback pairs, persistence class, and live-state side effects | `tests/verify_application_wdbi_surface.py`, `tests/verify_application_wdbi_surface_live.py` |
 | `data/control_partition.csv` | Control/safety cyclic-partition map | `tests/verify_control_partition.py` |
 | `data/motor_actuation_path.csv` | Motor acquisition/current/PWM path and bounded authenticated-command→d/q join census | `tests/verify_motor_actuation_boundary.py` |
 | `data/motor_safety_monitors.csv` | Nine-channel plausibility/deadline monitor registration and status-vector map | `tests/verify_motor_safety_monitors.py` |

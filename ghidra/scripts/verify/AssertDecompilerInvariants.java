@@ -258,12 +258,12 @@ public class AssertDecompilerInvariants extends GhidraScript {
             println("secoc_nvm_object_update decompile ok (" + nvmUpdate.getName() + ")");
         }
 
-        // Application ECUReset is the Stage-2 service-callback landmark.
+        // Application ClearDiagnosticInformation is the Stage-2 service-callback landmark.
         Function appReset = requireFunction(0x8b1f0L, "application_clear_diagnostic_information_callback");
         requireConvention(appReset, "__stdcall");
         if (appReset != null) {
             decompile(appReset);
-            println("application ECUReset decompile ok (" + appReset.getName() + ")");
+            println("application ClearDiagnosticInformation decompile ok (" + appReset.getName() + ")");
         }
 
         // Application SecurityAccess send-key exposes NRC 0x35 / 0x36.

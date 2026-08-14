@@ -72,12 +72,12 @@ public class SeedApplicationDiagnosticFunctions extends GhidraScript {
         ensureFunction(0x96A34L,"application_proprietary_ab_subfunction_01");
         ensureFunction(0x96A56L,"application_proprietary_ab_subfunction_02");
         ensureFunction(0x96A78L,"application_proprietary_ab_subfunction_03");
-        ensureFunction(0x8D3CCL,"application_routine_id_lookup");
+        ensureFunction(0x8D3CCL,"application_wdbi_start_callback_lookup");
 
-        // The dormant RoutineControl worker's 13 bounded RID callback pairs.
+        // The active SID-0x2E WDBI worker's 13 bounded DID callback pairs.
         // Auto-analysis does not treat all table words as entry-point seeds, so
         // create the functions explicitly before semantic annotation/decompilation.
-        long[][] routineCallbacks={
+        long[][] wdbiCallbacks={
             {0x0204L,0x4EC16L,0x4EC2AL},
             {0x2001L,0x4EC46L,0x4EC78L},
             {0x2002L,0x4ECBCL,0x4ECD0L},
@@ -92,10 +92,10 @@ public class SeedApplicationDiagnosticFunctions extends GhidraScript {
             {0x2013L,0x4EF68L,0x4EF90L},
             {0x2014L,0x4EFACL,0x4EFD4L},
         };
-        for (long[] row:routineCallbacks) {
-            String rid=String.format("%04x",row[0]);
-            ensureFunction(row[1],"application_routine_"+rid+"_start");
-            ensureFunction(row[2],"application_routine_"+rid+"_result");
+        for (long[] row:wdbiCallbacks) {
+            String did=String.format("%04x",row[0]);
+            ensureFunction(row[1],"application_wdbi_"+did+"_start");
+            ensureFunction(row[2],"application_wdbi_"+did+"_result");
         }
 
         // Direct descendants referenced by those callbacks but missed as

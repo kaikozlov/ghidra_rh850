@@ -17,22 +17,28 @@ DID record (16 bytes, ``<HHIII``):
     [8:12] extra pointer 1 (source record / config address)
     [12:16] extra pointer 2
 
-UDS service record (24 bytes, ``<IIBBBBIII``):
-    [0:4]   session-allow-list pointer
-    [4:8]   subfunction-table pointer
-    [8]     SID
-    [9]     subfunction-routing mode/attribute
-    [10]    security-allow-list length
-    [11]    session-allow-list length
-    [12:16] subfunction count/attribute
-    [16:20] service callback address (0 = subfunction-table driven)
-    [20:24] auxiliary callback/pointer
+UDS service object (24 bytes, ``<IIIIBBBBB3x``):
+    [0:4]   direct service callback (0 = subfunction-table driven/null-direct)
+    [4:8]   security-allow-list pointer
+    [8:12]  session-allow-list pointer
+    [12:16] subfunction-table pointer
+    [16]    SID
+    [17]    subfunction-routing mode/attribute
+    [18]    security-allow-list length
+    [19]    session-allow-list length
+    [20]    subfunction count
 
-Routine/control-ID record (12 bytes, ``<HHII``):
-    [0:2]  routine/control ID
-    [2:4]  flags
+WDBI callback record (12 bytes, ``<HHII``):
+    [0:2]  DID
+    [2:4]  reserved/flags
     [4:8]  start callback
     [8:12] result callback
+
+RoutineControl descriptor (8 bytes, ``<HBBI``):
+    [0:2] RID
+    [2]   policy/index byte
+    [3]   enable byte
+    [4:8] descriptor/config pointer
 
 Usage::
 
@@ -60,24 +66,24 @@ DID_TABLE_COUNT = 0xF2  # 242
 # Subset of DID records with known application semantics (annotated in Java).
 APP_DID_RECORDS_BASE = 0x2A30C  # F181, F186, F18C
 
-SERVICE_TABLE_BASE = 0x25E30
+SERVICE_TABLE_BASE = 0x25E28
 SERVICE_TABLE_COUNT = 17
-EXTRA_SERVICE_TABLE_BASE = 0x25FC8  # 6 additional records
+EXTRA_SERVICE_TABLE_BASE = 0x25FC0  # 6 secondary-endpoint records
 EXTRA_SERVICE_COUNT = 6
 
-ROUTINE_ID_TABLE_BASE = 0x25768
-ROUTINE_ID_TABLE_COUNT = 32
+WDBI_CALLBACK_TABLE_BASE = 0x25768
+WDBI_CALLBACK_TABLE_COUNT = 13
 
-WRITE_DID_TABLE_BASE = 0x26AEC
-WRITE_DID_TABLE_COUNT = 0x13  # 19
+ROUTINE_CONTROL_TABLE_BASE = 0x26AEC
+ROUTINE_CONTROL_TABLE_COUNT = 0x13  # 19
 
 
 # ── Struct definitions ────────────────────────────────────────────────────────
 
 DID_RECORD = struct.Struct("<HHIII")
-SERVICE_RECORD = struct.Struct("<IIBBBBIII")
-ROUTINE_RECORD = struct.Struct("<HHII")
-WRITE_DID_RECORD = struct.Struct("<HBBI")  # did, pad, enable, extra_ptr
+SERVICE_RECORD = struct.Struct("<IIIIBBBBB3x")
+WDBI_CALLBACK_RECORD = struct.Struct("<HHII")
+ROUTINE_CONTROL_RECORD = struct.Struct("<HBBI")
 
 
 # ── Data classes ──────────────────────────────────────────────────────────────
@@ -109,14 +115,14 @@ class ServiceEntry:
     security_count: int
     subfunction_count: int
     callback: int
-    auxiliary: int
+    security_list_ptr: int
     sessions: list[int]
     table_index: int
 
 
 @dataclass
-class RoutineEntry:
-    """One routine/control-ID record."""
+class WdbiCallbackEntry:
+    """One active SID-0x2E WDBI DID callback record."""
     identifier: int
     flags: int
     start_callback: int
@@ -125,9 +131,10 @@ class RoutineEntry:
 
 
 @dataclass
-class WriteDidEntry:
-    """One write-DID descriptor."""
+class RoutineControlEntry:
+    """One SID-0x31 RoutineControl RID descriptor."""
     identifier: int
+    policy_index: int
     enable: int
     extra: int
     table_index: int
@@ -138,8 +145,8 @@ class FirmwareTables:
     """All diagnostic tables extracted from the firmware."""
     dids: list[DidEntry] = field(default_factory=list)
     services: list[ServiceEntry] = field(default_factory=list)
-    routines: list[RoutineEntry] = field(default_factory=list)
-    write_dids: list[WriteDidEntry] = field(default_factory=list)
+    wdbi_callbacks: list[WdbiCallbackEntry] = field(default_factory=list)
+    routine_control: list[RoutineControlEntry] = field(default_factory=list)
 
     @property
     def did_by_id(self) -> dict[int, DidEntry]:
@@ -151,8 +158,12 @@ class FirmwareTables:
         return {d.callback: d.identifier for d in self.dids if d.has_callback}
 
     @property
-    def routine_by_id(self) -> dict[int, RoutineEntry]:
-        return {r.identifier: r for r in self.routines}
+    def wdbi_by_did(self) -> dict[int, WdbiCallbackEntry]:
+        return {r.identifier: r for r in self.wdbi_callbacks}
+
+    @property
+    def routine_control_by_rid(self) -> dict[int, RoutineControlEntry]:
+        return {r.identifier: r for r in self.routine_control}
 
     @property
     def service_by_sid(self) -> dict[int, ServiceEntry]:
@@ -184,11 +195,10 @@ def extract_services(cf: bytes | None = None) -> list[ServiceEntry]:
     entries = []
 
     def decode(row: tuple[int, ...], table_index: int) -> ServiceEntry:
-        session_ptr = row[0]
-        session_count = row[5]
+        callback, security_ptr, session_ptr, subfunc_ptr, sid, mode, security_count, session_count, subfunction_count = row
         if session_ptr + session_count > len(cf):
             raise ValueError(
-                f"service 0x{row[2]:02X} session list extends past firmware"
+                f"service 0x{sid:02X} session list extends past firmware"
             )
         sessions = (
             list(cf[session_ptr:session_ptr + session_count])
@@ -196,14 +206,14 @@ def extract_services(cf: bytes | None = None) -> list[ServiceEntry]:
         )
         return ServiceEntry(
             session_list_ptr=session_ptr,
-            subfunc_table_ptr=row[1],
-            sid=row[2],
-            subfunction_mode=row[3],
-            security_count=row[4],
+            subfunc_table_ptr=subfunc_ptr,
+            sid=sid,
+            subfunction_mode=mode,
+            security_count=security_count,
             session_count=session_count,
-            subfunction_count=row[6],
-            callback=row[7],
-            auxiliary=row[8],
+            subfunction_count=subfunction_count,
+            callback=callback,
+            security_list_ptr=security_ptr,
             sessions=sessions,
             table_index=table_index,
         )
@@ -219,31 +229,32 @@ def extract_services(cf: bytes | None = None) -> list[ServiceEntry]:
     return entries
 
 
-def extract_routines(cf: bytes | None = None) -> list[RoutineEntry]:
-    """Extract all 32 routine/control-ID records."""
+def extract_wdbi_callbacks(cf: bytes | None = None) -> list[WdbiCallbackEntry]:
+    """Extract the 13 active lower SID-0x2E WDBI callback records."""
     if cf is None:
         cf = CODEFLASH_PATH.read_bytes()
     entries = []
-    for i in range(ROUTINE_ID_TABLE_COUNT):
-        offset = ROUTINE_ID_TABLE_BASE + i * ROUTINE_RECORD.size
-        rid, flags, start_cb, result_cb = ROUTINE_RECORD.unpack_from(cf, offset)
-        entries.append(RoutineEntry(
-            identifier=rid, flags=flags, start_callback=start_cb,
+    for i in range(WDBI_CALLBACK_TABLE_COUNT):
+        offset = WDBI_CALLBACK_TABLE_BASE + i * WDBI_CALLBACK_RECORD.size
+        did, flags, start_cb, result_cb = WDBI_CALLBACK_RECORD.unpack_from(cf, offset)
+        entries.append(WdbiCallbackEntry(
+            identifier=did, flags=flags, start_callback=start_cb,
             result_callback=result_cb, table_index=i,
         ))
     return entries
 
 
-def extract_write_dids(cf: bytes | None = None) -> list[WriteDidEntry]:
-    """Extract all 19 write-DID descriptors."""
+def extract_routine_control(cf: bytes | None = None) -> list[RoutineControlEntry]:
+    """Extract all 19 SID-0x31 RoutineControl RID descriptors."""
     if cf is None:
         cf = CODEFLASH_PATH.read_bytes()
     entries = []
-    for i in range(WRITE_DID_TABLE_COUNT):
-        offset = WRITE_DID_TABLE_BASE + i * WRITE_DID_RECORD.size
-        did, _pad, enable, extra = WRITE_DID_RECORD.unpack_from(cf, offset)
-        entries.append(WriteDidEntry(
-            identifier=did, enable=enable, extra=extra, table_index=i,
+    for i in range(ROUTINE_CONTROL_TABLE_COUNT):
+        offset = ROUTINE_CONTROL_TABLE_BASE + i * ROUTINE_CONTROL_RECORD.size
+        rid, policy_index, enable, extra = ROUTINE_CONTROL_RECORD.unpack_from(cf, offset)
+        entries.append(RoutineControlEntry(
+            identifier=rid, policy_index=policy_index, enable=enable,
+            extra=extra, table_index=i,
         ))
     return entries
 
@@ -253,8 +264,8 @@ def extract_all(cf: bytes | None = None) -> FirmwareTables:
     return FirmwareTables(
         dids=extract_dids(cf),
         services=extract_services(cf),
-        routines=extract_routines(cf),
-        write_dids=extract_write_dids(cf),
+        wdbi_callbacks=extract_wdbi_callbacks(cf),
+        routine_control=extract_routine_control(cf),
     )
 
 
@@ -272,11 +283,10 @@ def main() -> None:
         cb = f"0x{s.callback:05X}" if s.callback else "—"
         print(f"  SID 0x{s.sid:02X}  callback={cb}")
 
-    print(f"\nRoutine table: {len(tables.routines)} entries")
-    unique_rids = set(r.identifier for r in tables.routines)
-    print(f"  unique IDs: {len(unique_rids)}")
+    print(f"\nWDBI callback table: {len(tables.wdbi_callbacks)} entries")
+    print(f"  DIDs: {', '.join(f'0x{r.identifier:04X}' for r in tables.wdbi_callbacks)}")
 
-    print(f"\nWrite-DID table: {len(tables.write_dids)} entries")
+    print(f"\nRoutineControl table: {len(tables.routine_control)} entries")
 
 
 if __name__ == "__main__":

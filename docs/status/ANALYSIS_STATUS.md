@@ -6,7 +6,7 @@ for claim scope and confidence, [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) for
 blockers, and subsystem reports for interpretation.
 
 Snapshot date: **2026-08-14**. Corrected normalized project-inventory SHA-256:
-`744c19a875362595f36b6c1f84cd156655d3c494ca6ef805e76eb353518338ee`.
+`8921b64db16f13ad588e661fc45d13bac0986da214aeec9f3eb0aa99190d9cac`.
 The inventory was produced byte-identically by two separately invoked four-stage
 rebuilds. Committed-project promotion is a separate final lifecycle gate.
 
@@ -36,7 +36,7 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 | Selected sweep without semantic conclusion | 88 | `reviewed_unknown`, no evidence grade; successful decompilation is a generated self-check only |
 | Per-function claim execution status | 105 `passed`, 5 `unavailable`, 0 `failed` | `data/semantic_review_status.csv`; `unavailable` marks manual CFG reviews with no automated execution gate |
 | Strongest independent oracle per reviewed function | 19 CFG/data-flow, 3 instruction semantics, 88 none | The 88 have only a generated self-check, which is recorded separately and confers no semantic grade |
-| Findings with exact `verified` grade | 51 | Exact-grade rows in `FINDINGS.md`; qualified/mixed/partial-grade rows are not included in this scalar |
+| Findings with exact `verified` grade | 52 | Exact-grade rows in `FINDINGS.md`; qualified/mixed/partial-grade rows are not included in this scalar |
 | Findings dynamically observed | 2 | SECOC-030 external partner observation and VAR-001 Corolla field probes; neither is promoted to Sienna `4512000` firmware fact |
 
 For material findings, `FINDINGS.md` identifies the claim-specific gate in its

@@ -2,7 +2,7 @@
 """Generate the application UDS service map as CSV.
 
 Raw-table facts (record fields, session allow-lists, subfunction rows, DID /
-write-DID / routine-ID tables) are derived only from the committed CodeFlash
+RoutineControl / WDBI callback tables) are derived only from the committed CodeFlash
 image. Semantic columns are explicit, auditable literals tied to recovered
 handlers; they are not inferred OEM names.
 """
@@ -24,14 +24,14 @@ SERVICE = struct.Struct("<IIIIBBBBB3x")
 SUBFN = struct.Struct("<IIIHH")
 DID = struct.Struct("<HHIII")
 ROUTINE_CONTROL = struct.Struct("<HBBI")
-ROUTINE = struct.Struct("<HHII")
+WDBI_CALLBACK = struct.Struct("<HHII")
 
 DID_TABLE = 0x2941C
 DID_COUNT = 0xF2
 ROUTINE_CONTROL_TABLE = 0x26AEC
 ROUTINE_CONTROL_COUNT = 0x13
-ROUTINE_TABLE = 0x25768
-ROUTINE_COUNT = 32
+WDBI_CALLBACK_TABLE = 0x25768
+WDBI_CALLBACK_COUNT = 13
 SA_SLOT0 = 0x26338
 SA_SLOT_SIZE = 0x18
 
@@ -162,12 +162,12 @@ SEMANTICS = {
     0x2E: {
         "service_callback_role": "direct callback 0x93C62; phase 0=0x93B56, phase 2=0x93BDE",
         "async_worker": "generic write-record operations via 0x93AF2/0x93A1E/0x9395E -> 0x92A70",
-        "security_policy": "generic DID write capability/session/security policy; not the 19-entry 0x26AEC table",
+        "security_policy": "outer sessions [2,3], no SecurityAccess; generic DID write capability plus callback-local runtime gates",
         "nrcs": "0x13 length; 0x31 DID/write capability; 0x33 security; configured worker NRC",
-        "side_effects": "writes only DIDs carrying configured write capability in the generic DID model",
-        "config_tables": f"generic DID table 0x{DID_TABLE:X} count {DID_COUNT}; record-operation tables near 0x26210",
-        "evidence_status": "recovered",
-        "notes": "The prior 19-entry WDBI surface was actually RoutineControl RID configuration.",
+        "side_effects": "13 implemented DIDs; eight arm NvM object 0x101/0x102/0x103 updates, while 2012/2013/2014 expose live state/control parameters",
+        "config_tables": f"generic DID table 0x{DID_TABLE:X}; WDBI callback table 0x{WDBI_CALLBACK_TABLE:X} count {WDBI_CALLBACK_COUNT}; class write wrappers 0x936AA/0x936D6",
+        "evidence_status": "verified surface",
+        "notes": "The prior 19-entry WDBI surface was actually RoutineControl RID configuration; 0x25768 is the active lower WDBI callback table.",
     },
     0x31: {
         "service_callback_role": "direct callback 0x95DCE; phases 0/2/3 start/cancel/poll via 0x95C8C/0x95D7E/0x95DB4",
@@ -177,7 +177,7 @@ SEMANTICS = {
         "side_effects": "configured RID actions include crypto-test bank activation, key update, lifecycle reinitialization, and service-mode controls",
         "config_tables": f"RoutineControl RID table 0x{ROUTINE_CONTROL_TABLE:X} count {ROUTINE_CONTROL_COUNT}; callback table 0x25804",
         "evidence_status": "recovered",
-        "notes": "Request shape is controlType + 16-bit RID. The separate 0x25768 callback table is a distinct dormant/internal routine subsystem.",
+        "notes": "Request shape is controlType + 16-bit RID. The 0x25768 callback table belongs to SID 0x2E WDBI, not RoutineControl.",
     },
     0x34: {
         "service_callback_role": "null in service table; simple-response path (byte[9]==0)",
@@ -296,7 +296,7 @@ def format_subfunctions(rows: list[dict[str, int | str]]) -> str:
 
 
 def build_rows() -> list[dict[str, str]]:
-    # Sanity: DID / configured RoutineControl / separate internal routine tables parse cleanly.
+    # Sanity: DID / configured RoutineControl / active WDBI callback tables parse cleanly.
     dids = [DID.unpack_from(CF, DID_TABLE + i * DID.size) for i in range(DID_COUNT)]
     if dids[0][0] != 0x0100 or dids[-1][0] != 0xF18C:
         raise SystemExit("DID table bounds mismatch")
@@ -306,11 +306,13 @@ def build_rows() -> list[dict[str, str]]:
     ]
     if control_rids[0][0] != 0x1000 or control_rids[-1][0] != 0x110D:
         raise SystemExit("RoutineControl RID table bounds mismatch")
-    routines = [
-        ROUTINE.unpack_from(CF, ROUTINE_TABLE + i * ROUTINE.size) for i in range(ROUTINE_COUNT)
+    wdbi_callbacks = [
+        WDBI_CALLBACK.unpack_from(CF, WDBI_CALLBACK_TABLE + i * WDBI_CALLBACK.size)
+        for i in range(WDBI_CALLBACK_COUNT)
     ]
-    if routines[0][0] != 0x0204 or routines[-1][0] != 0x110D:
-        raise SystemExit("routine-ID table bounds mismatch")
+    expected_wdbi_dids = [0x0204,0x2001,0x2002,0x2005,0x2006,0x2007,0x2008,0x2009,0x200D,0x2010,0x2012,0x2013,0x2014]
+    if [row[0] for row in wdbi_callbacks] != expected_wdbi_dids:
+        raise SystemExit("WDBI callback table membership mismatch")
 
     rows: list[dict[str, str]] = []
     for index in range(SERVICE_COUNT):
@@ -351,8 +353,8 @@ def build_rows() -> list[dict[str, str]]:
                 "did_table_count": str(DID_COUNT) if sid in (0x22,) else "",
                 "routine_control_table_addr": f"0x{ROUTINE_CONTROL_TABLE:X}" if sid == 0x31 else "",
                 "routine_control_table_count": str(ROUTINE_CONTROL_COUNT) if sid == 0x31 else "",
-                "internal_routine_table_addr": f"0x{ROUTINE_TABLE:X}" if sid == 0x31 else "",
-                "internal_routine_table_count": str(ROUTINE_COUNT) if sid == 0x31 else "",
+                "wdbi_callback_table_addr": f"0x{WDBI_CALLBACK_TABLE:X}" if sid == 0x2E else "",
+                "wdbi_callback_table_count": str(WDBI_CALLBACK_COUNT) if sid == 0x2E else "",
             }
         )
     return rows

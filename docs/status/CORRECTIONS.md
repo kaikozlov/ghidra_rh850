@@ -1094,3 +1094,33 @@ the mistakes are not re-made.
   [../security/application-security-access.md](../security/application-security-access.md);
   `tests/verify_application_rdbi_stale_response.py`;
   `exploit/followups/application_rdbi_stale_probe.py`.
+
+
+### CORR-056 — `0x25768` is the active 13-entry WDBI callback table, not a dormant 32-entry routine table
+
+- **Wrong:** the post-AB audit described `0x25768` as a 32-entry internal
+  RoutineControl/control-ID table structurally associated with SID `0x28` but
+  stock-wire gated. The firmware-table vocabulary parser reinforced the same
+  model by reading 32 rows past the real table and by decoding service objects
+  from the pre-CORR-053 `0x25E30/0x25FC8` bases.
+- **Right:** lookup `0x8D3CC` explicitly stops after index `0x0C`; `0x25768`
+  therefore contains **13** valid 12-byte records. Its caller chain is unique:
+  `0x8D3CC/0x8D416 <- 0x8A482/0x8A542 <- 0x8A630 <- 0x936AA/0x936D6`.
+  Those wrappers occupy the write-operation slots of DID classes
+  `0x0201..0x02FF` and `0x2001..0x20FF`, and the active SID-`0x2E` path reaches
+  them through `0x9395E -> 0x92A70`. No SID-`0x28`, SID-`0x31`, or SID-`0xAB`
+  edge enters this chain. SID `0x31` independently uses callback `0x95DCE` and
+  the 19-RID table at `0x26AEC`.
+- **Secondary correction:** `tools/diagnostics/firmware_tables.py` now decodes
+  service objects from runtime bases `0x25E28/0x25FC0` with the corrected
+  24-byte layout. Its generated vocabulary no longer shifts direct callback
+  ownership by one service and now reports `wdbi_callback_table=0x25768/13`
+  and `routine_control_table=0x26AEC/19`.
+- **Consequence:** the previously recovered object-`0x101/0x102/0x103`
+  persistence paths are not dormant internal possibilities; they are reachable
+  through real SID `0x2E`, subject to its session and callback-local gates.
+  DIAG-APP-016 records the corrected WDBI security surface.
+- **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
+  [../security/application-security-access.md](../security/application-security-access.md);
+  `data/application_wdbi_surface.csv`; `tests/verify_application_wdbi_surface.py`;
+  `tests/verify_application_wdbi_callbacks.py`.

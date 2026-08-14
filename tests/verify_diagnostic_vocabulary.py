@@ -110,8 +110,12 @@ check("vocabulary firmware DID table count is 242",
       vocab["firmware_tables"]["did_table"]["count"] == 242)
 check("vocabulary firmware service table count is 23",
       vocab["firmware_tables"]["service_table"]["count"] == 23)
-check("vocabulary firmware routine table count is 32",
-      vocab["firmware_tables"]["routine_table"]["count"] == 32)
+check("vocabulary firmware service table base is corrected runtime base",
+      vocab["firmware_tables"]["service_table"] == {"base": "0x25E28", "count": 23})
+check("vocabulary firmware WDBI callback table is 13 active rows",
+      vocab["firmware_tables"]["wdbi_callback_table"] == {"base": "0x25768", "count": 13})
+check("vocabulary firmware RoutineControl table is 19 RID rows",
+      vocab["firmware_tables"]["routine_control_table"] == {"base": "0x26AEC", "count": 19})
 check("vocabulary has DTC table metadata", "dtc_table" in vocab["firmware_tables"])
 check("firmware DTC table metadata covers 0xA0 records from 0x309DC",
       vocab["firmware_tables"]["dtc_table"] == {
@@ -188,7 +192,7 @@ check("identification DID sizes/attributes are 0x11, 0x01, 0x14",
        for did in (0xF181, 0xF186, 0xF18C)] == [0x11, 0x01, 0x14])
 check("DID 0x0102 attribute 0x07 is not a write-access bitfield",
       did_by_id[0x0102].response_size_or_attribute == 0x07
-      and 0x0102 not in {entry.identifier for entry in tables.write_dids})
+      and 0x0102 not in {entry.identifier for entry in tables.wdbi_callbacks})
 
 primary_services = {
     entry.sid: entry for entry in tables.services if entry.table_index < 17
@@ -202,9 +206,19 @@ expected_service_sessions = {
 check("service session counts come from byte 11",
       all(primary_services[sid].sessions == sessions
           for sid, sessions in expected_service_sessions.items()))
-check("service byte 9 is retained separately from session count",
+check("service routing-mode byte is retained separately from session count",
       primary_services[0x22].subfunction_mode == 0
       and primary_services[0x22].session_count == 3)
+check("corrected primary direct-service callback ownership is exact",
+      {sid: primary_services[sid].callback for sid in (0x14,0x22,0x23,0x2E,0x31,0xBA)}
+      == {0x14:0x8B1F0,0x22:0x945DC,0x23:0x948AA,0x2E:0x93C62,0x31:0x95DCE,0xBA:0x8D344})
+check("WDBI lower table has exact 13 implemented DIDs",
+      [entry.identifier for entry in tables.wdbi_callbacks]
+      == [0x0204,0x2001,0x2002,0x2005,0x2006,0x2007,0x2008,0x2009,0x200D,0x2010,0x2012,0x2013,0x2014])
+check("RoutineControl table has 19 RIDs 1000..110D",
+      len(tables.routine_control) == 19
+      and tables.routine_control[0].identifier == 0x1000
+      and tables.routine_control[-1].identifier == 0x110D)
 
 modified_cf = bytearray(CF)
 sid22 = primary_services[0x22]

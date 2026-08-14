@@ -232,7 +232,7 @@ public class AssertProjectInvariants extends GhidraScript {
         requireFunction(0x8d344L, "application_proprietary_ba_callback");
         requireLabel(0x2941cL, "application_did_table");
         requireLabel(0x26aecl, "application_routine_control_rid_table");
-        requireLabel(0x25768L, "application_routine_id_table");
+        requireLabel(0x25768L, "application_wdbi_callback_table");
 
         // Stage-3 application receive landmarks.
         requireFunction(0x7c640L, "application_com_rx_indication");

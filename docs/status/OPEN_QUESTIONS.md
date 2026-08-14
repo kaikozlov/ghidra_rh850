@@ -332,6 +332,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   synchronized labeled captures above. Use the redacted manifest schema in
   [../variants/newer-tsk-target-evidence.md](../variants/newer-tsk-target-evidence.md);
   until then every Sienna→newer-TSK transfer remains hypothesis.
+- **Application WDBI `2012/2013/2014` physical consequence.** Static recovery
+  proves that extended-session SID `0x2E` reaches these live application state
+  variables without SecurityAccess; `2012` additionally lacks both a local
+  vehicle-speed gate and an extended-session-entry speed gate. The exact effect
+  on steering/control behavior is not yet established. Any dynamic validation
+  must be isolated-bench only, start from read-only state capture, exercise one
+  DID/value at a time, and prove reset/session recovery before broader testing.
+  Do not treat the static state joins as a steering-control claim.
 - **Application CommunicationControl live effect.** Static recovery proves that
   extended-session SID `0x28` reaches real communication-mode updates without a
   configured SecurityAccess policy or recovered speed gate. The isolated-bench

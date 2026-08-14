@@ -483,7 +483,7 @@ def correlate_services(
 
         name = UDS_SERVICE_NAMES.get(svc.sid, f"UnknownService_0x{svc.sid:02X}")
         cb = f"0x{svc.callback:05X}" if svc.callback else None
-        table_base = "0x25E30" if svc.table_index < 17 else "0x25FC8"
+        table_base = "0x25E28" if svc.table_index < 17 else "0x25FC0"
         matches.append({
             "kind": "service",
             "sid": svc.sid,
@@ -568,9 +568,9 @@ def build_vocabulary() -> dict:
         "source_catalog": str(cat_path.relative_to(REPO_ROOT)),
         "firmware_tables": {
             "did_table": {"base": "0x2941C", "count": len(tables.dids)},
-            "service_table": {"base": "0x25E30", "count": len(tables.services)},
-            "routine_table": {"base": "0x25768", "count": len(tables.routines)},
-            "write_did_table": {"base": "0x26AEC", "count": len(tables.write_dids)},
+            "service_table": {"base": "0x25E28", "count": len(tables.services)},
+            "wdbi_callback_table": {"base": "0x25768", "count": len(tables.wdbi_callbacks)},
+            "routine_control_table": {"base": "0x26AEC", "count": len(tables.routine_control)},
             "dtc_table": {
                 "base": f"0x{DTC_TABLE_START:X}",
                 "end": f"0x{DTC_TABLE_END:X}",

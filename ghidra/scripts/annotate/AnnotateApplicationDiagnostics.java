@@ -111,7 +111,7 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
         label(0x20870L,"application_software_id_record_2",
             "Second 16-byte application software-ID slot beginning with ASCII 8A311. Present in this image but not emitted by the count-1 F181 callback.");
 
-        label(0x25E30L,"application_uds_service_table",
+        label(0x25E28L,"application_uds_service_table",
             "Seventeen 24-byte primary application UDS service records. SID is byte 8; configured sequence is 10,11,14,19,22,23,27,28,2E,31,34,36,37,3E,85,AB,BA.");
         label(0x25DE0L,"application_uds_service_group_directory",
             "Three 8-byte service-group descriptors: key/count/list are 2/17/25DF8, 3/6/25DC0, and 4/5/25E1C. They select primary physical 7A1, functional 777, and secondary physical 7A0 contexts.");
@@ -121,11 +121,11 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
             "Seventeen indexes 0..16 selecting the primary physical 7A1 service table.");
         label(0x25E1CL,"application_secondary_service_indices",
             "Five global service-record indexes 18..22, yielding SIDs 10,19,22,3E,AB for secondary physical CAN 7A0 / response 7A8.");
-        label(0x25FC8L,"application_additional_uds_service_records",
+        label(0x25FC0L,"application_additional_uds_service_records",
             "Six additional 24-byte service records used by limited groups 3/4. These are shared through index lists, not a standalone linear table.");
         int[] serviceSids={0x10,0x11,0x14,0x19,0x22,0x23,0x27,0x28,0x2E,0x31,0x34,0x36,0x37,0x3E,0x85,0xAB,0xBA};
         for (int i=1;i<serviceSids.length;i++) {
-            long value=0x25E30L+i*24L;
+            long value=0x25E28L+i*24L;
             label(value,String.format("application_sid_%02x_record",serviceSids[i]),
                 String.format("Application UDS service-table record for SID 0x%02X.",serviceSids[i]));
         }
@@ -258,7 +258,7 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
         fn(0x96918L,"application_proprietary_ab_selector_worker",
             "Validate AB selector payload lengths, copy request context, and configure the event-record query worker for active-list, single-ID, or detail mode.");
         fn(0x8CF84L,"application_proprietary_ab_event_worker",
-            "Advance the AB event-record query state machine and dispatch modes 1/2/3 through 0x4F8BA; no edge to the routine-ID table.");
+            "Advance the AB event-record query state machine and dispatch modes 1/2/3 through 0x4F8BA; no edge to the SID-0x2E WDBI callback table.");
         fn(0x4F8BAL,"application_event_record_query",
             "Query the checkpoint-backed event catalogue: mode 1 lists active IDs, mode 2 reads per-ID state, and mode 3 reads detail/snapshot data.");
         fn(0x54748L,"application_event_active_id_list",
@@ -271,16 +271,22 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
             "Operation-F1 start callback selected by the AB asynchronous handoff. Check the JTEKM token and enter operation state 3 through the B201A veneer.");
         fn(0x34B9AL,"application_proprietary_ab_f1_result",
             "Operation-F1 result callback selected by the AB asynchronous handoff; read operation state 3 through the B209C veneer.");
-        fn(0x8A482L,"application_routine_start_dispatch",
-            "Resolve one of the first 13 control-ID records and invoke its start callback through lookup 0x8D3CC. SID 0x28 records link the worker structurally, but stock subfunctions gate its 02xx/20xx selectors.");
-        fn(0x8A542L,"application_routine_result_dispatch",
-            "Resolve one of the first 13 control-ID records and invoke its result callback through lookup 0x8D416. Some results arm asynchronous NvM updates for objects 0x101/0x102/0x103.");
-        fn(0x8A630L,"application_routine_worker",
-            "Stock-gated start/poll worker reached by SID 0x28 generic-control wrappers 0x936AA/0x936D6 for selector ranges 02xx/20xx. Separate from SID 0xAB and unattached to null-callback SID 0x31.");
-        fn(0x8D3CCL,"application_routine_start_callback_lookup",
-            "Scan control-ID table entries 0..12 at 0x25768 and invoke the matching start callback. Sole direct caller is 0x8A50C in the stock-gated worker.");
-        fn(0x8D416L,"application_routine_result_callback_lookup",
-            "Scan control-ID table entries 0..12 at 0x25768 and invoke the matching result callback. Separate from SID 0xAB; selected results arm objects 0x101/0x102/0x103.");
+        fn(0x4EC16L,"application_wdbi_0204_start",
+            "WDBI DID 0x0204 start callback. Enforce the common vehicle-speed gate before the two-byte asynchronous diagnostic action is accepted.");
+        fn(0x936AAL,"application_wdbi_class_0201_write",
+            "Generic DID-class write wrapper for 0x0201..0x02FF; dispatch active SID-0x2E writes through 0x8A630.");
+        fn(0x936D6L,"application_wdbi_class_2001_write",
+            "Generic DID-class write wrapper for 0x2001..0x20FF; dispatch active SID-0x2E writes through 0x8A630.");
+        fn(0x8A482L,"application_wdbi_start_dispatch",
+            "Dispatch the active SID-0x2E WDBI start phase through the 13-entry DID callback table at 0x25768 and lookup 0x8D3CC.");
+        fn(0x8A542L,"application_wdbi_result_dispatch",
+            "Dispatch the active SID-0x2E WDBI result phase through lookup 0x8D416. Selected DIDs arm asynchronous NvM updates for objects 0x101/0x102/0x103.");
+        fn(0x8A630L,"application_wdbi_record_worker",
+            "Active SID-0x2E write-record worker reached through DID-class write wrappers 0x936AA/0x936D6 for ranges 02xx/20xx; runs the 0x25768 start/result callback pair.");
+        fn(0x8D3CCL,"application_wdbi_start_callback_lookup",
+            "Scan the 13-entry WDBI DID table at 0x25768 and invoke the matching start callback. The active caller chain is SID 0x2E -> 0x936AA/0x936D6 -> 0x8A630 -> 0x8A482.");
+        fn(0x8D416L,"application_wdbi_result_callback_lookup",
+            "Invoke the matching result callback from the 13-entry WDBI DID table at 0x25768. Selected results arm NvM objects 0x101/0x102/0x103.");
         fn(0x4F928L,"application_did_table_getter",
             "Return the application DID table base 0x2941C and count 0xF2 (242).");
         fn(0x93910L,"application_uds_negative_response",
@@ -292,8 +298,8 @@ public class AnnotateApplicationDiagnostics extends GhidraScript {
             "242 x 16-byte application DID records beginning at DID 0x0100 and ending at F18C. Getter 0x4F928 returns count 0xF2.");
         label(0x26AECL,"application_routine_control_rid_table",
             "19 x 8-byte RoutineControl RID descriptors. Parsed by the SID-0x31 worker at 0x95C8C and its lookup helpers.");
-        label(0x25768L,"application_routine_id_table",
-            "32 x 12-byte control-ID records (ID, flags, start_cb, result_cb). A stock-gated SID 0x28 worker consumes entries 0..12; SID 0x31 has a null callback and SID 0xAB has no edge here.");
+        label(0x25768L,"application_wdbi_callback_table",
+            "13 x 12-byte WDBI DID records (DID, reserved, start_cb, result_cb), actively consumed by SID 0x2E through class write wrappers 0x936AA/0x936D6.");
         label(0x28094L,"application_operation_descriptor_count",
             "Ten generic asynchronous operation descriptors follow at 0x28098. SID 0xAB uses operation F1.");
         label(0x28098L,"application_operation_descriptor_table",

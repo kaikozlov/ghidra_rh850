@@ -81,7 +81,7 @@ mere function-presence checks:
 | SecOC writers, consumers, and dormant paths | `verify_secoc_application.py`, `verify_secoc_nvm.py`, `verify_secoc_security_properties.py` | 189 |
 | ICU-S Stage-7 paths and consumer boundaries | `verify_icus_key_recovery_surface.py`, `verify_icus_key_update.py`, `verify_icus_software_paths.py`, `verify_icus_stage7_static.py` | 167 |
 | Motor/control joins | `verify_motor_actuation_boundary.py`, `verify_control_partition.py` | 156 |
-| Diagnostic SID/RID/DID callbacks | `verify_application_diagnostics.py`, `verify_application_routine_id_callbacks.py`, `verify_did_model.py` | 417 |
+| Diagnostic SID/RID/DID callbacks | `verify_application_diagnostics.py`, `verify_application_wdbi_callbacks.py`, `verify_did_model.py` | 417 |
 | Scheduler, receive, transmit roots | `verify_scheduler_timing.py`, `verify_application_receive.py`, `verify_application_transmit.py` | 157 |
 | Function-discovery floor and callback dispatch | `verify_function_discovery.py` | 30 |
 

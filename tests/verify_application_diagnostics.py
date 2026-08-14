@@ -304,7 +304,7 @@ check("reserve helper tests busy state before setting it",
       CF[0x4776:0x478A] == bytes.fromhex("a40fa3920152e009fa054457a392020a440fa292"),
       CF[0x4776:0x478A].hex())
 
-print("\n== application DID / write-DID / routine-ID tables ==")
+print("\n== application DID / RoutineControl / WDBI callback tables ==")
 did_rows = [APP_DID.unpack_from(CF, 0x2941C + i * APP_DID.size) for i in range(0xF2)]
 check("application DID table getter embeds count 0xF2 and base 0x2941C",
       CF[0x4F928:0x4F938] == bytes.fromhex("06f0200ef200800c2a061c9402007f00"),
@@ -314,18 +314,18 @@ check("DID table has 242 records from 0x0100 through F18C",
 check("DID table still contains F181/F186/F18C records",
       [(0xF181, 0x0011, 0x4E8E4), (0xF186, 0x0001, 0x4E90A), (0xF18C, 0x0014, 0x4E918)]
       == [(d, f, c) for d, f, c, _a1, _a2 in did_rows if d in (0xF181, 0xF186, 0xF18C)])
-WRITE_DID = struct.Struct("<HBBI")
-write_rows = [WRITE_DID.unpack_from(CF, 0x26AEC + i * WRITE_DID.size) for i in range(0x13)]
-check("write-DID table has 19 records from 0x1000 through 0x110D",
-      write_rows[0][0] == 0x1000 and write_rows[-1][0] == 0x110D and len(write_rows) == 0x13)
-check("write-DID records carry enable byte 0x01", all(row[2] == 1 for row in write_rows))
-ROUTINE = struct.Struct("<HHII")
-routine_rows = [ROUTINE.unpack_from(CF, 0x25768 + i * ROUTINE.size) for i in range(32)]
-check("routine-ID table has 32 records from 0x0204 through 0x110D",
-      routine_rows[0][0] == 0x0204 and routine_rows[-1][0] == 0x110D)
-check("routine-ID lookup scans tp+0x1884 (=0x25768)",
+ROUTINE_CONTROL = struct.Struct("<HBBI")
+routine_control_rows = [ROUTINE_CONTROL.unpack_from(CF, 0x26AEC + i * ROUTINE_CONTROL.size) for i in range(0x13)]
+check("RoutineControl table has 19 records from 0x1000 through 0x110D",
+      routine_control_rows[0][0] == 0x1000 and routine_control_rows[-1][0] == 0x110D and len(routine_control_rows) == 0x13)
+check("RoutineControl records carry enable byte 0x01", all(row[2] == 1 for row in routine_control_rows))
+WDBI_CALLBACK = struct.Struct("<HHII")
+wdbi_rows = [WDBI_CALLBACK.unpack_from(CF, 0x25768 + i * WDBI_CALLBACK.size) for i in range(13)]
+check("WDBI callback table has exact 13 implemented DIDs",
+      [row[0] for row in wdbi_rows] == [0x0204,0x2001,0x2002,0x2005,0x2006,0x2007,0x2008,0x2009,0x200D,0x2010,0x2012,0x2013,0x2014])
+check("WDBI start lookup scans tp+0x1884 (=0x25768)",
       bytes.fromhex("8418") in CF[0x8D3CC:0x8D416])
-check("routine-ID lookup stops after index 0x0C",
+check("WDBI start lookup stops after index 0x0C",
       bytes.fromhex("0c00") in CF[0x8D3CC:0x8D416])
 
 print("\n== per-SID handler bodies and bounded negatives ==")

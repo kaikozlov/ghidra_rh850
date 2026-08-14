@@ -57,11 +57,11 @@ CodeFlash VAs unless marked RAM or DataFlash.
 | Bootloader DID descriptors (4) | `0x8F14` | [../diagnostics/bootloader-dids.md](../diagnostics/bootloader-dids.md) |
 | Bootloader RDBI / WDBI handlers | `0x5FB8` / `0x4948` | [../diagnostics/bootloader-dids.md](../diagnostics/bootloader-dids.md) |
 | Bootloader SessionControl handler | `0x614A` | [../diagnostics/bootloader.md](../diagnostics/bootloader.md) |
-| Application service table (17 SIDs) | `0x25E30` | [../diagnostics/application.md](../diagnostics/application.md) |
+| Application service-object table (17 SIDs) | `0x25E28` | [../diagnostics/application.md](../diagnostics/application.md) |
 | Application DID read table (242) | `0x2941C` | [../diagnostics/application.md](../diagnostics/application.md) |
-| Application DID write table (19) | `0x26AEC` | [../diagnostics/application.md](../diagnostics/application.md) |
+| Application RoutineControl RID table (19) | `0x26AEC` | [../diagnostics/application.md](../diagnostics/application.md) |
 | Application DID records (F181/F186/F18C) | `0x2A30C` | [../diagnostics/application.md](../diagnostics/application.md) |
-| Application routine-ID table (32 pairs) | `0x25768` | [../diagnostics/application.md](../diagnostics/application.md) |
+| Application WDBI callback table (13 DIDs) | `0x25768` | [../diagnostics/application.md](../diagnostics/application.md) |
 | Session callbacks / state machine | `0x93FF6` / `0x94006` / `0x94016` / `0x93F3C` | [../diagnostics/application.md](../diagnostics/application.md) |
 | Phase-snapshot (programming gate) | RAM `0xFEBEE81F` (`GP+0x301F`) | [../diagnostics/application.md](../diagnostics/application.md) |
 | Non-Dcm transition phase source | RAM `0xFEBEB1A4` | [../diagnostics/application.md](../diagnostics/application.md) |

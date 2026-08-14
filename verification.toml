@@ -175,9 +175,41 @@ paths = [
   "ghidra/scripts/annotate/AnnotateApplicationReceive.java",
 ]
 
-[suite.application_routine_id_callbacks]
-tests = ["tests/verify_application_routine_id_callbacks.py"]
-paths = ["data/application_routine_id_callbacks.csv"]
+[suite.application_wdbi_callbacks]
+tests = ["tests/verify_application_wdbi_callbacks.py"]
+paths = [
+  "data/application_wdbi_callbacks.csv",
+  "tests/verify_application_wdbi_callbacks.py",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/status/CORRECTIONS.md",
+]
+
+[suite.application_wdbi_surface]
+tests = [
+  "tests/verify_application_wdbi_surface.py",
+  "tests/verify_application_wdbi_surface_live.py",
+]
+oracle = "cfg_dataflow"
+paths = [
+  "data/application_wdbi_surface.csv",
+  "tests/verify_application_wdbi_surface.py",
+  "tests/verify_application_wdbi_surface_live.py",
+  "ghidra/scripts/verify/AssertApplicationWdbiSurface.java",
+  "ghidra/scripts/annotate/AnnotateApplicationDiagnostics.java",
+  "ghidra/scripts/seed/SeedApplicationDiagnosticFunctions.java",
+  "ghidra/scripts/verify/AssertProjectInvariants.java",
+  "tools/generate_application_diagnostic_map.py",
+  "tools/diagnostics/firmware_tables.py",
+  "tools/diagnostics/correlate_vocabulary.py",
+  "data/application_diagnostic_map.csv",
+  "data/generated/21140bbd65e530a9/diagnostic_vocabulary.json",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
 
 [suite.application_security_access]
 tests = ["tests/verify_security_gate.py"]

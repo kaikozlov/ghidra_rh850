@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Verify the application SID 0xAB event-record service from firmware bytes.
 
-The service is distinct from SID 0xBA and from the separate internal routine
+The service is distinct from SID 0xBA and from the separate SID-0x2E WDBI
 callback table. This suite pins the 0xAB subfunctions/event-record tables, the
 complete configured event callback closure, and the adjacent 0xBA operation-F1
 boundary so service ownership cannot shift again.
@@ -155,14 +155,14 @@ for displacement, address in ((0x5AE8, 0xFEBF02E8), (0x5AF8, 0xFEBF02F8)):
     hit = CF.find(struct.pack("<h", displacement), 0x54C64, 0x55280)
     check(f"event callbacks do not use GP displacement for 0x{address:08X}", hit < 0, hex(hit))
 
-print("\n== separation from internal routine callback table ==")
-rid_lookup_callers = []
+print("\n== separation from SID-0x2E WDBI callback table ==")
+wdbi_lookup_callers = []
 for addr in range(0, len(CF) - 3, 2):
     decoded = decode_branch(addr)
     if decoded is not None and decoded[1] == 0x8D3CC:
-        rid_lookup_callers.append(addr)
-check("RID lookup has one direct caller", rid_lookup_callers == [0x8A50C], repr(rid_lookup_callers))
-check("RID lookup has no function-pointer literal", CF.find(struct.pack("<I", 0x8D3CC)) < 0)
+        wdbi_lookup_callers.append(addr)
+check("WDBI lookup has one direct caller", wdbi_lookup_callers == [0x8A50C], repr(wdbi_lookup_callers))
+check("WDBI lookup has no function-pointer literal", CF.find(struct.pack("<I", 0x8D3CC)) < 0)
 check("SID 0x31 direct callback is configured RoutineControl 0x95DCE", struct.unpack_from("<I", CF, 0x25F00)[0] == 0x95DCE)
 
 sensitive_targets = {

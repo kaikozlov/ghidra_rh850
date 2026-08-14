@@ -341,7 +341,7 @@ script does not understand `.ddb`; it consumes a deterministic generated artifac
 
 | Tool | Purpose |
 |---|---|
-| `tools/diagnostics/firmware_tables.py` | Extract DID/service/routine/write-DID structures from raw CodeFlash |
+| `tools/diagnostics/firmware_tables.py` | Extract DID/service/WDBI-callback/RoutineControl structures from raw CodeFlash |
 | `tools/diagnostics/correlate_vocabulary.py` | Match Techstream catalog with firmware tables, emit graded vocabulary |
 | `ghidra/scripts/annotate/ApplyDiagnosticVocabulary.java` | Apply OEM names/comments to Ghidra project |
 | `tests/verify_diagnostic_vocabulary.py` | Deterministic verification of every correlation |

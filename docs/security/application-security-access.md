@@ -281,8 +281,18 @@ authorization:
   extended-session-only, and ICU-S independently authenticates its SHE M1–M3
   package and replay counter. See
   [../diagnostics/application-routine-control-surface.md](../diagnostics/application-routine-control-surface.md).
-- **WriteDataByIdentifier (`0x2E`) is a separate generic DID-record service** at
-  `0x93C62`; it must not be inferred from the `0x26AEC` RoutineControl table.
+- **WriteDataByIdentifier (`0x2E`) has 13 implemented writable DIDs and no Dcm
+  SecurityAccess requirement.** The corrected active chain is
+  `0x93C62 -> 0x93B56 -> 0x92A70 -> 0x936AA/0x936D6 -> 0x8A630 -> 0x25768`.
+  Eight DIDs (`2001/2002/2005/2006/2007/2008/2009/200D`) arm state machines
+  that submit NvM object updates `0x101/0x102/0x103`; twelve of thirteen WDBI
+  starts have a vehicle-speed gate. DID `2012` is the exception: its start
+  callback is unconditional, payload `01` sets `FEBEB18F=0x5A`, and extended
+  session entry itself is not speed-gated because `0x4C942` checks speed only
+  for requested programming session `02`. Its multiple operational consumers
+  establish a live override/state boundary, but not yet a physical steering
+  effect. See `data/application_wdbi_surface.csv` and
+  [../diagnostics/application.md](../diagnostics/application.md).
 - **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB` exposes event-record list/state/detail reads through subfunction workers; the recovered graph does not perform the formerly hypothesized motor-control, calibration, flash, or provisioning writes. SID `0xBA` separately owns callback `0x8D344` and the bounded operation-F1 path; its OEM purpose remains open.
 
 For a comma integration this policy weakness is not a clean control interface.
@@ -299,9 +309,10 @@ per-ID state and detail. The complete configured indirect closure consists of
 crypto, NvM, ICU-S, SecOC, flash, or security-policy target and no GP-relative
 SecOC key-buffer access.
 
-The 13 RID callback pairs at `0x25768` are separate. Their lookup's only direct
-caller belongs to a dormant RoutineControl worker; stock SID `0x31` has a null
-callback, and there is no edge from `0xAB` to the RID lookup. The canonical
+The 13 callback pairs at `0x25768` belong to active SID `0x2E` WDBI. Their
+lookup remains separate from SID `0xAB`, while SID `0x31` independently owns
+direct callback `0x95DCE` and its 19-RID table at `0x26AEC`. CORR-056 records the
+former dormant-RoutineControl/SID-`0x28` attribution error. The canonical
 control-flow and table evidence is in
 [the application diagnostics report](../diagnostics/application.md).
 

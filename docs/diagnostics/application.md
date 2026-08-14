@@ -369,7 +369,7 @@ for live confirmation. The firmware-static disclosure chain is verified; the
 exact bench oracle has not yet been observed on hardware. This does not
 contradict the callback-local high-value-RAM negative above: the disclosed bytes
 come from Dcm response-buffer lifetime, not from a sensitive reference inside
-one of the 15 producer callbacks.
+one of the 48 success-stub producer callbacks.
 
 The same complete callback graph also closes the obvious RDBI side-effect class.
 None of the 196 callback roots has a fixed-global RAM write. Across their
@@ -385,7 +385,38 @@ Real SID `0x2E` WDBI uses direct callback `0x93C62`: phase 0 enters `0x93B56`,
 which parses a 16-bit DID, resolves generic DID write capability/policy through
 `0x92572/0x93A1E`, validates request length, and executes configured write-record
 operations through `0x9395E -> 0x92A70`; phase 2 finalizes through `0x93BDE`.
-It is **not** the 19-entry `0x26AEC` table.
+Only DID classes `0x0201..0x02FF` and `0x2001..0x20FF` expose write wrappers
+(`0x936AA/0x936D6`), and their common worker `0x8A630` resolves the actual
+implemented membership through the **13-entry callback table at `0x25768`**.
+Ten additional DIDs in those broad classes have no lower callback record and are
+therefore not implemented WDBI members. It is **not** the 19-entry `0x26AEC`
+RoutineControl table.
+
+The outer SID-`0x2E` service policy allows programming and extended sessions and
+has **zero SecurityAccess levels**. The 13 implemented DIDs divide as follows:
+
+| DIDs | Local gate | Recovered side effect |
+|---|---|---|
+| `2001` | vehicle speed | arms NvM object `0x101` state machine |
+| `2002` | vehicle speed | arms NvM object `0x102` state machine |
+| `2005/2006/2007/2008/2009/200D` | vehicle speed | arm selected-byte updates under NvM object `0x103` |
+| `0204` | vehicle speed | queues shared asynchronous diagnostic state `0x2E10` |
+| `2010` | vehicle speed | updates live runtime command-state block `FEBEB48E/49C/4A0` |
+| `2012` | **none** | payload `01` sets live override flag `FEBEB18F = 0x5A` |
+| `2013` | vehicle speed + two state flags clear | writes 16-bit live control parameter `FEBEB434` |
+| `2014` | vehicle speed + two state flags clear | writes live mode flag `FEBEB3EE = 0/0x5A` |
+
+For the eight persistent DIDs, the state consumers construct IDs `0x101/0x102/0x103`
+and call `0xFF09C -> secoc_nvm_object_update`; this is a direct persistence join,
+not merely a callback-local RAM write. DID `2012` is the exceptional reachability
+case: its start callback at `0x4EF4A` is unconditional, while session-transition
+policy `0x4C942` applies the vehicle-speed limit only to requested session `02`,
+not extended session `03`. Thus the static path `10 03` followed by
+`2E 20 12 01` requires neither SecurityAccess nor a recovered vehicle-speed
+gate. `FEBEB18F` is read by multiple operational state machines and the input
+snapshot; the exact physical consequence of toggling it remains a separate
+hardware/control-cone question and is not promoted beyond that proven state
+boundary. The complete matrix is `data/application_wdbi_surface.csv`.
 
 The 19-entry table at `0x26AEC` belongs to SID `0x31` RoutineControl. Direct
 callback `0x95DCE` uses `0x95C8C/0x95D7E/0x95DB4` for start/cancel/poll.
@@ -593,10 +624,15 @@ machine at `0x8D2B2`; the operation record at `0x28098` references
 to the selected security-sensitive target set, but its exact OEM meaning remains
 open. It must not be used as evidence about SID `0xAB`.
 
-The internal routine callback table rooted at `0x25768` is a third, separate
-structure. Lookup `0x8D3CC` has one direct caller at `0x8A50C` and no edge from
-the SID-`0xAB` event service. It is also distinct from the configured SID-`0x31`
-RoutineControl RID surface at `0x26AEC`.
+The callback table rooted at `0x25768` is the **active lower SID-`0x2E` WDBI
+membership table**, not a third dormant RoutineControl subsystem. It contains 13
+12-byte records `(DID, reserved, start_cb, result_cb)` for DIDs `0204`, `2001`,
+`2002`, `2005`, `2006`, `2007`, `2008`, `2009`, `200D`, `2010`, `2012`, `2013`,
+and `2014`. The unique caller chain is
+`SID 2E -> 0x936AA/0x936D6 -> 0x8A630 -> 0x8A482/0x8A542 -> 0x8D3CC/0x8D416`.
+There is no edge from SID `0xAB`, and the table remains distinct from SID `0x31`
+RoutineControl configuration at `0x26AEC`. CORR-056 records the former ownership
+and 32-row-count error.
 
 ### Direct-service versus subfunction dispatch
 
@@ -917,7 +953,7 @@ Those require successful bootloader capture or a firmware image from part
 | SID `0x31` direct binding to the 19-entry RoutineControl RID surface at `0x26AEC` | **Definitive** |
 | null direct-callback SIDs `11`/`34`/`36`/`37` receive generic positive responses; `14/23/31/BA` have real callbacks | **Definitive** |
 | generated Dcm DSP start-phase globally disabled (flag @0x25DCC=0) | **Definitive** |
-| SID `0x31` uses direct callback `0x95DCE`; separate internal `0x25768` routine table remains distinct | **Definitive** |
+| SID `0x2E` uniquely owns the 13-entry WDBI callback table at `0x25768`; SID `0x31` separately owns the 19-RID RoutineControl surface at `0x26AEC` | **Definitive** |
 | proprietary SID `0xAB` structure | **Recovered event-record list/state/detail service; exact OEM name unknown** |
 | reset reaches the bootloader rather than returning directly to application | **Strong inference** |
 | bootloader `0x614A` queues valid transitions instead of responding directly | **Definitive** |

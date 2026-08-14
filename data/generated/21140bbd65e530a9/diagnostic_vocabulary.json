@@ -13,14 +13,14 @@
       "count": 242
     },
     "service_table": {
-      "base": "0x25E30",
+      "base": "0x25E28",
       "count": 23
     },
-    "routine_table": {
+    "wdbi_callback_table": {
       "base": "0x25768",
-      "count": 32
+      "count": 13
     },
-    "write_did_table": {
+    "routine_control_table": {
       "base": "0x26AEC",
       "count": 19
     },
@@ -3207,7 +3207,7 @@
       "match_grade": "exact",
       "firmware_table_index": 0,
       "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
+      "firmware_table_base": "0x25E28",
       "annotation_action": "comment",
       "note": "UDS SID 0x10 (DiagnosticSessionControl)."
     },
@@ -3218,9 +3218,9 @@
       "oem_symbol": "uds_ecureset",
       "match_grade": "exact",
       "firmware_table_index": 1,
-      "firmware_callback": "0x8B1F0",
-      "firmware_table_base": "0x25E30",
-      "annotation_action": "name_callback",
+      "firmware_callback": null,
+      "firmware_table_base": "0x25E28",
+      "annotation_action": "comment",
       "note": "UDS SID 0x11 (ECUReset)."
     },
     {
@@ -3230,9 +3230,9 @@
       "oem_symbol": "uds_cleardiagnosticinformation",
       "match_grade": "exact",
       "firmware_table_index": 2,
-      "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
-      "annotation_action": "comment",
+      "firmware_callback": "0x8B1F0",
+      "firmware_table_base": "0x25E28",
+      "annotation_action": "name_callback",
       "note": "UDS SID 0x14 (ClearDiagnosticInformation)."
     },
     {
@@ -3242,9 +3242,9 @@
       "oem_symbol": "uds_readdtcinformation",
       "match_grade": "exact",
       "firmware_table_index": 3,
-      "firmware_callback": "0x945DC",
-      "firmware_table_base": "0x25E30",
-      "annotation_action": "name_callback",
+      "firmware_callback": null,
+      "firmware_table_base": "0x25E28",
+      "annotation_action": "comment",
       "note": "UDS SID 0x19 (ReadDTCInformation)."
     },
     {
@@ -3254,8 +3254,8 @@
       "oem_symbol": "uds_readdatabyidentifier",
       "match_grade": "exact",
       "firmware_table_index": 4,
-      "firmware_callback": "0x948AA",
-      "firmware_table_base": "0x25E30",
+      "firmware_callback": "0x945DC",
+      "firmware_table_base": "0x25E28",
       "annotation_action": "name_callback",
       "note": "UDS SID 0x22 (ReadDataByIdentifier)."
     },
@@ -3266,9 +3266,9 @@
       "oem_symbol": "uds_readmemorybyaddress",
       "match_grade": "exact",
       "firmware_table_index": 5,
-      "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
-      "annotation_action": "comment",
+      "firmware_callback": "0x948AA",
+      "firmware_table_base": "0x25E28",
+      "annotation_action": "name_callback",
       "note": "UDS SID 0x23 (ReadMemoryByAddress)."
     },
     {
@@ -3279,7 +3279,7 @@
       "match_grade": "exact",
       "firmware_table_index": 6,
       "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
+      "firmware_table_base": "0x25E28",
       "annotation_action": "comment",
       "note": "UDS SID 0x27 (SecurityAccess)."
     },
@@ -3290,9 +3290,9 @@
       "oem_symbol": "uds_communicationcontrol",
       "match_grade": "exact",
       "firmware_table_index": 7,
-      "firmware_callback": "0x93C62",
-      "firmware_table_base": "0x25E30",
-      "annotation_action": "name_callback",
+      "firmware_callback": null,
+      "firmware_table_base": "0x25E28",
+      "annotation_action": "comment",
       "note": "UDS SID 0x28 (CommunicationControl)."
     },
     {
@@ -3302,8 +3302,8 @@
       "oem_symbol": "uds_writedatabyidentifier",
       "match_grade": "exact",
       "firmware_table_index": 8,
-      "firmware_callback": "0x95DCE",
-      "firmware_table_base": "0x25E30",
+      "firmware_callback": "0x93C62",
+      "firmware_table_base": "0x25E28",
       "annotation_action": "name_callback",
       "note": "UDS SID 0x2E (WriteDataByIdentifier)."
     },
@@ -3314,9 +3314,9 @@
       "oem_symbol": "uds_routinecontrol",
       "match_grade": "exact",
       "firmware_table_index": 9,
-      "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
-      "annotation_action": "comment",
+      "firmware_callback": "0x95DCE",
+      "firmware_table_base": "0x25E28",
+      "annotation_action": "name_callback",
       "note": "UDS SID 0x31 (RoutineControl)."
     },
     {
@@ -3327,7 +3327,7 @@
       "match_grade": "exact",
       "firmware_table_index": 10,
       "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
+      "firmware_table_base": "0x25E28",
       "annotation_action": "comment",
       "note": "UDS SID 0x34 (RequestDownload)."
     },
@@ -3339,7 +3339,7 @@
       "match_grade": "exact",
       "firmware_table_index": 11,
       "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
+      "firmware_table_base": "0x25E28",
       "annotation_action": "comment",
       "note": "UDS SID 0x36 (TransferData)."
     },
@@ -3351,7 +3351,7 @@
       "match_grade": "exact",
       "firmware_table_index": 12,
       "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
+      "firmware_table_base": "0x25E28",
       "annotation_action": "comment",
       "note": "UDS SID 0x37 (RequestTransferExit)."
     },
@@ -3363,7 +3363,7 @@
       "match_grade": "exact",
       "firmware_table_index": 13,
       "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
+      "firmware_table_base": "0x25E28",
       "annotation_action": "comment",
       "note": "UDS SID 0x3E (TesterPresent)."
     },
@@ -3375,7 +3375,7 @@
       "match_grade": "exact",
       "firmware_table_index": 14,
       "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
+      "firmware_table_base": "0x25E28",
       "annotation_action": "comment",
       "note": "UDS SID 0x85 (ControlDTCSetting)."
     },
@@ -3386,9 +3386,9 @@
       "oem_symbol": "uds_proprietaryeventrecord",
       "match_grade": "exact",
       "firmware_table_index": 15,
-      "firmware_callback": "0x8D344",
-      "firmware_table_base": "0x25E30",
-      "annotation_action": "name_callback",
+      "firmware_callback": null,
+      "firmware_table_base": "0x25E28",
+      "annotation_action": "comment",
       "note": "UDS SID 0xAB (ProprietaryEventRecord)."
     },
     {
@@ -3398,9 +3398,9 @@
       "oem_symbol": "uds_proprietaryservice_ba",
       "match_grade": "exact",
       "firmware_table_index": 16,
-      "firmware_callback": null,
-      "firmware_table_base": "0x25E30",
-      "annotation_action": "comment",
+      "firmware_callback": "0x8D344",
+      "firmware_table_base": "0x25E28",
+      "annotation_action": "name_callback",
       "note": "UDS SID 0xBA (ProprietaryService_BA)."
     },
     {
