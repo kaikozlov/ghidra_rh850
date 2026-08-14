@@ -549,6 +549,14 @@ paths = [
   "tools/generate_semantic_coverage_ledger.sh",
 ]
 
+[suite.semantic_review_promotions]
+tests = ["tests/verify_semantic_review_promotions.py"]
+oracle = "cfg_dataflow"
+paths = [
+  "data/semantic_review_status.csv",
+  "tests/verify_semantic_review_promotions.py",
+]
+
 [suite.semantic_interest_ranking]
 tests = ["tests/verify_semantic_interest_ranking.py"]
 oracle = "generated_self_check"

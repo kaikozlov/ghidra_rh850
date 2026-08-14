@@ -204,7 +204,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x000048d2,38,FUN_000048d2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00004900,20,uds_write_did_negative_response,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00004914,52,uds_write_did_positive_response,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,1,0,,4,1,3,0,1,0,boot,unreviewed,,,,,,
-0x00004948,328,uds_write_data_by_identifier,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,1,,6,4,4,0,4,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 341 (zero-caller); decompiled successfully; exact semantics not independently established
+0x00004948,328,uds_write_data_by_identifier,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,1,,6,4,4,0,4,0,boot,semantically_identified,verified,tests/verify_did_model.py; tests/verify_security_gate.py,raw_bytes,passed,2026-08-14,Boot WDBI implements ordered 0203→0201→0202 programming handshake; DID/length/order/session/security gates and sequence-state effects are deterministically asserted
 0x00004a90,10,uds_write_did_state_reset,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,0,0,,2,0,2,0,0,0,boot,unreviewed,,,,,,
 0x00004a9a,68,uds_write_did_completion_task,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,3,0,,4,4,1,0,0,0,boot,unreviewed,,,,,,
 0x00004ae2,86,FUN_00004ae2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,1,0,,4,4,3,0,0,0,boot,unreviewed,,,,,,
@@ -260,11 +260,11 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00005c4a,10,FUN_00005c4a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,2,0,2,0,0,0,boot,unreviewed,,,,,,
 0x00005c54,34,FUN_00005c54,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,1,1,1,0,0,0,boot,unreviewed,,,,,,
 0x00005c76,8,FUN_00005c76,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
-0x00005c92,152,uds_request_transfer_exit,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,6,1,,7,5,4,0,1,0,boot,unreviewed,,,,,,
+0x00005c92,152,uds_request_transfer_exit,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,6,1,,7,5,4,0,1,0,boot,semantically_identified,verified,tests/verify_semantic_review_promotions.py,cfg_dataflow,passed,2026-08-14,"Boot RequestTransferExit service identity, payload-crypto finalization, transfer-state cleanup, and response return are deterministically asserted"
 0x00005d2a,2,FUN_00005d2a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00005d2c,20,FUN_00005d2c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00005d40,40,FUN_00005d40,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,4,0,4,0,0,0,boot,unreviewed,,,,,,
-0x00005d68,468,uds_request_download,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,10,1,,9,6,4,0,1,0,boot,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 254 (zero-caller); decompiled successfully; exact semantics not independently established
+0x00005d68,468,uds_request_download,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,10,1,,9,6,4,0,1,0,boot,semantically_identified,verified,tests/verify_memory_safety.py; tests/verify_payload_gate.py; tests/verify_security_gate.py,cfg_dataflow,passed,2026-08-14,"Boot RequestDownload address/length classes, programming/security/crypto-ready gates, redownload behavior, compare mode, and payload-gate use are deterministically asserted"
 0x00005f3c,2,FUN_00005f3c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
 0x00005f3e,42,bootloader_read_did_fill_placeholder,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,0,,1,0,0,0,1,0,boot,unreviewed,,,,,,
 0x00005f68,20,uds_read_did_negative_response,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,1,0,,0,0,0,0,0,0,boot,unreviewed,,,,,,
@@ -495,7 +495,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00034cb8,150,application_operation_04_start,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,3,1,,3,1,2,0,1,1,application,unreviewed,,,,,,
 0x00034d4e,72,application_operation_04_completion,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,1,1,,2,0,2,0,0,0,application,unreviewed,,,,,,
 0x00034d96,24,direct_call_target_00034d96,direct-call seed,SeedDirectCallTargets.java,USER_DEFINED,false,__stdcall,1,1,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
-0x00034dae,190,application_operation_05_start,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,4,1,,3,1,2,0,2,1,application,unreviewed,,,,,,
+0x00034dae,190,application_operation_05_start,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,4,1,,3,1,2,0,2,1,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-14,Selected current top-100 sweep operation-05 callback; decompiled successfully; exact operation semantics not independently established
 0x00034e6c,84,application_operation_05_completion,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,1,1,,2,0,2,0,1,0,application,unreviewed,,,,,,
 0x00034ec0,72,application_operation_06_start,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,1,1,,4,4,0,0,2,1,application,unreviewed,,,,,,
 0x00034f08,18,application_operation_06_completion,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,1,1,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -1001,7 +1001,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x0003e70e,30,FUN_0003e70e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,1,0,1,0,application,unreviewed,,,,,,
 0x0003e72c,114,FUN_0003e72c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,3,0,,4,4,3,0,2,0,application,unreviewed,,,,,,
 0x0003e79e,142,FUN_0003e79e,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,9,0,,2,2,1,0,3,0,application,unreviewed,,,,,,
-0x0003e82c,180,deadline_monitor_simple_04_callback_00,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,1,,12,12,0,0,5,0,application,unreviewed,,,,,,
+0x0003e82c,180,deadline_monitor_simple_04_callback_00,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,1,,12,12,0,0,5,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-14,Selected current top-100 sweep deadline-monitor callback; decompiled successfully; exact per-callback semantics not independently established
 0x0003e8e0,24,deadline_monitor_simple_04_callback_01,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,1,1,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0003e8f8,32,deadline_monitor_simple_04_callback_02,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,1,1,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x0003e918,18,FUN_0003e918,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
@@ -1207,7 +1207,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00041796,44,FUN_00041796,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,7,0,4,0,0,0,application,unreviewed,,,,,,
 0x000417c2,44,FUN_000417c2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,7,0,4,0,0,0,application,unreviewed,,,,,,
 0x000417ee,302,FUN_000417ee,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,4,0,,27,23,4,0,3,0,application,unreviewed,,,,,,
-0x0004191c,214,deadline_monitor_d_b_00_callback_00,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,2,,8,8,0,0,10,0,application,unreviewed,,,,,,
+0x0004191c,214,deadline_monitor_d_b_00_callback_00,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,2,,8,8,0,0,10,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-14,Selected current top-100 sweep deadline-monitor callback; decompiled successfully; exact per-callback semantics not independently established
 0x000419f2,16,deadline_monitor_d_b_00_callback_04,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,1,1,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00041a02,18,deadline_monitor_d_b_00_callback_08,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,1,1,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00041a14,6,FUN_00041a14,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,0,1,0,0,0,application,unreviewed,,,,,,
@@ -4197,7 +4197,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00086f96,90,FUN_00086f96,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,2,,6,3,4,0,0,0,application,unreviewed,,,,,,
 0x0008704c,92,icus_command8_key_update_start,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,1,,6,1,5,0,1,0,application,unreviewed,,,,,,
 0x000870a8,248,icus_command8_key_update_adapter,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,6,1,,7,1,7,0,0,0,application,unreviewed,,,,,,
-0x000871a0,186,icus_command8_key_update_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,1,,8,6,7,0,0,0,application,unreviewed,,,,,,
+0x000871a0,186,icus_command8_key_update_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,1,,8,6,7,0,0,0,application,semantically_identified,verified,tests/verify_icus_key_update.py; tests/verify_icus_stage7_static.py,cfg_dataflow,passed,2026-08-14,ICU command-8 key-update completion worker body and completion role are deterministically asserted
 0x0008725a,24,FUN_0008725a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00087272,40,FUN_00087272,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,4,2,0,,1,1,1,0,0,0,application,unreviewed,,,,,,
 0x0008729a,24,FUN_0008729a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,4,0,,0,0,0,0,0,0,application,unreviewed,,,,,,
@@ -4224,8 +4224,8 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00087bba,90,icus_command5_mac_generate_finish,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,2,2,2,,6,3,4,0,0,0,application,unreviewed,,,,,,
 0x00087c14,92,icus_command5_interrupt_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,4,1,,4,1,4,0,0,0,application,unreviewed,,,,,,
 0x00087c70,92,icus_command5_mac_generate_start,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,1,,6,1,5,0,0,0,application,unreviewed,,,,,,
-0x00087ccc,260,icus_command5_mac_generate_adapter,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,6,2,,7,1,7,0,0,0,application,unreviewed,,,,,,
-0x00087dd0,186,icus_command5_mac_generate_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,2,,8,6,7,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 410 (zero-caller); decompiled successfully; exact semantics not independently established
+0x00087ccc,260,icus_command5_mac_generate_adapter,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,6,2,,7,1,7,0,0,0,application,semantically_identified,verified,tests/verify_semantic_review_promotions.py,cfg_dataflow,passed,2026-08-14,ICU command-5 lower adapter ownership and prepare/start/finish callback installation are deterministically asserted
+0x00087dd0,186,icus_command5_mac_generate_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,2,,8,6,7,0,0,0,application,semantically_identified,verified,tests/verify_icus_stage7_static.py,cfg_dataflow,passed,2026-08-14,ICU command-5 MAC-generate completion path and accepted/rejected completion behavior are deterministically asserted
 0x00087e8a,24,FUN_00087e8a,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x00087ea2,46,FUN_00087ea2,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,0,,4,0,2,0,0,0,application,unreviewed,,,,,,
 0x00087ed0,172,icus_cmac_verify_prepare,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,0,,12,0,9,0,0,0,application,unreviewed,,,,,,
@@ -4233,8 +4233,8 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00087fca,90,FUN_00087fca,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,2,,6,3,4,0,0,0,application,unreviewed,,,,,,
 0x00088028,88,icus_command7_interrupt_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,4,0,,4,1,4,0,0,0,application,unreviewed,,,,,,
 0x00088080,92,icus_cmac_verify_start,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,1,2,1,,6,1,5,0,1,0,application,unreviewed,,,,,,
-0x000880dc,256,icus_cmac_verify_adapter,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,6,2,,7,1,7,0,0,0,application,unreviewed,,,,,,
-0x000881dc,186,icus_cmac_verify_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,2,,8,6,7,0,0,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-11,Selected rank 411 (zero-caller); decompiled successfully; exact semantics not independently established
+0x000880dc,256,icus_cmac_verify_adapter,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,6,2,,7,1,7,0,0,0,application,semantically_identified,verified,tests/verify_semantic_review_promotions.py,cfg_dataflow,passed,2026-08-14,ICU command-7 CMAC-verify lower adapter ownership and prepare/start/finish callback installation are deterministically asserted
+0x000881dc,186,icus_cmac_verify_completion,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,5,2,,8,6,7,0,0,0,application,semantically_identified,verified,tests/verify_icus_stage7_static.py,cfg_dataflow,passed,2026-08-14,ICU command-7 CMAC-verify completion path and accepted/rejected completion behavior are deterministically asserted
 0x00088296,24,FUN_00088296,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
 0x000882ae,44,FUN_000882ae,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,2,,5,0,5,0,0,0,application,unreviewed,,,,,,
 0x000882da,40,FUN_000882da,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,2,0,,1,1,1,0,0,0,application,unreviewed,,,,,,

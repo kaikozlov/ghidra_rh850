@@ -67,16 +67,19 @@ check("dispatch denominator published", "12 tables / 456 nonzero target pointers
 
 summary = json.loads((REPO / "data/semantic_coverage_summary.json").read_text())
 check("semantic review totals", summary["function_count"] == 6376
-      and summary["reviewed_function_count"] == 110
-      and summary["bounded_semantics_count"] == 22)
+      and summary["reviewed_function_count"] == 117
+      and summary["bounded_semantics_count"] == 30)
 check("semantic state totals", summary["review_state_counts"] == {
-    "reviewed_unknown": 88, "semantically_identified": 19,
-    "structurally_bounded": 3, "unreviewed": 6266,
+    "reviewed_unknown": 87, "semantically_identified": 27,
+    "structurally_bounded": 3, "unreviewed": 6259,
 })
 check("semantic grade totals", summary["evidence_grade_counts"]
-      == {"bounded": 3, "recovered": 11, "verified": 8})
+      == {"bounded": 3, "recovered": 11, "verified": 16})
+check("semantic oracle totals", summary["oracle_class_counts"]
+      == {"cfg_dataflow": 26, "generated_self_check": 87,
+          "instruction_semantics": 3, "raw_bytes": 1})
 check("execution totals explicit", summary["execution_status_counts"]
-      == {"passed": 105, "unavailable": 5})
+      == {"passed": 112, "unavailable": 5})
 
 with (REPO / "data/generated/semantic_interest_ranking.csv").open(newline="") as stream:
     selected = [row for row in csv.DictReader(stream) if row["selected_for_sweep"] == "true"]
@@ -110,7 +113,7 @@ check("exact verified finding denominator", len(verified_findings) == 59)
 check("dynamic observation denominator", observed_findings == ["SECOC-030", "VAR-001"])
 
 required_tokens = [
-    "105 `passed`, 5 `unavailable`, 0 `failed`",
+    "112 `passed`, 5 `unavailable`, 0 `failed`",
     "Live official Techstream↔`8965B4512000` flows captured | 0",
     "Exact cross-variant/target-generation transfers verified | 0",
 ]
