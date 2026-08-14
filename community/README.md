@@ -47,9 +47,13 @@ repository findings:
   into `sst.b 0x2,ep,r1`, completing a six-byte destination permutation
   `0..5`. This strongly indicates a one-bit acquisition error in the public
   dump, not a CRC-algorithm mismatch. The 8-byte egg marker is independently a
-  **false positive** on this calibration: it matches a 5-byte comparator in the
-  `0xAB` event-record dispatch path (`FUN_0003485A` at VA `0x3485A`), not the
-  SecOC Gate-2 control flow. See SECOC-028/043/044, CORR-042, and
+  **false positive as a SecOC signature** on this calibration: it matches the
+  shared 5-byte token comparator (`FUN_0003485A` at VA `0x3485A`) used by the
+  application SID `0xBA` proprietary operation table, not the SecOC Gate-2
+  control flow. Forcing that comparator true removes BA token comparisons, but
+  F7/`BAENA` still has an independent application SecurityAccess-level-2 check
+  at `0x34D96`; the patch therefore does not create the persistent BA
+  authorization state without SA2. See SECOC-028/035/043/044, SEC-APP-007, and
   `verify_community_tooling.py` §6–7.
 - **Extended version family** — targets 8965F3401200 (dual-CPU),
   8965F4207000, 8965F4201000, 8965B4209000, 8965B4233100, 8965B4509100.
@@ -60,8 +64,9 @@ repository findings:
 
 The author notes the complete patcher is "largely untested" on its target
 calibrations. Repository analysis independently verifies the bootstrap,
-CodeFlash/CRC mechanism, and the `4512000` dump anomaly; the raw egg target still
-requires calibration-specific semantic validation.
+CodeFlash/CRC mechanism, and the `4512000` dump anomaly; the `4512000` egg target is now semantically closed as
+SID-`0xBA` token-comparison logic rather than SecOC acceptance logic. Future
+F3/F4 egg matches still require calibration-specific semantic validation.
 
 ## `albinoelephant/`
 

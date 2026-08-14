@@ -109,6 +109,36 @@ oracle = "documentation_lint"
 tests = ["tests/verify_application_ab_service.py"]
 paths = ["docs/diagnostics/application.md"]
 
+[suite.application_proprietary_ba]
+tests = ["tests/verify_application_proprietary_ba.py"]
+oracle = "cfg_dataflow"
+paths = [
+  "data/application_proprietary_ba_surface.csv",
+  "tools/generate_application_proprietary_ba_surface.py",
+  "data/application_diagnostic_map.csv",
+  "tools/generate_application_diagnostic_map.py",
+  "docs/diagnostics/application-proprietary-ba.md",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/security/secoc/key-recovery-assessment.md",
+  "docs/security/secoc/software-path-assessment.md",
+  "docs/tooling/community-patch-target-analysis.md",
+  "community/README.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+]
+
+[suite.application_proprietary_ba_live]
+tests = ["tests/verify_application_proprietary_ba_live.py"]
+oracle = "cfg_dataflow"
+paths = [
+  "ghidra/scripts/verify/AssertApplicationProprietaryBaSurface.java",
+  "data/application_proprietary_ba_surface.csv",
+  "docs/diagnostics/application-proprietary-ba.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+]
+
 [suite.application_diagnostics]
 tests = ["tests/verify_application_diagnostics.py"]
 paths = [

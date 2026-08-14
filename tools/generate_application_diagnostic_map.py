@@ -253,14 +253,14 @@ SEMANTICS = {
         "notes": "SID 0xAB does not own callback 0x8D344; 0x8D344 belongs to SID 0xBA.",
     },
     0xBA: {
-        "service_callback_role": "direct callback 0x8D344; phase 0 mirrors request context then enters 0x8D2B2",
-        "async_worker": "0x8D2B2/0x8D32E operation-F1 state machine",
-        "security_policy": "none at service level; extended session only",
-        "nrcs": "worker-defined; OEM semantics not yet assigned",
-        "side_effects": "asynchronous proprietary operation; exact OEM purpose remains open",
-        "config_tables": "runtime service object 0x25FA8",
-        "evidence_status": "structurally recovered; semantics open",
-        "notes": "Previously mislabeled as SID 0xAB event-record callback by the shifted service parser.",
+        "service_callback_role": "direct callback 0x8D344; phase 0 enters 0x8D2B2 -> 0x4C8A8 -> 0x348B4 ten-operation dispatcher",
+        "async_worker": "0x8D2B2/0x8D32E shared BA operation state machine; ten descriptors at 0x28098",
+        "security_policy": "configured service sec_count=0; extended session only; F7/BAENA has callback-local application SA level-2 gate",
+        "nrcs": "worker-defined; gateway returns -13 when persistent authorization is absent and request is not F7/BAENA",
+        "side_effects": "persistent authorization, maintenance/reset, lifecycle mode requests, shared persistent workflow, alternate snapshot override",
+        "config_tables": "runtime service object 0x25FA8; operation count 0x28094; ten 16-byte descriptors at 0x28098",
+        "evidence_status": "verified configured surface; OEM labels bounded to embedded request tokens",
+        "notes": "SID 0xBA is separate from 0xAB. See application-proprietary-ba.md and application_proprietary_ba_surface.csv.",
     },
 }
 

@@ -30,10 +30,13 @@ jmp [lp]
 
 The crucial research rule is that the egg identifies a **location candidate**,
 not a semantic function. `8965B4512000` already proves why: the marker occurs
-exactly once at `0x3485A`, but Ghidra identifies the containing function as a
-5-byte comparator in the proprietary `0xAB` event-record path. Its two real
-callers are `FUN_00034882` and `application_proprietary_ab_f1_start`; it has no
-direct ICU-S reference. The actual SecOC receive-verify worker is at `0x8E4BA`.
+exactly once at `0x3485A`; the containing function is the shared 5-byte token
+comparator for the proprietary SID `0xBA` operation table. Its two direct call
+references are `FUN_00034882` and the historically named
+`application_proprietary_ab_f1_start` (now semantically BA F1/`JTEKM`); it has
+no direct ICU-S reference. Forcing its return true removes BA token comparisons,
+but F7 still independently requires application SA level 2 at `0x34D96`. The
+actual SecOC receive-verify worker is at `0x8E4BA`.
 
 ## 1. Raw-byte triage
 
@@ -100,7 +103,9 @@ DIRECT_ICUS_REF_COUNT 0
 ```
 
 and decompiles the known byte-comparison loop that returns 1 only when all
-requested bytes match.
+requested bytes match. The emitted caller name reflects the accepted project's
+historical symbol; service ownership is established separately from the corrected
+Dcm object and BA descriptor table.
 
 ## 3. Classification procedure for an F3/F4 image
 

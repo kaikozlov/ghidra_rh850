@@ -3,8 +3,9 @@
 
 The service is distinct from SID 0xBA and from the separate SID-0x2E WDBI
 callback table. This suite pins the 0xAB subfunctions/event-record tables, the
-complete configured event callback closure, and the adjacent 0xBA operation-F1
-boundary so service ownership cannot shift again.
+complete configured event callback closure, and one adjacent SID-0xBA F1 ownership
+sentinel so service ownership cannot shift again. The full BA table is verified
+separately by verify_application_proprietary_ba.py.
 """
 from pathlib import Path
 import struct
@@ -82,7 +83,7 @@ for index, (selector, callback, policy) in enumerate(expected_selectors):
         repr(actual),
     )
 
-print("\n== SID 0xBA operation-F1 handoff ==")
+print("\n== SID 0xBA F1 ownership sentinel ==")
 check("operation dispatch table has ten entries", struct.unpack_from("<I", CF, 0x28094)[0] == 10)
 f1 = CF[0x28098:0x280A8]
 check(
@@ -181,7 +182,7 @@ check("closed 0xAB event graph has no direct sensitive targets",
       not (ab_targets & sensitive_targets),
       repr(sorted(hex(x) for x in ab_targets & sensitive_targets)))
 ba_targets = direct_targets(0x34B74, 0x34BA8)
-check("bounded 0xBA operation-F1 path has no direct sensitive targets",
+check("bounded 0xBA F1 sentinel path has no direct sensitive targets",
       not (ba_targets & sensitive_targets),
       repr(sorted(hex(x) for x in ba_targets & sensitive_targets)))
 

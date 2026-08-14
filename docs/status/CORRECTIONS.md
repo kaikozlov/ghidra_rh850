@@ -1150,3 +1150,30 @@ the mistakes are not re-made.
   `data/application_wdbi_surface.csv`;
   `tests/verify_application_wdbi_2010_dead_state.py`;
   `tests/verify_application_wdbi_2010_dead_state_live.py`.
+
+
+### CORR-058 — `sec_count=0` does not eliminate callback-local SecurityAccess checks; SID `0xBA` F7 requires level 2
+
+- **Wrong:** SEC-APP-004 and the initial proprietary-service audit generalized the
+  empty Dcm service/DID/RoutineControl security-policy tables into “no configured
+  SecurityAccess gating in this calibration,” and bounded SID `0xBA` only through
+  its first operation.
+- **Right:** the policy-table statement remains true, but it is layer-specific.
+  The full ten-operation BA table at `0x28098` contains F7/`BAENA`; its start
+  callback `0x34DAE` calls `0x34D96 -> 0x8C8C6 -> 0x8FDCA`, and `0x34D96`
+  requires security-mask bit `0x02`. Setter `0x9075A` defines the mask as bit
+  `(level-1)`, making `0x02` application SecurityAccess level 2 (`27 03/04`).
+- **Persistent boundary:** successful F7 persists ordinary object 24 (`0x18`)
+  plus redundant object 5 (`0x105`) and establishes `FEBE5F27=0x5A` with a
+  30-invocation countdown. Restore helper `0x347B0` reconstructs that marker
+  from NvM, and generic BA dispatcher `0x348B4` accepts registered operations
+  while the marker is active without a fresh SA read. F6/`BADIS` clears it.
+- **Community patch consequence:** blurbdust's `0x3485A` egg is the BA shared
+  token comparator, not SecOC acceptance logic. Forcing it true removes BA token
+  comparisons but does not bypass the independent F7 SA2 check; therefore it is
+  neither an initial application-SA bypass nor a SecOC bypass.
+- **Canonical:** [../diagnostics/application-proprietary-ba.md](../diagnostics/application-proprietary-ba.md);
+  [../security/application-security-access.md](../security/application-security-access.md);
+  `data/application_proprietary_ba_surface.csv`;
+  `tests/verify_application_proprietary_ba.py`;
+  `tests/verify_application_proprietary_ba_live.py`.

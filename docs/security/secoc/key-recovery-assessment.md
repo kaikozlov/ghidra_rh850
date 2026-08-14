@@ -288,21 +288,29 @@ that does not transfer to this calibration.
 and treats the matched function as the patch target.
 
 On `8965B4512000` the egg matches exactly once at VA `0x3485A` (verified).
-But firmware analysis identifies that address as the prologue of
-`FUN_0003485A` — a 5-byte string comparator in the proprietary SID `0xAB`
-event-record token-comparison path:
+Firmware analysis now closes that address as the prologue of
+`FUN_0003485A` — the shared 5-byte comparator used by the proprietary SID
+`0xBA` operation table:
 
-- Caller `FUN_00034882 @ 0x34882` compares a parameter against the token bank
-  `"BAENAJTEKMTMPCLJTRM1JTRM2BADISBAENATZCLRJTRM3VSPDASINC"` (5 chars at a time).
-- Caller `application_proprietary_ab_f1_start @ 0x34B74` is the operation-F1
-  callback, confirmed in the `0xAB` graph.
+- `FUN_00034882 @ 0x34882` uses it for the F7/length-6/`BAENA` bootstrap check.
+- The currently named `application_proprietary_ab_f1_start @ 0x34B74` is
+  semantically the SID-`0xBA` F1/`JTEKM` start callback; its historical symbol
+  name predates corrected AB/BA service ownership.
+- F3-FB operation callbacks reuse the same comparator for their embedded fixed
+  request tokens; FA compares four bytes `VSPD` after its tester-selected value.
 
-The `0xAB` service is structurally classified as an event-record service (list,
-per-ID state, per-ID detail) — not a SecOC service. The closed `0xAB` graph has
-no static edge to `secoc_rx_verify_worker @ 0x8E4BA`, the ICU-S command-7
-verification chain, or any crypto/SecOC target (verified by
-`verify_application_ab_service.py`). The actual SecOC verify function's prologue
-is `a4 07 e1 f0 c6 00 e6 ee` — completely different from the egg.
+Replacing the comparator prologue with `mov 1,r10; jmp [lp]` therefore makes BA
+token comparisons succeed. It does **not** bypass the independent F7 local
+SecurityAccess check `0x34DAE -> 0x34D96 -> 0x8C8C6 -> 0x8FDCA`, where
+`0x34D96` requires mask bit `0x02` = application SA level 2. Before the
+persistent BA marker exists, the generic gateway still requires selector F7 and
+length 6; after successful F7, forcing the comparator true weakens the remaining
+registered operations' token checks while their local state gates remain.
+
+The `0xAB` service is separately classified as an event-record service (list,
+per-ID state, per-ID detail). Neither the BA comparator nor the closed AB graph
+is the SecOC receive-verify worker at `0x8E4BA`; its prologue is
+`a4 07 e1 f0 c6 00 e6 ee`, completely different from the egg.
 
 Applying the supplied patch would make the event-token comparator always return
 "match," distorting `0xAB` dispatch. It would not alter SecOC verification.
@@ -333,8 +341,8 @@ every calibration.
 |---|---|---|
 | Egg count (1) and address (`0x3485A`) | firmware-static | verified |
 | Function semantics (5-byte comparator) | firmware-static (decompilation) | verified |
-| `0xAB` membership and callers | firmware-static (x-ref + `verify_application_ab_service.py`) | verified |
-| No static edge to SecOC chain | firmware-static (`verify_application_ab_service.py` closed graph) | verified |
+| SID `0xBA` comparator membership and callers | firmware-static (descriptor table/x-ref + `verify_application_proprietary_ba.py`) | verified |
+| No static edge from BA comparator/surface to SecOC chain | firmware-static (`verify_application_proprietary_ba.py` + live direct-reference audit) | verified |
 | CRC repair geometry matches Sienna | firmware-static (`verify_boot_trust.py` + `verify_community_tooling.py` §7) | verified |
 | Community CRC-32/Ethernet terminal-fixup construction matches boot-validity behavior | stock region-0 fixture + reconstructed region 1 (`verify_codeflash_crc_reconstruction.py`; `verify_community_tooling.py` §7) | verified |
 | Published region-1 mismatch has unique single-bit correction `0xBB1C4 A2→82`, also repairing local store semantics | CRC syndrome + instruction semantics (`verify_codeflash_crc_reconstruction.py`) | verified correction; acquisition-error attribution is strong inference |

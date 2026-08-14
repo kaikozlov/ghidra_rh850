@@ -210,9 +210,10 @@ check("egg marker is 8 bytes (EGG_LEN 8)", "EGG_LEN 8" in mc or "EGG_LEN 8" in m
 print("\n== 6. egg signature false-positive on Sienna 8965B4512000 ==")
 
 # The egg (88 00 01 52 00 0a e5 0d) is the first 8 bytes of FUN_0003485A,
-# a 5-byte string-comparison helper in the 0xAB event-record dispatch path —
-# NOT the SecOC MAC verification function. Patching it would corrupt event
-# dispatch, not bypass SecOC. The actual SecOC verify worker is at 0x8E4BA.
+# the shared 5-byte token comparator for the SID-0xBA proprietary operation
+# table — NOT the SecOC MAC verification function. Patching it forces BA token
+# matches; F7's independent SA2 gate remains elsewhere. The actual SecOC verify
+# worker is at 0x8E4BA.
 EGG = bytes([0x88, 0x00, 0x01, 0x52, 0x00, 0x0A, 0xE5, 0x0D])
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 
@@ -235,9 +236,9 @@ if egg_matches:
 
     check("egg encodes known memcmp prologue", CF[egg_va:egg_va + 8] == EGG)
 
-    # PIN: the two 0xAB callers that reference this function
+    # PIN: the two direct callers of the SID-0xBA shared token comparator
     # FUN_00034882 at 0x34882 calls 0x3485A from 0x34898 (jarl)
-    # application_proprietary_ab_f1_start at 0x34B74 calls 0x3485A from 0x34B80 (jarl)
+    # historical symbol application_proprietary_ab_f1_start is BA F1/JTEKM and calls 0x3485A at 0x34B80
     import struct as _struct
 
     def jarl_target(call_site):
@@ -262,15 +263,16 @@ if egg_matches:
           hex(t1) if t1 is not None else "not a jarl")
 
     t2 = jarl_target(0x34B80)
-    check("application_proprietary_ab_f1_start calls egg at 0x34B80",
+    check("BA F1/JTEKM callback calls shared comparator at 0x34B80",
           t2 == 0x3485A,
           hex(t2) if t2 is not None else "not a jarl")
 
     # The patch would overwrite +0..3 with 01 52 7f 00:
     #   +0: 0152   mov 1, r10    (return = 1)
     #   +2: 7f00   jmp [lp]      (return immediately)
-    # This makes the function always return "match" — corrupting 0xAB dispatch,
-    # not SecOC. The effect is documented but not asserted here as a firmware
+    # This makes the function always return "match" for BA token comparisons,
+    # not SecOC; F7's independent SA2 gate remains elsewhere. The effect is
+    # documented but not asserted here as a firmware
     # fact (it's an analysis of the hypothetical patch, not a byte check).
 
     # The actual SecOC MAC verification function is secoc_rx_verify_worker at 0x8E4BA.

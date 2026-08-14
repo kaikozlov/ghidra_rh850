@@ -177,9 +177,7 @@ On failure, the worker returns `0x22` (conditionsNotCorrect).
 
 ## 6. Security-level consumers (what the unlock gates)
 
-**No configured SecurityAccess gating was found at the service, bounded RDBI-policy, or 19-RID RoutineControl policy layers in this Sienna calibration.** The complete configured `0xAB` event-record graph likewise contains no direct sensitive target. The
-security-state machinery is wired up and exercised, but the policy tables are
-empty.
+**No configured SecurityAccess gating was found at the service, bounded RDBI-policy, or 19-RID RoutineControl policy layers in this Sienna calibration.** That statement is limited to Dcm policy tables, not arbitrary callback-local checks. The complete configured `0xAB` event-record graph contains no direct sensitive target, while SID `0xBA` operation F7/`BAENA` independently reads the live Dcm security mask and requires application SecurityAccess level 2. The policy tables are empty even though this callback-local protection is real.
 
 | Scope | Check | Result |
 |---|---|---|
@@ -188,7 +186,8 @@ empty.
 | RDBI callback disclosure boundary | Firmware table `0x2941C` (242 rows / 196 unique callbacks), exact dispatch at `0x4CB8A→0x4CBB2`, depth-4 direct-call audit | No recovered callback-local path into command-5 output, key-update result bank, payload-derived key material, or application-SA seed/data/temp RAM; selected hits reduce to generic NvM workspace plus status accumulator `FEBE5050` |
 | RDBI transport-buffer lifetime | 48 success-stub DIDs across classes 0/2/3; fixed Dcm response buffer `FEBE59F8`; direct-mode path through `0x9434A→0x92810→0x935BA/0x9361A/0x9364A→0x8A374` | Each row declares 1..45 bytes but its producer returns success without writing; those bytes come from prior response-buffer contents. Maximum oracle: `62 1C F4 ‖ prior_RMBA_data[2:47]` |
 | All 19 configured RoutineControl RIDs | Policy table at `0x26420`, flag at `0x26B8D` | All have `level_count=0`; 18 policy-0 RIDs are effective in sessions `1/2/3` |
-| SID `0xAB` event worker, 75 snapshot descriptors, six detail descriptors; separate SID `0xBA` operation-F1 path | Resolve corrected service ownership and bounded descendants | Zero direct matches to selected crypto/NvM/ICU-S/SecOC/security-policy targets |
+| SID `0xAB` event worker, 75 snapshot descriptors, six detail descriptors | Resolve corrected service ownership and bounded descendants | Zero direct matches to selected crypto/NvM/ICU-S/SecOC/security-policy targets |
+| SID `0xBA` ten-operation table | Outer service `sec_count=0`; exact callback-local scan | F7/`BAENA` alone reaches SecurityAccess reader and requires mask bit `0x02` = level 2; successful F7 persists the BA authorization marker/countdown |
 
 The architecture is:
 
@@ -200,12 +199,13 @@ Generic Denso/AUTOSAR diagnostic stack:
 
 Sienna 8965B4512000 calibration:
     level-2 crypto enabled (real secret, real AES)
-    security policy tables unpopulated
+    Dcm service/DID/RoutineControl policy tables unpopulated
+    callback-local SecurityAccess checks can still exist (BA F7 is one)
 ```
 
-The algorithm and unlock state are real; the policy tables are empty. The
-unlock may be a dormant platform feature rather than an intentional
-protection boundary on this firmware.
+The algorithm and unlock state are real. The generic policy tables are empty,
+but F7 proves the unlock is not wholly dormant: selected application callbacks
+can consume the live security mask directly.
 
 The empty RDBI policy therefore exposes a broad read surface, but the recovered
 callback graph now supports a narrower confidentiality boundary than the policy
@@ -333,7 +333,8 @@ authorization:
   skips that helper. Neither cone has a recovered direct d/q/PI/PWM join. See
   `data/application_wdbi_surface.csv` and
   [../diagnostics/application.md](../diagnostics/application.md).
-- **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB` exposes event-record list/state/detail reads through subfunction workers; the recovered graph does not perform the formerly hypothesized motor-control, calibration, flash, or provisioning writes. SID `0xBA` separately owns callback `0x8D344` and the bounded operation-F1 path; its OEM purpose remains open.
+- **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB` exposes event-record list/state/detail reads through subfunction workers; the recovered graph does not perform the formerly hypothesized motor-control, calibration, flash, or provisioning writes.
+- **Proprietary `0xBA`** is extended-session only and has ten fixed operation descriptors. Its outer service object has no configured SecurityAccess level, but F7/`BAENA` has a callback-local level-2 gate. F7 persists a BA authorization marker plus 30-invocation countdown; while active, the generic gateway admits the remaining tokenized operations without a fresh SA read. The recovered effects are lifecycle/maintenance/persistent-state operations and bounded operational overrides, not a direct steering-current primitive. See [the dedicated BA report](../diagnostics/application-proprietary-ba.md).
 
 For a comma integration this policy weakness is not a clean control interface.
 It is primarily an availability/configuration surface, and the partially unnamed RoutineControl/OEM diagnostic semantics make it too fragile for steering control. A purpose-built,
@@ -367,7 +368,7 @@ matching ECU or bench setup is available:
 4. Send `27 04` + key
 5. Expect `67 04`
 
-Rules: do not send writes, resets, `0xAB`, or routines. Send `27 03` as
+Rules: do not send writes, resets, `0xAB`, `0xBA`, or routines. Send `27 03` as
 the first UDS request or include explicit padding bytes.
 
 ## 9. Variant limitations
@@ -391,5 +392,6 @@ the first UDS request or include explicit padding bytes.
 | Services: all sec_count=0 | `verify_security_consumers.py`: 17 service-table checks |
 | RDBI: no DIDs require level > 0 | `verify_security_consumers.py`: 242-DID bounded policy scan |
 | RoutineControl: all 19 RIDs level_count=0 | `verify_security_consumers.py`: 19-RID policy checks |
-| `0xAB` event closure and separate `0xBA` operation-F1 boundary: no selected sensitive targets | `verify_application_ab_service.py`: corrected service objects, event catalogue, snapshot/detail tables, and BA operation-F1 assertions |
+| `0xAB` event closure: no selected sensitive targets | `verify_application_ab_service.py`: corrected service objects plus event catalogue/snapshot/detail closure |
+| `0xBA` ten-operation surface and persistent authorization boundary | `verify_application_proprietary_ba.py` + live Ghidra assertion: exact table/tokens, F7 SA2 gate, object-24/object-5 persistence, restore/countdown, VSPD/SP1 separation, and no direct conditioned-command/d/q join |
 | Consumer set is exhaustive | `verify_security_consumers.py`: exact address-set assertion (11 addresses) |
