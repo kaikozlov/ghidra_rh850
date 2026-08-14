@@ -332,6 +332,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   synchronized labeled captures above. Use the redacted manifest schema in
   [../variants/newer-tsk-target-evidence.md](../variants/newer-tsk-target-evidence.md);
   until then every Sienna→newer-TSK transfer remains hypothesis.
+- **Application WDBI `0204` hardware-visible maintenance/reset consequence.**
+  Static recovery is closed: the write transitions/persists checkpoint object 7,
+  and one branch then starts queue operation 6, which resets/reinitializes state
+  and persists checkpoint objects 9/11/12/14/15 after WDBI completion. No direct
+  conditioned-command/d/q/PWM join is recovered. Dynamic characterization is
+  deliberately not packaged as a normal bench probe because it modifies
+  persistent state; use only a disposable/matching bench with complete NVM
+  backup/restore and recovery procedure if the physical effect becomes important.
 - **Application WDBI `2012` hardware-visible lifecycle-inhibit consequence.**
   Static recovery now closes the software cone: after the scaled-supply snapshot
   reaches `0x0900`, `2012` suppresses the mode-specific transition block that

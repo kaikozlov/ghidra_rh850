@@ -211,6 +211,29 @@ paths = [
   "docs/status/OPEN_QUESTIONS.md",
 ]
 
+[suite.application_wdbi_0204_maintenance]
+tests = [
+  "tests/verify_application_wdbi_0204_maintenance.py",
+  "tests/verify_application_wdbi_0204_maintenance_live.py",
+]
+oracle = "cfg_dataflow"
+paths = [
+  "data/application_wdbi_surface.csv",
+  "data/object15_reachability.csv",
+  "tests/verify_application_wdbi_0204_maintenance.py",
+  "tests/verify_application_wdbi_0204_maintenance_live.py",
+  "ghidra/scripts/verify/AssertApplicationWdbi0204Maintenance.java",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/storage/dataflash.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/ANALYSIS_STATUS.md",
+]
+
 [suite.application_wdbi_2010_dead_state]
 tests = [
   "tests/verify_application_wdbi_2010_dead_state.py",

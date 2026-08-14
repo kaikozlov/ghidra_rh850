@@ -400,13 +400,13 @@ has **zero SecurityAccess levels**. The 13 implemented DIDs divide as follows:
 | `2001` | vehicle speed | arms NvM object `0x101` state machine |
 | `2002` | vehicle speed | arms NvM object `0x102` state machine |
 | `2005/2006/2007/2008/2009/200D` | vehicle speed | arm selected-byte updates under NvM object `0x103` |
-| `0204` | vehicle speed | queues shared asynchronous diagnostic state `0x2E10` |
+| `0204` | vehicle speed | two-mode async persistent maintenance/reset action: mode-latch checkpoint object 7; one branch starts post-response queue operation 6 and resets/persists multiple checkpoint groups |
 | `2010` | vehicle speed | writes diagnostic residue `FEBEB48E/49C/4A0`; exact xrefs contain no runtime readers and its `0x2E10` pending branch is unreachable |
 | `2012` | **none** | payload `01` sets `FEBEB18F = 0x5A`; supply-qualified logical transition bit `0x08` inhibits a mode-specific lifecycle block and clears the alternate rotor-observer calibration selector |
 | `2013` | vehicle speed + two state flags clear | writes 16-bit parameter `FEBEB434`; bounded numeric-control cone reaches motor-worker staging-only `FEBE6DCA/6DCC` |
 | `2014` | vehicle speed + two state flags clear | writes mode flag `FEBEB3EE = 0/0x5A`; changes threshold/mode eligibility and participates in RoutineControl `110A/110C` start gating |
 
-For the eight persistent DIDs, the state consumers construct IDs `0x101/0x102/0x103`
+For the eight parameter-persistence DIDs, the state consumers construct IDs `0x101/0x102/0x103`
 and call `0xFF09C -> secoc_nvm_object_update`; this is a direct persistence join,
 not merely a callback-local RAM write. DID `2012` is the exceptional reachability
 case: its start callback at `0x4EF4A` is unconditional, while session-transition
@@ -414,6 +414,47 @@ policy `0x4C942` applies the vehicle-speed limit only to requested session `02`,
 not extended session `03`. Thus the static path `10 03` followed by
 `2E 20 12 01` requires neither SecurityAccess nor a recovered vehicle-speed
 gate. The complete matrix is `data/application_wdbi_surface.csv`.
+
+#### DID `0204`: asynchronous persistent maintenance/reset workflow
+
+DID `0204` is a two-byte, vehicle-speed-gated WDBI member. Its result callback
+uses bit 7 of the **second payload byte** to choose one of two asynchronous
+states: set selects `FEBE8167=0x11`, clear selects `0x21`. In either case the
+callback stores shared Dcm pending tag `FEBE816A=0x2E10` and returns status `2`.
+The `0x2E/0x10` pending dispatcher then invokes `0x4EBBC`: state `0x11` calls
+`0x35582`, writes application mode request `0x11` through `FDE08->B7F7C`, and
+advances to `0x12`; state `0x21` writes application mode request `0x22` and
+advances to `0x22`.
+
+The application-side consumer is part of normal per-tick scheduling. `B7E6E`
+consumes `FEBEAF47=0x11/0x22`, updates the current mode latch `FEBEAF49`, and,
+when the transition requires persistence, calls `B7E4A`. That helper submits
+checkpoint object **7** through `FF09C`; the checkpoint inventory classifies
+object 7 as the bounded evidence name `three_phase_mode_latch`. `B7F4C` polls
+object-7 NvM status and `B7F24` reports WDBI selector `0x12` completion only
+after the persistence operation leaves pending state. Thus this is a genuine
+application/NvM handshake, not only Dcm transaction bookkeeping.
+
+The two modes diverge after that completion signal. Dcm state `0x12` is simply
+cleared. State `0x22` instead calls `0x50922` before being cleared. `0x50922` is
+the recovered external starter for queue **operation 6** (its only other caller
+is internal queue replay); when idle it records operation `6`, calls initializer
+`0x508E6`, and marks the operation active. The initializer has an exact
+12-callee fan-out. Among those callees, recovered checkpoint writers clear or
+replace state and persist objects **9, 11, 12, 14, and 15** (`runtime_condition_snapshot`,
+`two_channel_u16_state`, `dual_incident_snapshot`, `three_entry_condition_history`,
+and `operating_state_snapshot`), while additional callees clear/reinitialize
+runtime event and subsystem state. Queue operation 6 continues under normal
+scheduling after the WDBI transaction itself has been signaled complete.
+
+A complete direct-reference audit of the recovered `0204` chain, including all
+12 operation-6 initializer callees, finds no direct reference to the conditioned
+steering-command state or the independently proved d/q reference/feedback cells.
+This bounds `0204` as a **persistent maintenance/reset and availability-state
+control**, not a recovered arbitrary steering-current/PWM command primitive. It
+is intentionally not given an isolated-bench probe here: the `0x22` branch
+deliberately clears and persists checkpoint state, so dynamic characterization
+requires a disposable/matching bench plus NVM backup/restore planning.
 
 #### DID `2010`: write-only diagnostic residue
 

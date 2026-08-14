@@ -286,7 +286,15 @@ authorization:
   `0x93C62 -> 0x93B56 -> 0x92A70 -> 0x936AA/0x936D6 -> 0x8A630 -> 0x25768`.
   Eight DIDs (`2001/2002/2005/2006/2007/2008/2009/200D`) arm state machines
   that submit NvM object updates `0x101/0x102/0x103`; twelve of thirteen WDBI
-  starts have a vehicle-speed gate. DID `2010` is one of those gated writes but
+  starts have a vehicle-speed gate. DID `0204` is also persistent but through a
+  distinct asynchronous maintenance path: payload-byte-1 bit 7 selects mode
+  request `0x11` versus `0x22`; both can persist checkpoint object 7
+  (`three_phase_mode_latch`) before WDBI completion. The `0x22` completion path
+  additionally starts queue operation 6, whose 12-callee initializer resets
+  subsystem/runtime state and persists checkpoint objects 9/11/12/14/15. A
+  complete direct-reference audit of that recovered cone has no conditioned
+  steering-command or d/q-reference/current-PI/PWM join. DID `2010` is one of
+  the gated writes but
   is statically bounded to write-only diagnostic residue: `B7C0E` writes
   `FEBEB48E/49C/4A0`, whose exact project xrefs have no runtime readers. Its
   apparent `FEBE816A=0x2E10` pending branch is unreachable because valid input
