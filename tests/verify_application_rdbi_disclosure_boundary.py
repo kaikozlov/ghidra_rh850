@@ -13,7 +13,8 @@ PROGRAM = "RH850_P1M-E_CodeFlash.bin"
 EXPECTED = (
     "ASSERT application-rdbi-disclosure-boundary: "
     "dids=242 unique_callbacks=196 max_depth=4 conservative_hits=4 "
-    "branch_resolved_hits=1 checkpoint_0x200_hits=0 unexpected=0"
+    "branch_resolved_hits=1 checkpoint_0x200_hits=0 root_fixed_global_writes=0 "
+    "fixed_global_writes=4 unexpected=0"
 )
 
 
@@ -61,7 +62,7 @@ def main() -> int:
             print(output[-4000:])
             return 1
 
-    print("[PASS] live RDBI disclosure boundary: 4 conservative hits -> 1 branch-resolved benign status hit")
+    print("[PASS] live RDBI boundary: 1 benign sensitive hit; no root writes; F186 lock bookkeeping only")
     return 0
 
 

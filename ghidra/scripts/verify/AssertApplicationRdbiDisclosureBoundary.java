@@ -57,6 +57,8 @@ public class AssertApplicationRdbiDisclosureBoundary extends GhidraScript {
             "0110:0006909a:READ:febe5050"
         ));
         Set<String> actual = new TreeSet<>();
+        Set<String> fixedGlobalWrites = new TreeSet<>();
+        Set<String> rootFixedGlobalWrites = new TreeSet<>();
         Set<Long> uniqueCallbacks = new HashSet<>();
 
         for (int index = 0; index < COUNT; index++) {
@@ -86,6 +88,12 @@ public class AssertApplicationRdbiDisclosureBoundary extends GhidraScript {
                         long address = target.getOffset();
                         if (!reference.getReferenceType().isCall() && auditRange(address)) {
                             actual.add(hitKey(did, instruction.getAddress(), reference));
+                        }
+                        if (reference.getReferenceType().isWrite()
+                                && address >= 0xfebe0000L && address <= 0xfebfffffL) {
+                            String write = hitKey(did, instruction.getAddress(), reference);
+                            fixedGlobalWrites.add(write);
+                            if (node.depth == 0) rootFixedGlobalWrites.add(write);
                         }
                         if (node.depth < MAX_DEPTH && reference.getReferenceType().isCall()) {
                             Function callee = getFunctionAt(target);
@@ -137,6 +145,32 @@ public class AssertApplicationRdbiDisclosureBoundary extends GhidraScript {
                 + branch200Hits);
         }
 
+        // A ReadDataByIdentifier callback should not mutate fixed application
+        // state. Across the same four-hop closure there are no fixed-global
+        // writes at any RDBI root. The only transitive fixed RAM writes are the
+        // balanced interrupt-mask nesting counter updates reached by F186's Dcm
+        // session getter. Pin both the exact write census and lock/read/unlock
+        // instruction order so ordinary RDBI cannot silently acquire a new
+        // control/persistence side effect.
+        Set<String> expectedWrites = new TreeSet<>(Arrays.asList(
+            "F186:000693f8:WRITE:febe39dc",
+            "F186:00069420:WRITE:febe39dc",
+            "F186:0006945c:WRITE:febe39dc",
+            "F186:00069486:WRITE:febe39dc"
+        ));
+        if (!rootFixedGlobalWrites.isEmpty()) {
+            throw new IllegalStateException("RDBI root gained fixed-global writes: "
+                + rootFixedGlobalWrites);
+        }
+        if (!fixedGlobalWrites.equals(expectedWrites)) {
+            throw new IllegalStateException("RDBI fixed-global write boundary changed: expected="
+                + expectedWrites + " actual=" + fixedGlobalWrites);
+        }
+        requireBytes(0x4e90eL, "84ffd014"); // F186 -> Dcm session getter 0x8FDDE
+        requireBytes(0x907ecL, "80ffd867"); // critical-section enter 0x96FC4
+        requireBytes(0x907f0L, "840f35a1"); // read current session FEBE5934
+        requireBytes(0x907f8L, "80ffd867"); // critical-section exit 0x96FD0
+
         // The sole branch-resolved crypto-neighborhood hit is a status
         // accumulator, not the generated command-5 output. Pin its complete
         // xref topology.
@@ -145,8 +179,8 @@ public class AssertApplicationRdbiDisclosureBoundary extends GhidraScript {
             "0006909a:READ", "000690e4:WRITE");
 
         println(String.format(
-            "ASSERT application-rdbi-disclosure-boundary: dids=%d unique_callbacks=%d max_depth=%d conservative_hits=%d branch_resolved_hits=%d checkpoint_0x200_hits=0 unexpected=0",
-            COUNT, uniqueCallbacks.size(), MAX_DEPTH, actual.size(), resolved.size()));
+            "ASSERT application-rdbi-disclosure-boundary: dids=%d unique_callbacks=%d max_depth=%d conservative_hits=%d branch_resolved_hits=%d checkpoint_0x200_hits=0 root_fixed_global_writes=0 fixed_global_writes=%d unexpected=0",
+            COUNT, uniqueCallbacks.size(), MAX_DEPTH, actual.size(), resolved.size(), fixedGlobalWrites.size()));
     }
 
     private Set<String> collectSensitiveHits(Function root, int maxDepth, int did) throws Exception {

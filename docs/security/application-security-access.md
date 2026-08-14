@@ -223,6 +223,11 @@ not key or generated-MAC material. This does **not** prove the full 242-DID
 corpus contains no privacy, diagnostic-history, or other sensitive information;
 it specifically closes the currently recovered key/MAC/SA-buffer disclosure
 candidates.
+ A separate fixed-write census over the same four-hop graph finds no
+RAM write at any RDBI callback root. The only transitive fixed RAM writes belong
+to DID `F186`'s balanced Dcm critical-section helpers (`FEBE39DC/FEBE39E0`)
+around a read of current session state `FEBE5934`; no persistence, SecOC,
+lifecycle, or steering-control mutation is recovered from an RDBI read.
 
 **Corolla caveat:** The Corolla EPS (`8965F1208000`) is a different
 calibration. Its Dcm configuration tables are generated separately and may

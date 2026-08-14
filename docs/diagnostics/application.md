@@ -315,6 +315,16 @@ crypto-test/status accumulator, not the command-5 generated output. This is a
 bounded negative for the currently recovered high-value RAM regions, not a
 claim that every RDBI value is non-sensitive.
 
+The same complete callback graph also closes the obvious RDBI side-effect class.
+None of the 196 callback roots has a fixed-global RAM write. Across their
+four-hop direct-call closure, the only fixed RAM writes are four updates to
+`FEBE39DC`, all exclusively under DID `F186`. That callback delegates through
+`0x8FDDE -> 0x907E6`; the latter enters a critical section at `0x907EC`, reads
+the current Dcm session byte `FEBE5934` at `0x907F0`, and exits at `0x907F8`.
+The underlying `0x693CE/0x69434` pair maintains the interrupt-mask nesting
+counter/stack at `FEBE39DC/FEBE39E0`. No persistence, SecOC, lifecycle, or
+steering-control write is recovered from an RDBI request.
+
 WDBI callback `0x95DCE` phases: start `0x95C8C`, cancel `0x95D7E`, poll `0x95DB4`.
 Writable DIDs are the separate 19-entry table at `0x26AEC` (`0x1000..0x110D`
 class), binary-searched by `0x9545C`. NRCs include `0x12`, `0x13`, `0x31`, and
