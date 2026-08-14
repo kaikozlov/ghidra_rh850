@@ -60,7 +60,7 @@ Important recovered effects include:
 | `1000` | `0x4F060` | builds 32-byte supported-`0x10xx` RoutineControl bitmap |
 | `1001` | `0x4F00A` | 32-byte support/capability bitmap query; no application state machine |
 | `1002` | `0x4F0EA` | vehicle-speed-gated lifecycle normalization/reinitialization via request `FEBEAF47=0x44` |
-| `1004` | `0x4F170` | fixed maintenance trigger: control type 1 requires input `FF FF`, then queues internal operation 5 without consuming a tester-chosen value |
+| `1004` | `0x4F170` | **no-speed-gate persistent event-log/history maintenance rewrite**: fixed `FF FF` starts queue operation 5 and rewrites objects 17/18/19/20/21/23 |
 | `1007` | `0x4F1EA` | one-shot live lifecycle reinitialization of groups `FEBEB454/455`; no local speed/mode gate |
 | `1008` | `0x4F25C` | one-shot diagnostic-only live lifecycle reinitialization of group `FEBEB456`; no local speed/mode gate |
 | `1009` | `0x4F2C2` | state-gated live lifecycle reinitialization: fixed-enabled feature byte, aggregate-health-zero admission, forces `FEBEB2D5=0x11` |
@@ -157,6 +157,64 @@ condition and, like the other lifecycle paths, has no recovered static join into
 the d/q/PWM producer cone.
 
 ## 5. Remaining query/lifecycle/persistence controls
+
+### `0x1004`: repeatable event-log/history persistent rewrite
+
+RID `0x1004` is another policy-0 persistent maintenance surface whose gating is
+weaker than its generic label previously suggested. Control type 1 requires the
+fixed two-byte payload `FF FF`; the action never consumes a tester-selected
+numeric value. Its precondition reads only alternate-handoff state and selector-3
+busy byte `FEBE8156`. It has **no recovered vehicle-speed reference**, and policy
+0 plus the outer SID-`0x31` object permit sessions `1/2/3`. The default-session
+start request is therefore **`31 01 10 04 FF FF`**.
+
+Type 1 calls `0x50864`, the queue-operation-5 starter. If idle it records state
+`5`, invokes `0x50858 -> 0x5449E`, then sets the active bit (`0x85`). Operation
+5 and operation 6 are intentionally coalesced: `0x50864` suppresses duplicate
+5/6 requests while that family is active or queued, and operation-6 completion
+helper `0x4C474` updates selector 3 whenever `FEBE8156` is pending.
+
+The dedicated initializer `0x5449E` brackets setup with event-state
+`FEBE897C = 0xAA -> 0xA5`, invokes bank initializer `0x5436E`, and initializes
+history groups `0`, `3`, and `2` through `0x54416`. Those initializers set dirty
+bit 2 in both alternating event-log bank flags (`FEBE8988/8989`) and in history
+flags `FEBE898A[0/3/2]`. The normal worker wrapper `0x54140` runs status worker
+`0x53DAC` followed by `checkpoint_event_log_banks_persist @ 0x53FC4`. The dirty
+bits necessarily satisfy `0x53FC4`'s persistence gate and force the following
+checkpoint rewrite set:
+
+| Object | Bounded checkpoint meaning |
+|---:|---|
+| `17` | event-log control state |
+| `18` | event-log snapshot bank A |
+| `19` | event-log snapshot bank B |
+| `20` | event-history group 0 |
+| `21` | event-history group 1 |
+| `23` | event-history group 2 |
+
+Object `17` is submitted directly; bank mapper `0x53EF2` returns the complementary
+`18/19` pair, so both dirty bank flags rewrite both banks; history mapper
+`0x53B70` maps initialized groups `0/3/2` to `20/21/23`. Object `22` is disabled
+in this calibration and is not part of the workflow.
+
+RoutineControl completion waits on the persistent workflow. On the first tick,
+`FEBE897C=0xA5` remains nonterminal while `0x53FC4` submits NVM updates and marks
+per-object status bytes pending. Later `0x53DAC` polls those statuses and changes
+`FEBE897C` only to `0` (success) or `0x55` (failure) after pending states clear.
+Queue monitor `0x50A1C` recognizes active state `0x85`, reports selector `3` with
+result `0` or `0x20`, and advances the queue. Generic selector helper `0x4F864`
+turns those into terminal RoutineControl states `2/3`. Since the start
+precondition rejects only state `1`, **RID `1004` is repeatable after completion**,
+not one-shot.
+
+The firmware proves a persistent event-log/history rewrite but does not retain an
+OEM service name that would justify calling this “ClearDTC.” Exact static/live
+graph audits across the recovered op5/event-history cone find no direct reference
+to conditioned steering-command or d/q-current/PWM state. The bounded consequence
+is repeatable persistent diagnostic/history integrity and maintenance-state
+perturbation, not arbitrary steering-current injection. A routine bench probe is
+intentionally omitted because the request deliberately rewrites persistent event
+history.
 
 The formerly generic `1001/1002/1103/1106/1108/1109` rows are now closed through
 their application workers and completion states.
@@ -322,6 +380,14 @@ separate.
   per-RID speed gates, live lifecycle-reinit bodies, one-shot writes, scheduler
   gate, service-mode chain, and termination structure directly from firmware
   bytes.
+- `tests/verify_application_routine_control_1004_event_history.py` pins the
+  no-speed `FF FF` request, operation-5 coalescing, forced dirty flags, exact
+  persistent object set `17/18/19/20/21/23`, completion ordering, repeatability,
+  and direct-actuation negative.
+- `tests/verify_application_routine_control_1004_event_history_live.py` runs
+  `AssertApplicationRoutine1004EventHistory.java` against the accepted project
+  to pin op5/event-persistence ownership, selector-3 topology, and the live
+  direct-state boundary.
 - `tests/verify_application_routine_control_remaining_controls.py` pins the
   generated classifications and the `1001/1002/1103/1106/1108/1109` bodies,
   start gates, completion selectors, operation-2 checkpoint set, operation-6

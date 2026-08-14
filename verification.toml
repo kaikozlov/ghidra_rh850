@@ -123,6 +123,32 @@ paths = [
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
 ]
 
+[suite.application_routine_control_1004_event_history]
+tests = [
+  "tests/verify_application_routine_control_1004_event_history.py",
+  "tests/verify_application_routine_control_1004_event_history_live.py",
+]
+oracle = "cfg_dataflow"
+paths = [
+  "tools/generate_application_routine_control_surface.py",
+  "data/application_routine_control_surface.csv",
+  "data/checkpoint_payload_map.csv",
+  "data/object15_reachability.csv",
+  "tests/verify_application_routine_control_1004_event_history.py",
+  "tests/verify_application_routine_control_1004_event_history_live.py",
+  "ghidra/scripts/verify/AssertApplicationRoutine1004EventHistory.java",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "docs/diagnostics/application-routine-control-surface.md",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/storage/dataflash.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/ANALYSIS_STATUS.md",
+]
+
 [suite.application_routine_control_remaining_controls]
 tests = [
   "tests/verify_application_routine_control_remaining_controls.py",

@@ -332,6 +332,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   synchronized labeled captures above. Use the redacted manifest schema in
   [../variants/newer-tsk-target-evidence.md](../variants/newer-tsk-target-evidence.md);
   until then every Sienna→newer-TSK transfer remains hypothesis.
+- **RoutineControl `1004` hardware-visible event-history rewrite consequence.**
+  Static recovery is closed: default-session `31 01 10 04 FF FF` has no recovered
+  vehicle-speed gate and repeatably drives operation 5, which waits on persistent
+  rewrites of event-log/history objects 17/18/19/20/21/23. No direct
+  conditioned-command/d/q/PWM join is recovered. Do not label the routine
+  “ClearDTC” without external/dynamic evidence. Dynamic characterization is not
+  packaged as a normal probe because it deliberately modifies persistent event
+  history; use only a disposable/matching ECU with NVM backup/restore.
 - **RoutineControl `1108` hardware-visible persistent-reset consequence.**
   Static recovery is closed: unauthenticated default-session `31 01 11 08` has
   no recovered vehicle-speed gate and repeatedly starts/coalesces queue operation

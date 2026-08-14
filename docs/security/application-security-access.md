@@ -273,8 +273,12 @@ authorization:
   preconditions omit the explicit vehicle-speed check used by neighboring
   `0x1002/0x1106`; `0x1009` is a state-gated variant. Their workers execute in
   normal per-tick scheduling for modes `>0x102`, including operational
-  `0x300/0x400/0x500`. More importantly, policy-0 RID **`0x1108`** is a zero-
-  payload, repeatable persistent checkpoint-reset trigger whose precondition has
+  `0x300/0x400/0x500`. Two repeatable policy-0 persistence paths are especially
+  weak-gated. RID **`0x1004`** is default-session reachable as `31 01 10 04 FF FF`;
+  its precondition has no recovered vehicle-speed reference, operation 5 forces
+  dirty event-log/history flags, and RoutineControl completion waits on NVM
+  rewrites of objects 17/18/19/20/21/23. RID **`0x1108`** is a zero-payload,
+  repeatable persistent checkpoint-reset trigger whose precondition has
   no recovered vehicle-speed reference: default-session `31 01 11 08` starts or
   queues operation 2, whose initializer resets/reinitializes state and persists
   checkpoint objects 9/11/12/14/15. Selector 10 reports completion; operation 6
