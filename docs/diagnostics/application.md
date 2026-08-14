@@ -401,7 +401,7 @@ has **zero SecurityAccess levels**. The 13 implemented DIDs divide as follows:
 | `2002` | vehicle speed | arms NvM object `0x102` state machine |
 | `2005/2006/2007/2008/2009/200D` | vehicle speed | arm selected-byte updates under NvM object `0x103` |
 | `0204` | vehicle speed | queues shared asynchronous diagnostic state `0x2E10` |
-| `2010` | vehicle speed | updates live runtime command-state block `FEBEB48E/49C/4A0` |
+| `2010` | vehicle speed | writes diagnostic residue `FEBEB48E/49C/4A0`; exact xrefs contain no runtime readers and its `0x2E10` pending branch is unreachable |
 | `2012` | **none** | payload `01` sets `FEBEB18F = 0x5A`; supply-qualified logical transition bit `0x08` inhibits a mode-specific lifecycle block and clears the alternate rotor-observer calibration selector |
 | `2013` | vehicle speed + two state flags clear | writes 16-bit parameter `FEBEB434`; bounded numeric-control cone reaches motor-worker staging-only `FEBE6DCA/6DCC` |
 | `2014` | vehicle speed + two state flags clear | writes mode flag `FEBEB3EE = 0/0x5A`; changes threshold/mode eligibility and participates in RoutineControl `110A/110C` start gating |
@@ -414,6 +414,34 @@ policy `0x4C942` applies the vehicle-speed limit only to requested session `02`,
 not extended session `03`. Thus the static path `10 03` followed by
 `2E 20 12 01` requires neither SecurityAccess nor a recovered vehicle-speed
 gate. The complete matrix is `data/application_wdbi_surface.csv`.
+
+#### DID `2010`: write-only diagnostic residue
+
+DID `2010` is a one-byte, vehicle-speed-gated WDBI member, but its result path
+does not reach live application control state in this calibration. Payload `00`
+passes `0x55AAAA55,0x55AAAA55` to `FE09C -> B7C0E`; payloads `01/02` pass
+`0xAA5555AA,0x55AAAA55`. `B7C0E` writes marker `0x44` to `FEBEB48E`, the two
+magic words to `FEBEB49C/FEBEB4A0`, and then returns fixed status `0`. The exact
+project xref census for each of those three RAM cells contains only the
+initialization write and the `B7C0E` write: there are **no recovered runtime
+READ/PARAM references**.
+
+The surrounding generated status path does not revive an asynchronous effect.
+For invalid payload values the callback skips `B7C0E` with internal status
+`-12`; for valid values `B7C0E` supplies `0`. Generic mapper `0x4C4A4` maps
+`0 -> 0` and `-12 -> 4`; only `-1` maps to `2`. `application_wdbi_2010_result`
+would write shared diagnostic word `FEBE816A = 0x2E10` only when that mapped
+result equals `2`, so the `0x2E10` branch is unreachable for DID `2010` and the
+callback always writes zero to `FEBE816A`.
+
+`FEBE816A` itself is Dcm service bookkeeping, not a `2010` application command:
+`0x4C3CA` masks its high byte and dispatches service tags `0x14`, `0x2E`, and
+`0xBA`; the ClearDiagnosticInformation state machine independently stores
+`0x1410`, while other WDBI operations can store `0x2E10`. Thus the supported
+static behavior of DID `2010` is a speed-gated write into three write-only
+diagnostic-residue cells plus clearing the shared diagnostic status word. No
+direct d/q-reference/current-PI/TSG3-PWM join is recovered. CORR-057 supersedes
+the earlier “live runtime command-state block” wording.
 
 #### DID `2012`: supply-qualified transition/lifecycle inhibit
 

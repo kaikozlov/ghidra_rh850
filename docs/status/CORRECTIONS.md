@@ -1124,3 +1124,29 @@ the mistakes are not re-made.
   [../security/application-security-access.md](../security/application-security-access.md);
   `data/application_wdbi_surface.csv`; `tests/verify_application_wdbi_surface.py`;
   `tests/verify_application_wdbi_callbacks.py`.
+
+### CORR-057 — WDBI DID `0x2010` writes diagnostic residue, not live runtime command state
+
+- **Wrong:** the initial true-WDBI surface matrix described DID `0x2010` as
+  updating a “live runtime command-state block” at `FEBEB48E/49C/4A0`.
+- **Right:** `application_wdbi_2010_result @ 0x4EF04` maps valid payload `00` to
+  `0x55AAAA55/0x55AAAA55` and payloads `01/02` to
+  `0xAA5555AA/0x55AAAA55`, then calls `FE09C -> B7C0E`. `B7C0E` writes marker
+  `0x44` plus those two words and returns fixed status `0`. Exact live Ghidra
+  xrefs for all three RAM cells contain only their initialization write and the
+  `B7C0E` write; none has a runtime READ/PARAM reference.
+- **Async-status boundary:** invalid payloads bypass `B7C0E` with status `-12`.
+  Generic mapper `0x4C4A4` maps `0 -> 0` and `-12 -> 4`; only `-1 -> 2`. The
+  callback's `result==2` branch is therefore unreachable and cannot set shared
+  `FEBE816A=0x2E10`; DID `2010` always clears that word to zero. `FEBE816A` is
+  generic diagnostic service bookkeeping: dispatcher `0x4C3CA` recognizes
+  high-byte service tags `0x14/0x2E/0xBA`, and ClearDiagnosticInformation uses
+  the same word with `0x1410`.
+- **Consequence:** no live application-state consumer or direct d/q/PI/PWM join
+  is recovered for DID `2010`. This is a static dead/write-only-state result for
+  the current calibration, not a claim about all related Toyota EPS variants.
+- **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
+  [../security/application-security-access.md](../security/application-security-access.md);
+  `data/application_wdbi_surface.csv`;
+  `tests/verify_application_wdbi_2010_dead_state.py`;
+  `tests/verify_application_wdbi_2010_dead_state_live.py`.

@@ -286,7 +286,13 @@ authorization:
   `0x93C62 -> 0x93B56 -> 0x92A70 -> 0x936AA/0x936D6 -> 0x8A630 -> 0x25768`.
   Eight DIDs (`2001/2002/2005/2006/2007/2008/2009/200D`) arm state machines
   that submit NvM object updates `0x101/0x102/0x103`; twelve of thirteen WDBI
-  starts have a vehicle-speed gate. DID `2012` is the exception: its start
+  starts have a vehicle-speed gate. DID `2010` is one of those gated writes but
+  is statically bounded to write-only diagnostic residue: `B7C0E` writes
+  `FEBEB48E/49C/4A0`, whose exact project xrefs have no runtime readers. Its
+  apparent `FEBE816A=0x2E10` pending branch is unreachable because valid input
+  produces mapper input `0` and invalid input `-12`, which `0x4C4A4` maps to
+  `0/4`; only mapper input `-1` yields result `2`. DID `2012` is the exception
+  to the speed-gated set: its start
   callback is unconditional, payload `01` sets `FEBEB18F=0x5A`, and extended
   session entry itself is not speed-gated because `0x4C942` checks speed only
   for requested programming session `02`. The downstream effect is now bounded:

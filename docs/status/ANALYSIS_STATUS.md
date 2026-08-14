@@ -36,7 +36,7 @@ rebuilds. Committed-project promotion is a separate final lifecycle gate.
 | Selected sweep without semantic conclusion | 88 | `reviewed_unknown`, no evidence grade; successful decompilation is a generated self-check only |
 | Per-function claim execution status | 105 `passed`, 5 `unavailable`, 0 `failed` | `data/semantic_review_status.csv`; `unavailable` marks manual CFG reviews with no automated execution gate |
 | Strongest independent oracle per reviewed function | 19 CFG/data-flow, 3 instruction semantics, 88 none | The 88 have only a generated self-check, which is recorded separately and confers no semantic grade |
-| Findings with exact `verified` grade | 54 | Exact-grade rows in `FINDINGS.md`; qualified/mixed/partial-grade rows are not included in this scalar |
+| Findings with exact `verified` grade | 55 | Exact-grade rows in `FINDINGS.md`; qualified/mixed/partial-grade rows are not included in this scalar |
 | Findings dynamically observed | 2 | SECOC-030 external partner observation and VAR-001 Corolla field probes; neither is promoted to Sienna `4512000` firmware fact |
 
 For material findings, `FINDINGS.md` identifies the claim-specific gate in its
