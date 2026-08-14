@@ -507,9 +507,31 @@ Signal lifecycle states managed by these monitors:
 | `0x33`/`0x44` | marked / replaced |
 
 Each dispatches lifecycle callbacks (timeout notification, reception
-notification, etc.) through a 15-slot function-pointer table
-(`param_3[0]`..`param_3[0xe]`). The four variants differ in signal class
-and timeout behavior.
+notification, etc.) through generated function-pointer records. A previously
+unseeded subset is now dispatch-proven directly from the receive-side setup
+code:
+
+| Callback table | Shape | Dispatcher join | Nonzero slots | Unique targets |
+|---:|---|---|---:|---:|
+| `0x28524` | one 13-pointer / 52-byte variant-D row | `0x3DB30` loads `0x28524` then calls `com_signal_deadline_monitor_d @ 0x6A28A` | 4 | 3 |
+| `0x28558` | 28 × three-pointer / 12-byte rows | `0x3DC88` loads `0x28558` and calls simple monitor `0x6962A` three times | 83 | 82 |
+| `0x286D0` | one 13-pointer / 52-byte variant-D row | `0x417EE` loads `0x286D0` and calls `0x6A28A` three times | 4 | 3 |
+
+The three tables contain 91 nonzero slots and **88 unique callback entry
+points**. The simple dispatcher consumes exactly `param_3[0..2]`; variant D
+consumes the full 13-pointer `param_3[0..12]` shape across its lifecycle states.
+The table byte hashes, setup bodies, literal table loads, and direct dispatcher
+calls are pinned by `tests/verify_deadline_monitor_dispatch_tables.py`.
+Consequently these 88 targets are not speculative pointer scans: they are
+configured callback entries on live COM deadline-monitor paths and are seeded
+into the persistent graph. This is a graph-completeness result; it does not by
+itself assign detailed semantics to each callback or create a new steering /
+SecOC primitive.
+
+The four monitor variants differ in signal class and timeout behavior. The
+older nine-channel plausibility/deadline family in the control-partition report
+is a separate `com_signal_deadline_monitor_c` registration cluster, not these
+newly recovered callback records.
 
 ## 8. RTE input staging copies
 

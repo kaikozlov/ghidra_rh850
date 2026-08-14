@@ -42,6 +42,11 @@ public class AssertFunctionDiscoveryFloor extends GhidraScript {
         new PointerTable("packet_low_selector", 0x26cecL, 45, 4, 0),
         new PointerTable("timer_expiry", 0x26da0L, 9, 4, 0),
         new PointerTable("record_operation", 0x26218L, 6, 28, 0),
+        new PointerTable("deadline_monitor_d_a", 0x28524L, 1, 52,
+            0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48),
+        new PointerTable("deadline_monitor_simple", 0x28558L, 28, 12, 0, 4, 8),
+        new PointerTable("deadline_monitor_d_b", 0x286d0L, 1, 52,
+            0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48),
     };
     private static final long[] BOUNDED_POINTERS = {
         0x21e4cL, 0x21e50L, 0x21e54L, 0x21e58L, 0x21e5cL, 0x21e44L,

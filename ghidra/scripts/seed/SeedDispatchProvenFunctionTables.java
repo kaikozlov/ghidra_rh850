@@ -68,6 +68,17 @@ public class SeedDispatchProvenFunctionTables extends GhidraScript {
         new Table("record_operation", 0x26218L, 6, 28, new int[] {0},
             "c135d4aa2b912fbd2200569d10bbc9b4288bb0a1a749d2a26f4f459bd5df7c76",
             0x92810L, 0x92850L),
+        new Table("deadline_monitor_d_a", 0x28524L, 1, 52,
+            new int[] {0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48},
+            "4b98b9c52b50bad19b6df6c6c5add0aff8d5cf796282253a9d04eb6cb7ae70e0",
+            0x6a28aL, 0x6a2f4L),
+        new Table("deadline_monitor_simple", 0x28558L, 28, 12, new int[] {0, 4, 8},
+            "ae2734c725b63086192f985acec10778ef57c87c050add9a0acf7a58b5ae0833",
+            0x6962aL, 0x6965aL),
+        new Table("deadline_monitor_d_b", 0x286d0L, 1, 52,
+            new int[] {0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48},
+            "3806052261dd30dea4ebc010e663fcb39322901565ef354eecb4bc96d999ed7b",
+            0x6a28aL, 0x6a2f4L),
     };
 
     @Override
@@ -103,7 +114,8 @@ public class SeedDispatchProvenFunctionTables extends GhidraScript {
                     }
 
                     String role = table.pointerOffsets.length == 1 ? "callback"
-                        : (field == 0 ? "start" : "completion");
+                        : table.pointerOffsets.length == 2 ? (field == 0 ? "start" : "completion")
+                        : String.format("callback_%02d", field);
                     String name = String.format("%s_%02d_%s",
                         table.id, index, role);
                     Function function = getFunctionAt(target);

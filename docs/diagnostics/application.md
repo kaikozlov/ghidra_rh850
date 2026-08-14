@@ -299,8 +299,10 @@ at `FUN_4CB8A` indexes the 16-byte records, loads the callback field at record
 `+4`, and performs the computed call at `0x4CBB2`. Earlier project snapshots had
 only 10 of those 196 targets represented as function entries; the
 firmware-proven table seed now recovers all 196, plus the direct/constant-veneer
-targets exposed by that graph. Two independent clean rebuilds converge exactly
-at 6,288 functions / 183,183 instructions.
+targets exposed by that graph. At the RDBI-recovery stage, two independent clean rebuilds converged exactly at
+6,288 functions / 183,183 instructions. The later dispatch-proven COM deadline
+monitor expansion in COM-006 adds 88 independent callback entries; the current
+project denominator is 6,376 functions / 183,240 instructions.
 
 A bounded depth-4 direct-call audit across all 242 RDBI roots finds no reference
 to the recovered command-5 generated-result buffer `FEBE51AA..FEBE51B9`, the

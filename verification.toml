@@ -65,6 +65,16 @@ paths = [
 tests = ["tests/verify_can_transport.py"]
 paths = ["docs/communications/"]
 
+[suite.deadline_monitor_dispatch_tables]
+tests = ["tests/verify_deadline_monitor_dispatch_tables.py"]
+paths = [
+  "tests/verify_deadline_monitor_dispatch_tables.py",
+  "docs/communications/application-rx.md",
+  "docs/status/FINDINGS.md",
+  "ghidra/scripts/seed/SeedDispatchProvenFunctionTables.java",
+  "ghidra/scripts/verify/AssertFunctionDiscoveryFloor.java",
+]
+
 [suite.control_partition]
 tests = ["tests/verify_control_partition.py"]
 paths = [
