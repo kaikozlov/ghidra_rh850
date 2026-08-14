@@ -1,7 +1,7 @@
 //@author kaikozlov
 //@category Verification
 // Read-only assertion for the fixed Dcm response-buffer lifetime used by the
-// 45-byte no-op RDBI disclosure family.
+// complete success-without-write RDBI disclosure family.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.symbol.Reference;
 import java.util.*;

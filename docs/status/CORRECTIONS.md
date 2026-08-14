@@ -1069,3 +1069,28 @@ the mistakes are not re-made.
 - **Canonical:** [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md);
   `tests/verify_application_read_memory_by_address.py`;
   `exploit/followups/application_rmba_probe.py`.
+
+### CORR-055 — RDBI stale-response disclosure affects 48 DIDs, not only the 15 45-byte rows
+
+- **Wrong:** DIAG-APP-015 initially scoped the stale Dcm response-buffer leak to
+  the visually conspicuous 15-row `1CF4..1CFF,1D01..1D03` family because those
+  rows all declared 45 bytes and formed one contiguous callback-stub block.
+- **Right:** an exhaustive scan of all 242 RDBI table rows finds **48 rows** whose
+  configured producer begins with the exact complete four-byte body
+  `mov 0,r10; jmp lp`. Their declared widths are 13×1, 12×2, 1×4, 4×7, 2×16,
+  1×17, and 15×45 bytes. The exact DID set is `0111`; `1066/106A`;
+  `10C7..10C9`; `10F7..10F9`; `1124..1129`; `112F..1131`; `11BC/11C8`;
+  `1C99..1CA0`; `1CF4..1CFF`; `1D01..1D03`; `1F03/1F04`; `2030..2032`.
+- **Why all 48 are live producer paths:** the rows occupy DID classes 0, 2, and
+  3. Each class advertises direct-read capability and its record-operation
+  wrapper (`0x935BA`, `0x9361A`, `0x9364A`) calls `0x8A374`. The generic
+  dynamic/element override that could bypass the primary callback is disabled by
+  zero configuration at `0x261E8` and `0x261EC` in this calibration.
+- **Security consequence:** DIAG-APP-015 remains valid but broader. A request can
+  disclose the configured row width (1..45 bytes) from persistent response
+  buffer `FEBE59F8`; 45 bytes remains the maximum per request. The default bench
+  oracle for DID `1CF4` is unchanged.
+- **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
+  [../security/application-security-access.md](../security/application-security-access.md);
+  `tests/verify_application_rdbi_stale_response.py`;
+  `exploit/followups/application_rdbi_stale_probe.py`.

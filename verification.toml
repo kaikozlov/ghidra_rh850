@@ -444,6 +444,7 @@ paths = [
   "docs/security/application-security-access.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/CORRECTIONS.md",
 ]
 
 [suite.xcp_security]
