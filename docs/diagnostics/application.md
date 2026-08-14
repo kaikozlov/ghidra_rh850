@@ -323,6 +323,45 @@ crypto-test/status accumulator, not the command-5 generated output. This is a
 bounded negative for the currently recovered high-value RAM regions, not a
 claim that every RDBI value is non-sensitive.
 
+#### Transport-layer stale-response disclosure in 15 RDBI DIDs
+
+A separate confidentiality defect exists **above the callback-local audit**.
+Fifteen configured DIDs — `1CF4..1CFF` and `1D01..1D03` — each declare a
+45-byte value, but their producer callbacks at `0x4E40C..0x4E444` are exactly
+15 four-byte `mov 0,r10; jmp lp` success stubs. DID-class record 2 at `0x26248`
+covers `0x1000..0x2000` and selects direct record operation 2
+(`0x9361A -> 0x8A374`). `0x8A374` obtains the declared size through
+`0x8A31E -> 0x4C81A`, then invokes the configured producer through `0x4CB8A`.
+An immediate producer return of zero preserves the already-populated 45-byte
+output length even though the stub wrote no bytes.
+
+The Dcm transport layer makes those unwritten bytes externally visible. Response
+buffer provider `0x91FD0` always returns fixed LocalRAM buffer `FEBE59F8`; its
+complete direct-xref topology contains only two one-byte clears (`0x91DAC` and
+`0x91F8A`) plus the pointer construction at `0x91FEE`. There is no whole-buffer
+clear before service dispatch. Direct-service helper `0x8F6FA` writes the
+positive-response SID at buffer offset 0 and advances `resData` by one. RDBI
+then writes the requested two-byte DID at offsets 1..2 and passes offset 3 to the
+45-byte no-op producer. The resulting 48-byte response therefore returns stale
+persistent-buffer contents at offsets 3..47.
+
+This gives an exact read-only confirmation oracle. Seed the fixed buffer with a
+47-byte application ReadMemoryByAddress response, then immediately request DID
+`1CF4`:
+
+```text
+23 15 02 FF 20 00 00 2F  ->  63 <seed[0:47]>
+22 1C F4                 ->  62 1C F4 <seed[2:47]>
+```
+
+`exploit/followups/application_rdbi_stale_probe.py` implements only those two
+read services, defaults to planning, and requires `--execute --bench-isolated`
+for live confirmation. The firmware-static disclosure chain is verified; the
+exact bench oracle has not yet been observed on hardware. This does not
+contradict the callback-local high-value-RAM negative above: the disclosed bytes
+come from Dcm response-buffer lifetime, not from a sensitive reference inside
+one of the 15 producer callbacks.
+
 The same complete callback graph also closes the obvious RDBI side-effect class.
 None of the 196 callback roots has a fixed-global RAM write. Across their
 four-hop direct-call closure, the only fixed RAM writes are four updates to

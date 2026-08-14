@@ -428,6 +428,24 @@ paths = [
   "docs/status/FINDINGS.md",
 ]
 
+[suite.application_rdbi_stale_response]
+tests = [
+  "tests/verify_application_rdbi_stale_response.py",
+  "tests/verify_application_rdbi_stale_response_live.py",
+]
+oracle = "cfg_dataflow"
+paths = [
+  "tests/verify_application_rdbi_stale_response.py",
+  "tests/verify_application_rdbi_stale_response_live.py",
+  "ghidra/scripts/verify/AssertApplicationRdbiStaleResponse.java",
+  "exploit/followups/application_rdbi_stale_probe.py",
+  "exploit/followups/README.md",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
 [suite.xcp_security]
 tests = ["tests/verify_xcp_security.py"]
 oracle = "cfg_dataflow"

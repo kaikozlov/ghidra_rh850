@@ -185,7 +185,8 @@ empty.
 |---|---|---|
 | All 17 services (Dcm dispatch layer) | `sec_count=0` at `0x25E28 + i*0x18 + 0x12` | No service is security-gated |
 | All 242 readable DIDs (RDBI) | Policy table at `0x261A4`, bounded scan of recognized policy records | No DID requires level > 0 |
-| RDBI callback disclosure boundary | Firmware table `0x2941C` (242 rows / 196 unique callbacks), exact dispatch at `0x4CB8A→0x4CBB2`, depth-4 direct-call audit | No recovered path into command-5 output, key-update result bank, payload-derived key material, or application-SA seed/data/temp RAM; selected hits reduce to generic NvM workspace plus status accumulator `FEBE5050` |
+| RDBI callback disclosure boundary | Firmware table `0x2941C` (242 rows / 196 unique callbacks), exact dispatch at `0x4CB8A→0x4CBB2`, depth-4 direct-call audit | No recovered callback-local path into command-5 output, key-update result bank, payload-derived key material, or application-SA seed/data/temp RAM; selected hits reduce to generic NvM workspace plus status accumulator `FEBE5050` |
+| RDBI transport-buffer lifetime | 15 DIDs `1CF4..1CFF,1D01..1D03`; fixed Dcm response buffer `FEBE59F8`; direct-mode path `0x9434A→0x92810→0x9361A→0x8A374` | Each DID declares 45 bytes but its producer returns success without writing; persistent response bytes at offsets 3..47 are returned. Exact RMBA→RDBI oracle predicts `62 1C F4 ‖ prior_RMBA_data[2:47]` |
 | All 19 configured RoutineControl RIDs | Policy table at `0x26420`, flag at `0x26B8D` | All have `level_count=0`; 18 policy-0 RIDs are effective in sessions `1/2/3` |
 | SID `0xAB` event worker, 75 snapshot descriptors, six detail descriptors; separate SID `0xBA` operation-F1 path | Resolve corrected service ownership and bounded descendants | Zero direct matches to selected crypto/NvM/ICU-S/SecOC/security-policy targets |
 
@@ -221,7 +222,18 @@ not key or generated-MAC material. This does **not** prove the full 242-DID
 corpus contains no privacy, diagnostic-history, or other sensitive information;
 it specifically closes the currently recovered key/MAC/SA-buffer disclosure
 candidates.
- A separate fixed-write census over the same four-hop graph finds no
+That callback-local result does not close the Dcm transport-buffer lifetime.
+Fifteen DIDs (`1CF4..1CFF`, `1D01..1D03`) declare 45-byte values while their
+configured producers immediately return success without writing. Dcm reuses the
+fixed response buffer at `FEBE59F8`; only byte 0 is cleared by the two reset
+sites, while positive-service dispatch and RDBI overwrite only the SID and DID
+before the unwritten 45-byte value is counted as valid. Consequently those DIDs
+expose prior response-buffer bytes without SecurityAccess. A 47-byte RMBA seed
+makes the result deterministic: `22 1C F4` should return the previous RMBA data
+bytes `2..46`. The static chain is verified and the read-only isolated-bench
+probe is prepared; hardware confirmation remains open.
+
+A separate fixed-write census over the same four-hop graph finds no
 RAM write at any RDBI callback root. The only transitive fixed RAM writes belong
 to DID `F186`'s balanced Dcm critical-section helpers (`FEBE39DC/FEBE39E0`)
 around a read of current session state `FEBE5934`; no persistence, SecOC,

@@ -16,6 +16,13 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   list/per-ID/detail structure is recovered, but the OEM service name and exact
   meanings of the event catalogue's encoded upper ID bits and record-kind
   values remain unknown.
+- **Live confirmation of the RDBI stale-response disclosure.** Firmware-static
+  analysis proves that DIDs `1CF4..1CFF` and `1D01..1D03` return 45 bytes that
+  their success-stub producers never write, sourced from persistent Dcm buffer
+  `FEBE59F8`. On an isolated Sienna `8965B4512000` bench, run the default-safe
+  `exploit/followups/application_rdbi_stale_probe.py`: its discriminator seeds
+  the buffer with a 47-byte SID-`0x23` read and requires `22 1C F4` to equal
+  `62 1C F4 ‖ seed[2:47]`. Preserve F181, route, and raw request/response bytes.
 - **XCP physical reachability and shadow-RAM consumers.** COM-005 proves the
   unauthenticated `0x7F7/0x7F8` disclosure path inside this firmware, but not
   whether a vehicle gateway or diagnostic connector forwards those CAN IDs.
