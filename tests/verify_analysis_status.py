@@ -84,6 +84,59 @@ check("execution totals explicit", summary["execution_status_counts"]
 with (REPO / "data/generated/semantic_interest_ranking.csv").open(newline="") as stream:
     selected = [row for row in csv.DictReader(stream) if row["selected_for_sweep"] == "true"]
 check("selected sweep denominator", len(selected) == 100)
+selected_unknown = sum(row["review_state"] == "reviewed_unknown" for row in selected)
+check("selected unknown denominator", selected_unknown == 87)
+
+# Live documentation pages must publish the same current graph/semantic
+# denominators as the generated artifacts. Historical dated reports are
+# intentionally outside this synchronization boundary.
+live_docs = {
+    "overview": (REPO / "docs/OVERVIEW.md").read_text(encoding="utf-8"),
+    "sienna": (REPO / "docs/variants/sienna-8965B4512000.md").read_text(encoding="utf-8"),
+    "generated": (REPO / "docs/reference/generated-artifacts.md").read_text(encoding="utf-8"),
+    "processor": (REPO / "docs/tooling/processor-module-audit.md").read_text(encoding="utf-8"),
+    "open_questions": (REPO / "docs/status/OPEN_QUESTIONS.md").read_text(encoding="utf-8"),
+}
+function_count = summary["function_count"]
+unreviewed = summary["review_state_counts"]["unreviewed"]
+graded = summary["bounded_semantics_count"]
+identified = summary["review_state_counts"]["semantically_identified"]
+reviewed_unknown = summary["review_state_counts"]["reviewed_unknown"]
+check(
+    "overview semantic denominator synchronized",
+    f"{function_count:,} structurally discovered functions, of which {unreviewed:,} remain" in live_docs["overview"]
+    and f"unreviewed and {graded} currently carry a semantic evidence grade" in live_docs["overview"],
+)
+check(
+    "Sienna semantic denominator synchronized",
+    f"most of the {function_count:,} structurally discovered" in live_docs["sienna"]
+    and f"functions; {unreviewed:,} remain unreviewed and only {graded} carry a semantic grade" in live_docs["sienna"],
+)
+check(
+    "generated-artifact function denominators synchronized",
+    f"structural function ledger ({function_count:,} rows)" in live_docs["generated"]
+    and f"pseudocode for all {function_count:,} functions" in live_docs["generated"],
+)
+check(
+    "processor audit current project totals synchronized",
+    f"**{function_count:,} functions, {totals['instructions']:,}\ninstructions, and {totals['symbols']:,} symbols**" in live_docs["processor"],
+)
+check(
+    "processor audit semantic denominator synchronized",
+    f"**{function_count:,}** functions: {unreviewed:,} `unreviewed`, {reviewed_unknown}" in live_docs["processor"]
+    and f"`semantically_identified`. {graded} rows carry a semantic evidence grade" in live_docs["processor"],
+)
+check(
+    "processor audit outside-function denominator synchronized",
+    f"records {outside['candidate_count']:,} conservative candidate runs" in live_docs["processor"]
+    and f"containing {outside['decoded_instruction_count']:,} decoded instructions; {outside['adjudication_state_counts']['unresolved']:,} remain unresolved" in live_docs["processor"],
+)
+check(
+    "open-questions semantic denominator synchronized",
+    f"but {selected_unknown} selected entries remain" in live_docs["open_questions"]
+    and f"across the whole ledger {unreviewed:,} functions remain" in live_docs["open_questions"]
+    and f"unreviewed and only {graded} carry a semantic grade" in live_docs["open_questions"],
+)
 
 priority = json.loads((REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json").read_text())
 check("priority semantic denominator", len(priority["schemas"]) == 11

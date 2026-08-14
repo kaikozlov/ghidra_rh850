@@ -31,6 +31,11 @@ oracle = "generated_self_check"
 paths = [
   "docs/status/ANALYSIS_STATUS.md",
   "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/OVERVIEW.md",
+  "docs/variants/sienna-8965B4512000.md",
+  "docs/reference/generated-artifacts.md",
+  "docs/tooling/processor-module-audit.md",
   "data/ghidra_project_inventory.baseline.jsonl",
   "data/outside_function_summary.json",
   "data/semantic_coverage_summary.json",

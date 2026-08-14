@@ -89,7 +89,7 @@ Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`
 (asserting companion: `ghidra/scripts/verify/AssertNoUndefinedInFunctions.java`).
 
 The current function bodies disassemble completely: **zero** undefined bytes
-occur inside any of the 6,037 functions. A SLEIGH decode failure would leave a hole
+occur inside any of the 6,376 functions. A SLEIGH decode failure would leave a hole
 inside a function; none exists, so the module decodes every instruction listed
 inside those current bodies. This does not establish that every executable body
 or compiler-emitted instruction has been discovered.
@@ -257,8 +257,8 @@ Instruction inventory for this firmware is committed as
 
 ## Exact project parity
 
-The corrected reproducible rebuild has **6,037 functions, 180,262
-instructions, and 38,069 CLI-reported symbols**. Aggregate floors remain useful as a fast collapse
+The current normalized project inventory has **6,376 functions, 183,240
+instructions, and 7,953 symbols**. Aggregate floors remain useful as a fast collapse
 detector, but they cannot detect equal-count substitutions. The deterministic
 `ExportProjectInventory.java` exporter therefore records path-free Ghidra and
 program identity, every memory mapping, function entry/body/signature/parameter
@@ -307,21 +307,21 @@ DATA reference into CodeFlash that is not a function entry (scalars included),
 not a table-only classifier. The ledger deliberately does **not** claim that
 every function is behaviorally understood.
 
-The corrected ledger contains **6,037** functions: 5,927 `unreviewed`, 88
-`reviewed_unknown`, 3 `structurally_bounded`, and 19
-`semantically_identified`. Only 22 rows carry a semantic evidence grade (3
-bounded, 11 recovered, 8 verified). The reproducible selected sweep and
+The current ledger contains **6,376** functions: 6,259 `unreviewed`, 87
+`reviewed_unknown`, 3 `structurally_bounded`, and 27
+`semantically_identified`. 30 rows carry a semantic evidence grade (3
+bounded, 11 recovered, 16 verified). The reproducible selected sweep and
 corrected-graph negative re-audit are recorded in
 [../status/CORRECTED_GRAPH_REAUDIT_2026-08-11.md](../status/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 
 This in-function inventory is not an executable denominator. The separate
-outside-function exporter currently records 2,061 conservative candidate runs
-containing 22,514 decoded instructions; 2,001 remain unresolved and 60 remain
-reviewed-unresolved. The reduction comes from repairing the authoritative
-bootloader SID `0x31` entry at `0x567E`: stage-2 analysis had split its four-byte
-`prepare` at `0x5680`, leaving the real 696-byte RoutineControl body outside the
-function until the UDS seed corrected the conflicting code unit. Those candidates are not automatically promoted from
-plausible decoding or pointer shape.
+outside-function exporter currently records 1,665 conservative candidate runs
+containing 17,147 decoded instructions; 1,605 remain unresolved and 60 remain
+reviewed-unresolved. Successive dispatch-proven recovery of the bootloader
+RoutineControl body, application RDBI callbacks, and COM deadline-monitor tables
+removed executable bodies from this conservative outside-function pool. The
+remaining candidates are not automatically promoted from plausible decoding or
+pointer shape.
 
 ## What these audits do *not* claim
 
