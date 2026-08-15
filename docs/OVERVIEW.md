@@ -86,8 +86,8 @@ See [storage/dataflash.md](storage/dataflash.md).
 ## Execution architecture
 
 Application foreground loop at `0x64FCC` polls TAUJ0 CH3; EIINT table at
-`0x20200`; 6,376 structurally discovered functions, of which 6,258 remain
-unreviewed and 31 currently carry a semantic evidence grade. See
+`0x20200`; 6,376 structurally discovered functions, of which 6,257 remain
+unreviewed and 32 currently carry a semantic evidence grade. See
 [architecture/firmware-architecture.md](architecture/firmware-architecture.md)
 and [tooling/processor-module-audit.md](tooling/processor-module-audit.md).
 

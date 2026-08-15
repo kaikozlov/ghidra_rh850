@@ -1149,7 +1149,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00040516,32,FUN_00040516,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,1,0,1,0,application,unreviewed,,,,,,
 0x00040536,86,FUN_00040536,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,4,0,,2,2,2,0,0,0,application,unreviewed,,,,,,
 0x0004058c,128,FUN_0004058c,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,8,0,,2,2,0,0,3,0,application,unreviewed,,,,,,
-0x0004060c,184,deadline_monitor_simple_20_callback_00,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,1,,9,9,0,0,8,0,application,unreviewed,,,,,,
+0x0004060c,184,deadline_monitor_simple_20_callback_00,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,0,1,,9,9,0,0,8,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-14,Selected replacement zero-caller deadline-monitor callback after XCP WRITE_DAQ promotion; decompiled successfully; table ownership is verified but exact callback threshold semantics are not independently established
 0x000406c4,16,deadline_monitor_simple_20_callback_01,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,1,1,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000406d4,20,deadline_monitor_simple_20_callback_02,manual/other,seed or annotation script,USER_DEFINED,false,__stdcall,0,1,1,,0,0,0,0,0,0,application,unreviewed,,,,,,
 0x000406e8,18,FUN_000406e8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,0,0,,1,1,0,0,0,0,application,unreviewed,,,,,,
@@ -4014,7 +4014,7 @@ entry_addr,body_bytes,name,discovery_source,discovery_provenance,name_source,is_
 0x00081358,80,FUN_00081358,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,1,1,2,,2,2,1,0,3,0,application,unreviewed,,,,,,
 0x000813a8,36,FUN_000813a8,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,3,0,2,,1,1,0,0,1,0,application,unreviewed,,,,,,
 0x000813cc,88,application_command_09_callback,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,0,1,,3,0,3,0,4,0,application,unreviewed,,,,,,
-0x00081424,262,application_command_10_callback,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,1,1,,6,3,3,0,6,0,application,reviewed_unknown,,data/generated/semantic_sweep_decompilations.jsonl,generated_self_check,passed,2026-08-14,Selected current top-100 application command-10 callback; decompiled successfully; exact command semantics not independently established
+0x00081424,262,application_command_10_callback,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,1,1,,6,3,3,0,6,0,application,semantically_identified,verified,tests/verify_xcp_security.py,cfg_dataflow,passed,2026-08-14,XCP WRITE_DAQ callback independently verified: accepts one-byte permitted-LocalRAM source pointers; installs them in the DAQ table; runtime sampler dereferences them only RAM-to-DTO/CAN 0x7F8
 0x0008152a,118,application_command_11_callback,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,0,1,,3,0,0,0,3,0,application,unreviewed,,,,,,
 0x000815a0,74,FUN_000815a0,auto-analysis,Ghidra auto-analysis,DEFAULT,false,__stdcall,2,2,0,,3,2,3,0,2,0,application,unreviewed,,,,,,
 0x000815ea,164,application_command_12_callback,callback-table seed,USER_DEFINED callback pointer reference,USER_DEFINED,false,__stdcall,0,2,1,,5,1,1,0,3,0,application,unreviewed,,,,,,

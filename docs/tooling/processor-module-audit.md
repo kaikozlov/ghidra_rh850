@@ -307,10 +307,10 @@ DATA reference into CodeFlash that is not a function entry (scalars included),
 not a table-only classifier. The ledger deliberately does **not** claim that
 every function is behaviorally understood.
 
-The current ledger contains **6,376** functions: 6,258 `unreviewed`, 87
-`reviewed_unknown`, 3 `structurally_bounded`, and 28
-`semantically_identified`. 31 rows carry a semantic evidence grade (3
-bounded, 11 recovered, 17 verified). The reproducible selected sweep and
+The current ledger contains **6,376** functions: 6,257 `unreviewed`, 87
+`reviewed_unknown`, 3 `structurally_bounded`, and 29
+`semantically_identified`. 32 rows carry a semantic evidence grade (3
+bounded, 11 recovered, 18 verified). The reproducible selected sweep and
 corrected-graph negative re-audit are recorded in
 [../status/CORRECTED_GRAPH_REAUDIT_2026-08-11.md](../status/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 
