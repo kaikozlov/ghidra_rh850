@@ -158,9 +158,12 @@ physical `0x7F7/0x7F8` route is reachable. The already-recovered d/q reference
 bytes at `FEBE6D28/6D2A` and staged TSG3 compare bytes at
 `FEBE38A2/38A4/38A6` all pass the DAQ address validator. Configuring adjacent
 byte entries can therefore observe those multi-byte states without patching the
-motor-control loop. Physical gateway/connector reachability remains unobserved;
-this does not turn the bounded 32 KiB shadow writer below into an actuation or
-execution primitive.
+motor-control loop. `exploit/followups/xcp_daq_probe.py` now reproduces the
+exact volatile list-0 configuration and has named observation profiles for this
+actuation discriminator plus recent WDBI/BA/async state. It never implements
+`DOWNLOAD` or `MODIFY_BITS`, and live mode remains isolated-bench/F181 gated.
+Physical gateway/connector reachability remains unobserved; this does not turn
+the bounded 32 KiB shadow writer below into an actuation or execution primitive.
 
 ### Generic write commands are real direct RAM writes
 
@@ -197,6 +200,10 @@ a bounded unknown; the absence of direct xrefs is not a universal non-use proof.
 The security conclusion is therefore stronger than the earlier
 "calibration-shadow write configuration" description but still bounded:
 **write capability is verified; downstream control/RCE/persistence impact is not.**
+`exploit/followups/xcp_shadow_write_plan.py` now represents the verified
+SET_MTA/DOWNLOAD wire primitive as an offline-only planner/simulator. It has no
+live transport path; that preserves the distinction between proving the write
+primitive and claiming an as-yet-unrecovered consumer or actuation effect.
 
 Firmware-static evidence proves CAN1 acceptance and response construction, not
 that an external vehicle gateway or diagnostic connector forwards CAN

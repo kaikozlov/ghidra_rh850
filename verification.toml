@@ -953,7 +953,12 @@ paths = [
 ]
 
 [suite.exploit_followups]
-tests = ["tests/verify_exploit_followups.py"]
+tests = [
+  "tests/verify_exploit_followups.py",
+  "tests/verify_secoc_freshness_trials.py",
+  "tests/verify_xcp_daq_probe.py",
+  "tests/verify_xcp_shadow_write_plan.py",
+]
 paths = [
   "exploit/followups/",
   "tests/verify_exploit_followups.py",

@@ -37,11 +37,14 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   bounded unknown. What is still unobserved is whether a vehicle gateway or
   diagnostic connector forwards CAN `0x7F7/0x7F8`.
   `exploit/followups/xcp_read_probe.py` remains read-only for isolated-bench
-  reachability confirmation; do not exercise generic write commands on a
-  vehicle. Canonical:
+  reachability confirmation. `exploit/followups/xcp_daq_probe.py` now adds the
+  exact volatile DAQ configuration/capture path, including named actuation and
+  diagnostic-state profiles, without implementing the generic F0/EC memory
+  writers. Do not exercise generic write commands on a vehicle. Canonical:
   [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md).
 - **Dynamic authenticated-command actuation discriminator.** If COM-007's
-  `0x7F7/0x7F8` route is physically reachable on the bench, its DAQ path can
+  `0x7F7/0x7F8` route is physically reachable on the bench,
+  `exploit/followups/xcp_daq_probe.py --profile actuation-discriminator` can
   stream the already-pinned d/q-reference and TSG3-compare RAM directly during
   this experiment without modifying the motor loop. The full-corpus
   extension closes the static join search more broadly than Stage 6. Protected
@@ -173,21 +176,29 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   hypothesis only).
 - **Reset-window replay.** Receiver freshness is zeroed at SecOC initialization,
   so a captured positive synchronization value is structurally forward after
-  reset. A cold-boot bench capture must determine sync cadence, whether an old
+  reset. `exploit/followups/secoc_freshness_trials.py reset-replay` now validates
+  the captured sync/protected frames and emits the exact offline phase artifact;
+  a cold-boot bench run must still determine sync cadence, whether the old
   authenticated sync can win the startup race, which early ordinary frames can
   then replay, and how quickly legitimate sync closes the window.
 - **Tag-guess and saturation rate.** The static profile exposes 28 CMAC bits,
   does not advance freshness on failure, and has no recovered authentication
-  failure lockout. Measure command-7 throughput, queue replacement, `0xE07`
+  failure lockout. `secoc_freshness_trials.py tag-guesses` now creates bounded
+  offline candidate sets while preserving payload and transmitted freshness;
+  live work still needs command-7 throughput, queue replacement, `0xE07`
   polling latency, watchdog load, legitimate-frame loss, and whether bus error
   behavior makes online guessing or only denial of service practical.
-- **Future-sync recovery.** A valid sync can jump arbitrarily forward. Verify on
-  a bench whether a far-future signed sync blocks lower legitimate epochs until
-  receiver reset, whether any external freshness manager repairs it, and which
+- **Future-sync recovery.** A valid sync can jump arbitrarily forward.
+  `secoc_freshness_trials.py future-sync` now rejects non-forward candidates and
+  records the already-authenticated candidate/current epochs; verify on a bench
+  whether a far-future signed sync blocks lower legitimate epochs until receiver
+  reset, whether any external freshness manager repairs it, and which
   diagnostic/status signals expose the desynchronization.
 - **FD ignored-suffix behavior.** CAN-FD DLC 48/64 is accepted then clamped to 32.
-  Confirm whether gateways or peer ECUs interpret the suffix differently; the
-  Sienna EPS itself does not pass it to SecOC/COM.
+  `secoc_freshness_trials.py fd-suffix-alias` now constructs exact 48/64-byte
+  aliases with an unchanged first 32-byte EPS authenticated view. Confirm whether
+  gateways or peer ECUs preserve/interpret the suffix differently; the Sienna
+  EPS itself does not pass it to SecOC/COM.
 
 ## Variants
 
