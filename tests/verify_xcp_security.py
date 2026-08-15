@@ -105,6 +105,10 @@ check("receive transport clears the eight-byte staging slot before bounded copy"
 check("receive transport copies only supplied bytes before dispatch",
       CF[0x82018:0x8203E] == bytes.fromhex(
           "000ac50d279f010001f0c4f1c199939f0100410ac1005e9f2894e809c1f5243e2894bfffc6fe"))
+check("generic responder zero-pads short responses to the eight-byte CTO",
+      CF[0x22BD4] == 0 and CF[0x22BA0] == 8
+      and CF[0x81168:0x8118C] == bytes.fromhex(
+          "850ff1ece009fa0d859fbdec830f0300e50501f0ddf18003410a8100f309a1fd639f0200"))
 
 print("\n== unauthenticated direct SHORT_UPLOAD ==")
 check("SHORT_UPLOAD requires address extension zero",

@@ -8,7 +8,7 @@ SNAPSHOT_DIR ?= $(CURDIR)/project
 override PROJECT_INVENTORY := $(CURDIR)/build/ghidra_project_inventory.jsonl
 override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.baseline.jsonl
 
-.PHONY: sync verify verify-core verify-local verify-one verify-changed verify-agent verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
+.PHONY: sync verify verify-core verify-local verify-one verify-changed verify-agent verify-exploit verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
 	ghidra-cli \
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
@@ -42,6 +42,14 @@ verify-changed:
 
 verify-agent:
 	$(PYTHON) tools/fast_verify.py --agent
+
+verify-exploit:
+	$(PYTHON) tools/fast_verify.py --suite exploit_surface
+	$(PYTHON) tools/fast_verify.py --suite secoc_manifest_patcher
+	$(PYTHON) tools/fast_verify.py --suite codeflash_dumper
+	$(PYTHON) tools/fast_verify.py --suite secoc_command5_experiment
+	$(PYTHON) tools/fast_verify.py --suite secoc_mac28_behavioral_proof
+	$(PYTHON) tools/fast_verify.py --suite exploit_followups
 
 verify-required-external:
 	$(PYTHON) tools/fast_verify.py --required-external

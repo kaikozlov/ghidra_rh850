@@ -899,6 +899,15 @@ paths = [
   "docs/status/OPEN_QUESTIONS.md",
 ]
 
+[suite.exploit_surface]
+tests = ["tests/verify_exploit_surface.py"]
+oracle = "generated_self_check"
+paths = [
+  "exploit/",
+  "tests/verify_exploit_surface.py",
+  "Makefile",
+]
+
 [suite.secoc_manifest_patcher]
 tests = ["tests/verify_secoc_manifest_patcher.py"]
 paths = [

@@ -209,7 +209,14 @@ Any live confirmation belongs on an isolated bench and should exercise only the
 read chain. The default-plan/simulation tool
 [`../../exploit/followups/xcp_read_probe.py`](../../exploit/followups/xcp_read_probe.py)
 operationalizes that bounded proof, requires an F181-bound isolated bench for
-live mode, and implements no generic write command.
+live mode, and implements no generic write command. Its default CodeFlash
+acquisition path uses CONNECT + `E4` copy + address-explicit `F4 SHORT_UPLOAD`,
+so each read selects its own source without relying on prior MTA state; the older
+`SET_MTA + F5` sequence remains an explicit comparison mode. A separate bounded
+`--ram-address/--ram-length` mode uses CONNECT + F4 only and mirrors the exact
+five firmware exclusions, making the known `FEBE6D28/6D2A` and
+`FEBE38A2/38A4/38A6` observation bytes directly probeable if the physical route
+is confirmed.
 
 ## Reproducibility and remaining boundary
 
