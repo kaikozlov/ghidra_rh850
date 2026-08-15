@@ -1,0 +1,347 @@
+{
+  "evidence_source": "firmware-static (composed from verified findings)",
+  "queries": [
+    {
+      "grade": "verified (composition of verified findings)",
+      "query": "privilege carryover across reset",
+      "result": "Exactly one verified reset-persistent authorization exists: BA persistent auth (SEC-APP-007). Application SA level 2, XCP connection, sessions, and bootloader SA are all reset-cleared or independently re-gated."
+    },
+    {
+      "grade": "verified",
+      "query": "stale authorization (checked but not re-derived)",
+      "result": "BA dispatcher 0x348B4 skips the fresh SA2 read while marker FEBE5F27==0x5A. This is the one stale-authorization window; it is bounded by the 30-invocation countdown and requires a prior legitimate SA2 enable (SEC-APP-007)."
+    },
+    {
+      "grade": "verified negative (authorization); bounded (residue value)",
+      "query": "cross-context state confusion (application vs bootloader)",
+      "result": "No shared privilege byte exists between contexts: application SA lives in the Dcm mask, bootloader SA in FEBF2B0F; each is written/cleared independently and the programming handoff performs no SA transfer (SEC-BOOT-007, DIAG-APP-003). Residue disclosure across handoff (FEBF2D08..) is a separate confidentiality question (SEC-APP-006), not an authorization transfer."
+    },
+    {
+      "grade": "verified",
+      "query": "XCP privilege composition",
+      "result": "The XCP family composes only its own connected flag: no SA level, session, or BA state gates any XCP memory command (COM-005). Its memory primitives are pre-SA by construction."
+    }
+  ],
+  "schema": "security-state-composition/1",
+  "scope": "Sienna EPS 8965B4512000",
+  "states": [
+    {
+      "attacker_writable_pre_auth": false,
+      "context": "bootloader",
+      "holder": "FEBF2B0F",
+      "id": "boot_sa_unlock",
+      "readers": [
+        {
+          "action": "RequestDownload gate ==2",
+          "addr": "0x5D68",
+          "provenance": "SEC-BOOT-007"
+        },
+        {
+          "action": "WDBI gate ==2",
+          "addr": "0x4948",
+          "provenance": "SEC-BOOT-007"
+        },
+        {
+          "action": "ECUReset gate ==2",
+          "addr": "0x60C2",
+          "provenance": "SEC-BOOT-007"
+        }
+      ],
+      "reset_behavior": "cleared to 1 at boot init; any session change downgrades 2->1",
+      "type": "byte enum",
+      "values": {
+        "0/1": "locked/armed (session-change writes 1)",
+        "2": "unlocked"
+      },
+      "writers": [
+        {
+          "action": "boot init writes 1",
+          "addr": "0x5090",
+          "provenance": "SEC-BOOT-007"
+        },
+        {
+          "action": "session-change writes 1 (never 2)",
+          "addr": "0x561E",
+          "provenance": "SEC-BOOT-007"
+        },
+        {
+          "action": "SA send-key success writes 2",
+          "addr": "0x54DC",
+          "provenance": "SEC-BOOT-007"
+        }
+      ]
+    },
+    {
+      "attacker_writable_pre_auth": true,
+      "context": "application",
+      "holder": "Dcm session state (FEBE5D.. region)",
+      "id": "app_session",
+      "readers": [
+        {
+          "action": "session allow-lists",
+          "addr": "service objects",
+          "provenance": "DIAG-APP-001"
+        }
+      ],
+      "reset_behavior": "returns to default (1) on ECU reset",
+      "type": "enum 1/2/3",
+      "values": {
+        "1": "default",
+        "2": "programming",
+        "3": "extended"
+      },
+      "writers": [
+        {
+          "action": "subfunction 01",
+          "addr": "0x93FF6",
+          "provenance": "DIAG-APP-001"
+        },
+        {
+          "action": "subfunction 02 (programming)",
+          "addr": "0x94006",
+          "provenance": "DIAG-APP-001"
+        },
+        {
+          "action": "subfunction 03 (extended)",
+          "addr": "0x94016",
+          "provenance": "DIAG-APP-001"
+        }
+      ]
+    },
+    {
+      "attacker_writable_pre_auth": false,
+      "context": "application",
+      "holder": "Dcm security bitmask (bit 1)",
+      "id": "app_sa_level2",
+      "readers": [
+        {
+          "action": "Dcm security mask reader",
+          "addr": "0x8FDCA->0x906F8",
+          "provenance": "SEC-APP-007"
+        }
+      ],
+      "reset_behavior": "cleared on ECU reset; NOT cleared on session change in this calibration (empty policy tables)",
+      "type": "bitmask",
+      "values": {
+        "0x02": "SecurityAccess level 2 active"
+      },
+      "writers": [
+        {
+          "action": "SA 27 04 send-key success (level 2)",
+          "addr": "0x8C82A",
+          "provenance": "SEC-APP-001"
+        }
+      ]
+    },
+    {
+      "attacker_writable_pre_auth": false,
+      "carryover": "This is the one verified reset-persistent authorization: a legitimate SA2 enable remains effective after reset until the 30-invocation countdown expires.",
+      "context": "application",
+      "holder": "FEBE5F27 (marker) + object 24 countdown + object 5 (0x105)",
+      "id": "ba_persistent_auth",
+      "readers": [
+        {
+          "action": "BA dispatcher gate: marker==0x5A skips fresh SA read",
+          "addr": "0x348B4",
+          "provenance": "SEC-APP-007"
+        }
+      ],
+      "reset_behavior": "PERSISTS across reset via NvM objects 24/5 until 30 countdown steps",
+      "type": "marker+countdown",
+      "values": {
+        "0x5A": "BA dispatch without fresh SA read",
+        "other": "requires fresh SA2"
+      },
+      "writers": [
+        {
+          "action": "BA F7/BAENA success persists marker+count 30",
+          "addr": "0x34DAE chain",
+          "provenance": "SEC-APP-007"
+        },
+        {
+          "action": "restore helper reconstructs from NvM after reset",
+          "addr": "0x347B0",
+          "provenance": "SEC-APP-007"
+        },
+        {
+          "action": "countdown step decrements, clears on expiry",
+          "addr": "0x34FB6",
+          "provenance": "SEC-APP-007"
+        },
+        {
+          "action": "explicit clear",
+          "addr": "F6/BADIS",
+          "provenance": "SEC-APP-007"
+        }
+      ]
+    },
+    {
+      "attacker_writable_pre_auth": false,
+      "context": "application->bootloader",
+      "holder": "FEBEE81F (phase snapshot)",
+      "id": "programming_handoff",
+      "readers": [
+        {
+          "action": "handoff gate",
+          "addr": "0x10 02 handler",
+          "provenance": "DIAG-APP-003"
+        }
+      ],
+      "reset_behavior": "re-derived from lifecycle state after reset",
+      "type": "byte",
+      "values": {
+        "0x11": "handoff rejected",
+        "other": "permitted"
+      },
+      "writers": [
+        {
+          "action": "phase snapshot",
+          "addr": "lifecycle phase machine",
+          "provenance": "DIAG-APP-003"
+        }
+      ]
+    },
+    {
+      "attacker_writable_pre_auth": true,
+      "context": "application",
+      "holder": "communication-mode state",
+      "id": "communication_control",
+      "readers": [
+        {
+          "action": "suppresses communication",
+          "addr": "Tx gating",
+          "provenance": "SEC-APP-005"
+        }
+      ],
+      "reset_behavior": "restored on reset; 28 00 01 restores unconditionally",
+      "type": "enum",
+      "values": {
+        "0": "enable",
+        "1/2": "disable variants"
+      },
+      "writers": [
+        {
+          "action": "28 01/00 control request",
+          "addr": "0x95154",
+          "provenance": "SEC-APP-005"
+        }
+      ]
+    },
+    {
+      "attacker_writable_pre_auth": true,
+      "carryover": "No SA gating exists at any layer of the XCP family in this calibration.",
+      "context": "application (CAN 0x7F7)",
+      "holder": "XCP connection state",
+      "id": "xcp_connected",
+      "readers": [
+        {
+          "action": "requires connection before commands",
+          "addr": "0x97160 dispatcher",
+          "provenance": "COM-005"
+        }
+      ],
+      "reset_behavior": "cleared on reset; no SA dependency exists in this image",
+      "type": "bool",
+      "values": {
+        "connected": "memory commands permitted"
+      },
+      "writers": [
+        {
+          "action": "sets connected; no GET_SEED/UNLOCK configured",
+          "addr": "0xFF CONNECT",
+          "provenance": "COM-005"
+        }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from": "application session S",
+      "id": "app_session_change",
+      "privileges": [
+        {
+          "note": "session change does not clear the Dcm security mask in this calibration (empty policy tables, SEC-APP-004)",
+          "privilege": "app_sa_level2",
+          "survives": true
+        },
+        {
+          "note": "marker/countdown unaffected by session state (SEC-APP-007)",
+          "privilege": "ba_persistent_auth",
+          "survives": true
+        },
+        {
+          "note": "XCP connection state is independent of UDS session (COM-005)",
+          "privilege": "xcp_connected",
+          "survives": true
+        }
+      ],
+      "to": "application session S'"
+    },
+    {
+      "from": "application",
+      "id": "app_soft_reset",
+      "privileges": [
+        {
+          "note": "cleared on reset",
+          "privilege": "app_sa_level2",
+          "survives": false
+        },
+        {
+          "note": "restored from NvM objects 24/5; 30 countdown invocations remain (SEC-APP-007)",
+          "privilege": "ba_persistent_auth",
+          "survives": true
+        },
+        {
+          "note": "cleared on reset",
+          "privilege": "xcp_connected",
+          "survives": false
+        },
+        {
+          "note": "returns to default",
+          "privilege": "app_session",
+          "survives": false
+        }
+      ],
+      "to": "application after ECUReset"
+    },
+    {
+      "from": "application programming session",
+      "id": "programming_handoff",
+      "privileges": [
+        {
+          "note": "bootloader has its own SA; the application Dcm mask is not consulted and FEBF2B0F boots at 1 (SEC-BOOT-007)",
+          "privilege": "app_sa_level2",
+          "survives": false
+        },
+        {
+          "note": "BA dispatcher exists only in application context; no bootloader reader recovered",
+          "privilege": "ba_persistent_auth",
+          "survives": false
+        },
+        {
+          "note": "separate context",
+          "privilege": "xcp_connected",
+          "survives": false
+        },
+        {
+          "note": "handoff is identity-unauthenticated but the bootloader SA byte starts locked; each context gates independently",
+          "privilege": "boot_sa_unlock",
+          "survives": false
+        }
+      ],
+      "to": "bootloader context"
+    },
+    {
+      "from": "bootloader session S",
+      "id": "boot_session_change",
+      "privileges": [
+        {
+          "note": "session-change handler 0x561E writes 1, downgrading an existing unlock (SEC-BOOT-007)",
+          "privilege": "boot_sa_unlock",
+          "survives": false
+        }
+      ],
+      "to": "bootloader session S'"
+    }
+  ]
+}

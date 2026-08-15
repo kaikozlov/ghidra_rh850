@@ -25,6 +25,7 @@ from exploit.command5.build_experiment import (
 from exploit.command5.stimulus import (
     COMMAND5_MODE,
     COMMAND5_SELECTOR,
+    DEFAULT_POLL_INTERVAL,
     DEFAULT_ROUNDS,
     StimulusError,
     build_input_frames,
@@ -198,9 +199,24 @@ except StimulusError as exc:
 else:
     check("wrong RID/selector response prefix is rejected", False)
 
+print("\n== live-observation timing/provenance schema (v2) ==")
+stimulus_source = (REPO / "exploit" / "command5" / "stimulus.py").read_text(encoding="utf-8").lower()
+check("live result schema is pinned as v2", '"sienna-command5-app-live-result-v2"' in stimulus_source)
+check("live result schema v1 is fully retired", '"sienna-command5-app-live-result-v1"' not in stimulus_source)
+check("configured command-5 poll interval is a named constant of 0.05 s", DEFAULT_POLL_INTERVAL == 0.05)
+check("polling loop sleeps exactly the configured interval", 'time.sleep(default_poll_interval)' in stimulus_source)
+check("poll interval is reported in the output timing block", '"poll_interval_seconds": default_poll_interval' in stimulus_source)
+check("poll window and round interval are reported in the timing block", '"poll_window_seconds": poll_seconds' in stimulus_source and '"round_interval_seconds": round_interval' in stimulus_source)
+check("each sent frame records monotonic and wall timestamps", '"sent_monotonic": sent_monotonic' in stimulus_source and '"sent_wall_utc": _utc_now()' in stimulus_source)
+check("each polling observation records per-request RTT from monotonic clock", '"rtt_seconds": observed_monotonic - requested_monotonic' in stimulus_source and '"requested_monotonic": requested_monotonic' in stimulus_source and '"observed_monotonic": observed_monotonic' in stimulus_source)
+check("each polling observation records a wall-clock stamp", '"observed_wall_utc": _utc_now()' in stimulus_source)
+check("run-level provenance records start and finish monotonic/wall stamps", '"started_monotonic": started_monotonic' in stimulus_source and '"finished_wall_utc": _utc_now()' in stimulus_source)
+check("timing block documents the clock semantics", '"monotonic": "time.monotonic seconds; deltas only (rtt, intervals), not wall time"' in stimulus_source)
+check("baseline result request records its own RTT", '"rtt_seconds": baseline_rtt' in stimulus_source)
+check("timing fields add no new mutating diagnostic service", stimulus_source.count("service_type.routine_control") == 2 and "service_type.write" not in stimulus_source and "request_download" not in stimulus_source and "write_data_by_identifier" not in stimulus_source)
+
 print("\n== scope and interpretation discipline ==")
 source = (REPO / "exploit" / "command5" / "build_experiment.py").read_text(encoding="utf-8").lower()
-stimulus_source = (REPO / "exploit" / "command5" / "stimulus.py").read_text(encoding="utf-8").lower()
 check("experiment patch does not contain SecOC Gate-2 target address", "8e6c8" not in source)
 check("experiment patch does not import production flash backend", "flash_backend" not in source)
 check("stimulus labels result as application-context evidence only", "does not prove production secoc transmit integration" in stimulus_source)

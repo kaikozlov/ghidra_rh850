@@ -328,6 +328,43 @@ crypto-test/status accumulator, not the command-5 generated output. This is a
 bounded negative for the currently recovered high-value RAM regions, not a
 claim that every RDBI value is non-sensitive.
 
+#### Response-length preflight bounds the render-loop check-after-copy shape (MEM-SAFE-006)
+
+The RDBI render machinery `0x9429E -> 0x929B0/0x92810 -> 0x4CB8A` callbacks
+checks response capacity *after* each producer runs — a shape that invites an
+overflow reading. Three pinned invariants yield no exploitable divergence in
+this calibration (bounded, not a universal closure; exact per-callback
+emitted-count provenance remains the residual):
+
+1. `0x944C6` accepts exactly one DID per request (payload even, `>=2`,
+   `length>>1 <= 1`), so the accumulated requirement is a single row.
+2. The preflight `0x94426 -> 0x9404A` (via `0x92788 -> 0x9354C..0x935A4 ->
+   0x8A31E -> 0x4C81A`) and the render path both source the per-DID length
+   from the same fixed 16-byte DID-table record word at `0x2941C + 16*idx + 2`
+   (read-only CodeFlash configuration, max 45 bytes).
+3. `0x9429E` copies first and only then compares `write_pos + emitted_count`
+   against clamped capacity `FEBE5D70`; the `0x14`/`0x24` responses are
+   post-copy outcomes, so that check cannot by itself prevent an overwrite if
+   a producer emitted more than declared. The negative therefore rests on
+   invariants 1–2 plus the absence of any recovered producer whose emitted
+   count exceeds its declared width (the residual).
+
+Verified by `tests/verify_application_rdbi_preflight_bounds.py`.
+
+#### Generalized response-disclosure audit (DIAG-APP-025)
+
+The stale-response criterion (declared-by-configuration length vs producer
+writes, above) is now applied to every response-producing surface:
+`tools/generate_response_disclosure_audit.py` +
+`tests/verify_response_disclosure_audit.py`. Result: exactly the 48 known
+stale-RDBI DIDs and **no new under-written surface** — RoutineControl packer
+`0x95966` uses kind-6 byte assigns and kind-7 routine-owned pointer copies
+(never an OR-only byte without a prior assign); no WDBI result callback is a
+success stub with nonzero result size; all seven XCP handlers route through
+the full-frame builder `0x9724E`; bootloader `F181` synthesizes every declared
+byte. The type-3 dispatcher status helpers (e.g. `0x960DE` pre-initializing
+its out slot) are the type-3 producers, not the action callbacks.
+
 #### Transport-layer stale-response disclosure in 48 RDBI DIDs
 
 A separate confidentiality defect exists **above the callback-local audit**.

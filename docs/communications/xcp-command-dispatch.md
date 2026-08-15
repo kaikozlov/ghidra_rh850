@@ -15,6 +15,7 @@
 >
 > **Verification:** `tests/verify_function_discovery.py`,
 > `tests/verify_xcp_security.py`, `tests/verify_xcp_shadow_write_live.py`,
+> `tests/verify_xcp_window_mpu_permissions.py`,
 > `tests/verify_exploit_followups.py`, `AssertXcpShadowWriteBoundary.java`,
 > `AssertRecoveredCallbackTables.java`, `AssertFunctionDiscoveryFloor.java`
 
@@ -186,8 +187,20 @@ command has a GET_SEED/UNLOCK prerequisite because those command slots are not
 configured in this image.
 
 That is a firmware-static **unauthenticated arbitrary 32 KiB LocalRAM write
-primitive**, with two important impact bounds. First, the containing LocalRAM
-memory block is read/write but non-executable. Second, an exhaustive live-project
+primitive**, with important impact bounds. First, the hardware MPU itself
+marks this window **supervisor-executable**: MPU region-1 bounds at CodeFlash
+`0x3181C/0x31820` are exactly `FEBF7C00..FEBFFBFC`, and the context attribute
+bytes `0x31898 = 0xB8` (context 0: supervisor R/W/X) and `0x318D8 = 0xA8`
+(context 1: supervisor R/X) prove execution is not hardware-denied. Both
+attributes use ASID 0/G=0; reset startup explicitly clears ASID to 0, MPU init
+enables protection in supervisor mode with `MPM=3` (MPE+SVP), and the
+application MPU loader selects context 0 initially (`0x3180F=0`), context 1 for
+foreground/flash-end entry (`0x31810=1`), and context 0 for CAN1 Tx/Rx ISR
+wrappers (`0x31811=0`). MPAT bit semantics are those in the Renesas P1M-E
+manual (`REFERENCE/r01uh0585ej0120_manual.pdf`, Table 3.49). The
+Ghidra LocalRAM memory block's `execute=false` is **analysis metadata about
+the imported program database, not a hardware security bound** (see
+CORRECTIONS). Second, an exhaustive live-project
 census over all defined function instructions finds exactly three direct
 references into `0xFEBF7C00..0xFEBFFBFF`, all `WRITE` references to the base
 `FEBF7C00` (`0x142E`, `0x62652`, `0x976E4`). It finds zero function-owned direct
@@ -197,9 +210,10 @@ pointer, executable alias, persistent-flash consumer, or motor-control consumer
 for attacker-written bytes. Runtime-only aliasing or computed consumers remain
 a bounded unknown; the absence of direct xrefs is not a universal non-use proof.
 
-The security conclusion is therefore stronger than the earlier
-"calibration-shadow write configuration" description but still bounded:
-**write capability is verified; downstream control/RCE/persistence impact is not.**
+The security conclusion is therefore corrected and still bounded:
+**write capability is verified, and the window is supervisor-executable by MPU
+configuration, but no control-transfer consumer is recovered** — so this
+remains a write primitive, not a claimed RCE.
 `exploit/followups/xcp_shadow_write_plan.py` now represents the verified
 SET_MTA/DOWNLOAD wire primitive as an offline-only planner/simulator. It has no
 live transport path; that preserves the distinction between proving the write
@@ -237,6 +251,14 @@ call whose destination lacks an exact function entry.
 The nearby 60-pointer array at `0x27C88..0x27D77`, including the wrapper-shaped
 targets referenced by `0x27D08..0x27D54`, is intentionally not seeded. Its
 bytes are valid CodeFlash pointers to entry-shaped runs, but this image has no
-referenced executable walker or computed-call consumer. It remains
-`unresolved-reviewed` in `data/outside_function_candidates.csv`; prologue shape
-and pointer shape alone do not prove dispatch.
+referenced executable walker or computed-call consumer. The negative is now
+stronger than "unreferenced": the descriptor array at `0x27E94` has exactly six
+recovered accessors, and every one consumes `desc+0x04` (bounds-checked
+`32x4` table at `0x27C08`) plus code slots `+0x10/+0x14/+0x18/+0x1C/+0x20` —
+never `desc+0x0C`, which is where `0x27C88` sits. The sole live xref to
+`0x27C88` is a single DATA word at `0x27D84`, the canonical data-reference
+graph contains no function-owned reference, and all 60 target pointer
+literals occur only inside the table itself. Prologue shape and pointer shape
+alone do not prove dispatch; the cluster stays `unresolved-reviewed` in
+`data/outside_function_candidates.csv` as a bounded structural negative, with
+no consumed selector path in this calibration.

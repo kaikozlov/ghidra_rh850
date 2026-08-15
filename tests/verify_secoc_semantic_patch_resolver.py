@@ -14,11 +14,14 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 
 from tools.build_secoc_patch_manifest import (
+    CONCATENATED_DUMP_SIZE,
     EXPECTED_CRC_RESIDUE,
+    P1M_E_CODEFLASH_SIZE,
     VALIDITY_MARKER,
     build_manifest,
     crc32,
     discover_crc_descriptors,
+    validate_codeflash_geometry,
 )
 
 passed = failed = 0
@@ -138,6 +141,62 @@ if descs:
     d = descs[0]
     check("synthetic descriptor validates terminal CRC construction", d.terminal_fixup_valid and d.full_crc == EXPECTED_CRC_RESIDUE)
     check("synthetic validity marker location is discovered by trailer scan", d.validity_marker_va == region_end + 0x0C)
+
+print("\n== fail-closed image geometry and provenance ==")
+cf_bytes = cf_path.read_bytes()
+dataflash_path = REPO / "firmware" / "RH850_P1M-E_DataFlash.bin"
+check("committed CodeFlash image has the expected 1 MiB geometry", len(cf_bytes) == P1M_E_CODEFLASH_SIZE == 0x100000)
+check("DataFlash prefix fixture is the 0x8000 concatenation prefix", dataflash_path.stat().st_size == 0x8000)
+try:
+    validate_codeflash_geometry(len(cf_bytes))
+    check("exact 1 MiB CodeFlash geometry is accepted", True)
+except ValueError as exc:
+    check("exact 1 MiB CodeFlash geometry is accepted", False, str(exc))
+for size, label in (
+    (0, "empty image"),
+    (0x8000, "DataFlash-only image"),
+    (0x80000, "half-size truncated image"),
+    (0xFFFFF, "one-byte-truncated image"),
+    (0x100008, "oversized image"),
+):
+    try:
+        validate_codeflash_geometry(size)
+    except ValueError as exc:
+        check(f"{label} geometry is rejected", "expected exactly" in str(exc), str(exc))
+    else:
+        check(f"{label} geometry is rejected", False)
+try:
+    validate_codeflash_geometry(CONCATENATED_DUMP_SIZE)
+except ValueError as exc:
+    check(
+        "0x108000 DataFlash+CodeFlash concatenation is rejected with explicit diagnosis",
+        "DataFlash" in str(exc) and "0x8000" in str(exc) and "strip" in str(exc),
+        str(exc),
+    )
+else:
+    check("0x108000 DataFlash+CodeFlash concatenation is rejected with explicit diagnosis", False)
+with tempfile.TemporaryDirectory() as td:
+    concat_path = Path(td) / "concat.bin"
+    concat_path.write_bytes(dataflash_path.read_bytes() + cf_bytes)
+    check("concatenated fixture is exactly 0x108000 bytes", concat_path.stat().st_size == CONCATENATED_DUMP_SIZE == 0x108000)
+    try:
+        build_manifest(resolution, concat_path, 0)
+    except ValueError as exc:
+        check("manifest builder rejects concatenated dump before any resolution logic", "DataFlash+CodeFlash concatenated" in str(exc), str(exc))
+    else:
+        check("manifest builder rejects concatenated dump before any resolution logic", False)
+    truncated_path = Path(td) / "truncated.bin"
+    truncated_path.write_bytes(cf_bytes[:-0x100])
+    try:
+        build_manifest(resolution, truncated_path, 0)
+    except ValueError as exc:
+        check("manifest builder rejects truncated image on geometry", "unexpected CodeFlash image geometry" in str(exc), str(exc))
+    else:
+        check("manifest builder rejects truncated image on geometry", False)
+    check("valid manifest rebuild still succeeds after geometry gate", build_manifest(resolution, cf_path, 0) == committed_manifest)
+wrapper = (REPO / "tools" / "resolve_secoc_patch_image.sh").read_text(encoding="utf-8")
+check("arbitrary-image wrapper gates geometry before the Ghidra import", "validate_codeflash_geometry" in wrapper and wrapper.index("validate_codeflash_geometry") < wrapper.index('-import "$IMAGE"'))
+check("arbitrary-image wrapper diagnoses the concatenated dump by name", "DataFlash+CodeFlash concatenated" in wrapper or "validate_codeflash_geometry" in wrapper)
 
 print("\n== fail-closed image/preimage behavior ==")
 sha_mismatch = copy.deepcopy(resolution)

@@ -371,6 +371,30 @@ matching ECU or bench setup is available:
 Rules: do not send writes, resets, `0xAB`, `0xBA`, or routines. Send `27 03` as
 the first UDS request or include explicit padding bytes.
 
+## 8.1 Cross-security-state composition audit (SEC-APP-008)
+
+An explicit composition model
+(`tools/generate_security_state_composition.py`, verified by
+`tests/verify_security_state_composition.py`) composes the firmware-proven
+state machines — UDS sessions (both contexts), application SA level 2, the BA
+persistent authorization (SEC-APP-007), the programming handoff phase,
+CommunicationControl, the XCP `0x7F7` connection, and the bootloader SA byte —
+and queries privilege carryover and stale authorization across transitions.
+Result:
+
+- **No privilege composition stronger than the existing SEC-APP-007 BA
+  reset-persistent downgrade exists.** Application SA and XCP are disjoint
+  privilege domains: no XCP command reads the Dcm security mask or BA state.
+- The programming handoff performs **no SA transfer** — no shared privilege
+  byte exists between the application and bootloader contexts, and the boot SA
+  byte re-arms locked at boot init (`0x5090` writes `1`), downgrading any
+  unlock on session change (`0x561E` writes `1`).
+- Exactly **one stale-authorization window** exists (BA dispatcher `0x348B4`
+  skipping the fresh SA read while `FEBE5F27 == 0x5A`), bounded by the
+  30-invocation countdown and requiring a prior legitimate SA2 enable.
+- CommunicationControl composes communication **availability** only, not
+  privilege.
+
 ## 9. Variant limitations
 
 | Assumption | Status |

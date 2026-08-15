@@ -1202,3 +1202,35 @@ the mistakes are not re-made.
 - **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
   `tests/verify_xcp_security.py`; `tests/verify_xcp_shadow_write_live.py`;
   `AssertXcpShadowWriteBoundary.java`.
+
+### CORR-060 — The XCP write window is supervisor-executable by hardware MPU configuration; "non-executable" was Ghidra analysis metadata
+
+- **Wrong:** COM-005 and CORR-059 stated the containing LocalRAM block is
+  "non-executable", citing the Ghidra program database's LocalRAM
+  `MemoryBlock` attribute `execute=false`. That attribute describes the
+  imported analysis program, not the deployed hardware.
+- **Right:** the raw CodeFlash MPU tables cover exactly the XCP write window.
+  MPU region-1 bounds at `0x3181C/0x31820` are `FEBF7C00..FEBFFBFC`;
+  the initial application selector `0x3180F=0x00` loads context 0;
+  `0x31810=0x01` selects context 1 for foreground/flash-end entry, while
+  `0x31811=0x00` selects context 0 for both CAN1 Tx/Rx ISR wrappers. Reset
+  startup explicitly clears `ASID=0`, and application MPU init loads `MPM=3`
+  (MPE+SVP enabled). Per Renesas P1M-E manual Table 3.49, context-0 attribute `MPAT1 @ 0x31898 = 0xB8` grants
+  supervisor read/write/**execute**, and context-1 `MPAT1 @ 0x318D8 = 0xA8`
+  grants supervisor read/**execute**. Neither context grants user-mode
+  access (bits 0..2 are zero).
+- **Impact boundary (unchanged in substance):** this correction does **not**
+  upgrade COM-005 to RCE. The exhaustive consumer census still finds exactly
+  three direct WRITE references to the window base (`0x142E`, `0x62652`,
+  `0x976E4`) and zero READ/PARAM/call/jump references, zero function entries
+  inside the window, and no recovered callback, pointer, flash, or motor
+  consumer. The corrected statement is: the window is attacker-writable
+  **supervisor-executable** RAM with **no recovered control-transfer
+  consumer** — write capability verified, execution path not recovered.
+- **Deterministic check:** `tests/verify_xcp_window_mpu_permissions.py` pins
+  the region bounds, selector bytes, both MPAT1 values, their decoded
+  permission sets, and the user-mode-negative property directly from the
+  committed CodeFlash bytes.
+- **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
+  [FINDINGS.md](FINDINGS.md) COM-005;
+  `tests/verify_xcp_window_mpu_permissions.py`.

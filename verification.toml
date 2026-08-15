@@ -899,6 +899,87 @@ paths = [
   "docs/status/OPEN_QUESTIONS.md",
 ]
 
+[suite.exploit_interest_ranking]
+tests = ["tests/verify_exploit_interest_ranking.py"]
+oracle = "generated_self_check"
+paths = [
+  "exploit/pipeline/",
+  "tools/generate_exploit_interest_ranking.py",
+  "tests/verify_exploit_interest_ranking.py",
+  "docs/tooling/exploit-interest-ranking.md",
+  "data/generated/exploit_interest_ranking.csv",
+  "data/generated/exploit_interest_cohorts.json",
+  "data/generated/decompilations.jsonl",
+  "data/application_diagnostic_map.csv",
+  "data/application_rx_map.csv",
+  "data/recovered_callback_tables.csv",
+  "data/application_async_operation_queue.csv",
+  "data/application_wdbi_callbacks.csv",
+  "data/application_routine_control_surface.csv",
+  "docs/status/FINDINGS.md",
+]
+
+[suite.security_state_composition]
+tests = ["tests/verify_security_state_composition.py"]
+oracle = "generated_self_check"
+paths = [
+  "tools/generate_security_state_composition.py",
+  "tests/verify_security_state_composition.py",
+  "data/generated/security_state_composition.json",
+  "data/generated/security_state_composition.csv",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+]
+
+[suite.response_disclosure_audit]
+tests = ["tests/verify_response_disclosure_audit.py"]
+oracle = "generated_self_check"
+paths = [
+  "tools/generate_response_disclosure_audit.py",
+  "tests/verify_response_disclosure_audit.py",
+  "data/generated/response_disclosure_audit.json",
+  "data/generated/response_disclosure_audit.csv",
+  "data/application_routine_control_surface.csv",
+  "data/application_wdbi_callbacks.csv",
+  "data/recovered_callback_tables.csv",
+  "docs/diagnostics/application.md",
+  "docs/status/FINDINGS.md",
+]
+
+[suite.xcp_window_mpu]
+tests = ["tests/verify_xcp_window_mpu_permissions.py"]
+paths = [
+  "tests/verify_xcp_window_mpu_permissions.py",
+  "docs/communications/xcp-command-dispatch.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "exploit/followups/xcp_shadow_write_plan.py",
+  "tests/verify_xcp_shadow_write_plan.py",
+  "tests/verify_xcp_shadow_write_live.py",
+  "exploit/followups/README.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
+[suite.application_rdbi_preflight]
+tests = ["tests/verify_application_rdbi_preflight_bounds.py"]
+paths = [
+  "tests/verify_application_rdbi_preflight_bounds.py",
+  "docs/diagnostics/application.md",
+  "docs/status/FINDINGS.md",
+]
+
+[suite.codeflash_structure_scanner]
+tests = ["tests/verify_rh850_codeflash_structure_scanner.py"]
+paths = [
+  "tools/analyze_rh850_codeflash_structure.py",
+  "tools/build_secoc_patch_manifest.py",
+  "tests/verify_rh850_codeflash_structure_scanner.py",
+  "docs/tooling/rh850-codeflash-structure-scanner.md",
+  "docs/tooling/README.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "firmware/",
+]
+
 [suite.exploit_surface]
 tests = ["tests/verify_exploit_surface.py"]
 oracle = "generated_self_check"

@@ -14,6 +14,7 @@ from exploit.followups.xcp_daq_probe import (  # noqa: E402
     ENTRIES_PER_ODT,
     MAX_ENTRIES,
     PROFILES,
+    SECOC_XCP_EXCLUDED_CANDIDATES,
     XcpDaqError,
     build_plan,
     clear_daq_list_request,
@@ -84,6 +85,49 @@ check("async/BA profile maps DIAG-APP-023 and SEC-APP-007",
       PROFILES["async-ba-state"].finding_ids == ("DIAG-APP-023", "SEC-APP-007"))
 check("BA operational profile maps DIAG-APP-024",
       PROFILES["ba-operational-state"].finding_ids == ("DIAG-APP-024",))
+
+print("\n== SecOC verification-state profile is firmware-pinned, not guessed ==")
+secoc = PROFILES["secoc-verification-state"]
+check("SecOC profile maps SECOC-011/012/029",
+      secoc.finding_ids == ("SECOC-011", "SECOC-012", "SECOC-029"))
+check("SecOC profile observes exactly the pinned SecOC state bytes",
+      secoc.addresses == (0xFEBE555C, 0xFEBE5568, 0xFEBE556C, 0xFEBE5560, 0xFEBE5562, 0xFEBE5564),
+      repr([hex(a) for a in secoc.addresses]))
+check("SecOC profile fits one ODT", len(secoc.addresses) <= ENTRIES_PER_ODT)
+import json as _json
+import struct as _struct
+# Canonicality is firmware-derived: the body-hash-pinned SecOC functions in
+# verify_secoc_security_properties.py are the writers/readers of these bytes.
+CANON = {
+    "0x0008e9fc": {"febe5568", "febe556c"},  # freshness state clear (writes)
+    "0x0008e7d4": {"febe5560", "febe5562", "febe5564"},  # freshness init wrapper (writes)
+    "0x0008ef9e": {"febe5568", "febe556c"},  # sync reconstruction (reads)
+}
+corpus_refs: dict[str, set[str]] = {}
+with (REPO / "data/generated/decompilations.jsonl").open(encoding="utf-8") as stream:
+    for line in stream:
+        row = _json.loads(line)
+        if row.get("record") == "function" and row.get("entry_addr") in CANON:
+            corpus_refs[row["entry_addr"]] = {
+                ref["to_addr"].lower().lstrip("0x")
+                for ref in row.get("data_references", [])
+                if isinstance(ref.get("to_addr"), str)
+            }
+for entry, expected in CANON.items():
+    check(f"corpus function {entry} references the claimed sync words",
+          expected <= corpus_refs.get(entry, set()), repr(sorted(corpus_refs.get(entry, set()))))
+# FEBE555C canonicality: the unique GP-relative load of the MAC result byte.
+check("MAC-result byte FEBE555C is loaded by the unique pinned Gate-2 instruction",
+      CF[0x8E69E:0x8E6A8] == bytes.fromhex("840f5d9de009e10f14d3") and CF.count(bytes.fromhex("840f5d9d")) == 1)
+check("MAC-result GP-relative offset -0x62A4 resolves to FEBE555C",
+      0xFEBEB800 - 0x62A4 == 0xFEBE555C)  # APP_GP pinned in verify_secoc_acceptance_gate.py
+for address, reason in SECOC_XCP_EXCLUDED_CANDIDATES:
+    check(f"firmware-excluded SecOC candidate {address:#010X} is rejected by the validator",
+          rejects(lambda a=address: validate_addresses((a,))), reason)
+check("no profile contains a firmware-excluded SecOC candidate",
+      all(addr not in p.addresses for p in PROFILES.values() for addr, _ in SECOC_XCP_EXCLUDED_CANDIDATES))
+check("SecOC profile mentions the deliberately excluded observation paths",
+      "firmware-excluded" in secoc.description and "command-5 generated-result buffer" in secoc.description)
 check("protected XCP interval cannot be configured as a DAQ source",
       rejects(lambda: validate_addresses((0xFEBF4958,))))
 check("duplicate sources rejected", rejects(lambda: validate_addresses((0xFEBE6D28, 0xFEBE6D28))))

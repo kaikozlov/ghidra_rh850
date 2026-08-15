@@ -1,0 +1,2586 @@
+{
+  "criterion": "declared-by-configuration response length vs producer writes; transport buffer reuse without full clear",
+  "findings": [
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e99e",
+      "producer_writes_declared": true,
+      "selector": "0x0100",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e98e",
+      "producer_writes_declared": true,
+      "selector": "0x0101",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cbfc",
+      "producer_writes_declared": true,
+      "selector": "0x0102",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 4,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cc76",
+      "producer_writes_declared": true,
+      "selector": "0x0103",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 12,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ccc4",
+      "producer_writes_declared": true,
+      "selector": "0x0105",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 6,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cd38",
+      "producer_writes_declared": true,
+      "selector": "0x0109",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 16,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cd74",
+      "producer_writes_declared": true,
+      "selector": "0x010B",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 4,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cdd4",
+      "producer_writes_declared": true,
+      "selector": "0x0110",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 4,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cdfc",
+      "producer_writes_declared": false,
+      "selector": "0x0111",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 4,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ce00",
+      "producer_writes_declared": true,
+      "selector": "0x0112",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e9b6",
+      "producer_writes_declared": true,
+      "selector": "0x0200",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ce26",
+      "producer_writes_declared": true,
+      "selector": "0x0204",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e9ce",
+      "producer_writes_declared": true,
+      "selector": "0x1000",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ce44",
+      "producer_writes_declared": true,
+      "selector": "0x1031",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ce76",
+      "producer_writes_declared": true,
+      "selector": "0x1032",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cea0",
+      "producer_writes_declared": true,
+      "selector": "0x1033",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cec6",
+      "producer_writes_declared": true,
+      "selector": "0x1034",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cef8",
+      "producer_writes_declared": true,
+      "selector": "0x1035",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cf44",
+      "producer_writes_declared": true,
+      "selector": "0x1036",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cf80",
+      "producer_writes_declared": true,
+      "selector": "0x1037",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cfae",
+      "producer_writes_declared": true,
+      "selector": "0x1038",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cec6",
+      "producer_writes_declared": true,
+      "selector": "0x1039",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cfbe",
+      "producer_writes_declared": true,
+      "selector": "0x1061",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cff0",
+      "producer_writes_declared": true,
+      "selector": "0x1062",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d022",
+      "producer_writes_declared": true,
+      "selector": "0x1063",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d05e",
+      "producer_writes_declared": true,
+      "selector": "0x1064",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d084",
+      "producer_writes_declared": true,
+      "selector": "0x1065",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d0b0",
+      "producer_writes_declared": false,
+      "selector": "0x1066",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cfbe",
+      "producer_writes_declared": true,
+      "selector": "0x1067",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004cff0",
+      "producer_writes_declared": true,
+      "selector": "0x1068",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d022",
+      "producer_writes_declared": true,
+      "selector": "0x1069",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d0b4",
+      "producer_writes_declared": false,
+      "selector": "0x106A",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d0b8",
+      "producer_writes_declared": true,
+      "selector": "0x106B",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d0b8",
+      "producer_writes_declared": true,
+      "selector": "0x106C",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d0ea",
+      "producer_writes_declared": true,
+      "selector": "0x1091",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d122",
+      "producer_writes_declared": true,
+      "selector": "0x1092",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d15a",
+      "producer_writes_declared": true,
+      "selector": "0x1093",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d192",
+      "producer_writes_declared": true,
+      "selector": "0x1094",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d1ca",
+      "producer_writes_declared": true,
+      "selector": "0x1095",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d1f4",
+      "producer_writes_declared": true,
+      "selector": "0x1096",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d21e",
+      "producer_writes_declared": true,
+      "selector": "0x1097",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d248",
+      "producer_writes_declared": true,
+      "selector": "0x1098",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d272",
+      "producer_writes_declared": true,
+      "selector": "0x10C1",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d2ae",
+      "producer_writes_declared": true,
+      "selector": "0x10C2",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d2ea",
+      "producer_writes_declared": true,
+      "selector": "0x10C3",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d326",
+      "producer_writes_declared": true,
+      "selector": "0x10C4",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d35c",
+      "producer_writes_declared": true,
+      "selector": "0x10C5",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d392",
+      "producer_writes_declared": true,
+      "selector": "0x10C6",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d3c8",
+      "producer_writes_declared": false,
+      "selector": "0x10C7",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d3cc",
+      "producer_writes_declared": false,
+      "selector": "0x10C8",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d3d0",
+      "producer_writes_declared": false,
+      "selector": "0x10C9",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d3d4",
+      "producer_writes_declared": true,
+      "selector": "0x10CA",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d406",
+      "producer_writes_declared": true,
+      "selector": "0x10F1",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d442",
+      "producer_writes_declared": true,
+      "selector": "0x10F2",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d47e",
+      "producer_writes_declared": true,
+      "selector": "0x10F3",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d4ba",
+      "producer_writes_declared": true,
+      "selector": "0x10F4",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d4f0",
+      "producer_writes_declared": true,
+      "selector": "0x10F5",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d526",
+      "producer_writes_declared": true,
+      "selector": "0x10F6",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d55c",
+      "producer_writes_declared": false,
+      "selector": "0x10F7",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d560",
+      "producer_writes_declared": false,
+      "selector": "0x10F8",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d564",
+      "producer_writes_declared": false,
+      "selector": "0x10F9",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d568",
+      "producer_writes_declared": true,
+      "selector": "0x10FA",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e9e6",
+      "producer_writes_declared": true,
+      "selector": "0x1100",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d59a",
+      "producer_writes_declared": true,
+      "selector": "0x1121",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d5ce",
+      "producer_writes_declared": true,
+      "selector": "0x1122",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d59a",
+      "producer_writes_declared": true,
+      "selector": "0x1123",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d602",
+      "producer_writes_declared": false,
+      "selector": "0x1124",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d606",
+      "producer_writes_declared": false,
+      "selector": "0x1125",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d60a",
+      "producer_writes_declared": false,
+      "selector": "0x1126",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d60e",
+      "producer_writes_declared": false,
+      "selector": "0x1127",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d612",
+      "producer_writes_declared": false,
+      "selector": "0x1128",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d616",
+      "producer_writes_declared": false,
+      "selector": "0x1129",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d5ce",
+      "producer_writes_declared": true,
+      "selector": "0x112A",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d61a",
+      "producer_writes_declared": true,
+      "selector": "0x112B",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d61a",
+      "producer_writes_declared": true,
+      "selector": "0x112C",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 4,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d644",
+      "producer_writes_declared": true,
+      "selector": "0x112D",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d680",
+      "producer_writes_declared": true,
+      "selector": "0x112E",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d6c0",
+      "producer_writes_declared": false,
+      "selector": "0x112F",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d6c4",
+      "producer_writes_declared": false,
+      "selector": "0x1130",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d6c8",
+      "producer_writes_declared": false,
+      "selector": "0x1131",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d6cc",
+      "producer_writes_declared": true,
+      "selector": "0x1132",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d6f6",
+      "producer_writes_declared": true,
+      "selector": "0x1133",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d71c",
+      "producer_writes_declared": true,
+      "selector": "0x1151",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d758",
+      "producer_writes_declared": true,
+      "selector": "0x1152",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d794",
+      "producer_writes_declared": true,
+      "selector": "0x1153",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d7d0",
+      "producer_writes_declared": true,
+      "selector": "0x1154",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d80c",
+      "producer_writes_declared": true,
+      "selector": "0x1155",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d856",
+      "producer_writes_declared": true,
+      "selector": "0x1156",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d71c",
+      "producer_writes_declared": true,
+      "selector": "0x1157",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d758",
+      "producer_writes_declared": true,
+      "selector": "0x1158",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d794",
+      "producer_writes_declared": true,
+      "selector": "0x1159",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d7d0",
+      "producer_writes_declared": true,
+      "selector": "0x115A",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d80c",
+      "producer_writes_declared": true,
+      "selector": "0x115B",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d856",
+      "producer_writes_declared": true,
+      "selector": "0x115C",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d890",
+      "producer_writes_declared": true,
+      "selector": "0x1181",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d8b6",
+      "producer_writes_declared": true,
+      "selector": "0x1182",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d8c8",
+      "producer_writes_declared": true,
+      "selector": "0x1183",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d8fc",
+      "producer_writes_declared": true,
+      "selector": "0x1184",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d930",
+      "producer_writes_declared": true,
+      "selector": "0x1185",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d95a",
+      "producer_writes_declared": true,
+      "selector": "0x1186",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d988",
+      "producer_writes_declared": true,
+      "selector": "0x11B1",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d9b4",
+      "producer_writes_declared": true,
+      "selector": "0x11B3",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d9e0",
+      "producer_writes_declared": true,
+      "selector": "0x11B4",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004da0c",
+      "producer_writes_declared": true,
+      "selector": "0x11B5",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004da38",
+      "producer_writes_declared": true,
+      "selector": "0x11B6",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004da66",
+      "producer_writes_declared": true,
+      "selector": "0x11B7",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004da8e",
+      "producer_writes_declared": true,
+      "selector": "0x11B8",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dab6",
+      "producer_writes_declared": true,
+      "selector": "0x11B9",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dade",
+      "producer_writes_declared": true,
+      "selector": "0x11BA",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004db06",
+      "producer_writes_declared": true,
+      "selector": "0x11BB",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004db2e",
+      "producer_writes_declared": false,
+      "selector": "0x11BC",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004db32",
+      "producer_writes_declared": true,
+      "selector": "0x11BD",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d988",
+      "producer_writes_declared": true,
+      "selector": "0x11BE",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d9b4",
+      "producer_writes_declared": true,
+      "selector": "0x11BF",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004d9e0",
+      "producer_writes_declared": true,
+      "selector": "0x11C0",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004da0c",
+      "producer_writes_declared": true,
+      "selector": "0x11C1",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004da38",
+      "producer_writes_declared": true,
+      "selector": "0x11C2",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004da66",
+      "producer_writes_declared": true,
+      "selector": "0x11C3",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004da8e",
+      "producer_writes_declared": true,
+      "selector": "0x11C4",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dab6",
+      "producer_writes_declared": true,
+      "selector": "0x11C5",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dade",
+      "producer_writes_declared": true,
+      "selector": "0x11C6",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004db06",
+      "producer_writes_declared": true,
+      "selector": "0x11C7",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004db2e",
+      "producer_writes_declared": false,
+      "selector": "0x11C8",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004db32",
+      "producer_writes_declared": true,
+      "selector": "0x11C9",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e9fe",
+      "producer_writes_declared": true,
+      "selector": "0x1C00",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004db5e",
+      "producer_writes_declared": true,
+      "selector": "0x1C02",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dba6",
+      "producer_writes_declared": true,
+      "selector": "0x1C03",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 8,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dbd0",
+      "producer_writes_declared": true,
+      "selector": "0x1C05",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dbf2",
+      "producer_writes_declared": true,
+      "selector": "0x1C06",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dc40",
+      "producer_writes_declared": true,
+      "selector": "0x1C07",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dc8e",
+      "producer_writes_declared": true,
+      "selector": "0x1C08",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dcb6",
+      "producer_writes_declared": true,
+      "selector": "0x1C09",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 8,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dbd0",
+      "producer_writes_declared": true,
+      "selector": "0x1C0C",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dcde",
+      "producer_writes_declared": true,
+      "selector": "0x1C31",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dd04",
+      "producer_writes_declared": true,
+      "selector": "0x1C32",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dd40",
+      "producer_writes_declared": true,
+      "selector": "0x1C33",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dd68",
+      "producer_writes_declared": true,
+      "selector": "0x1C37",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dd8e",
+      "producer_writes_declared": true,
+      "selector": "0x1C38",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ddca",
+      "producer_writes_declared": true,
+      "selector": "0x1C39",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ddf2",
+      "producer_writes_declared": true,
+      "selector": "0x1C3D",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004de18",
+      "producer_writes_declared": true,
+      "selector": "0x1C3E",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004de54",
+      "producer_writes_declared": true,
+      "selector": "0x1C3F",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004de7c",
+      "producer_writes_declared": true,
+      "selector": "0x1C43",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dea2",
+      "producer_writes_declared": true,
+      "selector": "0x1C44",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dede",
+      "producer_writes_declared": true,
+      "selector": "0x1C49",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004df04",
+      "producer_writes_declared": true,
+      "selector": "0x1C4A",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004df40",
+      "producer_writes_declared": true,
+      "selector": "0x1C4B",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004df68",
+      "producer_writes_declared": true,
+      "selector": "0x1C4F",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004df8e",
+      "producer_writes_declared": true,
+      "selector": "0x1C50",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dfca",
+      "producer_writes_declared": true,
+      "selector": "0x1C51",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004dff2",
+      "producer_writes_declared": true,
+      "selector": "0x1C52",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e018",
+      "producer_writes_declared": true,
+      "selector": "0x1C53",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e054",
+      "producer_writes_declared": true,
+      "selector": "0x1C81",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e080",
+      "producer_writes_declared": true,
+      "selector": "0x1C82",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e0ac",
+      "producer_writes_declared": true,
+      "selector": "0x1C83",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e0d8",
+      "producer_writes_declared": true,
+      "selector": "0x1C84",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e104",
+      "producer_writes_declared": true,
+      "selector": "0x1C86",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e12c",
+      "producer_writes_declared": true,
+      "selector": "0x1C87",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e194",
+      "producer_writes_declared": false,
+      "selector": "0x1C99",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e198",
+      "producer_writes_declared": false,
+      "selector": "0x1C9A",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e19c",
+      "producer_writes_declared": false,
+      "selector": "0x1C9B",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e1a0",
+      "producer_writes_declared": false,
+      "selector": "0x1C9C",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e1a4",
+      "producer_writes_declared": false,
+      "selector": "0x1C9D",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e1a8",
+      "producer_writes_declared": false,
+      "selector": "0x1C9E",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e1ac",
+      "producer_writes_declared": false,
+      "selector": "0x1C9F",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e1b0",
+      "producer_writes_declared": false,
+      "selector": "0x1CA0",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e1b4",
+      "producer_writes_declared": true,
+      "selector": "0x1CA1",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e1dc",
+      "producer_writes_declared": true,
+      "selector": "0x1CA2",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e242",
+      "producer_writes_declared": true,
+      "selector": "0x1CA3",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e26c",
+      "producer_writes_declared": true,
+      "selector": "0x1CA4",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e29e",
+      "producer_writes_declared": true,
+      "selector": "0x1CA5",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e2c6",
+      "producer_writes_declared": true,
+      "selector": "0x1CA6",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e32c",
+      "producer_writes_declared": true,
+      "selector": "0x1CA7",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e356",
+      "producer_writes_declared": true,
+      "selector": "0x1CA8",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e388",
+      "producer_writes_declared": true,
+      "selector": "0x1CA9",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e3c2",
+      "producer_writes_declared": true,
+      "selector": "0x1CAA",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e3fc",
+      "producer_writes_declared": true,
+      "selector": "0x1CAB",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e054",
+      "producer_writes_declared": true,
+      "selector": "0x1CAC",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e080",
+      "producer_writes_declared": true,
+      "selector": "0x1CAD",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e0ac",
+      "producer_writes_declared": true,
+      "selector": "0x1CAE",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e0d8",
+      "producer_writes_declared": true,
+      "selector": "0x1CAF",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e104",
+      "producer_writes_declared": true,
+      "selector": "0x1CB0",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e12c",
+      "producer_writes_declared": true,
+      "selector": "0x1CB1",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e1b4",
+      "producer_writes_declared": true,
+      "selector": "0x1CC0",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e1dc",
+      "producer_writes_declared": true,
+      "selector": "0x1CC1",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e242",
+      "producer_writes_declared": true,
+      "selector": "0x1CC2",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e26c",
+      "producer_writes_declared": true,
+      "selector": "0x1CC3",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e29e",
+      "producer_writes_declared": true,
+      "selector": "0x1CC4",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 7,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e2c6",
+      "producer_writes_declared": true,
+      "selector": "0x1CC5",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e32c",
+      "producer_writes_declared": true,
+      "selector": "0x1CC6",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e356",
+      "producer_writes_declared": true,
+      "selector": "0x1CC7",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e388",
+      "producer_writes_declared": true,
+      "selector": "0x1CC8",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e3c2",
+      "producer_writes_declared": true,
+      "selector": "0x1CC9",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e3fc",
+      "producer_writes_declared": true,
+      "selector": "0x1CCA",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e40c",
+      "producer_writes_declared": false,
+      "selector": "0x1CF4",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e410",
+      "producer_writes_declared": false,
+      "selector": "0x1CF5",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e414",
+      "producer_writes_declared": false,
+      "selector": "0x1CF6",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e418",
+      "producer_writes_declared": false,
+      "selector": "0x1CF7",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e41c",
+      "producer_writes_declared": false,
+      "selector": "0x1CF8",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e420",
+      "producer_writes_declared": false,
+      "selector": "0x1CF9",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e424",
+      "producer_writes_declared": false,
+      "selector": "0x1CFA",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e428",
+      "producer_writes_declared": false,
+      "selector": "0x1CFB",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e42c",
+      "producer_writes_declared": false,
+      "selector": "0x1CFC",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e430",
+      "producer_writes_declared": false,
+      "selector": "0x1CFD",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e434",
+      "producer_writes_declared": false,
+      "selector": "0x1CFE",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e438",
+      "producer_writes_declared": false,
+      "selector": "0x1CFF",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ea16",
+      "producer_writes_declared": true,
+      "selector": "0x1D00",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e43c",
+      "producer_writes_declared": false,
+      "selector": "0x1D01",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e440",
+      "producer_writes_declared": false,
+      "selector": "0x1D02",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 45,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e444",
+      "producer_writes_declared": false,
+      "selector": "0x1D03",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ea2e",
+      "producer_writes_declared": true,
+      "selector": "0x1F00",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 8,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e448",
+      "producer_writes_declared": true,
+      "selector": "0x1F01",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 8,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e448",
+      "producer_writes_declared": true,
+      "selector": "0x1F02",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e482",
+      "producer_writes_declared": false,
+      "selector": "0x1F03",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e486",
+      "producer_writes_declared": false,
+      "selector": "0x1F04",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ea46",
+      "producer_writes_declared": true,
+      "selector": "0x2000",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e48a",
+      "producer_writes_declared": true,
+      "selector": "0x2001",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e4aa",
+      "producer_writes_declared": true,
+      "selector": "0x2002",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e4d2",
+      "producer_writes_declared": true,
+      "selector": "0x2003",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e50c",
+      "producer_writes_declared": true,
+      "selector": "0x2004",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e546",
+      "producer_writes_declared": true,
+      "selector": "0x2005",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e57c",
+      "producer_writes_declared": true,
+      "selector": "0x2006",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e5b2",
+      "producer_writes_declared": true,
+      "selector": "0x2007",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e5e8",
+      "producer_writes_declared": true,
+      "selector": "0x2008",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e61e",
+      "producer_writes_declared": true,
+      "selector": "0x2009",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 3,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e654",
+      "producer_writes_declared": true,
+      "selector": "0x200A",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 4,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e6d4",
+      "producer_writes_declared": true,
+      "selector": "0x200B",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e774",
+      "producer_writes_declared": true,
+      "selector": "0x200C",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e7ae",
+      "producer_writes_declared": true,
+      "selector": "0x200D",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e7e4",
+      "producer_writes_declared": true,
+      "selector": "0x200E",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e81e",
+      "producer_writes_declared": true,
+      "selector": "0x200F",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e858",
+      "producer_writes_declared": true,
+      "selector": "0x2010",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e8a2",
+      "producer_writes_declared": true,
+      "selector": "0x2012",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 2,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e8b6",
+      "producer_writes_declared": true,
+      "selector": "0x2013",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e8ca",
+      "producer_writes_declared": true,
+      "selector": "0x2014",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 16,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e8dc",
+      "producer_writes_declared": false,
+      "selector": "0x2030",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 16,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e8dc",
+      "producer_writes_declared": false,
+      "selector": "0x2031",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 17,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e8e0",
+      "producer_writes_declared": false,
+      "selector": "0x2032",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 32,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004ea5e",
+      "producer_writes_declared": true,
+      "selector": "0xF100",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 17,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e8e4",
+      "producer_writes_declared": true,
+      "selector": "0xF181",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 1,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e90a",
+      "producer_writes_declared": true,
+      "selector": "0xF186",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "producer is four-byte success stub (mov 0,r10; jmp lp)",
+      "declared_response_bytes": 20,
+      "evidence_grade": "verified (matches DIAG stale-response census)",
+      "producer": "0x0004e918",
+      "producer_writes_declared": true,
+      "selector": "0xF18C",
+      "surface": "application_rdbi"
+    },
+    {
+      "criterion": "pointer-copyx1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x0002679c",
+      "producer_writes_declared": true,
+      "selector": "0x1000/type1_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x000266b8",
+      "producer_writes_declared": true,
+      "selector": "0x1000/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "pointer-copyx1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x000267a8",
+      "producer_writes_declared": true,
+      "selector": "0x1001/type1_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x000266c4",
+      "producer_writes_declared": true,
+      "selector": "0x1001/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x000266d0",
+      "producer_writes_declared": true,
+      "selector": "0x1002/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x000266dc",
+      "producer_writes_declared": true,
+      "selector": "0x1004/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x000266e8",
+      "producer_writes_declared": true,
+      "selector": "0x1007/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x000266f4",
+      "producer_writes_declared": true,
+      "selector": "0x1008/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x00026700",
+      "producer_writes_declared": true,
+      "selector": "0x1009/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "pointer-copyx1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x000267b4",
+      "producer_writes_declared": true,
+      "selector": "0x1010/type1_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "pointer-copyx1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x0002670c",
+      "producer_writes_declared": true,
+      "selector": "0x1010/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "pointer-copyx1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x000267c0",
+      "producer_writes_declared": true,
+      "selector": "0x1100/type1_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x00026718",
+      "producer_writes_declared": true,
+      "selector": "0x1100/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x00026724",
+      "producer_writes_declared": true,
+      "selector": "0x1103/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x00026730",
+      "producer_writes_declared": true,
+      "selector": "0x1106/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x0002673c",
+      "producer_writes_declared": true,
+      "selector": "0x1108/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x00026748",
+      "producer_writes_declared": true,
+      "selector": "0x1109/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x00026754",
+      "producer_writes_declared": true,
+      "selector": "0x110a/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x00026760",
+      "producer_writes_declared": true,
+      "selector": "0x110b/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x0002676c",
+      "producer_writes_declared": true,
+      "selector": "0x110c/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "assign-bytex1",
+      "declared_response_bytes": 1,
+      "evidence_grade": "recovered (packer descriptor census; kind-6 assigns and kind-7 routine-owned lengths are written by construction)",
+      "producer": "0x95966 descriptors @ 0x00026778",
+      "producer_writes_declared": true,
+      "selector": "0x110d/type3_request_result",
+      "surface": "application_routine_control_pack"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 28,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4EC2A",
+      "producer_writes_declared": true,
+      "selector": "0x0204",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 68,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4EC78",
+      "producer_writes_declared": true,
+      "selector": "0x2001",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 76,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4ECD0",
+      "producer_writes_declared": true,
+      "selector": "0x2002",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 54,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4ED40",
+      "producer_writes_declared": true,
+      "selector": "0x2005",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 54,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4ED8A",
+      "producer_writes_declared": true,
+      "selector": "0x2006",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 54,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4EDD4",
+      "producer_writes_declared": true,
+      "selector": "0x2007",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 54,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4EE1E",
+      "producer_writes_declared": true,
+      "selector": "0x2008",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 54,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4EE68",
+      "producer_writes_declared": true,
+      "selector": "0x2009",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 54,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4EEBA",
+      "producer_writes_declared": true,
+      "selector": "0x200D",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 70,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4EF04",
+      "producer_writes_declared": true,
+      "selector": "0x2010",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 26,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4EF4E",
+      "producer_writes_declared": true,
+      "selector": "0x2012",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 28,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4EF90",
+      "producer_writes_declared": true,
+      "selector": "0x2013",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "result callback is a success stub while result size >0",
+      "declared_response_bytes": 42,
+      "evidence_grade": "recovered (structural census)",
+      "producer": "0x4EFD4",
+      "producer_writes_declared": true,
+      "selector": "0x2014",
+      "surface": "application_wdbi"
+    },
+    {
+      "criterion": "handler routes through full-frame response builder 0x9724E",
+      "declared_response_bytes": 8,
+      "evidence_grade": "recovered (callback-table census)",
+      "note": "0x81FE4 clears the 8-byte Rx staging slot before copy; short-frame stale-tail closed (COM-005)",
+      "producer": "0x0009729a",
+      "producer_writes_declared": true,
+      "selector": "0xfb",
+      "surface": "xcp_command"
+    },
+    {
+      "criterion": "handler routes through full-frame response builder 0x9724E",
+      "declared_response_bytes": 8,
+      "evidence_grade": "recovered (callback-table census)",
+      "note": "0x81FE4 clears the 8-byte Rx staging slot before copy; short-frame stale-tail closed (COM-005)",
+      "producer": "0x000972fa",
+      "producer_writes_declared": true,
+      "selector": "0xfa",
+      "surface": "xcp_command"
+    },
+    {
+      "criterion": "handler routes through full-frame response builder 0x9724E",
+      "declared_response_bytes": 8,
+      "evidence_grade": "recovered (callback-table census)",
+      "note": "0x81FE4 clears the 8-byte Rx staging slot before copy; short-frame stale-tail closed (COM-005)",
+      "producer": "0x00097432",
+      "producer_writes_declared": true,
+      "selector": "0xf5",
+      "surface": "xcp_command"
+    },
+    {
+      "criterion": "handler routes through full-frame response builder 0x9724E",
+      "declared_response_bytes": 8,
+      "evidence_grade": "recovered (callback-table census)",
+      "note": "0x81FE4 clears the 8-byte Rx staging slot before copy; short-frame stale-tail closed (COM-005)",
+      "producer": "0x00097546",
+      "producer_writes_declared": true,
+      "selector": "0xf3",
+      "surface": "xcp_command"
+    },
+    {
+      "criterion": "handler routes through full-frame response builder 0x9724E",
+      "declared_response_bytes": 8,
+      "evidence_grade": "recovered (callback-table census)",
+      "note": "0x81FE4 clears the 8-byte Rx staging slot before copy; short-frame stale-tail closed (COM-005)",
+      "producer": "0x000975ee",
+      "producer_writes_declared": true,
+      "selector": "0xeb",
+      "surface": "xcp_command"
+    },
+    {
+      "criterion": "handler routes through full-frame response builder 0x9724E",
+      "declared_response_bytes": 8,
+      "evidence_grade": "recovered (callback-table census)",
+      "note": "0x81FE4 clears the 8-byte Rx staging slot before copy; short-frame stale-tail closed (COM-005)",
+      "producer": "0x00097668",
+      "producer_writes_declared": true,
+      "selector": "0xea",
+      "surface": "xcp_command"
+    },
+    {
+      "criterion": "handler routes through full-frame response builder 0x9724E",
+      "declared_response_bytes": 8,
+      "evidence_grade": "recovered (callback-table census)",
+      "note": "0x81FE4 clears the 8-byte Rx staging slot before copy; short-frame stale-tail closed (COM-005)",
+      "producer": "0x000976f4",
+      "producer_writes_declared": true,
+      "selector": "0xe4",
+      "surface": "xcp_command"
+    },
+    {
+      "criterion": "producer synthesizes every declared byte (verified DID model)",
+      "declared_response_bytes": 33,
+      "evidence_grade": "verified negative",
+      "producer": "0x5FB8",
+      "producer_writes_declared": true,
+      "selector": "0xF181",
+      "surface": "bootloader_rdbi"
+    }
+  ],
+  "prone_by_surface": {
+    "application_rdbi": 48,
+    "application_routine_control_pack": 0,
+    "application_wdbi": 0,
+    "bootloader_rdbi": 0,
+    "xcp_command": 0
+  },
+  "prone_total": 48,
+  "schema": "response-disclosure-audit/1",
+  "scope": "Sienna EPS 8965B4512000",
+  "surfaces_scanned": [
+    "application_rdbi",
+    "application_routine_control_type3",
+    "application_wdbi",
+    "xcp_command",
+    "bootloader_rdbi"
+  ],
+  "total_rows": 284
+}

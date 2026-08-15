@@ -17,6 +17,6 @@ def main()->int:
         out=log.read_text(errors='replace') if log.exists() else ''
         if r.returncode or EXPECTED not in out:
             print('[FAIL] XCP shadow write live'); print((r.stdout or '')+(r.stderr or '')+out[-10000:]); return 1
-    print('[PASS] XCP live boundary: shadow RW/non-exec with no consumer; DAQ pointer table is exact RAM-to-DTO read path')
+    print('[PASS] XCP live boundary: shadow RW with Ghidra analysis-metadata execute=false and no consumer; DAQ pointer table is exact RAM-to-DTO read path')
     return 0
 if __name__=='__main__': raise SystemExit(main())

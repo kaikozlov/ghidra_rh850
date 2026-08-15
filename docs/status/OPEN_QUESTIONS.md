@@ -32,10 +32,12 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   store-through-pointer path is recovered. The known d/q references
   `FEBE6D28/6D2A` and TSG3 compare state `FEBE38A2/38A4/38A6` are DAQ-readable,
   so a reachable channel would provide a non-invasive observer for the dynamic
-  actuation discriminator. The separate shadow write window remains RW,
-  non-executable, and direct-consumer-negative; runtime-computed aliases remain
-  bounded unknown. What is still unobserved is whether a vehicle gateway or
-  diagnostic connector forwards CAN `0x7F7/0x7F8`.
+  actuation discriminator. The separate shadow write window remains RW and
+  direct-consumer-negative. Its Ghidra `execute=false` attribute is analysis
+  metadata; the hardware MPU grants supervisor execute on that region
+  (CORR-060), so the open question is a runtime-computed control-transfer
+  consumer, not executability. What is still unobserved is whether a vehicle
+  gateway or diagnostic connector forwards CAN `0x7F7/0x7F8`.
   `exploit/followups/xcp_read_probe.py` remains read-only for isolated-bench
   reachability confirmation. `exploit/followups/xcp_daq_probe.py` now adds the
   exact volatile DAQ configuration/capture path, including named actuation and
@@ -167,7 +169,11 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   controlled `0x7F8` bench egress are specified. Remaining questions are
   dynamic: does live slot 4 actually permit command 5, what latency/jitter does
   it have under real command-7 load, and does a provisioned isolated bench
-  produce CMACs matching independently known frames? Production Tx integration
+  produce CMACs matching independently known frames? The stimulus harness now
+  records per-observation monotonic/wall timestamps and request RTT
+  (`command5/stimulus.py`, schema `sienna-command5-app-live-result-v2`), so the
+  slot-4 latency/jitter question can be answered from evidence without any new
+  mutator. Production Tx integration
   also requires a new audited route because stock CanIf has no `0x2E4/0x131` Tx
   entry. See
   [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.
@@ -402,3 +408,20 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   baseline-active EPS application Tx IDs are suppressed by `28 01 01` and prove
   all recover after `28 00 01`. This is an availability characterization, not a
   candidate steering interface.
+- **RDBI per-callback emitted-count provenance (MEM-SAFE-006 residual).** The
+  one-DID preflight and the shared configured length source bound the declared
+  response length, and no producer whose emitted count exceeds its declared
+  width has been recovered; but an exact emitted-count proof for all 196 RDBI
+  producer callbacks is not complete. Closing this residual would upgrade the
+  bounded negative to a verified closure.
+- **Exploit-interest cohort consumption (SWEEP-008).** The ranking pipeline
+  produces anchored candidate cohorts (`pre_sa_write`, `computed_store`,
+  `selector_dispatch`, ...). The first serious cohort is dispositioned; the
+  remaining ranked candidates are review input, not absence claims.
+- **Cross-calibration structural triage of future P1M-E images.** The offline
+  structural fingerprint scanner (`tools/analyze_rh850_codeflash_structure.py`)
+  now flags boot-CRC geometry, RAM-exec/MEM-SAFE-001 package anchors, and XCP
+  `0x7F7/0x7F8` route/command-map constants in arbitrary images. Every match is
+  a triage candidate only; whether each mechanism transfers must be verified
+  against the new firmware bytes before anything is recorded beyond
+  `docs/variants/` hypothesis.

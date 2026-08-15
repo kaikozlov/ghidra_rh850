@@ -68,8 +68,11 @@ check("chunk payloads reconstruct exactly", b"".join(chunk.data for chunk in chu
 plan = build_download_plan(SHADOW_START + 4, bytes(range(14)))
 check("plan binds COM-005", plan["finding_id"] == "COM-005")
 check("planner has no live execution path", plan["live_execution_implemented"] is False)
-check("plan records non-executable/no-direct-consumer impact bounds",
-      plan["window"]["executable"] is False and plan["window"]["direct_runtime_consumer_recovered"] is False)
+check("plan records impact bounds: Ghidra execute=false is analysis metadata; hardware MPU grants supervisor execute; no direct consumer",
+      plan["window"]["executable"] is False
+      and plan["window"]["executable_basis"] == "ghidra_localram_block_metadata"
+      and plan["window"]["hardware_mpu_supervisor_executable"] is True
+      and plan["window"]["direct_runtime_consumer_recovered"] is False)
 check("plan emits CONNECT + SET_MTA + three DOWNLOAD frames", [row["operation"] for row in plan["requests"]] == ["connect", "set_mta", "download", "download", "download"])
 check("all planned frames are exactly eight bytes", all(len(bytes.fromhex(row["request"])) == 8 for row in plan["requests"]))
 
