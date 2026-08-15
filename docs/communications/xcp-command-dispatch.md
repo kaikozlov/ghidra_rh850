@@ -34,7 +34,11 @@ paired CAN `0x7F7` request / `0x7F8` response route. The configured generic
 command map has no GET_SEED (`0xF8`) or UNLOCK (`0xF7`) callback. After CONNECT
 (`0xFF`), SET_MTA (`0xF6`) accepts a tester-supplied 32-bit address without an
 authorization check and the custom UPLOAD command (`0xF5`) returns one to seven
-bytes from permitted LocalRAM. The `0xE4` page-copy command first makes
+bytes from permitted LocalRAM. Independently, configured standard SHORT_UPLOAD
+(`0xF4`, callback `0x81A2E`) accepts a one-to-seven-byte length plus a tester
+32-bit address in the same request and directly returns the bytes after the
+same LocalRAM/exclusion checks; it does not require a prior SET_MTA. The `0xE4`
+page-copy command first makes
 CodeFlash `0x10000..0x17DEF` readable by copying it to permitted LocalRAM
 `0xFEBF7C00..0xFEBFF9EF`. Repeated uploads therefore recover 32,240 CodeFlash
 bytes exactly.
@@ -80,6 +84,21 @@ inclusive intervals encoded at `0x293F4`:
 That leaves 107,924 readable RAM bytes. The checker rejects requests crossing
 an exclusion and rejects address wraparound. The page-copy destination lies
 outside every exclusion.
+
+Standard SHORT_UPLOAD (`0xF4`) independently exposes the same LocalRAM allow-set.
+Its configured request length is eight bytes; byte 1 selects a read length of
+1..7, byte 3 must be address-extension zero, and bytes 4..7 are the
+little-endian source address. `application_command_05_callback @ 0x81A2E`
+explicitly rejects 32-bit address wrap, calls `0x81FBA -> 0x971D2` to reject
+intersection with the same five exclusion intervals, then enforces
+`0xFEBE0000..0xFEBFFFFF` before copying source bytes into response bytes 1..7.
+Thus `F4` is a second unauthenticated direct RAM-read primitive that does not
+need CONNECT+SET_MTA state to select its source address; it does **not** expand
+the readable address set beyond the 107,924 bytes already exposed by F5/DAQ.
+
+For example, an eight-byte `F4 01 00 00 28 6D BE FE` request selects one byte at
+`0xFEBE6D28`. Firmware-static evidence establishes the parser and read path, not
+external gateway reachability.
 
 The copied interval does not contain the bootloader secrets at `0xBFD8` and
 `0xBFE8` or the application SecurityAccess secret at `0x20840`; this finding

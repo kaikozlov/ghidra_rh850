@@ -82,13 +82,36 @@ command_map = CF[0x22C04:0x22C04 + CF[0x22BD1]]
 callback_table = [u32(0x22C30 + index * 4) for index in range(18)]
 check("CONNECT 0xFF maps to connection callback", callback_table[command_map[0]] == 0x81970)
 check("SET_MTA 0xF6 maps to callback 0x81B76", callback_table[command_map[0xFF - 0xF6]] == 0x81B76)
+check("SHORT_UPLOAD 0xF4 maps to callback 0x81A2E", callback_table[command_map[0xFF - 0xF4]] == 0x81A2E)
 check("DOWNLOAD 0xF0 maps to callback 0x80F12", callback_table[command_map[0xFF - 0xF0]] == 0x80F12)
 check("MODIFY_BITS 0xEC maps to callback 0x80FD8", callback_table[command_map[0xFF - 0xEC]] == 0x80FD8)
 check("GET_SEED 0xF8 has no configured callback", command_map[0xFF - 0xF8] == 0)
 check("UNLOCK 0xF7 has no configured callback", command_map[0xFF - 0xF7] == 0)
-check("CONNECT and SET_MTA require eight-byte requests", u16(0x22BA4) == 8 and u16(0x22BAC) == 8)
+check("CONNECT, SHORT_UPLOAD, and SET_MTA require eight-byte requests",
+      u16(0x22BA4) == 8 and u16(0x22BAE) == 8 and u16(0x22BAC) == 8)
 check("SET_MTA stores request bytes 4..7 without an authorization call",
       CF[0x81B92:0x81BA4] == bytes.fromhex("6308e0099a0d0235bfff02f6010a00527d0f"))
+
+print("\n== unauthenticated direct SHORT_UPLOAD ==")
+check("SHORT_UPLOAD requires address extension zero",
+      CF[0x81A48:0x81A50] == bytes.fromhex("a60f0300e009da45"))
+check("SHORT_UPLOAD accepts only lengths 1..7",
+      CF[0x81A50:0x81A62] == bytes.fromhex("a6e70100e0e1e23d850fbdec5f0ae1e19f3d"))
+check("SHORT_UPLOAD reads tester little-endian address from request bytes 4..7",
+      CF[0x81A62:0x81A66] == bytes.fromhex("26df0500"))
+check("SHORT_UPLOAD rejects address wrap before validation",
+      CF[0x81A66:0x81A72] == bytes.fromhex("1cd6ffff9a003b08fa09c12d"))
+check("SHORT_UPLOAD calls the shared five-interval exclusion validator",
+      CF[0x81A72:0x81A7C] == bytes.fromhex("dbd11b301c3880ff4205"))
+check("SHORT_UPLOAD enforces full LocalRAM bounds after exclusion validation",
+      CF[0x81A7C:0x81A90] == bytes.fromhex("250fa1ece1d9b125250f9dece1d1fb1de051da1d"))
+check("SHORT_UPLOAD copies source bytes directly into the response payload",
+      CF[0x81A9C:0x81AB2] == bytes.fromhex("0198db99939f010001f0ddf1410a8100809bfc09e1f5"))
+check("SHORT_UPLOAD exclusion helper is the same five-entry table used by DAQ",
+      CF[0x971DE:0x971E4] == bytes.fromhex("3206f4930200") and u32(0x2B3B8) == 5)
+check("SHORT_UPLOAD can directly read an allowed LocalRAM byte",
+      upload_allowed(0xFEBE6D28, 1, [struct.unpack_from("<II", CF, 0x293F4 + index * 8)
+                                    for index in range(u32(0x2B3B8))]))
 
 print("\n== unauthenticated DAQ read configuration ==")
 # The lower command map continues with the standard XCP-shaped DAQ family.
