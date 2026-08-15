@@ -91,6 +91,20 @@ check("CONNECT, SHORT_UPLOAD, and SET_MTA require eight-byte requests",
       u16(0x22BA4) == 8 and u16(0x22BAE) == 8 and u16(0x22BAC) == 8)
 check("SET_MTA stores request bytes 4..7 without an authorization call",
       CF[0x81B92:0x81BA4] == bytes.fromhex("6308e0099a0d0235bfff02f6010a00527d0f"))
+check("custom command dispatcher checks the connection/channel predicate before table scan",
+      CF[0x9717C:0x97186] == bytes.fromhex("1c30beff08aee051aa25"))
+check("connection predicate rejects disconnected or wrong-channel requests",
+      CF[0x82484:0x8249C] == bytes.fromhex("a40ff997610a8a0d840ff9978600e609ea5700007f000152"))
+check("standard command dispatcher independently requires matching connected channel",
+      CF[0x8111C:0x8112C] == bytes.fromhex("849ff997a40ff997fc999a3d610afa35"))
+check("receive transport rejects zero or greater-than-eight-byte CTO lengths",
+      CF[0x81FEA:0x81FFA] == bytes.fromhex("e7470500e041f225a50fb9ece141bb25") and CF[0x22B9D] == 8)
+check("receive transport clears the eight-byte staging slot before bounded copy",
+      CF[0x81FFA:0x82018] == bytes.fromhex("a59fbbec000aa50d01f0c3f2c4f1410a3ef62894810001050305f309e1f5")
+      and CF[0x22B9F] == 1)
+check("receive transport copies only supplied bytes before dispatch",
+      CF[0x82018:0x8203E] == bytes.fromhex(
+          "000ac50d279f010001f0c4f1c199939f0100410ac1005e9f2894e809c1f5243e2894bfffc6fe"))
 
 print("\n== unauthenticated direct SHORT_UPLOAD ==")
 check("SHORT_UPLOAD requires address extension zero",

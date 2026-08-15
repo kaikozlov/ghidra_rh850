@@ -93,8 +93,11 @@ explicitly rejects 32-bit address wrap, calls `0x81FBA -> 0x971D2` to reject
 intersection with the same five exclusion intervals, then enforces
 `0xFEBE0000..0xFEBFFFFF` before copying source bytes into response bytes 1..7.
 Thus `F4` is a second unauthenticated direct RAM-read primitive that does not
-need CONNECT+SET_MTA state to select its source address; it does **not** expand
-the readable address set beyond the 107,924 bytes already exposed by F5/DAQ.
+need a prior SET_MTA to select its source address; it does **not** expand the
+readable address set beyond the 107,924 bytes already exposed by F5/DAQ. The
+outer protocol dispatcher still requires a successful CONNECT on the same
+logical channel before either standard or custom memory commands execute;
+CONNECT itself has no GET_SEED/UNLOCK prerequisite in this image.
 
 For example, an eight-byte `F4 01 00 00 28 6D BE FE` request selects one byte at
 `0xFEBE6D28`. Firmware-static evidence establishes the parser and read path, not
@@ -197,8 +200,13 @@ The security conclusion is therefore stronger than the earlier
 
 Firmware-static evidence proves CAN1 acceptance and response construction, not
 that an external vehicle gateway or diagnostic connector forwards CAN
-`0x7F7/0x7F8`. Any live confirmation belongs on an isolated bench and should
-exercise only the read chain. The default-plan/simulation tool
+`0x7F7/0x7F8`. The transport also closes the obvious short-frame stale-tail
+avenue: `0x81FE4` accepts only nonzero payload lengths up to eight bytes, clears
+the eight-byte receive staging slot before copying the supplied bytes, and the
+custom handlers require an exact eight-byte request before consuming their
+fields. Standard commands retain their own configured request-length checks.
+Any live confirmation belongs on an isolated bench and should exercise only the
+read chain. The default-plan/simulation tool
 [`../../exploit/followups/xcp_read_probe.py`](../../exploit/followups/xcp_read_probe.py)
 operationalizes that bounded proof, requires an F181-bound isolated bench for
 live mode, and implements no generic write command.
