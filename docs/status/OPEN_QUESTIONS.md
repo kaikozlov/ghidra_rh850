@@ -221,8 +221,8 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **Semantic coverage.** The current graph has 6,376 structurally discovered
   functions. A reproducible ranked sweep decompiled 100 entries, including all
   mandatory callback/dispatcher families, but 87 selected entries remain
-  `reviewed_unknown`; across the whole ledger 6,259 functions remain
-  unreviewed and only 30 carry a semantic grade. This is an open semantic
+  `reviewed_unknown`; across the whole ledger 6,258 functions remain
+  unreviewed and only 31 carry a semantic grade. This is an open semantic
   denominator, not evidence of hidden subsystems. New work should remain
   lead-driven and record an explicit disposition without upgrading successful
   decompilation into semantic confidence. The selection artifact and current
