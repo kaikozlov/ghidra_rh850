@@ -1021,6 +1021,24 @@ paths = [
   "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
+[suite.command5_dtc_side_channel]
+tests = ["tests/verify_command5_dtc_side_channel.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_command5_dtc_side_channel.py",
+  "exploit/command5/stimulus.py",
+  "tests/verify_secoc_command5_experiment.py",
+  "data/application_diagnostic_map.csv",
+  "data/application_routine_control_surface.csv",
+  "data/generated/decompilations.jsonl",
+  "docs/security/secoc/application-chain.md",
+  "docs/security/secoc/software-path-assessment.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.secoc_mac28_behavioral_proof]
 tests = ["tests/verify_secoc_mac28_behavioral_proof.py"]
 paths = [

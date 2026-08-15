@@ -240,11 +240,50 @@ their application workers and completion states.
   `FEBEB25A/FEBEB325` and companion marker `FEBEB48D`. `B38C0` reports selector
   9 success only after all three reach `0x44`; intermediate states remain
   pending and failures report `0x20`.
-- **`0x1109` is a speed/state-gated persistent update.** Type 1 calls
-  `B7D26(0x22,1)`. When the underlying state requires persistence, helper
-  `0x3547E` submits redundant namespace-`0x100` object 0 and the RoutineControl
-  status becomes pending; `B7CC6/B7C4A` later resolves selector 11 success or
-  failure. This report deliberately does not invent a stronger object name.
+- **`0x1109` is a speed/state-gated persistent four-channel offset-object
+  reset/default.** Its fixed-value semantics are resolved separately below
+  (DIAG-APP-026); it does not accept tester-supplied calibration bytes.
+
+### `0x1109`: persistent four-channel offset-object reset/default
+
+RID `0x1109` is policy 0, has zero SecurityAccess entries and zero type-1 input
+bytes, and is therefore syntactically the four-byte request **`31 01 11 09`** in
+sessions `1/2/3`. Unlike `0x1108`, its `0x4F500` precondition is not freely
+triggerable: it checks `application_vehicle_speed_raw @ FEBEE892` against the
+configured threshold and requires several lifecycle/busy/state predicates to be
+clear. Once eligible, action `0x4F570` enters the shared `B7D26(0x22,1)`
+persistence workflow.
+
+The object semantics are now pinned rather than left generic:
+
+- redundant namespace-`0x100` **object 0** is exactly 16 bytes, uses base NvM
+  block `2`, and mirrors at `FEBEF468`;
+- helper `0x3547E` supplies a **fixed** 16-byte reset/default representation:
+  marker word `0`, four halfwords `0x0800`, and a zero tail, then submits object
+  `0x100` through `secoc_nvm_object_update @ 0x65CD8`;
+- the normal valid writer `0x35260` uses marker `A55A5AA5` and stores the four
+  staged halfwords instead, confirming that `0x3547E` is invalidating/defaulting
+  the object rather than providing an arbitrary-value write primitive;
+- restore helper `0x350D6` loads the four persisted halfwords into
+  `FEBE6ABE/C0/C2/C4`; `0x35048` copies those into the active quartet
+  `FEBE6AAA/AAC/AAE/AB0`, while `0x35066` explicitly installs neutral
+  `0x0800` in all four active slots;
+- live transform `0x47A5C` reads four raw channels `FEBE819E/A0/A2/A4`,
+  subtracts the corresponding active offsets, applies channel scale factors,
+  divides all four paths by `0x0800`, and saturates the results.
+
+The persistent object therefore holds four-channel **offset/default state used
+by a live signal-conditioning path**. The exact OEM calibration name is not
+asserted. The security consequence is a SecurityAccess-free, speed/state-gated
+persistent calibration-integrity/defaulting operation with fixed neutral/reset
+content. It is not arbitrary calibration injection, and the existing complete
+direct-reference audit still finds no direct join into the conditioned steering
+command, d/q current-reference, current-PI, or TSG3-PWM cone. No live convenience
+probe is supplied because exercising the request deliberately changes persistent
+state.
+
+`B7CC6/B7C4A` retain the previously recovered selector-11 asynchronous
+completion path.
 
 ### `0x1108`: repeatable no-speed-gate persistent checkpoint reset
 

@@ -110,6 +110,26 @@ check('1109 action calls B7D26 thunk with mode 0x22 and phase bit 1',CF[0x4F57E:
 check('B7D26 body pinned',sha(0xB7D26,194)=='639ed5a0f9aa8fe3f0a8c6c03b8de84fb83ea3cd32c920e41a358cab72746d6d')
 check('object0 update helper body pinned',sha(0x3547E,56)=='98b8f54819101ba03bd5abaf82cbcf74d2ca80c705f2eae0ae389c2ec13100ac')
 check('3547E submits literal namespace-0x100 object 0 through secoc NVM dispatcher',CF[0x3549C:0x354AE].startswith(bytes.fromhex('20360001')) and branch(0x354AA)==('jarl',0x65CD8))
+check('1109 accepts no tester payload bytes',rows['0x1109']['control_type1_input_bytes']=='0')
+check('redundant object0 descriptor is 16 bytes at FEBEF468 with base NvM block 2',struct.unpack_from('<HHI',CF,0x2B0AC)==(16,2,0xFEBEF468),repr(struct.unpack_from('<HHI',CF,0x2B0AC)))
+check('3547E persists fixed reset/default representation: marker 0, four 0x800 halfwords, zero tail',
+      CF[0x3548E:0x354AA]==bytes.fromhex('03f001050705200e0008850c840c20360001830c0338820c20ee1100'))
+check('valid object0 writer uses A55A5AA5 marker and staged four-channel offsets',
+      sha(0x35260,64)=='cc7a43bda4ec1523073e94482a1076353173f5704432ba549887c336669b3712'
+      and CF[0x35288:0x35290]==bytes.fromhex('2106a55a5aa5010d'))
+check('object0 restore copies four persisted halfwords into staged offset bank',
+      sha(0x350D6,74)=='1f4731d4b18caa293fdd29158c406b208c36979c248e0c865e2beef91a5435ff'
+      and all((t,'WRITE') in refs(0x350D6) for t in ['0xfebe6abe','0xfebe6ac0','0xfebe6ac2','0xfebe6ac4']))
+check('staged offsets copy into active four-channel offset bank',
+      sha(0x35048,30)=='c763d66277c97e591ade510a90dc5f2d493c8194b3b8619cfb3320f8be39032d'
+      and all((t,'WRITE') in refs(0x35048) for t in ['0xfebe6aaa','0xfebe6aac','0xfebe6aae','0xfebe6ab0']))
+check('neutral/default helper sets all four active offsets to 0x800',
+      sha(0x35066,18)=='e28bccbbdc75db223d8c0f5ec2516987d42ab863fbfd9413dc777b7b3167e775')
+check('live signal-conditioning transform reads raw quartet and active offset quartet',
+      sha(0x47A5C,396)=='b216623036f56554fe8c48595a35a0b4843b8ad71ec525efb2e258037f887c04'
+      and all((t,'READ') in refs(0x47A5C) for t in ['0xfebe819e','0xfebe81a0','0xfebe81a2','0xfebe81a4','0xfebe6aaa','0xfebe6aac','0xfebe6aae','0xfebe6ab0']))
+check('signal-conditioning transform subtracts offsets before four scale/divide-by-0x800 paths',
+      CF[0x47A94:0x47AA0]==bytes.fromhex('b3097498b2997590b1917688') and CF[0x47AB0:0x47AD0].count(bytes.fromhex('fc02'))==4)
 check('1109 completion state machines pinned',sha(0xB7CC6,96)=='c45a552c8d30b2028495022c78efe029dfc7db4b007a61cbda51f1fb9c6ef221' and sha(0xB7C4A,124)=='f39c8cccd6d98fe61861ff045ddf158c2adbe3fc73ed693bb260391b0716499a')
 check('B7C4A reports selector 11 through C430 thunk',CF[0xB7C98:0xB7CA0]==bytes.fromhex('1a380b3284ff646f') and branch(0xB7C9C)==('jarl',0xFEC00))
 

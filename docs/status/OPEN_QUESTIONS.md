@@ -162,8 +162,10 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **Application command-5 signing capability — dynamic discriminator only.**
   Stock RoutineControl `31 01 10 0F` now supplies bank-1 activation, and stock
   `0x68B42 -> 0x88350 -> 0x87CCC` supplies selector-4 command-5 plumbing; the
-  minimal bench oracle therefore needs no activation hook, only a bounded
-  observation route for `FEBE51AA`. For a production-resident signing proxy,
+  minimal bench experiment therefore needs no activation hook. SECOC-046 now
+  supplies a stock no-SA DTC observation of the terminal negative state
+  (`0x00D317`), but that state conflates command failure with full-result mismatch
+  and does not expose `FEBE51AA`; direct byte observation remains bounded. For a production-resident signing proxy,
   `0x65750` remains a foreground non-CH0 hook slot; command-7 contention is
   handled by deferring on the shared serialized driver; sender freshness and a
   controlled `0x7F8` bench egress are specified. Remaining questions are
@@ -173,7 +175,11 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   records per-observation monotonic/wall timestamps and request RTT
   (`command5/stimulus.py`, schema `sienna-command5-app-live-result-v2`), so the
   slot-4 latency/jitter question can be answered from evidence without any new
-  mutator. Production Tx integration
+  mutator. The same harness now records read-only `19 02 FF` snapshots before and
+  after stimulation. A second dynamic question is whether a tester can deliberately
+  trigger the recovered runtime re-arm chain `0x4F93C -> FEBE508D=0xA5 -> 0x68C0C
+  -> 0x67FCE`; static analysis proves the reset path exists but not external control
+  of the prerequisite application transition. Production Tx integration
   also requires a new audited route because stock CanIf has no `0x2E4/0x131` Tx
   entry. See
   [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.

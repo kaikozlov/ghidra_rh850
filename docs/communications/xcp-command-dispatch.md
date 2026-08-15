@@ -205,10 +205,16 @@ census over all defined function instructions finds exactly three direct
 references into `0xFEBF7C00..0xFEBFFBFF`, all `WRITE` references to the base
 `FEBF7C00` (`0x142E`, `0x62652`, `0x976E4`). It finds zero function-owned direct
 `READ`, `PARAM`, call/jump, or other references and zero function entries inside
-the window. The current static graph therefore does **not** establish a callback
-pointer, executable alias, persistent-flash consumer, or motor-control consumer
-for attacker-written bytes. Runtime-only aliasing or computed consumers remain
-a bounded unknown; the absence of direct xrefs is not a universal non-use proof.
+the window. The four recovered executable-code materializations of the actual
+window base are also pinned: startup clear `0x1426`, application page copy
+`0x6263E`, XCP range/translation helper `0x974D0`, and XCP E4 copy `0x976D0`.
+A nearby apparent alias at `0x6266E` is a separate 64-byte application-info
+initializer rooted at `FEBF7BB0`; its exact loop stops at `FEBF7BEF`, 16 bytes
+below the XCP window. The current static graph therefore does **not** establish a
+callback pointer, executable alias, persistent-flash consumer, or motor-control
+consumer for attacker-written bytes. Runtime-only aliasing or computed consumers
+remain a bounded unknown; the absence of direct xrefs/materialized consumers is
+not a universal non-use proof.
 
 The security conclusion is therefore corrected and still bounded:
 **write capability is verified, and the window is supervisor-executable by MPU

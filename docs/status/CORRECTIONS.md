@@ -1224,13 +1224,52 @@ the mistakes are not re-made.
   three direct WRITE references to the window base (`0x142E`, `0x62652`,
   `0x976E4`) and zero READ/PARAM/call/jump references, zero function entries
   inside the window, and no recovered callback, pointer, flash, or motor
-  consumer. The corrected statement is: the window is attacker-writable
+  consumer. The four executable-code materializations of `FEBF7C00` are pinned
+  to startup clear `0x1426`, application page copy `0x6263E`, XCP range helper
+  `0x974D0`, and E4 copy `0x976D0`; the suspicious adjacent initializer at
+  `0x6266E` starts at `FEBF7BB0` and its fixed 0x40-byte loop ends at
+  `FEBF7BEF`, so it cannot enter the attacker-write window. The corrected
+  statement is: the window is attacker-writable
   **supervisor-executable** RAM with **no recovered control-transfer
   consumer** — write capability verified, execution path not recovered.
 - **Deterministic check:** `tests/verify_xcp_window_mpu_permissions.py` pins
-  the region bounds, selector bytes, both MPAT1 values, their decoded
-  permission sets, and the user-mode-negative property directly from the
-  committed CodeFlash bytes.
+  hardware MPU permissions; `AssertXcpShadowWriteBoundary.java` additionally
+  pins direct-reference topology, all four recovered write-window base
+  materializers, and the bounded-below `FEBF7BB0..FEBF7BEF` adjacent loop.
 - **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
   [FINDINGS.md](FINDINGS.md) COM-005;
   `tests/verify_xcp_window_mpu_permissions.py`.
+
+### CORR-061 — Command-5 bank output bytes remain private, but the terminal negative state is stock-DTC observable
+
+- **Wrong:** the prior command-5 assessment treated the stock bank as fully
+  locally compared and effectively required a fresh application boot after each
+  terminal state, leaving `FEBE51AA` observation as the only stock-side
+  discriminator.
+- **Right:** the generated 16-byte result still has no recovered stock byte-output
+  route, but terminal failure is externally observable. Completion callback
+  `0x6926A` maps both command-5 execution failure and successful-generation/full-
+  result mismatch to state `0x44`; finalizer `0x68D0E` sets `FEBE5097=0x5A`;
+  monitor `0x55F1C` reports Dem event `0xCC,0x32`. Event `0xCC` maps to enabled
+  DTC-table index 133 / DTC `0x00D317` / failure type `0x57`, and the application
+  SID `19 02` path is available in sessions `1/3` with zero configured
+  SecurityAccess entries. Its supported status mask is `0xB9`, and the normal Dem
+  aggregator makes the event visible to that enumeration path.
+- **Boundary:** this is a terminal **negative-outcome** side channel, not direct
+  MAC disclosure. The DTC cannot distinguish command execution failure from a
+  wrong chosen expected value. Only after successful command execution is known
+  independently can it serve as a full expected-result equality discriminator.
+  The direct-reference census still finds no DTC/snapshot/UDS reader of
+  `FEBE51AA..FEBE51B9` beyond local comparator `0x69068`.
+- **Re-arm correction:** the finalizer still leaves bank active state `0x02/0xFF`,
+  so a fresh application boot is the deterministic baseline. But runtime reset is
+  not impossible: transition helper `0x4F93C` can request `0xA5`, cyclic
+  `0x68C0C` then invokes full reset `0x67FCE`, and that reset clears bank active
+  state to zero. Deliberate external control of that transition is unproved.
+- **Operationalization:** `exploit/command5/stimulus.py` records read-only
+  `19 02 FF` DTC snapshots before and after the existing bounded experiment and
+  never issues ClearDiagnosticInformation.
+- **Canonical:** [FINDINGS.md](FINDINGS.md) SECOC-046;
+  [../security/secoc/application-chain.md](../security/secoc/application-chain.md);
+  `tests/verify_command5_dtc_side_channel.py`;
+  `tests/verify_secoc_command5_experiment.py`.

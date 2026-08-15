@@ -66,6 +66,26 @@ public class AssertXcpShadowWriteBoundary extends GhidraScript {
                 "unexpected XCP shadow consumers reads=%d writes=%d params=%d calls=%d other=%d functions=%d",
                 readRefs, writeRefs, paramRefs, callRefs, otherRefs, functionsInWindow));
 
+        // Pin every recovered absolute materialization of the actual write-window
+        // base in executable code.  These are startup clear, application page
+        // copy, XCP range/translation, and XCP E4 copy.  None is a load used as a
+        // callback/control-transfer source.
+        assertInstruction(0x1426L, "mov 0xfebf7c00,ep");
+        assertInstruction(0x6263eL, "mov 0xfebf7c00,ep");
+        assertInstruction(0x974d0L, "mov 0xfebf7c00,r18");
+        assertInstruction(0x976d0L, "mov 0xfebf7c00,ep");
+
+        // A visually suspicious adjacent initializer is deliberately below the
+        // attacker-write window.  FUN_62662 starts at FEBF7BB0 and performs
+        // exactly 0x40 byte stores, therefore ending at FEBF7BEF; it cannot
+        // reach FEBF7C00.  Pin the base and loop bound/store sequence so this
+        // near-window negative cannot be lost to a later decompiler/xref drift.
+        assertInstruction(0x6266eL, "mov 0xfebf7bb0,ep");
+        assertInstruction(0x62676L, "add 0x1,r1");
+        assertInstruction(0x62678L, "addi -0x40,r1,r0");
+        assertInstruction(0x6267cL, "sst.b 0x0[ep],r19");
+        assertInstruction(0x6267eL, "bnc 0x00062664");
+
         // The adjacent XCP DAQ configuration is a separate read-only dynamic
         // pointer path.  Pin every direct reference to the 112-entry pointer
         // table and the decisive indirect load/store instructions so a future
@@ -93,7 +113,7 @@ public class AssertXcpShadowWriteBoundary extends GhidraScript {
         assertInstruction(0x82078L, "ori 0xf800,r6,r6");
 
         println(String.format(
-            "ASSERT xcp-shadow-write-boundary: block=%s bytes=%d read=true write=true execute=false refs=3 writes=3 reads=0 params=0 calls=0 other=0 functions=0 daq_refs=4 daq_direction=ram_to_dto daq_mode_mask=0x33 unexpected=0",
+            "ASSERT xcp-shadow-write-boundary: block=%s bytes=%d read=true write=true execute=false refs=3 writes=3 reads=0 params=0 calls=0 other=0 functions=0 materializers=4 near_window=FEBF7BB0..FEBF7BEF_bounded_below daq_refs=4 daq_direction=ram_to_dto daq_mode_mask=0x33 unexpected=0",
             block.getName(), END - START + 1));
     }
 
