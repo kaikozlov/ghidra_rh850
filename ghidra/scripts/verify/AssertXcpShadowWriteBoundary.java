@@ -66,8 +66,42 @@ public class AssertXcpShadowWriteBoundary extends GhidraScript {
                 "unexpected XCP shadow consumers reads=%d writes=%d params=%d calls=%d other=%d functions=%d",
                 readRefs, writeRefs, paramRefs, callRefs, otherRefs, functionsInWindow));
 
+        // The adjacent XCP DAQ configuration is a separate read-only dynamic
+        // pointer path.  Pin every direct reference to the 112-entry pointer
+        // table and the decisive indirect load/store instructions so a future
+        // analysis change cannot silently turn this into a reverse write path.
+        Set<String> daqRefs = new TreeSet<>();
+        for (Reference ref : getReferencesTo(toAddr(0xFEBE4CF0L))) {
+            daqRefs.add(ref.getFromAddress().toString() + ":" + ref.getReferenceType());
+        }
+        Set<String> expectedDaqRefs = new TreeSet<>(Arrays.asList(
+            "0008120a:WRITE",
+            "000812c2:DATA",
+            "000814c8:DATA",
+            "000817f2:DATA"
+        ));
+        if (!daqRefs.equals(expectedDaqRefs)) {
+            Set<String> missing = new TreeSet<>(expectedDaqRefs); missing.removeAll(daqRefs);
+            Set<String> extra = new TreeSet<>(daqRefs); extra.removeAll(expectedDaqRefs);
+            throw new IllegalStateException("XCP DAQ pointer-table topology changed missing=" + missing + " extra=" + extra);
+        }
+        assertInstruction(0x812c2L, "sld.w 0x0[ep],ep");
+        assertInstruction(0x812ceL, "sld.bu 0x0[ep],r18");
+        assertInstruction(0x812d0L, "st.b r18,-0x6b38[r19]");
+        assertInstruction(0x814c8L, "st.w r28,-0x6b10[ep]");
+        assertInstruction(0x81542L, "andi 0x33,r1,r0");
+        assertInstruction(0x82078L, "ori 0xf800,r6,r6");
+
         println(String.format(
-            "ASSERT xcp-shadow-write-boundary: block=%s bytes=%d read=true write=true execute=false refs=3 writes=3 reads=0 params=0 calls=0 other=0 functions=0 unexpected=0",
+            "ASSERT xcp-shadow-write-boundary: block=%s bytes=%d read=true write=true execute=false refs=3 writes=3 reads=0 params=0 calls=0 other=0 functions=0 daq_refs=4 daq_direction=ram_to_dto daq_mode_mask=0x33 unexpected=0",
             block.getName(), END - START + 1));
+    }
+
+    private void assertInstruction(long offset, String expected) {
+        Instruction ins = getInstructionAt(toAddr(offset));
+        if (ins == null || !ins.toString().equals(expected)) {
+            throw new IllegalStateException(String.format(
+                "instruction changed at %08X expected=%s actual=%s", offset, expected, ins));
+        }
     }
 }

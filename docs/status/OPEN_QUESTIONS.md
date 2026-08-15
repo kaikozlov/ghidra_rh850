@@ -23,20 +23,27 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `exploit/followups/application_rdbi_stale_probe.py`: its discriminator seeds
   the buffer with a 47-byte SID-`0x23` read and requires `22 1C F4` to equal
   `62 1C F4 ‖ seed[2:47]`. Preserve F181, route, and raw request/response bytes.
-- **XCP physical reachability; dynamic-only write consumers.** COM-005 now
-  proves both the unauthenticated `0x7F7/0x7F8` disclosure chain and a direct
-  32 KiB LocalRAM write primitive (`F0 DOWNLOAD` plus `EC MODIFY_BITS`) inside
-  this firmware. The static consumer audit is closed at the direct-xref layer:
-  the RW/non-executable window has exactly three function-owned direct refs, all
-  WRITEs to its base, with zero READ/PARAM/call refs or function entries. That
-  does not rule out runtime-computed aliases, so write impact remains bounded
-  absent a concrete computed-consumer lead. What is still unobserved is whether
-  a vehicle gateway or diagnostic connector forwards CAN `0x7F7/0x7F8`.
+- **XCP physical reachability; dynamic-only write consumers.** COM-005 proves
+  both the unauthenticated `0x7F7/0x7F8` disclosure chain and a direct 32 KiB
+  LocalRAM write primitive (`F0 DOWNLOAD` plus `EC MODIFY_BITS`). COM-007 now
+  closes the adjacent DAQ direction: `E1 WRITE_DAQ` configures 112 one-byte
+  LocalRAM source pointers, but the periodic engine only loads through those
+  pointers into DTO staging and transmits through `0x7F8`; no reverse
+  store-through-pointer path is recovered. The known d/q references
+  `FEBE6D28/6D2A` and TSG3 compare state `FEBE38A2/38A4/38A6` are DAQ-readable,
+  so a reachable channel would provide a non-invasive observer for the dynamic
+  actuation discriminator. The separate shadow write window remains RW,
+  non-executable, and direct-consumer-negative; runtime-computed aliases remain
+  bounded unknown. What is still unobserved is whether a vehicle gateway or
+  diagnostic connector forwards CAN `0x7F7/0x7F8`.
   `exploit/followups/xcp_read_probe.py` remains read-only for isolated-bench
   reachability confirmation; do not exercise generic write commands on a
   vehicle. Canonical:
   [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md).
-- **Dynamic authenticated-command actuation discriminator.** The full-corpus
+- **Dynamic authenticated-command actuation discriminator.** If COM-007's
+  `0x7F7/0x7F8` route is physically reachable on the bench, its DAQ path can
+  stream the already-pinned d/q-reference and TSG3-compare RAM directly during
+  this experiment without modifying the motor loop. The full-corpus
   extension closes the static join search more broadly than Stage 6. Protected
   `0x2E4` torque control (`BFA2`) and protected `0x131` LTA angle control
   (`AE60 -> ... -> C0D6`) are now proved to converge at `C144`; the common cone

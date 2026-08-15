@@ -85,6 +85,61 @@ The copied interval does not contain the bootloader secrets at `0xBFD8` and
 `0xBFE8` or the application SecurityAccess secret at `0x20840`; this finding
 does not claim direct key disclosure.
 
+### DAQ commands provide event-driven RAM telemetry, not a reverse write path
+
+The lower command map also implements a complete XCP-shaped DAQ subset:
+
+| Opcode | Callback | Recovered role |
+|---:|---:|---|
+| `E3` | `0x81794` | clear DAQ list |
+| `E2` | `0x813CC` | set DAQ pointer |
+| `E1` | `0x81424` | write one DAQ entry |
+| `E0` | `0x8152A` | set DAQ-list mode/event/prescaler |
+| `DE` | `0x815EA` | start/stop one DAQ list |
+| `DD` | `0x816C8` | synchronized DAQ start/stop |
+| `DA/D9/D8/D7` | `0x81870/0x818AE/0x81824/0x818E2` | DAQ capability/list/event queries |
+
+The configured geometry is four DAQ lists, four ODTs per list, and seven
+one-byte entries per ODT: **112 source pointers** total. `WRITE_DAQ` requires an
+eight-byte CTO with bit-offset `FF`, element size `01`, address extension `00`,
+and a tester-controlled 32-bit address. The address must lie in
+`0xFEBE0000..0xFEBFFFFF` and pass the same five exclusion intervals used by the
+UPLOAD path. `SET_DAQ_LIST_MODE` rejects any mode byte with mask bits `0x33`
+set, requires a valid event ID, a nonzero prescaler, and zero priority. Four
+event slots are configured as IDs `0/1/2/3`; the periodic event worker reloads
+each after two eligible communication-manager invocations. The absolute
+foreground-tick duration remains unsupported, so no wall-clock DAQ rate is
+claimed.
+
+The runtime data direction is pinned at the instruction level. `WRITE_DAQ`
+stores the accepted tester address into the pointer table at `FEBE4CF0`. The
+periodic sampler then executes:
+
+```text
+0x812C2  sld.w  0[ep], ep          # load configured source pointer
+0x812CE  sld.bu 0[ep], r18         # read one byte from that address
+0x812D0  st.b   r18, ...           # store only into local DTO staging
+```
+
+The sampled DTO is queued through `0x81E58`, drained through `0x81CAC`, and
+transmitted by configured callback `0x8206C`, which ORs class `0xF800` before
+`application_canif_transmit`; the special route resolves to CAN `0x7F8`. A
+read-only live-project assertion finds exactly four direct references to the
+DAQ pointer-table base: initialization, list clearing, `WRITE_DAQ`, and the
+sampler. No reverse store through the configured source pointer is recovered.
+Thus this DAQ surface is a **firmware-static unauthenticated event-driven
+LocalRAM disclosure primitive**, not a STIM-style memory-write primitive in this
+calibration.
+
+This is directly useful to the remaining dynamic steering discriminator if the
+physical `0x7F7/0x7F8` route is reachable. The already-recovered d/q reference
+bytes at `FEBE6D28/6D2A` and staged TSG3 compare bytes at
+`FEBE38A2/38A4/38A6` all pass the DAQ address validator. Configuring adjacent
+byte entries can therefore observe those multi-byte states without patching the
+motor-control loop. Physical gateway/connector reachability remains unobserved;
+this does not turn the bounded 32 KiB shadow writer below into an actuation or
+execution primitive.
+
 ### Generic write commands are real direct RAM writes
 
 The same unauthenticated generic command map contains standard XCP-shaped

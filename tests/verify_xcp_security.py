@@ -90,6 +90,78 @@ check("CONNECT and SET_MTA require eight-byte requests", u16(0x22BA4) == 8 and u
 check("SET_MTA stores request bytes 4..7 without an authorization call",
       CF[0x81B92:0x81BA4] == bytes.fromhex("6308e0099a0d0235bfff02f6010a00527d0f"))
 
+print("\n== unauthenticated DAQ read configuration ==")
+# The lower command map continues with the standard XCP-shaped DAQ family.
+daq_commands = {
+    0xE3: 0x81794,  # CLEAR_DAQ_LIST
+    0xE2: 0x813CC,  # SET_DAQ_PTR
+    0xE1: 0x81424,  # WRITE_DAQ
+    0xE0: 0x8152A,  # SET_DAQ_LIST_MODE
+    0xDE: 0x815EA,  # START_STOP_DAQ_LIST
+    0xDD: 0x816C8,  # START_STOP_SYNCH
+    0xDA: 0x81870,  # GET_DAQ_PROCESSOR_INFO
+    0xD9: 0x818AE,  # GET_DAQ_RESOLUTION_INFO
+    0xD8: 0x81824,  # GET_DAQ_LIST_INFO
+    0xD7: 0x818E2,  # GET_DAQ_EVENT_INFO
+}
+for opcode, callback in daq_commands.items():
+    index = command_map[0xFF - opcode]
+    check(f"DAQ opcode 0x{opcode:02X} maps to 0x{callback:X}",
+          index < len(callback_table) and callback_table[index] == callback)
+for opcode in (0xDF, 0xDC, 0xDB):
+    check(f"DAQ opcode 0x{opcode:02X} is unconfigured",
+          command_map[0xFF - opcode] == 0)
+check("all configured DAQ requests are eight bytes",
+      all(u16(off) == 8 for off in range(0x22BB0, 0x22BC4, 2)))
+check("DAQ geometry is four lists x four ODTs x seven byte entries = 112 pointers",
+      u16(0x22BC4) == 0x70 and CF[0x22BC7] == 4 and CF[0x22BC8] == 4
+      and CF[0x22BC9] == 7 and CF[0x22BC7] * CF[0x22BC8] * CF[0x22BC9] == 0x70)
+check("four DAQ event slots are configured", CF[0x22BC6] == 4)
+check("DAQ event records are reload=2 with event/list IDs 0..3",
+      [tuple(CF[0x22B72 + i * 3:0x22B72 + i * 3 + 3]) for i in range(4)]
+      == [(2, 0, 0), (2, 1, 1), (2, 2, 2), (2, 3, 3)])
+
+# WRITE_DAQ accepts exactly one-byte elements: bit-offset FF, size 1,
+# address-extension 0, then a tester-controlled little-endian u32 address.
+check("WRITE_DAQ validates bit-offset FF, size 1, extension 0",
+      CF[0x81440:0x81454] == bytes.fromhex("610862986390010601ff9a6d619afa65e091da65"))
+check("WRITE_DAQ loads request address and invokes one-byte exclusion validator",
+      CF[0x81454:0x81460] == bytes.fromhex("26e705001a381c3080ff5e0b"))
+check("WRITE_DAQ validator walks the shared five-entry exclusion table",
+      CF[0x971DE:0x971E4] == bytes.fromhex("3206f4930200")
+      and u32(0x2B3B8) == 5)
+check("WRITE_DAQ bounds are full LocalRAM FEBE0000..FEBFFFFF",
+      u32(0x22B84) == LOCAL_RAM_START and u32(0x22B80) == LOCAL_RAM_END)
+check("WRITE_DAQ stores the accepted address into the DAQ pointer table",
+      CF[0x814C8:0x814CC] == bytes.fromhex("7ee7f194"))
+check("SET_DAQ_LIST_MODE rejects every mode with mask bits 0x33 set",
+      CF[0x81540:0x81548] == bytes.fromhex("6108c10633009a2d"))
+
+# Periodic DAQ scheduling enters through the communication manager.  The
+# configured callback slots make the event worker deterministic without
+# assigning a wall-clock period to the foreground tick.
+check("DAQ periodic callback chain slots are 810AA -> 81358",
+      u32(0x22BF0) == 0x810AA and u32(0x22BE0) == 0x81358)
+check("DAQ scheduler reloads event record and samples only when counter is zero",
+      CF[0x8137A:0x81394] == bytes.fromhex(
+          "e009ca0dfdf60300c5f13ef68eec600861305c0f0000bfff66ff"))
+check("DAQ scheduler decrements counter on every eligible pass",
+      CF[0x81394:0x813A0] == bytes.fromhex("1cf0600841ea9d005f0a800b"))
+check("DAQ sampler queues each DTO through 0x81E58",
+      CF[0x812E2:0x812EA] == bytes.fromhex("243ec89480ff720b"))
+
+# Critical directionality proof: sampler loads a pointer from FEBE4CF0[],
+# dereferences exactly one byte from that address, then stores only into local
+# DTO staging before the queued transmit path.
+check("DAQ sampler loads configured pointer then reads one byte through it",
+      CF[0x812C2:0x812D0] == bytes.fromhex("00f5c49941d2410a9a0081006090"))
+check("DAQ sampled byte is stored into DTO staging, not through configured pointer",
+      CF[0x812D0:0x812D4] == bytes.fromhex("5397c894"))
+check("DAQ transmit callback is 0x8206C and selects special class 0xF800",
+      u32(0x22B90) == 0x8206C
+      and CF[0x82078:0x82082] == bytes.fromhex("863600f80338bfff8ecd"))
+check("DAQ special transmit class resolves to CAN 0x7F8", tx_record[0] == 0x7F8)
+
 print("\n== RAM upload geometry ==")
 exclusion_count = u32(0x2B3B8)
 exclusions = [struct.unpack_from("<II", CF, 0x293F4 + index * 8)
@@ -102,6 +174,11 @@ expected_exclusions = [
     (0xFEBF6C00, 0xFEBF78DF),
 ]
 check("five upload exclusions match firmware table", exclusions == expected_exclusions, repr(exclusions))
+# The previously recovered motor-observation locations are all inside the DAQ
+# readable LocalRAM boundary and outside these five exclusions.
+for address in (0xFEBE6D28, 0xFEBE6D2A, 0xFEBE38A2, 0xFEBE38A4, 0xFEBE38A6):
+    check(f"DAQ can select observation byte 0x{address:08X}",
+          upload_allowed(address, 1, exclusions))
 excluded_bytes = sum(end - start + 1 for start, end in exclusions)
 check("107,924 LocalRAM bytes remain readable", 0x20000 - excluded_bytes == 107_924)
 check("shadow start permits seven-byte upload", upload_allowed(SHADOW_START, 7, exclusions))
