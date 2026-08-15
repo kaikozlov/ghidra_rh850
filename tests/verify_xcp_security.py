@@ -46,6 +46,14 @@ def upload_allowed(start: int, length: int,
     return False
 
 
+def shadow_write_allowed(start: int, length: int) -> bool:
+    if length <= 0 or start > 0xFFFFFFFF - (length - 1):
+        return False
+    end = start + length - 1
+    return (LOCAL_RAM_START <= start and end <= LOCAL_RAM_END
+            and SHADOW_START <= start and end <= SHADOW_END)
+
+
 print("== physical CAN route and command dispatch ==")
 tx_record = struct.unpack_from("<IBBH", CF, 0x21F68)
 rx_record = struct.unpack_from("<IBBH", CF, 0x21F70)
@@ -74,6 +82,8 @@ command_map = CF[0x22C04:0x22C04 + CF[0x22BD1]]
 callback_table = [u32(0x22C30 + index * 4) for index in range(18)]
 check("CONNECT 0xFF maps to connection callback", callback_table[command_map[0]] == 0x81970)
 check("SET_MTA 0xF6 maps to callback 0x81B76", callback_table[command_map[0xFF - 0xF6]] == 0x81B76)
+check("DOWNLOAD 0xF0 maps to callback 0x80F12", callback_table[command_map[0xFF - 0xF0]] == 0x80F12)
+check("MODIFY_BITS 0xEC maps to callback 0x80FD8", callback_table[command_map[0xFF - 0xEC]] == 0x80FD8)
 check("GET_SEED 0xF8 has no configured callback", command_map[0xFF - 0xF8] == 0)
 check("UNLOCK 0xF7 has no configured callback", command_map[0xFF - 0xF7] == 0)
 check("CONNECT and SET_MTA require eight-byte requests", u16(0x22BA4) == 8 and u16(0x22BAC) == 8)
@@ -98,6 +108,56 @@ check("shadow start permits seven-byte upload", upload_allowed(SHADOW_START, 7, 
 check("last copied byte permits one-byte upload", upload_allowed(SHADOW_START + (COPY_END - COPY_START) - 1, 1, exclusions))
 check("upload crossing a protected interval is rejected", not upload_allowed(0xFEBE37FC, 8, exclusions))
 check("upload wraparound is rejected", not upload_allowed(0xFFFFFFFE, 4, exclusions))
+
+print("\n== unauthenticated RAM write geometry ==")
+check("write window constants are exact 32 KiB range",
+      u32(0x2B3BC) == SHADOW_START and u32(0x2B3C0) == SHADOW_END
+      and SHADOW_END - SHADOW_START + 1 == 0x8000)
+check("DOWNLOAD duplicate LocalRAM bounds are FEBE0000..FEBFFFFF",
+      u32(0x22B8C) == LOCAL_RAM_START and u32(0x22B88) == LOCAL_RAM_END)
+check("DOWNLOAD gets current MTA through 0x811A2", CF[0x80F52:0x80F56] == bytes.fromhex("80ff5002"))
+check("MTA getter reads FEBE4FF4", CF[0x811A2:0x811A8] == bytes.fromhex("2457f5977f00"))
+check("MTA setter writes FEBE4FF4", CF[0x8119C:0x811A2] == bytes.fromhex("6437f5977f00"))
+check("DOWNLOAD invokes shadow-window validator for requested count",
+      CF[0x80F66:0x80F6E] == bytes.fromhex("0a301d3880ff4210"))
+check("shadow validator loads exact low/high constants",
+      CF[0x9720C:0x97218] == bytes.fromhex("25f6d8740095f231a10d029d"))
+check("DOWNLOAD performs direct tester-byte store through MTA",
+      CF[0x80F8E:0x80FA4] == bytes.fromhex("0198dc99939f010001f0dbf1410a8100809bfd09e1f5"))
+check("DOWNLOAD advances MTA to end+1",
+      CF[0x80FA8:0x80FB0] == bytes.fromhex("1a36010080fff001"))
+check("DOWNLOAD max CTO 8 yields payload counts 1..6",
+      CF[0x22BA0] == 8
+      and CF[0x80F2C:0x80F40] == bytes.fromhex("a6ef0100850fbdece0e9f2450196fefff2e9bf45"))
+check("zero-length shadow write rejected", not shadow_write_allowed(SHADOW_START, 0))
+check("six-byte shadow write accepted", shadow_write_allowed(SHADOW_START, 6))
+check("write crossing shadow end rejected", not shadow_write_allowed(SHADOW_END - 2, 6))
+check("write address wrap rejected", not shadow_write_allowed(0xFFFFFFFE, 4))
+
+# Model repeated DOWNLOAD packets. The callback advances MTA to end+1, so a
+# tester can cover the complete 0x8000-byte range using <=6-byte chunks.
+write_model = bytearray(SHADOW_END - SHADOW_START + 1)
+mta_write = SHADOW_START
+written = 0
+while written < len(write_model):
+    count = min(6, len(write_model) - written)
+    if not shadow_write_allowed(mta_write, count):
+        break
+    payload = bytes(((written + i) & 0xFF) for i in range(count))
+    offset = mta_write - SHADOW_START
+    write_model[offset:offset + count] = payload
+    mta_write += count
+    written += count
+check("repeated DOWNLOAD model covers all 32 KiB", written == 0x8000)
+check("repeated DOWNLOAD advances MTA exactly one byte past shadow end", mta_write == SHADOW_END + 1)
+check("full-window write model changed final byte", write_model[-1] == 0xFF)
+
+check("MODIFY_BITS gets same MTA and requires word alignment",
+      CF[0x80FFC:0x81008] == bytes.fromhex("80ffa6010ae0ca060300ba2d"))
+check("MODIFY_BITS validates four bytes against same write window",
+      CF[0x81008:0x81014] == bytes.fromhex("0ac603000a30043a80ff9c0f"))
+check("MODIFY_BITS performs in-place 32-bit read-modify-write",
+      CF[0x81042:0x81050] == bytes.fromhex("19f0000d0a3041e13ce901edbfff"))
 
 print("\n== CodeFlash-to-RAM disclosure chain ==")
 check("calibration write window is exact 32 KiB shadow range", u32(0x2B3BC) == SHADOW_START and u32(0x2B3C0) == SHADOW_END)

@@ -1177,3 +1177,28 @@ the mistakes are not re-made.
   `data/application_proprietary_ba_surface.csv`;
   `tests/verify_application_proprietary_ba.py`;
   `tests/verify_application_proprietary_ba_live.py`.
+
+
+### CORR-059 — XCP generic writes are direct arbitrary 32 KiB LocalRAM writes, not merely a shadow-window configuration
+
+- **Wrong:** COM-005 described `0xFEBF7C00..0xFEBFFBFF` primarily as a
+  "calibration-shadow" write window and left the existence/impact of generic
+  writes bundled with the open consumer question.
+- **Right:** configured XCP-shaped command `F0 DOWNLOAD @ 0x80F12` directly
+  copies 1–6 tester bytes to the current MTA after exact LocalRAM and shadow
+  range validation, then advances MTA. Repeated requests can overwrite the full
+  32 KiB interval. `EC MODIFY_BITS @ 0x80FD8` separately performs aligned
+  32-bit masked read-modify-write in the same range. GET_SEED/UNLOCK are absent
+  from the command map, so the firmware-static write primitive itself is
+  unauthenticated.
+- **Impact boundary:** this does not establish RCE or steering control. The
+  containing LocalRAM block is non-executable, and exhaustive live-project
+  function-owned references into the interval are exactly three WRITEs to
+  `FEBF7C00`, with zero READ/PARAM/call refs and zero function entries. No direct
+  callback, persistent-flash, or motor consumer is recovered. Runtime/computed
+  aliasing remains a bounded unknown.
+- **Dynamic boundary:** external forwarding of CAN `0x7F7/0x7F8` remains
+  unobserved; the default live probe stays read-only.
+- **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
+  `tests/verify_xcp_security.py`; `tests/verify_xcp_shadow_write_live.py`;
+  `AssertXcpShadowWriteBoundary.java`.

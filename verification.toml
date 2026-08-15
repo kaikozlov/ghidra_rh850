@@ -686,7 +686,20 @@ paths = [
   "docs/communications/xcp-command-dispatch.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/CORRECTIONS.md",
   "tests/verify_xcp_security.py",
+]
+
+[suite.xcp_shadow_write_live]
+tests = ["tests/verify_xcp_shadow_write_live.py"]
+oracle = "cfg_dataflow"
+paths = [
+  "tests/verify_xcp_shadow_write_live.py",
+  "ghidra/scripts/verify/AssertXcpShadowWriteBoundary.java",
+  "docs/communications/xcp-command-dispatch.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/CORRECTIONS.md",
 ]
 
 [suite.secoc_application]

@@ -23,14 +23,18 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `exploit/followups/application_rdbi_stale_probe.py`: its discriminator seeds
   the buffer with a 47-byte SID-`0x23` read and requires `22 1C F4` to equal
   `62 1C F4 ‖ seed[2:47]`. Preserve F181, route, and raw request/response bytes.
-- **XCP physical reachability and shadow-RAM consumers.** COM-005 proves the
-  unauthenticated `0x7F7/0x7F8` disclosure path inside this firmware, but not
-  whether a vehicle gateway or diagnostic connector forwards those CAN IDs.
-  The default-safe `exploit/followups/xcp_read_probe.py` can confirm
-  reachability and the 32,240-byte copy/upload result on an isolated bench. Do
-  not exercise the generic write commands on a vehicle.
-  Static write-impact work should resume only with a new consumer, commit, or
-  executable-alias lead. Canonical:
+- **XCP physical reachability; dynamic-only write consumers.** COM-005 now
+  proves both the unauthenticated `0x7F7/0x7F8` disclosure chain and a direct
+  32 KiB LocalRAM write primitive (`F0 DOWNLOAD` plus `EC MODIFY_BITS`) inside
+  this firmware. The static consumer audit is closed at the direct-xref layer:
+  the RW/non-executable window has exactly three function-owned direct refs, all
+  WRITEs to its base, with zero READ/PARAM/call refs or function entries. That
+  does not rule out runtime-computed aliases, so write impact remains bounded
+  absent a concrete computed-consumer lead. What is still unobserved is whether
+  a vehicle gateway or diagnostic connector forwards CAN `0x7F7/0x7F8`.
+  `exploit/followups/xcp_read_probe.py` remains read-only for isolated-bench
+  reachability confirmation; do not exercise generic write commands on a
+  vehicle. Canonical:
   [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md).
 - **Dynamic authenticated-command actuation discriminator.** The full-corpus
   extension closes the static join search more broadly than Stage 6. Protected
