@@ -312,7 +312,7 @@ The current ledger contains **6,376** functions: 6,257 `unreviewed`, 87
 `semantically_identified`. 32 rows carry a semantic evidence grade (3
 bounded, 11 recovered, 18 verified). The reproducible selected sweep and
 corrected-graph negative re-audit are recorded in
-[../status/CORRECTED_GRAPH_REAUDIT_2026-08-11.md](../status/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
+[historical corrected-graph re-audit](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 
 This in-function inventory is not an executable denominator. The separate
 outside-function exporter currently records 1,665 conservative candidate runs

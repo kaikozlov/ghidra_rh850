@@ -60,6 +60,22 @@ check("all suite oracle classifications are valid",
 external_names = set(manifest.get("external", {}))
 check("every external requirement resolves to manifest metadata",
       all(set(entry.get("requires_external", [])) <= external_names for entry in suites.values()))
+manifest_paths = [
+    (suite_name, kind, value)
+    for suite_name, entry in suites.items()
+    for kind in ("tests", "paths")
+    for value in entry.get(kind, [])
+]
+missing_manifest_paths = [
+    (suite_name, kind, value)
+    for suite_name, kind, value in manifest_paths
+    if not (REPO / value.rstrip("/")).exists()
+]
+check(
+    "every manifest test/change path exists",
+    not missing_manifest_paths,
+    str(missing_manifest_paths[:10]),
+)
 check("every external Techstream suite declares its prerequisite",
       all("techstream_v18" in suites[name].get("requires_external", []) for name in (
           "techstream_rks", "techstream_layerb", "techstream_ddb_residuals",

@@ -1,8 +1,11 @@
 # Open questions
 
-Unresolved questions only. Once resolved, findings move to
-[FINDINGS.md](FINDINGS.md) (with their evidence grade) and any superseded
-prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
+Exhaustive unresolved-question ledger. **This is not the execution queue**; for
+what to work on next, start with [PRIORITIES.md](PRIORITIES.md).
+
+Once resolved, a question leaves this file, the result moves to
+[FINDINGS.md](FINDINGS.md) (with its evidence grade), and any superseded prior
+claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Bootloader
 
@@ -86,7 +89,7 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   words, and compare the resulting SHA/CRC descriptors with any independently
   acquired image. This read-only acquisition should precede every live APPLY and
   supplies the exact recovery source image. Canonical:
-  `exploit/dumper/README.md`; [EXPLOIT_ENGINEERING_2026-08-12.md](EXPLOIT_ENGINEERING_2026-08-12.md).
+  `exploit/dumper/README.md`; [historical exploit-engineering journal](../history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md).
 - **Live Gate-2 MAC28 causal proof.** The local hardware-proof harness and the
   exact one-off openpilot ablation are now complete and committed locally. What
   remains is hardware-only: on the same EPS/F181 and bus topology, preserve a
@@ -132,7 +135,7 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   direct software CMAC, object-15-to-ICU-S provisioning followed by
   selector/command-7 use, independent hardware-slot provisioning, or mixed use.
   See [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md)
-  and [EXTERNAL_REFERENCE_REFRESH_2026-08-10.md](EXTERNAL_REFERENCE_REFRESH_2026-08-10.md).
+  and [historical external-reference refresh](../history/2026-08/EXTERNAL_REFERENCE_REFRESH_2026-08-10.md).
 - **Same-vehicle `0x344` producer and key storage.** The same `4514000` partner
   key reportedly validates `PRE_COLLISION_2` (`0x344`) `112/113`, while
   `4512000` EPS has no `0x344` receive profile. Identify the physical producer
@@ -174,7 +177,7 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   it have under real command-7 load, and does a provisioned isolated bench
   produce CMACs matching independently known frames? The stimulus harness now
   records per-observation monotonic/wall timestamps and request RTT
-  (`command5/stimulus.py`, schema `sienna-command5-app-live-result-v2`), so the
+  (`command5/stimulus.py`, schema `sienna-command5-app-live-result-v4`), so the
   slot-4 latency/jitter question can be answered from evidence without any new
   mutator. The same harness now records read-only `19 02 FF` snapshots before and
   after stimulation. A second dynamic question is whether a tester can deliberately
@@ -262,7 +265,7 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   lead-driven and record an explicit disposition without upgrading successful
   decompilation into semantic confidence. The selection artifact and current
   boundary are in
-  [CORRECTED_GRAPH_REAUDIT_2026-08-11.md](CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
+  [historical corrected-graph re-audit](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 - **RFP/P1M-E serial-protocol transfer.** The generic RV40F **host-side static
   work is closed** (RFP-001..008): all 52 ordinary command IDs are censused,
   both connection/setup variants are recovered, the 8-byte `GetDeviceType`

@@ -32,14 +32,11 @@ not yet proven.
   are empty. The Corolla is a different calibration and may populate them —
   see [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 - SecOC verifies through ICU-S slot 4, but static CodeFlash does not determine
-  the donor's live key state. The former `FF*16` inference was disproved
-  because the KAT is compiled out. A paired command-5 generation primitive
-  exists; its only configured stock caller is a dormant test harness, and
-  Stage 7 strengthens that harness's activator to a whole-image bounded static
-  negative. The stock graph has no production SecOC transmit path. Separately,
-  the initialized application exposes serialized command-5 plumbing and a
-  foreground hook location sufficient to specify a minimum signing proxy;
-  live slot-4 permission and performance remain dynamic. See
-  [secoc/application-chain.md](secoc/application-chain.md),
-  [secoc/sender-implementation.md](secoc/sender-implementation.md), and
-  [secoc/software-path-assessment.md](secoc/software-path-assessment.md).
+  the live slot key. The former `FF*16` inference was disproved because the KAT
+  is compiled out. Stock RID `0x100F` activates the recovered command-5 test
+  bank; RID `0x1010` and RID `0x100E`/CAN `0x13..0x1A` are separate command-8
+  clients, with the cross-bank completion-attribution bug recorded as
+  SECOC-048. None of these facts creates a production SecOC transmit path or
+  bypasses ICU-S package authentication. A minimum signing-proxy architecture
+  is specified; live slot-4 command-5 permission/performance remain dynamic.
+  See [secoc/README.md](secoc/README.md).

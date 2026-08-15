@@ -1,0 +1,18 @@
+# Research history
+
+Dated investigation journals and handoff-style reports live here. They preserve
+chronology and methodology, including analyses that were later corrected.
+
+**Do not use this tree to determine current project state.** Start with
+[../OVERVIEW.md](../OVERVIEW.md) and [../status/](../status/README.md). Current
+claims live in subsystem reports plus `status/FINDINGS.md`; superseded claims
+are tracked in `status/CORRECTIONS.md`.
+
+## 2026-08
+
+- [2026-08/STATIC_ANALYSIS_SWEEP_2026-08-10.md](2026-08/STATIC_ANALYSIS_SWEEP_2026-08-10.md)
+- [2026-08/DISCORD_STATIC_FOLLOWUP_2026-08-10.md](2026-08/DISCORD_STATIC_FOLLOWUP_2026-08-10.md)
+- [2026-08/EXTERNAL_REFERENCE_REFRESH_2026-08-10.md](2026-08/EXTERNAL_REFERENCE_REFRESH_2026-08-10.md)
+- [2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md](2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md)
+- [2026-08/ALBINOELEPHANT_ARTIFACT_SWEEP_2026-08-12.md](2026-08/ALBINOELEPHANT_ARTIFACT_SWEEP_2026-08-12.md)
+- [2026-08/EXPLOIT_ENGINEERING_2026-08-12.md](2026-08/EXPLOIT_ENGINEERING_2026-08-12.md)

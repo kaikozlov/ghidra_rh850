@@ -1,3 +1,8 @@
+> **Historical snapshot.** This is a point-in-time investigation journal, not
+> current project state. Use [the current overview](../../OVERVIEW.md),
+> [priorities](../../status/PRIORITIES.md), and
+> [findings ledger](../../status/FINDINGS.md) for present conclusions.
+
 # Discord static follow-up — 2026-08-10
 
 Focused static-analysis sprint prompted by recent comma `#toyota-security`

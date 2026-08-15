@@ -102,7 +102,15 @@ paths = ["docs/diagnostics/"]
 
 [suite.doc_links]
 tests = ["tests/verify_doc_links.py"]
-paths = ["docs/"]
+paths = [
+  "docs/",
+  "README.md",
+  "AGENTS.md",
+  "exploit/README.md",
+  "community/README.md",
+  "data/README.md",
+  "ghidra/README.md",
+]
 oracle = "documentation_lint"
 
 [suite.application_ab_service]
@@ -180,7 +188,7 @@ paths = [
   "docs/storage/dataflash.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
 ]
 
@@ -205,7 +213,7 @@ paths = [
   "docs/storage/dataflash.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
 ]
 
@@ -224,7 +232,7 @@ paths = [
   "docs/diagnostics/application.md",
   "docs/diagnostics/README.md",
   "docs/status/FINDINGS.md",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
 ]
 
@@ -348,7 +356,7 @@ paths = [
   "docs/storage/dataflash.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
 ]
 
@@ -369,7 +377,7 @@ paths = [
   "docs/security/application-security-access.md",
   "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
   "docs/status/ANALYSIS_STATUS.md",
 ]
 
@@ -390,7 +398,7 @@ paths = [
   "docs/security/application-security-access.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
 [suite.application_wdbi_2013_2014_controls]
@@ -413,7 +421,7 @@ paths = [
   "docs/security/application-security-access.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
 [suite.application_security_access]
@@ -613,7 +621,7 @@ paths = [
   "data/semantic_review_status.csv",
   "data/generated/semantic_interest_ranking.csv",
   "tools/generate_semantic_interest_ranking.py",
-  "docs/status/STATIC_ANALYSIS_SWEEP_2026-08-10.md",
+  "docs/history/2026-08/STATIC_ANALYSIS_SWEEP_2026-08-10.md",
 ]
 
 [suite.semantic_sweep]
@@ -1033,7 +1041,7 @@ paths = [
   "exploit/common/",
   "exploit/patcher/",
   "tests/verify_secoc_manifest_patcher.py",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
 [suite.codeflash_dumper]
@@ -1041,7 +1049,7 @@ tests = ["tests/verify_codeflash_dumper.py"]
 paths = [
   "exploit/dumper/",
   "tests/verify_codeflash_dumper.py",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
 [suite.crypto_test_bank0_composition]
@@ -1067,8 +1075,8 @@ paths = [
   "docs/status/CORRECTIONS.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/RESEARCH_ROADMAP.md",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/PRIORITIES.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
 [suite.command5_dtc_side_channel]
@@ -1097,8 +1105,8 @@ paths = [
   "docs/security/secoc/application-chain.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/RESEARCH_ROADMAP.md",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/PRIORITIES.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
 [suite.exploit_followups]
@@ -1117,8 +1125,8 @@ paths = [
   "docs/security/application-security-access.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
-  "docs/status/RESEARCH_ROADMAP.md",
-  "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/PRIORITIES.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
 [suite.variant_acquisition_readiness]
@@ -1202,7 +1210,7 @@ paths = ["docs/variants/rav4-prime-forced-secoc-profile.md", "data/"]
 
 [suite.toyota_dataflash_analyzer]
 tests = ["tests/verify_toyota_dataflash_analyzer.py"]
-paths = ["tools/toyota_dataflash_analyzer.py", "tests/fixtures/"]
+paths = ["tools/analyze_toyota_dataflash.py", "tests/fixtures/"]
 
 [suite.toyota_eps_bus_probe]
 tests = ["tests/verify_toyota_eps_bus_probe.py"]
@@ -1218,4 +1226,4 @@ paths = ["tools/toyota_secoc_session.py", "tests/fixtures/"]
 
 [suite.u023a87_monitor_map]
 tests = ["tests/verify_u023a87_monitor_map.py"]
-paths = ["data/u023a87_monitor_map.csv", "docs/"]
+paths = ["data/generated/u023a87_monitor_map.json", "docs/"]

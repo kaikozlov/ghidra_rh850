@@ -1,3 +1,8 @@
+> **Historical snapshot.** This is a point-in-time investigation journal, not
+> current project state. Use [the current overview](../../OVERVIEW.md),
+> [priorities](../../status/PRIORITIES.md), and
+> [findings ledger](../../status/FINDINGS.md) for present conclusions.
+
 # Comprehensive static-analysis sweep — 2026-08-10
 
 Living execution journal for the staged sweep defined by
@@ -1485,9 +1490,9 @@ This disproved a completed-pipeline interpretation: section-3 supported-PID
 rows had been emitted as DIDs, producing a false direct `0x0100`
 DDB-to-firmware join, and P4DK4 section-6 PID rows had been called
 subfunctions. The canonical correction is
-[CORR-031](CORRECTIONS.md#corr-031--techstream-supported-pid-rows-were-mislabeled-as-dids),
+[CORR-031](../../status/CORRECTIONS.md#corr-031--techstream-supported-pid-rows-were-mislabeled-as-dids),
 with the corrected finding in `TMS-013` and full evidence in
-[the DDB pipeline report](../tooling/techstream-ddb-pipeline.md).
+[the DDB pipeline report](../../tooling/techstream-ddb-pipeline.md).
 
 The corrected generators now preserve section-3 rows as raw
 `supported_pid_record` evidence, decode DIDs only from section 7, classify

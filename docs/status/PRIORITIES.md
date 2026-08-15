@@ -1,0 +1,161 @@
+# Current priorities
+
+Short execution queue only. This page answers **what should we do next?** It is
+not a historical roadmap and should not become one. Detailed unresolved state
+belongs in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md); completed work belongs in
+[FINDINGS.md](FINDINGS.md) and the canonical subsystem reports.
+
+## P0 — highest information gain
+
+### 1. Live slot-4 command-5 permission
+
+**Question:** does provisioned ICU-S slot 4 actually permit command 5 MAC
+generation in initialized application context?
+
+Why this matters: static software already proves the application has selector-4
+command-5 plumbing and a stock RID `0x100F` activation path. A positive hardware
+result would make a production-resident signing proxy much more attractive than
+extracting the key itself.
+
+Ready now:
+
+- bounded command-5 experiment under `exploit/command5/`;
+- fresh-boot control/experiment artifact model;
+- F181/route binding, chronology, RTT/jitter, pre/post DTC snapshots;
+- no same-boot re-arm assumption.
+
+Positive criterion: current-run generated output changes from the pre-stimulus
+baseline under selector 4. A DTC-only negative does not separate command failure
+from expected-result mismatch.
+
+Canonical:
+[../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md) ·
+[../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md).
+
+### 2. XCP physical reachability
+
+**Question:** does the real bench/vehicle route deliver `0x7F7` to the EPS and
+return `0x7F8`?
+
+Why this matters: COM-005/007 already establish a powerful unauthenticated
+application surface. If reachable, XCP immediately becomes the preferred
+non-invasive dynamic observer for steering/SecOC experiments.
+
+Ready now:
+
+- CONNECT-only `exploit/followups/xcp_reachability.py`;
+- bounded read probe;
+- read-only DAQ profiles for actuation and diagnostic state.
+
+First live step must remain CONNECT/read-only. Do not start by exercising the
+F0/EC memory writers on a valuable ECU.
+
+Canonical:
+[../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md).
+
+### 3. Acquire another CodeFlash image
+
+Highest-value targets include a blurbdust-supported F3/F4 calibration,
+`8965F1208000`, or `8965B4514000`.
+
+Why this matters: one foreign image can answer transfer questions for the
+semantic Gate-2 resolver, MEM-SAFE-001, XCP, diagnostic policy, command-5/8
+plumbing, bootloader SA structure, and object-15 provisioning much faster than
+another broad pass over `4512000`.
+
+Ready now:
+
+- read-only dumper under `exploit/dumper/`;
+- `tools/check_variant_acquisition.py` for geometry/SHA/provenance/readiness;
+- structural scanner and semantic patch resolver.
+
+Canonical:
+[../tooling/variant-acquisition-readiness.md](../tooling/variant-acquisition-readiness.md) ·
+[../variants/README.md](../variants/README.md).
+
+## P1 — decisive hardware proofs
+
+### 4. Gate-2 MAC28 causal proof
+
+The firmware patching and evidence pipeline are locally complete. The missing
+result is the three-phase behavioral experiment on matching hardware:
+
+1. stock baseline works;
+2. MAC28-only ablation is rejected on the same stock firmware;
+3. the same ablation is accepted after the semantically resolved Gate-2 patch.
+
+Write/reboot success by itself is **not** proof.
+
+Ready now: `exploit/behavioral_proof/` and the manifest patch/restore tooling.
+
+### 5. Dynamic steering-command → actuation discriminator
+
+Static work has closed the obvious and non-obvious transfer paths from protected
+`0x2E4`/`0x131` command state to the identified d/q reference cells without
+finding a direct join. The next useful evidence is dynamic, not another generic
+xref sweep.
+
+Preferred setup if XCP is reachable: use the read-only DAQ
+`actuation-discriminator` profile while separately applying valid signed command
+modes on an isolated bench.
+
+Canonical:
+[../architecture/control-partition.md](../architecture/control-partition.md).
+
+### 6. Passive command-8 / provisioning provenance
+
+SECOC-047/048 statically close the second CAN-fed command-8 client and the
+cross-bank completion-attribution bug. What is missing is production context:
+
+- does RID `0x100E` / CAN `0x13..0x1A` appear during legitimate provisioning?
+- how does dealer tooling interpret RID `0x1010` status `02` with zero proof?
+- is any bank-0 terminal state externally observable?
+
+Prefer passive capture of a legitimate flow. Do not synthesize random command-8
+packages on the only original ECU.
+
+## P2 — useful when a specific dependency appears
+
+- **Reset-window replay / future-sync poisoning / tag-guess throughput / FD
+  suffix behavior:** host trial constructors exist; run on an isolated bench
+  when SecOC behavior itself is the active question.
+- **Live stale-RDBI confirmation:** easy and bounded, but lower strategic value
+  than the P0/P1 discriminators.
+- **CommunicationControl availability experiment:** reversible and ready; useful
+  for availability characterization, not a steering primitive.
+- **Command 13 characterization:** only interesting as a possible Renesas SHE
+  deviation; standard SHE already closes the old nonvolatile-key-export idea.
+- **Power/EM / fault injection:** fallback paths after software/vehicle-side
+  options are exhausted and physical topology is confirmed.
+
+## Static work that remains worthwhile
+
+Use the exploit-interest cohorts selectively. The reviewed-candidate ledger
+`data/exploit_interest_reviewed_candidates.csv` prevents already-audited
+functions from resurfacing as unexplained hits. New static work should have a
+specific exploit hypothesis, externally reachable sink, or variant-transfer
+question.
+
+The remaining explicitly open cohort rows without a recovered ingress root are
+not reason enough for another broad sweep by themselves.
+
+## Do not repeat without new evidence
+
+These directions have reached diminishing returns or have already been closed:
+
+- another generic whole-image decompilation/semantic sweep;
+- generic authenticated-command → d/q xref searching without a new concrete
+  bridge;
+- direct-reference searches for an XCP-window execution consumer using the same
+  existing graph;
+- interpreting the compiled-out `FF*16` KAT as the live slot-4 key;
+- treating object 15 as proof of the current live ICU-S key;
+- treating command 13 as a standard SHE nonvolatile-key export route;
+- building software-ID → patch-offset lookup tables instead of improving the
+  semantic resolver.
+
+## When this page changes
+
+Update this file only when the **execution order** changes. If an item is
+resolved, move the result to the appropriate subsystem report / `FINDINGS.md`
+and remove it here instead of appending a completion diary.

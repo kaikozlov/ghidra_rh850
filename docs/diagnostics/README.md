@@ -15,6 +15,7 @@ other.
 | [application.md](application.md) | Application 17-service-object map, 242-row readable-DID model, 19-RID RoutineControl surface, `0xAB` event service, programming handoff gate |
 | [application-routine-control-surface.md](application-routine-control-surface.md) | Complete 19-entry RoutineControl RID policy/control-type/callback surface, recovered service-mode controls, and bounded motor-actuation separation |
 | [application-async-operation-queue.md](application-async-operation-queue.md) | Shared five-operation async queue (`1/2/4/5/6`), exact diagnostic/internal ownership, SID-`0x14` completion bridge, no operation 3 |
+| [application-proprietary-ba.md](application-proprietary-ba.md) | Proprietary SID `0xBA` operation table and reset-persistent authorization window |
 
 ## Important distinction
 

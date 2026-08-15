@@ -1,44 +1,93 @@
-# Documentation
+# Documentation map
 
-Ghidra analysis of the China-market Sienna EPS firmware (`8965B4512000`,
-RH850/P1M-E R7F701381).
+This directory is organized by **document role**, not by chronology. If a page
+looks like a current-state source but is actually a dated investigation journal,
+that is a documentation bug.
 
-The single source of truth is the firmware itself. These reports are
-explanations reconstructed from it; every material claim is either checked by
-a deterministic test in `tests/` or explicitly marked with an evidence grade
-(see [status/FINDINGS.md](status/FINDINGS.md)).
+The firmware and deterministic tests remain authoritative. Documentation exists
+to make the evidence legible.
 
-## Where to start
+## Read these first
 
-| I want to… | Go here |
+1. **[OVERVIEW.md](OVERVIEW.md)** — the current technical picture.
+2. **[status/PRIORITIES.md](status/PRIORITIES.md)** — the short execution queue.
+3. **[status/README.md](status/README.md)** — how to use the live status ledgers.
+4. **[WORKFLOW.md](WORKFLOW.md)** — how to operate the Ghidra/tooling stack.
+
+If you are looking up one specific assertion, skip the prose and go straight to
+[status/FINDINGS.md](status/FINDINGS.md).
+
+## Document classes
+
+### Current orientation
+
+| Document | Purpose |
 |---|---|
-| Get the ten-minute picture of the firmware | [OVERVIEW.md](OVERVIEW.md) |
-| Open, verify, or rebuild the Ghidra project | [WORKFLOW.md](WORKFLOW.md) |
-| Look up whether a specific claim is proven | [status/FINDINGS.md](status/FINDINGS.md) |
-| See current coverage denominators and blockers | [status/ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) |
-| See what is still unresolved | [status/OPEN_QUESTIONS.md](status/OPEN_QUESTIONS.md) |
-| See which old conclusions were wrong, and why | [status/CORRECTIONS.md](status/CORRECTIONS.md) |
+| [OVERVIEW.md](OVERVIEW.md) | Human-scale summary of architecture, attack surface, exploit status, and current blockers |
+| [WORKFLOW.md](WORKFLOW.md) | Project lifecycle, Ghidra durability rules, verification, and rebuild procedure |
 
-## Sections
+### Live project status
+
+Everything under [status/](status/README.md) is current unless explicitly
+marked otherwise:
+
+| Document | Use it for |
+|---|---|
+| [status/PRIORITIES.md](status/PRIORITIES.md) | What to do next, in priority order |
+| [status/FINDINGS.md](status/FINDINGS.md) | Canonical claim IDs, scope, confidence, and verification |
+| [status/OPEN_QUESTIONS.md](status/OPEN_QUESTIONS.md) | Exhaustive unresolved-question ledger |
+| [status/ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) | Coverage/denominator snapshot |
+| [status/CORRECTIONS.md](status/CORRECTIONS.md) | Superseded or disproved prior claims |
+
+### Canonical subsystem reports
+
+A material conclusion should have exactly one canonical report in these trees:
 
 | Section | Scope |
 |---|---|
-| [architecture/](architecture/README.md) | Boot flow, execution architecture, control/safety partition, system-mode cluster |
-| [diagnostics/](diagnostics/README.md) | Application and bootloader UDS stacks, DID model |
-| [security/](security/README.md) | Application SecurityAccess, bootloader payload gate, SecOC |
-| [communications/](communications/README.md) | CAN/ISO-TP transport, application Rx/Tx maps |
-| [storage/](storage/README.md) | DataFlash layout and NvM semantics |
-| [variants/](variants/README.md) | Sienna vs. Corolla and the wider TSS 3 EPS family |
-| [tooling/](tooling/README.md) | Processor-module audit and analysis tooling |
-| [reference/](reference/README.md) | Generated artifacts and address reference |
+| [architecture/](architecture/README.md) | Boot/execution architecture, control partition, system modes |
+| [communications/](communications/README.md) | CAN/ISO-TP, application Rx/Tx, XCP |
+| [diagnostics/](diagnostics/README.md) | Bootloader/application UDS and configured service surfaces |
+| [security/](security/README.md) | SecurityAccess, payload gate, memory safety, SecOC, provisioning |
+| [storage/](storage/README.md) | DataFlash/NvM layout and semantics |
+| [variants/](variants/README.md) | Cross-calibration/vehicle evidence and transfer boundaries |
+| [tooling/](tooling/README.md) | Analysis, Techstream/RFP, cross-calibration, and acquisition tooling |
+| [reference/](reference/README.md) | Address/artifact lookup tables |
+
+### Historical research journals
+
+[history/](history/README.md) contains dated investigation reports. They are
+useful for chronology, methodology, and why a correction happened, but **they
+are not the place to determine current project state**. Current conclusions
+must be taken from the live status ledgers and canonical subsystem reports.
 
 ## Evidence vocabulary
 
-Every report carries an evidence grade in its header. The grades are defined in
-[status/FINDINGS.md](status/FINDINGS.md#evidence-grades):
+Confidence grades are defined centrally in
+[status/FINDINGS.md](status/FINDINGS.md#evidence-model):
 
-- **verified** — directly asserted by a deterministic test;
+- **verified** — directly asserted by a deterministic repository test;
+- **observed** — directly observed dynamically/externally but not reproduced by
+  a repository test;
 - **recovered** — control/data flow substantially reconstructed;
-- **bounded** — interpretation constrained, exact semantics unknown;
-- **hypothesis** — plausible, explicitly unverified;
-- **disproved** — retained only to prevent regression.
+- **bounded** — interpretation constrained but incomplete;
+- **hypothesis** — plausible and explicitly unverified;
+- **disproved** — retained to prevent the old claim from returning.
+
+Evidence source and confidence are separate dimensions. A third-party field
+observation can be genuinely observed while still not being a firmware-static
+fact for `8965B4512000`.
+
+## Canonical ownership rule
+
+To keep this tree from becoming confusing again:
+
+- subsystem reports own the detailed argument;
+- `FINDINGS.md` owns the compact claim/evidence index;
+- `OPEN_QUESTIONS.md` owns unresolved detail;
+- `PRIORITIES.md` owns only the short execution queue;
+- `OVERVIEW.md` summarizes and links;
+- dated investigation narratives go to `history/`.
+
+Do not copy multi-paragraph findings between documents. Link to the canonical
+home instead.

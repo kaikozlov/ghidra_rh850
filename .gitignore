@@ -15,3 +15,6 @@ Techstream/unpacked.7z
 Techstream/extracted/
 Techstream/decoded/
 Techstream/*.exe
+
+# Local reference corpus/handoffs. Context only; not repository truth.
+REFERENCE/

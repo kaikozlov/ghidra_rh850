@@ -1,3 +1,8 @@
+> **Historical snapshot.** This is a point-in-time investigation journal, not
+> current project state. Use [the current overview](../../OVERVIEW.md),
+> [priorities](../../status/PRIORITIES.md), and
+> [findings ledger](../../status/FINDINGS.md) for present conclusions.
+
 # Corrected-graph whole-image re-audit — 2026-08-11
 
 This is the canonical record of the Phase-I re-audit performed after recovering

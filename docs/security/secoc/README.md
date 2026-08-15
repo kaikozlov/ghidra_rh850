@@ -1,58 +1,65 @@
 # SecOC
 
-Runtime CAN message authentication (AUTOSAR Secure Onboard Communication).
+Runtime CAN authentication and ICU-S behavior for the Sienna
+`8965B4512000` application.
 
-| Report | Scope |
+## Current state in one page
+
+Six receive profiles are SecOC-protected through **ICU-S slot 4**. Command 7 is
+the recovered verification primitive; command 5 is the paired MAC-generation
+primitive. The application contains stock command-5 test plumbing and two
+separate command-8 authenticated-update clients, but no recovered production
+SecOC transmit path.
+
+What is established:
+
+- protected receive IDs are `0x00F`, `0x2E4`, `0x131`, `0x132`, `0x090`, and
+  `0x0D7`, with downstream roles individually classified;
+- freshness/synchronization and classic sender construction are recovered;
+- slot 4 is used for verification;
+- stock RID `0x100F` activates the command-5 bank-1 test path;
+- command-5 terminal failure/mismatch state has a no-SA DTC side channel, but
+  the generated 16-byte result remains private without the bounded observation
+  patch;
+- RID `0x1010` carries a 64-byte SHE-shaped command-8 request and 48-byte
+  result;
+- RID `0x100E` arms a second command-8 client assembled from CAN
+  `0x13..0x1A`;
+- the two command-8 clients share a completion-attribution bug (SECOC-048),
+  which can produce false diagnostic success but **does not bypass ICU-S
+  package authentication**;
+- object 15 and the compiled-out `FF*16` KAT do not establish the live slot-4
+  key in this dump.
+
+The highest-value remaining direct question is dynamic: **does live slot 4
+permit command 5 generation, and at what latency under normal command-7 load?**
+See [../../status/PRIORITIES.md](../../status/PRIORITIES.md).
+
+## Reports
+
+| Report | Canonical scope |
 |---|---|
-| [application-chain.md](application-chain.md) | Application receive profile: six SecOC-bound RX PDUs, freshness, command-7 verify, disabled KAT, and command-5 generation family |
-| [sender-implementation.md](sender-implementation.md) | Pinned opendbc sender analysis, direction/ID boundaries, and the independent local classic-CAN signer |
-| [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md) | Corrected NvM object model, object 15, protected slot state, and command-8 provisioning |
-| [key-recovery-assessment.md](key-recovery-assessment.md) | Ranked existing-key recovery routes: peer ECU, software command experiments, command permissions, side channels, provisioning capture, and fault injection |
-| [software-path-assessment.md](software-path-assessment.md) | Software-first audit: diagnostic/CAN bounds, constructible bootloader code execution, dormant ICU state, and command-5/RoutineControl-RID-1010 reuse templates |
-| [candidate-f05-payload.md](candidate-f05-payload.md) | Vance candidate-f05 DataFlash-dump semantics, standard-payload diff, reset behavior, and provenance boundary |
+| [application-chain.md](application-chain.md) | Six receive profiles, freshness, command-7 verification, crypto-test banks, command-8 composition |
+| [sender-implementation.md](sender-implementation.md) | Classic sender/freshness construction and minimum application-resident signing-proxy architecture |
+| [software-path-assessment.md](software-path-assessment.md) | Software attack surface, command-5/8 experiments, diagnostic/XCP intersections |
+| [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md) | NvM/object-15 model, ICU-S lifecycle, command-8 provisioning semantics |
+| [key-recovery-assessment.md](key-recovery-assessment.md) | Existing-key recovery routes and their evidence boundaries |
+| [candidate-f05-payload.md](candidate-f05-payload.md) | Vance candidate-f05 DataFlash-dump payload semantics/provenance |
 
-## Important distinction
+## Important boundaries
 
-The report's original proposed runtime-key command path (`0x65CD8 → 0x66E48 →
-0x67590 → 0x72F58`) is **wrong** — those are AUTOSAR NvM
-`ReadBlock`/`WriteBlock` and generic triplicate/checkpoint machinery, not CSM
-key-set/MAC or an ICU command path. The correction is fully documented in
-[key-storage-and-lifecycle.md](key-storage-and-lifecycle.md) and recorded in
-[../../status/CORRECTIONS.md](../../status/CORRECTIONS.md).
+- The old proposed `0x65CD8 → 0x66E48 → 0x67590 → 0x72F58` “runtime-key” path
+  was wrong; it is generic NvM/checkpoint machinery. See
+  [../../status/CORRECTIONS.md](../../status/CORRECTIONS.md).
+- A command-8 submission path is **not** a raw-key-write primitive. ICU-S still
+  authenticates AuthID/counter/M3 and keeps plaintext key material outside the
+  CPU-visible MainPE path.
+- Standard SHE does not provide a nonvolatile-slot export route through command
+  13/RAM_KEY; a Renesas-specific deviation remains only a lower-priority
+  hardware question.
+- Findings from `8965B4514000`, Corolla, F3/F4, or other TSS3 targets are not
+  facts about this calibration unless separately validated.
 
-## Current state
-
-All three object-15 copies are invalid in this exact snapshot, while the live
-SecOC receive path selects protected ICU-S slot 4 without reading object 15.
-The embedded `FF*16` KAT is compiled out and says nothing about the live slot.
-Command 5 is substantially recovered as MAC generation and accepts selector 4
-in software. Its sole configured stock caller is a CAN-fed crypto-test bank;
-stock application RoutineControl RID `0x100F` startRoutine activates bank 1 through wrapper
-`0x8A782 -> crypto_test_bank1_activate @ 0x69018`. The stock bank compares the
-result locally and is not a production SecOC transmit path. The earlier Stage-7
-"no recovered activation edge" conclusion was corrected on 2026-08-13: its
-direct-pointer census missed this one-hop RoutineControl wrapper. The active-state writer
-census remains useful only for showing that CAN input alone cannot arm the bank.
-Separately, the initialized application exposes serialized
-command-5 plumbing suitable for a foreground signing proxy. Live slot-4
-command-5 permission and performance remain dynamic.
-
-For existing-key recovery, the best overall lead remains a weaker same-vehicle
-producer ECU. The next direct step is now explicitly software-first: recovered
-gate material can construct an authenticated 4 KiB bootloader callback, and the
-existing CAN-dump payloads leave more than `0xE00` bytes for a direct ICU-S
-command/status experiment. A negative bootloader-context result does not close
-application lifecycle behavior; the same trust chain can in principle install a
-restorable application hook because boot validity is CRC/marker consistency, not
-a signature.
-
-Command 13's exact Renesas opcode semantics remain unresolved, but its value for
-standard SHE key extraction is now sharply bounded. SHE exposes only a
-caller-loaded volatile `RAM_KEY`; its export primitive is RAM_KEY-only and
-provides no nonvolatile-key copy/export operation, so the former
-`slot 4 -> RAM_KEY -> export` route is disproved under SHE (SECOC-025). A direct
-command-13 experiment is therefore useful only to characterize a Renesas-specific
-undocumented deviation, not as the default extraction path. Chosen-input
-power/EM analysis remains a characterized fallback. See
-[software-path-assessment.md](software-path-assessment.md) and
-[key-recovery-assessment.md](key-recovery-assessment.md).
+For claim IDs and confidence grades, use
+[../../status/FINDINGS.md](../../status/FINDINGS.md). For all unresolved details,
+use [../../status/OPEN_QUESTIONS.md](../../status/OPEN_QUESTIONS.md).

@@ -1,9 +1,11 @@
 # Analysis status matrix
 
 Current multidimensional status for the Sienna `8965B4512000` analysis. This
-page is a denominator/index, not a claim ledger: use [FINDINGS.md](FINDINGS.md)
-for claim scope and confidence, [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) for
-blockers, and subsystem reports for interpretation.
+page is a denominator/index, not a claim ledger or priority order: use
+[FINDINGS.md](FINDINGS.md) for claim scope/confidence,
+[OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) for the exhaustive unresolved ledger,
+[PRIORITIES.md](PRIORITIES.md) for the current execution queue, and subsystem
+reports for interpretation.
 
 Snapshot date: **2026-08-15**. Corrected normalized project-inventory SHA-256:
 `8921b64db16f13ad588e661fc45d13bac0986da214aeec9f3eb0aa99190d9cac`.

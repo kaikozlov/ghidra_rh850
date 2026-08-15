@@ -640,7 +640,7 @@ the mistakes are not re-made.
   review state, semantic grade, oracle class, and execution status are separate
   fields; 5,927 functions remain unreviewed.
 - **Canonical:** [../tooling/processor-module-audit.md](../tooling/processor-module-audit.md);
-  [CORRECTED_GRAPH_REAUDIT_2026-08-11.md](CORRECTED_GRAPH_REAUDIT_2026-08-11.md);
+  [historical corrected-graph re-audit](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md);
   `data/outside_function_candidates.csv`;
   `data/semantic_coverage_summary.json`;
   `tests/verify_function_discovery.py`;

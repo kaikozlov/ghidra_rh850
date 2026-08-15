@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Self-contained internal-link check for Markdown documentation.
 
-Walks the committed Markdown files (README.md, AGENTS.md, docs/**) and verifies
+Walks the project-facing Markdown entry points plus docs/** and verifies
 that every relative Markdown link target exists on disk. Catches the class of
 regression where a moved/renamed document leaves dangling cross-references
 (e.g. an untracked docs/reference/ directory).
@@ -24,10 +24,16 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 
-# Markdown files to scan: root docs + everything under docs/.
-SCAN = [REPO / "README.md", REPO / "AGENTS.md"] + sorted(
-    (REPO / "docs").rglob("*.md")
-)
+# Human-facing repository entry points plus everything under docs/. Vendored
+# component READMEs are intentionally excluded from this project-doc gate.
+SCAN = [
+    REPO / "README.md",
+    REPO / "AGENTS.md",
+    REPO / "exploit" / "README.md",
+    REPO / "community" / "README.md",
+    REPO / "data" / "README.md",
+    REPO / "ghidra" / "README.md",
+] + sorted((REPO / "docs").rglob("*.md"))
 
 # A relative Markdown link target: [text](path/to/file.md) or
 # [text](path/to/file.md#anchor). Excludes http(s):// and absolute paths.

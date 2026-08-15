@@ -169,7 +169,9 @@ When you produce a material conclusion:
 ## Navigation
 
 - Operating manual: [docs/WORKFLOW.md](docs/WORKFLOW.md)
+- Documentation map: [docs/README.md](docs/README.md)
+- Current priorities: [docs/status/PRIORITIES.md](docs/status/PRIORITIES.md)
 - Findings ledger: [docs/status/FINDINGS.md](docs/status/FINDINGS.md)
 - Open questions: [docs/status/OPEN_QUESTIONS.md](docs/status/OPEN_QUESTIONS.md)
 - Corrections: [docs/status/CORRECTIONS.md](docs/status/CORRECTIONS.md)
-- Subsystem indexes: [docs/README.md](docs/README.md)
+- Historical journals: [docs/history/README.md](docs/history/README.md)
