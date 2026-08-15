@@ -1273,3 +1273,47 @@ the mistakes are not re-made.
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md);
   `tests/verify_command5_dtc_side_channel.py`;
   `tests/verify_secoc_command5_experiment.py`.
+
+### CORR-062 — RID 0x1010 status 0x02 does not prove the diagnostic's own envelope executed
+
+- **Wrong (implicit sufficiency reading):** the §8.1 transport contract
+  presented selector-`03` status `0x02` with 48 proof bytes as evidence that
+  *the submitted RID `0x1010` package* completed: "`0x02` | complete |
+  M4[32] + M5[16]". Application-chain §5.4 similarly described the
+  diagnostic state machine as the sole application command-8 submitter whose
+  completion drives `0x44`.
+- **Right:** `icus_key_update_completion_callback @ 0x6920A` routes its next
+  state solely by reading diagnostic-active `FEBE5085` at completion time; it
+  does not track which bank submitted the in-flight job, and
+  `icus_key_update_diagnostic_start @ 0x68E16` never checks bank-0
+  `FEBE508A`. If the RID-`0x100E` bank-0 crypto test (SECOC-047) has a
+  command-8 job in flight, a diagnostic start between submit and completion
+  receives that completion as its own: it walks `0x44 -> 0x46 -> 0x55`,
+  terminalizes status `0x02`, and `31 03 10 10` returns 48 **zero** bytes from
+  `FEBE523A` while the real M4/M5 sit unread at `FEBE526A` until bank-0's
+  1200-tick timeout scrubs them.
+- **Consequence of the error:** any dealer/tooling workflow or trace analysis
+  that treats status `0x02` (with zero proof bytes) as confirmation of its own
+  rekey request can be fooled by an interleaved bank-0 run; conversely, a
+  captured trace cannot attribute a command-8 completion to a specific
+  envelope without excluding concurrent bank-0 activity. The race is a
+  state-machine misattribution/false-success oracle, **not** a key bypass and
+  **not** key disclosure (no stock reader of `FEBE526A`; RMBA/XCP exclude the
+  region).
+- **Canonical:** [FINDINGS.md](FINDINGS.md) SECOC-047/SECOC-048;
+  [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §5.10;
+  `tests/verify_crypto_test_bank0_composition.py`.
+
+### CORR-063 — RMBA lower-reader size rejection was imprecisely stated
+
+- **Wrong:** the earlier application memory/read boundary said the lower reader
+  "rejects values above 256", implying 256 was accepted and omitting zero.
+- **Right:** `0x4EB1C` performs unsigned `(size - 1) < 0xFF`, rejecting size
+  `0` and every size `>=256`. With the one-byte SID-`0x23` size field and the
+  upper remaining-capacity gate, the effective domain is
+  `1..min(255, remaining response capacity)`.
+- **Consequence:** no host-tool impact; the correction closes the off-by-one
+  boundary needed by the RMBA memory-safety audit.
+- **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
+  [FINDINGS.md](FINDINGS.md) MEM-SAFE-007;
+  `tests/verify_application_rmba_memory_safety.py`.

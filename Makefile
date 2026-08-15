@@ -50,6 +50,7 @@ verify-exploit:
 	$(PYTHON) tools/fast_verify.py --suite secoc_command5_experiment
 	$(PYTHON) tools/fast_verify.py --suite secoc_mac28_behavioral_proof
 	$(PYTHON) tools/fast_verify.py --suite exploit_followups
+	$(PYTHON) tools/fast_verify.py --suite variant_acquisition_readiness
 
 verify-required-external:
 	$(PYTHON) tools/fast_verify.py --required-external

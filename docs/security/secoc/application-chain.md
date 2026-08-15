@@ -560,7 +560,10 @@ This establishes a credible in-application mechanism capable of updating slot
 dealer backend actually uses DID `0x1010`, nor does it reveal the authentication
 secret/counter needed to construct an accepted package. The canonical lifecycle
 analysis and revised provisioning experiment are in
-[key-storage-and-lifecycle.md](key-storage-and-lifecycle.md).
+[key-storage-and-lifecycle.md](key-storage-and-lifecycle.md). §5.10 recovers a
+second stock command-8 submitter — the RID-`0x100E` bank-0 crypto test fed by
+CAN `0x13..0x1A` — and the completion-misattribution composition hazard
+between the two machines.
 
 ## 5.5 Security-boundary audit: what fails closed
 
@@ -703,6 +706,163 @@ period and ICU completion latency remain uncalibrated. A safe bench prototype
 should first measure command-5 permission for slot 4, end-to-end completion
 latency and jitter, command-5/7 contention, queue saturation, watchdog margin,
 and behavior when sync or legitimate protected traffic advances concurrently.
+
+## 5.10 Bank-0 crypto test: RID 0x100E → CAN 0x13..0x1A → command 8 (SECOC-047/048)
+
+> **Verification:** `tests/verify_crypto_test_bank0_composition.py` (32
+> assertions: raw CodeFlash pins, table decodes, and a deterministic composition
+> model reproducing the misattribution sequence)
+>
+> **Evidence grade:** recovered (firmware-static; all cited bytes pinned by the test)
+
+A second dormant crypto-test bank reaches **ICU-S command 8** — the same
+authenticated key-update primitive as RID `0x1010` — from ordinary classic CAN
+frames and a no-SecurityAccess routine:
+
+```text
+RoutineControl RID 0x100E startRoutine (31 01 10 0E)
+  -> wrapper 0x8A774 -> crypto_test_bank0_activate @ 0x68F92
+CAN 0x13..0x1A (8 classic 8-byte PDUs, COM signals 87..94)
+  -> application_com_opaque_rx_shadow_bank0 @ 0x68368
+  -> 64-byte envelope FEBE51FA..FEBE5239
+  -> icus_key_update_submit(1) @ 0x6823C
+  -> ICUSCMD = 8 (shared driver, bank-1 record)
+```
+
+### Activation and re-arm
+
+`0x68F92` gates only on bank-0 active state `FEBE508A == 0`. It then sets
+`FEBE508A=1`, timeout word `FEBE5078=0`, state `FEBE508B=0x11`, clears the
+collector scratch (`0x67EDC`), zeroes both `submit(1)` banks (`0x67F14(1)`),
+and snapshots the eight COM update counters (`0x68F0C`). The corrected
+SID-`0x31` service object permits sessions `1/2/3` with zero SecurityAccess
+entries, exactly like RID `0x100F`/`0x1010`; `31 01 10 0E` arms the bank from
+the default session. Re-arm requires active state zero: the finalizer leaves
+`2` (success) or `0xFF` (failure), and the full crypto-test reset `0x67FCE`
+(clearing `FEBE508A`) is the only other writer, so a fresh boot or that reset
+is required between runs.
+
+### Exact byte mapping to the 64-byte package
+
+The PDU index table `0x258E8` selects COM PDUs `0x0C..0x13`, i.e. **CAN IDs
+`0x13..0x1A** (PDU index + 7), each classic, DLC 8, acceptance rules 6..13.
+The offset table slice at `0x2591E` is `87+8i`. The collector's promote stage
+copies each stabilized PDU verbatim, so:
+
+```text
+envelope[8*i + k] = byte k of CAN frame 0x13+i   (i = 0..7, k = 0..7)
+FEBE51FA + 8*i + k
+```
+
+The CPU performs **no field decode, no length/type checks, and no M1/M2/M3
+interpretation** — the 64 bytes are an opaque transport for the SHE envelope
+that ICU-S itself authenticates. Bank 0 therefore gives a bus attacker
+*chosen-envelope submission* to command 8, but every cryptographic gate
+(M1 AuthID/slot, M3 CMAC, M2 counter/flags) is enforced by ICU-S; the MainPE
+path adds no bypass and no plaintext-key exposure.
+
+### Stability, repetition, and package mixing
+
+Each PDU is gated independently: on each *changed* COM update (update-counter
+delta vs `FEBE5038+i`), the 8 bytes are compared with the previous update's
+bytes (`FEBE50BA+8i`); equal (or first) bytes increment a per-PDU counter
+(`FEBE5030+i`), mismatch resets it to 1. When the counter reaches
+`CodeFlash[0x30FBB] == 3`, the PDU's ready bit in mask `FEBE508C` is set and its
+bytes are committed to `FEBE50FA+8i`. When the mask reaches `0xFF`, the eight
+committed chunks are promoted to the envelope and state advances `0x11 ->
+0x22`. Consequences:
+
+- each frame must be observed **three times identically** (update-counter
+  changes, not timer ticks — an attacker retransmitting identical frames with
+  incrementing COM counters satisfies it);
+- commits are per-PDU, so **the 64-byte package may mix chunks captured at
+different times** — M1 can come from one epoch and M2/M3 from another;
+- churn on one PDU never resets another PDU's stability counter.
+
+For an attacker this is *replay-fragmentation*: any previously captured valid
+(or partially valid) SHE traffic on `0x13..0x1A` can be reassembled at will.
+It does not forge authentication — ICU-S still validates the composite — but
+it defeats any assumption that envelope fields must originate from one
+sender/epoch. Replay of a previously *accepted* full package is bounded by the
+protected monotonic update counter inside M2 (enforced by ICU-S, not MainPE).
+
+### State machine, timeouts, and scrubbing
+
+`0x686EA` (active `FEBE508A==1`) increments `FEBE5078` each cyclic tick;
+`u16@0x30FB4 == 1200` ticks is the budget. States: `0x11` collect → `0x22`
+submit → `0x33` in flight → `0x44` completion → `0x46` (compiled-out KAT,
+`CodeFlash[0x30EF3]==0x00`) → `0x55` complete. `0x6823C` returns to `0x22`
+while the shared driver is busy (serialization), `0x33` on dispatch, `0x66` on
+error. The finalizer `0x68CD2` maps `0x55 -> active=2` and `0x66 ->
+active=0xFF`, and in **both** terminal paths runs `0x67EDC` + `0x67F14(1)`,
+zeroing the envelope `FEBE51FA..FEBE5239`, the result bank `FEBE526A..FEBE5299`,
+and all collector scratch.
+
+### Result visibility
+
+Hardware success copies M4[32]+M5[16] into `FEBE526A..FEBE5299` (the
+`submit(1)` result bank — distinct from the diagnostic bank `FEBE523A`). The
+whole-image direct-reference census finds **no reader** of `FEBE526A`: no
+DTC, snapshot, or UDS path consumes it, and it is zeroed at finalization.
+Like bank 1, success/failure is observable only through the crypto-test
+monitors: `0x690FC` returns `0x5A` while either the diagnostic or bank 0 is
+active, and `0x690C0` sets `FEBE5089=0x5A` for the diagnostic path; no
+bank-1-style `0x55F1C`/event-`0xCC` DTC reader exists for the bank-0 result
+bytes. Stock diagnostics therefore learn the terminal *state*, never M4/M5
+proof bytes, from this bank.
+
+### Composition hazard: completion misattribution (SECOC-048)
+
+The activation gates are independent in both directions:
+
+- `0x68E16` (RID `0x1010` start) checks only `FEBE5088` (external inhibit) and
+  `FEBE5085 != 1` — **never bank-0 `FEBE508A`**;
+- `0x68F92` (RID `0x100E`) checks only `FEBE508A == 0` — never the diagnostic.
+
+The completion callback `0x6920A` routes its next state (`0x44` success /
+`0x66` failure) **solely by reading `FEBE5085` at completion time**: if the
+diagnostic is active it writes `FEBE5086` and leaves `FEBE508B` untouched,
+and vice versa. It does not track which bank submitted the in-flight job.
+
+Because the shared ICU driver serializes the two submitters (the later
+`submit` busy-waits in state `0x22`), the hazardous interleaving is:
+
+```text
+0x100E arms bank 0; CAN 0x13..0x1A stabilize; submit(1) accepted -> bank0 0x33
+31 01 10 10 <diag envelope> arrives: accepted (FEBE5085 was still 0)
+  -> diag 0x22, submit(0) deferred (driver busy)ank-0 command 8 completes: FEBE5085==1 now true
+  -> diag 0x44; bank0 stays 0x33
+diag walks 0x44 -> 0x46 -> 0x55 -> status 0x02
+  -> 31 03 10 10 returns "complete" + 48 ZERO bytes from FEBE523A
+     (the real M4/M5 sit unread at FEBE526A)
+bank0 times out (1200 ticks) -> 0x66 -> active 0xFF
+  -> 0x67F14(1) scrubs FEBE51FA and FEBE526A
+```
+
+Impact classification:
+
+- **State-machine/completion misattribution, not a key bypass.** A successful
+  bank-0 command still requires an ICU-S-authenticated envelope; the race
+  cannot make ICU-S accept anything it would not otherwise accept.
+- The diagnostic can report **status `0x02` "complete" for an envelope it never
+  submitted**, with zero-filled M4/M5. Any tool treating RID `0x1010` status
+  `0x02` as proof that *its own* package executed is wrong; the proof bytes
+  returned are not correlated with the submitted request. (Supersedes the
+  sufficiency reading of §8.1 in
+  [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md#81-exact-diagnostic-transport-contract);
+  see CORR-062.)
+- The window where real M4/M5 exist at `FEBE526A` is **not remotely readable**:
+  no stock diagnostic reads that bank, RMBA/XCP disclosure paths exclude the
+  `0xFEBE5030..0xFEBE529B` region, and bank-0's own timeout (1200 ticks)
+  scrubs it. So the race yields a *false-success oracle*, not key-material
+  disclosure.
+- The symmetric interleaving (diagnostic in flight, `0x100E` activates) is
+  benign: the bank-0 collector runs while the diagnostic owns the driver, and
+  each completion is routed correctly once only one machine is active.
+
+`tests/verify_crypto_test_bank0_composition.py` reproduces the full sequence
+as a deterministic composition model and pins every gate/dispatch/scrub body
+named above.
 
 ## 6. Why all object-15 copies are invalid
 
@@ -896,6 +1056,11 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 | The initialized application wrapper serializes command 5 with the shared ICU driver | **Recovered** |
 | Startup initializes ICU-S through MainPE driver/SFR code; no ICU executable is loaded | **Recovered** |
 | RoutineControl RID `0x1010` reaches command 8 with a 64-byte request and 48-byte result | **Definitive structural behavior** |
+| RoutineControl RID `0x100E` arms a bank-0 crypto test that assembles a command-8 envelope from CAN `0x13..0x1A` and submits it via `icus_key_update_submit(1)` | **Recovered (SECOC-047; pinned by `verify_crypto_test_bank0_composition.py`)** |
+| Envelope byte `8i+k` is byte `k` of CAN `0x13+i`; three identical updates per PDU; per-PDU commits allow mixed-time packages | **Verified firmware structure** |
+| `FEBE526A..FEBE5299` M4/M5 have no stock reader and are scrubbed at finalization | **Recovered; disclosure-audit bounded** |
+| Command-8 completion state is routed solely by `FEBE5085`, so a diagnostic start between bank-0 submit and completion yields status `0x02` with zero M4/M5 for an envelope never submitted | **Recovered (SECOC-048; reproduced by deterministic composition model)** |
+| The composition race is a key bypass or exposes M4/M5 remotely | **Disproved for this graph; classification is state misattribution only** |
 | Command 8 is the SHE-compatible authenticated key-update service | **Recovered** |
 | DID `0x1010` is statically fixed to slot 4 | **Disproved; the target is package-carried** |
 | Toyota dealer tooling uses DID `0x1010` to rekey this EPS | **Requires dynamic observation** |

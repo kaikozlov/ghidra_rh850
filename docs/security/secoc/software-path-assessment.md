@@ -196,8 +196,10 @@ The recovered SID-`0x23` contract is unusually explicit:
 - memory ID `1` permits `FEBE0000..FEBFFFFF`; memory ID `2` permits
   `FF200000..FF207FFF`; both configured read-range records have security count
   zero and no write-range counterpart;
-- the one-byte size field caps a single request at 255 bytes; the lower reader
-  independently rejects values above 256.
+- the one-byte size field caps a single request at 255 bytes; the copy primitive
+  `0x4EB1C` independently rejects size `0` and every size `>= 256` (unsigned
+  `(size - 1) < 0xFF`), so the effective single-request size domain is
+  `1..min(255, remaining response capacity)`.
 
 The raw copy helpers then enforce hard exclusion tables. LocalRAM excludes:
 
@@ -236,6 +238,56 @@ rules, defaults to planning/simulation, requires explicit isolated-bench consent
 for live reads, and can acquire the 29,952-byte readable DataFlash subset in 119
 requests. `tests/verify_application_read_memory_by_address.py` pins the firmware
 configuration and `tests/verify_exploit_followups.py` pins the host protocol.
+
+### 2026-08-15 — RMBA memory-safety closure (purpose-built audit)
+
+`tests/verify_application_rmba_memory_safety.py` audits the entire
+tester-controlled address/length chain for memory-safety defects and pins the
+boundary matrix. The result is a **verified bounded negative**: no integer
+overflow/wrap, signedness/truncation defect, range-boundary inconsistency,
+requested-vs-emitted mismatch, or async state TOCTOU exists on this path.
+
+- **Length contract:** gate order in `0x9479A` is `len < 3` → NRC `0x13`,
+  ALFID whitelist (`0x92E92`, config `0x2612C`/`0x26130` == `{0x15}`) → NRC
+  `0x31`, then exact `len == (ALFID>>4) + (ALFID&0xF) + 1` (= 7) → NRC `0x13`.
+  No parsing ever runs past the request.
+- **Size domain:** the upper gate rejects `size == 0` and
+  `remaining < size`; the copy primitive `0x4EB1C` re-rejects everything
+  outside unsigned `(size-1) < 0xFF`. Effective domain `1..255` (bounded above
+  by the runtime response capacity, see OPEN_QUESTIONS).
+- **Address/memid:** `0x94672` consumes data[1] as the memory id (selector
+  `0x26328 == 1`) and parses exactly `BE32(data[2..5])`; of the five-byte
+  address field only four bytes are address. The range table match
+  (`0x92ECC`) is an exact-byte memid match against two enabled records, so
+  memid is pinned to `1`/`2` and the `0x8C456` `memid>>4 == 1` chunked/
+  programming branch is unreachable from SID `0x23` (pinned by boundary cases
+  for memid `0x11`/`0x21`/`0xFF`).
+- **Boundary consistency:** configured ranges are inclusive
+  `[low, high]`; the end-fit test `(uint32)(high - addr) < size - 1` and the
+  copy-time windows `addr >= FEBE0000 && addr <= FEC00000 - size` (RAM) /
+  `addr >= FF200000 && addr <= FF208000 - size` (DF) are arithmetically
+  identical to `addr + size - 1 <= high` — for all in-range operands neither
+  subtraction can wrap (`size <= 255`, `addr <= high`), and the exclusion
+  overlap formula `addr <= hi && lo + 1 - size <= addr` cannot underflow
+  (`min(lo) = 0xFEBE0000`). Every wrap candidate (`0xFFFFFFFF`, `0x7FFFFFFF`,
+  `0x80000000` addresses) is cut by the configured-range gate before any
+  address arithmetic runs.
+- **Requested vs emitted:** the read is single-shot — `0x4EABA`/`0x65DE6`
+  copy exactly the parsed size bytes and the response cursor `FEBE5D90`
+  advances by the requested size only on completion; no chunked re-basing of
+  the source address exists on the reachable path.
+- **Async/TOCTOU:** a corpus census pins that every writer of the RMBA private
+  state block (`FEBE5D78/7C/80/81/82`, request mirror `FEBE5D84..9F`, worker
+  state `FEBF4598..9C`) lies inside the RMBA call graph (start `0x9479A`,
+  poll, cancel `0x8C3E4 -> 0x8C3BE`, workers `0x9462E`/`0x94672`/`0x92ECC`/
+  `0x8C456`); the shared response cursor/capacity (`FEBE5D8C/90/98`) is
+  Dcm-owned (initializer `0x946FA`) and only read here. Copy-time revalidation
+  independently re-enforces bounds identical to the start-time gates, so even a
+  hypothetical inter-phase mutation cannot widen the read set.
+- **No write behavior:** both range records have `wr_ptr == 0`/`wr_cnt == 0`
+  (no write-range counterpart), and the only memory-writing worker branch
+  requires the unreachable `memid>>4 == 1` selector.
+
 
 Real SID `0x2E` WDBI is a separate generic DID-record write path. The 19-entry
 `0x26AEC` table is SID `0x31` RoutineControl; its exact sizing still bounds the

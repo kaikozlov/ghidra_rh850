@@ -60,7 +60,10 @@ a provisioned variant. In this exact dump object 15 has no valid persistent copy
 
 A **separate real key-update path** has now been recovered elsewhere in the
 application. Enabled RoutineControl RID `0x1010` transports a 64-byte authenticated request
-to ICU-S command 8 and returns a 48-byte proof/result. The lower driver splits
+to ICU-S command 8 and returns a 48-byte proof/result. A second, dormant
+command-8 submitter — the RID-`0x100E` bank-0 crypto test fed by CAN
+`0x13..0x1A` — is recovered in
+[application-chain.md §5.10](application-chain.md#510-bank-0-crypto-test-rid-0x100e--can-0x130x1a--command-8-secoc-047048). The lower driver splits
 the request as `16+32+16` and the response as `32+16`, exactly matching the
 AUTOSAR SHE M1/M2/M3 → M4/M5 memory-update protocol. This corrects the prior
 claim that the image had no SHE-shaped parser or ICU key-update route. It does
@@ -394,7 +397,12 @@ and clears the diagnostic request/result banks after either terminal status
 
 This is application-level polling, not one long RoutineControl request that eventually
 returns M4/M5. A trace must retain both control types to distinguish acceptance
-from completion.
+from completion. **Composition caveat (CORR-062):** status `0x02` proves only
+that *some* command-8 job completed while `FEBE5085` was active — the
+RID-`0x100E` bank-0 test can submit its own envelope first and have its
+completion attributed to the diagnostic, whose zeroed result bank is then
+returned as "proof". See
+[application-chain.md §5.10](application-chain.md#510-bank-0-crypto-test-rid-0x100e--can-0x130x1a--command-8-secoc-047048).
 
 The passive decoder implements this exact contract and reassembles normal
 ISO-TP on the Sienna diagnostic IDs:

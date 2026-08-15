@@ -299,6 +299,30 @@ requested address/size, checks configured range/session/security policy, and
 executes the bounded memory read through `0x8C456 -> 0x4EB1C`; phases 2/3 use
 `0x9486C/0x946FA`.
 
+#### SID `0x23` memory-safety boundary (MEM-SAFE-007)
+
+The exploit-oriented audit closes the configured RMBA path against address/size
+wrap, range-end disagreement, exclusion crossing, and asynchronous state-mutation
+escape. Only ALFID `0x15` is configured. With memory-ID mode enabled
+(`CodeFlash[0x26328]=1`), its five-byte address field is exactly
+`memory_id[1] || address_be32[4]`, and its one-byte size field limits requests to
+`1..255` bytes. `0x92ECC` first requires memory ID `1` or `2` and an address inside
+the configured inclusive range; `0x92FAE` then checks `high - address >= size - 1`
+using unsigned subtraction, so it never forms a wrapping `address + size` value.
+The copy-time RAM/DataFlash validators independently reject overlap with all seven
+protected intervals.
+
+The apparent async/TOCTOU surface is not reachable for the configured memory
+classes. `0x8C456` selects its alternate asynchronous branch from the memory-ID
+high nibble; IDs `1` and `2` both have high nibble zero and therefore call bounded
+reader `0x4EB1C` synchronously from phase 0. The parsed address/size/class cells
+have no unrelated writer in the tracked whole-image data-reference corpus, and
+both configured classes have zero write-range entries. This is a verified
+negative for escaping the recovered RMBA **read allow-set** through these software
+classes; it does not weaken the disclosure finding itself and is not a whole-Dcm
+memory-safety claim. Deterministic boundary cases live in
+`tests/verify_application_rmba_memory_safety.py`.
+
 The RDBI table contains 196 unique nonzero callback targets. The actual dispatch
 at `FUN_4CB8A` indexes the 16-byte records, loads the callback field at record
 `+4`, and performs the computed call at `0x4CBB2`. Earlier project snapshots had
@@ -328,26 +352,32 @@ crypto-test/status accumulator, not the command-5 generated output. This is a
 bounded negative for the currently recovered high-value RAM regions, not a
 claim that every RDBI value is non-sensitive.
 
-#### Response-length preflight bounds the render-loop check-after-copy shape (MEM-SAFE-006)
+#### Response-length preflight and producer-write closure (MEM-SAFE-006)
 
-The RDBI render machinery `0x9429E -> 0x929B0/0x92810 -> 0x4CB8A` callbacks
-checks response capacity *after* each producer runs — a shape that invites an
-overflow reading. Three pinned invariants yield no exploitable divergence in
-this calibration (bounded, not a universal closure; exact per-callback
-emitted-count provenance remains the residual):
+The RDBI render machinery `0x9429E -> 0x929B0/0x92810 -> 0x4CB8A` still has the
+unfortunate **check-after-copy** shape, but the configured surface is now fully
+closed against the specific declared-length divergence needed to exploit it:
 
 1. `0x944C6` accepts exactly one DID per request (payload even, `>=2`,
-   `length>>1 <= 1`), so the accumulated requirement is a single row.
-2. The preflight `0x94426 -> 0x9404A` (via `0x92788 -> 0x9354C..0x935A4 ->
-   0x8A31E -> 0x4C81A`) and the render path both source the per-DID length
-   from the same fixed 16-byte DID-table record word at `0x2941C + 16*idx + 2`
-   (read-only CodeFlash configuration, max 45 bytes).
-3. `0x9429E` copies first and only then compares `write_pos + emitted_count`
-   against clamped capacity `FEBE5D70`; the `0x14`/`0x24` responses are
-   post-copy outcomes, so that check cannot by itself prevent an overwrite if
-   a producer emitted more than declared. The negative therefore rests on
-   invariants 1–2 plus the absence of any recovered producer whose emitted
-   count exceeds its declared width (the residual).
+   `length>>1 <= 1`).
+2. Preflight and render source the same read-only length word at
+   `0x2941C + 16*idx + 2` (maximum 45 bytes).
+3. `0x8A374` writes that configured length into the count slot **before** dispatch
+   and `0x4CB8A` calls the producer as `callback(dest, declared_len)`; the producer
+   does not return an emitted count.
+4. `rdbi_emitted_write_audit.json` classifies all **196 unique producers** from
+   firmware bytes plus the hash-pinned decompiler corpus: 134 fixed-offset
+   writers, 46 success stubs, 11 declared-length-bounded engine wrappers, three
+   fixed-extent loops, one declared-length-bounded loop, and one single-byte
+   delegate. No producer writes past its declared slot: 150 exact-fit producers
+   and 46 zero-write stubs, with zero exceedances.
+
+The post-copy capacity check therefore cannot be reached with a producer-created
+length overrun in this calibration. This upgrades MEM-SAFE-006 to a verified
+negative for the configured RDBI length-mismatch class while retaining the known
+48 stale-response DIDs and making no general claim about other Dcm services.
+Generation and verification are in `tools/generate_rdbi_emitted_write_audit.py`
+and `tests/verify_application_rdbi_emitted_write_audit.py`.
 
 Verified by `tests/verify_application_rdbi_preflight_bounds.py`.
 

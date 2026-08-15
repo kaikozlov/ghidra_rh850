@@ -12,14 +12,18 @@ sys.path.insert(0, str(REPO))
 
 from exploit.followups.xcp_daq_probe import (  # noqa: E402
     ENTRIES_PER_ODT,
+    FORBIDDEN_COMMANDS,
     MAX_ENTRIES,
     PROFILES,
+    SCHEMA,
     SECOC_XCP_EXCLUDED_CANDIDATES,
     XcpDaqError,
+    assert_no_write_commands,
     build_plan,
     clear_daq_list_request,
     configure_daq,
     configuration_requests,
+    control_rtt_statistics,
     decode_dto,
     layout,
     profile_or_addresses,
@@ -182,7 +186,7 @@ try:
 except Exception:
     interleaved_ok = False
 else:
-    interleaved_ok = configured["entry_count"] == 7
+    interleaved_ok = configured[0]["entry_count"] == 7
 check("control exchange ignores interleaved DTO before START positive response", interleaved_ok)
 
 
@@ -214,6 +218,74 @@ check(
     and cleanup_panda.sent[-2][1][:2] == bytes.fromhex("de01")
     and cleanup_panda.sent[-1][1][:2] == bytes.fromhex("de00"),
 )
+
+print("\n== v2 evidence/provenance hardening ==")
+check("DAQ observer schema pinned as v2", SCHEMA == "sienna-xcp-daq-observer-v2")
+check("plan declares no generic write command implementation", plan["write_commands_implemented"] is False)
+check("plan publishes the forbidden-opcode audit including E4 page copy", set(plan["forbidden_command_opcodes"]) == {f"0x{op:02X}" for op in FORBIDDEN_COMMANDS} and 0xE4 in FORBIDDEN_COMMANDS and 0xF0 in FORBIDDEN_COMMANDS and 0xEC in FORBIDDEN_COMMANDS)
+assert_no_write_commands(requests)
+check("real configuration requests pass the no-write guard", True)
+try:
+    assert_no_write_commands((("download", bytes([0xF0]) + bytes(7)),))
+except XcpDaqError:
+    check("guard refuses a crafted F0 DOWNLOAD request", True)
+else:
+    check("guard refuses a crafted F0 DOWNLOAD request", False)
+try:
+    assert_no_write_commands((("copy_page", bytes([0xE4]) + bytes(7)),))
+except XcpDaqError:
+    check("guard refuses the E4 page copy as shadow mutation", True)
+else:
+    check("guard refuses the E4 page copy as shadow mutation", False)
+
+
+class TimingPanda:
+    """Answers every control request positively so timing evidence is produced."""
+
+    def __init__(self):
+        self.queue = []
+
+    def can_send(self, address, data, bus):
+        request = bytes(data)
+        response = bytes([0xFF]) + request[1:]
+        if request[:2] == bytes.fromhex("de01"):
+            response = bytes([0xFF, 0x00]) + request[2:]
+        self.queue.append((0x7F8, 0, response, bus))
+
+    def can_recv(self):
+        queued, self.queue = self.queue, []
+        return queued
+
+
+timing_panda = TimingPanda()
+try:
+    counts, timings = configure_daq(timing_panda, bus=1, timeout=0.05, addresses=profile.addresses)
+except Exception as exc:
+    raise exc
+stats = control_rtt_statistics(timings)
+check("configure_daq now returns per-request control timings", counts["entry_count"] == 7 and len(timings) == 12 and {row["operation"] for row in timings} == {op for op, _ in configuration_requests(profile.addresses)}, repr(sorted({row["operation"] for row in timings})))
+check("each timing row records request hex and both-clock stamps", all(set(row) >= {"operation", "request_hex", "requested_monotonic", "received_monotonic", "rtt_seconds", "received_wall_utc"} for row in timings) and all(row["rtt_seconds"] >= 0 for row in timings))
+check("control RTT statistics summarize the recorded timings", stats is not None and stats["count"] == len(timings) and stats["min_seconds"] <= stats["mean_seconds"] <= stats["max_seconds"] and stats["jitter_seconds"] == stats["max_seconds"] - stats["min_seconds"] and stats["samples_source"] == "time.monotonic deltas only")
+
+
+class StreamingDtoPanda:
+    """Emits one DTO per can_recv poll so capture wall stamps are exercised."""
+
+    def __init__(self):
+        self.calls = 0
+
+    def can_send(self, address, data, bus):
+        pass
+
+    def can_recv(self):
+        self.calls += 1
+        return [(0x7F8, 0, bytes.fromhex("0001020304050607"), 1)]
+
+
+from exploit.followups.xcp_daq_probe import capture_dto_frames  # noqa: E402
+streamed = capture_dto_frames(StreamingDtoPanda(), bus=1, addresses=profile.addresses, duration_seconds=0.05, max_frames=5)
+check("captured DTO frames now carry wall-clock stamps", len(streamed) == 5 and all("captured_wall_utc" in row and "captured_monotonic" in row for row in streamed) and all(row["captured_wall_utc"].startswith("2") for row in streamed))
+check("run-live metadata schema fields exist in source", all(token in (REPO / "exploit/followups/xcp_daq_probe.py").read_text() for token in ('"control_timing"', '"capture_window"', '"truncated_by_frame_cap"')))
 
 print("\n== CLI guardrails ==")
 probe = REPO / "exploit/followups/xcp_daq_probe.py"

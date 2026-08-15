@@ -25,12 +25,26 @@ from exploit.command5.build_experiment import (
 from exploit.command5.stimulus import (
     COMMAND5_MODE,
     COMMAND5_SELECTOR,
+    CONTROL_STATUS_ABSENT,
+    CONTROL_STATUS_FAILED,
+    CONTROL_STATUS_INCOMPATIBLE,
+    CONTROL_STATUS_POSITIVE,
     DEFAULT_POLL_INTERVAL,
     DEFAULT_ROUNDS,
+    LIVE_RESULT_SCHEMA,
+    ROLE_CONTROL,
+    ROLE_EXPERIMENT,
+    ROLES,
     StimulusError,
     build_input_frames,
     build_stimulus_plan,
+    build_verdict,
+    classify_dtc_change,
     command5_elm327_param,
+    latency_statistics,
+    load_control_artifact,
+    observation_interval_statistics,
+    observation_rtt_statistics,
     parse_bank1_activation_response,
     parse_control_type3_response,
 )
@@ -199,10 +213,11 @@ except StimulusError as exc:
 else:
     check("wrong RID/selector response prefix is rejected", False)
 
-print("\n== live-observation timing/provenance schema (v3) ==")
+print("\n== live-observation timing/provenance/verdict schema (v4) ==")
 stimulus_source = (REPO / "exploit" / "command5" / "stimulus.py").read_text(encoding="utf-8").lower()
-check("live result schema is pinned as v3", '"sienna-command5-app-live-result-v3"' in stimulus_source)
-check("older live result schemas are retired", '"sienna-command5-app-live-result-v1"' not in stimulus_source and '"sienna-command5-app-live-result-v2"' not in stimulus_source)
+check("live result schema is pinned as v4", '"sienna-command5-app-live-result-v4"' in stimulus_source)
+check("older live result schemas are retired", all(f'"sienna-command5-app-live-result-v{s}"' not in stimulus_source for s in (1, 2, 3)))
+check("live module constant matches the pinned schema", LIVE_RESULT_SCHEMA == "sienna-command5-app-live-result-v4")
 check("configured command-5 poll interval is a named constant of 0.05 s", DEFAULT_POLL_INTERVAL == 0.05)
 check("polling loop sleeps exactly the configured interval", 'time.sleep(default_poll_interval)' in stimulus_source)
 check("poll interval is reported in the output timing block", '"poll_interval_seconds": default_poll_interval' in stimulus_source)
@@ -215,7 +230,107 @@ check("timing block documents the clock semantics", '"monotonic": "time.monotoni
 check("baseline result request records its own RTT", '"rtt_seconds": baseline_rtt' in stimulus_source)
 check("timing/DTC fields add no new mutating diagnostic service", stimulus_source.count("service_type.routine_control") == 2 and "service_type.read_dtc_information" in stimulus_source and "clear_diagnostic" not in stimulus_source and "service_type.write" not in stimulus_source and "request_download" not in stimulus_source and "write_data_by_identifier" not in stimulus_source)
 check("live harness records read-only 19 02 FF DTC snapshots before and after", 'data=b"\\x02\\xff"' in stimulus_source and '"dtc_observation"' in stimulus_source and '"read_only": true' in stimulus_source)
-check("DTC interpretation keeps command-failure/mismatch ambiguity", "cannot distinguish command failure from expected-result mismatch" in stimulus_source)
+check("DTC interpretation keeps command-failure/mismatch ambiguity", "cannot separate command failure from expected-result mismatch" in stimulus_source)
+
+print("\n== v4 machine-readable verdict ==")
+check("verdict schema is pinned", '"sienna-command5-verdict-v1"' in stimulus_source)
+positive = build_verdict(result_regenerated=True, result_matches_expected=True, control_status=CONTROL_STATUS_ABSENT, dtc_changed=None)
+check("regenerated result matching expected value is positive/equal", positive["conclusion"] == "positive" and positive["command_failure"] is False and positive["compare_mismatch"] is False)
+positive_mismatch = build_verdict(result_regenerated=True, result_matches_expected=False, control_status=CONTROL_STATUS_ABSENT, dtc_changed=None)
+check("regenerated result with wrong expected value separates compare mismatch", positive_mismatch["conclusion"] == "positive" and positive_mismatch["command_failure"] is False and positive_mismatch["compare_mismatch"] is True)
+check("regenerated result without expected value leaves mismatch undecided", build_verdict(result_regenerated=True, result_matches_expected=None, control_status=CONTROL_STATUS_ABSENT, dtc_changed=None)["compare_mismatch"] is None)
+control_sep = build_verdict(result_regenerated=False, result_matches_expected=None, control_status=CONTROL_STATUS_POSITIVE, dtc_changed=False)
+check("passing separate-boot control leaves current-run failure mode unresolved", control_sep["conclusion"] == "negative_control_passed" and control_sep["command_failure"] is None and control_sep["compare_mismatch"] is None, repr(control_sep))
+control_dtc = build_verdict(result_regenerated=False, result_matches_expected=None, control_status=CONTROL_STATUS_POSITIVE, dtc_changed=True)
+check("passing control + latched DTC stays ambiguous", control_dtc["conclusion"] == "negative_control_passed" and control_dtc["command_failure"] is None and control_dtc["compare_mismatch"] is None)
+control_no_dtc = build_verdict(result_regenerated=False, result_matches_expected=None, control_status=CONTROL_STATUS_POSITIVE, dtc_changed=None)
+check("passing control without DTC snapshot stays ambiguous", control_no_dtc["command_failure"] is None and control_no_dtc["compare_mismatch"] is None)
+control_failed = build_verdict(result_regenerated=False, result_matches_expected=None, control_status=CONTROL_STATUS_FAILED, dtc_changed=None)
+check("failing control marks the run uninformative", control_failed["conclusion"] == "negative_control_failed" and control_failed["command_failure"] is None)
+no_control = build_verdict(result_regenerated=False, result_matches_expected=None, control_status=CONTROL_STATUS_ABSENT, dtc_changed=True)
+check("negative without control never decides the failure mode", no_control["conclusion"] == "negative_no_control" and no_control["command_failure"] is None and no_control["compare_mismatch"] is None)
+check("incompatible control artifact downgrades to no-control", build_verdict(result_regenerated=False, result_matches_expected=None, control_status=CONTROL_STATUS_INCOMPATIBLE, dtc_changed=False)["conclusion"] == "negative_no_control")
+check("missing baseline is explicitly inconclusive", build_verdict(result_regenerated=None, result_matches_expected=None, control_status=CONTROL_STATUS_ABSENT, dtc_changed=None)["conclusion"] == "inconclusive_no_baseline")
+check("every verdict conclusion is from the pinned set", all(v["conclusion"] in ("positive", "inconclusive_no_baseline", "negative_no_control", "negative_control_passed", "negative_control_failed") for v in (positive, positive_mismatch, control_sep, control_dtc, control_no_dtc, control_failed, no_control)))
+
+print("\n== v4 latency statistics and DTC classification ==")
+stats = latency_statistics([0.10, 0.20, 0.30, 0.40])
+check("latency statistics expose min/max/mean/jitter from monotonic deltas", stats["count"] == 4 and abs(stats["min_seconds"] - 0.10) < 1e-9 and abs(stats["max_seconds"] - 0.40) < 1e-9 and abs(stats["mean_seconds"] - 0.25) < 1e-9 and abs(stats["jitter_seconds"] - 0.30) < 1e-9)
+check("empty latency input is None, not zero", latency_statistics([]) is None)
+check("RTT statistics read observation rtt_seconds fields", observation_rtt_statistics([{"rtt_seconds": 0.5}, {"rtt_seconds": 0.7}])["max_seconds"] == 0.7)
+check("interval statistics need two observations", observation_interval_statistics([{ "observed_monotonic": 1.0 }]) is None and abs(observation_interval_statistics([{ "observed_monotonic": 1.0 }, { "observed_monotonic": 1.25 }])["mean_seconds"] - 0.25) < 1e-9)
+check("unchanged DTC snapshot classifies as no change", classify_dtc_change("ab00", "ab00") == {"available": True, "changed": False, "before_hex": "ab00", "after_hex": "ab00"})
+check("changed DTC snapshot classifies as changed", classify_dtc_change("ab00", "ab01")["changed"] is True)
+check("missing DTC snapshot classifies as unavailable", classify_dtc_change(None, "ab01") == {"available": False, "changed": None})
+
+print("\n== v4 chronology, separate-boot control artifact, and CLI guards ==")
+check("timeline marks every phase boundary in order", all(marker in stimulus_source for marker in ("_stimulus_started", "_stimulus_finished", "_polling_started", "_polling_finished", "bank1_activation", "dtc_snapshot_before", "dtc_snapshot_after", "control_artifact_loaded")) and '"phase": phase' in stimulus_source and 'phase="primary"' in stimulus_source)
+check("timeline events carry monotonic and wall stamps", '"monotonic": time.monotonic()' in stimulus_source and '"wall_utc": _utc_now()' in stimulus_source)
+check("exactly one stimulus/poll trial executes per run", stimulus_source.count("def _run_trial") == 1 and 'phase="primary"' in stimulus_source and stimulus_source.count("trial = _run_trial(") == 1 and 'phase="control"' not in stimulus_source)
+check("same-boot control CLI options are fully removed", "--control-message" not in stimulus_source and "--control-expected" not in stimulus_source)
+check("control is loaded artifact evidence, never executed", '"executed_this_boot": false' in stimulus_source and '"source": "separate-boot artifact"' in stimulus_source and stimulus_source.count("load_control_artifact(") >= 1)
+check("control artifact loader is SHA-bound and role-checked", '"sha256": hashlib.sha256(raw).hexdigest()' in stimulus_source and "was not produced by a --role" in stimulus_source)
+check("control run is bound to a fresh boot in plan text", "separate fresh boot" in json.dumps(build_stimulus_plan(bytes(16))) and "never re-executed" in stimulus_source)
+check("roles are exactly experiment and control", ROLES == ("experiment", "control") and ROLE_EXPERIMENT == "experiment" and ROLE_CONTROL == "control")
+check("experiment-role live result carries the role field", '"role": role' in stimulus_source)
+check("--control-artifact is refused on control-role runs", "--control-artifact is valid only for --role experiment runs" in stimulus_source and "--control-artifact is for experiment runs" in stimulus_source)
+check("--control-artifact requires --execute", '"--control-artifact requires --execute"' in stimulus_source)
+
+print("\n== separate-boot control artifact loader ==")
+import tempfile
+from exploit.common.ram_exec import RamExecRoute
+with tempfile.TemporaryDirectory() as td:
+    tmp = Path(td)
+    route = RamExecRoute(0, 1, "old", 0)
+    good_control = {
+        "schema": "sienna-command5-app-live-result-v4",
+        "role": "control",
+        "f181_hex": "41424344",
+        "route": {"bus": 0, "elm327_param": 1, "uds_variant": "old", "cpu_index": 0},
+        "verdict": {"result_regenerated": True, "conclusion": "positive"},
+    }
+    good_path = tmp / "control.json"
+    good_path.write_text(json.dumps(good_control))
+    evidence = load_control_artifact(good_path, f181_hex="41424344", route=route)
+    check("matching control artifact classifies positive", evidence["status"] == CONTROL_STATUS_POSITIVE and evidence["f181_match"] is True and evidence["route_match"] is True and evidence["executed_this_boot"] is False)
+    check("control artifact SHA-256 binds the loaded bytes", evidence["sha256"] == hashlib.sha256(good_path.read_bytes()).hexdigest())
+    check("F181 mismatch classifies incompatible", load_control_artifact(good_path, f181_hex="ffff", route=route)["status"] == CONTROL_STATUS_INCOMPATIBLE)
+    check("route mismatch classifies incompatible", load_control_artifact(good_path, f181_hex="41424344", route=RamExecRoute(1, 1, "old", 0))["status"] == CONTROL_STATUS_INCOMPATIBLE)
+    check("UDS variant mismatch classifies incompatible", load_control_artifact(good_path, f181_hex="41424344", route=RamExecRoute(0, 1, "new", 0))["status"] == CONTROL_STATUS_INCOMPATIBLE)
+    check("CPU index mismatch classifies incompatible", load_control_artifact(good_path, f181_hex="41424344", route=RamExecRoute(0, 1, "old", 1))["status"] == CONTROL_STATUS_INCOMPATIBLE)
+    failed_control = dict(good_control); failed_control["verdict"] = {"result_regenerated": False}
+    failed_path = tmp / "failed.json"; failed_path.write_text(json.dumps(failed_control))
+    check("non-regenerating control run classifies failed", load_control_artifact(failed_path, f181_hex="41424344", route=route)["status"] == CONTROL_STATUS_FAILED)
+    experiment_role = dict(good_control); experiment_role["role"] = "experiment"
+    role_path = tmp / "role.json"; role_path.write_text(json.dumps(experiment_role))
+    try:
+        load_control_artifact(role_path, f181_hex="41424344", route=route)
+        check("artifact not tagged --role control is rejected", False)
+    except StimulusError:
+        check("artifact not tagged --role control is rejected", True)
+    wrong_schema = dict(good_control); wrong_schema["schema"] = "sienna-command5-app-live-result-v3"
+    schema_path = tmp / "schema.json"; schema_path.write_text(json.dumps(wrong_schema))
+    try:
+        load_control_artifact(schema_path, f181_hex="41424344", route=route)
+        check("non-v4 control artifact is rejected", False)
+    except StimulusError:
+        check("non-v4 control artifact is rejected", True)
+    trash_path = tmp / "trash.json"; trash_path.write_text("not json")
+    try:
+        load_control_artifact(trash_path, f181_hex=None, route=route)
+        check("malformed control artifact is rejected", False)
+    except StimulusError:
+        check("malformed control artifact is rejected", True)
+    missing_path = tmp / "absent.json"
+    try:
+        load_control_artifact(missing_path, f181_hex=None, route=route)
+        check("missing control artifact is rejected", False)
+    except StimulusError:
+        check("missing control artifact is rejected", True)
+
+print("\n== scope and interpretation discipline ==")
+check("primary timing block reports RTT and poll-interval statistics", '"rtt_statistics": trial["rtt_statistics"]' in stimulus_source and '"poll_interval_statistics": trial["poll_interval_statistics"]' in stimulus_source)
+check("plan publishes the verdict contract and control option", '"verdict_contract": verdict_contract' in stimulus_source and '"known_good_control"' in stimulus_source)
 
 print("\n== scope and interpretation discipline ==")
 source = (REPO / "exploit" / "command5" / "build_experiment.py").read_text(encoding="utf-8").lower()

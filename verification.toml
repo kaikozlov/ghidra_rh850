@@ -239,6 +239,19 @@ paths = [
   "exploit/followups/application_rmba_probe.py",
 ]
 
+[suite.application_rmba_memory_safety]
+tests = ["tests/verify_application_rmba_memory_safety.py"]
+paths = [
+  "tests/verify_application_rmba_memory_safety.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "data/generated/decompilations.jsonl",
+  "docs/diagnostics/application.md",
+  "docs/security/secoc/software-path-assessment.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
 [suite.diagnostic_vocabulary]
 tests = ["tests/verify_diagnostic_vocabulary.py"]
 oracle = "generated_self_check"
@@ -919,6 +932,20 @@ paths = [
   "docs/status/FINDINGS.md",
 ]
 
+[suite.exploit_interest_reviewed_candidates]
+tests = ["tests/verify_exploit_interest_reviewed_candidates.py"]
+oracle = "generated_self_check"
+paths = [
+  "data/exploit_interest_reviewed_candidates.csv",
+  "tests/verify_exploit_interest_reviewed_candidates.py",
+  "data/generated/exploit_interest_ranking.csv",
+  "data/generated/exploit_interest_cohorts.json",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/tooling/exploit-interest-ranking.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
 [suite.security_state_composition]
 tests = ["tests/verify_security_state_composition.py"]
 oracle = "generated_self_check"
@@ -968,6 +995,17 @@ paths = [
   "docs/status/FINDINGS.md",
 ]
 
+[suite.application_rdbi_emitted_write]
+tests = ["tests/verify_application_rdbi_emitted_write_audit.py"]
+paths = [
+  "tools/generate_rdbi_emitted_write_audit.py",
+  "tests/verify_application_rdbi_emitted_write_audit.py",
+  "data/generated/rdbi_emitted_write_audit.json",
+  "docs/diagnostics/application.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
 [suite.codeflash_structure_scanner]
 tests = ["tests/verify_rh850_codeflash_structure_scanner.py"]
 paths = [
@@ -1004,6 +1042,18 @@ paths = [
   "exploit/dumper/",
   "tests/verify_codeflash_dumper.py",
   "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+]
+
+[suite.crypto_test_bank0_composition]
+tests = ["tests/verify_crypto_test_bank0_composition.py"]
+paths = [
+  "tests/verify_crypto_test_bank0_composition.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/security/secoc/application-chain.md",
+  "docs/security/secoc/key-storage-and-lifecycle.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
 ]
 
 [suite.secoc_command5_experiment]
@@ -1056,6 +1106,7 @@ tests = [
   "tests/verify_exploit_followups.py",
   "tests/verify_secoc_freshness_trials.py",
   "tests/verify_xcp_daq_probe.py",
+  "tests/verify_xcp_reachability.py",
   "tests/verify_xcp_shadow_write_plan.py",
 ]
 paths = [
@@ -1068,6 +1119,18 @@ paths = [
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/RESEARCH_ROADMAP.md",
   "docs/status/EXPLOIT_ENGINEERING_2026-08-12.md",
+]
+
+[suite.variant_acquisition_readiness]
+tests = ["tests/verify_variant_acquisition_readiness.py"]
+paths = [
+  "tools/check_variant_acquisition.py",
+  "tools/analyze_rh850_codeflash_structure.py",
+  "tools/build_secoc_patch_manifest.py",
+  "tests/verify_variant_acquisition_readiness.py",
+  "docs/tooling/variant-acquisition-readiness.md",
+  "docs/tooling/README.md",
+  "docs/variants/newer-tsk-target-evidence.md",
 ]
 
 [suite.lifecycle]

@@ -1,0 +1,3853 @@
+{
+  "callbacks": [
+    {
+      "body_sha256": "3763089a5a306c28312ade3f944531d72a02faf28e2d6a8bc5337681226e6238",
+      "body_size": 122,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cbfc",
+      "class": "direct_fixed",
+      "declared_len": 7,
+      "decompiled_c_sha256": "9d6ca62620321e4612ae7617c7b809e44803cf4503de98370c352f584302491d",
+      "dids": [
+        {
+          "declared": 7,
+          "did": "0x0102"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 7,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "de8ad611d87601f811d53e9413509ad271fb8fd17f5aeb483fa48d28ce9e5044",
+      "body_size": 78,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cc76",
+      "class": "direct_fixed",
+      "declared_len": 4,
+      "decompiled_c_sha256": "c0380915b5701b69ce8075cb98b21a2df20f1c7ce55855d5c29b048465b5ba6d",
+      "dids": [
+        {
+          "declared": 4,
+          "did": "0x0103"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 4,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "de77f2657ef3aa46c135fd558c9e2e9cdcadf21ea20d71f2d331e3605ab491f2",
+      "body_size": 116,
+      "bound_source": "checkpoint_object 0x204 (magic 0xA55A5AA5): 10-iteration copy loop at dest[0..9] plus fixed zero stores at dest[10] and dest[11]; invalid-record branch fills dest[0..9] with '?' instead; both loops trip-count 10 (`iVar4 + -9`)",
+      "callback": "0x0004ccc4",
+      "class": "fixed_extent_loop",
+      "declared_len": 12,
+      "decompiled_c_sha256": "fe1a1e414df35c83b5a12d370b0126ad5fa4d43eff6d9a45891337a204ad1cbc",
+      "dids": [
+        {
+          "declared": 12,
+          "did": "0x0105"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 12,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e21bd2dd2bd66644c7453df55e88b1185e654098c540e31160ec5678fefe9a76",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cd38",
+      "class": "direct_fixed",
+      "declared_len": 6,
+      "decompiled_c_sha256": "84f1c34f894f9f4a1c52566821e49e2c4c0430f32fdb3912f9065b4b55d1d139",
+      "dids": [
+        {
+          "declared": 6,
+          "did": "0x0109"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 6,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "46f17c5ce3f23043a53bdfaf016a5117fdcb3d5310802df553a04ab2ef0c7957",
+      "body_size": 96,
+      "bound_source": "checkpoint_object 0x20A (magic 0xA55A5AA5): single 16-iteration copy loop at dest[0..15]; invalid-record branch writes nothing (under-write only, error 5)",
+      "callback": "0x0004cd74",
+      "class": "fixed_extent_loop",
+      "declared_len": 16,
+      "decompiled_c_sha256": "058594d3f5b1e3755d97ca9a4e00a92419e3674ae2d2cd82492a12c2adbe677c",
+      "dids": [
+        {
+          "declared": 16,
+          "did": "0x010B"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 16,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "929b199c5c73f5574cfadba2b6b8b6e1c3257051a11e91f1154abeafd6744a97",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cdd4",
+      "class": "direct_fixed",
+      "declared_len": 4,
+      "decompiled_c_sha256": "6b5c58a8c864039a06bd3b90593ae8efda0ee77260de614e649c4c1b563225db",
+      "dids": [
+        {
+          "declared": 4,
+          "did": "0x0110"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 4,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004cdfc",
+      "class": "success_stub",
+      "declared_len": 4,
+      "decompiled_c_sha256": "28d576154d866898c99bd20d31ab2034859e495af8a844fbfdd9685feb352c1f",
+      "dids": [
+        {
+          "declared": 4,
+          "did": "0x0111"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "176c00096d8be70277baac1efe200da2c2430c2b70f841f652afeb0155dd0eaa",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004ce00",
+      "class": "direct_fixed",
+      "declared_len": 4,
+      "decompiled_c_sha256": "fff37f52721f9c66f2379936759d6647d85d1b14610a5b292039da8fa7205b67",
+      "dids": [
+        {
+          "declared": 4,
+          "did": "0x0112"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 4,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "ccfff5b3905c147628da227309cbdc27f54d3c40af01aa08cd8cb35152cea9c9",
+      "body_size": 30,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004ce26",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "ff7fe2b94777af928dcce7a89ac144805f8f25fe4a4fa4c63e51a029818f2635",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x0204"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "a8c07e0977856423360c138d2b82cc75242c7f1cae4743337b5cf18b09a10af3",
+      "body_size": 50,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004ce44",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "a26f48cba72770c09af512967942a48eb928345d0b8d8f7710e184f191a1ddef",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1031"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "15ff118b6b67975064b1f50664e648cd2b473996565140070b2859bea65144f6",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004ce76",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "1384bbaac9afed473813d324a6b9d860726839a25d1de96a7afc386e1dea1e36",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1032"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "a6d5c0f8578754da256ea5835d05cf7f76075f44ce1af3dc5241790b41bf8020",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cea0",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "3565e512fc8d21965718e45360d7f3def5a4c5731d4116e143ae7df153379edc",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1033"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "7d91cb622586df314c017f2e9eb00e148e2ae2e418c9288c0dc4ca5f73f6b5d9",
+      "body_size": 50,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cec6",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "12dfafba4336a1779a55c90640ff482b9e3ecba1dcfaa4794107b2c15feccebd",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1034"
+        },
+        {
+          "declared": 2,
+          "did": "0x1039"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "48a4629f9337b3f4da18b3b44d0114aaa2fbba0f4d6a1f81a89838371504f3b5",
+      "body_size": 76,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cef8",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "29adf37d840ea227a15520032508298f34129346916bf880ee7a835f0336c4c4",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1035"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "6e97b0d66fc1011e81f210a850632ebb23fe4ebfc1e785fce27112cb7706c542",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cf44",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "2fe64008ea5833da4254e36d03169753204b9f40152934eac1b24aaa557b224b",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1036"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "fb2ea4585ac1e10a9e5eba1ff004c5e9ac530474b6f3a499aabd28fa8ea976de",
+      "body_size": 46,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cf80",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "f7c7090b49bfcf02c81f96078a8ce0a630f8f23eb790c55231e16d6a4dc40b51",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1037"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "b2fc8741abc756c2c728d0e95c7d9c49073158212cccb1f5a0806dea1289e8d4",
+      "body_size": 16,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cfae",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "47dea6064cc64018bf1c85ac80d784741a03a86c16855f88cc4ffb94aefe0c8f",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1038"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "6870b5025267df0008413b951bf20a4989751f54de61e85a97a9ceb9cf0e311b",
+      "body_size": 50,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cfbe",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "694140e2d7275b2e8cdcbaa3298f79c1d2679349bfca82f280743c77aa49207d",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1061"
+        },
+        {
+          "declared": 2,
+          "did": "0x1067"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "85fede17218103e814b31f4d447d53a77a9fb8331e35f38b1c89bd894045ef7a",
+      "body_size": 50,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004cff0",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "5a2d704b47d1e058f4c19cd61da2412d1d4c227fc267ee5ba6ac10f8f40dd521",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1062"
+        },
+        {
+          "declared": 2,
+          "did": "0x1068"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "b93b517778fc11ffeeba1b9cbd37902ab16c65425c914fb6de690a749ed5410b",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d022",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "819a28bb94c6a920fd079d7e780c1998eec4649725ea8c67b254a59f511f6423",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1063"
+        },
+        {
+          "declared": 2,
+          "did": "0x1069"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "2173eae47937706ba9fb9495ee9eb5d434d2bb7ea8f870bda07857e8afd38733",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d05e",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "a686865ef156be89bd7bc0cadd765bb4779c2fda01ba3f9ee969b407f6fb2878",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1064"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "37be1a8d0f0b4d3c86450b4b3522f2bbb05adf305d69d41fa38232bc951bf291",
+      "body_size": 44,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d084",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "ebdab89ec741718d0e39b49e3f8386d2c8119a54807097fa08b475ea9fd5fe6e",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1065"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d0b0",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "17c775f9c857b3546bdfe05a78add85159bb6c1b4775aec4ae7e48d9c8ae4434",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1066"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d0b4",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "b74b3a2933af2c45a3a1aa51aef3a45d1356a600002ca1c30409e17e6c12cccb",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x106A"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "a85eeb528787e5fa3005b4fde3439b045c785bd5ec48f71cb92d4bf6feca99c6",
+      "body_size": 50,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d0b8",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "bcc61fbe4104baf01b2e960dfb64f6dc234694b59ccea6bb2432e4f2de37f0f5",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x106B"
+        },
+        {
+          "declared": 2,
+          "did": "0x106C"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "46f1c9926eec9657d4737fab0faf259b1b084c34debeeb1348331e28a2286908",
+      "body_size": 56,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d0ea",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "29f81401431a864d8528a763efd89068130380427abd2228c969b97a43b01c20",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1091"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "057ed521cb5723a71b8a57a18c2c872913a1ef68638d678b1cac909c67d20698",
+      "body_size": 56,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d122",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "253c81177e47bdf53dc1439a8fc4029bd2f358efd1269c1281621bc9e6bd6b03",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1092"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "cd447071d1f545391a0d3c721fe14a41f4f055146b26da1c8da8e0db4c3c020e",
+      "body_size": 56,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d15a",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "7c5c86e2a9c62d03fbf863db583f61c113408d384214e4f57a5b9b82dd18eb3e",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1093"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "a6d881da9fd51014cdef9970b4066e8a9dfb98cc64c274ee2f4c7092f2918581",
+      "body_size": 56,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d192",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "4f991e579ee1ba83b408c3901d56cacbb2c1659213ea9843e288c582c730a69d",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1094"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "de434fe4c47b18709a6ac590009ff8b32e192f26037b083c875a6b03dac22492",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d1ca",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "33cb2a3272af76055e05aeb282a1281fe38e18bf6106885dfdff010692734133",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1095"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "f713902649491584e2ece7284bb9ff3fe1bda2b43a16d403faa88545e3b2e18b",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d1f4",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "3b00cfbc093e8e3eeae662b2dec7a5f581d0cd0a39431c903d2fa1dd06b8101d",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1096"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "77236aa35c74fd988fc4feff0518be9622fd511b7a2987977a8ad7ae591211c5",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d21e",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "8f6c33b896aa0c05cf90afad9b8ec87bf5356c0dda6951e1407c975feedc5ca6",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1097"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "2278c4a25449abcf2556cc4239f356cbc976d3f46c70411499e401c8c6d2d2f0",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d248",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "7c63be1ccd74bdc61c662b5eff841a41eaa403b7d986ddab17b8c01ccc394b7d",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1098"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "ad8a5b499ad993e92e1317bd0c4697f742b56e2481da30003b89c7de137c5a43",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d272",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "86c34d9a1b28bd819f1c99ab88c8e0328218aa61e6655d9222da0b5d41af4fef",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10C1"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "eafaf396fcede7bf30c2870d294979ce2590be6f8872d55d1a3014140b22c303",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d2ae",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "663f50c44c5f0725f3b1e5d26dce2ad5e2d30d507a34b18476c16641fbf1ad34",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10C2"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "1034455d832e455abb0cab62bdad757d304fd86c6620e008b711d499e0cb9955",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d2ea",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "9d77fa835065a1a2e0f0b1a044c291dea4feb78156d2afef9f027f71a8c447b9",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10C3"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "369e4b8b2e047259ddd93e5ef7efaea5c1da0e5b18567649d31efa2a91fa52f5",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d326",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "73fdb3ec674cb397a62651e784c38e1c98501eb44c6bcfef09dd812cb965fd7a",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10C4"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "4615095ffa011f89023dc3c69bb78adabd4e70e492288a752f92faf7dd891b47",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d35c",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "7c980b0ab4308e294f5a22aea7d61c36ed9437e3fb486430bf321e0b06799ef2",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10C5"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "0097470e698ad7916181384af88493e84e4a40025c145b97ea2dc7a72491c970",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d392",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "696ad01e8be1c57cb8284967fac6333fc0d82e3c78b2a851ae28284fff07fe8d",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10C6"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d3c8",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "da234b718e01d433d2765c7619649a15d7bd091ce6032c13237f171462d8c3b1",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10C7"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d3cc",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "075c2fa9697871349d51090eb70cbc37621020b0763b5f5da701de1be0d69373",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10C8"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d3d0",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "9f8d5393b812629424bfd9f0657da80622f4d504511ea372429511d075372ce9",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10C9"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "5eb81b4e7b822e18c73b64ce87f52efa026f0959f154b118737d2efde055d7a6",
+      "body_size": 50,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d3d4",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "8a40232a34f93f2a186c6610863dc3c0cf76e5e0bc2f964bf474e4b12771aa6e",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10CA"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "2edf7e49b065e10a6ddbf0287064db92abfd6c587f466a28101f54f1c624cb59",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d406",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "3335676d01ea18c39cdb1faf4ca2a0c426ea6738aa98b0a54a1058477f88addb",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10F1"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "96d33e8b2e8f3cb4ff721606bdcb8b3a4f2cef51a0158ccb2763a51052bb0d6c",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d442",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "294ccfc0e7a115705414af60b9672dacb58c3db409dd7d280e3a239b7247148b",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10F2"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "eb0ab66ea2fa753a09406a17e18987c9d713d878aad19593f63daf36bf5e5682",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d47e",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "cd6daca4ab0866926ac6b050cf27e613d1702dbea1e3889d279b111fb8364059",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10F3"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "af5d7ddb703de14b8506d84160557bd91164c1ed34fb91d7445f3fbdc88b9cf7",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d4ba",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "4c8bf8cc4189f9b79b7195f2c05a715f7e781455e6ebba2c14225ca723928c2b",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10F4"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e78e34139427a965534ad73f540840c96b9bde14a2f7deda761c84ace44b300c",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d4f0",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "8782dffb46afaf8af7dd7b04c856096d9ab59d29cf38e7aa31659da12ad8d816",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10F5"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "8d0cc395e1ff90429eb2d7236880cdc3712c83c2d90da508c64e46219b0eeb6c",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d526",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "254e4761c5c856e3b896f8dc0c4e6325bd7d27b4f6b7f35ce875a0dfdf4a21c3",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10F6"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d55c",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "d7b1d198bd79628792555402e850a5b6bca1dc62ede72f302a2be5112b2b0eac",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10F7"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d560",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "c9be59000494775e2337d84ec6cc3a264b923f32bb246f505303b7ec82b61ec5",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10F8"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d564",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "ec36d335edb3abfcb453687f53167881cf188ad2f6dd3361b72ea4897f84d95e",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10F9"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "4d0555581f743a218cbec10c24078b61e7bd51964e19f4bcc921e96bf2beccf6",
+      "body_size": 50,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d568",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "73d08d5ac488249471f09f7ff9d4051f5734638d40b13388884b155aaf4dc577",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x10FA"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "19760f6a41ccaaa3406a5d57d5b9de7ffeb2c59a789a4fdf5d94fec737adfb55",
+      "body_size": 52,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d59a",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "8081d07bc090baf4e6aeae514b995b3de1ccb480e49bc9a909d7c98dd905055a",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1121"
+        },
+        {
+          "declared": 2,
+          "did": "0x1123"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "be071f9bcec4d616b05e634506060ac90cd82282d369f0938725b4e9534e1b70",
+      "body_size": 52,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d5ce",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "74d09d2950e7fe59d82f83167791fdfef43b8c4d5994024b18df186c7c14c149",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1122"
+        },
+        {
+          "declared": 2,
+          "did": "0x112A"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d602",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "668e58868451c7cb36dfafa8281a7523e3f2d1bc7df66a884dbfc3921958088c",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1124"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d606",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "0cd0720dc2a3b20cd4e2e50991f73c0ce85d749c62da94c34b19982a53c11aba",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1125"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d60a",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "6b888a793af01fe481104bb92af731eb44eb78dd96a1e17b3f08ce925fde91c5",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1126"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d60e",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "a3bfcdb177b835fd606ab321e1d1a6020fd92376f0504cfe7060ff2b3aef2ca4",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1127"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d612",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "528b8e052307d2546b8bae6e0d70200fcb33d19527492091d2348f11c1a174ea",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1128"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d616",
+      "class": "success_stub",
+      "declared_len": 2,
+      "decompiled_c_sha256": "b7b7c13f7db23cce4fbfdbc0a4c5b94331fb4849c43cb537261479857de80ec0",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1129"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "f6c3645edeefc1eecddb35f2c24da2b854a62418e32fc11c667345d2c4960412",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d61a",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "ad1c0f32b573f46c6bfa9b4dbaf84d56a1ed428bdc89008d0b862c9ff55ad151",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x112B"
+        },
+        {
+          "declared": 2,
+          "did": "0x112C"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "ec38fcac9d334dbad77c5bc37b51d7f928eaa972d530d097698f5ef60b66f97f",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d644",
+      "class": "direct_fixed",
+      "declared_len": 4,
+      "decompiled_c_sha256": "19ec4f05fb791a87d95ae0121dacbdb62122a4d5daa729106a43f80898284099",
+      "dids": [
+        {
+          "declared": 4,
+          "did": "0x112D"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 4,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "221df6c2c07c86c80e1071e789a9f08cec6dc9a05f18dd03103c0078dc856c87",
+      "body_size": 64,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d680",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "17daa99797140178d68e30d2197e3bff0300336ce709faf0950816f3c37db557",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x112E"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d6c0",
+      "class": "success_stub",
+      "declared_len": 7,
+      "decompiled_c_sha256": "10dd7773b8c78c410c39a8fb753e2aa1369526c9862749135a2196b1dcbbc766",
+      "dids": [
+        {
+          "declared": 7,
+          "did": "0x112F"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d6c4",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "337043f63e9c6984d3cfaed6877cdbdf1c161e8ea4f739ed661f600ae14db692",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1130"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004d6c8",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "968f1a05af06628110da4cfb30b892aafaaa21b1436c673c24ed120e0d91cf61",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1131"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "5ab3737789ec05efb9ea341233e5ee21d022e1cee679e1af49a63545a86262fc",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d6cc",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "af1eed1c0248296dc6beca76383ccc93317deeb58c3a219ab24ded94fcbabbe5",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1132"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "61eb45ace59a4b7716c08f225cefcf640955f3c1d70495de41e356b6c5acb67c",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d6f6",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "1905d79b4e5c2a1b1b07daef5d03f0a17ad5d3c656e8e9fd8becb7a97148a336",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1133"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "15563eaa44dabcbcd4f3be9059c1f5280ed0822481e369e12bafffcfa2d0dd52",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d71c",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "2165858a9111d24831efc430ea98a27d43c577f0de04498215338e231961d799",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1151"
+        },
+        {
+          "declared": 2,
+          "did": "0x1157"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "77610d459be494531313efd2e34952d130e96ba3a89cf58c76b67287244f6d93",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d758",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "60c76f7414a81fe2cf535cbbf584ee9fd47effaeaabafdffe16053ce3e5dd15c",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1152"
+        },
+        {
+          "declared": 2,
+          "did": "0x1158"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e8ea250109f50038147655581f4d32097958e918be7017a9a0153370f0745062",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d794",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "9a3b58a1a82b8dde9f5e2ab5127d593e6ea4a6f6073b607cbf3191b6a7791a0d",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1153"
+        },
+        {
+          "declared": 2,
+          "did": "0x1159"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "0ebd21fcfd6bff8ea7a4d1c137d30d3332447cf24902cb32d1c6642c5fa965c4",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d7d0",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "5b5b91e2d9264a0c96fa069dd884c20f7337d7440ba30150e768d5d7a24b93c4",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1154"
+        },
+        {
+          "declared": 2,
+          "did": "0x115A"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "febf680d71a9e3acd523633be8362d91212ccfdde9ba3c36ef1568a5b38970e1",
+      "body_size": 74,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d80c",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "9d79616e6ccb69744da3364bf312c303f09066ce5ae04e6e0d1ae5b7d3c80515",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1155"
+        },
+        {
+          "declared": 2,
+          "did": "0x115B"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "55ed402e9e49855bdc991bbcb5cd76eaf0d6c4c96c058853384a5a94ef63f0ca",
+      "body_size": 58,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d856",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "e5b6d3c6f9f68185afdb7e0bf2513a54d6439f40d45e8cd1cba8d068db025750",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1156"
+        },
+        {
+          "declared": 2,
+          "did": "0x115C"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "31007c87b1f9cdc4439fa02cdaa722ae3f0871bb55609d3c11e00a2e8cfa9a74",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d890",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "cfc7ea4cb98872b21e008c1ebdf2714f5559bb3dc196bbbaca495b131ffa68b7",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1181"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "29259e48f45c9354b9b1cf4807237b3dbcb102cf8ac39d9f687a063c1d9be9cd",
+      "body_size": 18,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d8b6",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "51ef073842f001e9bb2324501a335825013ee6545e088d0cf74f278b1cce9a7f",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1182"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "9bdebee64cfa94b7bf10a9f58c710ba47f705d236528e07bc3455b180eb86403",
+      "body_size": 52,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d8c8",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "af7a0ec0e651c1b9603544ba00705999cd2b5e8faac9de71488aa8c00b18fb7b",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1183"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "1d758ccae15e26cf82fd96279e5813fd4bbb21a675b328ffac4a3d5efffd6045",
+      "body_size": 52,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d8fc",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "31f99af67c32d6fbed64711ef3db47b731ff7a7f87ce4c5ed9fd89353409083f",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1184"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "2891e025f4fd75e52dbb1f1653601eb25f5a0b434692a069bcd7447e694b9ec0",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d930",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "806390661514757a12ca57b7415cb072f2d8e7a151b5b30f67fa086df9aefff7",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1185"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "5e6f11cfd9c60ce792bf590faf3d68f10de5ae4db9428c6afebadc39b3f8751e",
+      "body_size": 46,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d95a",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "5a47fd969c919d0f99e1db379598a8cce2876adbc164d2caed3ecd44218f60c0",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1186"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "caa49f4105946fb80aa9c485eba4ebbe688bc8eed41b0d02fb3ac34f113ba169",
+      "body_size": 44,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d988",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "1eeb42fb6390328a65a0bc127c6d1fb0fab0e4465ce138c2744be7f4878aa28d",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11B1"
+        },
+        {
+          "declared": 1,
+          "did": "0x11BE"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "eade89d18cdebe793db458d2a6299e206fa32e9a04e21995fd9cd4381c2cdaeb",
+      "body_size": 44,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d9b4",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "a49fbeb47dcd14fcffdafd5481510412d7b276d72d48a5c364b6e9752a6febda",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11B3"
+        },
+        {
+          "declared": 1,
+          "did": "0x11BF"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "a31031610226eb9e8ad9e948b96b925f5cc1e6e85a25497918cd399faaf1cb33",
+      "body_size": 44,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004d9e0",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "9c50825c54812d7400e1d850b4658af8921fa34d8190013250595e059fe78116",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11B4"
+        },
+        {
+          "declared": 1,
+          "did": "0x11C0"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "d0264fb4c736f859147c3f1a9a597c7f9358b0243f673e754cb7a610918c5a0d",
+      "body_size": 44,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004da0c",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "ab059f693ed983e5391704d255cf5c51dc9e48cb990b8ac4044ada484626a0f5",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11B5"
+        },
+        {
+          "declared": 1,
+          "did": "0x11C1"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e6e40b45befe2fee18e25ef9d923dd9d014eef51fb70a288a4487e18c9aeb55a",
+      "body_size": 46,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004da38",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "ad1cb5ecf0750ede7df75f5c1a8cfb5f54f1e7d9c6912a4414e6afb9e0f9c21d",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11B6"
+        },
+        {
+          "declared": 1,
+          "did": "0x11C2"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "304dce9bac8b0762e3d7174ee6eb140138ab4ed1686e3eca5b03af131149a0bb",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004da66",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "97443b8228ce98e883dfc6a7a1a20a6cfcf38b7c8c5fb0de3d0cad52e004c4d4",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11B7"
+        },
+        {
+          "declared": 1,
+          "did": "0x11C3"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "89b7488b50484764bb5adb7cb12346b8a835ab41e55422160dbd71e0bb6175c6",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004da8e",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "9bdce8ea91c82e922d68045a4a9361068a8e2a4dd2eb164296a8fdad146de107",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11B8"
+        },
+        {
+          "declared": 1,
+          "did": "0x11C4"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "9ba2bd3cafe2de042e2da1f57df06bade5a679a9ed0fd5d920535b25d4b497c3",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dab6",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "816e9b183e9e4602ed6c027d5c3a66c640690763cf92a7959168c45524cd5861",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11B9"
+        },
+        {
+          "declared": 1,
+          "did": "0x11C5"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "3d1b6c0b8e45dd2e8860326a3e6eb4450fea7dcd6d46335e2f864c946bcd43e3",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dade",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "01f2b48009f44a912f0b848b294cbfdf933db910450d36084923236c7bdab5b0",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11BA"
+        },
+        {
+          "declared": 1,
+          "did": "0x11C6"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "7172c54f8fc3836dd4065f717451299be43d7860bde1e7e34ec12b3360c96cda",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004db06",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "6432056cfb2f0e738282fb42b688fbe04b390bfb74cdd6b9fb2b586b301e639b",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11BB"
+        },
+        {
+          "declared": 1,
+          "did": "0x11C7"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004db2e",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "b448958fc8eaf7112f6aadf53f82e2f570ef971616d16edd25bf8288c5dd83e8",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11BC"
+        },
+        {
+          "declared": 1,
+          "did": "0x11C8"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "10c745ace5cc6a978580073b7215616ef66b0422c32778b76831050011183f41",
+      "body_size": 44,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004db32",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "bd17819d008e55eb990411d85bc9db10bb77592e532d8de8cc9ed5ec3a8f1687",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x11BD"
+        },
+        {
+          "declared": 1,
+          "did": "0x11C9"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "6155c74355da73ac2448842f4b620a1bb884dfcbc0e96a1f3fe599623b857f64",
+      "body_size": 72,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004db5e",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "b40d4b6bb204b4effc1838a76a694b87812aa839effc56040abdd4475366702f",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C02"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "74800f330a63d2fd63c186ce5d9eee06d67ebd9aca1a043d0dc183c730fc99d1",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dba6",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "bf66be3298ad10d139c11d4dc7640a40819e291647e5727d8a5487406680fe77",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C03"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "4f000f2c058c36afc16fda37f0cbea1df2aa1c8d1653fd2520dbd0e3752cb69c",
+      "body_size": 34,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dbd0",
+      "class": "direct_fixed",
+      "declared_len": 8,
+      "decompiled_c_sha256": "8ceed374b1a03647345f180914802d90a6144991beaf3b8f0b15c8ee48985ab8",
+      "dids": [
+        {
+          "declared": 8,
+          "did": "0x1C05"
+        },
+        {
+          "declared": 8,
+          "did": "0x1C0C"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 8,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e9097ac123ef12a770bd08737d9be4cdc8f9b63d241187c1f6c3f666d9cdebbc",
+      "body_size": 78,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dbf2",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "e095d75063e246aca1478020f6d17b2f3dd91720381db96548cab0489007c710",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C06"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "4b9a7dc63032edcea360e325579b1b77115c17f81c5708cd7cc3951ae692e998",
+      "body_size": 78,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dc40",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "373c681c7c7e1f11bb19273deb9a7377f3751ed4e86cd27de6aa97b90cbea3b7",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C07"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "c8cbb60f14f315d92f9abdde6b96d0c1c9170e74a97ff8e1c3770be1f96ed889",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dc8e",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "f5c98b252f6b95c9a389aa6b6faf31a7fce68be3fa10a7f8bb28f57ed21b1cdb",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C08"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e1613dcb66e76c7ec93f0e642d8b719f0046f3c7b6986a2cb0231cb22dd55b8a",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dcb6",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "bcd99a2e8dfe8c0725b60490bd6feaddd725f2282a1a102a973bcbfb39d7e6bd",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C09"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "db2e45b060ecefa185cf812a9aa61730758a0a1019642a324bb8a28075a2d145",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dcde",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "7295f3c5dffd8cdcaee467d45831c82e9fe1de0c7640d67f9fb7ee184bc09c07",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C31"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "175fa5d9fcfb260528a3ea872b652179bc6a72aac0f2efa0040231354af8c78c",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dd04",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "0b7760141379719e6fda719efc618982a04967ddccf9925b2ab364b4829fb6a2",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C32"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "0ac2b14acead9653216020202ed46e9d55b0c901dac01767d90f0d48c023cf80",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dd40",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "c3f7cc961dfc477499810b04a72a5ee50c2eb9f713ef77e8ba54c66614083363",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C33"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "f132ed554c1c3751645dc38bfec8df929efb7bd350a6b8eabf1cc95708e57d82",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dd68",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "f4f27ffcf31a1a8b085720cee2105b9c6939bd618dade39c9ec684ef2461de16",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C37"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "df12cd45cd9619eb9ff87becfabb13785051aca879a8f4baf4f9b4ec79d14790",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dd8e",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "138a7379947e95796a3869496a80a55c21a937f87240c21a395934d291faee75",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C38"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "3547f9e977c21211f92042dd6961c60512cb8dc41f2227515c37f38ff4bd807e",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004ddca",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "ce4e67d84692dee71a39ae19d5476360c7a8b8f9eee359d4391e8eb55d86f008",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C39"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "a3beaa4830f7956273d0064d5ba650d0c32fc7f9d2b79ea48765ffee06f2b750",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004ddf2",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "5c1daa4843cc46c770c8501d1a7be71fbbc9c2d3312ac85a683d268d3693f9f6",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C3D"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "f62bd4dbd3783bd66cb4f1d57f818f29f9436191331b589103ae89f8014d3f5d",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004de18",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "1b4becdba838b5e3c600472b20a2c2533bb2538c32ee8584347ab90af419df18",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C3E"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "cabcc9e9bb2a46ea501cde180957b905019e18048e6e8f8d6f4926c39e27288c",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004de54",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "1b1f1455800e4b06993bcca87be81fbf925f012d9cf91d92d29ebc373e12befe",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C3F"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e66cdc5ad520ddcab94c8d4bfe5e6196e7988c9a6f8a35bf878c25705ea6ac5a",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004de7c",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "bdba63e11dac1564304d605254f3794475e89ffce999fd75e552bb0bc64f2b90",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C43"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "abb4404c6d98a89563985a955487d9220d20b8d7b8a8ac2c088671c3b2dc032c",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dea2",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "e35eb703c1d28819d706a07936f8150d380a88a1b07bd4b2f01c7f10a654aa57",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C44"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "4074482afb53c0c218ad40bbb613c59097ef661a8da43265e3d69487e03f81b7",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dede",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "4aaa9665a9613ef82faa515526ea2d0c61017bc8334a42f23fd7194e1208bcd3",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C49"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "3e327334388e22a47efe62975a12f0887ec273e196bf20e31a019b1e24e24e38",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004df04",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "61e8fe9189f12cac29314c3ea6b71f6d2eed9cdb41b1cc30f0aab0783fcf03c9",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C4A"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "c60a3b67892b5a2fe01132555b3b09e9c390c1fad105045409327c6b7cfeab60",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004df40",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "7c8f878866a59bedad000016cc99902c841dc02bf10d93dd098f66c55793992d",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C4B"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "acc669a17e3629ae333d34d751073525a7648abd34b1ab74b95e689ff471ee5c",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004df68",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "9285fab1f50c29c428566ed3127ad72cdce03032a1d4260e1acc271320f7bd12",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C4F"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "aa014535f06df7ed5fcb270cc58944338497e9bbfa59a240fd017b6dc375dfcf",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004df8e",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "688bf248f958836b7a7d41762a9c3bb7237c814968cbf6734e56151498af87b6",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C50"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "93881c9377c43ef884491100ca8182a8c01eb087d897120c10c505d5da89a169",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dfca",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "e4b55a82ab920d6f670bcb5eb64bbcb3abceb002d610b7bb32cba61795db1dd8",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C51"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "9d6224afb03ccf6a1a312c4de659e93bfc7ed87d5e844dc668e647fb7434b3d4",
+      "body_size": 38,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004dff2",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "8089401e18936b23dc06d8c2664c6b7e160fdc0edad84ee4adee9f43b77beea6",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C52"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "fec45ee6bc00703681ab45bb8e40077fadd8a7e54162335ec99645458b093778",
+      "body_size": 60,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e018",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "cad4c81fc163de9c2ed30e848dce376181b921f78fa68338b859536d66f544eb",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1C53"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "d64f39e3b90a92b4b17cf69144cea031a14821a23290c9bab67e0f42e48d22a0",
+      "body_size": 44,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e054",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "431f962ca31e32ea21e63b658b45e249cb93df92d82bf892225ad1d450e43452",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C81"
+        },
+        {
+          "declared": 1,
+          "did": "0x1CAC"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "8e70ecc7940f52b59eb9bec3c2cf3cec396de8c0babcf05d3aa4b3385069433e",
+      "body_size": 44,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e080",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "2c16d42d6186c0656ae085134140c22a0ea17caa18b5a305e392a43c520d77b0",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C82"
+        },
+        {
+          "declared": 1,
+          "did": "0x1CAD"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "26c1469536b5ca47d7d230254d099af4e390e65d8f5f32d7e227d76aee3bf81b",
+      "body_size": 44,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e0ac",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "fa6ecbf2d5b1a05ac619b5823337a2b64916d1c369a0b367a7ab01f5c27381fc",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C83"
+        },
+        {
+          "declared": 1,
+          "did": "0x1CAE"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "9c448112b735385bc79ee0fcb231dc98d3e6cea6fe5bc63b0760432edc78ee70",
+      "body_size": 44,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e0d8",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "108cd4a10312e13c8486381da8e17adbe89ffa1ac733e7cf7a567b4c4f453a9b",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C84"
+        },
+        {
+          "declared": 1,
+          "did": "0x1CAF"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "22461343856dbd046272ba912883c0b31ecbd280d2ea7f847d4d4cb26da70903",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e104",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "6ba3e8177d0764d306faf997b87c24b880191e55159a274978b6ed0fc3b00e5b",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C86"
+        },
+        {
+          "declared": 1,
+          "did": "0x1CB0"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "42771aef2561a6c2ec9d63c5088187250332c6bc06bc34c88ce0ab3e6241abc5",
+      "body_size": 104,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e12c",
+      "class": "direct_fixed",
+      "declared_len": 7,
+      "decompiled_c_sha256": "87da0d2abe464d4de77cf01c7807b3f256abebea482687f00ac2fffe5a8a4746",
+      "dids": [
+        {
+          "declared": 7,
+          "did": "0x1C87"
+        },
+        {
+          "declared": 7,
+          "did": "0x1CB1"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 7,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e194",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "f271c2cecbb32ea1ede5459fea0aae210337a20d748ad214359dd23234fef7f8",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C99"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e198",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "54519e0ebffec45f2305090d1bfa445f90732748e5222566c11b35f9d0cae7cf",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C9A"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e19c",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "6c7df987ea215df8e801a5f22bf4829813a9a15de3f125209af46457c9a609c3",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C9B"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e1a0",
+      "class": "success_stub",
+      "declared_len": 7,
+      "decompiled_c_sha256": "20d84aa03d3bbe7833165424fcb9fb690ce4cc9487cdc5e7c76494fb958b78e1",
+      "dids": [
+        {
+          "declared": 7,
+          "did": "0x1C9C"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e1a4",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "3abaf203e1126babf1d2fbff14a8a91ccbcab7ee38a421744e3eb0dd4e1731ef",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C9D"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e1a8",
+      "class": "success_stub",
+      "declared_len": 7,
+      "decompiled_c_sha256": "a24d7922ec0ebc5e5636c173aab34a0038d1765d5da73db405cec727c26d9178",
+      "dids": [
+        {
+          "declared": 7,
+          "did": "0x1C9E"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e1ac",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "4bcac6739d53b36cdc6fd2de24111452ff727faa230dc167eef9ce6f6fc57b0a",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1C9F"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e1b0",
+      "class": "success_stub",
+      "declared_len": 7,
+      "decompiled_c_sha256": "30d2377542094cca07ffab506dbfc9e3becf521ddb44f6dcaf7ce8f68bb84cee",
+      "dids": [
+        {
+          "declared": 7,
+          "did": "0x1CA0"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "0495363d64188f20cfb4691429b20846231c15d257be1cb98420a32fe4f128f2",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e1b4",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "ffe597ccd44d68675e6d441e46c86e964c9b7161804c3ba911950cb46dfefaa5",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1CA1"
+        },
+        {
+          "declared": 1,
+          "did": "0x1CC0"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "71a9e89af99db31b7379ef1fdcd51e851c021c9479895b841e1653beeda2d5d1",
+      "body_size": 102,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e1dc",
+      "class": "direct_fixed",
+      "declared_len": 7,
+      "decompiled_c_sha256": "62b91715433bd6f20d85b4326e5319bc7bcd18dbb75df68f2ce6a020b4d3990d",
+      "dids": [
+        {
+          "declared": 7,
+          "did": "0x1CA2"
+        },
+        {
+          "declared": 7,
+          "did": "0x1CC1"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 7,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "b6e172e949c4f4b0fdaa11da1856b51e732c94fca97bc04335e01fe6dbc1f467",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e242",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "7c65875801b89962f3fd7a2b1b2d96cc463a70e4c40946748241d680eba2685b",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1CA3"
+        },
+        {
+          "declared": 2,
+          "did": "0x1CC2"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "c4118b6b899a4dd0987725d6117d60dfedf23c51b16c372d3c96d2dbed8a0b34",
+      "body_size": 50,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e26c",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "f5487758a84bebfbf63e70783dbc832ab667db1b26b81c3e05b2b12c15dc7b5e",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1CA4"
+        },
+        {
+          "declared": 2,
+          "did": "0x1CC3"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "93fab90e0f106e4c6188ef10c3e90167dc3d14adea11e9c3ac775712807b892d",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e29e",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "444568c91ae5663110087868ea4207775e651ce095e935917415e8257174f6ba",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1CA5"
+        },
+        {
+          "declared": 1,
+          "did": "0x1CC4"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "190e45de5442bd87685776cc638048ef936f12c68c00995018aaf742a5c29306",
+      "body_size": 102,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e2c6",
+      "class": "direct_fixed",
+      "declared_len": 7,
+      "decompiled_c_sha256": "f562126e1d5d51845c4ee4885a0733a21e9e9ac2e33f60e823ef162bab7a3f0c",
+      "dids": [
+        {
+          "declared": 7,
+          "did": "0x1CA6"
+        },
+        {
+          "declared": 7,
+          "did": "0x1CC5"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 7,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "c959c41ed7f5e41bd69a61d83ce8e5aa138959db17d5dfe538a280939c4956de",
+      "body_size": 42,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e32c",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "67517025d590c236dda6e41464259536ba53c26ed47a102780770acf8ce1edb7",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1CA7"
+        },
+        {
+          "declared": 2,
+          "did": "0x1CC6"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "05d184f8cc37c5013695c77496ec5d201eced52b5badb91f0b00da49ecf6544a",
+      "body_size": 50,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e356",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "af13e6b66530d864b6d7127b26766ebaa44d72887248894362efe167c0334400",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1CA8"
+        },
+        {
+          "declared": 2,
+          "did": "0x1CC7"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "c6ca4eef696454a4432ffe2ef2ab99c62564b55f86646e39d4231a6f86d00844",
+      "body_size": 58,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e388",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "7dd8a994d9540f2bdc6e75a2814e2a8460cf0a5b149818e65cce142b313742d5",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1CA9"
+        },
+        {
+          "declared": 2,
+          "did": "0x1CC8"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "1fd0d48f5a45037590890a2c42a896c09e3776b4caff61dcb0b366d264566d89",
+      "body_size": 58,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e3c2",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "2071e2026ffd848dd8f16f42bc971d7f1f91c852835e9efa4cd7dbd64049a600",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x1CAA"
+        },
+        {
+          "declared": 2,
+          "did": "0x1CC9"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "ff88a3ca4305d6a082fb6e123d7bb55b64040be5bb3b296f338638f31c662272",
+      "body_size": 16,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_000518f6; all writes bounded by param_2: clear loop `iVar4 < (param_2 & 0xffff)`; each 3-byte DTC triple and its 1-byte status store are behind `uVar5 + 3 - (param_2 & 0xffff) < 0`",
+      "callback": "0x0004e3fc",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "27834cee2fa11b4c6007a28aadf3045250da40333a39e6f476b9627c334fdf29",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0x1CAB"
+        },
+        {
+          "declared": 32,
+          "did": "0x1CCA"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e40c",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "c33965fef8d3f68c73e203e8e23c43a8445cf83b6fb81a239c27169914594d02",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CF4"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e410",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "d3bd3e2f37fce8caa87fea781611df421a05d36c1d515090427db31da28788bc",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CF5"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e414",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "fcdea611685a4b2660286828eb454108cc58b2e8ef2c3d17d106e866fc4a3792",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CF6"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e418",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "2c2d60549832ebfa2741446fd9c111adf3a7007f6886fe3f36df7a93e8cf4d24",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CF7"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e41c",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "820f044cbb69571332bb6dc85d9c1750f88cea7331b3388957d652677a739c8e",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CF8"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e420",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "47e5c3b471ed0f6f76d8e85a0eb2de8063fbc732f1653ce72fedd49bef7792ac",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CF9"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e424",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "f2f8e39c514c9de0b906797b9551d53190e6db3d51397636b6c068d33790cb5f",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CFA"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e428",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "b964f538a435a50940568702d7300541c8ab0e998fd39f4b55ffb58502944bbb",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CFB"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e42c",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "52e7b33e879e830b224e4e725647fd99b83bddf43b6c782c530f46de1df8b739",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CFC"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e430",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "854c1a52e01e8f47bc76df944e9a0c49c094a2ffe2f0c33a0c2c233ea0cfd001",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CFD"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e434",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "b76092c314607273127d1256f6329bb2eaaf6fe55ca5b4757d04346e2b5a305e",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CFE"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e438",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "0279ef2142689a335d04986e597cc796ee6edef81c03f88202453b09a2e95293",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1CFF"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e43c",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "76eea9e1e2364fa13ed4727470e3cc0bf69a5544c3af502a1448242b810ed887",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1D01"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e440",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "92d885a34e1677def4882dbc952798e3a20c9951bfd2539034e885647e59f8fa",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1D02"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e444",
+      "class": "success_stub",
+      "declared_len": 45,
+      "decompiled_c_sha256": "a06d41c4e657f5e77fad22f67dd62a5c6b16381410a2e184aad89f7c737dbc75",
+      "dids": [
+        {
+          "declared": 45,
+          "did": "0x1D03"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "297867412f98915495fc1b2fa6b9dff2a50bd7ac9d1d10c108e1bab525babbb0",
+      "body_size": 58,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e448",
+      "class": "direct_fixed",
+      "declared_len": 8,
+      "decompiled_c_sha256": "4b3e5d28433806790ebc2fffad91da989836f65ada2217978dd87cf8c2df46f3",
+      "dids": [
+        {
+          "declared": 8,
+          "did": "0x1F01"
+        },
+        {
+          "declared": 8,
+          "did": "0x1F02"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 8,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e482",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "78c072c8cb626bcb26f67f44c11a717df85918fa3cdc9c085721401e5e2614da",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1F03"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e486",
+      "class": "success_stub",
+      "declared_len": 1,
+      "decompiled_c_sha256": "389eac83e4b11ca200aa91979603511a1fde7a5f26339e6dbc1667721b634e08",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x1F04"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "98ba4113780d71a2f8b0c64c67cc981dfb193a671a54ca50e90b64b4eddfe865",
+      "body_size": 32,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e48a",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "ab1415b2e978b38e7ddcfedc4b0ba98e2cb99fd34912a4c4e0c79d09a6cc52a2",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2001"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "ec7df60c01e49bc1594cfe1cf5dceb7411edf4932f9f2f8971b3ef9380b8aa09",
+      "body_size": 40,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e4aa",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "f570b8da2233b3ff6034a3ef5996aba61f78d5aa7d6a2b3c819c1e3235b7d7da",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2002"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "85c4a0c6ff3596c0d0213d4243a5c90412f9612187c6e6aefd0232ac7e385bf2",
+      "body_size": 58,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e4d2",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "a9f5a901a112f60e89612393546e894c720bb83cac56adca216e17b903721e18",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2003"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "76db49e4b0289af7261561d5d0a53ba4f861aa5da7c52af03cba7ee51586f06a",
+      "body_size": 58,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e50c",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "639d66d917d1f49183351cdc6071d05f1c8dea7d90dc5cf498825bb620628e3e",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2004"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "afad8c31b6fa24eb1f566022999cdb3f195ce6448c21104fd672d969279d54d4",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e546",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "76cca82240350a286e3008f7251d465dd7cfcb592619cae6698adc5bf01717a9",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2005"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "c9176fd357727dad3c16db463458dbab7eb1b27dd7d8f8868e8559792aa9c3ef",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e57c",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "175bbdc94132a2ef9f32c6dab06f1df75ead7aa543f5d6167a0506c8dea5975d",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2006"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "0b54d951680649c5d3b9827b2abbd567a94d49e0e544a298d69c4fbb0d27a3c5",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e5b2",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "a86a2a8b02750be58442fc44ab5d81a50eca82d10b00197a6e248c7bd8e08c3f",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2007"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "697ae47382bac7a578c27fdbdc4f668cc7718d5d7766e5153bb6535149ff3954",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e5e8",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "c3f4bebdebdd8e6fd03f7b9dbefe6b7a209a6e2396ee4887cb3a70d7d17b4c49",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2008"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "359a15ceeafb58326b024d776da17e2fb29b21fbf8b7034b973f75ebcf64456a",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e61e",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "72bd1648fd5c4a6f642944f8d5d201531f86428f7ad59c5fce6d25eb66e96850",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2009"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "29a050dd80cdca7ff4d63b4bfb67839ae56d298e72bafa9a8aa4b7f4c4a960dd",
+      "body_size": 128,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e654",
+      "class": "direct_fixed",
+      "declared_len": 3,
+      "decompiled_c_sha256": "487301433cff126a1acca189aa90adb5dcfca8a21f1005501dcc3749ad1c879b",
+      "dids": [
+        {
+          "declared": 3,
+          "did": "0x200A"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 3,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "05b83e064cece002fb809f21290a1741e1ed251ade2b1dc84331cedb1b51b366",
+      "body_size": 160,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e6d4",
+      "class": "direct_fixed",
+      "declared_len": 4,
+      "decompiled_c_sha256": "aa0a167c2f821572ff37bb9b5821ea35777e7bda94bb48927bf097862766995d",
+      "dids": [
+        {
+          "declared": 4,
+          "did": "0x200B"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 4,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "259db8cadf884c0e6409efcb26ef1a9793b3c1ac81dd3f05b1766bc5b6e56d76",
+      "body_size": 58,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e774",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "47e3ceeb6eb95ac8c66bc5a7a0914fd18fa101c7de696c3364c429a453cb06c2",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x200C"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "fe4e18d3fe0a0c864fd158944ebd983c6450b566bae2ab918df494804ff3e7e6",
+      "body_size": 54,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e7ae",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "c98636833640887d3018849afbeeff58fb3f3bae07cbb30a2949784e0f0f0618",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x200D"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "1cfe02fd7fbbf89aa8246c799f704609a62c731c5a7739ce300b8461724b5216",
+      "body_size": 58,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e7e4",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "d673d72581e94e6735d69c47d56eca43b2f5d1bb372741014df57d944fa2621a",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x200E"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "4c19b4a0c0bb891e21e962223be61564c34615e2b72cbe17cda3e0da74683ee7",
+      "body_size": 58,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e81e",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "9a9b278c5207f038b1cf25a057cca493cdf5222726345a8fcd53d4d34a6c4fdb",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x200F"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "d6cf899fd2897f5c74c674958accd0b875326f723ba30e9e599111d219f36360",
+      "body_size": 74,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e858",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "cd0276b7fb3cf0ebdaa88649925708ad92137b1f3fad15fb05bf3da19b49ccdd",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2010"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "f9713f017c4845b45cc38907442dbdb2f699d4f37189a57026f26a4bf69db9fa",
+      "body_size": 20,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e8a2",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "ca815d1b3859090c9ab938009de4838c9697a2416cbc3bb593bea1ea32026f08",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2012"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "2bffaee0514eef440a91e78b49c3f267c02d41a2c51b9fd9a1314fe892f22756",
+      "body_size": 20,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e8b6",
+      "class": "direct_fixed",
+      "declared_len": 2,
+      "decompiled_c_sha256": "254a3ae15a7cbd19d91df6473f1c2ac6da31b3964189b7e5df28d21acea6eea5",
+      "dids": [
+        {
+          "declared": 2,
+          "did": "0x2013"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 2,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "4b530711bdb60f95ebf98b7fda9959f7996012c1f9e9e29491ec7a1c86078451",
+      "body_size": 18,
+      "bound_source": "fixed-offset stores (incl. pinned 2/4-byte LE store helpers) only",
+      "callback": "0x0004e8ca",
+      "class": "direct_fixed",
+      "declared_len": 1,
+      "decompiled_c_sha256": "79577afa0a1475f344d85f4f291dd0a8da324a0e5157248393640964deb3d31b",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0x2014"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e8dc",
+      "class": "success_stub",
+      "declared_len": 16,
+      "decompiled_c_sha256": "58b96ec17e4a6f7e36bf5e97d0e844ddfa3d6be9408a69b997c13632c6685435",
+      "dids": [
+        {
+          "declared": 16,
+          "did": "0x2030"
+        },
+        {
+          "declared": 16,
+          "did": "0x2031"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "bound_source": "body is exactly `mov 0,r10; jmp lp` (00 52 7f 00): no destination write",
+      "callback": "0x0004e8e0",
+      "class": "success_stub",
+      "declared_len": 17,
+      "decompiled_c_sha256": "bcbf08468e9973de9311bb8858900ab6339e8b14eceb0a77e157c64a5dd5f86a",
+      "dids": [
+        {
+          "declared": 17,
+          "did": "0x2032"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 0,
+      "write_relation": "zero"
+    },
+    {
+      "body_sha256": "418780040592312bedec13491143bf36ddfee1f3350444a810bf6144b0429c49",
+      "body_size": 38,
+      "bound_source": "application F181: `*dest = 1` then a 16-iteration copy of the software-ID record at dest[1..16] (declared 17)",
+      "callback": "0x0004e8e4",
+      "class": "fixed_extent_loop",
+      "declared_len": 17,
+      "decompiled_c_sha256": "afbc078bce1b88c8132d28e3d71a5a73f06f1db3a7771369c937c12848c61ebd",
+      "dids": [
+        {
+          "declared": 17,
+          "did": "0xF181"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 17,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "959bf60b1450c19a7620306576aa5067137c74b172af19666dcea4c219072acb",
+      "body_size": 14,
+      "bound_source": "forwards its argument registers to the Dcm session API 0x8FDDE, which tail-calls 0x907E6; the only destination write in that chain is the single-byte store `*param_1 = *(undefined1 *)(puVar1 + -0x17b3)` (declared length 1)",
+      "callback": "0x0004e90a",
+      "class": "register_delegate",
+      "declared_len": 1,
+      "decompiled_c_sha256": "fb3e5d4a75b20113055aada44f0647d94fdfedd1f686cf527e027f40ed8e6701",
+      "dids": [
+        {
+          "declared": 1,
+          "did": "0xF186"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 1,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "275f0fb29b3f55d82259190443df083a11f558758a0a2e4066c3297710da861c",
+      "body_size": 118,
+      "bound_source": "checkpoint_object 0x207 serial: both the copy loop and the '?'-fill loop are bounded by `(param_2 & 0xffff)`, i.e. the declared length forwarded by the caller",
+      "callback": "0x0004e918",
+      "class": "declared_bounded_loop",
+      "declared_len": 20,
+      "decompiled_c_sha256": "e70641e842b38962b91dc908fcc2445406061dd75ee5973727c23232eb517e32",
+      "dids": [
+        {
+          "declared": 20,
+          "did": "0xF18C"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 20,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "3b4f29c5b091241516131867bccfd29b2b1cfbeeb86366574bc931a24af9dd49",
+      "body_size": 16,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_0004c530; all writes bounded by param_2: clear loop `uVar4 < (param_2 & 0xffff)`; every OR write guarded by `uVar4 < (param_2 & 0xff)`",
+      "callback": "0x0004e98e",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "d6f314e11d6600ef7e08eadc216b23405c8bd51db599e55962bd9647d978843a",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0x0101"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "0ac6d66e1cd315f3d9679d818e4ee8231015de28d86722f5b86f8c510f06115f",
+      "body_size": 24,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_0004c604; all writes bounded by param_3: writes at dest param_2; clear loop `uVar3 < (param_3 & 0xffff)`; every OR write guarded by `uVar7 < (param_3 & 0xff)`",
+      "callback": "0x0004e99e",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "6858d2036b0b288b825ad8ea78efce894545588bff143c71e7d807fa4db88a85",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0x0100"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "2944c9a40a1333c8224d45e7eb19fa3c535464030aa0b299928e5de3d532e5d6",
+      "body_size": 24,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_0004c604; all writes bounded by param_3: writes at dest param_2; clear loop `uVar3 < (param_3 & 0xffff)`; every OR write guarded by `uVar7 < (param_3 & 0xff)`",
+      "callback": "0x0004e9b6",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "6696d1b1fa67463978ded13658211395d37bf40fdb5e42968f956d0ae22ff8ed",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0x0200"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "c7c5b56ae3e6a99b66eb27b3e242d1cedb88ee1ae710a1ad499358b820914156",
+      "body_size": 24,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_0004c604; all writes bounded by param_3: writes at dest param_2; clear loop `uVar3 < (param_3 & 0xffff)`; every OR write guarded by `uVar7 < (param_3 & 0xff)`",
+      "callback": "0x0004e9ce",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "f538df682dbd7f2ade72a080d8bcc22ceff5b0a99d9c40d5482bbe22d15ac073",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0x1000"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "7c8761a0637325efcac5486dae2bbfb36f0173709e7bb6cd4cd62a874bf46631",
+      "body_size": 24,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_0004c604; all writes bounded by param_3: writes at dest param_2; clear loop `uVar3 < (param_3 & 0xffff)`; every OR write guarded by `uVar7 < (param_3 & 0xff)`",
+      "callback": "0x0004e9e6",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "61c44093141e7f175a93c5e90c504be6a488f8ec09e9822b268373e22a056ca6",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0x1100"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "6c8416b4bc7795ce7783687e06429b89a6b56c2da010429ee474e041b1334b9b",
+      "body_size": 24,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_0004c604; all writes bounded by param_3: writes at dest param_2; clear loop `uVar3 < (param_3 & 0xffff)`; every OR write guarded by `uVar7 < (param_3 & 0xff)`",
+      "callback": "0x0004e9fe",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "6de5201d6b788de05872b1d66a31b2d35300d19048e7ec440f6e3ef1a8e18b06",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0x1C00"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "5504ee41ebe470cce69461a90f435e6df7b23b4b50e737de144e7eeb17f19f84",
+      "body_size": 24,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_0004c604; all writes bounded by param_3: writes at dest param_2; clear loop `uVar3 < (param_3 & 0xffff)`; every OR write guarded by `uVar7 < (param_3 & 0xff)`",
+      "callback": "0x0004ea16",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "d2c5f3c556e184439b21cbea86ca4bb94a8a23dbb806a2bd9045406de86229ef",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0x1D00"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "1bdb1933520afb68aca62bf9546f54592e51d61762c97355c60c7a9acfb456eb",
+      "body_size": 24,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_0004c604; all writes bounded by param_3: writes at dest param_2; clear loop `uVar3 < (param_3 & 0xffff)`; every OR write guarded by `uVar7 < (param_3 & 0xff)`",
+      "callback": "0x0004ea2e",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "b55fd58f7e94306a7eb69e4fbab14c4357b7c5807d02aa1882acaf5e74bff920",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0x1F00"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "1a4c30135fa101a313712a9ae12a0880e43c84758c07a60686074da86798fe5b",
+      "body_size": 24,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_0004c604; all writes bounded by param_3: writes at dest param_2; clear loop `uVar3 < (param_3 & 0xffff)`; every OR write guarded by `uVar7 < (param_3 & 0xff)`",
+      "callback": "0x0004ea46",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "c1c1e52b17f70533d6d7d753442ef9e1e6b8b4e426209bf9289f2779f005e87e",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0x2000"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    },
+    {
+      "body_sha256": "01a0c3a0ed6bd85d0c3b99ec55a3f57ac02351cf342532640d9d0f35ec4a458e",
+      "body_size": 24,
+      "bound_source": "forwards (dest, declared_len) to direct_call_target_0004c604; all writes bounded by param_3: writes at dest param_2; clear loop `uVar3 < (param_3 & 0xffff)`; every OR write guarded by `uVar7 < (param_3 & 0xff)`",
+      "callback": "0x0004ea5e",
+      "class": "engine_declared_bounded",
+      "declared_len": 32,
+      "decompiled_c_sha256": "1261f4d207224e13a27228fc839a1b72aa9a9dd898be1fe4e585f7fbd427c5a8",
+      "dids": [
+        {
+          "declared": 32,
+          "did": "0xF100"
+        }
+      ],
+      "exceeds_declared": false,
+      "max_write_extent": 32,
+      "write_relation": "exact_fit"
+    }
+  ],
+  "convention": {
+    "async_path": "pending path copies exactly the declared count bytes from a routine-owned buffer through 0x8A32A (uStack_2e = count slot)",
+    "count_initialization": "0x8A374 writes the configured length word (DID record +2 via 0x8A31E -> 0x4C81A) into the count slot BEFORE invoking the producer; the render loop 0x9429E advances by that slot, so the emitted count is configuration-owned, never producer-returned",
+    "dispatch": "0x4CB8A calls DID-table record+4 as callback(dest, declared_len)",
+    "pinned_bodies": {
+      "0x0004c81a": "5169fcc5a9e6f4799c1714109bb13eed2d0710c32cb67103fbf664a60d4e9f9a",
+      "0x0004cb8a": "28856781365cd615d4f5bc16605af83efc7098321c21e290158bf4cf53b1c05f",
+      "0x0008a31e": "a77a507740a47bac1347d4aa9b8c6e89bc36cd60a9b79ac2f1620a6af2c08b17",
+      "0x0008a374": "0212497b4b74bf09682aeebdaabab5c5f60adb04bddd84e5f9094b276c9cd80f",
+      "0x0009429e": "e8d48150f644cfec8ae372f5688d3ccb9cc0f973266d178050a18c77f6deb022"
+    }
+  },
+  "did_table": {
+    "base": "0x2941c",
+    "rows": 242,
+    "rows_with_producer": 242,
+    "unique_producers": 196
+  },
+  "exceptions": [
+    {
+      "c_bounds": [
+        "iVar4 + -9",
+        "*(undefined1 *)(param_1 + 10) = 0;",
+        "*(undefined1 *)(param_1 + 0xb) = 0;"
+      ],
+      "callback": "0x0004ccc4",
+      "class": "fixed_extent_loop",
+      "dids": [
+        261
+      ],
+      "extent": 12,
+      "note": "checkpoint_object 0x204 (magic 0xA55A5AA5): 10-iteration copy loop at dest[0..9] plus fixed zero stores at dest[10] and dest[11]; invalid-record branch fills dest[0..9] with '?' instead; both loops trip-count 10 (`iVar4 + -9`)",
+      "raw_pins": [
+        "a55a5aa5",
+        "209e3f00"
+      ]
+    },
+    {
+      "c_bounds": [
+        "iVar4 + -0xf"
+      ],
+      "callback": "0x0004cd74",
+      "class": "fixed_extent_loop",
+      "dids": [
+        267
+      ],
+      "extent": 16,
+      "note": "checkpoint_object 0x20A (magic 0xA55A5AA5): single 16-iteration copy loop at dest[0..15]; invalid-record branch writes nothing (under-write only, error 5)",
+      "raw_pins": [
+        "a55a5aa5"
+      ]
+    },
+    {
+      "c_bounds": [
+        "iVar3 + -0xf",
+        "param_1[iVar3 + 1] = (&application_software_id_record_1)[iVar3];"
+      ],
+      "callback": "0x0004e8e4",
+      "class": "fixed_extent_loop",
+      "dids": [
+        61825
+      ],
+      "extent": 17,
+      "note": "application F181: `*dest = 1` then a 16-iteration copy of the software-ID record at dest[1..16] (declared 17)",
+      "raw_pins": []
+    },
+    {
+      "c_bounds": [
+        "FUN_0008fdde();"
+      ],
+      "callback": "0x0004e90a",
+      "class": "register_delegate",
+      "delegate_chain": [
+        [
+          "0x0008fdde",
+          "if (param_1 == 0)",
+          "FUN_000907e6();"
+        ],
+        [
+          "0x000907e6",
+          "*param_1 = *(undefined1 *)(puVar1 + -0x17b3);",
+          null
+        ]
+      ],
+      "dids": [
+        61830
+      ],
+      "extent": 1,
+      "note": "forwards its argument registers to the Dcm session API 0x8FDDE, which tail-calls 0x907E6; the only destination write in that chain is the single-byte store `*param_1 = *(undefined1 *)(puVar1 + -0x17b3)` (declared length 1)",
+      "raw_pins": []
+    },
+    {
+      "c_bounds": [
+        "iVar3 - (param_2 & 0xffff)",
+        "= 0x3f;"
+      ],
+      "callback": "0x0004e918",
+      "class": "declared_bounded_loop",
+      "dids": [
+        61836
+      ],
+      "extent": null,
+      "note": "checkpoint_object 0x207 serial: both the copy loop and the '?'-fill loop are bounded by `(param_2 & 0xffff)`, i.e. the declared length forwarded by the caller",
+      "raw_pins": [
+        "a55a5aa5",
+        "209e3f00"
+      ]
+    }
+  ],
+  "provenance": {
+    "corpus": "data/generated/decompilations.jsonl",
+    "corpus_executable_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+    "corpus_function_count": 6376,
+    "corpus_inventory_sha256": "8921b64db16f13ad588e661fc45d13bac0986da214aeec9f3eb0aa99190d9cac",
+    "firmware": "firmware/RH850_P1M-E_CodeFlash.bin"
+  },
+  "question": "can any configured RDBI producer callback write beyond the declared per-DID length it is handed?",
+  "schema": "rdbi-emitted-write-audit/1",
+  "scope": "Sienna EPS 8965B4512000 application image",
+  "summary": {
+    "classes": {
+      "declared_bounded_loop": 1,
+      "direct_fixed": 134,
+      "engine_declared_bounded": 11,
+      "fixed_extent_loop": 3,
+      "register_delegate": 1,
+      "success_stub": 46
+    },
+    "classified": 196,
+    "exact_fit": 150,
+    "exceeds_declared": 0,
+    "max_declared": 45,
+    "max_extent": 32,
+    "under_nonzero": 0,
+    "zero_write": 46
+  },
+  "under_writers_non_stub": []
+}

@@ -159,6 +159,7 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   nonblank ICU-S storage. The current CPU-visible dump contains only `00/FF`;
   public P1M-E fault injection proves ordinary flash readout, not key-array
   access.
+- **Bank-0 command-8 production role and safe dynamic confirmation (SECOC-047/048).** Static firmware closes the CAN `0x13..0x1A` assembly and completion-misattribution mechanics. What remains useful is dynamic provenance, not random stimulation: determine whether RID `0x100E`/those CAN IDs occur during legitimate provisioning, whether any external monitor exposes bank-0 terminal state, and whether dealer tooling treats RID `0x1010` status `02` with zero proof as success. Reproduce the race only on a disposable/matching unit with a legitimately captured authenticated update package and complete recovery plan; preserve F181, route, M1–M5 hashes, timing, DTCs, and post-run key state. Do not synthesize command-8 packages on the only original ECU.
 - **Application command-5 signing capability — dynamic discriminator only.**
   Stock RoutineControl `31 01 10 0F` now supplies bank-1 activation, and stock
   `0x68B42 -> 0x88350 -> 0x87CCC` supplies selector-4 command-5 plumbing; the
@@ -414,16 +415,19 @@ prior claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   baseline-active EPS application Tx IDs are suppressed by `28 01 01` and prove
   all recover after `28 00 01`. This is an availability characterization, not a
   candidate steering interface.
-- **RDBI per-callback emitted-count provenance (MEM-SAFE-006 residual).** The
-  one-DID preflight and the shared configured length source bound the declared
-  response length, and no producer whose emitted count exceeds its declared
-  width has been recovered; but an exact emitted-count proof for all 196 RDBI
-  producer callbacks is not complete. Closing this residual would upgrade the
-  bounded negative to a verified closure.
 - **Exploit-interest cohort consumption (SWEEP-008).** The ranking pipeline
   produces anchored candidate cohorts (`pre_sa_write`, `computed_store`,
-  `selector_dispatch`, ...). The first serious cohort is dispositioned; the
-  remaining ranked candidates are review input, not absence claims.
+  `selector_dispatch`, ...). The first serious cohort and the 2026-08-15
+  second batch (highest-ranked unresolved candidates after excluding the
+  XCP/RDBI/RMBA/SA/boot-RC families and parallel command-8 work) are
+  dispositioned in `data/exploit_interest_reviewed_candidates.csv`; the
+  verification gate requires every ingress-reachable top-15 cohort member to
+  carry a disposition there. Rank-3 `0x00068368` is now promoted to
+  SECOC-047/048 by the parallel bank-0 audit; the other fresh batch-2 reviews
+  are bounded negatives or duplicates. Remaining `open` ledger rows: `0x00058404`/`0x0007c7c2`
+  (no recovered ingress root) and `0x000539a8` (event-log cluster adjacency
+  unverified). Beyond the ledger, the remaining ranked candidates are review
+  input, not absence claims.
 - **Cross-calibration structural triage of future P1M-E images.** The offline
   structural fingerprint scanner (`tools/analyze_rh850_codeflash_structure.py`)
   now flags boot-CRC geometry, RAM-exec/MEM-SAFE-001 package anchors, and XCP

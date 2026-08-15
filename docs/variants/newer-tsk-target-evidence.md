@@ -33,7 +33,11 @@ The machine-readable contract is
 with a redacted all-missing specimen in
 [target-artifact-manifest.example.json](target-artifact-manifest.example.json).
 Instantiate it only under an ignored path such as
-`build/target-evidence/target-artifacts.local.json`.
+`build/target-evidence/target-artifacts.local.json`. When a CodeFlash image is
+in hand, bind it first with the offline readiness checker
+([../tooling/variant-acquisition-readiness.md](../tooling/variant-acquisition-readiness.md)):
+the readiness artifact records geometry, SHA, run-record provenance, and the
+resolver handoff state that this bundle then pins by hash.
 
 ## Claims that must be re-proved
 
