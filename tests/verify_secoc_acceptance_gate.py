@@ -1,35 +1,15 @@
 #!/usr/bin/env python3
-"""Deterministic verification of the SecOC acceptance gate structure.
+"""Deterministic verification of the corrected SecOC acceptance-gate semantics.
 
-This suite pins the TWO-LEVEL gate structure that controls whether a secured
-PDU is delivered as authenticated or enters the failure/release path:
+The receive path has two distinct gates:
 
-  Gate 1 (0x8E726): verify_worker completion status
-    — "did the verification worker run without error?"
-    — filters out format errors, timeouts, submission failures
-    — does NOT distinguish MAC match from mismatch
+  Gate 1 (0x8E726): verify-worker completion status.
+  Gate 2 (0x8E69E..0x8E6C8): ICU-S CMAC verification result.
 
-  Gate 2 (0x8E69E): MAC verification result from FEBE555C
-    — "did the MAC actually match?"
-    — the REAL acceptance gate for authenticated delivery versus the
-      failure/release path
-
-Pre-existing evidence in verify_secoc_security_properties.py already pins:
-  - The unique load of FEBE555C at 0x8E69E (instruction bytes)
-  - Its booleanization
-  - The false-result branch avoiding authentic-PDU delivery (instruction bytes)
-
-This test adds:
-  - Both gate addresses and their instruction encodings
-  - The call edges in the dispatch path (jarl-decoded)
-  - Profile coverage
-  - The distinction between job-completion polling (FEBF13BE/BF) and
-    MAC result (FEBE555C)
-
-NOTE: The current deterministic test does not yet pin the complete argument
-and indirect-dispatch dataflow from secoc_submit_cmac_verify through the
-crypto driver to the FEBE555C write; this portion remains recovered from
-Ghidra decompilation. See §9.1 of application-chain.md for discussion.
+The command-7 KAT pins the Gate-2 result polarity: zero is verification OK;
+nonzero is not verified. Gate 2 booleanizes `(result != 0)` into r26, then
+`cmp r0,r26; bne mismatch`. Therefore result==0 falls through to the PduR/COM
+delivery chain, while nonzero branches to failure/retry bookkeeping.
 """
 from __future__ import annotations
 
@@ -40,18 +20,16 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 
-ok = 0
-bad = 0
+ok = bad = 0
 
 
 def check(name: str, condition: object, detail: str = "") -> None:
     global ok, bad
-    if bool(condition):
-        ok += 1
-    else:
-        bad += 1
+    passed = bool(condition)
+    ok += int(passed)
+    bad += int(not passed)
     suffix = f" ({detail})" if detail else ""
-    print(f"[{'PASS' if condition else 'FAIL'}] {name}{suffix}")
+    print(f"[{'PASS' if passed else 'FAIL'}] {name}{suffix}")
 
 
 def u16(off: int) -> int:
@@ -63,146 +41,131 @@ def u32(off: int) -> int:
 
 
 def jarl_target(call_site: int) -> int | None:
-    """Decode an RH850 jarl instruction's target address."""
-    hw1 = u16(call_site)
-    if hw1 != 0xFFBF:
+    w0, w1 = struct.unpack_from("<HH", CF, call_site)
+    if ((w0 >> 6) & 0x1F) != 0x1E or (w1 & 1):
         return None
-    hw2 = u16(call_site + 2)
-    disp = hw2 & 0x1FFF
-    if disp & 0x1000:
-        disp -= 0x2000
-    return call_site + disp
+    reg2 = (w0 >> 11) & 0x1F
+    if reg2 == 0:
+        return None
+    high = w0 & 0x3F
+    if high & 0x20:
+        high -= 0x40
+    return call_site + (high << 16) + w1
 
 
-def find_jarls(start: int, end: int) -> list[tuple[int, int]]:
-    results = []
+def find_jarls(start: int, end: int) -> dict[int, int]:
+    out: dict[int, int] = {}
     for off in range(start, min(end, len(CF) - 4), 2):
-        t = jarl_target(off)
-        if t is not None:
-            results.append((off, t))
-    return results
+        target = jarl_target(off)
+        if target is not None:
+            out[off] = target
+    return out
 
 
-# =====================================================================
-# 1. Gate 1: verify_worker completion check (0x8E726)
-# =====================================================================
-print("== 1. Gate 1: verify_worker completion at 0x8E726 ==")
-
-check("FUN_0008E700 calls secoc_rx_verify_worker at 0x8E720",
-      jarl_target(0x8E720) == 0x8E4BA)
-
-# Gate 1 instruction bytes: cmp r0, r10 + bne (4 bytes total)
-check("Gate 1 at 0x8E726: 'cmp r0, r10' (e051) then 'bne' (ea05)",
-      u16(0x8E726) == 0x51E0 and u16(0x8E728) == 0x05EA,
-      f"{hex(u16(0x8E726))} {hex(u16(0x8E728))}")
-
-# Delivery call (reached only if worker returned 0)
-check("FUN_0008E700 calls FUN_0008E67A at 0x8E72E",
-      jarl_target(0x8E72E) == 0x8E67A)
+print("== 1. Gate 1 remains worker-completion filtering ==")
+check("dispatcher calls secoc_rx_verify_worker", jarl_target(0x8E720) == 0x8E4BA)
+check(
+    "Gate 1 is cmp r0,r10 then bne",
+    u16(0x8E726) == 0x51E0 and u16(0x8E728) == 0x05EA,
+    f"0x{u16(0x8E726):04X} 0x{u16(0x8E728):04X}",
+)
+check("worker success enters Gate-2 dispatcher", jarl_target(0x8E72E) == 0x8E67A)
 
 
-# =====================================================================
-# 2. Gate 2: MAC verification result from FEBE555C (0x8E69E)
-# =====================================================================
-print("\n== 2. Gate 2: MAC result load at 0x8E69E (FEBE555C) ==")
+print("\n== 2. command-7 KAT pins verify-result polarity ==")
+# Synchronous slot-4 KAT: initialize output byte at sp+3 to 1, pass &sp[3] to
+# cryptoif_job_finish, then report SETFE(cStack_21 == 0). Thus only a driver
+# result of zero produces KAT pass; an unwritten/preinitialized 1 remains fail.
+check(
+    "KAT preinitializes verify-result output byte to 1",
+    CF[0x680FC:0x68102] == bytes.fromhex("010a430f0300"),
+    CF[0x680FC:0x68102].hex(),
+)
+check(
+    "KAT passes sp+3 as cryptoif_job_finish result pointer",
+    CF[0x6814A:0x68152] == bytes.fromhex("234e030082ff5a0a"),
+    CF[0x6814A:0x68152].hex(),
+)
+check("KAT result call targets cryptoif_job_finish", jarl_target(0x6814E) == 0x88BA8)
+check(
+    "KAT reports pass iff verify-result byte equals zero",
+    CF[0x68168:0x6817E] == bytes.fromhex("03f06398010a030d2036ff00233e0400e099e20f0000"),
+    CF[0x68168:0x6817E].hex(),
+)
 
-# Pinned by pre-existing verify_secoc_security_properties.py:
-# The unique load of the ICU verify-result byte, booleanization, and branch.
-# We assert the same bytes here for completeness.
+
+print("\n== 3. Gate 2 maps zero to delivery and nonzero to mismatch ==")
 GATE2_LOAD = bytes.fromhex("840f5d9de009e10f14d3")
-check("Gate 2 loads FEBE555C and booleanizes at 0x8E69E",
-      CF[0x8E69E:0x8E6A8] == GATE2_LOAD,
-      CF[0x8E69E:0x8E6A8].hex())
+check("Gate 2 loads FEBE555C and materializes result!=0", CF[0x8E69E:0x8E6A8] == GATE2_LOAD)
+check("FEBE555C load is unique", CF.count(bytes.fromhex("840f5d9d")) == 1)
+check(
+    "Gate 2 compares boolean to zero then BNEs to mismatch arm",
+    CF[0x8E6C4:0x8E6CC] == bytes.fromhex("1d30e0d19a0d1a38"),
+    CF[0x8E6C4:0x8E6CC].hex(),
+)
+check("gate CMP is cmp r0,r26", CF[0x8E6C6:0x8E6C8] == bytes.fromhex("e0d1"))
+check("following BNE remains 9a0d", CF[0x8E6C8:0x8E6CA] == bytes.fromhex("9a0d"))
 
-check("FEBE555C GP-relative load (840f5d9d) is unique in CodeFlash",
-      CF.count(bytes.fromhex("840f5d9d")) == 1)
-
-# The false-result branch bytes (pre-existing pin)
-GATE2_FALSE_BRANCH = bytes.fromhex("1d30e0d19a0d1a38bfff78fb1d301a38bfffe6fbd505")
-check("Gate 2 false-result branch at 0x8E6C4 avoids authentic delivery",
-      CF[0x8E6C4:0x8E6DA] == GATE2_FALSE_BRANCH,
-      CF[0x8E6C4:0x8E6DA].hex())
+# boolean := (verify_result != 0); BNE is taken when boolean != 0.
+# Combined with the KAT polarity, branch target is mismatch and fallthrough is OK.
+check("verified-result fallthrough begins at 0x8E6CA", 0x8E6C8 + 2 == 0x8E6CA)
+check("mismatch BNE target is 0x8E6DA", 0x8E6DA > 0x8E6CA)
 
 
-# =====================================================================
-# 3. Two-level gate: Gate 1 and Gate 2 are distinct
-# =====================================================================
-print("\n== 3. two-level gate structure ==")
+print("\n== 4. fallthrough is the PduR/COM delivery chain ==")
+jarls_gate = find_jarls(0x8E67A, 0x8E700)
+check("fallthrough calls verification-status helper with success code", jarls_gate.get(0x8E6CC) == 0x8E244)
+check("fallthrough calls PDU extract/route helper", jarls_gate.get(0x8E6D4) == 0x8E2BA)
+check("mismatch branch calls retry/failure bookkeeping", jarls_gate.get(0x8E6DE) == 0x8E382)
+check("pre-gate freshness/status callback remains before Gate 2", jarls_gate.get(0x8E6C0) == 0x8E646)
 
-check("Gate 1 (0x8E726) in FUN_0008E700, Gate 2 (0x8E69E) in FUN_0008E67A",
-      0x8E700 <= 0x8E726 < 0x8E73A and 0x8E67A <= 0x8E69E < 0x8E700)
+jarls_delivery = find_jarls(0x8E2BA, 0x8E30A)
+check("delivery helper extracts queued PDU", jarls_delivery.get(0x8E2D4) == 0x8D9A4)
+check("delivery helper passes extracted PDU to routing wrapper", jarls_delivery.get(0x8E2F0) == 0x8E7C6)
+check("routing wrapper enters PduR-style dispatcher", jarl_target(0x8E7CC) == 0x80BBA)
+check(
+    "PduR-style dispatcher terminates in computed routing callback",
+    CF[0x80C1C:0x80C26] == bytes.fromhex("25ef61e01330fdc760f9"),
+    CF[0x80C1C:0x80C26].hex(),
+)
 
-# Job-completion polling address (FEBF13BE/BF) differs from MAC result (FEBE555C)
+
+print("\n== 5. mismatch arm is retained/retry bookkeeping, not delivery ==")
+jarls_mismatch = find_jarls(0x8E382, 0x8E3EA)
+check("mismatch bookkeeping not direct PDU-routing wrapper", 0x8E7C6 not in jarls_mismatch.values())
+check("mismatch bookkeeping not PduR dispatcher", 0x80BBA not in jarls_mismatch.values())
+check(
+    "mismatch helper contains state/counter updates and status notification call",
+    jarls_mismatch.get(0x8E3CC) == 0x8E244 and jarls_mismatch.get(0x8E3DC) == 0x8E30A,
+)
+# In FUN_8E67A, cleanup is skipped for retained state 0xB4 and run otherwise.
+check(
+    "post-arm cleanup tests state against 0xB4",
+    CF[0x8E6EA:0x8E6F4] == bytes.fromhex("9c0f010001064cffc205"),
+    CF[0x8E6EA:0x8E6F4].hex(),
+)
+
+
+print("\n== 6. Gate 1 completion and Gate 2 verify result are distinct ==")
 GP = 0xFEBEB800
-check("job-completion polling (gp+0x5BBE = FEBF13BE) != MAC result (FEBE555C)",
-      GP + 0x5BBE == 0xFEBF13BE and 0xFEBF13BE != 0xFEBE555C)
+check(
+    "job-completion polling cell differs from CMAC verify-result cell",
+    GP + 0x5BBE == 0xFEBF13BE and 0xFEBF13BE != 0xFEBE555C,
+)
+check("cryptoif_job_finish calls crypto_driver_dispatch", jarl_target(0x88BD2) == 0x88556)
 
 
-# =====================================================================
-# 4. Dispatch path call edges (jarl-decoded)
-# =====================================================================
-print("\n== 4. dispatch path call edges ==")
-
-jarls_verify = dict(find_jarls(0x8E4BA, 0x8E700))
-check("verify_worker calls secoc_submit_cmac_verify at 0x8E600",
-      jarls_verify.get(0x8E600) == 0x8E3EA)
-
-jarls_e67a = dict(find_jarls(0x8E67A, 0x8E700))
-check("FUN_0008E67A calls FUN_0008E382 (MAC match path) at 0x8E6DE",
-      jarls_e67a.get(0x8E6DE) == 0x8E382)
-check("FUN_0008E67A calls FUN_0008E2BA (mismatch release path) at 0x8E6D4",
-      jarls_e67a.get(0x8E6D4) == 0x8E2BA)
-check("FUN_0008E67A calls FUN_0008E646 (commit freshness) at 0x8E6C0",
-      jarls_e67a.get(0x8E6C0) == 0x8E646)
-
-jarls_finish = dict(find_jarls(0x88BA8, 0x88C20))
-check("cryptoif_job_finish calls crypto_driver_dispatch at 0x88BD2",
-      jarls_finish.get(0x88BD2) == 0x88556)
-
-
-# =====================================================================
-# 5. Profile coverage
-# =====================================================================
-print("\n== 5. profile table ==")
-
+print("\n== 7. shared receive-profile coverage ==")
 profile_can_ids = []
 for i in range(6):
     base = 0x25972 + i * 0x50
     can_id = u32(base + 8)
     profile_can_ids.append(can_id)
-    check(f"profile {i} CAN ID 0x{can_id:03X}",
-          can_id != 0 and can_id < 0x800)
-
-check("profiles cover 0x2E4/0x131/0x132/0x090/0x0D7/0x00F",
-      set(profile_can_ids) == {0x2E4, 0x131, 0x132, 0x090, 0x0D7, 0x00F})
-
-
-# =====================================================================
-# 6. Limitations (not counted as pass/fail assertions)
-# =====================================================================
-print("\n== 6. limitations ==")
-
-# The plumbing from secoc_submit_cmac_verify's arguments through the crypto
-# driver to the FEBE555C write involves indirect calls (function pointers
-# resolved through the crypto driver record table). The current deterministic
-# test does not yet pin the complete argument and indirect-dispatch dataflow;
-# this portion remains recovered from Ghidra decompilation.
-#
-# What IS pinned by this test and the pre-existing security-properties test:
-#   - Gate 2 loads FEBE555C via unique ld.bu instruction (§2)
-#   - Gate 1 instruction bytes at 0x8E726 (§1)
-#   - Call edges in the dispatch path (§4)
-#   - Profile CAN IDs (§5)
-#
-# What is NOT yet pinned by deterministic tests:
-#   - The ABI argument setup placing gp-0x62A4 into the param_4 register
-#   - The crypto driver record's indirect target and retained result pointer
-#   - The completion instruction that writes match/mismatch through that pointer
-#   - The exact effect of FUN_0008E2BA on MAC mismatch (§9.5)
-
-print("  result-pointer plumbing: recovered from Ghidra decompilation,")
-print("  not yet pinned by deterministic raw-byte tests (see §9.1)")
-
+    check(f"profile {i} has valid CAN ID 0x{can_id:03X}", 0 < can_id < 0x800)
+check(
+    "profiles cover all six recovered secured inputs",
+    set(profile_can_ids) == {0x2E4, 0x131, 0x132, 0x090, 0x0D7, 0x00F},
+)
 
 print(f"\n== RESULT: {ok} passed, {bad} failed ==")
 sys.exit(1 if bad else 0)

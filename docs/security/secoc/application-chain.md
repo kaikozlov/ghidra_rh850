@@ -1081,259 +1081,177 @@ establish that Toyota's dealer backend uses DID `0x1010`.
 
 ## 9. SecOC acceptance-gate recovery (SECOC-029)
 
-> **Verification:** `tests/verify_secoc_acceptance_gate.py` (20 assertions:
-> 18 firmware-backed and 2 structural/address-arithmetic checks);
-> pre-existing `tests/verify_secoc_security_properties.py` (pins the FEBE555C
-> load and branch at 0x8E69E/0x8E6C4)
+> **Verification:** `tests/verify_secoc_acceptance_gate.py`,
+> `tests/verify_secoc_bypass_patch_point.py`, and
+> `tests/verify_secoc_security_properties.py`.
 >
-> **Evidence grade:** recovered (firmware-static decompilation + raw-byte
-> verification of call edges and instruction sequences)
+> **Evidence grade:** verified firmware structure for result polarity, local gate
+> direction, PduR/COM delivery reachability, and exact Sienna patch encoding;
+> cross-calibration transfer remains bounded.
 >
-> **Relationship to §5.5:** §5.5 established that the receive path fails
-> closed and that `0xFEBE555C` controls authentic delivery. This section
-> provides the complete two-level gate structure, the plumbing from
-> ICU-S command 7 to `0xFEBE555C`, and the ranked candidate patch points
-> derived from the corrected model.
+> **Correction:** the earlier model inverted the ICU-S verify-result polarity and
+> consequently labeled the two Gate-2 arms backwards. See the corresponding entry
+> in `docs/status/CORRECTIONS.md`. The old `0x8E6C8 9A→95` branch patch forces the
+> **mismatch** arm and is not a bypass.
 
-### 9.1 Two-level gate structure
+### 9.1 Two-level gate and command-7 result polarity
 
-The SecOC receive chain has **two independent gates** that must both pass
-for authenticated delivery:
+The receive chain has two independent decisions:
 
 ```text
-Gate 1 (0x8E726): verify_worker completion status
-  "Did the verification worker run without error?"
-  Located in FUN_0008E700 (the outer dispatcher)
-  Tests: return value of secoc_rx_verify_worker
-  Filters out: format errors (0x100), ICU-S submit failures (0x101),
-               timeouts (0x202), freshness failures (0x201)
-  Does NOT distinguish: MAC match from mismatch
+Gate 1 @ 0x8E726
+  tests secoc_rx_verify_worker completion status
+  0 = worker completed; nonzero = format/freshness/submit/timeout failure
+  this is not the CMAC match result
 
-Gate 2 (0x8E69E): MAC verification result from 0xFEBE555C
-  "Did the MAC actually match?"
-  Located in FUN_0008E67A (the acceptance/delivery function)
-  Tests: byte at 0xFEBE555C (ICU-S verification result)
-  Written by: crypto driver via the output pointer (param_4) passed
-              through secoc_submit_cmac_verify → cryptoif_job_finish →
-              crypto_driver_dispatch → ICU-S command 7
-  Distinguishes: authenticated delivery (match) from
-                the failure/release path (mismatch)
+Gate 2 @ 0x8E69E..0x8E6C8
+  loads ICU-S command-7 result byte from FEBE555C
+  command-7 result 0 = verified OK
+  command-7 result nonzero = not verified / mismatch
+  result is booleanized as r26 := (result != 0)
+  cmp r0,r26; bne 0x8E6DA
 ```
 
-Gate 1 and Gate 2 are independent because `cryptoif_job_finish` has two
-separate outputs:
+The zero-is-success polarity is not inferred from naming. The compiled-out
+synchronous slot-4 command-7 KAT at `0x680F8` preinitializes its result cell to
+`1`, passes that cell to `cryptoif_job_finish`, and reports KAT pass only when
+the returned result cell compares equal to zero. `verify_secoc_acceptance_gate.py`
+pins those instructions and the call target from raw CodeFlash.
 
-| Output | Address | Meaning | Consumed by |
+`cryptoif_job_finish @ 0x88BA8` still has a separate return status used by Gate
+1. Its two outputs must not be conflated:
+
+| Output | Meaning | Consumer |
+|---|---|---|
+| function return `0/1/2` | completed / dispatch error / timeout | Gate 1 through `secoc_rx_verify_worker` |
+| result byte `FEBE555C` | `0=verified OK`, nonzero=`not verified` | Gate 2 in `FUN_0008E67A` |
+
+The `FEBE555C` output pointer is passed through
+`secoc_submit_cmac_verify → cryptoif_job_finish → crypto_driver_dispatch →
+ICU-S command 7`. The unique post-verification `ld.bu` at `0x8E69E` is
+byte-pinned; some lower indirect-driver pointer plumbing remains recovered from
+Ghidra rather than independently instruction-pinned end to end.
+
+### 9.2 Corrected Gate-2 control flow
+
+The decisive local sequence is:
+
+```text
+0x8E69E  load FEBE555C
+0x8E6A2  cmp r0,r1
+0x8E6A4  cmovne 1,r1,r26        ; r26 = (verify_result != 0)
+   ...
+0x8E6C0  call FUN_0008E646      ; sees the real result-derived boolean
+0x8E6C6  cmp r0,r26
+0x8E6C8  bne 0x8E6DA
+
+result == 0 (verified OK): BNE not taken
+  0x8E6CC -> FUN_0008E244(profile, 0)
+  0x8E6D4 -> FUN_0008E2BA
+              -> FUN_0008D9A4        queued-PDU extraction
+              -> FUN_0008E7C6
+                   -> FUN_00080BBA   bounds-checked routing dispatcher
+                        -> computed route callback
+  -> join / cleanup
+
+result != 0 (not verified): BNE taken to 0x8E6DA
+  0x8E6DE -> FUN_0008E382(profile, 0x200)
+              failure/retry counter + state bookkeeping
+              verification-status notification
+              no PduR/COM routing chain
+  -> join; retained 0xB4 state can suppress cleanup for retry
+```
+
+This closes the previous `FUN_0008E2BA` ambiguity: it is the verified-delivery
+arm because it extracts the queued PDU and reaches the generic PduR/COM-style
+routing dispatcher. `FUN_0008E382` is the mismatch/retry arm. The latter's
+counter/state behavior and absence of the delivery chain independently agree
+with the command-7 KAT polarity.
+
+`FUN_0008E646` remains before the patched decision and receives the real
+result-derived status. The bypass therefore does not forge the earlier
+freshness/status argument; it forces delivery after that bookkeeping.
+
+### 9.3 State/outcome table
+
+| Condition | Gate 1 | Gate 2 result | Outcome |
 |---|---|---|---|
-| Job completion status | return value (0/1/2) | 0=operation completed, 1=dispatch error, 2=timeout | Gate 1 via verify_worker return |
-| MAC verification result | `0xFEBE555C` | nonzero=match, 0=mismatch | Gate 2 via `ld.bu` at `0x8E69E` |
+| valid freshness + valid MAC | pass | `0` | fallthrough; `FUN_0008E2BA → FUN_0008E7C6 → FUN_00080BBA`; PDU routed |
+| valid freshness + bad MAC | pass | nonzero | BNE taken; `FUN_0008E382` failure/retry bookkeeping; no recovered PDU route |
+| freshness failure | worker returns error | — | Gate 1 blocks Gate 2 delivery |
+| ICU-S submit/error/timeout | worker returns error | — | Gate 1 blocks delivery / retry policy applies |
+| format/DLC failure | worker returns error | — | Gate 1 blocks delivery |
 
-The plumbing: `secoc_submit_cmac_verify @ 0x8E3EA` passes `gp - 0x62A4`
-(= `0xFEBE555C`) as the fourth argument to `cryptoif_job_finish @ 0x88BA8`
-(recovered from decompiler output; the current deterministic test does
-not yet pin the complete argument and indirect-dispatch dataflow). The first two arguments are the
-received tag (`FEBE554C`) and its bit length (`FEBE5548`) — inputs to
-command 7, not outputs. Only the fourth argument (`FEBE555C`) is an output:
-the MAC verification result written by the driver via the ICU-S command-7
-completion path. The return value of `cryptoif_job_finish` reflects only
-whether the operation completed, not whether the MAC matched.
+### 9.4 Exact Sienna bypass patch (corrected)
 
-### 9.2 Complete receive-to-delivery decision path
+The verified Sienna patch is the compare immediately before the mismatch BNE:
 
-```text
-FUN_0008DD78 (periodic task)
-  → FUN_0008DD38 (loop until 0x300 = idle)
-    → FUN_0008E700 (central dispatch)
-      │
-      ├── FUN_0008D772(1, 0, &profile) → get next pending secured PDU
-      │
-      ├── secoc_rx_verify_worker @ 0x8E4BA
-      │     ├── Phase 1: freshness verification (callbacks)
-      │     └── Phase 2: CMAC verification
-      │       → secoc_submit_cmac_verify @ 0x8E3EA
-      │         → cryptoif_job_finish @ 0x88BA8
-      │           args: (handle, received_tag@FEBE554C,
-      │                  received_tag_bit_length@FEBE5548,
-      │                  verify_result@FEBE555C)
-      │           → crypto_driver_dispatch @ 0x88556 → ICU-S command 7
-      │           ← completion polled at gp+0x5BBE (FEBF13BE)
-      │           ← job status at gp+0x5BBF (FEBF13BF)
-      │         ← returns 0=completed, 1=error, 2=timeout
-      │         ← MAC result written to FEBE555C by driver
-      │     ← worker returns 0 on normal completion (regardless of MAC)
-      │
-      ├── GATE 1 at 0x8E726: cmp r0, r10; bne
-      │     If worker returned nonzero → skip delivery (error)
-      │     If worker returned 0 → enter FUN_0008E67A
-      │
-      └── FUN_0008E67A (acceptance/delivery)
-            ├── GATE 2 at 0x8E69E: ld.bu FEBE555C → booleanize → branch
-            │
-            ├── MAC MATCH (FEBE555C != 0):
-            │   → FUN_0008E646 (commit freshness with auth bit)
-            │   → FUN_0008E382 (authenticated delivery, state 0xB4)
-            │   → FUN_0008E482 (cleanup)
-            │
-            └── MAC MISMATCH (FEBE555C == 0):
-                → FUN_0008E646 (commit freshness without auth bit)
-                → FUN_0008E244 (failure notification)
-                → FUN_0008E2BA (release path; outcome unresolved — see §9.5)
-                → FUN_0008E482 (cleanup)
-```
+**CodeFlash `0x8E6C6`: `e0 d1 → e0 01`**
 
-### 9.3 State-transition table
-
-| Condition | Gate 1 | Gate 2 (FEBE555C) | State byte | Outcome |
-|---|---|---|---|---|
-| Valid MAC + valid freshness | pass (worker ret 0) | nonzero (match) | 0xC3 → 0xB4 | Authenticated delivery via FUN_0008E382 (deferred, freshness committed) |
-| Invalid MAC + valid freshness | pass (worker ret 0) | 0 (mismatch) | 0xC3 | Enters failure/release path via `FUN_0008E2BA`; freshness not advanced. Whether this forwards stale data, emits failure indication only, or releases the buffer is unresolved (§9.5) |
-| Valid MAC + invalid freshness | skip (worker ret 0x201) | — | 0xB4 | PDU discarded; freshness not committed |
-| ICU-S error/timeout | skip (worker ret 0x202) | — | 0xB4 | PDU retained; retry on next cycle |
-| Payload too short | skip (worker ret 0x100) | — | 0xA5 | PDU discarded |
-| Format/DLC error | skip (worker ret 0x103) | — | unchanged | No action |
-
-**Key distinction from the disproved model:** "worker returns 0" means
-"the verification operation completed normally," **not** "the MAC matched."
-The actual MAC match/mismatch is a separate output at `FEBE555C` tested
-by Gate 2.
-
-### 9.4 Candidate semantic patch points (not implemented)
-
-Ranked by narrowness. **No patch is implemented or recommended.**
-
-#### Candidate A — force `FEBE555C` to nonzero at Gate 2 (narrowest MAC bypass)
-
-- **Address:** `0x8E69E` (the `ld.bu -0x62A4[gp], r1` instruction)
-- **Mechanism:** patch the load or the booleanization to always produce
-  nonzero (match), regardless of what the ICU-S command-7 result wrote.
-- **Effect:** treats all MAC results as match. Freshness verification,
-  format checks, DLC enforcement, and Gate 1 all remain active.
-- **Cross-profile coverage:** all six profiles share Gate 2.
-- **Risk:** lowest — preserves freshness anti-replay, format checks.
-  Accepts replayed frames with valid freshness but wrong MAC.
-- **Preservation:** freshness bookkeeping, parsing, cleanup, and buffer
-  ownership all preserved.
-
-#### Candidate B — force `secoc_rx_verify_worker` return to 0
-
-- **Address:** `0x8E4BA` (return value `uVar6`)
-- **Effect:** passes Gate 1 for all PDUs, but Gate 2 (`FEBE555C`) still
-  distinguishes match from mismatch. A bad MAC would pass Gate 1 but
-  still take the mismatch path in `FUN_0008E67A`.
-- **Risk:** does NOT bypass MAC verification by itself. It only suppresses
-  format/freshness/submission errors. **This is NOT equivalent to
-  Candidate A.**
-
-#### Candidate C — force Gate 1 branch to always enter delivery
-
-- **Address:** `0x8E726` (the `cmp r0, r10; bne`)
-- **Effect:** same as Candidate B — enters `FUN_0008E67A` regardless of
-  worker status, but Gate 2 still gates on `FEBE555C`.
-- **Risk:** same as B — does NOT bypass MAC verification.
-
-**Candidates B and C do not bypass MAC verification.** Only Candidate A
-(patching Gate 2's load of `FEBE555C`) directly changes the MAC
-match/mismatch decision. This is the critical correction from the
-provisional SECOC-029 model, which incorrectly placed the MAC decision
-at Gate 1.
-
-### 9.5 Remaining ambiguities
-
-**FUN_0008E2BA outcome on MAC mismatch.** When Gate 2 reads a mismatch
-(`FEBE555C == 0`), `FUN_0008E67A` calls `FUN_0008E2BA`. Whether this function
-forwards previously authenticated/stale data to PduR/COM, emits only a failure
-indication, or solely releases the queued buffer is not resolved from static
-analysis. The function calls `FUN_0008D9A4` (PDU extraction) and then
-`FUN_0008E7C6` (which Ghidra resolves to `FUN_00080BBA`, a COM dispatch
-function), but the exact effect — whether the COM layer treats the released
-PDU as valid signal data or discards it — requires either tracing the COM
-signal dispatch path or a dynamic experiment. Until resolved, the mismatch
-outcome is stated only as "enters the failure/release path; freshness is not
-advanced."
-
-**Result-pointer plumbing.** The claim that `secoc_submit_cmac_verify` passes
-`FEBE555C` as the output pointer to `cryptoif_job_finish` is recovered from
-decompiler output. The current deterministic test does not yet pin the complete
-argument and indirect-dispatch dataflow — the ABI argument setup, driver-record
-contents, indirect target, retained pointer, and eventual write can all
-potentially be verified instruction-by-instruction against the firmware, but
-this work has not yet been done. The GP-relative offset `-0x62A4 = FEBE555C`
-is arithmetic-verified, and the unique load at `0x8E69E` is byte-verified, but
-the write path remains decompiler-only.
-
-**Profile routing.** The six profile records contain the expected CAN IDs, but
-the test does not prove all six route through `FUN_0008E700` from
-configuration-pointer or call-path evidence. The dispatch loop in
-`FUN_0008DD38` processes pending PDUs from a queue (`FUN_0008D772`), and the
-profile index is passed through to the verify worker. The shared-gate
-conclusion is based on the dispatch structure, not per-profile configuration
-tracing.
-
-### 9.6 MAC bypass patch point (verified; persistent CRC resigning recovered)
-
-Candidate A above identifies the Gate-2 load as the narrowest MAC-bypass target
-but does not specify exact patch bytes. The exact one-byte CodeFlash patch point
-is now pinned:
-
-**Patch:** CodeFlash VA `0x8E6C8`, byte `0x9A` → `0x95` (1 byte).
-
-| Property | Value |
+| Property | Corrected value |
 |---|---|
-| Original instruction | `0x0D9A` = `bne 0x8E6DA` (condition NE) |
-| Patched instruction | `0x0D95` = `br 0x8E6DA` (unconditional) |
-| Branch target | `0x8E6DA` → `FUN_0008E382` (authenticated delivery) — unchanged |
-| Bytes changed | 1 (low byte only; high byte `0x0D` is the displacement) |
-| Effect | Forces the shared Gate-2 authenticated-delivery branch regardless of MAC result; the existing §9.5 profile-routing caveat still applies |
-| Freshness | `FUN_0008E646` at `0x8E6C0` still receives the real MAC-derived boolean before the patched branch. The patch does not force a bad-MAC frame to commit authenticated freshness; existing tests pin the false-auth call path rather than claiming freshness advancement |
-| Gate 1 | Unchanged — format, freshness pre-check, and worker-completion filtering remain active |
-| Persistence | Patch VA `0x8E6C8` is inside boot-validity region 1 and therefore requires a replacement CRC adjustment at `0xFFDEC`. The community FCU RMW + CRC-32/Ethernet resigning scheme is valid; on the reconstructed stock image this Gate-2 patch produces adjustment `0x91698386` |
+| stock instruction | `cmp r0,r26` |
+| patched instruction | `cmp r0,r0` |
+| following branch | `0x8E6C8: 9a0d`, unchanged `bne 0x8E6DA` |
+| forced edge | fallthrough at `0x8E6CA`, the verified-delivery arm |
+| effect | every PDU that reaches Gate 2 takes the result-zero delivery path regardless of command-7 result |
+| Gate 1 | unchanged |
+| pre-gate freshness/status call | unchanged and still receives the real result-derived boolean |
 
-The patch sits at offset `0x8` within the false-path block pinned by
-`verify_secoc_acceptance_gate.py` (bytes `1d30e0d19a0d1a38...`). Only the
-condition code nibble changes (`0xA` → `0x5`); the Bcond opcode and 9-bit
-displacement are unchanged, so the target address is invariant.
+The exact context `e0d19a0d1a38bfff` occurs once in the analyzed
+`8965B4512000` CodeFlash. `ResolveSecocAcceptanceGate.java` does **not** use this
+byte string as a cross-calibration signature. It structurally rediscovers the
+`load → zero-test → cmovne → pre-gate call → cmp → BNE → converging arms`
+shape, verifies that the BNE is the result-nonzero edge, and synthesizes a
+same-register RH850 Format-II CMP from the decoded operand fields. It fails
+closed if the compiler emits a different polarity or multiple candidates.
 
-This is a **calibration-specific** patch point recovered from Sienna control
-flow — not a raw byte signature. The blurbdust 8-byte egg
-(`88 00 01 52 00 0A E5 0D`) does not locate this function (SECOC-028/035); it
-matches an unrelated `0xAB` event-record comparator. On other calibrations the
-equivalent function must be found by tracing the MAC-result load
-(`FEBE555C` equivalent) and its conditional branch.
+The superseded patch `0x8E6C8: 9a0d→950d` changes that BNE into an
+unconditional branch to `0x8E6DA`. Since `0x8E6DA` is the mismatch arm, the old
+patch forces failure/retry bookkeeping even for valid MACs. Deterministic tests
+retain this old encoding only as a negative regression so this inversion cannot
+recur.
 
-The persistent CRC path is now closed statically. `crc32_hardware_compute @
-0x47EA` clears the DCRA control byte, seeds COUT from the caller, feeds 32-bit
-words through CIN, and returns the complement of COUT. Stock CodeFlash region 0
-is an in-image fixture for the same CRC-32/Ethernet terminal-fixup construction
-used by blurbdust: CRC of `0x10000..0x17DEB` is `0xEC0CD6CF`, the stored word at
-`0x17DEC` is its complement `0x13F32930`, and the complete region residue is
-`0xFFFFFFFF`.
+### 9.5 Persistent CRC resigning
 
-The apparent contradiction in published region 1 is a property of the artifact,
-not the algorithm. As committed, `0x18000..0xFFDEF` has residue `0x5AA2313A`
-with stock fixup `0x0962887F`. CRC-syndrome analysis finds exactly one
-single-bit change anywhere in the 949,744-byte region that restores the expected
-residue: CodeFlash `0xBB1C4` bit 5, `0xA2→0x82`. That same correction changes
-`sst.b 0x22,ep,r1` into `sst.b 0x2,ep,r1` inside `FUN_000BB0A2`, turning the
-surrounding destination offsets from `1,0x22,0,4,5,3` into the exact six-byte
-permutation `1,2,0,4,5,3`. On this reconstructed stock image,
-CRC(`0x18000..0xFFDEB`) is `0xF69D7780`, whose complement is exactly the already
-stored `0x0962887F`. The reconstructed region residue is therefore
-`0xFFFFFFFF`. Attribution to an acquisition/readout error is a strong inference;
-the unique CRC solution and instruction-semantic repair are verified
-(SECOC-044/CORR-042).
+The patch remains inside boot-validity region 1, whose terminal adjustment word
+is `0xFFDEC`. The community FCU read-modify-write implementation correctly
+recomputes CRC from **live CodeFlash** after patching, so deployment must never
+hardcode an offline adjustment.
 
-Applying the Gate-2 byte patch to that reconstructed image changes the prefix
-CRC to `0x6E967C79`, so the replacement word is `0x91698386`; the complete
-region again has residue `0xFFFFFFFF`. This number is useful for offline
-reconstruction only. blurbdust's shellcode patches the target block first, then
-computes CRC directly from the live ECU CodeFlash and derives
-`new_adj = crc_pre_adj ^ 0xFFFFFFFF`, so it naturally uses the actual live flash
-contents rather than a hardcoded calibration-specific CRC.
+For reproducible offline fixtures:
 
-Verification: `tests/verify_secoc_bypass_patch_point.py` for the Gate-2 patch;
-`tests/verify_codeflash_crc_reconstruction.py` for the boot CRC, one-bit artifact
-repair, and `0x91698386` reconstructed fixup; `tests/verify_community_tooling.py`
-§7 for the community live-resigning implementation.
+- published CodeFlash artifact + corrected Gate-2 patch:
+  prefix CRC `0x23247E0C`, adjustment `0xDCDB81F3`;
+- reconstructed stock image with SECOC-044's unique `0xBB1C4 A2→82` repair +
+  corrected Gate-2 patch:
+  prefix CRC `0xBE36F00D`, adjustment **`0x41C90FF2`**;
+- both re-signed fixtures produce final residue `0xFFFFFFFF`.
+
+The previous `0x91698386` adjustment belongs to the superseded wrong-direction
+`9a0d→950d` patch and is retained only in correction/history text.
+
+### 9.6 Cross-calibration and live evidence boundary
+
+The semantic resolver is annotation-independent on the Sienna fixture: both the
+fully annotated project and a fresh bare CodeFlash import resolve
+`0x8E6C6 e0d1→e001`. That proves annotation independence, not universal Toyota
+address equivalence. Future firmware must be resolved independently and fails
+closed on zero/multiple candidates or incompatible branch polarity.
+
+A 2026-08-16 field report from yc provides strong external dynamic
+corroboration of the corrected direction: a 2024 RAV4 Prime reportedly ran
+openpilot lateral for about 1.5 days after applying the same local transform
+`e0d19a0d1a38bfff → e0019a0d1a38bfff`, with the 2021–23 RAV4 Prime profile
+forced, a dummy SecOC key, and stock Toyota longitudinal. yc also reported a
+2025 bZ4X patched without errors while retaining the stock camera; openpilot
+TSS3 message support remained missing there. Exact firmware/F181 artifacts for
+those vehicles are not present in this repository, so these are
+**external-source/observed** results, not firmware-static transfer proof.
+
+The RAV4 Prime report also does not replace the controlled MAC28 experiment
+below: forcing the old profile substitutes a broader message set, while the
+three-phase harness holds camera traffic constant and changes only MAC28.
 
 ## References
 

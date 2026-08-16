@@ -1036,9 +1036,13 @@ paths = [
 ]
 
 [suite.secoc_manifest_patcher]
-tests = ["tests/verify_secoc_manifest_patcher.py"]
+tests = [
+  "tests/verify_secoc_manifest_patcher.py",
+  "tests/verify_ram_exec_variant_requirements.py",
+]
 paths = [
   "exploit/common/",
+  "data/variant_ram_exec_requirements.json",
   "exploit/patcher/",
   "tests/verify_secoc_manifest_patcher.py",
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",

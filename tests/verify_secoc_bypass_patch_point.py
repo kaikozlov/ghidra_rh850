@@ -1,61 +1,35 @@
 #!/usr/bin/env python3
-"""Deterministic verification of the SecOC MAC-acceptance bypass patch point.
+"""Verify the corrected Gate-2 compare-neutralization MAC-bypass patch.
 
-This suite pins the exact CodeFlash byte that, when changed from 0x9A to 0x95,
-converts the Gate-2 conditional branch (bne → authenticated delivery only on MAC
-match) into an unconditional branch (br → authenticated delivery ALWAYS). This
-is the minimal one-byte CodeFlash change needed to bypass the recovered Gate-2
-MAC delivery decision shared by the configured receive profiles. Persistent
-deployment additionally requires a boot-compatible CRC repair.
+Command-7 result zero is verification OK. Gate 2 materializes `(result != 0)`
+into r26, executes `cmp r0,r26; bne mismatch`, and therefore falls through to
+PduR/COM delivery only when the verify result is zero. The bypass changes the
+CMP from `cmp r0,r26` to `cmp r0,r0`, making the existing BNE impossible while
+preserving the branch instruction and both arm bodies.
 
-Context (see SECOC-029, application-chain.md §9):
-  Gate 2 at 0x8E69E loads the MAC verification result byte from FEBE555C,
-  booleanizes it into r26, and at 0x8E6C8 branches to FUN_0008E382
-  (authenticated delivery) only when r26 != 0 (MAC matched). The false
-  path falls through to FUN_0008E244 + FUN_0008E2BA (failure/release).
-
-The patch converts the 2-byte Bcond instruction at 0x8E6C8 from:
-    0x0D9A = bne 0x8E6DA  (condition NE = 0xA)
-to:
-    0x0D95 = br  0x8E6DA  (condition always = 0x5)
-
-Only the low byte changes (0x9A → 0x95); the high byte (0x0D, which encodes
-the displacement) is unchanged. The branch target remains 0x8E6DA.
-
-Freshness handling remains independent of the patched branch: FUN_0008E646 is
-called at 0x8E6C0 before the branch and receives the REAL MAC-derived boolean in
-r7. The patch therefore forces only the subsequent delivery decision; it does
-not force the freshness manager to treat a bad MAC as authenticated. Existing
-analysis shows the false-auth path does not advance ordinary freshness state.
-
-CRC geometry: the patch is at VA 0x8E6C8, within boot-validity region 1
-(0x18000..0xFFDFF), whose adjustment word is at 0xFFDEC. The community flash
-RMW/resigning mechanism uses the same CRC-32/Ethernet terminal-fixup scheme
-verified by stock region 0. The published region-1 dump contains a separately
-recovered one-bit anomaly at 0xBB1C4; on the reconstructed stock image this
-Gate-2 patch re-signs with adjustment 0x91698386 (SECOC-028/044, CORR-042).
+The superseded 9a0d->950d patch is tested explicitly as a negative regression:
+it turns BNE into unconditional BR and therefore forces the mismatch/failure arm.
 """
 from __future__ import annotations
 
 import struct
 import sys
+import zlib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 
-ok = 0
-bad = 0
+ok = bad = 0
 
 
 def check(name: str, condition: object, detail: str = "") -> None:
     global ok, bad
-    if bool(condition):
-        ok += 1
-    else:
-        bad += 1
+    passed = bool(condition)
+    ok += int(passed)
+    bad += int(not passed)
     suffix = f" ({detail})" if detail else ""
-    print(f"[{'PASS' if condition else 'FAIL'}] {name}{suffix}")
+    print(f"[{'PASS' if passed else 'FAIL'}] {name}{suffix}")
 
 
 def u16(off: int) -> int:
@@ -66,130 +40,94 @@ def u32(off: int) -> int:
     return struct.unpack_from("<I", CF, off)[0]
 
 
-def decode_bcond(off: int) -> tuple[int, int, int, int, int, int]:
-    """Decode an RH850 Bcond addr9 instruction.
+def decode_cmp_format_ii(data: bytes) -> tuple[int, int, int]:
+    """Return (left_reg, right_reg, opcode6) for a 2-byte RH850 Format-II CMP."""
+    if len(data) != 2:
+        raise ValueError("CMP must be two bytes")
+    hw = int.from_bytes(data, "little")
+    return hw & 0x1F, (hw >> 11) & 0x1F, (hw >> 5) & 0x3F
 
-    Returns (halfword, s1115, opcode, op0406, cc0003, target_va).
-    """
-    hw = u16(off)
+
+def synthesize_cmp_same_register(data: bytes) -> bytes:
+    left, _right, _opcode = decode_cmp_format_ii(data)
+    hw = int.from_bytes(data, "little")
+    patched = (hw & 0x07FF) | (left << 11)
+    return patched.to_bytes(2, "little")
+
+
+def decode_bcond(off: int, data: bytes | None = None) -> tuple[int, int]:
+    hw = int.from_bytes(data if data is not None else CF[off:off + 2], "little")
     s1115 = (hw >> 11) & 0x1F
-    opcode = (hw >> 7) & 0xF
     op0406 = (hw >> 4) & 0x7
     cc = hw & 0xF
     s1115_signed = s1115 - 0x20 if s1115 & 0x10 else s1115
     target = ((s1115_signed << 4) | (op0406 << 1)) + off
-    return hw, s1115, opcode, op0406, cc, target
+    return cc, target
 
 
-# =====================================================================
-# 1. Original instruction at the patch point
-# =====================================================================
-print("== 1. original bne at patch point 0x8E6C8 ==")
+PATCH_VA = 0x8E6C6
+BRANCH_VA = 0x8E6C8
+ORIGINAL = bytes.fromhex("e0d1")
+REPLACEMENT = bytes.fromhex("e001")
 
-PATCH_VA = 0x8E6C8
-hw, s1115, opcode, op0406, cc, target = decode_bcond(PATCH_VA)
+print("== 1. corrected patch is CMP neutralization at 0x8E6C6 ==")
+check("stock patch preimage is e0d1", CF[PATCH_VA:PATCH_VA + 2] == ORIGINAL)
+left, right, opcode = decode_cmp_format_ii(ORIGINAL)
+check("stock CMP operands encode r0,r26", (left, right) == (0, 26), repr((left, right)))
+check("generic same-register synthesis yields e001", synthesize_cmp_same_register(ORIGINAL) == REPLACEMENT)
+pleft, pright, popcode = decode_cmp_format_ii(REPLACEMENT)
+check("patched CMP encodes r0,r0", (pleft, pright) == (0, 0))
+check("CMP opcode bits are preserved", popcode == opcode)
+check("only the second-register field changes", ORIGINAL[0] == REPLACEMENT[0] and ORIGINAL[1] != REPLACEMENT[1])
+check("full field-tested gate context is unique", CF.count(bytes.fromhex("e0d19a0d1a38bfff")) == 1)
 
-check("instruction at 0x8E6C8 is Bcond format (opcode 0xB)",
-      opcode == 0xB, f"opcode=0x{opcode:X}")
+print("\n== 2. BNE is preserved and still points to mismatch arm ==")
+check("following BNE bytes remain 9a0d", CF[BRANCH_VA:BRANCH_VA + 2] == bytes.fromhex("9a0d"))
+cc, target = decode_bcond(BRANCH_VA)
+check("stock branch condition is NE", cc == 0xA, f"cc=0x{cc:X}")
+check("stock branch target is mismatch bookkeeping at 0x8E6DA", target == 0x8E6DA, f"0x{target:X}")
+check("neutralized CMP makes BNE condition false for every result", pleft == pright)
+check("fallthrough begins at verified-delivery arm 0x8E6CA", BRANCH_VA + 2 == 0x8E6CA)
 
-check("condition is NE (cc=0xA)",
-      cc == 0xA, f"cc=0x{cc:X}")
+print("\n== 3. old branch patch is explicitly the wrong direction ==")
+OLD_WRONG_REPLACEMENT = bytes.fromhex("950d")
+old_cc, old_target = decode_bcond(BRANCH_VA, OLD_WRONG_REPLACEMENT)
+check("superseded 950d condition is unconditional BR", old_cc == 0x5, f"cc=0x{old_cc:X}")
+check("superseded 950d preserves mismatch target", old_target == 0x8E6DA)
+check("old patch therefore forces mismatch arm, not delivery", old_cc == 0x5 and old_target != 0x8E6CA)
+check("correct patch leaves the branch bytes untouched", CF[BRANCH_VA:BRANCH_VA + 2] == bytes.fromhex("9a0d"))
 
-check("branch target is 0x8E6DA (FUN_0008E382 authenticated delivery)",
-      target == 0x8E6DA, f"target=0x{target:X}")
+print("\n== 4. pre-gate freshness handling remains before patched CMP ==")
+check(
+    "Gate-2 context keeps freshness call before CMP and delivery calls after it",
+    CF[0x8E6C0:0x8E6DA] == bytes.fromhex("bfff86ff1d30e0d19a0d1a38bfff78fb1d301a38bfffe6fbd505"),
+    CF[0x8E6C0:0x8E6DA].hex(),
+)
+check("patch is two bytes after pre-gate call return setup", PATCH_VA > 0x8E6C0)
 
-check("original halfword is 0x0D9A",
-      hw == 0x0D9A, f"hw=0x{hw:04X}")
+print("\n== 5. CRC resigning for corrected patch ==")
+check("patch lies in boot CRC region 1", 0x18000 <= PATCH_VA < 0xFFDF0)
+check("CRC fixup remains at terminal word 0xFFDEC", 0xFFDEC == 0xFFDF0 - 4)
+check("validity marker remains 0x5AA5A55A", u32(0xFFE00) == 0x5AA5A55A)
 
+# Published image has the independently recovered one-bit acquisition anomaly.
+published = bytearray(CF)
+published[PATCH_VA:PATCH_VA + 2] = REPLACEMENT
+published_prefix = zlib.crc32(published[0x18000:0xFFDEC]) & 0xFFFFFFFF
+published_fixup = published_prefix ^ 0xFFFFFFFF
+check("published-image corrected-patch prefix CRC is pinned", published_prefix == 0x23247E0C, f"0x{published_prefix:08X}")
+check("published-image corrected-patch fixup is pinned", published_fixup == 0xDCDB81F3, f"0x{published_fixup:08X}")
 
-# =====================================================================
-# 2. Patched instruction
-# =====================================================================
-print("\n== 2. patched br at 0x8E6C8 ==")
+clean = bytearray(CF)
+clean[0xBB1C4] = 0x82
+clean[PATCH_VA:PATCH_VA + 2] = REPLACEMENT
+clean_prefix = zlib.crc32(clean[0x18000:0xFFDEC]) & 0xFFFFFFFF
+clean_fixup = clean_prefix ^ 0xFFFFFFFF
+struct.pack_into("<I", clean, 0xFFDEC, clean_fixup)
+clean_residue = zlib.crc32(clean[0x18000:0xFFDF0]) & 0xFFFFFFFF
+check("reconstructed-clean corrected-patch prefix CRC is pinned", clean_prefix == 0xBE36F00D, f"0x{clean_prefix:08X}")
+check("reconstructed-clean corrected-patch fixup is 0x41C90FF2", clean_fixup == 0x41C90FF2, f"0x{clean_fixup:08X}")
+check("reconstructed-clean corrected-patch residue is 0xFFFFFFFF", clean_residue == 0xFFFFFFFF, f"0x{clean_residue:08X}")
 
-PATCHED_BYTE = 0x95  # only the low byte changes
-patched_hw = (hw & 0xFF00) | PATCHED_BYTE
-s1115_p = (patched_hw >> 11) & 0x1F
-op0406_p = (patched_hw >> 4) & 0x7
-cc_p = patched_hw & 0xF
-s1115_p_signed = s1115_p - 0x20 if s1115_p & 0x10 else s1115_p
-target_p = ((s1115_p_signed << 4) | (op0406_p << 1)) + PATCH_VA
-
-check("patched condition is always (cc=0x5)",
-      cc_p == 0x5, f"cc=0x{cc_p:X}")
-
-check("patched target is still 0x8E6DA",
-      target_p == 0x8E6DA, f"target=0x{target_p:X}")
-
-check("only low byte changes (0x9A → 0x95)",
-      (hw & 0xFF00) == (patched_hw & 0xFF00) and (hw & 0xFF) != PATCHED_BYTE,
-      f"orig=0x{hw:04X} patched=0x{patched_hw:04X}")
-
-check("high byte unchanged (0x0D = displacement)",
-      (patched_hw >> 8) == 0x0D, f"high byte=0x{(patched_hw >> 8):02X}")
-
-
-# =====================================================================
-# 3. Gate 2 structure context
-# =====================================================================
-print("\n== 3. Gate 2 structure (patch in context) ==")
-
-# Freshness callback at 0x8E6C0 is BEFORE the branch and receives the real
-# MAC-derived boolean; changing 0x8E6C8 does not change that argument.
-GATE2_LOAD = bytes.fromhex("840f5d9de009e10f14d3")
-check("Gate 2 MAC result load at 0x8E69E (FEBE555C)",
-      CF[0x8E69E:0x8E6A8] == GATE2_LOAD,
-      CF[0x8E69E:0x8E6A8].hex())
-
-# FEBE555C GP-relative load is unique
-check("FEBE555C GP-relative load (840f5d9d) is unique",
-      CF.count(bytes.fromhex("840f5d9d")) == 1)
-
-# The false-path branch bytes (confirmed by verify_secoc_acceptance_gate.py)
-GATE2_FALSE_BRANCH = bytes.fromhex("1d30e0d19a0d1a38bfff78fb1d301a38bfffe6fbd505")
-check("Gate 2 false-result branch at 0x8E6C4 (contains our patch byte)",
-      CF[0x8E6C4:0x8E6DA] == GATE2_FALSE_BRANCH,
-      CF[0x8E6C4:0x8E6DA].hex())
-
-
-# =====================================================================
-# 4. CRC geometry (algorithm compatibility is verified separately)
-# =====================================================================
-print("\n== 4. CRC geometry ==")
-
-# Boot validity region 1: 0x18000..0xFFDFF, CRC descriptor at 0x8DE0
-check("CRC region 1 covers patch point",
-      0x18000 <= PATCH_VA <= 0xFFDFF)
-
-# Adjustment word at 0xFFDEC
-check("CRC adjustment word at 0xFFDEC",
-      0xFFDEC == 0xFFDF0 - 4)
-
-# Marker at 0xFFE00
-check("boot validity marker 0x5AA5A55A at 0xFFE00",
-      u32(0xFFE00) == 0x5AA5A55A,
-      f"0x{u32(0xFFE00):08X}")
-
-
-# =====================================================================
-# 5. Patch byte uniqueness (not a common byte)
-# =====================================================================
-print("\n== 5. patch point isolation ==")
-
-# The specific halfword 0x0D9A (bne +18) should not be too common
-bne_count = CF.count(struct.pack("<H", 0x0D9A))
-check(f"halfword 0x0D9A occurs {bne_count} times (context disambiguates)",
-      bne_count > 0, f"count={bne_count}")
-
-# The 10-byte context window at the patch point
-context = CF[0x8E6C0:0x8E6D2]
-check("patch context window is stable (jarl+cmp+bne+fallthrough)",
-      len(context) == 18 and context[8] == 0x9A and context[9] == 0x0D,
-      context.hex())
-
-
-# =====================================================================
-# Result
-# =====================================================================
 print(f"\n== RESULT: {ok} passed, {bad} failed ==")
 sys.exit(1 if bad else 0)

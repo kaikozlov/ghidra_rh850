@@ -12,7 +12,7 @@ The boot CRC scheme itself is not in doubt: region 0 is a stock known-good
 fixture for the same CRC-32/Ethernet + terminal complement-word construction
 used by the community flash patcher. Reconstructing the single bad bit makes
 region 1's existing fixup word validate exactly, and the verified Gate-2 patch
-then re-signs with fixup 0x91698386.
+then re-signs with the corrected compare-neutralization fixup 0x41C90FF2.
 """
 from __future__ import annotations
 
@@ -146,13 +146,13 @@ check(
 
 print("\n== 6. Gate-2 patch re-signs on reconstructed stock image ==")
 patched = bytearray(corrected)
-patched[0x8E6C8] = 0x95
+patched[0x8E6C6:0x8E6C8] = bytes.fromhex("e001")
 patched_pre = crc32_ethernet(patched[r1_start:r1_fixup])
 patched_fixup = patched_pre ^ 0xFFFFFFFF
 struct.pack_into("<I", patched, r1_fixup, patched_fixup)
 patched_full = crc32_ethernet(patched[r1_start:r1_end])
-check("Gate-2 patched prefix CRC", patched_pre == 0x6E967C79, f"0x{patched_pre:08X}")
-check("Gate-2 patched fixup is 0x91698386", patched_fixup == 0x91698386, f"0x{patched_fixup:08X}")
+check("Gate-2 patched prefix CRC", patched_pre == 0xBE36F00D, f"0x{patched_pre:08X}")
+check("Gate-2 corrected-patch fixup is 0x41C90FF2", patched_fixup == 0x41C90FF2, f"0x{patched_fixup:08X}")
 check("Gate-2 patched region residue is 0xFFFFFFFF", patched_full == 0xFFFFFFFF, f"0x{patched_full:08X}")
 
 print(f"\n== RESULT: {ok} passed, {bad} failed ==")

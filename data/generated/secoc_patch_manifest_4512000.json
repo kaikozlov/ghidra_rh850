@@ -9,8 +9,8 @@
     "fixup_va": "0xFFDEC",
     "length": 949744,
     "live_policy": "recompute prefix CRC from live CodeFlash after target-block RMW; write complement at discovered fixup VA; require final residue 0xFFFFFFFF",
-    "patched_fixup_for_supplied_image": "0x0C7B0D87",
-    "patched_prefix_crc_for_supplied_image": "0xF384F278",
+    "patched_fixup_for_supplied_image": "0xDCDB81F3",
+    "patched_prefix_crc_for_supplied_image": "0x23247E0C",
     "patched_residue_for_supplied_image": "0xFFFFFFFF",
     "start": "0x18000",
     "stock_expected_fixup": "0x9470067E",
@@ -63,17 +63,19 @@
     "size": 1048576
   },
   "patch": {
-    "address": "0x8E6C8",
+    "address": "0x8E6C6",
     "block_base": "0x88000",
     "block_size": 32768,
-    "original": "9a0d",
+    "original": "e0d1",
     "preimage_verified": true,
-    "replacement": "950d"
+    "replacement": "e001"
   },
   "safety": {
     "fail_closed": true,
     "requirements": [
       "semantic resolver produced exactly one candidate",
+      "verify-result polarity is zero-success and patch is RH850 CMP neutralization",
+      "preserved BNE bytes, encoded mismatch target, and verified fallthrough are self-consistent",
       "patch preimage matches supplied image",
       "exactly one self-describing CRC descriptor covers patch",
       "target CRC scheme validates directly or via a valid sibling descriptor",
@@ -83,15 +85,20 @@
   "schema": "toyota-secoc-patch-manifest-v1",
   "semantic_resolution": {
     "boolean_materialization": {
+      "meaning": "verify-result-nonzero",
       "register": "r26",
       "site": "0x0008e6a4"
     },
     "candidate_count": 1,
     "control_flow": {
-      "failure_path_calls": 2,
+      "bne": "0x0008e6c8",
+      "bne_bytes": "9a0d",
+      "gate_cmp": "0x0008e6c6",
       "join": "0x0008e6e2",
-      "success_path_calls": 1,
-      "success_target": "0x0008e6da"
+      "mismatch_branch_calls": 1,
+      "mismatch_branch_target": "0x0008e6da",
+      "verified_delivery_fallthrough": "0x0008e6ca",
+      "verified_fallthrough_calls": 2
     },
     "function": {
       "entry": "0x0008e67a",
@@ -99,11 +106,11 @@
     },
     "invariants": [
       "mapped-byte-result-global-is-also-passed-by-address",
-      "zero-test-and-cmovne-materialize-boolean",
+      "zero-test-and-cmovne-materialize-result-nonzero-boolean",
       "same-boolean-survives-through-pre-gate-call",
-      "same-boolean-controls-forward-bne",
-      "failure-and-success-arms-both-call-and-converge",
-      "patch-only-changes-rh850-condition-nibble"
+      "bne-taken-means-result-nonzero-fallthrough-means-result-zero",
+      "verified-and-mismatch-arms-both-call-and-converge",
+      "patch-neutralizes-cmp-registers-and-preserves-bne"
     ],
     "mac_result_source": {
       "address": "0xfebe555c",
@@ -112,14 +119,15 @@
       "resolution": "mapped"
     },
     "patch": {
-      "address": "0x0008e6c8",
-      "operation": "bne-to-unconditional-br-preserve-target",
-      "original": "9a0d",
-      "replacement": "950d"
+      "address": "0x0008e6c6",
+      "operation": "cmp-second-register-to-first-force-fallthrough",
+      "original": "e0d1",
+      "replacement": "e001"
     },
     "pre_gate_state_call": "0x0008e6c0",
     "program_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
     "resolution": "unique",
-    "schema": "toyota-secoc-semantic-target-v1"
+    "schema": "toyota-secoc-semantic-target-v2",
+    "verify_result_polarity": "zero-is-verified-ok-nonzero-is-not-verified"
   }
 }

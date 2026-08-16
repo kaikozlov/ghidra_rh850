@@ -67,7 +67,7 @@ print("\n== fail-closed authentication boundary ==")
 # is converted to boolean and passed to the freshness-commit callback. The
 # same boolean controls whether the authentic PDU is delivered downstream.
 check(
-    "post-verify path loads FEBE555C and booleanizes nonzero success",
+    "post-verify path loads FEBE555C and booleanizes nonzero mismatch",
     CF[0x8E69E:0x8E6A8] == bytes.fromhex("840f5d9de009e10f14d3"),
     CF[0x8E69E:0x8E6A8].hex(),
 )
@@ -77,7 +77,7 @@ check(
     str(CF.count(bytes.fromhex("840f5d9d"))),
 )
 check(
-    "false result takes notification path instead of authentic-PDU delivery",
+    "nonzero result branches to mismatch path while zero falls through delivery",
     CF[0x8E6C4:0x8E6DA]
     == bytes.fromhex("1d30e0d19a0d1a38bfff78fb1d301a38bfffe6fbd505"),
     CF[0x8E6C4:0x8E6DA].hex(),

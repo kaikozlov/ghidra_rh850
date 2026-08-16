@@ -348,12 +348,12 @@ check("community patcher derives adjustment as complement of live prefix CRC",
 # deterministic replacement adjustment. The live patcher would derive this from
 # the real ECU contents rather than needing the number hardcoded.
 patched = bytearray(corrected)
-patched[0x8E6C8] = 0x95
+patched[0x8E6C6:0x8E6C8] = bytes.fromhex("e001")
 patched_pre_adj = community_crc32(patched[r1_crc_addr:0xFFDEC])
 patched_adj = patched_pre_adj ^ 0xFFFFFFFF
 struct.pack_into("<I", patched, 0xFFDEC, patched_adj)
-check("reconstructed Gate-2 patch adjustment is 0x91698386",
-      patched_pre_adj == 0x6E967C79 and patched_adj == 0x91698386,
+check("reconstructed corrected Gate-2 patch adjustment is 0x41C90FF2",
+      patched_pre_adj == 0xBE36F00D and patched_adj == 0x41C90FF2,
       f"pre=0x{patched_pre_adj:08X} adjustment=0x{patched_adj:08X}")
 check("reconstructed Gate-2 patched region validates to 0xFFFFFFFF",
       community_crc32(patched[r1_crc_addr:crc_range_end]) == 0xFFFFFFFF)

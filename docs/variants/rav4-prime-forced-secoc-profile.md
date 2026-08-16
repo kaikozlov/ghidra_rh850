@@ -245,3 +245,53 @@ Still artifact-blocked:
   or some downstream acceptance predicate;
 - whether a correctly preserved stock message set with an intentionally bad MAC
   is accepted after the patch.
+
+## 6. 2026-08-16 corrected-predicate field update
+
+A later yc field report materially changes the interpretation of the earlier
+failed experiment without changing the static message-substitution boundary in
+§2.
+
+Reported setup on a **2024 RAV4 Prime / comma 4**:
+
+- EPS patch context `e0d19a0d1a38bfff -> e0019a0d1a38bfff`;
+- forced 2021–23 RAV4 Prime profile;
+- dummy SecOC key;
+- stock Toyota longitudinal;
+- openpilot lateral reportedly fully working for about **1.5 days**.
+
+The patch is the corrected Gate-2 compare neutralization independently recovered
+from the Sienna firmware: `cmp r0,r26 -> cmp r0,r0`, preserving the following
+BNE and forcing its result-zero/PduR-delivery fallthrough. The Sienna command-7
+KAT pins result zero as verification OK. This makes the field result strong
+external dynamic corroboration of the corrected predicate direction rather than
+of the superseded branch-to-`0x8E6DA` patch.
+
+The experiment is still not the controlled MAC28-only causal proof. The forced
+old profile continues to block/replace stock `0x191/0x412/0x2E4/0x131`, so
+traffic semantics change in addition to the protected authenticators. The
+strict proof therefore remains the three-phase same-traffic experiment in
+`exploit/behavioral_proof/`: healthy stock baseline, exact MAC28-only corruption
+rejected on stock firmware, then the identical corruption accepted after the
+semantically resolved patch.
+
+The same report says a **2025 bZ4X** accepted the patch with no errors while
+retaining the stock camera, but openpilot still lacks the required TSS3 message
+support there. Exact RAV4 Prime/bZ4X F181 and firmware images are not repository
+artifacts, so neither result is promoted to firmware-static cross-calibration
+proof.
+
+Finally, yc reports that blurbdust's shellcode required a linker script with
+VMA `0xFEBE0000` on the newer target and that the host script needed more robust
+timeout behavior. `data/variant_ram_exec_requirements.json` records the
+`FEBE0000` link VMA only as external deployment evidence. It deliberately does
+**not** infer a newer-target authenticated RequestDownload window or callback
+base. The verified `8965B4512000` bootstrap remains `0xFEBF0000..0xFEBF0FFF`.
+Host tooling now exposes an explicit `--ram-load-addr` hook that moves the
+RequestDownload, `0x10F0` verification address, payload callback, and payload
+CRC descriptor together; any non-default address requires an accompanying
+`--ram-geometry-evidence` provenance label. Thus a future acquired target can
+be exercised without inheriting Sienna geometry, while `FEBE0000` remains
+unverified until its bootloader bytes/artifacts are available. The same host
+path retains a configurable 120 s execution timeout plus UDS response-pending
+handling.

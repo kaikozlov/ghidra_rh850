@@ -91,8 +91,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   supplies the exact recovery source image. Canonical:
   `exploit/dumper/README.md`; [historical exploit-engineering journal](../history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md).
 - **Live Gate-2 MAC28 causal proof.** The local hardware-proof harness and the
-  exact one-off openpilot ablation are now complete and committed locally. What
-  remains is hardware-only: on the same EPS/F181 and bus topology, preserve a
+  exact one-off openpilot ablation are complete. yc's 2026-08-16 external field
+  report corroborates the corrected `cmp r0,r26 -> cmp r0,r0` direction on a
+  2024 RAV4 Prime, but its forced older profile changes a broader message set and
+  is not this causal experiment. What remains is hardware-only: on the same
+  EPS/F181 and bus topology, preserve a
   healthy stock baseline, demonstrate that the exact MAC28-only ablation is
   rejected on the identical stock firmware image, then apply the semantically
   resolved Gate-2 patch and demonstrate acceptance with the same ablation

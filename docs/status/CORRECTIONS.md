@@ -764,12 +764,14 @@ the mistakes are not re-made.
   stored `0x0962887F`, and the full region residue is `0xFFFFFFFF`. The unique
   correction is verified; interpreting it as a one-bit acquisition/readout
   error in the public dump is a strong inference.
-- **Gate-2 consequence:** after reconstructing `0xBB1C4=0x82` and applying the
-  Sienna Gate-2 patch `0x8E6C8: 0x9A→0x95`, CRC(prefix) becomes `0x6E967C79` and
-  the replacement fixup is `0x91698386`, yielding residue `0xFFFFFFFF`.
-  blurbdust's live shellcode does not need that value hardcoded: it writes the
-  target block first, computes the prefix CRC from actual ECU CodeFlash, then
-  writes its complement.
+- **Gate-2 consequence (superseded by CORR-064):** this entry originally
+  computed `0x6E967C79 / 0x91698386` for the then-assumed
+  `0x8E6C8: 0x9A→0x95` patch. CORR-064 proves that patch forces the mismatch
+  arm. The corrected `0x8E6C6: e0d1→e001` patch instead yields reconstructed-
+  clean prefix/fixup `0xBE36F00D / 0x41C90FF2`. The underlying CRC algorithm
+  conclusion of CORR-042 remains valid. blurbdust's live shellcode does not
+  hardcode either value: it computes the prefix CRC from actual ECU CodeFlash
+  after target-block RMW and writes its complement.
 - **Canonical:** [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md) §1.7;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.6;
   `tests/verify_codeflash_crc_reconstruction.py`; `tests/verify_community_tooling.py`;
@@ -1317,3 +1319,43 @@ the mistakes are not re-made.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
   [FINDINGS.md](FINDINGS.md) MEM-SAFE-007;
   `tests/verify_application_rmba_memory_safety.py`.
+
+### CORR-064 — Gate-2 result polarity and bypass branch direction were inverted
+
+- **Wrong:** SECOC-029/043/045 previously described `FEBE555C != 0` as a MAC
+  match, labeled the `0x8E6DA -> FUN_0008E382` BNE target as authenticated
+  delivery, and labeled the fallthrough through `FUN_0008E2BA` as a
+  failure/release path. The derived patch `0x8E6C8: 9a0d -> 950d` therefore
+  changed the BNE into an unconditional branch to what was incorrectly called
+  the success arm. Its reconstructed-clean offline fixup was `0x91698386`.
+- **Right:** the synchronous command-7 slot-4 KAT at `0x680F8` initializes its
+  result cell to `1` and reports pass only when command 7 leaves that cell equal
+  to **zero**. Gate 2 materializes `(FEBE555C != 0)` into `r26`; consequently
+  `0x8E6C6 cmp r0,r26; 0x8E6C8 bne 0x8E6DA` falls through on verified result
+  zero and branches on nonzero/not-verified. The fallthrough calls
+  `FUN_0008E2BA`, which extracts the queued PDU and reaches
+  `FUN_0008E7C6 -> FUN_00080BBA`, the bounds-checked PduR/COM routing
+  dispatcher. The taken arm calls `FUN_0008E382`, which performs
+  failure/retry/state bookkeeping and has no recovered PDU route.
+- **Correct patch:** `0x8E6C6: e0d1 -> e001`, changing `cmp r0,r26` to
+  `cmp r0,r0` while preserving the following `9a0d` BNE. This makes the
+  mismatch branch impossible and forces the verified-delivery fallthrough.
+  On the reconstructed-clean `8965B4512000` image the corrected patch yields
+  prefix CRC `0xBE36F00D` and fixup `0x41C90FF2`; on the committed published
+  artifact it yields `0x23247E0C` / `0xDCDB81F3`. Live code must recompute the
+  adjustment from live CodeFlash.
+- **Why this was caught:** yc's 2026-08-16 external field report used exactly
+  the compare neutralization (`e0d19a0d... -> e0019a0d...`) and reported
+  working lateral on a 2024 RAV4 Prime. Re-reading the firmware against that
+  observation exposed the arm-label contradiction already latent in the
+  `FUN_0008E2BA -> PduR/COM` call chain. The command-7 KAT then independently
+  pinned the result polarity from firmware bytes.
+- **Regression coverage:** the old `9a0d -> 950d` encoding is retained only as
+  a negative test proving that it forces the mismatch arm. The semantic
+  manifest builder rejects both the old operation and the old branch bytes
+  masquerading as CMP neutralization.
+- **Canonical:** [FINDINGS.md](FINDINGS.md) SECOC-029/043/045/049;
+  [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9;
+  `tests/verify_secoc_acceptance_gate.py`;
+  `tests/verify_secoc_bypass_patch_point.py`;
+  `tests/verify_secoc_semantic_patch_resolver.py`.

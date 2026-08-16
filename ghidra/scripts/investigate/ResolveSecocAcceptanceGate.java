@@ -2,23 +2,29 @@
 //@category Analysis
 // Calibration-independent structural resolver for the SecOC authenticated-delivery gate.
 //
-// This script deliberately contains no known Sienna patch VA and no known MAC-result
-// RAM address. It searches the current RH850 program for the machine-level data-flow
-// shape recovered from the acceptance gate:
+// This script deliberately contains no known calibration patch VA and no known
+// MAC-result RAM address. It searches the current RH850 program for the recovered
+// machine-level data-flow shape:
 //
-//   byte READ(global) -> cmp 0 -> cmovne 1 (materialize boolean)
+//   byte READ(result) -> cmp 0 -> cmovne 1 (boolean := result != 0)
 //     ... call state/freshness helper ...
-//   cmp 0, same_boolean -> bne success
-//     false path: one or more calls -> unconditional forward join
-//     success path: one or more calls -> same join
+//   cmp 0, same_boolean -> bne mismatch
+//     fallthrough (result == 0): one or more calls -> forward join
+//     branch target (result != 0): one or more calls -> same join
 //
-// When the import has a RAM model, the source global must also be passed by address
-// somewhere in the program (PARAM reference), which strongly distinguishes a crypto/
-// result output cell from ordinary status bytes. On a bare CodeFlash-only import the
-// GP-relative global may be unmapped; the resolver then retains the candidate on the
-// machine/CFG invariants and records the missing provenance explicitly. The script
-// fails closed unless exactly one candidate survives. If an output path is supplied,
-// it writes a small JSON resolver result.
+// The ICU-S verify-result convention is zero == verified OK and nonzero == not
+// verified. That polarity is independently pinned in the analyzed firmware by the
+// command-7 KAT; this Level-1 resolver therefore accepts only the local BNE shape
+// where result == 0 is the fallthrough edge. The synthesized patch neutralizes the
+// CMP immediately before the BNE (cmp A,B -> cmp A,A), making the BNE impossible
+// while leaving its displacement and both arm bodies untouched.
+//
+// When RAM references are mapped, the source global must also be passed by address
+// somewhere in the program, distinguishing a crypto result cell from ordinary
+// status bytes. A bare CodeFlash-only import may leave the GP-relative result cell
+// unmapped; the resolver retains the candidate on machine/CFG invariants and records
+// that provenance gap explicitly. The script fails closed unless exactly one
+// candidate survives.
 //
 // Usage: ResolveSecocAcceptanceGate.java [output-json]
 
@@ -51,13 +57,16 @@ public class ResolveSecocAcceptanceGate extends GhidraScript {
         Address boolAddr;
         String boolReg;
         Address stateCall;
+        Address gateCmpAddr;
         Address branchAddr;
-        Address successAddr;
+        Address verifiedFallthroughAddr;
+        Address mismatchBranchTarget;
         Address joinAddr;
-        int falseCalls;
-        int successCalls;
+        int verifiedCalls;
+        int mismatchCalls;
         byte[] originalBytes;
         byte[] replacementBytes;
+        byte[] branchBytes;
     }
 
     private String op(Instruction ins, int index) {
@@ -66,6 +75,11 @@ public class ResolveSecocAcceptanceGate extends GhidraScript {
 
     private boolean isZero(String s) {
         return s.equals("r0") || s.equals("0x0") || s.equals("0");
+    }
+
+    private Integer registerNumber(String operand) {
+        if (operand == null || !operand.matches("r(?:[12]?[0-9]|3[01])")) return null;
+        return Integer.parseInt(operand.substring(1));
     }
 
     private Address singleMemoryReadTarget(Instruction ins) {
@@ -117,13 +131,13 @@ public class ResolveSecocAcceptanceGate extends GhidraScript {
         return count;
     }
 
-    private Address findFalsePathJoin(Address fallthrough, Address success, Function fn) {
+    private Address findFallthroughJoin(Address fallthrough, Address branchTarget, Function fn) {
         Instruction ins = getInstructionAt(fallthrough);
         while (ins != null && fn.getBody().contains(ins.getAddress()) &&
-               ins.getAddress().compareTo(success) < 0) {
+               ins.getAddress().compareTo(branchTarget) < 0) {
             if (isUnconditionalJump(ins)) {
                 Address target = flowTarget(ins);
-                if (target != null && target.compareTo(success) > 0 && fn.getBody().contains(target)) {
+                if (target != null && target.compareTo(branchTarget) > 0 && fn.getBody().contains(target)) {
                     return target;
                 }
             }
@@ -132,16 +146,32 @@ public class ResolveSecocAcceptanceGate extends GhidraScript {
         return null;
     }
 
-    private byte[] unconditionalizeBne(Instruction branch) throws MemoryAccessException {
-        if (!branch.getMnemonicString().equalsIgnoreCase("bne")) return null;
-        byte[] original = branch.getBytes();
+    /**
+     * RH850 Format-II two-register instructions encode operand 0 in bits [4:0]
+     * and operand 1 in bits [15:11], preserving the six opcode bits [10:5].
+     * Verify those fields against Ghidra's decoded CMP operands before changing
+     * operand 1 to operand 0. This synthesizes cmp A,A without embedding any
+     * calibration-specific bytes or register number.
+     */
+    private byte[] neutralizeCmp(Instruction cmp) throws MemoryAccessException {
+        if (!cmp.getMnemonicString().equalsIgnoreCase("cmp") || cmp.getNumOperands() != 2) return null;
+        String left = op(cmp, 0), right = op(cmp, 1);
+        Integer leftReg = registerNumber(left), rightReg = registerNumber(right);
+        if (leftReg == null || rightReg == null) return null;
+        byte[] original = cmp.getBytes();
         if (original.length != 2) return null;
-        // RH850 Bcond cc0003 lives in the low nibble of the first little-endian byte.
-        // cc=0xA is NE; cc=0x5 is the unconditional BR condition. Preserve all
-        // displacement/opcode bits and change only the condition nibble.
-        if ((original[0] & 0x0f) != 0x0a) return null;
-        byte[] replacement = original.clone();
-        replacement[0] = (byte)((replacement[0] & 0xf0) | 0x05);
+
+        int halfword = (original[0] & 0xff) | ((original[1] & 0xff) << 8);
+        int encodedLeft = halfword & 0x1f;
+        int encodedRight = (halfword >>> 11) & 0x1f;
+        if (encodedLeft != leftReg || encodedRight != rightReg) return null;
+
+        int replacementHalfword = (halfword & 0x07ff) | (leftReg << 11);
+        byte[] replacement = new byte[] {
+            (byte)(replacementHalfword & 0xff),
+            (byte)((replacementHalfword >>> 8) & 0xff),
+        };
+        if (replacement[0] == original[0] && replacement[1] == original[1]) return null;
         return replacement;
     }
 
@@ -151,11 +181,6 @@ public class ResolveSecocAcceptanceGate extends GhidraScript {
 
         Address sourceGlobal = singleMemoryReadTarget(load);
         boolean sourcePassedByAddress = sourceGlobal != null && hasParamReference(sourceGlobal);
-        // A bare CodeFlash import may not yet have RAM/GP-relative references mapped.
-        // In that case, keep the candidate alive on machine/CFG structure alone.
-        // If Ghidra *does* resolve the load to a memory cell, require the stronger
-        // passed-by-address result provenance rather than accepting an ordinary
-        // mapped status byte.
         if (sourceGlobal != null && !sourcePassedByAddress) return null;
 
         String loadReg = op(load, load.getNumOperands() - 1);
@@ -182,22 +207,26 @@ public class ResolveSecocAcceptanceGate extends GhidraScript {
             if (!((isZero(c0) && c1.equals(boolReg)) || (isZero(c1) && c0.equals(boolReg)))) continue;
             if (lastCall == null) continue;
 
+            // Fail closed unless nonzero(result) takes the branch and zero(result)
+            // falls through. Other compiler polarities require a different patch
+            // synthesis and must not be guessed by this Level-1 resolver.
             Instruction branch = cursor.getNext();
             if (branch == null || !fn.getBody().contains(branch.getAddress()) ||
                 !branch.getMnemonicString().equalsIgnoreCase("bne")) continue;
-            Address success = flowTarget(branch);
-            if (success == null || success.compareTo(branch.getAddress()) <= 0 || !fn.getBody().contains(success)) continue;
+            Address mismatchTarget = flowTarget(branch);
+            if (mismatchTarget == null || mismatchTarget.compareTo(branch.getAddress()) <= 0 ||
+                !fn.getBody().contains(mismatchTarget)) continue;
 
             Instruction fall = branch.getNext();
             if (fall == null) continue;
-            Address join = findFalsePathJoin(fall.getAddress(), success, fn);
-            if (join == null || join.compareTo(success) <= 0) continue;
+            Address join = findFallthroughJoin(fall.getAddress(), mismatchTarget, fn);
+            if (join == null || join.compareTo(mismatchTarget) <= 0) continue;
 
-            int falseCalls = countCalls(fall.getAddress(), success, fn);
-            int successCalls = countCalls(success, join, fn);
-            if (falseCalls < 1 || successCalls < 1) continue;
+            int verifiedCalls = countCalls(fall.getAddress(), mismatchTarget, fn);
+            int mismatchCalls = countCalls(mismatchTarget, join, fn);
+            if (verifiedCalls < 1 || mismatchCalls < 1) continue;
 
-            byte[] replacement = unconditionalizeBne(branch);
+            byte[] replacement = neutralizeCmp(cursor);
             if (replacement == null) continue;
 
             Candidate c = new Candidate();
@@ -209,13 +238,16 @@ public class ResolveSecocAcceptanceGate extends GhidraScript {
             c.boolAddr = boolize.getAddress();
             c.boolReg = boolReg;
             c.stateCall = lastCall;
+            c.gateCmpAddr = cursor.getAddress();
             c.branchAddr = branch.getAddress();
-            c.successAddr = success;
+            c.verifiedFallthroughAddr = fall.getAddress();
+            c.mismatchBranchTarget = mismatchTarget;
             c.joinAddr = join;
-            c.falseCalls = falseCalls;
-            c.successCalls = successCalls;
-            c.originalBytes = branch.getBytes();
+            c.verifiedCalls = verifiedCalls;
+            c.mismatchCalls = mismatchCalls;
+            c.originalBytes = cursor.getBytes();
             c.replacementBytes = replacement;
+            c.branchBytes = branch.getBytes();
             return c;
         }
         return null;
@@ -234,10 +266,11 @@ public class ResolveSecocAcceptanceGate extends GhidraScript {
     private String json(Candidate c, int count) {
         StringBuilder sb = new StringBuilder();
         sb.append("{\n");
-        sb.append("  \"schema\": \"toyota-secoc-semantic-target-v1\",\n");
+        sb.append("  \"schema\": \"toyota-secoc-semantic-target-v2\",\n");
         sb.append("  \"candidate_count\": ").append(count).append(",\n");
         sb.append("  \"resolution\": \"unique\",\n");
         sb.append("  \"program_sha256\": \"").append(currentProgram.getExecutableSHA256()).append("\",\n");
+        sb.append("  \"verify_result_polarity\": \"zero-is-verified-ok-nonzero-is-not-verified\",\n");
         sb.append("  \"function\": {\"name\": \"").append(jesc(c.function.getName())).append("\", \"entry\": \"0x")
           .append(c.function.getEntryPoint().toString()).append("\"},\n");
         sb.append("  \"mac_result_source\": {");
@@ -249,27 +282,31 @@ public class ResolveSecocAcceptanceGate extends GhidraScript {
         sb.append("\"load_site\": \"0x").append(c.loadAddr.toString())
           .append("\", \"passed_by_address_elsewhere\": ").append(c.sourcePassedByAddress).append("},\n");
         sb.append("  \"boolean_materialization\": {\"site\": \"0x").append(c.boolAddr.toString())
-          .append("\", \"register\": \"").append(jesc(c.boolReg)).append("\"},\n");
+          .append("\", \"register\": \"").append(jesc(c.boolReg)).append("\", \"meaning\": \"verify-result-nonzero\"},\n");
         sb.append("  \"pre_gate_state_call\": \"0x").append(c.stateCall.toString()).append("\",\n");
-        sb.append("  \"patch\": {\"address\": \"0x").append(c.branchAddr.toString())
+        sb.append("  \"patch\": {\"address\": \"0x").append(c.gateCmpAddr.toString())
           .append("\", \"original\": \"").append(hexBytes(c.originalBytes))
           .append("\", \"replacement\": \"").append(hexBytes(c.replacementBytes))
-          .append("\", \"operation\": \"bne-to-unconditional-br-preserve-target\"},\n");
-        sb.append("  \"control_flow\": {\"success_target\": \"0x").append(c.successAddr.toString())
+          .append("\", \"operation\": \"cmp-second-register-to-first-force-fallthrough\"},\n");
+        sb.append("  \"control_flow\": {\"gate_cmp\": \"0x").append(c.gateCmpAddr.toString())
+          .append("\", \"bne\": \"0x").append(c.branchAddr.toString())
+          .append("\", \"bne_bytes\": \"").append(hexBytes(c.branchBytes))
+          .append("\", \"verified_delivery_fallthrough\": \"0x").append(c.verifiedFallthroughAddr.toString())
+          .append("\", \"mismatch_branch_target\": \"0x").append(c.mismatchBranchTarget.toString())
           .append("\", \"join\": \"0x").append(c.joinAddr.toString())
-          .append("\", \"failure_path_calls\": ").append(c.falseCalls)
-          .append(", \"success_path_calls\": ").append(c.successCalls).append("},\n");
+          .append("\", \"verified_fallthrough_calls\": ").append(c.verifiedCalls)
+          .append(", \"mismatch_branch_calls\": ").append(c.mismatchCalls).append("},\n");
         sb.append("  \"invariants\": [\n");
         if (c.sourcePassedByAddress) {
             sb.append("    \"mapped-byte-result-global-is-also-passed-by-address\",\n");
         } else {
             sb.append("    \"byte-result-load-structurally-resolved-global-unmapped\",\n");
         }
-        sb.append("    \"zero-test-and-cmovne-materialize-boolean\",\n");
+        sb.append("    \"zero-test-and-cmovne-materialize-result-nonzero-boolean\",\n");
         sb.append("    \"same-boolean-survives-through-pre-gate-call\",\n");
-        sb.append("    \"same-boolean-controls-forward-bne\",\n");
-        sb.append("    \"failure-and-success-arms-both-call-and-converge\",\n");
-        sb.append("    \"patch-only-changes-rh850-condition-nibble\"\n");
+        sb.append("    \"bne-taken-means-result-nonzero-fallthrough-means-result-zero\",\n");
+        sb.append("    \"verified-and-mismatch-arms-both-call-and-converge\",\n");
+        sb.append("    \"patch-neutralizes-cmp-registers-and-preserves-bne\"\n");
         sb.append("  ]\n");
         sb.append("}\n");
         return sb.toString();
@@ -300,11 +337,13 @@ public class ResolveSecocAcceptanceGate extends GhidraScript {
         println("SECOC_GATE_RESOLVER candidate_count=" + candidates.size());
         for (Candidate c : candidates) {
             println(String.format(
-                "CANDIDATE function=%s entry=%s result=%s load=%s bool=%s state_call=%s branch=%s original=%s replacement=%s success=%s join=%s false_calls=%d success_calls=%d",
+                "CANDIDATE function=%s entry=%s result=%s load=%s bool=%s state_call=%s cmp=%s original=%s replacement=%s bne=%s bne_bytes=%s verified_fallthrough=%s mismatch_target=%s join=%s verified_calls=%d mismatch_calls=%d",
                 c.function.getName(), c.function.getEntryPoint(),
                 c.sourceGlobal == null ? "<unmapped>" : c.sourceGlobal.toString(), c.loadAddr,
-                c.boolAddr, c.stateCall, c.branchAddr, hexBytes(c.originalBytes),
-                hexBytes(c.replacementBytes), c.successAddr, c.joinAddr, c.falseCalls, c.successCalls));
+                c.boolAddr, c.stateCall, c.gateCmpAddr, hexBytes(c.originalBytes),
+                hexBytes(c.replacementBytes), c.branchAddr, hexBytes(c.branchBytes),
+                c.verifiedFallthroughAddr, c.mismatchBranchTarget, c.joinAddr,
+                c.verifiedCalls, c.mismatchCalls));
         }
 
         if (candidates.size() != 1) {

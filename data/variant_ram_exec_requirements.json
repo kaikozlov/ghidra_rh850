@@ -1,0 +1,40 @@
+{
+  "schema": "toyota-eps-ram-exec-variant-requirements-v1",
+  "variants": [
+    {
+      "id": "sienna-8965b4512000",
+      "evidence": "firmware-static-verified",
+      "authenticated_download_base": "0xFEBF0000",
+      "authenticated_download_size": "0x1000",
+      "payload_callback_base": "0xFEBF0000",
+      "shellcode_link_vma": "0xFEBF0000",
+      "notes": "Verified from the analyzed bootloader and authenticated payload package. This remains the executable default in exploit/common/ram_exec.py."
+    },
+    {
+      "id": "yc-newer-toyota-field-report-2026-08-16",
+      "evidence": "external-source-observed",
+      "vehicles": [
+        "2024 Toyota RAV4 Prime",
+        "2025 Toyota bZ4X"
+      ],
+      "authenticated_download_base": null,
+      "authenticated_download_size": null,
+      "payload_callback_base": null,
+      "shellcode_link_vma": "0xFEBE0000",
+      "notes": "yc reports blurbdust's shellcode required a linker script targeting 0xFEBE0000. No matching firmware/F181 or exact modified host/payload artifact is present, so this is link-VMA deployment evidence only and must not be substituted for the Sienna bootloader download geometry."
+    }
+  ],
+  "host_configuration": {
+    "default_load_addr": "0xFEBF0000",
+    "load_size": "0x1000",
+    "override_cli": "--ram-load-addr",
+    "override_evidence_cli": "--ram-geometry-evidence",
+    "non_default_requires_evidence": true,
+    "coupled_fields": [
+      "RequestDownload address",
+      "0x10F0 verification descriptor address",
+      "payload callback address",
+      "payload CRC descriptor address"
+    ]
+  }
+}

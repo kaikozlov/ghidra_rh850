@@ -10,7 +10,7 @@ transfer as **hypotheses to check**, not facts.
 | Sienna (Vance partner) | `8965B4514000` | External field report pinned; firmware/raw outputs unavailable | [sienna-8965B4514000.md](sienna-8965B4514000.md) |
 | Corolla | `8965F1208000` | Field probes done; firmware not yet in hand | [corolla-8965F1208000.md](corolla-8965F1208000.md) |
 | Corolla (2023 US public-route specimen) | exact F181 pending | Public route recovered: genuine bus-1 `0x00F/0x116/0x24D`; forced TSS2 metadata has no carFw; DataFlash dump still external | [corolla-2023-us-public-route.md](corolla-2023-us-public-route.md) |
-| RAV4 Prime (2024 field experiment) | exact F181 pending | Live persistent-patch/openpilot experiment reported; static forced-profile interpretation only | [rav4-prime-forced-secoc-profile.md](rav4-prime-forced-secoc-profile.md) |
+| RAV4 Prime (2024 field experiments) | exact F181 pending | Earlier failure statically bounded; 2026-08-16 corrected compare-neutralization externally reported with ~1.5 days working lateral; strict MAC28-only proof still pending | [rav4-prime-forced-secoc-profile.md](rav4-prime-forced-secoc-profile.md) |
 | TSS 3.0 family | various | Partial comparison matrix | [tss3-family-comparison.md](tss3-family-comparison.md) |
 | Newer TSK target | exact part pending | Artifact/capture contract only; all transfer claims remain hypothesis | [newer-tsk-target-evidence.md](newer-tsk-target-evidence.md) |
 

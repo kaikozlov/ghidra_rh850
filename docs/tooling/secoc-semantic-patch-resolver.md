@@ -1,133 +1,113 @@
 # SecOC semantic patch resolver
 
-> **Scope:** host-side discovery of the SecOC authenticated-delivery patch point
-> and boot-CRC geometry without calibration-specific target offsets
+> **Scope:** host-side discovery of the SecOC Gate-2 delivery predicate and
+> boot-CRC geometry without calibration-specific target offsets
 >
-> **Status:** Level-1 structural resolver verified on `8965B4512000`; cross-
-> calibration transfer awaits F3/F4/Corolla/RAV4 CodeFlash images
+> **Status:** corrected Level-1 structural resolver verified on
+> `8965B4512000`; cross-calibration transfer remains fail-closed and unproved
 >
 > **Verification:** `tests/verify_secoc_semantic_patch_resolver.py`
 
-The persistent Sienna patch recovered in SECOC-043 is a one-instruction change,
-but its address (`0x8E6C8`) is calibration-specific. A useful patcher must not
-ship a growing `software_id -> address` table or search for the Sienna bytes.
-The durable target is the **semantic acceptance decision** that consumes the
-MAC result and selects authenticated delivery versus failure/release.
+The durable target is not a raw Sienna byte string or software-ID table. It is
+the decision that consumes the command-7 verification result and selects the
+verified PduR/COM delivery fallthrough versus mismatch/retry bookkeeping.
 
-This tooling therefore separates discovery from live flash mutation:
+The earlier resolver forced the forward BNE target. CORR-064 establishes that
+this was backwards: command-7 result `0` is verification success, so the stock
+BNE is **not taken** on success. The corrected resolver therefore patches the
+CMP immediately before that BNE and leaves the branch itself untouched.
 
-```text
-CodeFlash imported in Ghidra
-        |
-        v
-ResolveSecocAcceptanceGate.java
-        |
-        |  unique machine/CFG/data-flow result + program SHA-256
-        v
-semantic-resolution.json
-        |
-        +---- exact CodeFlash.bin
-        v
-build_secoc_patch_manifest.py
-        |
-        |  preimage check + dynamic boot-CRC descriptor discovery
-        v
-patch-manifest.json
-        |
-        v
-future minimal live FCU RMW payload
-```
+## 1. Semantic discovery
 
-The live payload should remain deliberately small: verify the manifest/preimage,
-read-modify-write the resolved target block, recompute the CRC from **live**
-CodeFlash using the resolved geometry, write the terminal fixup, and require the
-final `0xFFFFFFFF` residue before reboot. Semantic program analysis belongs on
-the host, not inside the 4 KiB RAM shellcode.
-
-## 1. Semantic acceptance-gate discovery
-
-Tracked resolver:
-
-`ghidra/scripts/investigate/ResolveSecocAcceptanceGate.java`
-
-The script contains **none** of the known Sienna target/function/MAC-result/CRC
-addresses. It walks every recovered function and searches for this structural
-shape:
+`ghidra/scripts/investigate/ResolveSecocAcceptanceGate.java` scans every
+recovered function for:
 
 ```text
-byte READ(global) -> cmp zero -> cmovne 1 -> auth_boolean
-                                      |
-                                      +---- later call(s), including state/freshness handling
-                                      |
-                              cmp zero, same auth_boolean
-                                      |
-                                  conditional branch
-                                 /                  \
-                       failure arm              success arm
-                       call(s)                   call(s)
-                                 \                  /
-                                  common forward join
+byte READ(result)
+  -> cmp zero
+  -> cmovne 1               ; boolean := (result != 0)
+  -> later state/freshness call(s)
+  -> cmp zero, same boolean
+  -> forward BNE            ; taken when result != 0
+       fallthrough: call(s) ----\
+                                  -> common forward join
+       branch target: call(s) ---/
 ```
 
-Additional fail-closed constraints:
+Fail-closed constraints include:
 
-1. the byte source has a Ghidra `PARAM` reference elsewhere in the image, i.e.
-   the same global is passed by address as an output/result cell rather than
-   merely being ordinary state;
-2. the same materialized boolean survives to the final branch predicate;
-3. at least one call occurs between boolean creation and the gate;
-4. both branch arms contain calls and converge at a common forward join;
-5. the gate is a two-byte RH850 `bne` whose condition nibble can be changed to
-   unconditional `br` while preserving all opcode/displacement bits;
-6. **exactly one** candidate must satisfy the complete predicate.
+1. when the RAM result cell is mapped, it must also be passed by address
+   elsewhere, distinguishing an output/result cell from ordinary state;
+2. the same materialized boolean must survive to the final predicate;
+3. the predicate must be a two-register RH850 CMP followed immediately by a
+   forward `bne`;
+4. result-zero must be the fallthrough polarity represented by this Level-1
+   shape; other compiler polarities are rejected rather than guessed;
+5. both arms must contain calls and converge;
+6. exactly one candidate must survive.
 
-If zero or multiple candidates survive, the resolver emits `FAIL_CLOSED` and no
-patch target is accepted.
+The patch is synthesized from the decoded RH850 Format-II CMP itself. Operand 0
+is validated against bits `[4:0]`, operand 1 against bits `[15:11]`, and the
+replacement copies operand 0 into operand 1 while preserving the opcode. In
+other words, `cmp A,B` becomes `cmp A,A`. This forces equality and therefore
+prevents the following BNE from taking the result-nonzero mismatch edge.
 
-On `8965B4512000`, a full-image scan returns exactly one candidate without being
-told any of its addresses:
+No Sienna target VA, MAC-result address, function address, CRC range, or fixup
+address is embedded in the resolver.
+
+### Sienna result
+
+Both the fully annotated project and a fresh bare CodeFlash import resolve:
 
 ```text
-result global   FEBE555C
-load            0x8E69E
-booleanize      0x8E6A4
-pre-gate call   0x8E6C0
-patch branch    0x8E6C8
-original        9a 0d
-replacement     95 0d
-success target  0x8E6DA
-join            0x8E6E2
-failure calls   2
-success calls   1
+result global             FEBE555C       (unmapped in bare import)
+load                      0x8E69E
+booleanize                0x8E6A4        r26 := result != 0
+pre-gate call             0x8E6C0
+patch CMP                 0x8E6C6
+overwrite                 e0 d1 -> e0 01
+preserved BNE             0x8E6C8        9a 0d
+verified fallthrough      0x8E6CA
+mismatch branch target    0x8E6DA
+join                      0x8E6E2
 ```
 
-This independently rediscovers SECOC-043 from structure rather than from the
-known patch offset.
+The output schema is `toyota-secoc-semantic-target-v2` and explicitly carries
+`verify_result_polarity = zero-is-verified-ok-nonzero-is-not-verified` plus the
+preserved BNE and both arm addresses.
 
-Committed resolver fixture:
+Committed fixtures:
 
-`data/generated/secoc_gate_resolution_4512000.json`
+- `data/generated/secoc_gate_resolution_4512000.json` — annotated project,
+  mapped result provenance;
+- `data/generated/secoc_gate_resolution_4512000_minimal.json` — fresh bare
+  CodeFlash import, same target/CFG with RAM provenance explicitly unmapped.
 
-The result includes `program_sha256`. The manifest builder requires that hash to
-match the supplied CodeFlash byte-for-byte, preventing a semantic result from
-one calibration from being accidentally applied to another.
+The program SHA-256 is part of the resolution and must equal the exact supplied
+CodeFlash image before a manifest can be built.
 
-The same resolver was also run against a **fresh, unannotated CodeFlash-only
-Ghidra import**. It still produced exactly one candidate and the same branch,
-replacement, success target, and join. As expected, the bare import does not map
-the GP-relative RAM result cell, so `mac_result_source.address` is explicitly
-`null` rather than guessed. This proves that the Level-1 target does not depend
-on the repository's Sienna annotations or function names. The committed bare-
-import fixture is `data/generated/secoc_gate_resolution_4512000_minimal.json`.
+## 2. Manifest and semantic rejection of the old patch
 
-## 2. Dynamic boot-CRC geometry
+`tools/build_secoc_patch_manifest.py` accepts only resolver schema v2 and the
+operation `cmp-second-register-to-first-force-fallthrough`. Before checking the
+image preimage it independently verifies that:
 
-Tracked manifest builder:
+- the patch is one 2-byte RH850 instruction;
+- opcode bits are preserved;
+- the replacement's second register equals the original first register;
+- the original operands were different;
+- the patch address is the resolved Gate-2 CMP;
+- a preserved BNE with the recorded bytes follows;
+- verified-fallthrough and mismatch-target provenance are present.
 
-`tools/build_secoc_patch_manifest.py`
+This prevents the superseded `0x8E6C8 9a0d -> 950d` branch patch from being
+accepted even if someone relabels its operation as the new one. That old patch
+is retained only in negative regression coverage because it forces the
+mismatch arm.
 
-It contains no Sienna CRC-region, fixup, or marker addresses. It scans the raw
-CodeFlash for self-describing 16-byte CRC records of the form:
+## 3. Dynamic boot-CRC discovery
+
+The manifest builder scans raw CodeFlash for self-describing CRC records:
 
 ```text
 region_start
@@ -136,43 +116,32 @@ pointer_to_embedded_region_start
 pointer_to_embedded_region_length
 ```
 
-A record is accepted only if both pointers resolve inside the image and their
-stored values reproduce `region_start` and `region_length`. On the Sienna image
-this raw scan finds exactly the two boot CRC descriptors independently known
-from the bootloader analysis.
-
-For the uniquely resolved descriptor covering the semantic patch, the tool
-infers:
-
-- CRC range from `start` + `length`;
-- terminal adjustment word as the final four bytes of that range;
-- nearby validity marker by an aligned trailer scan;
-- FCU erase/program block containing the target and the fixup;
-- stock prefix CRC, stored fixup, expected fixup, and full residue;
-- the replacement fixup for the supplied offline image after applying the
-  semantic branch patch.
-
-The terminal-fixup construction is validated as:
+It selects the unique descriptor covering the semantic patch, derives the
+terminal fixup as the final four bytes of the CRC range, discovers a nearby
+validity marker, derives FCU block geometry, and verifies the terminal-fixup
+construction:
 
 ```text
 fixup = CRC32(prefix) XOR 0xFFFFFFFF
 CRC32(prefix || LE32(fixup)) = 0xFFFFFFFF
 ```
 
-If the target region does not validate on the supplied artifact, the tool does
-**not** silently trust it. It requires at least one independently valid sibling
-descriptor proving the terminal-fixup scheme and records the target region as
-anomalous. This is what happens on the published `4512000` dump because of the
-SECOC-044 one-bit artifact discrepancy. A reconstructed clean image validates
-directly and yields the known Gate-2 replacement fixup `0x91698386` without any
-resolver change.
+The published `4512000` target region contains the separately documented
+SECOC-044 one-bit artifact anomaly, so the builder requires a valid sibling
+descriptor to prove the scheme rather than silently treating the target region
+as clean.
 
-The future live patcher must still recompute from **live ECU flash** rather than
-copy an offline fixup from the manifest.
+For the corrected patch:
 
-## 3. One-command workflow for an arbitrary P1M-E CodeFlash image
+- committed published image: prefix `0x23247E0C`, fixup `0xDCDB81F3`;
+- reconstructed-clean image: prefix `0xBE36F00D`, fixup `0x41C90FF2`;
+- final resigned residue: `0xFFFFFFFF`.
 
-The normal cross-calibration entry point is:
+These are offline fixtures only. Live deployment recomputes CRC from live
+CodeFlash after target-block RMW. The old `0x91698386` fixup belongs to the
+superseded wrong-direction branch patch.
+
+## 4. Arbitrary-image workflow
 
 ```bash
 tools/resolve_secoc_patch_image.sh \
@@ -180,69 +149,32 @@ tools/resolve_secoc_patch_image.sh \
   build/secoc_patch_manifest.json
 ```
 
-It does **not** use the canonical Sienna Ghidra project. Instead it creates a
-fresh disposable project under `build/secoc-targets/<image-sha>/`, imports only
-the supplied CodeFlash using the pinned RH850/P1M-E processor, runs ordinary
-Ghidra analysis, then executes the semantic resolver. The input binary is never
-modified.
+The wrapper validates bare 1 MiB P1M-E CodeFlash geometry before analysis,
+creates a disposable unannotated project under `build/secoc-targets/<sha>/`,
+runs the read-only semantic resolver, joins the resolver SHA to the exact image,
+validates patch semantics/preimage, discovers CRC geometry, and emits a manifest.
+The input image is never modified.
 
-The workflow:
+Zero/multiple semantic candidates, an incompatible branch polarity, SHA
+mismatch, invalid CMP transform, wrong BNE provenance, patch preimage mismatch,
+or ambiguous CRC geometry all fail closed.
 
-1. hashes the input and creates a disposable per-image workspace;
-2. performs a fresh unannotated RH850/P1M-E CodeFlash import;
-3. runs the read-only semantic scan;
-4. writes a semantic-resolution JSON containing the imported program SHA-256;
-5. verifies that SHA-256 against the exact supplied binary;
-6. verifies the resolved patch preimage bytes;
-7. discovers the boot-CRC descriptor that covers the patch;
-8. emits the complete host-side patch manifest.
+For the already imported working project, `tools/resolve_secoc_patch.sh` is the
+faster developer path and retains the same SHA/image join.
 
-Zero or multiple semantic candidates, a SHA mismatch, a wrong patch preimage,
-or ambiguous/unsupported CRC geometry all fail closed.
+## 5. Transfer boundary
 
-For an already imported working project, `tools/resolve_secoc_patch.sh` remains a
-faster developer path; the same SHA join prevents it from being paired with the
-wrong binary.
+The resolver is annotation-independent on `8965B4512000`; that is not evidence
+that every Toyota calibration uses the same address or even the same Level-1
+machine shape. No exact 2024 RAV4 Prime or 2025 bZ4X firmware/F181 artifact is
+present in the repository.
 
-## 4. What is generalized now
+A 2026-08-16 external field report from yc uses the same local transform
+`e0d19a0d... -> e0019a0d...` on newer Toyota vehicles and strongly corroborates
+the corrected **direction**, but cannot establish that an arbitrary image can be
+patched by offset. Each acquired CodeFlash must run through the semantic resolver
+independently.
 
-The following are no longer selected by Sienna calibration constants:
-
-- MAC-result global;
-- containing acceptance function;
-- Gate-2 branch address;
-- branch replacement bytes (synthesized from the local Bcond encoding);
-- success target and branch join;
-- CRC descriptor address;
-- CRC range start/end;
-- CRC adjustment-word address;
-- validity-marker address;
-- target/fixup FCU block base.
-
-The P1M-E FCU block size and CRC32/Ethernet algorithm remain **backend
-properties**, not vehicle properties. A future different RH850/flash-controller
-family should be a different backend rather than another table of vehicle
-offsets.
-
-## 5. Current transfer boundary
-
-This is deliberately a **Level-1 structural resolver**, not yet a proof that
-one machine-code shape covers every Toyota SecOC implementation. It is verified
-to uniquely rediscover the Sienna target; no F3/F4/Corolla/RAV4 CodeFlash image
-has yet been run through it.
-
-The next validation step is therefore not to add more Sienna heuristics. Acquire
-one of the blurbdust-supported F3/F4 images and run the resolver unchanged.
-Three outcomes are useful:
-
-1. **one candidate:** inspect its callers/data flow and compare it with the
-   blurbdust egg target;
-2. **zero candidates:** compiler/stack variation exceeded Level 1; promote the
-   resolver to higher-level p-code/CFG data-flow while keeping the same semantic
-   invariants;
-3. **multiple candidates:** add semantic provenance from the crypto verify
-   output/caller graph, not a calibration-specific byte signature.
-
-This also gives a direct way to determine whether the original blurbdust egg was
-merely an under-reversed proxy for the same acceptance decision, a broader
-shared predicate, or the wrong semantic target entirely.
+If a future image yields zero candidates, promote the resolver to p-code/CFG
+data-flow rather than adding an offset table. If it yields multiple candidates,
+add stronger crypto-result provenance and continue to fail closed.

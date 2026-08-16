@@ -133,6 +133,15 @@ check("raw CAN collector never changes Panda safety mode", "set_safety_mode" not
 check("DTC collector requests report-by-status without clear-DTC", "\\x02\\xff" in dtc_source and "clear_diagnostic" not in dtc_source and "clear_dtc" not in dtc_source)
 check("steering evidence records EPS torque/fault fields", all(value in steer_source for value in ("steeringtorqueeps", "steerfaulttemporary", "steerfaultpermanent")))
 
+print("\n== corrected semantic patch binding ==")
+semantic_manifest = json.loads((REPO / "data" / "generated" / "secoc_patch_manifest_4512000.json").read_text(encoding="utf-8"))
+semantic = semantic_manifest["semantic_resolution"]
+check("behavioral proof is bound to resolver schema v2", semantic["schema"] == "toyota-secoc-semantic-target-v2")
+check("behavioral proof uses zero-is-verified polarity", semantic["verify_result_polarity"] == "zero-is-verified-ok-nonzero-is-not-verified")
+check("behavioral proof reconstructs CMP neutralization", semantic["patch"] == {"address": "0x0008e6c6", "original": "e0d1", "replacement": "e001", "operation": "cmp-second-register-to-first-force-fallthrough"})
+check("behavioral proof preserves mismatch BNE", semantic["control_flow"]["bne_bytes"] == "9a0d" and semantic["control_flow"]["mismatch_branch_target"] == "0x0008e6da")
+check("behavioral proof names verified fallthrough", semantic["control_flow"]["verified_delivery_fallthrough"] == "0x0008e6ca")
+
 print("\n== complete causal-proof schema ==")
 with tempfile.TemporaryDirectory() as td:
     temp = Path(td)

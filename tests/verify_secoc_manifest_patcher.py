@@ -29,6 +29,7 @@ from exploit.patcher.patch_config import (
     config_from_manifest,
 )
 from exploit.common.payload_package import PAYLOAD_SIZE, inspect_payload, package_shellcode
+from exploit.common.ram_exec import explicit_ram_exec_geometry
 from exploit.patcher.build_payload import (
     CONFIG_OFFSET,
     TEMPLATE_SIZE,
@@ -75,7 +76,7 @@ check("ABI magic encodes SPC1", struct.pack("<I", MAGIC) == b"SPC1")
 check("ABI version is pinned", VERSION == 1)
 header = (REPO / "exploit" / "common" / "patch_config.h").read_text(encoding="utf-8")
 check("C and Python agree on config size", "#define PATCH_CONFIG_SIZE        96u" in header)
-check("C header carries no Sienna patch VA", "8E6C8" not in header.upper())
+check("C header carries no Sienna patch VA", "8E6C6" not in header.upper() and "8E6C8" not in header.upper())
 check("C header carries no Sienna CRC geometry", "FFDEC" not in header.upper() and "18000" not in header.upper())
 
 print("\n== Sienna manifest serialization ==")
@@ -178,7 +179,7 @@ foreign_cfg = config_from_manifest(foreign)
 check("synthetic foreign manifest serializes without special case", PatchConfigV1.from_bytes(foreign_cfg.to_bytes()).patch_va == 0x42220)
 source = (REPO / "exploit" / "patcher" / "patch_config.py").read_text(encoding="utf-8").lower()
 check("serializer has no software-ID routing table", "software_id" not in source and "8965" not in source)
-check("serializer has no known Sienna target/CRC addresses", all(token not in source for token in ("8e6c8", "ffdec", "88000", "f8000")))
+check("serializer has no known Sienna target/CRC addresses", all(token not in source for token in ("8e6c6", "8e6c8", "ffdec", "88000", "f8000")))
 
 print("\n== zero-write preflight structure ==")
 main_c = (REPO / "exploit" / "patcher" / "main.c").read_text(encoding="utf-8").lower()
@@ -261,7 +262,7 @@ all_generic_c = "\n".join(
     p.read_text(encoding="utf-8").lower()
     for p in (REPO / "exploit").rglob("*.c")
 )
-check("generic payload C embeds no known Sienna patch/CRC addresses", all(token not in all_generic_c for token in ("8e6c8", "ffdec", "88000", "f8000")))
+check("generic payload C embeds no known Sienna patch/CRC addresses", all(token not in all_generic_c for token in ("8e6c6", "8e6c8", "ffdec", "88000", "f8000")))
 check("generic payload C contains no automatic reset target", "0x157e" not in all_generic_c and "reset(" not in all_generic_c)
 
 print("\n== offline Sienna APPLY algorithm ==")
@@ -362,6 +363,18 @@ with tempfile.TemporaryDirectory() as td:
     check("RESTORE config restores preserved preimage", restore_cfg.replacement == apply_cfg.original)
     check("RESTORE simulation restores target and valid CRC", artifact["validation"]["target_bytes_restored"] is True and int(artifact["validation"]["restore_simulated_residue"], 0) == EXPECTED_RESIDUE)
     check("RESTORE payload is independently hash-pinned", hashlib.sha256((restore_dir / "restore_payload.bin").read_bytes()).hexdigest() == artifact["restore_payload"]["sha256"])
+    try:
+        validate_restore_artifact(
+            artifact_path,
+            image_path=REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin",
+            manifest_path=manifest_path,
+            template_path=template_path,
+            expected_ram_load_addr=0xFEBE0000,
+        )
+    except PayloadBuildError as exc:
+        check("RESTORE artifact is bound to its RAM-exec load address", "different RAM-exec load address" in str(exc), str(exc))
+    else:
+        check("RESTORE artifact is bound to its RAM-exec load address", False)
 
     wrong_image = temp / "wrong.bin"
     wrong_blob = bytearray((REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes())
@@ -489,6 +502,23 @@ with tempfile.TemporaryDirectory() as td:
         template_path=template_path,
     )
     check("APPLY accepts only matching preflight identity/observations", accepted_pf["f181_hex"] == pf["f181_hex"])
+    external_geometry = explicit_ram_exec_geometry(
+        load_addr=0xFEBE0000,
+        evidence="external-source:test-nondefault-geometry",
+    )
+    try:
+        validate_preflight_for_apply(
+            pf_path,
+            config=live_apply,
+            image=bytes(live_blob),
+            manifest_path=live_manifest_path,
+            template_path=template_path,
+            ram_exec_geometry=external_geometry,
+        )
+    except DeployError as exc:
+        check("APPLY rejects a preflight from different RAM-exec geometry", "RAM-exec geometry" in str(exc), str(exc))
+    else:
+        check("APPLY rejects a preflight from different RAM-exec geometry", False)
 
     bad_pf = copy.deepcopy(pf)
     bad_pf["observed"]["crc_prefix"] ^= 1

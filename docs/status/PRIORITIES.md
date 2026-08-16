@@ -77,8 +77,11 @@ Canonical:
 
 ### 4. Gate-2 MAC28 causal proof
 
-The firmware patching and evidence pipeline are locally complete. The missing
-result is the three-phase behavioral experiment on matching hardware:
+The corrected compare-neutralization patch and evidence pipeline are locally
+complete. yc's 2026-08-16 RAV4 Prime field report strongly corroborates the
+correct Gate-2 direction, but because it forced the older profile and used a
+dummy key it does not isolate MAC28. The missing decisive result is still the
+three-phase behavioral experiment on matching hardware:
 
 1. stock baseline works;
 2. MAC28-only ablation is rejected on the same stock firmware;

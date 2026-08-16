@@ -48,7 +48,8 @@ print("== semantic resolver has no Sienna target constants ==")
 java_path = REPO / "ghidra" / "scripts" / "investigate" / "ResolveSecocAcceptanceGate.java"
 java = java_path.read_text(encoding="utf-8").lower()
 for forbidden, label in (
-    ("8e6c8", "known Gate-2 patch VA"),
+    ("8e6c6", "known Gate-2 CMP patch VA"),
+    ("8e6c8", "known adjacent Gate-2 BNE VA"),
     ("febe555c", "known MAC-result global"),
     ("8e67a", "known acceptance-function entry"),
     ("ffdec", "known CRC fixup VA"),
@@ -60,20 +61,22 @@ for token, label in (
     ("getfunctions(true)", "whole-function census"),
     ("hasparamreference(sourceglobal)", "result output passed-by-address invariant"),
     ("cmovne", "boolean materialization"),
-    ("findfalsepathjoin", "success/failure convergence"),
+    ("findfallthroughjoin", "verified/mismatch convergence"),
     ("candidates.size() != 1", "fail-closed uniqueness"),
-    ("unconditionalizebne", "local branch synthesis"),
+    ("neutralizecmp", "local CMP neutralization synthesis"),
 ):
     check(f"resolver implements {label}", token in java)
 check("resolver is read-only", "saveprogram" not in java and "setname(" not in java and "createfunction(" not in java)
 
 print("\n== committed semantic result ==")
 check("semantic scan resolved exactly one candidate", resolution["candidate_count"] == 1 and resolution["resolution"] == "unique")
-check("fixture independently rediscovered known Gate-2 VA", int(resolution["patch"]["address"], 0) == 0x8E6C8)
+check("fixture independently rediscovered known Gate-2 VA", int(resolution["patch"]["address"], 0) == 0x8E6C6)
 check("fixture independently rediscovered MAC-result global", int(resolution["mac_result_source"]["address"], 0) == 0xFEBE555C)
-check("fixture synthesizes only BNE condition change", resolution["patch"]["original"] == "9a0d" and resolution["patch"]["replacement"] == "950d")
+check("fixture synthesizes corrected CMP neutralization", resolution["patch"]["original"] == "e0d1" and resolution["patch"]["replacement"] == "e001" and resolution["patch"]["operation"] == "cmp-second-register-to-first-force-fallthrough")
 check("fixture proves pre-gate state call precedes patch", int(resolution["pre_gate_state_call"], 0) < int(resolution["patch"]["address"], 0))
-check("fixture has calls on both failure and success arms", resolution["control_flow"]["failure_path_calls"] >= 1 and resolution["control_flow"]["success_path_calls"] >= 1)
+check("fixture pins zero-is-verified result polarity", resolution["verify_result_polarity"] == "zero-is-verified-ok-nonzero-is-not-verified")
+check("fixture preserves the BNE and names both corrected arms", resolution["control_flow"]["bne"] == "0x0008e6c8" and resolution["control_flow"]["bne_bytes"] == "9a0d" and resolution["control_flow"]["verified_delivery_fallthrough"] == "0x0008e6ca" and resolution["control_flow"]["mismatch_branch_target"] == "0x0008e6da")
+check("fixture has calls on both verified and mismatch arms", resolution["control_flow"]["verified_fallthrough_calls"] >= 1 and resolution["control_flow"]["mismatch_branch_calls"] >= 1)
 check("semantic result is bound to exact CodeFlash SHA", resolution["program_sha256"] == committed_manifest["image"]["sha256"])
 
 print("\n== bare CodeFlash-only import portability fixture ==")
@@ -115,7 +118,7 @@ with tempfile.TemporaryDirectory() as td:
     repaired_resolution["program_sha256"] = hashlib.sha256(repaired).hexdigest()
     clean = build_manifest(repaired_resolution, repaired_path, 0)
     check("reconstructed stock target CRC region validates", clean["boot_crc"]["stock_region_valid"] is True)
-    check("clean-image Gate-2 fixup is recovered dynamically", clean["boot_crc"]["patched_fixup_for_supplied_image"] == "0x91698386")
+    check("clean-image Gate-2 fixup is recovered dynamically", clean["boot_crc"]["patched_fixup_for_supplied_image"] == "0x41C90FF2")
     check("clean-image patched residue is 0xFFFFFFFF", clean["boot_crc"]["patched_residue_for_supplied_image"] == "0xFFFFFFFF")
 
 print("\n== generic synthetic CRC descriptor fixture ==")
@@ -213,9 +216,51 @@ bad_resolution["patch"]["original"] = "0000"
 try:
     build_manifest(bad_resolution, cf_path, 0)
 except ValueError as exc:
-    check("wrong patch preimage is rejected", "preimage mismatch" in str(exc), str(exc))
+    check("wrong semantic patch bytes are rejected before deployment", "same-register RH850 CMP" in str(exc), str(exc))
 else:
-    check("wrong patch preimage is rejected", False)
+    check("wrong semantic patch bytes are rejected before deployment", False)
+
+old_direction = copy.deepcopy(resolution)
+old_direction["patch"] = {
+    "address": "0x0008e6c8",
+    "original": "9a0d",
+    "replacement": "950d",
+    "operation": "bne-to-unconditional-br-preserve-target",
+}
+try:
+    build_manifest(old_direction, cf_path, 0)
+except ValueError as exc:
+    check("superseded branch-to-mismatch patch is rejected semantically", "operation" in str(exc), str(exc))
+else:
+    check("superseded branch-to-mismatch patch is rejected semantically", False)
+
+masqueraded_old_direction = copy.deepcopy(old_direction)
+masqueraded_old_direction["patch"]["operation"] = "cmp-second-register-to-first-force-fallthrough"
+masqueraded_old_direction["control_flow"]["gate_cmp"] = "0x0008e6c8"
+try:
+    build_manifest(masqueraded_old_direction, cf_path, 0)
+except ValueError as exc:
+    check("old branch bytes cannot masquerade as CMP neutralization", "same-register RH850 CMP" in str(exc), str(exc))
+else:
+    check("old branch bytes cannot masquerade as CMP neutralization", False)
+
+wrong_bne_target = copy.deepcopy(resolution)
+wrong_bne_target["control_flow"]["mismatch_branch_target"] = "0x0008e6dc"
+try:
+    build_manifest(wrong_bne_target, cf_path, 0)
+except ValueError as exc:
+    check("tampered mismatch target is rejected against encoded BNE", "encoded BNE target" in str(exc), str(exc))
+else:
+    check("tampered mismatch target is rejected against encoded BNE", False)
+
+wrong_fallthrough = copy.deepcopy(resolution)
+wrong_fallthrough["control_flow"]["verified_delivery_fallthrough"] = "0x0008e6cc"
+try:
+    build_manifest(wrong_fallthrough, cf_path, 0)
+except ValueError as exc:
+    check("tampered verified fallthrough is rejected", "BNE fallthrough" in str(exc), str(exc))
+else:
+    check("tampered verified fallthrough is rejected", False)
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 if failed:

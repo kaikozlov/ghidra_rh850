@@ -334,7 +334,7 @@ check("plan publishes the verdict contract and control option", '"verdict_contra
 
 print("\n== scope and interpretation discipline ==")
 source = (REPO / "exploit" / "command5" / "build_experiment.py").read_text(encoding="utf-8").lower()
-check("experiment patch does not contain SecOC Gate-2 target address", "8e6c8" not in source)
+check("experiment patch does not contain SecOC Gate-2 target addresses", "8e6c6" not in source and "8e6c8" not in source)
 check("experiment patch does not import production flash backend", "flash_backend" not in source)
 check("stimulus labels result as application-context evidence only", "does not prove production secoc transmit integration" in stimulus_source)
 check("live stimulus activates bank 1 through stock RoutineControl", "_raw_bank1_activate" in stimulus_source and "service_type.routine_control" in stimulus_source and "rid_bank1_activate" in stimulus_source)

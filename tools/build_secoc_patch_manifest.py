@@ -173,7 +173,7 @@ def patch_bytes(blob: bytes, patch_va: int, original: bytes, replacement: bytes,
 
 
 def build_manifest(resolution: dict[str, Any], image: Path, image_base: int) -> dict[str, Any]:
-    if resolution.get("schema") != "toyota-secoc-semantic-target-v1":
+    if resolution.get("schema") != "toyota-secoc-semantic-target-v2":
         raise ValueError("unsupported semantic resolver schema")
     if resolution.get("resolution") != "unique" or resolution.get("candidate_count") != 1:
         raise ValueError("semantic target did not resolve uniquely")
@@ -189,10 +189,64 @@ def build_manifest(resolution: dict[str, Any], image: Path, image_base: int) -> 
             f"semantic-resolution/image SHA-256 mismatch: resolver={program_sha256} image={image_sha256}"
         )
 
+    if resolution.get("verify_result_polarity") != "zero-is-verified-ok-nonzero-is-not-verified":
+        raise ValueError("unsupported or missing SecOC verify-result polarity")
+
     patch = resolution["patch"]
+    if patch.get("operation") != "cmp-second-register-to-first-force-fallthrough":
+        raise ValueError("semantic patch operation is not the verified fallthrough-forcing CMP neutralization")
     patch_va = parse_int(patch["address"])
     original = bytes.fromhex(patch["original"])
     replacement = bytes.fromhex(patch["replacement"])
+    if len(original) != 2 or len(replacement) != 2:
+        raise ValueError("semantic Gate-2 CMP patch must be exactly one 2-byte RH850 instruction")
+    original_hw = int.from_bytes(original, "little")
+    replacement_hw = int.from_bytes(replacement, "little")
+    original_left = original_hw & 0x1F
+    original_right = (original_hw >> 11) & 0x1F
+    replacement_left = replacement_hw & 0x1F
+    replacement_right = (replacement_hw >> 11) & 0x1F
+    original_opcode = (original_hw >> 5) & 0x3F
+    replacement_opcode = (replacement_hw >> 5) & 0x3F
+    if (
+        original_opcode != 0x0F
+        or replacement_opcode != 0x0F
+        or replacement_left != original_left
+        or replacement_right != original_left
+        or original_right == original_left
+    ):
+        raise ValueError("semantic patch is not a same-register RH850 CMP neutralization")
+
+    flow = resolution.get("control_flow", {})
+    if parse_int(flow.get("gate_cmp", "-1")) != patch_va:
+        raise ValueError("semantic patch address is not the resolved Gate-2 CMP")
+    if flow.get("verified_delivery_fallthrough") is None or flow.get("mismatch_branch_target") is None:
+        raise ValueError("semantic resolution is missing verified/mismatch arm provenance")
+    bne_va = parse_int(flow.get("bne", "-1"))
+    bne_bytes = bytes.fromhex(flow.get("bne_bytes", ""))
+    if bne_va != patch_va + len(original):
+        raise ValueError("semantic mismatch BNE is not immediately after the Gate-2 CMP")
+    if len(bne_bytes) != 2 or (bne_bytes[0] & 0x0F) != 0x0A:
+        raise ValueError("semantic resolution does not preserve a BNE mismatch branch")
+    bne_off = va_to_offset(bne_va, image_base, len(blob), len(bne_bytes))
+    if bne_off is None or blob[bne_off:bne_off + len(bne_bytes)] != bne_bytes:
+        raise ValueError("semantic BNE provenance does not match supplied image")
+
+    verified_fallthrough = parse_int(flow["verified_delivery_fallthrough"])
+    mismatch_target = parse_int(flow["mismatch_branch_target"])
+    join = parse_int(flow.get("join", "-1"))
+    if verified_fallthrough != bne_va + len(bne_bytes):
+        raise ValueError("semantic verified-delivery edge is not the BNE fallthrough")
+    bne_hw = int.from_bytes(bne_bytes, "little")
+    disp_hi = (bne_hw >> 11) & 0x1F
+    if disp_hi & 0x10:
+        disp_hi -= 0x20
+    decoded_bne_target = bne_va + (disp_hi << 4) + (((bne_hw >> 4) & 0x7) << 1)
+    if decoded_bne_target != mismatch_target:
+        raise ValueError("semantic mismatch target does not match the encoded BNE target")
+    if not (verified_fallthrough < mismatch_target < join):
+        raise ValueError("semantic Gate-2 arm ordering/convergence is inconsistent")
+
     patched = patch_bytes(blob, patch_va, original, replacement, image_base)
 
     descriptors = discover_crc_descriptors(blob, image_base)
@@ -298,6 +352,8 @@ def build_manifest(resolution: dict[str, Any], image: Path, image_base: int) -> 
             "fail_closed": True,
             "requirements": [
                 "semantic resolver produced exactly one candidate",
+                "verify-result polarity is zero-success and patch is RH850 CMP neutralization",
+                "preserved BNE bytes, encoded mismatch target, and verified fallthrough are self-consistent",
                 "patch preimage matches supplied image",
                 "exactly one self-describing CRC descriptor covers patch",
                 "target CRC scheme validates directly or via a valid sibling descriptor",
