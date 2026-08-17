@@ -104,6 +104,38 @@ check("HTH 0x13 decodes to channel 1", channel == 1)
 check("HTH 0x13 normalizes to Tx buffer index 16", n == 16, str(n))
 check("diagnostic Tx message RAM is 0xFFD24200", 0xFFD24000 + 0x20 * n == 0xFFD24200)
 check("diagnostic Tx command byte is 0xFFD20260", 0xFFD20250 + n == 0xFFD20260)
+
+
+print("\n== RSCFD Tx completion result polarity ==")
+# 0x3E48 extracts exactly CFDTMSTSn bits 2:1 into r10. The callback at
+# 0x3EA4 deliberately preserves that r10 value across the status-clear and
+# Tx-ID helpers (neither writes r10), subtracts 2, and dispatches values 2/3 to
+# the status-0 CanIf path while value 1 takes the status-2 error path.
+check("Tx result extractor masks 0x06 and shifts right one",
+      CF[0x3E48:0x3E5E] == bytes.fromhex("c432c6395d3a8700a707050d05a4c1560600a1527f00"))
+check("Tx result acknowledgement clears bits 2:1 then syncp",
+      CF[0x3E5E:0x3E80] == bytes.fromhex("c432c6395d3a8700a707050d05a4c10ef90087070d0d05a4a707050d05a41f007f00"))
+check("Tx completion dispatcher calls extractor, ack, ID helper before classifying preserved r10",
+      CF[0x3EB6:0x3EEE] == bytes.fromhex(
+          "1c301d38bfff8eff1c301d38bfff9cff1c301d3823460400234e0300bfffaeff"
+          "5e5203f0023d1b3063406152cb0580ff6008b50580ff7208"
+      ))
+
+def firmware_tx_completion_class(result: int) -> str:
+    # Exact 0x3ED6..0x3EE2 semantics: add -2; cmp 1; bh error.
+    adjusted = (result - 2) & 0xFFFFFFFF
+    return "error" if adjusted > 1 else "success"
+
+check("encoded result 1 follows error branch",
+      firmware_tx_completion_class(1) == "error")
+check("encoded results 2/3 follow success branch",
+      [firmware_tx_completion_class(v) for v in (2, 3)] == ["success", "success"])
+check("success wrapper injects CanIf status 0",
+      CF[0x4744:0x475C] == bytes.fromhex("800721000848c6008900074006380032bfff9aff40063f00"))
+check("error wrapper injects CanIf status 2",
+      CF[0x475C:0x4774] == bytes.fromhex("800721000848c6008900074006380232bfff82ff40063f00"))
+check("CanIf adapter advances CanTp only for status 0",
+      CF[0x1F0C:0x1F22] == bytes.fromhex("8007210006f060080235e009ca05c60080ff00104006"))
 check("RSCFD Rx wrapper calls common-FIFO reader",
       CF[0x4030:0x4034] == bytes.fromhex("bfff66ff"))
 check("RSCFD Rx wrapper calls CanIf_RxIndication",

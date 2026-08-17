@@ -904,6 +904,9 @@ the mistakes are not re-made.
 
 ### CORR-048 — RAM payload telemetry did not implement the full RSCFD Tx handshake
 
+> **Superseded in part by CORR-065:** the ready/acknowledgement mechanics below
+> remain correct, but the encoded result polarity stated here was itself reversed.
+
 - **Wrong:** the patch runtime had an empty busy-status check, and both patcher
   and dumper treated any nonzero `CFDTMSTS` result as successful transmission.
   A busy slot could therefore be overwritten, while abort/error results could
@@ -1359,3 +1362,46 @@ the mistakes are not re-made.
   `tests/verify_secoc_acceptance_gate.py`;
   `tests/verify_secoc_bypass_patch_point.py`;
   `tests/verify_secoc_semantic_patch_resolver.py`.
+
+### CORR-065 — RSCFD Tx completion result polarity was still reversed
+
+- **Wrong (CORR-048):** after correctly recovering the full busy/completion/ack
+  handshake, the repository stopped treating every nonzero `CFDTMSTS` result
+  as success but then classified encoded result `1` as the sole success and
+  results `2/3` as errors. `exploit/common/runtime.c`, the CodeFlash dumper,
+  SEC-EXP-003, and the transport documentation all inherited that mapping.
+- **Right:** `direct_call_target_00003e48 @ 0x3E48` does extract
+  `(CFDTMSTSn & 0x06) >> 1`, but that extractor alone does not define success.
+  Its caller preserves the extracted value across the `&0xF9`/`syncp`
+  acknowledgement and ID read, then executes `0x3ED6 add -2`, `0x3EE0 cmp 1`,
+  `0x3EE2 bh`. Original result `1` therefore takes `0x3EEA -> 0x475C`, whose
+  wrapper passes CanIf status `2`; original results `2/3` take
+  `0x3EE4 -> 0x4744`, whose wrapper passes CanIf status `0`.
+  `cantp_tx_confirmation_callback @ 0x1F0C` invokes `CanTp_TxConfirmation` only
+  for status `0`. Thus **encoded result 1 is the firmware error path and
+  results 2/3 are the successful-completion set**.
+- **Tooling correction:** patcher telemetry and the read-only dumper now wait
+  for a nonzero result and accept the set with bit 2 asserted (`status & 0x04`),
+  exactly encoded results `{2,3}`. The dumper retries result `1`; the patcher
+  refuses to continue its evidence channel on result `1`. The audited dumper
+  was rebuilt under the same pinned Docker V850 toolchain; its reviewed binary
+  is now 592 bytes.
+- **Why this survived CORR-048:** the earlier test proved the result extraction,
+  acknowledgement, and a host-side constant but did not prove the downstream
+  wrapper/status consumer. It therefore verified implementation consistency
+  around an incorrectly labeled enum. `verify_exploit_predicate_semantics.py`
+  now makes producer convention, downstream arm meaning, host predicate, and
+  opposite-direction regressions explicit across exploit-critical decisions.
+- **Related audit:** the same pass re-proved that the command-5 `0x68ECA: fa05->0000` observer mutation is in the correct direction: stock status `!=2`
+  branches to zero-fill while status `2` falls through to the selected-source
+  copy path, so NOPing the BNE forces copying. RID1010 status `0x02` remains a
+  known ownership/misattribution false-success condition (CORR-062), not a new
+  completion-success oracle. The Sienna community egg really does force its BA
+  comparator to return match, but its SecOC ownership remains disproved. Boot
+  application validity remains zero-success/nonzero-failure.
+- **Canonical:** [FINDINGS.md](FINDINGS.md) SEC-EXP-001/003;
+  [../communications/diagnostic-transport.md](../communications/diagnostic-transport.md);
+  [../tooling/exploit-predicate-semantics.md](../tooling/exploit-predicate-semantics.md);
+  `tests/verify_can_transport.py`;
+  `tests/verify_exploit_predicate_semantics.py`;
+  `tests/verify_secoc_command5_experiment.py`.

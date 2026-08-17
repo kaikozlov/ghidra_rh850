@@ -78,6 +78,30 @@ check("diagnostic copy gate patch is two-byte NOP", by_name["rid1010-force-copy"
 check("diagnostic result source patch points at generated-result buffer encoding", by_name["rid1010-result-source"].replacement.hex() == "2496aa99")
 check("experiment contains no activation or status-source mutation", set(by_name) == {"rid1010-force-copy", "rid1010-result-source"})
 
+def short_branch_target(addr: int, raw: bytes | None = None) -> int:
+    hw = int.from_bytes(raw if raw is not None else firmware[addr:addr + 2], "little")
+    return addr + (((hw >> 11) & 0x1F) << 4) + (((hw >> 4) & 0x7) << 1)
+
+def short_condition(raw: bytes) -> int:
+    return raw[0] & 0x0F
+
+# Pin the semantics of the branch we are removing, not merely its bytes.
+# Status 2 is the stock copy path; every other status takes the BNE to the
+# zero-fill loop. NOPing only that BNE therefore forces the copy path.
+check("RID1010 observer compares status 2 then branches on not-equal",
+      firmware[0x68EC8:0x68ECC] == bytes.fromhex("629afa05"))
+check("status!=2 BNE targets zero-fill loop", short_branch_target(0x68ECA) == 0x68ED8)
+check("status==2 fallthrough branches to copy-loop condition",
+      firmware[0x68ECC:0x68ECE] == bytes.fromhex("b515") and short_branch_target(0x68ECC) == 0x68EF2)
+check("non-copy arm writes literal zero", firmware[0x68ECE:0x68ED4] == bytes.fromhex("01f0c6f18003"))
+check("copy arm loads selected source byte and stores it",
+      firmware[0x68EDE:0x68EF2] == bytes.fromhex("24963a9a01f0c191c6f1b297ffff410ac1008093"))
+check("mutation purpose names the zero-fill branch it removes",
+      "status!=2 zero-fill branch" in by_name["rid1010-force-copy"].purpose)
+wrong_direction = bytes.fromhex("f505")
+check("opposite-direction rewrite would be unconditional branch to zero-fill",
+      short_condition(wrong_direction) == 0x5 and short_branch_target(0x68ECA, wrong_direction) == 0x68ED8)
+
 print("\n== stock RoutineControl activation contract ==")
 ROUTINE_RID = struct.Struct("<HBBI")
 rid_100f = ROUTINE_RID.unpack_from(firmware, 0x26AEC + 8 * ROUTINE_RID.size)

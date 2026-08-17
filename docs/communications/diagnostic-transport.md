@@ -154,11 +154,15 @@ byte `0xFFD20260`.
 
 The confirmation path at `0x3E48/0x3E5E` extracts result
 `(CFDTMSTSn & 0x06) >> 1` and clears those two bits with `& 0xF9` followed by
-`syncp`. Its caller routes encoded results 2 and 3 to the error callback;
-because confirmation is entered only for a nonzero result, encoded result 1 is
-the successful completion. RAM payloads using slot 16 must therefore wait for
-the complete ready mask, set TMTR only after filling message RAM, wait for a
-nonzero result, accept only result 1, and acknowledge the result bits.
+`syncp`. The decisive polarity is in its caller at `0x3ED6..0x3EEA`: after
+subtracting 2, values 0/1 (original results 2/3) reach wrapper `0x4744`, which
+passes CanIf status `0`; original result 1 reaches wrapper `0x475C`, which
+passes status `2`. `cantp_tx_confirmation_callback @ 0x1F0C` advances CanTp
+only for status `0`. Therefore encoded **results 2 and 3 are successful
+completion and result 1 is the error path** in this firmware. RAM payloads
+using slot 16 must wait for the complete ready mask, set TMTR only after filling
+message RAM, wait for a nonzero result, accept results 2/3, and acknowledge the
+result bits. CORR-065 supersedes the earlier reversed result mapping.
 
 No CAN-FD payload is used despite the FD-capable peripheral: CanIf rejects DLC
 above 8, CanTp always constructs eight-byte frames, and CFDTMFDCTR is cleared.

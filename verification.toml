@@ -1035,6 +1035,21 @@ paths = [
   "Makefile",
 ]
 
+[suite.exploit_predicate_semantics]
+tests = ["tests/verify_exploit_predicate_semantics.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_exploit_predicate_semantics.py",
+  "exploit/common/runtime.c",
+  "exploit/dumper/main.c",
+  "exploit/command5/build_experiment.py",
+  "tools/analyze_secoc_patch_target.py",
+  "docs/tooling/exploit-predicate-semantics.md",
+  "docs/communications/diagnostic-transport.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+]
+
 [suite.secoc_manifest_patcher]
 tests = [
   "tests/verify_secoc_manifest_patcher.py",
