@@ -13,6 +13,11 @@ CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 SOURCE = REPO / "exploit" / "ephemeral_runtime" / "main.c"
 BUILDER = REPO / "exploit" / "ephemeral_runtime" / "build_shellcode.py"
 AUDIT = REPO / "exploit" / "ephemeral_runtime" / "audited_build.json"
+CANARY_SOURCE = REPO / "exploit" / "ephemeral_runtime" / "canary.c"
+CANARY_BUILDER = REPO / "exploit" / "ephemeral_runtime" / "build_canary.py"
+CANARY_AUDIT = REPO / "exploit" / "ephemeral_runtime" / "audited_canary_build.json"
+SUBSTITUTION_PLANNER = REPO / "exploit" / "ephemeral_runtime" / "build_substitution_plan.py"
+CORPUS = REPO / "data" / "generated" / "decompilations.jsonl"
 passed = failed = 0
 
 
@@ -152,6 +157,75 @@ check("runtime source contains no CodeFlash/FACI programming primitive",
       all(token not in source.lower() for token in ("faci_", "flash_block_rmw", "program_page", "codeflash_write")))
 check("workstream contains no live deploy wrapper",
       not any(p.name.startswith(("deploy", "flash", "run_live")) for p in (REPO / "exploit" / "ephemeral_runtime").iterdir()))
+
+print("\n== inert scheduler canary ==")
+canary_source = CANARY_SOURCE.read_text(encoding="utf-8")
+canary_builder = CANARY_BUILDER.read_text(encoding="utf-8")
+canary_audit = json.loads(CANARY_AUDIT.read_text(encoding="utf-8"))
+canary_bindings = {item["path"]: item["sha256"] for item in canary_audit["sources"]}
+check("canary source is bound by audited build",
+      canary_bindings["exploit/ephemeral_runtime/canary.c"] == hashlib.sha256(CANARY_SOURCE.read_bytes()).hexdigest())
+check("canary builder is bound by audited build",
+      canary_bindings["exploit/ephemeral_runtime/build_canary.py"] == hashlib.sha256(CANARY_BUILDER.read_bytes()).hexdigest())
+check("audited canary is 332 bytes with 444 bytes headroom",
+      canary_audit["shellcode"]["size"] == 332 and canary_audit["shellcode"]["headroom"] == 444)
+check("audited canary executable SHA is pinned",
+      canary_audit["shellcode"]["sha256"] == "81176c6e1c33451cfa63bd3b4a0e07b8b0fb952c70b3d67442f1a294ed6b651e")
+check("canary is entry-zero, relocation-free, and explicitly unvalidated",
+      canary_audit["shellcode"]["entry_offset"] == 0 and
+      canary_audit["compile_contract"]["relocations"] == 0 and
+      canary_audit["review_status"] == "audited-inert-static-not-bench-validated")
+check("canary preserves stock aggregate 0x65750 and contains no COM/SecOC bridge",
+      "FOREGROUND_AGGREGATE       0x00065750u" in canary_source and
+      "application_com_rx" not in canary_source.lower() and "MAC28" not in canary_source)
+check("canary heartbeat is FEBFFBF0",
+      "CANARY_HEARTBEAT            0xFEBFFBF0u" in canary_source and
+      canary_audit["compile_contract"]["heartbeat_address"] == "0xFEBFFBF0")
+# Heartbeat is beyond startup CodeFlash shadow copy and remains XCP-readable.
+heartbeat = 0xFEBFFBF0
+exclusion_count = u32(0x2B3B8)
+exclusions = [struct.unpack_from("<II", CF, 0x293F4 + i * 8) for i in range(exclusion_count)]
+check("heartbeat is above startup shadow-copy end and inside XCP shadow window",
+      heartbeat > 0xFEBFF9EF and 0xFEBF7C00 <= heartbeat <= 0xFEBFFBFF)
+check("heartbeat lies outside all five XCP/RMBA RAM exclusions",
+      all(not (lo <= heartbeat <= hi) for lo, hi in exclusions))
+heartbeat_refs = []
+for line in CORPUS.read_text(encoding="utf-8").splitlines():
+    obj = json.loads(line)
+    if obj.get("record") != "function":
+        continue
+    for ref in obj.get("data_references", []):
+        if int(ref["to_addr"], 16) == heartbeat:
+            heartbeat_refs.append(ref)
+check("heartbeat has no canonical application direct reference", not heartbeat_refs, repr(heartbeat_refs))
+
+print("\n== post-auth substitution / execution ordering ==")
+planner = SUBSTITUTION_PLANNER.read_text(encoding="utf-8")
+check("planner writes runtime at FEBF0000 and callback cell FEBF0FD0",
+      "RUNTIME_BASE = 0xFEBF0000" in planner and "CALLBACK_ADDRESS = 0xFEBF0FD0" in planner)
+check("planner writes callback pointer last and uses FEBF0000 little-endian target",
+      '"callback_pointer_last"' in planner and "struct.pack(\"<I\", CALLBACK_VALUE)" in planner)
+check("planner pins exact FF00 execution request",
+      'FF00_REQUEST = bytes.fromhex("3101ff004500000e000000008000")' in planner)
+check("planner explicitly requires prior successful 10F0 authentication",
+      "pinned 4 KiB encrypted RAM-dump fixture has been uploaded and passed RID 0x10F0" in planner and
+      '"initial_authentication_bypassed": False' in planner)
+check("planner binds the pinned Sienna-authenticated public payload fixture",
+      'AUTHENTICATED_FIXTURE = REPO / "tests/fixtures/payloads/ram_dump_payload.bin"' in planner and
+      "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2" in planner)
+check("planner pins zero DID-0201/0202 inputs and no matching-CUW requirement for this Sienna",
+      "DID_201_KEY = bytes(16)" in planner and "DID_202_IV = bytes(16)" in planner and
+      '"matching_cuw_required_for_sienna_8965b4512000": False' in planner and
+      '"payload_build_secret_required_to_replay_fixture": False' in planner)
+check("flash_erase_start stages operation type 2 rather than invoking payload callback",
+      CF[0x4244:0x424A] == bytes.fromhex("020a440f9c91"))
+check("operation-type-2 worker reaches flash_driver_call_block_operation",
+      jarl22_target(0x4538) == 0x4332)
+check("block-operation helper loads FEBF0FD0 and indirect-calls it",
+      CF[0x434C:0x4362] == bytes.fromhex("40eebffe3defd10f0ad81c380142234e0300fdc760f9"))
+check("canary is non-returning after application transition",
+      "__attribute__((noreturn)) exploit" in canary_source and
+      "static void post_context_startup(void) __attribute__((noreturn, noinline));" in canary_source)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 if failed:

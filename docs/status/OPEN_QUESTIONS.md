@@ -74,8 +74,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   sequence, remains foreground scheduler owner, snapshots marked pre-verification
   `0x2E4/0x131`, runs stock SecOC, and conditionally re-delivers through stock
   `application_com_rx_indication` before the normal COM/system-mode/control
-  task. What remains is dynamic: obtain the matching `8965B4512000` CUW/payload,
-  first prove an inert scheduler shell and reset-to-stock behavior, then prove
+  task. The initial Sienna payload artifact is no longer open: the pinned public
+  encrypted RAM-dump fixture already satisfies this exact gate with zero
+  DID-0201/0202 inputs. What remains is dynamic: use the audited 332-byte inert
+  canary, offline MEM-SAFE substitution plan, and read-only SID-`0x23` heartbeat
+  probe to prove scheduler ownership and reset-to-stock behavior; next prove
   one-shot queue capture, then enable COM delivery on an isolated bench. Do not
   resume generic callback/xref searching unless dynamic behavior falsifies a
   specific static assumption. Canonical:

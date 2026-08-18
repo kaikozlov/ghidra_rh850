@@ -1591,3 +1591,28 @@ the mistakes are not re-made.
   [FINDINGS.md](FINDINGS.md) ARCH-014 / SECOC-061;
   `tests/verify_ephemeral_runtime.py`;
   `exploit/ephemeral_runtime/audited_build.json`.
+
+### CORR-069 — a matching CUW/payload is not a Sienna bootstrap dependency
+
+- **Prior boundary:** the ephemeral-runtime plan treated an absent matching
+  `8965B4512000` CUW/factory payload as the remaining artifact needed before one
+  legitimate authenticated `0x10F0` could unlock MEM-SAFE-001.
+- **Right:** the repository already contains two pinned public 4 KiB encrypted
+  payload fixtures that are accepted by this exact Sienna bootloader gate.
+  `tests/verify_payload_gate.py` decrypts them with the recovered construction
+  using tester-controlled `DID 0x0201 = 00*16` and `0x0202 = 00*16`, then proves
+  callback `FEBF0FD0→FEBF0000`, the embedded CRC descriptor, CRC32 residue,
+  CMAC, and exact AES-CBC round trip. The shared RAM-exec host already writes
+  those zero DID values.
+- **SecurityAccess distinction:** bootloader SecurityAccess remains mandatory and
+  uses the separately recovered SEC-BOOT-002/003 secret. Replaying the already
+  encrypted fixture does not require knowing `PAYLOAD_BUILD_SECRET` and does not
+  require the missing CUW credential pair.
+- **Scope:** this is specific to Sienna `8965B4512000`. The matching CUW remains
+  useful for dealer-flow provenance and variants where the pinned fixture does
+  not transfer. Do not project fixture acceptance to newer EPS images without
+  their own gate evidence.
+- **Canonical:** [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md) §8;
+  [FINDINGS.md](FINDINGS.md) SECOC-062;
+  `tests/verify_payload_gate.py`;
+  `exploit/ephemeral_runtime/build_substitution_plan.py`.

@@ -77,19 +77,25 @@ Evidence labels below follow `AGENTS.md`: **verified**, **recovered**,
    verification. A resident scheduler can snapshot a marked frame, allow stock
    verification/rejection/cleanup to run, then call stock
    `application_com_rx_indication @ 0x7C640` before `0x57AC2`.
-10. **Bounded:** the matching `8965B4512000` CUW / factory payload is not present
-   in the local Techstream corpus, so the OEM RAM driver's private command
-   interface cannot be recovered from current artifacts. This does not block
-   the MEM-SAFE-001 bootstrap once any matching payload can be accepted.
+10. **Verified for this Sienna gate:** a matching CUW is **not** required for the
+   initial authenticated RAM image. The repository already contains two pinned
+   public 4 KiB encrypted payload fixtures whose CRC, CMAC, callback slot, and
+   AES-CBC round trip are verified against this exact `8965B4512000` bootloader
+   using tester-controlled `DID 0x0201 = 00*16` and `0x0202 = 00*16`. The
+   matching CUW remains absent, so the OEM RAM driver's private command interface
+   is still artifact-bounded; that interface is simply unnecessary for the
+   MEM-SAFE-001 bootstrap on this image.
 
 ### Practical conclusion
 
 The best currently supported architecture is:
 
 ```text
-matching CUW credentials / valid Toyota payload
+pinned public encrypted 4 KiB payload fixture
+  + recovered boot SecurityAccess secret
+  + tester DID 0x0201/0x0202 = zero
   -> bootloader SecurityAccess
-  -> one valid authenticated 0x10F0
+  -> upload fixture and pass one authenticated 0x10F0
   -> MEM-SAFE-001 raw substitution
   -> arbitrary boot-context code in FEBF0000..0FFF
   -> stock boot transition prefix + boot validity check
@@ -467,29 +473,52 @@ arbitrary call. Those questions are artifact-bounded.
 
 The bootloader/MEM-SAFE-001 composition is the supported route instead.
 
-## 8. Reusing stock payload rather than forging one
+## 8. Reusing the pinned authenticated payload rather than forging one
 
-The architecture proposed in this investigation is statically supported with
-one important target-artifact dependency:
+The Sienna bootstrap has no remaining CUW/payload artifact dependency. Two
+committed public encrypted fixtures are already accepted by the exact recovered
+`8965B4512000` gate:
+
+| fixture | ciphertext SHA-256 | size |
+|---|---|---:|
+| `tests/fixtures/payloads/ram_dump_payload.bin` | `d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2` | `0x1000` |
+| `tests/fixtures/payloads/dataflash_dump_payload.bin` | `d48988366b5e6d2ddd7438caca5e6f6f02daba9b650263c323a2ffd770a06e34` | `0x1000` |
+
+`tests/verify_payload_gate.py` decrypts each with this image's recovered payload
+construction and proves:
+
+- callback slot `+0xFD0 = FEBF0000`;
+- CRC descriptor `FEBF0000 / 0xFF0`;
+- CRC32 residue `0xFFFFFFFF`;
+- CMAC over `DID_0x202_IV || plaintext[0:0xFF0]`;
+- exact AES-CBC ciphertext round trip.
+
+The fixture construction uses tester values `DID 0x0201 = 00*16` and
+`DID 0x0202 = 00*16`, which `exploit/common/ram_exec.py` already writes. Thus
+replaying the fixture does **not** require knowing `PAYLOAD_BUILD_SECRET` or
+obtaining a matching CUW. Bootloader SecurityAccess remains mandatory, but its
+separate `SEED_KEY_SECRET` is already recovered/verified for this firmware and
+the host deliberately accepts it through an environment/file input rather than
+hard-coding it into live tooling.
+
+The matching CUW still matters for dealer-flow provenance and for targets where
+these pinned fixtures do not transfer. It is not on the Sienna RAM-runtime
+critical path.
+
+Supported Sienna bootstrap:
 
 ```text
-matching CUW
-  -> obtain ECUAuthKey / ServiceAuthKey and original authenticated payload
-  -> use recovered CUW SecurityAccess construction
-  -> send the original payload unchanged
-  -> one successful 0x10F0
-  -> exploit post-auth raw substitution
+recovered boot SecurityAccess secret
+  -> programming session + SecurityAccess
+  -> DID 0203 setup; DID 0201/0202 = zero
+  -> upload pinned encrypted 4 KiB fixture
+  -> RID 10F0 passes CRC+CMAC
+  -> MEM-SAFE-001 post-auth raw substitution
   -> arbitrary boot-context RAM execution
 ```
 
-Modern CUW SecurityAccess construction is already recovered in
-`tooling/techstream.md`. A matching CUW credential pair should be sufficient to
-perform SecurityAccess without learning the ECU-family root secret. The exact
-`8965B4512000` pair remains unavailable locally.
-
-**Conclusion:** recovering `PAYLOAD_BUILD_SECRET` is not a prerequisite to this
-bootstrap. Acquiring a matching legitimate CUW/payload is the higher-value
-artifact.
+`exploit/ephemeral_runtime/build_substitution_plan.py` binds the RAM-dump fixture
+SHA directly before emitting substitutions.
 
 ## 9. Transition back to normal application
 
@@ -722,12 +751,14 @@ No RAM policy/result field was found that persistsently forces Gate-2 success.
 
 ### 5. E: pre-auth bootloader vulnerability
 
-**Rank: unnecessary unless matching CUW/payload acquisition fails.**
+**Rank: unnecessary for `8965B4512000`; still relevant only to transfer targets.**
 
 The current security/memory-safety audit has no verified primitive that bypasses
-the *first* authenticated payload. MEM-SAFE-001 is post-auth and already gives
-the needed execution upgrade. Do not spend broad effort on pre-auth bugs while
-a legitimate CUW path remains plausible.
+the *first* authenticated payload. It does not need one on this image: the
+repository already possesses public encrypted fixtures that satisfy the exact
+Sienna gate. MEM-SAFE-001 then gives the execution upgrade after their one
+successful `0x10F0`. Pre-auth research only regains priority on a target where
+neither the fixture nor known credential route transfers.
 
 ### 6. F: persistent CodeFlash patch
 
@@ -758,20 +789,20 @@ that bench proof exists.
 Static work now supports a complete runtime architecture, so the next steps
 should validate it in increasing-risk order rather than resume broad xref work.
 
-1. **Acquire the matching `8965B4512000` CUW/payload.** This closes the remaining
-   artifact dependency for the legitimate-authentication bootstrap and provides
-   the factory credential pair/payload.
-2. **Bench-prove transition + scheduler ownership with an inert runtime.** Use a
-   telemetry/canary build that performs the same boot/context/startup transition
-   and foreground scheduling but never calls `application_com_rx_indication`.
-   Verify retained execution, normal watchdog/tick behavior, and reset-to-stock.
-3. **Bench-prove one-shot marked-frame capture without steering delivery.** Log
+1. **Bench-prove transition + scheduler ownership with the inert runtime.** The
+   tracked `exploit/ephemeral_runtime/canary.c` performs the same
+   boot/context/startup transition and preserves stock `0x65750` whole; it never
+   calls `application_com_rx_indication`. Its audited build is 332 bytes and
+   increments heartbeat `FEBFFBF0`, which is readable through stock application
+   SID `0x23` via `application_rmba_probe.py --probe-ephemeral-canary`. Verify
+   heartbeat progression, normal watchdog/tick behavior, and reset-to-stock.
+2. **Bench-prove one-shot marked-frame capture without steering delivery.** Log
    queue descriptor/raw-buffer transitions for zero-MAC `0x2E4/0x131` and prove
    `active_mask` suppresses repeats across asynchronous pending ticks.
-4. **Enable the COM bridge on an isolated bench.** First verify the PDU update
+3. **Enable the COM bridge on an isolated bench.** First verify the PDU update
    counters and COM destinations, then perform the existing three-phase steering
    behavioral proof. Preserve timing, DTC, CAN, and reset evidence.
-5. **Only if the stock-COM bridge fails dynamically**, fall back to the earlier
+4. **Only if the stock-COM bridge fails dynamically**, fall back to the earlier
    pre-limiter `FEBEF184/FEBEF02A` direct-state injection architecture.
 
 ## 18. Reproducer
@@ -789,4 +820,9 @@ runtime architecture:
 - stock COM buffer/update-counter joins;
 - audited 704-byte, zero-relocation resident build and source/toolchain identity.
 
-Neither test claims hardware execution. The remaining proof class is dynamic.
+Neither test claims hardware execution. The tracked canary and
+`build_substitution_plan.py` now make the first dynamic proof reproducible:
+post-`0x10F0` raw-substitute the 332-byte inert runtime, write `FEBF0FD0 =
+FEBF0000` last, trigger the existing `0xFF00` callback path, and observe
+`FEBFFBF0` through read-only application RMBA. The remaining proof class is
+dynamic.

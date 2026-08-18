@@ -120,8 +120,10 @@ packages on the only original ECU.
 ### 7. Ephemeral SecOC scheduler bridge
 
 The static architecture is now complete enough to stop searching for a stock
-post-init callback. One legitimate authenticated payload plus MEM-SAFE-001 gives
-boot-context RAM code; `FEBF0000..FEBF0307` is retained application-RWX; and the
+post-init callback. On `8965B4512000`, the pinned public encrypted RAM-dump
+fixture already satisfies the exact authenticated 4 KiB payload gate with zero
+DID-0201/0202 inputs; after its one successful `0x10F0`, MEM-SAFE-001 gives
+boot-context RAM code. `FEBF0000..FEBF0307` is retained application-RWX, and the
 pinned callback-free runtime fits there at 704 bytes with 72 bytes headroom.
 The runtime reproduces stock startup, owns the TAUJ0-CH3 foreground schedule,
 and bridges only marked zero-MAC `0x2E4/0x131` through stock
@@ -130,11 +132,13 @@ normal COM/system-mode/control task.
 
 Highest-value next evidence, in order:
 
-1. acquire the matching `8965B4512000` CUW/payload and factory credential pair;
-2. on an isolated bench, run an inert scheduler-shell build and prove normal
-   foreground timing plus hardware-reset return to stock;
-3. prove one-shot marked-frame queue capture with no COM delivery;
-4. enable stock-COM delivery and run the existing three-phase behavioral proof.
+1. on an isolated bench, use the audited 332-byte
+   `exploit/ephemeral_runtime/canary.c` build; post-auth substitute it, trigger
+   the existing FF00 callback path, and read heartbeat `FEBFFBF0` through
+   `application_rmba_probe.py --probe-ephemeral-canary`; prove foreground
+   progression plus hardware-reset return to stock;
+2. prove one-shot marked-frame queue capture with no COM delivery;
+3. enable stock-COM delivery and run the existing three-phase behavioral proof.
 
 Do not spend more static effort on generic callback hunting unless one of those
 dynamic steps falsifies a concrete invariant. Canonical:
