@@ -9,6 +9,7 @@ them.
 | Bootloader SecurityAccess + payload gate | Unlock programming services; authenticated download | [bootloader-payload-gate.md](bootloader-payload-gate.md) |
 | Application SecurityAccess | Extended-session level 2 unlock | [application-security-access.md](application-security-access.md) |
 | SecOC | Runtime CAN message authentication and ICU-S software-path assessment | [secoc/README.md](secoc/README.md) |
+| Ephemeral SecOC bypass | Fail-stock RAM-only bootstrap, lifetime, hook, and internal-command feasibility | [ephemeral-secoc-bypass.md](ephemeral-secoc-bypass.md) |
 | Memory-safety audit | Externally reachable input-handler vulnerabilities | [memory-safety-audit.md](memory-safety-audit.md) |
 
 Dealer/tooling key-provisioning evidence is separate from those firmware

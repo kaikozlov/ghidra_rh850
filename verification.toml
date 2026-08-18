@@ -562,6 +562,23 @@ paths = [
 ]
 oracle = "cfg_dataflow"
 
+[suite.ephemeral_secoc_bypass]
+tests = ["tests/verify_ephemeral_secoc_bypass.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_ephemeral_secoc_bypass.py",
+  "docs/security/ephemeral-secoc-bypass.md",
+  "docs/security/README.md",
+  "docs/communications/xcp-command-dispatch.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "exploit/findings_coverage.json",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "data/generated/decompilations.jsonl",
+]
+
 [suite.ram_overlays]
 tests = ["tests/verify_ram_overlays.py"]
 paths = ["data/ram_overlay_map.csv"]

@@ -117,6 +117,27 @@ cross-bank completion-attribution bug. What is missing is production context:
 Prefer passive capture of a legitimate flow. Do not synthesize random command-8
 packages on the only original ECU.
 
+### 7. Ephemeral SecOC bootstrap / post-init trigger
+
+Static work now proves the useful half of a fail-stock runtime architecture:
+one legitimate authenticated payload plus MEM-SAFE-001 yields arbitrary
+boot-context RAM code; direct `boot_application_handoff @ 0x13B0` can preserve
+a 0x308-byte `FEBF0000..FEBF0307` application-RWX pocket. The two obvious RAM
+callbacks are explicitly reset during application startup, so the missing piece
+is a post-init control transfer into retained RAM.
+
+Highest-value next evidence, in order:
+
+1. acquire the matching `8965B4512000` CUW/payload and factory credential pair;
+2. on an isolated bench, prove direct-handoff retention with a harmless RAM
+   canary before attempting executable state;
+3. only then discriminate post-init control-transfer candidates; do not repeat
+   the already-closed direct-reference sweep of the XCP window.
+
+If resident execution is ultimately recovered, prefer injection at the
+pre-limiter `FEBEF184` / `FEBEF02A` command ingress rather than low-level motor
+state. Canonical: [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md).
+
 ## P2 — useful when a specific dependency appears
 
 - **Reset-window replay / future-sync poisoning / tag-guess throughput / FD

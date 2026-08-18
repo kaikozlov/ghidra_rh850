@@ -1542,3 +1542,21 @@ the mistakes are not re-made.
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.7;
   `tests/verify_lochuan_patch_semantics.py`;
   `external-references.lock.json`.
+
+### CORR-067 — `0x1426` is a zero-trip clear-shaped loop, not an XCP-window startup clear
+
+- **Wrong:** COM-005 and `xcp-command-dispatch.md` described `0x1426` as a
+  startup clear of the `FEBF7C00..` XCP/shadow window.
+- **Right:** `0x1426` loads `FEBF7C00` as the candidate start, while `0x1432`
+  loads `FEBE7000` as the endpoint. The loop uses `cmp endpoint,start` followed
+  by the same unsigned-lower `bc` form used by the real copy/clear loops. Since
+  `FEBF7C00 > FEBE7000`, control does not enter the `0x142E st.w r0,[ep]` body.
+  The effective reset-time upper-LocalRAM clear begins separately at `0x143C`
+  with `FEBE8000` and runs to the `FEC00000` boundary.
+- **Impact:** this correction does not make the XCP write window persist across
+  application initialization: `FUN_0006263E` still overwrites
+  `FEBF7C00..FEBFF9EF` from CodeFlash `0x10000..0x17DEF`. It does clarify the
+  exact reset/lifetime model used by the ephemeral SecOC investigation.
+- **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
+  [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md);
+  `tests/verify_ephemeral_secoc_bypass.py`.

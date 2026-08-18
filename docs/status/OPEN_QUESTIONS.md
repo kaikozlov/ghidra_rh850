@@ -68,6 +68,19 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## SecOC
 
+- **Ephemeral post-initialization control transfer.** ARCH-013/SECOC-060 now
+  prove a reset-cleared `FEBF0000..FEBF0307` retention pocket that survives a
+  direct `boot_application_handoff @ 0x13B0` path and remains supervisor R/W/X
+  under the application MPU. Existing authenticated execution plus MEM-SAFE-001
+  also closes the bootstrap after one legitimate accepted payload. What remains
+  unresolved is a stock control-transfer trigger **after application startup**:
+  the obvious ICU-S callback `FEBF1194` and parser callback `FEBE5600` are both
+  explicitly zeroed by startup initialization, and the XCP window has no
+  recovered call consumer. Do not repeat the same direct-xref sweep without new
+  evidence. Highest-value proof is first a harmless retained-RAM canary across
+  direct handoff, then a dynamic discriminator for a post-init computed-call,
+  scheduler, vector, or vulnerability route. Canonical:
+  [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md).
 - **Cross-calibration semantic patch resolver validation.** SECOC-045 now
   rediscovers the Sienna authenticated-delivery gate from a fresh unannotated
   CodeFlash-only import with no target/MAC-result/CRC addresses embedded in the
