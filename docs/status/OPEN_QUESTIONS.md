@@ -68,19 +68,19 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## SecOC
 
-- **Ephemeral post-initialization control transfer.** ARCH-013/SECOC-060 now
-  prove a reset-cleared `FEBF0000..FEBF0307` retention pocket that survives a
-  direct `boot_application_handoff @ 0x13B0` path and remains supervisor R/W/X
-  under the application MPU. Existing authenticated execution plus MEM-SAFE-001
-  also closes the bootstrap after one legitimate accepted payload. What remains
-  unresolved is a stock control-transfer trigger **after application startup**:
-  the obvious ICU-S callback `FEBF1194` and parser callback `FEBE5600` are both
-  explicitly zeroed by startup initialization, and the XCP window has no
-  recovered call consumer. Do not repeat the same direct-xref sweep without new
-  evidence. Highest-value proof is first a harmless retained-RAM canary across
-  direct handoff, then a dynamic discriminator for a post-init computed-call,
-  scheduler, vector, or vulnerability route. Canonical:
-  [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md).
+- **Ephemeral scheduler-bridge hardware validation.** ARCH-013/014 and
+  SECOC-060/061 now close the static architecture without a post-init stock
+  callback: the audited 704-byte runtime performs the stock boot/context/startup
+  sequence, remains foreground scheduler owner, snapshots marked pre-verification
+  `0x2E4/0x131`, runs stock SecOC, and conditionally re-delivers through stock
+  `application_com_rx_indication` before the normal COM/system-mode/control
+  task. What remains is dynamic: obtain the matching `8965B4512000` CUW/payload,
+  first prove an inert scheduler shell and reset-to-stock behavior, then prove
+  one-shot queue capture, then enable COM delivery on an isolated bench. Do not
+  resume generic callback/xref searching unless dynamic behavior falsifies a
+  specific static assumption. Canonical:
+  [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md);
+  `exploit/ephemeral_runtime/`.
 - **Cross-calibration semantic patch resolver validation.** SECOC-045 now
   rediscovers the Sienna authenticated-delivery gate from a fresh unannotated
   CodeFlash-only import with no target/MAC-result/CRC addresses embedded in the

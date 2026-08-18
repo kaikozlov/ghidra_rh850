@@ -1560,3 +1560,34 @@ the mistakes are not re-made.
 - **Canonical:** [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md);
   [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md);
   `tests/verify_ephemeral_secoc_bypass.py`.
+
+### CORR-068 — a post-init stock callback is not required for ephemeral residency
+
+- **Prior boundary:** ARCH-013/SECOC-060 correctly found no stock callback,
+  exception pointer, scheduler slot, or request-derived function pointer that
+  survives application startup and then transfers control into retained
+  `FEBF0000..FEBF0307`. The initial architecture therefore treated a new
+  post-initialization control-transfer primitive as the remaining blocker.
+- **Right:** that negative remains true for **stock re-entry**, but it is not an
+  end-to-end architectural blocker. `application_cpu_context_init @ 0x70524`
+  returns through `lp` after installing application `EBASE/INTBP/GP/TP/SP`; the
+  remainder of stock startup is 21 consecutive `jarl disp22` calls plus final
+  init and `ei`; and `application_foreground_cyclic_loop @ 0x64FCC` is a small
+  top-level cooperative scheduler. A boot-context RAM payload can reproduce
+  those stock transitions and remain the foreground scheduler owner instead of
+  ever entering `0x64FCC`.
+- **SecOC consequence:** `FUN_65750` provides a natural bridge boundary. The RAM
+  scheduler can snapshot a newly queued marked `0x2E4`/`0x131` secured record,
+  run stock communication/SecOC verification and cleanup, then conditionally
+  call stock `application_com_rx_indication @ 0x7C640` before the later
+  COM/system-mode/control task. No stock callback into RAM is needed.
+- **Constructibility:** the pinned RH850 build is 704 bytes with zero
+  relocations, fitting the verified 776-byte retained application-RWX pocket
+  with 72 bytes headroom.
+- **Evidence boundary:** this corrects the *architectural conclusion*, not the
+  earlier callback-negative firmware facts. The scheduler bridge remains
+  unobserved on hardware.
+- **Canonical:** [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md);
+  [FINDINGS.md](FINDINGS.md) ARCH-014 / SECOC-061;
+  `tests/verify_ephemeral_runtime.py`;
+  `exploit/ephemeral_runtime/audited_build.json`.

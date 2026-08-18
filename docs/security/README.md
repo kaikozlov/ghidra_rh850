@@ -18,6 +18,12 @@ Techstream online flow is in
 [mackey-registration.md](mackey-registration.md). Its relationship to SecOC is
 not yet proven.
 
+The RAM-only fail-stock alternative to the persistent SecOC patch is assessed in
+[ephemeral-secoc-bypass.md](ephemeral-secoc-bypass.md). Its current architecture
+uses a callback-free retained foreground scheduler and stock COM delivery; the
+tracked 704-byte runtime is under `exploit/ephemeral_runtime/` and remains
+unvalidated on hardware.
+
 ## Important distinctions
 
 - Bootloader SA uses `SEED_KEY_SECRET` (`0xBFE8`) and

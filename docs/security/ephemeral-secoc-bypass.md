@@ -16,10 +16,14 @@ stock boot
   -> reset/power cycle restores stock behavior
 ```
 
-The important result is narrower than "RAM execution exists." Bootloader RAM
-execution and a reset-cleared application-RWX retention pocket are both
-recovered. What is **not** recovered is a stock post-initialization control
-transfer into that pocket. That is the remaining architectural blocker.
+The important result is now stronger than "RAM execution exists." Bootloader
+RAM execution, a reset-cleared application-RWX retention pocket, and a complete
+**callback-free foreground scheduler shell** are recovered. The payload does not
+need stock application code to rediscover a RAM function pointer after startup:
+it performs the stock transition/initialization sequence itself, then remains
+the top-level foreground scheduler and inserts one bounded bridge between stock
+SecOC processing and stock COM/control processing. The remaining boundary is
+**dynamic bench validation**, not a missing static control-transfer primitive.
 
 Evidence labels below follow `AGENTS.md`: **verified**, **recovered**,
 **bounded**, **hypothesis**, and **disproved**.
@@ -59,7 +63,21 @@ Evidence labels below follow `AGENTS.md`: **verified**, **recovered**,
    validated `FEBF0000..FEBF0FFF` page. Consequently a legitimate accepted
    Toyota payload is sufficient to bootstrap **arbitrary boot-context RAM
    execution without knowing `PAYLOAD_BUILD_SECRET`**.
-8. **Bounded:** the matching `8965B4512000` CUW / factory payload is not present
+8. **Verified / generated-artifact:** the callback-free runtime is constructible
+   inside the retained pocket. The pinned RH850 build is 704 bytes (`0x2C0`),
+   entry offset 0, with zero relocations and 72 bytes of headroom inside
+   `FEBF0000..FEBF0307`. It reproduces stock startup from the firmware's own 21
+   consecutive `jarl disp22` instructions and preserves the stock TAUJ0 CH3
+   foreground poll/clear sequence.
+9. **Verified:** the stock scheduler exposes an exact splice for steering
+   delivery. `FUN_65750` orders `0x68C0C -> 0x791C4 -> 0x96BAC -> 0x68DE6 ->
+   0x57AC2 -> 0x6547C`; `0x791C4` reaches SecOC verify/Gate-2 processing, while
+   `0x57AC2` runs the later COM/system-mode/control path. SecOC records 1/2 copy
+   received `0x2E4`/`0x131` secured frames into `FEBE5490`/`FEBE5498` before
+   verification. A resident scheduler can snapshot a marked frame, allow stock
+   verification/rejection/cleanup to run, then call stock
+   `application_com_rx_indication @ 0x7C640` before `0x57AC2`.
+10. **Bounded:** the matching `8965B4512000` CUW / factory payload is not present
    in the local Techstream corpus, so the OEM RAM driver's private command
    interface cannot be recovered from current artifacts. This does not block
    the MEM-SAFE-001 bootstrap once any matching payload can be accepted.
@@ -74,20 +92,29 @@ matching CUW credentials / valid Toyota payload
   -> one valid authenticated 0x10F0
   -> MEM-SAFE-001 raw substitution
   -> arbitrary boot-context code in FEBF0000..0FFF
-  -> direct boot_application_handoff @ 0x13B0 (no hardware reset)
-  -> retain code/data in FEBF0000..0307
-  -> application initialization completes
-  -> ??? post-init stock control-transfer trigger
-  -> temporary hook or internal-command shim
+  -> stock boot transition prefix + boot validity check
+  -> application_cpu_context_init @ 0x70524
+  -> replay the stock startup JARL sequence @ 0x62760..0x627B0
+  -> enable interrupts
+  -> retained 704-byte foreground scheduler shell in FEBF0000..02BF
+       -> preserve stock foreground task order
+       -> snapshot newly queued zero-MAC 0x2E4 / 0x131
+       -> run stock communication + SecOC verification/cleanup
+       -> if stock did not already deliver it:
+            application_com_rx_indication(PDU, saved secured frame)
+       -> run stock COM unpack/system-mode/control path
+       -> continue remaining stock foreground tasks
+  -> hardware/watchdog/power reset clears RAM and returns to stock
 ```
 
-Everything through the retained R/W/X pocket is statically supported. The
-`???` remains unresolved. No recovered writable callback, exception pointer,
-scheduler entry, or request-derived function pointer survives startup and then
-jumps into attacker-selected RAM.
+The former `???` is resolved without finding a persistent callback: **the RAM
+payload never relinquishes top-level foreground control**. It calls the stock
+application functions in the same order and inserts the bridge at the boundary
+already present inside `FUN_65750`.
 
-That means an ephemeral bypass is **feasible in storage/execution terms but not
-yet end-to-end proven**.
+This makes the RAM-only bypass **statically end-to-end constructible**. It is
+still not a live result: direct transition, timing, one-shot record capture,
+COM delivery, and steering behavior remain isolated-bench proofs.
 
 ## 2. Correction: the persistent Gate-2 patch address
 
@@ -321,11 +348,23 @@ zeroed during startup as described above.
 
 The foreground design is cooperative rather than an RTOS with a writable RAM
 task table. Recovered system-mode and COM callback dispatchers use fixed
-CodeFlash callback tables/configuration. The whole-corpus indirect-call sweep
-was reviewed for functions that also directly reference LocalRAM; it did not
-recover a scheduler/task slot whose post-init target is both RAM-resident and
-attacker-selectable. This is a bounded static negative, not a claim that a
-computed pointer or corruption path cannot exist at runtime.
+CodeFlash callback tables/configuration. The whole-corpus computed-call census
+also closed additional RAM-backed targets beyond the two obvious callbacks:
+
+- `FEBF7704` is called at `0x72E56`, but every recovered call path runs
+  `FUN_72A9C -> FUN_72E5E` first, replacing the cell with fixed CodeFlash
+  `0x75664` or `0x7575A`;
+- ICU-S lower callbacks `FEBF117C/1180` are explicitly zeroed by `FUN_8735E`;
+- crypto driver callbacks `FEBF131C/1320/1324` are reset by
+  `icus_driver_state_initialize @ 0x89360`;
+- crypto job pointer families around `FEBF1370..139C` are reset by the startup
+  initializers selected by `FUN_88C28`.
+
+The reusable investigation scripts are
+`ghidra/scripts/investigate/ExportIndirectControlTransfers.java` and
+`ClassifyComputedCallTargets.java`. The negative remains bounded against
+unmodeled corruption/runtime aliasing, but no stock callback is needed by the
+final scheduler-owned architecture.
 
 ### 5.4 Search conclusion
 
@@ -337,7 +376,9 @@ requirements:
 3. can be made to point to the retained/XCP RAM region from the available
    boot/application inputs.
 
-This is the central missing primitive for a RAM function hook.
+That remains the conclusion for a **stock callback hook**. CORR-068 records why
+it is no longer an architectural blocker: the retained payload can own the
+application foreground schedule itself.
 
 ## 6. RAM-executed code already present in the firmware
 
@@ -351,7 +392,7 @@ call.
 This proves ordinary SRAM execution is a supported firmware design, not merely
 an MPU-theory possibility.
 
-### 6.2 Application executable RAM: confirmed, stock consumer missing
+### 6.2 Application executable RAM: confirmed; stock consumer still absent
 
 The XCP/shadow window `FEBF7C00..FEBFFBFF` has supervisor execute permission and
 is externally writable through the recovered XCP `F0 DOWNLOAD` / `EC
@@ -468,23 +509,52 @@ Application startup then initializes CPU context, MPU, drivers, SecOC, CAN, and
 normal tasks. The pocket remains within an application supervisor-RWX MPU
 region.
 
-### 9.3 The unresolved problem is post-init re-entry
+### 9.3 Post-init re-entry is unnecessary: retain scheduler ownership
 
-Application startup intentionally destroys the known boot-preseedable callback
-states and overwrites the XCP shadow region. No retained pointer-to-pocket
-trigger has been recovered.
+Application startup does intentionally destroy the known boot-preseedable
+callback states and overwrite the XCP shadow region. The exhaustive computed-call
+audit also closes additional attractive cells: `FEBF7704` is overwritten with
+fixed CodeFlash targets immediately before its only call; `FEBF117C/1180`,
+`FEBF1194`, `FEBF131C/1320/1324`, and the `FEBF1370..139C` crypto-job pointer
+families are reset by their startup initializers.
 
-A successful end-to-end design therefore still needs one of:
+Those negatives do **not** prevent a resident runtime. The stock application
+transition is sufficiently flat that the RAM payload can perform it directly:
 
-- a writable post-init callback/function pointer with a controllable target;
-- a scheduler/task indirection that can be registered after startup;
-- an exception/vector redirection that remains legal after the application sets
-  `EBASE/INTBP`;
-- a second application-mode control-flow vulnerability;
-- a runtime trigger that reaches retained code through a computed address.
+1. call the four stock boot transition initializers and `boot_validity_check`;
+2. call `application_cpu_context_init @ 0x70524`, which installs application
+   `INTBP/EBASE/GP/TP/SP` and returns through `lp`;
+3. decode and call the 21 consecutive stock `jarl disp22` instructions at
+   `0x62760..0x627B0`;
+4. call final initializer `0x6F15A(0)` and execute `ei`;
+5. remain resident and reproduce the top-level foreground loop instead of
+   entering stock `application_foreground_cyclic_loop @ 0x64FCC`.
 
-Until one is recovered or dynamically demonstrated, the ephemeral code-hook
-architecture is **bounded, not operational**.
+The top-level stock loop is small: it polls TAUJ0 CH3 and calls a short sequence
+of coarse tasks. The audited resident build implements that sequence and fits
+entirely in the 0x308-byte retained application-RWX pocket.
+
+**Static conclusion:** no post-initialization callback is required. The
+callback-free scheduler-shell architecture is constructible; hardware execution
+remains unobserved.
+
+### 9.4 Audited resident build
+
+Tracked implementation: `exploit/ephemeral_runtime/`.
+
+Pinned build result:
+
+```text
+entry offset: 0
+.text size:   704 bytes / 0x2C0
+retained max: 776 bytes / 0x308
+headroom:     72 bytes
+relocations:  0
+sha256:       8f486d36ae38d233165563ad2cc4a71d006cf5c8cf9a876345a3b6ab72f10495
+```
+
+This is **generated-artifact evidence**, not a bench observation. The builder
+pins the Docker image content ID and rejects oversized or relocatable output.
 
 ## 10. Data-only alternatives
 
@@ -510,72 +580,81 @@ available at the correct time; it is not an independent bypass.
 The attractive RAM callbacks are either actively initialized to zero or written
 from fixed tables before use. No retained arbitrary routing pointer was found.
 
-## 11. Internal steering-command injection
+## 11. Stock COM delivery is the preferred steering injection boundary
 
-If a resident application shim is eventually obtained, injecting **before the
-stock steering limiters** is preferable to forcing SecOC success or writing
-low-level motor-current state.
+Resident execution makes a cleaner hook available than writing
+`FEBEF184/FEBEF02A` directly: reuse the stock COM receive-delivery API.
 
-Recovered protected `0x2E4` torque path:
+SecOC queue storage for the two recovered steering profiles is:
 
-```text
-FEBE7F94
-  -> FEBEF184
-  -> system_mode_telemetry_snapshot @ 0xBA43A
-  -> FEBEAE20
-  -> 0xC853A clamp/gain
-  -> FEBEBF80
-  -> 0xC85B6 saturation/rate limit
-  -> FEBEBF9A / FEBEBF84
-  -> FEBEBFA2
-```
+| CAN | record | secured raw buffer | descriptor | COM PDU | COM update counter |
+|---:|---:|---:|---:|---:|---:|
+| `0x2E4` | 1 | `FEBE5490..5497` | `FEBE545A` | 6 | `FEBE5332` |
+| `0x131` | 2 | `FEBE5498..549F` | `FEBE5462` | 26 | `FEBE5346` |
 
-Request/mode path:
+`secoc_rx_queue_secured_pdu` copies the received secured frame into those raw
+buffers **before** CMAC verification. The top-level task `FUN_65750` then calls:
 
 ```text
-FEBE7F98
-  -> FEBEF02A
-  -> FEBEACFF
-  -> 0xCA354 source arbitration
-  -> FEBEC137
-  -> 0xCA3F8 torque-mode selection
-  -> FEBEC13D = external-request
-  -> 0xCA6B8 selects common command at FEBEC144
+0x68C0C
+0x791C4     communication stack; reaches SecOC verify/Gate 2 and cleanup
+0x96BAC
+0x68DE6
+0x57AC2     later COM unpack + system-mode/control work
+0x6547C
 ```
 
-A future shim should therefore prefer the pre-limiter copied inputs
-`FEBEF184` (torque) and `FEBEF02A` (request/mode) rather than writing
-`FEBEBFA2`, `FEBEC144`, or any d/q-current/PWM cell. That retains the recovered
-stock clamp, rate-limit, source arbitration, driver/fault logic downstream of
-the normal input-copy layer.
+The resident runtime therefore:
 
-This is an **architecture recommendation, not a live mutator implementation**.
-The separate static actuation study still has no proved direct join from this
-command cone into the recovered d/q reference producers; dynamic isolated-bench
-validation remains necessary.
+1. snapshots a newly queued selected frame before `0x791C4`;
+2. runs `0x791C4/0x96BAC/0x68DE6` unchanged;
+3. if stock processing did not already deliver the PDU, calls
+   `application_com_rx_indication @ 0x7C640` with the saved eight-byte frame;
+4. enters `0x57AC2`, allowing the stock generated COM unpackers and normal
+   steering pipeline to consume it.
 
-A resident shim would also need its own freshness/timeout contract so loss of
-comma input causes it to stop injecting and/or request a reset rather than hold
-a stale command.
+The local-bridge marker is **MAC28 all zero**: byte-4 low nibble plus bytes 5..7,
+matching the existing MAC28-only behavioral-proof transform. Authentic payload
+bytes and byte-4 high transmitted-freshness nibble are preserved.
 
-## 12. Can comma inject below SecOC?
+A saved pre-delivery COM update counter prevents duplicate delivery if stock
+SecOC unexpectedly accepted the frame. An `active_mask` edge-detects a queue
+record that remains pending across multiple foreground ticks, preventing stale
+replay while an asynchronous operation is outstanding. When comma traffic
+stops, no fresh marked record exists, no bridge call occurs, and the stock COM
+timeout path remains responsible for command expiry.
 
-Conceptually yes **if** the missing resident-code trigger is solved:
+This is preferable to direct internal-state writes because it preserves an even
+larger portion of the stock receive/control pipeline: COM validity/update state,
+normal unpacking, source arbitration, clamp/rate-limit, plausibility, and fault
+logic all remain downstream.
+
+The prior `FEBEF184/FEBEF02A` recommendation remains a useful fallback if the
+COM bridge proves dynamically unsuitable, but it is no longer the primary
+architecture.
+
+## 12. Comma does not need a new command transport
+
+The static implementation can reuse the **ordinary protected steering CAN
+frames themselves**:
 
 ```text
-comma/panda command channel
-  -> application RAM mailbox (XCP window is one possible store)
-  -> resident shim
-  -> FEBEF184 / FEBEF02A
-  -> stock downstream command pipeline
+comma/panda sends normal 0x2E4 / 0x131
+  -> authentic payload fields populated normally
+  -> MAC28 deliberately zeroed as local bridge marker
+  -> EPS normal CAN/SecOC ingress queues secured frame
+  -> resident scheduler snapshots it before verification
+  -> stock SecOC rejects/cleans it
+  -> resident scheduler re-delivers through stock Com_RxIndication
+  -> stock COM unpack/system-mode/control pipeline
 ```
 
-This is cleaner than manufacturing authenticated `0x2E4` frames because it
-bypasses the CAN/SecOC entrance while preserving the stock pre-actuation command
-processing.
+This avoids a new mailbox, XCP command channel, or proprietary side protocol.
+It also leaves unmarked/valid stock SecOC traffic on the original path.
 
-It is not currently deployable because the resident shim lacks a proved
-post-init execution trigger.
+The mechanism is **not yet deployable evidence**: live CAN queue timing,
+foreground jitter, and steering behavior still require isolated-bench
+validation.
 
 ## 13. CAN proxy / "comma as EPS"
 
@@ -594,9 +673,9 @@ by the static graph and was not pursued.
 | Candidate | If comma never installs it | If comma dies after install | Hardware/watchdog reset | Persistent flash risk |
 |---|---|---|---|---|
 | data-only verifier preseed | stock | not viable | stock | none |
-| retained RAM code + post-init hook | stock | shim policy-dependent; should timeout/reset | stock | none |
-| internal-command shim | stock | requires explicit freshness/fail-silent strategy | stock | none |
-| authenticated-loader bootstrap | stock/programming session only until handoff | depends on installed shim | stock | none if flash operations are not invoked |
+| retained RAM scheduler + COM bridge | stock | no fresh marked frame -> no bridge delivery; stock COM timeout remains active | stock | none |
+| direct internal-command fallback | stock | requires explicit freshness/fail-silent strategy | stock | none |
+| authenticated-loader bootstrap | stock/programming session only until transition | depends on installed RAM runtime | stock | none if flash operations are not invoked |
 | persistent Gate-2 patch | modified firmware | modified firmware | remains patched | yes |
 
 A future implementation should never use the flash-driver write/erase commands
@@ -605,31 +684,35 @@ SecurityAccess and payload acceptance.
 
 ## 15. Ranked architecture recommendation
 
-### 1. D + B/C: authenticated Toyota bootstrap -> retained RAM -> runtime hook
+### 1. D + scheduler-owned COM bridge
 
-**Rank: best supported direction, missing one post-init transfer primitive.**
+**Rank: best supported RAM-only direction; statically constructible, bench proof pending.**
 
-D is largely solved statically by existing authenticated execution plus
-MEM-SAFE-001. The retained `FEBF0000..0307` R/W/X pocket and direct handoff solve
-storage/lifetime. The missing part is B: a post-init call into retained RAM. If
-B is recovered, C (internal command injection before stock limiters) is the
-preferred payload behavior.
+D is solved statically by existing authenticated execution plus MEM-SAFE-001.
+The retained `FEBF0000..0307` R/W/X pocket provides clear-on-reset persistence,
+and the 704-byte callback-free runtime fits with 72 bytes of headroom. By owning
+the top-level foreground schedule, it removes the former post-init callback
+dependency. Bridging marked `0x2E4/0x131` through stock
+`application_com_rx_indication` preserves more stock behavior than direct state
+writes.
 
-### 2. C: internal steering injection
+### 2. C: direct internal steering injection
 
-**Rank: preferred behavior once resident execution exists.**
+**Rank: fallback if the stock-COM bridge is dynamically unsuitable.**
 
-Use `FEBEF184` / `FEBEF02A` or an equivalently early stock command ingress, not
-low-level motor-current state. This avoids pretending a MAC passed and retains
-more of the stock downstream command processing.
+`FEBEF184` / `FEBEF02A` remain the preferred direct-state fallback rather than
+low-level motor-current state. They preserve clamp/rate-limit/source-arbitration
+logic, but the COM bridge is now cleaner because it also preserves the stock COM
+validity/update and unpack layers.
 
-### 3. B: RAM function hook specifically around SecOC
+### 3. B: stock RAM callback/function hook
 
-**Rank: technically attractive, no stock hook found yet.**
+**Rank: unnecessary for the primary architecture; static candidates closed.**
 
-The retained application-RWX pocket makes it possible in principle, but both
-obvious callback families are startup-reset. A new post-init control transfer
-must be found.
+The known RAM-backed computed-call targets are startup-reset or overwritten from
+fixed CodeFlash descriptors before use. This no longer blocks RAM residency
+because the scheduler-shell path never requires stock code to call back into
+RAM.
 
 ### 4. A: data-only SecOC bypass
 
@@ -650,10 +733,11 @@ a legitimate CUW path remains plausible.
 
 **Rank: proven fallback, worst failure semantics.**
 
-The corrected Gate-2 predicate patch remains the only currently established
-end-to-end bypass mechanism, but it is persistent and carries flash/recovery
-risk. It should remain the fallback while the runtime-transfer dependency is
-investigated.
+The corrected Gate-2 predicate patch remains the only **live-field-corroborated**
+bypass mechanism in this repository, but it is persistent and carries
+flash/recovery risk. The RAM scheduler bridge is statically complete but has not
+run on hardware, so the persistent patch remains the operational fallback until
+that bench proof exists.
 
 ## 16. Explicitly ruled out / bounded approaches
 
@@ -667,37 +751,42 @@ investigated.
 | pure CAN proxy / EPS impersonation | disproved as SecOC solution | real EPS still verifies inbound protected steering frames |
 | OEM driver has arbitrary SRAM write/call | bounded / unknown | matching OEM payload absent from local artifacts |
 | retained `FEBF0000..0307` pocket has no computed/DMA owner | bounded | direct-ref negative only; needs dynamic canary proof |
+| stock post-init callback is required | disproved as architecture requirement | callback-free runtime owns the application foreground schedule |
 
 ## 17. Highest-value next experiments
 
-Static work is exhausted enough that the next steps should be discriminating,
-not another generic xref sweep.
+Static work now supports a complete runtime architecture, so the next steps
+should validate it in increasing-risk order rather than resume broad xref work.
 
-1. **Acquire the matching `8965B4512000` CUW/payload.** This closes the only
+1. **Acquire the matching `8965B4512000` CUW/payload.** This closes the remaining
    artifact dependency for the legitimate-authentication bootstrap and provides
-   the actual factory credential pair/payload.
-2. **Bench-prove direct-handoff retention with a harmless canary.** After an
-   accepted payload/raw-substitution sequence, place a non-executable marker in
-   `FEBF0000..0307`, invoke `0x13B0` without hardware reset, then observe the
-   marker from an application read-only channel. Do not start with steering.
-3. **Search dynamically for a post-init call primitive.** If XCP is physically
-   reachable, use it first as a read-only observer. Any future control-transfer
-   experiment should target inert instrumentation, not torque state.
-4. **Only after resident execution is independently proved**, prototype a
-   timeout/freshness-controlled shim against pre-limiter internal command state
-   on an isolated bench.
+   the factory credential pair/payload.
+2. **Bench-prove transition + scheduler ownership with an inert runtime.** Use a
+   telemetry/canary build that performs the same boot/context/startup transition
+   and foreground scheduling but never calls `application_com_rx_indication`.
+   Verify retained execution, normal watchdog/tick behavior, and reset-to-stock.
+3. **Bench-prove one-shot marked-frame capture without steering delivery.** Log
+   queue descriptor/raw-buffer transitions for zero-MAC `0x2E4/0x131` and prove
+   `active_mask` suppresses repeats across asynchronous pending ticks.
+4. **Enable the COM bridge on an isolated bench.** First verify the PDU update
+   counters and COM destinations, then perform the existing three-phase steering
+   behavioral proof. Preserve timing, DTC, CAN, and reset evidence.
+5. **Only if the stock-COM bridge fails dynamically**, fall back to the earlier
+   pre-limiter `FEBEF184/FEBEF02A` direct-state injection architecture.
 
 ## 18. Reproducer
 
-`tests/verify_ephemeral_secoc_bypass.py` pins the current static boundary:
+`tests/verify_ephemeral_secoc_bypass.py` pins the RAM-lifetime/MPU/callback
+boundary. `tests/verify_ephemeral_runtime.py` independently pins the callback-free
+runtime architecture:
 
-- reset clear geometry;
-- direct handoff / application entry;
-- application overwrite of the XCP shadow;
-- retained-pocket direct-reference bound;
-- MPU execute permission;
-- exact `FEBE555C` producer/consumer graph;
-- corrected Gate-2 predicate bytes;
-- callback reset/initialization behavior.
+- stock boot transition and application CPU-context install;
+- exact 21-entry startup `jarl disp22` sequence;
+- foreground TAUJ0 CH3 and top-level task order;
+- `FUN_65750` splice ordering;
+- communication -> SecOC verify/Gate-2 call chain;
+- pre-verification secured-record buffers/descriptors for `0x2E4/0x131`;
+- stock COM buffer/update-counter joins;
+- audited 704-byte, zero-relocation resident build and source/toolchain identity.
 
-It intentionally does **not** assert that an end-to-end post-init hook exists.
+Neither test claims hardware execution. The remaining proof class is dynamic.

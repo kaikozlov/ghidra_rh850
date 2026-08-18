@@ -48,6 +48,7 @@ verify-exploit:
 	$(PYTHON) tools/fast_verify.py --suite exploit_predicate_semantics
 	$(PYTHON) tools/fast_verify.py --suite secoc_manifest_patcher
 	$(PYTHON) tools/fast_verify.py --suite codeflash_dumper
+	$(PYTHON) tools/fast_verify.py --suite ephemeral_runtime
 	$(PYTHON) tools/fast_verify.py --suite secoc_command5_experiment
 	$(PYTHON) tools/fast_verify.py --suite secoc_mac28_behavioral_proof
 	$(PYTHON) tools/fast_verify.py --suite exploit_followups

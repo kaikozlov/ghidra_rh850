@@ -117,26 +117,29 @@ cross-bank completion-attribution bug. What is missing is production context:
 Prefer passive capture of a legitimate flow. Do not synthesize random command-8
 packages on the only original ECU.
 
-### 7. Ephemeral SecOC bootstrap / post-init trigger
+### 7. Ephemeral SecOC scheduler bridge
 
-Static work now proves the useful half of a fail-stock runtime architecture:
-one legitimate authenticated payload plus MEM-SAFE-001 yields arbitrary
-boot-context RAM code; direct `boot_application_handoff @ 0x13B0` can preserve
-a 0x308-byte `FEBF0000..FEBF0307` application-RWX pocket. The two obvious RAM
-callbacks are explicitly reset during application startup, so the missing piece
-is a post-init control transfer into retained RAM.
+The static architecture is now complete enough to stop searching for a stock
+post-init callback. One legitimate authenticated payload plus MEM-SAFE-001 gives
+boot-context RAM code; `FEBF0000..FEBF0307` is retained application-RWX; and the
+pinned callback-free runtime fits there at 704 bytes with 72 bytes headroom.
+The runtime reproduces stock startup, owns the TAUJ0-CH3 foreground schedule,
+and bridges only marked zero-MAC `0x2E4/0x131` through stock
+`application_com_rx_indication` after stock SecOC processing but before the
+normal COM/system-mode/control task.
 
 Highest-value next evidence, in order:
 
 1. acquire the matching `8965B4512000` CUW/payload and factory credential pair;
-2. on an isolated bench, prove direct-handoff retention with a harmless RAM
-   canary before attempting executable state;
-3. only then discriminate post-init control-transfer candidates; do not repeat
-   the already-closed direct-reference sweep of the XCP window.
+2. on an isolated bench, run an inert scheduler-shell build and prove normal
+   foreground timing plus hardware-reset return to stock;
+3. prove one-shot marked-frame queue capture with no COM delivery;
+4. enable stock-COM delivery and run the existing three-phase behavioral proof.
 
-If resident execution is ultimately recovered, prefer injection at the
-pre-limiter `FEBEF184` / `FEBEF02A` command ingress rather than low-level motor
-state. Canonical: [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md).
+Do not spend more static effort on generic callback hunting unless one of those
+dynamic steps falsifies a concrete invariant. Canonical:
+[../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md) ·
+`exploit/ephemeral_runtime/`.
 
 ## P2 — useful when a specific dependency appears
 
