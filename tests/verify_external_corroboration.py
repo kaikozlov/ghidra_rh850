@@ -278,6 +278,58 @@ def main() -> int:
         and "0x007f5201" in community_shell,
     )
 
+    print("\n== Lochuan semantic-error chronology ==")
+    initial_report = git_show(
+        roots["rh850_p1me_original"],
+        "4e5464d7871a608b7aa9772f3b1414d873823897:RESEARCH_REPORT_EN.md",
+    )
+    jul24_report = git_show(
+        roots["rh850_p1me_original"],
+        "c3d619f8708f408991a27e013f21d3d3e087aafe:RESEARCH_REPORT_EN.md",
+    )
+    for label, report in (("initial Jul-20", initial_report), ("Jul-24 edited", jul24_report)):
+        check(
+            f"Lochuan {label} report retains checkpoint-as-MAC model",
+            "secoc_mac_job_scheduler @ 0x66374" in report
+            and "secoc_mac_generate_submit(obj) @ 0x674A8" in report
+            and "| 5 | 8 | 6 | 64 | `FEBEF430`" in report
+            and "| 6 | 56 | 6 | 70 | `FEBEF4D0`" in report,
+        )
+    check(
+        "Jul-20 report does not record the eventual 0x664E6 target derivation",
+        all(token.lower() not in initial_report.lower() for token in ("0x66446", "0x664e4", "0x664e6")),
+    )
+    migration_design = git_show(
+        lochuan_root,
+        "37d9dbda1e590b7fe57949950c71545f00d71fb8:docs/superpowers/specs/2026-08-17-eps-patch-migration-design.md",
+    )
+    check(
+        "public repo begins by migrating an existing reviewed fixed patch",
+        "Migrate the useful parts of the existing 8965B4512000 EPS patch tool" in migration_design
+        and "The tool targets only the reviewed `8965B4512000` EPS" in migration_design
+        and "the reviewed order" in migration_design,
+    )
+    migration_plan = git_show(
+        lochuan_root,
+        "ea35228f3fe4ef9585d0489fda6dd84ad19eecbe:docs/superpowers/plans/2026-08-17-eps-patch-migration.md",
+    )
+    migration_plan_flat = " ".join(migration_plan.split())
+    check(
+        "migration plan imports proven fixed-writer primitives instead of re-deriving target",
+        "Migrate the proven transport, protocol, CRC, fixed-writer, and recovery primitives" in migration_plan_flat
+        and "Copy only the listed primitive source files" in migration_plan_flat,
+    )
+    first_public_manifest = git_show(
+        lochuan_root,
+        "0f0c3ef8ba26ba1ce8b2f51aed163abcbaf00174:eps_patch/manifest.py",
+    )
+    check(
+        "first public primitive migration already contains fixed 0x664E6 target",
+        "patch_address=0x664E6" in first_public_manifest
+        and 'original_instruction=bytes.fromhex("20 e6 31 00")' in first_public_manifest
+        and 'patched_instruction=bytes.fromhex("20 e6 10 00")' in first_public_manifest,
+    )
+
     print("\n== original combined image reconstruction ==")
     combined = roots["rh850_p1me_original"] / "RH850_P1M-E_Firmware.bin"
     split = (

@@ -1493,11 +1493,18 @@ the mistakes are not re-made.
   Therefore the deployment architecture can be attributed to the same community
   lineage while the fixed `4512000` semantic target must be treated as a
   separate private-tree input. Exact line-level FACI authorship is not recoverable.
-- **Historical-rationale bound:** Lochuan's older report really does label the
-  `0x66374/0x674A8` NvM cone as SecOC MAC scheduling/generation. That is a
-  plausible conceptual origin for treating `0x31` as a cryptographic failure,
-  but no surviving report explicitly says this misclassification caused the
-  choice of `0x664E6`. Record that link as inference, not direct provenance.
+- **Historical-rationale bound:** Lochuan's first report commit on 2026-07-20
+  already labels the `0x66374/0x674A8` NvM cone as SecOC MAC
+  scheduling/generation and maps objects 5/6 to likely `0x131/0x2E4`; the
+  2026-07-24 edit leaves those labels intact. This repository independently
+  corrected that exact cone on 2026-07-25 (`8cfd55d...`) to ordinary checkpoint
+  `NvM_WriteBlock` persistence with no CMAC operation. Lochuan's Aug-17 public
+  patch repo then begins as a migration of an existing reviewed fixed patch,
+  with `0x664E6` first appearing in `0f0c3ef...` under the commit message
+  `migrate reviewed eps patch primitives`. The July report never names
+  `0x66446/0x664E4/0x664E6` or the `31 -> 10` branch, so the private-tree target
+  derivation itself remains missing. The older misclassification is a strong
+  candidate origin, not direct proof of why that exact byte was selected.
 - **Rejected alternate explanation:** the F7/`BAENA` persistent authorization
   state does have a 30-worker-invocation countdown, but its marker is consumed
   only by the proprietary SID-`0xBA` operation gateway and has no recovered edge

@@ -1553,6 +1553,30 @@ as a cryptographic failure code. However, no surviving source explicitly says
 that this was the reasoning used to choose `0x664E6`; that final provenance step
 is an inference and is recorded as such rather than promoted to a fact.
 
+#### Chronology of the semantic error
+
+The commit history narrows that inference further without closing the missing
+private-tree gap:
+
+| Date | Repository / commit | What is actually recorded |
+|---|---|---|
+| 2026-07-20 | `lochuan/RH850_P1m-E` `4e5464d...` | first research report already calls `0x66374` a SecOC MAC scheduler, `0x674A8` MAC-generation submit, and maps checkpoint objects 5/6 to likely protected `0x131/0x2E4` |
+| 2026-07-24 | `lochuan/RH850_P1m-E` `c3d619f...` | report edited, but the above scheduler/submitter/object labels remain unchanged |
+| 2026-07-25 | this repository `8cfd55d...` | exact correction: `0x66374/0x674A8` persist ordinary checkpoint blocks; `0x674A8` submits `NvM_WriteBlock`; **no CMAC is generated here** |
+| 2026-08-17 03:48 +0800 | Lochuan patch repo `37d9dbd...` | migration design says to migrate the useful parts of an **existing** `8965B4512000` patch tool and retain the **reviewed two-sector patch** |
+| 2026-08-17 03:53 +0800 | `ea35228...` | implementation plan says to migrate the **proven transport, protocol, CRC, fixed-writer, and recovery primitives** and to copy reviewed source files from the source tree |
+| 2026-08-17 04:01 +0800 | `0f0c3ef...` | first public appearance of `patch_address=0x664E6` and `20 e6 31 00 -> 20 e6 10 00`, in a commit titled **migrate reviewed eps patch primitives** |
+
+The July report does **not** mention `0x66446`, `0x664E4`, `0x664E6`, or the
+`0x31 -> 0x10` completion branch. The exact moment and reasoning by which the
+private tool selected that byte therefore remains absent from the surviving
+record. What the chronology does establish is directionality: the public patch
+repository did not rediscover or re-prove the target; it imported a reviewed
+fixed target from an older private tool, and the only surviving earlier semantic
+model of the surrounding code was the July MAC-scheduler misclassification.
+That makes the misclassification a strong **candidate origin**, not documentary
+proof of the exact target-selection step.
+
 This is structurally capable of producing delayed or state-transition-dependent
 breakage after a genuine persistence failure, and a 2026-08-17 community report
 relayed through yc says Lochuan described the patch as flaky. The firmware now
