@@ -1320,15 +1320,85 @@ split-brain condition rather than suppressing the underlying storage fault:
                            Dem 0x94/0x93 + stale-NvM risk
 ```
 
+The activation condition is narrower than an ordinary status check and is now
+firmware-static. Queue states `0x22` (changed payload) and `0x33`
+(unchanged/retry candidate) both converge on the ordinary write path in
+`secoc_nvm_checkpoint_scheduler @ 0x66374`; after the optional
+`NvM_WriteBlock` submission, the scheduler records **completion state `0x33`**.
+`FUN_00067E08` routes NvM service `0x07` completion to `FUN_00067BC8`, which
+sets the per-object lower result `FEBF0338[obj]` to `0x5A` only when the callback
+reports success and the physical ring block matches the expected next slot; the
+defensive non-success/unexpected-slot case becomes `0xA5`. `FUN_00066446` then
+publishes `0x10` for `0x5A` and reaches the patched `0x31` immediate only for
+the non-`0x5A` case. Therefore **a successful ordinary NvM write never executes
+the semantic effect of the patch**. `0x664E6` is dormant until an ordinary write
+completion has already been classified as failed.
+
+That invariant also rules out the Dem record as the patch-specific LKAS cause.
+For the same failed write, stock and patched firmware both set `FEBF067C`, both
+report Dem `0x94`, and both expose the same DTC-table entry. Only
+`FEBF0308[obj]` differs (`0x31` stock versus forged `0x10`). Any behavioral
+difference must therefore be downstream of a consumer that trusts the public
+checkpoint status, not downstream of DTC `0x45D6` itself.
+
+#### Object 6 gives a concrete patch-sensitive steering-model path
+
+Object 6 is a 56-byte ordinary checkpoint object (`FEBEF4D0`) assembled by
+`checkpoint_multi_channel_u16_state_persist @ 0x38CEC`. One field is a closed
+learned-state persistence loop: `application_input_snapshot_update @ 0xBCB3A`
+copies live baseline `FEBEB592` to `FEBEE8AC`; the object-6 writer places
+`FEBEE8AC` at payload offset `+0x30`; and `FUN_000B9054` later restores that
+field back into `FEBEB592`.
+
+The important detail is that `FUN_000B9054` does not itself issue a DataFlash
+read. It starts with compiled defaults, calls the generated checkpoint restore
+API for literal object 6, and accepts payload `+0x30` only when the returned
+public status is exactly `0x10` and the adjacent marker is valid. The namespace-0
+restore helper first copies the current object RAM mirror into the caller buffer
+and then returns `FEBF0308[6]`. On any non-success status, `FUN_000B9054` instead
+publishes sentinel `0x7F80` and clears its validity byte. A failed object-6 write
+can therefore create this same-boot divergence:
+
+```text
+                                stock             Lochuan patched
+RAM mirror after update         new value         new value
+DataFlash after failed write    old value         old value
+public object status            0x31              0x10
+foreground object-6 reload      reject mirror     trust mirror
+restored FEBEB592               0x7F80/invalid    new RAM value/valid
+```
+
+The reload is lifecycle-relevant, not startup-only. In
+`system_mode_per_tick_dispatcher @ 0xBEC4C`, entry into the `>=0x200` mode band
+from `<0x200` runs `FUN_000B9036` and then, when dispatcher flag `0x10` is set,
+`FUN_000B9662`; the latter calls `FUN_000B9054` on its first pass and latches the
+initialization byte. Thus an already-failed persistence transaction can become
+behaviorally visible at a later foreground mode transition. A true reboot is a
+separate NvM restore and can reload the older committed DataFlash value, so the
+patched same-boot state is not guaranteed to survive power cycling.
+
+The accepted object-6 state is also not telemetry-only. `FUN_000B9552` derives
+`FEBEB594/596`; `FUN_000BA2B0` snapshots those to `FEBEAC6E/6C`; and the normal
+steering control cycle consumes them in `FUN_000C4D9C` and `FUN_000C4C8E`. The
+`FEBEAC6C` branch writes `FEBEBC88`, which is read by
+`steering_command_secondary_select_stage @ 0xCAC14`; the common late steering
+cone subsequently reaches `FEBEC1D4 -> FUN_000BF8C4 -> FEBEB788 ->`
+`steering_command_plausibility_monitor -> FEBEB87E`. The sibling `FEBEAC6E`
+branch reaches `FEBEBC9A -> FUN_000BF6C2 -> FEBEB754` and feeds the same
+interpolation/model family. This proves that forged object-6 success can alter a
+real steering-command plausibility/adaptation model after a failed persistence
+operation. It does **not** prove a direct edge to the recovered d/q-current/PWM
+actuation cone, nor does it yet identify a single explicit LKAS-inhibit bit.
+
 This is structurally capable of producing delayed or state-transition-dependent
-breakage: a higher-level state machine can continue using current RAM state even
-though the persistence transaction it waited for failed, while diagnostics and
-later restore/reload paths still observe the failure/stale storage. A
-2026-08-17 community report relayed through yc says Lochuan described this patch
-as flaky. The static firmware explains why such flakiness is plausible, but it
-does **not** yet prove which specific failed object, DTC policy, or later
-transition caused a reported LKAS deactivation. That causal chain requires a
-runtime trace of object ID/status plus Dem `0x93/0x94` around the drop.
+breakage. A 2026-08-17 community report relayed through yc says Lochuan described
+this patch as flaky. The static firmware now provides one concrete mechanism for
+such flakiness—object-6 learned state can be trusted after failed persistence and
+re-enter the steering model on a later mode transition—but it does **not** prove
+that object 6 was the failed object in the reported drive or that this path alone
+caused the eventual LKAS deactivation. A runtime trace of object ID/status plus
+Dem `0x93/0x94` and CAN `0x262` steering state around the drop remains the
+discriminator.
 
 The BA authorization countdown was checked and rejected as the explanation.
 F7/`BAENA` does create a reset-persistent marker plus a 30-worker-invocation

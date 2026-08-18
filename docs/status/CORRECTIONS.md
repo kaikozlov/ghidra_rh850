@@ -1428,12 +1428,25 @@ the mistakes are not re-made.
   `0x46`, identifier `0x45D6`). The public status array `FEBF0308[]` has no
   direct reference from the `0x8E6xx` SecOC acceptance worker in the canonical
   graph.
-- **Flakiness boundary:** continuing higher-level state after a failed
-  persistence operation while retaining the storage fault and possibly stale
-  NvM is structurally inconsistent and can explain delayed or
-  transition-dependent failures. A relayed 2026-08-17 community report says
-  Lochuan described the patch as flaky, but the exact object and eventual LKAS
-  inhibit chain remain unproved until runtime status/Dem traces are captured.
+- **Activation boundary:** both ordinary queue states `0x22` and `0x33`
+  converge on write completion state `0x33`; successful NvM service-`0x07`
+  completion produces lower result `0x5A` and branches around `0x664E4`. The
+  patched immediate is therefore semantically dormant unless an ordinary write
+  completion has already been classified non-success. The same failure raises
+  Dem `0x94` in stock and patched firmware, so DTC `0x45D6` is a witness to the
+  storage failure rather than the patch-specific behavioral delta.
+- **Concrete flakiness path:** object 6's 56-byte learned-state checkpoint stores
+  `FEBEB592` through snapshot `FEBEE8AC` at payload `+0x30`. `FUN_000B9054`
+  later trusts that field only when public object status is `0x10`; otherwise it
+  substitutes sentinel `0x7F80`. The namespace-0 restore API copies the current
+  RAM mirror before returning status, so a failed object-6 write plus the patch
+  makes unpersisted RAM look valid within the same boot. On entry into the
+  `>=0x200` mode band the foreground dispatcher can reload this state, and
+  derived `FEBEB594/596 -> FEBEAC6E/6C` values enter the normal steering-command
+  plausibility/adaptation model. This proves a real conditional steering-model
+  consequence, but not that object 6 failed in the reported drive or that the
+  model reaches one explicit LKAS-inhibit bit. Runtime object/status + `0x262`
+  capture remains required for that last causal attribution.
 - **Rejected alternate explanation:** the F7/`BAENA` persistent authorization
   state does have a 30-worker-invocation countdown, but its marker is consumed
   only by the proprietary SID-`0xBA` operation gateway and has no recovered edge
