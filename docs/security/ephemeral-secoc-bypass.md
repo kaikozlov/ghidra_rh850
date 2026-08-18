@@ -826,3 +826,45 @@ post-`0x10F0` raw-substitute the 332-byte inert runtime, write `FEBF0FD0 =
 FEBF0000` last, trigger the existing `0xFF00` callback path, and observe
 `FEBFFBF0` through read-only application RMBA. The remaining proof class is
 dynamic.
+
+
+## Cross-calibration runtime transfer
+
+The Sienna implementation is no longer an address-hard-coded payload.
+`tools/resolve_ephemeral_runtime_image.sh` performs a fresh disposable CodeFlash
+import, resolves Gate 2 plus the callback-free startup/scheduler skeleton, then
+completes the pointer-table/RAM anchors from raw RH850 signatures and GP-relative
+displacements. `tools/build_ephemeral_runtime_manifest.py` joins that result with
+the raw six-record SecOC table and separately proven RAM execution/retention
+geometry.
+
+The separation is deliberate. A foreign image may resolve the same application
+and SecOC architecture while still lacking proof that its authenticated payload
+window survives into application-RWX RAM. Such a target is emitted as
+`semantic-resolved-geometry-unresolved`; the runtime builders refuse it. Sienna
+RAM geometry is selected only by the exact CodeFlash SHA-256. Supplying the
+Sienna variant ID against a foreign image is an error, not an override.
+
+Both RH850 sources now consume only a generated `target_config.h`; boot calls,
+application context/startup, foreground tasks, SecOC queue addresses, COM
+delivery, update counters, and canary observation are supplied by the target
+manifest. On `8965B4512000`, the target-driven build reproduces the previously
+audited executables byte-for-byte: the 704-byte bridge retains SHA-256
+`8f486d36ae38d233165563ad2cc4a71d006cf5c8cf9a876345a3b6ab72f10495`, and
+the 332-byte inert canary retains
+`81176c6e1c33451cfa63bd3b4a0e07b8b0fb952c70b3d67442f1a294ed6b651e`.
+
+A canary build additionally requires a target-specific observation cell. Sienna
+uses verified `FEBFFBF0` through manifest evidence; a new target cannot inherit
+that address. Bootstrap compatibility is tracked separately in
+`data/variant_bootstrap_profiles.json`: SECOC-024/028 already establish the
+shared `f05f...` SecurityAccess/DID/`FEBF0000`/`10F0`/`FF00` family across
+multiple B4/F3/F4 EPS targets. What is target-specific is the evidence grade for
+**exact encrypted payload bytes** and for retained application-RWX geometry.
+`build_substitution_plan.py` therefore accepts any manifest with a matching
+bootstrap-family profile, but requires an explicitly SHA-pinned target-accepted
+fixture when the repository's Sienna fixture is not proven byte-for-byte for
+that software ID.
+
+Canonical tooling and failure modes are documented in
+[../tooling/ephemeral-runtime-semantic-resolver.md](../tooling/ephemeral-runtime-semantic-resolver.md).

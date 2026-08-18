@@ -55,6 +55,18 @@ Canonical:
 
 ### 3. Acquire another CodeFlash image
 
+
+The new first command for any acquired EPS image is now:
+
+```bash
+tools/resolve_ephemeral_runtime_image.sh path/to/CodeFlash.bin \
+  build/target-ephemeral-runtime.json
+```
+
+This one result tests Gate-2 transfer, callback-free startup/scheduler transfer,
+SecOC queue/COM geometry, and whether exact image-bound RAM retention evidence
+exists. Do not add a software-ID offset row to make a foreign image pass.
+
 Highest-value targets include a blurbdust-supported F3/F4 calibration,
 `8965F1208000`, or `8965B4514000`.
 
@@ -139,6 +151,12 @@ Highest-value next evidence, in order:
    progression plus hardware-reset return to stock;
 2. prove one-shot marked-frame queue capture with no COM delivery;
 3. enable stock-COM delivery and run the existing three-phase behavioral proof.
+
+For another EPS calibration, first join its software ID against
+`data/variant_bootstrap_profiles.json`: bootstrap reuse is already established
+for multiple B4/F3/F4 targets and should not be rediscovered from scratch. Keep
+that evidence separate from exact encrypted-fixture identity and from the
+per-image retained-RWX/scheduler manifest.
 
 Do not spend more static effort on generic callback hunting unless one of those
 dynamic steps falsifies a concrete invariant. Canonical:

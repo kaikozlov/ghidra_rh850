@@ -31,3 +31,5 @@ The RH850 language `v850e3:LE:32:default` is the **vendored in-tree fork** at
 `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
 `ghidra/ghidra_v850/PROVENANCE.json`). Install path and fingerprint checks are
 in [../WORKFLOW.md](../WORKFLOW.md).
+
+- [Ephemeral runtime semantic resolver](ephemeral-runtime-semantic-resolver.md) — fresh-image fail-closed resolver and SHA-bound target manifest for the RAM scheduler/SecOC-COM bridge.

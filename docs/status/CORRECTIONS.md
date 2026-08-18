@@ -1608,10 +1608,13 @@ the mistakes are not re-made.
   uses the separately recovered SEC-BOOT-002/003 secret. Replaying the already
   encrypted fixture does not require knowing `PAYLOAD_BUILD_SECRET` and does not
   require the missing CUW credential pair.
-- **Scope:** this is specific to Sienna `8965B4512000`. The matching CUW remains
-  useful for dealer-flow provenance and variants where the pinned fixture does
-  not transfer. Do not project fixture acceptance to newer EPS images without
-  their own gate evidence.
+- **Scope:** the deterministic byte-for-byte proof for the repository's pinned
+  fixture is specific to Sienna `8965B4512000`. This does **not** make the
+  authenticated-RAM bootstrap Sienna-only: SECOC-024/028 already carry
+  external-source evidence for the same SA/DID/download/routine and public
+  payload family across multiple B4/F3/F4 EPS calibrations. Preserve those
+  evidence grades separately; do not silently upgrade external operation reports
+  to local cryptographic verification of the exact Sienna fixture bytes.
 - **Canonical:** [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md) §8;
   [FINDINGS.md](FINDINGS.md) SECOC-062;
   `tests/verify_payload_gate.py`;

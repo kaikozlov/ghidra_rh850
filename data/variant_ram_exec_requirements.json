@@ -4,15 +4,23 @@
     {
       "id": "sienna-8965b4512000",
       "evidence": "firmware-static-verified",
+      "codeflash_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
       "authenticated_download_base": "0xFEBF0000",
       "authenticated_download_size": "0x1000",
       "payload_callback_base": "0xFEBF0000",
+      "payload_callback_cell": "0xFEBF0FD0",
       "shellcode_link_vma": "0xFEBF0000",
-      "notes": "Verified from the analyzed bootloader and authenticated payload package. This remains the executable default in exploit/common/ram_exec.py."
+      "retained_application_rwx_base": "0xFEBF0000",
+      "retained_application_rwx_end_exclusive": "0xFEBF0308",
+      "retained_application_rwx_size": "0x308",
+      "canary_observation_address": "0xFEBFFBF0",
+      "canary_observation_method": "application-rmba-or-xcp-read",
+      "notes": "Verified from the analyzed bootloader/authenticated payload package plus application MPU/reset-lifetime analysis. The canary observation cell is separately verified unused and readable on this Sienna; it is target evidence, not part of generic retained-code geometry."
     },
     {
       "id": "yc-newer-toyota-field-report-2026-08-16",
       "evidence": "external-source-observed",
+      "codeflash_sha256": null,
       "vehicles": [
         "2024 Toyota RAV4 Prime",
         "2025 Toyota bZ4X"
@@ -20,8 +28,14 @@
       "authenticated_download_base": null,
       "authenticated_download_size": null,
       "payload_callback_base": null,
+      "payload_callback_cell": null,
       "shellcode_link_vma": "0xFEBE0000",
-      "notes": "yc reports blurbdust's shellcode required a linker script targeting 0xFEBE0000. No matching firmware/F181 or exact modified host/payload artifact is present, so this is link-VMA deployment evidence only and must not be substituted for the Sienna bootloader download geometry."
+      "retained_application_rwx_base": null,
+      "retained_application_rwx_end_exclusive": null,
+      "retained_application_rwx_size": null,
+      "canary_observation_address": null,
+      "canary_observation_method": null,
+      "notes": "yc reports blurbdust's shellcode required a linker script targeting 0xFEBE0000. No matching firmware/F181 or exact modified host/payload artifact is present, so this is link-VMA deployment evidence only and must not be substituted for the Sienna bootloader download/retention geometry."
     }
   ],
   "host_configuration": {

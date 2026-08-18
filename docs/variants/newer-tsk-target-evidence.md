@@ -76,3 +76,17 @@ labeled official Techstream capture is present. Therefore:
 - Sienna firmware findings remain Sienna-specific;
 - target-generation transfer remains **hypothesis**, with zero verified exact
   transfers in [../status/ANALYSIS_STATUS.md](../status/ANALYSIS_STATUS.md).
+
+
+## Ephemeral runtime transfer boundary
+
+The reported newer-EPS `FEBE0000` shellcode link VMA is not sufficient to
+transfer the Sienna RAM scheduler. `tools/resolve_ephemeral_runtime_image.sh`
+separates the application/SecOC semantic contract from authenticated-download and
+application-retention geometry. Until a specific foreign CodeFlash SHA has
+verified callback/download bounds plus retained application-RWX memory, the target
+manifest remains non-buildable even if the scheduler and Gate-2 shapes match.
+
+This is intentional: `data/variant_ram_exec_requirements.json` retains the
+external `FEBE0000` observation but leaves callback-cell and retained-RWX fields
+null. No target is allowed to inherit Sienna `FEBF0000` geometry from that report.

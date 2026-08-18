@@ -137,8 +137,9 @@ builder_hash = hashlib.sha256(BUILDER.read_bytes()).hexdigest()
 bindings = {item["path"]: item["sha256"] for item in audit["sources"]}
 check("runtime source is bound by audited build", bindings["exploit/ephemeral_runtime/main.c"] == source_hash)
 check("runtime builder is bound by audited build", bindings["exploit/ephemeral_runtime/build_shellcode.py"] == builder_hash)
-check("audited resident image fits 0x308-byte pocket with 72-byte headroom",
-      audit["shellcode"]["size"] == 704 and audit["shellcode"]["headroom"] == 72 and audit["compile_contract"]["retained_limit"] == 776)
+check("audited resident image fits manifest 0x308-byte pocket with 72-byte headroom",
+      audit["shellcode"]["size"] == 704 and audit["shellcode"]["headroom"] == 72 and audit["compile_contract"]["retained_limit"] == 776 and
+      audit["compile_contract"]["target_codeflash_sha256"] == hashlib.sha256(CF).hexdigest())
 check("audited resident image has exact executable SHA",
       audit["shellcode"]["sha256"] == "8f486d36ae38d233165563ad2cc4a71d006cf5c8cf9a876345a3b6ab72f10495")
 check("audited build pins zero relocations and entry offset zero",
@@ -147,12 +148,12 @@ check("audited build is explicitly not bench-validated",
       audit["review_status"] == "audited-static-not-bench-validated")
 check("builder pins exact Docker image content identity",
       "2d5e4c27e490302fbcd05e896e31bf36109a2c5aab899b500eecbebd3fec8c24" in builder)
-check("runtime reuses stock startup JARL stream instead of duplicating a target table",
-      "APP_STARTUP_FIRST_JARL" in source and "APP_STARTUP_AFTER_JARLS" in source and "signed_high6" in source)
+check("runtime reuses manifest-resolved stock startup JARL stream instead of duplicating a target table",
+      "TARGET_APP_STARTUP_FIRST_JARL" in source and "TARGET_APP_STARTUP_AFTER_JARLS" in source and "signed_high6" in source)
 check("runtime bridge is limited to two steering profiles and MAC28-zero marker",
       "BRIDGE_PROFILE_COUNT       2u" in source and "MAC28_ZERO_MASK            0xFFFFFF0Fu" in source)
 check("runtime calls stock COM RxIndication before stock system-mode dispatcher",
-      source.index("call0(COM_AND_SECOC_MAIN)") < source.index("((com_rx_t)APPLICATION_COM_RX)") < source.index("call0(SYSTEM_MODE_DISPATCH)"))
+      source.index("call0(TARGET_AGG_1)") < source.index("((com_rx_t)TARGET_APPLICATION_COM_RX)") < source.index("call0(TARGET_AGG_4)"))
 check("runtime source contains no CodeFlash/FACI programming primitive",
       all(token not in source.lower() for token in ("faci_", "flash_block_rmw", "program_page", "codeflash_write")))
 check("workstream contains no live deploy wrapper",
@@ -168,19 +169,21 @@ check("canary source is bound by audited build",
 check("canary builder is bound by audited build",
       canary_bindings["exploit/ephemeral_runtime/build_canary.py"] == hashlib.sha256(CANARY_BUILDER.read_bytes()).hexdigest())
 check("audited canary is 332 bytes with 444 bytes headroom",
-      canary_audit["shellcode"]["size"] == 332 and canary_audit["shellcode"]["headroom"] == 444)
+      canary_audit["shellcode"]["size"] == 332 and canary_audit["shellcode"]["headroom"] == 444 and
+      canary_audit["compile_contract"]["target_codeflash_sha256"] == hashlib.sha256(CF).hexdigest())
 check("audited canary executable SHA is pinned",
       canary_audit["shellcode"]["sha256"] == "81176c6e1c33451cfa63bd3b4a0e07b8b0fb952c70b3d67442f1a294ed6b651e")
 check("canary is entry-zero, relocation-free, and explicitly unvalidated",
       canary_audit["shellcode"]["entry_offset"] == 0 and
       canary_audit["compile_contract"]["relocations"] == 0 and
       canary_audit["review_status"] == "audited-inert-static-not-bench-validated")
-check("canary preserves stock aggregate 0x65750 and contains no COM/SecOC bridge",
-      "FOREGROUND_AGGREGATE       0x00065750u" in canary_source and
+check("canary preserves the manifest-resolved stock aggregate and contains no COM/SecOC bridge",
+      "TARGET_FG_AGGREGATE" in canary_source and
       "application_com_rx" not in canary_source.lower() and "MAC28" not in canary_source)
-check("canary heartbeat is FEBFFBF0",
-      "CANARY_HEARTBEAT            0xFEBFFBF0u" in canary_source and
-      canary_audit["compile_contract"]["heartbeat_address"] == "0xFEBFFBF0")
+check("canary heartbeat comes from the target manifest and resolves to FEBFFBF0 on Sienna",
+      "TARGET_CANARY_HEARTBEAT" in canary_source and
+      canary_audit["compile_contract"]["heartbeat_address"] == "0xFEBFFBF0" and
+      canary_audit["compile_contract"]["heartbeat_source"] == "target-manifest canary_observation_address")
 # Heartbeat is beyond startup CodeFlash shadow copy and remains XCP-readable.
 heartbeat = 0xFEBFFBF0
 exclusion_count = u32(0x2B3B8)
@@ -201,21 +204,25 @@ check("heartbeat has no canonical application direct reference", not heartbeat_r
 
 print("\n== post-auth substitution / execution ordering ==")
 planner = SUBSTITUTION_PLANNER.read_text(encoding="utf-8")
-check("planner writes runtime at FEBF0000 and callback cell FEBF0FD0",
-      "RUNTIME_BASE = 0xFEBF0000" in planner and "CALLBACK_ADDRESS = 0xFEBF0FD0" in planner)
-check("planner writes callback pointer last and uses FEBF0000 little-endian target",
-      '"callback_pointer_last"' in planner and "struct.pack(\"<I\", CALLBACK_VALUE)" in planner)
+check("planner derives runtime base and callback cell from the target manifest",
+      "payload_callback_base" in planner and "payload_callback_cell" in planner and "DEFAULT_MANIFEST" in planner)
+check("planner writes callback pointer last and packs the manifest-derived target little-endian",
+      '"callback_pointer_last"' in planner and "struct.pack(\"<I\", callback_value)" in planner)
 check("planner pins exact FF00 execution request",
       'FF00_REQUEST = bytes.fromhex("3101ff004500000e000000008000")' in planner)
 check("planner explicitly requires prior successful 10F0 authentication",
-      "pinned 4 KiB encrypted RAM-dump fixture has been uploaded and passed RID 0x10F0" in planner and
+      "selected target-accepted encrypted bootstrap fixture has been uploaded and passed RID 0x10F0" in planner and
       '"initial_authentication_bypassed": False' in planner)
 check("planner binds the pinned Sienna-authenticated public payload fixture",
       'AUTHENTICATED_FIXTURE = REPO / "tests/fixtures/payloads/ram_dump_payload.bin"' in planner and
       "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2" in planner)
-check("planner pins zero DID-0201/0202 inputs and no matching-CUW requirement for this Sienna",
-      "DID_201_KEY = bytes(16)" in planner and "DID_202_IV = bytes(16)" in planner and
-      '"matching_cuw_required_for_sienna_8965b4512000": False' in planner and
+check("planner separates shared bootstrap-family reuse from exact fixture identity",
+      "authenticated_bootstrap_profile" in planner and
+      "cross_vehicle_reuse_established" in planner and
+      "--bootstrap-fixture" in planner and "--bootstrap-fixture-sha256" in planner and
+      "SIENNA_CODEFLASH_SHA256" not in planner)
+check("planner does not assume Sienna encrypted bytes transfer to every bootstrap-family target",
+      "local Sienna encrypted" in planner and "not proven byte-for-byte" in planner and
       '"payload_build_secret_required_to_replay_fixture": False' in planner)
 check("flash_erase_start stages operation type 2 rather than invoking payload callback",
       CF[0x4244:0x424A] == bytes.fromhex("020a440f9c91"))

@@ -68,6 +68,19 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## SecOC
 
+- **Cross-calibration ephemeral runtime transfer.** The Sienna fresh-import
+  resolver is now deterministic and the RH850 runtime sources are target-driven.
+  What remains is external evidence: run `tools/resolve_ephemeral_runtime_image.sh`
+  unchanged on the first foreign CodeFlash. A `semantic-resolved-geometry-unresolved`
+  result is useful and must remain non-buildable until that image's authenticated
+  download/callback/retention MPU geometry is proven. A build-ready foreign
+  manifest then still needs its own inert-canary observation cell. Authenticated
+  bootstrap-family evidence is already available for several B4/F3/F4 EPS IDs;
+  a target outside those rows needs new bootstrap evidence, while a known-family
+  target may still need an explicitly target-accepted encrypted fixture if exact
+  byte identity is not pinned. Canonical:
+  [../tooling/ephemeral-runtime-semantic-resolver.md](../tooling/ephemeral-runtime-semantic-resolver.md).
+
 - **Ephemeral scheduler-bridge hardware validation.** ARCH-013/014 and
   SECOC-060/061 now close the static architecture without a post-init stock
   callback: the audited 704-byte runtime performs the stock boot/context/startup

@@ -597,6 +597,26 @@ paths = [
   "data/application_rx_map.csv",
 ]
 
+[suite.ephemeral_runtime_resolver]
+tests = ["tests/verify_ephemeral_runtime_resolver.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_ephemeral_runtime_resolver.py",
+  "ghidra/scripts/investigate/ResolveEphemeralRuntime.java",
+  "tools/build_ephemeral_runtime_manifest.py",
+  "tools/resolve_ephemeral_runtime_image.sh",
+  "data/generated/ephemeral_runtime_resolution_4512000_minimal.json",
+  "data/generated/ephemeral_runtime_target_manifest_4512000.json",
+  "data/variant_ram_exec_requirements.json",
+  "data/variant_bootstrap_profiles.json",
+  "exploit/ephemeral_runtime/",
+  "docs/security/ephemeral-secoc-bypass.md",
+  "docs/tooling/ephemeral-runtime-semantic-resolver.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+]
+
 [suite.ram_overlays]
 tests = ["tests/verify_ram_overlays.py"]
 paths = ["data/ram_overlay_map.csv"]

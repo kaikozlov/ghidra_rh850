@@ -1,0 +1,264 @@
+{
+  "authenticated_bootstrap_profile": {
+    "authenticated_download_base": "0xFEBF0000",
+    "authenticated_download_size": "0x1000",
+    "boundary": "The Denso EPS authenticated-RAM bootstrap is already cross-vehicle: shared SA/DID/download/routine structure and public-payload reuse are established across listed B4/F3/F4 EPS evidence. Exact byte-for-byte acceptance of the repository Sienna ram_dump_payload.bin is locally verified only for 8965B4512000; other rows retain their external-source grade and may require a target-accepted fixture.",
+    "did_0201_default": "00000000000000000000000000000000",
+    "did_0202_default": "00000000000000000000000000000000",
+    "did_order": [
+      "0x0203",
+      "0x0201",
+      "0x0202"
+    ],
+    "execute_routine": "0xFF00",
+    "id": "denso-p1me-f05f-zero-did-febf-v1",
+    "matched_evidence": [
+      {
+        "exact_fixture_sha256": "d972d4bf432685217591768600a9abd7820d35b04a72270edc87074365356be2",
+        "fixture_transfer": "exact-local-fixture-verified",
+        "grade": "verified",
+        "notes": "Exact local CodeFlash gate plus pinned ram_dump_payload.bin acceptance.",
+        "software_id": "8965B4512000",
+        "source": "firmware-static+generated-artifact"
+      }
+    ],
+    "security_access_data_record": "00000000000000000000000000000000",
+    "security_access_secret": "f05f36b7d78c03e24ab4faef2a57d044",
+    "verify_routine": "0x10F0"
+  },
+  "gate2": {
+    "boolean_materialization": {
+      "meaning": "verify-result-nonzero",
+      "register": "r26",
+      "site": "0x0008e6a4"
+    },
+    "candidate_count": 1,
+    "control_flow": {
+      "bne": "0x0008e6c8",
+      "bne_bytes": "9a0d",
+      "gate_cmp": "0x0008e6c6",
+      "join": "0x0008e6e2",
+      "mismatch_branch_calls": 1,
+      "mismatch_branch_target": "0x0008e6da",
+      "verified_delivery_fallthrough": "0x0008e6ca",
+      "verified_fallthrough_calls": 2
+    },
+    "function": {
+      "entry": "0x0008e67a",
+      "name": "FUN_0008e67a"
+    },
+    "invariants": [
+      "mapped-byte-result-global-is-also-passed-by-address",
+      "zero-test-and-cmovne-materialize-result-nonzero-boolean",
+      "same-boolean-survives-through-pre-gate-call",
+      "bne-taken-means-result-nonzero-fallthrough-means-result-zero",
+      "verified-and-mismatch-arms-both-call-and-converge",
+      "patch-neutralizes-cmp-registers-and-preserves-bne"
+    ],
+    "mac_result_source": {
+      "address": "0xfebe555c",
+      "load_site": "0x0008e69e",
+      "passed_by_address_elsewhere": true,
+      "resolution": "mapped"
+    },
+    "patch": {
+      "address": "0x0008e6c6",
+      "operation": "cmp-second-register-to-first-force-fallthrough",
+      "original": "e0d1",
+      "replacement": "e001"
+    },
+    "pre_gate_state_call": "0x0008e6c0",
+    "program_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+    "resolution": "unique",
+    "schema": "toyota-secoc-semantic-target-v2",
+    "verify_result_polarity": "zero-is-verified-ok-nonzero-is-not-verified"
+  },
+  "image": {
+    "path": "firmware/RH850_P1M-E_CodeFlash.bin",
+    "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+    "size": 1048576,
+    "software_ids": [
+      "896504517012",
+      "8965B4512000",
+      "8965H0000000"
+    ]
+  },
+  "invariants": [
+    "Gate-2 semantic resolver unique and SHA-bound to input CodeFlash",
+    "startup/context/foreground/aggregate skeleton unique on analyzed program",
+    "boot transition prefix structurally resolved instead of inherited",
+    "SecOC queue-storage bases structurally resolved",
+    "Com_RxIndication and update-counter base structurally resolved",
+    "exact six-record SecOC Level-1 table order unique in raw CodeFlash",
+    "protected steering records 0x2E4/0x131 are classic 8-byte records",
+    "runtime build readiness additionally requires image-bound firmware-static RAM retention geometry"
+  ],
+  "ram_execution_geometry": {
+    "authenticated_download_base": "0xFEBF0000",
+    "authenticated_download_size": "0x1000",
+    "canary_observation_address": "0xFEBFFBF0",
+    "canary_observation_method": "application-rmba-or-xcp-read",
+    "codeflash_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+    "evidence": "firmware-static-verified",
+    "notes": "Verified from the analyzed bootloader/authenticated payload package plus application MPU/reset-lifetime analysis. The canary observation cell is separately verified unused and readable on this Sienna; it is target evidence, not part of generic retained-code geometry.",
+    "payload_callback_base": "0xFEBF0000",
+    "payload_callback_cell": "0xFEBF0FD0",
+    "retained_application_rwx_base": "0xFEBF0000",
+    "retained_application_rwx_end_exclusive": "0xFEBF0308",
+    "retained_application_rwx_size": "0x308",
+    "selection_source": "image-sha-bound",
+    "shellcode_link_vma": "0xFEBF0000",
+    "status": "verified",
+    "variant_id": "sienna-8965b4512000"
+  },
+  "runtime_build_ready": true,
+  "runtime_semantics": {
+    "anchors": {
+      "aggregate": "0x65750",
+      "aggregate_bridge_after_call_index": 3,
+      "aggregate_call_targets": [
+        "0x68C0C",
+        "0x791C4",
+        "0x96BAC",
+        "0x68DE6",
+        "0x57AC2",
+        "0x6547C"
+      ],
+      "aggregate_control_call_index": 4,
+      "aggregate_gate_call_index": 1,
+      "application_context_init": "0x70524",
+      "application_gp": "0xFEBEB800",
+      "boot_application_handoff": "0x13B0",
+      "boot_transition_call_targets": [
+        "0xC9A",
+        "0xE54",
+        "0xF80",
+        "0x10C6",
+        "0x119E"
+      ],
+      "boot_validity_call_index": 4,
+      "com_rx_indication": "0x7C640",
+      "com_timeout_helper": "0x8D682",
+      "com_update_counter_base": "0xFEBE532C",
+      "com_validity_base": "0xFEBE52CC",
+      "foreground_aggregate_call_index": 5,
+      "foreground_call_targets": [
+        "0x63E7C",
+        "0x643AC",
+        "0x702E8",
+        "0x65F5C",
+        "0x70308",
+        "0x65750",
+        "0x702E8",
+        "0x65C60",
+        "0x70308",
+        "0x64080"
+      ],
+      "foreground_loop": "0x64FCC",
+      "foreground_tick_counter": "0xFEBE39DB",
+      "foreground_timing_begin_call_index": 0,
+      "foreground_timing_end_call_index": 9,
+      "secoc_descriptor_base": "0xFEBE5452",
+      "secoc_queue_head_base": "0xFEBE544C",
+      "secoc_queue_storage_helper": "0x8D74C",
+      "secoc_raw_buffer_base": "0xFEBE5488",
+      "startup_coordinator": "0x62758",
+      "startup_final_init": "0x6F15A",
+      "startup_jarl_after": "0x627B4",
+      "startup_jarl_count": 21,
+      "startup_jarl_first": "0x62760",
+      "tick_bit": 4,
+      "tick_displacement": -20207,
+      "timing_flag": "0x1823C"
+    },
+    "candidate_count": 1,
+    "gate_entry": "0x8E67A",
+    "raw_completion": {
+      "method": "raw-rh850-level1-signatures-plus-gp-relative-displacements",
+      "status": "complete"
+    },
+    "schema": "p1me-ephemeral-runtime-semantic-v1",
+    "status": "resolved"
+  },
+  "schema": "p1me-ephemeral-runtime-target-manifest-v1",
+  "secoc_records": {
+    "records": [
+      {
+        "can_id": "0xF",
+        "index": 0,
+        "pdu_id": 11,
+        "raw_offset": "0x0",
+        "record_address": "0x25970",
+        "secured_length": 8
+      },
+      {
+        "can_id": "0x2E4",
+        "index": 1,
+        "pdu_id": 6,
+        "raw_offset": "0x8",
+        "record_address": "0x259C0",
+        "secured_length": 8
+      },
+      {
+        "can_id": "0x131",
+        "index": 2,
+        "pdu_id": 26,
+        "raw_offset": "0x10",
+        "record_address": "0x25A10",
+        "secured_length": 8
+      },
+      {
+        "can_id": "0x132",
+        "index": 3,
+        "pdu_id": 35,
+        "raw_offset": "0x18",
+        "record_address": "0x25A60",
+        "secured_length": 8
+      },
+      {
+        "can_id": "0x90",
+        "index": 4,
+        "pdu_id": 46,
+        "raw_offset": "0x20",
+        "record_address": "0x25AB0",
+        "secured_length": 32
+      },
+      {
+        "can_id": "0xD7",
+        "index": 5,
+        "pdu_id": 47,
+        "raw_offset": "0x40",
+        "record_address": "0x25B00",
+        "secured_length": 32
+      }
+    ],
+    "steering_bridge_profiles": [
+      {
+        "can_id": "0x2E4",
+        "descriptor_address": "0xFEBE545A",
+        "index": 1,
+        "pdu_id": 6,
+        "raw_buffer_address": "0xFEBE5490",
+        "raw_offset": "0x8",
+        "record_address": "0x259C0",
+        "secured_length": 8,
+        "update_counter_address": "0xFEBE5332"
+      },
+      {
+        "can_id": "0x131",
+        "descriptor_address": "0xFEBE5462",
+        "index": 2,
+        "pdu_id": 26,
+        "raw_buffer_address": "0xFEBE5498",
+        "raw_offset": "0x10",
+        "record_address": "0x25A10",
+        "secured_length": 8,
+        "update_counter_address": "0xFEBE5346"
+      }
+    ],
+    "stride": "0x50",
+    "table_address": "0x25970"
+  },
+  "status": "runtime-build-ready",
+  "transfer_boundary": "Static Level-1 runtime construction is permitted for this exact image; hardware canary remains mandatory."
+}
