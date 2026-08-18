@@ -876,6 +876,18 @@ paths = [
   "techstream.lock.json",
 ]
 
+[suite.techstream_cuw_security_up]
+tests = ["tests/verify_techstream_cuw_security_up.py"]
+requires_external = ["techstream_v18"]
+oracle = "instruction_semantics"
+paths = [
+  "tools/techstream/cuw_security_up.py",
+  "tests/verify_techstream_cuw_security_up.py",
+  "docs/tooling/techstream.md",
+  "docs/status/FINDINGS.md",
+  "techstream.lock.json",
+]
+
 [suite.techstream_layerb]
 tests = ["tests/verify_techstream_layerb.py"]
 paths = ["docs/tooling/techstream.md"]

@@ -331,9 +331,89 @@ object the caller passes. Key findings from the binary:
 | `Cuw.exe` Borland exports `@@Caes@Initialize`/`@@Caes@Finalize` | Delphi AES wrapper class present |
 | `Cuw.exe` Borland exports `@@Csha256@Initialize`/`@@Csha256@Finalize` | SHA-256 for firmware verification |
 | `Cuw.exe` imports `CryptEncrypt`, `CryptDecrypt`, `CryptImportKey` | Windows CryptoAPI (Wincrypt) used for AES |
-| No hardcoded SA key in `Cuw.exe` | Key material comes from calibration file at runtime |
+| No ECU-family SA root in `Cuw.exe` | Family-specific credential material comes from the calibration file; the common prepare DLL separately carries a host-side wrapping-key table |
 | `FUKUMORIYOSIYAMA` not present | CUW does not use the `CommandCommon.dll` AES key |
 | `SEED_KEY_SECRET` (`f05f36b7...`) not present | Firmware secret is not embedded in CUW |
+
+#### 4.5.1 `CalcSeedKeyForSecurityUp`: exact modern CUW construction
+
+The previously unresolved modern path is implemented by
+`TCUWCanCommonPrepareWriter.dll!CCanCommonPrepareWriter::CalcSeedKeyForSecurityUp`
+at RVA `0x1310`. It is standard **AES-128-ECB in two stages**. The function
+hardcodes selector `0` into a 17-record wrapping-key table and obtains the
+32-character hex string:
+
+```text
+B45B26D6344FD60E80BC01D63C7584A0
+```
+
+It invokes callback `+0x58` first and callback `+0x54` second. Tracing those
+callbacks through `Cuw.exe` reaches `CAES::GetDecryptedData` / `CryptDecrypt`
+and `CAES::GetEncryptedData` / `CryptEncrypt`, respectively. `CAES::ImportKey`
+imports `CALG_AES_128` (`0x660E`), and `CAES::SetEncryptionMode` calls
+`CryptSetKeyParam(KP_MODE=4, CRYPT_MODE_ECB=2)`. The resulting algorithm is:
+
+```text
+Kwrap = B45B26D6344FD60E80BC01D63C7584A0
+Kwork = AES-128-ECB-DEC(Kwrap, ServiceAuthKey[0:16])
+key_response = AES-128-ECB-ENC(Kwork, ecu_seed[0:16])
+```
+
+The intermediate `Kwork` is formatted as 32 uppercase hex characters with
+`%02X` before the second callback, whose string-to-byte wrapper decodes it
+back to the same 16 bytes. This formatting round trip does not alter the key.
+
+The CUW text parser also resolves the apparent 64-character-key ambiguity.
+`CBytes(string)` performs ordinary two-hex-digits-per-byte conversion; the
+calibration parser then copies exactly **16 decoded bytes** into the fixed
+`ECUAuthKey`, `ServiceAuthKey`, `SeedKey`, and `Nonce` fields. Thus a
+64-character value such as the public `8966312R1100` example is not
+nibble-packed: V18 consumes its first 16 decoded bytes on these paths. For that
+example:
+
+```text
+ServiceAuthKey text:
+4247354845484A394D40414D4E505040544749494757475C505C515351635152
+
+consumed ServiceAuthKey:
+4247354845484A394D40414D4E505040
+
+Kwork after selector-0 unwrap:
+140FF15B66E1F32564BC64C927C3334F
+```
+
+Unified prepare sends `27 01 || ECUAuthKey[16]`, so the host construction now
+lines up algebraically with the independently recovered RH850 bootloader
+construction:
+
+```text
+firmware: Kwork = AES-DEC(SEED_KEY_SECRET, ECUAuthKey)
+firmware: response = AES-ENC(Kwork, ecu_seed)
+
+host:     Kwork = AES-DEC(Kwrap, ServiceAuthKey)
+host:     response = AES-ENC(Kwork, ecu_seed)
+```
+
+For a matching ECU/CUW pair, the natural provisioning relation is therefore
+that both wrapped credentials decode to the same `Kwork`. Equivalently, a
+factory system that knows both roots can produce a pair as
+`ECUAuthKey = AES-ENC(SEED_KEY_SECRET, Kwork)` and
+`ServiceAuthKey = AES-ENC(Kwrap, Kwork)`. **That provisioning equation is an
+architecture inference, not yet a proved Sienna factory transcript**, because
+the matching `8965B4512000` CUW is still absent. It does, however, rule out the
+need for Techstream to derive the ECU-family root from a family string at
+runtime: this exact path receives no family identifier and always selects
+wrapping-key record 0. Family separation can instead be embodied in the
+factory-provisioned `ECUAuthKey`/`ServiceAuthKey` pair and the root already
+inside the ECU.
+
+This also bounds what a purchased matching CUW can reveal. Its credential pair
+is sufficient for Techstream-style SecurityAccess without exposing
+`SEED_KEY_SECRET`; a known AES plaintext/ciphertext relationship does not make
+the 128-bit ECU root invertible.
+
+The executable reproducer is `tools/techstream/cuw_security_up.py`; the raw-PE
+proof is `tests/verify_techstream_cuw_security_up.py`.
 
 The reproducible representation-aware census now enumerates all 6,620 files
 (670 PE candidates) in the extracted distribution. It finds nine exact AES
@@ -382,11 +462,13 @@ no seed/key derivation). This is an older EPS generation on V850E, not RH850.
 `WriteWithErase`, and `VerifyCompData`. SA is handled by its companion
 `PrepareWriter` (separate object in the CUW's two-phase architecture).
 
-The recovered standard and unified prepare writers both call
-`CUnifiedUtils::CalcSeedKey` with `CalibrationFile::GetServiceAuthKey()` and
-the 16-byte ECU seed. Unified prepare additionally prefixes the `27 01`
-request with `GetECUAuthKey()[16]`. This establishes the host data flow, but
-does not identify the cipher internals or prove the exact Sienna factory row.
+The recovered standard and unified prepare writers both derive the `27 02`
+response from `CalibrationFile::GetServiceAuthKey()` and the 16-byte ECU seed;
+the modern `CalcSeedKeyForSecurityUp` implementation is now recovered exactly
+above. Unified prepare additionally prefixes the `27 01` request with
+`GetECUAuthKey()[16]`. This proves the host-side cipher and credential flow but
+still does not prove the exact Sienna factory row or its calibration-specific
+credential values.
 
 ### 4.6 SendNonce / SendSeedKey — VFOREST flash-writer key-material transfer
 
@@ -524,6 +606,37 @@ positive-response templates and execute:
    `F610`; unified constructs `F010`, `00FF`, `F110`, and `F210`, with
    calibration-derived range/hash or offset-adjusted area fields.
 5. **ECUReset** — `11 01`, requiring `51 01` (180 ms reset timeout).
+
+For the Sienna bootloader, the unified predownload field names also line up
+with the independently recovered payload gate, without implying that the
+unified writer is definitely the missing Sienna factory row:
+
+```text
+CUW SeedKey[16] -> DID 0x0201
+CUW Nonce[16]   -> DID 0x0202
+
+firmware payload key = AES-128-ECB-ENC(PAYLOAD_BUILD_SECRET, DID_0201)
+firmware CBC IV      = DID_0202
+```
+
+`DID_0202` is also prepended to the encrypted body for the bootloader's CMAC
+check. Techstream does **not** need `PAYLOAD_BUILD_SECRET` in this flash path:
+it transmits the calibration-provided KDF input/nonce and then transfers an
+already-built calibration image. Consequently, a matching CUW gives a known
+`SeedKey`/`Nonce`/ciphertext tuple but does not by itself reveal the 128-bit
+payload-build root. This is distinct from §4.5.1, where the matching
+`ECUAuthKey`/`ServiceAuthKey` pair is enough to execute SecurityAccess without
+recovering the ECU's SecurityAccess root.
+
+`SecurityProperty2` is separate from both of these KDFs. It is not imported by
+`TCUWCanCommonPrepareWriter.dll`, so it cannot select or alter the recovered
+`CalcSeedKeyForSecurityUp` construction. It is read by the unified **flash**
+writers and passed into their transfer/image-format orchestration; those DLLs
+have no `CryptEncrypt`/`CryptDecrypt`/`CryptImportKey` edge. For the public
+`8966312R1100` example, `SecurityProperty2=98` is therefore flash metadata, not
+a selector for the SecurityAccess wrapping key or the firmware payload-build
+root. Its narrower transfer-format semantics remain calibration-route
+specific.
 
 ECU-specific flash writers include:
 `TCUWCanReproStdFlashWriter` (standard CAN), `TCUWCanUnifiedFlashWriter`
