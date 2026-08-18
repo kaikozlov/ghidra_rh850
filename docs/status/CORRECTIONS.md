@@ -1481,6 +1481,23 @@ the mistakes are not re-made.
   local source sector plus the single `0x664E6` mutation, so those hashes are
   identity pins rather than independent semantic evidence. The hardware record
   proves deployment/target-write mechanics, not SecOC acceptance.
+- **Lineage boundary:** Lochuan's deleted CRC-route design explicitly cites
+  `secoc-icanhack/extract_keys.py` and an independent friend
+  `disable-secoc-script/flash_patcher.py` as the reviewed authenticated-upload /
+  fixed-FF00 references. The first public payload commit says its patch payloads
+  were migrated reviewed sources and its patch-era headers mechanically migrated
+  from the old private `sienna-b4512000-rx-secoc` tree. This supports a shared
+  I-CAN-hack -> blurbdust/@yc -> private-Lochuan deployment lineage. Neither
+  upstream reference contains `0x664E6`/`0x664E4` or the `31 -> 10` instruction;
+  blurbdust's semantic egg is different and already disproved on `4512000`.
+  Therefore the deployment architecture can be attributed to the same community
+  lineage while the fixed `4512000` semantic target must be treated as a
+  separate private-tree input. Exact line-level FACI authorship is not recoverable.
+- **Historical-rationale bound:** Lochuan's older report really does label the
+  `0x66374/0x674A8` NvM cone as SecOC MAC scheduling/generation. That is a
+  plausible conceptual origin for treating `0x31` as a cryptographic failure,
+  but no surviving report explicitly says this misclassification caused the
+  choice of `0x664E6`. Record that link as inference, not direct provenance.
 - **Rejected alternate explanation:** the F7/`BAENA` persistent authorization
   state does have a 30-worker-invocation countdown, but its marker is consumed
   only by the proprietary SID-`0xBA` operation gateway and has no recovered edge

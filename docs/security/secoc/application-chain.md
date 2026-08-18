@@ -1495,6 +1495,64 @@ bad-MAC steering acceptance experiment.** The bench lineage validates loader,
 FACI, target-write, readback, and diagnostic instrumentation mechanics; it does
 not supply the missing causal edge from `0x664E6` to ICU-S/Gate-2 acceptance.
 
+#### Deployment lineage versus semantic-target lineage
+
+The surviving history also lets us separate what Lochuan inherited from the
+community patching work from what is unique to his `4512000` target. The deleted
+CRC-trigger recovery design at
+`1c0735176a60ae2c6f76d29aa5d2fb281e4373de` explicitly names two reviewed
+references: `secoc-icanhack/extract_keys.py` and an independent friend script
+`disable-secoc-script/flash_patcher.py`. It states that both authenticate a
+4-KiB envelope at `FEBF0000`, then execute it through the fixed `FF00`
+trampoline range `0xE0000/0x8000`. Those are exactly the I-CAN-hack bootstrap
+and the blurbdust/@yc-style host path already pinned in this repository.
+
+The hardware-specific writer structure is likewise the same family as the
+imported blurbdust/@yc implementation described by SECOC-028: 32-KiB CodeFlash
+block RMW through a `FEBF2000` SRAM buffer, FACI unlock `AA01`, write-window
+enable, P/E entry `5501`, erase `20/D0`, 256-byte programming through `E8/80`
+and `D0`, P/E exit `5500`, and a live-CodeFlash CRC repair at `FFDEC`. Lochuan's
+private/public descendant substantially hardens that pattern with exact idle
+snapshots, bounded polling, candidate intents, source/candidate identity pins,
+separate target/CRC writers, full readback streaming, durable recovery state,
+and fail-closed destructive transitions.
+
+This is not merely similarity inferred after the fact. The first public payload
+commit, `8d0f29fbe506e36de37a912930f6c68c10a75c42`, says the Task-4 payloads were
+added by **migrating the reviewed sources**, calls the shipped binaries
+**previously reviewed** artifacts, and says the patch-era shared headers were
+**mechanically migrated** from the old private
+`sienna-b4512000-rx-secoc` project. Exact line-by-line authorship cannot be
+reconstructed because that private source tree is not present, but the
+architectural/migration lineage is explicit.
+
+The **semantic target does not share that upstream provenance**. Neither the
+pinned I-CAN-hack source nor the imported blurbdust/@yc source contains
+`0x664E6`, `0x664E4`, `20 e6 31 00`, or `20 e6 10 00`. Blurbdust's writer instead
+hunts the independent egg `88 00 01 52 00 0A E5 0D` and replaces its first four
+bytes with `01 52 7F 00`; on `4512000`, SECOC-028/035 already prove that egg is
+the unrelated SID-`0xBA` token comparator at `0x3485A`. Thus the supportable
+lineage is:
+
+```text
+I-CAN-hack authenticated RAM execution
+                +
+blurbdust/@yc persistent FACI RMW + CRC-repair pattern
+                ↓
+Lochuan private sienna-b4512000-rx-secoc hardening
+                ↓
+public 8965B4512000-FW-PATCH migration/productionization
+                │
+                └── carries distinct fixed target 0x664E6 from the private tree
+```
+
+The old Lochuan research report labels `0x66374` as a SecOC MAC scheduler and
+`0x674A8` as a MAC-generation submitter. That historical misclassification is a
+**plausible explanation** for how a checkpoint failure code could have been read
+as a cryptographic failure code. However, no surviving source explicitly says
+that this was the reasoning used to choose `0x664E6`; that final provenance step
+is an inference and is recorded as such rather than promoted to a fact.
+
 This is structurally capable of producing delayed or state-transition-dependent
 breakage after a genuine persistence failure, and a 2026-08-17 community report
 relayed through yc says Lochuan described the patch as flaky. The firmware now

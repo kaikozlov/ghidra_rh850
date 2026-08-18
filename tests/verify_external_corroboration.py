@@ -232,6 +232,52 @@ def main() -> int:
         and "All evidence came from local deterministic fakes" in recovery_report,
     )
 
+    print("\n== Lochuan patch deployment lineage ==")
+    check(
+        "Lochuan deleted design explicitly cites I-CAN-hack plus independent friend patcher",
+        "`secoc-icanhack/extract_keys.py` and its independent friend script" in crc_route_design
+        and "`disable-secoc-script/flash_patcher.py`" in crc_route_design,
+    )
+    check(
+        "Lochuan reference route is FEBF0000/0x1000 upload plus fixed E0000/0x8000 FF00",
+        "RAM `0xFEBF0000 / 0x1000`" in crc_route_design
+        and "range `0xE0000 / 0x8000`" in crc_route_design,
+    )
+    migration_report = git_show(
+        lochuan_root,
+        "8d0f29fbe506e36de37a912930f6c68c10a75c42:.superpowers/sdd/2026-08-17-eps-patch-migration/task-4-report.md",
+    )
+    check(
+        "first public payload commit says reviewed sources were migrated",
+        "After migrating the reviewed sources" in migration_report,
+    )
+    check(
+        "first public payload commit calls binaries previously reviewed artifacts",
+        "previously\nreviewed GCC 13.2.0/binutils 2.41 artifacts" in migration_report,
+    )
+    check(
+        "first public payload commit says patch-era sources were mechanically migrated",
+        "mechanically\nmigrated patch-era sources retain their own exact shared headers" in migration_report,
+    )
+    icanhack_host = (roots["icanhack_secoc"] / "extract_keys.py").read_text(encoding="utf-8").lower()
+    community_host = (REPO / "community/blurbdust_secoc_flash_patcher/flash_patcher.py").read_text(encoding="utf-8").lower()
+    community_shell = (REPO / "community/blurbdust_secoc_flash_patcher/main.c").read_text(encoding="utf-8").lower()
+    upstream_text = "\n".join((icanhack_host, community_host, community_shell))
+    check(
+        "upstream I-CAN-hack/blurbdust sources do not contain Lochuan 0x664E6 target",
+        "664e6" not in upstream_text and "664e4" not in upstream_text
+        and "20 e6 31 00" not in upstream_text and "20 e6 10 00" not in upstream_text,
+    )
+    check(
+        "blurbdust semantic target is the independent eight-byte egg",
+        all(token in community_shell for token in (
+            "#define egg_0 0x88", "#define egg_1 0x00", "#define egg_2 0x01",
+            "#define egg_3 0x52", "#define egg_4 0x00", "#define egg_5 0x0a",
+            "#define egg_6 0xe5", "#define egg_7 0x0d",
+        ))
+        and "0x007f5201" in community_shell,
+    )
+
     print("\n== original combined image reconstruction ==")
     combined = roots["rh850_p1me_original"] / "RH850_P1M-E_Firmware.bin"
     split = (

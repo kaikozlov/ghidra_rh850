@@ -75,7 +75,9 @@ checkpoint/NvM failure-status fail-open, not another Gate-2 encoding; see
 [`docs/security/secoc/application-chain.md` §9.7](../docs/security/secoc/application-chain.md#97-yc-compare-neutralization-versus-lochuan3b1b-0x664e6-patch).
 The older pinned `lochuan/RH850_P1m-E` report is retained alongside it because
 its historical misidentification of the checkpoint cone as SecOC MAC scheduling
-explains how that target was selected.
+is a plausible conceptual origin for the bad target. No surviving source
+explicitly states that this misclassification caused the original `0x664E6`
+selection, so that final provenance link remains an inference.
 
 ## `albinoelephant/`
 
