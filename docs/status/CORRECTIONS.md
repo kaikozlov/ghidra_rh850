@@ -1468,10 +1468,19 @@ the mistakes are not re-made.
   comes from a separate debounce/fault family. No direct `object6 -> public
   LKAS-off` edge is recovered.
 - **External validation boundary:** Lochuan's public README explicitly says Flash
-  `PASS` does not prove RX SecOC bypass; the retained migration report says no
-  live ECU, vehicle, Panda, network, or other hardware operation was performed.
-  Surviving history contains no functional invalid-MAC steering proof for
-  `0x664E6`; the bench-proven material is loader/FACI/writer mechanics.
+  `PASS` does not prove RX SecOC bypass. Deleted-but-reachable history does record
+  real hardware work: a failed read-only DCRA probe, a rejected 32-KiB
+  `RequestDownload`, and—most importantly—an audited target-sector transaction
+  in which `0x60000` was prechecked, armed, written, and fully read back as the
+  candidate. A subsequent live read still showed target=candidate while the CRC
+  sector remained source; the later CRC trigger failed with raw
+  `03 7F 31 31 00 00 00 00` / NRC `0x31`. The subsequent recovery release was
+  explicitly offline-only and repository history contains no later hardware CRC
+  commit/final PASS or stationary invalid-MAC steering proof. Core tests also
+  reproduce the published target original/candidate SHA pins directly from the
+  local source sector plus the single `0x664E6` mutation, so those hashes are
+  identity pins rather than independent semantic evidence. The hardware record
+  proves deployment/target-write mechanics, not SecOC acceptance.
 - **Rejected alternate explanation:** the F7/`BAENA` persistent authorization
   state does have a 30-worker-invocation countdown, but its marker is consumed
   only by the proprietary SID-`0xBA` operation gateway and has no recovered edge

@@ -52,6 +52,15 @@ def git_head(path: Path) -> str:
     ).stdout.strip()
 
 
+def git_show(path: Path, spec: str) -> str:
+    return subprocess.run(
+        ["git", "-C", str(path), "show", spec],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+
+
 def dbc_message(dbc: str, can_id: int, name: str) -> str:
     """Return one DBC message block, excluding following BO_ definitions."""
     marker = f"BO_ {can_id} {name}:"
@@ -160,6 +169,67 @@ def main() -> int:
         "patch_address=0x664E6" in lochuan_manifest
         and 'original_instruction=bytes.fromhex("20 e6 31 00")' in lochuan_manifest
         and 'patched_instruction=bytes.fromhex("20 e6 10 00")' in lochuan_manifest,
+    )
+    lochuan_readme = (roots["lochuan_b4512000_fw_patch"] / "README.md").read_text(encoding="utf-8")
+    check(
+        "Lochuan public guide explicitly separates Flash PASS from RX SecOC proof",
+        "PASS is a Flash-level result" in lochuan_readme
+        and "does not, by itself, prove that the EPS RX SecOC behavior is functionally bypassed" in lochuan_readme,
+    )
+
+    # The public-release commit deleted the internal design/report tree, but the
+    # pinned commit retains that history. Pin the specific ancestors that record
+    # the actual bench incident so deployment evidence is not conflated with the
+    # later offline migration/recovery test reports.
+    lochuan_root = roots["lochuan_b4512000_fw_patch"]
+    dcra_design = git_show(
+        lochuan_root,
+        "b23649d688022413647f3412e409e121e91372d8:docs/superpowers/specs/2026-08-17-dcra-cout-and-adjustment-correction-design.md",
+    )
+    dcra_flat = " ".join(dcra_design.split())
+    check(
+        "Lochuan history records a real failed read-only DCRA probe",
+        "complete diagnostic report from the failed read-only probe" in dcra_flat
+        and "primary code `3`" in dcra_flat
+        and "0xf5ee5210" in dcra_flat,
+    )
+    four_kib_design = git_show(
+        lochuan_root,
+        "efe9ecea97777fd4ed8bbfc4c9309623a08b178d:docs/superpowers/specs/2026-08-17-four-kib-payload-download-design.md",
+    )
+    check(
+        "Lochuan history records the rejected 32-KiB RequestDownload",
+        "0xFEBF2000" in four_kib_design
+        and "32 KiB" in four_kib_design
+        and "request out of range" in four_kib_design.lower(),
+    )
+    crc_route_design = git_show(
+        lochuan_root,
+        "1c0735176a60ae2c6f76d29aa5d2fb281e4373de:docs/superpowers/specs/2026-08-17-crc-trigger-route-recovery-design.md",
+    )
+    check(
+        "Lochuan history records a successful real target-sector commit/readback",
+        "target source was prechecked, armed, written, and completely read back" in crc_route_design
+        and "exact target candidate" in crc_route_design,
+    )
+    crc_route_flat = " ".join(crc_route_design.split())
+    check(
+        "same incident later observed target=candidate while CRC remained source",
+        "proved the target was the exact candidate and the CRC sector was still the exact source" in crc_route_flat,
+    )
+    check(
+        "same incident ended CRC trigger with exact NRC31 raw frame",
+        "03 7f 31 31 00 00 00 00" in crc_route_design
+        and "Request Out Of Range" in crc_route_design,
+    )
+    recovery_report = git_show(
+        lochuan_root,
+        "9f5fbffc905c64c1f26f4991a2e2468f64ce78f7:.superpowers/sdd/2026-08-17-crc-trigger-route-recovery-report.md",
+    )
+    check(
+        "post-incident CRC recovery verification was offline only",
+        "No hardware, ECU, vehicle, Panda, comma, Docker, SSH, network, or external" in recovery_report
+        and "All evidence came from local deterministic fakes" in recovery_report,
     )
 
     print("\n== original combined image reconstruction ==")

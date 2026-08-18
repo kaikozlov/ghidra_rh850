@@ -9,6 +9,7 @@ the lower storage-failure latch and Dem reporting path remain intact.
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import struct
 import sys
@@ -307,7 +308,23 @@ check(
     all(not (0x8E600 <= entry < 0x8E800) for entry, _name, _site, _kind in refs),
 )
 
-print("\n== 18. real Gate-2 patch is independent ==")
+print("\n== 18. published target-sector pins are derivable from this offline image ==")
+target_sector = CF[0x60000:0x68000]
+patched_target_sector = bytearray(target_sector)
+patched_target_sector[0x664E6 - 0x60000] = 0x10
+check(
+    "published original target-sector SHA is the canonical offline sector",
+    hashlib.sha256(target_sector).hexdigest() == "f0e76a887c2b85609cee4cd44620db068d414edfb44bbafe551ec440b2a0e9d0",
+    hashlib.sha256(target_sector).hexdigest(),
+)
+check(
+    "published candidate SHA is exactly the one-byte offline mutation",
+    hashlib.sha256(patched_target_sector).hexdigest() == "c67d992a8413d020fb16464d58654ab3fbd84139809b6b544c6142d6dcfeeb7b",
+    hashlib.sha256(patched_target_sector).hexdigest(),
+)
+check("published original CRC fixup is literal source-image word", u32(0xFFDEC) == 0x0962887F, hex(u32(0xFFDEC)))
+
+print("\n== 19. real Gate-2 patch is independent ==")
 check("real Gate-2 stock CMP remains e0d1 at 0x8E6C6", CF[0x8E6C6:0x8E6C8] == bytes.fromhex("e0d1"))
 check("real Gate-2 following mismatch BNE remains 9a0d", CF[0x8E6C8:0x8E6CA] == bytes.fromhex("9a0d"))
 check("Lochuan target and Gate-2 target are distinct", 0x664E6 != 0x8E6C6)

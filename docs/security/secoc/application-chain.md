@@ -1446,17 +1446,54 @@ public `0x262`/`0x351` status producers**. A later indirect consequence is still
 possible, but the current static graph does not identify one explicit LKAS-off
 bit.
 
-Finally, the external repository does not contain the missing functional proof.
-Its public README repeatedly states that Flash-level `PASS` does **not** prove RX
-SecOC bypass and requires a later stationary openpilot/EPS compatibility test.
-The retained migration task report explicitly records: "No live ECU, vehicle,
-Panda, network, or other hardware operation was performed"; its verification was
-local deterministic tests, retained source inspection, and binary/manifest
-checks. Deleted/public history searched so far contains no report demonstrating
-invalid-MAC steering acceptance with the `0x664E6` edit. The surviving
-"bench-proven" language concerns the `0xFEBF0000` 4-KiB loader/FACI trigger and
-writer mechanics, not a causal bad-MAC acceptance result. Thus there is presently
-**no repository evidence that this byte ever functionally bypassed SecOC**.
+The external repository provides **real deployment evidence, but still no
+functional SecOC-bypass proof**. Its current README explicitly says Flash-level
+`PASS` does not by itself prove RX SecOC bypass and requires a later stationary
+openpilot/EPS compatibility test. The public-release commit deleted the internal
+SDD/design tree, but that history is still reachable from the pinned repository
+commit and separates several actual bench observations from later offline-only
+verification:
+
+- DCRA correction ancestor `b23649d688022413647f3412e409e121e91372d8`
+  says its input was a complete report from a **failed read-only probe** on the
+  target ECU. The probe reached primary result `3` before FACI P/E and captured
+  the DCRA `CTL/COUT` behavior that exposed the XOR-restoration bug.
+- 4-KiB loader ancestor `efe9ecea97777fd4ed8bbfc4c9309623a08b178d`
+  records the migrated host's real `RequestDownload(0xFEBF2000, 32 KiB)` being
+  rejected as request-out-of-range, while the older writer lineage used a
+  4-KiB authenticated envelope at `0xFEBF0000` and copied the 32-KiB sector
+  internally before FACI P/E.
+- CRC-route recovery ancestor `1c0735176a60ae2c6f76d29aa5d2fb281e4373de`
+  records an audited persisted attempt whose **target source was prechecked,
+  armed, written, and completely read back as the exact candidate**. A later
+  read-only `live_read` still classified the complete target sector as the
+  candidate while the CRC sector remained the original source. The subsequent
+  CRC trigger ended with exact UDS frame `03 7F 31 31 00 00 00 00` (NRC `0x31`,
+  Request Out Of Range).
+- The later recovery-release report at
+  `9f5fbffc905c64c1f26f4991a2e2468f64ce78f7` explicitly says its corrected
+  `CRC_PRECHECKED -> CRC_COMMITTED -> PASS` coverage used local deterministic
+  fakes and ran **no hardware/ECU/Panda/network operation**. Repository history
+  after the CRC-route work contains only build/docs/public-release commits, so
+  there is no retained later hardware record of a confirmed CRC-sector commit,
+  final Flash-level PASS, or stationary openpilot/SecOC functional test.
+
+The target-sector identity pins do not add an independent semantic observation.
+`tests/verify_lochuan_patch_semantics.py` reproduces the published original
+sector SHA-256 `f0e76a887c2b85609cee4cd44620db068d414edfb44bbafe551ec440b2a0e9d0`
+directly from this repository's `0x60000..0x67FFF` CodeFlash bytes and reproduces
+candidate SHA-256 `c67d992a8413d020fb16464d58654ab3fbd84139809b6b544c6142d6dcfeeb7b`
+by changing only `0x664E6` to `0x10`; the original CRC fixup `0x0962887F` is
+likewise the literal source-image word at `0xFFDEC`. These pins prove image
+identity/candidate construction, not that the changed instruction has the
+claimed SecOC meaning.
+
+The strongest supportable historical statement is therefore: **the one-byte
+target candidate was genuinely programmed and read back on an EPS, but the
+surviving evidence does not show a completed boot-valid two-sector patch or a
+bad-MAC steering acceptance experiment.** The bench lineage validates loader,
+FACI, target-write, readback, and diagnostic instrumentation mechanics; it does
+not supply the missing causal edge from `0x664E6` to ICU-S/Gate-2 acceptance.
 
 This is structurally capable of producing delayed or state-transition-dependent
 breakage after a genuine persistence failure, and a 2026-08-17 community report
