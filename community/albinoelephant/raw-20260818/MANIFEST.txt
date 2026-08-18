@@ -1,0 +1,80 @@
+Toyota Corolla EPS memory dumps - 2026-08-18
+============================================
+
+Owner: albinoelephant (Discord), 2023 US Corolla, Toyota-B harness, post pin-swap.
+Read owner-side over OBD with TSK Manager (openpilot fork, `tskm` branch) using the
+public payload-build secret. No glitching, no bench work, no module removal.
+
+MODULE IDENTIFICATION (read out of these files)
+-----------------------------------------------
+MCU boot-info string, code flash 0x000180:  "BOOT INFO AREA  R7F701383       72114350"
+  -> Renesas RH850 R7F701383, 1 MB code flash, 64 KB data flash.
+ECU serial string, code flash 0x00A4DC:     "8965012N50A05G310920"
+Live software id pair, code flash 0x017D80 / 0x017DC0, mirrored into local RAM at
+  0x01F980 / 0x01F9C0:                      "8965H1202000" and "8A3111202000"
+Second id block, code flash 0x020860:       "8965F1208000" (no RAM copy)
+
+NOTE FOR SPAN: this is NOT your car. Your EPS reports app_sw_id 8965F1208000 and
+ecu_serial 8965012N50E12H030731 (2025 Corolla Hybrid). This module's own serial is
+8965012N50A05G310920 and its live software id is 8965H1202000. The 8965F1208000
+string that appears in this code flash is a table entry, not this unit's identity.
+
+FILES
+-----
+albinoelephant-corolla-2023.20260812-1050/
+  dump_ff200000_ff208000.bin              32,768 B   DataFlash 0xFF200000-0xFF208000
+    sha256 8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299
+  can_oracle.ndjson                       97,768 B   1,232 SecOC sync-frame (0x0F) rows
+    sha256 8863398a98875a853e722a6ba83fc10563d5764cea33719c8af34225efa189a3
+
+albinoelephant-corolla-2023.20260814-0023/
+  dump_codeflash_00000000_00200000_20260814-025814.bin      2,097,152 B
+    Code flash 0x00000000-0x00200000. Real content ends at 0x100000; the upper
+    1,048,576 bytes are past the end of code flash on this part.
+    sha256 97f9d42d936b97a99e7ab3d3ef20c6fb4c1fc3cc2ba199f6b158675a1709aee6
+  dump_dataflash_ff200000_ff210000_*.bin   65,536 B x 5   DataFlash, 5 separate reads
+    sha256 06992af443f2aa0e0559202a7fcd0dfdc040ce91843956807d8b902abdf8b486  (002328)
+    sha256 462065968d2f2da2cb88d62d63b6cf78c9242e801a7e66d31b1733ab1e860f53  (002403)
+    sha256 5c91da76ef352b1171eef49df853dcb486c88f44abc0958b1c9df23376e805ec  (003232)
+    sha256 f638954406e240250c99c52ce251afd4103eeec39586676102b297e0a51357be  (004424)
+    sha256 8fef0fd1a7869d9faad4516493d600d3ec02d62a69f73299981746b3bcb19990  (004957)
+  dump_extended_codeflash_01000000_0100c000_*.bin  49,152 B x 3
+    0x01000000-0x0100C000. All three reads byte-identical.
+    sha256 90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7
+  dump_global_ram_feef8000_fef08000_*.bin  65,536 B x 3   Global RAM
+    sha256 1904a16d8cfbc1a0e3ec399b94e3eb9626f981473870aa50772e21b56e651f88  (002555)
+    sha256 52daca8a7d913fd727e42723ec50e731c09d413b5c359ac8914c874817414b77  (004529)
+    sha256 63f7470eba1625b4ee2db5a2fb721922a574dbd477021aa83936b6e3cadb9420  (005127)
+  dump_local_ram_pe1_febe0000_fec00000_*.bin  131,072 B x 3   Local RAM (PE1)
+    sha256 2631d6d290cf3ee1adfe62e81798be67479c9f7c0a58dfeb6d097a2558eb4e53  (002502)
+    sha256 5cff0226c1228dc06f8e0edb9908ab4078e557b54abc48666eecebd29bf41e09  (004452)
+    sha256 f27514c621ba56b127058341f6730c96900347e72d7c54e101875ee4fb3f46ce  (005055)
+
+Total 17 files, 3,292,648 bytes.
+
+MEMORY COVERAGE
+---------------
+Local RAM aliases on a 0x20000 period on this silicon, so the 128 KB local + 64 KB
+global reads cover the part's whole 192 KB RAM array. DataFlash past 64 KB reads as a
+single repeated value. Every main-core-readable region on this module is in this set.
+
+WHAT HAS ALREADY BEEN CHECKED
+-----------------------------
+All 16 dump files were swept with a sliding 16-byte window against two independent
+SecOC sync oracles (984 distinct samples from route a74eba85c97eaf67/00000004--
+555953f500, and the 206-sample capture in can_oracle.ndjson). Zero survivors. The
+positive control - planting a known key into these same files at these same sizes and
+re-running with the owner's own (trip, reset) values - recovers it, so the sweep works.
+
+The three RAM key addresses that hold real keys on a 2023 Sienna (0xFEBE6EC0 SecOC,
+0xFEBE6E60 master, 0xFEBF42E0 factory) are all empty on this module across three reads,
+on a live RAM capture (24.045 % non-zero bytes).
+
+In the 64 KB DataFlash: 67 "aa aa aa aa" slot markers, of which 27 records carry a
+16-byte field with 12 or more distinct byte values. Those fields have never been
+identified. The SecOC frame key is measurably absent; nothing here rules out other key
+material in those 27 records.
+
+The 1,232 oracle rows are all bus 0 and bus 2, none on bus 1 where this EPS answers.
+The current reading is that this EPS is not a SecOC participant for steering on this
+car, which is why no steering key is stored in it.
