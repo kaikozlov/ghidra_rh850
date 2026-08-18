@@ -83,12 +83,25 @@ selection, so that final provenance link remains an inference.
 
 **Contributor:** albinoelephant, comma Discord, 2026-08-12
 
-**Vehicle attribution:** reported 2023 US Corolla; exact EPS F181 still unknown
+**Vehicle attribution:** reported 2023 US Corolla. The later tracked CodeFlash
+identifies the firmware artifact as `8965H1202000` / `8A3111202000` on
+`R7F701383`; a direct UDS F181 transcript is still not retained.
 
-This directory preserves the contributor's complete 32 KiB TSKM DataFlash dump
-and TSKM CAN-oracle output, plus a compact CAN-only oracle derived from the
-already-pinned public route supplied during the same investigation. The raw
-artifacts are immutable evidence inputs rather than tooling.
+This directory preserves the contributor's complete 2026-08-18 memory corpus
+under `albinoelephant/raw-20260818/` (CodeFlash, DataFlash, global/local RAM,
+and the earlier TSKM oracle), plus a compact CAN-only oracle derived from the
+already-pinned public route. The contributor-supplied `MANIFEST.txt` pins every
+raw file hash and acquisition note; the artifacts are immutable evidence inputs
+rather than tooling.
+
+The CodeFlash range dump normalizes to a one-megabyte image with SHA-256
+`0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f`.
+It independently transfers all three Sienna cryptographic roots, the semantic
+Gate-2/CRC-resigning machinery, and the checkpoint semantics behind the old
+Lochuan patch. Its Gate-2 queue is nevertheless variant-specific: exactly
+`0x00F/0x0D7/0x0B6`, with no `0x2E4/0x131` steering profiles. This foreign
+image exposed and now regression-tests the resolver's former Sienna-specific
+queue/table assumptions.
 
 The contributor's TSKM oracle contains synchronization `0x00F` only, explaining
 the original matcher failure. The derived public-route oracle adds the genuine

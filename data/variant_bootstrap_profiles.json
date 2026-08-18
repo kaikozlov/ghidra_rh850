@@ -3,7 +3,7 @@
     {
       "authenticated_download_base": "0xFEBF0000",
       "authenticated_download_size": "0x1000",
-      "boundary": "The Denso EPS authenticated-RAM bootstrap is already cross-vehicle: shared SA/DID/download/routine structure and public-payload reuse are established across listed B4/F3/F4 EPS evidence. Exact byte-for-byte acceptance of the repository Sienna ram_dump_payload.bin is locally verified only for 8965B4512000; other rows retain their external-source grade and may require a target-accepted fixture.",
+      "boundary": "The Denso EPS authenticated-RAM bootstrap is already cross-vehicle: shared SA/DID/download/routine structure and public-payload reuse are established across listed B4/F3/F4 EPS evidence, and 8965H1202000 now has direct field-observed range-payload execution plus firmware-static secret/flow corroboration. Exact byte-for-byte acceptance of the repository Sienna ram_dump_payload.bin is locally verified only for 8965B4512000; other rows retain their evidence grade and may require a target-accepted fixture.",
       "did_0201_default": "00000000000000000000000000000000",
       "did_0202_default": "00000000000000000000000000000000",
       "did_order": [
@@ -19,6 +19,13 @@
           "notes": "Exact local CodeFlash gate plus pinned ram_dump_payload.bin acceptance.",
           "software_id": "8965B4512000",
           "source": "firmware-static+generated-artifact"
+        },
+        {
+          "fixture_transfer": "target-built-range-payloads-observed",
+          "grade": "observed",
+          "notes": "Contributor field acquisition used the shared authenticated-RAM path to execute range-dump payloads and recover CodeFlash/DataFlash/RAM on the 2023 Corolla EPS; exact local Sienna fixture-byte acceptance is not claimed.",
+          "software_id": "8965H1202000",
+          "source": "community/albinoelephant/raw-20260818/MANIFEST.txt + recovered CodeFlash"
         },
         {
           "fixture_transfer": "shared-public-payload-reported",
@@ -71,15 +78,7 @@
         }
       ],
       "execute_routine": "0xFF00",
-      "family_corroboration": [
-        {
-          "grade": "observed",
-          "notes": "A successful 32 KiB DataFlash dump proves dynamic RAM-payload execution occurred in that investigation; exact EPS F181 remains unknown, so it is not assigned to a specific software-ID profile row.",
-          "software_id": null,
-          "source": "community/albinoelephant + prior TSKM field workflow",
-          "vehicle": "reported 2023 US Corolla"
-        }
-      ],
+      "family_corroboration": [],
       "id": "denso-p1me-f05f-zero-did-febf-v1",
       "security_access_data_record": "00000000000000000000000000000000",
       "security_access_secret": "f05f36b7d78c03e24ab4faef2a57d044",

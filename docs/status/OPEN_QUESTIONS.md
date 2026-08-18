@@ -266,21 +266,20 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   diagnostic endpoint, responding SIDs, level-`0x03` seed behavior, and
   observed SecOC traffic; do not describe those as unknown. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
-- **Separate 2023 US Corolla public-route specimen.** The completed 32 KiB
-  DataFlash and its sync-only TSKM oracle are now retained and analyzed. No raw
-  dump window matches the local `0x00F` oracle; however CAN capture and dumping
-  are separate TSKM jobs and the dump performs a programming/SecurityAccess/
-  RAM-exec transition, so identical runtime-key epoch is not proven. The older
-  public-route `0x116`/`0x24D` oracle also gives zero raw key matches and is
-  definitely a different freshness epoch (`TRIP 0xCE9` versus local `0xD0D`).
-  The full `4512000` physical map finds 60 committed records, including a
-  coherent 117/118 checkpoint ring in a reference-disabled slot, proving shared
-  geometry with variant-specific provisioning. Remaining high-value gaps are
-  exact EPS `F181`, CodeFlash, and—if the vehicle is revisited—a controlled
-  full-bus capture immediately before the dump transition and again after
-  recovery/reset to establish runtime-key continuity.
-  Route metadata is forced `TOYOTA_COROLLA_TSS2` with no `carFw`, so it cannot
-  identify the physical calibration. See
+- **Separate 2023 US Corolla / tracked `8965H1202000` specimen.** The complete
+  memory corpus is now retained. CodeFlash internally identifies
+  `8965H1202000/8A3111202000`, `R7F701383`, and serial
+  `8965012N50A05G310920`; all three Sienna crypto roots transfer byte-for-byte,
+  Gate-2/CRC resolution transfers, and the target's actual queue is exactly
+  `00F/D7/B6` with no `2E4/131`. Thus CodeFlash identity and static SecOC
+  topology are no longer open. What remains is the **dynamic epoch/key boundary**:
+  no raw DataFlash window matches the local `0x00F` oracle, but CAN capture and
+  dumping are separate jobs, and the older public-route `0x116/0x24D` oracle is
+  a different freshness epoch (`TRIP 0xCE9` versus local `0xD0D`). If the vehicle
+  is revisited, collect a direct `F181` plus full-bus capture immediately before
+  the dump transition and again after recovery/reset. Route metadata remains
+  forced `TOYOTA_COROLLA_TSS2` with no `carFw`, so the route-to-image/model-year
+  join remains contributor attribution. See
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md).
 - **TSS 3.0 family breadth.** Which Sienna findings generalize across the
   family (Camry, RAV4, etc.) is unmapped. See

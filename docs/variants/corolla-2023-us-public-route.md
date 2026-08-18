@@ -3,13 +3,18 @@
 > **Scope:** public comma route `a74eba85c97eaf67|00000004--555953f500`,
 > discussed as a 2023 US Corolla in comma `#toyota-security`
 >
-> **Exact EPS F181:** unknown
+> **Firmware identity from tracked CodeFlash:** `8965H1202000` / `8A3111202000`,
+> MCU `R7F701383`, serial `8965012N50A05G310920`
 >
-> **Status:** route evidence recovered; contributor DataFlash + TSKM oracle acquired;
-> F181/CodeFlash still artifact-blocked
+> **Direct UDS F181 transcript:** not retained; the live-ID blocks above are
+> firmware-static evidence from the acquired image
+>
+> **Status:** route evidence + complete contributor memory corpus acquired;
+> CodeFlash semantics now independently analyzed
 >
 > **Evidence source:** public logged route + pinned Panda/opendbc source +
-> contributor-supplied TSKM artifacts + external Discord vehicle attribution
+> contributor-supplied TSKM/CodeFlash/DataFlash/RAM artifacts + external Discord
+> vehicle attribution
 >
 > **Machine-readable summaries:**
 > `data/generated/corolla_2023_public_route_summary.json` and
@@ -18,8 +23,13 @@
 This specimen must remain separate from the earlier
 [`8965F1208000`](corolla-8965F1208000.md) Corolla investigation. The earlier
 variant has an exact application software ID from direct field probing. This
-public route does **not**: its logged software was deliberately forced to an old
-`TOYOTA_COROLLA_TSS2` fingerprint and contains no `carFw` inventory.
+public route still does **not** identify its physical EPS: its logged software
+was deliberately forced to an old `TOYOTA_COROLLA_TSS2` fingerprint and contains
+no `carFw` inventory. The later contributor memory corpus independently closes
+the firmware side for this specimen: its CodeFlash live-ID blocks identify
+`8965H1202000` / `8A3111202000`. An embedded `8965F1208000` string at
+CodeFlash `0x20860` is a table entry and must not be mistaken for Span's distinct
+`8965F1208000` ECU.
 
 The public route is nevertheless highly useful because it resolves which CAN
 traffic was genuinely received from the vehicle and which apparent steering
@@ -59,10 +69,11 @@ secOcKeyAvailable:        false
 route parameter is `MOCK`, also with no firmware inventory. There is therefore
 no hidden F181/firmware identity in the logged parameters.
 
-**Consequence:** the route cannot independently prove that the physical car was
-a 2023 model or identify its EPS calibration. The 2023-US attribution remains
-an external field statement until F181 or another ECU identity artifact is
-obtained.
+**Consequence:** the route alone still cannot independently prove model year or
+EPS calibration. The contributor's later CodeFlash is now an independent ECU
+identity artifact for the same externally attributed specimen; the 2023-US
+vehicle attribution itself remains an external field statement because no stock
+`carFw`/VIN-bearing route inventory joins the route to the image.
 
 ## 2. Genuine incoming protected-family traffic
 
@@ -281,35 +292,182 @@ does not reproduce the related `8965B4514000` CPU-visible key-storage result at
 The complete machine-readable result is
 `data/generated/corolla_2023_albino_dataflash_analysis.json`.
 
-## 7. Remaining evidence boundary
+## 7. 2026-08-18 full memory corpus and CodeFlash closure
 
-The public route and supplied DataFlash still do **not** provide:
+The later contributor bundle is preserved unchanged under
+`community/albinoelephant/raw-20260818/`; its own `MANIFEST.txt` pins the
+individual file hashes and acquisition notes. The CodeFlash range-dumper artifact is
+2 MiB because it reads `0x00000000..0x001FFFFF`, but bytes
+`0x00100000..0x001FFFFF` are entirely `0xFF`. The actual one-megabyte image is
+therefore the first half:
 
-- EPS F181 / exact calibration identity;
-- a stock passive `carFw` inventory;
-- CodeFlash;
-- proof of where the synchronization or protected-message key is actually
-  stored/derived;
-- proof that this reported 2023-US specimen is architecturally identical to the
-  separately probed `8965F1208000` Corolla.
+```text
+source range dump SHA-256: 97f9d42d936b97a99e7ab3d3ef20c6fb4c1fc3cc2ba199f6b158675a1709aee6
+normalized CodeFlash SHA-256: 0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f
+MCU boot-info: R7F701383 / 72114350
+ECU serial: 8965012N50A05G310920
+live software IDs: 8965H1202000 / 8A3111202000
+```
 
-The vehicle attribution therefore remains external until F181 is obtained.
+The image also contains `8965F1208000` at `0x20860`, but the primary live-ID
+block is `8965H1202000` at `0x17D80`; the contributor manifest independently
+records the same distinction. This closes the old calibration-unknown statement
+for the firmware artifact without rewriting the route's still-forced identity.
 
-## 8. Narrow artifact request after DataFlash closure
+### 7.1 Security roots transfer exactly
 
-For this specimen the existing artifacts are substantially analyzed, but the
-cross-session boundary reopens one narrow dynamic request. Highest-yield next
-evidence is:
+Three security roots are byte-identical to `8965B4512000` at the same CodeFlash
+addresses:
 
-1. **the exact EPS F181 response** (and secondary software ID if present);
-2. **CodeFlash**, if a safe/reliable acquisition path becomes available;
-3. if the vehicle is revisited, a **controlled paired capture around the dump**:
-   full-bus synchronization/protected CAN immediately before the programming
-   transition, then repeat after recovery/reset and retain the resulting
-   DataFlash dump plus exact `F181`.
+| purpose | CodeFlash | value |
+|---|---:|---|
+| payload-build secret | `0xBFD8` | `ba052435f8843f985fd1329d2b6117b0` |
+| boot SecurityAccess secret | `0xBFE8` | `f05f36b7d78c03e24ab4faef2a57d044` |
+| application SecurityAccess secret | `0x20840` | `893e08418c741ffa2a9c044bffa55813` |
 
-The existing local TSKM oracle is useful but was collected as a separate job.
-A controlled paired recapture would establish whether synchronization and
-protected keys survive the programming/reset transition instead of assuming
-runtime-key continuity. An unrelated additional CAN capture would not close
-that boundary.
+The foreign boot-SA stage-1 routine at `0x6FD0` is also byte-identical across its
+50-byte extent to the Sienna routine at `0x6FEC`. The application root is not
+merely an unreferenced constant: the foreign application path at `0x86BBC`
+initializes its AES context from CodeFlash `0x20840`, and caller `0x86C2A` uses
+the same `FEBF497A` / `FEBF495A` state family and 16-byte comparison shape.
+This promotes the shared cryptographic architecture for `8965H1202000` from
+family inference to firmware-static evidence.
+
+The acquisition itself is additional dynamic evidence for the authenticated-RAM
+bootstrap: the contributor used TSKM range payloads to obtain CodeFlash,
+DataFlash, and RAM owner-side over OBD. The contributor manifest explicitly says
+no glitching, bench work, or module removal. This does **not** promote the exact
+Sienna encrypted `ram_dump_payload.bin` bytes to verified on this calibration;
+it proves target-built range-payload execution in the shared bootstrap family.
+
+### 7.2 Gate-2 and CRC-resigning transfer
+
+Running the calibration-independent Gate-2 resolver unchanged on a fresh
+unannotated import returns exactly one candidate:
+
+```text
+Gate-2 function       0x88C16
+CMP                    0x88C62  e0 d1
+neutralized CMP        0x88C62  e0 01
+preserved BNE          0x88C64  9a 0d
+verified fallthrough   0x88C66
+mismatch target        0x88C76
+```
+
+The independent CRC manifest builder finds two valid self-describing boot CRC
+descriptors. The Gate patch lies in region 1 (`0x18000..0xFFDF0`), whose stock
+fixup at `0xFFDEC` is `0xAD59D70C` and already validates to residue
+`0xFFFFFFFF`. Applying only the resolved Gate CMP change gives prefix CRC
+`0x22A0EB88`, fixup `0xDD5F1477`, and again residue `0xFFFFFFFF`. This is the
+first tracked foreign-image proof that both the semantic Gate resolver and the
+CRC-resigning backend transfer beyond `8965B4512000`.
+
+The result is a patch for this image's **configured SecOC acceptance paths**, not
+a claim that this Corolla uses Sienna's steering profiles. The profile census
+below is what determines that applicability.
+
+### 7.3 The configured SecOC queue is not Sienna's steering queue
+
+The callback-free runtime semantic resolver also transfers far enough to recover
+the foreign startup/scheduler skeleton and target-specific state:
+
+```text
+boot handoff          0x1394
+startup coordinator   0x5CAAC
+context init          0x6A8C4
+foreground loop       0x5F30C
+aggregate             0x5FAF2
+GP                    FEBEB800
+TP                    0x23D6C
+tick counter          FEBE38EF
+Com_RxIndication      0x76A3C
+COM timeout helper    0x87A82
+COM validity base     FEBE51C4
+COM update base       FEBE5224
+```
+
+The important difference is queue 1. The generated queue helper at `0x87B72`
+selects queue 1 at `0x87B92`, returning descriptor/head/raw bases
+`FEBE5356/FEBE5350/FEBE5398` and an explicit **record count of 3**. Gate-2's
+`index * 0x50 + TP-relative-base` machine shape independently locates the table
+at `0x2572C`. Its three records are:
+
+| index | CAN ID | PDU | raw offset | secured length |
+|---:|---:|---:|---:|---:|
+| 0 | `0x00F` | 9 | `0x00` | 8 |
+| 1 | `0x0D7` | 40 | `0x08` | 32 |
+| 2 | `0x0B6` | 42 | `0x28` | 32 |
+
+There is no configured queue-1 `0x2E4` or `0x131` record. The correct runtime
+resolver result is therefore
+`semantic-resolved-steering-unsupported`, not a generic resolver failure and not
+a build-ready steering bridge. This provides firmware-static support for the
+earlier observation that this specimen does not look like the Sienna steering
+SecOC participant: SecOC exists, but its configured protected domains differ.
+
+### 7.4 Foreign image exposed three resolver overfits
+
+The first implementation of the runtime resolver failed on this image despite
+the architecture clearly transferring. The failures were real tooling bugs:
+
+1. queue discovery matched one exact Sienna compiler layout instead of the
+   generated queue-1 output contract;
+2. table discovery required the literal six-ID Sienna order
+   `00F/2E4/131/132/090/0D7` instead of deriving table base and count;
+3. software-ID extraction accepted a 12-character prefix of the longer ECU
+   serial `8965012N50A05G310920`.
+
+The corrected resolver derives GP and TP from context setup, queue-1 bases/count
+from the generated helper, and the record table from Gate-2's TP-relative
+`index*0x50` access. `0x2E4/0x131` are now **bridge capability requirements**,
+not discovery signatures. Software-ID extraction requires token boundaries. The
+wrapper also accepts this exact 2 MiB range-dumper geometry only when the upper
+1 MiB is all `0xFF`, normalizes it in a disposable workspace, and preserves both
+source and normalized hashes in the output manifest.
+
+The Sienna target remains byte-for-byte build-ready under the generalized code;
+the tracked `8965H1202000` image is now the foreign regression proving that a
+non-steering profile set resolves successfully and fails closed at capability
+selection.
+
+### 7.5 Lochuan checkpoint semantics transfer too
+
+The eight-byte context around the old Sienna Lochuan byte at `0x664E6` occurs
+exactly once in the foreign image, at `0x6081A`; the homologous status byte is
+`0x6081E = 0x31`. Its containing foreign function `0x6077E` has the same
+checkpoint-completion shape: a successful lower result publishes `0x10`, while
+a non-`0x5A` result publishes `0x31` and separately records failure state.
+Thus the earlier conclusion that `0x31 -> 0x10` is a checkpoint/NvM fail-open,
+not a SecOC Gate-2 bypass, independently transfers to this Corolla image.
+
+## 8. Remaining evidence boundary
+
+The new corpus closes CodeFlash identity and much of the firmware-static
+transfer question, but it still does **not** provide:
+
+- a direct UDS `F181` transcript from the same acquisition;
+- a stock passive `carFw` inventory joining the public route to the firmware;
+- proof of where the `0x00F` / `0x0D7` / `0x0B6` runtime authentication keys are
+  stored or derived;
+- same-runtime-epoch proof between the CAN oracles and any DataFlash read;
+- proof that this `8965H1202000` specimen is architecturally identical to
+  Span's separately probed `8965F1208000` Corolla.
+
+The firmware artifact identifies itself strongly; the vehicle/model-year link
+remains contributor attribution rather than route-contained identity.
+
+## 9. Highest-value next evidence
+
+For this specimen, another generic CodeFlash request is no longer useful. If the
+vehicle is revisited, the remaining high-value dynamic evidence is a controlled
+paired capture: full-bus synchronization/protected CAN immediately before the
+programming/range-dump transition, then repeat after recovery/reset and retain
+the corresponding memory snapshot plus a direct `F181` response. That would
+resolve runtime-key continuity without assuming it across separate jobs.
+
+For steering-bridge portability, the higher-value next CodeFlash is instead a
+foreign EPS whose Gate-2 queue actually contains classic `0x2E4/0x131` records
+—for example Span's distinct `8965F1208000` if that image becomes available.
+The `8965H1202000` corpus has already served its purpose as a negative-capability
+regression: the resolver transfers, discovers the target's real three-profile
+queue, and correctly refuses to construct a Sienna-shaped steering bridge.

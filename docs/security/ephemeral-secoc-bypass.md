@@ -833,17 +833,28 @@ dynamic.
 The Sienna implementation is no longer an address-hard-coded payload.
 `tools/resolve_ephemeral_runtime_image.sh` performs a fresh disposable CodeFlash
 import, resolves Gate 2 plus the callback-free startup/scheduler skeleton, then
-completes the pointer-table/RAM anchors from raw RH850 signatures and GP-relative
-displacements. `tools/build_ephemeral_runtime_manifest.py` joins that result with
-the raw six-record SecOC table and separately proven RAM execution/retention
-geometry.
+completes the pointer-table/RAM anchors from raw RH850 signatures and GP/TP-relative
+displacements. `tools/build_ephemeral_runtime_manifest.py` derives the target's
+queue-1 record count and Gate-2 table base from machine structure, validates each
+configured SecOC record, and only then asks whether the current steering bridge's
+`0x2E4/0x131` profiles exist. RAM execution/retention geometry remains a separate
+join.
 
 The separation is deliberate. A foreign image may resolve the same application
-and SecOC architecture while still lacking proof that its authenticated payload
-window survives into application-RWX RAM. Such a target is emitted as
-`semantic-resolved-geometry-unresolved`; the runtime builders refuse it. Sienna
-RAM geometry is selected only by the exact CodeFlash SHA-256. Supplying the
-Sienna variant ID against a foreign image is an error, not an override.
+and SecOC architecture while either lacking Sienna's steering profiles or lacking
+proof that its authenticated payload window survives into application-RWX RAM.
+The former is emitted as `semantic-resolved-steering-unsupported`; the latter as
+`semantic-resolved-geometry-unresolved`. Runtime builders refuse both. Sienna RAM
+geometry is selected only by the exact CodeFlash SHA-256. Supplying the Sienna
+variant ID against a foreign image is an error, not an override.
+
+The tracked 2023-Corolla `8965H1202000` image is now the first foreign proof of
+that distinction. The resolver transfers the boot/startup/foreground/Gate-2/COM
+architecture unchanged, but the actual queue has exactly `0x00F/0x0D7/0x0B6`,
+not `0x2E4/0x131`; its manifest therefore resolves successfully and stops at the
+steering-capability boundary. The image also carries the same payload-build,
+boot-SA, and application-SA roots as `8965B4512000`, while the owner-side range
+dumps provide direct observed bootstrap execution evidence.
 
 Both RH850 sources now consume only a generated `target_config.h`; boot calls,
 application context/startup, foreground tasks, SecOC queue addresses, COM
@@ -859,7 +870,8 @@ uses verified `FEBFFBF0` through manifest evidence; a new target cannot inherit
 that address. Bootstrap compatibility is tracked separately in
 `data/variant_bootstrap_profiles.json`: SECOC-024/028 already establish the
 shared `f05f...` SecurityAccess/DID/`FEBF0000`/`10F0`/`FF00` family across
-multiple B4/F3/F4 EPS targets. What is target-specific is the evidence grade for
+multiple B4/F3/F4 EPS targets, and `8965H1202000` now adds a tracked
+field-observed execution case. What is target-specific is the evidence grade for
 **exact encrypted payload bytes** and for retained application-RWX geometry.
 `build_substitution_plan.py` therefore accepts any manifest with a matching
 bootstrap-family profile, but requires an explicitly SHA-pinned target-accepted

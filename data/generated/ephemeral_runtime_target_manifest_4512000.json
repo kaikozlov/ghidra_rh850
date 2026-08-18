@@ -2,7 +2,7 @@
   "authenticated_bootstrap_profile": {
     "authenticated_download_base": "0xFEBF0000",
     "authenticated_download_size": "0x1000",
-    "boundary": "The Denso EPS authenticated-RAM bootstrap is already cross-vehicle: shared SA/DID/download/routine structure and public-payload reuse are established across listed B4/F3/F4 EPS evidence. Exact byte-for-byte acceptance of the repository Sienna ram_dump_payload.bin is locally verified only for 8965B4512000; other rows retain their external-source grade and may require a target-accepted fixture.",
+    "boundary": "The Denso EPS authenticated-RAM bootstrap is already cross-vehicle: shared SA/DID/download/routine structure and public-payload reuse are established across listed B4/F3/F4 EPS evidence, and 8965H1202000 now has direct field-observed range-payload execution plus firmware-static secret/flow corroboration. Exact byte-for-byte acceptance of the repository Sienna ram_dump_payload.bin is locally verified only for 8965B4512000; other rows retain their evidence grade and may require a target-accepted fixture.",
     "did_0201_default": "00000000000000000000000000000000",
     "did_0202_default": "00000000000000000000000000000000",
     "did_order": [
@@ -48,7 +48,7 @@
       "name": "FUN_0008e67a"
     },
     "invariants": [
-      "mapped-byte-result-global-is-also-passed-by-address",
+      "byte-result-load-structurally-resolved-global-unmapped",
       "zero-test-and-cmovne-materialize-result-nonzero-boolean",
       "same-boolean-survives-through-pre-gate-call",
       "bne-taken-means-result-nonzero-fallthrough-means-result-zero",
@@ -56,10 +56,10 @@
       "patch-neutralizes-cmp-registers-and-preserves-bne"
     ],
     "mac_result_source": {
-      "address": "0xfebe555c",
+      "address": null,
       "load_site": "0x0008e69e",
-      "passed_by_address_elsewhere": true,
-      "resolution": "mapped"
+      "passed_by_address_elsewhere": false,
+      "resolution": "unmapped-on-current-import"
     },
     "patch": {
       "address": "0x0008e6c6",
@@ -74,23 +74,26 @@
     "verify_result_polarity": "zero-is-verified-ok-nonzero-is-not-verified"
   },
   "image": {
+    "normalization": "bare-codeflash",
     "path": "firmware/RH850_P1M-E_CodeFlash.bin",
     "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
     "size": 1048576,
     "software_ids": [
-      "896504517012",
       "8965B4512000",
       "8965H0000000"
-    ]
+    ],
+    "source_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+    "source_size": 1048576
   },
   "invariants": [
     "Gate-2 semantic resolver unique and SHA-bound to input CodeFlash",
     "startup/context/foreground/aggregate skeleton unique on analyzed program",
     "boot transition prefix structurally resolved instead of inherited",
-    "SecOC queue-storage bases structurally resolved",
+    "SecOC queue-1 storage bases and record count structurally resolved",
+    "Gate-2 SecOC table base derived from TP-relative index*0x50 machine shape",
     "Com_RxIndication and update-counter base structurally resolved",
-    "exact six-record SecOC Level-1 table order unique in raw CodeFlash",
-    "protected steering records 0x2E4/0x131 are classic 8-byte records",
+    "every queue-1 record satisfies the generated Level-1 SecOC record shape",
+    "runtime build readiness requires classic 0x2E4/0x131 bridge records",
     "runtime build readiness additionally requires image-bound firmware-static RAM retention geometry"
   ],
   "ram_execution_geometry": {
@@ -128,6 +131,7 @@
       "aggregate_gate_call_index": 1,
       "application_context_init": "0x70524",
       "application_gp": "0xFEBEB800",
+      "application_tp": "0x23EE4",
       "boot_application_handoff": "0x13B0",
       "boot_transition_call_targets": [
         "0xC9A",
@@ -159,9 +163,12 @@
       "foreground_timing_begin_call_index": 0,
       "foreground_timing_end_call_index": 9,
       "secoc_descriptor_base": "0xFEBE5452",
+      "secoc_queue1_case": "0x8D74E",
       "secoc_queue_head_base": "0xFEBE544C",
       "secoc_queue_storage_helper": "0x8D74C",
       "secoc_raw_buffer_base": "0xFEBE5488",
+      "secoc_record_count": 6,
+      "secoc_record_table": "0x25970",
       "startup_coordinator": "0x62758",
       "startup_final_init": "0x6F15A",
       "startup_jarl_after": "0x627B4",
@@ -182,6 +189,7 @@
   },
   "schema": "p1me-ephemeral-runtime-target-manifest-v1",
   "secoc_records": {
+    "record_count": 6,
     "records": [
       {
         "can_id": "0xF",
@@ -232,6 +240,9 @@
         "secured_length": 32
       }
     ],
+    "steering_bridge_applicable": true,
+    "steering_bridge_incompatible_ids": [],
+    "steering_bridge_missing_ids": [],
     "steering_bridge_profiles": [
       {
         "can_id": "0x2E4",
@@ -255,6 +266,10 @@
         "secured_length": 8,
         "update_counter_address": "0xFEBE5346"
       }
+    ],
+    "steering_bridge_required_ids": [
+      "0x2E4",
+      "0x131"
     ],
     "stride": "0x50",
     "table_address": "0x25970"

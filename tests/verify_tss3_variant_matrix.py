@@ -50,7 +50,8 @@ sienna_4514000 = next(
     (r for r in rows if r["application_software_id"] == "8965B4514000"),
     None,
 )
-corolla = next((r for r in rows if "Corolla" in r["vehicle"]), None)
+corolla = next((r for r in rows if r["application_software_id"] == "8965F1208000"), None)
+corolla_h = next((r for r in rows if r["application_software_id"] == "8965H1202000"), None)
 
 # ── Sienna 4512000 row: firmware-derived facts ──────────────────
 check("Sienna 4512000 row present", sienna_4512000 is not None)
@@ -177,6 +178,22 @@ if corolla:
           "count=0x02" in corolla["application_dids"]
           and "two records" in corolla["application_dids"],
           repr(corolla["application_dids"][:60]))
+
+# ── 2023 Corolla 8965H1202000: tracked CodeFlash evidence ───────
+check("Corolla 8965H1202000 row present", corolla_h is not None)
+if corolla_h:
+    check("8965H1202000 firmware artifact is locally available", corolla_h["firmware_available"].startswith("yes"))
+    check("8965H1202000 MCU is exact R7F701383", "R7F701383" in corolla_h["mcu"] and "RH850" in corolla_h["mcu"])
+    check("8965H1202000 secondary software ID is exact", corolla_h["secondary_software_id"] == "8A3111202000")
+    check("8965H1202000 identity does not promote embedded F1208000 table entry",
+          "table entry" in corolla_h["application_dids"] and "not unit identity" in corolla_h["application_dids"])
+    check("8965H1202000 Gate-2 secured IDs are D7/B6",
+          "0x0D7" in corolla_h["secured_can_ids"] and "0x0B6" in corolla_h["secured_can_ids"])
+    check("8965H1202000 does not claim 2E4/131 Gate-2 profiles",
+          "no 0x2E4/0x131" in corolla_h["secured_can_ids"] and "0x2E4;" not in corolla_h["secured_can_ids"])
+    check("8965H1202000 exact crypto-root transfer is documented",
+          all(token in corolla_h["security_levels"] for token in ("0xBFD8", "0xBFE8", "0x20840", "byte-identical")))
+    check("8965H1202000 source is the tracked raw corpus", "raw-20260818" in corolla_h["source"])
 
 # ── Global structural checks ────────────────────────────────────
 required_cols = {

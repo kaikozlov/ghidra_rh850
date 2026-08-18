@@ -1619,3 +1619,59 @@ the mistakes are not re-made.
   [FINDINGS.md](FINDINGS.md) SECOC-062;
   `tests/verify_payload_gate.py`;
   `exploit/ephemeral_runtime/build_substitution_plan.py`.
+
+### CORR-070 — the albinoelephant 2023-Corolla firmware is no longer calibration-unknown
+
+- **Obsolete boundary:** the route/DataFlash-era documentation described the
+  reported 2023-US-Corolla specimen as having unknown exact EPS identity and no
+  CodeFlash artifact.
+- **New evidence:** the contributor's 2026-08-18 memory corpus contains a
+  2 MiB CodeFlash range dump whose upper 1 MiB is entirely `0xFF`; the first
+  1 MiB is a valid RH850/P1M-E CodeFlash image with SHA-256
+  `0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f`.
+  Its boot-info identifies `R7F701383`; the ECU serial is
+  `8965012N50A05G310920`; its live-ID blocks are `8965H1202000` and
+  `8A3111202000`.
+- **Important non-join:** the same image contains `8965F1208000` at
+  `0x20860`, but that is a table entry, not the unit's primary live-ID block.
+  It must not be used to identify this artifact as Span's distinct
+  `8965F1208000` Corolla.
+- **Remaining boundary:** there is still no retained direct UDS `F181`
+  transcript or stock `carFw` route inventory. The public route remains forced
+  `TOYOTA_COROLLA_TSS2`, so the route-to-image/model-year join is contributor
+  attribution rather than route-contained identity.
+
+Checked by `tests/verify_albinoelephant_corolla_codeflash.py`; canonical report:
+[`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-public-route.md).
+
+### CORR-071 — the first runtime target resolver overfit Sienna's queue layout and CAN-ID order
+
+- **Wrong implementation assumption:** the initial cross-calibration runtime
+  manifest builder recognized one exact Sienna queue-helper byte sequence and
+  then searched raw CodeFlash for the exact six-record ID order
+  `00F/2E4/131/132/090/0D7`. This made Sienna's *configuration* part of the
+  supposedly calibration-independent discovery signature.
+- **Disproving image:** fresh `8965H1202000` analysis recovered the same
+  startup/foreground/SecOC architecture and a unique Gate-2, but the generated
+  queue helper uses a slightly different compiler layout and queue 1 contains
+  exactly three records: `00F/D7/B6`. The old builder therefore failed with
+  `expected one raw SecOC-queue-storage-helper candidate, found 0` even though
+  the target architecture was resolvable.
+- **Corrected contract:** the builder now derives GP and TP from application
+  context setup; recognizes the queue-1 output contract rather than one exact
+  instruction schedule; recovers descriptor/head/raw bases and record count;
+  derives the record-table base from Gate-2's own TP-relative `index*0x50`
+  access; and validates each generated record structurally. `0x2E4/0x131` are
+  checked only afterward as steering-bridge capabilities.
+- **Fail-closed result:** a target with a valid SecOC queue but no steering
+  records now returns `semantic-resolved-steering-unsupported`. It does not
+  inherit Sienna records or RAM geometry and is not runtime-build-ready.
+- **Related parser fix:** software-ID extraction now requires alphanumeric token
+  boundaries; the old regex incorrectly accepted `8965012N50A0`, the first 12
+  characters of the longer ECU serial, as a software ID.
+
+The generalized implementation still reproduces Sienna's exact queue geometry
+and audited runtime builds. The tracked H image is the permanent foreign
+regression. Checked by `tests/verify_ephemeral_runtime_resolver.py` and
+`tests/verify_albinoelephant_corolla_codeflash.py`; canonical tooling report:
+[`../tooling/ephemeral-runtime-semantic-resolver.md`](../tooling/ephemeral-runtime-semantic-resolver.md).

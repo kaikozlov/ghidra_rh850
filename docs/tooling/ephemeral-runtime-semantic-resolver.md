@@ -22,12 +22,16 @@ must independently establish four classes of evidence:
 
 1. the boot -> application transition and foreground scheduler skeleton;
 2. the SecOC-owned foreground subtask and the post-SecOC COM/control splice;
-3. the raw SecOC queue/record and COM update geometry used by `0x2E4` / `0x131`;
-4. authenticated-download plus application-retention RAM geometry for the exact
+3. the target's actual raw SecOC queue/record and COM update geometry;
+4. whether that queue contains the classic `0x2E4` / `0x131` records required by
+   the current steering bridge;
+5. authenticated-download plus application-retention RAM geometry for the exact
    CodeFlash image.
 
-If the first three resolve but the fourth does not, the manifest is useful for
-variant comparison but is explicitly **not runtime-build-ready**.
+If the control/queue structure resolves but either steering capability or exact
+RAM geometry does not, the manifest remains useful for variant comparison but is
+explicitly **not runtime-build-ready**. Missing steering records are reported as
+`semantic-resolved-steering-unsupported`, not as a resolver failure.
 
 ## One-command fresh-image workflow
 
@@ -36,8 +40,12 @@ tools/resolve_ephemeral_runtime_image.sh path/to/CodeFlash.bin \
   build/new_eps_ephemeral_runtime.json
 ```
 
-The input must be a bare 1 MiB CodeFlash image. The wrapper creates a disposable
-project below `build/ephemeral-runtime-targets/<sha>/`; it never opens or changes
+The input may be either a bare 1 MiB CodeFlash image or the tracked range-dumper
+shape: 2 MiB with an entirely `0xFF` upper 1 MiB. The latter is normalized only
+in a disposable workspace, while the output manifest preserves both source and
+normalized hashes. Any other oversized/truncated geometry fails closed. The
+wrapper creates a disposable project below
+`build/ephemeral-runtime-targets/<normalized-sha>/`; it never opens or changes
 committed `project/` and never modifies the input image.
 
 The same fresh import runs, in order:
@@ -85,46 +93,92 @@ anchors directly from target-independent RH850/compiler shapes:
 
 - **boot handoff:** unique prologue + five direct `jarl disp22` calls +
   `cmp r0,r10`;
-- **application GP:** immediate loaded inside the resolved context initializer;
+- **application GP/TP:** immediates loaded inside the resolved context initializer;
 - **foreground tick counter:** GP-relative byte increment tail in the resolved
   foreground loop;
 - **`Com_RxIndication`:** unique register/prologue prefix, independent of
   calibration addresses;
 - **COM validity/update helper:** generated `PDU < limit` helper shape, with RAM
   bases derived from GP-relative displacements;
-- **SecOC queue-storage helper:** generated three-store helper shape, with
+- **SecOC queue-1 storage case:** generated three-output-store contract, with
   descriptor / queue-head / raw-buffer bases derived from GP-relative
-  displacements.
+  displacements and the configured record count recovered from the `+0xC`
+  output; harmless compiler scheduling of the success return is tolerated;
+- **SecOC record table:** Gate-2's own `index * 0x50` plus TP-relative table-base
+  machine shape identifies the table without any CAN-ID signature.
 
 If Ghidra already resolved one of these values, the raw result must agree with
 it exactly. A disagreement aborts manifest generation.
 
 ## Raw SecOC record join
 
-The builder requires one six-record `0x50`-byte SecOC table with the recovered
-Level-1 order:
+The builder no longer treats Sienna's six-record order as a discovery signature.
+The queue-1 helper supplies the target's configured **record count**, and Gate-2
+itself supplies the table base. Each of those records must independently satisfy
+the generated Level-1 shape before it is accepted.
 
-```text
-0x00F, 0x2E4, 0x131, 0x132, 0x090, 0x0D7
-```
-
-For each record it reads only raw descriptor fields:
+For each configured record the builder reads only raw descriptor fields:
 
 - CAN ID at `+0x0A`;
 - raw secured-buffer offset at `+0x28`;
-- application PDU ID at `+0x34`;
-- secured PDU length at `+0x3C`.
+- application PDU ID at `+0x34` (with its generated duplicate);
+- secured PDU length at `+0x3C` (with its generated duplicate).
 
-The two steering bridge profiles are then derived rather than hard-coded:
+Only after the target's real table is recovered does the current steering bridge
+ask for `0x2E4` and `0x131`. When both exist with the classic 8-byte shape, their
+addresses are derived algebraically:
 
 ```text
-raw_buffer    = secoc_raw_base + record.raw_offset
-descriptor    = secoc_descriptor_base + record_index * 8
+raw_buffer     = secoc_raw_base + record.raw_offset
+descriptor     = secoc_descriptor_base + record_index * 8
 update_counter = com_update_counter_base + record.pdu_id
 ```
 
-The current runtime requires both `0x2E4` and `0x131` to retain the classic
-8-byte secured-record shape.
+If either steering record is absent or has an incompatible secured length, the
+manifest records the missing/incompatible IDs and returns
+`semantic-resolved-steering-unsupported`. This is a successful capability
+classification: the target's SecOC architecture resolved, but the current Sienna
+steering bridge does not apply.
+
+## First foreign regression: Corolla `8965H1202000`
+
+The tracked albinoelephant CodeFlash is the first non-Sienna image run through
+the complete workflow. The 2 MiB source range dump has SHA-256
+`97f9d42d936b97a99e7ab3d3ef20c6fb4c1fc3cc2ba199f6b158675a1709aee6`;
+after the validated all-`0xFF` upper half is removed, the exact 1 MiB CodeFlash
+SHA-256 is
+`0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f`.
+
+Without target offsets, the fresh Ghidra stage resolves Gate-2 at `0x88C16` and
+the runtime control skeleton. Raw completion then recovers:
+
+```text
+boot handoff          0x1394
+startup coordinator   0x5CAAC
+context init          0x6A8C4
+foreground loop       0x5F30C
+aggregate             0x5FAF2
+GP / TP               FEBEB800 / 0x23D6C
+Com_RxIndication      0x76A3C
+COM timeout helper    0x87A82
+queue helper / case   0x87B72 / 0x87B92
+queue record count    3
+record table          0x2572C
+```
+
+The three Gate-2 queue records are `0x00F`, `0x0D7`, and `0x0B6`; the latter two
+are 32-byte secured records. There is no queue-1 `0x2E4` or `0x131`, so the
+foreign manifest intentionally ends as
+`semantic-resolved-steering-unsupported`. This image exposed the old resolver's
+two Sienna overfits—exact queue-helper bytes and exact six-ID table order—and is
+now the regression proving they are gone. It also exposed a software-ID parser
+bug where the first 12 characters of the longer ECU serial looked like an ID;
+token-boundary extraction now rejects that false positive.
+
+The same image independently resolves the Gate-2 CMP patch at `0x88C62` (`e0d1 -> e001`) and validates the stock/modified CRC construction, so semantic
+Gate resolution is known to transfer even where steering-bridge applicability
+does not. Canonical firmware interpretation is in
+[../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md).
 
 ## RAM execution and retention are a separate proof
 
@@ -193,7 +247,9 @@ SECOC-024/028 evidence already establishes a reusable Denso EPS family:
 - authenticated download at `FEBF0000`, size `0x1000`;
 - `0x10F0` verify and `0xFF00` execution flow;
 - public-payload/bootstrap reuse across listed `8965B4x` targets and the
-  blurbdust F3/F4 patcher targets.
+  blurbdust F3/F4 patcher targets;
+- direct field-observed range-payload execution on tracked `8965H1202000`, whose
+  CodeFlash also carries the same boot SA root and application/payload roots.
 
 `data/variant_bootstrap_profiles.json` records that evidence independently from
 RAM-retention geometry. The target manifest joins a bootstrap profile by raw
@@ -202,8 +258,9 @@ foreign CodeFlash merely because its SHA is not Sienna's.
 
 The important narrower boundary is **exact encrypted fixture identity**. The
 repository's `ram_dump_payload.bin` is cryptographically verified byte-for-byte
-against `8965B4512000`. Other family rows retain their external-source grade;
-when the exact local fixture is not pinned for that target, the planner requires
+against `8965B4512000`. Other family rows retain their own evidence grade (`8965H1202000` is now
+field-observed; the B4/F3/F4 rows remain external-source); when the exact local
+fixture is not pinned for that target, the planner requires
 an explicit target-accepted 4 KiB fixture plus its SHA-256. Thus three questions
 remain independent: bootstrap-family compatibility, exact payload bytes, and
 application-time RAM retention/scheduler geometry.
@@ -220,7 +277,14 @@ It also asserts that:
 - the semantic resolver source contains no Sienna target addresses;
 - foreign SHA cannot select Sienna geometry;
 - external-only geometry remains non-buildable;
+- the tracked `8965H1202000` range dump normalizes reproducibly and resolves the
+  exact three-record foreign queue;
+- missing `0x2E4/0x131` produces an unsupported-capability manifest rather than
+  an exception or a Sienna fallback;
 - the disposable wrapper runs Gate-2 resolution before runtime resolution.
 
-The next useful transfer artifact is another target CodeFlash image. Run the
-resolver unchanged first; do not add an offset row to make it pass.
+The next strategically useful CodeFlash is not merely "another target"; it is a
+foreign EPS whose resolved queue actually contains classic `0x2E4/0x131`, so
+that steering-bridge geometry and application RAM retention can be tested on a
+second applicable calibration. Run the resolver unchanged first; do not add an
+offset row to make it pass.

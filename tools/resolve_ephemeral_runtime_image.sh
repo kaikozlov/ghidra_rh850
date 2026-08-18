@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Resolve the callback-free ephemeral runtime contract from an arbitrary bare
-# RH850/P1M-E CodeFlash image using one disposable, unannotated Ghidra import.
+# Resolve the callback-free ephemeral runtime contract from an arbitrary
+# RH850/P1M-E CodeFlash image/range dump using one disposable Ghidra import.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -17,10 +17,15 @@ retention geometry, and emits a target manifest. The input image is never
 modified.
 
 A semantic match without verified image-bound RAM geometry is emitted as
-"semantic-resolved-geometry-unresolved" and is NOT runtime-build-ready. This is
-intentional fail-closed behavior for new Toyota EPS images.
+"semantic-resolved-geometry-unresolved" and is NOT runtime-build-ready. A target
+whose Gate-2 queue lacks the classic 0x2E4/0x131 steering records is emitted as
+"semantic-resolved-steering-unsupported". Both are intentional fail-closed
+results rather than resolver errors.
 
-CODEFLASH.bin must be the bare 1 MiB (0x100000) CodeFlash image.
+CODEFLASH.bin may be either the bare 1 MiB (0x100000) CodeFlash image or a 2 MiB
+range-dumper artifact whose upper 1 MiB is entirely 0xFF. The latter is
+normalized to its first 1 MiB for analysis while the manifest preserves the
+source artifact hash/size.
 EOF
 }
 
@@ -47,18 +52,21 @@ PY
 VARIANT_ID="${3:-}"
 mkdir -p "$(dirname "$OUT")"
 
-uv run --locked python -c '
-import sys
+mapfile -t IMAGE_INFO < <(uv run --locked python - "$IMAGE" <<'PY'
 from pathlib import Path
-from tools.build_secoc_patch_manifest import validate_codeflash_geometry
+import sys
+from tools.build_ephemeral_runtime_manifest import load_codeflash, sha256
 try:
-    validate_codeflash_geometry(Path(sys.argv[1]).stat().st_size)
-except ValueError as exc:
+    image, source = load_codeflash(Path(sys.argv[1]))
+except Exception as exc:
     print(f"rejecting image: {exc}", file=sys.stderr)
     raise SystemExit(1)
-' "$IMAGE"
-
-SHA=$(shasum -a 256 "$IMAGE" | awk '{print $1}')
+print(sha256(image))
+print(source["normalization"])
+PY
+)
+SHA=${IMAGE_INFO[0]}
+NORMALIZATION=${IMAGE_INFO[1]}
 SHORT=${SHA:0:16}
 WORK="$ROOT/build/ephemeral-runtime-targets/$SHORT"
 PROJECT_DIR="$WORK/project"
@@ -73,6 +81,18 @@ case "$PROJECT_DIR" in
 esac
 mkdir -p "$PROJECT_DIR"
 
+IMPORT_IMAGE="$IMAGE"
+if [[ "$NORMALIZATION" != "bare-codeflash" ]]; then
+  IMPORT_IMAGE="$WORK/normalized-CodeFlash.bin"
+  uv run --locked python - "$IMAGE" "$IMPORT_IMAGE" <<'PY'
+from pathlib import Path
+import sys
+from tools.build_ephemeral_runtime_manifest import load_codeflash
+image, _ = load_codeflash(Path(sys.argv[1]))
+Path(sys.argv[2]).write_bytes(image)
+PY
+fi
+
 "$ROOT/tools/run_headless" \
   --with-investigate \
   --project-dir "$PROJECT_DIR" \
@@ -81,7 +101,7 @@ mkdir -p "$PROJECT_DIR"
   --log "$LOG" \
   --quiet \
   -- \
-  -import "$IMAGE" \
+  -import "$IMPORT_IMAGE" \
   -processor v850e3:LE:32:default \
   -postScript ResolveSecocAcceptanceGate.java "$GATE" \
   -postScript ResolveEphemeralRuntime.java "$GATE" "$SEMANTIC" \

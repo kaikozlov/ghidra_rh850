@@ -320,7 +320,7 @@
       "size": 32768,
       "sha256": "8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299",
       "provenance": "Discord attachment; TSKM /cache/tsk/dataflash output from reported 2023 US Corolla investigation",
-      "notes": "Complete 0xFF200000..0xFF207FFF DataFlash dump; exact EPS F181/calibration not yet known"
+      "notes": "Complete 0xFF200000..0xFF207FFF DataFlash dump; later tracked 2026-08-18 CodeFlash corpus identifies the firmware artifact as 8965H1202000."
     },
     {
       "source": "albinoelephant, comma Discord, 2026-08-12",
@@ -337,6 +337,150 @@
       "sha256": "a9bf3f279001b8b77e96acfc186944a962c59cc7bedf739d902d971ff4b03f15",
       "provenance": "CAN-only extraction from pinned public-route segment-0 rlog d246a55988889253c8d155f04b132b1bb443fdd74f1e6bad68eef8879a5c477b",
       "notes": "Genuine bus-1 classic SecOC-family rows only: 0x00F=588, 0x116=2499, 0x24D=59; no route metadata retained"
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/MANIFEST.txt",
+      "size": 4835,
+      "sha256": "b0999bbe4761d5dffaa6bd82263751ae80ef073458a8ccd8087414b23724065c",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "Contributor-supplied manifest describing vehicle attribution, ECU identity, memory ranges, and hashes for the preserved corpus."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260812-1050/can_oracle.ndjson",
+      "size": 97768,
+      "sha256": "8863398a98875a853e722a6ba83fc10563d5764cea33719c8af34225efa189a3",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260812-1050/dump_ff200000_ff208000.bin",
+      "size": 32768,
+      "sha256": "8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+      "size": 2097152,
+      "sha256": "97f9d42d936b97a99e7ab3d3ef20c6fb4c1fc3cc2ba199f6b158675a1709aee6",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-002328.bin",
+      "size": 65536,
+      "sha256": "06992af443f2aa0e0559202a7fcd0dfdc040ce91843956807d8b902abdf8b486",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-002403.bin",
+      "size": 65536,
+      "sha256": "462065968d2f2da2cb88d62d63b6cf78c9242e801a7e66d31b1733ab1e860f53",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-003232.bin",
+      "size": 65536,
+      "sha256": "5c91da76ef352b1171eef49df853dcb486c88f44abc0958b1c9df23376e805ec",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-004424.bin",
+      "size": 65536,
+      "sha256": "f638954406e240250c99c52ce251afd4103eeec39586676102b297e0a51357be",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_dataflash_ff200000_ff210000_20260814-004957.bin",
+      "size": 65536,
+      "sha256": "8fef0fd1a7869d9faad4516493d600d3ec02d62a69f73299981746b3bcb19990",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_extended_codeflash_01000000_0100c000_20260814-002640.bin",
+      "size": 49152,
+      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_extended_codeflash_01000000_0100c000_20260814-004606.bin",
+      "size": 49152,
+      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_extended_codeflash_01000000_0100c000_20260814-005156.bin",
+      "size": 49152,
+      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_global_ram_feef8000_fef08000_20260814-002555.bin",
+      "size": 65536,
+      "sha256": "1904a16d8cfbc1a0e3ec399b94e3eb9626f981473870aa50772e21b56e651f88",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_global_ram_feef8000_fef08000_20260814-004529.bin",
+      "size": 65536,
+      "sha256": "52daca8a7d913fd727e42723ec50e731c09d413b5c359ac8914c874817414b77",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_global_ram_feef8000_fef08000_20260814-005127.bin",
+      "size": 65536,
+      "sha256": "63f7470eba1625b4ee2db5a2fb721922a574dbd477021aa83936b6e3cadb9420",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-002502.bin",
+      "size": 131072,
+      "sha256": "2631d6d290cf3ee1adfe62e81798be67479c9f7c0a58dfeb6d097a2558eb4e53",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-004452.bin",
+      "size": 131072,
+      "sha256": "5cff0226c1228dc06f8e0edb9908ab4078e557b54abc48666eecebd29bf41e09",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "albinoelephant, comma Discord, 2026-08-18",
+      "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-005055.bin",
+      "size": 131072,
+      "sha256": "f27514c621ba56b127058341f6730c96900347e72d7c54e101875ee4fb3f46ce",
+      "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
+      "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
     }
   ],
   "public_routes": [

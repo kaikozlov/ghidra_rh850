@@ -53,10 +53,15 @@ F0/EC memory writers on a valuable ECU.
 Canonical:
 [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md).
 
-### 3. Acquire another CodeFlash image
+### 3. Acquire a foreign CodeFlash with steering SecOC profiles
 
+The generic-transfer milestone is no longer artifact-blocked: tracked Corolla
+`8965H1202000` independently resolves Gate-2, startup/scheduler, COM, and its
+actual three-record SecOC queue. That image correctly reports the current
+`0x2E4/0x131` steering bridge as unsupported, so the next acquisition should be
+chosen for **applicability**, not merely foreignness.
 
-The new first command for any acquired EPS image is now:
+The first command for any acquired EPS image remains:
 
 ```bash
 tools/resolve_ephemeral_runtime_image.sh path/to/CodeFlash.bin \
@@ -67,13 +72,18 @@ This one result tests Gate-2 transfer, callback-free startup/scheduler transfer,
 SecOC queue/COM geometry, and whether exact image-bound RAM retention evidence
 exists. Do not add a software-ID offset row to make a foreign image pass.
 
-Highest-value targets include a blurbdust-supported F3/F4 calibration,
-`8965F1208000`, or `8965B4514000`.
+Highest-value targets are now ones likely to contain protected steering records:
+Span's distinct `8965F1208000`, `8965B4514000`, or a blurbdust-supported F3/F4
+calibration with an independently observed steering profile. `8965H1202000` is
+already the negative-capability regression and should not be counted again as an
+unresolved transfer target.
 
-Why this matters: one foreign image can answer transfer questions for the
-semantic Gate-2 resolver, MEM-SAFE-001, XCP, diagnostic policy, command-5/8
-plumbing, bootloader SA structure, and object-15 provisioning much faster than
-another broad pass over `4512000`.
+Why this matters: the H image has already proved the semantic Gate-2/runtime
+resolver can transfer without Sienna offsets. The next image can answer the
+remaining higher-value question: whether the current steering bridge and its
+retained-RAM geometry generalize to a second **applicable** EPS. It can also
+advance MEM-SAFE-001, XCP, diagnostic-policy, command-5/8, boot-SA, and
+provisioning comparisons.
 
 Ready now:
 
@@ -154,9 +164,10 @@ Highest-value next evidence, in order:
 
 For another EPS calibration, first join its software ID against
 `data/variant_bootstrap_profiles.json`: bootstrap reuse is already established
-for multiple B4/F3/F4 targets and should not be rediscovered from scratch. Keep
-that evidence separate from exact encrypted-fixture identity and from the
-per-image retained-RWX/scheduler manifest.
+for multiple B4/F3/F4 targets, and tracked `8965H1202000` now provides a direct
+field-observed foreign execution case. Keep that evidence separate from exact
+encrypted-fixture identity, from per-image retained-RWX/scheduler geometry, and
+from whether the resolved queue actually contains `0x2E4/0x131`.
 
 Do not spend more static effort on generic callback hunting unless one of those
 dynamic steps falsifies a concrete invariant. Canonical:

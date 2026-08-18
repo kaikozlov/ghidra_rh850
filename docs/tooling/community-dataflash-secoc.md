@@ -204,5 +204,10 @@ does not reproduce here even though part of the storage geometry itself does.
 Machine-readable result:
 `data/generated/corolla_2023_albino_dataflash_analysis.json`.
 
-The exact EPS F181 and CodeFlash remain unavailable, so this evidence must stay
-separate from the exact `8965F1208000` Corolla calibration investigation.
+A later contributor corpus now supplies CodeFlash and identifies that firmware
+artifact as `8965H1202000` / `8A3111202000` on `R7F701383`; see
+[`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-public-route.md).
+The public route still lacks a stock `carFw`/direct-F181 join, so vehicle-to-image
+attribution remains external. This specimen must also remain separate from the
+distinct directly probed `8965F1208000` Corolla. The DataFlash key-search result
+above is unchanged by the new CodeFlash evidence.

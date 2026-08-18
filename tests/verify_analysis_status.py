@@ -168,7 +168,7 @@ check("dynamic observation denominator", observed_findings == ["SECOC-030", "VAR
 required_tokens = [
     "114 `passed`, 5 `unavailable`, 0 `failed`",
     "Live official Techstream↔`8965B4512000` flows captured | 0",
-    "Exact cross-variant/target-generation transfers verified | 0",
+    "Exact cross-variant/target-generation transfers verified | 1 tracked foreign CodeFlash regression (`8965H1202000`)",
 ]
 check("blocked and execution dimensions published", all(token in text for token in required_tokens))
 

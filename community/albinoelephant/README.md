@@ -1,19 +1,67 @@
 # albinoelephant Corolla field artifacts
 
 **Contributor:** albinoelephant (`@albinoelephant`, comma Discord)
-**Received:** 2026-08-12
+**Received:** initial DataFlash/oracle 2026-08-12; complete memory corpus 2026-08-18
 **Vehicle attribution:** reported by the contributor as a 2023 US Toyota Corolla
-**Exact EPS F181 / calibration:** unknown
+**Firmware-static live software IDs:** `8965H1202000` / `8A3111202000`
+**MCU / serial:** RH850/P1M-E `R7F701383`; `8965012N50A05G310920`
+**Direct UDS F181 transcript:** not retained
 
 This directory preserves the raw field artifacts supplied from the contributor's
-`optskug/openpilot` TSK Manager (`tskm` branch) run, plus one repository-derived
-CAN-only oracle from the contributor's already-public comma route.
+TSK Manager investigation, plus one repository-derived CAN-only oracle from the
+contributor's already-public comma route. The complete 2026-08-18 bundle is
+preserved byte-for-byte under `raw-20260818/`, including its contributor-supplied
+`MANIFEST.txt`.
 
-The model-year/vehicle attribution is external field evidence. The public route
-itself was run with a forced `TOYOTA_COROLLA_TSS2` fingerprint and contains no
-`carFw`, so neither the route nor these DataFlash bytes independently establish
-an exact EPS software ID. Keep this specimen separate from the exact
-`8965F1208000` Corolla investigation until F181 is obtained.
+The model-year/vehicle attribution remains external field evidence. The public
+route itself was run with a forced `TOYOTA_COROLLA_TSS2` fingerprint and contains
+no `carFw`, so the route alone still does not identify its physical EPS. The
+later CodeFlash does identify the firmware artifact itself: its live-ID blocks are
+`8965H1202000` / `8A3111202000`. A separate `8965F1208000` string at CodeFlash
+`0x20860` is a table entry, not this unit's live identity. Keep this specimen
+separate from Span's exact `8965F1208000` Corolla.
+
+
+## Complete 2026-08-18 memory corpus
+
+`raw-20260818/` is the immutable extraction of the contributor bundle. It contains
+the earlier 32 KiB DataFlash/oracle pair plus a later session with the full
+CodeFlash range, five 64 KiB DataFlash reads, three extended-CodeFlash reads,
+three global-RAM reads, and three local-RAM PE1 reads. See
+`raw-20260818/MANIFEST.txt` for the exact acquisition notes and every supplied
+file hash.
+
+The CodeFlash range artifact is:
+
+```text
+raw-20260818/albinoelephant-corolla-2023.20260814-0023/
+  dump_codeflash_00000000_00200000_20260814-025814.bin
+source size:    0x200000
+source SHA-256: 97f9d42d936b97a99e7ab3d3ef20c6fb4c1fc3cc2ba199f6b158675a1709aee6
+```
+
+Its upper 1 MiB is entirely `0xFF`; the actual first-1-MiB CodeFlash has SHA-256
+`0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f`.
+Repository tooling preserves both identities: a 2 MiB range dump is accepted
+only when the upper half is all `0xFF`, and normalization occurs in a disposable
+workspace without modifying this source artifact.
+
+Static analysis of that image establishes:
+
+- the payload-build, boot-SA, and application-SA roots at `0xBFD8`, `0xBFE8`,
+  and `0x20840` are byte-identical to `8965B4512000`;
+- the calibration-independent Gate-2 resolver uniquely finds `0x88C62` (`e0d1 -> e001`);
+- the stock region-1 CRC is valid and the Gate patch re-signs with fixup
+  `0xDD5F1477`;
+- the configured Gate-2 queue has only three records: `0x00F`, `0x0D7`, and
+  `0x0B6`; there is no queue-1 `0x2E4` or `0x131`, so the Sienna steering bridge
+  is not applicable to this image;
+- the homolog of Lochuan's `0x31 -> 0x10` checkpoint byte is `0x6081E`, and its
+  containing function has the same checkpoint-failure semantics rather than
+  SecOC acceptance semantics.
+
+Canonical interpretation and exact resolver anchors are documented in
+[`docs/variants/corolla-2023-us-public-route.md`](../../docs/variants/corolla-2023-us-public-route.md).
 
 ## Raw supplied artifacts
 

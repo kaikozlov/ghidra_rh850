@@ -4,7 +4,8 @@
 > boot-CRC geometry without calibration-specific target offsets
 >
 > **Status:** corrected Level-1 structural resolver verified on
-> `8965B4512000`; cross-calibration transfer remains fail-closed and unproved
+> `8965B4512000` and independently transferred to tracked Corolla
+> `8965H1202000`; every additional calibration still resolves fail-closed
 >
 > **Verification:** `tests/verify_secoc_semantic_patch_resolver.py`
 
@@ -86,6 +87,38 @@ Committed fixtures:
 The program SHA-256 is part of the resolution and must equal the exact supplied
 CodeFlash image before a manifest can be built.
 
+### Corolla `8965H1202000` foreign result
+
+The tracked albinoelephant CodeFlash provides the first exact foreign-image
+regression. A fresh unannotated import with normalized SHA-256
+`0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f`
+resolves exactly one homolog without adding any target address:
+
+```text
+Gate-2 function           0x88C16
+booleanize                0x88C40
+pre-gate call             0x88C5C
+patch CMP                 0x88C62
+overwrite                 e0 d1 -> e0 01
+preserved BNE             0x88C64        9a 0d
+verified fallthrough      0x88C66
+mismatch branch target    0x88C76
+join                      0x88C7E
+```
+
+Its stock target CRC descriptor is clean rather than anomalous: region
+`0x18000..0xFFDF0` validates with stored fixup `0xAD59D70C`. Applying the
+resolved CMP neutralization gives prefix CRC `0x22A0EB88`, fixup `0xDD5F1477`,
+and final residue `0xFFFFFFFF`. This proves the semantic target + CRC-resigning
+pipeline transfers across these two exact images; it does **not** imply the
+foreign target has Sienna's configured CAN profiles. Its queue census is
+separately resolved as `0x00F/0x0D7/0x0B6`.
+
+Committed foreign fixture:
+`data/generated/secoc_gate_resolution_8965H1202000_minimal.json`. The exact raw
+corpus and interpretation are in
+[../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md).
+
 ## 2. Manifest and semantic rejection of the old patch
 
 `tools/build_secoc_patch_manifest.py` accepts only resolver schema v2 and the
@@ -164,10 +197,11 @@ faster developer path and retains the same SHA/image join.
 
 ## 5. Transfer boundary
 
-The resolver is annotation-independent on `8965B4512000`; that is not evidence
-that every Toyota calibration uses the same address or even the same Level-1
-machine shape. No exact 2024 RAV4 Prime or 2025 bZ4X firmware/F181 artifact is
-present in the repository.
+The resolver is now annotation-independent on Sienna and independently proven on
+one exact foreign Corolla image. That is still not evidence that every Toyota
+calibration uses the same address or even the same Level-1 machine shape. No
+exact 2024 RAV4 Prime or 2025 bZ4X firmware/F181 artifact is present in the
+repository.
 
 A 2026-08-16 external field report from yc uses the same local transform
 `e0d19a0d... -> e0019a0d...` on newer Toyota vehicles and strongly corroborates

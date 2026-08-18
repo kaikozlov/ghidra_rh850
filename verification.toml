@@ -607,6 +607,10 @@ paths = [
   "tools/resolve_ephemeral_runtime_image.sh",
   "data/generated/ephemeral_runtime_resolution_4512000_minimal.json",
   "data/generated/ephemeral_runtime_target_manifest_4512000.json",
+  "data/generated/secoc_gate_resolution_8965H1202000_minimal.json",
+  "data/generated/ephemeral_runtime_resolution_8965H1202000_minimal.json",
+  "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json",
+  "community/albinoelephant/raw-20260818/",
   "data/variant_ram_exec_requirements.json",
   "data/variant_bootstrap_profiles.json",
   "exploit/ephemeral_runtime/",
@@ -1283,6 +1287,25 @@ paths = [
   "data/generated/corolla_2023_albino_dataflash_analysis.json",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/tooling/community-dataflash-secoc.md",
+  "external-references.lock.json",
+]
+oracle = "raw_bytes"
+
+[suite.albinoelephant_corolla_codeflash]
+tests = ["tests/verify_albinoelephant_corolla_codeflash.py"]
+paths = [
+  "tests/verify_albinoelephant_corolla_codeflash.py",
+  "community/albinoelephant/raw-20260818/",
+  "data/generated/secoc_gate_resolution_8965H1202000_minimal.json",
+  "data/generated/ephemeral_runtime_resolution_8965H1202000_minimal.json",
+  "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json",
+  "data/variant_bootstrap_profiles.json",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/tooling/ephemeral-runtime-semantic-resolver.md",
+  "docs/tooling/secoc-semantic-patch-resolver.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "community/README.md",
   "external-references.lock.json",
 ]
 oracle = "raw_bytes"
