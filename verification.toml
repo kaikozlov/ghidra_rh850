@@ -1334,6 +1334,20 @@ paths = ["docs/variants/rav4-prime-forced-secoc-profile.md", "data/"]
 tests = ["tests/verify_toyota_dataflash_analyzer.py"]
 paths = ["tools/analyze_toyota_dataflash.py", "tests/fixtures/"]
 
+[suite.toyota_b_programming_topology]
+tests = ["tests/verify_toyota_b_programming_topology.py"]
+paths = [
+  "tests/verify_toyota_b_programming_topology.py",
+  "community/albinoelephant/raw-20260818/",
+  "docs/tooling/panda-toyota-routing.md",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "external-references.lock.json",
+]
+oracle = "raw_bytes"
+
 [suite.toyota_eps_bus_probe]
 tests = ["tests/verify_toyota_eps_bus_probe.py"]
 paths = ["tools/toyota_eps_bus_probe.py", "tests/fixtures/"]

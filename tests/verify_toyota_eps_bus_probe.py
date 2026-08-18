@@ -45,7 +45,7 @@ check("probe defaults to all three logical Panda buses", plan.buses == (0, 1, 2)
 check("probe uses ELM327 safety mode", plan.elm327_safety_mode == ELM327_SAFETY_MODE == 3)
 check("probe defaults to nonzero ELM327 param", plan.elm327_param == DEFAULT_ELM327_PARAM == 1)
 check("probe declares no mutating services", plan.mutating_services == ())
-check("Toyota-B repin-equivalence candidate uses logical bus 1", TOYOTA_B_REPIN_CANDIDATE_BUS == 1)
+check("Toyota-B direct-diagnostic-route candidate uses logical bus 1", TOYOTA_B_REPIN_CANDIDATE_BUS == 1)
 
 print("\n== pinned Cuatro/Tres FDCAN2 route model ==")
 normal = fdcan2_route(1, harness_flipped=False)
@@ -77,7 +77,8 @@ check("dry-run reports F181", output["plan"]["did"] == 0xF181)
 check("dry-run reports normal-routing ELM327 param", output["plan"]["elm327_param"] == 1)
 check("routing note distinguishes OBD mux", "param=0" in output["routing_note"] and "logical bus 1" in output["routing_note"])
 check("dry-run emits both harness-orientation implementations", len(output["fdcan2_routes"]) == 2)
-check("dry-run records the software repin candidate as param1 + bus1", output["toyota_b_repin_candidate"]["elm327_param"] == 1 and output["toyota_b_repin_candidate"]["bus"] == 1)
+check("dry-run records the direct diagnostic candidate as param1 + bus1", output["toyota_b_repin_candidate"]["elm327_param"] == 1 and output["toyota_b_repin_candidate"]["bus"] == 1)
+check("dry-run does not call that candidate relay-topology equivalent", output["toyota_b_repin_candidate"]["scope"] == "direct-diagnostic-route" and output["toyota_b_repin_candidate"]["relay_topology_equivalent"] is False)
 check("dry-run keeps candidate dynamically unconfirmed", "confirmation required" in output["toyota_b_repin_candidate"]["status"])
 
 custom = subprocess.run(

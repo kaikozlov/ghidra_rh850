@@ -543,11 +543,13 @@ the mistakes are not re-made.
   FDCAN2 physical mux: ELM param 0 routes logical bus 1/FDCAN2 to OBD, while
   param 1 routes it to the normal harness. Comma 4/Cuatro inherits the exact
   Tres GPIO/transceiver mux. `UdsClient.bus` selects only the logical queue.
-- **Consequence:** for yc's reported stock Toyota-B CAN0/CAN1 repin experiment,
-  the static software-equivalence candidate is `set_safety_mode(3,1)` plus UDS
-  logical bus 1. Changing only `BUS=1` while retaining implicit ELM param 0
-  exercises the OBD physical path and is not an equivalent test. Live
-  programming-session confirmation remains required.
+- **Consequence (refined by CORR-072):** for yc's reported stock Toyota-B
+  CAN0/CAN1 repin experiment, `set_safety_mode(3,1)` plus UDS logical bus 1 is
+  the static **direct-diagnostic-route** candidate. Changing only `BUS=1` while
+  retaining implicit ELM param 0 exercises the OBD physical path. Official
+  harness schematics later proved that neither software setting is a full
+  equivalent of physically moving the vehicle network onto the CAN0/CAN2
+  intercept-relay pair; see CORR-072.
 - **Canonical:** [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md);
   SECOC-033; `tests/verify_toyota_eps_bus_probe.py`; optional
   `tests/verify_external_corroboration.py`.
@@ -1675,3 +1677,39 @@ and audited runtime builds. The tracked H image is the permanent foreign
 regression. Checked by `tests/verify_ephemeral_runtime_resolver.py` and
 `tests/verify_albinoelephant_corolla_codeflash.py`; canonical tooling report:
 [`../tooling/ephemeral-runtime-semantic-resolver.md`](../tooling/ephemeral-runtime-semantic-resolver.md).
+
+### CORR-072 — `ELM param 1 + bus 1` is a direct diagnostic route, not a full Toyota-B repin equivalent
+
+- **Earlier wording:** the Panda routing analysis called `SAFETY_ELM327` parameter
+  1 plus logical bus 1 a "software-equivalence candidate" for the reported
+  Toyota-B CAN0/CAN1 physical repin.
+- **Missing hardware dimension:** official comma `Harness_Box.pdf` defines
+  `CAN0 = CAR`, `CAN1 = RADAR`, `CAN2 = CAMERA`, `CAN3 = COMMA POWER` and places
+  the solid-state intercept relay specifically between CAN0 and CAN2. Official
+  `Toyota_B_Harness.pdf` puts CAN2+CAN1 on the camera side and CAN0+CAN1 on the
+  car side. The pinned field report that the relevant network "ends up on bus 1
+  instead of bus 0/2" therefore describes a real network-to-relay assignment
+  mismatch, not merely a Panda logical-bus naming mismatch.
+- **Corrected split:** `param=1,bus=1` attaches Panda FDCAN2 directly to the
+  stock harness CAN1 wires and is the correct static **direct-diagnostic-route**
+  candidate. It does not move that vehicle network onto the CAN0/CAN2 split,
+  insert the intercept relay around it, or make generic 0↔2 forwarding represent
+  its two sides. A physical repin/corrected adapter may therefore still be
+  required for ordinary openpilot interception even if direct diagnostics can
+  avoid it.
+- **Foreign firmware closure:** exact `8965H1202000` CodeFlash independently
+  eliminates an EPS application→boot bus switch. Application and boot use RSCFD
+  channel 1; boot retains `0x7A1/0x777 -> 0x7A9`; the application RSCFD
+  register/config tables transfer exactly; boot initialization is byte-identical
+  and the core CAN/CanIf region differs only in three relocation bytes. Its
+  PROGRAMMING session also transfers the asynchronous reset handoff, so a
+  `10 02` timeout alone is not a rejection discriminator.
+- **Remaining boundary:** why the indirect OBD route fails to survive or observe
+  the transition is still outside the EPS evidence set. Gateway forwarding,
+  response timing, ACK/bus-off, and wake/topology remain candidates; none is
+  promoted without gateway firmware or a dual-segment transition capture.
+
+Checked by `tests/verify_toyota_b_programming_topology.py`,
+`tests/verify_toyota_eps_bus_probe.py`, and optional
+`tests/verify_external_corroboration.py`. Canonical report:
+[`../tooling/panda-toyota-routing.md`](../tooling/panda-toyota-routing.md).

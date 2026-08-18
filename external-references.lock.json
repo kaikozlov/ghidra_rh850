@@ -21,6 +21,11 @@
       "directory": "calvinpark-openpilot",
       "commit": "eeb87f4f9cbcba2ee9c358c8d93015a513c1f822"
     },
+    "commaai_hardware": {
+      "url": "https://github.com/commaai/hardware.git",
+      "directory": "comma-hardware",
+      "commit": "530b7da136b6a6d4b0d37b95bdb3472c59f672f4"
+    },
     "toyota_dataflash_secoc_setup": {
       "url": "https://github.com/Bk2ol/tsk_extraction_by_can_log.git",
       "directory": "tsk_extraction_by_can_log",
@@ -287,6 +292,24 @@
       "path": "README.md",
       "size": 195395,
       "sha256": "ffd48e30cf430083cdeca522a1455b1a0ff5d77c3af3a5176d15830db5c7886a"
+    },
+    {
+      "repository": "commaai_hardware",
+      "path": "harness/v3/Toyota_B_Harness.pdf",
+      "size": 32357,
+      "sha256": "39126557ad6ae4400dd0ac44080437e860cb3a6923a42b0ab523a78f456a8fb6"
+    },
+    {
+      "repository": "commaai_hardware",
+      "path": "harness/v3/Harness_Box.pdf",
+      "size": 22319,
+      "sha256": "36dc9e55ff193a98c74ea7db9f0d63f0f7ea75f6cd2d5eb3ccd763a686585562"
+    },
+    {
+      "repository": "commaai_hardware",
+      "path": "harness/OBD-C.sch.pdf",
+      "size": 41427,
+      "sha256": "3450700e3711643c097374a1d71d20e4d6004ac9946534e052e23c0417401008"
     }
   ],
   "community_artifacts": [

@@ -59,6 +59,13 @@ Static analysis of that image establishes:
 - the homolog of Lochuan's `0x31 -> 0x10` checkpoint byte is `0x6081E`, and its
   containing function has the same checkpoint-failure semantics rather than
   SecOC acceptance semantics.
+- application and boot/programming diagnostics remain on RSCFD channel 1 in
+  this exact image; boot retains `0x7A1/0x777 -> 0x7A9`, so the post-pin-swap
+  success is not explained by an EPS application-to-boot CAN-controller change;
+- the foreign PROGRAMMING session reproduces the asynchronous reset handoff and
+  `0x0180` speed / `0x0A00` supply policy thresholds. A `10 02` timeout by itself
+  can therefore represent reset overtaking the final positive response rather
+  than ECU rejection.
 
 Canonical interpretation and exact resolver anchors are documented in
 [`docs/variants/corolla-2023-us-public-route.md`](../../docs/variants/corolla-2023-us-public-route.md).

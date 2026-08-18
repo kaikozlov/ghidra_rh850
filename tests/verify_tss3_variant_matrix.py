@@ -193,6 +193,10 @@ if corolla_h:
           "no 0x2E4/0x131" in corolla_h["secured_can_ids"] and "0x2E4;" not in corolla_h["secured_can_ids"])
     check("8965H1202000 exact crypto-root transfer is documented",
           all(token in corolla_h["security_levels"] for token in ("0xBFD8", "0xBFE8", "0x20840", "byte-identical")))
+    check("8965H1202000 Toyota-B route distinguishes relay topology from direct diagnostics",
+          all(token in corolla_h["diagnostic_bus"] for token in ("CAN0/CAN2", "CAN1", "ELM param1", "logical bus1")))
+    check("8965H1202000 programming row pins application/boot channel continuity and async reset",
+          all(token in corolla_h["programming_observation"] for token in ("RSCFD channel1", "0x7A1/0x777->0x7A9", "async kind2", "0x0180", "0x0A00", "50 02")))
     check("8965H1202000 source is the tracked raw corpus", "raw-20260818" in corolla_h["source"])
 
 # ── Global structural checks ────────────────────────────────────

@@ -197,7 +197,12 @@ def main() -> int:
         "toyota_b_repin_candidate": {
             "elm327_param": 1,
             "bus": TOYOTA_B_REPIN_CANDIDATE_BUS,
-            "status": "static-equivalence candidate; programming-transition confirmation required",
+            "scope": "direct-diagnostic-route",
+            "relay_topology_equivalent": False,
+            "status": (
+                "static direct-diagnostic-route candidate; not equivalent to moving the vehicle "
+                "network onto the CAN0/CAN2 intercept-relay pair; programming-transition confirmation required"
+            ),
         },
         "mode": "execute" if args.execute else "dry-run",
     }

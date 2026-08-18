@@ -271,16 +271,26 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `8965H1202000/8A3111202000`, `R7F701383`, and serial
   `8965012N50A05G310920`; all three Sienna crypto roots transfer byte-for-byte,
   Gate-2/CRC resolution transfers, and the target's actual queue is exactly
-  `00F/D7/B6` with no `2E4/131`. Thus CodeFlash identity and static SecOC
-  topology are no longer open. What remains is the **dynamic epoch/key boundary**:
-  no raw DataFlash window matches the local `0x00F` oracle, but CAN capture and
-  dumping are separate jobs, and the older public-route `0x116/0x24D` oracle is
-  a different freshness epoch (`TRIP 0xCE9` versus local `0xD0D`). If the vehicle
-  is revisited, collect a direct `F181` plus full-bus capture immediately before
-  the dump transition and again after recovery/reset. Route metadata remains
+  `00F/D7/B6` with no `2E4/131`. The Toyota-B pin-swap's **physical function is
+  also closed statically**: official comma hardware makes CAN0/CAN2 the
+  intercept-relay pair, while the affected field pinout put the relevant network
+  on unsplit CAN1. Exact H firmware rules out an EPS app→boot controller/ID
+  migration and reproduces the asynchronous programming-reset handoff. The
+  direct stock-wire diagnostic candidate is therefore `ELM param 1 + bus 1`; it
+  is not relay-topology equivalent to the physical repin. Two dynamic boundaries
+  remain. First, the exact reason the **indirect OBD route** does not reliably
+  survive/observe `10 02` is still gateway/timing/ACK/wakeup territory and cannot
+  be selected without gateway firmware or a dual-segment capture. Second, the
+  **epoch/key boundary** remains: no raw DataFlash window matches the local
+  `0x00F` oracle, CAN capture and dumping are separate jobs, and the older
+  public-route `0x116/0x24D` oracle is a different freshness epoch (`TRIP 0xCE9`
+  versus local `0xD0D`). If revisited, record direct F181 plus full-bus and Panda
+  health on both normal-CAN1 and OBD routes immediately around the programming
+  transition, then repeat the memory/capture epoch join. Route metadata remains
   forced `TOYOTA_COROLLA_TSS2` with no `carFw`, so the route-to-image/model-year
   join remains contributor attribution. See
-  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md).
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
+  and [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md).
 - **TSS 3.0 family breadth.** Which Sienna findings generalize across the
   family (Camry, RAV4, etc.) is unmapped. See
   [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).

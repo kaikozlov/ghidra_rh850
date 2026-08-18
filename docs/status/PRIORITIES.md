@@ -176,6 +176,13 @@ dynamic steps falsifies a concrete invariant. Canonical:
 
 ## P2 — useful when a specific dependency appears
 
+- **Toyota-B direct-route confirmation:** the static root cause is now bounded.
+  If an affected car is available, compare stock-pin `ELM param 1 + bus 1`
+  against the OBD route while recording Panda CAN health and post-`10 02`
+  endpoint reappearance. This is useful to distinguish gateway/timing from
+  ACK/bus-off behavior; do not physically repin merely to answer the diagnostic
+  question. The test does not replace the CAN0/CAN2 relay topology needed for
+  normal openpilot interception.
 - **Reset-window replay / future-sync poisoning / tag-guess throughput / FD
   suffix behavior:** host trial constructors exist; run on an isolated bench
   when SecOC behavior itself is the active question.

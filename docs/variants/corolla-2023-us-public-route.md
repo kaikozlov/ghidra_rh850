@@ -440,6 +440,55 @@ a non-`0x5A` result publishes `0x31` and separately records failure state.
 Thus the earlier conclusion that `0x31 -> 0x10` is a checkpoint/NvM fail-open,
 not a SecOC Gate-2 bypass, independently transfers to this Corolla image.
 
+### 7.6 The same image closes the EPS side of the Toyota-B pin-swap anomaly
+
+The official comma hardware schematics and this exact CodeFlash can now be
+combined without projecting Sienna behavior onto the Corolla.
+
+Official harness hardware defines CAN0/CAN2 as the car/camera intercept-relay
+pair and CAN1 as a separate unsplit network. The pinned field report says the
+affected Toyota-B assignment puts the desired network on CAN1 instead of the
+expected 0/2 relay pair; physically swapping CAN0/CAN1 corrects that harness
+assignment.
+
+On `8965H1202000` itself, however, there is no corresponding application→boot
+CAN migration:
+
+```text
+application: RSCFD channel 1 only (CAN1 RX/TX EIINT 187/188)
+boot Rx:     0x7A1 / 0x777, channel 1 only
+boot Tx:     0x7A9, HTH 0x13, channel 1
+```
+
+The complete application RSCFD register map and `3 × 0x34` driver configuration
+are byte-identical to Sienna. The foreign boot peripheral-init implementation is
+also byte-identical, and its core CAN/CanIf region transfers except for three
+variant-table relocation bytes.
+
+The foreign PROGRAMMING session independently reproduces the asynchronous reset
+architecture: its five session records are byte-identical, the PROGRAMMING row
+is the same async kind-2 form, the lower `0x08000200/0x08000201` operation is
+backed by the same zero-return stub shape, and the policy/readiness thresholds
+remain `0x0180` speed and `0x0A00` supply. A final `50 02` can therefore be
+overtaken by reset; a client timeout alone is not evidence of rejection.
+
+Consequently the physical repin is not an EPS requirement for selecting a
+bootloader CAN controller, CAN ID, hidden handoff SecurityAccess domain, or
+alternate programming primitive. For direct diagnostics on stock wiring, Panda's
+static direct-route candidate is `ELM327 param 1 + logical bus 1`, which puts
+FDCAN2 on harness CAN1 rather than the OBD mux. That does **not** recreate the
+CAN0/CAN2 intercept-relay topology required by normal openpilot forwarding.
+
+The exact reason an indirect OBD path can answer ordinary UDS yet fail to
+survive/observe the reset remains external to this EPS image: gateway forwarding,
+response timing, ACK/bus-off behavior, or another vehicle-network wake/topology
+effect. No gateway artifact or dual-segment transition capture is pinned, so the
+repository deliberately does not choose among them.
+
+Canonical routing analysis and the complete eliminated/surviving hypothesis
+matrix are in [panda-toyota-routing.md](../tooling/panda-toyota-routing.md).
+Checked by `tests/verify_toyota_b_programming_topology.py`.
+
 ## 8. Remaining evidence boundary
 
 The new corpus closes CodeFlash identity and much of the firmware-static

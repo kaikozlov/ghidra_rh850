@@ -61,6 +61,15 @@ def git_show(path: Path, spec: str) -> str:
     ).stdout
 
 
+def pdf_text(path: Path) -> str:
+    return subprocess.run(
+        ["pdftotext", "-layout", str(path), "-"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+
+
 def dbc_message(dbc: str, can_id: int, name: str) -> str:
     """Return one DBC message block, excluding following BO_ definitions."""
     marker = f"BO_ {can_id} {name}:"
@@ -119,6 +128,32 @@ def main() -> int:
             check(f"{label} fixture exists", fixture.is_file(), str(fixture))
             if fixture.is_file():
                 check(f"{label} equals committed fixture", path.read_bytes() == fixture.read_bytes())
+
+    print("\n== official comma Toyota-B harness topology ==")
+    harness_box = pdf_text(roots["commaai_hardware"] / "harness/v3/Harness_Box.pdf")
+    toyota_b = pdf_text(roots["commaai_hardware"] / "harness/v3/Toyota_B_Harness.pdf")
+    obd_c = pdf_text(roots["commaai_hardware"] / "harness/OBD-C.sch.pdf")
+    check(
+        "official harness box assigns CAN0=CAR, CAN1=RADAR, CAN2=CAMERA, CAN3=COMMA POWER",
+        all(token in harness_box for token in ("CAN0 = CAR", "CAN1 = RADAR", "CAN2 = CAMERA", "CAN3 = COMMA POWER")),
+    )
+    check(
+        "official harness box relay is the CAN0/CAN2 split pair",
+        'SOLID-STATE "RELAY"' in harness_box and "CAN2_H 1" in harness_box and "CAN0_H" in harness_box
+        and "CAN2_L" in harness_box and "CAN0_L" in harness_box,
+    )
+    check(
+        "official Toyota-B adapter puts CAN2+CAN1 on camera side and CAN0+CAN1 on car side",
+        "TO CAMERA" in toyota_b and "TO CAR" in toyota_b
+        and "CAN2_H - ORANGE" in toyota_b and "CAN2_L - GREEN" in toyota_b
+        and "CAN1_H - PINK" in toyota_b and "CAN1_L - BLUE" in toyota_b
+        and "CAN0_H - ORANGE" in toyota_b and "CAN0_L - GREEN" in toyota_b,
+    )
+    check(
+        "official OBD-C mapping uses SBU1 for the CAN0/CAN2 relay and keeps CAN1 distinct",
+        "SBU1 is used for driving the relay between CAN0 and CAN2" in obd_c
+        and "CAN1_H" in obd_c and "CAN1_L" in obd_c,
+    )
 
     print("\n== pinned Stage-8 optskug evidence ==")
     optskug_readme = (roots["optskug_docs"] / "README.md").read_text(encoding="utf-8")
@@ -538,6 +573,16 @@ def main() -> int:
     check(
         "CAN collector also selects implicit ELM327 param 0",
         "panda.set_safety_mode(3)" in collect_step,
+    )
+    check(
+        "DataFlash programming client prefers a 100 ms UDS timeout",
+        '{"timeout": 0.1, "debug": false}' in dump_step
+        and '{"timeout": 0.1}' in dump_step,
+    )
+    check(
+        "DataFlash flow retries PROGRAMMING after a one-second reset window",
+        dump_step.count("diagnostic_session_control(uds_mod.session_type.programming)") == 2
+        and "time.sleep(1.0)" in dump_step,
     )
 
     print("\n== pinned Panda ELM327 and harness routing ==")

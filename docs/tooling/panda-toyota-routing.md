@@ -2,15 +2,18 @@
 
 > **Scope:** pinned Calvin Park openpilot/Panda checkout at
 > `eeb87f4f9cbcba2ee9c358c8d93015a513c1f822`, pinned Bk2ol DataFlash tooling
-> at `db453752beeb7cdd024a1a9c38c6711c981e75ad`, and Toyota EPS
-> `8965B4512000` firmware.
+> at `db453752beeb7cdd024a1a9c38c6711c981e75ad`, official comma hardware at
+> `530b7da136b6a6d4b0d37b95bdb3472c59f672f4`, Sienna `8965B4512000`, and
+> tracked Corolla `8965H1202000` CodeFlash.
 >
-> **Status:** active; software-equivalence candidate recovered, vehicle transition
-> confirmation still required.
+> **Status:** active; physical pin-swap function statically resolved, direct
+> diagnostic software route recovered, exact OBD-transition failure mechanism bounded.
 >
-> **Evidence source:** firmware-static, pinned external-source, and local tooling.
+> **Evidence source:** firmware-static, official hardware schematics, pinned
+> external-source, contributor raw CodeFlash, and local tooling.
 >
-> **Verification:** `tests/verify_toyota_eps_bus_probe.py` plus optional
+> **Verification:** `tests/verify_toyota_eps_bus_probe.py`,
+> `tests/verify_toyota_b_programming_topology.py`, plus optional
 > `tests/verify_external_corroboration.py`.
 
 ## 1. Question and result
@@ -33,17 +36,24 @@ There are two independent routing controls:
 The current community dump flow changes or hard-codes only the first dimension
 while leaving the second in the OBD-mux state.
 
-For the reported Toyota-B CAN0/CAN1 repin case, the strongest software-equivalent
-candidate is therefore:
+Official harness schematics add a third dimension: the harness box is designed
+around a **CAN0/CAN2 intercept-relay pair**, while CAN1 is a separate unsplit
+network. The field report that the Toyota-B pinout puts the desired network on
+CAN1 instead of the expected CAN0/CAN2 pair is therefore literal hardware
+topology, not just Panda naming.
+
+For diagnostics, Panda can still attach directly to that stock CAN1 pair without
+repinning:
 
 ```python
 panda.set_safety_mode(3, 1)  # ELM327 + CAN_MODE_NORMAL
-BUS = 1                      # Panda logical bus 1 -> MCU FDCAN2
+BUS = 1                      # Panda logical bus 1 -> FDCAN2 -> harness CAN1
 ```
 
-This is a **high-confidence static-equivalence candidate**, not yet a vehicle-
-verified programming fix. The decisive test is entering programming mode on the
-unmodified harness with this exact pair of settings.
+This is a **high-confidence direct-diagnostic-route candidate**. It is not a full
+electrical equivalent of repinning the vehicle network onto the CAN0/CAN2
+intercept-relay pair, and therefore it must not be described as a software
+replacement for the relay topology used by normal openpilot forwarding.
 
 ## 2. Keep four naming layers separate
 
@@ -227,7 +237,62 @@ Two invariants are important:
 `tools/toyota_eps_bus_probe.py` now emits this truth table for the selected
 ELM parameter, and `tests/verify_toyota_eps_bus_probe.py` pins the model.
 
-## 7. Relay and forwarding: an important correction
+## 7. Official Toyota-B / harness-box topology
+
+The official comma hardware repository closes a gap that Panda source alone
+cannot: which named harness networks are physically attached to the relay.
+Three pinned schematics are relevant:
+
+- `harness/v3/Harness_Box.pdf` states the intended mapping explicitly:
+  `CAN0 = CAR`, `CAN1 = RADAR`, `CAN2 = CAMERA`, `CAN3 = COMMA POWER`;
+- the same harness-box schematic places the solid-state intercept relay between
+  **CAN0 and CAN2**, with the associated termination network on that pair;
+- `harness/v3/Toyota_B_Harness.pdf` carries CAN2 and CAN1 on the camera-side
+  connector and CAN0 and CAN1 on the car-side connector;
+- `harness/OBD-C.sch.pdf` maps the USB-C lanes and states that SBU1 drives the
+  relay between CAN0 and CAN2.
+
+That yields the intended physical model:
+
+```text
+camera-side main CAN -------- CAN2 ----+
+                                      | harness-box intercept relay
+car-side main CAN ----------- CAN0 ----+
+
+secondary/shared CAN -------- CAN1 ----- no CAN0/CAN2 intercept relay
+OBD / Comma Power path ------ CAN3 ----- separate harness-box path
+```
+
+This makes the pinned optskug field statement precise: on the affected Toyota-B
+vehicles, the relevant network assignment was reported as "flipped" such that
+**the relay ends up on bus 1 instead of bus 0/2**. Physically exchanging the
+Toyota-B CAN0/CAN1 pairs moves that vehicle network onto the harness-box topology
+for which comma's interception design was built.
+
+That is the first part of the pin-swap root cause. It is source-backed by the
+official schematics plus the independent field report; it is not inferred from
+EPS firmware.
+
+### Diagnostic equivalence is not relay-topology equivalence
+
+This distinction corrects the earlier wording in this report.
+
+`ELM param 1 + logical bus 1` can put Panda FDCAN2 directly on the **existing
+harness CAN1 wires**. For a point-to-point diagnostic exchange, that can remove
+the need to repin merely to reach the EPS directly.
+
+It does **not** move those wires onto CAN0/CAN2, does not insert the CAN0/CAN2
+solid-state relay around that network, and does not make generic 0↔2 forwarding
+represent its camera/car sides. Therefore:
+
+```text
+param=1 + bus=1      == candidate direct diagnostic route to stock CAN1
+physical CAN0/CAN1   == correction of harness network assignment / relay topology
+```
+
+Those are different operations with different goals.
+
+## 8. Relay and forwarding
 
 Panda's generic software forwarding relation is:
 
@@ -237,299 +302,299 @@ logical bus 2 -> logical bus 0
 logical bus 1 -> no generic forwarding destination
 ```
 
-This correctly reflects the two-sided camera/car harness topology and explains
-why field reports describe a bad Toyota-B assignment as putting the relay on
-“bus 1 instead of bus 0/2.” Harness orientation also swaps 0 and 2 only.
+That matches the official hardware design: logical 0/2 represent the two sides
+of the normal interceptable camera/car pair, while bus 1 is a separate controller.
+Harness orientation swaps logical 0 and 2 only.
 
-However, **ELM diagnostics do not depend on that software forwarder**.
-`SAFETY_ELM327` calls `set_intercept_relay(false, false)`, and `nooutput_init`
-sets `disable_forwarding=true`. `harness_init()` likewise says to “keep buses
-connected by default” and leaves the intercept relay undriven.
+ELM diagnostics do **not** depend on the software forwarder. `SAFETY_ELM327`
+calls `set_intercept_relay(false, false)`, `nooutput_init` sets
+`disable_forwarding=true`, and harness initialization leaves the physical relay
+pass-through by default. Thus the dump/programming question is about which
+physical transceiver/network the diagnostic controller is attached to, not about
+Panda synthesizing 0↔2 forwarding while in ELM mode.
 
-So the precise model is:
+This also means a successful ELM diagnostic test on bus 1 does not prove that the
+same wiring is suitable for normal openpilot interception. The latter needs the
+network on the relay-backed 0/2 topology or an equivalent hardware redesign.
 
-- bus 0/2 describe the normal relay-separated camera/car sides when interception
-  is active;
-- in ELM mode the relay remains physically pass-through and software 0<->2
-  forwarding is disabled;
-- bus 1/FDCAN2 is a separate controller whose physical endpoint can be normal
-  harness or OBD depending on the mux state.
+## 9. Why the old community "software swap" was not direct CAN1
 
-This distinction removes an earlier overstatement that the successful dump
-necessarily depended on active Panda software forwarding. The material point is
-**physical topology/path selection**, not an ELM forwarding rule.
-
-## 8. Current Bk2ol DataFlash workflow
-
-The pinned community workflow contains three coupled assumptions.
-
-### EPS probe
+The pinned Bk2ol workflow couples:
 
 ```python
 BUS = 0
-panda.set_safety_mode(3)  # implicit param 0
+panda.set_safety_mode(3)  # implicit parameter 0
 ```
 
-### DataFlash dump
+and the later public Calvin range-dumper family preserves the same implicit
+ELM-parameter-zero assumption. Merely changing `BUS` to 1 changes only the Panda
+logical queue. With ELM parameter 0, logical bus 1/FDCAN2 is still selected as
+`CAN_MODE_OBD_CAN2`.
 
-```python
-BUS = 0
-panda.set_safety_mode(3)  # implicit param 0
-```
-
-### CAN oracle collection
-
-```python
-ORACLE_BUSES = {0, 2}
-panda.set_safety_mode(3)  # implicit param 0
-```
-
-Consequences:
-
-1. logical bus 1/FDCAN2 is permanently muxed to OBD for the script;
-2. the probe and dump never discover which normal-harness logical bus actually
-   reaches the EPS;
-3. simply changing `BUS = 1` still leaves bus 1 on the OBD physical route;
-4. the oracle collector ignores bus 1 entirely.
-
-This exactly explains why a “software swap” implemented as only `BUS=0 -> 1`
-is not an equivalent test of a physical Toyota-B CAN0/CAN1 repin.
-
-### Heartbeat is not the hidden failure here
-
-Standalone `Panda()` defaults to `disable_checks=True`. Its connect path disables
-Panda heartbeat checks and exits power save before the script selects ELM mode.
-Therefore the Bk2ol script is not expected to fall back to SILENT merely because
-its programming sequence takes more than the normal heartbeat timeout.
-
-This was checked because an unnoticed SILENT transition would have mimicked a
-routing failure; it does not fit this standalone path.
-
-### CAN-FD automatic switching is also not silently changing the path
-
-The same `Panda()` connect path disables automatic CAN-FD switching on every
-logical bus and initializes the configured CAN speed. That is relevant for
-future CAN-FD variants, but it does not provide an alternate explanation for the
-reported classic-CAN routing asymmetry.
-
-## 9. Why the physical repin can succeed when bus-only software fails
-
-For the reported experiment, the two configurations are best represented as
-follows.
-
-### Reported bus-only “software swap”
+Therefore the reported bus-only experiment was:
 
 ```text
-stock Toyota-B wiring
-+ ELM param 0
-+ UDS bus 1
-
 UDS bus 1
  -> Panda logical bus 1
  -> MCU FDCAN2
  -> CAN_MODE_OBD_CAN2
- -> OBD physical path
+ -> OBD / CAN3-side physical route
+ -> vehicle-side gateway/topology
+ -> EPS
 ```
 
-This can plausibly produce ordinary UDS responses through the vehicle's OBD/
-gateway-visible network while still being the wrong path for a reset/programming
-transition.
-
-### Successful physical repin
+It was **not**:
 
 ```text
-Toyota-B CAN0/CAN1 vehicle pairs physically exchanged
-+ ELM param 0
-+ dump on logical bus 0
-
-UDS bus 0
- -> Panda logical bus 0 / corresponding normal harness controller path
- -> repinned vehicle network now lands on that physical interface
+Panda FDCAN2 -> stock Toyota-B CAN1 wires -> EPS segment
 ```
 
-The electrical network itself has moved. No Panda logical-bus setting alone can
-move the vehicle wires.
+This explains how ordinary UDS can work while the experiment still fails to
+exercise the same network attachment as the physical repin.
 
-### Candidate true software equivalent on stock pins
+Other Panda-side false leads are statically excluded:
+
+- ELM parameter 0 and 1 use the same diagnostic transmit whitelist; `0x7A1` is
+  permitted under both;
+- standalone `Panda()` disables heartbeat checks, so a normal programming delay
+  should not silently force SILENT safety mode;
+- the connect path disables automatic CAN-FD switching, so an automatic protocol
+  mode change is not silently remapping the route;
+- `set_obd(False)` after remembering ELM parameter 0 is fragile because a harness
+  orientation reinitialization reapplies the remembered safety parameter;
+- the stable normal-harness choice is `set_safety_mode(3, 1)`.
+
+## 10. The three configurations, precisely
+
+### A. Unmodified harness + old bus-only attempt
 
 ```text
-stock Toyota-B wiring
-+ ELM param 1
-+ UDS bus 1
-
-UDS bus 1
- -> Panda logical bus 1
- -> MCU FDCAN2
- -> CAN_MODE_NORMAL
- -> normal-harness FDCAN2 physical path
+stock Toyota-B pinout
+ELM param 0
+logical bus 1
+    -> FDCAN2
+    -> OBD physical mux
+    -> indirect vehicle path
 ```
 
-This is the software state that addresses the physical path omitted by the
-reported bus-only test. It is therefore the next experiment to run before
-attributing the timeout to an unavoidable harness defect.
+This can observe an EPS that is gateway-reachable without placing Panda on the
+EPS's stock harness CAN1 segment.
 
-## 10. Why this is not an EPS app-to-boot controller switch
+### B. Physical CAN0/CAN1 repin + old bus-0 tooling
 
-The `8965B4512000` firmware independently rules out a tempting ECU-side
-explanation: its application and boot/programming environment both use RSCFD
-channel 1 for the `0x7A1/0x7A9` diagnostic endpoint.
+```text
+vehicle CAN pairs physically exchanged at Toyota-B adapter
+ELM param 0
+logical bus 0
+    -> network of interest now lands on harness CAN0
+    -> matching camera side lands on CAN2
+    -> harness-box CAN0/CAN2 relay topology is now correct
+```
+
+The electrical network itself has moved. This is why the field report says the
+relay moved from the wrong bus 1 assignment to the expected 0/2 pair.
+
+### C. Stock pins + direct diagnostic software route
+
+```text
+stock Toyota-B pinout
+ELM param 1
+logical bus 1
+    -> FDCAN2
+    -> CAN_MODE_NORMAL
+    -> harness CAN1 physical wires
+    -> target vehicle network directly
+```
+
+C is the correct static software replacement **for direct diagnostics**. It is
+not a replacement for B when the objective is ordinary openpilot interception
+through the CAN0/CAN2 relay.
+
+`tools/toyota_eps_bus_probe.py` now reports this distinction explicitly and marks
+its `param=1,bus=1` candidate as `relay_topology_equivalent=false`.
+
+## 11. The real Corolla firmware eliminates an EPS-side bus switch
+
+The tracked `8965H1202000` CodeFlash gives a foreign-image check independent of
+the Sienna firmware.
 
 ### Application
 
-The application EIINT table at `0x20200` installs only the CAN1 pair:
+Its EIINT table installs only the RSCFD CAN1 receive/transmit pair:
 
 ```text
-EIINT 184 CAN0 RX -> 0x61D88 default handler
-EIINT 185 CAN0 TX -> 0x61D88 default handler
-EIINT 187 CAN1 RX -> application_can1_rx_isr @ 0x6506A
-EIINT 188 CAN1 TX -> application_can1_tx_isr @ 0x65028
-EIINT 192 CAN2 RX -> 0x61D88 default handler
-EIINT 193 CAN2 TX -> 0x61D88 default handler
+EIINT 184 CAN0 RX -> default handler 0x5C0F2
+EIINT 185 CAN0 TX -> default handler 0x5C0F2
+EIINT 187 CAN1 RX -> 0x5F3AA
+EIINT 188 CAN1 TX -> 0x5F368
+EIINT 192 CAN2 RX -> default handler 0x5C0F2
+EIINT 193 CAN2 TX -> default handler 0x5C0F2
 ```
 
-The application RX/TX bodies at `0x82E40` and `0x8474E` hard-code RSCFD channel
-1.
+The application RX and TX bodies at `0x7D240` and `0x7EB4E` both carry the same
+channel-1 specialization. More strongly, the complete three-channel RSCFD
+register-address map is byte-identical to the Sienna map, and the complete
+three-channel `3 × 0x34` application driver-configuration table is also
+byte-identical.
 
 ### Boot/programming environment
 
-The boot CanIf configuration is also channel-1-specific:
-
-- receive filter 0 at `0x8920` matches `0x7A1`;
-- only HRHs `0x10` and `0x13` expose that filter, both channel 1;
-- channel-0 and channel-2 HRHs have no active receive filter;
-- the sole diagnostic Tx route uses response `0x7A9` and HTH `0x13`, also
-  channel 1.
-
-`tests/verify_toyota_eps_bus_probe.py` reads these relationships directly from
-CodeFlash.
-
-Therefore an EPS-side “application uses one controller, bootloader uses another”
-model is false for this firmware.
-
-## 11. Remaining transition-time uncertainty
-
-Static analysis can now establish the software-routing mismatch and identify the
-missing normal-route configuration, but it cannot yet prove what makes the OBD
-route fail exactly at programming transition.
-
-Possible residual mechanisms include:
-
-- a gateway path that stops forwarding/reaching the EPS while it resets into
-  boot;
-- loss of a CAN acknowledger or other network participant on the indirect path;
-- a topology-dependent reset/wakeup condition;
-- FDCAN2 ACK/bus-off behavior on the wrong physical segment.
-
-The last item is worth instrumenting: pinned Panda FDCAN code explicitly contains
-recovery for ACK errors encountered while multiplexing FDCAN2 between its normal
-and OBD physical paths. That is evidence that physical mux state can materially
-affect link-level behavior, but it is **not** proof that ACK failure caused yc's
-specific timeout.
-
-Calvin's opposite field result further argues against promoting any one gateway
-mechanism to fact until the exact Panda routing state in both tests is recorded.
-
-## 12. Decisive vehicle test
-
-The minimum high-value test is deliberately narrow.
-
-### A. Stock harness, normal FDCAN2 route
-
-On an unmodified Toyota-B harness:
-
-```python
-panda = Panda()
-panda.set_safety_mode(3, 1)
-uds = UdsClient(panda, 0x7A1, 0x7A9, bus=1, ...)
-```
-
-First confirm read-only `F181`. Then, only in the existing controlled programming
-workflow, try the same default -> extended -> programming transition used by the
-known dump method.
-
-Record immediately before and after the transition:
+The foreign boot CanIf/RSCFD configuration is equally specific:
 
 ```text
-panda.health():
-  safety_mode
-  safety_param
-  car_harness_status
-  heartbeat_lost
-  power_save_enabled
-
-panda.can_health(1):
-  last_error / last_stored_error
-  transmit_error_cnt / receive_error_cnt
-  bus_off / bus_off_cnt
-  total_tx_cnt / total_rx_cnt
-  can_core_reset_count
+physical request:   0x7A1
+functional request: 0x777
+response:           0x7A9
+Tx HTH:             0x13 (channel 1)
+0x7A1 HRHs:         0x10 and 0x13 (channel 1)
+channel 0 Rx:       none
+channel 2 Rx:       none
 ```
 
-The important invariant is `safety_param == 1` throughout the attempt.
+Only the channel-1 boot channel record is enabled. The 442-byte boot peripheral
+initialization implementation is byte-identical between `8965B4512000` and
+`8965H1202000`. Across the core boot CAN/CanIf transport region
+`0x3400..0x46FF`, the foreign image differs from Sienna at only three relocation
+bytes caused by shifted variant-local tables; the driver logic itself transfers.
 
-### B. Compare the OBD route explicitly
+Therefore the physical repin is **not** compensating for an application→boot
+controller migration, a different boot diagnostic arbitration ID, or an alternate
+CAN0/CAN2 boot endpoint. The actual Corolla stays on RSCFD channel 1 across the
+transition.
 
-Repeat the read-only probe with:
+The public successful dump path also keeps the Panda CAN speed fixed across the
+application→boot transition. Whatever the exact register-level timing fields
+mean, a boot-only incompatible bitrate is incompatible with the observed
+successful swapped-path dump and is not a viable explanation for the pin swap.
 
-```python
-panda.set_safety_mode(3, 0)
-UdsClient(..., bus=1)
-```
+## 12. The real Corolla also reproduces the asynchronous `10 02` reset handoff
 
-This distinguishes “logical bus 1 responds” from “normal-harness bus 1
-responds.” Those are different electrical experiments.
+The foreign image independently transfers the Sienna programming-session
+architecture:
 
-### Interpretation
+- the five 10-byte session runtime records are byte-identical; the PROGRAMMING
+  row is the same asynchronous kind-2 record;
+- the programming policy uses the same `0x0180` speed threshold;
+- readiness uses the same `0x0A00` supply threshold and the same phase/inhibit
+  shape;
+- the lower `0x08000200`/`0x08000201` handoff operation is backed by the same
+  zero-return stub shape rather than a hidden network/security unlock;
+- the same `0x5A` token/success convention is present;
+- commit requests the same reset/system-mode path.
 
-If stock pins + `param=1,bus=1` enter programming successfully, the physical
-repin has a software replacement and the immediate tooling bug is solved.
+The session front end consequently has the same important observable property:
+a successful PROGRAMMING request can remain in response-pending handling while
+the application commits the reset. Endpoint disappearance can overtake a final
+`50 02` response.
 
-If `F181` works on `param=1,bus=1` but programming still fails, then the repin is
-changing something beyond the FDCAN2 normal/OBD mux and the next step is a
-simultaneous transition capture on the relevant physical segments.
+This matters because the pinned Bk2ol dumper constructs its UDS client with a
+`0.1 s` timeout when that API accepts it, sends `10 02`, sleeps one second, then
+sends `10 02` again; an exception exits the programming block as a failure. A
+reported "PROGRAMMING timeout" from that tooling is therefore not evidence that
+the ECU rejected programming. It can be a valid asynchronous reset whose final
+positive response is overtaken, followed by failure to rediscover/reach the boot
+endpoint on the selected physical route.
 
-If `F181` does not answer on `param=1,bus=1`, the assumed correspondence between
-the stock Toyota-B CAN1 pair and FDCAN2 normal-harness path is wrong for that
-setup, and the response matrix itself tells us which branch to investigate.
+The pin swap does not bypass a hidden application SecurityAccess prerequisite,
+change these speed/supply gates, or select a different lower handoff primitive.
 
-## 13. Tooling recommendation
+## 13. Hypothesis matrix
 
-The community extractor should eventually stop encoding routing as a single
-hard-coded `BUS` constant. The robust workflow is:
+| Hypothesis for why the swap helped | Static result | Evidence |
+|---|---|---|
+| EPS changes from CAN1 in application to CAN0/CAN2 in boot | **Eliminated** | `8965H1202000` app vectors/bodies and boot CanIf/RSCFD are channel 1 |
+| bootloader changes `0x7A1/0x7A9` IDs | **Eliminated** | foreign boot tables retain `0x7A1/0x777 -> 0x7A9` |
+| boot stack is a substantially different CAN implementation on Corolla | **Eliminated** | boot peripheral init exact; core CAN/CanIf driver transfers except three relocation bytes |
+| pin swap satisfies a hidden programming SecurityAccess gate | **Eliminated for the first `10 02` handoff** | foreign session policy/handoff path has the same non-SA architecture; lower operation is stubbed |
+| pin swap changes the application speed/supply programming prerequisites | **No direct mechanism recovered** | thresholds are local state predicates identical in shape/value; wiring operation has no firmware edge to them |
+| Panda ELM param 0 vs 1 changes UDS permissions | **Eliminated** | same ELM whitelist; parameter selects board CAN mode |
+| Panda heartbeat silently forces SILENT during programming | **Eliminated for standalone public tool pattern** | standalone Panda connect disables heartbeat checks |
+| ELM software 0↔2 forwarding is required for the dump | **Eliminated** | ELM disables software forwarding and leaves relay pass-through |
+| old `BUS=1` test directly exercised Toyota-B CAN1 | **Eliminated** | implicit ELM param 0 routes FDCAN2 to OBD path |
+| physical swap corrects the network's placement relative to the CAN0/CAN2 intercept relay | **Supported directly** | official harness schematics + pinned field report that relay ended up on bus 1 instead of 0/2 |
+| `param=1,bus=1` can directly attach diagnostics to stock CAN1 | **Supported statically; live programming confirmation pending** | Panda FDCAN2 mux truth table + Toyota-B wiring |
+| `param=1,bus=1` is fully equivalent to repinning for normal openpilot interception | **Eliminated** | it leaves the vehicle network on unsplit CAN1 rather than the relay-backed CAN0/CAN2 pair |
+| OBD/gateway path stops forwarding during/reset after `10 02` | **Survives; unproved** | consistent with topology, but no gateway firmware or dual-segment transition capture is pinned |
+| indirect OBD path loses ACK / bus-off stability during transition | **Survives; unproved** | Panda explicitly handles FDCAN2 mux-related ACK errors; no field health trace binds this to the event |
+| old client timeout semantics misclassified a successful async reset | **Strongly plausible contributor, not sufficient alone** | foreign firmware permits reset before final positive response; old tooling treated timeout as failure |
 
-1. create Panda and explicitly select `SAFETY_ELM327, param=1`;
-2. perform read-only `0x7A1 -> 0x7A9 / F181` discovery on logical buses 0, 1, 2
-   in **normal routing**;
-3. require exactly one expected EPS identity, or fail closed on ambiguity;
-4. persist the discovered `(logical bus, elm327_param)` pair as the diagnostic
-   route;
-5. use that exact pair throughout programming and dump;
-6. only use OBD muxing as an explicit alternate route, never as an implicit
-   default;
-7. include bus 1 in CAN-oracle capture/discovery instead of assuming `{0,2}`;
-8. log `health()` and `can_health()` state around programming transition so a
-   routing or ACK failure is distinguishable from an ECU negative response.
+## 14. What static analysis still cannot choose
 
-`tools/toyota_eps_bus_probe.py` implements the read-only discovery half and now
-emits the recovered FDCAN2 route model plus the Toyota-B static-equivalence
-candidate. It intentionally does **not** enter programming mode.
+The remaining causal fork is now outside the EPS firmware.
 
-## 14. Bottom line
+The OBD-mux route can reach ordinary application diagnostics, but the repository
+does not contain the relevant Toyota gateway firmware/configuration or a
+simultaneous capture on both the OBD-facing and EPS-facing segments during
+`10 02`. Consequently static evidence cannot distinguish among:
 
-The important result is no longer merely “hardware and software swaps are
-different.” The exact missing software state is identified:
+1. gateway forwarding/state changes while the EPS resets;
+2. a gateway/indirect-route timing effect combined with the old client's short
+   response-pending timeout;
+3. ACK/bus-off behavior on the FDCAN2 OBD physical path during endpoint reset;
+4. another vehicle-network wake/topology effect outside the EPS.
+
+These are no longer equally broad hypotheses: all known EPS-side controller,
+address, handoff, and privilege alternatives are closed on the real Corolla
+image. A gateway policy must not be promoted from "plausible" to fact without a
+gateway artifact or transition capture.
+
+## 15. Correct tooling behavior
+
+The robust diagnostic workflow is:
+
+1. select `SAFETY_ELM327, param=1` so the remembered Panda state is normal-harness
+   routing;
+2. discover `0x7A1 -> 0x7A9 / F181` across logical buses, preferring bus 1;
+3. persist `(elm327_param, tx_bus, rx_bus, request_id, response_id, F181)` as the
+   route identity;
+4. keep that physical route fixed across stateful operations;
+5. treat a `10 02` response timeout as inconclusive unless an NRC was actually
+   received;
+6. rediscover the EPS/boot endpoint on the **same route** after the reset;
+7. capture `health()`/`can_health()` around the transition so ACK/bus-off failures
+   are distinguishable from ECU protocol behavior.
+
+The current `kai-openpilot` TSK implementation already follows this model:
+`tsk/lib/diagnostic_route.py` prefers normal routing and records the physical
+route dimension, while `tsk/lib/programming.py` preserves it, tolerates the
+expected asynchronous `10 02` timeout, and requires post-reset reappearance.
+
+For normal openpilot interception, this diagnostic solution is insufficient by
+itself. The vehicle network must still be presented to the harness box in the
+expected CAN0/CAN2 split topology, whether by the physical repin or a corrected
+Toyota-B adapter/harness mapping.
+
+## 16. Bottom line
+
+The static root cause is now substantially resolved:
 
 ```text
-logical bus 1 alone          = insufficient
-logical bus 1 + ELM param 0  = FDCAN2 on OBD path
-logical bus 1 + ELM param 1  = FDCAN2 on normal harness path
+Why did the physical swap matter?
+    Because the affected Toyota-B network was reported on harness CAN1,
+    while comma's intercept relay is physically a CAN0 <-> CAN2 device.
+    Swapping CAN0/CAN1 moves the vehicle network into the topology the
+    harness box expects.
+
+Why did ordinary UDS work before the swap?
+    The attempted software bus-1 route still had ELM param 0, so FDCAN2
+    was muxed to the OBD path. That indirect path could reach the EPS.
+
+Does the EPS itself require the pin swap to enter boot/programming?
+    No static evidence supports that. The actual 8965H1202000 Corolla uses
+    RSCFD channel 1 and 0x7A1/0x7A9 in both application and boot, and its
+    asynchronous programming-reset architecture transfers from Sienna.
+
+Can diagnostics avoid the physical swap?
+    Statically, the correct candidate is ELM param 1 + logical bus 1,
+    which attaches FDCAN2 directly to stock harness CAN1. Live confirmation
+    remains useful, but this is the correct electrical diagnostic experiment.
+
+Can software alone make stock CAN1 equivalent to the 0/2 relay topology?
+    No. Direct diagnostic access and harness interception are different
+    problems. The relay topology still requires the network to be on CAN0/CAN2.
 ```
 
-The reported “software swap” exercised the second row. The physical repin
-changed the network attachment itself. For the unmodified harness, the third row
-is the software configuration that must be tested.
-
-That makes `ELM327 param 1 + logical bus 1` the current best software replacement
-candidate for yc's physical Toyota-B CAN0/CAN1 swap, with dynamic programming-
-transition confirmation as the only remaining step before calling it a verified
-fix.
+The only unresolved part is the exact vehicle-side reason the **indirect OBD
+route** does not reliably survive/observe the programming reset. That is bounded
+to gateway/timing/ACK/wakeup behavior outside the EPS; the pin-swap function
+itself is no longer mysterious.
