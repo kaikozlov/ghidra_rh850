@@ -1334,6 +1334,53 @@ the non-`0x5A` case. Therefore **a successful ordinary NvM write never executes
 the semantic effect of the patch**. `0x664E6` is dormant until an ordinary write
 completion has already been classified as failed.
 
+The lower service-`0x07` path now makes "failed write" precise. `FUN_000715B6`
+builds lower operation class `2`; the selector map at `0x27760/0x27770` maps
+class 2 to adapter index 1, whose pointer is `0x72DFA`. That pointer target is
+not yet a canonical project function, but read-only pseudo-disassembly plus raw
+CodeFlash bytes pin its complete terminal behavior: it samples write-device
+state `FEBF7776` and writes the NvM request-result byte `FEBF7700` only when the
+device state is **0 or 1**. State 0 becomes completed request result 0; state 1
+becomes completed request result 1. Other device states remain nonterminal.
+Thus the generic NvM dispatcher's other result classes do not broaden the
+ordinary checkpoint write-completion path.
+
+The same write device explicitly selects report mode `2`. `FUN_00076CD6` then
+uses the second result byte from the eight-row lower report map at `0x27E0C`:
+
+```text
+lower report key   mode-2 raw code   write-device consequence
+0x00000001         0x00              state 0 -> completed result 0
+0x0000FFFF         0xFD              state 1 -> completed result 1
+0x0000FFFE         0x7F              state 1 -> completed result 1
+0x0000FFFD         0xFD              state 1 -> completed result 1
+0x0000FFFC         0x83              state 4 -> nonterminal/special
+0x0000FFFB         0xFD              state 1 -> completed result 1
+0x0000FFFA         0xFF              state 1 -> completed result 1
+0xFFFF0000         0x7F              state 1 -> completed result 1
+```
+
+`FUN_00075692` is the only direct consumer that maps these raw codes into
+`FEBF7776`: raw `0` selects state 0, raw `0x83` selects state 4, and every other
+nonzero raw code selects state 1. Because `0x72DFA` does not commit state 4 to
+`FEBF7700`, the `0xFFFC -> 0x83` row is **not** a completed write failure; a later
+lower callback can still replace it with terminal success or failure. The
+ordinary checkpoint callback `FUN_00067BC8` therefore receives completed
+service-7 result 0 or 1 on this backend. It accepts only result 0 plus the
+expected next ring block; completed result 1 (or the defensive unexpected-ring
+case) becomes lower `0xA5`, then stock public `0x31`.
+
+The exceptional keys are not all opaque. `0xFFFD` is returned at several lower
+record-read/verification sites when `FUN_000737BA` finds a mismatch between the
+storage representation and expected RAM data. `0xFFFB` is the common invalid
+state/range/setup return across the same storage-machine family. Other terminal
+keys remain numeric because no firmware-supported semantic name has been
+recovered. This means `0x31` is best described as a **terminal ordinary-write
+failure**, not narrowly as a physical DataFlash program-pulse failure: setup,
+state, record verification, or lower media errors can all collapse to completed
+result 1. Conversely, normal success and the explicit special/nonterminal
+`0xFFFC/0x83` path do not execute the patched immediate.
+
 That invariant also rules out the Dem record as the patch-specific LKAS cause.
 For the same failed write, stock and patched firmware both set `FEBF067C`, both
 report Dem `0x94`, and both expose the same DTC-table entry. Only

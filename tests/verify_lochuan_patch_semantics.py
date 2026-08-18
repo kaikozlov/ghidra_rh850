@@ -289,7 +289,65 @@ check(
     repr({hex(k): sorted(v & sensitive) for k, v in lka_refs.items()}),
 )
 
-print("\n== 17. checkpoint public status has no direct Gate-2 owner ==")
+print("\n== 17. ordinary WriteBlock completion is binary success/failure at checkpoint boundary ==")
+# NvM service 0x07 builds lower operation class 2. The lower selector map at
+# 0x27760 maps class 2 to adapter index 1, whose callback pointer is 0x72DFA.
+# 0x72DFA is currently outside the canonical function graph, so pin its bytes
+# directly: it samples the write-device state, writes FEBF7700 only for state
+# 0 or 1, and leaves all other states nonterminal.
+check(
+    "service-7 write path materializes lower operation class 2",
+    CF[0x715DC:0x715E6] == bytes.fromhex("0755050582ec01e5405e"),
+    CF[0x715DC:0x715E6].hex(),
+)
+check(
+    "lower operation selector maps class 2 to adapter index 1",
+    u32(0x27760) == 2 and u32(0x27764) == 0x27770
+    and u32(0x27778) == 2 and u32(0x2777C) == 1,
+)
+check("adapter index 1 callback is 0x72DFA", u32(0x2776C) == 0x72DFA, hex(u32(0x2776C)))
+check(
+    "write completion adapter only commits request result 0 or 1",
+    CF[0x72E1A:0x72E3A] == bytes.fromhex("e051a20d6152aa150032bfff54e20432bfff4ee20152405ebffe1f0a4b570077"),
+    CF[0x72E1A:0x72E3A].hex(),
+)
+
+print("\n== 18. write report mode has one success key, one special nonterminal key, and failure keys ==")
+# FUN_75482 puts this device into report mode 2. In FUN_76CD6 that selects the
+# second result byte in the eight-row table at 0x27E0C. The resulting raw code
+# reaches FUN_75692: raw 0 -> state 0; raw 0x83 -> state 4; every other nonzero
+# code -> state 1. Because 0x72DFA only commits terminal state 0/1, raw 0x83 is
+# explicitly not a completed WriteBlock failure yet.
+check(
+    "write device setup selects report mode 2",
+    CF[0x754AE:0x754B4] == bytes.fromhex("023280ff1a17"),
+    CF[0x754AE:0x754B4].hex(),
+)
+expected_write_map = [
+    (0x00000001, 0x00),
+    (0x0000FFFF, 0xFD),
+    (0x0000FFFE, 0x7F),
+    (0x0000FFFD, 0xFD),
+    (0x0000FFFC, 0x83),
+    (0x0000FFFB, 0xFD),
+    (0x0000FFFA, 0xFF),
+    (0xFFFF0000, 0x7F),
+]
+actual_write_map = []
+for i in range(8):
+    row = CF[0x27E0C + i * 8:0x27E14 + i * 8]
+    actual_write_map.append((int.from_bytes(row[0:4], "little"), row[5]))
+check("mode-2 lower report map matches eight pinned rows", actual_write_map == expected_write_map, repr(actual_write_map))
+check(
+    "raw result mapper sends zero to state0, 0x83 to state4, other nonzero to state1",
+    CF[0x75692:0x756C6] == bytes.fromhex(
+        "80076100c6eeff00fa051d30bfff26fe80ff9c03e50d1d067dffba050432a505"
+        "0132bfff10fe1d3080ff760380ff8c0340067f00"
+    ),
+    CF[0x75692:0x756C6].hex(),
+)
+
+print("\n== 19. checkpoint public status has no direct Gate-2 owner ==")
 refs: list[tuple[int, str, str, str]] = []
 with CORPUS.open(encoding="utf-8") as stream:
     for line in stream:
@@ -308,7 +366,7 @@ check(
     all(not (0x8E600 <= entry < 0x8E800) for entry, _name, _site, _kind in refs),
 )
 
-print("\n== 18. published target-sector pins are derivable from this offline image ==")
+print("\n== 20. published target-sector pins are derivable from this offline image ==")
 target_sector = CF[0x60000:0x68000]
 patched_target_sector = bytearray(target_sector)
 patched_target_sector[0x664E6 - 0x60000] = 0x10
@@ -324,7 +382,7 @@ check(
 )
 check("published original CRC fixup is literal source-image word", u32(0xFFDEC) == 0x0962887F, hex(u32(0xFFDEC)))
 
-print("\n== 19. real Gate-2 patch is independent ==")
+print("\n== 21. real Gate-2 patch is independent ==")
 check("real Gate-2 stock CMP remains e0d1 at 0x8E6C6", CF[0x8E6C6:0x8E6C8] == bytes.fromhex("e0d1"))
 check("real Gate-2 following mismatch BNE remains 9a0d", CF[0x8E6C8:0x8E6CA] == bytes.fromhex("9a0d"))
 check("Lochuan target and Gate-2 target are distinct", 0x664E6 != 0x8E6C6)

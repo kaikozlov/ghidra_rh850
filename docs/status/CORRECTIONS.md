@@ -1432,9 +1432,19 @@ the mistakes are not re-made.
   converge on write completion state `0x33`; successful NvM service-`0x07`
   completion produces lower result `0x5A` and branches around `0x664E4`. The
   patched immediate is therefore semantically dormant unless an ordinary write
-  completion has already been classified non-success. The same failure raises
-  Dem `0x94` in stock and patched firmware, so DTC `0x45D6` is a witness to the
-  storage failure rather than the patch-specific behavioral delta.
+  completion has already been classified non-success. The exact service-7
+  backend is now pinned too: lower operation class 2 selects completion adapter
+  `0x72DFA`, which commits request result only for write-device state 0/1. The
+  mode-2 report table maps key `1` to raw `0`/terminal success, maps
+  `FFFF/FFFE/FFFD/FFFB/FFFA/FFFF0000` to terminal failure codes, and maps
+  `FFFC` to raw `0x83`/device state 4, which remains nonterminal. `0xFFFD` is
+  concretely produced by lower record-verification mismatches and `0xFFFB` by
+  invalid state/range/setup paths. Stock `0x31` is therefore a terminal
+  ordinary-write failure (or defensive unexpected-ring completion), not a
+  pending/retry state and not necessarily only a physical program-pulse error.
+  The same failure raises Dem `0x94` in stock and patched firmware, so DTC
+  `0x45D6` is a witness to the storage failure rather than the patch-specific
+  behavioral delta.
 - **Concrete flakiness path:** object 6's 56-byte learned-state checkpoint stores
   `FEBEB592` through snapshot `FEBEE8AC` at payload `+0x30`. `FUN_000B9054`
   later trusts that field only when public object status is `0x10`; otherwise it
