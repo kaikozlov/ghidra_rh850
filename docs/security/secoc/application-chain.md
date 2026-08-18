@@ -1381,6 +1381,35 @@ state, record verification, or lower media errors can all collapse to completed
 result 1. Conversely, normal success and the explicit special/nonterminal
 `0xFFFC/0x83` path do not execute the patched immediate.
 
+The second failure condition inside `FUN_00067BC8`—service result 0 but callback
+physical block not equal to the object's expected next ring slot—is now bounded
+as well. The recovered normal scheduler cannot manufacture that mismatch:
+
+1. ordinary checkpoint writes have exactly one submitter (`0x674A8`) and are
+   single-flight under active state `FEBF0680`; triplicate writes use the only
+   other `NvM_WriteBlock` caller and route to a different callback handler;
+2. when `0x674A8` submits a write, it marks the object's lower result waiting and
+   writes `FEBF0690 = 0xFF`; the scheduler publishes public status `0x20/0x21`;
+3. `FUN_00067E08` dispatches an ordinary callback only while that object's lower
+   result is still `0xFF`. `FUN_00067BC8` records either `0x5A` or `0xA5` and
+   unconditionally returns `0x5A`; only then does the router clear `FEBF0690`;
+4. the coordinator's only persistence reinitialization route is the `0x700`
+   save/recovery path through `FUN_000B04FE -> protected A55A handoff -> mode
+   0x100 -> FUN_000B09A6 -> FUN_000FF060`. Before `B04FE` can run, `FUN_000B047E`
+   requires `FUN_00065E88` readiness. `FUN_00065E88` independently rejects any
+   checkpoint object whose public status has high nibble `0x20` **and** rejects
+   `FEBF0690 == 0xFF` (or `0xA5`). Thus the recovered coordinator cannot reset
+   the persistence subsystem across an outstanding ordinary WriteBlock.
+
+A duplicate/corrupt/unmodeled callback could still arrive after a later
+transaction for the same object has marked its lower result waiting again, so
+the physical-block comparison remains meaningful defensive code. What is ruled
+out is ordinary scheduler overlap, cross-namespace completion confusion, or the
+recovered system-mode reinitialization path as a normal source of the mismatch.
+Accordingly, stock `0x31` should be read as either a **terminal service-7 write
+failure** or a **defensive unexpected/stale ring completion**, with the latter
+not recovered as a normal lifecycle outcome.
+
 That invariant also rules out the Dem record as the patch-specific LKAS cause.
 For the same failed write, stock and patched firmware both set `FEBF067C`, both
 report Dem `0x94`, and both expose the same DTC-table entry. Only

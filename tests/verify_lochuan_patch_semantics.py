@@ -347,7 +347,50 @@ check(
     CF[0x75692:0x756C6].hex(),
 )
 
-print("\n== 19. checkpoint public status has no direct Gate-2 owner ==")
+print("\n== 19. normal ordinary scheduling cannot create the ring-mismatch failure arm ==")
+# The ordinary submitter marks the per-object lower result and global ordinary
+# wait byte as 0xFF after submitting service 0x07. The scheduler simultaneously
+# publishes 0x20/0x21 while the transaction is active. Shutdown/reinit readiness
+# calls FUN_668EE (reject any public 0x2x checkpoint status) and independently
+# rejects FEBF0690==0xFF, so the recovered coordinator cannot reset/reinitialize
+# persistence across a live ordinary WriteBlock.
+check(
+    "ordinary write submit sets lower-result wait marker and FEBF0690 to 0xFF",
+    CF[0x6757E:0x6758A] == bytes.fromhex("c4d91f0a5b0f384b440f904e"),
+    CF[0x6757E:0x6758A].hex(),
+)
+check(
+    "scheduler publishes ordinary active status in 0x20/0x21 class",
+    CF[0x6640C:0x66420] == bytes.fromhex("20ee210020de330064e7824e01d2b50520ee3200"),
+    CF[0x6640C:0x66420].hex(),
+)
+check(
+    "persistence readiness rejects ordinary wait marker 0xFF or lower failure 0xA5",
+    CF[0x65EA0:0x65EB6] == bytes.fromhex("80ffee190ae080ff0e1b1c0601ffe20d1c065bffb20d"),
+    CF[0x65EA0:0x65EB6].hex(),
+)
+# The callback router first requires the object's lower result to still be 0xFF,
+# dispatches service 7 to FUN_67BC8, and clears FEBF0690 only because 67BC8
+# always returns 0x5A after recording success/failure. Duplicate completions after
+# the first callback are therefore ignored until a new transaction explicitly
+# marks that object waiting again.
+check(
+    "ordinary callback router requires waiting lower result before service dispatch",
+    CF[0x67E30:0x67E50] == bytes.fromhex("bfff64fa0a0601ff8a4d1df0ecf7400221062caf0200c1f17208a106ffffd23d"),
+    CF[0x67E30:0x67E50].hex(),
+)
+check(
+    "service-7 callback clears FEBF0690 only after handler returns 0x5A",
+    CF[0x67E62:0x67E7E] == bytes.fromhex("67daaa351a301c3824468854bfff5afd0a06a6ff9a2d4407904ee525"),
+    CF[0x67E62:0x67E7E].hex(),
+)
+check(
+    "67BC8 always returns 0x5A after writing lower success/failure state",
+    CF[0x67C20:0x67C34] == bytes.fromhex("208ea5ff2496384b13f0d2f120565a00808b7f00"),
+    CF[0x67C20:0x67C34].hex(),
+)
+
+print("\n== 20. checkpoint public status has no direct Gate-2 owner ==")
 refs: list[tuple[int, str, str, str]] = []
 with CORPUS.open(encoding="utf-8") as stream:
     for line in stream:
@@ -366,7 +409,7 @@ check(
     all(not (0x8E600 <= entry < 0x8E800) for entry, _name, _site, _kind in refs),
 )
 
-print("\n== 20. published target-sector pins are derivable from this offline image ==")
+print("\n== 21. published target-sector pins are derivable from this offline image ==")
 target_sector = CF[0x60000:0x68000]
 patched_target_sector = bytearray(target_sector)
 patched_target_sector[0x664E6 - 0x60000] = 0x10
@@ -382,7 +425,7 @@ check(
 )
 check("published original CRC fixup is literal source-image word", u32(0xFFDEC) == 0x0962887F, hex(u32(0xFFDEC)))
 
-print("\n== 21. real Gate-2 patch is independent ==")
+print("\n== 22. real Gate-2 patch is independent ==")
 check("real Gate-2 stock CMP remains e0d1 at 0x8E6C6", CF[0x8E6C6:0x8E6C8] == bytes.fromhex("e0d1"))
 check("real Gate-2 following mismatch BNE remains 9a0d", CF[0x8E6C8:0x8E6CA] == bytes.fromhex("9a0d"))
 check("Lochuan target and Gate-2 target are distinct", 0x664E6 != 0x8E6C6)

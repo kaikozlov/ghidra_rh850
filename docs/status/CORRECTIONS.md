@@ -1445,6 +1445,17 @@ the mistakes are not re-made.
   The same failure raises Dem `0x94` in stock and patched firmware, so DTC
   `0x45D6` is a witness to the storage failure rather than the patch-specific
   behavioral delta.
+- **Ring-mismatch boundary:** `FUN_00067BC8` also reports lower failure when a
+  nominally successful service-7 callback names a physical ring block other than
+  the object's expected next slot. Normal ordinary writes are single-flight;
+  triplicate callbacks route elsewhere. Submission sets public status `0x20/21`
+  and `FEBF0690=0xFF`, while the only coordinator persistence-reinit path is
+  gated by `FUN_00065E88`, which rejects both public `0x2x` status and ordinary
+  wait byte `0xFF`. The callback router itself only dispatches an object still
+  marked waiting and clears `FEBF0690` after `FUN_67BC8` records terminal state.
+  No recovered normal overlap/reset path therefore produces a ring mismatch; it
+  is a defensive unexpected/stale-completion guard. Duplicate/corrupt/unmodeled
+  callbacks remain outside the static bound.
 - **Concrete flakiness path:** object 6's 56-byte learned-state checkpoint stores
   `FEBEB592` through snapshot `FEBEE8AC` at payload `+0x30`. `FUN_000B9054`
   later trusts that field only when public object status is `0x10`; otherwise it
