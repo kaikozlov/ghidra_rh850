@@ -1488,6 +1488,14 @@ the mistakes are not re-made.
   functions directly reads the object-6-sensitive model state, and CAN `0x351`
   comes from a separate debounce/fault family. No direct `object6 -> public
   LKAS-off` edge is recovered.
+- **Complete object census:** all 32 ordinary descriptor slots now have an
+  explicit patch-sensitivity disposition in
+  `data/lochuan_patch_object_census.csv`. Enabled sensitive objects are
+  `0,1,2,3,4,5,6,7,8,10,13,17,18,19,20,21,23,24`; enabled recovered-unaffected
+  objects are `9,11,12,14,15,27`; the rest are disabled. The only recovered
+  steering-adaptation family is 5/6/8, with object 7 on a separate protected
+  status/mode fault path. Object 13 is bounded to snapshot/DID/monitor consumers;
+  0..4/10/17..23 are monitor/event history, and 24 is the unrelated BA countdown.
 - **External validation boundary:** Lochuan's public README explicitly says Flash
   `PASS` does not prove RX SecOC bypass. Deleted-but-reachable history does record
   real hardware work: a failed read-only DCRA probe, a rejected 32-KiB

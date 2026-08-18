@@ -1511,6 +1511,50 @@ state machine to base state. Thus the global `31→10` edit can also perturb a
 real protected-status/mode workflow after failed persistence, but this remains
 separate from ICU-S MAC acceptance.
 
+#### Complete ordinary-object blast-radius census
+
+The shared completion worker covers 32 configured descriptor slots, so the
+analysis was extended beyond the initially interesting 0..24 range. The
+machine-readable disposition is `data/lochuan_patch_object_census.csv` and is
+cross-checked against `data/checkpoint_payload_map.csv` by
+`verify_lochuan_patch_semantics.py`.
+
+The exact enabled **patch-sensitive** set is:
+
+```text
+0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 13, 17, 18, 19, 20, 21, 23, 24
+```
+
+These objects have at least one recovered restore or transaction-status consumer
+that distinguishes stock failure class `0x31` from patched success class `0x10`.
+Objects 20/21/23 are selected indirectly by event-history group mapping
+`0 -> 20`, `3 -> 21`, `2 -> 23`, which is why they do not appear as literal
+object IDs at the generic restore call.
+
+The exact enabled **but patch-insensitive in the recovered object-specific
+surface** set is:
+
+```text
+9, 11, 12, 14, 15, 27
+```
+
+Objects 9/12/14/15 only special-case restore status `0x11`, so stock `0x31` and
+patched `0x10` take the same recovered branch. Object 11 has a writer but no
+recovered object-specific public-status/restore consumer. Object 27 is an
+enabled 72-byte configured orphan slot with no recovered object-specific writer,
+mirror reader, or status reader. Slots 16, 22, 25, 26, and 28..31 are disabled
+in this calibration.
+
+The functional roles keep the steering conclusion bounded. Objects 0..4/10 and
+17..23 are monitor/event counter/log/history state. Object 24 is the unrelated
+persistent BA countdown. Object 13's exact-success restore accepts a
+counter/accumulator pair into `FEBEB682/684`; the normal snapshot copies those to
+`FEBEE896/90C`, whose complete direct-reader set is the dual-incident snapshot
+persistence helper, DID `0x0102`, and monitor helper `0x5379C`—no recovered
+steering-command consumer. The uniquely steering-relevant recovered persistence
+family therefore remains objects **5/6/8**, with object 7 separately affecting
+the protected-`0x0D7` mode/fault workflow.
+
 The public steering-status audit places a useful bound on the object-6 mechanism.
 The five dynamic CAN `0x262` `LKA_STATE` producer functions
 `0xC8072/0xC8224/0xC8280/0xC8306/0xC8690` have no direct reads of

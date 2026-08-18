@@ -20,6 +20,7 @@ CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 CORPUS = REPO / "data" / "generated" / "decompilations.jsonl"
 CHECKPOINT_MAP = REPO / "data" / "checkpoint_payload_map.csv"
 NVM_RECORDS = REPO / "data" / "dataflash_nvm_records.csv"
+OBJECT_CENSUS = REPO / "data" / "lochuan_patch_object_census.csv"
 
 ok = bad = 0
 
@@ -390,7 +391,55 @@ check(
     CF[0x67C20:0x67C34].hex(),
 )
 
-print("\n== 20. checkpoint public status has no direct Gate-2 owner ==")
+print("\n== 20. all 32 ordinary descriptor slots have a patch-sensitivity disposition ==")
+with CHECKPOINT_MAP.open(newline="", encoding="utf-8") as stream:
+    descriptor_rows = {int(row["object_index"]): row for row in csv.DictReader(stream)}
+with OBJECT_CENSUS.open(newline="", encoding="utf-8") as stream:
+    census_rows = {int(row["object_index"]): row for row in csv.DictReader(stream)}
+check("checkpoint census covers exactly descriptor slots 0..31", set(census_rows) == set(range(32)))
+check("checkpoint descriptor map covers exactly slots 0..31", set(descriptor_rows) == set(range(32)))
+for obj in range(32):
+    check(
+        f"object {obj} census enabled bit matches descriptor",
+        census_rows[obj]["enabled"] == descriptor_rows[obj]["enabled"],
+    )
+sensitive = {obj for obj,row in census_rows.items() if row["patch_sensitive"] == "yes"}
+check(
+    "exact patch-sensitive enabled object set",
+    sensitive == {0,1,2,3,4,5,6,7,8,10,13,17,18,19,20,21,23,24},
+    repr(sorted(sensitive)),
+)
+unaffected_enabled = {obj for obj,row in census_rows.items() if row["enabled"] == "yes" and row["patch_sensitive"] == "no"}
+check(
+    "exact enabled-but-unaffected object set",
+    unaffected_enabled == {9,11,12,14,15,27},
+    repr(sorted(unaffected_enabled)),
+)
+# Event-history object IDs are selected indirectly; pin the mapping that explains
+# why 20/21/23 do not appear as literal restore arguments in the corpus.
+check(
+    "event-history selector maps groups to objects 20/21/23",
+    CF[0x53B76:0x53B8E] == bytes.fromhex("ff00aa0554526332ba05205615006232ba05205617007f00"),
+    CF[0x53B76:0x53B8E].hex(),
+)
+# Object 13's accepted state is snapshotted to FEBEE896/90C; their direct readers
+# are incident/DID/monitor helpers, not the steering-command C8xx/CAxx cone.
+obj13_snapshot_readers = set()
+with CORPUS.open(encoding="utf-8") as stream:
+    for line in stream:
+        row = json.loads(line)
+        if row.get("record") != "function":
+            continue
+        for ref in row.get("data_references", []):
+            if ref.get("ref_type") == "READ" and ref.get("to_addr", "").lower() in {"0xfebee896", "0xfebee90c"}:
+                obj13_snapshot_readers.add(int(row["entry_addr"], 16))
+check(
+    "object13 snapshot outputs have only incident/DID/monitor direct readers",
+    obj13_snapshot_readers == {0x4528C, 0x4CBFC, 0x5379C},
+    repr(sorted(hex(x) for x in obj13_snapshot_readers)),
+)
+
+print("\n== 21. checkpoint public status has no direct Gate-2 owner ==")
 refs: list[tuple[int, str, str, str]] = []
 with CORPUS.open(encoding="utf-8") as stream:
     for line in stream:
@@ -409,7 +458,7 @@ check(
     all(not (0x8E600 <= entry < 0x8E800) for entry, _name, _site, _kind in refs),
 )
 
-print("\n== 21. published target-sector pins are derivable from this offline image ==")
+print("\n== 22. published target-sector pins are derivable from this offline image ==")
 target_sector = CF[0x60000:0x68000]
 patched_target_sector = bytearray(target_sector)
 patched_target_sector[0x664E6 - 0x60000] = 0x10
@@ -425,7 +474,7 @@ check(
 )
 check("published original CRC fixup is literal source-image word", u32(0xFFDEC) == 0x0962887F, hex(u32(0xFFDEC)))
 
-print("\n== 22. real Gate-2 patch is independent ==")
+print("\n== 23. real Gate-2 patch is independent ==")
 check("real Gate-2 stock CMP remains e0d1 at 0x8E6C6", CF[0x8E6C6:0x8E6C8] == bytes.fromhex("e0d1"))
 check("real Gate-2 following mismatch BNE remains 9a0d", CF[0x8E6C8:0x8E6CA] == bytes.fromhex("9a0d"))
 check("Lochuan target and Gate-2 target are distinct", 0x664E6 != 0x8E6C6)

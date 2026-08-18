@@ -1,0 +1,33 @@
+object_index,enabled,patch_sensitive,status_mechanism,evidence_name,patch_specific_effect
+0,yes,yes,restore_exact_10+status_class,monitor_aggregate,failed write can be accepted by restore and transaction poller
+1,yes,yes,status_class_only,monitor_state_bank_0,restore treats 0x31 like 0x10 but transaction poller changes failure to success
+2,yes,yes,restore_exact_10+status_class,monitor_state_bank_1,failed write can be accepted by restore and transaction poller
+3,yes,yes,restore_exact_10+status_class,monitor_state_bank_2,failed write can be accepted by restore and transaction poller
+4,yes,yes,status_class_only,two_group_event_counters,restore treats 0x31 like 0x10 but poller changes failure outcome
+5,yes,yes,restore_exact_10+status_exact_10,two_channel_s16_sentinel_state,forged success preserves reference pair used by object-6 validators
+6,yes,yes,restore_exact_10+status_exact_10,multi_channel_u16_state,forged success trusts learned adaptation bank after failed persistence
+7,yes,yes,restore_exact_10,three_phase_mode_latch,forged success can retain persisted phase feeding protected-0x0D7 fault/mode workflow
+8,yes,yes,restore_exact_10,u32_value_with_validity,forged success trusts adaptation tuple feeding steering-learning partition
+9,yes,no,restore_11_special_only,runtime_condition_snapshot,stock 0x31 and patched 0x10 take same recovered restore branch
+10,yes,yes,status_class_only,event_counter_pair,restore treats 0x31 like 0x10 but transaction poller changes failure to success
+11,yes,no,no_recovered_object_specific_status_or_restore_consumer,two_channel_u16_state,writer recovered but no consumer of public status distinction
+12,yes,no,restore_11_special_only,dual_incident_snapshot,stock 0x31 and patched 0x10 take same recovered restore branch
+13,yes,yes,restore_exact_10,counter_and_accumulator,forged success accepts monitor counter/accumulator state; downstream recovered as snapshot/DID/monitor not steering command
+14,yes,no,restore_11_special_only,three_entry_condition_history,stock 0x31 and patched 0x10 take same recovered restore branch
+15,yes,no,restore_11_special_only,operating_state_snapshot,stock 0x31 and patched 0x10 take same recovered restore branch
+16,no,no,disabled,disabled,descriptor disabled in this calibration
+17,yes,yes,restore_exact_10+status_class,event_log_control,forged success accepts event-log control state and transaction result
+18,yes,yes,restore_exact_10+status_class,event_log_snapshot_bank_a,forged success accepts event-log bank and transaction result
+19,yes,yes,restore_exact_10+status_class,event_log_snapshot_bank_b,forged success accepts event-log bank and transaction result
+20,yes,yes,restore_exact_10+status_class,event_history_group_0,index-mapped restore/poller treats failed history write as success
+21,yes,yes,restore_exact_10+status_class,event_history_group_1,index-mapped restore/poller treats failed history write as success
+22,no,no,disabled,disabled,descriptor disabled in this calibration
+23,yes,yes,restore_exact_10+status_class,event_history_group_2,index-mapped restore/poller treats failed history write as success
+24,yes,yes,status_exact_10,persistent_countdown,proprietary operation completion sees failed persistence as success; BA path remains unrelated to Gate 2
+25,no,no,disabled,disabled,descriptor disabled in this calibration
+26,no,no,disabled,disabled,descriptor disabled in this calibration
+27,yes,no,configured_orphan_no_recovered_consumer,configured_orphan_slot,enabled descriptor but no static object-specific writer/status/restore consumer recovered
+28,no,no,disabled,disabled,descriptor disabled in this calibration
+29,no,no,disabled,disabled,descriptor disabled in this calibration
+30,no,no,disabled,disabled,descriptor disabled in this calibration
+31,no,no,disabled,disabled,descriptor disabled in this calibration
