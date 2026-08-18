@@ -1390,15 +1390,81 @@ real steering-command plausibility/adaptation model after a failed persistence
 operation. It does **not** prove a direct edge to the recovered d/q-current/PWM
 actuation cone, nor does it yet identify a single explicit LKAS-inhibit bit.
 
+Object 6 is not isolated. Objects **5, 6, and 8 are explicitly orchestrated as
+one persistence family**. `FUN_000B19D2` calls the object-5 writer, object-6
+writer, and object-8 writer in sequence. In high-level substate `0x701`,
+`FUN_000B1A0E` waits for event `0x27`, invokes that grouped commit, and advances
+to `0x702`; in the recovered system-mode coordinator this `0x700..0x702`
+sequence precedes the `0x800` final shutdown/reset sequence, so it is a
+save-before-final-shutdown lifecycle. A second same-boot persistence route exists
+inside `FUN_000B2C42`: while transition phase `0x11` satisfies its strict
+conditions, it commits objects 5, 6, and 13 after either zero or **100 foreground
+dispatcher ticks**, selected by the mirrored `FEBEB320` classifier
+`0x55AAAA55/0xAA5555AA`. The absolute wall-clock duration is not statically
+recovered.
+
+The data coupling matches the lifecycle coupling. Object 5 is an 8-byte,
+six-record checkpoint whose successful restore publishes the paired reference
+values around `FEBE7D70/FEBE7D78`; failure substitutes signed sentinel `0x7D00`.
+Six independently recovered object-6 validator functions read the object-5
+current/restored pairs `FEBE7D6E/70` and `FEBE7D76/78` and use their deltas to
+decide whether slices of the object-6 bank are accepted or replaced. A forged
+object-5 `0x10` can therefore alter the acceptance criteria for the larger
+object-6 learned bank. Object 8 is another exact-`0x10` restore: its persisted
+u32/u16/validity tuple is published to `FEBEAF04/FEBEAE0E/FEBEACEC`, then seeds
+`FEBEB830/834/836` in the same steering-learning/plausibility partition. The
+patch can consequently create a **coupled same-boot trust split** across multiple
+learned-state records after a real persistence failure, not merely preserve one
+object-6 word.
+
+The source ECU's captured DataFlash argues that this is an exceptional recovery
+path rather than a continuously active condition. All six physical checkpoint
+records for object 5 validate, all six for object 6 validate, and both records
+for object 8 validate; every generation/complement pair is internally valid and
+the generations show ordinary ring rotation. There is no evidence that the
+captured ECU was already operating in a persistent checkpoint-failure regime.
+For that ECU, the `0x664E6` edit normally remains dormant until a **new** ordinary
+NvM write failure occurs.
+
+Object 7 is patch-sensitive but belongs to a different workflow. Its exact-`0x10`
+restore can select persisted phase `0x11` and set `FEBEAF44`; that phase byte is
+read directly by `fd0d7_status_fault_monitor @ 0xB6396`, which monitors the
+protected `0x0D7` status path and can raise system-mode event `0x2D`. Event
+`0x2D` is consumed in system-mode substate `0x522` before returning the `0x500`
+state machine to base state. Thus the global `31→10` edit can also perturb a
+real protected-status/mode workflow after failed persistence, but this remains
+separate from ICU-S MAC acceptance.
+
+The public steering-status audit places a useful bound on the object-6 mechanism.
+The five dynamic CAN `0x262` `LKA_STATE` producer functions
+`0xC8072/0xC8224/0xC8280/0xC8306/0xC8690` have no direct reads of
+`FEBEB87E`, `FEBEBC88`, `FEBEBC9A`, `FEBEB754`, `FEBEC1B8`, or `FEBEC1D4`.
+CAN `0x351` is likewise produced from the separate `FEBEB5F8` debounce/fault
+family rather than directly from `FEBEB87E`. The object-6 path is therefore a
+real internal steering-model perturbation with **no recovered direct edge to the
+public `0x262`/`0x351` status producers**. A later indirect consequence is still
+possible, but the current static graph does not identify one explicit LKAS-off
+bit.
+
+Finally, the external repository does not contain the missing functional proof.
+Its public README repeatedly states that Flash-level `PASS` does **not** prove RX
+SecOC bypass and requires a later stationary openpilot/EPS compatibility test.
+The retained migration task report explicitly records: "No live ECU, vehicle,
+Panda, network, or other hardware operation was performed"; its verification was
+local deterministic tests, retained source inspection, and binary/manifest
+checks. Deleted/public history searched so far contains no report demonstrating
+invalid-MAC steering acceptance with the `0x664E6` edit. The surviving
+"bench-proven" language concerns the `0xFEBF0000` 4-KiB loader/FACI trigger and
+writer mechanics, not a causal bad-MAC acceptance result. Thus there is presently
+**no repository evidence that this byte ever functionally bypassed SecOC**.
+
 This is structurally capable of producing delayed or state-transition-dependent
-breakage. A 2026-08-17 community report relayed through yc says Lochuan described
-this patch as flaky. The static firmware now provides one concrete mechanism for
-such flakiness—object-6 learned state can be trusted after failed persistence and
-re-enter the steering model on a later mode transition—but it does **not** prove
-that object 6 was the failed object in the reported drive or that this path alone
-caused the eventual LKAS deactivation. A runtime trace of object ID/status plus
-Dem `0x93/0x94` and CAN `0x262` steering state around the drop remains the
-discriminator.
+breakage after a genuine persistence failure, and a 2026-08-17 community report
+relayed through yc says Lochuan described the patch as flaky. The firmware now
+explains several ways such flakiness could occur, but none supplies a MAC-bypass
+mechanism. Runtime object/status/Dem traces remain useful for reproducing the
+persistence pathology; a controlled MAC28 ablation remains the discriminator for
+SecOC acceptance.
 
 The BA authorization countdown was checked and rejected as the explanation.
 F7/`BAENA` does create a reset-persistent marker plus a 30-worker-invocation

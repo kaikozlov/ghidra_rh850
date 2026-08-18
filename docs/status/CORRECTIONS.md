@@ -1447,6 +1447,31 @@ the mistakes are not re-made.
   consequence, but not that object 6 failed in the reported drive or that the
   model reaches one explicit LKAS-inhibit bit. Runtime object/status + `0x262`
   capture remains required for that last causal attribution.
+- **Coupled persistence family:** objects 5/6/8 are explicitly committed together
+  by `FUN_000B19D2`. Object 5 supplies restored reference values used by multiple
+  object-6 acceptance validators, while object 8 seeds the same steering-learning
+  partition. The `0x700..0x702` high-level sequence commits 5/6/8 before the
+  recovered `0x800` final-shutdown sequence; a separate transition-phase worker
+  commits 5/6/13 after a static 0-or-100 foreground-tick dwell. This broadens the
+  fail-open blast radius without creating any MAC predicate.
+- **Captured-storage negative:** all six source-ECU checkpoint records for object
+  5, all six for object 6, and both records for object 8 are valid with valid
+  generation/complement pairs. The supplied ECU therefore does not show an
+  ongoing checkpoint-failure condition that would make `0x664E6` continuously
+  active; a new failed ordinary NvM write is required.
+- **Other patch-sensitive state:** object 7's exact-success restore feeds phase
+  byte `FEBEAF44`, which participates in protected-`0x0D7` fault monitoring and
+  system-mode event `0x2D`/substate `0x522`. This is a real mode/fault consequence
+  of forged checkpoint success, not an ICU-S acceptance path.
+- **Public-status bound:** none of the five dynamic `0x262 LKA_STATE` producer
+  functions directly reads the object-6-sensitive model state, and CAN `0x351`
+  comes from a separate debounce/fault family. No direct `object6 -> public
+  LKAS-off` edge is recovered.
+- **External validation boundary:** Lochuan's public README explicitly says Flash
+  `PASS` does not prove RX SecOC bypass; the retained migration report says no
+  live ECU, vehicle, Panda, network, or other hardware operation was performed.
+  Surviving history contains no functional invalid-MAC steering proof for
+  `0x664E6`; the bench-proven material is loader/FACI/writer mechanics.
 - **Rejected alternate explanation:** the F7/`BAENA` persistent authorization
   state does have a 30-worker-invocation countdown, but its marker is consumed
   only by the proprietary SID-`0xBA` operation gateway and has no recovered edge

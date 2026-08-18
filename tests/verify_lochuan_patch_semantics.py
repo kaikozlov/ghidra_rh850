@@ -8,6 +8,7 @@ the lower storage-failure latch and Dem reporting path remain intact.
 """
 from __future__ import annotations
 
+import csv
 import json
 import struct
 import sys
@@ -16,6 +17,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 CORPUS = REPO / "data" / "generated" / "decompilations.jsonl"
+CHECKPOINT_MAP = REPO / "data" / "checkpoint_payload_map.csv"
+NVM_RECORDS = REPO / "data" / "dataflash_nvm_records.csv"
 
 ok = bad = 0
 
@@ -177,7 +180,115 @@ check(
     CF[0xBF010:0xBF01C].hex(),
 )
 
-print("\n== 11. checkpoint public status has no direct Gate-2 owner ==")
+print("\n== 11. objects 5/6/8 are one persisted adaptation family ==")
+with CHECKPOINT_MAP.open(newline="", encoding="utf-8") as stream:
+    checkpoint_rows = {int(row["object_index"]): row for row in csv.DictReader(stream)}
+for obj, expected in {
+    5: (8, 6, 64, "0xFEBEF430"),
+    6: (56, 6, 70, "0xFEBEF4D0"),
+    8: (8, 2, 76, "0xFEBEF438"),
+}.items():
+    row = checkpoint_rows[obj]
+    actual = (int(row["data_length"]), int(row["ring_blocks"]), int(row["first_nvm_block"]), row["ram_mirror"])
+    check(f"object {obj} checkpoint geometry", actual == expected, repr(actual))
+check(
+    "B19D2 grouped commit calls object5, object6, then object8 writers",
+    CF[0xB19D6:0xB19E2] == bytes.fromhex("84ff72d584ff1ed580ff6895"),
+    CF[0xB19D6:0xB19E2].hex(),
+)
+check(
+    "0x701 lifecycle substate invokes grouped 5/6/8 commit then advances to 0x702",
+    CF[0xB1A52:0xB1A5E] == bytes.fromhex("bfff80ff20360207bfffd6e8"),
+    CF[0xB1A52:0xB1A5E].hex(),
+)
+check("transition persistence first dwell threshold is 0 ticks", u16(0xAEF28) == 0, str(u16(0xAEF28)))
+check("transition persistence alternate dwell threshold is 100 ticks", u16(0xAEF2E) == 100, str(u16(0xAEF2E)))
+check(
+    "transition-dwell commit calls object5, object6, and object13 writers",
+    CF[0xB2D34:0xB2D42] == bytes.fromhex("01d884ff12c284ffbec180ff868f"),
+    CF[0xB2D34:0xB2D42].hex(),
+)
+
+print("\n== 12. captured 5/6/8 DataFlash rings are healthy ==")
+with NVM_RECORDS.open(newline="", encoding="utf-8") as stream:
+    nvm_rows = list(csv.DictReader(stream))
+for obj, expected_count in ((5, 6), (6, 6), (8, 2)):
+    rows = [r for r in nvm_rows if r["owner_class"] == "checkpoint" and r["owner_index"] == str(obj)]
+    check(f"object {obj} has expected captured ring count", len(rows) == expected_count, str(len(rows)))
+    check(f"object {obj} captured records all validate", all(r["record_valid"] == "yes" for r in rows))
+    check(f"object {obj} generation/complement pairs all validate", all(r["checkpoint_counter_valid"] == "yes" for r in rows))
+
+print("\n== 13. object5 status controls object6 validation baseline ==")
+check("object5 restore requires exact public status 0x10", CF[0x477E6:0x477EC] == bytes.fromhex("0a06f0ff7980"))
+check("object5 restore failure substitutes signed sentinel 0x7D00", CF[0x47808:0x47810] == bytes.fromhex("200e007d01980092"))
+# The object-6 validators compare the restored object-5 baselines against their
+# current paired samples before accepting slices of the object-6 bank.
+validator_refs: dict[int, set[str]] = {}
+with CORPUS.open(encoding="utf-8") as stream:
+    for line in stream:
+        row = json.loads(line)
+        if row.get("record") != "function":
+            continue
+        entry = int(row["entry_addr"], 16)
+        if entry in {0x38848, 0x3910A, 0x393EC, 0x39D48, 0x3A4E6, 0x3AD34}:
+            validator_refs[entry] = {ref.get("to_addr", "").lower() for ref in row.get("data_references", [])}
+needed_baselines = {"0xfebe7d6e", "0xfebe7d70", "0xfebe7d76", "0xfebe7d78"}
+check(
+    "object6 validators read object5 current/restored reference pair",
+    any(needed_baselines <= refs for refs in validator_refs.values()),
+    repr({hex(k): sorted(v & needed_baselines) for k, v in validator_refs.items()}),
+)
+
+print("\n== 14. object8 is another exact-0x10 adaptation restore ==")
+check("object8 restore requires exact public status 0x10", CF[0xBAF00:0xBAF06] == bytes.fromhex("0a06f0ffca0d"))
+check(
+    "object8 success publishes persisted u32/u16/validity tuple",
+    CF[0xBAF08:0xBAF18] == bytes.fromhex("000d640f05f77208640f0ef66608440f"),
+    CF[0xBAF08:0xBAF18].hex(),
+)
+
+print("\n== 15. object7 is a separate protected-status phase workflow ==")
+check("object7 restore requires exact public status 0x10 for persisted phase", CF[0xB7E0C:0xB7E1C] == bytes.fromhex("0a06f0ff8a15830f01000106efffba0d"))
+# Firmware corpus proves object7 phase byte FEBEAF44 is read by the protected
+# 0x0D7 fault monitor, which raises event 0x2D; mode substate 0x522 consumes it.
+obj7_phase_read = event_2d_set = event_2d_consume = False
+with CORPUS.open(encoding="utf-8") as stream:
+    for line in stream:
+        row = json.loads(line)
+        if row.get("record") != "function":
+            continue
+        entry = int(row["entry_addr"], 16)
+        code = row.get("decompiled_c", "").lower()
+        refs_here = {ref.get("to_addr", "").lower() for ref in row.get("data_references", [])}
+        if entry == 0xB6396:
+            obj7_phase_read = "0xfebeaf44" in refs_here
+            event_2d_set = "system_mode_event_set(0x2d)" in code
+        if entry == 0xB1DAC:
+            event_2d_consume = "fun_000b03cc(0x2d)" in code and "0x522" in code
+check("0x0D7 fault monitor reads object7 phase byte", obj7_phase_read)
+check("0x0D7 fault monitor raises system event 0x2D", event_2d_set)
+check("mode-0x522 workflow consumes event 0x2D", event_2d_consume)
+
+print("\n== 16. object6-sensitive learner has no direct 0x262/0x351 status edge ==")
+sensitive = {"0xfebeb87e", "0xfebebc88", "0xfebebc9a", "0xfebeb754", "0xfebec1b8", "0xfebec1d4"}
+lka_producers = {0xC8072, 0xC8224, 0xC8280, 0xC8306, 0xC8690}
+lka_refs: dict[int, set[str]] = {}
+with CORPUS.open(encoding="utf-8") as stream:
+    for line in stream:
+        row = json.loads(line)
+        if row.get("record") != "function":
+            continue
+        entry = int(row["entry_addr"], 16)
+        if entry in lka_producers:
+            lka_refs[entry] = {ref.get("to_addr", "").lower() for ref in row.get("data_references", [])}
+check("all five dynamic 0x262 LKA producers are present", set(lka_refs) == lka_producers, repr(sorted(hex(x) for x in lka_refs)))
+check(
+    "none of the dynamic 0x262 LKA producers directly reads object6-sensitive model state",
+    all(not (refs & sensitive) for refs in lka_refs.values()),
+    repr({hex(k): sorted(v & sensitive) for k, v in lka_refs.items()}),
+)
+
+print("\n== 17. checkpoint public status has no direct Gate-2 owner ==")
 refs: list[tuple[int, str, str, str]] = []
 with CORPUS.open(encoding="utf-8") as stream:
     for line in stream:
@@ -196,7 +307,7 @@ check(
     all(not (0x8E600 <= entry < 0x8E800) for entry, _name, _site, _kind in refs),
 )
 
-print("\n== 12. real Gate-2 patch is independent ==")
+print("\n== 18. real Gate-2 patch is independent ==")
 check("real Gate-2 stock CMP remains e0d1 at 0x8E6C6", CF[0x8E6C6:0x8E6C8] == bytes.fromhex("e0d1"))
 check("real Gate-2 following mismatch BNE remains 9a0d", CF[0x8E6C8:0x8E6CA] == bytes.fromhex("9a0d"))
 check("Lochuan target and Gate-2 target are distinct", 0x664E6 != 0x8E6C6)
