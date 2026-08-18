@@ -901,6 +901,19 @@ tests = [
 ]
 paths = ["docs/security/secoc/application-chain.md", "firmware/"]
 
+[suite.lochuan_patch_semantics]
+tests = ["tests/verify_lochuan_patch_semantics.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_lochuan_patch_semantics.py",
+  "docs/security/secoc/application-chain.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "community/README.md",
+  "docs/tooling/community-patch-target-analysis.md",
+  "external-references.lock.json",
+]
+
 [suite.secoc_semantic_patch_resolver]
 tests = ["tests/verify_secoc_semantic_patch_resolver.py"]
 paths = [

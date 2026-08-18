@@ -6,6 +6,11 @@
       "directory": "RH850_P1m-E",
       "commit": "b8c6bcf6b84763a9c5288fc8fa6766ebfe66ce4a"
     },
+    "lochuan_b4512000_fw_patch": {
+      "url": "https://github.com/lochuan/8965B4512000-FW-PATCH.git",
+      "directory": "8965B4512000-FW-PATCH",
+      "commit": "e7c1f17d1090470b18f7f3315abd99b64e5e4619"
+    },
     "icanhack_secoc": {
       "url": "https://github.com/I-CAN-hack/secoc.git",
       "directory": "secoc",
@@ -43,6 +48,24 @@
       "path": "RH850_P1M-E_Firmware.bin",
       "size": 1081344,
       "sha256": "0bba74d0e443f9dd3da33e3a28c3511ec31e35e8303acef7e0117fbdc91d5a86"
+    },
+    {
+      "repository": "rh850_p1me_original",
+      "path": "RESEARCH_REPORT_EN.md",
+      "size": 42627,
+      "sha256": "9e9fb350a93610f938353a03d9b4d6fe87d3a974bf237f89c12b4e5c83b2e18d"
+    },
+    {
+      "repository": "lochuan_b4512000_fw_patch",
+      "path": "README.md",
+      "size": 62186,
+      "sha256": "2dbc74fc3663925329169ce51f214d35b259d8072255d9d77d762201e9fa5dad"
+    },
+    {
+      "repository": "lochuan_b4512000_fw_patch",
+      "path": "eps_patch/manifest.py",
+      "size": 7736,
+      "sha256": "dffb1cac2027634649203166ea3ead785b06e5b8d71ba7a83f7ca9a44b7c3158"
     },
     {
       "repository": "icanhack_secoc",

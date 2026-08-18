@@ -1405,3 +1405,40 @@ the mistakes are not re-made.
   `tests/verify_can_transport.py`;
   `tests/verify_exploit_predicate_semantics.py`;
   `tests/verify_secoc_command5_experiment.py`.
+
+### CORR-066 — Lochuan `0x664E6: 0x31→0x10` is checkpoint fail-open, not SecOC MAC acceptance
+
+- **External historical model:** the pinned `lochuan/RH850_P1m-E` report labels
+  `0x66374` as `secoc_mac_job_scheduler`, `0x674A8` as
+  `secoc_mac_generate_submit`, and checkpoint objects 5/6 as likely CAN
+  `0x131/0x2E4` MAC objects. The later pinned
+  `lochuan/8965B4512000-FW-PATCH` consequently treats `0x664E6: 31→10` as the
+  reviewed persistent control-flow target.
+- **Right:** `0x664E6` is only the immediate byte inside
+  `0x664E4 movea 0x31,r0,r28` in ordinary checkpoint completion worker
+  `FUN_00066446`. Stock status is already `0x10` on lower completion result
+  `0x5A`. On lower failure the worker changes the public object status to
+  `0x31` **and independently stores `0x5A` to `FEBF067C`**. Replacing only the
+  `0x31` byte with `0x10` therefore lies to the checkpoint consumer while
+  leaving the lower failure indication intact; it does not alter ICU-S command
+  7 or Gate-2 delivery.
+- **Fault consequence:** `FUN_000667DE` consumes/clears `FEBF067C/FEBF067D`,
+  and `FUN_000556DC` reports them as Dem `0x94/0x93`. Both event records map to
+  enabled DTC index 3, raw DTC record `46 d6 45 00 01 00 00 00` (failure type
+  `0x46`, identifier `0x45D6`). The public status array `FEBF0308[]` has no
+  direct reference from the `0x8E6xx` SecOC acceptance worker in the canonical
+  graph.
+- **Flakiness boundary:** continuing higher-level state after a failed
+  persistence operation while retaining the storage fault and possibly stale
+  NvM is structurally inconsistent and can explain delayed or
+  transition-dependent failures. A relayed 2026-08-17 community report says
+  Lochuan described the patch as flaky, but the exact object and eventual LKAS
+  inhibit chain remain unproved until runtime status/Dem traces are captured.
+- **Rejected alternate explanation:** the F7/`BAENA` persistent authorization
+  state does have a 30-worker-invocation countdown, but its marker is consumed
+  only by the proprietary SID-`0xBA` operation gateway and has no recovered edge
+  into SecOC Gate 2.
+- **Canonical:** [FINDINGS.md](FINDINGS.md) SECOC-050;
+  [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.7;
+  `tests/verify_lochuan_patch_semantics.py`;
+  `external-references.lock.json`.

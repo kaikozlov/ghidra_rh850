@@ -1253,6 +1253,109 @@ The RAV4 Prime report also does not replace the controlled MAC28 experiment
 below: forcing the old profile substitutes a broader message set, while the
 three-phase harness holds camera traffic constant and changes only MAC28.
 
+### 9.7 YC compare-neutralization versus Lochuan/3b1b `0x664E6` patch
+
+The corrected yc patch and the patch published by Lochuan/3b1b must not be
+classified as alternate encodings of the same SecOC decision. They modify
+independent subsystems.
+
+The relevant external sources are pinned beside the yc/community provenance in
+[`external-references.lock.json`](../../../external-references.lock.json):
+
+- `lochuan/8965B4512000-FW-PATCH @ e7c1f17d1090470b18f7f3315abd99b64e5e4619`,
+  whose `eps_patch/manifest.py` fixes `patch_address=0x664E6` and changes
+  `20 e6 31 00` to `20 e6 10 00`;
+- `lochuan/RH850_P1m-E @ b8c6bcf6b84763a9c5288fc8fa6766ebfe66ce4a`,
+  whose `RESEARCH_REPORT_EN.md` labels `0x66374` as
+  `secoc_mac_job_scheduler`, `0x674A8` as `secoc_mac_generate_submit`, and maps
+  checkpoint objects 5/6 to likely CAN `0x131/0x2E4` MAC objects.
+
+Those historical labels explain why `0x664E6` looked like a plausible SecOC
+patch, but the current firmware reconstruction disproves that ownership. The
+cited `0x66374`/`0x674A8` cone is ordinary checkpoint/NvM machinery; in
+particular, `0x674A8` builds redundant persistence records and reaches NvM write
+submission, not ICU-S MAC generation.
+
+The exact `0x664E6` instruction is the immediate byte inside
+`0x664E4: movea 0x31,r0,r28` in `FUN_00066446`. That function is an ordinary
+checkpoint completion worker. In its `state == 0x33` completion arm it already
+starts from success status `0x10`; only when the lower completion result is not
+`0x5A` does it execute:
+
+```text
+0x664E0  movea 0x5A,r0,r1
+0x664E4  movea 0x31,r0,r28   ; checkpoint failure status
+0x664E8  st.b  r1,0x4E7C,gp ; FEBF067C = 0x5A, lower-layer error latch
+...
+0x664FC  st.b  r28,0x4B08+r29 ; FEBF0308[object] = public object status
+```
+
+Lochuan's one-byte `0x31 -> 0x10` edit therefore changes only the status exposed
+to the waiting checkpoint consumer. The real failure path still sets
+`FEBF067C=0x5A`. If the underlying write succeeds, stock firmware already
+publishes `0x10`, so the patch has no effect at all. If it fails, the patched ECU
+simultaneously reports success upward while retaining the lower-layer failure
+latch and potentially stale persistent state.
+
+That lower-layer failure is not silent. `FUN_000667DE` consumes and clears
+`FEBF067C/FEBF067D`; cyclic monitor `FUN_000556DC` publishes ordinary Dem event
+`0x94` for the `067C` latch and `0x93` for `067D`. Both events map through the
+configured event table to enabled DTC-table index 3, whose raw record is failure
+type `0x46`, DTC identifier `0x45D6`, enabled `1`. The patch therefore creates a
+split-brain condition rather than suppressing the underlying storage fault:
+
+```text
+                 actual checkpoint/NvM completion
+                         /             \
+                    success           failure
+                       |                 |
+                 status 0x10       stock status 0x31
+                                         |
+                              Lochuan patch -> 0x10
+                                         |
+                                  consumer proceeds
+                                         |
+                     FEBF067C/067D failure latch remains
+                                         |
+                           Dem 0x94/0x93 + stale-NvM risk
+```
+
+This is structurally capable of producing delayed or state-transition-dependent
+breakage: a higher-level state machine can continue using current RAM state even
+though the persistence transaction it waited for failed, while diagnostics and
+later restore/reload paths still observe the failure/stale storage. A
+2026-08-17 community report relayed through yc says Lochuan described this patch
+as flaky. The static firmware explains why such flakiness is plausible, but it
+does **not** yet prove which specific failed object, DTC policy, or later
+transition caused a reported LKAS deactivation. That causal chain requires a
+runtime trace of object ID/status plus Dem `0x93/0x94` around the drop.
+
+The BA authorization countdown was checked and rejected as the explanation.
+F7/`BAENA` does create a reset-persistent marker plus a 30-worker-invocation
+countdown, but the marker is consumed by the proprietary SID-`0xBA` operation
+gateway and has no recovered edge into Gate-2 SecOC acceptance.
+
+Finally, the canonical direct-reference graph for `FEBF0308[]` contains only the
+checkpoint subsystem (`0x6622A..0x668EE`); no direct reference comes from the
+`0x8E6xx` receive-acceptance worker. Thus `0x664E6` is **not itself a bad-MAC
+acceptance bypass**. If a field setup accepts bad-MAC steering frames with only
+that patch, some additional runtime condition or experiment change must explain
+the SecOC effect.
+
+| Property | yc corrected patch | Lochuan/3b1b patch |
+|---|---|---|
+| Address | `0x8E6C6` | `0x664E6` (immediate byte of instruction at `0x664E4`) |
+| Edit | `cmp r0,r26 -> cmp r0,r0` | checkpoint status immediate `0x31 -> 0x10` |
+| Layer | SecOC Gate-2 post-command-7 acceptance | generic ordinary checkpoint/NvM completion |
+| Bad MAC effect | mismatch BNE becomes impossible; PDU takes verified-delivery arm | no recovered direct Gate-2 edge |
+| Lower-layer truth preserved | yes; real verify boolean still reaches pre-gate bookkeeping | no; consumer sees success while failure latch remains set |
+| Scope | one receive-acceptance predicate | every ordinary checkpoint completion using this failure arm |
+| Stability expectation | narrow semantic bypass | inconsistent state / delayed-failure risk |
+
+The distinction is pinned by `tests/verify_lochuan_patch_semantics.py`; the
+external repositories are provenance evidence only and are checked separately by
+`make verify-external`.
+
 ## References
 
 - AUTOSAR, *Specification of Secure Hardware Extensions*, §4.9 memory update

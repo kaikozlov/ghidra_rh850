@@ -139,6 +139,29 @@ def main() -> int:
         "the relay ends up on bus 1 instead of bus 0/2" in optskug_readme.lower(),
     )
 
+    print("\n== Lochuan historical/persistent-patch provenance ==")
+    lochuan_report = (roots["rh850_p1me_original"] / "RESEARCH_REPORT_EN.md").read_text(encoding="utf-8")
+    lochuan_manifest = (roots["lochuan_b4512000_fw_patch"] / "eps_patch/manifest.py").read_text(encoding="utf-8")
+    check(
+        "Lochuan historical report labels 0x66374 as SecOC MAC scheduler",
+        "secoc_mac_job_scheduler @ 0x66374" in lochuan_report,
+    )
+    check(
+        "Lochuan historical report labels 0x674A8 as SecOC MAC generate submit",
+        "secoc_mac_generate_submit(obj) @ 0x674A8" in lochuan_report,
+    )
+    check(
+        "Lochuan historical report maps objects 5/6 to likely 0x131/0x2E4",
+        "| 5 | 8 | 6 | 64 | `FEBEF430`" in lochuan_report
+        and "| 6 | 56 | 6 | 70 | `FEBEF4D0`" in lochuan_report,
+    )
+    check(
+        "Lochuan patch manifest pins 0x664E6 and 0x31->0x10 instruction byte",
+        "patch_address=0x664E6" in lochuan_manifest
+        and 'original_instruction=bytes.fromhex("20 e6 31 00")' in lochuan_manifest
+        and 'patched_instruction=bytes.fromhex("20 e6 10 00")' in lochuan_manifest,
+    )
+
     print("\n== original combined image reconstruction ==")
     combined = roots["rh850_p1me_original"] / "RH850_P1M-E_Firmware.bin"
     split = (

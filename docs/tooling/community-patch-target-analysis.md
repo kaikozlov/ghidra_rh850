@@ -28,6 +28,17 @@ mov 1, r10
 jmp [lp]
 ```
 
+This blurbdust/yc egg-based patch is also distinct from the separately published
+Lochuan/3b1b `8965B4512000-FW-PATCH` repository. That repository is pinned as
+`lochuan_b4512000_fw_patch` in
+[`external-references.lock.json`](../../external-references.lock.json) at
+`e7c1f17d1090470b18f7f3315abd99b64e5e4619` and fixes a different target,
+`0x664E6: 0x31→0x10`. Firmware analysis now closes that byte as an ordinary
+checkpoint/NvM failure-status fail-open, not a second SecOC Gate-2 encoding. The
+full yc-versus-Lochuan comparison, including why the older Lochuan analysis
+selected that byte and why it can be flaky, is canonical in
+[the SecOC application chain §9.7](../security/secoc/application-chain.md#97-yc-compare-neutralization-versus-lochuan3b1b-0x664e6-patch).
+
 The crucial research rule is that the egg identifies a **location candidate**,
 not a semantic function. `8965B4512000` already proves why: the marker occurs
 exactly once at `0x3485A`; the containing function is the shared 5-byte token

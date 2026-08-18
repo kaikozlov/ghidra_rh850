@@ -68,6 +68,15 @@ CodeFlash/CRC mechanism, and the `4512000` dump anomaly; the `4512000` egg targe
 SID-`0xBA` token-comparison logic rather than SecOC acceptance logic. Future
 F3/F4 egg matches still require calibration-specific semantic validation.
 
+For comparison with yc's corrected Gate-2 patch, the independently published
+Lochuan/3b1b `8965B4512000-FW-PATCH` repository is now pinned in
+`../external-references.lock.json`. Its `0x664E6: 0x31→0x10` target is a generic
+checkpoint/NvM failure-status fail-open, not another Gate-2 encoding; see
+[`docs/security/secoc/application-chain.md` §9.7](../docs/security/secoc/application-chain.md#97-yc-compare-neutralization-versus-lochuan3b1b-0x664e6-patch).
+The older pinned `lochuan/RH850_P1m-E` report is retained alongside it because
+its historical misidentification of the checkpoint cone as SecOC MAC scheduling
+explains how that target was selected.
+
 ## `albinoelephant/`
 
 **Contributor:** albinoelephant, comma Discord, 2026-08-12
