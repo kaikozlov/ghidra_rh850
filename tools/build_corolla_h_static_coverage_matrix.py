@@ -149,6 +149,28 @@ def main() -> None:
                 "role": item["role"],
             }
 
+    can_com_path = REPO / "data/generated/corolla_8965H1202000_can_com.json"
+    if can_com_path.is_file():
+        can_com = load_json(can_com_path)
+        can_com_rel = str(can_com_path.relative_to(REPO))
+        evidence_file_hashes[can_com_rel] = sha256(can_com_path.read_bytes())
+        can_ev_path = REPO / can_com["evidence"]["decompiler_evidence"]
+        can_ev = load_json(can_ev_path)
+        can_targets = {int(r["entry"], 16) for r in can_ev.get("functions", [])}
+        for item in can_com.get("can_com_role_closure", []):
+            ref = int(item["reference_entry"], 16)
+            target = int(item["target_entry"], 16)
+            if target not in can_targets:
+                raise ValueError(f"CAN/COM role target lacks tracked target-native evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["target_entry"],
+                "report": can_com_rel,
+                "evidence": can_com["evidence"]["decompiler_evidence"],
+                "role": item["reference_name"],
+            }
+
     # Explicit generated-surface recensuses. These are not function homology:
     # they prove the foreign generated surface was exhaustively re-enumerated.
     recensus: dict[int, set[str]] = defaultdict(set)

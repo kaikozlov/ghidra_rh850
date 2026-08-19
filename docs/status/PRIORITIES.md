@@ -233,9 +233,11 @@ mapped CPU command-7 path, while authenticated command 8 is the recovered refres
 interface. The remaining H-static work should therefore be driven by the named
 coverage denominator. The first large residue is now closed: all eight changed
 `scheduler_system` roles are target-native mapped, reducing the global genuinely
-unresolved denominator from 462 to **454**. Continue from that explicit residue,
-prioritizing externally reachable semantics and changed COM/storage/security
-plumbing rather than repeating the closed system-orchestration pass;
+unresolved denominator from 462 to 454. The nine changed CAN/COM transport roles
+are now also target-native closed, reducing the residue again to **445** and
+leaving zero genuinely-unresolved functions under both `scheduler_system` and
+`can_com`. Continue from that explicit residue, prioritizing storage/security and
+other externally reachable semantics rather than repeating those closed passes;
 generic XCP DAQ callbacks remain optional unless a concrete exploit question
 needs them.
 

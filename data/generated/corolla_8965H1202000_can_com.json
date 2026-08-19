@@ -1,0 +1,292 @@
+{
+  "can_com_role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x0005D3CE",
+      "reference_metrics": {
+        "body_size": 1078,
+        "fun_call_count": 184,
+        "if_count": 29,
+        "loop_count": 0
+      },
+      "reference_name": "autosar_com_rx_dispatch_group_b",
+      "target_entry": "0x00058450",
+      "target_metrics": {
+        "body_size": 1050,
+        "fun_call_count": 200,
+        "if_count": 29,
+        "loop_count": 0
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x0005DB6E",
+      "reference_metrics": {
+        "body_size": 2136,
+        "fun_call_count": 370,
+        "if_count": 97,
+        "loop_count": 0
+      },
+      "reference_name": "autosar_com_rx_dispatch_group_a",
+      "target_entry": "0x00058BBC",
+      "target_metrics": {
+        "body_size": 2060,
+        "fun_call_count": 360,
+        "if_count": 96,
+        "loop_count": 0
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00069DEC",
+      "reference_metrics": {
+        "body_size": 1182,
+        "fun_call_count": 0,
+        "if_count": 88,
+        "loop_count": 0
+      },
+      "reference_name": "com_signal_deadline_monitor_c",
+      "target_entry": "0x0006418C",
+      "target_metrics": {
+        "body_size": 1182,
+        "fun_call_count": 1,
+        "if_count": 88,
+        "loop_count": 0
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x0007C640",
+      "reference_metrics": {
+        "body_size": 212,
+        "fun_call_count": 7,
+        "if_count": 5,
+        "loop_count": 1
+      },
+      "reference_name": "application_com_rx_indication",
+      "target_entry": "0x00076A3C",
+      "target_metrics": {
+        "body_size": 212,
+        "fun_call_count": 9,
+        "if_count": 5,
+        "loop_count": 1
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x0007E30C",
+      "reference_metrics": {
+        "body_size": 76,
+        "fun_call_count": 2,
+        "if_count": 0,
+        "loop_count": 0
+      },
+      "reference_name": "application_pdur_tx_confirmation_router",
+      "target_entry": "0x00078708",
+      "target_metrics": {
+        "body_size": 76,
+        "fun_call_count": 3,
+        "if_count": 0,
+        "loop_count": 0
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x0007E5F2",
+      "reference_metrics": {
+        "body_size": 124,
+        "fun_call_count": 0,
+        "if_count": 7,
+        "loop_count": 0
+      },
+      "reference_name": "application_canif_get_tx_can_id",
+      "target_entry": "0x000789EE",
+      "target_metrics": {
+        "body_size": 124,
+        "fun_call_count": 1,
+        "if_count": 7,
+        "loop_count": 0
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x0007F002",
+      "reference_metrics": {
+        "body_size": 110,
+        "fun_call_count": 1,
+        "if_count": 1,
+        "loop_count": 0
+      },
+      "reference_name": "application_canif_tx_confirmation",
+      "target_entry": "0x000793FE",
+      "target_metrics": {
+        "body_size": 110,
+        "fun_call_count": 2,
+        "if_count": 1,
+        "loop_count": 0
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00080992",
+      "reference_metrics": {
+        "body_size": 26,
+        "fun_call_count": 0,
+        "if_count": 0,
+        "loop_count": 0
+      },
+      "reference_name": "application_pdur_com_transmit",
+      "target_entry": "0x0007AD8E",
+      "target_metrics": {
+        "body_size": 26,
+        "fun_call_count": 1,
+        "if_count": 0,
+        "loop_count": 0
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00084710",
+      "reference_metrics": {
+        "body_size": 62,
+        "fun_call_count": 4,
+        "if_count": 2,
+        "loop_count": 0
+      },
+      "reference_name": "application_rscfd_tx_confirmation_dispatch",
+      "target_entry": "0x0007EB10",
+      "target_metrics": {
+        "body_size": 62,
+        "fun_call_count": 5,
+        "if_count": 2,
+        "loop_count": 0
+      }
+    }
+  ],
+  "can_com_role_closure_count": 9,
+  "configuration_pointer_proofs": [
+    {
+      "h_pointer_at": "0x0002192C",
+      "h_target": "0x00078708",
+      "role": "pdur_tx_confirmation",
+      "sienna_pointer_at": "0x00021980",
+      "sienna_target": "0x0007E30C"
+    },
+    {
+      "h_pointer_at": "0x00021E68",
+      "h_target": "0x000789EE",
+      "role": "canif_get_tx_can_id",
+      "sienna_pointer_at": "0x00021EDC",
+      "sienna_target": "0x0007E5F2"
+    },
+    {
+      "h_pointer_at": "0x00021E5C",
+      "h_target": "0x000793FE",
+      "role": "canif_tx_confirmation",
+      "sienna_pointer_at": "0x00021ED0",
+      "sienna_target": "0x0007F002"
+    },
+    {
+      "h_pointer_at": "0x00021DB4",
+      "h_target": "0x00076A3C",
+      "role": "com_rx_indication",
+      "sienna_pointer_at": "0x00021E28",
+      "sienna_target": "0x0007C640"
+    },
+    {
+      "h_pointer_at": "0x00021C70",
+      "h_target": "0x0007ADC2",
+      "role": "pdu_transmit_router",
+      "sienna_pointer_at": "0x00021CE4",
+      "sienna_target": "0x000809C6"
+    },
+    {
+      "h_pointer_at": "0x00021C90",
+      "h_target": "0x0007B040",
+      "role": "pdu_rx_router",
+      "sienna_pointer_at": "0x00021D04",
+      "sienna_target": "0x00080C44"
+    }
+  ],
+  "deadline_monitor_c": {
+    "active_h_caller": "0x0003E118",
+    "active_h_caller_invokes_6418c": true,
+    "boundary": "body identity alone is ambiguous; active role is bound by target-native caller census",
+    "exact_body_equal": true,
+    "h": "0x0006418C",
+    "h_exact_body_occurrences": [
+      "0x0006418C",
+      "0x000CF27E"
+    ],
+    "sienna": "0x00069DEC"
+  },
+  "evidence": {
+    "canonical_corpus": "data/generated/decompilations.jsonl",
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "rx_dispatch_groups": {
+    "boundary": "same generated mode-dispatch roles; changed PDU/unpacker populations remain target-specific",
+    "group_a": {
+      "guard_diff": [
+        {
+          "h": [],
+          "h_range": [
+            60,
+            60
+          ],
+          "opcode": "delete",
+          "sienna": [
+            "if (uVar != 0) {"
+          ],
+          "sienna_range": [
+            60,
+            61
+          ]
+        }
+      ],
+      "h": "0x00058BBC",
+      "h_guard_count": 96,
+      "sienna": "0x0005DB6E",
+      "sienna_guard_count": 97
+    },
+    "group_b": {
+      "guard_diff": [],
+      "h": "0x00058450",
+      "h_guard_count": 29,
+      "sienna": "0x0005D3CE",
+      "sienna_guard_count": 29
+    }
+  },
+  "schema": "corolla-h-can-com-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "boundary": "roles/configured callbacks are recovered; individual PDU membership remains owned by the separate exact H COM topology report",
+    "can_com_residue_closed": true,
+    "role_count": 9,
+    "transport_configuration_regenerated": true
+  },
+  "supporting_route_chain": {
+    "h_com_rx_config_target": "0x21DB4 -> 0x76A3C",
+    "h_normal_rx_terminal_call": "FUN_0007b026 -> pointer 0x21C90 -> 0x7B040",
+    "normal_rx_demux": {
+      "h": "0x0007A402",
+      "sienna": "0x00080006"
+    },
+    "pdu_rx_router": {
+      "h": "0x0007B040",
+      "sienna": "0x00080C44"
+    },
+    "pdu_transmit_router": {
+      "h": "0x0007ADC2",
+      "sienna": "0x000809C6"
+    },
+    "special_rx_demux": {
+      "h": "0x0007A382",
+      "sienna": "0x0007FF86"
+    }
+  }
+}

@@ -313,8 +313,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   descriptor and authenticated command 8 as the recovered refresh interface.
   The eight changed high-level `scheduler_system` roles are also now target-native
   recovered (mode-event policy, per-tick wiring, startup/init, reset continuation),
-  reducing the genuinely-unresolved matrix residue to 454. Remaining H-static work
-  is the explicit residue outside that closed orchestration surface; generic DAQ/XCP
+  reducing the genuinely-unresolved matrix residue to 454. The nine changed CAN/COM
+  roles are now also target-native recovered, making the current residue **445**
+  with zero unresolved `scheduler_system` or `can_com` entries. Remaining H-static
+  work is the explicit residue outside those closed surfaces; generic DAQ/XCP
   callbacks remain optional unless an exploit hypothesis needs them. If revisited
   dynamically, record
   direct F181 plus full-bus and Panda health on both normal-CAN1 and OBD routes

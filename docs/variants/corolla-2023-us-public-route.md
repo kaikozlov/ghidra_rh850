@@ -1470,11 +1470,11 @@ promotion:
 ```text
 named canonical functions                 1113
 verified exact-body transfers              288
-target-native inspected unique-shape       23
-target-native role-recovered                  8
+target-native inspected unique-shape       25
+target-native role-recovered                 17
 complete target-surface recensuses          227
-structural candidates only                  113
-genuinely unresolved                        454
+structural candidates only                  111
+genuinely unresolved                        445
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1495,7 +1495,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(337 currently have
+(350 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -1566,6 +1566,57 @@ image-bound decompiler evidence file;
 `tests/verify_corolla_8965H1202000_system_orchestration.py` pins the eight role
 mappings, event schedules, guard delta, reset windows, wrapper chains, and
 regenerated COM/RTE boundary.
+
+### 7.17 CAN / COM transport and generated receive dispatch
+
+The remaining nine named `can_com` transfer gaps are now target-native recovered.
+The two large generated receive groups retain their high-level state schedules:
+Sienna group B `5D3CE` maps to H `58450` with an exact **29/29** normalized guard
+sequence, while group A `5DB6E` maps to H `58BBC` at 2136→2060 bytes and 97→96
+guards. After normalizing local variable and branch-label names, group A differs
+by one deleted nested `if (uVar != 0)` guard; the PDU/unpacker population around
+those guards is target-specific and remains owned by the exact COM-topology/FD
+reports rather than inferred from function similarity.
+
+The low-level transport roles are stronger because the generated configuration
+tables point directly at them:
+
+```text
+role                         Sienna config/target       H config/target
+PduR Tx confirmation         21980 -> 7E30C            2192C -> 78708
+CanIf get Tx CAN ID          21EDC -> 7E5F2            21E68 -> 789EE
+CanIf Tx confirmation        21ED0 -> 7F002            21E5C -> 793FE
+COM RxIndication             21E28 -> 7C640            21DB4 -> 76A3C
+PduR transmit router         21CE4 -> 809C6            21C70 -> 7ADC2
+PduR receive router          21D04 -> 80C44            21C90 -> 7B040
+```
+
+That table join corrects an earlier triage-only navigation hit: H COM
+`RxIndication` is **`0x76A3C`**, not the nearby copy fragment around `0x769E0`.
+H `76A3C` preserves the complete 212-byte generated behavior: optional filter
+bit `0x10`, secondary gate bit `0x08`, bounded frame copy, state-byte clear with
+`& 0xDC`, and timeout refresh when flag `0x04` is set. H normal receive demux
+`7A402` terminates through `7B026 -> [21C90] 7B040`; transmit adapter `7AD8E`
+uses `[21C70] 7ADC2`. CanIf Tx-ID lookup `789EE` and confirmation `793FE` retain
+the same six route classes (`0000/6000/0800/B800/C000/F800`). Hardware Tx
+completion is joined by `7EB4E -> 7EB10`.
+
+`com_signal_deadline_monitor_c` is a useful ambiguity case. Its 1182-byte body is
+byte-identical at H `6418C`, but the same body also exists at H `CF27E`; exact
+identity alone therefore cannot choose the live role. Target-native monitor
+caller `3E118 -> 6418C` disambiguates the active COM deadline-monitor instance,
+so the coverage promotion is use-site backed rather than duplicate-body guessed.
+
+Machine-readable ownership is
+`data/generated/corolla_8965H1202000_can_com.json` plus compact target-native
+decompiler evidence. `tests/verify_corolla_8965H1202000_can_com.py` pins all nine
+role mappings, both receive-group guard schedules, the duplicate deadline-body
+boundary, raw configuration-pointer joins, COM Rx behavior, and the normal
+Rx/PduR/CanIf confirmation chains. The `can_com` tag now has **zero genuinely
+unresolved functions**. Incorporating this evidence also promotes two structural
+candidates to inspected unique-shape status, giving a global denominator of
+**445 genuinely unresolved**, 25 inspected unique-shape, 17 role-recovered, and
+111 structural-only canonical functions.
 
 ## 8. Remaining evidence boundary
 
