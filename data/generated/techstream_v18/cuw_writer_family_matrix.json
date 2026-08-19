@@ -1,0 +1,3726 @@
+{
+  "distribution": "Toyota Techstream V18.00.003",
+  "evidence_boundary": {
+    "exact_recovered_commands": "recovered: only previously byte/decompilation-pinned standard/unified builders are promoted here",
+    "imports": "structural: imported helper/getter names prove dependencies, not exact on-wire requests",
+    "target_disposition": "bounded unless exact target firmware rejects/implements the corresponding grammar"
+  },
+  "route_stats": {
+    "encoded_ini_files_decoded": 201,
+    "factory_rows": 196
+  },
+  "schema_version": 1,
+  "source": "external-source",
+  "writer_stats": {
+    "distinct_referenced_writers": 47,
+    "flash_writers": 25,
+    "missing_referenced_writers": [],
+    "prepare_writers": 22,
+    "present_referenced_writers": 47,
+    "protocol_tag_counts": {
+      "calibration-auth-pair": 4,
+      "calibration-nonce": 6,
+      "calibration-offset": 2,
+      "calibration-seed-key": 6,
+      "common-flash-protocol": 15,
+      "common-prepare-protocol": 14,
+      "ethernet": 2,
+      "flash": 25,
+      "nonce-seed-material-transfer": 4,
+      "p5-can-diagnostic-transport": 15,
+      "prepare": 22,
+      "repro-standard": 4,
+      "security-named": 7,
+      "security-up-aes-wrapper": 3,
+      "seed-key": 12,
+      "unified": 3,
+      "vforest": 2
+    }
+  },
+  "writers": [
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter",
+          "WriteMsgs"
+        ],
+        "parameter": [
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 8384
+        }
+      ],
+      "factory_identifiers": [
+        "105P4-CAN & P5-CAN268",
+        "106P5-CAN269"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanHINOFlashWriter.dll",
+      "parameter_files": [
+        "105P4-CAN & P5-CAN268.ini",
+        "106P5-CAN269.ini"
+      ],
+      "protocol_tags": [
+        "flash",
+        "p5-can-diagnostic-transport"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 2,
+      "sha256": "3aef2663ab746e1e18f940728779aaf71ba8908adf09846d4d12dfe762b118a8",
+      "size": 14848,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 6720
+        },
+        {
+          "name": "PrepareRetry",
+          "rva": 7104
+        }
+      ],
+      "factory_identifiers": [
+        "151CAN313"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanHINOFlashWriterForDSS.dll",
+      "parameter_files": [
+        "151CAN313.ini"
+      ],
+      "protocol_tags": [
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 1,
+      "sha256": "e529260eeaca9b585d1485f0635827de104dee21a14de86eb80eb853176616df",
+      "size": 13312,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 7104
+        }
+      ],
+      "factory_identifiers": [
+        "150CAN312"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanHINOFlashWriterForVCS.dll",
+      "parameter_files": [
+        "150CAN312.ini"
+      ],
+      "protocol_tags": [
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 1,
+      "sha256": "2d6fc05a46cacd41a0aa7f01d0a4caa55dc3806a9f2ed65c1c8c273fadff7164",
+      "size": 13312,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetKindOfECU"
+      ],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can",
+          "SetBStoECU"
+        ],
+        "j2534": [
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter",
+          "WriteMsgs"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 6768
+        }
+      ],
+      "factory_identifiers": [
+        "105P4-CAN & P5-CAN268",
+        "106P5-CAN269"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanHINOPrepareWriter.dll",
+      "parameter_files": [
+        "105P4-CAN & P5-CAN268.ini",
+        "106P5-CAN269.ini"
+      ],
+      "protocol_tags": [
+        "p5-can-diagnostic-transport",
+        "prepare"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 2,
+      "sha256": "200cdf52f2005339301355aaca64f97049cb22007568ec951c3634ac6b0a7888",
+      "size": 12288,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 4576
+        }
+      ],
+      "factory_identifiers": [
+        "151CAN313"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanHINOPrepareWriterForDSS.dll",
+      "parameter_files": [
+        "151CAN313.ini"
+      ],
+      "protocol_tags": [
+        "prepare"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 1,
+      "sha256": "87a618c00436291a959f90a6472ab9d46c59018d81a97dc0a05f69f167123fcc",
+      "size": 8192,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 5984
+        }
+      ],
+      "factory_identifiers": [
+        "150CAN312"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanHINOPrepareWriterForVCS.dll",
+      "parameter_files": [
+        "150CAN312.ini"
+      ],
+      "protocol_tags": [
+        "prepare"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 1,
+      "sha256": "46b95a2bedbe14a3fb4064cda612178cbebe22890b39dd079819a90c887bb22d",
+      "size": 11776,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetCPUType",
+        "GetLocationID",
+        "GetNumCPUImages"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "ChangeNextCpu",
+          "CheckIDWithWaitOfSFs",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "GetBlockInfo",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "ReadSpecifiedCanMsg",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter",
+          "WriteMsgs"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong",
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 12896
+        },
+        {
+          "name": "PrepareRetry",
+          "rva": 13056
+        }
+      ],
+      "factory_identifiers": [
+        "0CAN190",
+        "0CAN90",
+        "10P5-CAN148",
+        "153CAN90",
+        "1P5-CAN227",
+        "6CAN90"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanM16CFlashWriter.dll",
+      "parameter_files": [
+        "0CAN190.ini",
+        "0CAN90.ini",
+        "10P5-CAN148.ini",
+        "153CAN90.ini",
+        "1P5-CAN227.ini",
+        "6CAN90.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 6,
+      "sha256": "6358f8230cd89299ed4eac3063d6fd2b219a761dddba543589e9bda898cc08a5",
+      "size": 25600,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter",
+          "StopSyncPeriodicMsg",
+          "WriteMsgs"
+        ],
+        "parameter": [
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 8112
+        }
+      ],
+      "factory_identifiers": [
+        "65CAN165",
+        "66CAN166"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanMMCFlashWriter.dll",
+      "parameter_files": [
+        "65CAN165.ini",
+        "66CAN166.ini"
+      ],
+      "protocol_tags": [
+        "flash",
+        "p5-can-diagnostic-transport"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 2,
+      "sha256": "28598b23787ce67d63620a267ec1e0897b2cd5abf8a3319609a3cb4a5fccca9b",
+      "size": 13824,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetKindOfECU"
+      ],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StartSyncPeriodicMsg",
+          "StopFilter",
+          "StopSyncPeriodicMsg",
+          "WriteMsgs"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 7040
+        }
+      ],
+      "factory_identifiers": [
+        "65CAN165",
+        "66CAN166"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanMMCPrepareWriter.dll",
+      "parameter_files": [
+        "65CAN165.ini",
+        "66CAN166.ini"
+      ],
+      "protocol_tags": [
+        "p5-can-diagnostic-transport",
+        "prepare"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 2,
+      "sha256": "a91d6b36df4882db63327437d460c99fea02651fe8e75414227edd6783d871ae",
+      "size": 37888,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetCPUType",
+        "GetContactType",
+        "GetKindOfECU",
+        "GetLocationID",
+        "GetNumCPUImages",
+        "GetPassword",
+        "SetCPUType"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "ChangeNextCpu",
+          "CheckBlock",
+          "CheckIDWithWaitOfSFs",
+          "EraseBlock",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "InVerifyBlock",
+          "ReceiveAck",
+          "VerifyBlock",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckCPUTypeFromFirmwareVersion",
+          "CompleteBlockInfo",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "IsECUOfReceiveRespForFinish",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "ReadSpecifiedCanMsg",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter",
+          "WriteMsgs"
+        ],
+        "parameter": [
+          "GetParameter",
+          "GetParameterbool",
+          "GetParameterlong",
+          "LoadParameter",
+          "SetKeys"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 9920
+        },
+        {
+          "name": "PrepareRetry",
+          "rva": 10080
+        }
+      ],
+      "factory_identifiers": [
+        "0CAN189",
+        "10P5-CAN147",
+        "10P5-CAN206",
+        "16P5-CAN13",
+        "16P5-CAN19",
+        "17CAN14",
+        "1P5-CAN216",
+        "23P5-CAN209",
+        "23P5-CAN66",
+        "34CAN142",
+        "59CAN40",
+        "62CAN15",
+        "62CAN16",
+        "70P5-CAN187",
+        "70P5-CAN188",
+        "70P5-CAN210",
+        "72P5-CAN13",
+        "72P5-CAN19"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanPowerTrainFlashWriter.dll",
+      "parameter_files": [
+        "0CAN189.ini",
+        "10P5-CAN147.ini",
+        "10P5-CAN206.ini",
+        "16P5-CAN13.ini",
+        "16P5-CAN19.ini",
+        "17CAN14.ini",
+        "1P5-CAN216.ini",
+        "23P5-CAN209.ini",
+        "23P5-CAN66.ini",
+        "34CAN142.ini",
+        "59CAN40.ini",
+        "62CAN15.ini",
+        "62CAN16.ini",
+        "70P5-CAN187.ini",
+        "70P5-CAN188.ini",
+        "70P5-CAN210.ini",
+        "72P5-CAN13.ini",
+        "72P5-CAN19.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 18,
+      "sha256": "f46a4d0c3531db188e767c0bed1060be83b18b6dccb9f73373e6994fd5dfe6c2",
+      "size": 23040,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetCPUType",
+        "GetContactType",
+        "GetKindOfECU",
+        "GetLocationID",
+        "GetNewPassword",
+        "GetNumCPUImages"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "CheckIDWithWaitOfSFs",
+          "EraseBlock",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "InVerifyBlock",
+          "VerifyBlock",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckBlockRanges",
+          "CheckCPUTypeFromFirmwareVersion",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "0CParameter",
+          "1CParameter",
+          "GetParameterbool",
+          "GetParameterlong",
+          "LoadParameter",
+          "SetKeys"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 6944
+        }
+      ],
+      "factory_identifiers": [
+        "82P5-CAN230"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanPowerTrainFlashWriterForSolar.dll",
+      "parameter_files": [
+        "82P5-CAN230.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 1,
+      "sha256": "06ecdab2f9dde29322f148d51f83e298c0e1d301c210c83b09293de2641c9c95",
+      "size": 17408,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 4160
+        }
+      ],
+      "factory_identifiers": [
+        "54CAN156"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanPSAFlashWriter.dll",
+      "parameter_files": [
+        "54CAN156.ini"
+      ],
+      "protocol_tags": [
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 1,
+      "sha256": "8a4476982b53c780e419ce17367e75f35045ac38c6cb3b681d610d6def70f79c",
+      "size": 14848,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StartPeriodicMsg",
+          "StopFilter",
+          "StopPeriodicMsg"
+        ],
+        "parameter": [
+          "GetParameterbool"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 4096
+        }
+      ],
+      "factory_identifiers": [
+        "54CAN156"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanPSAPrepareWriter.dll",
+      "parameter_files": [
+        "54CAN156.ini"
+      ],
+      "protocol_tags": [
+        "prepare"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 1,
+      "sha256": "62d89afb1e4ce3ddc24cac9ff5ea90ffcb45f5e43e41450f92d0c14b9a96f351",
+      "size": 12288,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetChargeLocalBusEcuReprogrammingFlow",
+        "GetChargeLocalBusPowerOnControllingEcuDiagID",
+        "GetNodeIdx",
+        "GetRequiredSpecReproVer"
+      ],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "GetSendTimeout",
+          "SetSendTimeout",
+          "StartFlowControlFilter",
+          "StopFilter",
+          "StopSyncPeriodicMsg",
+          "WriteMsgs"
+        ]
+      },
+      "exact_recovered_commands": [
+        {
+          "confidence": "recovered",
+          "method": "request_download",
+          "positive_response": "74 || maxBlockLength",
+          "request": "34 || dataFormat || 44 || address[4] || size[4]",
+          "response_rule": "usable payload=min(decoded maxBlockLength,0x0FFF)-2",
+          "route": "standard-flash",
+          "rva": 5616
+        },
+        {
+          "confidence": "recovered",
+          "method": "transfer_data",
+          "positive_response": "76 || blockSequenceCounter",
+          "request": "36 || blockSequenceCounter || data",
+          "route": "both-flash"
+        },
+        {
+          "confidence": "recovered",
+          "method": "transfer_exit",
+          "positive_response": "77",
+          "request": "37",
+          "route": "both-flash"
+        },
+        {
+          "confidence": "recovered",
+          "method": "routine_control",
+          "positive_response": "71 01 || routineIdentifier",
+          "request": "31 01 F5 10 / 31 01 00 FF / 31 01 F6 10 plus calibration-derived range/hash fields",
+          "route": "standard-flash",
+          "rva": 9712
+        },
+        {
+          "confidence": "recovered",
+          "method": "ecu_reset",
+          "positive_response": "51 01",
+          "request": "11 01",
+          "route": "both-flash",
+          "timeout_ms": 180
+        }
+      ],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 13808
+        }
+      ],
+      "factory_identifiers": [
+        "P5-Unified03",
+        "P5-Unified04"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanReproStdFlashWriter.dll",
+      "parameter_files": [
+        "P5-Unified03.ini",
+        "P5-Unified04.ini"
+      ],
+      "protocol_tags": [
+        "flash",
+        "p5-can-diagnostic-transport",
+        "repro-standard"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 2,
+      "sha256": "82b99c43a2d30ecddb57942eb82019a0f4b997a55e569f8055f648a0f54ea4ef",
+      "size": 25088,
+      "target_disposition": {
+        "corolla_8965H1202000": "candidate-vocabulary-requires-target-boot-table-join",
+        "reason": "recovered standard/unified UDS builders use Sienna-implemented diagnostic vocabulary; exact factory selection still requires calibration metadata",
+        "sienna_8965B4512000": "compatible-vocabulary-bounded-selection"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetChargeLocalBusEcuReprogrammingFlow",
+        "GetChargeLocalBusEcuStartTimeAfterPowerOn",
+        "GetChargeLocalBusPowerOnControllingEcuDiagID",
+        "GetEmissionsRelatedSystem",
+        "GetGatewayDiagID",
+        "GetGatewayMode",
+        "GetNodeIdx",
+        "GetNumGateway",
+        "GetServiceAuthKey",
+        "GetWakeUpTimeAfterReset"
+      ],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "JudgeReproGWNode"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can",
+          "SetBStoECU"
+        ],
+        "j2534": [
+          "SetLocalTimeToPrevSendTime",
+          "StartFlowControlFilter",
+          "StartSyncPeriodicMsg",
+          "StopFilter",
+          "StopSyncPeriodicMsg",
+          "WriteMsgs"
+        ]
+      },
+      "exact_recovered_commands": [
+        {
+          "confidence": "recovered",
+          "method": "programming_session",
+          "positive_response": "50 02",
+          "request": "10 02",
+          "route": "standard-prepare",
+          "rva": 5120
+        },
+        {
+          "confidence": "recovered",
+          "method": "security_access",
+          "positive_response": "67 01 || seed[16]; then 67 02",
+          "request": "27 01; then 27 02 || CalcSeedKey(GetServiceAuthKey(node), seed[16])",
+          "route": "standard-prepare",
+          "rva": 5392
+        }
+      ],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 10864
+        }
+      ],
+      "factory_identifiers": [
+        "P5-Unified03",
+        "P5-Unified04"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanReproStdPrepareWriter.dll",
+      "parameter_files": [
+        "P5-Unified03.ini",
+        "P5-Unified04.ini"
+      ],
+      "protocol_tags": [
+        "common-prepare-protocol",
+        "p5-can-diagnostic-transport",
+        "prepare",
+        "repro-standard",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 2,
+      "sha256": "ae2d15b8c55027dab1e54343fa179829e41ac69d0c9efa7b7feb1f8d6024022b",
+      "size": 19968,
+      "target_disposition": {
+        "corolla_8965H1202000": "candidate-vocabulary-requires-target-boot-table-join",
+        "reason": "recovered standard/unified UDS builders use Sienna-implemented diagnostic vocabulary; exact factory selection still requires calibration metadata",
+        "sienna_8965B4512000": "compatible-vocabulary-bounded-selection"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetALFID",
+        "GetDownloadAddress",
+        "GetDownloadMemsize",
+        "GetEraseBlock",
+        "GetFileIdx",
+        "GetNumCPUImages",
+        "GetNumFile"
+      ],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "SetLocalTimeToPrevSendTime",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter",
+          "StopSyncPeriodicMsg"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "PrepareRetry",
+          "rva": 8416
+        },
+        {
+          "name": "StartFlashWrite",
+          "rva": 10128
+        }
+      ],
+      "factory_identifiers": [
+        "127CAN282",
+        "128CAN283",
+        "129CAN284",
+        "130CAN285",
+        "131CAN286",
+        "132CAN287",
+        "132CAN288",
+        "133CAN289",
+        "134CAN290",
+        "135CAN291",
+        "136CAN292",
+        "137CAN293",
+        "138CAN294",
+        "139CAN295",
+        "140CAN296",
+        "140CAN297"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanSBRFlashWriter.dll",
+      "parameter_files": [
+        "127CAN282.ini",
+        "128CAN283.ini",
+        "129CAN284.ini",
+        "130CAN285.ini",
+        "131CAN286.ini",
+        "132CAN287.ini",
+        "132CAN288.ini",
+        "133CAN289.ini",
+        "134CAN290.ini",
+        "135CAN291.ini",
+        "136CAN292.ini",
+        "137CAN293.ini",
+        "138CAN294.ini",
+        "139CAN295.ini",
+        "140CAN296.ini",
+        "140CAN297.ini"
+      ],
+      "protocol_tags": [
+        "flash",
+        "p5-can-diagnostic-transport"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 16,
+      "sha256": "ebc59025c4d621e13de04f3b9ac194b12dbe307cc9133851ce0564a7cdf4d463",
+      "size": 17920,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils"
+        ],
+        "j2534": [
+          "SetLocalTimeToPrevSendTime",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter",
+          "StopSyncPeriodicMsg"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 5392
+        }
+      ],
+      "factory_identifiers": [
+        "127CAN282",
+        "128CAN283",
+        "129CAN284",
+        "130CAN285",
+        "131CAN286",
+        "132CAN287",
+        "132CAN288",
+        "133CAN289",
+        "134CAN290",
+        "135CAN291",
+        "136CAN292",
+        "137CAN293",
+        "138CAN294",
+        "139CAN295",
+        "140CAN296",
+        "140CAN297"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanSBRPrepareWriter.dll",
+      "parameter_files": [
+        "127CAN282.ini",
+        "128CAN283.ini",
+        "129CAN284.ini",
+        "130CAN285.ini",
+        "131CAN286.ini",
+        "132CAN287.ini",
+        "132CAN288.ini",
+        "133CAN289.ini",
+        "134CAN290.ini",
+        "135CAN291.ini",
+        "136CAN292.ini",
+        "137CAN293.ini",
+        "138CAN294.ini",
+        "139CAN295.ini",
+        "140CAN296.ini",
+        "140CAN297.ini"
+      ],
+      "protocol_tags": [
+        "prepare"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 16,
+      "sha256": "0f59958e2fdabcc845c160c0763f3aa26e3c02e0e3b060916be29e96e0ef7213",
+      "size": 11264,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetCPUType",
+        "GetLocationID",
+        "GetNonce",
+        "GetNumCPUImages",
+        "GetSeedKey"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "ChangeNextCpu",
+          "CheckIDWithWaitOfSFs",
+          "DetectFalsify",
+          "FinishReprogramming",
+          "SendNonceAndSeedKey",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "GetBlockInfo",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "ReadSpecifiedCanMsg",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter",
+          "WriteMsgs"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong",
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 4160
+        }
+      ],
+      "factory_identifiers": [
+        "0P5-CAN(SECURITY)303"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanSecurityM16CFlashWriter.dll",
+      "parameter_files": [
+        "0P5-CAN(SECURITY)303.ini"
+      ],
+      "protocol_tags": [
+        "calibration-nonce",
+        "calibration-seed-key",
+        "common-flash-protocol",
+        "flash",
+        "nonce-seed-material-transfer",
+        "security-named"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 1,
+      "sha256": "dcdab6bca2405aec8147d0ae5c1b9b93ce3393e478b1c5016c4430bcd7648590",
+      "size": 23552,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-target-transfer",
+        "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
+        "sienna_8965B4512000": "incompatible-vforest-transfer"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetCPUType",
+        "GetContactType",
+        "GetKindOfECU",
+        "GetLocationID",
+        "GetNewPassword",
+        "GetNonce",
+        "GetNumCPUImages",
+        "GetSeedKey"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "ChangeNextCpu",
+          "CheckIDWithWaitOfSFs",
+          "DetectFalsify",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "GetStatus",
+          "ReceiveAck",
+          "SendNonceAndSeedKey",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CheckCPUTypeFromFirmwareVersion",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter",
+          "WriteMsgs"
+        ],
+        "parameter": [
+          "GetParameter",
+          "GetParameterbool",
+          "GetParameterlong",
+          "LoadParameter",
+          "SetKeys"
+        ]
+      },
+      "exact_recovered_commands": [
+        {
+          "confidence": "recovered",
+          "method": "transfer_data",
+          "positive_response": "76 || blockSequenceCounter",
+          "request": "36 || blockSequenceCounter || data",
+          "route": "both-flash"
+        },
+        {
+          "confidence": "recovered",
+          "method": "transfer_exit",
+          "positive_response": "77",
+          "request": "37",
+          "route": "both-flash"
+        },
+        {
+          "confidence": "recovered",
+          "method": "ecu_reset",
+          "positive_response": "51 01",
+          "request": "11 01",
+          "route": "both-flash",
+          "timeout_ms": 180
+        }
+      ],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 4160
+        }
+      ],
+      "factory_identifiers": [
+        "0P5-CAN(SECURITY)302"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanSecurityVFORESTFlashWriter.dll",
+      "parameter_files": [
+        "0P5-CAN(SECURITY)302.ini"
+      ],
+      "protocol_tags": [
+        "calibration-nonce",
+        "calibration-seed-key",
+        "common-flash-protocol",
+        "flash",
+        "nonce-seed-material-transfer",
+        "security-named",
+        "vforest"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 1,
+      "sha256": "905ae71d648161b3f5d6c188dc3a2d7a147ae6b90694e2f8e80b0ffa7a260645",
+      "size": 20480,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-target-transfer",
+        "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
+        "sienna_8965B4512000": "incompatible-vforest-transfer"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetNodeIdx",
+        "GetNonce",
+        "GetNumCPUImages",
+        "GetOffsetAddress",
+        "GetP4ServerMaxTime",
+        "GetSecurityProperty2",
+        "GetSeedKey",
+        "GetWakeUpTimeAfterReset"
+      ],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "GetSendTimeout",
+          "SetSendTimeout",
+          "StartFlowControlFilter",
+          "StopFilter",
+          "StopSyncPeriodicMsg",
+          "WriteMsgs"
+        ]
+      },
+      "exact_recovered_commands": [
+        {
+          "confidence": "recovered",
+          "method": "predownload_wdbi",
+          "positive_response": "6E 02 03; 6E 02 01; 6E 02 02",
+          "request": "2E 02 03 || GetOffsetAddress(node)[5]; 2E 02 01 || GetSeedKey(node)[16]; 2E 02 02 || GetNonce(node)[16]",
+          "route": "unified-flash",
+          "rva": 4336
+        },
+        {
+          "confidence": "recovered",
+          "method": "request_download",
+          "positive_response": "74 || maxBlockLength",
+          "request": "34 || compressionFlag || areaFlag || 46 || (offset[5]+areaAddress) || areaSize",
+          "response_rule": "usable payload=min(decoded maxBlockLength,0x0FFF)-2",
+          "route": "unified-flash",
+          "rva": 5152
+        },
+        {
+          "confidence": "recovered",
+          "method": "transfer_data",
+          "positive_response": "76 || blockSequenceCounter",
+          "request": "36 || blockSequenceCounter || data",
+          "route": "both-flash"
+        },
+        {
+          "confidence": "recovered",
+          "method": "transfer_exit",
+          "positive_response": "77",
+          "request": "37",
+          "route": "both-flash"
+        },
+        {
+          "confidence": "recovered",
+          "method": "routine_control",
+          "positive_response": "71 01 || routineIdentifier",
+          "request": "31 01 F0 10 / 31 01 00 FF / 31 01 F1 10 / 31 01 F2 10 plus offset-adjusted area/range",
+          "route": "unified-flash",
+          "rva": 8320
+        },
+        {
+          "confidence": "recovered",
+          "method": "ecu_reset",
+          "positive_response": "51 01",
+          "request": "11 01",
+          "route": "both-flash",
+          "timeout_ms": 180
+        }
+      ],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 11184
+        }
+      ],
+      "factory_identifiers": [
+        "P5-Unified"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanUnifiedFlashWriter.dll",
+      "parameter_files": [
+        "P5-Unified.ini"
+      ],
+      "protocol_tags": [
+        "calibration-nonce",
+        "calibration-offset",
+        "calibration-seed-key",
+        "flash",
+        "p5-can-diagnostic-transport",
+        "unified"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 1,
+      "sha256": "091eb414be13fd24cc0a9c52853e6e02a3b417c5851c765d2d45263f475718a1",
+      "size": 18432,
+      "target_disposition": {
+        "corolla_8965H1202000": "candidate-vocabulary-requires-target-boot-table-join",
+        "reason": "recovered standard/unified UDS builders use Sienna-implemented diagnostic vocabulary; exact factory selection still requires calibration metadata",
+        "sienna_8965B4512000": "compatible-vocabulary-bounded-selection"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetNodeIdx",
+        "GetNonce",
+        "GetNumCPUImages",
+        "GetOffsetAddress",
+        "GetP4ServerMaxTime",
+        "GetSecurityProperty2",
+        "GetSeedKey",
+        "GetWakeUpTimeAfterReset"
+      ],
+      "common_operations": {
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "GetSendTimeout",
+          "SetSendTimeout",
+          "StartFlowControlFilter",
+          "StopFilter",
+          "StopSyncPeriodicMsg",
+          "WriteMsgs"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 10608
+        }
+      ],
+      "factory_identifiers": [
+        "P5-Unified10"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanUnifiedFlashWriterEachArea.dll",
+      "parameter_files": [
+        "P5-Unified10.ini"
+      ],
+      "protocol_tags": [
+        "calibration-nonce",
+        "calibration-offset",
+        "calibration-seed-key",
+        "flash",
+        "p5-can-diagnostic-transport",
+        "unified"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 1,
+      "sha256": "95c5ec26bc10c5227bc830c142eb86093aa3709606b108b33051f9b982f9ae3e",
+      "size": 17408,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetDiagID",
+        "GetECUAuthKey",
+        "GetEmissionsRelatedSystem",
+        "GetGatewayDiagID",
+        "GetNodeIdx",
+        "GetNumGateway",
+        "GetP4ServerMaxTime",
+        "GetServiceAuthKey",
+        "GetWakeUpTimeAfterReset"
+      ],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "DiagnosticMask",
+          "JudgeReproGWNode"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can",
+          "SetBStoECU"
+        ],
+        "j2534": [
+          "SetLocalTimeToPrevSendTime",
+          "StartFlowControlFilter",
+          "StartSyncPeriodicMsg",
+          "StopFilter",
+          "StopSyncPeriodicMsg",
+          "WriteMsgs"
+        ]
+      },
+      "exact_recovered_commands": [
+        {
+          "confidence": "recovered",
+          "method": "security_access",
+          "positive_response": "67 01 || seed[16]; then 67 02",
+          "request": "27 01 || GetECUAuthKey(node)[16]; then 27 02 || CalcSeedKey(GetServiceAuthKey(node), seed[16])",
+          "route": "unified-prepare",
+          "rva": 5424
+        }
+      ],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 8912
+        }
+      ],
+      "factory_identifiers": [
+        "P5-Unified",
+        "P5-Unified10"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWCanUnifiedPrepareWriter.dll",
+      "parameter_files": [
+        "P5-Unified.ini",
+        "P5-Unified10.ini"
+      ],
+      "protocol_tags": [
+        "calibration-auth-pair",
+        "common-prepare-protocol",
+        "p5-can-diagnostic-transport",
+        "prepare",
+        "seed-key",
+        "unified"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 2,
+      "sha256": "0314ca168c63342f4d4e26251ae9e8c700dae35b7144c63254296fc331375db8",
+      "size": 17408,
+      "target_disposition": {
+        "corolla_8965H1202000": "candidate-vocabulary-requires-target-boot-table-join",
+        "reason": "recovered standard/unified UDS builders use Sienna-implemented diagnostic vocabulary; exact factory selection still requires calibration metadata",
+        "sienna_8965B4512000": "compatible-vocabulary-bounded-selection"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetLogicalAddress",
+        "GetNodeIdx",
+        "GetRequiredSpecReproVer",
+        "GetWakeUpTimeAfterReset"
+      ],
+      "common_operations": {
+        "j2534": [
+          "InitPASSTHRU_MSG0500",
+          "StopSyncPeriodicMsg"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 11808
+        }
+      ],
+      "factory_identifiers": [
+        "Ethernet",
+        "Ethernet03",
+        "Ethernet04"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWEthernetReprostdFlashWriter.dll",
+      "parameter_files": [
+        "Ethernet.ini",
+        "Ethernet03.ini",
+        "Ethernet04.ini"
+      ],
+      "protocol_tags": [
+        "ethernet",
+        "flash",
+        "repro-standard"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 3,
+      "sha256": "fbf5eeadc705cdbb28dc19128836eac21c28427ad8ec884cd353f80b65f06794",
+      "size": 22528,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetGatewayLogicalAddress",
+        "GetLogicalAddress",
+        "GetNodeIdx",
+        "GetNumGateway",
+        "GetServiceAuthKey",
+        "GetWakeUpTimeAfterReset"
+      ],
+      "common_operations": {
+        "j2534": [
+          "ControlIO0500",
+          "InitPASSTHRU_MSG0500",
+          "SetLocalTimeToPrevSendTime",
+          "StopSyncPeriodicMsg"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 6944
+        }
+      ],
+      "factory_identifiers": [
+        "Ethernet",
+        "Ethernet03",
+        "Ethernet04"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWEthernetReprostdPrepareWriter.dll",
+      "parameter_files": [
+        "Ethernet.ini",
+        "Ethernet03.ini",
+        "Ethernet04.ini"
+      ],
+      "protocol_tags": [
+        "ethernet",
+        "prepare",
+        "repro-standard",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 3,
+      "sha256": "9ceb02941b99d128adf582236eb8b4a1eedbc2ad9f637305f8e5245c6520ec5b",
+      "size": 13824,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetLocationID",
+        "GetPassword"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "CheckIDWithWaitOfSFs",
+          "EraseBlock",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "InVerifyBlock",
+          "IsFinishReprogramming",
+          "VerifyBlock",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckCPUTypeFromFirmwareVersion",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "IsFinishReprogramming",
+          "rva": 4400
+        },
+        {
+          "name": "StartFlashWrite",
+          "rva": 6432
+        }
+      ],
+      "factory_identifiers": [
+        "19CAN143",
+        "19CAN144",
+        "19CAN145",
+        "19CAN237",
+        "76CAN207"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanAirbagFlashWriter.dll",
+      "parameter_files": [
+        "19CAN143.ini",
+        "19CAN144.ini",
+        "19CAN145.ini",
+        "19CAN237.ini",
+        "76CAN207.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 5,
+      "sha256": "7686ca90fa12345e8efab3e461f1d9b9408f1605019b7b10e88229b6f763684f",
+      "size": 14848,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKey",
+          "ChangeMode",
+          "DiagnosticMask",
+          "GetBusTypeFromCPUImage"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg",
+          "SetBStoECU"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong",
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 5920
+        }
+      ],
+      "factory_identifiers": [
+        "19CAN143",
+        "19CAN144",
+        "19CAN145",
+        "19CAN237",
+        "37CAN162",
+        "38CAN108",
+        "38CAN220",
+        "38CAN225",
+        "38CAN226",
+        "38CAN229",
+        "38CAN267",
+        "74CAN221",
+        "74CAN222",
+        "74CAN266",
+        "76CAN207"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanAirbagPrepareWriter.dll",
+      "parameter_files": [
+        "19CAN143.ini",
+        "19CAN144.ini",
+        "19CAN145.ini",
+        "19CAN237.ini",
+        "37CAN162.ini",
+        "38CAN108.ini",
+        "38CAN220.ini",
+        "38CAN225.ini",
+        "38CAN226.ini",
+        "38CAN229.ini",
+        "38CAN267.ini",
+        "74CAN221.ini",
+        "74CAN222.ini",
+        "74CAN266.ini",
+        "76CAN207.ini"
+      ],
+      "protocol_tags": [
+        "common-prepare-protocol",
+        "prepare",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 15,
+      "sha256": "0a2898843e9858fbc0dd62159ea9882ec2a545af8c0b6169f363fa646813ca01",
+      "size": 12800,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetCPUType",
+        "GetContactType",
+        "GetKindOfECU",
+        "GetLocationID",
+        "GetNewPassword",
+        "GetNumCPUImages"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "CheckIDWithWaitOfSFs",
+          "EraseBlock",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "InVerifyBlock",
+          "VerifyBlock",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckBlockRanges",
+          "CheckCPUTypeFromFirmwareVersion",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "0CParameter",
+          "1CParameter",
+          "GetParameterbool",
+          "GetParameterlong",
+          "LoadParameter",
+          "SetKeys"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 7040
+        }
+      ],
+      "factory_identifiers": [
+        "11CAN151",
+        "11CAN152",
+        "11CAN178",
+        "11CAN179",
+        "11CAN231",
+        "11CAN241",
+        "11CAN242",
+        "11CAN254",
+        "24CAN167",
+        "24CAN168",
+        "24CAN169",
+        "24CAN170",
+        "24CAN171",
+        "24CAN174",
+        "24CAN175",
+        "24CAN194",
+        "24CAN197",
+        "24CAN198",
+        "24CAN235",
+        "24CAN236",
+        "24CAN238",
+        "24CAN245",
+        "24CAN257",
+        "24CAN258",
+        "24CAN279",
+        "24CAN280",
+        "24CAN281",
+        "27CAN212",
+        "27CAN243",
+        "28CAN151",
+        "28CAN196",
+        "28CAN208",
+        "28CAN263",
+        "33CAN212",
+        "35CAN150",
+        "37CAN162",
+        "38CAN246",
+        "40CAN212",
+        "41CAN228",
+        "41CAN255",
+        "42CAN217",
+        "42CAN218",
+        "42CAN264",
+        "42CAN265",
+        "43CAN212",
+        "44CAN212",
+        "60CAN153",
+        "60CAN177",
+        "60CAN199",
+        "61CAN154",
+        "61CAN155",
+        "61CAN262",
+        "63CAN212",
+        "64CAN164",
+        "68CAN183",
+        "68CAN184",
+        "68CAN200",
+        "68CAN201",
+        "69CAN185",
+        "69CAN186",
+        "69CAN191",
+        "69CAN192",
+        "71CAN133",
+        "71CAN193",
+        "71CAN194",
+        "71CAN195",
+        "73CAN204",
+        "73CAN244",
+        "73CAN259",
+        "74CAN221",
+        "74CAN222",
+        "74CAN224",
+        "74CAN249",
+        "74CAN260",
+        "74CAN261",
+        "74CAN266",
+        "75CAN205",
+        "83CAN228",
+        "83CAN255",
+        "86CAN183",
+        "86CAN184"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanBodyFlashWriter.dll",
+      "parameter_files": [
+        "11CAN151.ini",
+        "11CAN152.ini",
+        "11CAN178.ini",
+        "11CAN179.ini",
+        "11CAN231.ini",
+        "11CAN241.ini",
+        "11CAN242.ini",
+        "11CAN254.ini",
+        "24CAN167.ini",
+        "24CAN168.ini",
+        "24CAN169.ini",
+        "24CAN170.ini",
+        "24CAN171.ini",
+        "24CAN174.ini",
+        "24CAN175.ini",
+        "24CAN194.ini",
+        "24CAN197.ini",
+        "24CAN198.ini",
+        "24CAN235.ini",
+        "24CAN236.ini",
+        "24CAN238.ini",
+        "24CAN245.ini",
+        "24CAN257.ini",
+        "24CAN258.ini",
+        "24CAN279.ini",
+        "24CAN280.ini",
+        "24CAN281.ini",
+        "27CAN212.ini",
+        "27CAN243.ini",
+        "28CAN151.ini",
+        "28CAN196.ini",
+        "28CAN208.ini",
+        "28CAN263.ini",
+        "33CAN212.ini",
+        "35CAN150.ini",
+        "37CAN162.ini",
+        "38CAN246.ini",
+        "40CAN212.ini",
+        "41CAN228.ini",
+        "41CAN255.ini",
+        "42CAN217.ini",
+        "42CAN218.ini",
+        "42CAN264.ini",
+        "42CAN265.ini",
+        "43CAN212.ini",
+        "44CAN212.ini",
+        "60CAN153.ini",
+        "60CAN177.ini",
+        "60CAN199.ini",
+        "61CAN154.ini",
+        "61CAN155.ini",
+        "61CAN262.ini",
+        "63CAN212.ini",
+        "64CAN164.ini",
+        "68CAN183.ini",
+        "68CAN184.ini",
+        "68CAN200.ini",
+        "68CAN201.ini",
+        "69CAN185.ini",
+        "69CAN186.ini",
+        "69CAN191.ini",
+        "69CAN192.ini",
+        "71CAN133.ini",
+        "71CAN193.ini",
+        "71CAN194.ini",
+        "71CAN195.ini",
+        "73CAN204.ini",
+        "73CAN244.ini",
+        "73CAN259.ini",
+        "74CAN221.ini",
+        "74CAN222.ini",
+        "74CAN224.ini",
+        "74CAN249.ini",
+        "74CAN260.ini",
+        "74CAN261.ini",
+        "74CAN266.ini",
+        "75CAN205.ini",
+        "83CAN228.ini",
+        "83CAN255.ini",
+        "86CAN183.ini",
+        "86CAN184.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 81,
+      "sha256": "98752a7f831451ecb4796f7639107c21a445e7185f0c80f1bb2849539e6e32f9",
+      "size": 17408,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetCPUType",
+        "GetContactType",
+        "GetKindOfECU",
+        "GetLocationID",
+        "GetNewPassword",
+        "GetNumCPUImages"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "CheckIDWithWaitOfSFs",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "GetStatus",
+          "InVerifyBlock",
+          "ReceiveAck",
+          "VerifyBlock2",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SetBStoECU"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckBlockRanges",
+          "CheckCPUTypeFromFirmwareVersion",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter",
+          "WriteMsgs"
+        ],
+        "parameter": [
+          "0CParameter",
+          "1CParameter",
+          "GetParameter",
+          "GetParameterbool",
+          "GetParameterlong",
+          "LoadParameter",
+          "SetKeys"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 4176
+        }
+      ],
+      "factory_identifiers": [
+        "79CAN234",
+        "80CAN234",
+        "81CAN234"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanBodyFlashWriterForCXPI.dll",
+      "parameter_files": [
+        "79CAN234.ini",
+        "80CAN234.ini",
+        "81CAN234.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 3,
+      "sha256": "1d73ad1719cdfaf7de3bac56fbc915374b2ab128a1feea6b910335e8d752cda7",
+      "size": 23040,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKey",
+          "ChangeMode",
+          "DiagnosticMask",
+          "GetBusTypeFromCPUImage"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg",
+          "SetBStoECU"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 4096
+        },
+        {
+          "name": "ChangeToReprogGatewayMode",
+          "rva": 4288
+        }
+      ],
+      "factory_identifiers": [
+        "11CAN151",
+        "11CAN152",
+        "11CAN178",
+        "11CAN179",
+        "11CAN231",
+        "11CAN241",
+        "11CAN242",
+        "11CAN254",
+        "24CAN167",
+        "24CAN168",
+        "24CAN169",
+        "24CAN170",
+        "24CAN171",
+        "24CAN174",
+        "24CAN175",
+        "24CAN194",
+        "24CAN197",
+        "24CAN198",
+        "24CAN235",
+        "24CAN236",
+        "24CAN238",
+        "24CAN245",
+        "24CAN257",
+        "24CAN258",
+        "24CAN279",
+        "24CAN280",
+        "24CAN281",
+        "27CAN212",
+        "27CAN243",
+        "28CAN151",
+        "28CAN196",
+        "28CAN208",
+        "28CAN263",
+        "33CAN212",
+        "35CAN150",
+        "38CAN246",
+        "40CAN212",
+        "41CAN228",
+        "41CAN255",
+        "42CAN217",
+        "42CAN218",
+        "42CAN264",
+        "42CAN265",
+        "43CAN212",
+        "44CAN212",
+        "60CAN153",
+        "60CAN177",
+        "60CAN199",
+        "63CAN212",
+        "64CAN164",
+        "68CAN183",
+        "68CAN184",
+        "68CAN200",
+        "68CAN201",
+        "69CAN185",
+        "69CAN186",
+        "69CAN191",
+        "69CAN192",
+        "71CAN133",
+        "71CAN193",
+        "71CAN194",
+        "71CAN195",
+        "73CAN204",
+        "73CAN244",
+        "73CAN259",
+        "74CAN224",
+        "74CAN249",
+        "74CAN260",
+        "74CAN261",
+        "75CAN205",
+        "79CAN234",
+        "80CAN234",
+        "81CAN234",
+        "83CAN228",
+        "83CAN255",
+        "86CAN183",
+        "86CAN184"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanBodyPrepareWriter.dll",
+      "parameter_files": [
+        "11CAN151.ini",
+        "11CAN152.ini",
+        "11CAN178.ini",
+        "11CAN179.ini",
+        "11CAN231.ini",
+        "11CAN241.ini",
+        "11CAN242.ini",
+        "11CAN254.ini",
+        "24CAN167.ini",
+        "24CAN168.ini",
+        "24CAN169.ini",
+        "24CAN170.ini",
+        "24CAN171.ini",
+        "24CAN174.ini",
+        "24CAN175.ini",
+        "24CAN194.ini",
+        "24CAN197.ini",
+        "24CAN198.ini",
+        "24CAN235.ini",
+        "24CAN236.ini",
+        "24CAN238.ini",
+        "24CAN245.ini",
+        "24CAN257.ini",
+        "24CAN258.ini",
+        "24CAN279.ini",
+        "24CAN280.ini",
+        "24CAN281.ini",
+        "27CAN212.ini",
+        "27CAN243.ini",
+        "28CAN151.ini",
+        "28CAN196.ini",
+        "28CAN208.ini",
+        "28CAN263.ini",
+        "33CAN212.ini",
+        "35CAN150.ini",
+        "38CAN246.ini",
+        "40CAN212.ini",
+        "41CAN228.ini",
+        "41CAN255.ini",
+        "42CAN217.ini",
+        "42CAN218.ini",
+        "42CAN264.ini",
+        "42CAN265.ini",
+        "43CAN212.ini",
+        "44CAN212.ini",
+        "60CAN153.ini",
+        "60CAN177.ini",
+        "60CAN199.ini",
+        "63CAN212.ini",
+        "64CAN164.ini",
+        "68CAN183.ini",
+        "68CAN184.ini",
+        "68CAN200.ini",
+        "68CAN201.ini",
+        "69CAN185.ini",
+        "69CAN186.ini",
+        "69CAN191.ini",
+        "69CAN192.ini",
+        "71CAN133.ini",
+        "71CAN193.ini",
+        "71CAN194.ini",
+        "71CAN195.ini",
+        "73CAN204.ini",
+        "73CAN244.ini",
+        "73CAN259.ini",
+        "74CAN224.ini",
+        "74CAN249.ini",
+        "74CAN260.ini",
+        "74CAN261.ini",
+        "75CAN205.ini",
+        "79CAN234.ini",
+        "80CAN234.ini",
+        "81CAN234.ini",
+        "83CAN228.ini",
+        "83CAN255.ini",
+        "86CAN183.ini",
+        "86CAN184.ini"
+      ],
+      "protocol_tags": [
+        "common-prepare-protocol",
+        "prepare",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 77,
+      "sha256": "0326c4515d3f9935f561190c410f87de1527bed1f2b1a2d8d67546302b9b9b6a",
+      "size": 13824,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "parameter": [
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 4096
+        }
+      ],
+      "factory_identifiers": [
+        "61CAN154",
+        "61CAN155",
+        "61CAN262"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanCentralGWPrepareWriter.dll",
+      "parameter_files": [
+        "61CAN154.ini",
+        "61CAN155.ini",
+        "61CAN262.ini"
+      ],
+      "protocol_tags": [
+        "prepare"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 3,
+      "sha256": "125b3c800353ebb5ce2d12171f719a52cf95e6e215f527164ed7ed9db772f975",
+      "size": 7168,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetLocationID",
+        "GetNumCPUImages",
+        "GetPassword"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "ChangeNextCpu",
+          "CheckIDWithWaitOfSFs",
+          "EraseBlock",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "InVerifyBlock",
+          "VerifyBlock",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckCPUTypeFromFirmwareVersion",
+          "CompleteBlockInfo",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 6688
+        }
+      ],
+      "factory_identifiers": [
+        "13CAN161",
+        "13CAN213",
+        "49CAN176",
+        "4CAN248",
+        "50CAN219",
+        "52CAN250",
+        "77CAN132",
+        "77CAN219",
+        "7CAN23",
+        "7CAN232"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanChassisShrinkFlashWriter.dll",
+      "parameter_files": [
+        "13CAN161.ini",
+        "13CAN213.ini",
+        "49CAN176.ini",
+        "4CAN248.ini",
+        "50CAN219.ini",
+        "52CAN250.ini",
+        "77CAN132.ini",
+        "77CAN219.ini",
+        "7CAN23.ini",
+        "7CAN232.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 10,
+      "sha256": "90fe884150c4062e2b0cd9a28f67cb8f12be2d9d4e311f3beb4bab5393cc35fc",
+      "size": 16896,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetKindOfECU"
+      ],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKey",
+          "ChangeMode",
+          "DiagnosticMask"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterlong",
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 4096
+        }
+      ],
+      "factory_identifiers": [
+        "13CAN161",
+        "13CAN213",
+        "49CAN176",
+        "4CAN248",
+        "50CAN219",
+        "52CAN250",
+        "77CAN132",
+        "77CAN219",
+        "7CAN23",
+        "7CAN232"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanChassisShrinkPrepareWriter.dll",
+      "parameter_files": [
+        "13CAN161.ini",
+        "13CAN213.ini",
+        "49CAN176.ini",
+        "4CAN248.ini",
+        "50CAN219.ini",
+        "52CAN250.ini",
+        "77CAN132.ini",
+        "77CAN219.ini",
+        "7CAN23.ini",
+        "7CAN232.ini"
+      ],
+      "protocol_tags": [
+        "common-prepare-protocol",
+        "prepare",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 10,
+      "sha256": "ea8baa28a29f595c626198663fd8ce93da02e9a5dd4b43dde99814de407064e3",
+      "size": 12800,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetLocationID",
+        "GetPassword"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "CheckIDWithWaitOfSFs",
+          "EraseBlock",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "InVerifyBlock",
+          "VerifyBlock",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckCPUTypeFromFirmwareVersion",
+          "CompleteBlockInfo",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetSendTimeout",
+          "GetTimeout",
+          "SetSendTimeout",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 6208
+        }
+      ],
+      "factory_identifiers": [
+        "29CAN146",
+        "29CAN223",
+        "29CAN233"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanClearanceSonarFlashWriter.dll",
+      "parameter_files": [
+        "29CAN146.ini",
+        "29CAN223.ini",
+        "29CAN233.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 3,
+      "sha256": "63c0214218f10562dcc9dfdc728234c6858b8c86b6f18715d380c0a0b6d01830",
+      "size": 14336,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKey",
+          "ChangeMode",
+          "DiagnosticMask",
+          "GetBusTypeFromCPUImage"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg",
+          "SetBStoECU"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterlong",
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 5920
+        }
+      ],
+      "factory_identifiers": [
+        "29CAN146",
+        "29CAN223",
+        "29CAN233"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanClearanceSonarPrepareWriter.dll",
+      "parameter_files": [
+        "29CAN146.ini",
+        "29CAN223.ini",
+        "29CAN233.ini"
+      ],
+      "protocol_tags": [
+        "common-prepare-protocol",
+        "prepare",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 3,
+      "sha256": "0f7df48a01c0712bffbdf2f423730a9705004d5dd6bccdbe12e041aafc60077b",
+      "size": 12800,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetLocationID",
+        "GetNumCPUImages",
+        "GetPassword"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "ChangeNextCpu",
+          "CheckIDWithWaitOfSFs",
+          "EraseBlock",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "InVerifyBlock",
+          "IsFinishReprogramming",
+          "VerifyBlock",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckCPUTypeFromFirmwareVersion",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 6608
+        },
+        {
+          "name": "IsFinishReprogramming",
+          "rva": 6768
+        }
+      ],
+      "factory_identifiers": [
+        "38CAN108",
+        "38CAN220",
+        "38CAN225",
+        "38CAN226",
+        "38CAN229",
+        "38CAN267"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanDSS1FlashWriter.dll",
+      "parameter_files": [
+        "38CAN108.ini",
+        "38CAN220.ini",
+        "38CAN225.ini",
+        "38CAN226.ini",
+        "38CAN229.ini",
+        "38CAN267.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 6,
+      "sha256": "481143e2358e947b65f06effa913b333de37b629bd3628ac8b5228bf20fcc4ca",
+      "size": 15360,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKey",
+          "ChangeMode",
+          "DiagnosticMask"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong",
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 4160
+        }
+      ],
+      "factory_identifiers": [
+        "0CAN189",
+        "0CAN190",
+        "0CAN87",
+        "0CAN88",
+        "0CAN90",
+        "153CAN87",
+        "153CAN88",
+        "153CAN90",
+        "17CAN14",
+        "34CAN142",
+        "59CAN40",
+        "5CAN87",
+        "5CAN88",
+        "62CAN15",
+        "62CAN16",
+        "6CAN87",
+        "6CAN88",
+        "6CAN90"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanPowerTrainPrepareWriter.dll",
+      "parameter_files": [
+        "0CAN189.ini",
+        "0CAN190.ini",
+        "0CAN87.ini",
+        "0CAN88.ini",
+        "0CAN90.ini",
+        "153CAN87.ini",
+        "153CAN88.ini",
+        "153CAN90.ini",
+        "17CAN14.ini",
+        "34CAN142.ini",
+        "59CAN40.ini",
+        "5CAN87.ini",
+        "5CAN88.ini",
+        "62CAN15.ini",
+        "62CAN16.ini",
+        "6CAN87.ini",
+        "6CAN88.ini",
+        "6CAN90.ini"
+      ],
+      "protocol_tags": [
+        "common-prepare-protocol",
+        "prepare",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 18,
+      "sha256": "a88fac87421d58cf5901ece638aea10e4db6d721ce60360e2d97cf83d80e4a08",
+      "size": 17408,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetLocationID",
+        "GetNewPassword",
+        "GetNonce",
+        "GetNumCPUImages",
+        "GetSeedKey"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "ChangeNextCpu",
+          "CheckIDWithWaitOfSFs",
+          "DetectFalsify",
+          "EraseBlock",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "InVerifyBlock",
+          "IsFinishReprogramming",
+          "SendNonce",
+          "SendSeedKey",
+          "VerifyBlock",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckCPUTypeFromFirmwareVersion",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "IsFinishReprogramming",
+          "rva": 4400
+        },
+        {
+          "name": "StartFlashWrite",
+          "rva": 6960
+        }
+      ],
+      "factory_identifiers": [
+        "19CAN(SECURITY)214",
+        "19CAN(SECURITY)252",
+        "19CAN(SECURITY)253",
+        "19CAN(SECURITY)256"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanSecurityAirbagFlashWriter.dll",
+      "parameter_files": [
+        "19CAN(SECURITY)214.ini",
+        "19CAN(SECURITY)252.ini",
+        "19CAN(SECURITY)253.ini",
+        "19CAN(SECURITY)256.ini"
+      ],
+      "protocol_tags": [
+        "calibration-nonce",
+        "calibration-seed-key",
+        "common-flash-protocol",
+        "flash",
+        "nonce-seed-material-transfer",
+        "security-named"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 4,
+      "sha256": "b8e9c81b300baf2099d88ada89a05d7686a8469cbe0031aa3b9dcbba13e6d04e",
+      "size": 16384,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-target-transfer",
+        "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
+        "sienna_8965B4512000": "incompatible-vforest-transfer"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetECUAuthKey",
+        "GetServiceAuthKey"
+      ],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKeyForSecurityUp",
+          "ChangeMode",
+          "DiagnosticMask"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 5680
+        }
+      ],
+      "factory_identifiers": [
+        "19CAN(SECURITY)214",
+        "19CAN(SECURITY)252",
+        "19CAN(SECURITY)253",
+        "19CAN(SECURITY)256"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanSecurityAirbagPrepareWriter.dll",
+      "parameter_files": [
+        "19CAN(SECURITY)214.ini",
+        "19CAN(SECURITY)252.ini",
+        "19CAN(SECURITY)253.ini",
+        "19CAN(SECURITY)256.ini"
+      ],
+      "protocol_tags": [
+        "calibration-auth-pair",
+        "common-prepare-protocol",
+        "prepare",
+        "security-named",
+        "security-up-aes-wrapper"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 4,
+      "sha256": "82cfc42a6b76a030ab23b53f21c467ba9f16efd84ad77ee1b60b30682f96e60e",
+      "size": 12288,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetLocationID",
+        "GetNewPassword",
+        "GetNonce",
+        "GetNumCPUImages",
+        "GetSeedKey"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "ChangeNextCpu",
+          "CheckIDWithWaitOfSFs",
+          "DetectFalsify",
+          "EraseBlock",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "InVerifyBlock",
+          "SendNonce",
+          "SendSeedKey",
+          "VerifyBlock",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckCPUTypeFromFirmwareVersion",
+          "CompleteBlockInfo",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 6768
+        }
+      ],
+      "factory_identifiers": [
+        "102CAN(SECURITY)211",
+        "13CAN(SECURITY)213",
+        "14CAN(SECURITY)35",
+        "21CAN(SECURITY)116",
+        "21CAN(SECURITY)120",
+        "49CAN(SECURITY)211",
+        "49CAN(SECURITY)215",
+        "49CAN(SECURITY)239",
+        "4CAN(SECURITY)119",
+        "4CAN(SECURITY)251",
+        "4CAN(SECURITY)55"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanSecurityChassisShrinkFlashWriter.dll",
+      "parameter_files": [
+        "102CAN(SECURITY)211.ini",
+        "13CAN(SECURITY)213.ini",
+        "14CAN(SECURITY)35.ini",
+        "21CAN(SECURITY)116.ini",
+        "21CAN(SECURITY)120.ini",
+        "49CAN(SECURITY)211.ini",
+        "49CAN(SECURITY)215.ini",
+        "49CAN(SECURITY)239.ini",
+        "4CAN(SECURITY)119.ini",
+        "4CAN(SECURITY)251.ini",
+        "4CAN(SECURITY)55.ini"
+      ],
+      "protocol_tags": [
+        "calibration-nonce",
+        "calibration-seed-key",
+        "common-flash-protocol",
+        "flash",
+        "nonce-seed-material-transfer",
+        "security-named"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 11,
+      "sha256": "e5ba42abbb602cef4a63d8c53eb2bfb241e34a7f65b8ab524f87c8c57de97df8",
+      "size": 16896,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-target-transfer",
+        "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
+        "sienna_8965B4512000": "incompatible-vforest-transfer"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetECUAuthKey",
+        "GetKindOfECU",
+        "GetServiceAuthKey"
+      ],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKeyForSecurityUp",
+          "ChangeMode",
+          "DiagnosticMask"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterlong"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 4096
+        }
+      ],
+      "factory_identifiers": [
+        "102CAN(SECURITY)211",
+        "13CAN(SECURITY)213",
+        "14CAN(SECURITY)35",
+        "21CAN(SECURITY)116",
+        "21CAN(SECURITY)120",
+        "49CAN(SECURITY)211",
+        "49CAN(SECURITY)215",
+        "49CAN(SECURITY)239",
+        "4CAN(SECURITY)119",
+        "4CAN(SECURITY)251",
+        "4CAN(SECURITY)55"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanSecurityChassisShrinkPrepareWriter.dll",
+      "parameter_files": [
+        "102CAN(SECURITY)211.ini",
+        "13CAN(SECURITY)213.ini",
+        "14CAN(SECURITY)35.ini",
+        "21CAN(SECURITY)116.ini",
+        "21CAN(SECURITY)120.ini",
+        "49CAN(SECURITY)211.ini",
+        "49CAN(SECURITY)215.ini",
+        "49CAN(SECURITY)239.ini",
+        "4CAN(SECURITY)119.ini",
+        "4CAN(SECURITY)251.ini",
+        "4CAN(SECURITY)55.ini"
+      ],
+      "protocol_tags": [
+        "calibration-auth-pair",
+        "common-prepare-protocol",
+        "prepare",
+        "security-named",
+        "security-up-aes-wrapper"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 11,
+      "sha256": "88f7e7387544137f3ca7bd3f83089f95eaa8061ff001002a5538e9ab1c52b9e3",
+      "size": 12800,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetCPUType",
+        "GetContactType",
+        "GetKindOfECU",
+        "GetLocationID",
+        "GetNumCPUImages",
+        "GetPassword"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "ChangeNextCpu",
+          "CheckIDWithWaitOfSFs",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "GetStatus",
+          "ReceiveAck",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CheckCPUTypeFromFirmwareVersion",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter",
+          "WriteMsgs"
+        ],
+        "parameter": [
+          "GetParameter",
+          "GetParameterbool",
+          "GetParameterlong",
+          "LoadParameter",
+          "SetKeys"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 9024
+        }
+      ],
+      "factory_identifiers": [
+        "0CAN87",
+        "0CAN88",
+        "0P4-CAN & P5-CAN87",
+        "0P4-CAN & P5-CAN88",
+        "153CAN87",
+        "153CAN88",
+        "1P5-CAN86",
+        "1P5-CAN87",
+        "1P5-CAN88",
+        "5CAN87",
+        "5CAN88",
+        "6CAN87",
+        "6CAN88"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4CanVFORESTFlashWriter.dll",
+      "parameter_files": [
+        "0CAN87.ini",
+        "0CAN88.ini",
+        "0P4-CAN & P5-CAN87.ini",
+        "0P4-CAN & P5-CAN88.ini",
+        "153CAN87.ini",
+        "153CAN88.ini",
+        "1P5-CAN86.ini",
+        "1P5-CAN87.ini",
+        "1P5-CAN88.ini",
+        "5CAN87.ini",
+        "5CAN88.ini",
+        "6CAN87.ini",
+        "6CAN88.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash",
+        "vforest"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 13,
+      "sha256": "0721243b7f9649b72b830a0a2a58b44b81b3aed681a351ef0e8ae14cc75c12b0",
+      "size": 19968,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-target-transfer",
+        "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
+        "sienna_8965B4512000": "incompatible-vforest-transfer"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKey",
+          "ChangeMode",
+          "DiagnosticMask"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsg",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterlong",
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 8480
+        }
+      ],
+      "factory_identifiers": [
+        "0P4-CAN & P5-CAN87",
+        "0P4-CAN & P5-CAN88"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP4P5CanPowerTrainPrepareWriter.dll",
+      "parameter_files": [
+        "0P4-CAN & P5-CAN87.ini",
+        "0P4-CAN & P5-CAN88.ini"
+      ],
+      "protocol_tags": [
+        "common-prepare-protocol",
+        "p5-can-diagnostic-transport",
+        "prepare",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 2,
+      "sha256": "0a64261d70e6a70ec80fcddf18f654c36e9941b0132d1ce5831b6fe9f65810eb",
+      "size": 16384,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetCPUType",
+        "GetContactType",
+        "GetKindOfECU",
+        "GetLocationID",
+        "GetNewPassword",
+        "GetNumCPUImages"
+      ],
+      "common_operations": {
+        "common_flash": [
+          "0CCanCommonFlashWriter",
+          "1CCanCommonFlashWriter",
+          "CheckIDWithWaitOfSFs",
+          "EraseBlock",
+          "FinishReprogramming",
+          "GetMemoryInfo",
+          "InVerifyBlock",
+          "VerifyBlock",
+          "WriteBlock",
+          "WritingErrorDispose"
+        ],
+        "flash_utils": [
+          "0CFlashWriterUtils",
+          "1CFlashWriterUtils",
+          "CalcBlockSizes",
+          "CheckBlockRanges",
+          "CheckCPUTypeFromFirmwareVersion",
+          "GetBlockInfo",
+          "GetBlockRanges",
+          "SelectRetryPassword"
+        ],
+        "j2534": [
+          "GetTimeout",
+          "SetTimeout",
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "0CParameter",
+          "1CParameter",
+          "GetParameterbool",
+          "GetParameterlong",
+          "LoadParameter",
+          "SetKeys"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartFlashWrite",
+          "rva": 7040
+        }
+      ],
+      "factory_identifiers": [
+        "16P5-CAN202",
+        "16P5-CAN203",
+        "87P5-CAN247"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP5CanBodyFlashWriter.dll",
+      "parameter_files": [
+        "16P5-CAN202.ini",
+        "16P5-CAN203.ini",
+        "87P5-CAN247.ini"
+      ],
+      "protocol_tags": [
+        "common-flash-protocol",
+        "flash"
+      ],
+      "roles": [
+        "flash"
+      ],
+      "route_row_count": 3,
+      "sha256": "d03dc43c7224aa5bf3eab477d55eefc90c4c18c2032b616089bdab4c7050a70a",
+      "size": 17408,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKey",
+          "DiagnosticMask"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool",
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 8624
+        }
+      ],
+      "factory_identifiers": [
+        "10P5-CAN147",
+        "10P5-CAN148",
+        "10P5-CAN206",
+        "16P5-CAN13",
+        "16P5-CAN19",
+        "1P5-CAN216",
+        "1P5-CAN227",
+        "1P5-CAN86",
+        "1P5-CAN87",
+        "1P5-CAN88",
+        "23P5-CAN209",
+        "23P5-CAN66",
+        "70P5-CAN187",
+        "70P5-CAN188",
+        "70P5-CAN210",
+        "72P5-CAN13",
+        "72P5-CAN19",
+        "87P5-CAN247"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP5CanPowerTrainPrepareWriter.dll",
+      "parameter_files": [
+        "10P5-CAN147.ini",
+        "10P5-CAN148.ini",
+        "10P5-CAN206.ini",
+        "16P5-CAN13.ini",
+        "16P5-CAN19.ini",
+        "1P5-CAN216.ini",
+        "1P5-CAN227.ini",
+        "1P5-CAN86.ini",
+        "1P5-CAN87.ini",
+        "1P5-CAN88.ini",
+        "23P5-CAN209.ini",
+        "23P5-CAN66.ini",
+        "70P5-CAN187.ini",
+        "70P5-CAN188.ini",
+        "70P5-CAN210.ini",
+        "72P5-CAN13.ini",
+        "72P5-CAN19.ini",
+        "87P5-CAN247.ini"
+      ],
+      "protocol_tags": [
+        "common-prepare-protocol",
+        "p5-can-diagnostic-transport",
+        "prepare",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 18,
+      "sha256": "c8ce54595b9f577d22d24c8cfe489492c03f59ea894e2eed68f4a8b2f9a900cf",
+      "size": 16896,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKey",
+          "DiagnosticMask"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can",
+          "SetBStoECU"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameterbool"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 8208
+        }
+      ],
+      "factory_identifiers": [
+        "16P5-CAN202",
+        "16P5-CAN203"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP5CanPowerTrainPrepareWriterForBodyMicon.dll",
+      "parameter_files": [
+        "16P5-CAN202.ini",
+        "16P5-CAN203.ini"
+      ],
+      "protocol_tags": [
+        "common-prepare-protocol",
+        "p5-can-diagnostic-transport",
+        "prepare",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 2,
+      "sha256": "2c3d784965b882847518f7e165193388c4a35307bda6f7db59e54d0207935e2c",
+      "size": 16896,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKey",
+          "DiagnosticMask"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ],
+        "parameter": [
+          "GetParameters"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 8688
+        }
+      ],
+      "factory_identifiers": [
+        "82P5-CAN230"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP5CanPowerTrainPrepareWriterForSolar.dll",
+      "parameter_files": [
+        "82P5-CAN230.ini"
+      ],
+      "protocol_tags": [
+        "common-prepare-protocol",
+        "p5-can-diagnostic-transport",
+        "prepare",
+        "seed-key"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 1,
+      "sha256": "3e73eb6eb0c79e2d348e62febb13720d552b16e000b05f856bd182415c7e2f3b",
+      "size": 16896,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    },
+    {
+      "calibration_getters": [
+        "GetECUAuthKey",
+        "GetServiceAuthKey"
+      ],
+      "common_operations": {
+        "common_prepare": [
+          "0CCanCommonPrepareWriter",
+          "1CCanCommonPrepareWriter",
+          "CalcSeedKeyForSecurityUp",
+          "DiagnosticMask"
+        ],
+        "diag_comm": [
+          "0CCanDiagCommUtils",
+          "SendRequMsgAndReceiveRespMsgForP5Can"
+        ],
+        "j2534": [
+          "StartFlowControlFilter",
+          "StopFilter"
+        ]
+      },
+      "exact_recovered_commands": [],
+      "exports": [
+        {
+          "name": "StartPrepareWrite",
+          "rva": 8352
+        }
+      ],
+      "factory_identifiers": [
+        "0P5-CAN(SECURITY)302",
+        "0P5-CAN(SECURITY)303"
+      ],
+      "image_base": 268435456,
+      "name": "TCUWP5CanSecurityPowerTrainPrepareWriter.dll",
+      "parameter_files": [
+        "0P5-CAN(SECURITY)302.ini",
+        "0P5-CAN(SECURITY)303.ini"
+      ],
+      "protocol_tags": [
+        "calibration-auth-pair",
+        "common-prepare-protocol",
+        "p5-can-diagnostic-transport",
+        "prepare",
+        "security-named",
+        "security-up-aes-wrapper"
+      ],
+      "roles": [
+        "prepare"
+      ],
+      "route_row_count": 2,
+      "sha256": "07c6f2e162e347cacd0acea92f4925309f1c4e658456d0e99068034c3c1212b1",
+      "size": 16384,
+      "target_disposition": {
+        "corolla_8965H1202000": "unresolved-specialized-family",
+        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": "unresolved-specialized-family"
+      }
+    }
+  ]
+}
