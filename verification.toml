@@ -1399,6 +1399,66 @@ paths = [
 ]
 oracle = "raw_bytes"
 
+
+[suite.corolla_8965h_secoc_key_provenance]
+tests = ["tests/verify_corolla_8965H1202000_secoc_key_provenance.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_secoc_key_provenance.py",
+  "tools/build_corolla_h_secoc_key_provenance.py",
+  "tools/extract_variant_function_evidence.py",
+  "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
+  "data/generated/corolla_2023_albino_dataflash_analysis.json",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
+
+[suite.corolla_8965h_supervisor_external_ingress]
+tests = ["tests/verify_corolla_8965H1202000_supervisor_external_ingress.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_supervisor_external_ingress.py",
+  "tools/extract_corolla_h_supervisor_external_ingress_census.py",
+  "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
+  "data/generated/corolla_8965H1202000_fd_control_interface.json",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
+
+[suite.corolla_8965h_static_coverage]
+tests = ["tests/verify_corolla_8965H1202000_static_coverage.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_static_coverage.py",
+  "tools/build_corolla_h_static_coverage_matrix.py",
+  "data/generated/corolla_8965H1202000_static_coverage_matrix.json",
+  "data/generated/corolla_8965H1202000_named_function_transfer_ledger.json",
+  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
+  "data/generated/corolla_8965H1202000_application_diagnostics_diff.json",
+  "data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json",
+  "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
 [suite.external_corroboration]
 tests = ["tests/verify_external_corroboration.py"]
 paths = ["external-references.lock.json", "docs/status/"]

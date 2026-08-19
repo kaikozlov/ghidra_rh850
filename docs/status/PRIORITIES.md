@@ -222,13 +222,19 @@ hypothesis is now bounded negative: `025` is a shared pre-existing FD interface;
 B6's only signed16 scalar is staged-only under the complete direct-reference
 census; active B6 fields are supervisor gate/mode/sequence/scaling state; and the
 retained Sienna-shaped clamp input is zero-fed while `AE20` is an internal
-plausibility/status branch. Highest-value remaining H work is therefore narrower:
-use the now-complete 123-stage `0xCEDAE` ledger to trace any remaining nonzero externally sourced supervisor inputs and trace any remaining
-nonzero externally sourced supervisor inputs before assigning an H replacement
-command; trace the storage/derivation provenance of the three H SecOC runtime
-keys; and finish a generic XCP DAQ callback only if a concrete exploit question
-needs it. Those are concrete variant-transfer gaps and are not
-covered by the generic-sweep prohibition below.
+plausibility/status branch. The two remaining high-value H gaps identified there
+are now also closed at the
+firmware-static boundary. A complete generated-COM→snapshot→`0xCEDAE` ingress
+census finds no H-only/wire-changed scalar ≥12 bits and no changed shared-CAN
+field in the mapped supervisor cone; all changed surviving fields are sub-12-bit
+`0x0B6` supervisor state. Separately, all `00F/D7/B6` SecOC profiles use config
+ID/job 0 and select one protected ICU-S **slot 4**; the raw key is opaque to the
+mapped CPU command-7 path, while authenticated command 8 is the recovered refresh
+interface. The remaining H-static work should therefore be driven by the named
+coverage denominator (`462` genuinely unresolved canonical functions), prioritizing
+large target-native system/COM/orchestration or externally reachable semantics;
+generic XCP DAQ callbacks remain optional unless a concrete exploit question
+needs them.
 
 The remaining explicitly open cohort rows without a recovered ingress root are
 not reason enough for another broad sweep by themselves.

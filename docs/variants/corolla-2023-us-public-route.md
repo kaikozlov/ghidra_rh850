@@ -1292,6 +1292,215 @@ function exists elsewhere in the other image. The machine-readable ledger and
 its two compact structural-evidence files retain enough information to audit all
 123 H stages without reopening the disposable Ghidra project.
 
+
+### 7.13 SecOC key provenance: all H profiles select one protected ICU-S slot 4
+
+The H SecOC key question can now be separated cleanly into **profile selection**,
+**CPU-visible configuration**, and **opaque ICU-S key state**. The three H
+queue-1 records are `00F/D7/B6`, and target-native `secoc_rx_verify_worker @
+0x88A56` reads two generated fields from each 0x50-byte record before CMAC:
+
+```text
+record + 0x16 -> SecOC crypto-config ID
+record + 0x20 -> CryptoIf job handle
+```
+
+All three records contain **config ID 0 and job handle 0**. The per-profile
+values elsewhere in the records are therefore not separate key handles.
+
+H `secoc_rx_init @ 0x88024` installs config 0 from CodeFlash `0x2570C`. Its
+exact 20-byte value is:
+
+```text
+01 00 00 00 | 04 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+```
+
+The first word is generated config type 1. `secoc_crypto_config_set @ 0x88458`
+validates that type and copies the following 16-byte config payload into runtime
+state; the payload is **not a 16-byte AES key**: only its first byte is nonzero,
+`0x04`. The object is byte-identical to the canonical Sienna slot-4 config at
+`0x25950`.
+
+The selector flow is recovered end-to-end rather than inferred from that shape:
+
+1. `0x88A56` fetches config 0 and submits CryptoIf job 0.
+2. `cryptoif_job_begin @ 0x82F6A` requires config type 1 and stores the config
+   pointer at `FEBF1274`.
+3. `cryptoif_job_finish @ 0x82FA8` forwards that pointer through generic driver
+   dispatch `0x82956`.
+4. `icus_command7_prepare @ 0x822D0` requires `*config == 1` and copies
+   **config byte +4**—the `0x04` above—into ICU request descriptor word 4.
+5. `icus_command7_cmac_verify @ 0x83BF4` requires descriptor word 4 `< 0x0F`
+   and writes `(word4 << 16) | 7` to `ICUSCMD`.
+
+Thus the application asks ICU-S command 7 to verify with **protected slot 4**.
+No 16-byte raw key is copied into the command-7 CPU request descriptor. Because
+all three H profiles use config 0 / job 0, the correct static model is **one
+shared slot-4 key selection for `00F/D7/B6`**, not three independently selected
+runtime keys.
+
+The disabled H known-answer path independently corroborates the selector. H
+`0x62430` invokes job 0 using another exact `{type=1, selector=4}` config at
+`0x215B0`, but its fixed compile gate `CodeFlash[0x2CA9F]` is `0x00`, not
+`0x5A`, so the KAT body is inactive and places no constraint on the current live
+slot-4 key value.
+
+#### Provisioning/refresh is package-authenticated, not a raw application key write
+
+The separately recovered ICU-S command-8 path survives on H. `0x81262` requires
+exactly 64 input bytes and stages them as `16 + 32 + 16`; `0x83D7A` launches
+`ICUSCMD=8`; success returns 48 bytes. The CPU-side command-8 descriptor carries
+pointers/lengths for that authenticated package and has **no fixed raw target-slot
+selector field analogous to command 7**. In the already established SHE-style
+M1/M2/M3 memory-update model, target/key identity is authenticated inside the
+package rather than supplied as a plaintext application key buffer.
+
+That provides a concrete firmware-static lifecycle model:
+
+```text
+boot / normal SecOC:
+  install {type=1, slot=4} selector config
+  -> verify using opaque ICU-S slot 4
+
+provision / refresh:
+  authenticated 64-byte command-8 package
+  -> ICU-S protected key-update machinery
+```
+
+No mapped H SecOC initialization path loads or derives 16 raw key bytes in CPU
+software before command 7.
+
+#### DataFlash does not expose the live key as an obvious CPU-visible 16-byte value
+
+The contributor's 32 KiB DataFlash snapshot has a committed exhaustive raw-window
+scan with **23,277 tested unique 16-byte candidates and zero matches** against the
+retained SecOC oracle set. That tracked artifact does not independently preserve
+the richer temporary per-domain/simple-transform scan, so those stronger negatives
+are not carried forward here.
+
+That negative is useful but remains correctly bounded: CAN collection and
+DataFlash dumping were separate jobs/epochs, so it excludes an exact raw candidate
+in the tested snapshot, not transformed/derived values, arbitrary KDFs, or
+undocumented ICU-S-internal storage. Combined with the command-7 path, however,
+the strongest
+static model is now straightforward: **the application selects protected ICU-S
+slot 4; the raw slot-4 AES key is opaque to the mapped CPU verification path and
+can be refreshed through authenticated command 8.**
+
+Machine-readable evidence is in
+`data/generated/corolla_8965H1202000_secoc_key_provenance.json` and the compact
+H-native function set
+`data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json`.
+`tests/verify_corolla_8965H1202000_secoc_key_provenance.py` regenerates and pins
+the result.
+
+
+### 7.14 External supervisor ingress: no hidden H command-sized wire field remains in the mapped COM path
+
+The final steering-ingress pass removes one remaining loophole in the earlier
+argument. It is not enough to observe that `0x0B6` is the only new CAN ID: H
+could in principle have reused a Sienna CAN ID while changing one field into a
+new command. The complete generated-COM provenance census therefore compares
+**wire fields**, not signal numbers or names.
+
+For every H scalar receive call, the census resolves:
+
+```text
+CAN ID + relative PDU byte + bit length + bit offset + signedness
+    -> raw COM destination
+    -> periodic FEBEF* staging destination
+    -> FEBEAD*/FEBEAE* supervisor snapshot
+    -> direct reference inside the CEDAE call cone
+```
+
+The same wire tuple is reconstructed independently from Sienna's generated COM
+configuration. An H field is classified `shared_wire_field` only when the same
+CAN ID carries the same relative byte/bit/signed shape on Sienna. This catches
+CAN-ID reuse with changed field geometry.
+
+Two closure conditions are then enforced by the extraction tool and regression:
+
+1. **Every H-only or H-wire-changed scalar that reaches the mapped supervisor
+   cone comes from `0x0B6`.** No changed field on a shared non-B6 CAN ID survives
+   the generated raw→staging→snapshot provenance into the supervisor.
+2. **No H-only/wire-changed scalar of 12 bits or wider reaches that cone.** In
+   particular, B6's signed-16 signal 255 is absent from the resulting consumer
+   census, agreeing with the independent §7.11 direct-xref negative.
+
+The B6 fields that *do* survive are the already classified sub-12-bit
+supervisory inputs: gate, mode/table selector, modulo/sequence delta,
+percentage/scaling inputs, and validity/status. Non-B6 supervisor inputs that
+survive the census are wire-shape matches to Sienna's corresponding CAN fields;
+shared FD `0x025` remains a shared field source rather than an H-only transport.
+
+This closes the static **obvious replacement-command ingress** question much
+more strongly than an ID census alone. Within the mapped scalar COM path feeding
+`0xCEDAE`, H has neither:
+
+- a new/reformatted large torque/angle-like scalar on a shared CAN ID; nor
+- an active large scalar on H-only `0x0B6`.
+
+Combined with the raw removal of `2E4/131`, the order-unpaired Sienna `0x131`
+angle stage, and the zero-fed retained torque clamp branch, the supported static
+interpretation is that this exact H calibration **does not expose a recovered
+Sienna-style external steering-command mode through its mapped application COM
+supervisor ingress**. That statement is intentionally narrower than "the EPS
+cannot be commanded": opaque/group signals, computed-pointer flows outside the
+modeled generated-copy chain, undocumented hardware paths, or a different ECU
+remain separate hypotheses. The normal local motor/assist control system is also
+unaffected by this negative.
+
+The machine-readable census is
+`data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json`,
+generated by `tools/extract_corolla_h_supervisor_external_ingress_census.py` from
+the complete target-native H decompiler corpus. Every cited consumer and source
+unpacker carries an exact raw-body SHA-256 so
+`tests/verify_corolla_8965H1202000_supervisor_external_ingress.py` can bind the
+tracked result back to the immutable H CodeFlash without committing the full
+disposable corpus.
+
+### 7.15 Named-function coverage denominator
+
+The cross-variant work now has an explicit **coverage denominator** rather than
+using the raw function-body diff as a proxy for semantic understanding. The
+canonical Sienna project contains 1,113 semantically named CodeFlash functions.
+The H coverage overlay classifies them only when tracked evidence justifies the
+promotion:
+
+```text
+named canonical functions                 1113
+verified exact-body transfers              288
+target-native inspected unique-shape       23
+complete target-surface recensuses          227
+structural candidates only                  113
+genuinely unresolved                        462
+```
+
+`target-native inspected unique-shape` means a unique complete-instruction-shape
+H candidate is also present in one of the committed compact H-native decompiler
+evidence sets. `target-surface recensused` is different: the old S function may
+not have a one-to-one H homolog, but the entire foreign generated surface has
+been independently enumerated—for example all H RDBI producers, all 19
+RoutineControl callback rows, or every direct stage in the 94→123 steering
+supervisor comparison. A raw structural candidate with no later H-native evidence
+stays structural-only. Everything else remains genuinely unresolved.
+
+This matrix is intentionally conservative. It does **not** mean every promoted
+function has an OEM-level semantic name, and it does not turn domain-wide
+findings into one-to-one function equivalence. Conversely, a canonical function
+that disappeared because H regenerated the whole table should not remain counted
+as an unexplained firmware difference merely because its exact body no longer
+exists. H-native functions with no unique canonical S pair are counted separately
+(320 currently have
+tracked target-native evidence) rather than being forced into the 1,113-function
+Sienna denominator.
+
+The machine-readable owner is
+`data/generated/corolla_8965H1202000_static_coverage_matrix.json`; it joins the
+raw transfer ledger, the unique structural map, compact H-native evidence sets,
+and the explicitly complete RDBI/RoutineControl/supervisor censuses.
+`tests/verify_corolla_8965H1202000_static_coverage.py` pins the promotion rules.
+
 ## 8. Remaining evidence boundary
 
 The new corpus closes CodeFlash identity and much of the firmware-static
@@ -1299,8 +1508,7 @@ transfer question, but it still does **not** provide:
 
 - a direct UDS `F181` transcript from the same acquisition;
 - a stock passive `carFw` inventory joining the public route to the firmware;
-- proof of where the `0x00F` / `0x0D7` / `0x0B6` runtime authentication keys are
-  stored or derived;
+- proof of where the selected slot-4 key value is physically stored or internally derived inside ICU-S;
 - same-runtime-epoch proof between the CAN oracles and any DataFlash read;
 - proof that this `8965H1202000` specimen is architecturally identical to
   Span's separately probed `8965F1208000` Corolla.

@@ -1800,3 +1800,20 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   §7.12; `tests/verify_corolla_8965H1202000_steering_supervisor.py`.
+
+### CORR-075 — H `00F/D7/B6` do not select three independent SecOC keys
+
+- **Earlier shorthand:** remaining H work referred to the "three H SecOC runtime
+  keys," using the three configured authentication profiles as if each implied a
+  separate key.
+- **Correct:** all three H queue records carry SecOC crypto-config ID `0` and
+  CryptoIf job handle `0`. Config 0 is `{type=1, selector=4}`. The recovered
+  CryptoIf/command-7 path copies selector `4` into the ICU request and writes
+  `(4 << 16) | 7` to `ICUSCMD`. The application therefore selects **one shared
+  protected ICU-S slot 4** for `00F/D7/B6`.
+- **Boundary:** this identifies the selected protected slot, not the raw AES key
+  value or undocumented ICU-S-internal storage/derivation. DataFlash raw-key
+  negatives retain their capture-epoch caveat.
+- **Canonical:**
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
+  §7.13; `tests/verify_corolla_8965H1202000_secoc_key_provenance.py`.

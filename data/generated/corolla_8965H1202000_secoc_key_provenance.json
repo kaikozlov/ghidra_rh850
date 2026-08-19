@@ -1,0 +1,129 @@
+{
+  "command7_cpu_to_icus_path": {
+    "cmac_submit": "0x88986",
+    "config_get": "0x884AA",
+    "config_set": "0x88458",
+    "crypto_driver_dispatch": "0x82956",
+    "cryptoif_begin": "0x82F6A",
+    "cryptoif_finish": "0x82FA8",
+    "icus_command7": "0x83BF4",
+    "icus_command7_prepare": "0x822D0",
+    "raw_key_bytes_in_cpu_command_descriptor": false,
+    "secoc_rx_init": "0x88024",
+    "selector_flow": [
+      "CodeFlash[0x2570C] config0 = type1 + selector4 + zero padding",
+      "secoc_rx_init installs config0",
+      "every H queue record references config0 and CryptoIf job0",
+      "CryptoIf begin stores the config pointer and finish forwards it through driver dispatch",
+      "command7 prepare copies config byte +4 into descriptor word4",
+      "command7 validates descriptor word4 < 15 and writes (word4 << 16) | 7 to ICUSCMD"
+    ],
+    "verify_worker": "0x88A56"
+  },
+  "command8_key_update": {
+    "conclusion": "the CPU forwards the authenticated 64-byte key-update package to ICU-S command 8; no fixed slot is selected by the CPU-side command descriptor, so target/key identity remains package-authenticated rather than a raw application key write",
+    "configured_submit_worker": "0x62574",
+    "driver": "0x83D7A",
+    "fixed_cpu_side_target_slot_selector": null,
+    "icus_command": 8,
+    "prepare": "0x81262",
+    "request_length": 64,
+    "staging_shape": [
+      16,
+      32,
+      16
+    ],
+    "success_output_length": 48
+  },
+  "dataflash_raw_key_negative": {
+    "boundary": "The DataFlash dump and retained CAN oracle are contributor artifacts and are not proven same-runtime-epoch. The scan excludes an exact raw 16-byte candidate among the 23,277 tested windows; it does not exclude transformed/derived values or ICU-S-internal storage.",
+    "candidates_tested": 23277,
+    "capture_summary": {
+      "buses_with_sync": [
+        1
+      ],
+      "counts": {
+        "bus1:0x00F": 588,
+        "bus1:0x116": 2499,
+        "bus1:0x24D": 59
+      },
+      "orphan_protected": {
+        "bus1:0x116": 3
+      }
+    },
+    "interpretation": "the committed exhaustive raw-window scan found zero candidate matches; this supports absence of an obvious CPU-visible raw key in the supplied DataFlash snapshot, not absence of derivation or protected hardware storage",
+    "matches": [],
+    "min_entropy": 0.0,
+    "snapshot_sha256": "8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299"
+  },
+  "decompiler_evidence": {
+    "function_count": 22,
+    "path": "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",
+    "sha256": "5233f222002644f854c8161e70306f3d89e6e0edfa0df5714154092cb180f851"
+  },
+  "evidence_boundary": "Static CPU/application proof: all configured H SecOC queue records select one generated config/job, whose config is {type=1, selector=4}; CryptoIf forwards that object into the command-7 descriptor and ICUSCMD receives selector 4. No 16-byte raw key is passed through the command-7 CPU descriptor. This does not reveal undocumented ICU-S internal storage/derivation. DataFlash raw-key negatives retain their acquisition-epoch boundary.",
+  "images": {
+    "corolla_h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "schema": "corolla-8965H1202000-secoc-key-provenance-v1",
+  "secoc_records": [
+    {
+      "address": "0x2572C",
+      "application_pdu_id": 9,
+      "can_id": "0x00F",
+      "cryptoif_job_handle": 0,
+      "index": 0,
+      "profile_word_0x10": "0x00000000",
+      "secoc_crypto_config_id": 0,
+      "secured_length": 8
+    },
+    {
+      "address": "0x2577C",
+      "application_pdu_id": 40,
+      "can_id": "0x0D7",
+      "cryptoif_job_handle": 0,
+      "index": 1,
+      "profile_word_0x10": "0x00010001",
+      "secoc_crypto_config_id": 0,
+      "secured_length": 32
+    },
+    {
+      "address": "0x257CC",
+      "application_pdu_id": 42,
+      "can_id": "0x0B6",
+      "cryptoif_job_handle": 0,
+      "index": 2,
+      "profile_word_0x10": "0x00020001",
+      "secoc_crypto_config_id": 0,
+      "secured_length": 32
+    }
+  ],
+  "shared_crypto_selection": {
+    "conclusion": "00F, 0D7, and 0B6 share one ICU-S slot-4 authentication key selection; the firmware does not select three independent keys for these profiles",
+    "config_bytes": "0100000004000000000000000000000000000000",
+    "config_object_address": "0x2570C",
+    "config_type": 1,
+    "cryptoif_job_handle": 0,
+    "icus_slot_selector": 4,
+    "same_bytes_as_sienna": true,
+    "secoc_crypto_config_id": 0,
+    "sienna_config_address": "0x25950"
+  },
+  "slot4_kat": {
+    "compile_gate_address": "0x2CA9F",
+    "compile_gate_value": 0,
+    "config_address": "0x215B0",
+    "config_bytes": "0100000004000000000000000000000000000000",
+    "enabled": false,
+    "meaning": "disabled known-answer path independently corroborates job0/config type1/slot4 but places no constraint on the live slot-4 key value"
+  },
+  "static_storage_derivation_conclusion": {
+    "best_static_model": "mapped application SecOC init selects protected ICU-S slot 4; key value is opaque to command-7 CPU software and can be refreshed through authenticated ICU-S command-8 package handling",
+    "cpu_visible_raw_slot4_key": false,
+    "cpu_visible_slot4_selector": true,
+    "mapped_secoc_init_key_derivation_found": false,
+    "mapped_secoc_init_raw_key_load_found": false,
+    "provisioning_interface_found": true
+  }
+}

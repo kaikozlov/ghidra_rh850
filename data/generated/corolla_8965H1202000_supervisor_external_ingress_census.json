@@ -1,0 +1,965 @@
+{
+  "evidence_boundary": "Complete scalar generated-COM -> raw/staging/snapshot direct-reference census over the supplied target-native H decompiler corpus and CEDAE call cone to depth 5. Direct-reference and generated-copy proof does not exclude opaque/computed-pointer flows outside this model.",
+  "external_refs": [
+    {
+      "address": 4273909232,
+      "bitoff": 0,
+      "bits": 12,
+      "can": 37,
+      "consumer": 779546,
+      "consumer_body_sha256": "ea41ecfbfd7eb4a3c1c8b7b02de8d8da43d5d691212c3b4b9abaf6f0883d11da",
+      "consumer_body_size": 166,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        779546
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        221
+      ],
+      "signal": 184,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908933,
+      "bitoff": 4,
+      "bits": 4,
+      "can": 37,
+      "consumer": 779546,
+      "consumer_body_sha256": "ea41ecfbfd7eb4a3c1c8b7b02de8d8da43d5d691212c3b4b9abaf6f0883d11da",
+      "consumer_body_size": 166,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        779546
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        222
+      ],
+      "signal": 185,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908963,
+      "bitoff": 6,
+      "bits": 1,
+      "can": 144,
+      "consumer": 779712,
+      "consumer_body_sha256": "d33479e51e3f0e364b05e5c0a82dfa5fc93fdb86c86b051824428110d07e59ae",
+      "consumer_body_size": 86,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        780250,
+        779712
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        275
+      ],
+      "signal": 231,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "909912975ee324e5cce6c1cc2a05d87a6026ad579bbb1f6750959e0655460a88",
+          "body_size": 362,
+          "entry": 288652
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908964,
+      "bitoff": 7,
+      "bits": 1,
+      "can": 144,
+      "consumer": 779712,
+      "consumer_body_sha256": "d33479e51e3f0e364b05e5c0a82dfa5fc93fdb86c86b051824428110d07e59ae",
+      "consumer_body_size": 86,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        780250,
+        779712
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        274
+      ],
+      "signal": 230,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "909912975ee324e5cce6c1cc2a05d87a6026ad579bbb1f6750959e0655460a88",
+          "body_size": 362,
+          "entry": 288652
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908930,
+      "bitoff": 7,
+      "bits": 1,
+      "can": 37,
+      "consumer": 779880,
+      "consumer_body_sha256": "84eca1d9883e38193986fbaa99c5b71270bc6ea4429d50d9a38e5605be37c784",
+      "consumer_body_size": 52,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        780250,
+        779880
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        218
+      ],
+      "signal": 181,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908932,
+      "bitoff": 5,
+      "bits": 1,
+      "can": 37,
+      "consumer": 779880,
+      "consumer_body_sha256": "84eca1d9883e38193986fbaa99c5b71270bc6ea4429d50d9a38e5605be37c784",
+      "consumer_body_size": 52,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        780250,
+        779880
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        220
+      ],
+      "signal": 183,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908930,
+      "bitoff": 7,
+      "bits": 1,
+      "can": 37,
+      "consumer": 779932,
+      "consumer_body_sha256": "43664676f8f7f9d1c4f976c64ecca860de0569f8c572e969262136f702db2b32",
+      "consumer_body_size": 44,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        780250,
+        779932
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        218
+      ],
+      "signal": 181,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908932,
+      "bitoff": 5,
+      "bits": 1,
+      "can": 37,
+      "consumer": 779932,
+      "consumer_body_sha256": "43664676f8f7f9d1c4f976c64ecca860de0569f8c572e969262136f702db2b32",
+      "consumer_body_size": 44,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        780250,
+        779932
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        220
+      ],
+      "signal": 183,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908936,
+      "bitoff": 7,
+      "bits": 1,
+      "can": 170,
+      "consumer": 779976,
+      "consumer_body_sha256": "1e64fcfe22ad75f73eeb0b3aa33da9c57021155337c0403cb764673d1ab647d2",
+      "consumer_body_size": 48,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        780250,
+        779976
+      ],
+      "fd": false,
+      "s_same_shape_signals": [
+        230
+      ],
+      "signal": 191,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "b9c98ee7acdaa83aa7031bdcc0958146df8bf51ad3ad4635d3eb081e55444923",
+          "body_size": 328,
+          "entry": 287830
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908937,
+      "bitoff": 7,
+      "bits": 1,
+      "can": 170,
+      "consumer": 779976,
+      "consumer_body_sha256": "1e64fcfe22ad75f73eeb0b3aa33da9c57021155337c0403cb764673d1ab647d2",
+      "consumer_body_size": 48,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        780250,
+        779976
+      ],
+      "fd": false,
+      "s_same_shape_signals": [
+        232
+      ],
+      "signal": 193,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "b9c98ee7acdaa83aa7031bdcc0958146df8bf51ad3ad4635d3eb081e55444923",
+          "body_size": 328,
+          "entry": 287830
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 2,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908938,
+      "bitoff": 7,
+      "bits": 1,
+      "can": 170,
+      "consumer": 779976,
+      "consumer_body_sha256": "1e64fcfe22ad75f73eeb0b3aa33da9c57021155337c0403cb764673d1ab647d2",
+      "consumer_body_size": 48,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        780250,
+        779976
+      ],
+      "fd": false,
+      "s_same_shape_signals": [
+        234
+      ],
+      "signal": 195,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "b9c98ee7acdaa83aa7031bdcc0958146df8bf51ad3ad4635d3eb081e55444923",
+          "body_size": 328,
+          "entry": 287830
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908939,
+      "bitoff": 7,
+      "bits": 1,
+      "can": 170,
+      "consumer": 779976,
+      "consumer_body_sha256": "1e64fcfe22ad75f73eeb0b3aa33da9c57021155337c0403cb764673d1ab647d2",
+      "consumer_body_size": 48,
+      "consumer_path": [
+        847278,
+        785362,
+        784182,
+        780674,
+        780250,
+        779976
+      ],
+      "fd": false,
+      "s_same_shape_signals": [
+        236
+      ],
+      "signal": 197,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "b9c98ee7acdaa83aa7031bdcc0958146df8bf51ad3ad4635d3eb081e55444923",
+          "body_size": 328,
+          "entry": 287830
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 6,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273909232,
+      "bitoff": 0,
+      "bits": 12,
+      "can": 37,
+      "consumer": 794998,
+      "consumer_body_sha256": "95109162ebe0c79fc44986d12f15a0c0bdf7067d21fcd0a7dce4af8534566b2d",
+      "consumer_body_size": 288,
+      "consumer_path": [
+        847278,
+        795286,
+        794998
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        221
+      ],
+      "signal": 184,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908933,
+      "bitoff": 4,
+      "bits": 4,
+      "can": 37,
+      "consumer": 794998,
+      "consumer_body_sha256": "95109162ebe0c79fc44986d12f15a0c0bdf7067d21fcd0a7dce4af8534566b2d",
+      "consumer_body_size": 288,
+      "consumer_path": [
+        847278,
+        795286,
+        794998
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        222
+      ],
+      "signal": 185,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908932,
+      "bitoff": 5,
+      "bits": 1,
+      "can": 37,
+      "consumer": 795286,
+      "consumer_body_sha256": "6258a8384f057f730e2acd1ca4dfe78a53350b850914c9b74cd475e4ce1aa3d5",
+      "consumer_body_size": 322,
+      "consumer_path": [
+        847278,
+        795286
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        220
+      ],
+      "signal": 183,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908952,
+      "bitoff": 3,
+      "bits": 1,
+      "can": 257,
+      "consumer": 809524,
+      "consumer_body_sha256": "e45f2c91ed48819a5f6ed903b6816b2c851455e167c2843d921ab087b242d93c",
+      "consumer_body_size": 100,
+      "consumer_path": [
+        847278,
+        810392,
+        809524
+      ],
+      "fd": false,
+      "s_same_shape_signals": [
+        242
+      ],
+      "signal": 203,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "d8ed5160f56dc69a05cf2e998a80bcddc28570932a1e71b6f3119d96a81aa527",
+          "body_size": 96,
+          "entry": 288162
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908942,
+      "bitoff": 3,
+      "bits": 1,
+      "can": 213,
+      "consumer": 815814,
+      "consumer_body_sha256": "a442e5fabc273837ad9c59d1fe7875a3b9820c06b323aced2d143ab2d5db16dc",
+      "consumer_body_size": 234,
+      "consumer_path": [
+        847278,
+        815814
+      ],
+      "fd": false,
+      "s_same_shape_signals": [
+        251
+      ],
+      "signal": 208,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "dfc7112612109dde43e499bebdb12ddd11166055ba38c243727fb23c467c4a7e",
+          "body_size": 130,
+          "entry": 288262
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908942,
+      "bitoff": 3,
+      "bits": 1,
+      "can": 213,
+      "consumer": 816048,
+      "consumer_body_sha256": "756fb61a9cabbb5c440f43cd3d58e1bd7e302aaf18af13782781644610a4a535",
+      "consumer_body_size": 216,
+      "consumer_path": [
+        847278,
+        816048
+      ],
+      "fd": false,
+      "s_same_shape_signals": [
+        251
+      ],
+      "signal": 208,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "dfc7112612109dde43e499bebdb12ddd11166055ba38c243727fb23c467c4a7e",
+          "body_size": 130,
+          "entry": 288262
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273909185,
+      "bitoff": 7,
+      "bits": 1,
+      "can": 182,
+      "consumer": 819614,
+      "consumer_body_sha256": "44a116dfff978f098fbd458a6466d355d7c730841013ca5038e028c64adbdc63",
+      "consumer_body_size": 188,
+      "consumer_path": [
+        847278,
+        820060,
+        819614
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 264,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 10,
+      "wire_class": "h_only_can"
+    },
+    {
+      "address": 4273909186,
+      "bitoff": 6,
+      "bits": 2,
+      "can": 182,
+      "consumer": 821714,
+      "consumer_body_sha256": "dc7d211b96c4988dafd4b8b2db7b3a66bab229b3d112f2a770e84c99078c2f94",
+      "consumer_body_size": 304,
+      "consumer_path": [
+        847278,
+        821714
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 260,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 7,
+      "wire_class": "h_only_can"
+    },
+    {
+      "address": 4273908932,
+      "bitoff": 5,
+      "bits": 1,
+      "can": 37,
+      "consumer": 831576,
+      "consumer_body_sha256": "aa397145bf2579b18c7745aa71bab5d1d5ff08ee6753ec09dbf63540512168af",
+      "consumer_body_size": 36,
+      "consumer_path": [
+        847278,
+        831798,
+        831576
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        220
+      ],
+      "signal": 183,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273909180,
+      "bitoff": 0,
+      "bits": 6,
+      "can": 182,
+      "consumer": 832070,
+      "consumer_body_sha256": "a70f6921b1b896c51a38b0fbde8a5abedb33555c2afbb0fcb3b42bf076d5d8c2",
+      "consumer_body_size": 76,
+      "consumer_path": [
+        847278,
+        832898,
+        832070
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 261,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 7,
+      "wire_class": "h_only_can"
+    },
+    {
+      "address": 4273908950,
+      "bitoff": 5,
+      "bits": 1,
+      "can": 315,
+      "consumer": 832146,
+      "consumer_body_sha256": "b1b24caeace1079860b29c441719ec4ea16c0df54c6ddcc02e97fe3442b857a6",
+      "consumer_body_size": 78,
+      "consumer_path": [
+        847278,
+        832898,
+        832146
+      ],
+      "fd": false,
+      "s_same_shape_signals": [
+        264
+      ],
+      "signal": 220,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "f966abf75a955b05d09ad9741976424a5b25be0ea2600a9617fe93c2adb64c2d",
+          "body_size": 252,
+          "entry": 288396
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 2,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273909268,
+      "bitoff": 0,
+      "bits": 12,
+      "can": 37,
+      "consumer": 832224,
+      "consumer_body_sha256": "f5283041756c0934d3e4e528438913ad1c14856eda856ceca22c9ef43802704e",
+      "consumer_body_size": 180,
+      "consumer_path": [
+        847278,
+        832898,
+        832584,
+        832224
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        223
+      ],
+      "signal": 186,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273909232,
+      "bitoff": 0,
+      "bits": 12,
+      "can": 37,
+      "consumer": 834942,
+      "consumer_body_sha256": "e933cf89ef424526096c82c81af343c40197f90b01417b021b1b3d442212631f",
+      "consumer_body_size": 240,
+      "consumer_path": [
+        847278,
+        831798,
+        834942
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        221
+      ],
+      "signal": 184,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 0,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273909268,
+      "bitoff": 0,
+      "bits": 12,
+      "can": 37,
+      "consumer": 834942,
+      "consumer_body_sha256": "e933cf89ef424526096c82c81af343c40197f90b01417b021b1b3d442212631f",
+      "consumer_body_size": 240,
+      "consumer_path": [
+        847278,
+        831798,
+        834942
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        223
+      ],
+      "signal": 186,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273908933,
+      "bitoff": 4,
+      "bits": 4,
+      "can": 37,
+      "consumer": 834942,
+      "consumer_body_sha256": "e933cf89ef424526096c82c81af343c40197f90b01417b021b1b3d442212631f",
+      "consumer_body_size": 240,
+      "consumer_path": [
+        847278,
+        831798,
+        834942
+      ],
+      "fd": true,
+      "s_same_shape_signals": [
+        222
+      ],
+      "signal": 185,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "eafcd511ed972fd830621291bb2a7a98054687b274d3529319f2a104a85c2f66",
+          "body_size": 232,
+          "entry": 287594
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "shared_wire_field"
+    },
+    {
+      "address": 4273909179,
+      "bitoff": 2,
+      "bits": 1,
+      "can": 182,
+      "consumer": 835310,
+      "consumer_body_sha256": "82dca8e1b3e15dc005b67329d83f671da6237293ac4d19ca4ab87ef77433c093",
+      "consumer_body_size": 224,
+      "consumer_path": [
+        847278,
+        830782,
+        830748,
+        830500,
+        829760,
+        835310
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 258,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 6,
+      "wire_class": "h_only_can"
+    },
+    {
+      "address": 4273909182,
+      "bitoff": 0,
+      "bits": 8,
+      "can": 182,
+      "consumer": 835534,
+      "consumer_body_sha256": "6a99c0c71b793b6dbf5c5099dcc3a37d0cb29b25633922e9761e1046716dedb1",
+      "consumer_body_size": 448,
+      "consumer_path": [
+        847278,
+        830782,
+        830748,
+        835534
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 263,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 9,
+      "wire_class": "h_only_can"
+    },
+    {
+      "address": 4273909181,
+      "bitoff": 0,
+      "bits": 8,
+      "can": 182,
+      "consumer": 836674,
+      "consumer_body_sha256": "ccc08ba834e91cdcda69aecf967c56000067eddb095471784f2b5f5006994790",
+      "consumer_body_size": 170,
+      "consumer_path": [
+        847278,
+        830782,
+        837272,
+        836674
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 262,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 8,
+      "wire_class": "h_only_can"
+    }
+  ],
+  "images": {
+    "corolla_h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "potential_changed_large_fields": [],
+  "schema": "corolla-8965H1202000-supervisor-external-ingress-census-v1",
+  "source_corpora": {
+    "corolla_h": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+    "corolla_h_sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539",
+    "sienna": "data/generated/decompilations.jsonl",
+    "sienna_sha256": "5879534a813f8162b6c12c00183cb6c284a68dac2c5218dd25b9265010da392c"
+  },
+  "summary": {
+    "can_counts": {
+      "0x101": 1,
+      "0x13b": 1,
+      "0x25": 14,
+      "0x90": 2,
+      "0xaa": 4,
+      "0xb6": 6,
+      "0xd5": 2
+    },
+    "external_refs": 30,
+    "external_signals": 20,
+    "h_com_snapshot_cells": 32,
+    "h_com_stage_cells": 90,
+    "h_cone_functions": 303,
+    "h_offset_table": "0x22788",
+    "h_scalar_rx_calls": 101,
+    "potential_changed_large_fields": 0,
+    "s_offset_table": "0x228e4",
+    "wire_class_counts": {
+      "h_only_can": 6,
+      "shared_wire_field": 24
+    }
+  }
+}

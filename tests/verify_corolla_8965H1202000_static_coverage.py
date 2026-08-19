@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+"""Verify the evidence-graded named-function coverage denominator."""
+from __future__ import annotations
+import json, subprocess, sys, tempfile
+from pathlib import Path
+REPO=Path(__file__).resolve().parents[1]
+ART=REPO/'data/generated/corolla_8965H1202000_static_coverage_matrix.json'
+TOOL=REPO/'tools/build_corolla_h_static_coverage_matrix.py'
+passed=failed=0
+def check(name,cond,detail=''):
+ global passed,failed
+ ok=bool(cond);passed+=int(ok);failed+=int(not ok);s=f' ({detail})' if detail else ''
+ print(f"[{'PASS' if ok else 'FAIL'}][raw_bytes] {name}{s}")
+with tempfile.TemporaryDirectory() as td:
+ out=Path(td)/'coverage.json';subprocess.run([sys.executable,str(TOOL),'--out',str(out)],cwd=REPO,check=True,stdout=subprocess.DEVNULL)
+ check('tracked coverage matrix regenerates exactly',out.read_bytes()==ART.read_bytes())
+d=json.loads(ART.read_text());s=d['summary'];rows=d['functions']
+print('\n== denominator ==')
+check('matrix covers all 1113 named canonical functions',s['named_function_count']==1113==len(rows))
+check('coverage counts sum to denominator',sum(s['coverage_counts'].values())==1113)
+check('all 288 exact named transfers remain verified exact',s['coverage_counts']['verified-exact-body-transfer']==288)
+check('some changed/structural entries are promoted only by later evidence',s['coverage_counts'].get('target-native-inspected-unique-shape',0)>0 and s['coverage_counts'].get('target-surface-recensused',0)>0)
+check('matrix retains a genuine unresolved residue',0<s['genuinely_unresolved_count']<689)
+check('matrix retains structural-only candidates rather than auto-promoting them',s['structural_candidate_only_count']>0)
+print('\n== promotion evidence discipline ==')
+check('target-native-inspected rows always name evidence files',all(r['target_native_evidence_files'] for r in rows if r['coverage']=='target-native-inspected-unique-shape'))
+check('surface-recensused rows always name an explicit complete recensus',all(r['surface_recensus'] for r in rows if r['coverage']=='target-surface-recensused'))
+check('structural-only rows have no target-native evidence',all(not r['target_native_evidence_files'] for r in rows if r['coverage']=='structural-candidate-only'))
+check('genuinely unresolved rows have neither target-native evidence nor surface recensus',all(not r['target_native_evidence_files'] and not r['surface_recensus'] for r in rows if r['coverage']=='genuinely-unresolved'))
+check('H-native inspected additions without unique S pair are counted separately',s['h_native_evidence_functions_without_unique_sienna_pair']>0)
+print(f'\nResults: {passed} passed, {failed} failed')
+raise SystemExit(1 if failed else 0)

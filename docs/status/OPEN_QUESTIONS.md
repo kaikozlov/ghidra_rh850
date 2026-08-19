@@ -305,12 +305,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   signed16 scalar is staged-only under the complete direct-reference census;
   active B6 fields are gate/mode/sequence/scaling/validity state; and the retained
   Sienna-shaped clamp branch reads zero-fed `AE12`, while internal `AE20` is a
-  plausibility/status path. Remaining H-static work is narrower: classify every
-  H-only/reordered `0xCEDAE` orchestration stage, trace any remaining nonzero
-  externally sourced supervisor inputs before assigning an H replacement command,
-  finish non-steering generic DAQ/XCP callbacks only if an exploit question
-  requires them, and identify the storage/derivation provenance of the three H
-  SecOC runtime keys. If revisited dynamically, record
+  plausibility/status path. The H-only/reordered `0xCEDAE` stage ledger is now
+  complete, and the mapped generated-COM ingress has no H-only/wire-changed scalar
+  ≥12 bits; the only changed surviving fields are sub-12-bit B6 supervisory inputs.
+  SecOC provenance is also closed at the CPU↔ICU-S boundary: `00F/D7/B6` share
+  config/job 0 and protected slot 4, with no raw key in the mapped command-7 CPU
+  descriptor and authenticated command 8 as the recovered refresh interface.
+  Remaining H-static work is now the explicit named-function residue in the
+  coverage matrix rather than those two old transfer questions; generic DAQ/XCP
+  callbacks remain optional unless an exploit hypothesis needs them. If revisited
+  dynamically, record
   direct F181 plus full-bus and Panda health on both normal-CAN1 and OBD routes
   immediately around the programming transition, then repeat the memory/capture
   epoch join. Route metadata remains forced `TOYOTA_COROLLA_TSS2` with no `carFw`,
