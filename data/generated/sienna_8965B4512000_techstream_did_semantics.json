@@ -1,0 +1,245 @@
+{
+  "boundary": "Techstream names are carried by exact primary Data ID identity plus Sienna target-native callback/dataflow. 1C02 names a general internal command-value torque observable; it is not intrinsically a specific external steering-CAN field.",
+  "dids": [
+    {
+      "callback": "0x0004D71C",
+      "callback_sha256": "15563eaa44dabcbcd4f3be9059c1f5280ed0822481e369e12bafffcfa2d0dd52",
+      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "did": "0x1151",
+      "monitor_key": 251,
+      "observer_cell": "0xFEBE66E6",
+      "role": "actual_q_current",
+      "semantic": "Motor Actual Current (Q Axis)",
+      "size": 60,
+      "source_chain": [
+        "0xFEBE66E6",
+        "0xFEBE6D1A"
+      ],
+      "techstream_alternate_data_id": null,
+      "techstream_name": "Motor Actual Current (Q Axis)",
+      "techstream_primary_data_id": "0x1151",
+      "techstream_record_sha256": null,
+      "unit": "A"
+    },
+    {
+      "callback": "0x0004D758",
+      "callback_sha256": "77610d459be494531313efd2e34952d130e96ba3a89cf58c76b67287244f6d93",
+      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "did": "0x1152",
+      "monitor_key": 252,
+      "observer_cell": "0xFEBE66FC",
+      "role": "command_q_current",
+      "semantic": "Command Value Current (Q Axis)",
+      "size": 60,
+      "source_chain": [
+        "0xFEBE66FC",
+        "0xFEBE6D2C",
+        "0xFEBE6D7E"
+      ],
+      "techstream_alternate_data_id": null,
+      "techstream_name": "Command Value Current (Q Axis)",
+      "techstream_primary_data_id": "0x1152",
+      "techstream_record_sha256": null,
+      "unit": "A"
+    },
+    {
+      "callback": "0x0004D794",
+      "callback_sha256": "e8ea250109f50038147655581f4d32097958e918be7017a9a0153370f0745062",
+      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "did": "0x1153",
+      "monitor_key": 253,
+      "observer_cell": "0xFEBE66E4",
+      "role": "actual_d_current",
+      "semantic": "Motor Actual Current 2 (D Axis)",
+      "size": 60,
+      "source_chain": [
+        "0xFEBE66E4",
+        "0xFEBE6D18"
+      ],
+      "techstream_alternate_data_id": null,
+      "techstream_name": "Motor Actual Current 2 (D Axis)",
+      "techstream_primary_data_id": "0x1153",
+      "techstream_record_sha256": null,
+      "unit": "A"
+    },
+    {
+      "callback": "0x0004D7D0",
+      "callback_sha256": "0ebd21fcfd6bff8ea7a4d1c137d30d3332447cf24902cb32d1c6642c5fa965c4",
+      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "did": "0x1154",
+      "monitor_key": 254,
+      "observer_cell": "0xFEBE66FE",
+      "role": "command_d_current",
+      "semantic": "Command Value Current 2 (D Axis)",
+      "size": 60,
+      "source_chain": [
+        "0xFEBE66FE",
+        "0xFEBE6D2E",
+        "0xFEBE6D70"
+      ],
+      "techstream_alternate_data_id": null,
+      "techstream_name": "Command Value Current 2 (D Axis)",
+      "techstream_primary_data_id": "0x1154",
+      "techstream_record_sha256": null,
+      "unit": "A"
+    },
+    {
+      "callback": "0x0004D80C",
+      "callback_sha256": "febf680d71a9e3acd523633be8362d91212ccfdde9ba3c36ef1568a5b38970e1",
+      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "did": "0x1155",
+      "monitor_key": 255,
+      "observer_cell": "0xFEBE665C",
+      "role": "motor_rotation_angle",
+      "semantic": "Motor Rotation Angle",
+      "size": 74,
+      "source_chain": [
+        "0xFEBE665C",
+        "0xFEBE7D14",
+        "0xFEBE7D34"
+      ],
+      "techstream_alternate_data_id": null,
+      "techstream_name": "Motor Rotation Angle",
+      "techstream_primary_data_id": "0x1155",
+      "techstream_record_sha256": null,
+      "unit": "deg"
+    },
+    {
+      "callback": "0x0004D856",
+      "callback_sha256": "55ed402e9e49855bdc991bbcb5cd76eaf0d6c4c96c058853384a5a94ef63f0ca",
+      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "did": "0x1156",
+      "monitor_key": 256,
+      "observer_cell": "0xFEBE6764",
+      "role": "final_q_current_limit",
+      "semantic": "Final Motor Current Limited (Q Axis)",
+      "size": 58,
+      "source_chain": [
+        "0xFEBE6764",
+        "0xFEBEE608",
+        "0xFEBEAF40"
+      ],
+      "techstream_alternate_data_id": null,
+      "techstream_name": "Final Motor Current Limited (Q Axis)",
+      "techstream_primary_data_id": "0x1156",
+      "techstream_record_sha256": null,
+      "unit": "A"
+    },
+    {
+      "callback": "0x0004D930",
+      "callback_sha256": "2891e025f4fd75e52dbb1f1653601eb25f5a0b434692a069bcd7447e694b9ec0",
+      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "did": "0x1185",
+      "monitor_key": null,
+      "observer_cell": "0xFEBE8070",
+      "role": "vehicle_speed_sp1",
+      "semantic": "CAN Vehicle Speed (SP1)",
+      "size": 42,
+      "source_chain": [
+        "0xFEBE8070"
+      ],
+      "techstream_alternate_data_id": "0x3185",
+      "techstream_name": "CAN Vehicle Speed (SP1)",
+      "techstream_primary_data_id": "0x1185",
+      "techstream_record_sha256": "df9cce739aa225b14a6f37bca1339c603f59df554252767f4506af8b75bf799f",
+      "unit": "km/h"
+    },
+    {
+      "callback": "0x0004DB5E",
+      "callback_sha256": "6155c74355da73ac2448842f4b620a1bb884dfcbc0e96a1f3fe599623b857f64",
+      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "did": "0x1C02",
+      "monitor_key": 402,
+      "observer_cell": "0xFEBE674A",
+      "role": "internal_command_value_torque",
+      "semantic": "Command Value Torque",
+      "size": 72,
+      "source_chain": [
+        "0xFEBE674A",
+        "0xFEBEE40A",
+        "0xFEBEAC56",
+        "0xFEBEC1D2"
+      ],
+      "techstream_alternate_data_id": "0x3C02",
+      "techstream_name": "Command Value Torque",
+      "techstream_primary_data_id": "0x1C02",
+      "techstream_record_sha256": "22d9452d31b5d2c53599c4f0fc318b6e1857940013cf697c67c8507a842365cf",
+      "unit": "Nm"
+    }
+  ],
+  "image_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+  "observer_priority": [
+    "0x1C02",
+    "0x1152",
+    "0x1151",
+    "0x1153",
+    "0x1156",
+    "0x1154",
+    "0x1185",
+    "0x1155"
+  ],
+  "schema_version": 1,
+  "software_id": "8965B4512000",
+  "supporting_functions": [
+    {
+      "address": "0x00037644",
+      "role": "dual_motor_dq_feedback_combine",
+      "sha256": "dc7538faf77887c6853d35476f9a81c77392f26b310f01f43e43c03f9b81d21c",
+      "size": 202
+    },
+    {
+      "address": "0x00037712",
+      "role": "dual_motor_dq_current_reference",
+      "sha256": "b6edf908eb9146a587a91624abfe192dfcf0836a768b90fb8727695c4f5aa2fd",
+      "size": 120
+    },
+    {
+      "address": "0x000472A6",
+      "role": "motor_rotation_wrap",
+      "sha256": "afafca11826a8fec9e00c7de66acadf936a7d5c9e436f27e6b2c91947dd23409",
+      "size": 38
+    },
+    {
+      "address": "0x0005B662",
+      "role": "rte_snapshot_copy",
+      "sha256": "8837ddbca9f9dceb1bcde654a6c3a7392434961194a9d4b217619259a63d98e3",
+      "size": 222
+    },
+    {
+      "address": "0x0005C0B6",
+      "role": "rte_input_staging_copy_b",
+      "sha256": "b377901e71b061fa0ccd1f47514b5b143faf7b945030a38cf8c99acc6394ed70",
+      "size": 1204
+    },
+    {
+      "address": "0x0005C56A",
+      "role": "rte_snapshot_copy_2",
+      "sha256": "1d488700c63fc71faf6f0c2e209728bfe2dedc98a669c4b21ad93f1510013146",
+      "size": 252
+    },
+    {
+      "address": "0x000B8ED0",
+      "role": "q_limit_publish",
+      "sha256": "8e218c0f56fac380c95a304626d74d3f68712bbbf6d15fa8be00600ddeca12b9",
+      "size": 128
+    },
+    {
+      "address": "0x000BCA88",
+      "role": "q_limit_rte_publish",
+      "sha256": "2e7414670c072213679f49ffbdd34fdf451dbee4a354d2c76e3e7ba376e01a2b",
+      "size": 66
+    },
+    {
+      "address": "0x000BCACE",
+      "role": "command_torque_rte_publish",
+      "sha256": "3ae0757039124215d6cdfc603093adb8b609475ff6dc9823676f9f22bdeb5588",
+      "size": 104
+    },
+    {
+      "address": "0x000CB454",
+      "role": "command_torque_state_publish",
+      "sha256": "7c9efea6bd33b474b37b78a72f483446cee9c69703aab242abbed0570e31d9c4",
+      "size": 72
+    }
+  ]
+}

@@ -1161,6 +1161,41 @@ census in the Corolla variant report shows the retained Sienna-homolog LTA
 contribution is direct-write inactive in this calibration and B6 has no recovered
 opaque/group/full-PDU command consumer.
 
+The same exact Data-ID vocabulary now also closes the corresponding **Sienna
+`8965B4512000` observer semantics target-natively**, rather than borrowing H RAM
+addresses. Sienna's own 242-row RDBI table contains these exact live 2-byte DIDs:
+
+| DID | Techstream name | Sienna target-native source |
+|---:|---|---|
+| `1151` | `Motor Actual Current (Q Axis)` | `FEBE66E6 <- FEBE6D1A` |
+| `1152` | `Command Value Current (Q Axis)` | `FEBE66FC <- FEBE6D2C <- FEBE6D7E` |
+| `1153` | `Motor Actual Current 2 (D Axis)` | `FEBE66E4 <- FEBE6D18` |
+| `1154` | `Command Value Current 2 (D Axis)` | `FEBE66FE <- FEBE6D2E <- FEBE6D70` |
+| `1155` | `Motor Rotation Angle` | `FEBE665C <- FEBE7D14 <- FEBE7D34` |
+| `1156` | `Final Motor Current Limited (Q Axis)` | `FEBE6764 <- FEBEE608 <- FEBEAF40` |
+| `1185` | `CAN Vehicle Speed (SP1)` | `FEBE8070` |
+| `1C02` | `Command Value Torque` | `FEBE674A <- FEBEE40A <- FEBEAC56 <- FEBEC1D2` |
+
+The current names are stronger than same-number guesswork. `dual_motor_dq_feedback_combine
+@ 0x37644` is the direct writer of `6D18/6D1A`; `dual_motor_dq_current_reference
+@ 0x37712` directly publishes `6D2C=6D7E` and `6D2E=6D70`; the Sienna RTE staging
+worker `0x5C0B6` copies those four values to the exact RDBI source cells. For
+`1C02`, `0xCB454` publishes `FEBEC1D2 -> FEBEAC56`, `0xBCACE` publishes that to
+`FEBEE40A`, and the callback applies the same dimensional scaling/clamp shape
+already recovered for H. For `1156`, `0xBCA88` publishes `FEBEAF40 -> FEBEE608`
+before the diagnostic staging copy. The firmware bodies and exact DID table are
+SHA/raw-byte pinned in `verify_sienna_8965B4512000_techstream_did_semantics.py`.
+
+This gives a capture-ready ordinary-UDS observer set. The preferred later
+sequence is `1C02` (general internal torque command), `1152` (Q command), `1151`
+(actual Q), `1153` (actual D), `1156` (final Q limit), `1154` (D command), with
+`1185` as a vehicle-speed timing reference and `1155` as a motor-angle reference.
+It does **not** change the provenance boundary: Sienna `1C02` is an internal
+command-value-torque observer; the external authenticated `0x2E4` command path
+must still be distinguished experimentally from other local contributors.
+Canonical generated artifact:
+`data/generated/sienna_8965B4512000_techstream_did_semantics.json`.
+
 The same exact H join closes protected `0x0D7` at field level. Its regenerated
 PDU40 unpacker reads only signal 240 (1 bit), signal 243 (16 bits), and signal
 246 (4 bits). Signal 243 is stored at `FEBE7D82`; DID `0x1185` reads that cell
