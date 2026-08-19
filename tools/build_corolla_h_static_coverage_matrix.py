@@ -215,6 +215,28 @@ def main() -> None:
                 "role": item["reference_name"],
             }
 
+    motor_path = REPO / "data/generated/corolla_8965H1202000_motor_control.json"
+    if motor_path.is_file():
+        motor = load_json(motor_path)
+        motor_rel = str(motor_path.relative_to(REPO))
+        evidence_file_hashes[motor_rel] = sha256(motor_path.read_bytes())
+        motor_ev_path = REPO / motor["evidence"]["decompiler_evidence"]
+        motor_ev = load_json(motor_ev_path)
+        motor_targets = {int(r["entry"], 16) for r in motor_ev.get("functions", [])}
+        for item in motor.get("motor_role_closure", []):
+            ref = int(item["reference_entry"], 16)
+            target = int(item["target_entry"], 16)
+            if target not in motor_targets:
+                raise ValueError(f"motor-control role target lacks tracked target-native evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["target_entry"],
+                "report": motor_rel,
+                "evidence": motor["evidence"]["decompiler_evidence"],
+                "role": item["reference_name"],
+            }
+
     # Explicit generated-surface recensuses. These are not function homology:
     # they prove the foreign generated surface was exhaustively re-enumerated.
     recensus: dict[int, set[str]] = defaultdict(set)

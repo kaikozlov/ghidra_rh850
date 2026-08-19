@@ -1,0 +1,329 @@
+{
+  "calibration_state_machine": {
+    "h_body_size": 1004,
+    "h_completion_states": {
+      "main": 68,
+      "preceding": 34
+    },
+    "h_handler_size": 1638,
+    "h_has_state_33_call": true,
+    "h_main_phase": "0x0002E780",
+    "h_preceding_phase": "0x0002E44C",
+    "h_state_0x33_handler": "0x0002E780",
+    "h_state_machine": "0x0002EDE6",
+    "interpretation": "same six-channel calibration state machine and state-0x33 role, with regenerated fixed-point handler/state addresses",
+    "sienna_body_size": 1004,
+    "sienna_handler_size": 1560,
+    "sienna_has_state_33_call": true,
+    "sienna_state_0x33_handler": "0x00032B80",
+    "sienna_state_machine": "0x00033198",
+    "version_dispatch": {
+      "domains": [
+        1298,
+        1536
+      ],
+      "h_steady": "0x00057EEE",
+      "h_transition": "0x00057CEA",
+      "sienna_steady": "0x0005CE0C",
+      "sienna_transition": "0x0005CC08"
+    }
+  },
+  "ch0_worker": {
+    "h": "0x00058226",
+    "h_anchor_call_order": [
+      "FUN_00032616",
+      "FUN_000324d4",
+      "FUN_00033c70",
+      "FUN_00033d60"
+    ],
+    "h_body_size": 192,
+    "h_steady_worker_call_from_wrapper": "FUN_00058226(2,uVar2)",
+    "h_transition_dispatcher": "0x00057FC8",
+    "h_wrapper": "0x00052DBA",
+    "interpretation": "same high-rate CH0 orchestration role with a shorter regenerated stage list; PI and inverse-transform anchors preserve relative order",
+    "mode_gate": 512,
+    "phase_duty_gate": 257,
+    "sienna": "0x0005D18C",
+    "sienna_body_size": 216,
+    "sienna_wrapper": "0x0005784C",
+    "wrapper_body_sizes": [
+      146,
+      146
+    ]
+  },
+  "current_pi_pair": {
+    "axis_a_body_sizes": [
+      304,
+      304
+    ],
+    "axis_b_body_sizes": [
+      404,
+      280
+    ],
+    "axis_b_boundary": "H keeps the B-before-A current-loop role but simplifies Sienna axis-B cross-integrator/state coupling from 404 to 280 bytes; do not transfer Sienna axis-B internal state semantics wholesale",
+    "h_axis_a": "0x000324D4",
+    "h_axis_a_gain_block": "0x0002D5A4..0x0002D5B0",
+    "h_axis_a_reference_feedback": [
+      "0xFEBE6BBE",
+      "0xFEBE6BB0"
+    ],
+    "h_axis_b": "0x00032616",
+    "h_axis_b_gain_block": "0x0002D5B4..0x0002D5BC",
+    "h_axis_b_reference_feedback": [
+      "0xFEBE6BBC",
+      "0xFEBE6BAC"
+    ],
+    "h_shared_reset_gate": true,
+    "h_worker_indices": [
+      11,
+      12
+    ],
+    "order_preserved": true,
+    "sienna_axis_a": "0x00036902",
+    "sienna_axis_b": "0x00036A44",
+    "sienna_worker_indices": [
+      15,
+      16
+    ]
+  },
+  "evidence": {
+    "canonical_corpus": "data/generated/decompilations.jsonl",
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "inverse_rotating_frame": {
+    "body_sizes": [
+      226,
+      226
+    ],
+    "formula_tokens": [
+      "0x6eda",
+      "0x6883",
+      "0x8000",
+      "0x2000",
+      "0x7fff",
+      "0x8001"
+    ],
+    "formula_tokens_present": true,
+    "h": [
+      "0x00033C70",
+      "0x00033D60"
+    ],
+    "h_angle_pairs": [
+      [
+        "0xFEBE7A54",
+        "0xFEBE7A56"
+      ],
+      [
+        "0xFEBE7A60",
+        "0xFEBE7A62"
+      ]
+    ],
+    "h_inputs": [
+      [
+        "0xFEBE6A80",
+        "0xFEBE6A82"
+      ],
+      [
+        "0xFEBE6A84",
+        "0xFEBE6A86"
+      ]
+    ],
+    "h_outputs": [
+      [
+        "0xFEBE6C78",
+        "0xFEBE6C7A",
+        "0xFEBE6C7C"
+      ],
+      [
+        "0xFEBE6C80",
+        "0xFEBE6C82",
+        "0xFEBE6C84"
+      ]
+    ],
+    "h_worker_indices": [
+      20,
+      21
+    ],
+    "order_preserved": true,
+    "sienna": [
+      "0x00038464",
+      "0x00038554"
+    ],
+    "sienna_worker_indices": [
+      24,
+      25
+    ]
+  },
+  "motor_role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00032B80",
+      "reference_metrics": {
+        "body_size": 1560,
+        "direct_call_count": 1,
+        "if_count": 59
+      },
+      "reference_name": "motor_coord_transform_calib_handler",
+      "target_entry": "0x0002E780",
+      "target_metrics": {
+        "body_size": 1638,
+        "direct_call_count": 1,
+        "if_count": 59
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00036A44",
+      "reference_metrics": {
+        "body_size": 404,
+        "direct_call_count": 0,
+        "if_count": 20
+      },
+      "reference_name": "dq_current_pi_axis_b",
+      "target_entry": "0x00032616",
+      "target_metrics": {
+        "body_size": 280,
+        "direct_call_count": 0,
+        "if_count": 12
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00038464",
+      "reference_metrics": {
+        "body_size": 226,
+        "direct_call_count": 0,
+        "if_count": 6
+      },
+      "reference_name": "motor0_inverse_rotating_frame_transform",
+      "target_entry": "0x00033C70",
+      "target_metrics": {
+        "body_size": 226,
+        "direct_call_count": 0,
+        "if_count": 6
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00038554",
+      "reference_metrics": {
+        "body_size": 226,
+        "direct_call_count": 0,
+        "if_count": 6
+      },
+      "reference_name": "motor1_inverse_rotating_frame_transform",
+      "target_entry": "0x00033D60",
+      "target_metrics": {
+        "body_size": 226,
+        "direct_call_count": 0,
+        "if_count": 6
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x0005D18C",
+      "reference_metrics": {
+        "body_size": 216,
+        "direct_call_count": 37,
+        "if_count": 6
+      },
+      "reference_name": "tauj0_ch0_motor_control_worker",
+      "target_entry": "0x00058226",
+      "target_metrics": {
+        "body_size": 192,
+        "direct_call_count": 33,
+        "if_count": 6
+      }
+    }
+  ],
+  "motor_role_closure_count": 5,
+  "schema": "corolla-h-motor-control-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "axis_a_unique_shape_supporting_evidence": true,
+    "boundary": "high-level control roles and fixed-point transforms are recovered; H-specific downstream calibrations/state semantics remain target-specific where bodies changed",
+    "five_changed_roles_recovered": true,
+    "motor_control_residue_closed": true
+  },
+  "supporting_analogues": [
+    {
+      "reference_entry": "0x00036902",
+      "reference_metrics": {
+        "body_size": 304,
+        "direct_call_count": 0,
+        "if_count": 14
+      },
+      "reference_name": "dq_current_pi_axis_a",
+      "target_entry": "0x000324D4",
+      "target_metrics": {
+        "body_size": 304,
+        "direct_call_count": 0,
+        "if_count": 14
+      }
+    },
+    {
+      "reference_entry": "0x00033198",
+      "reference_metrics": {
+        "body_size": 1004,
+        "direct_call_count": 5,
+        "if_count": 33
+      },
+      "reference_name": "six-channel calibration state machine",
+      "target_entry": "0x0002EDE6",
+      "target_metrics": {
+        "body_size": 1004,
+        "direct_call_count": 5,
+        "if_count": 33
+      }
+    },
+    {
+      "reference_entry": "0x0005784C",
+      "reference_metrics": {
+        "body_size": 146,
+        "direct_call_count": 10,
+        "if_count": 2
+      },
+      "reference_name": "CH0 mode/version wrapper",
+      "target_entry": "0x00052DBA",
+      "target_metrics": {
+        "body_size": 146,
+        "direct_call_count": 10,
+        "if_count": 2
+      }
+    },
+    {
+      "reference_entry": "0x0005CC08",
+      "reference_metrics": {
+        "body_size": 388,
+        "direct_call_count": 45,
+        "if_count": 33
+      },
+      "reference_name": "transition dispatcher",
+      "target_entry": "0x00057CEA",
+      "target_metrics": {
+        "body_size": 388,
+        "direct_call_count": 45,
+        "if_count": 33
+      }
+    },
+    {
+      "reference_entry": "0x0005CE0C",
+      "reference_metrics": {
+        "body_size": 156,
+        "direct_call_count": 17,
+        "if_count": 6
+      },
+      "reference_name": "steady dispatcher",
+      "target_entry": "0x00057EEE",
+      "target_metrics": {
+        "body_size": 156,
+        "direct_call_count": 17,
+        "if_count": 6
+      }
+    }
+  ]
+}

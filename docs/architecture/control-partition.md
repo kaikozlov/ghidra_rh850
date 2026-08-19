@@ -665,7 +665,19 @@ assist-torque region populated by the `0xB89CC/0xB8A12/0xB8B10` cluster. The
 command itself is bounded by its own `0xC853A` clamp and `0xC85B6` rate-limit
 stages before the deeper `CA6B8/CA75E` branch above.
 
-### 9.5 Nine-channel registered plausibility/deadline monitor family
+#### H-variant motor pipeline note (`8965H1202000`)
+
+The Corolla H target-native pass preserves the same high-level CH0 motor-control
+partition while regenerating state/calibration storage. H steady worker `0x58226`
+orders current PI-B `0x32616`, PI-A `0x324D4`, inverse transforms `0x33C70/0x33D60`,
+and downstream phase-duty stages. The two inverse transforms preserve the Sienna
+fixed-point math exactly by formula constants; axis A remains a 304-byte structural
+twin, while axis B is simplified from 404 to 280 bytes and therefore must not
+inherit Sienna's extra internal cross-integrator semantics. Calibration state
+machine `0x2EDE6` retains state `0x33 -> 0x2E780` and the `0x512/0x600` lifecycle
+domains. See the Corolla variant report §7.20 for image-bound evidence.
+
+## 9.5 Nine-channel registered plausibility/deadline monitor family
 
 The former SWEEP-006 description of `0x43A78`, `0x43716`, and `0x438C6` as
 "fully isolated safety interlocks" is superseded. They are helper predicates

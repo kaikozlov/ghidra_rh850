@@ -240,9 +240,12 @@ leaving zero genuinely-unresolved functions under both `scheduler_system` and
 object-15 protected geometry and invalid supplied object-15 snapshot, reducing the
 global residue again to 442 and `storage_nvm` unresolved to zero. The four XCP
 command-handler gaps are now also closed—including H-specific F5 exclusion ranges
-and surviving EB/EA state—reducing the residue to **438** with `xcp` unresolved
-zero. Continue from that explicit residue, prioritizing remaining SecOC/steering/
-motor-control and externally reachable semantics rather than repeating closed passes;
+and surviving EB/EA state—reducing the residue to 438 with `xcp` unresolved
+zero. The five remaining motor-control roles are now also target-native closed,
+including the H-specific simplified axis-B PI and calibration state-0x33 path;
+`motor_control` unresolved is zero and the global residue is **433**. Continue
+from that explicit residue, prioritizing remaining SecOC/steering/crypto and
+externally reachable semantics rather than repeating closed passes;
 generic XCP DAQ callbacks remain optional unless a concrete exploit question
 needs them.
 

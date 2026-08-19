@@ -3105,19 +3105,28 @@
     },
     {
       "body_size": 1560,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: motor_coord_transform_calib_handler",
+        "report:data/generated/corolla_8965H1202000_motor_control.json",
+        "target-native:data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
       ],
       "reference_entry": "0x00032B80",
       "reference_name": "motor_coord_transform_calib_handler",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_motor_control.json",
+        "role": "motor_coord_transform_calib_handler",
+        "target_entry": "0x0002E780"
+      },
       "semantic_tags": [
         "motor_control"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0002E780",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -3488,9 +3497,10 @@
     },
     {
       "body_size": 304,
-      "coverage": "structural-candidate-only",
+      "coverage": "target-native-inspected-unique-shape",
       "coverage_basis": [
-        "unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"
+        "unique complete instruction-shape target",
+        "target-native:data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
       ],
       "reference_entry": "0x00036902",
       "reference_name": "dq_current_pi_axis_a",
@@ -3500,24 +3510,35 @@
       ],
       "surface_recensus": [],
       "target_entry": "0x000324d4",
-      "target_native_evidence_files": [],
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
+      ],
       "transfer_status": "unique-instruction-shape-candidate"
     },
     {
       "body_size": 404,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: dq_current_pi_axis_b",
+        "report:data/generated/corolla_8965H1202000_motor_control.json",
+        "target-native:data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
       ],
       "reference_entry": "0x00036A44",
       "reference_name": "dq_current_pi_axis_b",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_motor_control.json",
+        "role": "dq_current_pi_axis_b",
+        "target_entry": "0x00032616"
+      },
       "semantic_tags": [
         "motor_control"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00032616",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -3556,36 +3577,54 @@
     },
     {
       "body_size": 226,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: motor0_inverse_rotating_frame_transform",
+        "report:data/generated/corolla_8965H1202000_motor_control.json",
+        "target-native:data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
       ],
       "reference_entry": "0x00038464",
       "reference_name": "motor0_inverse_rotating_frame_transform",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_motor_control.json",
+        "role": "motor0_inverse_rotating_frame_transform",
+        "target_entry": "0x00033C70"
+      },
       "semantic_tags": [
         "motor_control"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00033C70",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 226,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: motor1_inverse_rotating_frame_transform",
+        "report:data/generated/corolla_8965H1202000_motor_control.json",
+        "target-native:data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
       ],
       "reference_entry": "0x00038554",
       "reference_name": "motor1_inverse_rotating_frame_transform",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_motor_control.json",
+        "role": "motor1_inverse_rotating_frame_transform",
+        "target_entry": "0x00033D60"
+      },
       "semantic_tags": [
         "motor_control"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00033D60",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -11034,19 +11073,28 @@
     },
     {
       "body_size": 216,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: tauj0_ch0_motor_control_worker",
+        "report:data/generated/corolla_8965H1202000_motor_control.json",
+        "target-native:data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
       ],
       "reference_entry": "0x0005D18C",
       "reference_name": "tauj0_ch0_motor_control_worker",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_motor_control.json",
+        "role": "tauj0_ch0_motor_control_worker",
+        "target_entry": "0x00058226"
+      },
       "semantic_tags": [
         "motor_control"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00058226",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -18946,23 +18994,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 1560,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00032B80",
-      "reference_name": "motor_coord_transform_calib_handler",
-      "role_recovery": null,
-      "semantic_tags": [
-        "motor_control"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 38,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -19272,57 +19303,6 @@
       "reference_name": "application_operation_09_completion",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 404,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00036A44",
-      "reference_name": "dq_current_pi_axis_b",
-      "role_recovery": null,
-      "semantic_tags": [
-        "motor_control"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 226,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00038464",
-      "reference_name": "motor0_inverse_rotating_frame_transform",
-      "role_recovery": null,
-      "semantic_tags": [
-        "motor_control"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 226,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00038554",
-      "reference_name": "motor1_inverse_rotating_frame_transform",
-      "role_recovery": null,
-      "semantic_tags": [
-        "motor_control"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -21963,23 +21943,6 @@
       "reference_name": "rte_input_staging_copy_a",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 216,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0005D18C",
-      "reference_name": "tauj0_ch0_motor_control_worker",
-      "role_recovery": null,
-      "semantic_tags": [
-        "motor_control"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -25597,6 +25560,8 @@
       "data/generated/corolla_8965H1202000_can_com.json": "4b09e7090e59d92aab8ae82e6b71bd23a2885dba6067c2fbce35a7eaf03575cb",
       "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json": "a7056121e4f7c886c4b890749cced5ca394467b3d907386e3ed1d0c82f482288",
       "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json": "23276acc88a2fa363ae0d78bbc16cebc9459caac80634aae6bf3c3756a058ab3",
+      "data/generated/corolla_8965H1202000_motor_control.json": "eca55432652bac286223b181602ca62f4a64d207c39cf0698e508731a909b756",
+      "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json": "79e9b0a26271f349724288b59e8f5e34733ecbf5bf56c698072b8fe9b82e402d",
       "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json": "5233f222002644f854c8161e70306f3d89e6e0edfa0df5714154092cb180f851",
       "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json": "6a6a5240c110ad3167310677930544aeebf2a09b276fe03c9d497f93fc05091e",
       "data/generated/corolla_8965H1202000_storage_nvm.json": "a7459c13d6bc02afdc1f1fbcc2dd572e90ac6e3f2848840e9ce7929c6150bb2b",
@@ -25656,23 +25621,6 @@
       ],
       "surface_recensus": [],
       "target_entry": "0x00032314",
-      "target_native_evidence_files": [],
-      "transfer_status": "unique-instruction-shape-candidate"
-    },
-    {
-      "body_size": 304,
-      "coverage": "structural-candidate-only",
-      "coverage_basis": [
-        "unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"
-      ],
-      "reference_entry": "0x00036902",
-      "reference_name": "dq_current_pi_axis_a",
-      "role_recovery": null,
-      "semantic_tags": [
-        "motor_control"
-      ],
-      "surface_recensus": [],
-      "target_entry": "0x000324d4",
       "target_native_evidence_files": [],
       "transfer_status": "unique-instruction-shape-candidate"
     },
@@ -27470,17 +27418,17 @@
   ],
   "summary": {
     "coverage_counts": {
-      "genuinely-unresolved": 438,
-      "structural-candidate-only": 111,
-      "target-native-inspected-unique-shape": 25,
-      "target-native-role-recovered": 24,
+      "genuinely-unresolved": 433,
+      "structural-candidate-only": 110,
+      "target-native-inspected-unique-shape": 26,
+      "target-native-role-recovered": 29,
       "target-surface-recensused": 227,
       "verified-exact-body-transfer": 288
     },
-    "genuinely_unresolved_count": 438,
-    "h_native_evidence_functions_without_unique_sienna_pair": 364,
+    "genuinely_unresolved_count": 433,
+    "h_native_evidence_functions_without_unique_sienna_pair": 374,
     "named_function_count": 1113,
-    "structural_candidate_only_count": 111,
+    "structural_candidate_only_count": 110,
     "surface_recensus_reference_function_count": 325,
     "tag_coverage_counts": {
       "can_com": {
@@ -27503,9 +27451,9 @@
         "verified-exact-body-transfer": 77
       },
       "motor_control": {
-        "genuinely-unresolved": 5,
-        "structural-candidate-only": 14,
-        "target-native-role-recovered": 1,
+        "structural-candidate-only": 13,
+        "target-native-inspected-unique-shape": 1,
+        "target-native-role-recovered": 6,
         "target-surface-recensused": 1
       },
       "scheduler_system": {
@@ -27544,6 +27492,6 @@
         "verified-exact-body-transfer": 3
       }
     },
-    "target_native_inspected_reference_function_count": 42
+    "target_native_inspected_reference_function_count": 45
   }
 }

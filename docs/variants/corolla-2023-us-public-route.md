@@ -1470,11 +1470,11 @@ promotion:
 ```text
 named canonical functions                 1113
 verified exact-body transfers              288
-target-native inspected unique-shape       25
-target-native role-recovered                 24
+target-native inspected unique-shape       26
+target-native role-recovered                 29
 complete target-surface recensuses          227
-structural candidates only                  111
-genuinely unresolved                        438
+structural candidates only                  110
+genuinely unresolved                        433
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1495,7 +1495,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(364 currently have
+(374 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -1713,11 +1713,77 @@ Machine-readable ownership is `data/generated/corolla_8965H1202000_xcp.json`
 plus its compact decompiler evidence;
 `tests/verify_corolla_8965H1202000_xcp.py` pins the four roles, selector table,
 H-specific F5 bounds/exclusions, page-state cells, and E4 presence. The `xcp`
-tag now has **zero genuinely-unresolved named functions** and the global residue
-falls **442→438**. Current coverage is 288 exact, 25 inspected unique-shape, 24
-role-recovered, 227 surface-recensused, 111 structural-only, and 438 genuinely
-unresolved canonical functions; 364 H-native evidence functions have no unique
-Sienna structural pair and remain separately counted.
+tag now has **zero genuinely-unresolved named functions**.
+
+### 7.20 Motor-control pipeline and calibration state machine
+
+The five remaining changed `motor_control` roles are now target-native mapped:
+
+```text
+S 32B80 motor_coord_transform_calib_handler       -> H 2E780
+S 36A44 dq_current_pi_axis_b                      -> H 32616
+S 38464 motor0_inverse_rotating_frame_transform   -> H 33C70
+S 38554 motor1_inverse_rotating_frame_transform   -> H 33D60
+S 5D18C tauj0_ch0_motor_control_worker            -> H 58226
+```
+
+The coordinate-transform calibration mapping is anchored by the state machine,
+not raw address proximity. Sienna `33198` and H `2EDE6` are both **1004-byte**
+six-channel calibration state machines. In each, lifecycle state `0x33` invokes
+the large transform/filter phase: S `32B80` (1560 B), H `2E780` (1638 B). The H
+preceding phase `2E44C` publishes completion state `0x22`; `2E780` publishes
+`0x44`. The transition and steady dispatchers retain both version domains
+`0x512` and `0x600`: `S 5CC08/5CE0C -> H 57CEA/57EEE`, with the H branches calling
+`2EDE6` in exactly those domains.
+
+The d/q current pair also keeps its pipeline position but not identical internals.
+H axis A is `324D4`, a **304-byte** unique complete-shape analogue of S `36902`;
+that existing structural candidate is now independently target-native inspected.
+H axis B is `32616`. The steady CH0 worker calls `32616 -> 324D4`, preserving
+Sienna's **axis-B -> axis-A** order. Both H loops share the same fault/reset gate
+`0x40004`, signed ±`0x7FFF` error saturation, direction gating, calibrated gain
+selection, and saturated 32-bit integrator form. Their H data are separated as:
+
+```text
+axis A: reference FEBE6BBE - feedback FEBE6BB0, gains 2D5A4..2D5B0
+axis B: reference FEBE6BBC - feedback FEBE6BAC, gains 2D5B4..2D5BC
+```
+
+There is a real generation change here: Sienna axis B is 404 bytes and contains
+an additional cross-integrator/state-coupling path; H axis B is only **280 bytes**.
+The role and outer PI behavior transfer, but Sienna's axis-B internal state
+semantics must not be copied wholesale to H.
+
+The inverse rotating-frame pair is much more literal. H `33C70/33D60` are twin
+**226-byte** functions and retain the same fixed-point formula constants
+`0x6EDA`, `0x6883`, divisors `0x8000/0x2000`, and `0x7FFF/0x8001` output bounds.
+Their H banks are:
+
+```text
+motor 0: input 6A80/6A82, angle 7A54/7A56 -> phase 6C78/6C7A/6C7C
+motor 1: input 6A84/6A86, angle 7A60/7A62 -> phase 6C80/6C82/6C84
+```
+
+Finally, the high-rate worker maps `S 5D18C (216 B) -> H 58226 (192 B)`. Their
+mode wrappers are both 146 bytes (`S 5784C`, H `52DBA`), and H's wrapper invokes
+transition dispatcher `57FC8` on mode changes and steady worker `58226` otherwise.
+Within both transition and steady H paths the anchor order is
+`PI-B -> PI-A -> inverse0 -> inverse1`; the worker retains the `>0x1FF` motor
+control gate and `>0x100` phase-duty side path. H's stage list is shorter, so
+unmapped intermediate calibration/state helpers remain H-specific rather than
+being assigned Sienna names by sequence alone.
+
+Machine-readable ownership is
+`data/generated/corolla_8965H1202000_motor_control.json` plus compact H-native
+decompiler evidence. `tests/verify_corolla_8965H1202000_motor_control.py` pins
+the five roles, 0x33 state-machine path, PI pair/order, fixed-point inverse
+transforms, CH0 wrapper/worker topology, and the axis-B semantic boundary. The
+`motor_control` tag now has **zero genuinely-unresolved functions**. Axis A also
+moves structural-only -> inspected unique-shape, so the global denominator becomes
+**433 genuinely unresolved**, 26 inspected unique-shape, 29 role-recovered, 227
+surface-recensused, 110 structural-only, and 288 exact canonical functions; 374
+H-native evidence functions lack a unique Sienna pair and remain separately
+counted.
 
 ## 8. Remaining evidence boundary
 
