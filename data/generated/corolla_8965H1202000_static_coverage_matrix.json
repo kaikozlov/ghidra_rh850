@@ -3882,1320 +3882,1496 @@
     },
     {
       "body_size": 72,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003DB78",
       "reference_name": "deadline_monitor_d_a_00_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003DBC0",
       "reference_name": "deadline_monitor_d_a_00_callback_04",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 18,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003DBD0",
       "reference_name": "deadline_monitor_d_a_00_callback_08",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 86,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003DDE2",
       "reference_name": "deadline_monitor_simple_00_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003DE38",
       "reference_name": "deadline_monitor_simple_00_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003DE48",
       "reference_name": "deadline_monitor_simple_00_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 86,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E080",
       "reference_name": "deadline_monitor_simple_01_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E0D6",
       "reference_name": "deadline_monitor_simple_01_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E0E6",
       "reference_name": "deadline_monitor_simple_01_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 98,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E2A4",
       "reference_name": "deadline_monitor_simple_02_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E306",
       "reference_name": "deadline_monitor_simple_02_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E316",
       "reference_name": "deadline_monitor_simple_02_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 102,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E4D4",
       "reference_name": "deadline_monitor_simple_03_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E53A",
       "reference_name": "deadline_monitor_simple_03_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E54A",
       "reference_name": "deadline_monitor_simple_03_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 180,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E82C",
       "reference_name": "deadline_monitor_simple_04_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 24,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E8E0",
       "reference_name": "deadline_monitor_simple_04_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 32,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003E8F8",
       "reference_name": "deadline_monitor_simple_04_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 84,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003EAB6",
       "reference_name": "deadline_monitor_simple_05_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003EB0A",
       "reference_name": "deadline_monitor_simple_05_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003EB1A",
       "reference_name": "deadline_monitor_simple_05_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 84,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003ECCC",
       "reference_name": "deadline_monitor_simple_06_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003ED20",
       "reference_name": "deadline_monitor_simple_06_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003ED30",
       "reference_name": "deadline_monitor_simple_06_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 112,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003EE3C",
       "reference_name": "deadline_monitor_simple_07_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003EEAC",
       "reference_name": "deadline_monitor_simple_07_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003EEBC",
       "reference_name": "deadline_monitor_simple_07_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 112,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003EFC8",
       "reference_name": "deadline_monitor_simple_08_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F038",
       "reference_name": "deadline_monitor_simple_08_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F048",
       "reference_name": "deadline_monitor_simple_08_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 114,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F1A0",
       "reference_name": "deadline_monitor_simple_09_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F212",
       "reference_name": "deadline_monitor_simple_09_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F222",
       "reference_name": "deadline_monitor_simple_09_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 114,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F37A",
       "reference_name": "deadline_monitor_simple_10_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F3EC",
       "reference_name": "deadline_monitor_simple_10_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F3FC",
       "reference_name": "deadline_monitor_simple_10_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 120,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F4AE",
       "reference_name": "deadline_monitor_simple_11_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F526",
       "reference_name": "deadline_monitor_simple_11_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F536",
       "reference_name": "deadline_monitor_simple_11_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 120,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F5E8",
       "reference_name": "deadline_monitor_simple_12_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F660",
       "reference_name": "deadline_monitor_simple_12_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F670",
       "reference_name": "deadline_monitor_simple_12_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 118,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F7CA",
       "reference_name": "deadline_monitor_simple_13_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F840",
       "reference_name": "deadline_monitor_simple_13_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F850",
       "reference_name": "deadline_monitor_simple_13_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 118,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003F9AA",
       "reference_name": "deadline_monitor_simple_14_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003FA20",
       "reference_name": "deadline_monitor_simple_14_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003FA30",
       "reference_name": "deadline_monitor_simple_14_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 98,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003FBFA",
       "reference_name": "deadline_monitor_simple_15_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003FC5C",
       "reference_name": "deadline_monitor_simple_15_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003FC6C",
       "reference_name": "deadline_monitor_simple_15_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 102,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003FE36",
       "reference_name": "deadline_monitor_simple_16_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003FE9C",
       "reference_name": "deadline_monitor_simple_16_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003FEAC",
       "reference_name": "deadline_monitor_simple_16_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 108,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0003FFA2",
       "reference_name": "deadline_monitor_simple_17_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040014",
       "reference_name": "deadline_monitor_simple_17_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040024",
       "reference_name": "deadline_monitor_simple_17_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 114,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0004011A",
       "reference_name": "deadline_monitor_simple_18_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0004018C",
       "reference_name": "deadline_monitor_simple_18_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0004019C",
       "reference_name": "deadline_monitor_simple_18_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 180,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040372",
       "reference_name": "deadline_monitor_simple_19_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040426",
       "reference_name": "deadline_monitor_simple_19_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040436",
       "reference_name": "deadline_monitor_simple_19_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 184,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0004060C",
       "reference_name": "deadline_monitor_simple_20_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x000406C4",
       "reference_name": "deadline_monitor_simple_20_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x000406D4",
       "reference_name": "deadline_monitor_simple_20_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 128,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040898",
       "reference_name": "deadline_monitor_simple_21_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 26,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040918",
       "reference_name": "deadline_monitor_simple_21_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040932",
       "reference_name": "deadline_monitor_simple_21_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 132,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040B02",
       "reference_name": "deadline_monitor_simple_22_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 26,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040B86",
       "reference_name": "deadline_monitor_simple_22_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040BA0",
       "reference_name": "deadline_monitor_simple_22_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 86,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040D72",
       "reference_name": "deadline_monitor_simple_23_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040DC8",
       "reference_name": "deadline_monitor_simple_23_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040DD8",
       "reference_name": "deadline_monitor_simple_23_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 86,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00040FAA",
       "reference_name": "deadline_monitor_simple_24_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00041000",
       "reference_name": "deadline_monitor_simple_24_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00041010",
       "reference_name": "deadline_monitor_simple_24_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 98,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x000411CE",
       "reference_name": "deadline_monitor_simple_25_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00041230",
       "reference_name": "deadline_monitor_simple_25_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00041240",
       "reference_name": "deadline_monitor_simple_25_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 102,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x000413FE",
       "reference_name": "deadline_monitor_simple_26_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00041464",
       "reference_name": "deadline_monitor_simple_26_callback_01",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00041474",
       "reference_name": "deadline_monitor_simple_26_callback_02",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 38,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x000415D8",
       "reference_name": "deadline_monitor_simple_27_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 214,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x0004191C",
       "reference_name": "deadline_monitor_d_b_00_callback_00",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x000419F2",
       "reference_name": "deadline_monitor_d_b_00_callback_04",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 18,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "deadline-monitor-complete-three-table-recensus"
       ],
       "reference_entry": "0x00041A02",
       "reference_name": "deadline_monitor_d_b_00_callback_08",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "deadline-monitor-complete-three-table-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
@@ -12449,9 +12625,10 @@
     },
     {
       "body_size": 1208,
-      "coverage": "structural-candidate-only",
+      "coverage": "target-native-inspected-unique-shape",
       "coverage_basis": [
-        "unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"
+        "unique complete instruction-shape target",
+        "target-native:data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0006A28A",
       "reference_name": "com_signal_deadline_monitor_d",
@@ -12461,7 +12638,9 @@
       ],
       "surface_recensus": [],
       "target_entry": "0x0006462a",
-      "target_native_evidence_files": [],
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "unique-instruction-shape-candidate"
     },
     {
@@ -20319,1326 +20498,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 72,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003DB78",
-      "reference_name": "deadline_monitor_d_a_00_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003DBC0",
-      "reference_name": "deadline_monitor_d_a_00_callback_04",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 18,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003DBD0",
-      "reference_name": "deadline_monitor_d_a_00_callback_08",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 86,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003DDE2",
-      "reference_name": "deadline_monitor_simple_00_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003DE38",
-      "reference_name": "deadline_monitor_simple_00_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003DE48",
-      "reference_name": "deadline_monitor_simple_00_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 86,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E080",
-      "reference_name": "deadline_monitor_simple_01_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E0D6",
-      "reference_name": "deadline_monitor_simple_01_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E0E6",
-      "reference_name": "deadline_monitor_simple_01_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 98,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E2A4",
-      "reference_name": "deadline_monitor_simple_02_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E306",
-      "reference_name": "deadline_monitor_simple_02_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E316",
-      "reference_name": "deadline_monitor_simple_02_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 102,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E4D4",
-      "reference_name": "deadline_monitor_simple_03_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E53A",
-      "reference_name": "deadline_monitor_simple_03_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E54A",
-      "reference_name": "deadline_monitor_simple_03_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 180,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E82C",
-      "reference_name": "deadline_monitor_simple_04_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 24,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E8E0",
-      "reference_name": "deadline_monitor_simple_04_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 32,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003E8F8",
-      "reference_name": "deadline_monitor_simple_04_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 84,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003EAB6",
-      "reference_name": "deadline_monitor_simple_05_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003EB0A",
-      "reference_name": "deadline_monitor_simple_05_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003EB1A",
-      "reference_name": "deadline_monitor_simple_05_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 84,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003ECCC",
-      "reference_name": "deadline_monitor_simple_06_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003ED20",
-      "reference_name": "deadline_monitor_simple_06_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003ED30",
-      "reference_name": "deadline_monitor_simple_06_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 112,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003EE3C",
-      "reference_name": "deadline_monitor_simple_07_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003EEAC",
-      "reference_name": "deadline_monitor_simple_07_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003EEBC",
-      "reference_name": "deadline_monitor_simple_07_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 112,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003EFC8",
-      "reference_name": "deadline_monitor_simple_08_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F038",
-      "reference_name": "deadline_monitor_simple_08_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F048",
-      "reference_name": "deadline_monitor_simple_08_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 114,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F1A0",
-      "reference_name": "deadline_monitor_simple_09_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F212",
-      "reference_name": "deadline_monitor_simple_09_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F222",
-      "reference_name": "deadline_monitor_simple_09_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 114,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F37A",
-      "reference_name": "deadline_monitor_simple_10_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F3EC",
-      "reference_name": "deadline_monitor_simple_10_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F3FC",
-      "reference_name": "deadline_monitor_simple_10_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 120,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F4AE",
-      "reference_name": "deadline_monitor_simple_11_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F526",
-      "reference_name": "deadline_monitor_simple_11_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F536",
-      "reference_name": "deadline_monitor_simple_11_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 120,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F5E8",
-      "reference_name": "deadline_monitor_simple_12_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F660",
-      "reference_name": "deadline_monitor_simple_12_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F670",
-      "reference_name": "deadline_monitor_simple_12_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 118,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F7CA",
-      "reference_name": "deadline_monitor_simple_13_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F840",
-      "reference_name": "deadline_monitor_simple_13_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F850",
-      "reference_name": "deadline_monitor_simple_13_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 118,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003F9AA",
-      "reference_name": "deadline_monitor_simple_14_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003FA20",
-      "reference_name": "deadline_monitor_simple_14_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003FA30",
-      "reference_name": "deadline_monitor_simple_14_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 98,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003FBFA",
-      "reference_name": "deadline_monitor_simple_15_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003FC5C",
-      "reference_name": "deadline_monitor_simple_15_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003FC6C",
-      "reference_name": "deadline_monitor_simple_15_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 102,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003FE36",
-      "reference_name": "deadline_monitor_simple_16_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003FE9C",
-      "reference_name": "deadline_monitor_simple_16_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003FEAC",
-      "reference_name": "deadline_monitor_simple_16_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 108,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0003FFA2",
-      "reference_name": "deadline_monitor_simple_17_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040014",
-      "reference_name": "deadline_monitor_simple_17_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040024",
-      "reference_name": "deadline_monitor_simple_17_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 114,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004011A",
-      "reference_name": "deadline_monitor_simple_18_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004018C",
-      "reference_name": "deadline_monitor_simple_18_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004019C",
-      "reference_name": "deadline_monitor_simple_18_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 180,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040372",
-      "reference_name": "deadline_monitor_simple_19_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040426",
-      "reference_name": "deadline_monitor_simple_19_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040436",
-      "reference_name": "deadline_monitor_simple_19_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 184,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004060C",
-      "reference_name": "deadline_monitor_simple_20_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000406C4",
-      "reference_name": "deadline_monitor_simple_20_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000406D4",
-      "reference_name": "deadline_monitor_simple_20_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 128,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040898",
-      "reference_name": "deadline_monitor_simple_21_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 26,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040918",
-      "reference_name": "deadline_monitor_simple_21_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040932",
-      "reference_name": "deadline_monitor_simple_21_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 132,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040B02",
-      "reference_name": "deadline_monitor_simple_22_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 26,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040B86",
-      "reference_name": "deadline_monitor_simple_22_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040BA0",
-      "reference_name": "deadline_monitor_simple_22_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 86,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040D72",
-      "reference_name": "deadline_monitor_simple_23_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040DC8",
-      "reference_name": "deadline_monitor_simple_23_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040DD8",
-      "reference_name": "deadline_monitor_simple_23_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 86,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00040FAA",
-      "reference_name": "deadline_monitor_simple_24_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00041000",
-      "reference_name": "deadline_monitor_simple_24_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00041010",
-      "reference_name": "deadline_monitor_simple_24_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 98,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000411CE",
-      "reference_name": "deadline_monitor_simple_25_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00041230",
-      "reference_name": "deadline_monitor_simple_25_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00041240",
-      "reference_name": "deadline_monitor_simple_25_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 102,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000413FE",
-      "reference_name": "deadline_monitor_simple_26_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00041464",
-      "reference_name": "deadline_monitor_simple_26_callback_01",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00041474",
-      "reference_name": "deadline_monitor_simple_26_callback_02",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 38,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000415D8",
-      "reference_name": "deadline_monitor_simple_27_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 214,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004191C",
-      "reference_name": "deadline_monitor_d_b_00_callback_00",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000419F2",
-      "reference_name": "deadline_monitor_d_b_00_callback_04",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 18,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00041A02",
-      "reference_name": "deadline_monitor_d_b_00_callback_08",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 90,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -24382,6 +23241,8 @@
       "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json": "a7056121e4f7c886c4b890749cced5ca394467b3d907386e3ed1d0c82f482288",
       "data/generated/corolla_8965H1202000_crypto_residue.json": "0619483d6ea92fc67a8089b566b43c1aada1a3c955ef041a631645d5476b9c1d",
       "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json": "bb11ebfa277539c89132d4406defe49ffb0cd99a8255d0aab6c542c9397ac560",
+      "data/generated/corolla_8965H1202000_deadline_monitor_surface.json": "5f7e6f2e57921b9c299aa467d7fa90cb2770361e9ce24840730926c5a048d365",
+      "data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json": "f433a079539e07caaa8ceea6bd64e4b97fc01761b26f2cf074c321932ae0bb2e",
       "data/generated/corolla_8965H1202000_diagnostic_residue.json": "752e98346df125b8caded970a7c0d95db5f6683c169ff70814a72f4fe4994a40",
       "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json": "cf8ad15a1d73109c163968d66caf32909224a19699775e112469ace92430df08",
       "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json": "23276acc88a2fa363ae0d78bbc16cebc9459caac80634aae6bf3c3756a058ab3",
@@ -25329,23 +24190,6 @@
       "transfer_status": "unique-instruction-shape-candidate"
     },
     {
-      "body_size": 1208,
-      "coverage": "structural-candidate-only",
-      "coverage_basis": [
-        "unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"
-      ],
-      "reference_entry": "0x0006A28A",
-      "reference_name": "com_signal_deadline_monitor_d",
-      "role_recovery": null,
-      "semantic_tags": [
-        "can_com"
-      ],
-      "surface_recensus": [],
-      "target_entry": "0x0006462a",
-      "target_native_evidence_files": [],
-      "transfer_status": "unique-instruction-shape-candidate"
-    },
-    {
       "body_size": 44,
       "coverage": "structural-candidate-only",
       "coverage_basis": [
@@ -26196,22 +25040,22 @@
   ],
   "summary": {
     "coverage_counts": {
-      "genuinely-unresolved": 316,
-      "structural-candidate-only": 107,
-      "target-native-inspected-unique-shape": 29,
+      "genuinely-unresolved": 228,
+      "structural-candidate-only": 106,
+      "target-native-inspected-unique-shape": 30,
       "target-native-role-recovered": 111,
-      "target-surface-recensused": 262,
+      "target-surface-recensused": 350,
       "verified-exact-body-transfer": 288
     },
-    "genuinely_unresolved_count": 316,
-    "h_native_evidence_functions_without_unique_sienna_pair": 437,
+    "genuinely_unresolved_count": 228,
+    "h_native_evidence_functions_without_unique_sienna_pair": 525,
     "named_function_count": 1113,
-    "structural_candidate_only_count": 107,
-    "surface_recensus_reference_function_count": 360,
+    "structural_candidate_only_count": 106,
+    "surface_recensus_reference_function_count": 448,
     "tag_coverage_counts": {
       "can_com": {
-        "structural-candidate-only": 15,
-        "target-native-inspected-unique-shape": 2,
+        "structural-candidate-only": 14,
+        "target-native-inspected-unique-shape": 3,
         "target-native-role-recovered": 9,
         "verified-exact-body-transfer": 28
       },
@@ -26258,10 +25102,10 @@
         "verified-exact-body-transfer": 5
       },
       "untagged": {
-        "genuinely-unresolved": 316,
+        "genuinely-unresolved": 228,
         "structural-candidate-only": 24,
         "target-native-inspected-unique-shape": 1,
-        "target-surface-recensused": 3,
+        "target-surface-recensused": 91,
         "verified-exact-body-transfer": 138
       },
       "xcp": {
@@ -26269,6 +25113,6 @@
         "verified-exact-body-transfer": 3
       }
     },
-    "target_native_inspected_reference_function_count": 48
+    "target_native_inspected_reference_function_count": 51
   }
 }

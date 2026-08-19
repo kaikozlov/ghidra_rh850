@@ -1470,11 +1470,11 @@ promotion:
 ```text
 named canonical functions                 1113
 verified exact-body transfers              288
-target-native inspected unique-shape       29
+target-native inspected unique-shape       30
 target-native role-recovered                111
-complete target-surface recensuses          262
-structural candidates only                  107
-genuinely unresolved                        316
+complete target-surface recensuses          350
+structural candidates only                  106
+genuinely unresolved                        228
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1495,7 +1495,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(437 currently have
+(525 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -1986,6 +1986,40 @@ roles, and raw/decompiler hashes. `diagnostics` now has **zero genuinely unresol
 named functions**. The only remaining genuinely unresolved canonical names are the
 **316 untagged functions**; the global denominator is 316 unresolved, 29 inspected
 unique-shape, 111 role-recovered, 262 recensused, 107 structural-only, and 288 exact.
+
+### 7.25 Deadline-monitor generated callback surface
+
+The largest remaining untagged family is now closed at its actual generated
+configuration boundary. Sienna's deadline subsystem uses three callback tables:
+variant-D A (one 13-pointer row), a 28-row simple table (three pointers per row),
+and variant-D B (one 13-pointer row). Corolla H preserves the same three-table
+geometry and exactly the same callback cardinalities:
+
+```text
+                 Sienna base   H base    nonzero / unique
+variant-D A      28524         280B4       4/3 S, 3/3 H
+simple           28558         280E8      83/82 both
+variant-D B      286D0         28260       4/3 both
+unique union                                88 both
+```
+
+The H simple table retains the final duplicated start callback and null third
+slot. Its dispatcher is the unique full-instruction-shape homolog
+`S 6962A -> H 639CA` (138 bytes), while the 13-pointer variant-D dispatcher is
+`S 6A28A -> H 6462A` (1208 bytes). The simple setup likewise maps by unique
+shape `S 3DC88 -> H 387E4` and directly uses H table `280E8`.
+
+All 88 H callback targets were forced only in a disposable project and then
+raw-body/decompiler hashed into compact evidence. The canonical 88 named
+`deadline_*` callbacks are therefore closed by a **complete target-table
+recensus**, not by assigning Sienna callback names to H rows. H-specific monitor
+IDs, thresholds, and operands remain target-native configuration.
+
+Machine-readable ownership is
+`data/generated/corolla_8965H1202000_deadline_monitor_surface.json` plus compact
+evidence. `tests/verify_corolla_8965H1202000_deadline_monitor_surface.py` pins
+table geometry/cardinality, dispatcher homologs, all callback hashes, and the
+no-fake-one-to-one boundary. The global named residue drops **316 -> 228**.
 
 ## 8. Remaining evidence boundary
 

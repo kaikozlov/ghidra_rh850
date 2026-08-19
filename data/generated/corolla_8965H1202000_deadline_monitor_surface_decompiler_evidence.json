@@ -1,0 +1,656 @@
+{
+  "callback_count": 88,
+  "function_count": 91,
+  "functions": [
+    {
+      "body_sha256": "3ee6d8d8f250060475c19060198a4c6b551d671d7ad06ff1dc2c7cdfabed2821",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_000386f4(void)\n\n{\n  if (DAT_febe7290 == 'Z') {\n    return 0x44;\n  }\n  if (DAT_febe7f35 == 'Z') {\n    return 0x22;\n  }\n  return 0x11;\n}\n\n",
+      "decompiled_c_sha256": "0af6db7467d85cf7df90dd9efbe58e12c102eb10830dc822d2c57a5bba9afe31",
+      "entry": "0x000386F4"
+    },
+    {
+      "body_sha256": "658841b1ac7d7dc5816e1ce2ad6f161bf7923f6150dc58636ca558d67e5b9ff5",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003871a(void)\n\n{\n  FUN_0004c338(0xf2,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "4bb1bc42b1c1a56ee97c82d463169b71cce7409c186fcacddffd72f09f192e08",
+      "entry": "0x0003871A"
+    },
+    {
+      "body_sha256": "a10fb2ff96449fc1abfe1cf2f1bd16660486e8168c8fea146b1be8292e45f1fd",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003872e(void)\n\n{\n  FUN_0004c430(0xf2);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "4bc952ed708f3bf6685f77eb392220005069b12d453f8ecd05e70442dba98bdd",
+      "entry": "0x0003872E"
+    },
+    {
+      "body_sha256": "66036655524e616fa2336565bdea7f9c686e744fcdb15484fc9009d5884a27da",
+      "body_size": 346,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_000387e4(void)\n\n{\n  uint uVar1;\n  ushort uVar2;\n  undefined1 *puVar3;\n  int iVar4;\n  char cVar5;\n  byte bVar6;\n  \n  bVar6 = DAT_febe6626;\n  cVar5 = DAT_febe6625;\n  uVar2 = _DAT_febe65e4;\n  uVar1 = _DAT_febe6370;\n  puVar3 = &LAB_febeb800;\n  iVar4 = FUN_00038792();\n  if (iVar4 != 0x5a) {\n    FUN_000639bc(puVar3 + -0x4554);\n    FUN_000639bc(puVar3 + -0x454c);\n    FUN_000639bc(puVar3 + -0x4544);\n    goto LAB_000388de;\n  }\n  if (DAT_0002b6f8 == 'Z') {\n    FUN_00063a54(puVar3 + -0x4554,&DAT_0002b20a,&PTR_FUN_000280e8);\n    FUN_00063a54(puVar3 + -0x454c,&DAT_0002b20a,&PTR_FUN_000280e8);\n    FUN_00063a54(puVar3 + -0x4544,&DAT_0002b20a,&PTR_FUN_000280e8);\n    goto LAB_000388de;\n  }\n  if ((uVar2 & 1) != 0) goto LAB_000388de;\n  if (((cVar5 == '\\0') && ((uVar1 & 0x7000) == 0)) && ((uVar1 & 1) == 0)) {\n    if (bVar6 < DAT_0002b276) {\n      bVar6 = bVar6 + 1;\n      goto LAB_0003883c;\n    }\n    cVar5 = '\\x11';\n    bVar6 = 0;\n  }\n  else {\nLAB_0003883c:\n    if (cVar5 != '\\x11') goto LAB_000388de;\n  }\n  *(undefined2 *)(puVar3 + -0x453a) = 0x57;\n  puVar3[-0x453c] = puVar3[-0x38c0];\n  FUN_000639ca(puVar3 + -0x4554,&DAT_0002b20a,&PTR_FUN_000280e8);\n  *(undefined2 *)(puVar3 + -0x453a) = 0x58;\n  puVar3[-0x453c] = puVar3[-0x38bf];\n  FUN_000639ca(puVar3 + -0x454c,&DAT_0002b20a,&PTR_FUN_000280e8);\n  *(undefined2 *)(puVar3 + -0x453a) = 0x59;\n  puVar3[-0x453c] = puVar3[-0x38be];\n  FUN_000639ca(puVar3 + -0x4544,&DAT_0002b20a,&PTR_FUN_000280e8);\nLAB_000388de:\n  if (((puVar3[-0x4554] == '\\0') && (puVar3[-0x454c] == '\\0')) && (puVar3[-0x4544] == '\\0')) {\n    FUN_0002d956(0x1a);\n  }\n  if (((puVar3[-0x4554] == '\\\"') || (puVar3[-0x454c] == '\\\"')) || (puVar3[-0x4544] == '\\\"')) {\n    FUN_00036dfa(10);\n    FUN_000374e2(10,0x1d);\n    FUN_00036e68(10);\n  }\n  puVar3[-0x51db] = cVar5;\n  puVar3[-0x51da] = bVar6;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "5edd0092aa90ce313a9c70ce0d314834c00fc4469405c489bc7e0d37a780057d",
+      "entry": "0x000387E4"
+    },
+    {
+      "body_sha256": "2172177adfbc7d34ebc1fdc6f826a8efcfe1593c28ca4cd4333c80ac1fd4fcb5",
+      "body_size": 86,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003893e(void)\n\n{\n  if ((((DAT_febe637c == '\\0') && (DAT_febe6374 == '\\0')) && ((_DAT_febe64cc & 4) != 0)) &&\n     ((((_DAT_febe64c8 & 4) != 0 && ((_DAT_febe64d4 & 2) == 0)) &&\n      (((_DAT_febe64c0 & 1) != 0 && (DAT_febe64ac == 'Z')))))) {\n    if (DAT_febe72c4 == 'Z') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "60866338e261d4bb82ae34d2d133765cc3d436e6c76ecf3e19fb0421f0caef7e",
+      "entry": "0x0003893E"
+    },
+    {
+      "body_sha256": "b38515e069057b13f2290b638a79207c8b6d5f698e6fcd2b1f85f128ee5de193",
+      "body_size": 16,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_00038994(void)\n\n{\n  FUN_0004c4fe(_DAT_febe72c6);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "2d7bf647ba1285c5cec7a78021ba2036396c1d8d4262919d4d945a890754abd2",
+      "entry": "0x00038994"
+    },
+    {
+      "body_sha256": "74c36392e878fdd57202e9b21c957a61703d59dfbf9d74e4dcdacf3703a01883",
+      "body_size": 20,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_000389a4(void)\n\n{\n  FUN_0004c338(_DAT_febe72c6,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "ae3512f6b8d3ebb24e4cb7abef0fcf890c718d4f65185f100c5cf203c5ab2e5a",
+      "entry": "0x000389A4"
+    },
+    {
+      "body_sha256": "d3f86d53b32f8aaf83de2dcf8a2cd945e01f1d3c5046da11f9a85e03e845dc00",
+      "body_size": 86,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00038bdc(void)\n\n{\n  if ((((DAT_febe637d == '\\0') && (DAT_febe6375 == '\\0')) && ((_DAT_febe64cc & 0x40000) != 0)) &&\n     ((((_DAT_febe64c8 & 0x40000) != 0 && ((_DAT_febe64d4 & 0x20000) == 0)) &&\n      (((_DAT_febe64c0 & 1) != 0 && (DAT_febe64ac == 'Z')))))) {\n    if (DAT_febe72e0 == 'Z') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "8f039cb860cf5086870755e094600ea072ab0300fcc03fef8b862636562a9796",
+      "entry": "0x00038BDC"
+    },
+    {
+      "body_sha256": "8118965623ee69cec4ead6a95d7701aaf8653b2c6d77f07cebb0c122f8110f08",
+      "body_size": 16,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_00038c32(void)\n\n{\n  FUN_0004c4fe(_DAT_febe72e2);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "4af3bce828f9bcd5ddfc987f405e069867e663fbacf66f5a4b1bbe6e7f5fc2ca",
+      "entry": "0x00038C32"
+    },
+    {
+      "body_sha256": "760ffec6b37e5e6835917e79167601445b92ef0cf1996519fc0d952cc5ac2e0a",
+      "body_size": 20,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_00038c42(void)\n\n{\n  FUN_0004c338(_DAT_febe72e2,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "511ff508267e625025566454af1b58e1d8b457179afa8ff516804536c8be7657",
+      "entry": "0x00038C42"
+    },
+    {
+      "body_sha256": "f217f831f38c641ecf6972bacebdb418b6bab97b7013de460da5e57162afac0a",
+      "body_size": 98,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00038e00(void)\n\n{\n  if ((((((DAT_febe637c == '\\x02') && (DAT_febe6374 == '\\x02')) && ((_DAT_febe64cc & 2) == 0)) &&\n       (((_DAT_febe64cc & 4) != 0 && ((_DAT_febe64c8 & 2) == 0)))) &&\n      (((_DAT_febe64c8 & 4) != 0 && (((_DAT_febe64d4 & 2) == 0 && ((_DAT_febe64c0 & 1) == 0)))))) &&\n     (DAT_febe64b2 == 'Z')) {\n    if (DAT_febe72fc == 'Z') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "3bc975366f1bcb13363b897a4b52baa630daee396eaad7fd7fce6428a9169ea6",
+      "entry": "0x00038E00"
+    },
+    {
+      "body_sha256": "a78edb5f465f8369832c672b7a5c010f46395549a2b5ffbfa138e070e4044616",
+      "body_size": 16,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_00038e62(void)\n\n{\n  FUN_0004c4fe(_DAT_febe72fe);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a22dc0f3b5f8494d01d4435ef18c87769ffd3e1934d609f3955c30b0eba3c8ea",
+      "entry": "0x00038E62"
+    },
+    {
+      "body_sha256": "7e2dfd9a07ed1fa1960ddaa0b2b1999c1c14e23ca28bc4ad4b0776a8c8fc1bcf",
+      "body_size": 20,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_00038e72(void)\n\n{\n  FUN_0004c338(_DAT_febe72fe,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "b50064258da600e2c626c533f55daa3d32e768c0aef33e9a71a4da7c6d799cd6",
+      "entry": "0x00038E72"
+    },
+    {
+      "body_sha256": "421dbb463d7bea849c3ee9cfeb4917bb495c50c639880425bf1f696c5acbd90b",
+      "body_size": 102,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00039030(void)\n\n{\n  if ((((((DAT_febe637d == '\\x02') && (DAT_febe6375 == '\\x02')) && ((_DAT_febe64cc & 0x20000) == 0))\n       && (((_DAT_febe64cc & 0x40000) != 0 && ((_DAT_febe64c8 & 0x20000) == 0)))) &&\n      (((_DAT_febe64c8 & 0x40000) != 0 &&\n       (((_DAT_febe64d4 & 0x20000) == 0 && ((_DAT_febe64c0 & 1) == 0)))))) && (DAT_febe64b3 == 'Z'))\n  {\n    if (DAT_febe7318 == 'Z') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "9b606b10714acd909d1f342a7a5f63085d586d38f9f943bec8e99f8b10afcb17",
+      "entry": "0x00039030"
+    },
+    {
+      "body_sha256": "fff309f8ea8643dd392ec7464651b95702a1bc9d4bad2daf99ca0c759f4d2e58",
+      "body_size": 16,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_00039096(void)\n\n{\n  FUN_0004c4fe(_DAT_febe731a);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "fb743d8a4d90c416ee90a7b30ac43ab339dc3b3c0b13e960c44d716089108306",
+      "entry": "0x00039096"
+    },
+    {
+      "body_sha256": "01d99376d4ec88f8e0b6d9735900eef10e20e055534eb8efc21b733faa7f9682",
+      "body_size": 20,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_000390a6(void)\n\n{\n  FUN_0004c338(_DAT_febe731a,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "3f7b74463d5130accd52e39c5281ff55ee3230a0f046cd83bf0a6d3eb6b2c316",
+      "entry": "0x000390A6"
+    },
+    {
+      "body_sha256": "fb3a9062addbc636736175d31799c1fd64998ac7177fc2e3cb837d2acc67c4c0",
+      "body_size": 180,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00039388(void)\n\n{\n  if (((((DAT_febe637c == '\\x02') && (DAT_febe637d == '\\x02')) && (DAT_febe6374 == '\\0')) &&\n      ((((DAT_febe6375 == '\\0' && ((_DAT_febe64cc & 2) != 0)) &&\n        (((_DAT_febe64cc & 4) == 0 &&\n         (((_DAT_febe64cc & 0x20000) != 0 && ((_DAT_febe64cc & 0x40000) == 0)))))) &&\n       ((_DAT_febe64c8 & 4) != 0)))) &&\n     (((((_DAT_febe64c8 & 0x40000) != 0 && ((_DAT_febe64d4 & 2) != 0)) &&\n       ((_DAT_febe64d4 & 0x20000) != 0)) && (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z'))))))\n  {\n    if ((((DAT_0002b2a2 <= _DAT_febe63aa) || (DAT_0002b2a4 <= _DAT_febe63ac)) ||\n        (DAT_0002b2a0 < _DAT_febe63b0)) &&\n       (((DAT_0002b2a8 <= _DAT_febe63aa || (DAT_0002b2a6 <= _DAT_febe63ac)) ||\n        (_DAT_febe63b0 <= DAT_0002b2a0)))) {\n      return 0x11;\n    }\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "885289bc37a90a46bfa2b7593d3ccb5bb9a8fa470883d27fb6d0789331a5badd",
+      "entry": "0x00039388"
+    },
+    {
+      "body_sha256": "a48c0052c52ebf235c7eafe840fe749e63ac320e281fb8237eccbcc09563af75",
+      "body_size": 24,
+      "decompiled_c": "\nvoid FUN_0003943c(void)\n\n{\n  FUN_0004c4fe(0x60);\n  FUN_0004c4fe(0x61);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "667687dbbe8fb28b0e335bb4448a4302dbe8f03771942a828a159b5215cbeae8",
+      "entry": "0x0003943C"
+    },
+    {
+      "body_sha256": "825c390c7dc97d0639fac8d42d6b6247f63cd3aeae0db796c247a6e4286995c5",
+      "body_size": 32,
+      "decompiled_c": "\nvoid FUN_00039454(void)\n\n{\n  FUN_0004c338(0x60,0x32);\n  FUN_0004c338(0x61,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a1f85b47609c578bf30c422a0df816ba82c0bd3dfe89b415f84a5cf753b50458",
+      "entry": "0x00039454"
+    },
+    {
+      "body_sha256": "23df3780ee0fc4f89a8dea63acb2d8ecbfb4699ad66ade0dcaceaf654dc1f758",
+      "body_size": 84,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00039612(void)\n\n{\n  if ((((DAT_febe637c == '\\0') && (DAT_febe6374 == '\\0')) && ((_DAT_febe64cc & 4) != 0)) &&\n     ((((_DAT_febe64c8 & 4) != 0 && ((_DAT_febe64d4 & 2) == 0)) &&\n      (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z')))))) {\n    if (DAT_febe7f49 == '\\0') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "0b5b77b0ac55d00b3640c0ba8b489b358b4cf7659a692f2e9aa64302e09c8c19",
+      "entry": "0x00039612"
+    },
+    {
+      "body_sha256": "b6a1e11cecbbfc52a57daaab080bce8ae42f18a505118f1b4bf8320b8baf0ad2",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_00039666(void)\n\n{\n  FUN_0004c4fe(0x74);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "7b065d086216e09114d986af2ec84eb957b95809075e8cbe892cee4738d804dc",
+      "entry": "0x00039666"
+    },
+    {
+      "body_sha256": "5872a137b416160cd3222dac11763ff43ce443e7b66893327074c4baf8428450",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_00039676(void)\n\n{\n  FUN_0004c338(0x74,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "c21d5bee599889025d38222a130a2dd338c8921167d8367ee145a184e810531d",
+      "entry": "0x00039676"
+    },
+    {
+      "body_sha256": "c44b5609c4d782221b8d6e959ed4ac78db6b1b0b19b1dafa908fde48419fb3a3",
+      "body_size": 84,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00039828(void)\n\n{\n  if ((((DAT_febe637d == '\\0') && (DAT_febe6375 == '\\0')) && ((_DAT_febe64cc & 0x40000) != 0)) &&\n     ((((_DAT_febe64c8 & 0x40000) != 0 && ((_DAT_febe64d4 & 0x20000) == 0)) &&\n      (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z')))))) {\n    if (DAT_febe7f4a == '\\0') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "1ee20f40076e6d5f11521ed7f7594e442b50c689e0bc99a8c1746893ed495368",
+      "entry": "0x00039828"
+    },
+    {
+      "body_sha256": "93e1398b023e8846d321c454de25ef49119274db31bb73cda0a61048010e0e82",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003987c(void)\n\n{\n  FUN_0004c4fe(0x75);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "af506a9b4cf0521ee16de6800fc4e3ae552dd113a5dbbb5f77d90268b418feb4",
+      "entry": "0x0003987C"
+    },
+    {
+      "body_sha256": "c1f0532dd68d9353a910b450e38233ad966c25e6a1eef642b788d068a8dd24f0",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003988c(void)\n\n{\n  FUN_0004c338(0x75,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "30e98825a9e4af146e2066095d27094d15794c0b3c45a0a69b088d6ef19dae3c",
+      "entry": "0x0003988C"
+    },
+    {
+      "body_sha256": "eaf7b0937b44e0cf2f57cd6f313936bb6ee64acefe6a10d2e854ec32ec6f30c6",
+      "body_size": 112,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00039998(void)\n\n{\n  undefined4 uVar1;\n  \n  if (((((DAT_febe637c == '\\0') && (DAT_febe6374 == '\\0')) && ((_DAT_febe64cc & 4) != 0)) &&\n      (((_DAT_febe64c8 & 4) != 0 && ((_DAT_febe64d4 & 2) == 0)))) &&\n     (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z')))) {\n    if ((_DAT_febe63a6 < DAT_0002b2ba) || (DAT_febe7f3c == 'Z')) {\n      uVar1 = 0x22;\n    }\n    else {\n      uVar1 = 0x11;\n    }\n  }\n  else {\n    _DAT_febe6664 = _DAT_febe6664 + 1;\n    uVar1 = 0x44;\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "22bc60ce41ce8a01e5defa09495d529c3495945e4c899cbbf75551d16864b24f",
+      "entry": "0x00039998"
+    },
+    {
+      "body_sha256": "f09e8579003704bbb86c41e28928ff0006b045833653554f6b392cc835bc5966",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_00039a08(void)\n\n{\n  FUN_0004c4fe(0x89);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "fc537b4fc8411dbca769938fce844fe3ee5fd39b972ef44d2714f74878bde438",
+      "entry": "0x00039A08"
+    },
+    {
+      "body_sha256": "44756bdb9846d2d7eee88182161b6541e9679367ff97013673599c767970c084",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_00039a18(void)\n\n{\n  FUN_0004c338(0x89,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "469ef0bc3ca4dcb05e2c07a415614cee9b53267efd9e82ea0dd4917d45bb8ad2",
+      "entry": "0x00039A18"
+    },
+    {
+      "body_sha256": "ff57222661eba164a6c497e3be2d08bf3a6284a738225876bbbf71d2ad11b8bd",
+      "body_size": 112,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00039b24(void)\n\n{\n  undefined4 uVar1;\n  \n  if (((((DAT_febe637d == '\\0') && (DAT_febe6375 == '\\0')) && ((_DAT_febe64cc & 0x40000) != 0)) &&\n      (((_DAT_febe64c8 & 0x40000) != 0 && ((_DAT_febe64d4 & 0x20000) == 0)))) &&\n     (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z')))) {\n    if ((_DAT_febe63a8 < DAT_0002b2c2) || (DAT_febe7f3b == 'Z')) {\n      uVar1 = 0x22;\n    }\n    else {\n      uVar1 = 0x11;\n    }\n  }\n  else {\n    _DAT_febe666c = _DAT_febe666c + 1;\n    uVar1 = 0x44;\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "141e519a04c2d9c35edef80b803a6031945f2e4d29b597056302c67326891a78",
+      "entry": "0x00039B24"
+    },
+    {
+      "body_sha256": "41934d12f4bb9fdb3758a6f64d7c75598725fbc9462e498454e7597fe2d1f10f",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_00039b94(void)\n\n{\n  FUN_0004c4fe(0x8a);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "57bf26470a8eda2bfe91a7d3248d8afafbdcdb02d7bb0203e360c0c9a9bbb99c",
+      "entry": "0x00039B94"
+    },
+    {
+      "body_sha256": "1542c916fc7faa7fcf5af89aa0e381ae65a4c445c9e5573d5d1aff6012b73762",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_00039ba4(void)\n\n{\n  FUN_0004c338(0x8a,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "09b197f4cabe49b99e066e7d70fc6e188b3df54b9ed80da7c414eba970220d90",
+      "entry": "0x00039BA4"
+    },
+    {
+      "body_sha256": "f3b15e7bf7ac37552e17a40a2876460ee9d3d060c01ada96e00b49ae1d4b5835",
+      "body_size": 114,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00039cfc(void)\n\n{\n  if (((((DAT_febe637c == '\\x02') && (DAT_febe6374 == '\\0')) && ((_DAT_febe64cc & 4) != 0)) &&\n      (((_DAT_febe64c8 & 4) != 0 && ((_DAT_febe64d4 & 2) == 0)))) &&\n     (((_DAT_febe64c0 & 1) != 0 && (DAT_febe64ac == 'Z')))) {\n    if (((_DAT_febe63aa <= DAT_0002b2d0) || (DAT_0002b2ce < _DAT_febe63b0)) &&\n       ((_DAT_febe63aa <= DAT_0002b2d2 || (_DAT_febe63b0 <= DAT_0002b2ce)))) {\n      return 0x11;\n    }\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "3bd620505347200e5625ec511f177b60aea05c7432d5e96d44c268c809fcd814",
+      "entry": "0x00039CFC"
+    },
+    {
+      "body_sha256": "add7ea982c7c5bb84cbe44539ca3205ce8e318e65b260d425e92167954c9fc77",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_00039d6e(void)\n\n{\n  FUN_0004c4fe(0xef);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "8437cf74065094808f4be7366c477c9919f5b46712fef42e00dcf47b94e2cbcd",
+      "entry": "0x00039D6E"
+    },
+    {
+      "body_sha256": "021ae4dfb611580d2c6fc28f74d9f5eb461aeeee9338eee924b41568eb57fad9",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_00039d7e(void)\n\n{\n  FUN_0004c338(0xef,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "0fb6837a0120a5f83cb400aa085168d66fc00b7045f6fe5bdb64f79a25a5cc9d",
+      "entry": "0x00039D7E"
+    },
+    {
+      "body_sha256": "7f8dd7b6720f96d5b17f62fee77ac3928a8b9e28aceae68ff480b5eb986b43dc",
+      "body_size": 114,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_00039ed6(void)\n\n{\n  if (((((DAT_febe637d == '\\x02') && (DAT_febe6375 == '\\0')) && ((_DAT_febe64cc & 0x40000) != 0)) &&\n      (((_DAT_febe64c8 & 0x40000) != 0 && ((_DAT_febe64d4 & 0x20000) == 0)))) &&\n     (((_DAT_febe64c0 & 1) != 0 && (DAT_febe64ac == 'Z')))) {\n    if (((_DAT_febe63ac <= DAT_0002b2dc) || (DAT_0002b2da < _DAT_febe63b0)) &&\n       ((_DAT_febe63ac <= DAT_0002b2de || (_DAT_febe63b0 <= DAT_0002b2da)))) {\n      return 0x11;\n    }\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "06d7b0f8e511bb47bc04e2d5d2b91bda18fe0720649401cd60e35bf31bccaf9b",
+      "entry": "0x00039ED6"
+    },
+    {
+      "body_sha256": "c5bbf753695074d5050fe9d8397b1425ab5990b1ff48d41439252a6548a774a5",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_00039f48(void)\n\n{\n  FUN_0004c4fe(0xf0);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a8bb63c4317541fa76739963d20c978f5666df1787d4c34d7bcd90c4a98ee13a",
+      "entry": "0x00039F48"
+    },
+    {
+      "body_sha256": "399405499447808ac4cf9beae633ffafd1f2c8d6af7a102fc39e5684aab3d4a7",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_00039f58(void)\n\n{\n  FUN_0004c338(0xf0,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "5537478310dbda1a31573cbf89d3ad2319fbd4ebc928d7e86979003a51e3c7be",
+      "entry": "0x00039F58"
+    },
+    {
+      "body_sha256": "5382b76060ece4960113d42a121901d0ba4bd9e29c96b3f03e6ac6fc748fba0e",
+      "body_size": 120,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003a00a(void)\n\n{\n  if (((((DAT_febe637c == '\\x02') && (DAT_febe6374 == '\\0')) && ((_DAT_febe64cc & 2) != 0)) &&\n      (((_DAT_febe64cc & 4) == 0 && ((_DAT_febe64c8 & 4) != 0)))) &&\n     (((_DAT_febe64d4 & 2) != 0 && (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z')))))) {\n    if (((DAT_0002b2e4 <= _DAT_febe63aa) || (DAT_0002b2e2 < _DAT_febe63b0)) &&\n       ((DAT_0002b2e6 <= _DAT_febe63aa || (_DAT_febe63b0 <= DAT_0002b2e2)))) {\n      return 0x11;\n    }\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "181c1ab9377acdea1c6d4d2fa70014e09367b62fb45a71e45e4b0fbfdbb7b353",
+      "entry": "0x0003A00A"
+    },
+    {
+      "body_sha256": "938d02df1d459ad9bced4ef6de7b6d4fd8133958a0133ecb253d0130fff3bd70",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003a082(void)\n\n{\n  FUN_0004c4fe(0x9d);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "8c35fb78c91528d175bf19bbece507dadc061a6bf131f07d2e5d8127af64cc0b",
+      "entry": "0x0003A082"
+    },
+    {
+      "body_sha256": "3bf7b41580389db171b79391cdb896b77a965c240ef79d06f9000b185e86b735",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003a092(void)\n\n{\n  FUN_0004c338(0x9d,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a9ff86eb0be43a08f4d4d8987b8d99117d561fb491de7de19b59323d5600750c",
+      "entry": "0x0003A092"
+    },
+    {
+      "body_sha256": "82808b573e283433f3937f3a973c90ed227b583de56c25ae34bc6e195e5a2904",
+      "body_size": 120,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003a144(void)\n\n{\n  if (((((DAT_febe637d == '\\x02') && (DAT_febe6375 == '\\0')) && ((_DAT_febe64cc & 0x20000) != 0)) &&\n      (((_DAT_febe64cc & 0x40000) == 0 && ((_DAT_febe64c8 & 0x40000) != 0)))) &&\n     (((_DAT_febe64d4 & 0x20000) != 0 && (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z')))))) {\n    if (((DAT_0002b2ec <= _DAT_febe63ac) || (DAT_0002b2ea < _DAT_febe63b0)) &&\n       ((DAT_0002b2ee <= _DAT_febe63ac || (_DAT_febe63b0 <= DAT_0002b2ea)))) {\n      return 0x11;\n    }\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "21366ee55e5faa25801b67513e0e48043f049e6d9429676c92019f87edfbf93f",
+      "entry": "0x0003A144"
+    },
+    {
+      "body_sha256": "bf62c0b8855c5bed7749629eee007e92fbd26ed22b399df16e56f9b851a25b8d",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003a1bc(void)\n\n{\n  FUN_0004c4fe(199);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "e1cf2787c1138107ded79c80c32e89f5e1445a7d483df071c1f53110625c0a73",
+      "entry": "0x0003A1BC"
+    },
+    {
+      "body_sha256": "609f91f17992129747188a22df0d3d2ef4e2c4ab4dd35d04a7449f973e1d9cf5",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003a1cc(void)\n\n{\n  FUN_0004c338(199,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a3038fa7c62ea97cbf65724185d3d5b2ce8ac3712d713219dfd7312f0872cad5",
+      "entry": "0x0003A1CC"
+    },
+    {
+      "body_sha256": "11962bb2908aea91c2de294a99d668fa2ccbdf11207bb00362e8be48ba6af2f1",
+      "body_size": 118,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003a326(void)\n\n{\n  int iVar1;\n  uint uVar2;\n  int iVar3;\n  \n  uVar2 = (uint)_DAT_febe63b0;\n  iVar1 = uVar2 - _DAT_febe63a6;\n  if (((((DAT_febe637c == '\\0') && (DAT_febe6374 == '\\0')) && ((_DAT_febe64cc & 4) != 0)) &&\n      (((_DAT_febe64c8 & 4) != 0 && ((_DAT_febe64d4 & 2) == 0)))) &&\n     (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z')))) {\n    iVar3 = (int)DAT_0002b2f8;\n    if (((iVar1 - iVar3 < 0 != (iVar1 < 0 != iVar3 < 0 && iVar3 < 0 == iVar1 - iVar3 < 0) ||\n          iVar1 == iVar3) || (DAT_0002b2f6 < uVar2)) &&\n       (((uint)DAT_0002b2fa <= (uint)_DAT_febe63a6 || (uVar2 <= DAT_0002b2f6)))) {\n      return 0x11;\n    }\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "6b29ffdfa0fac889101bc82def17a5fed8877c518fd9a515fff08f04025639aa",
+      "entry": "0x0003A326"
+    },
+    {
+      "body_sha256": "2552e99d990d244c083b9e6f3a790b753d5c92932464f34e38c812c002b429eb",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003a39c(void)\n\n{\n  FUN_0004c4fe(0x79);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1e3dbf1401d5013e0ca1c4340ebaa69b49f4e1c831f6354a7e4a8348d127f365",
+      "entry": "0x0003A39C"
+    },
+    {
+      "body_sha256": "706fc27b0ef842ca2134359a71999e31966910976a459cedeeadd1beb1da7ff6",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003a3ac(void)\n\n{\n  FUN_0004c338(0x79,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f47e29d7857970f5d9dec186967c47b6c8632d87f14d8b5b9ab418ee2eaa924b",
+      "entry": "0x0003A3AC"
+    },
+    {
+      "body_sha256": "f306b4373bfd566c402c25831684bb1a803edd1f0b1d2808b97a5c1244a175be",
+      "body_size": 118,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003a506(void)\n\n{\n  int iVar1;\n  int iVar2;\n  uint uVar3;\n  \n  uVar3 = (uint)_DAT_febe63b0;\n  iVar1 = uVar3 - _DAT_febe63a8;\n  if (((((DAT_febe637d == '\\0') && (DAT_febe6375 == '\\0')) && ((_DAT_febe64cc & 0x40000) != 0)) &&\n      (((_DAT_febe64c8 & 0x40000) != 0 && ((_DAT_febe64d4 & 0x20000) == 0)))) &&\n     (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z')))) {\n    iVar2 = (int)DAT_0002b304;\n    if (((iVar1 - iVar2 < 0 != (iVar1 < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 - iVar2 < 0) ||\n          iVar1 == iVar2) || (DAT_0002b302 < uVar3)) &&\n       (((uint)DAT_0002b306 <= (uint)_DAT_febe63a8 || (uVar3 <= DAT_0002b302)))) {\n      return 0x11;\n    }\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "a90d045731287472f72788b5fab5675056dcd68135c26c06c8ff4b1c3c832c1f",
+      "entry": "0x0003A506"
+    },
+    {
+      "body_sha256": "c2b428758ba186896821a97023cdaa282f90063a81f6c241345d9c30f52bb1af",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003a57c(void)\n\n{\n  FUN_0004c4fe(0xb8);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f90f3acf4559f62f5bbaf4ab47017f1b06d19d1e86ecaf7bc86b28a0c0950e65",
+      "entry": "0x0003A57C"
+    },
+    {
+      "body_sha256": "5d74dd8e3794709d2a6f55f0511ae0107c71bd0f3fe9c69d1c3ed9d41a3ab3c9",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003a58c(void)\n\n{\n  FUN_0004c338(0xb8,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1e3427ee5de5a1f20bd63ecda0ff385708e32b556285f30cce0050e4105249a4",
+      "entry": "0x0003A58C"
+    },
+    {
+      "body_sha256": "774d3bb00801beed0bc7a6bd9a055834728afa3b6cd0006bdeca0c5a29d4bf6f",
+      "body_size": 98,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003a756(void)\n\n{\n  if ((((((DAT_febe637c == '\\x02') && (DAT_febe6374 == '\\x02')) && ((_DAT_febe64cc & 2) == 0)) &&\n       (((_DAT_febe64cc & 4) != 0 && ((_DAT_febe64c8 & 2) == 0)))) &&\n      (((_DAT_febe64c8 & 4) != 0 && (((_DAT_febe64d4 & 2) == 0 && ((_DAT_febe64c0 & 1) == 0)))))) &&\n     (DAT_febe64b2 == 'Z')) {\n    if (DAT_febe7f3a == 'Z') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "f3ffa2282716ab4d41b5743b87a73930d588e2863ca849ed9a9ec2a93576e0c8",
+      "entry": "0x0003A756"
+    },
+    {
+      "body_sha256": "14554cd6968b3825703b7879fc8187b7b250d4801208fd1691148885c78068da",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003a7b8(void)\n\n{\n  FUN_0004c4fe(0x78);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "997a7e0c5abdba56efa2db950c86ae461088af4856e4fa8b3dcf784c76812d25",
+      "entry": "0x0003A7B8"
+    },
+    {
+      "body_sha256": "9690f271bdb9c5e159df5aa33d15ec2fa33f24851c8fe867244bc7b757a2954f",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003a7c8(void)\n\n{\n  FUN_0004c338(0x78,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "fa755902306c6de99d60f4e03a18248a2faba28d691f6db323ffc9cee06474d0",
+      "entry": "0x0003A7C8"
+    },
+    {
+      "body_sha256": "a267c07bf035275e3e29473ee6e8404407e83d4d76dc4bd8fda65dace8126823",
+      "body_size": 102,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003a992(void)\n\n{\n  if ((((((DAT_febe637d == '\\x02') && (DAT_febe6375 == '\\x02')) && ((_DAT_febe64cc & 0x20000) == 0))\n       && (((_DAT_febe64cc & 0x40000) != 0 && ((_DAT_febe64c8 & 0x20000) == 0)))) &&\n      (((_DAT_febe64c8 & 0x40000) != 0 &&\n       (((_DAT_febe64d4 & 0x20000) == 0 && ((_DAT_febe64c0 & 1) == 0)))))) && (DAT_febe64b3 == 'Z'))\n  {\n    if (DAT_febe7f39 == 'Z') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "b62944cb808cad89193b72bb91d469af9b3e3190c38f52b0c177a2395624cc59",
+      "entry": "0x0003A992"
+    },
+    {
+      "body_sha256": "2ccc2b858c5f727dc11d01d2637c6c8769d2734e838280c9bc2fb5c658e5dd9d",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003a9f8(void)\n\n{\n  FUN_0004c4fe(0xc4);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "3377d3ca10d690759ab876a966f69fc57f50844452c3f3cbbc425e81bb0d26a3",
+      "entry": "0x0003A9F8"
+    },
+    {
+      "body_sha256": "0ba17bc20e35d82ff121fd10e6910769567edcf0919ececac0cc4f85d8216fe5",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003aa08(void)\n\n{\n  FUN_0004c338(0xc4,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "31a09d486cfe0ecfa9209758c04d45dc99a4b41171304b8a1567aa4273f28e0f",
+      "entry": "0x0003AA08"
+    },
+    {
+      "body_sha256": "f51a98ca42b16cf170da2a2ea3cede6b2b7e6847eefc801cba504e40024c38a1",
+      "body_size": 114,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003aafe(void)\n\n{\n  if (((((DAT_febe637c == '\\0') && (DAT_febe6374 == '\\0')) && ((_DAT_febe64cc & 4) != 0)) &&\n      (((_DAT_febe64c8 & 4) != 0 && ((_DAT_febe64d4 & 2) == 0)))) &&\n     (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z')))) {\n    if (((_DAT_febe63aa <= DAT_0002b324) || (DAT_0002b322 < _DAT_febe63b0)) &&\n       ((_DAT_febe63aa <= DAT_0002b326 || (_DAT_febe63b0 <= DAT_0002b322)))) {\n      return 0x11;\n    }\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "03b2bdb83ba3bcb8d950ee8bd1d0d833bd8c05aafd3b7b2995d30ecf105410c9",
+      "entry": "0x0003AAFE"
+    },
+    {
+      "body_sha256": "1c1281e83041e6997a5c84bbcb676f7ea6941d6781dee17df23ece54d22e46e0",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003ab70(void)\n\n{\n  FUN_0004c4fe(0x9c);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "0e7c690f9d0400d08a012165d195d8dde0095ed7ba1178cb14b71fbd3889c75c",
+      "entry": "0x0003AB70"
+    },
+    {
+      "body_sha256": "5465a6920b68ae8f9ac604e67ccebced382768b655c72d85faf16883322b99ca",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003ab80(void)\n\n{\n  FUN_0004c338(0x9c,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "42548a5a5e397333f1c5e896724ffbbf1f840f735ec14a06e46bd4a28932d1e2",
+      "entry": "0x0003AB80"
+    },
+    {
+      "body_sha256": "318c3620729b0fab599456204c40128ea5327fce38a306b8e512b11884f5da03",
+      "body_size": 114,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003ac76(void)\n\n{\n  if (((((DAT_febe637d == '\\0') && (DAT_febe6375 == '\\0')) && ((_DAT_febe64cc & 0x40000) != 0)) &&\n      (((_DAT_febe64c8 & 0x40000) != 0 && ((_DAT_febe64d4 & 0x20000) == 0)))) &&\n     (((_DAT_febe64c0 & 1) == 0 && (DAT_febe64ac == 'Z')))) {\n    if (((_DAT_febe63ac <= DAT_0002b32c) || (DAT_0002b32a < _DAT_febe63b0)) &&\n       ((_DAT_febe63ac <= DAT_0002b32e || (_DAT_febe63b0 <= DAT_0002b32a)))) {\n      return 0x11;\n    }\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "7c22065b09d1cb15a0e1e5e49224acef50e6ce232054de3c7b2488d70e28cc0e",
+      "entry": "0x0003AC76"
+    },
+    {
+      "body_sha256": "1be7dcacb56eb7a6320cd7eae0a1b341c967c36198f782fd0aa9f63f6a6aaa8b",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003ace8(void)\n\n{\n  FUN_0004c4fe(0xc6);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "42d65ed668eb81eab222a6aed2c80c26ab307379421d99b9790ee40fbf26eef9",
+      "entry": "0x0003ACE8"
+    },
+    {
+      "body_sha256": "b737f019604b0b7732d5a997ac0f5f4f360a37c852952b90e47ef0d0138d6575",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003acf8(void)\n\n{\n  FUN_0004c338(0xc6,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a45bc64029f786337c55cb2b0528bec42eb7e2173ecfe46c7b3e5763b94b88f2",
+      "entry": "0x0003ACF8"
+    },
+    {
+      "body_sha256": "434afcba234ff171919d337ee1c69a741e0fed1ab81457a18e166fde90a421f0",
+      "body_size": 180,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003aece(void)\n\n{\n  if (((((DAT_febe637c != '\\0') || (DAT_febe6374 != '\\x02')) || ((_DAT_febe64cc & 4) == 0)) ||\n      (((_DAT_febe64c8 & 2) == 0 || ((_DAT_febe64c8 & 4) != 0)))) ||\n     (((_DAT_febe64d4 & 2) == 0 || (((_DAT_febe64c0 & 1) != 0 || (DAT_febe64ac != 'Z')))))) {\n    return 0x44;\n  }\n  if (((((DAT_0002b33e <= _DAT_febe63aa) || (DAT_0002b33a < _DAT_febe63b0)) &&\n       ((DAT_0002b340 <= _DAT_febe63aa ||\n        ((_DAT_febe63b0 <= DAT_0002b33a || (DAT_0002b33c < _DAT_febe63b0)))))) &&\n      (((DAT_0002b342 <= _DAT_febe63aa || (_DAT_febe63b0 <= DAT_0002b33c)) &&\n       (((_DAT_febe63aa <= DAT_0002b344 || (DAT_0002b33a < _DAT_febe63b0)) &&\n        ((_DAT_febe63aa <= DAT_0002b346 ||\n         ((_DAT_febe63b0 <= DAT_0002b33a || (DAT_0002b33c < _DAT_febe63b0)))))))))) &&\n     ((_DAT_febe63aa <= DAT_0002b348 || (_DAT_febe63b0 <= DAT_0002b33c)))) {\n    return 0x11;\n  }\n  return 0x22;\n}\n\n",
+      "decompiled_c_sha256": "c170e421289185f3dd360ea34f91a10807eac0437822db2a472586ff6dcfb107",
+      "entry": "0x0003AECE"
+    },
+    {
+      "body_sha256": "dc4e29026d841d1c1b13706e511fae8341bcf2de7f9127b34a7f4de573aaf33b",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003af82(void)\n\n{\n  FUN_0004c4fe(0x7b);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "d1956bf145ea644e3f7114df94d3ae7a4ecce3f109febf7295354f2ea4b2cf4d",
+      "entry": "0x0003AF82"
+    },
+    {
+      "body_sha256": "34fcb3b7de5894f18529b4fbb39a567f0d899c08b98981de9c951820be8683c1",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003af92(void)\n\n{\n  FUN_0004c338(0x7b,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "cb1453c68902c76d786aa69a5cead4e3a1107e3b64d0b0c8a8d13424b2a9710f",
+      "entry": "0x0003AF92"
+    },
+    {
+      "body_sha256": "da4a5076861171a491de1f33c449bf884db5be33efa15936b11b125b795735bc",
+      "body_size": 184,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003b168(void)\n\n{\n  if (((((DAT_febe637d != '\\0') || (DAT_febe6375 != '\\x02')) || ((_DAT_febe64cc & 0x40000) == 0)) ||\n      (((_DAT_febe64c8 & 0x20000) == 0 || ((_DAT_febe64c8 & 0x40000) != 0)))) ||\n     (((_DAT_febe64d4 & 0x20000) == 0 || (((_DAT_febe64c0 & 1) != 0 || (DAT_febe64ac != 'Z')))))) {\n    return 0x44;\n  }\n  if (((((DAT_0002b356 <= _DAT_febe63ac) || (DAT_0002b352 < _DAT_febe63b0)) &&\n       ((DAT_0002b358 <= _DAT_febe63ac ||\n        ((_DAT_febe63b0 <= DAT_0002b352 || (DAT_0002b354 < _DAT_febe63b0)))))) &&\n      (((DAT_0002b35a <= _DAT_febe63ac || (_DAT_febe63b0 <= DAT_0002b354)) &&\n       (((_DAT_febe63ac <= DAT_0002b35c || (DAT_0002b352 < _DAT_febe63b0)) &&\n        ((_DAT_febe63ac <= DAT_0002b35e ||\n         ((_DAT_febe63b0 <= DAT_0002b352 || (DAT_0002b354 < _DAT_febe63b0)))))))))) &&\n     ((_DAT_febe63ac <= DAT_0002b360 || (_DAT_febe63b0 <= DAT_0002b354)))) {\n    return 0x11;\n  }\n  return 0x22;\n}\n\n",
+      "decompiled_c_sha256": "6a8291b3cd489bd5099a4af5d05a88c15af6723354e77351ffb782b0a5e9c69c",
+      "entry": "0x0003B168"
+    },
+    {
+      "body_sha256": "98f86c26bec2e64d543c9a6f731067e365e1c57d375ebd224e84390bab21214b",
+      "body_size": 16,
+      "decompiled_c": "\nvoid FUN_0003b220(void)\n\n{\n  FUN_0004c4fe(0xba);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "d05057752c7698ed87ed963f8ce9483a1a8864f5226032006bd0e688553d13c1",
+      "entry": "0x0003B220"
+    },
+    {
+      "body_sha256": "2f6ac1888f36d2a567a1bff2e847a9b5ee52480828ab56c0958a132133d253ab",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_0003b230(void)\n\n{\n  FUN_0004c338(0xba,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "d6f9c4c1cc55e4166968334f202f9fb1fb8982c9c943d37b34559244461622a9",
+      "entry": "0x0003B230"
+    },
+    {
+      "body_sha256": "73df90f883522dbfa3f5fb5aec22603c4e2b76514f2f5102baf4f592172e153f",
+      "body_size": 128,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003b3f4(void)\n\n{\n  undefined2 uVar1;\n  \n  if ((((((DAT_febe637c == '\\x02') && (DAT_febe6374 == '\\x02')) && ((_DAT_febe64cc & 2) == 0)) &&\n       (((_DAT_febe64cc & 4) != 0 && ((_DAT_febe64c8 & 2) == 0)))) &&\n      (((_DAT_febe64c8 & 4) != 0 && (((_DAT_febe64d4 & 2) == 0 && ((_DAT_febe64c0 & 1) == 0)))))) &&\n     (DAT_febe64ae == 'Z')) {\n    uVar1 = _DAT_febe73bc;\n    if ((_DAT_febe73c0 <= DAT_0002b362) && (uVar1 = _DAT_febe73be, DAT_0002b364 <= _DAT_febe73c0)) {\n      return 0x11;\n    }\n    _DAT_febe66ca = uVar1;\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "e46c238a0f1cf11d124b6995b2e930068549a0ecda601fc1330461a58543af57",
+      "entry": "0x0003B3F4"
+    },
+    {
+      "body_sha256": "3b239a45e5bd9476db2683a9a83aed0d6fd72a7ca72d240b5e94c0c0f4065ee4",
+      "body_size": 26,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003b474(void)\n\n{\n  undefined2 uVar1;\n  \n  uVar1 = _DAT_febe73be;\n  FUN_0004c4fe(_DAT_febe73bc);\n  FUN_0004c4fe(uVar1);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "93e95c349fcb6d39a2a52a67305cbaf68a54bc2f517c53f5c1d7b87b2cae37ac",
+      "entry": "0x0003B474"
+    },
+    {
+      "body_sha256": "13d51bf12872ac35dadd971ef6e847960655cae0c4300077099fbd639d6c83bf",
+      "body_size": 20,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003b48e(void)\n\n{\n  FUN_0004c338(_DAT_febe66ca,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f4da09990edde8a6a5dd6294d5cd62682e72a7e581e8b30f53e7caeed816f57f",
+      "entry": "0x0003B48E"
+    },
+    {
+      "body_sha256": "4b5075a3447b181bfde509f0000b09a7b4c45321af9751b82efe69d3a28d7478",
+      "body_size": 132,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003b65e(void)\n\n{\n  undefined2 uVar1;\n  \n  if ((((((DAT_febe637d == '\\x02') && (DAT_febe6375 == '\\x02')) && ((_DAT_febe64cc & 0x20000) == 0))\n       && (((_DAT_febe64cc & 0x40000) != 0 && ((_DAT_febe64c8 & 0x20000) == 0)))) &&\n      (((_DAT_febe64c8 & 0x40000) != 0 &&\n       (((_DAT_febe64d4 & 0x20000) == 0 && ((_DAT_febe64c0 & 1) == 0)))))) && (DAT_febe64af == 'Z'))\n  {\n    uVar1 = _DAT_febe73dc;\n    if ((_DAT_febe73e0 <= DAT_0002b36a) && (uVar1 = _DAT_febe73de, DAT_0002b36c <= _DAT_febe73e0)) {\n      return 0x11;\n    }\n    _DAT_febe66d2 = uVar1;\n    return 0x22;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "29c08836efd89713975684fa0409484e076e8eea516e94e153ca19d67d33bdda",
+      "entry": "0x0003B65E"
+    },
+    {
+      "body_sha256": "152ef37b31a447e230dae0d689694941d72241e8f8b28fccbb3676525a979e95",
+      "body_size": 26,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003b6e2(void)\n\n{\n  undefined2 uVar1;\n  \n  uVar1 = _DAT_febe73de;\n  FUN_0004c4fe(_DAT_febe73dc);\n  FUN_0004c4fe(uVar1);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "328730ebbed1ba2d1c8342f66e78201d4c842bf49383073f5becd6183a1a71e1",
+      "entry": "0x0003B6E2"
+    },
+    {
+      "body_sha256": "5031f0940880bffce16bf5fe5c7cc234c20d9e2556aae6a5746cdaecea918544",
+      "body_size": 20,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003b6fc(void)\n\n{\n  FUN_0004c338(_DAT_febe66d2,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "870ed2a18ecaaa7a6f2e88bd46fee480ec8e209dc387be3473bc567ae0757d80",
+      "entry": "0x0003B6FC"
+    },
+    {
+      "body_sha256": "c3ff96fd0fb02233c751d059329ddcfe12fcd8a98cbe4f21b472a8c840c10e56",
+      "body_size": 86,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003b8ce(void)\n\n{\n  if ((((DAT_febe637c == '\\0') && (DAT_febe6374 == '\\0')) && ((_DAT_febe64cc & 4) != 0)) &&\n     ((((_DAT_febe64c8 & 4) != 0 && ((_DAT_febe64d4 & 2) == 0)) &&\n      (((_DAT_febe64c0 & 1) != 0 && (DAT_febe64ac == 'Z')))))) {\n    if (DAT_febe73fc == 'Z') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "cd1256978d4cff42264ee346654c78fd852d600a33def1cb3a7164e061b96f06",
+      "entry": "0x0003B8CE"
+    },
+    {
+      "body_sha256": "7b93ccc4747d66562dd2e4d8330c7f535f5460199ee5cf959aee004ad9895257",
+      "body_size": 16,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003b924(void)\n\n{\n  FUN_0004c4fe(_DAT_febe73fe);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "86ee83f81fe076ea3c275a82be68b42ad68a4809912d4c35f4cea8bd9484d5db",
+      "entry": "0x0003B924"
+    },
+    {
+      "body_sha256": "d45b399f96f3ee0576516a9d5c5f29c322187fa94eef3d8bee0cb115a9e2d020",
+      "body_size": 20,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003b934(void)\n\n{\n  FUN_0004c338(_DAT_febe73fe,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "6f36304a79e63eeaa2e94e416a60de238118a772de34e1b6da859272fb3885c5",
+      "entry": "0x0003B934"
+    },
+    {
+      "body_sha256": "ee2ef82b4c21508dd2a0f441f5301d0caaf6facf82e4839cc694c9ea06cdb589",
+      "body_size": 86,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003bb06(void)\n\n{\n  if ((((DAT_febe637d == '\\0') && (DAT_febe6375 == '\\0')) && ((_DAT_febe64cc & 0x40000) != 0)) &&\n     ((((_DAT_febe64c8 & 0x40000) != 0 && ((_DAT_febe64d4 & 0x20000) == 0)) &&\n      (((_DAT_febe64c0 & 1) != 0 && (DAT_febe64ac == 'Z')))))) {\n    if (DAT_febe7418 == 'Z') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "33bc17bf51a69de422a1337814572f1d34e98a004f282d481ff49b8c1a5cc5b1",
+      "entry": "0x0003BB06"
+    },
+    {
+      "body_sha256": "b9db4d35a53a6a427fdc3d2d467a63f6c83b57106d99b1db933a913ca9157907",
+      "body_size": 16,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003bb5c(void)\n\n{\n  FUN_0004c4fe(_DAT_febe741a);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1aa128ce2821ec3cf5e2cda6d9dff0d75b1c5cef30605de5bb1562467254ba06",
+      "entry": "0x0003BB5C"
+    },
+    {
+      "body_sha256": "35b7114c4bf49a67f2ab713ce31367fcdc2812e033b62b15c080b5f250150172",
+      "body_size": 20,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003bb6c(void)\n\n{\n  FUN_0004c338(_DAT_febe741a,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "24ca66265cf3075175c98b454ddbc30497e37feb9a7e5ec47a5237a7bc4a58ce",
+      "entry": "0x0003BB6C"
+    },
+    {
+      "body_sha256": "1af3f2eb2937d18f075480582fec82cb52de7abf5913dcfcc8a0ad09bba34be5",
+      "body_size": 98,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003bd2a(void)\n\n{\n  if ((((((DAT_febe637c == '\\x02') && (DAT_febe6374 == '\\x02')) && ((_DAT_febe64cc & 2) == 0)) &&\n       (((_DAT_febe64cc & 4) != 0 && ((_DAT_febe64c8 & 2) == 0)))) &&\n      (((_DAT_febe64c8 & 4) != 0 && (((_DAT_febe64d4 & 2) == 0 && ((_DAT_febe64c0 & 1) == 0)))))) &&\n     (DAT_febe64b2 == 'Z')) {\n    if (DAT_febe7434 == 'Z') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "cddf93fa5fb4dd3c58a5d3f5166f78558cf3ec5e291d20226966efa9d55c345f",
+      "entry": "0x0003BD2A"
+    },
+    {
+      "body_sha256": "89bcbd6db9d306fe960001848da5cd668d0ba9c4fcef4b5273729ca5b1e9ff41",
+      "body_size": 16,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003bd8c(void)\n\n{\n  FUN_0004c4fe(_DAT_febe7436);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "693a146898bf5f08ce5e7ceecd1f68f561f1a3bbbac697aff1b46351e69a9049",
+      "entry": "0x0003BD8C"
+    },
+    {
+      "body_sha256": "b0661e5235ce58f198d98d44975b1a9b1c170d6414a0b6bc5f26869360a3c076",
+      "body_size": 20,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003bd9c(void)\n\n{\n  FUN_0004c338(_DAT_febe7436,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "fe696b1f4387afcd1d030a258de972f6707e5453e79a87e7c58fb366f38c3bb4",
+      "entry": "0x0003BD9C"
+    },
+    {
+      "body_sha256": "f0d9c9911f9d4d94a232a0cb26ead061249a1b15955d32ade2ff32e8bb39674d",
+      "body_size": 102,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003bf5a(void)\n\n{\n  if ((((((DAT_febe637d == '\\x02') && (DAT_febe6375 == '\\x02')) && ((_DAT_febe64cc & 0x20000) == 0))\n       && (((_DAT_febe64cc & 0x40000) != 0 && ((_DAT_febe64c8 & 0x20000) == 0)))) &&\n      (((_DAT_febe64c8 & 0x40000) != 0 &&\n       (((_DAT_febe64d4 & 0x20000) == 0 && ((_DAT_febe64c0 & 1) == 0)))))) && (DAT_febe64b3 == 'Z'))\n  {\n    if (DAT_febe7450 == 'Z') {\n      return 0x22;\n    }\n    return 0x11;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "1bfc9f5fac99f190409570224dc1112d08b4e2032632ea7989314bf59a4d373f",
+      "entry": "0x0003BF5A"
+    },
+    {
+      "body_sha256": "4198c0f14522633d66e50f51bfa0abc94c4335abe434fea93258a46c8f77b7dc",
+      "body_size": 16,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003bfc0(void)\n\n{\n  FUN_0004c4fe(_DAT_febe7452);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "845ad1f4169dfc98e5de46428809262eef88935197efea13af46b985e6a6c578",
+      "entry": "0x0003BFC0"
+    },
+    {
+      "body_sha256": "ce05d33f06576a3b0305de9bf34f2444ff1bbb9852e63513cb29ea01da6697d1",
+      "body_size": 20,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003bfd0(void)\n\n{\n  FUN_0004c338(_DAT_febe7452,0x32);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "ad4f91b033f4225e81718f6ee732034c39481debe78669e86043174a80de83fc",
+      "entry": "0x0003BFD0"
+    },
+    {
+      "body_sha256": "b6c61b2b79e324067e9bfa390b1dbadff134fde8a33202bb2d63930c2e38a376",
+      "body_size": 38,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003c134(void)\n\n{\n  int iVar1;\n  int iVar2;\n  \n  iVar2 = (int)DAT_0002b3ae;\n  iVar1 = _DAT_febe7456 - iVar2;\n  if ((iVar1 < 0 != (_DAT_febe7456 < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0)) &&\n     (iVar2 = (int)DAT_0002b3b0, iVar1 = _DAT_febe7458 - iVar2,\n     iVar1 < 0 != (_DAT_febe7458 < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0))) {\n    return 0x22;\n  }\n  return 0x11;\n}\n\n",
+      "decompiled_c_sha256": "d581d49c82426088ad5ff4084f3bb887ecf0157b3043e8739b2ed994ed6a36ea",
+      "entry": "0x0003C134"
+    },
+    {
+      "body_sha256": "1f6e64662795242d4f8a21dda0cb03cf908f4e592bcaa4345c2e6ef14592277b",
+      "body_size": 214,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nundefined4 FUN_0003c478(void)\n\n{\n  ushort uVar1;\n  short sVar2;\n  int iVar3;\n  uint uVar4;\n  int iVar5;\n  int iVar6;\n  int iVar7;\n  \n  iVar7 = (int)_DAT_febe74c8;\n  iVar3 = (int)_DAT_febe614a;\n  if (iVar7 + 0x7fff < 0 == (-1 < iVar7 && iVar7 + 0x7fff < 0) && iVar7 != -0x7fff) {\n    if (iVar7 < 0) {\n      iVar7 = (int)-_DAT_febe74c8;\n    }\n  }\n  else {\n    iVar7 = 0x7fff;\n  }\n  if (iVar3 + 0x7fff < 0 == (-1 < iVar3 && iVar3 + 0x7fff < 0) && iVar3 != -0x7fff) {\n    if (iVar3 < 0) {\n      iVar3 = (int)-_DAT_febe614a;\n    }\n  }\n  else {\n    iVar3 = 0x7fff;\n  }\n  if ((int)(_DAT_febe74cc + 0x7fffffff) < 0 ==\n      (-1 < (int)_DAT_febe74cc && (int)(_DAT_febe74cc + 0x7fffffff) < 0) &&\n      _DAT_febe74cc != 0x80000001) {\n    uVar4 = _DAT_febe74cc;\n    if ((int)_DAT_febe74cc < 0) {\n      uVar4 = -_DAT_febe74cc;\n    }\n  }\n  else {\n    uVar4 = 0x7fffffff;\n  }\n  if ((DAT_febe74c4 == '\\0') && ((_DAT_febe87cc & 0x40004) == 0)) {\n    uVar1 = DAT_0002b3c0;\n    sVar2 = DAT_0002b3be;\n    if (DAT_febeeb88 != 'Z') {\n      uVar1 = DAT_0002b3bc;\n      sVar2 = DAT_0002b3ba;\n    }\n    iVar6 = (int)sVar2;\n    iVar5 = (int)DAT_0002b3b6;\n    if ((((iVar7 - iVar5 < 0 != (iVar7 < 0 != iVar5 < 0 && iVar5 < 0 == iVar7 - iVar5 < 0)) &&\n         (iVar5 = uVar4 - DAT_0002b3b8,\n         iVar5 < 0 == ((int)uVar4 < 0 && -1 < iVar5) && uVar4 != DAT_0002b3b8)) &&\n        (iVar3 - iVar6 < 0 != (iVar3 < 0 != iVar6 < 0 && iVar6 < 0 == iVar3 - iVar6 < 0) ||\n         iVar3 == iVar6)) && (uVar1 <= _DAT_febe7ab2)) {\n      return 0x22;\n    }\n    iVar5 = (int)DAT_0002b3c2;\n    if ((((iVar7 - iVar5 < 0 != (iVar7 < 0 != iVar5 < 0 && iVar5 < 0 == iVar7 - iVar5 < 0)) &&\n         (iVar7 = uVar4 - DAT_0002b3c4,\n         iVar7 < 0 != ((int)uVar4 < 0 && -1 < iVar7) || uVar4 == DAT_0002b3c4)) &&\n        ((DAT_febeeb88 == '\\0' &&\n         ((iVar7 = (int)DAT_0002b3c6,\n          iVar3 - iVar7 < 0 != (iVar3 < 0 != iVar7 < 0 && iVar7 < 0 == iVar3 - iVar7 < 0) ||\n          iVar3 == iVar7 && (DAT_0002b3c8 <= _DAT_febe7ab2)))))) && (_DAT_febe7844 == -1)) {\n      return 0x11;\n    }\n    return 0x33;\n  }\n  return 0x44;\n}\n\n",
+      "decompiled_c_sha256": "86f3531b25edf541ea3502b3aa8b5b5e78910ee7db806a803a010a6b202f8e5f",
+      "entry": "0x0003C478"
+    },
+    {
+      "body_sha256": "5d8533d2208d330ee7d03ab949de62d404cae34cab8e8bbf06edfcc278bde738",
+      "body_size": 16,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003c54e(void)\n\n{\n  FUN_0004c4fe(_DAT_febe74c6);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "08d5ea839ab0dd6117b032c8bbfbef6ad53e2e4b786456c67cf1c917cda9daf3",
+      "entry": "0x0003C54E"
+    },
+    {
+      "body_sha256": "cd22aa4eddbfbf60f7e6db0574adb7c33174342e286403c7f3f468f5d52591ac",
+      "body_size": 18,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_0003c55e(void)\n\n{\n  FUN_0004c338(_DAT_febe74c6,10);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "5e0aaa81b7b47085b205e7a203f03642f1e06f1c2250944afd9411a0648f161e",
+      "entry": "0x0003C55E"
+    },
+    {
+      "body_sha256": "132514c473f707f4665912b443e08178f7b27e32bc58f74759956d6a66a0f579",
+      "body_size": 138,
+      "decompiled_c": "\nundefined4 FUN_000639ca(undefined1 *param_1,ushort *param_2,undefined4 *param_3)\n\n{\n  int iVar1;\n  uint uVar2;\n  uint uVar3;\n  code *pcVar4;\n  ushort uVar5;\n  undefined1 uVar6;\n  undefined1 uVar7;\n  uint uVar8;\n  uint uVar9;\n  \n  uVar9 = (uint)*(ushort *)(param_1 + 4);\n  uVar2 = (uint)param_2[1];\n  uVar8 = (uint)*(ushort *)(param_1 + 2);\n  uVar5 = *(ushort *)(param_1 + 6);\n  if ((int)(uVar9 - uVar2) < 0 || uVar9 == uVar2) {\n    uVar3 = (uint)*param_2;\n    if ((int)(uVar8 - uVar3) < 0 || uVar8 == uVar3) {\n      uVar6 = 0xff;\n      iVar1 = (*(code *)*param_3)();\n      if (iVar1 == 0x11) {\n        uVar9 = 0;\n        if (((int)(uVar8 - uVar3) < 0 || uVar8 == uVar3) &&\n           (uVar8 = uVar8 + 1, (int)(uVar8 - uVar3) < 0 || uVar8 == uVar3)) goto LAB_00063a42;\n        pcVar4 = (code *)param_3[1];\n        uVar7 = 0;\n        uVar6 = 0;\n      }\n      else {\n        if (iVar1 != 0x22) goto LAB_00063a42;\n        uVar8 = 0;\n        if ((int)(uVar9 - uVar2) < 0 || uVar9 == uVar2) {\n          uVar9 = uVar9 + 1;\n        }\n        uVar3 = uVar9;\n        if (-1 < (int)(uVar5 - uVar9)) {\n          uVar3 = (uint)uVar5;\n        }\n        uVar5 = (ushort)uVar3;\n        if ((int)(uVar9 - uVar2) < 0 || uVar9 == uVar2) goto LAB_00063a42;\n        pcVar4 = (code *)param_3[2];\n        uVar7 = 0x22;\n        uVar6 = 0x22;\n      }\n      if (pcVar4 != (code *)0x0) {\n        (*pcVar4)();\n        uVar6 = uVar7;\n      }\n    }\n    else {\n      uVar6 = 0;\n    }\n  }\n  else {\n    uVar6 = 0x22;\n  }\nLAB_00063a42:\n  *param_1 = uVar6;\n  *(short *)(param_1 + 2) = (short)uVar8;\n  *(short *)(param_1 + 4) = (short)uVar9;\n  *(ushort *)(param_1 + 6) = uVar5;\n  return 0x11;\n}\n\n",
+      "decompiled_c_sha256": "7be6134989a8edee1a1b4d200e13a096fab224affa69a564e308888f4d96e502",
+      "entry": "0x000639CA"
+    },
+    {
+      "body_sha256": "1854f75394c483afffd8a2355be27f8a406398065249add8d951d9a23b69b2e8",
+      "body_size": 1208,
+      "decompiled_c": "\nundefined4 FUN_0006462a(uint *param_1,ushort *param_2,undefined4 *param_3)\n\n{\n  ushort uVar1;\n  ushort uVar2;\n  ushort uVar3;\n  ushort uVar4;\n  short sVar5;\n  uint uVar6;\n  uint uVar7;\n  int iVar8;\n  ushort uVar9;\n  ushort uVar10;\n  ushort uVar11;\n  ushort uVar12;\n  ushort uVar13;\n  code *pcVar14;\n  \n  uVar11 = (ushort)param_1[1];\n  uVar10 = *(ushort *)((int)param_1 + 6);\n  uVar13 = (ushort)param_1[2];\n  uVar12 = *(ushort *)((int)param_1 + 10);\n  uVar9 = (ushort)param_1[3];\n  uVar1 = param_2[1];\n  uVar2 = *param_2;\n  uVar3 = param_2[2];\n  uVar4 = param_2[3];\n  if (uVar13 == 0) {\n    if (uVar2 < uVar11) {\n      sVar5 = 0x2200;\n    }\n    else {\n      sVar5 = 0;\n      if (uVar11 != 0) {\n        sVar5 = 0x1100;\n      }\n    }\n  }\n  else {\n    sVar5 = 0x22;\n    if (uVar13 <= uVar3) {\n      sVar5 = 0x11;\n    }\n  }\n  if (sVar5 == 0) {\n    iVar8 = (*(code *)*param_3)();\n    if (iVar8 == 0x11) {\n      if ((uVar1 < uVar10) || (uVar10 = uVar10 + 1, uVar1 < uVar10)) {\n        uVar11 = 0;\n        uVar10 = 0;\n        uVar6 = 0;\n      }\n      else if ((uVar2 < uVar11) || (uVar11 = uVar11 + 1, uVar2 < uVar11)) {\n        uVar6 = 0x2200;\n      }\n      else {\n        uVar6 = 0x11001100;\n      }\n      uVar13 = 0;\n      uVar12 = 0;\n    }\n    else if (iVar8 == 0x22) {\n      uVar11 = 0;\n      uVar10 = 0;\n      if ((uVar4 < uVar12) || (uVar12 = uVar12 + 1, uVar4 < uVar12)) goto LAB_00064958;\n      if (uVar13 <= uVar3) {\n        uVar13 = uVar13 + 1;\n      }\n      uVar1 = uVar13;\n      if (uVar13 <= uVar9) {\n        uVar1 = uVar9;\n      }\n      uVar9 = uVar1;\n      uVar6 = 0x22;\n      if (uVar13 <= uVar3) {\n        uVar6 = 0x110011;\n      }\n    }\n    else if ((iVar8 == 0x33) || (iVar8 == 0x44)) {\nLAB_00064958:\n      uVar11 = 0;\n      uVar10 = 0;\n      uVar12 = 0;\n      uVar6 = 0;\n      uVar13 = uVar10;\n    }\n    else {\n      uVar6 = 0;\n    }\n    uVar7 = uVar6 & 0xffff;\n    if (uVar7 != 0) {\n      if (uVar7 == 0x11) {\n        if ((code *)param_3[6] != (code *)0x0) {\n          (*(code *)param_3[6])();\n        }\n        pcVar14 = (code *)param_3[0xb];\n      }\n      else if (uVar7 == 0x22) {\n        if ((code *)param_3[6] != (code *)0x0) {\n          (*(code *)param_3[6])();\n        }\n        if ((code *)param_3[8] != (code *)0x0) {\n          (*(code *)param_3[8])();\n        }\n        pcVar14 = (code *)param_3[0xc];\n      }\n      else if (uVar7 == 0x1100) {\n        if ((code *)param_3[2] != (code *)0x0) {\n          (*(code *)param_3[2])();\n        }\n        pcVar14 = (code *)param_3[9];\n      }\n      else {\n        if (uVar7 != 0x2200) {\n          uVar6 = 0;\n          goto LAB_00064acc;\n        }\n        if ((code *)param_3[2] != (code *)0x0) {\n          (*(code *)param_3[2])();\n        }\n        if ((code *)param_3[4] != (code *)0x0) {\n          (*(code *)param_3[4])();\n        }\n        pcVar14 = (code *)param_3[10];\n      }\n      if (pcVar14 != (code *)0x0) {\n        (*pcVar14)();\n      }\n    }\n    goto LAB_00064acc;\n  }\n  if (sVar5 == 0x11) {\n    iVar8 = (*(code *)param_3[1])();\n    if ((uVar4 < uVar12) || (uVar12 = uVar12 + 1, uVar4 < uVar12)) {\nLAB_00064a54:\n      uVar11 = 0;\n      uVar10 = 0;\n      uVar13 = 0;\n      uVar12 = 0;\n      uVar6 = 0;\n    }\n    else {\n      if (iVar8 == 0x11) {\nLAB_00064a4e:\n        uVar11 = 0;\n        uVar10 = uVar11;\n      }\n      else {\n        if (iVar8 == 0x22) {\n          uVar11 = 0;\n          uVar10 = 0;\n          if (uVar13 <= uVar3) {\n            uVar13 = uVar13 + 1;\n          }\n          uVar1 = uVar13;\n          if (uVar13 <= uVar9) {\n            uVar1 = uVar9;\n          }\n          uVar9 = uVar1;\n          uVar6 = 0x22;\n          if (uVar13 <= uVar3) {\n            uVar6 = 0x110011;\n          }\n          goto LAB_00064a5e;\n        }\n        if (iVar8 == 0x33) goto LAB_00064a4e;\n        if (iVar8 == 0x44) goto LAB_00064a54;\n      }\n      uVar6 = 0x11;\n    }\nLAB_00064a5e:\n    uVar7 = uVar6 & 0xffff;\n    if (uVar7 == 0) {\n      if ((code *)param_3[7] != (code *)0x0) {\n        (*(code *)param_3[7])();\n      }\n    }\n    else {\n      if (uVar7 == 0x11) {\n        pcVar14 = (code *)param_3[0xb];\n      }\n      else {\n        if (uVar7 != 0x22) {\n          if ((code *)param_3[0xb] != (code *)0x0) {\n            (*(code *)param_3[0xb])();\n          }\n          uVar6 = 0x11;\n          goto LAB_00064acc;\n        }\n        if ((code *)param_3[8] != (code *)0x0) {\n          (*(code *)param_3[8])();\n        }\n        pcVar14 = (code *)param_3[0xc];\n      }\n      if (pcVar14 != (code *)0x0) {\n        (*pcVar14)();\n      }\n    }\n    goto LAB_00064acc;\n  }\n  if (sVar5 == 0x1100) {\n    iVar8 = (*(code *)*param_3)();\n    if ((uVar1 < uVar10) || (uVar10 = uVar10 + 1, uVar1 < uVar10)) {\nLAB_00064812:\n      uVar11 = 0;\n      uVar10 = 0;\n      uVar12 = 0;\n      uVar6 = 0;\n      uVar13 = uVar10;\n    }\n    else if (iVar8 == 0x11) {\n      if ((uVar2 < uVar11) || (uVar11 = uVar11 + 1, uVar2 < uVar11)) {\n        uVar6 = 0x2200;\n      }\n      else {\n        uVar6 = 0x11001100;\n      }\n      uVar13 = 0;\n      uVar12 = 0;\n    }\n    else if (iVar8 == 0x22) {\n      uVar11 = 0;\n      uVar10 = 0;\n      if ((uVar4 < uVar12) || (uVar12 = uVar12 + 1, uVar4 < uVar12)) goto LAB_00064812;\n      if (uVar13 <= uVar3) {\n        uVar13 = uVar13 + 1;\n      }\n      uVar1 = uVar13;\n      if (uVar13 <= uVar9) {\n        uVar1 = uVar9;\n      }\n      uVar9 = uVar1;\n      uVar6 = 0x22;\n      if (uVar13 <= uVar3) {\n        uVar6 = 0x110011;\n      }\n    }\n    else {\n      if (iVar8 == 0x33) {\n        uVar13 = 0;\n        uVar12 = uVar13;\n      }\n      else if (iVar8 == 0x44) goto LAB_00064812;\n      uVar6 = 0x1100;\n    }\n    uVar7 = uVar6 & 0xffff;\n    if (uVar7 == 0) {\n      if ((code *)param_3[3] != (code *)0x0) {\n        (*(code *)param_3[3])();\n      }\n    }\n    else {\n      if (uVar7 == 0x11) {\n        if ((code *)param_3[3] != (code *)0x0) {\n          (*(code *)param_3[3])();\n        }\n        if ((code *)param_3[6] != (code *)0x0) {\n          (*(code *)param_3[6])();\n        }\n        pcVar14 = (code *)param_3[0xb];\n      }\n      else if (uVar7 == 0x22) {\n        if ((code *)param_3[3] != (code *)0x0) {\n          (*(code *)param_3[3])();\n        }\n        if ((code *)param_3[6] != (code *)0x0) {\n          (*(code *)param_3[6])();\n        }\n        if ((code *)param_3[8] != (code *)0x0) {\n          (*(code *)param_3[8])();\n        }\n        pcVar14 = (code *)param_3[0xc];\n      }\n      else if (uVar7 == 0x1100) {\n        pcVar14 = (code *)param_3[9];\n      }\n      else {\n        if (uVar7 != 0x2200) {\n          if ((code *)param_3[9] != (code *)0x0) {\n            (*(code *)param_3[9])();\n          }\n          uVar6 = 0x1100;\n          goto LAB_00064acc;\n        }\n        if ((code *)param_3[4] != (code *)0x0) {\n          (*(code *)param_3[4])();\n        }\n        pcVar14 = (code *)param_3[10];\n      }\n      if (pcVar14 != (code *)0x0) {\n        (*pcVar14)();\n      }\n    }\n    goto LAB_00064acc;\n  }\n  if (sVar5 != 0x2200) {\n    if ((code *)param_3[0xc] != (code *)0x0) {\n      (*(code *)param_3[0xc])();\n    }\n    uVar6 = 0x22;\n    goto LAB_00064acc;\n  }\n  iVar8 = (*(code *)*param_3)();\n  if (iVar8 == 0x11) {\nLAB_000646e6:\n    uVar13 = 0;\n    uVar12 = 0;\nLAB_000646ea:\n    uVar6 = 0x2200;\n  }\n  else {\n    if (iVar8 != 0x22) {\n      if ((iVar8 == 0x33) || (iVar8 == 0x44)) goto LAB_000646e6;\n      goto LAB_000646ea;\n    }\n    uVar11 = 0;\n    uVar10 = 0;\n    if ((uVar4 < uVar12) || (uVar12 = uVar12 + 1, uVar4 < uVar12)) {\n      uVar13 = 0;\n      uVar12 = 0;\n      uVar6 = 0;\n    }\n    else {\n      if (uVar13 <= uVar3) {\n        uVar13 = uVar13 + 1;\n      }\n      uVar1 = uVar13;\n      if (uVar13 <= uVar9) {\n        uVar1 = uVar9;\n      }\n      uVar9 = uVar1;\n      uVar6 = 0x22;\n      if (uVar13 <= uVar3) {\n        uVar6 = 0x110011;\n      }\n    }\n  }\n  uVar7 = uVar6 & 0xffff;\n  if (uVar7 == 0) {\n    if ((code *)param_3[5] != (code *)0x0) {\n      (*(code *)param_3[5])();\n    }\n  }\n  else {\n    if (uVar7 == 0x11) {\n      if ((code *)param_3[5] != (code *)0x0) {\n        (*(code *)param_3[5])();\n      }\n      if ((code *)param_3[6] != (code *)0x0) {\n        (*(code *)param_3[6])();\n      }\n      pcVar14 = (code *)param_3[0xb];\n    }\n    else if (uVar7 == 0x22) {\n      if ((code *)param_3[5] != (code *)0x0) {\n        (*(code *)param_3[5])();\n      }\n      if ((code *)param_3[6] != (code *)0x0) {\n        (*(code *)param_3[6])();\n      }\n      if ((code *)param_3[8] != (code *)0x0) {\n        (*(code *)param_3[8])();\n      }\n      pcVar14 = (code *)param_3[0xc];\n    }\n    else {\n      pcVar14 = (code *)param_3[10];\n      if (uVar7 != 0x2200) {\n        if (pcVar14 != (code *)0x0) {\n          (*pcVar14)();\n        }\n        uVar6 = 0x2200;\n        goto LAB_00064acc;\n      }\n    }\n    if (pcVar14 != (code *)0x0) {\n      (*pcVar14)();\n    }\n  }\nLAB_00064acc:\n  *param_1 = uVar6;\n  *(ushort *)(param_1 + 1) = uVar11;\n  *(ushort *)((int)param_1 + 6) = uVar10;\n  *(ushort *)(param_1 + 2) = uVar13;\n  *(ushort *)((int)param_1 + 10) = uVar12;\n  *(ushort *)(param_1 + 3) = uVar9;\n  return 0x11;\n}\n\n",
+      "decompiled_c_sha256": "b9516f9e387119485d4308fd50614c6e166fea2c9fd97333d6c5f251697c6cf7",
+      "entry": "0x0006462A"
+    }
+  ],
+  "image": {
+    "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "codeflash_size": 1048576,
+    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+  },
+  "schema": "corolla-h-deadline-monitor-surface-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "boundary": "disposable H corpus with exactly the 88 callback-table targets forced as functions before decompilation",
+    "path": "build/h_deadline_forced.jsonl",
+    "sha256": "50b3eda4b5564e9d20016af2ec5d1b6507259e829dc6b53f3573bceb161be94a"
+  },
+  "support_count": 3
+}

@@ -245,7 +245,7 @@ zero. The five remaining motor-control roles are target-native closed, and the f
 42-function SecOC/ICU-S residue is now closed as well, including the lower
 command5/7/8 adapters, freshness graph, Rx ingress, ICU ISRs, crypto-test callbacks,
 and regenerated D7 unpacker. `secoc_icus` unresolved is zero, overlapping
-`crypto`, `steering`, and `diagnostics` unresolved are now **zero**. The global residue is **316**, all untagged. Continue from
+`crypto`, `steering`, and `diagnostics` unresolved are now **zero**. The global residue is **228**, all untagged after closing the 88-function deadline-monitor callback family. Continue from
 that explicit residue, prioritizing the remaining diagnostic/untagged and
 externally reachable semantics rather than repeating closed passes;
 generic XCP DAQ callbacks remain optional unless a concrete exploit question

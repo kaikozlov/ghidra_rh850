@@ -358,6 +358,14 @@ def main() -> None:
         for item in diagnostic_residue.get("diagnostic_surface_recensus", []):
             recensus[int(item["reference_entry"], 16)].add("diagnostic-complete-target-surface-recensus")
 
+    deadline_surface_path = REPO / "data/generated/corolla_8965H1202000_deadline_monitor_surface.json"
+    if deadline_surface_path.is_file():
+        deadline_surface = load_json(deadline_surface_path)
+        deadline_surface_rel = str(deadline_surface_path.relative_to(REPO))
+        evidence_file_hashes[deadline_surface_rel] = sha256(deadline_surface_path.read_bytes())
+        for item in deadline_surface.get("surface_recensus", []):
+            recensus[int(item["reference_entry"], 16)].add("deadline-monitor-complete-three-table-recensus")
+
     # Classify each canonical named function conservatively.
     classified = []
     for row in rows:
