@@ -416,9 +416,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   capture, explicitly record `Command Value Torque` (monitor 402),
   `Cooperation Control State` (60), and `Control State Information` (403): the
   static P5 metadata now proves 402 is 16-bit/`Nm`, 60 has the binary
-  cooperation-control display, and 403 is 16-bit/unitless, but a live transcript
-  is needed to identify their UDS data IDs and compare values/timing against the
-  recovered CAN/application states. Then compare SA seed/key exchange, DID reads,
+  cooperation-control display, and 403 is 16-bit/unitless. TMS-020 also proves
+  that the type-62 primary/alternate words are Data IDs and identifies monitor
+  402 as primary DID `0x1C02` / alternate `0x3C02`; the remaining live purpose is
+  to observe support/exposure, returned values, timing, and session behavior, not
+  to discover that DID from scratch. Then compare SA seed/key exchange, DID reads,
   session transitions, and programming handoff against SEC-BOOT-003,
   SEC-APP-001, and DIAG-APP-001/003. Preserve raw logs
   privately and commit only reviewed/redacted derivatives or hashes. See
@@ -431,6 +433,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `SeedKey`, `Nonce`, `OffsetAddress`, download ranges, data-format fields, and
   routine choices. Firmware support for the same UDS SIDs/DIDs is only a
   bounded compatibility join, not proof of which host builder was selected.
+- **Calibration target-integrity metadata.** TMS-024 recovers a distinct
+  calibration-container target record in `Cuw.exe`: each Repro/Erase/Delta/
+  Compression target carries `StartAddress`, `Length`, `CRC`, `CMAC`, and
+  `DigitalSignature`. This is not the TIS/RKS `Signature`. Static work remains
+  immediately actionable without a matching calibration: recover the target-data
+  object layout in `TCUWCalibrationFile.dll`, then trace CRC/CMAC/
+  `DigitalSignature` consumers through every referenced flash-writer family and
+  join any resulting command/routine grammar to the two available EPS CodeFlash
+  images. The actual target values and signer remain blocked on a matching
+  calibration artifact.
 - **RKS authorization vs. EPS reflash (Layer A).** The TIS portal RKS flow
   (TMS-009) is a CUW-side VIN+license permission gate, distinct from the
   cal-file crypto key (Layer B). Open: whether it is *mandatory* for every EPS

@@ -5,6 +5,77 @@ not a historical roadmap and should not become one. Detailed unresolved state
 belongs in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md); completed work belongs in
 [FINDINGS.md](FINDINGS.md) and the canonical subsystem reports.
 
+## Current pre-GTS static-only queue
+
+The next paid/short-duration GTS+ session is intentionally deferred until the
+existing V18/firmware corpus has yielded every high-information static fact that
+can sharpen the capture plan. During that constraint, work these targets in
+order rather than starting another broad firmware sweep.
+
+1. **Fingerprint every CUW writer family selected by the decoded factory rows.**
+   The 196 recovered factory rows reference 47 distinct prepare/flash writer
+   modules, while the current command-level inventory deeply pins only the
+   selected standard/unified/VFOREST/security subset. Recover and normalize each
+   referenced writer's UDS/proprietary SIDs, DIDs, RoutineControl IDs, request
+   layouts, imported `CalibrationFile` getters, response checks, and timing.
+   Then score each route against the exact Sienna and Corolla-H bootloader
+   service/DID/routine grammars. This is the highest-value route-narrowing work
+   available without a matching `.cuw`/`.cal`.
+
+2. **Trace calibration target-integrity metadata end to end.** TMS-024 now
+   proves `Cuw.exe` target records contain `StartAddress`, `Length`, `CRC`,
+   `CMAC`, and `DigitalSignature` for six Repro/Erase/Delta/Compression target
+   families. Recover the corresponding `TCUWCalibrationFile.dll` object layout
+   and follow each field into all writer families. Only after that trace should
+   `DigitalSignature` be compared with firmware-side CRC/CMAC/routine gates; it
+   is currently distinct from the TIS/RKS `Signature`.
+
+3. **Turn the calibration parser into a complete schema/parser before acquiring
+   a real calibration.** Recover archive/header/logical-block/target layouts,
+   processor/count relationships, auth fields (`ServiceAuthKey`, `ECUAuthKey`,
+   `SeedKey`, `Nonce`, `OffsetAddress`), route selectors, data-format fields,
+   and target-integrity records. The goal is that a future captured `.cuw`/`.cal`
+   can be decoded immediately during a short GTS+ window rather than reverse
+   engineered after the fact.
+
+4. **Build the Sienna-side `EMPS_P5` DID semantic join.** TMS-020/021 already
+   use exact P5 Data IDs to name Corolla-H `1C02` and `1151..1156`. The Sienna
+   RDBI table independently implements `1151→4D71C`, `1152→4D758`,
+   `1153→4D794`, `1154→4D7D0`, `1155→4D80C`, `1156→4D856`, `1185→4D930`, and
+   `1C02→4DB5E`. Trace those producers into Sienna motor/control state and carry
+   only evidence-supported OEM names. This can preselect useful plain-UDS
+   observers for later live experiments and removes work from the paid capture
+   session.
+
+5. **Finish the RKS client state machine, not its server cryptography.** Pin the
+   offline Signature-file parser and state transitions, the predicate deciding
+   whether RKS is required/skipped, and the producer of the 16-byte `SeedValue`
+   plus `KeypairID`/`RequesterKind`/`IsStored`. The imported token is now pinned
+   to exactly 512 alphanumeric characters. Stop at the client/server boundary;
+   the signing algorithm/private key are not present in V18.
+
+6. **Recover CUW timing, retry, and Flash-Recovery semantics.** Finish the
+   `TCUWControlCommPhase.dll` timing/retry fields (`WaitTimeAfterSeedData`,
+   `WaitTimeAfterSeedKey`, reset/reconnect windows) and the recovery-file state
+   model. These are strategically useful because they determine the timing and
+   failure artifacts the eventual GTS+ session must capture.
+
+7. **Decode only DDB residues that feed the targets above.** The broad DDB
+   pipeline is already productive; remaining section/category semantics should
+   be attacked when they can name a CUW/diagnostic field, a Sienna/H DID, or a
+   capture observable. Do not restart an undirected DDB census.
+
+8. **Use older/specialized EPS CUW artifacts only as comparative leads.**
+   `Cuw_iQ_EMPS.exe` and specialized writer families may expose historical EPS
+   naming or protocol ancestry. Analyze them after 1–7, and keep generation
+   transfer bounded. Likewise, revisit MACKey applicability or the three open
+   exploit-interest rows only when a concrete CUW/diagnostic edge points at
+   them.
+
+After this queue, the remaining high-value blockers should be genuinely new
+artifacts or runtime evidence: an exact calibration package, newer GTS+/CUW+,
+a retained J2534 session, gateway/camera firmware, or missing target CodeFlash.
+
 ## P0 — highest information gain
 
 ### 1. Live slot-4 command-5 permission

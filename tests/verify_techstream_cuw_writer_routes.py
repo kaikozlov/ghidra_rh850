@@ -170,6 +170,62 @@ check("standard TransferData constructs 36/76", imm_store(std_td, 0x36) and imm_
 check("standard TransferExit constructs 37/77", imm_store(std_te, 0x37) and imm_store(std_te, 0x77))
 check("standard reset constructs 11 01 / 51 01", imm_store(std_reset, 0x11) and imm_store(std_reset, 0x51))
 
+print("\n== calibration target-integrity metadata parser ==")
+# Cuw.exe contains a separate calibration-container parser for per-target
+# integrity metadata.  Keep this distinct from the portal RKS "Signature": the
+# static parser proves only that calibration target records carry these fields.
+cuw_data = (CUW / "Cuw.exe").read_bytes()
+cuw_pe = pefile.PE(data=cuw_data)
+cuw_base = cuw_pe.OPTIONAL_HEADER.ImageBase
+parent_va, parent_size = 0x0040B63C, 3045
+helper_va, helper_size = 0x0040C224, 838
+parent = cuw_pe.get_data(parent_va - cuw_base, parent_size)
+helper = cuw_pe.get_data(helper_va - cuw_base, helper_size)
+check("calibration logical-block parser body identity",
+      hashlib.sha256(parent).hexdigest()
+      == "ce3e4d43fa5539105c776684bb73b24fc9516a94768b99d044d960d8b520807d")
+check("per-target integrity parser body identity",
+      hashlib.sha256(helper).hexdigest()
+      == "62cf1764aaa6f06169e7b0b4953cf24593490b7337d6a8a63854b190779dec8d")
+target_fields = [
+    ("StartAddress", 0x005D0C25),
+    ("Length", 0x005D0C33),
+    ("CRC", 0x005D0C3B),
+    ("CMAC", 0x005D0C40),
+    ("DigitalSignature", 0x005D0C46),
+]
+field_ref_offsets = []
+for field, va in target_fields:
+    encoded = struct.pack("<I", va)
+    offset = helper.find(encoded)
+    check(f"per-target parser references {field}",
+          field.encode() + b"\x00" in cuw_data and offset >= 0,
+          detail=f"helper+{offset:#x}" if offset >= 0 else "missing")
+    field_ref_offsets.append(offset)
+check("per-target parser visits integrity fields in declared order",
+      field_ref_offsets == sorted(field_ref_offsets) and all(offset >= 0 for offset in field_ref_offsets),
+      detail=", ".join(hex(offset) for offset in field_ref_offsets))
+# The parent invokes the same helper once for each target-family record:
+# ReproData, EraseAndReproRoutine, DeltaReproData,
+# DeltaEraseAndReproRoutine, CompressionReproData, and
+# CompressionEraseAndReproRoutine.
+helper_calls = []
+for offset in range(len(parent) - 4):
+    if parent[offset] != 0xE8:
+        continue
+    rel = struct.unpack_from("<i", parent, offset + 1)[0]
+    call_va = parent_va + offset
+    if call_va + 5 + rel == helper_va:
+        helper_calls.append(call_va)
+check("logical-block parser invokes per-target parser six times",
+      helper_calls == [0x0040BFEA, 0x0040C03E, 0x0040C092,
+                       0x0040C0E6, 0x0040C13A, 0x0040C18E],
+      detail=", ".join(hex(value) for value in helper_calls))
+for prefix in (b"ReproData", b"EraseAndReproRoutine", b"DeltaReproData",
+               b"DeltaEraseAndReproRoutine", b"CompressionReproData",
+               b"CompressionEraseAndReproRoutine"):
+    check(f"logical-block parser family present: {prefix.decode()}", prefix in cuw_data)
+
 print("\n== inventory identity and live regeneration ==")
 oracle = "identity_hash"
 inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))

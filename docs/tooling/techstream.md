@@ -649,6 +649,48 @@ therefore prove the factory mechanism and request builders, but not the exact
 `8965B4512000` factory identifier, keys/nonces, address ranges, data-format
 values, or routine choices.
 
+#### 5.2.1 Calibration target-integrity metadata — separate `DigitalSignature` field
+
+A deeper pass over `Cuw.exe` recovers a second signature-bearing structure that
+must not be conflated with the TIS/RKS `Signature` in §5.3. The logical-block
+parser `FUN_0040B63C` (3045 bytes) walks up to 16 block records and parses
+`NewCID`, `SecurityProperty2`, `Nonce`, `ReproMethod`, `P4ServerMaxTime`, and
+`NumberOfTargets`. For each target it invokes `FUN_0040C224` six times, once for
+each of these target families:
+
+- `ReproData`;
+- `EraseAndReproRoutine`;
+- `DeltaReproData`;
+- `DeltaEraseAndReproRoutine`;
+- `CompressionReproData`;
+- `CompressionEraseAndReproRoutine`.
+
+The shared target parser reads five named fields in order:
+
+```text
+StartAddress
+Length
+CRC
+CMAC
+DigitalSignature
+```
+
+The six calls are at `0x40BFEA`, `0x40C03E`, `0x40C092`, `0x40C0E6`,
+`0x40C13A`, and `0x40C18E`; the helper begins at `0x40C224`. This establishes a
+calibration-container **per-target integrity record** carrying CRC, CMAC, and a
+field literally named `DigitalSignature`. It does **not** yet establish the
+signature algorithm, length, signer, verification location, or whether the
+`DigitalSignature` field is transmitted to an ECU. In particular, no static
+edge currently joins it to the independent TIS/RKS permission token in §5.3.
+
+This is now a high-value pre-capture target. The next static step is to recover
+the corresponding `TCUWCalibrationFile.dll` object layout and trace each of
+these five fields into every flash-writer family. The result can then be joined
+against the Sienna bootloader's independently recovered CRC/CMAC/download/routine
+semantics without assuming that a matching `.cuw` is already available.
+`verify_techstream_cuw_writer_routes.py` pins the parser bodies, six call sites,
+and field vocabulary.
+
 ### 5.3 Reprogramming-key authorization (RKS / TIS portal) — Layer A
 
 The reflash passes through two independent authorization layers that never
@@ -717,7 +759,11 @@ the returned **`Signature`** textarea and validates it with
   model is sneaker-net: a **Signature file** is produced by the retrieve sequence
   on a separate internet-connected computer and then read/imported on the
   offline reprogramming PC (`pstrImportFilePath`,
-  `CReproKeyServerAccessCtrlr::CheckReproKeyFormat`).
+  `CReproKeyServerAccessCtrlr::CheckReproKeyFormat`). The native format checker
+  at `0x0047FFF0` requires the imported token length to be exactly `0x200`
+  characters (`cmp edx,0x200` at `0x00480021`). Together with the managed
+  alphanumeric regex below, this pins a fixed-width 512-character client format;
+  it does not identify the server-side signing primitive.
 - **Paperwork fallback:** *"If the operation using the computer connected to the
   internet is not possible, process implementation report will be required."*
 
@@ -743,11 +789,14 @@ must be registered (`ApplicationRegistration`,
 
 **No client-side cryptography.** The `MemberRef` table of `CUWAccessRKS.dll`
 contains no `RSACryptoServiceProvider`, no signature-verify call, no
-certificate, and no embedded public key. The only check on the returned
-`Signature` is the alphanumeric regex. Signing is entirely server-side; the
-client trusts the `Signature` purely on receipt through the authenticated IE
-session. `KeypairID` is a selector for the portal's signing key, not a client
-key.
+certificate, and no embedded public key. Client-side validation is format-only:
+the managed layer requires `^[0-9a-zA-Z]+$`, and native
+`CReproKeyServerAccessCtrlr::CheckReproKeyFormat` requires exactly 512
+characters. Signing is entirely server-side; the client trusts the `Signature`
+purely on receipt through the authenticated IE session. `KeypairID` is a
+selector for the portal's signing key, not a client key. The fixed width is
+compatible with several possible server token/signature encodings and is not
+sufficient evidence to name one.
 
 **Layer A↔B independence (verified):** the `Signature` never reaches any flash
 writer — `TCUWCanSecurityVFORESTFlashWriter`, `TCUWCanUnifiedFlashWriter`, and

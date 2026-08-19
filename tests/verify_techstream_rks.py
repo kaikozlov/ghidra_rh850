@@ -7,7 +7,8 @@ material:
 
   Layer A — TIS portal RKS (CUWAccessRKS.dll/.NET): VIN+license-bound
             *permission* gate; embedded-IE browser automation; the returned
-            "Signature" is validated only by a regex (no client-side crypto).
+            "Signature" is format-checked by an alphanumeric regex plus a
+            fixed 0x200-character native length gate (no client-side crypto).
   Layer B — per-ECU CalcSeedKey/CollateSeedKey (native flash writers): the
             cryptographic ECU unlock with the calibration-file key
             (maps to firmware SEC-BOOT-003).
@@ -143,6 +144,7 @@ body_pins = {
     (0x0049BCFE, 989): "0f2427fa1323a5d20f781ce0f32013f8ad77b25acf3833165d9be7205d6e0aba",
     (0x0047FB24, 565): "7e6a8d5d7d3e74bc02cbfcad07ee9f6650943bef0789c7b8285a76c6411051fd",
     (0x0041A01C, 104): "e00ded4e0bf0f3f3da6dcb7998a4ddd95f20cb6775814cefb2734b75bf40e87a",
+    (0x0047FFF0, 286): "91d49fd79ef6c9ae255349831c2d4d964585d4dbd58edac3e59c684d854ffe99",
 }
 for (address, size), expected in body_pins.items():
     body = pe.get_data(address - image_base, size)
@@ -161,6 +163,13 @@ check("SeedValue writes a 33-byte hex string at native offset +0x78",
 check("SeedValue encoder is uppercase hexadecimal",
       b"\x80\x04\x1e\x30" in hex_encoder
       and b"\x80\x04\x1e\x37" in hex_encoder)
+
+# Offline-imported ReproKey/Signature is a fixed-width 0x200-character token.
+# This is a client-side format gate only; it does not identify the server-side
+# signing algorithm or make the token an ECU-facing credential.
+check("offline ReproKey/Signature format requires exactly 0x200 characters",
+      pe.get_data(0x00480021 - image_base, 6) == b"\x81\xfa\x00\x02\x00\x00"
+      and b"CReproKeyServerAccessCtrlr::CheckReproKeyFormat LengthError" in cuw_b)
 
 # --- Layer A <-> Layer B independence ----------------------------------------
 # The returned Signature must never reach a flash writer. Native writers store
