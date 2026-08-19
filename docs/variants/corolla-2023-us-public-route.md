@@ -1471,10 +1471,10 @@ promotion:
 named canonical functions                 1113
 verified exact-body transfers              288
 target-native inspected unique-shape       26
-target-native role-recovered                 71
+target-native role-recovered                 78
 complete target-surface recensuses          227
 structural candidates only                  110
-genuinely unresolved                        391
+genuinely unresolved                        384
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1780,7 +1780,7 @@ the five roles, 0x33 state-machine path, PI pair/order, fixed-point inverse
 transforms, CH0 wrapper/worker topology, and the axis-B semantic boundary. The
 `motor_control` tag now has **zero genuinely-unresolved functions**. Axis A also
 moves structural-only -> inspected unique-shape, so the global denominator becomes
-**391 genuinely unresolved**, 26 inspected unique-shape, 71 role-recovered, 227
+**384 genuinely unresolved**, 26 inspected unique-shape, 78 role-recovered, 227
 surface-recensused, 110 structural-only, and 288 exact canonical functions; 374
 H-native evidence functions lack a unique Sienna pair and remain separately
 counted after the SecOC/ICU-S closure below.
@@ -1854,9 +1854,52 @@ pins the core relocation island, Rx front-end, configured profile/freshness
 callbacks, ICU ISRs, crypto-test callbacks, and regenerated D7 unpacker. With
 these 42 promotions, `secoc_icus` has **zero genuinely-unresolved named
 functions**, the overlapping `crypto` residue falls to **7**, and the global
-1,113-function denominator becomes **391 genuinely unresolved**, 26 inspected
-unique-shape, 71 role-recovered, 227 surface-recensused, 110 structural-only, and
-288 exact-body transfers.
+1,113-function denominator becomes **384 genuinely unresolved**, 26 inspected
+unique-shape, 78 role-recovered, 227 surface-recensused, 110 structural-only, and
+288 exact-body transfers after the crypto closure below.
+
+### 7.22 Remaining crypto helpers and test-bank generation
+
+The final **seven** named `crypto` residues are now target-native mapped, closing
+that tag's genuinely-unresolved count to zero. They split into three independent
+classes rather than one crypto-library block.
+
+The boot cleanup wrapper is `S 70FC payload_crypto_finalize -> H 70E0`. Its 12
+bytes are exactly equal, but that body is globally non-unique, so the mapping is
+not promoted from bytes alone. The surrounding clear helper independently maps
+`S 70E4 -> H 70C8` (`-0x1C`), and H `70E0` directly calls `70C8`; this binds the
+same TransferExit/verify-cleanup role without relying on the ambiguous body.
+
+Both application crypto-test banks retain their activation/snapshot architecture
+at one `-0x5CC8` island:
+
+```text
+S 68F0C bank0 counter snapshot -> H 63244
+S 68F92 bank0 activate         -> H 632CA
+S 68FC2 bank1 counter snapshot -> H 632FA
+S 69018 bank1 activate         -> H 63350
+```
+
+Bank 0 still snapshots eight COM update counters before entering state `0x11`;
+bank 1 still snapshots five. The generated counter indices are H-specific: Sienna
+uses `12..19` / `20..24`, while H uses `10..17` / `18..22`, an exact **−2** shift
+consistent with the changed preceding H Rx generation. H bank-0 activation uses
+`FEBE4F82/4F83`; bank 1 uses `FEBE4F87/4F88`. The state machine roles transfer,
+but Sienna's counter numbers and RAM cells do not.
+
+The remaining lower-driver record lookups are `S 88302 -> H 82702` and `S 88508
+-> H 82908`, both at the same `-0x5C00` ICU/CryptoIf relocation as §7.21. Each
+still scans exactly two records with stride `0x20`; H's generated bases are
+`27C88` and `27CCC`.
+
+Machine-readable ownership is
+`data/generated/corolla_8965H1202000_crypto_residue.json` plus the compact
+seven-function evidence file. `tests/verify_corolla_8965H1202000_crypto_residue.py`
+pins all mappings, the boot call-chain disambiguation, counter cohorts/lifecycle,
+and driver-record geometry. `crypto` now has **zero genuinely-unresolved named
+functions**, and the global denominator becomes **384 genuinely unresolved**, 26
+inspected unique-shape, 78 role-recovered, 227 surface-recensused, 110
+structural-only, and 288 exact-body transfers.
 
 ## 8. Remaining evidence boundary
 

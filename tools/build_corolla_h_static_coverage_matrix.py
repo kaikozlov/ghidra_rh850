@@ -259,6 +259,28 @@ def main() -> None:
                 "role": item["reference_name"],
             }
 
+    crypto_path = REPO / "data/generated/corolla_8965H1202000_crypto_residue.json"
+    if crypto_path.is_file():
+        crypto = load_json(crypto_path)
+        crypto_rel = str(crypto_path.relative_to(REPO))
+        evidence_file_hashes[crypto_rel] = sha256(crypto_path.read_bytes())
+        crypto_ev_path = REPO / crypto["evidence"]["decompiler_evidence"]
+        crypto_ev = load_json(crypto_ev_path)
+        crypto_targets = {int(r["target_entry"], 16) for r in crypto_ev.get("functions", [])}
+        for item in crypto.get("crypto_role_closure", []):
+            ref = int(item["reference_entry"], 16)
+            target = int(item["target_entry"], 16)
+            if target not in crypto_targets:
+                raise ValueError(f"crypto role target lacks tracked target-native evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["target_entry"],
+                "report": crypto_rel,
+                "evidence": crypto["evidence"]["decompiler_evidence"],
+                "role": item["reference_name"],
+            }
+
     # Explicit generated-surface recensuses. These are not function homology:
     # they prove the foreign generated surface was exhaustively re-enumerated.
     recensus: dict[int, set[str]] = defaultdict(set)

@@ -2818,19 +2818,28 @@
     },
     {
       "body_size": 12,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: payload_crypto_finalize",
+        "report:data/generated/corolla_8965H1202000_crypto_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000070FC",
       "reference_name": "payload_crypto_finalize",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_crypto_residue.json",
+        "role": "payload_crypto_finalize",
+        "target_entry": "0x000070E0"
+      },
       "semantic_tags": [
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000070E0",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -12068,70 +12077,106 @@
     },
     {
       "body_size": 134,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: crypto_test_bank0_update_counter_snapshot",
+        "report:data/generated/corolla_8965H1202000_crypto_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00068F0C",
       "reference_name": "crypto_test_bank0_update_counter_snapshot",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_crypto_residue.json",
+        "role": "crypto_test_bank0_update_counter_snapshot",
+        "target_entry": "0x00063244"
+      },
       "semantic_tags": [
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00063244",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 48,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: crypto_test_bank0_activate",
+        "report:data/generated/corolla_8965H1202000_crypto_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00068F92",
       "reference_name": "crypto_test_bank0_activate",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_crypto_residue.json",
+        "role": "crypto_test_bank0_activate",
+        "target_entry": "0x000632CA"
+      },
       "semantic_tags": [
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000632CA",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 86,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: crypto_test_bank1_update_counter_snapshot",
+        "report:data/generated/corolla_8965H1202000_crypto_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00068FC2",
       "reference_name": "crypto_test_bank1_update_counter_snapshot",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_crypto_residue.json",
+        "role": "crypto_test_bank1_update_counter_snapshot",
+        "target_entry": "0x000632FA"
+      },
       "semantic_tags": [
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000632FA",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 42,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: crypto_test_bank1_activate",
+        "report:data/generated/corolla_8965H1202000_crypto_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00069018",
       "reference_name": "crypto_test_bank1_activate",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_crypto_residue.json",
+        "role": "crypto_test_bank1_activate",
+        "target_entry": "0x00063350"
+      },
       "semantic_tags": [
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00063350",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -13973,19 +14018,28 @@
     },
     {
       "body_size": 34,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: crypto_generate_driver_record_lookup",
+        "report:data/generated/corolla_8965H1202000_crypto_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00088302",
       "reference_name": "crypto_generate_driver_record_lookup",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_crypto_residue.json",
+        "role": "crypto_generate_driver_record_lookup",
+        "target_entry": "0x00082702"
+      },
       "semantic_tags": [
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082702",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -14007,19 +14061,28 @@
     },
     {
       "body_size": 34,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: crypto_driver_record_lookup",
+        "report:data/generated/corolla_8965H1202000_crypto_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00088508",
       "reference_name": "crypto_driver_record_lookup",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_crypto_residue.json",
+        "role": "crypto_driver_record_lookup",
+        "target_entry": "0x00082908"
+      },
       "semantic_tags": [
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082908",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -19345,23 +19408,6 @@
       "coverage_basis": [
         "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
       ],
-      "reference_entry": "0x000070FC",
-      "reference_name": "payload_crypto_finalize",
-      "role_recovery": null,
-      "semantic_tags": [
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 12,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
       "reference_entry": "0x00020880",
       "reference_name": "application_entry",
       "role_recovery": null,
@@ -22490,74 +22536,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 134,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00068F0C",
-      "reference_name": "crypto_test_bank0_update_counter_snapshot",
-      "role_recovery": null,
-      "semantic_tags": [
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 48,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00068F92",
-      "reference_name": "crypto_test_bank0_activate",
-      "role_recovery": null,
-      "semantic_tags": [
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 86,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00068FC2",
-      "reference_name": "crypto_test_bank1_update_counter_snapshot",
-      "role_recovery": null,
-      "semantic_tags": [
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 42,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00069018",
-      "reference_name": "crypto_test_bank1_activate",
-      "role_recovery": null,
-      "semantic_tags": [
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 38,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -23124,40 +23102,6 @@
       "reference_name": "application_can1_tx_interrupt_body",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 34,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00088302",
-      "reference_name": "crypto_generate_driver_record_lookup",
-      "role_recovery": null,
-      "semantic_tags": [
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 34,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00088508",
-      "reference_name": "crypto_driver_record_lookup",
-      "role_recovery": null,
-      "semantic_tags": [
-        "crypto"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -25216,6 +25160,8 @@
       "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json": "47c23950f0f540368319caa7e6318473f3cc8ab991356e0b9591b2d6296ccdd7",
       "data/generated/corolla_8965H1202000_can_com.json": "4b09e7090e59d92aab8ae82e6b71bd23a2885dba6067c2fbce35a7eaf03575cb",
       "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json": "a7056121e4f7c886c4b890749cced5ca394467b3d907386e3ed1d0c82f482288",
+      "data/generated/corolla_8965H1202000_crypto_residue.json": "0619483d6ea92fc67a8089b566b43c1aada1a3c955ef041a631645d5476b9c1d",
+      "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json": "bb11ebfa277539c89132d4406defe49ffb0cd99a8255d0aab6c542c9397ac560",
       "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json": "23276acc88a2fa363ae0d78bbc16cebc9459caac80634aae6bf3c3756a058ab3",
       "data/generated/corolla_8965H1202000_motor_control.json": "eca55432652bac286223b181602ca62f4a64d207c39cf0698e508731a909b756",
       "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json": "79e9b0a26271f349724288b59e8f5e34733ecbf5bf56c698072b8fe9b82e402d",
@@ -27077,14 +27023,14 @@
   ],
   "summary": {
     "coverage_counts": {
-      "genuinely-unresolved": 391,
+      "genuinely-unresolved": 384,
       "structural-candidate-only": 110,
       "target-native-inspected-unique-shape": 26,
-      "target-native-role-recovered": 71,
+      "target-native-role-recovered": 78,
       "target-surface-recensused": 227,
       "verified-exact-body-transfer": 288
     },
-    "genuinely_unresolved_count": 391,
+    "genuinely_unresolved_count": 384,
     "h_native_evidence_functions_without_unique_sienna_pair": 374,
     "named_function_count": 1113,
     "structural_candidate_only_count": 110,
@@ -27097,10 +27043,9 @@
         "verified-exact-body-transfer": 28
       },
       "crypto": {
-        "genuinely-unresolved": 7,
         "structural-candidate-only": 11,
         "target-native-inspected-unique-shape": 9,
-        "target-native-role-recovered": 7,
+        "target-native-role-recovered": 14,
         "verified-exact-body-transfer": 26
       },
       "diagnostics": {

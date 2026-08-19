@@ -1,0 +1,86 @@
+{
+  "boundary": "seven residual canonical crypto roles only; no neighboring disposable-project boundaries are promoted",
+  "function_count": 7,
+  "functions": [
+    {
+      "body_sha256": "2a09719036df6e00326d3df5af884ebe092c8bf2608dcc3da3c3a697f2765ef4",
+      "decompiled_c": "\nvoid FUN_000070e0(void)\n\n{\n  FUN_000070c8();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "7b23a3bcea6662b7bb558f13ab65d0951f5b383d0a4a2e30f823c7acd56c121e",
+      "reference_entry": "0x000070FC",
+      "source_corpus": "clean",
+      "target_entry": "0x000070E0",
+      "target_reported_body_size": 12
+    },
+    {
+      "body_sha256": "0a3c200a24b6ad0a3ad6f3b802288aad5d65865aa7fae500266bbe4a6993efac",
+      "decompiled_c": "\nvoid direct_call_target_00063244(void)\n\n{\n  uRamfebe4f30 = *(undefined1 *)(DAT_000256a4 + 0xfebe5224);\n  uRamfebe4f31 = *(undefined1 *)(DAT_000256a6 + 0xfebe5224);\n  uRamfebe4f32 = *(undefined1 *)(DAT_000256a8 + 0xfebe5224);\n  uRamfebe4f33 = *(undefined1 *)(DAT_000256aa + 0xfebe5224);\n  uRamfebe4f34 = *(undefined1 *)(DAT_000256ac + 0xfebe5224);\n  uRamfebe4f35 = *(undefined1 *)(DAT_000256ae + 0xfebe5224);\n  uRamfebe4f36 = *(undefined1 *)(DAT_000256b0 + 0xfebe5224);\n  uRamfebe4f37 = *(undefined1 *)(DAT_000256b2 + 0xfebe5224);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "81493d9c563955dbaaa646ee745b2f3137bf8ec205545c2ae9d2177aea619d72",
+      "reference_entry": "0x00068F0C",
+      "source_corpus": "secoc_app",
+      "target_entry": "0x00063244",
+      "target_reported_body_size": 134
+    },
+    {
+      "body_sha256": "e60066d9809bf660d8fb64973182c9933c96229a11a9479e0f18535ce874357b",
+      "decompiled_c": "\nvoid direct_call_target_000632ca(void)\n\n{\n  if (cRamfebe4f82 == '\\0') {\n    cRamfebe4f82 = '\\x01';\n    uRamfebe4f70 = 0;\n    uRamfebe4f83 = 0x11;\n    FUN_00062214();\n    FUN_0006224c(1);\n    direct_call_target_00063244();\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f436fcda0d99bc312e277a2ebbd348ed75431dc39de10fd91529ffa46dc26e51",
+      "reference_entry": "0x00068F92",
+      "source_corpus": "secoc_app",
+      "target_entry": "0x000632CA",
+      "target_reported_body_size": 48
+    },
+    {
+      "body_sha256": "5aac77a85aa1f31265b471f6211f9fa8320d2a6f52f1a64a3e7a12be9210ff0c",
+      "decompiled_c": "\nvoid direct_call_target_000632fa(void)\n\n{\n  uRamfebe4f97 = *(undefined1 *)(DAT_000256b4 + 0xfebe5224);\n  uRamfebe4f98 = *(undefined1 *)(DAT_000256b6 + 0xfebe5224);\n  uRamfebe4f99 = *(undefined1 *)(DAT_000256b8 + 0xfebe5224);\n  uRamfebe4f9a = *(undefined1 *)(DAT_000256ba + 0xfebe5224);\n  uRamfebe4f9b = *(undefined1 *)(DAT_000256bc + 0xfebe5224);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "648003280b8c1fbcbac9ca517523c28b4b32e048ec45f7bcf798bf5c6b084b8a",
+      "reference_entry": "0x00068FC2",
+      "source_corpus": "secoc_app",
+      "target_entry": "0x000632FA",
+      "target_reported_body_size": 86
+    },
+    {
+      "body_sha256": "4783d7dedb544a8c0d36d96c365d302475db234596a4ccae071bab37b0880630",
+      "decompiled_c": "\nvoid direct_call_target_00063350(void)\n\n{\n  if (cRamfebe4f87 == '\\0') {\n    cRamfebe4f87 = '\\x01';\n    uRamfebe4f72 = 0;\n    uRamfebe4f88 = 0x11;\n    FUN_00062282();\n    direct_call_target_000632fa();\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "727d7b308d365c9380ad848cc01cd532045dcec98c572c03967c38c884abac42",
+      "reference_entry": "0x00069018",
+      "source_corpus": "secoc_app",
+      "target_entry": "0x00063350",
+      "target_reported_body_size": 42
+    },
+    {
+      "body_sha256": "3f2b753f8224428cb697ca006a8bb59d60c1949ac9edad4712c40dce0ec68c15",
+      "decompiled_c": "\nshort * FUN_00082702(short param_1)\n\n{\n  short *psVar1;\n  uint uVar2;\n  \n  uVar2 = 0;\n  do {\n    psVar1 = (short *)(uVar2 * 0x20 + 0x27c88);\n    if (*psVar1 == param_1) {\n      return psVar1;\n    }\n    uVar2 = uVar2 + 1;\n  } while (uVar2 < 2);\n  return (short *)0x0;\n}\n\n",
+      "decompiled_c_sha256": "3c9cd7021fcdceee0b418ffaa73be4912eca4fab9f4f246c52880380d1df9832",
+      "reference_entry": "0x00088302",
+      "source_corpus": "secoc_app",
+      "target_entry": "0x00082702",
+      "target_reported_body_size": 34
+    },
+    {
+      "body_sha256": "97459dd2c3ff3b95cc00a1c7195f414044b4efa3e69835060b1ba2a4f3dffd3c",
+      "decompiled_c": "\nshort * FUN_00082908(short param_1)\n\n{\n  short *psVar1;\n  uint uVar2;\n  \n  uVar2 = 0;\n  do {\n    psVar1 = (short *)(uVar2 * 0x20 + 0x27ccc);\n    if (*psVar1 == param_1) {\n      return psVar1;\n    }\n    uVar2 = uVar2 + 1;\n  } while (uVar2 < 2);\n  return (short *)0x0;\n}\n\n",
+      "decompiled_c_sha256": "c8cd096048f5ed6bd55e6f507f0476618af32dc3406addbadfdba497c088eaee",
+      "reference_entry": "0x00088508",
+      "source_corpus": "secoc_app",
+      "target_entry": "0x00082908",
+      "target_reported_body_size": 34
+    }
+  ],
+  "image": {
+    "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "codeflash_size": 1048576,
+    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+  },
+  "schema": "corolla-h-crypto-residue-decompiler-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpora": {
+    "clean": {
+      "path": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+      "sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539"
+    },
+    "secoc_app": {
+      "path": "build/h_8965H1202000_secoc_app_decompilations.jsonl",
+      "sha256": "5ce86a5aa18eedefe19e346f6df6b87057690b5c4464ec36fd253bc5816810d7"
+    }
+  }
+}

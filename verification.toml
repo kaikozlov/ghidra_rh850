@@ -1543,6 +1543,23 @@ paths = [
 oracle = "raw_bytes"
 
 
+[suite.corolla_8965h_crypto_residue]
+tests = ["tests/verify_corolla_8965H1202000_crypto_residue.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_crypto_residue.py",
+  "tools/build_corolla_h_crypto_residue.py",
+  "tools/extract_corolla_h_crypto_residue_evidence.py",
+  "data/generated/corolla_8965H1202000_crypto_residue.json",
+  "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
+  "data/generated/decompilations.jsonl",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
 [suite.corolla_8965h_secoc_surface]
 tests = ["tests/verify_corolla_8965H1202000_secoc_surface.py"]
 paths = [
@@ -1588,6 +1605,8 @@ paths = [
   "data/generated/corolla_8965H1202000_motor_control.json",
   "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_secoc_surface.json",
+  "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_crypto_residue.json",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/reference/generated-artifacts.md",

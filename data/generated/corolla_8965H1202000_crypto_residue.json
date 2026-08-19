@@ -1,0 +1,185 @@
+{
+  "crypto_role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "mapping_note": "exact-ambiguous-body-role-recovered",
+      "reference_entry": "0x000070FC",
+      "reference_name": "payload_crypto_finalize",
+      "target_entry": "0x000070E0",
+      "target_reported_body_size": 12
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "mapping_note": "target-native-role-recovered",
+      "reference_entry": "0x00068F0C",
+      "reference_name": "crypto_test_bank0_update_counter_snapshot",
+      "target_entry": "0x00063244",
+      "target_reported_body_size": 134
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "mapping_note": "target-native-role-recovered",
+      "reference_entry": "0x00068F92",
+      "reference_name": "crypto_test_bank0_activate",
+      "target_entry": "0x000632CA",
+      "target_reported_body_size": 48
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "mapping_note": "target-native-role-recovered",
+      "reference_entry": "0x00068FC2",
+      "reference_name": "crypto_test_bank1_update_counter_snapshot",
+      "target_entry": "0x000632FA",
+      "target_reported_body_size": 86
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "mapping_note": "target-native-role-recovered",
+      "reference_entry": "0x00069018",
+      "reference_name": "crypto_test_bank1_activate",
+      "target_entry": "0x00063350",
+      "target_reported_body_size": 42
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "mapping_note": "target-native-role-recovered",
+      "reference_entry": "0x00088302",
+      "reference_name": "crypto_generate_driver_record_lookup",
+      "target_entry": "0x00082702",
+      "target_reported_body_size": 34
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "mapping_note": "target-native-role-recovered",
+      "reference_entry": "0x00088508",
+      "reference_name": "crypto_driver_record_lookup",
+      "target_entry": "0x00082908",
+      "target_reported_body_size": 34
+    }
+  ],
+  "crypto_role_closure_count": 7,
+  "crypto_test_banks": {
+    "bank0": {
+      "activate": {
+        "h": "0x000632CA",
+        "h_active_cell": "0xFEBE4F82",
+        "h_state_cell": "0xFEBE4F83",
+        "initial_state": 17,
+        "sienna": "0x00068F92"
+      },
+      "index_shift": [
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2,
+        -2
+      ],
+      "snapshot": {
+        "h": "0x00063244",
+        "h_counter_indices": [
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17
+        ],
+        "sienna": "0x00068F0C",
+        "sienna_counter_indices": [
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19
+        ]
+      }
+    },
+    "bank1": {
+      "activate": {
+        "h": "0x00063350",
+        "h_active_cell": "0xFEBE4F87",
+        "h_state_cell": "0xFEBE4F88",
+        "initial_state": 17,
+        "sienna": "0x00069018"
+      },
+      "index_shift": [
+        -2,
+        -2,
+        -2,
+        -2,
+        -2
+      ],
+      "snapshot": {
+        "h": "0x000632FA",
+        "h_counter_indices": [
+          18,
+          19,
+          20,
+          21,
+          22
+        ],
+        "sienna": "0x00068FC2",
+        "sienna_counter_indices": [
+          20,
+          21,
+          22,
+          23,
+          24
+        ]
+      }
+    },
+    "interpretation": "both crypto-test banks preserve activation/state/snapshot architecture, while generated COM update-counter indices shift by -2, consistent with the H changed preceding Rx topology; do not transfer Sienna counter numbers"
+  },
+  "driver_record_lookup": {
+    "delta": -23552,
+    "generate": {
+      "h": "0x00082702",
+      "record_base": "0x00027C88",
+      "record_count": 2,
+      "record_stride": 32,
+      "sienna": "0x00088302"
+    },
+    "interpretation": "two-record lower-driver lookup roles preserve ID/stride/count with relocated generated tables",
+    "verify_generic": {
+      "h": "0x00082908",
+      "record_base": "0x00027CCC",
+      "record_count": 2,
+      "record_stride": 32,
+      "sienna": "0x00088508"
+    }
+  },
+  "evidence": {
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "payload_crypto_finalize": {
+    "body_size": 12,
+    "clear_delta": -28,
+    "exact_body_equal": true,
+    "h": "0x000070E0",
+    "h_calls_clear": true,
+    "h_clear": "0x000070C8",
+    "interpretation": "same boot payload crypto cleanup wrapper; raw body is non-unique globally, so role is bound by the adjacent clear-function call chain rather than exact bytes alone",
+    "sienna": "0x000070FC",
+    "sienna_clear": "0x000070E4"
+  },
+  "schema": "corolla-h-crypto-residue-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "all_7_crypto_residual_roles_recovered": true,
+    "boundary": "role/control semantics are recovered; generated H COM counter indices and RAM addresses remain target-specific",
+    "crypto_named_residue_closed": true,
+    "test_bank_counter_population_changed": true
+  }
+}
