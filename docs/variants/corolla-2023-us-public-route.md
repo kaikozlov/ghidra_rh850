@@ -1498,9 +1498,8 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(560 currently have
-tracked target-native evidence) rather than being forced into the 1,113-function
-Sienna denominator.
+(566 currently have tracked target-native evidence) rather than being forced
+into the 1,113-function Sienna denominator.
 
 The machine-readable owner is
 `data/generated/corolla_8965H1202000_static_coverage_matrix.json`; it joins the
@@ -2248,6 +2247,70 @@ recovered target role, complete target-surface recensus, or target-native
 operand/dataflow inspection. Remaining uncertainty is claim-specific (for example
 field-for-field equivalence of regenerated code, runtime reachability, or behavior
 that needs live/bench evidence), not missing comparative static coverage.
+
+### 7.34 Techstream semantic join: DID 1C02 is the live internal Command Value Torque observable
+
+The initial H static-coverage pass did not repeat the Techstream/DDB correlation
+that had been unusually productive on Sienna. Doing that target-specific join
+changes the steering interpretation in a useful way.
+
+`GetDatMonListP5_DT.dll` constructs the ECU support-data-ID list and filters P5
+monitor exposure through `CheckSupportPid`. Raw `EMPS_P5.ddb` type-62 records
+contain a primary/alternate Data-ID pair at `+0x36/+0x38`: every nonzero
+alternate word resolves in the same database's type-61 `DataIdForDm` table, and
+every nonzero primary does as well except the deliberate `0xFFFE` sentinel.
+Techstream monitor **402 `Command Value Torque`** is 16-bit, resolves through the
+physical-data/unit chain to **Nm**, and carries primary Data ID **`0x1C02`**
+(alternate `0x3C02`).
+
+That is an exact target join rather than vocabulary transfer. H independently
+implements RDBI DID `0x1C02` as live two-byte callback `0x495A0`. The callback
+uses the same dimensional formula shape as Sienna's corresponding diagnostic
+producer and the H-local source traces into the active steering pipeline:
+
+```text
+H CE974 active steering pipeline
+  -> CD55A  compose/bound local command precursor -> FEBEC3C0
+  -> CD5DC  FEBEC3C0 * FEBEAC5A / 0x400 -> FEBEC3D2
+  -> CE928  FEBEC3D2 -> FEBEAC56
+  -> BB9E8  FEBEAC56 -> FEBEE40A
+  -> 56892 / 57692  FEBEE40A -> FEBE65F2
+  -> 495A0  scale FEBE65F2 by FEBEE8A6, clamp +/-20000, emit DID 1C02
+```
+
+This resolves a conceptual ambiguity from the Sienna-only correlation. The same
+H image has no configured SecOC or normal-COM `0x2E4/0x131` steering ingress, and
+the complete H external-supervisor-ingress census finds no replacement large
+external scalar in the mapped COM cone. Nevertheless **Command Value Torque
+remains live**. Monitor 402 therefore labels an **internal EPS command-value
+torque observable**; it is not intrinsically the external `0x2E4` field. On
+Sienna, `0x2E4` is one recovered upstream command source. On H, the source is
+composed by H-local steering logic and its ultimate external/LTA provenance is
+still the missing question.
+
+The broader join is also useful. Of H's 226 readable RDBI DIDs, **124** occur in
+`EMPS_P5`'s type-61 Data-ID table, yielding **137 named monitor rows across 121
+primary Data IDs**. This supplies firmware-joined names for commanded and actual
+d/q current, motor phase current/duty, torque sensors, steering angle, motor
+rotation, and other internal states rather than requiring address-based guesses.
+`EMPS2_P5` has a weaker 112-DID overlap. The newer target-angle vocabulary in
+`EMPS_P5`—`Target Lateral ID`, `Target Steering Angle After Output
+Compensation`, `Advanced Drive Target Steering Angle`, and System-2 variants—is
+grouped under primary DIDs `0x1CEE/0x1CEF`; **neither DID exists in H RDBI**.
+
+The practical next discriminator is therefore much sharper than a generic xref
+hunt: while stock LTA is actively steering, observe DID `0x1C02` together with
+Techstream-named commanded d/q-current DIDs (for example `0x1152/0x1154`), actual
+current, and the already mapped d/q/PWM state, preferably with XCP providing the
+high-rate internal view. Correlated movement would reveal where stock lateral
+control enters the H-local command synthesis even if no Sienna-shaped wire field
+exists.
+
+Machine-readable ownership:
+`data/generated/corolla_8965H1202000_techstream_correlations.json` and
+`data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json`;
+`tests/verify_corolla_8965H1202000_techstream_correlations.py` regenerates the
+join and raw-binds all cited H functions and Techstream databases.
 
 ## 8. Remaining evidence boundary
 

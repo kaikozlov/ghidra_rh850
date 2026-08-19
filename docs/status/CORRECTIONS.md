@@ -1817,3 +1817,30 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   §7.13; `tests/verify_corolla_8965H1202000_secoc_key_provenance.py`.
+
+
+### CORR-076 — Techstream monitor 402 is an internal commanded-torque observable, not intrinsically the external `0x2E4` field
+
+- **Earlier Sienna-only reading:** TMS-017 accepted `EMPS_P5` monitor 402
+  `Command Value Torque` as corroboration for the authenticated `0x2E4` steering
+  command domain. Its stated boundary already avoided claiming a direct COM-cell
+  read, but the surrounding comparison could still be read as if monitor 402
+  semantically named that wire field.
+- **Foreign-image discriminator:** tracked Corolla `8965H1202000` has no
+  configured SecOC or normal-COM `0x2E4/0x131`, yet Techstream's recovered
+  primary Data ID for monitor 402 is `0x1C02`, which H implements as live RDBI
+  callback `0x495A0`. H-native dataflow traces the diagnostic source through
+  `FEBE65F2 <- FEBEE40A <- FEBEAC56 <- FEBEC3D2 <- FEBEC3C0`; active steering
+  pipeline `0xCE974` executes the upstream `CD55A -> CD5DC -> CE928` synthesis.
+- **Correct interpretation:** monitor 402 labels an **internal EPS command-value
+  torque observable**. On Sienna, authenticated `0x2E4` is one recovered upstream
+  external command source; that source association is calibration-specific and
+  must not be transferred to H or another variant without independent ingress
+  evidence.
+- **Consequence:** H now has an exact live discriminator for stock-LTA work: read
+  DID `0x1C02` together with commanded q/d-current DIDs `0x1152/0x1154` and
+  internal d/q/PWM state instead of searching blindly for a relocated 16-bit CAN
+  torque field.
+- **Canonical:**
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
+  §7.34; `tests/verify_corolla_8965H1202000_techstream_correlations.py`.

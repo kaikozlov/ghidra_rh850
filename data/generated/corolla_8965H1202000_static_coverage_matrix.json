@@ -21598,6 +21598,7 @@
       "data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json": "188c0147fe3bca5ba82922861673e57f7aaeed6d131daec3340397b4df9e1a06",
       "data/generated/corolla_8965H1202000_system_orchestration.json": "a00144920f5c18cf13398c4ac7b5606ba33107c37f3cdf6c9bb2f613ed58f395",
       "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json": "94b3c107f9fbfde21c25bd9a65a62e051e69236896612173eb24e749347275b0",
+      "data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json": "3b368726c5568965a37c22ea63f33b4ac118878a553ce607471c2e3a86a1f1fb",
       "data/generated/corolla_8965H1202000_veneer_bank.json": "67683b3545a7c5b60aa211a8d0ceb78f46160de85f250a828c038e8eb088c661",
       "data/generated/corolla_8965H1202000_xcp.json": "f90ff5f0482f97aa6779ea0897d6b579fb0a9baae740bdc8b1f13ade81737340",
       "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json": "e4b287abe347bcb6dae233e52d1ba3c8b732c7a5e260fe7137f1f731a20f1cb5"
@@ -21612,7 +21613,7 @@
       "verified-exact-body-transfer": 288
     },
     "genuinely_unresolved_count": 0,
-    "h_native_evidence_functions_without_unique_sienna_pair": 560,
+    "h_native_evidence_functions_without_unique_sienna_pair": 566,
     "named_function_count": 1113,
     "structural_candidate_only_count": 0,
     "surface_recensus_reference_function_count": 614,
@@ -21669,6 +21670,6 @@
         "verified-exact-body-transfer": 3
       }
     },
-    "target_native_inspected_reference_function_count": 147
+    "target_native_inspected_reference_function_count": 149
   }
 }

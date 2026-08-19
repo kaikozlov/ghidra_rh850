@@ -1,0 +1,87 @@
+{
+  "boundary": "Target-native evidence for the Techstream Command Value Torque join only. Names are not promoted into the Ghidra snapshot; raw-body hashes bind each recovered pseudocode observation to 8965H1202000.",
+  "function_count": 10,
+  "functions": [
+    {
+      "body_sha256": "b03489f33a061280583ba31f970c6f34f48c7ffb223f5dd120a00f7c1dc3c9dc",
+      "body_size": 72,
+      "decompiled_c": "\nundefined4 FUN_000495a0(undefined4 param_1)\n\n{\n  int aiStack_c [2];\n  \n  aiStack_c[0] = (((int)((int)sRamfebe65f2 * (uint)uRamfebee8a6) / 0x2000) * 100) / 0x100;\n  FUN_0006943a(aiStack_c[0],20000,&DAT_ffffb1e0,aiStack_c);\n  FUN_0006385c((int)(short)aiStack_c[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9f2d404f6781351346e4f58ea7d3edadde51d28c353e79c7550bdf5addda84ce",
+      "entry": "0x000495A0"
+    },
+    {
+      "body_sha256": "6b71508fae2a0a891b6f54f8ad11f067100b86c362e9069d0dc629f4ebb8065b",
+      "body_size": 222,
+      "decompiled_c": "\nvoid FUN_00056892(void)\n\n{\n  uRamfebe62e8 = uRamfebee408;\n  uRamfebe65f0 = uRamfebee408;\n  uRamfebe65f2 = uRamfebee40a;\n  uRamfebe65f4 = uRamfebee40c;\n  uRamfebe65f6 = uRamfebee40e;\n  uRamfebe65e8 = uRamfebee400;\n  uRamfebe65f8 = uRamfebee410;\n  uRamfebe65fa = uRamfebee412;\n  uRamfebe65e9 = uRamfebee401;\n  uRamfebe65ea = uRamfebee402;\n  uRamfebe65eb = uRamfebee403;\n  uRamfebe65ec = uRamfebee404;\n  uRamfebe65fc = uRamfebee414;\n  uRamfebe65ed = uRamfebee405;\n  uRamfebe65fe = uRamfebee416;\n  uRamfebe65ee = uRamfebee406;\n  uRamfebe6600 = uRamfebee418;\n  uRamfebe65ef = uRamfebee407;\n  uRamfebe62e7 = uRamfebee407;\n  uRamfebe62ea = uRamfebee40a;\n  uRamfebe62ec = uRamfebee40c;\n  uRamfebe62ee = uRamfebee40e;\n  uRamfebe660c = uRamfebee608;\n  uRamfebe62e0 = uRamfebee400;\n  uRamfebe62f0 = uRamfebee410;\n  uRamfebe62f2 = uRamfebee412;\n  uRamfebe6604 = uRamfebee600;\n  uRamfebe62e1 = uRamfebee401;\n  uRamfebe62e2 = uRamfebee402;\n  uRamfebe62e3 = uRamfebee403;\n  uRamfebe6614 = uRamfebee610;\n  uRamfebe62e4 = uRamfebee404;\n  uRamfebe62f4 = uRamfebee414;\n  uRamfebe62e5 = uRamfebee405;\n  uRamfebe6605 = uRamfebee601;\n  uRamfebe62f6 = uRamfebee416;\n  uRamfebe62e6 = uRamfebee406;\n  uRamfebe62f8 = uRamfebee418;\n  uRamfebe6606 = uRamfebee602;\n  uRamfebe6607 = uRamfebee603;\n  uRamfebe660e = uRamfebee60a;\n  uRamfebe6608 = uRamfebee604;\n  uRamfebe6609 = uRamfebee605;\n  uRamfebe660a = uRamfebee606;\n  uRamfebe6610 = uRamfebee60c;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "0b5237efbadbae065a9a636d3128a8783f216cc39d04d1e552a682f166b6e701",
+      "entry": "0x00056892"
+    },
+    {
+      "body_sha256": "0984ca86bed4a15a8c30ffde433466482d8a6cb04f7fcdc75f829e6b7308f356",
+      "body_size": 252,
+      "decompiled_c": "\nvoid FUN_00057692(void)\n\n{\n  uRamfebe6314 = uRamfebe7ec4;\n  uRamfebe6316 = uRamfebe7ec6;\n  uRamfebe6318 = uRamfebe7ec8;\n  uRamfebe631a = uRamfebe7eca;\n  uRamfebe631c = uRamfebe7ecc;\n  uRamfebe631e = uRamfebe7ece;\n  uRamfebe6320 = uRamfebe7ed0;\n  uRamfebe6322 = uRamfebe7ed2;\n  uRamfebe6324 = uRamfebe7ed4;\n  uRamfebe6326 = uRamfebe7ed6;\n  uRamfebe6328 = uRamfebe7ed8;\n  uRamfebe632a = uRamfebe7eda;\n  uRamfebe6394 = uRamfebe7ae6;\n  uRamfebe6396 = uRamfebe7ae8;\n  uRamfebe6398 = uRamfebe7aea;\n  uRamfebe639a = uRamfebe7aec;\n  uRamfebe639c = uRamfebe7aee;\n  uRamfebe639e = uRamfebe7af0;\n  uRamfebe63a0 = uRamfebe7af2;\n  uRamfebe63a2 = uRamfebe7af4;\n  uRamfebe6554 = uRamfebe7b08;\n  uRamfebe65dc = uRamfebe78fc;\n  uRamfebe65f0 = uRamfebee408;\n  uRamfebe65f2 = uRamfebee40a;\n  uRamfebe65f4 = uRamfebee40c;\n  uRamfebe65f6 = uRamfebee40e;\n  uRamfebe65e8 = uRamfebee400;\n  uRamfebe65f8 = uRamfebee410;\n  uRamfebe65fa = uRamfebee412;\n  uRamfebe65e9 = uRamfebee401;\n  uRamfebe65ea = uRamfebee402;\n  uRamfebe65eb = uRamfebee403;\n  uRamfebe65ec = uRamfebee404;\n  uRamfebe65fc = uRamfebee414;\n  uRamfebe65ed = uRamfebee405;\n  uRamfebe65fe = uRamfebee416;\n  uRamfebe65ee = uRamfebee406;\n  uRamfebe6600 = uRamfebee418;\n  uRamfebe65ef = uRamfebee407;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "41548ef48a10d9e87158e0f22c0c0e033feed75ee5566d1dd23efb068e6cf371",
+      "entry": "0x00057692"
+    },
+    {
+      "body_sha256": "e51081b08b6ea5d7185a05dcac1b047d0a10050262e47ced3ae133ea4a38e81c",
+      "body_size": 92,
+      "decompiled_c": "\nvoid FUN_000bb9e8(void)\n\n{\n  uRamfebee408 = uRamfebeac58;\n  uRamfebee40a = uRamfebeac56;\n  uRamfebee40c = uRamfebeac54;\n  uRamfebee40e = uRamfebeac70;\n  uRamfebee400 = uRamfebeac2d;\n  uRamfebee410 = uRamfebeac76;\n  uRamfebee401 = 0;\n  uRamfebee402 = 0;\n  uRamfebee412 = uRamfebeac7a;\n  uRamfebee404 = 0;\n  uRamfebee403 = uRamfebeac39;\n  uRamfebee416 = 0;\n  uRamfebee406 = 0;\n  uRamfebee414 = uRamfebeac7e;\n  uRamfebee418 = 0;\n  uRamfebee405 = uRamfebeac3e;\n  uRamfebee407 = uRamfebeb328;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1d291445800ef3f9acc6cee34ac8bbe50fdee62b54a3edfdd2089957b5c7a0b8",
+      "entry": "0x000BB9E8"
+    },
+    {
+      "body_sha256": "5c5d8bd6d157d8a164ea5c502b1027feb6d159f6a8b1f6a0639d132ce72b2e9e",
+      "body_size": 26,
+      "decompiled_c": "\nuint FUN_000c84f2(void)\n\n{\n  uint uVar1;\n  \n  uVar1 = (uint)uRamfebebf80;\n  if (uRamfebebf70 + uVar1 != 0xffff) {\n    uVar1 = (uint)DAT_000afba6;\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "3050f3e64956c871c31f0a2e5acb2f8fbeb031f753035f16319dfb7e9e28fa7f",
+      "entry": "0x000C84F2"
+    },
+    {
+      "body_sha256": "bd7ce71800344c49d7f5d14c6c49a289301c61a4c23e5665dcf35c3ea60c1fad",
+      "body_size": 26,
+      "decompiled_c": "\nuint FUN_000c850c(void)\n\n{\n  uint uVar1;\n  \n  uVar1 = (uint)uRamfebebf64;\n  if (uRamfebebf6e + uVar1 != 0xffff) {\n    uVar1 = (uint)DAT_000afb96;\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "179580a0eaf93c482abe98b6c1df07388cb127db4a9b5c9610a76b9bc4b6f8d2",
+      "entry": "0x000C850C"
+    },
+    {
+      "body_sha256": "bbf9d4babd2f4d0cdb1338c0bfc1124e051cbf01d4f0863b7214b41b690d8877",
+      "body_size": 130,
+      "decompiled_c": "\nvoid FUN_000cd55a(void)\n\n{\n  int iVar1;\n  char cVar2;\n  int iVar3;\n  short sVar4;\n  int iVar5;\n  int iVar6;\n  short sVar7;\n  \n  cVar2 = cRamfebebf5b;\n  iVar3 = -0x1414800;\n  iVar5 = FUN_000c84f2();\n  iVar6 = FUN_000c850c();\n  if (*(char *)(iVar3 + -0xbd8) == '\\x01') {\n    sVar4 = *(short *)(iVar3 + 0xbca);\n  }\n  else {\n    sVar4 = *(short *)(iVar3 + 0xbd0);\n  }\n  *(short *)(iVar3 + 0xbc2) = sVar4;\n  sVar4 = (short)((iVar6 * sVar4) / 0x100);\n  iVar6 = (int)sVar4;\n  sVar7 = (short)((iVar5 * *(short *)(iVar3 + 0x7fa)) / 0x100);\n  if (cVar2 == '\\0') {\n    iVar6 = sVar7 + iVar6;\n  }\n  *(short *)(iVar3 + 0xbda) = sVar7;\n  sVar7 = DAT_000b0098;\n  iVar5 = (int)DAT_000b0098;\n  *(short *)(iVar3 + 0xbcc) = sVar4;\n  *(char *)(iVar3 + 0xbcf) = cVar2;\n  *(int *)(iVar3 + 0xbb0) = iVar6;\n  if (iVar6 - iVar5 < 0 != (iVar6 < 0 != iVar5 < 0 && iVar5 < 0 == iVar6 - iVar5 < 0) ||\n      iVar6 == iVar5) {\n    iVar1 = -iVar5;\n    if (iVar6 + iVar5 < 0 == (iVar6 < 0 != iVar1 < 0 && iVar1 < 0 == iVar6 + iVar5 < 0) &&\n        iVar6 != iVar1) {\n      sVar7 = (short)iVar6;\n    }\n    else {\n      sVar7 = (short)iVar1;\n    }\n  }\n  *(short *)(iVar3 + 0xbc0) = sVar7;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "dbe93b5f61eef630d661083f44227883a795c393a371f5c95678e6c000b90282",
+      "entry": "0x000CD55A"
+    },
+    {
+      "body_sha256": "db73e4e220a326da8c064880fd10a480fc629b8e5be41191a146fc0ae81cf8d9",
+      "body_size": 104,
+      "decompiled_c": "\nvoid FUN_000cd5dc(void)\n\n{\n  ushort uVar1;\n  int iVar2;\n  int iVar3;\n  int iVar4;\n  \n  iVar4 = (int)sRamfebeac4c;\n  uVar1 = uRamfebec4b2;\n  if (0x7ffe < uRamfebec4b2) {\n    uVar1 = 0x7fff;\n  }\n  iVar2 = (int)(short)uVar1;\n  if (iVar2 - iVar4 < 0 != (iVar2 < 0 != iVar4 < 0 && iVar4 < 0 == iVar2 - iVar4 < 0)) {\n    iVar4 = iVar2;\n  }\n  sRamfebec3d2 = (short)((int)((int)sRamfebec3c0 * (uint)uRamfebeac5a) / 0x400);\n  iVar3 = (int)sRamfebec3d2;\n  iVar2 = iVar4;\n  if ((iVar3 - iVar4 < 0 != (iVar3 < 0 != iVar4 < 0 && iVar4 < 0 == iVar3 - iVar4 < 0) ||\n       iVar3 == iVar4) &&\n     (iVar2 = -iVar4,\n     iVar3 + iVar4 < 0 == (iVar3 < 0 != iVar2 < 0 && iVar2 < 0 == iVar3 + iVar4 < 0) &&\n     iVar3 != iVar2)) {\n    iVar2 = iVar3;\n  }\n  uRamfebec3d6 = (undefined2)iVar2;\n  uRamfebec3c4 = uRamfebec3d6;\n  if ((cRamfebeac29 == '\\0') || (cRamfebeac2a != '\\0')) {\n    uRamfebec3d6 = 0;\n  }\n  uRamfebec3d8 = (short)iVar4;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "032cc89f6d9e590fc50b4bf7d7b3edfa3cd2bf648e3c3e3c4fc95665b361a26d",
+      "entry": "0x000CD5DC"
+    },
+    {
+      "body_sha256": "bf7c370d59a94863a83ec002c5154c12c44b15fb8f9f24ab23295e106cb4db03",
+      "body_size": 76,
+      "decompiled_c": "\nvoid FUN_000ce928(void)\n\n{\n  uRamfebeac39 = 0;\n  uRamfebeac54 = uRamfebec3d4;\n  uRamfebeac76 = uRamfebec3d6;\n  uRamfebeac56 = uRamfebec3d2;\n  uRamfebeac58 = uRamfebeb864;\n  uRamfebeac68 = uRamfebec3d0;\n  uRamfebeac7e = uRamfebec3d8;\n  uRamfebeac2d = 0;\n  if (cRamfebec418 != '\\0') {\n    uRamfebeac2d = 0x5a;\n  }\n  uRamfebeac70 = uRamfebeb8ae;\n  uRamfebeac3e = uRamfebec4b8;\n  uRamfebeac3f = uRamfebec4b7;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "fe24eeb3a1072e1b35f47dd2f76e58a9e20db9753d896b3057607ea1354543d2",
+      "entry": "0x000CE928"
+    },
+    {
+      "body_sha256": "e4beafb436f35564812c209f1a9dbf538cab80c8373c2d153d4761489c5fa765",
+      "body_size": 268,
+      "decompiled_c": "\nvoid FUN_000ce974(void)\n\n{\n  char cVar1;\n  \n  cVar1 = cRamfebeac31;\n  FUN_000c0b90();\n  FUN_000c0c36();\n  FUN_000c7844();\n  if (cVar1 == 'Z') {\n    FUN_000c0c8e();\n    FUN_000c0936();\n    FUN_000c125c();\n    FUN_000c141c();\n    FUN_000c15fc();\n  }\n  FUN_000c0cc8();\n  FUN_000c1a2c();\n  FUN_000c1648();\n  FUN_000c16d2();\n  FUN_000c175c();\n  FUN_000c09f4();\n  if (cVar1 == 'Z') {\n    FUN_000c0584();\n    FUN_000c96ce();\n    FUN_000c977c();\n    FUN_000c1ecc();\n    FUN_000c68b6();\n    FUN_000c574c();\n    FUN_000c5fdc();\n    FUN_000c60f0();\n    FUN_000c0606();\n  }\n  FUN_000c06be();\n  FUN_000c04e2();\n  FUN_000be25a();\n  if (cVar1 == 'Z') {\n    FUN_000c1a86();\n    FUN_000be328();\n  }\n  FUN_000c53e4();\n  FUN_000c53f4();\n  FUN_000cd31a();\n  FUN_000c1b78();\n  FUN_000c1aee();\n  if (cVar1 == 'Z') {\n    FUN_000c5874();\n    FUN_000c58d6();\n    FUN_000c5932();\n    FUN_000c68f4();\n    FUN_000c6146();\n    FUN_000c8c78();\n    FUN_000c8d42();\n  }\n  FUN_000ce50e();\n  FUN_000c1efa();\n  FUN_000c0f8a();\n  FUN_000c3f50();\n  FUN_000c40b8();\n  FUN_000c435c();\n  FUN_000c43d0();\n  FUN_000c3104();\n  FUN_000ce396();\n  FUN_000cd3cc();\n  FUN_000cd440();\n  FUN_000cd496();\n  FUN_000cd53e();\n  FUN_000cd55a();\n  FUN_000cd5dc();\n  FUN_000cda90();\n  FUN_000cd644();\n  FUN_000ce928();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "05dff52fbb6542b3045f5cafd6daf919b8ac4607ee6369db4228afbbdf596898",
+      "entry": "0x000CE974"
+    }
+  ],
+  "image": {
+    "path": "build/community-normalized/8965H1202000_CodeFlash.bin",
+    "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "size": 1048576
+  },
+  "schema": "corolla-h-techstream-steering-decompiler-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "path": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+    "sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539"
+  }
+}

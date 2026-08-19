@@ -115,17 +115,24 @@ Ready now: `exploit/behavioral_proof/` and the manifest patch/restore tooling.
 
 ### 5. Dynamic steering-command → actuation discriminator
 
-Static work has closed the obvious and non-obvious transfer paths from protected
-`0x2E4`/`0x131` command state to the identified d/q reference cells without
-finding a direct join. The next useful evidence is dynamic, not another generic
-xref sweep.
+Techstream now gives the tracked H Corolla a concrete semantic observer that the
+initial firmware-only pass lacked. `EMPS_P5` monitor 402 `Command Value Torque`
+resolves to DID `0x1C02`, and H `0x495A0` reads a live target-native producer
+chain rooted inside the active `0xCE974` steering pipeline. This survives even
+though H has no configured `0x2E4/0x131`, proving that the diagnostic name is an
+internal commanded-torque observable rather than one fixed external CAN field.
 
-Preferred setup if XCP is reachable: use the read-only DAQ
-`actuation-discriminator` profile while separately applying valid signed command
-modes on an isolated bench.
+The next useful evidence is therefore dynamic, not another generic xref sweep.
+On the H Corolla, capture stock LTA while reading `0x1C02` plus Techstream-named
+commanded d/q current (`0x1152/0x1154`) and actual-current observers. If XCP is
+reachable, run the read-only DAQ `actuation-discriminator` profile at the same
+time to correlate those named diagnostics with the identified d/q/PWM state.
+For a Sienna-style applicable EPS, separately retain the existing valid signed
+`0x2E4/0x131` command experiment.
 
 Canonical:
-[../architecture/control-partition.md](../architecture/control-partition.md).
+[../architecture/control-partition.md](../architecture/control-partition.md) ·
+[../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.34.
 
 ### 6. Passive command-8 / provisioning provenance
 

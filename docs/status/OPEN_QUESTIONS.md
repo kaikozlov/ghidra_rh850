@@ -62,9 +62,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   recovered. This does not prove physical independence. A provisioned isolated
   bench should test the two command modes separately: a valid signed `0x2E4`
   torque request and, where the target supports it, a valid signed `0x131` LTA
-  request/angle command, while observing d/q-reference/current/PWM state. Static
-  broad searching should not be repeated without a new concrete lead.
-  Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3.
+  request/angle command, while observing d/q-reference/current/PWM state. For
+  tracked Corolla `8965H1202000`, do **not** synthesize those absent Sienna
+  profiles: the Techstream join now supplies a target-native discriminator.
+  During stock LTA, read DID `0x1C02` (`Command Value Torque`) plus commanded
+  q/d-current DIDs `0x1152/0x1154` and correlate them with the same XCP d/q/PWM
+  profile. H's `1C02` producer is live inside `0xCE974` despite no configured
+  `0x2E4/0x131`, so the remaining question is what H-local/external state drives
+  that command synthesis. Static broad searching should not be repeated without
+  a new concrete lead.
+  Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3 ·
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.34.
 
 ## SecOC
 

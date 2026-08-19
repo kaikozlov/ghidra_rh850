@@ -456,6 +456,28 @@ paths = [
   "docs/status/CORRECTIONS.md",
 ]
 
+[suite.corolla_8965h_techstream_correlations]
+tests = ["tests/verify_corolla_8965H1202000_techstream_correlations.py"]
+requires_external = ["techstream_v18"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_corolla_8965H1202000_techstream_correlations.py",
+  "tools/extract_corolla_h_techstream_steering_evidence.py",
+  "tools/build_corolla_h_techstream_correlations.py",
+  "data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_techstream_correlations.json",
+  "data/generated/corolla_8965H1202000_application_diagnostics_diff.json",
+  "data/generated/techstream_v18/priority_steering_ddb_semantics.json",
+  "data/generated/techstream_v18/application_interface_correlations.json",
+  "community/albinoelephant/raw-20260818/",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/tooling/techstream.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+
 [suite.application_transmit]
 tests = [
   "tests/verify_application_transmit.py",

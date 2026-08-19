@@ -954,14 +954,58 @@ explicit dispositions in
 | 403 | `Control State Information` | 16-bit, unitless | **rejected as a direct name** for any specific `0x262` field/bit |
 
 Monitor 402 is materially stronger than a lexical match. The same metadata is
-byte-identical across NA/EU/JP; the firmware independently receives authenticated
-CAN `0x2E4` signal 61 as a signed 16-bit value and carries it through the
-recovered steering-command conditioning chain; and the pinned public Toyota DBC
-independently calls that exact `0x2E4` 16-bit field `STEER_TORQUE_CMD`.
-Techstream's diagnostic monitor is therefore accepted as external vocabulary
-and dimensional corroboration for the **command domain**. It is **not** proof
-that monitor 402 reads the COM destination directly, and it does not expose the
-SecOC MAC, freshness state, or downstream d/q current reference.
+byte-identical across NA/EU/JP; on Sienna the firmware independently receives
+authenticated CAN `0x2E4` signal 61 as a signed 16-bit value and carries it
+through the recovered steering-command conditioning chain; and the pinned public
+Toyota DBC independently calls that exact `0x2E4` 16-bit field
+`STEER_TORQUE_CMD`. Techstream's diagnostic monitor is therefore accepted as
+external vocabulary and dimensional corroboration for the **command domain**.
+It is **not** proof that monitor 402 reads the COM destination directly, and it
+does not expose the SecOC MAC, freshness state, or downstream d/q current
+reference.
+
+The later `8965H1202000` Corolla comparison makes that boundary decisive rather
+than merely cautious. `GetDatMonListP5_DT.dll` builds the ECU support-data-ID
+list and filters P5 monitor exposure through `CheckSupportPid`. In the raw
+`EMPS_P5` type-62 records, the previously unnamed words at `+0x36/+0x38` behave
+as primary/alternate Data IDs: all 222 nonzero primary words resolve through the
+same database's type-61 `DataIdForDm` table except the single `0xFFFE` sentinel,
+and all 166 nonzero alternate words resolve there. Monitor 402 carries primary
+`0x1C02` and alternate `0x3C02`.
+
+Corolla H independently implements **RDBI DID `0x1C02`** with live 2-byte
+callback `0x495A0`. Its target-native producer chain is recovered as:
+
+```text
+CD55A (compose/bound H-local command precursor)
+  -> FEBEC3C0
+CD5DC: FEBEC3C0 * FEBEAC5A / 0x400
+  -> FEBEC3D2
+CE928: FEBEC3D2 -> FEBEAC56
+BB9E8: FEBEAC56 -> FEBEE40A
+56892/57692: FEBEE40A -> FEBE65F2
+495A0: FEBE65F2 * FEBEE8A6 / 0x2000 * 100 / 0x100
+  -> clamp +/-20000 -> signed16 DID 1C02
+```
+
+The active H steering pipeline `0xCE974` invokes `CD55A -> CD5DC -> CE928` in
+that order. Yet the same exact H image has no configured SecOC or normal-COM
+`0x2E4/0x131` ingress. Thus monitor 402 is best understood as an **internal EPS command-value-torque
+observable**; association with one external CAN field
+is calibration-specific and must be independently proved. This corrects any
+stronger reading of the earlier Sienna correlation.
+
+The same join produces a much larger semantic dictionary: H's 226 readable RDBI
+DIDs overlap 124 `EMPS_P5` type-61 IDs and support 137 named monitor rows across
+121 primary Data IDs, including commanded/actual d/q current, phase current and
+duty, torque-sensor, steering-angle, and motor-rotation observables. By contrast,
+the attractive newer target-angle group (`Target Lateral ID`, `Target Steering
+Angle After Output Compensation`, `Advanced Drive Target Steering Angle`, plus
+System-2 variants) is grouped under primary DIDs `0x1CEE/0x1CEF`; neither DID is
+implemented by H RDBI. Machine-readable ownership is
+`data/generated/corolla_8965H1202000_techstream_correlations.json` with compact
+image-bound target evidence in
+`corolla_8965H1202000_techstream_steering_decompiler_evidence.json`.
 
 The state-monitor candidates do not meet that bar. Key 60's binary cooperation
 encoding is real, and the same key/name also occurs once in P5 behavior-data
