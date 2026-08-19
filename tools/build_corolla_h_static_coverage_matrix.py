@@ -382,6 +382,22 @@ def main() -> None:
                 raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
             role_recovery[ref] = {"target_entry":item["target_entry"],"report":plausibility_rel,"evidence":plausibility["evidence"]["decompiler_evidence"],"role":item["reference_name"]}
 
+    small_adapters_path = REPO / "data/generated/corolla_8965H1202000_small_adapters.json"
+    if small_adapters_path.is_file():
+        small_adapters = load_json(small_adapters_path)
+        small_adapters_rel = str(small_adapters_path.relative_to(REPO))
+        evidence_file_hashes[small_adapters_rel] = sha256(small_adapters_path.read_bytes())
+        small_ev_path = REPO / small_adapters["evidence"]["decompiler_evidence"]
+        small_ev = load_json(small_ev_path)
+        small_targets = {int(r["entry"], 16) for r in small_ev.get("functions", [])}
+        for item in small_adapters.get("role_closure", []):
+            ref = int(item["reference_entry"], 16); target = int(item["target_entry"], 16)
+            if target not in small_targets:
+                raise ValueError(f"small-adapter role target lacks evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {"target_entry":item["target_entry"],"report":small_adapters_rel,"evidence":small_adapters["evidence"]["decompiler_evidence"],"role":item["reference_name"]}
+
     # Classify each canonical named function conservatively.
     classified = []
     for row in rows:

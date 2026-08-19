@@ -1660,6 +1660,24 @@ paths = [
 ]
 oracle = "raw_bytes"
 
+[suite.corolla_8965h_small_adapters]
+tests = ["tests/verify_corolla_8965H1202000_small_adapters.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_small_adapters.py",
+  "tools/build_corolla_h_small_adapters.py",
+  "tools/extract_corolla_h_small_adapter_evidence.py",
+  "data/generated/corolla_8965H1202000_small_adapters.json",
+  "data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
 [suite.corolla_8965h_static_coverage]
 tests = ["tests/verify_corolla_8965H1202000_static_coverage.py"]
 paths = [
@@ -1696,6 +1714,8 @@ paths = [
   "data/generated/corolla_8965H1202000_deadline_monitor_surface.json",
   "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+  "data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_small_adapters.json",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/reference/generated-artifacts.md",

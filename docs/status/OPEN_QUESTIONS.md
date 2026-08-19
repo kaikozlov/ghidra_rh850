@@ -321,7 +321,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   read semantics with H-specific exclusions. The five changed motor-control roles
   are target-native closed, and the remaining 42 named SecOC/ICU-S roles are now
   closed as a complete target-native surface as well. The current residue is
-  **217**, with zero unresolved `scheduler_system`, `can_com`, `storage_nvm`,
+  **199**, with zero unresolved `scheduler_system`, `can_com`, `storage_nvm`,
   `xcp`, `motor_control`, `secoc_icus`, `crypto`, `steering`, or `diagnostics` entries. All remaining named residue is untagged; the complete 88-function deadline-monitor family is also closed by target-table recensus. Remaining H-static work is the explicit
   residue outside those closed surfaces; generic DAQ/XCP
   callbacks remain optional unless an exploit hypothesis needs them. If revisited

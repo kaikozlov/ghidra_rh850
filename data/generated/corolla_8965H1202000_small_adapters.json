@@ -1,0 +1,273 @@
+{
+  "bounded_api": {
+    "delta": -23648,
+    "h_pointer_table": {
+      "base": "0x00021838",
+      "values": [
+        "0x0008B3CE",
+        "0x0008B462",
+        "0x0008B9E2",
+        "0x0008B4E2",
+        "0x0008BB46",
+        "0x0008BC56"
+      ]
+    },
+    "h_wrapper_range": [
+      "0x00075168",
+      "0x000751C8"
+    ],
+    "same_wrapper_sizes": true,
+    "sienna_pointer_table": {
+      "base": "0x0002188C",
+      "values": [
+        "0x000903A8",
+        "0x0009043C",
+        "0x000909BC",
+        "0x000904BC",
+        "0x00090B20",
+        "0x00090C30"
+      ]
+    },
+    "sienna_wrapper_range": [
+      "0x0007ADC8",
+      "0x0007AE28"
+    ]
+  },
+  "evidence": {
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "packet_selector": {
+    "configured_selectors_h": [
+      0,
+      1,
+      4,
+      5,
+      6,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      22,
+      31,
+      35,
+      36,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43
+    ],
+    "configured_selectors_sienna": [
+      0,
+      1,
+      4,
+      5,
+      6,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      22,
+      31,
+      35,
+      36,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43
+    ],
+    "h_table_base": "0x000269FC",
+    "mapped_selectors": [
+      39,
+      43,
+      15,
+      16,
+      38,
+      6,
+      22
+    ],
+    "mapped_target_checks": true,
+    "sienna_table_base": "0x00026CEC",
+    "table_count": 44
+  },
+  "record_operation": {
+    "all_h_callbacks_48_bytes": true,
+    "h_callback_words": [
+      "0x0008E5E0",
+      "0x0008E610",
+      "0x0008E640",
+      "0x0008E670",
+      "0x0008E6A0"
+    ],
+    "h_table_base": "0x00025F28",
+    "mapped_target_checks": true,
+    "record_count": 5,
+    "sienna_callback_words": [
+      "0x000935BA",
+      "0x000935EA",
+      "0x0009361A",
+      "0x0009364A",
+      "0x0009367A"
+    ],
+    "sienna_table_base": "0x00026218",
+    "stride": 28
+  },
+  "role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "family": "bounded_api",
+      "reference_entry": "0x0007ADC8",
+      "reference_name": "bounded_api_wrapper_00",
+      "target_entry": "0x00075168"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "bounded_api",
+      "reference_entry": "0x0007ADDC",
+      "reference_name": "bounded_api_wrapper_01",
+      "target_entry": "0x0007517C"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "bounded_api",
+      "reference_entry": "0x0007ADEE",
+      "reference_name": "bounded_api_wrapper_02",
+      "target_entry": "0x0007518E"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "bounded_api",
+      "reference_entry": "0x0007AE00",
+      "reference_name": "bounded_api_wrapper_03",
+      "target_entry": "0x000751A0"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "bounded_api",
+      "reference_entry": "0x0007AE14",
+      "reference_name": "bounded_api_wrapper_04",
+      "target_entry": "0x000751B4"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "bounded_api",
+      "reference_entry": "0x0007AE28",
+      "reference_name": "bounded_api_wrapper_05",
+      "target_entry": "0x000751C8"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "packet_selector",
+      "reference_entry": "0x00090676",
+      "reference_name": "packet_low_selector_39_callback",
+      "selector": 39,
+      "target_entry": "0x0008B69C"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "packet_selector",
+      "reference_entry": "0x0009133C",
+      "reference_name": "packet_low_selector_43_callback",
+      "selector": 43,
+      "target_entry": "0x0008C362"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "packet_selector",
+      "reference_entry": "0x00094A52",
+      "reference_name": "packet_low_selector_15_callback",
+      "selector": 15,
+      "target_entry": "0x0008FA78"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "packet_selector",
+      "reference_entry": "0x00094B66",
+      "reference_name": "packet_low_selector_16_callback",
+      "selector": 16,
+      "target_entry": "0x0008FB8C"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "packet_selector",
+      "reference_entry": "0x000953AA",
+      "reference_name": "packet_low_selector_38_callback",
+      "selector": 38,
+      "target_entry": "0x000903D0"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "packet_selector",
+      "reference_entry": "0x00095DFC",
+      "reference_name": "packet_low_selector_06_callback",
+      "selector": 6,
+      "target_entry": "0x00090E22"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "packet_selector",
+      "reference_entry": "0x00096B0C",
+      "reference_name": "packet_low_selector_22_callback",
+      "selector": 22,
+      "target_entry": "0x00091B32"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "record_operation",
+      "record_index": 0,
+      "reference_entry": "0x000935BA",
+      "reference_name": "record_operation_00_callback",
+      "target_entry": "0x0008E5E0"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "record_operation",
+      "record_index": 1,
+      "reference_entry": "0x000935EA",
+      "reference_name": "record_operation_01_callback",
+      "target_entry": "0x0008E610"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "record_operation",
+      "record_index": 2,
+      "reference_entry": "0x0009361A",
+      "reference_name": "record_operation_02_callback",
+      "target_entry": "0x0008E640"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "record_operation",
+      "record_index": 3,
+      "reference_entry": "0x0009364A",
+      "reference_name": "record_operation_03_callback",
+      "target_entry": "0x0008E670"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "family": "record_operation",
+      "record_index": 4,
+      "reference_entry": "0x0009367A",
+      "reference_name": "record_operation_04_callback",
+      "target_entry": "0x0008E6A0"
+    }
+  ],
+  "role_closure_count": 18,
+  "schema": "corolla-h-small-adapters-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "all_18_roles_recovered": true,
+    "boundary": "packet selector and record-index meanings are configuration-bound; bounded wrappers preserve API slot order/signatures. Target callback internals and target table payload fields remain H-specific."
+  }
+}

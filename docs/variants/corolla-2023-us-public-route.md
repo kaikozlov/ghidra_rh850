@@ -1471,10 +1471,10 @@ promotion:
 named canonical functions                 1113
 verified exact-body transfers              288
 target-native inspected unique-shape       30
-target-native role-recovered                122
+target-native role-recovered                140
 complete target-surface recensuses          350
 structural candidates only                  106
-genuinely unresolved                        217
+genuinely unresolved                        199
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1495,7 +1495,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(535 currently have
+(553 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -2046,6 +2046,28 @@ RAM locations, and the added aggregate output remain target-specific.
 
 Machine-readable ownership is `data/generated/corolla_8965H1202000_plausibility_monitor.json`.
 The global genuinely-unresolved named residue drops **228 -> 217**.
+
+### 7.27 Generated packet, record, and bounded-API adapters
+
+Eighteen remaining small adapter roles are now mapped from their owning target
+configuration rather than local byte similarity. The six bounded wrappers map
+`7ADC8..7AE28 -> 75168..751C8` at `-0x5C60` with identical body-size/signature
+pattern `20,18,18,20,20,18`. Their H indirect-call table is `21838`; all six
+underlying API targets preserve a separate `-0x4FDA` relocation from Sienna.
+
+The 44-entry low-selector callback table is uniquely recovered at H `269FC`. Its
+configured selector set is identical to Sienna's 21 selectors. The seven formerly
+unresolved selector callbacks map by selector identity:
+`6→90E22, 15→8FA78, 16→8FB8C, 22→91B32, 38→903D0, 39→8B69C, 43→8C362`.
+
+The five-record operation table is H `25F28`, still five `0x1C` records. Its
+callback word maps rows 0..4 to `8E5E0/8E610/8E640/8E670/8E6A0`; all five are
+48-byte wrappers with the same operation-phase dispatch shape.
+
+These are direct role mappings because selector/record/API-slot identity comes
+from target-native configuration. Callback-internal data and the remaining table
+payload fields stay H-specific. The global unresolved denominator falls
+**217 -> 199**.
 
 ## 8. Remaining evidence boundary
 

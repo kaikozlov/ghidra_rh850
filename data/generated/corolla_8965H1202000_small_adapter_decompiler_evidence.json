@@ -1,0 +1,143 @@
+{
+  "function_count": 18,
+  "functions": [
+    {
+      "body_sha256": "f5fe7f9773c29e06f08605624599994aafa6b079514b3d1b608c7544bead0c04",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_00075168(undefined2 param_1,undefined4 param_2,undefined2 param_3)\n\n{\n  (*(code *)PTR_FUN_00021838)(param_1,param_2,param_3);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "883d56987dbb02f0da5d95a185f63ff6846fe8de76491dc8df1fdd6ed1c7c160",
+      "entry": "0x00075168"
+    },
+    {
+      "body_sha256": "3847a496eedd88bbbbea4d205b954e6046ad3ded0c724ec7f99bda974c4ba932",
+      "body_size": 18,
+      "decompiled_c": "\nvoid FUN_0007517c(undefined2 param_1)\n\n{\n  (*(code *)PTR_FUN_0002183c)(param_1);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f15a235352c671364579cb0c18caf34f1edbc431e6b81f893e2509107884bf34",
+      "entry": "0x0007517C"
+    },
+    {
+      "body_sha256": "12e0ca749c4e17dfda8b9a9bab58085ebea1ff2b7954517f921c9874ecf0bfcf",
+      "body_size": 18,
+      "decompiled_c": "\nvoid FUN_0007518e(undefined2 param_1)\n\n{\n  (*(code *)PTR_FUN_00021840)(param_1);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "bfa391581a8bd5afc11fd4b205b56fb644f69a6e4685415e91b4f4ca3794afd0",
+      "entry": "0x0007518E"
+    },
+    {
+      "body_sha256": "71278e76ab8621507689a771af4e45212096b36c9f7df541afd77c8018a615f5",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_000751a0(undefined2 param_1,undefined1 param_2)\n\n{\n  (*(code *)PTR_FUN_00021844)(param_1,param_2);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "59a4136d2423ac8a84b3e813e2dac3bed6c9e8cf99f16da94a447b68a3c46c5d",
+      "entry": "0x000751A0"
+    },
+    {
+      "body_sha256": "7871ab3896a9d3b50c120da8a3245765fea6ea4d17b4672cc81c3f2fe4066020",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_000751b4(undefined2 param_1,undefined1 param_2)\n\n{\n  (*(code *)PTR_FUN_00021848)(param_1,param_2);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "9b3e4ca0b983c17bcf57e221369a1936309725431a4d5cbe696f09e8e7bab665",
+      "entry": "0x000751B4"
+    },
+    {
+      "body_sha256": "24b572db69419de80c46782b6274882528747a85880ab0c3baffd913b4c92342",
+      "body_size": 18,
+      "decompiled_c": "\nvoid FUN_000751c8(undefined2 param_1)\n\n{\n  (*(code *)PTR_FUN_0002184c)(param_1);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "d9ebd4d82df4e37e5194428c215719a16476bd17f57078faf90a783eaa57d5de",
+      "entry": "0x000751C8"
+    },
+    {
+      "body_sha256": "67252fa0496230f85833138d6d42872ea1606d05d44d228e2c516ba07d0ad647",
+      "body_size": 82,
+      "decompiled_c": "\nvoid FUN_0008b69c(void)\n\n{\n  short *psVar1;\n  undefined *puVar2;\n  undefined4 uVar3;\n  \n  puVar2 = &DAT_00023d6c;\n  FUN_00091fba();\n  uVar3 = FUN_0008d38c();\n  FUN_00091fc6();\n  psVar1 = (short *)(puVar2 + (short)uVar3 * 0xc + 0x2060);\n  FUN_0008b6ee(*(undefined2 *)\n                ((uint)(ushort)psVar1[2] * 0xc +\n                 *(int *)(*(int *)((uint)(ushort)psVar1[1] * 4 +\n                                  *(int *)(puVar2 + *psVar1 * 0x14 + 0x2038)) + 4) + 6));\n  FUN_0008d206(uVar3,0);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "6b87630de5f380b153800ae0c15082d0326c4a88ea3132524866c6e7a9266963",
+      "entry": "0x0008B69C"
+    },
+    {
+      "body_sha256": "01b961722beb2c067a4b6bcae00e36177853859e728c2ccb93b763bfe76192e5",
+      "body_size": 258,
+      "decompiled_c": "\nvoid FUN_0008c362(void)\n\n{\n  undefined1 *puVar1;\n  int iVar2;\n  int iVar3;\n  undefined4 uVar4;\n  undefined4 uVar5;\n  undefined4 uVar6;\n  undefined1 auStack_19 [5];\n  \n  puVar1 = &LAB_febeb800;\n  iVar2 = FUN_0008bd7e();\n  iVar3 = FUN_0008be44();\n  uVar4 = FUN_0008d192();\n  if (puVar1[-0x5faf] == '\\0') {\n    if (iVar3 == 0x20) {\n      FUN_0008bd96(0x30);\n      FUN_0008c286(uVar4,iVar2 + 8,0);\n    }\n    else if (iVar3 == 0x21) {\n      auStack_19[0] = 0xff;\n      iVar2 = FUN_0008c048(auStack_19);\n      if (iVar2 != 0) {\n        FUN_0008bd96(0x40);\n        FUN_0008c110(uVar4,iVar2,auStack_19[0]);\n      }\n    }\n  }\n  else {\n    uVar5 = FUN_0008cf6a();\n    uVar6 = FUN_0008cee6(1,1);\n    if (iVar3 == 0x20) {\n      FUN_00091e4a(3,uVar5);\n      FUN_00091e4a(4,uVar6);\n      FUN_0008bf0e();\n      FUN_0008c27a();\n      iVar2 = FUN_0008c280(0);\n      if (iVar2 == 1) {\n        FUN_0008af92(3,1);\n      }\n      FUN_0008bd96(0x11);\n    }\n    else if (iVar3 == 0x21) {\n      FUN_00091e7a(3);\n      FUN_00091e7a(4);\n      FUN_00091e7a(2);\n      uVar4 = FUN_0008bf2e(1);\n      FUN_0008c0f8(uVar4);\n    }\n    else if (iVar3 == 0x22) {\n      FUN_00091e7a(3);\n      FUN_00091e7a(4);\n      FUN_0008bd96(0x40);\n      FUN_0008c1be(uVar4,iVar2 + 8);\n    }\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "054ebe445243bbc71093ad09fa6859e76d30a4e589f36b84313aeee6038dde76",
+      "entry": "0x0008C362"
+    },
+    {
+      "body_sha256": "e8b3c9f9944c27c6983aad3701cb56d61449402a5f9d75a1089d41f54f6ad36a",
+      "body_size": 32,
+      "decompiled_c": "\nvoid FUN_0008fa78(void)\n\n{\n  if (DAT_febe5cb8 < 2) {\n    FUN_0008f9a2((&DAT_0002605c)[(short)(ushort)DAT_febe5cb8 * 0x18],1);\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "dc2f8ed9e07bfde3fc31376af54ac708d45559c6db4ba9f7533885dbb8598422",
+      "entry": "0x0008FA78"
+    },
+    {
+      "body_sha256": "976e9feb55699aa586a271ec87fec4ee2071e557d56d7184512ab6bcd00dbd1b",
+      "body_size": 32,
+      "decompiled_c": "\nvoid FUN_0008fb8c(void)\n\n{\n  if (DAT_febe5cb8 < 2) {\n    FUN_0008fa98((&DAT_0002605c)[(short)(ushort)DAT_febe5cb8 * 0x18],1);\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "2c09d8cab415ad213ce00b278afe01a7b6eb2cf295d4b2d56c7267400d6bee23",
+      "entry": "0x0008FB8C"
+    },
+    {
+      "body_sha256": "f52e74b582d6c4e8ecb4ee98b4b9a3da35485eb1e1c73a94cf21b9f757d5070d",
+      "body_size": 86,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_000903d0(void)\n\n{\n  uint uVar1;\n  undefined2 uVar2;\n  \n  if (DAT_febe5cde < 6) {\n    uVar1 = *_DAT_febe5ce4 & 0xf;\n    if (uVar1 - 1 < 3) {\n      uVar2 = 0;\n      if (DAT_febe5cde == 4 || DAT_febe5cde == 5) {\n        uVar2 = CONCAT11(_DAT_febe5ce4[1],_DAT_febe5ce4[2]);\n      }\n      FUN_00090082((int)(uint)*_DAT_febe5ce4 >> 4,DAT_febe5cde,uVar2,\n                   (&DAT_0002608f)[(short)(ushort)DAT_febe5cde * 3 + uVar1],DAT_febe5cdf);\n    }\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "9600c6f30078d7848427e397afa22024c938292c8145b5ccb3ff9f3a0359789b",
+      "entry": "0x000903D0"
+    },
+    {
+      "body_sha256": "7135cc05f422b3dead2b1474c17afb3fe52fb99b369bd541aa92455673d76f4e",
+      "body_size": 26,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_00090e22(void)\n\n{\n  FUN_00090b32(1,&DAT_febe5d04,_DAT_febe5d00,DAT_febe5d02);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "252d10192fc8f5eb575849ff784d88b8e5b2a79e63e5c06cf56782f3587edc7b",
+      "entry": "0x00090E22"
+    },
+    {
+      "body_sha256": "d78c8e74316d322968a0dedf9e911edffe768d5d6d43db1bb8d5ffeae8b7fa29",
+      "body_size": 46,
+      "decompiled_c": "\nvoid FUN_00091b32(void)\n\n{\n  undefined1 *puVar1;\n  int iVar2;\n  char acStack_5 [5];\n  \n  puVar1 = &LAB_febeb800;\n  acStack_5[0] = '\\0';\n  iVar2 = func_0x000918cc(acStack_5);\n  if (((iVar2 != 0) && (iVar2 != 10)) && (acStack_5[0] != '\\x14')) {\n    FUN_0008e936(puVar1 + -0x5ae0);\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f8e275fda525d284040bf2b6cd5af52c2020ae584a8265d084265df008140b19",
+      "entry": "0x00091B32"
+    },
+    {
+      "body_sha256": "e79d6d6559efe0cfe02808ab83b2d9803e769bd5b3a7e1359fb37af5444549fa",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4\nFUN_0008e5e0(undefined2 param_1,undefined4 param_2,byte param_3,undefined4 param_4,\n            undefined4 param_5)\n\n{\n  undefined4 uVar1;\n  \n  if (param_3 < 2) {\n    uVar1 = FUN_00084774(param_2,param_4,param_5,param_1);\n  }\n  else {\n    uVar1 = 0;\n    if (param_3 == 2) {\n      FUN_00084704();\n    }\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "10d15171775d7db740182b8937b88f2a835064515e3da229d030eed5cc846603",
+      "entry": "0x0008E5E0"
+    },
+    {
+      "body_sha256": "aab43c2678a948dffbb232119a0ea305f02dff46e1ff1ea65730eb1c1baf63b4",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4\nFUN_0008e610(undefined2 param_1,undefined4 param_2,byte param_3,undefined4 param_4,\n            undefined4 param_5)\n\n{\n  undefined4 uVar1;\n  \n  if (param_3 < 2) {\n    uVar1 = FUN_00084774(param_2,param_4,param_5,param_1);\n  }\n  else {\n    uVar1 = 0;\n    if (param_3 == 2) {\n      FUN_00084704();\n    }\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "c5828023a728256ac5f507ad9370d3b456320d047dfb31bf09d18678c4e0a8ca",
+      "entry": "0x0008E610"
+    },
+    {
+      "body_sha256": "12fad8facd8052f535f73587fe5c7fb2eb2641e5775a515ec99651b53d1b9d47",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4\nFUN_0008e640(undefined2 param_1,undefined4 param_2,byte param_3,undefined4 param_4,\n            undefined4 param_5)\n\n{\n  undefined4 uVar1;\n  \n  if (param_3 < 2) {\n    uVar1 = FUN_00084774(param_2,param_4,param_5,param_1);\n  }\n  else {\n    uVar1 = 0;\n    if (param_3 == 2) {\n      FUN_00084704();\n    }\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "4bfc80f65d2ddb27ad3b68844272be6e2a29ead2ff2f8170de379cf515d57952",
+      "entry": "0x0008E640"
+    },
+    {
+      "body_sha256": "5ec80d3f7e588734bb849867940619d20f43a13b0e8669b71eab0b19e8d80a3e",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4\nFUN_0008e670(undefined2 param_1,undefined4 param_2,byte param_3,undefined4 param_4,\n            undefined4 param_5)\n\n{\n  undefined4 uVar1;\n  \n  if (param_3 < 2) {\n    uVar1 = FUN_00084774(param_2,param_4,param_5,param_1);\n  }\n  else {\n    uVar1 = 0;\n    if (param_3 == 2) {\n      FUN_00084704();\n    }\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "bc7ae7402e2bf6f446595fd96f0cd7612b4b55af528737e8f0d307d363108216",
+      "entry": "0x0008E670"
+    },
+    {
+      "body_sha256": "314681912f484b33ce5e0b0f5d8e953a3b590677b07d3485ed607ed494887cc6",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4\nFUN_0008e6a0(undefined2 param_1,undefined4 param_2,byte param_3,undefined4 param_4,\n            undefined4 param_5)\n\n{\n  undefined4 uVar1;\n  \n  if (param_3 < 2) {\n    uVar1 = FUN_00084774(param_2,param_4,param_5,param_1);\n  }\n  else {\n    uVar1 = 0;\n    if (param_3 == 2) {\n      FUN_00084704();\n    }\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "fd9ff0e8386c9a47d803cd6e3f6ad76bfe1a1cbdba3fe7cf9d6037661cab7b0b",
+      "entry": "0x0008E6A0"
+    }
+  ],
+  "image": {
+    "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "codeflash_size": 1048576,
+    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+  },
+  "schema": "corolla-h-small-adapter-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "boundary": "only configuration-backed/triage-backed adapter starts compacted; FE veneer experiments are excluded",
+    "path": "build/h_small_adapters_forced.jsonl",
+    "sha256": "c4647bd02ecf142c80401baef7cfd2503c30cf7567b85adf93787334490a37eb"
+  }
+}
