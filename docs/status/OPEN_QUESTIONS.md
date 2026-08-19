@@ -433,16 +433,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `SeedKey`, `Nonce`, `OffsetAddress`, download ranges, data-format fields, and
   routine choices. Firmware support for the same UDS SIDs/DIDs is only a
   bounded compatibility join, not proof of which host builder was selected.
-- **Calibration target-integrity metadata.** TMS-024 recovers a distinct
-  calibration-container target record in `Cuw.exe`: each Repro/Erase/Delta/
-  Compression target carries `StartAddress`, `Length`, `CRC`, `CMAC`, and
-  `DigitalSignature`. This is not the TIS/RKS `Signature`. Static work remains
-  immediately actionable without a matching calibration: recover the target-data
-  object layout in `TCUWCalibrationFile.dll`, then trace CRC/CMAC/
-  `DigitalSignature` consumers through every referenced flash-writer family and
-  join any resulting command/routine grammar to the two available EPS CodeFlash
-  images. The actual target values and signer remain blocked on a matching
-  calibration artifact.
+- **Calibration package outer envelope and target-specific integrity values.**
+  TMS-026 closes the V18 metadata/object/static-consumer work: the exact
+  `CLogicalBlockAreaInfo` layout is recovered and the standard writer transmits
+  `StartAddress`/`Length` plus CRC, CMAC, or `DigitalSignature` through its
+  `F510/00FF/F610` RoutineControl grammar; unified flash uses a separate
+  `CFileHeaderInfo`/`OffsetAddress` model. The embedded `attach.att` descriptor
+  schema is parser-ready. What remains needs a real calibration artifact: pin the
+  outer `.cuw` envelope/extraction framing, actual target values, selected
+  required-spec branch, and signer/signature algorithm. This `DigitalSignature`
+  remains unrelated to TIS/RKS `Signature` absent a real dataflow edge.
 - **RKS authorization vs. EPS reflash (Layer A).** The TIS portal RKS flow
   (TMS-009) is a CUW-side VIN+license permission gate, distinct from the
   cal-file crypto key (Layer B). Open: whether it is *mandatory* for every EPS

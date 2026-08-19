@@ -1,0 +1,522 @@
+{
+  "descriptor": {
+    "embedded_name": "attach.att",
+    "evidence": [
+      "Cuw.exe initializer 0x00403480 stores literal attach.att",
+      "Cuw.exe imports GetPrivateProfileIntA/GetPrivateProfileStringA",
+      "Cuw.exe 0x00404708 reads recovered section/key vocabulary through the descriptor object"
+    ],
+    "grammar": "Windows-profile/INI-like key-value descriptor",
+    "key_vocabulary": [
+      "Format",
+      "Version",
+      "NumberOfNode",
+      "NumberOfCalibration",
+      "Number",
+      "DateOfIssue",
+      "VehicleType",
+      "VehicleName",
+      "ECUType",
+      "ContactType",
+      "KindOfECU",
+      "ModelYear",
+      "ECUAuthKey",
+      "ServiceAuthKey",
+      "RequiredSpecReproVer",
+      "WakeUpTimeAfterReset",
+      "IntervalTimeBetweenFrame",
+      "DiagID",
+      "LogicalAddress",
+      "NumberOfGateway",
+      "EmissionsRelatedSystem",
+      "ChargeLocalBusEcuReprogrammingFlow",
+      "ChargeLocalBusPowerOnControllingEcuDiagID",
+      "ChargeLocalBusEcuStartTimeAfterPowerOn",
+      "NumberOfLogicalBlock",
+      "CPUImageName",
+      "NewCID",
+      "CompressionAlgorithm",
+      "SecurityProperty2",
+      "SeedKey",
+      "Nonce",
+      "ReproMethod",
+      "OffsetAddress",
+      "P4ServerMaxTime",
+      "NumberOfTargets",
+      "NumberOfAreaSettings",
+      "FlashCodeName",
+      "LocationID",
+      "CPUType",
+      "NumberOfTargetHardwares",
+      "DataFormatID",
+      "NumberOfFiles",
+      "FileName",
+      "DataFormat",
+      "EraseBlock",
+      "ALFID",
+      "DownloadAddress",
+      "DownloadMemsize",
+      "System",
+      "EngineType",
+      "KindOfCal",
+      "IsControlledBySCC",
+      "IsBlankECU",
+      "IsNonFieldFix",
+      "StartAddress",
+      "Length",
+      "CRC",
+      "CMAC",
+      "DigitalSignature",
+      "VehicleForNA",
+      "VehicleForEUOT"
+    ],
+    "section_templates": [
+      "Vehicle",
+      "CPUImage00",
+      "LogicalBlocknxx",
+      "xx_TargetCalibration",
+      "ReproDatanxx",
+      "EraseAndReproRoutinenxx",
+      "DeltaReproDatanxx",
+      "DeltaEraseAndReproRoutinenxx",
+      "CompressionReproDatanxx",
+      "CompressionEraseAndReproRoutinenxx",
+      "00_TargetHardware",
+      "File0000"
+    ]
+  },
+  "distribution": "Toyota Techstream V18.00.003",
+  "function_identities": [
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "8693436e2efd94928b402c111df5ab049e18dab7fca04e1f92bcf3a4462319d3",
+      "role": "attached_information_object_init",
+      "sha256": "8693436e2efd94928b402c111df5ab049e18dab7fca04e1f92bcf3a4462319d3",
+      "size": 448,
+      "va": 4207744
+    },
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "249e7ac1c90725f27e8e92bd9a787fc2c01fda3753c8e8383acaeec2f2a255ad",
+      "role": "attached_information_parser",
+      "sha256": "249e7ac1c90725f27e8e92bd9a787fc2c01fda3753c8e8383acaeec2f2a255ad",
+      "size": 25389,
+      "va": 4212488
+    },
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "ce3e4d43fa5539105c776684bb73b24fc9516a94768b99d044d960d8b520807d",
+      "role": "logical_block_parser",
+      "sha256": "ce3e4d43fa5539105c776684bb73b24fc9516a94768b99d044d960d8b520807d",
+      "size": 3045,
+      "va": 4240956
+    },
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "62cf1764aaa6f06169e7b0b4953cf24593490b7337d6a8a63854b190779dec8d",
+      "role": "target_integrity_parser",
+      "sha256": "62cf1764aaa6f06169e7b0b4953cf24593490b7337d6a8a63854b190779dec8d",
+      "size": 838,
+      "va": 4244004
+    },
+    {
+      "artifact": "TCUWCanReproStdFlashWriter.dll",
+      "expected_sha256": "6aa2bd0d44347d588386f57ce6fda737f44504460d032644f10ad75261692652",
+      "role": "standard_target_integrity_routine_control",
+      "sha256": "6aa2bd0d44347d588386f57ce6fda737f44504460d032644f10ad75261692652",
+      "size": 1112,
+      "va": 268445168
+    },
+    {
+      "artifact": "TCUWCanReproStdFlashWriter.dll",
+      "expected_sha256": "3f0955be8af3615fe82696445623041cb7ed5196860a6a820d495b20414df017",
+      "role": "standard_flash_orchestration",
+      "sha256": "3f0955be8af3615fe82696445623041cb7ed5196860a6a820d495b20414df017",
+      "size": 2598,
+      "va": 268446288
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "bd46b15bcdfbc0d86c469f323dfae90fa70cc0f1a338dc94addad87841350771",
+      "role": "logical_block_area_default_ctor",
+      "sha256": "bd46b15bcdfbc0d86c469f323dfae90fa70cc0f1a338dc94addad87841350771",
+      "size": 60,
+      "va": 268441072
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "02f3a95fab81edff83c4bbd0ae44509bda64d78c49c1d2bb9d76fafb40689e3a",
+      "role": "logical_block_area_dtor",
+      "sha256": "02f3a95fab81edff83c4bbd0ae44509bda64d78c49c1d2bb9d76fafb40689e3a",
+      "size": 158,
+      "va": 268441136
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "6f172a820cd37c8dcdb9473f45ec706ef02bc6aa08f27831545c0c353ee6d009",
+      "role": "target_data_default_ctor",
+      "sha256": "6f172a820cd37c8dcdb9473f45ec706ef02bc6aa08f27831545c0c353ee6d009",
+      "size": 20,
+      "va": 268441296
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "f02459d873fb345e708d6e2150f23ad3e08d28b0c56f4d9a54aa5f0af0d09b85",
+      "role": "logical_block_default_ctor",
+      "sha256": "f02459d873fb345e708d6e2150f23ad3e08d28b0c56f4d9a54aa5f0af0d09b85",
+      "size": 582,
+      "va": 268441792
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "7e01c0b658802fa5c51bc2a72266b88a0ec86a41f338538542bf1fdb39fa7e0b",
+      "role": "target_data_copy_ctor",
+      "sha256": "7e01c0b658802fa5c51bc2a72266b88a0ec86a41f338538542bf1fdb39fa7e0b",
+      "size": 51,
+      "va": 268443632
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "bc71d320bed2c30c1e7725a8fcef130982d5daee377160b5f13343f591756257",
+      "role": "logical_block_area_copy_ctor",
+      "sha256": "bc71d320bed2c30c1e7725a8fcef130982d5daee377160b5f13343f591756257",
+      "size": 214,
+      "va": 268444144
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "4250f1b01bd4f1b6d0caba4164c853a433567b4ed9fd2943218864617fd5bbe6",
+      "role": "target_data_assign",
+      "sha256": "4250f1b01bd4f1b6d0caba4164c853a433567b4ed9fd2943218864617fd5bbe6",
+      "size": 34,
+      "va": 268444960
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "3a2cede5b45dfda8a0a62589a69488131ceb8c2daec9d0cf1a539e52b2d24ca1",
+      "role": "logical_block_area_assign",
+      "sha256": "3a2cede5b45dfda8a0a62589a69488131ceb8c2daec9d0cf1a539e52b2d24ca1",
+      "size": 92,
+      "va": 268445712
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "97175eecffbbb1431f60660f3f9297e8686a7cdc0e5cb21e965b45a57610417e",
+      "role": "import_calib_archived_file",
+      "sha256": "97175eecffbbb1431f60660f3f9297e8686a7cdc0e5cb21e965b45a57610417e",
+      "size": 53,
+      "va": 268448480
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "800567b49cc5318b1d450a1dd580a091b7f28d22ed6422095cd72afd997878d3",
+      "role": "import_file_header_info",
+      "sha256": "800567b49cc5318b1d450a1dd580a091b7f28d22ed6422095cd72afd997878d3",
+      "size": 174,
+      "va": 268450752
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "54736e7ab774c35e15206c2a9201db75c77d480020f9a62e5037dd57a8918874",
+      "role": "import_logical_block_area_info",
+      "sha256": "54736e7ab774c35e15206c2a9201db75c77d480020f9a62e5037dd57a8918874",
+      "size": 163,
+      "va": 268450928
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "e1631b79f6f6c1aef405314bc73689ba9c772445085c2c60bf86e233cf51aec1",
+      "role": "import_logical_block",
+      "sha256": "e1631b79f6f6c1aef405314bc73689ba9c772445085c2c60bf86e233cf51aec1",
+      "size": 1526,
+      "va": 268451104
+    },
+    {
+      "artifact": "TCUWCalibrationFile.dll",
+      "expected_sha256": "6fdb177b88013a4bb9c7265f14ced1523622991b31358a2b00e632dd97346043",
+      "role": "import_calibration_file",
+      "sha256": "6fdb177b88013a4bb9c7265f14ced1523622991b31358a2b00e632dd97346043",
+      "size": 2880,
+      "va": 268452640
+    }
+  ],
+  "objects": {
+    "CLogicalBlockAreaInfo": {
+      "fields": [
+        {
+          "kind": "msvc_string",
+          "name": "StartAddress",
+          "object_offset": 0,
+          "size": 28,
+          "source_offset": 0
+        },
+        {
+          "kind": "msvc_string",
+          "name": "Length",
+          "object_offset": 28,
+          "size": 28,
+          "source_offset": 4
+        },
+        {
+          "kind": "msvc_string",
+          "name": "CRC",
+          "object_offset": 56,
+          "size": 28,
+          "source_offset": 8
+        },
+        {
+          "kind": "msvc_string",
+          "name": "CMAC",
+          "object_offset": 84,
+          "size": 28,
+          "source_offset": 12
+        },
+        {
+          "kind": "msvc_string",
+          "name": "DigitalSignature",
+          "object_offset": 112,
+          "size": 28,
+          "source_offset": 16
+        }
+      ],
+      "size": 140
+    },
+    "CLogicalBlockInfo": {
+      "area_records": [
+        {
+          "call_va": 4243434,
+          "logical_block_object_offset": 8,
+          "name": "ReproData",
+          "source_offset": 8
+        },
+        {
+          "call_va": 4243518,
+          "logical_block_object_offset": 148,
+          "name": "EraseAndReproRoutine",
+          "source_offset": 28
+        },
+        {
+          "call_va": 4243602,
+          "logical_block_object_offset": 288,
+          "name": "DeltaReproData",
+          "source_offset": 48
+        },
+        {
+          "call_va": 4243686,
+          "logical_block_object_offset": 428,
+          "name": "DeltaEraseAndReproRoutine",
+          "source_offset": 68
+        },
+        {
+          "call_va": 4243770,
+          "logical_block_object_offset": 568,
+          "name": "CompressionReproData",
+          "source_offset": 88
+        },
+        {
+          "call_va": 4243854,
+          "logical_block_object_offset": 708,
+          "name": "CompressionEraseAndReproRoutine",
+          "source_offset": 108
+        }
+      ],
+      "size": 924,
+      "source_record_size": 152,
+      "tail": [
+        {
+          "kind": "scalar",
+          "offset": 848
+        },
+        {
+          "kind": "msvc_string",
+          "offset": 852,
+          "size": 28
+        },
+        {
+          "kind": "scalar",
+          "offset": 880
+        },
+        {
+          "kind": "msvc_string",
+          "offset": 884,
+          "size": 28
+        },
+        {
+          "kind": "scalar",
+          "offset": 912
+        },
+        {
+          "kind": "pointer",
+          "offset": 916
+        },
+        {
+          "kind": "scalar",
+          "offset": 920
+        }
+      ],
+      "target_array_pointer_offset": 0,
+      "target_count_offset": 4
+    },
+    "CalibArchivedFile": {
+      "boundary": "field roles are only promoted where an exported getter or copy operation names them",
+      "known_output_offsets": [
+        0,
+        28,
+        32,
+        36,
+        88,
+        92,
+        96
+      ],
+      "known_source_offsets": [
+        0,
+        4,
+        8,
+        12,
+        28,
+        32,
+        36
+      ]
+    },
+    "TargetData": {
+      "fields": [
+        {
+          "kind": "msvc_string",
+          "offset": 0,
+          "size": 28
+        },
+        {
+          "kind": "scalar",
+          "offset": 28,
+          "size": 4
+        }
+      ],
+      "size": 32
+    }
+  },
+  "outer_container_boundary": {
+    "ready_path": "tools/techstream/parse_cuw_attach.py parses the recovered descriptor once extracted; preserve the first acquired raw package before attempting extraction",
+    "reason": "the V18 installation contains no .cuw/.cal specimen; static code proves an embedded attach.att metadata descriptor but a byte-accurate outer-package extractor cannot be fixture-validated locally",
+    "status": "artifact-blocked-for-parser-validation"
+  },
+  "schema_version": 1,
+  "target_integrity": {
+    "boundary": "field presence/layout and the standard-writer ECU transmission are recovered; signer/private-key provenance and target acceptance remain separate questions",
+    "families": [
+      {
+        "call_va": 4243434,
+        "logical_block_object_offset": 8,
+        "name": "ReproData",
+        "source_offset": 8
+      },
+      {
+        "call_va": 4243518,
+        "logical_block_object_offset": 148,
+        "name": "EraseAndReproRoutine",
+        "source_offset": 28
+      },
+      {
+        "call_va": 4243602,
+        "logical_block_object_offset": 288,
+        "name": "DeltaReproData",
+        "source_offset": 48
+      },
+      {
+        "call_va": 4243686,
+        "logical_block_object_offset": 428,
+        "name": "DeltaEraseAndReproRoutine",
+        "source_offset": 68
+      },
+      {
+        "call_va": 4243770,
+        "logical_block_object_offset": 568,
+        "name": "CompressionReproData",
+        "source_offset": 88
+      },
+      {
+        "call_va": 4243854,
+        "logical_block_object_offset": 708,
+        "name": "CompressionEraseAndReproRoutine",
+        "source_offset": 108
+      }
+    ],
+    "fields": [
+      {
+        "name": "StartAddress",
+        "source_offset": 0
+      },
+      {
+        "name": "Length",
+        "source_offset": 4
+      },
+      {
+        "name": "CRC",
+        "source_offset": 8
+      },
+      {
+        "name": "CMAC",
+        "source_offset": 12
+      },
+      {
+        "name": "DigitalSignature",
+        "source_offset": 16
+      }
+    ],
+    "record_size": 20,
+    "standard_writer_consumer": {
+      "evidence": "exact target-object offsets from TCUWCalibrationFile plus direct field loads/copies in the byte-pinned standard RoutineControl builder and orchestration",
+      "field_offsets": {
+        "CMAC": 84,
+        "CRC": 56,
+        "DigitalSignature": 112,
+        "Length": 28,
+        "StartAddress": 0
+      },
+      "function_va": 268445168,
+      "integrity_selection": {
+        "crc": "if CRC is nonempty, an explicit length/selector 4 precedes the CRC bytes",
+        "other_required_spec": "prefix 01 00 then DigitalSignature bytes; request length becomes transport_prefix+0x114",
+        "required_spec_repro_ver_03": "prefix 00 10 then CMAC bytes; request length becomes transport_prefix+0x24"
+      },
+      "positive_response": "71 01 || routine_id",
+      "request": "31 01 || routine_id || 44 || StartAddress || Length || integrity_selector || integrity_value",
+      "routine_ids": {
+        "0": "F510",
+        "1": "00FF",
+        "2": "F610"
+      },
+      "target_family_callers": {
+        "compression": [
+          "CompressionReproData",
+          "CompressionEraseAndReproRoutine"
+        ],
+        "delta": [
+          "DeltaReproData",
+          "DeltaEraseAndReproRoutine"
+        ],
+        "whole": [
+          "ReproData",
+          "EraseAndReproRoutine"
+        ]
+      }
+    },
+    "unified_writer_boundary": "the recovered unified writer uses CFileHeaderInfo area tuples plus OffsetAddress in F010/F110/F210/00FF; it does not consume CLogicalBlockAreaInfo CRC/CMAC/DigitalSignature through the standard target-record builder"
+  },
+  "top_level_import": {
+    "boundary": "geometry is exact from ImportData; semantic labels for every anonymous slot require the parser call-site join",
+    "function_va": 268452640,
+    "source_geometry": {
+      "binary_material_count": 8,
+      "binary_material_source_start": 56,
+      "binary_material_source_stride": 16,
+      "calibration_array_pointer": 24,
+      "calibration_count": 28,
+      "calibration_output_stride": 44700,
+      "calibration_source_stride": 184,
+      "node_array_pointer": 8,
+      "node_count": 12,
+      "node_output_stride": 188,
+      "node_source_stride": 96
+    }
+  }
+}

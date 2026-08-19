@@ -676,20 +676,66 @@ DigitalSignature
 ```
 
 The six calls are at `0x40BFEA`, `0x40C03E`, `0x40C092`, `0x40C0E6`,
-`0x40C13A`, and `0x40C18E`; the helper begins at `0x40C224`. This establishes a
-calibration-container **per-target integrity record** carrying CRC, CMAC, and a
-field literally named `DigitalSignature`. It does **not** yet establish the
-signature algorithm, length, signer, verification location, or whether the
-`DigitalSignature` field is transmitted to an ECU. In particular, no static
-edge currently joins it to the independent TIS/RKS permission token in §5.3.
+`0x40C13A`, and `0x40C18E`; the helper begins at `0x40C224`. The downstream
+`TCUWCalibrationFile.dll` model is now recovered exactly enough to remove the
+old ambiguity. `CLogicalBlockAreaInfo` is `0x8C` bytes and consists of five
+consecutive `0x1C` MSVC-string objects:
 
-This is now a high-value pre-capture target. The next static step is to recover
-the corresponding `TCUWCalibrationFile.dll` object layout and trace each of
-these five fields into every flash-writer family. The result can then be joined
-against the Sienna bootloader's independently recovered CRC/CMAC/download/routine
-semantics without assuming that a matching `.cuw` is already available.
-`verify_techstream_cuw_writer_routes.py` pins the parser bodies, six call sites,
-and field vocabulary.
+```text
++0x00 StartAddress
++0x1C Length
++0x38 CRC
++0x54 CMAC
++0x70 DigitalSignature
+```
+
+`CLogicalBlockInfo` is `0x39C` bytes. It begins with a target-array pointer/count
+and embeds six `CLogicalBlockAreaInfo` objects at `+0x008/+0x094/+0x120/+0x1AC/
++0x238/+0x2C4`, corresponding in order to ReproData, EraseAndReproRoutine,
+DeltaReproData, DeltaEraseAndReproRoutine, CompressionReproData, and
+CompressionEraseAndReproRoutine. The source logical-block record is `0x98`
+bytes. `TargetData` is `0x20` bytes. These layouts are independently closed by
+the import/copy constructors, assignment operators, destructor, and
+`ImportDataForLogicalBlock*` methods rather than inferred from field spacing.
+
+The standard flash writer also closes the **ECU-facing consumer**. Its
+byte-pinned RoutineControl builder at `0x100025F0` receives one of those exact
+area objects and constructs `31 01 || RID || 44 || StartAddress || Length ||
+integrity`. It uses RIDs `F510`, `00FF`, and `F610`. A nonempty CRC is carried
+with an explicit four-byte selector/length form; `RequiredSpecReproVer03`
+selects a `00 10 || CMAC` form, while the alternate required-spec path selects
+`01 00 || DigitalSignature`. The caller at `0x10002A50` routes the whole,
+delta, and compression target families through the matching area objects and
+expects `71 01 || RID`. Thus `DigitalSignature` is not merely dormant metadata
+in the standard package-download route: CUW can transmit it to the ECU as part
+of a RoutineControl request. The signer/private-key/verification algorithm and
+whether a particular EPS calibration selects that branch remain unproven.
+
+The recovered unified writer is structurally different: its `F010/F110/F210/
+00FF` routines consume `CFileHeaderInfo` area tuples plus `OffsetAddress`; it
+does not use the standard `CLogicalBlockAreaInfo` target-integrity builder. No
+static edge joins either path to the independent TIS/RKS permission token in
+§5.3.
+
+The same pass recovers the calibration metadata object grammar. `Cuw.exe`
+initializes an embedded descriptor named **`attach.att`**, imports the Win32
+profile APIs, and its parser at `0x00404708` reads the exact vehicle/node/
+logical-block vocabulary including `ECUAuthKey`, `ServiceAuthKey`, `SeedKey`,
+`Nonce`, `OffsetAddress`, `SecurityProperty2`, file/range/data-format fields,
+and the integrity fields above. `CalibrationFile::ImportData @ 0x10004320`
+pins the top-level array/count geometry and object strides. The generated schema
+is `data/generated/techstream_v18/cuw_calibration_schema.json`; an extracted
+descriptor can be losslessly normalized with
+`tools/techstream/parse_cuw_attach.py`, which deliberately preserves unknown
+keys for a future newer calibration.
+
+One boundary remains artifact-driven: this V18 installation contains no `.cuw`
+or `.cal` specimen, so the **outer package envelope/extraction framing** cannot
+be fixture-validated locally. The metadata/schema/parser work is ready; preserve
+the first acquired raw package and its extracted `attach.att` before extending
+the outer-container decoder. `tests/verify_techstream_cuw_calibration_schema.py`
+pins all recovered function bodies, object geometry, standard-writer consumer,
+and deterministic parser/schema generation.
 
 #### 5.2.2 Complete decoded-route writer census
 
