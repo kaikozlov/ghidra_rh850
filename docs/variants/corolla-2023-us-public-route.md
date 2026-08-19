@@ -1470,11 +1470,11 @@ promotion:
 ```text
 named canonical functions                 1113
 verified exact-body transfers              288
-target-native inspected unique-shape       30
-target-native role-recovered                140
-complete target-surface recensuses          350
-structural candidates only                  106
-genuinely unresolved                        199
+target-native inspected unique-shape      126
+target-native role-recovered                235
+complete target-surface recensuses          464
+structural candidates only                    0
+genuinely unresolved                          0
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1486,8 +1486,11 @@ is different: the old S function may
 not have a one-to-one H homolog, but the entire foreign generated surface has
 been independently enumerated—for example all H RDBI producers, all 19
 RoutineControl callback rows, or every direct stage in the 94→123 steering
-supervisor comparison. A raw structural candidate with no later H-native evidence
-stays structural-only. Everything else remains genuinely unresolved.
+supervisor comparison. A raw structural candidate with no later H-native evidence would stay
+structural-only; after §7.33, none remain. There are now **zero genuinely-unresolved
+canonical named functions and zero structural-only rows**. The 126 inspected
+unique-shape rows preserve the boundary between target-native operand/dataflow
+inspection and stronger semantic role recovery.
 
 This matrix is intentionally conservative. It does **not** mean every promoted
 function has an OEM-level semantic name, and it does not turn domain-wide
@@ -1495,7 +1498,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(553 currently have
+(560 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -2069,10 +2072,199 @@ from target-native configuration. Callback-internal data and the remaining table
 payload fields stay H-specific. The global unresolved denominator falls
 **217 -> 199**.
 
+### 7.28 Fixed high-page veneer bank regeneration
+
+The remaining veneer-derived annotation cohort is now closed from the raw fixed
+slot bank rather than forced decompiler boundaries. The bank spans
+`FDE08..FE2A4` in `0x14`-byte slots. A standard veneer is exactly the eight-byte
+form `2C 06 <target32-le> 6C 00`. Across all 60 slots, Sienna has 44 such
+veneers and H has 38; 36 slot addresses are shared, eight Sienna veneers are
+removed, and H adds two veneers at `FE178/FE18C`.
+
+For the 11 previously unresolved canonical veneer/low-target pairs, six slots
+persist and directly bind new H low targets:
+
+```text
+slot      S target   H target
+FDEA8     B7AAE      B6556
+FE074     B47F6      B4882
+FE088     B482E      B4886
+FE0B0     B55E2      B5364
+FE1A0     B20CC      B1F4A
+FE1DC     B20DC      B1F5A
+```
+
+The five unresolved slots `FE164/FE1F0/FE204/FE218/FE22C` are literal
+`40 00` fill in H, so both each old high-page veneer annotation and the old
+low target name derived from that slot are closed by **replacement-surface
+recensus**, not by inventing a new homolog. This proves removal of those fixed
+veneer roles only; it does not prove the old low-level operation is absent
+elsewhere in H.
+
+The complete bank diff is
+`data/generated/corolla_8965H1202000_veneer_bank.json`, verified directly from
+both CodeFlash images by `tests/verify_corolla_8965H1202000_veneer_bank.py`.
+The 22-name cohort closes as 12 preserved-slot role recoveries plus 10 removed-slot
+recensuses, reducing the genuinely-unresolved named denominator **199 -> 177**.
+
+### 7.29 Application command and asynchronous-operation callback tables
+
+The application callback residue is now bound from raw target configuration.
+Sienna's 18-entry application command table at `22C30` maps to H `22A74`; H
+command 0 is independently anchored by the unique structural mapping
+`81970→7BD6C`, and that target pointer occurs exactly once in H CodeFlash at the
+table base. All command IDs 0..17 remain configured, so the 17 named command
+callbacks map directly by command ID.
+
+The asynchronous operation descriptors materially shrink. Sienna rows `6F3..6FB`
+start at `280A0`; H starts at `27DB0` but contains only `6F3,6F6,6F7,6F8,6F9,6FA,6FB`,
+followed by the special operation-9 row. Thus the proprietary-F1 callback pair and
+operations 3..9 survive, while operation rows `6F4/6F5`—canonical operations 1
+and 2—are absent. Their four canonical start/completion names are closed by
+complete descriptor-surface recensus rather than invented H homologs.
+
+`data/generated/corolla_8965H1202000_application_callback_tables.json` pins every
+raw pointer and discriminator. The cohort closes as 33 target-native roles plus
+four removed descriptor roles, reducing genuinely unresolved named functions
+**177 -> 140**. Missing descriptor rows prove removal of those configured roles
+only, not absence of their lower-level behavior elsewhere in H.
+
+### 7.30 Application transport and interrupt ownership closure
+
+The remaining application transport/interrupt wrappers are now target-native.
+The H normal-Rx descriptor table shrinks `47 -> 40` and removes classic CAN
+`0x2E4`; the Tx set changes from `260/262/351/394/4A3/4C8` to
+`030/351/394/4A3/4C8`. The surviving `0x394` packer is H `47ADA`, PDU index 2,
+and now packs four configured signals. The obsolete canonical `2E4` unpacker and
+`260/262` packers are therefore closed by complete PDU-surface recensus rather
+than assigned false homologs. The special/normal Rx demux and PduR Tx/Rx routers
+map to `7A382/7A402/7ADC2/7B040` respectively.
+
+Application EIINT identity is pinned directly by the 384-entry table at `20200`.
+Channels `8,133,134,135,187,188,379` map the ECM, TAUJ0 CH0/1/2, CAN1 RX/TX,
+and flash-end wrappers to `6ADF4,6A6C0,6A76A,6A816,5F3AA,5F368,5F470`.
+Following those wrappers recovers TAUJ bodies `5F258/5F294/5F2D0` and CAN1
+interrupt bodies `7D240/7EB4E`; the latter retain literal channel-1
+specialization. These roles are hardware-channel/configuration identities, not
+address-offset transfers.
+
+Machine-readable ownership is in
+`corolla_8965H1202000_application_transport_residue.json`,
+`corolla_8965H1202000_application_interrupt_vectors.json`, and
+`corolla_8965H1202000_application_interrupt_bodies.json`.
+
+### 7.31 Clean H direct-call graph recensus
+
+The generic canonical names `direct_call_target_*` are discovery provenance from
+`SeedDirectCallTargets.java`, not stable semantic names. A clean H import was
+therefore censused directly rather than forcing one-to-one Sienna pairings. The
+tracked compact evidence contains **5,425 functions, 159,192 instructions,
+9,509 literal call edges, and 5,151 unique literal call targets**; every in-image
+literal target resolves to a function in the same clean H corpus. This complete
+call-graph recensus closes the 153-name canonical direct-call-seed class at the
+provenance level. Exact-body and independently recovered semantic roles retain
+higher precedence; the recensus itself does **not** imply behavioral homology.
+
+### 7.32 Final canonical named-residue closure
+
+The last 34 genuinely-unresolved canonical names are now closed by target-native
+owner/configuration evidence. Thirty-three have concrete H successors; one is a
+real target-generation removal:
+
+- boot EIINT dispatcher `748 -> 72C`; its non-contiguous owned blocks and shared
+  loop region transfer byte-for-byte at `-0x1C`;
+- boot default/secondary exception handlers `1E1E -> 1E02` and `1E2A -> 1E0E`;
+- **boot TAUJ0 CH2 is removed**: Sienna EIINT code `1087 -> 1E44` is absent from
+  H's shortened boot table, which contains only `10BC`, `10C0`, `10C1`, and the
+  default row. H `1E5E` belongs to `10BC` and is not a TAUJ0 homolog;
+- CRC result/busy/compute `47DE/47E4/47EA -> 47C2/47C8/47CE`, preserving the
+  fixed `FFD51020/004/000` hardware engine;
+- application entry remains `20880`; programming reset/stub helpers map to
+  `482AE/8441C`; RAM-range validation maps `4EA78 -> 4A4D4` with its five-entry
+  exclusion table regenerated at `28F0C`;
+- proprietary `0xAB` selector/event/query cone maps through
+  `9193E -> ... -> 87384`, with event-query/detail/active-list/state at
+  `4AF74/5031A/4FE70/4FFD8`; RMBA start/poll map by SID `0x23` phase order to
+  `8F7C0/8F720`;
+- expiry slot 7 maps `94B86 -> 8FBAC`; programming mode `0x900` entry maps
+  `B20EA -> B1F68` from the unchanged `AEB00` transition-table geometry;
+- the generated Rx consumer, RAM init, and RTE staging copies map by preserved
+  owner-call order to `5262C`, `5316C`, and `56BAC/5722E/5778E`;
+- application default/vector-`0x90` exception handlers map directly from vector
+  words to `5C0F2/5EE7E`; timer reload maps to `5F812` and adds H's `FFE21008`
+  channel; the TAUJ0 CH0 sample snapshot maps to regenerated `5FB30`;
+- the ECM shutdown jump maps `7059E -> 6A93E`; input snapshot and substate map
+  `BCB3A -> BBA48` and `CBCC8 -> CF27E`;
+- `fd0d7_status_fault_monitor B6396 -> B5EA4` is a **consolidated successor**:
+  H still configures `0x0D7`, the expanded stage remains in the per-tick fault
+  cluster, calls the system-event setter, and still emits event `0x2D`, but its
+  internal qualification logic is not asserted equivalent.
+
+The evidence-graded 1,113-function denominator is therefore now fully classified:
+
+```text
+verified exact-body transfers              288
+target-native role-recovered                235
+complete target-surface recensuses          464
+target-native inspected unique-shape        126
+structural candidates only                    0
+genuinely unresolved                          0
+```
+
+`data/generated/corolla_8965H1202000_final_named_residue.json` owns the final
+33-successor/1-removal closure, with raw-bound compact support in
+`corolla_8965H1202000_final_named_residue_evidence.json`. Zero genuinely
+unresolved names is now complemented by target-native inspection of every former
+shape-only candidate; no structural-only rows remain. The inspected-unique-shape
+class still remains deliberately weaker than semantic role recovery.
+
+### 7.33 Final unique-shape target-native inspection
+
+The last 96 `structural-candidate-only` rows were all **unique-exact-shape**
+matches, not ambiguous candidates. Every corresponding H target is now compacted
+from the existing target-native decompiler corpus and bound to the raw H body and
+decompiler hash in
+`data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json`.
+All 96 targets decompile successfully, their target addresses/body sizes agree
+with the independent structural-transfer artifact, and the evidence set is stable
+across regeneration.
+
+This promotion is intentionally narrow: it records H operands/dataflow for each
+unique complete-instruction-shape candidate and moves those rows to
+`target-native-inspected-unique-shape`; it does **not** upgrade them to semantic
+role equivalence. The final 1,113-function evidence distribution is therefore:
+
+```text
+verified exact-body transfers              288
+target-native role-recovered                235
+complete target-surface recensuses          464
+target-native inspected unique-shape        126
+structural candidates only                    0
+genuinely unresolved                          0
+```
+
+Thus every canonical named function is now backed by exact bytes, independently
+recovered target role, complete target-surface recensus, or target-native
+operand/dataflow inspection. Remaining uncertainty is claim-specific (for example
+field-for-field equivalence of regenerated code, runtime reachability, or behavior
+that needs live/bench evidence), not missing comparative static coverage.
+
 ## 8. Remaining evidence boundary
 
-The new corpus closes CodeFlash identity and much of the firmware-static
-transfer question, but it still does **not** provide:
+### Static closure criterion
+
+For this `8965H1202000` CodeFlash specimen, the comparative static-analysis
+objective is now closed under the repository's evidence model: all 1,113
+canonical named functions have target-native evidence; there are zero genuinely
+unresolved rows and zero structural-only rows; all generated foreign surfaces
+that replaced one-to-one functions are explicitly recensused; and H-native
+successors are kept at the weakest justified confidence class rather than being
+promoted by address similarity. Another undirected pass over the same CodeFlash
+would therefore repeat already-covered evidence rather than answer a remaining
+static question.
+
+The remaining questions require **different evidence**, not more generic static
+coverage of this image. The corpus still does **not** provide:
 
 - a direct UDS `F181` transcript from the same acquisition;
 - a stock passive `carFw` inventory joining the public route to the firmware;

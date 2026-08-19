@@ -1,0 +1,595 @@
+{
+  "async_operation_table": {
+    "canonical_discriminators": [
+      "0x06F3",
+      "0x06F4",
+      "0x06F5",
+      "0x06F6",
+      "0x06F7",
+      "0x06F8",
+      "0x06F9",
+      "0x06FA",
+      "0x06FB"
+    ],
+    "h_base": "0x00027DB0",
+    "h_discriminators": [
+      "0x06F3",
+      "0x06F6",
+      "0x06F7",
+      "0x06F8",
+      "0x06F9",
+      "0x06FA",
+      "0x06FB"
+    ],
+    "removed_discriminators": [
+      "0x06F4",
+      "0x06F5"
+    ],
+    "rows": [
+      {
+        "discriminator": "0x06F3",
+        "h": {
+          "address": "0x00027DB0",
+          "completion": "0x000307E8",
+          "config_word": "0x010006F3",
+          "discriminator": 1779,
+          "start": "0x000307C2",
+          "tail_word": "0x00000000"
+        },
+        "sienna": {
+          "address": "0x000280A0",
+          "completion": "0x00034B9A",
+          "config_word": "0x010006F3",
+          "discriminator": 1779,
+          "start": "0x00034B74",
+          "tail_word": "0x00000000"
+        },
+        "status": "preserved"
+      },
+      {
+        "discriminator": "0x06F4",
+        "h": null,
+        "sienna": {
+          "address": "0x000280B0",
+          "completion": "0x00034BF4",
+          "config_word": "0x0C0006F4",
+          "discriminator": 1780,
+          "start": "0x00034BA8",
+          "tail_word": "0x00000000"
+        },
+        "status": "removed"
+      },
+      {
+        "discriminator": "0x06F5",
+        "h": null,
+        "sienna": {
+          "address": "0x000280C0",
+          "completion": "0x00034C76",
+          "config_word": "0x0C0006F5",
+          "discriminator": 1781,
+          "start": "0x00034C50",
+          "tail_word": "0x00000000"
+        },
+        "status": "removed"
+      },
+      {
+        "discriminator": "0x06F6",
+        "h": {
+          "address": "0x00027DC0",
+          "completion": "0x00030842",
+          "config_word": "0x010006F6",
+          "discriminator": 1782,
+          "start": "0x000307F6",
+          "tail_word": "0x00000000"
+        },
+        "sienna": {
+          "address": "0x000280D0",
+          "completion": "0x00034CAA",
+          "config_word": "0x010006F6",
+          "discriminator": 1782,
+          "start": "0x00034C84",
+          "tail_word": "0x00000000"
+        },
+        "status": "preserved"
+      },
+      {
+        "discriminator": "0x06F7",
+        "h": {
+          "address": "0x00027DD0",
+          "completion": "0x00030934",
+          "config_word": "0x010006F7",
+          "discriminator": 1783,
+          "start": "0x0003089E",
+          "tail_word": "0x00000000"
+        },
+        "sienna": {
+          "address": "0x000280E0",
+          "completion": "0x00034D4E",
+          "config_word": "0x010006F7",
+          "discriminator": 1783,
+          "start": "0x00034CB8",
+          "tail_word": "0x00000000"
+        },
+        "status": "preserved"
+      },
+      {
+        "discriminator": "0x06F8",
+        "h": {
+          "address": "0x00027DE0",
+          "completion": "0x00030A52",
+          "config_word": "0x010006F8",
+          "discriminator": 1784,
+          "start": "0x00030994",
+          "tail_word": "0x00000000"
+        },
+        "sienna": {
+          "address": "0x000280F0",
+          "completion": "0x00034E6C",
+          "config_word": "0x010006F8",
+          "discriminator": 1784,
+          "start": "0x00034DAE",
+          "tail_word": "0x00000000"
+        },
+        "status": "preserved"
+      },
+      {
+        "discriminator": "0x06F9",
+        "h": {
+          "address": "0x00027DF0",
+          "completion": "0x00030ADC",
+          "config_word": "0x0C0006F9",
+          "discriminator": 1785,
+          "start": "0x00030AA6",
+          "tail_word": "0x00000000"
+        },
+        "sienna": {
+          "address": "0x00028100",
+          "completion": "0x00034F08",
+          "config_word": "0x0C0006F9",
+          "discriminator": 1785,
+          "start": "0x00034EC0",
+          "tail_word": "0x00000000"
+        },
+        "status": "preserved"
+      },
+      {
+        "discriminator": "0x06FA",
+        "h": {
+          "address": "0x00027E00",
+          "completion": "0x00030B14",
+          "config_word": "0x010006FA",
+          "discriminator": 1786,
+          "start": "0x00030AEE",
+          "tail_word": "0x00000000"
+        },
+        "sienna": {
+          "address": "0x00028110",
+          "completion": "0x00034F40",
+          "config_word": "0x010006FA",
+          "discriminator": 1786,
+          "start": "0x00034F1A",
+          "tail_word": "0x00000000"
+        },
+        "status": "preserved"
+      },
+      {
+        "discriminator": "0x06FB",
+        "h": {
+          "address": "0x00027E10",
+          "completion": "0x00030B54",
+          "config_word": "0x010006FB",
+          "discriminator": 1787,
+          "start": "0x00030B22",
+          "tail_word": "0x00000000"
+        },
+        "sienna": {
+          "address": "0x00028120",
+          "completion": "0x00034F80",
+          "config_word": "0x010006FB",
+          "discriminator": 1787,
+          "start": "0x00034F4E",
+          "tail_word": "0x00000000"
+        },
+        "status": "preserved"
+      },
+      {
+        "discriminator": "special-op9",
+        "h": {
+          "address": "0x00027E20",
+          "completion": "0x00030B7E",
+          "config_word": "0x00036136",
+          "discriminator": 24886,
+          "start": "0x00030B64",
+          "tail_word": "0x00036136"
+        },
+        "sienna": {
+          "address": "0x00028130",
+          "completion": "0x00034FAA",
+          "config_word": "0x0003ABDA",
+          "discriminator": 43994,
+          "start": "0x00034F90",
+          "tail_word": "0x0003ABDA"
+        },
+        "status": "preserved"
+      }
+    ],
+    "sienna_base": "0x000280A0"
+  },
+  "command_table": {
+    "anchor": {
+      "h_pointer_occurrences": [
+        "0x00022A74"
+      ],
+      "reference": "0x00081970",
+      "structural_classification": "unique-exact-shape",
+      "target": "0x0007BD6C"
+    },
+    "count": 18,
+    "h_base": "0x00022A74",
+    "rows": [
+      {
+        "command_id": 0,
+        "h_target": "0x0007BD6C",
+        "sienna_target": "0x00081970"
+      },
+      {
+        "command_id": 1,
+        "h_target": "0x0007BD7E",
+        "sienna_target": "0x00081982"
+      },
+      {
+        "command_id": 2,
+        "h_target": "0x0007BDDE",
+        "sienna_target": "0x000819E2"
+      },
+      {
+        "command_id": 3,
+        "h_target": "0x0007BDB2",
+        "sienna_target": "0x000819B6"
+      },
+      {
+        "command_id": 4,
+        "h_target": "0x0007BF72",
+        "sienna_target": "0x00081B76"
+      },
+      {
+        "command_id": 5,
+        "h_target": "0x0007BE2A",
+        "sienna_target": "0x00081A2E"
+      },
+      {
+        "command_id": 6,
+        "h_target": "0x0007B30E",
+        "sienna_target": "0x00080F12"
+      },
+      {
+        "command_id": 7,
+        "h_target": "0x0007B3D4",
+        "sienna_target": "0x00080FD8"
+      },
+      {
+        "command_id": 8,
+        "h_target": "0x0007BB90",
+        "sienna_target": "0x00081794"
+      },
+      {
+        "command_id": 9,
+        "h_target": "0x0007B7C8",
+        "sienna_target": "0x000813CC"
+      },
+      {
+        "command_id": 10,
+        "h_target": "0x0007B820",
+        "sienna_target": "0x00081424"
+      },
+      {
+        "command_id": 11,
+        "h_target": "0x0007B926",
+        "sienna_target": "0x0008152A"
+      },
+      {
+        "command_id": 12,
+        "h_target": "0x0007B9E6",
+        "sienna_target": "0x000815EA"
+      },
+      {
+        "command_id": 13,
+        "h_target": "0x0007BAC4",
+        "sienna_target": "0x000816C8"
+      },
+      {
+        "command_id": 14,
+        "h_target": "0x0007BC6C",
+        "sienna_target": "0x00081870"
+      },
+      {
+        "command_id": 15,
+        "h_target": "0x0007BCAA",
+        "sienna_target": "0x000818AE"
+      },
+      {
+        "command_id": 16,
+        "h_target": "0x0007BC20",
+        "sienna_target": "0x00081824"
+      },
+      {
+        "command_id": 17,
+        "h_target": "0x0007BCDE",
+        "sienna_target": "0x000818E2"
+      }
+    ],
+    "sienna_base": "0x00022C30"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "role_closure": [
+    {
+      "reference_entry": "0x00081982",
+      "reference_name": "application_command_01_callback",
+      "role": "application command callback ID 1",
+      "target_entry": "0x0007BD7E"
+    },
+    {
+      "reference_entry": "0x000819E2",
+      "reference_name": "application_command_02_callback",
+      "role": "application command callback ID 2",
+      "target_entry": "0x0007BDDE"
+    },
+    {
+      "reference_entry": "0x000819B6",
+      "reference_name": "application_command_03_callback",
+      "role": "application command callback ID 3",
+      "target_entry": "0x0007BDB2"
+    },
+    {
+      "reference_entry": "0x00081B76",
+      "reference_name": "application_command_04_callback",
+      "role": "application command callback ID 4",
+      "target_entry": "0x0007BF72"
+    },
+    {
+      "reference_entry": "0x00081A2E",
+      "reference_name": "application_command_05_callback",
+      "role": "application command callback ID 5",
+      "target_entry": "0x0007BE2A"
+    },
+    {
+      "reference_entry": "0x00080F12",
+      "reference_name": "application_command_06_callback",
+      "role": "application command callback ID 6",
+      "target_entry": "0x0007B30E"
+    },
+    {
+      "reference_entry": "0x00080FD8",
+      "reference_name": "application_command_07_callback",
+      "role": "application command callback ID 7",
+      "target_entry": "0x0007B3D4"
+    },
+    {
+      "reference_entry": "0x00081794",
+      "reference_name": "application_command_08_callback",
+      "role": "application command callback ID 8",
+      "target_entry": "0x0007BB90"
+    },
+    {
+      "reference_entry": "0x000813CC",
+      "reference_name": "application_command_09_callback",
+      "role": "application command callback ID 9",
+      "target_entry": "0x0007B7C8"
+    },
+    {
+      "reference_entry": "0x00081424",
+      "reference_name": "application_command_10_callback",
+      "role": "application command callback ID 10",
+      "target_entry": "0x0007B820"
+    },
+    {
+      "reference_entry": "0x0008152A",
+      "reference_name": "application_command_11_callback",
+      "role": "application command callback ID 11",
+      "target_entry": "0x0007B926"
+    },
+    {
+      "reference_entry": "0x000815EA",
+      "reference_name": "application_command_12_callback",
+      "role": "application command callback ID 12",
+      "target_entry": "0x0007B9E6"
+    },
+    {
+      "reference_entry": "0x000816C8",
+      "reference_name": "application_command_13_callback",
+      "role": "application command callback ID 13",
+      "target_entry": "0x0007BAC4"
+    },
+    {
+      "reference_entry": "0x00081870",
+      "reference_name": "application_command_14_callback",
+      "role": "application command callback ID 14",
+      "target_entry": "0x0007BC6C"
+    },
+    {
+      "reference_entry": "0x000818AE",
+      "reference_name": "application_command_15_callback",
+      "role": "application command callback ID 15",
+      "target_entry": "0x0007BCAA"
+    },
+    {
+      "reference_entry": "0x00081824",
+      "reference_name": "application_command_16_callback",
+      "role": "application command callback ID 16",
+      "target_entry": "0x0007BC20"
+    },
+    {
+      "reference_entry": "0x000818E2",
+      "reference_name": "application_command_17_callback",
+      "role": "application command callback ID 17",
+      "target_entry": "0x0007BCDE"
+    },
+    {
+      "reference_entry": "0x00034B74",
+      "reference_name": "application_proprietary_ab_f1_start",
+      "role": "async operation descriptor 0x06f3 start",
+      "target_entry": "0x000307C2"
+    },
+    {
+      "reference_entry": "0x00034B9A",
+      "reference_name": "application_proprietary_ab_f1_result",
+      "role": "async operation descriptor 0x06f3 completion",
+      "target_entry": "0x000307E8"
+    },
+    {
+      "reference_entry": "0x00034C84",
+      "reference_name": "application_operation_03_start",
+      "role": "async operation descriptor 0x06f6 start",
+      "target_entry": "0x000307F6"
+    },
+    {
+      "reference_entry": "0x00034CAA",
+      "reference_name": "application_operation_03_completion",
+      "role": "async operation descriptor 0x06f6 completion",
+      "target_entry": "0x00030842"
+    },
+    {
+      "reference_entry": "0x00034CB8",
+      "reference_name": "application_operation_04_start",
+      "role": "async operation descriptor 0x06f7 start",
+      "target_entry": "0x0003089E"
+    },
+    {
+      "reference_entry": "0x00034D4E",
+      "reference_name": "application_operation_04_completion",
+      "role": "async operation descriptor 0x06f7 completion",
+      "target_entry": "0x00030934"
+    },
+    {
+      "reference_entry": "0x00034DAE",
+      "reference_name": "application_operation_05_start",
+      "role": "async operation descriptor 0x06f8 start",
+      "target_entry": "0x00030994"
+    },
+    {
+      "reference_entry": "0x00034E6C",
+      "reference_name": "application_operation_05_completion",
+      "role": "async operation descriptor 0x06f8 completion",
+      "target_entry": "0x00030A52"
+    },
+    {
+      "reference_entry": "0x00034EC0",
+      "reference_name": "application_operation_06_start",
+      "role": "async operation descriptor 0x06f9 start",
+      "target_entry": "0x00030AA6"
+    },
+    {
+      "reference_entry": "0x00034F08",
+      "reference_name": "application_operation_06_completion",
+      "role": "async operation descriptor 0x06f9 completion",
+      "target_entry": "0x00030ADC"
+    },
+    {
+      "reference_entry": "0x00034F1A",
+      "reference_name": "application_operation_07_start",
+      "role": "async operation descriptor 0x06fa start",
+      "target_entry": "0x00030AEE"
+    },
+    {
+      "reference_entry": "0x00034F40",
+      "reference_name": "application_operation_07_completion",
+      "role": "async operation descriptor 0x06fa completion",
+      "target_entry": "0x00030B14"
+    },
+    {
+      "reference_entry": "0x00034F4E",
+      "reference_name": "application_operation_08_start",
+      "role": "async operation descriptor 0x06fb start",
+      "target_entry": "0x00030B22"
+    },
+    {
+      "reference_entry": "0x00034F80",
+      "reference_name": "application_operation_08_completion",
+      "role": "async operation descriptor 0x06fb completion",
+      "target_entry": "0x00030B54"
+    },
+    {
+      "reference_entry": "0x00034F90",
+      "reference_name": "application_operation_09_start",
+      "role": "async operation special op9 start",
+      "target_entry": "0x00030B64"
+    },
+    {
+      "reference_entry": "0x00034FAA",
+      "reference_name": "application_operation_09_completion",
+      "role": "async operation special op9 completion",
+      "target_entry": "0x00030B7E"
+    }
+  ],
+  "role_closure_count": 33,
+  "schema": "corolla-h-application-callback-tables-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "boundary": "Command IDs and operation discriminators come from raw target configuration. Missing 6F4/6F5 proves removal of those configured descriptor roles only; it does not prove their lower-level behaviors are absent elsewhere in H.",
+    "command_roles_recovered": 17,
+    "global_roles_recovered": 33,
+    "operation_roles_recovered": 16,
+    "operation_roles_removed": 4
+  },
+  "surface_recensus": [
+    {
+      "reason": "H async-operation descriptor set has no 0x06f4 row",
+      "reference_entry": "0x00034BA8",
+      "reference_name": "application_operation_01_start"
+    },
+    {
+      "reason": "H async-operation descriptor set has no 0x06f4 row",
+      "reference_entry": "0x00034BF4",
+      "reference_name": "application_operation_01_completion"
+    },
+    {
+      "reason": "H async-operation descriptor set has no 0x06f5 row",
+      "reference_entry": "0x00034C50",
+      "reference_name": "application_operation_02_start"
+    },
+    {
+      "reason": "H async-operation descriptor set has no 0x06f5 row",
+      "reference_entry": "0x00034C76",
+      "reference_name": "application_operation_02_completion"
+    }
+  ],
+  "surface_recensus_count": 4,
+  "target_evidence_entries": [
+    "0x000307C2",
+    "0x000307E8",
+    "0x000307F6",
+    "0x00030842",
+    "0x0003089E",
+    "0x00030934",
+    "0x00030994",
+    "0x00030A52",
+    "0x00030AA6",
+    "0x00030ADC",
+    "0x00030AEE",
+    "0x00030B14",
+    "0x00030B22",
+    "0x00030B54",
+    "0x00030B64",
+    "0x00030B7E",
+    "0x0007B30E",
+    "0x0007B3D4",
+    "0x0007B7C8",
+    "0x0007B820",
+    "0x0007B926",
+    "0x0007B9E6",
+    "0x0007BAC4",
+    "0x0007BB90",
+    "0x0007BC20",
+    "0x0007BC6C",
+    "0x0007BCAA",
+    "0x0007BCDE",
+    "0x0007BD7E",
+    "0x0007BDB2",
+    "0x0007BDDE",
+    "0x0007BE2A",
+    "0x0007BF72"
+  ]
+}

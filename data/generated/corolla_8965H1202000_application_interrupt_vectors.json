@@ -1,0 +1,116 @@
+{
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "role_closure": [
+    {
+      "reference_entry": "0x00070A54",
+      "reference_name": "application_ecm_maskable_isr",
+      "role": "application EIINT channel 8 wrapper",
+      "target_entry": "0x0006ADF4"
+    },
+    {
+      "reference_entry": "0x00070320",
+      "reference_name": "application_tauj0_ch0_isr",
+      "role": "application EIINT channel 133 wrapper",
+      "target_entry": "0x0006A6C0"
+    },
+    {
+      "reference_entry": "0x000703CA",
+      "reference_name": "application_tauj0_ch1_isr",
+      "role": "application EIINT channel 134 wrapper",
+      "target_entry": "0x0006A76A"
+    },
+    {
+      "reference_entry": "0x00070476",
+      "reference_name": "application_tauj0_ch2_isr",
+      "role": "application EIINT channel 135 wrapper",
+      "target_entry": "0x0006A816"
+    },
+    {
+      "reference_entry": "0x0006506A",
+      "reference_name": "application_can1_rx_isr",
+      "role": "application EIINT channel 187 wrapper",
+      "target_entry": "0x0005F3AA"
+    },
+    {
+      "reference_entry": "0x00065028",
+      "reference_name": "application_can1_tx_isr",
+      "role": "application EIINT channel 188 wrapper",
+      "target_entry": "0x0005F368"
+    },
+    {
+      "reference_entry": "0x00065130",
+      "reference_name": "application_flash_end_isr",
+      "role": "application EIINT channel 379 wrapper",
+      "target_entry": "0x0005F470"
+    }
+  ],
+  "role_closure_count": 7,
+  "rows": [
+    {
+      "channel": 8,
+      "h_target": "0x0006ADF4",
+      "reference_name": "application_ecm_maskable_isr",
+      "sienna_target": "0x00070A54"
+    },
+    {
+      "channel": 133,
+      "h_target": "0x0006A6C0",
+      "reference_name": "application_tauj0_ch0_isr",
+      "sienna_target": "0x00070320"
+    },
+    {
+      "channel": 134,
+      "h_target": "0x0006A76A",
+      "reference_name": "application_tauj0_ch1_isr",
+      "sienna_target": "0x000703CA"
+    },
+    {
+      "channel": 135,
+      "h_target": "0x0006A816",
+      "reference_name": "application_tauj0_ch2_isr",
+      "sienna_target": "0x00070476"
+    },
+    {
+      "channel": 187,
+      "h_target": "0x0005F3AA",
+      "reference_name": "application_can1_rx_isr",
+      "sienna_target": "0x0006506A"
+    },
+    {
+      "channel": 188,
+      "h_target": "0x0005F368",
+      "reference_name": "application_can1_tx_isr",
+      "sienna_target": "0x00065028"
+    },
+    {
+      "channel": 379,
+      "h_target": "0x0005F470",
+      "reference_name": "application_flash_end_isr",
+      "sienna_target": "0x00065130"
+    }
+  ],
+  "schema": "corolla-h-application-interrupt-vectors-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "boundary": "Role transfer is limited to wrapper identity at the same hardware EIINT channel. Handler internals and downstream callback targets remain H-specific unless separately recovered.",
+    "seven_unresolved_wrappers_recovered": true
+  },
+  "table": {
+    "base": "0x00020200",
+    "count": 384,
+    "h_sha256": "62de01c9043489886fdb08f72211ade8f464ab4b1c85df897dc0256d529ef04e",
+    "sienna_sha256": "554934523aac4826727d8682748f52cf2811af5a7c54b9654efd9ef89bed2a66"
+  },
+  "target_evidence_entries": [
+    "0x0006ADF4",
+    "0x0006A6C0",
+    "0x0006A76A",
+    "0x0006A816",
+    "0x0005F3AA",
+    "0x0005F368",
+    "0x0005F470"
+  ]
+}

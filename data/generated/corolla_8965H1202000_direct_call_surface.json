@@ -1,0 +1,791 @@
+{
+  "canonical_direct_call_seed_count": 153,
+  "evidence": {
+    "call_surface": "data/generated/corolla_8965H1202000_direct_call_surface_evidence.json",
+    "call_surface_sha256": "7b6d5c8063078bfa92933542b55be2b469670c1c56af1405019152e7b0db414e",
+    "canonical_ledger": "data/semantic_coverage_ledger.csv",
+    "canonical_ledger_sha256": "593853a78d2e97c43122b15777a5d3856c684ad34b7ad7c3588ebf3475ba61d3"
+  },
+  "h_surface_summary": {
+    "closed": true,
+    "function_count": 5425,
+    "instruction_count": 159192,
+    "literal_call_edge_count": 9509,
+    "missing_in_image_literal_call_targets": [],
+    "unique_literal_call_target_count": 5151
+  },
+  "schema": "corolla-h-direct-call-surface-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "boundary": "direct_call_target_* is discovery provenance, not semantic identity. Complete H literal-call recensus closes that naming/provenance class only; exact-body and target-native semantic role evidence remain higher-precedence, and no one-to-one behavior is inferred from this recensus.",
+    "target_literal_call_graph_closed": true
+  },
+  "surface_recensus": [
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000014a2",
+      "reference_name": "direct_call_target_000014a2"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00001ce8",
+      "reference_name": "direct_call_target_00001ce8"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00001d2c",
+      "reference_name": "direct_call_target_00001d2c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00001d9a",
+      "reference_name": "direct_call_target_00001d9a"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00001e04",
+      "reference_name": "direct_call_target_00001e04"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000021c2",
+      "reference_name": "direct_call_target_000021c2"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00002250",
+      "reference_name": "direct_call_target_00002250"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00002e32",
+      "reference_name": "direct_call_target_00002e32"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00002e86",
+      "reference_name": "direct_call_target_00002e86"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00002ecc",
+      "reference_name": "direct_call_target_00002ecc"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00003e1c",
+      "reference_name": "direct_call_target_00003e1c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00003e48",
+      "reference_name": "direct_call_target_00003e48"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00003e5e",
+      "reference_name": "direct_call_target_00003e5e"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00003e80",
+      "reference_name": "direct_call_target_00003e80"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00003ea4",
+      "reference_name": "direct_call_target_00003ea4"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00003ef2",
+      "reference_name": "direct_call_target_00003ef2"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00003f4a",
+      "reference_name": "direct_call_target_00003f4a"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00004048",
+      "reference_name": "direct_call_target_00004048"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000042d8",
+      "reference_name": "direct_call_target_000042d8"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000046ee",
+      "reference_name": "direct_call_target_000046ee"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00004744",
+      "reference_name": "direct_call_target_00004744"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0000475c",
+      "reference_name": "direct_call_target_0000475c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0000478e",
+      "reference_name": "direct_call_target_0000478e"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00004794",
+      "reference_name": "direct_call_target_00004794"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00004df2",
+      "reference_name": "direct_call_target_00004df2"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00005584",
+      "reference_name": "direct_call_target_00005584"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000065aa",
+      "reference_name": "direct_call_target_000065aa"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0000666c",
+      "reference_name": "direct_call_target_0000666c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000067f6",
+      "reference_name": "direct_call_target_000067f6"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00034d96",
+      "reference_name": "direct_call_target_00034d96"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00038b4c",
+      "reference_name": "direct_call_target_00038b4c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00038dca",
+      "reference_name": "direct_call_target_00038dca"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000390d4",
+      "reference_name": "direct_call_target_000390d4"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0003937c",
+      "reference_name": "direct_call_target_0003937c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000397d4",
+      "reference_name": "direct_call_target_000397d4"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00039a36",
+      "reference_name": "direct_call_target_00039a36"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0003a01e",
+      "reference_name": "direct_call_target_0003a01e"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0003a028",
+      "reference_name": "direct_call_target_0003a028"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0003a160",
+      "reference_name": "direct_call_target_0003a160"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0003a16a",
+      "reference_name": "direct_call_target_0003a16a"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0003a79a",
+      "reference_name": "direct_call_target_0003a79a"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0003a8b2",
+      "reference_name": "direct_call_target_0003a8b2"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0003b252",
+      "reference_name": "direct_call_target_0003b252"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0003b25e",
+      "reference_name": "direct_call_target_0003b25e"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0004c530",
+      "reference_name": "direct_call_target_0004c530"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0004c5ae",
+      "reference_name": "direct_call_target_0004c5ae"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0004c604",
+      "reference_name": "direct_call_target_0004c604"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0004ea76",
+      "reference_name": "direct_call_target_0004ea76"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0004eaba",
+      "reference_name": "direct_call_target_0004eaba"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0004ead6",
+      "reference_name": "direct_call_target_0004ead6"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0004eb1c",
+      "reference_name": "direct_call_target_0004eb1c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0004eb92",
+      "reference_name": "direct_call_target_0004eb92"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0004f8ae",
+      "reference_name": "direct_call_target_0004f8ae"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000518f6",
+      "reference_name": "direct_call_target_000518f6"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000547ba",
+      "reference_name": "direct_call_target_000547ba"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000547dc",
+      "reference_name": "direct_call_target_000547dc"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00054832",
+      "reference_name": "direct_call_target_00054832"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00054910",
+      "reference_name": "direct_call_target_00054910"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000549fa",
+      "reference_name": "direct_call_target_000549fa"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00054a54",
+      "reference_name": "direct_call_target_00054a54"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00054a7e",
+      "reference_name": "direct_call_target_00054a7e"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00054b62",
+      "reference_name": "direct_call_target_00054b62"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000555f8",
+      "reference_name": "direct_call_target_000555f8"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00065de6",
+      "reference_name": "direct_call_target_00065de6"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00066096",
+      "reference_name": "direct_call_target_00066096"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00066624",
+      "reference_name": "direct_call_target_00066624"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0006795c",
+      "reference_name": "direct_call_target_0006795c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00069042",
+      "reference_name": "direct_call_target_00069042"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00069504",
+      "reference_name": "direct_call_target_00069504"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0006f102",
+      "reference_name": "direct_call_target_0006f102"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00075858",
+      "reference_name": "direct_call_target_00075858"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000784c4",
+      "reference_name": "direct_call_target_000784c4"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00081f94",
+      "reference_name": "direct_call_target_00081f94"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00081fa0",
+      "reference_name": "direct_call_target_00081fa0"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008b1d4",
+      "reference_name": "direct_call_target_0008b1d4"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008b278",
+      "reference_name": "direct_call_target_0008b278"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008b294",
+      "reference_name": "direct_call_target_0008b294"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008b2b8",
+      "reference_name": "direct_call_target_0008b2b8"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008b532",
+      "reference_name": "direct_call_target_0008b532"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008bad0",
+      "reference_name": "direct_call_target_0008bad0"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008bd30",
+      "reference_name": "direct_call_target_0008bd30"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008bd78",
+      "reference_name": "direct_call_target_0008bd78"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008c276",
+      "reference_name": "direct_call_target_0008c276"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008c30a",
+      "reference_name": "direct_call_target_0008c30a"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008c3e4",
+      "reference_name": "direct_call_target_0008c3e4"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008c3f0",
+      "reference_name": "direct_call_target_0008c3f0"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008c406",
+      "reference_name": "direct_call_target_0008c406"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008c456",
+      "reference_name": "direct_call_target_0008c456"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008c8c6",
+      "reference_name": "direct_call_target_0008c8c6"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008c920",
+      "reference_name": "direct_call_target_0008c920"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008cd9c",
+      "reference_name": "direct_call_target_0008cd9c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008cda8",
+      "reference_name": "direct_call_target_0008cda8"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008cdce",
+      "reference_name": "direct_call_target_0008cdce"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008cdf2",
+      "reference_name": "direct_call_target_0008cdf2"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008cf06",
+      "reference_name": "direct_call_target_0008cf06"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0008d32e",
+      "reference_name": "direct_call_target_0008d32e"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00092e92",
+      "reference_name": "direct_call_target_00092e92"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00092ecc",
+      "reference_name": "direct_call_target_00092ecc"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00092fae",
+      "reference_name": "direct_call_target_00092fae"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00092fee",
+      "reference_name": "direct_call_target_00092fee"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000938a6",
+      "reference_name": "direct_call_target_000938a6"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00093bde",
+      "reference_name": "direct_call_target_00093bde"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0009452e",
+      "reference_name": "direct_call_target_0009452e"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0009462e",
+      "reference_name": "direct_call_target_0009462e"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00094672",
+      "reference_name": "direct_call_target_00094672"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0009486c",
+      "reference_name": "direct_call_target_0009486c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000948e6",
+      "reference_name": "direct_call_target_000948e6"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00094bcc",
+      "reference_name": "direct_call_target_00094bcc"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00094c7a",
+      "reference_name": "direct_call_target_00094c7a"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00094cce",
+      "reference_name": "direct_call_target_00094cce"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00094cee",
+      "reference_name": "direct_call_target_00094cee"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00094da0",
+      "reference_name": "direct_call_target_00094da0"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00094dee",
+      "reference_name": "direct_call_target_00094dee"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00094ee6",
+      "reference_name": "direct_call_target_00094ee6"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00094f8e",
+      "reference_name": "direct_call_target_00094f8e"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000952ee",
+      "reference_name": "direct_call_target_000952ee"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00095306",
+      "reference_name": "direct_call_target_00095306"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00095400",
+      "reference_name": "direct_call_target_00095400"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0009545c",
+      "reference_name": "direct_call_target_0009545c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000954d2",
+      "reference_name": "direct_call_target_000954d2"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00095556",
+      "reference_name": "direct_call_target_00095556"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00095bfc",
+      "reference_name": "direct_call_target_00095bfc"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00095d7e",
+      "reference_name": "direct_call_target_00095d7e"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00095db4",
+      "reference_name": "direct_call_target_00095db4"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000968a6",
+      "reference_name": "direct_call_target_000968a6"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000969fc",
+      "reference_name": "direct_call_target_000969fc"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00096b3a",
+      "reference_name": "direct_call_target_00096b3a"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00096b5a",
+      "reference_name": "direct_call_target_00096b5a"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000972e4",
+      "reference_name": "direct_call_target_000972e4"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x0009735a",
+      "reference_name": "direct_call_target_0009735a"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00097406",
+      "reference_name": "direct_call_target_00097406"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00097496",
+      "reference_name": "direct_call_target_00097496"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000974b2",
+      "reference_name": "direct_call_target_000974b2"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x00097506",
+      "reference_name": "direct_call_target_00097506"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000976d0",
+      "reference_name": "direct_call_target_000976d0"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000b4888",
+      "reference_name": "direct_call_target_000b4888"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000b55ac",
+      "reference_name": "direct_call_target_000b55ac"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000b55fa",
+      "reference_name": "direct_call_target_000b55fa"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000b5802",
+      "reference_name": "direct_call_target_000b5802"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000b5f66",
+      "reference_name": "direct_call_target_000b5f66"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000b70d0",
+      "reference_name": "direct_call_target_000b70d0"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000b7b4c",
+      "reference_name": "direct_call_target_000b7b4c"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fdea8",
+      "reference_name": "direct_call_target_000fdea8"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fe074",
+      "reference_name": "direct_call_target_000fe074"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fe088",
+      "reference_name": "direct_call_target_000fe088"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fe0b0",
+      "reference_name": "direct_call_target_000fe0b0"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fe164",
+      "reference_name": "direct_call_target_000fe164"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fe1a0",
+      "reference_name": "direct_call_target_000fe1a0"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fe1dc",
+      "reference_name": "direct_call_target_000fe1dc"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fe1f0",
+      "reference_name": "direct_call_target_000fe1f0"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fe204",
+      "reference_name": "direct_call_target_000fe204"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fe218",
+      "reference_name": "direct_call_target_000fe218"
+    },
+    {
+      "reason": "canonical name records only literal direct-call discovery provenance; H clean literal-call graph is completely re-enumerated",
+      "reference_entry": "0x000fe22c",
+      "reference_name": "direct_call_target_000fe22c"
+    }
+  ],
+  "surface_recensus_count": 153
+}

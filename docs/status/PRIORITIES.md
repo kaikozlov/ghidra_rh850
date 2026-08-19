@@ -245,11 +245,15 @@ zero. The five remaining motor-control roles are target-native closed, and the f
 42-function SecOC/ICU-S residue is now closed as well, including the lower
 command5/7/8 adapters, freshness graph, Rx ingress, ICU ISRs, crypto-test callbacks,
 and regenerated D7 unpacker. `secoc_icus` unresolved is zero, overlapping
-`crypto`, `steering`, and `diagnostics` unresolved are now **zero**. The global residue is **199**, all untagged after closing the generated packet/record/bounded adapter roles. Continue from
-that explicit residue, prioritizing the remaining diagnostic/untagged and
-externally reachable semantics rather than repeating closed passes;
-generic XCP DAQ callbacks remain optional unless a concrete exploit question
-needs them.
+`crypto`, `steering`, and `diagnostics` unresolved are now **zero**. The canonical
+1,113-function named denominator is now also **zero genuinely unresolved**. The former 96 structural-only rows are now all target-native inspected as well,
+so no shape-only coverage residue remains. New static work should be initiated only
+by a concrete target-native semantic, externally reachable, runtime, or exploit
+question; do not restart a broad Sienna-offset sweep. Generic XCP DAQ callbacks
+remain optional unless a concrete exploit question needs them. For
+`8965H1202000` specifically, undirected comparative CodeFlash analysis is now a
+closed task: remaining variant questions require runtime, ICU-S-internal,
+route-identity, or foreign-firmware evidence.
 
 The remaining explicitly open cohort rows without a recovered ingress root are
 not reason enough for another broad sweep by themselves.

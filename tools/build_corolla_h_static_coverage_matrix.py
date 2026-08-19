@@ -170,6 +170,27 @@ def main() -> None:
                 "evidence": can_com["evidence"]["decompiler_evidence"],
                 "role": item["reference_name"],
             }
+        route_names = {
+            "special_rx_demux": "application_can_special_rx_demux",
+            "normal_rx_demux": "application_can_normal_rx_demux",
+            "pdu_transmit_router": "application_pdu_transmit_router",
+            "pdu_rx_router": "application_pdu_rx_router",
+        }
+        for key, role_name in route_names.items():
+            item = can_com.get("supporting_route_chain", {}).get(key)
+            if not item:
+                continue
+            ref = int(item["sienna"], 16); target = int(item["h"], 16)
+            if target not in can_targets:
+                raise ValueError(f"CAN/COM supporting-route target lacks tracked H evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["h"],
+                "report": can_com_rel,
+                "evidence": can_com["evidence"]["decompiler_evidence"],
+                "role": role_name,
+            }
 
     storage_path = REPO / "data/generated/corolla_8965H1202000_storage_nvm.json"
     if storage_path.is_file():
@@ -397,6 +418,115 @@ def main() -> None:
             if ref in role_recovery:
                 raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
             role_recovery[ref] = {"target_entry":item["target_entry"],"report":small_adapters_rel,"evidence":small_adapters["evidence"]["decompiler_evidence"],"role":item["reference_name"]}
+
+    veneer_bank_path = REPO / "data/generated/corolla_8965H1202000_veneer_bank.json"
+    if veneer_bank_path.is_file():
+        veneer_bank = load_json(veneer_bank_path)
+        veneer_bank_rel = str(veneer_bank_path.relative_to(REPO))
+        evidence_file_hashes[veneer_bank_rel] = sha256(veneer_bank_path.read_bytes())
+        veneer_targets = {int(x, 16) for x in veneer_bank.get("target_evidence_entries", [])}
+        for item in veneer_bank.get("role_closure", []):
+            ref = int(item["reference_entry"], 16); target = int(item["target_entry"], 16)
+            if target not in veneer_targets:
+                raise ValueError(f"veneer-bank role target lacks raw slot evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {"target_entry":item["target_entry"],"report":veneer_bank_rel,"evidence":veneer_bank_rel,"role":item["role"]}
+        for item in veneer_bank.get("surface_recensus", []):
+            recensus[int(item["reference_entry"], 16)].add("high-page-veneer-bank-complete-recensus")
+
+    final_residue_path = REPO / "data/generated/corolla_8965H1202000_final_named_residue.json"
+    if final_residue_path.is_file():
+        final_residue = load_json(final_residue_path)
+        final_residue_rel = str(final_residue_path.relative_to(REPO))
+        evidence_file_hashes[final_residue_rel] = sha256(final_residue_path.read_bytes())
+        final_evidence_path = REPO / final_residue["evidence"]["final_compact_evidence"]
+        final_evidence_rel = str(final_evidence_path.relative_to(REPO))
+        evidence_file_hashes[final_evidence_rel] = sha256(final_evidence_path.read_bytes())
+        final_targets = {int(x,16) for x in final_residue.get("target_evidence_entries", [])}
+        if not final_residue.get("static_conclusion", {}).get("all_34_prior_unresolved_names_closed"):
+            raise ValueError("final named-residue closure is incomplete")
+        for item in final_residue.get("role_closure", []):
+            ref=int(item["reference_entry"],16);target=int(item["target_entry"],16)
+            if target not in final_targets:
+                raise ValueError(f"final role target lacks target-native evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate final named-residue role recovery: {ref:#x}")
+            role_recovery[ref]={"target_entry":item["target_entry"],"report":final_residue_rel,"evidence":final_evidence_rel,"role":item["role"]}
+        for item in final_residue.get("surface_recensus", []):
+            recensus[int(item["reference_entry"],16)].add("boot-eiint-complete-table-recensus")
+
+    direct_call_surface_path = REPO / "data/generated/corolla_8965H1202000_direct_call_surface.json"
+    if direct_call_surface_path.is_file():
+        direct_call_surface = load_json(direct_call_surface_path)
+        direct_call_surface_rel = str(direct_call_surface_path.relative_to(REPO))
+        evidence_file_hashes[direct_call_surface_rel] = sha256(direct_call_surface_path.read_bytes())
+        direct_call_evidence_path = REPO / direct_call_surface["evidence"]["call_surface"]
+        evidence_file_hashes[str(direct_call_evidence_path.relative_to(REPO))] = sha256(direct_call_evidence_path.read_bytes())
+        if not direct_call_surface.get("static_conclusion", {}).get("target_literal_call_graph_closed"):
+            raise ValueError("H direct-call graph recensus is not closed")
+        for item in direct_call_surface.get("surface_recensus", []):
+            recensus[int(item["reference_entry"],16)].add("clean-h-direct-call-graph-complete-recensus")
+
+    app_interrupt_bodies_path = REPO / "data/generated/corolla_8965H1202000_application_interrupt_bodies.json"
+    if app_interrupt_bodies_path.is_file():
+        app_interrupt_bodies = load_json(app_interrupt_bodies_path)
+        app_interrupt_bodies_rel = str(app_interrupt_bodies_path.relative_to(REPO))
+        evidence_file_hashes[app_interrupt_bodies_rel] = sha256(app_interrupt_bodies_path.read_bytes())
+        app_interrupt_targets = {int(x,16) for x in app_interrupt_bodies.get("target_evidence_entries", [])}
+        for item in app_interrupt_bodies.get("role_closure", []):
+            ref=int(item["reference_entry"],16);target=int(item["target_entry"],16)
+            if target not in app_interrupt_targets: raise ValueError(f"interrupt body target lacks evidence: {target:#x}")
+            if ref in role_recovery: raise ValueError(f"duplicate interrupt body recovery: {ref:#x}")
+            role_recovery[ref]={"target_entry":item["target_entry"],"report":app_interrupt_bodies_rel,"evidence":app_interrupt_bodies["evidence"]["decompiler_evidence"],"role":item["role"]}
+
+    app_vectors_path = REPO / "data/generated/corolla_8965H1202000_application_interrupt_vectors.json"
+    if app_vectors_path.is_file():
+        app_vectors = load_json(app_vectors_path)
+        app_vectors_rel = str(app_vectors_path.relative_to(REPO))
+        evidence_file_hashes[app_vectors_rel] = sha256(app_vectors_path.read_bytes())
+        vector_targets = {int(x,16) for x in app_vectors.get("target_evidence_entries", [])}
+        for item in app_vectors.get("role_closure", []):
+            ref=int(item["reference_entry"],16);target=int(item["target_entry"],16)
+            if target not in vector_targets: raise ValueError(f"vector role target lacks raw evidence: {target:#x}")
+            if ref in role_recovery: raise ValueError(f"duplicate vector role recovery: {ref:#x}")
+            role_recovery[ref]={"target_entry":item["target_entry"],"report":app_vectors_rel,"evidence":app_vectors_rel,"role":item["role"]}
+
+    app_transport_path = REPO / "data/generated/corolla_8965H1202000_application_transport_residue.json"
+    if app_transport_path.is_file():
+        app_transport = load_json(app_transport_path)
+        app_transport_rel = str(app_transport_path.relative_to(REPO))
+        evidence_file_hashes[app_transport_rel] = sha256(app_transport_path.read_bytes())
+        app_transport_targets = {int(x,16) for x in app_transport.get("target_evidence_entries", [])}
+        for item in app_transport.get("role_closure", []):
+            ref = int(item["reference_entry"],16); target = int(item["target_entry"],16)
+            # supporting CAN routes may already be credited from the parent CAN report.
+            if ref in role_recovery:
+                existing = int(role_recovery[ref]["target_entry"],16)
+                if existing != target:
+                    raise ValueError(f"transport role conflicts at {ref:#x}: {existing:#x}!={target:#x}")
+                continue
+            if target not in app_transport_targets:
+                raise ValueError(f"application transport target lacks evidence: {target:#x}")
+            role_recovery[ref] = {"target_entry":item["target_entry"],"report":app_transport_rel,"evidence":app_transport["evidence"]["decompiler_evidence"],"role":item["role"]}
+        for item in app_transport.get("surface_recensus", []):
+            recensus[int(item["reference_entry"],16)].add("application-transport-complete-pdu-recensus")
+
+    app_callbacks_path = REPO / "data/generated/corolla_8965H1202000_application_callback_tables.json"
+    if app_callbacks_path.is_file():
+        app_callbacks = load_json(app_callbacks_path)
+        app_callbacks_rel = str(app_callbacks_path.relative_to(REPO))
+        evidence_file_hashes[app_callbacks_rel] = sha256(app_callbacks_path.read_bytes())
+        app_callback_targets = {int(x, 16) for x in app_callbacks.get("target_evidence_entries", [])}
+        for item in app_callbacks.get("role_closure", []):
+            ref = int(item["reference_entry"], 16); target = int(item["target_entry"], 16)
+            if target not in app_callback_targets:
+                raise ValueError(f"application callback role target lacks raw table evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {"target_entry":item["target_entry"],"report":app_callbacks_rel,"evidence":app_callbacks_rel,"role":item["role"]}
+        for item in app_callbacks.get("surface_recensus", []):
+            recensus[int(item["reference_entry"], 16)].add("application-async-operation-complete-table-recensus")
 
     # Classify each canonical named function conservatively.
     classified = []

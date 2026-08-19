@@ -1,0 +1,410 @@
+{
+  "claims": {
+    "boot_eiint": {
+      "dispatcher_shift": -28,
+      "dispatcher_target": "0x0000072C",
+      "h_rows": [
+        [
+          "0x000010BC",
+          "0x00001E5E"
+        ],
+        [
+          "0x000010C0",
+          "0x00001E6C"
+        ],
+        [
+          "0x000010C1",
+          "0x00001E7A"
+        ],
+        [
+          "0xFFFFFFFF",
+          "0x00001E88"
+        ]
+      ],
+      "removed_codes": [
+        "0x00001087",
+        "0x000010B8",
+        "0x000010B9",
+        "0x000010BB"
+      ],
+      "sienna_rows": [
+        [
+          "0x00001087",
+          "0x00001E44"
+        ],
+        [
+          "0x000010B8",
+          "0x00001E50"
+        ],
+        [
+          "0x000010B9",
+          "0x00001E5E"
+        ],
+        [
+          "0x000010BB",
+          "0x00001E6C"
+        ],
+        [
+          "0x000010BC",
+          "0x00001E7A"
+        ],
+        [
+          "0x000010C0",
+          "0x00001E88"
+        ],
+        [
+          "0x000010C1",
+          "0x00001E96"
+        ],
+        [
+          "0xFFFFFFFF",
+          "0x00001EA4"
+        ]
+      ]
+    },
+    "crc": {
+      "busy": "0x000047C8",
+      "compute": "0x000047CE",
+      "fixed_registers": [
+        "0xFFD51020",
+        "0xFFD51004",
+        "0xFFD51000"
+      ],
+      "result": "0x000047C2"
+    },
+    "ram_policy": {
+      "h_ranges": [
+        [
+          "0xFEBE0000",
+          "0xFEBE37FF"
+        ],
+        [
+          "0xFEBE4F28",
+          "0xFEBE5193"
+        ],
+        [
+          "0xFEBF0150",
+          "0xFEBF128F"
+        ],
+        [
+          "0xFEBF4958",
+          "0xFEBF4B33"
+        ],
+        [
+          "0xFEBF6000",
+          "0xFEBF6CDF"
+        ]
+      ],
+      "h_table": "0x00028F0C",
+      "sienna_ranges": [
+        [
+          "0xFEBE0000",
+          "0xFEBE37FF"
+        ],
+        [
+          "0xFEBE5030",
+          "0xFEBE529B"
+        ],
+        [
+          "0xFEBF0288",
+          "0xFEBF13CB"
+        ],
+        [
+          "0xFEBF4958",
+          "0xFEBF4B33"
+        ],
+        [
+          "0xFEBF6C00",
+          "0xFEBF78DF"
+        ]
+      ],
+      "sienna_table": "0x000293F4"
+    },
+    "timer_expiry": {
+      "h_base": "0x00026AB0",
+      "h_targets": [
+        "0x0008B610",
+        "0x0008BF6C",
+        "0x0008B030",
+        "0x0008B0F4",
+        "0x0008B090",
+        "0x0008AE88",
+        "0x0008B5FA",
+        "0x0008FBAC",
+        "0x0008FBAC"
+      ],
+      "sienna_base": "0x00026DA0",
+      "sienna_targets": [
+        "0x000905EA",
+        "0x00090F46",
+        "0x0009000A",
+        "0x000900CE",
+        "0x0009006A",
+        "0x0008FE62",
+        "0x000905D4",
+        "0x00094B86",
+        "0x00094B86"
+      ]
+    }
+  },
+  "evidence": {
+    "final_compact_evidence": "data/generated/corolla_8965H1202000_final_named_residue_evidence.json",
+    "final_compact_evidence_sha256": "e5353aed633ff1753ffe6b7c9b8e1ae77fad8713f92e1e22cff4190ba0465406"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "role_closure": [
+    {
+      "reference_entry": "0x00000748",
+      "reference_name": "boot_eiint_dispatch",
+      "role": "boot-shared-block-byte-transfer",
+      "target_entry": "0x0000072C"
+    },
+    {
+      "reference_entry": "0x00001E1E",
+      "reference_name": "boot_default_exception_handler",
+      "role": "boot-handler-exact-shift",
+      "target_entry": "0x00001E02"
+    },
+    {
+      "reference_entry": "0x00001E2A",
+      "reference_name": "boot_secondary_exception_handler",
+      "role": "boot-handler-exact-shift",
+      "target_entry": "0x00001E0E"
+    },
+    {
+      "reference_entry": "0x000047DE",
+      "reference_name": "memory_crc_verify_result",
+      "role": "crc-peripheral-cluster",
+      "target_entry": "0x000047C2"
+    },
+    {
+      "reference_entry": "0x000047E4",
+      "reference_name": "memory_crc_verify_busy",
+      "role": "crc-peripheral-cluster",
+      "target_entry": "0x000047C8"
+    },
+    {
+      "reference_entry": "0x000047EA",
+      "reference_name": "crc32_hardware_compute",
+      "role": "crc-peripheral-cluster",
+      "target_entry": "0x000047CE"
+    },
+    {
+      "reference_entry": "0x00020880",
+      "reference_name": "application_entry",
+      "role": "application-handoff-pointer",
+      "target_entry": "0x00020880"
+    },
+    {
+      "reference_entry": "0x0004C986",
+      "reference_name": "application_programming_reset_marker_clear",
+      "role": "programming-readiness-call-slot",
+      "target_entry": "0x000482AE"
+    },
+    {
+      "reference_entry": "0x0004EA78",
+      "reference_name": "application_ram_range_allowed",
+      "role": "ram-policy-table-transfer",
+      "target_entry": "0x0004A4D4"
+    },
+    {
+      "reference_entry": "0x0004F8BA",
+      "reference_name": "application_event_record_query",
+      "role": "proprietary-ab-event-call-chain",
+      "target_entry": "0x0004AF74"
+    },
+    {
+      "reference_entry": "0x00054748",
+      "reference_name": "application_event_active_id_list",
+      "role": "event-query-call-slot",
+      "target_entry": "0x0004FE70"
+    },
+    {
+      "reference_entry": "0x000548B0",
+      "reference_name": "application_event_state_query",
+      "role": "event-query-call-slot",
+      "target_entry": "0x0004FFD8"
+    },
+    {
+      "reference_entry": "0x00054BF2",
+      "reference_name": "application_event_detail_query",
+      "role": "event-query-call-slot",
+      "target_entry": "0x0005031A"
+    },
+    {
+      "reference_entry": "0x00056FC2",
+      "reference_name": "application_rx_signal_consumer_56fc2",
+      "role": "dual-owner-singleton-intersection",
+      "target_entry": "0x0005262C"
+    },
+    {
+      "reference_entry": "0x00057BFE",
+      "reference_name": "application_ram_default_init",
+      "role": "scheduler-call-slot",
+      "target_entry": "0x0005316C"
+    },
+    {
+      "reference_entry": "0x0005B9C4",
+      "reference_name": "rte_input_staging_copy_c",
+      "role": "scheduler-call-slot",
+      "target_entry": "0x00056BAC"
+    },
+    {
+      "reference_entry": "0x0005C0B6",
+      "reference_name": "rte_input_staging_copy_b",
+      "role": "scheduler-call-slot",
+      "target_entry": "0x0005722E"
+    },
+    {
+      "reference_entry": "0x0005C666",
+      "reference_name": "rte_input_staging_copy_a",
+      "role": "scheduler-call-slot",
+      "target_entry": "0x0005778E"
+    },
+    {
+      "reference_entry": "0x00061D88",
+      "reference_name": "application_default_exception_handler",
+      "role": "application-vector-table",
+      "target_entry": "0x0005C0F2"
+    },
+    {
+      "reference_entry": "0x00064B3E",
+      "reference_name": "application_vector_0x90_handler",
+      "role": "application-vector-table",
+      "target_entry": "0x0005EE7E"
+    },
+    {
+      "reference_entry": "0x0006547C",
+      "reference_name": "application_timer_peripheral_reload",
+      "role": "fixed-peripheral-successor",
+      "target_entry": "0x0005F812"
+    },
+    {
+      "reference_entry": "0x0006578E",
+      "reference_name": "tauj0_ch0_sample_snapshot",
+      "role": "tauj0-ch0-successor-chain",
+      "target_entry": "0x0005FB30"
+    },
+    {
+      "reference_entry": "0x0007059E",
+      "reference_name": "boot_shutdown_reset_path",
+      "role": "ecm-wrapper-embedded-jump",
+      "target_entry": "0x0006A93E"
+    },
+    {
+      "reference_entry": "0x0008A01C",
+      "reference_name": "application_programming_lower_request_stub",
+      "role": "repeated-programming-call-slot",
+      "target_entry": "0x0008441C"
+    },
+    {
+      "reference_entry": "0x0008CF84",
+      "reference_name": "application_proprietary_ab_event_worker",
+      "role": "proprietary-ab-thunk-chain",
+      "target_entry": "0x00087384"
+    },
+    {
+      "reference_entry": "0x000946FA",
+      "reference_name": "application_read_memory_by_address_request_poll",
+      "role": "sid23-phase-call-slot",
+      "target_entry": "0x0008F720"
+    },
+    {
+      "reference_entry": "0x0009479A",
+      "reference_name": "application_read_memory_by_address_request_start",
+      "role": "sid23-phase-call-slot",
+      "target_entry": "0x0008F7C0"
+    },
+    {
+      "reference_entry": "0x00094B86",
+      "reference_name": "timer_expiry_07_callback",
+      "role": "expiry-table-index",
+      "target_entry": "0x0008FBAC"
+    },
+    {
+      "reference_entry": "0x00096918",
+      "reference_name": "application_proprietary_ab_selector_worker",
+      "role": "sidab-common-worker",
+      "target_entry": "0x0009193E"
+    },
+    {
+      "reference_entry": "0x000B20EA",
+      "reference_name": "system_programming_shutdown_mode_entry",
+      "role": "mode9-transition-table",
+      "target_entry": "0x000B1F68"
+    },
+    {
+      "reference_entry": "0x000B6396",
+      "reference_name": "fd0d7_status_fault_monitor",
+      "role": "consolidated-fd0d7-successor",
+      "target_entry": "0x000B5EA4"
+    },
+    {
+      "reference_entry": "0x000BCB3A",
+      "reference_name": "application_input_snapshot_update",
+      "role": "per-tick-final-call",
+      "target_entry": "0x000BBA48"
+    },
+    {
+      "reference_entry": "0x000CBCC8",
+      "reference_name": "application_substate_machine",
+      "role": "single-child-wrapper",
+      "target_entry": "0x000CF27E"
+    }
+  ],
+  "role_closure_count": 33,
+  "schema": "corolla-h-final-named-residue-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "all_34_prior_unresolved_names_closed": true,
+    "boundary": "Zero genuinely-unresolved canonical names means every canonical named role has exact-body, target-native role, target-surface recensus, or target-native inspection evidence. It does not promote structural-only candidates or imply field-for-field equivalence for consolidated/generated successors.",
+    "direct_target_native_successors": 33,
+    "removed_target_surface_roles": 1
+  },
+  "surface_recensus": [
+    {
+      "reason": "H complete boot EIINT table removes code 0x1087; H 0x1E5E belongs to code 0x10BC and must not be misidentified as TAUJ0 CH2",
+      "reference_entry": "0x00001E44",
+      "reference_name": "boot_tauj0_ch2_isr"
+    }
+  ],
+  "surface_recensus_count": 1,
+  "target_evidence_entries": [
+    "0x0000072C",
+    "0x00001E02",
+    "0x00001E0E",
+    "0x000047C2",
+    "0x000047C8",
+    "0x000047CE",
+    "0x00020880",
+    "0x000482AE",
+    "0x0004A4D4",
+    "0x0004AF74",
+    "0x0004FE70",
+    "0x0004FFD8",
+    "0x0005031A",
+    "0x0005262C",
+    "0x0005316C",
+    "0x00056BAC",
+    "0x0005722E",
+    "0x0005778E",
+    "0x0005C0F2",
+    "0x0005EE7E",
+    "0x0005F812",
+    "0x0005FB30",
+    "0x0006A93E",
+    "0x0008441C",
+    "0x00087384",
+    "0x0008F720",
+    "0x0008F7C0",
+    "0x0008FBAC",
+    "0x0009193E",
+    "0x000B1F68",
+    "0x000B5EA4",
+    "0x000BBA48",
+    "0x000CF27E"
+  ]
+}

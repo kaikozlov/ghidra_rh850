@@ -1,0 +1,200 @@
+{
+  "evidence": {
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "role_closure": [
+    {
+      "reference_entry": "0x0007FF86",
+      "reference_name": "application_can_special_rx_demux",
+      "role": "application_can_special_rx_demux",
+      "target_entry": "0x0007A382"
+    },
+    {
+      "reference_entry": "0x00080006",
+      "reference_name": "application_can_normal_rx_demux",
+      "role": "application_can_normal_rx_demux",
+      "target_entry": "0x0007A402"
+    },
+    {
+      "reference_entry": "0x000809C6",
+      "reference_name": "application_pdu_transmit_router",
+      "role": "application_pdu_transmit_router",
+      "target_entry": "0x0007ADC2"
+    },
+    {
+      "reference_entry": "0x00080C44",
+      "reference_name": "application_pdu_rx_router",
+      "role": "application_pdu_rx_router",
+      "target_entry": "0x0007B040"
+    },
+    {
+      "reference_entry": "0x0004C158",
+      "reference_name": "application_pack_can_394",
+      "role": "application_pack_can_394",
+      "target_entry": "0x00047ADA"
+    }
+  ],
+  "role_closure_count": 5,
+  "rx_configuration": {
+    "can_2e4_removed": true,
+    "h_base": "0x00021F94",
+    "h_count": 40,
+    "h_ids": [
+      "0x3B0",
+      "0x63B",
+      "0x624",
+      "0x63D",
+      "0x00F",
+      "0x013",
+      "0x014",
+      "0x015",
+      "0x016",
+      "0x017",
+      "0x018",
+      "0x019",
+      "0x01A",
+      "0x01B",
+      "0x01C",
+      "0x01D",
+      "0x01E",
+      "0x01F",
+      "0x0D0",
+      "0x3BF",
+      "0x127",
+      "0x115",
+      "0x1C5",
+      "0x294",
+      "0x51E",
+      "0x611",
+      "0x2D1",
+      "0x675",
+      "0x2E8",
+      "0x025",
+      "0x0AA",
+      "0x101",
+      "0x0D5",
+      "0x13B",
+      "0x090",
+      "0x0D7",
+      "0x64F",
+      "0x0B6",
+      "0x403",
+      "0x490"
+    ],
+    "sienna_base": "0x00022018",
+    "sienna_count": 47,
+    "sienna_ids": [
+      "0x2E4",
+      "0x3B0",
+      "0x63B",
+      "0x624",
+      "0x63D",
+      "0x00F",
+      "0x013",
+      "0x014",
+      "0x015",
+      "0x016",
+      "0x017",
+      "0x018",
+      "0x019",
+      "0x01A",
+      "0x01B",
+      "0x01C",
+      "0x01D",
+      "0x01E",
+      "0x01F",
+      "0x191",
+      "0x131",
+      "0x2FD",
+      "0x0D0",
+      "0x3BF",
+      "0x127",
+      "0x115",
+      "0x1C5",
+      "0x294",
+      "0x51E",
+      "0x132",
+      "0x611",
+      "0x2D1",
+      "0x675",
+      "0x2E8",
+      "0x025",
+      "0x423",
+      "0x0AA",
+      "0x101",
+      "0x0D5",
+      "0x13B",
+      "0x090",
+      "0x0D7",
+      "0x64F",
+      "0x020",
+      "0x403",
+      "0x490",
+      "0x1DA"
+    ]
+  },
+  "schema": "corolla-h-application-transport-residue-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "boundary": "Removed PDU descriptors close only the canonical generated pack/unpack roles. Surviving 0x394 is role-mapped by target PDU index plus H-native packer behavior; signal count changes from Sienna and field identity is not transferred.",
+    "five_roles_recovered": true,
+    "three_removed_generated_roles": true
+  },
+  "surface_recensus": [
+    {
+      "reason": "H complete normal-Rx descriptor table has no CAN 0x2E4",
+      "reference_entry": "0x0004A244",
+      "reference_name": "application_unpack_can_2e4"
+    },
+    {
+      "reason": "H complete Tx descriptor run has no CAN 0x260",
+      "reference_entry": "0x0004BCEE",
+      "reference_name": "application_pack_can_260"
+    },
+    {
+      "reason": "H complete Tx descriptor run has no CAN 0x262",
+      "reference_entry": "0x0004BE24",
+      "reference_name": "application_pack_can_262"
+    }
+  ],
+  "surface_recensus_count": 3,
+  "target_evidence_entries": [
+    "0x00047ADA",
+    "0x0007A382",
+    "0x0007A402",
+    "0x0007ADC2",
+    "0x0007B040"
+  ],
+  "tx_configuration": {
+    "h_394_index": 2,
+    "h_394_packer": {
+      "body_size": 196,
+      "direct_pack_call_count": 4,
+      "entry": "0x00047ADA",
+      "submits_pdu_index_2": true
+    },
+    "h_ids": [
+      "0x030",
+      "0x351",
+      "0x394",
+      "0x4A3",
+      "0x4C8"
+    ],
+    "removed": [
+      "0x260",
+      "0x262"
+    ],
+    "sienna_ids": [
+      "0x260",
+      "0x262",
+      "0x351",
+      "0x394",
+      "0x4A3",
+      "0x4C8"
+    ]
+  }
+}

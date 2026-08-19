@@ -1,0 +1,113 @@
+{
+  "evidence": {
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json"
+  },
+  "image": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+  },
+  "role_closure": [
+    {
+      "reference_entry": "0x00064F18",
+      "reference_name": "application_tauj0_ch0_body",
+      "role": "application_tauj0_ch0_body",
+      "target_entry": "0x0005F258"
+    },
+    {
+      "reference_entry": "0x00064F54",
+      "reference_name": "application_tauj0_ch1_body",
+      "role": "application_tauj0_ch1_body",
+      "target_entry": "0x0005F294"
+    },
+    {
+      "reference_entry": "0x00064F90",
+      "reference_name": "application_tauj0_ch2_body",
+      "role": "application_tauj0_ch2_body",
+      "target_entry": "0x0005F2D0"
+    },
+    {
+      "reference_entry": "0x00082E40",
+      "reference_name": "application_can1_rx_interrupt_body",
+      "role": "application_can1_rx_interrupt_body",
+      "target_entry": "0x0007D240"
+    },
+    {
+      "reference_entry": "0x0008474E",
+      "reference_name": "application_can1_tx_interrupt_body",
+      "role": "application_can1_tx_interrupt_body",
+      "target_entry": "0x0007EB4E"
+    }
+  ],
+  "role_closure_count": 5,
+  "rows": [
+    {
+      "chain": [
+        "0x0006A6C0",
+        "0x0005F258"
+      ],
+      "h_body": "0x0005F258",
+      "h_body_size": 60,
+      "h_wrapper": "0x0006A6C0",
+      "reference_entry": "0x00064F18",
+      "reference_name": "application_tauj0_ch0_body"
+    },
+    {
+      "chain": [
+        "0x0006A76A",
+        "0x0005F294"
+      ],
+      "h_body": "0x0005F294",
+      "h_body_size": 60,
+      "h_wrapper": "0x0006A76A",
+      "reference_entry": "0x00064F54",
+      "reference_name": "application_tauj0_ch1_body"
+    },
+    {
+      "chain": [
+        "0x0006A816",
+        "0x0005F2D0"
+      ],
+      "h_body": "0x0005F2D0",
+      "h_body_size": 60,
+      "h_wrapper": "0x0006A816",
+      "reference_entry": "0x00064F90",
+      "reference_name": "application_tauj0_ch2_body"
+    },
+    {
+      "chain": [
+        "0x0005F3AA",
+        "0x0005FB1E",
+        "0x0007D240"
+      ],
+      "h_body": "0x0007D240",
+      "h_body_size": 14,
+      "h_wrapper": "0x0005F3AA",
+      "reference_entry": "0x00082E40",
+      "reference_name": "application_can1_rx_interrupt_body"
+    },
+    {
+      "chain": [
+        "0x0005F368",
+        "0x0005FB12",
+        "0x0007EB4E"
+      ],
+      "h_body": "0x0007EB4E",
+      "h_body_size": 14,
+      "h_wrapper": "0x0005F368",
+      "reference_entry": "0x0008474E",
+      "reference_name": "application_can1_tx_interrupt_body"
+    }
+  ],
+  "schema": "corolla-h-application-interrupt-bodies-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "boundary": "TAUJ role identity is anchored by same EIINT-channel wrapper direct calls; CAN1 body identity is anchored by same EIINT channel plus one-hop thunk and literal channel-1 specialization. Deeper timer/ADC semantics are not transferred here.",
+    "five_roles_recovered": true
+  },
+  "target_evidence_entries": [
+    "0x0005F258",
+    "0x0005F294",
+    "0x0005F2D0",
+    "0x0007D240",
+    "0x0007EB4E"
+  ]
+}

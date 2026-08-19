@@ -320,11 +320,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   target-native closed, preserving the custom selector set and application-side F5
   read semantics with H-specific exclusions. The five changed motor-control roles
   are target-native closed, and the remaining 42 named SecOC/ICU-S roles are now
-  closed as a complete target-native surface as well. The current residue is
-  **199**, with zero unresolved `scheduler_system`, `can_com`, `storage_nvm`,
-  `xcp`, `motor_control`, `secoc_icus`, `crypto`, `steering`, or `diagnostics` entries. All remaining named residue is untagged; the complete 88-function deadline-monitor family is also closed by target-table recensus. Remaining H-static work is the explicit
-  residue outside those closed surfaces; generic DAQ/XCP
-  callbacks remain optional unless an exploit hypothesis needs them. If revisited
+  closed as a complete target-native surface as well. The canonical 1,113-name
+  denominator is now **zero genuinely unresolved** after closing the generated
+  monitor/adaptor surfaces, application command/async tables, transport/interrupt
+  ownership, the clean direct-call provenance graph, and the final 34-name residue.
+  The former 96 `structural-candidate-only` rows now all have target-native H
+  operand/dataflow inspection evidence, leaving **zero structural-only rows** as
+  well. Further H-static work should therefore be driven by concrete semantic,
+  exploit, runtime-reachability, or target-architecture questions rather than
+  denominator completion;
+  generic DAQ/XCP callbacks remain optional unless such a hypothesis needs them. If revisited
   dynamically, record
   direct F181 plus full-bus and Panda health on both normal-CAN1 and OBD routes
   immediately around the programming transition, then repeat the memory/capture

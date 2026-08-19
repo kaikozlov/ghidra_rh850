@@ -1,0 +1,65 @@
+{
+  "function_count": 7,
+  "functions": [
+    {
+      "body_sha256": "94109c479c5cb27673b8f78d8bcbd8ca7bbaa23691bff5414e2ba5b028eedd52",
+      "body_size": 60,
+      "decompiled_c": "\nvoid FUN_0005f258(void)\n\n{\n  undefined1 *puVar1;\n  int iVar2;\n  \n  puVar1 = &LAB_febeb800;\n  iVar2 = 0;\n  if (DAT_0002d4ac == 'Z') {\n    puVar1 = &LAB_febeb800;\n    FUN_0005e14c();\n    iVar2 = 0x5a;\n  }\n  FUN_0005e594();\n  FUN_0005fa96();\n  if (iVar2 == 0x5a) {\n    FUN_0005e22c();\n  }\n  puVar1[-0x7f14] = puVar1[-0x7f14] + '\\x01';\n  return;\n}\n\n",
+      "decompiled_c_sha256": "4b31b5dbb4e8f49ee647bcc67bc47c08bd71b47ea66dadc10beb534cbf2cb741",
+      "entry": "0x0005F258"
+    },
+    {
+      "body_sha256": "1c7e1f16d1d7ee9c939a090bb82a0aec09e0a405a8c7ccfc9f7cc868d0c646eb",
+      "body_size": 60,
+      "decompiled_c": "\nvoid FUN_0005f294(void)\n\n{\n  undefined1 *puVar1;\n  int iVar2;\n  \n  puVar1 = &LAB_febeb800;\n  iVar2 = 0;\n  if (DAT_0002d4ac == 'Z') {\n    puVar1 = &LAB_febeb800;\n    FUN_0005e15e();\n    iVar2 = 0x5a;\n  }\n  FUN_0005e5c0();\n  FUN_0005faaa();\n  if (iVar2 == 0x5a) {\n    FUN_0005e27c();\n  }\n  puVar1[-0x7f13] = puVar1[-0x7f13] + '\\x01';\n  return;\n}\n\n",
+      "decompiled_c_sha256": "d2811a3d2024b2b972f93364fb82facf8528ceb6e571215ae8a38a8b9eb580cd",
+      "entry": "0x0005F294"
+    },
+    {
+      "body_sha256": "c3d3b773a827576fe91fe70f558b35b3d3292df4512076b83e03840282047e1d",
+      "body_size": 60,
+      "decompiled_c": "\nvoid FUN_0005f2d0(void)\n\n{\n  undefined1 *puVar1;\n  int iVar2;\n  \n  puVar1 = &LAB_febeb800;\n  iVar2 = 0;\n  if (DAT_0002d4ac == 'Z') {\n    puVar1 = &LAB_febeb800;\n    FUN_0005e180();\n    iVar2 = 0x5a;\n  }\n  FUN_0005e6be();\n  FUN_0005fac2();\n  if (iVar2 == 0x5a) {\n    FUN_0005e2f6();\n  }\n  puVar1[-0x7f12] = puVar1[-0x7f12] + '\\x01';\n  return;\n}\n\n",
+      "decompiled_c_sha256": "c1687b6705ba3376a9e3a7af0b15276e15200ac973dabafbbe0816c9f5db3aa6",
+      "entry": "0x0005F2D0"
+    },
+    {
+      "body_sha256": "10362b1d3993e0537cf9c052e613985730e5df932e14cfb37af848e454a3f1b4",
+      "body_size": 12,
+      "decompiled_c": "\nvoid FUN_0005fb12(void)\n\n{\n  FUN_0007eb4e();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "e7472c1c20a371d84d066d118c414277fce9b37f962bbf2217e36439f2b9b5e6",
+      "entry": "0x0005FB12"
+    },
+    {
+      "body_sha256": "46c90a25207d682cdf8ec2772f0e6306eb3980864fe7e246cb406932c1a5a716",
+      "body_size": 12,
+      "decompiled_c": "\nvoid FUN_0005fb1e(void)\n\n{\n  FUN_0007d240();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a4cd40bc9d6d2ba8d4856629268387d2b8d6cbda140d996a4192d8749adb282e",
+      "entry": "0x0005FB1E"
+    },
+    {
+      "body_sha256": "aa09c071131a8f662ef4d104f030e40112cd17ed07197d6d6439bfe75fac87ae",
+      "body_size": 14,
+      "decompiled_c": "\nvoid FUN_0007d240(void)\n\n{\n  FUN_0007d202(1);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "871e0427ffc561f10a68757eb39c9faf14a91f2a36db37efa3f5d472ad61ed60",
+      "entry": "0x0007D240"
+    },
+    {
+      "body_sha256": "aa09c071131a8f662ef4d104f030e40112cd17ed07197d6d6439bfe75fac87ae",
+      "body_size": 14,
+      "decompiled_c": "\nvoid FUN_0007eb4e(void)\n\n{\n  FUN_0007eb10(1);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a093010b6586fe0d1bc37f126167aaa772d7d39ab20b3914f89fecf89b81585d",
+      "entry": "0x0007EB4E"
+    }
+  ],
+  "image": {
+    "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "codeflash_size": 1048576,
+    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+  },
+  "schema": "corolla-h-application-interrupt-body-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "path": "build/h_small_adapters_forced.jsonl",
+    "sha256": "c4647bd02ecf142c80401baef7cfd2503c30cf7567b85adf93787334490a37eb"
+  }
+}

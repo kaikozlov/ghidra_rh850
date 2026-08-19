@@ -1,0 +1,1099 @@
+{
+  "bank": {
+    "added_slots": [
+      "0x000FE178",
+      "0x000FE18C"
+    ],
+    "common_veneer_slots": 36,
+    "end": "0x000FE2A4",
+    "h_veneer_count": 38,
+    "removed_slots": [
+      "0x000FE164",
+      "0x000FE1B4",
+      "0x000FE1C8",
+      "0x000FE1F0",
+      "0x000FE204",
+      "0x000FE218",
+      "0x000FE22C",
+      "0x000FE2A4"
+    ],
+    "sienna_veneer_count": 44,
+    "slot_count": 60,
+    "slots": [
+      {
+        "address": "0x000FDE08",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06246a0b006c00",
+          "target": "0x000B6A24"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c067c7f0b006c00",
+          "target": "0x000B7F7C"
+        },
+        "slot_index": 0
+      },
+      {
+        "address": "0x000FDE1C",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06baa40b006c00",
+          "target": "0x000BA4BA"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c064cb60b006c00",
+          "target": "0x000BB64C"
+        },
+        "slot_index": 1
+      },
+      {
+        "address": "0x000FDE30",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06ce670b006c00",
+          "target": "0x000B67CE"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06267d0b006c00",
+          "target": "0x000B7D26"
+        },
+        "slot_index": 2
+      },
+      {
+        "address": "0x000FDE44",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c062ea70b006c00",
+          "target": "0x000BA72E"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06c0b80b006c00",
+          "target": "0x000BB8C0"
+        },
+        "slot_index": 3
+      },
+      {
+        "address": "0x000FDE58",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06305a0b006c00",
+          "target": "0x000B5A30"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c060c5d0b006c00",
+          "target": "0x000B5D0C"
+        },
+        "slot_index": 4
+      },
+      {
+        "address": "0x000FDE6C",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06043c0b006c00",
+          "target": "0x000B3C04"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c0674390b006c00",
+          "target": "0x000B3974"
+        },
+        "slot_index": 5
+      },
+      {
+        "address": "0x000FDE80",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06a0640b006c00",
+          "target": "0x000B64A0"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06f8790b006c00",
+          "target": "0x000B79F8"
+        },
+        "slot_index": 6
+      },
+      {
+        "address": "0x000FDE94",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06de640b006c00",
+          "target": "0x000B64DE"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06367a0b006c00",
+          "target": "0x000B7A36"
+        },
+        "slot_index": 7
+      },
+      {
+        "address": "0x000FDEA8",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c0656650b006c00",
+          "target": "0x000B6556"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06ae7a0b006c00",
+          "target": "0x000B7AAE"
+        },
+        "slot_index": 8
+      },
+      {
+        "address": "0x000FDEBC",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06925e0b006c00",
+          "target": "0x000B5E92"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c0628600b006c00",
+          "target": "0x000B6028"
+        },
+        "slot_index": 9
+      },
+      {
+        "address": "0x000FDED0",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c066e2b0b006c00",
+          "target": "0x000B2B6E"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06a2280b006c00",
+          "target": "0x000B28A2"
+        },
+        "slot_index": 10
+      },
+      {
+        "address": "0x000FDEE4",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06642b0b006c00",
+          "target": "0x000B2B64"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c0698280b006c00",
+          "target": "0x000B2898"
+        },
+        "slot_index": 11
+      },
+      {
+        "address": "0x000FDEF8",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c067e870b006c00",
+          "target": "0x000B877E"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06cc9c0b006c00",
+          "target": "0x000B9CCC"
+        },
+        "slot_index": 12
+      },
+      {
+        "address": "0x000FDF0C",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c0620830b006c00",
+          "target": "0x000B8320"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c066e980b006c00",
+          "target": "0x000B986E"
+        },
+        "slot_index": 13
+      },
+      {
+        "address": "0x000FDF20",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06c48a0b006c00",
+          "target": "0x000B8AC4"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c0612a00b006c00",
+          "target": "0x000BA012"
+        },
+        "slot_index": 14
+      },
+      {
+        "address": "0x000FDF34",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 15
+      },
+      {
+        "address": "0x000FDF48",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 16
+      },
+      {
+        "address": "0x000FDF5C",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 17
+      },
+      {
+        "address": "0x000FDF70",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 18
+      },
+      {
+        "address": "0x000FDF84",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 19
+      },
+      {
+        "address": "0x000FDF98",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 20
+      },
+      {
+        "address": "0x000FDFAC",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 21
+      },
+      {
+        "address": "0x000FDFC0",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06766e0b006c00",
+          "target": "0x000B6E76"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06ce830b006c00",
+          "target": "0x000B83CE"
+        },
+        "slot_index": 22
+      },
+      {
+        "address": "0x000FDFD4",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06be780b006c00",
+          "target": "0x000B78BE"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c060c8e0b006c00",
+          "target": "0x000B8E0C"
+        },
+        "slot_index": 23
+      },
+      {
+        "address": "0x000FDFE8",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c066c9c0b006c00",
+          "target": "0x000B9C6C"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c0610b20b006c00",
+          "target": "0x000BB210"
+        },
+        "slot_index": 24
+      },
+      {
+        "address": "0x000FDFFC",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c0674030b006c00",
+          "target": "0x000B0374"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06bc020b006c00",
+          "target": "0x000B02BC"
+        },
+        "slot_index": 25
+      },
+      {
+        "address": "0x000FE010",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c069a020b006c00",
+          "target": "0x000B029A"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06e2010b006c00",
+          "target": "0x000B01E2"
+        },
+        "slot_index": 26
+      },
+      {
+        "address": "0x000FE024",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06b01e0b006c00",
+          "target": "0x000B1EB0"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c061a200b006c00",
+          "target": "0x000B201A"
+        },
+        "slot_index": 27
+      },
+      {
+        "address": "0x000FE038",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06321e0b006c00",
+          "target": "0x000B1E32"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06341f0b006c00",
+          "target": "0x000B1F34"
+        },
+        "slot_index": 28
+      },
+      {
+        "address": "0x000FE04C",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c0626440b006c00",
+          "target": "0x000B4426"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06be390b006c00",
+          "target": "0x000B39BE"
+        },
+        "slot_index": 29
+      },
+      {
+        "address": "0x000FE060",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c066c480b006c00",
+          "target": "0x000B486C"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06a6470b006c00",
+          "target": "0x000B47A6"
+        },
+        "slot_index": 30
+      },
+      {
+        "address": "0x000FE074",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c0682480b006c00",
+          "target": "0x000B4882"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06f6470b006c00",
+          "target": "0x000B47F6"
+        },
+        "slot_index": 31
+      },
+      {
+        "address": "0x000FE088",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c0686480b006c00",
+          "target": "0x000B4886"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c062e480b006c00",
+          "target": "0x000B482E"
+        },
+        "slot_index": 32
+      },
+      {
+        "address": "0x000FE09C",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06b6660b006c00",
+          "target": "0x000B66B6"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c060e7c0b006c00",
+          "target": "0x000B7C0E"
+        },
+        "slot_index": 33
+      },
+      {
+        "address": "0x000FE0B0",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c0664530b006c00",
+          "target": "0x000B5364"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06e2550b006c00",
+          "target": "0x000B55E2"
+        },
+        "slot_index": 34
+      },
+      {
+        "address": "0x000FE0C4",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c0646530b006c00",
+          "target": "0x000B5346"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06c4550b006c00",
+          "target": "0x000B55C4"
+        },
+        "slot_index": 35
+      },
+      {
+        "address": "0x000FE0D8",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06d8480b006c00",
+          "target": "0x000B48D8"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06ca480b006c00",
+          "target": "0x000B48CA"
+        },
+        "slot_index": 36
+      },
+      {
+        "address": "0x000FE0EC",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c064e5a0b006c00",
+          "target": "0x000B5A4E"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c062a5d0b006c00",
+          "target": "0x000B5D2A"
+        },
+        "slot_index": 37
+      },
+      {
+        "address": "0x000FE100",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06c8660b006c00",
+          "target": "0x000B66C8"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06207c0b006c00",
+          "target": "0x000B7C20"
+        },
+        "slot_index": 38
+      },
+      {
+        "address": "0x000FE114",
+        "h": {
+          "kind": "other",
+          "raw8": "80072100bfffb4e2",
+          "target": null
+        },
+        "sienna": {
+          "kind": "other",
+          "raw8": "80072100bfffb4e2",
+          "target": null
+        },
+        "slot_index": 39
+      },
+      {
+        "address": "0x000FE128",
+        "h": {
+          "kind": "other",
+          "raw8": "80072100bfff36e3",
+          "target": null
+        },
+        "sienna": {
+          "kind": "other",
+          "raw8": "80072100bfff36e3",
+          "target": null
+        },
+        "slot_index": 40
+      },
+      {
+        "address": "0x000FE13C",
+        "h": {
+          "kind": "other",
+          "raw8": "80072100bfff86e3",
+          "target": null
+        },
+        "sienna": {
+          "kind": "other",
+          "raw8": "80072100bfff86e3",
+          "target": null
+        },
+        "slot_index": 41
+      },
+      {
+        "address": "0x000FE150",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c062e1f0b006c00",
+          "target": "0x000B1F2E"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c069c200b006c00",
+          "target": "0x000B209C"
+        },
+        "slot_index": 42
+      },
+      {
+        "address": "0x000FE164",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c0614710b006c00",
+          "target": "0x000B7114"
+        },
+        "slot_index": 43
+      },
+      {
+        "address": "0x000FE178",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06be9f0b006c00",
+          "target": "0x000B9FBE"
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 44
+      },
+      {
+        "address": "0x000FE18C",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06925d0b006c00",
+          "target": "0x000B5D92"
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 45
+      },
+      {
+        "address": "0x000FE1A0",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c064a1f0b006c00",
+          "target": "0x000B1F4A"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06cc200b006c00",
+          "target": "0x000B20CC"
+        },
+        "slot_index": 46
+      },
+      {
+        "address": "0x000FE1B4",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06fe710b006c00",
+          "target": "0x000B71FE"
+        },
+        "slot_index": 47
+      },
+      {
+        "address": "0x000FE1C8",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06a8760b006c00",
+          "target": "0x000B76A8"
+        },
+        "slot_index": 48
+      },
+      {
+        "address": "0x000FE1DC",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c065a1f0b006c00",
+          "target": "0x000B1F5A"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06dc200b006c00",
+          "target": "0x000B20DC"
+        },
+        "slot_index": 49
+      },
+      {
+        "address": "0x000FE1F0",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c060a720b006c00",
+          "target": "0x000B720A"
+        },
+        "slot_index": 50
+      },
+      {
+        "address": "0x000FE204",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c0618720b006c00",
+          "target": "0x000B7218"
+        },
+        "slot_index": 51
+      },
+      {
+        "address": "0x000FE218",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c0626720b006c00",
+          "target": "0x000B7226"
+        },
+        "slot_index": 52
+      },
+      {
+        "address": "0x000FE22C",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c062c720b006c00",
+          "target": "0x000B722C"
+        },
+        "slot_index": 53
+      },
+      {
+        "address": "0x000FE240",
+        "h": {
+          "kind": "veneer",
+          "raw8": "2c06ea220b006c00",
+          "target": "0x000B22EA"
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c06e2220b006c00",
+          "target": "0x000B22E2"
+        },
+        "slot_index": 54
+      },
+      {
+        "address": "0x000FE254",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 55
+      },
+      {
+        "address": "0x000FE268",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 56
+      },
+      {
+        "address": "0x000FE27C",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 57
+      },
+      {
+        "address": "0x000FE290",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "slot_index": 58
+      },
+      {
+        "address": "0x000FE2A4",
+        "h": {
+          "kind": "fill",
+          "raw8": "4000400040004000",
+          "target": null
+        },
+        "sienna": {
+          "kind": "veneer",
+          "raw8": "2c0644560b006c00",
+          "target": "0x000B5644"
+        },
+        "slot_index": 59
+      }
+    ],
+    "start": "0x000FDE08",
+    "stride": 20
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "role_closure": [
+    {
+      "reference_entry": "0x000FDEA8",
+      "reference_name": "direct_call_target_000fdea8",
+      "role": "fixed high-page veneer slot 0xfdea8",
+      "target_entry": "0x000FDEA8"
+    },
+    {
+      "reference_entry": "0x000B7AAE",
+      "reference_name": "constant_veneer_target_000b7aae",
+      "role": "target selected by preserved veneer slot 0xfdea8",
+      "target_entry": "0x000B6556"
+    },
+    {
+      "reference_entry": "0x000FE074",
+      "reference_name": "direct_call_target_000fe074",
+      "role": "fixed high-page veneer slot 0xfe074",
+      "target_entry": "0x000FE074"
+    },
+    {
+      "reference_entry": "0x000B47F6",
+      "reference_name": "constant_veneer_target_000b47f6",
+      "role": "target selected by preserved veneer slot 0xfe074",
+      "target_entry": "0x000B4882"
+    },
+    {
+      "reference_entry": "0x000FE088",
+      "reference_name": "direct_call_target_000fe088",
+      "role": "fixed high-page veneer slot 0xfe088",
+      "target_entry": "0x000FE088"
+    },
+    {
+      "reference_entry": "0x000B482E",
+      "reference_name": "constant_veneer_target_000b482e",
+      "role": "target selected by preserved veneer slot 0xfe088",
+      "target_entry": "0x000B4886"
+    },
+    {
+      "reference_entry": "0x000FE0B0",
+      "reference_name": "direct_call_target_000fe0b0",
+      "role": "fixed high-page veneer slot 0xfe0b0",
+      "target_entry": "0x000FE0B0"
+    },
+    {
+      "reference_entry": "0x000B55E2",
+      "reference_name": "constant_veneer_target_000b55e2",
+      "role": "target selected by preserved veneer slot 0xfe0b0",
+      "target_entry": "0x000B5364"
+    },
+    {
+      "reference_entry": "0x000FE1A0",
+      "reference_name": "direct_call_target_000fe1a0",
+      "role": "fixed high-page veneer slot 0xfe1a0",
+      "target_entry": "0x000FE1A0"
+    },
+    {
+      "reference_entry": "0x000B20CC",
+      "reference_name": "constant_veneer_target_000b20cc",
+      "role": "target selected by preserved veneer slot 0xfe1a0",
+      "target_entry": "0x000B1F4A"
+    },
+    {
+      "reference_entry": "0x000FE1DC",
+      "reference_name": "direct_call_target_000fe1dc",
+      "role": "fixed high-page veneer slot 0xfe1dc",
+      "target_entry": "0x000FE1DC"
+    },
+    {
+      "reference_entry": "0x000B20DC",
+      "reference_name": "constant_veneer_target_000b20dc",
+      "role": "target selected by preserved veneer slot 0xfe1dc",
+      "target_entry": "0x000B1F5A"
+    }
+  ],
+  "role_closure_count": 12,
+  "schema": "corolla-h-veneer-bank-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "boundary": "A preserved fixed veneer slot proves the H call-slot role and its H low target. A removed slot proves only removal of that canonical veneer-derived role; it does not prove the old low-level operation is absent elsewhere in H.",
+    "preserved_unresolved_pairs": 6,
+    "removed_unresolved_pairs": 5
+  },
+  "surface_recensus": [
+    {
+      "reason": "H slot 0xfe164 is fill, not a veneer",
+      "reference_entry": "0x000FE164",
+      "reference_name": "direct_call_target_000fe164"
+    },
+    {
+      "reason": "canonical low target was named from removed veneer slot 0xfe164; no one-to-one H role assigned",
+      "reference_entry": "0x000B7114",
+      "reference_name": "constant_veneer_target_000b7114"
+    },
+    {
+      "reason": "H slot 0xfe1f0 is fill, not a veneer",
+      "reference_entry": "0x000FE1F0",
+      "reference_name": "direct_call_target_000fe1f0"
+    },
+    {
+      "reason": "canonical low target was named from removed veneer slot 0xfe1f0; no one-to-one H role assigned",
+      "reference_entry": "0x000B720A",
+      "reference_name": "constant_veneer_target_000b720a"
+    },
+    {
+      "reason": "H slot 0xfe204 is fill, not a veneer",
+      "reference_entry": "0x000FE204",
+      "reference_name": "direct_call_target_000fe204"
+    },
+    {
+      "reason": "canonical low target was named from removed veneer slot 0xfe204; no one-to-one H role assigned",
+      "reference_entry": "0x000B7218",
+      "reference_name": "constant_veneer_target_000b7218"
+    },
+    {
+      "reason": "H slot 0xfe218 is fill, not a veneer",
+      "reference_entry": "0x000FE218",
+      "reference_name": "direct_call_target_000fe218"
+    },
+    {
+      "reason": "canonical low target was named from removed veneer slot 0xfe218; no one-to-one H role assigned",
+      "reference_entry": "0x000B7226",
+      "reference_name": "constant_veneer_target_000b7226"
+    },
+    {
+      "reason": "H slot 0xfe22c is fill, not a veneer",
+      "reference_entry": "0x000FE22C",
+      "reference_name": "direct_call_target_000fe22c"
+    },
+    {
+      "reason": "canonical low target was named from removed veneer slot 0xfe22c; no one-to-one H role assigned",
+      "reference_entry": "0x000B722C",
+      "reference_name": "constant_veneer_target_000b722c"
+    }
+  ],
+  "surface_recensus_count": 10,
+  "target_evidence_entries": [
+    "0x000B1F4A",
+    "0x000B1F5A",
+    "0x000B4882",
+    "0x000B4886",
+    "0x000B5364",
+    "0x000B6556",
+    "0x000FDEA8",
+    "0x000FE074",
+    "0x000FE088",
+    "0x000FE0B0",
+    "0x000FE1A0",
+    "0x000FE1DC"
+  ],
+  "unresolved_pair_census": [
+    {
+      "h_raw8": "2c0656650b006c00",
+      "h_target": "0x000B6556",
+      "sienna_target": "0x000B7AAE",
+      "slot": "0x000FDEA8",
+      "status": "preserved-slot"
+    },
+    {
+      "h_raw8": "2c0682480b006c00",
+      "h_target": "0x000B4882",
+      "sienna_target": "0x000B47F6",
+      "slot": "0x000FE074",
+      "status": "preserved-slot"
+    },
+    {
+      "h_raw8": "2c0686480b006c00",
+      "h_target": "0x000B4886",
+      "sienna_target": "0x000B482E",
+      "slot": "0x000FE088",
+      "status": "preserved-slot"
+    },
+    {
+      "h_raw8": "2c0664530b006c00",
+      "h_target": "0x000B5364",
+      "sienna_target": "0x000B55E2",
+      "slot": "0x000FE0B0",
+      "status": "preserved-slot"
+    },
+    {
+      "h_raw8": "4000400040004000",
+      "h_target": null,
+      "sienna_target": "0x000B7114",
+      "slot": "0x000FE164",
+      "status": "removed-slot"
+    },
+    {
+      "h_raw8": "2c064a1f0b006c00",
+      "h_target": "0x000B1F4A",
+      "sienna_target": "0x000B20CC",
+      "slot": "0x000FE1A0",
+      "status": "preserved-slot"
+    },
+    {
+      "h_raw8": "2c065a1f0b006c00",
+      "h_target": "0x000B1F5A",
+      "sienna_target": "0x000B20DC",
+      "slot": "0x000FE1DC",
+      "status": "preserved-slot"
+    },
+    {
+      "h_raw8": "4000400040004000",
+      "h_target": null,
+      "sienna_target": "0x000B720A",
+      "slot": "0x000FE1F0",
+      "status": "removed-slot"
+    },
+    {
+      "h_raw8": "4000400040004000",
+      "h_target": null,
+      "sienna_target": "0x000B7218",
+      "slot": "0x000FE204",
+      "status": "removed-slot"
+    },
+    {
+      "h_raw8": "4000400040004000",
+      "h_target": null,
+      "sienna_target": "0x000B7226",
+      "slot": "0x000FE218",
+      "status": "removed-slot"
+    },
+    {
+      "h_raw8": "4000400040004000",
+      "h_target": null,
+      "sienna_target": "0x000B722C",
+      "slot": "0x000FE22C",
+      "status": "removed-slot"
+    }
+  ]
+}

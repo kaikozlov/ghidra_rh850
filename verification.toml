@@ -1667,9 +1667,148 @@ paths = [
   "tools/build_corolla_h_small_adapters.py",
   "tools/extract_corolla_h_small_adapter_evidence.py",
   "data/generated/corolla_8965H1202000_small_adapters.json",
+  "data/generated/corolla_8965H1202000_application_callback_tables.json",
+  "data/generated/corolla_8965H1202000_veneer_bank.json",
+  "data/generated/corolla_8965H1202000_application_transport_residue.json",
+  "data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_application_interrupt_vectors.json",
+  "data/generated/corolla_8965H1202000_application_interrupt_bodies.json",
+  "data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_direct_call_surface.json",
+  "data/generated/corolla_8965H1202000_direct_call_surface_evidence.json",
+  "data/generated/corolla_8965H1202000_final_named_residue.json",
+  "data/generated/corolla_8965H1202000_final_named_residue_evidence.json",
+  "data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json",
   "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
   "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
+[suite.corolla_8965h_application_callback_tables]
+tests = ["tests/verify_corolla_8965H1202000_application_callback_tables.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_application_callback_tables.py",
+  "tools/build_corolla_h_application_callback_tables.py",
+  "data/generated/corolla_8965H1202000_application_callback_tables.json",
+  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
+[suite.corolla_8965h_veneer_bank]
+tests = ["tests/verify_corolla_8965H1202000_veneer_bank.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_veneer_bank.py",
+  "tools/build_corolla_h_veneer_bank.py",
+  "data/generated/corolla_8965H1202000_application_callback_tables.json",
+  "data/generated/corolla_8965H1202000_veneer_bank.json",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
+[suite.corolla_8965h_application_transport_residue]
+tests = ["tests/verify_corolla_8965H1202000_application_transport_residue.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_application_transport_residue.py",
+  "tools/build_corolla_h_application_transport_residue.py",
+  "tools/extract_corolla_h_application_transport_evidence.py",
+  "data/generated/corolla_8965H1202000_application_transport_residue.json",
+  "data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+]
+oracle = "raw_bytes"
+
+[suite.corolla_8965h_application_interrupt_vectors]
+tests = ["tests/verify_corolla_8965H1202000_application_interrupt_vectors.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_application_interrupt_vectors.py",
+  "tools/build_corolla_h_application_interrupt_vectors.py",
+  "data/generated/corolla_8965H1202000_application_interrupt_vectors.json",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+]
+oracle = "raw_bytes"
+
+[suite.corolla_8965h_application_interrupt_bodies]
+tests = ["tests/verify_corolla_8965H1202000_application_interrupt_bodies.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_application_interrupt_bodies.py",
+  "tools/build_corolla_h_application_interrupt_bodies.py",
+  "tools/extract_corolla_h_application_interrupt_body_evidence.py",
+  "data/generated/corolla_8965H1202000_application_interrupt_bodies.json",
+  "data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+]
+oracle = "raw_bytes"
+
+[suite.corolla_8965h_direct_call_surface]
+tests = ["tests/verify_corolla_8965H1202000_direct_call_surface.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_direct_call_surface.py",
+  "tools/build_corolla_h_direct_call_surface.py",
+  "tools/extract_corolla_h_direct_call_surface_evidence.py",
+  "data/generated/corolla_8965H1202000_direct_call_surface.json",
+  "data/generated/corolla_8965H1202000_direct_call_surface_evidence.json",
+  "data/semantic_coverage_ledger.csv",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+]
+oracle = "raw_bytes"
+
+[suite.corolla_8965h_final_named_residue]
+tests = ["tests/verify_corolla_8965H1202000_final_named_residue.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_final_named_residue.py",
+  "tools/build_corolla_h_final_named_residue.py",
+  "tools/extract_corolla_h_final_named_residue_evidence.py",
+  "data/generated/corolla_8965H1202000_final_named_residue.json",
+  "data/generated/corolla_8965H1202000_final_named_residue_evidence.json",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
+[suite.corolla_8965h_structural_residue_inspection]
+tests = ["tests/verify_corolla_8965H1202000_structural_residue_inspection.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_structural_residue_inspection.py",
+  "tools/extract_corolla_h_structural_residue_evidence.py",
+  "data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
+  "data/generated/corolla_8965H1202000_static_coverage_matrix.json",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
@@ -1716,6 +1855,8 @@ paths = [
   "data/generated/corolla_8965H1202000_plausibility_monitor.json",
   "data/generated/corolla_8965H1202000_small_adapter_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_small_adapters.json",
+  "data/generated/corolla_8965H1202000_application_callback_tables.json",
+  "data/generated/corolla_8965H1202000_veneer_bank.json",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/reference/generated-artifacts.md",
