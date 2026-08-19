@@ -311,8 +311,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   SecOC provenance is also closed at the CPU↔ICU-S boundary: `00F/D7/B6` share
   config/job 0 and protected slot 4, with no raw key in the mapped command-7 CPU
   descriptor and authenticated command 8 as the recovered refresh interface.
-  Remaining H-static work is now the explicit named-function residue in the
-  coverage matrix rather than those two old transfer questions; generic DAQ/XCP
+  The eight changed high-level `scheduler_system` roles are also now target-native
+  recovered (mode-event policy, per-tick wiring, startup/init, reset continuation),
+  reducing the genuinely-unresolved matrix residue to 454. Remaining H-static work
+  is the explicit residue outside that closed orchestration surface; generic DAQ/XCP
   callbacks remain optional unless an exploit hypothesis needs them. If revisited
   dynamically, record
   direct F181 plus full-bus and Panda health on both normal-CAN1 and OBD routes

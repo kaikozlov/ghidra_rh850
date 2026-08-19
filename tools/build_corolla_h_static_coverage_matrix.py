@@ -9,7 +9,9 @@ Coverage is promoted only by one of:
     target-native evidence artifact;
   * an explicitly complete generated-surface recensus (currently application
     RDBI/RoutineControl and the complete steering-supervisor direct-stage set).
-Everything else remains structural-only or unresolved.
+A tracked target-native role-recovery report may also promote a canonical role when
+the foreign function was independently recovered even though generated restructuring
+prevents exact/unique-shape matching. Everything else remains structural-only or unresolved.
 """
 from __future__ import annotations
 
@@ -123,6 +125,30 @@ def main() -> None:
             continue
         evidence_reference_entries[reference].update(owners)
 
+    # Explicit target-native high-level role recovery. This is intentionally
+    # separate from unique-shape transfer and from generated-surface recensus.
+    role_recovery: dict[int, dict] = {}
+    orchestration_path = REPO / "data/generated/corolla_8965H1202000_system_orchestration.json"
+    if orchestration_path.is_file():
+        orchestration = load_json(orchestration_path)
+        orchestration_rel = str(orchestration_path.relative_to(REPO))
+        evidence_file_hashes[orchestration_rel] = sha256(orchestration_path.read_bytes())
+        system_ev_path = REPO / orchestration["evidence"]["decompiler_evidence"]
+        system_ev = load_json(system_ev_path)
+        system_targets = {int(r["entry"], 16) for r in system_ev.get("functions", [])}
+        reset_target = int(system_ev["reset_0x1f2"]["entry"], 16)
+        for item in orchestration.get("scheduler_system_closure", []):
+            ref = int(item["reference_entry"], 16)
+            target = int(item["target_entry"], 16)
+            if target not in system_targets and target != reset_target:
+                raise ValueError(f"orchestration role target lacks tracked target-native evidence: {target:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["target_entry"],
+                "report": orchestration_rel,
+                "evidence": orchestration["evidence"]["decompiler_evidence"],
+                "role": item["role"],
+            }
+
     # Explicit generated-surface recensuses. These are not function homology:
     # they prove the foreign generated surface was exhaustively re-enumerated.
     recensus: dict[int, set[str]] = defaultdict(set)
@@ -158,6 +184,16 @@ def main() -> None:
         if status == "exact-byte-transfer":
             coverage = "verified-exact-body-transfer"
             basis = ["complete canonical body is byte-identical at resolved H target"]
+        elif ref in role_recovery:
+            recovered = role_recovery[ref]
+            coverage = "target-native-role-recovered"
+            basis = [
+                f"target-native role recovery: {recovered['role']}",
+                f"report:{recovered['report']}",
+                f"target-native:{recovered['evidence']}",
+            ]
+            target = recovered["target_entry"]
+            target_int = int(target, 16)
         elif status == "unique-instruction-shape-candidate" and owners:
             coverage = "target-native-inspected-unique-shape"
             basis = ["unique complete instruction-shape target"] + [f"target-native:{x}" for x in owners]
@@ -181,7 +217,8 @@ def main() -> None:
                 "target_entry": target,
                 "coverage": coverage,
                 "coverage_basis": basis,
-                "target_native_evidence_files": owners,
+                "target_native_evidence_files": (owners if ref not in role_recovery else [role_recovery[ref]["evidence"]]),
+                "role_recovery": role_recovery.get(ref),
                 "surface_recensus": census,
             }
         )
@@ -199,7 +236,7 @@ def main() -> None:
     payload = {
         "schema": "corolla-8965H1202000-static-coverage-matrix-v1",
         "evidence_boundary": (
-            "Navigation/denominator artifact. Surface recensus means the foreign generated surface was exhaustively re-enumerated; it is not function homology. Structural-candidate-only is not semantic transfer. Genuinely-unresolved means only that none of the tracked promotion conditions apply."
+            "Navigation/denominator artifact. Surface recensus means the foreign generated surface was exhaustively re-enumerated; it is not function homology. Target-native role recovery means a foreign role was independently reconstructed and pinned; it is not byte/shape identity. Structural-candidate-only is not semantic transfer. Genuinely-unresolved means only that none of the tracked promotion conditions apply."
         ),
         "source": {
             "named_transfer_ledger": str(args.ledger.relative_to(REPO)),

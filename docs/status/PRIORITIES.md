@@ -231,8 +231,11 @@ field in the mapped supervisor cone; all changed surviving fields are sub-12-bit
 ID/job 0 and select one protected ICU-S **slot 4**; the raw key is opaque to the
 mapped CPU command-7 path, while authenticated command 8 is the recovered refresh
 interface. The remaining H-static work should therefore be driven by the named
-coverage denominator (`462` genuinely unresolved canonical functions), prioritizing
-large target-native system/COM/orchestration or externally reachable semantics;
+coverage denominator. The first large residue is now closed: all eight changed
+`scheduler_system` roles are target-native mapped, reducing the global genuinely
+unresolved denominator from 462 to **454**. Continue from that explicit residue,
+prioritizing externally reachable semantics and changed COM/storage/security
+plumbing rather than repeating the closed system-orchestration pass;
 generic XCP DAQ callbacks remain optional unless a concrete exploit question
 needs them.
 

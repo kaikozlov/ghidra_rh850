@@ -1,0 +1,630 @@
+{
+  "evidence": {
+    "canonical_corpus": "data/generated/decompilations.jsonl",
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json"
+  },
+  "images": {
+    "corolla_h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "mode_coordinator": {
+    "clear_sequences_identical": true,
+    "event_clear_sequence": [
+      0,
+      0,
+      1,
+      9,
+      0,
+      1,
+      9,
+      12,
+      0,
+      1,
+      9,
+      6,
+      0,
+      1,
+      9,
+      2,
+      0,
+      9,
+      7,
+      2,
+      15,
+      0,
+      8,
+      1
+    ],
+    "event_query_sequence": [
+      0,
+      9,
+      5,
+      0,
+      1,
+      9,
+      3,
+      0,
+      1,
+      9,
+      6,
+      12,
+      0,
+      1,
+      9,
+      6,
+      11,
+      7,
+      0,
+      1,
+      9,
+      4,
+      7,
+      2,
+      0,
+      9,
+      10,
+      7,
+      14,
+      15,
+      9,
+      2,
+      7,
+      0,
+      13,
+      8,
+      1,
+      9
+    ],
+    "h_entry": "0x000B05D0",
+    "h_metrics": {
+      "body_size": 1016,
+      "direct_call_count": 100,
+      "if_count": 47,
+      "loop_count": 0,
+      "switch_count": 0,
+      "unique_direct_call_count": 21
+    },
+    "interpretation": "same generated event-driven mode policy; helper addresses and surrounding application wiring moved",
+    "mode_comparison_literals": [
+      256,
+      512,
+      768,
+      1024,
+      1280,
+      1792
+    ],
+    "query_sequences_identical": true,
+    "sienna_entry": "0x000B0518",
+    "sienna_metrics": {
+      "body_size": 1014,
+      "direct_call_count": 100,
+      "if_count": 47,
+      "loop_count": 0,
+      "switch_count": 0,
+      "unique_direct_call_count": 21
+    }
+  },
+  "per_tick_dispatch": {
+    "boundary": "guard-level wiring comparison; removed helper calls are not assigned OEM semantics solely from location",
+    "guard_diff": [
+      {
+        "h_guards": [],
+        "h_range": [
+          60,
+          60
+        ],
+        "opcode": "delete",
+        "sienna_guards": [
+          "if (0x102 < param_2) {",
+          "if (param_3 < 0x103) {",
+          "if (param_2 == 0x520) {",
+          "if (param_3 == 0x520) {",
+          "if (0x102 < param_2) {",
+          "if (param_3 < 0x103) {",
+          "if (param_2 - 0x200 < 0x323) {",
+          "if (0x322 < param_3 - 0x200) {",
+          "if (param_2 == 0x520) {",
+          "if (param_3 == 0x520) {"
+        ],
+        "sienna_range": [
+          60,
+          70
+        ]
+      }
+    ],
+    "h_entry": "0x000BD954",
+    "h_guard_count": 64,
+    "h_has_0x520_guard": false,
+    "h_major_call_order": [
+      "FUN_000b8ee4",
+      "FUN_000b05d0",
+      "FUN_000bba48"
+    ],
+    "h_major_call_positions": {
+      "FUN_000b05d0": 6666,
+      "FUN_000b8ee4": 6480,
+      "FUN_000bba48": 7110
+    },
+    "h_metrics": {
+      "body_size": 1236,
+      "direct_call_count": 208,
+      "if_count": 64,
+      "loop_count": 0,
+      "switch_count": 0,
+      "unique_direct_call_count": 151
+    },
+    "sienna_entry": "0x000BEC4C",
+    "sienna_guard_count": 74,
+    "sienna_has_0x520_guard": true,
+    "sienna_metrics": {
+      "body_size": 1330,
+      "direct_call_count": 215,
+      "if_count": 74,
+      "loop_count": 0,
+      "switch_count": 0,
+      "unique_direct_call_count": 159
+    },
+    "sienna_only_post_coordinator_calls": [
+      "FUN_000b64b8",
+      "FUN_000b653e",
+      "FUN_000b7016",
+      "FUN_000b68dc",
+      "FUN_000b7016",
+      "FUN_000b743e",
+      "FUN_000b74b8",
+      "FUN_000b7234",
+      "FUN_000b727e",
+      "FUN_000b65ec",
+      "FUN_000b65ee",
+      "FUN_000b763c",
+      "FUN_000b74f2",
+      "FUN_000b763c",
+      "FUN_000b6740",
+      "FUN_000b6888"
+    ]
+  },
+  "reduced_per_tick_companion": {
+    "h_calls": [
+      "FUN_000b8ee4",
+      "FUN_000b05d0",
+      "FUN_000bba48"
+    ],
+    "h_entry": "0x000BDE28",
+    "h_metrics": {
+      "body_size": 460,
+      "direct_call_count": 76,
+      "if_count": 22,
+      "loop_count": 0,
+      "switch_count": 0,
+      "unique_direct_call_count": 76
+    },
+    "sienna_entry": "0x000BF17E",
+    "sienna_metrics": {
+      "body_size": 504,
+      "direct_call_count": 80,
+      "if_count": 27,
+      "loop_count": 0,
+      "switch_count": 0,
+      "unique_direct_call_count": 80
+    }
+  },
+  "regenerated_com_rte_surface": {
+    "boundary": "H split/restructured these generated copy/dispatch surfaces; do not infer canonical one-to-one function identity from the representative fragments",
+    "consumer_fragment_callers_within_evidence": [
+      "0x0005389C",
+      "0x00058450",
+      "0x0005886A",
+      "0x000589A8",
+      "0x00058B3C"
+    ],
+    "ram_default_init": {
+      "caller": "0x00052CFA",
+      "target": "0x0005316C"
+    },
+    "rte_copy_banks": [
+      {
+        "target": "0x00056970",
+        "wrapper": "0x00052E4C"
+      },
+      {
+        "target": "0x0005701E",
+        "wrapper": "0x00052EEE"
+      },
+      {
+        "target": "0x0005722E",
+        "wrapper": "0x00052FEC"
+      }
+    ],
+    "shared_h_rx_consumer_fragment": "0x000524B8",
+    "task_wrapper": {
+      "caller": "0x00052CE6",
+      "target": "0x0005389C"
+    }
+  },
+  "scheduler_system_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000001F2",
+      "reference_name": "boot_reset_startup",
+      "role": "target-native non-contiguous reset decision",
+      "target_entry": "0x000001F2",
+      "target_evidence": {
+        "decompiled_c_sha256": "77028e6d0f8574e50a1db2b5193beaed92ce16aea2dbaedd26244d8994152629",
+        "non_contiguous": true,
+        "raw_windows": [
+          {
+            "role": "reset prologue/system synchronization",
+            "sha256": "383aac199b95ef333d63b7ef65193a897b961adea49774e30ab2fa22f28be99b",
+            "size": 96,
+            "start": "0x000001F2"
+          },
+          {
+            "role": "flash-controller status/consistency decision",
+            "sha256": "4d2827b1616f9058e4e5a2a1d504b76081b5022588c4819b99005701a4c0bb09",
+            "size": 192,
+            "start": "0x00000320"
+          },
+          {
+            "role": "FCU command/key sequence",
+            "sha256": "644e480407b86c89de6f8e2cde33bd461f52b4f0f1f1c90c2d5a93820e84aa4d",
+            "size": 112,
+            "start": "0x000003D8"
+          },
+          {
+            "role": "reset-marker validation and terminal decision",
+            "sha256": "c87a841eb721c7498148cc1e6c0bd268ca92566be828ddcee7b3fc079daf09dc",
+            "size": 152,
+            "start": "0x00000694"
+          }
+        ],
+        "static_markers": {
+          "fcu_command_constants": true,
+          "fcu_key_literal": true,
+          "ffc0a_marker_constants": true,
+          "terminal_infinite_loop": true
+        }
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00058404",
+      "reference_metrics": {
+        "body_size": 12894,
+        "direct_call_count": 352,
+        "if_count": 0,
+        "loop_count": 278,
+        "switch_count": 0,
+        "unique_direct_call_count": 352
+      },
+      "reference_name": "autosar_os_task_signal_dispatch",
+      "role": "regenerated periodic signal-processing task",
+      "target_entry": "0x0005389C",
+      "target_metrics": {
+        "body_size": 12278,
+        "direct_call_count": 333,
+        "if_count": 0,
+        "loop_count": 236,
+        "switch_count": 0,
+        "unique_direct_call_count": 333
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00062758",
+      "reference_metrics": {
+        "body_size": 110,
+        "direct_call_count": 25,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 25
+      },
+      "reference_name": "application_startup_coordinator",
+      "role": "startup coordinator ending in IRQ enable + foreground loop",
+      "target_entry": "0x0005CAAC",
+      "target_metrics": {
+        "body_size": 98,
+        "direct_call_count": 22,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 22
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000B0518",
+      "reference_metrics": {
+        "body_size": 1014,
+        "direct_call_count": 100,
+        "if_count": 47,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 21
+      },
+      "reference_name": "system_mode_coordinator",
+      "role": "event-driven mode coordinator",
+      "target_entry": "0x000B05D0",
+      "target_metrics": {
+        "body_size": 1016,
+        "direct_call_count": 100,
+        "if_count": 47,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 21
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000B28AC",
+      "reference_metrics": {
+        "body_size": 26,
+        "direct_call_count": 1,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 1
+      },
+      "reference_name": "application_system_transition_phase_init",
+      "role": "generated four-argument transition-state initializer",
+      "target_entry": "0x000B2692",
+      "target_metrics": {
+        "body_size": 26,
+        "direct_call_count": 1,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 1
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000BA43A",
+      "reference_metrics": {
+        "body_size": 2732,
+        "direct_call_count": 14,
+        "if_count": 13,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 6
+      },
+      "reference_name": "system_mode_telemetry_snapshot",
+      "role": "regenerated telemetry/state snapshot",
+      "target_entry": "0x000B8EE4",
+      "target_metrics": {
+        "body_size": 2654,
+        "direct_call_count": 14,
+        "if_count": 13,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 6
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000BD10E",
+      "reference_metrics": {
+        "body_size": 5404,
+        "direct_call_count": 103,
+        "if_count": 0,
+        "loop_count": 44,
+        "switch_count": 0,
+        "unique_direct_call_count": 103
+      },
+      "reference_name": "eps_subsystem_init_orchestrator",
+      "role": "one-shot EPS subsystem initialization orchestrator",
+      "target_entry": "0x000BBFE6",
+      "target_metrics": {
+        "body_size": 5036,
+        "direct_call_count": 94,
+        "if_count": 0,
+        "loop_count": 44,
+        "switch_count": 0,
+        "unique_direct_call_count": 94
+      }
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000BEC4C",
+      "reference_metrics": {
+        "body_size": 1330,
+        "direct_call_count": 215,
+        "if_count": 74,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 159
+      },
+      "reference_name": "system_mode_per_tick_dispatcher",
+      "role": "full old/new-mode per-tick dispatcher",
+      "target_entry": "0x000BD954",
+      "target_metrics": {
+        "body_size": 1236,
+        "direct_call_count": 208,
+        "if_count": 64,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 151
+      }
+    }
+  ],
+  "scheduler_system_closure_count": 8,
+  "schema": "corolla-h-system-orchestration-v1",
+  "software_id": "8965H1202000",
+  "startup_and_wrappers": {
+    "per_tick_wrapper": {
+      "target": "0x000BD954",
+      "wrapper": "0x000FDD40",
+      "wrapper_code": "\nvoid FUN_000fdd40(undefined1 param_1,undefined2 param_2,undefined2 param_3)\n\n{\n  FUN_000bd954(param_1,param_2,param_3);\n  return;\n}\n\n"
+    },
+    "startup": {
+      "enables_irq": true,
+      "h_entry": "0x0005CAAC",
+      "last_explicit_fun_call": "FUN_0005f30c",
+      "metrics": {
+        "body_size": 98,
+        "direct_call_count": 22,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 22
+      }
+    },
+    "subsystem_init_wrapper": {
+      "target": "0x000BBFE6",
+      "wrapper": "0x000FDC14",
+      "wrapper_code": "\nvoid FUN_000fdc14(void)\n\n{\n  FUN_000bbfe6();\n  return;\n}\n\n"
+    },
+    "transition_phase_init": {
+      "body_size": 26,
+      "code": "\nvoid FUN_000b2692(void)\n\n{\n  FUN_000d04a4(0,0xfebeb162,0xfebeb160,0xfebeb161);\n  return;\n}\n\n",
+      "h_entry": "0x000B2692"
+    }
+  },
+  "static_conclusion": {
+    "com_rte_surface_regenerated": true,
+    "mode_policy_preserved": true,
+    "per_tick_wiring_regenerated": true,
+    "remaining_boundary": "lower helper semantics inside changed wiring remain independently auditable; this report closes the named high-level scheduler/system roles, not every generated COM helper",
+    "scheduler_system_residue_closed": true
+  },
+  "supporting_analogues": [
+    {
+      "boundary": "target-native supporting analogue",
+      "reference_entry": "0x000BF17E",
+      "reference_metrics": {
+        "body_size": 504,
+        "direct_call_count": 80,
+        "if_count": 27,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 80
+      },
+      "reference_name": "FUN_000bf17e",
+      "role": "reduced/current-mode per-tick companion",
+      "target_entry": "0x000BDE28",
+      "target_metrics": {
+        "body_size": 460,
+        "direct_call_count": 76,
+        "if_count": 22,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 76
+      }
+    },
+    {
+      "boundary": "target-native supporting analogue",
+      "reference_entry": "0x00057BFE",
+      "reference_metrics": {
+        "body_size": 2054,
+        "direct_call_count": 0,
+        "if_count": 0,
+        "loop_count": 28,
+        "switch_count": 0,
+        "unique_direct_call_count": 0
+      },
+      "reference_name": "application_ram_default_init",
+      "role": "application RAM default initializer",
+      "target_entry": "0x0005316C",
+      "target_metrics": {
+        "body_size": 1840,
+        "direct_call_count": 0,
+        "if_count": 0,
+        "loop_count": 28,
+        "switch_count": 0,
+        "unique_direct_call_count": 0
+      }
+    },
+    {
+      "boundary": "supporting role analogue; not promoted to an exact one-to-one semantic transfer",
+      "reference_entry": "0x00056FC2",
+      "reference_metrics": {
+        "body_size": 1956,
+        "direct_call_count": 0,
+        "if_count": 0,
+        "loop_count": 9,
+        "switch_count": 0,
+        "unique_direct_call_count": 0
+      },
+      "reference_name": "application_rx_signal_consumer_56fc2",
+      "role": "canonical monolithic Rx-signal consumer; H role is fragmented",
+      "target_entry": "0x000524B8",
+      "target_metrics": {
+        "body_size": 206,
+        "direct_call_count": 0,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 0
+      }
+    },
+    {
+      "boundary": "supporting role analogue; not promoted to an exact one-to-one semantic transfer",
+      "reference_entry": "0x0005B9C4",
+      "reference_metrics": {
+        "body_size": 1250,
+        "direct_call_count": 0,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 0
+      },
+      "reference_name": "rte_input_staging_copy_c",
+      "role": "RTE staging bank C family",
+      "target_entry": "0x00056970",
+      "target_metrics": {
+        "body_size": 572,
+        "direct_call_count": 0,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 0
+      }
+    },
+    {
+      "boundary": "supporting role analogue; not promoted to an exact one-to-one semantic transfer",
+      "reference_entry": "0x0005C0B6",
+      "reference_metrics": {
+        "body_size": 1204,
+        "direct_call_count": 0,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 0
+      },
+      "reference_name": "rte_input_staging_copy_b",
+      "role": "RTE staging bank B family",
+      "target_entry": "0x0005701E",
+      "target_metrics": {
+        "body_size": 528,
+        "direct_call_count": 0,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 0
+      }
+    },
+    {
+      "boundary": "supporting role analogue; not promoted to an exact one-to-one semantic transfer",
+      "reference_entry": "0x0005C666",
+      "reference_metrics": {
+        "body_size": 1442,
+        "direct_call_count": 0,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 0
+      },
+      "reference_name": "rte_input_staging_copy_a",
+      "role": "RTE staging bank A family",
+      "target_entry": "0x0005722E",
+      "target_metrics": {
+        "body_size": 1124,
+        "direct_call_count": 0,
+        "if_count": 0,
+        "loop_count": 0,
+        "switch_count": 0,
+        "unique_direct_call_count": 0
+      }
+    }
+  ]
+}

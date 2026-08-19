@@ -1471,14 +1471,18 @@ promotion:
 named canonical functions                 1113
 verified exact-body transfers              288
 target-native inspected unique-shape       23
+target-native role-recovered                  8
 complete target-surface recensuses          227
 structural candidates only                  113
-genuinely unresolved                        462
+genuinely unresolved                        454
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
 H candidate is also present in one of the committed compact H-native decompiler
-evidence sets. `target-surface recensused` is different: the old S function may
+evidence sets. `target-native role-recovered` is separate: the H role was
+independently reconstructed and raw/evidence pinned even though regenerated
+function boundaries prevent exact/unique-shape transfer. `target-surface recensused`
+is different: the old S function may
 not have a one-to-one H homolog, but the entire foreign generated surface has
 been independently enumerated—for example all H RDBI producers, all 19
 RoutineControl callback rows, or every direct stage in the 94→123 steering
@@ -1491,7 +1495,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(320 currently have
+(337 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -1500,6 +1504,68 @@ The machine-readable owner is
 raw transfer ledger, the unique structural map, compact H-native evidence sets,
 and the explicitly complete RDBI/RoutineControl/supervisor censuses.
 `tests/verify_corolla_8965H1202000_static_coverage.py` pins the promotion rules.
+
+### 7.16 System / scheduler orchestration
+
+The largest high-level `scheduler_system` residue is now target-native rather than
+address-transferred. All eight formerly genuinely-unresolved canonical roles have
+concrete H implementations:
+
+```text
+Sienna 0x001F2 reset decision             -> H 0x001F2 (non-contiguous Ghidra body)
+Sienna 0x58404 periodic signal task       -> H 0x5389C
+Sienna 0x62758 startup coordinator        -> H 0x5CAAC
+Sienna 0xB0518 mode coordinator           -> H 0xB05D0
+Sienna 0xB28AC transition-phase init      -> H 0xB2692
+Sienna 0xBA43A telemetry snapshot         -> H 0xB8EE4
+Sienna 0xBD10E subsystem init             -> H 0xBBFE6
+Sienna 0xBEC4C full per-tick dispatcher   -> H 0xBD954
+```
+
+The mode coordinator is stronger than a size/call-count analogy. Sienna and H
+execute the exact same **38-event query sequence** and **24-event clear sequence**
+through their relocated generated helpers, with the same `0x100..0x700` mode-band
+comparisons. The high-level event-driven mode policy therefore survives the
+generation change even though its state addresses and helper addresses moved.
+
+The full per-tick dispatcher is where target-specific wiring differs. Sienna has
+74 ordered guard tests and H has 64. Sequence alignment produces exactly one
+contiguous deletion of ten Sienna guards after the mode-coordinator call. That
+removed block contains both Sienna `param == 0x520` entry/steady-state pairs plus
+additional `0x103` and `0x200..0x522` guarded work; H has **no `0x520` guard** in
+this dispatcher. The deleted call region includes canonical `B763C`, already
+proved on Sienna as part of the WDBI-`2013` numeric-control cone. This is consistent
+with the H diagnostic-generation changes (`2013/2014` stale producers and
+`110A/110C/110D` no-op control callbacks), but the other deleted helpers are not
+assigned OEM semantics merely from adjacency. H still preserves the late major
+order `B8EE4 telemetry snapshot -> B05D0 mode coordinator -> BBA48 input snapshot`;
+the reduced/current-mode companion likewise maps `S BF17E -> H BDE28` and keeps
+the same trio.
+
+Startup and one-shot orchestration also transfer by role: H `5CAAC` is a flat
+startup sequence that enables EI interrupts and tails into the foreground cyclic
+loop; `FDC14 -> BBFE6` is the subsystem-init veneer and `FDD40 -> BD954` forwards
+the three per-tick arguments. H `B2692` retains the 26-byte generated
+four-argument transition-state initializer shape. The reset-decision continuation
+at `0x1F2` is explicitly treated as a non-contiguous Ghidra body: fixed raw windows
+pin the same FCU status/key-command logic, `FFC0A000/004/008/00C` marker constants,
+and terminal reset loop without pretending its reported body size is contiguous.
+
+The lower generated COM/RTE surface is intentionally not forced into a false
+one-to-one transfer. H splits the old large Rx consumer across a shared fragment
+`524B8` called by five generated paths (`5389C/58450/5886A/589A8/58B3C`), and its
+RTE copy banks are separately wrapped around `56970/5701E/5722E`. This closes the
+high-level scheduler/system roles while leaving individual changed COM helpers
+available for later, hypothesis-driven audit. In the named-function matrix the
+`scheduler_system` tag now has **zero genuinely-unresolved functions**, and the
+global unresolved denominator falls from 462 to **454**.
+
+Machine-readable ownership is
+`data/generated/corolla_8965H1202000_system_orchestration.json` plus the compact
+image-bound decompiler evidence file;
+`tests/verify_corolla_8965H1202000_system_orchestration.py` pins the eight role
+mappings, event schedules, guard delta, reset windows, wrapper chains, and
+regenerated COM/RTE boundary.
 
 ## 8. Remaining evidence boundary
 

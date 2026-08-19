@@ -1439,6 +1439,26 @@ paths = [
 oracle = "raw_bytes"
 
 
+[suite.corolla_8965h_system_orchestration]
+tests = ["tests/verify_corolla_8965H1202000_system_orchestration.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_system_orchestration.py",
+  "tools/extract_corolla_h_system_orchestration_evidence.py",
+  "tools/build_corolla_h_system_orchestration.py",
+  "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_system_orchestration.json",
+  "data/generated/decompilations.jsonl",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
+
 [suite.corolla_8965h_static_coverage]
 tests = ["tests/verify_corolla_8965H1202000_static_coverage.py"]
 paths = [
@@ -1453,6 +1473,8 @@ paths = [
   "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_system_orchestration.json",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/reference/generated-artifacts.md",
