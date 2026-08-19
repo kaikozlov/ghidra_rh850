@@ -466,7 +466,12 @@ rewrites the target to slot 4. No edge from this command-8 path to object-15 NvM
 persistence has been recovered.
 
 The generic NvM restore/persistence path remains separately relevant because
-object 15 is key-bearing on field-verified related variants:
+object 15 is key-bearing on field-verified related variants. The H-variant pass
+now independently confirms that `8965H1202000` retains the same 16-object restore
+namespace and exact `FF206C00..FF206EFF` protected geometry, but the supplied H
+DataFlash has **zero valid object-15 copies**. That strengthens the separation
+between generic persistence and the live ICU-S slot-4 verifier on this unit without
+proving that other H units cannot carry a valid object 15.
 
 Consequently:
 

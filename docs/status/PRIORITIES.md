@@ -236,8 +236,11 @@ coverage denominator. The first large residue is now closed: all eight changed
 unresolved denominator from 462 to 454. The nine changed CAN/COM transport roles
 are now also target-native closed, reducing the residue again to **445** and
 leaving zero genuinely-unresolved functions under both `scheduler_system` and
-`can_com`. Continue from that explicit residue, prioritizing storage/security and
-other externally reachable semantics rather than repeating those closed passes;
+`can_com`. The three changed storage/NvM roles are now also closed, including the
+object-15 protected geometry and invalid supplied object-15 snapshot, reducing the
+global residue again to **442** and `storage_nvm` unresolved to zero. Continue from
+that explicit residue, prioritizing remaining SecOC/XCP/steering and externally
+reachable semantics rather than repeating those closed passes;
 generic XCP DAQ callbacks remain optional unless a concrete exploit question
 needs them.
 

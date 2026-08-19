@@ -1,0 +1,41 @@
+{
+  "function_count": 3,
+  "functions": [
+    {
+      "body_sha256": "07a57670a75f4531ecd21fb1b503d9180ffd6747872a1526b007111fe531d80c",
+      "body_size": 68,
+      "decompiled_c": "\nundefined4 FUN_0004a534(uint param_1,int param_2)\n\n{\n  undefined4 uVar1;\n  uint uVar2;\n  \n  uVar1 = 0x5a;\n  if ((0xff1fffff < param_1) && (param_1 <= -param_2 - 0xdf8000U)) {\n    uVar2 = 0;\n    do {\n      if ((param_1 <= *(uint *)(uVar2 * 8 + 0x28f00)) &&\n         ((*(int *)(uVar2 * 8 + 0x28efc) - param_2) + 1U <= param_1)) {\n        uVar1 = 0;\n      }\n      uVar2 = uVar2 + 1;\n    } while (uVar2 < 2);\n    return uVar1;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "25f7b4b4340c977dffc0d81eb41554a8f84d46f7489050b5a3c1284150b450b3",
+      "entry": "0x0004A534",
+      "name": "FUN_0004a534"
+    },
+    {
+      "body_sha256": "435415a1bfcfd8e673398d6f08adc9696debe21f8eadd5ed3622319ccf9773c5",
+      "body_size": 84,
+      "decompiled_c": "\nundefined4 FUN_0005ffbc(uint param_1)\n\n{\n  int iVar1;\n  undefined4 uVar2;\n  uint uVar3;\n  \n  uVar2 = 0;\n  uVar3 = param_1 & 0xff00;\n  param_1 = param_1 & 0xff;\n  iVar1 = FUN_0005fec6(0xfebf0535,0xfebf0f6d,0xfebf0f91,0);\n  if (iVar1 != 0x5a) {\n    if (uVar3 == 0) {\n      uVar2 = func_0x0006095c(param_1);\n    }\n    else if (uVar3 == 0x100) {\n      uVar2 = FUN_000610ea(param_1);\n    }\n    else if (uVar3 == 0x200) {\n      uVar2 = FUN_000603ce(param_1);\n    }\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "81dac35945b217b10e2b35779bf5e9305df72e68a7c767553d3866f3a6d1d8a2",
+      "entry": "0x0005FFBC",
+      "name": "FUN_0005ffbc"
+    },
+    {
+      "body_sha256": "1062bfeaee0b837581b686b842d269d55859e3a1865fe1ea18f921670602384b",
+      "body_size": 150,
+      "decompiled_c": "\nundefined4 FUN_000610ea(ushort param_1)\n\n{\n  int iVar1;\n  int iVar2;\n  undefined4 uVar3;\n  uint uVar4;\n  uint uVar5;\n  byte bStack_e;\n  undefined1 auStack_d [5];\n  \n  iVar1 = -0x1414800;\n  uVar5 = (uint)param_1;\n  FUN_00060cfa(&bStack_e,auStack_d);\n  uVar4 = (uint)bStack_e;\n  iVar2 = FUN_000610ba(uVar4,auStack_d[0]);\n  if ((iVar2 == 1) || (DAT_0002a972 <= uVar5)) {\n    uVar3 = 0;\n  }\n  else {\n    iVar2 = FUN_000610d4(uVar4);\n    if ((*(ushort *)(&DAT_00004c54 + iVar2 * 4 + iVar1 + 2) != uVar5) ||\n       ((&DAT_00004c54)[iVar2 * 4 + iVar1] != '\\x11')) {\n      iVar2 = uVar4 * 4 + iVar1;\n      (&DAT_00004c54)[iVar2] = 0x11;\n      *(ushort *)(&DAT_00004c56 + iVar2) = param_1;\n      bStack_e = FUN_00060d6c(uVar4);\n      FUN_00069d1a(0x20,iVar1 + 0x49f0 + uVar5,iVar1 + 0x574c + uVar5,iVar1 + 0x5770 + uVar5);\n    }\n    uVar3 = 1;\n  }\n  (&DAT_00004d4a)[iVar1] = bStack_e;\n  return uVar3;\n}\n\n",
+      "decompiled_c_sha256": "5f88abb81ee960b4435f7a10b97d0bd05fb3ab0365af35514e1f6f82dbceb168",
+      "entry": "0x000610EA",
+      "name": "FUN_000610ea"
+    }
+  ],
+  "image": {
+    "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "codeflash_size": 1048576,
+    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+  },
+  "schema": "corolla-h-storage-nvm-decompiler-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "boundary": "disposable H corpus with only the three missing storage/NvM entry points forced",
+    "path": "build/h_8965H1202000_storage_nvm_decompilations.jsonl",
+    "sha256": "8d500f77c56a449d1b836f9a5773c58414f62a636ecf5b71e9f4ded1a48cb8c1"
+  }
+}

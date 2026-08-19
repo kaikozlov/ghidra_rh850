@@ -1471,10 +1471,10 @@ promotion:
 named canonical functions                 1113
 verified exact-body transfers              288
 target-native inspected unique-shape       25
-target-native role-recovered                 17
+target-native role-recovered                 20
 complete target-surface recensuses          227
 structural candidates only                  111
-genuinely unresolved                        445
+genuinely unresolved                        442
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1495,7 +1495,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(350 currently have
+(353 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -1614,9 +1614,59 @@ role mappings, both receive-group guard schedules, the duplicate deadline-body
 boundary, raw configuration-pointer joins, COM Rx behavior, and the normal
 Rx/PduR/CanIf confirmation chains. The `can_com` tag now has **zero genuinely
 unresolved functions**. Incorporating this evidence also promotes two structural
-candidates to inspected unique-shape status, giving a global denominator of
-**445 genuinely unresolved**, 25 inspected unique-shape, 17 role-recovered, and
-111 structural-only canonical functions.
+candidates to inspected unique-shape status.
+
+### 7.18 Storage / NvM restore and DataFlash exclusion
+
+The three genuinely-unresolved `storage_nvm` roles are now target-native mapped:
+
+```text
+S 4EAD8 application_dataflash_range_allowed -> H 4A534
+S 65C84 secoc_nvm_restore_request            -> H 5FFBC
+S 66DB2 secoc_nvm_queue_restore              -> H 610EA
+```
+
+All three H bodies retain the exact canonical sizes (68/84/150 bytes). More
+important, their data/config semantics transfer directly. H `4A534` uses the
+exact same two-entry protected-range table as Sienna, relocated from `293E4` to
+`28EFC`:
+
+```text
+FF207800..FF207FFF
+FF206C00..FF206EFF
+```
+
+The second interval contains the known related-variant object-15 key-field
+geometry: raw `FF206E14`, XOR55 `FF206D14`, and XORAA `FF206C14`. Thus H preserves
+the same DataFlash exclusion geometry around the entire triplicate object-15
+region. This proves the range filter's protected geometry; it does not by itself
+prove every caller/API path through that helper.
+
+H `5FFBC` retains the same request namespaces: `0x000`, `0x100`, and `0x200`.
+Namespace **`0x100` calls `610EA`**, which is the generic triplicate NvM restore
+queue—not an ICU key-set command. H and Sienna both configure **16 restore
+objects**, so object 15 remains addressable by the generic persistence machinery.
+`610EA` retains queue state `0x11` and invokes the three-copy worker `69D1A`; this
+is the same raw/XOR55/XORAA restore architecture already established on Sienna.
+
+The contributor H DataFlash snapshot closes the current-state boundary. Object 15
+exists at the expected roots `FF206E00/FF206D00/FF206C00`, but **all three copies
+are invalid** and there is no valid consensus. This agrees with the separate SecOC
+result: the mapped runtime verifier selects ICU-S slot 4 directly, while command 8
+is the authenticated provisioning interface. Generic NvM restore can process
+object 15, but this supplied H snapshot cannot supply a valid persisted object-15
+key to explain the live slot-4 state. Runtime equivalence of related-variant
+object-15 key fields and the H ICU-S slot remains explicitly unproven.
+
+`data/generated/corolla_8965H1202000_storage_nvm.json` and its compact decompiler
+evidence own this conclusion; `tests/verify_corolla_8965H1202000_storage_nvm.py`
+pins the three roles, protected ranges, 16-object namespace, queue state/worker,
+and object-15 validity. `storage_nvm` now has **zero genuinely-unresolved named
+functions**; because two of these functions are also tagged SecOC/NvM, the
+`secoc_icus` residue falls 44→42 and the global named residue falls **445→442**.
+The current denominator is therefore 288 exact, 25 inspected unique-shape, 20
+role-recovered, 227 surface-recensused, 111 structural-only, and 442 genuinely
+unresolved canonical functions.
 
 ## 8. Remaining evidence boundary
 

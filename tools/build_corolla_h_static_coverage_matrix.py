@@ -171,6 +171,28 @@ def main() -> None:
                 "role": item["reference_name"],
             }
 
+    storage_path = REPO / "data/generated/corolla_8965H1202000_storage_nvm.json"
+    if storage_path.is_file():
+        storage = load_json(storage_path)
+        storage_rel = str(storage_path.relative_to(REPO))
+        evidence_file_hashes[storage_rel] = sha256(storage_path.read_bytes())
+        storage_ev_path = REPO / storage["evidence"]["decompiler_evidence"]
+        storage_ev = load_json(storage_ev_path)
+        storage_targets = {int(r["entry"], 16) for r in storage_ev.get("functions", [])}
+        for item in storage.get("storage_nvm_role_closure", []):
+            ref = int(item["reference_entry"], 16)
+            target = int(item["target_entry"], 16)
+            if target not in storage_targets:
+                raise ValueError(f"storage/NvM role target lacks tracked target-native evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["target_entry"],
+                "report": storage_rel,
+                "evidence": storage["evidence"]["decompiler_evidence"],
+                "role": item["reference_name"],
+            }
+
     # Explicit generated-surface recensuses. These are not function homology:
     # they prove the foreign generated surface was exhaustively re-enumerated.
     recensus: dict[int, set[str]] = defaultdict(set)

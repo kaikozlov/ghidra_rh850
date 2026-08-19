@@ -9431,19 +9431,28 @@
     },
     {
       "body_size": 68,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_dataflash_range_allowed",
+        "report:data/generated/corolla_8965H1202000_storage_nvm.json",
+        "target-native:data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json"
       ],
       "reference_entry": "0x0004EAD8",
       "reference_name": "application_dataflash_range_allowed",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_storage_nvm.json",
+        "role": "application_dataflash_range_allowed",
+        "target_entry": "0x0004A534"
+      },
       "semantic_tags": [
         "storage_nvm"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0004A534",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -11401,20 +11410,29 @@
     },
     {
       "body_size": 84,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_nvm_restore_request",
+        "report:data/generated/corolla_8965H1202000_storage_nvm.json",
+        "target-native:data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json"
       ],
       "reference_entry": "0x00065C84",
       "reference_name": "secoc_nvm_restore_request",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_storage_nvm.json",
+        "role": "secoc_nvm_restore_request",
+        "target_entry": "0x0005FFBC"
+      },
       "semantic_tags": [
         "secoc_icus",
         "storage_nvm"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0005FFBC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -11537,20 +11555,29 @@
     },
     {
       "body_size": 150,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_nvm_queue_restore",
+        "report:data/generated/corolla_8965H1202000_storage_nvm.json",
+        "target-native:data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json"
       ],
       "reference_entry": "0x00066DB2",
       "reference_name": "secoc_nvm_queue_restore",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_storage_nvm.json",
+        "role": "secoc_nvm_queue_restore",
+        "target_entry": "0x000610EA"
+      },
       "semantic_tags": [
         "secoc_icus",
         "storage_nvm"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000610EA",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -21160,23 +21187,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 68,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EAD8",
-      "reference_name": "application_dataflash_range_allowed",
-      "role_recovery": null,
-      "semantic_tags": [
-        "storage_nvm"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 118,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -22124,24 +22134,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 84,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00065C84",
-      "reference_name": "secoc_nvm_restore_request",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus",
-        "storage_nvm"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 128,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -22151,24 +22143,6 @@
       "reference_name": "direct_call_target_00066624",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 150,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00066DB2",
-      "reference_name": "secoc_nvm_queue_restore",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus",
-        "storage_nvm"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -25657,6 +25631,8 @@
       "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json": "23276acc88a2fa363ae0d78bbc16cebc9459caac80634aae6bf3c3756a058ab3",
       "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json": "5233f222002644f854c8161e70306f3d89e6e0edfa0df5714154092cb180f851",
       "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json": "6a6a5240c110ad3167310677930544aeebf2a09b276fe03c9d497f93fc05091e",
+      "data/generated/corolla_8965H1202000_storage_nvm.json": "a7459c13d6bc02afdc1f1fbcc2dd572e90ac6e3f2848840e9ce7929c6150bb2b",
+      "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json": "df04f0bee2bd39cb4d338efe22cf7744f7da8be7b3144f4df487092c4b90af2b",
       "data/generated/corolla_8965H1202000_system_orchestration.json": "a00144920f5c18cf13398c4ac7b5606ba33107c37f3cdf6c9bb2f613ed58f395",
       "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json": "94b3c107f9fbfde21c25bd9a65a62e051e69236896612173eb24e749347275b0"
     }
@@ -27524,15 +27500,15 @@
   ],
   "summary": {
     "coverage_counts": {
-      "genuinely-unresolved": 445,
+      "genuinely-unresolved": 442,
       "structural-candidate-only": 111,
       "target-native-inspected-unique-shape": 25,
-      "target-native-role-recovered": 17,
+      "target-native-role-recovered": 20,
       "target-surface-recensused": 227,
       "verified-exact-body-transfer": 288
     },
-    "genuinely_unresolved_count": 445,
-    "h_native_evidence_functions_without_unique_sienna_pair": 350,
+    "genuinely_unresolved_count": 442,
+    "h_native_evidence_functions_without_unique_sienna_pair": 353,
     "named_function_count": 1113,
     "structural_candidate_only_count": 111,
     "surface_recensus_reference_function_count": 325,
@@ -27569,9 +27545,10 @@
         "verified-exact-body-transfer": 3
       },
       "secoc_icus": {
-        "genuinely-unresolved": 44,
+        "genuinely-unresolved": 42,
         "structural-candidate-only": 27,
         "target-native-inspected-unique-shape": 18,
+        "target-native-role-recovered": 2,
         "verified-exact-body-transfer": 11
       },
       "steering": {
@@ -27581,8 +27558,8 @@
         "target-surface-recensused": 3
       },
       "storage_nvm": {
-        "genuinely-unresolved": 3,
         "structural-candidate-only": 23,
+        "target-native-role-recovered": 3,
         "verified-exact-body-transfer": 5
       },
       "untagged": {
