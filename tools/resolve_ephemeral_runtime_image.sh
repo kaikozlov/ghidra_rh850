@@ -10,11 +10,11 @@ usage() {
   cat <<'EOF'
 Usage: tools/resolve_ephemeral_runtime_image.sh CODEFLASH.bin [manifest.json] [variant-id]
 
-Imports CODEFLASH.bin into a disposable Ghidra project, runs the existing
-calibration-independent Gate-2 resolver plus the callback-free runtime semantic
-resolver, scans the raw SecOC record table, joins image-bound RAM execution /
-retention geometry, and emits a target manifest. The input image is never
-modified.
+Imports CODEFLASH.bin into a disposable Ghidra project, recovers and applies the
+target's own boot/application GP+TP context, runs the existing calibration-
+independent Gate-2 resolver plus the callback-free runtime semantic resolver,
+scans the raw SecOC record table, joins image-bound RAM execution / retention
+geometry, and emits a target manifest. The input image is never modified.
 
 A semantic match without verified image-bound RAM geometry is emitted as
 "semantic-resolved-geometry-unresolved" and is NOT runtime-build-ready. A target
@@ -103,6 +103,7 @@ fi
   -- \
   -import "$IMPORT_IMAGE" \
   -processor v850e3:LE:32:default \
+  -postScript ApplyRecoveredGpTpContext.java \
   -postScript ResolveSecocAcceptanceGate.java "$GATE" \
   -postScript ResolveEphemeralRuntime.java "$GATE" "$SEMANTIC" \
   -commit "Disposable ephemeral runtime semantic analysis"

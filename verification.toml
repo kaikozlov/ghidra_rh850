@@ -603,6 +603,7 @@ oracle = "raw_bytes"
 paths = [
   "tests/verify_ephemeral_runtime_resolver.py",
   "ghidra/scripts/investigate/ResolveEphemeralRuntime.java",
+  "ghidra/scripts/import/ApplyRecoveredGpTpContext.java",
   "tools/build_ephemeral_runtime_manifest.py",
   "tools/resolve_ephemeral_runtime_image.sh",
   "data/generated/ephemeral_runtime_resolution_4512000_minimal.json",
@@ -1110,6 +1111,13 @@ paths = [
   "firmware/",
 ]
 
+[suite.variant_function_structure_matcher]
+tests = ["tests/verify_variant_function_structure_matcher.py"]
+paths = [
+  "tests/verify_variant_function_structure_matcher.py",
+  "tools/match_variant_function_structure.py",
+]
+
 [suite.exploit_surface]
 tests = ["tests/verify_exploit_surface.py"]
 oracle = "generated_self_check"
@@ -1299,6 +1307,20 @@ paths = [
   "data/generated/secoc_gate_resolution_8965H1202000_minimal.json",
   "data/generated/ephemeral_runtime_resolution_8965H1202000_minimal.json",
   "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json",
+  "data/generated/corolla_8965H1202000_function_body_transfer.json",
+  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
+  "data/generated/corolla_8965H1202000_named_function_transfer_ledger.json",
+  "data/generated/corolla_8965H1202000_application_rx_diff.json",
+  "tools/compare_variant_function_bodies.py",
+  "tools/build_variant_named_transfer_ledger.py",
+  "tools/compare_variant_application_rx.py",
+  "tools/analyze_rh850_codeflash_structure.py",
+  "ghidra/scripts/verify/ExportFunctionStructuralFingerprints.java",
+  "ghidra/scripts/import/ApplyRecoveredGpTpContext.java",
+  "ghidra/scripts/import/ApplyVariantGpTpContext.java",
+  "ghidra/scripts/investigate/FindGpTpWrites.java",
+  "ghidra/scripts/investigate/InspectAddressReferences.java",
+  "data/ghidra_project_inventory.baseline.jsonl",
   "data/variant_bootstrap_profiles.json",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/tooling/ephemeral-runtime-semantic-resolver.md",

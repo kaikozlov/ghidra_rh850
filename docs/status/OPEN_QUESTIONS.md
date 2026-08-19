@@ -284,11 +284,29 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   **epoch/key boundary** remains: no raw DataFlash window matches the local
   `0x00F` oracle, CAN capture and dumping are separate jobs, and the older
   public-route `0x116/0x24D` oracle is a different freshness epoch (`TRIP 0xCE9`
-  versus local `0xD0D`). If revisited, record direct F181 plus full-bus and Panda
-  health on both normal-CAN1 and OBD routes immediately around the programming
-  transition, then repeat the memory/capture epoch join. Route metadata remains
-  forced `TOYOTA_COROLLA_TSS2` with no `carFw`, so the route-to-image/model-year
-  join remains contributor attribution. See
+  versus local `0xD0D`). The major H-native static transfer questions exposed by
+  the first whole-image census are now substantially closed rather than left as
+  offset hypotheses. XCP target-native decomp proves the same unauthenticated
+  LocalRAM read / shadow-write / E4 CodeFlash-copy architecture with H-specific
+  exclusion ranges. SecOC target-native decomp proves the same verification
+  algorithm over a different `00F/D7/B6` profile set. Motor-control recovery
+  reaches the d/q-to-duty and TSG3 hardware path; the high-level steering pipeline
+  is anchored at H `0xCEDAE` and is larger than Sienna's. The corrected H GP/TP
+  context and generated COM tables now prove that classic `2E4/131` are absent
+  from normal Rx as well as SecOC, that the old `2E4` request staging cell is
+  periodically forced to zero, and that FD `0B6` is the new secured control/status
+  PDU feeding several stages in `0xCEDAE`; Tx likewise replaces `260/262` with FD
+  `030`. Remaining H-static work is narrower: assign field-level semantics and
+  provenance inside `0B6`/`030`, determine whether any H input carries an external
+  command magnitude analogous to Sienna `2E4` or whether the H pipeline is driven
+  through a different internal interface, classify every H-only/reordered
+  orchestration stage, finish non-steering generic DAQ/XCP callbacks only if an
+  exploit question requires them, and identify the storage/derivation provenance
+  of the three H SecOC runtime keys. If revisited dynamically, record
+  direct F181 plus full-bus and Panda health on both normal-CAN1 and OBD routes
+  immediately around the programming transition, then repeat the memory/capture
+  epoch join. Route metadata remains forced `TOYOTA_COROLLA_TSS2` with no `carFw`,
+  so the route-to-image/model-year join remains contributor attribution. See
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   and [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md).
 - **TSS 3.0 family breadth.** Which Sienna findings generalize across the

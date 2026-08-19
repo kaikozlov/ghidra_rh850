@@ -8,8 +8,10 @@ Sienna 8965B4512000 calibration:
 - self-describing boot-CRC descriptors and the boot-validity marker value;
 - RAM-exec gate / MEM-SAFE-001 structural immediates (download-window base,
   post-link package descriptor pair);
-- XCP 0x7F7/0x7F8 route constants, page-copy window/shadow constants, and
-  eight-byte command-map records (selector byte + little-endian callback);
+- XCP 0x7F7/0x7F8 route constants in both plain-u32 and the packed
+  standard-ID descriptor representation observed on the tracked Corolla H,
+  page-copy window/shadow constants, and eight-byte command-map records
+  (selector byte + little-endian callback);
 - a byte-level prefilter for the SecOC semantic gate resolver shape
   (32-bit-displacement byte loads feeding a cmov-family materialization).
 
@@ -103,6 +105,27 @@ def _find_u32(blob: bytes, value: int, max_vas: int) -> dict[str, Any]:
         "first_vas": [f"0x{off:X}" for off in offsets],
         "triage": TRIAGE_NOTE,
     }
+
+
+def _packed_standard_can_id_word(can_id: int) -> int:
+    """Encode the alternative standard-ID descriptor word seen on Corolla H.
+
+    The tracked H image stores its special 0x7F7/0x7F8 route as
+    ``0x80000000 | (id << 18) | 2`` rather than as a plain u32 CAN ID.  This
+    helper records that exact structural representation only; it does not claim
+    every matching word is a live CAN route without target-side table tracing.
+    """
+    if not 0 <= can_id <= 0x7FF:
+        raise ValueError(f"standard CAN ID out of range: {can_id:#x}")
+    return 0x80000000 | (can_id << 18) | 0x2
+
+
+def _find_packed_standard_can_id(blob: bytes, can_id: int, max_vas: int) -> dict[str, Any]:
+    packed = _packed_standard_can_id_word(can_id)
+    result = _find_u32(blob, packed, max_vas)
+    result["decoded_standard_can_id"] = f"0x{can_id:03X}"
+    result["encoding"] = "0x80000000 | (standard_can_id << 18) | 0x2"
+    return result
 
 
 def classify_geometry(size: int) -> dict[str, Any]:
@@ -225,13 +248,20 @@ def scan_xcp_surface(blob: bytes, max_vas: int) -> dict[str, Any]:
         "classification": "triage-candidate",
         "request_can_id_immediates": _find_u32(blob, XCP_REQUEST_CAN_ID, max_vas),
         "response_can_id_immediates": _find_u32(blob, XCP_RESPONSE_CAN_ID, max_vas),
+        "request_can_id_packed_standard_descriptors": _find_packed_standard_can_id(
+            blob, XCP_REQUEST_CAN_ID, max_vas
+        ),
+        "response_can_id_packed_standard_descriptors": _find_packed_standard_can_id(
+            blob, XCP_RESPONSE_CAN_ID, max_vas
+        ),
         "page_copy_window_end_immediates": _find_u32(blob, XCP_PAGE_COPY_WINDOW_END, max_vas),
         "page_copy_shadow_base_immediates": _find_u32(blob, XCP_PAGE_COPY_SHADOW_BASE, max_vas),
         "command_map_window_count": len(windows),
         "command_map_windows": windows,
         "interpretation": (
-            "paired CAN route constants, page-copy window/shadow constants, and "
-            "eight-byte selector/callback command-map records are the structural "
+            "paired CAN route constants (plain or packed standard-ID representation), "
+            "page-copy window/shadow constants, and eight-byte selector/callback "
+            "command-map records are the structural "
             "signature of the XCP-shaped calibration surface; candidate maps must be "
             "decompiled and validated against their own firmware before use — " + TRIAGE_NOTE
         ),

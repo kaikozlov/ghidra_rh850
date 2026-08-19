@@ -50,12 +50,22 @@ committed `project/` and never modifies the input image.
 
 The same fresh import runs, in order:
 
-1. `ResolveSecocAcceptanceGate.java` — existing calibration-independent Gate-2
+1. `ApplyRecoveredGpTpContext.java` — recover boot/application GP+TP directly
+   from the target's repeated startup `mov immediate,gp` / `mov immediate,tp`
+   pairs and apply that context to the disposable project;
+2. `ResolveSecocAcceptanceGate.java` — existing calibration-independent Gate-2
    resolver;
-2. `ResolveEphemeralRuntime.java` — callback-free startup/scheduler control
+3. `ResolveEphemeralRuntime.java` — callback-free startup/scheduler control
    resolver;
-3. `build_ephemeral_runtime_manifest.py` — raw-machine completion, SecOC record
+4. `build_ephemeral_runtime_manifest.py` — raw-machine completion, SecOC record
    scan, and RAM-geometry join.
+
+The context pre-pass is intentionally target-native. It does not copy the
+canonical Sienna GP/TP constants and it does not select the most common write to
+`tp`, because RH850 code also uses that register as ordinary scratch state. The
+raw completion layer below still recovers GP/TP independently and requires exact
+agreement with any Ghidra-resolved values, so the context pass adds analysis
+quality without weakening the existing fail-closed cross-check.
 
 For the analyzed Sienna, the fresh unannotated import intentionally reports
 `control-resolved`: bare Ghidra has no LocalRAM blocks and does not automatically
@@ -281,7 +291,7 @@ It also asserts that:
   exact three-record foreign queue;
 - missing `0x2E4/0x131` produces an unsupported-capability manifest rather than
   an exception or a Sienna fallback;
-- the disposable wrapper runs Gate-2 resolution before runtime resolution.
+- the disposable wrapper recovers/applies target GP/TP before Gate-2 and runtime resolution.
 
 The next strategically useful CodeFlash is not merely "another target"; it is a
 foreign EPS whose resolved queue actually contains classic `0x2E4/0x131`, so

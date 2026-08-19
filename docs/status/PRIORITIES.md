@@ -203,6 +203,25 @@ functions from resurfacing as unexplained hits. New static work should have a
 specific exploit hypothesis, externally reachable sink, or variant-transfer
 question.
 
+Tracked Corolla `8965H1202000` now has both a whole-image exact-body census and
+an address-independent structural transfer pass, so its remaining static work is
+**target-native**, not another Sienna-offset sweep. The first H-specific gaps are
+already closed: XCP read/write/E4 semantics were re-proved in H decompilation;
+the SecOC verify algorithm was recovered over H's different `00F/D7/B6`
+profile set; and the motor-control chain is anchored from H scheduler through
+d/q/phase processing to the TSG3 hardware boundary, with the larger steering
+pipeline at `0xCEDAE` calling the recovered clamp/rate stages. Target-native
+startup/COM recovery also closes the old classic-CAN assumption: app GP remains
+`FEBEB800` but TP is `23D6C`; normal Rx drops `2E4/131` and adds secured FD
+`0B6`; the old `2E4` request cell is periodically forced to zero; and Tx replaces
+`260/262` with a 32-byte FD `030`. Highest-value remaining H work is therefore
+narrower: assign field-level provenance/semantics inside `0B6` and `030`, identify
+whether any H input carries an external command magnitude analogous to Sienna
+`2E4`, classify the H-only/reordered orchestration stages, trace the
+storage/derivation provenance of the three H SecOC runtime keys, and finish a
+generic XCP DAQ callback only if a concrete exploit question needs it. Those are concrete variant-transfer gaps and are not
+covered by the generic-sweep prohibition below.
+
 The remaining explicitly open cohort rows without a recovered ingress root are
 not reason enough for another broad sweep by themselves.
 

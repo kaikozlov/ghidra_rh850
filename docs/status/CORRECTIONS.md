@@ -1713,3 +1713,57 @@ Checked by `tests/verify_toyota_b_programming_topology.py`,
 `tests/verify_toyota_eps_bus_probe.py`, and optional
 `tests/verify_external_corroboration.py`. Canonical report:
 [`../tooling/panda-toyota-routing.md`](../tooling/panda-toyota-routing.md).
+
+### CORR-073 — absence of plain `0x7F7/0x7F8` literals does not mean H lost the XCP-shaped CAN route
+
+- **Wrong first-pass inference:** `8965H1202000` contains no plain little-endian
+  `0x000007F7` / `0x000007F8` application literals, so the Sienna XCP-shaped
+  command family may have survived without its physical CAN ingress.
+- **Right:** H stores the same standard IDs in its target-specific packed
+  descriptor representation:
+  `0x9FDC0002 = 0x80000000 | (0x7F7 << 18) | 2` and
+  `0x9FE00002 = 0x80000000 | (0x7F8 << 18) | 2`. Descriptor references lead to
+  the H receive callback, and the generic opcode map, callback family, LocalRAM
+  envelope, 32-KiB shadow, and target-native read/write semantics independently
+  recover the same command architecture.
+- **Tooling fix:** `tools/analyze_rh850_codeflash_structure.py` now reports both
+  plain-u32 and packed-standard-ID representations. A synthetic packed fixture
+  prevents this encoding change from becoming another route false negative.
+- **Boundary:** descriptor encoding equivalence does not make the H LocalRAM
+  exclusion ranges identical; those were recovered separately and differ from
+  Sienna.
+
+Checked by `tests/verify_rh850_codeflash_structure_scanner.py` and
+`tests/verify_albinoelephant_corolla_codeflash.py`. Canonical report:
+[`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-public-route.md) §7.7.
+
+### CORR-074 — foreign Ghidra projects must recover target GP/TP; canonical Sienna context is not portable
+
+- **Unsafe workflow:** a disposable foreign import could inherit the canonical
+  device-profile GP/TP context. H happens to retain application GP
+  `0xFEBEB800`, which made many GP-relative results look credible, but its
+  application TP is `0x23D6C`, not Sienna `0x23EE4`; boot TP likewise moves
+  `0x869C -> 0x867C`. TP-relative generated-table references could therefore be
+  decoded against the wrong absolute address even when nearby pseudocode looked
+  plausible.
+- **Right:** recover the target context from the firmware's own repeated startup
+  idiom `mov immediate,gp` followed by `mov immediate,tp`, apply it before
+  foreign semantic analysis, and independently require the raw-machine resolver
+  to agree. H recovers boot `FEBF9800/867C` and application
+  `FEBEB800/23D6C`; Sienna independently recovers `FEBF9800/869C` and
+  `FEBEB800/23EE4`.
+- **Tooling fix:** `ApplyRecoveredGpTpContext.java` is now the first post-import
+  pass in `tools/resolve_ephemeral_runtime_image.sh`. It deliberately does not
+  select the most common write to `tp`, because RH850 also uses that register as
+  ordinary scratch state. `ApplyVariantGpTpContext.java` remains an explicit
+  exact-image override for review/debugging.
+- **Consequence:** corrected H TP resolves the generated COM layout exactly:
+  274 signals ending at the 45-entry PDU table, which in turn exposes the real
+  `2E4/131 -> 0B6` receive-generation change and `260/262 -> 030` transmit
+  consolidation. Existing H GP-relative steering/dataflow conclusions remain
+  valid because application GP did not change.
+
+The one-command H resolver reproduces the tracked semantic manifest after this
+fix (apart from the caller-selected output-path string). Canonical reports:
+[`../tooling/ephemeral-runtime-semantic-resolver.md`](../tooling/ephemeral-runtime-semantic-resolver.md)
+and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-public-route.md) §7.9.

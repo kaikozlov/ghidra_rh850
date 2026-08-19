@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import struct
 import subprocess
 import sys
 from pathlib import Path
@@ -68,6 +69,9 @@ check("RAM-exec download-window base immediates present", ram_exec["download_win
 check("post-link package descriptor pair appears exactly once", ram_exec["package_descriptor_pair_count"] == 1)
 check("paired XCP CAN route constants are present",
       xcp["request_can_id_immediates"]["count"] == 2 and xcp["response_can_id_immediates"]["count"] == 1)
+check("Sienna route uses plain-u32 rather than Corolla-H packed standard-ID form",
+      xcp["request_can_id_packed_standard_descriptors"]["count"] == 0
+      and xcp["response_can_id_packed_standard_descriptors"]["count"] == 0)
 check("page-copy window-end and shadow constants are present",
       xcp["page_copy_window_end_immediates"]["count"] == 6 and xcp["page_copy_shadow_base_immediates"]["count"] == 6)
 maps = {w["va"]: w for w in xcp["command_map_windows"]}
@@ -107,6 +111,17 @@ check("0x108000 dump classifies as DataFlash+CodeFlash concatenation",
       concat["image"]["geometry"]["classification"] == "dataflash-codeflash-concat")
 check("concat geometry note explains the 0x8000 VA shift", "0x8000" in concat["image"]["geometry"]["note"])
 check("concat report does not claim bare-CodeFlash geometry", concat["image"]["geometry"]["geometry_matches_bare_codeflash"] is False)
+
+packed_fixture = bytearray(1 << 20)
+struct.pack_into("<I", packed_fixture, 0x100, 0x80000000 | (0x7F7 << 18) | 0x2)
+struct.pack_into("<I", packed_fixture, 0x108, 0x80000000 | (0x7F8 << 18) | 0x2)
+packed_report = analyze(bytes(packed_fixture))
+check("packed standard-ID fixture recovers 0x7F7 request",
+      packed_report["xcp_command_surface"]["request_can_id_packed_standard_descriptors"]["count"] == 1
+      and packed_report["xcp_command_surface"]["request_can_id_packed_standard_descriptors"]["first_vas"] == ["0x100"])
+check("packed standard-ID fixture recovers 0x7F8 response",
+      packed_report["xcp_command_surface"]["response_can_id_packed_standard_descriptors"]["count"] == 1
+      and packed_report["xcp_command_surface"]["response_can_id_packed_standard_descriptors"]["first_vas"] == ["0x108"])
 
 zeros = analyze(b"\x00" * (1 << 20))
 check("content-free 1 MiB image has correct geometry but zero anchors",
