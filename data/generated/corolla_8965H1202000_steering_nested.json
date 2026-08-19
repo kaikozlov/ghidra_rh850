@@ -1,0 +1,183 @@
+{
+  "classic_command_mode_replacement": {
+    "classic_131_rx_present": false,
+    "classic_2e4_rx_present": false,
+    "h_decoder": "0x000CBE6E",
+    "h_decoder_inputs": [
+      "FEBEACBD",
+      "FEBEC26D",
+      "FEBEADB0"
+    ],
+    "h_decoder_outputs": [
+      "FEBEC272",
+      "FEBEC273",
+      "FEBEC26E",
+      "FEBEC26F",
+      "FEBEC270",
+      "FEBEC271"
+    ],
+    "h_decoder_wrapper": "0x000CB68A",
+    "interpretation": "H does not preserve separate authenticated-0x131 LTA and authenticated-0x2E4 torque arbitration/latch functions. The paired root-stage wrapper collapses to one H supervisory-mode decoder that derives six local mode flags from H-specific state. The three canonical roles are therefore closed by a complete replacement-surface recensus, not fake one-to-one homologs.",
+    "sienna_roles": [
+      "steering_request_source_arbitration",
+      "steering_lta_mode_latch",
+      "steering_lka_torque_mode_latch"
+    ]
+  },
+  "classic_command_surface_recensus": [
+    {
+      "classification": "target-surface-recensused",
+      "reference_entry": "0x000CA354",
+      "reference_name": "steering_request_source_arbitration",
+      "replacement_surface": "0x000CBE6E"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "reference_entry": "0x000CA3B8",
+      "reference_name": "steering_lta_mode_latch",
+      "replacement_surface": "0x000CBE6E"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "reference_entry": "0x000CA3F8",
+      "reference_name": "steering_lka_torque_mode_latch",
+      "replacement_surface": "0x000CBE6E"
+    }
+  ],
+  "classic_command_surface_recensus_count": 3,
+  "evidence": {
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "lta_rate_limit": {
+    "h": "0x000C9C16",
+    "h_is_fourth_wrapper_call": true,
+    "h_output_cells": [
+      "0xFEBEC1E0",
+      "0xFEBEC200",
+      "0xFEBEC20A"
+    ],
+    "h_wrapper_call_count": 4,
+    "interpretation": "same terminal limiter position in the paired four-call LTA-control wrapper; H regenerates internal state and expands the limiter body",
+    "sienna": "0x000C8D62",
+    "sienna_wrapper_call_count": 4,
+    "wrapper_h": "0x000C9CD2",
+    "wrapper_sienna": "0x000C8DC8"
+  },
+  "pipeline": {
+    "h": "0x000CEDAE",
+    "h_body_size": 533,
+    "h_wrapper_calls_pipeline": true,
+    "sienna": "0x000CB86E",
+    "sienna_body_size": 424,
+    "wrapper_h": "0x000CF028",
+    "wrapper_sienna": "0x000CBA72"
+  },
+  "primary_command_conditioning": {
+    "mode_select": {
+      "h": "0x000CB8BA",
+      "h_mode_state": "0xFEBEC2A6",
+      "h_selected_command": "0xFEBEC278",
+      "sienna": "0x000CA6B8"
+    },
+    "ordered_targets": [
+      "0x000CB6F6",
+      "0x000CB72A",
+      "0x000CB7D6",
+      "0x000CB8BA",
+      "0x000CB900",
+      "0x000CB9B6"
+    ],
+    "slew_gain_limit": {
+      "h": "0x000CB9B6",
+      "h_output": "0xFEBEC2A8",
+      "h_selected_command": "0xFEBEC278",
+      "sienna": "0x000CA75E"
+    },
+    "wrapper_call_count_h": 6,
+    "wrapper_call_count_sienna": 6,
+    "wrapper_h": "0x000CBA40",
+    "wrapper_sienna": "0x000CA7F0"
+  },
+  "schema": "corolla-h-steering-nested-v1",
+  "secondary_command_conditioning": {
+    "following_gain_clip_anchor": {
+      "h": "0x000CD440",
+      "h_body_size": 86,
+      "sienna": "0x000CAC6A"
+    },
+    "h_parent_chain": [
+      "0x000B8E84",
+      "0x000CEFF8",
+      "0x000CE974"
+    ],
+    "interpretation": "secondary select remains immediately upstream of the independently structural-matched gain/clip stage; H adds target-specific intermediate conditioning before the pair",
+    "select": {
+      "h": "0x000CD3CC",
+      "h_body_size": 116,
+      "h_output": "0xFEBEC3B8",
+      "sienna": "0x000CAC14",
+      "sienna_body_size": 86
+    },
+    "sienna_parent_chain": [
+      "0x000BA3DA",
+      "0x000CBA42",
+      "0x000CB49C"
+    ]
+  },
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "all_9_named_steering_residuals_closed": true,
+    "boundary": "high-level steering role/control topology is closed. H-specific supervisory mode meanings, calibration constants, and internal estimator state remain target-specific; absent classic 2E4/131 command ingress is not reintroduced.",
+    "one_to_one_roles_recovered": 6,
+    "removed_or_replaced_roles_recensused": 3
+  },
+  "steering_role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000C8D62",
+      "reference_name": "lta_internal_command_rate_limit",
+      "target_entry": "0x000C9C16",
+      "target_reported_body_size": 188
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000CA6B8",
+      "reference_name": "steering_command_mode_select_stage",
+      "target_entry": "0x000CB8BA",
+      "target_reported_body_size": 70
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000CA75E",
+      "reference_name": "steering_command_slew_gain_limit_stage",
+      "target_entry": "0x000CB9B6",
+      "target_reported_body_size": 138
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000CAC14",
+      "reference_name": "steering_command_secondary_select_stage",
+      "target_entry": "0x000CD3CC",
+      "target_reported_body_size": 116
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000CB86E",
+      "reference_name": "steering_control_cycle_pipeline",
+      "target_entry": "0x000CEDAE",
+      "target_reported_body_size": 533
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000CBA72",
+      "reference_name": "steering_control_cycle_wrapper",
+      "target_entry": "0x000CF028",
+      "target_reported_body_size": 12
+    }
+  ],
+  "steering_role_closure_count": 6
+}

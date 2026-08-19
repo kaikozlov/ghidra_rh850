@@ -18745,19 +18745,28 @@
     },
     {
       "body_size": 102,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: lta_internal_command_rate_limit",
+        "report:data/generated/corolla_8965H1202000_steering_nested.json",
+        "target-native:data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
       ],
       "reference_entry": "0x000C8D62",
       "reference_name": "lta_internal_command_rate_limit",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_steering_nested.json",
+        "role": "lta_internal_command_rate_limit",
+        "target_entry": "0x000C9C16"
+      },
       "semantic_tags": [
         "steering"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000C9C16",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -18781,9 +18790,9 @@
     },
     {
       "body_size": 100,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "steering-classic-command-mode-complete-replacement-recensus"
       ],
       "reference_entry": "0x000CA354",
       "reference_name": "steering_request_source_arbitration",
@@ -18791,16 +18800,18 @@
       "semantic_tags": [
         "steering"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "steering-classic-command-mode-complete-replacement-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 64,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "steering-classic-command-mode-complete-replacement-recensus"
       ],
       "reference_entry": "0x000CA3B8",
       "reference_name": "steering_lta_mode_latch",
@@ -18808,16 +18819,18 @@
       "semantic_tags": [
         "steering"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "steering-classic-command-mode-complete-replacement-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 40,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "steering-classic-command-mode-complete-replacement-recensus"
       ],
       "reference_entry": "0x000CA3F8",
       "reference_name": "steering_lka_torque_mode_latch",
@@ -18825,67 +18838,97 @@
       "semantic_tags": [
         "steering"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "steering-classic-command-mode-complete-replacement-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 72,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: steering_command_mode_select_stage",
+        "report:data/generated/corolla_8965H1202000_steering_nested.json",
+        "target-native:data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
       ],
       "reference_entry": "0x000CA6B8",
       "reference_name": "steering_command_mode_select_stage",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_steering_nested.json",
+        "role": "steering_command_mode_select_stage",
+        "target_entry": "0x000CB8BA"
+      },
       "semantic_tags": [
         "steering"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000CB8BA",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 146,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: steering_command_slew_gain_limit_stage",
+        "report:data/generated/corolla_8965H1202000_steering_nested.json",
+        "target-native:data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
       ],
       "reference_entry": "0x000CA75E",
       "reference_name": "steering_command_slew_gain_limit_stage",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_steering_nested.json",
+        "role": "steering_command_slew_gain_limit_stage",
+        "target_entry": "0x000CB9B6"
+      },
       "semantic_tags": [
         "steering"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000CB9B6",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 86,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: steering_command_secondary_select_stage",
+        "report:data/generated/corolla_8965H1202000_steering_nested.json",
+        "target-native:data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
       ],
       "reference_entry": "0x000CAC14",
       "reference_name": "steering_command_secondary_select_stage",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_steering_nested.json",
+        "role": "steering_command_secondary_select_stage",
+        "target_entry": "0x000CD3CC"
+      },
       "semantic_tags": [
         "steering"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000CD3CC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 86,
-      "coverage": "structural-candidate-only",
+      "coverage": "target-native-inspected-unique-shape",
       "coverage_basis": [
-        "unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"
+        "unique complete instruction-shape target",
+        "target-native:data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
       ],
       "reference_entry": "0x000CAC6A",
       "reference_name": "steering_command_secondary_gain_clip",
@@ -18895,7 +18938,9 @@
       ],
       "surface_recensus": [],
       "target_entry": "0x000cd440",
-      "target_native_evidence_files": [],
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
+      ],
       "transfer_status": "unique-instruction-shape-candidate"
     },
     {
@@ -18919,36 +18964,54 @@
     },
     {
       "body_size": 424,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: steering_control_cycle_pipeline",
+        "report:data/generated/corolla_8965H1202000_steering_nested.json",
+        "target-native:data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
       ],
       "reference_entry": "0x000CB86E",
       "reference_name": "steering_control_cycle_pipeline",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_steering_nested.json",
+        "role": "steering_control_cycle_pipeline",
+        "target_entry": "0x000CEDAE"
+      },
       "semantic_tags": [
         "steering"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000CEDAE",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 12,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: steering_control_cycle_wrapper",
+        "report:data/generated/corolla_8965H1202000_steering_nested.json",
+        "target-native:data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
       ],
       "reference_entry": "0x000CBA72",
       "reference_name": "steering_control_cycle_wrapper",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_steering_nested.json",
+        "role": "steering_control_cycle_wrapper",
+        "target_entry": "0x000CF028"
+      },
       "semantic_tags": [
         "steering"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000CF028",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -24697,159 +24760,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 102,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000C8D62",
-      "reference_name": "lta_internal_command_rate_limit",
-      "role_recovery": null,
-      "semantic_tags": [
-        "steering"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 100,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000CA354",
-      "reference_name": "steering_request_source_arbitration",
-      "role_recovery": null,
-      "semantic_tags": [
-        "steering"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 64,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000CA3B8",
-      "reference_name": "steering_lta_mode_latch",
-      "role_recovery": null,
-      "semantic_tags": [
-        "steering"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 40,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000CA3F8",
-      "reference_name": "steering_lka_torque_mode_latch",
-      "role_recovery": null,
-      "semantic_tags": [
-        "steering"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 72,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000CA6B8",
-      "reference_name": "steering_command_mode_select_stage",
-      "role_recovery": null,
-      "semantic_tags": [
-        "steering"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 146,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000CA75E",
-      "reference_name": "steering_command_slew_gain_limit_stage",
-      "role_recovery": null,
-      "semantic_tags": [
-        "steering"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 86,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000CAC14",
-      "reference_name": "steering_command_secondary_select_stage",
-      "role_recovery": null,
-      "semantic_tags": [
-        "steering"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 424,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000CB86E",
-      "reference_name": "steering_control_cycle_pipeline",
-      "role_recovery": null,
-      "semantic_tags": [
-        "steering"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 12,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000CBA72",
-      "reference_name": "steering_control_cycle_wrapper",
-      "role_recovery": null,
-      "semantic_tags": [
-        "steering"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 1182,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -25168,6 +25078,8 @@
       "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json": "5233f222002644f854c8161e70306f3d89e6e0edfa0df5714154092cb180f851",
       "data/generated/corolla_8965H1202000_secoc_surface.json": "012ab334b9446f41c9767de39834e1b37754254e7fb0cdf44c591219d778ccae",
       "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json": "daf40421514eff8565d93b90adbb3613d062a72f96d103f9d2a80bb58d327163",
+      "data/generated/corolla_8965H1202000_steering_nested.json": "216734cbd422f9c6a296834523964d871c3226a5754b66d44fb6909f90c36529",
+      "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json": "98290a57716323c1e8dbe490d3128508677c9681ffd2b93914be002482054c4d",
       "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json": "6a6a5240c110ad3167310677930544aeebf2a09b276fe03c9d497f93fc05091e",
       "data/generated/corolla_8965H1202000_storage_nvm.json": "a7459c13d6bc02afdc1f1fbcc2dd572e90ac6e3f2848840e9ce7929c6150bb2b",
       "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json": "df04f0bee2bd39cb4d338efe22cf7744f7da8be7b3144f4df487092c4b90af2b",
@@ -27002,39 +26914,22 @@
       "target_entry": "0x000bf1f0",
       "target_native_evidence_files": [],
       "transfer_status": "unique-instruction-shape-candidate"
-    },
-    {
-      "body_size": 86,
-      "coverage": "structural-candidate-only",
-      "coverage_basis": [
-        "unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"
-      ],
-      "reference_entry": "0x000CAC6A",
-      "reference_name": "steering_command_secondary_gain_clip",
-      "role_recovery": null,
-      "semantic_tags": [
-        "steering"
-      ],
-      "surface_recensus": [],
-      "target_entry": "0x000cd440",
-      "target_native_evidence_files": [],
-      "transfer_status": "unique-instruction-shape-candidate"
     }
   ],
   "summary": {
     "coverage_counts": {
-      "genuinely-unresolved": 384,
-      "structural-candidate-only": 110,
-      "target-native-inspected-unique-shape": 26,
-      "target-native-role-recovered": 78,
-      "target-surface-recensused": 227,
+      "genuinely-unresolved": 375,
+      "structural-candidate-only": 109,
+      "target-native-inspected-unique-shape": 27,
+      "target-native-role-recovered": 84,
+      "target-surface-recensused": 230,
       "verified-exact-body-transfer": 288
     },
-    "genuinely_unresolved_count": 384,
-    "h_native_evidence_functions_without_unique_sienna_pair": 374,
+    "genuinely_unresolved_count": 375,
+    "h_native_evidence_functions_without_unique_sienna_pair": 386,
     "named_function_count": 1113,
-    "structural_candidate_only_count": 110,
-    "surface_recensus_reference_function_count": 325,
+    "structural_candidate_only_count": 109,
+    "surface_recensus_reference_function_count": 328,
     "tag_coverage_counts": {
       "can_com": {
         "structural-candidate-only": 15,
@@ -27074,10 +26969,10 @@
         "verified-exact-body-transfer": 11
       },
       "steering": {
-        "genuinely-unresolved": 9,
-        "structural-candidate-only": 3,
-        "target-native-inspected-unique-shape": 2,
-        "target-surface-recensused": 3
+        "structural-candidate-only": 2,
+        "target-native-inspected-unique-shape": 3,
+        "target-native-role-recovered": 6,
+        "target-surface-recensused": 6
       },
       "storage_nvm": {
         "structural-candidate-only": 23,
@@ -27096,6 +26991,6 @@
         "verified-exact-body-transfer": 3
       }
     },
-    "target_native_inspected_reference_function_count": 45
+    "target_native_inspected_reference_function_count": 46
   }
 }

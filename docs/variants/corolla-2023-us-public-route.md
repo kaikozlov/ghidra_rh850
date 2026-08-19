@@ -1470,11 +1470,11 @@ promotion:
 ```text
 named canonical functions                 1113
 verified exact-body transfers              288
-target-native inspected unique-shape       26
-target-native role-recovered                 78
-complete target-surface recensuses          227
-structural candidates only                  110
-genuinely unresolved                        384
+target-native inspected unique-shape       27
+target-native role-recovered                 84
+complete target-surface recensuses          230
+structural candidates only                  109
+genuinely unresolved                        375
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1495,7 +1495,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(374 currently have
+(386 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -1897,8 +1897,62 @@ Machine-readable ownership is
 seven-function evidence file. `tests/verify_corolla_8965H1202000_crypto_residue.py`
 pins all mappings, the boot call-chain disambiguation, counter cohorts/lifecycle,
 and driver-record geometry. `crypto` now has **zero genuinely-unresolved named
-functions**, and the global denominator becomes **384 genuinely unresolved**, 26
-inspected unique-shape, 78 role-recovered, 227 surface-recensused, 110
+functions**. After the steering closure in §7.23, the global denominator is
+**375 genuinely unresolved**, 27 inspected unique-shape, 84 role-recovered, 230
+surface-recensused, 109 structural-only, and 288 exact-body transfers.
+
+### 7.23 Remaining steering roles: nested conditioning and classic-command replacement
+
+The final nine `steering`-tagged named residues are now closed without forcing
+one-to-one equivalence where H removed the classic command architecture. Six
+roles have direct target-native mappings:
+
+```text
+S C8D62 lta_internal_command_rate_limit          -> H C9C16
+S CA6B8 steering_command_mode_select_stage       -> H CB8BA
+S CA75E steering_command_slew_gain_limit_stage   -> H CB9B6
+S CAC14 steering_command_secondary_select_stage  -> H CD3CC
+S CB86E steering_control_cycle_pipeline          -> H CEDAE
+S CBA72 steering_control_cycle_wrapper           -> H CF028
+```
+
+The mappings are call-graph anchored. S `C8DC8` and H `C9CD2` are paired
+four-call LTA-control wrappers, with the mapped limiter occupying the terminal
+position. S `CA7F0` and H `CBA40` each contain six ordered conditioning stages;
+H `CB8BA` occupies the old mode-select position and `CB9B6` the terminal
+slew/gain/limit position. The H pair uses regenerated state (`FEBEC278`,
+`FEBEC2A6`, `FEBEC2A8`) rather than Sienna's `FEBEC144/16E/170`.
+
+The old source-arbitration/latch trio is different and is intentionally **not**
+assigned fake homologs:
+
+```text
+S CA354 steering_request_source_arbitration
+S CA3B8 steering_lta_mode_latch
+S CA3F8 steering_lka_torque_mode_latch
+```
+
+Those functions jointly selected authenticated `0x131` LTA versus authenticated
+`0x2E4` torque mode. H has neither classic Rx descriptor. The paired root-stage
+position collapses to wrapper `CB68A -> CBE6E`, where `CBE6E` decodes H-specific
+supervisory state (`FEBEACBD`, `FEBEC26D`, `FEBEADB0`) into six local mode flags
+`FEBEC26E..273`. These three canonical roles are therefore closed by a complete
+**replacement-surface recensus**, not role transfer.
+
+The separate secondary-command branch is also target-mapped. S
+`BA3DA -> CBA42 -> CB49C` corresponds to H `B8E84 -> CEFF8 -> CE974`. Inside
+that branch, `CAC14 -> CD3CC` remains immediately upstream of the independently
+matched gain/clip stage `CAC6A -> CD440`. H `CD3CC` publishes the analogous
+secondary conditioned state at `FEBEC3B8`, after additional H-specific
+conditioning.
+
+Machine-readable ownership is
+`data/generated/corolla_8965H1202000_steering_nested.json` plus compact H-native
+evidence. `tests/verify_corolla_8965H1202000_steering_nested.py` pins the six
+role mappings, three-function replacement recensus, wrapper order, H mode
+decoder, secondary chain, and raw/decompiler hashes. `steering` now has **zero
+genuinely-unresolved named functions**. The global denominator is **375
+unresolved**, 27 inspected unique-shape, 84 role-recovered, 230 recensused, 109
 structural-only, and 288 exact-body transfers.
 
 ## 8. Remaining evidence boundary

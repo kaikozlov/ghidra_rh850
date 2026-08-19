@@ -281,6 +281,29 @@ def main() -> None:
                 "role": item["reference_name"],
             }
 
+    steering_nested_path = REPO / "data/generated/corolla_8965H1202000_steering_nested.json"
+    steering_nested = None
+    if steering_nested_path.is_file():
+        steering_nested = load_json(steering_nested_path)
+        steering_nested_rel = str(steering_nested_path.relative_to(REPO))
+        evidence_file_hashes[steering_nested_rel] = sha256(steering_nested_path.read_bytes())
+        steering_ev_path = REPO / steering_nested["evidence"]["decompiler_evidence"]
+        steering_ev = load_json(steering_ev_path)
+        steering_targets = {int(r["entry"], 16) for r in steering_ev.get("functions", [])}
+        for item in steering_nested.get("steering_role_closure", []):
+            ref = int(item["reference_entry"], 16)
+            target = int(item["target_entry"], 16)
+            if target not in steering_targets:
+                raise ValueError(f"steering role target lacks tracked target-native evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["target_entry"],
+                "report": steering_nested_rel,
+                "evidence": steering_nested["evidence"]["decompiler_evidence"],
+                "role": item["reference_name"],
+            }
+
     # Explicit generated-surface recensuses. These are not function homology:
     # they prove the foreign generated surface was exhaustively re-enumerated.
     recensus: dict[int, set[str]] = defaultdict(set)
@@ -302,6 +325,11 @@ def main() -> None:
     # Every canonical direct steering-supervisor stage has an explicit row in the 94->123 ledger.
     for entry in canonical_supervisor_calls():
         recensus[entry].add("steering-supervisor-complete-direct-stage-ledger")
+
+    # The classic 0x131/0x2E4 arbitration+latch trio is removed/replaced as one H surface.
+    if steering_nested is not None:
+        for item in steering_nested.get("classic_command_surface_recensus", []):
+            recensus[int(item["reference_entry"], 16)].add("steering-classic-command-mode-complete-replacement-recensus")
 
     # Classify each canonical named function conservatively.
     classified = []
