@@ -828,6 +828,319 @@ FEBF0000` last, trigger the existing `0xFF00` callback path, and observe
 dynamic.
 
 
+
+## 19. End-to-end boot-to-control lifecycle
+
+This section joins the verified firmware primitives, Panda routing, and the
+prepared openpilot sender into one operational sequence. It deliberately
+separates the **current implemented state** from the **intended ephemeral bridge
+state**. The key-backed SecOC path can operate without EPS modification. The
+RAM-resident steering bridge remains a statically complete architecture whose
+full ignition-to-control lifecycle has not yet been run on hardware.
+
+The exact Sienna image used for the bridge analysis is:
+
+```text
+F181                 8965B4512000
+CodeFlash SHA-256     21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde
+```
+
+### 19.1 Car boot and comma boot start independently
+
+At ignition-on, the EPS starts from stock firmware. Its boot code validates the
+normal application integrity state and transfers to the stock application. The
+camera, EPS, and other vehicle ECUs therefore begin in the ordinary Toyota
+configuration.
+
+Comma boots in parallel. Panda starts first; AGNOS/openpilot then starts
+`pandad`, `card`, `selfdrived`, `controlsd`, and the other managed processes.
+Before the car is identified, Panda is not yet in the final Toyota control safety
+mode.
+
+### 19.2 Panda starts on the normal-harness diagnostic route
+
+Current Panda/openpilot initializes ELM327 safety with parameter `1` before
+fingerprinting. On Cuatro this selects FDCAN2's normal-harness route rather than
+the OBD-multiplexed route. Firmware queries may temporarily request OBD
+multiplexing and then return to the normal route.
+
+This route selection is separate from the physical intercept relay. Official
+comma hardware places the normal forwarding/interception boundary between CAN0
+and CAN2. CAN1 is not a software-selectable third side of that relay. See
+[../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md).
+
+### 19.3 `card` identifies the platform and exact EPS firmware
+
+`card` waits for CAN, runs the vehicle/firmware query, and publishes `CarParams`.
+The EPS firmware inventory in `CP.carFw` must contain the exact F181 validated
+for the runtime package. For a Toyota SecOC platform, the interface also marks
+SecOC as required and derives the corresponding Toyota safety configuration.
+
+The lifecycle branches here:
+
+- **real key available:** load `SecOCKey`, use ordinary SecOC signing, and leave
+  the EPS stock;
+- **ephemeral bridge requested:** install and prove the RAM runtime on this EPS
+  boot before claiming SecOC transport is available.
+
+A remembered configuration request is not proof that the bridge is resident.
+
+### 19.4 Enter the EPS bootloader on the preserved physical route
+
+The installer first reads exact F181 over the discovered same-bus diagnostic
+route, then requests:
+
+```text
+10 01  DEFAULT
+10 03  EXTENDED
+10 02  PROGRAMMING
+```
+
+The application-to-bootloader transition is asynchronous. The application can
+reset before the final positive `50 02` reaches the tester. A missing final
+response is therefore not authoritative failure. The correct discriminator is
+bootloader reappearance on the **same physical route**, with the endpoint
+identity rechecked after transition.
+
+For the affected Toyota-B topology, `ELM327 param 1 + logical bus 1` is the
+statically recovered direct stock-wire diagnostic candidate. It can provide
+direct EPS diagnostics on CAN1, but it does not recreate the CAN0/CAN2
+intercept-relay topology required later for normal openpilot substitution.
+
+### 19.5 Wait through boot SecurityAccess initialization, then authenticate
+
+The bootloader SecurityAccess implementation starts each initialization with a
+fresh nominal 10-second delay. Its failed-attempt counter and delay state live in
+LocalRAM, but reset does **not** provide immediate access because initialization
+arms a new delay. An automatic installer must therefore tolerate
+`requiredTimeDelayNotExpired` (NRC `0x37`) and retry after the startup delay.
+
+After that delay, the known boot SecurityAccess flow is:
+
+```text
+comma -> 27 01 + 16-byte zero data_record
+EPS   -> 16-byte seed
+
+working_key = AES-DEC(boot_secret, zero_record)
+response    = AES-ENC(working_key, seed)
+
+comma -> 27 02 + response
+EPS   -> unlocked
+```
+
+For `8965B4512000`, the boot secret is:
+
+```text
+f05f36b7d78c03e24ab4faef2a57d044
+```
+
+See [../diagnostics/bootloader.md](../diagnostics/bootloader.md) §2.1 for the
+attempt counter and delay state machine.
+
+### 19.6 Authenticate one exact 4 KiB RAM package
+
+The installer writes the bootloader setup DIDs, downloads the exact accepted
+4 KiB fixture to `FEBF0000`, exits transfer, and runs `0x10F0` verification:
+
+```text
+2E 0203
+2E 0201
+2E 0202
+34  RequestDownload(FEBF0000, 0x1000)
+36  TransferData ...
+37  RequestTransferExit
+31 01 10F0 ...
+```
+
+Exact encrypted-fixture acceptance remains an evidence gate separate from shared
+boot geometry. A compatible `FEBF0000/0x1000` address window does not authorize a
+foreign ciphertext.
+
+### 19.7 Use the post-auth short-write primitive to install the runtime
+
+After one successful `0x10F0`, MEM-SAFE-001 permits raw substitutions of at most
+15 bytes inside the authenticated RAM page. The resident image is written in
+short substitutions, and the callback cell at `FEBF0FD0` is written last so a
+partially installed image is not selected as the callback target.
+
+For the exact Sienna build:
+
+```text
+resident steering bridge   704 bytes
+resident bridge SHA-256    8f486d36ae38d233165563ad2cc4a71d006cf5c8cf9a876345a3b6ab72f10495
+retained application R/W/X FEBF0000..FEBF0307
+callback cell               FEBF0FD0
+```
+
+The current field-facing TSK integration exposes only the 332-byte inert canary,
+not this steering bridge.
+
+### 19.8 `FF00` hands execution through retained RAM into the stock application
+
+The installer triggers the existing `FF00` callback path. The RAM code performs
+the stock application transition directly while preserving the retained runtime
+region. A normal hardware reset would clear this RAM and remove the bridge.
+
+The resident scheduler then reproduces the normal application foreground work
+while wrapping the SecOC/COM receive boundary. It does **not** replace Toyota's
+steering controller.
+
+### 19.9 Prove runtime residency on this boot before enabling controls
+
+Before openpilot may use the bridge sender, the installer must prove at least:
+
+1. application diagnostics reappeared on the expected route;
+2. F181 still matches the exact validated target;
+3. runtime-specific liveness proves that the resident scheduler is active;
+4. the live runtime identity matches the manifest/runtime package validated for
+   this F181.
+
+This must be **per-boot, volatile evidence**. A persistent "bridge requested"
+setting is configuration intent only. If the EPS resets after installation,
+LocalRAM is cleared while any persistent host-side request remains.
+
+Therefore, an operational integration must fail closed if this-boot runtime
+attestation is absent or becomes stale. The current inert-canary workflow already
+proves the right shape: application reappearance, heartbeat progression, hard
+reset, exact F181 reappearance, then proof that the heartbeat stopped.
+
+### 19.10 Panda switches from fingerprinting to Toyota control safety
+
+After `card` finishes the car interface and controls are ready, `pandad` changes
+Panda from ELM327/fingerprinting mode to the final Toyota safety model and
+`safetyParam`.
+
+Generic Panda forwarding maps CAN0 <-> CAN2. Toyota's SecOC Tx list marks
+`0x2E4` and `0x131` as relay-checked control messages. With the vehicle network
+on the proper physical split, the stock camera copies are blocked at the relay
+boundary while openpilot can transmit replacements on the car/EPS side.
+
+```text
+CAMERA -- stock 0x2E4/0x131 --> CAN2 --X--> CAN0 --> EPS
+                                          ^
+                                          |
+                              Panda static blocking
+
+openpilot replacement ------------------> CAN0 --> EPS
+```
+
+This is the point at which the Toyota-B physical CAN0/CAN2 topology matters.
+Software can select CAN1 for diagnostics, but it cannot electrically remove a
+stock camera frame from an unsplit CAN1 after that frame is already on the wire.
+
+### 19.11 Normal openpilot feedback and control loop
+
+The rest of the loop is normal openpilot:
+
+```text
+vehicle/EPS CAN
+    -> Panda
+    -> pandad `can`
+    -> card / Toyota CarState
+    -> `carState`
+    -> selfdrived + controlsd
+    -> `carControl`
+    -> card / Toyota CarController
+    -> `sendcan`
+    -> pandad
+    -> Panda safety
+    -> vehicle CAN
+```
+
+`CarState` consumes the Toyota SecOC synchronization state, including the
+freshness/reset counters needed by the sender.
+
+### 19.12 Sender behavior differs only at the SecOC envelope
+
+With a real key, `CarController` builds a normal MAC28-protected command.
+
+With the resident bridge enabled, the prepared sender emits lateral `0x2E4` and
+`0x131` with:
+
+- authentic command payload fields;
+- the transmitted freshness high nibble preserved; and
+- the MAC28 field set to zero as the local bridge marker.
+
+Protected longitudinal `0x183` is not covered by this resident bridge and still
+requires ordinary SecOC authentication.
+
+### 19.13 The resident EPS bridge returns marked commands to Toyota's stock path
+
+For a marked steering frame, the intended EPS sequence is:
+
+```text
+raw CAN receive
+    -> resident runtime snapshots the newly queued marked frame
+    -> stock SecOC verification rejects the zero MAC28
+    -> stock cleanup runs
+    -> runtime confirms stock COM did not consume the PDU
+    -> application_com_rx_indication(...)
+    -> stock COM unpack / mode logic / steering logic
+    -> stock EPS motor-control path
+```
+
+For this image, the stock delivery API is
+`application_com_rx_indication @ 0x7C640`. The runtime therefore bypasses one
+receive-authentication decision and then returns to Toyota's normal application
+pipeline.
+
+### 19.14 Reset and power loss return the EPS to stock
+
+A hardware reset, watchdog reset, or power cycle clears the retained LocalRAM
+runtime and returns the EPS to its normal boot/application path. The next drive
+must reinstall and re-attest the bridge before marked commands are allowed.
+
+That produces the intended fail-silent lifecycle:
+
+```text
+CAR POWER ON
+   |
+   +----------------------+-------------------------+
+   |                                                |
+EPS stock boot                                   comma boot
+   |                                                |
+stock application <---- normal vehicle CAN ----> Panda/openpilot
+   |                                                |
+   |<---- F181 + route discovery ------------------|
+   |<---- 10 01 / 10 03 / 10 02 ------------------|
+   v                                                |
+bootloader                                          |
+   |<---- wait through boot SA startup delay -------|
+   |<---- 27 01 / 27 02 ---------------------------|
+   |<---- 2E + 34/36/37 + 10F0 --------------------|
+   |<---- short RAM substitutions -----------------|
+   |<---- FF00 -------------------------------------|
+   v                                                |
+resident runtime -> stock application               |
+   |                                                |
+   |---- per-boot runtime attestation ------------->|
+   |                                                v
+   |                                      Toyota safety/control ready
+   |                                                |
+camera stock 2E4/131 --X-- Panda relay boundary    |
+   |                                                |
+   |<---- openpilot marked replacement -------------|
+   |                                                |
+bridge redelivery -> stock Toyota steering          |
+```
+
+### 19.15 Current integration gaps
+
+The full lifecycle is not yet an implemented ignition-to-control product path.
+Two host-integration requirements follow directly from the recovered firmware
+semantics:
+
+1. **SecurityAccess startup-delay handling.** Automatic bridge deployment must
+   explicitly wait/retry through the bootloader's fresh 10-second startup delay.
+2. **Per-boot runtime attestation.** Sender arming must depend on volatile proof
+   that the target-bound runtime is alive on the current EPS boot, not only on a
+   persistent request/F181 configuration.
+
+The first item follows from SEC-BOOT-010. The second follows from the verified
+upper-LocalRAM clear on hardware reset plus the retained-runtime architecture.
+The inert canary remains the correct first dynamic proof before steering delivery
+is enabled.
+
 ## Cross-calibration runtime transfer
 
 The Sienna implementation is no longer an address-hard-coded payload.
