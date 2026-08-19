@@ -1,0 +1,638 @@
+{
+  "diagnostic_role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x0004C942",
+      "reference_name": "application_session_transition_policy",
+      "target_entry": "0x0004826A",
+      "target_reported_body_size": 30
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00080114",
+      "reference_name": "application_can_diagnostic_rx_demux",
+      "target_entry": "0x0007A510",
+      "target_reported_body_size": 144
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x0008A27E",
+      "reference_name": "application_session_transition_check_adapter",
+      "target_entry": "0x0008467E",
+      "target_reported_body_size": 40
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x0008B144",
+      "reference_name": "application_clear_diagnostic_information_request_start",
+      "target_entry": "0x00085544",
+      "target_reported_body_size": 144
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000936AA",
+      "reference_name": "application_wdbi_class_0201_write",
+      "target_entry": "0x0008E6D0",
+      "target_reported_body_size": 44
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000936D6",
+      "reference_name": "application_wdbi_class_2001_write",
+      "target_entry": "0x0008E6FC",
+      "target_reported_body_size": 44
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00093B56",
+      "reference_name": "application_wdbi_request_start",
+      "target_entry": "0x0008EB7C",
+      "target_reported_body_size": 136
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00093C62",
+      "reference_name": "application_wdbi_callback",
+      "target_entry": "0x0008EC88",
+      "target_reported_body_size": 36
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00093D28",
+      "reference_name": "application_session_request_start",
+      "target_entry": "0x0008ED4E",
+      "target_reported_body_size": 266
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00093E32",
+      "reference_name": "application_session_request_cancel",
+      "target_entry": "0x0008EE58",
+      "target_reported_body_size": 64
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00093E72",
+      "reference_name": "application_session_request_poll",
+      "target_entry": "0x0008EE98",
+      "target_reported_body_size": 202
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00093F9A",
+      "reference_name": "application_session_transition_background_poll",
+      "target_entry": "0x0008EFC0",
+      "target_reported_body_size": 66
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000944C6",
+      "reference_name": "application_rdbi_request_start",
+      "target_entry": "0x0008F4EC",
+      "target_reported_body_size": 104
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000955DC",
+      "reference_name": "application_routine_control_type_supported",
+      "target_entry": "0x00090602",
+      "target_reported_body_size": 72
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00095624",
+      "reference_name": "application_routine_control_input_length_invalid",
+      "target_entry": "0x0009064A",
+      "target_reported_body_size": 162
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000956C6",
+      "reference_name": "application_routine_control_output_capacity_invalid",
+      "target_entry": "0x000906EC",
+      "target_reported_body_size": 212
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00095C8C",
+      "reference_name": "application_routine_control_request_start",
+      "target_entry": "0x00090CB2",
+      "target_reported_body_size": 242
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000B28A2",
+      "reference_name": "application_diagnostic_helper_b28a2",
+      "target_entry": "0x000B2B6E",
+      "target_reported_body_size": 10
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000B47A6",
+      "reference_name": "application_diagnostic_helper_b47a6",
+      "target_entry": "0x000B486C",
+      "target_reported_body_size": 12
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000B55C4",
+      "reference_name": "application_diagnostic_helper_b55c4",
+      "target_entry": "0x000B5346",
+      "target_reported_body_size": 30
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000B5D0C",
+      "reference_name": "application_diagnostic_helper_b5d0c",
+      "target_entry": "0x000B5A30",
+      "target_reported_body_size": 30
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000B7C0E",
+      "reference_name": "application_diagnostic_helper_b7c0e",
+      "target_entry": "0x000B66B6",
+      "target_reported_body_size": 18
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000FDE58",
+      "reference_name": "application_diagnostic_helper_fde58",
+      "target_entry": "0x000FDE58",
+      "target_reported_body_size": 8
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000FDED0",
+      "reference_name": "application_diagnostic_helper_fded0",
+      "target_entry": "0x000FDED0",
+      "target_reported_body_size": 8
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000FE060",
+      "reference_name": "application_diagnostic_helper_fe060",
+      "target_entry": "0x000FE060",
+      "target_reported_body_size": 8
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000FE09C",
+      "reference_name": "application_diagnostic_helper_fe09c",
+      "target_entry": "0x000FE09C",
+      "target_reported_body_size": 8
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000FE0C4",
+      "reference_name": "application_diagnostic_helper_fe0c4",
+      "target_entry": "0x000FE0C4",
+      "target_reported_body_size": 8
+    }
+  ],
+  "diagnostic_role_closure_count": 27,
+  "diagnostic_surface_recensus": [
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A672",
+      "reference_entry": "0x0004EC16",
+      "reference_name": "application_wdbi_0204_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A686",
+      "reference_entry": "0x0004EC2A",
+      "reference_name": "application_wdbi_0204_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A6A2",
+      "reference_entry": "0x0004EC46",
+      "reference_name": "application_wdbi_2001_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A6B6",
+      "reference_entry": "0x0004EC78",
+      "reference_name": "application_wdbi_2001_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A6EC",
+      "reference_entry": "0x0004ECBC",
+      "reference_name": "application_wdbi_2002_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A700",
+      "reference_entry": "0x0004ECD0",
+      "reference_name": "application_wdbi_2002_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A748",
+      "reference_entry": "0x0004ED2C",
+      "reference_name": "application_wdbi_2005_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A75C",
+      "reference_entry": "0x0004ED40",
+      "reference_name": "application_wdbi_2005_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A778",
+      "reference_entry": "0x0004ED76",
+      "reference_name": "application_wdbi_2006_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A78C",
+      "reference_entry": "0x0004ED8A",
+      "reference_name": "application_wdbi_2006_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A7A8",
+      "reference_entry": "0x0004EDC0",
+      "reference_name": "application_wdbi_2007_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A7BC",
+      "reference_entry": "0x0004EDD4",
+      "reference_name": "application_wdbi_2007_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A7D8",
+      "reference_entry": "0x0004EE0A",
+      "reference_name": "application_wdbi_2008_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A7EC",
+      "reference_entry": "0x0004EE1E",
+      "reference_name": "application_wdbi_2008_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A808",
+      "reference_entry": "0x0004EE54",
+      "reference_name": "application_wdbi_2009_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A81C",
+      "reference_entry": "0x0004EE68",
+      "reference_name": "application_wdbi_2009_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "removed DID",
+      "h_target": null,
+      "reference_entry": "0x0004EEA6",
+      "reference_name": "application_wdbi_200d_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "removed DID",
+      "h_target": null,
+      "reference_entry": "0x0004EEBA",
+      "reference_name": "application_wdbi_200d_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A840",
+      "reference_entry": "0x0004EEF0",
+      "reference_name": "application_wdbi_2010_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A854",
+      "reference_entry": "0x0004EF04",
+      "reference_name": "application_wdbi_2010_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A89A",
+      "reference_entry": "0x0004EF4A",
+      "reference_name": "application_wdbi_2012_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "surviving H callback",
+      "h_target": "0x0004A89E",
+      "reference_entry": "0x0004EF4E",
+      "reference_name": "application_wdbi_2012_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "disabled callback surface",
+      "h_target": "0x0004A8B8",
+      "reference_entry": "0x0004EF68",
+      "reference_name": "application_wdbi_2013_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "disabled callback surface",
+      "h_target": "0x0004A8BC",
+      "reference_entry": "0x0004EF90",
+      "reference_name": "application_wdbi_2013_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "disabled callback surface",
+      "h_target": "0x0004A8C0",
+      "reference_entry": "0x0004EFAC",
+      "reference_name": "application_wdbi_2014_start"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "disabled callback surface",
+      "h_target": "0x0004A8C4",
+      "reference_entry": "0x0004EFD4",
+      "reference_name": "application_wdbi_2014_result"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "removed alternate WDBI branch",
+      "reference_entry": "0x0004EC68",
+      "reference_name": "application_diagnostic_helper_4ec68"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "readable-DID surface regenerated and exhaustively enumerated",
+      "reference_entry": "0x0004F928",
+      "reference_name": "application_did_table_getter"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "2014 setter removed from live H WDBI path",
+      "reference_entry": "0x000B71FE",
+      "reference_name": "application_diagnostic_helper_b71fe"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "2013 setter removed from live H WDBI path",
+      "reference_entry": "0x000B76A8",
+      "reference_name": "application_diagnostic_helper_b76a8"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "2014 thunk removed from live H WDBI path",
+      "reference_entry": "0x000FE1B4",
+      "reference_name": "application_diagnostic_helper_fe1b4"
+    },
+    {
+      "classification": "target-surface-recensused",
+      "disposition": "2013 thunk removed from live H WDBI path",
+      "reference_entry": "0x000FE1C8",
+      "reference_name": "application_diagnostic_helper_fe1c8"
+    }
+  ],
+  "diagnostic_surface_recensus_count": 32,
+  "evidence": {
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "routine_control": {
+    "h_rid_count_source": "DAT_00026376",
+    "helpers": [
+      [
+        "0x000955DC",
+        "0x00090602"
+      ],
+      [
+        "0x00095624",
+        "0x0009064A"
+      ],
+      [
+        "0x000956C6",
+        "0x000906EC"
+      ],
+      [
+        "0x00095C8C",
+        "0x00090CB2"
+      ]
+    ],
+    "outer_policy_shape_owned_by": "corolla_8965H1202000_application_diagnostics_diff.json"
+  },
+  "schema": "corolla-h-diagnostic-residue-v1",
+  "session": {
+    "policy": {
+      "h": "0x0004826A",
+      "requested_session_2_speed_gate": true,
+      "sienna": "0x0004C942"
+    },
+    "request_family": [
+      [
+        "0x00093D28",
+        "0x0008ED4E"
+      ],
+      [
+        "0x00093E32",
+        "0x0008EE58"
+      ],
+      [
+        "0x00093E72",
+        "0x0008EE98"
+      ],
+      [
+        "0x00093F9A",
+        "0x0008EFC0"
+      ]
+    ]
+  },
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "all_59_diagnostic_residuals_closed": true,
+    "boundary": "DCM lifecycle roles are recovered; generated DID/RID/WDBI content is target-specific and removed/disabled WDBI functions are recensused rather than assigned fake homologs.",
+    "diagnostics_named_residue_closed": true,
+    "role_recovered": 27,
+    "surface_recensused": 32
+  },
+  "wdbi": {
+    "added_dids": [],
+    "disabled_on_h": [
+      "0x2013",
+      "0x2014"
+    ],
+    "h_2012_unconditional_start": true,
+    "h_table": {
+      "base": "0x00025530",
+      "count": 12,
+      "rows": [
+        {
+          "did": "0x0204",
+          "result": "0x0004A686",
+          "start": "0x0004A672"
+        },
+        {
+          "did": "0x2001",
+          "result": "0x0004A6B6",
+          "start": "0x0004A6A2"
+        },
+        {
+          "did": "0x2002",
+          "result": "0x0004A700",
+          "start": "0x0004A6EC"
+        },
+        {
+          "did": "0x2005",
+          "result": "0x0004A75C",
+          "start": "0x0004A748"
+        },
+        {
+          "did": "0x2006",
+          "result": "0x0004A78C",
+          "start": "0x0004A778"
+        },
+        {
+          "did": "0x2007",
+          "result": "0x0004A7BC",
+          "start": "0x0004A7A8"
+        },
+        {
+          "did": "0x2008",
+          "result": "0x0004A7EC",
+          "start": "0x0004A7D8"
+        },
+        {
+          "did": "0x2009",
+          "result": "0x0004A81C",
+          "start": "0x0004A808"
+        },
+        {
+          "did": "0x2010",
+          "result": "0x0004A854",
+          "start": "0x0004A840"
+        },
+        {
+          "did": "0x2012",
+          "result": "0x0004A89E",
+          "start": "0x0004A89A"
+        },
+        {
+          "did": "0x2013",
+          "result": "0x0004A8BC",
+          "start": "0x0004A8B8"
+        },
+        {
+          "did": "0x2014",
+          "result": "0x0004A8C4",
+          "start": "0x0004A8C0"
+        }
+      ]
+    },
+    "interpretation": "H removes DID 200D; 2013/2014 remain configured but their start callbacks return 5 and results are no-op; 2012 remains unconditional-start. Surviving maintenance/persistence callbacks are regenerated and therefore old per-DID function identity is closed by complete table/callback recensus.",
+    "removed_dids": [
+      "0x200D"
+    ],
+    "result_lookup": {
+      "h": "0x00087816",
+      "h_count": 12,
+      "sienna": "0x0008D416"
+    },
+    "sienna_table": {
+      "base": "0x00025768",
+      "count": 13,
+      "rows": [
+        {
+          "did": "0x0204",
+          "result": "0x0004EC2A",
+          "start": "0x0004EC16"
+        },
+        {
+          "did": "0x2001",
+          "result": "0x0004EC78",
+          "start": "0x0004EC46"
+        },
+        {
+          "did": "0x2002",
+          "result": "0x0004ECD0",
+          "start": "0x0004ECBC"
+        },
+        {
+          "did": "0x2005",
+          "result": "0x0004ED40",
+          "start": "0x0004ED2C"
+        },
+        {
+          "did": "0x2006",
+          "result": "0x0004ED8A",
+          "start": "0x0004ED76"
+        },
+        {
+          "did": "0x2007",
+          "result": "0x0004EDD4",
+          "start": "0x0004EDC0"
+        },
+        {
+          "did": "0x2008",
+          "result": "0x0004EE1E",
+          "start": "0x0004EE0A"
+        },
+        {
+          "did": "0x2009",
+          "result": "0x0004EE68",
+          "start": "0x0004EE54"
+        },
+        {
+          "did": "0x200D",
+          "result": "0x0004EEBA",
+          "start": "0x0004EEA6"
+        },
+        {
+          "did": "0x2010",
+          "result": "0x0004EF04",
+          "start": "0x0004EEF0"
+        },
+        {
+          "did": "0x2012",
+          "result": "0x0004EF4E",
+          "start": "0x0004EF4A"
+        },
+        {
+          "did": "0x2013",
+          "result": "0x0004EF90",
+          "start": "0x0004EF68"
+        },
+        {
+          "did": "0x2014",
+          "result": "0x0004EFD4",
+          "start": "0x0004EFAC"
+        }
+      ]
+    },
+    "start_lookup": {
+      "h": "0x000877CC",
+      "h_count": 12,
+      "h_table_base": "0x00025530",
+      "sienna": "0x0008D3CC"
+    }
+  }
+}

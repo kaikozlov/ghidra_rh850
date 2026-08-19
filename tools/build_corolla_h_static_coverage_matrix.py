@@ -304,6 +304,29 @@ def main() -> None:
                 "role": item["reference_name"],
             }
 
+    diagnostic_residue_path = REPO / "data/generated/corolla_8965H1202000_diagnostic_residue.json"
+    diagnostic_residue = None
+    if diagnostic_residue_path.is_file():
+        diagnostic_residue = load_json(diagnostic_residue_path)
+        diagnostic_residue_rel = str(diagnostic_residue_path.relative_to(REPO))
+        evidence_file_hashes[diagnostic_residue_rel] = sha256(diagnostic_residue_path.read_bytes())
+        diagnostic_ev_path = REPO / diagnostic_residue["evidence"]["decompiler_evidence"]
+        diagnostic_ev = load_json(diagnostic_ev_path)
+        diagnostic_targets = {int(r["entry"], 16) for r in diagnostic_ev.get("functions", [])}
+        for item in diagnostic_residue.get("diagnostic_role_closure", []):
+            ref = int(item["reference_entry"], 16)
+            target = int(item["target_entry"], 16)
+            if target not in diagnostic_targets:
+                raise ValueError(f"diagnostic role target lacks tracked target-native evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["target_entry"],
+                "report": diagnostic_residue_rel,
+                "evidence": diagnostic_residue["evidence"]["decompiler_evidence"],
+                "role": item["reference_name"],
+            }
+
     # Explicit generated-surface recensuses. These are not function homology:
     # they prove the foreign generated surface was exhaustively re-enumerated.
     recensus: dict[int, set[str]] = defaultdict(set)
@@ -330,6 +353,10 @@ def main() -> None:
     if steering_nested is not None:
         for item in steering_nested.get("classic_command_surface_recensus", []):
             recensus[int(item["reference_entry"], 16)].add("steering-classic-command-mode-complete-replacement-recensus")
+
+    if diagnostic_residue is not None:
+        for item in diagnostic_residue.get("diagnostic_surface_recensus", []):
+            recensus[int(item["reference_entry"], 16)].add("diagnostic-complete-target-surface-recensus")
 
     # Classify each canonical named function conservatively.
     classified = []

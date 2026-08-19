@@ -1470,11 +1470,11 @@ promotion:
 ```text
 named canonical functions                 1113
 verified exact-body transfers              288
-target-native inspected unique-shape       27
-target-native role-recovered                 84
-complete target-surface recensuses          230
-structural candidates only                  109
-genuinely unresolved                        375
+target-native inspected unique-shape       29
+target-native role-recovered                111
+complete target-surface recensuses          262
+structural candidates only                  107
+genuinely unresolved                        316
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1495,7 +1495,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(386 currently have
+(437 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -1951,9 +1951,41 @@ Machine-readable ownership is
 evidence. `tests/verify_corolla_8965H1202000_steering_nested.py` pins the six
 role mappings, three-function replacement recensus, wrapper order, H mode
 decoder, secondary chain, and raw/decompiler hashes. `steering` now has **zero
-genuinely-unresolved named functions**. The global denominator is **375
-unresolved**, 27 inspected unique-shape, 84 role-recovered, 230 recensused, 109
-structural-only, and 288 exact-body transfers.
+genuinely-unresolved named functions**. After §7.24, the global denominator is **316 unresolved**, 29 inspected unique-shape, 111 role-recovered, 262 recensused, 107 structural-only, and 288 exact-body transfers.
+
+### 7.24 Diagnostic residue: H WDBI is a 12-DID surface
+
+The remaining 59 `diagnostics`-tagged named functions are now closed by 27
+target-native role mappings plus 32 complete-surface recensuses. The generic DCM
+layer is highly conserved: H recovers the CAN diagnostic demux, session policy and
+request lifecycle, ClearDiagnosticInformation, WDBI request/class wrappers, RDBI
+request worker, and all four generic RoutineControl validation/request roles at
+exact canonical body sizes with relocated generated tables/state.
+
+The lower WDBI implementation is a real generation change. Sienna's active table
+at `0x25768` has 13 rows; H lookup `877CC/87816` uses a 12-row table at `0x25530`:
+
+```text
+H WDBI: 0204 2001 2002 2005 2006 2007 2008 2009 2010 2012 2013 2014
+removed relative to Sienna: 200D
+```
+
+`2013` and `2014` remain table members but are statically disabled: their H start
+callbacks `4A8B8/4A8C0` return internal result `5`, while result callbacks
+`4A8BC/4A8C4` are four-byte success no-ops. `2012` remains live with unconditional
+start `4A89A` and result `4A89E` reaching H lifecycle helper `B2B6E`. `0204` still
+arms pending tag `0x2E10`; the remaining maintenance/persistence callbacks are
+regenerated around H-specific state and helper addresses. The old DID-specific
+function identities are therefore closed by exhaustive H table/callback recensus,
+not S-relative address assignment.
+
+Machine-readable ownership is `data/generated/corolla_8965H1202000_diagnostic_residue.json`
+plus compact H-native evidence. `tests/verify_corolla_8965H1202000_diagnostic_residue.py`
+pins all 59 dispositions, WDBI table membership, disabled/live DIDs, generic DCM
+roles, and raw/decompiler hashes. `diagnostics` now has **zero genuinely unresolved
+named functions**. The only remaining genuinely unresolved canonical names are the
+**316 untagged functions**; the global denominator is 316 unresolved, 29 inspected
+unique-shape, 111 role-recovered, 262 recensused, 107 structural-only, and 288 exact.
 
 ## 8. Remaining evidence boundary
 

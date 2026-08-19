@@ -5646,19 +5646,28 @@
     },
     {
       "body_size": 30,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_session_transition_policy",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x0004C942",
       "reference_name": "application_session_transition_policy",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_session_transition_policy",
+        "target_entry": "0x0004826A"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0004826A",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -9544,9 +9553,9 @@
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EC16",
       "reference_name": "application_wdbi_0204_start",
@@ -9554,16 +9563,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 28,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EC2A",
       "reference_name": "application_wdbi_0204_result",
@@ -9571,16 +9582,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EC46",
       "reference_name": "application_wdbi_2001_start",
@@ -9588,16 +9601,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EC68",
       "reference_name": "application_diagnostic_helper_4ec68",
@@ -9605,16 +9620,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 68,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EC78",
       "reference_name": "application_wdbi_2001_result",
@@ -9622,16 +9639,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004ECBC",
       "reference_name": "application_wdbi_2002_start",
@@ -9639,16 +9658,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 76,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004ECD0",
       "reference_name": "application_wdbi_2002_result",
@@ -9656,16 +9677,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004ED2C",
       "reference_name": "application_wdbi_2005_start",
@@ -9673,16 +9696,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 54,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004ED40",
       "reference_name": "application_wdbi_2005_result",
@@ -9690,16 +9715,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004ED76",
       "reference_name": "application_wdbi_2006_start",
@@ -9707,16 +9734,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 54,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004ED8A",
       "reference_name": "application_wdbi_2006_result",
@@ -9724,16 +9753,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EDC0",
       "reference_name": "application_wdbi_2007_start",
@@ -9741,16 +9772,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 54,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EDD4",
       "reference_name": "application_wdbi_2007_result",
@@ -9758,16 +9791,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EE0A",
       "reference_name": "application_wdbi_2008_start",
@@ -9775,16 +9810,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 54,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EE1E",
       "reference_name": "application_wdbi_2008_result",
@@ -9792,16 +9829,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EE54",
       "reference_name": "application_wdbi_2009_start",
@@ -9809,16 +9848,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 54,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EE68",
       "reference_name": "application_wdbi_2009_result",
@@ -9826,16 +9867,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EEA6",
       "reference_name": "application_wdbi_200d_start",
@@ -9843,16 +9886,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 54,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EEBA",
       "reference_name": "application_wdbi_200d_result",
@@ -9860,16 +9905,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 20,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EEF0",
       "reference_name": "application_wdbi_2010_start",
@@ -9877,16 +9924,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 70,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EF04",
       "reference_name": "application_wdbi_2010_result",
@@ -9894,16 +9943,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 4,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EF4A",
       "reference_name": "application_wdbi_2012_start",
@@ -9911,16 +9962,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 26,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EF4E",
       "reference_name": "application_wdbi_2012_result",
@@ -9928,16 +9981,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 40,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EF68",
       "reference_name": "application_wdbi_2013_start",
@@ -9945,16 +10000,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 28,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EF90",
       "reference_name": "application_wdbi_2013_result",
@@ -9962,16 +10019,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 40,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EFAC",
       "reference_name": "application_wdbi_2014_start",
@@ -9979,16 +10038,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 42,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004EFD4",
       "reference_name": "application_wdbi_2014_result",
@@ -9996,7 +10057,9 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
@@ -10622,9 +10685,9 @@
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x0004F928",
       "reference_name": "application_did_table_getter",
@@ -10632,7 +10695,9 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
@@ -13039,19 +13104,28 @@
     },
     {
       "body_size": 144,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_can_diagnostic_rx_demux",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00080114",
       "reference_name": "application_can_diagnostic_rx_demux",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_can_diagnostic_rx_demux",
+        "target_entry": "0x0007A510"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0007A510",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -14707,19 +14781,28 @@
     },
     {
       "body_size": 40,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_session_transition_check_adapter",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008A27E",
       "reference_name": "application_session_transition_check_adapter",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_session_transition_check_adapter",
+        "target_entry": "0x0008467E"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008467E",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -14951,19 +15034,28 @@
     },
     {
       "body_size": 144,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_clear_diagnostic_information_request_start",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008B144",
       "reference_name": "application_clear_diagnostic_information_request_start",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_clear_diagnostic_information_request_start",
+        "target_entry": "0x00085544"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00085544",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -15540,9 +15632,10 @@
     },
     {
       "body_size": 74,
-      "coverage": "structural-candidate-only",
+      "coverage": "target-native-inspected-unique-shape",
       "coverage_basis": [
-        "unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"
+        "unique complete instruction-shape target",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008D3CC",
       "reference_name": "application_wdbi_start_callback_lookup",
@@ -15552,14 +15645,17 @@
       ],
       "surface_recensus": [],
       "target_entry": "0x000877cc",
-      "target_native_evidence_files": [],
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "unique-instruction-shape-candidate"
     },
     {
       "body_size": 92,
-      "coverage": "structural-candidate-only",
+      "coverage": "target-native-inspected-unique-shape",
       "coverage_basis": [
-        "unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"
+        "unique complete instruction-shape target",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008D416",
       "reference_name": "application_wdbi_result_callback_lookup",
@@ -15569,7 +15665,9 @@
       ],
       "surface_recensus": [],
       "target_entry": "0x00087816",
-      "target_native_evidence_files": [],
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "unique-instruction-shape-candidate"
     },
     {
@@ -16420,36 +16518,54 @@
     },
     {
       "body_size": 44,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_wdbi_class_0201_write",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000936AA",
       "reference_name": "application_wdbi_class_0201_write",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_wdbi_class_0201_write",
+        "target_entry": "0x0008E6D0"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008E6D0",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 44,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_wdbi_class_2001_write",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000936D6",
       "reference_name": "application_wdbi_class_2001_write",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_wdbi_class_2001_write",
+        "target_entry": "0x0008E6FC"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008E6FC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -16503,19 +16619,28 @@
     },
     {
       "body_size": 136,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_wdbi_request_start",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00093B56",
       "reference_name": "application_wdbi_request_start",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_wdbi_request_start",
+        "target_entry": "0x0008EB7C"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008EB7C",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -16535,19 +16660,28 @@
     },
     {
       "body_size": 36,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_wdbi_callback",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00093C62",
       "reference_name": "application_wdbi_callback",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_wdbi_callback",
+        "target_entry": "0x0008EC88"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008EC88",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -16614,53 +16748,80 @@
     },
     {
       "body_size": 266,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_session_request_start",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00093D28",
       "reference_name": "application_session_request_start",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_session_request_start",
+        "target_entry": "0x0008ED4E"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008ED4E",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 64,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_session_request_cancel",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00093E32",
       "reference_name": "application_session_request_cancel",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_session_request_cancel",
+        "target_entry": "0x0008EE58"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008EE58",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 202,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_session_request_poll",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00093E72",
       "reference_name": "application_session_request_poll",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_session_request_poll",
+        "target_entry": "0x0008EE98"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008EE98",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -16682,19 +16843,28 @@
     },
     {
       "body_size": 66,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_session_transition_background_poll",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00093F9A",
       "reference_name": "application_session_transition_background_poll",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_session_transition_background_poll",
+        "target_entry": "0x0008EFC0"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008EFC0",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -16750,19 +16920,28 @@
     },
     {
       "body_size": 104,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_rdbi_request_start",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000944C6",
       "reference_name": "application_rdbi_request_start",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_rdbi_request_start",
+        "target_entry": "0x0008F4EC"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008F4EC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -17396,53 +17575,80 @@
     },
     {
       "body_size": 72,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_routine_control_type_supported",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000955DC",
       "reference_name": "application_routine_control_type_supported",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_routine_control_type_supported",
+        "target_entry": "0x00090602"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00090602",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 162,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_routine_control_input_length_invalid",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00095624",
       "reference_name": "application_routine_control_input_length_invalid",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_routine_control_input_length_invalid",
+        "target_entry": "0x0009064A"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0009064A",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 212,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_routine_control_output_capacity_invalid",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000956C6",
       "reference_name": "application_routine_control_output_capacity_invalid",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_routine_control_output_capacity_invalid",
+        "target_entry": "0x000906EC"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000906EC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -17462,19 +17668,28 @@
     },
     {
       "body_size": 242,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_routine_control_request_start",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x00095C8C",
       "reference_name": "application_routine_control_request_start",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_routine_control_request_start",
+        "target_entry": "0x00090CB2"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00090CB2",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -18093,19 +18308,28 @@
     },
     {
       "body_size": 10,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_diagnostic_helper_b28a2",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000B28A2",
       "reference_name": "application_diagnostic_helper_b28a2",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_diagnostic_helper_b28a2",
+        "target_entry": "0x000B2B6E"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000B2B6E",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -18155,19 +18379,28 @@
     },
     {
       "body_size": 44,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_diagnostic_helper_b47a6",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000B47A6",
       "reference_name": "application_diagnostic_helper_b47a6",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_diagnostic_helper_b47a6",
+        "target_entry": "0x000B486C"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000B486C",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -18232,19 +18465,28 @@
     },
     {
       "body_size": 30,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_diagnostic_helper_b55c4",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000B55C4",
       "reference_name": "application_diagnostic_helper_b55c4",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_diagnostic_helper_b55c4",
+        "target_entry": "0x000B5346"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000B5346",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -18294,19 +18536,28 @@
     },
     {
       "body_size": 30,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_diagnostic_helper_b5d0c",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000B5D0C",
       "reference_name": "application_diagnostic_helper_b5d0c",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_diagnostic_helper_b5d0c",
+        "target_entry": "0x000B5A30"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000B5A30",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -18371,9 +18622,9 @@
     },
     {
       "body_size": 6,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x000B71FE",
       "reference_name": "application_diagnostic_helper_b71fe",
@@ -18381,7 +18632,9 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
@@ -18448,9 +18701,9 @@
     },
     {
       "body_size": 6,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x000B76A8",
       "reference_name": "application_diagnostic_helper_b76a8",
@@ -18458,7 +18711,9 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
@@ -18495,19 +18750,28 @@
     },
     {
       "body_size": 18,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_diagnostic_helper_b7c0e",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000B7C0E",
       "reference_name": "application_diagnostic_helper_b7c0e",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_diagnostic_helper_b7c0e",
+        "target_entry": "0x000B66B6"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000B66B6",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -19031,19 +19295,28 @@
     },
     {
       "body_size": 8,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_diagnostic_helper_fde58",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000FDE58",
       "reference_name": "application_diagnostic_helper_fde58",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_diagnostic_helper_fde58",
+        "target_entry": "0x000FDE58"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000FDE58",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -19063,36 +19336,54 @@
     },
     {
       "body_size": 8,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_diagnostic_helper_fded0",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000FDED0",
       "reference_name": "application_diagnostic_helper_fded0",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_diagnostic_helper_fded0",
+        "target_entry": "0x000FDED0"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000FDED0",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 8,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_diagnostic_helper_fe060",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000FE060",
       "reference_name": "application_diagnostic_helper_fe060",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_diagnostic_helper_fe060",
+        "target_entry": "0x000FE060"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000FE060",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -19127,19 +19418,28 @@
     },
     {
       "body_size": 8,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_diagnostic_helper_fe09c",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000FE09C",
       "reference_name": "application_diagnostic_helper_fe09c",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_diagnostic_helper_fe09c",
+        "target_entry": "0x000FE09C"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000FE09C",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -19159,19 +19459,28 @@
     },
     {
       "body_size": 8,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_diagnostic_helper_fe0c4",
+        "report:data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "target-native:data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x000FE0C4",
       "reference_name": "application_diagnostic_helper_fe0c4",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_diagnostic_residue.json",
+        "role": "application_diagnostic_helper_fe0c4",
+        "target_entry": "0x000FE0C4"
+      },
       "semantic_tags": [
         "diagnostics"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000FE0C4",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -19206,9 +19515,9 @@
     },
     {
       "body_size": 8,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x000FE1B4",
       "reference_name": "application_diagnostic_helper_fe1b4",
@@ -19216,16 +19525,18 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 8,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-surface-recensused",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "diagnostic-complete-target-surface-recensus"
       ],
       "reference_entry": "0x000FE1C8",
       "reference_name": "application_diagnostic_helper_fe1c8",
@@ -19233,7 +19544,9 @@
       "semantic_tags": [
         "diagnostics"
       ],
-      "surface_recensus": [],
+      "surface_recensus": [
+        "diagnostic-complete-target-surface-recensus"
+      ],
       "target_entry": null,
       "target_native_evidence_files": [],
       "transfer_status": "changed-or-unresolved"
@@ -21596,23 +21909,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 30,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004C942",
-      "reference_name": "application_session_transition_policy",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 6,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -21688,465 +21984,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EC16",
-      "reference_name": "application_wdbi_0204_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 28,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EC2A",
-      "reference_name": "application_wdbi_0204_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EC46",
-      "reference_name": "application_wdbi_2001_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EC68",
-      "reference_name": "application_diagnostic_helper_4ec68",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 68,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EC78",
-      "reference_name": "application_wdbi_2001_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004ECBC",
-      "reference_name": "application_wdbi_2002_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 76,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004ECD0",
-      "reference_name": "application_wdbi_2002_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004ED2C",
-      "reference_name": "application_wdbi_2005_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 54,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004ED40",
-      "reference_name": "application_wdbi_2005_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004ED76",
-      "reference_name": "application_wdbi_2006_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 54,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004ED8A",
-      "reference_name": "application_wdbi_2006_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EDC0",
-      "reference_name": "application_wdbi_2007_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 54,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EDD4",
-      "reference_name": "application_wdbi_2007_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EE0A",
-      "reference_name": "application_wdbi_2008_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 54,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EE1E",
-      "reference_name": "application_wdbi_2008_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EE54",
-      "reference_name": "application_wdbi_2009_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 54,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EE68",
-      "reference_name": "application_wdbi_2009_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EEA6",
-      "reference_name": "application_wdbi_200d_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 54,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EEBA",
-      "reference_name": "application_wdbi_200d_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 20,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EEF0",
-      "reference_name": "application_wdbi_2010_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 70,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EF04",
-      "reference_name": "application_wdbi_2010_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 4,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EF4A",
-      "reference_name": "application_wdbi_2012_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 26,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EF4E",
-      "reference_name": "application_wdbi_2012_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 40,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EF68",
-      "reference_name": "application_wdbi_2013_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 28,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EF90",
-      "reference_name": "application_wdbi_2013_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 40,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EFAC",
-      "reference_name": "application_wdbi_2014_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 42,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004EFD4",
-      "reference_name": "application_wdbi_2014_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 12,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -22171,23 +22008,6 @@
       "reference_name": "application_event_record_query",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004F928",
-      "reference_name": "application_did_table_getter",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -22839,23 +22659,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 144,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00080114",
-      "reference_name": "application_can_diagnostic_rx_demux",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 112,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -23180,40 +22983,6 @@
       "reference_name": "application_programming_lower_request_stub",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 40,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008A27E",
-      "reference_name": "application_session_transition_check_adapter",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 144,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008B144",
-      "reference_name": "application_clear_diagnostic_information_request_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -23595,40 +23364,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 44,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000936AA",
-      "reference_name": "application_wdbi_class_0201_write",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 44,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000936D6",
-      "reference_name": "application_wdbi_class_2001_write",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 6,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -23644,23 +23379,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 136,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00093B56",
-      "reference_name": "application_wdbi_request_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 132,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -23670,108 +23388,6 @@
       "reference_name": "direct_call_target_00093bde",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 36,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00093C62",
-      "reference_name": "application_wdbi_callback",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 266,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00093D28",
-      "reference_name": "application_session_request_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 64,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00093E32",
-      "reference_name": "application_session_request_cancel",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 202,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00093E72",
-      "reference_name": "application_session_request_poll",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 66,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00093F9A",
-      "reference_name": "application_session_transition_background_poll",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 104,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000944C6",
-      "reference_name": "application_rdbi_request_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -24048,57 +23664,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 72,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000955DC",
-      "reference_name": "application_routine_control_type_supported",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 162,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00095624",
-      "reference_name": "application_routine_control_input_length_invalid",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 212,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000956C6",
-      "reference_name": "application_routine_control_output_capacity_invalid",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 144,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -24108,23 +23673,6 @@
       "reference_name": "direct_call_target_00095bfc",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 242,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00095C8C",
-      "reference_name": "application_routine_control_request_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -24371,40 +23919,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 10,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000B28A2",
-      "reference_name": "application_diagnostic_helper_b28a2",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 44,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000B47A6",
-      "reference_name": "application_diagnostic_helper_b47a6",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 56,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -24465,23 +23979,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 30,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000B55C4",
-      "reference_name": "application_diagnostic_helper_b55c4",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 24,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -24521,23 +24018,6 @@
       "reference_name": "direct_call_target_000b5802",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 30,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000B5D0C",
-      "reference_name": "application_diagnostic_helper_b5d0c",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -24604,23 +24084,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 6,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000B71FE",
-      "reference_name": "application_diagnostic_helper_b71fe",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 14,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -24681,23 +24144,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 6,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000B76A8",
-      "reference_name": "application_diagnostic_helper_b76a8",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 58,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -24722,23 +24168,6 @@
       "reference_name": "direct_call_target_000b7b4c",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 18,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000B7C0E",
-      "reference_name": "application_diagnostic_helper_b7c0e",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -24780,61 +24209,10 @@
       "coverage_basis": [
         "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
       ],
-      "reference_entry": "0x000FDE58",
-      "reference_name": "application_diagnostic_helper_fde58",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 8,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
       "reference_entry": "0x000FDEA8",
       "reference_name": "direct_call_target_000fdea8",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 8,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000FDED0",
-      "reference_name": "application_diagnostic_helper_fded0",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 8,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000FE060",
-      "reference_name": "application_diagnostic_helper_fe060",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -24876,44 +24254,10 @@
       "coverage_basis": [
         "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
       ],
-      "reference_entry": "0x000FE09C",
-      "reference_name": "application_diagnostic_helper_fe09c",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 8,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
       "reference_entry": "0x000FE0B0",
       "reference_name": "direct_call_target_000fe0b0",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 8,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000FE0C4",
-      "reference_name": "application_diagnostic_helper_fe0c4",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -24944,40 +24288,6 @@
       "reference_name": "direct_call_target_000fe1a0",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 8,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000FE1B4",
-      "reference_name": "application_diagnostic_helper_fe1b4",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 8,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000FE1C8",
-      "reference_name": "application_diagnostic_helper_fe1c8",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -25072,6 +24382,8 @@
       "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json": "a7056121e4f7c886c4b890749cced5ca394467b3d907386e3ed1d0c82f482288",
       "data/generated/corolla_8965H1202000_crypto_residue.json": "0619483d6ea92fc67a8089b566b43c1aada1a3c955ef041a631645d5476b9c1d",
       "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json": "bb11ebfa277539c89132d4406defe49ffb0cd99a8255d0aab6c542c9397ac560",
+      "data/generated/corolla_8965H1202000_diagnostic_residue.json": "752e98346df125b8caded970a7c0d95db5f6683c169ff70814a72f4fe4994a40",
+      "data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json": "cf8ad15a1d73109c163968d66caf32909224a19699775e112469ace92430df08",
       "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json": "23276acc88a2fa363ae0d78bbc16cebc9459caac80634aae6bf3c3756a058ab3",
       "data/generated/corolla_8965H1202000_motor_control.json": "eca55432652bac286223b181602ca62f4a64d207c39cf0698e508731a909b756",
       "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json": "79e9b0a26271f349724288b59e8f5e34733ecbf5bf56c698072b8fe9b82e402d",
@@ -26537,40 +25849,6 @@
       "transfer_status": "unique-instruction-shape-candidate"
     },
     {
-      "body_size": 74,
-      "coverage": "structural-candidate-only",
-      "coverage_basis": [
-        "unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"
-      ],
-      "reference_entry": "0x0008D3CC",
-      "reference_name": "application_wdbi_start_callback_lookup",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": "0x000877cc",
-      "target_native_evidence_files": [],
-      "transfer_status": "unique-instruction-shape-candidate"
-    },
-    {
-      "body_size": 92,
-      "coverage": "structural-candidate-only",
-      "coverage_basis": [
-        "unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"
-      ],
-      "reference_entry": "0x0008D416",
-      "reference_name": "application_wdbi_result_callback_lookup",
-      "role_recovery": null,
-      "semantic_tags": [
-        "diagnostics"
-      ],
-      "surface_recensus": [],
-      "target_entry": "0x00087816",
-      "target_native_evidence_files": [],
-      "transfer_status": "unique-instruction-shape-candidate"
-    },
-    {
       "body_size": 36,
       "coverage": "structural-candidate-only",
       "coverage_basis": [
@@ -26918,18 +26196,18 @@
   ],
   "summary": {
     "coverage_counts": {
-      "genuinely-unresolved": 375,
-      "structural-candidate-only": 109,
-      "target-native-inspected-unique-shape": 27,
-      "target-native-role-recovered": 84,
-      "target-surface-recensused": 230,
+      "genuinely-unresolved": 316,
+      "structural-candidate-only": 107,
+      "target-native-inspected-unique-shape": 29,
+      "target-native-role-recovered": 111,
+      "target-surface-recensused": 262,
       "verified-exact-body-transfer": 288
     },
-    "genuinely_unresolved_count": 375,
-    "h_native_evidence_functions_without_unique_sienna_pair": 386,
+    "genuinely_unresolved_count": 316,
+    "h_native_evidence_functions_without_unique_sienna_pair": 437,
     "named_function_count": 1113,
-    "structural_candidate_only_count": 109,
-    "surface_recensus_reference_function_count": 328,
+    "structural_candidate_only_count": 107,
+    "surface_recensus_reference_function_count": 360,
     "tag_coverage_counts": {
       "can_com": {
         "structural-candidate-only": 15,
@@ -26944,10 +26222,10 @@
         "verified-exact-body-transfer": 26
       },
       "diagnostics": {
-        "genuinely-unresolved": 59,
-        "structural-candidate-only": 10,
-        "target-native-inspected-unique-shape": 1,
-        "target-surface-recensused": 222,
+        "structural-candidate-only": 8,
+        "target-native-inspected-unique-shape": 3,
+        "target-native-role-recovered": 27,
+        "target-surface-recensused": 254,
         "verified-exact-body-transfer": 77
       },
       "motor_control": {
@@ -26991,6 +26269,6 @@
         "verified-exact-body-transfer": 3
       }
     },
-    "target_native_inspected_reference_function_count": 46
+    "target_native_inspected_reference_function_count": 48
   }
 }
