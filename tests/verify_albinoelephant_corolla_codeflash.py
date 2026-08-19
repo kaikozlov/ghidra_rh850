@@ -79,6 +79,8 @@ check("payload-build secret exact value", codeflash[0xBFD8:0xBFE8].hex() == "ba0
 check("boot SA secret exact value", codeflash[0xBFE8:0xBFF8].hex() == "f05f36b7d78c03e24ab4faef2a57d044")
 check("application SA secret exact value", codeflash[0x20840:0x20850].hex() == "893e08418c741ffa2a9c044bffa55813")
 check("boot SA stage-1 routine transfers byte-for-byte", codeflash[0x6FD0:0x6FD0 + 50] == SIENNA[0x6FEC:0x6FEC + 50])
+check("complete boot SA request/key/lockout/init state machine transfers at -0x1c",
+      codeflash[0x530C:0x5612] == SIENNA[0x5328:0x562E])
 
 print("\n== foreign Gate-2 and CRC-resigning manifest ==")
 gate = json.loads(GATE.read_text(encoding="utf-8"))

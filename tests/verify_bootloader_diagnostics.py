@@ -194,6 +194,34 @@ check("send-key success stores security state 2 at FEBF2B0F",
       CF[0x54DA:0x54E0].hex())
 check("send-key attempt counter lives at FEBF2B57",
       (BOOT_GP + (-0x6CA9)) & 0xFFFFFFFF == 0xFEBF2B57)
+# The mismatch branch tests (attempt_counter - 1). Starting from zero, the
+# first failure takes the increment/NRC-0x35 path; with counter == 1 the next
+# failure takes the lockout/NRC-0x36 path and clears the counter.
+check("send-key second-failure lockout branch is exact",
+      CF[0x5498:0x54DA] == bytes.fromhex(
+          "bfff8cc8210600c2eb0b640f1d93010a440f569364572193000a4407579301f0"
+          "c4f15e072493410a0106f0ff96fd01ea20363600e5ad449f579301ea2036350085ad"),
+      CF[0x5498:0x54DA].hex())
+check("SecurityAccess delay worker is exact and clears FEBF2B56 after expiry",
+      CF[0x5584:0x55AA] == bytes.fromhex(
+          "80072100840f5793610aca0dbfff94c7240f2193a151240f1d93e151b3054407569340063f00"))
+check("SecurityAccess init arms 200000000-tick delay and clears attempts",
+      CF[0x55AA:0x55FC] == bytes.fromhex(
+          "80072100210600c2eb0b640f1d93bfff6cc7010a440f569364572193000a44075793"
+          "249e249301f0d3f1410a80030106f0ffa003f6f5000a01f0d3f19003410a0106f0ffa6fd13f0010ab003b10b40063f00"))
+# Generic boot timer scheduling uses the same free-running counter and scales
+# its millisecond-valued 16-bit delay argument by 20,000 ticks. The CanTp
+# config immediately exercised through this scheduler contains canonical
+# 1000/150/10-ms transport timers.
+check("boot timer scheduler body pins 20000 ticks-per-ms scaling",
+      CF[0x1D2C:0x1D56] == bytes.fromhex(
+          "8007a17006e007d89c0008d0db0009c88036ffff80ffde540a30bfffdefffcf60c00240e3891c1f103d5"))
+check("CanTp timer configuration pins 1000/150/10-ms arguments",
+      int.from_bytes(CF[0x8D5C:0x8D5E], "little") == 1000 and
+      int.from_bytes(CF[0x8D5E:0x8D60], "little") == 150 and
+      int.from_bytes(CF[0x8D64:0x8D66], "little") == 10)
+check("SecurityAccess lockout duration resolves to 10 seconds",
+      200_000_000 // 20_000 == 10_000)
 check("NRC helper builds negative response for SID 0x27",
       CF[0x52CA:0x52D6] == bytes.fromhex("800721000638870020362700"))
 

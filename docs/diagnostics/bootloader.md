@@ -152,6 +152,49 @@ The timing fields are P2 = 50 ms and encoded P2* = 500 units = 5,000 ms. With
 bit 7 set, the session transition still occurs and only the final positive
 response is suppressed.
 
+### 2.1 Bootloader SecurityAccess failure counter and delay
+
+The physical-only `SecurityAccess` handler at `0x5516` implements a small
+RAM-only anti-bruteforce state machine for the bootloader `27 01/27 02` flow.
+The relevant state is:
+
+```text
+FEBF2B57  failed-key attempt counter
+FEBF2B56  delay/lockout flag
+FEBF2B20  delay start tick
+FEBF2B1C  delay duration ticks
+```
+
+A mismatching `27 02` key first checks `attempt_counter - 1`. From the initialized
+value zero, the first bad key increments `FEBF2B57` to 1 and returns NRC `0x35`
+(`invalidKey`). The second consecutive bad key takes the exceeded-attempts path:
+it records the current free-running timer value, stores duration `200000000`,
+sets `FEBF2B56 = 1`, clears `FEBF2B57` to zero, and returns NRC `0x36`
+(`exceededNumberOfAttempts`). While the flag is set, `27 01` returns NRC `0x37`
+(`requiredTimeDelayNotExpired`). `direct_call_target_00005584 @ 0x5584` clears
+the flag once the elapsed timer delta exceeds the stored duration.
+
+The timer scheduler at `0x1D2C` converts its 16-bit millisecond delay argument to
+this same free-running tick domain as `delay * 20000`; the adjacent CanTp timing
+configuration contains ordinary `1000/150/10` ms values consumed through that
+scheduler. Therefore the SecurityAccess duration is:
+
+```text
+200000000 ticks / 20000 ticks-per-ms = 10000 ms = 10 s
+```
+
+Initialization at `0x55AA` deliberately starts with the same `200000000`-tick
+delay active and the attempt counter zero. A reset therefore does not bypass the
+wait; it restarts the nominal 10-second delay. The counter, delay flag, start
+value, and duration all live in LocalRAM. No DataFlash/NvM persistence is involved.
+A successful `27 02` clears the attempt counter as it sets the bootloader SA
+unlock state to 2.
+
+This policy applies only to failed bootloader **send-key** attempts. A
+`DiagnosticSessionControl` request such as `10 02`, including an asynchronous
+programming transition whose final response is lost during reset, does not
+increment `FEBF2B57`.
+
 ## 3. ECUReset (`SID 0x11`)
 
 `uds_ecu_reset @ 0x60C2` accepts only hardReset subfunction 1:

@@ -333,6 +333,17 @@ the same `FEBF497A` / `FEBF495A` state family and 16-byte comparison shape.
 This promotes the shared cryptographic architecture for `8965H1202000` from
 family inference to firmware-static evidence.
 
+The bootloader SecurityAccess state machine transfers more broadly than the AES
+primitive alone: Sienna `0x5328..0x562D` is byte-identical to Corolla
+`0x530C..0x5611` (`-0x1C` relocation). That span contains request-seed, send-key,
+the failed-key counter, the delay worker, and SA initialization. Consequently
+this tracked Corolla image has the same statically verified policy: first bad
+`27 02` -> NRC `0x35`; second consecutive bad key -> NRC `0x36` plus a
+`200000000`-tick RAM delay; `27 01` returns `0x37` until expiry; initialization
+starts delayed with the attempt counter cleared. The shared boot timer domain
+uses `20000` ticks/ms, making the nominal delay 10 seconds. None of this state is
+persistent NVM. See [bootloader diagnostics](../diagnostics/bootloader.md) §2.1.
+
 The acquisition itself is additional dynamic evidence for the authenticated-RAM
 bootstrap: the contributor used TSKM range payloads to obtain CodeFlash,
 DataFlash, and RAM owner-side over OBD. The contributor manifest explicitly says
