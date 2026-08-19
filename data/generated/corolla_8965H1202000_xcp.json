@@ -1,0 +1,155 @@
+{
+  "custom_command_table": {
+    "h_base": "0x0002AE38",
+    "h_handlers": [
+      "0x000922CA",
+      "0x0009232A",
+      "0x00092462",
+      "0x00092576",
+      "0x0009261E",
+      "0x00092698",
+      "0x00092724"
+    ],
+    "selectors": [
+      251,
+      250,
+      245,
+      243,
+      235,
+      234,
+      228
+    ],
+    "sienna_base": "0x0002B3F0",
+    "sienna_handlers": [
+      "0x0009729A",
+      "0x000972FA",
+      "0x00097432",
+      "0x00097546",
+      "0x000975EE",
+      "0x00097668",
+      "0x000976F4"
+    ]
+  },
+  "e4_support": {
+    "h_handler": "0x00092724",
+    "remains_in_same_custom_table": true,
+    "selector": 228
+  },
+  "evidence": {
+    "canonical_corpus": "data/generated/decompilations.jsonl",
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json"
+  },
+  "f5_upload": {
+    "byte_count_max": 7,
+    "byte_count_min": 1,
+    "copy_helper": "0x00092436",
+    "exclusion_count": 5,
+    "h": "0x00092462",
+    "h_exclusion_ranges": [
+      [
+        "0xFEBE0000",
+        "0xFEBE37FF"
+      ],
+      [
+        "0xFEBE4F28",
+        "0xFEBE5193"
+      ],
+      [
+        "0xFEBF0150",
+        "0xFEBF128F"
+      ],
+      [
+        "0xFEBF4958",
+        "0xFEBF4B33"
+      ],
+      [
+        "0xFEBF6000",
+        "0xFEBF6CDF"
+      ]
+    ],
+    "interpretation": "bounded upload/read policy survives with H-specific relocated exclusion windows",
+    "localram_outer_range": [
+      "0xFEBE0000",
+      "0xFEBFFFFF"
+    ],
+    "range_helper": "0x0009238A",
+    "request_length": 8,
+    "special_codeflash_copy_check": {
+      "end_exclusive": "0x00017DF0",
+      "length": 32236,
+      "start_min": "0x00010000"
+    }
+  },
+  "fa_indexed_identifier": {
+    "h": "0x0009232A",
+    "index_limit": 5,
+    "metadata_table": "0x0002AE14",
+    "pointer_table": "0x0002AE10",
+    "response_helper": "0x0009227E"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "page_state": {
+    "reader_h": "0x00092698",
+    "reader_selectors": [
+      1,
+      2
+    ],
+    "response_helper": "0x0009227E",
+    "state_cells": [
+      "0xFEBE5DB0",
+      "0xFEBE5DB1"
+    ],
+    "writer_accepts_values": [
+      0,
+      1
+    ],
+    "writer_flag_mask": 3,
+    "writer_h": "0x0009261E"
+  },
+  "schema": "corolla-h-xcp-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "application_side_f5_read_primitive_preserved": true,
+    "boundary": "this transfers application-side command semantics; external gateway reachability remains a separate dynamic/topology question",
+    "custom_selector_set_preserved": true,
+    "xcp_residue_closed": true
+  },
+  "xcp_role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000972FA",
+      "reference_name": "xcp_command_fa_handler",
+      "selector": 250,
+      "target_body_size": 96,
+      "target_entry": "0x0009232A"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00097432",
+      "reference_name": "xcp_command_f5_handler",
+      "selector": 245,
+      "target_body_size": 100,
+      "target_entry": "0x00092462"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000975EE",
+      "reference_name": "xcp_command_eb_handler",
+      "selector": 235,
+      "target_body_size": 122,
+      "target_entry": "0x0009261E"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00097668",
+      "reference_name": "xcp_command_ea_handler",
+      "selector": 234,
+      "target_body_size": 104,
+      "target_entry": "0x00092698"
+    }
+  ],
+  "xcp_role_closure_count": 4
+}

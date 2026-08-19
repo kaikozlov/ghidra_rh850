@@ -193,6 +193,28 @@ def main() -> None:
                 "role": item["reference_name"],
             }
 
+    xcp_path = REPO / "data/generated/corolla_8965H1202000_xcp.json"
+    if xcp_path.is_file():
+        xcp = load_json(xcp_path)
+        xcp_rel = str(xcp_path.relative_to(REPO))
+        evidence_file_hashes[xcp_rel] = sha256(xcp_path.read_bytes())
+        xcp_ev_path = REPO / xcp["evidence"]["decompiler_evidence"]
+        xcp_ev = load_json(xcp_ev_path)
+        xcp_targets = {int(r["entry"], 16) for r in xcp_ev.get("functions", [])}
+        for item in xcp.get("xcp_role_closure", []):
+            ref = int(item["reference_entry"], 16)
+            target = int(item["target_entry"], 16)
+            if target not in xcp_targets:
+                raise ValueError(f"XCP role target lacks tracked target-native evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["target_entry"],
+                "report": xcp_rel,
+                "evidence": xcp["evidence"]["decompiler_evidence"],
+                "role": item["reference_name"],
+            }
+
     # Explicit generated-surface recensuses. These are not function homology:
     # they prove the foreign generated surface was exhaustively re-enumerated.
     recensus: dict[int, set[str]] = defaultdict(set)

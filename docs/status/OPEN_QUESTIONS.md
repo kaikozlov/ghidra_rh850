@@ -316,8 +316,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   reducing the genuinely-unresolved matrix residue to 454. The nine changed CAN/COM
   roles are now also target-native recovered. The three changed storage/NvM roles
   are likewise closed: H preserves object-15 exclusion/restore geometry but the
-  supplied object-15 copies are invalid. The current residue is **442**, with zero
-  unresolved `scheduler_system`, `can_com`, or `storage_nvm` entries. Remaining
+  supplied object-15 copies are invalid. The four changed XCP handlers are also
+  target-native closed, preserving the custom selector set and application-side F5
+  read semantics with H-specific exclusions. The current residue is **438**, with
+  zero unresolved `scheduler_system`, `can_com`, `storage_nvm`, or `xcp` entries. Remaining
   H-static work is the explicit residue outside those closed surfaces; generic DAQ/XCP
   callbacks remain optional unless an exploit hypothesis needs them. If revisited
   dynamically, record

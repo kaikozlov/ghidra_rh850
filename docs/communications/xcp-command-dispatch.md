@@ -60,6 +60,13 @@ by exact body size and SHA-256 in the canonical CSV. The handlers converge on
 the response helper at `0x9724E`, which builds an eight-byte response in RAM at
 `0xFEBE5E94`.
 
+For Corolla H `8965H1202000`, the same generated selector sequence is present at
+`0x2AE38`; `FA/F5/EB/EA` map to `9232A/92462/9261E/92698`. The F5 outer LocalRAM
+policy and `0x7DEC` CodeFlash special case remain, but the five exclusion windows
+are H-specific (`FEBE0000..37FF`, `FEBE4F28..5193`, `FEBF0150..128F`,
+`FEBF4958..4B33`, `FEBF6000..6CDF`). EB/EA page state moves to `FEBE5DB0/5DB1`.
+See the Corolla variant report §7.19 for image-bound evidence.
+
 ## Security path
 
 All request frames are eight bytes. This is the minimal firmware-static proof

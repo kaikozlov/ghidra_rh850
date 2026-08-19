@@ -17288,19 +17288,28 @@
     },
     {
       "body_size": 96,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: xcp_command_fa_handler",
+        "report:data/generated/corolla_8965H1202000_xcp.json",
+        "target-native:data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json"
       ],
       "reference_entry": "0x000972FA",
       "reference_name": "xcp_command_fa_handler",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_xcp.json",
+        "role": "xcp_command_fa_handler",
+        "target_entry": "0x0009232A"
+      },
       "semantic_tags": [
         "xcp"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0009232A",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -17335,19 +17344,28 @@
     },
     {
       "body_size": 100,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: xcp_command_f5_handler",
+        "report:data/generated/corolla_8965H1202000_xcp.json",
+        "target-native:data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json"
       ],
       "reference_entry": "0x00097432",
       "reference_name": "xcp_command_f5_handler",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_xcp.json",
+        "role": "xcp_command_f5_handler",
+        "target_entry": "0x00092462"
+      },
       "semantic_tags": [
         "xcp"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00092462",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -17414,36 +17432,54 @@
     },
     {
       "body_size": 122,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: xcp_command_eb_handler",
+        "report:data/generated/corolla_8965H1202000_xcp.json",
+        "target-native:data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json"
       ],
       "reference_entry": "0x000975EE",
       "reference_name": "xcp_command_eb_handler",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_xcp.json",
+        "role": "xcp_command_eb_handler",
+        "target_entry": "0x0009261E"
+      },
       "semantic_tags": [
         "xcp"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0009261E",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 104,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: xcp_command_ea_handler",
+        "report:data/generated/corolla_8965H1202000_xcp.json",
+        "target-native:data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json"
       ],
       "reference_entry": "0x00097668",
       "reference_name": "xcp_command_ea_handler",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_xcp.json",
+        "role": "xcp_command_ea_handler",
+        "target_entry": "0x00092698"
+      },
       "semantic_tags": [
         "xcp"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00092698",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -24588,23 +24624,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 96,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000972FA",
-      "reference_name": "xcp_command_fa_handler",
-      "role_recovery": null,
-      "semantic_tags": [
-        "xcp"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 172,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -24635,23 +24654,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 100,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00097432",
-      "reference_name": "xcp_command_f5_handler",
-      "role_recovery": null,
-      "semantic_tags": [
-        "xcp"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 84,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -24676,40 +24678,6 @@
       "reference_name": "direct_call_target_00097506",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 122,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000975EE",
-      "reference_name": "xcp_command_eb_handler",
-      "role_recovery": null,
-      "semantic_tags": [
-        "xcp"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 104,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00097668",
-      "reference_name": "xcp_command_ea_handler",
-      "role_recovery": null,
-      "semantic_tags": [
-        "xcp"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -25634,7 +25602,9 @@
       "data/generated/corolla_8965H1202000_storage_nvm.json": "a7459c13d6bc02afdc1f1fbcc2dd572e90ac6e3f2848840e9ce7929c6150bb2b",
       "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json": "df04f0bee2bd39cb4d338efe22cf7744f7da8be7b3144f4df487092c4b90af2b",
       "data/generated/corolla_8965H1202000_system_orchestration.json": "a00144920f5c18cf13398c4ac7b5606ba33107c37f3cdf6c9bb2f613ed58f395",
-      "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json": "94b3c107f9fbfde21c25bd9a65a62e051e69236896612173eb24e749347275b0"
+      "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json": "94b3c107f9fbfde21c25bd9a65a62e051e69236896612173eb24e749347275b0",
+      "data/generated/corolla_8965H1202000_xcp.json": "f90ff5f0482f97aa6779ea0897d6b579fb0a9baae740bdc8b1f13ade81737340",
+      "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json": "e4b287abe347bcb6dae233e52d1ba3c8b732c7a5e260fe7137f1f731a20f1cb5"
     }
   },
   "structural_candidate_only": [
@@ -27500,15 +27470,15 @@
   ],
   "summary": {
     "coverage_counts": {
-      "genuinely-unresolved": 442,
+      "genuinely-unresolved": 438,
       "structural-candidate-only": 111,
       "target-native-inspected-unique-shape": 25,
-      "target-native-role-recovered": 20,
+      "target-native-role-recovered": 24,
       "target-surface-recensused": 227,
       "verified-exact-body-transfer": 288
     },
-    "genuinely_unresolved_count": 442,
-    "h_native_evidence_functions_without_unique_sienna_pair": 353,
+    "genuinely_unresolved_count": 438,
+    "h_native_evidence_functions_without_unique_sienna_pair": 364,
     "named_function_count": 1113,
     "structural_candidate_only_count": 111,
     "surface_recensus_reference_function_count": 325,
@@ -27570,7 +27540,7 @@
         "verified-exact-body-transfer": 138
       },
       "xcp": {
-        "genuinely-unresolved": 4,
+        "target-native-role-recovered": 4,
         "verified-exact-body-transfer": 3
       }
     },

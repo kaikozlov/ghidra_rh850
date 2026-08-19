@@ -1,0 +1,111 @@
+{
+  "boundary": "only forced XCP command/helper boundaries are promoted; unrelated disposable-project partitioning is ignored",
+  "function_count": 11,
+  "functions": [
+    {
+      "body_sha256": "ec792afb4318ad59a26c3bf1b42e44d18beda163d73a30294fe253a2f336b4e7",
+      "body_size": 96,
+      "decompiled_c": "\nundefined4 FUN_0009232a(int param_1,short param_2)\n\n{\n  int iVar1;\n  int iVar2;\n  undefined4 uVar3;\n  undefined4 uVar4;\n  int iVar5;\n  undefined1 auStack_18 [4];\n  undefined1 auStack_14 [8];\n  \n  uVar4 = 0xa5;\n  uVar3 = 0x21;\n  iVar5 = 0;\n  do {\n    auStack_18[iVar5] = 0;\n    iVar2 = iVar5 + 1;\n    iVar1 = iVar5 + -7;\n    iVar5 = iVar2;\n  } while (iVar1 < 0 != (iVar2 < 0 && -1 < iVar1));\n  if (param_2 == 8) {\n    if (*(byte *)(param_1 + 1) < 5) {\n      iVar5 = (uint)*(byte *)(param_1 + 1) * 8;\n      uVar4 = 0x5a;\n      auStack_18[1] = 0;\n      FUN_00092314(*(undefined4 *)(iVar5 + 0x2ae14),auStack_14);\n      FUN_0007c390(*(undefined4 *)(iVar5 + 0x2ae10));\n    }\n    else {\n      uVar3 = 0x22;\n    }\n  }\n  FUN_0009227e(auStack_18,uVar4,uVar3);\n  return 0x5a;\n}\n\n",
+      "decompiled_c_sha256": "8de23db19fe5863d20c7523e9a5c3464167928f1bf1c808bb8d211d20020ab25",
+      "entry": "0x0009232A",
+      "name": "FUN_0009232a"
+    },
+    {
+      "body_sha256": "9408ed82510985279521923fa92a79c492661acbe8e487f28ffa51bd0fb6f89e",
+      "body_size": 100,
+      "decompiled_c": "\nundefined4 FUN_00092462(int param_1,short param_2)\n\n{\n  int iVar1;\n  int iVar2;\n  byte bVar3;\n  undefined4 uVar4;\n  int iVar5;\n  undefined4 uVar6;\n  undefined4 uVar7;\n  undefined1 auStack_1c [16];\n  \n  uVar6 = 0xa5;\n  uVar7 = 0x21;\n  iVar5 = 0;\n  do {\n    auStack_1c[iVar5] = 0;\n    iVar2 = iVar5 + 1;\n    iVar1 = iVar5 + -7;\n    iVar5 = iVar2;\n  } while (iVar1 < 0 != (iVar2 < 0 && -1 < iVar1));\n  if (param_2 == 8) {\n    bVar3 = *(byte *)(param_1 + 1);\n    if ((bVar3 == 0) || (7 < bVar3)) {\n      uVar7 = 0x22;\n    }\n    else {\n      uVar4 = FUN_0007c39c();\n      iVar5 = FUN_0009238a(uVar4,bVar3);\n      if (iVar5 == 0) {\n        uVar6 = 0x5a;\n        FUN_00092436();\n      }\n      else {\n        uVar7 = 0x24;\n      }\n    }\n  }\n  FUN_0009227e(auStack_1c,uVar6,uVar7);\n  return 0x5a;\n}\n\n",
+      "decompiled_c_sha256": "fc1ddcf3ac6512dc700b8fb011d457efa2560df712d77dc511b5e463d98f5310",
+      "entry": "0x00092462",
+      "name": "FUN_00092462"
+    },
+    {
+      "body_sha256": "5b27d286030f7058d2db0856bbaeaec90bbd920c2c5dc22e39527e7edbeb288f",
+      "body_size": 122,
+      "decompiled_c": "\nundefined4 FUN_0009261e(int param_1,short param_2)\n\n{\n  int iVar1;\n  int iVar2;\n  byte bVar3;\n  byte bVar4;\n  undefined4 uVar5;\n  undefined4 uVar6;\n  int iVar7;\n  undefined1 auStack_c [12];\n  \n  uVar5 = 0xa5;\n  uVar6 = 0x21;\n  iVar7 = 0;\n  do {\n    auStack_c[iVar7] = 0;\n    iVar2 = iVar7 + 1;\n    iVar1 = iVar7 + -7;\n    iVar7 = iVar2;\n  } while (iVar1 < 0 != (iVar2 < 0 && -1 < iVar1));\n  if (param_2 == 8) {\n    if (*(char *)(param_1 + 2) == '\\0') {\n      bVar3 = *(byte *)(param_1 + 3);\n      bVar4 = *(byte *)(param_1 + 1);\n      if ((bVar3 < 2) && ((bVar3 == 1 || ((bVar4 & 1) == 0)))) {\n        if ((bVar4 & 3) == 0) {\n          uVar6 = 0x27;\n        }\n        else {\n          uVar5 = 0x5a;\n          if ((bVar4 & 2) != 0) {\n            DAT_febe5db1 = bVar3;\n          }\n          if ((bVar4 & 1) != 0) {\n            DAT_febe5db0 = bVar3;\n          }\n        }\n      }\n      else {\n        uVar6 = 0x26;\n      }\n    }\n    else {\n      uVar6 = 0x28;\n    }\n  }\n  FUN_0009227e(auStack_c,uVar5,uVar6);\n  return 0x5a;\n}\n\n",
+      "decompiled_c_sha256": "74e9aa530cbdc089059016a88f6d2c4bbbf31b679b2e166aaa4e7a83bca7851f",
+      "entry": "0x0009261E",
+      "name": "FUN_0009261e"
+    },
+    {
+      "body_sha256": "c0e4c64e3c5305ccc23329baba91ebf7f1c49f9ac19ed3ea078dd73f926575eb",
+      "body_size": 104,
+      "decompiled_c": "\nundefined4 FUN_00092698(int param_1,short param_2)\n\n{\n  int iVar1;\n  int iVar2;\n  undefined1 uVar3;\n  undefined4 uVar4;\n  undefined4 uVar5;\n  int iVar6;\n  undefined1 auStack_c [12];\n  \n  uVar4 = 0xa5;\n  uVar5 = 0x21;\n  iVar6 = 0;\n  do {\n    auStack_c[iVar6] = 0;\n    iVar2 = iVar6 + 1;\n    iVar1 = iVar6 + -7;\n    iVar6 = iVar2;\n  } while (iVar1 < 0 != (iVar2 < 0 && -1 < iVar1));\n  if (param_2 == 8) {\n    if (*(char *)(param_1 + 2) == '\\0') {\n      uVar3 = DAT_febe5db0;\n      if ((*(char *)(param_1 + 1) == '\\x01') ||\n         (uVar3 = DAT_febe5db1, *(char *)(param_1 + 1) == '\\x02')) {\n        uVar4 = 0x5a;\n        auStack_c[3] = uVar3;\n      }\n      else {\n        uVar5 = 0x27;\n      }\n    }\n    else {\n      uVar5 = 0x28;\n    }\n  }\n  FUN_0009227e(auStack_c,uVar4,uVar5);\n  return 0x5a;\n}\n\n",
+      "decompiled_c_sha256": "a870da8ff415c5790ff48e6177f40dae5b27586cdd83fe132c40ae6b201054b7",
+      "entry": "0x00092698",
+      "name": "FUN_00092698"
+    },
+    {
+      "body_sha256": "22c1d5ead5c00f8aa35d9acf1c9f56a0f8395a3f4d0fb962dc6539d59c39d851",
+      "body_size": 76,
+      "decompiled_c": "\nvoid FUN_0009227e(int param_1,char param_2,undefined1 param_3)\n\n{\n  int iVar1;\n  int iVar2;\n  int iVar3;\n  \n  if (param_2 == 'Z') {\n    uRamfebe5da8 = 0xff;\n    iVar3 = 1;\n    do {\n      iVar2 = iVar3 + 1;\n      iVar1 = iVar3 + -7;\n      *(undefined1 *)(iVar3 + -0x141a258) = *(undefined1 *)(iVar3 + param_1);\n      iVar3 = iVar2;\n    } while (iVar1 < 0 != (iVar2 < 0 && -1 < iVar1));\n    return;\n  }\n  uRamfebe5da8 = 0xfe;\n  iVar3 = 2;\n  uRamfebe5da9 = param_3;\n  do {\n    iVar2 = iVar3 + 1;\n    iVar1 = iVar3 + -7;\n    *(undefined1 *)(iVar3 + -0x141a258) = *(undefined1 *)(iVar3 + param_1);\n    iVar3 = iVar2;\n  } while (iVar1 < 0 != (iVar2 < 0 && -1 < iVar1));\n  return;\n}\n\n",
+      "decompiled_c_sha256": "da463a8f7adfcb7e28d5433e50a1aed75e4927e9ceb501eef8c72cee3fefef84",
+      "entry": "0x0009227E",
+      "name": "FUN_0009227e"
+    },
+    {
+      "body_sha256": "6b8f6313a36806a1d07154f0bedad0ecccc551b2dd22769a8e7349df6be47c54",
+      "body_size": 22,
+      "decompiled_c": "\nvoid FUN_00092314(undefined4 param_1,undefined1 *param_2)\n\n{\n  param_2[1] = (char)((uint)param_1 >> 8);\n  *param_2 = (char)param_1;\n  param_2[2] = (char)((uint)param_1 >> 0x10);\n  param_2[3] = (char)((uint)param_1 >> 0x18);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1c1a2974609c7448fb6f61d2a0da9b36b49ff0e5a0f98b04159af620744c95cb",
+      "entry": "0x00092314",
+      "name": "FUN_00092314"
+    },
+    {
+      "body_sha256": "5e025ad5e431b85db528163550548ebf6190159e01466bf42c87a953970353e8",
+      "body_size": 172,
+      "decompiled_c": "\nundefined4 FUN_0009238a(undefined *param_1,int param_2)\n\n{\n  int iVar1;\n  undefined *puVar2;\n  undefined4 uVar3;\n  undefined *puVar4;\n  int iVar5;\n  int iVar6;\n  \n  puVar2 = param_1;\n  if ((param_2 != 0) && (puVar2 = (undefined *)0xffffffff, param_1 < (undefined *)~(param_2 - 1U)))\n  {\n    puVar2 = param_1 + param_2 + -1;\n  }\n  if (((undefined *)0xfebdffff < param_1) && (puVar2 < (undefined *)0xfec00000)) {\n    iVar5 = 0;\n    while( true ) {\n      if (iVar5 - DAT_0002ae00 < 0 ==\n          (iVar5 < 0 != DAT_0002ae00 < 0 && DAT_0002ae00 < 0 == iVar5 - DAT_0002ae00 < 0)) {\n        return 0;\n      }\n      if ((param_1 <= (undefined *)(&DAT_00028f10)[iVar5 * 2]) &&\n         ((undefined *)(&DAT_00028f0c)[iVar5 * 2] <= puVar2)) break;\n      iVar5 = iVar5 + 1;\n    }\n    return 1;\n  }\n  if (((param_2 == 0x7dec) && ((undefined *)0xffff < param_1)) && (puVar2 < &DAT_00017df0)) {\n    return 0;\n  }\n  uVar3 = 1;\n  iVar5 = 0;\n  do {\n    iVar6 = *(int *)(iVar5 * 8 + 0x2ae14);\n    if (((iVar6 != 0) && (puVar4 = *(undefined **)(iVar5 * 8 + 0x2ae10), puVar4 <= param_1)) &&\n       (puVar2 <= puVar4 + iVar6 + -1)) {\n      uVar3 = 0;\n    }\n    iVar1 = iVar5 + 1;\n    iVar6 = iVar5 + -4;\n    iVar5 = iVar1;\n  } while (iVar6 < 0 != (iVar1 < 0 && -1 < iVar6));\n  return uVar3;\n}\n\n",
+      "decompiled_c_sha256": "8a5ec22e481c0dedeb0034726cf27793994ab9a16738b067004c510e27eba0c4",
+      "entry": "0x0009238A",
+      "name": "FUN_0009238a"
+    },
+    {
+      "body_sha256": "cf6f60fee089bbda17d5dad315bf9bbda7fac5ee89790df6ce57ef8a315881e1",
+      "body_size": 44,
+      "decompiled_c": "\nvoid FUN_00092436(int param_1,uint param_2,int param_3)\n\n{\n  uint uVar1;\n  \n  for (uVar1 = 0; uVar1 < (param_2 & 0xff); uVar1 = uVar1 + 1) {\n    *(undefined1 *)(uVar1 + param_3) = *(undefined1 *)(uVar1 + param_1);\n  }\n  FUN_0007c390((param_2 & 0xff) + param_1);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "86e221cd37323ed0d926f2482292dd6ee0b57060529add40d6c781facf3eb9ef",
+      "entry": "0x00092436",
+      "name": "FUN_00092436"
+    },
+    {
+      "body_sha256": "a1f3a33374dd11e34ec54491c10f5f4d1ccd3e61125a4d91b66c1d34d18e0112",
+      "body_size": 12,
+      "decompiled_c": "\nvoid FUN_0007c390(void)\n\n{\n  FUN_0007b598();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a8ca4e55adf927da36a9c59b0edb114e2ba9c704cc6a13f10abd5f56c3b3e425",
+      "entry": "0x0007C390",
+      "name": "FUN_0007c390"
+    },
+    {
+      "body_sha256": "71abf85a79dd1c98f0b400787cadcd683d907305f705ceccdfb234fb91be2928",
+      "body_size": 12,
+      "decompiled_c": "\nvoid FUN_0007c39c(void)\n\n{\n  FUN_0007b59e();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "eb29ea06f9164f9cfd3c86c0c255b24d5d3b9f8fb13f718bb1ed9bcbc3b1af78",
+      "entry": "0x0007C39C",
+      "name": "FUN_0007c39c"
+    },
+    {
+      "body_sha256": "14367502c37c230022c4c3d55fded0377095e663d89fbe83efc0834efa84050b",
+      "body_size": 106,
+      "decompiled_c": "\nundefined4 FUN_00092724(int param_1,short param_2)\n\n{\n  int iVar1;\n  int iVar2;\n  int iVar3;\n  undefined4 uVar4;\n  undefined4 uVar5;\n  undefined1 auStack_14 [12];\n  \n  uVar4 = 0xa5;\n  uVar5 = 0x21;\n  iVar3 = 0;\n  do {\n    auStack_14[iVar3] = 0;\n    iVar2 = iVar3 + 1;\n    iVar1 = iVar3 + -7;\n    iVar3 = iVar2;\n  } while (iVar1 < 0 != (iVar2 < 0 && -1 < iVar1));\n  if (param_2 == 8) {\n    if ((*(char *)(param_1 + 1) == '\\0') && (*(char *)(param_1 + 3) == '\\0')) {\n      if ((*(byte *)(param_1 + 2) < 2) && (*(byte *)(param_1 + 4) < 2)) {\n        if (*(byte *)(param_1 + 4) == 1) {\n          uVar4 = 0x5a;\n          if (*(byte *)(param_1 + 2) == 0) {\n            func_0x00092700();\n          }\n        }\n        else {\n          uVar5 = 0x23;\n        }\n      }\n      else {\n        uVar5 = 0x26;\n      }\n    }\n    else {\n      uVar5 = 0x28;\n    }\n  }\n  FUN_0009227e(auStack_14,uVar4,uVar5);\n  return 0x5a;\n}\n\n",
+      "decompiled_c_sha256": "c56aa0c4f0c8845124a3392cd8b2b0dc568486c418c7825bb5a67b76e59b230e",
+      "entry": "0x00092724",
+      "name": "FUN_00092724"
+    }
+  ],
+  "image": {
+    "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "codeflash_size": 1048576,
+    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+  },
+  "schema": "corolla-h-xcp-decompiler-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpora": [
+    {
+      "path": "build/h_8965H1202000_xcp_decompilations.jsonl",
+      "sha256": "c40b65647c1097f1497b2a4df8766c486ce150bd055ef289b7657c0927c76432"
+    },
+    {
+      "path": "build/h_8965H1202000_xcp_helpers_decompilations.jsonl",
+      "sha256": "29d2be920b4eefe74ecb1d0767db2f81a7c60d1c34b6f5942223885435b5415c"
+    }
+  ]
+}

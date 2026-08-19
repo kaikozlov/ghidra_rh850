@@ -1471,10 +1471,10 @@ promotion:
 named canonical functions                 1113
 verified exact-body transfers              288
 target-native inspected unique-shape       25
-target-native role-recovered                 20
+target-native role-recovered                 24
 complete target-surface recensuses          227
 structural candidates only                  111
-genuinely unresolved                        442
+genuinely unresolved                        438
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1495,7 +1495,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(353 currently have
+(364 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -1663,10 +1663,61 @@ evidence own this conclusion; `tests/verify_corolla_8965H1202000_storage_nvm.py`
 pins the three roles, protected ranges, 16-object namespace, queue state/worker,
 and object-15 validity. `storage_nvm` now has **zero genuinely-unresolved named
 functions**; because two of these functions are also tagged SecOC/NvM, the
-`secoc_icus` residue falls 44→42 and the global named residue falls **445→442**.
-The current denominator is therefore 288 exact, 25 inspected unique-shape, 20
-role-recovered, 227 surface-recensused, 111 structural-only, and 442 genuinely
-unresolved canonical functions.
+`secoc_icus` residue falls 44→42.
+
+### 7.19 XCP custom commands and H-specific read boundary
+
+The four remaining XCP command-handler gaps are now target-native:
+
+```text
+S 972FA XCP 0xFA -> H 9232A
+S 97432 XCP 0xF5 -> H 92462
+S 975EE XCP 0xEB -> H 9261E
+S 97668 XCP 0xEA -> H 92698
+```
+
+The generated custom-command table proves the roles independently of byte
+alignment. Sienna and H have the identical selector sequence
+`FB, FA, F5, F3, EB, EA, E4`; H's pointer fields resolve to
+`922CA/9232A/92462/92576/9261E/92698/92724`. None of these four commands is
+compiled out on H.
+
+H `FA` retains the indexed-identifier limit `< 5` and uses the relocated
+`2AE10/2AE14` metadata pair. H `F5` retains eight-byte requests with upload
+length restricted to **1..7 bytes**, then calls range helper `9238A` and copy/MTA
+advance helper `92436`. The outer read policy remains LocalRAM
+`FEBE0000..FEBFFFFF` with five exclusion intervals, but three exclusion windows
+move with H's RAM layout:
+
+```text
+FEBE0000..FEBE37FF
+FEBE4F28..FEBE5193
+FEBF0150..FEBF128F
+FEBF4958..FEBF4B33
+FEBF6000..FEBF6CDF
+```
+
+`9238A` also retains the special `length == 0x7DEC` CodeFlash rule spanning
+`0x10000..0x17DEF`. Thus the application-side bounded upload/read primitive
+survives on H, but Sienna's exact exclusion addresses must not be reused.
+External gateway/connector reachability remains a separate topology/dynamic
+question.
+
+The `EB/EA` pair likewise survives as a shared page-state writer/reader, relocated
+from Sienna `FEBE5E9C/5E9D` to H **`FEBE5DB0/5DB1`**. `EB` still validates a
+0/1 value and flag mask `&3`; `EA` still reads selector 1 or 2. `E4` remains in
+the same custom-command table at H `92724`, preserving the surrounding page-copy
+family.
+
+Machine-readable ownership is `data/generated/corolla_8965H1202000_xcp.json`
+plus its compact decompiler evidence;
+`tests/verify_corolla_8965H1202000_xcp.py` pins the four roles, selector table,
+H-specific F5 bounds/exclusions, page-state cells, and E4 presence. The `xcp`
+tag now has **zero genuinely-unresolved named functions** and the global residue
+falls **442→438**. Current coverage is 288 exact, 25 inspected unique-shape, 24
+role-recovered, 227 surface-recensused, 111 structural-only, and 438 genuinely
+unresolved canonical functions; 364 H-native evidence functions have no unique
+Sienna structural pair and remain separately counted.
 
 ## 8. Remaining evidence boundary
 

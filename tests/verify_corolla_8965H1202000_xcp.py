@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+"""Verify target-native H XCP command residuals."""
+from __future__ import annotations
+import hashlib,json,struct,subprocess,sys,tempfile
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[1];ART=ROOT/'data/generated/corolla_8965H1202000_xcp.json';EV=ROOT/'data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json';BUILD=ROOT/'tools/build_corolla_h_xcp.py';HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
+p=f=0
+def sha(b):return hashlib.sha256(b).hexdigest()
+def ck(n,c,d=''):
+ global p,f
+ ok=bool(c);p+=ok;f+=not ok;print(f"[{'PASS' if ok else 'FAIL'}][raw_bytes] {n}"+(f' ({d})' if d else ''))
+a=json.loads(ART.read_text());e=json.loads(EV.read_text());H=HRAW.read_bytes()[:0x100000];by={int(x['entry'],16):x for x in e['functions']}
+with tempfile.TemporaryDirectory() as td:
+ out=Path(td)/'x.json';r=subprocess.run([sys.executable,str(BUILD),'--out',str(out)],cwd=ROOT,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True);ck('builder exits',r.returncode==0,r.stdout[-300:] if r.returncode else '');ck('report regenerates exactly',r.returncode==0 and out.read_bytes()==ART.read_bytes())
+ck('H hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);ck('11 H XCP functions compacted',e['function_count']==11==len(e['functions']));ck('all raw bodies validate',all(sha(H[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in e['functions']));ck('all decompiler hashes validate',all(sha(x['decompiled_c'].encode())==x['decompiled_c_sha256'] for x in e['functions']))
+exp={'0x000972FA':'0x0009232A','0x00097432':'0x00092462','0x000975EE':'0x0009261E','0x00097668':'0x00092698'};ck('four XCP residual roles recovered',a['xcp_role_closure_count']==4 and {x['reference_entry']:x['target_entry'] for x in a['xcp_role_closure']}==exp)
+ck('custom selector sequence is unchanged',a['custom_command_table']['selectors']==[0xFB,0xFA,0xF5,0xF3,0xEB,0xEA,0xE4]);ck('H command table points at all four recovered handlers',a['custom_command_table']['h_handlers'][1:6:1][0]=='0x0009232A' and a['custom_command_table']['h_handlers'][2]=='0x00092462' and a['custom_command_table']['h_handlers'][4]=='0x0009261E' and a['custom_command_table']['h_handlers'][5]=='0x00092698')
+fa=a['fa_indexed_identifier'];ck('FA keeps index<5 behavior',fa['index_limit']==5 and '< 5' in by[0x9232A]['decompiled_c']);f5=a['f5_upload'];ck('F5 accepts only lengths 1..7',f5['byte_count_min']==1 and f5['byte_count_max']==7 and all(t in by[0x92462]['decompiled_c'] for t in ('bVar3 == 0','7 < bVar3')));ck('F5 range helper covers LocalRAM outer range','0xfebdffff < param_1' in by[0x9238A]['decompiled_c'] and '0xfec00000' in by[0x9238A]['decompiled_c']);ck('F5 has five H-specific exclusion ranges',f5['exclusion_count']==5 and len(f5['h_exclusion_ranges'])==5);ck('F5 retains special CodeFlash 0x10000..17DEF rule',f5['special_codeflash_copy_check']['length']==0x7DEC and '0x7dec' in by[0x9238A]['decompiled_c'] and 'DAT_00017df0' in by[0x9238A]['decompiled_c']);ck('F5 copy helper advances MTA', 'FUN_0007c390' in by[0x92436]['decompiled_c'])
+ps=a['page_state'];ck('EB writer and EA reader share H state cells',all(cell.lower().replace('0x','') in (by[0x9261E]['decompiled_c']+by[0x92698]['decompiled_c']).lower() for cell in ps['state_cells']));ck('EB writer preserves flag mask and value<2 checks','bVar4 & 3' in by[0x9261E]['decompiled_c'] and 'bVar3 < 2' in by[0x9261E]['decompiled_c']);ck('EA reader preserves selectors 1/2',"== '\\x01'" in by[0x92698]['decompiled_c'] and "== '\\x02'" in by[0x92698]['decompiled_c']);ck('E4 remains in same custom command table',a['e4_support']['remains_in_same_custom_table'] and a['custom_command_table']['h_handlers'][-1]=='0x00092724');ck('application-side F5 primitive explicitly preserved',a['static_conclusion']['application_side_f5_read_primitive_preserved']);ck('external reachability remains bounded','external gateway reachability' in a['static_conclusion']['boundary'])
+print(f'\nResults: {p} passed, {f} failed');raise SystemExit(1 if f else 0)

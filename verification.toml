@@ -1501,6 +1501,27 @@ paths = [
 oracle = "raw_bytes"
 
 
+[suite.corolla_8965h_xcp]
+tests = ["tests/verify_corolla_8965H1202000_xcp.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_xcp.py",
+  "tools/extract_corolla_h_xcp_evidence.py",
+  "tools/build_corolla_h_xcp.py",
+  "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_xcp.json",
+  "data/generated/decompilations.jsonl",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/",
+  "docs/communications/xcp-command-dispatch.md",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
+
 [suite.corolla_8965h_static_coverage]
 tests = ["tests/verify_corolla_8965H1202000_static_coverage.py"]
 paths = [
@@ -1521,6 +1542,8 @@ paths = [
   "data/generated/corolla_8965H1202000_can_com.json",
   "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_storage_nvm.json",
+  "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_xcp.json",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/reference/generated-artifacts.md",
