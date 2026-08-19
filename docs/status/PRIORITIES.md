@@ -241,10 +241,12 @@ object-15 protected geometry and invalid supplied object-15 snapshot, reducing t
 global residue again to 442 and `storage_nvm` unresolved to zero. The four XCP
 command-handler gaps are now also closed—including H-specific F5 exclusion ranges
 and surviving EB/EA state—reducing the residue to 438 with `xcp` unresolved
-zero. The five remaining motor-control roles are now also target-native closed,
-including the H-specific simplified axis-B PI and calibration state-0x33 path;
-`motor_control` unresolved is zero and the global residue is **433**. Continue
-from that explicit residue, prioritizing remaining SecOC/steering/crypto and
+zero. The five remaining motor-control roles are target-native closed, and the full
+42-function SecOC/ICU-S residue is now closed as well, including the lower
+command5/7/8 adapters, freshness graph, Rx ingress, ICU ISRs, crypto-test callbacks,
+and regenerated D7 unpacker. `secoc_icus` unresolved is zero, overlapping
+`crypto` unresolved is **7**, and the global residue is **391**. Continue from
+that explicit residue, prioritizing the remaining crypto/steering/diagnostic and
 externally reachable semantics rather than repeating closed passes;
 generic XCP DAQ callbacks remain optional unless a concrete exploit question
 needs them.

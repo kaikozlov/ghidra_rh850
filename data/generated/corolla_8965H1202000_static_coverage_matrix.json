@@ -5456,19 +5456,28 @@
     },
     {
       "body_size": 194,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_unpack_can_0d7_secoc_fd",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0004B3AA",
       "reference_name": "application_unpack_can_0d7_secoc_fd",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "application_unpack_can_0d7_secoc_fd",
+        "target_entry": "0x000468FA"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000468FA",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -11361,36 +11370,54 @@
     },
     {
       "body_size": 66,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_icus_ch292_isr",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x000650AC",
       "reference_name": "application_icus_ch292_isr",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "application_icus_ch292_isr",
+        "target_entry": "0x0005F3EC"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0005F3EC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 66,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: application_icus_ch293_isr",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x000650EE",
       "reference_name": "application_icus_ch293_isr",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "application_icus_ch293_isr",
+        "target_entry": "0x0005F42E"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0005F42E",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -12124,87 +12151,132 @@
     },
     {
       "body_size": 38,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command5_test_result_compare",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00069068",
       "reference_name": "icus_command5_test_result_compare",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command5_test_result_compare",
+        "target_entry": "0x000633A0"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000633A0",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 34,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_key_update_completion_callback",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0006920A",
       "reference_name": "icus_key_update_completion_callback",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_key_update_completion_callback",
+        "target_entry": "0x00063542"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00063542",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 26,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command1_3_test_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0006922C",
       "reference_name": "icus_command1_3_test_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command1_3_test_completion",
+        "target_entry": "0x00063564"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00063564",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 36,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command7_test_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00069246",
       "reference_name": "icus_command7_test_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command7_test_completion",
+        "target_entry": "0x0006357E"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0006357E",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 26,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command5_test_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0006926A",
       "reference_name": "icus_command5_test_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command5_test_completion",
+        "target_entry": "0x000635A2"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000635A2",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -13444,104 +13516,158 @@
     },
     {
       "body_size": 92,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command8_key_update_start",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008704C",
       "reference_name": "icus_command8_key_update_start",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command8_key_update_start",
+        "target_entry": "0x0008144C"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008144C",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 248,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command8_key_update_adapter",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x000870A8",
       "reference_name": "icus_command8_key_update_adapter",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command8_key_update_adapter",
+        "target_entry": "0x000814A8"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000814A8",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 186,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command8_key_update_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x000871A0",
       "reference_name": "icus_command8_key_update_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command8_key_update_completion",
+        "target_entry": "0x000815A0"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000815A0",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 38,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_interrupt_channel292_dispatch",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00087610",
       "reference_name": "icus_interrupt_channel292_dispatch",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_interrupt_channel292_dispatch",
+        "target_entry": "0x00081A10"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00081A10",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 38,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_interrupt_channel293_dispatch",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00087636",
       "reference_name": "icus_interrupt_channel293_dispatch",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_interrupt_channel293_dispatch",
+        "target_entry": "0x00081A36"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00081A36",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 92,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command1_3_test_submit",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008783C",
       "reference_name": "icus_command1_3_test_submit",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command1_3_test_submit",
+        "target_entry": "0x00081C3C"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00081C3C",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -13563,104 +13689,158 @@
     },
     {
       "body_size": 116,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command5_mac_generate_copy_result",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00087B46",
       "reference_name": "icus_command5_mac_generate_copy_result",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command5_mac_generate_copy_result",
+        "target_entry": "0x00081F46"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00081F46",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 90,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command5_mac_generate_finish",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00087BBA",
       "reference_name": "icus_command5_mac_generate_finish",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command5_mac_generate_finish",
+        "target_entry": "0x00081FBA"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00081FBA",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 92,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command5_interrupt_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00087C14",
       "reference_name": "icus_command5_interrupt_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command5_interrupt_completion",
+        "target_entry": "0x00082014"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082014",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 92,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command5_mac_generate_start",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00087C70",
       "reference_name": "icus_command5_mac_generate_start",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command5_mac_generate_start",
+        "target_entry": "0x00082070"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082070",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 260,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command5_mac_generate_adapter",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00087CCC",
       "reference_name": "icus_command5_mac_generate_adapter",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command5_mac_generate_adapter",
+        "target_entry": "0x000820CC"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000820CC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 186,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command5_mac_generate_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00087DD0",
       "reference_name": "icus_command5_mac_generate_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command5_mac_generate_completion",
+        "target_entry": "0x000821D0"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000821D0",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -13686,73 +13866,109 @@
     },
     {
       "body_size": 88,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command7_interrupt_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00088028",
       "reference_name": "icus_command7_interrupt_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command7_interrupt_completion",
+        "target_entry": "0x00082428"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082428",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 92,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_cmac_verify_start",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00088080",
       "reference_name": "icus_cmac_verify_start",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_cmac_verify_start",
+        "target_entry": "0x00082480"
+      },
       "semantic_tags": [
         "secoc_icus",
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082480",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 256,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_cmac_verify_adapter",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x000880DC",
       "reference_name": "icus_cmac_verify_adapter",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_cmac_verify_adapter",
+        "target_entry": "0x000824DC"
+      },
       "semantic_tags": [
         "secoc_icus",
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000824DC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 186,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_cmac_verify_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x000881DC",
       "reference_name": "icus_cmac_verify_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_cmac_verify_completion",
+        "target_entry": "0x000825DC"
+      },
       "semantic_tags": [
         "secoc_icus",
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000825DC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -13828,19 +14044,28 @@
     },
     {
       "body_size": 16,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_key_update_driver_record_lookup",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x000888FA",
       "reference_name": "icus_key_update_driver_record_lookup",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_key_update_driver_record_lookup",
+        "target_entry": "0x00082CFA"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082CFA",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -13862,73 +14087,109 @@
     },
     {
       "body_size": 74,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_key_update_driver_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x000889CC",
       "reference_name": "icus_key_update_driver_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_key_update_driver_completion",
+        "target_entry": "0x00082DCC"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082DCC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 14,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: cryptoif_generate_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00088B5C",
       "reference_name": "cryptoif_generate_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "cryptoif_generate_completion",
+        "target_entry": "0x00082F5C"
+      },
       "semantic_tags": [
         "secoc_icus",
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082F5C",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 50,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: cryptoif_job_begin",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00088B6A",
       "reference_name": "cryptoif_job_begin",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "cryptoif_job_begin",
+        "target_entry": "0x00082F6A"
+      },
       "semantic_tags": [
         "secoc_icus",
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082F6A",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 12,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: cryptoif_job_update",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00088B9C",
       "reference_name": "cryptoif_job_update",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "cryptoif_job_update",
+        "target_entry": "0x00082F9C"
+      },
       "semantic_tags": [
         "secoc_icus",
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00082F9C",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -13954,20 +14215,29 @@
     },
     {
       "body_size": 14,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: cryptoif_job_completion",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00088C0A",
       "reference_name": "cryptoif_job_completion",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "cryptoif_job_completion",
+        "target_entry": "0x0008300A"
+      },
       "semantic_tags": [
         "secoc_icus",
         "crypto"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008300A",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -14109,19 +14379,28 @@
     },
     {
       "body_size": 82,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_input_fifo_step",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00089448",
       "reference_name": "icus_input_fifo_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_input_fifo_step",
+        "target_entry": "0x00083848"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00083848",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -14143,36 +14422,54 @@
     },
     {
       "body_size": 82,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_output_fifo_step",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x000894BE",
       "reference_name": "icus_output_fifo_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_output_fifo_step",
+        "target_entry": "0x000838BE"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000838BE",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 60,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: icus_command_finalize",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x00089510",
       "reference_name": "icus_command_finalize",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "icus_command_finalize",
+        "target_entry": "0x00083910"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00083910",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -15280,36 +15577,54 @@
     },
     {
       "body_size": 62,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_rx_init",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008DB84",
       "reference_name": "secoc_rx_init",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "secoc_rx_init",
+        "target_entry": "0x00088024"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00088024",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 62,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_rx_indication",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008DC64",
       "reference_name": "secoc_rx_indication",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "secoc_rx_indication",
+        "target_entry": "0x0008818C"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008818C",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -15496,53 +15811,80 @@
     },
     {
       "body_size": 104,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_freshness_profile_lookup",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008E80A",
       "reference_name": "secoc_freshness_profile_lookup",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "secoc_freshness_profile_lookup",
+        "target_entry": "0x00089558"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00089558",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 86,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_get_rx_freshness",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008E8E6",
       "reference_name": "secoc_get_rx_freshness",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "secoc_get_rx_freshness",
+        "target_entry": "0x000896B0"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x000896B0",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 58,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_commit_rx_freshness",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008E942",
       "reference_name": "secoc_commit_rx_freshness",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "secoc_commit_rx_freshness",
+        "target_entry": "0x00089758"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00089758",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -15581,70 +15923,106 @@
     },
     {
       "body_size": 212,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_reconstruct_normal_freshness",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008EECA",
       "reference_name": "secoc_reconstruct_normal_freshness",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "secoc_reconstruct_normal_freshness",
+        "target_entry": "0x00089E9A"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00089E9A",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 228,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_reconstruct_sync_freshness",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008EF9E",
       "reference_name": "secoc_reconstruct_sync_freshness",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "secoc_reconstruct_sync_freshness",
+        "target_entry": "0x00089F6E"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x00089F6E",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 52,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_commit_normal_freshness",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008F084",
       "reference_name": "secoc_commit_normal_freshness",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "secoc_commit_normal_freshness",
+        "target_entry": "0x0008A07A"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008A07A",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 78,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: secoc_commit_sync_freshness",
+        "report:data/generated/corolla_8965H1202000_secoc_surface.json",
+        "target-native:data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
       ],
       "reference_entry": "0x0008F112",
       "reference_name": "secoc_commit_sync_freshness",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_secoc_surface.json",
+        "role": "secoc_commit_sync_freshness",
+        "target_entry": "0x0008A130"
+      },
       "semantic_tags": [
         "secoc_icus"
       ],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0008A130",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -21019,23 +21397,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 194,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004B3AA",
-      "reference_name": "application_unpack_can_0d7_secoc_fd",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 306,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -22054,40 +22415,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 66,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000650AC",
-      "reference_name": "application_icus_ch292_isr",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 66,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000650EE",
-      "reference_name": "application_icus_ch293_isr",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 54,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -22240,91 +22567,6 @@
       "reference_name": "direct_call_target_00069042",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 38,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00069068",
-      "reference_name": "icus_command5_test_result_compare",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 34,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0006920A",
-      "reference_name": "icus_key_update_completion_callback",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 26,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0006922C",
-      "reference_name": "icus_command1_3_test_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 36,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00069246",
-      "reference_name": "icus_command7_test_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 26,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0006926A",
-      "reference_name": "icus_command5_test_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -22888,281 +23130,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 92,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008704C",
-      "reference_name": "icus_command8_key_update_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 248,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000870A8",
-      "reference_name": "icus_command8_key_update_adapter",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 186,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000871A0",
-      "reference_name": "icus_command8_key_update_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 38,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00087610",
-      "reference_name": "icus_interrupt_channel292_dispatch",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 38,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00087636",
-      "reference_name": "icus_interrupt_channel293_dispatch",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 92,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008783C",
-      "reference_name": "icus_command1_3_test_submit",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 116,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00087B46",
-      "reference_name": "icus_command5_mac_generate_copy_result",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 90,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00087BBA",
-      "reference_name": "icus_command5_mac_generate_finish",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 92,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00087C14",
-      "reference_name": "icus_command5_interrupt_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 92,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00087C70",
-      "reference_name": "icus_command5_mac_generate_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 260,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00087CCC",
-      "reference_name": "icus_command5_mac_generate_adapter",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 186,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00087DD0",
-      "reference_name": "icus_command5_mac_generate_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 88,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00088028",
-      "reference_name": "icus_command7_interrupt_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 92,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00088080",
-      "reference_name": "icus_cmac_verify_start",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus",
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 256,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000880DC",
-      "reference_name": "icus_cmac_verify_adapter",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus",
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 186,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000881DC",
-      "reference_name": "icus_cmac_verify_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus",
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 34,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -23190,163 +23157,6 @@
       "role_recovery": null,
       "semantic_tags": [
         "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 16,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000888FA",
-      "reference_name": "icus_key_update_driver_record_lookup",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 74,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000889CC",
-      "reference_name": "icus_key_update_driver_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 14,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00088B5C",
-      "reference_name": "cryptoif_generate_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus",
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 50,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00088B6A",
-      "reference_name": "cryptoif_job_begin",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus",
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 12,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00088B9C",
-      "reference_name": "cryptoif_job_update",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus",
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 14,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00088C0A",
-      "reference_name": "cryptoif_job_completion",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus",
-        "crypto"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 82,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00089448",
-      "reference_name": "icus_input_fifo_step",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 82,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000894BE",
-      "reference_name": "icus_output_fifo_step",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 60,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00089510",
-      "reference_name": "icus_command_finalize",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
       ],
       "surface_recensus": [],
       "target_entry": null,
@@ -23607,159 +23417,6 @@
       "reference_name": "direct_call_target_0008d32e",
       "role_recovery": null,
       "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 62,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008DB84",
-      "reference_name": "secoc_rx_init",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 62,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008DC64",
-      "reference_name": "secoc_rx_indication",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 104,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008E80A",
-      "reference_name": "secoc_freshness_profile_lookup",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 86,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008E8E6",
-      "reference_name": "secoc_get_rx_freshness",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 58,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008E942",
-      "reference_name": "secoc_commit_rx_freshness",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 212,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008EECA",
-      "reference_name": "secoc_reconstruct_normal_freshness",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 228,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008EF9E",
-      "reference_name": "secoc_reconstruct_sync_freshness",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 52,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008F084",
-      "reference_name": "secoc_commit_normal_freshness",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 78,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0008F112",
-      "reference_name": "secoc_commit_sync_freshness",
-      "role_recovery": null,
-      "semantic_tags": [
-        "secoc_icus"
-      ],
       "surface_recensus": [],
       "target_entry": null,
       "target_native_evidence_files": [],
@@ -25563,6 +25220,8 @@
       "data/generated/corolla_8965H1202000_motor_control.json": "eca55432652bac286223b181602ca62f4a64d207c39cf0698e508731a909b756",
       "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json": "79e9b0a26271f349724288b59e8f5e34733ecbf5bf56c698072b8fe9b82e402d",
       "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json": "5233f222002644f854c8161e70306f3d89e6e0edfa0df5714154092cb180f851",
+      "data/generated/corolla_8965H1202000_secoc_surface.json": "012ab334b9446f41c9767de39834e1b37754254e7fb0cdf44c591219d778ccae",
+      "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json": "daf40421514eff8565d93b90adbb3613d062a72f96d103f9d2a80bb58d327163",
       "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json": "6a6a5240c110ad3167310677930544aeebf2a09b276fe03c9d497f93fc05091e",
       "data/generated/corolla_8965H1202000_storage_nvm.json": "a7459c13d6bc02afdc1f1fbcc2dd572e90ac6e3f2848840e9ce7929c6150bb2b",
       "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json": "df04f0bee2bd39cb4d338efe22cf7744f7da8be7b3144f4df487092c4b90af2b",
@@ -27418,14 +27077,14 @@
   ],
   "summary": {
     "coverage_counts": {
-      "genuinely-unresolved": 433,
+      "genuinely-unresolved": 391,
       "structural-candidate-only": 110,
       "target-native-inspected-unique-shape": 26,
-      "target-native-role-recovered": 29,
+      "target-native-role-recovered": 71,
       "target-surface-recensused": 227,
       "verified-exact-body-transfer": 288
     },
-    "genuinely_unresolved_count": 433,
+    "genuinely_unresolved_count": 391,
     "h_native_evidence_functions_without_unique_sienna_pair": 374,
     "named_function_count": 1113,
     "structural_candidate_only_count": 110,
@@ -27438,9 +27097,10 @@
         "verified-exact-body-transfer": 28
       },
       "crypto": {
-        "genuinely-unresolved": 14,
+        "genuinely-unresolved": 7,
         "structural-candidate-only": 11,
         "target-native-inspected-unique-shape": 9,
+        "target-native-role-recovered": 7,
         "verified-exact-body-transfer": 26
       },
       "diagnostics": {
@@ -27463,10 +27123,9 @@
         "verified-exact-body-transfer": 3
       },
       "secoc_icus": {
-        "genuinely-unresolved": 42,
         "structural-candidate-only": 27,
         "target-native-inspected-unique-shape": 18,
-        "target-native-role-recovered": 2,
+        "target-native-role-recovered": 44,
         "verified-exact-body-transfer": 11
       },
       "steering": {

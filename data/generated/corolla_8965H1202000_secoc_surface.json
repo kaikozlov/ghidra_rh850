@@ -1,0 +1,714 @@
+{
+  "application_icus_isrs": {
+    "channel292": {
+      "dispatch": "0x00081A10",
+      "h": "0x0005F3EC",
+      "sienna": "0x000650AC"
+    },
+    "channel293": {
+      "dispatch": "0x00081A36",
+      "h": "0x0005F42E",
+      "sienna": "0x000650EE"
+    },
+    "same_reported_size": true
+  },
+  "crypto_test_callbacks": {
+    "boundary": "forced callback Ghidra bodies are fragmented by prior disposable-project overlaps; decompiled semantics plus canonical-size raw windows are evidence, not reported contiguous body size",
+    "command1_3_completion": {
+      "h": "0x00063564",
+      "sienna": "0x0006922C"
+    },
+    "command5_completion": {
+      "h": "0x000635A2",
+      "sienna": "0x0006926A"
+    },
+    "command7_completion": {
+      "h": "0x0006357E",
+      "sienna": "0x00069246"
+    },
+    "key_update_completion": {
+      "h": "0x00063542",
+      "sienna": "0x0006920A"
+    },
+    "result_compare": {
+      "compare_length": 16,
+      "h": "0x000633A0",
+      "match_state": 51,
+      "mismatch_state": 68,
+      "sienna": "0x00069068"
+    }
+  },
+  "d7_unpacker": {
+    "h": "0x000468FA",
+    "h_pdu40_signal_ids": [
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247
+    ],
+    "h_reported_body_size": 140,
+    "h_scalar_destinations": [
+      "0xFEBE7D82",
+      "0xFEBE7D84",
+      "0xFEBE7D85"
+    ],
+    "h_scalar_receive_signal_ids": [
+      243,
+      240,
+      246
+    ],
+    "h_secoc_record_pdu_id": 40,
+    "interpretation": "H keeps the D7 protected-PDU unpack role but regenerates the signal population: configured PDU 40 owns signals 240..247 and this scalar unpacker reads 240/243/246 rather than transferring Sienna signal IDs.",
+    "sienna": "0x0004B3AA",
+    "sienna_body_size": 194
+  },
+  "evidence": {
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json"
+  },
+  "freshness": {
+    "commit_dispatches_normal_sync": true,
+    "commit_normal": {
+      "h": "0x0008A07A",
+      "sienna": "0x0008F084"
+    },
+    "commit_rx": {
+      "h": "0x00089758",
+      "sienna": "0x0008E942"
+    },
+    "commit_sync": {
+      "h": "0x0008A130",
+      "sienna": "0x0008F112"
+    },
+    "configured_commit_callback_set": [
+      563032
+    ],
+    "configured_get_callback_set": [
+      562864
+    ],
+    "get_dispatches_normal_sync": true,
+    "get_rx": {
+      "h": "0x000896B0",
+      "sienna": "0x0008E8E6"
+    },
+    "profile_lookup": {
+      "h": "0x00089558",
+      "sienna": "0x0008E80A"
+    },
+    "reconstruct_normal": {
+      "h": "0x00089E9A",
+      "sienna": "0x0008EECA"
+    },
+    "reconstruct_sync": {
+      "h": "0x00089F6E",
+      "sienna": "0x0008EF9E"
+    }
+  },
+  "icus_cryptoif_core": {
+    "all_at_single_delta": true,
+    "all_reported_body_sizes_match": true,
+    "anchors": {
+      "command5_adapter": "0x000820CC",
+      "command7_verify_adapter": "0x000824DC",
+      "command8_adapter": "0x000814A8",
+      "cryptoif_job_begin": "0x00082F6A",
+      "finalizer": "0x00083910",
+      "input_fifo": "0x00083848",
+      "output_fifo": "0x000838BE"
+    },
+    "boundary": "same function-boundary/control families; operand/configuration semantics remain target-native and are separately pinned by slot-4/key-provenance evidence",
+    "delta": -23552,
+    "role_count": 25,
+    "roles": [
+      {
+        "delta": -23552,
+        "reference_body_size": 92,
+        "reference_entry": "0x0008704C",
+        "reference_name": "icus_command8_key_update_start",
+        "same_reported_size": true,
+        "target_entry": "0x0008144C",
+        "target_reported_body_size": 92
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 248,
+        "reference_entry": "0x000870A8",
+        "reference_name": "icus_command8_key_update_adapter",
+        "same_reported_size": true,
+        "target_entry": "0x000814A8",
+        "target_reported_body_size": 248
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 186,
+        "reference_entry": "0x000871A0",
+        "reference_name": "icus_command8_key_update_completion",
+        "same_reported_size": true,
+        "target_entry": "0x000815A0",
+        "target_reported_body_size": 186
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 38,
+        "reference_entry": "0x00087610",
+        "reference_name": "icus_interrupt_channel292_dispatch",
+        "same_reported_size": true,
+        "target_entry": "0x00081A10",
+        "target_reported_body_size": 38
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 38,
+        "reference_entry": "0x00087636",
+        "reference_name": "icus_interrupt_channel293_dispatch",
+        "same_reported_size": true,
+        "target_entry": "0x00081A36",
+        "target_reported_body_size": 38
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 92,
+        "reference_entry": "0x0008783C",
+        "reference_name": "icus_command1_3_test_submit",
+        "same_reported_size": true,
+        "target_entry": "0x00081C3C",
+        "target_reported_body_size": 92
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 116,
+        "reference_entry": "0x00087B46",
+        "reference_name": "icus_command5_mac_generate_copy_result",
+        "same_reported_size": true,
+        "target_entry": "0x00081F46",
+        "target_reported_body_size": 116
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 90,
+        "reference_entry": "0x00087BBA",
+        "reference_name": "icus_command5_mac_generate_finish",
+        "same_reported_size": true,
+        "target_entry": "0x00081FBA",
+        "target_reported_body_size": 90
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 92,
+        "reference_entry": "0x00087C14",
+        "reference_name": "icus_command5_interrupt_completion",
+        "same_reported_size": true,
+        "target_entry": "0x00082014",
+        "target_reported_body_size": 92
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 92,
+        "reference_entry": "0x00087C70",
+        "reference_name": "icus_command5_mac_generate_start",
+        "same_reported_size": true,
+        "target_entry": "0x00082070",
+        "target_reported_body_size": 92
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 260,
+        "reference_entry": "0x00087CCC",
+        "reference_name": "icus_command5_mac_generate_adapter",
+        "same_reported_size": true,
+        "target_entry": "0x000820CC",
+        "target_reported_body_size": 260
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 186,
+        "reference_entry": "0x00087DD0",
+        "reference_name": "icus_command5_mac_generate_completion",
+        "same_reported_size": true,
+        "target_entry": "0x000821D0",
+        "target_reported_body_size": 186
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 88,
+        "reference_entry": "0x00088028",
+        "reference_name": "icus_command7_interrupt_completion",
+        "same_reported_size": true,
+        "target_entry": "0x00082428",
+        "target_reported_body_size": 88
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 92,
+        "reference_entry": "0x00088080",
+        "reference_name": "icus_cmac_verify_start",
+        "same_reported_size": true,
+        "target_entry": "0x00082480",
+        "target_reported_body_size": 92
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 256,
+        "reference_entry": "0x000880DC",
+        "reference_name": "icus_cmac_verify_adapter",
+        "same_reported_size": true,
+        "target_entry": "0x000824DC",
+        "target_reported_body_size": 256
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 186,
+        "reference_entry": "0x000881DC",
+        "reference_name": "icus_cmac_verify_completion",
+        "same_reported_size": true,
+        "target_entry": "0x000825DC",
+        "target_reported_body_size": 186
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 16,
+        "reference_entry": "0x000888FA",
+        "reference_name": "icus_key_update_driver_record_lookup",
+        "same_reported_size": true,
+        "target_entry": "0x00082CFA",
+        "target_reported_body_size": 16
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 74,
+        "reference_entry": "0x000889CC",
+        "reference_name": "icus_key_update_driver_completion",
+        "same_reported_size": true,
+        "target_entry": "0x00082DCC",
+        "target_reported_body_size": 74
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 14,
+        "reference_entry": "0x00088B5C",
+        "reference_name": "cryptoif_generate_completion",
+        "same_reported_size": true,
+        "target_entry": "0x00082F5C",
+        "target_reported_body_size": 14
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 50,
+        "reference_entry": "0x00088B6A",
+        "reference_name": "cryptoif_job_begin",
+        "same_reported_size": true,
+        "target_entry": "0x00082F6A",
+        "target_reported_body_size": 50
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 12,
+        "reference_entry": "0x00088B9C",
+        "reference_name": "cryptoif_job_update",
+        "same_reported_size": true,
+        "target_entry": "0x00082F9C",
+        "target_reported_body_size": 12
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 14,
+        "reference_entry": "0x00088C0A",
+        "reference_name": "cryptoif_job_completion",
+        "same_reported_size": true,
+        "target_entry": "0x0008300A",
+        "target_reported_body_size": 14
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 82,
+        "reference_entry": "0x00089448",
+        "reference_name": "icus_input_fifo_step",
+        "same_reported_size": true,
+        "target_entry": "0x00083848",
+        "target_reported_body_size": 82
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 82,
+        "reference_entry": "0x000894BE",
+        "reference_name": "icus_output_fifo_step",
+        "same_reported_size": true,
+        "target_entry": "0x000838BE",
+        "target_reported_body_size": 82
+      },
+      {
+        "delta": -23552,
+        "reference_body_size": 60,
+        "reference_entry": "0x00089510",
+        "reference_name": "icus_command_finalize",
+        "same_reported_size": true,
+        "target_entry": "0x00083910",
+        "target_reported_body_size": 60
+      }
+    ]
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "rx_frontend": {
+    "indication": {
+      "body_size": 62,
+      "calls_record_lookup": true,
+      "calls_secured_queue": true,
+      "h": "0x0008818C",
+      "sienna": "0x0008DC64"
+    },
+    "init": {
+      "h": "0x00088024",
+      "h_reported_body_size": 66,
+      "installs_slot4_config": true,
+      "sienna": "0x0008DB84"
+    },
+    "profile_count": 3,
+    "profiles": [
+      {
+        "can_id": 15,
+        "commit_callback": 563032,
+        "crypto_config_id": 0,
+        "cryptoif_handle": 0,
+        "freshness_callback": 562864,
+        "freshness_id": 0,
+        "index": 0,
+        "pdu_id": 9,
+        "state_callback": 406714
+      },
+      {
+        "can_id": 215,
+        "commit_callback": 563032,
+        "crypto_config_id": 0,
+        "cryptoif_handle": 0,
+        "freshness_callback": 562864,
+        "freshness_id": 1,
+        "index": 1,
+        "pdu_id": 40,
+        "state_callback": 406714
+      },
+      {
+        "can_id": 182,
+        "commit_callback": 563032,
+        "crypto_config_id": 0,
+        "cryptoif_handle": 0,
+        "freshness_callback": 562864,
+        "freshness_id": 2,
+        "index": 2,
+        "pdu_id": 42,
+        "state_callback": 406714
+      }
+    ]
+  },
+  "schema": "corolla-h-secoc-surface-v1",
+  "secoc_role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008704C",
+      "reference_name": "icus_command8_key_update_start",
+      "target_entry": "0x0008144C"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x000870A8",
+      "reference_name": "icus_command8_key_update_adapter",
+      "target_entry": "0x000814A8"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x000871A0",
+      "reference_name": "icus_command8_key_update_completion",
+      "target_entry": "0x000815A0"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00087610",
+      "reference_name": "icus_interrupt_channel292_dispatch",
+      "target_entry": "0x00081A10"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00087636",
+      "reference_name": "icus_interrupt_channel293_dispatch",
+      "target_entry": "0x00081A36"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008783C",
+      "reference_name": "icus_command1_3_test_submit",
+      "target_entry": "0x00081C3C"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00087B46",
+      "reference_name": "icus_command5_mac_generate_copy_result",
+      "target_entry": "0x00081F46"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00087BBA",
+      "reference_name": "icus_command5_mac_generate_finish",
+      "target_entry": "0x00081FBA"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00087C14",
+      "reference_name": "icus_command5_interrupt_completion",
+      "target_entry": "0x00082014"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00087C70",
+      "reference_name": "icus_command5_mac_generate_start",
+      "target_entry": "0x00082070"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00087CCC",
+      "reference_name": "icus_command5_mac_generate_adapter",
+      "target_entry": "0x000820CC"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00087DD0",
+      "reference_name": "icus_command5_mac_generate_completion",
+      "target_entry": "0x000821D0"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00088028",
+      "reference_name": "icus_command7_interrupt_completion",
+      "target_entry": "0x00082428"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00088080",
+      "reference_name": "icus_cmac_verify_start",
+      "target_entry": "0x00082480"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x000880DC",
+      "reference_name": "icus_cmac_verify_adapter",
+      "target_entry": "0x000824DC"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x000881DC",
+      "reference_name": "icus_cmac_verify_completion",
+      "target_entry": "0x000825DC"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x000888FA",
+      "reference_name": "icus_key_update_driver_record_lookup",
+      "target_entry": "0x00082CFA"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x000889CC",
+      "reference_name": "icus_key_update_driver_completion",
+      "target_entry": "0x00082DCC"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00088B5C",
+      "reference_name": "cryptoif_generate_completion",
+      "target_entry": "0x00082F5C"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00088B6A",
+      "reference_name": "cryptoif_job_begin",
+      "target_entry": "0x00082F6A"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00088B9C",
+      "reference_name": "cryptoif_job_update",
+      "target_entry": "0x00082F9C"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00088C0A",
+      "reference_name": "cryptoif_job_completion",
+      "target_entry": "0x0008300A"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00089448",
+      "reference_name": "icus_input_fifo_step",
+      "target_entry": "0x00083848"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x000894BE",
+      "reference_name": "icus_output_fifo_step",
+      "target_entry": "0x000838BE"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00089510",
+      "reference_name": "icus_command_finalize",
+      "target_entry": "0x00083910"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008DB84",
+      "reference_name": "secoc_rx_init",
+      "target_entry": "0x00088024"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008DC64",
+      "reference_name": "secoc_rx_indication",
+      "target_entry": "0x0008818C"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008E80A",
+      "reference_name": "secoc_freshness_profile_lookup",
+      "target_entry": "0x00089558"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008E8E6",
+      "reference_name": "secoc_get_rx_freshness",
+      "target_entry": "0x000896B0"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008E942",
+      "reference_name": "secoc_commit_rx_freshness",
+      "target_entry": "0x00089758"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008EECA",
+      "reference_name": "secoc_reconstruct_normal_freshness",
+      "target_entry": "0x00089E9A"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008EF9E",
+      "reference_name": "secoc_reconstruct_sync_freshness",
+      "target_entry": "0x00089F6E"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008F084",
+      "reference_name": "secoc_commit_normal_freshness",
+      "target_entry": "0x0008A07A"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0008F112",
+      "reference_name": "secoc_commit_sync_freshness",
+      "target_entry": "0x0008A130"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x000650AC",
+      "reference_name": "application_icus_ch292_isr",
+      "target_entry": "0x0005F3EC"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x000650EE",
+      "reference_name": "application_icus_ch293_isr",
+      "target_entry": "0x0005F42E"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00069068",
+      "reference_name": "icus_command5_test_result_compare",
+      "target_entry": "0x000633A0"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0006920A",
+      "reference_name": "icus_key_update_completion_callback",
+      "target_entry": "0x00063542"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0006922C",
+      "reference_name": "icus_command1_3_test_completion",
+      "target_entry": "0x00063564"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x00069246",
+      "reference_name": "icus_command7_test_completion",
+      "target_entry": "0x0006357E"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0006926A",
+      "reference_name": "icus_command5_test_completion",
+      "target_entry": "0x000635A2"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json",
+      "reference_entry": "0x0004B3AA",
+      "reference_name": "application_unpack_can_0d7_secoc_fd",
+      "target_entry": "0x000468FA"
+    }
+  ],
+  "secoc_role_closure_count": 42,
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "all_42_secoc_icus_residual_roles_recovered": true,
+    "boundary": "role/control architecture is recovered target-natively; profile IDs, freshness state addresses, D7 signal population, and protected key contents remain H-specific",
+    "h_freshness_architecture_preserved": true,
+    "h_profile_population_changed": true,
+    "underlying_verify_engine_preserved": true
+  }
+}

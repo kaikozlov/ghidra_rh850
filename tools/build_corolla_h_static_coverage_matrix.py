@@ -237,6 +237,28 @@ def main() -> None:
                 "role": item["reference_name"],
             }
 
+    secoc_path = REPO / "data/generated/corolla_8965H1202000_secoc_surface.json"
+    if secoc_path.is_file():
+        secoc = load_json(secoc_path)
+        secoc_rel = str(secoc_path.relative_to(REPO))
+        evidence_file_hashes[secoc_rel] = sha256(secoc_path.read_bytes())
+        secoc_ev_path = REPO / secoc["evidence"]["decompiler_evidence"]
+        secoc_ev = load_json(secoc_ev_path)
+        secoc_targets = {int(r["target_entry"], 16) for r in secoc_ev.get("functions", [])}
+        for item in secoc.get("secoc_role_closure", []):
+            ref = int(item["reference_entry"], 16)
+            target = int(item["target_entry"], 16)
+            if target not in secoc_targets:
+                raise ValueError(f"SecOC/ICU-S role target lacks tracked target-native evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["target_entry"],
+                "report": secoc_rel,
+                "evidence": secoc["evidence"]["decompiler_evidence"],
+                "role": item["reference_name"],
+            }
+
     # Explicit generated-surface recensuses. These are not function homology:
     # they prove the foreign generated surface was exhaustively re-enumerated.
     recensus: dict[int, set[str]] = defaultdict(set)

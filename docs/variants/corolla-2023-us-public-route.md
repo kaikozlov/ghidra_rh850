@@ -1471,10 +1471,10 @@ promotion:
 named canonical functions                 1113
 verified exact-body transfers              288
 target-native inspected unique-shape       26
-target-native role-recovered                 29
+target-native role-recovered                 71
 complete target-surface recensuses          227
 structural candidates only                  110
-genuinely unresolved                        433
+genuinely unresolved                        391
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1663,7 +1663,7 @@ evidence own this conclusion; `tests/verify_corolla_8965H1202000_storage_nvm.py`
 pins the three roles, protected ranges, 16-object namespace, queue state/worker,
 and object-15 validity. `storage_nvm` now has **zero genuinely-unresolved named
 functions**; because two of these functions are also tagged SecOC/NvM, the
-`secoc_icus` residue falls 44→42.
+At this checkpoint the `secoc_icus` residue fell 44→42; §7.21 subsequently closes those remaining 42 roles.
 
 ### 7.19 XCP custom commands and H-specific read boundary
 
@@ -1780,10 +1780,83 @@ the five roles, 0x33 state-machine path, PI pair/order, fixed-point inverse
 transforms, CH0 wrapper/worker topology, and the axis-B semantic boundary. The
 `motor_control` tag now has **zero genuinely-unresolved functions**. Axis A also
 moves structural-only -> inspected unique-shape, so the global denominator becomes
-**433 genuinely unresolved**, 26 inspected unique-shape, 29 role-recovered, 227
+**391 genuinely unresolved**, 26 inspected unique-shape, 71 role-recovered, 227
 surface-recensused, 110 structural-only, and 288 exact canonical functions; 374
 H-native evidence functions lack a unique Sienna pair and remain separately
-counted.
+counted after the SecOC/ICU-S closure below.
+
+### 7.21 SecOC / ICU-S residual surface
+
+The remaining **42** named `secoc_icus` functions are now target-native mapped,
+closing that tag's genuinely-unresolved residue completely. This pass extends the
+earlier verify-worker and slot-4 findings to the whole named receive/crypto
+surface instead of assuming the lower middleware transfers wholesale.
+
+The lower ICU-S/CryptoIf block is the cleanest part of the result. Twenty-five
+canonical roles map at one exact relocation island, **H = Sienna - 0x5C00**, and
+every mapped H function has the same reported body size as its canonical role.
+That set includes command-8 start/adapter/completion, command-5
+copy/finish/interrupt/start/adapter/completion, command-7 interrupt/start/adapter/
+completion, both ICU interrupt dispatchers, key-update driver lookup/completion,
+CryptoIf begin/update/completion, the generate completion callback, both FIFO
+steps, and the ICU command finalizer. Target-native call edges independently pin
+the material adapters: H `814A8 -> 81262` (command 8), `820CC -> 81E94`
+(command 5), and `824DC -> 822D0` (command 7).
+
+The generated receive front-end is preserved but not at one global relocation.
+H `secoc_rx_init @ 88024` installs the already-proven config-0/slot-4 state. The
+actual H RxIndication is **`8818C`**: it checks initialized state and a non-null,
+non-empty PDU, calls record lookup `885C0` with receive queue selector 0, then
+queues the resolved secured PDU through `8865A`. This boundary was recovered from
+the only target xrefs to those two functions; the superficially Sienna-relative
+`88104` is not code and is explicitly rejected.
+
+The freshness graph is also complete from the configured H profile callbacks:
+
+```text
+S 8E80A freshness profile lookup       -> H 89558
+S 8E8E6 get Rx freshness               -> H 896B0
+S 8E942 commit Rx freshness            -> H 89758
+S 8EECA reconstruct normal freshness   -> H 89E9A
+S 8EF9E reconstruct sync freshness     -> H 89F6E
+S 8F084 commit normal freshness        -> H 8A07A
+S 8F112 commit sync freshness          -> H 8A130
+```
+
+All three H receive profiles point to `896B0` for freshness retrieval and
+`89758` for commit. The get callback resolves the profile and dispatches normal
+versus sync reconstruction; the commit callback resolves the same profile and
+dispatches normal versus sync state commit. The architecture therefore transfers,
+but the H freshness state addresses and profile population remain target-specific.
+
+Application-side ICU interrupt wrappers map independently as `S 650AC/650EE -> H
+5F3EC/5F42E`, each still 66 bytes and calling H lower dispatchers `81A10/81A36`.
+The five crypto-test callbacks are also recovered at their true H starts
+`633A0/63542/63564/6357E/635A2`. Their disposable-project Ghidra bodies are partly
+fragmented by earlier forced overlaps, so the tracked evidence intentionally pins
+canonical-size raw windows plus recovered decompiler semantics instead of
+pretending those reported fragment sizes are authoritative. The command-5 result
+comparator still checks 16 bytes and returns `0x44` on mismatch / `0x33` on
+match; the command-5 completion invokes that comparator on successful lower-layer
+completion.
+
+Finally, the protected D7 generated unpacker is **regenerated**, not a literal
+Sienna signal-map transfer. H's D7 SecOC record routes to application PDU 40;
+raw COM configuration assigns PDU 40 signals `240..247`, and H unpacker `468FA`
+reads scalar signals `240/243/246`. Its body is 140 bytes versus Sienna's 194-byte
+D7 unpacker. Thus the protected D7 role survives while Sienna's signal IDs and
+individual field population do not.
+
+Machine-readable ownership is
+`data/generated/corolla_8965H1202000_secoc_surface.json` plus the compact
+42-role target-native evidence file. `tests/verify_corolla_8965H1202000_secoc_surface.py`
+pins the core relocation island, Rx front-end, configured profile/freshness
+callbacks, ICU ISRs, crypto-test callbacks, and regenerated D7 unpacker. With
+these 42 promotions, `secoc_icus` has **zero genuinely-unresolved named
+functions**, the overlapping `crypto` residue falls to **7**, and the global
+1,113-function denominator becomes **391 genuinely unresolved**, 26 inspected
+unique-shape, 71 role-recovered, 227 surface-recensused, 110 structural-only, and
+288 exact-body transfers.
 
 ## 8. Remaining evidence boundary
 
