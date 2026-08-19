@@ -16,6 +16,8 @@ S_IMAGE = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
 H_CORPUS = REPO / "build/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
 S_CORPUS = REPO / "data/generated/decompilations.jsonl"
 EVIDENCE = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json"
+SUPERVISOR = REPO / "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json"
+TOYOTA_DBC = REPO / "REFERENCE/opendbc/opendbc/dbc/generator/toyota/_toyota_2017.dbc"
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
 
 H_SIGNAL_TO_PDU = 0x223FC
@@ -120,6 +122,8 @@ def main() -> int:
     h = H_IMAGE.read_bytes()
     s = S_IMAGE.read_bytes()
     ev = load_json(EVIDENCE)
+    supervisor = load_json(SUPERVISOR)
+    toyota_dbc = TOYOTA_DBC.read_text()
     hf = load_corpus(H_CORPUS)
     sf = load_corpus(S_CORPUS)
     ef = funcs_by_entry(ev)
@@ -317,6 +321,101 @@ def main() -> int:
         ),
     }
 
+    def unique_supervisor_signal(signal_id: int) -> dict:
+        rows = [row for row in supervisor["external_refs"] if row["signal"] == signal_id]
+        if not rows:
+            raise ValueError(f"supervisor signal {signal_id} missing")
+        keys = {
+            (
+                row["can"], row["bits"], row["signed"], row["wire_byte"],
+                row["bitoff"], row["address"],
+                tuple(x["entry"] for x in row["source_unpackers"]),
+                tuple(row["s_same_shape_signals"]),
+            )
+            for row in rows
+        }
+        if len(keys) != 1:
+            raise ValueError(f"supervisor signal {signal_id} has inconsistent shapes: {keys}")
+        can_id, bits, signed, wire_byte, bit_offset, address, unpackers, s_same = next(iter(keys))
+        return {
+            "signal_id": signal_id,
+            "can_id": f"0x{can_id:03X}",
+            "bit_length": bits,
+            "signed": bool(signed),
+            "wire_byte": wire_byte,
+            "bit_offset_in_byte": bit_offset,
+            "snapshot_address": f"0x{address:08X}",
+            "source_unpackers": [f"0x{x:08X}" for x in unpackers],
+            "sienna_same_shape_signals": list(s_same),
+            "consumer_entries": sorted({f"0x{row['consumer']:08X}" for row in rows}),
+        }
+
+    dbc_signal_rows = {}
+    for name in ("STEER_ANGLE", "STEER_FRACTION", "STEER_RATE"):
+        match = re.search(
+            rf"^\s*SG_\s+{name}\s*:\s*(\d+)\|(\d+)@0([+-])",
+            toyota_dbc,
+            re.MULTILINE,
+        )
+        if match is None:
+            raise ValueError(f"missing pinned Toyota DBC signal {name}")
+        dbc_signal_rows[name] = {
+            "start_bit_motorola": int(match.group(1)),
+            "bit_length": int(match.group(2)),
+            "signed": match.group(3) == "-",
+        }
+    if "BO_ 37 STEER_ANGLE_SENSOR: 8 XXX" not in toyota_dbc:
+        raise ValueError("pinned Toyota DBC no longer defines CAN 0x025 STEER_ANGLE_SENSOR")
+
+    shared_025 = {
+        "can_id": "0x025",
+        "dbc": {
+            "path": str(TOYOTA_DBC.relative_to(REPO)),
+            "sha256": sha(TOYOTA_DBC.read_bytes()),
+            "message": "STEER_ANGLE_SENSOR",
+            "message_id_decimal": 37,
+            "signals": dbc_signal_rows,
+        },
+        "h_signals": {
+            "184": unique_supervisor_signal(184),
+            "185": unique_supervisor_signal(185),
+            "186": unique_supervisor_signal(186),
+        },
+        "unpacker": {
+            "entry": "0x0004636A",
+            "signal184_shape_recovered": require(c[0x4636A], "FUN_0007643a(0xb8,0x11f,0xc,0,1", "0xfebe7d34"),
+            "signal185_shape_recovered": require(c[0x4636A], "FUN_0007643a(0xb9,0x123,4,4,1", "-0x3ac5"),
+            "signal186_shape_recovered": require(c[0x4636A], "FUN_0007643a(0xba,0x123,0xc,0,1", "-0x3aca"),
+        },
+        "target_native_semantics": {
+            "angle_plus_fraction": {
+                "entry": "0x000C2176",
+                "relation": "FEBEADF0 * 15 + FEBEACC5 reconstructs the high-resolution steering-angle input",
+                "recovered": require(c[0xC2176], "sRamfebeadf0 * 0xf + (int)cRamfebeacc5"),
+            },
+            "steering_rate_magnitude": {
+                "entry": "0x000CB2E0",
+                "relation": "absolute FEBEAE14 is thresholded as the steering-rate magnitude",
+                "recovered": require(c[0xCB2E0], "FUN_000ce7bc((int)sRamfebeae14)", "DAT_000afd00"),
+            },
+            "joint_plausibility": {
+                "entry": "0x000CBD7E",
+                "relation": "the supervisor jointly consumes the reconstructed angle and absolute rate cells in plausibility logic",
+                "recovered": require(c[0xCBD7E], "sRamfebeadf0 * 0xf", "cRamfebeacc5", "sRamfebeae14"),
+            },
+        },
+        "classification": "shared-command-sized-ingress-is-steering-angle-sensor-state",
+        "interpretation": (
+            "The only shared H supervisor-reaching fields >=12 bits are signal184 and signal186 on CAN0x025. "
+            "Together with signal185 they exactly match the pinned Toyota STEER_ANGLE_SENSOR layout: signed12 coarse STEER_ANGLE, signed4 STEER_FRACTION, signed12 STEER_RATE. "
+            "H independently recombines 184*15+185 as steering angle and treats 186 as a rate magnitude. They are sensor measurements, not a semantically repurposed autonomous command."
+        ),
+        "boundary": (
+            "The public DBC is corroboration rather than sole naming evidence: target-native H arithmetic independently distinguishes angle+fraction and rate semantics. "
+            "This closes the adversarial possibility that an unchanged-shape large scalar was silently repurposed as the missing LTA command."
+        ),
+    }
+
     out = {
         "schema": "corolla-8965H1202000-lta-command-provenance-v1",
         "software_id": "8965H1202000",
@@ -326,9 +425,14 @@ def main() -> int:
         },
         "corpus": {"path": str(H_CORPUS.relative_to(REPO)), "sha256": sha(H_CORPUS.read_bytes())},
         "evidence": {"path": str(EVIDENCE.relative_to(REPO)), "sha256": sha(EVIDENCE.read_bytes()), "function_count": ev["function_count"]},
+        "supporting_inputs": {
+            "supervisor_external_ingress_census": {"path": str(SUPERVISOR.relative_to(REPO)), "sha256": sha(SUPERVISOR.read_bytes())},
+            "toyota_dbc": {"path": str(TOYOTA_DBC.relative_to(REPO)), "sha256": sha(TOYOTA_DBC.read_bytes())},
+        },
         "retained_lta_branch": retained_lta,
         "d7_hidden_payload_census": d7,
         "b6_hidden_payload_census": b6,
+        "shared_can025_sensor_ingress": shared_025,
         "final_command_composition": final_composition,
         "static_conclusion": {
             "retained_sienna_lta_magnitude_direct_write_zero": all(
@@ -340,6 +444,11 @@ def main() -> int:
             "retained_sienna_lta_branch_active_under_recovered_direct_writes": False,
             "hidden_d7_group_or_full_pdu_command_recovered": False,
             "hidden_b6_group_or_full_pdu_command_recovered": False,
+            "shared_command_sized_ingress_classified_as_sensor_state": (
+                shared_025["h_signals"]["184"]["bit_length"] == 12
+                and shared_025["h_signals"]["186"]["bit_length"] == 12
+                and all(x["recovered"] for x in shared_025["target_native_semantics"].values())
+            ),
             "command_value_torque_is_lta_only": False,
             "external_autonomous_lateral_ingress_identified": False,
             "broad_static_search_closed": True,

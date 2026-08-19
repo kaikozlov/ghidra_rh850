@@ -19,12 +19,14 @@ DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance
 
 # Initialization / retained LTA command path / final command composition / COM APIs.
 ENTRIES = [
+    0x4636A,  # shared CAN025 steering-sensor unpacker
     0x46A10,  # H 0B6 scalar unpacker
     0x5262C,  # generated COM staging publication including F126/F127...
     0x7643A,  # scalar Com_ReceiveSignal-like helper
     0x7636C,  # full-PDU copy helper
     0x77A3A,  # block/group signal copy helper
     0xB8EEC,  # generated staging -> steering snapshot copier
+    0xC2176,  # CAN025 coarse angle + fraction reconstruction
     0xC584A,  # local assist contributor initialization
     0xC5932,  # local assist contribution BD0E
     0xC97A8,  # retained LTA state initialization
@@ -32,6 +34,7 @@ ENTRIES = [
     0xC9CD2,  # retained LTA wrapper
     0xCB07C,  # C26D-derived enable status
     0xCB1C8,  # retained LTA mode-source initialization
+    0xCB2E0,  # CAN025 steering-rate magnitude threshold logic
     0xCB670,  # retained LTA decoded-mode initialization
     0xCB68A,  # cyclic decoded-mode wrapper
     0xCB696,  # retained LTA command-state initialization
@@ -40,6 +43,7 @@ ENTRIES = [
     0xCB9B6,  # retained LTA command slew/gain/limit -> C2A8
     0xCBA40,  # retained LTA command wrapper
     0xCBE6E,  # decoded LTA mode selector
+    0xCBD7E,  # CAN025 angle/rate plausibility consumer
     0xCCE8C,  # H-local assist contribution C358
     0xCD1E8,  # H-local assist precursor C392
     0xCD3CC,  # secondary/final command composition

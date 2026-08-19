@@ -493,6 +493,8 @@ paths = [
   "data/generated/corolla_8965H1202000_lta_command_provenance.json",
   "data/generated/corolla_8965H1202000_fd_control_interface.json",
   "data/generated/corolla_8965H1202000_steering_nested.json",
+  "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
+  "REFERENCE/opendbc/opendbc/dbc/generator/toyota/_toyota_2017.dbc",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",

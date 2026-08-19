@@ -67,9 +67,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   profiles. TMS-021 now statically proves the general internal `1C02 Command
   Value Torque` contribution reaches Techstream-visible base Q command `1152`
   and then compensated-command/error/PI state in the closed-loop Q-current path.
-  VAR-036/CORR-078 separately close the retained LTA branch as direct-write
-  inactive and rule out a recovered hidden B6 group/full-PDU command. The
-  remaining Corolla experiment is therefore genuinely external-provenance work:
+  VAR-036/VAR-037/CORR-078 separately close the retained LTA branch as
+  direct-write inactive, rule out recovered hidden D7/B6 group/full-PDU commands,
+  and classify the only shared command-sized CAN025 fields as steering-angle/rate
+  sensor state. The remaining Corolla experiment is therefore genuinely
+  external-provenance work:
   during a known stock-LTA interval, capture all real incoming CAN-FD traffic and
   read the H precursor/mode/contributor cells to find a state that moves before
   the autonomous component of the general torque command. If none does, acquire

@@ -124,12 +124,15 @@ mapped as `0x1151/0x1153/0x1156`. Another generic command→motor xref sweep is 
 longer useful.
 
 The remaining H question is **external autonomous-lateral provenance**, not
-ordinary EPS torque provenance. The dedicated static census now closes the two
-last obvious EPS-local escape hatches: the retained Sienna-homolog LTA magnitude
-cells and mode source are direct-write zero/inactive, while B6's nonscalar rows
-have no recovered block/group/full-PDU/direct-literal consumer. `1C02` is a
-general internal torque-command observable with local assist contributors, so
-watching it alone cannot identify stock LTA.
+ordinary EPS torque provenance. The dedicated static census now closes the
+EPS-local escape hatches: the retained Sienna-homolog LTA magnitude cells and
+mode source are direct-write zero/inactive; D7's only 16-bit scalar is
+Techstream `CAN Vehicle Speed (SP1)`; B6's sole 16-bit scalar is staged-only and
+its nonscalar rows have no recovered block/group/full-PDU/direct-literal
+consumer; and the only shared supervisor-reaching >=12-bit fields on CAN `0x025`
+are target-natively proved steering angle/rate sensor state. `1C02` is a general
+internal torque-command observable with local assist contributors, so watching
+it alone cannot identify stock LTA.
 
 The next H evidence must therefore be same-vehicle dynamic correlation: capture a
 known stock-LTA steering interval on **all genuine incoming buses** while reading

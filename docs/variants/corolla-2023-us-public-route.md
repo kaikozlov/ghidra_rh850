@@ -2398,7 +2398,15 @@ pointer literals. As a control, Sienna's known `2E4` profile itself has configur
 IDs `58..65` but scalar reads only `58..63`; configured nonscalar rows are thus
 not evidence for a hidden wire command by themselves.
 
-The other protected brake-module profile, `0x0D7`, also closes without a hidden steering magnitude. Its configured PDU40 signal IDs are `240..247`, but the regenerated scalar unpacker reads only signal 240 (1 bit), signal 243 (16 bits), and signal 246 (4 bits). Signal 243 lands at `FEBE7D82`; H RDBI DID `0x1185` reads that exact cell, and `EMPS_P5` names it **`CAN Vehicle Speed (SP1)`**. The nonscalar D7 IDs `241/242/244/245/247` occur in no resolved block/group receive, no full-PDU read uses PDU40, and D7's COM buffer `FEBE4ACC` has no raw absolute-pointer literal. Thus D7's only recovered command-sized scalar is OEM-identified vehicle speed, not lateral command magnitude.
+The other protected brake-module profile, `0x0D7`, also closes without a hidden
+steering magnitude. Its configured PDU40 signal IDs are `240..247`, but the
+regenerated scalar unpacker reads only signal 240 (1 bit), signal 243 (16 bits),
+and signal 246 (4 bits). Signal 243 lands at `FEBE7D82`; H RDBI DID `0x1185`
+reads that exact cell, and `EMPS_P5` names it **`CAN Vehicle Speed (SP1)`**. The
+nonscalar D7 IDs `241/242/244/245/247` occur in no resolved block/group receive,
+no full-PDU read uses PDU40, and D7's COM buffer `FEBE4ACC` has no raw absolute-
+pointer literal. Thus D7's only recovered command-sized scalar is OEM-identified
+vehicle speed, not lateral command magnitude.
 
 Techstream's DTC vocabulary independently identifies the B6 source domain. H's
 six-row communication-monitor table `27F68` associates receive-status slot
@@ -2428,6 +2436,26 @@ rename the classic Image Processing Module A messages: **the active camera/IPM-A
 communication-monitor surface was removed while disabled diagnostic scaffolding
 remained**.
 
+A final adversarial pass also closes the only **shared** command-sized scalar
+inputs that the changed-field census deliberately did not count. H signals
+`184/185/186` on CAN `0x025` are byte/shape compatible with the pinned Toyota
+`STEER_ANGLE_SENSOR` definition:
+
+```text
+H signal 184  signed 12 bit  wire byte 0        -> STEER_ANGLE
+H signal 185  signed  4 bit  wire byte 4 nibble -> STEER_FRACTION
+H signal 186  signed 12 bit  wire byte 4        -> STEER_RATE
+```
+
+This is not being named from the DBC alone. H `C2176` independently reconstructs
+`FEBEADF0 * 15 + FEBEACC5`, exactly combining signal 184's coarse angle with
+signal 185's fractional component; `CB2E0` takes the absolute value of signal
+186's snapshot `FEBEAE14` and thresholds it as a rate magnitude; `CBD7E` jointly
+uses the reconstructed angle and rate in plausibility logic. Signals 184 and 186
+are the only shared supervisor-reaching fields at least 12 bits wide. They are
+therefore steering-sensor measurements, not an unchanged-shape field whose
+semantics silently became an autonomous command.
+
 Finally, `CD3CC` confirms why `1C02` cannot be treated as an LTA-only endpoint.
 Its command composition includes retained `C2A8` only as one conditional additive
 term. Several sibling terms (`BE04`, `BD90`, `B678`, `BEC6`, `C39C`) are also
@@ -2439,9 +2467,11 @@ assist/control term via `CCE8C <- CD1E8`. Ordinary EPS assist can therefore move
 The supportable static conclusion is now narrow and strong: **this exact
 `8965H1202000` image contains no recovered stock autonomous-lateral ingress.**
 The classic Sienna path is absent, the retained homolog is direct-write inactive,
-and the only H-only FD input is both supervisory under all recovered scalar
-consumers **and Techstream-classified as Brake System Control Module traffic**;
-its nonscalar/group/full-PDU escape routes are closed. This is still not proof
+the H-only protected input is both supervisory under all recovered scalar
+consumers **and Techstream-classified as Brake System Control Module traffic**,
+D7's only large scalar is SP1 vehicle speed, and the remaining shared large
+fields are target-natively proved steering angle/rate sensor state. Their
+nonscalar/group/full-PDU escape routes are closed. This is still not proof
 that the vehicle lacks LTA: a computed alias or hardware writer remains bounded,
 and the autonomous request may be generated or transformed in another ECU. The
 next evidence must therefore be same-vehicle dynamic provenance or another ECU's
@@ -2450,8 +2480,8 @@ firmware, not another undirected pass over this EPS CodeFlash.
 Machine-readable ownership:
 `data/generated/corolla_8965H1202000_lta_command_provenance.json` and
 `data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json`;
-`tests/verify_corolla_8965H1202000_lta_command_provenance.py` pins the 88-assertion
-raw-byte/API/direct-reference closure.
+`tests/verify_corolla_8965H1202000_lta_command_provenance.py` pins the complete
+raw-byte/API/direct-reference/DBC-correlated closure.
 
 ## 8. Remaining evidence boundary
 

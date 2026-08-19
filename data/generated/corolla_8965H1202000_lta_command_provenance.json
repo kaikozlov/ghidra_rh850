@@ -223,9 +223,9 @@
     "secured_length": 32
   },
   "evidence": {
-    "function_count": 32,
+    "function_count": 36,
     "path": "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
-    "sha256": "9a4b863d901c9b45bf7ee6805d561ed61303af835bccad96769aaf3e321ce27b"
+    "sha256": "df5c156d88cb930bd50d41dd05f124d8aaaf2de0d1f1a23a23793ee896fcb0aa"
   },
   "evidence_boundary": "Static closure is exact for recovered direct RAM-symbol writes, raw absolute pointers, generated scalar receive calls, literal block/group receive calls, and literal full-PDU copy calls in the tracked H corpus. It does not prove absence of computed-pointer aliases, DMA/hardware writers, or an autonomous command produced by another ECU.",
   "final_command_composition": {
@@ -529,6 +529,119 @@
     }
   },
   "schema": "corolla-8965H1202000-lta-command-provenance-v1",
+  "shared_can025_sensor_ingress": {
+    "boundary": "The public DBC is corroboration rather than sole naming evidence: target-native H arithmetic independently distinguishes angle+fraction and rate semantics. This closes the adversarial possibility that an unchanged-shape large scalar was silently repurposed as the missing LTA command.",
+    "can_id": "0x025",
+    "classification": "shared-command-sized-ingress-is-steering-angle-sensor-state",
+    "dbc": {
+      "message": "STEER_ANGLE_SENSOR",
+      "message_id_decimal": 37,
+      "path": "REFERENCE/opendbc/opendbc/dbc/generator/toyota/_toyota_2017.dbc",
+      "sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48",
+      "signals": {
+        "STEER_ANGLE": {
+          "bit_length": 12,
+          "signed": true,
+          "start_bit_motorola": 3
+        },
+        "STEER_FRACTION": {
+          "bit_length": 4,
+          "signed": true,
+          "start_bit_motorola": 39
+        },
+        "STEER_RATE": {
+          "bit_length": 12,
+          "signed": true,
+          "start_bit_motorola": 35
+        }
+      }
+    },
+    "h_signals": {
+      "184": {
+        "bit_length": 12,
+        "bit_offset_in_byte": 0,
+        "can_id": "0x025",
+        "consumer_entries": [
+          "0x000BE51A",
+          "0x000C2176",
+          "0x000CBD7E"
+        ],
+        "sienna_same_shape_signals": [
+          221
+        ],
+        "signal_id": 184,
+        "signed": true,
+        "snapshot_address": "0xFEBEADF0",
+        "source_unpackers": [
+          "0x0004636A"
+        ],
+        "wire_byte": 0
+      },
+      "185": {
+        "bit_length": 4,
+        "bit_offset_in_byte": 4,
+        "can_id": "0x025",
+        "consumer_entries": [
+          "0x000BE51A",
+          "0x000C2176",
+          "0x000CBD7E"
+        ],
+        "sienna_same_shape_signals": [
+          222
+        ],
+        "signal_id": 185,
+        "signed": true,
+        "snapshot_address": "0xFEBEACC5",
+        "source_unpackers": [
+          "0x0004636A"
+        ],
+        "wire_byte": 4
+      },
+      "186": {
+        "bit_length": 12,
+        "bit_offset_in_byte": 0,
+        "can_id": "0x025",
+        "consumer_entries": [
+          "0x000CB2E0",
+          "0x000CBD7E"
+        ],
+        "sienna_same_shape_signals": [
+          223
+        ],
+        "signal_id": 186,
+        "signed": true,
+        "snapshot_address": "0xFEBEAE14",
+        "source_unpackers": [
+          "0x0004636A"
+        ],
+        "wire_byte": 4
+      }
+    },
+    "interpretation": "The only shared H supervisor-reaching fields >=12 bits are signal184 and signal186 on CAN0x025. Together with signal185 they exactly match the pinned Toyota STEER_ANGLE_SENSOR layout: signed12 coarse STEER_ANGLE, signed4 STEER_FRACTION, signed12 STEER_RATE. H independently recombines 184*15+185 as steering angle and treats 186 as a rate magnitude. They are sensor measurements, not a semantically repurposed autonomous command.",
+    "target_native_semantics": {
+      "angle_plus_fraction": {
+        "entry": "0x000C2176",
+        "recovered": true,
+        "relation": "FEBEADF0 * 15 + FEBEACC5 reconstructs the high-resolution steering-angle input"
+      },
+      "joint_plausibility": {
+        "entry": "0x000CBD7E",
+        "recovered": true,
+        "relation": "the supervisor jointly consumes the reconstructed angle and absolute rate cells in plausibility logic"
+      },
+      "steering_rate_magnitude": {
+        "entry": "0x000CB2E0",
+        "recovered": true,
+        "relation": "absolute FEBEAE14 is thresholded as the steering-rate magnitude"
+      }
+    },
+    "unpacker": {
+      "entry": "0x0004636A",
+      "signal184_shape_recovered": true,
+      "signal185_shape_recovered": true,
+      "signal186_shape_recovered": true
+    }
+  },
   "software_id": "8965H1202000",
   "static_conclusion": {
     "broad_static_search_closed": true,
@@ -539,6 +652,17 @@
     "next_evidence": "Use same-vehicle stock-LTA capture plus read-only XCP/RDBI to identify a state changing upstream of the general internal torque command; or acquire the camera/gateway/other steering-controller firmware if the command is generated outside this EPS image.",
     "retained_sienna_lta_branch_active_under_recovered_direct_writes": false,
     "retained_sienna_lta_enable_direct_write_zero": true,
-    "retained_sienna_lta_magnitude_direct_write_zero": true
+    "retained_sienna_lta_magnitude_direct_write_zero": true,
+    "shared_command_sized_ingress_classified_as_sensor_state": true
+  },
+  "supporting_inputs": {
+    "supervisor_external_ingress_census": {
+      "path": "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
+      "sha256": "662944f3f9c58a0a2abaa655dedd22153ad6f95ed1239ba2a14752ed738e74bd"
+    },
+    "toyota_dbc": {
+      "path": "REFERENCE/opendbc/opendbc/dbc/generator/toyota/_toyota_2017.dbc",
+      "sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48"
+    }
   }
 }
