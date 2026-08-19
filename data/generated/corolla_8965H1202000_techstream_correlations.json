@@ -1,4 +1,82 @@
 {
+  "camera_ipm_a_residue": {
+    "boundary": "This is a calibration-specific active-monitor/DTC conclusion. It does not identify the replacement vehicle-level LTA architecture or prove another ECU cannot transform camera commands before the EPS sees them.",
+    "h_dtc_index": 93,
+    "h_dtc_raw_hex": "873ac20000000000",
+    "h_dtc_record_address": "0x0002C870",
+    "h_enabled_word": 0,
+    "h_event_b3": {
+      "dtc_index": 0,
+      "event_id": "0xB3",
+      "note": "Sienna U023A87 map retained B3 as configured-unresolved; H disconnects it from DTC index 93 as well.",
+      "raw_hex": "4200000000000000"
+    },
+    "interpretation": "H retains disabled U023A87 Image Processing Module A diagnostic residue at DTC index 93. The four Sienna active communication-monitor rows that joined this DTC to CAN 0x2E4, 0x131, 0x191, and 0x2FD are absent from H's active six-row monitor table, although their Dem event records still point to disabled DTC index 93. Together with the missing 2E4/131 SecOC/COM profiles, this is strong evidence that the classic direct camera/IPM-A steering interface was disabled/removed rather than renumbered to B6.",
+    "packed_dtc": "0xC23A87",
+    "removed_sienna_can_ids": [
+      "0x131",
+      "0x191",
+      "0x2E4",
+      "0x2FD"
+    ],
+    "sienna_active_ipm_rows": [
+      {
+        "corolla_h_active_monitor_row_present": false,
+        "corolla_h_event_dtc_index": 93,
+        "corolla_h_event_raw_hex": "42005d1100000000",
+        "event_id": "0xB0",
+        "sienna_can_ids": [
+          "0x2E4"
+        ],
+        "sienna_monitor_index": 6,
+        "sienna_monitor_raw_hex": "0000b0000600a50b",
+        "sienna_row_event_matches": true,
+        "sienna_rx_state_selector": 0
+      },
+      {
+        "corolla_h_active_monitor_row_present": false,
+        "corolla_h_event_dtc_index": 93,
+        "corolla_h_event_raw_hex": "43005d1100000000",
+        "event_id": "0x138",
+        "sienna_can_ids": [
+          "0x131"
+        ],
+        "sienna_monitor_index": 8,
+        "sienna_monitor_raw_hex": "000038010807a50b",
+        "sienna_row_event_matches": true,
+        "sienna_rx_state_selector": 7
+      },
+      {
+        "corolla_h_active_monitor_row_present": false,
+        "corolla_h_event_dtc_index": 93,
+        "corolla_h_event_raw_hex": "43005d1100000000",
+        "event_id": "0x13C",
+        "sienna_can_ids": [
+          "0x191"
+        ],
+        "sienna_monitor_index": 7,
+        "sienna_monitor_raw_hex": "00003c010706a50b",
+        "sienna_row_event_matches": true,
+        "sienna_rx_state_selector": 6
+      },
+      {
+        "corolla_h_active_monitor_row_present": false,
+        "corolla_h_event_dtc_index": 93,
+        "corolla_h_event_raw_hex": "43005d1100000000",
+        "event_id": "0x13D",
+        "sienna_can_ids": [
+          "0x2FD"
+        ],
+        "sienna_monitor_index": 9,
+        "sienna_monitor_raw_hex": "00003d010908a50b",
+        "sienna_row_event_matches": true,
+        "sienna_rx_state_selector": 8
+      }
+    ],
+    "techstream_code": "U023A87",
+    "techstream_description": "Lost Communication with Image Processing Module \"A\"",
+    "techstream_failure": "Missing Message"
+  },
   "command_value_torque": {
     "corolla_h_rdbi": {
       "callback": "0x000495A0",
@@ -55,6 +133,202 @@
       "name": "Command Value Torque",
       "primary_data_id": "0x1C02",
       "unit": "Nm"
+    }
+  },
+  "communication_monitor_dtc": {
+    "b6_interpretation": "H CAN 0x0B6 maps through receive-status slot 0x18 / PDU42 to Dem event 0x0143, DTC index 82, packed DTC 0xC12987, which EMPS_P5 names U012987 Lost Communication with Brake System Control Module / Missing Message. 0x0D7 and classic 0x0D5 share the same DTC. This strongly classifies B6 as brake-system-originated supervisory/control data rather than an Image Processing Module A steering-command replacement.",
+    "boundary": "The DTC name identifies the monitored source/module relationship in Techstream's P5 diagnostic model; it does not assign every B6 field or prove that no brake-originated field can influence steering.",
+    "brake_missing_message_can_ids": [
+      "0x0D7",
+      "0x0D5",
+      "0x0B6"
+    ],
+    "dem_event_table": "0x0002B988",
+    "dispatcher": "0x000378CC",
+    "dtc_table": "0x0002C588",
+    "monitor_table": "0x00027F68",
+    "row_count": 6,
+    "rows": [
+      {
+        "can_fd": true,
+        "can_id": "0x025",
+        "dem_event": "0x00AD",
+        "dem_event_raw_hex": "0100000000010000",
+        "dem_event_record_address": "0x0002BEF0",
+        "descriptor_index": 29,
+        "dtc": null,
+        "length": 32,
+        "pdu_id": 34,
+        "raw_hex": "0600ad000010a506",
+        "row_index": 0,
+        "signal_ids": [
+          184,
+          185,
+          186,
+          181,
+          182,
+          183,
+          187
+        ],
+        "status_slot": "0x10",
+        "system_event": "0x06",
+        "unpacker_entry": "0x0004636A"
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x0D7",
+        "dem_event": "0x00AA",
+        "dem_event_raw_hex": "4310520f40010000",
+        "dem_event_record_address": "0x0002BED8",
+        "descriptor_index": 35,
+        "dtc": {
+          "base_dtc": "0xC129",
+          "enabled_word": 1,
+          "failure_type": "0x87",
+          "h_dtc_index": 82,
+          "h_raw_hex": "8729c10001000000",
+          "h_record_address": "0x0002C818",
+          "packed_dtc": "0xC12987",
+          "techstream_code": "U012987",
+          "techstream_description": "Lost Communication with Brake System Control Module",
+          "techstream_failure": "Missing Message",
+          "techstream_raw_sha256": "b9b22676cbb4f869c419e0d5c9fbf1197c3cda91cb38cc9eacf98142383f64b4"
+        },
+        "length": 32,
+        "pdu_id": 40,
+        "raw_hex": "0700aa000116a506",
+        "row_index": 1,
+        "signal_ids": [
+          243,
+          240,
+          246
+        ],
+        "status_slot": "0x16",
+        "system_event": "0x07",
+        "unpacker_entry": "0x000468FA"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0D0",
+        "dem_event": "0x00E0",
+        "dem_event_raw_hex": "0100000000010000",
+        "dem_event_record_address": "0x0002C088",
+        "descriptor_index": 18,
+        "dtc": null,
+        "length": 8,
+        "pdu_id": 23,
+        "raw_hex": "0000e0000205a506",
+        "row_index": 2,
+        "signal_ids": [
+          109,
+          105
+        ],
+        "status_slot": "0x05",
+        "system_event": null,
+        "unpacker_entry": "0x00045E34"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x3B0",
+        "dem_event": null,
+        "dem_event_raw_hex": null,
+        "dem_event_record_address": null,
+        "descriptor_index": 0,
+        "dtc": null,
+        "length": 8,
+        "pdu_id": 5,
+        "raw_hex": "000000000300a506",
+        "row_index": 3,
+        "signal_ids": [
+          59
+        ],
+        "status_slot": "0x00",
+        "system_event": null,
+        "unpacker_entry": "0x00045C8E"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0D5",
+        "dem_event": "0x00AE",
+        "dem_event_raw_hex": "4300520000010000",
+        "dem_event_record_address": "0x0002BEF8",
+        "descriptor_index": 32,
+        "dtc": {
+          "base_dtc": "0xC129",
+          "enabled_word": 1,
+          "failure_type": "0x87",
+          "h_dtc_index": 82,
+          "h_raw_hex": "8729c10001000000",
+          "h_record_address": "0x0002C818",
+          "packed_dtc": "0xC12987",
+          "techstream_code": "U012987",
+          "techstream_description": "Lost Communication with Brake System Control Module",
+          "techstream_failure": "Missing Message",
+          "techstream_raw_sha256": "b9b22676cbb4f869c419e0d5c9fbf1197c3cda91cb38cc9eacf98142383f64b4"
+        },
+        "length": 8,
+        "pdu_id": 37,
+        "raw_hex": "0000ae000413a506",
+        "row_index": 4,
+        "signal_ids": [
+          209,
+          210,
+          208
+        ],
+        "status_slot": "0x13",
+        "system_event": null,
+        "unpacker_entry": "0x00046606"
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x0B6",
+        "dem_event": "0x0143",
+        "dem_event_raw_hex": "4200520000010000",
+        "dem_event_record_address": "0x0002C3A0",
+        "descriptor_index": 37,
+        "dtc": {
+          "base_dtc": "0xC129",
+          "enabled_word": 1,
+          "failure_type": "0x87",
+          "h_dtc_index": 82,
+          "h_raw_hex": "8729c10001000000",
+          "h_record_address": "0x0002C818",
+          "packed_dtc": "0xC12987",
+          "techstream_code": "U012987",
+          "techstream_description": "Lost Communication with Brake System Control Module",
+          "techstream_failure": "Missing Message",
+          "techstream_raw_sha256": "b9b22676cbb4f869c419e0d5c9fbf1197c3cda91cb38cc9eacf98142383f64b4"
+        },
+        "length": 32,
+        "pdu_id": 42,
+        "raw_hex": "000043010518a506",
+        "row_index": 5,
+        "signal_ids": [
+          254,
+          255,
+          256,
+          257,
+          258,
+          259,
+          260,
+          261,
+          262,
+          263,
+          264,
+          265
+        ],
+        "status_slot": "0x18",
+        "system_event": null,
+        "unpacker_entry": "0x00046A10"
+      }
+    ],
+    "scheduler": "0x000379A2",
+    "target_native_checks": {
+      "dem_lifecycle_joins_event_to_dtc_table": true,
+      "dispatcher_has_six_rows": true,
+      "failure_reporter_uses_event_table": true,
+      "scheduler_walks_six_rows": true,
+      "status_reader_uses_febe7c01": true
     }
   },
   "data_id_layout_recovery": {
@@ -3301,9 +3575,326 @@
       }
     ]
   },
-  "schema": "corolla-8965H1202000-techstream-correlations-v1",
+  "motor_current_bridge": {
+    "boundary": "This proves an internal command-torque -> Q-current-reference control join. It does not identify the ultimate external/LTA source feeding the high-level FEBEC3C0/FEBEC3D2 synthesis.",
+    "d_axis_command_chain": [
+      {
+        "entry": "0x0003364E",
+        "recovered": true,
+        "relation": "internal D-axis/current auxiliary state is updated and written to FEBE6C0E (GP-0x4BF2)"
+      },
+      {
+        "entry": "0x000335EE",
+        "recovered": true,
+        "relation": "D-axis/current auxiliary correction is computed around prior FEBE6C0E"
+      },
+      {
+        "entry": "0x00033622",
+        "recovered": true,
+        "relation": "auxiliary D-axis/current update is limited against calibration/state"
+      },
+      {
+        "entry": "0x0003322E",
+        "recovered": true,
+        "relation": "FEBE6C0E -> FEBE6BC2 d-axis current reference"
+      },
+      {
+        "entry": "0x0005722E",
+        "recovered": true,
+        "relation": "FEBE6BC2 -> FEBE65A6 diagnostic snapshot"
+      },
+      {
+        "entry": "0x00049212",
+        "recovered": true,
+        "relation": "FEBE65A6 -> DID 0x1154 Command Value Current 2 (D Axis)"
+      }
+    ],
+    "interpretation": "Techstream closes the previously missing static bridge from H's internal command-value-torque state to the motor current loop. DID 0x1C02 observes FEBEC3D2 upstream of a gating/limit stage; the gated sibling FEBEC3D4 is published through EE40C, negated into the high-rate Q-axis reference path, and appears as DID 0x1152 Command Value Current (Q Axis). DID 0x1156 independently observes the selected Q-axis current-limit magnitude. The D-axis command path is generated by a separate motor-internal auxiliary update and is not statically sourced from the 1C02 command-torque chain.",
+    "q_axis_actual_chain": [
+      {
+        "entry": "0x00033160",
+        "recovered": true,
+        "relation": "motor feedback combine -> FEBE6BAE q-axis actual current and FEBE6BAC d-axis actual current"
+      },
+      {
+        "entry": "0x0005722E",
+        "recovered": true,
+        "relation": "FEBE6BAE -> FEBE6592; FEBE6BAC -> FEBE6590"
+      },
+      {
+        "entry": "0x0004915E",
+        "recovered": true,
+        "relation": "FEBE6592 -> DID 0x1151 Motor Actual Current (Q Axis)"
+      },
+      {
+        "entry": "0x000491D6",
+        "recovered": true,
+        "relation": "FEBE6590 -> DID 0x1153 Motor Actual Current 2 (D Axis)"
+      }
+    ],
+    "q_axis_command_chain": [
+      {
+        "entry": "0x000CD5DC",
+        "recovered": true,
+        "relation": "FEBEC3D2 is bounded/gated into FEBEC3D6 while FEBEC3D8 records the current-limit magnitude"
+      },
+      {
+        "entry": "0x000CD644",
+        "recovered": true,
+        "relation": "FEBEC3D6 -> FEBEC3D4, with a bounded fault/override replacement"
+      },
+      {
+        "entry": "0x000CE928",
+        "recovered": true,
+        "relation": "FEBEC3D4 -> FEBEAC54 and FEBEC3D8 -> FEBEAC7E"
+      },
+      {
+        "entry": "0x000BB9E8",
+        "recovered": true,
+        "relation": "FEBEAC54 -> FEBEE40C and FEBEAC7E -> FEBEE414"
+      },
+      {
+        "entry": "0x000312F0",
+        "recovered": true,
+        "relation": "-FEBEE40C -> FEBE6964; FEBEE40A remains the sibling command-torque observer; FEBEE414 -> FEBE696A"
+      },
+      {
+        "entry": "0x000336EE",
+        "recovered": true,
+        "relation": "FEBE6964 -> FEBE6C1A"
+      },
+      {
+        "entry": "0x0003322E",
+        "recovered": true,
+        "relation": "FEBE6C1A -> FEBE6BC0 Techstream-visible base Q-current command, and FEBE6BE4 + FEBE6C1A -> FEBE6BB8 compensated Q command"
+      },
+      {
+        "entry": "0x0005722E",
+        "recovered": true,
+        "relation": "FEBE6BC0 -> FEBE65A4 diagnostic snapshot"
+      },
+      {
+        "entry": "0x0004919A",
+        "recovered": true,
+        "relation": "FEBE65A4 -> DID 0x1152 Command Value Current (Q Axis)"
+      },
+      {
+        "entry": "0x00033160",
+        "recovered": true,
+        "relation": "motor feedback combine publishes raw Q feedback aggregate FEBE6BB4 and Techstream-visible saturated Q actual FEBE6BAE"
+      },
+      {
+        "entry": "0x00032934",
+        "recovered": true,
+        "relation": "FEBE6BB8 compensated Q command - FEBE6BB4 raw Q feedback -> bounded Q current error"
+      },
+      {
+        "entry": "0x00032958",
+        "recovered": true,
+        "relation": "Q current-error sign/gating state is derived for PI anti-windup"
+      },
+      {
+        "entry": "0x000329A0",
+        "recovered": true,
+        "relation": "Q current error drives the dedicated PI/integrator state"
+      }
+    ],
+    "q_axis_limit_chain": [
+      {
+        "entry": "0x000CD5DC",
+        "recovered": true,
+        "relation": "FEBEC3D8 records the selected symmetric current-limit magnitude"
+      },
+      {
+        "entry": "0x000CE928",
+        "recovered": true,
+        "relation": "FEBEC3D8 -> FEBEAC7E"
+      },
+      {
+        "entry": "0x000BB9E8",
+        "recovered": true,
+        "relation": "FEBEAC7E -> FEBEE414"
+      },
+      {
+        "entry": "0x00056892",
+        "recovered": true,
+        "relation": "FEBEE414 -> FEBE65FC diagnostic snapshot"
+      },
+      {
+        "entry": "0x00049298",
+        "recovered": true,
+        "relation": "FEBE65FC -> DID 0x1156 Final Motor Current Limited (Q Axis)"
+      }
+    ],
+    "techstream_monitors": {
+      "251": {
+        "alternate_data_id": "0x3151",
+        "bit_width": 16,
+        "ddb_record_sha256": "68d6ef0654b428f26abb8b59545b3804226117cd93d82f2be16ed30853979fb3",
+        "h_callback": "0x4915E",
+        "h_callback_classification": "direct_fixed",
+        "h_declared_length": 2,
+        "monitor_key": 251,
+        "name": "Motor Actual Current (Q Axis)",
+        "primary_data_id": "0x1151",
+        "unit": "A"
+      },
+      "252": {
+        "alternate_data_id": "0x3152",
+        "bit_width": 16,
+        "ddb_record_sha256": "4f36506918bf36dd7b5544f7af961eacbdfbaa2101da8a5b8f9821e11515abcb",
+        "h_callback": "0x4919A",
+        "h_callback_classification": "direct_fixed",
+        "h_declared_length": 2,
+        "monitor_key": 252,
+        "name": "Command Value Current (Q Axis)",
+        "primary_data_id": "0x1152",
+        "unit": "A"
+      },
+      "253": {
+        "alternate_data_id": "0x3153",
+        "bit_width": 16,
+        "ddb_record_sha256": "af7fad1107c5b2852d435f1d603b054be1ae1e9142ae687c0b74f27fd5bd388b",
+        "h_callback": "0x491D6",
+        "h_callback_classification": "direct_fixed",
+        "h_declared_length": 2,
+        "monitor_key": 253,
+        "name": "Motor Actual Current 2 (D Axis)",
+        "primary_data_id": "0x1153",
+        "unit": "A"
+      },
+      "254": {
+        "alternate_data_id": "0x3154",
+        "bit_width": 16,
+        "ddb_record_sha256": "7f871a832cfc274e7a0287fd0bdabdc5d4abaf1624de3cc9b871cca0f2df10d4",
+        "h_callback": "0x49212",
+        "h_callback_classification": "direct_fixed",
+        "h_declared_length": 2,
+        "monitor_key": 254,
+        "name": "Command Value Current 2 (D Axis)",
+        "primary_data_id": "0x1154",
+        "unit": "A"
+      },
+      "255": {
+        "alternate_data_id": "0x3155",
+        "bit_width": 16,
+        "ddb_record_sha256": "3301e00d6f92e670dfed94b6f11720aa3624c8d433f77deb05ee29e503efb957",
+        "h_callback": "0x4924E",
+        "h_callback_classification": "direct_fixed",
+        "h_declared_length": 2,
+        "monitor_key": 255,
+        "name": "Motor Rotation Angle",
+        "primary_data_id": "0x1155",
+        "unit": "deg"
+      },
+      "256": {
+        "alternate_data_id": "0x3156",
+        "bit_width": 16,
+        "ddb_record_sha256": "9f7cdd216915ce731a159b54ac6bea8375585ec6af7e372a7e150290d26e90d7",
+        "h_callback": "0x49298",
+        "h_callback_classification": "direct_fixed",
+        "h_declared_length": 2,
+        "monitor_key": 256,
+        "name": "Final Motor Current Limited (Q Axis)",
+        "primary_data_id": "0x1156",
+        "unit": "A"
+      }
+    }
+  },
+  "protected_brake_profile_semantics": {
+    "b6": {
+      "can_id": "0x0B6",
+      "interpretation": "B6's sole 16-bit scalar is the already-censused staged-only signal255; all supervisor-reaching changed fields are <=8 bits, and its nonscalar/group/full-PDU surfaces are separately closed.",
+      "largest_recovered_scalar_bits": 16,
+      "largest_scalar_role": "signed16-staged-only-direct-xref-negative",
+      "largest_scalar_signal_id": 255,
+      "techstream_source_dtc": {
+        "base_dtc": "0xC129",
+        "enabled_word": 1,
+        "failure_type": "0x87",
+        "h_dtc_index": 82,
+        "h_raw_hex": "8729c10001000000",
+        "h_record_address": "0x0002C818",
+        "packed_dtc": "0xC12987",
+        "techstream_code": "U012987",
+        "techstream_description": "Lost Communication with Brake System Control Module",
+        "techstream_failure": "Missing Message",
+        "techstream_raw_sha256": "b9b22676cbb4f869c419e0d5c9fbf1197c3cda91cb38cc9eacf98142383f64b4"
+      }
+    },
+    "conclusion": "Both protected brake-originated profiles are inconsistent with a recovered hidden autonomous steering-magnitude replacement: D7's 16-bit field is SP1 vehicle speed and B6's 16-bit field has no runtime consumer under the complete direct-xref census.",
+    "d7": {
+      "can_id": "0x0D7",
+      "configured_signal_ids": [
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247
+      ],
+      "interpretation": "D7's only recovered 16-bit scalar is signal243 at FEBE7D82, exactly exposed by H DID 0x1185 and named by EMPS_P5 as CAN Vehicle Speed (SP1). Its other recovered scalars are 1-bit signal240 and 4-bit signal246 status fields. Together with the U012987 Brake System Control Module missing-message DTC, D7 does not expose a recovered steering-command magnitude.",
+      "non_scalar_configured_ids": [
+        241,
+        242,
+        244,
+        245,
+        247
+      ],
+      "pdu_id": 40,
+      "scalar_calls": [
+        {
+          "bit_length": 1,
+          "bit_offset_in_byte": 7,
+          "packed_bit_offset": 383,
+          "signal_id": 240
+        },
+        {
+          "bit_length": 16,
+          "bit_offset_in_byte": 0,
+          "packed_bit_offset": 384,
+          "signal_id": 243
+        },
+        {
+          "bit_length": 4,
+          "bit_offset_in_byte": 4,
+          "packed_bit_offset": 411,
+          "signal_id": 246
+        }
+      ],
+      "sp1_vehicle_speed": {
+        "callback_recovered": true,
+        "destination": "0xFEBE7D82",
+        "h_callback": "0x49372",
+        "monitor_key": 305,
+        "name": "CAN Vehicle Speed (SP1)",
+        "primary_data_id": "0x1185",
+        "signal_id": 243
+      },
+      "techstream_source_dtc": {
+        "base_dtc": "0xC129",
+        "enabled_word": 1,
+        "failure_type": "0x87",
+        "h_dtc_index": 82,
+        "h_raw_hex": "8729c10001000000",
+        "h_record_address": "0x0002C818",
+        "packed_dtc": "0xC12987",
+        "techstream_code": "U012987",
+        "techstream_description": "Lost Communication with Brake System Control Module",
+        "techstream_failure": "Missing Message",
+        "techstream_raw_sha256": "b9b22676cbb4f869c419e0d5c9fbf1197c3cda91cb38cc9eacf98142383f64b4"
+      }
+    }
+  },
+  "schema": "corolla-8965H1202000-techstream-correlations-v2",
   "software_id": "8965H1202000",
   "sources": {
+    "corolla_application_rx": {
+      "path": "data/generated/corolla_8965H1202000_application_rx_diff.json",
+      "sha256": "5f3010636ad1c865f0855e68fc07b57537a1db1b40ededd3dcb31fb878e3c5e3"
+    },
     "corolla_codeflash": {
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
       "sha256": "97f9d42d936b97a99e7ab3d3ef20c6fb4c1fc3cc2ba199f6b158675a1709aee6",
@@ -3321,13 +3912,26 @@
       "relative_path": "NA/DB/EMPS_P5.ddb",
       "sha256": "1e5ffc4f998570458fa86dd0d563949006f9e0781f15d118d01e80656fadd199"
     },
+    "sienna_codeflash": {
+      "path": "firmware/RH850_P1M-E_CodeFlash.bin",
+      "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+      "size": 1048576
+    },
+    "sienna_u023a87_monitor_map": {
+      "path": "data/generated/u023a87_monitor_map.json",
+      "sha256": "c2e03f659d2eafd5d9502d9f6cef2dce343887097b66d49d48da90a5f86719a2"
+    },
     "target_native_evidence": {
       "path": "data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json",
-      "sha256": "3b368726c5568965a37c22ea63f33b4ac118878a553ce607471c2e3a86a1f1fb"
+      "sha256": "b2edf550eb3ef0b52bd2bfce884c8cdb07c9d2651783371bc67f5bf60b3ec01c"
     },
     "techstream_application_correlations": {
       "path": "data/generated/techstream_v18/application_interface_correlations.json",
       "sha256": "f046b9594dd82124b0ba973622050393f265930c54791cd0bc89db5c1c2b19c0"
+    },
+    "techstream_master_routes": {
+      "path": "data/generated/techstream_v18/toyota_master_routes.json",
+      "sha256": "4193fbe1abe77259d573cbd7b36cc5e8afcc04078585520f94ab54bbe3721dfd"
     },
     "techstream_semantics": {
       "path": "data/generated/techstream_v18/priority_steering_ddb_semantics.json",
@@ -3335,10 +3939,63 @@
     }
   },
   "static_conclusion": {
+    "b6_brake_system_missing_message_dtc_join": true,
+    "camera_ipm_a_dtc_disabled": true,
+    "classic_active_test_surface_present": false,
+    "command_torque_to_q_current_static_bridge": true,
     "command_value_torque_exact_did_join": true,
     "command_value_torque_live_internal_pipeline": true,
+    "d_axis_command_path_separate": true,
     "external_can_field_equivalence": false,
-    "next_use": "Use the recovered Techstream DID vocabulary as labels/observers for H target-native control-state tracing and live XCP/RDBI correlation, rather than guessing replacement CAN fields from Sienna names.",
+    "live_cooperation_control_state_monitor": false,
+    "next_use": "Use a same-vehicle stock-LTA interval plus all-bus capture and read-only RDBI/XCP to identify the autonomous contribution before it enters the general internal torque/current chain. If no EPS-local precursor moves, acquire the camera/gateway/other steering-controller firmware rather than repeating broad EPS static analysis.",
+    "protected_brake_profiles_have_no_recovered_steering_magnitude": true,
+    "q_axis_limit_observer_recovered": true,
+    "q_d_actual_current_observers_recovered": true,
+    "sienna_ipm_a_monitor_rows_removed_in_h": true,
     "techstream_corolla_join_previously_missing": true
+  },
+  "techstream_surface": {
+    "active_test_named_dlls": [],
+    "classic_active_test_section_types_present": [],
+    "cooperation_control_state": {
+      "h_callback": "0x489DC",
+      "h_callback_classification": "success_stub",
+      "h_declared_length": 1,
+      "interpretation": "H implements the nominal Cooperation Control State DID as a success stub, so the attractive Techstream name does not expose live Corolla cooperation/LTA state in this calibration.",
+      "monitor_key": 60,
+      "name": "Cooperation Control State",
+      "primary_data_id": "0x106A"
+    },
+    "emps2_p5_master_route_count": 0,
+    "emps_p5_master_routed_regions": [
+      "NA",
+      "EU",
+      "JP"
+    ],
+    "interpretation": "The master-routed EMPS_P5 surface is data-monitor/DTC/support/RoB oriented. It is routed in NA/EU/JP, while EMPS2_P5 has no recovered master route in this V18 corpus. EMPS_P5's parsed section set contains no classic type-11/type-12 active-test tables, and category 405 routes no DLL whose name identifies Active Test or RoutineControl. This is a bounded Techstream-package negative, not proof that Toyota has no separate utility or server-mediated steering procedure.",
+    "master_route_dlls": [
+      "GetDatMonListP5_DT.dll",
+      "DelDiagCodeP4.dll",
+      "JudgeDiagStatusP5_DT.dll",
+      "GetDatMonSignalInfoP5_DT.dll",
+      "GetCID_SID22_DT.dll",
+      "GetSupportP5_DT.dll",
+      "GetRoBP5_DT.dll",
+      "DelRoBP5_DT.dll"
+    ],
+    "na_master_category_id": 405,
+    "na_master_generation": 20,
+    "routine_named_dlls": [],
+    "section_types": [
+      61,
+      62,
+      63,
+      80,
+      87,
+      88,
+      90,
+      91
+    ]
   }
 }

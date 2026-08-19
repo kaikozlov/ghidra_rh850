@@ -997,25 +997,98 @@ stronger reading of the earlier Sienna correlation.
 
 The same join produces a much larger semantic dictionary: H's 226 readable RDBI
 DIDs overlap 124 `EMPS_P5` type-61 IDs and support 137 named monitor rows across
-121 primary Data IDs, including commanded/actual d/q current, phase current and
-duty, torque-sensor, steering-angle, and motor-rotation observables. By contrast,
-the attractive newer target-angle group (`Target Lateral ID`, `Target Steering
+121 primary Data IDs. The most important current-domain rows are exact H joins:
+
+| Techstream monitor | H DID | unit | Target-native role |
+|---|---:|---|---|
+| `Motor Actual Current (Q Axis)` | `1151` | A | `FEBE6BAE -> FEBE6592 -> 4915E` |
+| `Command Value Current (Q Axis)` | `1152` | A | `FEBE6BC0 -> FEBE65A4 -> 4919A` |
+| `Motor Actual Current 2 (D Axis)` | `1153` | A | `FEBE6BAC -> FEBE6590 -> 491D6` |
+| `Command Value Current 2 (D Axis)` | `1154` | A | `FEBE6BC2 -> FEBE65A6 -> 49212` |
+| `Motor Rotation Angle` | `1155` | deg | live 2-byte callback `4924E` |
+| `Final Motor Current Limited (Q Axis)` | `1156` | A | `FEBEE414 -> FEBE65FC -> 49298` |
+
+This closes the previously missing downstream bridge from monitor 402's internal
+command-value state into the closed-loop motor controller. `FEBEC3D2` (the source
+ultimately read by `1C02`) is bounded/gated by `CD5DC` into `FEBEC3D6`; `CD644`
+normally copies that to `FEBEC3D4`; `CE928 -> BB9E8` publishes it as `FEBEE40C`;
+and motor setup `312F0` negates `FEBEE40C` into `FEBE6964`. `336EE` publishes
+that as `FEBE6C1A`. At `3322E`, the same term has two independently useful roles:
+`FEBE6BC0 = FEBE6C1A` is the **Techstream-visible base Q-current command** behind
+DID `1152`, while `FEBE6BB8 = saturate(FEBE6BE4 + FEBE6C1A)` is the compensated
+Q command. `33160` publishes raw Q feedback aggregate `FEBE6BB4`; `32934`
+computes the bounded command-error `6BB8 - 6BB4`; `32958/329A0` drive the Q-axis
+PI/integrator in high-rate motor worker `58226`, which continues through the
+already-mapped transform/duty/PWM path. This prevents a misleading shortcut:
+Techstream's `Command Value Current (Q Axis)` is a real command observer, but its
+RAM cell is not itself the final PI-error variable.
+
+The selected bound in `FEBEC3D8` is independently published through `FEBEE414`
+and exposed by DID `1156` as `Final Motor Current Limited (Q Axis)`. `33160`
+supplies the saturated Q/D diagnostic feedback pair observed by `1151/1153`.
+The D-axis command `1154` is generated through a separate motor-internal
+`3364E -> 335EE/33622 -> 3322E` path rather than from the recovered `1C02`
+command-torque chain.
+
+Thus Techstream now supplies both the OEM vocabulary **and** an independent
+firmware-static semantic bridge from H's general internal torque command through
+the Q-current PI loop. That command is not LTA-specific. The separate provenance
+census in the Corolla variant report shows the retained Sienna-homolog LTA
+contribution is direct-write inactive in this calibration and B6 has no recovered
+opaque/group/full-PDU command consumer.
+
+The same exact H join closes protected `0x0D7` at field level. Its regenerated
+PDU40 unpacker reads only signal 240 (1 bit), signal 243 (16 bits), and signal
+246 (4 bits). Signal 243 is stored at `FEBE7D82`; DID `0x1185` reads that cell
+and `EMPS_P5` names it **`CAN Vehicle Speed (SP1)`**. D7's nonscalar configured
+rows have no recovered group/full-PDU consumer. Its only command-sized scalar is
+therefore OEM-identified vehicle speed, not a hidden steering magnitude.
+
+The P5 DTC path strengthens that B6 conclusion with an OEM source label. H's
+six-row communication-monitor scheduler maps receive-status slot `0x18` to the
+B6 unpacker/PDU42. Failure of that row selects Dem event `0x0143`; H's event
+and DTC tables resolve it to packed `0xC12987`, and the exact `EMPS_P5` type-65
+record names it **U012987 `Lost Communication with Brake System Control Module`
+/ `Missing Message`**. `0x0D7` and `0x0D5` share the same DTC. This is an exact
+firmware→Techstream join and makes B6 a brake-system-originated protected message
+in Toyota's own diagnostic model, not a plausible hidden camera/IPM-A steering
+command merely because it is H-only.
+
+Conversely, the old Image Processing Module A diagnostic remains only as disabled
+residue. H DTC index 93 is packed `0xC23A87`, exactly the `EMPS_P5` U023A87
+`Lost Communication with Image Processing Module "A" / Missing Message` row, but
+H's DTC enable word is zero. The Sienna comparison had active communication-
+monitor rows joining that DTC to `2E4`, `131`, `191`, and `2FD`; H retains those
+four Dem event records pointing to index93 but none is present in H's active
+six-row monitor table. This is strong calibration-specific evidence that the
+classic direct camera/IPM-A interface was disabled/removed rather than renumbered
+to B6. It does not identify where the vehicle's replacement LTA architecture
+lives.
+
+The attractive newer target-angle group (`Target Lateral ID`, `Target Steering
 Angle After Output Compensation`, `Advanced Drive Target Steering Angle`, plus
 System-2 variants) is grouped under primary DIDs `0x1CEE/0x1CEF`; neither DID is
-implemented by H RDBI. Machine-readable ownership is
+implemented by H RDBI. Category-405 `EMPS_P5` is also observation-oriented rather
+than an obvious command surface: its parsed section set is exactly
+`61/62/63/80/87/88/90/91`, with no classic type-11/type-12 Active Test table, and
+its eight master-routed DLLs contain no Active-Test- or Routine-named role. The
+nominal `Cooperation Control State` DID `0x106A` is a success stub in H. These are
+bounded negatives for this Techstream package/calibration, not proof that Toyota
+has no separate utility or server-mediated procedure.
+
+Machine-readable ownership is
 `data/generated/corolla_8965H1202000_techstream_correlations.json` with compact
 image-bound target evidence in
 `corolla_8965H1202000_techstream_steering_decompiler_evidence.json`.
 
 The state-monitor candidates do not meet that bar. Key 60's binary cooperation
-encoding is real, and the same key/name also occurs once in P5 behavior-data
-section 88, but no firmware-static edge identifies one `0x262` LTA/LKA bit as
-that diagnostic state. Key 403 is a generic 16-bit state word with no recovered
-route to a specific Tx aggregate. Those names therefore remain diagnostic
-vocabulary, not CAN signal names. Consumer-proven P5 tables 61/63/80/88/90/91
-contain no key-402 or key-403 join; neither target name appears as an exact
-active-test name. This is a bounded search, not a whole-diagnostic-system
-absence claim.
+encoding is real in the DDB and the same key/name also occurs once in P5
+behavior-data section 88, but exact H DID `106A` returns success without writing
+its declared byte. Key 403 is a generic 16-bit state word with no recovered route
+to a specific external steering aggregate. Those names therefore remain
+diagnostic vocabulary, not proof of a live autonomous-control interface.
+Consumer-proven P5 tables 61/63/80/88/90/91 contain no key-402 or key-403 join.
+This is a bounded search, not a whole-diagnostic-system absence claim.
 
 The repository parser now decodes section directories, DTC records,
 factory-identified supported-PID/PID/DID table classes, freeze-data monitor

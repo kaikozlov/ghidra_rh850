@@ -1,0 +1,544 @@
+{
+  "b6_hidden_payload_census": {
+    "boundary": "B6 has 28 authenticated application bytes, but only scalar IDs 254..265 are consumed by its recovered unpacker. The four configured nonscalar IDs 252/253/266/267 are absent from every literal block/group receive call; no full-PDU copy uses PDU42; and the B6 COM buffer base has no raw absolute pointer literal. This closes the generated scalar/group/full-PDU/direct-literal surfaces, not arbitrary computed aliases or hardware access.",
+    "can_id": "0x0B6",
+    "classification": "no-recovered-hidden-b6-group-or-full-pdu-command-consumer",
+    "com": {
+      "all_literal_block_group_receive_ids": [
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        99,
+        100,
+        101,
+        102
+      ],
+      "all_literal_full_pdu_ids": [
+        0
+      ],
+      "b6_full_pdu_copy_present": false,
+      "block_group_calls": [
+        {
+          "entry": "0X000626A0",
+          "first_args": [
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96
+          ],
+          "raw_first_args": [
+            "DAT_000256be",
+            "DAT_000256c0",
+            "DAT_000256c2",
+            "DAT_000256c4",
+            "DAT_000256c6",
+            "DAT_000256c8",
+            "DAT_000256ca",
+            "DAT_000256cc"
+          ]
+        },
+        {
+          "entry": "0X00062A96",
+          "first_args": [
+            99,
+            100,
+            101,
+            102
+          ],
+          "raw_first_args": [
+            "DAT_000256d2",
+            "DAT_000256d4",
+            "DAT_000256d6",
+            "DAT_000256d8"
+          ]
+        }
+      ],
+      "block_group_receive_api": "FUN_00077A3A",
+      "buffer_address": "0xFEBE4AF4",
+      "buffer_offset": 423,
+      "configured_signal_ids": [
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267
+      ],
+      "configured_without_scalar_receive": [
+        252,
+        253,
+        266,
+        267
+      ],
+      "full_pdu_calls": [
+        {
+          "entry": "0X0004766A",
+          "first_args": [
+            0
+          ],
+          "raw_first_args": [
+            "0"
+          ]
+        }
+      ],
+      "full_pdu_copy_api": "FUN_0007636C",
+      "non_scalar_ids_used_by_block_group_api": [],
+      "raw_u32_buffer_pointer_hits": [],
+      "scalar_receive_ids": [
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265
+      ]
+    },
+    "pdu_id": 42,
+    "profile": {
+      "authenticated_application_bytes": 28,
+      "authenticator_bits": 28,
+      "full_freshness_bits": 46,
+      "record": "0x000257CC",
+      "security_trailer_bytes": 4,
+      "transmitted_freshness_bits": 4
+    },
+    "secured_length": 32,
+    "sienna_2e4_control": {
+      "configured_signal_ids": [
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65
+      ],
+      "configured_without_scalar_receive": [
+        64,
+        65
+      ],
+      "interpretation": "Sienna 2E4 itself has configured IDs beyond its scalar application fields; configured-table membership alone is not evidence for a hidden command payload.",
+      "pdu_id": 6,
+      "scalar_receive_ids": [
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ]
+    }
+  },
+  "corpus": {
+    "path": "build/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
+    "sha256": "98fbd903f71165a433cb01dbb2e17bf3471824881760e6420d65ecef9f4f8dfa"
+  },
+  "d7_hidden_payload_census": {
+    "boundary": "D7 has 28 authenticated application bytes; recovered scalar IDs are 240/243/246. Configured nonscalar IDs 241/242/244/245/247 are absent from every literal block/group receive call; no full-PDU copy uses PDU40; and the D7 COM buffer base has no raw absolute pointer literal. Techstream independently identifies scalar243 as CAN Vehicle Speed (SP1).",
+    "can_id": "0x0D7",
+    "classification": "no-recovered-hidden-d7-group-or-full-pdu-command-consumer",
+    "com": {
+      "all_literal_block_group_receive_ids": [
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        99,
+        100,
+        101,
+        102
+      ],
+      "all_literal_full_pdu_ids": [
+        0
+      ],
+      "block_group_receive_api": "FUN_00077A3A",
+      "buffer_address": "0xFEBE4ACC",
+      "buffer_offset": 383,
+      "configured_signal_ids": [
+        240,
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247
+      ],
+      "configured_without_scalar_receive": [
+        241,
+        242,
+        244,
+        245,
+        247
+      ],
+      "d7_full_pdu_copy_present": false,
+      "full_pdu_copy_api": "FUN_0007636C",
+      "non_scalar_ids_used_by_block_group_api": [],
+      "raw_u32_buffer_pointer_hits": [],
+      "scalar_receive_ids": [
+        240,
+        243,
+        246
+      ]
+    },
+    "pdu_id": 40,
+    "profile": {
+      "authenticated_application_bytes": 28,
+      "authenticator_bits": 28,
+      "full_freshness_bits": 46,
+      "record": "0x0002577C",
+      "security_trailer_bytes": 4,
+      "transmitted_freshness_bits": 4
+    },
+    "secured_length": 32
+  },
+  "evidence": {
+    "function_count": 32,
+    "path": "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
+    "sha256": "9a4b863d901c9b45bf7ee6805d561ed61303af835bccad96769aaf3e321ce27b"
+  },
+  "evidence_boundary": "Static closure is exact for recovered direct RAM-symbol writes, raw absolute pointers, generated scalar receive calls, literal block/group receive calls, and literal full-PDU copy calls in the tracked H corpus. It does not prove absence of computed-pointer aliases, DMA/hardware writers, or an autonomous command produced by another ECU.",
+  "final_command_composition": {
+    "bd0e_local_chain": {
+      "entry": "0x000C5932",
+      "recovered": true,
+      "relation": "FEBEABB0 + FEBEBCF8 -> bounded FEBEBD0E"
+    },
+    "c358_local_chain": {
+      "c392_entry": "0x000CD1E8",
+      "c392_recovered_local_state": true,
+      "entry": "0x000CCE8C",
+      "recovered": true,
+      "relation": "FEBEC392 + FEBEC2D4 -> bounded FEBEC358"
+    },
+    "direct_zero_writer_census": {
+      "0xFEBEABB0": [
+        {
+          "entry": "0X000C584A",
+          "lines": [
+            "uRamfebeabb0 = 0;"
+          ]
+        }
+      ],
+      "0xFEBEB678": [
+        {
+          "entry": "0X000BDFF4",
+          "lines": [
+            "uRamfebeb678 = 0;"
+          ]
+        }
+      ],
+      "0xFEBEBCF8": [
+        {
+          "entry": "0X000C584A",
+          "lines": [
+            "uRamfebebcf8 = 0;"
+          ]
+        }
+      ],
+      "0xFEBEBD90": [
+        {
+          "entry": "0X000C6110",
+          "lines": [
+            "uRamfebebd90 = 0;"
+          ]
+        }
+      ],
+      "0xFEBEBE04": [
+        {
+          "entry": "0X000C68DA",
+          "lines": [
+            "uRamfebebe04 = 0;"
+          ]
+        }
+      ],
+      "0xFEBEBEC6": [
+        {
+          "entry": "0X000C7206",
+          "lines": [
+            "uRamfebebec6 = 0;"
+          ]
+        }
+      ],
+      "0xFEBEC2D4": [
+        {
+          "entry": "0X000CC83C",
+          "lines": [
+            "uRamfebec2d4 = 0;"
+          ]
+        },
+        {
+          "entry": "0X000CC914",
+          "lines": [
+            "uRamfebec2d4 = 0;"
+          ]
+        }
+      ],
+      "0xFEBEC39C": [
+        {
+          "entry": "0X000CD2E8",
+          "lines": [
+            "uRamfebec39c = 0;"
+          ]
+        }
+      ]
+    },
+    "entry": "0x000CD3CC",
+    "interpretation": "1C02 Command Value Torque is a general EPS-internal torque-command observable, not an LTA-only value. The retained C2A8 lateral-command term is only one conditional additive contributor. Under direct-writer evidence, the other zero-censused terms collapse while C358 remains a local/internal assist-control contribution.",
+    "recovered_terms": [
+      "FEBEBE04",
+      "FEBEBD90",
+      "FEBEBD0E",
+      "FEBEC39C",
+      "FEBEB678",
+      "FEBEC2A8",
+      "FEBEBEC6",
+      "FEBEC358"
+    ]
+  },
+  "images": {
+    "corolla_h": {
+      "path": "build/community-normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+      "size": 1048576
+    },
+    "sienna_reference": {
+      "path": "firmware/RH850_P1M-E_CodeFlash.bin",
+      "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+      "size": 1048576
+    }
+  },
+  "retained_lta_branch": {
+    "boundary": "C17C/C17E/C184 have exactly init-zero plus consumer references in the complete tracked target corpus; C26D has exactly init-zero plus readers, and no raw absolute pointer literals exist for any of them. Under recovered direct writes, the decoded mode never activates and the retained C2A8 contribution remains zero. Computed-pointer/DMA/undocumented writers remain a bounded unknown, so this is not proof that the vehicle has no LTA.",
+    "classification": "retained-sienna-homolog-lta-branch-direct-write-inactive",
+    "command_conditioning": [
+      {
+        "entry": "0x000C9C16",
+        "recovered": true,
+        "relation": "C17C/C17E/C184 -> C1E0/C200/C20A"
+      },
+      {
+        "entry": "0x000CB8BA",
+        "recovered": true,
+        "relation": "C1E0/C200/C20A -> C278; if decoded mode C272 is not active and C2A6 is zero, C278 is forced zero"
+      },
+      {
+        "entry": "0x000CB9B6",
+        "recovered": true,
+        "relation": "C278 * C290 / 0x100, slew/clip -> C2A8"
+      },
+      {
+        "entry": "0x000CD3CC",
+        "recovered": true,
+        "relation": "C2A8 is one conditional additive contributor to final command composition"
+      }
+    ],
+    "command_state_writes": {
+      "0xFEBEC2A6": [
+        {
+          "entry": "0X000CB696",
+          "lines": [
+            "uRamfebec2a6 = 0;"
+          ]
+        },
+        {
+          "entry": "0X000CB6CA",
+          "lines": [
+            "uRamfebec2a6 = 0;"
+          ]
+        },
+        {
+          "entry": "0X000CB8BA",
+          "lines": [
+            "cRamfebec2a6 = '\\x02';",
+            "cRamfebec2a6 = '\\0';"
+          ]
+        }
+      ],
+      "0xFEBEC2A8": [
+        {
+          "entry": "0X000CB696",
+          "lines": [
+            "uRamfebec2a8 = 0;"
+          ]
+        },
+        {
+          "entry": "0X000CB6CA",
+          "lines": [
+            "uRamfebec2a8 = 0;"
+          ]
+        },
+        {
+          "entry": "0X000CB9B6",
+          "lines": [
+            "sRamfebec2a8 = (short)uVar3;"
+          ]
+        }
+      ]
+    },
+    "magnitude_inputs": {
+      "0xFEBEC17C": {
+        "direct_lhs_writes": [
+          {
+            "entry": "0X000C97A8",
+            "lines": [
+              "uRamfebec17c = 0;"
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "entry": "0X000C97A8",
+            "lines": [
+              "uRamfebec17c = 0;"
+            ]
+          },
+          {
+            "entry": "0X000C9C16",
+            "lines": [
+              "iVar3 = (int)sRamfebec17c;"
+            ]
+          }
+        ],
+        "raw_u32_literal_pointer_hits": []
+      },
+      "0xFEBEC17E": {
+        "direct_lhs_writes": [
+          {
+            "entry": "0X000C97A8",
+            "lines": [
+              "uRamfebec17e = 0;"
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "entry": "0X000C97A8",
+            "lines": [
+              "uRamfebec17e = 0;"
+            ]
+          },
+          {
+            "entry": "0X000C9C16",
+            "lines": [
+              "iRamfebec080 = (int)sRamfebec17e;"
+            ]
+          }
+        ],
+        "raw_u32_literal_pointer_hits": []
+      },
+      "0xFEBEC184": {
+        "direct_lhs_writes": [
+          {
+            "entry": "0X000C97A8",
+            "lines": [
+              "uRamfebec184 = 0;"
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "entry": "0X000C97A8",
+            "lines": [
+              "uRamfebec184 = 0;"
+            ]
+          },
+          {
+            "entry": "0X000C9C16",
+            "lines": [
+              "if (((iVar3 == iRamfebec080) || (iVar3 == sRamfebec184)) || (iRamfebec080 != sRamfebec184)) {"
+            ]
+          }
+        ],
+        "raw_u32_literal_pointer_hits": []
+      },
+      "0xFEBEC26D": {
+        "direct_lhs_writes": [
+          {
+            "entry": "0X000CB1C8",
+            "lines": [
+              "uRamfebec26d = 0;"
+            ]
+          }
+        ],
+        "occurrences": [
+          {
+            "entry": "0X000CB07C",
+            "lines": [
+              "bRamfebec226 = cRamfebec26d == '\\x01' && cRamfebeacbd == '\\0';"
+            ]
+          },
+          {
+            "entry": "0X000CB1C8",
+            "lines": [
+              "uRamfebec26d = 0;"
+            ]
+          },
+          {
+            "entry": "0X000CBE6E",
+            "lines": [
+              "if ((cRamfebeacbd == '\\0') && (cRamfebec26d == '\\x01')) {"
+            ]
+          }
+        ],
+        "raw_u32_literal_pointer_hits": []
+      }
+    },
+    "magnitude_vote_and_rate_limit": {
+      "entry": "0x000C9C16",
+      "recovered": true,
+      "role": "majority/select three command-magnitude words, rate/clip, publish replicated command state"
+    },
+    "mode_enable": {
+      "cyclic_decoder": "0x000CBE6E",
+      "cyclic_decoder_owner": "0x000CB68A -> 0x000CEDAE",
+      "decoder_requires_one": true,
+      "decoder_zeroes_all_outputs_when_gate_false": true,
+      "init_entry": "0x000CB1C8",
+      "source": "0xFEBEC26D"
+    }
+  },
+  "schema": "corolla-8965H1202000-lta-command-provenance-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "broad_static_search_closed": true,
+    "command_value_torque_is_lta_only": false,
+    "external_autonomous_lateral_ingress_identified": false,
+    "hidden_b6_group_or_full_pdu_command_recovered": false,
+    "hidden_d7_group_or_full_pdu_command_recovered": false,
+    "next_evidence": "Use same-vehicle stock-LTA capture plus read-only XCP/RDBI to identify a state changing upstream of the general internal torque command; or acquire the camera/gateway/other steering-controller firmware if the command is generated outside this EPS image.",
+    "retained_sienna_lta_branch_active_under_recovered_direct_writes": false,
+    "retained_sienna_lta_enable_direct_write_zero": true,
+    "retained_sienna_lta_magnitude_direct_write_zero": true
+  }
+}

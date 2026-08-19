@@ -64,15 +64,19 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   torque request and, where the target supports it, a valid signed `0x131` LTA
   request/angle command, while observing d/q-reference/current/PWM state. For
   tracked Corolla `8965H1202000`, do **not** synthesize those absent Sienna
-  profiles: the Techstream join now supplies a target-native discriminator.
-  During stock LTA, read DID `0x1C02` (`Command Value Torque`) plus commanded
-  q/d-current DIDs `0x1152/0x1154` and correlate them with the same XCP d/q/PWM
-  profile. H's `1C02` producer is live inside `0xCE974` despite no configured
-  `0x2E4/0x131`, so the remaining question is what H-local/external state drives
-  that command synthesis. Static broad searching should not be repeated without
-  a new concrete lead.
+  profiles. TMS-021 now statically proves the general internal `1C02 Command
+  Value Torque` contribution reaches Techstream-visible base Q command `1152`
+  and then compensated-command/error/PI state in the closed-loop Q-current path.
+  VAR-036/CORR-078 separately close the retained LTA branch as direct-write
+  inactive and rule out a recovered hidden B6 group/full-PDU command. The
+  remaining Corolla experiment is therefore genuinely external-provenance work:
+  during a known stock-LTA interval, capture all real incoming CAN-FD traffic and
+  read the H precursor/mode/contributor cells to find a state that moves before
+  the autonomous component of the general torque command. If none does, acquire
+  the camera/gateway/other steering-controller firmware. Static broad searching
+  of this H EPS should not be repeated without a new concrete lead.
   Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3 ·
-  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.34.
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §§7.34–7.35.
 
 ## SecOC
 

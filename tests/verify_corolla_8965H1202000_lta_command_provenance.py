@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""Verify the exact-image Corolla H autonomous-lateral command provenance."""
+from __future__ import annotations
+
+import hashlib
+import json
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+ART = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
+EVID = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json"
+TOOL = REPO / "tools/build_corolla_h_lta_command_provenance.py"
+IMAGE = REPO / "build/community-normalized/8965H1202000_CodeFlash.bin"
+passed = failed = 0
+
+
+def check(name: str, cond: object, detail: str = "") -> None:
+    global passed, failed
+    ok = bool(cond)
+    passed += int(ok); failed += int(not ok)
+    suffix = f" ({detail})" if detail else ""
+    print(f"[{'PASS' if ok else 'FAIL'}][raw_bytes] {name}{suffix}")
+
+
+with tempfile.TemporaryDirectory() as td:
+    out = Path(td) / "lta.json"
+    subprocess.run([sys.executable, str(TOOL), "--out", str(out)], cwd=REPO, check=True,
+                   stdout=subprocess.DEVNULL)
+    check("tracked LTA provenance report regenerates exactly", out.read_bytes() == ART.read_bytes())
+
+d = json.loads(ART.read_text())
+e = json.loads(EVID.read_text())
+image = IMAGE.read_bytes()
+
+print("\n== evidence identity ==")
+check("report is exact H image-bound", d["software_id"] == "8965H1202000" and d["images"]["corolla_h"]["sha256"] == hashlib.sha256(image).hexdigest())
+check("32 target-native functions support provenance closure", e["function_count"] == 32)
+for row in e["functions"]:
+    start = int(row["entry"], 16); size = row["body_size"]
+    check(f"raw body hash {row['entry']}", hashlib.sha256(image[start:start+size]).hexdigest() == row["body_sha256"])
+
+print("\n== retained Sienna-homolog LTA magnitude branch ==")
+r = d["retained_lta_branch"]
+for addr, init, consumer in [
+    ("0xFEBEC17C", "0X000C97A8", "0X000C9C16"),
+    ("0xFEBEC17E", "0X000C97A8", "0X000C9C16"),
+    ("0xFEBEC184", "0X000C97A8", "0X000C9C16"),
+]:
+    cell = r["magnitude_inputs"][addr]
+    check(f"{addr} has exactly init plus rate-limit consumer", [x["entry"] for x in cell["occurrences"]] == [init, consumer])
+    check(f"{addr} only direct writer is zero init", len(cell["direct_lhs_writes"]) == 1 and "= 0;" in cell["direct_lhs_writes"][0]["lines"][0])
+    check(f"{addr} has no raw absolute pointer literal", cell["raw_u32_literal_pointer_hits"] == [])
+check("C9C16 recovers three-word magnitude vote/rate-limit", r["magnitude_vote_and_rate_limit"]["recovered"])
+
+print("\n== retained LTA mode activation ==")
+c26d = r["magnitude_inputs"]["0xFEBEC26D"]
+check("C26D occurrence set is two readers plus one zero init", [x["entry"] for x in c26d["occurrences"]] == ["0X000CB07C", "0X000CB1C8", "0X000CBE6E"])
+check("C26D only direct writer is zero", len(c26d["direct_lhs_writes"]) == 1 and "= 0;" in c26d["direct_lhs_writes"][0]["lines"][0])
+check("C26D has no raw absolute pointer literal", c26d["raw_u32_literal_pointer_hits"] == [])
+check("cyclic decoder explicitly requires C26D==1", r["mode_enable"]["decoder_requires_one"])
+check("decoder initializes all mode outputs to zero before gate", r["mode_enable"]["decoder_zeroes_all_outputs_when_gate_false"])
+check("retained command conditioning chain is recovered", all(x["recovered"] for x in r["command_conditioning"]))
+check("C2A6 writers are init/reset plus CB8BA state machine", [x["entry"] for x in r["command_state_writes"]["0xFEBEC2A6"]] == ["0X000CB696", "0X000CB6CA", "0X000CB8BA"])
+check("C2A8 writers are init/reset plus CB9B6 conditioner", [x["entry"] for x in r["command_state_writes"]["0xFEBEC2A8"]] == ["0X000CB696", "0X000CB6CA", "0X000CB9B6"])
+
+print("\n== D7 hidden-payload census ==")
+d7 = d["d7_hidden_payload_census"]
+check("D7 SecOC profile is 32 bytes with 28-bit MAC and 4-bit transmitted freshness", d7["secured_length"] == 32 and d7["profile"]["authenticator_bits"] == 28 and d7["profile"]["transmitted_freshness_bits"] == 4)
+check("D7 carries 28 authenticated application bytes", d7["profile"]["security_trailer_bytes"] == 4 and d7["profile"]["authenticated_application_bytes"] == 28)
+check("D7 configured signal IDs are exactly 240..247", d7["com"]["configured_signal_ids"] == list(range(240,248)))
+check("D7 scalar receive IDs are exactly 240/243/246", d7["com"]["scalar_receive_ids"] == [240,243,246])
+check("D7 configured nonscalar IDs are 241/242/244/245/247", d7["com"]["configured_without_scalar_receive"] == [241,242,244,245,247])
+check("no D7 nonscalar ID is consumed by block/group API", d7["com"]["non_scalar_ids_used_by_block_group_api"] == [])
+check("full-PDU copy does not use D7/PDU40", d7["com"]["all_literal_full_pdu_ids"] == [0] and d7["com"]["d7_full_pdu_copy_present"] is False)
+check("D7 COM buffer has no raw absolute pointer literal", d7["com"]["buffer_address"] == "0xFEBE4ACC" and d7["com"]["raw_u32_buffer_pointer_hits"] == [])
+
+print("\n== B6 hidden-payload census ==")
+b = d["b6_hidden_payload_census"]
+check("B6 SecOC profile is 32 bytes with 28-bit MAC and 4-bit transmitted freshness", b["secured_length"] == 32 and b["profile"]["authenticator_bits"] == 28 and b["profile"]["transmitted_freshness_bits"] == 4)
+check("B6 therefore carries 28 authenticated application bytes", b["profile"]["security_trailer_bytes"] == 4 and b["profile"]["authenticated_application_bytes"] == 28)
+check("B6 configured signal IDs are exactly 252..267", b["com"]["configured_signal_ids"] == list(range(252,268)))
+check("B6 scalar receive IDs are exactly 254..265", b["com"]["scalar_receive_ids"] == list(range(254,266)))
+check("B6 configured nonscalar IDs are 252/253/266/267", b["com"]["configured_without_scalar_receive"] == [252,253,266,267])
+check("block/group receive calls resolve only unrelated IDs", b["com"]["all_literal_block_group_receive_ids"] == list(range(89,97)) + list(range(99,103)))
+check("no B6 nonscalar ID is consumed by block/group API", b["com"]["non_scalar_ids_used_by_block_group_api"] == [])
+check("full-PDU copy surface only uses PDU0", b["com"]["all_literal_full_pdu_ids"] == [0] and b["com"]["b6_full_pdu_copy_present"] is False)
+check("B6 COM buffer has no raw absolute pointer literal", b["com"]["buffer_address"] == "0xFEBE4AF4" and b["com"]["raw_u32_buffer_pointer_hits"] == [])
+check("Sienna 2E4 control also has nonscalar configured rows", b["sienna_2e4_control"]["configured_signal_ids"] == list(range(58,66)) and b["sienna_2e4_control"]["configured_without_scalar_receive"] == [64,65])
+
+print("\n== final internal torque-command composition ==")
+f = d["final_command_composition"]
+check("BD0E is recovered from local ABB0+BCF8 chain", f["bd0e_local_chain"]["recovered"])
+check("C358 is recovered from local C392+C2D4 chain", f["c358_local_chain"]["recovered"] and f["c358_local_chain"]["c392_recovered_local_state"])
+for addr in ["0xFEBEBE04","0xFEBEBD90","0xFEBEB678","0xFEBEBEC6","0xFEBEC39C","0xFEBEABB0","0xFEBEBCF8"]:
+    writes = f["direct_zero_writer_census"][addr]
+    check(f"{addr} direct writers are zero-only", writes and all("= 0;" in line for x in writes for line in x["lines"]))
+
+print("\n== bounded static conclusion ==")
+s = d["static_conclusion"]
+check("retained LTA magnitudes are direct-write zero", s["retained_sienna_lta_magnitude_direct_write_zero"])
+check("retained LTA enable is direct-write zero", s["retained_sienna_lta_enable_direct_write_zero"])
+check("retained LTA branch is not active under recovered direct writes", s["retained_sienna_lta_branch_active_under_recovered_direct_writes"] is False)
+check("no hidden D7 group/full-PDU command is recovered", s["hidden_d7_group_or_full_pdu_command_recovered"] is False)
+check("no hidden B6 group/full-PDU command is recovered", s["hidden_b6_group_or_full_pdu_command_recovered"] is False)
+check("Command Value Torque is not classified LTA-only", s["command_value_torque_is_lta_only"] is False)
+check("external autonomous lateral ingress remains unidentified", s["external_autonomous_lateral_ingress_identified"] is False)
+check("broad static search is closed", s["broad_static_search_closed"] is True)
+
+print(f"\nResults: {passed} passed, {failed} failed")
+raise SystemExit(1 if failed else 0)

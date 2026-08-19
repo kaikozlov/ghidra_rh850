@@ -113,26 +113,36 @@ Write/reboot success by itself is **not** proof.
 
 Ready now: `exploit/behavioral_proof/` and the manifest patch/restore tooling.
 
-### 5. Dynamic steering-command → actuation discriminator
+### 5. Corolla H external/LTA command-provenance discriminator
 
-Techstream now gives the tracked H Corolla a concrete semantic observer that the
-initial firmware-only pass lacked. `EMPS_P5` monitor 402 `Command Value Torque`
-resolves to DID `0x1C02`, and H `0x495A0` reads a live target-native producer
-chain rooted inside the active `0xCE974` steering pipeline. This survives even
-though H has no configured `0x2E4/0x131`, proving that the diagnostic name is an
-internal commanded-torque observable rather than one fixed external CAN field.
+Techstream has now closed the downstream H actuation question statically.
+`EMPS_P5` monitor 402 `Command Value Torque` resolves to DID `0x1C02`, and the
+same target-specific semantic join proves that state reaches DID `0x1152`
+`Command Value Current (Q Axis)` through the real H current-reference pipeline.
+Actual Q/D current and the selected Q-current limit are independently named and
+mapped as `0x1151/0x1153/0x1156`. Another generic command→motor xref sweep is no
+longer useful.
 
-The next useful evidence is therefore dynamic, not another generic xref sweep.
-On the H Corolla, capture stock LTA while reading `0x1C02` plus Techstream-named
-commanded d/q current (`0x1152/0x1154`) and actual-current observers. If XCP is
-reachable, run the read-only DAQ `actuation-discriminator` profile at the same
-time to correlate those named diagnostics with the identified d/q/PWM state.
-For a Sienna-style applicable EPS, separately retain the existing valid signed
-`0x2E4/0x131` command experiment.
+The remaining H question is **external autonomous-lateral provenance**, not
+ordinary EPS torque provenance. The dedicated static census now closes the two
+last obvious EPS-local escape hatches: the retained Sienna-homolog LTA magnitude
+cells and mode source are direct-write zero/inactive, while B6's nonscalar rows
+have no recovered block/group/full-PDU/direct-literal consumer. `1C02` is a
+general internal torque-command observable with local assist contributors, so
+watching it alone cannot identify stock LTA.
+
+The next H evidence must therefore be same-vehicle dynamic correlation: capture a
+known stock-LTA steering interval on **all genuine incoming buses** while reading
+`1C02`, `1152`, and the retained/H-native upstream mode/contributor cells with
+read-only XCP/DAQ if reachable. Look for a state transition that precedes the
+increment attributable to autonomous steering. If no EPS-local precursor moves,
+the next firmware target is the camera/gateway/other steering controller rather
+than another generic pass over this EPS image. For a Sienna-style applicable EPS,
+separately retain the existing valid signed `0x2E4/0x131` command experiment.
 
 Canonical:
 [../architecture/control-partition.md](../architecture/control-partition.md) ·
-[../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.34.
+[../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §§7.34–7.35.
 
 ### 6. Passive command-8 / provisioning provenance
 

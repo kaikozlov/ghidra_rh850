@@ -46,7 +46,7 @@ check('removed boot TAUJ0 CH2 role is recensused, not falsely mapped',sum(1 for 
 check('235 total roles are target-native recovered',s['coverage_counts'].get('target-native-role-recovered')==235)
 check('all 88 deadline callbacks are closed by complete target recensus',sum(1 for r in rows if r['reference_name'].startswith('deadline_') and r['coverage']=='target-surface-recensused')==88)
 check('global genuinely-unresolved denominator is zero',s['genuinely_unresolved_count']==0)
-check('all 96 former structural-only rows are target-native inspected',sum(1 for r in rows if r['coverage']=='target-native-inspected-unique-shape' and r.get('target_native_evidence_files')==['data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json'])==96)
+check('all 96 former structural-only rows retain target-native structural-residue evidence',sum(1 for r in rows if r['coverage']=='target-native-inspected-unique-shape' and 'data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json' in r.get('target_native_evidence_files', []))==96)
 check('final evidence-class distribution is pinned',s['coverage_counts']=={'verified-exact-body-transfer':288,'target-native-role-recovered':235,'target-surface-recensused':464,'target-native-inspected-unique-shape':126})
 check('surface-recensused rows always name an explicit complete recensus',all(r['surface_recensus'] for r in rows if r['coverage']=='target-surface-recensused'))
 check('no structural-only rows remain',not any(r['coverage']=='structural-candidate-only' for r in rows))

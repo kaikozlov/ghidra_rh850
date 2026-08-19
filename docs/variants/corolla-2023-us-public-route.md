@@ -1498,7 +1498,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(566 currently have tracked target-native evidence) rather than being forced
+(582 currently have tracked target-native evidence) rather than being forced
 into the 1,113-function Sienna denominator.
 
 The machine-readable owner is
@@ -2298,19 +2298,160 @@ rotation, and other internal states rather than requiring address-based guesses.
 Compensation`, `Advanced Drive Target Steering Angle`, and System-2 variants—is
 grouped under primary DIDs `0x1CEE/0x1CEF`; **neither DID exists in H RDBI**.
 
-The practical next discriminator is therefore much sharper than a generic xref
-hunt: while stock LTA is actively steering, observe DID `0x1C02` together with
-Techstream-named commanded d/q-current DIDs (for example `0x1152/0x1154`), actual
-current, and the already mapped d/q/PWM state, preferably with XCP providing the
-high-rate internal view. Correlated movement would reveal where stock lateral
-control enters the H-local command synthesis even if no Sienna-shaped wire field
-exists.
+The current-domain rows close a second, more important join that the firmware-only
+pass had left open. Techstream names `0x1151/0x1152/0x1153/0x1154` as actual-Q,
+command-Q, actual-D, and command-D motor current respectively, all 16-bit in A,
+and `0x1156` as `Final Motor Current Limited (Q Axis)`. Target-native H dataflow
+then proves the command-Q path:
+
+```text
+FEBEC3D2                    # DID 1C02 Command Value Torque source
+  -> CD5DC -> FEBEC3D6      # gate / symmetric bound
+  -> CD644 -> FEBEC3D4      # normal pass-through, bounded override on fault state
+  -> CE928 -> FEBEAC54
+  -> BB9E8 -> FEBEE40C
+  -> 312F0 -> -FEBEE40C -> FEBE6964
+  -> 336EE -> FEBE6C1A
+  -> 3322E -> FEBE6BC0      # Techstream-visible base Q-current command
+             + FEBE6BE4
+             -> FEBE6BB8    # compensated Q-current command
+  -> 33160 supplies raw Q feedback aggregate FEBE6BB4
+  -> 32934: FEBE6BB8 - FEBE6BB4 -> bounded Q-current error
+  -> 32958 / 329A0          # Q-current PI / integrator
+  -> 58226 high-rate motor worker
+  -> already-mapped transform / duty / TSG3 PWM chain
+```
+
+`FEBE6BC0` is therefore not being promoted to "the final PI input" merely because
+Techstream calls it `Command Value Current (Q Axis)`. It is the OEM-visible base
+Q command. The same source term `FEBE6C1A` also contributes to compensated
+command `FEBE6BB8`, which is explicitly compared against raw Q feedback
+`FEBE6BB4` before the dedicated PI stage. That closes the actual closed-loop
+motor consequence.
+
+The same motor-feedback combiner `33160` publishes saturated diagnostic
+`FEBE6BAE/FEBE6BAC`, which `5722E` snapshots to `FEBE6592/FEBE6590` and the
+`1151/1153` callbacks expose as actual Q/D current. `CD5DC -> FEBEC3D8 -> CE928
+-> BB9E8 -> FEBEE414 -> FEBE65FC -> 49298` independently closes DID `0x1156`
+as the selected Q-axis current-limit observer. The D-axis **command** is separate:
+`3364E` updates an internal auxiliary state through `335EE/33622`, `3322E`
+publishes it as `FEBE6BC2`, and DID `0x1154` observes it. No static edge from the
+`1C02` command-torque chain into that D-axis command was recovered.
+
+So the old downstream question is closed: H's **general internal command-value
+torque state really reaches the closed-loop Q-current controller**. That does not
+make `1C02` an autonomous-lateral command. The remaining question is specifically
+which, if any, external/LTA contribution is added upstream of that general EPS
+command.
+
+The Techstream surface also closes two tempting diagnostic shortcuts. The
+master-routed category-405 / generation-20 `EMPS_P5` database contains section
+types `61/62/63/80/87/88/90/91`, not classic type-11/type-12 Active Test tables;
+its eight routed DLLs are data-monitor, DTC, support, CID/SID22, and RoB roles,
+with no Active-Test- or Routine-named DLL. And H DID `0x106A`, which Techstream
+calls `Cooperation Control State`, is an exact success stub that emits no byte.
+The package therefore supplies excellent observation vocabulary but no recovered
+dealer steering-command primitive for this calibration.
 
 Machine-readable ownership:
 `data/generated/corolla_8965H1202000_techstream_correlations.json` and
 `data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json`;
 `tests/verify_corolla_8965H1202000_techstream_correlations.py` regenerates the
 join and raw-binds all cited H functions and Techstream databases.
+
+### 7.35 Autonomous-lateral provenance closure: retained LTA is inactive and protected D7/B6 expose no recovered hidden command
+
+The Techstream join made it possible to separate the **general EPS torque command**
+from the specific autonomous-lateral contribution. Re-auditing the latter closes
+the remaining EPS-local static escape hatches.
+
+First, the retained Sienna-homolog LTA conditioner is present but direct-write
+inactive in this H calibration:
+
+```text
+FEBEC17C  direct writer: C97A8 = 0; only other direct reference: C9C16
+FEBEC17E  direct writer: C97A8 = 0; only other direct reference: C9C16
+FEBEC184  direct writer: C97A8 = 0; only other direct reference: C9C16
+
+C9C16  majority/select + rate/limit -> C1E0 / C200 / C20A
+CB8BA  select -> C278
+CB9B6  gain/slew/clip -> C2A8
+CD3CC  C2A8 is one conditional additive term in the general command
+```
+
+All three magnitude cells have zero raw absolute-pointer literals. The mode side
+has the same shape: `FEBEC26D` has one direct writer (`CB1C8`, zero) and only two
+readers (`CB07C`, `CBE6E`), with no raw absolute-pointer literal. Cyclic decoder
+`CBE6E` requires `C26D == 1`; otherwise its decoded mode outputs remain zero.
+`CB8BA` cannot latch a nonzero selected LTA command from the recovered state, and
+`CB9B6` therefore has no recovered nonzero source for `C2A8`.
+
+Second, the four B6 configuration rows that were outside the scalar census do
+**not** reveal an opaque command path. B6 is a 32-byte secured profile with a
+28-bit authenticator and 4 transmitted freshness bits, leaving **28 authenticated
+application bytes**. Its generated signal IDs are `252..267`, while the actual
+scalar receive calls are exactly `254..265`. The remaining `252/253/266/267` do
+not occur in any block/group receive: all resolved calls to `FUN_00077A3A` use
+only IDs `89..96,99..102`. The full-PDU helper `FUN_0007636C` is called only for
+PDU 0, never B6/PDU42. B6's COM buffer base `FEBE4AF4` also has zero raw absolute
+pointer literals. As a control, Sienna's known `2E4` profile itself has configured
+IDs `58..65` but scalar reads only `58..63`; configured nonscalar rows are thus
+not evidence for a hidden wire command by themselves.
+
+The other protected brake-module profile, `0x0D7`, also closes without a hidden steering magnitude. Its configured PDU40 signal IDs are `240..247`, but the regenerated scalar unpacker reads only signal 240 (1 bit), signal 243 (16 bits), and signal 246 (4 bits). Signal 243 lands at `FEBE7D82`; H RDBI DID `0x1185` reads that exact cell, and `EMPS_P5` names it **`CAN Vehicle Speed (SP1)`**. The nonscalar D7 IDs `241/242/244/245/247` occur in no resolved block/group receive, no full-PDU read uses PDU40, and D7's COM buffer `FEBE4ACC` has no raw absolute-pointer literal. Thus D7's only recovered command-sized scalar is OEM-identified vehicle speed, not lateral command magnitude.
+
+Techstream's DTC vocabulary independently identifies the B6 source domain. H's
+six-row communication-monitor table `27F68` associates receive-status slot
+`0x18` with row 5. Slot `0x18` is the B6 unpacker `46A10`, whose scalar signals
+all belong to PDU42 / CAN `0x0B6`. Its failure row selects Dem event `0x0143`;
+H's event table `2B988` maps that to DTC index 82, and the DTC table at `2C588`
+contains packed code `0xC12987`. `EMPS_P5` resolves that exact packed record as
+**U012987 — `Lost Communication with Brake System Control Module`, failure
+`Missing Message`**. Protected `0x0D7` and classic `0x0D5` independently resolve
+to the same DTC, which is consistent with their brake/vehicle-dynamics role.
+Thus B6 is not merely "supervisory by field shape"; Toyota's own P5 diagnostic
+model classifies it as **brake-system-originated**. This does not assign every B6
+field or prove brake-originated state cannot influence steering, but it strongly
+rejects B6 as a hidden Image Processing Module A / camera steering-command
+replacement.
+
+The old camera diagnostic surface survives only as disabled residue. H DTC index
+93 contains packed `0xC23A87`, which the same `EMPS_P5` corpus names **U023A87
+`Lost Communication with Image Processing Module "A"` / `Missing Message`**, but
+H's DTC enable word is zero. This is the same logical DTC that the Sienna monitor
+map joins to active rows for `0x2E4` (event B0), `0x131` (138), `0x191` (13C), and
+`0x2FD` (13D). H still retains those four Dem event records pointing to DTC index
+93, but none of the four events appears in H's active six-row communication-
+monitor table. The old Sienna B3 residue is even weaker in H: its event record no
+longer points to DTC93 at all. In other words, the exact H image did not simply
+rename the classic Image Processing Module A messages: **the active camera/IPM-A
+communication-monitor surface was removed while disabled diagnostic scaffolding
+remained**.
+
+Finally, `CD3CC` confirms why `1C02` cannot be treated as an LTA-only endpoint.
+Its command composition includes retained `C2A8` only as one conditional additive
+term. Several sibling terms (`BE04`, `BD90`, `B678`, `BEC6`, `C39C`) are also
+zero-fed under complete direct-writer evidence; `BD0E` collapses from two
+zero-initialized local terms, while `C358` remains a real internally generated
+assist/control term via `CCE8C <- CD1E8`. Ordinary EPS assist can therefore move
+`Command Value Torque` without any autonomous request.
+
+The supportable static conclusion is now narrow and strong: **this exact
+`8965H1202000` image contains no recovered stock autonomous-lateral ingress.**
+The classic Sienna path is absent, the retained homolog is direct-write inactive,
+and the only H-only FD input is both supervisory under all recovered scalar
+consumers **and Techstream-classified as Brake System Control Module traffic**;
+its nonscalar/group/full-PDU escape routes are closed. This is still not proof
+that the vehicle lacks LTA: a computed alias or hardware writer remains bounded,
+and the autonomous request may be generated or transformed in another ECU. The
+next evidence must therefore be same-vehicle dynamic provenance or another ECU's
+firmware, not another undirected pass over this EPS CodeFlash.
+
+Machine-readable ownership:
+`data/generated/corolla_8965H1202000_lta_command_provenance.json` and
+`data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json`;
+`tests/verify_corolla_8965H1202000_lta_command_provenance.py` pins the 88-assertion
+raw-byte/API/direct-reference closure.
 
 ## 8. Remaining evidence boundary
 
@@ -2329,10 +2470,18 @@ static question.
 The remaining questions require **different evidence**, not more generic static
 coverage of this image. The corpus still does **not** provide:
 
+- a same-vehicle capture of a known **stock LTA steering interval** synchronized
+  to all incoming buses and the H internal command/mode state, so the true
+  autonomous-lateral provenance remains unidentified;
+- proof that the missing autonomous contribution is produced inside this EPS at
+  all rather than by a camera/gateway/other steering controller;
 - a direct UDS `F181` transcript from the same acquisition;
 - a stock passive `carFw` inventory joining the public route to the firmware;
 - proof of where the selected slot-4 key value is physically stored or internally derived inside ICU-S;
 - same-runtime-epoch proof between the CAN oracles and any DataFlash read;
+- a retained Techstream transcript proving that this exact vehicle session chose
+  category-405 `EMPS_P5` (the 124-DID overlap and exact `1C02` join make it the
+  strongest static vocabulary fit, not a captured session-selection proof);
 - proof that this `8965H1202000` specimen is architecturally identical to
   Span's separately probed `8965F1208000` Corolla.
 
@@ -2341,16 +2490,32 @@ remains contributor attribution rather than route-contained identity.
 
 ## 9. Highest-value next evidence
 
-For this specimen, another generic CodeFlash request is no longer useful. If the
-vehicle is revisited, the remaining high-value dynamic evidence is a controlled
-paired capture: full-bus synchronization/protected CAN immediately before the
-programming/range-dump transition, then repeat after recovery/reset and retain
-the corresponding memory snapshot plus a direct `F181` response. That would
-resolve runtime-key continuity without assuming it across separate jobs.
+For **Corolla steering support**, the highest-value experiment is now a
+same-vehicle stock-LTA provenance capture, not another firmware-wide static pass:
 
-For steering-bridge portability, the higher-value next CodeFlash is instead a
-foreign EPS whose Gate-2 queue actually contains classic `0x2E4/0x131` records
-—for example Span's distinct `8965F1208000` if that image becomes available.
-The `8965H1202000` corpus has already served its purpose as a negative-capability
-regression: the resolver transfers, discovers the target's real three-profile
-queue, and correctly refuses to construct a Sienna-shaped steering bridge.
+1. establish an interval where factory LTA is visibly applying steering;
+2. record all genuine incoming CAN/CAN-FD segments without openpilot-generated
+   echoes being mistaken for stock traffic;
+3. simultaneously read `1C02 Command Value Torque`, `1152 Command Value Current
+   (Q Axis)`, and the retained/H-native upstream mode/contributor cells with
+   read-only XCP if the `7F7/7F8` route is physically reachable;
+4. identify what changes **before** the autonomous component appears in the
+   general torque/current chain.
+
+If nothing EPS-local moves upstream, stop treating the EPS as the missing-source
+firmware and acquire the camera/gateway/other steering-controller image. That is
+now a discriminating experiment rather than a generic data-collection request.
+
+For the separate key/provisioning question, retain the controlled paired capture:
+full-bus synchronization/protected CAN immediately before the programming/range-
+dump transition, then repeat after recovery/reset and retain the corresponding
+memory snapshot plus a direct `F181` response. That resolves runtime-key
+continuity without assuming it across separate jobs.
+
+For Sienna-style steering-bridge portability, the higher-value next EPS CodeFlash
+is still a foreign calibration whose Gate-2 queue actually contains classic
+`0x2E4/0x131` records—for example Span's distinct `8965F1208000` if that image
+becomes available. The `8965H1202000` corpus has now served two purposes: it is a
+negative-capability regression for the classic bridge **and** a fully analyzed
+counterexample showing that downstream general torque/current control can remain
+while the recovered Sienna-homolog autonomous ingress is inactive.
