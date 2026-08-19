@@ -300,13 +300,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   well: 17 outer SIDs retain their policy shape, RDBI is 226 DIDs with a distinct
   32-selector stale-response set, and RoutineControl keeps the same 19 policy rows
   while `110A/C/D` become no-op and `110B` becomes an H-only active lifecycle.
-  Remaining H-static work is narrower: assign field-level semantics and
-  provenance inside `0B6`/`030`, determine whether any H input carries an external
-  command magnitude analogous to Sienna `2E4` or whether the H pipeline is driven
-  through a different internal interface, classify every H-only/reordered
-  orchestration stage, finish non-steering generic DAQ/XCP callbacks only if an
-  exploit question requires them, and identify the storage/derivation provenance
-  of the three H SecOC runtime keys. If revisited dynamically, record
+  The FD field pass now closes the obvious replacement-command candidates:
+  `025` is shared with Sienna and retains the `025 -> 4A3` telemetry join; B6's
+  signed16 scalar is staged-only under the complete direct-reference census;
+  active B6 fields are gate/mode/sequence/scaling/validity state; and the retained
+  Sienna-shaped clamp branch reads zero-fed `AE12`, while internal `AE20` is a
+  plausibility/status path. Remaining H-static work is narrower: classify every
+  H-only/reordered `0xCEDAE` orchestration stage, trace any remaining nonzero
+  externally sourced supervisor inputs before assigning an H replacement command,
+  finish non-steering generic DAQ/XCP callbacks only if an exploit question
+  requires them, and identify the storage/derivation provenance of the three H
+  SecOC runtime keys. If revisited dynamically, record
   direct F181 plus full-bus and Panda health on both normal-CAN1 and OBD routes
   immediately around the programming transition, then repeat the memory/capture
   epoch join. Route metadata remains forced `TOYOTA_COROLLA_TSS2` with no `carFw`,

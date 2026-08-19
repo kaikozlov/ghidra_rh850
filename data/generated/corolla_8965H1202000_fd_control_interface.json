@@ -1,0 +1,849 @@
+{
+  "evidence": {
+    "function_count": 56,
+    "function_evidence_sha256": "23276acc88a2fa363ae0d78bbc16cebc9459caac80634aae6bf3c3756a058ab3",
+    "reference_census_sha256": "afff8633ed68a6d5f9425ffcefb637086ea6c56347f06d0dd0364c182f25eb77",
+    "reference_term_count": 74
+  },
+  "evidence_boundary": "Raw generated CAN/PDU/signal configuration is exact-image byte evidence. Consumer roles are target-native decompiler recovery. No-consumer/no-writer statements are bounded to the complete direct textual-reference census of the tracked disposable H corpus and do not exclude computed-pointer/alias-only accesses.",
+  "fd_0x030_transmit": {
+    "checksum_like_signal_9": {
+      "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
+      "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte",
+      "wire_byte": 7
+    },
+    "classification": "H-generation replacement/consolidation for Sienna 0x260/0x262 transmit slots; field-for-field equivalence not claimed",
+    "configured_signal_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "configured_without_recovered_direct_pack_call": [
+      35,
+      36
+    ],
+    "corolla_h_tx_ids": [
+      "0x030",
+      "0x351",
+      "0x394",
+      "0x4A3",
+      "0x4C8"
+    ],
+    "direct_packer_signal_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34
+    ],
+    "fields": [
+      {
+        "bit_length": 8,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [],
+        "signal_id": 0,
+        "source": "0xFEBE7E06",
+        "wire_byte": 0,
+        "writer_class": "default-init-only-direct-writer-census"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [],
+        "signal_id": 1,
+        "source": "0xFEBE7E07",
+        "wire_byte": 2,
+        "writer_class": "default-init-only-direct-writer-census"
+      },
+      {
+        "bit_length": 12,
+        "bit_offset": 4,
+        "nondefault_writer_functions": [
+          "0x000470C6"
+        ],
+        "signal_id": 2,
+        "source": "0xFEBE7E34",
+        "wire_byte": 3,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 4,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [
+          "0x000470C6"
+        ],
+        "signal_id": 3,
+        "source": "0xFEBE7E08",
+        "wire_byte": 4,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 12,
+        "bit_offset": 4,
+        "nondefault_writer_functions": [
+          "0x00047074"
+        ],
+        "signal_id": 4,
+        "source": "0xFEBE7E36",
+        "wire_byte": 5,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 3,
+        "nondefault_writer_functions": [
+          "0x000470C6"
+        ],
+        "signal_id": 5,
+        "source": "0xFEBE7E09",
+        "wire_byte": 6,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 2,
+        "nondefault_writer_functions": [
+          "0x00046C4C"
+        ],
+        "signal_id": 6,
+        "source": "0xFEBE7DAE",
+        "wire_byte": 6,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 1,
+        "nondefault_writer_functions": [
+          "0x00046EE0"
+        ],
+        "signal_id": 7,
+        "source": "0xFEBE7DB3",
+        "wire_byte": 6,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [
+          "0x00046C4C"
+        ],
+        "signal_id": 8,
+        "source": "0xFEBE7DB2",
+        "wire_byte": 6,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 8,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [
+          "0x4766A"
+        ],
+        "signal_id": 9,
+        "source": null,
+        "wire_byte": 7,
+        "writer_class": "computed-first-seven-byte-additive-field-plus-0x38"
+      },
+      {
+        "bit_length": 8,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [],
+        "signal_id": 10,
+        "source": "0xFEBE7E0A",
+        "wire_byte": 8,
+        "writer_class": "default-init-only-direct-writer-census"
+      },
+      {
+        "bit_length": 12,
+        "bit_offset": 4,
+        "nondefault_writer_functions": [
+          "0x000470C6"
+        ],
+        "signal_id": 11,
+        "source": "0xFEBE7E38",
+        "wire_byte": 9,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 3,
+        "nondefault_writer_functions": [
+          "0x000470C6"
+        ],
+        "signal_id": 12,
+        "source": "0xFEBE7E0B",
+        "wire_byte": 10,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 18,
+        "bit_offset": 6,
+        "nondefault_writer_functions": [
+          "0x000470C6"
+        ],
+        "signal_id": 13,
+        "source": "0xFEBE7E44",
+        "wire_byte": 11,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 5,
+        "nondefault_writer_functions": [],
+        "signal_id": 14,
+        "source": "0xFEBE7E0C",
+        "wire_byte": 13,
+        "writer_class": "default-init-only-direct-writer-census"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 4,
+        "nondefault_writer_functions": [
+          "0x000470C6"
+        ],
+        "signal_id": 15,
+        "source": "0xFEBE7E0D",
+        "wire_byte": 13,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 3,
+        "nondefault_writer_functions": [],
+        "signal_id": 16,
+        "source": "0xFEBE7E0E",
+        "wire_byte": 13,
+        "writer_class": "default-init-only-direct-writer-census"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 2,
+        "nondefault_writer_functions": [],
+        "signal_id": 17,
+        "source": "0xFEBE7E0F",
+        "wire_byte": 13,
+        "writer_class": "default-init-only-direct-writer-census"
+      },
+      {
+        "bit_length": 2,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [],
+        "signal_id": 18,
+        "source": "0xFEBE7E4C",
+        "wire_byte": 13,
+        "writer_class": "default-init-only-direct-writer-census"
+      },
+      {
+        "bit_length": 16,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [
+          "0x00047074"
+        ],
+        "signal_id": 19,
+        "source": "0xFEBE7E3A",
+        "wire_byte": 14,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 7,
+        "nondefault_writer_functions": [
+          "0x00046FD0"
+        ],
+        "signal_id": 20,
+        "source": "0xFEBE7DC4",
+        "wire_byte": 16,
+        "writer_class": "runtime-constant-zero-direct-writer-census"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 6,
+        "nondefault_writer_functions": [
+          "0x00046FD0"
+        ],
+        "signal_id": 21,
+        "source": "0xFEBE7DBE",
+        "wire_byte": 16,
+        "writer_class": "runtime-constant-zero-direct-writer-census"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 5,
+        "nondefault_writer_functions": [
+          "0x00046FD0"
+        ],
+        "signal_id": 22,
+        "source": "0xFEBE7DC6",
+        "wire_byte": 16,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 4,
+        "nondefault_writer_functions": [
+          "0x00046FD0"
+        ],
+        "signal_id": 23,
+        "source": "0xFEBE7DC7",
+        "wire_byte": 16,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 3,
+        "nondefault_writer_functions": [
+          "0x00046FD0"
+        ],
+        "signal_id": 24,
+        "source": "0xFEBE7DC8",
+        "wire_byte": 16,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 2,
+        "bit_offset": 1,
+        "nondefault_writer_functions": [
+          "0x00046FD0"
+        ],
+        "signal_id": 25,
+        "source": "0xFEBE7DC9",
+        "wire_byte": 16,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [
+          "0x00046FD0"
+        ],
+        "signal_id": 26,
+        "source": "0xFEBE7DBC",
+        "wire_byte": 16,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 7,
+        "nondefault_writer_functions": [],
+        "signal_id": 27,
+        "source": "0xFEBE7E10",
+        "wire_byte": 17,
+        "writer_class": "default-init-only-direct-writer-census"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 6,
+        "nondefault_writer_functions": [],
+        "signal_id": 28,
+        "source": "0xFEBE7E11",
+        "wire_byte": 17,
+        "writer_class": "default-init-only-direct-writer-census"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 5,
+        "nondefault_writer_functions": [
+          "0x0004746A"
+        ],
+        "signal_id": 29,
+        "source": "0xFEBE7E5E",
+        "wire_byte": 17,
+        "writer_class": "runtime-constant-zero-direct-writer-census"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 4,
+        "nondefault_writer_functions": [
+          "0x0004746A"
+        ],
+        "signal_id": 30,
+        "source": "0xFEBE7E5D",
+        "wire_byte": 17,
+        "writer_class": "runtime-constant-zero-direct-writer-census"
+      },
+      {
+        "bit_length": 4,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [],
+        "signal_id": 31,
+        "source": "0xFEBE7E12",
+        "wire_byte": 17,
+        "writer_class": "default-init-only-direct-writer-census"
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [
+          "0x00046FD0"
+        ],
+        "signal_id": 32,
+        "source": "0xFEBE7DB0",
+        "wire_byte": 19,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 16,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [
+          "0x00046FD0"
+        ],
+        "signal_id": 33,
+        "source": "0xFEBE7E26",
+        "wire_byte": 20,
+        "writer_class": "runtime-produced"
+      },
+      {
+        "bit_length": 16,
+        "bit_offset": 0,
+        "nondefault_writer_functions": [],
+        "signal_id": 34,
+        "source": "0xFEBE7E3C",
+        "wire_byte": 22,
+        "writer_class": "default-init-only-direct-writer-census"
+      }
+    ],
+    "pdu0_descriptor": {
+      "cycle_or_timeout": 2,
+      "flags": 3,
+      "length": 32
+    },
+    "sienna_tx_ids": [
+      "0x260",
+      "0x262",
+      "0x351",
+      "0x394",
+      "0x4A3",
+      "0x4C8"
+    ]
+  },
+  "fd_receive_generation": {
+    "corolla_h_fd_rx": [
+      {
+        "can_id": "0x025",
+        "length": 32
+      },
+      {
+        "can_id": "0x090",
+        "length": 32
+      },
+      {
+        "can_id": "0x0D7",
+        "length": 32
+      },
+      {
+        "can_id": "0x0B6",
+        "length": 32
+      }
+    ],
+    "corolla_h_normal_rx_table": "0x21F94",
+    "h_only_fd_rx": [
+      "0x0B6"
+    ],
+    "shared_0x025_boundary": {
+      "classification": "shared-preexisting-fd-interface-not-h-replacement",
+      "corolla_h_signed12_signal_184": {
+        "corresponds_by_generated-shape_to_sienna_signal": 221,
+        "directly_repacked_to_can_0x4A3_bytes": [
+          1,
+          2
+        ],
+        "raw_destination": "0xFEBE7D34"
+      },
+      "unique_instruction_shape_pairs": [
+        {
+          "corolla_h": "0x4636A",
+          "role": "FD025 generated unpacker",
+          "sienna": "0x4AD82"
+        },
+        {
+          "corolla_h": "0x46D9A",
+          "role": "FD025-to-4A3 producer",
+          "sienna": "0x4B7BA"
+        },
+        {
+          "corolla_h": "0x4749A",
+          "role": "CAN 0x4A3 packer",
+          "sienna": "0x4BB1E"
+        }
+      ]
+    },
+    "sienna_fd_rx": [
+      {
+        "can_id": "0x025",
+        "length": 32
+      },
+      {
+        "can_id": "0x090",
+        "length": 32
+      },
+      {
+        "can_id": "0x0D7",
+        "length": 32
+      }
+    ],
+    "sienna_normal_rx_table": "0x22018"
+  },
+  "images": {
+    "corolla_h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "schema": "corolla-8965H1202000-fd-control-interface-v1",
+  "secured_fd_0x0b6": {
+    "buffer_offset": "0x1A7",
+    "configured_signal_ids": [
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267
+    ],
+    "configured_without_recovered_scalar_extract": [
+      252,
+      253,
+      266,
+      267
+    ],
+    "fields": [
+      {
+        "bit_length": 6,
+        "bit_offset": 0,
+        "direct_consumers": [],
+        "paths_from_0xCEDAE": {},
+        "raw_destination": "0xFEBE7D96",
+        "role": "staged-only-direct-xref-negative",
+        "signal_id": 254,
+        "signed": false,
+        "snapshot_destination": null,
+        "staging_destination": "0xFEBEF127",
+        "wire_byte": 3
+      },
+      {
+        "bit_length": 16,
+        "bit_offset": 0,
+        "direct_consumers": [],
+        "paths_from_0xCEDAE": {},
+        "raw_destination": "0xFEBE7D94",
+        "role": "signed16-staged-only-direct-xref-negative",
+        "signal_id": 255,
+        "signed": true,
+        "snapshot_destination": null,
+        "staging_destination": "0xFEBEF1CC",
+        "wire_byte": 4
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 7,
+        "direct_consumers": [],
+        "paths_from_0xCEDAE": {},
+        "raw_destination": "0xFEBE7DA2",
+        "role": "snapshot-only-direct-xref-negative",
+        "signal_id": 256,
+        "signed": false,
+        "snapshot_destination": "0xFEBEADDD",
+        "staging_destination": "0xFEBEF147",
+        "wire_byte": 6
+      },
+      {
+        "bit_length": 3,
+        "bit_offset": 4,
+        "direct_consumers": [],
+        "paths_from_0xCEDAE": {},
+        "raw_destination": "0xFEBE7D97",
+        "role": "snapshot-only-direct-xref-negative",
+        "signal_id": 257,
+        "signed": false,
+        "snapshot_destination": "0xFEBEADB1",
+        "staging_destination": "0xFEBEF128",
+        "wire_byte": 6
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 2,
+        "direct_consumers": [
+          "0xCBEEE"
+        ],
+        "paths_from_0xCEDAE": {
+          "0xCBEEE": [
+            "0xCEDAE",
+            "0xCAD3E",
+            "0xCAD1C",
+            "0xCAC24",
+            "0xCA940",
+            "0xCBEEE"
+          ]
+        },
+        "raw_destination": "0xFEBE7D98",
+        "role": "steering-cone-gate",
+        "signal_id": 258,
+        "signed": false,
+        "snapshot_destination": "0xFEBEADBB",
+        "staging_destination": "0xFEBEF129",
+        "wire_byte": 6
+      },
+      {
+        "bit_length": 2,
+        "bit_offset": 0,
+        "direct_consumers": [],
+        "paths_from_0xCEDAE": {},
+        "raw_destination": "0xFEBE7D99",
+        "role": "staged-only-direct-xref-negative",
+        "signal_id": 259,
+        "signed": false,
+        "snapshot_destination": null,
+        "staging_destination": "0xFEBEF12A",
+        "wire_byte": 6
+      },
+      {
+        "bit_length": 2,
+        "bit_offset": 6,
+        "direct_consumers": [
+          "0xC89D2",
+          "0xC8D42"
+        ],
+        "paths_from_0xCEDAE": {
+          "0xC89D2": [
+            "0xCEDAE",
+            "0xC89D2"
+          ],
+          "0xC8D42": null
+        },
+        "raw_destination": "0xFEBE7D9A",
+        "role": "mode-table-selector",
+        "signal_id": 260,
+        "signed": false,
+        "snapshot_destination": "0xFEBEADC2",
+        "staging_destination": "0xFEBEF12B",
+        "wire_byte": 7
+      },
+      {
+        "bit_length": 6,
+        "bit_offset": 0,
+        "direct_consumers": [
+          "0xCB246"
+        ],
+        "paths_from_0xCEDAE": {
+          "0xCB246": [
+            "0xCEDAE",
+            "0xCB582",
+            "0xCB246"
+          ]
+        },
+        "raw_destination": "0xFEBE7D9B",
+        "role": "modulo-sequence-delta",
+        "signal_id": 261,
+        "signed": false,
+        "snapshot_destination": "0xFEBEADBC",
+        "staging_destination": "0xFEBEF12C",
+        "wire_byte": 7
+      },
+      {
+        "bit_length": 8,
+        "bit_offset": 0,
+        "direct_consumers": [
+          "0xCC442"
+        ],
+        "paths_from_0xCEDAE": {
+          "0xCC442": [
+            "0xCEDAE",
+            "0xCAD3E",
+            "0xCC698",
+            "0xCC442"
+          ]
+        },
+        "raw_destination": "0xFEBE7D9C",
+        "role": "percentage-scaling",
+        "signal_id": 262,
+        "signed": false,
+        "snapshot_destination": "0xFEBEADBD",
+        "staging_destination": "0xFEBEF12D",
+        "wire_byte": 8
+      },
+      {
+        "bit_length": 8,
+        "bit_offset": 0,
+        "direct_consumers": [
+          "0xCBFCE"
+        ],
+        "paths_from_0xCEDAE": {
+          "0xCBFCE": [
+            "0xCEDAE",
+            "0xCAD3E",
+            "0xCAD1C",
+            "0xCBFCE"
+          ]
+        },
+        "raw_destination": "0xFEBE7D9D",
+        "role": "percentage-scaling",
+        "signal_id": 263,
+        "signed": false,
+        "snapshot_destination": "0xFEBEADBE",
+        "staging_destination": "0xFEBEF12E",
+        "wire_byte": 9
+      },
+      {
+        "bit_length": 1,
+        "bit_offset": 7,
+        "direct_consumers": [
+          "0xC819E"
+        ],
+        "paths_from_0xCEDAE": {
+          "0xC819E": [
+            "0xCEDAE",
+            "0xC835C",
+            "0xC819E"
+          ]
+        },
+        "raw_destination": "0xFEBE7D9E",
+        "role": "validity-reset-gate",
+        "signal_id": 264,
+        "signed": false,
+        "snapshot_destination": "0xFEBEADC1",
+        "staging_destination": "0xFEBEF12F",
+        "wire_byte": 10
+      },
+      {
+        "bit_length": 3,
+        "bit_offset": 0,
+        "direct_consumers": [
+          "0xCCF58"
+        ],
+        "paths_from_0xCEDAE": {
+          "0xCCF58": [
+            "0xCEDAE",
+            "0xCCF58"
+          ]
+        },
+        "raw_destination": "0xFEBE7DA1",
+        "role": "validity-gated-mode-status",
+        "signal_id": 265,
+        "signed": false,
+        "snapshot_destination": "0xFEBEADD9",
+        "staging_destination": "0xFEBEF141",
+        "wire_byte": 10
+      }
+    ],
+    "pdu_id": 42,
+    "scalar_extracted_signal_ids": [
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265
+    ],
+    "signed16_replacement_command_result": "signal 255 is the only 16-bit signed B6 scalar, but its staging cell has no direct runtime consumer in the target-native corpus; it is not evidence of a relocated 2E4 torque command",
+    "validity": {
+      "direct_consumers": [
+        "0xC7C70",
+        "0xC819E",
+        "0xCC7F8",
+        "0xCCF58"
+      ],
+      "role": "control/status validity gating",
+      "snapshot_destination": "0xFEBEADB9",
+      "staging_destination": "0xFEBEF132"
+    }
+  },
+  "sienna_shaped_branch_corrections": {
+    "old_2e4_monitor_branch": {
+      "classification": "internal-controller-output-fed monitor/status branch; not the H clamp/rate command input",
+      "h_chain": [
+        "0x35526 -> FEBE6D7A",
+        "0x5262C -> FEBEF156",
+        "0xB8EE4 -> FEBEAE20",
+        "0xC80C4 plausibility/status predicate"
+      ]
+    },
+    "retained_torque_clamp_branch": {
+      "clamp_function": "0xC91B6",
+      "classification": "retained framework branch with zero source in this calibration under the recovered direct-writer census",
+      "direct_writer_census": [
+        "0x5262C writes zero",
+        "0x5389C writes zero"
+      ],
+      "input": "0xFEBEAE12",
+      "scale_helper": "0xCF12A maps zero input to zero for the fixed 0x100/100 call",
+      "upstream_staging": "0xFEBEF166"
+    }
+  }
+}

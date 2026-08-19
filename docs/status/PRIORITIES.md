@@ -217,12 +217,17 @@ startup/COM recovery also closes the old classic-CAN assumption: app GP remains
 `260/262` with a 32-byte FD `030`. The application diagnostic surface is now
 re-censused target-natively too: H has 226 readable DIDs / 32 exact-stub stale
 selectors and the same 19 RoutineControl policy rows, but `110A/C/D` become no-op
-while `110B` becomes a new active lifecycle. Highest-value remaining H work is therefore
-narrower: assign field-level provenance/semantics inside `0B6` and `030`, identify
-whether any H input carries an external command magnitude analogous to Sienna
-`2E4`, classify the H-only/reordered orchestration stages, trace the
-storage/derivation provenance of the three H SecOC runtime keys, and finish a
-generic XCP DAQ callback only if a concrete exploit question needs it. Those are concrete variant-transfer gaps and are not
+while `110B` becomes a new active lifecycle. The obvious FD replacement-command
+hypothesis is now bounded negative: `025` is a shared pre-existing FD interface;
+B6's only signed16 scalar is staged-only under the complete direct-reference
+census; active B6 fields are supervisor gate/mode/sequence/scaling state; and the
+retained Sienna-shaped clamp input is zero-fed while `AE20` is an internal
+plausibility/status branch. Highest-value remaining H work is therefore narrower:
+classify the H-only/reordered `0xCEDAE` orchestration stages and trace any remaining
+nonzero externally sourced supervisor inputs before assigning an H replacement
+command; trace the storage/derivation provenance of the three H SecOC runtime
+keys; and finish a generic XCP DAQ callback only if a concrete exploit question
+needs it. Those are concrete variant-transfer gaps and are not
 covered by the generic-sweep prohibition below.
 
 The remaining explicitly open cohort rows without a recovered ingress root are

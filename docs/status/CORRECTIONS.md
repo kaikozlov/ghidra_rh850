@@ -1767,3 +1767,22 @@ The one-command H resolver reproduces the tracked semantic manifest after this
 fix (apart from the caller-selected output-path string). Canonical reports:
 [`../tooling/ephemeral-runtime-semantic-resolver.md`](../tooling/ephemeral-runtime-semantic-resolver.md)
 and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-public-route.md) §7.9.
+
+### CORR-073 — H `FEBEAE20` is not the retained torque-clamp input
+
+- **Earlier provisional transfer:** the first H steering pass followed Sienna's
+  `2E4` staging geometry far enough to identify H `FEBE6D7A -> FEBEF156 ->
+  FEBEAE20` and treated the nearby transferred clamp/rate stages as part of the
+  same command chain.
+- **Correct target-native result:** H `0xC91B6` reads **`FEBEAE12`**, not
+  `FEBEAE20`. `FEBEAE12` comes from `FEBEF166`; the complete recovered direct
+  writer set for that staging word is H `0x5262C` and `0x5389C`, and both write
+  zero. Fixed helper `0xCF12A(...,0x100,100,...)` preserves zero. The separate
+  `FEBEAE20` path is fed by H-internal controller state `FEBE6D7A` and consumed
+  by `0xC80C4` as a threshold/plausibility predicate.
+- **Consequence:** the Sienna external-torque clamp branch is retained as
+  framework code but is zero-fed in this H calibration under the direct-writer
+  evidence. This does not imply the entire EPS motor/assist system is inactive.
+- **Canonical:**
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
+  §7.11; `tests/verify_corolla_8965H1202000_fd_control.py`.

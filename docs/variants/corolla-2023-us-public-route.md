@@ -933,11 +933,14 @@ surviving downstream slot is a defaulted compatibility/state cell, not evidence
 that the removed `2E4` route still exists. An indirect pointer write would have
 to be proved separately before overriding that bounded conclusion.
 
-The torque staging also changes. Instead of Sienna's raw `2E4` torque cell feeding
-`FEBEF184`, H `0x5262C` writes its per-cycle torque staging value at `GP+0x3956`
-from H-internal state at `GP-0x4A86`; H `0xB8EEC` then snapshots `GP+0x3956` into
-the downstream control state. This is another direct indication that the old
-classic-CAN steering command ingress was replaced rather than merely moved.
+The old torque-shaped staging also changes, but the deeper target-native pass
+corrects its role. Instead of Sienna's raw `2E4` torque cell feeding `FEBEF184`,
+H `0x5262C` writes `GP+0x3956` from H-internal state `GP-0x4A86`, and `0xB8EEC`
+snapshots that value to `FEBEAE20`. H `0xC80C4` consumes `FEBEAE20` only in a
+threshold/plausibility predicate. The retained Sienna-shaped clamp/gain worker
+`0xC91B6` reads **`FEBEAE12` instead**, so `FEBEAE20` must not be described as
+H's active clamp/torque-command input. Section 7.11 pins the separate `AE12`
+source and the stronger FD-field census.
 
 #### Transmit configuration: 260/262 collapse into a new 32-byte FD 030 PDU
 
@@ -1087,6 +1090,135 @@ nonzero RoutineControl callbacks, and the 25 helper/downstream functions needed
 for the bounds and lifecycle claims, with each function tied to the exact H raw
 body SHA-256. `tests/verify_corolla_8965H1202000_application_diagnostics.py`
 regenerates the comparison and pins the evidence boundary.
+
+
+### 7.11 FD control interface: B6 is supervisory, 025 is shared, and the retained torque branch is zero-fed
+
+A full target-native field/consumer pass now closes the obvious "the command
+must have moved to one of the new FD frames" hypothesis much more strongly.
+The normal application FD-Rx sets are:
+
+```text
+8965B4512000:  025  090  0D7
+8965H1202000:  025  090  0D7  0B6
+```
+
+Thus **`0x0B6` is the only H-only FD receive descriptor**. `0x025` is not a new
+H command transport: Sienna already has the same 32-byte FD PDU. Three complete
+instruction-shape joins are unique on both images:
+
+```text
+S 0x4AD82  025 generated unpacker      -> H 0x4636A
+S 0x4B7BA  025-to-4A3 producer         -> H 0x46D9A
+S 0x4BB1E  CAN 0x4A3 packer            -> H 0x4749A
+```
+
+The operand-level H check agrees with that architectural transfer. H `0x4636A`
+extracts signed-12 signal 184 to `FEBE7D34`; H `0x46D9A` splits that value into
+its high nibble/low byte, and H `0x4749A` emits those bytes directly as CAN
+`0x4A3` B1/B2. This is the same pre-existing `025 -> 4A3` telemetry/state join
+that Sienna implements with signal 221. It therefore cannot by itself explain
+the disappearance of the Sienna-only `2E4/131` command modes.
+
+#### B6 scalar map and downstream use
+
+H PDU 42 (`0x0B6`) has COM-buffer base `0x1A7`, configured signal IDs
+`252..267`, and exactly twelve scalar extracts (`254..265`). The target-native
+map is:
+
+| signal | wire field | signed | staged / snapshot | recovered role |
+|---:|---|:---:|---|---|
+| 254 | B3[5:0] | no | `FEBEF127` / none | staged only; no direct runtime consumer |
+| 255 | B4..B5 | **yes, 16b** | `FEBEF1CC` / none | staged only; no direct runtime consumer |
+| 256 | B6[7] | no | `FEBEF147` / `FEBEADDD` | snapshot only; no direct runtime consumer |
+| 257 | B6[6:4] | no | `FEBEF128` / `FEBEADB1` | snapshot only; no direct runtime consumer |
+| 258 | B6[2] | no | `FEBEF129` / `FEBEADBB` | steering-cone gate (`CBEEE`) |
+| 259 | B6[1:0] | no | `FEBEF12A` / none | staged only; no direct runtime consumer |
+| 260 | B7[7:6] | no | `FEBEF12B` / `FEBEADC2` | mode/table selector (`C89D2/C8D42`) |
+| 261 | B7[5:0] | no | `FEBEF12C` / `FEBEADBC` | modulo/sequence delta (`CB246`) |
+| 262 | B8 | no | `FEBEF12D` / `FEBEADBD` | percentage/scaling input (`CC442`) |
+| 263 | B9 | no | `FEBEF12E` / `FEBEADBE` | percentage/scaling input (`CBFCE`) |
+| 264 | B10[7] | no | `FEBEF12F` / `FEBEADC1` | validity/reset gate (`C819E`) |
+| 265 | B10[2:0] | no | `FEBEF141` / `FEBEADD9` | validity-gated mode/status (`CCF58`) |
+
+The queue/update validity state is separately staged to `FEBEF132` and reaches
+`FEBEADB9`; it gates `C7C70`, `C819E`, `CC7F8`, and `CCF58`. The active
+B6 consumers above have target-native call paths inside the `0xCEDAE` supervisor
+cone. In contrast, the **only signed 16-bit B6 scalar is signal 255, and its
+staging cell has no direct runtime consumer in the complete H decompiler
+reference census**. Signals 254/259 likewise stop at staging; 256/257 stop at
+the copied snapshot. These are bounded direct-reference negatives: a future
+computed-pointer/alias proof could override them, but there is no static basis
+to rename signal 255 as a relocated `2E4 STEER_TORQUE_CMD`.
+
+The positive B6 result is therefore narrower and more useful: `0x0B6` is a
+**secured supervisory/control-status interface** supplying gates, mode/table
+selection, a sequence-like delta, percentage/scaling inputs, and validity state.
+It is not statically demonstrated to carry the removed Sienna torque/angle
+command payloads.
+
+#### The retained Sienna-shaped torque branch is dormant on H
+
+Following the actual H operands corrects a second tempting cross-variant
+mistake. H `0xC91B6`, the unique instruction-shape homolog of Sienna's
+clamp/gain worker, reads `FEBEAE12`, not `FEBEAE20`. `FEBEAE12` is produced by
+`0xB8EEC` through scale helper `0xCF12A` from staging word `FEBEF166`. The
+complete H direct-writer census finds only two writes to that staging word:
+
+```text
+0x5262C: FEBEF166 = 0
+0x5389C: GP+0x3966 / FEBEF166 = 0
+```
+
+For the fixed `0x100/100` call, `0xCF12A` preserves zero input as zero output.
+Consequently the retained clamp/gain branch is **zero-fed in this calibration**
+under the recovered direct-writer evidence. The old Sienna-shaped `FEBEAE20`
+path is separate: H internal controller family `0x35526/0x355CE/0x35710` produces
+`FEBE6D7A`, `0x5262C` stages it at `FEBEF156`, `0xB8EEC` copies it to
+`FEBEAE20`, and `0xC80C4` uses it in a plausibility/status predicate. This is a
+monitor/status branch, not the active `C91B6` clamp input.
+
+This does **not** prove that all H steering actuation is zero or absent. It proves
+that the specific Sienna external-torque branch retained in H is not supplied by
+a recovered nonzero source. The ordinary EPS assist/motor-control chain and
+other H supervisor states remain separate.
+
+#### FD 030 transmit field map
+
+The H transmit generation likewise can now be described at field level. PDU 0
+is `CAN-FD 0x030`, 32 bytes, cycle/raw count 2, with configured signal IDs
+`0..36`. H `0x4766A` directly packs only **signals 0..34**; configured IDs
+35/36 have no recovered direct pack call and remain unassigned rather than being
+given invented wire fields.
+
+The direct packer covers bytes B0 through B22. Runtime producers are
+`0x470C6`, `0x47074`, `0x46C4C`, `0x46EE0`, `0x46FD0`, and `0x4746A` plus
+initial/default state. The complete source-writer census distinguishes normal
+runtime-produced fields from init-only fields and from four runtime-constant-zero
+bits (signals 20/21/29/30). Signal 9 at B7 is computed inside the packer itself:
+
+```text
+B7 = (B0 + B1 + ... + B6 + 0x38) & 0xFF
+```
+
+That exact additive behavior is recovered from code; the repository does not
+promote the `0x38` constant into an OEM checksum name or infer protocol lineage
+from the constant alone.
+
+The configuration-level conclusion remains that FD `0x030` occupies the H Tx
+slot where Sienna used classic `0x260/0x262`, but the field-level pass reinforces
+why `030 == concatenate(260,262)` is wrong: H has 37 configured fields, 35 direct
+packer calls, different widths/positions/sources, and several default/constant
+fields. It is a generation-level consolidation/replacement, not a bytewise wire
+translation.
+
+Machine-readable evidence is in
+`data/generated/corolla_8965H1202000_fd_control_interface.json`, with compact
+H-native decompilation evidence in
+`data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json` and
+the bounded full-corpus direct-reference census in
+`data/generated/corolla_8965H1202000_fd_control_reference_census.json`.
+`tests/verify_corolla_8965H1202000_fd_control.py` regenerates and pins the report.
 
 ## 8. Remaining evidence boundary
 

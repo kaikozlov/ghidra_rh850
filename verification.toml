@@ -1352,6 +1352,29 @@ paths = [
 ]
 oracle = "raw_bytes"
 
+
+[suite.corolla_8965h_fd_control]
+tests = ["tests/verify_corolla_8965H1202000_fd_control.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_fd_control.py",
+  "tools/extract_variant_function_evidence.py",
+  "tools/extract_variant_decompiler_reference_census.py",
+  "tools/build_corolla_h_fd_control_interface.py",
+  "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_fd_control_reference_census.json",
+  "data/generated/corolla_8965H1202000_fd_control_interface.json",
+  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
 [suite.external_corroboration]
 tests = ["tests/verify_external_corroboration.py"]
 paths = ["external-references.lock.json", "docs/status/"]
