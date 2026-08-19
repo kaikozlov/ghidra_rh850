@@ -1,0 +1,2428 @@
+{
+  "functions": [
+    {
+      "body_sha256": "4935e729455e31b378869acc5dcd4b2ae88bb6862c384400d03bd1c5d6f8f43e",
+      "body_size": 68,
+      "decompiled_c": "\nvoid FUN_00047d76(byte param_1,ushort param_2)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  param_2 = param_2 & 0xff;\n  if (param_1 < 0x10) {\n    FUN_0004af1e(param_1,param_2);\n  }\n  else {\n    if (param_1 == 0x12) {\n      iVar1 = -0x1414800;\n      FUN_0004a652();\n    }\n    if (((*(ushort *)(iVar1 + -0x397e) & 0xff) == 0x10) && (param_2 != 0x10)) {\n      *(ushort *)(iVar1 + -0x397e) = *(ushort *)(iVar1 + -0x397e) & 0xff00 | param_2;\n    }\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1dba52737afd7fcdd8137ef665e7fcbed0e6ef83a115beab104b46814a935999",
+      "entry": "0x00047D76",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "34ec89ad66cd2af0821711e8cd17244966586b58a8c2cf509b9cb8d4df1bdf3b",
+      "body_size": 108,
+      "decompiled_c": "\nvoid FUN_00047e76(int param_1,uint param_2)\n\n{\n  ushort *puVar1;\n  byte *pbVar2;\n  ushort uVar3;\n  uint uVar4;\n  int iVar5;\n  int iVar6;\n  ushort auStack_e [3];\n  \n  for (uVar4 = 0; uVar4 < (param_2 & 0xffff); uVar4 = uVar4 + 1 & 0xffff) {\n    *(undefined1 *)(uVar4 + param_1) = 0;\n  }\n  iVar5 = FUN_0004afe2(auStack_e);\n  for (iVar6 = 0;\n      (int)(iVar6 - (uint)auStack_e[0]) < 0 != (iVar6 < 0 && -1 < (int)(iVar6 - (uint)auStack_e[0]))\n      ; iVar6 = iVar6 + 1) {\n    puVar1 = (ushort *)(iVar6 * 0x10 + iVar5);\n    uVar3 = *puVar1;\n    if (((char)puVar1[6] == '\\0') && ((uVar3 & 0xff) == 0)) {\n      uVar4 = (int)(uint)uVar3 >> 0xb;\n      if (uVar4 < (param_2 & 0xff)) {\n        pbVar2 = (byte *)(uVar4 + param_1);\n        *pbVar2 = *pbVar2 | (byte)(0x80 >> ((int)(uint)uVar3 >> 8 & 7U));\n      }\n    }\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "153d14550aa4f8e9805275fc05c02561613cb9b0797c7f510c0527d3c397d968",
+      "entry": "0x00047E76",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "bbf635fd4b479dfb93e1dda1f622c3bf02921e646ac559b95e940faf4f10042d",
+      "body_size": 144,
+      "decompiled_c": "\nvoid FUN_00047f38(uint param_1,int param_2,uint param_3)\n\n{\n  ushort *puVar1;\n  byte *pbVar2;\n  uint uVar3;\n  int iVar4;\n  int iVar5;\n  int iVar6;\n  uint uVar7;\n  ushort auStack_26 [3];\n  \n  for (uVar3 = 0; uVar3 < (param_3 & 0xffff); uVar3 = uVar3 + 1 & 0xffff) {\n    *(undefined1 *)(uVar3 + param_2) = 0;\n  }\n  iVar4 = FUN_0004afe2(auStack_26);\n  for (iVar6 = 0;\n      (int)(iVar6 - (uint)auStack_26[0]) < 0 !=\n      (iVar6 < 0 && -1 < (int)(iVar6 - (uint)auStack_26[0])); iVar6 = iVar6 + 1) {\n    puVar1 = (ushort *)(iVar6 * 0x10 + iVar4);\n    uVar3 = (uint)*puVar1;\n    if (((((char)puVar1[6] == '\\0') && ((param_1 & 0xff00) < uVar3)) &&\n        (uVar3 < ((param_1 & 0xff00) + 0x100 & 0xffff))) &&\n       ((*(code **)(puVar1 + 4) == (code *)0x0 ||\n        (iVar5 = (**(code **)(puVar1 + 4))(), iVar5 == 0x5a)))) {\n      uVar7 = (int)(uVar3 - 1 & 0xff) >> 3;\n      if (uVar7 < (param_3 & 0xff)) {\n        pbVar2 = (byte *)(uVar7 + param_2);\n        *pbVar2 = *pbVar2 | (byte)(0x80 >> (uVar3 - 1 & 7));\n      }\n    }\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f3e561f8e09da4ab301a08163f77fc89ffb375e727dd8156cfac51c21545d6b7",
+      "entry": "0x00047F38",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "f0d1e687eefeda696b516fe27c9c0ff8ff5bd232e7384b166d2a02db2ed3fdf3",
+      "body_size": 122,
+      "decompiled_c": "\nundefined4 FUN_00048524(int param_1)\n\n{\n  undefined1 uStack_f;\n  undefined2 uStack_e;\n  undefined4 auStack_c [2];\n  \n  if (cRamfebee813 == 'Z') {\n    auStack_c[0] = uRamfebee90c;\n    uStack_e = uRamfebee896;\n    uStack_f = uRamfebee815;\n    FUN_00069490(uRamfebee896,0xfffe,&uStack_e);\n    func_0x000694a2(auStack_c[0],0xfffffffe,auStack_c);\n    FUN_0006947e(uStack_f,1,&uStack_f);\n  }\n  else {\n    uStack_e = 0xffff;\n    auStack_c[0] = 0xffffffff;\n    uStack_f = 0;\n  }\n  FUN_00063824(uStack_e,param_1);\n  FUN_0006380c(auStack_c[0],param_1 + 2);\n  *(undefined1 *)(param_1 + 6) = uStack_f;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "dd39fc0c72ef2cb34dac3b609151534eaf47cd718854047b061b06ed24836518",
+      "entry": "0x00048524",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "8346084e9b6adfc6d9b046b44bdfed95341ab3d8a2476d9e0ef564f34d0359ae",
+      "body_size": 78,
+      "decompiled_c": "\nundefined4 FUN_0004859e(undefined1 *param_1)\n\n{\n  undefined *puVar1;\n  undefined1 auStack_d [5];\n  \n  puVar1 = puRamfebee910;\n  if (cRamfebee813 == 'Z') {\n    auStack_d[0] = uRamfebee814;\n    FUN_0006947e(uRamfebee814,2,auStack_d);\n    if (puVar1 < &DAT_000f4240) goto LAB_000485d6;\n  }\n  else {\n    auStack_d[0] = 0;\n  }\n  puVar1 = (undefined *)0x0;\nLAB_000485d6:\n  FUN_0006380c(puVar1,param_1);\n  *param_1 = auStack_d[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "039c1616c60b7b894ed8cd0105f78f32f9c03cdb3125c008035cccf85e4fe7d0",
+      "entry": "0x0004859E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "2d33807a2210162ec1384385a06af153b3f4f28dffeefb35d8d6d7488d0e7b82",
+      "body_size": 116,
+      "decompiled_c": "\nundefined4 FUN_000485ec(int param_1)\n\n{\n  int iVar1;\n  int iVar2;\n  int *piVar3;\n  int iVar4;\n  undefined4 uVar5;\n  undefined4 *puVar6;\n  int iStack_18;\n  undefined1 auStack_14 [16];\n  \n  piVar3 = &iStack_18;\n  puVar6 = (undefined4 *)0x212a4;\n  do {\n    uVar5 = *puVar6;\n    puVar6 = puVar6 + 1;\n    *piVar3 = uVar5;\n    piVar3 = piVar3 + 1;\n  } while (puVar6 != (undefined4 *)0x212b4);\n  iVar4 = FUN_0006009e(0x204,&iStack_18);\n  if ((iVar4 == 0x10) && (iStack_18 == -0x5aa5a55b)) {\n    iVar4 = 0;\n    do {\n      iVar2 = iVar4 + 1;\n      iVar1 = iVar4 + -9;\n      *(undefined1 *)(iVar4 + param_1) = auStack_14[iVar4];\n      iVar4 = iVar2;\n    } while (iVar1 < 0 != (iVar2 < 0 && -1 < iVar1));\n  }\n  else {\n    iVar4 = 0;\n    do {\n      iVar2 = iVar4 + 1;\n      *(undefined1 *)(iVar4 + param_1) = 0x3f;\n      iVar1 = iVar4 + -9;\n      iVar4 = iVar2;\n    } while (iVar1 < 0 != (iVar2 < 0 && -1 < iVar1));\n  }\n  *(undefined1 *)(param_1 + 10) = 0;\n  *(undefined1 *)(param_1 + 0xb) = 0;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "7ee2b3278cbcb05b7b5cf26adc06dd0b63172a4536c27df02f95f97050a7886a",
+      "entry": "0x000485EC",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "dbbac6faef7d9673d84a3468be4543f05343a03b7e0c000f5857fa7d5db7d1fc",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00048660(undefined1 *param_1)\n\n{\n  undefined1 uVar1;\n  undefined1 uVar2;\n  undefined1 uVar3;\n  undefined1 uVar4;\n  undefined1 uVar5;\n  undefined1 uVar6;\n  \n  uVar1 = uRamfebee866;\n  uVar6 = uRamfebee867;\n  uVar5 = uRamfebee868;\n  uVar4 = uRamfebee869;\n  uVar3 = uRamfebee86a;\n  uVar2 = uRamfebee86b;\n  if (cRamfebee813 != 'Z') {\n    uVar1 = 0xff;\n    uVar6 = 0xff;\n    uVar5 = 0xff;\n    uVar4 = 0xff;\n    uVar3 = 0xff;\n    uVar2 = 0xff;\n  }\n  *param_1 = uVar1;\n  param_1[1] = uVar6;\n  param_1[2] = uVar5;\n  param_1[3] = uVar4;\n  param_1[4] = uVar3;\n  param_1[5] = uVar2;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "268f14910b50d1f8360fb9db16a2ffb88cf8ff7d8888178788c482ab291c9342",
+      "entry": "0x00048660",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "06088b6f2aa0b8805c3534eb4f7c2d2b6956ee463cf8f6ca6a7a5c1ede9f1574",
+      "body_size": 96,
+      "decompiled_c": "\nundefined4 FUN_0004869c(int param_1)\n\n{\n  int iVar1;\n  int iVar2;\n  int *piVar3;\n  int iVar4;\n  undefined4 uVar5;\n  undefined4 *puVar6;\n  int iStack_20;\n  undefined1 auStack_1c [24];\n  \n  piVar3 = &iStack_20;\n  puVar6 = (undefined4 *)0x212b4;\n  do {\n    uVar5 = *puVar6;\n    puVar6 = puVar6 + 1;\n    *piVar3 = uVar5;\n    piVar3 = piVar3 + 1;\n  } while (puVar6 != (undefined4 *)0x212cc);\n  iVar4 = FUN_0006009e(0x208,&iStack_20);\n  if ((iVar4 == 0x10) && (iStack_20 == -0x5aa5a55b)) {\n    uVar5 = 0;\n    iVar4 = 0;\n    do {\n      iVar2 = iVar4 + 1;\n      iVar1 = iVar4 + -0xf;\n      *(undefined1 *)(iVar4 + param_1) = auStack_1c[iVar4];\n      iVar4 = iVar2;\n    } while (iVar1 < 0 != (iVar2 < 0 && -1 < iVar1));\n  }\n  else {\n    uVar5 = 5;\n  }\n  return uVar5;\n}\n\n",
+      "decompiled_c_sha256": "492ad404472a39746cb03dabd91c2fbe885fd24407493d8ef1f7cdc36dd675c6",
+      "entry": "0x0004869C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "3c7fddcd072edffe2299c4103e22a8474b537d226ab8805fc0e3a7aecbd8e22f",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_000486fc(undefined4 param_1)\n\n{\n  int iVar1;\n  uint uVar2;\n  \n  iVar1 = -0x1414800;\n  uVar2 = FUN_000633d2();\n  if (~*(uint *)(iVar1 + -0x3164) < uVar2) {\n    iVar1 = -1;\n  }\n  else {\n    iVar1 = uVar2 + *(uint *)(iVar1 + -0x3164);\n  }\n  FUN_0006380c(iVar1,param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "c6f8cf89d6b1173151b6e734b0ac0accfd004904ecf5da64445ab43a1ce2933c",
+      "entry": "0x000486FC",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00048724(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "18b45e0a9a7b51a51f20752362c45091109e3f1a0b7216dcfd0d228c5ca0abbd",
+      "entry": "0x00048724",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "c75ab342dcd40fcd3762215376c10ae504b2572b72396313c7743ff407ddb881",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_00048728(undefined4 param_1)\n\n{\n  int iVar1;\n  \n  if (~uRamfebe86a4 < uRamfebe87a0) {\n    iVar1 = -1;\n  }\n  else {\n    iVar1 = uRamfebe87a0 + uRamfebe86a4;\n  }\n  FUN_0006380c(iVar1,param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "3ceb3b53cf5a8bc1f29488c235b1ad5ef00457bb12e65aaa014035ca5097574f",
+      "entry": "0x00048728",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e97ad43c580c48dbdd25ed31bf084abad7aea85d346d1a59a637dcdbccf8b087",
+      "body_size": 30,
+      "decompiled_c": "\nundefined4 FUN_0004874e(undefined1 *param_1)\n\n{\n  char cVar1;\n  undefined1 uVar2;\n  \n  cVar1 = cRamfebee855;\n  *param_1 = 0x80;\n  uVar2 = 0;\n  if (cVar1 == '\\x11') {\n    uVar2 = 0x80;\n  }\n  param_1[1] = uVar2;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9ee38e7a2605c2189bca2f6a86b879b1847c57abc3eaf5be6440814171cbc77f",
+      "entry": "0x0004874E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "3b0da5bf2d67039bf7c9b5f15e9ac12b01cbaa3f7766575f016d8b0c576f0b2e",
+      "body_size": 50,
+      "decompiled_c": "\nundefined4 FUN_0004876c(undefined4 param_1)\n\n{\n  uint uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = (uint)uRamfebee894 * 10 >> 7;\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,3000,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9c3c62e30a31490e47eabfbdc6de942caafaef3abeca805a74e01c9b19b457b4",
+      "entry": "0x0004876C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "6be74882c822840726897a64eba35c6283451afb7c35fc7f11ffc00c2df58135",
+      "body_size": 42,
+      "decompiled_c": "\nundefined4 FUN_0004879e(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebee890;\n  FUN_00069490(uRamfebee890,&LAB_00003200,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "222b2dd336814469672d31ca014fc9ce7a82f1f974ff9263c5b64b4803df4d33",
+      "entry": "0x0004879E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "58692c6423abb1d1ff002b5c05600302bb0a30ab184d02f7dc4a532e859cdec6",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_000487c8(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee811;\n  FUN_0006947e(uRamfebee811,1,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "691dd2f8a237b50723473b02078e06401efae8c43c5e213d64bbf998b584c445",
+      "entry": "0x000487C8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "baf34adea18543761bf622b06b5ab7f1a67cea9b912afd16f50efa0850dd20ac",
+      "body_size": 50,
+      "decompiled_c": "\nundefined4 FUN_000487ee(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe63b2 * 100 >> 8);\n  FUN_00069490((uint)uRamfebe63b2 * 100 >> 8,0x9c4,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "c0cd29481ce4af5f99ccedb95902a0d31ca15faf70e29520cfd96ad863299bbe",
+      "entry": "0x000487EE",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "8f7a840090d5692c939bfd8700a5616d43a567d786d6171a67655ab06492dd2d",
+      "body_size": 76,
+      "decompiled_c": "\nundefined4 FUN_00048820(undefined4 param_1)\n\n{\n  int iVar1;\n  int aiStack_c [2];\n  \n  if (iRamfebe6960 == -0x5aa5a55b) {\n    aiStack_c[0] = (sRamfebe6554 * 1000) / 0x100;\n    FUN_0006943a(aiStack_c[0],25000,0xffff9e58,aiStack_c);\n    iVar1 = (int)(short)aiStack_c[0];\n  }\n  else {\n    iVar1 = -0x8000;\n  }\n  FUN_0006385c(iVar1,param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "77f54d0fae87288c9be2a5557f622bb0c0d85564ed76a10e6a2e04548edfd57d",
+      "entry": "0x00048820",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "f4715f748a9d227208d3420230ff1db6bcd915131ba9907c34e7cf4bd3d54d6f",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_0004886c(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe6550 * 0x168) / 0x400);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "c1635a7a6dbfaa33d8120a99598f6a70f491534fad0a24475edc0bbb2758368c",
+      "entry": "0x0004886C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "2263c7e09a5c2727e2782f2a99599451ae9510287e87ef0575cfd792c75be621",
+      "body_size": 46,
+      "decompiled_c": "\nundefined4 FUN_000488a8(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = sRamfebe7a46;\n  FUN_00069420((int)sRamfebe7a46,0x7ff,0xfffff800,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "c0dddd2b8feaf4d0ed1c122cbcf897695b479466789c93f3fdb9c0d4d70b592f",
+      "entry": "0x000488A8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e2b2d6ea7aa4554d401f84bbb5b9b66ed1a3dd639c068156dac18c68b8b3e86c",
+      "body_size": 16,
+      "decompiled_c": "\nundefined4 FUN_000488d6(byte *param_1)\n\n{\n  *param_1 = bRamfebe7cdc & 0xf;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "68d04bbca46f4307d4260ea24344b4e6d6ce03733d764f198d71a1329dcba4b9",
+      "entry": "0x000488D6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "29b0e31d581c88e932ff352ba1be2c74fa8005dde4edc7bb52064e21bdb0ef86",
+      "body_size": 50,
+      "decompiled_c": "\nundefined4 FUN_000488e6(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe63b0 * 100 >> 8);\n  FUN_00069490((uint)uRamfebe63b0 * 100 >> 8,0x9c4,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "365ddb76fc890528af2b8e86c2a43dcd1710bb569c51380caedbfb88e646139c",
+      "entry": "0x000488E6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "0fde90b824f8e84a15e185e24a0f8b537789da04073a69f22f600a36a265fee7",
+      "body_size": 50,
+      "decompiled_c": "\nundefined4 FUN_00048918(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe63a6 * 100 >> 8);\n  FUN_00069490((uint)uRamfebe63a6 * 100 >> 8,0x9c4,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "678dd284aaadfc163e6599db063b3d81888ce0dcfee33758dec6bfd6167a7f92",
+      "entry": "0x00048918",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "d335ffabbdaf20737433a582ce50f226849105d0800dc7882479c4d9ddf99a46",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_0004894a(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe7ad6 * 10) / 0x80);\n  FUN_00069420((int)asStack_a[0],2000,0xfffffe0c,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "27d91b769cb56512d3fe1f8113bc2cc9063aa3bcc74060dff46c9f3fb43dd9f3",
+      "entry": "0x0004894A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "22e933fd609d3aa6a3304ce11a11e79991ab7e35b00f85791d880ae07011f232",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_00048986(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee829;\n  FUN_0006947e(uRamfebee829,2,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "1f85645a4ea7dc5abf9f126f20a3f2ba781d101dbf0d39304ef43d38371e4e0e",
+      "entry": "0x00048986",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "9f91e266879733bfedcb7da708f26c741a49062663501adb049580494fc5c5fc",
+      "body_size": 44,
+      "decompiled_c": "\nundefined4 FUN_000489ac(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = 0 < sRamfebe65fc;\n  FUN_0006947e(auStack_9[0],1,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "6731d15408558609ed937e74f77d0b59153945c19fedd9baa6fc08a5dca4bb77",
+      "entry": "0x000489AC",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_000489d8(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "3b9024a7bc2f200b96f8324f6ce2914cde5bc76bd09948a870873dd5d997e7d0",
+      "entry": "0x000489D8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_000489dc(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "f697db5b1ebb22e7673904d43ae9aed1e7fa726d8edc88ef5c1cbb3788d39362",
+      "entry": "0x000489DC",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "cd27d3b01a93116fc3e04d744b2af1ee83366ad638745dcab8e87ffe87d3bea9",
+      "body_size": 50,
+      "decompiled_c": "\nundefined4 FUN_000489e0(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe63aa * 100 >> 8);\n  FUN_00069490((uint)uRamfebe63aa * 100 >> 8,0x9c4,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "2c9244bd2bad48ec8b74c9181362973b7f44676e5a66c3eaab43ec97694e83f4",
+      "entry": "0x000489E0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "d63b7fde0fea7b9b712f2b64994c48c918e0db63716f28909b3dfecaba5000fe",
+      "body_size": 56,
+      "decompiled_c": "\nundefined4 FUN_00048a12(undefined4 param_1)\n\n{\n  int aiStack_c [2];\n  \n  aiStack_c[0] = (sRamfebe6396 * 1000) / 0x100;\n  FUN_0006943a(aiStack_c[0],25000,0xffff9e58,aiStack_c);\n  FUN_0006385c((int)(short)aiStack_c[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "3ba8041bc09664fd0af39c32c70849b3151f6617b3ab3fed1563d6c3d2101997",
+      "entry": "0x00048A12",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "f37c2db4e22fb6b4c65994be079adc848dec6b5405441f56c0b51bfdfc215239",
+      "body_size": 56,
+      "decompiled_c": "\nundefined4 FUN_00048a4a(undefined4 param_1)\n\n{\n  int aiStack_c [2];\n  \n  aiStack_c[0] = (sRamfebe6398 * 1000) / 0x100;\n  FUN_0006943a(aiStack_c[0],25000,0xffff9e58,aiStack_c);\n  FUN_0006385c((int)(short)aiStack_c[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "00f74c48241e16e5429541646479be524a8da50d3ea7a72cc83e54587ea7131d",
+      "entry": "0x00048A4A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "27d946fd635c173683d49f5ba995855b2fe60a2d214e4a8c07eef8312092d85d",
+      "body_size": 56,
+      "decompiled_c": "\nundefined4 FUN_00048a82(undefined4 param_1)\n\n{\n  int aiStack_c [2];\n  \n  aiStack_c[0] = (sRamfebe639a * 1000) / 0x100;\n  FUN_0006943a(aiStack_c[0],25000,0xffff9e58,aiStack_c);\n  FUN_0006385c((int)(short)aiStack_c[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "2a8c30ab8bcaca3b45c751141533e9faf667a882742f3a745734f11ea80f2a4d",
+      "entry": "0x00048A82",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "0671563c5e0685392cd7aadb7ddd8bdebe8366cf01b1a71c171bd575f6781943",
+      "body_size": 56,
+      "decompiled_c": "\nundefined4 FUN_00048aba(undefined4 param_1)\n\n{\n  int aiStack_c [2];\n  \n  aiStack_c[0] = (sRamfebe639c * 1000) / 0x100;\n  FUN_0006943a(aiStack_c[0],25000,0xffff9e58,aiStack_c);\n  FUN_0006385c((int)(short)aiStack_c[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "8b9c661999850286907827fdd64d083f3aac5f4fc0f71ed5aa38cc7f28f5eaf4",
+      "entry": "0x00048ABA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "6c9fd8657286e4df9977bb194d1c501b8cc501f39c1a53b7b81df8359a3e0971",
+      "body_size": 42,
+      "decompiled_c": "\nundefined4 FUN_00048af2(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebe655a;\n  FUN_00069490(uRamfebe655a,0xffff,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "a34700f0443ea1075a9367ca510b9b9648210cdfe90e39c1b0eac5e3b482c027",
+      "entry": "0x00048AF2",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "b7bc84bfd6f35b56255529da34811a48a415232514f21e1b9d5277032894a63a",
+      "body_size": 42,
+      "decompiled_c": "\nundefined4 FUN_00048b1c(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebe655c;\n  FUN_00069490(uRamfebe655c,0xffff,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "e19908377f36dace19cecf717df1c4aecd646bd3b4439a2dae7ec694299b421a",
+      "entry": "0x00048B1C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "49bda1b50cd7947c0f2c41968490d43d9acd6e0ce72fa04425a28aa0ad9ba96b",
+      "body_size": 42,
+      "decompiled_c": "\nundefined4 FUN_00048b46(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebe655e;\n  FUN_00069490(uRamfebe655e,0xffff,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "911dd799d9c6b77210314ef0363561d8f33e3f0c1479faac00fc5e2d487c0fa0",
+      "entry": "0x00048B46",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "5f344e136de9bf5a39773a9a51883b39e42a87ef6fff6ed57c82a95483754775",
+      "body_size": 42,
+      "decompiled_c": "\nundefined4 FUN_00048b70(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebe6560;\n  FUN_00069490(uRamfebe6560,0xffff,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "1de75e392e96fe8054b63c8d025ea86eb644a0e2bd5f9a2a3a1c60f288b16c1a",
+      "entry": "0x00048B70",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "744d8aecc6e1bedbf0d0955a5f562b3a6c6d82304b083133227e1e1bef23f34b",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00048b9a(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe6500 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "106f824a17040e9fa985395c852bd54b9e59fc5fa19506fefb9745cc93dd63c9",
+      "entry": "0x00048B9A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "daa5f38e4471e2ab4d540d38fd4897911c9173c87d8edb7d12fff0ab239b32f5",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00048bd6(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe6502 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "99c57412885813b401fa2b39388c7d5160076584ce2690f27ff2d5c67e51e315",
+      "entry": "0x00048BD6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "dfe9842fb6eb6e0d92af0de10e4be946cdaf9bab5d75473f40122c75873e075f",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00048c12(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe6504 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9b612ec36f7abbab65aca6545088654f97d0038284c481cccbe1545a6e23b1f7",
+      "entry": "0x00048C12",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "ed323679485780bcfc9677126efd86c83bf3e70f3d1478099a4e3c9de8e94a5a",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_00048c4e(undefined4 param_1)\n\n{\n  uint uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = (uint)uRamfebe6346 * 0x271 >> 0xb;\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,10000,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "bfb9828fde3386579e83df3653ec42745edd6a984617ecb83cfa86d19e56a6ce",
+      "entry": "0x00048C4E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "b024cc7093d7839321163c7c13733f0d051195cc3c59c1ca45406940dc6f4fe9",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_00048c84(undefined4 param_1)\n\n{\n  uint uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = (uint)uRamfebe6348 * 0x271 >> 0xb;\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,10000,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "ded0450d75280498823276cbf83b8a1eca58f362c8a7aa5a2e6ba7d968bd37ab",
+      "entry": "0x00048C84",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "dda5d488c63febcb1030c75015ec1a42779382c0d4ca081d012aba4f57b495cd",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_00048cba(undefined4 param_1)\n\n{\n  uint uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = (uint)uRamfebe634a * 0x271 >> 0xb;\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,10000,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "ea123f6abaef99e84c1687f24c75e251d308f26451e088dbfae9b004e97258d2",
+      "entry": "0x00048CBA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00048cf0(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "718f7e6c795d587c8ee999a7e9811314f215bd478395e0affa720d5747ba027f",
+      "entry": "0x00048CF0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00048cf4(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9f68495d5ae110b24bdbb00894370394b7aa5f1167af27187affa6d5e172b126",
+      "entry": "0x00048CF4",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00048cf8(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "330b2abbd554bc205975c34109d972d330b70333e76b350e0f3e35413495fa4a",
+      "entry": "0x00048CF8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "88c02309a38e5be2391ed6e3e39866de6e82526042fa21fec79fceebf215f5b3",
+      "body_size": 50,
+      "decompiled_c": "\nundefined4 FUN_00048cfc(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe63a6 * 100 >> 8);\n  FUN_00069490((uint)uRamfebe63a6 * 100 >> 8,0x9c4,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "928b7e929f2d5df4d197acb865b0ebc6ba7d569937c9f81f70c7c05f9a67931f",
+      "entry": "0x00048CFC",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "a625558966bbca6903d33b821932725a0022f1ef355100ea515f94724484d8fe",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00048d2e(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe6506 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "c4f4ec8435d1f3d58d271ce8f05db2d1357b53853720ea1cadcbb26f24e1bedd",
+      "entry": "0x00048D2E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "87d62e8362d8238e086c2f5bff3addf58c1e572896ed26501a068fb95c14afec",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00048d6a(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe6508 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "5d29b5271851873a04f916e2c59098a2898976776ffa5f3e9d1b9115e4ea86bb",
+      "entry": "0x00048D6A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "7755571a1575b2727815a8979ef4ea0ce86a3001f215ac795aacfad30e9c6312",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00048da6(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe650a * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "21d141861f23f09aaab0514e7eacdd43ad89c6f21c17bf579df3b6603b12eefe",
+      "entry": "0x00048DA6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "7c5d857046b848bc26d7c41385f09b2f0edd90c673da9317de848941d592a7d0",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_00048de2(undefined4 param_1)\n\n{\n  uint uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = (uint)uRamfebe634c * 0x271 >> 0xb;\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,10000,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "b861d086e2ae9719577339fffc96586c5af88db00fbb456ea694c8a47cc1dc7a",
+      "entry": "0x00048DE2",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "b86cff9251699b88004f420c14fc55026d776f9edda1109c38e36b3aed45f309",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_00048e18(undefined4 param_1)\n\n{\n  uint uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = (uint)uRamfebe634e * 0x271 >> 0xb;\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,10000,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "6966967365880a773c5b5cc9b3939c75e680ff2365c3f7096cb0f7affe13a5e5",
+      "entry": "0x00048E18",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "46d348dcf5e2ce959f19b4c72f67820013f8497321c08b270fd1c491b75f2bb0",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_00048e4e(undefined4 param_1)\n\n{\n  uint uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = (uint)uRamfebe6350 * 0x271 >> 0xb;\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,10000,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9392cb178de4b5ff8522e1ad2e2ebce4a75c0e4c26e37ed3092888fdfc578e38",
+      "entry": "0x00048E4E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00048e84(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "059b335fb3783919231d7fdb137ebfa09b3e97f0edb1ae9744d230f403ad20d5",
+      "entry": "0x00048E84",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00048e88(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "35e2cda3504d048d42bb67eb8cd6f1376a5376e245a8f8c4660b2ad746cae4f4",
+      "entry": "0x00048E88",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00048e8c(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "e0dbb8e4639a54817f50a05863cd740c95b4b9f8de05137fe06f7aeb866fed00",
+      "entry": "0x00048E8C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "412a18b97b7cf92f55f6cf0c23fa65cf0ef33275e01cb5ed8a107ccdbb06d78d",
+      "body_size": 50,
+      "decompiled_c": "\nundefined4 FUN_00048e90(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe63a8 * 100 >> 8);\n  FUN_00069490((uint)uRamfebe63a8 * 100 >> 8,0x9c4,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "746719f65fe225fe5f95d513a45e199120172cc26a6bb8e376e1762b2ef12495",
+      "entry": "0x00048E90",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00048ec2(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "b27313ce84fe06a1af218a93964754051afa7ebbdd3cb22095d4ea4408139606",
+      "entry": "0x00048EC2",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00048ec6(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "045c83327664497ac80b746fadcd5d0fb8a9fa0e08adc93dc08421424fbc0762",
+      "entry": "0x00048EC6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e99328d11b9b50d44c15f355f2a5346686e875e0eeed45117d604a677856cf42",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4 FUN_00048eca(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe64b6 * 500 >> 0x10);\n  FUN_00069490((uint)uRamfebe64b6 * 500 >> 0x10,500,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "a90ab2689cbd767f9bc23eea25855b0d8a0d60cfa42c023d98b152b1ecd3c785",
+      "entry": "0x00048ECA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "fd3fb02dc247553c62ea3a24488efbcf66b77b61dbee4c9b080813978f1e4ede",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4 FUN_00048efa(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe64b4 * 500 >> 0x10);\n  FUN_00069490((uint)uRamfebe64b4 * 500 >> 0x10,500,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "232b3ff11e9ad5a859f0c2d14f55d39bec3086cadee3633c8803263610927243",
+      "entry": "0x00048EFA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "ad4d3dc21d4533453fa1844909c951a4d17ae1fd3dd1ad86991ca2a87a96a55a",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4 FUN_00048f2a(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe64ba * 500 >> 0x10);\n  FUN_00069490((uint)uRamfebe64ba * 500 >> 0x10,500,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "04ca28de545cd96001f1bdeebc98bc8bb6f603f7c0611a2018aeba6ead4c391b",
+      "entry": "0x00048F2A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "6541c3d049f223f76ee02af3c560ddc5f790a7cd7bfde4fd8ce7d2c39b0a3b66",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4 FUN_00048f5a(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe64b8 * 500 >> 0x10);\n  FUN_00069490((uint)uRamfebe64b8 * 500 >> 0x10,500,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "62fa5f7e3a32410f201220f546b11c8da81e3d009947720cf775899287a3837a",
+      "entry": "0x00048F5A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "149bf933065bf2b107d61c5a00105ac7ca200bf37eeffea534fda84ff85a4b34",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4 FUN_00048f8a(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe64be * 500 >> 0x10);\n  FUN_00069490((uint)uRamfebe64be * 500 >> 0x10,500,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "504e289bc8ffe285f40108ddb8e8784ba02589cda9278e8b68ecab2c5d526acb",
+      "entry": "0x00048F8A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "5eb651d95c2af139dd7b57cf7bd34814deaeee93d06e77706de7367f73e1a6b8",
+      "body_size": 48,
+      "decompiled_c": "\nundefined4 FUN_00048fba(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebe64bc * 500 >> 0x10);\n  FUN_00069490((uint)uRamfebe64bc * 500 >> 0x10,500,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "5a45836fade6f9eba9e4a4bc99ceeb748071705c7f8e23c9fcd71071e5a9ccd0",
+      "entry": "0x00048FBA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00048fea(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "74c4f22df0e2f4c2516343218a8ef89903ba2ef8088158d18a677d8dabb9d6f9",
+      "entry": "0x00048FEA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "42711be1821bff16579a0d4fa22e913ee2355084b799d1e02f95c927ebe22098",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00048fee(undefined4 param_1)\n\n{\n  int aiStack_c [2];\n  \n  aiStack_c[0] = (iRamfebee938 * 4000) / 0x1000;\n  FUN_0006943a(aiStack_c[0],0x1ffff,0xfffe0000,aiStack_c);\n  FUN_00063844(aiStack_c[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "98f207b77f3c07658de8dee5a0b228cd44a855449a75b7f9687f57667d5e9ddc",
+      "entry": "0x00048FEE",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_0004902a(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "605900f7d3d1687722f56424869e7701868837934443b58b414389d17ff3fad1",
+      "entry": "0x0004902A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "a95cc2857dd7c256ecbdcdec2e76b1aeb5b8e606d05489a925144f8ad325f2ed",
+      "body_size": 210,
+      "decompiled_c": "\nundefined4 FUN_0004902e(byte *param_1)\n\n{\n  byte bVar1;\n  undefined4 uStack_18;\n  undefined4 uStack_14;\n  undefined4 auStack_10 [2];\n  \n  uStack_14 = uRamfebee940;\n  uStack_18 = uRamfebee93c;\n  auStack_10[0] = uRamfebee944;\n  bVar1 = bRamfebee880 | cRamfebee87f << 4;\n  if (bVar1 == 0x33) {\n    func_0x000638ee(uRamfebee93c,10,0x10,&uStack_18);\n    func_0x000638ee(uStack_14,10,0x10,&uStack_14);\n    func_0x000638ee(auStack_10[0],10,0x10,auStack_10);\n    FUN_0006943a(uStack_18,0x7fff,0xffff8000,&uStack_18);\n    FUN_0006943a(uStack_14,0x7fff,0xffff8000,&uStack_14);\n    FUN_0006943a(auStack_10[0],0x7fff,0xffff8000,auStack_10);\n  }\n  else {\n    uStack_18 = 0x7fff;\n    uStack_14 = 0x7fff;\n    auStack_10[0] = 0x7fff;\n  }\n  *param_1 = bVar1;\n  FUN_0006385c((int)(short)uStack_18,param_1 + 1);\n  FUN_0006385c((int)(short)uStack_14,param_1 + 3);\n  FUN_0006385c((int)(short)auStack_10[0],param_1 + 5);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "b228d4939c1607cc3d71c66c7841c17f37b7158cafa3947a16f8e3dba24d6e9b",
+      "entry": "0x0004902E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "a3498a0a6afc589d7a994297d5aab0a2029cbeaec5934a30357b95ebb4e897e9",
+      "body_size": 46,
+      "decompiled_c": "\nundefined4 FUN_00049100(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = FUN_0004ed9e(0x11);\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9a0f2f51f8d56363c2efcf8d6f69917e3afd1c5ab2f33635c8d84f4d2b40527e",
+      "entry": "0x00049100",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "2601d23fb0f82b898f630a6e7888a2b0615d1946358f6e62cda8081029a5e632",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_0004912e(undefined1 *param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebee8de;\n  FUN_00069490(uRamfebee8de,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "806590a32941d75572a5558992340de5ef28cd6f20f8ac115f3d4ce7239ef10b",
+      "entry": "0x0004912E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049156(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9580c08a52dd3b3a3bf9197e3b85d220cf501bee9edb3f072904986fd409a406",
+      "entry": "0x00049156",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_0004915a(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "52606c21b303a557f2284cf21048e767543f290fab53d9649d401c9b252126f8",
+      "entry": "0x0004915A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "6328c07d5936c0345c8d8e903e4a72f4c233ca9e47fa5dd77acf6ef8bf52fdb6",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_0004915e(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe6592 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "8a6bd94fc021aebc7487d8af5c9242e3dd834110267bd8f9c3de7d6f36d26891",
+      "entry": "0x0004915E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "f8a72da866c623b1604c63392029e40b012c2886c935aeced8ae141e141a84c0",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_0004919a(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe65a4 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9e7c9094caf909291b92a72b485d47b7526a05df7382b07e2175c8f13d80bb4a",
+      "entry": "0x0004919A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "92ba8148e03f68f7ee96ec8985d13d922160253b4b866f37430ba89c8bc6d582",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_000491d6(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe6590 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "6bf2d03ea5569184ec9e8f9829228aba11fe4fecc4cd95fe0ef29ddd554dd0f8",
+      "entry": "0x000491D6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "3884e18888ce38eeb469f5768ac7c1a327e5fdb1069b88c222d89e0d54bf78ca",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00049212(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe65a6 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9baba7f8c49f1c89123d92860e22daa89006b1016d795662ef9561979cdf5f98",
+      "entry": "0x00049212",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "ffc3e981689f83aa8f1bd5c8d186df704fcd7bdfffc558bd9f60186bd2cbc559",
+      "body_size": 74,
+      "decompiled_c": "\nundefined4 FUN_0004924e(undefined4 param_1)\n\n{\n  uint uVar1;\n  uint uVar2;\n  undefined2 auStack_e [3];\n  \n  uVar2 = (uint)uRamfebe6530;\n  uVar1 = FUN_0004ce56(0x52);\n  if ((uVar1 & 1) == 0) {\n    uVar1 = uVar2 * 0x465 >> 0xb;\n    auStack_e[0] = (undefined2)uVar1;\n    FUN_00069490(uVar1,36000,auStack_e);\n  }\n  else {\n    auStack_e[0] = 0xffff;\n  }\n  FUN_00063824(auStack_e[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "c230f027cea8ac987d1d5d9fc8f6f2115a0883e3b16e8df286b0ec54f7ce7fe8",
+      "entry": "0x0004924E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "02dbcf28ee038012522dbe52e3f596cab752226b85a078f61897bef4de1b771b",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4 FUN_00049298(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe65fc * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "02168bc2de256e920211948d9a0c03267716f2f828d5f788d4fd8fd981aaf7fa",
+      "entry": "0x00049298",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "0211769db35eee2e91fbbcf11d89a35b326a3417086eaa4b7f48968fc0037ccb",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_000492d2(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebe7a44;\n  FUN_0006947e(uRamfebe7a44,3,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "092b902f040dfb057095d9c0f095776a0538c6f1824995b8bc584d45d495e006",
+      "entry": "0x000492D2",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "1ee51f7cb18472e712898d0bb44bed37316def0b7d6505fde6acf00803d3d204",
+      "body_size": 18,
+      "decompiled_c": "\nundefined4 FUN_000492f8(byte *param_1)\n\n{\n  byte bVar1;\n  \n  bVar1 = bRamfebe7cf5;\n  if (4 < bRamfebe7cf5) {\n    bVar1 = 1;\n  }\n  *param_1 = bVar1;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "5a1de6076941016e7222d59fd59c42c8aa82d8730866083f4bc097d3e86cc936",
+      "entry": "0x000492F8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "8576ed55d8d7b39b25e591bef65b1b26c39cc7d48b177268cd0f01227257f081",
+      "body_size": 52,
+      "decompiled_c": "\nundefined4 FUN_0004930a(undefined1 *param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = sRamfebe7d4c / 100;\n  FUN_00069420((int)asStack_a[0],0xff,0,asStack_a);\n  *param_1 = (char)asStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "7b3bd1b9b1e85b1eec52448cc6658fe829f7f8cc79b98288bc51a068e29f1556",
+      "entry": "0x0004930A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "03f87064dfc0a60c17ae6b88430176a918beda18d8a463cd03e607a50b0f36ab",
+      "body_size": 52,
+      "decompiled_c": "\nundefined4 FUN_0004933e(undefined1 *param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = sRamfebe7d4e / 100;\n  FUN_00069420((int)asStack_a[0],0xff,0,asStack_a);\n  *param_1 = (char)asStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "7407d0f5aeb1a98533aeab06a488994195f9a85a4362e7a552dd006ca3d745da",
+      "entry": "0x0004933E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "26f051c89edf38016385492db09b63519ceae24a55ed8c7826206993e27adf2a",
+      "body_size": 42,
+      "decompiled_c": "\nundefined4 FUN_00049372(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebe7d82;\n  FUN_00069490(uRamfebe7d82,30000,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9aad5cffd2907990d4af21c1ae4a2f04528d66bcb4faf546a4180a8a406c7f7c",
+      "entry": "0x00049372",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "7e23f988a00c0226b50b1460d76202e2f7643745944b2ce54b86696981d56906",
+      "body_size": 46,
+      "decompiled_c": "\nundefined4 FUN_0004939c(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = sRamfebe7d36;\n  FUN_00069420((int)sRamfebe7d36,0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "36f85daea8949d6045d8974ae4b4357db39b697af523ae50e8e32b8c56c6f4e6",
+      "entry": "0x0004939C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "a1f025dc8413c52a0296f6a88d7a50c5ba304fe110b94fa8bdfa214b6da466d0",
+      "body_size": 44,
+      "decompiled_c": "\nundefined4 FUN_000493ca(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = FUN_0004ed9e(0);\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "f24a5b8ca946a619dc39bb6c584daea452a0aa5a05df8057392f7034c5a8f026",
+      "entry": "0x000493CA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "53cb772a5eae4c9cb642a0f09b97cb02d22a8016e7332198aa59b6dfe59a5ef9",
+      "body_size": 44,
+      "decompiled_c": "\nundefined4 FUN_000493f6(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = FUN_0004ed9e(5);\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "e1033f017c9c8b2987213cdc86b68e19cb938c6ce6189de12c717d92d27e77ab",
+      "entry": "0x000493F6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "b662a7ebae213f68a4d7ffc5b3b553e21251758414ed1accac066f3c30af27a4",
+      "body_size": 44,
+      "decompiled_c": "\nundefined4 FUN_00049422(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = FUN_0004ed9e(6);\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "cf5c8cff648d9259ccdad87b83b4377f05c34f5bb618314c24f4f26035623d5a",
+      "entry": "0x00049422",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "a5e851fe6a1bd7a955b9a90817592bef239775fdfcf139e523379c3cf7fa8ad2",
+      "body_size": 44,
+      "decompiled_c": "\nundefined4 FUN_0004944e(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = FUN_0004ed9e(7);\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "f5429dbd6ca41bbecda28aa8ae9f886682b8e3d6684b981788b80a91b3d0d176",
+      "entry": "0x0004944E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "ca323aa87c4ee3f50b9546c38d0e4c2b53438991d99d1a6e2048e830a270e71f",
+      "body_size": 46,
+      "decompiled_c": "\nundefined4 FUN_0004947a(undefined1 *param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (ushort)bRamfebe82fd + (ushort)bRamfebe82fc;\n  FUN_00069490(asStack_a[0],0xff,asStack_a);\n  *param_1 = (char)asStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "faee8f524126a01a3807527ec7d46b11430068e17cfd479a441f5df08e97ae48",
+      "entry": "0x0004947A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "f90cb815889cc66ea46d7b326cbbbef01213bafb0023b666920f3f657a9d9aae",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_000494a8(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebe82fe;\n  FUN_0006947e(uRamfebe82fe,0xff,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "eb7b4a7eba92f2353772a3e0c53c53f4d950c840fe08367f5ba574811a9983e3",
+      "entry": "0x000494A8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "344754f68fd3454edd8249d7005d732b0f5c5be8b37cda8361e8410b85c2c6c2",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_000494d0(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebe82ff;\n  FUN_0006947e(uRamfebe82ff,0xff,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "2cb83b1568efd9378e2ae93c4c075fb3562ccbc399863fc6d007063b338e43fd",
+      "entry": "0x000494D0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e5c07751881c5864d0c4dc19d27962a516392ed21a2ce98f9e8881bebf971bc0",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_000494f8(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebe8300;\n  FUN_0006947e(uRamfebe8300,0xff,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "fa7e89a7a6facd8fe7274ba9088bc016ac3e05b43dd7ac777c60aac5f5236a30",
+      "entry": "0x000494F8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "799334e51c2f75161f4f5b49943d0819c2560955a21330f53a5bd2696c5f38f2",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_00049520(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebe8301;\n  FUN_0006947e(uRamfebe8301,0xff,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "818949e5a60a101a44ccd9d96097c4b639593e6456d059f9a57418f43329e67c",
+      "entry": "0x00049520",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "6e7318ec0e4837568127e6ebc6a5c2973b9127f7fd140c584971c2569c076613",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_00049548(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebe8303;\n  FUN_0006947e(uRamfebe8303,0xff,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "1e058b893f10a039b0dadc8f175dc617650fd22c21dcb66ee7c9df6946f1da6d",
+      "entry": "0x00049548",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049570(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "d298b67159e7d6450b03c65187f8bc35fea222cd7d8fc8af771a08b4ce293d38",
+      "entry": "0x00049570",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "ba83543693dace4ad4f43dafaf2fbdaef640abd0748cef99c5b8fbbe210e2afe",
+      "body_size": 44,
+      "decompiled_c": "\nundefined4 FUN_00049574(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = FUN_0004ed9e(0xe);\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "196d93041ff69480033535145c1df1e6b80c130d20dca9fa2fa73345004b23b0",
+      "entry": "0x00049574",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "b03489f33a061280583ba31f970c6f34f48c7ffb223f5dd120a00f7c1dc3c9dc",
+      "body_size": 72,
+      "decompiled_c": "\nundefined4 FUN_000495a0(undefined4 param_1)\n\n{\n  int aiStack_c [2];\n  \n  aiStack_c[0] = (((int)((int)sRamfebe65f2 * (uint)uRamfebee8a6) / 0x2000) * 100) / 0x100;\n  FUN_0006943a(aiStack_c[0],20000,&DAT_ffffb1e0,aiStack_c);\n  FUN_0006385c((int)(short)aiStack_c[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9f2d404f6781351346e4f58ea7d3edadde51d28c353e79c7550bdf5addda84ce",
+      "entry": "0x000495A0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "238be4223443aa79878cbcf0c96b9cfdfcec33afbc4a9d5309e1c455e454b708",
+      "body_size": 42,
+      "decompiled_c": "\nundefined4 FUN_000495e8(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebee8cc;\n  FUN_00069490(uRamfebee8cc,0xffff,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "55167eae1760a8d715f8520ef53afa55bd9d42bb2c62917915063b35fc1b4c26",
+      "entry": "0x000495E8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "63808ba2120b94756c653d4fd7a8e25cc306b1083c7a7872999453a91b2294cd",
+      "body_size": 34,
+      "decompiled_c": "\nundefined4 FUN_00049612(int param_1)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  FUN_0006380c(uRamfebe7f50,param_1);\n  FUN_0006380c(*(undefined4 *)(iVar1 + -0x38ac),param_1 + 4);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "6eb02e7b640e91ffe702a6802016cb90c4248d1d15738ae4914a985865a79e59",
+      "entry": "0x00049612",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "9d2de38ae2dd00d1113867c45b506f6d2bd9f89b417bd53b4d43202e333ad6a3",
+      "body_size": 78,
+      "decompiled_c": "\nundefined4 FUN_00049634(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  if (cRamfebe6d64 == '\\0') {\n    asStack_a[0] = 0x7fff;\n  }\n  else {\n    asStack_a[0] = (short)((sRamfebe6d72 * 10) / 0x80);\n    FUN_00069420((int)asStack_a[0],2000,0xfffffe0c,asStack_a);\n  }\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "b05bec12f2d0ab43d928ce4de4e1d364ae6936e4eb27e6ecd1680cd48b84d38e",
+      "entry": "0x00049634",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "452840773d189bc6460c55331f68a7ee4877696a42712c8702872b57943bf3d6",
+      "body_size": 78,
+      "decompiled_c": "\nundefined4 FUN_00049682(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  if (cRamfebe6d65 == '\\0') {\n    asStack_a[0] = 0x7fff;\n  }\n  else {\n    asStack_a[0] = (short)((sRamfebe6d74 * 10) / 0x80);\n    FUN_00069420((int)asStack_a[0],2000,0xfffffe0c,asStack_a);\n  }\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "4029b3d5e6418a00b53b117746592c6854f30258b94ee43e8cdd2c0309928171",
+      "entry": "0x00049682",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "287be04b5934058de77e8e4cb1d6feeac666f3de0e74c7b706150a56bc8985f9",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_000496d0(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebe6d64;\n  FUN_0006947e(uRamfebe6d64,0xff,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "af0a4d36753fe105f93d2e11fc91e2cdc6c9c01bbb66816889b210c06ddc5b7a",
+      "entry": "0x000496D0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "b15bae6bd8ff5ea179bfb832d2c5bf3d33f533d8b51e34318809224b6ca73337",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_000496f8(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebe6d65;\n  FUN_0006947e(uRamfebe6d65,0xff,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "c79761683c81e84e628297e728f7ccee3bbc12ad49d8e13cd05272a1b94d8b94",
+      "entry": "0x000496F8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "585909ffd67c499d39af00c5f77be35cc1b796518c8d80d4c4e90c7069029c93",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_00049720(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee840;\n  FUN_0006947e(uRamfebee840,1,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "2391f977e2dc1bbc1bdb5e4ad5672dec4882c5ea280134187220035513da0786",
+      "entry": "0x00049720",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "946898e1fdf1e721df3d4fa1d1250ded2f9328091c967648a72e499167616338",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00049746(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebee8c6 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "3e967812353e25a0493eee977b08f148f8c38ae6ebadc79cf15346856bf22a2e",
+      "entry": "0x00049746",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "71c0feb30ed65af1f90ae2dcb1baf2633c7634ba8a84e869eb44783447e86419",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_00049782(undefined1 *param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebee8c4;\n  FUN_00069490(uRamfebee8c4,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "e800db9399673d45a8e49e66b2281fdc8b1a7095dfc650be030e084955eea5f5",
+      "entry": "0x00049782",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "b3e7f3ff6faa74a7210207f8f985a72001b769e0938bf8ec915c7e6f45d84a47",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_000497aa(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee842;\n  FUN_0006947e(uRamfebee842,1,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "fd2a6989a36352d9fd2b641a785006578e3b7baa914390485c14374358d7af57",
+      "entry": "0x000497AA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "818d196ddf6402ab80407cd6c03c3605339fde8c29af650f9ba41938c4522a68",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_000497d0(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebee8c2 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "41450d05cbed38c90459db4d450e9ab1775b76bc879a5fe5f0265971f7ca2193",
+      "entry": "0x000497D0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "f266b2bcca170db5515773ecc7a478c5648c3687613d3bd28579458cbc335c60",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_0004980c(undefined1 *param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebee8c8;\n  FUN_00069490(uRamfebee8c8,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "a8a30759b492d46afb3f4937c2db179b47f345cdc2934b39c5990a18f4756c0b",
+      "entry": "0x0004980C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "48aff7c34a800a9f13fe6a4a82dbf9bf07aae9c639530601dca8fab7c2d496e1",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_00049834(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee82d;\n  FUN_0006947e(uRamfebee82d,1,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "70b264f1bcdd4277fa266636e4cb911667557f8ad46865bebcb5df995e05dbec",
+      "entry": "0x00049834",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "b4724ef8ae1283395540edd5f78653369372cf820b574a75b17f2dfff4424c0a",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_0004985a(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebee8b6 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "51bbe1ae1eb49857e10a6dd4a9aac7d66e9eb33c2d1f2de6899e1f4218caa3f1",
+      "entry": "0x0004985A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "277aecd25d2baec4dcebd11d769f9260216d0a24f204c201a51c3e142b209d55",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_00049896(undefined1 *param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebee8b8;\n  FUN_00069490(uRamfebee8b8,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "7fe3ef642022206605ebda05fa90ce8e446bf56c4f996e1a47d2df0d559211a5",
+      "entry": "0x00049896",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "353b45ca1d3f894f94f06cddabb11f711b2414327fdb57dd1e798d43877bef50",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_000498be(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee831;\n  FUN_0006947e(uRamfebee831,1,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "d75db7912a898afbcacd79dd566ca8bcb1fd6f0e7a46e580fc6b6257a5f75f4d",
+      "entry": "0x000498BE",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "933078af0137df875b296281ebccff944bc61803541538261fdc636c844f93ed",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_000498e4(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebee8ba * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "74cbd58c3f9758d91218e14f392136408ef538fda37fa1692065a56f304912f6",
+      "entry": "0x000498E4",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "4c89568e39ef9cefd1029861e2703390174d4fea648fdae3201712d31eec0b04",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_00049920(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee83e;\n  FUN_0006947e(uRamfebee83e,1,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "13fd1f5fa197056c41a6689b89b8db18c2b85b02ba42cfcb7a489ad0713b9010",
+      "entry": "0x00049920",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "6edd1061b6b68d6a6c9a8aab4440a2cc17ccbc8af38ea9d93ae3adeb83052a81",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00049946(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebee8c2 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "e54e1505f1de6c6dcf2a978d11c93881293bb7f258acc293515af5e2c052e212",
+      "entry": "0x00049946",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "69bb0673490e2ef193bbbe06f09774ef042de2a6e13479f94dd5ec4ddb3659fa",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_00049982(undefined1 *param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebee8be;\n  FUN_00069490(uRamfebee8be,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "6be38ea91eb2f7937342e7a25692594b03f7f4da0344a20fd82da4e0f00043a7",
+      "entry": "0x00049982",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "f80abe375a71940fafe0fc73b3d6b80e8c37c45f4cd900c3a71e8a7dc5b8ff02",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_000499aa(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee83f;\n  FUN_0006947e(uRamfebee83f,1,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "8174e6eed5b3c888e43382d0c34af5f75047564977e22bbdcef7fd0cd5e964ea",
+      "entry": "0x000499AA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "c3cbbf6400753ce9d53058cea2557b6ecbb49d3cdeb7890fc9170196f93e2319",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_000499d0(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebee8c2 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "2d681b525bdd0817f0559e5f483fe7f68fe1378faf77db43ea9bdfb797d30126",
+      "entry": "0x000499D0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "4ca7cdca22646eaeed1386190d525c44cfefbf928faaf9441f70becc912dbad9",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_00049a0c(undefined1 *param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebee8c0;\n  FUN_00069490(uRamfebee8c0,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "dcaf19897c07b533ea06d4f1f43452c0f655071d2564d08b0071586bcb4128b9",
+      "entry": "0x00049A0C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "ebc691ab8cdaec3a2669ea975fd899d67d3d7adb3843f0bb6af422f7dd1af4f6",
+      "body_size": 38,
+      "decompiled_c": "\nundefined4 FUN_00049a34(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee85f;\n  FUN_0006947e(uRamfebee85f,0xf,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "86a8bc6a3f7ade30239a706299c495246a1a5a391ada603fc195a3c8bcd9fa48",
+      "entry": "0x00049A34",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "50529a6d04dc70211629f420c49cb5e8701460c12d602331b83aade66e3dba11",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_00049a5a(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebee8da * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],0x7fff,0xffff8000,asStack_a);\n  FUN_0006385c((int)asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "a83a4009236af68205c321745f5bb687ffba72327cc96d36d23cca189a332e9f",
+      "entry": "0x00049A5A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049a96(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "188cee080114ae94f33a87b4c55bea042eaa801953ec0df3cb774ea26813c540",
+      "entry": "0x00049A96",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "c0ebd209b535b52b77dc915d08533a3bf0f9132de33eb29535b92c9b9bcae104",
+      "body_size": 44,
+      "decompiled_c": "\nundefined4 FUN_00049a9a(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = FUN_0004ed9e(2);\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "e645bde2bbbbd1ca3c9c0f02ea3287749c7fa65dcc15a8438a1d1bd3c4bcc162",
+      "entry": "0x00049A9A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "2e63ce5bf2e9efeae9702bcd92e5a0be8951c7b51d0f6bdf73b79733e8fbd5a1",
+      "body_size": 44,
+      "decompiled_c": "\nundefined4 FUN_00049ac6(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = FUN_0004ed9e(3);\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "1214d1b0298a95a05d74fdce671addf0e51986585ada14246be58592f912e6fc",
+      "entry": "0x00049AC6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "3d89c9a1dcb5382a51f284ef78dd7e5e15c75955807bddf48ec92b7334789cf3",
+      "body_size": 44,
+      "decompiled_c": "\nundefined4 FUN_00049af2(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined2 auStack_a [3];\n  \n  uVar1 = FUN_0004ed9e(0xd);\n  auStack_a[0] = (undefined2)uVar1;\n  FUN_00069490(uVar1,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "e870cf67889a01d1d13e7c87dc44a8f65aa4c3a800d5abfdc6f49264dbea8da3",
+      "entry": "0x00049AF2",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "3249bc68b461f15d3e756451405805360925060bf3bf210f3752d82f6a94d608",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_00049b1e(undefined1 *param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebe78dc;\n  FUN_00069490(uRamfebe78dc,0xff,auStack_a);\n  *param_1 = (char)auStack_a[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "7ac9f8b9c580d83325ce35cf6dbbee746036f74eb6b5bddf275eeb3448c9de97",
+      "entry": "0x00049B1E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "c78461a2a3923e81dbfcc0e7e910c196aca18b3fd6773a654ee3192cf633f8a8",
+      "body_size": 104,
+      "decompiled_c": "\nundefined4 FUN_00049b46(int param_1)\n\n{\n  undefined1 uStack_f;\n  undefined2 uStack_e;\n  undefined4 auStack_c [2];\n  \n  auStack_c[0] = uRamfebe78e4;\n  uStack_e = uRamfebe78e0;\n  uStack_f = uRamfebe78d9;\n  FUN_00069490(uRamfebe78e0,0xfffe,&uStack_e);\n  func_0x000694a2(auStack_c[0],0xfffffffe,auStack_c);\n  FUN_0006947e(uStack_f,1,&uStack_f);\n  FUN_00063824(uStack_e,param_1);\n  FUN_0006380c(auStack_c[0],param_1 + 2);\n  *(undefined1 *)(param_1 + 6) = uStack_f;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "a9f38f2ce661b3fc1988753ead8ce02212e6159138ce7f16c27e65f3fd242424",
+      "entry": "0x00049B46",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049bae(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "f93b001482f3c2467412c07beffaa256befc2e96a65fd3d33f69f920a67bfb1f",
+      "entry": "0x00049BAE",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049bb2(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "4ce6cebedba93d5277d86b4aaca83c6cd5a061266edd7a1662dea60ae34fccf5",
+      "entry": "0x00049BB2",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049bb6(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "5857910fbd6e07edb1a2fc3fd361561c9f80c94d1b0268cc388f38dd85b5a431",
+      "entry": "0x00049BB6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049bba(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "ccfdc880b029760c80165a8ba2409ee433f432df1fb6b21db28e5296946e089d",
+      "entry": "0x00049BBA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049bbe(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "eb7167c6d0a44318554e1ea6ed39ce29444b85801506090f92473af7f3a9b187",
+      "entry": "0x00049BBE",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049bc2(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "718f380fda5fef2db67eb20d1a0d6b0efb2308864ae426aa2baf90bfaa132556",
+      "entry": "0x00049BC2",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049bc6(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "910e694df8df73b73b9cbb18ba7ee547277427d14b92ee54c5b7c0e7dc86b309",
+      "entry": "0x00049BC6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_00049bca(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "f5c0f1595a7569f189f075cc08705c9ac091de900a3821c20ffb979f498e1356",
+      "entry": "0x00049BCA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "1f6504692d6add1b367f63526bb85239af861c6666e457d56f3f09b031578c5c",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_00049bce(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee816;\n  FUN_0006947e(uRamfebee816,0xff,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "7fd7609af4dfcd3277c9175d1c36f9a9722de3594970f2633f638321ab6c1325",
+      "entry": "0x00049BCE",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "02aea72da43bb5811b254a36e3d8181d483de59862af93b14413df9cd89426c8",
+      "body_size": 102,
+      "decompiled_c": "\nundefined4 FUN_00049bf6(int param_1)\n\n{\n  undefined1 uStack_f;\n  undefined2 uStack_e;\n  undefined4 auStack_c [2];\n  \n  auStack_c[0] = uRamfebee914;\n  uStack_e = uRamfebee898;\n  uStack_f = uRamfebee818;\n  FUN_00069490(uRamfebee898,0xfffe,&uStack_e);\n  func_0x000694a2(auStack_c[0],0xfffffffe,auStack_c);\n  FUN_0006947e(uStack_f,1,&uStack_f);\n  FUN_00063824(uStack_e,param_1);\n  FUN_0006380c(auStack_c[0],param_1 + 2);\n  *(undefined1 *)(param_1 + 6) = uStack_f;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "b73a4278456227d01524acadd9f72ddd9e06a2c36145ff38e422a350300a8925",
+      "entry": "0x00049BF6",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "1863f8ab41fb9400771d38a83876fa2680733e8aac51fdd2d0542076ae98b1ba",
+      "body_size": 42,
+      "decompiled_c": "\nundefined4 FUN_00049c5c(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebee8a0;\n  FUN_00069490(uRamfebee8a0,0xffff,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "ada6f8e8e46faaaccc34ef79736ef0dac6030752f8dc02edbd568903eeb026c4",
+      "entry": "0x00049C5C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "1d58b61daa643dda85a78de3a1506d34be630a0b12c58091f939d5365818a0a3",
+      "body_size": 50,
+      "decompiled_c": "\nundefined4 FUN_00049c86(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebee89c * 100 >> 8);\n  FUN_00069490((uint)uRamfebee89c * 100 >> 8,0x9c4,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "1e8ccb156c256ddd4539da88c26df3d406e2cf0a8f76cf41806951220bef3e00",
+      "entry": "0x00049C86",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "6d2ddb341d7059bddd07063940abb772809cdf86feafea0f45a78879912acae6",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_00049cb8(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee817;\n  FUN_0006947e(uRamfebee817,0xff,auStack_9);\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "e1b3ac5b2f41e258fd6233c5b542cc1dea7986ed6ecf0e3d407ca680d2422d40",
+      "entry": "0x00049CB8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "7a680b25c2383ee4243c5cf2022a59774af7f13bab15b342920eff1d14ca8990",
+      "body_size": 102,
+      "decompiled_c": "\nundefined4 FUN_00049ce0(int param_1)\n\n{\n  undefined1 uStack_f;\n  undefined2 uStack_e;\n  undefined4 auStack_c [2];\n  \n  auStack_c[0] = uRamfebee918;\n  uStack_e = uRamfebee89a;\n  uStack_f = uRamfebee819;\n  FUN_00069490(uRamfebee89a,0xfffe,&uStack_e);\n  func_0x000694a2(auStack_c[0],0xfffffffe,auStack_c);\n  FUN_0006947e(uStack_f,1,&uStack_f);\n  FUN_00063824(uStack_e,param_1);\n  FUN_0006380c(auStack_c[0],param_1 + 2);\n  *(undefined1 *)(param_1 + 6) = uStack_f;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "51dcda9d555f3abe9e5132c0c2bcbc69b9bd877361d349f5e3c447cc363a2d09",
+      "entry": "0x00049CE0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "14463beeba5a1d924ef8c67e784ea65be7c1fd28ede1dfb80662fbac5da1c39b",
+      "body_size": 42,
+      "decompiled_c": "\nundefined4 FUN_00049d46(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = uRamfebee8a2;\n  FUN_00069490(uRamfebee8a2,0xffff,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "8f7f2968f21fadfaeafeadae388317a3beca0cc666ed9613ff96f1f89c91ab0a",
+      "entry": "0x00049D46",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "7f804b49a750b0aa18993201d96831b72dac14c924e2f78141bb84768abd009d",
+      "body_size": 50,
+      "decompiled_c": "\nundefined4 FUN_00049d70(undefined4 param_1)\n\n{\n  undefined2 auStack_a [3];\n  \n  auStack_a[0] = (undefined2)((uint)uRamfebee89e * 100 >> 8);\n  FUN_00069490((uint)uRamfebee89e * 100 >> 8,0x9c4,auStack_a);\n  FUN_00063824(auStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "c5b10001e9076a6a11baf78bfc983cc15b6d86333f71b6633c66b49fcf4a8a54",
+      "entry": "0x00049D70",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "f0b70e4856940ee5a9545575b045600326c48b4584534949c2d2413142487ba0",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4 FUN_00049da2(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe6d08 * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],25000,0,asStack_a);\n  FUN_00063824(asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "373ac43bb06a02cb3f2ef31ce8cdd2d152a82a98d0da9660058847bc431e37cf",
+      "entry": "0x00049DA2",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "63fc3451e6cc5f486e37bf6d803f2bbf2d265c01b0effea17cecd7f140294585",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4 FUN_00049ddc(undefined4 param_1)\n\n{\n  short asStack_a [3];\n  \n  asStack_a[0] = (short)((sRamfebe6d0a * 100) / 0x80);\n  FUN_00069420((int)asStack_a[0],25000,0,asStack_a);\n  FUN_00063824(asStack_a[0],param_1);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "7bbb33877485b289a63c8f7c56b482bc0030ffd1b5131e7d06a672f809cc008e",
+      "entry": "0x00049DDC",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e4b0423026368481564ae50d024348e82cd0467a1500f0e42b4e32635b6f5f36",
+      "body_size": 16,
+      "decompiled_c": "\nundefined4 FUN_00049e16(undefined4 param_1,undefined2 param_2)\n\n{\n  FUN_0004d044(param_1,param_2);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "a62b398542ff43e308de37bc22cf7209ecb4bdfad10445a9c1aaa133bfb9afbd",
+      "entry": "0x00049E16",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "297867412f98915495fc1b2fa6b9dff2a50bd7ac9d1d10c108e1bab525babbb0",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4 FUN_00049e26(char *param_1)\n\n{\n  *param_1 = s_APP_INFO_AREA_PVCGHF0E__00020800[0x10];\n  param_1[1] = s_APP_INFO_AREA_PVCGHF0E__00020800[0x11];\n  param_1[2] = s_APP_INFO_AREA_PVCGHF0E__00020800[0x12];\n  param_1[3] = s_APP_INFO_AREA_PVCGHF0E__00020800[0x13];\n  param_1[4] = s_APP_INFO_AREA_PVCGHF0E__00020800[0x14];\n  param_1[5] = s_APP_INFO_AREA_PVCGHF0E__00020800[0x15];\n  param_1[6] = s_APP_INFO_AREA_PVCGHF0E__00020800[0x16];\n  param_1[7] = s_APP_INFO_AREA_PVCGHF0E__00020800[0x17];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "b9513deeead0c992275c66e660d6f2033c5dc5af012018e1dc743b0d7f0f77e5",
+      "entry": "0x00049E26",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "9b33b662164a803e3e9ee9bb6e62db72c34f6d150225323ea7cbc205bef0f0d1",
+      "body_size": 12,
+      "decompiled_c": "\nundefined4 FUN_00049e60(undefined1 *param_1)\n\n{\n  *param_1 = uRamfebee881;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "779f64601528f0aa6b9b6c43b08713d9bbb328069fee2dab3d5341606bb6774f",
+      "entry": "0x00049E60",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "de3ec7bdcce0fccdcd41d769ca3b0884fe384cce355bc29e12269fee9abccf16",
+      "body_size": 20,
+      "decompiled_c": "\nundefined4 FUN_00049e6c(undefined4 param_1)\n\n{\n  *(bool *)param_1 = cRamfebee882 == 'Z';\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "019f2ab0bc5687e0bfee7f2ccb9c9b1756aefdb3d52a515345d6bc323390dd9f",
+      "entry": "0x00049E6C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "f05a9178063d88e39854915f8b844e1e340c02e083786e17bfa2e979d88d87be",
+      "body_size": 32,
+      "decompiled_c": "\nundefined4 FUN_00049e80(undefined1 *param_1)\n\n{\n  undefined1 uVar1;\n  \n  uVar1 = 0xff;\n  if (cRamfebee849 == 'D') {\n    uVar1 = func_0x000fe074();\n  }\n  *param_1 = uVar1;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "76c1293b2a961161993a4b906d40b806731fd7a59031020589a56db7ca93db38",
+      "entry": "0x00049E80",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "ec7df60c01e49bc1594cfe1cf5dceb7411edf4932f9f2f8971b3ef9380b8aa09",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_00049ea0(undefined1 *param_1)\n\n{\n  undefined1 uVar1;\n  \n  if (iRamfebee91c == 0x55aaaa55) {\n    uVar1 = 0;\n  }\n  else if (iRamfebee91c == -0x55aaaa56) {\n    uVar1 = 1;\n  }\n  else {\n    uVar1 = 0xff;\n  }\n  *param_1 = uVar1;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "fd2c2052fbcc398958915375e0822bdf4470619478ad76e922d56255db2b8e88",
+      "entry": "0x00049EA0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "afa253d50c3d11ae4eb5aca1b6311fbffe37b580e1a67ea1e1ce8186097cde5a",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4 FUN_00049ec8(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined1 auStack_9 [5];\n  \n  if (cRamfebee849 == 'D') {\n    uVar1 = func_0x000fe088(7);\n    auStack_9[0] = (undefined1)uVar1;\n    FUN_0006947e(uVar1,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "bf79d8873ed6bf62ba6b1fbb1144c42561dce0b2ddc9d230d9740cd73a05e0cd",
+      "entry": "0x00049EC8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "4b30fc44f259a25675f808c193b2e3dca0fb64b048415ee30bcddc77d8735750",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4 FUN_00049f02(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined1 auStack_9 [5];\n  \n  if (cRamfebee849 == 'D') {\n    uVar1 = func_0x000fe088(8);\n    auStack_9[0] = (undefined1)uVar1;\n    FUN_0006947e(uVar1,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "723bfeca56debde28f4706b8039e25e45062dc1ac88e29d8627616950d950b78",
+      "entry": "0x00049F02",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "3d52494079ba5bfc794571b5ddb14013365b8bf3fda6aa08021128483f6bb91a",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_00049f3c(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee84d;\n  if (cRamfebee84a == 'Z') {\n    FUN_0006947e(uRamfebee84d,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "0c73dfdaa1c8e14c0cd88841d80ac5be76488ebc7bccd8d9c75956696537abd2",
+      "entry": "0x00049F3C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "0f458d1c98da36fe8254b34c10daae93754ba4c8d73b3b548b9fb3d9dcf3c3cf",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_00049f72(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee84e;\n  if (cRamfebee84a == 'Z') {\n    FUN_0006947e(uRamfebee84e,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "3afb907c4083f78325bf8f92e588e43567db07eb5f630240aac018b1399192b9",
+      "entry": "0x00049F72",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "39861b7387e3df5a996be27ed750c7ea67ae5180ffbc46fa95c82a69f80b3e9b",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_00049fa8(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee84f;\n  if (cRamfebee84a == 'Z') {\n    FUN_0006947e(uRamfebee84f,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "fed3c457eb77e56e39ec1d4fe170e6bc11757470cfa702358b87051d13a36291",
+      "entry": "0x00049FA8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "72a4cd5de7ed49567c97b547759ea91d6cd12caf2c8e44878535f0c4cc1aaab5",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_00049fde(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee850;\n  if (cRamfebee84a == 'Z') {\n    FUN_0006947e(uRamfebee850,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "aa1f35a48ae26443490a4842d1efb309b6a8b1fba680a82a3cf9e53e8846bfa2",
+      "entry": "0x00049FDE",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "283c734192575f458752a7a44261a77bfe31cc372c05a1c8b1a3e114170568ac",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_0004a014(undefined1 *param_1)\n\n{\n  undefined1 auStack_9 [5];\n  \n  auStack_9[0] = uRamfebee851;\n  if (cRamfebee84a == 'Z') {\n    FUN_0006947e(uRamfebee851,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "229c916f5e1fee46f75399b3b9c77991bf12663f542aa084a50ecbad6eafd9af",
+      "entry": "0x0004A014",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "72fb8dbc06aa0b552aa2a9e010f1398173376cf85f76d7f926a60b8f48a17063",
+      "body_size": 128,
+      "decompiled_c": "\nundefined4 FUN_0004a04a(undefined1 *param_1)\n\n{\n  undefined1 uStack_b;\n  undefined1 uStack_a;\n  undefined1 auStack_9 [5];\n  \n  if (cRamfebee849 == 'D') {\n    uStack_b = func_0x000fe088(9);\n    uStack_a = func_0x000fe088(10);\n    auStack_9[0] = func_0x000fe088(0xb);\n    FUN_0006947e(uStack_b,0xff,&uStack_b);\n    FUN_0006947e(uStack_a,0xff,&uStack_a);\n    FUN_0006947e(auStack_9[0],0xff,auStack_9);\n    *param_1 = uStack_b;\n    param_1[1] = uStack_a;\n  }\n  else {\n    auStack_9[0] = 0xff;\n    *param_1 = 0xff;\n    param_1[1] = 0xff;\n  }\n  param_1[2] = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "4ddba67ffd47f225b7dad1045d1f59ed6ef339532f0767e19665ad2003410934",
+      "entry": "0x0004A04A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "3270c6ac48ce58d085d8331e045d101240b290daf8bfdff1377564e95d38c800",
+      "body_size": 160,
+      "decompiled_c": "\nundefined4 FUN_0004a0ca(undefined1 *param_1)\n\n{\n  undefined1 uStack_c;\n  undefined1 uStack_b;\n  undefined1 uStack_a;\n  undefined1 auStack_9 [5];\n  \n  if (cRamfebee849 == 'D') {\n    uStack_c = func_0x000fe088(0);\n    uStack_b = func_0x000fe088(1);\n    uStack_a = func_0x000fe088(2);\n    auStack_9[0] = func_0x000fe088(3);\n    FUN_0006947e(uStack_c,0xff,&uStack_c);\n    FUN_0006947e(uStack_b,0xff,&uStack_b);\n    FUN_0006947e(uStack_a,0xff,&uStack_a);\n    FUN_0006947e(auStack_9[0],0xff,auStack_9);\n    *param_1 = uStack_c;\n    param_1[1] = uStack_b;\n    param_1[2] = uStack_a;\n  }\n  else {\n    auStack_9[0] = 0xff;\n    *param_1 = 0xff;\n    param_1[1] = 0xff;\n    param_1[2] = 0xff;\n  }\n  param_1[3] = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "31b687ffb5fc07a15031a490c5be0ae21fae9b3d3585cf6f7bd91dced930da01",
+      "entry": "0x0004A0CA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "373be0323ca27aa16ecd6b2309151d36ed75d3568b17ca217e4b9486934ca040",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4 FUN_0004a16a(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined1 auStack_9 [5];\n  \n  if (cRamfebee849 == 'D') {\n    uVar1 = func_0x000fe088(4);\n    auStack_9[0] = (undefined1)uVar1;\n    FUN_0006947e(uVar1,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "1ef34bf35d0582a794bcb26a8d39886edcbc67d46c301b3ac92f787c69980092",
+      "entry": "0x0004A16A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "ebbd9771b6f50595ea9b1af502dc3a591350f54f7f93673fe5fdcfec9a027203",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4 FUN_0004a1a4(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined1 auStack_9 [5];\n  \n  if (cRamfebee849 == 'D') {\n    uVar1 = func_0x000fe088(5);\n    auStack_9[0] = (undefined1)uVar1;\n    FUN_0006947e(uVar1,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "4e69bb51dd2d1a67974712dbdc524cf109fff8b9eb86626f43be861a3f50f0dc",
+      "entry": "0x0004A1A4",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "a7722e96fd60a9b9895953d607384be75d5631742933ec86063b9275653f164b",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4 FUN_0004a1de(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined1 auStack_9 [5];\n  \n  if (cRamfebee849 == 'D') {\n    uVar1 = func_0x000fe088(6);\n    auStack_9[0] = (undefined1)uVar1;\n    FUN_0006947e(uVar1,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "5a386fe09b09ddfc95d9b3042cfadf2e55e7c0eb15947d95024d976ffd952f5b",
+      "entry": "0x0004A1DE",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "424a79bdfc3632772e714d49e93f72852211cf57487a700cdfff8c9491b6a198",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4 FUN_0004a218(undefined1 *param_1)\n\n{\n  undefined4 uVar1;\n  undefined1 auStack_9 [5];\n  \n  if (cRamfebee849 == 'D') {\n    uVar1 = func_0x000fe088(0xc);\n    auStack_9[0] = (undefined1)uVar1;\n    FUN_0006947e(uVar1,0xff,auStack_9);\n  }\n  else {\n    auStack_9[0] = 0xff;\n  }\n  *param_1 = auStack_9[0];\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "b780b521636671ebc5e1797580f39b3a7a03c1abe0926fbdd3dd0905aa2c3940",
+      "entry": "0x0004A218",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "d6cf899fd2897f5c74c674958accd0b875326f723ba30e9e599111d219f36360",
+      "body_size": 74,
+      "decompiled_c": "\nundefined4 FUN_0004a252(undefined1 *param_1)\n\n{\n  undefined1 uVar1;\n  \n  if ((iRamfebee924 == 0x55aaaa55) && (iRamfebee92c == 0x55aaaa55)) {\n    uVar1 = 0;\n    goto LAB_0004a296;\n  }\n  if (iRamfebee924 == -0x55aaaa56) {\n    if (iRamfebee92c == 0x55aaaa55) {\n      uVar1 = 1;\n      goto LAB_0004a296;\n    }\n    if (iRamfebee92c == -0x55aaaa56) {\n      uVar1 = 2;\n      goto LAB_0004a296;\n    }\n  }\n  if ((iRamfebee924 == 0x55aaaa55) && (iRamfebee92c == -0x55aaaa56)) {\n    uVar1 = 3;\n  }\n  else {\n    uVar1 = 0xff;\n  }\nLAB_0004a296:\n  *param_1 = uVar1;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "2bc2f320c0ebbead2276783688c50081e8045df6ca09610f0a50eecbbc9aef1a",
+      "entry": "0x0004A252",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "f9713f017c4845b45cc38907442dbdb2f699d4f37189a57026f26a4bf69db9fa",
+      "body_size": 20,
+      "decompiled_c": "\nundefined4 FUN_0004a29c(undefined4 param_1)\n\n{\n  *(bool *)param_1 = cRamfebee81e == 'Z';\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "ec73bc58609e698861458ac82c999ab0df929d2bd2f4bbc85612bd5756901252",
+      "entry": "0x0004A29C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_0004a2b0(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "23187a932ae539661846977017d198c43f9574b2b158e03dfd9d0c78c81c8a2e",
+      "entry": "0x0004A2B0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_0004a2b4(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "ab613fd204868e879ce970e78dfabd4d2d6a411a8dd5f956b3d6b4b563752c2e",
+      "entry": "0x0004A2B4",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "3cb3607ef7a883c4b021e58bb5fcdfb98540da332189d9416564643250261063",
+      "body_size": 40,
+      "decompiled_c": "\nundefined4 FUN_0004a2b8(int param_1)\n\n{\n  undefined1 *puVar1;\n  undefined1 *puVar2;\n  uint uVar3;\n  \n  uVar3 = 0;\n  do {\n    puVar1 = (undefined1 *)(uVar3 + param_1);\n    *puVar1 = (&DAT_00020850)[uVar3];\n    puVar2 = &DAT_00017da0 + uVar3;\n    uVar3 = uVar3 + 1;\n    puVar1[8] = *puVar2;\n  } while (uVar3 < 8);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "94535c16afc7700794745c6610b0a2ea6a6f33d3530f348e81f70b865280499a",
+      "entry": "0x0004A2B8",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "c5116d2a93cd3a50821a267e0ec248dce3ee00866e5a4d518347f10c2a07dcb7",
+      "body_size": 72,
+      "decompiled_c": "\nundefined4 FUN_0004a2e0(undefined1 *param_1)\n\n{\n  int iVar1;\n  int iVar2;\n  int iVar3;\n  \n  *param_1 = 1;\n  iVar3 = func_0x0005c0ec();\n  iVar2 = 0;\n  if (iVar3 == 0) {\n    do {\n      iVar1 = iVar2 + 1;\n      iVar3 = iVar2 + -0xf;\n      param_1[iVar2 + 1] = *(undefined1 *)(iVar2 + 0x17d80);\n      iVar2 = iVar1;\n    } while (iVar3 < 0 != (iVar1 < 0 && -1 < iVar3));\n  }\n  else {\n    do {\n      iVar1 = iVar2 + 1;\n      param_1[iVar2 + 1] = 0x21;\n      iVar3 = iVar2 + -0xf;\n      iVar2 = iVar1;\n    } while (iVar3 < 0 != (iVar1 < 0 && -1 < iVar3));\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "f7b418b8648bcd2b4a12c8c6db33307cfad0196847b5c27cf98784ab5c78e280",
+      "entry": "0x0004A2E0",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "879ef946b2a69e02dda707e3327f37f5717937daee0b49f62d53199f3ea5c4d5",
+      "body_size": 86,
+      "decompiled_c": "\nundefined4 FUN_0004a328(undefined1 *param_1)\n\n{\n  int iVar1;\n  int iVar2;\n  int iVar3;\n  \n  *param_1 = 2;\n  iVar3 = func_0x0005c0ec();\n  iVar2 = 0;\n  if (iVar3 == 0) {\n    do {\n      param_1[iVar2 + 1] = *(undefined1 *)(iVar2 + 0x20860);\n      iVar1 = iVar2 + 1;\n      iVar3 = iVar2 + -0xf;\n      param_1[iVar2 + 0x11] = (&DAT_00017dc0)[iVar2];\n      iVar2 = iVar1;\n    } while (iVar3 < 0 != (iVar1 < 0 && -1 < iVar3));\n  }\n  else {\n    do {\n      iVar1 = iVar2 + 1;\n      param_1[iVar2 + 1] = 0x21;\n      iVar3 = iVar2 + -0xf;\n      param_1[iVar2 + 0x11] = 0x21;\n      iVar2 = iVar1;\n    } while (iVar3 < 0 != (iVar1 < 0 && -1 < iVar3));\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "0d597c641d639c3458bf85af06e953168792451ee053623e41e03076c55b1855",
+      "entry": "0x0004A328",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "5df7e054bb5cebcd22d42d72f2270dec8ce1f87d349c79e9a23d14a2d9343138",
+      "body_size": 14,
+      "decompiled_c": "\nundefined4 FUN_0004a37e(void)\n\n{\n  FUN_0008ae04();\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "aea5220c3a7b2a723e87a859fb5f014f282edd55312f81e3b6eb9cad326faa53",
+      "entry": "0x0004A37E",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "515eb43f3ce9573eaa24e66ec5363621c78ee2f1d362bacd0eb8360acce36770",
+      "body_size": 118,
+      "decompiled_c": "\nundefined4 FUN_0004a38c(int param_1,uint param_2)\n\n{\n  int iVar1;\n  int *piVar2;\n  int iVar3;\n  undefined4 uVar4;\n  undefined4 *puVar5;\n  int iStack_34;\n  undefined1 auStack_30 [40];\n  \n  piVar2 = &iStack_34;\n  puVar5 = (undefined4 *)0x212cc;\n  do {\n    uVar4 = *puVar5;\n    puVar5 = puVar5 + 1;\n    *piVar2 = uVar4;\n    piVar2 = piVar2 + 1;\n  } while (puVar5 != (undefined4 *)0x212f4);\n  iVar3 = FUN_0006009e(0x207,&iStack_34);\n  if ((iVar3 == 0x10) && (iStack_34 == -0x5aa5a55b)) {\n    for (iVar3 = 0; iVar1 = iVar3 - (param_2 & 0xffff), iVar1 < 0 != (iVar3 < 0 && -1 < iVar1);\n        iVar3 = iVar3 + 1) {\n      *(undefined1 *)(iVar3 + param_1) = auStack_30[iVar3];\n    }\n  }\n  else {\n    for (iVar3 = 0; iVar1 = iVar3 - (param_2 & 0xffff), iVar1 < 0 != (iVar3 < 0 && -1 < iVar1);\n        iVar3 = iVar3 + 1) {\n      *(undefined1 *)(iVar3 + param_1) = 0x3f;\n    }\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "d780ddd2dd123985022b3b273e956fb7b5d7dd5066b6475fd1894287e6acdb5b",
+      "entry": "0x0004A38C",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "51beb4a875f1abc0654599a6e6580fbb0ad571d7df256a5da728599aaed9f15f",
+      "body_size": 16,
+      "decompiled_c": "\nundefined4 FUN_0004a402(undefined4 param_1,undefined2 param_2)\n\n{\n  FUN_00047e76(param_1,param_2);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "b895f3af743e0cac5dd4fb9da12185a1082ab3f16c8aca16f4b0c11b3d4a3d3d",
+      "entry": "0x0004A402",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "89a3ef5c5beba7ff3d5ffc426d8da4b2d40510cb44f392bade62905b9e6e1e38",
+      "body_size": 24,
+      "decompiled_c": "\nundefined4 FUN_0004a412(undefined4 param_1,undefined2 param_2)\n\n{\n  FUN_00047f38(0x100,param_1,param_2);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "5ffde2f2723c78b09b3c8ac6fbf6d80d175f9776e85e7314754f98c967ce7c46",
+      "entry": "0x0004A412",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "7c523b9fc129000f2dca08fef1b6be721d419a56f9bd49e9466816fc9690f7ab",
+      "body_size": 24,
+      "decompiled_c": "\nundefined4 FUN_0004a42a(undefined4 param_1,undefined2 param_2)\n\n{\n  FUN_00047f38(0x200,param_1,param_2);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "23afb15a6692d9a0598297f6bfdafeb4ffe37f44417a301d466088f08ffc95b5",
+      "entry": "0x0004A42A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "9c74bdaa0332aabe91d1adf37c4095ad3443f8a8d3a6c0ce2941b798c81021b2",
+      "body_size": 24,
+      "decompiled_c": "\nundefined4 FUN_0004a442(undefined4 param_1,undefined2 param_2)\n\n{\n  FUN_00047f38(0x1000,param_1,param_2);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "cc3676eb7553dfaf4221ddbfb24c02b8535070b7413407d56ff706bdcaaa19a9",
+      "entry": "0x0004A442",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "4fc4838ed9a77f5405c7ea9dd8f1a33950f686a9bc76ce19175d5f6dc13ab2d8",
+      "body_size": 24,
+      "decompiled_c": "\nundefined4 FUN_0004a45a(undefined4 param_1,undefined2 param_2)\n\n{\n  FUN_00047f38(0x1100,param_1,param_2);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "a8702b3bbf52d561431b5a816e10fedf6f07d0267e9cd92cea9a9732b4ffc05b",
+      "entry": "0x0004A45A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "519779e3a040ba121e56aeaba446673ed044e13da6248d2d659618174b6ee309",
+      "body_size": 24,
+      "decompiled_c": "\nundefined4 FUN_0004a472(undefined4 param_1,undefined2 param_2)\n\n{\n  FUN_00047f38(0x1c00,param_1,param_2);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "93d8b6a408877784f1efdb722817aafd268152d427d09b41c9492e9080e20578",
+      "entry": "0x0004A472",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "ab738f62f3103dc1ea8c2ee7299d2a79b06b44ca911188ee55a7e8644eee9188",
+      "body_size": 24,
+      "decompiled_c": "\nundefined4 FUN_0004a48a(undefined4 param_1,undefined2 param_2)\n\n{\n  FUN_00047f38(0x1f00,param_1,param_2);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "fac86d2085b0c01d664b5d859266b9cc383f56b7c6a41ad66cd1e23345dc4bfe",
+      "entry": "0x0004A48A",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "329cb16a0a092280dde28dcdd9d4169d44e87ee0853ec39de00fe1233baa5ed5",
+      "body_size": 24,
+      "decompiled_c": "\nundefined4 FUN_0004a4a2(undefined4 param_1,undefined2 param_2)\n\n{\n  FUN_00047f38(0x2000,param_1,param_2);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "66de941eee7f019ac6fbe60855ef71e26395878eab4eaf7675098f105e9b56fd",
+      "entry": "0x0004A4A2",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "d3880ef2778bea17ba177791e4d1ad101bafddb49c5b6b0a09a4fdb87269607d",
+      "body_size": 24,
+      "decompiled_c": "\nundefined4 FUN_0004a4ba(undefined4 param_1,undefined2 param_2)\n\n{\n  FUN_00047f38(&DAT_0000f100,param_1,param_2);\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "1aad9a36301d5d91b6dc5be65c21ec177de2431153ee6ba7254a28e55f01f077",
+      "entry": "0x0004A4BA",
+      "selection_roles": [
+        "rdbi_producer"
+      ]
+    },
+    {
+      "body_sha256": "c569c10f97e3d38d35d708e0b5c15a7996d2b6b138003cc1de3f55c50bcf9bab",
+      "body_size": 12,
+      "decompiled_c": "\nundefined4 FUN_0004a8d6(void)\n\n{\n  undefined4 uVar1;\n  \n  if (cRamfebe7e6a == '\\x01') {\n    uVar1 = 5;\n  }\n  else {\n    uVar1 = 0;\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "4c04b4b1af4897ccab4085d37e976a403a1da0dccdd64c43bd7f808bad4af805",
+      "entry": "0x0004A8D6",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "ac523da63b0e8d70d1289692e6380097da1565d9da42bd0eb860141bc2bdcc54",
+      "body_size": 74,
+      "decompiled_c": "\nundefined4\nFUN_0004a8e2(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n            undefined2 *param_5)\n\n{\n  int iVar1;\n  undefined4 uVar2;\n  \n  iVar1 = -0x1414800;\n  uVar2 = 0;\n  if (param_1 == '\\x01') {\n    func_0x00047ee2(param_4,0x20);\n    *param_5 = 0x20;\n    *(undefined1 *)(iVar1 + -0x3994) = 2;\n  }\n  else if (param_1 == '\\x03') {\n    *param_4 = uRamfebe7e6c;\n    *param_5 = 1;\n  }\n  else {\n    uVar2 = 7;\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "c39299cd85011f4b22d8566c49d1cbec717e709b72267d77d1916236f98c1b46",
+      "entry": "0x0004A8E2",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "c569c10f97e3d38d35d708e0b5c15a7996d2b6b138003cc1de3f55c50bcf9bab",
+      "body_size": 12,
+      "decompiled_c": "\nundefined4 FUN_0004a92c(void)\n\n{\n  undefined4 uVar1;\n  \n  if (cRamfebe7e6a == '\\x01') {\n    uVar1 = 5;\n  }\n  else {\n    uVar1 = 0;\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "8657ce72e343afaa82de3c54d3e7864147482cec71bf6cadec567c19587d4dc4",
+      "entry": "0x0004A92C",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "75cdc1bbe71819ed582429cd4b2c5ba1ae8999bd06078e219180ad525e5db9ad",
+      "body_size": 78,
+      "decompiled_c": "\nundefined4\nFUN_0004a938(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n            undefined2 *param_5)\n\n{\n  int iVar1;\n  undefined4 uVar2;\n  \n  iVar1 = -0x1414800;\n  uVar2 = 0;\n  if (param_1 == '\\x01') {\n    func_0x00047fc8(0x1000,param_4,0x20);\n    *param_5 = 0x20;\n    *(undefined1 *)(iVar1 + -0x3995) = 2;\n  }\n  else if (param_1 == '\\x03') {\n    *param_4 = uRamfebe7e6b;\n    *param_5 = 1;\n  }\n  else {\n    uVar2 = 7;\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "f688640d4c85a657d82232f43e63baa0ad386ec743a01d705f8aa745c0986370",
+      "entry": "0x0004A938",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "248f560e6459ceb57aa2d11f5b8e66dd54baccd9ee3dd00d0aa49418d79f0b80",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4 FUN_0004a986(char param_1)\n\n{\n  if (cRamfebe7e6a == '\\x01') {\n    return 5;\n  }\n  if (param_1 == '\\x01') {\n    if (uRam0002d452 < uRamfebee892) {\n      return 5;\n    }\n    if (cRamfebe7e6d == '\\x01') {\n      return 8;\n    }\n  }\n  else if (param_1 != '\\x03') {\n    return 7;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "0747ae98bb467ad0f23ebd4d5be46e97f7b9cd3fdca7bf549a7e9aeb6d9b1bcd",
+      "entry": "0x0004A986",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "c3e5019fdba26922c20fc538d4a8c6b35dc1f30e66241946fcb730f4f6933c14",
+      "body_size": 66,
+      "decompiled_c": "\nundefined4\nFUN_0004a9c2(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n            undefined2 *param_5)\n\n{\n  undefined2 uVar1;\n  int iVar2;\n  \n  iVar2 = -0x1414800;\n  if (param_1 == '\\x01') {\n    FUN_00031146();\n    thunk_FUN_000b6a24(0x44);\n    *(undefined1 *)(iVar2 + -0x3993) = 1;\n    uVar1 = 0;\n  }\n  else {\n    if (param_1 != '\\x03') {\n      return 7;\n    }\n    *param_4 = uRamfebe7e6d;\n    uVar1 = 1;\n  }\n  *param_5 = uVar1;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "46f215e276ad59708a8926e0fe7477b51a387529c6b8bf820cd553bb906a9e76",
+      "entry": "0x0004A9C2",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "0c29a2106a5371375f99cc99dc683ca8f3a2769f586275bbe8bc28508baf81df",
+      "body_size": 68,
+      "decompiled_c": "\nundefined4 FUN_0004aa04(char param_1,char *param_2)\n\n{\n  if (cRamfebe7e6a == '\\x01') {\n    return 5;\n  }\n  if (param_1 == '\\x01') {\n    if ((*param_2 != -1) || (param_2[1] != -1)) {\n      return 4;\n    }\n    if (cRamfebe7e6e == '\\x01') {\n      return 8;\n    }\n  }\n  else if (param_1 != '\\x03') {\n    return 7;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "6c82dc01e731294ce935ea8cfedce501aba706fd609304d6eda6342c62a52bce",
+      "entry": "0x0004AA04",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "24d0953ad1fa5a20f90e5279b272bc0e4faa2b47bff26081bf597c1e7855b67b",
+      "body_size": 68,
+      "decompiled_c": "\nint FUN_0004aa48(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n                undefined2 *param_5)\n\n{\n  undefined2 uVar1;\n  undefined4 uVar2;\n  int iVar3;\n  \n  if (param_1 == '\\x01') {\n    uVar2 = FUN_0004bfae();\n    iVar3 = func_0x00047dea(uVar2);\n    if (iVar3 == 0) {\n      uRamfebe7e6e = 1;\n    }\n    uVar1 = 0;\n  }\n  else {\n    if (param_1 != '\\x03') {\n      return 7;\n    }\n    iVar3 = 0;\n    *param_4 = uRamfebe7e6e;\n    uVar1 = 1;\n  }\n  *param_5 = uVar1;\n  return iVar3;\n}\n\n",
+      "decompiled_c_sha256": "f5e6faa12047e53ad070f61725209780dab3886982543a0d2bb99b82c3aae9b6",
+      "entry": "0x0004AA48",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "d89aa214af44bc0f4a1509e4e0bfd52f0fa71e52751ff333cfdc5b2a34652b3e",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_0004aa8c(char param_1)\n\n{\n  char cVar1;\n  int iVar2;\n  \n  cVar1 = cRamfebe7e6f;\n  if (param_1 == '\\x01') {\n    iVar2 = thunk_FUN_000b64a0(0);\n    if (iVar2 != 0x5a) {\n      return 5;\n    }\n    if (cVar1 == '\\x01') {\n      return 8;\n    }\n  }\n  else if (param_1 != '\\x03') {\n    return 7;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "e15c35b5e8fde117e6a8d3a0e08414436e96426f83521fed135ff60f877935eb",
+      "entry": "0x0004AA8C",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "49a026b3251015d24a7e066668239a9003493d4fb8a148f4737b0f09870c9a0c",
+      "body_size": 60,
+      "decompiled_c": "\nundefined4\nFUN_0004aac2(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n            undefined2 *param_5)\n\n{\n  undefined2 uVar1;\n  int iVar2;\n  \n  iVar2 = -0x1414800;\n  if (param_1 == '\\x01') {\n    thunk_FUN_000b64de(0);\n    *(undefined1 *)(iVar2 + -0x3991) = 1;\n    uVar1 = 0;\n  }\n  else {\n    if (param_1 != '\\x03') {\n      return 7;\n    }\n    *param_4 = uRamfebe7e6f;\n    uVar1 = 1;\n  }\n  *param_5 = uVar1;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "3aded9993d062326b4896485c00c5dae728c70a05d718a7669ec229b0e15f040",
+      "entry": "0x0004AAC2",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "a65c80ef9afae0c726a0b909a34361d45498e2be761ae12614b996b9291e86f2",
+      "body_size": 54,
+      "decompiled_c": "\nundefined4 FUN_0004aafe(char param_1)\n\n{\n  char cVar1;\n  int iVar2;\n  \n  cVar1 = cRamfebe7e70;\n  if (param_1 == '\\x01') {\n    iVar2 = thunk_FUN_000b64a0(2);\n    if (iVar2 != 0x5a) {\n      return 5;\n    }\n    if (cVar1 == '\\x01') {\n      return 8;\n    }\n  }\n  else if (param_1 != '\\x03') {\n    return 7;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "4aa71c0842eabf58f7678b909870a9e8c919cd6ef413b8a36445564333aa79d9",
+      "entry": "0x0004AAFE",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "45316e15e042ce2d7a59bb3c163a94f2b488ad4c9962cdbf9f2ce893cf57d300",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4\nFUN_0004ab34(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n            undefined2 *param_5)\n\n{\n  undefined2 uVar1;\n  int iVar2;\n  \n  iVar2 = -0x1414800;\n  if (param_1 == '\\x01') {\n    FUN_000fdea8();\n    *(undefined1 *)(iVar2 + -0x3990) = 1;\n    uVar1 = 0;\n  }\n  else {\n    if (param_1 != '\\x03') {\n      return 7;\n    }\n    *param_4 = uRamfebe7e70;\n    uVar1 = 1;\n  }\n  *param_5 = uVar1;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "3d18da1cb16cd48f12f8ce5c4c2ebf060ab92cdf1cd7a4c1dcf99ded724b9f8b",
+      "entry": "0x0004AB34",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "3c15d2e921b6982b78421d567bc3604c25953380619ccc589b9a02e4a891d07c",
+      "body_size": 44,
+      "decompiled_c": "\nundefined4 FUN_0004ab6e(char param_1)\n\n{\n  if (cRamfebe7e6a == '\\x01') {\n    return 5;\n  }\n  if (param_1 == '\\x01') {\n    if (cRamfebe7e71 == '\\x01') {\n      return 8;\n    }\n  }\n  else if (param_1 != '\\x03') {\n    return 7;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "4afbf6ddf605ffda7cd8a941e284577391733b31df0e89bb13e863d4e0639a88",
+      "entry": "0x0004AB6E",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "a7d82ce5df5ac5cdf84a67ac3d54b2490d2e37962176174e3668f59a2be83ef4",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4\nFUN_0004ab9a(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n            undefined2 *param_5)\n\n{\n  undefined2 uVar1;\n  int iVar2;\n  \n  iVar2 = -0x1414800;\n  if (param_1 == '\\x01') {\n    FUN_000fe0b0();\n    *(undefined1 *)(iVar2 + -0x398f) = 1;\n    uVar1 = 0;\n  }\n  else {\n    if (param_1 != '\\x03') {\n      return 7;\n    }\n    *param_4 = uRamfebe7e71;\n    uVar1 = 1;\n  }\n  *param_5 = uVar1;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "ee68b8ae40d8ef2d795027fb9db1fdf5a6ede48c5793d57810e93575c9c7b8a9",
+      "entry": "0x0004AB9A",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "c569c10f97e3d38d35d708e0b5c15a7996d2b6b138003cc1de3f55c50bcf9bab",
+      "body_size": 12,
+      "decompiled_c": "\nundefined4 FUN_0004abd4(void)\n\n{\n  undefined4 uVar1;\n  \n  if (cRamfebe7e6a == '\\x01') {\n    uVar1 = 5;\n  }\n  else {\n    uVar1 = 0;\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "1c5fdd10f8ac8970098805e34a13b426d99645cf026be1ac99478587a0d7af57",
+      "entry": "0x0004ABD4",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "b916902656f45ec44a1df0448e900c21f61b0b306bfe986ce951556d7832614b",
+      "body_size": 78,
+      "decompiled_c": "\nundefined4\nFUN_0004abe0(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n            undefined2 *param_5)\n\n{\n  int iVar1;\n  undefined4 uVar2;\n  \n  iVar1 = -0x1414800;\n  uVar2 = 0;\n  if (param_1 == '\\x01') {\n    func_0x00047fc8(0x1100,param_4,0x20);\n    *param_5 = 0x20;\n    *(undefined1 *)(iVar1 + -0x398e) = 2;\n  }\n  else if (param_1 == '\\x03') {\n    *param_4 = uRamfebe7e72;\n    *param_5 = 1;\n  }\n  else {\n    uVar2 = 7;\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "6b895393889694f52e557e74ed407c47a59a98bd7e08258f2258b83b340be9a6",
+      "entry": "0x0004ABE0",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "0bea4355bca6625282313ffe1211e2c9bf34f969d8ca40a8bcef89188aad29c9",
+      "body_size": 68,
+      "decompiled_c": "\nundefined4 FUN_0004ac2e(char param_1)\n\n{\n  int iVar1;\n  undefined4 uVar2;\n  \n  if (cRamfebe7e6a == '\\x01') {\nLAB_0004ac60:\n    uVar2 = 5;\n  }\n  else {\n    if (param_1 == '\\x01') {\n      iVar1 = func_0x000310ba();\n      if ((iVar1 != 1) || (cRamfebe7e76 == '\\x01')) goto LAB_0004ac60;\n      if (cRamfebe7e73 == '\\x01') {\n        return 8;\n      }\n    }\n    else if (param_1 != '\\x03') {\n      return 7;\n    }\n    uVar2 = 0;\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "3a4e971d4eb8e6ec49e227f566d8f4f142b0275013ded10e1988569a4a13d9f8",
+      "entry": "0x0004AC2E",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "7438cad338e9f0c19b508dfd415c8920bb5eeb6dc58692184baa4f54a48342d8",
+      "body_size": 64,
+      "decompiled_c": "\nint FUN_0004ac72(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n                undefined2 *param_5)\n\n{\n  undefined2 uVar1;\n  int iVar2;\n  \n  if (param_1 == '\\x01') {\n    iVar2 = func_0x0003113a();\n    if (iVar2 == 2) {\n      iVar2 = 0;\n      uRamfebe7e73 = 1;\n    }\n    uVar1 = 0;\n  }\n  else {\n    if (param_1 != '\\x03') {\n      return 7;\n    }\n    iVar2 = 0;\n    *param_4 = uRamfebe7e73;\n    uVar1 = 1;\n  }\n  *param_5 = uVar1;\n  return iVar2;\n}\n\n",
+      "decompiled_c_sha256": "4005af39cdea8fe047855300bfb585a762a8f59cae071c3ade139d96b9ce2cc6",
+      "entry": "0x0004AC72",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "7f3785641bd51c62a1d77a1af6cea5cb795d8412dde7faf8197d91072b4c278c",
+      "body_size": 62,
+      "decompiled_c": "\nundefined4 FUN_0004acb2(char param_1)\n\n{\n  if (cRamfebe7e6a == '\\x01') {\n    return 5;\n  }\n  if (param_1 == '\\x01') {\n    if (uRam0002d452 < uRamfebee892) {\n      return 5;\n    }\n    if (cRamfebe7e74 == '\\x01') {\n      return 8;\n    }\n  }\n  else if (param_1 != '\\x03') {\n    return 7;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "0735167cb3852021871f33f70fbfd8a8bd6f470918fcad20b1cbce621072985a",
+      "entry": "0x0004ACB2",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "e710c5e9c666eec62656051d2476b9362c4d21aab124dec3e6f4b1e4ba7fa003",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4\nFUN_0004acf0(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n            undefined2 *param_5)\n\n{\n  undefined2 uVar1;\n  int iVar2;\n  \n  iVar2 = -0x1414800;\n  if (param_1 == '\\x01') {\n    FUN_000fde6c();\n    *(undefined1 *)(iVar2 + -0x398c) = 1;\n    uVar1 = 0;\n  }\n  else {\n    if (param_1 != '\\x03') {\n      return 7;\n    }\n    *param_4 = uRamfebe7e74;\n    uVar1 = 1;\n  }\n  *param_5 = uVar1;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "dbece9b25e4de3a8df85058b3d9a236526eaf82181bd385a27bd583d3e759df0",
+      "entry": "0x0004ACF0",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "3f6f0b948dd23c56bb6081200fc962401d3362b95e706e06c34f9f68384065bd",
+      "body_size": 46,
+      "decompiled_c": "\nundefined4 FUN_0004ad2a(char param_1)\n\n{\n  if (cRamfebe7e6a == '\\x01') {\n    return 5;\n  }\n  if (param_1 == '\\x01') {\n    if (cRamfebe7e75 == '\\x01') {\n      return 8;\n    }\n  }\n  else if (param_1 != '\\x03') {\n    return 7;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "9e5eb228ff869dacbad0de43899c6acb4a55772aa76bdf98a869f2ebc2ace206",
+      "entry": "0x0004AD2A",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "563a150158b645c67e6c6ee2cb965d0165fcc679c3257d6563c07974ccb560ed",
+      "body_size": 68,
+      "decompiled_c": "\nint FUN_0004ad58(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n                undefined2 *param_5)\n\n{\n  undefined2 uVar1;\n  undefined4 uVar2;\n  int iVar3;\n  \n  if (param_1 == '\\x01') {\n    uVar2 = FUN_0004beaa();\n    iVar3 = func_0x00047dea(uVar2);\n    if (iVar3 == 0) {\n      uRamfebe7e75 = 1;\n    }\n    uVar1 = 0;\n  }\n  else {\n    if (param_1 != '\\x03') {\n      return 7;\n    }\n    iVar3 = 0;\n    *param_4 = uRamfebe7e75;\n    uVar1 = 1;\n  }\n  *param_5 = uVar1;\n  return iVar3;\n}\n\n",
+      "decompiled_c_sha256": "f7ad878ff6c768430e96aa33036db04ca76e7476a5645a248fedadfc9e5f9158",
+      "entry": "0x0004AD58",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "b0ea27b05da17811872edc8d07abfb41113284053d25be5d6085e5416a6634c6",
+      "body_size": 92,
+      "decompiled_c": "\nundefined4 FUN_0004ad9c(char param_1)\n\n{\n  if (cRamfebe7e6a == '\\x01') {\n    return 5;\n  }\n  if (param_1 == '\\x01') {\n    if (uRam0002d452 < uRamfebee892) {\n      return 5;\n    }\n    if (cRamfebe7e73 == '\\x01') {\n      return 5;\n    }\n    if (cRamfebe7d84 != '\\0') {\n      return 5;\n    }\n    if (cRamfebe7d87 != '\\0') {\n      return 5;\n    }\n    if (cRamfebee81f != '\\0') {\n      return 5;\n    }\n    if (cRamfebe7e76 == '\\x01') {\n      return 8;\n    }\n  }\n  else if (param_1 != '\\x03') {\n    return 7;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "cba0f0f4ed7e7aa20cfa84ecb8c103d99a0344dcb1fb8703a4dccb17a13b0280",
+      "entry": "0x0004AD9C",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "f1fadbc6db2e067954f81dd5b067e1769a434c9849fde9976db1eccdf7932471",
+      "body_size": 84,
+      "decompiled_c": "\nint FUN_0004adf8(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n                undefined2 *param_5)\n\n{\n  undefined2 uVar1;\n  undefined4 uVar2;\n  int iVar3;\n  \n  if (param_1 == '\\x01') {\n    uVar2 = thunk_FUN_000b67ce(0x22,1);\n    iVar3 = func_0x00047dea(uVar2);\n    if (iVar3 == 2) {\n      iVar3 = 0;\n      uRamfebe7e76 = 1;\n    }\n    else if (iVar3 == 0) {\n      uRamfebe7e76 = 2;\n    }\n    uVar1 = 0;\n  }\n  else {\n    if (param_1 != '\\x03') {\n      return 7;\n    }\n    iVar3 = 0;\n    *param_4 = uRamfebe7e76;\n    uVar1 = 1;\n  }\n  *param_5 = uVar1;\n  return iVar3;\n}\n\n",
+      "decompiled_c_sha256": "2e0fc3187a606e6f08b15761a7ff85ff686e0aacd419a2989f37cbcc04f86564",
+      "entry": "0x0004ADF8",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_0004ae4c(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "559071e5b8a6a86a61d7e6cf874d37b0db725050343fa44e5704f62d64b8db06",
+      "entry": "0x0004AE4C",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_0004ae50(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "d6780f2dd8f9f612bee00dad4006dd6ac0234606bc5cea323ae02ecbbcd831b1",
+      "entry": "0x0004AE50",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "35d1cfd04b7e5997fd2cf7c6de66dbc08401f5e163fd1c379a281c72657a7864",
+      "body_size": 62,
+      "decompiled_c": "\nundefined4 FUN_0004ae54(char param_1)\n\n{\n  if (cRamfebe7e6a == '\\x01') {\n    return 5;\n  }\n  if (param_1 == '\\x01') {\n    if (uRam0002d452 < uRamfebee892) {\n      return 5;\n    }\n    if (cRamfebe7e78 == '\\x01') {\n      return 8;\n    }\n  }\n  else if (param_1 != '\\x03') {\n    return 7;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "f80163ab051dd09c98e52344fa929ea8dbdfa92b766f4440f00c89ddf34f0b40",
+      "entry": "0x0004AE54",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "342876aac68de8787e3f59b897ef0b84d46ec96c575114368e6de6b31e459d0e",
+      "body_size": 58,
+      "decompiled_c": "\nundefined4\nFUN_0004ae92(char param_1,undefined4 param_2,undefined4 param_3,undefined1 *param_4,\n            undefined2 *param_5)\n\n{\n  undefined2 uVar1;\n  int iVar2;\n  \n  iVar2 = -0x1414800;\n  if (param_1 == '\\x01') {\n    FUN_000fe18c();\n    *(undefined1 *)(iVar2 + -0x3988) = 1;\n    uVar1 = 0;\n  }\n  else {\n    if (param_1 != '\\x03') {\n      return 7;\n    }\n    *param_4 = uRamfebe7e78;\n    uVar1 = 1;\n  }\n  *param_5 = uVar1;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "7591fb01d73c3ccb27dff7fbcb28a893ef63770f3ce603e0c8ecb6840c9401d1",
+      "entry": "0x0004AE92",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_0004aecc(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "43c4048c82015852121dd3c401e8312555468f6f216e9bacaf1525f5873fe105",
+      "entry": "0x0004AECC",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_0004aed0(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "f8f836c23bcca7674825c314b40e789624c8d2bf254edbb69c3ee1d9e071351c",
+      "entry": "0x0004AED0",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_0004aed4(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "ce124e71302751608e013887363836e2b3210366c0b4506a9a0f0d09549c2d2e",
+      "entry": "0x0004AED4",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "e10925bcdba50e4ccdc1f83daad05a6b0ec36d5a872fcd8da11cd4168a8a3e3d",
+      "body_size": 4,
+      "decompiled_c": "\nundefined4 FUN_0004aed8(void)\n\n{\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "be4537c69c3877ebdf4067d3f4350cbfb68d1f08fc633e34b064ccdf7ad46aad",
+      "entry": "0x0004AED8",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "c2f108c407de8be27006a8adb3fdb3df61e5994055d541bff57a5cc8bc7c8214",
+      "body_size": 158,
+      "decompiled_c": "\nvoid FUN_0004d044(int param_1,uint param_2)\n\n{\n  int iVar1;\n  undefined1 *puVar2;\n  undefined1 uVar3;\n  int iVar4;\n  uint uVar5;\n  undefined4 uVar6;\n  uint uVar7;\n  uint uVar8;\n  undefined1 auStack_20 [8];\n  byte abStack_18 [12];\n  \n  for (iVar4 = 0; iVar1 = iVar4 - (param_2 & 0xffff), iVar1 < 0 != (iVar4 < 0 && -1 < iVar1);\n      iVar4 = iVar4 + 1) {\n    *(undefined1 *)(iVar4 + param_1) = 0;\n  }\n  uVar6 = FUN_000694d4();\n  uVar8 = 0;\n  do {\n    uVar5 = uVar8 + 1;\n    abStack_18[uVar8] = *(byte *)(uVar8 + 0xfebe5e45);\n    auStack_20[uVar8] = *(undefined1 *)(uVar8 + 0xfebe5e4d);\n    uVar8 = uVar5;\n  } while (uVar5 < 8);\n  FUN_000694fa(uVar6);\n  uVar5 = 0;\n  uVar8 = 0;\n  do {\n    uVar7 = (uint)abStack_18[uVar8];\n    uVar3 = auStack_20[uVar8];\n    if (-1 < (int)((uVar5 + 3) - (param_2 & 0xffff))) {\n      return;\n    }\n    if ((uVar7 != 0) && (uVar7 < 0xa0)) {\n      uVar6 = (&DAT_0002c588)[uVar7 * 2];\n      puVar2 = (undefined1 *)(uVar5 + param_1);\n      uVar5 = uVar5 + 3 & 0xff;\n      puVar2[2] = (char)uVar6;\n      *puVar2 = (char)((uint)uVar6 >> 0x10);\n      puVar2[1] = (char)((uint)uVar6 >> 8);\n      *(undefined1 *)(uVar5 + param_1) = uVar3;\n      uVar5 = uVar5 + 1 & 0xff;\n    }\n    uVar8 = uVar8 + 1;\n  } while (uVar8 < 8);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "9651bfe6d2f784f5a14e14c97a2e5b48abb8ad4dea38ccc7d3ffffc742eee20b",
+      "entry": "0x0004D044",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "79f3c0d3b250232d86c5a1c409e1022e001874f9e50d3eeff408e0b7c325cdf7",
+      "body_size": 24,
+      "decompiled_c": "\nvoid FUN_0006380c(undefined4 param_1,undefined1 *param_2)\n\n{\n  *param_2 = (char)((uint)param_1 >> 0x18);\n  param_2[1] = (char)((uint)param_1 >> 0x10);\n  param_2[2] = (char)((uint)param_1 >> 8);\n  param_2[3] = (char)param_1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "baf7c903ed0c5df5a8191e87825d9ad4bb97fd22234912e7b57b0737ce4aaae7",
+      "entry": "0x0006380C",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "0dd3126ed46cf6ce166395e53de88cb0f98359a0b2367f2da265f61f6ceea955",
+      "body_size": 12,
+      "decompiled_c": "\nvoid FUN_00063824(undefined4 param_1,undefined1 *param_2)\n\n{\n  *param_2 = (char)((uint)param_1 >> 8);\n  param_2[1] = (char)param_1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "86d471064db0811ec02b89870daca9f1ec9b791733d04b03c1400a9c65a35987",
+      "entry": "0x00063824",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "79f3c0d3b250232d86c5a1c409e1022e001874f9e50d3eeff408e0b7c325cdf7",
+      "body_size": 24,
+      "decompiled_c": "\nvoid FUN_00063844(undefined4 param_1,undefined1 *param_2)\n\n{\n  *param_2 = (char)((uint)param_1 >> 0x18);\n  param_2[1] = (char)((uint)param_1 >> 0x10);\n  param_2[2] = (char)((uint)param_1 >> 8);\n  param_2[3] = (char)param_1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "7b44a28f030d5c0fbd86355190ea42f84ef8fd4561cb0e9513f79ccbcc984b4e",
+      "entry": "0x00063844",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "0dd3126ed46cf6ce166395e53de88cb0f98359a0b2367f2da265f61f6ceea955",
+      "body_size": 12,
+      "decompiled_c": "\nvoid FUN_0006385c(undefined4 param_1,undefined1 *param_2)\n\n{\n  *param_2 = (char)((uint)param_1 >> 8);\n  param_2[1] = (char)param_1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "ed819a0594f2f0dbc537f9abf20b7399123aa4d083222c0d796ca72bf092df28",
+      "entry": "0x0006385C",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "dfac33733e8cadab3a1f90e1bb9cce317cfae3e809bb401602a7b05f72d6876c",
+      "body_size": 12,
+      "decompiled_c": "\nvoid FUN_00084b68(void)\n\n{\n  FUN_00084b64();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "252512116f5436be318b279513a7456114d35d35e0c46d34231f38e106904a9e",
+      "entry": "0x00084B68",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "da045aa5744c33fbed591b0420ed32c2848f19ccf7a3fb85afac9eb7b975869f",
+      "body_size": 14,
+      "decompiled_c": "\nundefined4 FUN_00084b74(void)\n\n{\n  func_0x000632ca();\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "203ce24de4d9acc43a3ce53b416abfd08ccf80c7261147d544f4aecd517d18ab",
+      "entry": "0x00084B74",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "80c1a3c733257c537f6a1cc5757a8e4c248f60e825fdaffec61757f613ea4be2",
+      "body_size": 14,
+      "decompiled_c": "\nundefined4 FUN_00084b82(void)\n\n{\n  func_0x00063350();\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "ba500d4ece1cba1b92c496686bd5f55d5f59ec4b16030aa19fe0f810ef31de12",
+      "entry": "0x00084B82",
+      "selection_roles": [
+        "routine_control_callback"
+      ]
+    },
+    {
+      "body_sha256": "e3102b31f9db2f794b29cfe705e1e37af37a2265f7037d55e970180fe6beae9f",
+      "body_size": 20,
+      "decompiled_c": "\nundefined4 FUN_0008ae04(int param_1)\n\n{\n  undefined4 uVar1;\n  \n  if (param_1 == 0) {\n    uVar1 = 0;\n  }\n  else {\n    uVar1 = FUN_0008b80c();\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "8bf7446bb0af253b5dc61e37e53b2c7106c9e559c39fc32d292f6fe6a253e454",
+      "entry": "0x0008AE04",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "a2a084c186c2b9d95df93463df510f5af9696d1171c11dd81ddc9e99f1400081",
+      "body_size": 28,
+      "decompiled_c": "\nundefined4 FUN_0008b80c(undefined1 *param_1)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  FUN_00091fea();\n  *param_1 = *(undefined1 *)(iVar1 + -0x5fb8);\n  FUN_00091ff6();\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "870a6a7580db5ef5e0c79ac413b5c95d6fab5af5757dd10f3711844450eac537",
+      "entry": "0x0008B80C",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "3f2885208c29e8de203fe62451fcd0b6305c9f90b63dc042d4c9a54bcf64a032",
+      "body_size": 28,
+      "decompiled_c": "\nvoid FUN_000b3c04(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  func_0x000b4878();\n  func_0x000b5a18();\n  func_0x000b66ac();\n  *(undefined1 *)(iVar1 + -0x618) = 0x11;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "2ae2b5b4a368e8bafc9d32b547714a1e60a1589af0223e138e7ddf9b692288a3",
+      "entry": "0x000B3C04",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "4b72210b5f9f6b6e0a8560292f6963cbae79c8c3cf1f53ca9adedfecb85753e6",
+      "body_size": 24,
+      "decompiled_c": "\nvoid FUN_000b5364(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  func_0x000b532e();\n  FUN_000b52c8();\n  *(undefined1 *)(iVar1 + -0x563) = 0x11;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "6c880e0c7b684087c1c58ab014c163a67ae41e2c40e6687f2dbe5695fe826f9e",
+      "entry": "0x000B5364",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "219d893fe43edbabfbb8d3b2fc4df364dcaebce654cf9fa0444cd057dbd53fef",
+      "body_size": 90,
+      "decompiled_c": "\nvoid FUN_000b5d2c(void)\n\n{\n  int iVar1;\n  uint uVar2;\n  char cVar3;\n  \n  cVar3 = cRamfebeb32c;\n  iVar1 = -0x1414800;\n  if (cRamfebeb32c == '\\x11') {\n    iVar1 = -0x1414800;\n    FUN_000ba06a();\n    cVar3 = '\\\"';\n  }\n  else if (cRamfebeb32c == '\\\"') {\n    iVar1 = -0x1414800;\n    uVar2 = FUN_000ff0c4(0x1c);\n    if (uVar2 == 0x10) {\n      thunk_FUN_00047d76(0xd,0);\n      cVar3 = 'D';\n    }\n    else if ((uVar2 & 0xf0) != 0x20) {\n      thunk_FUN_00047d76(0xd,0x20);\n      cVar3 = -0x78;\n    }\n  }\n  *(char *)(iVar1 + -0x4d4) = cVar3;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "969fd414e9bd3318c54f88a3e77cfbde2892d0e2352eab06a3ef032fb66a8cf2",
+      "entry": "0x000B5D2C",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "d8e135117891b8a29ca0f53f72826637b257c2d7d008b6331cd5f7415bfcb1bf",
+      "body_size": 10,
+      "decompiled_c": "\nvoid FUN_000b5d92(void)\n\n{\n  uRamfebeb32c = 0x11;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "3ba1c05c1c0448d7bfd4e0488c21e02cdc04635926c911b581d5dcc49a48fefb",
+      "entry": "0x000B5D92",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "68270ad758247aee86cc93fe6255e5baf61e2be95f2ced9e9a547b5b152e8244",
+      "body_size": 62,
+      "decompiled_c": "\nundefined4 FUN_000b64a0(char param_1)\n\n{\n  char cVar1;\n  char cVar2;\n  \n  cVar1 = cRamfebeb372;\n  cVar2 = cRamfebeb371;\n  if ((((param_1 == '\\0') || (cVar2 = cRamfebeb370, param_1 == '\\x01')) ||\n      (cVar1 = cRamfebeb371, param_1 == '\\x02')) && ((cVar2 != '\\x11' && (cVar1 != '\\x11')))) {\n    return 0x5a;\n  }\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "6a6d5e8fa894e7cc73960f966630b0b69188df23e9cdbca0fd12a2c7af0ee754",
+      "entry": "0x000B64A0",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "114da05162d4dd37688e8b28f4c4b936a9070c54d2a6d218c5c40c51b07f5456",
+      "body_size": 120,
+      "decompiled_c": "\nvoid FUN_000b64de(char param_1)\n\n{\n  undefined2 uVar1;\n  undefined2 uVar2;\n  char cVar3;\n  char cVar4;\n  \n  uVar2 = uRamfebeb378;\n  uVar1 = uRamfebeb376;\n  cVar3 = cRamfebeb371;\n  cVar4 = cRamfebeb370;\n  if (param_1 == '\\0') {\n    if (cRamfebeb370 != '\\x11') {\n      FUN_000b52e2();\n      if (cVar3 != '\\x11') {\n        FUN_000b488c();\n        FUN_000b5c0a();\n        FUN_000b66d4();\n        FUN_000b5cf6();\n      }\n      cVar4 = '\\x11';\n      uVar2 = 0;\n    }\n  }\n  else if ((param_1 == '\\x01') && (cRamfebeb371 != '\\x11')) {\n    if (cRamfebeb370 != '\\x11') {\n      FUN_000b488c();\n      FUN_000b5c0a();\n      FUN_000b66d4();\n      FUN_000b5cf6();\n    }\n    cVar3 = '\\x11';\n    uVar1 = 0;\n  }\n  cRamfebeb370 = cVar4;\n  cRamfebeb371 = cVar3;\n  uRamfebeb378 = uVar2;\n  uRamfebeb376 = uVar1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "70f5ddf59b688962cd14ee8de9d8646e38ef1c7f237a94f3ab9fedad528e4705",
+      "entry": "0x000B64DE",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "b36f1d369d0d679f5c85e27dc50c499e388ae19a440aff7920a995b8c6f03626",
+      "body_size": 58,
+      "decompiled_c": "\nvoid FUN_000b6556(void)\n\n{\n  undefined2 uVar1;\n  int iVar2;\n  \n  iVar2 = -0x1414800;\n  uVar1 = uRamfebeb37a;\n  if (cRamfebeb372 != '\\x11') {\n    iVar2 = -0x1414800;\n    func_0x000b537c();\n    func_0x000b48b2();\n    func_0x000b5584();\n    func_0x000b65f4();\n    func_0x000b5c8a();\n    uVar1 = 0;\n  }\n  *(undefined2 *)(iVar2 + -0x486) = uVar1;\n  cRamfebeb372 = 0x11;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "e85692a5b47b12c2337bf24cf40badabb0ee3b4738a2bdb7fcd9e35bbba20657",
+      "entry": "0x000B6556",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "b057102a17a636059fd6f56c04af2e01ce8386bbcc09aa7b2d5f7302a28aaf96",
+      "body_size": 20,
+      "decompiled_c": "\nvoid FUN_000ba06a(void)\n\n{\n  FUN_000c494c();\n  FUN_000c4968();\n  FUN_000b9fd2();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "e1592a6e1fbe0e5cb330381993c1ce659495fd0590b19189a5a070423c7897e4",
+      "entry": "0x000BA06A",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "1b6c19052a4b41ca62174f5f7a0a1f0721b137cfe89c3c63f851d392dbaaab57",
+      "body_size": 8,
+      "decompiled_c": "\nvoid FUN_000fde6c(void)\n\n{\n  FUN_000b3c04();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1a8ec64daabc9b1ef2a9f88063583483ae7026c1f72f356b5b161ed88f27ca83",
+      "entry": "0x000FDE6C",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "a72eecd3d5761f8a92a4781504b024444a9376ea98d227aa5ab83e85510364ca",
+      "body_size": 8,
+      "decompiled_c": "\nvoid thunk_FUN_000b64a0(void)\n\n{\n  FUN_000b64a0();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "ac1f11e604ca98bd53f9d1a907073186ddd2fcb5fbc3c09b358cd779bd00f9ca",
+      "entry": "0x000FDE80",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "e79336a78c3f608427e9612a61c7d7a59e1ca7f37e556414acdcd95e6546e369",
+      "body_size": 8,
+      "decompiled_c": "\nvoid thunk_FUN_000b64de(void)\n\n{\n  FUN_000b64de();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "366c4969f84f38282638cbde49cfc04f4940604624fa29b1dfda7598e2b30a70",
+      "entry": "0x000FDE94",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "78f0c054ba14d565f406e3cc13c574b11079a1ae0f91816804a074ff9dc96d2f",
+      "body_size": 8,
+      "decompiled_c": "\nvoid FUN_000fdea8(void)\n\n{\n  FUN_000b6556();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "60b5825428fd4c1b38338803bb0a9952facc98e88d035d2cbce12487b5e30cd5",
+      "entry": "0x000FDEA8",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "ab86110a06eef1afc7237eab9c8f5f4f4e63ebde8e2f6f55cbaf3d47cbc4898a",
+      "body_size": 8,
+      "decompiled_c": "\nvoid FUN_000fe0b0(void)\n\n{\n  FUN_000b5364();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "582715d4b69346e9c6543a3d1396d53a7aad78486262156fcf0bc81e1e8124f7",
+      "entry": "0x000FE0B0",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "a9377819cfd8d4ee8f0016fb145bb5ee4aba1cda1dd648c00e0ddf3763524e3c",
+      "body_size": 8,
+      "decompiled_c": "\nvoid FUN_000fe18c(void)\n\n{\n  FUN_000b5d92();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "bc3ad29c6be5d302c1c8d364659dee3a43d5b6c81945b024649bbfed1b82ad1c",
+      "entry": "0x000FE18C",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    },
+    {
+      "body_sha256": "5893a4e0a290489f8851975f37f05fc38dfbaa7a031e2326b59c73e846dd2ced",
+      "body_size": 14,
+      "decompiled_c": "\nvoid FUN_000ff0c4(undefined2 param_1)\n\n{\n  FUN_0006006c(param_1);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "e954ceb788a7117f5e884719eacf37e1429709f694281f1cf180614858e4f3b8",
+      "entry": "0x000FF0C4",
+      "selection_roles": [
+        "extra_helper_or_downstream"
+      ]
+    }
+  ],
+  "image": {
+    "path": "build/community-normalized/8965H1202000_CodeFlash.bin",
+    "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "size": 1048576
+  },
+  "schema": "rh850-variant-application-diagnostic-decompiler-evidence-v1",
+  "selection": {
+    "extra_count": 25,
+    "function_count": 240,
+    "rdbi_producer_count": 180,
+    "routine_control_callback_count": 35
+  },
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "note": "Disposable target-native Ghidra corpus; path is provenance only and is not required by downstream deterministic checks.",
+    "path": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+    "sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539"
+  },
+  "tables": {
+    "did_count": 226,
+    "did_table": "0x28F34",
+    "routine_callback_table": "0x255C0",
+    "routine_count": 19
+  }
+}

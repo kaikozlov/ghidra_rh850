@@ -1,0 +1,3674 @@
+{
+  "application_service_objects": {
+    "corolla_h": [
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 3,
+        "session_list_present": true,
+        "sid": "0x10",
+        "subfunction_count": 3,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x11",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": "0x855F0",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 2,
+        "session_list_present": true,
+        "sid": "0x14",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 2,
+        "session_list_present": true,
+        "sid": "0x19",
+        "subfunction_count": 4,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": "0x8F602",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 3,
+        "session_list_present": true,
+        "sid": "0x22",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": "0x8F8D0",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x23",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 2,
+        "session_list_present": true,
+        "sid": "0x27",
+        "subfunction_count": 4,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x28",
+        "subfunction_count": 3,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": "0x8EC88",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 2,
+        "session_list_present": true,
+        "sid": "0x2E",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": "0x90DF4",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 3,
+        "session_list_present": true,
+        "sid": "0x31",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x34",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x36",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x37",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 3,
+        "session_list_present": true,
+        "sid": "0x3E",
+        "subfunction_count": 1,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x85",
+        "subfunction_count": 2,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 2,
+        "session_list_present": true,
+        "sid": "0xAB",
+        "subfunction_count": 3,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": "0x87744",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0xBA",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      }
+    ],
+    "corolla_h_base": "0x25B38",
+    "count": 17,
+    "semantic_policy_shape_same": true,
+    "sid_sequence": [
+      "0x10",
+      "0x11",
+      "0x14",
+      "0x19",
+      "0x22",
+      "0x23",
+      "0x27",
+      "0x28",
+      "0x2E",
+      "0x31",
+      "0x34",
+      "0x36",
+      "0x37",
+      "0x3E",
+      "0x85",
+      "0xAB",
+      "0xBA"
+    ],
+    "sienna": [
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 3,
+        "session_list_present": true,
+        "sid": "0x10",
+        "subfunction_count": 3,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x11",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": "0x8B1F0",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 2,
+        "session_list_present": true,
+        "sid": "0x14",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 2,
+        "session_list_present": true,
+        "sid": "0x19",
+        "subfunction_count": 4,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": "0x945DC",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 3,
+        "session_list_present": true,
+        "sid": "0x22",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": "0x948AA",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x23",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 2,
+        "session_list_present": true,
+        "sid": "0x27",
+        "subfunction_count": 4,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x28",
+        "subfunction_count": 3,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": "0x93C62",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 2,
+        "session_list_present": true,
+        "sid": "0x2E",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": "0x95DCE",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 3,
+        "session_list_present": true,
+        "sid": "0x31",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x34",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x36",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x37",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 3,
+        "session_list_present": true,
+        "sid": "0x3E",
+        "subfunction_count": 1,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0x85",
+        "subfunction_count": 2,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": null,
+        "direct_callback_present": false,
+        "has_subfunction": 1,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 2,
+        "session_list_present": true,
+        "sid": "0xAB",
+        "subfunction_count": 3,
+        "subfunction_table_present": true
+      },
+      {
+        "direct_callback": "0x8D344",
+        "direct_callback_present": true,
+        "has_subfunction": 0,
+        "security_count": 0,
+        "security_list_present": false,
+        "session_count": 1,
+        "session_list_present": true,
+        "sid": "0xBA",
+        "subfunction_count": 0,
+        "subfunction_table_present": false
+      }
+    ],
+    "sienna_base": "0x25E28"
+  },
+  "decompiler_evidence": {
+    "function_count": 240,
+    "path": "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
+    "sha256": "47c23950f0f540368319caa7e6318473f3cc8ab991356e0b9591b2d6296ccdd7"
+  },
+  "evidence_boundary": "Raw tables/configuration are verified byte evidence. RDBI output bounds and highlighted RoutineControl semantics additionally use the image-bound compact target-native Ghidra evidence set; no OEM names are inferred for H-only states.",
+  "images": {
+    "corolla_h": {
+      "normalization": "trim-all-ff-upper-1mib-from-2mib-range-dump",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "sienna": {
+      "normalization": "bare-codeflash",
+      "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+    }
+  },
+  "readable_dids": {
+    "added": [],
+    "corolla_h_base": "0x28F34",
+    "corolla_h_count": 226,
+    "corolla_h_rdbi_output_audit": {
+      "classification_counts": {
+        "declared_bounded_bitmap": 9,
+        "declared_bounded_engine": 1,
+        "declared_bounded_loop": 1,
+        "direct_fixed": 136,
+        "fixed_extent_loop": 5,
+        "session_delegate": 1,
+        "success_stub": 27
+      },
+      "nonstub_underwrite_producer_count": 0,
+      "overrun_producer_count": 0,
+      "producers": [
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48524",
+          "classification": "direct_fixed",
+          "declared_length": 7,
+          "dids": [
+            "0x0102"
+          ],
+          "max_write_extent": 7,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4859E",
+          "classification": "direct_fixed",
+          "declared_length": 4,
+          "dids": [
+            "0x0103"
+          ],
+          "max_write_extent": 4,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "target-native loop/store form pinned for configured DID width",
+          "callback": "0x485EC",
+          "classification": "fixed_extent_loop",
+          "declared_length": 12,
+          "dids": [
+            "0x0105"
+          ],
+          "max_write_extent": 12,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48660",
+          "classification": "direct_fixed",
+          "declared_length": 6,
+          "dids": [
+            "0x0109"
+          ],
+          "max_write_extent": 6,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "target-native loop/store form pinned for configured DID width",
+          "callback": "0x4869C",
+          "classification": "fixed_extent_loop",
+          "declared_length": 16,
+          "dids": [
+            "0x010B"
+          ],
+          "max_write_extent": 16,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x486FC",
+          "classification": "direct_fixed",
+          "declared_length": 4,
+          "dids": [
+            "0x0110"
+          ],
+          "max_write_extent": 4,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x48724",
+          "classification": "success_stub",
+          "declared_length": 4,
+          "dids": [
+            "0x0111"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48728",
+          "classification": "direct_fixed",
+          "declared_length": 4,
+          "dids": [
+            "0x0112"
+          ],
+          "max_write_extent": 4,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4874E",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x0204"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4876C",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1031"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4879E",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1032"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x487C8",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1033"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x487EE",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1034",
+            "0x1039"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48820",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1035"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4886C",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1036"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x488A8",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1037"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x488D6",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1038"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x488E6",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1061",
+            "0x1067"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48918",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1062",
+            "0x1068"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4894A",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1063",
+            "0x1069"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48986",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1064"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x489AC",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1065"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x489D8",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x1066"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x489DC",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x106A"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x489E0",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x106B",
+            "0x106C"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48A12",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1091"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48A4A",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1092"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48A82",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1093"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48ABA",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1094"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48AF2",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1095"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48B1C",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1096"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48B46",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1097"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48B70",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1098"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48B9A",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10C1"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48BD6",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10C2"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48C12",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10C3"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48C4E",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10C4"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48C84",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10C5"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48CBA",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10C6"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x48CF0",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x10C7"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x48CF4",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x10C8"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x48CF8",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x10C9"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48CFC",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10CA"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48D2E",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10F1"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48D6A",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10F2"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48DA6",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10F3"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48DE2",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10F4"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48E18",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10F5"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48E4E",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10F6"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x48E84",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x10F7"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x48E88",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x10F8"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x48E8C",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x10F9"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48E90",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x10FA"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x48EC2",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x1121",
+            "0x1123"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x48EC6",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x1122",
+            "0x112A"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48ECA",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1124"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48EFA",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1125"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48F2A",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1126"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48F5A",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1127"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48F8A",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1128"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48FBA",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1129"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x48FEA",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x112B",
+            "0x112C"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x48FEE",
+          "classification": "direct_fixed",
+          "declared_length": 4,
+          "dids": [
+            "0x112D"
+          ],
+          "max_write_extent": 4,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x4902A",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x112E"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4902E",
+          "classification": "direct_fixed",
+          "declared_length": 7,
+          "dids": [
+            "0x112F"
+          ],
+          "max_write_extent": 7,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49100",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1130"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4912E",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1131"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49156",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x1132"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x4915A",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x1133"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4915E",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1151",
+            "0x1157"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4919A",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1152",
+            "0x1158"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x491D6",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1153",
+            "0x1159"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49212",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1154",
+            "0x115A"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4924E",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1155",
+            "0x115B"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49298",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1156",
+            "0x115C"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x492D2",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1181"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x492F8",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1182"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4930A",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1183"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4933E",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1184"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49372",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1185"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4939C",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1186"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x493CA",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11B1",
+            "0x11BE"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x493F6",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11B3",
+            "0x11BF"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49422",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11B4",
+            "0x11C0"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4944E",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11B5",
+            "0x11C1"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4947A",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11B6",
+            "0x11C2"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x494A8",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11B7",
+            "0x11C3"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x494D0",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11B8",
+            "0x11C4"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x494F8",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11B9",
+            "0x11C5"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49520",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11BA",
+            "0x11C6"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49548",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11BB",
+            "0x11C7"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49570",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x11BC",
+            "0x11C8"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49574",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x11BD",
+            "0x11C9"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x495A0",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C02"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x495E8",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C03"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49612",
+          "classification": "direct_fixed",
+          "declared_length": 8,
+          "dids": [
+            "0x1C05",
+            "0x1C0C"
+          ],
+          "max_write_extent": 8,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49634",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C06"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49682",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C07"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x496D0",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C08"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x496F8",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C09"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49720",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C31"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49746",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C32"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49782",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C33"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x497AA",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C37"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x497D0",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C38"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4980C",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C39"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49834",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C3D"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4985A",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C3E"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49896",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C3F"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x498BE",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C43"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x498E4",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C44"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49920",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C49"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49946",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C4A"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49982",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C4B"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x499AA",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C4F"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x499D0",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C50"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49A0C",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C51"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49A34",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C52"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49A5A",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1C53"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49A96",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x1C81",
+            "0x1CAC"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49A9A",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C82",
+            "0x1CAD"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49AC6",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C83",
+            "0x1CAE"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49AF2",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C84",
+            "0x1CAF"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49B1E",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1C86",
+            "0x1CB0"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49B46",
+          "classification": "direct_fixed",
+          "declared_length": 7,
+          "dids": [
+            "0x1C87",
+            "0x1CB1"
+          ],
+          "max_write_extent": 7,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49BAE",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x1C99"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49BB2",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x1C9A"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49BB6",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x1C9B"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49BBA",
+          "classification": "success_stub",
+          "declared_length": 7,
+          "dids": [
+            "0x1C9C"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49BBE",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x1C9D"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49BC2",
+          "classification": "success_stub",
+          "declared_length": 7,
+          "dids": [
+            "0x1C9E"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49BC6",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x1C9F"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x49BCA",
+          "classification": "success_stub",
+          "declared_length": 7,
+          "dids": [
+            "0x1CA0"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49BCE",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1CA1",
+            "0x1CC0"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49BF6",
+          "classification": "direct_fixed",
+          "declared_length": 7,
+          "dids": [
+            "0x1CA2",
+            "0x1CC1"
+          ],
+          "max_write_extent": 7,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49C5C",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1CA3",
+            "0x1CC2"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49C86",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1CA4",
+            "0x1CC3"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49CB8",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1CA5",
+            "0x1CC4"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49CE0",
+          "classification": "direct_fixed",
+          "declared_length": 7,
+          "dids": [
+            "0x1CA6",
+            "0x1CC5"
+          ],
+          "max_write_extent": 7,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49D46",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1CA7",
+            "0x1CC6"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49D70",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1CA8",
+            "0x1CC7"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49DA2",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1CA9",
+            "0x1CC8"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49DDC",
+          "classification": "direct_fixed",
+          "declared_length": 2,
+          "dids": [
+            "0x1CAA",
+            "0x1CC9"
+          ],
+          "max_write_extent": 2,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x4D044 clear/copy engine is bounded by forwarded declared_len",
+          "callback": "0x49E16",
+          "classification": "declared_bounded_engine",
+          "declared_length": 32,
+          "dids": [
+            "0x1CAB",
+            "0x1CCA"
+          ],
+          "max_write_extent": 32,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49E26",
+          "classification": "direct_fixed",
+          "declared_length": 8,
+          "dids": [
+            "0x1F01",
+            "0x1F02"
+          ],
+          "max_write_extent": 8,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49E60",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1F03"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49E6C",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x1F04"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49E80",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2001"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49EA0",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2002"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49EC8",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2003"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49F02",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2004"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49F3C",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2005"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49F72",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2006"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49FA8",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2007"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x49FDE",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2008"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4A014",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2009"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4A04A",
+          "classification": "direct_fixed",
+          "declared_length": 3,
+          "dids": [
+            "0x200A"
+          ],
+          "max_write_extent": 3,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4A0CA",
+          "classification": "direct_fixed",
+          "declared_length": 4,
+          "dids": [
+            "0x200B"
+          ],
+          "max_write_extent": 4,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4A16A",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x200C"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4A1A4",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x200D"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4A1DE",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x200E"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4A218",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x200F"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4A252",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2010"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "only fixed-offset direct stores / pinned 2- or 4-byte endian helpers",
+          "callback": "0x4A29C",
+          "classification": "direct_fixed",
+          "declared_length": 1,
+          "dids": [
+            "0x2012"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x4A2B0",
+          "classification": "success_stub",
+          "declared_length": 2,
+          "dids": [
+            "0x2013"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "body is exact `00 52 7F 00` return-success stub",
+          "callback": "0x4A2B4",
+          "classification": "success_stub",
+          "declared_length": 1,
+          "dids": [
+            "0x2014"
+          ],
+          "max_write_extent": 0,
+          "write_relation": "underwrite"
+        },
+        {
+          "basis": "target-native loop/store form pinned for configured DID width",
+          "callback": "0x4A2B8",
+          "classification": "fixed_extent_loop",
+          "declared_length": 16,
+          "dids": [
+            "0x2030",
+            "0x2031"
+          ],
+          "max_write_extent": 16,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "target-native loop/store form pinned for configured DID width",
+          "callback": "0x4A2E0",
+          "classification": "fixed_extent_loop",
+          "declared_length": 17,
+          "dids": [
+            "0x2032"
+          ],
+          "max_write_extent": 17,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "target-native loop/store form pinned for configured DID width",
+          "callback": "0x4A328",
+          "classification": "fixed_extent_loop",
+          "declared_length": 33,
+          "dids": [
+            "0xF181"
+          ],
+          "max_write_extent": 33,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x4A37E -> 0x8AE04 -> 0x8B80C; lower getter writes one byte",
+          "callback": "0x4A37E",
+          "classification": "session_delegate",
+          "declared_length": 1,
+          "dids": [
+            "0xF186"
+          ],
+          "max_write_extent": 1,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "copy/fill loops are bounded by `(param_2 & 0xffff)`",
+          "callback": "0x4A38C",
+          "classification": "declared_bounded_loop",
+          "declared_length": 20,
+          "dids": [
+            "0xF18C"
+          ],
+          "max_write_extent": 20,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x47E76 clears declared_len and bounds every bit update by declared_len",
+          "callback": "0x4A402",
+          "classification": "declared_bounded_bitmap",
+          "declared_length": 32,
+          "dids": [
+            "0x0101"
+          ],
+          "max_write_extent": 32,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x47F38 clears declared_len and bounds every bit update by declared_len",
+          "callback": "0x4A412",
+          "classification": "declared_bounded_bitmap",
+          "declared_length": 32,
+          "dids": [
+            "0x0100"
+          ],
+          "max_write_extent": 32,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x47F38 clears declared_len and bounds every bit update by declared_len",
+          "callback": "0x4A42A",
+          "classification": "declared_bounded_bitmap",
+          "declared_length": 32,
+          "dids": [
+            "0x0200"
+          ],
+          "max_write_extent": 32,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x47F38 clears declared_len and bounds every bit update by declared_len",
+          "callback": "0x4A442",
+          "classification": "declared_bounded_bitmap",
+          "declared_length": 32,
+          "dids": [
+            "0x1000"
+          ],
+          "max_write_extent": 32,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x47F38 clears declared_len and bounds every bit update by declared_len",
+          "callback": "0x4A45A",
+          "classification": "declared_bounded_bitmap",
+          "declared_length": 32,
+          "dids": [
+            "0x1100"
+          ],
+          "max_write_extent": 32,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x47F38 clears declared_len and bounds every bit update by declared_len",
+          "callback": "0x4A472",
+          "classification": "declared_bounded_bitmap",
+          "declared_length": 32,
+          "dids": [
+            "0x1C00"
+          ],
+          "max_write_extent": 32,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x47F38 clears declared_len and bounds every bit update by declared_len",
+          "callback": "0x4A48A",
+          "classification": "declared_bounded_bitmap",
+          "declared_length": 32,
+          "dids": [
+            "0x1F00"
+          ],
+          "max_write_extent": 32,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x47F38 clears declared_len and bounds every bit update by declared_len",
+          "callback": "0x4A4A2",
+          "classification": "declared_bounded_bitmap",
+          "declared_length": 32,
+          "dids": [
+            "0x2000"
+          ],
+          "max_write_extent": 32,
+          "write_relation": "exact_or_declared_bounded"
+        },
+        {
+          "basis": "0x47F38 clears declared_len and bounds every bit update by declared_len",
+          "callback": "0x4A4BA",
+          "classification": "declared_bounded_bitmap",
+          "declared_length": 32,
+          "dids": [
+            "0xF100"
+          ],
+          "max_write_extent": 32,
+          "write_relation": "exact_or_declared_bounded"
+        }
+      ],
+      "stale_response_basis": "every underwriter is an exact 4-byte return-success stub; no non-stub underwriter or overrun remains after exhaustive 180-producer classification",
+      "stale_response_did_count": 32,
+      "stale_response_dids": [
+        "0x0111",
+        "0x1066",
+        "0x106A",
+        "0x10C7",
+        "0x10C8",
+        "0x10C9",
+        "0x10F7",
+        "0x10F8",
+        "0x10F9",
+        "0x1121",
+        "0x1122",
+        "0x1123",
+        "0x112A",
+        "0x112B",
+        "0x112C",
+        "0x112E",
+        "0x1132",
+        "0x1133",
+        "0x11BC",
+        "0x11C8",
+        "0x1C81",
+        "0x1C99",
+        "0x1C9A",
+        "0x1C9B",
+        "0x1C9C",
+        "0x1C9D",
+        "0x1C9E",
+        "0x1C9F",
+        "0x1CA0",
+        "0x1CAC",
+        "0x2013",
+        "0x2014"
+      ],
+      "unique_producer_count": 180
+    },
+    "corolla_h_unique_producer_count": 180,
+    "declared_length_changes": [
+      {
+        "corolla_h": 33,
+        "did": "0xF181",
+        "sienna": 17
+      }
+    ],
+    "f181": {
+      "corolla_h_callback": "0x4A328",
+      "corolla_h_declared_length": 33,
+      "corolla_h_semantics": "writes count byte 2 plus two 16-byte software-ID records from CodeFlash 0x20860 and 0x17DC0; failure path fills both records with 0x21",
+      "sienna_declared_length": 17
+    },
+    "removed": [
+      "0x1CF4",
+      "0x1CF5",
+      "0x1CF6",
+      "0x1CF7",
+      "0x1CF8",
+      "0x1CF9",
+      "0x1CFA",
+      "0x1CFB",
+      "0x1CFC",
+      "0x1CFD",
+      "0x1CFE",
+      "0x1CFF",
+      "0x1D00",
+      "0x1D01",
+      "0x1D02",
+      "0x1D03"
+    ],
+    "shared_count": 226,
+    "sienna_base": "0x2941C",
+    "sienna_count": 242,
+    "stale_response_comparison": {
+      "corolla_h_count": 32,
+      "new_h_stale_vs_sienna": [
+        "0x1121",
+        "0x1122",
+        "0x1123",
+        "0x112A",
+        "0x112B",
+        "0x112C",
+        "0x112E",
+        "0x1132",
+        "0x1133",
+        "0x1C81",
+        "0x1CAC",
+        "0x2013",
+        "0x2014"
+      ],
+      "shared": [
+        "0x0111",
+        "0x1066",
+        "0x106A",
+        "0x10C7",
+        "0x10C8",
+        "0x10C9",
+        "0x10F7",
+        "0x10F8",
+        "0x10F9",
+        "0x11BC",
+        "0x11C8",
+        "0x1C99",
+        "0x1C9A",
+        "0x1C9B",
+        "0x1C9C",
+        "0x1C9D",
+        "0x1C9E",
+        "0x1C9F",
+        "0x1CA0"
+      ],
+      "sienna_count": 48,
+      "sienna_stale_fixed_or_removed_on_h": [
+        "0x1124",
+        "0x1125",
+        "0x1126",
+        "0x1127",
+        "0x1128",
+        "0x1129",
+        "0x112F",
+        "0x1130",
+        "0x1131",
+        "0x1CF4",
+        "0x1CF5",
+        "0x1CF6",
+        "0x1CF7",
+        "0x1CF8",
+        "0x1CF9",
+        "0x1CFA",
+        "0x1CFB",
+        "0x1CFC",
+        "0x1CFD",
+        "0x1CFE",
+        "0x1CFF",
+        "0x1D01",
+        "0x1D02",
+        "0x1D03",
+        "0x1F03",
+        "0x1F04",
+        "0x2030",
+        "0x2031",
+        "0x2032"
+      ]
+    }
+  },
+  "routine_control": {
+    "corolla_h": [
+      {
+        "action_callback": "0x4A938",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4A92C",
+        "rid": "0x1000",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 32,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4A8E2",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4A8D6",
+        "rid": "0x1001",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 32,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4A9C2",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4A986",
+        "rid": "0x1002",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4AA48",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AA04",
+        "rid": "0x1004",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 2,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4AAC2",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AA8C",
+        "rid": "0x1007",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4AB34",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AAFE",
+        "rid": "0x1008",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4AB9A",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AB6E",
+        "rid": "0x1009",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x84B74",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 0
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x84B68",
+        "rid": "0x100E",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 0
+        }
+      },
+      {
+        "action_callback": "0x84B82",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 0
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x84B68",
+        "rid": "0x100F",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 0
+        }
+      },
+      {
+        "action_callback": null,
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 1,
+        "policy_record_pointer": "0x26390",
+        "precondition_callback": null,
+        "rid": "0x1010",
+        "security_count": 0,
+        "sessions": [
+          3
+        ],
+        "widths": {
+          "type1_input": 64,
+          "type1_output": 49,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 49
+        }
+      },
+      {
+        "action_callback": "0x4ABE0",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4ABD4",
+        "rid": "0x1100",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 32,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4AC72",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AC2E",
+        "rid": "0x1103",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4ACF0",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4ACB2",
+        "rid": "0x1106",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4AD58",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AD2A",
+        "rid": "0x1108",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4ADF8",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AD9C",
+        "rid": "0x1109",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4AE50",
+        "control_type_support": {
+          "1": 1,
+          "2": 1,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AE4C",
+        "rid": "0x110A",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4AE92",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AE54",
+        "rid": "0x110B",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4AED0",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AECC",
+        "rid": "0x110C",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4AED8",
+        "control_type_support": {
+          "1": 1,
+          "2": 1,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26388",
+        "precondition_callback": "0x4AED4",
+        "rid": "0x110D",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      }
+    ],
+    "corolla_h_callback_table": "0x255C0",
+    "corolla_h_noop_precondition_and_action_rids": [
+      "0x110A",
+      "0x110C",
+      "0x110D"
+    ],
+    "corolla_h_rid_table": "0x267FC",
+    "decoded_policy_support_and_widths_identical": true,
+    "material_semantic_differences": {
+      "0x1009": "H action directly starts its lifecycle worker and latches status; Sienna's feature/aggregate conditional action and request-results clear logic do not transfer.",
+      "0x1106": "H keeps the speed gate and starts the structurally matched multigroup lifecycle worker, but its action no longer conditions start/clear on Sienna's aggregate-health cell.",
+      "0x110A": "H precondition/action are exact four-byte success stubs; Sienna internal service-mode-2 action does not transfer.",
+      "0x110B": "H is newly active: speed-gated type-1 starts lifecycle cell FEBEB32C=0x11. Periodic worker advances 0x11->0x22, polls operation 0x1C, then reaches 0x44 success or 0x88 abnormal completion. Sienna 110B is no-op/status.",
+      "0x110C": "H precondition/action are exact four-byte success stubs; Sienna internal service-mode-3 action does not transfer.",
+      "0x110D": "H precondition/action are exact four-byte success stubs; Sienna internal service-mode-4 action does not transfer."
+    },
+    "rid_sequence": [
+      "0x1000",
+      "0x1001",
+      "0x1002",
+      "0x1004",
+      "0x1007",
+      "0x1008",
+      "0x1009",
+      "0x100E",
+      "0x100F",
+      "0x1010",
+      "0x1100",
+      "0x1103",
+      "0x1106",
+      "0x1108",
+      "0x1109",
+      "0x110A",
+      "0x110B",
+      "0x110C",
+      "0x110D"
+    ],
+    "sienna": [
+      {
+        "action_callback": "0x4F060",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F054",
+        "rid": "0x1000",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 32,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F00A",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4EFFE",
+        "rid": "0x1001",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 32,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F0EA",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F0AE",
+        "rid": "0x1002",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F170",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F12C",
+        "rid": "0x1004",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 2,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F1EA",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F1B4",
+        "rid": "0x1007",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F25C",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F226",
+        "rid": "0x1008",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F2C2",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F296",
+        "rid": "0x1009",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x8A774",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 0
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x8A768",
+        "rid": "0x100E",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 0
+        }
+      },
+      {
+        "action_callback": "0x8A782",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 0
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x8A768",
+        "rid": "0x100F",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 0
+        }
+      },
+      {
+        "action_callback": null,
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 1,
+        "policy_record_pointer": "0x26680",
+        "precondition_callback": null,
+        "rid": "0x1010",
+        "security_count": 0,
+        "sessions": [
+          3
+        ],
+        "widths": {
+          "type1_input": 64,
+          "type1_output": 49,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 49
+        }
+      },
+      {
+        "action_callback": "0x4F32E",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F322",
+        "rid": "0x1100",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 32,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F3C0",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F37C",
+        "rid": "0x1103",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F43E",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F400",
+        "rid": "0x1106",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F4BC",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F48E",
+        "rid": "0x1108",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F570",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F500",
+        "rid": "0x1109",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F630",
+        "control_type_support": {
+          "1": 1,
+          "2": 1,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F5C4",
+        "rid": "0x110A",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F69E",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F69A",
+        "rid": "0x110B",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F702",
+        "control_type_support": {
+          "1": 1,
+          "2": 0,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F6A2",
+        "rid": "0x110C",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      },
+      {
+        "action_callback": "0x4F7B8",
+        "control_type_support": {
+          "1": 1,
+          "2": 1,
+          "3": 1
+        },
+        "enabled": 1,
+        "policy_index": 0,
+        "policy_record_pointer": "0x26678",
+        "precondition_callback": "0x4F74A",
+        "rid": "0x110D",
+        "security_count": 0,
+        "sessions": [
+          1,
+          2,
+          3
+        ],
+        "widths": {
+          "type1_input": 0,
+          "type1_output": 0,
+          "type2_input": 0,
+          "type2_output": 0,
+          "type3_output": 1
+        }
+      }
+    ],
+    "sienna_callback_table": "0x25804",
+    "sienna_rid_table": "0x26AEC"
+  },
+  "schema": "corolla-8965H1202000-application-diagnostics-diff-v1"
+}

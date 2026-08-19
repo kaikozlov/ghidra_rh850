@@ -214,7 +214,10 @@ pipeline at `0xCEDAE` calling the recovered clamp/rate stages. Target-native
 startup/COM recovery also closes the old classic-CAN assumption: app GP remains
 `FEBEB800` but TP is `23D6C`; normal Rx drops `2E4/131` and adds secured FD
 `0B6`; the old `2E4` request cell is periodically forced to zero; and Tx replaces
-`260/262` with a 32-byte FD `030`. Highest-value remaining H work is therefore
+`260/262` with a 32-byte FD `030`. The application diagnostic surface is now
+re-censused target-natively too: H has 226 readable DIDs / 32 exact-stub stale
+selectors and the same 19 RoutineControl policy rows, but `110A/C/D` become no-op
+while `110B` becomes a new active lifecycle. Highest-value remaining H work is therefore
 narrower: assign field-level provenance/semantics inside `0B6` and `030`, identify
 whether any H input carries an external command magnitude analogous to Sienna
 `2E4`, classify the H-only/reordered orchestration stages, trace the

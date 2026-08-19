@@ -976,6 +976,118 @@ IDs, TP-relative table addresses, `2E4/131` steering ingress, or `260/262` Tx
 assumptions into H.** Reuse the common COM implementation, but resolve the
 foreign GP/TP context and generated descriptor/signal maps from that image.
 
+
+### 7.10 Application diagnostics: same outer stack, different generated DID/RID behavior
+
+The application diagnostic stack also transfers at the framework level but not
+at the generated-content level. A deterministic raw-table comparison plus a
+compact target-native decompiler evidence set now covers the complete primary
+service table, all readable-DID producers, and all RoutineControl callbacks:
+
+```text
+                                      8965B4512000   8965H1202000
+primary 17-SID service table          0x25E28        0x25B38
+readable-DID table                    0x2941C        0x28F34
+readable DID rows                     242            226
+unique nonzero read producers         —              180
+RoutineControl RID table              0x26AEC        0x267FC
+RoutineControl callback table         0x25804        0x255C0
+```
+
+The outer 17-service sequence is unchanged (`10/11/14/19/22/23/27/28/2E/31/
+34/36/37/3E/85/AB/BA`). The presence/absence of direct callbacks and subfunction
+tables, session/security counts, and subfunction counts are identical after
+relocation; all 17 outer service objects still have configured security count
+zero. This is a framework/configuration transfer, not proof that every callback
+behind those objects has the same semantics.
+
+#### RDBI generation: 242 → 226, and the stale-response set changes identity
+
+H removes exactly the contiguous 16-DID block `1CF4..1D03` and adds no readable
+DIDs. The only declared-width change among the 226 shared rows is `F181`, which
+expands from 17 to **33 bytes**. H-native `0x4A328` writes count byte `02`, then
+two 16-byte software-ID records from CodeFlash `0x20860` and `0x17DC0`; on its
+fallback path it fills both records with `0x21`. Thus the two live H identity
+records are part of the application diagnostic implementation itself, rather
+than merely strings observed elsewhere in CodeFlash.
+
+The Sienna stale-response result does **not** transfer as a selector list. Every
+one of H's 180 unique nonzero readable-DID producers has now been classified by
+its target-native output behavior. The audit accepts only fixed-offset stores,
+the recovered 2-/4-byte endian helpers, declared-length-bounded bitmap/record
+engines, explicitly bounded fixed loops, and F186's one-byte session delegate.
+The result is:
+
+```text
+Sienna stale-response DIDs                 48
+H stale-response DIDs                      32
+shared stale selectors                     19
+Sienna stale selectors fixed/removed on H  29
+new H stale selectors                      13
+H non-stub underwriters                     0
+H producer overruns                         0
+```
+
+Every H underwriter is the **same exact four-byte return-success body**
+`00 52 7F 00`; no non-stub producer underwrites. H's exact stale set is:
+
+```text
+0111
+1066 106A
+10C7 10C8 10C9
+10F7 10F8 10F9
+1121 1122 1123 112A 112B 112C 112E 1132 1133
+11BC 11C8
+1C81 1C99 1C9A 1C9B 1C9C 1C9D 1C9E 1C9F 1CA0 1CAC
+2013 2014
+```
+
+This is a useful generation-level warning: even a vulnerability class that
+survives across both images must be re-censused from the foreign producer table.
+H fixes/replaces several old Sienna stale producers (`1124..1129`, `112F`,
+`1130/1131`, `1F03/1F04`, `2030..2032`) while introducing different no-op
+producers such as `1121..1123`, `112A..112E`, `1132/1133`, `1C81/1CAC`, and
+`2013/2014`.
+
+#### RoutineControl: identical policy geometry, materially different actions
+
+All 19 Sienna RIDs remain configured in H, in the same order. Decoding the
+foreign policy-index/count/pointer tables and all control-type descriptor tables
+shows **identical enable state, policy index, security count, session lists,
+control-type 1/2/3 support, and input/output widths for every RID**. The callback
+implementations are nevertheless not interchangeable.
+
+The largest H-specific changes are:
+
+- `1009`: H directly starts its lifecycle worker and latches result state; the
+  Sienna feature/aggregate conditional start and request-results clear behavior
+  do not transfer.
+- `1106`: H keeps the speed gate and reaches the structurally matched
+  multigroup lifecycle-reset family (`H 0xB3C04` is the unique complete
+  instruction-shape homolog of Sienna `0xB3974`), but the H action no longer
+  conditions start/clear on Sienna's aggregate-health cell.
+- `110A`, `110C`, and `110D`: both the H precondition and action callbacks are
+  exact four-byte success stubs. Sienna's service-mode actions behind those
+  three RIDs therefore **do not transfer** even though their generated policy
+  rows still advertise the same control types and widths.
+- `110B`: the reverse change. Sienna's callbacks are no-ops, while H makes this
+  RID active and speed-gated. H action `0x4AE92` calls `0xFE18C -> 0xB5D92`,
+  setting state `FEBEB32C=0x11`. Periodic H worker `0xB5D2C` advances
+  `0x11 -> 0x22`, polls operation `0x1C`, publishes completion through the
+  generated selector/status dispatcher, and terminates at `0x44` on success or
+  `0x88` on abnormal completion. No exact whole-instruction-shape counterpart
+  exists in Sienna, so the OEM physical meaning of this H-only lifecycle is left
+  unnamed pending a stronger external correlation.
+
+The machine-readable sources are
+`data/generated/corolla_8965H1202000_application_diagnostics_diff.json` and
+`data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json`.
+The latter is deliberately compact: it stores only the 180 RDBI producers, 35
+nonzero RoutineControl callbacks, and the 25 helper/downstream functions needed
+for the bounds and lifecycle claims, with each function tied to the exact H raw
+body SHA-256. `tests/verify_corolla_8965H1202000_application_diagnostics.py`
+regenerates the comparison and pins the evidence boundary.
+
 ## 8. Remaining evidence boundary
 
 The new corpus closes CodeFlash identity and much of the firmware-static

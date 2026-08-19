@@ -296,7 +296,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   from normal Rx as well as SecOC, that the old `2E4` request staging cell is
   periodically forced to zero, and that FD `0B6` is the new secured control/status
   PDU feeding several stages in `0xCEDAE`; Tx likewise replaces `260/262` with FD
-  `030`. Remaining H-static work is narrower: assign field-level semantics and
+  `030`. The application-diagnostic generation is now independently re-censused as
+  well: 17 outer SIDs retain their policy shape, RDBI is 226 DIDs with a distinct
+  32-selector stale-response set, and RoutineControl keeps the same 19 policy rows
+  while `110A/C/D` become no-op and `110B` becomes an H-only active lifecycle.
+  Remaining H-static work is narrower: assign field-level semantics and
   provenance inside `0B6`/`030`, determine whether any H input carries an external
   command magnitude analogous to Sienna `2E4` or whether the H pipeline is driven
   through a different internal interface, classify every H-only/reordered
