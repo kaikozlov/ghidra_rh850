@@ -1,0 +1,101 @@
+{
+  "boundary": "H-native channel/aggregate/publisher roles plus generated Rx-dispatch owner; no S operands are transferred",
+  "function_count": 12,
+  "functions": [
+    {
+      "body_sha256": "a0aabe863cfcea34619f71900aac5edadc2e635891d5f4b850d6b0f9202e8fe0",
+      "body_size": 90,
+      "decompiled_c": "\nvoid FUN_0003e118(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  if (DAT_0002b79c == 'Z') {\n    FUN_0006410c(0xfebe7680);\n  }\n  else if (((uRamfebe6fb4 & 2) == 0) || (cRamfebeeb85 != 'Z')) {\n    FUN_0004c4fe(0xe2);\n  }\n  else {\n    FUN_0006418c(0xfebe7680,&DAT_0002b464,&PTR_LAB_00028514);\n  }\n  FUN_0003eccc(7,*(undefined4 *)(iVar1 + -0x4180));\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1969d814271f489022df7e9c73b351142b3a68ac59dbe719c370170eb5fe2e3c",
+      "entry": "0x0003E118"
+    },
+    {
+      "body_sha256": "a70675d432a9b1279108cc6e3024f4f82b979a7ee7aed93940535e2c6f0ab707",
+      "body_size": 90,
+      "decompiled_c": "\nvoid FUN_0003e1ca(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  if (DAT_0002b7a0 == 'Z') {\n    FUN_0006410c(0xfebe768c);\n  }\n  else if (((uRamfebe6fb4 & 1) == 0) || (cRamfebeeb85 != 'Z')) {\n    FUN_0004c4fe(0xe3);\n  }\n  else {\n    FUN_0006418c(0xfebe768c,&DAT_0002b468,&PTR_LAB_00028548);\n  }\n  FUN_0003eccc(8,*(undefined4 *)(iVar1 + -0x4174));\n  return;\n}\n\n",
+      "decompiled_c_sha256": "3b5b2d3c147566884baa26ba106c3c2bf6ab37e22e3353e0a480c07e7fd13b08",
+      "entry": "0x0003E1CA"
+    },
+    {
+      "body_sha256": "349b1f30772c1ab289be7748d411a61de087ad467fe41622e7c90b01f5749313",
+      "body_size": 90,
+      "decompiled_c": "\nvoid FUN_0003e27c(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  if (DAT_0002b7a4 == 'Z') {\n    FUN_0006410c(0xfebe7698);\n  }\n  else if (((uRamfebe6fb4 & 1) == 0) && (cRamfebeeb85 == 'Z')) {\n    FUN_0006418c(0xfebe7698,&DAT_0002b46c,&PTR_LAB_0002857c);\n  }\n  else {\n    FUN_00064128(0xfebe7698,&DAT_0002b46c);\n  }\n  FUN_0003eccc(3,*(undefined4 *)(iVar1 + -0x4168));\n  return;\n}\n\n",
+      "decompiled_c_sha256": "425f8542204ad86b0807aa1ea248e7ac2471ca978eb14781d105a54add49d279",
+      "entry": "0x0003E27C"
+    },
+    {
+      "body_sha256": "7375ef22633cbc08377f12629ab2f0296ee6d93a696380dfcee809336d9f6cd8",
+      "body_size": 90,
+      "decompiled_c": "\nvoid FUN_0003e42c(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  if (DAT_0002b7a8 == 'Z') {\n    FUN_0006410c(0xfebe76a4);\n  }\n  else if (((uRamfebe6fb4 & 2) == 0) && (cRamfebeeb85 == 'Z')) {\n    FUN_0006418c(0xfebe76a4,&DAT_0002b470,&PTR_LAB_000285b0);\n  }\n  else {\n    FUN_00064128(0xfebe76a4,&DAT_0002b470);\n  }\n  FUN_0003eccc(4,*(undefined4 *)(iVar1 + -0x415c));\n  return;\n}\n\n",
+      "decompiled_c_sha256": "0148731b9e6edf55114faeb3ef1fb91178ab67c9ce69466d2c1b65d26671e80c",
+      "entry": "0x0003E42C"
+    },
+    {
+      "body_sha256": "be9a3a6a8e702e7d9fb542631ef50c1e3585c033656250d36f50dee8014c7b7d",
+      "body_size": 92,
+      "decompiled_c": "\nvoid FUN_0003e5dc(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  if (DAT_0002b7ac == 'Z') {\n    FUN_0006410c(0xfebe76b0);\n  }\n  else if (((uRamfebe6fb4 & 3) == 0) && (cRamfebeeb85 == 'Z')) {\n    FUN_0006418c(0xfebe76b0,&DAT_0002b474,&PTR_LAB_000285e4);\n  }\n  else {\n    FUN_00064128(0xfebe76b0,&DAT_0002b474);\n  }\n  FUN_0003eccc(0,*(undefined4 *)(iVar1 + -0x4150));\n  return;\n}\n\n",
+      "decompiled_c_sha256": "fd597038a46c2c00d23077d57c211c4f4672b801d3bc323aca1969d29a3684e5",
+      "entry": "0x0003E5DC"
+    },
+    {
+      "body_sha256": "172e1bbcd314aab7be5b9af2c4f84167a7301c0493c41c3f3c32a91e33b44cec",
+      "body_size": 72,
+      "decompiled_c": "\nvoid FUN_0003e7cc(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  if (DAT_0002b7b0 == 'Z') {\n    FUN_0006410c(0xfebe76bc);\n  }\n  else if ((uRamfebe6fb4 & 1) == 0) {\n    FUN_0006418c(0xfebe76bc,&DAT_0002b478,&PTR_LAB_00028618);\n  }\n  else {\n    FUN_00064128(0xfebe76bc,&DAT_0002b478);\n  }\n  FUN_0003eccc(1,*(undefined4 *)(iVar1 + -0x4144));\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f8ae322c048e36878bde3a5e9ae6755236daa47a7960fbff223272d07fad9ff1",
+      "entry": "0x0003E7CC"
+    },
+    {
+      "body_sha256": "faadc6a4b160acda32d1a1350be292f140e2caa7311bd5fac7aac52797c8ba24",
+      "body_size": 72,
+      "decompiled_c": "\nvoid FUN_0003e87a(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  if (DAT_0002b7b4 == 'Z') {\n    FUN_0006410c(0xfebe76c8);\n  }\n  else if ((uRamfebe6fb4 & 2) == 0) {\n    FUN_0006418c(0xfebe76c8,&DAT_0002b47c,&PTR_LAB_0002864c);\n  }\n  else {\n    FUN_00064128(0xfebe76c8,&DAT_0002b47c);\n  }\n  FUN_0003eccc(2,*(undefined4 *)(iVar1 + -0x4138));\n  return;\n}\n\n",
+      "decompiled_c_sha256": "483a9734bb437c7e973ab805d2c2db9a04873544d293ae5fef5743706e8d092e",
+      "entry": "0x0003E87A"
+    },
+    {
+      "body_sha256": "77ec5d61b1a258648925a48443c6859255af1d6143ab8b9ba9a8e4ebf7430d59",
+      "body_size": 92,
+      "decompiled_c": "\nvoid FUN_0003e928(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  if (DAT_0002b7b8 == 'Z') {\n    FUN_0006410c(0xfebe76d4);\n  }\n  else if (((uRamfebe6fb4 & 3) == 0) && (cRamfebeeb85 == 'Z')) {\n    FUN_0006418c(0xfebe76d4,&DAT_0002b480,&PTR_LAB_00028680);\n  }\n  else {\n    FUN_00064128(0xfebe76d4,&DAT_0002b480);\n  }\n  FUN_0003eccc(5,*(undefined4 *)(iVar1 + -0x412c));\n  return;\n}\n\n",
+      "decompiled_c_sha256": "c561285d07c5c26bdf16ca5625c4899c196a70ef9d50d29fffb9b16ed46eb4af",
+      "entry": "0x0003E928"
+    },
+    {
+      "body_sha256": "2012084170658dd943f223f4c3d44f81df4ea7647e6ce3c92eaf2d69a7286e6b",
+      "body_size": 92,
+      "decompiled_c": "\nvoid FUN_0003ea16(void)\n\n{\n  int iVar1;\n  \n  iVar1 = -0x1414800;\n  if (DAT_0002b7bc == 'Z') {\n    FUN_0006410c(0xfebe76e0);\n  }\n  else if (((uRamfebe6fb4 & 3) == 0) && (cRamfebeeb85 == 'Z')) {\n    FUN_0006418c(0xfebe76e0,&DAT_0002b484,&PTR_LAB_000286b4);\n  }\n  else {\n    FUN_00064128(0xfebe76e0,&DAT_0002b484);\n  }\n  FUN_0003eccc(6,*(undefined4 *)(iVar1 + -0x4120));\n  return;\n}\n\n",
+      "decompiled_c_sha256": "2a8a668b69f5b7691d8c5c7304d33b3156f2e305911ffdc4e21eed38a1adab1a",
+      "entry": "0x0003EA16"
+    },
+    {
+      "body_sha256": "ff6e6588e4e7ee3e2234c9b07034bd908efdf2ea083d96058d13bef400aca6a5",
+      "body_size": 484,
+      "decompiled_c": "\nvoid FUN_0003eae8(void)\n\n{\n  char cVar1;\n  ushort uVar2;\n  int iVar3;\n  undefined4 uVar4;\n  int iVar5;\n  undefined1 uVar6;\n  \n  uVar2 = uRamfebe6fb4;\n  cVar1 = cRamfebe628c;\n  iVar3 = -0x1414800;\n  iVar5 = (int)sRamfebe62ea;\n  FUN_00036dfa(1);\n  if (((*(byte *)(iVar3 + -0x4112) |\n       *(byte *)(iVar3 + -0x4110) |\n       *(byte *)(iVar3 + -0x4113) | *(byte *)(iVar3 + -0x4111) | *(byte *)(iVar3 + -0x4114)) & 0x11)\n      == 0x11) {\n    FUN_000374e2(1,10);\n  }\n  if ((*(byte *)(iVar3 + -0x4114) & 0x22) == 0x22) {\n    iVar5 = FUN_00031420(2,iVar5);\n    if ((iVar5 == 1) || (cVar1 == '\\x01')) {\n      uVar4 = 0xb;\n    }\n    else {\n      uVar4 = 0x17;\n    }\n    FUN_000374e2(1,uVar4);\n  }\n  if (((*(byte *)(iVar3 + -0x4113) | *(byte *)(iVar3 + -0x4111)) & 0x22) == 0x22) {\n    FUN_000374e2(1,0x23);\n  }\n  if (((*(byte *)(iVar3 + -0x4112) | *(byte *)(iVar3 + -0x4110)) & 0x22) == 0x22) {\n    FUN_000374e2(1,0x24);\n  }\n  if (((*(byte *)(iVar3 + -0x410d) | *(byte *)(iVar3 + -0x410f)) & 0x22) == 0x22) {\n    FUN_000374e2(1,0x1b);\n  }\n  if (((*(byte *)(iVar3 + -0x410c) | *(byte *)(iVar3 + -0x410e)) & 0x22) == 0x22) {\n    FUN_000374e2(1,0x1c);\n  }\n  if ((((((*(byte *)(iVar3 + -0x4113) | *(byte *)(iVar3 + -0x4111)) & 0x22) == 0x22) &&\n       ((uVar2 & 1) == 0)) ||\n      ((((*(byte *)(iVar3 + -0x4112) | *(byte *)(iVar3 + -0x4110)) & 0x22) == 0x22 &&\n       ((uVar2 & 2) == 0)))) || ((*(byte *)(iVar3 + -0x4114) & 0x22) == 0x22)) {\n    FUN_000374e2(1,10);\n  }\n  if (((*(byte *)(iVar3 + -0x4112) |\n       *(byte *)(iVar3 + -0x4110) | *(byte *)(iVar3 + -0x4113) | *(byte *)(iVar3 + -0x4111)) & 0x22)\n      == 0x22) {\n    FUN_000374e2(1,0x32);\n  }\n  uVar6 = 0;\n  if (*(char *)(iVar3 + -0x4112) != '\\0' ||\n      (*(char *)(iVar3 + -0x410c) != '\\0' ||\n      (*(char *)(iVar3 + -0x4110) != '\\0' ||\n      (*(char *)(iVar3 + -0x410e) != '\\0' ||\n      (*(char *)(iVar3 + -0x4113) != '\\0' ||\n      (*(char *)(iVar3 + -0x410d) != '\\0' ||\n      (*(char *)(iVar3 + -0x4111) != '\\0' ||\n      (*(char *)(iVar3 + -0x410f) != '\\0' || *(char *)(iVar3 + -0x4114) != '\\0')))))))) {\n    uVar6 = 0x5a;\n  }\n  FUN_00036e68(1);\n  uVar4 = 0;\n  if (*(char *)(iVar3 + -0x4112) != '\\0' ||\n      (*(char *)(iVar3 + -0x410e) != '\\0' ||\n      (*(char *)(iVar3 + -0x4110) != '\\0' ||\n      (*(char *)(iVar3 + -0x4113) != '\\0' ||\n      (*(char *)(iVar3 + -0x410f) != '\\0' ||\n      (*(char *)(iVar3 + -0x4111) != '\\0' || *(char *)(iVar3 + -0x4114) != '\\0')))))) {\n    uVar4 = 0x11;\n  }\n  FUN_0004d7ce(5,uVar4);\n  uVar4 = 0;\n  if (((*(byte *)(iVar3 + -0x4112) |\n       *(byte *)(iVar3 + -0x410e) |\n       *(byte *)(iVar3 + -0x4110) |\n       *(byte *)(iVar3 + -0x4113) | *(byte *)(iVar3 + -0x410f) | *(byte *)(iVar3 + -0x4111)) & 0x11)\n      == 0x11) {\n    uVar4 = 0x5a;\n  }\n  FUN_00047484(1,uVar4);\n  *(undefined1 *)(iVar3 + -0x410b) = uVar6;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "3fcc5392f3ecfb50978940c77e6d5358255bdaf0be06b98d7a713402f9c90245",
+      "entry": "0x0003EAE8"
+    },
+    {
+      "body_sha256": "3583585202ad59988cf9b4bb832665fe30c55e6a45bcd044f6c73f8f423f6de6",
+      "body_size": 18,
+      "decompiled_c": "\nvoid FUN_0003eccc(uint param_1,undefined1 param_2)\n\n{\n  if ((param_1 & 0xff) < 9) {\n    *(undefined1 *)((param_1 & 0xff) + 0xfebe76ec) = param_2;\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "42dd4ef52d62395f22e2e3ebd6c002c5658ed24e8b687dea28dbd5c0b332dad7",
+      "entry": "0x0003ECCC"
+    },
+    {
+      "body_sha256": "81c90c65b783502fd63042070a158fa923f59e41a6be3cb0c3fae98d030d41dc",
+      "body_size": 1050,
+      "decompiled_c": "\nvoid FUN_00058450(undefined4 param_1,uint param_2,uint param_3)\n\n{\n  param_3 = param_3 & 0xffff;\n  param_2 = param_2 & 0xffff;\n  if (0xff < param_2) {\n    if (param_3 < 0x100) {\n      FUN_00050dce();\n      FUN_00050dd8();\n      FUN_00050d4e();\n      FUN_00050d58();\n      FUN_0004b176();\n      FUN_0004b178();\n      FUN_0004b056();\n      FUN_0004b058();\n      FUN_0004b06c();\n    }\n    else {\n      FUN_00050dd8();\n      FUN_00050d58();\n      FUN_0004b178();\n      FUN_0004b058();\n    }\n    FUN_0004b06e();\n  }\n  if (0x100 < param_2) {\n    if (param_3 < 0x101) {\n      FUN_00043b8a();\n      FUN_00043c14();\n      FUN_00044412();\n    }\n    else {\n      FUN_00043c14();\n    }\n    FUN_00044424();\n  }\n  if (0xff < param_2) {\n    if (param_3 < 0x100) {\n      FUN_00042ed6();\n    }\n    FUN_0004312c();\n  }\n  if (0x100 < param_2) {\n    if (param_3 < 0x101) {\n      FUN_00040842();\n    }\n    FUN_00040942();\n  }\n  if (0x102 < param_2) {\n    if (param_2 < 0x523) {\n      if (param_3 - 0x103 < 0x420) {\n        FUN_00036796();\n        FUN_00036828();\n        FUN_00036930();\n        FUN_000369e0();\n      }\n      else {\n        FUN_00036786();\n        FUN_00036796();\n        FUN_00036818();\n        FUN_00036828();\n        FUN_00036920();\n        FUN_00036930();\n        FUN_000369d0();\n        FUN_000369e0();\n        FUN_0003689c();\n      }\n      FUN_0003689e();\n    }\n    if (param_3 < 0x103) {\n      FUN_000383b4();\n    }\n    FUN_000383b6();\n  }\n  if (param_2 - 0x200 < 0x323) {\n    if (param_3 - 0x200 < 0x323) {\n      FUN_0003fece();\n      FUN_0003f6cc();\n      FUN_0003ef10();\n      FUN_0003f1e6();\n      FUN_0003f372();\n      FUN_0003f4fe();\n      FUN_0003ece2();\n      FUN_0003c57c();\n      if (param_2 - 0x20c < 0x317) {\n        if (0x316 < param_3 - 0x20c) {\n          FUN_0003c02c();\n        }\n        FUN_0003c056();\n      }\n      FUN_0003c7b6();\n      FUN_0003ce6a();\n      FUN_0003cd54();\n      FUN_0003c1f0();\n      FUN_0003c34a();\n      FUN_0003c9b2();\n      FUN_0003d53a();\n      if (param_2 - 0x20c < 0x317) {\n        if (0x316 < param_3 - 0x20c) {\n          FUN_0003cfea();\n        }\n        FUN_0003d014();\n      }\n      FUN_0003d778();\n      FUN_0003de2e();\n      FUN_0003dd16();\n      FUN_0003d1ae();\n      FUN_0003d308();\n      FUN_0003d974();\n      if (param_2 - 0x301 < 0x222) {\n        if (0x221 < param_3 - 0x301) {\n          FUN_0003df86();\n        }\n        FUN_0003e0da();\n      }\n      FUN_0003e5dc();\n      if (param_2 - 0x20b < 0x318) {\n        if (param_3 - 0x20b < 0x318) {\n          FUN_0003e7cc();\n        }\n        else {\n          FUN_0003e7bc();\n          FUN_0003e7cc();\n          FUN_0003e86a();\n        }\n        FUN_0003e87a();\n      }\n      FUN_0003e27c();\n      FUN_0003e42c();\n      FUN_0003e928();\n      FUN_0003ea16();\n      FUN_0003e118();\n      FUN_0003e1ca();\n      FUN_0003eae8();\n      FUN_0003ff38();\n    }\n    else {\n      FUN_0003f8a4();\n      FUN_0003fece();\n      FUN_0003f694();\n      FUN_0003f6cc();\n      FUN_0003eed8();\n      FUN_0003ef10();\n      FUN_0003f1ce();\n      FUN_0003f1e6();\n      FUN_0003f35a();\n      FUN_0003f372();\n      FUN_0003f4e6();\n      FUN_0003f4fe();\n      FUN_0003ece0();\n      FUN_0003ece2();\n      FUN_0003c576();\n      FUN_0003c57c();\n      FUN_0003c784();\n      FUN_0003c7b6();\n      FUN_0003ce5a();\n      FUN_0003ce6a();\n      FUN_0003cd44();\n      FUN_0003cd54();\n      FUN_0003c17e();\n      FUN_0003c1f0();\n      FUN_0003c31e();\n      FUN_0003c34a();\n      FUN_0003c9b0();\n      FUN_0003c9b2();\n      FUN_0003d534();\n      FUN_0003d53a();\n      FUN_0003d746();\n      FUN_0003d778();\n      FUN_0003de1e();\n      FUN_0003de2e();\n      FUN_0003dd06();\n      FUN_0003dd16();\n      FUN_0003d13c();\n      FUN_0003d1ae();\n      FUN_0003d2dc();\n      FUN_0003d308();\n      FUN_0003d972();\n      FUN_0003d974();\n      FUN_0003e5cc();\n      FUN_0003e5dc();\n      FUN_0003e26c();\n      FUN_0003e27c();\n      FUN_0003e41c();\n      FUN_0003e42c();\n      FUN_0003e918();\n      FUN_0003e928();\n      FUN_0003ea06();\n      FUN_0003ea16();\n      FUN_0003e108();\n      FUN_0003e118();\n      FUN_0003e1ba();\n      FUN_0003e1ca();\n      FUN_0003eae6();\n      FUN_0003eae8();\n      FUN_0003ff36();\n      FUN_0003ff38();\n      FUN_00040152();\n    }\n    FUN_00040154();\n  }\n  if (param_2 - 0x301 < 0x222) {\n    if (param_3 - 0x301 < 0x222) {\n      FUN_00040c26();\n      FUN_00040efc();\n      FUN_000416b4();\n      FUN_000419be();\n      FUN_00042132();\n      FUN_00042238();\n      FUN_00041fa2();\n      FUN_0004206a();\n      FUN_0004233e();\n      FUN_000424da();\n      FUN_000415e8();\n      FUN_00041cac();\n      FUN_0004152a();\n    }\n    else {\n      FUN_00040c16();\n      FUN_00040c26();\n      FUN_00040eec();\n      FUN_00040efc();\n      FUN_000416a4();\n      FUN_000416b4();\n      FUN_000419ae();\n      FUN_000419be();\n      FUN_00042122();\n      FUN_00042132();\n      FUN_00042228();\n      FUN_00042238();\n      FUN_00041f92();\n      FUN_00041fa2();\n      FUN_0004205a();\n      FUN_0004206a();\n      FUN_0004232e();\n      FUN_0004233e();\n      FUN_000424ca();\n      FUN_000424da();\n      FUN_000415d8();\n      FUN_000415e8();\n      FUN_00041caa();\n      FUN_00041cac();\n      FUN_00041518();\n      FUN_0004152a();\n      FUN_0003fee4();\n    }\n    FUN_0003fee6();\n  }\n  if (0x102 < param_2) {\n    if (param_3 < 0x103) {\n      FUN_00036b36();\n    }\n    FUN_00036cec();\n    if (param_3 < 0x103) {\n      FUN_0002dde6();\n      FUN_0002df3a();\n      FUN_0002d9e0();\n      FUN_0002da90();\n      FUN_0002f1e2();\n      FUN_0002f40a();\n      FUN_00030be4();\n    }\n    else {\n      FUN_0002df3a();\n      FUN_0002da90();\n      FUN_0002f40a();\n    }\n    FUN_00030c4c();\n  }\n  if (param_2 == 0x600) {\n    if (param_3 != 0x600) {\n      FUN_0002dce6();\n    }\n    FUN_0002dce8();\n  }\n  FUN_000524b8();\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a7eae54a7a1b7d9b502886be78ddf88a8e4937c4a1a0914ec1af2a7373d84374",
+      "entry": "0x00058450"
+    }
+  ],
+  "image": {
+    "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "codeflash_size": 1048576,
+    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+  },
+  "schema": "corolla-h-plausibility-monitor-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "path": "build/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
+    "sha256": "98fbd903f71165a433cb01dbb2e17bf3471824881760e6420d65ecef9f4f8dfa"
+  }
+}

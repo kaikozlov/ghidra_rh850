@@ -1640,6 +1640,26 @@ paths = [
 ]
 oracle = "raw_bytes"
 
+[suite.corolla_8965h_plausibility_monitor]
+tests = ["tests/verify_corolla_8965H1202000_plausibility_monitor.py"]
+paths = [
+  "tests/verify_corolla_8965H1202000_plausibility_monitor.py",
+  "tools/build_corolla_h_plausibility_monitor.py",
+  "tools/extract_corolla_h_plausibility_monitor_evidence.py",
+  "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+  "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json",
+  "data/generated/decompilations.jsonl",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+]
+oracle = "raw_bytes"
+
 [suite.corolla_8965h_static_coverage]
 tests = ["tests/verify_corolla_8965H1202000_static_coverage.py"]
 paths = [
@@ -1674,6 +1694,8 @@ paths = [
   "data/generated/corolla_8965H1202000_diagnostic_residue.json",
   "data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_deadline_monitor_surface.json",
+  "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_plausibility_monitor.json",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/reference/generated-artifacts.md",

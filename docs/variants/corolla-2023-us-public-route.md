@@ -1471,10 +1471,10 @@ promotion:
 named canonical functions                 1113
 verified exact-body transfers              288
 target-native inspected unique-shape       30
-target-native role-recovered                111
+target-native role-recovered                122
 complete target-surface recensuses          350
 structural candidates only                  106
-genuinely unresolved                        228
+genuinely unresolved                        217
 ```
 
 `target-native inspected unique-shape` means a unique complete-instruction-shape
@@ -1495,7 +1495,7 @@ findings into one-to-one function equivalence. Conversely, a canonical function
 that disappeared because H regenerated the whole table should not remain counted
 as an unexplained firmware difference merely because its exact body no longer
 exists. H-native functions with no unique canonical S pair are counted separately
-(525 currently have
+(535 currently have
 tracked target-native evidence) rather than being forced into the 1,113-function
 Sienna denominator.
 
@@ -2020,6 +2020,32 @@ Machine-readable ownership is
 evidence. `tests/verify_corolla_8965H1202000_deadline_monitor_surface.py` pins
 table geometry/cardinality, dispatcher homologs, all callback hashes, and the
 no-fake-one-to-one boundary. The global named residue drops **316 -> 228**.
+
+### 7.26 Nine-channel plausibility monitor family
+
+The 11 named plausibility-monitor residues are now target-native role mapped. The
+nine channel steps preserve both generated dispatcher order and their status-index
+permutation:
+
+```text
+channel:       0      1      2      3      4      5      6      7      8
+status index:  7      8      3      4      0      1      2      5      6
+H function:   3E118  3E1CA  3E27C  3E42C  3E5DC  3E7CC  3E87A  3E928  3EA16
+```
+
+Each channel's 13-pointer callback table moves by exactly `-0x470` from Sienna
+(`28984..28B24 -> 28514..286B4`). Every H channel calls common status publisher
+`3ECCC`, which remains an 18-byte `<9` indexed byte store (H vector `FEBE76EC`).
+The owning generated Rx group calls the channels in the same channel4/5/6/2/3/7/8/0/1
+order before aggregation.
+
+The aggregate maps `S 43F28 (436 B) -> H 3EAE8 (484 B)`. It preserves the nine-state
+diagnostic/event aggregation but adds one H-specific status publication path. Thus
+channel role/table/status semantics transfer, while H thresholds, callback operands,
+RAM locations, and the added aggregate output remain target-specific.
+
+Machine-readable ownership is `data/generated/corolla_8965H1202000_plausibility_monitor.json`.
+The global genuinely-unresolved named residue drops **228 -> 217**.
 
 ## 8. Remaining evidence boundary
 

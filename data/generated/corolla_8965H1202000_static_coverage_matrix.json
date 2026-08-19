@@ -5378,167 +5378,266 @@
     },
     {
       "body_size": 90,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_channel0_step",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x00043558",
       "reference_name": "plausibility_monitor_channel0_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_channel0_step",
+        "target_entry": "0x0003E118"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003E118",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 90,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_channel1_step",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x0004360A",
       "reference_name": "plausibility_monitor_channel1_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_channel1_step",
+        "target_entry": "0x0003E1CA"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003E1CA",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 90,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_channel2_step",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x000436BC",
       "reference_name": "plausibility_monitor_channel2_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_channel2_step",
+        "target_entry": "0x0003E27C"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003E27C",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 90,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_channel3_step",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x0004386C",
       "reference_name": "plausibility_monitor_channel3_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_channel3_step",
+        "target_entry": "0x0003E42C"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003E42C",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 92,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_channel4_step",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x00043A1C",
       "reference_name": "plausibility_monitor_channel4_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_channel4_step",
+        "target_entry": "0x0003E5DC"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003E5DC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 72,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_channel5_step",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x00043C0C",
       "reference_name": "plausibility_monitor_channel5_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_channel5_step",
+        "target_entry": "0x0003E7CC"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003E7CC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 72,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_channel6_step",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x00043CBA",
       "reference_name": "plausibility_monitor_channel6_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_channel6_step",
+        "target_entry": "0x0003E87A"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003E87A",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 92,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_channel7_step",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x00043D68",
       "reference_name": "plausibility_monitor_channel7_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_channel7_step",
+        "target_entry": "0x0003E928"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003E928",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 92,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_channel8_step",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x00043E56",
       "reference_name": "plausibility_monitor_channel8_step",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_channel8_step",
+        "target_entry": "0x0003EA16"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003EA16",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 436,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_status_aggregate",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x00043F28",
       "reference_name": "plausibility_monitor_status_aggregate",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_status_aggregate",
+        "target_entry": "0x0003EAE8"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003EAE8",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
       "body_size": 18,
-      "coverage": "genuinely-unresolved",
+      "coverage": "target-native-role-recovered",
       "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
+        "target-native role recovery: plausibility_monitor_status_publish",
+        "report:data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "target-native:data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
       ],
       "reference_entry": "0x000440DC",
       "reference_name": "plausibility_monitor_status_publish",
-      "role_recovery": null,
+      "role_recovery": {
+        "evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
+        "report": "data/generated/corolla_8965H1202000_plausibility_monitor.json",
+        "role": "plausibility_monitor_status_publish",
+        "target_entry": "0x0003ECCC"
+      },
       "semantic_tags": [],
       "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
+      "target_entry": "0x0003ECCC",
+      "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+      ],
       "transfer_status": "changed-or-unresolved"
     },
     {
@@ -20498,171 +20597,6 @@
       "transfer_status": "changed-or-unresolved"
     },
     {
-      "body_size": 90,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00043558",
-      "reference_name": "plausibility_monitor_channel0_step",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 90,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004360A",
-      "reference_name": "plausibility_monitor_channel1_step",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 90,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000436BC",
-      "reference_name": "plausibility_monitor_channel2_step",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 90,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x0004386C",
-      "reference_name": "plausibility_monitor_channel3_step",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 92,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00043A1C",
-      "reference_name": "plausibility_monitor_channel4_step",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 72,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00043C0C",
-      "reference_name": "plausibility_monitor_channel5_step",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 72,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00043CBA",
-      "reference_name": "plausibility_monitor_channel6_step",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 92,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00043D68",
-      "reference_name": "plausibility_monitor_channel7_step",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 92,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00043E56",
-      "reference_name": "plausibility_monitor_channel8_step",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 436,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x00043F28",
-      "reference_name": "plausibility_monitor_status_aggregate",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
-      "body_size": 18,
-      "coverage": "genuinely-unresolved",
-      "coverage_basis": [
-        "no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"
-      ],
-      "reference_entry": "0x000440DC",
-      "reference_name": "plausibility_monitor_status_publish",
-      "role_recovery": null,
-      "semantic_tags": [],
-      "surface_recensus": [],
-      "target_entry": null,
-      "target_native_evidence_files": [],
-      "transfer_status": "changed-or-unresolved"
-    },
-    {
       "body_size": 202,
       "coverage": "genuinely-unresolved",
       "coverage_basis": [
@@ -23248,6 +23182,8 @@
       "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json": "23276acc88a2fa363ae0d78bbc16cebc9459caac80634aae6bf3c3756a058ab3",
       "data/generated/corolla_8965H1202000_motor_control.json": "eca55432652bac286223b181602ca62f4a64d207c39cf0698e508731a909b756",
       "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json": "79e9b0a26271f349724288b59e8f5e34733ecbf5bf56c698072b8fe9b82e402d",
+      "data/generated/corolla_8965H1202000_plausibility_monitor.json": "6c52c691fba55a999e14236a85be317eb17762a49b4b0598cb79c3df3478accc",
+      "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json": "9571597f2af8e83634d580d9f90ceab2039103741d5c3d6e1442ff1e49ecf395",
       "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json": "5233f222002644f854c8161e70306f3d89e6e0edfa0df5714154092cb180f851",
       "data/generated/corolla_8965H1202000_secoc_surface.json": "012ab334b9446f41c9767de39834e1b37754254e7fb0cdf44c591219d778ccae",
       "data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json": "daf40421514eff8565d93b90adbb3613d062a72f96d103f9d2a80bb58d327163",
@@ -25040,15 +24976,15 @@
   ],
   "summary": {
     "coverage_counts": {
-      "genuinely-unresolved": 228,
+      "genuinely-unresolved": 217,
       "structural-candidate-only": 106,
       "target-native-inspected-unique-shape": 30,
-      "target-native-role-recovered": 111,
+      "target-native-role-recovered": 122,
       "target-surface-recensused": 350,
       "verified-exact-body-transfer": 288
     },
-    "genuinely_unresolved_count": 228,
-    "h_native_evidence_functions_without_unique_sienna_pair": 525,
+    "genuinely_unresolved_count": 217,
+    "h_native_evidence_functions_without_unique_sienna_pair": 535,
     "named_function_count": 1113,
     "structural_candidate_only_count": 106,
     "surface_recensus_reference_function_count": 448,
@@ -25102,9 +25038,10 @@
         "verified-exact-body-transfer": 5
       },
       "untagged": {
-        "genuinely-unresolved": 228,
+        "genuinely-unresolved": 217,
         "structural-candidate-only": 24,
         "target-native-inspected-unique-shape": 1,
+        "target-native-role-recovered": 11,
         "target-surface-recensused": 91,
         "verified-exact-body-transfer": 138
       },

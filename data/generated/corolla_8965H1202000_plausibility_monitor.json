@@ -1,0 +1,595 @@
+{
+  "aggregate": {
+    "h": "0x0003EAE8",
+    "h_adds_status_publication": true,
+    "preserves_nine_state_aggregation": true,
+    "sienna": "0x00043F28",
+    "size_change": [
+      436,
+      484
+    ]
+  },
+  "channels": [
+    {
+      "channel": 0,
+      "expected_status_index": 7,
+      "h": "0x0003E118",
+      "h_status_index": 7,
+      "h_table": {
+        "base": "0x00028514",
+        "nonzero": 3,
+        "pointers": [
+          "0x0003E172",
+          "0x0003E172",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "0x0003E198",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 2
+      },
+      "sienna": "0x00043558",
+      "sienna_status_index": 7,
+      "sienna_table": {
+        "base": "0x00028984",
+        "nonzero": 3,
+        "pointers": [
+          "0x000435B2",
+          "0x000435B2",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "0x000435D8",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 2
+      },
+      "table_delta": -1136
+    },
+    {
+      "channel": 1,
+      "expected_status_index": 8,
+      "h": "0x0003E1CA",
+      "h_status_index": 8,
+      "h_table": {
+        "base": "0x00028548",
+        "nonzero": 3,
+        "pointers": [
+          "0x0003E224",
+          "0x0003E224",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "0x0003E24A",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 2
+      },
+      "sienna": "0x0004360A",
+      "sienna_status_index": 8,
+      "sienna_table": {
+        "base": "0x000289B8",
+        "nonzero": 3,
+        "pointers": [
+          "0x00043664",
+          "0x00043664",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "0x0004368A",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 2
+      },
+      "table_delta": -1136
+    },
+    {
+      "channel": 2,
+      "expected_status_index": 3,
+      "h": "0x0003E27C",
+      "h_status_index": 3,
+      "h_table": {
+        "base": "0x0002857C",
+        "nonzero": 4,
+        "pointers": [
+          "0x0003E344",
+          "0x0003E344",
+          null,
+          null,
+          "0x0003E3EA",
+          null,
+          null,
+          null,
+          "0x0003E3FA",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "sienna": "0x000436BC",
+      "sienna_status_index": 3,
+      "sienna_table": {
+        "base": "0x000289EC",
+        "nonzero": 4,
+        "pointers": [
+          "0x00043784",
+          "0x00043784",
+          null,
+          null,
+          "0x0004382A",
+          null,
+          null,
+          null,
+          "0x0004383A",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "table_delta": -1136
+    },
+    {
+      "channel": 3,
+      "expected_status_index": 4,
+      "h": "0x0003E42C",
+      "h_status_index": 4,
+      "h_table": {
+        "base": "0x000285B0",
+        "nonzero": 4,
+        "pointers": [
+          "0x0003E4F4",
+          "0x0003E4F4",
+          null,
+          null,
+          "0x0003E59A",
+          null,
+          null,
+          null,
+          "0x0003E5AA",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "sienna": "0x0004386C",
+      "sienna_status_index": 4,
+      "sienna_table": {
+        "base": "0x00028A20",
+        "nonzero": 4,
+        "pointers": [
+          "0x00043934",
+          "0x00043934",
+          null,
+          null,
+          "0x000439DA",
+          null,
+          null,
+          null,
+          "0x000439EA",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "table_delta": -1136
+    },
+    {
+      "channel": 4,
+      "expected_status_index": 0,
+      "h": "0x0003E5DC",
+      "h_status_index": 0,
+      "h_table": {
+        "base": "0x000285E4",
+        "nonzero": 4,
+        "pointers": [
+          "0x0003E6D6",
+          "0x0003E6D6",
+          null,
+          null,
+          "0x0003E778",
+          null,
+          null,
+          null,
+          "0x0003E790",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "sienna": "0x00043A1C",
+      "sienna_status_index": 0,
+      "sienna_table": {
+        "base": "0x00028A54",
+        "nonzero": 4,
+        "pointers": [
+          "0x00043B16",
+          "0x00043B16",
+          null,
+          null,
+          "0x00043BB8",
+          null,
+          null,
+          null,
+          "0x00043BD0",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "table_delta": -1136
+    },
+    {
+      "channel": 5,
+      "expected_status_index": 1,
+      "h": "0x0003E7CC",
+      "h_status_index": 1,
+      "h_table": {
+        "base": "0x00028618",
+        "nonzero": 4,
+        "pointers": [
+          "0x0003E814",
+          "0x0003E814",
+          null,
+          null,
+          "0x0003E838",
+          null,
+          null,
+          null,
+          "0x0003E848",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "sienna": "0x00043C0C",
+      "sienna_status_index": 1,
+      "sienna_table": {
+        "base": "0x00028A88",
+        "nonzero": 4,
+        "pointers": [
+          "0x00043C54",
+          "0x00043C54",
+          null,
+          null,
+          "0x00043C78",
+          null,
+          null,
+          null,
+          "0x00043C88",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "table_delta": -1136
+    },
+    {
+      "channel": 6,
+      "expected_status_index": 2,
+      "h": "0x0003E87A",
+      "h_status_index": 2,
+      "h_table": {
+        "base": "0x0002864C",
+        "nonzero": 4,
+        "pointers": [
+          "0x0003E8C2",
+          "0x0003E8C2",
+          null,
+          null,
+          "0x0003E8E6",
+          null,
+          null,
+          null,
+          "0x0003E8F6",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "sienna": "0x00043CBA",
+      "sienna_status_index": 2,
+      "sienna_table": {
+        "base": "0x00028ABC",
+        "nonzero": 4,
+        "pointers": [
+          "0x00043D02",
+          "0x00043D02",
+          null,
+          null,
+          "0x00043D26",
+          null,
+          null,
+          null,
+          "0x00043D36",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "table_delta": -1136
+    },
+    {
+      "channel": 7,
+      "expected_status_index": 5,
+      "h": "0x0003E928",
+      "h_status_index": 5,
+      "h_table": {
+        "base": "0x00028680",
+        "nonzero": 4,
+        "pointers": [
+          "0x0003E984",
+          "0x0003E984",
+          null,
+          null,
+          "0x0003E9D4",
+          null,
+          null,
+          null,
+          "0x0003E9E4",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "sienna": "0x00043D68",
+      "sienna_status_index": 5,
+      "sienna_table": {
+        "base": "0x00028AF0",
+        "nonzero": 4,
+        "pointers": [
+          "0x00043DC4",
+          "0x00043DC4",
+          null,
+          null,
+          "0x00043E14",
+          null,
+          null,
+          null,
+          "0x00043E24",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "table_delta": -1136
+    },
+    {
+      "channel": 8,
+      "expected_status_index": 6,
+      "h": "0x0003EA16",
+      "h_status_index": 6,
+      "h_table": {
+        "base": "0x000286B4",
+        "nonzero": 4,
+        "pointers": [
+          "0x0003EA72",
+          "0x0003EA72",
+          null,
+          null,
+          "0x0003EAC2",
+          null,
+          null,
+          null,
+          "0x0003EAD2",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "sienna": "0x00043E56",
+      "sienna_status_index": 6,
+      "sienna_table": {
+        "base": "0x00028B24",
+        "nonzero": 4,
+        "pointers": [
+          "0x00043EB2",
+          "0x00043EB2",
+          null,
+          null,
+          "0x00043F02",
+          null,
+          null,
+          null,
+          "0x00043F12",
+          null,
+          null,
+          null,
+          null
+        ],
+        "unique": 3
+      },
+      "table_delta": -1136
+    }
+  ],
+  "evidence": {
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json"
+  },
+  "images": {
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "owner_dispatch": {
+    "channel_call_order_h": [
+      "0x0003E5DC",
+      "0x0003E7CC",
+      "0x0003E87A",
+      "0x0003E27C",
+      "0x0003E42C",
+      "0x0003E928",
+      "0x0003EA16",
+      "0x0003E118",
+      "0x0003E1CA",
+      "0x0003EAE8"
+    ],
+    "h": "0x00058450",
+    "sienna": "0x0005D3CE"
+  },
+  "publisher": {
+    "both_body_size_18": true,
+    "h": "0x0003ECCC",
+    "h_bound": 9,
+    "h_vector_base": "0xFEBE76EC",
+    "sienna": "0x000440DC"
+  },
+  "role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 90,
+      "reference_entry": "0x00043558",
+      "reference_name": "plausibility_monitor_channel0_step",
+      "sienna_body_size": 90,
+      "target_entry": "0x0003E118"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 90,
+      "reference_entry": "0x0004360A",
+      "reference_name": "plausibility_monitor_channel1_step",
+      "sienna_body_size": 90,
+      "target_entry": "0x0003E1CA"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 90,
+      "reference_entry": "0x000436BC",
+      "reference_name": "plausibility_monitor_channel2_step",
+      "sienna_body_size": 90,
+      "target_entry": "0x0003E27C"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 90,
+      "reference_entry": "0x0004386C",
+      "reference_name": "plausibility_monitor_channel3_step",
+      "sienna_body_size": 90,
+      "target_entry": "0x0003E42C"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 92,
+      "reference_entry": "0x00043A1C",
+      "reference_name": "plausibility_monitor_channel4_step",
+      "sienna_body_size": 92,
+      "target_entry": "0x0003E5DC"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 72,
+      "reference_entry": "0x00043C0C",
+      "reference_name": "plausibility_monitor_channel5_step",
+      "sienna_body_size": 72,
+      "target_entry": "0x0003E7CC"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 72,
+      "reference_entry": "0x00043CBA",
+      "reference_name": "plausibility_monitor_channel6_step",
+      "sienna_body_size": 72,
+      "target_entry": "0x0003E87A"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 92,
+      "reference_entry": "0x00043D68",
+      "reference_name": "plausibility_monitor_channel7_step",
+      "sienna_body_size": 92,
+      "target_entry": "0x0003E928"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 92,
+      "reference_entry": "0x00043E56",
+      "reference_name": "plausibility_monitor_channel8_step",
+      "sienna_body_size": 92,
+      "target_entry": "0x0003EA16"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 484,
+      "reference_entry": "0x00043F28",
+      "reference_name": "plausibility_monitor_status_aggregate",
+      "sienna_body_size": 436,
+      "target_entry": "0x0003EAE8"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "h_body_size": 18,
+      "reference_entry": "0x000440DC",
+      "reference_name": "plausibility_monitor_status_publish",
+      "sienna_body_size": 18,
+      "target_entry": "0x0003ECCC"
+    }
+  ],
+  "role_closure_count": 11,
+  "schema": "corolla-h-plausibility-monitor-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "all_11_roles_recovered": true,
+    "all_channel_table_deltas_minus_0x470": true,
+    "boundary": "channel roles, table ownership, status-index mapping, and aggregate/publisher architecture are recovered; H callback operands, thresholds, state addresses, and the added aggregate status path remain target-specific.",
+    "status_index_permutation_preserved": true
+  },
+  "status_index_order": [
+    7,
+    8,
+    3,
+    4,
+    0,
+    1,
+    2,
+    5,
+    6
+  ]
+}

@@ -366,6 +366,22 @@ def main() -> None:
         for item in deadline_surface.get("surface_recensus", []):
             recensus[int(item["reference_entry"], 16)].add("deadline-monitor-complete-three-table-recensus")
 
+    plausibility_path = REPO / "data/generated/corolla_8965H1202000_plausibility_monitor.json"
+    if plausibility_path.is_file():
+        plausibility = load_json(plausibility_path)
+        plausibility_rel = str(plausibility_path.relative_to(REPO))
+        evidence_file_hashes[plausibility_rel] = sha256(plausibility_path.read_bytes())
+        plausibility_ev_path = REPO / plausibility["evidence"]["decompiler_evidence"]
+        plausibility_ev = load_json(plausibility_ev_path)
+        plausibility_targets = {int(r["entry"], 16) for r in plausibility_ev.get("functions", [])}
+        for item in plausibility.get("role_closure", []):
+            ref = int(item["reference_entry"], 16); target = int(item["target_entry"], 16)
+            if target not in plausibility_targets:
+                raise ValueError(f"plausibility role target lacks evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {"target_entry":item["target_entry"],"report":plausibility_rel,"evidence":plausibility["evidence"]["decompiler_evidence"],"role":item["reference_name"]}
+
     # Classify each canonical named function conservatively.
     classified = []
     for row in rows:
