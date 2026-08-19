@@ -1786,3 +1786,17 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   §7.11; `tests/verify_corolla_8965H1202000_fd_control.py`.
+
+### CORR-074 — H `0xCEDAE` is 534 bytes, not 533
+
+- **Earlier provisional count:** the first target-native steering pass described
+  H `0xCEDAE` as a 533-byte supervisor body.
+- **Correct:** the exact Ghidra/raw function boundary is `0x216` bytes = **534
+  bytes**. The new complete supervisor-stage ledger binds that body to 123 direct
+  stage calls.
+- **Consequence:** semantic conclusions from the earlier pass are unchanged;
+  this corrects the body-size denominator before it becomes a cross-variant
+  invariant.
+- **Canonical:**
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
+  §7.12; `tests/verify_corolla_8965H1202000_steering_supervisor.py`.

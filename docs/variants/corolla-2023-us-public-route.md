@@ -753,7 +753,7 @@ the physical PWM boundary rather than ending at a mathematical look-alike.
 
 The high-level steering pipeline is **not** an exact structural transplant. The
 Sienna 12-byte wrapper `0xCBA72` maps cleanly to H `0xCF028`, but H's wrapper
-calls a real 533-byte pipeline at `0xCEDAE`; Sienna's corresponding pipeline at
+calls a real 534-byte pipeline at `0xCEDAE`; Sienna's corresponding pipeline at
 `0xCB86E` is only 424 bytes. H's pipeline has a larger/reordered stage set, while
 still directly calling H `0xC91B6` and `0xC9232` for the recovered steering
 clamp/gain and rate-limit stages. This gives a target-native anchor for the
@@ -1219,6 +1219,78 @@ H-native decompilation evidence in
 the bounded full-corpus direct-reference census in
 `data/generated/corolla_8965H1202000_fd_control_reference_census.json`.
 `tests/verify_corolla_8965H1202000_fd_control.py` regenerates and pins the report.
+
+
+### 7.12 Steering supervisor: every direct stage is now classified
+
+The larger H steering supervisor is now treated as a finite stage inventory rather
+than as a monolithic "different pipeline." Raw/Ghidra function boundaries give
+Sienna `0xCB86E` a 424-byte body and H `0xCEDAE` a **534-byte (`0x216`)** body.
+Their complete direct-call denominators are 94 and 123 stages respectively.
+
+A global order alignment uses complete per-function instruction sequences plus
+body-size compatibility. It is deliberately evidence-graded: order alignment is
+only navigation, while a pair is promoted when the independent whole-image
+structural artifact proves a unique complete instruction-shape match. The result
+is:
+
+```text
+Sienna direct stages                        94
+H direct stages                            123
+order-paired                                83
+  unique exact instruction-shape pairs      33
+  high-similarity nonexact pairs             24
+  weaker order-aligned candidates            26
+H order-unpaired insertions                  40
+Sienna order-unpaired stages                 11
+```
+
+The 40 H insertions are all explicitly dispositioned in
+`data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json`.
+They cluster into four bounded families rather than one hidden command decoder:
+
+1. **Supervisor plausibility/mode/fault expansion.** The block around
+   `0xC7BE8..0xC8B02` adds activation debounce, validity gates, history/delta and
+   rate checks, mode/table selection, scaling/correction, and three explicit
+   fault-monitor paths. B6-derived state enters this family through the already
+   recovered gate/mode/sequence/scaling/validity fields.
+2. **Dual-channel motion/plausibility estimation.** H adds a large later block
+   around `0xC2296..0xC3DC6`: three motion-state estimator stages, paired
+   channel-A/channel-B statistical/window classifiers, consistency/debounce,
+   health arbitration, and a five-stage local wrapper. The repository gives
+   these algorithmic role names only; it does not infer an OEM sensor/system
+   label from the math alone.
+3. **Geometry/residual estimation.** `0xC4536/0xC4696` construct paired means,
+   residuals, and bounded multi-channel geometry state used by the late H
+   supervisor.
+4. **Calibration/status postprocessing.** `0xC9466`, `0xC5DEC`, `0xCD15A` and
+   late wrappers add operating-state interpolation and status propagation;
+   `0xCCF58` is the B6-validity-gated status export already mapped in §7.11.
+
+This also sharpens what was **removed** from the Sienna generation. Eleven Sienna
+stages are unpaired at their ordered positions. Several are ADF6/AE4A-indexed
+command-shaping/gain stages. Most importantly,
+`lta_angle_command_smoothing @ 0xC8DE0`—the recovered stage that consumes the
+authenticated `0x131 STEERING_LTA_2` angle and writes the smoothed command—is
+order-unpaired on H. That independent code result agrees with both H's normal-Rx
+and SecOC configuration: `0x131` is absent. The classic torque clamp/rate workers
+*do* survive as unique exact-shape pairs (`C853A/C85B6 -> C91B6/C9232`), but §7.11
+proves their H input is zero-fed.
+
+The combination matters more than any one address: **H retains generic steering
+supervisor/control framework code while removing the two known Sienna external
+command modes and inserting substantial supervisor/estimator machinery.** The
+repo therefore does not invent a replacement steering-command frame merely
+because the physical EPS obviously still performs normal steering assist. The
+remaining question is narrower: whether any other nonzero externally sourced H
+supervisor input constitutes a remotely commanded mode, or whether this
+calibration's externally authenticated interfaces are supervisory/status-only.
+
+The order-alignment boundary is explicit. A nonexact order-paired row is not
+semantic transfer proof, and an order-unpaired row is not proof that no analogous
+function exists elsewhere in the other image. The machine-readable ledger and
+its two compact structural-evidence files retain enough information to audit all
+123 H stages without reopening the disposable Ghidra project.
 
 ## 8. Remaining evidence boundary
 

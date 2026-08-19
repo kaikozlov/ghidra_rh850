@@ -1,0 +1,1617 @@
+{
+  "evidence_boundary": "Global order alignment is a navigation aid. Only unique complete instruction-shape pairs are semantic-transfer candidates; other pairs require target-native operand/dataflow review. H/S order-unpaired rows are not global absence proofs.",
+  "explicit_command_mode_boundary": {
+    "classic_131": "normal Rx/SecOC descriptor absent on H and Sienna lta_angle_command_smoothing 0xC8DE0 is order-unpaired",
+    "classic_2e4": "normal Rx descriptor absent on H and retained clamp branch is independently proven zero-fed",
+    "replacement_command": "no direct replacement is assigned; H-only expansion is classified as supervisor/estimation/plausibility/status unless stronger ingress evidence exists"
+  },
+  "h_order_unpaired": [
+    {
+      "bounded_description": "two mode-selected interpolation lookups from ADE8-derived operating state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC9466",
+      "h_index": 13,
+      "role_class": "calibration_interpolation"
+    },
+    {
+      "bounded_description": "mode-indexed interpolation from ADE8-derived operating state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC5DEC",
+      "h_index": 14,
+      "role_class": "calibration_interpolation"
+    },
+    {
+      "bounded_description": "absolute/threshold debounce over steering snapshot state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC803C",
+      "h_index": 52,
+      "role_class": "supervisor_plausibility"
+    },
+    {
+      "bounded_description": "AE20/AE22 multi-window plausibility predicate; AE20 is not clamp input",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC80C4",
+      "h_index": 53,
+      "role_class": "supervisor_plausibility"
+    },
+    {
+      "bounded_description": "sentinel/validity aggregation over AE0A..AE10 and supervisor flags",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC813A",
+      "h_index": 54,
+      "role_class": "supervisor_validity"
+    },
+    {
+      "bounded_description": "history/delta comparison with mode-dependent limits",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7E88",
+      "h_index": 55,
+      "role_class": "supervisor_history_delta"
+    },
+    {
+      "bounded_description": "mode fallback/latch update",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7F40",
+      "h_index": 56,
+      "role_class": "supervisor_mode_latch"
+    },
+    {
+      "bounded_description": "paired scaled-state consistency/rate check",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC8526",
+      "h_index": 58,
+      "role_class": "supervisor_consistency"
+    },
+    {
+      "bounded_description": "mode-dependent scale initialization and state update",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC8370",
+      "h_index": 59,
+      "role_class": "supervisor_mode_scaling"
+    },
+    {
+      "bounded_description": "feedback delta/history/rate estimator",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC87FC",
+      "h_index": 60,
+      "role_class": "supervisor_rate_estimation"
+    },
+    {
+      "bounded_description": "snapshot delta with signed saturation",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC88EE",
+      "h_index": 61,
+      "role_class": "supervisor_delta_saturation"
+    },
+    {
+      "bounded_description": "speed-normalized rate and bounded state update",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC8926",
+      "h_index": 62,
+      "role_class": "supervisor_rate_estimation"
+    },
+    {
+      "bounded_description": "B6-derived two-bit mode/table selection with debounce/ramp state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC89D2",
+      "h_index": 63,
+      "role_class": "b6_mode_table"
+    },
+    {
+      "bounded_description": "bounded error/offset correction from supervisor state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC8B02",
+      "h_index": 64,
+      "role_class": "supervisor_correction"
+    },
+    {
+      "bounded_description": "activation debounce with event/fault path",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7BE8",
+      "h_index": 65,
+      "role_class": "supervisor_activation_fault"
+    },
+    {
+      "bounded_description": "B6 validity plus local validity gate",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7C70",
+      "h_index": 66,
+      "role_class": "b6_validity_gate"
+    },
+    {
+      "bounded_description": "sign/plausibility monitor with event/fault path",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7C94",
+      "h_index": 67,
+      "role_class": "supervisor_fault_monitor"
+    },
+    {
+      "bounded_description": "stability/debounce monitor with event/fault path",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7D6A",
+      "h_index": 68,
+      "role_class": "supervisor_fault_monitor"
+    },
+    {
+      "bounded_description": "delta monitor with event/fault path",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7DEE",
+      "h_index": 69,
+      "role_class": "supervisor_fault_monitor"
+    },
+    {
+      "bounded_description": "mode-change/status latch update",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC8652",
+      "h_index": 70,
+      "role_class": "supervisor_mode_latch"
+    },
+    {
+      "bounded_description": "three-stage local postprocessing wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC9ED0",
+      "h_index": 77,
+      "role_class": "composite_wrapper"
+    },
+    {
+      "bounded_description": "multi-input H-only motion/state arbitration block",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC2296",
+      "h_index": 89,
+      "role_class": "h_motion_state_estimator"
+    },
+    {
+      "bounded_description": "kinematic/feedback compensation and bounded interpolation block",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC265C",
+      "h_index": 90,
+      "role_class": "h_motion_state_estimator"
+    },
+    {
+      "bounded_description": "paired state-update wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC432E",
+      "h_index": 91,
+      "role_class": "h_motion_state_estimator"
+    },
+    {
+      "bounded_description": "channel-A statistical/window plausibility estimator",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC35BC",
+      "h_index": 92,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "channel-B mirror statistical/window plausibility estimator",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC37AC",
+      "h_index": 93,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "channel-A window/status classifier",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC399C",
+      "h_index": 94,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "channel-B window/status classifier",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3A2E",
+      "h_index": 95,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "dual-channel consistency/debounce state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3AC8",
+      "h_index": 96,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "speed/state threshold fault latch",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3BD4",
+      "h_index": 97,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "five-stage H-only estimation subpipeline wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3526",
+      "h_index": 98,
+      "role_class": "composite_wrapper"
+    },
+    {
+      "bounded_description": "combined channel-health/status arbitration",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3C3C",
+      "h_index": 99,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "combined channel-health finalizer",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3DC6",
+      "h_index": 100,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "two-channel mean plus residual/offset construction",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC4536",
+      "h_index": 103,
+      "role_class": "h_geometry_estimation"
+    },
+    {
+      "bounded_description": "bounded multi-channel residual/geometry computation",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC4696",
+      "h_index": 104,
+      "role_class": "h_geometry_estimation"
+    },
+    {
+      "bounded_description": "two-stage late postprocessing wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xCDCFC",
+      "h_index": 105,
+      "role_class": "composite_wrapper"
+    },
+    {
+      "bounded_description": "B6-validity-gated mode/status propagation",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xCCF58",
+      "h_index": 106,
+      "role_class": "b6_status_export"
+    },
+    {
+      "bounded_description": "multi-source status/calibration postprocessing wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xCD01C",
+      "h_index": 107,
+      "role_class": "status_postprocess"
+    },
+    {
+      "bounded_description": "ADE8-dependent calibrated postprocessing wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC5FCC",
+      "h_index": 108,
+      "role_class": "calibration_postprocess"
+    },
+    {
+      "bounded_description": "two mode-selected interpolation lookups from ADE8-derived operating state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xCD15A",
+      "h_index": 109,
+      "role_class": "calibration_interpolation"
+    }
+  ],
+  "roots": {
+    "corolla_h": "0xCEDAE",
+    "corolla_h_body_size": 534,
+    "corolla_h_direct_stage_count": 123,
+    "sienna": "0xCB86E",
+    "sienna_body_size": 424,
+    "sienna_direct_stage_count": 94
+  },
+  "schema": "corolla-8965H1202000-steering-supervisor-stage-ledger-v1",
+  "sienna_order_unpaired": [
+    {
+      "bounded_description": "ADF6-indexed calibration lookup",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4CE0",
+      "sienna_index": 17
+    },
+    {
+      "bounded_description": "ADF6-indexed calibration lookup",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4E12",
+      "sienna_index": 18
+    },
+    {
+      "bounded_description": "ADF6-indexed calibration lookup",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4F62",
+      "sienna_index": 19
+    },
+    {
+      "bounded_description": "ADF6-indexed calibration lookup",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC5100",
+      "sienna_index": 20
+    },
+    {
+      "bounded_description": "AE4A-indexed paired calibration lookup",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC5050",
+      "sienna_index": 26
+    },
+    {
+      "bounded_description": "AE4A/BC9C gain and bounded scaling stage",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4E2C",
+      "sienna_index": 31
+    },
+    {
+      "bounded_description": "ADF6/BE28 mode-gain/debounce stage",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC53A2",
+      "sienna_index": 42
+    },
+    {
+      "bounded_description": "authenticated 0x131 angle smoothing into BFF0",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_lta_angle_command",
+      "sienna_entry": "0xC8DE0",
+      "sienna_index": 64
+    },
+    {
+      "bounded_description": "state snapshot/bounded helper wrapper",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_state_postprocess",
+      "sienna_entry": "0xC5350",
+      "sienna_index": 86
+    },
+    {
+      "bounded_description": "command/state sign debounce/status stage",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4EC8",
+      "sienna_index": 89
+    },
+    {
+      "bounded_description": "AE4A-driven gain/integrator/output shaping stage",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4F7C",
+      "sienna_index": 90
+    }
+  ],
+  "stages": [
+    {
+      "classification": "paired",
+      "h_entry": "0xC0A6C",
+      "h_index": 0,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC20B0",
+      "sienna_index": 0,
+      "structural_similarity": 0.976127
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC0D46",
+      "h_index": 1,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC2376",
+      "sienna_index": 1,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC0E52",
+      "h_index": 2,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC2482",
+      "sienna_index": 2,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC0F5E",
+      "h_index": 3,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC258E",
+      "sienna_index": 3,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC71E0",
+      "h_index": 4,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC6364",
+      "sienna_index": 4,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC0FF6",
+      "h_index": 5,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC25C2",
+      "sienna_index": 5,
+      "structural_similarity": 0.698042
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC104E",
+      "h_index": 6,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC2608",
+      "sienna_index": 6,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC10DA",
+      "h_index": 7,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC264E",
+      "sienna_index": 7,
+      "structural_similarity": 0.698042
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC183C",
+      "h_index": 8,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC2C2A",
+      "sienna_index": 8,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC5968",
+      "h_index": 9,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC419E",
+      "sienna_index": 9,
+      "structural_similarity": 0.627825
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC781C",
+      "h_index": 10,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC69A0",
+      "sienna_index": 10,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC1094",
+      "h_index": 11,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC87DE",
+      "sienna_index": 11,
+      "structural_similarity": 0.562208
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC6A2E",
+      "h_index": 12,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC45E6",
+      "sienna_index": 12,
+      "structural_similarity": 1.0
+    },
+    {
+      "bounded_description": "two mode-selected interpolation lookups from ADE8-derived operating state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC9466",
+      "h_index": 13,
+      "role_class": "calibration_interpolation"
+    },
+    {
+      "bounded_description": "mode-indexed interpolation from ADE8-derived operating state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC5DEC",
+      "h_index": 14,
+      "role_class": "calibration_interpolation"
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC6B2C",
+      "h_index": 15,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC5CE0",
+      "sienna_index": 13,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC655C",
+      "h_index": 16,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC58DE",
+      "sienna_index": 14,
+      "structural_similarity": 0.796041
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC5412",
+      "h_index": 17,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC3C6E",
+      "sienna_index": 15,
+      "structural_similarity": 0.698042
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC55C8",
+      "h_index": 18,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC3E12",
+      "sienna_index": 16,
+      "structural_similarity": 0.78976
+    },
+    {
+      "bounded_description": "ADF6-indexed calibration lookup",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4CE0",
+      "sienna_index": 17
+    },
+    {
+      "bounded_description": "ADF6-indexed calibration lookup",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4E12",
+      "sienna_index": 18
+    },
+    {
+      "bounded_description": "ADF6-indexed calibration lookup",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4F62",
+      "sienna_index": 19
+    },
+    {
+      "bounded_description": "ADF6-indexed calibration lookup",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC5100",
+      "sienna_index": 20
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC76D2",
+      "h_index": 19,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC6856",
+      "sienna_index": 21,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC6ECE",
+      "h_index": 20,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC606E",
+      "sienna_index": 22,
+      "structural_similarity": 0.632222
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC6E68",
+      "h_index": 21,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC6024",
+      "sienna_index": 23,
+      "structural_similarity": 0.686182
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC0A20",
+      "h_index": 22,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC2076",
+      "sienna_index": 24,
+      "structural_similarity": 0.796041
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCE558",
+      "h_index": 23,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xCB0A4",
+      "sienna_index": 25,
+      "structural_similarity": 1.0
+    },
+    {
+      "bounded_description": "AE4A-indexed paired calibration lookup",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC5050",
+      "sienna_index": 26
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCE574",
+      "h_index": 24,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xCB0C0",
+      "sienna_index": 27,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC5642",
+      "h_index": 25,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC3E82",
+      "sienna_index": 28,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xBE3B0",
+      "h_index": 26,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xBF750",
+      "sienna_index": 29,
+      "structural_similarity": 0.975861
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xBFBD2",
+      "h_index": 27,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC11E8",
+      "sienna_index": 30,
+      "structural_similarity": 1.0
+    },
+    {
+      "bounded_description": "AE4A/BC9C gain and bounded scaling stage",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4E2C",
+      "sienna_index": 31
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC72C6",
+      "h_index": 28,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC644A",
+      "sienna_index": 32,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC78F0",
+      "h_index": 29,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC6AA4",
+      "sienna_index": 33,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC795E",
+      "h_index": 30,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC6B12",
+      "sienna_index": 34,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC7524",
+      "h_index": 31,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC66A8",
+      "sienna_index": 35,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC7488",
+      "h_index": 32,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC660C",
+      "sienna_index": 36,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC73B0",
+      "h_index": 33,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC6534",
+      "sienna_index": 37,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC76FA",
+      "h_index": 34,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC687E",
+      "sienna_index": 38,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC7A8A",
+      "h_index": 35,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC6C3E",
+      "sienna_index": 39,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC7B30",
+      "h_index": 36,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC6CE4",
+      "sienna_index": 40,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC79CC",
+      "h_index": 37,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC6B80",
+      "sienna_index": 41,
+      "structural_similarity": 1.0
+    },
+    {
+      "bounded_description": "ADF6/BE28 mode-gain/debounce stage",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC53A2",
+      "sienna_index": 42
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC777A",
+      "h_index": 38,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC68FE",
+      "sienna_index": 43,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC4F6C",
+      "h_index": 39,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC37E4",
+      "sienna_index": 44,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC6258",
+      "h_index": 40,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC55E2",
+      "sienna_index": 45,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC97A6",
+      "h_index": 41,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC8AAE",
+      "sienna_index": 46,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCB664",
+      "h_index": 42,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xCA31E",
+      "sienna_index": 47,
+      "structural_similarity": 0.7275
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCB68A",
+      "h_index": 43,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xCA4B8",
+      "sienna_index": 48,
+      "structural_similarity": 0.841071
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC930C",
+      "h_index": 44,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC8690",
+      "sienna_index": 49,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC8FAC",
+      "h_index": 45,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC8306",
+      "sienna_index": 50,
+      "structural_similarity": 0.909686
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC9122",
+      "h_index": 46,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC84A6",
+      "sienna_index": 51,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC91B6",
+      "h_index": 47,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC853A",
+      "sienna_index": 52,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC9232",
+      "h_index": 48,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC85B6",
+      "sienna_index": 53,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC8E70",
+      "h_index": 49,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC8072",
+      "sienna_index": 54,
+      "structural_similarity": 0.429105
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC8F0A",
+      "h_index": 50,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC8224",
+      "sienna_index": 55,
+      "structural_similarity": 0.314073
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC8F26",
+      "h_index": 51,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC8280",
+      "sienna_index": 56,
+      "structural_similarity": 1.0
+    },
+    {
+      "bounded_description": "absolute/threshold debounce over steering snapshot state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC803C",
+      "h_index": 52,
+      "role_class": "supervisor_plausibility"
+    },
+    {
+      "bounded_description": "AE20/AE22 multi-window plausibility predicate; AE20 is not clamp input",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC80C4",
+      "h_index": 53,
+      "role_class": "supervisor_plausibility"
+    },
+    {
+      "bounded_description": "sentinel/validity aggregation over AE0A..AE10 and supervisor flags",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC813A",
+      "h_index": 54,
+      "role_class": "supervisor_validity"
+    },
+    {
+      "bounded_description": "history/delta comparison with mode-dependent limits",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7E88",
+      "h_index": 55,
+      "role_class": "supervisor_history_delta"
+    },
+    {
+      "bounded_description": "mode fallback/latch update",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7F40",
+      "h_index": 56,
+      "role_class": "supervisor_mode_latch"
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC835C",
+      "h_index": 57,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC9EE4",
+      "sienna_index": 57,
+      "structural_similarity": 0.875556
+    },
+    {
+      "bounded_description": "paired scaled-state consistency/rate check",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC8526",
+      "h_index": 58,
+      "role_class": "supervisor_consistency"
+    },
+    {
+      "bounded_description": "mode-dependent scale initialization and state update",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC8370",
+      "h_index": 59,
+      "role_class": "supervisor_mode_scaling"
+    },
+    {
+      "bounded_description": "feedback delta/history/rate estimator",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC87FC",
+      "h_index": 60,
+      "role_class": "supervisor_rate_estimation"
+    },
+    {
+      "bounded_description": "snapshot delta with signed saturation",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC88EE",
+      "h_index": 61,
+      "role_class": "supervisor_delta_saturation"
+    },
+    {
+      "bounded_description": "speed-normalized rate and bounded state update",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC8926",
+      "h_index": 62,
+      "role_class": "supervisor_rate_estimation"
+    },
+    {
+      "bounded_description": "B6-derived two-bit mode/table selection with debounce/ramp state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC89D2",
+      "h_index": 63,
+      "role_class": "b6_mode_table"
+    },
+    {
+      "bounded_description": "bounded error/offset correction from supervisor state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC8B02",
+      "h_index": 64,
+      "role_class": "supervisor_correction"
+    },
+    {
+      "bounded_description": "activation debounce with event/fault path",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7BE8",
+      "h_index": 65,
+      "role_class": "supervisor_activation_fault"
+    },
+    {
+      "bounded_description": "B6 validity plus local validity gate",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7C70",
+      "h_index": 66,
+      "role_class": "b6_validity_gate"
+    },
+    {
+      "bounded_description": "sign/plausibility monitor with event/fault path",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7C94",
+      "h_index": 67,
+      "role_class": "supervisor_fault_monitor"
+    },
+    {
+      "bounded_description": "stability/debounce monitor with event/fault path",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7D6A",
+      "h_index": 68,
+      "role_class": "supervisor_fault_monitor"
+    },
+    {
+      "bounded_description": "delta monitor with event/fault path",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC7DEE",
+      "h_index": 69,
+      "role_class": "supervisor_fault_monitor"
+    },
+    {
+      "bounded_description": "mode-change/status latch update",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC8652",
+      "h_index": 70,
+      "role_class": "supervisor_mode_latch"
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCB136",
+      "h_index": 71,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC9D68",
+      "sienna_index": 58,
+      "structural_similarity": 0.897727
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCB14E",
+      "h_index": 72,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC9D7C",
+      "sienna_index": 59,
+      "structural_similarity": 0.707436
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCAF38",
+      "h_index": 73,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC9AB6",
+      "sienna_index": 60,
+      "structural_similarity": 0.875556
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCB582",
+      "h_index": 74,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xCA15E",
+      "sienna_index": 61,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCB59A",
+      "h_index": 75,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xCA176",
+      "sienna_index": 62,
+      "structural_similarity": 0.702998
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCB22E",
+      "h_index": 76,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC9E90",
+      "sienna_index": 63,
+      "structural_similarity": 1.0
+    },
+    {
+      "bounded_description": "three-stage local postprocessing wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC9ED0",
+      "h_index": 77,
+      "role_class": "composite_wrapper"
+    },
+    {
+      "bounded_description": "authenticated 0x131 angle smoothing into BFF0",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_lta_angle_command",
+      "sienna_entry": "0xC8DE0",
+      "sienna_index": 64
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCAD3E",
+      "h_index": 78,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC978E",
+      "sienna_index": 65,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCAD62",
+      "h_index": 79,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC97B2",
+      "sienna_index": 66,
+      "structural_similarity": 0.726087
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC9CD2",
+      "h_index": 80,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC8DC8",
+      "sienna_index": 67,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCBA40",
+      "h_index": 81,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xCA7F0",
+      "sienna_index": 68,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCBCDA",
+      "h_index": 82,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xCAA8A",
+      "sienna_index": 69,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC083C",
+      "h_index": 83,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC1E44",
+      "sienna_index": 70,
+      "structural_similarity": 0.391745
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC5E92",
+      "h_index": 84,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC4628",
+      "sienna_index": 71,
+      "structural_similarity": 0.391745
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC6D9A",
+      "h_index": 85,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC5F56",
+      "sienna_index": 72,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC51DA",
+      "h_index": 86,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC3A5A",
+      "sienna_index": 73,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC63D0",
+      "h_index": 87,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC5708",
+      "sienna_index": 74,
+      "structural_similarity": 0.391745
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC4AC0",
+      "h_index": 88,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC3300",
+      "sienna_index": 75,
+      "structural_similarity": 0.391745
+    },
+    {
+      "bounded_description": "multi-input H-only motion/state arbitration block",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC2296",
+      "h_index": 89,
+      "role_class": "h_motion_state_estimator"
+    },
+    {
+      "bounded_description": "kinematic/feedback compensation and bounded interpolation block",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC265C",
+      "h_index": 90,
+      "role_class": "h_motion_state_estimator"
+    },
+    {
+      "bounded_description": "paired state-update wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC432E",
+      "h_index": 91,
+      "role_class": "h_motion_state_estimator"
+    },
+    {
+      "bounded_description": "channel-A statistical/window plausibility estimator",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC35BC",
+      "h_index": 92,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "channel-B mirror statistical/window plausibility estimator",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC37AC",
+      "h_index": 93,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "channel-A window/status classifier",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC399C",
+      "h_index": 94,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "channel-B window/status classifier",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3A2E",
+      "h_index": 95,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "dual-channel consistency/debounce state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3AC8",
+      "h_index": 96,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "speed/state threshold fault latch",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3BD4",
+      "h_index": 97,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "five-stage H-only estimation subpipeline wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3526",
+      "h_index": 98,
+      "role_class": "composite_wrapper"
+    },
+    {
+      "bounded_description": "combined channel-health/status arbitration",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3C3C",
+      "h_index": 99,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "bounded_description": "combined channel-health finalizer",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC3DC6",
+      "h_index": 100,
+      "role_class": "h_dual_channel_plausibility"
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC4446",
+      "h_index": 101,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC4ACA",
+      "sienna_index": 76,
+      "structural_similarity": 0.337573
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC44BE",
+      "h_index": 102,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC4BAC",
+      "sienna_index": 77,
+      "structural_similarity": 0.337573
+    },
+    {
+      "bounded_description": "two-channel mean plus residual/offset construction",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC4536",
+      "h_index": 103,
+      "role_class": "h_geometry_estimation"
+    },
+    {
+      "bounded_description": "bounded multi-channel residual/geometry computation",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC4696",
+      "h_index": 104,
+      "role_class": "h_geometry_estimation"
+    },
+    {
+      "bounded_description": "two-stage late postprocessing wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xCDCFC",
+      "h_index": 105,
+      "role_class": "composite_wrapper"
+    },
+    {
+      "bounded_description": "B6-validity-gated mode/status propagation",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xCCF58",
+      "h_index": 106,
+      "role_class": "b6_status_export"
+    },
+    {
+      "bounded_description": "multi-source status/calibration postprocessing wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xCD01C",
+      "h_index": 107,
+      "role_class": "status_postprocess"
+    },
+    {
+      "bounded_description": "ADE8-dependent calibrated postprocessing wrapper",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xC5FCC",
+      "h_index": 108,
+      "role_class": "calibration_postprocess"
+    },
+    {
+      "bounded_description": "two mode-selected interpolation lookups from ADE8-derived operating state",
+      "classification": "h-order-unpaired",
+      "evidence_boundary": "target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna",
+      "h_entry": "0xCD15A",
+      "h_index": 109,
+      "role_class": "calibration_interpolation"
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCE4FE",
+      "h_index": 110,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC4844",
+      "sienna_index": 78,
+      "structural_similarity": 0.718182
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC6F28",
+      "h_index": 111,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC60AC",
+      "sienna_index": 79,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC6F8A",
+      "h_index": 112,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC610E",
+      "sienna_index": 80,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC70D4",
+      "h_index": 113,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC6258",
+      "sienna_index": 81,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC93A4",
+      "h_index": 114,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC871C",
+      "sienna_index": 82,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC93D2",
+      "h_index": 115,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC874A",
+      "sienna_index": 83,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC94B2",
+      "h_index": 116,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xC880C",
+      "sienna_index": 84,
+      "structural_similarity": 0.798333
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC9670",
+      "h_index": 117,
+      "pair_evidence": "order-aligned-high-similarity",
+      "sienna_entry": "0xC89A2",
+      "sienna_index": 85,
+      "structural_similarity": 0.86361
+    },
+    {
+      "bounded_description": "state snapshot/bounded helper wrapper",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_state_postprocess",
+      "sienna_entry": "0xC5350",
+      "sienna_index": 86
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC4F1A",
+      "h_index": 118,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC3792",
+      "sienna_index": 87,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC5D98",
+      "h_index": 119,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC4592",
+      "sienna_index": 88,
+      "structural_similarity": 1.0
+    },
+    {
+      "bounded_description": "command/state sign debounce/status stage",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4EC8",
+      "sienna_index": 89
+    },
+    {
+      "bounded_description": "AE4A-driven gain/integrator/output shaping stage",
+      "classification": "sienna-order-unpaired",
+      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
+      "role_class": "sienna_command_shaping",
+      "sienna_entry": "0xC4F7C",
+      "sienna_index": 90
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC6A7C",
+      "h_index": 120,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC5C30",
+      "sienna_index": 91,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xC6B54",
+      "h_index": 121,
+      "pair_evidence": "unique-exact-instruction-shape",
+      "sienna_entry": "0xC5D08",
+      "sienna_index": 92,
+      "structural_similarity": 1.0
+    },
+    {
+      "classification": "paired",
+      "h_entry": "0xCEC1E",
+      "h_index": 122,
+      "pair_evidence": "order-aligned-candidate",
+      "sienna_entry": "0xCB700",
+      "sienna_index": 93,
+      "structural_similarity": 0.794222
+    }
+  ],
+  "summary": {
+    "h_order_unpaired": 40,
+    "h_unpaired_role_counts": {
+      "b6_mode_table": 1,
+      "b6_status_export": 1,
+      "b6_validity_gate": 1,
+      "calibration_interpolation": 3,
+      "calibration_postprocess": 1,
+      "composite_wrapper": 3,
+      "h_dual_channel_plausibility": 8,
+      "h_geometry_estimation": 2,
+      "h_motion_state_estimator": 3,
+      "status_postprocess": 1,
+      "supervisor_activation_fault": 1,
+      "supervisor_consistency": 1,
+      "supervisor_correction": 1,
+      "supervisor_delta_saturation": 1,
+      "supervisor_fault_monitor": 3,
+      "supervisor_history_delta": 1,
+      "supervisor_mode_latch": 2,
+      "supervisor_mode_scaling": 1,
+      "supervisor_plausibility": 2,
+      "supervisor_rate_estimation": 2,
+      "supervisor_validity": 1
+    },
+    "paired": 83,
+    "paired_high_similarity_nonexact": 24,
+    "paired_order_candidate": 26,
+    "paired_unique_exact_shape": 33,
+    "sienna_order_unpaired": 11
+  }
+}

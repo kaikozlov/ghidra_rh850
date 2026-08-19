@@ -223,7 +223,7 @@ B6's only signed16 scalar is staged-only under the complete direct-reference
 census; active B6 fields are supervisor gate/mode/sequence/scaling state; and the
 retained Sienna-shaped clamp input is zero-fed while `AE20` is an internal
 plausibility/status branch. Highest-value remaining H work is therefore narrower:
-classify the H-only/reordered `0xCEDAE` orchestration stages and trace any remaining
+use the now-complete 123-stage `0xCEDAE` ledger to trace any remaining nonzero externally sourced supervisor inputs and trace any remaining
 nonzero externally sourced supervisor inputs before assigning an H replacement
 command; trace the storage/derivation provenance of the three H SecOC runtime
 keys; and finish a generic XCP DAQ callback only if a concrete exploit question
