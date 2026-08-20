@@ -1,11 +1,108 @@
 {
-  "boundary": "Techstream names are carried by exact primary Data ID identity plus Sienna target-native callback/dataflow. 1C02 names a general internal command-value torque observable; it is not intrinsically a specific external steering-CAN field.",
+  "boundary": "Techstream names are carried by exact primary Data-ID identity plus Sienna target-native callback/dataflow. 0x1C02 is a general internal command-value-torque observer; the recovered downstream current-control bridge does not make it intrinsically a specific external steering-CAN field or LTA source.",
+  "bounded_residues": [
+    "producer/meaning of internal Dem event 0x52 that invalidates 0x1155",
+    "individual semantic ownership of the steering_command_secondary_select_stage contributors and exact external 0x2E4 -> general-command contribution",
+    "direct sin/cos table labeling behind the cross-consistent D/Q Park-axis interpretation",
+    "semantic meaning of every q-limit candidate feeding FEBEAF40",
+    "DDB range-word representation details for 0x1155 beyond the firmware-emitted 36000 cap"
+  ],
+  "capture_card": [
+    {
+      "did": "0x1C02",
+      "purpose": "general internal command torque",
+      "request": "22 1C 02",
+      "scale": "0.01 Nm/LSB",
+      "signed": true
+    },
+    {
+      "did": "0x1152",
+      "purpose": "base Q-current command; compare sign/magnitude with 1C02",
+      "request": "22 11 52",
+      "scale": "0.01 A/LSB",
+      "signed": true
+    },
+    {
+      "did": "0x1151",
+      "purpose": "Q-current actual/follower",
+      "request": "22 11 51",
+      "scale": "0.01 A/LSB",
+      "signed": true
+    },
+    {
+      "did": "0x1156",
+      "purpose": "selected Q-current limit",
+      "request": "22 11 56",
+      "scale": "0.01 A/LSB",
+      "signed": false
+    },
+    {
+      "did": "0x1065",
+      "purpose": "limit-positive companion",
+      "request": "22 10 65",
+      "scale": "boolean",
+      "signed": false
+    },
+    {
+      "did": "0x1154",
+      "purpose": "base D-current command / field-axis behavior",
+      "request": "22 11 54",
+      "scale": "0.01 A/LSB",
+      "signed": true
+    },
+    {
+      "did": "0x1153",
+      "purpose": "D-current actual",
+      "request": "22 11 53",
+      "scale": "0.01 A/LSB",
+      "signed": true
+    },
+    {
+      "did": "0x1185",
+      "purpose": "protected-0D7 SP1 speed; compare with 0x0102",
+      "request": "22 11 85",
+      "scale": "0.01 km/h/LSB",
+      "signed": false
+    },
+    {
+      "did": "0x1155",
+      "purpose": "motor-angle validity canary",
+      "request": "22 11 55",
+      "scale": "0.01 deg/LSB; 0xFFFF invalid",
+      "signed": false
+    }
+  ],
+  "companion_dids": [
+    {
+      "boundary": "structural companion observer; no independent EMPS_P5 OEM name is assigned here",
+      "callback": "0x0004D084",
+      "callback_sha256": "37be1a8d0f0b4d3c86450b4b3522f2bbb05adf305d69d41fa38232bc951bf291",
+      "did": "0x1065",
+      "emitted_encoding": "1 byte; bool(FEBE6764 > 0)",
+      "semantic": "Q-current-limit-positive flag",
+      "size": 44,
+      "source_chain": [
+        "0xFEBE6764"
+      ],
+      "unit": "boolean"
+    }
+  ],
+  "control_model": {
+    "base_references": "dual_motor_dq_current_reference publishes base 0x1152/0x1154 sources while separate compensated cells FEBE6D24/FEBE6D28 feed the PI loops",
+    "feedback": "dual_motor_dq_feedback_combine publishes D/Q sum-frame actual state; 0x1151/0x1153 observe the staged Q/D sums",
+    "q_command_bridge": "limited sibling FEBEC1D4 is published through FEBEAC54/FEBEE40C; motor setup negates that value into FEBE6ACC -> FEBE6DB2 -> Q-current magnitude/sign mapping -> FEBE6D7E -> 0x1152",
+    "q_limit": "0x1156 observes FEBEAF40 through FEBEE608/FEBE6764; FEBEAF40 is a selected current-limit magnitude and also constrains the command clamp",
+    "speed": "0x1185 observes the 16-bit SP1 field decoded from protected CAN-FD 0x0D7 and is intentionally distinct from DID 0x0102's other vehicle-speed acquisition",
+    "torque_observer": "0x1C02 observes sibling command state FEBEC1D2 through FEBEAC56/FEBEE40A; it is upstream/general and does not identify one external command provenance"
+  },
   "dids": [
     {
       "callback": "0x0004D71C",
       "callback_sha256": "15563eaa44dabcbcd4f3be9059c1f5280ed0822481e369e12bafffcfa2d0dd52",
-      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "confidence": "exact DID vocabulary + target-native callback/dataflow",
+      "control_role": "dual-motor sum-frame Q-axis actual-current observer",
       "did": "0x1151",
+      "emitted_encoding": "signed16; raw observer * 100 / 0x80; clamp [-32768,32767]; 0.01 A/LSB",
       "monitor_key": 251,
       "observer_cell": "0xFEBE66E6",
       "role": "actual_q_current",
@@ -15,17 +112,21 @@
         "0xFEBE66E6",
         "0xFEBE6D1A"
       ],
-      "techstream_alternate_data_id": null,
+      "techstream_alternate_data_id": "0x3151",
       "techstream_name": "Motor Actual Current (Q Axis)",
       "techstream_primary_data_id": "0x1151",
-      "techstream_record_sha256": null,
+      "techstream_record_index": 75,
+      "techstream_record_sha256": "68d6ef0654b428f26abb8b59545b3804226117cd93d82f2be16ed30853979fb3",
       "unit": "A"
     },
     {
       "callback": "0x0004D758",
       "callback_sha256": "77610d459be494531313efd2e34952d130e96ba3a89cf58c76b67287244f6d93",
-      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "capture_expectation": "normal path maps command magnitude monotonically and negates FEBEE40C before the Q-current reference path; compare sign against 0x1C02 rather than assuming equality",
+      "confidence": "exact DID vocabulary + target-native callback/dataflow",
+      "control_role": "base Q-current command observer; compensated PI reference is FEBE6D24, not the DID-visible base cell",
       "did": "0x1152",
+      "emitted_encoding": "signed16; raw observer * 100 / 0x80; clamp [-32768,32767]; 0.01 A/LSB",
       "monitor_key": 252,
       "observer_cell": "0xFEBE66FC",
       "role": "command_q_current",
@@ -34,19 +135,25 @@
       "source_chain": [
         "0xFEBE66FC",
         "0xFEBE6D2C",
-        "0xFEBE6D7E"
+        "0xFEBE6D7E",
+        "0xFEBE6DB2",
+        "0xFEBE6ACC",
+        "0xFEBEE40C"
       ],
-      "techstream_alternate_data_id": null,
+      "techstream_alternate_data_id": "0x3152",
       "techstream_name": "Command Value Current (Q Axis)",
       "techstream_primary_data_id": "0x1152",
-      "techstream_record_sha256": null,
+      "techstream_record_index": 76,
+      "techstream_record_sha256": "4f36506918bf36dd7b5544f7af961eacbdfbaa2101da8a5b8f9821e11515abcb",
       "unit": "A"
     },
     {
       "callback": "0x0004D794",
       "callback_sha256": "e8ea250109f50038147655581f4d32097958e918be7017a9a0153370f0745062",
-      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "confidence": "exact DID vocabulary + target-native callback/dataflow",
+      "control_role": "dual-motor sum-frame D-axis actual-current observer; FEBE6D18 feeds the D-current PI error",
       "did": "0x1153",
+      "emitted_encoding": "signed16; raw observer * 100 / 0x80; clamp [-32768,32767]; 0.01 A/LSB",
       "monitor_key": 253,
       "observer_cell": "0xFEBE66E4",
       "role": "actual_d_current",
@@ -56,17 +163,21 @@
         "0xFEBE66E4",
         "0xFEBE6D18"
       ],
-      "techstream_alternate_data_id": null,
+      "techstream_alternate_data_id": "0x3153",
       "techstream_name": "Motor Actual Current 2 (D Axis)",
       "techstream_primary_data_id": "0x1153",
-      "techstream_record_sha256": null,
+      "techstream_record_index": 77,
+      "techstream_record_sha256": "af7fad1107c5b2852d435f1d603b054be1ae1e9142ae687c0b74f27fd5bd388b",
       "unit": "A"
     },
     {
       "callback": "0x0004D7D0",
       "callback_sha256": "0ebd21fcfd6bff8ea7a4d1c137d30d3332447cf24902cb32d1c6642c5fa965c4",
-      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "capture_expectation": "the recovered magnitude-indexed map becomes negative at high command magnitude, consistent with field-weakening behavior; exact calibration-table semantics remain bounded",
+      "confidence": "exact DID vocabulary + target-native callback/dataflow",
+      "control_role": "base D-current command observer; compensated PI reference is FEBE6D28",
       "did": "0x1154",
+      "emitted_encoding": "signed16; raw observer * 100 / 0x80; clamp [-32768,32767]; 0.01 A/LSB",
       "monitor_key": 254,
       "observer_cell": "0xFEBE66FE",
       "role": "command_d_current",
@@ -77,17 +188,20 @@
         "0xFEBE6D2E",
         "0xFEBE6D70"
       ],
-      "techstream_alternate_data_id": null,
+      "techstream_alternate_data_id": "0x3154",
       "techstream_name": "Command Value Current 2 (D Axis)",
       "techstream_primary_data_id": "0x1154",
-      "techstream_record_sha256": null,
+      "techstream_record_index": 78,
+      "techstream_record_sha256": "7f871a832cfc274e7a0287fd0bdabdc5d4abaf1624de3cc9b871cca0f2df10d4",
       "unit": "A"
     },
     {
       "callback": "0x0004D80C",
       "callback_sha256": "febf680d71a9e3acd523633be8362d91212ccfdde9ba3c36ef1568a5b38970e1",
-      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "confidence": "exact DID vocabulary + target-native callback/dataflow",
+      "control_role": "resolver/motor-angle observer with explicit internal-Dem validity gate",
       "did": "0x1155",
+      "emitted_encoding": "unsigned16; observer * 0x465 >> 11; clamp to 36000; 0.01 deg/LSB; 0xFFFF when Dem event 0x52 is set",
       "monitor_key": 255,
       "observer_cell": "0xFEBE665C",
       "role": "motor_rotation_angle",
@@ -98,17 +212,21 @@
         "0xFEBE7D14",
         "0xFEBE7D34"
       ],
-      "techstream_alternate_data_id": null,
+      "techstream_alternate_data_id": "0x3155",
       "techstream_name": "Motor Rotation Angle",
       "techstream_primary_data_id": "0x1155",
-      "techstream_record_sha256": null,
+      "techstream_record_index": 79,
+      "techstream_record_sha256": "3301e00d6f92e670dfed94b6f11720aa3624c8d433f77deb05ee29e503efb957",
       "unit": "deg"
     },
     {
       "callback": "0x0004D856",
       "callback_sha256": "55ed402e9e49855bdc991bbcb5cd76eaf0d6c4c96c058853384a5a94ef63f0ca",
-      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "companion_did": "0x1065",
+      "confidence": "exact DID vocabulary + target-native callback/dataflow",
+      "control_role": "selected minimum current-limit magnitude used by the command clamp; individual limit-candidate meanings remain bounded",
       "did": "0x1156",
+      "emitted_encoding": "unsigned/non-negative signed16 transport; observer * 100 / 0x80; clamp [0,32767]; 0.01 A/LSB",
       "monitor_key": 256,
       "observer_cell": "0xFEBE6764",
       "role": "final_q_current_limit",
@@ -119,36 +237,43 @@
         "0xFEBEE608",
         "0xFEBEAF40"
       ],
-      "techstream_alternate_data_id": null,
+      "techstream_alternate_data_id": "0x3156",
       "techstream_name": "Final Motor Current Limited (Q Axis)",
       "techstream_primary_data_id": "0x1156",
-      "techstream_record_sha256": null,
+      "techstream_record_index": 80,
+      "techstream_record_sha256": "9f7cdd216915ce731a159b54ac6bea8375585ec6af7e372a7e150290d26e90d7",
       "unit": "A"
     },
     {
       "callback": "0x0004D930",
       "callback_sha256": "2891e025f4fd75e52dbb1f1653601eb25f5a0b434692a069bcd7447e694b9ec0",
-      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "confidence": "exact DID vocabulary + target-native callback/dataflow",
+      "control_role": "protected 0x0D7 PDU speed observer; distinct from DID 0x0102 vehicle-speed acquisition",
       "did": "0x1185",
-      "monitor_key": null,
+      "emitted_encoding": "unsigned16; clamp to 30000; 0.01 km/h/LSB; 300.00 km/h cap",
+      "monitor_key": 305,
       "observer_cell": "0xFEBE8070",
       "role": "vehicle_speed_sp1",
       "semantic": "CAN Vehicle Speed (SP1)",
       "size": 42,
       "source_chain": [
-        "0xFEBE8070"
+        "0xFEBE8070",
+        "SecOC CAN-FD 0x0D7 signal 0x11B/283"
       ],
       "techstream_alternate_data_id": "0x3185",
       "techstream_name": "CAN Vehicle Speed (SP1)",
       "techstream_primary_data_id": "0x1185",
+      "techstream_record_index": 85,
       "techstream_record_sha256": "df9cce739aa225b14a6f37bca1339c603f59df554252767f4506af8b75bf799f",
       "unit": "km/h"
     },
     {
       "callback": "0x0004DB5E",
       "callback_sha256": "6155c74355da73ac2448842f4b620a1bb884dfcbc0e96a1f3fe599623b857f64",
-      "confidence": "exact DID vocabulary + target-native producer/dataflow",
+      "confidence": "exact DID vocabulary + target-native callback/dataflow",
+      "control_role": "general internal command-value-torque observer upstream of the limited sibling that reaches the motor Q/D current-reference path; not intrinsically one external CAN command",
       "did": "0x1C02",
+      "emitted_encoding": "signed16; (((observer * FEBEE8A6)/0x2000)*100)/0x100; clamp [-20000,20000]; 0.01 Nm/LSB",
       "monitor_key": 402,
       "observer_cell": "0xFEBE674A",
       "role": "internal_command_value_torque",
@@ -158,29 +283,75 @@
         "0xFEBE674A",
         "0xFEBEE40A",
         "0xFEBEAC56",
-        "0xFEBEC1D2"
+        "0xFEBEC1D2",
+        "0xFEBEC1C0"
       ],
       "techstream_alternate_data_id": "0x3C02",
       "techstream_name": "Command Value Torque",
       "techstream_primary_data_id": "0x1C02",
+      "techstream_record_index": 99,
       "techstream_record_sha256": "22d9452d31b5d2c53599c4f0fc318b6e1857940013cf697c67c8507a842365cf",
       "unit": "Nm"
     }
   ],
   "image_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+  "motor_angle_validity": {
+    "dem_event": "0x52",
+    "dtc_table_index": 0,
+    "event_record_address": "0x0003006C",
+    "event_record_raw": "0000000000010000",
+    "interpretation": "event is used as an internal motor-angle validity gate; its event record carries DTC-table index 0, while the event producer/physical fault meaning remains unresolved"
+  },
   "observer_priority": [
     "0x1C02",
     "0x1152",
     "0x1151",
-    "0x1153",
     "0x1156",
+    "0x1065",
     "0x1154",
+    "0x1153",
     "0x1185",
     "0x1155"
   ],
-  "schema_version": 1,
+  "schema_version": 2,
   "software_id": "8965B4512000",
   "supporting_functions": [
+    {
+      "address": "0x0003572C",
+      "role": "motor_command_sign_junction",
+      "sha256": "67956f36e398ed2e7c8f4be577f1c6e06232624e35cb686500bcb20f82e79b76",
+      "size": 156
+    },
+    {
+      "address": "0x00035960",
+      "role": "dual_motor_clarke_park_feedback",
+      "sha256": "c9262790564a9fe9e821ce7ec9fdef836df5be7e437722227b2286bb80d9a16c",
+      "size": 338
+    },
+    {
+      "address": "0x00036902",
+      "role": "dq_current_pi_axis_a",
+      "sha256": "e1fb68e74cc958c031e979ffdbd0f8b4bee9d06aabe56fd4facaf6c0b56a01bc",
+      "size": 304
+    },
+    {
+      "address": "0x00036A44",
+      "role": "dq_current_pi_axis_b",
+      "sha256": "5f65d48e9ddb845b43a7623c004f92a5194d1ef373a9fa2809ed7ea9d78ca26e",
+      "size": 404
+    },
+    {
+      "address": "0x00036DDE",
+      "role": "q_current_error_clamp",
+      "sha256": "0e00245bcc4e536076335ed08fd27adb38244f9178ea88ccbd0e535d29d5241c",
+      "size": 36
+    },
+    {
+      "address": "0x00036F9A",
+      "role": "q_current_pi_frontend",
+      "sha256": "391861ea0664187982a8925a6f8c4947b70dfa3f6ef91fa3f44c21a103a84957",
+      "size": 96
+    },
     {
       "address": "0x00037644",
       "role": "dual_motor_dq_feedback_combine",
@@ -194,10 +365,46 @@
       "size": 120
     },
     {
+      "address": "0x00037B5A",
+      "role": "d_current_base_select",
+      "sha256": "302a9411ecae8a05e004a4030882a6db1e24d2a099ed4f19e748016ba3708273",
+      "size": 52
+    },
+    {
+      "address": "0x00037B92",
+      "role": "q_current_magnitude_map",
+      "sha256": "c7149e1b149c27011551d5df495017ddadd8379146064ed2f71005f9edb3116b",
+      "size": 322
+    },
+    {
+      "address": "0x00037CD4",
+      "role": "q_current_sign_and_map",
+      "sha256": "d263816997fca7e5eaf670851aa3f51d43b2ee10affdbf64c72b78fb6cff4d75",
+      "size": 38
+    },
+    {
+      "address": "0x00037FA2",
+      "role": "q_current_command_input_latch",
+      "sha256": "f83ae42587f4ba20409f7390cf69ccbe7858c54ac07642b4271f04ed71650565",
+      "size": 16
+    },
+    {
       "address": "0x000472A6",
       "role": "motor_rotation_wrap",
       "sha256": "afafca11826a8fec9e00c7de66acadf936a7d5c9e436f27e6b2c91947dd23409",
       "size": 38
+    },
+    {
+      "address": "0x0004B3AA",
+      "role": "application_unpack_can_0d7_secoc_fd",
+      "sha256": "8f85c500735112fe26b4f8e4c8427412470ec651682d6dd8c4f0f23e3b102869",
+      "size": 194
+    },
+    {
+      "address": "0x00051708",
+      "role": "dem_event_state_query",
+      "sha256": "3a209df850d42c5342253f8b2eb08e4e1b32eb4eccad261206478f1dfb40aec5",
+      "size": 82
     },
     {
       "address": "0x0005B662",
@@ -218,6 +425,30 @@
       "size": 252
     },
     {
+      "address": "0x0005C666",
+      "role": "rte_input_staging_copy_a",
+      "sha256": "4febf9e4c285ba5fbc1ca86cf35d64cb5f29332ad88f956c7553076c99859a53",
+      "size": 1442
+    },
+    {
+      "address": "0x0005D18C",
+      "role": "tauj0_ch0_motor_control_worker",
+      "sha256": "12794b965c51b34ffaaac9d767e574c0f8c000aecf4650c6f0db90123b2a21c2",
+      "size": 216
+    },
+    {
+      "address": "0x000B8E5C",
+      "role": "q_limit_candidate_select_a",
+      "sha256": "e0e01605ef189d29777307e6e1e192651e7fe841988a02ddeaa76cf7783d7aca",
+      "size": 60
+    },
+    {
+      "address": "0x000B8E98",
+      "role": "q_limit_candidate_select_b",
+      "sha256": "930e9af14e9087310a5e089536f8a4de74c9eb45e02e6815fd8f13ce2a033692",
+      "size": 52
+    },
+    {
       "address": "0x000B8ED0",
       "role": "q_limit_publish",
       "sha256": "8e218c0f56fac380c95a304626d74d3f68712bbbf6d15fa8be00600ddeca12b9",
@@ -236,10 +467,89 @@
       "size": 104
     },
     {
+      "address": "0x000CAC14",
+      "role": "steering_command_secondary_select_stage",
+      "sha256": "6c5aad354d25e4a9992724d785db7ba017586801f2f8c8092f77e0620ac30d60",
+      "size": 86
+    },
+    {
+      "address": "0x000CAC6A",
+      "role": "steering_command_secondary_gain_clip",
+      "sha256": "60ea90259f66b3cf3504db8f2c3108b906c36973665566252bb0f81e7304caa6",
+      "size": 86
+    },
+    {
+      "address": "0x000CACC0",
+      "role": "steering_command_secondary_limit_stage",
+      "sha256": "11188d41fd987a254a8aefb59a2b645c2552b5bb9f75257d77f8a81bb1e64c22",
+      "size": 168
+    },
+    {
+      "address": "0x000CAD68",
+      "role": "steering_command_primary_limit_publish",
+      "sha256": "d008db29a48896ff522c5e0e7e5598bb11e7b65374341eb8375588b37bb3f49e",
+      "size": 28
+    },
+    {
+      "address": "0x000CAD84",
+      "role": "steering_command_primary_select",
+      "sha256": "dd6e742c24e92f6f439b37091277f942d13777f80d63cb1b8af15d5b383fd784",
+      "size": 82
+    },
+    {
+      "address": "0x000CADD6",
+      "role": "steering_command_torque_scale_and_limit",
+      "sha256": "790e282d3a64ba2be8a6336c5fd5d37a9ceeaa2729386477926fcca500c807a0",
+      "size": 80
+    },
+    {
+      "address": "0x000CAE26",
+      "role": "steering_command_limited_sibling",
+      "sha256": "50ee6a700508c9595465862adfd1b77e32f059d77ca6df66075e9f5e619d072f",
+      "size": 48
+    },
+    {
+      "address": "0x000CAE56",
+      "role": "steering_command_delayed_variant",
+      "sha256": "80a3a89f6a3889628f2669e4cd9a7541e1ccd1af55f975726f4acf0d9e1ba5fd",
+      "size": 68
+    },
+    {
       "address": "0x000CB454",
       "role": "command_torque_state_publish",
       "sha256": "7c9efea6bd33b474b37b78a72f483446cee9c69703aab242abbed0570e31d9c4",
       "size": 72
+    },
+    {
+      "address": "0x000FCC00",
+      "role": "command_limit_table_state_publish",
+      "sha256": "eec430d4c7934e892d9dbacd8f07123c6678a5abc3f7609bee6bef15f5a05656",
+      "size": 78
     }
+  ],
+  "xcp_read_only_candidates": [
+    "0xFEBE6D18",
+    "0xFEBE6D1A",
+    "0xFEBE6D2C",
+    "0xFEBE6D2E",
+    "0xFEBE6D24",
+    "0xFEBE6D28",
+    "0xFEBE6D20",
+    "0xFEBE665C",
+    "0xFEBE7D14",
+    "0xFEBE6764",
+    "0xFEBEAF40",
+    "0xFEBEB548",
+    "0xFEBE8070",
+    "0xFEBEE40A",
+    "0xFEBEE40C",
+    "0xFEBE674A",
+    "0xFEBEE8A6",
+    "0xFEBE719A",
+    "0xFEBEC1B8",
+    "0xFEBEC1D2",
+    "0xFEBEC1D4",
+    "0xFEBEC1D6",
+    "0xFEBEC1D8"
   ]
 }

@@ -413,14 +413,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   The remaining question is purely dynamic. Capture health check, data list,
   active-test/customization, MACKey Registration, CUW preparation, and reflash
   authorization/programming as six separate labeled operations. In the Data List
-  capture, explicitly record `Command Value Torque` (monitor 402),
-  `Cooperation Control State` (60), and `Control State Information` (403): the
-  static P5 metadata now proves 402 is 16-bit/`Nm`, 60 has the binary
-  cooperation-control display, and 403 is 16-bit/unitless. TMS-020 also proves
-  that the type-62 primary/alternate words are Data IDs and identifies monitor
-  402 as primary DID `0x1C02` / alternate `0x3C02`; the remaining live purpose is
-  to observe support/exposure, returned values, timing, and session behavior, not
-  to discover that DID from scratch. Then compare SA seed/key exchange, DID reads,
+  capture, TMS-027's Sienna observer card should be polled directly:
+  `1C02`, `1152`, `1151`, `1156`, companion `1065`, `1154`, `1153`, `1185`,
+  and `1155`, with `1185` paired against the separate `0102` speed acquisition.
+  Exact scaling, callback provenance, alternate P5 Data IDs, and invalid markers
+  are already static facts; the remaining purpose is correlation/support/timing,
+  especially the unresolved external-`0x2E4` contribution to the general
+  `1C02` command. Also retain `Cooperation Control State` (60) and `Control State
+  Information` (403) as lower-confidence vocabulary probes: 60 has the binary
+  cooperation-control display while 403 remains 16-bit/unitless. Then compare
+  SA seed/key exchange, DID reads,
   session transitions, and programming handoff against SEC-BOOT-003,
   SEC-APP-001, and DIAG-APP-001/003. Preserve raw logs
   privately and commit only reviewed/redacted derivatives or hashes. See

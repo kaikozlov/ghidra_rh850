@@ -1406,15 +1406,60 @@ already recovered for H. For `1156`, `0xBCA88` publishes `FEBEAF40 -> FEBEE608`
 before the diagnostic staging copy. The firmware bodies and exact DID table are
 SHA/raw-byte pinned in `verify_sienna_8965B4512000_techstream_did_semantics.py`.
 
-This gives a capture-ready ordinary-UDS observer set. The preferred later
-sequence is `1C02` (general internal torque command), `1152` (Q command), `1151`
-(actual Q), `1153` (actual D), `1156` (final Q limit), `1154` (D command), with
-`1185` as a vehicle-speed timing reference and `1155` as a motor-angle reference.
-It does **not** change the provenance boundary: Sienna `1C02` is an internal
-command-value-torque observer; the external authenticated `0x2E4` command path
-must still be distinguished experimentally from other local contributors.
+The producer pass is now closed far enough to state what each observer means in
+the motor-control loop, rather than only naming its source cell:
+
+- `1151` emits the staged dual-motor **Q actual** sum at `0.01 A/LSB`;
+  `1153` is the corresponding **D actual** sum. Their producer
+  `dual_motor_dq_feedback_combine @ 0x37644` feeds the current-loop state.
+- `1152` emits the **base Q-current command** at `0.01 A/LSB`. The motor path is
+  `FEBEE40C -> -FEBE6ACC -> FEBE6DB2 -> q-current magnitude/sign map ->
+  FEBE6D7E -> FEBE6D2C`. The PI does not consume that DID cell directly: its
+  compensated reference is `FEBE6D24 = clamp(FEBE6D50 + FEBE6D7E)`.
+- `1154` likewise exposes the **base D-current command** while the compensated
+  D reference is `FEBE6D28 = clamp(FEBE6D4E + FEBE6D70)`. The recovered
+  magnitude-indexed map becomes negative at high command magnitude, a useful
+  field-axis/field-weakening discriminator; the exact calibration-table meaning
+  remains bounded.
+- `1156` exposes the selected non-negative Q-current-limit magnitude
+  `FEBEAF40 -> FEBEE608 -> FEBE6764` at `0.01 A/LSB`. Companion DID `1065`
+  (one byte, callback `0x4D084`) is exactly `FEBE6764 > 0`; it is a structural
+  companion and is not assigned a separate OEM P5 name here.
+- `1155` scales motor/resolver angle as `raw * 0x465 >> 11`, capped at 36000
+  (`0.01 deg/LSB`). If internal Dem event `0x52` is set, the callback returns
+  `0xFFFF`; that makes it a useful validity canary. The producer/meaning of
+  event `0x52` itself remains unresolved.
+- `1185` is the 16-bit SP1 field from protected CAN-FD `0x0D7`, capped at
+  30000 (`0.01 km/h/LSB`). It should be paired with DID `0102`, whose Sienna
+  source is a different vehicle-speed acquisition, to detect source/timing
+  differences.
+- `1C02` scales `FEBE674A` with `FEBEE8A6` and clamps to ±20000
+  (`0.01 Nm/LSB`). Its chain is `FEBEC1D2 -> FEBEAC56 -> FEBEE40A ->
+  FEBE674A`. The limited sibling `FEBEC1D4` is what proceeds through
+  `FEBEAC54/FEBEE40C` into the Q/D-current path. Thus `1C02` is a genuine
+  **general internal command-value-torque observer upstream of motor control**,
+  but it is still not intrinsically the authenticated external `0x2E4` command
+  or an LTA-specific quantity.
+
+This gives a capture-ready ordinary-UDS observer card. Preferred sequence:
+`1C02` (internal torque), `1152` (base Q command), `1151` (Q actual), `1156` +
+`1065` (current limit + validity companion), `1154` (D command), `1153` (D
+actual), `1185` (protected SP1 speed, paired with `0102`), and `1155` (motor
+angle/invalid canary). The generated artifact includes exact `22` request bytes,
+engineering-unit encodings, alternate P5 Data IDs, all eight raw DDB record
+hashes, 35 byte-pinned supporting functions, and a read-only XCP candidate set.
+
+The remaining static boundaries are explicit: the producer/meaning of Dem event
+`0x52`; exact semantic ownership of the individual contributors summed by
+`steering_command_secondary_select_stage`; the exact authenticated `0x2E4` ->
+general-command contribution; direct sin/cos-table naming behind the
+cross-consistent D/Q assignment; and the meaning of each candidate feeding the
+selected current limit. Those are not silently promoted from control-shape
+inference.
+
 Canonical generated artifact:
-`data/generated/sienna_8965B4512000_techstream_did_semantics.json`.
+`data/generated/sienna_8965B4512000_techstream_did_semantics.json`; verifier:
+`tests/verify_sienna_8965B4512000_techstream_did_semantics.py`.
 
 The same exact H join closes protected `0x0D7` at field level. Its regenerated
 PDU40 unpacker reads only signal 240 (1 bit), signal 243 (16 bits), and signal

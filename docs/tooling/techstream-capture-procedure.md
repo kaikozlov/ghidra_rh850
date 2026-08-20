@@ -43,6 +43,32 @@ timestamp, ChannelID, J2534 protocol, flags, four address bytes, exact payload
 bytes, reported/actual lengths, and any extra bytes. Preserve API-call and
 status lines so connection/filter/ioctl state is reconstructible.
 
+## Sienna ordinary-UDS motor/control observer card
+
+For `8965B4512000`, TMS-027 already resolves the high-value observer DIDs and
+engineering-unit transforms. A later labeled steering experiment should poll
+these rather than spending paid-session time rediscovering Data IDs:
+
+| Order | Request | Observer | Interpretation |
+|---:|---|---|---|
+| 1 | `22 1C 02` | `Command Value Torque` | signed `0.01 Nm/LSB`; general internal command torque |
+| 2 | `22 11 52` | Q command | signed `0.01 A/LSB`; base Q-current command |
+| 3 | `22 11 51` | Q actual | signed `0.01 A/LSB`; closed-loop follower |
+| 4 | `22 11 56` | final Q limit | non-negative `0.01 A/LSB` |
+| 5 | `22 10 65` | limit-positive companion | one-byte boolean; structural companion |
+| 6 | `22 11 54` | D command | signed `0.01 A/LSB`; base field-axis command |
+| 7 | `22 11 53` | D actual | signed `0.01 A/LSB` |
+| 8 | `22 11 85` | SP1 speed | `0.01 km/h/LSB`; protected `0x0D7` source; pair with `0102` |
+| 9 | `22 11 55` | motor angle | `0.01 deg/LSB`; `0xFFFF` is an internal-Dem invalid marker |
+
+Keep exact request/response timestamps and the concurrent external CAN stimulus.
+In particular, do not equate `1C02` with the external authenticated `0x2E4`
+command merely because they correlate: the static result proves a general
+internal torque observer and its downstream motor-current consequence, while
+exact contributor provenance remains a live/static residue. The machine-readable
+card and read-only XCP candidate addresses are in
+`data/generated/sienna_8965B4512000_techstream_did_semantics.json`.
+
 ## CUW timing/recovery capture checklist
 
 TMS-030/TMS-031 move the CUW timing/recovery work out of exploratory RE. For an

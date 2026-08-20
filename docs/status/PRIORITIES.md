@@ -5,74 +5,24 @@ not a historical roadmap and should not become one. Detailed unresolved state
 belongs in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md); completed work belongs in
 [FINDINGS.md](FINDINGS.md) and the canonical subsystem reports.
 
-## Current pre-GTS static-only queue
+## Pre-GTS static-only queue: closed
 
-The next paid/short-duration GTS+ session is intentionally deferred until the
-existing V18/firmware corpus has yielded every high-information static fact that
-can sharpen the capture plan. During that constraint, work these targets in
-order rather than starting another broad firmware sweep.
+The eight-item V18/firmware static-closure pass is complete to the evidence
+available without a matching calibration package or live GTS+/CUW session.
+TMS-025/TMS-029 close writer-family census/target scoring; TMS-024/TMS-026 close
+the target-integrity/calibration-schema boundary; TMS-027 closes the Sienna
+motor/control observer card; TMS-028 closes the RKS client boundary; and
+TMS-030/TMS-031 close CUW timing/recovery plus the targeted DDB/legacy-EPS
+comparative pass.
 
-1. **Fingerprint every CUW writer family selected by the decoded factory rows.**
-   The 196 recovered factory rows reference 47 distinct prepare/flash writer
-   modules, while the current command-level inventory deeply pins only the
-   selected standard/unified/VFOREST/security subset. Recover and normalize each
-   referenced writer's UDS/proprietary SIDs, DIDs, RoutineControl IDs, request
-   layouts, imported `CalibrationFile` getters, response checks, and timing.
-   Then score each route against the exact Sienna and Corolla-H bootloader
-   service/DID/routine grammars. This is the highest-value route-narrowing work
-   available without a matching `.cuw`/`.cal`.
-
-2. **Trace calibration target-integrity metadata end to end.** TMS-024 now
-   proves `Cuw.exe` target records contain `StartAddress`, `Length`, `CRC`,
-   `CMAC`, and `DigitalSignature` for six Repro/Erase/Delta/Compression target
-   families. Recover the corresponding `TCUWCalibrationFile.dll` object layout
-   and follow each field into all writer families. Only after that trace should
-   `DigitalSignature` be compared with firmware-side CRC/CMAC/routine gates; it
-   is currently distinct from the TIS/RKS `Signature`.
-
-3. **Turn the calibration parser into a complete schema/parser before acquiring
-   a real calibration.** Recover archive/header/logical-block/target layouts,
-   processor/count relationships, auth fields (`ServiceAuthKey`, `ECUAuthKey`,
-   `SeedKey`, `Nonce`, `OffsetAddress`), route selectors, data-format fields,
-   and target-integrity records. The goal is that a future captured `.cuw`/`.cal`
-   can be decoded immediately during a short GTS+ window rather than reverse
-   engineered after the fact.
-
-4. **Build the Sienna-side `EMPS_P5` DID semantic join.** TMS-020/021 already
-   use exact P5 Data IDs to name Corolla-H `1C02` and `1151..1156`. The Sienna
-   RDBI table independently implements `1151→4D71C`, `1152→4D758`,
-   `1153→4D794`, `1154→4D7D0`, `1155→4D80C`, `1156→4D856`, `1185→4D930`, and
-   `1C02→4DB5E`. Trace those producers into Sienna motor/control state and carry
-   only evidence-supported OEM names. This can preselect useful plain-UDS
-   observers for later live experiments and removes work from the paid capture
-   session.
-
-5. **Finish the RKS client state machine, not its server cryptography.** Pin the
-   offline Signature-file parser and state transitions, the predicate deciding
-   whether RKS is required/skipped, and the producer of the 16-byte `SeedValue`
-   plus `KeypairID`/`RequesterKind`/`IsStored`. The imported token is now pinned
-   to exactly 512 alphanumeric characters. Stop at the client/server boundary;
-   the signing algorithm/private key are not present in V18.
-
-6. **CUW timing/retry/Flash-Recovery static closure — completed (TMS-030).**
-   The two timing tables, retry/reconnect ownership, bus-speed selector meaning,
-   and `RecoveryInfo.ini` schema/lifecycle are byte-pinned. Remaining work is
-   live attribution: retain timestamps, selected route metadata, recovery files,
-   and IG transitions during a real GTS+/CUW session.
-
-7. **Targeted DDB residue pass — completed for the current queue (TMS-031).**
-   Power/IG/key-cycle Data IDs needed for recovery experiments are named and
-   raw-record-pinned. Do not restart an undirected DDB census; decode more only
-   when a new live/static question supplies a concrete target.
-
-8. **Older/specialized EPS CUW comparative pass — completed to the bounded
-   ancestry limit (TMS-031).** `Cuw_iQ_EMPS.exe` now contributes retry,
-   recovery/CID, IG-transition, VIM/Tester2, and legacy transport vocabulary.
-   None is promoted onto RH850 without target-native evidence.
-
-After this queue, the remaining high-value blockers should be genuinely new
-artifacts or runtime evidence: an exact calibration package, newer GTS+/CUW+,
-a retained J2534 session, gateway/camera firmware, or missing target CodeFlash.
+Do not start another undirected V18 or firmware sweep to continue that queue.
+The remaining high-value blockers now require genuinely new evidence: a matching
+`.cuw`/`.cal` package, a retained labeled GTS+/J2534 session, newer GTS+/CUW+,
+gateway/camera/other steering-controller firmware, or missing target CodeFlash.
+The concrete live capture requirements are in
+[../tooling/techstream-capture-procedure.md](../tooling/techstream-capture-procedure.md),
+and unresolved static/dynamic boundaries remain in
+[OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
 ## P0 — highest information gain
 
