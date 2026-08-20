@@ -443,17 +443,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   outer `.cuw` envelope/extraction framing, actual target values, selected
   required-spec branch, and signer/signature algorithm. This `DigitalSignature`
   remains unrelated to TIS/RKS `Signature` absent a real dataflow edge.
-- **RKS authorization vs. EPS reflash (Layer A).** The TIS portal RKS flow
-  (TMS-009) is a CUW-side VIN+license permission gate, distinct from the
-  cal-file crypto key (Layer B). Open: whether it is *mandatory* for every EPS
-  reflash or optional/regional/offline-bypassable. `SeedValue` itself is now
-  statically bounded: `CUWAccessRKSWrapper` reads native buffer `+0x78`, and
-  `Cuw.exe` serializes a pre-existing **16-byte** native input into 32 uppercase
-  hex characters plus NUL with no RNG/time transform in the request-building
-  edge. Only the producer of those 16 bytes one indirect controller edge
-  upstream remains unknown; resolving it is low priority because Layer A never
-  reaches the ECU or any of the three firmware secrets. See
-  [../tooling/techstream.md](../tooling/techstream.md) §5.3.
+- **RKS exact target/region policy (Layer A).** TMS-028 closes the static client
+  state machine, request-field provenance, online/offline/import convergence,
+  fixed token format, and the `IsStored`/SeedValue boundaries. The shipped client
+  explicitly supports continuing without Signature Request when the repair
+  manual says it is unnecessary, and no calibration-schema or flash-writer edge
+  makes RKS universal. What remains is external policy evidence: determine
+  whether a particular EPS calibration/region requires RKS during a legitimate
+  GTS+/TIS session. The 16-byte SeedValue producer remains one runtime callback
+  edge upstream but is low priority because Layer A never reaches the ECU or any
+  firmware secret. See [../tooling/techstream.md](../tooling/techstream.md) §5.3.
 - **MEM-SAFE-001 transfer to newer SecOC/TSK targets.** The partial-AES-block
   raw-write primitive (MEM-SAFE-001) upgrades a prior authenticated payload into
   arbitrary RAM-code execution without repeating CMAC. The exact bounded host

@@ -1,0 +1,293 @@
+{
+  "cuw_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+  "distribution": "Toyota Techstream V18.00.003",
+  "function_identities": [
+    {
+      "role": "modal_request_driver",
+      "sha256": "87750f2ad51724d73870159aa88ada77ae6f6dccc52d9aacf1f2f812f76c4264",
+      "size": 482,
+      "va": 4833500
+    },
+    {
+      "role": "shared_signature_file_import",
+      "sha256": "1797de62560cd248ef84150e7521535ea7c6d656251df964fc8ed8e40e191eca",
+      "size": 402,
+      "va": 4834052
+    },
+    {
+      "role": "shared_back_transition",
+      "sha256": "fcdbd2e9676f1fdd5600d8227f07ddff7734aca8d689e4d3e261626b69ce7aaf",
+      "size": 404,
+      "va": 4834456
+    },
+    {
+      "role": "online_start",
+      "sha256": "d8bec33ce77ac6d575752332c25e350f68da09537260eb0b3a5db41a8ae2bfe5",
+      "size": 525,
+      "va": 4834860
+    },
+    {
+      "role": "offline_start",
+      "sha256": "5877ed0b4f81d8cd638b901975b48804adf21b47aaa97c18d69d792369be7a14",
+      "size": 125,
+      "va": 4835388
+    },
+    {
+      "role": "network_retry",
+      "sha256": "3394d74eaedade978dce7f1121b9489e5d0eb38dae6afbead3be0c7ad46db303",
+      "size": 71,
+      "va": 4836444
+    },
+    {
+      "role": "offline_import_next",
+      "sha256": "9013c4dd93651ad5be4910afdc54ca17de8006a5499d4a5c40e7a0e7614302ed",
+      "size": 68,
+      "va": 4836644
+    },
+    {
+      "role": "network_cancel",
+      "sha256": "84b02cf16a279df7b5d8d5d5f326a6620a4c578262532413da06722aa38d6cff",
+      "size": 246,
+      "va": 4837120
+    },
+    {
+      "role": "offline_export_page",
+      "sha256": "231b32470ce73d6d40ba4819c8c93fcdb4f8535f844c4962186511cb7c9d1604",
+      "size": 353,
+      "va": 4837968
+    },
+    {
+      "role": "pasted_signature_import",
+      "sha256": "6373f10210c14aced84ca99809f930df124c74e30f1ada7832acfaf59b2e85c7",
+      "size": 324,
+      "va": 4838330
+    },
+    {
+      "role": "online_request_page",
+      "sha256": "5a36128aa3541ca6b38ee566c69b56493a39e7276b2fc045c5dfc0f04e82dfdf",
+      "size": 64,
+      "va": 4838724
+    },
+    {
+      "role": "vin_required_page",
+      "sha256": "34f9817948485d6b127825fd8d82b16035a97355ef00e7e895e8bd6cd2c76ef6",
+      "size": 46,
+      "va": 4838788
+    },
+    {
+      "role": "signature_retry",
+      "sha256": "a85038cac44e866999653395ca94e02bdb00f4811857e37ab4506b8d50b4f178",
+      "size": 71,
+      "va": 4841072
+    },
+    {
+      "role": "signature_cancel",
+      "sha256": "1686592f6016333e2cf6109627d9f4103b76c7b1730415cd5e3348002202b17a",
+      "size": 246,
+      "va": 4841144
+    },
+    {
+      "role": "offline_export_path",
+      "sha256": "59f7e72817ee26753b952bb8ff7845af860b580a2b08ca6fc28a6a0d6c62dc51",
+      "size": 525,
+      "va": 4717916
+    },
+    {
+      "role": "signature_file_import_adapter",
+      "sha256": "2ca26a722d6ac7abf68a727fc5ae882ff6c8f0265346ae09bc1735a6721b181e",
+      "size": 131,
+      "va": 4718444
+    },
+    {
+      "role": "state_setter",
+      "sha256": "45194393d5861ab436b6f3c4b157f19fb59e2256574400be10b7c4c126d4cd5d",
+      "size": 4,
+      "va": 4719040
+    },
+    {
+      "role": "state_getter",
+      "sha256": "f57c66db8160b7cafb36f5bf723daa83fea7ac8b37e5bab06255b2efcb1c929e",
+      "size": 4,
+      "va": 4719044
+    },
+    {
+      "role": "flow_mode_copy",
+      "sha256": "bff00c1b6858ea26f595455fcd8c8c8aadd98899e1f4c838b0b13c27eb8fb6cb",
+      "size": 138,
+      "va": 4509948
+    },
+    {
+      "role": "cuw_reprogram_flow_init",
+      "sha256": "121786c8a7e5d1eceb5eba49cef6dddb5723a90345b2f4d5b343b03a16b1cd13",
+      "size": 1970,
+      "va": 4830160
+    }
+  ],
+  "managed_mapping": {
+    "SetDataForReproKey": "CUWAccessRKSWrapper.SetDataForReproKey",
+    "is_stored": "hardcoded true before all string fields are copied; this is a DataForReproKey-validity flag, not evidence of a cached server token",
+    "xml_fields": [
+      "X-Version",
+      "SoftwareID",
+      "SoftwareVersion",
+      "LicenseKey",
+      "VehicleIdentificationNumber",
+      "RequesterKind",
+      "KeypairID",
+      "SeedValue"
+    ]
+  },
+  "request_fields": [
+    {
+      "name": "XVersion",
+      "native_offset": 533,
+      "source": "RKS config object +0x00",
+      "wrapper_offset": 0
+    },
+    {
+      "name": "GTSSoftwareID",
+      "native_offset": 536,
+      "source": "RKS config object +0x04",
+      "wrapper_offset": 3
+    },
+    {
+      "name": "GTSSoftwareVersion",
+      "native_offset": 569,
+      "source": "RKS config object +0x08",
+      "wrapper_offset": 36
+    },
+    {
+      "name": "GTSLicenseKey",
+      "native_offset": 579,
+      "source": "RKS config object +0x0C or +0x10 selected by host mode",
+      "wrapper_offset": 46
+    },
+    {
+      "name": "VIN",
+      "native_offset": 626,
+      "source": "current vehicle object +0x7C",
+      "wrapper_offset": 93
+    },
+    {
+      "name": "RequesterKind",
+      "native_offset": 644,
+      "source": "RKS config object +0x18",
+      "wrapper_offset": 111
+    },
+    {
+      "name": "KeypairID",
+      "native_offset": 646,
+      "source": "RKS config object +0x1C",
+      "wrapper_offset": 113
+    },
+    {
+      "name": "SeedValue",
+      "native_offset": 653,
+      "source": "second argument of registered CUW callback; exactly 16 bytes serialized to 32 uppercase hex chars",
+      "wrapper_offset": 120
+    }
+  ],
+  "requirement_boundary": {
+    "calibration_predicate": "none recovered in the attach.att schema or flash-writer dataflow",
+    "client_ui": "shipped locale explicitly instructs technicians to consult the repair manual whether the target needs Signature Request and, on unsupported IE/.NET prerequisite dialogs, choose No to continue reprogramming when Signature Request is not necessary",
+    "conclusion": "V18 does not justify treating RKS as mandatory for every EPS reflash; exact target/regional requirement remains external policy/runtime evidence"
+  },
+  "schema_version": 1,
+  "seed_boundary": {
+    "priority": "low for ECU security because Layer A never reaches a flash writer or ECU",
+    "producer": "the 16-byte value arrives as callback argument 2 to the registered CUW reprogram-flow callback; no RNG/time/hash transform occurs in the recovered request-construction edge",
+    "registration": "flow mode 3 registers the callback at 0x49BCF8 from 0x492D00; the actual callback invoker/runtime producer is one external controller/event edge upstream"
+  },
+  "server_boundary": "no client private key, public-key verification, signature-generation algorithm, or ECU-facing RKS token dataflow is present; do not infer server cryptography from the fixed token format",
+  "state_machine": {
+    "file_import": "online ImportReproKey Next and OfflineImportReproKey Next both converge at 0x49C304; file import extracts XML <Signature>, requires exactly 0x200 characters and alphanumeric-only, then sets native state 1 on success or 2 on failure/cancel",
+    "offline_start": "Offline button -> ExportDataForReproKey XML file/path -> offline instruction page -> same shared signature-file import as online file-reading path",
+    "online_start": "StartRequestReproKey Next -> browser launch/request page -> managed RequestReproKey/PasteSeedData -> polling -> import",
+    "paste_import": "Paste Signature Next uses the same native 0x200-character format checker before storing the token and setting state 1",
+    "retry_state_values": {
+      "network_cancel": 2,
+      "network_retry": 4,
+      "signature_cancel": 2,
+      "signature_retry": 4
+    },
+    "state_byte": "RKS controller +0x04; 0 while modal request runs, 1 success, 2 abort/failure; retry UI side fields use value 4",
+    "vin_gate": "empty current VIN branches to the S701-94 VIN-required page; nonempty VIN enters request/import navigation"
+  },
+  "ui_handlers": [
+    {
+      "method_table_va": 4834860,
+      "name": "Button_StartRequestReproKey_NextClick",
+      "va": 4834860
+    },
+    {
+      "method_table_va": 4835388,
+      "name": "Button_StartRequestReproKey_OffLineClick",
+      "va": 4835388
+    },
+    {
+      "method_table_va": 4835516,
+      "name": "Button_StartRequestReproKey_CancelClick",
+      "va": 4835516
+    },
+    {
+      "method_table_va": 4836368,
+      "name": "Button_RequestingReproKey_CancelClick",
+      "va": 4836368
+    },
+    {
+      "method_table_va": 4833984,
+      "name": "Button_ImportReproKey_NextClick",
+      "va": 4833984
+    },
+    {
+      "method_table_va": 4836576,
+      "name": "Button_ImportReproKey_BackClick",
+      "va": 4836576
+    },
+    {
+      "method_table_va": 4836644,
+      "name": "Button_OfflineImportReproKey_NextClick",
+      "va": 4836644
+    },
+    {
+      "method_table_va": 4836712,
+      "name": "Button_OfflineImportReproKey_BackClick",
+      "va": 4836712
+    },
+    {
+      "method_table_va": 4836780,
+      "name": "Button_RequestReproKeyError_BackClick",
+      "va": 4836780
+    },
+    {
+      "method_table_va": 4838324,
+      "name": "Button_PasteReproKey_NextClick",
+      "va": 4838324
+    },
+    {
+      "method_table_va": 4838656,
+      "name": "Button_PasteReproKey_CancelClick",
+      "va": 4838656
+    },
+    {
+      "method_table_va": 4841144,
+      "name": "Button_InputReproKeyError_CancelClick",
+      "va": 4841144
+    },
+    {
+      "method_table_va": 4841072,
+      "name": "Button_InputReproKeyError_RetryClick",
+      "va": 4841072
+    },
+    {
+      "method_table_va": 4836444,
+      "name": "Button_RKSNetworkError_RetryClick",
+      "va": 4836444
+    },
+    {
+      "method_table_va": 4837120,
+      "name": "Button_RKSNetworkError_CancelClick",
+      "va": 4837120
+    }
+  ]
+}

@@ -797,6 +797,29 @@ Layer B is the cryptographic gate (writer `CalcSeedKey`/`CollateSeedKey`,
 `IsStored, XVersion, GTSSoftwareID, GTSSoftwareVersion, GTSLicenseKey, VIN,
 RequesterKind, KeypairID, SeedValue`.
 
+The native→managed layout is now recovered end-to-end. Native request storage
+starts at `CReproKeyServerAccessCtrlr + 0x215`; the wrapper copies these exact
+offsets into the managed fields:
+
+| Managed field | Wrapper offset | Native object offset | Native source |
+|---|---:|---:|---|
+| `XVersion` | `+00` | `+215` | RKS client-config object `+00` |
+| `GTSSoftwareID` | `+03` | `+218` | config `+04` |
+| `GTSSoftwareVersion` | `+24` | `+239` | config `+08` |
+| `GTSLicenseKey` | `+2E` | `+243` | config `+0C/+10`, selected by host mode |
+| `VIN` | `+5D` | `+272` | current-vehicle object `+7C` |
+| `RequesterKind` | `+6F` | `+284` | config `+18` |
+| `KeypairID` | `+71` | `+286` | config `+1C` |
+| `SeedValue` | `+78` | `+28D` | 16-byte callback argument, rendered as 32 uppercase hex chars |
+
+`CUWAccessRKSWrapper.SetDataForReproKey` sets `IsStored=true` immediately
+before copying those fields. This is a managed request-data-validity flag, not
+evidence that a previously issued server token is cached or reusable. The
+config object is the `0x38`-byte structure returned by `FUN_0043DFBC`; its
+accessors at `43F034/3C/48/54/60/6C/78` expose the offsets above. The request
+builder `FUN_0049BCFE` obtains that object, reads VIN from the current vehicle,
+then passes the native request block to `FUN_0047FB24`.
+
 **XML payload** (exact, from the .NET `#US` string heap):
 
 ```xml
@@ -841,6 +864,44 @@ the returned **`Signature`** textarea and validates it with
   it does not identify the server-side signing primitive.
 - **Paperwork fallback:** *"If the operation using the computer connected to the
   internet is not possible, process implementation report will be required."*
+
+The native wizard state machine is also closed at the client boundary. Delphi's
+method table binds `Button_StartRequestReproKey_NextClick` to `0x49C62C`, the
+Offline button to `0x49C83C`, online `ImportReproKey` Next to `0x49C2C0`, and
+offline `ImportReproKey` Next to `0x49CD24`. Both file-reading pages converge on
+shared importer `0x49C304`; the pasted-signature page at `0x49D3BA` uses the
+same fixed-width checker. Success writes RKS controller state `1`, failure/
+abort writes `2`, and the network/signature Retry buttons use their separate UI
+state value `4`. Empty VIN branches to the `S701-94` VIN-required page.
+
+The offline path is not a second signing algorithm. `0x49C83C -> 0x47FD5C ->
+0x49D250` exports the same request XML to a file/path and later rejoins the
+shared Signature importer. Managed `ImportReproKey` requires an XML
+`<Signature>` element, length exactly `0x200`, then the alphanumeric regex.
+The native checker independently enforces the same fixed width.
+
+One earlier open policy question can now be narrowed substantially. The shipped
+regional UI catalogs explicitly instruct the technician to *refer to the repair
+manual whether the target vehicle needs Signature Request* and, when the
+browser/.NET prerequisite path is unavailable, to choose **No** to continue
+reprogramming if Signature Request is not necessary. No RKS-required field is
+present in the recovered `attach.att` calibration schema and no RKS token reaches
+a flash writer. Therefore V18 does **not** support treating RKS as universally
+mandatory for every ECU/EPS reflash. What remains external is the Toyota policy
+for a particular target/region/calibration, not another hidden client-side
+cryptographic predicate.
+
+`SeedValue` is likewise closed to the static client boundary. The reprogram flow
+registers `FUN_0049BCF8/FUN_0049BCFE` as a callback when host flow mode is `3`;
+its second callback argument is the exact 16-byte SeedValue source. The request
+builder performs no RNG/time/hash derivation before hex serialization. The
+actual event/controller callback invoker one edge upstream is not named by the
+local static corpus; because Layer A never reaches the ECU, pursuing that
+runtime producer has low security value.
+
+Canonical generated state artifact:
+`data/generated/techstream_v18/rks_client_state.json`; verifier:
+`tests/verify_techstream_rks_client_state.py`.
 
 A separate **Flash Recovery** subsystem (`CFlashRecoveryInfo`, *"A recovery
 file for the previous vehicle has been created"*) stores vehicle/ECU-specific
