@@ -61,6 +61,55 @@ print('\n== shipped UI policy boundary ==')
 mo=(CUW/'locale/no/LC_MESSAGES/default.mo').read_bytes()
 for s in [b'Refer to the repair manual whether the target vehicle needs Signature Request.',b'If Signature Request is not necessary, press "No" to continue reprogramming.',b'Press "Offline" to perform offline Signature Request.']:
  check('locale: '+s.decode(),s in mo)
+print('\n== RKS SeedValue producer chain (static closure) ==')
+# The whole producer is static Cuw.exe code: registration -> globals -> invoker
+# thunk -> CentralGW P5-CAN SecurityAccess 27 21 seed -> callback -> 27 22 || token[256].
+for r in obj['raw_anchors']:
+ raw=pe.get_data(r['va']-base,r['len'])
+ check('anchor '+r['name'],raw.hex()==r['hex'],f"{r['va']:#x}={raw.hex()}")
+for c in obj['call_anchors']:
+ o=pe.get_offset_from_rva(c['va']-base); op=data[o]
+ dest=c['va']+5+struct.unpack_from('<i',data,o+1)[0] if op==0xE8 else 0
+ check('call '+c['name'],op==0xE8 and dest==c['target'],f"{c['va']:#x}->{dest:#x}")
+for s in obj['string_anchors']:
+ o=pe.get_offset_from_rva(s['va']-base); got=data[o:data.find(b'\0',o)]
+ check('string '+s['name'],got.decode()==s['value'],repr(got))
+# Invoker thunk must reference the seed/token globals and the callback-code global.
+thunk=pe.get_data(0x590858-base,0x1C)
+for imm,nm in [(bytes.fromhex('ec9c6200'),'token buf 0x629CEC'),(bytes.fromhex('dc9c6200'),'seed buf 0x629CDC'),
+               (bytes.fromhex('d49c6200'),'callback self 0x629CD4'),(bytes.fromhex('d09c6200'),'callback code 0x629CD0')]:
+ check('thunk references '+nm,imm in thunk)
+def off(va): return pe.get_offset_from_rva(va-base)
+# CentralGW SecurityAccess grammar: 27 21/67 21 then 27 22||token[0x100] (len 0x107)/67 22,
+# with the 7F 27 {13,35,36} negative gate.
+check('request 27 21 + expected 67 21',data[off(0x590364)+6]==0x27 and data[off(0x590364)+13]==0x21 and data[off(0x590392)+6]==0x67 and data[off(0x590392)+13]==0x21)
+check('send-key 27 22 + expected 67 22',data[off(0x5904a4)+6]==0x27 and data[off(0x5904a4)+13]==0x22 and data[off(0x5904ea)+6]==0x67 and data[off(0x5904ea)+13]==0x22)
+check('token copy is 0x100 bytes and request length 0x107',struct.unpack_from('<I',data,off(0x5904b2)+1)[0]==0x100 and struct.unpack_from('<I',data,off(0x5904d3)+6)[0]==0x107)
+check('seed record copy is 0x10 bytes',data[off(0x5903f6)]==0x6A and data[off(0x5903f6)+1]==0x10)
+check('NRC gate is 7F 27 with 13/35/36',data[off(0x59056d)+2]==0x7F and data[off(0x59057a)+2]==0x27 and sorted(data[off(x)+2] for x in (0x590587,0x59058c,0x590591))==[0x13,0x35,0x36])
+print('\n== shipped RKS.ini provenance ==')
+# Ini/RKS.ini is obfuscated per-nibble: n -> 0x20+4n, two chars per byte.
+ini=(CUW/'Ini/RKS.ini').read_bytes()
+dec=bytearray()
+for i in range(0,len(ini)-1,2):
+ dec.append(((((ini[i]-0x20)&0xff)>>2)<<4)|(((ini[i+1]-0x20)&0xff)>>2))
+dec=bytes(dec)
+prov=obj['rks_ini_provenance']
+check('RKS.ini sha256 pinned',hashlib.sha256(ini).hexdigest()==prov['sha256'])
+check('RKS.ini decoded sha256 pinned',hashlib.sha256(dec).hexdigest()==prov['decoded_sha256'])
+text=dec.decode('ascii','replace')
+check('decoded ini is [ReproKeyRequest] plaintext','[ReproKeyRequest]' in text and 'InternetExplorerDownLoadURL' in text)
+fields=dict(l.split('=',1) for l in text.replace('\r\n','\n').split('\n') if '=' in l and not l.startswith('['))
+check('RequesterKind=0 (shipped)',fields.get('RequesterKind')=='0' and prov['decoded_section_fields']['RequesterKind']=='0')
+check('KeypairID=RK0001 (shipped)',fields.get('KeypairID')=='RK0001' and prov['decoded_section_fields']['KeypairID']=='RK0001')
+check('loader strings present in Cuw.exe',b'Ini\\RKS.ini\0' in data and b'ReproKeyRequest\0' in data)
+check('config accessors return +0x18/+0x1C',pe.get_data(0x43f06c-base,11)==bytes.fromhex('558bec8b450883c0185dc3') and pe.get_data(0x43f078-base,11)==bytes.fromhex('558bec8b450883c01c5dc3'))
+check('SeedValue native source is the 27 21 seed chain', '27 21' in obj['request_fields'][-1]['source'] and '0x629CDC' in obj['request_fields'][-1]['source'])
+print('\n== static boundary statement ==')
+sb=obj['static_boundary']
+check('no missing producer code claimed',sb['producer'].startswith('fully recovered'))
+check('external residues are seed value + server key only',[x for x in sb['external_residues'] if 'seed VALUE' in x or 'private key' in x].__len__()==2)
+check('IsStored semantics preserved','validity flag' in obj['managed_mapping']['is_stored'] and 'cached server token' in obj['managed_mapping']['is_stored'])
 print('\n== deterministic regeneration ==')
 with tempfile.TemporaryDirectory() as td:
  out=Path(td)/'x.json';r=subprocess.run([sys.executable,str(REPO/'tools/techstream/generate_rks_client_state.py'),'--output',str(out)],check=False)

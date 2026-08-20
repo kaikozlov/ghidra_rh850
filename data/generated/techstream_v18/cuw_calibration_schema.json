@@ -120,6 +120,70 @@
       "va": 4244004
     },
     {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "5e7643d2f60a70228c50a8691f58cd019824f5845be6d06485a18e5c9487240f",
+      "role": "outer_container_parse",
+      "sha256": "5e7643d2f60a70228c50a8691f58cd019824f5845be6d06485a18e5c9487240f",
+      "size": 1224,
+      "va": 4275184
+    },
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "4ba646645ebcb1d7ae59a3d61843178d1ace0df1e18f244857c1a9fc82a94568",
+      "role": "first_member_reader_len_name_payload_crc",
+      "sha256": "4ba646645ebcb1d7ae59a3d61843178d1ace0df1e18f244857c1a9fc82a94568",
+      "size": 640,
+      "va": 4272028
+    },
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "d0cd2ac91d508a838cefb960211a946bd3c7639bb6b0432b022317d2954b8619",
+      "role": "crc32_zlib",
+      "sha256": "d0cd2ac91d508a838cefb960211a946bd3c7639bb6b0432b022317d2954b8619",
+      "size": 72,
+      "va": 4271256
+    },
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "97c918e9c82e6270ec13c329fd27690b064070b21d5031517f1134e877a1581e",
+      "role": "raise_format_not_recognized",
+      "sha256": "97c918e9c82e6270ec13c329fd27690b064070b21d5031517f1134e877a1581e",
+      "size": 108,
+      "va": 4276408
+    },
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "d4663b50186cd9a3912fa59e8037573ac1ea05af70525e1cb1afe9524aeff9a6",
+      "role": "raise_version_not_supported",
+      "sha256": "d4663b50186cd9a3912fa59e8037573ac1ea05af70525e1cb1afe9524aeff9a6",
+      "size": 108,
+      "va": 4276516
+    },
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "b5753e9537c0a1307c6395565061ebd2b27afb754bea75453932e43e81da8dcf",
+      "role": "raise_crc_error",
+      "sha256": "b5753e9537c0a1307c6395565061ebd2b27afb754bea75453932e43e81da8dcf",
+      "size": 108,
+      "va": 4272560
+    },
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "e3f6e7878e67c9758551776204b44675a0f754d18e1ef09f7467b9458ddac226",
+      "role": "raise_sizes_dont_match",
+      "sha256": "e3f6e7878e67c9758551776204b44675a0f754d18e1ef09f7467b9458ddac226",
+      "size": 108,
+      "va": 4276960
+    },
+    {
+      "artifact": "Cuw.exe",
+      "expected_sha256": "e65e53a1005694527020730f6563499e4bbb8145292a195c4b18d4d90f0be072",
+      "role": "raise_cpu_image_count_mismatch",
+      "sha256": "e65e53a1005694527020730f6563499e4bbb8145292a195c4b18d4d90f0be072",
+      "size": 108,
+      "va": 4276852
+    },
+    {
       "artifact": "TCUWCanReproStdFlashWriter.dll",
       "expected_sha256": "6aa2bd0d44347d588386f57ce6fda737f44504460d032644f10ad75261692652",
       "role": "standard_target_integrity_routine_control",
@@ -410,12 +474,107 @@
       "size": 32
     }
   },
-  "outer_container_boundary": {
-    "ready_path": "tools/techstream/parse_cuw_attach.py parses the recovered descriptor once extracted; preserve the first acquired raw package before attempting extraction",
-    "reason": "the V18 installation contains no .cuw/.cal specimen; static code proves an embedded attach.att metadata descriptor but a byte-accurate outer-package extractor cannot be fixture-validated locally",
-    "status": "artifact-blocked-for-parser-validation"
+  "outer_container": {
+    "declared_total_size": {
+      "container_field_offset": 24,
+      "endianness": "big",
+      "offset": 18,
+      "origin": "measured from file offset 0",
+      "parse_site": "0x413D5E..0x413DE0 (explicit bswap-by-shifts)",
+      "size": 4
+    },
+    "error_strings": {
+      "0x5D4D6F": "Calibration file:\n\tData too big for storage.",
+      "0x5D4D9C": "Calibration file:\n\tFile is corrupt (CRC Error)",
+      "0x5D4DCB": "Calibration file:\n\tFile format not recognized.  Either this file is damaged or it is not a calibration file.",
+      "0x5D4E38": "Calibration file:\n\tThis version of calibration file is not supported by this program.",
+      "0x5D4E8E": "Calibration file:\n\tFile is incorrect (Number of CPU images doesn't match)",
+      "0x5D4ED8": "Calibration file:\n\tFile is incorrect (File sizes don't match)"
+    },
+    "first_member": {
+      "evidence": "reader consumed-bytes return value is name_len + 8 + payload_len; payload CRC is verified through 0x412C98 with raiser 0x4131B0; the extracted payload is handed directly to the attach.att INI parser 0x404708",
+      "name_length_prefix": "u16be",
+      "offset": 22,
+      "payload_crc32": "u32be",
+      "payload_length": "u32be",
+      "reader_va": 4272028
+    },
+    "format_type": {
+      "boundary": "only table membership is statically enforced (raiser 0x414124); per-value semantics are claimed ONLY for gbytFORMAT_VERSIONS {01,03,04}; meaning of 05,06,07,08,09,65,66,67 is NOT recovered and NOT claimed",
+      "known_format_versions": [
+        1,
+        3,
+        4
+      ],
+      "known_format_versions_source": "TCUWCalibrationFile.dll gbytFORMAT_VERSIONS @ 0x100063A4 (count 3 @ 0x100063A8)",
+      "membership_only_values": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        101,
+        102,
+        103
+      ],
+      "offset": 13,
+      "table_count": 11,
+      "table_count_va": 6115984,
+      "table_va": 6115972,
+      "values": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        101,
+        102,
+        103
+      ]
+    },
+    "grammar": "magic[13] || format_type:u8 || crc32:u32be || total_size:u32be || { name_len:u16be || name || payload_len:u32be || payload_crc32:u32be || payload } || format-specific tail (opaque)",
+    "magic": {
+      "bytes_hex": "0043414c4942524154494f4e00",
+      "const_va": 6112572,
+      "evidence": "0x412CE0 pushes 0xD (13) and copies the constant; 0x413BF0 compares it at 0x413C43; mismatch raises 0x4140B8",
+      "initializer_va": 4271328,
+      "length": 13
+    },
+    "outer_crc_check": {
+      "algorithm": "zlib CRC32 (table @ 0x5D454C, init/final 0xFFFFFFFF)",
+      "call_site": 4276307,
+      "compare_va": 4276315,
+      "function_va": 4271256,
+      "note": "coverage begins immediately after the stored-CRC field, i.e. at the total-size field",
+      "raiser_va": 4272560,
+      "region": "[18, declared_total)"
+    },
+    "parser": "tools/techstream/parse_cuw_container.py",
+    "size_check": {
+      "compare_va": 4276331,
+      "raiser_va": 4276960,
+      "semantics": "bytes consumed by parsing must equal the declared total"
+    },
+    "stored_crc32": {
+      "container_field_offset": 20,
+      "endianness": "big",
+      "offset": 14,
+      "parse_site": "0x413CF8..0x413D57 (explicit bswap-by-shifts)",
+      "size": 4
+    },
+    "tail_policy": "everything after the first member record is preserved verbatim and never interpreted; format-specific CPU-image tail semantics are deliberately not mapped"
   },
-  "schema_version": 2,
+  "outer_container_boundary": {
+    "no_overclaim": "the 11-entry type table is enforced as membership only; semantic meaning is claimed ONLY for gbytFORMAT_VERSIONS {01,03,04}; the meanings of 05,06,07,08,09,65,66,67 and of the tail are not recovered",
+    "ready_path": "tools/techstream/parse_cuw_container.py extracts and validates the first named member (attach.att); tools/techstream/parse_cuw_attach.py parses it; preserve the first acquired raw package before extending the format-specific tail decoder",
+    "recovered": "outer magic/format-type/CRC/size framing and first-member (attach.att) extraction are statically pinned from Cuw.exe 0x413BF0 and 0x412F9C and implemented in tools/techstream/parse_cuw_container.py against a synthetic fixture built from the recovered grammar",
+    "remaining": "the V18 tree still contains no real .cuw/.cal specimen; remaining artifact dependencies are (1) validating the recovered framing against a real package, (2) which format-type value and which format-specific tail layout real packages actually use, and (3) actual package values (credentials, ranges, integrity fields)",
+    "status": "framing-statically-recovered; specimen-validation-pending"
+  },
+  "schema_version": 3,
   "target_integrity": {
     "boundary": "all 32 V18 route pairs are classified for Sienna/H target relevance. Standard transmits the signature-bearing target record but is target-incompatible; both compatible Unified routes use the separate area start/length path. Signer/private-key provenance and actual package values remain artifact/server questions.",
     "families": [
@@ -597,7 +756,7 @@
         "flash_writer": "TCUWCanUnifiedFlashWriter.dll",
         "integrity_path": "unified-CFileHeaderInfo-area",
         "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
-        "target_reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 format 46; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
+        "target_reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 || dataFormatIdentifier || 46 || addressSpaceByte || address || length; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
         "target_verdict": "byte-compatible"
       },
       {
@@ -612,7 +771,7 @@
         "flash_writer": "TCUWCanUnifiedFlashWriterEachArea.dll",
         "integrity_path": "unified-CFileHeaderInfo-area",
         "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
-        "target_reason": "same 18-byte SA and 0203->0201->0202 predownload; per-area RequestDownload is now recovered as 34 || flags || 46 || (OffsetAddress[5]+areaStart) || areaSize, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
+        "target_reason": "same 18-byte SA and 0203->0201->0202 predownload re-sent per area; per-area RequestDownload is recovered as 34 || dataFormatIdentifier || 46 || addressSpaceByte || (OffsetAddress[5]+areaStart) || areaLength, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
         "target_verdict": "byte-compatible"
       },
       {

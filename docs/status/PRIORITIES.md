@@ -11,9 +11,11 @@ The eight-item V18/firmware static-closure pass is complete to the evidence
 available without a matching calibration package or live GTS+/CUW session.
 TMS-025/TMS-029 close writer-family census/target scoring; TMS-024/TMS-026 close
 the target-integrity/calibration-schema boundary; TMS-027 closes the Sienna
-motor/control observer card; TMS-028 closes the RKS client boundary; and
-TMS-030/TMS-031 close CUW timing/recovery plus the targeted DDB/legacy-EPS
-comparative pass.
+motor/control observer card; TMS-028/TMS-033 close the RKS client incl. the
+full SeedValue producer chain; TMS-030/TMS-031 close CUW timing/recovery plus
+the targeted DDB/legacy-EPS comparative pass; TMS-032 closes both surviving
+Unified routes at body level; and TMS-034 recovers the outer `.cuw` container
+framing (synthetic-fixture validated, specimen validation pending).
 
 Do not start another undirected V18 or firmware sweep to continue that queue.
 The remaining high-value blockers now require genuinely new evidence: a matching

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import hashlib, json, subprocess, sys, tempfile
+import hashlib, json, struct, subprocess, sys, tempfile, zlib
 from pathlib import Path
 import pefile
 
@@ -55,6 +55,58 @@ with tempfile.TemporaryDirectory() as td:
  sections={x['name']:{y['name']:y['value'] for y in x['fields']} for x in obj.get('sections',[])}
  check('unknown fields are losslessly retained',sections.get('01_TargetCalibration',{}).get('UnknownFutureField')=='preserve-me')
  check('case/value preservation',sections.get('Vehicle',{}).get('ECUAuthKey')=='00112233445566778899AABBCCDDEEFF')
+
+print('\n== outer container framing: statically recovered constants ==')
+oc=s['outer_container']
+cpe=pefile.PE(str(ROOT/'Cuw.exe')); cbase=cpe.OPTIONAL_HEADER.ImageBase
+check('schema magic equals Cuw.exe constant @0x5d453c',bytes.fromhex(oc['magic']['bytes_hex'])==cpe.get_data(0x5D453C-cbase,13)==bytes.fromhex('0043414c4942524154494f4e00') and oc['magic']['length']==13)
+check('schema type table equals Cuw.exe table @0x5d5284 (count 11 @0x5d5290)',oc['format_type']['values']==list(cpe.get_data(0x5D5284-cbase,11))==[1,3,4,5,6,7,8,9,0x65,0x66,0x67] and oc['format_type']['table_count']==struct.unpack('<I',cpe.get_data(0x5D5290-cbase,4))[0]==11)
+kal=pefile.PE(str(ROOT/'TCUWCalibrationFile.dll')); kb=kal.OPTIONAL_HEADER.ImageBase
+check('known format versions equal gbytFORMAT_VERSIONS @0x100063a4',oc['format_type']['known_format_versions']==list(kal.get_data(0x100063A4-kb,3))==[1,3,4])
+check('membership-only values not overclaimed',oc['format_type']['membership_only_values']==[5,6,7,8,9,0x65,0x66,0x67] and 'NOT claimed' in oc['format_type']['boundary'])
+check('boundary status reflects recovered-framing + specimen-pending',s['outer_container_boundary']['status']=='framing-statically-recovered; specimen-validation-pending' and 'no real .cuw' in s['outer_container_boundary']['remaining'])
+check('outer CRC region begins at total-size field',oc['outer_crc_check']['region']=='[18, declared_total)' and oc['outer_crc_check']['compare_va']==0x41405b)
+check('tail is explicitly opaque', 'never interpreted' in oc['tail_policy'])
+
+print('\n== outer container parser: synthetic fixture from recovered grammar ==')
+# Fixture is assembled here independently of the parser module, straight from
+# the documented grammar, so a parser bug cannot mask a grammar mismatch.
+INI=(b'[Vehicle]\nVersion=102\nContactType=P5-Unified\nECUAuthKey=00112233445566778899AABBCCDDEEFF\n\n[01_TargetCalibration]\nStartAddress=00000000\nLength=00100000\n')
+TAIL=bytes(range(64))+b'CPU-IMAGE-TAIL-OPAQUE'
+def build(fmt=3,name=b'attach.att',payload=INI,tail=TAIL):
+    total=22+2+len(name)+8+len(payload)+len(tail)
+    b=bytearray(b'\x00CALIBRATION\x00'+bytes([fmt])+struct.pack('>I',0)+struct.pack('>I',total))
+    b+=struct.pack('>H',len(name))+name+struct.pack('>I',len(payload))+struct.pack('>I',zlib.crc32(payload)&0xffffffff)+payload+tail
+    b[14:18]=struct.pack('>I',zlib.crc32(bytes(b[18:total]))&0xffffffff)
+    return bytes(b)
+GOOD=build()
+with tempfile.TemporaryDirectory() as td:
+    td=Path(td); cuw=td/'synthetic.cuw'; out=td/'r.json'; pay=td/'attach.att'
+    cuw.write_bytes(GOOD)
+    r=subprocess.run([sys.executable,str(REPO/'tools/techstream/parse_cuw_container.py'),str(cuw),'--output',str(out),'--payload-out',str(pay)],check=False,capture_output=True,text=True)
+    obj=json.loads(out.read_text()) if out.exists() else {}
+    check('container parser exits successfully',r.returncode==0 and obj.get('ok') is True)
+    check('magic/type/name extracted',obj.get('format_type')==3 and obj.get('name')=='attach.att' and obj.get('name_length')==10)
+    check('payload round-trips byte-exact',pay.exists() and pay.read_bytes()==INI and obj.get('payload_length')==len(INI))
+    check('outer CRC verified over [18,declared)',obj.get('computed_outer_crc32')==obj.get('stored_crc32') and obj.get('outer_crc_region')==[18,len(GOOD)] and obj.get('declared_total_size')==len(GOOD))
+    check('opaque tail preserved verbatim',obj.get('tail_length')==len(TAIL) and hashlib.sha256(TAIL).hexdigest()==obj.get('tail_sha256'))
+    def run_bad(label,data,needle):
+        f=td/label; f.write_bytes(data); o=td/(label+'.json')
+        rr=subprocess.run([sys.executable,str(REPO/'tools/techstream/parse_cuw_container.py'),str(f),'--output',str(o)],check=False,capture_output=True,text=True)
+        jj=json.loads(o.read_text()) if o.exists() else {}
+        check(label,rr.returncode==1 and any(needle in e for e in jj.get('errors',[])),(jj.get('errors') or ['?'])[0][:90])
+    bad=bytearray(GOOD); bad[1]=0x58; run_bad('bad magic rejected',bytes(bad),'bad magic')
+    run_bad('unknown format type rejected',build(fmt=0x02),'not in statically recovered membership table')
+    badpay=bytearray(GOOD); badpay[22+2+10+4]^=0x01; run_bad('bad payload crc rejected',bytes(badpay),'payload CRC mismatch')
+    corrupted=bytearray(GOOD); corrupted[len(GOOD)-5]^=0xff; run_bad('tail corruption caught by outer crc',bytes(corrupted),'outer CRC mismatch')
+    flipcrc=bytearray(GOOD); flipcrc[14]^=0x01; run_bad('bad stored outer crc rejected',bytes(flipcrc),'outer CRC mismatch')
+    over=bytearray(build(tail=b'')); struct.pack_into('>I',over,18,len(over)+10); run_bad('declared size beyond file rejected',bytes(over),'exceeds file size')
+    short=bytearray(GOOD); struct.pack_into('>H',short,22,0x7ff); run_bad('truncated name rejected',bytes(short),'truncated inside first member name')
+    # build_synthetic helper agrees with the independent fixture builder
+    sys.path.insert(0,str(REPO/'tools/techstream'))
+    import parse_cuw_container as pcc
+    check('module build_synthetic matches independent grammar',pcc.build_synthetic(INI,tail=TAIL)==GOOD)
+    check('module parse agrees on good fixture',not pcc.parse(GOOD)['errors'])
 
 print('\n== deterministic regeneration ==')
 with tempfile.TemporaryDirectory() as td:

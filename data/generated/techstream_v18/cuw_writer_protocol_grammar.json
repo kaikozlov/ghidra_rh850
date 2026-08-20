@@ -414,8 +414,8 @@
       "target_disposition": "rejected: request-seed application payload is 19 bytes, one byte longer than target exact policy"
     },
     "UnifiedEachArea": {
-      "download": "34 || compressionFlag || areaFlag || 46 || (OffsetAddress[5]+areaStart) || areaSize; parses 74 and caps block at 0x0FFF",
-      "predownload": "2E 0203||OffsetAddress[5] -> 2E 0201||SeedKey[16] -> 2E 0202||Nonce[16]",
+      "download": "34 || dataFormatIdentifier || 46 || addressSpaceByte || (OffsetAddress[5]+areaStart) || areaLength; parses 74 and caps block at 0x0FFF before subtracting two header bytes",
+      "predownload": "2E 0203||OffsetAddress[5] -> 2E 0201||SeedKey[16] -> 2E 0202||Nonce[16], re-sent for every area group",
       "reset": "11 01 -> 51 01",
       "routines": [
         "10F0",
@@ -1874,7 +1874,7 @@
       "factory_rows": 1,
       "flash_writer": "TCUWCanUnifiedFlashWriter.dll",
       "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
-      "reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 format 46; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
+      "reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 || dataFormatIdentifier || 46 || addressSpaceByte || address || length; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
       "reset_templates": [
         "11 01"
       ],
@@ -1923,7 +1923,7 @@
       "factory_rows": 1,
       "flash_writer": "TCUWCanUnifiedFlashWriterEachArea.dll",
       "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
-      "reason": "same 18-byte SA and 0203->0201->0202 predownload; per-area RequestDownload is now recovered as 34 || flags || 46 || (OffsetAddress[5]+areaStart) || areaSize, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
+      "reason": "same 18-byte SA and 0203->0201->0202 predownload re-sent per area; per-area RequestDownload is recovered as 34 || dataFormatIdentifier || 46 || addressSpaceByte || (OffsetAddress[5]+areaStart) || areaLength, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
       "reset_templates": [
         "11 01"
       ],
@@ -1969,7 +1969,7 @@
       "verdict_sienna_8965B4512000": "byte-compatible"
     }
   ],
-  "schema_version": 3,
+  "schema_version": 4,
   "target_boot_grammar": {
     "note": "Corolla-H boot/UDS target grammar is independently transferred target-natively in tracked variant tests",
     "request_seed": "27 01 || 16 tester bytes; exact request length 0x12",
@@ -1982,6 +1982,313 @@
     ],
     "send_key": "27 02 || 16-byte key",
     "wdbi_order": "0203(5)->0201(16)->0202(16)"
+  },
+  "unified_survivor_closure": {
+    "decisive_pin_reference": "EachArea predownload/request-download/reset/routine-control bodies remain pinned in decisive_function_identities (0x100010f0/0x10001420/0x100019c0/0x10001f80)",
+    "host_verification": {
+      "claim": "neither surviving Unified flash writer performs any host-side CRC/CMAC/DigitalSignature/hash verification of the image it transfers",
+      "evidence": "import census of both flash writers contains no CRC/CMAC/DigitalSignature/crypto facility; recorded under negative_import_evidence"
+    },
+    "image_area_sequencing": {
+      "TCUWCanUnifiedFlashWriter.dll": {
+        "address_source": "per-area CFileHeaderInfo area objects (std::string StartAddress/Length, stride 0x38) summed across the three area tables for progress; RequestDownload uses OffsetAddress[5]+areaStart and the raw Length field bytes",
+        "last_cpu_image_tail": "GetWakeUpTimeAfterReset stored, StopSyncPeriodicMsg, 11 01 reset (fcn 0x10001a20, 180 ms), then raw J2534 tail frames (fcn 0x10001b10)",
+        "predownload": "2E 02 03||OffsetAddress[5] -> 2E 02 01||SeedKey[16] -> 2E 02 02||Nonce[16] sent once per CPU image before the area loop (fcn 0x100010f0 called at VA 0x1000268a)",
+        "routines_per_image": "one 10F0 pair (tag 0, whole image) before the area loop, then per area: FF00 (tag 1) always, 10F1 (tag 2) pair, 10F2 (tag 3) pair",
+        "scope": "per node CPU image; verified from pinned unified_main_worker/unified_download_write_step/unified_routine_control bodies"
+      },
+      "TCUWCanUnifiedFlashWriterEachArea.dll": {
+        "address_source": "three per-image area tables (CFileHeaderInfo-shaped +0x48/+0x90/+0xB4); area objects stride 0x38 = {std::string StartAddress@+0x00, std::string Length@+0x1C}; RequestDownload address = big-endian 40-bit GetOffsetAddress[5] combined with GetUnsignedLong(area StartAddress), Length bytes copied verbatim",
+        "last_cpu_image_tail": "GetWakeUpTimeAfterReset stored, StopSyncPeriodicMsg, 11 01 reset (fcn 0x100019c0, 180 ms), 50 ms-step wake countdown with per-step host callback, then two raw J2534 WriteMsgs tail frames: CAN ID 0x777 data 10 81 (len 6) and CAN ID 0x7F7 data FE 10 81 (len 7, TxFlag 0x80)",
+        "predownload": "2E 02 03||OffsetAddress[5] -> 2E 02 01||SeedKey[16] -> 2E 02 02||Nonce[16] re-sent inside the per-area loop (fcn 0x100010f0 called at VA 0x10002616) before every area group",
+        "routines_per_area": "conditional 10F0 (tag 0) pair when the first area table is non-empty, FF00 (tag 1) always, conditional 10F1 (tag 2) pair when the second area table is non-empty, 10F2 (tag 3) pair always",
+        "scope": "per node CPU image and per area group; verified from pinned each_area_main_worker/each_area_download_write_step bodies"
+      }
+    },
+    "make_send_data": {
+      "pin": {
+        "binary": "TCUWUnifiedUtils.dll",
+        "binary_sha256": "bc357c49d52911bd85e97b9c89b6dd29df1d967a0dfa43d657e3c851b2c1a130",
+        "role": "make_send_data",
+        "sha256": "c2e0050b01d1cbd114ee0d63e49c7525766d6084dcc5030abbd1828c91bf8fbf",
+        "size": 108,
+        "va": 268446784
+      },
+      "semantics": "CUnifiedUtils::MakeSendData walks typSFormatRecord records {kind:u8, pad, offset:u32, ptr:u32, len:u32} (stride 0x10) and memcpy-copies the prebuilt payload bytes into the 36-block buffer; it performs no host encryption, compression, or hash transform"
+    },
+    "negative_import_evidence": {
+      "forbidden_substrings": [
+        "GetReproMethod",
+        "GetDataFormat",
+        "GetCompressionAlgorithm",
+        "GetEraseBlock",
+        "GetALFID",
+        "GetDownloadAddress",
+        "GetDownloadMemsize",
+        "GetRequiredSpecReproVer",
+        "DigitalSignature",
+        "CMAC",
+        "CRC",
+        "CryptEncrypt",
+        "CryptDecrypt",
+        "CryptImportKey"
+      ],
+      "interpretation": "the surviving writers consume only GetNodeIdx/GetNumCPUImages/GetOffsetAddress/GetSeedKey/GetNonce/GetP4ServerMaxTime/GetSecurityProperty2/GetWakeUpTimeAfterReset/GetNumCPUImageDataAreaInfo plus prepare-side GetECUAuthKey/GetServiceAuthKey; GetReproMethod/GetDataFormat and every digest/signature getter are provably absent, so those fields cannot alter either surviving route",
+      "per_binary": {
+        "TCUWCanUnifiedFlashWriter.dll": {
+          "calibration_getters_consumed": [
+            "?GetNodeIdx@CalibrationFile@@QAE?BHH@Z",
+            "?GetNonce@CalibrationFile@@QAEPBEH@Z",
+            "?GetNumCPUImageDataAreaInfo@CFileHeaderInfo@@QBEHXZ",
+            "?GetNumCPUImages@CalibrationFile@@QAEHXZ",
+            "?GetOffsetAddress@CalibrationFile@@QAEPBEH@Z",
+            "?GetP4ServerMaxTime@CalibrationFile@@QAE?BIH@Z",
+            "?GetSecurityProperty2@CalibrationFile@@QAEPBDH@Z",
+            "?GetSeedKey@CalibrationFile@@QAEPBEH@Z",
+            "?GetWakeUpTimeAfterReset@CalibrationFile@@QAE?BIH@Z"
+          ],
+          "forbidden_hits": []
+        },
+        "TCUWCanUnifiedFlashWriterEachArea.dll": {
+          "calibration_getters_consumed": [
+            "?GetNodeIdx@CalibrationFile@@QAE?BHH@Z",
+            "?GetNonce@CalibrationFile@@QAEPBEH@Z",
+            "?GetNumCPUImageDataAreaInfo@CFileHeaderInfo@@QBEHXZ",
+            "?GetNumCPUImages@CalibrationFile@@QAEHXZ",
+            "?GetOffsetAddress@CalibrationFile@@QAEPBEH@Z",
+            "?GetP4ServerMaxTime@CalibrationFile@@QAE?BIH@Z",
+            "?GetSecurityProperty2@CalibrationFile@@QAEPBDH@Z",
+            "?GetSeedKey@CalibrationFile@@QAEPBEH@Z",
+            "?GetWakeUpTimeAfterReset@CalibrationFile@@QAE?BIH@Z"
+          ],
+          "forbidden_hits": []
+        },
+        "TCUWCanUnifiedPrepareWriter.dll": {
+          "calibration_getters_consumed": [
+            "?GetDiagID@CalibrationFile@@QAEPBDH@Z",
+            "?GetECUAuthKey@CalibrationFile@@QAEPBEH@Z",
+            "?GetEmissionsRelatedSystem@CalibrationFile@@QAE?BIH@Z",
+            "?GetGatewayDiagID@CalibrationFile@@QAEPBDHH@Z",
+            "?GetNodeIdx@CalibrationFile@@QAE?BHH@Z",
+            "?GetNumGateway@CalibrationFile@@QAE?BHH@Z",
+            "?GetP4ServerMaxTime@CalibrationFile@@QAE?BIH@Z",
+            "?GetServiceAuthKey@CalibrationFile@@QAEPBEH@Z",
+            "?GetWakeUpTimeAfterReset@CalibrationFile@@QAE?BIH@Z"
+          ],
+          "forbidden_hits": []
+        }
+      }
+    },
+    "pinned_bodies": [
+      {
+        "binary": "TCUWCanUnifiedFlashWriter.dll",
+        "binary_sha256": "091eb414be13fd24cc0a9c52853e6e02a3b417c5851c765d2d45263f475718a1",
+        "role": "unified_main_worker",
+        "sha256": "e62369e56a5b3b0226f7bcfeebc024d7196877a70289ce79467cd4739917abec",
+        "size": 1312,
+        "va": 268444944
+      },
+      {
+        "binary": "TCUWCanUnifiedFlashWriter.dll",
+        "binary_sha256": "091eb414be13fd24cc0a9c52853e6e02a3b417c5851c765d2d45263f475718a1",
+        "role": "unified_download_write_step",
+        "sha256": "8ab8407ad57ca0aea5ac2a2ffd5ed10b8d65dcc6850e9dd2131e630faac24b3f",
+        "size": 768,
+        "va": 268442960
+      },
+      {
+        "binary": "TCUWCanUnifiedFlashWriter.dll",
+        "binary_sha256": "091eb414be13fd24cc0a9c52853e6e02a3b417c5851c765d2d45263f475718a1",
+        "role": "unified_request_download",
+        "sha256": "ab7e07d2c8d5602f34892c751329726f397bd07213fa3c641da5b211813f9cde",
+        "size": 944,
+        "va": 268440608
+      },
+      {
+        "binary": "TCUWCanUnifiedFlashWriter.dll",
+        "binary_sha256": "091eb414be13fd24cc0a9c52853e6e02a3b417c5851c765d2d45263f475718a1",
+        "role": "unified_transfer_data",
+        "sha256": "9fbc28e4c9eaa5c54f4434ec8305bdc8a4331d9b884e107b32f74ccb680e0eee",
+        "size": 324,
+        "va": 268441568
+      },
+      {
+        "binary": "TCUWCanUnifiedFlashWriter.dll",
+        "binary_sha256": "091eb414be13fd24cc0a9c52853e6e02a3b417c5851c765d2d45263f475718a1",
+        "role": "unified_routine_control",
+        "sha256": "35688924d8dc13d88d1c32acf009c129140878ed8850f1c2450629ad349f1862",
+        "size": 1151,
+        "va": 268443776
+      },
+      {
+        "binary": "TCUWCanUnifiedFlashWriterEachArea.dll",
+        "binary_sha256": "95c5ec26bc10c5227bc830c142eb86093aa3709606b108b33051f9b982f9ae3e",
+        "role": "each_area_download_write_step",
+        "sha256": "511f155fa5c6dac06606d34aa32e65a5b20d66a622d9b87bd01b8662ebaa7b80",
+        "size": 596,
+        "va": 268442864
+      },
+      {
+        "binary": "TCUWCanUnifiedFlashWriterEachArea.dll",
+        "binary_sha256": "95c5ec26bc10c5227bc830c142eb86093aa3709606b108b33051f9b982f9ae3e",
+        "role": "each_area_main_worker",
+        "sha256": "43e89745fb42a09003996a45dd6bf03aff45501e86842f04364615a61a746e99",
+        "size": 1326,
+        "va": 268444368
+      },
+      {
+        "binary": "TCUWUnifiedUtils.dll",
+        "binary_sha256": "bc357c49d52911bd85e97b9c89b6dd29df1d967a0dfa43d657e3c851b2c1a130",
+        "role": "make_send_data",
+        "sha256": "c2e0050b01d1cbd114ee0d63e49c7525766d6084dcc5030abbd1828c91bf8fbf",
+        "size": 108,
+        "va": 268446784
+      },
+      {
+        "binary": "TCUWUnifiedUtils.dll",
+        "binary_sha256": "bc357c49d52911bd85e97b9c89b6dd29df1d967a0dfa43d657e3c851b2c1a130",
+        "role": "wrap_key_selector_resolver",
+        "sha256": "6b62e4e114f856f932ebe339d3e35399fcaf76742e514c84d7b7ac8ea0e28c2c",
+        "size": 48,
+        "va": 268439552
+      },
+      {
+        "binary": "TCUWUnifiedUtils.dll",
+        "binary_sha256": "bc357c49d52911bd85e97b9c89b6dd29df1d967a0dfa43d657e3c851b2c1a130",
+        "role": "calc_seed_key",
+        "sha256": "a360328e446abdd7aa3d8740bec0191f882c498c402e2b68090497f3e29acecd",
+        "size": 234,
+        "va": 268446544
+      }
+    ],
+    "request_download": {
+      "applies_to": [
+        "TCUWCanUnifiedFlashWriter.dll (0x10001420, 944 B)",
+        "TCUWCanUnifiedFlashWriterEachArea.dll (0x10001420, 855 B)"
+      ],
+      "details": [
+        "request bytes: 0x34, then dataFormatIdentifier from SecurityProperty2 decoded-byte bit 3, then 0x46, then addressSpaceByte derived from the area/routine tag (tags 0/1/2 -> 1, tag 3 -> 0), then the 5-byte big-endian address, then the area Length field bytes",
+        "address = big-endian 40-bit combination of GetOffsetAddress[5] with GetUnsignedLong(area StartAddress string)",
+        "areaLength is transmitted as the raw Length field bytes, not a parsed integer",
+        "positive response 0x74 carries a big-endian maxBlockLength; the writer caps it at 0x0FFF and then subtracts two header bytes before use"
+      ],
+      "grammar": "34 || dataFormatIdentifier || 46 || addressSpaceByte || (OffsetAddress[5] + areaStart) || areaLength",
+      "supersedes": "field provenance here is authoritative: route_families[].reason and the mirrored cuw_writer_family_matrix.json / cuw_calibration_schema.json dispositions carry the same corrected byte order (regenerated from this classifier) but only as one-line summaries; per-byte semantics, SecurityProperty2 decoding, and sequencing live in this closure"
+    },
+    "security_property2": {
+      "boundary": "the decoded byte is key material semantics, not a character code; do not reinterpret the ASCII character value",
+      "decode": "CBytes(const char*) performs ordinary two-hex-digits-per-byte decoding (the same parser proven for the auth fields), so the public value \"98\" decodes to a first byte 0x98",
+      "example": {
+        "dataFormatIdentifier": 1,
+        "decoded_first_byte": "0x98",
+        "public_string": "98"
+      },
+      "rule": "dataFormatIdentifier = (first decoded byte >> 3) & 1, i.e. bit 3 of the decoded byte; encoded in each_area_download_write_step by shr dl,3 / and dl,1 at VA 0x10001d33/0x10001d3b",
+      "source": "CalibrationFile::GetSecurityProperty2(node) returns the calibration string; the writer builds CBytes(const char*) from it"
+    },
+    "surviving_routes": [
+      "TCUWCanUnifiedPrepareWriter.dll+TCUWCanUnifiedFlashWriter.dll",
+      "TCUWCanUnifiedPrepareWriter.dll+TCUWCanUnifiedFlashWriterEachArea.dll"
+    ],
+    "wrap_key_selector_table": {
+      "binary": "TCUWUnifiedUtils.dll",
+      "reachability": {
+        "records_1_16": "present in the shipped binary but not proven reachable by any pinned V18 caller; no non-zero selector feed is recovered",
+        "surviving_path": "selector 0 is hardcoded: CUnifiedUtils::CalcSeedKey pushes imm8 0 at VA 0x10002b6e before calling the resolver, and TCUWCanCommonPrepareWriter!CalcSeedKeyForSecurityUp likewise uses selector 0; record 0 equals that selector-0 key B45B26D6344FD60E80BC01D63C7584A0"
+      },
+      "record_count": 17,
+      "records": [
+        {
+          "index": 0,
+          "key_string": "B45B26D6344FD60E80BC01D63C7584A0",
+          "selector": 0
+        },
+        {
+          "index": 1,
+          "key_string": "8C98930D3C63806872D862BA4E80CEC7",
+          "selector": 1
+        },
+        {
+          "index": 2,
+          "key_string": "B48A5A5A1B81BDC5BBAFE865DB015FAF",
+          "selector": 2
+        },
+        {
+          "index": 3,
+          "key_string": "66D5364A0D2D45C67E8DB120ED471438",
+          "selector": 3
+        },
+        {
+          "index": 4,
+          "key_string": "0B4BB2772B2119F733FC8C3A7304F022",
+          "selector": 4
+        },
+        {
+          "index": 5,
+          "key_string": "DEBA6517054A22F89E736DD581994083",
+          "selector": 5
+        },
+        {
+          "index": 6,
+          "key_string": "A808350D2BAF2084F0A5C10790A5D506",
+          "selector": 6
+        },
+        {
+          "index": 7,
+          "key_string": "2C141EC46ACA89ABB2F46AC888259AAF",
+          "selector": 7
+        },
+        {
+          "index": 8,
+          "key_string": "2C141EC46ACA89ABB2F46AC888259AAF",
+          "selector": 8
+        },
+        {
+          "index": 9,
+          "key_string": "E3992F9D0C5288FD76CA8831F96A650E",
+          "selector": 9
+        },
+        {
+          "index": 10,
+          "key_string": "56C38E68EC229CAE7CFAA01C1A3910F9",
+          "selector": 10
+        },
+        {
+          "index": 11,
+          "key_string": "914D952487EF67E791F660A5FB085FFD",
+          "selector": 11
+        },
+        {
+          "index": 12,
+          "key_string": "056635362503999729880276102709225963151817922019145305737830A277",
+          "selector": 12
+        },
+        {
+          "index": 13,
+          "key_string": "CA3ADB298E8ABEDBF29A612028CD2A165194B244F60A403B919968385FA4FA37",
+          "selector": 13
+        },
+        {
+          "index": 14,
+          "key_string": "9978D5FA22B0C4E78B5D6451B2F7B7B5",
+          "selector": 14
+        },
+        {
+          "index": 15,
+          "key_string": "A6ACED0620C90AED08E2042BC076C986",
+          "selector": 15
+        },
+        {
+          "index": 16,
+          "key_string": "05060701090C0D080A0D020B0F0400030B0406000F020D09050C010A030D0E08",
+          "selector": 16
+        }
+      ],
+      "resolver": "wrap_key_selector_resolver (0x10001000, 48 B) linearly scans the selector dword at record+0x204 and returns record+0x00",
+      "selector_offset": 516,
+      "stride": 520,
+      "table_va": "0x100051b0"
+    }
   },
   "verdict_counts": {
     "byte-compatible": 2,

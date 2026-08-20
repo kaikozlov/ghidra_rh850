@@ -1894,6 +1894,67 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/techstream_v18/cuw_writer_protocol_grammar.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.
 
+### CORR-085 — the outer `.cuw` envelope was described as unrecoverable; its framing is statically pinned
+
+- **Earlier wording (TMS-026/OPEN_QUESTIONS):** the V18 tree contains no
+  specimen, so the outer package envelope/extraction framing "cannot be
+  fixture-validated locally" and was listed as a package-artifact blocker.
+- **Correction:** static analysis of `Cuw.exe` (`0x413BF0`/`0x412F9C`/
+  `0x412C98`) recovers the exact outer framing — magic `"\0CALIBRATION\0"`, BE
+  type/CRC/total fields, first-member length-prefixed record with per-payload
+  CRC32, CRC coverage `[18, declaredTotal)`, and a consumed==total size check.
+  `tools/techstream/parse_cuw_container.py` implements it and is validated
+  against a synthetic fixture built independently from the grammar.
+- **Preserved boundary:** real-package validation, format-type/tail semantics,
+  and actual values remain specimen-bound. Membership-only enforcement is not
+  promoted to per-value meaning.
+- **Canonical:** TMS-034; `tests/verify_techstream_cuw_calibration_schema.py`;
+  [../tooling/techstream.md](../tooling/techstream.md) §5.2.1.
+
+### CORR-084 — the RKS SeedValue producer was called an unresolved upstream edge; it is fully static `Cuw.exe` code
+
+- **Earlier wording (§5.3/TMS-009/TMS-028):** `FUN_0049BCFE` is reached through
+  an indirect path "with no recovered direct static caller", leaving who
+  produces the 16 bytes unresolved.
+- **Correction:** the whole chain is recovered and raw-byte anchored
+  (TMS-033): CentralGW P5-CAN SecurityAccess `27 21` response seed → global
+  `0x629CDC` → thunk `0x590858` → callback `0x49BCF8` → SeedValue; the portal
+  token returns to the ECU as `27 22 || token[256]`.
+- **Preserved boundary:** only the live gateway seed value and the server
+  signing key remain external.
+- **Canonical:** TMS-033; `tests/verify_techstream_rks_client_state.py`;
+  [../tooling/techstream.md](../tooling/techstream.md) §5.3.
+
+### CORR-083 — `SecurityProperty2` was not an ASCII character selector; it is hex-decoded key material
+
+- **Earlier wording:** §5.2 discussed `SecurityProperty2=98` as flash metadata
+  whose transfer-format semantics remained route-specific, with no decoding
+  rule.
+- **Correction:** the writer builds `CBytes(const char*)` from the string, i.e.
+  ordinary hex decoding (`98` → byte `0x98`), and bit 3 of the first decoded
+  byte becomes the Unified RequestDownload `dataFormatIdentifier`
+  (`shr dl,3 / and dl,1` in the pinned EachArea step). The public example
+  yields `0x98 → 1`.
+- **Rule:** never reinterpret the decoded byte as its ASCII character value.
+- **Canonical:** TMS-032; `tests/verify_techstream_cuw_writer_protocol_grammar.py`;
+  [../tooling/techstream.md](../tooling/techstream.md) §5.2.3.
+
+### CORR-082 — the Unified RequestDownload field order was transposed
+
+- **Earlier wording (§5.2 bullet 2, TMS-026/TMS-029 route reasons):**
+  `34 || compressionFlag || areaFlag || 46 || …`, i.e. the `0x46` format byte
+  placed after both flag bytes.
+- **Correction:** the pinned builders emit `34 || dataFormatIdentifier || 46 ||
+  addressSpaceByte || address || length` — `0x46` is byte 2 and the second
+  flag (address-space selector) follows it. The corrected order is now the
+  single source of truth in `route_verdict` and is regenerated into the
+  grammar, matrix, and calibration-schema artifacts.
+- **Also corrected:** the "size" operand is the area Length field's raw bytes
+  transmitted verbatim, not a parsed integer, and the field is named
+  `areaLength`/`length` rather than the ambiguous `areaSize`.
+- **Canonical:** TMS-032; `tests/verify_techstream_cuw_writer_protocol_grammar.py`;
+  [../tooling/techstream.md](../tooling/techstream.md) §5.2/§5.2.3.
+
 ### CORR-081 — the first CUW route census stopped one pass too early; all 196 rows are statically classifiable
 
 - **Earlier boundary:** TMS-029 initially left 30 factory rows as bounded-rejected,
@@ -1908,8 +1969,9 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   mismatch.
 - **EachArea correction:** `TCUWCanUnifiedFlashWriterEachArea` is not merely
   vocabulary-compatible. It exactly performs `0203→0201→0202`, per-area
-  `34 || flags || 46 || adjustedAddress[5] || areaSize`, block cap `0x0FFF`,
-  RIDs `10F0/FF00/10F1/10F2`, and `11 01`; it is byte-compatible.
+  RequestDownload, block cap `0x0FFF`, RIDs `10F0/FF00/10F1/10F2`, and
+  `11 01`; it is byte-compatible. (The RequestDownload field order printed
+  here was later transposed-corrected by CORR-082.)
 - **Correct census:** all 196 rows are now statically disposed as **194 rejected
   + 2 byte-compatible Unified rows**, with zero unresolved/bounded route rows.
   A matching package is still required to choose between the two compatible

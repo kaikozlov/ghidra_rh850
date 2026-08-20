@@ -1,4 +1,49 @@
 {
+  "call_anchors": [
+    {
+      "name": "request_builder_reads_config_requesterkind",
+      "target": 4452460,
+      "va": 4833258
+    },
+    {
+      "name": "request_builder_reads_config_keypairid",
+      "target": 4452472,
+      "va": 4833289
+    },
+    {
+      "name": "request_builder_seed_ptr_via_accessor",
+      "target": 4452412,
+      "va": 4833324
+    },
+    {
+      "name": "collate_seed_key_calls_p5can_diag",
+      "target": 4577432,
+      "va": 5833713
+    },
+    {
+      "name": "callback_sends_request_block_to_filler",
+      "target": 4717348,
+      "va": 4833387
+    },
+    {
+      "name": "seed_bridge_memcpy_callee",
+      "target": 5940544,
+      "va": 5834749
+    },
+    {
+      "name": "token_store_memcpy_callee",
+      "target": 5940544,
+      "va": 4718989
+    }
+  ],
+  "centralgw_security_access": {
+    "actor": "CCentralGWModeChanger::CollateSeedKeyForP5CentralGW = fcn 0x590320 (assertion string at 0x629BC5), entered from ChangeToReprogGWMode 0x58F028 -> 0x5901D0",
+    "diag_send": "requests and expected responses are transmitted by CCanDiagCommUtils::SendRequMsgAndReceiveRespMsgForP5Can = fcn 0x45D898 (log string at 0x5EE616), called at 0x5903F1 and 0x59054C",
+    "nrc_gate": "negative responses are gated as 7F 27 with NRC 0x13 (0x590587), 0x35 (0x59058C), or 0x36 (0x590591); response length must be 8 (0x59055C)",
+    "seed_extract": "16-byte seed record memcpy from diag response +0x1F at 0x5903F6; the record dword at +4 is the AnsiString pointer to the 16 seed bytes",
+    "send_key": "request 27 22 stored at 0x5904A4 followed by the 256 decoded token bytes (memcpy 0x100 at 0x5904B2); total request length 0x107 at 0x5904D3; expected positive response 67 22 at 0x5904EA",
+    "send_seed": "request 27 21 stored at 0x590364; expected positive response 67 21 at 0x590392"
+  },
   "cuw_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
   "distribution": "Toyota Techstream V18.00.003",
   "function_identities": [
@@ -121,6 +166,48 @@
       "sha256": "121786c8a7e5d1eceb5eba49cef6dddb5723a90345b2f4d5b343b03a16b1cd13",
       "size": 1970,
       "va": 4830160
+    },
+    {
+      "role": "rks_request_callback_builder",
+      "sha256": "7e90f8f6873684941e51000d4d3fc10551f07f8ee95cb22f1377d88b4a2ade34",
+      "size": 995,
+      "va": 4832504
+    },
+    {
+      "role": "rks_request_block_filler",
+      "sha256": "19e9a8f28ce8ac94a0d167a1fbc2c160cf086a043d5c0756cf431f62b2629234",
+      "size": 567,
+      "va": 4717348
+    },
+    {
+      "role": "rks_signature_token_store",
+      "sha256": "4d5def28c158b94a020f9653bcbea8632521c4f0a953f1a0dee375a1e1e86051",
+      "size": 130,
+      "va": 4718908
+    },
+    {
+      "role": "rks_ini_loader",
+      "sha256": "d89bd70290df18347be1888f3b276dd9cb53a87ff33be709bf7cfde92cbf359c",
+      "size": 3956,
+      "va": 4448448
+    },
+    {
+      "role": "centralgw_collate_seed_key_for_p5",
+      "sha256": "5932279540bc1b2e28e72a82d957ac05efc73268967519d38af0e2236b6aca22",
+      "size": 735,
+      "va": 5833504
+    },
+    {
+      "role": "rks_seed_token_bridge",
+      "sha256": "377ec8fcbcbf84151710d96ac0038e8238cf36e4f6fcebf1878980c0f0a6bd0c",
+      "size": 108,
+      "va": 5834732
+    },
+    {
+      "role": "rks_callback_invoker_thunk",
+      "sha256": "07c039bfd3675d8ab9c804fde47ce74afe30155bb5e9f89f7ae725ec4fbaf5b7",
+      "size": 28,
+      "va": 5834840
     }
   ],
   "managed_mapping": {
@@ -137,6 +224,152 @@
       "SeedValue"
     ]
   },
+  "raw_anchors": [
+    {
+      "hex": "83fa030f858e00",
+      "len": 7,
+      "name": "flow_mode3_gate_cmp3",
+      "va": 4796350
+    },
+    {
+      "hex": "c745c8f8bc4900",
+      "len": 7,
+      "name": "registration_imm_0x49bcf8",
+      "va": 4796359
+    },
+    {
+      "hex": "8990180f0000",
+      "len": 6,
+      "name": "tmethod_store_code_plus_0xf18",
+      "va": 4694849
+    },
+    {
+      "hex": "89901c0f0000",
+      "len": 6,
+      "name": "tmethod_store_data_plus_0xf1c",
+      "va": 4694858
+    },
+    {
+      "hex": "ffb31c0f0000ffb3180f0000",
+      "len": 12,
+      "name": "invoker_push_pair_f1c_f18",
+      "va": 4688850
+    },
+    {
+      "hex": "558bec8b45088905d09c62008b450c8905d49c62005dc20800",
+      "len": 25,
+      "name": "globals_installer_body",
+      "va": 5832516
+    },
+    {
+      "hex": "558bec8b45088905d09c62008b450c8905d49c62005dc20800",
+      "len": 25,
+      "name": "globals_installer_body2",
+      "va": 5832516
+    },
+    {
+      "hex": "6a105268dc9c6200e83e9d010083",
+      "len": 14,
+      "name": "seed_bridge_memcpy16_to_0x629cdc",
+      "va": 5834741
+    },
+    {
+      "hex": "ff15d09c6200",
+      "len": 6,
+      "name": "invoker_thunk_call_global",
+      "va": 5834855
+    },
+    {
+      "hex": "8b55bc5253",
+      "len": 5,
+      "name": "callback_seed_arg_push",
+      "va": 4833319
+    },
+    {
+      "hex": "c685a1efffff27c685a2efffff21",
+      "len": 14,
+      "name": "secacc_request_sid_27_21",
+      "va": 5833572
+    },
+    {
+      "hex": "c68569dfffff67c6856adfffff21",
+      "len": 14,
+      "name": "secacc_expected_67_21",
+      "va": 5833618
+    },
+    {
+      "hex": "6a108d8d33cfffff518d45bc50",
+      "len": 13,
+      "name": "seed_record_copy_16_from_resp",
+      "va": 5833718
+    },
+    {
+      "hex": "c685f9bdffff27c685fabdffff22",
+      "len": 14,
+      "name": "secacc_sendkey_sid_27_22",
+      "va": 5833892
+    },
+    {
+      "hex": "6800010000",
+      "len": 5,
+      "name": "secacc_sendkey_token_len_0x100",
+      "va": 5833906
+    },
+    {
+      "hex": "c785ecbdffff07010000",
+      "len": 10,
+      "name": "secacc_sendkey_request_len_0x107",
+      "va": 5833939
+    },
+    {
+      "hex": "c685c1adffff67c685c2adffff22",
+      "len": 14,
+      "name": "secacc_expected_67_22",
+      "va": 5833962
+    },
+    {
+      "hex": "83bd7c9dffff08",
+      "len": 7,
+      "name": "nrc_gate_resp_len_8",
+      "va": 5834076
+    },
+    {
+      "hex": "83f87f",
+      "len": 3,
+      "name": "nrc_gate_neg_sid_0x7f",
+      "va": 5834093
+    },
+    {
+      "hex": "83fa27",
+      "len": 3,
+      "name": "nrc_gate_sid_0x27",
+      "va": 5834106
+    },
+    {
+      "hex": "83f813",
+      "len": 3,
+      "name": "nrc_gate_nrc_0x13",
+      "va": 5834119
+    },
+    {
+      "hex": "83f835",
+      "len": 3,
+      "name": "nrc_gate_nrc_0x35",
+      "va": 5834124
+    },
+    {
+      "hex": "83f836",
+      "len": 3,
+      "name": "nrc_gate_nrc_0x36",
+      "va": 5834129
+    },
+    {
+      "hex": "6800010000",
+      "len": 5,
+      "name": "token_store_push_0x100",
+      "va": 4718976
+    }
+  ],
   "request_fields": [
     {
       "name": "XVersion",
@@ -171,19 +404,19 @@
     {
       "name": "RequesterKind",
       "native_offset": 644,
-      "source": "RKS config object +0x18",
+      "source": "RKS.ini [ReproKeyRequest] RequesterKind (shipped \"0\") loaded by 0x43E0C0 into config +0x18; read via accessor 0x43F06C at 0x49BFEA",
       "wrapper_offset": 111
     },
     {
       "name": "KeypairID",
       "native_offset": 646,
-      "source": "RKS config object +0x1C",
+      "source": "RKS.ini [ReproKeyRequest] KeypairID (shipped \"RK0001\") loaded by 0x43E0C0 into config +0x1C; read via accessor 0x43F078 at 0x49C009",
       "wrapper_offset": 113
     },
     {
       "name": "SeedValue",
       "native_offset": 653,
-      "source": "second argument of registered CUW callback; exactly 16 bytes serialized to 32 uppercase hex chars",
+      "source": "CentralGW P5-CAN SecurityAccess 27 21 response seed: 16-byte record copied from the diag response at +0x1F, bridged through global 0x629CDC to the registered callback at 0x49BCF8; exactly 16 bytes serialized to 32 uppercase hex chars",
       "wrapper_offset": 120
     }
   ],
@@ -192,11 +425,33 @@
     "client_ui": "shipped locale explicitly instructs technicians to consult the repair manual whether the target needs Signature Request and, on unsupported IE/.NET prerequisite dialogs, choose No to continue reprogramming when Signature Request is not necessary",
     "conclusion": "V18 does not justify treating RKS as mandatory for every EPS reflash; exact target/regional requirement remains external policy/runtime evidence"
   },
-  "schema_version": 1,
-  "seed_boundary": {
-    "priority": "low for ECU security because Layer A never reaches a flash writer or ECU",
-    "producer": "the 16-byte value arrives as callback argument 2 to the registered CUW reprogram-flow callback; no RNG/time/hash transform occurs in the recovered request-construction edge",
-    "registration": "flow mode 3 registers the callback at 0x49BCF8 from 0x492D00; the actual callback invoker/runtime producer is one external controller/event edge upstream"
+  "rks_ini_provenance": {
+    "decoded_section_fields": {
+      "IFVersion": "01",
+      "KeypairID": "RK0001",
+      "LicenseKey": "0000000000000000000000000000000000000000000000",
+      "RequesterKind": "0",
+      "SUBARU_LicenseKey": "1111111111111111111111111111111111111111111111",
+      "SoftwareID": "GTS",
+      "SoftwareVersion": "00.00.000",
+      "VehicleIdentificationNumber": "00000000000000000"
+    },
+    "decoded_sha256": "ba4d2c5cbed3417a639bd4945efd2cf3e576191db9a7b79744cee79e7aeb9f5d",
+    "encoding": "per-nibble ASCII obfuscation: nibble n -> char 0x20+4n, two chars per byte",
+    "field_mapping": "RequesterKind -> config +0x18 (accessor 0x43F06C, read at 0x49BFEA); KeypairID -> config +0x1C (accessor 0x43F078, read at 0x49C009)",
+    "loader": "fcn 0x43E0C0 references \"Ini\\\\RKS.ini\" (0x5E06C9), section \"ReproKeyRequest\" (0x5E06D5), and the key names; config singleton object at 0x6360B4 (getter 0x43DFBC, slot initializer 0x43DEBC)",
+    "path": "Calibration Update Wizard/Ini/RKS.ini (shipped, obfuscated)",
+    "sha256": "29d402d267a573243eeb9e66c9bb8ffeb1c021ed909e7f403d87e1ff85e263ff"
+  },
+  "schema_version": 2,
+  "seed_producer_chain": {
+    "callback_consume": "0x49BCF8 pushes its EDX seed pointer at 0x49C027, resolves the seed record via accessor 0x43F03C at 0x49C02C ([seed+4] -> AnsiString of the 16 seed bytes), and passes it to 0x47FB24 which copies exactly 16 bytes and hex-encodes 32 uppercase chars into controller +0x28D",
+    "global_install": "invoker-side function at 0x478B68 pushes the parked pair (0x478BD2) into 0x58FF44, which installs globals 0x629CD0(callback code)/0x629CD4(callback self)",
+    "invocation": "thunk 0x590858: EDX=0x629CDC (16-byte seed buffer), ECX=0x629CEC (0x100-byte token buffer), EAX=[0x629CD4], call [0x629CD0] at 0x590867; result byte -> 0x629DEC",
+    "no_client_transform": "no RNG, time, or hash derivation exists anywhere in the producer chain; the value is the gateway SecurityAccess seed",
+    "registration": "flow-mode-3 gate at 0x492FBE (cmp byte [flow+0xC64],3) stores TMethod{0x49BCF8, flow} at 0x492FC7; fcn 0x47A338 parks it at controller +0xF18/+0xF1C",
+    "seed_bridge": "0x5907EC memcpy(0x629CDC, seed16, 0x10) at 0x5907F5 and, after a successful callback, memcpy(0x629CEC, token256, 0x100)",
+    "summary": "RKS SeedValue = 16-byte CentralGW P5-CAN SecurityAccess 27 21 response seed; the whole producer is static Cuw.exe code \u2014 no producer edge is missing"
   },
   "server_boundary": "no client private key, public-key verification, signature-generation algorithm, or ECU-facing RKS token dataflow is present; do not infer server cryptography from the fixed token format",
   "state_machine": {
@@ -213,6 +468,36 @@
     "state_byte": "RKS controller +0x04; 0 while modal request runs, 1 success, 2 abort/failure; retry UI side fields use value 4",
     "vin_gate": "empty current VIN branches to the S701-94 VIN-required page; nonempty VIN enters request/import navigation"
   },
+  "static_boundary": {
+    "external_residues": [
+      "the live Central Gateway seed VALUE returned by the vehicle for 27 21",
+      "the TIS-portal server-side signing algorithm and private key behind the 512-character token"
+    ],
+    "priority": "low for ECU security because Layer A never reaches a flash writer or ECU",
+    "producer": "fully recovered inside Cuw.exe; there is no missing or unnamed producer code path"
+  },
+  "string_anchors": [
+    {
+      "name": "loader_ini_path",
+      "va": 6162121,
+      "value": "Ini\\RKS.ini"
+    },
+    {
+      "name": "loader_section",
+      "va": 6162133,
+      "value": "ReproKeyRequest"
+    },
+    {
+      "name": "loader_key_ifver",
+      "va": 6162149,
+      "value": "IFVersion"
+    },
+    {
+      "name": "loader_key_swid",
+      "va": 6162160,
+      "value": "SoftwareID"
+    }
+  ],
   "ui_handlers": [
     {
       "method_table_va": 4834860,

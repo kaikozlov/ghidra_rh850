@@ -1632,7 +1632,7 @@
           "factory_rows": 1,
           "flash_writer": "TCUWCanUnifiedFlashWriter.dll",
           "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
-          "reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 format 46; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
+          "reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 || dataFormatIdentifier || 46 || addressSpaceByte || address || length; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
           "sienna_8965B4512000": "byte-compatible"
         }
       ]
@@ -1702,7 +1702,7 @@
           "factory_rows": 1,
           "flash_writer": "TCUWCanUnifiedFlashWriterEachArea.dll",
           "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
-          "reason": "same 18-byte SA and 0203->0201->0202 predownload; per-area RequestDownload is now recovered as 34 || flags || 46 || (OffsetAddress[5]+areaStart) || areaSize, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
+          "reason": "same 18-byte SA and 0203->0201->0202 predownload re-sent per area; per-area RequestDownload is recovered as 34 || dataFormatIdentifier || 46 || addressSpaceByte || (OffsetAddress[5]+areaStart) || areaLength, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
           "sienna_8965B4512000": "byte-compatible"
         }
       ]
@@ -1791,7 +1791,7 @@
           "factory_rows": 1,
           "flash_writer": "TCUWCanUnifiedFlashWriter.dll",
           "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
-          "reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 format 46; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
+          "reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 || dataFormatIdentifier || 46 || addressSpaceByte || address || length; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
           "sienna_8965B4512000": "byte-compatible"
         },
         {
@@ -1799,7 +1799,7 @@
           "factory_rows": 1,
           "flash_writer": "TCUWCanUnifiedFlashWriterEachArea.dll",
           "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
-          "reason": "same 18-byte SA and 0203->0201->0202 predownload; per-area RequestDownload is now recovered as 34 || flags || 46 || (OffsetAddress[5]+areaStart) || areaSize, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
+          "reason": "same 18-byte SA and 0203->0201->0202 predownload re-sent per area; per-area RequestDownload is recovered as 34 || dataFormatIdentifier || 46 || addressSpaceByte || (OffsetAddress[5]+areaStart) || areaLength, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
           "sienna_8965B4512000": "byte-compatible"
         }
       ]

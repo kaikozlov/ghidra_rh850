@@ -13,6 +13,7 @@ import argparse
 import hashlib
 import json
 import collections
+import struct
 import sys
 from pathlib import Path
 from typing import Any
@@ -32,6 +33,14 @@ FUNCTIONS = {
         (0x00404708, 25389, "attached_information_parser"),
         (0x0040B63C, 3045, "logical_block_parser"),
         (0x0040C224, 838, "target_integrity_parser"),
+        (0x00413BF0, 0x4C8, "outer_container_parse"),
+        (0x00412F9C, 0x280, "first_member_reader_len_name_payload_crc"),
+        (0x00412C98, 0x48, "crc32_zlib"),
+        (0x004140B8, 0x6C, "raise_format_not_recognized"),
+        (0x00414124, 0x6C, "raise_version_not_supported"),
+        (0x004131B0, 0x6C, "raise_crc_error"),
+        (0x004142E0, 0x6C, "raise_sizes_dont_match"),
+        (0x00414274, 0x6C, "raise_cpu_image_count_mismatch"),
     ],
     "TCUWCanReproStdFlashWriter.dll": [
         (0x100025F0, 1112, "standard_target_integrity_routine_control"),
@@ -63,6 +72,14 @@ EXPECTED_HASHES = {
     ("Cuw.exe", 0x00404708): "249e7ac1c90725f27e8e92bd9a787fc2c01fda3753c8e8383acaeec2f2a255ad",
     ("Cuw.exe", 0x0040B63C): "ce3e4d43fa5539105c776684bb73b24fc9516a94768b99d044d960d8b520807d",
     ("Cuw.exe", 0x0040C224): "62cf1764aaa6f06169e7b0b4953cf24593490b7337d6a8a63854b190779dec8d",
+    ("Cuw.exe", 0x00413BF0): "5e7643d2f60a70228c50a8691f58cd019824f5845be6d06485a18e5c9487240f",
+    ("Cuw.exe", 0x00412F9C): "4ba646645ebcb1d7ae59a3d61843178d1ace0df1e18f244857c1a9fc82a94568",
+    ("Cuw.exe", 0x00412C98): "d0cd2ac91d508a838cefb960211a946bd3c7639bb6b0432b022317d2954b8619",
+    ("Cuw.exe", 0x004140B8): "97c918e9c82e6270ec13c329fd27690b064070b21d5031517f1134e877a1581e",
+    ("Cuw.exe", 0x00414124): "d4663b50186cd9a3912fa59e8037573ac1ea05af70525e1cb1afe9524aeff9a6",
+    ("Cuw.exe", 0x004131B0): "b5753e9537c0a1307c6395565061ebd2b27afb754bea75453932e43e81da8dcf",
+    ("Cuw.exe", 0x004142E0): "e3f6e7878e67c9758551776204b44675a0f754d18e1ef09f7467b9458ddac226",
+    ("Cuw.exe", 0x00414274): "e65e53a1005694527020730f6563499e4bbb8145292a195c4b18d4d90f0be072",
     ("TCUWCanReproStdFlashWriter.dll", 0x100025F0): "6aa2bd0d44347d588386f57ce6fda737f44504460d032644f10ad75261692652",
     ("TCUWCanReproStdFlashWriter.dll", 0x10002A50): "3f0955be8af3615fe82696445623041cb7ed5196860a6a820d495b20414df017",
     ("TCUWCanUnifiedFlashWriterEachArea.dll", 0x10001420): "c14089dd3cb7777838a9b2ebf6c24b88eaf86c5cdd5567952f68a2436483efec",
@@ -121,6 +138,69 @@ def body_hash(path: Path, va: int, size: int) -> str:
     return hashlib.sha256(pe.get_data(va - base, size)).hexdigest()
 
 
+def outer_container_framing(root: Path) -> dict[str, Any]:
+    """Read the framing constants directly out of Cuw.exe so the schema is
+    derived from the binary rather than transcribed."""
+    path = root / "Cuw.exe"
+    pe = pefile.PE(str(path)); base = pe.OPTIONAL_HEADER.ImageBase
+    magic = pe.get_data(0x5D453C - base, 13)
+    table = list(pe.get_data(0x5D5284 - base, 11))
+    table_count = struct.unpack("<I", pe.get_data(0x5D5290 - base, 4))[0]
+    calib = pefile.PE(str(root / "TCUWCalibrationFile.dll"))
+    cbase = calib.OPTIONAL_HEADER.ImageBase
+    known_versions = list(calib.get_data(0x100063A4 - cbase, 3))
+    return {
+        "grammar": "magic[13] || format_type:u8 || crc32:u32be || total_size:u32be || "
+                   "{ name_len:u16be || name || payload_len:u32be || payload_crc32:u32be || payload } || "
+                   "format-specific tail (opaque)",
+        "magic": {
+            "bytes_hex": magic.hex(), "length": 13,
+            "const_va": 0x5D453C, "initializer_va": 0x412CE0,
+            "evidence": "0x412CE0 pushes 0xD (13) and copies the constant; 0x413BF0 compares it at 0x413C43; mismatch raises 0x4140B8",
+        },
+        "format_type": {
+            "offset": 13, "table_va": 0x5D5284, "table_count_va": 0x5D5290,
+            "table_count": table_count, "values": table,
+            "known_format_versions": known_versions,
+            "known_format_versions_source": "TCUWCalibrationFile.dll gbytFORMAT_VERSIONS @ 0x100063A4 (count 3 @ 0x100063A8)",
+            "membership_only_values": [v for v in table if v not in known_versions],
+            "boundary": "only table membership is statically enforced (raiser 0x414124); per-value semantics are claimed ONLY for "
+                        "gbytFORMAT_VERSIONS {01,03,04}; meaning of 05,06,07,08,09,65,66,67 is NOT recovered and NOT claimed",
+        },
+        "stored_crc32": {"offset": 14, "size": 4, "endianness": "big", "container_field_offset": 0x14,
+                         "parse_site": "0x413CF8..0x413D57 (explicit bswap-by-shifts)"},
+        "declared_total_size": {"offset": 18, "size": 4, "endianness": "big", "container_field_offset": 0x18,
+                                 "origin": "measured from file offset 0",
+                                 "parse_site": "0x413D5E..0x413DE0 (explicit bswap-by-shifts)"},
+        "first_member": {
+            "offset": 22, "name_length_prefix": "u16be",
+            "payload_length": "u32be", "payload_crc32": "u32be",
+            "reader_va": 0x412F9C,
+            "evidence": "reader consumed-bytes return value is name_len + 8 + payload_len; payload CRC is verified through "
+                        "0x412C98 with raiser 0x4131B0; the extracted payload is handed directly to the attach.att INI parser 0x404708",
+        },
+        "outer_crc_check": {
+            "region": "[18, declared_total)",
+            "algorithm": "zlib CRC32 (table @ 0x5D454C, init/final 0xFFFFFFFF)",
+            "function_va": 0x412C98, "call_site": 0x414053, "compare_va": 0x41405B, "raiser_va": 0x4131B0,
+            "note": "coverage begins immediately after the stored-CRC field, i.e. at the total-size field",
+        },
+        "size_check": {"compare_va": 0x41406B, "raiser_va": 0x4142E0,
+                       "semantics": "bytes consumed by parsing must equal the declared total"},
+        "error_strings": {
+            "0x5D4DCB": "Calibration file:\n\tFile format not recognized.  Either this file is damaged or it is not a calibration file.",
+            "0x5D4E38": "Calibration file:\n\tThis version of calibration file is not supported by this program.",
+            "0x5D4D9C": "Calibration file:\n\tFile is corrupt (CRC Error)",
+            "0x5D4E8E": "Calibration file:\n\tFile is incorrect (Number of CPU images doesn't match)",
+            "0x5D4ED8": "Calibration file:\n\tFile is incorrect (File sizes don't match)",
+            "0x5D4D6F": "Calibration file:\n\tData too big for storage.",
+        },
+        "tail_policy": "everything after the first member record is preserved verbatim and never interpreted; "
+                       "format-specific CPU-image tail semantics are deliberately not mapped",
+        "parser": "tools/techstream/parse_cuw_container.py",
+    }
+
+
 def generate(root: Path) -> dict[str, Any]:
     funcs = []
     for filename, rows in FUNCTIONS.items():
@@ -170,7 +250,7 @@ def generate(root: Path) -> dict[str, Any]:
         })
 
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "distribution": "Toyota Techstream V18.00.003",
         "descriptor": {
             "embedded_name": "attach.att",
@@ -252,10 +332,21 @@ def generate(root: Path) -> dict[str, Any]:
             "boundary": "geometry is exact from ImportData; semantic labels for every anonymous slot require the parser call-site join",
         },
         "function_identities": funcs,
+        "outer_container": outer_container_framing(root),
         "outer_container_boundary": {
-            "status": "artifact-blocked-for-parser-validation",
-            "reason": "the V18 installation contains no .cuw/.cal specimen; static code proves an embedded attach.att metadata descriptor but a byte-accurate outer-package extractor cannot be fixture-validated locally",
-            "ready_path": "tools/techstream/parse_cuw_attach.py parses the recovered descriptor once extracted; preserve the first acquired raw package before attempting extraction",
+            "status": "framing-statically-recovered; specimen-validation-pending",
+            "recovered": "outer magic/format-type/CRC/size framing and first-member (attach.att) extraction are statically pinned "
+                         "from Cuw.exe 0x413BF0 and 0x412F9C and implemented in tools/techstream/parse_cuw_container.py "
+                         "against a synthetic fixture built from the recovered grammar",
+            "remaining": "the V18 tree still contains no real .cuw/.cal specimen; remaining artifact dependencies are "
+                         "(1) validating the recovered framing against a real package, (2) which format-type value and which "
+                         "format-specific tail layout real packages actually use, and (3) actual package values "
+                         "(credentials, ranges, integrity fields)",
+            "no_overclaim": "the 11-entry type table is enforced as membership only; semantic meaning is claimed ONLY for "
+                            "gbytFORMAT_VERSIONS {01,03,04}; the meanings of 05,06,07,08,09,65,66,67 and of the tail are not recovered",
+            "ready_path": "tools/techstream/parse_cuw_container.py extracts and validates the first named member (attach.att); "
+                          "tools/techstream/parse_cuw_attach.py parses it; preserve the first acquired raw package before "
+                          "extending the format-specific tail decoder",
         },
     }
 

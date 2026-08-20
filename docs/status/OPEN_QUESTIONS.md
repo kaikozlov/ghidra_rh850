@@ -427,17 +427,19 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   SEC-APP-001, and DIAG-APP-001/003. Preserve raw logs
   privately and commit only reviewed/redacted derivatives or hashes. See
   [../tooling/techstream-capture-procedure.md](../tooling/techstream-capture-procedure.md).
-- **Sienna EPS exact CUW row and calibration material.** TMS-029 now closes the
-  complete V18 static route census: 194/196 factory rows have an exact target
-  mismatch and only two remain, both pairing `TCUWCanUnifiedPrepareWriter` with
-  either `TCUWCanUnifiedFlashWriter` or `TCUWCanUnifiedFlashWriterEachArea`.
-  EachArea's formerly bounded RequestDownload/routine/reset path is now exact and
-  byte-compatible too. What is still missing is the actual `.cuw`/`.cal`
-  metadata proving which of those two Unified rows Toyota selected and supplying
-  `ServiceAuthKey`, `ECUAuthKey`, `SeedKey`, `Nonce`, `OffsetAddress`, download
-  ranges, data-format fields, per-area choice, and actual target-integrity/header
-  values. Do not promote byte compatibility into an exact transcript without
-  that artifact.
+- **Sienna EPS exact CUW row and calibration material.** TMS-029/TMS-032 close
+  the complete V18 static route census and both surviving Unified routes at
+  body level (RequestDownload grammar incl. hex-decoded `SecurityProperty2`
+  bit 3, per-CPU-image/area sequencing, `MakeSendData` verbatim copy, negative
+  import census, 17-record wrap-key table with records 1–16 present but not
+  proven reachable): 194/196 factory rows have an exact target mismatch and
+  only two remain, both pairing `TCUWCanUnifiedPrepareWriter` with either
+  `TCUWCanUnifiedFlashWriter` or `TCUWCanUnifiedFlashWriterEachArea`. What is
+  still missing is the actual `.cuw`/`.cal` metadata proving which of those
+  two Unified rows Toyota selected and supplying `ServiceAuthKey`,
+  `ECUAuthKey`, `SeedKey`, `Nonce`, `OffsetAddress`, download ranges,
+  per-area choice, and actual target-integrity/header values. Do not promote
+  byte compatibility into an exact transcript without that artifact.
 - **CUW retry/recovery live attribution.** TMS-030/TMS-031 close the V18 static
   timing tables, retry/reconnect controller, recovery-file schema, and useful
   P5 power-cycle observers. A live session is still needed to identify the
@@ -447,26 +449,34 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   raw J2534 timestamps, selected factory/contact/CPU metadata, and Data IDs
   `0016..0019`, `0033/0034/0036`, `0421/0422`, `07D1/07D2`, and
   `26AC/26AD/26C1/26C3`. This is now a capture task, not a static-RE blocker.
-- **Calibration package outer envelope and target-specific integrity values.**
-  TMS-026 closes the V18 metadata/object/static-consumer work: the exact
-  `CLogicalBlockAreaInfo` layout is recovered and the standard writer transmits
-  `StartAddress`/`Length` plus CRC, CMAC, or `DigitalSignature` through its
-  `10F5/FF00/10F6` RoutineControl grammar; unified flash uses a separate
-  `CFileHeaderInfo`/`OffsetAddress` model. The embedded `attach.att` descriptor
-  schema is parser-ready. What remains needs a real calibration artifact: pin the
-  outer `.cuw` envelope/extraction framing, actual target values, selected
-  required-spec branch, and signer/signature algorithm. This `DigitalSignature`
-  remains unrelated to TIS/RKS `Signature` absent a real dataflow edge.
-- **RKS exact target/region policy (Layer A).** TMS-028 closes the static client
-  state machine, request-field provenance, online/offline/import convergence,
-  fixed token format, and the `IsStored`/SeedValue boundaries. The shipped client
+- **Calibration package specimen validation and target-specific integrity
+  values.** TMS-026/TMS-034 close the static work: the exact
+  `CLogicalBlockAreaInfo` layout, the standard writer's `10F5/FF00/10F6`
+  integrity transfer, the unified `CFileHeaderInfo`/`OffsetAddress` model, the
+  `attach.att` descriptor schema, **and** the outer `.cuw` framing
+  (magic/type/CRC/size + first-member record, recovered from `Cuw.exe` and
+  implemented in `tools/techstream/parse_cuw_container.py`, synthetic-fixture
+  validated). What remains needs a real calibration artifact: validate the
+  recovered framing against an actual package, pin which format-type value and
+  format-specific tail layout real packages use (membership-only — no per-value
+  semantics claimed), and recover actual target values, the selected
+  required-spec branch, and the signer/signature algorithm. This
+  `DigitalSignature` remains unrelated to TIS/RKS `Signature` absent a real
+  dataflow edge.
+- **RKS exact target/region policy (Layer A).** TMS-028/TMS-033 close the static
+  client completely: state machine, request-field provenance (incl. shipped
+  `Ini/RKS.ini` `[ReproKeyRequest]` values), online/offline/import convergence,
+  fixed token format, the `IsStored` flag, and the full SeedValue producer
+  chain (CentralGW P5-CAN `27 21` seed → callback → ReproKeyRequest; portal
+  token returned to the ECU as `27 22 || token[256]`). The shipped client
   explicitly supports continuing without Signature Request when the repair
   manual says it is unnecessary, and no calibration-schema or flash-writer edge
   makes RKS universal. What remains is external policy evidence: determine
   whether a particular EPS calibration/region requires RKS during a legitimate
-  GTS+/TIS session. The 16-byte SeedValue producer remains one runtime callback
-  edge upstream but is low priority because Layer A never reaches the ECU or any
-  firmware secret. See [../tooling/techstream.md](../tooling/techstream.md) §5.3.
+  GTS+/TIS session, plus the live gateway seed value and the server-side
+  signing algorithm/private key — both external to the shipped client, which
+  never reaches the ECU security boundary or any firmware secret.
+  See [../tooling/techstream.md](../tooling/techstream.md) §5.3.
 - **MEM-SAFE-001 transfer to newer SecOC/TSK targets.** The partial-AES-block
   raw-write primitive (MEM-SAFE-001) upgrades a prior authenticated payload into
   arbitrary RAM-code execution without repeating CMAC. The exact bounded host
