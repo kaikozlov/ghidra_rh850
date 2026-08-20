@@ -1,12 +1,285 @@
 {
+  "decisive_function_identities": [
+    {
+      "binary": "TCUWCanMMCPrepareWriter.dll",
+      "binary_sha256": "a91d6b36df4882db63327437d460c99fea02651fe8e75414227edd6783d871ae",
+      "role": "mmc_session_10_02",
+      "sha256": "e94a24b4295712f932f28644a13856657e140a41f47d9e049eb77012e9db238a",
+      "size": 259,
+      "va": 268439744
+    },
+    {
+      "binary": "TCUWCanMMCPrepareWriter.dll",
+      "binary_sha256": "a91d6b36df4882db63327437d460c99fea02651fe8e75414227edd6783d871ae",
+      "role": "mmc_seed_key_transform",
+      "sha256": "336441de4c8a66c725d562a7d508664b72467e5f9d79102a42539555cd0792eb",
+      "size": 519,
+      "va": 268440144
+    },
+    {
+      "binary": "TCUWCanMMCPrepareWriter.dll",
+      "binary_sha256": "a91d6b36df4882db63327437d460c99fea02651fe8e75414227edd6783d871ae",
+      "role": "mmc_security_access_41_42",
+      "sha256": "1d395d9f5db80d42b9ff203cfd47f5c64fe1f2e7098b961de6953fe90e651fbc",
+      "size": 703,
+      "va": 268441248
+    },
+    {
+      "binary": "TCUWCanMMCFlashWriter.dll",
+      "binary_sha256": "28598b23787ce67d63620a267ec1e0897b2cd5abf8a3319609a3cb4a5fccca9b",
+      "role": "mmc_transfer_data",
+      "sha256": "6a6fdd3e6a7761514b749ccd5784d4c5af5454bedcc2d8a0effab3ff855ae6f3",
+      "size": 284,
+      "va": 268439760
+    },
+    {
+      "binary": "TCUWCanMMCFlashWriter.dll",
+      "binary_sha256": "28598b23787ce67d63620a267ec1e0897b2cd5abf8a3319609a3cb4a5fccca9b",
+      "role": "mmc_transfer_exit",
+      "sha256": "8d6229e77e8ee100abfb9f2c6cc497e41cd72147006f99b431b830cc49634ab7",
+      "size": 249,
+      "va": 268440048
+    },
+    {
+      "binary": "TCUWCanMMCFlashWriter.dll",
+      "binary_sha256": "28598b23787ce67d63620a267ec1e0897b2cd5abf8a3319609a3cb4a5fccca9b",
+      "role": "mmc_routine_0304",
+      "sha256": "48bd5fd91a72c6b35083819fc29c66fec4e19822445c5f9b9d2c1f4eb61af40e",
+      "size": 212,
+      "va": 268440304
+    },
+    {
+      "binary": "TCUWCanMMCFlashWriter.dll",
+      "binary_sha256": "28598b23787ce67d63620a267ec1e0897b2cd5abf8a3319609a3cb4a5fccca9b",
+      "role": "mmc_suppressed_reset",
+      "sha256": "30e946469adc2f9a4a544c69d0c82ddbcb81729f602983ae0d509bb463497010",
+      "size": 169,
+      "va": 268440528
+    },
+    {
+      "binary": "TCUWCanMMCFlashWriter.dll",
+      "binary_sha256": "28598b23787ce67d63620a267ec1e0897b2cd5abf8a3319609a3cb4a5fccca9b",
+      "role": "mmc_request_download",
+      "sha256": "da7de94d5fad0c88c50c379f10e37506af6bcde001891226f6039cb6af5afda0",
+      "size": 736,
+      "va": 268440912
+    },
+    {
+      "binary": "TCUWCanMMCFlashWriter.dll",
+      "binary_sha256": "28598b23787ce67d63620a267ec1e0897b2cd5abf8a3319609a3cb4a5fccca9b",
+      "role": "mmc_routine_0301",
+      "sha256": "520578418397db233ce75e984a45c1732749e9e2194c9e6cee5fbc4dd160173b",
+      "size": 390,
+      "va": 268441648
+    },
+    {
+      "binary": "TCUWCanMMCFlashWriter.dll",
+      "binary_sha256": "28598b23787ce67d63620a267ec1e0897b2cd5abf8a3319609a3cb4a5fccca9b",
+      "role": "mmc_routine_ff00",
+      "sha256": "bf807286529fa0afe4a6bd4be34411b689cbe237579c0ab3ab9712e7a6c89c7d",
+      "size": 540,
+      "va": 268442048
+    },
+    {
+      "binary": "TCUWP5CanPowerTrainPrepareWriter.dll",
+      "binary_sha256": "c8ce54595b9f577d22d24c8cfe489492c03f59ea894e2eed68f4a8b2f9a900cf",
+      "role": "p5_powertrain_security_access",
+      "sha256": "543075b279396029ee6f85d97a987b8241cbbdf56b075cdf8e5c710bc0fb9aa5",
+      "size": 1064,
+      "va": 268439856
+    },
+    {
+      "binary": "TCUWP4P5CanPowerTrainPrepareWriter.dll",
+      "binary_sha256": "0a64261d70e6a70ec80fcddf18f654c36e9941b0132d1ce5831b6fe9f65810eb",
+      "role": "p4p5_powertrain_security_access",
+      "sha256": "5c04f40723697db552295f0e88d44070256ae8c69ecd7924258e0a55f44c347c",
+      "size": 1150,
+      "va": 268441248
+    },
+    {
+      "binary": "TCUWP5CanPowerTrainPrepareWriterForBodyMicon.dll",
+      "binary_sha256": "2c3d784965b882847518f7e165193388c4a35307bda6f7db59e54d0207935e2c",
+      "role": "p5_body_micon_security_access",
+      "sha256": "800fc3ca0bcf75c02a47d066d2861d7d050ef10132187b3082c2438835a783c7",
+      "size": 596,
+      "va": 268439856
+    },
+    {
+      "binary": "TCUWP5CanPowerTrainPrepareWriterForSolar.dll",
+      "binary_sha256": "3e73eb6eb0c79e2d348e62febb13720d552b16e000b05f856bd182415c7e2f3b",
+      "role": "p5_solar_security_access",
+      "sha256": "0a9505705d04ccbfbed62b13c92f9d8d15ed5a44f0a492494e8a1c17ac8c4332",
+      "size": 1064,
+      "va": 268439872
+    },
+    {
+      "binary": "TCUWP4CanSecurityChassisShrinkPrepareWriter.dll",
+      "binary_sha256": "88f7e7387544137f3ca7bd3f83089f95eaa8061ff001002a5538e9ab1c52b9e3",
+      "role": "security_chassis_security_access",
+      "sha256": "dba153f39e29c345e1d447fa965a7dd5c193ca7792b73f841e817c65c902169c",
+      "size": 840,
+      "va": 268440608
+    },
+    {
+      "binary": "TCUWP4CanCentralGWPrepareWriter.dll",
+      "binary_sha256": "125b3c800353ebb5ce2d12171f719a52cf95e6e215f527164ed7ed9db772f975",
+      "role": "central_gateway_prepare_callback",
+      "sha256": "c57590adbd3bab5649ac00b8fec3a3bbefd57e319f5ae44256be9cb214545e3b",
+      "size": 156,
+      "va": 268439552
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "legacy_common_check_id",
+      "sha256": "13dd52e2e0639bf2dce9a73ccfe350b25e598f9497b57f0dcfda90d7b32f7b83",
+      "size": 976,
+      "va": 268442304
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "legacy_common_finish_reprogramming",
+      "sha256": "2f07f36ede2285820e6e0d91aef45de26c96c3f5d626338789b741f70421d5a0",
+      "size": 299,
+      "va": 268444912
+    },
+    {
+      "binary": "TCUWCanUnifiedFlashWriterEachArea.dll",
+      "binary_sha256": "95c5ec26bc10c5227bc830c142eb86093aa3709606b108b33051f9b982f9ae3e",
+      "role": "each_area_predownload",
+      "sha256": "a7a63de50d99f369bca87f8dc22a36e5a5c64c7698016d2d4da8a3d3bde9ef2f",
+      "size": 816,
+      "va": 268439792
+    },
+    {
+      "binary": "TCUWCanUnifiedFlashWriterEachArea.dll",
+      "binary_sha256": "95c5ec26bc10c5227bc830c142eb86093aa3709606b108b33051f9b982f9ae3e",
+      "role": "each_area_request_download",
+      "sha256": "c14089dd3cb7777838a9b2ebf6c24b88eaf86c5cdd5567952f68a2436483efec",
+      "size": 855,
+      "va": 268440608
+    },
+    {
+      "binary": "TCUWCanUnifiedFlashWriterEachArea.dll",
+      "binary_sha256": "95c5ec26bc10c5227bc830c142eb86093aa3709606b108b33051f9b982f9ae3e",
+      "role": "each_area_reset",
+      "sha256": "c70e11f5a34a63b54097ed24a2a5e392fdcbf3b2303dde9bbb34889e11cb2018",
+      "size": 239,
+      "va": 268442048
+    },
+    {
+      "binary": "TCUWCanUnifiedFlashWriterEachArea.dll",
+      "binary_sha256": "95c5ec26bc10c5227bc830c142eb86093aa3709606b108b33051f9b982f9ae3e",
+      "role": "each_area_routine_control",
+      "sha256": "61fb7c16743a2313a4a082a284cfe241e2102998fb3f68d02d8072e502d8a1d9",
+      "size": 832,
+      "va": 268443520
+    }
+  ],
   "distribution": "Toyota Techstream V18.00.003",
-  "evidence_boundary": "raw template scans preserve encoded x86 store bytes; semantic route verdicts use only decisive byte/decompilation-pinned writer/firmware facts. unresolved/bounded classes are not absence claims.",
+  "evidence_boundary": "all 196 decoded factory rows now have an exact static target disposition: two Unified-family rows are byte-compatible with the tracked boot grammar and 194 rows have at least one byte/decompilation-pinned mismatch. Exact factory-row selection and calibration values still require the matching package/live session.",
+  "family_evidence": {
+    "CentralGW+BodyFlash": {
+      "flash": "P4 BodyFlash delegates to legacy CCanCommonFlashWriter; FinishReprogramming writes raw command byte 0x80 after CAN address prefix",
+      "prepare": "CentralGW prepare invokes host callback and waits WaitTimeAfterReprogrammingMode",
+      "target_disposition": "rejected: legacy raw common-flash protocol is not target UDS boot grammar"
+    },
+    "MMC": {
+      "download": "34 || dataFormat || 44 || address[4] || size[4]; 74 20 response; max block capped at 0x0FFF",
+      "reset": "11 81 (suppressed hard reset)",
+      "routines": [
+        "0301",
+        "FF00",
+        "0304"
+      ],
+      "security_access": "27 41 -> 67 41 (8-byte seed), then 27 42 || 8-byte derived key -> 67 42",
+      "target_disposition": "rejected: SA 41/42 -> NRC 0x12; RIDs 0301/0304 -> NRC 0x31",
+      "transfer": "36/counter/data -> 76/counter; 37 -> 77"
+    },
+    "P4P5PowerTrain": {
+      "security_access": "bare 27 01 -> 4-byte seed; 27 02 || 4-byte derived key; parameter-driven WaitTimeAfterSeedData/Key",
+      "target_disposition": "rejected: exact target request-seed length is 18 bytes"
+    },
+    "P5BodyMicon": {
+      "security_access": "bare 27 01 -> 6-byte seed; 27 02 || 6-byte derived key",
+      "target_disposition": "rejected: exact target request-seed length is 18 bytes"
+    },
+    "P5PowerTrain": {
+      "security_access": "bare 27 01 -> 4-byte seed; 27 02 || 4-byte derived key",
+      "session": "10 02 -> 50 02",
+      "target_disposition": "rejected: exact target request-seed length is 18 bytes"
+    },
+    "P5Solar": {
+      "security_access": "bare 27 01 -> 4-byte seed; 27 02 || 4-byte derived key",
+      "session": "10 02 -> 50 02",
+      "target_disposition": "rejected: exact target request-seed length is 18 bytes"
+    },
+    "SecurityChassisShrink": {
+      "security_access": "27 01 || dynamic selector[1] || ECUAuthKey[16]; 27 02 || CalcSeedKeyForSecurityUp[16]",
+      "target_disposition": "rejected: request-seed application payload is 19 bytes, one byte longer than target exact policy"
+    },
+    "UnifiedEachArea": {
+      "download": "34 || compressionFlag || areaFlag || 46 || (OffsetAddress[5]+areaStart) || areaSize; parses 74 and caps block at 0x0FFF",
+      "predownload": "2E 0203||OffsetAddress[5] -> 2E 0201||SeedKey[16] -> 2E 0202||Nonce[16]",
+      "reset": "11 01 -> 51 01",
+      "routines": [
+        "10F0",
+        "FF00",
+        "10F1",
+        "10F2"
+      ],
+      "target_disposition": "byte-compatible with tracked target boot grammar; exact calibration selection/values remain runtime/package-bounded"
+    }
+  },
   "route_families": [
     {
       "factory_rows": 74,
       "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
       "prepare_writer": "TCUWP4CanBodyPrepareWriter.dll",
       "reason": "SecurityAccess 61/62 subfunctions are unsupported by target bootloader",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "5000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          "",
+          "0"
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          "1000",
+          "5000"
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "1500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "15",
+          "3"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -15,6 +288,48 @@
       "flash_writer": "TCUWCanSBRFlashWriter.dll",
       "prepare_writer": "TCUWCanSBRPrepareWriter.dll",
       "reason": "SecurityAccess 33/34 and vendor-session grammar unsupported by target",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "0",
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0",
+          "1"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          "",
+          "120000"
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          ""
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          ""
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -22,23 +337,151 @@
       "factory_rows": 12,
       "flash_writer": "TCUWCanPowerTrainFlashWriter.dll",
       "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
-      "reason": "common prepare SecurityAccess builder unresolved at exact request shape; no positive 18-byte evidence",
-      "verdict_corolla_8965H1202000": "bounded-rejected",
-      "verdict_sienna_8965B4512000": "bounded-rejected"
+      "reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "0",
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0",
+          "1"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "1000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          "",
+          "0"
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "",
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "",
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0",
+          "3"
+        ]
+      },
+      "verdict_corolla_8965H1202000": "rejected",
+      "verdict_sienna_8965B4512000": "rejected"
     },
     {
       "factory_rows": 11,
       "flash_writer": "TCUWP4CanSecurityChassisShrinkFlashWriter.dll",
       "prepare_writer": "TCUWP4CanSecurityChassisShrinkPrepareWriter.dll",
-      "reason": "security-up short request class; no target-compatible 16-byte seed-request append recovered",
-      "verdict_corolla_8965H1202000": "bounded-rejected",
-      "verdict_sienna_8965B4512000": "bounded-rejected"
+      "reason": "27 01 || dynamic selector byte || ECUAuthKey[16] is 19-byte application payload, conflicting with target exact 18-byte request-seed policy",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "3000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          "80000"
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "2000",
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0",
+          "1",
+          "3"
+        ]
+      },
+      "verdict_corolla_8965H1202000": "rejected",
+      "verdict_sienna_8965B4512000": "rejected"
     },
     {
       "factory_rows": 10,
       "flash_writer": "TCUWP4CanChassisShrinkFlashWriter.dll",
       "prepare_writer": "TCUWP4CanChassisShrinkPrepareWriter.dll",
       "reason": "3-byte 27 01 request conflicts with target exact 18-byte request-seed policy",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "3000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          "80000"
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0",
+          "1",
+          "3"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -47,6 +490,45 @@
       "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
       "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
       "reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "1000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -55,6 +537,48 @@
       "flash_writer": "TCUWCanPowerTrainFlashWriter.dll",
       "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
       "reason": "short/common SecurityAccess class; flash pairings are independently incompatible",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "0",
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0",
+          "1"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "1000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          "",
+          "0"
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -63,6 +587,46 @@
       "flash_writer": "TCUWP4CanDSS1FlashWriter.dll",
       "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
       "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "5000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          "1000"
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "1500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "200",
+          "3"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -71,6 +635,47 @@
       "flash_writer": "TCUWP4CanAirbagFlashWriter.dll",
       "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
       "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "0",
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "5000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          "",
+          "0"
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          "1000"
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "1500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -79,6 +684,45 @@
       "flash_writer": "TCUWCanM16CFlashWriter.dll",
       "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
       "reason": "legacy M16C password/material-transfer grammar has no target boot handler",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "10000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          "3000"
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -87,6 +731,45 @@
       "flash_writer": "TCUWP4CanSecurityAirbagFlashWriter.dll",
       "prepare_writer": "TCUWP4CanSecurityAirbagPrepareWriter.dll",
       "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "0"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "5000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          "1000"
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "1500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -95,6 +778,47 @@
       "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
       "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
       "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "5000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          "1000",
+          "1500"
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "1500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0",
+          "3"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -103,6 +827,45 @@
       "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
       "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
       "reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "1000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -111,6 +874,45 @@
       "flash_writer": "TCUWP4CanClearanceSonarFlashWriter.dll",
       "prepare_writer": "TCUWP4CanClearanceSonarPrepareWriter.dll",
       "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "3000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          "80000"
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "10"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -118,15 +920,93 @@
       "factory_rows": 3,
       "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
       "prepare_writer": "TCUWP4CanCentralGWPrepareWriter.dll",
-      "reason": "central-gateway prepare/routine family, no target boot grammar match",
-      "verdict_corolla_8965H1202000": "bounded-rejected",
-      "verdict_sienna_8965B4512000": "bounded-rejected"
+      "reason": "prepare delegates a gateway callback; paired P4 body flash uses legacy raw common-flash framing rather than target UDS boot grammar",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "5000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          "1000"
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "1500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "3"
+        ]
+      },
+      "verdict_corolla_8965H1202000": "rejected",
+      "verdict_sienna_8965B4512000": "rejected"
     },
     {
       "factory_rows": 3,
       "flash_writer": "TCUWP4CanBodyFlashWriterForCXPI.dll",
       "prepare_writer": "TCUWP4CanBodyPrepareWriter.dll",
       "reason": "SecurityAccess 61/62 subfunctions are unsupported by target bootloader",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "5000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          "1000"
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "1500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "161"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -135,6 +1015,45 @@
       "flash_writer": "TCUWEthernetReprostdFlashWriter.dll",
       "prepare_writer": "TCUWEthernetReprostdPrepareWriter.dll",
       "reason": "ReproStd family plus Ethernet transport",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          ""
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          ""
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -143,6 +1062,45 @@
       "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
       "prepare_writer": "TCUWP4P5CanPowerTrainPrepareWriter.dll",
       "reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "1000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -151,6 +1109,47 @@
       "flash_writer": "TCUWCanHINOFlashWriter.dll",
       "prepare_writer": "TCUWCanHINOPrepareWriter.dll",
       "reason": "SecurityAccess 03/04 HINO family unsupported by target",
+      "reset_templates": [
+        "11 01"
+      ],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          ""
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          ""
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -159,6 +1158,45 @@
       "flash_writer": "TCUWCanM16CFlashWriter.dll",
       "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
       "reason": "legacy M16C password/material-transfer grammar has no target boot handler",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "10000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          "3000"
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -166,23 +1204,144 @@
       "factory_rows": 2,
       "flash_writer": "TCUWP5CanBodyFlashWriter.dll",
       "prepare_writer": "TCUWP5CanPowerTrainPrepareWriterForBodyMicon.dll",
-      "reason": "common prepare SecurityAccess class; no positive 18-byte evidence",
-      "verdict_corolla_8965H1202000": "bounded-rejected",
-      "verdict_sienna_8965B4512000": "bounded-rejected"
+      "reason": "exact builder sends bare 27 01 before a 6-byte seed/key exchange; target requires 16 tester bytes in request-seed",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "5000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          "1000"
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "1500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "3"
+        ]
+      },
+      "verdict_corolla_8965H1202000": "rejected",
+      "verdict_sienna_8965B4512000": "rejected"
     },
     {
       "factory_rows": 2,
       "flash_writer": "TCUWCanMMCFlashWriter.dll",
       "prepare_writer": "TCUWCanMMCPrepareWriter.dll",
-      "reason": "legacy MMC grammar not sufficiently recovered for exact target disposition",
-      "verdict_corolla_8965H1202000": "unresolved",
-      "verdict_sienna_8965B4512000": "unresolved"
+      "reason": "exact MMC SecurityAccess uses subfunctions 41/42; flash additionally uses unsupported RIDs 0301/0304",
+      "reset_templates": [
+        "11 81"
+      ],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          "400"
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          ""
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          ""
+        ]
+      },
+      "verdict_corolla_8965H1202000": "rejected",
+      "verdict_sienna_8965B4512000": "rejected"
     },
     {
       "factory_rows": 2,
       "flash_writer": "TCUWCanReproStdFlashWriter.dll",
       "prepare_writer": "TCUWCanReproStdPrepareWriter.dll",
       "reason": "2-byte 27 01 -> target NRC 0x13; standard RIDs 10F5/10F6 absent -> NRC 0x31",
+      "reset_templates": [
+        "11 01"
+      ],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          ""
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          ""
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -191,6 +1350,45 @@
       "flash_writer": "TCUWCanSecurityVFORESTFlashWriter.dll",
       "prepare_writer": "TCUWP5CanSecurityPowerTrainPrepareWriter.dll",
       "reason": "18-byte SA shape matches but RID 0x1003 and paired VFOREST/M16C flash grammar are target-incompatible",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "1000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -199,6 +1397,45 @@
       "flash_writer": "TCUWCanSecurityM16CFlashWriter.dll",
       "prepare_writer": "TCUWP5CanSecurityPowerTrainPrepareWriter.dll",
       "reason": "18-byte SA shape matches but RID 0x1003 and paired VFOREST/M16C flash grammar are target-incompatible",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "10000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          "3000"
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "500"
+        ],
+        "WaitTimeAfterSeedData": [
+          "100"
+        ],
+        "WaitTimeAfterSeedKey": [
+          "100"
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -207,6 +1444,47 @@
       "flash_writer": "TCUWCanHINOFlashWriterForVCS.dll",
       "prepare_writer": "TCUWCanHINOPrepareWriterForVCS.dll",
       "reason": "SecurityAccess 03/04 HINO family unsupported by target",
+      "reset_templates": [
+        "11 01"
+      ],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          ""
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          ""
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -215,6 +1493,45 @@
       "flash_writer": "TCUWCanHINOFlashWriterForDSS.dll",
       "prepare_writer": "TCUWCanHINOPrepareWriterForDSS.dll",
       "reason": "SecurityAccess 03/04 HINO family unsupported by target",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "0"
+        ],
+        "PrepareRetryFlag": [
+          "1"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          ""
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          ""
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -223,6 +1540,45 @@
       "flash_writer": "TCUWCanPSAFlashWriter.dll",
       "prepare_writer": "TCUWCanPSAPrepareWriter.dll",
       "reason": "legacy PSA authentication/SID family unsupported by target",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          ""
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          ""
+        ]
+      },
       "verdict_corolla_8965H1202000": "rejected",
       "verdict_sienna_8965B4512000": "rejected"
     },
@@ -230,23 +1586,142 @@
       "factory_rows": 1,
       "flash_writer": "TCUWCanPowerTrainFlashWriterForSolar.dll",
       "prepare_writer": "TCUWP5CanPowerTrainPrepareWriterForSolar.dll",
-      "reason": "common prepare SecurityAccess class; no positive 18-byte evidence",
-      "verdict_corolla_8965H1202000": "bounded-rejected",
-      "verdict_sienna_8965B4512000": "bounded-rejected"
+      "reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "5000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "1500"
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
+      "verdict_corolla_8965H1202000": "rejected",
+      "verdict_sienna_8965B4512000": "rejected"
     },
     {
       "factory_rows": 1,
       "flash_writer": "TCUWP5CanBodyFlashWriter.dll",
       "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
-      "reason": "common prepare SecurityAccess builder unresolved at exact request shape; no positive 18-byte evidence",
-      "verdict_corolla_8965H1202000": "bounded-rejected",
-      "verdict_sienna_8965B4512000": "bounded-rejected"
+      "reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+      "reset_templates": [],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          "5000"
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          "1000"
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          "1500"
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          "0"
+        ]
+      },
+      "verdict_corolla_8965H1202000": "rejected",
+      "verdict_sienna_8965B4512000": "rejected"
     },
     {
       "factory_rows": 1,
       "flash_writer": "TCUWCanUnifiedFlashWriter.dll",
       "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
       "reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 format 46; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
+      "reset_templates": [
+        "11 01"
+      ],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          ""
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          ""
+        ]
+      },
       "verdict_corolla_8965H1202000": "byte-compatible",
       "verdict_sienna_8965B4512000": "byte-compatible"
     },
@@ -254,12 +1729,53 @@
       "factory_rows": 1,
       "flash_writer": "TCUWCanUnifiedFlashWriterEachArea.dll",
       "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
-      "reason": "same target-compatible prepare/predownload/RID family; exact per-area RequestDownload layout remains bounded",
-      "verdict_corolla_8965H1202000": "compatible-bounded",
-      "verdict_sienna_8965B4512000": "compatible-bounded"
+      "reason": "same 18-byte SA and 0203->0201->0202 predownload; per-area RequestDownload is now recovered as 34 || flags || 46 || (OffsetAddress[5]+areaStart) || areaSize, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
+      "reset_templates": [
+        "11 01"
+      ],
+      "timing_retry_profile": {
+        "IGOffRetriableFlag": [
+          "1"
+        ],
+        "PrepareRetryFlag": [
+          "0"
+        ],
+        "ReceiveTimeoutBeforeFlashWrite": [
+          ""
+        ],
+        "ReceiveTimeoutBeforeInitialCommand": [
+          ""
+        ],
+        "ReceiveTimeoutBeforePrepareRetry": [
+          ""
+        ],
+        "WaitTimeAfterEndOfFlashing": [
+          ""
+        ],
+        "WaitTimeAfterFlashWrite": [
+          ""
+        ],
+        "WaitTimeAfterIGOnAtRetry": [
+          ""
+        ],
+        "WaitTimeAfterReprogrammingMode": [
+          ""
+        ],
+        "WaitTimeAfterSeedData": [
+          ""
+        ],
+        "WaitTimeAfterSeedKey": [
+          ""
+        ],
+        "WaitTimeBetweenSF": [
+          ""
+        ]
+      },
+      "verdict_corolla_8965H1202000": "byte-compatible",
+      "verdict_sienna_8965B4512000": "byte-compatible"
     }
   ],
-  "schema_version": 1,
+  "schema_version": 2,
   "target_boot_grammar": {
     "note": "Corolla-H boot/UDS target grammar is independently transferred target-natively in tracked variant tests",
     "request_seed": "27 01 || 16 tester bytes; exact request length 0x12",
@@ -274,11 +1790,8 @@
     "wdbi_order": "0203(5)->0201(16)->0202(16)"
   },
   "verdict_counts": {
-    "bounded-rejected": 30,
-    "byte-compatible": 1,
-    "compatible-bounded": 1,
-    "rejected": 162,
-    "unresolved": 2
+    "byte-compatible": 2,
+    "rejected": 194
   },
   "writer_scans": {
     "TCUWCanCommonFlashWriter.dll": {

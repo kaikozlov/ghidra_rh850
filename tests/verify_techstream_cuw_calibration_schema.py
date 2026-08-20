@@ -35,7 +35,15 @@ consumer=s['target_integrity']['standard_writer_consumer']
 check('standard writer consumes exact five object offsets',consumer['field_offsets']=={'StartAddress':0,'Length':0x1c,'CRC':0x38,'CMAC':0x54,'DigitalSignature':0x70})
 check('standard writer wire routine IDs are 10F5/FF00/10F6',consumer['routine_ids']=={'0':'10F5','1':'FF00','2':'10F6'})
 check('standard writer carries all six target families',set(sum(consumer['target_family_callers'].values(),[]))=={'ReproData','EraseAndReproRoutine','DeltaReproData','DeltaEraseAndReproRoutine','CompressionReproData','CompressionEraseAndReproRoutine'})
-check('unified route is explicitly kept separate','CFileHeaderInfo' in s['target_integrity']['unified_writer_boundary'] and 'does not consume' in s['target_integrity']['unified_writer_boundary'])
+check('unified routes are explicitly kept separate','CFileHeaderInfo' in s['target_integrity']['unified_writer_boundary'] and 'do not consume' in s['target_integrity']['unified_writer_boundary'])
+route_rel=s['target_integrity']['route_relevance']
+check('all 32 route pairs have integrity relevance',len(route_rel)==32 and sum(x['factory_rows'] for x in route_rel)==196)
+check('integrity relevance matches 194 rejected / 2 compatible',sum(x['factory_rows'] for x in route_rel if x['target_verdict']=='rejected')==194 and sum(x['factory_rows'] for x in route_rel if x['target_verdict']=='byte-compatible')==2)
+standard_rel=next(x for x in route_rel if x['integrity_path']=='standard-CLogicalBlockAreaInfo')
+check('signature-bearing standard integrity path is target-rejected',standard_rel['target_verdict']=='rejected' and standard_rel['factory_rows']==2 and 'DigitalSignature' in standard_rel['field_flow'])
+unified_rel=[x for x in route_rel if x['integrity_path']=='unified-CFileHeaderInfo-area']
+check('both compatible routes use unified area path',len(unified_rel)==2 and all(x['target_verdict']=='byte-compatible' for x in unified_rel))
+check('compatible routes do not promote standard signature fields',all('not consumed through the standard' in x['field_flow']['DigitalSignature'] for x in unified_rel))
 
 print('\n== extracted attach.att parser fixture ==')
 fixture='''[Vehicle]\nVersion=102\nECUAuthKey=00112233445566778899AABBCCDDEEFF\nServiceAuthKey=FFEEDDCCBBAA99887766554433221100\n\n[LogicalBlock101]\nReproMethod=Whole\nNumberOfTargets=1\n\n[01_TargetCalibration]\nStartAddress=00000000\nLength=00100000\nCRC=12345678\nCMAC=00112233445566778899AABBCCDDEEFF\nDigitalSignature=ABCDEF\nUnknownFutureField=preserve-me\n'''

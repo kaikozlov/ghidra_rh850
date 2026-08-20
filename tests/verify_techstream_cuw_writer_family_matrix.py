@@ -83,11 +83,28 @@ for name, row in writers.items():
 sec_vforest = writers["TCUWCanSecurityVFORESTFlashWriter.dll"]
 check("security VFOREST imports nonce and seed-key material", {"GetNonce", "GetSeedKey"} <= set(sec_vforest["calibration_getters"]))
 check("security VFOREST is tagged material-transfer", "nonce-seed-material-transfer" in sec_vforest["protocol_tags"])
-check("security VFOREST is target-rejected for Sienna", sec_vforest["target_disposition"]["sienna_8965B4512000"] == "incompatible-vforest-transfer")
+check("security VFOREST route is target-rejected for Sienna", all(x["sienna_8965B4512000"] == "rejected" for x in sec_vforest["target_route_dispositions"]))
 for name in ("TCUWP4CanSecurityAirbagPrepareWriter.dll", "TCUWP4CanSecurityChassisShrinkPrepareWriter.dll", "TCUWP5CanSecurityPowerTrainPrepareWriter.dll"):
     check(f"{name}: security-up wrapper is explicit import", "security-up-aes-wrapper" in writers[name]["protocol_tags"])
 for name in ("TCUWCanReproStdPrepareWriter.dll", "TCUWCanUnifiedPrepareWriter.dll", "TCUWCanReproStdFlashWriter.dll", "TCUWCanUnifiedFlashWriter.dll"):
     check(f"{name}: exact recovered command list retained", bool(writers[name]["exact_recovered_commands"]))
+
+print("\n== exact route-level target dispositions ==")
+route_map = {}
+for row in writers.values():
+    for route in row["target_route_dispositions"]:
+        key = (route["prepare_writer"], route["flash_writer"])
+        if key in route_map:
+            check(f"{key}: repeated route disposition identical", route_map[key] == route)
+        else:
+            route_map[key] = route
+check("matrix carries all 32 exact route pairs", len(route_map) == 32)
+counts = Counter()
+for route in route_map.values():
+    counts[route["sienna_8965B4512000"]] += route["factory_rows"]
+check("all 196 rows statically closed 194 rejected / 2 compatible", counts == Counter({"rejected": 194, "byte-compatible": 2}), repr(counts))
+check("Corolla-H route dispositions match transferred boot grammar", all(x["corolla_8965H1202000"] == x["sienna_8965B4512000"] for x in route_map.values()))
+check("writer-level target_disposition is explicitly structural", all(x["target_disposition"]["sienna_8965B4512000"].startswith("structural-") for x in writers.values()))
 
 print("\n== live deterministic regeneration ==")
 oracle = "generated_self_check"

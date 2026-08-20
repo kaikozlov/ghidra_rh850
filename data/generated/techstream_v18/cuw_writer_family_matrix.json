@@ -1,15 +1,16 @@
 {
   "distribution": "Toyota Techstream V18.00.003",
   "evidence_boundary": {
-    "exact_recovered_commands": "recovered: only previously byte/decompilation-pinned standard/unified builders are promoted here",
+    "exact_recovered_commands": "recovered subset: this inventory retains legacy COMMANDS pins; the second-stage route-grammar artifact owns the additional exact formerly-specialized builders",
     "imports": "structural: imported helper/getter names prove dependencies, not exact on-wire requests",
-    "target_disposition": "bounded unless exact target firmware rejects/implements the corresponding grammar"
+    "target_disposition": "writer-level structural compatibility hint retained for backward compatibility; do not use for route decisions",
+    "target_route_dispositions": "exact route-pair classifier shared with cuw_writer_protocol_grammar.json; all 196 rows are either byte-compatible or rejected"
   },
   "route_stats": {
     "encoded_ini_files_decoded": 201,
     "factory_rows": 196
   },
-  "schema_version": 1,
+  "schema_version": 2,
   "source": "external-source",
   "writer_stats": {
     "distinct_referenced_writers": 47,
@@ -82,10 +83,20 @@
       "sha256": "3aef2663ab746e1e18f940728779aaf71ba8908adf09846d4d12dfe762b118a8",
       "size": 14848,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWCanHINOFlashWriter.dll",
+          "prepare_writer": "TCUWCanHINOPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 HINO family unsupported by target",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -131,10 +142,20 @@
       "sha256": "e529260eeaca9b585d1485f0635827de104dee21a14de86eb80eb853176616df",
       "size": 13312,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanHINOFlashWriterForDSS.dll",
+          "prepare_writer": "TCUWCanHINOPrepareWriterForDSS.dll",
+          "reason": "SecurityAccess 03/04 HINO family unsupported by target",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -176,10 +197,20 @@
       "sha256": "2d6fc05a46cacd41a0aa7f01d0a4caa55dc3806a9f2ed65c1c8c273fadff7164",
       "size": 13312,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanHINOFlashWriterForVCS.dll",
+          "prepare_writer": "TCUWCanHINOPrepareWriterForVCS.dll",
+          "reason": "SecurityAccess 03/04 HINO family unsupported by target",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -226,10 +257,20 @@
       "sha256": "200cdf52f2005339301355aaca64f97049cb22007568ec951c3634ac6b0a7888",
       "size": 12288,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWCanHINOFlashWriter.dll",
+          "prepare_writer": "TCUWCanHINOPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 HINO family unsupported by target",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -263,10 +304,20 @@
       "sha256": "87a618c00436291a959f90a6472ab9d46c59018d81a97dc0a05f69f167123fcc",
       "size": 8192,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanHINOFlashWriterForDSS.dll",
+          "prepare_writer": "TCUWCanHINOPrepareWriterForDSS.dll",
+          "reason": "SecurityAccess 03/04 HINO family unsupported by target",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -305,10 +356,20 @@
       "sha256": "46b95a2bedbe14a3fb4064cda612178cbebe22890b39dd079819a90c887bb22d",
       "size": 11776,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanHINOFlashWriterForVCS.dll",
+          "prepare_writer": "TCUWCanHINOPrepareWriterForVCS.dll",
+          "reason": "SecurityAccess 03/04 HINO family unsupported by target",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -386,10 +447,28 @@
       "sha256": "6358f8230cd89299ed4eac3063d6fd2b219a761dddba543589e9bda898cc08a5",
       "size": 25600,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 4,
+          "flash_writer": "TCUWCanM16CFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
+          "reason": "legacy M16C password/material-transfer grammar has no target boot handler",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWCanM16CFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+          "reason": "legacy M16C password/material-transfer grammar has no target boot handler",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -436,10 +515,20 @@
       "sha256": "28598b23787ce67d63620a267ec1e0897b2cd5abf8a3319609a3cb4a5fccca9b",
       "size": 13824,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWCanMMCFlashWriter.dll",
+          "prepare_writer": "TCUWCanMMCPrepareWriter.dll",
+          "reason": "exact MMC SecurityAccess uses subfunctions 41/42; flash additionally uses unsupported RIDs 0301/0304",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -487,10 +576,20 @@
       "sha256": "a91d6b36df4882db63327437d460c99fea02651fe8e75414227edd6783d871ae",
       "size": 37888,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWCanMMCFlashWriter.dll",
+          "prepare_writer": "TCUWCanMMCPrepareWriter.dll",
+          "reason": "exact MMC SecurityAccess uses subfunctions 41/42; flash additionally uses unsupported RIDs 0301/0304",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -609,10 +708,28 @@
       "sha256": "f46a4d0c3531db188e767c0bed1060be83b18b6dccb9f73373e6994fd5dfe6c2",
       "size": 23040,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 6,
+          "flash_writer": "TCUWCanPowerTrainFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
+          "reason": "short/common SecurityAccess class; flash pairings are independently incompatible",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 12,
+          "flash_writer": "TCUWCanPowerTrainFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+          "reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -687,10 +804,20 @@
       "sha256": "06ecdab2f9dde29322f148d51f83e298c0e1d301c210c83b09293de2641c9c95",
       "size": 17408,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanPowerTrainFlashWriterForSolar.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriterForSolar.dll",
+          "reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -732,10 +859,20 @@
       "sha256": "8a4476982b53c780e419ce17367e75f35045ac38c6cb3b681d610d6def70f79c",
       "size": 14848,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanPSAFlashWriter.dll",
+          "prepare_writer": "TCUWCanPSAPrepareWriter.dll",
+          "reason": "legacy PSA authentication/SID family unsupported by target",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -779,10 +916,20 @@
       "sha256": "62d89afb1e4ce3ddc24cac9ff5ea90ffcb45f5e43e41450f92d0c14b9a96f351",
       "size": 12288,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanPSAFlashWriter.dll",
+          "prepare_writer": "TCUWCanPSAPrepareWriter.dll",
+          "reason": "legacy PSA authentication/SID family unsupported by target",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -874,10 +1021,20 @@
       "sha256": "82b99c43a2d30ecddb57942eb82019a0f4b997a55e569f8055f648a0f54ea4ef",
       "size": 25088,
       "target_disposition": {
-        "corolla_8965H1202000": "incompatible-standard-route",
-        "reason": "standard prepare emits bare 27 01 while both tracked bootloaders require 18-byte 27 01||data[16]; standard flash also uses RIDs 10F5/10F6 absent from the tracked boot routine table",
-        "sienna_8965B4512000": "incompatible-standard-route"
-      }
+        "corolla_8965H1202000": "structural-standard-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-standard-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWCanReproStdFlashWriter.dll",
+          "prepare_writer": "TCUWCanReproStdPrepareWriter.dll",
+          "reason": "2-byte 27 01 -> target NRC 0x13; standard RIDs 10F5/10F6 absent -> NRC 0x31",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -960,10 +1117,20 @@
       "sha256": "ae2d15b8c55027dab1e54343fa179829e41ac69d0c9efa7b7feb1f8d6024022b",
       "size": 19968,
       "target_disposition": {
-        "corolla_8965H1202000": "incompatible-standard-route",
-        "reason": "standard prepare emits bare 27 01 while both tracked bootloaders require 18-byte 27 01||data[16]; standard flash also uses RIDs 10F5/10F6 absent from the tracked boot routine table",
-        "sienna_8965B4512000": "incompatible-standard-route"
-      }
+        "corolla_8965H1202000": "structural-standard-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-standard-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWCanReproStdFlashWriter.dll",
+          "prepare_writer": "TCUWCanReproStdPrepareWriter.dll",
+          "reason": "2-byte 27 01 -> target NRC 0x13; standard RIDs 10F5/10F6 absent -> NRC 0x31",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -1052,10 +1219,20 @@
       "sha256": "ebc59025c4d621e13de04f3b9ac194b12dbe307cc9133851ce0564a7cdf4d463",
       "size": 17920,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 16,
+          "flash_writer": "TCUWCanSBRFlashWriter.dll",
+          "prepare_writer": "TCUWCanSBRPrepareWriter.dll",
+          "reason": "SecurityAccess 33/34 and vendor-session grammar unsupported by target",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -1130,10 +1307,20 @@
       "sha256": "0f59958e2fdabcc845c160c0763f3aa26e3c02e0e3b060916be29e96e0ef7213",
       "size": 11264,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 16,
+          "flash_writer": "TCUWCanSBRFlashWriter.dll",
+          "prepare_writer": "TCUWCanSBRPrepareWriter.dll",
+          "reason": "SecurityAccess 33/34 and vendor-session grammar unsupported by target",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -1204,10 +1391,20 @@
       "sha256": "dcdab6bca2405aec8147d0ae5c1b9b93ce3393e478b1c5016c4430bcd7648590",
       "size": 23552,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-target-transfer",
-        "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
-        "sienna_8965B4512000": "incompatible-vforest-transfer"
-      }
+        "corolla_8965H1202000": "structural-vforest-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-vforest-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanSecurityM16CFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanSecurityPowerTrainPrepareWriter.dll",
+          "reason": "18-byte SA shape matches but RID 0x1003 and paired VFOREST/M16C flash grammar are target-incompatible",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -1307,10 +1504,20 @@
       "sha256": "905ae71d648161b3f5d6c188dc3a2d7a147ae6b90694e2f8e80b0ffa7a260645",
       "size": 20480,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-target-transfer",
-        "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
-        "sienna_8965B4512000": "incompatible-vforest-transfer"
-      }
+        "corolla_8965H1202000": "structural-vforest-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-vforest-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanSecurityVFORESTFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanSecurityPowerTrainPrepareWriter.dll",
+          "reason": "18-byte SA shape matches but RID 0x1003 and paired VFOREST/M16C flash grammar are target-incompatible",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -1415,10 +1622,20 @@
       "sha256": "091eb414be13fd24cc0a9c52853e6e02a3b417c5851c765d2d45263f475718a1",
       "size": 18432,
       "target_disposition": {
-        "corolla_8965H1202000": "byte-compatible-vocabulary-bounded-selection",
-        "reason": "unified prepare emits exact 18-byte 27 01||ECUAuthKey; unified flash uses 0203/0201/0202 and RIDs 10F0/FF00/10F1/10F2 matching both tracked bootloader grammars; exact calibration selection/values remain bounded",
-        "sienna_8965B4512000": "byte-compatible-vocabulary-bounded-selection"
-      }
+        "corolla_8965H1202000": "structural-unified-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-unified-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "byte-compatible",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanUnifiedFlashWriter.dll",
+          "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
+          "reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 format 46; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
+          "sienna_8965B4512000": "byte-compatible"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -1475,10 +1692,20 @@
       "sha256": "95c5ec26bc10c5227bc830c142eb86093aa3709606b108b33051f9b982f9ae3e",
       "size": 17408,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-unified-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-unified-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "byte-compatible",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanUnifiedFlashWriterEachArea.dll",
+          "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
+          "reason": "same 18-byte SA and 0203->0201->0202 predownload; per-area RequestDownload is now recovered as 34 || flags || 46 || (OffsetAddress[5]+areaStart) || areaSize, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
+          "sienna_8965B4512000": "byte-compatible"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -1554,10 +1781,28 @@
       "sha256": "0314ca168c63342f4d4e26251ae9e8c700dae35b7144c63254296fc331375db8",
       "size": 17408,
       "target_disposition": {
-        "corolla_8965H1202000": "byte-compatible-vocabulary-bounded-selection",
-        "reason": "unified prepare emits exact 18-byte 27 01||ECUAuthKey; unified flash uses 0203/0201/0202 and RIDs 10F0/FF00/10F1/10F2 matching both tracked bootloader grammars; exact calibration selection/values remain bounded",
-        "sienna_8965B4512000": "byte-compatible-vocabulary-bounded-selection"
-      }
+        "corolla_8965H1202000": "structural-unified-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-unified-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "byte-compatible",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanUnifiedFlashWriter.dll",
+          "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
+          "reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 format 46; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
+          "sienna_8965B4512000": "byte-compatible"
+        },
+        {
+          "corolla_8965H1202000": "byte-compatible",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanUnifiedFlashWriterEachArea.dll",
+          "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
+          "reason": "same 18-byte SA and 0203->0201->0202 predownload; per-area RequestDownload is now recovered as 34 || flags || 46 || (OffsetAddress[5]+areaStart) || areaSize, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
+          "sienna_8965B4512000": "byte-compatible"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -1603,10 +1848,20 @@
       "sha256": "fbf5eeadc705cdbb28dc19128836eac21c28427ad8ec884cd353f80b65f06794",
       "size": 22528,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 3,
+          "flash_writer": "TCUWEthernetReprostdFlashWriter.dll",
+          "prepare_writer": "TCUWEthernetReprostdPrepareWriter.dll",
+          "reason": "ReproStd family plus Ethernet transport",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -1657,10 +1912,20 @@
       "sha256": "9ceb02941b99d128adf582236eb8b4a1eedbc2ad9f637305f8e5245c6520ec5b",
       "size": 13824,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 3,
+          "flash_writer": "TCUWEthernetReprostdFlashWriter.dll",
+          "prepare_writer": "TCUWEthernetReprostdPrepareWriter.dll",
+          "reason": "ReproStd family plus Ethernet transport",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -1739,10 +2004,20 @@
       "sha256": "7686ca90fa12345e8efab3e461f1d9b9408f1605019b7b10e88229b6f763684f",
       "size": 14848,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 5,
+          "flash_writer": "TCUWP4CanAirbagFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -1825,10 +2100,36 @@
       "sha256": "0a2898843e9858fbc0dd62159ea9882ec2a545af8c0b6169f363fa646813ca01",
       "size": 12800,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 5,
+          "flash_writer": "TCUWP4CanAirbagFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 4,
+          "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 6,
+          "flash_writer": "TCUWP4CanDSS1FlashWriter.dll",
+          "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -2063,10 +2364,36 @@
       "sha256": "98752a7f831451ecb4796f7639107c21a445e7185f0c80f1bb2849539e6e32f9",
       "size": 17408,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 4,
+          "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 74,
+          "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanBodyPrepareWriter.dll",
+          "reason": "SecurityAccess 61/62 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 3,
+          "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanCentralGWPrepareWriter.dll",
+          "reason": "prepare delegates a gateway callback; paired P4 body flash uses legacy raw common-flash framing rather than target UDS boot grammar",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -2152,10 +2479,20 @@
       "sha256": "1d73ad1719cdfaf7de3bac56fbc915374b2ab128a1feea6b910335e8d752cda7",
       "size": 23040,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 3,
+          "flash_writer": "TCUWP4CanBodyFlashWriterForCXPI.dll",
+          "prepare_writer": "TCUWP4CanBodyPrepareWriter.dll",
+          "reason": "SecurityAccess 61/62 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -2365,10 +2702,28 @@
       "sha256": "0326c4515d3f9935f561190c410f87de1527bed1f2b1a2d8d67546302b9b9b6a",
       "size": 13824,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 74,
+          "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanBodyPrepareWriter.dll",
+          "reason": "SecurityAccess 61/62 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 3,
+          "flash_writer": "TCUWP4CanBodyFlashWriterForCXPI.dll",
+          "prepare_writer": "TCUWP4CanBodyPrepareWriter.dll",
+          "reason": "SecurityAccess 61/62 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -2406,10 +2761,20 @@
       "sha256": "125b3c800353ebb5ce2d12171f719a52cf95e6e215f527164ed7ed9db772f975",
       "size": 7168,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 3,
+          "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanCentralGWPrepareWriter.dll",
+          "reason": "prepare delegates a gateway callback; paired P4 body flash uses legacy raw common-flash framing rather than target UDS boot grammar",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -2496,10 +2861,20 @@
       "sha256": "90fe884150c4062e2b0cd9a28f67cb8f12be2d9d4e311f3beb4bab5393cc35fc",
       "size": 16896,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 10,
+          "flash_writer": "TCUWP4CanChassisShrinkFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanChassisShrinkPrepareWriter.dll",
+          "reason": "3-byte 27 01 request conflicts with target exact 18-byte request-seed policy",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -2571,10 +2946,20 @@
       "sha256": "ea8baa28a29f595c626198663fd8ce93da02e9a5dd4b43dde99814de407064e3",
       "size": 12800,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 10,
+          "flash_writer": "TCUWP4CanChassisShrinkFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanChassisShrinkPrepareWriter.dll",
+          "reason": "3-byte 27 01 request conflicts with target exact 18-byte request-seed policy",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -2647,10 +3032,20 @@
       "sha256": "63c0214218f10562dcc9dfdc728234c6858b8c86b6f18715d380c0a0b6d01830",
       "size": 14336,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 3,
+          "flash_writer": "TCUWP4CanClearanceSonarFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanClearanceSonarPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -2708,10 +3103,20 @@
       "sha256": "0f7df48a01c0712bffbdf2f423730a9705004d5dd6bccdbe12e041aafc60077b",
       "size": 12800,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 3,
+          "flash_writer": "TCUWP4CanClearanceSonarFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanClearanceSonarPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -2794,10 +3199,20 @@
       "sha256": "481143e2358e947b65f06effa913b333de37b629bd3628ac8b5228bf20fcc4ca",
       "size": 15360,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 6,
+          "flash_writer": "TCUWP4CanDSS1FlashWriter.dll",
+          "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -2884,10 +3299,36 @@
       "sha256": "a88fac87421d58cf5901ece638aea10e4db6d721ce60360e2d97cf83d80e4a08",
       "size": 17408,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 4,
+          "flash_writer": "TCUWCanM16CFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
+          "reason": "legacy M16C password/material-transfer grammar has no target boot handler",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 6,
+          "flash_writer": "TCUWCanPowerTrainFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
+          "reason": "short/common SecurityAccess class; flash pairings are independently incompatible",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 8,
+          "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
+          "reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -2975,10 +3416,20 @@
       "sha256": "b8e9c81b300baf2099d88ada89a05d7686a8469cbe0031aa3b9dcbba13e6d04e",
       "size": 16384,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-target-transfer",
-        "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
-        "sienna_8965B4512000": "incompatible-vforest-transfer"
-      }
+        "corolla_8965H1202000": "structural-vforest-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-vforest-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 4,
+          "flash_writer": "TCUWP4CanSecurityAirbagFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanSecurityAirbagPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -3041,10 +3492,20 @@
       "sha256": "82cfc42a6b76a030ab23b53f21c467ba9f16efd84ad77ee1b60b30682f96e60e",
       "size": 12288,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 4,
+          "flash_writer": "TCUWP4CanSecurityAirbagFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanSecurityAirbagPrepareWriter.dll",
+          "reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -3142,10 +3603,20 @@
       "sha256": "e5ba42abbb602cef4a63d8c53eb2bfb241e34a7f65b8ab524f87c8c57de97df8",
       "size": 16896,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-target-transfer",
-        "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
-        "sienna_8965B4512000": "incompatible-vforest-transfer"
-      }
+        "corolla_8965H1202000": "structural-vforest-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-vforest-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 11,
+          "flash_writer": "TCUWP4CanSecurityChassisShrinkFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanSecurityChassisShrinkPrepareWriter.dll",
+          "reason": "27 01 || dynamic selector byte || ECUAuthKey[16] is 19-byte application payload, conflicting with target exact 18-byte request-seed policy",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -3222,10 +3693,20 @@
       "sha256": "88f7e7387544137f3ca7bd3f83089f95eaa8061ff001002a5538e9ab1c52b9e3",
       "size": 12800,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 11,
+          "flash_writer": "TCUWP4CanSecurityChassisShrinkFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanSecurityChassisShrinkPrepareWriter.dll",
+          "reason": "27 01 || dynamic selector byte || ECUAuthKey[16] is 19-byte application payload, conflicting with target exact 18-byte request-seed policy",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -3318,10 +3799,36 @@
       "sha256": "0721243b7f9649b72b830a0a2a58b44b81b3aed681a351ef0e8ae14cc75c12b0",
       "size": 19968,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-target-transfer",
-        "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
-        "sienna_8965B4512000": "incompatible-vforest-transfer"
-      }
+        "corolla_8965H1202000": "structural-vforest-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-vforest-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 8,
+          "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
+          "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
+          "reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
+          "prepare_writer": "TCUWP4P5CanPowerTrainPrepareWriter.dll",
+          "reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 3,
+          "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+          "reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -3377,10 +3884,20 @@
       "sha256": "0a64261d70e6a70ec80fcddf18f654c36e9941b0132d1ce5831b6fe9f65810eb",
       "size": 16384,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
+          "prepare_writer": "TCUWP4P5CanPowerTrainPrepareWriter.dll",
+          "reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -3459,10 +3976,28 @@
       "sha256": "d03dc43c7224aa5bf3eab477d55eefc90c4c18c2032b616089bdab4c7050a70a",
       "size": 17408,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWP5CanBodyFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+          "reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWP5CanBodyFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriterForBodyMicon.dll",
+          "reason": "exact builder sends bare 27 01 before a 6-byte seed/key exchange; target requires 16 tester bytes in request-seed",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -3548,10 +4083,44 @@
       "sha256": "c8ce54595b9f577d22d24c8cfe489492c03f59ea894e2eed68f4a8b2f9a900cf",
       "size": 16896,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWCanM16CFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+          "reason": "legacy M16C password/material-transfer grammar has no target boot handler",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 12,
+          "flash_writer": "TCUWCanPowerTrainFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+          "reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 3,
+          "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+          "reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWP5CanBodyFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+          "reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -3605,10 +4174,20 @@
       "sha256": "2c3d784965b882847518f7e165193388c4a35307bda6f7db59e54d0207935e2c",
       "size": 16896,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 2,
+          "flash_writer": "TCUWP5CanBodyFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriterForBodyMicon.dll",
+          "reason": "exact builder sends bare 27 01 before a 6-byte seed/key exchange; target requires 16 tester bytes in request-seed",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [],
@@ -3659,10 +4238,20 @@
       "sha256": "3e73eb6eb0c79e2d348e62febb13720d552b16e000b05f856bd182415c7e2f3b",
       "size": 16896,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanPowerTrainFlashWriterForSolar.dll",
+          "prepare_writer": "TCUWP5CanPowerTrainPrepareWriterForSolar.dll",
+          "reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     },
     {
       "calibration_getters": [
@@ -3717,10 +4306,28 @@
       "sha256": "07c6f2e162e347cacd0acea92f4925309f1c4e658456d0e99068034c3c1212b1",
       "size": 16384,
       "target_disposition": {
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
-        "sienna_8965B4512000": "unresolved-specialized-family"
-      }
+        "corolla_8965H1202000": "structural-specialized-family",
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
+        "sienna_8965B4512000": "structural-specialized-family"
+      },
+      "target_route_dispositions": [
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanSecurityM16CFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanSecurityPowerTrainPrepareWriter.dll",
+          "reason": "18-byte SA shape matches but RID 0x1003 and paired VFOREST/M16C flash grammar are target-incompatible",
+          "sienna_8965B4512000": "rejected"
+        },
+        {
+          "corolla_8965H1202000": "rejected",
+          "factory_rows": 1,
+          "flash_writer": "TCUWCanSecurityVFORESTFlashWriter.dll",
+          "prepare_writer": "TCUWP5CanSecurityPowerTrainPrepareWriter.dll",
+          "reason": "18-byte SA shape matches but RID 0x1003 and paired VFOREST/M16C flash grammar are target-incompatible",
+          "sienna_8965B4512000": "rejected"
+        }
+      ]
     }
   ]
 }

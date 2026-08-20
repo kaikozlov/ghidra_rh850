@@ -23,6 +23,7 @@ import pefile
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 from tools.techstream.generate_cuw_writer_inventory import COMMANDS, factory_routes  # noqa: E402
+from tools.techstream.generate_cuw_writer_protocol_grammar import route_verdict  # noqa: E402
 
 DEFAULT_ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics"
 DEFAULT_OUT = REPO / "data/generated/techstream_v18/cuw_writer_family_matrix.json"
@@ -106,36 +107,33 @@ def exact_commands(name: str) -> list[dict[str, Any]]:
         r = command["route"]
         if r == route or (r == "both-flash" and "flash" in route):
             out.append(command)
-    # The each-area unified writer shares the same imported calibration contract,
-    # but its exact body is not represented by COMMANDS; do not silently inherit.
+    # Unified EachArea's exact request builders are pinned by the second-stage
+    # route-grammar artifact rather than COMMANDS; do not duplicate them here.
     if route == "unified-flash-each-area":
         return []
     return out
 
 
 def target_disposition(name: str, tags: list[str]) -> dict[str, str]:
+    """Writer-level structural summary.
+
+    Exact target compatibility is a property of the prepare+flash route, not an
+    isolated DLL.  `target_route_dispositions` below is authoritative and is
+    computed with the same exact route classifier as the protocol-grammar
+    artifact.  Keep this field only for backward-compatible structural hints.
+    """
     if name in {"TCUWCanReproStdPrepareWriter.dll", "TCUWCanReproStdFlashWriter.dll"}:
-        return {
-            "sienna_8965B4512000": "incompatible-standard-route",
-            "corolla_8965H1202000": "incompatible-standard-route",
-            "reason": "standard prepare emits bare 27 01 while both tracked bootloaders require 18-byte 27 01||data[16]; standard flash also uses RIDs 10F5/10F6 absent from the tracked boot routine table",
-        }
-    if name in {"TCUWCanUnifiedPrepareWriter.dll", "TCUWCanUnifiedFlashWriter.dll"}:
-        return {
-            "sienna_8965B4512000": "byte-compatible-vocabulary-bounded-selection",
-            "corolla_8965H1202000": "byte-compatible-vocabulary-bounded-selection",
-            "reason": "unified prepare emits exact 18-byte 27 01||ECUAuthKey; unified flash uses 0203/0201/0202 and RIDs 10F0/FF00/10F1/10F2 matching both tracked bootloader grammars; exact calibration selection/values remain bounded",
-        }
-    if "nonce-seed-material-transfer" in tags or "vforest" in tags:
-        return {
-            "sienna_8965B4512000": "incompatible-vforest-transfer",
-            "corolla_8965H1202000": "unresolved-target-transfer",
-            "reason": "Sienna bootloader has no proprietary VFOREST handler; bytes 0x37..0x3c in this family are proprietary block-sequence frames, not UDS services",
-        }
+        status = "structural-standard-family"
+    elif name in {"TCUWCanUnifiedPrepareWriter.dll", "TCUWCanUnifiedFlashWriter.dll", "TCUWCanUnifiedFlashWriterEachArea.dll"}:
+        status = "structural-unified-family"
+    elif "nonce-seed-material-transfer" in tags or "vforest" in tags:
+        status = "structural-vforest-family"
+    else:
+        status = "structural-specialized-family"
     return {
-        "sienna_8965B4512000": "unresolved-specialized-family",
-        "corolla_8965H1202000": "unresolved-specialized-family",
-        "reason": "import-level protocol fingerprint is structural only; no exact target route is asserted without a recovered request builder/calibration selection",
+        "sienna_8965B4512000": status,
+        "corolla_8965H1202000": status,
+        "reason": "writer-level import/tag summary only; exact target disposition is route-pair-specific in target_route_dispositions",
     }
 
 
@@ -164,6 +162,18 @@ def inspect_writer(path: Path, roles: set[str], route_rows: list[dict[str, Any]]
     tags = classify_tags(path.name, imports)
     factories = sorted({row["factory_identifier"] for row in route_rows if row["factory_identifier"]})
     params = sorted({row["parameter_file"] for row in route_rows})
+    pair_counts = collections.Counter((row["prepare_writer"], row["flash_writer"]) for row in route_rows)
+    route_dispositions = []
+    for (prepare, flash), count in sorted(pair_counts.items()):
+        verdict, reason = route_verdict(prepare, flash)
+        route_dispositions.append({
+            "prepare_writer": prepare,
+            "flash_writer": flash,
+            "factory_rows": count,
+            "sienna_8965B4512000": verdict,
+            "corolla_8965H1202000": verdict,
+            "reason": reason,
+        })
     result = {
         "name": path.name,
         "roles": sorted(roles),
@@ -179,6 +189,7 @@ def inspect_writer(path: Path, roles: set[str], route_rows: list[dict[str, Any]]
         "protocol_tags": tags,
         "exact_recovered_commands": exact_commands(path.name),
         "target_disposition": target_disposition(path.name, tags),
+        "target_route_dispositions": route_dispositions,
     }
     return result
 
@@ -207,7 +218,7 @@ def generate(root: Path) -> dict[str, Any]:
     flash = [w for w in writers if "flash" in w["roles"]]
     tag_counts = collections.Counter(tag for w in writers for tag in w["protocol_tags"])
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "source": "external-source",
         "distribution": "Toyota Techstream V18.00.003",
         "route_stats": stats,
@@ -221,8 +232,9 @@ def generate(root: Path) -> dict[str, Any]:
         },
         "evidence_boundary": {
             "imports": "structural: imported helper/getter names prove dependencies, not exact on-wire requests",
-            "exact_recovered_commands": "recovered: only previously byte/decompilation-pinned standard/unified builders are promoted here",
-            "target_disposition": "bounded unless exact target firmware rejects/implements the corresponding grammar",
+            "exact_recovered_commands": "recovered subset: this inventory retains legacy COMMANDS pins; the second-stage route-grammar artifact owns the additional exact formerly-specialized builders",
+            "target_disposition": "writer-level structural compatibility hint retained for backward compatibility; do not use for route decisions",
+            "target_route_dispositions": "exact route-pair classifier shared with cuw_writer_protocol_grammar.json; all 196 rows are either byte-compatible or rejected",
         },
         "writers": writers,
     }

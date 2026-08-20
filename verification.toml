@@ -983,6 +983,38 @@ paths = [
   "techstream.lock.json",
 ]
 
+[suite.techstream_pre_gts_static_closure]
+tests = [
+  "tests/verify_sienna_8965B4512000_techstream_did_semantics.py",
+  "tests/verify_techstream_cuw_calibration_schema.py",
+  "tests/verify_techstream_cuw_timing_recovery.py",
+  "tests/verify_techstream_cuw_writer_family_matrix.py",
+  "tests/verify_techstream_cuw_writer_protocol_grammar.py",
+  "tests/verify_techstream_rks_client_state.py",
+]
+requires_external = ["techstream_v18"]
+oracle = "cfg_dataflow"
+paths = [
+  "tools/techstream/generate_sienna_techstream_did_semantics.py",
+  "data/generated/sienna_8965B4512000_techstream_did_semantics.json",
+  "tools/techstream/generate_cuw_calibration_schema.py",
+  "data/generated/techstream_v18/cuw_calibration_schema.json",
+  "tools/techstream/generate_cuw_timing_recovery.py",
+  "data/generated/techstream_v18/cuw_timing_recovery.json",
+  "tools/techstream/generate_cuw_writer_family_matrix.py",
+  "data/generated/techstream_v18/cuw_writer_family_matrix.json",
+  "tools/techstream/generate_cuw_writer_protocol_grammar.py",
+  "data/generated/techstream_v18/cuw_writer_protocol_grammar.json",
+  "tools/techstream/generate_rks_client_state.py",
+  "data/generated/techstream_v18/rks_client_state.json",
+  "docs/tooling/techstream.md",
+  "docs/tooling/techstream-capture-procedure.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+]
+
 [suite.techstream_cuw_security_up]
 tests = ["tests/verify_techstream_cuw_security_up.py"]
 requires_external = ["techstream_v18"]

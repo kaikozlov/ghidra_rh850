@@ -136,6 +136,22 @@
       "va": 268446288
     },
     {
+      "artifact": "TCUWCanUnifiedFlashWriterEachArea.dll",
+      "expected_sha256": "c14089dd3cb7777838a9b2ebf6c24b88eaf86c5cdd5567952f68a2436483efec",
+      "role": "unified_each_area_request_download",
+      "sha256": "c14089dd3cb7777838a9b2ebf6c24b88eaf86c5cdd5567952f68a2436483efec",
+      "size": 855,
+      "va": 268440608
+    },
+    {
+      "artifact": "TCUWCanUnifiedFlashWriterEachArea.dll",
+      "expected_sha256": "61fb7c16743a2313a4a082a284cfe241e2102998fb3f68d02d8072e502d8a1d9",
+      "role": "unified_each_area_routine_control",
+      "sha256": "61fb7c16743a2313a4a082a284cfe241e2102998fb3f68d02d8072e502d8a1d9",
+      "size": 832,
+      "va": 268443520
+    },
+    {
       "artifact": "TCUWCalibrationFile.dll",
       "expected_sha256": "bd46b15bcdfbc0d86c469f323dfae90fa70cc0f1a338dc94addad87841350771",
       "role": "logical_block_area_default_ctor",
@@ -399,9 +415,9 @@
     "reason": "the V18 installation contains no .cuw/.cal specimen; static code proves an embedded attach.att metadata descriptor but a byte-accurate outer-package extractor cannot be fixture-validated locally",
     "status": "artifact-blocked-for-parser-validation"
   },
-  "schema_version": 1,
+  "schema_version": 2,
   "target_integrity": {
-    "boundary": "field presence/layout and the standard-writer ECU transmission are recovered; signer/private-key provenance and target acceptance remain separate questions",
+    "boundary": "all 32 V18 route pairs are classified for Sienna/H target relevance. Standard transmits the signature-bearing target record but is target-incompatible; both compatible Unified routes use the separate area start/length path. Signer/private-key provenance and actual package values remain artifact/server questions.",
     "families": [
       {
         "call_va": 4243434,
@@ -463,6 +479,488 @@
       }
     ],
     "record_size": 20,
+    "route_relevance": [
+      {
+        "factory_rows": 2,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanHINOFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWCanHINOPrepareWriter.dll",
+        "target_reason": "SecurityAccess 03/04 HINO family unsupported by target",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 1,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanHINOFlashWriterForDSS.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWCanHINOPrepareWriterForDSS.dll",
+        "target_reason": "SecurityAccess 03/04 HINO family unsupported by target",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 1,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanHINOFlashWriterForVCS.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWCanHINOPrepareWriterForVCS.dll",
+        "target_reason": "SecurityAccess 03/04 HINO family unsupported by target",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 2,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanMMCFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWCanMMCPrepareWriter.dll",
+        "target_reason": "exact MMC SecurityAccess uses subfunctions 41/42; flash additionally uses unsupported RIDs 0301/0304",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 1,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanPSAFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWCanPSAPrepareWriter.dll",
+        "target_reason": "legacy PSA authentication/SID family unsupported by target",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 2,
+        "field_flow": {
+          "CMAC": "conditionally copied for RequiredSpecReproVer03",
+          "CRC": "conditionally copied with CRC selector/length",
+          "DigitalSignature": "conditionally copied on alternate required-spec path",
+          "Length": "copied into 31 01 routine request",
+          "StartAddress": "copied into 31 01 routine request"
+        },
+        "flash_writer": "TCUWCanReproStdFlashWriter.dll",
+        "integrity_path": "standard-CLogicalBlockAreaInfo",
+        "prepare_writer": "TCUWCanReproStdPrepareWriter.dll",
+        "target_reason": "2-byte 27 01 -> target NRC 0x13; standard RIDs 10F5/10F6 absent -> NRC 0x31",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 16,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanSBRFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWCanSBRPrepareWriter.dll",
+        "target_reason": "SecurityAccess 33/34 and vendor-session grammar unsupported by target",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 1,
+        "field_flow": {
+          "CMAC": "not consumed through the standard CLogicalBlockAreaInfo routine builder",
+          "CRC": "not consumed through the standard CLogicalBlockAreaInfo routine builder",
+          "DigitalSignature": "not consumed through the standard CLogicalBlockAreaInfo routine builder",
+          "Length": "area length used in RequestDownload/RoutineControl",
+          "StartAddress": "area start used with OffsetAddress in RequestDownload/RoutineControl"
+        },
+        "flash_writer": "TCUWCanUnifiedFlashWriter.dll",
+        "integrity_path": "unified-CFileHeaderInfo-area",
+        "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
+        "target_reason": "18-byte SA; exact 0203->0201->0202 WDBI; RIDs 10F0/FF00/10F1/10F2; 34 format 46; 36/37; 11 01 all match target boot grammar; exact calibration selection/values remain bounded",
+        "target_verdict": "byte-compatible"
+      },
+      {
+        "factory_rows": 1,
+        "field_flow": {
+          "CMAC": "not consumed through the standard CLogicalBlockAreaInfo routine builder",
+          "CRC": "not consumed through the standard CLogicalBlockAreaInfo routine builder",
+          "DigitalSignature": "not consumed through the standard CLogicalBlockAreaInfo routine builder",
+          "Length": "area length used in RequestDownload/RoutineControl",
+          "StartAddress": "area start used with OffsetAddress in RequestDownload/RoutineControl"
+        },
+        "flash_writer": "TCUWCanUnifiedFlashWriterEachArea.dll",
+        "integrity_path": "unified-CFileHeaderInfo-area",
+        "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
+        "target_reason": "same 18-byte SA and 0203->0201->0202 predownload; per-area RequestDownload is now recovered as 34 || flags || 46 || (OffsetAddress[5]+areaStart) || areaSize, with the same 10F0/FF00/10F1/10F2 and 11 01 family",
+        "target_verdict": "byte-compatible"
+      },
+      {
+        "factory_rows": 3,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWEthernetReprostdFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWEthernetReprostdPrepareWriter.dll",
+        "target_reason": "ReproStd family plus Ethernet transport",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 5,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanAirbagFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
+        "target_reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 4,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
+        "target_reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 6,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanDSS1FlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanAirbagPrepareWriter.dll",
+        "target_reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 74,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanBodyPrepareWriter.dll",
+        "target_reason": "SecurityAccess 61/62 subfunctions are unsupported by target bootloader",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 3,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanBodyFlashWriterForCXPI.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanBodyPrepareWriter.dll",
+        "target_reason": "SecurityAccess 61/62 subfunctions are unsupported by target bootloader",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 3,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanBodyFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanCentralGWPrepareWriter.dll",
+        "target_reason": "prepare delegates a gateway callback; paired P4 body flash uses legacy raw common-flash framing rather than target UDS boot grammar",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 10,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanChassisShrinkFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanChassisShrinkPrepareWriter.dll",
+        "target_reason": "3-byte 27 01 request conflicts with target exact 18-byte request-seed policy",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 3,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanClearanceSonarFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanClearanceSonarPrepareWriter.dll",
+        "target_reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 4,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanM16CFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
+        "target_reason": "legacy M16C password/material-transfer grammar has no target boot handler",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 6,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanPowerTrainFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
+        "target_reason": "short/common SecurityAccess class; flash pairings are independently incompatible",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 8,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanPowerTrainPrepareWriter.dll",
+        "target_reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 4,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanSecurityAirbagFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanSecurityAirbagPrepareWriter.dll",
+        "target_reason": "SecurityAccess 03/04 subfunctions are unsupported by target bootloader",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 11,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanSecurityChassisShrinkFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4CanSecurityChassisShrinkPrepareWriter.dll",
+        "target_reason": "27 01 || dynamic selector byte || ECUAuthKey[16] is 19-byte application payload, conflicting with target exact 18-byte request-seed policy",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 2,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP4P5CanPowerTrainPrepareWriter.dll",
+        "target_reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 2,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanM16CFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+        "target_reason": "legacy M16C password/material-transfer grammar has no target boot handler",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 12,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanPowerTrainFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+        "target_reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 3,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP4CanVFORESTFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+        "target_reason": "proprietary VFOREST nonce/seed framing has no target boot handler",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 1,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP5CanBodyFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP5CanPowerTrainPrepareWriter.dll",
+        "target_reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 2,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWP5CanBodyFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP5CanPowerTrainPrepareWriterForBodyMicon.dll",
+        "target_reason": "exact builder sends bare 27 01 before a 6-byte seed/key exchange; target requires 16 tester bytes in request-seed",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 1,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanPowerTrainFlashWriterForSolar.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP5CanPowerTrainPrepareWriterForSolar.dll",
+        "target_reason": "exact builder sends bare 27 01 then derives a 4-byte response key; target requires 27 01 || 16 tester bytes",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 1,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanSecurityM16CFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP5CanSecurityPowerTrainPrepareWriter.dll",
+        "target_reason": "18-byte SA shape matches but RID 0x1003 and paired VFOREST/M16C flash grammar are target-incompatible",
+        "target_verdict": "rejected"
+      },
+      {
+        "factory_rows": 1,
+        "field_flow": {
+          "CMAC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "CRC": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "DigitalSignature": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "Length": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted",
+          "StartAddress": "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+        },
+        "flash_writer": "TCUWCanSecurityVFORESTFlashWriter.dll",
+        "integrity_path": "target-incompatible-route",
+        "prepare_writer": "TCUWP5CanSecurityPowerTrainPrepareWriter.dll",
+        "target_reason": "18-byte SA shape matches but RID 0x1003 and paired VFOREST/M16C flash grammar are target-incompatible",
+        "target_verdict": "rejected"
+      }
+    ],
     "standard_writer_consumer": {
       "evidence": "exact target-object offsets from TCUWCalibrationFile plus direct field loads/copies in the byte-pinned standard RoutineControl builder and orchestration",
       "field_offsets": {
@@ -500,7 +998,7 @@
         ]
       }
     },
-    "unified_writer_boundary": "the recovered unified writer uses CFileHeaderInfo area tuples plus OffsetAddress in RIDs 10F0/10F1/10F2/FF00; it does not consume CLogicalBlockAreaInfo CRC/CMAC/DigitalSignature through the standard target-record builder"
+    "unified_writer_boundary": "both recovered Unified flash variants use CFileHeaderInfo-shape area start/length plus OffsetAddress in RIDs 10F0/10F1/10F2/FF00; they do not consume CLogicalBlockAreaInfo CRC/CMAC/DigitalSignature through the standard target-record builder"
   },
   "top_level_import": {
     "boundary": "geometry is exact from ImportData; semantic labels for every anonymous slot require the parser call-site join",

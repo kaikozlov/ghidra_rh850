@@ -12,12 +12,17 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import collections
+import sys
 from pathlib import Path
 from typing import Any
 
 import pefile
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO))
+from tools.techstream.generate_cuw_writer_inventory import factory_routes  # noqa: E402
+from tools.techstream.generate_cuw_writer_protocol_grammar import route_verdict  # noqa: E402
 ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Calibration Update Wizard"
 OUT = REPO / "data/generated/techstream_v18/cuw_calibration_schema.json"
 
@@ -31,6 +36,10 @@ FUNCTIONS = {
     "TCUWCanReproStdFlashWriter.dll": [
         (0x100025F0, 1112, "standard_target_integrity_routine_control"),
         (0x10002A50, 2598, "standard_flash_orchestration"),
+    ],
+    "TCUWCanUnifiedFlashWriterEachArea.dll": [
+        (0x10001420, 855, "unified_each_area_request_download"),
+        (0x10001F80, 832, "unified_each_area_routine_control"),
     ],
     "TCUWCalibrationFile.dll": [
         (0x100015F0, 60, "logical_block_area_default_ctor"),
@@ -56,6 +65,8 @@ EXPECTED_HASHES = {
     ("Cuw.exe", 0x0040C224): "62cf1764aaa6f06169e7b0b4953cf24593490b7337d6a8a63854b190779dec8d",
     ("TCUWCanReproStdFlashWriter.dll", 0x100025F0): "6aa2bd0d44347d588386f57ce6fda737f44504460d032644f10ad75261692652",
     ("TCUWCanReproStdFlashWriter.dll", 0x10002A50): "3f0955be8af3615fe82696445623041cb7ed5196860a6a820d495b20414df017",
+    ("TCUWCanUnifiedFlashWriterEachArea.dll", 0x10001420): "c14089dd3cb7777838a9b2ebf6c24b88eaf86c5cdd5567952f68a2436483efec",
+    ("TCUWCanUnifiedFlashWriterEachArea.dll", 0x10001F80): "61fb7c16743a2313a4a082a284cfe241e2102998fb3f68d02d8072e502d8a1d9",
     ("TCUWCalibrationFile.dll", 0x100015F0): "bd46b15bcdfbc0d86c469f323dfae90fa70cc0f1a338dc94addad87841350771",
     ("TCUWCalibrationFile.dll", 0x10001630): "02f3a95fab81edff83c4bbd0ae44509bda64d78c49c1d2bb9d76fafb40689e3a",
     ("TCUWCalibrationFile.dll", 0x100016D0): "6f172a820cd37c8dcdb9473f45ec706ef02bc6aa08f27831545c0c353ee6d009",
@@ -119,8 +130,47 @@ def generate(root: Path) -> dict[str, Any]:
             funcs.append({"artifact": filename, "va": va, "size": size, "role": role,
                           "sha256": digest, "expected_sha256": EXPECTED_HASHES[(filename, va)]})
 
+    routes, _ = factory_routes(root.parent)
+    pairs = collections.Counter((row["prepare_writer"], row["flash_writer"]) for row in routes)
+    route_relevance = []
+    for (prepare, flash), count in sorted(pairs.items()):
+        verdict, reason = route_verdict(prepare, flash)
+        if prepare == "TCUWCanReproStdPrepareWriter.dll" and flash == "TCUWCanReproStdFlashWriter.dll":
+            integrity_path = "standard-CLogicalBlockAreaInfo"
+            field_flow = {
+                "StartAddress": "copied into 31 01 routine request",
+                "Length": "copied into 31 01 routine request",
+                "CRC": "conditionally copied with CRC selector/length",
+                "CMAC": "conditionally copied for RequiredSpecReproVer03",
+                "DigitalSignature": "conditionally copied on alternate required-spec path",
+            }
+        elif prepare == "TCUWCanUnifiedPrepareWriter.dll" and flash in {"TCUWCanUnifiedFlashWriter.dll", "TCUWCanUnifiedFlashWriterEachArea.dll"}:
+            integrity_path = "unified-CFileHeaderInfo-area"
+            field_flow = {
+                "StartAddress": "area start used with OffsetAddress in RequestDownload/RoutineControl",
+                "Length": "area length used in RequestDownload/RoutineControl",
+                "CRC": "not consumed through the standard CLogicalBlockAreaInfo routine builder",
+                "CMAC": "not consumed through the standard CLogicalBlockAreaInfo routine builder",
+                "DigitalSignature": "not consumed through the standard CLogicalBlockAreaInfo routine builder",
+            }
+        else:
+            integrity_path = "target-incompatible-route"
+            field_flow = {
+                key: "route rejected by an earlier exact boot-grammar mismatch; no Sienna/H target-integrity semantic is promoted"
+                for key in ("StartAddress", "Length", "CRC", "CMAC", "DigitalSignature")
+            }
+        route_relevance.append({
+            "prepare_writer": prepare,
+            "flash_writer": flash,
+            "factory_rows": count,
+            "target_verdict": verdict,
+            "target_reason": reason,
+            "integrity_path": integrity_path,
+            "field_flow": field_flow,
+        })
+
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "distribution": "Toyota Techstream V18.00.003",
         "descriptor": {
             "embedded_name": "attach.att",
@@ -187,8 +237,9 @@ def generate(root: Path) -> dict[str, Any]:
                 },
                 "evidence": "exact target-object offsets from TCUWCalibrationFile plus direct field loads/copies in the byte-pinned standard RoutineControl builder and orchestration",
             },
-            "unified_writer_boundary": "the recovered unified writer uses CFileHeaderInfo area tuples plus OffsetAddress in RIDs 10F0/10F1/10F2/FF00; it does not consume CLogicalBlockAreaInfo CRC/CMAC/DigitalSignature through the standard target-record builder",
-            "boundary": "field presence/layout and the standard-writer ECU transmission are recovered; signer/private-key provenance and target acceptance remain separate questions",
+            "unified_writer_boundary": "both recovered Unified flash variants use CFileHeaderInfo-shape area start/length plus OffsetAddress in RIDs 10F0/10F1/10F2/FF00; they do not consume CLogicalBlockAreaInfo CRC/CMAC/DigitalSignature through the standard target-record builder",
+            "route_relevance": route_relevance,
+            "boundary": "all 32 V18 route pairs are classified for Sienna/H target relevance. Standard transmits the signature-bearing target record but is target-incompatible; both compatible Unified routes use the separate area start/length path. Signer/private-key provenance and actual package values remain artifact/server questions.",
         },
         "top_level_import": {
             "function_va": 0x10004320,

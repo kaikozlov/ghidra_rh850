@@ -532,9 +532,12 @@ bytes; it does no cryptography.
 > length `0x12` (`27 01 || 16 bytes`), and its wire RIDs `10F5/10F6` are absent.
 > The unified builder sends the required 16-byte `ECUAuthKey`, writes
 > calibration-derived values to DIDs `0x0203`, `0x0201`, and `0x0202`, and uses
-> the target's `10F0/FF00/10F1/10F2` routine family. The absent matching
-> calibration payload still prevents asserting that this compatible factory row
-> is the one selected for `8965B4512000` or recovering its actual values. The CUW-side structural
+> the target's `10F0/FF00/10F1/10F2` routine family. TMS-029 now closes the
+> remaining writer census: **194/196 factory rows have an exact static mismatch**,
+> while the two rows pairing `TCUWCanUnifiedPrepareWriter` with either normal
+> UnifiedFlashWriter or UnifiedFlashWriterEachArea are byte-compatible. The
+> absent matching calibration payload still prevents choosing between those two
+> compatible rows or recovering their actual values. The CUW-side structural
 > finding (key-material transfer, not SA; `0x37`–`0x3c` are block-seq bytes, not
 > SIDs; `arg3=GetNonce`, `arg4=GetSeedKey`) stands, but its target ECU is not
 > `8965B4512000`.
@@ -598,16 +601,18 @@ code).
 
 ### 5.2 Flash-write phase
 
-The standard and unified flash writers expose `StartFlashWrite`. Both enforce
-positive-response templates and execute:
+The standard writer and both Unified flash variants expose `StartFlashWrite`.
+Their exact builders cover:
 
 1. **Predownload data** — standard uses calibration-selected WDBI tables;
    unified sends `2E 02 03 || OffsetAddress[5]`, `2E 02 01 || SeedKey[16]`,
    and `2E 02 02 || Nonce[16]`, requiring the corresponding `6E` responses.
 2. **RequestDownload** — standard builds `34 || dataFormat || 44 ||
-   address[4] || size[4]`; unified builds `34 || compressionFlag || areaFlag ||
-   46 || (offset[5]+areaAddress) || areaSize`. Both parse `74` and cap the
-   negotiated block length at `0x0FFF` before subtracting two header bytes.
+   address[4] || size[4]`; both Unified variants build
+   `34 || compressionFlag || areaFlag || 46 || (offset[5]+areaAddress) ||
+   areaSize`. The EachArea body is independently pinned at `0x10001420`; it
+   parses `74` and caps the negotiated block length at `0x0FFF` before
+   subtracting two header bytes, removing the earlier per-area-layout boundary.
 3. **TransferData / TransferExit** — `36 || counter || data` / `76 || counter`,
    then `37` / `77`.
 4. **RoutineControl** — standard writes wire RIDs `10F5`, `FF00`, and `10F6`;
@@ -721,11 +726,23 @@ in the standard package-download route: CUW can transmit it to the ECU as part
 of a RoutineControl request. The signer/private-key/verification algorithm and
 whether a particular EPS calibration selects that branch remain unproven.
 
-The recovered unified writer is structurally different: its `10F0/10F1/10F2/
-FF00` routines consume `CFileHeaderInfo` area tuples plus `OffsetAddress`; it
-does not use the standard `CLogicalBlockAreaInfo` target-integrity builder. No
-static edge joins either path to the independent TIS/RKS permission token in
-§5.3.
+The recovered Unified path is structurally different from standard. Normal
+Unified and UnifiedEachArea both use `10F0/10F1/10F2/FF00`, derive the effective
+five-byte address by adding calibration `OffsetAddress` to an area start, and
+append the area length/range from the `CFileHeaderInfo`-shape area object. The
+EachArea routine builder at `0x10001F80` reads the two consecutive string fields
+at `+0x00/+0x1C`, then constructs `31 01 || RID || 45 || adjustedAddress[5] ||
+length`; its RequestDownload path uses the same area start/length pair. This is
+separate from the standard `CLogicalBlockAreaInfo` CRC/CMAC/DigitalSignature
+request builder. Because TMS-029 now rejects every non-Unified route, the
+signature-bearing standard target-integrity transfer is **not part of either
+statically compatible Sienna/H route**. Schema-v2 of
+`cuw_calibration_schema.json` records this field-flow/target-relevance result for
+all 32 route pairs: standard has the exact CRC/CMAC/DigitalSignature transfer,
+the two compatible Unified rows have the separate area start/length path, and
+the remaining 29 route pairs are target-rejected before any target-integrity
+semantic can affect the Sienna/H disposition. No static edge joins either
+integrity path to the independent TIS/RKS permission token in §5.3.
 
 The same pass recovers the calibration metadata object grammar. `Cuw.exe`
 initializes an embedded descriptor named **`attach.att`**, imports the Win32
@@ -757,24 +774,43 @@ for every one of those 47 modules, its SHA-256, route/factory provenance, export
 imported `CalibrationFile` getters, imported common writer/transport operations,
 and bounded protocol-family tags.
 
-This census deliberately separates two evidence levels. The standard/unified
-prepare and flash paths retain the exact request builders already recovered and
-byte-pinned in §5.1/§5.2. For the many specialized powertrain/body/airbag/HINO/
-MMC/PSA/SBR/legacy writers, imported helper/getter names are **structural
-fingerprints only**; an import such as `GetNonce`, `CalcSeedKeyForSecurityUp`, or
-a common flash helper does not by itself prove a particular request byte sequence.
-This prevents the route inventory from silently upgrading dependency names into
-wire semantics.
+The writer matrix deliberately keeps **imports/tags structural**: a dependency
+such as `GetNonce`, `CalcSeedKeyForSecurityUp`, or a common flash helper still
+is not promoted to wire semantics merely because it is imported. Exact target
+classification lives at the **prepare+flash route-pair** level in
+`cuw_writer_protocol_grammar.json`, and schema-v2 of the matrix mirrors those
+route dispositions in `target_route_dispositions`.
 
-The target comparison remains useful even at that boundary. Security-VFOREST
-writers are structurally distinguished by their nonce/seed material-transfer
-helpers, and the recovered Sienna bootloader has no handler for that proprietary
-framing, so that route family is target-rejected for `8965B4512000`. The recovered
-standard/unified builders use diagnostic vocabulary implemented by the Sienna
-bootloader, but exact factory selection remains calibration-metadata-dependent.
+A focused Ghidra pass closes every class that the first census left bounded:
+
+| Family / former residue | Exact decisive grammar | Sienna/H disposition |
+|---|---|---|
+| P5 PowerTrain | bare `27 01`, 4-byte seed/key | rejected: target requires 18-byte request-seed |
+| P4/P5 PowerTrain | bare `27 01`, 4-byte seed/key; parameter-timed | rejected: same exact-length mismatch |
+| P5 BodyMicon | bare `27 01`, 6-byte seed/key | rejected: same exact-length mismatch |
+| P5 Solar | bare `27 01`, 4-byte seed/key | rejected: same exact-length mismatch |
+| SecurityChassisShrink | `27 01 || selector[1] || ECUAuthKey[16]` | rejected: 19-byte application request vs exact 18-byte target policy |
+| MMC | `27 41/42`; RIDs `0301/0304` plus `FF00`; `11 81` | rejected: unsupported SA subfunctions/RIDs |
+| CentralGW + P4 BodyFlash | prepare host callback; legacy common-flash raw framing, finish byte `0x80` | rejected: not target UDS boot grammar |
+| UnifiedEachArea | `0203→0201→0202`; `34 .. 46 ..`; RIDs `10F0/FF00/10F1/10F2`; `11 01` | **byte-compatible** |
+
+Together with the previously exact families, this produces the final static
+census: **194 rejected rows + 2 byte-compatible Unified rows, zero unresolved or
+bounded route rows**. The generated route records also carry the complete
+factory-row timing/retry profile for 12 high-value parameters plus recovered UDS
+reset templates; this preserves timing/retry/reset behavior per route rather than
+leaving it as prose. The surviving pair differs only in normal-vs-per-area
+Unified flash orchestration and both have blank legacy seed-delay fields,
+`IGOffRetriableFlag=1`, and `11 01` reset. Static V18 cannot choose which one
+Toyota selected for `8965B4512000`/`8965H1202000`; that requires the matching
+calibration package or a retained live CUW session.
+
 The matrix and its independent decoder/import verifier are generated by
 `tools/techstream/generate_cuw_writer_family_matrix.py` and
-`tests/verify_techstream_cuw_writer_family_matrix.py`.
+`tests/verify_techstream_cuw_writer_family_matrix.py`; the exact second-stage
+body pins and route classifier are generated by
+`tools/techstream/generate_cuw_writer_protocol_grammar.py` and verified by
+`tests/verify_techstream_cuw_writer_protocol_grammar.py`.
 
 ### 5.3 Reprogramming-key authorization (RKS / TIS portal) — Layer A
 

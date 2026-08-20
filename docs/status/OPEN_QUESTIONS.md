@@ -427,15 +427,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   SEC-APP-001, and DIAG-APP-001/003. Preserve raw logs
   privately and commit only reviewed/redacted derivatives or hashes. See
   [../tooling/techstream-capture-procedure.md](../tooling/techstream-capture-procedure.md).
-- **Sienna EPS exact CUW row and calibration material.** TMS-029 now narrows the
-  host grammar beyond SID-level compatibility: standard is byte-incompatible
-  (2-byte `27 01`, RIDs `10F5/10F6`), while unified matches the tracked boot
-  request-seed length, DIDs, and `10F0/FF00/10F1/10F2` routine family. What is
-  still missing is the actual `.cuw`/`.cal` metadata proving which unified row
-  Toyota selected and supplying `ServiceAuthKey`, `ECUAuthKey`, `SeedKey`,
-  `Nonce`, `OffsetAddress`, download ranges, data-format fields, per-area choice,
-  and target-integrity values. Do not promote byte compatibility into an exact
-  transcript without that artifact.
+- **Sienna EPS exact CUW row and calibration material.** TMS-029 now closes the
+  complete V18 static route census: 194/196 factory rows have an exact target
+  mismatch and only two remain, both pairing `TCUWCanUnifiedPrepareWriter` with
+  either `TCUWCanUnifiedFlashWriter` or `TCUWCanUnifiedFlashWriterEachArea`.
+  EachArea's formerly bounded RequestDownload/routine/reset path is now exact and
+  byte-compatible too. What is still missing is the actual `.cuw`/`.cal`
+  metadata proving which of those two Unified rows Toyota selected and supplying
+  `ServiceAuthKey`, `ECUAuthKey`, `SeedKey`, `Nonce`, `OffsetAddress`, download
+  ranges, data-format fields, per-area choice, and actual target-integrity/header
+  values. Do not promote byte compatibility into an exact transcript without
+  that artifact.
 - **CUW retry/recovery live attribution.** TMS-030/TMS-031 close the V18 static
   timing tables, retry/reconnect controller, recovery-file schema, and useful
   P5 power-cycle observers. A live session is still needed to identify the

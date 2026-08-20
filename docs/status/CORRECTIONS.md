@@ -1885,12 +1885,38 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `0x12`; other lengths return NRC `0x13`.
 - **Correct target join:** Sienna's boot routine table is exactly
   `10F0/10F1/10F2/10F3/FF00`. Standard therefore fails both at request-seed and
-  later at `10F5/10F6`; unified is the sole recovered byte-compatible factory
-  family. A matching calibration artifact is still required to prove Toyota
-  selected that row and to recover its actual credentials/ranges.
+  later at `10F5/10F6`; Unified is the sole recovered byte-compatible **family**.
+  CORR-081 later closes both of that family's V18 row variants (normal and
+  EachArea) as byte-compatible. A matching calibration artifact is still
+  required to prove which row Toyota selected and to recover its actual
+  credentials/ranges.
 - **Canonical:** `tests/verify_techstream_cuw_writer_protocol_grammar.py`;
   `data/generated/techstream_v18/cuw_writer_protocol_grammar.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.
+
+### CORR-081 — the first CUW route census stopped one pass too early; all 196 rows are statically classifiable
+
+- **Earlier boundary:** TMS-029 initially left 30 factory rows as bounded-rejected,
+  two MMC rows unresolved, and UnifiedEachArea compatible-but-bounded because
+  exact request builders for those families had not been decompiled.
+- **Focused closure:** isolated-Ghidra decompilation pins the decisive bodies.
+  P5 PowerTrain/Solar and P4/P5 PowerTrain use bare `27 01` with 4-byte seed/key; BodyMicon uses bare
+  `27 01` with 6-byte seed/key; SecurityChassisShrink sends
+  `27 01 || selector[1] || ECUAuthKey[16]`; MMC uses `27 41/42` and RIDs
+  `0301/0304`; CentralGW's paired P4 BodyFlash delegates the legacy raw
+  `CCanCommonFlashWriter` protocol. Each has an exact Sienna/H boot-grammar
+  mismatch.
+- **EachArea correction:** `TCUWCanUnifiedFlashWriterEachArea` is not merely
+  vocabulary-compatible. It exactly performs `0203→0201→0202`, per-area
+  `34 || flags || 46 || adjustedAddress[5] || areaSize`, block cap `0x0FFF`,
+  RIDs `10F0/FF00/10F1/10F2`, and `11 01`; it is byte-compatible.
+- **Correct census:** all 196 rows are now statically disposed as **194 rejected
+  + 2 byte-compatible Unified rows**, with zero unresolved/bounded route rows.
+  A matching package is still required to choose between the two compatible
+  rows and recover calibration values.
+- **Canonical:** `tests/verify_techstream_cuw_writer_protocol_grammar.py`;
+  `data/generated/techstream_v18/cuw_writer_protocol_grammar.json`;
+  [../tooling/techstream.md](../tooling/techstream.md) §5.2.2.
 
 ### CORR-080 — CUW timing ownership and `CANCommunicationSpeedAddress` were over-attributed
 

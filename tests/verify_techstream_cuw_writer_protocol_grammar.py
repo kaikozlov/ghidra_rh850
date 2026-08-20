@@ -21,6 +21,41 @@ check('unified SA request starts 27 01',raw('TCUWCanUnifiedPrepareWriter.dll',0x
 check('unified copies first ECUAuthKey dword',raw('TCUWCanUnifiedPrepareWriter.dll',0x15c6,2)==bytes.fromhex('8b08'))
 check('unified SA length is prefix+0x12',raw('TCUWCanUnifiedPrepareWriter.dll',0x15f1,3)==bytes.fromhex('8d4712'))
 
+
+print('\n== formerly bounded SecurityAccess families ==')
+def templates(name): return {x['bytes'] for x in obj['writer_scans'][name]['templates']}
+for name in ['TCUWP5CanPowerTrainPrepareWriter.dll','TCUWP4P5CanPowerTrainPrepareWriter.dll','TCUWP5CanPowerTrainPrepareWriterForBodyMicon.dll','TCUWP5CanPowerTrainPrepareWriterForSolar.dll']:
+ check(name+' exposes bare 27 01 / 27 02 templates',{'27 01','27 02','67 01','67 02'} <= templates(name))
+check('security chassis has 27 01/02 family',{'27 01','27 02','67 01','67 02'} <= templates('TCUWP4CanSecurityChassisShrinkPrepareWriter.dll'))
+# The security-chassis body calls both GetECUAuthKey and CalcSeedKeyForSecurityUp;
+# Ghidra shows a dynamic selector byte inserted between 27 01 and the 16-byte ECUAuthKey.
+sec_body=raw('TCUWP4CanSecurityChassisShrinkPrepareWriter.dll',0x1420,840)
+check('security chassis body imports ECUAuthKey in SA builder',bytes.fromhex('b8300010') in sec_body)
+check('security chassis body imports security-up key transform',bytes.fromhex('c0300010') in sec_body)
+
+print('\n== MMC exact legacy grammar ==')
+check('MMC prepare exposes SA 41/42',{'27 41','67 41','27 42','67 42'} <= templates('TCUWCanMMCPrepareWriter.dll'))
+mmc_r0301=raw('TCUWCanMMCFlashWriter.dll',0x1830,390)
+mmc_r0304=raw('TCUWCanMMCFlashWriter.dll',0x12f0,212)
+mmc_rff00=raw('TCUWCanMMCFlashWriter.dll',0x19c0,540)
+check('MMC routine 0301 encoded on wire',bytes.fromhex('31010301') in mmc_r0301 and bytes.fromhex('71010301') in mmc_r0301)
+check('MMC routine 0304 encoded on wire',bytes.fromhex('31010304') in mmc_r0304 and bytes.fromhex('71010304') in mmc_r0304)
+check('MMC routine FF00 encoded on wire',bytes.fromhex('3101ff00') in mmc_rff00 and bytes.fromhex('7101ff00') in mmc_rff00)
+check('MMC reset is suppressed 11 81', '11 81' in templates('TCUWCanMMCFlashWriter.dll'))
+
+print('\n== Unified EachArea exact request-download closure ==')
+each=raw('TCUWCanUnifiedFlashWriterEachArea.dll',0x1420,855)
+check('EachArea RequestDownload sets SID 34',b'\x34' in each)
+check('EachArea RequestDownload contains address/length format 46',b'\x46' in each)
+check('EachArea parses positive SID 74',b'\x74' in each)
+check('EachArea caps negotiated block at 0x0FFF',bytes.fromhex('ff0f0000') in each)
+check('EachArea exact predownload order', [x['bytes'] for x in obj['writer_scans']['TCUWCanUnifiedFlashWriterEachArea.dll']['templates'][:6]] == ['2e 02 03','6e 02 03','2e 02 01','6e 02 01','2e 02 02','6e 02 02'])
+
+print('\n== decisive body pins for formerly bounded families ==')
+for x in obj['decisive_function_identities']:
+ body=raw(x['binary'],x['va']-0x10000000,x['size'])
+ check(x['role']+' raw body identity',hashlib.sha256(body).hexdigest()==x['sha256'])
+
 print('\n== target boot SecurityAccess contract ==')
 # Corpus body is SHA-bound to raw firmware; semantic assertion is kept alongside raw identity.
 rec=None
@@ -49,13 +84,21 @@ check('Sienna boot routine table exact',routines==[0x10F0,0x10F1,0x10F2,0x10F3,0
 print('\n== route-family closure ==')
 check('32 distinct prepare/flash families',len(obj['route_families'])==32)
 check('196 rows classified',sum(x['factory_rows'] for x in obj['route_families'])==196)
-check('verdict counts conservative exact',obj['verdict_counts']=={'bounded-rejected':30,'byte-compatible':1,'compatible-bounded':1,'rejected':162,'unresolved':2},repr(obj['verdict_counts']))
-uni=next(x for x in obj['route_families'] if x['prepare_writer']=='TCUWCanUnifiedPrepareWriter.dll' and x['flash_writer']=='TCUWCanUnifiedFlashWriter.dll')
+check('verdict counts fully closed',obj['verdict_counts']=={'byte-compatible':2,'rejected':194},repr(obj['verdict_counts']))
+uni=[x for x in obj['route_families'] if x['prepare_writer']=='TCUWCanUnifiedPrepareWriter.dll']
 std=next(x for x in obj['route_families'] if x['prepare_writer']=='TCUWCanReproStdPrepareWriter.dll')
-check('unified route is sole byte-compatible row',uni['factory_rows']==1 and uni['verdict_sienna_8965B4512000']=='byte-compatible')
+check('both Unified route rows are byte-compatible',sum(x['factory_rows'] for x in uni)==2 and all(x['verdict_sienna_8965B4512000']=='byte-compatible' for x in uni))
 check('standard route rejected by exact grammar',std['factory_rows']==2 and std['verdict_sienna_8965B4512000']=='rejected')
-mmc=sum(x['factory_rows'] for x in obj['route_families'] if x['verdict_sienna_8965B4512000']=='unresolved')
-check('only two MMC rows remain unresolved',mmc==2)
+check('no unresolved/bounded route rows remain',all(x['verdict_sienna_8965B4512000'] in {'byte-compatible','rejected'} for x in obj['route_families']))
+
+print('\n== per-route timing/retry/reset profiles ==')
+timing_keys={'WaitTimeAfterSeedData','WaitTimeAfterSeedKey','WaitTimeAfterReprogrammingMode','WaitTimeAfterFlashWrite','WaitTimeAfterEndOfFlashing','ReceiveTimeoutBeforeFlashWrite','ReceiveTimeoutBeforeInitialCommand','ReceiveTimeoutBeforePrepareRetry','WaitTimeBetweenSF','PrepareRetryFlag','IGOffRetriableFlag','WaitTimeAfterIGOnAtRetry'}
+check('all 32 routes carry complete timing/retry key set',len(obj['route_families'])==32 and all(set(x['timing_retry_profile'])==timing_keys for x in obj['route_families']))
+unified_routes=[x for x in obj['route_families'] if x['prepare_writer']=='TCUWCanUnifiedPrepareWriter.dll']
+check('both compatible Unified rows have modern blank seed timing and IG-off retry enabled',all(x['timing_retry_profile']['WaitTimeAfterSeedData']==[''] and x['timing_retry_profile']['WaitTimeAfterSeedKey']==[''] and x['timing_retry_profile']['IGOffRetriableFlag']==['1'] for x in unified_routes))
+check('both compatible Unified flash variants expose 11 01 reset template',all(x['reset_templates']==['11 01'] for x in unified_routes))
+mmc_route=next(x for x in obj['route_families'] if x['prepare_writer']=='TCUWCanMMCPrepareWriter.dll')
+check('MMC profile pins 400ms end wait and suppressed 11 81 reset',mmc_route['timing_retry_profile']['WaitTimeAfterEndOfFlashing']==['400'] and mmc_route['reset_templates']==['11 81'])
 
 print('\n== raw-template scanner/regeneration ==')
 # The scanner covers every referenced writer plus support DLLs and preserves encoded store bytes.
