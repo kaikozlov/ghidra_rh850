@@ -56,6 +56,17 @@ for x in obj['decisive_function_identities']:
  body=raw(x['binary'],x['va']-0x10000000,x['size'])
  check(x['role']+' raw body identity',hashlib.sha256(body).hexdigest()==x['sha256'])
 
+print('\n== shared legacy common-flash grammar ==')
+check('15 referenced flash writers import CCanCommonFlashWriter',len(obj['common_flash_users'])==15)
+check('shared common-flash grammar is explicitly proprietary','not UDS SIDs' in obj['common_flash_grammar']['framing'])
+expected_common={'CheckFinishReprogramming':'0x3E','ChangeNextCpu':'0x65','FinishReprogramming':'0x80','GetStatusOnce':'0x50'}
+check('fixed common-flash command bytes exact',all(obj['common_flash_grammar']['commands'][k].startswith(v) for k,v in expected_common.items()))
+check('nonce/seed common-flash sequences exact','0x37 -> 0x38 -> 0x39' in obj['common_flash_grammar']['commands']['SendNonce'] and '0x3A -> 0x3B -> 0x3C' in obj['common_flash_grammar']['commands']['SendSeedKey'])
+check('erase/verify variants exact','0x25' in obj['common_flash_grammar']['commands']['EraseBlock'] and '0x26' in obj['common_flash_grammar']['commands']['EraseBlock'] and '0x15' in obj['common_flash_grammar']['commands']['VerifyBlock'] and '0x16' in obj['common_flash_grammar']['commands']['VerifyBlock'])
+for x in obj['common_flash_function_identities']:
+ body=raw(x['binary'],x['va']-0x10000000,x['size'])
+ check('common flash '+x['role']+' body identity',hashlib.sha256(body).hexdigest()==x['sha256'])
+
 print('\n== target boot SecurityAccess contract ==')
 # Corpus body is SHA-bound to raw firmware; semantic assertion is kept alongside raw identity.
 rec=None

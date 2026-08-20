@@ -781,6 +781,32 @@ classification lives at the **prepare+flash route-pair** level in
 `cuw_writer_protocol_grammar.json`, and schema-v2 of the matrix mirrors those
 route dispositions in `target_route_dispositions`.
 
+The one major shared implementation behind the specialized writers is now
+recovered directly rather than left as an import-name hint. **15 of the 25 flash
+writer modules import `TCUWCanCommonFlashWriter.dll`**, whose 19 exported
+protocol bodies are all byte-hash-pinned in the route-grammar artifact. This is
+a proprietary command protocol after the caller-supplied CAN-address prefix,
+not UDS service numbering:
+
+| Common-flash operation | Recovered command grammar |
+|---|---|
+| ack | exact 5-byte response, command/status byte `0x3C` |
+| finish check / finish | `0x3E` / `0x80` |
+| nonce / seed-key material | nonce `0x37→0x38→0x39`; seed-key `0x3A→0x3B→0x3C` (6/6/4-byte chunks) |
+| memory/status/CPU | memory info `0x76` then fallback `0x75`; status `0x50`; next CPU `0x65` |
+| blank / erase | `0x35/0x36`; `0x25/0x26` for short/extended range |
+| write | `0x41` block start, `0x45` continuation; parameter-selected 0x100/0x80/0x20-byte data classes |
+| in-verify / verify | `0x47/0x48`; `0x15/0x16`; alternate verifier `0x18` with 0x80-byte chunks |
+| falsify check | `0x47`, then status polling |
+
+The same helper bodies recover the corresponding status-poll waits
+(`WaitTimeBeforeStatusCheckForBlankCheck/EraseBlock/WriteBlock/InVerify/Verify`).
+That common grammar covers the body/chassis/powertrain/security/M16C/VFOREST
+flash families that delegate to it. The remaining direct flash families
+(MMC, SBR, HINO, PSA, ReproStd, Unified, Ethernet variants) are represented by
+their own raw template/decompilation evidence. Thus the family census no longer
+uses “imports common flash helper” as a substitute for the shared wire grammar.
+
 A focused Ghidra pass closes every class that the first census left bounded:
 
 | Family / former residue | Exact decisive grammar | Sienna/H disposition |

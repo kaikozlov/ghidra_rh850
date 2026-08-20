@@ -121,6 +121,52 @@ DECISIVE_FUNCTIONS={
  'TCUWCanUnifiedFlashWriterEachArea.dll':[(0x100010f0,816,'each_area_predownload'),(0x10001420,855,'each_area_request_download'),(0x100019c0,239,'each_area_reset'),(0x10001f80,832,'each_area_routine_control')],
 }
 
+COMMON_FLASH_FUNCTIONS=[
+ (0x10001070,503,'WriteBytes'),
+ (0x10001270,155,'ReceiveAck'),
+ (0x10001360,276,'CheckFinishReprogramming'),
+ (0x100014c0,402,'SendNonce'),
+ (0x10001670,402,'SendSeedKey'),
+ (0x10001820,593,'SendNonceAndSeedKey'),
+ (0x10001ac0,976,'CheckIDWithWaitOfSFs'),
+ (0x10001ee0,716,'GetMemoryInfo'),
+ (0x100021d0,317,'GetStatusOnce'),
+ (0x10002310,143,'GetStatus'),
+ (0x100023d0,255,'ChangeNextCpu'),
+ (0x100024f0,299,'FinishReprogramming'),
+ (0x100027d0,309,'DetectFalsify'),
+ (0x10002920,431,'CheckBlock'),
+ (0x10002af0,465,'EraseBlock'),
+ (0x10002ce0,1415,'WriteBlock'),
+ (0x100032c0,465,'InVerifyBlock'),
+ (0x100034b0,944,'VerifyBlock'),
+ (0x10003920,907,'VerifyBlock2'),
+]
+
+COMMON_FLASH_GRAMMAR={
+ 'framing':'proprietary CCanCommonFlashWriter commands follow the caller-supplied 4/5-byte CAN address prefix; command bytes below are not UDS SIDs',
+ 'ack':'ReceiveAck waits for an exact 5-byte response with command/status byte 0x3C after the address prefix',
+ 'commands':{
+  'CheckFinishReprogramming':'0x3E',
+  'SendNonce':'0x37 -> 0x38 -> 0x39, splitting a 16-byte nonce into 6/6/4-byte material chunks',
+  'SendSeedKey':'0x3A -> 0x3B -> 0x3C, splitting a 16-byte seed-key blob into 6/6/4-byte material chunks',
+  'SendNonceAndSeedKey':'0x37..0x39 nonce then 0x3A..0x3C seed-key',
+  'CheckIDWithWaitOfSFs':'five-frame ID/password handshake followed by status traffic; final emitted command 0x3C',
+  'GetMemoryInfo':'0x76 preferred, fallback 0x75; parses returned memory geometry then requires ack',
+  'GetStatusOnce':'0x50, then status message and ack',
+  'ChangeNextCpu':'0x65',
+  'FinishReprogramming':'0x80',
+  'DetectFalsify':'0x47 followed by status polling while status is 0x50',
+  'CheckBlock':'0x35 short-range or 0x36 extended-range; polls with WaitTimeBeforeStatusCheckForBlankCheck',
+  'EraseBlock':'0x25 short-range or 0x26 extended-range; polls with WaitTimeBeforeStatusCheckForEraseBlock',
+  'WriteBlock':'0x41 starts a block; address + dynamic chunk-size selector follows; 0x45 continues; data chunk is selected by SendDataByteForWriteBlockType (0x100/0x80/0x20 byte classes)',
+  'InVerifyBlock':'0x47 short-range or 0x48 extended-range; polls with WaitTimeBeforeStatusCheckForInVerify',
+  'VerifyBlock':'0x15 short-range or 0x16 extended-range; sends 0x100-byte chunks and polls WaitTimeBeforeStatusCheckForVerify',
+  'VerifyBlock2':'0x18 extended-range; sends 0x80-byte chunks and polls WaitTimeBeforeStatusCheckForVerify',
+ },
+ 'target_boundary':'this shared proprietary common-flash grammar explains the body/chassis/powertrain/security families that import it; it is distinct from the tracked Sienna/H UDS boot grammar and cannot become target-compatible by parameter choice alone once the route-specific decisive mismatch is applied',
+}
+
 FAMILY_EVIDENCE={
  'MMC':{'security_access':'27 41 -> 67 41 (8-byte seed), then 27 42 || 8-byte derived key -> 67 42','download':'34 || dataFormat || 44 || address[4] || size[4]; 74 20 response; max block capped at 0x0FFF','transfer':'36/counter/data -> 76/counter; 37 -> 77','routines':['0301','FF00','0304'],'reset':'11 81 (suppressed hard reset)','target_disposition':'rejected: SA 41/42 -> NRC 0x12; RIDs 0301/0304 -> NRC 0x31'},
  'P5PowerTrain':{'security_access':'bare 27 01 -> 4-byte seed; 27 02 || 4-byte derived key','session':'10 02 -> 50 02','target_disposition':'rejected: exact target request-seed length is 18 bytes'},
@@ -140,6 +186,14 @@ def decisive_function_identities(root:Path)->list[dict[str,Any]]:
    body=pe.get_data(va-base,size)
    out.append({'binary':name,'binary_sha256':hashlib.sha256(data).hexdigest(),'va':va,'size':size,'role':role,'sha256':hashlib.sha256(body).hexdigest()})
  return out
+
+def common_flash_function_identities(root:Path)->list[dict[str,Any]]:
+ name='TCUWCanCommonFlashWriter.dll'; path=root/'Calibration Update Wizard'/name
+ data=path.read_bytes(); pe=pefile.PE(data=data); base=pe.OPTIONAL_HEADER.ImageBase
+ return [
+  {'binary':name,'binary_sha256':hashlib.sha256(data).hexdigest(),'va':va,'size':size,'role':role,'sha256':hashlib.sha256(pe.get_data(va-base,size)).hexdigest()}
+  for va,size,role in COMMON_FLASH_FUNCTIONS
+ ]
 
 
 ROUTE_TIMING_KEYS=(
@@ -193,7 +247,8 @@ def main():
   verdict,reason=route_verdict(p,f); counts[verdict]+=n
   reset_templates=sorted({t['bytes'] for t in scans.get(f,{}).get('templates',[]) if t['bytes'].startswith('11 ')})
   fam.append({'prepare_writer':p,'flash_writer':f,'factory_rows':n,'verdict_sienna_8965B4512000':verdict,'verdict_corolla_8965H1202000':verdict,'reason':reason,'timing_retry_profile':route_parameter_profile(by_pair[(p,f)]),'reset_templates':reset_templates})
- obj={'schema_version':2,'distribution':'Toyota Techstream V18.00.003','writer_scans':scans,'route_families':fam,'verdict_counts':dict(sorted(counts.items())),'decisive_function_identities':decisive_function_identities(a.root.resolve()),'family_evidence':FAMILY_EVIDENCE,
+ common_users=sorted(n for n,rec in scans.items() if any(imp.get('dll')=='TCUWCanCommonFlashWriter.dll' for imp in rec.get('imports',[])))
+ obj={'schema_version':3,'distribution':'Toyota Techstream V18.00.003','writer_scans':scans,'route_families':fam,'verdict_counts':dict(sorted(counts.items())),'decisive_function_identities':decisive_function_identities(a.root.resolve()),'common_flash_function_identities':common_flash_function_identities(a.root.resolve()),'common_flash_grammar':COMMON_FLASH_GRAMMAR,'common_flash_users':common_users,'family_evidence':FAMILY_EVIDENCE,
  'target_boot_grammar':{'request_seed':'27 01 || 16 tester bytes; exact request length 0x12','send_key':'27 02 || 16-byte key','wdbi_order':'0203(5)->0201(16)->0202(16)','routine_ids':['10F0','10F1','10F2','10F3','FF00'],'note':'Corolla-H boot/UDS target grammar is independently transferred target-natively in tracked variant tests'},
  'evidence_boundary':'all 196 decoded factory rows now have an exact static target disposition: two Unified-family rows are byte-compatible with the tracked boot grammar and 194 rows have at least one byte/decompilation-pinned mismatch. Exact factory-row selection and calibration values still require the matching package/live session.'}
  a.output.parent.mkdir(parents=True,exist_ok=True); a.output.write_text(json.dumps(obj,indent=2,sort_keys=True)+'\n'); return 0

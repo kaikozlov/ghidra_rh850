@@ -1,4 +1,198 @@
 {
+  "common_flash_function_identities": [
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "WriteBytes",
+      "sha256": "817f218448a2565050dc29ef3b7e9da41c669c50230a5a6229b899dffc011e07",
+      "size": 503,
+      "va": 268439664
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "ReceiveAck",
+      "sha256": "cf15c7a637e56df95ffd0f43811d3f888ac70aa60609c902d417849f5847fa0f",
+      "size": 155,
+      "va": 268440176
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "CheckFinishReprogramming",
+      "sha256": "627e79872a733f5cfab29aad43ba0242c69f7619c00fefd8bd7c9fd5cdf9ed87",
+      "size": 276,
+      "va": 268440416
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "SendNonce",
+      "sha256": "e493fb92b1a6efd4906303e30294931e187e78fe4319ae01da2b3f3d899bc67e",
+      "size": 402,
+      "va": 268440768
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "SendSeedKey",
+      "sha256": "b146a959310adebc73581d799f00ff9717ab0e549034954967d70606b65ec99f",
+      "size": 402,
+      "va": 268441200
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "SendNonceAndSeedKey",
+      "sha256": "ca06524131742fb7d2413a786521f27652d0e0ef151685a7f3389dd4aaa653fc",
+      "size": 593,
+      "va": 268441632
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "CheckIDWithWaitOfSFs",
+      "sha256": "13dd52e2e0639bf2dce9a73ccfe350b25e598f9497b57f0dcfda90d7b32f7b83",
+      "size": 976,
+      "va": 268442304
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "GetMemoryInfo",
+      "sha256": "058d27b19d804b5006d094f330c67e3a0ac0463b1e5709f7be3817850de36b52",
+      "size": 716,
+      "va": 268443360
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "GetStatusOnce",
+      "sha256": "4f363f0b430f581a0913e2e991f55b608cd54bb46f719ed1597972c1c14e90c0",
+      "size": 317,
+      "va": 268444112
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "GetStatus",
+      "sha256": "25423b26e21695fe98b4638227d93cedab94a8b59e5ff2f6b0eef500b08bb87c",
+      "size": 143,
+      "va": 268444432
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "ChangeNextCpu",
+      "sha256": "6ae29345d4ad594b7e5ee08e1f55d0ef86c07966ab9060efd4103cc781a463d3",
+      "size": 255,
+      "va": 268444624
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "FinishReprogramming",
+      "sha256": "2f07f36ede2285820e6e0d91aef45de26c96c3f5d626338789b741f70421d5a0",
+      "size": 299,
+      "va": 268444912
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "DetectFalsify",
+      "sha256": "465449c899b1d14f976f9a07c7da51a29b7fcdecb33c4d1b634e7ddcaa3c4cf5",
+      "size": 309,
+      "va": 268445648
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "CheckBlock",
+      "sha256": "192edf5b85d2b0051a450e33d0110ab09c0a51cde49770cf73187404c08984dd",
+      "size": 431,
+      "va": 268445984
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "EraseBlock",
+      "sha256": "d5614eac0b6f68c96bf3aa4fa7b24f91934a907289cc063ed412746ffdc4a63d",
+      "size": 465,
+      "va": 268446448
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "WriteBlock",
+      "sha256": "c331265e7f6170bdb2027e34873477ce44cab48a39102e5a4ad94e82e341edef",
+      "size": 1415,
+      "va": 268446944
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "InVerifyBlock",
+      "sha256": "4f88e2c1bd68a5f93d9084339385369ade9ba1573c25d923792730a54ebba0fd",
+      "size": 465,
+      "va": 268448448
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "VerifyBlock",
+      "sha256": "ac6994d7285750a3fc4f883350a7ed626dd6f1e81432a47468f208054d7e2471",
+      "size": 944,
+      "va": 268448944
+    },
+    {
+      "binary": "TCUWCanCommonFlashWriter.dll",
+      "binary_sha256": "d5ad221ef328eea777fe59ab4b0090fbf42ea5c6ba45eef454c97de40c53f4e3",
+      "role": "VerifyBlock2",
+      "sha256": "bd6719b12966b590155c970dd339b3d70908e2c061421aa80baee9f871a4201c",
+      "size": 907,
+      "va": 268450080
+    }
+  ],
+  "common_flash_grammar": {
+    "ack": "ReceiveAck waits for an exact 5-byte response with command/status byte 0x3C after the address prefix",
+    "commands": {
+      "ChangeNextCpu": "0x65",
+      "CheckBlock": "0x35 short-range or 0x36 extended-range; polls with WaitTimeBeforeStatusCheckForBlankCheck",
+      "CheckFinishReprogramming": "0x3E",
+      "CheckIDWithWaitOfSFs": "five-frame ID/password handshake followed by status traffic; final emitted command 0x3C",
+      "DetectFalsify": "0x47 followed by status polling while status is 0x50",
+      "EraseBlock": "0x25 short-range or 0x26 extended-range; polls with WaitTimeBeforeStatusCheckForEraseBlock",
+      "FinishReprogramming": "0x80",
+      "GetMemoryInfo": "0x76 preferred, fallback 0x75; parses returned memory geometry then requires ack",
+      "GetStatusOnce": "0x50, then status message and ack",
+      "InVerifyBlock": "0x47 short-range or 0x48 extended-range; polls with WaitTimeBeforeStatusCheckForInVerify",
+      "SendNonce": "0x37 -> 0x38 -> 0x39, splitting a 16-byte nonce into 6/6/4-byte material chunks",
+      "SendNonceAndSeedKey": "0x37..0x39 nonce then 0x3A..0x3C seed-key",
+      "SendSeedKey": "0x3A -> 0x3B -> 0x3C, splitting a 16-byte seed-key blob into 6/6/4-byte material chunks",
+      "VerifyBlock": "0x15 short-range or 0x16 extended-range; sends 0x100-byte chunks and polls WaitTimeBeforeStatusCheckForVerify",
+      "VerifyBlock2": "0x18 extended-range; sends 0x80-byte chunks and polls WaitTimeBeforeStatusCheckForVerify",
+      "WriteBlock": "0x41 starts a block; address + dynamic chunk-size selector follows; 0x45 continues; data chunk is selected by SendDataByteForWriteBlockType (0x100/0x80/0x20 byte classes)"
+    },
+    "framing": "proprietary CCanCommonFlashWriter commands follow the caller-supplied 4/5-byte CAN address prefix; command bytes below are not UDS SIDs",
+    "target_boundary": "this shared proprietary common-flash grammar explains the body/chassis/powertrain/security families that import it; it is distinct from the tracked Sienna/H UDS boot grammar and cannot become target-compatible by parameter choice alone once the route-specific decisive mismatch is applied"
+  },
+  "common_flash_users": [
+    "TCUWCanM16CFlashWriter.dll",
+    "TCUWCanPowerTrainFlashWriter.dll",
+    "TCUWCanPowerTrainFlashWriterForSolar.dll",
+    "TCUWCanSecurityM16CFlashWriter.dll",
+    "TCUWCanSecurityVFORESTFlashWriter.dll",
+    "TCUWP4CanAirbagFlashWriter.dll",
+    "TCUWP4CanBodyFlashWriter.dll",
+    "TCUWP4CanBodyFlashWriterForCXPI.dll",
+    "TCUWP4CanChassisShrinkFlashWriter.dll",
+    "TCUWP4CanClearanceSonarFlashWriter.dll",
+    "TCUWP4CanDSS1FlashWriter.dll",
+    "TCUWP4CanSecurityAirbagFlashWriter.dll",
+    "TCUWP4CanSecurityChassisShrinkFlashWriter.dll",
+    "TCUWP4CanVFORESTFlashWriter.dll",
+    "TCUWP5CanBodyFlashWriter.dll"
+  ],
   "decisive_function_identities": [
     {
       "binary": "TCUWCanMMCPrepareWriter.dll",
@@ -1775,7 +1969,7 @@
       "verdict_sienna_8965B4512000": "byte-compatible"
     }
   ],
-  "schema_version": 2,
+  "schema_version": 3,
   "target_boot_grammar": {
     "note": "Corolla-H boot/UDS target grammar is independently transferred target-natively in tracked variant tests",
     "request_seed": "27 01 || 16 tester bytes; exact request length 0x12",
