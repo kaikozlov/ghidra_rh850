@@ -172,7 +172,7 @@ def generate(root: Path) -> dict[str, Any]:
             "standard_writer_consumer": {
                 "function_va": 0x100025F0,
                 "request": "31 01 || routine_id || 44 || StartAddress || Length || integrity_selector || integrity_value",
-                "routine_ids": {"0": "F510", "1": "00FF", "2": "F610"},
+                "routine_ids": {"0": "10F5", "1": "FF00", "2": "10F6"},
                 "field_offsets": {"StartAddress": 0x00, "Length": 0x1C, "CRC": 0x38, "CMAC": 0x54, "DigitalSignature": 0x70},
                 "integrity_selection": {
                     "crc": "if CRC is nonempty, an explicit length/selector 4 precedes the CRC bytes",
@@ -187,7 +187,7 @@ def generate(root: Path) -> dict[str, Any]:
                 },
                 "evidence": "exact target-object offsets from TCUWCalibrationFile plus direct field loads/copies in the byte-pinned standard RoutineControl builder and orchestration",
             },
-            "unified_writer_boundary": "the recovered unified writer uses CFileHeaderInfo area tuples plus OffsetAddress in F010/F110/F210/00FF; it does not consume CLogicalBlockAreaInfo CRC/CMAC/DigitalSignature through the standard target-record builder",
+            "unified_writer_boundary": "the recovered unified writer uses CFileHeaderInfo area tuples plus OffsetAddress in RIDs 10F0/10F1/10F2/FF00; it does not consume CLogicalBlockAreaInfo CRC/CMAC/DigitalSignature through the standard target-record builder",
             "boundary": "field presence/layout and the standard-writer ECU transmission are recovered; signer/private-key provenance and target acceptance remain separate questions",
         },
         "top_level_import": {

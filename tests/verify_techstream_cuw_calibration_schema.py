@@ -33,7 +33,7 @@ check('six parser calls exact',[x['call_va'] for x in s['target_integrity']['fam
 check('attach.att and critical key vocabulary captured',s['descriptor']['embedded_name']=='attach.att' and {'ECUAuthKey','ServiceAuthKey','SeedKey','Nonce','OffsetAddress','SecurityProperty2','DigitalSignature'} <= set(s['descriptor']['key_vocabulary']))
 consumer=s['target_integrity']['standard_writer_consumer']
 check('standard writer consumes exact five object offsets',consumer['field_offsets']=={'StartAddress':0,'Length':0x1c,'CRC':0x38,'CMAC':0x54,'DigitalSignature':0x70})
-check('standard writer routine IDs are F510/00FF/F610',consumer['routine_ids']=={'0':'F510','1':'00FF','2':'F610'})
+check('standard writer wire routine IDs are 10F5/FF00/10F6',consumer['routine_ids']=={'0':'10F5','1':'FF00','2':'10F6'})
 check('standard writer carries all six target families',set(sum(consumer['target_family_callers'].values(),[]))=={'ReproData','EraseAndReproRoutine','DeltaReproData','DeltaEraseAndReproRoutine','CompressionReproData','CompressionEraseAndReproRoutine'})
 check('unified route is explicitly kept separate','CFileHeaderInfo' in s['target_integrity']['unified_writer_boundary'] and 'does not consume' in s['target_integrity']['unified_writer_boundary'])
 

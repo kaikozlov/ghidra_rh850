@@ -526,11 +526,15 @@ bytes; it does no cryptography.
 > `SendNonceAndSeedKey` path (`0x37`–`0x3c` proprietary frames) **does not apply
 > to the Sienna** — those frames would be rejected (NRC 0x11). The firmware
 > therefore constrains any matching Sienna host route to its implemented UDS
-> vocabulary. The recovered standard and unified CUW builders both use that
-> vocabulary, and the unified builder writes calibration-derived values to
-> DIDs `0x0203`, `0x0201`, and `0x0202`; however, the absent matching
-> calibration payload prevents selecting between those builders or asserting
-> an exact Sienna transcript. The CUW-side structural
+> vocabulary. A later byte-level join (CORR-079/TMS-029) sharpens this further:
+> the standard writer is **not** compatible despite using familiar UDS SIDs,
+> because its request-seed is only `27 01` while this bootloader requires exact
+> length `0x12` (`27 01 || 16 bytes`), and its wire RIDs `10F5/10F6` are absent.
+> The unified builder sends the required 16-byte `ECUAuthKey`, writes
+> calibration-derived values to DIDs `0x0203`, `0x0201`, and `0x0202`, and uses
+> the target's `10F0/FF00/10F1/10F2` routine family. The absent matching
+> calibration payload still prevents asserting that this compatible factory row
+> is the one selected for `8965B4512000` or recovering its actual values. The CUW-side structural
 > finding (key-material transfer, not SA; `0x37`–`0x3c` are block-seq bytes, not
 > SIDs; `arg3=GetNonce`, `arg4=GetSeedKey`) stands, but its target ECU is not
 > `8965B4512000`.
@@ -562,21 +566,25 @@ execute the pre-flash authentication and mode transition. Their exact UDS
 builders recover:
 
 1. **Programming session** — `10 02`, requiring `50 02`.
-2. **Standard SecurityAccess** — `27 01`, require `67 01 || seed[16]`, then
+2. **Standard SecurityAccess** — a **2-byte** `27 01`, require `67 01 || seed[16]`, then
    `27 02 || CalcSeedKey(GetServiceAuthKey(node), seed)` and require `67 02`.
-3. **Unified SecurityAccess** — the same exchange except the seed request is
-   `27 01 || GetECUAuthKey(node)[16]`.
+3. **Unified SecurityAccess** — an **18-byte** seed request
+   `27 01 || GetECUAuthKey(node)[16]`, then the same derived-key send. This
+   request shape exactly matches the tracked Sienna/H boot policy; the standard
+   2-byte request does not.
 4. **Route-specific transitions** — communication, gateway, and timing steps
    remain selected by the parameter/calibration data.
 
-Timing parameters are configured through `TCUWControlCommPhase.dll` using a
-calibration file that specifies:
+Timing parameters come from the encoded CUW parameter tables shared across the
+controller/writers. `TCUWControlCommPhase.dll` itself consumes only the retry/
+IG-off subset; writer DLLs and `Cuw.exe` consume the remaining timing keys. The
+parameter model includes:
 
 - `WaitTimeAfterSeedData` — delay between seed request and key send
 - `WaitTimeAfterSeedKey` — delay after SA completion
 - `SecurityKey` / `SecurityAccessPassword` — embedded key material
 - `FlagToCalcKeyLogicForEncrypt` — selects encrypt vs. decrypt key path
-- `CANCommunicationSpeedAddress` — baud rate register address
+- `CANCommunicationSpeedAddress` — CPU-image byte offset used to select bus/speed mode (not a hardware register address)
 - `PasswordCheckIDAddress` / `PasswordAddress` — ECU-specific addresses
 
 The SA input comes from `CalibrationFile::GetServiceAuthKey()`; unified prepare
@@ -602,9 +610,11 @@ positive-response templates and execute:
    negotiated block length at `0x0FFF` before subtracting two header bytes.
 3. **TransferData / TransferExit** — `36 || counter || data` / `76 || counter`,
    then `37` / `77`.
-4. **RoutineControl** — standard constructs routine IDs `F510`, `00FF`, and
-   `F610`; unified constructs `F010`, `00FF`, `F110`, and `F210`, with
-   calibration-derived range/hash or offset-adjusted area fields.
+4. **RoutineControl** — standard writes wire RIDs `10F5`, `FF00`, and `10F6`;
+   unified writes `10F0`, `FF00`, `10F1`, and `10F2`, with calibration-derived
+   range/hash or offset-adjusted area fields. Earlier `F510/00FF/...` labels
+   incorrectly read x86 little-endian immediate values as wire order
+   (CORR-079).
 5. **ECUReset** — `11 01`, requiring `51 01` (180 ms reset timeout).
 
 For the Sienna bootloader, the unified predownload field names also line up
@@ -701,7 +711,7 @@ the import/copy constructors, assignment operators, destructor, and
 The standard flash writer also closes the **ECU-facing consumer**. Its
 byte-pinned RoutineControl builder at `0x100025F0` receives one of those exact
 area objects and constructs `31 01 || RID || 44 || StartAddress || Length ||
-integrity`. It uses RIDs `F510`, `00FF`, and `F610`. A nonempty CRC is carried
+integrity`. It uses wire RIDs `10F5`, `FF00`, and `10F6`. A nonempty CRC is carried
 with an explicit four-byte selector/length form; `RequiredSpecReproVer03`
 selects a `00 10 || CMAC` form, while the alternate required-spec path selects
 `01 00 || DigitalSignature`. The caller at `0x10002A50` routes the whole,
@@ -711,8 +721,8 @@ in the standard package-download route: CUW can transmit it to the ECU as part
 of a RoutineControl request. The signer/private-key/verification algorithm and
 whether a particular EPS calibration selects that branch remain unproven.
 
-The recovered unified writer is structurally different: its `F010/F110/F210/
-00FF` routines consume `CFileHeaderInfo` area tuples plus `OffsetAddress`; it
+The recovered unified writer is structurally different: its `10F0/10F1/10F2/
+FF00` routines consume `CFileHeaderInfo` area tuples plus `OffsetAddress`; it
 does not use the standard `CLogicalBlockAreaInfo` target-integrity builder. No
 static edge joins either path to the independent TIS/RKS permission token in
 §5.3.

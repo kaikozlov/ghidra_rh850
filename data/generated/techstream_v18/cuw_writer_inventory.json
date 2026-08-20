@@ -10782,7 +10782,7 @@
             "TCUWCanDiagCommUtils.dll!?SendRequMsgAndReceiveRespMsgForP5Can@CCanDiagCommUtils@@QAEXABVCBytes@@PAUPASSTHRU_MSG@@01K1W4enmError@CPassThruException@@_NKKK_N@Z"
           ],
           "name": "routine_control",
-          "role": "UDS 31 01 F010/F110/F210/00FF",
+          "role": "UDS 31 01 10F0/10F1/10F2/FF00 (wire bytes 10 F0/10 F1/10 F2/FF 00)",
           "rva": 8320,
           "size": 1151
         }
@@ -12510,7 +12510,7 @@
       "confidence": "recovered",
       "method": "routine_control",
       "positive_response": "71 01 || routineIdentifier",
-      "request": "31 01 F5 10 / 31 01 00 FF / 31 01 F6 10 plus calibration-derived range/hash fields",
+      "request": "31 01 10 F5 / 31 01 FF 00 / 31 01 10 F6 plus calibration-derived range/hash fields",
       "route": "standard-flash",
       "rva": 9712
     },
@@ -12518,7 +12518,7 @@
       "confidence": "recovered",
       "method": "routine_control",
       "positive_response": "71 01 || routineIdentifier",
-      "request": "31 01 F0 10 / 31 01 00 FF / 31 01 F1 10 / 31 01 F2 10 plus offset-adjusted area/range",
+      "request": "31 01 10 F0 / 31 01 FF 00 / 31 01 10 F1 / 31 01 10 F2 plus offset-adjusted area/range",
       "route": "unified-flash",
       "rva": 8320
     },
@@ -15089,7 +15089,7 @@
       514,
       515
     ],
-    "bounded_join": "standard and unified builders use implemented SIDs; unified predownload names the same 0201/0202/0203 DIDs, but calibration selection and accepted payload semantics remain unproven",
+    "bounded_join": "standard prepare is target-incompatible (bare 27 01 versus exact 18-byte target seed request) and standard RIDs 10F5/10F6 are absent; unified prepare/flash is byte-vocabulary compatible (18-byte seed request, 0203/0201/0202, 10F0/FF00/10F1/10F2) but exact calibration selection and values remain unproven",
     "calibration_scope": "Sienna 8965B4512000",
     "supported_standard_uds_sids": [
       16,

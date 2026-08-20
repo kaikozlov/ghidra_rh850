@@ -481,9 +481,9 @@
       "positive_response": "71 01 || routine_id",
       "request": "31 01 || routine_id || 44 || StartAddress || Length || integrity_selector || integrity_value",
       "routine_ids": {
-        "0": "F510",
-        "1": "00FF",
-        "2": "F610"
+        "0": "10F5",
+        "1": "FF00",
+        "2": "10F6"
       },
       "target_family_callers": {
         "compression": [
@@ -500,7 +500,7 @@
         ]
       }
     },
-    "unified_writer_boundary": "the recovered unified writer uses CFileHeaderInfo area tuples plus OffsetAddress in F010/F110/F210/00FF; it does not consume CLogicalBlockAreaInfo CRC/CMAC/DigitalSignature through the standard target-record builder"
+    "unified_writer_boundary": "the recovered unified writer uses CFileHeaderInfo area tuples plus OffsetAddress in RIDs 10F0/10F1/10F2/FF00; it does not consume CLogicalBlockAreaInfo CRC/CMAC/DigitalSignature through the standard target-record builder"
   },
   "top_level_import": {
     "boundary": "geometry is exact from ImportData; semantic labels for every anonymous slot require the parser call-site join",

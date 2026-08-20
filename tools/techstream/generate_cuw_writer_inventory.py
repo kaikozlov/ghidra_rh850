@@ -87,7 +87,7 @@ METHODS: dict[str, list[tuple[str, int, int, str]]] = {
         ("transfer_exit", 0x1930, 240, "UDS 37/77"),
         ("ecu_reset", 0x1A20, 239, "UDS 11 01/51 01"),
         ("download_area", 0x1D50, 768, "download/transfer/exit loop"),
-        ("routine_control", 0x2080, 1151, "UDS 31 01 F010/F110/F210/00FF"),
+        ("routine_control", 0x2080, 1151, "UDS 31 01 10F0/10F1/10F2/FF00 (wire bytes 10 F0/10 F1/10 F2/FF 00)"),
     ],
 }
 
@@ -113,10 +113,10 @@ COMMANDS = [
      "positive_response": "76 || blockSequenceCounter", "confidence": "recovered"},
     {"route": "both-flash", "method": "transfer_exit", "request": "37", "positive_response": "77", "confidence": "recovered"},
     {"route": "standard-flash", "method": "routine_control", "rva": 0x25F0,
-     "request": "31 01 F5 10 / 31 01 00 FF / 31 01 F6 10 plus calibration-derived range/hash fields",
+     "request": "31 01 10 F5 / 31 01 FF 00 / 31 01 10 F6 plus calibration-derived range/hash fields",
      "positive_response": "71 01 || routineIdentifier", "confidence": "recovered"},
     {"route": "unified-flash", "method": "routine_control", "rva": 0x2080,
-     "request": "31 01 F0 10 / 31 01 00 FF / 31 01 F1 10 / 31 01 F2 10 plus offset-adjusted area/range",
+     "request": "31 01 10 F0 / 31 01 FF 00 / 31 01 10 F1 / 31 01 10 F2 plus offset-adjusted area/range",
      "positive_response": "71 01 || routineIdentifier", "confidence": "recovered"},
     {"route": "both-flash", "method": "ecu_reset", "request": "11 01", "positive_response": "51 01",
      "timeout_ms": 180, "confidence": "recovered"},
@@ -252,7 +252,7 @@ def generate(root: Path) -> dict[str, Any]:
             "calibration_scope": "Sienna 8965B4512000",
             "supported_standard_uds_sids": [0x10, 0x11, 0x22, 0x27, 0x28, 0x2E, 0x31, 0x34, 0x36, 0x37, 0x3E, 0x85],
             "bootloader_dids": [0xF181, 0x0201, 0x0202, 0x0203],
-            "bounded_join": "standard and unified builders use implemented SIDs; unified predownload names the same 0201/0202/0203 DIDs, but calibration selection and accepted payload semantics remain unproven",
+            "bounded_join": "standard prepare is target-incompatible (bare 27 01 versus exact 18-byte target seed request) and standard RIDs 10F5/10F6 are absent; unified prepare/flash is byte-vocabulary compatible (18-byte seed request, 0203/0201/0202, 10F0/FF00/10F1/10F2) but exact calibration selection and values remain unproven",
         },
         "blockers": {
             "matching_calibration_payload_required": True,

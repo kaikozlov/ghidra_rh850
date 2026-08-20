@@ -114,12 +114,17 @@ def exact_commands(name: str) -> list[dict[str, Any]]:
 
 
 def target_disposition(name: str, tags: list[str]) -> dict[str, str]:
-    if name in {"TCUWCanReproStdPrepareWriter.dll", "TCUWCanReproStdFlashWriter.dll",
-                "TCUWCanUnifiedPrepareWriter.dll", "TCUWCanUnifiedFlashWriter.dll"}:
+    if name in {"TCUWCanReproStdPrepareWriter.dll", "TCUWCanReproStdFlashWriter.dll"}:
         return {
-            "sienna_8965B4512000": "compatible-vocabulary-bounded-selection",
-            "corolla_8965H1202000": "candidate-vocabulary-requires-target-boot-table-join",
-            "reason": "recovered standard/unified UDS builders use Sienna-implemented diagnostic vocabulary; exact factory selection still requires calibration metadata",
+            "sienna_8965B4512000": "incompatible-standard-route",
+            "corolla_8965H1202000": "incompatible-standard-route",
+            "reason": "standard prepare emits bare 27 01 while both tracked bootloaders require 18-byte 27 01||data[16]; standard flash also uses RIDs 10F5/10F6 absent from the tracked boot routine table",
+        }
+    if name in {"TCUWCanUnifiedPrepareWriter.dll", "TCUWCanUnifiedFlashWriter.dll"}:
+        return {
+            "sienna_8965B4512000": "byte-compatible-vocabulary-bounded-selection",
+            "corolla_8965H1202000": "byte-compatible-vocabulary-bounded-selection",
+            "reason": "unified prepare emits exact 18-byte 27 01||ECUAuthKey; unified flash uses 0203/0201/0202 and RIDs 10F0/FF00/10F1/10F2 matching both tracked bootloader grammars; exact calibration selection/values remain bounded",
         }
     if "nonce-seed-material-transfer" in tags or "vforest" in tags:
         return {

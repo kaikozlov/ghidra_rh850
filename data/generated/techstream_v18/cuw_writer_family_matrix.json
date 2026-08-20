@@ -833,7 +833,7 @@
           "confidence": "recovered",
           "method": "routine_control",
           "positive_response": "71 01 || routineIdentifier",
-          "request": "31 01 F5 10 / 31 01 00 FF / 31 01 F6 10 plus calibration-derived range/hash fields",
+          "request": "31 01 10 F5 / 31 01 FF 00 / 31 01 10 F6 plus calibration-derived range/hash fields",
           "route": "standard-flash",
           "rva": 9712
         },
@@ -874,9 +874,9 @@
       "sha256": "82b99c43a2d30ecddb57942eb82019a0f4b997a55e569f8055f648a0f54ea4ef",
       "size": 25088,
       "target_disposition": {
-        "corolla_8965H1202000": "candidate-vocabulary-requires-target-boot-table-join",
-        "reason": "recovered standard/unified UDS builders use Sienna-implemented diagnostic vocabulary; exact factory selection still requires calibration metadata",
-        "sienna_8965B4512000": "compatible-vocabulary-bounded-selection"
+        "corolla_8965H1202000": "incompatible-standard-route",
+        "reason": "standard prepare emits bare 27 01 while both tracked bootloaders require 18-byte 27 01||data[16]; standard flash also uses RIDs 10F5/10F6 absent from the tracked boot routine table",
+        "sienna_8965B4512000": "incompatible-standard-route"
       }
     },
     {
@@ -960,9 +960,9 @@
       "sha256": "ae2d15b8c55027dab1e54343fa179829e41ac69d0c9efa7b7feb1f8d6024022b",
       "size": 19968,
       "target_disposition": {
-        "corolla_8965H1202000": "candidate-vocabulary-requires-target-boot-table-join",
-        "reason": "recovered standard/unified UDS builders use Sienna-implemented diagnostic vocabulary; exact factory selection still requires calibration metadata",
-        "sienna_8965B4512000": "compatible-vocabulary-bounded-selection"
+        "corolla_8965H1202000": "incompatible-standard-route",
+        "reason": "standard prepare emits bare 27 01 while both tracked bootloaders require 18-byte 27 01||data[16]; standard flash also uses RIDs 10F5/10F6 absent from the tracked boot routine table",
+        "sienna_8965B4512000": "incompatible-standard-route"
       }
     },
     {
@@ -1373,7 +1373,7 @@
           "confidence": "recovered",
           "method": "routine_control",
           "positive_response": "71 01 || routineIdentifier",
-          "request": "31 01 F0 10 / 31 01 00 FF / 31 01 F1 10 / 31 01 F2 10 plus offset-adjusted area/range",
+          "request": "31 01 10 F0 / 31 01 FF 00 / 31 01 10 F1 / 31 01 10 F2 plus offset-adjusted area/range",
           "route": "unified-flash",
           "rva": 8320
         },
@@ -1415,9 +1415,9 @@
       "sha256": "091eb414be13fd24cc0a9c52853e6e02a3b417c5851c765d2d45263f475718a1",
       "size": 18432,
       "target_disposition": {
-        "corolla_8965H1202000": "candidate-vocabulary-requires-target-boot-table-join",
-        "reason": "recovered standard/unified UDS builders use Sienna-implemented diagnostic vocabulary; exact factory selection still requires calibration metadata",
-        "sienna_8965B4512000": "compatible-vocabulary-bounded-selection"
+        "corolla_8965H1202000": "byte-compatible-vocabulary-bounded-selection",
+        "reason": "unified prepare emits exact 18-byte 27 01||ECUAuthKey; unified flash uses 0203/0201/0202 and RIDs 10F0/FF00/10F1/10F2 matching both tracked bootloader grammars; exact calibration selection/values remain bounded",
+        "sienna_8965B4512000": "byte-compatible-vocabulary-bounded-selection"
       }
     },
     {
@@ -1554,9 +1554,9 @@
       "sha256": "0314ca168c63342f4d4e26251ae9e8c700dae35b7144c63254296fc331375db8",
       "size": 17408,
       "target_disposition": {
-        "corolla_8965H1202000": "candidate-vocabulary-requires-target-boot-table-join",
-        "reason": "recovered standard/unified UDS builders use Sienna-implemented diagnostic vocabulary; exact factory selection still requires calibration metadata",
-        "sienna_8965B4512000": "compatible-vocabulary-bounded-selection"
+        "corolla_8965H1202000": "byte-compatible-vocabulary-bounded-selection",
+        "reason": "unified prepare emits exact 18-byte 27 01||ECUAuthKey; unified flash uses 0203/0201/0202 and RIDs 10F0/FF00/10F1/10F2 matching both tracked bootloader grammars; exact calibration selection/values remain bounded",
+        "sienna_8965B4512000": "byte-compatible-vocabulary-bounded-selection"
       }
     },
     {

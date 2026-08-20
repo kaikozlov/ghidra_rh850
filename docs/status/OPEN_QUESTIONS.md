@@ -425,19 +425,20 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   SEC-APP-001, and DIAG-APP-001/003. Preserve raw logs
   privately and commit only reviewed/redacted derivatives or hashes. See
   [../tooling/techstream-capture-procedure.md](../tooling/techstream-capture-procedure.md).
-- **Sienna EPS CUW route and calibration material.** TMS-004/TMS-007 recover the
-  V18 controller's decoded parameter-row factory and the standard/unified
-  command builders, but the installation contains no `.cuw` or `.cal` payload.
-  Obtain the matching `8965B4512000` payload or a labeled transcript to select
-  the exact factory identifier and recover its `ServiceAuthKey`, `ECUAuthKey`,
-  `SeedKey`, `Nonce`, `OffsetAddress`, download ranges, data-format fields, and
-  routine choices. Firmware support for the same UDS SIDs/DIDs is only a
-  bounded compatibility join, not proof of which host builder was selected.
+- **Sienna EPS exact CUW row and calibration material.** TMS-029 now narrows the
+  host grammar beyond SID-level compatibility: standard is byte-incompatible
+  (2-byte `27 01`, RIDs `10F5/10F6`), while unified matches the tracked boot
+  request-seed length, DIDs, and `10F0/FF00/10F1/10F2` routine family. What is
+  still missing is the actual `.cuw`/`.cal` metadata proving which unified row
+  Toyota selected and supplying `ServiceAuthKey`, `ECUAuthKey`, `SeedKey`,
+  `Nonce`, `OffsetAddress`, download ranges, data-format fields, per-area choice,
+  and target-integrity values. Do not promote byte compatibility into an exact
+  transcript without that artifact.
 - **Calibration package outer envelope and target-specific integrity values.**
   TMS-026 closes the V18 metadata/object/static-consumer work: the exact
   `CLogicalBlockAreaInfo` layout is recovered and the standard writer transmits
   `StartAddress`/`Length` plus CRC, CMAC, or `DigitalSignature` through its
-  `F510/00FF/F610` RoutineControl grammar; unified flash uses a separate
+  `10F5/FF00/10F6` RoutineControl grammar; unified flash uses a separate
   `CFileHeaderInfo`/`OffsetAddress` model. The embedded `attach.att` descriptor
   schema is parser-ready. What remains needs a real calibration artifact: pin the
   outer `.cuw` envelope/extraction framing, actual target values, selected

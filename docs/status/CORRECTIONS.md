@@ -1868,6 +1868,30 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   §7.34; `tests/verify_corolla_8965H1202000_techstream_correlations.py`.
 
+### CORR-079 — CUW routine IDs were displayed in x86 immediate order; standard is not a Sienna-compatible route
+
+- **Earlier wording:** CUW standard routines were written as `F510/00FF/F610`,
+  unified routines as `F010/00FF/F110/F210`, and the standard/unified families
+  were both described as vocabulary-compatible with the Sienna bootloader.
+- **Wire-order correction:** the writer stores 16-bit x86 immediates directly into
+  the request buffer. Raw instruction bytes therefore prove the actual wire IDs
+  are standard `10F5/FF00/10F6` and unified `10F0/FF00/10F1/10F2`. The earlier
+  rendering accidentally read the numeric little-endian immediate as network
+  byte order.
+- **SecurityAccess correction:** ReproStd sets its request length to transport
+  prefix `+2` and emits bare `27 01`. Unified copies 16 bytes from
+  `GetECUAuthKey` and sets length to prefix `+0x12`. Sienna
+  `uds_security_access_request_seed @ 0x5328` requires exact request length
+  `0x12`; other lengths return NRC `0x13`.
+- **Correct target join:** Sienna's boot routine table is exactly
+  `10F0/10F1/10F2/10F3/FF00`. Standard therefore fails both at request-seed and
+  later at `10F5/10F6`; unified is the sole recovered byte-compatible factory
+  family. A matching calibration artifact is still required to prove Toyota
+  selected that row and to recover its actual credentials/ranges.
+- **Canonical:** `tests/verify_techstream_cuw_writer_protocol_grammar.py`;
+  `data/generated/techstream_v18/cuw_writer_protocol_grammar.json`;
+  [../tooling/techstream.md](../tooling/techstream.md) §5.
+
 ### CORR-078 — the retained H Sienna-homolog LTA branch is direct-write inactive; B6 nonscalar rows are not a recovered hidden command
 
 - **Earlier residual possibilities:** after scalar COM closure, two static escape
