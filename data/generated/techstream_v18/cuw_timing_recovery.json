@@ -1,0 +1,1191 @@
+{
+  "boundary": "static V18 can recover timing/recovery mechanics and capture targets, but the exact Sienna/Corolla factory row still requires the matching calibration package or a retained live CUW/GTS+ session",
+  "capture_observables": {
+    "emsp5_power_cycle_data_ids": [
+      {
+        "data_id": "0x0016",
+        "name": "Status of Vehicle Power (IGP PT2)",
+        "sources": [
+          {
+            "record_index": 10,
+            "record_sha256": "54f743206e531d0d93cd1f6076b58cff552e1e77ada2a12deb98c54b0e630546",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 9,
+            "record_sha256": "d979568c8a9c8adb7f4497a0c471f99a94c8fd2d4b5656d2f9519b16b7804f58",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x0017",
+        "name": "Status of Vehicle Power (IGP PT1)",
+        "sources": [
+          {
+            "record_index": 11,
+            "record_sha256": "19a095f270aa1f72c51f2561b135ac47048e9a9e66450f7a67570903cff86930",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 10,
+            "record_sha256": "9651745a4830a9f468f88d67066be3ea633b9c2f27fc0ec81093897a84d731ed",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x0018",
+        "name": "Status of Vehicle Power (IGP PDC)",
+        "sources": [
+          {
+            "record_index": 12,
+            "record_sha256": "0211a056c4acee84465107a6008508ee71c471f97225252bdf96595fd56bd252",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 11,
+            "record_sha256": "5919dc0334a23df03e9c2068d305c62d88a58981a5290c1a9c498061860586bd",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x0019",
+        "name": "Status of Vehicle Power (IGR PDC)",
+        "sources": [
+          {
+            "record_index": 13,
+            "record_sha256": "2e1b49f1669a47558b75423648154912994865e795e4085efb47a75455a42c24",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 12,
+            "record_sha256": "839f7a67f90ff180abb73e004bc4a07bad55e33fbb29142d581017fae62a62b1",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x0033",
+        "name": "IG Power Supply",
+        "sources": [
+          {
+            "record_index": 14,
+            "record_sha256": "9e8e7bbe119dca76f495fd53969637cf7e52e59d3cd14d9d087a8ffd80b4256e",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 13,
+            "record_sha256": "9a9ee1d150105152d392fd8ce99595acf5afc568bdd98587cbbf69b4b97a56f5",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x0034",
+        "name": "PIG Power Supply",
+        "sources": [
+          {
+            "record_index": 15,
+            "record_sha256": "1cf0341d28700c49ba581a0241f0839bf9ed37afa09465be8a7e883ad9a59fca",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 14,
+            "record_sha256": "f354fbb02afc39425423350f40c0185b7142ac5f526490f62b5b3e47f4fd2576",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x0036",
+        "name": "Power Source",
+        "sources": [
+          {
+            "record_index": 17,
+            "record_sha256": "370105ba75d03a9a8190c6789108419e5879ad2fef11f5ab99f32f1f0e88f98a",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 16,
+            "record_sha256": "0d3574d5656a4b0a3f70f5e1f0a2c519161ee9709e9254e77d6c3cca41e7b2f5",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x0167",
+        "name": "Engine Stall/READY OFF Control History",
+        "sources": [
+          {
+            "record_index": 81,
+            "record_sha256": "9697f1da64e58f3d7da54a8bb3003132528115a576ab3ff2cc9282c9b2202c39",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 94,
+            "record_sha256": "fb98f1cef0a59674304499f0991ba1f1098a8b67b176c8c4f938c802fc3e1fef",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x0421",
+        "name": "IG Power Supply (System 2)",
+        "sources": [
+          {
+            "record_index": 87,
+            "record_sha256": "b0f27ea9d2d0e7f0f8d2b6fdb25bd299ae05a3e97e17067572578a8d3f1e4f75",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 114,
+            "record_sha256": "203acefa8b11ecf0900d8d060545e822e7c49324a16df148b9f8bad215abb9a1",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x0422",
+        "name": "PIG Power Supply (System 2)",
+        "sources": [
+          {
+            "record_index": 88,
+            "record_sha256": "97145b69fb41dc3a57422aa3a54e430a0cc61d5bd12a81fdf242689ee598c370",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 115,
+            "record_sha256": "43f4636914b9877f552c2ce8a79515a2eef9d20b592d38781528b6081f24ec62",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x07D1",
+        "name": "Backup Power Supply - IG Power Supply (Input)",
+        "sources": [
+          {
+            "record_index": 116,
+            "record_sha256": "7d99656746c6e57af1d8eaaa94b607a1f7f348a2071ef5b6de6f41b73555c6c4",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 137,
+            "record_sha256": "682b04a8d20727bf6d75ff4a9f1e84991e9f3e0dde7688cbe8ef43ed02773020",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x07D2",
+        "name": "Backup Power Supply - PIG Power Supply (Input)",
+        "sources": [
+          {
+            "record_index": 117,
+            "record_sha256": "56cf8adb47d1b746eb38360377d79534353af103b5f47e5f4d4feab9e88a626f",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 138,
+            "record_sha256": "ac59d1b956ae64d4020c5072a3a8778b106ded527d9476f94642b9cb21270a75",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x26AC",
+        "name": "Key Cycle",
+        "sources": [
+          {
+            "record_index": 185,
+            "record_sha256": "6f6c7c0903d30accc31fe219fdfea3d68a3b410765fe5989ea2d28600f324004",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 206,
+            "record_sha256": "6f6c7c0903d30accc31fe219fdfea3d68a3b410765fe5989ea2d28600f324004",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x26AD",
+        "name": "IG-ON Elapsed Time",
+        "sources": [
+          {
+            "record_index": 186,
+            "record_sha256": "fa9f0bcc5eb2251bacc4a5873cff3ef88a16ad434a1f62ab2d41cd885871d5c8",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 207,
+            "record_sha256": "fa9f0bcc5eb2251bacc4a5873cff3ef88a16ad434a1f62ab2d41cd885871d5c8",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x26C0",
+        "name": "Clock Type",
+        "sources": [
+          {
+            "record_index": 196,
+            "record_sha256": "998d0bd4099ad0b7efa5e39e57f015833108bc7142508baa2099b5405aed0be4",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 217,
+            "record_sha256": "998d0bd4099ad0b7efa5e39e57f015833108bc7142508baa2099b5405aed0be4",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x26C1",
+        "name": "IG-ON Elapsed Time",
+        "sources": [
+          {
+            "record_index": 197,
+            "record_sha256": "d4863c413f7f25e7ff5dfdb13ef648bdaa133a5b9ec10b44f9fd5b49ea93bc16",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 218,
+            "record_sha256": "d4863c413f7f25e7ff5dfdb13ef648bdaa133a5b9ec10b44f9fd5b49ea93bc16",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      },
+      {
+        "data_id": "0x26C3",
+        "name": "IG-ON Elapsed Time",
+        "sources": [
+          {
+            "record_index": 199,
+            "record_sha256": "45d369bcb6f6a01b403975e855d0553170eb796461a99ac432614c4f59b131ba",
+            "relative_path": "NA/DB/EMPS2_P5.ddb"
+          },
+          {
+            "record_index": 220,
+            "record_sha256": "45d369bcb6f6a01b403975e855d0553170eb796461a99ac432614c4f59b131ba",
+            "relative_path": "NA/DB/EMPS_P5.ddb"
+          }
+        ]
+      }
+    ],
+    "later_session_requirements": [
+      "preserve raw calibration package/extracted attach.att and the Save/RecoveryInfo.ini directory before and after any deliberate interruption",
+      "retain J2534 API timing plus raw message timestamps across 10 02, 27 01/02, reset, disconnect/reconnect, and any IG OFF/ON transition",
+      "capture Data IDs 0x0016..0x0019, 0x0033/0x0034/0x0036, 0x0421/0x0422, 0x07D1/0x07D2, and 0x26AC/0x26AD/0x26C1/0x26C3 during recovery/retry experiments",
+      "compare on-wire SecurityAccess spacing with the static route fingerprints rather than assuming the 100 ms legacy table applies to Unified",
+      "record the selected factory/contact/CPU metadata so timing evidence can be attributed to one CUW route"
+    ]
+  },
+  "distribution": "Toyota Techstream V18.00.003",
+  "factory_parameter_table": {
+    "columns": 85,
+    "rows": 196,
+    "timing_retry_distributions": {
+      "CANCommunicationSpeedAddress": {
+        "": 125,
+        "004036": 1,
+        "006FFDE": 1,
+        "008FF2": 1,
+        "01FFB6": 2,
+        "036DB2": 1,
+        "037FF2": 1,
+        "03BBB6": 2,
+        "03EF86": 1,
+        "03FCB6": 2,
+        "03FFB6": 1,
+        "041BB6": 1,
+        "047BB6": 1,
+        "057EB6": 2,
+        "057F96": 1,
+        "068874": 1,
+        "077EB6": 8,
+        "07FBB6": 1,
+        "081BB6": 1,
+        "083BB6": 2,
+        "087BB6": 2,
+        "0A7F96": 1,
+        "0EFFDE": 1,
+        "0F1FB6": 1,
+        "0F5FF2": 1,
+        "0FFFC2": 5,
+        "1036": 2,
+        "103BB6": 2,
+        "107BB4": 1,
+        "107BB6": 2,
+        "120032": 1,
+        "13FFC2": 1,
+        "16FFA6": 3,
+        "187BB4": 1,
+        "1AFFA6": 1,
+        "1EFFB6": 1,
+        "1FFFA6": 1,
+        "1FFFB6": 1,
+        "207BB6": 2,
+        "27FF86": 1,
+        "2E7FB6": 1,
+        "3BFFB6": 1,
+        "3DFEB6": 1,
+        "3FCFF2": 1,
+        "3FFFB6": 1,
+        "4036": 1,
+        "41FFB6": 1,
+        "67FF32": 1,
+        "C4032": 1
+      },
+      "FlagToSendAllOnPrepareRetry": {
+        "": 195,
+        "1": 1
+      },
+      "FlagToWaitAfterFuncReq": {
+        "": 186,
+        "1": 10
+      },
+      "IGOffRetriableFlag": {
+        "0": 21,
+        "1": 175
+      },
+      "PrepareRetryFlag": {
+        "": 4,
+        "0": 179,
+        "1": 13
+      },
+      "ReceiveTimeoutBeforeFlashWrite": {
+        "": 30,
+        "1000": 32,
+        "10000": 7,
+        "3000": 24,
+        "5000": 103
+      },
+      "ReceiveTimeoutBeforeGetCID": {
+        "100": 15,
+        "1000": 174,
+        "3000": 1,
+        "50": 3,
+        "5000": 3
+      },
+      "ReceiveTimeoutBeforeInitialCommand": {
+        "": 160,
+        "0": 12,
+        "80000": 24
+      },
+      "ReceiveTimeoutBeforePrepareRetry": {
+        "": 196
+      },
+      "ReceveTimeoutSumCheck": {
+        "": 195,
+        "200": 1
+      },
+      "RequestCANIDAllowingTimeout": {
+        "": 190,
+        "0705": 1,
+        "07E1": 5
+      },
+      "RequestCANIDBreakingResponse": {
+        "": 196
+      },
+      "SendTimeoutBeforePrepareWrite": {
+        "": 193,
+        "10000": 3
+      },
+      "WaitTimeAfterEndOfFlashing": {
+        "": 92,
+        "1000": 98,
+        "1500": 2,
+        "400": 2,
+        "5000": 2
+      },
+      "WaitTimeAfterFlashWrite": {
+        "": 189,
+        "3000": 7
+      },
+      "WaitTimeAfterIGOnAtRetry": {
+        "": 195,
+        "120000": 1
+      },
+      "WaitTimeAfterReprogrammingMode": {
+        "": 30,
+        "1500": 103,
+        "2000": 1,
+        "500": 62
+      },
+      "WaitTimeAfterSeedData": {
+        "": 34,
+        "100": 162
+      },
+      "WaitTimeAfterSeedKey": {
+        "": 34,
+        "100": 162
+      },
+      "WaitTimeBeforeStatusCheckForBlankCheck": {
+        "": 178,
+        "10": 18
+      },
+      "WaitTimeBeforeStatusCheckForEraseBlock": {
+        "": 44,
+        "10": 148,
+        "5": 4
+      },
+      "WaitTimeBeforeStatusCheckForInVerify": {
+        "": 51,
+        "10": 145
+      },
+      "WaitTimeBeforeStatusCheckForVerify": {
+        "": 30,
+        "5": 166
+      },
+      "WaitTimeBeforeStatusCheckForWriteBlock": {
+        "": 30,
+        "40": 3,
+        "5": 163
+      },
+      "WaitTimeBetweenSF": {
+        "": 30,
+        "0": 54,
+        "1": 9,
+        "10": 3,
+        "15": 4,
+        "161": 3,
+        "200": 2,
+        "3": 91
+      }
+    }
+  },
+  "flash_recovery": {
+    "file": "Save/RecoveryInfo.ini",
+    "identity_binding": "VIN plus AssyNo/CID lists are persisted and checked/displayed for recovery eligibility; no cryptographic vehicle binding is recovered in this client path",
+    "internal_fields": [
+      {
+        "name": "resume_armed",
+        "offset": 91,
+        "type": "bool"
+      },
+      {
+        "name": "recovery_disabled",
+        "offset": 92,
+        "type": "bool"
+      },
+      {
+        "name": "backup_path",
+        "offset": 96,
+        "type": "string"
+      },
+      {
+        "name": "persistence_active",
+        "offset": 108,
+        "type": "bool"
+      },
+      {
+        "name": "recovery_ini_path",
+        "offset": 112,
+        "type": "string"
+      }
+    ],
+    "lifecycle": {
+      "create_or_activate": "0x00429FF4 creates/activates recovery state; modern and legacy reprogram flows call it when a job starts",
+      "delete_dialog": "0x0044FC80 confirms permanent recovery deletion then finalizes it",
+      "finalize": "0x0042DE54 deletes the saved calibration payload and RecoveryInfo.ini on final success/delete",
+      "load": "0x0042A0BC reconstructs strings/vectors/bools/integers from RecoveryInfo.ini",
+      "restore_backup": "0x0042EDF0 copies the backup recovery file into place when needed",
+      "resume": "WriteCpuIndex selects the CPU-image restart point; Writing/WritingEndBlock/UseNewSoftwarePassword constrain the resumed phase",
+      "save": "0x0042EEDC writes the whole state; setters persist changes when persistence is active",
+      "startup_check": "0x0044F568 loads remaining recovery state and drives the Retry/Cancel/Delete eligibility UI"
+    },
+    "persisted_fields": [
+      {
+        "name": "SavedCalibrationFilePath",
+        "offset": 0,
+        "type": "string"
+      },
+      {
+        "name": "SelectedJ2534Device",
+        "offset": 4,
+        "type": "string"
+      },
+      {
+        "name": "CID",
+        "offset": 24,
+        "type": "vector<string>"
+      },
+      {
+        "name": "VIN",
+        "offset": 40,
+        "type": "string"
+      },
+      {
+        "name": "CIDNode",
+        "offset": 64,
+        "type": "vector<string>"
+      },
+      {
+        "name": "ReproCheckResult",
+        "offset": 80,
+        "type": "bool"
+      },
+      {
+        "name": "IsCentralGWExist",
+        "offset": 81,
+        "type": "bool"
+      },
+      {
+        "name": "WriteCpuIndex",
+        "offset": 84,
+        "type": "int32"
+      },
+      {
+        "name": "Writing",
+        "offset": 88,
+        "type": "bool"
+      },
+      {
+        "name": "UseNewSoftwarePassword",
+        "offset": 89,
+        "type": "bool"
+      },
+      {
+        "name": "WritingEndBlock",
+        "offset": 90,
+        "type": "bool"
+      },
+      {
+        "name": "PassThruErrorCode",
+        "offset": 116,
+        "type": "int32"
+      },
+      {
+        "name": "AssyNo",
+        "offset": 136,
+        "type": "vector<string>"
+      },
+      {
+        "name": "VehicleInfoForUpdateAvailableFlag",
+        "offset": 184,
+        "type": "vector<bool>"
+      }
+    ],
+    "section": "RecoveryInfo",
+    "string_records": [
+      {
+        "raw_hex": "5265636f76657279496e666f00",
+        "text": "RecoveryInfo",
+        "va": 6130960
+      },
+      {
+        "raw_hex": "536176656443616c6962726174696f6e46696c655061746800",
+        "text": "SavedCalibrationFilePath",
+        "va": 6130973
+      },
+      {
+        "raw_hex": "53656c65637465644a3235333444657669636500",
+        "text": "SelectedJ2534Device",
+        "va": 6130998
+      },
+      {
+        "raw_hex": "4349444e756d00",
+        "text": "CIDNum",
+        "va": 6131018
+      },
+      {
+        "raw_hex": "434944256400",
+        "text": "CID%d",
+        "va": 6131025
+      },
+      {
+        "raw_hex": "56494e00",
+        "text": "VIN",
+        "va": 6131031
+      },
+      {
+        "raw_hex": "4349444e6f64654e756d00",
+        "text": "CIDNodeNum",
+        "va": 6131035
+      },
+      {
+        "raw_hex": "4349444e6f6465256400",
+        "text": "CIDNode%d",
+        "va": 6131046
+      },
+      {
+        "raw_hex": "526570726f436865636b526573756c7400",
+        "text": "ReproCheckResult",
+        "va": 6131056
+      },
+      {
+        "raw_hex": "497343656e7472616c4757457869737400",
+        "text": "IsCentralGWExist",
+        "va": 6131073
+      },
+      {
+        "raw_hex": "5772697465437075496e64657800",
+        "text": "WriteCpuIndex",
+        "va": 6131090
+      },
+      {
+        "raw_hex": "57726974696e6700",
+        "text": "Writing",
+        "va": 6131104
+      },
+      {
+        "raw_hex": "5573654e6577536f66747761726550617373776f726400",
+        "text": "UseNewSoftwarePassword",
+        "va": 6131112
+      },
+      {
+        "raw_hex": "57726974696e67456e64426c6f636b00",
+        "text": "WritingEndBlock",
+        "va": 6131135
+      },
+      {
+        "raw_hex": "5265636f76657279496e666f2e696e6900",
+        "text": "RecoveryInfo.ini",
+        "va": 6131151
+      },
+      {
+        "raw_hex": "50617373546872754572726f72436f646500",
+        "text": "PassThruErrorCode",
+        "va": 6131168
+      },
+      {
+        "raw_hex": "417373794e6f4e756d00",
+        "text": "AssyNoNum",
+        "va": 6131186
+      },
+      {
+        "raw_hex": "417373794e6f256400",
+        "text": "AssyNo%d",
+        "va": 6131196
+      },
+      {
+        "raw_hex": "56656869636c65496e666f466f72557064617465417661696c61626c65466c61674e756d00",
+        "text": "VehicleInfoForUpdateAvailableFlagNum",
+        "va": 6131205
+      },
+      {
+        "raw_hex": "56656869636c65496e666f466f72557064617465417661696c61626c65466c6167256400",
+        "text": "VehicleInfoForUpdateAvailableFlag%d",
+        "va": 6131242
+      }
+    ]
+  },
+  "function_identities": [
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "flash_recovery_static_keys_init",
+      "sha256": "c335e020b7f82cb0354b0302b065b5dc8a67d969812f9256cdda822d12db22e2",
+      "size": 717,
+      "va": 4363972
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "flash_recovery_create_or_activate",
+      "sha256": "b81270fb4b98365564200e195f291e260ec531b586a1d23d411580dbf35f3279",
+      "size": 200,
+      "va": 4366324
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "flash_recovery_load",
+      "sha256": "519bd40345c6dda00113ece28c9df5f243a623b76e5d297c3d4a86dfeb5aa3c0",
+      "size": 10799,
+      "va": 4366524
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "flash_recovery_finalize_delete",
+      "sha256": "20982acec1b39c86f86698406b582c7a4cdf10e3913bb52cef236d168fce73e9",
+      "size": 32,
+      "va": 4382292
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "flash_recovery_restore_backup",
+      "sha256": "63700394220fe5970716498ae6515e727ddf837a2c68c46bf14b68dbc1298fa4",
+      "size": 234,
+      "va": 4386288
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "set_write_cpu_index",
+      "sha256": "d1feee1831acaa21abd919e3c523d8ad44c75a06f3af64504ec495b3710ae914",
+      "size": 27,
+      "va": 4385980
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "set_writing",
+      "sha256": "b4a3cb8eb4ada4bfdeda8e39b4f62a6a726cd72056209c38fae847a6187a11e6",
+      "size": 25,
+      "va": 4386020
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "set_use_new_software_password",
+      "sha256": "c5339c8318dfc39fdf1fa261b28010b1d708e8cc9b7395f092937fccd063f0bb",
+      "size": 27,
+      "va": 4386060
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "set_writing_end_block",
+      "sha256": "c0e79c57f0f1ddbb80ae23e35910730f88b5751f7736958ba825e2764b10e201",
+      "size": 27,
+      "va": 4386100
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "set_passthru_error_code",
+      "sha256": "6102b3a069abe65fec55b92706fe3aa561e24794287341c45783c0dfafcfe789",
+      "size": 27,
+      "va": 4386248
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "flash_recovery_save",
+      "sha256": "acf116acaaeffff7a1e3b85c893e376083f558111b38f46acf21849a1c03aa19",
+      "size": 3142,
+      "va": 4386524
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "flash_recovery_startup_check",
+      "sha256": "2ceeb39f3d667915c55c7d880fa932e48835ee9caec8063fa1e1adc5991d8df8",
+      "size": 563,
+      "va": 4519272
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "flash_recovery_delete_dialog",
+      "sha256": "df0fe17c5efd6ad5abf2e6e6dbd143a144de73082d0e38605fd0dda7ec0d7c58",
+      "size": 458,
+      "va": 4521088
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "legacy_reprogram_controller",
+      "sha256": "4833debdd891adf6636575c46017cc5f296e096bff0a9daed75156906babdaa6",
+      "size": 19128,
+      "va": 4581504
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "modern_reprogram_flow_a",
+      "sha256": "6c45697f758b8da484039d6eab4616106442b0de4530863ccf15b2d60ca64729",
+      "size": 1659,
+      "va": 5784148
+    },
+    {
+      "binary": "Cuw.exe",
+      "binary_sha256": "97f7b9302a6090e2715ca6c9713aecc73404d6c0f75aede2dd52f09bd201074b",
+      "role": "modern_reprogram_flow_b",
+      "sha256": "a971d41789159f4254316adc3ec3d88c44c4be30a53bb25577305451979db924",
+      "size": 694,
+      "va": 5798612
+    },
+    {
+      "binary": "TCUWControlCommPhase.dll",
+      "binary_sha256": "8c8d03d3e8ff9b32dcccf0b5ef5249304d720f19aed070b18894f1a78a3fabca",
+      "role": "retry_driver",
+      "sha256": "23c0f98938625003a5e300aedb695818779d3a87c418b40247334de361869f63",
+      "size": 2060,
+      "va": 268466000
+    },
+    {
+      "binary": "TCUWControlCommPhase.dll",
+      "binary_sha256": "8c8d03d3e8ff9b32dcccf0b5ef5249304d720f19aed070b18894f1a78a3fabca",
+      "role": "reconnect_transport",
+      "sha256": "b41ffa306686fb13a775b84908a7a0faa1cf95f03b8044c250b01f8f015de038",
+      "size": 378,
+      "va": 268443792
+    },
+    {
+      "binary": "TCUWControlCommPhase.dll",
+      "binary_sha256": "8c8d03d3e8ff9b32dcccf0b5ef5249304d720f19aed070b18894f1a78a3fabca",
+      "role": "phase_dispatcher",
+      "sha256": "3fbf7875dd7303b78eda7dde6123d6b70235a532b847ef055b7244a588529d2f",
+      "size": 582,
+      "va": 268478640
+    },
+    {
+      "binary": "TCUWP4P5CanPowerTrainPrepareWriter.dll",
+      "binary_sha256": "0a64261d70e6a70ec80fcddf18f654c36e9941b0132d1ce5831b6fe9f65810eb",
+      "role": "legacy_seed_key_sequence",
+      "sha256": "5c04f40723697db552295f0e88d44070256ae8c69ecd7924258e0a55f44c347c",
+      "size": 1150,
+      "va": 268441248
+    },
+    {
+      "binary": "TCUWP4P5CanPowerTrainPrepareWriter.dll",
+      "binary_sha256": "0a64261d70e6a70ec80fcddf18f654c36e9941b0132d1ce5831b6fe9f65810eb",
+      "role": "legacy_post_seed_key_wait",
+      "sha256": "3708dc28e578852ee2d9ffe68f31317ad47491fc3d854be0e3f77650304a55e5",
+      "size": 78,
+      "va": 268443403
+    },
+    {
+      "binary": "TCUWCanSecurityVFORESTFlashWriter.dll",
+      "binary_sha256": "905ae71d648161b3f5d6c188dc3a2d7a147ae6b90694e2f8e80b0ffa7a260645",
+      "role": "vforest_mode_transition_and_status_poll",
+      "sha256": "2adeb05d67f1e72be151685fdb9959703bcbdf54761bcacaaf50274b6a063772",
+      "size": 1519,
+      "va": 268440064
+    },
+    {
+      "binary": "TCUWCanCommonPrepareWriter.dll",
+      "binary_sha256": "0dc5cd195f2febe8b4140bb1ef8a06aeebe3eb0bbc0c989077fc76b2e05a5e31",
+      "role": "get_bus_type_from_cpu_image",
+      "sha256": "6287accd194372fe5eb76f2438d9634d93b741f827e903db7a5ad81977534adb",
+      "size": 204,
+      "va": 268441136
+    }
+  ],
+  "legacy_iq_emps": {
+    "binary": "Cuw_iQ_EMPS.exe",
+    "boundary": "legacy/V850-M16C-era naming is comparative evidence only; it does not establish RH850 target behavior",
+    "inferences": [
+      "SelectRetryPassword is historical vocabulary consistent with the modern UseNewSoftwarePassword recovery field",
+      "FiveBaudInit/SetBaudRateOfECU/TweakBaudRate are legacy transport ancestry, not evidence that the modern CAN target performs those operations",
+      "PrepareWrite1/2/3 iQ-EMPS pages expose operator-driven IG-OFF -> start -> IG-ON sequencing ancestry",
+      "three retry captions and terminal three-attempt error show a longstanding CUW retry model; exact modern counter implementation remains independently bounded",
+      "Verify Calibration ID and prior-reprogramming recovery strings show EPS-specific recovery/CID verification ancestry"
+    ],
+    "sha256": "a5520c1cfa9e88fde4df825ef68d3bbad2013d47fe4ee6895813936372a5745b",
+    "strings": [
+      {
+        "file_offset": 4286334,
+        "text": "Flash Calibration Update in Process - 1st retry"
+      },
+      {
+        "file_offset": 4286588,
+        "text": "Flash Calibration Update in Process - 2nd retry"
+      },
+      {
+        "file_offset": 4286842,
+        "text": "Flash Calibration Update in Process - 3rd retry"
+      },
+      {
+        "file_offset": 4586832,
+        "text": "CUW made three unsuccessful attempts to reprogram the ECU."
+      },
+      {
+        "file_offset": 1445344,
+        "text": "CFlashWriter::SelectRetryPassword"
+      },
+      {
+        "file_offset": 1465806,
+        "text": "CSilVinReader::FiveBaudInit"
+      },
+      {
+        "file_offset": 1462805,
+        "text": "CSilFlashWriter::SetBaudRateOfECU"
+      },
+      {
+        "file_offset": 1463962,
+        "text": "CSilFlashWriter::TweakBaudRate"
+      },
+      {
+        "file_offset": 1437107,
+        "text": "CCanFlashWriter::ChangeReprogrammingMode"
+      },
+      {
+        "file_offset": 1487468,
+        "text": "TabSheet_PrepareWrite1_iQ_EMPS"
+      },
+      {
+        "file_offset": 1488337,
+        "text": "TabSheet_PrepareWrite2_iQ_EMPS"
+      },
+      {
+        "file_offset": 1489149,
+        "text": "TabSheet_PrepareWrite3_iQ_EMPS"
+      },
+      {
+        "file_offset": 376196,
+        "text": "CTechVim_iQ_EPS_FlashWriter"
+      },
+      {
+        "file_offset": 371408,
+        "text": "CTester2IF"
+      },
+      {
+        "file_offset": 4589266,
+        "text": "Verify Calibration ID"
+      },
+      {
+        "file_offset": 4589651,
+        "text": "The previous reprogramming attempt was interrupted or did not finish."
+      },
+      {
+        "file_offset": 4589924,
+        "text": "A recovery file for the previous vehicle has been created."
+      }
+    ]
+  },
+  "schema_version": 1,
+  "source": "external-source + generated-artifact",
+  "system_parameter_table": {
+    "columns": 30,
+    "eps_rows": [
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13SIL59",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "2000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13SIL60",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "2000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13SIL58",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "2000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN35",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "0005FFD4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN36",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "0007FFD4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN37",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "0007FFD4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN43",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "0004DFD4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN51",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "00009BD4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN67",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "0003BFD4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN68",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "00031FC4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN56",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "2000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN83",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "0002DFC4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN125",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "0001FFD4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN102",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "0003FFD4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN121",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "0005FFD4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN122",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "0007FFD4",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "41",
+        "factory_identifier": "36CAN100",
+        "kind_of_ecu": "EMPS(DH)\nEMPS(DH)\nEMPS(DH)\nEMPS(DH)",
+        "password_address": "",
+        "use_cid_getter_flash_writer": "0",
+        "wait_after_ig_on": "",
+        "wait_igoffon": "30"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN161",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "",
+        "use_cid_getter_flash_writer": "1",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN213",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "",
+        "use_cid_getter_flash_writer": "1",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      },
+      {
+        "calibration_type": "17",
+        "factory_identifier": "13CAN(SECURITY)213",
+        "kind_of_ecu": "EMPS/PPS\nEMPS/PPS\nEMPS/PPS\nEMPS/PPS",
+        "password_address": "",
+        "use_cid_getter_flash_writer": "1",
+        "wait_after_ig_on": "6000",
+        "wait_igoffon": "10"
+      }
+    ],
+    "host_ig_recovery_distributions": {
+      "CPUTypeWithModeChangeAtCPUTypeChangeFlag": {
+        "": 2,
+        "0": 336,
+        "1": 42
+      },
+      "FlagToCancelAutomaticIGOFF": {
+        "": 61,
+        "1": 319
+      },
+      "FlagToChangeToReprogGWModeForCentralGW": {
+        "": 2,
+        "0": 72,
+        "1": 306
+      },
+      "FlagToDoIGOFFONAtCPUTypeChange": {
+        "": 2,
+        "0": 336,
+        "1": 42
+      },
+      "FlagToUseCIDGetterAndFlashWriterDLL": {
+        "0": 200,
+        "1": 180
+      },
+      "WaitTimeAfterBatteryConnected": {
+        "": 378,
+        "5": 2
+      },
+      "WaitTimeAfterBatteryDisconnected": {
+        "": 378,
+        "10": 2
+      },
+      "WaitTimeAfterIGOn": {
+        "": 33,
+        "1000": 6,
+        "10000": 44,
+        "15000": 3,
+        "2000": 5,
+        "3000": 1,
+        "500": 3,
+        "6000": 277,
+        "7000": 8
+      },
+      "WaitTimeForIGOFFON": {
+        "10": 368,
+        "15": 2,
+        "30": 10
+      }
+    },
+    "rows": 380
+  },
+  "timing_semantics": {
+    "bus_type": "CANCommunicationSpeedAddress is interpreted by GetBusTypeFromCPUImage as a CPU-image byte location used to select one of the bus/speed modes; it is not a hardware register address",
+    "host_ig": "Parameter.ini supplies WaitTimeForIGOFFON and WaitTimeAfterIGOn plus automatic-IG/gateway/CPU-type-change flags used by the host-side reprogramming flow",
+    "legacy_seed_data": "P4/P5 prepare uses WaitTimeAfterSeedData between seed receipt/CalcSeedKey and the key-send phase; V18 table value is 100 ms for 162/196 factory rows",
+    "legacy_seed_key": "P4/P5 prepare uses WaitTimeAfterSeedKey after the 27 02 exchange; V18 table value is 100 ms for the same 162 rows",
+    "modern_seed_pacing": "ReproStd/Unified prepare do not consume the WaitTimeAfterSeed* keys; their pacing is code-immediate/route-specific",
+    "retry_driver": "TCUWControlCommPhase retry driver consumes IGOffRetriableFlag, PrepareRetryFlag and ReceiveTimeoutBeforePrepareRetry, can reconnect after teardown, and contains a hardcoded 5000 ms post-flash-confirm wait",
+    "transport_reconnect": "controller reconnect selects CAN Connect(6) versus Ethernet Connect0500(0x800f) by contact type",
+    "vforest_mode_wait": "Security-VFOREST flash consumes WaitTimeAfterReprogrammingMode and WaitTimeBetweenSF around mode transition/status polling"
+  }
+}

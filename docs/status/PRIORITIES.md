@@ -54,23 +54,21 @@ order rather than starting another broad firmware sweep.
    to exactly 512 alphanumeric characters. Stop at the client/server boundary;
    the signing algorithm/private key are not present in V18.
 
-6. **Recover CUW timing, retry, and Flash-Recovery semantics.** Finish the
-   `TCUWControlCommPhase.dll` timing/retry fields (`WaitTimeAfterSeedData`,
-   `WaitTimeAfterSeedKey`, reset/reconnect windows) and the recovery-file state
-   model. These are strategically useful because they determine the timing and
-   failure artifacts the eventual GTS+ session must capture.
+6. **CUW timing/retry/Flash-Recovery static closure — completed (TMS-030).**
+   The two timing tables, retry/reconnect ownership, bus-speed selector meaning,
+   and `RecoveryInfo.ini` schema/lifecycle are byte-pinned. Remaining work is
+   live attribution: retain timestamps, selected route metadata, recovery files,
+   and IG transitions during a real GTS+/CUW session.
 
-7. **Decode only DDB residues that feed the targets above.** The broad DDB
-   pipeline is already productive; remaining section/category semantics should
-   be attacked when they can name a CUW/diagnostic field, a Sienna/H DID, or a
-   capture observable. Do not restart an undirected DDB census.
+7. **Targeted DDB residue pass — completed for the current queue (TMS-031).**
+   Power/IG/key-cycle Data IDs needed for recovery experiments are named and
+   raw-record-pinned. Do not restart an undirected DDB census; decode more only
+   when a new live/static question supplies a concrete target.
 
-8. **Use older/specialized EPS CUW artifacts only as comparative leads.**
-   `Cuw_iQ_EMPS.exe` and specialized writer families may expose historical EPS
-   naming or protocol ancestry. Analyze them after 1–7, and keep generation
-   transfer bounded. Likewise, revisit MACKey applicability or the three open
-   exploit-interest rows only when a concrete CUW/diagnostic edge points at
-   them.
+8. **Older/specialized EPS CUW comparative pass — completed to the bounded
+   ancestry limit (TMS-031).** `Cuw_iQ_EMPS.exe` now contributes retry,
+   recovery/CID, IG-transition, VIM/Tester2, and legacy transport vocabulary.
+   None is promoted onto RH850 without target-native evidence.
 
 After this queue, the remaining high-value blockers should be genuinely new
 artifacts or runtime evidence: an exact calibration package, newer GTS+/CUW+,

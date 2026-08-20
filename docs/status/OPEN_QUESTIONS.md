@@ -434,6 +434,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `Nonce`, `OffsetAddress`, download ranges, data-format fields, per-area choice,
   and target-integrity values. Do not promote byte compatibility into an exact
   transcript without that artifact.
+- **CUW retry/recovery live attribution.** TMS-030/TMS-031 close the V18 static
+  timing tables, retry/reconnect controller, recovery-file schema, and useful
+  P5 power-cycle observers. A live session is still needed to identify the
+  selected target row and measure its actual SecurityAccess spacing,
+  reset/disconnect/reconnect timing, IG OFF/ON behavior, and recovery-state
+  transitions. Preserve `Save/RecoveryInfo.ini`, its saved calibration payload,
+  raw J2534 timestamps, selected factory/contact/CPU metadata, and Data IDs
+  `0016..0019`, `0033/0034/0036`, `0421/0422`, `07D1/07D2`, and
+  `26AC/26AD/26C1/26C3`. This is now a capture task, not a static-RE blocker.
 - **Calibration package outer envelope and target-specific integrity values.**
   TMS-026 closes the V18 metadata/object/static-consumer work: the exact
   `CLogicalBlockAreaInfo` layout is recovered and the standard writer transmits

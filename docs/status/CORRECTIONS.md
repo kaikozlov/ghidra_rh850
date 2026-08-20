@@ -1892,6 +1892,14 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/techstream_v18/cuw_writer_protocol_grammar.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.
 
+### CORR-080 — CUW timing ownership and `CANCommunicationSpeedAddress` were over-attributed
+
+- **Earlier wording:** timing parameters were described as configured/owned by `TCUWControlCommPhase.dll`, and `CANCommunicationSpeedAddress` was described as a baud-rate register address.
+- **Reference-level correction:** the controller contains the timing-key strings but has no executable absolute reference to `WaitTimeAfterSeedData` or `WaitTimeAfterSeedKey`; the P4/P5 prepare writer references those keys at `0x100019F0` and `0x10001F2F`. The controller's executable references instead cover the retry/IG-off subset such as `PrepareRetryFlag`, `IGOffRetriableFlag`, and `ReceiveTimeoutBeforePrepareRetry`.
+- **Bus-speed correction:** `TCUWCanCommonPrepareWriter::GetBusTypeFromCPUImage @ 0x10001630` reads `CANCommunicationSpeedAddress` as a byte location in the downloaded CPU image and maps that byte to a bus/speed mode. It is not a hardware register address.
+- **Correct model:** the encoded factory/system parameter tables are shared configuration consumed by different CUW components; ownership must be assigned at actual code references, not string presence.
+- **Canonical:** `tests/verify_techstream_cuw_timing_recovery.py`; `data/generated/techstream_v18/cuw_timing_recovery.json`; [../tooling/techstream.md](../tooling/techstream.md) §5.4.
+
 ### CORR-078 — the retained H Sienna-homolog LTA branch is direct-write inactive; B6 nonscalar rows are not a recovered hidden command
 
 - **Earlier residual possibilities:** after scalar COM closure, two static escape

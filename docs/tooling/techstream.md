@@ -913,11 +913,10 @@ Canonical generated state artifact:
 `data/generated/techstream_v18/rks_client_state.json`; verifier:
 `tests/verify_techstream_rks_client_state.py`.
 
-A separate **Flash Recovery** subsystem (`CFlashRecoveryInfo`, *"A recovery
-file for the previous vehicle has been created"*) stores vehicle/ECU-specific
-state to resume an interrupted reflash (*"ECU is at risk of being broken if
-Flash Recovery is performed for ECU other than the above"*) — unrelated to the
-portal `Signature`.
+A separate **Flash Recovery** subsystem stores vehicle/ECU-specific state to
+resume an interrupted reflash. Its persistence schema, retry timing, and later
+capture implications are canonical in §5.4; it is unrelated to the portal
+`Signature`.
 
 **VIN — six uses (the identity spine):** (1) **mandatory gate** — *"VIN is
 required to perform ECU reprogramming"*; (2) **read from the vehicle** via
@@ -976,6 +975,156 @@ hashes and the managed `+0x78` mapping are pinned by
 > code path, and the portal is the RKS reprogramming-key authorization
 > described here. The portal does not supply the ECU crypto key (Layer B's key
 > remains in the calibration file). Recorded in `docs/status/CORRECTIONS.md`.
+
+
+### 5.4 Timing, retry, reconnect, and Flash Recovery
+
+The V18 CUW timing model is now statically closed far enough to make a later
+GTS+/J2534 session a measurement exercise rather than exploratory reverse
+engineering. The generated evidence is
+`data/generated/techstream_v18/cuw_timing_recovery.json`; verifier:
+`tests/verify_techstream_cuw_timing_recovery.py`.
+
+#### 5.4.1 Two parameter tables and who consumes them
+
+The encoded CUW corpus contains two distinct parameter layers:
+
+- **196 factory/protocol rows** in the per-factory INIs. Their 85-column schema
+  carries writer-facing timing/retry fields such as `WaitTimeAfterSeedData`,
+  `WaitTimeAfterSeedKey`, `WaitTimeAfterReprogrammingMode`, status-poll waits,
+  `PrepareRetryFlag`, `IGOffRetriableFlag`, and transport timeout fields.
+- **380 host/system rows** in `Ini/Parameter.ini`. Its 30-column schema carries
+  host-side IG/battery/gateway behavior such as `WaitTimeForIGOFFON`,
+  `WaitTimeAfterIGOn`, `FlagToCancelAutomaticIGOFF`,
+  `FlagToDoIGOFFONAtCPUTypeChange`, and
+  `FlagToChangeToReprogGWModeForCentralGW`.
+
+The important attribution correction is that `TCUWControlCommPhase.dll` is not
+the generic owner of every timing key merely because it contains the strings.
+Raw absolute-reference checks show **no executable reference** there to
+`WaitTimeAfterSeedData` or `WaitTimeAfterSeedKey`. The P4/P5 prepare family does
+reference those keys at `0x100019F0` / `0x10001F2F`. The controller instead
+references the retry subset (`PrepareRetryFlag`, `IGOffRetriableFlag`, and
+`ReceiveTimeoutBeforePrepareRetry`) and coordinates transport/host callbacks.
+
+The V18 distributions are useful route fingerprints. `WaitTimeAfterSeedData`
+and `WaitTimeAfterSeedKey` are both exactly `100 ms` for 162/196 factory rows
+and blank for 34 modern rows. `IGOffRetriableFlag=1` on 175/196 rows;
+`PrepareRetryFlag=1` on only 13. `WaitTimeAfterReprogrammingMode` is mostly
+500/1500 ms. On the system side, `WaitTimeForIGOFFON` is 10 s on 368/380 rows,
+30 s on 10, and 15 s on 2; `WaitTimeAfterIGOn` is usually 6000 ms (277/380) but
+varies by family. The three modern EPS host rows `13CAN161`, `13CAN213`, and
+`13CAN(SECURITY)213` all use the newer CID/flash-writer route flag.
+
+Recovered code semantics sharpen those tables:
+
+- `TCUWP4P5CanPowerTrainPrepareWriter.dll` uses the two seed timing keys around
+  its SecurityAccess seed/key phases. Modern ReproStd/Unified prepare paths do
+  not consume those keys, so a later Unified transcript must not be forced into
+  the legacy 100-ms assumption.
+- `TCUWControlCommPhase.dll` `retry_driver @ 0x10007750` owns the retry/reconnect
+  loop. It reads the IG-off/retry fields, can apply
+  `ReceiveTimeoutBeforePrepareRetry`, invokes the writer retry entry, and has a
+  hardcoded 5000-ms post-completion wait in the confirmed-flash path.
+- `reconnect_transport @ 0x10002090` distinguishes normal CAN `Connect(6)` from
+  the Ethernet `Connect0500(0x800f)` path.
+- Security-VFOREST `0x10001200` consumes
+  `WaitTimeAfterReprogrammingMode`/`WaitTimeBetweenSF` around its
+  mode-change/status-poll machinery; that is comparative route evidence only
+  because the tracked Sienna bootloader rejects VFOREST framing.
+- `TCUWCanCommonPrepareWriter::GetBusTypeFromCPUImage @ 0x10001630` proves
+  `CANCommunicationSpeedAddress` is a **CPU-image byte location used to choose a
+  bus/speed mode**, not a hardware baud-rate register address.
+
+All of those bodies are SHA-pinned in the generated artifact so the decompiled
+semantics cannot silently drift from the installed V18 binaries.
+
+#### 5.4.2 Flash Recovery persistence and resume state
+
+`CFlashRecoveryInfo` persists interrupted jobs under
+`Save/RecoveryInfo.ini`, section `RecoveryInfo`. The exact key block begins at
+`Cuw.exe` VA `0x005D8D10` and includes:
+
+| State | Object offset | Role |
+|---|---:|---|
+| `SavedCalibrationFilePath` | `+0x00` | saved calibration payload used by recovery |
+| `SelectedJ2534Device` | `+0x04` | pass-thru-device identity |
+| `CID[]` | `+0x18` | calibration IDs for the interrupted job |
+| `VIN` | `+0x28` | vehicle identity |
+| `CIDNode[]` | `+0x40` | per-node CIDs |
+| `ReproCheckResult` | `+0x50` | prior repro/RKS-check state |
+| `IsCentralGWExist` | `+0x51` | topology state |
+| `WriteCpuIndex` | `+0x54` | CPU-image resume index |
+| `Writing` | `+0x58` | reprogramming in progress |
+| `UseNewSoftwarePassword` | `+0x59` | retry/password-generation state |
+| `WritingEndBlock` | `+0x5A` | current area/block completion state |
+| `PassThruErrorCode` | `+0x74` | last J2534 error |
+| `AssyNo[]` | `+0x88` | ECU identity list shown by recovery UI |
+| update-availability flags | `+0xB8` | per-ECU update status |
+
+Internal state also keeps a resume-armed byte at `+0x5B`, recovery-disabled at
+`+0x5C`, a backup path at `+0x60`, persistence-active at `+0x6C`, and the INI
+path at `+0x70`.
+
+The lifecycle is recovered and byte-pinned: `0x00429FF4` creates/activates the
+recovery record; `0x0042A0BC` loads it; setters at `0x0042ECBC..0x0042EDC8`
+persist progress; `0x0042EEDC` writes the record; `0x0042EDF0` restores a
+backup; `0x0044F568` performs startup recovery eligibility/UI handling; and
+`0x0042DE54` deletes both the saved calibration payload and recovery INI on
+final success/deletion. `WriteCpuIndex` chooses the CPU-image restart point;
+`Writing`, `WritingEndBlock`, and `UseNewSoftwarePassword` constrain the resumed
+phase.
+
+The persisted VIN plus AssyNo/CID lists provide a strong **procedural identity
+binding** and the UI warns against recovering a different vehicle. No
+cryptographic binding is recovered in this client path; do not describe the
+recovery file as cryptographically vehicle-bound.
+
+#### 5.4.3 Capture-ready power-cycle observables
+
+The DDB pass for this task was deliberately targeted rather than another broad
+census. Exact NA `EMPS_P5`/`EMPS2_P5` section-62 rows identify ordinary
+monitor/Data IDs that should be timestamped during any CUW retry/recovery run:
+
+| Data ID | OEM name |
+|---:|---|
+| `0016..0019` | `Status of Vehicle Power` IGP/IGR variants |
+| `0033` / `0034` / `0036` | `IG Power Supply` / `PIG Power Supply` / `Power Source` |
+| `0421` / `0422` | System-2 IG/PIG supply |
+| `07D1` / `07D2` | backup IG/PIG supply inputs |
+| `26AC` | `Key Cycle` |
+| `26AD`, `26C1`, `26C3` | `IG-ON Elapsed Time` |
+| `26C0` | `Clock Type` |
+| `0167` | `Engine Stall/READY OFF Control History` |
+
+Each row is raw-record-hashed in `cuw_timing_recovery.json`. This is exactly the
+kind of DDB residue worth decoding before GTS+: it converts a future power-cycle
+experiment into synchronized named observables.
+
+For the short paid session, preserve the original calibration package and
+extracted `attach.att`; snapshot `Save/RecoveryInfo.ini` plus the saved
+calibration payload before/after an intentional interruption; retain raw J2534
+API timestamps across `10 02`, `27 01/02`, reset, disconnect/reconnect and IG
+OFF/ON; log the power-cycle Data IDs above; and record the selected
+factory/contact/CPU metadata. SecurityAccess spacing should be compared with the
+static writer fingerprint rather than assumed from the legacy 100-ms table.
+
+#### 5.4.4 Bounded iQ-EMPS ancestry
+
+`Cuw_iQ_EMPS.exe` is useful only as a naming/ancestry source. Its exact binary
+contains the same 1st/2nd/3rd retry captions and terminal three-attempt error as
+modern CUW, `CFlashWriter::SelectRetryPassword`, `CCanFlashWriter::ChangeReprogrammingMode`,
+`CSilVinReader::FiveBaudInit`, `CSilFlashWriter::{SetBaudRateOfECU,TweakBaudRate}`,
+`PrepareWrite1_iQ_EMPS`/`2`/`3`, `CTechVim_iQ_EPS_FlashWriter`, `CTester2IF`, and
+EPS-specific `Verify Calibration ID` / interrupted-reprogramming recovery text.
+
+The useful interpretation is historical: `SelectRetryPassword` is consistent
+with the modern `UseNewSoftwarePassword` recovery state; the three PrepareWrite
+pages expose operator-driven IG-OFF → start → IG-ON ancestry; VIM/Tester2 names
+explain older Denso/Toyota tool vocabulary. The K-line/M16C/V850-era baud and
+password machinery is **not** promoted onto the RH850 Sienna/Corolla firmware.
+Every comparative string and the whole iQ binary identity are pinned by
+`verify_techstream_cuw_timing_recovery.py`.
 
 ## 6. ptshim32.dll — J2534 traffic logger
 

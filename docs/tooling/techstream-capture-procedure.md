@@ -43,6 +43,47 @@ timestamp, ChannelID, J2534 protocol, flags, four address bytes, exact payload
 bytes, reported/actual lengths, and any extra bytes. Preserve API-call and
 status lines so connection/filter/ioctl state is reconstructible.
 
+## CUW timing/recovery capture checklist
+
+TMS-030/TMS-031 move the CUW timing/recovery work out of exploratory RE. For an
+authorized reflash/recovery experiment, capture these artifacts as a synchronized
+set:
+
+1. **Route identity before programming:** hash the raw calibration package and
+   extracted `attach.att`; retain selected factory identifier, contact type, CPU
+   type/image index, prepare/flash writer names, request/response CAN IDs, and
+   `F181`.
+2. **SecurityAccess timing:** retain exact timestamps for `10 02`, the complete
+   `27 01` request/`67 01` response, `27 02`/`67 02`, and the first following
+   reprogramming command. Do not assume the legacy 100-ms seed/key timing applies
+   to Unified; compare the observed spacing with the selected writer family.
+3. **Reset/reconnect boundary:** retain J2534 `PassThruConnect`/disconnect,
+   filter/ioctl, Tx confirmation, ECUReset response, silence interval, first
+   post-reset receive, and any CAN-vs-Ethernet reconnect choice.
+4. **Power/ignition observables:** sample Data IDs `0016`, `0017`, `0018`,
+   `0019`, `0033`, `0034`, `0036`, `0421`, `0422`, `07D1`, `07D2`, `26AC`,
+   `26AD`, `26C0`, `26C1`, and `26C3` across IG OFF/ON and retry. `0167`
+   (`Engine Stall/READY OFF Control History`) is a useful companion.
+5. **Recovery-file snapshots:** before the job, immediately after recovery state
+   is created, after each CPU/image boundary where practical, immediately after
+   an authorized interruption, after restart/recovery eligibility is shown, and
+   after final success/delete, preserve hashes/copies of `Save/RecoveryInfo.ini`
+   and the referenced saved calibration payload. Record whether `WriteCpuIndex`,
+   `Writing`, `UseNewSoftwarePassword`, `WritingEndBlock`, and
+   `PassThruErrorCode` changed.
+6. **Identity check evidence:** privately retain the VIN/AssyNo/CID values used by
+   the recovery screen only long enough to prove same-vehicle eligibility; do
+   not commit those identifiers. The V18 client binding is procedural rather
+   than cryptographic.
+7. **Retry count/UI state:** timestamp every retry prompt/state and whether the
+   writer executes `PrepareRetry`; preserve enough evidence to distinguish the
+   static three-attempt UI model from the exact runtime counter behavior for the
+   selected route.
+
+The static expectation set is machine-readable in
+`data/generated/techstream_v18/cuw_timing_recovery.json`. Any mismatch is a new
+finding; do not coerce the live trace to the V18 model.
+
 ## Save, normalize, and verify
 
 Keep the raw `j2534_MMDDYYYYhhmmss.log` private and immutable. Hash it before
