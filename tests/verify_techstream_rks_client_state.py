@@ -109,6 +109,8 @@ print('\n== static boundary statement ==')
 sb=obj['static_boundary']
 check('no missing producer code claimed',sb['producer'].startswith('fully recovered'))
 check('external residues are seed value + server key only',[x for x in sb['external_residues'] if 'seed VALUE' in x or 'private key' in x].__len__()==2)
+check('static boundary recognizes gateway-facing Layer A','Central Gateway' in sb['priority'] and '27 21/27 22' in sb['priority'] and 'EPS flash-writer Layer B' in sb['priority'])
+check('server boundary names the gateway token flow without inventing server crypto','Central Gateway' in obj['server_boundary'] and '27 22 payload' in obj['server_boundary'] and 'not to the EPS flash writers' in obj['server_boundary'] and 'signature-generation algorithm' in obj['server_boundary'])
 check('IsStored semantics preserved','validity flag' in obj['managed_mapping']['is_stored'] and 'cached server token' in obj['managed_mapping']['is_stored'])
 print('\n== deterministic regeneration ==')
 with tempfile.TemporaryDirectory() as td:

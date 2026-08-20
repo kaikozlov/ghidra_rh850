@@ -107,7 +107,7 @@ COMMANDS = [
      "request": "34 || dataFormat || 44 || address[4] || size[4]", "positive_response": "74 || maxBlockLength",
      "response_rule": "usable payload=min(decoded maxBlockLength,0x0FFF)-2", "confidence": "recovered"},
     {"route": "unified-flash", "method": "request_download", "rva": 0x1420,
-     "request": "34 || compressionFlag || areaFlag || 46 || (offset[5]+areaAddress) || areaSize",
+     "request": "34 || dataFormatIdentifier || 46 || addressSpaceByte || (offset[5]+areaAddress) || areaLength",
      "positive_response": "74 || maxBlockLength", "response_rule": "usable payload=min(decoded maxBlockLength,0x0FFF)-2", "confidence": "recovered"},
     {"route": "both-flash", "method": "transfer_data", "request": "36 || blockSequenceCounter || data",
      "positive_response": "76 || blockSequenceCounter", "confidence": "recovered"},

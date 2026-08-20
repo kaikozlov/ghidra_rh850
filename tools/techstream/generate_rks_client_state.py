@@ -240,13 +240,13 @@ def main():
  'static_boundary':{
    'producer':'fully recovered inside Cuw.exe; there is no missing or unnamed producer code path',
    'external_residues':['the live Central Gateway seed VALUE returned by the vehicle for 27 21','the TIS-portal server-side signing algorithm and private key behind the 512-character token'],
-   'priority':'low for ECU security because Layer A never reaches a flash writer or ECU',
+   'priority':'reflash-security infrastructure: Layer A reaches the Central Gateway through 27 21/27 22 but remains separate from EPS flash-writer Layer B; this does not expose an unauthenticated primitive',
  },
  'raw_anchors':anchors,
  'call_anchors':calls,
  'string_anchors':strs,
  'function_identities':funcs,
- 'server_boundary':'no client private key, public-key verification, signature-generation algorithm, or ECU-facing RKS token dataflow is present; do not infer server cryptography from the fixed token format',
+ 'server_boundary':'no client private key, public-key verification, or signature-generation algorithm is present; the server-produced 512-character token is decoded and sent to the Central Gateway as the 27 22 payload, not to the EPS flash writers; do not infer server cryptography from the fixed token format',
  }
  a.output.parent.mkdir(parents=True,exist_ok=True); a.output.write_text(json.dumps(obj,indent=2,sort_keys=True)+'\n')
  return 0

@@ -234,6 +234,11 @@ check("inventory covers all 201 encoded INIs and 196 factory rows",
 check("inventory records zero local calibration payloads",
       inventory["blockers"]["matching_payloads_found"] == []
       and inventory["blockers"]["matching_calibration_payload_required"] is True)
+unified_rd = next(x for x in inventory["commands"]
+                  if x["route"] == "unified-flash" and x["method"] == "request_download")
+check("inventory Unified RequestDownload uses corrected field order",
+      unified_rd["request"]
+      == "34 || dataFormatIdentifier || 46 || addressSpaceByte || (offset[5]+areaAddress) || areaLength")
 for artifact in inventory["artifacts"]:
     data = (ROOT / artifact["path"]).read_bytes()
     check(f"{Path(artifact['path']).name}: artifact identity", hashlib.sha256(data).hexdigest() == artifact["sha256"])

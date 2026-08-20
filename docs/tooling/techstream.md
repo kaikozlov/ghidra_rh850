@@ -1018,13 +1018,14 @@ mandatory for every ECU/EPS reflash. What remains external is the Toyota policy
 for a particular target/region/calibration, not another hidden client-side
 cryptographic predicate.
 
-`SeedValue` is likewise closed to the static client boundary. The reprogram flow
+`SeedValue` is fully closed inside the native client. The reprogram flow
 registers `FUN_0049BCF8/FUN_0049BCFE` as a callback when host flow mode is `3`;
-its second callback argument is the exact 16-byte SeedValue source. The request
-builder performs no RNG/time/hash derivation before hex serialization. The
-actual event/controller callback invoker one edge upstream is not named by the
-local static corpus; because Layer A never reaches the ECU, pursuing that
-runtime producer has low security value.
+the callback receives the exact 16-byte seed returned by the Central Gateway
+`27 21` SecurityAccess request, and the request builder performs no RNG/time/hash
+derivation before hex serialization. The 512-character RKS response is later
+decoded to 256 bytes and returned to the Central Gateway as `27 22 || token[256]`.
+This is gateway-facing Layer-A authorization and remains separate from the EPS
+flash-writer Layer-B SecurityAccess path.
 
 Canonical generated state artifact:
 `data/generated/techstream_v18/rks_client_state.json`; verifier:
@@ -1063,10 +1064,11 @@ sufficient evidence to name one.
 **Layer A↔B independence (verified):** the `Signature` never reaches any flash
 writer — `TCUWCanSecurityVFORESTFlashWriter`, `TCUWCanUnifiedFlashWriter`, and
 `TCUWCanCommonPrepareWriter` contain zero `reprokey`/`tagrepro`/`setrepro`
-references (ASCII and UTF-16). Layer A is a CUW-side permission token; it does
-not touch the ECU, the writer crypto, or any of the three firmware secrets.
-This is why none of the firmware secrets appear anywhere in the 6,826-file
-installer tree — they live in the calibration file (Layer B), not the installer.
+references (ASCII and UTF-16). Layer A is nevertheless vehicle-facing: CUW
+decodes the server token and returns its 256 bytes to the Central Gateway in
+`27 22`. That gateway authorization does not enter the EPS flash-writer crypto
+or any of the three firmware-secret paths. The firmware secrets remain
+calibration-file Layer-B material, not installer-resident RKS material.
 
 **`SeedValue` boundary (native path now recovered).**
 `CUWAccessRKSWrapper.SetDataForReproKey` maps native request-buffer offset

@@ -453,7 +453,7 @@
     "seed_bridge": "0x5907EC memcpy(0x629CDC, seed16, 0x10) at 0x5907F5 and, after a successful callback, memcpy(0x629CEC, token256, 0x100)",
     "summary": "RKS SeedValue = 16-byte CentralGW P5-CAN SecurityAccess 27 21 response seed; the whole producer is static Cuw.exe code \u2014 no producer edge is missing"
   },
-  "server_boundary": "no client private key, public-key verification, signature-generation algorithm, or ECU-facing RKS token dataflow is present; do not infer server cryptography from the fixed token format",
+  "server_boundary": "no client private key, public-key verification, or signature-generation algorithm is present; the server-produced 512-character token is decoded and sent to the Central Gateway as the 27 22 payload, not to the EPS flash writers; do not infer server cryptography from the fixed token format",
   "state_machine": {
     "file_import": "online ImportReproKey Next and OfflineImportReproKey Next both converge at 0x49C304; file import extracts XML <Signature>, requires exactly 0x200 characters and alphanumeric-only, then sets native state 1 on success or 2 on failure/cancel",
     "offline_start": "Offline button -> ExportDataForReproKey XML file/path -> offline instruction page -> same shared signature-file import as online file-reading path",
@@ -473,7 +473,7 @@
       "the live Central Gateway seed VALUE returned by the vehicle for 27 21",
       "the TIS-portal server-side signing algorithm and private key behind the 512-character token"
     ],
-    "priority": "low for ECU security because Layer A never reaches a flash writer or ECU",
+    "priority": "reflash-security infrastructure: Layer A reaches the Central Gateway through 27 21/27 22 but remains separate from EPS flash-writer Layer B; this does not expose an unauthenticated primitive",
     "producer": "fully recovered inside Cuw.exe; there is no missing or unnamed producer code path"
   },
   "string_anchors": [

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Generate the byte-pinned V18 CUW calibration metadata/object schema.
 
-This describes the metadata parser and TCUWCalibrationFile in-memory model.
-It deliberately does not invent the outer .cuw archive framing: the installed
-V18 tree contains no calibration specimen against which such an extractor can
-be validated.  `parse_cuw_attach.py` consumes the recovered `attach.att`
-descriptor once extracted.
+This describes the metadata parser, TCUWCalibrationFile in-memory model, and
+the statically recovered outer .cuw framing.  The framing parser is validated
+with an independently built synthetic fixture; a real Toyota calibration package
+is still required to validate observed format-type/tail choices and actual values.
+`parse_cuw_container.py` extracts the first member and `parse_cuw_attach.py`
+consumes the recovered `attach.att` descriptor.
 """
 from __future__ import annotations
 

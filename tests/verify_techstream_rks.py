@@ -166,7 +166,9 @@ check("SeedValue encoder is uppercase hexadecimal",
 
 # Offline-imported ReproKey/Signature is a fixed-width 0x200-character token.
 # This is a client-side format gate only; it does not identify the server-side
-# signing algorithm or make the token an ECU-facing credential.
+# signing algorithm.  TMS-033 separately proves the decoded token is returned
+# to the Central Gateway as the 27 22 payload, while remaining absent from the
+# EPS flash writers checked below.
 check("offline ReproKey/Signature format requires exactly 0x200 characters",
       pe.get_data(0x00480021 - image_base, 6) == b"\x81\xfa\x00\x02\x00\x00"
       and b"CReproKeyServerAccessCtrlr::CheckReproKeyFormat LengthError" in cuw_b)
