@@ -139,5 +139,23 @@ check("SecurityAccess computed key == Willem sample ad250d24...",
 pderived = AES.new(PAYLOAD_BUILD_SECRET, AES.MODE_ECB).encrypt(bytes(16))
 check("payload derived key == 80d221a0...", pderived.hex()=="80d221a05622b4f9d4f287922e6c78d1", pderived.hex())
 
+# ---- 8. SecOC RX record attempt caps + status-hook slots (SECOC-068) ----
+print("\n== 8. SecOC record caps + hook slots ==")
+recs = [0x25970 + 0x50 * i for i in range(6)]
+macs = [struct.unpack_from("<H", fw, va_file(b) + 2)[0] for b in recs]
+check("all six SecOC RX records carry MAC length 28", macs == [28] * 6, str(macs))
+lim10 = [fw[va_file(b) + 0x10] for b in recs]
+check("attempt cap +0x10: sync 0, five ordinary 1", lim10 == [0, 1, 1, 1, 1, 1], str(lim10))
+lim2e = [fw[va_file(b) + 0x2E] for b in recs]
+check("secondary cap +0x2E: sync 0, five ordinary 2", lim2e == [0, 2, 2, 2, 2, 2], str(lim2e))
+hooks = struct.unpack_from("<3I", fw, va_file(0x25940))
+check("status-hook slots == 6911C/69116/691EA",
+      list(hooks) == [0x6911C, 0x69116, 0x691EA], " ".join(f"{h:x}" for h in hooks))
+# KAT config word0 must be 1: icus_cmac_verify_prepare (0x87ED0) rejects *config != 1,
+# and the stored config passes, so the sole KAT kill switch remains gate byte
+# 0x30EF3 == 0x00 (SECOC-004). Guards against future "doubly dead KAT" misreads.
+_kat0 = struct.unpack_from("<I", fw, va_file(0x21604))[0]
+check("KAT config word0 == 1 (passes prepare validation)", _kat0 == 1, hex(_kat0))
+
 print(f"\n== RESULT: {ok} passed, {bad} failed ==")
 sys.exit(1 if bad else 0)

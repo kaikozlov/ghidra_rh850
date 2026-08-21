@@ -446,6 +446,16 @@ file offset/RVA `0x8020`, adjacent to `s2Cjar5er8iwP4Xz`, but neither constant
 has a recovered direct code reference in this DLL. Presence is therefore
 recorded without promoting either one to an IT3ACNK key.
 
+In `IT3UtilityNeoNK.dll` the constant is live key material rather than
+incidental data: the EntranceDLL AES-ECB wrapper loads the NUL-terminated
+literal directly (immediate `0x1003A7D4` at `0x10023F3B`, pushed at
+`0x10023F5A`), derives the key length from `strlen` — 32 for the full
+`bCVaAQnA3fNdDgdls2Cjar5er8iwP4Xz` literal (raw bytes verified at file offset
+`0x3A7D4`) — into the 128/192/256-selecting key schedule at `0x10024050`,
+with PKCS#7 gating at `0x10023F26` and the block cipher at `0x10024460`. The
+live IT3 Neo cipher is therefore AES-256-ECB keyed by the full 32-character
+string, not AES-128 keyed by the 16-character prefix.
+
 All twelve IT3ACNK crypto exports are classified and extent-hashed in
 `data/generated/techstream_v18/crypto_inventory.json`. Besides `EncryptAds`,
 the direct constant consumers are `EncryptSecretKeyC` (`EnerGizerreLayXT`),

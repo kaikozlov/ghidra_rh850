@@ -631,6 +631,21 @@ independent attempts for a fixed authenticated input.
 The failure path does not commit freshness and has no recovered per-source or
 per-PDU authentication-failure lockout. This lets repeated guesses continue to
 target the same candidate until a legitimate authenticated frame advances state.
+
+The mismatch arm is not entirely silent, but neither mechanism constrains an
+attacker. It invokes three registered application-status notification hooks
+(callback slots `0x6911C`, `0x69116`, `0x691EA` in the init/config block at
+`0x25940`) whose handlers write RAM bookkeeping only: event word `0xFEBE5048`,
+status byte `0xFEBE5064`, an 8-entry ring at `0xFEBE50AA`, and per-entry
+counters in the `0xFEBE5070` table. No Com/PduR transmit and no Dem/Dlt/Det
+call is reachable from them. A one-time per-profile attempt cap also exists:
+counter `0xFEBE550E` is bounded by record field `+0x10` (raw records at
+`0x25970..0x25B30`: sync profile `0`, each of the five ordinary profiles `1`;
+`0xFEBE550C` is bounded by `+0x2E`, value `2`). Cap-exceed transiently sets
+status `0x96`, which the worker tail (`0x8E4BA`/`0x8E67A`) immediately
+releases via `0x8E482` back to `0xE1` while `0x8E166` re-arms the queue slot
+to `0xC3`; verification is never gated and `0xFEBE550E` has no runtime reset,
+so the cap is cosmetic for a guessing attacker.
 The upper CryptoIf wrapper also waits synchronously for completion with a fixed
 `0xE07`-iteration polling budget. Thus malformed-but-well-shaped protected
 traffic has two distinct effects:

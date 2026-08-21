@@ -186,6 +186,42 @@ The flash sequencer landmarks are:
 - the indirect callback dispatch at `0x4350`/`0x435E` (documented in
   `../security/bootloader-payload-gate.md` as the authenticated-flash-driver entry).
 
+### 4.1 The failure runtime is also the normal programming-mode runtime
+
+Two audit results refine the picture above (recovered by independent pseudocode
+re-derivation against raw bytes; split-CodeFlash file offset == VA):
+
+1. **Application-initiated programming enters this loop live.** When the
+   application observes a programming request (predicate `FUN_00065E88`:
+   programming requested and neither `0xA5` nor `0xFF` veto markers present),
+   `FUN_00064EC8` clears the ICU-S marker RAM window
+   `0xFFC0A000..0xFFC0A00C`, then calls `FUN_00009F00` ->
+   `FUN_0000148E` (retained `{kind=0,id=7A1,session=2}` config record at
+   `0x31914`) and jumps **directly** into `boot_failure_main_loop` (`0x1398`)
+   without any CRC/validity failure and without a reset. The trailing
+   `system_hard_reset()` in that path is unreachable.
+
+2. **Failure-loop setup auto-arms the diagnostic surface.** `FUN_00001338`
+   (the `0x1398` prologue) reaches `FUN_000069D2`, which sets the diagnostic
+   master flag `DAT_febf2bd0` whenever the retained config word0 at
+   `0xFEBF2908` is `0x00` or `0xFF`. When word0 is `0x00` it additionally runs
+   `FUN_00000770 -> FUN_00006A22 -> FUN_00006504 -> FUN_00005148 ->
+   FUN_0000630C`, auto-entering extended session 3. UDS request processing
+   itself is gated on the armed flag at `0x6AAC`. Both real entry paths
+   pre-fill word0 to `0xFF` or `0`, so diagnostics are armed in practice.
+
+Consequence: a degraded ECU (failed validity, interrupted marker write) boots
+straight into a fully armed reprogramming runtime, and healthy programming mode
+is literally the same runtime. The attack surface is nevertheless unchanged
+relative to healthy programming mode: the degraded state serves the same
+20-entry SID table at `0x8E54` (SEC-BOOT-004), and every erase/write/reset/RAM-exec
+path still requires SecurityAccess level 2 (`0xFEBF2B0F == 2`; writer census:
+only send-key success writes `2` — SEC-BOOT-007). No unauthenticated mutating
+path exists in the failure loop, and watchdog/reset transitions cannot leave
+the UDS stack privileged (sanitize ordering in `FUN_00005086` precedes IRQ
+enable at `0x1398`).
+
+
 ## 5. Object-15 reachability (bounded negative)
 
 The SecOC triplicate key-bearing object is index 15 in namespace `0x100`,
