@@ -417,10 +417,13 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `libRFP.dylib`, explicitly left un-analyzed by RFP-001..008); fingerprint a
   bench target read-only first (`GetDeviceType 0x38`, `Inquiry 0x00`,
   `GetIDAuth 0x2C`, then protection/option reads `0x21/0x23/0x27/0x2E/0x49`)
-  before anything mutating; and treat `CheckIDAuth 0x30` with an all-FF ID as
-  the first authentication probe (blank-ID `UserID=0xFFFFFFFF` convention),
-  deferring `ValidateICU_S 0x70` and `DisableSerialProgramming 0x29` until
-  their silicon effect on P1M-E is observed.
+  before anything mutating; and, **only as a target-transfer hypothesis**, try
+  `CheckIDAuth 0x30` with an all-FF ID as the first authentication probe. The
+  shipped RFP docs/configuration contain generic all-FF ID examples/conventions,
+  but there is no R7F701381/P1M-E device record proving that blank-ID state for
+  this target. Treat acceptance/rejection as an observation, not a prior fact.
+  Defer `ValidateICU_S 0x70` and `DisableSerialProgramming 0x29` until their
+  silicon effect on P1M-E is observed. See CORR-092.
   See [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
 - **DID `0x1010` production use and slot-4 package.** Static firmware now
   recovers a SHE-compatible command-8 key-update service behind RoutineControl RID

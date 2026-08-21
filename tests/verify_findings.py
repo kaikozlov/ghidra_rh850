@@ -139,18 +139,47 @@ check("SecurityAccess computed key == Willem sample ad250d24...",
 pderived = AES.new(PAYLOAD_BUILD_SECRET, AES.MODE_ECB).encrypt(bytes(16))
 check("payload derived key == 80d221a0...", pderived.hex()=="80d221a05622b4f9d4f287922e6c78d1", pderived.hex())
 
-# ---- 8. SecOC RX record attempt caps + status-hook slots (SECOC-068) ----
-print("\n== 8. SecOC record caps + hook slots ==")
+# ---- 8. SecOC RX retry budgets + callback routing (SECOC-068 / CORR-090) ----
+print("\n== 8. SecOC retry budgets + callback routing ==")
 recs = [0x25970 + 0x50 * i for i in range(6)]
 macs = [struct.unpack_from("<H", fw, va_file(b) + 2)[0] for b in recs]
 check("all six SecOC RX records carry MAC length 28", macs == [28] * 6, str(macs))
 lim10 = [fw[va_file(b) + 0x10] for b in recs]
-check("attempt cap +0x10: sync 0, five ordinary 1", lim10 == [0, 1, 1, 1, 1, 1], str(lim10))
+check("current-PDU verify retry budget +0x10: sync 0, five ordinary 1",
+      lim10 == [0, 1, 1, 1, 1, 1], str(lim10))
 lim2e = [fw[va_file(b) + 0x2E] for b in recs]
-check("secondary cap +0x2E: sync 0, five ordinary 2", lim2e == [0, 2, 2, 2, 2, 2], str(lim2e))
+check("CryptoIf-submit retry budget +0x2E: sync 0, five ordinary 2",
+      lim2e == [0, 2, 2, 2, 2, 2], str(lim2e))
+# FUN_0008E166 owns fresh-PDU admission. The raw writes at 0x8E1A0/0x8E1A2
+# zero FEBE550C/FEBE550E in the D2 admission arm; pin the complete function so
+# the retry budgets cannot again be misread as persistent cross-frame counters.
+check("fresh-PDU admission helper exact body pins per-frame retry reset",
+      hashlib.sha256(fw[va_file(0x8E166):va_file(0x8E166) + 66]).hexdigest()
+      == "36a81b38ac5106dee1068526e91b7c33aff0fd8e6df4540868229a0bb2b58dfc")
+check("fresh-PDU admission zeroes both retry counters at 0x8E1A0/0x8E1A2",
+      fw[va_file(0x8E19C):va_file(0x8E1A8)] == bytes.fromhex("24f60c9d8004810440067f00"))
+# The +0x10 and +0x2E limits are consumed by different helpers.
+check("wrong-MAC/current-PDU helper exact body is 0x8E382",
+      hashlib.sha256(fw[va_file(0x8E382):va_file(0x8E382) + 104]).hexdigest()
+      == "6d1250c3a12079c7de2ca965822e7c091c84ad0ba74db083bc3d918478d7ade2")
+check("CryptoIf-submit retry helper exact body is 0x8E426",
+      hashlib.sha256(fw[va_file(0x8E426):va_file(0x8E426) + 92]).hexdigest()
+      == "3562b9de405f3ae6069011d43fcef0349dbe072c62e7bce653fcb26c3e489046")
+# Global callbacks are three distinct slots; all records also carry the same
+# per-profile +0x4C callback. 0x8E36C is the separate freshness-result-0x24
+# dispatcher through slot 0x25944, while 0x8E30A is the generic failure path.
 hooks = struct.unpack_from("<3I", fw, va_file(0x25940))
-check("status-hook slots == 6911C/69116/691EA",
+check("global status-hook slots == 6911C/69116/691EA",
       list(hooks) == [0x6911C, 0x69116, 0x691EA], " ".join(f"{h:x}" for h in hooks))
+profile_hooks = [struct.unpack_from("<I", fw, va_file(b) + 0x4C)[0] for b in recs]
+check("all per-profile +0x4C callbacks are 0x69182", profile_hooks == [0x69182] * 6,
+      " ".join(f"{h:x}" for h in profile_hooks))
+check("freshness-result callback dispatcher 0x8E36C body is pinned separately",
+      hashlib.sha256(fw[va_file(0x8E36C):va_file(0x8E36C) + 22]).hexdigest()
+      == "7a616930f2da5d88e211e6a1b4810ab71d19e77e2f04927b4f340a8646ae43b0")
+check("generic failure callback dispatcher 0x8E30A body is pinned separately",
+      hashlib.sha256(fw[va_file(0x8E30A):va_file(0x8E30A) + 98]).hexdigest()
+      == "6f0ab67025d52b235d475bcc11fc33f2ddb54f36690e3b778670a3bfcb08b8bc")
 # KAT config word0 must be 1: icus_cmac_verify_prepare (0x87ED0) rejects *config != 1,
 # and the stored config passes, so the sole KAT kill switch remains gate byte
 # 0x30EF3 == 0x00 (SECOC-004). Guards against future "doubly dead KAT" misreads.

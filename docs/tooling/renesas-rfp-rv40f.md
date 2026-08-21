@@ -468,5 +468,12 @@ remaining RFP/P1M-E questions require a target or a legitimate capture:
 - Does a manufacturing-only provisioning path exist outside this standard RFP
   distribution?
 
+The shipped RFP CLI documentation includes a generic all-`FF` ID-code example,
+and retained generic configuration strings use `UserID=0xFFFFFFFF`. Those facts
+support an all-`FF` `CheckIDAuth` value as a reasonable **probe hypothesis**,
+not as a recovered R7F701381/P1M-E blank-ID state. The analyzed distribution has
+no specific P1M-E device record that closes that transfer. Acceptance or
+rejection must therefore be treated as target observation (CORR-092).
+
 Until those are observed, host support must not be promoted into a claim about
 P1M-E mask-ROM capabilities.

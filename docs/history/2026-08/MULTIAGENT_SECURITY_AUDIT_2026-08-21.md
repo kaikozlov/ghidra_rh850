@@ -39,7 +39,7 @@ The `-0x8000` rule applies only to the original combined dump layout
 | 4 | Peer-ECU RAM-mirror slot-4 key extraction (704-byte table `0xFEBE6E34` class) | extract | route verified on siblings; requires acquired second ECU |
 | 5 | Command-5 signing proxy via dormant RID `0x100F` harness | bypass | software chain verified; slot-4 generation permission is the single hardware unknown |
 | 6 | Persistent Gate-2 patch `0x8E6C6 e0d1→e001` | bypass | known (SECOC-043/045); externally corroborated; causal bench proof pending |
-| 7 | Native serial programming (RV40F) as independent flash channel | bypass | host side fully recovered; gated on boot-pin wiring, blank-ID state, P1M-E mask-ROM support |
+| 7 | Native serial programming (RV40F) as independent flash channel | bypass | host side fully recovered; gated on boot-pin wiring, target authentication state, and P1M-E mask-ROM support; all-FF ID is only a transfer hypothesis |
 | 8 | MAC28 online guessing (28-bit tag, no effective lockout) | bypass | oracle-grade only (~2^27 mean per frame); not practical for steering |
 | 9 | Kmaster derivation for SHE rekey | derive | dead end statically: CPU is a blob-forwarder; OEM master secret exists in no analyzed binary |
 
@@ -48,13 +48,15 @@ The `-0x8000` rule applies only to the original combined dump layout
 ### Bootloader transition and degraded runtime
 
 - New **SEC-BOOT-011** (canonical §4.1 of
-  `architecture/boot-validity-and-flash-lifecycle.md`): the failure runtime and
-  normal programming mode are the same runtime. Application-initiated
+  `architecture/boot-validity-and-flash-lifecycle.md`): failed-validity and
+  normal programming converge on the same long-lived bootloader/DCM runtime,
+  but a later review corrected their entry-state equivalence. Application
   programming jumps live `FUN_00064EC8 → 0x9F00 → 0x148E(@0x31914) → 0x1398`
-  without CRC failure or reset; failure-loop setup auto-arms diagnostics
-  (`FUN_000069D2` master flag on retained word0 ∈ {0x00,0xFF}; extended
-  session 3 additionally when word0 == 0 via
-  `0x770→0x6A22→0x6504→0x5148→0x630C`).
+  without CRC failure or reset. `FUN_000069D2` arms diagnostics for retained
+  word0 ∈ {`0x00`,`0xFF`}; `FUN_00005086` initializes session 1. Only word0
+  `0x00` runs `0x6504→0x5148→0x630C` and injects the retained synthetic
+  `10 02`. Failed-validity word0 `0xFF` remains in default session, where a
+  direct `10 02` receives NRC `0x7E` (CORR-089).
 - Refuted again with writer censuses: no erase/write/RAM-exec path in the
   degraded state skips SecurityAccess level 2; reset windows cannot leave UDS
   privileged (sanitize ordering precedes IRQ enable).
@@ -72,11 +74,15 @@ The `-0x8000` rule applies only to the original combined dump layout
 - Command-5 engine `0x89630` caller chain re-confirmed unique
   (`0x68B42→0x88350→0x87CCC→0x87C70`); RID `0x100F` arms bank 1 with no
   SecurityAccess requirement (default session suffices).
-- New **SECOC-068**: wrong-MAC arm census — three RAM-only status hooks
-  (`0x6911C/0x69116/0x691EA` @ config `0x25940`) and a cosmetic one-time
-  attempt cap (record `+0x10` = 0 sync / 1 ordinary ×5, `+0x2E` = 0/2×5;
-  transient status `0x96` immediately released via `0x8E482`). Guessing stays
-  unthrottled; byte-locked in `verify_findings.py` §8.
+- New **SECOC-068**, corrected by follow-up review (CORR-090): ordinary
+  wrong-MAC handling uses global counter `FEBE550E` against record `+0x10`
+  (0 sync / 1 ordinary ×5), but this is a retry budget for the **current queued
+  PDU**. Fresh-PDU admission in `0x8E166` resets both retry counters, so
+  distinct guesses remain unthrottled. Record `+0x2E=2` bounds the separate
+  `FEBE550C` path when CryptoIf submit returns result 2. Callback routing is
+  also split: ordinary mismatch uses `6911C`; `69116` is freshness-result-0x24;
+  cap-exceeded generic failure additionally uses per-profile `69182` and global
+  `691EA`. Regression coverage now locks the reset and routing distinction.
 - Freshness facts reconfirmed against primary evidence: RAM-only freshness
   zeroed each boot (`secoc_rx_init` chain), no forward-delta clamp on sync
   acceptance (wrap floor from config byte at `0x2596C`), CMAC truncation at
@@ -96,7 +102,9 @@ The `-0x8000` rule applies only to the original combined dump layout
   SHE-provisioning commands, and no P1M-E device record all survived
   refutation attempts. Pre-capture recon steps appended to the serial-boot
   entry in `status/OPEN_QUESTIONS.md` (driver mode-entry pattern extraction,
-  read-only fingerprint order, blank-ID `CheckIDAuth` first probe).
+  read-only fingerprint order, and an explicitly hypothesis-grade all-FF
+  `CheckIDAuth` first probe; generic RFP examples do not prove P1M-E blank-ID
+  state — CORR-092).
 - CUW grammar cross-check reconfirmed: unified prepare's `27 01 ‖ ECUAuthKey[16]`
   (length exactly `0x12`) is the same tester-chosen record our SA algebra
   consumes; OEM flashing proves the offline path end-to-end once the
@@ -128,9 +136,14 @@ The `-0x8000` rule applies only to the original combined dump layout
 - `SEC-BOOT-011` — FINDINGS row + canonical §4.1 +
   `exploit/findings_coverage.json` disposition.
 - `SECOC-068` — FINDINGS row + application-chain.md §5.7 qualifier +
-  `verify_findings.py` §8 byte checks (record caps, hook slots, KAT guard).
-- `docs/tooling/techstream.md` — bCVa AES-256 strlen-keyed live-use paragraph.
-- `docs/status/OPEN_QUESTIONS.md` — serial-boot pre-capture steps appended.
+  `verify_findings.py` §8 byte checks. Follow-up review corrected the counters
+  to per-queued-PDU / CryptoIf-submit retry budgets and split the callback
+  routes (CORR-090).
+- `docs/tooling/techstream.md` — bCVa AES-256 strlen-keyed live-use paragraph;
+  follow-up review corrected the padding wording and added raw NeoNK regression
+  anchors (CORR-091).
+- `docs/status/OPEN_QUESTIONS.md` — serial-boot pre-capture steps appended;
+  all-FF ID probing remains a P1M-E transfer hypothesis (CORR-092).
 - This journal + history index entries.
 
 Everything else the audit surfaced was already canonical (SEC-BOOT-001..010,

@@ -449,12 +449,21 @@ recorded without promoting either one to an IT3ACNK key.
 In `IT3UtilityNeoNK.dll` the constant is live key material rather than
 incidental data: the EntranceDLL AES-ECB wrapper loads the NUL-terminated
 literal directly (immediate `0x1003A7D4` at `0x10023F3B`, pushed at
-`0x10023F5A`), derives the key length from `strlen` — 32 for the full
-`bCVaAQnA3fNdDgdls2Cjar5er8iwP4Xz` literal (raw bytes verified at file offset
-`0x3A7D4`) — into the 128/192/256-selecting key schedule at `0x10024050`,
-with PKCS#7 gating at `0x10023F26` and the block cipher at `0x10024460`. The
-live IT3 Neo cipher is therefore AES-256-ECB keyed by the full 32-character
-string, not AES-128 keyed by the 16-character prefix.
+`0x10023F5A`) and derives its length with `strlen`. The resulting length is 32
+for the full `bCVaAQnA3fNdDgdls2Cjar5er8iwP4Xz` literal (raw bytes verified at
+file offset `0x3A7D4`). The key-schedule dispatcher at `0x10024050` maps
+lengths 16/24/32 to AES-128/192/256 respectively, so this literal selects the
+AES-256 path. The wrapper shifts the input length by four and calls the block
+cipher at `0x10024460` once per 16-byte block, establishing ECB composition.
+
+The adjacent tail-handling code was previously mislabeled as a PKCS#7 gate.
+`0x10023F26` is only the pre-decrypt `length & 0x0F == 0` block-alignment
+check. Optional post-decrypt trimming starts at `0x10024001`: it reads the last
+plaintext byte as a count, bounds that count against the plaintext length, and
+zeros that many trailing bytes. No loop compares every trailing byte to the
+count, so this is **not a strict PKCS#7 padding validator**. The live IT3 Neo
+cipher is nevertheless AES-256-ECB keyed by the full 32-character string, not
+AES-128 keyed by the 16-character prefix. See CORR-091.
 
 All twelve IT3ACNK crypto exports are classified and extent-hashed in
 `data/generated/techstream_v18/crypto_inventory.json`. Besides `EncryptAds`,

@@ -201,25 +201,32 @@ re-derivation against raw bytes; split-CodeFlash file offset == VA):
    without any CRC/validity failure and without a reset. The trailing
    `system_hard_reset()` in that path is unreachable.
 
-2. **Failure-loop setup auto-arms the diagnostic surface.** `FUN_00001338`
-   (the `0x1398` prologue) reaches `FUN_000069D2`, which sets the diagnostic
-   master flag `DAT_febf2bd0` whenever the retained config word0 at
-   `0xFEBF2908` is `0x00` or `0xFF`. When word0 is `0x00` it additionally runs
-   `FUN_00000770 -> FUN_00006A22 -> FUN_00006504 -> FUN_00005148 ->
-   FUN_0000630C`, auto-entering extended session 3. UDS request processing
-   itself is gated on the armed flag at `0x6AAC`. Both real entry paths
-   pre-fill word0 to `0xFF` or `0`, so diagnostics are armed in practice.
+2. **Failure-loop setup arms diagnostics, but the two entry states are not
+   equivalent.** `FUN_00001338` (the `0x1398` prologue) reaches
+   `FUN_000069D2`, which sets the diagnostic master flag `DAT_febf2bd0` whenever
+   retained config word0 at `0xFEBF2908` is `0x00` or `0xFF`. `FUN_00006A22`
+   then initializes the DCM through `FUN_00005086`, which sets
+   `uds_current_session = 1`. Only the normal application-to-PROGRAMMING
+   retained path (`word0 == 0x00`) executes `FUN_00006504`; its
+   `FUN_00005148 -> FUN_0000630C` pre-hook temporarily installs session 3 and
+   clears the initializer delay before the retained request is injected as
+   synthetic bootloader `10 02`. The failed-validity `word0 == 0xFF` branch
+   does not call `FUN_00006504`; it remains in default session 1. This matters
+   because `uds_diagnostic_session_control @ 0x614A` explicitly rejects a
+   direct default-session `10 02` with NRC `0x7E`. UDS request processing in
+   both cases is gated on the armed master flag at `0x6AAC`.
 
-Consequence: a degraded ECU (failed validity, interrupted marker write) boots
-straight into a fully armed reprogramming runtime, and healthy programming mode
-is literally the same runtime. The attack surface is nevertheless unchanged
-relative to healthy programming mode: the degraded state serves the same
-20-entry SID table at `0x8E54` (SEC-BOOT-004), and every erase/write/reset/RAM-exec
-path still requires SecurityAccess level 2 (`0xFEBF2B0F == 2`; writer census:
-only send-key success writes `2` — SEC-BOOT-007). No unauthenticated mutating
-path exists in the failure loop, and watchdog/reset transitions cannot leave
-the UDS stack privileged (sanitize ordering in `FUN_00005086` precedes IRQ
-enable at `0x1398`).
+Consequence: a degraded ECU (failed validity, interrupted marker write) and a
+healthy programming transition converge on the same long-lived bootloader /
+DCM / flash-worker runtime, but **not on the same initial diagnostic session**.
+The degraded path is DCM-armed in default session; the normal retained handoff
+performs the synthetic transition into programming state. The mutation boundary
+is unchanged: the same 20-entry SID table at `0x8E54` is present, every
+erase/write/reset/RAM-exec path still requires SecurityAccess level 2
+(`0xFEBF2B0F == 2`; writer census: only send-key success writes `2` —
+SEC-BOOT-007), and no unauthenticated mutating path was recovered. Watchdog/reset
+transitions likewise cannot preserve UDS privilege because sanitization in
+`FUN_00005086` precedes IRQ enable at `0x1398`. See CORR-089.
 
 
 ## 5. Object-15 reachability (bounded negative)

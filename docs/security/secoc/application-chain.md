@@ -632,20 +632,34 @@ The failure path does not commit freshness and has no recovered per-source or
 per-PDU authentication-failure lockout. This lets repeated guesses continue to
 target the same candidate until a legitimate authenticated frame advances state.
 
-The mismatch arm is not entirely silent, but neither mechanism constrains an
-attacker. It invokes three registered application-status notification hooks
-(callback slots `0x6911C`, `0x69116`, `0x691EA` in the init/config block at
-`0x25940`) whose handlers write RAM bookkeeping only: event word `0xFEBE5048`,
-status byte `0xFEBE5064`, an 8-entry ring at `0xFEBE50AA`, and per-entry
-counters in the `0xFEBE5070` table. No Com/PduR transmit and no Dem/Dlt/Det
-call is reachable from them. A one-time per-profile attempt cap also exists:
-counter `0xFEBE550E` is bounded by record field `+0x10` (raw records at
-`0x25970..0x25B30`: sync profile `0`, each of the five ordinary profiles `1`;
-`0xFEBE550C` is bounded by `+0x2E`, value `2`). Cap-exceed transiently sets
-status `0x96`, which the worker tail (`0x8E4BA`/`0x8E67A`) immediately
-releases via `0x8E482` back to `0xE1` while `0x8E166` re-arms the queue slot
-to `0xC3`; verification is never gated and `0xFEBE550E` has no runtime reset,
-so the cap is cosmetic for a guessing attacker.
+The mismatch arm is not entirely silent, but it has no cross-frame throttle.
+For an ordinary CMAC mismatch, `FUN_0008E67A` calls `FUN_0008E382(...,0x200)`.
+That helper compares the **global current-queued-PDU retry counter**
+`0xFEBE550E` against record field `+0x10` (raw records
+`0x25970..0x25B30`: sync profile `0`, each of the five ordinary profiles `1`).
+An ordinary profile therefore permits one retry of the same queued PDU after
+its first failed verification; a second failed verification reaches the
+cap-exceeded `0x96` bookkeeping path and release. Crucially, when a fresh PDU
+is admitted in state `0xD2`, `FUN_0008E166` transitions it to `0xC3` and
+explicitly resets both `0xFEBE550E` and `0xFEBE550C` to zero. A new frame thus
+starts with a fresh retry budget, so distinct MAC28 guesses are not rate-limited
+by this counter.
+
+The second record limit, `+0x2E = 2` for the five ordinary profiles, bounds
+`0xFEBE550C` in `FUN_0008E426`. That helper is reached when
+`secoc_submit_cmac_verify()` returns result `2`; it is a CryptoIf submission /
+busy retry budget, **not** a second wrong-MAC attempt limit.
+
+Callback routing is likewise more specific than the raw three-pointer config
+block suggests. Global slot `0x25940 -> 0x6911C` is the status hook used by the
+ordinary mismatch path. Global slot `0x25944 -> 0x69116` is called separately
+through `FUN_0008E36C` for freshness-callback result `0x24`, not for an ordinary
+wrong MAC. The cap-exceeded generic failure path `FUN_0008E30A` invokes
+`0x6911C`, the per-profile callback at record `+0x4C` (all six records point to
+`0x69182`), and global slot `0x25948 -> 0x691EA`. These handlers remain RAM-only
+bookkeeping in the recovered application graph; no Com/PduR transmit or
+Dem/Dlt/Det edge was recovered from them.
+
 The upper CryptoIf wrapper also waits synchronously for completion with a fixed
 `0xE07`-iteration polling budget. Thus malformed-but-well-shaped protected
 traffic has two distinct effects:
@@ -659,8 +673,8 @@ This is not yet a claim of practical steering-frame forgery. CAN arbitration,
 ECU queue behavior, ICU-S throughput, error reporting, legitimate traffic, and
 watchdog effects determine the real attempt rate. Those must be measured on a
 bench. The static firmware nevertheless proves the tag width, unchanged
-freshness on failure, absence of a recovered lockout in this path, and bounded
-busy-poll loop.
+freshness on failure, absence of a recovered cross-frame lockout in this path,
+and bounded busy-poll loop. See CORR-090.
 
 ## 5.8 DLC canonicalization: classic is exact, FD has ignored suffix aliases
 

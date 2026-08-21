@@ -2149,3 +2149,82 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md)
   §19.5; `tests/verify_bootloader_diagnostics.py`;
   `data/p1me_product_memory.json`.
+
+### CORR-089 — degraded boot and normal PROGRAMMING share the runtime, not the entry session
+
+- **Wrong:** SEC-BOOT-011 initially said a failed-validity ECU boots into a
+  "fully armed reprogramming runtime" equivalent to the normal retained
+  application-to-PROGRAMMING handoff.
+- **Right:** both paths arm the same bootloader DCM/flash-worker runtime, but
+  `FUN_00006A22 -> FUN_00005086` initializes `uds_current_session=1` first.
+  Only retained word0 `0x00` runs `FUN_00006504`; its pre-hook
+  `FUN_00005148 -> FUN_0000630C` installs session 3 and clears the initializer
+  delay before injecting the retained synthetic `10 02`. Failed-validity
+  word0 `0xFF` does not enter that arm and stays in default session 1.
+- **Consequence:** `uds_diagnostic_session_control @ 0x614A` rejects a direct
+  default-session `10 02` with NRC `0x7E`. The same SID table and SA2 mutation
+  gates are present, so the security conclusion does not become an
+  unauthenticated programming path; only the entry-state equivalence is
+  withdrawn.
+- **Canonical:** [../architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md)
+  §4.1; `tests/verify_bootloader_diagnostics.py`.
+
+### CORR-090 — SecOC limits are per-queued-PDU / CryptoIf retry budgets, not persistent wrong-MAC caps
+
+- **Wrong:** SECOC-068 initially described `FEBE550E` as a one-time per-profile
+  wrong-MAC attempt cap with no runtime reset, described `FEBE550C/+0x2E` as a
+  second authentication-attempt cap, and grouped global callbacks
+  `6911C/69116/691EA` together as the ordinary wrong-MAC notification set.
+- **Right:** `FUN_0008E382` uses `FEBE550E` against record `+0x10` as a retry
+  budget for the current queued PDU. For ordinary profiles `+0x10=1`, so one
+  failed verification may be retried once. When a fresh PDU enters state
+  `0xD2`, `FUN_0008E166` transitions it to `0xC3` and explicitly zeroes both
+  `FEBE550C` and `FEBE550E`; every newly admitted frame starts fresh.
+  `FUN_0008E426` separately uses `FEBE550C` against `+0x2E=2` only when
+  `secoc_submit_cmac_verify()` returns result `2`, making it a CryptoIf-submit
+  retry budget rather than another wrong-MAC limit.
+- **Callback correction:** ordinary mismatch status uses global
+  `0x25940->0x6911C`. Global `0x25944->0x69116` is reached separately for
+  freshness callback result `0x24`. Generic cap-exceeded failure
+  `FUN_0008E30A` reaches `0x6911C`, the per-profile `+0x4C` callback
+  (`0x69182` for all six records), and global `0x25948->0x691EA`.
+- **Security consequence:** the old mechanism description was wrong, but the
+  MAC28 conclusion survives for a stronger reason: distinct newly received
+  guesses are not throttled across frames because admission resets the retry
+  counters.
+- **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
+  §5.7; `tests/verify_findings.py`; `tests/verify_secoc_acceptance_gate.py`.
+
+### CORR-091 — NeoNK AES-256 result stands; the prior PKCS#7-gate description did not
+
+- **Wrong:** the first NeoNK write-up called `0x10023F26` a "PKCS#7 gate".
+- **Right:** `0x10023F26` only enforces ciphertext length divisible by 16 before
+  decryption. The wrapper still `strlen`s the exact 32-byte
+  `bCVaAQnA3fNdDgdls2Cjar5er8iwP4Xz` literal, feeds length 32 to the
+  16/24/32-byte key-schedule dispatcher, and therefore selects AES-256. Its
+  block loop calls the AES primitive once per 16-byte block, so ECB composition
+  is unchanged.
+- **Tail handling:** optional trimming at `0x10024001` reads only the final
+  plaintext byte as a count, bounds it against total length, and zeroes that
+  many trailing bytes. It does not compare every padding byte, so it is not a
+  strict PKCS#7 validator.
+- **Canonical:** [../tooling/techstream.md](../tooling/techstream.md) §4.5;
+  `tests/verify_techstream_crypto_inventory.py`.
+
+### CORR-092 — generic RFP all-FF ID examples do not prove P1M-E blank-ID state
+
+- **Overstatement:** the pre-capture plan initially called all-FF
+  `CheckIDAuth 0x30` a P1M-E "blank-ID convention" and elevated it to the first
+  authentication probe as though target state were known.
+- **Right:** shipped RFP documentation includes an all-FF ID authentication
+  example, and retained generic RFP configuration strings include
+  `UserID=0xFFFFFFFF`. That is valid evidence for a generic RFP convention, not
+  for R7F701381/P1M-E specifically. The analyzed distribution has no specific
+  P1M-E device record proving its mask-ROM authentication state.
+- **Correct disposition:** an all-FF `CheckIDAuth` remains a reasonable
+  hypothesis-grade first probe after read-only fingerprinting. Acceptance or
+  rejection must be recorded as target observation; `ValidateICU_S 0x70` and
+  `DisableSerialProgramming 0x29` remain deferred until their silicon effects
+  are understood.
+- **Canonical:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) RFP/P1M-E entry;
+  [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).

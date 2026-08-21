@@ -242,10 +242,25 @@ check("adjacent CanTp timing configuration pins raw 1000/150/10 values",
 # backoff.
 check("normal programming handoff record is zero-kind / 0x7A1 / session 2",
       struct.unpack_from("<II", CF, 0x31914) == (0, 0x7A1) and CF[0x31924] == 2)
-check("handoff session hook calls clear-delay helper",
+check("handoff session pre-hook calls session-3 setter then clear-delay helper",
       CF[0x5148:0x5158] == bytes.fromhex("8007210080ffc01180ffda0440063f00"))
+check("session-3 setter body is exact before synthetic 10 02 replay",
+      CF[0x630C:0x631C] == bytes.fromhex("80072100010a440fa1930332bfffc0ee"))
 check("clear-delay helper writes FEBF2B56 = 0",
       CF[0x562A:0x5630] == bytes.fromhex("440756937f00"))
+# CORR-089: failed-validity word0==FF arms DCM but does not take the retained
+# synthetic-request arm. Pin the setup/session-control bodies and the unique
+# default-session -> programming NRC 0x7E site so the two entry states cannot
+# again be collapsed into one "already-programming" state.
+check("boot diagnostic setup body pins distinct word0==0 and word0==FF arms",
+      hashlib.sha256(CF[0x6A22:0x6A22 + 138]).hexdigest()
+      == "f6acb6647f8343527e82a2f02dfbe8ec90ca8833d6edb92f862a193f883db5ca")
+check("DiagnosticSessionControl body is exact for entry-state distinction",
+      hashlib.sha256(CF[0x614A:0x614A + 186]).hexdigest()
+      == "a14405a1ed4aee55e370e073c289716d5c48bd1543c38060491303a665132883")
+check("default-session direct 10 02 rejection emits unique NRC 0x7E",
+      occurrences(bytes.fromhex("20367e00")) == [0x619E],
+      repr(occurrences(bytes.fromhex("20367e00"))))
 check("NRC helper builds negative response for SID 0x27",
       CF[0x52CA:0x52D6] == bytes.fromhex("800721000638870020362700"))
 
