@@ -244,23 +244,70 @@ sibling mirror addresses `0xFEBE6E**` hold motor-signal data here (`FUN_000389C0
 not keys. Combined with the SHE read-prohibition (SECOC-025), the slot-4 key is ICU-S-only on
 this calibration: extraction requires a bus-level/hardware read or SCA, or a weaker peer ECU.
 
-### 1.7 Independent corroboration: persistent CodeFlash patching toolchain (SECOC-028)
+### 1.7 Blurbdust fork lineage and persistent CodeFlash extension (SECOC-028)
 
-A second community toolchain (blurbdust/@yc, comma Discord, 2026-08-01;
-`community/blurbdust_secoc_flash_patcher/`) independently re-implements the
-authenticated-RAM-exec bootstrap and extends it toward **persistent CodeFlash
-patching** — the first community tool we've seen that targets a reboot-surviving
-SecOC bypass rather than a volatile RAM payload. The import splits cleanly into
-two layers: infrastructure that transfers strongly, and an exploit signature
-that does not transfer to this calibration.
+The August-2026 Discord bundle is not a second independent implementation of the
+authenticated-RAM-exec bootstrap. Git archaeology now pins its public lineage:
+`blurbdust/secoc` is a fork of `I-CAN-hack/secoc` at parent
+`4ce19cc31ff560b697bcd59cc3db55711f50b7b3`, and blurbdust added the persistent
+patcher in `dbfd991bc817deca0c5c94e2fb5171d1142682c1` (2026-04-28), followed by
+`846866d...` and `47d2824...`. A separate pinned I-CAN-hack `tundra` precursor
+`b80d9104...` (2025-07-13) already carries the exact F3401200/2200 version
+record, CPU0 `0203=01 00 00 00 00`, and `45 01` grammar later generalized by
+blurbdust; those pieces are inherited lineage rather than CUW-provenance clues.
+The retained `community/.../main.c` is
+byte-identical to public `shellcode/main_flash_patch.c @ 47d2824`; the retained
+`flash_patcher.py` differs from the public file only in the two progress-frame
+`struct.unpack` endian format strings. Therefore the inherited SA/download/
+routine-control bootstrap is **same-lineage corroboration**, not independent
+evidence. Blurbdust's new evidence is the persistent FACI writer/patch host plus
+the separately shared CUW extractor.
+
+The CUW and writer chronology are tightly coupled. The optskug timeline preserves
+blurbdust Discord message `1496150355224952995` (Discord snowflake timestamp
+2026-04-21 14:07:21 UTC), where he says he has a script extracting the TechInfo
+`.cuw` flash driver and computing `0x201`/`0x202`. Seven days later his first public patcher commit adds the persistent FACI writer.
+Its F3401200/2200 host target is not an independent clue: Willem's 2025 Tundra
+branch already contained the exact target record and much of the new-UDS
+plumbing. The retained
+`decrypt.T-0035-22.py` does exactly the described job: it parses `CPUImageN` and
+`EraseRoutineN`, recovers DID `0x0201`/`0x0202`, decrypts and CMAC-checks the
+regions, and writes `{NewCID}_erase.pt.bin`. No April attachment hash survives,
+so the retained file is strongly consistent with the script he described but
+not proved byte-identical to that April copy.
+
+The first public `main_flash_patch.c` also already contains almost the full raw
+manufacturer-shaped FACI sequence: FSTATR-ready at `0xFFA10080/0x8000`, FASTAT
+command-lock at `0xFFA10010/0x10`, `FENTRYR=0xAA01`, the
+`FHVE15/FHVE3/FAREASELC/FPROTR` entry sequence, `FPSADDR/FSADDR` erase
+`0x20,0xD0`, and page program `0xE8,0x80,...,0xD0`. Its symbolic register names
+are shifted, and two important semantics are wrong/incomplete: it polls reserved
+FSTATR bit 21 instead of Toyota's bit 11/SUSRDY (`0x800`) per halfword, and it
+omits the manufacturer `0x7040` FSTATR error mask / Status Clear `0x50` recovery.
+This pattern is consistent with raw behavior reconstructed from disassembly
+without a correct symbolic register map. Combined with the April-21 extractor statement, a CUW-informed FACI origin is
+**plausible and worth pursuing**, but the inherited F340 target identity does not
+strengthen authorship provenance and line-level derivation remains unproved until the actual
+`T-0035-22.cuw` or plaintext manufacturer `*_erase.pt.bin` is acquired and
+diffed. The full provenance/semantic matrix is in `community/README.md`.
+The retained extractor also does not implement the V18 outer
+`\0CALIBRATION\0` magic/CRC/size/member validation recovered later in
+`tools/techstream/parse_cuw_container.py`; it opportunistically scans its input
+for INI/S-record content. Until a real T-0035 specimen is available, whether it
+expects the raw package or an exposed inner/package-specific layer remains
+specimen-bound. Preserve and validate the raw CUW before applying it.
+
+The import still splits cleanly into two functional layers: infrastructure that
+transfers strongly, and an exploit signature that does not transfer to this
+calibration.
 
 #### Infrastructure (bootstrap, FCU RMW, and CRC resigning transfer strongly)
 
 - **`flash_patcher.py`** — host tool. Structurally identical to the
-  I-CAN-hack/Bk2ol bootstrap: same `SEED_KEY_SECRET`, same `0x203→0x201→0x202`
+  inherited I-CAN-hack/Bk2ol bootstrap: same `SEED_KEY_SECRET`, same `0x203→0x201→0x202`
   DID order, same `0xFEBF0000` download window, same `0x10F0`/`0xFF00` routine
   triggers, all-zero data_record protocol. The structural cross-validation is
-  pinned in `verify_community_tooling.py` §1–5 (28 assertions). Its version
+  pinned in `verify_community_tooling.py`. Its version
   table covers `8965B4209000`, `8965B4233100`, `8965B4509100`, and new parts
   `8965F3401200` (dual-CPU), `8965F4207000`, `8965F4201000`.
 - **Flash RMW + CRC resigning** — `main.c` uses FCU registers (`FACI` at

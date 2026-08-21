@@ -2070,3 +2070,45 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:** `exploit/patcher/flash_backend.c`;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
   §9.7; `tests/verify_secoc_manifest_patcher.py`.
+
+### CORR-087 — the blurbdust Discord bundle was misclassified as source-less independent tooling
+
+- **Earlier wording/provenance:** the August-2026 import described all three
+  `community/blurbdust_secoc_flash_patcher/` files as Discord attachments with
+  "no canonical git source" and called the bundle an independently developed
+  implementation that independently corroborated the I-CAN-hack authenticated
+  RAM-exec bootstrap.
+- **Public lineage:** `blurbdust/secoc` is a public fork of
+  `I-CAN-hack/secoc`; GitHub records its creation on 2026-04-28. Blurbdust's
+  `dbfd991bc817deca0c5c94e2fb5171d1142682c1` added `flash_patcher.py` and
+  `shellcode/main_flash_patch.c`, followed by `846866d...` and pinned
+  `47d2824...`. The retained community `main.c` is byte-identical to public
+  `shellcode/main_flash_patch.c @ 47d2824`. The retained `flash_patcher.py`
+  differs only in the two `decode_frame` `struct.unpack` endian format strings
+  (`<I` in the Discord attachment, `>I` in public Git). Therefore the inherited
+  SA/DID/download/routine-control bootstrap is same-lineage corroboration, not
+  independent evidence.
+- **What remains source-less:** `decrypt.T-0035-22.py` does not occur anywhere
+  in the public `blurbdust/secoc` reachable history. Its behavior and filename
+  do, however, match blurbdust's Discord message `1496150355224952995`
+  (2026-04-21 14:07:21 UTC), where he said he had a TechInfo `.cuw` flash-driver
+  extractor that computes `0x201` and `0x202`. No April attachment hash survives,
+  so the retained August file is strongly consistent with that private tool but
+  cannot be proved byte-identical to it.
+- **Provenance consequence:** the exact F340 target/new-UDS plumbing is older
+  than blurbdust's writer: pinned I-CAN-hack `tundra @ b80d9104...` (2025-07-13)
+  already carries the `8965F3401200/8965F3402200` record, CPU0 DID-`0x0203`
+  offset, and `45 01` routine grammar later generalized by blurbdust. Seven days
+  after blurbdust's 2026-04-21 CUW-extractor statement, his first public commit
+  adds the persistent writer and carries nearly the full raw OEM-shaped FACI
+  command sequence. Its shifted register names,
+  wrong bit-21 pacing, and incomplete status recovery prevent claiming a direct
+  source translation. The evidence supports a **plausible CUW-informed writer
+  lineage**, not proven line-level derivation; inherited target identity is not
+  counted as independent provenance evidence. Exact proof still requires the
+  original CUW/plaintext Toyota `*_erase.pt.bin`.
+- **Canonical:** [../../community/README.md](../../community/README.md)
+  `blurbdust_secoc_flash_patcher` provenance section;
+  [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
+  §1.7; `tests/verify_community_tooling.py`; optional
+  `tests/verify_external_corroboration.py`.

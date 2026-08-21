@@ -195,6 +195,131 @@ def main() -> int:
         and "computes `0x201` and `0x202`" in optskug_readme,
     )
 
+    print("\n== blurbdust public lineage and CUW chronology ==")
+    blur_root = roots["blurbdust_secoc"]
+    blur_first = "dbfd991bc817deca0c5c94e2fb5171d1142682c1"
+    blur_parent = subprocess.run(
+        ["git", "-C", str(blur_root), "rev-parse", f"{blur_first}^"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    blur_first_date = subprocess.run(
+        ["git", "-C", str(blur_root), "show", "-s", "--format=%aI", blur_first],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    check(
+        "blurbdust first flash-writer commit forks directly from pinned I-CAN-hack tip",
+        blur_parent == lock["repositories"]["icanhack_secoc"]["commit"],
+        blur_parent,
+    )
+    check(
+        "blurbdust first flash-writer commit dates to 2026-04-28",
+        blur_first_date.startswith("2026-04-28T"),
+        blur_first_date,
+    )
+
+    tundra_root = roots["icanhack_secoc_tundra"]
+    tundra_date = subprocess.run(
+        ["git", "-C", str(tundra_root), "show", "-s", "--format=%aI", "HEAD"],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    tundra_host = (tundra_root / "extract_keys.py").read_text(encoding="utf-8")
+    first_host = git_show(blur_root, f"{blur_first}:flash_patcher.py")
+    check(
+        "Willem tundra precursor predates blurbdust writer and names the exact F340 pair",
+        tundra_date.startswith("2025-07-13T")
+        and "8965F3401200" in tundra_host
+        and "8965F3402200" in tundra_host
+        and "8965F3401200" in first_host
+        and "8965F3402200" in first_host,
+        tundra_date,
+    )
+    check(
+        "Willem tundra precursor supplies the CPU0 0203 offset and new-UDS 45 01 grammar generalized by blurbdust",
+        'write_data_by_identifier(0x203, b"\\x01\\x00\\x00\\x00\\x00")' in tundra_host
+        and 'offset_addr = b"\\x01\\x00\\x00\\x00\\x00" if cpu_index == 0' in first_host
+        and 'data = b"\\x45\\x01"' in tundra_host
+        and 'routine_magic = b"\\x45\\x01" if new_uds else' in first_host,
+    )
+    check(
+        "blurbdust generalized rather than byte-copying the tundra RequestDownload prefix",
+        'data += b"\\x01" # [4]' in tundra_host
+        and 'data = b"\\x01\\x46" + mem_id + b"\\x00"' in first_host,
+    )
+
+    public_shell = (blur_root / "shellcode/main_flash_patch.c").read_bytes()
+    community_shell = (REPO / "community/blurbdust_secoc_flash_patcher/main.c").read_bytes()
+    check(
+        "retained Discord main.c is byte-identical to pinned public main_flash_patch.c",
+        public_shell == community_shell,
+        hashlib.sha256(public_shell).hexdigest()[:16],
+    )
+
+    public_host = (blur_root / "flash_patcher.py").read_text(encoding="utf-8")
+    community_host_exact = (REPO / "community/blurbdust_secoc_flash_patcher/flash_patcher.py").read_text(encoding="utf-8")
+    normalized_public_host = public_host.replace('struct.unpack(">I"', 'struct.unpack("<I"')
+    check(
+        "Discord/public host tools differ only in two decode_frame endian format strings",
+        public_host.count('struct.unpack(">I"') == 2
+        and community_host_exact.count('struct.unpack("<I"') == 2
+        and normalized_public_host == community_host_exact,
+    )
+
+    public_history_paths = subprocess.run(
+        ["git", "-C", str(blur_root), "log", "--all", "--name-only", "--pretty=format:"],
+        check=True, capture_output=True, text=True,
+    ).stdout
+    check(
+        "public blurbdust history never contains the retained T-0035 decryptor",
+        "decrypt.T-0035-22.py" not in public_history_paths
+        and not (blur_root / "decrypt.T-0035-22.py").exists(),
+    )
+
+    first_shell = git_show(blur_root, f"{blur_first}:shellcode/main_flash_patch.c")
+    check(
+        "first public writer already targets exact T-0035-22 F3401200/F3402200 pair",
+        "8965F3401200" in first_host and "8965F3402200" in first_host,
+    )
+    check(
+        "first public writer already carries the OEM-shaped FACI raw sequence",
+        "0xFFA10080" in first_shell
+        and "0xFFA10010" in first_shell
+        and "0xFFA10084" in first_shell
+        and "0xFFA10088" in first_shell
+        and "0xFFF8A430" in first_shell
+        and "0xFFF82410" in first_shell
+        and "FACI_FCMD8 = 0x20" in first_shell
+        and "FACI_FCMD8 = 0xE8" in first_shell
+        and "FACI_FCMD8 = 0x80" in first_shell
+        and "FACI_FCMD8 = 0xD0" in first_shell,
+    )
+    check(
+        "first public writer contains the obsolete bit-21 pacing later corrected from Toyota CUW",
+        "while (FACI_FASTAT & (1 << 21))" in first_shell,
+    )
+
+    discord_cuw_message = 1496150355224952995
+    discord_cuw_ms = (discord_cuw_message >> 22) + 1420070400000
+    check(
+        "optskug pins the exact blurbdust CUW-extractor Discord message",
+        str(discord_cuw_message) in optskug_readme
+        and discord_cuw_ms == 1776780441815,
+        str(discord_cuw_ms),
+    )
+    check(
+        "CUW-extractor statement predates the first public writer by seven calendar days",
+        "### April 2026" in optskug_readme
+        and "2026-04-28" in blur_first_date,
+    )
+
+    corrected_faci = (roots["lochuan_b4512000_fw_patch"] / "payload/faci_dual.h").read_text(encoding="utf-8")
+    check(
+        "Lochuan manufacturer comparison supplies exactly the missing pacing/status semantics",
+        "0x00000800u" in corrected_faci
+        and "0x00007040u" in corrected_faci
+        and "FACI_CMD8=0x50u" in corrected_faci
+        and "manufacturer's CUW" in corrected_faci,
+    )
+
     print("\n== Lochuan historical/persistent-patch provenance ==")
     lochuan_report = (roots["rh850_p1me_original"] / "RESEARCH_REPORT_EN.md").read_text(encoding="utf-8")
     lochuan_manifest = (roots["lochuan_b4512000_fw_patch"] / "eps_patch/manifest.py").read_text(encoding="utf-8")

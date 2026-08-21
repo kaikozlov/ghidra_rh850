@@ -1698,6 +1698,22 @@ not proved personal provenance for Lochuan. The exact `.cuw`/erase payload is
 still **not** in our retained corpus, so byte-for-byte CUW parity remains
 external-source.
 
+The blurbdust lineage now makes that acquisition lead more than a generic family
+match. Public `blurbdust/secoc` is an `I-CAN-hack/secoc` fork; his 2026-04-21
+Discord message says he already had a TechInfo CUW flash-driver extractor that
+computes `0x201/0x202`, and his first public persistent-writer commit follows on
+2026-04-28. The exact F3401200/2200 target record and part of the new-UDS host
+plumbing already existed in Willem's pinned 2025 `tundra` branch, so those are
+inherited context rather than CUW-authorship evidence. The retained Discord `main.c` is
+byte-identical to that public writer, while retained `decrypt.T-0035-22.py`
+performs the exact `EraseRoutineN -> *_erase.pt.bin` extraction he described.
+The first writer's raw FACI sequence also substantially matches the later
+manufacturer-corrected sequence despite shifted symbolic names; its known gaps
+are precisely the later CUW-derived bit-11 pacing and `0x7040`/Status-Clear
+semantics. This is strong **circumstantial** evidence that the CUW work informed
+the persistent writer, not proof of source translation; see SECOC-028/CORR-087
+and `community/README.md`.
+
 Git archaeology strengthens the comparison provenance without recovering the
 bytes. Commit `390ddb730ca24265c7935989e251f45545909d65` itself says the
 manufacturer CUW flash-programming shellcode was from the **`8965F3` series and

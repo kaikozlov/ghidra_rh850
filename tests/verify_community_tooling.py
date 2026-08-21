@@ -78,6 +78,64 @@ for rel_path, expected in sorted(expected_hashes.items()):
         check(f"{rel_path} SHA-256 matches lock", actual == expected, actual[:16])
 
 
+# ---- 0b. Provenance bridge: Discord bundle -> public blurbdust/secoc ----
+print("\n== 0b. blurbdust public-lineage provenance ==")
+blur_repo = lock.get("repositories", {}).get("blurbdust_secoc", {})
+check(
+    "blurbdust/secoc public fork is pinned",
+    blur_repo.get("url") == "https://github.com/blurbdust/secoc.git"
+    and blur_repo.get("directory") == "blurbdust-secoc"
+    and blur_repo.get("commit") == "47d282428d2ad504e79120c35d492d1211142da6",
+)
+
+public_artifacts = {
+    (a.get("repository"), a.get("path")): a
+    for a in lock.get("artifacts", [])
+}
+community_artifacts = {
+    a.get("path"): a
+    for a in lock.get("community_artifacts", [])
+}
+community_main = community_artifacts.get(
+    "community/blurbdust_secoc_flash_patcher/main.c", {}
+)
+public_main = public_artifacts.get(
+    ("blurbdust_secoc", "shellcode/main_flash_patch.c"), {}
+)
+check(
+    "Discord main.c hash is identical to pinned public main_flash_patch.c",
+    bool(community_main.get("sha256"))
+    and community_main.get("sha256") == public_main.get("sha256"),
+    community_main.get("sha256", "")[:16],
+)
+check(
+    "main.c provenance records byte-identical public source",
+    "byte-identical to blurbdust/secoc" in community_main.get("provenance", ""),
+)
+
+community_host = community_artifacts.get(
+    "community/blurbdust_secoc_flash_patcher/flash_patcher.py", {}
+)
+check(
+    "host-tool provenance records the two endian-only public differences",
+    "two decode_frame struct.unpack endian format strings"
+    in community_host.get("provenance", ""),
+)
+
+community_decrypt = community_artifacts.get(
+    "community/blurbdust_secoc_flash_patcher/decrypt.T-0035-22.py", {}
+)
+check(
+    "CUW decryptor remains explicitly non-Git provenance",
+    community_decrypt.get("provenance") == "Discord attachment, no canonical git source",
+)
+check(
+    "CUW decryptor note binds the 2026-04-21 extractor statement without overclaiming identity",
+    "2026-04-21" in community_decrypt.get("notes", "")
+    and "no April attachment hash survives" in community_decrypt.get("notes", ""),
+)
+
+
 # ---- 1. flash_patcher.py SA secret and algorithm ----
 print("\n== 1. flash_patcher.py: SA secret and algorithm ==")
 fp = (COMMUNITY / "flash_patcher.py").read_text()
@@ -176,6 +234,22 @@ check("CUW tool verifies CMAC", "cmac" in dc.lower() or "CMAC" in dc)
 
 # AES-CBC decrypt for payload (consistent with SEC-BOOT-005 AES-CBC)
 check("CUW tool decrypts AES-CBC", "CBC" in dc)
+
+# This extractor is intentionally a different layer from the later statically
+# recovered Techstream V18 outer-container parser.  Do not silently treat its
+# regex/INI scan as package-integrity validation.
+outer_parser = (REPO / "tools/techstream/parse_cuw_container.py").read_text()
+check(
+    "T-0035 extractor scans INI/S-record content rather than validating outer CUW framing",
+    "parse_ini(data)" in dc and "parse_srec_streams(data)" in dc
+    and "CALIBRATION" not in dc and "zlib.crc32" not in dc,
+)
+check(
+    "Techstream outer parser independently validates CALIBRATION magic and package CRC",
+    "0043414c4942524154494f4e00" in outer_parser
+    and "zlib.crc32" in outer_parser
+    and "FIRST_MEMBER_OFFSET" in outer_parser,
+)
 
 
 # ---- 5. main.c shellcode addresses ----

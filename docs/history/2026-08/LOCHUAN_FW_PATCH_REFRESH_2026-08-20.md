@@ -193,6 +193,8 @@ Toyota T-SB-0069-22
 
 The retained `decrypt.T-0035-22.py` implements that extraction shape. Lochuan then independently states that he disassembled an `8965F3... *_erase.pt.bin` and compared it with his writer. It is highly plausible that these refer to the same Tundra CUW lineage, but the surviving evidence does **not** prove that Lochuan's exact input file was `T-0035-22.cuw` or that he used this exact script.
 
+A follow-up provenance audit closes a previously missed connection in our own corpus. `blurbdust/secoc` has been public since 2026-04-28 as a fork of `I-CAN-hack/secoc`; its `shellcode/main_flash_patch.c @ 47d2824` is byte-identical to our retained `community/.../main.c`, while its public `flash_patcher.py` differs from our Discord copy only in two progress-frame endian format strings. More importantly, blurbdust's exact CUW-extractor Discord message (`1496150355224952995`) dates to **2026-04-21 14:07:21 UTC**, seven days before first public writer commit `dbfd991...`. The exact `8965F3401200/8965F3402200` record and core new-UDS Tundra plumbing predate blurbdust on Willem's pinned `tundra @ b80d9104...` branch (2025-07-13), so they are inherited context rather than evidence of CUW-derived authorship. The writer's first-pass MMIO sequence already performs the same raw FENTRYR/HV/protection/erase/program operations later retained by the manufacturer-corrected code, although its symbolic register names are shifted and its bit-21 pacing/status cleanup are wrong. This makes a CUW-informed blurbdust writer lineage a strong hypothesis and makes the actual Tundra CUW especially valuable for source/behavior comparison; it still does not establish Lochuan's personal transfer path.
+
 What remains unknown is **how Lochuan personally obtained his copy**: his repository says only that he extracted the payload from `8965F3...` update packages. It does not say whether he downloaded a package directly with TIS access or received a CUW/plaintext payload from Willem, blurbdust, or another participant.
 
 A bounded search of local files and Git object histories, GitHub code/forks/releases, the I-CAN-hack Tundra branch, Internet Archive exact/prefix captures, archive.org item search, Common Crawl 2024/2025/2026 indexes, and exact web queries found no public mirror of `T-0035-22.cuw` or an `8965F3... *_erase.pt.bin`. Thus exact CUW byte parity still cannot be reproduced locally today. The best concrete acquisition target is **`T-0035-22.cuw`** (or a plaintext erase payload derived from it): hash-pin it, run/verify the retained decryptor, and independently disassemble the result.
@@ -227,6 +229,7 @@ No surviving Lochuan artifact records the **CUW extraction procedure itself**. A
 ## 5. Repository changes made from this refresh
 
 - advanced `external-references.lock.json` from `e7c1f17...` to `9eed2b4...` and later pinned `lochuan/eps-telescope @ 2bb94a5...` for the Aug-19 hardware-manual chronology;
+- pinned public `blurbdust/secoc @ 47d2824...` plus Willem's `I-CAN-hack/secoc tundra @ b80d9104...` precursor, bound the retained Discord shellcode byte-for-byte to the public fork, and corrected the prior "no canonical git source" / "independent toolchain" classification;
 - added hashes for refreshed `README.md`, `eps_patch/manifest.py`, and `payload/faci_dual.h`;
 - updated `tests/verify_external_corroboration.py` to distinguish the historical wrong target from the current corrected target and pin the FACI refresh/vehicle claims;
 - corrected `exploit/patcher/flash_backend.c` and strengthened its deterministic regression checks;
@@ -262,6 +265,12 @@ local:    make verify
 archaeology follow-up:
           make verify-external -> 384 checks passed, 0 failed
           make verify-changed  -> 110 suites passed, 0 failed
+
+blurbdust-lineage follow-up:
+          make verify          -> 181 core suites passed, 0 failed
+          make verify-external -> 414 checks passed, 0 failed
+          make verify-changed  -> 112 suites passed, 0 failed
+          verify_community_tooling.py -> 101 checks passed, 0 failed
 ```
 
 A direct live Ghidra-bridge xref attempt was also made first for the FACI registers, per repository policy, but the local bridge could not start because the runtime reported `Language not found for 'v850e3:LE:32:default'`. The existing read-only pseudocode corpus and raw firmware references were then used for the bounded local cross-check above. No committed Ghidra project was modified.
