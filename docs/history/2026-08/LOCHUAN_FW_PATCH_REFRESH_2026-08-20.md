@@ -222,6 +222,8 @@ That chronology separates two evidence contributions which the Aug-20 commit mes
 
 The most likely location of the missing manufacturer input is therefore **outside the public Git tree**, in Kevin/Lochuan's private reverse-engineering workspace or another local artifact directory used alongside it. The archaeology does not recover an exact CUW filename, local path, SHA-256, Ghidra project name, or transfer source. `T-0035-22.cuw` remains the best independently documented `8965F3` acquisition lead, not a proven filename for Lochuan's personal copy.
 
+No surviving Lochuan artifact records the **CUW extraction procedure itself**. Across the FW-PATCH history, deleted migration documents, and `eps-telescope` history there is no CUW parser/decryptor, extraction command, `SeedKey`/`Nonce` handling tied to CUW files, `EraseRoutineN` parser, intermediate filename, or output hash. His evidence stops at the two statements that an `8965F3` manufacturer image was imported into Ghidra and that he extracted/disassembled an `*_erase.pt.bin`. The retained `community/blurbdust_secoc_flash_patcher/decrypt.T-0035-22.py` supplies an independently documented community procedure for CUW→plaintext erase-routine extraction, but no surviving evidence proves Lochuan used that script or an equivalent implementation.
+
 ## 5. Repository changes made from this refresh
 
 - advanced `external-references.lock.json` from `e7c1f17...` to `9eed2b4...` and later pinned `lochuan/eps-telescope @ 2bb94a5...` for the Aug-19 hardware-manual chronology;
