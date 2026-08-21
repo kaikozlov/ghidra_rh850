@@ -1276,19 +1276,24 @@ reports; it is simply **no longer the current Lochuan patch**.
 
 The refreshed README also says the corrected patch point, target-sector digests,
 and CRC adjustment were captured from an actual bench vehicle and validated with
-a complete `probe -> patch -> verify` run. This is stronger deployment evidence
-than the retained historical `0x664E6` incident, but the corresponding run
-directory, F181/CodeFlash identity, raw protocol transcript, and CAN trace are not
-published, so the hardware statement remains external-source rather than an
-independently auditable run.
+a complete `probe -> patch -> verify` run. The bench **image identity is bound**,
+not unknown: the current manifest is hard-locked to F181
+`01 8965B4512000 00000000`, and its original `0x88000`-sector SHA-256
+`281a0ef918a1bd8e709bb579a7f19163d3e908eedb5bdf79ad7348c701177b01`
+exactly equals both Lochuan's pinned Sienna-CN `RH850_P1M-E_Firmware.bin` and the
+canonical CodeFlash in this repository. Operator provenance identifies that donor
+as the PRC Sienna EPS used for this analysis. The newer run directory, raw
+protocol transcript, and CAN trace are not published, so execution of the newer
+bench run remains external-source even though its source calibration is fixed.
 
 The same README adds the sentence "Verified working" for a 2024 RAV4 Prime and
-a 2026 PRC-made Sienna. No exact identity/run artifact or controlled MAC28-only
-experiment is tied to those two named vehicles in the repository. Treat them as
-external-source field claims, not as new firmware-static target proofs or as a
-replacement for the three-phase causal experiment in §9.8. The RAV4 model/year
-overlaps the yc field report in §9.6, but the public artifacts do not establish
-whether it is an independent vehicle or experiment.
+a 2026 PRC-made Sienna. The Sienna statement therefore has exact
+`8965B4512000` image binding plus author/operator vehicle provenance; the precise
+model-year label and the run transcript remain externally reported. The RAV4
+claim remains artifact-unbound. Neither statement replaces the controlled
+MAC28-only experiment in §9.8. The RAV4 model/year overlaps the yc field report
+in §9.6, but the public artifacts do not establish whether it is an independent
+vehicle or experiment.
 
 The relevant external sources are pinned beside the yc/community provenance in
 [`external-references.lock.json`](../../../external-references.lock.json):
@@ -1677,8 +1682,21 @@ FSTATR bit-21 poll to bounded bit-11 (`0x00000800`) polling, and checks FSTATR
 error mask `0x00007040` in addition to FASTAT command-lock. It also explicitly
 uses Forced Stop `0xB3` and Status Clear `0x50` during failure cleanup. Lochuan's
 README attributes these details to a register-by-register comparison against a
-Toyota CUW `8965F3... *_erase.pt.bin`; that manufacturer payload is **not** in
-our retained corpus, so exact CUW parity remains external-source evidence.
+Toyota CUW `8965F3... *_erase.pt.bin`.
+
+The source-package chain is now bounded more tightly. The pinned community
+chronology records a concrete Toyota TSB `T-SB-0069-22` source:
+`T-0035-22.cuw` for the dual-CPU Tundra EPS `8965F3401200/8965F3402200`, and the
+retained `decrypt.T-0035-22.py` maps each CUW `EraseRoutineN` region to a
+plaintext `{NewCID}_erase.pt.bin`. The official bulletin carries TechInfo
+calibration links for those IDs; anonymous requests now reach the Toyota
+TechInfo login gate. Lochuan states only that his comparison used an
+`8965F3... *_erase.pt.bin`; he does not identify the exact CUW filename, say
+whether it came directly through TIS or the community, or say that he used the
+retained decryptor. Thus `T-0035-22.cuw` is the best concrete acquisition lead,
+not proved personal provenance for Lochuan. The exact `.cuw`/erase payload is
+still **not** in our retained corpus, so byte-for-byte CUW parity remains
+external-source.
 
 The update nevertheless exposed a local implementation defect: our
 `exploit/patcher/flash_backend.c` had inherited the older bit-21 pacing loop and

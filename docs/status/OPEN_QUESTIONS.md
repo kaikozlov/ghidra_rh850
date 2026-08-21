@@ -115,8 +115,12 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   rediscovers the Sienna authenticated-delivery gate from a fresh unannotated
   CodeFlash-only import with no target/MAC-result/CRC addresses embedded in the
   resolver. The highest-value next artifact is any blurbdust-supported
-  `8965F3`/`8965F4` CodeFlash (or the missing Corolla `8965F1208000` image): run
-  `tools/resolve_secoc_patch_image.sh` unchanged and compare its unique semantic
+  `8965F3`/`8965F4` CodeFlash (or the missing Corolla `8965F1208000` image).
+  For F3 the acquisition target is now concrete: Toyota Tundra package
+  `T-0035-22.cuw` from TSB `T-SB-0069-22` contains the `8965F3401200/2200`
+  images plus the CUW erase routine; the retained community decryptor can emit
+  the body/erase plaintext once the package is acquired. Run
+  `tools/resolve_secoc_patch_image.sh` unchanged on the recovered CodeFlash and compare its unique semantic
   target, if any, with the community egg location. Zero candidates means the
   Level-1 machine shape must be lifted to p-code/CFG data-flow; multiple
   candidates require stronger crypto-result provenance. Do **not** add a

@@ -182,6 +182,18 @@ def main() -> int:
         "optskug records Toyota-B physical bus assignment can move the relay onto bus 1",
         "the relay ends up on bus 1 instead of bus 0/2" in optskug_readme.lower(),
     )
+    check(
+        "optskug records the exact Tundra CUW source for the 8965F3 flash driver",
+        "T-SB-0069-22" in optskug_readme
+        and "T-0035-22.cuw" in optskug_readme
+        and "flash driver that's uploaded before flashing" in optskug_readme
+        and "This flash driver should be applicable to all cars" in optskug_readme,
+    )
+    check(
+        "optskug records community extraction of the flash driver from Techinfo CUW",
+        "script for extracting the flash driver from the Techinfo `.cuw` package" in optskug_readme
+        and "computes `0x201` and `0x202`" in optskug_readme,
+    )
 
     print("\n== Lochuan historical/persistent-patch provenance ==")
     lochuan_report = (roots["rh850_p1me_original"] / "RESEARCH_REPORT_EN.md").read_text(encoding="utf-8")
@@ -222,6 +234,19 @@ def main() -> int:
         "Lochuan current README claims RAV4 Prime 2024 and Sienna 2026 PRC verification",
         "Verified working on a **2024 Toyota RAV4 Prime**" in lochuan_readme
         and "a **2026 Toyota Sienna (PRC made)**" in lochuan_readme,
+    )
+    canonical_code = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()
+    upstream_combined = (roots["rh850_p1me_original"] / "RH850_P1M-E_Firmware.bin").read_bytes()
+    canonical_target_sector_sha = hashlib.sha256(canonical_code[0x88000:0x90000]).hexdigest()
+    upstream_target_sector_sha = hashlib.sha256(upstream_combined[0x90000:0x98000]).hexdigest()
+    check(
+        "Lochuan current bench target is bound to the canonical 8965B4512000 CN-Sienna donor image",
+        'part_number=b"8965B4512000"' in lochuan_manifest
+        and 'application_software_id=b"\\x018965B4512000\\x00\\x00\\x00\\x00"' in lochuan_manifest
+        and canonical_target_sector_sha == "281a0ef918a1bd8e709bb579a7f19163d3e908eedb5bdf79ad7348c701177b01"
+        and upstream_target_sector_sha == canonical_target_sector_sha
+        and f'original_sha256="{canonical_target_sector_sha}"' in lochuan_manifest,
+        canonical_target_sector_sha,
     )
     lochuan_faci = (roots["lochuan_b4512000_fw_patch"] / "payload/faci_dual.h").read_text(encoding="utf-8")
     check(
