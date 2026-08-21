@@ -200,16 +200,37 @@ def main() -> int:
         and "| 6 | 56 | 6 | 70 | `FEBEF4D0`" in lochuan_report,
     )
     check(
-        "Lochuan patch manifest pins 0x664E6 and 0x31->0x10 instruction byte",
-        "patch_address=0x664E6" in lochuan_manifest
-        and 'original_instruction=bytes.fromhex("20 e6 31 00")' in lochuan_manifest
-        and 'patched_instruction=bytes.fromhex("20 e6 10 00")' in lochuan_manifest,
+        "Lochuan current manifest converges on the corrected Gate-2 compare neutralization",
+        "patch_address=0x8E6C7" in lochuan_manifest
+        and 'original_instruction=bytes.fromhex("1d 30 e0 d1")' in lochuan_manifest
+        and 'patched_instruction=bytes.fromhex("1d 30 e0 01")' in lochuan_manifest
+        and "crc_patched_prefix_sw=0xBE36F00D" in lochuan_manifest
+        and "crc_patched_adjust_word=0x41C90FF2" in lochuan_manifest,
     )
     lochuan_readme = (roots["lochuan_b4512000_fw_patch"] / "README.md").read_text(encoding="utf-8")
     check(
         "Lochuan public guide explicitly separates Flash PASS from RX SecOC proof",
         "PASS is a Flash-level result" in lochuan_readme
         and "does not, by itself, prove that the EPS RX SecOC behavior is functionally bypassed" in lochuan_readme,
+    )
+    check(
+        "Lochuan current README claims corrected artifacts came from a full bench probe-patch-verify run",
+        "captured from the actual bench vehicle" in lochuan_readme
+        and "full `probe → patch → verify` run" in lochuan_readme,
+    )
+    check(
+        "Lochuan current README claims RAV4 Prime 2024 and Sienna 2026 PRC verification",
+        "Verified working on a **2024 Toyota RAV4 Prime**" in lochuan_readme
+        and "a **2026 Toyota Sienna (PRC made)**" in lochuan_readme,
+    )
+    lochuan_faci = (roots["lochuan_b4512000_fw_patch"] / "payload/faci_dual.h").read_text(encoding="utf-8")
+    check(
+        "Lochuan current FACI source carries the CUW-correlated status/pacing correction",
+        "#define FSTATR_ERROR_MASK 0x00007040u" in lochuan_faci
+        and "FACI_FSTATR&0x00000800u" in lochuan_faci
+        and "0x00200000" not in lochuan_faci
+        and "0xFFA10080" in lochuan_faci
+        and "0xFFA10010" in lochuan_faci,
     )
 
     # The public-release commit deleted the internal design/report tree, but the

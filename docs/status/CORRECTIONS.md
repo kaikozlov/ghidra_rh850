@@ -2039,3 +2039,34 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   §7.35; `tests/verify_corolla_8965H1202000_lta_command_provenance.py`.
+
+### CORR-086 — the persistent patcher's FACI pacing/status model inherited obsolete community code
+
+- **Earlier wording/implementation:** `exploit/patcher/flash_backend.c` was
+  described as retaining the reviewed P1M-E FACI primitive with full checked
+  completion. Its per-halfword program loop actually polled FSTATR bit 21
+  (`0x00200000`), and `faci_result()` checked only ready bit 15 plus FASTAT
+  command-lock bit 4. This came from the older blurbdust-derived writer lineage.
+- **External correction:** refreshed `lochuan/8965B4512000-FW-PATCH` commit
+  `390ddb730ca24265c7935989e251f45545909d65` says its comparison against Toyota
+  CUW `8965F3... *_erase.pt.bin` requires FSTATR bit 11 (`0x00000800`) for the
+  program pacing loop, FSTATR error mask `0x00007040`, FASTAT command-lock bit 4,
+  and the manufacturer register identities `FSTATR=FFA10080`, `FASTAT=FFA10010`,
+  `FENTRYR=FFA10084`, `FPROTR=FFA10088`. The referenced CUW payload is not
+  retained locally, so the byte-identical CUW comparison remains
+  **external-source**, not independently verified here.
+- **Local firmware cross-check:** the Sienna image independently contradicts the
+  old command-lock-only model. `FUN_00077B6A` uses FSTATR bit 15 as ready;
+  `FUN_00077BA0/FUN_00077C56` issue Status Clear `0x50` and Forced Stop `0xB3`;
+  `FUN_00077D9A` checks low FSTATR status bit `0x400` while feeding program data;
+  and `FUN_00077F96` tests mask `0x24068`. These do not prove Lochuan's exact CUW
+  mask, but they do prove that the old local abstraction omitted relevant FSTATR
+  state.
+- **Correct implementation:** the backend now uses the corrected register names,
+  bounded bit-11 pacing, `0x7040` FSTATR status checking, FASTAT command-lock,
+  Forced Stop/Status Clear recovery, and a checked P/E exit even after partial
+  entry failure. `tests/verify_secoc_manifest_patcher.py` pins those source-level
+  invariants and rejects the old bit-21 poll.
+- **Canonical:** `exploit/patcher/flash_backend.c`;
+  [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
+  §9.7; `tests/verify_secoc_manifest_patcher.py`.

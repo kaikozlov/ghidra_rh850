@@ -9,7 +9,7 @@
     "lochuan_b4512000_fw_patch": {
       "url": "https://github.com/lochuan/8965B4512000-FW-PATCH.git",
       "directory": "8965B4512000-FW-PATCH",
-      "commit": "e7c1f17d1090470b18f7f3315abd99b64e5e4619"
+      "commit": "9eed2b4ac871b1944e686769cc3e0a43fd7198c3"
     },
     "icanhack_secoc": {
       "url": "https://github.com/I-CAN-hack/secoc.git",
@@ -63,14 +63,20 @@
     {
       "repository": "lochuan_b4512000_fw_patch",
       "path": "README.md",
-      "size": 62186,
-      "sha256": "2dbc74fc3663925329169ce51f214d35b259d8072255d9d77d762201e9fa5dad"
+      "size": 68239,
+      "sha256": "ccccd0c396e34fbd4495d5d36b3a511e50d2471c3f3e0b7f0dbe66f431c0e1cf"
     },
     {
       "repository": "lochuan_b4512000_fw_patch",
       "path": "eps_patch/manifest.py",
-      "size": 7736,
-      "sha256": "dffb1cac2027634649203166ea3ead785b06e5b8d71ba7a83f7ca9a44b7c3158"
+      "size": 7754,
+      "sha256": "099ce5d24cf2b28f6b3fdbfcb89cdc53401375a8d07b250e9615bee974435efe"
+    },
+    {
+      "repository": "lochuan_b4512000_fw_patch",
+      "path": "payload/faci_dual.h",
+      "size": 5352,
+      "sha256": "67554bbb1181f9798c509f3358f8d8f9bd0ed94870f34f419b69b130fab33c1d"
     },
     {
       "repository": "icanhack_secoc",

@@ -1255,16 +1255,47 @@ three-phase harness holds camera traffic constant and changes only MAC28.
 
 ### 9.7 YC compare-neutralization versus Lochuan/3b1b `0x664E6` patch
 
-The corrected yc patch and the patch published by Lochuan/3b1b must not be
-classified as alternate encodings of the same SecOC decision. They modify
-independent subsystems.
+This subsection now has two time slices. At the prior public pin
+`e7c1f17d1090470b18f7f3315abd99b64e5e4619`, Lochuan/3b1b shipped the
+independent `0x664E6: 0x31 -> 0x10` checkpoint-status patch analyzed below. On
+2026-08-18, commit `2188d5a235d4ac1bf8c616266b8f6b472a047fdb` removed that target and
+switched the public tool to the **same corrected Gate-2 compare neutralization
+independently recovered here**: instruction `0x8E6C6: e0 d1 -> e0 01`
+(`cmp r0,r26 -> cmp r0,r0`; represented by Lochuan's one-byte manifest edit at
+`patch_address=0x8E6C7`). The updated manifest also independently converges on
+prefix CRC `0xBE36F00D` and replacement terminal fixup `0x41C90FF2`. The current
+external pin is `9eed2b4ac871b1944e686769cc3e0a43fd7198c3`.
+
+That convergence is strong external corroboration of SECOC-043, but it does not
+change the local proof grade: this repository had already derived the Gate-2
+predicate, branch polarity, exact bytes, and CRC fixup from the Sienna firmware.
+Nor does it erase the historical analysis below. The old `0x664E6` target was
+actually published and programmed during the retained development history, so
+its semantics remain relevant to provenance and to interpreting old field
+reports; it is simply **no longer the current Lochuan patch**.
+
+The refreshed README also says the corrected patch point, target-sector digests,
+and CRC adjustment were captured from an actual bench vehicle and validated with
+a complete `probe -> patch -> verify` run. This is stronger deployment evidence
+than the retained historical `0x664E6` incident, but the corresponding run
+directory, F181/CodeFlash identity, raw protocol transcript, and CAN trace are not
+published, so the hardware statement remains external-source rather than an
+independently auditable run.
+
+The same README adds the sentence "Verified working" for a 2024 RAV4 Prime and
+a 2026 PRC-made Sienna. No exact identity/run artifact or controlled MAC28-only
+experiment is tied to those two named vehicles in the repository. Treat them as
+external-source field claims, not as new firmware-static target proofs or as a
+replacement for the three-phase causal experiment in §9.8. The RAV4 model/year
+overlaps the yc field report in §9.6, but the public artifacts do not establish
+whether it is an independent vehicle or experiment.
 
 The relevant external sources are pinned beside the yc/community provenance in
 [`external-references.lock.json`](../../../external-references.lock.json):
 
-- `lochuan/8965B4512000-FW-PATCH @ e7c1f17d1090470b18f7f3315abd99b64e5e4619`,
-  whose `eps_patch/manifest.py` fixes `patch_address=0x664E6` and changes
-  `20 e6 31 00` to `20 e6 10 00`;
+- current `lochuan/8965B4512000-FW-PATCH @ 9eed2b4ac871b1944e686769cc3e0a43fd7198c3`,
+  whose manifest now carries the corrected Gate-2 target and whose Git history
+  retains the pre-`2188d5a` `0x664E6` implementation;
 - `lochuan/RH850_P1m-E @ b8c6bcf6b84763a9c5288fc8fa6766ebfe66ce4a`,
   whose `RESEARCH_REPORT_EN.md` labels `0x66374` as
   `secoc_mac_job_scheduler`, `0x674A8` as `secoc_mac_generate_submit`, and maps
@@ -1566,13 +1597,15 @@ public `0x262`/`0x351` status producers**. A later indirect consequence is still
 possible, but the current static graph does not identify one explicit LKAS-off
 bit.
 
-The external repository provides **real deployment evidence, but still no
-functional SecOC-bypass proof**. Its current README explicitly says Flash-level
-`PASS` does not by itself prove RX SecOC bypass and requires a later stationary
-openpilot/EPS compatibility test. The public-release commit deleted the internal
-SDD/design tree, but that history is still reachable from the pinned repository
-commit and separates several actual bench observations from later offline-only
-verification:
+The historical `0x664E6` repository record provides **real deployment evidence,
+but no functional SecOC-bypass proof**. The current README still explicitly says
+Flash-level `PASS` does not by itself prove RX SecOC bypass and requires a later
+stationary system test, even though it now separately claims two vehicles as
+"Verified working." The latter claim has no retained causal trace or exact target
+artifact, so it cannot retroactively convert the old `0x664E6` incident into a
+Gate-2 proof. The public-release commit deleted the internal SDD/design tree, but
+that history remains reachable from the current repository and separates several
+actual bench observations from later offline-only verification:
 
 - DCRA correction ancestor `b23649d688022413647f3412e409e121e91372d8`
   says its input was a complete report from a **failed read-only probe** on the
@@ -1629,13 +1662,33 @@ and the blurbdust/@yc-style host path already pinned in this repository.
 
 The hardware-specific writer structure is likewise the same family as the
 imported blurbdust/@yc implementation described by SECOC-028: 32-KiB CodeFlash
-block RMW through a `FEBF2000` SRAM buffer, FACI unlock `AA01`, write-window
-enable, P/E entry `5501`, erase `20/D0`, 256-byte programming through `E8/80`
-and `D0`, P/E exit `5500`, and a live-CodeFlash CRC repair at `FFDEC`. Lochuan's
-private/public descendant substantially hardens that pattern with exact idle
-snapshots, bounded polling, candidate intents, source/candidate identity pins,
-separate target/CRC writers, full readback streaming, durable recovery state,
-and fail-closed destructive transitions.
+block RMW through a `FEBF2000` SRAM buffer, FACI entry, erase `20/D0`, 256-byte
+programming through `E8/80` and `D0`, and a live-CodeFlash CRC repair at
+`FFDEC`. Lochuan's private/public descendant substantially hardens that pattern
+with exact idle snapshots, bounded polling, candidate intents,
+source/candidate identity pins, separate target/CRC writers, full readback
+streaming, durable recovery state, and fail-closed destructive transitions.
+
+A later upstream correction matters to our own deployment code. Commit
+`390ddb730ca24265c7935989e251f45545909d65` renames the FACI registers to the
+manufacturer convention (`FSTATR=FFA10080`, `FASTAT=FFA10010`,
+`FENTRYR=FFA10084`, `FPROTR=FFA10088`), changes per-halfword pacing from the old
+FSTATR bit-21 poll to bounded bit-11 (`0x00000800`) polling, and checks FSTATR
+error mask `0x00007040` in addition to FASTAT command-lock. It also explicitly
+uses Forced Stop `0xB3` and Status Clear `0x50` during failure cleanup. Lochuan's
+README attributes these details to a register-by-register comparison against a
+Toyota CUW `8965F3... *_erase.pt.bin`; that manufacturer payload is **not** in
+our retained corpus, so exact CUW parity remains external-source evidence.
+
+The update nevertheless exposed a local implementation defect: our
+`exploit/patcher/flash_backend.c` had inherited the older bit-21 pacing loop and
+command-lock-only completion check. The local Sienna firmware independently
+supports the need for richer FACI handling: `FUN_00077B6A` reads FSTATR bit 15
+as ready; `FUN_00077BA0/FUN_00077C56` use Status Clear `0x50` and Forced Stop
+`0xB3`; and the programming/status helpers at `0x77D9A/0x77F96` test low FSTATR
+status/error bits rather than bit 21. CORR-086 therefore refreshes our backend
+to the CUW-correlated bit-11/mask sequence while keeping the exact manufacturer
+comparison explicitly external.
 
 This is not merely similarity inferred after the fact. The first public payload
 commit, `8d0f29fbe506e36de37a912930f6c68c10a75c42`, says the Task-4 payloads were
@@ -1717,18 +1770,19 @@ acceptance bypass**. If a field setup accepts bad-MAC steering frames with only
 that patch, some additional runtime condition or experiment change must explain
 the SecOC effect.
 
-| Property | yc corrected patch | Lochuan/3b1b patch |
+| Property | corrected Gate-2 patch (yc, this repo, current Lochuan) | historical Lochuan pre-`2188d5a` patch |
 |---|---|---|
-| Address | `0x8E6C6` | `0x664E6` (immediate byte of instruction at `0x664E4`) |
+| Address | instruction `0x8E6C6` (`0x8E6C7` changed byte) | `0x664E6` (immediate byte of instruction at `0x664E4`) |
 | Edit | `cmp r0,r26 -> cmp r0,r0` | checkpoint status immediate `0x31 -> 0x10` |
 | Layer | SecOC Gate-2 post-command-7 acceptance | generic ordinary checkpoint/NvM completion |
 | Bad MAC effect | mismatch BNE becomes impossible; PDU takes verified-delivery arm | no recovered direct Gate-2 edge |
 | Lower-layer truth preserved | yes; real verify boolean still reaches pre-gate bookkeeping | no; consumer sees success while failure latch remains set |
 | Scope | one receive-acceptance predicate | every ordinary checkpoint completion using this failure arm |
+| CRC fixup on reconstructed `4512000` | `0x41C90FF2` | historical target had a different candidate CRC |
 | Stability expectation | narrow semantic bypass | inconsistent state / delayed-failure risk |
 
-The distinction is pinned by `tests/verify_lochuan_patch_semantics.py`; the
-external repositories are provenance evidence only and are checked separately by
+The historical distinction is pinned by `tests/verify_lochuan_patch_semantics.py`;
+current-upstream convergence and FACI source semantics are checked separately by
 `make verify-external`.
 
 ## References

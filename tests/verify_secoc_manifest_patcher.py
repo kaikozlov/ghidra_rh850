@@ -252,13 +252,31 @@ check("APPLY rejects final residue mismatch", "err_final_residue" in apply_c)
 apply_dispatch_pos = main_c.index("run_apply(cfg)")
 apply_success_pos = main_c.index("telemetry_stage(stage_success)", apply_dispatch_pos)
 check("success is emitted only after run_apply returns zero", apply_dispatch_pos < main_c.index("if (err == 0u)", apply_dispatch_pos) < apply_success_pos)
-check("flash backend retains reviewed FACI primitive", all(token in flash_c for token in ("faci_erase", "faci_program_page", "faci_fentryr", "faci_fpckar")))
-check("FCU command completion checks timeout and command-lock status", "static int faci_result" in flash_c and "faci_err_timeout" in flash_c and "faci_err_command_lock" in flash_c)
-check("FCU clear-error operation propagates failure", "static int faci_check_clear_errors" in flash_c and "return faci_result();" in flash_c)
+check("flash backend uses corrected P1M-E FACI register identities", all(token in flash_c for token in (
+    "faci_fstatr", "0xffa10080", "faci_fastat", "0xffa10010",
+    "faci_fentryr", "0xffa10084", "faci_fprotr", "0xffa10088",
+    "faci_fareaselc", "0xffa10020", "fhve15_reg", "0xfff8a430",
+    "fhve3_reg", "0xfff82410",
+)))
+check("FCU command completion checks timeout, status-mask, and command-lock state",
+      "static int faci_result" in flash_c
+      and "faci_err_timeout" in flash_c
+      and "faci_err_status" in flash_c
+      and "fastat_cmdlk_mask" in flash_c
+      and "fstatr_error_mask         0x00007040u" in flash_c)
+check("program data pacing uses corrected bounded FSTATR bit-11 poll",
+      "fstatr_program_pace_mask  0x00000800u" in flash_c
+      and "while ((faci_fstatr & fstatr_program_pace_mask) != 0u)" in flash_c
+      and "unsigned short timeout = 0xffffu" in flash_c
+      and "1u << 21" not in flash_c
+      and "0x00200000" not in flash_c)
+check("FCU cleanup has both Forced Stop and Status Clear",
+      "faci_fcmd8 = 0xb3u" in flash_c and "faci_fcmd8 = 0x50u" in flash_c)
+check("FCU failure cleanup propagates Status Clear result", "static int faci_failure_cleanup" in flash_c and flash_c.count("return faci_result();") >= 3)
 check("FCU enter and exit transitions return checked status", "static int faci_enter_pe_mode" in flash_c and "static int faci_exit_pe_mode" in flash_c)
 check("erase and program completion use full FACI result", flash_c.count("return faci_result();") >= 3)
-check("all post-enter failures converge on P/E cleanup", flash_c.count("goto exit_pe;") >= 3 and "exit_pe:" in flash_c)
-check("FCU errors preserve failing phase in return code", all(token in flash_c for token in ("flash_err_unlock", "flash_err_clear", "flash_err_enter", "flash_err_erase", "flash_err_program", "flash_err_exit")))
+check("all P/E-attempt failures converge on cleanup and exit", flash_c.count("goto cleanup;") >= 3 and "cleanup:" in flash_c and "err = faci_exit_pe_mode();" in flash_c)
+check("FCU errors preserve failing phase in return code", all(token in flash_c for token in ("flash_err_unlock", "flash_err_enter", "flash_err_erase", "flash_err_program", "flash_err_exit", "flash_err_cleanup")))
 all_generic_c = "\n".join(
     p.read_text(encoding="utf-8").lower()
     for p in (REPO / "exploit").rglob("*.c")

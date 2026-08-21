@@ -69,15 +69,21 @@ SID-`0xBA` token-comparison logic rather than SecOC acceptance logic. Future
 F3/F4 egg matches still require calibration-specific semantic validation.
 
 For comparison with yc's corrected Gate-2 patch, the independently published
-Lochuan/3b1b `8965B4512000-FW-PATCH` repository is now pinned in
-`../external-references.lock.json`. Its `0x664E6: 0x31→0x10` target is a generic
-checkpoint/NvM failure-status fail-open, not another Gate-2 encoding; see
+Lochuan/3b1b `8965B4512000-FW-PATCH` repository is pinned in
+`../external-references.lock.json`. Its **historical pre-2026-08-18**
+`0x664E6: 0x31→0x10` target is a generic checkpoint/NvM failure-status fail-open,
+not another Gate-2 encoding; see
 [`docs/security/secoc/application-chain.md` §9.7](../docs/security/secoc/application-chain.md#97-yc-compare-neutralization-versus-lochuan3b1b-0x664e6-patch).
-The older pinned `lochuan/RH850_P1m-E` report is retained alongside it because
-its historical misidentification of the checkpoint cone as SecOC MAC scheduling
-is a plausible conceptual origin for the bad target. No surviving source
-explicitly states that this misclassification caused the original `0x664E6`
-selection, so that final provenance link remains an inference.
+Commit `2188d5a...` subsequently removed that target and the current public tool
+now independently matches the corrected Gate-2 compare neutralization at
+`0x8E6C6 e0d1→e001` plus CRC fixup `0x41C90FF2`. Commit `390ddb7...` also
+corrected the FACI program-pacing/status model; that refresh exposed and prompted
+CORR-086 in our own persistent patcher. The older pinned `lochuan/RH850_P1m-E`
+report is retained alongside the current checkout because its historical
+misidentification of the checkpoint cone as SecOC MAC scheduling is a plausible
+conceptual origin for the bad target. No surviving source explicitly states that
+this misclassification caused the original `0x664E6` selection, so that final
+provenance link remains an inference.
 
 ## `albinoelephant/`
 
