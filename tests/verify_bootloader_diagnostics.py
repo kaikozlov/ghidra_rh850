@@ -8,12 +8,14 @@ repository is required.
 from __future__ import annotations
 
 import hashlib
+import json
 import struct
 import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
+P1ME = json.loads((REPO / "data" / "p1me_product_memory.json").read_text(encoding="utf-8"))
 TP = 0x869C
 
 passed = failed = 0
@@ -209,19 +211,41 @@ check("SecurityAccess init arms 200000000-tick delay and clears attempts",
       CF[0x55AA:0x55FC] == bytes.fromhex(
           "80072100210600c2eb0b640f1d93bfff6cc7010a440f569364572193000a44075793"
           "249e249301f0d3f1410a80030106f0ffa003f6f5000a01f0d3f19003410a0106f0ffa6fd13f0010ab003b10b40063f00"))
-# Generic boot timer scheduling uses the same free-running counter and scales
-# its millisecond-valued 16-bit delay argument by 20,000 ticks. The CanTp
-# config immediately exercised through this scheduler contains canonical
-# 1000/150/10-ms transport timers.
-check("boot timer scheduler body pins 20000 ticks-per-ms scaling",
+# The delay's wall-clock scale is independently recoverable from the actual
+# counter source and TAUJ1 configuration, not from the adjacent CanTp numbers.
+check("free-running SecurityAccess timer reader is exact",
+      CF[0x1D24:0x1D2C] == bytes.fromhex("8007095120ca7f00"))
+check("tracked timer source is TAUJ1CNT0 at FFE51010",
+      P1ME["timer"]["tauj1cnt0_address"] == 0xFFE51010)
+check("TAUJ1 init stores TPS=FFF2 and CMOR0=0156",
+      P1ME["timer"]["firmware_tauj1tps_value"] == 0xFFF2 and
+      P1ME["timer"]["firmware_tauj1cmor0_value"] == 0x0156)
+check("P1M-E 80MHz P-Bus and PRS0=2 make TAUJ1 CK0 20MHz",
+      P1ME["timer"]["p_bus_hz"] == 80_000_000 and
+      P1ME["timer"]["prs0"] == 2 and
+      P1ME["timer"]["ck0_hz"] == 20_000_000)
+check("SecurityAccess 200000000-tick delay is 10 seconds",
+      P1ME["timer"]["security_delay_ticks"] // P1ME["timer"]["ck0_hz"] == 10 and
+      P1ME["timer"]["security_delay_ms"] == 10_000)
+check("generic boot scheduler body pins exact x20000 counter scaling",
       CF[0x1D2C:0x1D56] == bytes.fromhex(
           "8007a17006e007d89c0008d0db0009c88036ffff80ffde540a30bfffdefffcf60c00240e3891c1f103d5"))
-check("CanTp timer configuration pins 1000/150/10-ms arguments",
+check("adjacent CanTp timing configuration pins raw 1000/150/10 values",
       int.from_bytes(CF[0x8D5C:0x8D5E], "little") == 1000 and
       int.from_bytes(CF[0x8D5E:0x8D60], "little") == 150 and
       int.from_bytes(CF[0x8D64:0x8D66], "little") == 10)
-check("SecurityAccess lockout duration resolves to 10 seconds",
-      200_000_000 // 20_000 == 10_000)
+
+# Boot diagnostic initialization does arm the same delay, but the normal
+# application->PROGRAMMING retained handoff deliberately clears it before the
+# synthetic bootloader 10 02 is replayed.  This is why successful field unlocks
+# roughly one second after PROGRAMMING do not contradict the 10-second bad-key
+# backoff.
+check("normal programming handoff record is zero-kind / 0x7A1 / session 2",
+      struct.unpack_from("<II", CF, 0x31914) == (0, 0x7A1) and CF[0x31924] == 2)
+check("handoff session hook calls clear-delay helper",
+      CF[0x5148:0x5158] == bytes.fromhex("8007210080ffc01180ffda0440063f00"))
+check("clear-delay helper writes FEBF2B56 = 0",
+      CF[0x562A:0x5630] == bytes.fromhex("440756937f00"))
 check("NRC helper builds negative response for SID 0x27",
       CF[0x52CA:0x52D6] == bytes.fromhex("800721000638870020362700"))
 

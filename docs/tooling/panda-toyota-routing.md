@@ -538,6 +538,38 @@ address, handoff, and privilege alternatives are closed on the real Corolla
 image. A gateway policy must not be promoted from "plausible" to fact without a
 gateway artifact or transition capture.
 
+## 14.1 2026-08-19 live `param=1` observation and the old preflight confound
+
+Calvin's pinned `dump` journal adds one dynamic result that the static topology
+could not supply. Span's 2025 Corolla answered an EPS DEFAULT-session request on
+**logical bus 1 under both ELM327 `param=0` and `param=1`**, while buses 0 and 2
+were silent for that EPS probe. The Panda reported a flipped harness. This is the
+first retained in-car measurement proving that the `param=1` FDCAN2 route can
+reach the EPS conductors on that vehicle.
+
+The same run did **not** test PROGRAMMING on that direct route. The preflight
+revision then in use chose the first answering `(bus,param)` pair in array order;
+`param=0` was enumerated first, so `(bus1,param0)` won despite `(bus1,param1)`
+also answering. The subsequent `10 02` and five range-dump attempts therefore
+ran on the OBD-multiplexed/gateway path and went silent. Those negatives do not
+transfer to `param=1`.
+
+Pinned final `dump @ 42d1120` corrects the bug by probing every answering route
+through the diagnostic ladder and selecting only a route that actually opens
+PROGRAMMING. Calvin's `CLAUDE.md` says the corrected selector was mock-tested, but no committed preflight test at the pinned tip independently proves that claim; it has not yet run in-car in the retained record.
+The remaining dynamic discriminator is exactly one measurement:
+
+```text
+ELM327 param 1 + logical bus 1
+    -> DEFAULT / EXTENDED
+    -> 10 02 PROGRAMMING
+    -> rediscover 0x7A1/0x7A9 on the same route
+```
+
+A positive result would establish a direct stock-wire programming path without
+making that route equivalent to the CAN0/CAN2 interception topology required for
+normal openpilot operation.
+
 ## 15. Correct tooling behavior
 
 The robust diagnostic workflow is:

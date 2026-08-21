@@ -273,6 +273,38 @@ that reflects product policy, provisioning state, a masked/incomplete snapshot,
 or another operational source. The exact key source for this captured image is
 therefore unknown.
 
+Calvin's now-pinned `dump` research journal adds related-variant field structure
+that must stay separate from those static conclusions. On his in-car Sienna
+range corpus, two already-known plaintext values at `FF206E14` and `FF206ED4`
+reportedly anchored a **0x40-byte repeating KEY-record geometry**: record index at
+`+0x00`, fields he labels ID/AuthID at `+0x04/+0x08`, and a 16-byte value at
+`+0x14`. The first address independently matches the object-15 raw-copy second
+field above. The second address is three `0x40` strides later; under the exact
+`8965B4512000` physical map it is **object 12** raw copy `FF206EC0 + 0x14`, not
+object 14 (whose corresponding field is `FF206E54`). Thus the stride/+0x14
+geometry is corroborative, while Calvin's table-wide ID/AuthID and
+"ECU master key" labels remain external terminology and must not be imported as
+`4512000` object semantics.
+
+The same journal reports that a dealer rekey did **not** erase the preceding
+factory SecOC key: the old value remained readable in plaintext DataFlash. The
+before/after artifact is not retained here, so this remains an external field
+observation. It makes stale historical key material a plausible lifecycle concern
+on that observed Sienna; it does not establish a valid object-15 record on this
+exact `4512000` or H snapshot.
+
+The H repeatability audit also changes how strongly a *single* DataFlash image
+may be read. Official P1M-E product data identifies `R7F701383` as a 1-MiB DPS
+part with **32 KiB DataFlash** at `FF200000..FF207FFF`. Calvin's 64-KiB profile
+therefore over-reads the specified DataFlash array; its upper 32 KiB is excluded
+from DataFlash conclusions. Across the five retained reads, the actual first
+32 KiB differ by 23.5077 to 25.6470 percent pairwise. The cause is not assigned
+to genuine flash writes. What survives the repeatability test is structural:
+every one of the five independently yields three valid copies for objects 0/2/5
+and zero valid copies for object 15. Thus "object 15 is uncommitted in the
+retained H reads" is repeatable; arbitrary single-byte contents are not promoted
+without repetition.
+
 Pages 480–511 remain strongly consistent with an ICU-S-reserved 2 KiB tail. In
 this capture the entire tail exposes only `00/FF` readback. That supports a
 protected-storage boundary; it does not expose plaintext slot bytes or prove the

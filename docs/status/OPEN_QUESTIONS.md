@@ -281,8 +281,13 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   location, bootloader payload gate, bootloader secrets, and SecOC
   implementation must therefore still be checked against the actual CodeFlash.
   Direct field probing has already established the software IDs, physical
-  diagnostic endpoint, responding SIDs, level-`0x03` seed behavior, and
-  observed SecOC traffic; do not describe those as unknown. See
+  diagnostic endpoint, responding SIDs, level-`0x03` seed behavior, observed
+  SecOC traffic, and (2026-08-19) DEFAULT-session reachability on bus 1 under
+  **both** ELM327 params 0 and 1; do not describe those as unknown. The old
+  PROGRAMMING failure remains route-confounded because that preflight selected
+  `(bus1,param0)` by array order. Final Calvin `dump @ 42d1120` selects by actual
+  PROGRAMMING reachability, but **PROGRAMMING on `(bus1,param1)` has never been
+  measured in-car** and is now the decisive cheap experiment. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 - **Separate 2023 US Corolla / tracked `8965H1202000` specimen.** The complete
   memory corpus is now retained. CodeFlash internally identifies
@@ -318,6 +323,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   well: 17 outer SIDs retain their policy shape, RDBI is 226 DIDs with a distinct
   32-selector stale-response set, and RoutineControl keeps the same 19 policy rows
   while `110A/C/D` become no-op and `110B` becomes an H-only active lifecycle.
+  The retained five-run H FF20-range corpus also adds a storage-quality boundary.
+  Official Renesas P1M-E documentation identifies `R7F701383` as a DPS 1-MiB
+  device with **32 KiB DataFlash at `FF200000..FF207FFF`**; the upper half of
+  Calvin's 64-KiB host profile is outside the specified DataFlash array and must
+  not be treated as DataFlash. Across the actual first 32 KiB, the five reads
+  differ by 23.5077%-25.6470% pairwise while object validity still repeats
+  exactly (0/2/5 valid, object 15 invalid). The same Renesas documentation maps
+  both the `FEBE` PE1-local and `FEDE` self-local 128-KiB views while specifying
+  only 128 KiB total local RAM, so `FEDE` is an architectural self view rather
+  than an additional bank. A direct H `local_ram_self` read would reproduce
+  dynamic access behavior, but is no longer required to resolve memory extent.
   The FD field pass now closes the obvious replacement-command candidates:
   `025` is shared with Sienna and retains the `025 -> 4A3` telemetry join; B6's
   signed16 scalar is staged-only under the complete direct-reference census;
@@ -358,6 +374,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **TSS 3.0 family breadth.** Which Sienna findings generalize across the
   family (Camry, RAV4, etc.) is unmapped. See
   [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).
+
+- **Boot SecurityAccess lifecycle measurement.** The bad-key backoff itself is
+  statically closed at **10 seconds**: the second bad `27 02` arms
+  `200000000` TAUJ1CNT0 ticks and `27 01` returns NRC `0x37`; TAUJ1CNT0 runs at
+  20 MHz from the recovered P1M-E timer configuration. Separately, the ordinary
+  application→PROGRAMMING retained replay explicitly clears the initializer
+  delay before synthetic boot `10 02`, explaining Calvin's roughly one-second
+  successful unlocks. Remaining dynamic value is lifecycle confirmation after
+  hard reset / actual bad-key lockout, not the nominal duration. Host tooling
+  should request SecurityAccess normally after PROGRAMMING and respect NRC
+  `0x37` only when the backoff is actually active.
 
 ## Tooling
 

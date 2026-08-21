@@ -36,6 +36,11 @@
       "directory": "calvinpark-openpilot",
       "commit": "eeb87f4f9cbcba2ee9c358c8d93015a513c1f822"
     },
+    "calvinpark_openpilot_dump": {
+      "url": "https://github.com/calvinpark/openpilot.git",
+      "directory": "calvinpark-openpilot-dump",
+      "commit": "42d1120395877e96ed440646a765157a0ad7646b"
+    },
     "commaai_hardware": {
       "url": "https://github.com/commaai/hardware.git",
       "directory": "comma-hardware",
@@ -337,6 +342,66 @@
       "path": "README.md",
       "size": 195395,
       "sha256": "ffd48e30cf430083cdeca522a1455b1a0ff5d77c3af3a5176d15830db5c7886a"
+    },
+    {
+      "repository": "calvinpark_openpilot_dump",
+      "path": "CLAUDE.md",
+      "size": 130954,
+      "sha256": "7e5a2504d928170add432dbf1ec68772b5f4e47d40714883b5acf4374bf38e8a"
+    },
+    {
+      "repository": "calvinpark_openpilot_dump",
+      "path": "tsk/lib/dump_range.py",
+      "size": 21088,
+      "sha256": "21fce761351861d811be82a8628cd6c0a3d04a87d2ed95f5beeba814c63ab26b"
+    },
+    {
+      "repository": "calvinpark_openpilot_dump",
+      "path": "tsk/lib/preflight.py",
+      "size": 33127,
+      "sha256": "714bac321cbf9cf0aa2247782bdf28d427f3283fa8447692cb981c66dcb16ee7"
+    },
+    {
+      "repository": "calvinpark_openpilot_dump",
+      "path": "tsk/lib/preflight_store.py",
+      "size": 13114,
+      "sha256": "59e200a92549afc3c09ce2a2e698d8de0788bef2ec053ad8467cf8bdd1d217b6"
+    },
+    {
+      "repository": "calvinpark_openpilot_dump",
+      "path": "tsk/lib/payload_codeflash_00000000_00200000.bin",
+      "size": 4096,
+      "sha256": "860f8a3418d23ccfd0861a97efdb9e1d23a8854c3a629b8d7b6821eb93d0b588"
+    },
+    {
+      "repository": "calvinpark_openpilot_dump",
+      "path": "tsk/lib/payload_dataflash_ff200000_ff210000.bin",
+      "size": 4096,
+      "sha256": "9545c4192797a4800d675c454892a787f1df88683522eefb6b47915cf9c7a4eb"
+    },
+    {
+      "repository": "calvinpark_openpilot_dump",
+      "path": "tsk/lib/payload_extended_codeflash_01000000_0100c000.bin",
+      "size": 4096,
+      "sha256": "9882860dffe746217f776ef69d93f40bc4405c62bc009f156f87c6a444ae7b2c"
+    },
+    {
+      "repository": "calvinpark_openpilot_dump",
+      "path": "tsk/lib/payload_global_ram_feef8000_fef08000.bin",
+      "size": 4096,
+      "sha256": "43d00fdaf790c6deb230d3a4e7b8f8bd17e077a100fa53ebb194532f55c510fd"
+    },
+    {
+      "repository": "calvinpark_openpilot_dump",
+      "path": "tsk/lib/payload_local_ram_pe1_febe0000_fec00000.bin",
+      "size": 4096,
+      "sha256": "fbb1f5bd352c3f0bf416d6b1ef6a7696f97cad2b9f49570ca859207f3269e44f"
+    },
+    {
+      "repository": "calvinpark_openpilot_dump",
+      "path": "tsk/lib/payload_local_ram_self_fede0000_fee00000.bin",
+      "size": 4096,
+      "sha256": "fba7950a62939f75d7b06e08fc1fe4ceea5fd2109b8fe4677494a3777543a35d"
     },
     {
       "repository": "commaai_hardware",

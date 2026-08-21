@@ -907,13 +907,22 @@ statically recovered direct stock-wire diagnostic candidate. It can provide
 direct EPS diagnostics on CAN1, but it does not recreate the CAN0/CAN2
 intercept-relay topology required later for normal openpilot substitution.
 
-### 19.5 Wait through boot SecurityAccess initialization, then authenticate
+### 19.5 Respect boot SecurityAccess backoff, then authenticate
 
-The bootloader SecurityAccess implementation starts each initialization with a
-fresh nominal 10-second delay. Its failed-attempt counter and delay state live in
-LocalRAM, but reset does **not** provide immediate access because initialization
-arms a new delay. An automatic installer must therefore tolerate
-`requiredTimeDelayNotExpired` (NRC `0x37`) and retry after the startup delay.
+The bootloader has a verified **10-second anti-bruteforce backoff**: the second
+consecutive bad `27 02` key sets the RAM delay flag and `27 01` returns NRC
+`0x37` until the TAUJ1-based 200,000,000-tick interval expires. The same raw
+delay is armed during boot diagnostic initialization, but the ordinary
+application-to-PROGRAMMING handoff carries a retained `{kind=0, id=0x7A1,
+session=2}` record and its boot replay path `0x6504 -> 0x5148 -> 0x562A` clears
+the delay flag before the synthetic `10 02`.
+
+Therefore an installer should **not** add a fixed ten-second sleep after every
+normal PROGRAMMING transition. It should request SecurityAccess normally and,
+if NRC `0x37` is actually returned, respect/retry through the verified
+anti-bruteforce interval. Calvin's successful range dumps roughly one second
+after PROGRAMMING corroborate this handoff-clear behavior; they do not weaken
+the post-failure lockout.
 
 After that delay, the known boot SecurityAccess flow is:
 
@@ -1130,8 +1139,10 @@ The full lifecycle is not yet an implemented ignition-to-control product path.
 Two host-integration requirements follow directly from the recovered firmware
 semantics:
 
-1. **SecurityAccess startup-delay handling.** Automatic bridge deployment must
-   explicitly wait/retry through the bootloader's fresh 10-second startup delay.
+1. **SecurityAccess backoff handling.** Normal application-to-PROGRAMMING replay
+   clears the initializer delay, so deployment must not add an unconditional
+   ten-second startup sleep. If NRC `0x37` is returned after failed keys or another
+   delay-armed lifecycle, respect/retry through the verified 10-second backoff.
 2. **Per-boot runtime attestation.** Sender arming must depend on volatile proof
    that the target-bound runtime is alive on the current EPS boot, not only on a
    persistent request/F181 configuration.

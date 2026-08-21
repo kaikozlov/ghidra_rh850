@@ -222,6 +222,33 @@ size:   32768 bytes
 sha256: 8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299
 ```
 
+A later retained range-dump session changes the evidentiary weight of any one
+DataFlash image, but its physical boundary is no longer uncertain. The retained
+CodeFlash identifies `R7F701383`; Renesas' P1M-E product table lists that exact
+part as a DPS **1-MiB** device, and the hardware manual maps 1-MiB-device
+DataFlash to `0xFF200000..0xFF207FFF` (32 KiB). The later
+`0xFF200000..0xFF20FFFF` profile therefore consists of 32 KiB actual DataFlash
+plus 32 KiB outside the specified DataFlash array. The upper half must not be
+called or analyzed as physical DataFlash.
+
+Across the five reads, the **actual first 32 KiB** differ by
+**23.5077%-25.6470%** pairwise, and only 17,325 of those 32,768 positions are
+identical across all five. The full 64-KiB host range differs by
+26.2650%-27.7328%, but that number mixes physical DataFlash with off-array
+P-Bus address space and is retained only as a transport/read-path observation.
+This is read-to-read capture divergence, not a claim that one quarter of
+physical DataFlash was genuinely rewritten. Three extended-CodeFlash captures
+are byte-identical, while global RAM differs about 1.2% and PE1 local RAM about
+2.8%-3.2%. `tests/verify_albinoelephant_corolla_repeatability.py` and
+`data/p1me_product_memory.json` pin these boundaries.
+
+That repeatability audit does **not** destroy the structural NvM conclusion below:
+every one of the five DataFlash reads independently gives three valid copies for
+objects 0/2/5 and zero valid copies for object 15. It does downgrade arbitrary
+single-byte/null observations from any one capture. The original 32-KiB scan is
+therefore retained as one exact captured image with an epoch-bound cryptographic
+negative, not promoted to a byte-perfect physical-NvM reconstruction.
+
 `tools/analyze_toyota_dataflash.py` was run against the contributor's public
 route oracle with `--domain-scan --min-entropy 0`. This removes the normal
 entropy heuristic entirely: all 32,753 overlapping 16-byte windows are
@@ -296,7 +323,25 @@ The complete machine-readable result is
 
 The later contributor bundle is preserved unchanged under
 `community/albinoelephant/raw-20260818/`; its own `MANIFEST.txt` pins the
-individual file hashes and acquisition notes. The CodeFlash range-dumper artifact is
+individual file hashes and acquisition notes. The 15 range files total 3,162,112
+bytes; with the earlier 32-KiB DataFlash artifact, they contain exactly 3,194,640
+sliding 16-byte **positions**. Calvin's pinned `dump/CLAUDE.md` records running
+that corpus against two synchronization oracles — **6,389,280
+window/oracle invocations, zero reported matches** — with a planted-key control
+at offset `0x4000` recovered by the same path. This is scan geometry, not a claim
+that exactly 6,389,280 CMAC operations occurred internally: `matcher.py` can
+probe multiple sync samples and fully verify survivors.
+
+The zero-match result remains external dynamic evidence and is cross-session:
+the retained TSKM oracle (`TRIP=0xD0D`) and older public-route oracle
+(`TRIP=0xCE9`) are not the Aug-14 dump runtime epoch. It therefore excludes raw
+window equality only under the explicit assumption that the relevant key was
+stable across those sessions. It does not exclude transformed/derived keys or
+ICU-S-internal storage. In addition, half of every 64-KiB `dataflash` profile is
+outside the specified `R7F701383` DataFlash array and must not be counted as
+physical DataFlash coverage.
+
+The CodeFlash range-dumper artifact is
 2 MiB because it reads `0x00000000..0x001FFFFF`, but bytes
 `0x00100000..0x001FFFFF` are entirely `0xFF`. The actual one-megabyte image is
 therefore the first half:
@@ -338,11 +383,14 @@ primitive alone: Sienna `0x5328..0x562D` is byte-identical to Corolla
 `0x530C..0x5611` (`-0x1C` relocation). That span contains request-seed, send-key,
 the failed-key counter, the delay worker, and SA initialization. Consequently
 this tracked Corolla image has the same statically verified policy: first bad
-`27 02` -> NRC `0x35`; second consecutive bad key -> NRC `0x36` plus a
-`200000000`-tick RAM delay; `27 01` returns `0x37` until expiry; initialization
-starts delayed with the attempt counter cleared. The shared boot timer domain
-uses `20000` ticks/ms, making the nominal delay 10 seconds. None of this state is
-persistent NVM. See [bootloader diagnostics](../diagnostics/bootloader.md) §2.1.
+`27 02` -> NRC `0x35`; second consecutive bad key -> NRC `0x36` plus a verified
+**10-second** `200000000`-TAUJ1-tick RAM delay; `27 01` returns `0x37` until
+expiry; initialization arms the same delay with the attempt counter cleared.
+The normal application-to-PROGRAMMING replay is a separate lifecycle and
+explicitly clears the initializer delay before synthetic boot `10 02`, which is
+why Calvin's immediate successful field unlocks do not contradict the bad-key
+backoff (CORR-088). None of this state is persistent NVM. See
+[bootloader diagnostics](../diagnostics/bootloader.md) §2.1.
 
 The acquisition itself is additional dynamic evidence for the authenticated-RAM
 bootstrap: the contributor used TSKM range payloads to obtain CodeFlash,

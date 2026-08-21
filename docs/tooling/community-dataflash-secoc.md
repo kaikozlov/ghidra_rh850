@@ -211,3 +211,104 @@ The public route still lacks a stock `carFw`/direct-F181 join, so vehicle-to-ima
 attribution remains external. This specimen must also remain separate from the
 distinct directly probed `8965F1208000` Corolla. The DataFlash key-search result
 above is unchanged by the new CodeFlash evidence.
+
+## 6. Calvin `dump` range-dumper archaeology and repeatability
+
+The exploratory range dumper is now pinned independently at
+`calvinpark/openpilot@42d1120395877e96ed440646a765157a0ad7646b`. Its six
+current 4-KiB authenticated payloads cover:
+
+```text
+00000000..00200000  CodeFlash
+01000000..0100C000  CodeFlash extended area
+FEBE0000..FEC00000  PE1 local RAM
+FEDE0000..FEE00000  self local-RAM window
+FEEF8000..FEF08000  global RAM
+FF200000..FF210000  64-KiB host range (DataFlash only through FF207FFF on R7F701383)
+```
+
+`data/p1me_product_memory.json` now pins the Renesas product/address geometry:
+`R7F701383` is a 1-MiB DPS part with 32-KiB DataFlash, 128-KiB total local RAM,
+and 64-KiB global RAM. The hardware manual exposes both `FEBE0000..FEBFFFFF`
+(PE1 area) and `FEDE0000..FEDFFFFF` (self view) as 128-KiB local-RAM mappings;
+with only 128 KiB physical local RAM, the self window is an architectural view
+of the same PE-local memory, not an additional bank. Calvin's repeated Sienna
+experiment is useful dynamic confirmation, not the sole basis for the alias.
+
+All six payload packages independently decrypt/authenticate with the recovered
+payload-build secret at CodeFlash `0xBFD8`, have CRC residue `0xFFFFFFFF`, and
+carry callback/descriptor `FEBF0000` / length `0xFF0`. In the executable body
+below `0xFD0`, exactly six bytes vary, encoding four range-immediate fields; the
+CRC fixup at `0xFEC..0xFEF` also varies as expected. The range binaries use a
+reset-return body distinct from Willem's 32-KiB DataFlash self-loop artifact,
+but reset-return itself is older: Willem's earlier RAM dumper already returns
+through boot reset `0x157E`. A source/toolchain cross-check closes that lineage
+more tightly: rebuilding Bk2ol's later-public
+`payload_source/shellcode/main_ff1ff000_ff209000.c` with its GCC 13.2/binutils
+2.41 V850 toolchain and substituting the global-RAM range reproduces Calvin's
+**entire encrypted** `payload_global_ram_feef8000_fef08000.bin` byte-for-byte
+(SHA-256 `43d00fda...`). The other shipped ranges preserve one long-body binary
+layout and patch fixed immediates, so recompiling each source variant can select
+shorter instruction encodings and is not expected to byte-reproduce every
+package. This proves source/compiler-family equivalence, not original authorship:
+Vance's candidate-f05 artifact predates Bk2ol's public source, so the pre-public
+source provenance remains bounded by SECOC-031.
+
+The branch history is also rewritten. The original July `Range dumper` and
+`mo-dump` commits were first pushed on `tskm`; `wide` was created only during the
+2026-08-12/13 history split and was renamed `dump` on 2026-08-19. Orphaned
+commits preserve an abandoned 288-KiB DataFlash payload
+`FF200000..FF238000`, split 1-MiB CodeFlash payloads, and an older wide RAM
+profile. The final six payload blobs themselves remained byte-identical through
+the later rebases/amends. Full chronology is in
+[`CALVIN_TSKM_DUMP_ARCHAEOLOGY_2026-08-21.md`](../history/2026-08/CALVIN_TSKM_DUMP_ARCHAEOLOGY_2026-08-21.md).
+
+One provenance question in Calvin's journal can also be closed from public Git.
+The `DEFAULT -> sleep(.5) -> EXTENDED -> sleep(.7) -> PROGRAMMING ->
+sleep(1.0) -> PROGRAMMING` ladder appears verbatim in Bk2ol's pinned
+`steps/step_dump_dataflash.py`; Calvin's current `dump_range.py` preserves that
+exact timing as a declarative four-step ladder. This gives the timing ladder a concrete public Bk2ol precursor/common lineage
+point; byte-for-byte sequence identity does not by itself establish who copied
+or authored it first.
+
+### Repeatability changes how dump negatives are graded
+
+Calvin's Sienna journal first recorded two complete **64-KiB range reads** 21
+seconds apart differing in 16,703 bytes (25.487%). For H we can now separate the
+physical region from the host profile: official P1M-E product data identifies
+`R7F701383` as a DPS 1-MiB device with **32 KiB DataFlash** at
+`FF200000..FF207FFF`. The `FF208000..FF20FFFF` upper half of Calvin's 64-KiB
+profile is outside the specified DataFlash array and must not be used as
+DataFlash evidence.
+
+The retained H corpus still independently demonstrates poor repeatability in the
+**actual first 32 KiB DataFlash**:
+
+| range | retained repeats | pairwise divergence |
+|---|---:|---:|
+| actual DataFlash `FF200000..FF207FFF` | 5 | 23.5077%-25.6470% |
+| full 64-KiB host range (includes off-array half) | 5 | 26.2650%-27.7328% |
+| extended CodeFlash 48 KiB | 3 | 0 bytes |
+| global RAM 64 KiB | 3 | 1.1932%-1.2070% |
+| PE1 local RAM 128 KiB | 3 | 2.8053%-3.2166% |
+
+Only 17,325/32,768 physical-DataFlash byte positions are identical across all
+five retained reads. The cause is deliberately left open; “read-to-read capture
+divergence” is the observation. Do not interpret the off-array upper half as
+flash noise, an extra array, or a harmless region: the hardware manual classifies
+the enclosing area as P-Bus address space and warns against unspecified/reserved
+accesses.
+
+The useful distinction is between **single-byte content** and **repeated
+structure**. Every one of the five DataFlash reads still independently decodes
+objects 0/2/5 with three valid copies and object 15 with zero valid copies. That
+structural conclusion therefore survives; an isolated candidate or null byte in
+one read does not. `tests/verify_albinoelephant_corolla_repeatability.py` pins
+these exact dispositions and divergence ranges.
+
+One host-tool limitation also remains explicit at the pinned tip:
+`matcher.ORACLE_BUSES={0,2}` is Sienna-shaped and discards a bus-1-only Corolla
+oracle. It fails closed as `insufficient_oracle` rather than installing a bad
+key, but it can misleadingly ask for “more CAN” forever on a vehicle whose
+protected traffic is on bus 1. Repository-local `toyota_secoc_oracle.py` already
+avoids that restriction.

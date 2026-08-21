@@ -2112,3 +2112,40 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md)
   §1.7; `tests/verify_community_tooling.py`; optional
   `tests/verify_external_corroboration.py`.
+
+### CORR-088 — normal PROGRAMMING replay clears the initializer delay; it does not disprove the 10-second bad-key backoff
+
+- **Bad intermediate interpretation:** the first Calvin `dump` archaeology pass
+  treated successful SecurityAccess roughly one second after PROGRAMMING as a
+  contradiction of the firmware's 10-second delay and withdrew the wall-clock
+  conversion. That merged two distinct delay lifecycles.
+- **Anti-bruteforce path:** `uds_security_access_send_key @ 0x53F2` permits one
+  bad key (NRC `0x35`), then the second consecutive mismatch stores
+  `200000000`, records the current timer, sets `FEBF2B56`, clears the attempt
+  counter, and returns NRC `0x36`. `27 01` returns NRC `0x37` while that flag is
+  active; `0x5584` clears it only after the counter delta exceeds the duration.
+- **Clock proof:** `FUN_00001D24 @ 0x1D24` reads `TAUJ1CNT0` at `0xFFE51010`.
+  `FUN_00001C60` programs `TAUJ1TPS=0xFFF2` (`PRS0=2`, CK0=`PCLK/4`) and
+  `TAUJ1CMOR0=0x0156` (CK0 count clock). The retained P1M-E datasheet places
+  this peripheral/P-Bus domain at 80 MHz, so TAUJ1 channel 0 counts at 20 MHz.
+  Thus `200000000 / 20000000 = 10` seconds. The generic `0x1D2C` scheduler's
+  `delay * 20000` arithmetic is consistent with 20,000 ticks/ms.
+- **Separate initializer path:** `FUN_000055AA` also arms the same delay while
+  boot diagnostics initialize. The normal application-to-PROGRAMMING retained
+  handoff at CodeFlash `0x31914` is `{kind=0, diagnostic_id=0x7A1,
+  requested_session=2}`. Its boot replay executes `0x6504 -> 0x5148 -> 0x562A`;
+  `0x562A` explicitly writes `FEBF2B56=0` before the synthetic bootloader
+  `10 02`.
+- **Why Calvin does not contradict it:** the range-dump ladder reaches
+  SecurityAccess about one second after the normal PROGRAMMING handoff. Those
+  successes are consistent with, and externally corroborate, the explicit
+  handoff-clear path. They do not exercise the two-bad-key backoff.
+- **Correct disposition:** the 10-second anti-bruteforce delay is verified. Do
+  not impose a fixed ten-second sleep after every normal PROGRAMMING transition;
+  request SecurityAccess normally. If NRC `0x37` is actually returned, respect
+  the active 10-second backoff. Hard-reset/failure lifecycles that do not replay
+  the normal retained handoff remain distinct from this ordinary path.
+- **Canonical:** [../diagnostics/bootloader.md](../diagnostics/bootloader.md) §2.1;
+  [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md)
+  §19.5; `tests/verify_bootloader_diagnostics.py`;
+  `data/p1me_product_memory.json`.

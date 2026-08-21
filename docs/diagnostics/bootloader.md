@@ -174,21 +174,43 @@ sets `FEBF2B56 = 1`, clears `FEBF2B57` to zero, and returns NRC `0x36`
 (`requiredTimeDelayNotExpired`). `direct_call_target_00005584 @ 0x5584` clears
 the flag once the elapsed timer delta exceeds the stored duration.
 
-The timer scheduler at `0x1D2C` converts its 16-bit millisecond delay argument to
-this same free-running tick domain as `delay * 20000`; the adjacent CanTp timing
-configuration contains ordinary `1000/150/10` ms values consumed through that
-scheduler. Therefore the SecurityAccess duration is:
+The wall-clock duration is also statically recoverable. `FUN_00001D24 @ 0x1D24`
+reads `0xFFE51010`, which the RH850/P1M-E hardware manual identifies as
+`TAUJ1CNT0`. Boot timer setup `FUN_00001C60 @ 0x1C60` programs
+`TAUJ1TPS=0xFFF2` and `TAUJ1CMOR0=0x0156`. The low TPS nibble is `PRS0=2`,
+so CK0 is `PCLK/4`; CMOR0 selects CK0 as the count clock. The P1M-E
+datasheet places this peripheral/P-Bus domain at 80 MHz, giving a 20 MHz
+TAUJ1 channel-0 counter. Therefore:
 
 ```text
-200000000 ticks / 20000 ticks-per-ms = 10000 ms = 10 s
+200000000 ticks / 20000000 ticks/s = 10 seconds
 ```
 
-Initialization at `0x55AA` deliberately starts with the same `200000000`-tick
-delay active and the attempt counter zero. A reset therefore does not bypass the
-wait; it restarts the nominal 10-second delay. The counter, delay flag, start
-value, and duration all live in LocalRAM. No DataFlash/NvM persistence is involved.
-A successful `27 02` clears the attempt counter as it sets the bootloader SA
-unlock state to 2.
+The generic scheduler at `0x1D2C` independently agrees with that clock domain:
+it schedules a 16-bit delay argument as `current + delay * 20000`, i.e. 20,000
+ticks per millisecond. The nearby CanTp values `1000/150/10` are corroboration,
+not the basis of the unit conversion.
+
+There are **two distinct ways** this delay state is armed. The second failed
+`27 02` arms the 10-second anti-bruteforce backoff described above. Separately,
+`FUN_000055AA` arms the same raw duration while boot diagnostics are initialized.
+The normal application-to-PROGRAMMING handoff does not leave that initializer
+delay active. Its retained handoff record at CodeFlash `0x31914` is kind `0`,
+diagnostic ID `0x7A1`, requested session `0x02`; the boot replay path
+`0x6504 -> 0x5148 -> 0x562A` explicitly clears `FEBF2B56` before replaying the
+synthetic bootloader `10 02`.
+
+That distinction resolves the apparent conflict with Calvin Park's `dump` field
+history. His range-dump path reaches SecurityAccess about one second after the
+normal PROGRAMMING handoff and succeeds. Those runs exercise the explicit
+handoff-clear path; they do **not** test, much less contradict, the 10-second
+backoff after two bad keys. Host code therefore should not unconditionally sleep
+ten seconds after a normal PROGRAMMING transition, but it must respect NRC
+`0x37` if the anti-bruteforce delay is actually active.
+
+Initialization state and the failed-key backoff remain RAM-only: the counter,
+delay flag, start value, and duration have no DataFlash/NvM persistence. A
+successful `27 02` clears the attempt counter as it sets bootloader SA state 2.
 
 This policy applies only to failed bootloader **send-key** attempts. A
 `DiagnosticSessionControl` request such as `10 02`, including an asynchronous

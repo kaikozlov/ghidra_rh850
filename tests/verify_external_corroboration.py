@@ -320,6 +320,157 @@ def main() -> int:
         and "manufacturer's CUW" in corrected_faci,
     )
 
+    print("\n== Calvin dump-branch archaeology and range evidence ==")
+    dump_root = roots["calvinpark_openpilot_dump"]
+    dump_claude = (dump_root / "CLAUDE.md").read_text(encoding="utf-8")
+    dump_range = (dump_root / "tsk/lib/dump_range.py").read_text(encoding="utf-8")
+    dump_preflight = (dump_root / "tsk/lib/preflight.py").read_text(encoding="utf-8")
+    local_cf = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()
+    local_p1me = json.loads((REPO / "data/p1me_product_memory.json").read_text(encoding="utf-8"))
+    local_archaeology = (REPO / "docs/history/2026-08/CALVIN_TSKM_DUMP_ARCHAEOLOGY_2026-08-21.md").read_text(encoding="utf-8")
+
+    visible = [
+        "7f207ac644d466723c58e3f02b9d583d00fea2eb",
+        "ce279fcb5cadefa584e9ac1d6ab14be6a44426d8",
+        "725f84756dda589894bd85e6c4a02e2dd3c41c2d",
+        "42d1120395877e96ed440646a765157a0ad7646b",
+    ]
+    subjects = [subprocess.run(
+        ["git", "-C", str(dump_root), "show", "-s", "--format=%s", commit],
+        check=True, capture_output=True, text=True,
+    ).stdout.strip() for commit in visible]
+    check("dump visible research chain is TSKM Web -> Range dumper -> mo-dump -> spanconstants",
+          subjects == ["TSKM Web", "Range dumper", "mo-dump", "spanconstants"], repr(subjects))
+
+    rewritten = {
+        "37181a271a4ce9ec83354fb64c491bc17223b56b": "TSKM Web",
+        "a7b90ffb45846495b16416a05904ecab87af2290": "Range dumper",
+        "28ff8452ee4633f17a8fd2a4c590f9022998cd2a": "mo-dump",
+        "5feb4f4ca0b9319989f1392d95137c85932f3fbe": "TSKM Web",
+        "9a18846efe5d20a15acc78e905ff9cd407132022": "Range dumper",
+        "6ffa39e634a49bf23fe50dff4f864938fc9e5906": "mo-dump",
+        "823d9293c0e4564afb6126f61ac6227f068da924": "save",
+        "60d4ec550f26b0c4a867122ab43c3d54a7da6c3a": "spanconstants",
+    }
+    for commit, subject in rewritten.items():
+        proc = subprocess.run(
+            ["git", "-C", str(dump_root), "show", "-s", "--format=%s", commit],
+            capture_output=True, text=True,
+        )
+        check(f"rewritten dump commit {commit[:9]} remains archaeology-readable",
+              proc.returncode == 0 and proc.stdout.strip() == subject,
+              proc.stdout.strip() if proc.returncode == 0 else "missing")
+
+    check("save and both spanconstants generations amend the same 725f parent",
+          all(subprocess.run(
+              ["git", "-C", str(dump_root), "show", "-s", "--format=%P", c],
+              check=True, capture_output=True, text=True,
+          ).stdout.strip() == "725f84756dda589894bd85e6c4a02e2dd3c41c2d"
+          for c in ("823d9293c0e4564afb6126f61ac6227f068da924",
+                    "60d4ec550f26b0c4a867122ab43c3d54a7da6c3a",
+                    "42d1120395877e96ed440646a765157a0ad7646b")))
+    check("spanconstants generations preserve Aug-18 author time while commit time advances",
+          subprocess.run(["git", "-C", str(dump_root), "show", "-s", "--format=%aI|%cI", "60d4ec550"],
+                         check=True, capture_output=True, text=True).stdout.strip()
+          == "2026-08-18T17:01:45-07:00|2026-08-19T17:03:05-07:00"
+          and subprocess.run(["git", "-C", str(dump_root), "show", "-s", "--format=%aI|%cI", "42d112039"],
+                             check=True, capture_output=True, text=True).stdout.strip()
+          == "2026-08-18T17:01:45-07:00|2026-08-20T17:18:00-07:00")
+
+    check("current range dumper pins the six RH850 exploratory windows",
+          all(token in dump_range for token in (
+              "0x00000000, 0x00200000", "0x01000000, 0x0100C000",
+              "0xFEBE0000, 0xFEC00000", "0xFEDE0000, 0xFEE00000",
+              "0xFEEF8000, 0xFEF08000", "0xFF200000, 0xFF210000")))
+    dump_payload_paths = [
+        "tsk/lib/payload_codeflash_00000000_00200000.bin",
+        "tsk/lib/payload_dataflash_ff200000_ff210000.bin",
+        "tsk/lib/payload_extended_codeflash_01000000_0100c000.bin",
+        "tsk/lib/payload_global_ram_feef8000_fef08000.bin",
+        "tsk/lib/payload_local_ram_pe1_febe0000_fec00000.bin",
+        "tsk/lib/payload_local_ram_self_fede0000_fee00000.bin",
+    ]
+    local_codeflash = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()
+    build_secret = local_codeflash[0xBFD8:0xBFE8]
+    zero16 = bytes(16)
+    derived = AES.new(build_secret, AES.MODE_ECB).encrypt(zero16)
+    range_plaintexts = []
+    for rel in dump_payload_paths:
+        ciphertext = (dump_root / rel).read_bytes()
+        plaintext = AES.new(derived, AES.MODE_CBC, zero16).decrypt(ciphertext)
+        cmac = CMAC.new(derived, ciphermod=AES)
+        cmac.update(zero16 + plaintext[:0xFF0])
+        check(f"Calvin range payload {Path(rel).name} authenticates under BFD8 payload root",
+              len(ciphertext) == 0x1000
+              and binascii.crc32(plaintext[:0xFF0]) % (1 << 32) == 0xFFFFFFFF
+              and cmac.digest() == plaintext[0xFF0:]
+              and struct.unpack_from("<I", plaintext, 0xFD0)[0] == 0xFEBF0000
+              and struct.unpack_from("<II", plaintext, 0xFE0) == (0xFEBF0000, 0xFF0))
+        range_plaintexts.append(plaintext)
+    varying = {
+        i for i in range(0xFD0)
+        if len({plaintext[i] for plaintext in range_plaintexts}) > 1
+    }
+    check("six range payload executable bodies share exactly six varying immediate bytes",
+          varying == {0x6A, 0x6B, 0x6F, 0x182, 0x183, 0x187},
+          repr(sorted(hex(i) for i in varying)))
+    crc_fixups = {plaintext[0xFEC:0xFF0] for plaintext in range_plaintexts}
+    check("range payload CRC fixup also varies across all six packages", len(crc_fixups) == 6,
+          repr(sorted(x.hex() for x in crc_fixups)))
+
+    bk_dump = (roots["toyota_dataflash_secoc_setup"] / "steps/step_dump_dataflash.py").read_text(encoding="utf-8")
+    check("Calvin 0.5/0.7/1.0 + repeated PROGRAMMING ladder has a pinned Bk2ol precursor",
+          "diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)" in bk_dump
+          and "time.sleep(0.5)" in bk_dump
+          and "diagnostic_session_control(uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)" in bk_dump
+          and "time.sleep(0.7)" in bk_dump
+          and bk_dump.count("diagnostic_session_control(uds_mod.SESSION_TYPE.PROGRAMMING)") >= 2
+          and "time.sleep(1.0)" in bk_dump
+          and '("default", SESSION_TYPE.DEFAULT, 0.5)' in dump_range
+          and '("extended", SESSION_TYPE.EXTENDED_DIAGNOSTIC, 0.7)' in dump_range
+          and '("programming", SESSION_TYPE.PROGRAMMING, 1.0)' in dump_range
+          and '("programming_repeat", SESSION_TYPE.PROGRAMMING, 0.0)' in dump_range)
+    check("range dumper explicitly warns that one complete DataFlash capture is weak",
+          "16,703 of 65,536 bytes (25.487 %)" in dump_range
+          and "A SINGLE CAPTURE IS WEAK" in dump_range)
+    check("Calvin journal records external 0x40-stride/key labels and dealer-rekey residue",
+          "`0x40` stride" in dump_claude and "ID/AuthID at `+0x04`/`+0x08`" in dump_claude
+          and "dealer rekey does not erase the previous key" in dump_claude)
+    check("local audit corrects FF206ED4 to object 12 while keeping Calvin labels external",
+          "FF206ED4` is **object 12's**" in local_archaeology
+          and "ID/AuthID" in local_archaeology and "external field observation" in local_archaeology)
+
+    check("Calvin journal records R7F701381 FEBE/FEDE live alias observation",
+          "`0xFEDE0000` and `0xFEBE0000` are two address windows onto one array" in dump_claude)
+    check("local Renesas geometry independently closes the PE1/self mapping",
+          local_p1me["products"]["R7F701383"]["local_ram_bytes"] == 0x20000
+          and local_p1me["address_space"]["local_ram_pe1"] == {"start": 0xFEBE0000, "end_exclusive": 0xFEC00000}
+          and local_p1me["address_space"]["local_ram_self"] == {"start": 0xFEDE0000, "end_exclusive": 0xFEE00000})
+
+    check("Calvin journal records broad Corolla no-key scan with positive control",
+          "6,389,280 sliding-window scans and zero matches" in dump_claude
+          and "key planted at offset `0x4000`" in dump_claude)
+    check("local audit bounds no-key result to cross-session raw-window matching",
+          "cross-session" in local_archaeology and "raw 16-byte value" in local_archaeology
+          and "6,389,280 window/oracle invocations" in local_archaeology)
+
+    check("Calvin journal records roughly-one-second PROGRAMMING unlock chronology",
+          "roughly one second after entering PROGRAMMING" in dump_claude
+          and "A fresh 10-second delay on bootloader entry would have returned `0x37`" in dump_claude)
+    check("local firmware/device evidence preserves 10-second bad-key backoff and handoff clear",
+          local_p1me["timer"]["security_delay_ms"] == 10_000
+          and local_cf[0x562A:0x5630] == bytes.fromhex("440756937f00")
+          and struct.unpack_from("<II", local_cf, 0x31914) == (0, 0x7A1)
+          and local_cf[0x31924] == 2)
+
+    check("final preflight chooses routes by actual PROGRAMMING reachability",
+          "_probe_route" in dump_preflight and "PROGRAMMING" in dump_preflight
+          and "param=1" in dump_claude and "Whether PROGRAMMING answers there is still unmeasured" in dump_claude)
+    check("Calvin journal stale DataFlash-extent caveat is superseded by official local geometry",
+          "`R7F701383`'s DataFlash extent is unsettled" in dump_claude
+          and local_p1me["products"]["R7F701383"]["dataflash_bytes"] == 0x8000
+          and local_p1me["address_space"]["dataflash_1mb"] == {"start": 0xFF200000, "end_exclusive": 0xFF208000})
+
     print("\n== Lochuan historical/persistent-patch provenance ==")
     lochuan_report = (roots["rh850_p1me_original"] / "RESEARCH_REPORT_EN.md").read_text(encoding="utf-8")
     lochuan_manifest = (roots["lochuan_b4512000_fw_patch"] / "eps_patch/manifest.py").read_text(encoding="utf-8")

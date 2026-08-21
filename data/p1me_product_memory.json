@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "scope": "Renesas RH850/P1M-E product and address-space facts used to interpret the retained Toyota EPS dumps",
+  "sources": {
+    "datasheet": {
+      "path": "REFERENCE/r01ds0505ed0100-rh850p1m-e.pdf",
+      "sha256": "71b80cf05abf256f4047c7c2d6fa706438f70440e5e2959f1ce83d18c7822aad",
+      "revision": "R01DS0505ED0100 Rev.1.00",
+      "date": "2025-09-30",
+      "references": [
+        "Table 1.1, page 2: R7F701383 is a DPS 1-MB product; Local RAM 128 KB; Global RAM 64 KB; DATA Flash 64 KB*1 / 32 KB*2, where note 2 applies to 1-MB devices",
+        "Figure 1.3, page 6: Peripheral IP Group 1 / P-Bus domain 80 MHz"
+      ]
+    },
+    "hardware_manual": {
+      "path": "REFERENCE/r01uh0585ej0120_manual.pdf",
+      "sha256": "aaea89a7f5d9b029776945868d21728465d372223c41db05cbd728a0499a6e34",
+      "revision": "R01UH0585EJ0120 Rev.1.20",
+      "date": "2018-03-23",
+      "references": [
+        "Table 4.1, page 257: 1-MB device Data Flash FF200000-FF207FFF; 2-MB device FF200000-FF20FFFF; PE1 local-RAM and self local-RAM views are each 128 KB",
+        "Section 24.3, pages 1887-1894: TAUJ TPS/CMOR/CNT register semantics; PRS0=2 gives CK0=PCLK/4; CMOR CKS=0 and CCS=0 count on CK0"
+      ]
+    }
+  },
+  "products": {
+    "R7F701383": {
+      "regulator": "DPS",
+      "codeflash_bytes": 1048576,
+      "dataflash_bytes": 32768,
+      "local_ram_bytes": 131072,
+      "global_ram_bytes": 65536
+    }
+  },
+  "address_space": {
+    "codeflash_1mb": {"start": 0, "end_exclusive": 1048576},
+    "dataflash_1mb": {"start": 4280287232, "end_exclusive": 4280320000},
+    "dataflash_2mb": {"start": 4280287232, "end_exclusive": 4280352768},
+    "local_ram_pe1": {"start": 4273864704, "end_exclusive": 4273995776},
+    "local_ram_self": {"start": 4275961856, "end_exclusive": 4276092928},
+    "global_ram": {"start": 4277108736, "end_exclusive": 4277174272}
+  },
+  "timer": {
+    "p_bus_hz": 80000000,
+    "tauj1cnt0_address": 4293201936,
+    "tauj1tps_address": 4293202064,
+    "tauj1cmor0_address": 4293202048,
+    "firmware_tauj1tps_value": 65522,
+    "firmware_tauj1cmor0_value": 342,
+    "prs0": 2,
+    "ck0_hz": 20000000,
+    "security_delay_ticks": 200000000,
+    "security_delay_ms": 10000
+  }
+}

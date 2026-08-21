@@ -55,6 +55,18 @@ paths = ["docs/security/bootloader-payload-gate.md", "firmware/"]
 tests = ["tests/verify_bootloader_diagnostics.py"]
 paths = ["docs/diagnostics/bootloader.md", "docs/diagnostics/bootloader-dids.md"]
 
+[suite.p1me_product_memory]
+tests = ["tests/verify_p1me_product_memory.py"]
+paths = [
+  "tests/verify_p1me_product_memory.py",
+  "data/p1me_product_memory.json",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/tooling/community-dataflash-secoc.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+oracle = "raw_bytes"
+
 [suite.bootloader_secrets]
 tests = ["tests/verify_findings.py"]
 paths = ["docs/security/"]
@@ -1378,6 +1390,16 @@ paths = [
 ]
 oracle = "raw_bytes"
 
+[suite.albinoelephant_corolla_repeatability]
+tests = ["tests/verify_albinoelephant_corolla_repeatability.py"]
+paths = [
+  "tests/verify_albinoelephant_corolla_repeatability.py",
+  "community/albinoelephant/raw-20260818/",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/tooling/community-dataflash-secoc.md",
+  "docs/status/FINDINGS.md",
+]
+
 [suite.albinoelephant_corolla_codeflash]
 tests = ["tests/verify_albinoelephant_corolla_codeflash.py"]
 paths = [
@@ -1944,7 +1966,13 @@ oracle = "raw_bytes"
 
 [suite.external_corroboration]
 tests = ["tests/verify_external_corroboration.py"]
-paths = ["external-references.lock.json", "docs/status/"]
+paths = [
+  "external-references.lock.json",
+  "docs/status/",
+  "docs/history/2026-08/CALVIN_TSKM_DUMP_ARCHAEOLOGY_2026-08-21.md",
+  "data/p1me_product_memory.json",
+  "tests/verify_external_corroboration.py",
+]
 modes = ["local"]
 args = ["--repos-dir", "../"]
 oracle = "independent_external_artifact"
