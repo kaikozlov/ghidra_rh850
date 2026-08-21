@@ -257,6 +257,41 @@ def main() -> int:
         and "0xFFA10080" in lochuan_faci
         and "0xFFA10010" in lochuan_faci,
     )
+    faci_correction_commit = git_show(
+        roots["lochuan_b4512000_fw_patch"],
+        "390ddb730ca24265c7935989e251f45545909d65",
+    )
+    check(
+        "Lochuan FACI correction commit explicitly says 8965F3 CUW shellcode was imported into Ghidra",
+        "manufacturer's own CUW flash-programming shellcode" in faci_correction_commit
+        and "8965F3 series, imported into Ghidra" in faci_correction_commit
+        and "manufacturer's andi 0x7040" in faci_correction_commit
+        and "SUSRDY" in faci_correction_commit,
+    )
+    migration_report = git_show(
+        roots["lochuan_b4512000_fw_patch"],
+        "1118d031d7d7a03ec10312cc7140904e2cc923f3:.superpowers/sdd/2026-08-17-eps-patch-migration/task-4-report.md",
+    )
+    check(
+        "Lochuan deleted migration report binds the public writer to a private reviewed predecessor tree",
+        "/Users/kevin/Desktop/disable-secoc/sienna-b4512000-rx-secoc/.venv/bin/python" in migration_report
+        and "After migrating the reviewed sources" in migration_report
+        and "previously\nreviewed GCC 13.2.0/binutils 2.41 artifacts" in migration_report
+        and "mechanically\nmigrated patch-era sources" in migration_report,
+    )
+    telescope_design = git_show(
+        roots["lochuan_eps_telescope"],
+        "99b98f0a42fdb519f9a2fb6c47e71d75e906f6d2:docs/superpowers/specs/2026-08-19-rh850-eps-probe-design.md",
+    )
+    check(
+        "Lochuan Aug-19 eps-telescope design already derives corrected FACI register names from the hardware manual",
+        "正确寄存器映射（来自 RH850/P1M-E 硬件手册）" in telescope_design
+        and "| 0xFFA10010 | FASTAT |" in telescope_design
+        and "| 0xFFA10020 | FAREASELC |" in telescope_design
+        and "| 0xFFA10080 | FSTATR |" in telescope_design
+        and "| 0xFFF82410 | FHVE3 |" in telescope_design
+        and "| 0xFFF8A430 | FHVE15 |" in telescope_design,
+    )
 
     # The public-release commit deleted the internal design/report tree, but the
     # pinned commit retains that history. Pin the specific ancestors that record

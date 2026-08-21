@@ -11,6 +11,11 @@
       "directory": "8965B4512000-FW-PATCH",
       "commit": "9eed2b4ac871b1944e686769cc3e0a43fd7198c3"
     },
+    "lochuan_eps_telescope": {
+      "url": "https://github.com/lochuan/eps-telescope.git",
+      "directory": "eps-telescope",
+      "commit": "2bb94a5411f88bcda47c8f70cab66e768b35cb6b"
+    },
     "icanhack_secoc": {
       "url": "https://github.com/I-CAN-hack/secoc.git",
       "directory": "secoc",

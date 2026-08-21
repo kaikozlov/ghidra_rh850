@@ -1698,6 +1698,18 @@ not proved personal provenance for Lochuan. The exact `.cuw`/erase payload is
 still **not** in our retained corpus, so byte-for-byte CUW parity remains
 external-source.
 
+Git archaeology strengthens the comparison provenance without recovering the
+bytes. Commit `390ddb730ca24265c7935989e251f45545909d65` itself says the
+manufacturer CUW flash-programming shellcode was from the **`8965F3` series and
+was imported into Ghidra**; its message specifically attributes the program
+loop's FSTATR bit-11/SUSRDY pacing and `andi 0x7040` error mask to that
+manufacturer code. Conversely, Lochuan's `eps-telescope` design commit
+`99b98f0a42fdb519f9a2fb6c47e71d75e906f6d2` from the previous day already
+lists the corrected FACI register identities and explicitly derives them from
+the RH850/P1M-E hardware manual. The cleanest chronology is therefore: manual
+for the register map/name cleanup, then manufacturer CUW disassembly for the
+bit-11 pacing and `0x7040` status semantics.
+
 The update nevertheless exposed a local implementation defect: our
 `exploit/patcher/flash_backend.c` had inherited the older bit-21 pacing loop and
 command-lock-only completion check. The local Sienna firmware independently
@@ -1713,9 +1725,16 @@ commit, `8d0f29fbe506e36de37a912930f6c68c10a75c42`, says the Task-4 payloads wer
 added by **migrating the reviewed sources**, calls the shipped binaries
 **previously reviewed** artifacts, and says the patch-era shared headers were
 **mechanically migrated** from the old private
-`sienna-b4512000-rx-secoc` project. Exact line-by-line authorship cannot be
-reconstructed because that private source tree is not present, but the
-architectural/migration lineage is explicit.
+`sienna-b4512000-rx-secoc` project. Deleted migration reports preserve that
+predecessor's local path as
+`/Users/kevin/Desktop/disable-secoc/sienna-b4512000-rx-secoc`. The public repo's
+root is an Aug-17 migration-design commit, not the original writer-development
+history. Exhaustive surviving-ref/object checks find no committed `.cuw`,
+`*_erase.pt.bin`, Ghidra project, hidden remote branch/tag, or unreachable Git
+object containing the manufacturer input. Exact line-by-line authorship and the
+private CUW file location therefore cannot be reconstructed from public Git,
+but the architectural/migration lineage is explicit and places the missing
+input outside the surviving public tree.
 
 The **semantic target does not share that upstream provenance**. Neither the
 pinned I-CAN-hack source nor the imported blurbdust/@yc source contains
