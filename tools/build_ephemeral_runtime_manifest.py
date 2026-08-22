@@ -426,6 +426,14 @@ def geometry_contract(item: dict | None, source: str) -> dict:
         **values,
         "canary_observation_address": item.get("canary_observation_address") if item else None,
         "canary_observation_method": item.get("canary_observation_method") if item else None,
+        "command5_dispatch_address": item.get("command5_dispatch_address") if item else None,
+        "command5_driver_record": item.get("command5_driver_record") if item else None,
+        "command5_key_selector": item.get("command5_key_selector") if item else None,
+        "command5_done_flag": item.get("command5_done_flag") if item else None,
+        "command5_status_flag": item.get("command5_status_flag") if item else None,
+        "command5_mailbox_address": item.get("command5_mailbox_address") if item else None,
+        "command5_mailbox_size": item.get("command5_mailbox_size") if item else None,
+        "command5_mailbox_transport": item.get("command5_mailbox_transport") if item else None,
         "notes": item.get("notes") if item else "No image-bound RAM execution/retention geometry is available.",
     }
 

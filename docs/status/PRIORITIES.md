@@ -33,19 +33,23 @@ and unresolved static/dynamic boundaries remain in
 **Question:** does provisioned ICU-S slot 4 actually permit command 5 MAC
 generation in initialized application context?
 
-Why this matters: static software proves a stock no-SA selector-controlled
-command-5 test, but SECOC-069 now bounds that caller to 16 bytes; production
-SecOC inputs are 7/12/36 bytes. The generic lower command-5 API accepts 0..80
-bytes. A positive hardware result would therefore validate the cryptographic
-primitive needed by a production-resident signer, not prove that the unmodified
-diagnostic bank already signs production frames.
+Why this matters: SECOC-070 removes the remaining software-call problem. A
+546-byte RAM-only application runtime now invokes serialized command-5 driver
+record 0 with fixed selector 4 and caller-chosen `0..80` byte input, including
+the exact 7/12/36-byte SecOC domains. It needs no persistent CodeFlash hook or
+per-request application SecurityAccess; only the already-solved authenticated
+bootloader-RAM foothold is required to install it. A positive hardware result
+would therefore validate the final cryptographic permission assumption for the
+resident signer.
 
 Ready now:
 
-- bounded command-5 experiment under `exploit/command5/`;
-- fresh-boot control/experiment artifact model;
-- F181/route binding, chronology, RTT/jitter, pre/post DTC snapshots;
-- no same-boot re-arm assumption.
+- low-risk fixed-16 stock permission experiment under `exploit/command5/`;
+- deterministic 546-byte RAM proxy under `exploit/ephemeral_runtime/`;
+- variable-length XCP mailbox planner / guarded live client in
+  `exploit/command5/ram_proxy.py`;
+- clean driver record 0 completion path, fixed slot 4, and busy/defer arbitration;
+- exact 7/12/36-byte inputs once the RAM proxy and XCP route are live.
 
 Stage-1 positive criterion: current-run generated output changes from the
 pre-stimulus baseline under selector 4 / mode 1. A DTC-only negative does not
@@ -53,8 +57,11 @@ separate command failure from expected-result mismatch. On a separate fresh
 boot, selector 4 / mode 0 is the expected-negative raw-AES policy control, but
 it needs its own result-source observer (`FEBE519A`; the command-5 observer points
 at `FEBE51AA`) or equivalent status instrumentation; the DTC alone is ambiguous.
-Only after stage 1 succeeds, test the bounded `0x68B8A` `16→12` adaptation and compare
-the first 28 generated bits against an independently known classic SecOC tag.
+Only after stage 1 succeeds, the preferred exact-domain test is the RAM proxy
+with a known 12-byte classic authenticated input; compare its first 28 generated
+bits against an independently known classic SecOC tag. The older `0x68B8A`
+`16→12` CodeFlash adaptation remains a fallback experiment, not the preferred
+path.
 
 Canonical:
 [../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md) ·

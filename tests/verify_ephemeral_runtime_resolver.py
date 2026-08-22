@@ -132,6 +132,14 @@ check("manifest derives 131 bridge addresses", profiles[1]["can_id"] == "0x131" 
 check("manifest carries target-specific canary observation evidence",
       m["ram_execution_geometry"]["canary_observation_address"] == "0xFEBFFBF0" and
       m["ram_execution_geometry"]["canary_observation_method"] == "application-rmba-or-xcp-read")
+check("manifest carries SHA-bound command-5 proxy contract",
+      m["ram_execution_geometry"]["command5_dispatch_address"] == "0x88350" and
+      m["ram_execution_geometry"]["command5_driver_record"] == 0 and
+      m["ram_execution_geometry"]["command5_key_selector"] == 4 and
+      m["ram_execution_geometry"]["command5_done_flag"] == "0xFEBF13BC" and
+      m["ram_execution_geometry"]["command5_status_flag"] == "0xFEBF13BD" and
+      m["ram_execution_geometry"]["command5_mailbox_address"] == "0xFEBFFB80" and
+      m["ram_execution_geometry"]["command5_mailbox_size"] == "0x80")
 
 print("\n== 8965H1202000 foreign-image regression ==")
 check("2 MiB range dump normalizes to exact 1 MiB CodeFlash",
@@ -185,11 +193,18 @@ check("target config reconstructs original Sienna boot/COM/bridge anchors",
       values["BRIDGE_DESC_BASE"] == 0xFEBE545A and values["BRIDGE_COUNTER_BASE"] == 0xFEBE5332)
 check("target config derives Sienna canary observation from manifest evidence",
       values["CANARY_HEARTBEAT"] == 0xFEBFFBF0)
+check("target config derives command-5 record/slot/mailbox from manifest evidence",
+      values["COMMAND5_DISPATCH"] == 0x88350 and values["COMMAND5_DRIVER_RECORD"] == 0 and
+      values["COMMAND5_KEY_SELECTOR"] == 4 and values["COMMAND5_DONE_FLAG"] == 0xFEBF13BC and
+      values["COMMAND5_STATUS_FLAG"] == 0xFEBF13BD and values["COMMAND5_MAILBOX"] == 0xFEBFFB80 and
+      values["COMMAND5_MAILBOX_SIZE"] == 0x80)
 header = config.render_header(m)
 check("generated target header carries manifest-derived anchors",
       "#define TARGET_BOOT_INIT_0 0xC9A" in header and
       "#define TARGET_APPLICATION_COM_RX 0x7C640" in header and
-      "#define TARGET_CANARY_HEARTBEAT 0xFEBFFBF0" in header)
+      "#define TARGET_CANARY_HEARTBEAT 0xFEBFFBF0" in header and
+      "#define TARGET_COMMAND5_DISPATCH 0x88350" in header and
+      "#define TARGET_COMMAND5_MAILBOX 0xFEBFFB80" in header)
 bridge_source = BRIDGE_SOURCE.read_text(encoding="utf-8").lower()
 canary_source = CANARY_SOURCE.read_text(encoding="utf-8").lower()
 source_forbidden = ["0x00000c9a", "0x00070524", "0x00062760", "0x00064fcc", "0x0007c640", "0xfebe5490", "0xfebe545a", "0xfebe5332", "0xfebffbf0"]

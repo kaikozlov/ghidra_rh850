@@ -123,7 +123,7 @@ check("stock harness requests 16-byte command-5 result", CF[0x68B8A:0x68B92] == 
 check("stock harness dispatches generation driver", decode_long_branch(0x68BAC) == ("jarl", 0x88350))
 check("foreground slot calls dormant step and finalize pair",
       decode_long_branch(0x65754) == ("jarl", 0x68C0C) and decode_long_branch(0x65760) == ("jarl", 0x68DE6))
-for token in ("selector 4", "0x68b42", "0x65750", "0x7f8", "command-7 contention", "teardown"):
+for token in ("selector 4", "0x68b42", "record 0", "febffb80", "0x7f8", "command-7 contention", "teardown"):
     check(f"sender design records {token}", token.lower() in SENDER_REPORT.read_text(encoding="utf-8").lower())
 
 print("\n== candidate-f05 provenance boundary ==")

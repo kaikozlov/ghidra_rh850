@@ -1302,6 +1302,25 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.secoc_command5_ram_proxy]
+tests = ["tests/verify_secoc_command5_ram_proxy.py"]
+oracle = "raw_bytes"
+paths = [
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "data/generated/decompilations.jsonl",
+  "data/generated/ephemeral_runtime_target_manifest_4512000.json",
+  "data/variant_ram_exec_requirements.json",
+  "tools/build_ephemeral_runtime_manifest.py",
+  "exploit/ephemeral_runtime/",
+  "exploit/command5/ram_proxy.py",
+  "tests/verify_secoc_command5_ram_proxy.py",
+  "docs/security/secoc/command5-oracle-assessment.md",
+  "docs/security/secoc/sender-implementation.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.command5_dtc_side_channel]
 tests = ["tests/verify_command5_dtc_side_channel.py"]
 oracle = "raw_bytes"

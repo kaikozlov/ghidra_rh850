@@ -74,7 +74,7 @@
   },
   "image": {
     "normalization": "trim-all-ff-upper-1mib-from-2mib-range-dump",
-    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+    "path": "/Users/kai/dev/inspect/repos/ghidra_rh850_analysis/community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
     "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "size": 1048576,
     "software_ids": [
@@ -101,6 +101,14 @@
     "canary_observation_address": null,
     "canary_observation_method": null,
     "codeflash_sha256": null,
+    "command5_dispatch_address": null,
+    "command5_done_flag": null,
+    "command5_driver_record": null,
+    "command5_key_selector": null,
+    "command5_mailbox_address": null,
+    "command5_mailbox_size": null,
+    "command5_mailbox_transport": null,
+    "command5_status_flag": null,
     "evidence": null,
     "notes": "No image-bound RAM execution/retention geometry is available.",
     "payload_callback_base": null,

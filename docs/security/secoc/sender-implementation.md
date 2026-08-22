@@ -249,11 +249,13 @@ DataFlash verifier, it does not assume steering IDs or Panda buses 0/2. It:
 - opendbc Toyota controller:
   <https://github.com/commaai/opendbc/blob/c9b31d21bc396e8958891e271936bdbdf1a6ca93/opendbc/car/toyota/carcontroller.py>
 
-## 5. Application-resident command-5 signing proxy — static engineering design
+## 5. Application-resident command-5 signing proxy — RAM implementation
 
-Stage 7 closes the software architecture for an EPS-resident signing proxy
-without implementing a persistent exploit or claiming that slot 4 permits
-command 5 on live Renesas ICU-S hardware.
+The software architecture is now implemented as a **RAM-only** application-
+context proxy. It does not require a persistent CodeFlash hook and does not
+claim that slot 4 permits command 5 on live Renesas ICU-S hardware. Installation
+reuses the separately verified authenticated bootloader-RAM execution chain; once
+resident, individual command-5 requests require no application SecurityAccess.
 
 ### 5.1 Use the stock serialized command-5 path
 
@@ -262,23 +264,24 @@ engine `0x89630`. The generated crypto-test harness already proves the complete
 calling convention:
 
 ```text
-icus_crypto_test_submit @ 0x68B42
+RAM proxy
   -> crypto_generate_driver_dispatch @ 0x88350
-  -> driver record 1 at 0x27F8C / 0x27FAC
+  -> driver record 0 @ 0x27F78
   -> icus_command5_mac_generate_adapter @ 0x87CCC
   -> shared ICU driver
   -> command 5
 ```
 
-For mode 1, `0x68B42` constructs a configuration record whose first word is
-`1` and whose selector byte at `+4` is runtime-controlled, supplies a message
-buffer, and uses literal `0x10` for both the stock test input length and initial
-output capacity. **That 16-byte length belongs to the test caller.** The lower
-prepare `0x87A94` accepts lengths below `0x51` and converts the byte count to an
-ICU bit length, so a proxy can retain the same serialized path while supplying
-the exact 12-byte classic or 36-byte FD authenticated input and **selector 4**.
-The lower engine accepts selectors `0..14`; no plaintext key crosses MainPE.
-The distinction and CMAC-length proof are canonical in
+The stock mode-1 test at `0x68B42` remains useful as calling-convention proof,
+but the resident proxy deliberately uses **record 0**, not diagnostic record 1.
+Both records use adapter `0x87CCC` and asynchronous worker `0x87DD0`; record 0's
+completion callback `0x88B5C` merely stores status to `FEBF13BD` and sets done
+flag `FEBF13BC`, whereas record 1 callback `0x6926A` invokes the diagnostic
+16-byte expected-result comparer. The lower prepare `0x87A94` accepts lengths
+below `0x51` and converts the byte count to an ICU bit length, so the proxy
+supplies the exact 12-byte classic or 36-byte FD authenticated input and fixes
+**selector 4**. The lower engine accepts selectors `0..14`; no plaintext key
+crosses MainPE. The distinction and CMAC-length proof are canonical in
 [command5-oracle-assessment.md](command5-oracle-assessment.md).
 
 For classic protected `0x2E4` or `0x131`, the command-5 message is the already
@@ -312,20 +315,27 @@ This makes command-7 receive verification the conservative priority. Actual
 latency and whether the workload is schedulable at vehicle message cadence are
 dynamic measurements.
 
-### 5.3 Foreground hook placement
+### 5.3 RAM-resident foreground owner and XCP mailbox
 
-`application_foreground_cyclic_loop @ 0x64FCC` runs on the polled TAUJ0 CH3
-foreground schedule. Its wrapper `0x65750` contains two calls to the dormant
-crypto-test subsystem:
+A persistent CodeFlash hook is unnecessary. The already implemented ephemeral
+runtime owns the normal TAUJ0 CH3 foreground loop after reproducing the stock
+boot transition, `application_cpu_context_init @ 0x70524`, startup JARL sequence,
+and final initializer. `command5_proxy.c` adds command-5 service after the normal
+foreground calls, outside the TAUJ0 CH0 motor-current ISR.
 
-- `0x65754 -> application_crypto_test_cyclic_step @ 0x68C0C`;
-- `0x65760 -> application_crypto_test_cyclic_finalize @ 0x68DE6`.
+The compiled Sienna proxy is **546 bytes** with zero relocations, so it fits the
+verified 776-byte retained application-RWX interval `FEBF0000..FEBF0307` with
+230 bytes headroom. Its tester mailbox is `FEBFFB80..FEBFFBFF`, a 128-byte
+interval with zero canonical application direct xrefs, above the startup shadow
+copy, and inside the unauthenticated COM-005 XCP read/write window. The mailbox
+supports 80 input bytes and 16 output bytes. Request sequence is committed last;
+response sequence is published only after record-0 completion has copied the
+result.
 
-Those two call slots are the minimum statically justified place for a small
-proxy submit/completion scheduler: they already belong to dormant crypto-test
-work, execute in initialized application context, and are outside the TAUJ0 CH0
-motor-current ISR. This identifies a hook architecture only; no patch bytes or
-persistent installer are supplied here.
+`exploit/command5/ram_proxy.py` is the matching offline planner / bench-gated
+live client. It fixes record 0 and selector 4, defaults to the configured
+authenticated-domain lengths `7/12/36`, and uses existing XCP SET_MTA/DOWNLOAD
+and SHORT_UPLOAD rather than inventing a new CAN protocol.
 
 ### 5.4 Freshness state for `0x2E4` and `0x131`
 

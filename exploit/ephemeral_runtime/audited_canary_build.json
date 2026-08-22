@@ -14,7 +14,7 @@
     "retained_limit": 776,
     "target_codeflash_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
     "target_manifest": "data/generated/ephemeral_runtime_target_manifest_4512000.json",
-    "target_manifest_sha256": "562393d0e40ba8dce158131860e2a2f3f97022cf480ee841247adacfa981b134"
+    "target_manifest_sha256": "e0fddd8204ec9ec34b6cdf88d3b34f24097cef9609d7471f50c181b8ef626395"
   },
   "review_status": "audited-inert-static-not-bench-validated",
   "schema": "p1me-ephemeral-scheduler-canary-audited-build-v2",
@@ -35,11 +35,11 @@
     },
     {
       "path": "exploit/ephemeral_runtime/target_config.py",
-      "sha256": "8f6c00dcce6af79600e56af902461a17d1f594bbe71a707bbb8fb52dddc2235f"
+      "sha256": "7806e5995937b7d9767dcf994f2283ff4e7c93af8d11ace9cd45be2ccc054b19"
     },
     {
       "path": "data/generated/ephemeral_runtime_target_manifest_4512000.json",
-      "sha256": "562393d0e40ba8dce158131860e2a2f3f97022cf480ee841247adacfa981b134"
+      "sha256": "e0fddd8204ec9ec34b6cdf88d3b34f24097cef9609d7471f50c181b8ef626395"
     }
   ],
   "toolchain": {

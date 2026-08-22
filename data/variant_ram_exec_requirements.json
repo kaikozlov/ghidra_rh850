@@ -15,7 +15,15 @@
       "retained_application_rwx_size": "0x308",
       "canary_observation_address": "0xFEBFFBF0",
       "canary_observation_method": "application-rmba-or-xcp-read",
-      "notes": "Verified from the analyzed bootloader/authenticated payload package plus application MPU/reset-lifetime analysis. The canary observation cell is separately verified unused and readable on this Sienna; it is target evidence, not part of generic retained-code geometry."
+      "command5_dispatch_address": "0x88350",
+      "command5_driver_record": 0,
+      "command5_key_selector": 4,
+      "command5_done_flag": "0xFEBF13BC",
+      "command5_status_flag": "0xFEBF13BD",
+      "command5_mailbox_address": "0xFEBFFB80",
+      "command5_mailbox_size": "0x80",
+      "command5_mailbox_transport": "xcp-shadow-rw-or-application-rmba-read",
+      "notes": "Verified from the analyzed bootloader/authenticated payload package plus application MPU/reset-lifetime analysis. The canary observation cell is separately verified unused and readable on this Sienna. The command-5 proxy contract is Sienna-specific: dispatcher 0x88350 record 0 resolves to adapter 0x87CCC and completion callback 0x88B5C; FEBF13BC/13BD are record-0 done/status cells; FEBFFB80..FEBFFBFF has no canonical application direct references, lies above the startup shadow-copy end, and is inside the no-SA XCP read/write window. The command-5 mailbox overlaps the canary observation cell, so canary and proxy variants are mutually exclusive."
     },
     {
       "id": "yc-newer-toyota-field-report-2026-08-16",
@@ -35,6 +43,14 @@
       "retained_application_rwx_size": null,
       "canary_observation_address": null,
       "canary_observation_method": null,
+      "command5_dispatch_address": null,
+      "command5_driver_record": null,
+      "command5_key_selector": null,
+      "command5_done_flag": null,
+      "command5_status_flag": null,
+      "command5_mailbox_address": null,
+      "command5_mailbox_size": null,
+      "command5_mailbox_transport": null,
       "notes": "yc reports blurbdust's shellcode required a linker script targeting 0xFEBE0000. No matching firmware/F181 or exact modified host/payload artifact is present, so this is link-VMA deployment evidence only and must not be substituted for the Sienna bootloader download/retention geometry."
     }
   ],

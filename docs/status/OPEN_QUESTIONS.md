@@ -217,34 +217,26 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   public P1M-E fault injection proves ordinary flash readout, not key-array
   access.
 - **Bank-0 command-8 production role and safe dynamic confirmation (SECOC-047/048).** Static firmware closes the CAN `0x13..0x1A` assembly and completion-misattribution mechanics. What remains useful is dynamic provenance, not random stimulation: determine whether RID `0x100E`/those CAN IDs occur during legitimate provisioning, whether any external monitor exposes bank-0 terminal state, and whether dealer tooling treats RID `0x1010` status `02` with zero proof as success. Reproduce the race only on a disposable/matching unit with a legitimately captured authenticated update package and complete recovery plan; preserve F181, route, M1–M5 hashes, timing, DTCs, and post-run key state. Do not synthesize command-8 packages on the only original ECU.
-- **Application command-5 signing capability — dynamic discriminator only.**
-  Stock RoutineControl `31 01 10 0F` supplies bank-1 activation, and stock
-  `0x68B42 -> 0x88350 -> 0x87CCC` supplies selector-controlled command-5 plumbing.
-  SECOC-069 adds the crucial length boundary: the diagnostic caller submits
-  exactly 16 bytes, while configured SecOC inputs are 7/12/36 bytes, so stock
-  activation is not itself a production signing oracle. The lower prepare
-  `0x87A94` accepts 0..80 bytes; a documented `0x68B8A` `16→12` adaptation is
-  sufficient for a classic-domain experiment after hardware permission is shown.
-  SECOC-046 now
-  supplies a stock no-SA DTC observation of the terminal negative state
-  (`0x00D317`), but that state conflates command failure with full-result mismatch
-  and does not expose `FEBE51AA`; direct byte observation remains bounded. For a production-resident signing proxy,
-  `0x65750` remains a foreground non-CH0 hook slot; command-7 contention is
-  handled by deferring on the shared serialized driver; sender freshness and a
-  controlled `0x7F8` bench egress are specified. Remaining questions are
-  dynamic: does live slot 4 actually permit command 5, what latency/jitter does
-  it have under real command-7 load, and does a provisioned isolated bench
-  produce CMACs matching independently known frames? The stimulus harness now
-  records per-observation monotonic/wall timestamps and request RTT
-  (`command5/stimulus.py`, schema `sienna-command5-app-live-result-v4`), so the
-  slot-4 latency/jitter question can be answered from evidence without any new
-  mutator. The same harness now records read-only `19 02 FF` snapshots before and
-  after stimulation. A second dynamic question is whether a tester can deliberately
-  trigger the recovered runtime re-arm chain `0x4F93C -> FEBE508D=0xA5 -> 0x68C0C
-  -> 0x67FCE`; static analysis proves the reset path exists but not external control
-  of the prerequisite application transition. Production Tx integration
-  also requires a new audited route because stock CanIf has no `0x2E4/0x131` Tx
-  entry. See
+- **Application command-5 signing capability — only hardware permission/timing remain dynamic.**
+  Stock RoutineControl `31 01 10 0F` still supplies a fixed-16 diagnostic test,
+  but SECOC-070 closes the alternate-caller problem: a 546-byte RAM-only runtime
+  now invokes serialized dispatcher `0x88350` through clean driver record 0 with
+  fixed selector 4 and caller-chosen `0..80` byte length. Its `FEBFFB80..FEBFFBFF`
+  mailbox is reachable through the existing no-application-SA XCP read/write
+  path; record-0 completion publishes the generated result without the stock
+  diagnostic 16-byte comparer. Installation still requires the already-solved
+  authenticated bootloader-RAM/MEM-SAFE-001 foothold, but no persistent CodeFlash
+  hook or per-request application SecurityAccess is needed. The remaining
+  command-5 questions are therefore genuinely dynamic: does live provisioned
+  slot 4 accept command 5, what latency/jitter does it have under real command-7
+  verification load, and do 7/12/36-byte results match independently known
+  CMACs? The runtime retries shared-driver busy rather than aborting command 7.
+  Sender freshness remains a separate protocol-state requirement. The older
+  stock-bank stimulus remains useful as a low-risk permission/control experiment,
+  while `command5/ram_proxy.py` is the variable-length planner / guarded live
+  client after the RAM runtime is installed. Production Tx integration still
+  requires a new audited route because stock CanIf has no `0x2E4/0x131` Tx entry.
+  See
   [../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md) and
   [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.
 - **Object-15 producer.** No static producer exists in this calibration.
