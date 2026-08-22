@@ -1,0 +1,704 @@
+{
+  "evidence_boundary": "Raw generated normal-Rx descriptor-table comparison only. Same CAN ID/length proves a shared configured receive descriptor, not identical downstream signal semantics, SecOC policy, hardware routing, or consumer behavior.",
+  "reference": {
+    "descriptor_count": 47,
+    "descriptors": [
+      {
+        "can_fd": false,
+        "can_id": "0x2E4",
+        "index": 0,
+        "length": 8,
+        "software_id": "0x000002E4"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x3B0",
+        "index": 1,
+        "length": 8,
+        "software_id": "0x000003B0"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x63B",
+        "index": 2,
+        "length": 8,
+        "software_id": "0x0000063B"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x624",
+        "index": 3,
+        "length": 8,
+        "software_id": "0x00000624"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x63D",
+        "index": 4,
+        "length": 8,
+        "software_id": "0x0000063D"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x00F",
+        "index": 5,
+        "length": 8,
+        "software_id": "0x0000000F"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x013",
+        "index": 6,
+        "length": 8,
+        "software_id": "0x00000013"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x014",
+        "index": 7,
+        "length": 8,
+        "software_id": "0x00000014"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x015",
+        "index": 8,
+        "length": 8,
+        "software_id": "0x00000015"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x016",
+        "index": 9,
+        "length": 8,
+        "software_id": "0x00000016"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x017",
+        "index": 10,
+        "length": 8,
+        "software_id": "0x00000017"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x018",
+        "index": 11,
+        "length": 8,
+        "software_id": "0x00000018"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x019",
+        "index": 12,
+        "length": 8,
+        "software_id": "0x00000019"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01A",
+        "index": 13,
+        "length": 8,
+        "software_id": "0x0000001A"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01B",
+        "index": 14,
+        "length": 8,
+        "software_id": "0x0000001B"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01C",
+        "index": 15,
+        "length": 8,
+        "software_id": "0x0000001C"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01D",
+        "index": 16,
+        "length": 8,
+        "software_id": "0x0000001D"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01E",
+        "index": 17,
+        "length": 8,
+        "software_id": "0x0000001E"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01F",
+        "index": 18,
+        "length": 8,
+        "software_id": "0x0000001F"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x191",
+        "index": 19,
+        "length": 8,
+        "software_id": "0x00000191"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x131",
+        "index": 20,
+        "length": 8,
+        "software_id": "0x00000131"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x2FD",
+        "index": 21,
+        "length": 8,
+        "software_id": "0x000002FD"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0D0",
+        "index": 22,
+        "length": 8,
+        "software_id": "0x000000D0"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x3BF",
+        "index": 23,
+        "length": 8,
+        "software_id": "0x000003BF"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x127",
+        "index": 24,
+        "length": 8,
+        "software_id": "0x00000127"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x115",
+        "index": 25,
+        "length": 8,
+        "software_id": "0x00000115"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x1C5",
+        "index": 26,
+        "length": 8,
+        "software_id": "0x000001C5"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x294",
+        "index": 27,
+        "length": 8,
+        "software_id": "0x00000294"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x51E",
+        "index": 28,
+        "length": 8,
+        "software_id": "0x0000051E"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x132",
+        "index": 29,
+        "length": 8,
+        "software_id": "0x00000132"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x611",
+        "index": 30,
+        "length": 8,
+        "software_id": "0x00000611"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x2D1",
+        "index": 31,
+        "length": 8,
+        "software_id": "0x000002D1"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x675",
+        "index": 32,
+        "length": 8,
+        "software_id": "0x00000675"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x2E8",
+        "index": 33,
+        "length": 8,
+        "software_id": "0x000002E8"
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x025",
+        "index": 34,
+        "length": 32,
+        "software_id": "0x40000025"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x423",
+        "index": 35,
+        "length": 1,
+        "software_id": "0x00000423"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0AA",
+        "index": 36,
+        "length": 8,
+        "software_id": "0x000000AA"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x101",
+        "index": 37,
+        "length": 8,
+        "software_id": "0x00000101"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0D5",
+        "index": 38,
+        "length": 8,
+        "software_id": "0x000000D5"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x13B",
+        "index": 39,
+        "length": 8,
+        "software_id": "0x0000013B"
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x090",
+        "index": 40,
+        "length": 32,
+        "software_id": "0x40000090"
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x0D7",
+        "index": 41,
+        "length": 32,
+        "software_id": "0x400000D7"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x64F",
+        "index": 42,
+        "length": 8,
+        "software_id": "0x0000064F"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x020",
+        "index": 43,
+        "length": 8,
+        "software_id": "0x00000020"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x403",
+        "index": 44,
+        "length": 8,
+        "software_id": "0x00000403"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x490",
+        "index": 45,
+        "length": 1,
+        "software_id": "0x00000490"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x1DA",
+        "index": 46,
+        "length": 8,
+        "software_id": "0x000001DA"
+      }
+    ],
+    "id": "8965B4512000",
+    "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+    "table_start": "0x00022018"
+  },
+  "schema": "rh850-cross-image-application-rx-descriptor-diff-v1",
+  "summary": {
+    "added": [
+      {
+        "can_fd": true,
+        "can_id": "0x0B6",
+        "index": 37,
+        "length": 32,
+        "software_id": "0x400000B6"
+      }
+    ],
+    "added_descriptor_count": 1,
+    "removed": [
+      {
+        "can_fd": false,
+        "can_id": "0x2E4",
+        "index": 0,
+        "length": 8,
+        "software_id": "0x000002E4"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x191",
+        "index": 19,
+        "length": 8,
+        "software_id": "0x00000191"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x131",
+        "index": 20,
+        "length": 8,
+        "software_id": "0x00000131"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x2FD",
+        "index": 21,
+        "length": 8,
+        "software_id": "0x000002FD"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x132",
+        "index": 29,
+        "length": 8,
+        "software_id": "0x00000132"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x423",
+        "index": 35,
+        "length": 1,
+        "software_id": "0x00000423"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x020",
+        "index": 43,
+        "length": 8,
+        "software_id": "0x00000020"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x1DA",
+        "index": 46,
+        "length": 8,
+        "software_id": "0x000001DA"
+      }
+    ],
+    "removed_descriptor_count": 8,
+    "shared_descriptor_count": 39
+  },
+  "target": {
+    "descriptor_count": 40,
+    "descriptors": [
+      {
+        "can_fd": false,
+        "can_id": "0x3B0",
+        "index": 0,
+        "length": 8,
+        "software_id": "0x000003B0"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x63B",
+        "index": 1,
+        "length": 8,
+        "software_id": "0x0000063B"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x624",
+        "index": 2,
+        "length": 8,
+        "software_id": "0x00000624"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x63D",
+        "index": 3,
+        "length": 8,
+        "software_id": "0x0000063D"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x00F",
+        "index": 4,
+        "length": 8,
+        "software_id": "0x0000000F"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x013",
+        "index": 5,
+        "length": 8,
+        "software_id": "0x00000013"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x014",
+        "index": 6,
+        "length": 8,
+        "software_id": "0x00000014"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x015",
+        "index": 7,
+        "length": 8,
+        "software_id": "0x00000015"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x016",
+        "index": 8,
+        "length": 8,
+        "software_id": "0x00000016"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x017",
+        "index": 9,
+        "length": 8,
+        "software_id": "0x00000017"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x018",
+        "index": 10,
+        "length": 8,
+        "software_id": "0x00000018"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x019",
+        "index": 11,
+        "length": 8,
+        "software_id": "0x00000019"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01A",
+        "index": 12,
+        "length": 8,
+        "software_id": "0x0000001A"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01B",
+        "index": 13,
+        "length": 8,
+        "software_id": "0x0000001B"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01C",
+        "index": 14,
+        "length": 8,
+        "software_id": "0x0000001C"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01D",
+        "index": 15,
+        "length": 8,
+        "software_id": "0x0000001D"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01E",
+        "index": 16,
+        "length": 8,
+        "software_id": "0x0000001E"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x01F",
+        "index": 17,
+        "length": 8,
+        "software_id": "0x0000001F"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0D0",
+        "index": 18,
+        "length": 8,
+        "software_id": "0x000000D0"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x3BF",
+        "index": 19,
+        "length": 8,
+        "software_id": "0x000003BF"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x127",
+        "index": 20,
+        "length": 8,
+        "software_id": "0x00000127"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x115",
+        "index": 21,
+        "length": 8,
+        "software_id": "0x00000115"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x1C5",
+        "index": 22,
+        "length": 8,
+        "software_id": "0x000001C5"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x294",
+        "index": 23,
+        "length": 8,
+        "software_id": "0x00000294"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x51E",
+        "index": 24,
+        "length": 8,
+        "software_id": "0x0000051E"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x611",
+        "index": 25,
+        "length": 8,
+        "software_id": "0x00000611"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x2D1",
+        "index": 26,
+        "length": 8,
+        "software_id": "0x000002D1"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x675",
+        "index": 27,
+        "length": 8,
+        "software_id": "0x00000675"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x2E8",
+        "index": 28,
+        "length": 8,
+        "software_id": "0x000002E8"
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x025",
+        "index": 29,
+        "length": 32,
+        "software_id": "0x40000025"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0AA",
+        "index": 30,
+        "length": 8,
+        "software_id": "0x000000AA"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x101",
+        "index": 31,
+        "length": 8,
+        "software_id": "0x00000101"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x0D5",
+        "index": 32,
+        "length": 8,
+        "software_id": "0x000000D5"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x13B",
+        "index": 33,
+        "length": 8,
+        "software_id": "0x0000013B"
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x090",
+        "index": 34,
+        "length": 32,
+        "software_id": "0x40000090"
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x0D7",
+        "index": 35,
+        "length": 32,
+        "software_id": "0x400000D7"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x64F",
+        "index": 36,
+        "length": 8,
+        "software_id": "0x0000064F"
+      },
+      {
+        "can_fd": true,
+        "can_id": "0x0B6",
+        "index": 37,
+        "length": 32,
+        "software_id": "0x400000B6"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x403",
+        "index": 38,
+        "length": 8,
+        "software_id": "0x00000403"
+      },
+      {
+        "can_fd": false,
+        "can_id": "0x490",
+        "index": 39,
+        "length": 1,
+        "software_id": "0x00000490"
+      }
+    ],
+    "id": "8965F1208000",
+    "normalization": "trim-all-ff-upper-1mib-from-2mib-range-dump",
+    "sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+    "source_sha256": "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d",
+    "source_size": 2097152,
+    "table_start": "0x00021F94"
+  }
+}

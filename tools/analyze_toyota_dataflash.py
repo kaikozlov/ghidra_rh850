@@ -474,8 +474,17 @@ def analyze(
     capture_path: Path | None = None,
     min_entropy: float = 3.0,
     domain_scan: bool = False,
+    physical_prefix_size: int | None = None,
 ) -> dict[str, object]:
-    dump = dump_path.read_bytes()
+    source_dump = dump_path.read_bytes()
+    if physical_prefix_size is not None:
+        if physical_prefix_size <= 0 or physical_prefix_size > len(source_dump):
+            raise ValueError(
+                f"physical prefix size must be within source dump: {physical_prefix_size:#x} vs {len(source_dump):#x}"
+            )
+        dump = source_dump[:physical_prefix_size]
+    else:
+        dump = source_dump
     try:
         display_dump = str(dump_path.resolve().relative_to(REPO.resolve()))
     except ValueError:
@@ -508,6 +517,10 @@ def analyze(
             ),
         },
     }
+    if physical_prefix_size is not None:
+        result["source_dump_sha256"] = sha256(source_dump)
+        result["source_size"] = len(source_dump)
+        result["normalization"] = f"physical-prefix-{physical_prefix_size:#x}"
     if capture_path is not None:
         sync_samples, protected_samples, summary = load_capture(capture_path)
         try:
@@ -539,6 +552,11 @@ def main() -> int:
     parser.add_argument("--domain-scan", action="store_true", help="test every unique high-entropy 16-byte window across sync and each protected ID")
     parser.add_argument("--min-entropy", type=float, default=3.0)
     parser.add_argument("--rank-limit", type=int, default=100)
+    parser.add_argument(
+        "--physical-prefix-size",
+        type=lambda value: int(value, 0),
+        help="analyze only this leading physical span while preserving source-dump provenance",
+    )
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 
@@ -549,6 +567,7 @@ def main() -> int:
         capture_path=args.capture,
         min_entropy=args.min_entropy,
         domain_scan=args.domain_scan,
+        physical_prefix_size=args.physical_prefix_size,
     )
     text = json.dumps(result, indent=2, sort_keys=True) + "\n"
     if args.output:

@@ -3,7 +3,7 @@
     {
       "authenticated_download_base": "0xFEBF0000",
       "authenticated_download_size": "0x1000",
-      "boundary": "The Denso EPS authenticated-RAM bootstrap is already cross-vehicle: shared SA/DID/download/routine structure and public-payload reuse are established across listed B4/F3/F4 EPS evidence, and 8965H1202000 now has direct field-observed range-payload execution plus firmware-static secret/flow corroboration. Exact byte-for-byte acceptance of the repository Sienna ram_dump_payload.bin is locally verified only for 8965B4512000; other rows retain their evidence grade and may require a target-accepted fixture.",
+      "boundary": "The Denso EPS authenticated-RAM bootstrap is already cross-vehicle: shared SA/DID/download/routine structure and public-payload reuse are established across listed B4/F3/F4 EPS evidence, while 8965H1202000 and 8965F1208000 have direct field-observed range-payload execution plus firmware-static secret/flow corroboration. Exact byte-for-byte acceptance of the repository Sienna ram_dump_payload.bin is locally verified only for 8965B4512000; other rows retain their evidence grade and may require a target-accepted fixture.",
       "did_0201_default": "00000000000000000000000000000000",
       "did_0202_default": "00000000000000000000000000000000",
       "did_order": [
@@ -26,6 +26,13 @@
           "notes": "Contributor field acquisition used the shared authenticated-RAM path to execute range-dump payloads and recover CodeFlash/DataFlash/RAM on the 2023 Corolla EPS; exact local Sienna fixture-byte acceptance is not claimed.",
           "software_id": "8965H1202000",
           "source": "community/albinoelephant/raw-20260818/MANIFEST.txt + recovered CodeFlash"
+        },
+        {
+          "fixture_transfer": "target-built-range-payloads-observed",
+          "grade": "observed",
+          "notes": "Span's 2025 Corolla acquisition used the same authenticated-RAM range-dump workflow to recover CodeFlash/DataFlash/extended-CodeFlash/GlobalRAM/LocalRAM. The image independently preserves the H-family payload-build and boot-SA roots and boot flow; exact acceptance of the repository Sienna ram_dump_payload.bin is not claimed.",
+          "software_id": "8965F1208000",
+          "source": "community/spanconstant/raw-20260821/MANIFEST.txt + recovered CodeFlash"
         },
         {
           "fixture_transfer": "shared-public-payload-reported",

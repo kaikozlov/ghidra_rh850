@@ -1,0 +1,21 @@
+{
+  "schema": "toyota-secoc-semantic-target-v2",
+  "candidate_count": 1,
+  "resolution": "unique",
+  "program_sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+  "verify_result_polarity": "zero-is-verified-ok-nonzero-is-not-verified",
+  "function": {"name": "FUN_00088c16", "entry": "0x00088c16"},
+  "mac_result_source": {"address": null, "resolution": "unmapped-on-current-import", "load_site": "0x00088c3a", "passed_by_address_elsewhere": false},
+  "boolean_materialization": {"site": "0x00088c40", "register": "r26", "meaning": "verify-result-nonzero"},
+  "pre_gate_state_call": "0x00088c5c",
+  "patch": {"address": "0x00088c62", "original": "e0d1", "replacement": "e001", "operation": "cmp-second-register-to-first-force-fallthrough"},
+  "control_flow": {"gate_cmp": "0x00088c62", "bne": "0x00088c64", "bne_bytes": "9a0d", "verified_delivery_fallthrough": "0x00088c66", "mismatch_branch_target": "0x00088c76", "join": "0x00088c7e", "verified_fallthrough_calls": 2, "mismatch_branch_calls": 1},
+  "invariants": [
+    "byte-result-load-structurally-resolved-global-unmapped",
+    "zero-test-and-cmovne-materialize-result-nonzero-boolean",
+    "same-boolean-survives-through-pre-gate-call",
+    "bne-taken-means-result-nonzero-fallthrough-means-result-zero",
+    "verified-and-mismatch-arms-both-call-and-converge",
+    "patch-neutralizes-cmp-registers-and-preserves-bne"
+  ]
+}
