@@ -145,9 +145,9 @@ RECORD_ROLES = {
         "boundary": "Payload is marker A55A5AA5 followed by the 20-character unit serial (e.g. '8965012N50A05G310920' -> '8965012N50E12H030731'), zero padded. The serial embeds the same 89650-12N50 part-number family as record 4 plus a unit-unique suffix. Techstream's English string database carries the OEM vocabulary 'Display of ECU Product Serial Number' (M_English entry 7345514) and 'Sensor Serial Number' (entry 2665916) used by diagnostic serial displays; no target-native firmware reader of the staged copy at FEBEFAD8 was recovered, so the serial classification rests on the live F18C/serial observation and the record shape.",
     },
     8: {
-        "classification": "changed-opaque-unit-record",
-        "role": "opaque_24_byte_unit_record",
-        "boundary": "Only three payload bytes differ. No target-native semantic consumer beyond the generic record family has been recovered; do not assign an OEM meaning or manufacturing origin.",
+        "classification": "changed-unit-record-unresolved-field",
+        "role": "family_standard_unit_value_record",
+        "boundary": "Payload is marker A55A5AA5, u16 1, u16 20 (0x14), eight zero bytes, a 4-byte unit-specific value at payload+0x10 (u32 LE; bytes 1..3 carry the value, byte 0 is zero: baseline 0x7FCF4D00, target 0x3AA4B800), and four zero bytes. Sienna's final same-family record at 0xA628 has the identical schema with value 0x1AEBBD00. Only the three value bytes differ (0xA519..0xA51B). The differing field is unit-record content, not a checksum (records are CRC-terminated separately). No recovered fixed-index consumer; the field remains an opaque family-standard unit value — do not assign an OEM meaning.",
     },
 }
 
@@ -288,6 +288,68 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
         if 0x10000 <= val < 0x17E00 and any((val + d) in changed for d in range(4)):
             aligned_numeric_hits.append({"application_offset": f"0x{off:X}", "numeric_value": f"0x{val:X}"})
 
+    # ---- second-slice structural closures ----
+    # Runtime shadow liveness: every retained PE1/self LocalRAM capture proves the shadow
+    # is the live runtime copy (byte-identical to the same image's CodeFlash page).
+    shadow_verifications = []
+    for label, ram_path, img, base in (
+        ("albino-PE1-002502", ROOT / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-002502.bin", h, 0xFEBE0000),
+        ("albino-PE1-004452", ROOT / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-004452.bin", h, 0xFEBE0000),
+        ("albino-PE1-005055", ROOT / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-005055.bin", h, 0xFEBE0000),
+        ("span-PE1-151834", ROOT / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_pe1_febe0000_fec00000_20260821-151834.bin", s, 0xFEBE0000),
+        ("span-self-152418", ROOT / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_self_fede0000_fee00000_20260821-152418.bin", s, 0xFEDE0000),
+    ):
+        ram = ram_path.read_bytes()
+        shadow_va = SHADOW_RAM_START if base == 0xFEBE0000 else (base + 0x17C00)
+        sh = ram[shadow_va - base:shadow_va - base + (SHADOW_SOURCE_END - SHADOW_SOURCE_START)]
+        shadow_verifications.append({
+            "capture": label,
+            "ram_base": f"0x{base:08X}", "shadow_va": f"0x{shadow_va:08X}",
+            "diffs_vs_own_codeflash": sum(1 for a, b in zip(sh, img[0x10000:0x10000 + (SHADOW_SOURCE_END - SHADOW_SOURCE_START)]) if a != b),
+            "diffs_vs_high_template": sum(1 for a, b in zip(sh, img[0x18000:0x18000 + (SHADOW_SOURCE_END - SHADOW_SOURCE_START)]) if a != b),
+        })
+
+    # High-block boundary: 0x18000..0x1FDEF is an invariant structurally homologous template,
+    # not a proven selectable page and not a proven default source.
+    high_homology = sum(1 for k in range(0x7DF0) if h[0x10000 + k] == h[0x18000 + k])
+    changed_low = [i for i in range(0x10000, 0x17DF0) if h[i] != s[i]]
+    high_matches_h = sum(1 for i in changed_low if h[0x18000 + (i - 0x10000)] == h[i])
+    high_matches_span = sum(1 for i in changed_low if h[0x18000 + (i - 0x10000)] == s[i])
+    high_third_value = len(changed_low) - high_matches_h - high_matches_span
+
+    # Bank-A exact structural partition (corrected 32x0x28 row family).
+    def row_changes(start: int, end: int, stride: int) -> list[int]:
+        return [diff_count(h, s, a, a + stride) for a in range(start, end, stride)]
+
+    rows44_changes = row_changes(0x10100, 0x109C4, 0x44)
+    rows24_changes = row_changes(0x109C4, 0x10A54, 0x24)
+    rows28_changes = row_changes(0x10B54, 0x11054, 0x28)
+    bank_a_total = sum(rows44_changes) + sum(rows24_changes) + diff_count(h, s, 0x10A54, 0x10B54) + sum(rows28_changes) + diff_count(h, s, 0x11054, 0x11400)
+    if bank_a_total != diff_count(h, s, 0x10100, 0x11400):
+        raise ValueError(f"bank-A partition does not close: {bank_a_total} != {diff_count(h, s, 0x10100, 0x11400)}")
+    if not all(struct.unpack_from("<I", h, a + 0x40)[0] == 0xFFFF7FFF for a in range(0x10100, 0x109C4, 0x44)):
+        raise ValueError("bank-A 0x44-row terminal sentinel drift")
+    if not all(struct.unpack_from("<I", h, a + 0x24)[0] == 0x7FFFFFFF for a in range(0x10B54, 0x11054, 0x28)):
+        raise ValueError("bank-A 0x28-row terminal sentinel drift")
+
+    # Compiled default blocks for records 0/2/3: zero in both images; readers seed from
+    # these defaults then overlay the persistent A000 record values.
+    default_blocks = {
+        "rec3_default": (0x21000, 0x10, 0x203),
+        "rec0_default": (0x21010, 0x28, 0x200),
+        "rec2_default": (0x21038, 0x40, 0x202),
+    }
+    default_rows = []
+    for name, (va, ln, family_idx) in default_blocks.items():
+        blk_h = h[va:va + ln]
+        blk_s = s[va:va + ln]
+        default_rows.append({
+            "name": name, "va": f"0x{va:X}", "length": ln, "family_index": f"0x{family_idx:X}",
+            "identical_between_variants": blk_h == blk_s,
+            "all_zero_baseline": not any(blk_h), "all_zero_target": not any(blk_s),
+        })
+
+
     # Boot integrity-region table + AES-CMAC tag verification chain.
     # 0x8DE0 table is byte-identical between H and Span (asserted below).
     region_rows = []
@@ -348,11 +410,62 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
                 "start": "0x10100", "end_exclusive": "0x11400", "changed_bytes": diff_count(h, s, 0x10100, 0x11400),
                 "sentinel_offsets_baseline": sentinel_offsets_h, "sentinel_offsets_target": sentinel_offsets_s,
                 "sentinel_geometry_identical": sentinel_offsets_h == sentinel_offsets_s,
+                "exact_partition": {
+                    "curve_rows_0x44": {"start": "0x10100", "end_exclusive": "0x109C4", "count": 33,
+                                          "row_shape": "16 packed (u16 axis, i16 value) dwords + u32 0xFFFF7FFF terminal",
+                                          "per_row_changed_bytes": rows44_changes,
+                                          "unchanged_row_indices": [i for i, c in enumerate(rows44_changes) if c == 0],
+                                          "total_changed": sum(rows44_changes)},
+                    "rows_0x24": {"start": "0x109C4", "end_exclusive": "0x10A54", "count": 4,
+                                   "row_shape": "8 packed (u16 axis, i16 value) dwords + u32 0x7FFFFFFF terminal",
+                                   "per_row_changed_bytes": rows24_changes, "total_changed": sum(rows24_changes)},
+                    "interstitial": {"start": "0x10A54", "end_exclusive": "0x10B54",
+                                      "changed_bytes": diff_count(h, s, 0x10A54, 0x10B54)},
+                    "rows_0x28": {"start": "0x10B54", "end_exclusive": "0x11054", "count": 32,
+                                   "row_shape": "9 packed (u16 axis, i16 value) dwords + u32 0x7FFFFFFF terminal",
+                                   "per_row_changed_bytes": rows28_changes,
+                                   "unchanged_row_indices": [i for i, c in enumerate(rows28_changes) if c == 0],
+                                   "total_changed": sum(rows28_changes)},
+                    "tail": {"start": "0x11054", "end_exclusive": "0x11400",
+                              "changed_bytes": diff_count(h, s, 0x11054, 0x11400)},
+                    "total_changed": bank_a_total,
+                },
             },
             "structured_bank_b": {
                 "start": "0x120F4", "end_exclusive": "0x1237C", "record_stride": bank_b_stride,
-                "record_count": len(bank_b_records), "record_shape": "eight u32 values followed by u32 0x7FFFFFFF sentinel",
+                "record_count": len(bank_b_records),
+                "record_shape": "eight packed (u16 axis, i16 value) point dwords followed by u32 0x7FFFFFFF sentinel",
+                "shared_axis_rows_2_17": "rows 2..17 all carry the same u16 axis {6400,7680,10240,12800,15360,19200,25600,32000} with only the i16 values changed; rows 0/1 use a distinct small axis {0,80,480,960,1920,3200,4800,11520} and are unchanged",
                 "records": bank_b_records,
+            },
+            "runtime_shadow_liveness": {
+                "captures": shadow_verifications,
+                "conclusion": "All five retained runtime snapshots (albino 3x PE1, Span PE1, Span self-alias) hold FEBF7C00..FEBFF9EF byte-identical to the same specimen's CodeFlash 0x10000..0x17DEF. The low page is therefore the live runtime shadow actually consumed at runtime, not a dormant copy.",
+            },
+            "high_template_boundary": {
+                "range": "0x18000..0x1FDEF",
+                "identical_between_variants": h[0x18000:0x1FDF0] == s[0x18000:0x1FDF0],
+                "byte_homology_fraction_with_low_page": round(high_homology / 0x7DF0, 4),
+                "at_changed_low_offsets": {"high_equals_baseline": high_matches_h, "high_equals_target": high_matches_span, "third_value": high_third_value},
+                "no_marker_at_0x1FE00": struct.unpack_from("<I", h, 0x1FE00)[0] != 0x5AA5A55A,
+                "xcp_config_area_0x261F0_all_zero": not any(h[0x261F0:0x26230]),
+                "boundary": "The high block is an invariant structurally homologous template/reference-like region. No CodeFlash content reader/copy from it is recovered, and there is no 0x1FE00 marker/tag structure. It is NOT proven to be factory/default calibration and NOT proven XCP-selectable; no alternate-page selection is claimed (the checked XCP config area is all zero in the raw image). At the 1,311 changed low offsets it matches the baseline only 60 times and Span 11 times, so it is not simply either specimen's calibration.",
+            },
+            "compiled_default_override_semantics": {
+                "default_blocks": default_rows,
+                "reader_chain": {
+                    "0x2DAA8": "seeds its 0x10-byte staging buffer from CodeFlash 0x21000 (all zero), then calls 0x6009E(0x203) whose successful read (0x10) overwrites staging with the persistent record-3 values",
+                    "0x2DF98": "seeds its 0x28-byte staging buffer from CodeFlash 0x21010 (all zero), then calls 0x6009E(0x200) to overlay record-0 values",
+                    "0x2FB36": "seeds its 0x40-byte staging buffer from CodeFlash 0x21038 (all zero), then calls 0x6009E(0x202) to overlay record-2 values",
+                },
+                "interpretation": "Because the compiled fallback defaults are byte-identical zero blocks in both specimens while the persistent A000 values differ, records 0/2/3 are demonstrably per-unit (or service-written) calibration overrides relative to unchanged software defaults — not a compile-time 2023->2025 tuning revision. Techstream's exact OEM vocabulary (Torque Sensor Adjustment; Torque Sensor 1..4 Zero Point Value; Motor Rotation Angle Sensor Calibration; Torque Sensor Missing Calibration of Adjustment Value Non-Memory/Incomplete in NA EMPS_P5/EMPS2_P5 section 87/65; EPS Motor Angle Zero Point Value family) corroborates the adjustment/calibration class but does not assign individual record channels without offset-level dataflow.",
+            },
+            "xcp_page_state": {
+                "set_cal_page_handler": "0x9261E (custom selector 0xEB)", "get_cal_page_handler": "0x92698 (custom selector 0xEA)",
+                "e4_copy_handler": "0x92724 (custom selector 0xE4) -> 0x92700",
+                "state_cells": ["0xFEBE5DB0", "0xFEBE5DB1"],
+                "writer_flag_mask": 3, "writer_accepts_values": [0, 1],
+                "boundary": "XCP EB/EA only reference the page-state cells FEBE5DB0/5DB1; E4 copies CodeFlash 0x10000..0x17DEF into the RAM shadow. This supports a calibration-page interpretation of the low bank, but individual CPU consumers of the copied values remain unproven.",
             },
             "cpu_consumer_boundary": "Target-native H/Span review found no recovered application CPU semantic dereference of the 0x10000+ shadow beyond the startup/E4 copies and XCP calibration-page bookkeeping. Apparent low-address references reviewed in the decompiler resolve to scalar/control-word uses or numeric/packed metadata rather than reads of the low-bank contents. Computed-pointer or undocumented hardware-overlay use is not disproved.",
             "aligned_application_numeric_hits_near_changed_low_bytes": aligned_numeric_hits,
@@ -393,6 +506,12 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             "post_crc_opaque_tag_baseline": cmac_tag_h.hex(), "post_crc_opaque_tag_target": cmac_tag_s.hex(),
             "opaque_tag_cpu_xref_status": "superseded: the 16 bytes at 0x17DF0..0x17DFF are the region-0 AES-CMAC tag per boot_integrity_regions; no separate opaque-tag interpretation remains",
             "opaque_tag_algorithm": "superseded-by-boot-integrity-region-0-aes-cmac-tag",
+            "isolated_scalar_region": {
+                "va": "0x13E40", "u16_sequence_baseline": list(struct.unpack_from("<8H", h, 0x13E40)),
+                "u16_sequence_target": list(struct.unpack_from("<8H", s, 0x13E40)),
+                "only_changed_position": "0x13E46 (u16 0x0929 -> 0x0989; low byte 0x29 -> 0x89)",
+                "boundary": "Single u16 inside an otherwise unchanged 8-u16 island (2,104,2345,2345,2442,2442,2442,0). No direct CPU consumer and no Techstream offset-level join recovered.",
+            },
             "shadow_identity_mirrors": {
                 "0x17D80_to_ram": "0xFEBFF980",
                 "0x17DC0_to_ram": "0xFEBFF9C0"

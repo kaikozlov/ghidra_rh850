@@ -179,4 +179,63 @@ interp = tracked["interpretation"]
 check("artifact refuses to promote specimen differences to a model-year tuning claim", interp["unit_specific_motor_calibration_differs"] and not interp["model_year_tuning_change_proven"])
 check("artifact preserves the unresolved 0x10000+ CPU-consumer boundary", "no recovered application CPU semantic dereference" in shadow["cpu_consumer_boundary"] and "not disproved" in shadow["cpu_consumer_boundary"])
 
+# ---- second-slice closures ----
+# Runtime shadow liveness across every retained snapshot.
+live = shadow["runtime_shadow_liveness"]["captures"]
+check("all five runtime snapshots hold the shadow byte-identical to their own CodeFlash low page", len(live) == 5 and all(c["diffs_vs_own_codeflash"] == 0 for c in live) and {c["capture"] for c in live} == {"albino-PE1-002502", "albino-PE1-004452", "albino-PE1-005055", "span-PE1-151834", "span-self-152418"})
+# Independent re-derivation from the raw captures.
+for cap, rel, base, img in (
+    ("albino-PE1-002502", "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-002502.bin", 0xFEBE0000, h),
+    ("albino-PE1-004452", "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-004452.bin", 0xFEBE0000, h),
+    ("albino-PE1-005055", "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_local_ram_pe1_febe0000_fec00000_20260814-005055.bin", 0xFEBE0000, h),
+    ("span-PE1-151834", "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_pe1_febe0000_fec00000_20260821-151834.bin", 0xFEBE0000, s),
+    ("span-self-152418", "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_self_fede0000_fee00000_20260821-152418.bin", 0xFEDE0000, s),
+):
+    ram = (REPO / rel).read_bytes()
+    shadow_va = 0xFEBF7C00 if base == 0xFEBE0000 else base + 0x17C00
+    sh = ram[shadow_va - base:shadow_va - base + 0x7DF0]
+    check(f"{cap}: RAM shadow equals same-image CodeFlash 0x10000..0x17DEF", sh == img[0x10000:0x10000 + 0x7DF0])
+
+# High-template boundary.
+ht = shadow["high_template_boundary"]
+check("high 0x18000..0x1FDEF is identical between specimens and ~84.9% homologous to the low page", ht["identical_between_variants"] and h[0x18000:0x1FDF0] == s[0x18000:0x1FDF0] and ht["byte_homology_fraction_with_low_page"] == 0.8488)
+check("high template is neither specimen's calibration at the changed offsets", ht["at_changed_low_offsets"] == {"high_equals_baseline": 60, "high_equals_target": 11, "third_value": 1240})
+check("high template carries no marker/tag structure and the checked XCP config area is zero", ht["no_marker_at_0x1FE00"] and struct.unpack_from("<I", h, 0x1FE00)[0] != 0x5AA5A55A and ht["xcp_config_area_0x261F0_all_zero"] and not any(h[0x261F0:0x26230]))
+
+# Bank-A exact structural partition (33x0x44 + 4x0x24 + interstitial + 32x0x28 + tail = 1143).
+part = shadow["structured_bank_a"]["exact_partition"]
+check("bank-A 0x44 row family: 33 rows, every-8th unchanged, 645 changed bytes", part["curve_rows_0x44"]["count"] == 33 and part["curve_rows_0x44"]["unchanged_row_indices"] == [0, 8, 16, 24, 32] and part["curve_rows_0x44"]["total_changed"] == 645)
+check("bank-A 0x24 row family unchanged", part["rows_0x24"]["count"] == 4 and part["rows_0x24"]["total_changed"] == 0)
+check("bank-A interstitial carries 28 changes", part["interstitial"]["changed_bytes"] == 28)
+check("bank-A 0x28 row family: 32 rows, every-8th unchanged, 240 changed bytes", part["rows_0x28"]["count"] == 32 and part["rows_0x28"]["unchanged_row_indices"] == [0, 8, 16, 24] and part["rows_0x28"]["total_changed"] == 240)
+diff_total_bank_a = sum(1 for k in range(0x10100, 0x11400) if h[k] != s[k])
+check("bank-A tail carries 230 changes and the partition closes to 1143", part["tail"]["changed_bytes"] == 230 and part["total_changed"] == 1143 == diff_total_bank_a)
+check("bank-A 0x44 rows end in FFFF7FFF and 0x28 rows end in 7FFFFFFF", all(struct.unpack_from("<I", h, a + 0x40)[0] == 0xFFFF7FFF for a in range(0x10100, 0x109C4, 0x44)) and all(struct.unpack_from("<I", h, a + 0x24)[0] == 0x7FFFFFFF for a in range(0x10B54, 0x11054, 0x28)))
+
+# Bank-B packed point schema: rows 2..17 share the same u16 axis; only i16 values change.
+rowsB = list(range(0x120F4, 0x1237C, 0x24))
+axis_2_17 = {tuple(struct.unpack_from("<H", s, a + 4 * k)[0] for k in range(8)) for a in rowsB[2:]}
+check("bank-B rows 2..17 share the exact u16 axis {6400,7680,10240,12800,15360,19200,25600,32000}", axis_2_17 == {(6400, 7680, 10240, 12800, 15360, 19200, 25600, 32000)})
+axis_0_1 = {tuple(struct.unpack_from("<H", h, a + 4 * k)[0] for k in range(8)) for a in rowsB[:2]}
+check("bank-B rows 0/1 use the distinct small axis and are unchanged", axis_0_1 == {(0, 80, 480, 960, 1920, 3200, 4800, 11520)} and all(h[a:a + 0x24] == s[a:a + 0x24] for a in rowsB[:2]))
+
+# Compiled-default override semantics: defaults are zero in both specimens; records differ.
+cdo = shadow["compiled_default_override_semantics"]
+check("compiled default blocks for records 0/2/3 are byte-identical zero pages in both specimens", all(d["identical_between_variants"] and d["all_zero_baseline"] and d["all_zero_target"] for d in cdo["default_blocks"]) and h[0x21000:0x21078] == s[0x21000:0x21078] and not any(h[0x21000:0x21078]))
+check("default blocks are pinned at the exact reader-seeded addresses", [(d["va"], d["length"], d["family_index"]) for d in cdo["default_blocks"]] == [("0x21000", 0x10, "0x203"), ("0x21010", 0x28, "0x200"), ("0x21038", 0x40, "0x202")])
+check("records 0/2/3 are classified as per-unit/service overrides over unchanged software defaults", "not a compile-time 2023->2025 tuning revision" in cdo["interpretation"] and "Torque Sensor Adjustment" in cdo["interpretation"])
+
+# XCP page-state handlers.
+xps = shadow["xcp_page_state"]
+check("XCP page-state cells and handlers are pinned", xps["state_cells"] == ["0xFEBE5DB0", "0xFEBE5DB1"] and xps["set_cal_page_handler"] == "0x9261E (custom selector 0xEB)" and xps["get_cal_page_handler"] == "0x92698 (custom selector 0xEA)" and xps["e4_copy_handler"] == "0x92724 (custom selector 0xE4) -> 0x92700")
+
+# Record-8 authoritative unit field.
+check("record-8 differing field is the u32 at payload+0x10 with byte 0 zero", struct.unpack_from("<I", h, 0xA518)[0] == 0x7FCF4D00 and struct.unpack_from("<I", s, 0xA518)[0] == 0x3AA4B800 and h[0xA518] == 0 and records[8]["role"] == "family_standard_unit_value_record")
+SIENNA_R8 = struct.unpack_from("<I", SIENNA, 0xA638)[0]
+check("Sienna final unit record carries the same schema with value 0x1AEBBD00", SIENNA_R8 == 0x1AEBBD00 and struct.unpack_from("<I", SIENNA, 0xA628)[0] == 0xA55A5AA5)
+
+# Isolated scalar region authoritative bytes.
+iso = ident["isolated_scalar_region"]
+check("isolated scalar u16 sequences are exact", iso["u16_sequence_baseline"] == [2, 104, 2345, 2345, 2442, 2442, 2442, 0] and iso["u16_sequence_target"] == [2, 104, 2345, 2441, 2442, 2442, 2442, 0] and list(struct.unpack_from("<8H", h, 0x13E40)) == iso["u16_sequence_baseline"] and list(struct.unpack_from("<8H", s, 0x13E40)) == iso["u16_sequence_target"])
+
 print("\nSpan low-CodeFlash calibration delta verification passed.")

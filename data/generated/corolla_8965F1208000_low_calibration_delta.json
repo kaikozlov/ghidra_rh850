@@ -351,8 +351,8 @@
           0,
           0
         ],
-        "boundary": "Only three payload bytes differ. No target-native semantic consumer beyond the generic record family has been recovered; do not assign an OEM meaning or manufacturing origin.",
-        "classification": "changed-opaque-unit-record",
+        "boundary": "Payload is marker A55A5AA5, u16 1, u16 20 (0x14), eight zero bytes, a 4-byte unit-specific value at payload+0x10 (u32 LE; bytes 1..3 carry the value, byte 0 is zero: baseline 0x7FCF4D00, target 0x3AA4B800), and four zero bytes. Sienna's final same-family record at 0xA628 has the identical schema with value 0x1AEBBD00. Only the three value bytes differ (0xA519..0xA51B). The differing field is unit-record content, not a checksum (records are CRC-terminated separately). No recovered fixed-index consumer; the field remains an opaque family-standard unit value \u2014 do not assign an OEM meaning.",
+        "classification": "changed-unit-record-unresolved-field",
         "codeflash_source": "0xA508",
         "descriptor_va": "0x2ABEC",
         "index": 8,
@@ -363,7 +363,7 @@
         "payload_changed_bytes": 3,
         "payload_target_sha256": "193a50dc092c600a600379ee9fb3140b40deeb90ecc12ae245d4b8a723878e62",
         "ram_destination": "0xFEBEFB08",
-        "role": "opaque_24_byte_unit_record",
+        "role": "family_standard_unit_value_record",
         "standard_terminal_residue_ffffffff_baseline": true,
         "standard_terminal_residue_ffffffff_target": true,
         "stored_crc_fixup_baseline": "0xCC9B0CC2",
@@ -820,6 +820,31 @@
   "identity_and_integrity_tail": {
     "f181_secondary_baseline": "8A3111202000",
     "f181_secondary_target": "8A3111213000",
+    "isolated_scalar_region": {
+      "boundary": "Single u16 inside an otherwise unchanged 8-u16 island (2,104,2345,2345,2442,2442,2442,0). No direct CPU consumer and no Techstream offset-level join recovered.",
+      "only_changed_position": "0x13E46 (u16 0x0929 -> 0x0989; low byte 0x29 -> 0x89)",
+      "u16_sequence_baseline": [
+        2,
+        104,
+        2345,
+        2345,
+        2442,
+        2442,
+        2442,
+        0
+      ],
+      "u16_sequence_target": [
+        2,
+        104,
+        2345,
+        2441,
+        2442,
+        2442,
+        2442,
+        0
+      ],
+      "va": "0x13E40"
+    },
     "low_region_crc32_residue_baseline": "0xFFFFFFFF",
     "low_region_crc32_residue_target": "0xFFFFFFFF",
     "low_region_crc_fixup_baseline": "bd112672",
@@ -1772,9 +1797,99 @@
         "numeric_value": "0x10F7A"
       }
     ],
+    "compiled_default_override_semantics": {
+      "default_blocks": [
+        {
+          "all_zero_baseline": true,
+          "all_zero_target": true,
+          "family_index": "0x203",
+          "identical_between_variants": true,
+          "length": 16,
+          "name": "rec3_default",
+          "va": "0x21000"
+        },
+        {
+          "all_zero_baseline": true,
+          "all_zero_target": true,
+          "family_index": "0x200",
+          "identical_between_variants": true,
+          "length": 40,
+          "name": "rec0_default",
+          "va": "0x21010"
+        },
+        {
+          "all_zero_baseline": true,
+          "all_zero_target": true,
+          "family_index": "0x202",
+          "identical_between_variants": true,
+          "length": 64,
+          "name": "rec2_default",
+          "va": "0x21038"
+        }
+      ],
+      "interpretation": "Because the compiled fallback defaults are byte-identical zero blocks in both specimens while the persistent A000 values differ, records 0/2/3 are demonstrably per-unit (or service-written) calibration overrides relative to unchanged software defaults \u2014 not a compile-time 2023->2025 tuning revision. Techstream's exact OEM vocabulary (Torque Sensor Adjustment; Torque Sensor 1..4 Zero Point Value; Motor Rotation Angle Sensor Calibration; Torque Sensor Missing Calibration of Adjustment Value Non-Memory/Incomplete in NA EMPS_P5/EMPS2_P5 section 87/65; EPS Motor Angle Zero Point Value family) corroborates the adjustment/calibration class but does not assign individual record channels without offset-level dataflow.",
+      "reader_chain": {
+        "0x2DAA8": "seeds its 0x10-byte staging buffer from CodeFlash 0x21000 (all zero), then calls 0x6009E(0x203) whose successful read (0x10) overwrites staging with the persistent record-3 values",
+        "0x2DF98": "seeds its 0x28-byte staging buffer from CodeFlash 0x21010 (all zero), then calls 0x6009E(0x200) to overlay record-0 values",
+        "0x2FB36": "seeds its 0x40-byte staging buffer from CodeFlash 0x21038 (all zero), then calls 0x6009E(0x202) to overlay record-2 values"
+      }
+    },
     "cpu_consumer_boundary": "Target-native H/Span review found no recovered application CPU semantic dereference of the 0x10000+ shadow beyond the startup/E4 copies and XCP calibration-page bookkeeping. Apparent low-address references reviewed in the decompiler resolve to scalar/control-word uses or numeric/packed metadata rather than reads of the low-bank contents. Computed-pointer or undocumented hardware-overlay use is not disproved.",
     "destination_start": "0xFEBF7C00",
+    "high_template_boundary": {
+      "at_changed_low_offsets": {
+        "high_equals_baseline": 60,
+        "high_equals_target": 11,
+        "third_value": 1240
+      },
+      "boundary": "The high block is an invariant structurally homologous template/reference-like region. No CodeFlash content reader/copy from it is recovered, and there is no 0x1FE00 marker/tag structure. It is NOT proven to be factory/default calibration and NOT proven XCP-selectable; no alternate-page selection is claimed (the checked XCP config area is all zero in the raw image). At the 1,311 changed low offsets it matches the baseline only 60 times and Span 11 times, so it is not simply either specimen's calibration.",
+      "byte_homology_fraction_with_low_page": 0.8488,
+      "identical_between_variants": true,
+      "no_marker_at_0x1FE00": true,
+      "range": "0x18000..0x1FDEF",
+      "xcp_config_area_0x261F0_all_zero": true
+    },
     "length": 32240,
+    "runtime_shadow_liveness": {
+      "captures": [
+        {
+          "capture": "albino-PE1-002502",
+          "diffs_vs_high_template": 4874,
+          "diffs_vs_own_codeflash": 0,
+          "ram_base": "0xFEBE0000",
+          "shadow_va": "0xFEBF7C00"
+        },
+        {
+          "capture": "albino-PE1-004452",
+          "diffs_vs_high_template": 4874,
+          "diffs_vs_own_codeflash": 0,
+          "ram_base": "0xFEBE0000",
+          "shadow_va": "0xFEBF7C00"
+        },
+        {
+          "capture": "albino-PE1-005055",
+          "diffs_vs_high_template": 4874,
+          "diffs_vs_own_codeflash": 0,
+          "ram_base": "0xFEBE0000",
+          "shadow_va": "0xFEBF7C00"
+        },
+        {
+          "capture": "span-PE1-151834",
+          "diffs_vs_high_template": 4923,
+          "diffs_vs_own_codeflash": 0,
+          "ram_base": "0xFEBE0000",
+          "shadow_va": "0xFEBF7C00"
+        },
+        {
+          "capture": "span-self-152418",
+          "diffs_vs_high_template": 4923,
+          "diffs_vs_own_codeflash": 0,
+          "ram_base": "0xFEDE0000",
+          "shadow_va": "0xFEDF7C00"
+        }
+      ],
+      "conclusion": "All five retained runtime snapshots (albino 3x PE1, Span PE1, Span self-alias) hold FEBF7C00..FEBFF9EF byte-identical to the same specimen's CodeFlash 0x10000..0x17DEF. The low page is therefore the live runtime shadow actually consumed at runtime, not a dormant copy."
+    },
     "source_end_exclusive": "0x17DF0",
     "source_start": "0x10000",
     "startup_call_chain": [
@@ -1786,6 +1901,128 @@
     "structured_bank_a": {
       "changed_bytes": 1143,
       "end_exclusive": "0x11400",
+      "exact_partition": {
+        "curve_rows_0x44": {
+          "count": 33,
+          "end_exclusive": "0x109C4",
+          "per_row_changed_bytes": [
+            0,
+            23,
+            23,
+            20,
+            21,
+            26,
+            22,
+            26,
+            0,
+            21,
+            24,
+            19,
+            22,
+            27,
+            24,
+            25,
+            0,
+            23,
+            23,
+            20,
+            21,
+            26,
+            22,
+            26,
+            0,
+            23,
+            23,
+            20,
+            21,
+            26,
+            22,
+            26,
+            0
+          ],
+          "row_shape": "16 packed (u16 axis, i16 value) dwords + u32 0xFFFF7FFF terminal",
+          "start": "0x10100",
+          "total_changed": 645,
+          "unchanged_row_indices": [
+            0,
+            8,
+            16,
+            24,
+            32
+          ]
+        },
+        "interstitial": {
+          "changed_bytes": 28,
+          "end_exclusive": "0x10B54",
+          "start": "0x10A54"
+        },
+        "rows_0x24": {
+          "count": 4,
+          "end_exclusive": "0x10A54",
+          "per_row_changed_bytes": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "row_shape": "8 packed (u16 axis, i16 value) dwords + u32 0x7FFFFFFF terminal",
+          "start": "0x109C4",
+          "total_changed": 0
+        },
+        "rows_0x28": {
+          "count": 32,
+          "end_exclusive": "0x11054",
+          "per_row_changed_bytes": [
+            0,
+            9,
+            7,
+            12,
+            9,
+            7,
+            9,
+            7,
+            0,
+            9,
+            7,
+            12,
+            9,
+            7,
+            9,
+            7,
+            0,
+            9,
+            7,
+            12,
+            9,
+            7,
+            9,
+            7,
+            0,
+            9,
+            7,
+            12,
+            9,
+            7,
+            9,
+            7
+          ],
+          "row_shape": "9 packed (u16 axis, i16 value) dwords + u32 0x7FFFFFFF terminal",
+          "start": "0x10B54",
+          "total_changed": 240,
+          "unchanged_row_indices": [
+            0,
+            8,
+            16,
+            24
+          ]
+        },
+        "tail": {
+          "changed_bytes": 230,
+          "end_exclusive": "0x11400",
+          "start": "0x11054"
+        },
+        "total_changed": 1143
+      },
       "sentinel_geometry_identical": true,
       "sentinel_offsets_baseline": {
         "0x7FFFFFFF": [
@@ -1942,7 +2179,7 @@
     "structured_bank_b": {
       "end_exclusive": "0x1237C",
       "record_count": 18,
-      "record_shape": "eight u32 values followed by u32 0x7FFFFFFF sentinel",
+      "record_shape": "eight packed (u16 axis, i16 value) point dwords followed by u32 0x7FFFFFFF sentinel",
       "record_stride": 36,
       "records": [
         {
@@ -2072,9 +2309,25 @@
           "terminal_sentinel": "0x7FFFFFFF"
         }
       ],
+      "shared_axis_rows_2_17": "rows 2..17 all carry the same u16 axis {6400,7680,10240,12800,15360,19200,25600,32000} with only the i16 values changed; rows 0/1 use a distinct small axis {0,80,480,960,1920,3200,4800,11520} and are unchanged",
       "start": "0x120F4"
     },
-    "xcp_e4_copy_function": "0x00092700"
+    "xcp_e4_copy_function": "0x00092700",
+    "xcp_page_state": {
+      "boundary": "XCP EB/EA only reference the page-state cells FEBE5DB0/5DB1; E4 copies CodeFlash 0x10000..0x17DEF into the RAM shadow. This supports a calibration-page interpretation of the low bank, but individual CPU consumers of the copied values remain unproven.",
+      "e4_copy_handler": "0x92724 (custom selector 0xE4) -> 0x92700",
+      "get_cal_page_handler": "0x92698 (custom selector 0xEA)",
+      "set_cal_page_handler": "0x9261E (custom selector 0xEB)",
+      "state_cells": [
+        "0xFEBE5DB0",
+        "0xFEBE5DB1"
+      ],
+      "writer_accepts_values": [
+        0,
+        1
+      ],
+      "writer_flag_mask": 3
+    }
   },
   "motor_rotation_angle_luts": [
     {

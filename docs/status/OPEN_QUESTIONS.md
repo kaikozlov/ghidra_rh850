@@ -288,9 +288,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   bytes + 1,311 changed bytes in the structured `0x10000..0x17DEF` shadow source
   + the 16-byte region-0 AES-CMAC tag at `0x17DF0` (role/geometry proven; the
   factory DID `0x201`/`0x202` tag inputs are not recovered). Remaining questions are the real vehicle-level
-  lateral-command provenance, any semantic CPU consumer of that `0x10000+`
-  shadow bank, H/Span-specific retained-RAM execution geometry if a runtime is
-  built, and live ICU-S policy only where hardware evidence is needed. See
+  lateral-command provenance, per-channel Techstream naming of the A000
+  records and the `0x10000+` shadow rows (class corroborated, offsets not
+  mapped), the factory DID `0x201/0x202` inputs of the region-0 CMAC tag,
+  H/Span-specific retained-RAM execution geometry if a runtime is built, and
+  live ICU-S policy only where hardware evidence is needed. The low page is
+  proven live-shadowed at runtime in every retained capture, and records
+  0/2/3 are proven per-unit/service overrides over unchanged all-zero compiled
+  defaults — not a compile-time model-year tune. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 - **Separate 2023 US Corolla / tracked `8965H1202000` specimen.** The complete
   memory corpus is now retained. CodeFlash internally identifies
