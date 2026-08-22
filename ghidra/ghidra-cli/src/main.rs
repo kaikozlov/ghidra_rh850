@@ -540,9 +540,8 @@ fn run_with_bridge(cli: Cli) -> anyhow::Result<()> {
     let project_path = resolve_project_path(&project_from_cmd, &config)?;
 
     let ghidra_install_dir = config
-        .ghidra_install_dir
-        .clone()
-        .or_else(|| config.get_ghidra_install_dir().ok())
+        .get_ghidra_install_dir()
+        .ok()
         .ok_or_else(|| {
             anyhow::anyhow!(
                 "Ghidra installation directory not configured. Run 'ghidra setup' first."
@@ -1427,9 +1426,8 @@ fn handle_bridge_start(
     let project_path = resolve_project_path(&project, &config)?;
 
     let ghidra_install_dir = config
-        .ghidra_install_dir
-        .clone()
-        .or_else(|| config.get_ghidra_install_dir().ok())
+        .get_ghidra_install_dir()
+        .ok()
         .ok_or_else(|| {
             anyhow::anyhow!(
                 "Ghidra installation directory not configured. Run 'ghidra setup' first."

@@ -461,6 +461,16 @@ check(
     "tools/g has session-status command",
     "session-status" in g_content and "cmd_session_status" in g_content,
 )
+check(
+    "tools/g binds ghidra-cli to isolated GHIDRA_HOME",
+    'export GHIDRA_INSTALL_DIR="$GHIDRA_HOME"' in g_content,
+)
+cli_main = (REPO / "ghidra" / "ghidra-cli" / "src" / "main.rs").read_text()
+check(
+    "ghidra-cli bridge resolution honors Config environment precedence",
+    cli_main.count(".get_ghidra_install_dir()") >= 2
+    and ".ghidra_install_dir\n        .clone()\n        .or_else(|| config.get_ghidra_install_dir().ok())" not in cli_main,
+)
 
 # --- Test 12: Makefile has finalize-project target ----------------------------
 makefile_content = (REPO / "Makefile").read_text()

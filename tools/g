@@ -133,6 +133,14 @@ if [[ "${GHIDRA_NO_BOOTSTRAP:-0}" != "1" ]]; then
   source "$ROOT/tools/lib/ghidra_env.sh" none
 fi
 
+# Bind the vendored CLI to the same isolated Ghidra installation that supplied
+# the processor extension.  ghidra-cli otherwise may reuse a user-global
+# ghidra_install_dir from its config, which can silently select a different
+# Ghidra version that cannot open this project's v850e3 language.
+if [[ -n "${GHIDRA_HOME:-}" ]]; then
+  export GHIDRA_INSTALL_DIR="$GHIDRA_HOME"
+fi
+
 # --- Special commands ---------------------------------------------------------
 
 cmd_session_status() {
