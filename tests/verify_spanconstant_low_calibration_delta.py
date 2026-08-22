@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""Verify the exhausted Span-vs-albino low-CodeFlash calibration/identity delta."""
+from __future__ import annotations
+
+import hashlib
+import importlib.util
+import json
+import struct
+import zlib
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[1]
+BASELINE = REPO / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+TARGET = REPO / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
+ARTIFACT = REPO / "data/generated/corolla_8965F1208000_low_calibration_delta.json"
+TOOL = REPO / "tools/analyze_spanconstant_low_calibration_delta.py"
+
+
+def check(label: str, ok: bool) -> None:
+    if not ok:
+        raise AssertionError(label)
+    print(f"[ok] {label}")
+
+
+def sha256(blob: bytes) -> str:
+    return hashlib.sha256(blob).hexdigest()
+
+
+spec = importlib.util.spec_from_file_location("span_low_delta", TOOL)
+assert spec is not None and spec.loader is not None
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+
+tracked = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+fresh = mod.build_report(BASELINE, TARGET)
+check("tracked low-delta report regenerates exactly from both raw CodeFlash images", tracked == fresh)
+
+h = BASELINE.read_bytes()[:0x100000]
+s = TARGET.read_bytes()[:0x100000]
+changed = {i for i, (a, b) in enumerate(zip(h, s)) if a != b}
+summary = tracked["summary"]
+check("exactly 2190 CodeFlash bytes differ", len(changed) == summary["different_codeflash_bytes"] == 2190)
+check("low delta remains bounded to 0xA004..0x17DFF", min(changed) == 0xA004 and max(changed) == 0x17DFF)
+check("application 0x20000..0xFFFFF remains byte-identical", h[0x20000:] == s[0x20000:] and summary["application_different_bytes"] == 0)
+check("delta partitions exactly into A000 records, low shadow source, and post-CRC tag", summary["delta_partition_complete"] and (summary["a000_record_bank_changed_bytes"], summary["low_shadow_source_changed_bytes"], summary["post_crc_opaque_tag_changed_bytes"]) == (863, 1311, 16) and 863 + 1311 + 16 == 2190)
+
+# Count width is intentionally pinned as u16.  Reading a u32 here would merge the
+# adjacent 0x0012 field and manufacture the bogus value 0x00120009.
+family = tracked["a000_record_family"]
+check("A000 family count is the u16 9 at 0x2A974", struct.unpack_from("<H", h, 0x2A974)[0] == 9 and struct.unpack_from("<H", s, 0x2A974)[0] == 9 and family["record_count_source"] == {"va": "0x2A974", "width_bits": 16, "baseline": 9, "target": 9})
+check("adjacent metadata proves the count must not be read as u32", struct.unpack_from("<I", h, 0x2A974)[0] == 0x00120009)
+
+expected_desc = [
+    (0x28, 0xFEBEF600, 0xA000),
+    (0x08, 0xFEBEF630, 0xA030),
+    (0x40, 0xFEBEF640, 0xA040),
+    (0x10, 0xFEBEF688, 0xA088),
+    (0x10, 0xFEBEF6A0, 0xA0A0),
+    (0x308, 0xFEBEF6B8, 0xA0B8),
+    (0x108, 0xFEBEF9C8, 0xA3C8),
+    (0x28, 0xFEBEFAD8, 0xA4D8),
+    (0x18, 0xFEBEFB08, 0xA508),
+]
+actual_desc = [struct.unpack_from("<HHII", h, 0x2AB8C + i * 12) for i in range(9)]
+check("all nine 12-byte A000 descriptors use u16 length + zero pad + two pointers", actual_desc == [(ln, 0, ram, src) for ln, ram, src in expected_desc] and h[0x2AB8C:0x2ABF8] == s[0x2AB8C:0x2ABF8])
+check("artifact pins 16-bit descriptor lengths rather than relying on zero-extended u32 coincidence", all(r["length_width_bits"] == 16 and r["padding_u16"] == 0 for r in family["records"]))
+
+records = family["records"]
+check("A000 payload changed-byte census is exact", [r["payload_changed_bytes"] for r in records] == [26, 0, 37, 6, 0, 758, 0, 9, 3])
+check("record-0 staged consumption chain is explicitly retained", records[0]["evidence_chain"] == ["0x6009E(0x200)->0x604AA", "0x2DF98->FEBE679E..FEBE67C0", "0x2DE9A->FEBE6776..FEBE6798", "0x43528"])
+check("record-2 staged consumption/update chain is explicitly retained", records[2]["evidence_chain"] == ["0x6009E(0x202)->0x604AA", "0x2FB36->FEBE68F4..FEBE6928", "0x2F40A->0x2F318", "0x2F318->FEBE6896..FEBE68CA", "0x2FC22", "0x2EDE6/0x30008->0x60010(0x202) runtime-copy path"])
+check("record-3 staged-to-live selector chain is explicitly retained", records[3]["evidence_chain"] == ["0x6009E(0x203)->0x604AA", "0x2DAA8->FEBE671A/1C/1E", "0x2DA0A->FEBE6712/14/16", "0x42700", "0x42720"])
+for idx, (length, _ram, source) in enumerate(expected_desc):
+    residue_h = zlib.crc32(h[source:source + length + 4]) & 0xFFFFFFFF
+    residue_s = zlib.crc32(s[source:source + length + 4]) & 0xFFFFFFFF
+    if idx == 1:
+        check("record 1 is the sole zero-fixup CRC exception", struct.unpack_from("<I", h, source + length)[0] == 0 and struct.unpack_from("<I", s, source + length)[0] == 0 and residue_h == residue_s == 0x7BD5C66F)
+    else:
+        check(f"record {idx} payload+fixup has 0xFFFFFFFF zlib residue in both images", residue_h == residue_s == 0xFFFFFFFF)
+
+# Record 5 is exactly header[8] + three signed-byte 256-entry LUTs.
+luts = tracked["motor_rotation_angle_luts"]
+check("record-5 three-mode LUT geometry is exact", [(x["start"], x["end_exclusive"]) for x in luts] == [("0xA0C0", "0xA1C0"), ("0xA1C0", "0xA2C0"), ("0xA2C0", "0xA3C0")])
+check("record-5 LUT changed-byte counts are exact", [x["changed_bytes"] for x in luts] == [254, 253, 251])
+check("record-5 LUT deltas are numerically pinned", [(x["baseline_min"], x["baseline_max"], x["target_min"], x["target_max"], x["max_absolute_delta"]) for x in luts] == [(-32, 30, -27, 26, 34), (-38, 38, -23, 22, 36), (-30, 30, -27, 26, 37)])
+
+# Record 6 is an active-addressed but all-zero sibling table in both specimens.
+check("record-6 payload+8 table is exactly 256 zero bytes in both images", h[0xA3D0:0xA4D0] == s[0xA3D0:0xA4D0] == bytes(0x100))
+check("record-6 role remains explicitly zero-filled rather than inferred tuned", records[6]["role"] == "zero_filled_angle_correction_lut" and records[6]["classification"] == "active-addressed-null-record" and records[6]["payload_changed_bytes"] == 0 and records[6]["payload_all_zero_baseline"] and records[6]["payload_all_zero_target"] and not records[6]["a55a5aa5_marker_present_baseline"] and not records[6]["a55a5aa5_marker_present_target"])
+
+coeff = tracked["record3_coefficients"]
+check("record-3 selected angle-offset coefficients are exact", coeff["baseline"] == [244, 0, 270] and coeff["target"] == [-786, -795, -723])
+check("serial identity changes are exact", records[7]["baseline_serial"] == "8965012N50A05G310920" and records[7]["target_serial"] == "8965012N50E12H030731")
+check("Span target label is explicitly tied to observed/application F181, not the separate 0x17D80 identity", tracked["target_id"] == "8965F1208000" and "0x20860" in tracked["target_id_basis"] and "8965H1213000" in tracked["target_id_basis"])
+
+bank_b = tracked["low_shadow_bank"]["structured_bank_b"]
+check("structured bank-B has 18 correctly aligned 0x24-byte rows with exact per-row delta census", bank_b["start"] == "0x120F4" and bank_b["end_exclusive"] == "0x1237C" and bank_b["record_stride"] == 0x24 and bank_b["record_count"] == 18 and [r["changed_bytes"] for r in bank_b["records"]] == [0,0,8,8,8,8,12,12,12,12,12,12,12,12,8,8,8,8])
+check("every structured-bank-B row terminates in 0x7FFFFFFF in both images", all(struct.unpack_from("<I", h, int(r["start"], 16) + 0x20)[0] == 0x7FFFFFFF and struct.unpack_from("<I", s, int(r["start"], 16) + 0x20)[0] == 0x7FFFFFFF for r in bank_b["records"]))
+
+# Pin exact bodies for the role-critical target-native H functions.  Span carries
+# the same bytes; semantic names remain bounded to the reviewed decompilation.
+critical_bodies = {
+    0x20880: (12, "b9a074cdc45397ba3280936e41004cc89349741987c0dc30b0ff1096c4cdcea8"),
+    0x2DA0A: (30, "3abb7917543506aa512f3305aa43db8352e72b0b9344998085bf4a83b308312f"),
+    0x2DAA8: (76, "8267b219728798c75e114016dc6e14d3462d6bcbc86a224402748b8f1ac0ca49"),
+    0x2DE9A: (114, "4048d75cff367588d216df84a12ff7527c03cf51d86493a29cfc783d06024a46"),
+    0x2DF98: (158, "4b582527ee25091758f3a2740d69bc498b938b55e63d456d6d26fc9a5a58e38e"),
+    0x2F318: (174, "5fd2df992c7c8a0c0977ff75dd04cd765cf5a5c6db6587d6438d63487592f266"),
+    0x2F40A: (84, "52068a58965879d675dc8cbdb777fc6df0c49f5882046ea135b8943631b05756"),
+    0x2FB36: (236, "7784fea0dbbd56eb0a9b57a8ce536c08d776152bd6542d4836d9859a212b4b0e"),
+    0x2FC22: (358, "8a5777067e1b3db7bdbef8d6f6a991c876fbdff0cd794f75907608f65d5e7275"),
+    0x42700: (32, "c2de75d0be21e7679428ca2e12db63f07b64ccb9e3ec5f7f30c12869762d425a"),
+    0x42720: (462, "e5e7934e934c33a069d9b87e2dd1710d0a010e179dd1b18599960b5248ef285e"),
+    0x42B98: (86, "3c18e76bb4c15652771bf8f0f888b136b13b4873ada71f12294760311df56254"),
+    0x42C42: (208, "7f46bd2257f3af0d2c6ec537688c5394cf1c15a5fde5e0a4eecaba0fd378051b"),
+    0x42D28: (184, "17edb8a5c2acfd47373e0722fd457771918a03810d30275909a45eff5f1ab1e0"),
+    0x43528: (1632, "95a65b941a1927412d8b195cd599fc2402e3d907e7c620496e1bb0d570a13c7c"),
+    0x50E6A: (8, "069adea92809ff18277718f63f617d18eaf4bd41b8bbd4d2f402609c33670a16"),
+    0x5CAAC: (98, "783e8a3519e75cacffae2489a5e42e1a69cf05a989d2aeb3a3af3352f591dbf9"),
+    0x6009E: (50, "d49d1c703a5a3ec6b15beeefc357d73578ba4e7f19e447e486409f7c31a7b512"),
+    0x604AA: (110, "bfea50e9d2a853b368efe551ffa784ff48b45c7891115ceb09a053ddfc9861e8"),
+}
+for addr, (size, expected_sha) in critical_bodies.items():
+    hb = h[addr:addr + size]
+    sb = s[addr:addr + size]
+    check(f"role-critical body 0x{addr:08X} is pinned and byte-identical", hb == sb and sha256(hb) == expected_sha)
+
+shadow = tracked["low_shadow_bank"]
+check("startup and XCP-E4 shadow-copy bodies are exact twins", sha256(h[0x5C992:0x5C992 + 36]) == sha256(h[0x92700:0x92700 + 36]) == "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2")
+check("shadow-copy geometry remains 0x10000..0x17DF0 -> FEBF7C00", shadow["source_start"] == "0x10000" and shadow["source_end_exclusive"] == "0x17DF0" and shadow["destination_start"] == "0xFEBF7C00" and shadow["length"] == 0x7DF0)
+check("startup copy is pinned to application-entry initialization chain", shadow["startup_call_chain"] == ["0x00020880", "0x0005CAAC", "0x0005C992"])
+
+ident = tracked["identity_and_integrity_tail"]
+check("low shadow region terminal fixups and 0xFFFFFFFF CRC32 residues are exact", struct.unpack_from("<I", h, 0x17DEC)[0] == 0x722611BD and struct.unpack_from("<I", s, 0x17DEC)[0] == 0x01A011A0 and zlib.crc32(h[0x10000:0x17DF0]) & 0xFFFFFFFF == zlib.crc32(s[0x10000:0x17DF0]) & 0xFFFFFFFF == 0xFFFFFFFF and ident["low_region_crc32_residue_baseline"] == ident["low_region_crc32_residue_target"] == "0xFFFFFFFF")
+check("post-CRC 16-byte tag changes completely but remains unresolved", h[0x17DF0:0x17E00] != s[0x17DF0:0x17E00] and sum(a != b for a, b in zip(h[0x17DF0:0x17E00], s[0x17DF0:0x17E00])) == 16 and ident["opaque_tag_algorithm"] == "unresolved")
+check("0x17E00 validity marker itself is unchanged", h[0x17E00:0x17E04] == s[0x17E00:0x17E04] == bytes.fromhex("5aa5a55a"))
+check("shadow geometry exactly explains the two retained identity mirrors", ident["shadow_identity_mirrors"] == {"0x17D80_to_ram": "0xFEBFF980", "0x17DC0_to_ram": "0xFEBFF9C0"})
+check("isolated scalar byte change at 0x13E46 is pinned without inventing record framing", struct.unpack_from("<H", h, 0x13E46)[0] == 0x0929 and struct.unpack_from("<H", s, 0x13E46)[0] == 0x0989)
+
+interp = tracked["interpretation"]
+check("artifact refuses to promote specimen differences to a model-year tuning claim", interp["unit_specific_motor_calibration_differs"] and not interp["model_year_tuning_change_proven"])
+check("artifact preserves the unresolved 0x10000+ CPU-consumer boundary", "no recovered application CPU semantic dereference" in shadow["cpu_consumer_boundary"] and "not disproved" in shadow["cpu_consumer_boundary"])
+
+print("\nSpan low-CodeFlash calibration delta verification passed.")

@@ -2332,3 +2332,24 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   Span by ID.
 - **Canonical:** [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §7;
   VAR-043; `tests/verify_spanconstant_corolla_cross_variant.py`.
+
+### CORR-098 — the first Span low-delta pass missed indirect A000 calibration consumers
+
+- **Stale wording:** the initial Span/H comparison said the changed low tables had
+  no simple application consumer beyond identity and an `0xA240` numeric false
+  positive, leaving `0xA0C0..0xA3C3` as an undifferentiated calibration caveat.
+- **Right:** the application reaches the `0xA000` bank indirectly through
+  `FUN_00050e6a`, which returns base `0xA000`. A **u16 count 9 at `0x2A974`**
+  selects a nine-entry descriptor family at `0x2AB8C`. Fixed-index readers plus explicit staging→live copy/gate paths load
+  records 0/2/3 into working calibration state, while `0x42C42 -> 0x42B98`
+  directly indexes three changed 256-byte signed motor-rotation-angle correction
+  LUTs in record 5. `0x42D28` separately indexes record-6 payload+8, which is a
+  256-byte zero table in both specimens.
+- **What remains bounded:** this proves active **specimen/unit calibration**
+  differences, not a 2023-to-2025 tuning revision. The separate
+  `0x10000..0x17DEF` shadow-copy bank is structurally variant-specific but still
+  lacks a recovered semantic CPU dereference, and `0x17DF0..0x17DFF` remains an
+  opaque post-CRC field.
+- **Canonical:**
+  [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §4.2;
+  VAR-045; `tests/verify_spanconstant_low_calibration_delta.py`.

@@ -233,8 +233,13 @@ The full comparative pass is tracked rather than left as preliminary triage.
 Span differs from albino's normalized 1-MiB CodeFlash in only 2,190 low-region
 bytes and is identical from `0x17E00` onward; a fresh clean target-native Ghidra
 structural import and an independent Span→Sienna transfer run reproduce the H
-application result. DataFlash/extended-CodeFlash/RAM invariants are separately
-pinned by `tests/verify_spanconstant_corolla_memory.py`.
+application result. The low delta is now location-exhausted: 863 changed bytes
+belong to the active nine-record `0xA000` unit-calibration/identity family,
+1,311 lie in the structured `0x10000..0x17DEF` shadow source, and 16 form the
+still-opaque post-CRC field. The active motor/sensor calibration differences are
+not promoted to model-year tuning because the specimens are different physical
+ECUs. DataFlash/extended-CodeFlash/RAM invariants are separately pinned by
+`tests/verify_spanconstant_corolla_memory.py`.
 
 `tests/verify_spanconstant_corolla_codeflash.py` still proves the H-family
 unauthenticated XCP high-LocalRAM write architecture and live application→boot

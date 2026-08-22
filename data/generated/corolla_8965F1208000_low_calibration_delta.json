@@ -1,0 +1,1998 @@
+{
+  "a000_record_family": {
+    "descriptor_shape": "u16 length, u16 zero padding, u32 runtime-RAM destination, u32 CodeFlash source",
+    "descriptor_table": "0x2AB8C",
+    "record_count": 9,
+    "record_count_source": {
+      "baseline": 9,
+      "target": 9,
+      "va": "0x2A974",
+      "width_bits": 16
+    },
+    "records": [
+      {
+        "baseline_signed16": [
+          23205,
+          -23206,
+          -16437,
+          -16585,
+          -15954,
+          -16182,
+          -16379,
+          -15831,
+          -30,
+          -15,
+          -13,
+          -16473,
+          -16227,
+          -16362,
+          -16278,
+          -16133,
+          -16218,
+          -3,
+          -11,
+          -17
+        ],
+        "boundary": "0x2DF98 validates/reads fixed family index 0x200 into FEBE679E..FEBE67C0 staging; 0x2DE9A copies that staging block to live FEBE6776..FEBE6798, whose sign-dependent gains/offsets are consumed by 0x43528 in a redundant multi-channel motor/sensor path. Exact OEM channel naming remains bounded.",
+        "classification": "active-unit-calibration",
+        "codeflash_source": "0xA000",
+        "descriptor_va": "0x2AB8C",
+        "evidence_chain": [
+          "0x6009E(0x200)->0x604AA",
+          "0x2DF98->FEBE679E..FEBE67C0",
+          "0x2DE9A->FEBE6776..FEBE6798",
+          "0x43528"
+        ],
+        "index": 0,
+        "length": 40,
+        "length_width_bits": 16,
+        "padding_u16": 0,
+        "payload_baseline_sha256": "0f97599347a5d4146218378e587a33f8ac146e88c42f13aaa60240d9b0c8a8e1",
+        "payload_changed_bytes": 26,
+        "payload_target_sha256": "0bae74bda5d314d2f791c45f8076f86838da03ff352c475e4c56b40ed7bb8ad9",
+        "ram_destination": "0xFEBEF600",
+        "role": "multi_channel_gain_offset_calibration",
+        "standard_terminal_residue_ffffffff_baseline": true,
+        "standard_terminal_residue_ffffffff_target": true,
+        "stored_crc_fixup_baseline": "0x64982FE9",
+        "stored_crc_fixup_target": "0xAF89E3F6",
+        "target_signed16": [
+          23205,
+          -23206,
+          -16553,
+          -16625,
+          -16203,
+          -16369,
+          -16453,
+          -16129,
+          -4,
+          -11,
+          -10,
+          -16730,
+          -16499,
+          -16603,
+          -16534,
+          -16413,
+          -16478,
+          -8,
+          -9,
+          -10
+        ],
+        "zlib_crc32_payload_plus_fixup_baseline": "0xFFFFFFFF",
+        "zlib_crc32_payload_plus_fixup_target": "0xFFFFFFFF"
+      },
+      {
+        "classification": "unchanged-record",
+        "codeflash_source": "0xA030",
+        "descriptor_va": "0x2AB98",
+        "index": 1,
+        "length": 8,
+        "length_width_bits": 16,
+        "padding_u16": 0,
+        "payload_baseline_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+        "payload_changed_bytes": 0,
+        "payload_target_sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+        "ram_destination": "0xFEBEF630",
+        "role": "unresolved_8_byte_unit_record",
+        "standard_terminal_residue_ffffffff_baseline": false,
+        "standard_terminal_residue_ffffffff_target": false,
+        "stored_crc_fixup_baseline": "0x00000000",
+        "stored_crc_fixup_target": "0x00000000",
+        "zlib_crc32_payload_plus_fixup_baseline": "0x7BD5C66F",
+        "zlib_crc32_payload_plus_fixup_target": "0x7BD5C66F"
+      },
+      {
+        "baseline_signed16": [
+          23205,
+          -23206,
+          0,
+          0,
+          32718,
+          -32615,
+          30051,
+          29899,
+          -32702,
+          -32756,
+          29907,
+          30008,
+          32612,
+          -32760,
+          30041,
+          29862,
+          6,
+          4,
+          27866,
+          27782,
+          8208,
+          4,
+          6,
+          27833,
+          27812,
+          8196,
+          6,
+          1,
+          27838,
+          27805,
+          8199,
+          0
+        ],
+        "boundary": "0x2FB36 validates/reads fixed family index 0x202 into FEBE68F4..FEBE6928 staging; 0x2F318 copies that block into live FEBE6896..FEBE68CA under 0x2F40A's integrity/state gate, and 0x2FC22 bounds-checks the live coefficients. The related six-channel state machine 0x2EDE6 and 0x30008 can feed derived/current values back through 0x60010(0x202) to the runtime RAM copy. No CodeFlash self-programming is claimed.",
+        "classification": "active-unit-calibration",
+        "codeflash_source": "0xA040",
+        "descriptor_va": "0x2ABA4",
+        "evidence_chain": [
+          "0x6009E(0x202)->0x604AA",
+          "0x2FB36->FEBE68F4..FEBE6928",
+          "0x2F40A->0x2F318",
+          "0x2F318->FEBE6896..FEBE68CA",
+          "0x2FC22",
+          "0x2EDE6/0x30008->0x60010(0x202) runtime-copy path"
+        ],
+        "index": 2,
+        "length": 64,
+        "length_width_bits": 16,
+        "padding_u16": 0,
+        "payload_baseline_sha256": "4c7cb5dd2ea6c1e3612c85545883637b1528e0dce7a9b2518d867e9ab20c7699",
+        "payload_changed_bytes": 37,
+        "payload_target_sha256": "67479970a440d4b5b994754aaf939f7aac9b308a4d7e0b850ef3b7c5b95f2d64",
+        "ram_destination": "0xFEBEF640",
+        "role": "six_channel_calibration_state_coefficients",
+        "standard_terminal_residue_ffffffff_baseline": true,
+        "standard_terminal_residue_ffffffff_target": true,
+        "stored_crc_fixup_baseline": "0x27D675F5",
+        "stored_crc_fixup_target": "0x05512353",
+        "target_signed16": [
+          23205,
+          -23206,
+          0,
+          0,
+          -32668,
+          -32710,
+          29420,
+          29294,
+          32765,
+          -32679,
+          29464,
+          29400,
+          -32752,
+          -32746,
+          29386,
+          29362,
+          -4,
+          4,
+          27810,
+          27782,
+          8198,
+          -6,
+          0,
+          27873,
+          27737,
+          8218,
+          -3,
+          0,
+          27828,
+          27767,
+          8204,
+          0
+        ],
+        "zlib_crc32_payload_plus_fixup_baseline": "0xFFFFFFFF",
+        "zlib_crc32_payload_plus_fixup_target": "0xFFFFFFFF"
+      },
+      {
+        "baseline_signed16": [
+          23205,
+          -23206,
+          244,
+          0,
+          270,
+          0,
+          0,
+          0
+        ],
+        "boundary": "0x2DAA8 validates/reads fixed family index 0x203 into staging FEBE671A/1C/1E; 0x2DA0A copies those three signed coefficients to live FEBE6712/14/16. 0x42700 selects one by status bits and 0x42720 adds it to the motor-rotation-angle path before trig/vector generation.",
+        "classification": "active-unit-calibration",
+        "codeflash_source": "0xA088",
+        "descriptor_va": "0x2ABB0",
+        "evidence_chain": [
+          "0x6009E(0x203)->0x604AA",
+          "0x2DAA8->FEBE671A/1C/1E",
+          "0x2DA0A->FEBE6712/14/16",
+          "0x42700",
+          "0x42720"
+        ],
+        "index": 3,
+        "length": 16,
+        "length_width_bits": 16,
+        "padding_u16": 0,
+        "payload_baseline_sha256": "c1a999574b73613f84b58c987383fd6480b4371f447a5466bbf3506c1f4d85a5",
+        "payload_changed_bytes": 6,
+        "payload_target_sha256": "b725c9f0aee68c5a697291777481b48c19801c98eba9e82b117f3239b0c167e5",
+        "ram_destination": "0xFEBEF688",
+        "role": "three_way_motor_angle_offset_coefficients",
+        "standard_terminal_residue_ffffffff_baseline": true,
+        "standard_terminal_residue_ffffffff_target": true,
+        "stored_crc_fixup_baseline": "0xC438660B",
+        "stored_crc_fixup_target": "0xD4E0559E",
+        "target_signed16": [
+          23205,
+          -23206,
+          -786,
+          -795,
+          -723,
+          0,
+          0,
+          0
+        ],
+        "zlib_crc32_payload_plus_fixup_baseline": "0xFFFFFFFF",
+        "zlib_crc32_payload_plus_fixup_target": "0xFFFFFFFF"
+      },
+      {
+        "classification": "unchanged-record",
+        "codeflash_source": "0xA0A0",
+        "descriptor_va": "0x2ABBC",
+        "index": 4,
+        "length": 16,
+        "length_width_bits": 16,
+        "padding_u16": 0,
+        "payload_baseline_sha256": "8eb6c78640f75c5277056497ec8e02a6274643b91244e35168a696bfed6e51cb",
+        "payload_changed_bytes": 0,
+        "payload_target_sha256": "8eb6c78640f75c5277056497ec8e02a6274643b91244e35168a696bfed6e51cb",
+        "ram_destination": "0xFEBEF6A0",
+        "role": "unresolved_16_byte_unit_record",
+        "standard_terminal_residue_ffffffff_baseline": true,
+        "standard_terminal_residue_ffffffff_target": true,
+        "stored_crc_fixup_baseline": "0xB631B871",
+        "stored_crc_fixup_target": "0xB631B871",
+        "zlib_crc32_payload_plus_fixup_baseline": "0xFFFFFFFF",
+        "zlib_crc32_payload_plus_fixup_target": "0xFFFFFFFF"
+      },
+      {
+        "boundary": "Three 256-byte signed lookup curves at payload+8 are selected by 0x42C42 and linearly interpolated by 0x42B98; Techstream vocabulary corroborates the motor-rotation-angle domain but does not name these exact tables.",
+        "classification": "active-unit-calibration",
+        "codeflash_source": "0xA0B8",
+        "descriptor_va": "0x2ABC8",
+        "index": 5,
+        "length": 776,
+        "length_width_bits": 16,
+        "padding_u16": 0,
+        "payload_baseline_sha256": "87604948a2b02ced15ee534c75cc58d31f7cfe3f8701c87bb0d99d4c2c4339dd",
+        "payload_changed_bytes": 758,
+        "payload_target_sha256": "569e3a604174e3db95facc05ce9c8897a18de82a81d2442db2e1939c1a63cf5a",
+        "ram_destination": "0xFEBEF6B8",
+        "role": "three_mode_motor_rotation_angle_correction_luts",
+        "standard_terminal_residue_ffffffff_baseline": true,
+        "standard_terminal_residue_ffffffff_target": true,
+        "stored_crc_fixup_baseline": "0xC8682777",
+        "stored_crc_fixup_target": "0x96F5F919",
+        "zlib_crc32_payload_plus_fixup_baseline": "0xFFFFFFFF",
+        "zlib_crc32_payload_plus_fixup_target": "0xFFFFFFFF"
+      },
+      {
+        "a55a5aa5_marker_present_baseline": false,
+        "a55a5aa5_marker_present_target": false,
+        "boundary": "Record 6 payload+8 is a 256-byte all-zero table in both images. 0x42D28 obtains A000 through 0x50E6A and indexes base+0x3D0, exactly record6 payload+8, in the same angle-correction domain. The full 0x108-byte payload is zero (including the absent 5AA5/A55A marker); it is active-addressed structure but contributes zero with the retained bytes.",
+        "classification": "active-addressed-null-record",
+        "codeflash_source": "0xA3C8",
+        "descriptor_va": "0x2ABD4",
+        "index": 6,
+        "length": 264,
+        "length_width_bits": 16,
+        "padding_u16": 0,
+        "payload_all_zero_baseline": true,
+        "payload_all_zero_target": true,
+        "payload_baseline_sha256": "44b8aa4d28701168922acf61435ea4bb442f97b0b14ad7a2510ed68874ee2a72",
+        "payload_changed_bytes": 0,
+        "payload_target_sha256": "44b8aa4d28701168922acf61435ea4bb442f97b0b14ad7a2510ed68874ee2a72",
+        "ram_destination": "0xFEBEF9C8",
+        "role": "zero_filled_angle_correction_lut",
+        "standard_terminal_residue_ffffffff_baseline": true,
+        "standard_terminal_residue_ffffffff_target": true,
+        "stored_crc_fixup_baseline": "0xF59F3C5F",
+        "stored_crc_fixup_target": "0xF59F3C5F",
+        "zlib_crc32_payload_plus_fixup_baseline": "0xFFFFFFFF",
+        "zlib_crc32_payload_plus_fixup_target": "0xFFFFFFFF"
+      },
+      {
+        "baseline_serial": "8965012N50A05G310920",
+        "classification": "identity",
+        "codeflash_source": "0xA4D8",
+        "descriptor_va": "0x2ABE0",
+        "index": 7,
+        "length": 40,
+        "length_width_bits": 16,
+        "padding_u16": 0,
+        "payload_baseline_sha256": "8dc0124b982897d9b3ce1a65d3fb811fd7353eb574b4da74890a94ec37bc2750",
+        "payload_changed_bytes": 9,
+        "payload_target_sha256": "d7e51e909c6a570ae25da23eee5f3c3dcdbe8d73ed1ed4a47a288147c7babb45",
+        "ram_destination": "0xFEBEFAD8",
+        "role": "ecu_serial_record",
+        "standard_terminal_residue_ffffffff_baseline": true,
+        "standard_terminal_residue_ffffffff_target": true,
+        "stored_crc_fixup_baseline": "0xD4956B5A",
+        "stored_crc_fixup_target": "0x3DA7467C",
+        "target_serial": "8965012N50E12H030731",
+        "zlib_crc32_payload_plus_fixup_baseline": "0xFFFFFFFF",
+        "zlib_crc32_payload_plus_fixup_target": "0xFFFFFFFF"
+      },
+      {
+        "baseline_signed16": [
+          23205,
+          -23206,
+          1,
+          20,
+          0,
+          0,
+          0,
+          0,
+          19712,
+          32719,
+          0,
+          0
+        ],
+        "boundary": "Only three payload bytes differ. No target-native semantic consumer beyond the generic record family has been recovered; do not assign an OEM meaning or manufacturing origin.",
+        "classification": "changed-opaque-unit-record",
+        "codeflash_source": "0xA508",
+        "descriptor_va": "0x2ABEC",
+        "index": 8,
+        "length": 24,
+        "length_width_bits": 16,
+        "padding_u16": 0,
+        "payload_baseline_sha256": "dbafbf9c697414879bb4651fa879af9a0f35f45d221e76d2a9294914c9b9f185",
+        "payload_changed_bytes": 3,
+        "payload_target_sha256": "193a50dc092c600a600379ee9fb3140b40deeb90ecc12ae245d4b8a723878e62",
+        "ram_destination": "0xFEBEFB08",
+        "role": "opaque_24_byte_unit_record",
+        "standard_terminal_residue_ffffffff_baseline": true,
+        "standard_terminal_residue_ffffffff_target": true,
+        "stored_crc_fixup_baseline": "0xCC9B0CC2",
+        "stored_crc_fixup_target": "0x08FD311C",
+        "target_signed16": [
+          23205,
+          -23206,
+          1,
+          20,
+          0,
+          0,
+          0,
+          0,
+          -18432,
+          15012,
+          0,
+          0
+        ],
+        "zlib_crc32_payload_plus_fixup_baseline": "0xFFFFFFFF",
+        "zlib_crc32_payload_plus_fixup_target": "0xFFFFFFFF"
+      }
+    ],
+    "runtime_family_boundary": "0x60010 updates the RAM copy for family 0x200; 0x6009E/0x604AA validate/read CodeFlash-backed records. This does not prove application self-programming of CodeFlash.",
+    "standard_crc_note": "Eight records use a 4-byte terminal fixup such that zlib.crc32(payload||fixup)==0xFFFFFFFF. Record 1 is the sole special all-zero-fixup exception and is left unclassified."
+  },
+  "application_function_evidence": [
+    {
+      "baseline_body_sha256": "b9a074cdc45397ba3280936e41004cc89349741987c0dc30b0ff1096c4cdcea8",
+      "body_size": 12,
+      "byte_identical": true,
+      "entry": "0x00020880",
+      "role": "application_entry_to_startup_initializer",
+      "target_body_sha256": "b9a074cdc45397ba3280936e41004cc89349741987c0dc30b0ff1096c4cdcea8"
+    },
+    {
+      "baseline_body_sha256": "3abb7917543506aa512f3305aa43db8352e72b0b9344998085bf4a83b308312f",
+      "body_size": 30,
+      "byte_identical": true,
+      "entry": "0x0002DA0A",
+      "role": "record3_staging_to_live_copy",
+      "target_body_sha256": "3abb7917543506aa512f3305aa43db8352e72b0b9344998085bf4a83b308312f"
+    },
+    {
+      "baseline_body_sha256": "8267b219728798c75e114016dc6e14d3462d6bcbc86a224402748b8f1ac0ca49",
+      "body_size": 76,
+      "byte_identical": true,
+      "entry": "0x0002DAA8",
+      "role": "record3_calibration_read_to_staging",
+      "target_body_sha256": "8267b219728798c75e114016dc6e14d3462d6bcbc86a224402748b8f1ac0ca49"
+    },
+    {
+      "baseline_body_sha256": "4048d75cff367588d216df84a12ff7527c03cf51d86493a29cfc783d06024a46",
+      "body_size": 114,
+      "byte_identical": true,
+      "entry": "0x0002DE9A",
+      "role": "record0_staging_to_live_copy",
+      "target_body_sha256": "4048d75cff367588d216df84a12ff7527c03cf51d86493a29cfc783d06024a46"
+    },
+    {
+      "baseline_body_sha256": "4b582527ee25091758f3a2740d69bc498b938b55e63d456d6d26fc9a5a58e38e",
+      "body_size": 158,
+      "byte_identical": true,
+      "entry": "0x0002DF98",
+      "role": "record0_calibration_read_to_staging",
+      "target_body_sha256": "4b582527ee25091758f3a2740d69bc498b938b55e63d456d6d26fc9a5a58e38e"
+    },
+    {
+      "baseline_body_sha256": "b572a723e468e9c32cb755743a5574c45b952e19d04783184774de4b12cbfc0d",
+      "body_size": 1004,
+      "byte_identical": true,
+      "entry": "0x0002EDE6",
+      "role": "six_channel_calibration_state_machine",
+      "target_body_sha256": "b572a723e468e9c32cb755743a5574c45b952e19d04783184774de4b12cbfc0d"
+    },
+    {
+      "baseline_body_sha256": "5fd2df992c7c8a0c0977ff75dd04cd765cf5a5c6db6587d6438d63487592f266",
+      "body_size": 174,
+      "byte_identical": true,
+      "entry": "0x0002F318",
+      "role": "record2_staging_to_live_copy",
+      "target_body_sha256": "5fd2df992c7c8a0c0977ff75dd04cd765cf5a5c6db6587d6438d63487592f266"
+    },
+    {
+      "baseline_body_sha256": "52068a58965879d675dc8cbdb777fc6df0c49f5882046ea135b8943631b05756",
+      "body_size": 84,
+      "byte_identical": true,
+      "entry": "0x0002F40A",
+      "role": "record2_staging_to_live_gate",
+      "target_body_sha256": "52068a58965879d675dc8cbdb777fc6df0c49f5882046ea135b8943631b05756"
+    },
+    {
+      "baseline_body_sha256": "d4b3fe69d1c5a4428727a008f044c1b73af92122572a172c855f0fb66b3de963",
+      "body_size": 426,
+      "byte_identical": true,
+      "entry": "0x0002F46A",
+      "role": "record2_calibration_bounds_checker",
+      "target_body_sha256": "d4b3fe69d1c5a4428727a008f044c1b73af92122572a172c855f0fb66b3de963"
+    },
+    {
+      "baseline_body_sha256": "7784fea0dbbd56eb0a9b57a8ce536c08d776152bd6542d4836d9859a212b4b0e",
+      "body_size": 236,
+      "byte_identical": true,
+      "entry": "0x0002FB36",
+      "role": "record2_calibration_read_to_staging",
+      "target_body_sha256": "7784fea0dbbd56eb0a9b57a8ce536c08d776152bd6542d4836d9859a212b4b0e"
+    },
+    {
+      "baseline_body_sha256": "8a5777067e1b3db7bdbef8d6f6a991c876fbdff0cd794f75907608f65d5e7275",
+      "body_size": 358,
+      "byte_identical": true,
+      "entry": "0x0002FC22",
+      "role": "record2_live_coefficient_bounds_checker",
+      "target_body_sha256": "8a5777067e1b3db7bdbef8d6f6a991c876fbdff0cd794f75907608f65d5e7275"
+    },
+    {
+      "baseline_body_sha256": "dde28ff23ecdfd47df6fa2c794d3a8dfdb7220bd877b7b9491dd65e2c4a5f213",
+      "body_size": 756,
+      "byte_identical": true,
+      "entry": "0x00030008",
+      "role": "record2_runtime_shadow_update",
+      "target_body_sha256": "dde28ff23ecdfd47df6fa2c794d3a8dfdb7220bd877b7b9491dd65e2c4a5f213"
+    },
+    {
+      "baseline_body_sha256": "c2de75d0be21e7679428ca2e12db63f07b64ccb9e3ec5f7f30c12869762d425a",
+      "body_size": 32,
+      "byte_identical": true,
+      "entry": "0x00042700",
+      "role": "record3_three_way_coefficient_selector",
+      "target_body_sha256": "c2de75d0be21e7679428ca2e12db63f07b64ccb9e3ec5f7f30c12869762d425a"
+    },
+    {
+      "baseline_body_sha256": "e5e7934e934c33a069d9b87e2dd1710d0a010e179dd1b18599960b5248ef285e",
+      "body_size": 462,
+      "byte_identical": true,
+      "entry": "0x00042720",
+      "role": "record3_angle_offset_consumer",
+      "target_body_sha256": "e5e7934e934c33a069d9b87e2dd1710d0a010e179dd1b18599960b5248ef285e"
+    },
+    {
+      "baseline_body_sha256": "97e5fd83cb44d90a4c8e705ee74049a06ba4bec063f8d84543e5e8c19a6910c6",
+      "body_size": 38,
+      "byte_identical": true,
+      "entry": "0x000428F6",
+      "role": "motor_rotation_angle_wrap_extender",
+      "target_body_sha256": "97e5fd83cb44d90a4c8e705ee74049a06ba4bec063f8d84543e5e8c19a6910c6"
+    },
+    {
+      "baseline_body_sha256": "942b760b9eef04d5ff1bdb41a3dbcd0e5de8b425af600449ff3dfc5732f295af",
+      "body_size": 242,
+      "byte_identical": true,
+      "entry": "0x000429EE",
+      "role": "redundant_channel_angle_vector_builder",
+      "target_body_sha256": "942b760b9eef04d5ff1bdb41a3dbcd0e5de8b425af600449ff3dfc5732f295af"
+    },
+    {
+      "baseline_body_sha256": "3c18e76bb4c15652771bf8f0f888b136b13b4873ada71f12294760311df56254",
+      "body_size": 86,
+      "byte_identical": true,
+      "entry": "0x00042B98",
+      "role": "three_mode_signed_byte_angle_correction_lut",
+      "target_body_sha256": "3c18e76bb4c15652771bf8f0f888b136b13b4873ada71f12294760311df56254"
+    },
+    {
+      "baseline_body_sha256": "3705bc169142ecdc6a52979664228563f9faf36be0616f20d9f2da91683f870b",
+      "body_size": 84,
+      "byte_identical": true,
+      "entry": "0x00042BEE",
+      "role": "corrected_angle_wrap_unwrap",
+      "target_body_sha256": "3705bc169142ecdc6a52979664228563f9faf36be0616f20d9f2da91683f870b"
+    },
+    {
+      "baseline_body_sha256": "7f46bd2257f3af0d2c6ec537688c5394cf1c15a5fde5e0a4eecaba0fd378051b",
+      "body_size": 208,
+      "byte_identical": true,
+      "entry": "0x00042C42",
+      "role": "motor_angle_correction_mode_selector",
+      "target_body_sha256": "7f46bd2257f3af0d2c6ec537688c5394cf1c15a5fde5e0a4eecaba0fd378051b"
+    },
+    {
+      "baseline_body_sha256": "17edb8a5c2acfd47373e0722fd457771918a03810d30275909a45eff5f1ab1e0",
+      "body_size": 184,
+      "byte_identical": true,
+      "entry": "0x00042D28",
+      "role": "record6_zero_lut_angle_correction_consumer",
+      "target_body_sha256": "17edb8a5c2acfd47373e0722fd457771918a03810d30275909a45eff5f1ab1e0"
+    },
+    {
+      "baseline_body_sha256": "95a65b941a1927412d8b195cd599fc2402e3d907e7c620496e1bb0d570a13c7c",
+      "body_size": 1632,
+      "byte_identical": true,
+      "entry": "0x00043528",
+      "role": "multi_channel_gain_offset_runtime_consumer",
+      "target_body_sha256": "95a65b941a1927412d8b195cd599fc2402e3d907e7c620496e1bb0d570a13c7c"
+    },
+    {
+      "baseline_body_sha256": "069adea92809ff18277718f63f617d18eaf4bd41b8bbd4d2f402609c33670a16",
+      "body_size": 8,
+      "byte_identical": true,
+      "entry": "0x00050E6A",
+      "role": "a000_unit_calibration_record_base_getter",
+      "target_body_sha256": "069adea92809ff18277718f63f617d18eaf4bd41b8bbd4d2f402609c33670a16"
+    },
+    {
+      "baseline_body_sha256": "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2",
+      "body_size": 36,
+      "byte_identical": true,
+      "entry": "0x0005C992",
+      "role": "startup_low_codeflash_shadow_copy",
+      "target_body_sha256": "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2"
+    },
+    {
+      "baseline_body_sha256": "783e8a3519e75cacffae2489a5e42e1a69cf05a989d2aeb3a3af3352f591dbf9",
+      "body_size": 98,
+      "byte_identical": true,
+      "entry": "0x0005CAAC",
+      "role": "application_startup_initializer",
+      "target_body_sha256": "783e8a3519e75cacffae2489a5e42e1a69cf05a989d2aeb3a3af3352f591dbf9"
+    },
+    {
+      "baseline_body_sha256": "2f511008918603bee3f6c6b6d3dadccfcbd3b8c36bb5fb779cd91571a63082d9",
+      "body_size": 92,
+      "byte_identical": true,
+      "entry": "0x00060010",
+      "role": "calibration_family_dispatch_write_runtime_shadow",
+      "target_body_sha256": "2f511008918603bee3f6c6b6d3dadccfcbd3b8c36bb5fb779cd91571a63082d9"
+    },
+    {
+      "baseline_body_sha256": "d49d1c703a5a3ec6b15beeefc357d73578ba4e7f19e447e486409f7c31a7b512",
+      "body_size": 50,
+      "byte_identical": true,
+      "entry": "0x0006009E",
+      "role": "calibration_family_dispatch_validate_read",
+      "target_body_sha256": "d49d1c703a5a3ec6b15beeefc357d73578ba4e7f19e447e486409f7c31a7b512"
+    },
+    {
+      "baseline_body_sha256": "147cef0f3a58265da5d50b6e97c4459ef85afe33f389288699c5df80dce1cabb",
+      "body_size": 98,
+      "byte_identical": true,
+      "entry": "0x000602A0",
+      "role": "a000_record_ram_clear_init",
+      "target_body_sha256": "147cef0f3a58265da5d50b6e97c4459ef85afe33f389288699c5df80dce1cabb"
+    },
+    {
+      "baseline_body_sha256": "8c953888f531c7286006fef37de0e4ffa426d23df64a998e2e6138936c3daeb8",
+      "body_size": 48,
+      "byte_identical": true,
+      "entry": "0x00060302",
+      "role": "a000_record_crc_worker",
+      "target_body_sha256": "8c953888f531c7286006fef37de0e4ffa426d23df64a998e2e6138936c3daeb8"
+    },
+    {
+      "baseline_body_sha256": "18e1918120c6b040052794aed79106f5e9d0173d5bfc66a86a654f5324101ccb",
+      "body_size": 52,
+      "byte_identical": true,
+      "entry": "0x00060332",
+      "role": "a000_record_crc_validator",
+      "target_body_sha256": "18e1918120c6b040052794aed79106f5e9d0173d5bfc66a86a654f5324101ccb"
+    },
+    {
+      "baseline_body_sha256": "72c20e5e72fa5aaa5a7bddd13f10ff55b0ceb6cc101405e19d8741814cdc6891",
+      "body_size": 90,
+      "byte_identical": true,
+      "entry": "0x00060418",
+      "role": "a000_record_runtime_shadow_copy_in",
+      "target_body_sha256": "72c20e5e72fa5aaa5a7bddd13f10ff55b0ceb6cc101405e19d8741814cdc6891"
+    },
+    {
+      "baseline_body_sha256": "bfea50e9d2a853b368efe551ffa784ff48b45c7891115ceb09a053ddfc9861e8",
+      "body_size": 110,
+      "byte_identical": true,
+      "entry": "0x000604AA",
+      "role": "a000_record_validate_and_copy_out",
+      "target_body_sha256": "bfea50e9d2a853b368efe551ffa784ff48b45c7891115ceb09a053ddfc9861e8"
+    },
+    {
+      "baseline_body_sha256": "409571e44bfaebf6e0f487fec3695879e968cbc031a7aca2fb1c79e823a01b3e",
+      "body_size": 166,
+      "byte_identical": true,
+      "entry": "0x00069EF0",
+      "role": "quadrant_angle_solver",
+      "target_body_sha256": "409571e44bfaebf6e0f487fec3695879e968cbc031a7aca2fb1c79e823a01b3e"
+    },
+    {
+      "baseline_body_sha256": "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2",
+      "body_size": 36,
+      "byte_identical": true,
+      "entry": "0x00092700",
+      "role": "xcp_e4_low_codeflash_shadow_copy",
+      "target_body_sha256": "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2"
+    }
+  ],
+  "baseline": {
+    "normalization": "trim-all-ff-upper-1mib-from-2mib-range-dump",
+    "normalized_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+    "source_sha256": "97f9d42d936b97a99e7ab3d3ef20c6fb4c1fc3cc2ba199f6b158675a1709aee6",
+    "source_size": 2097152
+  },
+  "baseline_id": "8965H1202000",
+  "identity_and_integrity_tail": {
+    "f181_secondary_baseline": "8A3111202000",
+    "f181_secondary_target": "8A3111213000",
+    "low_region_crc32_residue_baseline": "0xFFFFFFFF",
+    "low_region_crc32_residue_target": "0xFFFFFFFF",
+    "low_region_crc_fixup_baseline": "bd112672",
+    "low_region_crc_fixup_target": "a011a001",
+    "low_region_crc_geometry": "zlib.crc32(0x10000..0x17DEF including terminal fixup)==0xFFFFFFFF",
+    "opaque_tag_algorithm": "unresolved",
+    "opaque_tag_cpu_xref_status": "no recovered direct CPU content reference; copy loops stop at 0x17DF0",
+    "post_crc_opaque_tag_baseline": "52ba323a89692008e2ebd9afd6204049",
+    "post_crc_opaque_tag_target": "05de41cb041b5a0ab538e7f4bc94a339",
+    "shadow_identity_mirrors": {
+      "0x17D80_to_ram": "0xFEBFF980",
+      "0x17DC0_to_ram": "0xFEBFF9C0"
+    },
+    "single_record_identity_baseline": "8965H1202000",
+    "single_record_identity_target": "8965H1213000"
+  },
+  "interpretation": {
+    "low_delta_is_not_identity_only": true,
+    "model_year_tuning_change_proven": false,
+    "note": "The changed A000 records contain active motor/sensor calibration, including motor-rotation-angle correction. Because the specimens are different physical ECUs, the bytes may be per-unit manufacturing calibration, service calibration, or variant tuning rather than a 2023->2025 software-generation tune change. The evidence does not distinguish those origins.",
+    "same_executable_generation": true,
+    "security_secoc_diagnostic_xcp_code_changed": false,
+    "steering_command_interface_changed_by_code": false,
+    "unit_specific_motor_calibration_differs": true
+  },
+  "low_region_bins": [
+    {
+      "changed_bytes": 863,
+      "end_exclusive": "0xA528",
+      "label": "a000_unit_calibration_identity_records",
+      "size": 1320,
+      "start": "0xA000"
+    },
+    {
+      "changed_bytes": 0,
+      "end_exclusive": "0x10100",
+      "label": "low_bank_header",
+      "size": 256,
+      "start": "0x10000"
+    },
+    {
+      "changed_bytes": 1143,
+      "end_exclusive": "0x11400",
+      "label": "structured_lookup_bank_a",
+      "size": 4864,
+      "start": "0x10100"
+    },
+    {
+      "changed_bytes": 0,
+      "end_exclusive": "0x120F4",
+      "label": "unchanged_low_bank_gap_a",
+      "size": 3316,
+      "start": "0x11400"
+    },
+    {
+      "changed_bytes": 160,
+      "end_exclusive": "0x1237C",
+      "label": "structured_lookup_bank_b",
+      "size": 648,
+      "start": "0x120F4"
+    },
+    {
+      "changed_bytes": 0,
+      "end_exclusive": "0x13E00",
+      "label": "unchanged_low_bank_gap_b",
+      "size": 6788,
+      "start": "0x1237C"
+    },
+    {
+      "changed_bytes": 1,
+      "end_exclusive": "0x13E80",
+      "label": "isolated_changed_scalar_region",
+      "size": 128,
+      "start": "0x13E00"
+    },
+    {
+      "changed_bytes": 0,
+      "end_exclusive": "0x17D80",
+      "label": "unchanged_low_bank_tail",
+      "size": 16128,
+      "start": "0x13E80"
+    },
+    {
+      "changed_bytes": 2,
+      "end_exclusive": "0x17D90",
+      "label": "single_record_identity",
+      "size": 16,
+      "start": "0x17D80"
+    },
+    {
+      "changed_bytes": 0,
+      "end_exclusive": "0x17DC0",
+      "label": "identity_gap",
+      "size": 48,
+      "start": "0x17D90"
+    },
+    {
+      "changed_bytes": 2,
+      "end_exclusive": "0x17DD0",
+      "label": "f181_secondary_record",
+      "size": 16,
+      "start": "0x17DC0"
+    },
+    {
+      "changed_bytes": 0,
+      "end_exclusive": "0x17DEC",
+      "label": "pre_crc_fixup_tail",
+      "size": 28,
+      "start": "0x17DD0"
+    },
+    {
+      "changed_bytes": 3,
+      "end_exclusive": "0x17DF0",
+      "label": "low_region_terminal_crc_fixup",
+      "size": 4,
+      "start": "0x17DEC"
+    },
+    {
+      "changed_bytes": 16,
+      "end_exclusive": "0x17E00",
+      "label": "post_crc_opaque_tag",
+      "size": 16,
+      "start": "0x17DF0"
+    }
+  ],
+  "low_shadow_bank": {
+    "aligned_application_numeric_hits_near_changed_low_bytes": [
+      {
+        "application_offset": "0x28CD0",
+        "numeric_value": "0x108AC"
+      },
+      {
+        "application_offset": "0x28DA8",
+        "numeric_value": "0x108AC"
+      },
+      {
+        "application_offset": "0x29024",
+        "numeric_value": "0x11033"
+      },
+      {
+        "application_offset": "0x29074",
+        "numeric_value": "0x11038"
+      },
+      {
+        "application_offset": "0x29514",
+        "numeric_value": "0x11181"
+      },
+      {
+        "application_offset": "0x29524",
+        "numeric_value": "0x11182"
+      },
+      {
+        "application_offset": "0x29574",
+        "numeric_value": "0x111B1"
+      },
+      {
+        "application_offset": "0x29584",
+        "numeric_value": "0x111B3"
+      },
+      {
+        "application_offset": "0x29594",
+        "numeric_value": "0x111B4"
+      },
+      {
+        "application_offset": "0x295A4",
+        "numeric_value": "0x111B5"
+      },
+      {
+        "application_offset": "0x295B4",
+        "numeric_value": "0x111B6"
+      },
+      {
+        "application_offset": "0x295C4",
+        "numeric_value": "0x111B7"
+      },
+      {
+        "application_offset": "0x295D4",
+        "numeric_value": "0x111B8"
+      },
+      {
+        "application_offset": "0x295E4",
+        "numeric_value": "0x111B9"
+      },
+      {
+        "application_offset": "0x295F4",
+        "numeric_value": "0x111BA"
+      },
+      {
+        "application_offset": "0x29684",
+        "numeric_value": "0x111C3"
+      },
+      {
+        "application_offset": "0x29694",
+        "numeric_value": "0x111C4"
+      },
+      {
+        "application_offset": "0x296A4",
+        "numeric_value": "0x111C5"
+      },
+      {
+        "application_offset": "0x296B4",
+        "numeric_value": "0x111C6"
+      },
+      {
+        "application_offset": "0x296C4",
+        "numeric_value": "0x111C7"
+      },
+      {
+        "application_offset": "0x296D4",
+        "numeric_value": "0x111C8"
+      },
+      {
+        "application_offset": "0x296E4",
+        "numeric_value": "0x111C9"
+      },
+      {
+        "application_offset": "0x29D78",
+        "numeric_value": "0x10203"
+      },
+      {
+        "application_offset": "0x29F1C",
+        "numeric_value": "0x10402"
+      },
+      {
+        "application_offset": "0x29F34",
+        "numeric_value": "0x10403"
+      },
+      {
+        "application_offset": "0x29F4C",
+        "numeric_value": "0x10409"
+      },
+      {
+        "application_offset": "0x2A7B0",
+        "numeric_value": "0x12147"
+      },
+      {
+        "application_offset": "0x2A7B8",
+        "numeric_value": "0x12148"
+      },
+      {
+        "application_offset": "0x2A7C0",
+        "numeric_value": "0x12149"
+      },
+      {
+        "application_offset": "0x2A7C8",
+        "numeric_value": "0x1214A"
+      },
+      {
+        "application_offset": "0x2A7D0",
+        "numeric_value": "0x1214C"
+      },
+      {
+        "application_offset": "0x2A7D8",
+        "numeric_value": "0x1214D"
+      },
+      {
+        "application_offset": "0x2AE84",
+        "numeric_value": "0x1015E"
+      },
+      {
+        "application_offset": "0x2B2A8",
+        "numeric_value": "0x10445"
+      },
+      {
+        "application_offset": "0x2D0A4",
+        "numeric_value": "0x10403"
+      },
+      {
+        "application_offset": "0x2F9E4",
+        "numeric_value": "0x10632"
+      },
+      {
+        "application_offset": "0x31E74",
+        "numeric_value": "0x1063B"
+      },
+      {
+        "application_offset": "0x3217C",
+        "numeric_value": "0x1063B"
+      },
+      {
+        "application_offset": "0x325CC",
+        "numeric_value": "0x10633"
+      },
+      {
+        "application_offset": "0x325D8",
+        "numeric_value": "0x10621"
+      },
+      {
+        "application_offset": "0x3270C",
+        "numeric_value": "0x10633"
+      },
+      {
+        "application_offset": "0x32718",
+        "numeric_value": "0x10621"
+      },
+      {
+        "application_offset": "0x3286C",
+        "numeric_value": "0x10632"
+      },
+      {
+        "application_offset": "0x32878",
+        "numeric_value": "0x10632"
+      },
+      {
+        "application_offset": "0x343F8",
+        "numeric_value": "0x10633"
+      },
+      {
+        "application_offset": "0x34934",
+        "numeric_value": "0x1062A"
+      },
+      {
+        "application_offset": "0x34DF4",
+        "numeric_value": "0x1062A"
+      },
+      {
+        "application_offset": "0x355C0",
+        "numeric_value": "0x1062A"
+      },
+      {
+        "application_offset": "0x35D14",
+        "numeric_value": "0x1062A"
+      },
+      {
+        "application_offset": "0x3660C",
+        "numeric_value": "0x10FFC"
+      },
+      {
+        "application_offset": "0x3663C",
+        "numeric_value": "0x10F7D"
+      },
+      {
+        "application_offset": "0x36EF0",
+        "numeric_value": "0x10FE6"
+      },
+      {
+        "application_offset": "0x38AC4",
+        "numeric_value": "0x10E40"
+      },
+      {
+        "application_offset": "0x391E8",
+        "numeric_value": "0x10EDC"
+      },
+      {
+        "application_offset": "0x3A640",
+        "numeric_value": "0x10ED1"
+      },
+      {
+        "application_offset": "0x3C4C0",
+        "numeric_value": "0x10621"
+      },
+      {
+        "application_offset": "0x3C6E0",
+        "numeric_value": "0x10621"
+      },
+      {
+        "application_offset": "0x3FB8C",
+        "numeric_value": "0x10621"
+      },
+      {
+        "application_offset": "0x3FC98",
+        "numeric_value": "0x10621"
+      },
+      {
+        "application_offset": "0x3FDA4",
+        "numeric_value": "0x10621"
+      },
+      {
+        "application_offset": "0x414DC",
+        "numeric_value": "0x10632"
+      },
+      {
+        "application_offset": "0x46DF4",
+        "numeric_value": "0x10F03"
+      },
+      {
+        "application_offset": "0x48590",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x49BA0",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x49D38",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x4A0B0",
+        "numeric_value": "0x10F5D"
+      },
+      {
+        "application_offset": "0x4A148",
+        "numeric_value": "0x10F5D"
+      },
+      {
+        "application_offset": "0x4B7F4",
+        "numeric_value": "0x10FFB"
+      },
+      {
+        "application_offset": "0x4D3AC",
+        "numeric_value": "0x10F83"
+      },
+      {
+        "application_offset": "0x4E48C",
+        "numeric_value": "0x10F83"
+      },
+      {
+        "application_offset": "0x4E7B0",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x4E9F4",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x4F7CC",
+        "numeric_value": "0x10F9C"
+      },
+      {
+        "application_offset": "0x5006C",
+        "numeric_value": "0x10FFC"
+      },
+      {
+        "application_offset": "0x50260",
+        "numeric_value": "0x10FE3"
+      },
+      {
+        "application_offset": "0x50A24",
+        "numeric_value": "0x10F83"
+      },
+      {
+        "application_offset": "0x50A54",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x51904",
+        "numeric_value": "0x10FFC"
+      },
+      {
+        "application_offset": "0x519E0",
+        "numeric_value": "0x10FE6"
+      },
+      {
+        "application_offset": "0x519F8",
+        "numeric_value": "0x10FE6"
+      },
+      {
+        "application_offset": "0x521B4",
+        "numeric_value": "0x10FE9"
+      },
+      {
+        "application_offset": "0x53088",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x54BF8",
+        "numeric_value": "0x10FBD"
+      },
+      {
+        "application_offset": "0x54C9C",
+        "numeric_value": "0x10F9D"
+      },
+      {
+        "application_offset": "0x54D90",
+        "numeric_value": "0x10F9D"
+      },
+      {
+        "application_offset": "0x54E50",
+        "numeric_value": "0x10F9D"
+      },
+      {
+        "application_offset": "0x551CC",
+        "numeric_value": "0x10F9D"
+      },
+      {
+        "application_offset": "0x5BE58",
+        "numeric_value": "0x10FE3"
+      },
+      {
+        "application_offset": "0x5C9AC",
+        "numeric_value": "0x17DF0"
+      },
+      {
+        "application_offset": "0x5EF64",
+        "numeric_value": "0x10E40"
+      },
+      {
+        "application_offset": "0x60160",
+        "numeric_value": "0x10F81"
+      },
+      {
+        "application_offset": "0x60F14",
+        "numeric_value": "0x10FF9"
+      },
+      {
+        "application_offset": "0x6139C",
+        "numeric_value": "0x10FFC"
+      },
+      {
+        "application_offset": "0x61ECC",
+        "numeric_value": "0x10F72"
+      },
+      {
+        "application_offset": "0x637F0",
+        "numeric_value": "0x10621"
+      },
+      {
+        "application_offset": "0x63944",
+        "numeric_value": "0x10F7D"
+      },
+      {
+        "application_offset": "0x63AD8",
+        "numeric_value": "0x10E1C"
+      },
+      {
+        "application_offset": "0x63BA8",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0x64AF0",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0x64ED0",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0x65058",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0x692F0",
+        "numeric_value": "0x10FE6"
+      },
+      {
+        "application_offset": "0x69BA8",
+        "numeric_value": "0x10F7A"
+      },
+      {
+        "application_offset": "0x69F5C",
+        "numeric_value": "0x10E40"
+      },
+      {
+        "application_offset": "0x6E404",
+        "numeric_value": "0x10F7C"
+      },
+      {
+        "application_offset": "0x6E45C",
+        "numeric_value": "0x10F7C"
+      },
+      {
+        "application_offset": "0x6E490",
+        "numeric_value": "0x10F7C"
+      },
+      {
+        "application_offset": "0x6E4F4",
+        "numeric_value": "0x10F7C"
+      },
+      {
+        "application_offset": "0x6E5B4",
+        "numeric_value": "0x10F7C"
+      },
+      {
+        "application_offset": "0x6E5EC",
+        "numeric_value": "0x10F7C"
+      },
+      {
+        "application_offset": "0x6E918",
+        "numeric_value": "0x10F9D"
+      },
+      {
+        "application_offset": "0x6EB0C",
+        "numeric_value": "0x10F7B"
+      },
+      {
+        "application_offset": "0x702D4",
+        "numeric_value": "0x10FFA"
+      },
+      {
+        "application_offset": "0x70374",
+        "numeric_value": "0x10FFD"
+      },
+      {
+        "application_offset": "0x70EB0",
+        "numeric_value": "0x10FF9"
+      },
+      {
+        "application_offset": "0x710BC",
+        "numeric_value": "0x10F9C"
+      },
+      {
+        "application_offset": "0x715AC",
+        "numeric_value": "0x10F81"
+      },
+      {
+        "application_offset": "0x71648",
+        "numeric_value": "0x10F9D"
+      },
+      {
+        "application_offset": "0x72644",
+        "numeric_value": "0x10F9D"
+      },
+      {
+        "application_offset": "0x73C24",
+        "numeric_value": "0x10F7D"
+      },
+      {
+        "application_offset": "0x752C8",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x7B45C",
+        "numeric_value": "0x10F5D"
+      },
+      {
+        "application_offset": "0x7B7C8",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0x7BA18",
+        "numeric_value": "0x10FA6"
+      },
+      {
+        "application_offset": "0x7BB94",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0x7BC20",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0x7BC6C",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0x7BDD4",
+        "numeric_value": "0x10F5D"
+      },
+      {
+        "application_offset": "0x7BEC8",
+        "numeric_value": "0x10F5D"
+      },
+      {
+        "application_offset": "0x7BF00",
+        "numeric_value": "0x10FA7"
+      },
+      {
+        "application_offset": "0x7BF78",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0x7CD68",
+        "numeric_value": "0x10F73"
+      },
+      {
+        "application_offset": "0x7CD80",
+        "numeric_value": "0x10F73"
+      },
+      {
+        "application_offset": "0x7CE94",
+        "numeric_value": "0x10F71"
+      },
+      {
+        "application_offset": "0x7D66C",
+        "numeric_value": "0x10621"
+      },
+      {
+        "application_offset": "0x7D75C",
+        "numeric_value": "0x10E81"
+      },
+      {
+        "application_offset": "0x7D8B8",
+        "numeric_value": "0x10621"
+      },
+      {
+        "application_offset": "0x7DB30",
+        "numeric_value": "0x10E40"
+      },
+      {
+        "application_offset": "0x7DB7C",
+        "numeric_value": "0x10F72"
+      },
+      {
+        "application_offset": "0x7DC0C",
+        "numeric_value": "0x10E81"
+      },
+      {
+        "application_offset": "0x7DD04",
+        "numeric_value": "0x10FFA"
+      },
+      {
+        "application_offset": "0x7E4A4",
+        "numeric_value": "0x10FFC"
+      },
+      {
+        "application_offset": "0x7E67C",
+        "numeric_value": "0x10F73"
+      },
+      {
+        "application_offset": "0x7E994",
+        "numeric_value": "0x10F81"
+      },
+      {
+        "application_offset": "0x7F790",
+        "numeric_value": "0x10F5C"
+      },
+      {
+        "application_offset": "0x803F4",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x805B0",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x80A14",
+        "numeric_value": "0x10FA6"
+      },
+      {
+        "application_offset": "0x83BDC",
+        "numeric_value": "0x10F7C"
+      },
+      {
+        "application_offset": "0x84498",
+        "numeric_value": "0x10F9D"
+      },
+      {
+        "application_offset": "0x84A44",
+        "numeric_value": "0x10FFD"
+      },
+      {
+        "application_offset": "0x84FE8",
+        "numeric_value": "0x10FA9"
+      },
+      {
+        "application_offset": "0x850D8",
+        "numeric_value": "0x10F96"
+      },
+      {
+        "application_offset": "0x8527C",
+        "numeric_value": "0x10FFD"
+      },
+      {
+        "application_offset": "0x85468",
+        "numeric_value": "0x10626"
+      },
+      {
+        "application_offset": "0x862CC",
+        "numeric_value": "0x10FA1"
+      },
+      {
+        "application_offset": "0x863D0",
+        "numeric_value": "0x10F83"
+      },
+      {
+        "application_offset": "0x86BA4",
+        "numeric_value": "0x10F81"
+      },
+      {
+        "application_offset": "0x86DA4",
+        "numeric_value": "0x10626"
+      },
+      {
+        "application_offset": "0x86FBC",
+        "numeric_value": "0x10626"
+      },
+      {
+        "application_offset": "0x87630",
+        "numeric_value": "0x10626"
+      },
+      {
+        "application_offset": "0x87FF8",
+        "numeric_value": "0x10F47"
+      },
+      {
+        "application_offset": "0x8801C",
+        "numeric_value": "0x10F7A"
+      },
+      {
+        "application_offset": "0x887A0",
+        "numeric_value": "0x10F83"
+      },
+      {
+        "application_offset": "0x88BFC",
+        "numeric_value": "0x10E40"
+      },
+      {
+        "application_offset": "0x89A50",
+        "numeric_value": "0x10F86"
+      },
+      {
+        "application_offset": "0x89A58",
+        "numeric_value": "0x10F86"
+      },
+      {
+        "application_offset": "0x89EA8",
+        "numeric_value": "0x10FE6"
+      },
+      {
+        "application_offset": "0x8A804",
+        "numeric_value": "0x10F81"
+      },
+      {
+        "application_offset": "0x8BA30",
+        "numeric_value": "0x10F99"
+      },
+      {
+        "application_offset": "0x8D014",
+        "numeric_value": "0x10F7D"
+      },
+      {
+        "application_offset": "0x8D2C4",
+        "numeric_value": "0x10FFB"
+      },
+      {
+        "application_offset": "0x8D4A8",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x8D67C",
+        "numeric_value": "0x10F83"
+      },
+      {
+        "application_offset": "0x8D6CC",
+        "numeric_value": "0x10F83"
+      },
+      {
+        "application_offset": "0x8E138",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x8E9EC",
+        "numeric_value": "0x10F81"
+      },
+      {
+        "application_offset": "0x9165C",
+        "numeric_value": "0x10F83"
+      },
+      {
+        "application_offset": "0x91670",
+        "numeric_value": "0x10FA3"
+      },
+      {
+        "application_offset": "0x919C8",
+        "numeric_value": "0x10F81"
+      },
+      {
+        "application_offset": "0x92508",
+        "numeric_value": "0x17DF0"
+      },
+      {
+        "application_offset": "0x926DC",
+        "numeric_value": "0x10F81"
+      },
+      {
+        "application_offset": "0xAFBDC",
+        "numeric_value": "0x10190"
+      },
+      {
+        "application_offset": "0xB4228",
+        "numeric_value": "0x10FA7"
+      },
+      {
+        "application_offset": "0xB4B04",
+        "numeric_value": "0x10FA7"
+      },
+      {
+        "application_offset": "0xB5E84",
+        "numeric_value": "0x10FE8"
+      },
+      {
+        "application_offset": "0xB605C",
+        "numeric_value": "0x10632"
+      },
+      {
+        "application_offset": "0xB7224",
+        "numeric_value": "0x10F9A"
+      },
+      {
+        "application_offset": "0xB7858",
+        "numeric_value": "0x10E40"
+      },
+      {
+        "application_offset": "0xB7AA0",
+        "numeric_value": "0x10E1A"
+      },
+      {
+        "application_offset": "0xB7B6C",
+        "numeric_value": "0x10F86"
+      },
+      {
+        "application_offset": "0xB8228",
+        "numeric_value": "0x10E40"
+      },
+      {
+        "application_offset": "0xB859C",
+        "numeric_value": "0x10E40"
+      },
+      {
+        "application_offset": "0xB89A8",
+        "numeric_value": "0x10FFC"
+      },
+      {
+        "application_offset": "0xBAC64",
+        "numeric_value": "0x10ED0"
+      },
+      {
+        "application_offset": "0xBFEA0",
+        "numeric_value": "0x10FF3"
+      },
+      {
+        "application_offset": "0xC21A8",
+        "numeric_value": "0x10E41"
+      },
+      {
+        "application_offset": "0xC8454",
+        "numeric_value": "0x10FF1"
+      },
+      {
+        "application_offset": "0xC89DC",
+        "numeric_value": "0x10FEF"
+      },
+      {
+        "application_offset": "0xCE6A4",
+        "numeric_value": "0x10FE6"
+      },
+      {
+        "application_offset": "0xCE848",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0xCF1C0",
+        "numeric_value": "0x10F7D"
+      },
+      {
+        "application_offset": "0xCF230",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0xCF260",
+        "numeric_value": "0x10FE7"
+      },
+      {
+        "application_offset": "0xD0194",
+        "numeric_value": "0x10626"
+      },
+      {
+        "application_offset": "0xD049C",
+        "numeric_value": "0x10F7A"
+      }
+    ],
+    "cpu_consumer_boundary": "Target-native H/Span review found no recovered application CPU semantic dereference of the 0x10000+ shadow beyond the startup/E4 copies and XCP calibration-page bookkeeping. Apparent low-address references reviewed in the decompiler resolve to scalar/control-word uses or numeric/packed metadata rather than reads of the low-bank contents. Computed-pointer or undocumented hardware-overlay use is not disproved.",
+    "destination_start": "0xFEBF7C00",
+    "length": 32240,
+    "source_end_exclusive": "0x17DF0",
+    "source_start": "0x10000",
+    "startup_call_chain": [
+      "0x00020880",
+      "0x0005CAAC",
+      "0x0005C992"
+    ],
+    "startup_copy_function": "0x0005C992",
+    "structured_bank_a": {
+      "changed_bytes": 1143,
+      "end_exclusive": "0x11400",
+      "sentinel_geometry_identical": true,
+      "sentinel_offsets_baseline": {
+        "0x7FFFFFFF": [
+          "0x109E4",
+          "0x10A08",
+          "0x10A2C",
+          "0x10A50",
+          "0x10B78",
+          "0x10BA0",
+          "0x10BC8",
+          "0x10BF0",
+          "0x10C18",
+          "0x10C40",
+          "0x10C68",
+          "0x10C90",
+          "0x10CB8",
+          "0x10CE0",
+          "0x10D08",
+          "0x10D30",
+          "0x10D58",
+          "0x10D80",
+          "0x10DA8",
+          "0x10DD0",
+          "0x10DF8",
+          "0x10E20",
+          "0x10E48",
+          "0x10E70",
+          "0x10E98",
+          "0x10EC0",
+          "0x10EE8",
+          "0x10F10",
+          "0x10F38",
+          "0x10F60",
+          "0x10F88",
+          "0x10FB0",
+          "0x10FD8",
+          "0x11000",
+          "0x11028",
+          "0x11050"
+        ],
+        "0xFFFF7FFF": [
+          "0x10140",
+          "0x10184",
+          "0x101C8",
+          "0x1020C",
+          "0x10250",
+          "0x10294",
+          "0x102D8",
+          "0x1031C",
+          "0x10360",
+          "0x103A4",
+          "0x103E8",
+          "0x1042C",
+          "0x10470",
+          "0x104B4",
+          "0x104F8",
+          "0x1053C",
+          "0x10580",
+          "0x105C4",
+          "0x10608",
+          "0x1064C",
+          "0x10690",
+          "0x106D4",
+          "0x10718",
+          "0x1075C",
+          "0x107A0",
+          "0x107E4",
+          "0x10828",
+          "0x1086C",
+          "0x108B0",
+          "0x108F4",
+          "0x10938",
+          "0x1097C",
+          "0x109C0"
+        ]
+      },
+      "sentinel_offsets_target": {
+        "0x7FFFFFFF": [
+          "0x109E4",
+          "0x10A08",
+          "0x10A2C",
+          "0x10A50",
+          "0x10B78",
+          "0x10BA0",
+          "0x10BC8",
+          "0x10BF0",
+          "0x10C18",
+          "0x10C40",
+          "0x10C68",
+          "0x10C90",
+          "0x10CB8",
+          "0x10CE0",
+          "0x10D08",
+          "0x10D30",
+          "0x10D58",
+          "0x10D80",
+          "0x10DA8",
+          "0x10DD0",
+          "0x10DF8",
+          "0x10E20",
+          "0x10E48",
+          "0x10E70",
+          "0x10E98",
+          "0x10EC0",
+          "0x10EE8",
+          "0x10F10",
+          "0x10F38",
+          "0x10F60",
+          "0x10F88",
+          "0x10FB0",
+          "0x10FD8",
+          "0x11000",
+          "0x11028",
+          "0x11050"
+        ],
+        "0xFFFF7FFF": [
+          "0x10140",
+          "0x10184",
+          "0x101C8",
+          "0x1020C",
+          "0x10250",
+          "0x10294",
+          "0x102D8",
+          "0x1031C",
+          "0x10360",
+          "0x103A4",
+          "0x103E8",
+          "0x1042C",
+          "0x10470",
+          "0x104B4",
+          "0x104F8",
+          "0x1053C",
+          "0x10580",
+          "0x105C4",
+          "0x10608",
+          "0x1064C",
+          "0x10690",
+          "0x106D4",
+          "0x10718",
+          "0x1075C",
+          "0x107A0",
+          "0x107E4",
+          "0x10828",
+          "0x1086C",
+          "0x108B0",
+          "0x108F4",
+          "0x10938",
+          "0x1097C",
+          "0x109C0"
+        ]
+      },
+      "start": "0x10100"
+    },
+    "structured_bank_b": {
+      "end_exclusive": "0x1237C",
+      "record_count": 18,
+      "record_shape": "eight u32 values followed by u32 0x7FFFFFFF sentinel",
+      "record_stride": 36,
+      "records": [
+        {
+          "baseline_sha256": "0db1d9f2ca4c62b877a83ddeb58fc5b4f306c824b87de575f4db0c63dfc70827",
+          "changed_bytes": 0,
+          "start": "0x120F4",
+          "target_sha256": "0db1d9f2ca4c62b877a83ddeb58fc5b4f306c824b87de575f4db0c63dfc70827",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "36623353c0980acd47032aebb8edec916c41657343e148e967f9129a7e7212d0",
+          "changed_bytes": 0,
+          "start": "0x12118",
+          "target_sha256": "36623353c0980acd47032aebb8edec916c41657343e148e967f9129a7e7212d0",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "79b8f05097779d1d6eb1176bf0cccfa719785ed737b644e44d34350ea5cba709",
+          "changed_bytes": 8,
+          "start": "0x1213C",
+          "target_sha256": "6424ed731ef8969a6da20e2a33d19224abde84bd42946bf49df64c104e372c9b",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "79b8f05097779d1d6eb1176bf0cccfa719785ed737b644e44d34350ea5cba709",
+          "changed_bytes": 8,
+          "start": "0x12160",
+          "target_sha256": "6424ed731ef8969a6da20e2a33d19224abde84bd42946bf49df64c104e372c9b",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "79b8f05097779d1d6eb1176bf0cccfa719785ed737b644e44d34350ea5cba709",
+          "changed_bytes": 8,
+          "start": "0x12184",
+          "target_sha256": "6424ed731ef8969a6da20e2a33d19224abde84bd42946bf49df64c104e372c9b",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "79b8f05097779d1d6eb1176bf0cccfa719785ed737b644e44d34350ea5cba709",
+          "changed_bytes": 8,
+          "start": "0x121A8",
+          "target_sha256": "6424ed731ef8969a6da20e2a33d19224abde84bd42946bf49df64c104e372c9b",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "5eab215541622d51ecd1bf455d928df1133cb0bbe61e7d4600fe19e05d5baee0",
+          "changed_bytes": 12,
+          "start": "0x121CC",
+          "target_sha256": "8101a4dbcdbf93800b5730902d7bb0489c4f0412b0708be43bc1cf58cf5310fa",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "5eab215541622d51ecd1bf455d928df1133cb0bbe61e7d4600fe19e05d5baee0",
+          "changed_bytes": 12,
+          "start": "0x121F0",
+          "target_sha256": "8101a4dbcdbf93800b5730902d7bb0489c4f0412b0708be43bc1cf58cf5310fa",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "5eab215541622d51ecd1bf455d928df1133cb0bbe61e7d4600fe19e05d5baee0",
+          "changed_bytes": 12,
+          "start": "0x12214",
+          "target_sha256": "8101a4dbcdbf93800b5730902d7bb0489c4f0412b0708be43bc1cf58cf5310fa",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "5eab215541622d51ecd1bf455d928df1133cb0bbe61e7d4600fe19e05d5baee0",
+          "changed_bytes": 12,
+          "start": "0x12238",
+          "target_sha256": "8101a4dbcdbf93800b5730902d7bb0489c4f0412b0708be43bc1cf58cf5310fa",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "a1da36dabba1f63235d52eaae941a14e441683f29a72878919f6d13763487da4",
+          "changed_bytes": 12,
+          "start": "0x1225C",
+          "target_sha256": "b80e6afd0a17eccf4aaf1a3d80bf188e1d6c0c8e4db41b41ea083574412c8edb",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "a1da36dabba1f63235d52eaae941a14e441683f29a72878919f6d13763487da4",
+          "changed_bytes": 12,
+          "start": "0x12280",
+          "target_sha256": "b80e6afd0a17eccf4aaf1a3d80bf188e1d6c0c8e4db41b41ea083574412c8edb",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "a1da36dabba1f63235d52eaae941a14e441683f29a72878919f6d13763487da4",
+          "changed_bytes": 12,
+          "start": "0x122A4",
+          "target_sha256": "b80e6afd0a17eccf4aaf1a3d80bf188e1d6c0c8e4db41b41ea083574412c8edb",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "a1da36dabba1f63235d52eaae941a14e441683f29a72878919f6d13763487da4",
+          "changed_bytes": 12,
+          "start": "0x122C8",
+          "target_sha256": "b80e6afd0a17eccf4aaf1a3d80bf188e1d6c0c8e4db41b41ea083574412c8edb",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "2b811e93e0b1e8a0d33d59c4576f3c0592eab47247bc08bfc70f96f7e1ae424e",
+          "changed_bytes": 8,
+          "start": "0x122EC",
+          "target_sha256": "74d0cb95537e3e0f90ee01fbd7f33c3cf162950638cbd756a322d1c3068c6770",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "2b811e93e0b1e8a0d33d59c4576f3c0592eab47247bc08bfc70f96f7e1ae424e",
+          "changed_bytes": 8,
+          "start": "0x12310",
+          "target_sha256": "74d0cb95537e3e0f90ee01fbd7f33c3cf162950638cbd756a322d1c3068c6770",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "2b811e93e0b1e8a0d33d59c4576f3c0592eab47247bc08bfc70f96f7e1ae424e",
+          "changed_bytes": 8,
+          "start": "0x12334",
+          "target_sha256": "74d0cb95537e3e0f90ee01fbd7f33c3cf162950638cbd756a322d1c3068c6770",
+          "terminal_sentinel": "0x7FFFFFFF"
+        },
+        {
+          "baseline_sha256": "2b811e93e0b1e8a0d33d59c4576f3c0592eab47247bc08bfc70f96f7e1ae424e",
+          "changed_bytes": 8,
+          "start": "0x12358",
+          "target_sha256": "74d0cb95537e3e0f90ee01fbd7f33c3cf162950638cbd756a322d1c3068c6770",
+          "terminal_sentinel": "0x7FFFFFFF"
+        }
+      ],
+      "start": "0x120F4"
+    },
+    "xcp_e4_copy_function": "0x00092700"
+  },
+  "motor_rotation_angle_luts": [
+    {
+      "baseline_max": 30,
+      "baseline_min": -32,
+      "changed_bytes": 254,
+      "end_exclusive": "0xA1C0",
+      "max_absolute_delta": 34,
+      "mean_absolute_delta": 17.40625,
+      "mode_index": 0,
+      "start": "0xA0C0",
+      "target_max": 26,
+      "target_min": -27
+    },
+    {
+      "baseline_max": 38,
+      "baseline_min": -38,
+      "changed_bytes": 253,
+      "end_exclusive": "0xA2C0",
+      "max_absolute_delta": 36,
+      "mean_absolute_delta": 16.222656,
+      "mode_index": 1,
+      "start": "0xA1C0",
+      "target_max": 22,
+      "target_min": -23
+    },
+    {
+      "baseline_max": 30,
+      "baseline_min": -30,
+      "changed_bytes": 251,
+      "end_exclusive": "0xA3C0",
+      "max_absolute_delta": 37,
+      "mean_absolute_delta": 16.878906,
+      "mode_index": 2,
+      "start": "0xA2C0",
+      "target_max": 26,
+      "target_min": -27
+    }
+  ],
+  "record3_coefficients": {
+    "baseline": [
+      244,
+      0,
+      270
+    ],
+    "consumer": "0x42720",
+    "formula_boundary": "selected coefficient is added to 5*(motor_rotation_angle - comparison/state angle) before trigonometric/vector generation",
+    "selector": "0x42700",
+    "target": [
+      -786,
+      -795,
+      -723
+    ]
+  },
+  "schema": "corolla-span-low-calibration-delta-v1",
+  "summary": {
+    "a000_record_bank_changed_bytes": 863,
+    "all_differences_below_0x17e00": true,
+    "application_different_bytes": 0,
+    "application_start": "0x20000",
+    "delta_partition_complete": true,
+    "different_codeflash_bytes": 2190,
+    "first_difference": "0xA004",
+    "last_difference": "0x17DFF",
+    "low_shadow_source_changed_bytes": 1311,
+    "post_crc_opaque_tag_changed_bytes": 16
+  },
+  "target": {
+    "normalization": "trim-all-ff-upper-1mib-from-2mib-range-dump",
+    "normalized_sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+    "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+    "source_sha256": "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d",
+    "source_size": 2097152
+  },
+  "target_id": "8965F1208000",
+  "target_id_basis": "observed/application F181 primary 8965F1208000 at 0x20860; distinct single-record identity 8965H1213000 at 0x17D80 is retained separately"
+}

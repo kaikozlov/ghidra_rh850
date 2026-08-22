@@ -113,12 +113,12 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   specific static assumption. Canonical:
   [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md);
   `exploit/ephemeral_runtime/`.
-- **Cross-calibration semantic patch resolver validation.** SECOC-045 now
+- **Cross-calibration semantic patch resolver validation.** SECOC-045
   rediscovers the Sienna authenticated-delivery gate from a fresh unannotated
   CodeFlash-only import with no target/MAC-result/CRC addresses embedded in the
-  resolver. Span's `8965F1208000` specimen is now persisted and should be run
-  through the unchanged resolver next; beyond it, the highest-value missing
-  artifacts are blurbdust-supported `8965F3`/`8965F4` CodeFlash images.
+  resolver, and Span `8965F1208000` has now independently reproduced the same
+  semantic resolution against its own persisted image. The next high-value
+  validation artifacts are blurbdust-supported `8965F3`/`8965F4` CodeFlash images.
   For F3 the acquisition target is now concrete: Toyota Tundra package
   `T-0035-22.cuw` from TSB `T-SB-0069-22` contains the `8965F3401200/2200`
   images plus the CUW erase routine; the retained community decryptor can emit
@@ -280,16 +280,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   observations, but runtime crypto architecture, `0x344` EPS direction/owner,
   mismatch clustering, and key uniqueness remain open. See
   [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md).
-- **Corolla `8965F1208000`.** The acquisition blocker is closed: the full
-  2026-08-21 Span source ZIP and normalized CodeFlash/DataFlash/RAM/preflight
-  corpus are tracked under `community/spanconstant/`, and boot-info verifies
-  `R7F701383`. The corrected `(bus1,param1)` preflight opened PROGRAMMING,
-  received a SecurityAccess seed, accepted the key, and completed the range
-  dumps. Firmware-static work now starts from the actual bytes rather than from
-  Sienna/H inference. Highest-value unresolved items are the F181 producer join
-  (`8965F1208000` observed versus raw `8965H1213000` at `0x17D80`), application
-  SA implementation/secret, boot payload-gate roots, SecOC profile/key-selection
-  topology, and steering-command ingress. See
+- **Corolla `8965F1208000`.** Acquisition and broad static comparison are
+  closed against the tracked 2026-08-21 Span corpus. F181, all three static
+  security roots, normal-Rx/SecOC topology, Sienna transfer, non-CodeFlash
+  memory, and the `0xA000` active unit-calibration family are now pinned from
+  actual bytes. The low delta is exactly partitioned as 863 changed A000-family
+  bytes + 1,311 changed bytes in the structured `0x10000..0x17DEF` shadow source
+  + 16 opaque post-CRC bytes. Remaining questions are the real vehicle-level
+  lateral-command provenance, any semantic CPU consumer of that `0x10000+`
+  shadow bank, H/Span-specific retained-RAM execution geometry if a runtime is
+  built, and live ICU-S policy only where hardware evidence is needed. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 - **Separate 2023 US Corolla / tracked `8965H1202000` specimen.** The complete
   memory corpus is now retained. CodeFlash internally identifies

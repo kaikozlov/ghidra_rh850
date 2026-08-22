@@ -50,6 +50,16 @@ reproduced H's full exact-body, structural, named-function, and normal-Rx result
 The resolved Span SecOC queue is `00F/D7/B6`, not Sienna's `2E4/131` steering
 profiles.
 
+The 2,190-byte low delta is now exhausted rather than left as a generic
+calibration caveat. Exactly 863 changed bytes belong to a nine-record `0xA000`
+unit-calibration/identity family, whose active consumers include three
+mode-selected motor-rotation-angle correction LUTs and selected angle-offset
+coefficients; 1,311 changed bytes lie in the structured `0x10000..0x17DEF`
+shadow-copy source; the remaining 16 bytes are the opaque post-CRC field
+`0x17DF0..0x17DFF`. The active calibration differences are specimen-specific
+evidence, **not** proof of a 2023→2025 tuning revision, and the semantic CPU
+consumer of the `0x10000+` shadow bank remains bounded.
+
 The non-CodeFlash corpus is also compared directly. Span's 48-KiB extended
 CodeFlash is byte-identical to all three albino reads. All three physical
 first-32-KiB DataFlash prefixes retain the same NvM geometry and zero valid

@@ -108,9 +108,11 @@ This one result tests Gate-2 transfer, callback-free startup/scheduler transfer,
 SecOC queue/COM geometry, and whether exact image-bound RAM retention evidence
 exists. Do not add a software-ID offset row to make a foreign image pass.
 
-The highest-value **available** transfer target is now Span's persisted
-`8965F1208000` corpus: run the unchanged semantic/runtime resolvers and then do
-its target-native SA/SecOC/steering census. The highest-value still-missing
+Span's persisted `8965F1208000` corpus is now closed through the unchanged
+semantic/runtime resolvers, target-native SA/SecOC/steering comparison, and the
+low-CodeFlash unit-calibration audit. Its remaining static question is narrow:
+identify a semantic consumer for the structured `0x10000..0x17DEF` shadow bank
+only if independent evidence supports one. The highest-value still-missing
 images are `8965B4514000` or a blurbdust-supported F3/F4 calibration with an
 independently observed steering profile. `8965H1202000` remains the
 negative-capability regression and should not be counted again as an unresolved
