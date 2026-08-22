@@ -1508,9 +1508,15 @@ oracle = "raw_bytes"
 
 
 [suite.spanconstant_corolla_codeflash]
-tests = ["tests/verify_spanconstant_corolla_codeflash.py"]
+tests = [
+  "tests/verify_spanconstant_corolla_codeflash.py",
+  "tests/verify_spanconstant_corolla_equivalence.py",
+]
 paths = [
   "tests/verify_spanconstant_corolla_codeflash.py",
+  "tests/verify_spanconstant_corolla_equivalence.py",
+  "tools/analyze_corolla_codeflash_equivalence.py",
+  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
   "community/spanconstant/",
   "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
   "data/tss3_eps_variant_matrix.csv",

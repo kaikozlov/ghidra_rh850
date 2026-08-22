@@ -1,0 +1,267 @@
+{
+  "application_equivalence": {
+    "baseline_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
+    "different_bytes": 0,
+    "end_exclusive": "0x100000",
+    "identical": true,
+    "size": 917504,
+    "start": "0x20000",
+    "target_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f"
+  },
+  "baseline": {
+    "normalization": "trim-all-ff-upper-1mib-from-2mib-range-dump",
+    "normalized_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+    "sha256": "97f9d42d936b97a99e7ab3d3ef20c6fb4c1fc3cc2ba199f6b158675a1709aee6",
+    "size": 2097152
+  },
+  "baseline_id": "8965H1202000",
+  "changed_byte_buckets_64k": {
+    "0x00000-0x0FFFF": 863,
+    "0x10000-0x1FFFF": 1327
+  },
+  "comparison": {
+    "coalesced_equal_gap_max": 32,
+    "coalesced_region_count": 18,
+    "coalesced_regions": [
+      {
+        "changed_bytes": 81,
+        "end_exclusive": "0xA09C",
+        "span": 152,
+        "start": "0xA004"
+      },
+      {
+        "changed_bytes": 762,
+        "end_exclusive": "0xA3C4",
+        "span": 772,
+        "start": "0xA0C0"
+      },
+      {
+        "changed_bytes": 20,
+        "end_exclusive": "0xA524",
+        "span": 62,
+        "start": "0xA4E6"
+      },
+      {
+        "changed_bytes": 161,
+        "end_exclusive": "0x1031C",
+        "span": 466,
+        "start": "0x1014A"
+      },
+      {
+        "changed_bytes": 162,
+        "end_exclusive": "0x1053C",
+        "span": 466,
+        "start": "0x1036A"
+      },
+      {
+        "changed_bytes": 161,
+        "end_exclusive": "0x1075C",
+        "span": 466,
+        "start": "0x1058A"
+      },
+      {
+        "changed_bytes": 161,
+        "end_exclusive": "0x1097C",
+        "span": 466,
+        "start": "0x107AA"
+      },
+      {
+        "changed_bytes": 24,
+        "end_exclusive": "0x10AC0",
+        "span": 102,
+        "start": "0x10A5A"
+      },
+      {
+        "changed_bytes": 4,
+        "end_exclusive": "0x10B52",
+        "span": 55,
+        "start": "0x10B1B"
+      },
+      {
+        "changed_bytes": 60,
+        "end_exclusive": "0x10C8F",
+        "span": 261,
+        "start": "0x10B8A"
+      },
+      {
+        "changed_bytes": 60,
+        "end_exclusive": "0x10DCF",
+        "span": 261,
+        "start": "0x10CCA"
+      },
+      {
+        "changed_bytes": 60,
+        "end_exclusive": "0x10F0F",
+        "span": 261,
+        "start": "0x10E0A"
+      },
+      {
+        "changed_bytes": 290,
+        "end_exclusive": "0x113CE",
+        "span": 1156,
+        "start": "0x10F4A"
+      },
+      {
+        "changed_bytes": 160,
+        "end_exclusive": "0x12370",
+        "span": 562,
+        "start": "0x1213E"
+      },
+      {
+        "changed_bytes": 1,
+        "end_exclusive": "0x13E47",
+        "span": 1,
+        "start": "0x13E46"
+      },
+      {
+        "changed_bytes": 2,
+        "end_exclusive": "0x17D89",
+        "span": 2,
+        "start": "0x17D87"
+      },
+      {
+        "changed_bytes": 2,
+        "end_exclusive": "0x17DC9",
+        "span": 2,
+        "start": "0x17DC7"
+      },
+      {
+        "changed_bytes": 19,
+        "end_exclusive": "0x17E00",
+        "span": 20,
+        "start": "0x17DEC"
+      }
+    ],
+    "different_bytes": 2190,
+    "exact_changed_run_count": 886,
+    "first_difference": "0xA004",
+    "identical_bytes": 1046386,
+    "identical_fraction": 0.997911453,
+    "last_difference": "0x17DFF",
+    "total_bytes": 1048576
+  },
+  "crc_descriptors": {
+    "baseline": [
+      {
+        "descriptor_va": "0x8DB0",
+        "end": "0x17DF0",
+        "fixup_va": "0x17DEC",
+        "full_crc": "0xFFFFFFFF",
+        "length": 32240,
+        "prefix_crc": "0x8DD9EE42",
+        "start": "0x10000",
+        "stored_fixup": "0x722611BD",
+        "terminal_fixup_valid": true
+      },
+      {
+        "descriptor_va": "0x8DC0",
+        "end": "0xFFDF0",
+        "fixup_va": "0xFFDEC",
+        "full_crc": "0xFFFFFFFF",
+        "length": 949744,
+        "prefix_crc": "0x52A628F3",
+        "start": "0x18000",
+        "stored_fixup": "0xAD59D70C",
+        "terminal_fixup_valid": true
+      }
+    ],
+    "target": [
+      {
+        "descriptor_va": "0x8DB0",
+        "end": "0x17DF0",
+        "fixup_va": "0x17DEC",
+        "full_crc": "0xFFFFFFFF",
+        "length": 32240,
+        "prefix_crc": "0xFE5FEE5F",
+        "start": "0x10000",
+        "stored_fixup": "0x01A011A0",
+        "terminal_fixup_valid": true
+      },
+      {
+        "descriptor_va": "0x8DC0",
+        "end": "0xFFDF0",
+        "fixup_va": "0xFFDEC",
+        "full_crc": "0xFFFFFFFF",
+        "length": 949744,
+        "prefix_crc": "0x52A628F3",
+        "start": "0x18000",
+        "stored_fixup": "0xAD59D70C",
+        "terminal_fixup_valid": true
+      }
+    ]
+  },
+  "interpretation_boundary": {
+    "exact_application_byte_identity_allows_semantic_transfer": true,
+    "low_region_differences_require_independent_data_calibration_identity_audit": true,
+    "note": "Byte identity proves code/configuration equality only for the exact covered ranges. Low-region differences are retained explicitly and must not be erased by whole-variant semantic inheritance."
+  },
+  "pinned_ranges": {
+    "application_security_access_secret": {
+      "baseline_sha256": "5801c0aad614d7446f42410b334158a9a269839e7e4e70f5b732ec37cc305e2f",
+      "end_exclusive": "0x20850",
+      "identical": true,
+      "start": "0x20840",
+      "target_sha256": "5801c0aad614d7446f42410b334158a9a269839e7e4e70f5b732ec37cc305e2f"
+    },
+    "boot_security_access_secret": {
+      "baseline_sha256": "15264462fe0618b12bcf3059c1f120e5e738f021111fa381fec13a9b0da97933",
+      "end_exclusive": "0xBFF8",
+      "identical": true,
+      "start": "0xBFE8",
+      "target_sha256": "15264462fe0618b12bcf3059c1f120e5e738f021111fa381fec13a9b0da97933"
+    },
+    "f181_primary_record": {
+      "baseline_ascii": "8965F1208000",
+      "baseline_sha256": "0bd18086f727e00c2e2e3c8bfa09f865d15198ced2f8154a0061d4f0617b1407",
+      "end_exclusive": "0x20870",
+      "identical": true,
+      "start": "0x20860",
+      "target_ascii": "8965F1208000",
+      "target_sha256": "0bd18086f727e00c2e2e3c8bfa09f865d15198ced2f8154a0061d4f0617b1407"
+    },
+    "f181_secondary_record": {
+      "baseline_ascii": "8A3111202000",
+      "baseline_sha256": "25119cf99a6ff30ac25adab29988202620f43d045cd379e78466f5c3aaf83c01",
+      "end_exclusive": "0x17DD0",
+      "identical": false,
+      "start": "0x17DC0",
+      "target_ascii": "8A3111213000",
+      "target_sha256": "b64b0d4e6a8d3c4d3940cb59a122d3e7f2161afaffdb690f37b2136ac78f8254"
+    },
+    "payload_build_secret": {
+      "baseline_sha256": "2aea015ddae7f99590918290d6b6fa05e975af9125096f2e27274674d3504d11",
+      "end_exclusive": "0xBFE8",
+      "identical": true,
+      "start": "0xBFD8",
+      "target_sha256": "2aea015ddae7f99590918290d6b6fa05e975af9125096f2e27274674d3504d11"
+    },
+    "serial": {
+      "baseline_ascii": "8965012N50A05G310920",
+      "baseline_sha256": "7b2390e64268aa8fa4fc021515437b4a8bc4188e191e4825852d0aa4c02e8f24",
+      "end_exclusive": "0xA4F1",
+      "identical": false,
+      "start": "0xA4DC",
+      "target_ascii": "8965012N50E12H030731",
+      "target_sha256": "361974c4d0cfc94398d6d54509858e36290a4c2039629947e7ad3585df06e337"
+    },
+    "single_record_identity": {
+      "baseline_ascii": "8965H1202000",
+      "baseline_sha256": "cc18b57f05381e28af2a143de1ae7ef01fe6e92d2b6303d0c833c6cd9452c19c",
+      "end_exclusive": "0x17D90",
+      "identical": false,
+      "start": "0x17D80",
+      "target_ascii": "8965H1213000",
+      "target_sha256": "0af34037577bdc9c38abec69e3c5d04a9939cc4a6dd076ef6f7b6dd6ef1e7201"
+    }
+  },
+  "schema": "toyota-corolla-codeflash-equivalence-v1",
+  "target": {
+    "normalization": "trim-all-ff-upper-1mib-from-2mib-range-dump",
+    "normalized_sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+    "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+    "sha256": "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d",
+    "size": 2097152
+  },
+  "target_id": "8965F1208000"
+}
