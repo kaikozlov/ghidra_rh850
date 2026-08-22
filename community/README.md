@@ -224,13 +224,21 @@ route preflight, and SecurityAccess log are individually hash-pinned in
 The tracked CodeFlash has source SHA-256
 `b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d`
 and boot-info `R7F701383`. The same acquisition bundle records live F181
-`8965F1208000 / 8A3111213000` and serial `8965012N50E12H030731`; raw CodeFlash
-also contains `8965H1213000` at `0x17D80`, whose relationship to F181 remains a
-target-native dataflow question rather than an assumed identity.
+`8965F1208000 / 8A3111213000` and serial `8965012N50E12H030731`. Static closure
+now reconciles the identity records exactly: the byte-identical F181 producer
+reads `8965F1208000 @ 0x20860` and `8A3111213000 @ 0x17DC0`, while
+`8965H1213000 @ 0x17D80` belongs to a separate one-record identity path.
 
-`tests/verify_spanconstant_corolla_codeflash.py` proves that the persisted image
-repeats the H-family unauthenticated XCP high-LocalRAM write architecture and
-live application→boot retention path, while deliberately stopping short of a
-no-auth PC-pivot claim. See
+The full comparative pass is tracked rather than left as preliminary triage.
+Span differs from albino's normalized 1-MiB CodeFlash in only 2,190 low-region
+bytes and is identical from `0x17E00` onward; a fresh clean target-native Ghidra
+structural import and an independent Span→Sienna transfer run reproduce the H
+application result. DataFlash/extended-CodeFlash/RAM invariants are separately
+pinned by `tests/verify_spanconstant_corolla_memory.py`.
+
+`tests/verify_spanconstant_corolla_codeflash.py` still proves the H-family
+unauthenticated XCP high-LocalRAM write architecture and live application→boot
+retention path, while deliberately stopping short of a no-auth PC-pivot claim.
+See
 [`spanconstant/README.md`](spanconstant/README.md) and
 [`docs/variants/corolla-8965F1208000.md`](../docs/variants/corolla-8965F1208000.md).

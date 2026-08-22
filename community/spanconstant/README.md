@@ -36,8 +36,26 @@ The CodeFlash range SHA-256 is
 The firmware boot-info identifies `R7F701383`. Raw CodeFlash strings contain
 `8965H1213000` at `0x17D80`, `8A3111213000` at `0x17DC0`, and `8965F1208000` at
 `0x20860`. The live preflight independently observed F181 as
-`8965F1208000 / 8A3111213000`. The repository intentionally does **not** infer
-which raw block supplies F181 until that producer is recovered target-natively.
+`8965F1208000 / 8A3111213000`. Target-native closure now resolves the producer:
+byte-identical `FUN_0004a328` reads the two F181 records from `0x20860` and
+`0x17DC0`; `0x17D80` belongs to a separate one-record identity path.
+
+## Comparative static closure
+
+Against albino's tracked 2023 Corolla, the normalized first-MiB CodeFlash differs
+in exactly 2,190 bytes, all below `0x17E00`; the high CRC/application image is
+byte-identical. A fresh clean Span Ghidra import independently produced the same
+5,425-function structural fingerprint corpus as H, and a direct Span→Sienna run
+reproduced H's full exact-body, structural, named-function, and normal-Rx results.
+The resolved Span SecOC queue is `00F/D7/B6`, not Sienna's `2E4/131` steering
+profiles.
+
+The non-CodeFlash corpus is also compared directly. Span's 48-KiB extended
+CodeFlash is byte-identical to all three albino reads. All three physical
+first-32-KiB DataFlash prefixes retain the same NvM geometry and zero valid
+object-15 copies; Span adds committed checkpoint slot 104 and carries different
+mutable object-2 state. Runtime RAM differences are separately treated as
+snapshot state.
 
 ## XCP / PROGRAMMING retention result
 

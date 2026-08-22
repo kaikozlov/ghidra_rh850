@@ -2300,3 +2300,35 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `tests/verify_spanconstant_corolla_codeflash.py`.
 - **Canonical:** [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md);
   VAR-039.
+
+### CORR-096 — Span `0x17D80` is not the F181 primary software-ID record
+
+- **Stale ambiguity:** the first Span write-up left the relationship between raw
+  `8965H1213000 @ 0x17D80` and live F181 `8965F1208000` unresolved, because all
+  three nearby identity strings were visible before the target producer was
+  joined.
+- **Right:** the byte-identical H/Span F181 producer `FUN_0004a328` emits two
+  16-byte records from CodeFlash `0x20860` and `0x17DC0`. On Span those are
+  exactly `8965F1208000` and `8A3111213000`. `FUN_0004a2e0` separately reads
+  `0x17D80`, so `8965H1213000` belongs to a distinct one-record identity path.
+- **Impact:** the live F181 and raw firmware are internally consistent; no
+  `F12080`/`H12130` identity contradiction remains.
+- **Canonical:** [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §3;
+  VAR-042; `tests/verify_spanconstant_corolla_equivalence.py`.
+
+### CORR-097 — vehicle-bus `2E4/131/344` observations are not Span EPS SecOC/Rx configuration
+
+- **Wrong implication:** the preliminary Span record listed historically
+  observed secured `0x2E4/0x131/0x344` traffic alongside EPS facts in a way that
+  could be read as the EPS's configured protected receive set.
+- **Right:** direct firmware resolution gives Span the same normal-Rx and SecOC
+  configuration as H. Its Gate-2 queue is exactly `0x00F/0x0D7/0x0B6`, and the
+  normal-Rx diff explicitly removes Sienna `0x2E4` and `0x131`; neither is a
+  Span Gate-2 profile. The persisted 2026-08-21 `can_oracle.ndjson` is empty and
+  its READY capture does not provide a same-session protected-frame oracle that
+  overrides the static census.
+- **Impact:** bus presence proves network traffic, not destination ECU
+  acceptance. The Sienna `2E4/131` steering bridge must not be transplanted to
+  Span by ID.
+- **Canonical:** [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §7;
+  VAR-043; `tests/verify_spanconstant_corolla_cross_variant.py`.

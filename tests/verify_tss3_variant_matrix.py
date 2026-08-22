@@ -136,16 +136,18 @@ if corolla:
           all(token in corolla["diagnostic_bus"] for token in ("CAN-FD", "param 1", "bus 1")))
     check("Span Corolla secoc_sync_id remains 0x0F",
           corolla["secoc_sync_id"].strip() == "0x0F")
-    check("Span Corolla secured CAN observations retain 2E4/131/344",
-          all(x in corolla["secured_can_ids"] for x in ("0x2E4", "0x131", "0x344")))
-    check("Span Corolla F181 and tracked raw-ID distinction are explicit",
-          all(x in corolla["application_dids"] for x in ("F181=8965F1208000+8A3111213000", "8965H1213000", "0x17D80", "0x20860", "not yet target-native recovered")))
+    check("Span Corolla firmware Gate-2 queue is 00F/D7/B6 and excludes 2E4/131",
+          all(x in corolla["secured_can_ids"] for x in ("0x00F", "0x0D7", "0x0B6", "no 0x2E4/0x131")))
+    check("Span Corolla historical 2E4/131/344 bus observations are explicitly not an EPS RX census",
+          all(x in corolla["secured_can_ids"] for x in ("0x2E4", "0x131", "0x344", "not an EPS RX census")))
+    check("Span Corolla F181 producer and separate 17D80 identity path are explicit",
+          all(x in corolla["application_dids"] for x in ("F181=8965F1208000+8A3111213000", "FUN_0004a328", "@0x20860", "@0x17DC0", "8965H1213000 @0x17D80", "separate one-record identity")))
     check("Span Corolla corrected direct PROGRAMMING succeeded",
           all(x in corolla["programming_observation"] for x in ("2026-08-21", "bus1,param1", "opened PROGRAMMING", "accepted SecurityAccess key", "completed CodeFlash")))
     check("Span Corolla older param0 timeout is retained as non-diagnostic",
           "param0 timeout" in corolla["programming_observation"] and "non-diagnostic" in corolla["programming_observation"])
-    check("Span Corolla security row records successful boot unlock without inventing app-secret result",
-          "accepted key" in corolla["security_levels"] and "target-native SA roots/algorithms still pending" in corolla["security_levels"])
+    check("Span Corolla security row records exact static roots while keeping live app-key acceptance bounded",
+          all(x in corolla["security_levels"] for x in ("@0xBFD8", "@0xBFE8", "@0x20840", "byte-identical", "accepted key", "prior app send-key used the boot secret")))
     check("Span Corolla application SID set retains 13 answering services",
           "13 answering" in corolla["application_sid_set"].lower() or "13" in corolla["application_sid_set"])
     check("Span Corolla source points at persisted corpus",
