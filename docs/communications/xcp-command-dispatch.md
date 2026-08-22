@@ -226,6 +226,18 @@ consumer for attacker-written bytes. Runtime-only aliasing or computed consumers
 remain a bounded unknown; the absence of direct xrefs/materialized consumers is
 not a universal non-use proof.
 
+A cross-lifecycle audit adds one important lifetime property without changing
+that control-transfer conclusion. The normal application `10 02` programming
+handoff is a live `0x64EC8 -> 0x9F00 -> 0x148E -> 0x1398` jump. The caller loads
+fixed CodeFlash source `0x31914` into `r6`, `0x9F00` touches no XCP-window bytes,
+and the boot runtime reached through `0x1398 -> 0x1338` does not invoke
+reset-startup initializer `0x1404`. Therefore an XCP `DOWNLOAD` payload written
+to `FEBF7C00..FEBFFBFF` immediately before the programming transition remains
+resident in the boot programming runtime. This strengthens COM-005 from
+"post-init application storage" to **cross-application/boot retained executable
+storage**, but still does not supply the missing PC-redirection consumer. See
+SEC-BOOT-012 and `tests/verify_xcp_boot_handoff_retention.py`.
+
 The security conclusion is therefore corrected and still bounded:
 **write capability is verified, and the window is supervisor-executable by MPU
 configuration, but no control-transfer consumer is recovered** — so this

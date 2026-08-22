@@ -2261,3 +2261,23 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md);
   `tests/verify_secoc_command5_oracle_assessment.py`; SECOC-069.
+
+### CORR-094 — the programming handoff preserves XCP-window bytes, but its 36-byte state-copy source is fixed
+
+- **Wrong investigation hypotheses:** treating application `10 02` as though it
+  necessarily reset/cleared the `FEBF7C00..FEBFFBFF` XCP window, or treating
+  the `r6` source consumed by `0x148E` as potentially tester-selected.
+- **Right:** application `FUN_00064EC8 @ 0x64EE6` loads literal
+  `r6 = 0x31914` immediately before calling `0x9F00`. `0x9F00` enters the boot
+  context live, touches no XCP-window byte, clears `MPM`, and calls `0x148E`;
+  `0x148E` copies nine fixed CodeFlash dwords into `FEBF2908` and enters
+  `0x1398`. The subsequent `0x1338` runtime initializer does not call `0x1404`.
+  `0x1404` is reset-startup-only, and its apparent `FEBF7C00` clear remains the
+  CORR-067 zero-trip loop. Tester bytes written to the XCP window immediately
+  before `10 02` therefore remain resident in boot, but the handoff-copy itself
+  is not an arbitrary-write primitive.
+- **Impact:** this creates cross-lifecycle code placement/retention, not a
+  complete RCE. A separate boot control-transfer primitive is still required.
+- **Canonical:**
+  [../architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md) §4.1;
+  `tests/verify_xcp_boot_handoff_retention.py`; SEC-BOOT-012.

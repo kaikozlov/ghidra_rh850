@@ -1157,6 +1157,18 @@ paths = [
   "docs/status/FINDINGS.md",
 ]
 
+[suite.xcp_boot_handoff_retention]
+tests = ["tests/verify_xcp_boot_handoff_retention.py"]
+paths = [
+  "tests/verify_xcp_boot_handoff_retention.py",
+  "docs/architecture/boot-validity-and-flash-lifecycle.md",
+  "docs/communications/xcp-command-dispatch.md",
+  "docs/security/ephemeral-secoc-bypass.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+]
+oracle = "raw_bytes"
+
 [suite.xcp_window_mpu]
 tests = ["tests/verify_xcp_window_mpu_permissions.py"]
 paths = [

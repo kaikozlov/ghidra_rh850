@@ -201,6 +201,22 @@ re-derivation against raw bytes; split-CodeFlash file offset == VA):
    without any CRC/validity failure and without a reset. The trailing
    `system_hard_reset()` in that path is unreachable.
 
+   This live handoff also preserves the application's XCP/shadow payload window.
+   `FUN_00064EC8 @ 0x64EE6` explicitly loads `r6 = 0x31914` before calling
+   `0x9F00`; the nine-dword copy at `0x148E` therefore has a fixed CodeFlash
+   source and is **not** an attacker-selected pointer. `0x9F00` establishes
+   `SP=FEBE8000`, `GP=FEBF9800`, `TP=0x869C`, writes `MPM=0`, and calls
+   `0x148E` without touching `FEBF7C00..FEBFFBFF`. The subsequent
+   `0x1398 -> 0x1338` boot-runtime initialization likewise does not call
+   reset-startup initializer `0x1404`; direct xrefs make `boot_reset_startup @
+   0x1F2` its sole caller. The apparent `0x1426` `FEBF7C00` clear remains the
+   CORR-067 zero-trip loop (`FEBF7C00 > FEBE7000`). Consequently bytes written
+   into the XCP window immediately before `10 02` remain resident across the
+   normal application-to-boot transition. This is a **retention primitive, not
+   code execution**: no boot control-transfer consumer into that window is
+   established here. `tests/verify_xcp_boot_handoff_retention.py` pins this
+   composition directly from raw CodeFlash.
+
 2. **Failure-loop setup arms diagnostics, but the two entry states are not
    equivalent.** `FUN_00001338` (the `0x1398` prologue) reaches
    `FUN_000069D2`, which sets the diagnostic master flag `DAT_febf2bd0` whenever

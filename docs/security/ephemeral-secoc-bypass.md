@@ -405,12 +405,26 @@ is externally writable through the recovered XCP `F0 DOWNLOAD` / `EC
 MODIFY_BITS` paths. The application startup also copies CodeFlash into that
 window.
 
-However, the direct-reference census still contains no stock code-transfer
-consumer into the XCP window. Its usefulness is therefore:
+A lifecycle re-audit strengthens the storage primitive: the normal application
+`10 02` transition enters the boot programming runtime by a live
+`0x64EC8 -> 0x9F00 -> 0x148E -> 0x1398` jump, not a reset. `0x64EC8` loads the
+fixed retained-record source `0x31914`; `0x9F00` touches no XCP-window bytes and
+writes `MPM=0`; `0x1398 -> 0x1338` does not call reset-startup initializer
+`0x1404`. Thus bytes written to `FEBF7C00..FEBFFBFF` immediately before
+`10 02` remain resident after bootloader entry. The prior candidate that the
+handoff copy source itself might be tester-selectable is disproved by the
+literal `mov 0x31914,r6` at `0x64EE6`.
 
-- post-init code/data storage if a separate control-transfer primitive is found;
+However, the direct-reference census still contains no stock code-transfer
+consumer into the XCP window in either the application or the audited boot
+runtime. Its usefulness is therefore:
+
+- retained application-to-boot code/data storage if a separate control-transfer
+  primitive is found;
 - a convenient command mailbox for a future resident shim;
 - not, by itself, code execution.
+
+See SEC-BOOT-012 and `tests/verify_xcp_boot_handoff_retention.py`.
 
 ### 6.3 No independent application relocation loader recovered
 
