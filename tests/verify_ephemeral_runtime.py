@@ -156,8 +156,13 @@ check("runtime calls stock COM RxIndication before stock system-mode dispatcher"
       source.index("call0(TARGET_AGG_1)") < source.index("((com_rx_t)TARGET_APPLICATION_COM_RX)") < source.index("call0(TARGET_AGG_4)"))
 check("runtime source contains no CodeFlash/FACI programming primitive",
       all(token not in source.lower() for token in ("faci_", "flash_block_rmw", "program_page", "codeflash_write")))
-check("workstream contains no live deploy wrapper",
-      not any(p.name.startswith(("deploy", "flash", "run_live")) for p in (REPO / "exploit" / "ephemeral_runtime").iterdir()))
+installer_source = (REPO / "exploit" / "ephemeral_runtime" / "live_installer.py").read_text(encoding="utf-8")
+check("live installer is isolated-bench gated and defaults to plan-only",
+      "--bench-isolated" in installer_source and "--execute" in installer_source and
+      "--execute requires --bench-isolated" in installer_source)
+check("live installer retains initial boot SecurityAccess boundary",
+      "initial_authentication_bypassed" in installer_source and "load_security_secret" in installer_source and
+      "load_payload_secret" not in installer_source)
 
 print("\n== inert scheduler canary ==")
 canary_source = CANARY_SOURCE.read_text(encoding="utf-8")

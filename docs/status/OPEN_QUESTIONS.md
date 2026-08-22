@@ -104,8 +104,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   task. The initial Sienna payload artifact is no longer open: the pinned public
   encrypted RAM-dump fixture already satisfies this exact gate with zero
   DID-0201/0202 inputs. What remains is dynamic: use the audited 332-byte inert
-  canary, offline MEM-SAFE substitution plan, and read-only SID-`0x23` heartbeat
-  probe to prove scheduler ownership and reset-to-stock behavior; next prove
+  canary through the complete bench-gated `live_installer.py` workflow. The
+  installer now rechecks application F181 and requires SID-`0x23` heartbeat
+  progression itself; use a hardware reset plus the existing read-only probe only
+  when proving reset-to-stock behavior. Next prove
   one-shot queue capture, then enable COM delivery on an isolated bench. Do not
   resume generic callback/xref searching unless dynamic behavior falsifies a
   specific static assumption. Canonical:

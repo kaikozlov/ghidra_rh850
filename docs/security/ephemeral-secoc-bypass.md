@@ -834,12 +834,21 @@ runtime architecture:
 - stock COM buffer/update-counter joins;
 - audited 704-byte, zero-relocation resident build and source/toolchain identity.
 
-Neither test claims hardware execution. The tracked canary and
-`build_substitution_plan.py` now make the first dynamic proof reproducible:
-post-`0x10F0` raw-substitute the 332-byte inert runtime, write `FEBF0FD0 =
-FEBF0000` last, trigger the existing `0xFF00` callback path, and observe
-`FEBFFBF0` through read-only application RMBA. The remaining proof class is
-dynamic.
+Neither test claims hardware execution. The tracked canary,
+`build_substitution_plan.py`, and `live_installer.py` now make the first dynamic
+proof reproducible end to end: the installer performs exact F181 binding,
+programming-session transition, recovered boot SecurityAccess, replay of the
+pinned accepted encrypted 4 KiB fixture, `0x10F0`, post-auth raw substitution,
+callback-last installation, and the `0xFF00` trigger. For the canary variant the
+same process then waits for application F181 to reappear, enters extended
+diagnostics, reads the manifest-selected heartbeat through stock SID `0x23`,
+and requires progression before reporting attestation. It defaults to plan-only
+and requires `--execute --bench-isolated` for live use. The pinned fixture means
+this operational path does not require the payload-build secret. For
+`command5-proxy`, the same process can wait for the XCP mailbox and issue one
+variable-length command-5 request; slot-4 command-5 permission remains a dynamic
+hardware result. The remaining proof class is physical execution, not missing
+host choreography.
 
 
 
@@ -1022,10 +1031,11 @@ This must be **per-boot, volatile evidence**. A persistent "bridge requested"
 setting is configuration intent only. If the EPS resets after installation,
 LocalRAM is cleared while any persistent host-side request remains.
 
-Therefore, an operational integration must fail closed if this-boot runtime
-attestation is absent or becomes stale. The current inert-canary workflow already
-proves the right shape: application reappearance, heartbeat progression, hard
-reset, exact F181 reappearance, then proof that the heartbeat stopped.
+The inert-canary installer now performs the first half of that proof
+automatically in the same process: application reappearance, exact manifest-bound
+F181, extended-session SID `0x23`, and heartbeat progression at the
+manifest-selected observation cell. A later hard-reset/heartbeat-stop check still
+proves reset-to-stock when that specific property is under test.
 
 ### 19.10 Panda switches from fingerprinting to Toyota control safety
 

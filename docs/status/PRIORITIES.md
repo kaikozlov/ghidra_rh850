@@ -210,11 +210,13 @@ normal COM/system-mode/control task.
 
 Highest-value next evidence, in order:
 
-1. on an isolated bench, use the audited 332-byte
-   `exploit/ephemeral_runtime/canary.c` build; post-auth substitute it, trigger
-   the existing FF00 callback path, and read heartbeat `FEBFFBF0` through
-   `application_rmba_probe.py --probe-ephemeral-canary`; prove foreground
-   progression plus hardware-reset return to stock;
+1. on an isolated bench, use `exploit/ephemeral_runtime/live_installer.py
+   --variant canary --execute --bench-isolated` with an exact F181-bound route;
+   it performs boot SecurityAccess, pinned-fixture `0x10F0`, MEM-SAFE
+   substitutions, callback-last installation, FF00, application F181
+   reappearance, and SID-`0x23` heartbeat-progression attestation in one command.
+   If reset-to-stock is the property under test, then hard-reset and use the
+   read-only heartbeat probe to prove the runtime disappeared;
 2. prove one-shot marked-frame queue capture with no COM delivery;
 3. enable stock-COM delivery and run the existing three-phase behavioral proof.
 

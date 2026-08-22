@@ -638,6 +638,16 @@ paths = [
   "data/generated/decompilations.jsonl",
 ]
 
+[suite.ephemeral_runtime_live_installer]
+tests = ["tests/verify_ephemeral_runtime_live_installer.py"]
+paths = [
+  "exploit/ephemeral_runtime/live_installer.py",
+  "tests/verify_ephemeral_runtime_live_installer.py",
+  "exploit/ephemeral_runtime/README.md",
+  "docs/security/ephemeral-secoc-bypass.md",
+]
+oracle = "generated_self_check"
+
 [suite.ephemeral_runtime]
 tests = ["tests/verify_ephemeral_runtime.py"]
 oracle = "raw_bytes"
@@ -1156,6 +1166,17 @@ paths = [
   "docs/diagnostics/application.md",
   "docs/status/FINDINGS.md",
 ]
+
+[suite.boot_noauth_pc_pivot_assessment]
+tests = ["tests/verify_boot_noauth_pc_pivot_assessment.py"]
+paths = [
+  "tests/verify_boot_noauth_pc_pivot_assessment.py",
+  "docs/security/bootloader-noauth-pc-pivot-assessment.md",
+  "docs/security/README.md",
+  "docs/status/FINDINGS.md",
+  "exploit/findings_coverage.json",
+]
+oracle = "raw_bytes"
 
 [suite.xcp_boot_handoff_retention]
 tests = ["tests/verify_xcp_boot_handoff_retention.py"]
