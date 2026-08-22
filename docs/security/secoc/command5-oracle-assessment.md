@@ -207,6 +207,65 @@ That is the real basis for the application-resident signing-proxy design. It is
 stronger than the stock diagnostic bank, but it requires application-context
 code execution or an equivalent hook.
 
+### 6.1 No stock tester-to-driver length-smuggling path was recovered
+
+A focused audit checked whether malformed CAN input, a timing race, or a second
+unauthenticated write surface could make the lower command-5 driver see a length
+other than the caller's literal `0x10` without changing CodeFlash. No such path
+is recovered in this image.
+
+The important point is that `16` is not a tester field that is validated and
+then copied. It is a literal machine-code argument materialized immediately
+before the call:
+
+```text
+0x68B8A  movea 0x10, r0, r9
+...
+0x68BAC  jarl  0x88350
+```
+
+`crypto_generate_driver_dispatch @ 0x88350` forwards that `r9` argument to the
+static driver record selected by literal record ID `1`; tester bytes do not
+select the record or its function pointer. `icus_command5_mac_generate_adapter @
+0x87CCC` immediately calls `icus_command5_mac_generate_prepare @ 0x87A94` with
+the same length.
+
+The CAN-side collector also does not provide an overflow or alternate length:
+
+- CAN `0x01B..0x01F` are all configured as fixed 8-byte receive PDUs;
+- the four group-copy calls for `0x01C..0x01F` each load literal copy length `8`;
+- collector loops are bounded to four groups of eight bytes;
+- selector and mode are the only scalar tester fields used for crypto dispatch;
+- no tester byte is used as a copy length, array index, driver-record ID, or
+  function pointer.
+
+There is no useful asynchronous pointer lifetime to race. `0x87A94` copies the
+input into private staging and writes the prepared descriptor immediately. The
+message bit length is materialized as `param_3 << 3` in the descriptor at
+`FEBF1214`; direct Ghidra xrefs show its only CodeFlash writer is the prepare
+function. The subsequent start routine consumes the prepared object at
+`FEBF1208`; it does not retain a pointer to the caller's stack length argument.
+
+The broader application diagnostic surface does not supply a missing arbitrary
+write primitive: the 17 configured primary UDS SIDs are
+`10/11/14/19/22/23/27/28/2E/31/34/36/37/3E/85/AB/BA`; SID `0x3D`
+WriteMemoryByAddress is absent. SID `0x2E` is restricted to 13 configured WDBI
+DIDs rather than arbitrary addressing. The separate unauthenticated XCP write
+surface is restricted to `FEBF7C00..FEBFFBFF`, which does not overlap command-5
+prepared/staging state `FEBF1208..FEBF1287`.
+
+Therefore the bounded static conclusion is:
+
+> **Stock tester-controlled input cannot currently be made to smuggle a 12-byte
+> length through the 16-byte wrapper.** Achieving that without the documented
+> one-instruction change would require a *different* primitive: control-flow
+> hijack into the lower API, an arbitrary write reaching `FEBF12xx`, register or
+> stack corruption during the call, or a hardware fault. None is recovered from
+> the bank-1 input path.
+
+This is a software-static negative, not a claim that fault injection or an
+unknown computed memory-corruption primitive is impossible.
+
 ## 7. A bounded one-instruction adaptation covers classic SecOC
 
 There is an especially small bridge between the existing diagnostic experiment

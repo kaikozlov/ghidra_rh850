@@ -88,6 +88,36 @@ check("generic prepare admits input lengths below 0x51",
 check("generic prepare converts byte length to bit length",
       CF[0x87B1E:0x87B26] == bytes.fromhex("24f6085ac3ea1e0e"), CF[0x87B1E:0x87B26].hex())
 check("12-byte classic and 36-byte FD inputs both fit generic command-5", 12 < 0x51 and 36 < 0x51)
+
+print("\n== no stock tester-to-driver length-smuggling path ==")
+# The wrapper materializes both driver ID 1 and length 16 as immediates.  Neither
+# comes from the tester-controlled message/selector buffers.
+check("mode-1 wrapper materializes literal length 16 in r9",
+      CF[0x68B8A:0x68B8E] == bytes.fromhex("204e1000"))
+check("mode-1 wrapper materializes literal driver record id 1",
+      CF[0x68B92:0x68B94] == bytes.fromhex("0132"))
+# All five CAN inputs are fixed DLC-8 PDU descriptors.
+check("CAN 01B..01F receive descriptors are all fixed DLC 8",
+      [CF[0x22088 + i*8:0x22088 + (i+1)*8] for i in range(5)] ==
+      [bytes.fromhex(f"{cid:02x}00000008000000") for cid in range(0x1B, 0x20)])
+# The four opaque/group reads load literal 8 into r8 directly before the helper.
+for site in (0x6884E, 0x6888A, 0x688C6, 0x68902):
+    check(f"collector group copy at 0x{site+2:X} uses literal length 8",
+          CF[site:site+2] == bytes.fromhex("0842"), CF[site:site+2].hex())
+# Prepare stages the bit length into the private descriptor; the start routine
+# later references the fixed descriptor root rather than the wrapper stack.
+check("prepare shifts byte length left by 3 before descriptor construction",
+      CF[0x87B22:0x87B24] == bytes.fromhex("c3ea"), CF[0x87B22:0x87B24].hex())
+check("command-5 start addresses prepared descriptor FEBF1208",
+      CF[0x87C8A:0x87C8E] == bytes.fromhex("2436085a"), CF[0x87C8A:0x87C8E].hex())
+# Primary application UDS service table contains 17 records and no SID 0x3D.
+service_sids = [CF[0x25E28 + i*0x18 + 0x10] for i in range(17)]
+check("primary application UDS service set is exact and has no WriteMemoryByAddress 0x3D",
+      service_sids == [0x10,0x11,0x14,0x19,0x22,0x23,0x27,0x28,0x2E,0x31,0x34,0x36,0x37,0x3E,0x85,0xAB,0xBA],
+      repr([hex(x) for x in service_sids]))
+check("known XCP write window cannot reach command-5 prepared state",
+      0xFEBFFBFF < 0xFEBF1208 or 0xFEBF7C00 > 0xFEBF1287)
+
 check("generic output-copy body pinned", body_hash(0x87B46, 116) == "c62fc5e48366ad9f56eb73694bfa1481eaba9045f09d36dc751fc264e54f4be2")
 check("output copy clamps only values above 16, so capacity 12 remains 12",
       CF[0x87B82:0x87B90] == bytes.fromhex("00450806efffb905204610000145"), CF[0x87B82:0x87B90].hex())
@@ -129,6 +159,8 @@ for token in (
     "vendor extension",
     "freshness",
     "command 1/3",
+    "length-smuggling",
+    "writememorybyaddress",
 ):
     check(f"assessment records {token}", token in text.lower())
 
