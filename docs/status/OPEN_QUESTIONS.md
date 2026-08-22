@@ -286,7 +286,8 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   memory, and the `0xA000` active unit-calibration family are now pinned from
   actual bytes. The low delta is exactly partitioned as 863 changed A000-family
   bytes + 1,311 changed bytes in the structured `0x10000..0x17DEF` shadow source
-  + 16 opaque post-CRC bytes. Remaining questions are the real vehicle-level
+  + the 16-byte region-0 AES-CMAC tag at `0x17DF0` (role/geometry proven; the
+  factory DID `0x201`/`0x202` tag inputs are not recovered). Remaining questions are the real vehicle-level
   lateral-command provenance, any semantic CPU consumer of that `0x10000+`
   shadow bank, H/Span-specific retained-RAM execution geometry if a runtime is
   built, and live ICU-S policy only where hardware evidence is needed. See

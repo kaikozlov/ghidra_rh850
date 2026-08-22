@@ -90,6 +90,10 @@ check("record-6 role remains explicitly zero-filled rather than inferred tuned",
 
 coeff = tracked["record3_coefficients"]
 check("record-3 selected angle-offset coefficients are exact", coeff["baseline"] == [244, 0, 270] and coeff["target"] == [-786, -795, -723])
+check("record-4 payload is marker + Toyota part number 89650-12N50, identical in both specimens", h[0xA0A0:0xA0B0] == s[0xA0A0:0xA0B0] and struct.unpack_from("<I", h, 0xA0A0)[0] == 0xA55A5AA5 and h[0xA0A4:0xA0AE] == b"8965012N50" and records[4]["role"] == "ecu_part_number_record" and records[4]["classification"] == "identity")
+SIENNA = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()
+check("Sienna same-shaped record 4 carries its own part number 89650-45170", struct.unpack_from("<I", SIENNA, 0xA0A0)[0] == 0xA55A5AA5 and SIENNA[0xA0A4:0xA0AE] == b"8965045170")
+check("record-4 part-number classification remains evidence-bounded (no recovered firmware reader)", "No target-native firmware consumer" in records[4]["boundary"] and "ECU Part Number" in records[4]["boundary"])
 check("serial identity changes are exact", records[7]["baseline_serial"] == "8965012N50A05G310920" and records[7]["target_serial"] == "8965012N50E12H030731")
 check("Span target label is explicitly tied to observed/application F181, not the separate 0x17D80 identity", tracked["target_id"] == "8965F1208000" and "0x20860" in tracked["target_id_basis"] and "8965H1213000" in tracked["target_id_basis"])
 
@@ -132,7 +136,41 @@ check("startup copy is pinned to application-entry initialization chain", shadow
 
 ident = tracked["identity_and_integrity_tail"]
 check("low shadow region terminal fixups and 0xFFFFFFFF CRC32 residues are exact", struct.unpack_from("<I", h, 0x17DEC)[0] == 0x722611BD and struct.unpack_from("<I", s, 0x17DEC)[0] == 0x01A011A0 and zlib.crc32(h[0x10000:0x17DF0]) & 0xFFFFFFFF == zlib.crc32(s[0x10000:0x17DF0]) & 0xFFFFFFFF == 0xFFFFFFFF and ident["low_region_crc32_residue_baseline"] == ident["low_region_crc32_residue_target"] == "0xFFFFFFFF")
-check("post-CRC 16-byte tag changes completely but remains unresolved", h[0x17DF0:0x17E00] != s[0x17DF0:0x17E00] and sum(a != b for a, b in zip(h[0x17DF0:0x17E00], s[0x17DF0:0x17E00])) == 16 and ident["opaque_tag_algorithm"] == "unresolved")
+
+# The 16 bytes at 0x17DF0..0x17DFF are the region-0 AES-CMAC tag, verified by the
+# boot integrity chain, not an opaque/unresolved field.
+regions = tracked["boot_integrity_regions"]
+check("boot integrity region table is pinned at 0x8DE0 with three identical rows", regions["region_table_va"] == "0x8DE0" and regions["row_count"] == 3 and regions["row_stride"] == 28 and h[0x8DE0:0x8DE0 + 3*28] == s[0x8DE0:0x8DE0 + 3*28] and regions["table_identical_between_variants"])
+expected_rows = [
+    ("0x10000", "0x17DFF", "0x17DF0", "0x17E00", "0x8DB0"),
+    ("0x18000", "0xFFDFF", "0xFFDF0", "0xFFE00", "0x8DC0"),
+    ("0xFEBF0000", "0xFEBF0FFF", "0xFEBF0FF0", "0x0", "0x8DD0"),
+]
+actual_rows = [(r["start"], r["end_inclusive"], r["cmac_tag_address"], r["marker_address"], r["crc_descriptor_table"]) for r in regions["rows"]]
+check("integrity region rows carry exact start/end/tag/marker/descriptor tuples", actual_rows == expected_rows)
+check("each region tag address is exactly the final 16 bytes of its region", all(r["tag_is_final_16_bytes_of_region"] for r in regions["rows"]))
+check("region-0 and region-1 validity markers are 0x5AA5A55A in both images", all(r["marker_value_baseline"] == r["marker_value_target"] == "0x5AA5A55A" for r in regions["rows"][:2]))
+cmac_chain_entries = {c["entry"].split("/")[0] for c in regions["cmac_verify_chain"]}
+check("CMAC verify chain pins all named boot functions", cmac_chain_entries == {"0x00005BEA", "0x0000591A", "0x00006E9E", "0x00007106", "0x00003376", "0x00006EC4", "0x00007DF0", "0x00007336", "0x00007D34"})
+check("region-0 AES-CMAC tag is fully changed (16/16) and recorded", regions["region0_cmac_tag_baseline"] == h[0x17DF0:0x17E00].hex() and regions["region0_cmac_tag_target"] == s[0x17DF0:0x17E00].hex() and sum(a != b for a, b in zip(h[0x17DF0:0x17E00], s[0x17DF0:0x17E00])) == 16)
+check("0x17DF0 tag semantics are promoted from unresolved to AES-CMAC", tracked["identity_and_integrity_tail"]["opaque_tag_algorithm"] == "superseded-by-boot-integrity-region-0-aes-cmac-tag")
+check("high-region tag slot at 0xFFDF0 is identical between specimens and not asserted programmed", h[0xFFDF0:0xFFE00] == s[0xFFDF0:0xFFE00])
+# Role-critical CMAC chain bodies are byte-identical between H and Span.
+cmac_bodies = {
+    0x3376: (58, "273d630364ce881bf6f650f608ac8fb827976f8295e008d8688d1201070558eb", "boot_memory_region_get_cmac_tag"),
+    0x33B0: (54, "6810ac24f3352e2c76c849533f1c8b0257e2c2a2a4253f07b8554f8c3bad0f08", "boot_memory_region_get_marker_address"),
+    0x6E9E: (38, "a0baa6aad16f29ea7db82777a045644c47e98a36613eb7d43645ba4ed27535ce", "payload_cmac_verify_enqueue"),
+    0x6EC4: (36, "8290e60e9b154a0176f2c810dd82ffcf449b510c8448833dd31dd75ce932b135", "cmac_block_pump_driver"),
+    0x7106: (78, "5b3bb8aed8ad88461607d99ad93d0aab9d98af2e7917b955a83724a71c0523e1", "payload_cmac_verify_setup"),
+    0x7154: (126, "71e860cb6ed0162187da9999684b10b4492ed27d3b34f5da3a85a1146a87bc58", "payload_cmac_verify_step"),
+    0x7336: (148, "cc4aef610ab09029bfe3490300a4aaa348e4450c9644caa4b32f6ea766217261", "aes_block_encrypt_core"),
+    0x7DF0: (424, "6b6c6949b1182832ff07ab16ce67234f31ace090797160a68068b626e5327017", "aes_cmac_process_block"),
+}
+for addr, (size, expected_sha, name) in cmac_bodies.items():
+    hb = h[addr:addr + size]
+    sb = s[addr:addr + size]
+    check(f"CMAC chain body {name} 0x{addr:08X} is pinned and byte-identical", hb == sb and sha256(hb) == expected_sha)
+
 check("0x17E00 validity marker itself is unchanged", h[0x17E00:0x17E04] == s[0x17E00:0x17E04] == bytes.fromhex("5aa5a55a"))
 check("shadow geometry exactly explains the two retained identity mirrors", ident["shadow_identity_mirrors"] == {"0x17D80_to_ram": "0xFEBFF980", "0x17DC0_to_ram": "0xFEBFF9C0"})
 check("isolated scalar byte change at 0x13E46 is pinned without inventing record framing", struct.unpack_from("<H", h, 0x13E46)[0] == 0x0929 and struct.unpack_from("<H", s, 0x13E46)[0] == 0x0989)

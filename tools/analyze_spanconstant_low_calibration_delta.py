@@ -29,12 +29,29 @@ A_DESC_STRIDE = 12
 SHADOW_SOURCE_START = 0x10000
 SHADOW_SOURCE_END = 0x17DF0
 SHADOW_RAM_START = 0xFEBF7C00
+# Boot integrity-region table (3 rows x 28 bytes) and the AES-CMAC verify chain that
+# consumes it.  Row shape: u32 start, u32 end-inclusive, u32 cmac_tag_address (field +8,
+# returned by boot_memory_region_get_cmac_tag), u32 marker_address (+0xC, returned by
+# boot_memory_region_get_marker_address), u32 field_10 (+0x10), u32 enabled, u32 crc
+# descriptor pointer.  Named functions are Sienna ledger names proven as exact-byte
+# transfers at identical H addresses.
+REGION_TABLE_VA = 0x8DE0
+REGION_TABLE_ROWS = 3
+REGION_TABLE_STRIDE = 28
 
 # Function sizes are target-native H Ghidra boundaries.  Span is byte-identical
 # over every one of these application bodies, so the raw-body hashes are also
 # Span body hashes.  The role names are deliberately structural/bounded.
 FUNCTIONS = {
     0x20880: (12, "application_entry_to_startup_initializer"),
+    0x3376: (58, "boot_memory_region_get_cmac_tag"),
+    0x33B0: (54, "boot_memory_region_get_marker_address"),
+    0x6E9E: (38, "payload_cmac_verify_enqueue"),
+    0x6EC4: (36, "cmac_block_pump_driver"),
+    0x7106: (78, "payload_cmac_verify_setup"),
+    0x7154: (126, "payload_cmac_verify_step"),
+    0x7336: (148, "aes_block_encrypt_core"),
+    0x7DF0: (424, "aes_cmac_process_block"),
     0x2DA0A: (30, "record3_staging_to_live_copy"),
     0x2DAA8: (76, "record3_calibration_read_to_staging"),
     0x2DE9A: (114, "record0_staging_to_live_copy"),
@@ -84,7 +101,7 @@ LOW_BINS = [
     (0x17DC0, 0x17DD0, "f181_secondary_record"),
     (0x17DD0, 0x17DEC, "pre_crc_fixup_tail"),
     (0x17DEC, 0x17DF0, "low_region_terminal_crc_fixup"),
-    (0x17DF0, 0x17E00, "post_crc_opaque_tag"),
+    (0x17DF0, 0x17E00, "region0_cmac_tag"),
 ]
 
 RECORD_ROLES = {
@@ -107,7 +124,11 @@ RECORD_ROLES = {
         "boundary": "0x2DAA8 validates/reads fixed family index 0x203 into staging FEBE671A/1C/1E; 0x2DA0A copies those three signed coefficients to live FEBE6712/14/16. 0x42700 selects one by status bits and 0x42720 adds it to the motor-rotation-angle path before trig/vector generation.",
         "evidence_chain": ["0x6009E(0x203)->0x604AA", "0x2DAA8->FEBE671A/1C/1E", "0x2DA0A->FEBE6712/14/16", "0x42700", "0x42720"],
     },
-    4: {"classification": "unchanged-record", "role": "unresolved_16_byte_unit_record"},
+    4: {
+        "classification": "identity",
+        "role": "ecu_part_number_record",
+        "boundary": "Payload is marker A55A5AA5 followed by the 10-character Toyota part number '8965012N50' (i.e. 89650-12N50) and two NUL bytes, identical in both Corolla specimens. The Sienna calibration's same-shaped record 4 at 0xA0A0 carries '8965045170' (89650-45170), matching its F181 identity family. Techstream's English string database contains the exact OEM vocabulary 'ECU Part Number' (M_English entries 2665884 and 10040272) used by diagnostic part-number displays. No target-native firmware consumer of this record's staged RAM (FEBEF6A0) was recovered, so the classification rests on the cross-variant Toyota part-number shape plus OEM vocabulary, not on a decompiled reader.",
+    },
     5: {
         "classification": "active-unit-calibration",
         "role": "three_mode_motor_rotation_angle_correction_luts",
@@ -118,7 +139,11 @@ RECORD_ROLES = {
         "role": "zero_filled_angle_correction_lut",
         "boundary": "Record 6 payload+8 is a 256-byte all-zero table in both images. 0x42D28 obtains A000 through 0x50E6A and indexes base+0x3D0, exactly record6 payload+8, in the same angle-correction domain. The full 0x108-byte payload is zero (including the absent 5AA5/A55A marker); it is active-addressed structure but contributes zero with the retained bytes.",
     },
-    7: {"classification": "identity", "role": "ecu_serial_record"},
+    7: {
+        "classification": "identity",
+        "role": "ecu_serial_record",
+        "boundary": "Payload is marker A55A5AA5 followed by the 20-character unit serial (e.g. '8965012N50A05G310920' -> '8965012N50E12H030731'), zero padded. The serial embeds the same 89650-12N50 part-number family as record 4 plus a unit-unique suffix. Techstream's English string database carries the OEM vocabulary 'Display of ECU Product Serial Number' (M_English entry 7345514) and 'Sensor Serial Number' (entry 2665916) used by diagnostic serial displays; no target-native firmware reader of the staged copy at FEBEFAD8 was recovered, so the serial classification rests on the live F18C/serial observation and the record shape.",
+    },
     8: {
         "classification": "changed-opaque-unit-record",
         "role": "opaque_24_byte_unit_record",
@@ -263,8 +288,25 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
         if 0x10000 <= val < 0x17E00 and any((val + d) in changed for d in range(4)):
             aligned_numeric_hits.append({"application_offset": f"0x{off:X}", "numeric_value": f"0x{val:X}"})
 
-    opaque_tag_h = h[0x17DF0:0x17E00]
-    opaque_tag_s = s[0x17DF0:0x17E00]
+    # Boot integrity-region table + AES-CMAC tag verification chain.
+    # 0x8DE0 table is byte-identical between H and Span (asserted below).
+    region_rows = []
+    for i in range(REGION_TABLE_ROWS):
+        off = REGION_TABLE_VA + i * REGION_TABLE_STRIDE
+        start, end_incl, tag, marker, field_10, enabled, crc_desc = struct.unpack_from("<7I", h, off)
+        if struct.unpack_from("<7I", s, off) != (start, end_incl, tag, marker, field_10, enabled, crc_desc):
+            raise ValueError(f"integrity region table row {i} changed between variants")
+        region_rows.append({
+            "row": i, "start": f"0x{start:X}", "end_inclusive": f"0x{end_incl:X}",
+            "cmac_tag_address": f"0x{tag:X}", "marker_address": f"0x{marker:X}",
+            "field_10": f"0x{field_10:X}", "enabled": enabled, "crc_descriptor_table": f"0x{crc_desc:X}",
+            "tag_is_final_16_bytes_of_region": tag == end_incl - 0xF,
+            "marker_value_baseline": f"0x{struct.unpack_from('<I', h, marker)[0]:08X}",
+            "marker_value_target": f"0x{struct.unpack_from('<I', s, marker)[0]:08X}",
+        })
+    cmac_tag_h = h[0x17DF0:0x17E00]
+    cmac_tag_s = s[0x17DF0:0x17E00]
+
 
     return {
         "schema": "corolla-span-low-calibration-delta-v1",
@@ -278,6 +320,7 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             "a000_record_bank_changed_bytes": diff_count(h, s, 0xA000, 0xA528),
             "low_shadow_source_changed_bytes": diff_count(h, s, SHADOW_SOURCE_START, SHADOW_SOURCE_END),
             "post_crc_opaque_tag_changed_bytes": diff_count(h, s, 0x17DF0, 0x17E00),
+            "region0_cmac_tag_changed_bytes": diff_count(h, s, 0x17DF0, 0x17E00),
             "delta_partition_complete": len(changed) == (diff_count(h, s, 0xA000, 0xA528) + diff_count(h, s, SHADOW_SOURCE_START, SHADOW_SOURCE_END) + diff_count(h, s, 0x17DF0, 0x17E00)),
         },
         "low_region_bins": low_bins,
@@ -314,6 +357,29 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             "cpu_consumer_boundary": "Target-native H/Span review found no recovered application CPU semantic dereference of the 0x10000+ shadow beyond the startup/E4 copies and XCP calibration-page bookkeeping. Apparent low-address references reviewed in the decompiler resolve to scalar/control-word uses or numeric/packed metadata rather than reads of the low-bank contents. Computed-pointer or undocumented hardware-overlay use is not disproved.",
             "aligned_application_numeric_hits_near_changed_low_bytes": aligned_numeric_hits,
         },
+        "boot_integrity_regions": {
+            "region_table_va": f"0x{REGION_TABLE_VA:X}",
+            "row_count": REGION_TABLE_ROWS,
+            "row_stride": REGION_TABLE_STRIDE,
+            "row_shape": "u32 start, u32 end-inclusive, u32 cmac_tag_address (+8), u32 marker_address (+0xC), u32 field_10, u32 enabled, u32 crc descriptor table pointer",
+            "table_identical_between_variants": True,
+            "rows": region_rows,
+            "cmac_verify_chain": [
+                {"entry": "0x00005BEA", "role": "integrity task dispatcher by FEBF2B64 mode (0x10F0/0x10F1 -> routine_verify_crc_cmac_task 0x591A)"},
+                {"entry": "0x0000591A", "role": "routine_verify_crc_cmac_task: resolves region start/len from FEBF2B58/5C and starts the CMAC session"},
+                {"entry": "0x00006E9E", "role": "payload_cmac_verify_enqueue: gates on FEBF2BFD and calls payload_cmac_verify_setup"},
+                {"entry": "0x00007106", "role": "payload_cmac_verify_setup: boot_memory_region_get_cmac_tag stores the tag pointer, initializes the AES-CMAC IV block, sets current=start and end=start+len-0x10"},
+                {"entry": "0x00003376", "role": "boot_memory_region_get_cmac_tag: iterates the 0x8DE0 table and returns field +8 (region-0 = 0x17DF0)"},
+                {"entry": "0x00006EC4/0x00007154", "role": "payload_cmac_verify_step: processes 16-byte blocks; on the final block byte-compares all 16 generated CMAC bytes against the stored tag"},
+                {"entry": "0x00007DF0", "role": "aes_cmac_process_block: CBC-MAC style XOR + subkey handling with 0x80 padding on the final partial block"},
+                {"entry": "0x00007336", "role": "AES block encryption core (10-round loop)"},
+                {"entry": "0x00007D34", "role": "aes_cmac_generate_subkeys"},
+            ],
+            "region0_cmac_tag_baseline": cmac_tag_h.hex(),
+            "region0_cmac_tag_target": cmac_tag_s.hex(),
+            "region0_cmac_semantics": "For region 0 (0x10000..0x17DFF), the final 16 bytes at 0x17DF0..0x17DFF are the AES-CMAC tag over 0x10000..0x17DEF under a boot-derived key. The tag is verified by routine_verify_crc_cmac_task (0x591A). The complete 16/16-byte tag change between H and Span is therefore expected cryptographic integrity fallout of the changed calibration page, not independent tuning data. Boundary: the verification role and code path are proven, but the exact DID 0x201 key material and the DID 0x202 IV/build-time inputs used by the factory to produce the stored low-region tag are not recovered from this static image/session; zero-valued DID material used by public RAM fixtures does not reproduce the stored tag. The boot payload-build root at 0xBFD8 is present in the image; non-reproduction with zero inputs is an input-recovery boundary, not a statement that the key is absent.",
+            "high_region_boundary": "Region 1 (0x18000..0xFFDFF) has its CMAC tag at 0xFFDF0 and validity marker at 0xFFE00; because H and Span are byte-identical over 0x18000..0xFFDF0, that tag is also identical and does not enter this delta. The 0x40004000-pattern filler at 0xFFDF0..0xFFDFF is retained as observed; whether the high-region tag slot is programmed on this generation is not asserted here.",
+        },
         "identity_and_integrity_tail": {
             "single_record_identity_baseline": h[0x17D80:0x17D90].split(b"\0",1)[0].decode("ascii","replace"),
             "single_record_identity_target": s[0x17D80:0x17D90].split(b"\0",1)[0].decode("ascii","replace"),
@@ -324,9 +390,9 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             "low_region_crc32_residue_baseline": f"0x{zlib.crc32(h[0x10000:0x17DF0]) & 0xFFFFFFFF:08X}",
             "low_region_crc32_residue_target": f"0x{zlib.crc32(s[0x10000:0x17DF0]) & 0xFFFFFFFF:08X}",
             "low_region_crc_geometry": "zlib.crc32(0x10000..0x17DEF including terminal fixup)==0xFFFFFFFF",
-            "post_crc_opaque_tag_baseline": opaque_tag_h.hex(), "post_crc_opaque_tag_target": opaque_tag_s.hex(),
-            "opaque_tag_cpu_xref_status": "no recovered direct CPU content reference; copy loops stop at 0x17DF0",
-            "opaque_tag_algorithm": "unresolved",
+            "post_crc_opaque_tag_baseline": cmac_tag_h.hex(), "post_crc_opaque_tag_target": cmac_tag_s.hex(),
+            "opaque_tag_cpu_xref_status": "superseded: the 16 bytes at 0x17DF0..0x17DFF are the region-0 AES-CMAC tag per boot_integrity_regions; no separate opaque-tag interpretation remains",
+            "opaque_tag_algorithm": "superseded-by-boot-integrity-region-0-aes-cmac-tag",
             "shadow_identity_mirrors": {
                 "0x17D80_to_ram": "0xFEBFF980",
                 "0x17DC0_to_ram": "0xFEBFF9C0"

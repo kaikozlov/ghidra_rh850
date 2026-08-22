@@ -2353,3 +2353,32 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §4.2;
   VAR-045; `tests/verify_spanconstant_low_calibration_delta.py`.
+
+### CORR-099 — `0x17DF0..0x17DFF` is the region-0 AES-CMAC tag, not an opaque field
+
+- **Stale wording:** CORR-098 and the first low-delta report retained the final
+  16 changed bytes at `0x17DF0..0x17DFF` as an "opaque post-CRC field" whose
+  algorithm was "unresolved".
+- **Right:** the boot integrity-region table at `0x8DE0` (3 rows x 28 bytes,
+  byte-identical H/Span) defines region 0 as `0x10000..0x17DFF` with its CMAC
+  tag address at field +8 = `0x17DF0` and validity marker at +0xC = `0x17E00`.
+  `boot_memory_region_get_cmac_tag @0x3376` returns that field;
+  `routine_verify_crc_cmac_task @0x591A` -> `payload_cmac_verify_enqueue
+  @0x6E9E` -> `payload_cmac_verify_setup @0x7106` initializes the AES-CMAC
+  session over `0x10000..0x17DEF` (end = start+len-0x10, tag excluded);
+  `payload_cmac_verify_step @0x7154` byte-compares all 16 generated CMAC bytes
+  against the stored tag on the final block. The complete 16/16-byte change
+  between H and Span is expected cryptographic integrity fallout of the changed
+  calibration page, not independent tuning data.
+- **Boundary preserved:** the verification role and code path are proven; the
+  exact DID 0x201 key material and DID 0x202 IV/build-time inputs that produced
+  the factory-stored tag are not recovered from this static image/session, and
+  zero-valued DID material used by public RAM fixtures does not reproduce the
+  stored tag. The boot payload-build root at `0xBFD8` is present in the image;
+  non-reproduction with zero inputs is an input-recovery boundary, not proof of
+  key absence. Region 1 (`0x18000..0xFFDFF`, tag `0xFFDF0`) is byte-identical
+  between specimens and does not enter this delta; whether its tag slot is
+  programmed on this generation is not asserted.
+- **Canonical:**
+  [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §4.2.3;
+  VAR-045/VAR-046; `tests/verify_spanconstant_low_calibration_delta.py`.
