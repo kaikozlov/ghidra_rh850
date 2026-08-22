@@ -163,7 +163,7 @@ for line in (REPO / "docs/status/FINDINGS.md").read_text(encoding="utf-8").split
             if grade.startswith("observed"):
                 observed_findings.append(cells[0])
 check("exact verified finding denominator", len(verified_findings) == 64)
-check("dynamic observation denominator", observed_findings == ["SECOC-030", "VAR-001"])
+check("dynamic observation denominator", observed_findings == ["SECOC-030", "VAR-001", "VAR-039", "VAR-041"])
 
 required_tokens = [
     "114 `passed`, 5 `unavailable`, 0 `failed`",

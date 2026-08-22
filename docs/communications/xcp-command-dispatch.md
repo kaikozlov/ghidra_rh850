@@ -238,6 +238,16 @@ resident in the boot programming runtime. This strengthens COM-005 from
 storage**, but still does not supply the missing PC-redirection consumer. See
 SEC-BOOT-012 and `tests/verify_xcp_boot_handoff_retention.py`.
 
+The same composition is preliminarily present in Span's 2026-08-21 Corolla
+CodeFlash (`SHA-256 b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d`):
+the generic opcode map, all 18 callbacks, `0x7F7/0x7F8` packed descriptors,
+LocalRAM/shadow bounds, five exclusion intervals, `0x5F208` handoff caller,
+complete `0x9F00` boot stub, `0x1472` state copier, and reset-only `0x13E8`
+initializer are byte-identical to tracked Corolla `8965H1202000`. GET_SEED and
+UNLOCK remain unconfigured. This third-specimen result is graded **observed /
+external-source** until the Span dump is persisted and regression-tested; see
+[the Span Corolla variant record](../variants/corolla-8965F1208000.md).
+
 The security conclusion is therefore corrected and still bounded:
 **write capability is verified, and the window is supervisor-executable by MPU
 configuration, but no control-transfer consumer is recovered** — so this

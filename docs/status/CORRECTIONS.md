@@ -2281,3 +2281,20 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../architecture/boot-validity-and-flash-lifecycle.md](../architecture/boot-validity-and-flash-lifecycle.md) §4.1;
   `tests/verify_xcp_boot_handoff_retention.py`; SEC-BOOT-012.
+
+### CORR-095 — Span direct PROGRAMMING was no longer unmeasured after the corrected 2026-08-21 preflight
+
+- **Stale claim:** VAR-039 and the Span variant record said PROGRAMMING on
+  `(bus1,param1)` remained unmeasured because the 2026-08-19 preflight selected
+  `(bus1,param0)` by array order.
+- **Right:** the corrected 2026-08-21 preflight selected `(bus1,param1)` by
+  actual PROGRAMMING reachability, opened PROGRAMMING, received a SecurityAccess
+  seed, accepted the key, and completed the requested CodeFlash/DataFlash/RAM
+  range dumps. The old timeout remains useful only as evidence about the wrong
+  gateway/OBD route.
+- **Evidence boundary:** the source ZIP is currently local/untracked, SHA-256
+  `a5744b4c4627d3e5c20d590bb882d25b9b40c0679cbc3e9660140c7f2ef5262b`;
+  this correction is therefore external-source/observed until the bundle is
+  persisted and covered by deterministic tests.
+- **Canonical:** [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md);
+  VAR-039.
