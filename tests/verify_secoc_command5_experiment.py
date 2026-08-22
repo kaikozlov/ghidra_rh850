@@ -77,6 +77,10 @@ by_name = {m.name: m for m in MUTATIONS}
 check("diagnostic copy gate patch is two-byte NOP", by_name["rid1010-force-copy"].replacement == b"\x00\x00")
 check("diagnostic result source patch points at generated-result buffer encoding", by_name["rid1010-result-source"].replacement.hex() == "2496aa99")
 check("experiment contains no activation or status-source mutation", set(by_name) == {"rid1010-force-copy", "rid1010-result-source"})
+check("stock experiment deliberately leaves command-5 input length at 16 bytes", firmware[0x68B8A:0x68B8E] == bytes.fromhex("204e1000"))
+command5_readme = (REPO / "exploit" / "command5" / "README.md").read_text(encoding="utf-8").lower()
+check("command-5 README does not claim 16-byte probe is production SecOC signing",
+      "does **not** by itself prove production-frame signing" in command5_readme)
 
 def short_branch_target(addr: int, raw: bytes | None = None) -> int:
     hw = int.from_bytes(raw if raw is not None else firmware[addr:addr + 2], "little")

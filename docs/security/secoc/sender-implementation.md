@@ -272,10 +272,14 @@ icus_crypto_test_submit @ 0x68B42
 
 For mode 1, `0x68B42` constructs a configuration record whose first word is
 `1` and whose selector byte at `+4` is runtime-controlled, supplies a message
-buffer, sets output capacity to `0x10`, and requests a 16-byte result. A proxy
-therefore substitutes **selector 4** while retaining this exact stock
-serialized path. The lower engine accepts selectors `0..14`; no plaintext key
-crosses MainPE.
+buffer, and uses literal `0x10` for both the stock test input length and initial
+output capacity. **That 16-byte length belongs to the test caller.** The lower
+prepare `0x87A94` accepts lengths below `0x51` and converts the byte count to an
+ICU bit length, so a proxy can retain the same serialized path while supplying
+the exact 12-byte classic or 36-byte FD authenticated input and **selector 4**.
+The lower engine accepts selectors `0..14`; no plaintext key crosses MainPE.
+The distinction and CMAC-length proof are canonical in
+[command5-oracle-assessment.md](command5-oracle-assessment.md).
 
 For classic protected `0x2E4` or `0x131`, the command-5 message is the already
 recovered 12-byte authenticated input:

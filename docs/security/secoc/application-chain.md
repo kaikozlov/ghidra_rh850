@@ -421,6 +421,16 @@ FEBE518A..199  expected 16-byte result
 FEBE51AA..1B9  generated 16-byte result
 ```
 
+**Length boundary (SECOC-069):** mode 1 at `0x68B42` passes literal input
+length `0x10` to command 5. That is a property of this generated test caller,
+not of the lower ICU-S API. None of the configured SecOC authenticated domains
+is 16 bytes: sync is 7 bytes, classic `0x2E4/0x131/0x132` is 12 bytes, and
+CAN-FD `0x090/0x0D7` is 36 bytes. Because AES-CMAC padding/subkey selection is
+length-sensitive, a chosen 16-byte CMAC does not directly produce the 12- or
+36-byte production tag. The exact capability matrix, the lower 0..80-byte API,
+and the bounded classic-12 adaptation are canonical in
+[command5-oracle-assessment.md](command5-oracle-assessment.md).
+
 `crypto_test_bank1_activate @ 0x69018` is the only recovered function that sets
 `FEBE508F=1`; it initializes state `0x11`, clears the bank, and snapshots the
 five COM update counters. It is reached by stock application RoutineControl RID `0x100F`:

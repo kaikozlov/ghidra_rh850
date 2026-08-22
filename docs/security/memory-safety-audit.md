@@ -469,18 +469,22 @@ CPU-visible key copy, not an OOB read into ICU-S address space.
 
 ## Strategic assessment: the signing-oracle path
 
-**Key extraction is unnecessary for the comma goal.** The useful primitive is a
-CMAC signing oracle: invoke ICU-S command 5 (MAC generation) with selector 4
-(slot 4 = SecOC key) and attacker-chosen input, then return the 16-byte
-generated MAC.
+**Key extraction can be unnecessary for the comma goal.** The useful lower
+primitive is variable-length ICU-S command 5 with selector 4, but SECOC-069
+shows the stock no-SA diagnostic caller fixes the input to 16 bytes and is not
+directly congruent with the real 12/36-byte protected-message domains. A true
+SecOC signing oracle therefore needs the documented classic-12 adaptation or an
+application-context call through the generic lower wrapper.
 
 Four potential routes to this oracle:
 
-1. **Overwrite the dormant command-5 test-bank activation/state** — the
-   crypto-test bank at `FEBE508F` is the sole configured command-5 caller, but
-   its activator `0x69018` has no recovered CodeFlash caller. A data-only
-   corruption that sets `FEBE508F=1` could arm the bank through ordinary CAN
-   traffic on `0x01B..0x01F`.
+1. **Use the stock diagnostic activation** — the crypto-test bank at
+   `FEBE508F` is the sole configured command-5 caller, and the corrected
+   RoutineControl graph reaches its activator directly: `31 01 10 0F ->
+   0x8A782 -> 0x69018`, with no Dcm SecurityAccess requirement. No data-only
+   activation corruption is needed. SECOC-069 additionally bounds this stock
+   caller to a 16-byte CMAC domain, so activation alone is not a production
+   SecOC signing oracle.
 2. **Redirect an existing asynchronous callback** — point an existing ICU-S
    or diagnostic callback at the command-5 dispatcher `0x88350`.
 3. **Corrupt a diagnostic output pointer/length** — so the 16-byte ICU result

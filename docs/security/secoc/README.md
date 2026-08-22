@@ -20,7 +20,9 @@ What is established:
 - stock RID `0x100F` activates the command-5 bank-1 test path;
 - command-5 terminal failure/mismatch state has a no-SA DTC side channel, but
   the generated 16-byte result remains private without the bounded observation
-  patch;
+  patch; the stock bank also fixes the MAC input to 16 bytes, while this image's
+  SecOC domains are 7/12/36 bytes, so the stock bank is not itself a production
+  SecOC signing oracle (SECOC-069);
 - RID `0x1010` carries a 64-byte SHE-shaped command-8 request and 48-byte
   result;
 - RID `0x100E` arms a second command-8 client assembled from CAN
@@ -41,6 +43,7 @@ See [../../status/PRIORITIES.md](../../status/PRIORITIES.md).
 |---|---|
 | [application-chain.md](application-chain.md) | Six receive profiles, freshness, command-7 verification, crypto-test banks, command-8 composition |
 | [sender-implementation.md](sender-implementation.md) | Classic sender/freshness construction and minimum application-resident signing-proxy architecture |
+| [command5-oracle-assessment.md](command5-oracle-assessment.md) | Stock no-SA command-5 bank, exact length/output boundary, classic-12 adaptation, raw-AES control, and slot-policy evidence |
 | [software-path-assessment.md](software-path-assessment.md) | Software attack surface, command-5/8 experiments, diagnostic/XCP intersections |
 | [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md) | NvM/object-15 model, ICU-S lifecycle, command-8 provisioning semantics |
 | [key-recovery-assessment.md](key-recovery-assessment.md) | Existing-key recovery routes and their evidence boundaries |

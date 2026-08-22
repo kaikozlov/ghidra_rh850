@@ -160,12 +160,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **Live slot-4 operation permissions.** Static CodeFlash proves slot-4
   verification (command 7). The AUTOSAR SHE spec governs usage by a single
   binary `KEY_USAGE` flag (enc/dec ⊕ MAC-generate+verify; no verify-only
-  facility — SECOC-023, CORR-017), so under SHE a MAC-usage slot 4 *permits*
-  command-5 generation and would *reject* command 1/3 enc/dec. The remaining
-  open question is therefore narrower: does the Renesas ICU-S deviate from SHE
-  (a non-standard verify-only restriction, or debug/lifecycle gating)? Bench-test
+  facility — SECOC-023, CORR-017), so under standard SHE a MAC-usage slot 4
+  *permits* command-5 generation and would *reject* command 1/3 enc/dec. Renesas
+  public P1M material also lists CMAC generation/verification, but SHE-adjacent
+  vendor extensions are possible (Vector documents an additional verification-only
+  `CMAC USAGE` flag). The remaining open question is therefore target-specific:
+  what policy/lifecycle does this provisioned P1M-E slot enforce? Bench-test
   command 7 good/bad controls then command 5 after normal application
-  initialization; record status, output, latency, jitter, and debug-attached
+  initialization; characterize mode-0 command 1 only with a separate
+  `FEBE519A` output observer because the DTC cannot distinguish rejection from
+  compare mismatch; record status, output, latency, jitter, and debug-attached
   behavior. See
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md) §1.3.
 - **Command 13 vendor semantics.** The SHE spec disproves the normal
@@ -214,9 +218,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   access.
 - **Bank-0 command-8 production role and safe dynamic confirmation (SECOC-047/048).** Static firmware closes the CAN `0x13..0x1A` assembly and completion-misattribution mechanics. What remains useful is dynamic provenance, not random stimulation: determine whether RID `0x100E`/those CAN IDs occur during legitimate provisioning, whether any external monitor exposes bank-0 terminal state, and whether dealer tooling treats RID `0x1010` status `02` with zero proof as success. Reproduce the race only on a disposable/matching unit with a legitimately captured authenticated update package and complete recovery plan; preserve F181, route, M1–M5 hashes, timing, DTCs, and post-run key state. Do not synthesize command-8 packages on the only original ECU.
 - **Application command-5 signing capability — dynamic discriminator only.**
-  Stock RoutineControl `31 01 10 0F` now supplies bank-1 activation, and stock
-  `0x68B42 -> 0x88350 -> 0x87CCC` supplies selector-4 command-5 plumbing; the
-  minimal bench experiment therefore needs no activation hook. SECOC-046 now
+  Stock RoutineControl `31 01 10 0F` supplies bank-1 activation, and stock
+  `0x68B42 -> 0x88350 -> 0x87CCC` supplies selector-controlled command-5 plumbing.
+  SECOC-069 adds the crucial length boundary: the diagnostic caller submits
+  exactly 16 bytes, while configured SecOC inputs are 7/12/36 bytes, so stock
+  activation is not itself a production signing oracle. The lower prepare
+  `0x87A94` accepts 0..80 bytes; a documented `0x68B8A` `16→12` adaptation is
+  sufficient for a classic-domain experiment after hardware permission is shown.
+  SECOC-046 now
   supplies a stock no-SA DTC observation of the terminal negative state
   (`0x00D317`), but that state conflates command failure with full-result mismatch
   and does not expose `FEBE51AA`; direct byte observation remains bounded. For a production-resident signing proxy,
@@ -236,6 +245,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   of the prerequisite application transition. Production Tx integration
   also requires a new audited route because stock CanIf has no `0x2E4/0x131` Tx
   entry. See
+  [../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md) and
   [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.
 - **Object-15 producer.** No static producer exists in this calibration.
   Where a provisioned unit writes object 15 from is unknown (dealer tool path

@@ -33,10 +33,12 @@ and unresolved static/dynamic boundaries remain in
 **Question:** does provisioned ICU-S slot 4 actually permit command 5 MAC
 generation in initialized application context?
 
-Why this matters: static software already proves the application has selector-4
-command-5 plumbing and a stock RID `0x100F` activation path. A positive hardware
-result would make a production-resident signing proxy much more attractive than
-extracting the key itself.
+Why this matters: static software proves a stock no-SA selector-controlled
+command-5 test, but SECOC-069 now bounds that caller to 16 bytes; production
+SecOC inputs are 7/12/36 bytes. The generic lower command-5 API accepts 0..80
+bytes. A positive hardware result would therefore validate the cryptographic
+primitive needed by a production-resident signer, not prove that the unmodified
+diagnostic bank already signs production frames.
 
 Ready now:
 
@@ -45,11 +47,17 @@ Ready now:
 - F181/route binding, chronology, RTT/jitter, pre/post DTC snapshots;
 - no same-boot re-arm assumption.
 
-Positive criterion: current-run generated output changes from the pre-stimulus
-baseline under selector 4. A DTC-only negative does not separate command failure
-from expected-result mismatch.
+Stage-1 positive criterion: current-run generated output changes from the
+pre-stimulus baseline under selector 4 / mode 1. A DTC-only negative does not
+separate command failure from expected-result mismatch. On a separate fresh
+boot, selector 4 / mode 0 is the expected-negative raw-AES policy control, but
+it needs its own result-source observer (`FEBE519A`; the command-5 observer points
+at `FEBE51AA`) or equivalent status instrumentation; the DTC alone is ambiguous.
+Only after stage 1 succeeds, test the bounded `0x68B8A` `16→12` adaptation and compare
+the first 28 generated bits against an independently known classic SecOC tag.
 
 Canonical:
+[../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md) ·
 [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md) ·
 [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md).
 

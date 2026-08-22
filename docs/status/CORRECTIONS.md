@@ -2228,3 +2228,36 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   are understood.
 - **Canonical:** [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) RFP/P1M-E entry;
   [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
+
+### CORR-093 — the stock command-5 bank is a fixed-16 CMAC test, not an arbitrary SecOC signer
+
+- **Overstatement:** shorthand such as "full CMAC oracle if slot policy permits"
+  and "signing oracle" blurred the stock RID-`0x100F` diagnostic bank together
+  with the lower variable-length command-5 API. That wording could be read to
+  mean an unauthenticated tester can already request a valid MAC for any
+  production SecOC message using unmodified firmware.
+- **Right:** mode 1 at `icus_crypto_test_submit @ 0x68B42` passes literal input
+  length `0x10`; the tester controls exactly 16 message bytes through CAN
+  `0x01C/0x01D`. This image's configured authenticated inputs are 7 bytes for
+  sync, 12 bytes for classic `0x2E4/0x131/0x132`, and 36 bytes for FD
+  `0x090/0x0D7`. AES-CMAC padding/final-subkey selection depends on message
+  length, so a 16-byte CMAC query is not a transformable substitute for the
+  12- or 36-byte target CMAC.
+- **Lower capability:** `icus_command5_mac_generate_prepare @ 0x87A94` accepts
+  byte lengths below `0x51` and supplies `len<<3` to ICU-S, so application-context
+  code can request the real 12/36-byte domains. Stock result-copy worker
+  `0x87B46` preserves output capacities up to 16.
+- **Bounded classic adaptation:** changing `0x68B8A` from
+  `20 4E 10 00` (`movea 0x10`) to `20 4E 0C 00` (`movea 0x0C`) makes the
+  existing chosen-message path 12 bytes and leaves 12 returned MAC bytes—more
+  than enough for MAC28. Combined with the existing observation shim, that is a
+  true classic-domain signing experiment *if* live slot 4 accepts command 5.
+- **Policy nuance:** standard AUTOSAR SHE makes a MAC-use key eligible for MAC
+  generation and verification, and Renesas public P1M ICU-S material lists both
+  services. But vendor extensions exist in the ecosystem: Vector documents an
+  additional `CMAC USAGE` flag capable of making a MAC key verification-only.
+  This does not prove P1M-E has that flag; it reinforces that live slot-4 policy
+  must be measured rather than inferred from the base SHE FID alone.
+- **Canonical:**
+  [../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md);
+  `tests/verify_secoc_command5_oracle_assessment.py`; SECOC-069.

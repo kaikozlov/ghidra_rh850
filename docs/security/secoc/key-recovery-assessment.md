@@ -102,7 +102,7 @@ The exact `FFC5D000` store encoding occurs at nine CodeFlash sites:
 |---:|---|---|
 | `0x8919C` | abort/reset command `0x3F` | none |
 | `0x89628` | runtime selector plus command 1 or 3 | chosen-input AES oracle if slot policy permits |
-| `0x8973A` | runtime selector plus command 5 | full CMAC oracle if slot policy permits |
+| `0x8973A` | runtime selector plus command 5 | lower variable-length CMAC primitive if slot policy permits; stock diagnostic caller is fixed to 16 bytes (SECOC-069) |
 | `0x8990C` | runtime selector plus command 7 | live SecOC verification and SCA stimulus |
 | `0x89A2C` | command 8 | authenticated M1-M3 key update, not export |
 | `0x89A8A` | command 11 | initialization/test family; no key output recovered |
@@ -174,12 +174,15 @@ MAC-usage slot would reject, while command 5 (MAC generation) is the
 spec-permitted primitive — which makes a command-5 signing oracle the
 SHE-aligned path, not a likely-denied one.
 
-Caveat, kept separate: this is the AUTOSAR SHE architectural reference. The
-Renesas ICU-S is a vendor core and the restricted `ICUSE` manual is unobtained
-(SECOC-018), so this does not prove ICU-S follows SHE exactly — only that the
-default expectation is "command 5 is permitted on slot 4," and a denial would
-require Renesas to have added a non-standard verify-only restriction. Confirm
-generation behavior with a single bench probe.
+Caveat, kept separate: this is the AUTOSAR SHE architectural reference. Renesas
+public P1M material calls ICU-S SHE-compliant and explicitly lists CMAC
+generation and verification, but the restricted `ICUSE` manual is unobtained
+(SECOC-018). Real SHE-adjacent implementations can add policy: Vector documents
+an additional `CMAC USAGE` flag that can make a MAC key verification-only. That
+does not prove P1M-E has the same extension; it proves only that standard-SHE
+flag semantics cannot substitute for the hardware experiment. The default prior
+remains that command 5 should work on a MAC-use slot, while live slot-4 policy
+is dynamic. See [command5-oracle-assessment.md](command5-oracle-assessment.md).
 
 ### 1.4 DataFlash, debug, and serial programming
 
@@ -879,12 +882,17 @@ profiles select ICU-S slot 4 (SECOC-001/002), which is **firmware-verified**
 evidence of a single key slot for the profiles this ECU receives. It does not
 constrain the key topology of PDUs this ECU does not receive.
 
-### 11.4 EPS as native SecOC signing oracle: conditional on unknowns
+### 11.4 EPS as native SecOC signing oracle: lower API yes, stock bank no
 
-If ICU-S slot 4 permits MAC generation via command 5 (not just verification via
-command 7), then authenticated code execution on this EPS could turn it into a
-native SecOC signing oracle without plaintext key recovery. This is a
-**hypothesis gated by two unknowns**, not an established capability:
+SECOC-069 separates two previously conflated paths. Stock RID `0x100F` can
+activate a tester-controlled command-5 test without SecurityAccess, but that
+caller fixes the CMAC input to 16 bytes and keeps output private; it therefore
+is **not directly congruent** with the configured 7/12/36-byte SecOC domains.
+The lower command-5 prepare at `0x87A94`, however, accepts 0..80 input bytes, so
+application-context code can request the exact 12-byte classic or 36-byte FD
+authenticated input. If ICU-S slot 4 permits MAC generation, that lower path can
+turn the EPS into a native SecOC signing oracle without plaintext key recovery.
+It remains gated by hardware policy and application-context execution:
 
 1. **Does ICU-S slot 4 permit MAC generation?** Command 5's software plumbing
    accepts selector 4 and handles output (SECOC-006, **verified structure**).

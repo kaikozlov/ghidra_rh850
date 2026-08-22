@@ -1281,6 +1281,27 @@ paths = [
   "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
 ]
 
+[suite.secoc_command5_oracle_assessment]
+tests = ["tests/verify_secoc_command5_oracle_assessment.py"]
+oracle = "raw_bytes"
+paths = [
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "ghidra/ghidra_v850/data/languages/v850_arithmetic.sinc",
+  "tests/verify_secoc_command5_oracle_assessment.py",
+  "tests/verify_secoc_command5_experiment.py",
+  "exploit/command5/",
+  "docs/security/secoc/command5-oracle-assessment.md",
+  "docs/security/secoc/application-chain.md",
+  "docs/security/secoc/key-recovery-assessment.md",
+  "docs/security/secoc/sender-implementation.md",
+  "docs/security/memory-safety-audit.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.command5_dtc_side_channel]
 tests = ["tests/verify_command5_dtc_side_channel.py"]
 oracle = "raw_bytes"
