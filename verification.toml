@@ -1247,6 +1247,7 @@ tests = ["tests/verify_exploit_surface.py"]
 oracle = "generated_self_check"
 paths = [
   "exploit/",
+  "docs/status/FINDINGS.md",
   "tests/verify_exploit_surface.py",
   "Makefile",
 ]
@@ -2143,3 +2144,16 @@ paths = ["tools/toyota_secoc_session.py", "tests/fixtures/"]
 [suite.u023a87_monitor_map]
 tests = ["tests/verify_u023a87_monitor_map.py"]
 paths = ["data/generated/u023a87_monitor_map.json", "docs/"]
+
+[suite.keyless_exec_surface]
+tests = ["tests/verify_keyless_exec_surface.py"]
+paths = [
+  "tests/verify_keyless_exec_surface.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+  "data/generated/decompilations.jsonl",
+  "docs/security/keyless-exec-surface-assessment.md",
+  "docs/security/bootloader-noauth-pc-pivot-assessment.md",
+]
+oracle = "cfg_dataflow"
