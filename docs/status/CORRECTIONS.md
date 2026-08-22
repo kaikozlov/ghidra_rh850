@@ -2382,3 +2382,60 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Canonical:**
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) §4.2.3;
   VAR-045/VAR-046; `tests/verify_spanconstant_low_calibration_delta.py`.
+
+### CORR-100 — the low-delta semantic boundary is closed: consumers, bank role, record-8 reader, and CMAC KDF recovered
+
+- **Stale wording (four superseded claims):**
+  1. The high `0x18000..0x1FDEF` block was described as an inert
+     "template/reference-like region" whose factory/default/manufacturing role
+     was "not proven".
+  2. The `0x10000+` shadow was described as having "no recovered semantic CPU
+     dereference beyond the startup/E4 copies and XCP calibration-page
+     bookkeeping".
+  3. Record 8 was described as having "no recovered fixed-index consumer".
+  4. The region-0 CMAC was described only as using a "boot-derived key"; the
+     exact KDF and authenticated-message construction had not yet been recovered.
+     The historical DID 0x201/0x202 values themselves remain genuinely absent.
+- **Right:**
+  1. The application contains a **seven-pair high/default + low/vehicle pointer table at `0xB022C`** (every high twin exactly
+     `+0x8000` above its low twin). `0x5C032` compares low-page identity
+     (`JA112001` @ `0x17DA0`, `8A311` @ `0x17DC0`) against application
+     identity (`0x20850`/`0x20870`); the selector chain `0xB5D0A` ->
+     `0xB5D12` -> `0xB8D62`/`0xBD56C` fans the one-bit selector to
+     `FEBEAC3C`/`FEBEAFE0`. All five retained runtime captures hold both
+     selectors `= 1` with compatibility status `0`, so the captured vehicles
+     ran the low/vehicle bank. The high block is therefore the **compiled
+     fallback/default calibration bank** used on reset/mismatch — an inert
+     template it is not.
+  2. Semantic CPU consumers of the `0x10000+` low bank are recovered: Bank B
+     rows are live vehicle-speed-dependent linear-interpolation maps
+     (`0xC6E68`/`0xC6ECE` over selected low base `0x10100`, interpolator
+     `0xCE6A2`, axis `FEBEADE8` = conditioned/clamped DID `0x1185` `CAN
+     Vehicle Speed (SP1)` via `0xBB22A`/`0xBB362`/`0xB8EEC`), and the
+     `0x13E46` u16 feeds `0xB5DBC` -> `B33C` -> `0xC3AC8` as a dual-channel
+     plausibility-center coefficient, with retained H/Span `B33C` values
+     exactly matching the low-bank formula.
+  3. Record 8 is the persistent object returned by **H RDBI DID `0x010B`** ->
+     callback `0x4869C` -> `0x6009E(0x208)`, joined at object level to
+     Techstream `Output of torque sensor 2` (legacy KWP `TRQ1 Zero Point
+     Value`).
+  4. The region-0 CMAC construction is fully recovered:
+     `K = AES-128-ECB-ENC(PAYLOAD_BUILD_SECRET @0xBFD8, DID0201[16])`
+     (derivation at `0x704C`) and
+     `tag = AES-CMAC(K, DID0202[16] || CodeFlash[0x10000:0x17DF0])`. Zero
+     boot-session inputs deterministically reproduce the retained derived key
+     `80d221a05622b4f9d4f287922e6c78d1` but neither stored factory tag.
+- **What remains bounded (not reverted):** exact OEM names/units for the
+  Bank-B map outputs and the `0x13E46` coefficient; the record-8 inner-u32's
+  exact subfield/endianness-presentation/unit (the DDB carries no
+  field-level scaling); the historical 16-byte DID0201 SeedKey / DID0202
+  Nonce used by the factory/package (volatile inputs absent from the
+  retained corpus — a matching Corolla CUW/calibration package or reflash
+  transcript would supply them); and XCP page-state
+  (`FEBE5DB0/5DB1`) remains separate from the application compatibility
+  selector, with no XCP high-page route.
+- **Canonical:**
+  [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md)
+  §4.2.2–§4.2.3; VAR-048;
+  `tests/verify_spanconstant_low_calibration_delta.py`;
+  `data/generated/corolla_8965F1208000_low_calibration_delta.json`.

@@ -93,7 +93,7 @@ check("record-3 selected angle-offset coefficients are exact", coeff["baseline"]
 check("record-4 payload is marker + Toyota part number 89650-12N50, identical in both specimens", h[0xA0A0:0xA0B0] == s[0xA0A0:0xA0B0] and struct.unpack_from("<I", h, 0xA0A0)[0] == 0xA55A5AA5 and h[0xA0A4:0xA0AE] == b"8965012N50" and records[4]["role"] == "ecu_part_number_record" and records[4]["classification"] == "identity")
 SIENNA = (REPO / "firmware/RH850_P1M-E_CodeFlash.bin").read_bytes()
 check("Sienna same-shaped record 4 carries its own part number 89650-45170", struct.unpack_from("<I", SIENNA, 0xA0A0)[0] == 0xA55A5AA5 and SIENNA[0xA0A4:0xA0AE] == b"8965045170")
-check("record-4 part-number classification remains evidence-bounded (no recovered firmware reader)", "No target-native firmware consumer" in records[4]["boundary"] and "ECU Part Number" in records[4]["boundary"])
+check("record-4 part-number classification remains evidence-bounded", "ECU Part Number" in records[4]["boundary"])
 check("serial identity changes are exact", records[7]["baseline_serial"] == "8965012N50A05G310920" and records[7]["target_serial"] == "8965012N50E12H030731")
 check("Span target label is explicitly tied to observed/application F181, not the separate 0x17D80 identity", tracked["target_id"] == "8965F1208000" and "0x20860" in tracked["target_id_basis"] and "8965H1213000" in tracked["target_id_basis"])
 
@@ -177,7 +177,7 @@ check("isolated scalar byte change at 0x13E46 is pinned without inventing record
 
 interp = tracked["interpretation"]
 check("artifact refuses to promote specimen differences to a model-year tuning claim", interp["specimen_specific_motor_calibration_differs"] and not interp["model_year_tuning_change_proven"])
-check("artifact preserves the unresolved 0x10000+ CPU-consumer boundary", "no recovered application CPU semantic dereference" in shadow["cpu_consumer_boundary"] and "not disproved" in shadow["cpu_consumer_boundary"])
+check("artifact records recovered low-bank semantic CPU consumers", "Superseded" in shadow["cpu_consumer_boundary"] and "seven-pair" in shadow["cpu_consumer_boundary"] and "interpolation" in shadow["cpu_consumer_boundary"])
 
 # ---- second-slice closures ----
 # Runtime shadow liveness across every retained snapshot.
@@ -196,11 +196,18 @@ for cap, rel, base, img in (
     sh = ram[shadow_va - base:shadow_va - base + 0x7DF0]
     check(f"{cap}: RAM shadow equals same-image CodeFlash 0x10000..0x17DEF", sh == img[0x10000:0x10000 + 0x7DF0])
 
-# High-template boundary.
+# Application-selected high/default versus low/vehicle calibration banks.
 ht = shadow["high_template_boundary"]
+sel = shadow["calibration_bank_selection"]
 check("high 0x18000..0x1FDEF is identical between specimens and ~84.9% homologous to the low page", ht["identical_between_variants"] and h[0x18000:0x1FDF0] == s[0x18000:0x1FDF0] and ht["byte_homology_fraction_with_low_page"] == 0.8488)
-check("high template is neither specimen's calibration at the changed offsets", ht["at_changed_low_offsets"] == {"high_equals_baseline": 60, "high_equals_target": 11, "high_matches_neither": 1240})
-check("high template has no low-region validity marker at 0x1FE00", ht["no_marker_at_0x1FE00"] and struct.unpack_from("<I", h, 0x1FE00)[0] != 0x5AA5A55A)
+check("high default bank is neither specimen's active low calibration at the changed offsets", ht["at_changed_low_offsets"] == {"high_equals_baseline": 60, "high_equals_target": 11, "high_matches_neither": 1240})
+check("high default bank has no low-region validity marker at 0x1FE00", ht["no_marker_at_0x1FE00"] and struct.unpack_from("<I", h, 0x1FE00)[0] != 0x5AA5A55A)
+check("high block is now classified as compiled fallback/default calibration", ht["classification"] == "compiled fallback/default calibration bank" and "compatibility" in ht["boundary"] and "XCP remains separate" in ht["boundary"])
+expected_pairs=[(0x1BE40,0x13E40),(0x18100,0x10100),(0x1A46C,0x1246C),(0x1A900,0x12900),(0x1A960,0x12960),(0x1BD60,0x13D60),(0x1BE60,0x13E60)]
+check("seven-pair high/low calibration table is exact", [(int(x["high_default"],16),int(x["low_vehicle"],16)) for x in sel["pointer_pairs"]] == expected_pairs and [struct.unpack_from("<II", h, 0xB022C+i*8) for i in range(7)] == expected_pairs)
+ci=sel["compatibility_identity"]
+check("low/application compatibility gate compares JA112001 plus 8A311 prefix", ci["primary_low"] == ci["primary_application"] == "JA112001" and ci["secondary_low"] == ci["secondary_application"] == "8A311" and ci["primary_equal_h"] and ci["primary_equal_span"] and ci["secondary_equal_h"] and ci["secondary_equal_span"])
+check("all retained runtime captures select low/vehicle bank and report compatible", all(c["runtime_bank_selector_ac3c"] == c["runtime_bank_selector_afe0"] == 1 and c["compatibility_status_052c"] == "0x00000000" for c in live))
 
 # Bank-A exact structural partition (33x0x44 + 4x0x24 + interstitial + 32x0x28 + tail = 1143).
 part = shadow["structured_bank_a"]["exact_partition"]
@@ -237,13 +244,49 @@ for addr, size, expected_sha in [
     check(f"XCP calibration-page body 0x{addr:08X} is pinned and byte-identical", h[addr:addr+size] == s[addr:addr+size] and sha256(h[addr:addr+size]) == expected_sha)
 check("recovered XCP grammar explicitly excludes a high-page copy/selection path", not xps["recovered_high_page_selection"] and "No recovered XCP route selects or copies 0x18000..0x1FDEF" in xps["boundary"])
 
-# Record-8 authoritative unit field.
-check("record-8 differing field is the u32 at payload+0x10 with byte 0 zero", struct.unpack_from("<I", h, 0xA518)[0] == 0x7FCF4D00 and struct.unpack_from("<I", s, 0xA518)[0] == 0x3AA4B800 and h[0xA518] == 0 and records[8]["role"] == "same_schema_value_record")
+# Record-8 is the persistent object returned by RDBI DID 0x010B.
+check("record-8 differing field is the u32 at payload+0x10 with byte 0 zero", struct.unpack_from("<I", h, 0xA518)[0] == 0x7FCF4D00 and struct.unpack_from("<I", s, 0xA518)[0] == 0x3AA4B800 and h[0xA518] == 0)
+check("record-8 object-level role is DID 0x010B torque-sensor diagnostic object", records[8]["role"] == "did_010b_output_of_torque_sensor_2_persistent_object" and records[8]["classification"] == "diagnostic-persistent-torque-sensor-object" and any("0x6009E(0x208)" in x for x in records[8]["evidence_chain"]) and "Output of torque sensor 2" in records[8]["boundary"] and "field-level" in records[8]["boundary"])
+check("H raw RDBI row 6 routes DID 0x010B length 0x10 to callback 0x4869C", struct.unpack_from("<H", h, 0x28F94)[0] == 0x010B and h[0x28F96] == 0x10 and struct.unpack_from("<I", h, 0x28F98)[0] == 0x4869C)
+vocab = json.loads((REPO / "data/generated/21140bbd65e530a9/diagnostic_vocabulary.json").read_text(encoding="utf-8"))
+did_010b = [m for m in vocab["mappings"] if m.get("identifier") == 0x010B]
+check("Techstream vocabulary pins DID 0x010B to Output of torque sensor 2", len(did_010b) == 1 and did_010b[0]["firmware_callback"] == "0x4CD74" and did_010b[0]["firmware_response_size_or_attribute"] == "0x0010" and did_010b[0]["source_db"] == "EPS_CAN_P4DK" and did_010b[0]["can_variant_name"] == "Output of torque sensor 2" and did_010b[0]["kwp_variant_name"] == "TRQ1 Zero Point Value")
 SIENNA_R8 = struct.unpack_from("<I", SIENNA, 0xA638)[0]
 check("Sienna same-schema record carries value 0x1AEBBD00", SIENNA_R8 == 0x1AEBBD00 and struct.unpack_from("<I", SIENNA, 0xA628)[0] == 0xA55A5AA5)
 
-# Isolated scalar region authoritative bytes.
+# Isolated scalar region authoritative bytes and live downstream dataflow.
 iso = ident["isolated_scalar_region"]
 check("isolated scalar u16 sequences are exact", iso["u16_sequence_baseline"] == [2, 104, 2345, 2345, 2442, 2442, 2442, 0] and iso["u16_sequence_target"] == [2, 104, 2345, 2441, 2442, 2442, 2442, 0] and list(struct.unpack_from("<8H", h, 0x13E40)) == iso["u16_sequence_baseline"] and list(struct.unpack_from("<8H", s, 0x13E40)) == iso["u16_sequence_target"])
+check("0x13E46 functional role is recovered through B5DBC/B33C into dual-channel plausibility", iso["derived_baseline"] == (2345*104 >> 4) == 0x3B8A and iso["derived_target"] == (2441*104 >> 4) == 0x3DFA and iso["classification"] == "vehicle-specific dual-channel sensor plausibility-center coefficient" and "0xC3AC8" in iso["runtime_confirmation"])
+check("captured B33C exactly confirms scalar formula in H and Span", {c["dual_channel_center_b33c"] for c in live if c["capture"].startswith("albino")} == {0x3B8A} and {c["dual_channel_center_b33c"] for c in live if c["capture"].startswith("span")} == {0x3DFA})
+
+# CMAC construction is fully recovered; only historical volatile factory/package inputs are absent.
+cmc=regions["region0_cmac_construction"]
+check("region0 CMAC KDF and authenticated message are explicit", cmc["h_key_derivation_function"] == "0x704C" and cmc["derived_key_formula"] == "AES-128-ECB-ENC(PAYLOAD_BUILD_SECRET, DID_0201[16])" and cmc["authenticated_message"] == "DID_0202[16] || CodeFlash[0x10000:0x17DF0]")
+check("zero boot-session values derive known key but do not reproduce stored factory CMACs", cmc["zero_session_derived_key"] == "80d221a05622b4f9d4f287922e6c78d1" and cmc["zero_session_cmac_baseline"] == "ace0375230cbe38c89f0480eb21050ef" and cmc["zero_session_cmac_target"] == "c9c36edde79a8ebb17904acc9c9e920d" and not cmc["zero_session_matches_stored_baseline"] and not cmc["zero_session_matches_stored_target"])
+check("all retained sessions have zero 0201/0202 and expected derived key", all(c["did_0201_key_material"] == c["did_0202_iv"] == "00"*16 and c["derived_payload_key"] == "80d221a05622b4f9d4f287922e6c78d1" for c in live))
+
+# Bank-B rows are active linear-interpolation maps over conditioned Techstream SP1 vehicle speed.
+sem=bank_b["semantic_consumers"]
+check("bank-B is recovered as active vehicle-speed-dependent interpolation maps", "linear interpolation" in sem["interpolator"] and "CAN Vehicle Speed (SP1)" in sem["axis_source"] and "vehicle-speed-dependent interpolation maps" in sem["classification"] and "0xC6E68" in sem and "0xC6ECE" in sem)
+
+# Pin the new semantic-closure code bodies against raw H/Span bytes.
+closure_bodies={
+    0x5C032:(146,"1f97ac00cb1c819cbe66410cd6d371b6b5b1bd380d2a430a4c015478f5ff8317"),
+    0x5C0E6:(6,"406df36ede56166376232e46f46af4eb507531ee2ca9938d33bd8a5f1a16b9fa"),
+    0xFF254:(12,"29e44fd08c35474257787f762bbbd2509737c3daec0e0b5330e2b10a33d057e2"),
+    0xB5D12:(22,"231c4cabf82021edeb1c7be48c91be1b666f2413bb57de61d87f869ab3cbbbba"),
+    0xB5DBC:(120,"a285d176930f5df55593b5f4338ebfc828c864a0c6712db0f93f85c709326bcc"),
+    0xCE5C6:(82,"9ac3ae432edb8801a0070113b230807ec727629c74f4e57818a03f7dbb987f52"),
+    0xCE650:(82,"b1675b9c90edadde3c5dbfba492bf8889b1be04b07240cc71f7608bcd02661e8"),
+    0xCE6A2:(82,"3ca16241437dd662fbe846ee359fd7e7745c108ad1b653cfea54e7d324bf9d7a"),
+    0xC6E68:(102,"041a146111e651dd0351101c46a83ebd1663b24bc1d55a5ae54c9c54aa86480f"),
+    0xC6ECE:(90,"4bffe36373c128d16b58560ecb22c88e39cb5e1b958e4d54a0a3183139f43804"),
+    0xC3AC8:(268,"ad11cf9bc40474eab370addb9e65413986a8a24e31873d765f8374f130caebeb"),
+    0x4869C:(96,"06088b6f2aa0b8805c3534eb4f7c2d2b6956ee463cf8f6ca6a7a5c1ede9f1574"),
+    0x704C:(50,"b7fd65e8b4c7076862e61fa5ecbb533359421c67e7b850e8ebde293991377655"),
+}
+for addr,(size,expected_sha) in closure_bodies.items():
+    check(f"semantic-closure body 0x{addr:08X} is pinned and byte-identical", h[addr:addr+size] == s[addr:addr+size] and sha256(h[addr:addr+size]) == expected_sha)
 
 print("\nSpan low-CodeFlash calibration delta verification passed.")

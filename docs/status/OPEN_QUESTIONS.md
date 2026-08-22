@@ -286,20 +286,25 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   memory, and the `0xA000` active unit-calibration family are now pinned from
   actual bytes. The low delta is exactly partitioned as 863 changed A000-family
   bytes + 1,311 changed bytes in the structured `0x10000..0x17DEF` shadow source
-  + the 16-byte region-0 AES-CMAC tag at `0x17DF0` (CMAC role/control flow
-  recovered and table/tag bytes verified; the factory DID `0x201`/`0x202` tag
-  inputs are not recovered). Remaining questions are the real vehicle-level
-  lateral-command provenance; per-channel Techstream naming of the A000 records
-  and `0x10000+` shadow rows (class corroborated, offsets not mapped); exact OEM
-  meaning of record 8's specimen-varying u32 and the isolated `0x13E46` u16; the
-  manufacturing/tooling role of the invariant high `0x18000..0x1FDEF` homolog;
-  the factory DID `0x201/0x202` inputs of the region-0 CMAC tag; H/Span-specific
+  + the 16-byte region-0 AES-CMAC tag at `0x17DF0`. The semantic closure is now
+  complete (VAR-048/CORR-100): the `0xB022C` seven-pair selector picks the
+  low/vehicle bank in every retained capture (high `0x18000..0x1FDEF` = compiled
+  fallback/default), Bank B runs live vehicle-speed interpolation over
+  conditioned SP1, `0x13E46` feeds the dual-channel plausibility center with
+  runtime-confirmed `B33C`, record 8 is the DID `0x010B` torque-sensor
+  diagnostic object, and the region-0 CMAC KDF/message are fully recovered.
+  Remaining questions are the real vehicle-level lateral-command provenance;
+  exact OEM naming where no Techstream join exists (Bank-B map-output
+  labels/units, the `0x13E46` coefficient's physical label/unit, the record-8
+  inner-u32 subfield); the historical factory/package DID `0x201/0x202` inputs
+  of the region-0 CMAC tag (a matching Corolla CUW/calibration package or
+  reflash transcript would supply them); per-channel Techstream naming of A000
+  records (class corroborated, offsets not mapped); H/Span-specific
   retained-RAM execution geometry if a runtime is built; and live ICU-S policy
-  only where hardware evidence is needed. The low page is materialized verbatim
-  in every retained runtime capture. Records 0/2/3 are persistent calibration
-  state admitted only after successful reads over byte-identical all-zero staging
-  seeds — not differing compiled model-year constants; factory vs service origin
-  is not distinguished. See
+  only where hardware evidence is needed. Records 0/2/3 are persistent
+  calibration state admitted only after successful reads over byte-identical
+  all-zero staging seeds — not differing compiled model-year constants; factory
+  vs service origin is not distinguished. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 - **Separate 2023 US Corolla / tracked `8965H1202000` specimen.** The complete
   memory corpus is now retained. CodeFlash internally identifies

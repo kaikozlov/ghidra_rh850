@@ -16,6 +16,9 @@ import struct
 import zlib
 from pathlib import Path
 
+from Crypto.Cipher import AES
+from Crypto.Hash import CMAC
+
 ROOT = Path(__file__).resolve().parents[1]
 H_DEFAULT = ROOT / "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
 SPAN_DEFAULT = ROOT / "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
@@ -88,6 +91,28 @@ FUNCTIONS = {
     0x60332: (52, "a000_record_crc_validator"),
     0x60418: (90, "a000_record_runtime_shadow_copy_in"),
     0x604AA: (110, "a000_record_validate_and_copy_out"),
+    0x5C032: (146, "low_calibration_application_identity_compatibility_check"),
+    0x5C0C4: (34, "calibration_compatibility_status_repair"),
+    0x5C0E6: (6, "calibration_compatibility_status_getter"),
+    0xFF254: (12, "calibration_compatibility_wrapper"),
+    0xB5D0A: (6, "calibration_bank_selector_reset"),
+    0xB5D12: (22, "compatibility_to_calibration_bank_selector"),
+    0xB5DBC: (120, "dual_channel_plausibility_center_coefficient_builder"),
+    0xB8D62: (290, "calibration_bank_selector_fanout_a"),
+    0xBD56C: (194, "calibration_bank_selector_fanout_b"),
+    0xCE5C6: (82, "signed_axis_linear_interpolator_a"),
+    0xCE650: (82, "signed_axis_linear_interpolator_b"),
+    0xCE6A2: (82, "unsigned_axis_linear_interpolator"),
+    0xBE042: (154, "selected_bank_0x44_interpolation_map_dispatch"),
+    0xC0A20: (58, "selected_bank_0x24_interpolation_map_dispatch"),
+    0xC4BD2: (414, "selected_bank_0x28_interpolation_map_dispatch"),
+    0xC6E68: (102, "vehicle_speed_interpolation_maps_a"),
+    0xC6ECE: (90, "vehicle_speed_interpolation_maps_b"),
+    0xBB22A: (156, "sp1_vehicle_speed_clamp_scale"),
+    0xBB362: (228, "sp1_vehicle_speed_conditioner"),
+    0xC3AC8: (268, "dual_channel_consistency_window"),
+    0x4869C: (96, "did_010b_persistent_object_0x208_reader"),
+    0x704C: (50, "payload_build_derive_key"),
 }
 
 # Exact low-region bins chosen only after the full byte diff was exhausted.
@@ -149,9 +174,10 @@ RECORD_ROLES = {
         "boundary": "Payload is marker A55A5AA5 followed by the 20-character unit serial (e.g. '8965012N50A05G310920' -> '8965012N50E12H030731'), zero padded. The serial embeds the same 89650-12N50 part-number family as record 4 plus a unit-unique suffix. Techstream's English string database carries the OEM vocabulary 'Display of ECU Product Serial Number' (M_English entry 7345514) and 'Sensor Serial Number' (entry 2665916) used by diagnostic serial displays; no target-native firmware reader of the staged copy at FEBEFAD8 was recovered, so the serial classification rests on the live F18C/serial observation and the record shape.",
     },
     8: {
-        "classification": "changed-unit-record-unresolved-field",
-        "role": "same_schema_value_record",
-        "boundary": "Payload is marker A55A5AA5, u16 1, u16 20 (0x14), eight zero bytes, a 4-byte unit-specific value at payload+0x10 (u32 LE; bytes 1..3 carry the value, byte 0 is zero: baseline 0x7FCF4D00, target 0x3AA4B800), and four zero bytes. Sienna has a same-schema record at 0xA628 with value 0x1AEBBD00. Only the three value bytes differ (0xA519..0xA51B). The differing field is unit-record content, not a checksum (records are CRC-terminated separately). No recovered fixed-index consumer; the field remains a same-schema specimen-varying content value — do not assign an OEM meaning.",
+        "classification": "diagnostic-persistent-torque-sensor-object",
+        "role": "did_010b_output_of_torque_sensor_2_persistent_object",
+        "boundary": "Payload is marker A55A5AA5, u16 1, u16 20 (0x14), eight zero bytes, a 4-byte specimen-varying value at payload+0x10 (u32 LE: baseline 0x7FCF4D00, target 0x3AA4B800), and four zero bytes. H callback 0x4869C reads fixed persistent family index 0x208 through 0x6009E, requires a valid 0x10-byte body plus A55A5AA5 marker, and returns the 16 bytes after the marker through RDBI DID 0x010B. The same-DID/same-size Sienna object is already joined to Techstream's exact monitor name 'Output of torque sensor 2' (with legacy KWP vocabulary 'TRQ1 Zero Point Value'). This closes the object-level torque-sensor diagnostic role. The DDB exposes no field-level scaling for the inner u32, so that four-byte member's exact Toyota subfield name/unit remains bounded rather than guessed.",
+        "evidence_chain": ["H RDBI DID 0x010B -> 0x4869C", "0x4869C -> 0x6009E(0x208)", "Techstream EPS_CAN_P4DK monitor 267 = Output of torque sensor 2"],
     },
 }
 
@@ -311,6 +337,13 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             "ram_base": f"0x{base:08X}", "shadow_va": f"0x{shadow_va:08X}",
             "diffs_vs_own_codeflash": sum(1 for a, b in zip(sh, img[0x10000:0x10000 + (SHADOW_SOURCE_END - SHADOW_SOURCE_START)]) if a != b),
             "diffs_vs_high_template": sum(1 for a, b in zip(sh, img[0x18000:0x18000 + (SHADOW_SOURCE_END - SHADOW_SOURCE_START)]) if a != b),
+            "runtime_bank_selector_ac3c": ram[0xAC3C],
+            "runtime_bank_selector_afe0": ram[0xAFE0],
+            "compatibility_status_052c": f"0x{struct.unpack_from('<I', ram, 0x1052C)[0]:08X}",
+            "dual_channel_center_b33c": struct.unpack_from('<I', ram, 0xB33C)[0],
+            "did_0202_iv": ram[0x12CF8:0x12D08].hex(),
+            "did_0201_key_material": ram[0x12D08:0x12D18].hex(),
+            "derived_payload_key": ram[0x12D18:0x12D28].hex(),
         })
 
     # High-block boundary: 0x18000..0x1FDEF is an invariant structurally homologous template,
@@ -320,6 +353,62 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
     high_matches_h = sum(1 for i in changed_low if h[0x18000 + (i - 0x10000)] == h[i])
     high_matches_span = sum(1 for i in changed_low if h[0x18000 + (i - 0x10000)] == s[i])
     high_matches_neither = len(changed_low) - high_matches_h - high_matches_span
+
+    # The application contains a seven-pair table of compiled high/default and
+    # programmable low calibration bases.  Selector 0 chooses the high pointer; selector 1
+    # chooses the low pointer.  The compatibility gate compares low-page identity bytes to
+    # application-owned identity bytes and drives the selector.
+    pair_table_va = 0xB022C
+    pair_table = []
+    for i in range(7):
+        high_ptr, low_ptr = struct.unpack_from("<II", h, pair_table_va + i * 8)
+        high_ptr_s, low_ptr_s = struct.unpack_from("<II", s, pair_table_va + i * 8)
+        if (high_ptr_s, low_ptr_s) != (high_ptr, low_ptr):
+            raise ValueError(f"calibration pointer pair {i} changed between variants")
+        if high_ptr - low_ptr != 0x8000:
+            raise ValueError(f"calibration pointer pair {i} does not preserve +0x8000 high twin")
+        pair_table.append({"index": i, "high_default": f"0x{high_ptr:X}", "low_vehicle": f"0x{low_ptr:X}"})
+    if not all(c["runtime_bank_selector_ac3c"] == 1 and c["runtime_bank_selector_afe0"] == 1 for c in shadow_verifications):
+        raise ValueError("retained runtime capture did not select low calibration bank")
+    if not all(c["compatibility_status_052c"] == "0x00000000" for c in shadow_verifications):
+        raise ValueError("retained runtime capture did not report compatible low calibration")
+
+    compatibility_identity = {
+        "primary_low_va": "0x17DA0", "primary_application_va": "0x20850",
+        "primary_length": 8,
+        "primary_low": h[0x17DA0:0x17DA8].decode("ascii", "replace"),
+        "primary_application": h[0x20850:0x20858].decode("ascii", "replace"),
+        "primary_equal_h": h[0x17DA0:0x17DA8] == h[0x20850:0x20858],
+        "primary_equal_span": s[0x17DA0:0x17DA8] == s[0x20850:0x20858],
+        "secondary_low_va": "0x17DC0", "secondary_application_va": "0x20870",
+        "secondary_length": 5,
+        "secondary_low": h[0x17DC0:0x17DC5].decode("ascii", "replace"),
+        "secondary_application": h[0x20870:0x20875].decode("ascii", "replace"),
+        "secondary_equal_h": h[0x17DC0:0x17DC5] == h[0x20870:0x20875],
+        "secondary_equal_span": s[0x17DC0:0x17DC5] == s[0x20870:0x20875],
+    }
+
+    # The isolated 0x13E46 value is selected by 0xB5DBC when the compatibility-selected
+    # low pair (1BE40/13E40) is active.  Its derived runtime value is captured in B33C.
+    scalar_h = struct.unpack_from("<H", h, 0x13E46)[0]
+    scalar_s = struct.unpack_from("<H", s, 0x13E46)[0]
+    scalar_multiplier_h = struct.unpack_from("<H", h, 0x13E42)[0]
+    scalar_multiplier_s = struct.unpack_from("<H", s, 0x13E42)[0]
+    scalar_derived_h = scalar_h * scalar_multiplier_h >> 4
+    scalar_derived_s = scalar_s * scalar_multiplier_s >> 4
+
+    # Region-0 CMAC construction is fully recovered except for the historical factory/package
+    # DID values.  Public retained RAM has zero session values, which reproduce the known
+    # derived key but not either stored factory tag.
+    payload_build_secret = bytes.fromhex("ba052435f8843f985fd1329d2b6117b0")
+    zero16 = bytes(16)
+    zero_derived_key = AES.new(payload_build_secret, AES.MODE_ECB).encrypt(zero16)
+    def region0_cmac_with_zero_inputs(img: bytes) -> str:
+        cm = CMAC.new(zero_derived_key, ciphermod=AES)
+        cm.update(zero16 + img[0x10000:0x17DF0])
+        return cm.hexdigest()
+    zero_cmac_h = region0_cmac_with_zero_inputs(h)
+    zero_cmac_s = region0_cmac_with_zero_inputs(s)
 
     # Bank-A exact structural partition (corrected 32x0x28 row family).
     def row_changes(start: int, end: int, stride: int) -> list[int]:
@@ -439,11 +528,32 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
                 "record_count": len(bank_b_records),
                 "record_shape": "eight packed (u16 axis, i16 value) point dwords followed by u32 0x7FFFFFFF sentinel",
                 "shared_axis_rows_2_17": "rows 2..17 all carry the same u16 axis {6400,7680,10240,12800,15360,19200,25600,32000} with only the i16 values changed; rows 0/1 use a distinct small axis {0,80,480,960,1920,3200,4800,11520} and are unchanged",
+                "semantic_consumers": {
+                    "interpolator": "0xCE6A2 performs linear interpolation over u16-axis/i16-value rows terminated by axis 0xFFFF",
+                    "0xC6E68": "selected low base 0x10100 + 0x203C/0x20CC + (mode&3)*0x24 -> Bank-B rows 2..9",
+                    "0xC6ECE": "selected low base 0x10100 + 0x215C/0x21EC + (mode&3)*0x24 -> Bank-B rows 10..17",
+                    "axis_source": "FEBEADE8 is a conditioned/scaled form of H DID 0x1185 / Techstream 'CAN Vehicle Speed (SP1)' (km/h); 0xBB22A clamps the source at 30000 and 0xBB362 conditions it before 0xB8EEC mirrors it to FEBEADE8",
+                    "classification": "active vehicle-speed-dependent interpolation maps; exact OEM names/physical units of each map output remain bounded because the shipped DDB describes live monitor signals, not these internal calibration-map labels",
+                },
                 "records": bank_b_records,
             },
             "runtime_shadow_liveness": {
                 "captures": shadow_verifications,
                 "conclusion": "All five retained runtime snapshots (albino 3x PE1, Span PE1, Span self-alias) hold FEBF7C00..FEBFF9EF byte-identical to the same specimen's CodeFlash 0x10000..0x17DEF. This proves the low page is materialized verbatim in the runtime LocalRAM shadow; it does not by itself prove a semantic CPU consumer of the copied calibration contents.",
+            },
+            "calibration_bank_selection": {
+                "pointer_pair_table_va": f"0x{pair_table_va:X}",
+                "pointer_pairs": pair_table,
+                "selector_semantics": "selector 0 = compiled high/default twin; selector 1 = programmable low/vehicle twin",
+                "compatibility_identity": compatibility_identity,
+                "selector_chain": [
+                    "0xB5D0A resets FEBEB328=0 (high/default)",
+                    "0xB5D12 calls 0xFF254 -> 0x5C0E6; compatibility status 0 sets FEBEB328=1",
+                    "0xB8D62 fans FEBEB328 to FEBEAC3C",
+                    "0xBD56C fans FEBEB328 to FEBEAFE0",
+                    "0x5C032 compares low-page identity at 0x17DA0/0x17DC0 to application identity at 0x20850/0x20870 and stores the compatibility status",
+                ],
+                "runtime_proof": "All five retained H/Span LocalRAM views have both selectors == 1 and compatibility status 0, so captured vehicle runtime selected the specimen-specific low calibration bank.",
             },
             "high_template_boundary": {
                 "range": "0x18000..0x1FDEF",
@@ -451,7 +561,8 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
                 "byte_homology_fraction_with_low_page": round(high_homology / 0x7DF0, 4),
                 "at_changed_low_offsets": {"high_equals_baseline": high_matches_h, "high_equals_target": high_matches_span, "high_matches_neither": high_matches_neither},
                 "no_marker_at_0x1FE00": struct.unpack_from("<I", h, 0x1FE00)[0] != 0x5AA5A55A,
-                "boundary": "The high block is an invariant structurally homologous template/reference-like region. No CodeFlash content reader/copy from it is recovered, and the dword at 0x1FE00 is not the `0x5AA5A55A` validity marker used by the low region. Target-native H review of the recovered XCP page grammar finds no route that selects or copies this high block: SET/GET_CAL_PAGE only manipulate/report FEBE5DB0/5DB1 and E4 hardcodes the 0x10000..0x17DEF low-page copy. It is still NOT proven to be factory/default calibration, and its manufacturing/tooling origin remains bounded. At the 1,311 changed low offsets it matches the baseline only 60 times, Span 11 times, and neither specimen 1,240 times, so it is not simply either specimen's calibration.",
+                "classification": "compiled fallback/default calibration bank",
+                "boundary": "The prior template-only boundary is superseded. The seven-pair table at 0xB022C directly pairs high addresses with low twins exactly 0x8000 lower. Application consumers index those pairs with the compatibility-derived one-bit selector. Reset/mismatch selects the high pointer (0); a passing low-page/application identity check selects the low pointer (1), which is observed in every retained H/Span runtime capture. The high block is therefore the compiled fallback/default calibration dataset used when the programmable low calibration is not accepted as application-compatible. XCP remains separate: its recovered page grammar still never selects/copies the high bank. Exact Toyota internal calibration-symbol names are not present in the available corpus.",
             },
             "compiled_staging_seed_semantics": {
                 "seed_blocks": seed_rows,
@@ -469,9 +580,9 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
                 "writer_flag_mask": 3, "writer_accepts_values": [0, 1],
                 "state_initializer": "0x9225C (FEBE5DB0=1, FEBE5DB1=0)",
                 "recovered_high_page_selection": False,
-                "boundary": "Target-native H review finds FEBE5DB0/5DB1 only in the page-state initializer 0x9225C and SET/GET_CAL_PAGE handlers 0x9261E/0x92698. E4 0x92724 accepts page selectors 0/1 but invokes 0x92700 only for selector 0, and 0x92700 hardcodes CodeFlash 0x10000..0x17DEF -> FEBF7C00. No recovered XCP route selects or copies 0x18000..0x1FDEF. This supports a calibration-page interpretation of the low bank while individual CPU consumers of the copied values remain unproven.",
+                "boundary": "Target-native H review finds FEBE5DB0/5DB1 only in the page-state initializer 0x9225C and SET/GET_CAL_PAGE handlers 0x9261E/0x92698. E4 0x92724 accepts page selectors 0/1 but invokes 0x92700 only for selector 0, and 0x92700 hardcodes CodeFlash 0x10000..0x17DEF -> FEBF7C00. No recovered XCP route selects or copies 0x18000..0x1FDEF. This XCP state is separate from the application compatibility selector at FEBEB328/FEBEAC3C/FEBEAFE0.",
             },
-            "cpu_consumer_boundary": "Target-native H/Span review found no recovered application CPU semantic dereference of the 0x10000+ shadow beyond the startup/E4 copies and XCP calibration-page bookkeeping. Apparent low-address references reviewed in the decompiler resolve to scalar/control-word uses or numeric/packed metadata rather than reads of the low-bank contents. Computed-pointer or undocumented hardware-overlay use is not disproved.",
+            "cpu_consumer_boundary": "Superseded: semantic application consumers are recovered through the seven-pair high/low pointer table at 0xB022C. The low page is not only copied to LocalRAM; when compatibility passes, control code directly selects low CodeFlash table bases and runs their interpolation/control consumers. Exact Toyota symbolic names for every internal map output remain unavailable without matching calibration metadata/source symbols.",
             "aligned_application_numeric_hits_near_changed_low_bytes": aligned_numeric_hits,
         },
         "boot_integrity_regions": {
@@ -494,7 +605,20 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             ],
             "region0_cmac_tag_baseline": cmac_tag_h.hex(),
             "region0_cmac_tag_target": cmac_tag_s.hex(),
-            "region0_cmac_semantics": "For region 0 (0x10000..0x17DFF), the final 16 bytes at 0x17DF0..0x17DFF are the AES-CMAC tag over 0x10000..0x17DEF under a boot-derived key. The tag is verified by routine_verify_crc_cmac_task (0x591A). The complete 16/16-byte tag change between H and Span is therefore expected cryptographic integrity fallout of the changed calibration page, not independent tuning data. Boundary: the verification role and code path are proven, but the exact DID 0x201 key material and the DID 0x202 IV/build-time inputs used by the factory to produce the stored low-region tag are not recovered from this static image/session; zero-valued DID material used by public RAM fixtures does not reproduce the stored tag. The boot payload-build root at 0xBFD8 is present in the image; non-reproduction with zero inputs is an input-recovery boundary, not a statement that the key is absent.",
+            "region0_cmac_construction": {
+                "payload_build_secret": payload_build_secret.hex(),
+                "h_key_derivation_function": "0x704C",
+                "derived_key_formula": "AES-128-ECB-ENC(PAYLOAD_BUILD_SECRET, DID_0201[16])",
+                "authenticated_message": "DID_0202[16] || CodeFlash[0x10000:0x17DF0]",
+                "zero_session_derived_key": zero_derived_key.hex(),
+                "zero_session_cmac_baseline": zero_cmac_h,
+                "zero_session_cmac_target": zero_cmac_s,
+                "zero_session_matches_stored_baseline": zero_cmac_h == cmac_tag_h.hex(),
+                "zero_session_matches_stored_target": zero_cmac_s == cmac_tag_s.hex(),
+                "retained_ram_session_values": "all retained H/Span LocalRAM captures have DID0201=0, DID0202=0 and derived key 80d221a05622b4f9d4f287922e6c78d1; these are later/default boot-session values, not the factory values that produced either stored tag",
+                "techstream_route": "Unified CUW writes 0203 OffsetAddress -> 0201 SeedKey -> 0202 Nonce before transfer/verification; matching CUW package values or a programming-session capture would supply the two missing 16-byte inputs",
+            },
+            "region0_cmac_semantics": "For region 0, the CMAC algorithm and message are now fully recovered: K=AES-128-ECB-ENC(root@0xBFD8,DID0201), MAC=AES-CMAC(K,DID0202 || CodeFlash[0x10000:0x17DF0]). The stored 16-byte tag at 0x17DF0 protects the page body. What remains is not a firmware-analysis unknown: the historical 16-byte DID0201 SeedKey and 16-byte DID0202 Nonce used by the factory/package are volatile inputs and are absent from the retained package/session corpus. Zero values reproduce the retained derived key but not either stored tag. A matching Corolla CUW/calibration package or legitimate reflash transcript is the missing evidence source.",
             "high_region_boundary": "Region 1 (0x18000..0xFFDFF) has its CMAC tag at 0xFFDF0 and validity marker at 0xFFE00; because H and Span are byte-identical over 0x18000..0xFFDF0, that tag is also identical and does not enter this delta. The 0x40004000-pattern filler at 0xFFDF0..0xFFDFF is retained as observed; whether the high-region tag slot is programmed on this generation is not asserted here.",
         },
         "identity_and_integrity_tail": {
@@ -513,7 +637,11 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
                 "va": "0x13E40", "u16_sequence_baseline": list(struct.unpack_from("<8H", h, 0x13E40)),
                 "u16_sequence_target": list(struct.unpack_from("<8H", s, 0x13E40)),
                 "only_changed_position": "0x13E46 (u16 0x0929 -> 0x0989; low byte 0x29 -> 0x89)",
-                "boundary": "Single u16 inside an otherwise unchanged 8-u16 island (2,104,2345,2345,2442,2442,2442,0). No direct CPU consumer and no Techstream offset-level join recovered.",
+                "consumer": "0xB5DBC selects high 0x1BE40 / low 0x13E40 through FEBEAFE0; with the captured normal branch it reads +6 exactly and computes B33C = u16@+6 * u16@+2 >> 4",
+                "derived_baseline": scalar_derived_h, "derived_target": scalar_derived_s,
+                "runtime_confirmation": "retained H B33C=0x3B8A and Span B33C=0x3DFA exactly equal the low-bank formula; 0xB8EEC mirrors B33C to FEBEAF0C, which 0xC3AC8 uses as the center term of a dual-channel consistency/plausibility window",
+                "classification": "vehicle-specific dual-channel sensor plausibility-center coefficient",
+                "boundary": "The functional role is closed. The surrounding pipeline is a paired sensor plausibility/consistency monitor, but no exact Techstream calibration-parameter record names this coefficient or supplies its engineering unit. Do not invent a Toyota parameter label or unit from the numeric value alone.",
             },
             "shadow_identity_mirrors": {
                 "0x17D80_to_ram": "0xFEBFF980",

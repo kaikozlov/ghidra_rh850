@@ -351,10 +351,15 @@
           0,
           0
         ],
-        "boundary": "Payload is marker A55A5AA5, u16 1, u16 20 (0x14), eight zero bytes, a 4-byte unit-specific value at payload+0x10 (u32 LE; bytes 1..3 carry the value, byte 0 is zero: baseline 0x7FCF4D00, target 0x3AA4B800), and four zero bytes. Sienna has a same-schema record at 0xA628 with value 0x1AEBBD00. Only the three value bytes differ (0xA519..0xA51B). The differing field is unit-record content, not a checksum (records are CRC-terminated separately). No recovered fixed-index consumer; the field remains a same-schema specimen-varying content value \u2014 do not assign an OEM meaning.",
-        "classification": "changed-unit-record-unresolved-field",
+        "boundary": "Payload is marker A55A5AA5, u16 1, u16 20 (0x14), eight zero bytes, a 4-byte specimen-varying value at payload+0x10 (u32 LE: baseline 0x7FCF4D00, target 0x3AA4B800), and four zero bytes. H callback 0x4869C reads fixed persistent family index 0x208 through 0x6009E, requires a valid 0x10-byte body plus A55A5AA5 marker, and returns the 16 bytes after the marker through RDBI DID 0x010B. The same-DID/same-size Sienna object is already joined to Techstream's exact monitor name 'Output of torque sensor 2' (with legacy KWP vocabulary 'TRQ1 Zero Point Value'). This closes the object-level torque-sensor diagnostic role. The DDB exposes no field-level scaling for the inner u32, so that four-byte member's exact Toyota subfield name/unit remains bounded rather than guessed.",
+        "classification": "diagnostic-persistent-torque-sensor-object",
         "codeflash_source": "0xA508",
         "descriptor_va": "0x2ABEC",
+        "evidence_chain": [
+          "H RDBI DID 0x010B -> 0x4869C",
+          "0x4869C -> 0x6009E(0x208)",
+          "Techstream EPS_CAN_P4DK monitor 267 = Output of torque sensor 2"
+        ],
         "index": 8,
         "length": 24,
         "length_width_bits": 16,
@@ -363,7 +368,7 @@
         "payload_changed_bytes": 3,
         "payload_target_sha256": "193a50dc092c600a600379ee9fb3140b40deeb90ecc12ae245d4b8a723878e62",
         "ram_destination": "0xFEBEFB08",
-        "role": "same_schema_value_record",
+        "role": "did_010b_output_of_torque_sensor_2_persistent_object",
         "standard_terminal_residue_ffffffff_baseline": true,
         "standard_terminal_residue_ffffffff_target": true,
         "stored_crc_fixup_baseline": "0xCC9B0CC2",
@@ -421,6 +426,14 @@
       "entry": "0x00006EC4",
       "role": "cmac_block_pump_driver",
       "target_body_sha256": "8290e60e9b154a0176f2c810dd82ffcf449b510c8448833dd31dd75ce932b135"
+    },
+    {
+      "baseline_body_sha256": "b7fd65e8b4c7076862e61fa5ecbb533359421c67e7b850e8ebde293991377655",
+      "body_size": 50,
+      "byte_identical": true,
+      "entry": "0x0000704C",
+      "role": "payload_build_derive_key",
+      "target_body_sha256": "b7fd65e8b4c7076862e61fa5ecbb533359421c67e7b850e8ebde293991377655"
     },
     {
       "baseline_body_sha256": "5b3bb8aed8ad88461607d99ad93d0aab9d98af2e7917b955a83724a71c0523e1",
@@ -623,12 +636,44 @@
       "target_body_sha256": "95a65b941a1927412d8b195cd599fc2402e3d907e7c620496e1bb0d570a13c7c"
     },
     {
+      "baseline_body_sha256": "06088b6f2aa0b8805c3534eb4f7c2d2b6956ee463cf8f6ca6a7a5c1ede9f1574",
+      "body_size": 96,
+      "byte_identical": true,
+      "entry": "0x0004869C",
+      "role": "did_010b_persistent_object_0x208_reader",
+      "target_body_sha256": "06088b6f2aa0b8805c3534eb4f7c2d2b6956ee463cf8f6ca6a7a5c1ede9f1574"
+    },
+    {
       "baseline_body_sha256": "069adea92809ff18277718f63f617d18eaf4bd41b8bbd4d2f402609c33670a16",
       "body_size": 8,
       "byte_identical": true,
       "entry": "0x00050E6A",
       "role": "a000_unit_calibration_record_base_getter",
       "target_body_sha256": "069adea92809ff18277718f63f617d18eaf4bd41b8bbd4d2f402609c33670a16"
+    },
+    {
+      "baseline_body_sha256": "1f97ac00cb1c819cbe66410cd6d371b6b5b1bd380d2a430a4c015478f5ff8317",
+      "body_size": 146,
+      "byte_identical": true,
+      "entry": "0x0005C032",
+      "role": "low_calibration_application_identity_compatibility_check",
+      "target_body_sha256": "1f97ac00cb1c819cbe66410cd6d371b6b5b1bd380d2a430a4c015478f5ff8317"
+    },
+    {
+      "baseline_body_sha256": "18676aaf7debbd9a995f47f5192b4e871b3e1ccefea55351390bfda7a50f9366",
+      "body_size": 34,
+      "byte_identical": true,
+      "entry": "0x0005C0C4",
+      "role": "calibration_compatibility_status_repair",
+      "target_body_sha256": "18676aaf7debbd9a995f47f5192b4e871b3e1ccefea55351390bfda7a50f9366"
+    },
+    {
+      "baseline_body_sha256": "406df36ede56166376232e46f46af4eb507531ee2ca9938d33bd8a5f1a16b9fa",
+      "body_size": 6,
+      "byte_identical": true,
+      "entry": "0x0005C0E6",
+      "role": "calibration_compatibility_status_getter",
+      "target_body_sha256": "406df36ede56166376232e46f46af4eb507531ee2ca9938d33bd8a5f1a16b9fa"
     },
     {
       "baseline_body_sha256": "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2",
@@ -749,6 +794,142 @@
       "entry": "0x00092724",
       "role": "xcp_e4_cal_page_copy_handler",
       "target_body_sha256": "14367502c37c230022c4c3d55fded0377095e663d89fbe83efc0834efa84050b"
+    },
+    {
+      "baseline_body_sha256": "6fe2491b06b638fb62b9bdb940398eb4a53ace4dd7dc20aa1b2f513851989253",
+      "body_size": 6,
+      "byte_identical": true,
+      "entry": "0x000B5D0A",
+      "role": "calibration_bank_selector_reset",
+      "target_body_sha256": "6fe2491b06b638fb62b9bdb940398eb4a53ace4dd7dc20aa1b2f513851989253"
+    },
+    {
+      "baseline_body_sha256": "231c4cabf82021edeb1c7be48c91be1b666f2413bb57de61d87f869ab3cbbbba",
+      "body_size": 22,
+      "byte_identical": true,
+      "entry": "0x000B5D12",
+      "role": "compatibility_to_calibration_bank_selector",
+      "target_body_sha256": "231c4cabf82021edeb1c7be48c91be1b666f2413bb57de61d87f869ab3cbbbba"
+    },
+    {
+      "baseline_body_sha256": "a285d176930f5df55593b5f4338ebfc828c864a0c6712db0f93f85c709326bcc",
+      "body_size": 120,
+      "byte_identical": true,
+      "entry": "0x000B5DBC",
+      "role": "dual_channel_plausibility_center_coefficient_builder",
+      "target_body_sha256": "a285d176930f5df55593b5f4338ebfc828c864a0c6712db0f93f85c709326bcc"
+    },
+    {
+      "baseline_body_sha256": "161bdb8d1c669d33eace9502604d7338e05b65df863fa710ab156f760126e0ab",
+      "body_size": 290,
+      "byte_identical": true,
+      "entry": "0x000B8D62",
+      "role": "calibration_bank_selector_fanout_a",
+      "target_body_sha256": "161bdb8d1c669d33eace9502604d7338e05b65df863fa710ab156f760126e0ab"
+    },
+    {
+      "baseline_body_sha256": "1f7acd442844b974587dbc48dca6a1d94eb45c0be102e6fa12e7789078ac3b9a",
+      "body_size": 156,
+      "byte_identical": true,
+      "entry": "0x000BB22A",
+      "role": "sp1_vehicle_speed_clamp_scale",
+      "target_body_sha256": "1f7acd442844b974587dbc48dca6a1d94eb45c0be102e6fa12e7789078ac3b9a"
+    },
+    {
+      "baseline_body_sha256": "2c4fe26b10b9666afed466479550c14ebdc3a088c9ae20d26ae768a76767e959",
+      "body_size": 228,
+      "byte_identical": true,
+      "entry": "0x000BB362",
+      "role": "sp1_vehicle_speed_conditioner",
+      "target_body_sha256": "2c4fe26b10b9666afed466479550c14ebdc3a088c9ae20d26ae768a76767e959"
+    },
+    {
+      "baseline_body_sha256": "6b8452a8260962f04015e7fa8d4057376c8b10f533ac0f3f96f909dc3689597f",
+      "body_size": 194,
+      "byte_identical": true,
+      "entry": "0x000BD56C",
+      "role": "calibration_bank_selector_fanout_b",
+      "target_body_sha256": "6b8452a8260962f04015e7fa8d4057376c8b10f533ac0f3f96f909dc3689597f"
+    },
+    {
+      "baseline_body_sha256": "462938a9273793e19d12e148eae7e5371134e43e8fcb0d81f210dd77707d5d92",
+      "body_size": 154,
+      "byte_identical": true,
+      "entry": "0x000BE042",
+      "role": "selected_bank_0x44_interpolation_map_dispatch",
+      "target_body_sha256": "462938a9273793e19d12e148eae7e5371134e43e8fcb0d81f210dd77707d5d92"
+    },
+    {
+      "baseline_body_sha256": "1d876e7a34e1b6dafc4c53541e16e19e5969f5f672a251a7ecad592806917ae8",
+      "body_size": 58,
+      "byte_identical": true,
+      "entry": "0x000C0A20",
+      "role": "selected_bank_0x24_interpolation_map_dispatch",
+      "target_body_sha256": "1d876e7a34e1b6dafc4c53541e16e19e5969f5f672a251a7ecad592806917ae8"
+    },
+    {
+      "baseline_body_sha256": "ad11cf9bc40474eab370addb9e65413986a8a24e31873d765f8374f130caebeb",
+      "body_size": 268,
+      "byte_identical": true,
+      "entry": "0x000C3AC8",
+      "role": "dual_channel_consistency_window",
+      "target_body_sha256": "ad11cf9bc40474eab370addb9e65413986a8a24e31873d765f8374f130caebeb"
+    },
+    {
+      "baseline_body_sha256": "3453d42ddcd3bae8d6ca2147164860235c96983e7e211de09c37ce03da0b3c0d",
+      "body_size": 414,
+      "byte_identical": true,
+      "entry": "0x000C4BD2",
+      "role": "selected_bank_0x28_interpolation_map_dispatch",
+      "target_body_sha256": "3453d42ddcd3bae8d6ca2147164860235c96983e7e211de09c37ce03da0b3c0d"
+    },
+    {
+      "baseline_body_sha256": "041a146111e651dd0351101c46a83ebd1663b24bc1d55a5ae54c9c54aa86480f",
+      "body_size": 102,
+      "byte_identical": true,
+      "entry": "0x000C6E68",
+      "role": "vehicle_speed_interpolation_maps_a",
+      "target_body_sha256": "041a146111e651dd0351101c46a83ebd1663b24bc1d55a5ae54c9c54aa86480f"
+    },
+    {
+      "baseline_body_sha256": "4bffe36373c128d16b58560ecb22c88e39cb5e1b958e4d54a0a3183139f43804",
+      "body_size": 90,
+      "byte_identical": true,
+      "entry": "0x000C6ECE",
+      "role": "vehicle_speed_interpolation_maps_b",
+      "target_body_sha256": "4bffe36373c128d16b58560ecb22c88e39cb5e1b958e4d54a0a3183139f43804"
+    },
+    {
+      "baseline_body_sha256": "9ac3ae432edb8801a0070113b230807ec727629c74f4e57818a03f7dbb987f52",
+      "body_size": 82,
+      "byte_identical": true,
+      "entry": "0x000CE5C6",
+      "role": "signed_axis_linear_interpolator_a",
+      "target_body_sha256": "9ac3ae432edb8801a0070113b230807ec727629c74f4e57818a03f7dbb987f52"
+    },
+    {
+      "baseline_body_sha256": "b1675b9c90edadde3c5dbfba492bf8889b1be04b07240cc71f7608bcd02661e8",
+      "body_size": 82,
+      "byte_identical": true,
+      "entry": "0x000CE650",
+      "role": "signed_axis_linear_interpolator_b",
+      "target_body_sha256": "b1675b9c90edadde3c5dbfba492bf8889b1be04b07240cc71f7608bcd02661e8"
+    },
+    {
+      "baseline_body_sha256": "3ca16241437dd662fbe846ee359fd7e7745c108ad1b653cfea54e7d324bf9d7a",
+      "body_size": 82,
+      "byte_identical": true,
+      "entry": "0x000CE6A2",
+      "role": "unsigned_axis_linear_interpolator",
+      "target_body_sha256": "3ca16241437dd662fbe846ee359fd7e7745c108ad1b653cfea54e7d324bf9d7a"
+    },
+    {
+      "baseline_body_sha256": "29e44fd08c35474257787f762bbbd2509737c3daec0e0b5330e2b10a33d057e2",
+      "body_size": 12,
+      "byte_identical": true,
+      "entry": "0x000FF254",
+      "role": "calibration_compatibility_wrapper",
+      "target_body_sha256": "29e44fd08c35474257787f762bbbd2509737c3daec0e0b5330e2b10a33d057e2"
     }
   ],
   "baseline": {
@@ -799,7 +980,20 @@
       }
     ],
     "high_region_boundary": "Region 1 (0x18000..0xFFDFF) has its CMAC tag at 0xFFDF0 and validity marker at 0xFFE00; because H and Span are byte-identical over 0x18000..0xFFDF0, that tag is also identical and does not enter this delta. The 0x40004000-pattern filler at 0xFFDF0..0xFFDFF is retained as observed; whether the high-region tag slot is programmed on this generation is not asserted here.",
-    "region0_cmac_semantics": "For region 0 (0x10000..0x17DFF), the final 16 bytes at 0x17DF0..0x17DFF are the AES-CMAC tag over 0x10000..0x17DEF under a boot-derived key. The tag is verified by routine_verify_crc_cmac_task (0x591A). The complete 16/16-byte tag change between H and Span is therefore expected cryptographic integrity fallout of the changed calibration page, not independent tuning data. Boundary: the verification role and code path are proven, but the exact DID 0x201 key material and the DID 0x202 IV/build-time inputs used by the factory to produce the stored low-region tag are not recovered from this static image/session; zero-valued DID material used by public RAM fixtures does not reproduce the stored tag. The boot payload-build root at 0xBFD8 is present in the image; non-reproduction with zero inputs is an input-recovery boundary, not a statement that the key is absent.",
+    "region0_cmac_construction": {
+      "authenticated_message": "DID_0202[16] || CodeFlash[0x10000:0x17DF0]",
+      "derived_key_formula": "AES-128-ECB-ENC(PAYLOAD_BUILD_SECRET, DID_0201[16])",
+      "h_key_derivation_function": "0x704C",
+      "payload_build_secret": "ba052435f8843f985fd1329d2b6117b0",
+      "retained_ram_session_values": "all retained H/Span LocalRAM captures have DID0201=0, DID0202=0 and derived key 80d221a05622b4f9d4f287922e6c78d1; these are later/default boot-session values, not the factory values that produced either stored tag",
+      "techstream_route": "Unified CUW writes 0203 OffsetAddress -> 0201 SeedKey -> 0202 Nonce before transfer/verification; matching CUW package values or a programming-session capture would supply the two missing 16-byte inputs",
+      "zero_session_cmac_baseline": "ace0375230cbe38c89f0480eb21050ef",
+      "zero_session_cmac_target": "c9c36edde79a8ebb17904acc9c9e920d",
+      "zero_session_derived_key": "80d221a05622b4f9d4f287922e6c78d1",
+      "zero_session_matches_stored_baseline": false,
+      "zero_session_matches_stored_target": false
+    },
+    "region0_cmac_semantics": "For region 0, the CMAC algorithm and message are now fully recovered: K=AES-128-ECB-ENC(root@0xBFD8,DID0201), MAC=AES-CMAC(K,DID0202 || CodeFlash[0x10000:0x17DF0]). The stored 16-byte tag at 0x17DF0 protects the page body. What remains is not a firmware-analysis unknown: the historical 16-byte DID0201 SeedKey and 16-byte DID0202 Nonce used by the factory/package are volatile inputs and are absent from the retained package/session corpus. Zero values reproduce the retained derived key but not either stored tag. A matching Corolla CUW/calibration package or legitimate reflash transcript is the missing evidence source.",
     "region0_cmac_tag_baseline": "52ba323a89692008e2ebd9afd6204049",
     "region0_cmac_tag_target": "05de41cb041b5a0ab538e7f4bc94a339",
     "region_table_va": "0x8DE0",
@@ -853,8 +1047,13 @@
     "f181_secondary_baseline": "8A3111202000",
     "f181_secondary_target": "8A3111213000",
     "isolated_scalar_region": {
-      "boundary": "Single u16 inside an otherwise unchanged 8-u16 island (2,104,2345,2345,2442,2442,2442,0). No direct CPU consumer and no Techstream offset-level join recovered.",
+      "boundary": "The functional role is closed. The surrounding pipeline is a paired sensor plausibility/consistency monitor, but no exact Techstream calibration-parameter record names this coefficient or supplies its engineering unit. Do not invent a Toyota parameter label or unit from the numeric value alone.",
+      "classification": "vehicle-specific dual-channel sensor plausibility-center coefficient",
+      "consumer": "0xB5DBC selects high 0x1BE40 / low 0x13E40 through FEBEAFE0; with the captured normal branch it reads +6 exactly and computes B33C = u16@+6 * u16@+2 >> 4",
+      "derived_baseline": 15242,
+      "derived_target": 15866,
       "only_changed_position": "0x13E46 (u16 0x0929 -> 0x0989; low byte 0x29 -> 0x89)",
+      "runtime_confirmation": "retained H B33C=0x3B8A and Span B33C=0x3DFA exactly equal the low-bank formula; 0xB8EEC mirrors B33C to FEBEAF0C, which 0xC3AC8 uses as the center term of a dual-channel consistency/plausibility window",
       "u16_sequence_baseline": [
         2,
         104,
@@ -1828,6 +2027,71 @@
         "numeric_value": "0x10F7A"
       }
     ],
+    "calibration_bank_selection": {
+      "compatibility_identity": {
+        "primary_application": "JA112001",
+        "primary_application_va": "0x20850",
+        "primary_equal_h": true,
+        "primary_equal_span": true,
+        "primary_length": 8,
+        "primary_low": "JA112001",
+        "primary_low_va": "0x17DA0",
+        "secondary_application": "8A311",
+        "secondary_application_va": "0x20870",
+        "secondary_equal_h": true,
+        "secondary_equal_span": true,
+        "secondary_length": 5,
+        "secondary_low": "8A311",
+        "secondary_low_va": "0x17DC0"
+      },
+      "pointer_pair_table_va": "0xB022C",
+      "pointer_pairs": [
+        {
+          "high_default": "0x1BE40",
+          "index": 0,
+          "low_vehicle": "0x13E40"
+        },
+        {
+          "high_default": "0x18100",
+          "index": 1,
+          "low_vehicle": "0x10100"
+        },
+        {
+          "high_default": "0x1A46C",
+          "index": 2,
+          "low_vehicle": "0x1246C"
+        },
+        {
+          "high_default": "0x1A900",
+          "index": 3,
+          "low_vehicle": "0x12900"
+        },
+        {
+          "high_default": "0x1A960",
+          "index": 4,
+          "low_vehicle": "0x12960"
+        },
+        {
+          "high_default": "0x1BD60",
+          "index": 5,
+          "low_vehicle": "0x13D60"
+        },
+        {
+          "high_default": "0x1BE60",
+          "index": 6,
+          "low_vehicle": "0x13E60"
+        }
+      ],
+      "runtime_proof": "All five retained H/Span LocalRAM views have both selectors == 1 and compatibility status 0, so captured vehicle runtime selected the specimen-specific low calibration bank.",
+      "selector_chain": [
+        "0xB5D0A resets FEBEB328=0 (high/default)",
+        "0xB5D12 calls 0xFF254 -> 0x5C0E6; compatibility status 0 sets FEBEB328=1",
+        "0xB8D62 fans FEBEB328 to FEBEAC3C",
+        "0xBD56C fans FEBEB328 to FEBEAFE0",
+        "0x5C032 compares low-page identity at 0x17DA0/0x17DC0 to application identity at 0x20850/0x20870 and stores the compatibility status"
+      ],
+      "selector_semantics": "selector 0 = compiled high/default twin; selector 1 = programmable low/vehicle twin"
+    },
     "compiled_staging_seed_semantics": {
       "interpretation": "The three readers use byte-identical all-zero staging seeds in the shared application and then admit persistent A000 records only on successful validation/read. The differing record 0/2/3 values are therefore persistent calibration state, not differing compiled software constants; this does not require treating the zero seeds as fallback defaults. Factory adjustment and/or later service writing remain possible origins. Techstream's exact OEM vocabulary (Torque Sensor Adjustment; Torque Sensor 1..4 Zero Point Value; Motor Rotation Angle Sensor Calibration; EPS Motor Angle Zero Point Value, plus missing/incomplete-calibration failure text) corroborates the adjustment/calibration class but does not assign individual record channels without an offset-level join.",
       "reader_chain": {
@@ -1865,7 +2129,7 @@
         }
       ]
     },
-    "cpu_consumer_boundary": "Target-native H/Span review found no recovered application CPU semantic dereference of the 0x10000+ shadow beyond the startup/E4 copies and XCP calibration-page bookkeeping. Apparent low-address references reviewed in the decompiler resolve to scalar/control-word uses or numeric/packed metadata rather than reads of the low-bank contents. Computed-pointer or undocumented hardware-overlay use is not disproved.",
+    "cpu_consumer_boundary": "Superseded: semantic application consumers are recovered through the seven-pair high/low pointer table at 0xB022C. The low page is not only copied to LocalRAM; when compatibility passes, control code directly selects low CodeFlash table bases and runs their interpolation/control consumers. Exact Toyota symbolic names for every internal map output remain unavailable without matching calibration metadata/source symbols.",
     "destination_start": "0xFEBF7C00",
     "high_template_boundary": {
       "at_changed_low_offsets": {
@@ -1873,8 +2137,9 @@
         "high_equals_target": 11,
         "high_matches_neither": 1240
       },
-      "boundary": "The high block is an invariant structurally homologous template/reference-like region. No CodeFlash content reader/copy from it is recovered, and the dword at 0x1FE00 is not the `0x5AA5A55A` validity marker used by the low region. Target-native H review of the recovered XCP page grammar finds no route that selects or copies this high block: SET/GET_CAL_PAGE only manipulate/report FEBE5DB0/5DB1 and E4 hardcodes the 0x10000..0x17DEF low-page copy. It is still NOT proven to be factory/default calibration, and its manufacturing/tooling origin remains bounded. At the 1,311 changed low offsets it matches the baseline only 60 times, Span 11 times, and neither specimen 1,240 times, so it is not simply either specimen's calibration.",
+      "boundary": "The prior template-only boundary is superseded. The seven-pair table at 0xB022C directly pairs high addresses with low twins exactly 0x8000 lower. Application consumers index those pairs with the compatibility-derived one-bit selector. Reset/mismatch selects the high pointer (0); a passing low-page/application identity check selects the low pointer (1), which is observed in every retained H/Span runtime capture. The high block is therefore the compiled fallback/default calibration dataset used when the programmable low calibration is not accepted as application-compatible. XCP remains separate: its recovered page grammar still never selects/copies the high bank. Exact Toyota internal calibration-symbol names are not present in the available corpus.",
       "byte_homology_fraction_with_low_page": 0.8488,
+      "classification": "compiled fallback/default calibration bank",
       "identical_between_variants": true,
       "no_marker_at_0x1FE00": true,
       "range": "0x18000..0x1FDEF"
@@ -1884,37 +2149,72 @@
       "captures": [
         {
           "capture": "albino-PE1-002502",
+          "compatibility_status_052c": "0x00000000",
+          "derived_payload_key": "80d221a05622b4f9d4f287922e6c78d1",
+          "did_0201_key_material": "00000000000000000000000000000000",
+          "did_0202_iv": "00000000000000000000000000000000",
           "diffs_vs_high_template": 4874,
           "diffs_vs_own_codeflash": 0,
+          "dual_channel_center_b33c": 15242,
           "ram_base": "0xFEBE0000",
+          "runtime_bank_selector_ac3c": 1,
+          "runtime_bank_selector_afe0": 1,
           "shadow_va": "0xFEBF7C00"
         },
         {
           "capture": "albino-PE1-004452",
+          "compatibility_status_052c": "0x00000000",
+          "derived_payload_key": "80d221a05622b4f9d4f287922e6c78d1",
+          "did_0201_key_material": "00000000000000000000000000000000",
+          "did_0202_iv": "00000000000000000000000000000000",
           "diffs_vs_high_template": 4874,
           "diffs_vs_own_codeflash": 0,
+          "dual_channel_center_b33c": 15242,
           "ram_base": "0xFEBE0000",
+          "runtime_bank_selector_ac3c": 1,
+          "runtime_bank_selector_afe0": 1,
           "shadow_va": "0xFEBF7C00"
         },
         {
           "capture": "albino-PE1-005055",
+          "compatibility_status_052c": "0x00000000",
+          "derived_payload_key": "80d221a05622b4f9d4f287922e6c78d1",
+          "did_0201_key_material": "00000000000000000000000000000000",
+          "did_0202_iv": "00000000000000000000000000000000",
           "diffs_vs_high_template": 4874,
           "diffs_vs_own_codeflash": 0,
+          "dual_channel_center_b33c": 15242,
           "ram_base": "0xFEBE0000",
+          "runtime_bank_selector_ac3c": 1,
+          "runtime_bank_selector_afe0": 1,
           "shadow_va": "0xFEBF7C00"
         },
         {
           "capture": "span-PE1-151834",
+          "compatibility_status_052c": "0x00000000",
+          "derived_payload_key": "80d221a05622b4f9d4f287922e6c78d1",
+          "did_0201_key_material": "00000000000000000000000000000000",
+          "did_0202_iv": "00000000000000000000000000000000",
           "diffs_vs_high_template": 4923,
           "diffs_vs_own_codeflash": 0,
+          "dual_channel_center_b33c": 15866,
           "ram_base": "0xFEBE0000",
+          "runtime_bank_selector_ac3c": 1,
+          "runtime_bank_selector_afe0": 1,
           "shadow_va": "0xFEBF7C00"
         },
         {
           "capture": "span-self-152418",
+          "compatibility_status_052c": "0x00000000",
+          "derived_payload_key": "80d221a05622b4f9d4f287922e6c78d1",
+          "did_0201_key_material": "00000000000000000000000000000000",
+          "did_0202_iv": "00000000000000000000000000000000",
           "diffs_vs_high_template": 4923,
           "diffs_vs_own_codeflash": 0,
+          "dual_channel_center_b33c": 15866,
           "ram_base": "0xFEDE0000",
+          "runtime_bank_selector_ac3c": 1,
+          "runtime_bank_selector_afe0": 1,
           "shadow_va": "0xFEDF7C00"
         }
       ],
@@ -2339,12 +2639,19 @@
           "terminal_sentinel": "0x7FFFFFFF"
         }
       ],
+      "semantic_consumers": {
+        "0xC6E68": "selected low base 0x10100 + 0x203C/0x20CC + (mode&3)*0x24 -> Bank-B rows 2..9",
+        "0xC6ECE": "selected low base 0x10100 + 0x215C/0x21EC + (mode&3)*0x24 -> Bank-B rows 10..17",
+        "axis_source": "FEBEADE8 is a conditioned/scaled form of H DID 0x1185 / Techstream 'CAN Vehicle Speed (SP1)' (km/h); 0xBB22A clamps the source at 30000 and 0xBB362 conditions it before 0xB8EEC mirrors it to FEBEADE8",
+        "classification": "active vehicle-speed-dependent interpolation maps; exact OEM names/physical units of each map output remain bounded because the shipped DDB describes live monitor signals, not these internal calibration-map labels",
+        "interpolator": "0xCE6A2 performs linear interpolation over u16-axis/i16-value rows terminated by axis 0xFFFF"
+      },
       "shared_axis_rows_2_17": "rows 2..17 all carry the same u16 axis {6400,7680,10240,12800,15360,19200,25600,32000} with only the i16 values changed; rows 0/1 use a distinct small axis {0,80,480,960,1920,3200,4800,11520} and are unchanged",
       "start": "0x120F4"
     },
     "xcp_e4_copy_function": "0x00092700",
     "xcp_page_state": {
-      "boundary": "Target-native H review finds FEBE5DB0/5DB1 only in the page-state initializer 0x9225C and SET/GET_CAL_PAGE handlers 0x9261E/0x92698. E4 0x92724 accepts page selectors 0/1 but invokes 0x92700 only for selector 0, and 0x92700 hardcodes CodeFlash 0x10000..0x17DEF -> FEBF7C00. No recovered XCP route selects or copies 0x18000..0x1FDEF. This supports a calibration-page interpretation of the low bank while individual CPU consumers of the copied values remain unproven.",
+      "boundary": "Target-native H review finds FEBE5DB0/5DB1 only in the page-state initializer 0x9225C and SET/GET_CAL_PAGE handlers 0x9261E/0x92698. E4 0x92724 accepts page selectors 0/1 but invokes 0x92700 only for selector 0, and 0x92700 hardcodes CodeFlash 0x10000..0x17DEF -> FEBF7C00. No recovered XCP route selects or copies 0x18000..0x1FDEF. This XCP state is separate from the application compatibility selector at FEBEB328/FEBEAC3C/FEBEAFE0.",
       "e4_copy_handler": "0x92724 (custom selector 0xE4) -> 0x92700",
       "get_cal_page_handler": "0x92698 (custom selector 0xEA)",
       "recovered_high_page_selection": false,
