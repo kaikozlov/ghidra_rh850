@@ -108,11 +108,13 @@ This one result tests Gate-2 transfer, callback-free startup/scheduler transfer,
 SecOC queue/COM geometry, and whether exact image-bound RAM retention evidence
 exists. Do not add a software-ID offset row to make a foreign image pass.
 
-Highest-value targets are now ones likely to contain protected steering records:
-Span's distinct `8965F1208000`, `8965B4514000`, or a blurbdust-supported F3/F4
-calibration with an independently observed steering profile. `8965H1202000` is
-already the negative-capability regression and should not be counted again as an
-unresolved transfer target.
+The highest-value **available** transfer target is now Span's persisted
+`8965F1208000` corpus: run the unchanged semantic/runtime resolvers and then do
+its target-native SA/SecOC/steering census. The highest-value still-missing
+images are `8965B4514000` or a blurbdust-supported F3/F4 calibration with an
+independently observed steering profile. `8965H1202000` remains the
+negative-capability regression and should not be counted again as an unresolved
+transfer target.
 
 Why this matters: the H image has already proved the semantic Gate-2/runtime
 resolver can transfer without Sienna offsets. The next image can answer the

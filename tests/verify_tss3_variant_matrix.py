@@ -120,64 +120,36 @@ if sienna_4514000:
     check("Sienna 4514000 source pins the Vance commit",
           "3333453f10c09a27df265156458ce976cc9ce25a" in sienna_4514000["source"])
 
-# ── Corolla row: field-probe observations ───────────────────────
+# ── Span Corolla: persisted field + firmware corpus ─────────────────────
 if corolla:
-    check("Corolla evidence_grade is not definitive",
-          corolla["evidence_grade"] != "definitive",
-          repr(corolla["evidence_grade"]))
-    check("Corolla application_software_id is observed (8965F1208000)",
-          corolla["application_software_id"] == "8965F1208000",
-          repr(corolla["application_software_id"]))
-    check("Corolla secondary_software_id is observed (8A3111213000)",
-          corolla["secondary_software_id"] == "8A3111213000",
-          repr(corolla["secondary_software_id"]))
-    check("Corolla diagnostic_bus notes CAN-FD",
-          "CAN-FD" in corolla["diagnostic_bus"] or "CAN FD" in corolla["diagnostic_bus"],
-          repr(corolla["diagnostic_bus"]))
-    check("Corolla secoc_sync_id is 0x0F",
-          corolla["secoc_sync_id"].strip() == "0x0F",
-          repr(corolla["secoc_sync_id"]))
-    check("Corolla secured_can_ids includes 0x2E4",
-          "0x2E4" in corolla["secured_can_ids"])
-    check("Corolla programming_observation documents timeout not refusal",
-          "timeout" in corolla["programming_observation"].lower()
-          and "not decisive" in corolla["programming_observation"].lower(),
-          repr(corolla["programming_observation"][:80]))
-    check("Corolla security_levels documents observed level 0x03 seed",
-          "0x03" in corolla["security_levels"] and "seed" in corolla["security_levels"].lower())
-    check("Corolla security_levels documents bootloader secret was used",
-          "bootloader secret" in corolla["security_levels"].lower()
-          and "non-diagnostic" in corolla["security_levels"].lower(),
-          repr(corolla["security_levels"][:80]))
-    check("Corolla security_levels documents app SA secret is untested",
-          "untested" in corolla["security_levels"].lower()
-          and "893e08" in corolla["security_levels"],
-          repr(corolla["security_levels"][:80]))
-    check("Corolla application_sid_set documents 13 answering services",
-          "13 answering" in corolla["application_sid_set"].lower()
-          or "13" in corolla["application_sid_set"],
-          repr(corolla["application_sid_set"][:60]))
-    check("Corolla programming_observation documents timeout indeterminacy",
-          "timeout" in corolla["programming_observation"].lower()
-          and ("not decisive" in corolla["programming_observation"].lower()
-               or "not" in corolla["programming_observation"].lower()),
-          repr(corolla["programming_observation"][:80]))
-    check("Corolla programming_observation does NOT claim refusal",
-          "refus" not in corolla["programming_observation"].lower(),
-          repr(corolla["programming_observation"][:80]))
-    check("Corolla programming_observation notes missing bus capture",
-          "bus" in corolla["programming_observation"].lower()
-          and ("missing" in corolla["programming_observation"].lower()
-               or "not captured" in corolla["programming_observation"].lower()),
-          repr(corolla["programming_observation"][:80]))
-    check("Corolla programming_observation documents 0x14 crash",
-          "0x14" in corolla["programming_observation"]
-          and "crash" in corolla["programming_observation"].lower(),
-          repr(corolla["programming_observation"][:80]))
-    check("Corolla application_dids records F181 count=0x02 two records",
-          "count=0x02" in corolla["application_dids"]
-          and "two records" in corolla["application_dids"],
-          repr(corolla["application_dids"][:60]))
+    check("Span Corolla evidence_grade is definitive after corpus persistence",
+          corolla["evidence_grade"] == "definitive", repr(corolla["evidence_grade"]))
+    check("Span Corolla firmware artifact is locally available",
+          corolla["firmware_available"].startswith("yes") and "spanconstant/raw-20260821" in corolla["firmware_available"])
+    check("Span Corolla application_software_id remains observed F181 8965F1208000",
+          corolla["application_software_id"] == "8965F1208000")
+    check("Span Corolla secondary software ID remains 8A3111213000",
+          corolla["secondary_software_id"] == "8A3111213000")
+    check("Span Corolla exact MCU is tracked R7F701383",
+          "R7F701383" in corolla["mcu"] and "RH850" in corolla["mcu"])
+    check("Span Corolla direct diagnostic route is bus1 param1",
+          all(token in corolla["diagnostic_bus"] for token in ("CAN-FD", "param 1", "bus 1")))
+    check("Span Corolla secoc_sync_id remains 0x0F",
+          corolla["secoc_sync_id"].strip() == "0x0F")
+    check("Span Corolla secured CAN observations retain 2E4/131/344",
+          all(x in corolla["secured_can_ids"] for x in ("0x2E4", "0x131", "0x344")))
+    check("Span Corolla F181 and tracked raw-ID distinction are explicit",
+          all(x in corolla["application_dids"] for x in ("F181=8965F1208000+8A3111213000", "8965H1213000", "0x17D80", "0x20860", "not yet target-native recovered")))
+    check("Span Corolla corrected direct PROGRAMMING succeeded",
+          all(x in corolla["programming_observation"] for x in ("2026-08-21", "bus1,param1", "opened PROGRAMMING", "accepted SecurityAccess key", "completed CodeFlash")))
+    check("Span Corolla older param0 timeout is retained as non-diagnostic",
+          "param0 timeout" in corolla["programming_observation"] and "non-diagnostic" in corolla["programming_observation"])
+    check("Span Corolla security row records successful boot unlock without inventing app-secret result",
+          "accepted key" in corolla["security_levels"] and "target-native SA roots/algorithms still pending" in corolla["security_levels"])
+    check("Span Corolla application SID set retains 13 answering services",
+          "13 answering" in corolla["application_sid_set"].lower() or "13" in corolla["application_sid_set"])
+    check("Span Corolla source points at persisted corpus",
+          "community/spanconstant/raw-20260821/MANIFEST.txt" in corolla["source"] and "matching ECU serial" in corolla["source"])
 
 # ── 2023 Corolla 8965H1202000: tracked CodeFlash evidence ───────
 check("Corolla 8965H1202000 row present", corolla_h is not None)

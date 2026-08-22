@@ -217,15 +217,16 @@ re-derivation against raw bytes; split-CodeFlash file offset == VA):
    established here. `tests/verify_xcp_boot_handoff_retention.py` pins this
    composition directly from raw CodeFlash.
 
-   A preliminary third-calibration recurrence is now observed in Span's
-   2026-08-21 Corolla dump: CodeFlash SHA-256
-   `b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d`
+   A third calibration now independently verifies the same lifetime property.
+   Span's tracked 2026-08-21 Corolla CodeFlash (SHA-256
+   `b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d`)
    is 99.8956% same-address byte-identical to tracked Corolla
    `8965H1202000`, and its handoff caller `0x5F208`, complete `0x9F00` boot
-   stub, `0x1472` state copier, and reset-only `0x13E8` initializer are all
-   byte-identical to that tracked image. Its XCP write/shadow geometry is also
-   identical. This is currently **observed external-source evidence** because
-   the Span bundle has not yet been persisted; canonical variant detail is in
+   stub, `0x1472` state copier, reset-only `0x13E8` initializer, and XCP
+   write/shadow geometry are all byte-identical to that tracked image.
+   `tests/verify_spanconstant_corolla_codeflash.py` pins the source ZIP,
+   extracted CodeFlash, and every one of those transfer landmarks. Canonical
+   variant detail is in
    [corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 
 2. **Failure-loop setup arms diagnostics, but the two entry states are not

@@ -2292,9 +2292,11 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   seed, accepted the key, and completed the requested CodeFlash/DataFlash/RAM
   range dumps. The old timeout remains useful only as evidence about the wrong
   gateway/OBD route.
-- **Evidence boundary:** the source ZIP is currently local/untracked, SHA-256
+- **Evidence boundary:** the source ZIP is now tracked byte-for-byte at
+  `community/spanconstant/spanconstant_tsk.zip` with SHA-256
   `a5744b4c4627d3e5c20d590bb882d25b9b40c0679cbc3e9660140c7f2ef5262b`;
-  this correction is therefore external-source/observed until the bundle is
-  persisted and covered by deterministic tests.
+  the corrected preflight, route record, SecurityAccess log, and normalized
+  memory corpus are independently pinned by
+  `tests/verify_spanconstant_corolla_codeflash.py`.
 - **Canonical:** [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md);
   VAR-039.

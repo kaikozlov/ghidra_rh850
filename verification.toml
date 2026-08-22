@@ -1507,6 +1507,24 @@ paths = [
 oracle = "raw_bytes"
 
 
+[suite.spanconstant_corolla_codeflash]
+tests = ["tests/verify_spanconstant_corolla_codeflash.py"]
+paths = [
+  "tests/verify_spanconstant_corolla_codeflash.py",
+  "community/spanconstant/",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "data/tss3_eps_variant_matrix.csv",
+  "docs/variants/corolla-8965F1208000.md",
+  "docs/architecture/boot-validity-and-flash-lifecycle.md",
+  "docs/communications/xcp-command-dispatch.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "external-references.lock.json",
+  "community/README.md",
+]
+oracle = "raw_bytes"
+
+
 [suite.corolla_8965h_application_diagnostics]
 tests = ["tests/verify_corolla_8965H1202000_application_diagnostics.py"]
 paths = [

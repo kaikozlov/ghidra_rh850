@@ -1,0 +1,136 @@
+{
+  "dump": {
+    "bytes": 65536,
+    "dump_path": "/cache/tsk/range-dumps/dump_dataflash_ff200000_ff210000_20260821-151200.bin",
+    "frames": 16384,
+    "message": "Dump complete: 65536/65536 bytes.\ndump_dataflash_ff200000_ff210000_20260821-151200.bin",
+    "status": "complete",
+    "total": 65536
+  },
+  "ecu_serial": "8965012N50E12H030731",
+  "error": "",
+  "identity": {
+    "active_session": "01",
+    "app_sw_id": "8965F12080008A3111213000",
+    "ecu_serial": "8965012N50E12H030731"
+  },
+  "panda": {
+    "dongle": "23257862c6bf2f83",
+    "harness_status": 2,
+    "hw_serial": "WnMwhpWJ4x",
+    "version": "DEV-6409a587-DEBUG"
+  },
+  "probes": [
+    {
+      "bus": 1,
+      "chosen": false,
+      "default": "opened",
+      "extended": "opened",
+      "extended_again": "opened",
+      "liveness": "03",
+      "param": 0,
+      "programming": "silent",
+      "services": {
+        "0x11": "silent",
+        "0x28": "silent",
+        "0x34": "silent",
+        "0x85": "silent"
+      }
+    },
+    {
+      "bus": 1,
+      "chosen": true,
+      "default": "opened",
+      "extended": "opened",
+      "extended_again": "opened",
+      "liveness": "03",
+      "param": 1,
+      "programming": "opened",
+      "services": {
+        "0x11": "NRC 0x7f",
+        "0x28": "NRC 0x13",
+        "0x34": "NRC 0x7f",
+        "0x85": "NRC 0x13"
+      }
+    }
+  ],
+  "result": "ready to dump",
+  "route": {
+    "bus": 1,
+    "param": 1
+  },
+  "screenshot": "RESULT: ready to dump\n\nSteering ECU     answered on bus 1\nBuses answering  param 0: bus 1\n                 param 1: bus 1\nPanda            23257862c6bf2f83, harness flipped\n\nDefault session      opened\nExtended session     opened\nProgramming session  opened\nSecurity seed        received\nSecurity unlock      accepted\nTest dump            65536 of 65536 bytes\n\nECU part number  8965F12080008A3111213000\nECU serial       8965012N50E12H030731\n\nRoute probes\n  bus 1 param 0\n    sessions  ok / ok / silent\n    services  11 silent   28 silent\n              34 silent   85 silent\n  bus 1 param 1  <-- used\n    sessions  ok / ok / ok\n    services  11 NRC 7f   28 NRC 13\n              34 NRC 7f   85 NRC 13",
+  "stages": {
+    "default": "opened",
+    "dump": "65536 of 65536 bytes",
+    "extended": "opened",
+    "programming": "opened",
+    "seed": "received",
+    "unlock": "accepted"
+  },
+  "stages_extra": {
+    "programming_repeat": "opened",
+    "trigger": "sent",
+    "upload": "accepted"
+  },
+  "stamp": "20260821-151149",
+  "sweep": [
+    {
+      "answered": false,
+      "bus": 0,
+      "detail": "MessageTimeoutError",
+      "param": 0
+    },
+    {
+      "answered": true,
+      "bus": 1,
+      "detail": "opened",
+      "param": 0
+    },
+    {
+      "answered": false,
+      "bus": 2,
+      "detail": "MessageTimeoutError",
+      "param": 0
+    },
+    {
+      "answered": false,
+      "bus": 0,
+      "detail": "MessageTimeoutError",
+      "param": 1
+    },
+    {
+      "answered": true,
+      "bus": 1,
+      "detail": "opened",
+      "param": 1
+    },
+    {
+      "answered": false,
+      "bus": 2,
+      "detail": "MessageTimeoutError",
+      "param": 1
+    }
+  ],
+  "traffic": [
+    {
+      "bus": 0,
+      "frames": 1182,
+      "ids": 22,
+      "sync": 0
+    },
+    {
+      "bus": 1,
+      "frames": 5,
+      "ids": 2,
+      "sync": 0
+    },
+    {
+      "bus": 2,
+      "frames": 1182,
+      "ids": 22,
+      "sync": 0
+    }
+  ],
+  "traffic_param": 0
+}

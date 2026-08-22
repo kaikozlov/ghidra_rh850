@@ -116,8 +116,9 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **Cross-calibration semantic patch resolver validation.** SECOC-045 now
   rediscovers the Sienna authenticated-delivery gate from a fresh unannotated
   CodeFlash-only import with no target/MAC-result/CRC addresses embedded in the
-  resolver. The highest-value next artifact is any blurbdust-supported
-  `8965F3`/`8965F4` CodeFlash (or the missing Corolla `8965F1208000` image).
+  resolver. Span's `8965F1208000` specimen is now persisted and should be run
+  through the unchanged resolver next; beyond it, the highest-value missing
+  artifacts are blurbdust-supported `8965F3`/`8965F4` CodeFlash images.
   For F3 the acquisition target is now concrete: Toyota Tundra package
   `T-0035-22.cuw` from TSB `T-SB-0069-22` contains the `8965F3401200/2200`
   images plus the CUW erase routine; the retained community decryptor can emit
@@ -279,19 +280,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   observations, but runtime crypto architecture, `0x344` EPS direction/owner,
   mismatch clustering, and key uniqueness remain open. See
   [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md).
-- **Corolla `8965F1208000`.** Firmware-static confirmation remains blocked:
-  Stage 8 found no public CodeFlash artifact under the exact identifier or
-  firmware-shaped path variants. MCU identity, SA implementation/secret
-  location, bootloader payload gate, bootloader secrets, and SecOC
-  implementation must therefore still be checked against the actual CodeFlash.
-  Direct field probing has already established the software IDs, physical
-  diagnostic endpoint, responding SIDs, level-`0x03` seed behavior, observed
-  SecOC traffic, and (2026-08-19) DEFAULT-session reachability on bus 1 under
-  **both** ELM327 params 0 and 1; do not describe those as unknown. The old
-  PROGRAMMING failure remains route-confounded because that preflight selected
-  `(bus1,param0)` by array order. Final Calvin `dump @ 42d1120` selects by actual
-  PROGRAMMING reachability, but **PROGRAMMING on `(bus1,param1)` has never been
-  measured in-car** and is now the decisive cheap experiment. See
+- **Corolla `8965F1208000`.** The acquisition blocker is closed: the full
+  2026-08-21 Span source ZIP and normalized CodeFlash/DataFlash/RAM/preflight
+  corpus are tracked under `community/spanconstant/`, and boot-info verifies
+  `R7F701383`. The corrected `(bus1,param1)` preflight opened PROGRAMMING,
+  received a SecurityAccess seed, accepted the key, and completed the range
+  dumps. Firmware-static work now starts from the actual bytes rather than from
+  Sienna/H inference. Highest-value unresolved items are the F181 producer join
+  (`8965F1208000` observed versus raw `8965H1213000` at `0x17D80`), application
+  SA implementation/secret, boot payload-gate roots, SecOC profile/key-selection
+  topology, and steering-command ingress. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 - **Separate 2023 US Corolla / tracked `8965H1202000` specimen.** The complete
   memory corpus is now retained. CodeFlash internally identifies

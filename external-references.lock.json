@@ -614,6 +614,110 @@
       "sha256": "f27514c621ba56b127058341f6730c96900347e72d7c54e101875ee4fb3f46ce",
       "provenance": "Contributor-supplied Corolla EPS memory-corpus member; preserved byte-for-byte under raw-20260818",
       "notes": "See community/albinoelephant/raw-20260818/MANIFEST.txt for acquisition context and per-file interpretation."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/spanconstant_tsk.zip",
+      "size": 1754757,
+      "sha256": "a5744b4c4627d3e5c20d590bb882d25b9b40c0679cbc3e9660140c7f2ef5262b",
+      "provenance": "Original Span TSKM acquisition bundle; retained byte-for-byte before normalization",
+      "notes": "Full source bundle including macOS metadata and large UDS sweep captures; normalized analysis subset is under community/spanconstant/raw-20260821."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/MANIFEST.txt",
+      "size": 4350,
+      "sha256": "ff691183dc81da9a7f232b4028ab4d9c48799f8866fd6b7ace90562ce9d5e29d",
+      "provenance": "Repository-authored normalization manifest for the retained Span 2026-08-21 source bundle",
+      "notes": "Pins source ZIP, extracted member paths/hashes, CodeFlash identity, and repeatability observations."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+      "size": 2097152,
+      "sha256": "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_dataflash_ff200000_ff210000_20260821-151200.bin",
+      "size": 65536,
+      "sha256": "85d76a96436e99e246b0695938e2dd046b8878e7d0e68f2ba7cd79f285f468a2",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_dataflash_ff200000_ff210000_20260821-151612.bin",
+      "size": 65536,
+      "sha256": "7f64ae2e66af7d8367e1926a7f2137f8255e0b92b82a77e55cedde4eee418137",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_dataflash_ff200000_ff210000_20260821-151743.bin",
+      "size": 65536,
+      "sha256": "c90903073c483d6743e35ff4ab6aa6bbcb78756b0a025c620027f910568cd271",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_extended_codeflash_01000000_0100c000_20260821-151952.bin",
+      "size": 49152,
+      "sha256": "90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_global_ram_feef8000_fef08000_20260821-151923.bin",
+      "size": 65536,
+      "sha256": "aedfa4def81ca249cc93154f04c8c017d75d5cf45b8e4a707399266f3c4e0713",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_pe1_febe0000_fec00000_20260821-151834.bin",
+      "size": 131072,
+      "sha256": "255e167643e297fcc6e7458d3372e3df53eed08bd21e2b55714451aac4ee4e38",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_local_ram_self_fede0000_fee00000_20260821-152418.bin",
+      "size": 131072,
+      "sha256": "7668da24f9baceb6329221be8ad0fabae16650df80a234e6ef76decc4f6c0e44",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/preflight_8965012N50E12H030731_20260821-151149.json",
+      "size": 3436,
+      "sha256": "a069f155695dd10a19834afb2a3f7b35daaac52d52fc0be66f56d213cda57285",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/route.json",
+      "size": 159,
+      "sha256": "c6fcb2b72b9ce447f6d62af119e93de7ca3ee6f10affa95ea98a15d2e435d4aa",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant Corolla acquisition, 2026-08-21",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/security_access_log.json",
+      "size": 2173,
+      "sha256": "9db9eaf86eb3faf524c550dc8628f14b8f2ecea40920dc9b18c0779d32760c35",
+      "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
+      "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
     }
   ],
   "public_routes": [

@@ -1,0 +1,76 @@
+Span Corolla EPS memory corpus - 2026-08-21
+===============================================
+
+Source: spanconstant_tsk.zip (retained byte-for-byte at community/spanconstant/)
+Source ZIP SHA-256: a5744b4c4627d3e5c20d590bb882d25b9b40c0679cbc3e9660140c7f2ef5262b
+Vehicle attribution: Span / 2025 Toyota Corolla Hybrid (field attribution)
+Observed application F181: 8965F1208000 / 8A3111213000
+ECU serial: 8965012N50E12H030731
+Direct diagnostic route: bus 1, ELM327 param 1
+
+NORMALIZATION
+-------------
+This directory is an exact-byte extraction of the analysis-relevant memory/provenance members.
+macOS __MACOSX resource forks, .DS_Store, and large UDS sweep captures remain preserved only
+inside the retained source ZIP and are intentionally not duplicated here.
+
+FILES
+-----
+dump_codeflash_00000000_00200000_20260821-152033.bin
+  size 2,097,152  sha256 b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d
+  source member tsk/range-dumps/dump_codeflash_00000000_00200000_20260821-152033.bin
+dump_dataflash_ff200000_ff210000_20260821-151200.bin
+  size 65,536  sha256 85d76a96436e99e246b0695938e2dd046b8878e7d0e68f2ba7cd79f285f468a2
+  source member tsk/range-dumps/dump_dataflash_ff200000_ff210000_20260821-151200.bin
+dump_dataflash_ff200000_ff210000_20260821-151612.bin
+  size 65,536  sha256 7f64ae2e66af7d8367e1926a7f2137f8255e0b92b82a77e55cedde4eee418137
+  source member tsk/range-dumps/dump_dataflash_ff200000_ff210000_20260821-151612.bin
+dump_dataflash_ff200000_ff210000_20260821-151743.bin
+  size 65,536  sha256 c90903073c483d6743e35ff4ab6aa6bbcb78756b0a025c620027f910568cd271
+  source member tsk/range-dumps/dump_dataflash_ff200000_ff210000_20260821-151743.bin
+dump_extended_codeflash_01000000_0100c000_20260821-151952.bin
+  size 49,152  sha256 90cc7b3d88e0c8b7ef330160ecb792134f5fbf9b9d8219c80d038a5451a15cc7
+  source member tsk/range-dumps/dump_extended_codeflash_01000000_0100c000_20260821-151952.bin
+dump_global_ram_feef8000_fef08000_20260821-151923.bin
+  size 65,536  sha256 aedfa4def81ca249cc93154f04c8c017d75d5cf45b8e4a707399266f3c4e0713
+  source member tsk/range-dumps/dump_global_ram_feef8000_fef08000_20260821-151923.bin
+dump_local_ram_pe1_febe0000_fec00000_20260821-151834.bin
+  size 131,072  sha256 255e167643e297fcc6e7458d3372e3df53eed08bd21e2b55714451aac4ee4e38
+  source member tsk/range-dumps/dump_local_ram_pe1_febe0000_fec00000_20260821-151834.bin
+dump_local_ram_self_fede0000_fee00000_20260821-152418.bin
+  size 131,072  sha256 7668da24f9baceb6329221be8ad0fabae16650df80a234e6ef76decc4f6c0e44
+  source member tsk/range-dumps/dump_local_ram_self_fede0000_fee00000_20260821-152418.bin
+preflight_8965012N50E12H030731_20260821-151149.json
+  size 3,436  sha256 a069f155695dd10a19834afb2a3f7b35daaac52d52fc0be66f56d213cda57285
+  source member tsk/preflight/preflight_8965012N50E12H030731_20260821-151149.json
+route.json
+  size 159  sha256 c6fcb2b72b9ce447f6d62af119e93de7ca3ee6f10affa95ea98a15d2e435d4aa
+  source member tsk/preflight/route.json
+security_access_log.json
+  size 2,173  sha256 9db9eaf86eb3faf524c550dc8628f14b8f2ecea40920dc9b18c0779d32760c35
+  source member tsk/security_access_log.json
+
+CODEFLASH IDENTITY / GEOMETRY
+-----------------------------
+2 MiB range SHA-256: b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d
+normalized first-1-MiB SHA-256: fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6
+upper 1 MiB all FF: True
+boot info @0x180: BOOT INFO AREA  R7F701383       72114350
+ECU serial @0xA4DC: 8965012N50E12H030731
+raw ID @0x17D80: 8965H1213000
+raw ID @0x17DC0: 8A3111213000
+raw ID @0x20860: 8965F1208000
+
+REPEATABILITY NOTES
+-------------------
+DataFlash read 1 vs 2, physical first 32 KiB: 2860/32768 bytes differ (8.7280%)
+DataFlash read 1 vs 3, physical first 32 KiB: 3017/32768 bytes differ (9.2072%)
+DataFlash read 2 vs 3, physical first 32 KiB: 2934/32768 bytes differ (8.9539%)
+PE1-view vs self-view LocalRAM captures (different times): 3678/131072 bytes differ (2.8061%)
+
+EVIDENCE BOUNDARY
+-----------------
+The tracked bytes establish the firmware artifact and reproducible static comparisons. Vehicle
+model/year attribution remains contributor/field evidence. Observed F181 is 8965F1208000 while
+the raw CodeFlash also contains 8965H1213000 at 0x17D80; do not assign the F181 producer or
+interpret that relationship without target-native dataflow analysis.

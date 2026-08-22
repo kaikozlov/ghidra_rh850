@@ -162,13 +162,13 @@ for line in (REPO / "docs/status/FINDINGS.md").read_text(encoding="utf-8").split
                 verified_findings.append(cells[0])
             if grade.startswith("observed"):
                 observed_findings.append(cells[0])
-check("exact verified finding denominator", len(verified_findings) == 64)
-check("dynamic observation denominator", observed_findings == ["SECOC-030", "VAR-001", "VAR-039", "VAR-041"])
+check("exact verified finding denominator", len(verified_findings) == 67)
+check("dynamic observation denominator", observed_findings == ["SECOC-030", "VAR-001"])
 
 required_tokens = [
     "114 `passed`, 5 `unavailable`, 0 `failed`",
     "Live official Techstream↔`8965B4512000` flows captured | 0",
-    "Exact cross-variant/target-generation transfers verified | 1 tracked foreign CodeFlash regression (`8965H1202000`)",
+    "Exact cross-variant/target-generation transfers verified | 2 tracked foreign CodeFlash regressions (`8965H1202000`, Span 2026-08-21)",
 ]
 check("blocked and execution dimensions published", all(token in text for token in required_tokens))
 

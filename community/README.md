@@ -208,3 +208,29 @@ variant report. `tools/analyze_toyota_dataflash.py` can therefore test the
 actual dump against all three observed domains offline. See
 [`albinoelephant/README.md`](albinoelephant/README.md) and
 [`docs/variants/corolla-2023-us-public-route.md`](../docs/variants/corolla-2023-us-public-route.md).
+
+
+## `spanconstant/`
+
+**Contributor/specimen:** Span, 2025 Toyota Corolla Hybrid investigation
+**Acquired:** 2026-08-21
+
+This directory preserves the complete original `spanconstant_tsk.zip` plus an
+exact-byte normalized memory/provenance subset under `raw-20260821/`. The source
+ZIP, normalization manifest, CodeFlash/DataFlash/RAM members, corrected direct
+route preflight, and SecurityAccess log are individually hash-pinned in
+`external-references.lock.json`.
+
+The tracked CodeFlash has source SHA-256
+`b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d`
+and boot-info `R7F701383`. The same acquisition bundle records live F181
+`8965F1208000 / 8A3111213000` and serial `8965012N50E12H030731`; raw CodeFlash
+also contains `8965H1213000` at `0x17D80`, whose relationship to F181 remains a
+target-native dataflow question rather than an assumed identity.
+
+`tests/verify_spanconstant_corolla_codeflash.py` proves that the persisted image
+repeats the H-family unauthenticated XCP high-LocalRAM write architecture and
+live application→boot retention path, while deliberately stopping short of a
+no-auth PC-pivot claim. See
+[`spanconstant/README.md`](spanconstant/README.md) and
+[`docs/variants/corolla-8965F1208000.md`](../docs/variants/corolla-8965F1208000.md).
