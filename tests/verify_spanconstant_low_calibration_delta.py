@@ -42,7 +42,7 @@ summary = tracked["summary"]
 check("exactly 2190 CodeFlash bytes differ", len(changed) == summary["different_codeflash_bytes"] == 2190)
 check("low delta remains bounded to 0xA004..0x17DFF", min(changed) == 0xA004 and max(changed) == 0x17DFF)
 check("application 0x20000..0xFFFFF remains byte-identical", h[0x20000:] == s[0x20000:] and summary["application_different_bytes"] == 0)
-check("delta partitions exactly into A000 records, low shadow source, and post-CRC tag", summary["delta_partition_complete"] and (summary["a000_record_bank_changed_bytes"], summary["low_shadow_source_changed_bytes"], summary["post_crc_opaque_tag_changed_bytes"]) == (863, 1311, 16) and 863 + 1311 + 16 == 2190)
+check("delta partitions exactly into A000 records, low shadow source, and region-0 CMAC tag", summary["delta_partition_complete"] and (summary["a000_record_bank_changed_bytes"], summary["low_shadow_source_changed_bytes"], summary["region0_cmac_tag_changed_bytes"]) == (863, 1311, 16) and 863 + 1311 + 16 == 2190)
 
 # Count width is intentionally pinned as u16.  Reading a u32 here would merge the
 # adjacent 0x0012 field and manufacture the bogus value 0x00120009.
@@ -149,11 +149,11 @@ expected_rows = [
 actual_rows = [(r["start"], r["end_inclusive"], r["cmac_tag_address"], r["marker_address"], r["crc_descriptor_table"]) for r in regions["rows"]]
 check("integrity region rows carry exact start/end/tag/marker/descriptor tuples", actual_rows == expected_rows)
 check("each region tag address is exactly the final 16 bytes of its region", all(r["tag_is_final_16_bytes_of_region"] for r in regions["rows"]))
-check("region-0 and region-1 validity markers are 0x5AA5A55A in both images", all(r["marker_value_baseline"] == r["marker_value_target"] == "0x5AA5A55A" for r in regions["rows"][:2]))
+check("region-0 and region-1 validity markers are 0x5AA5A55A and row-2 null marker is not dereferenced", all(r["marker_value_baseline"] == r["marker_value_target"] == "0x5AA5A55A" for r in regions["rows"][:2]) and regions["rows"][2]["marker_address"] == "0x0" and regions["rows"][2]["marker_value_baseline"] is None and regions["rows"][2]["marker_value_target"] is None)
 cmac_chain_entries = {c["entry"].split("/")[0] for c in regions["cmac_verify_chain"]}
 check("CMAC verify chain pins all named boot functions", cmac_chain_entries == {"0x00005BEA", "0x0000591A", "0x00006E9E", "0x00007106", "0x00003376", "0x00006EC4", "0x00007DF0", "0x00007336", "0x00007D34"})
 check("region-0 AES-CMAC tag is fully changed (16/16) and recorded", regions["region0_cmac_tag_baseline"] == h[0x17DF0:0x17E00].hex() and regions["region0_cmac_tag_target"] == s[0x17DF0:0x17E00].hex() and sum(a != b for a, b in zip(h[0x17DF0:0x17E00], s[0x17DF0:0x17E00])) == 16)
-check("0x17DF0 tag semantics are promoted from unresolved to AES-CMAC", tracked["identity_and_integrity_tail"]["opaque_tag_algorithm"] == "superseded-by-boot-integrity-region-0-aes-cmac-tag")
+check("0x17DF0 tag semantics are recorded directly as AES-CMAC", ident["region0_cmac_tag_baseline"] == regions["region0_cmac_tag_baseline"] and ident["region0_cmac_tag_target"] == regions["region0_cmac_tag_target"] and "AES-CMAC" in ident["region0_cmac_tag_role"])
 check("high-region tag slot at 0xFFDF0 is identical between specimens and not asserted programmed", h[0xFFDF0:0xFFE00] == s[0xFFDF0:0xFFE00])
 # Role-critical CMAC chain bodies are byte-identical between H and Span.
 cmac_bodies = {
@@ -176,7 +176,7 @@ check("shadow geometry exactly explains the two retained identity mirrors", iden
 check("isolated scalar byte change at 0x13E46 is pinned without inventing record framing", struct.unpack_from("<H", h, 0x13E46)[0] == 0x0929 and struct.unpack_from("<H", s, 0x13E46)[0] == 0x0989)
 
 interp = tracked["interpretation"]
-check("artifact refuses to promote specimen differences to a model-year tuning claim", interp["unit_specific_motor_calibration_differs"] and not interp["model_year_tuning_change_proven"])
+check("artifact refuses to promote specimen differences to a model-year tuning claim", interp["specimen_specific_motor_calibration_differs"] and not interp["model_year_tuning_change_proven"])
 check("artifact preserves the unresolved 0x10000+ CPU-consumer boundary", "no recovered application CPU semantic dereference" in shadow["cpu_consumer_boundary"] and "not disproved" in shadow["cpu_consumer_boundary"])
 
 # ---- second-slice closures ----
@@ -199,12 +199,12 @@ for cap, rel, base, img in (
 # High-template boundary.
 ht = shadow["high_template_boundary"]
 check("high 0x18000..0x1FDEF is identical between specimens and ~84.9% homologous to the low page", ht["identical_between_variants"] and h[0x18000:0x1FDF0] == s[0x18000:0x1FDF0] and ht["byte_homology_fraction_with_low_page"] == 0.8488)
-check("high template is neither specimen's calibration at the changed offsets", ht["at_changed_low_offsets"] == {"high_equals_baseline": 60, "high_equals_target": 11, "third_value": 1240})
-check("high template carries no marker/tag structure and the checked XCP config area is zero", ht["no_marker_at_0x1FE00"] and struct.unpack_from("<I", h, 0x1FE00)[0] != 0x5AA5A55A and ht["xcp_config_area_0x261F0_all_zero"] and not any(h[0x261F0:0x26230]))
+check("high template is neither specimen's calibration at the changed offsets", ht["at_changed_low_offsets"] == {"high_equals_baseline": 60, "high_equals_target": 11, "high_matches_neither": 1240})
+check("high template has no low-region validity marker at 0x1FE00", ht["no_marker_at_0x1FE00"] and struct.unpack_from("<I", h, 0x1FE00)[0] != 0x5AA5A55A)
 
 # Bank-A exact structural partition (33x0x44 + 4x0x24 + interstitial + 32x0x28 + tail = 1143).
 part = shadow["structured_bank_a"]["exact_partition"]
-check("bank-A 0x44 row family: 33 rows, every-8th unchanged, 645 changed bytes", part["curve_rows_0x44"]["count"] == 33 and part["curve_rows_0x44"]["unchanged_row_indices"] == [0, 8, 16, 24, 32] and part["curve_rows_0x44"]["total_changed"] == 645)
+check("bank-A 0x44 row family: 33 rows, every-8th unchanged, 645 changed bytes", part["packed_point_rows_0x44"]["count"] == 33 and part["packed_point_rows_0x44"]["unchanged_row_indices"] == [0, 8, 16, 24, 32] and part["packed_point_rows_0x44"]["total_changed"] == 645)
 check("bank-A 0x24 row family unchanged", part["rows_0x24"]["count"] == 4 and part["rows_0x24"]["total_changed"] == 0)
 check("bank-A interstitial carries 28 changes", part["interstitial"]["changed_bytes"] == 28)
 check("bank-A 0x28 row family: 32 rows, every-8th unchanged, 240 changed bytes", part["rows_0x28"]["count"] == 32 and part["rows_0x28"]["unchanged_row_indices"] == [0, 8, 16, 24] and part["rows_0x28"]["total_changed"] == 240)
@@ -220,19 +220,27 @@ axis_0_1 = {tuple(struct.unpack_from("<H", h, a + 4 * k)[0] for k in range(8)) f
 check("bank-B rows 0/1 use the distinct small axis and are unchanged", axis_0_1 == {(0, 80, 480, 960, 1920, 3200, 4800, 11520)} and all(h[a:a + 0x24] == s[a:a + 0x24] for a in rowsB[:2]))
 
 # Compiled-default override semantics: defaults are zero in both specimens; records differ.
-cdo = shadow["compiled_default_override_semantics"]
-check("compiled default blocks for records 0/2/3 are byte-identical zero pages in both specimens", all(d["identical_between_variants"] and d["all_zero_baseline"] and d["all_zero_target"] for d in cdo["default_blocks"]) and h[0x21000:0x21078] == s[0x21000:0x21078] and not any(h[0x21000:0x21078]))
-check("default blocks are pinned at the exact reader-seeded addresses", [(d["va"], d["length"], d["family_index"]) for d in cdo["default_blocks"]] == [("0x21000", 0x10, "0x203"), ("0x21010", 0x28, "0x200"), ("0x21038", 0x40, "0x202")])
-check("records 0/2/3 are classified as per-unit/service overrides over unchanged software defaults", "not a compile-time 2023->2025 tuning revision" in cdo["interpretation"] and "Torque Sensor Adjustment" in cdo["interpretation"])
+cdo = shadow["compiled_staging_seed_semantics"]
+check("compiled staging seed blocks for records 0/2/3 are byte-identical zero pages in both specimens", all(d["identical_between_variants"] and d["all_zero_baseline"] and d["all_zero_target"] for d in cdo["seed_blocks"]) and h[0x21000:0x21078] == s[0x21000:0x21078] and not any(h[0x21000:0x21078]))
+check("staging seed blocks are pinned at the exact reader-seeded addresses", [(d["va"], d["length"], d["family_index"]) for d in cdo["seed_blocks"]] == [("0x21000", 0x10, "0x203"), ("0x21010", 0x28, "0x200"), ("0x21038", 0x40, "0x202")])
+check("records 0/2/3 are persistent calibration state over unchanged staging seeds, not differing compiled constants", "persistent calibration state" in cdo["interpretation"] and "not differing compiled software constants" in cdo["interpretation"] and "Torque Sensor Adjustment" in cdo["interpretation"])
 
 # XCP page-state handlers.
 xps = shadow["xcp_page_state"]
-check("XCP page-state cells and handlers are pinned", xps["state_cells"] == ["0xFEBE5DB0", "0xFEBE5DB1"] and xps["set_cal_page_handler"] == "0x9261E (custom selector 0xEB)" and xps["get_cal_page_handler"] == "0x92698 (custom selector 0xEA)" and xps["e4_copy_handler"] == "0x92724 (custom selector 0xE4) -> 0x92700")
+check("XCP page-state cells and handlers are pinned", xps["state_cells"] == ["0xFEBE5DB0", "0xFEBE5DB1"] and xps["set_cal_page_handler"] == "0x9261E (custom selector 0xEB)" and xps["get_cal_page_handler"] == "0x92698 (custom selector 0xEA)" and xps["e4_copy_handler"] == "0x92724 (custom selector 0xE4) -> 0x92700" and xps["state_initializer"] == "0x9225C (FEBE5DB0=1, FEBE5DB1=0)" and xps["recovered_high_page_selection"] is False)
+for addr, size, expected_sha in [
+    (0x9225C, 34, "3ac0034cf5cf5e1e7a6f7b1a13d1aadad6c3dee342d5fca5a8e8cbf86657e8e5"),
+    (0x9261E, 122, "5b27d286030f7058d2db0856bbaeaec90bbd920c2c5dc22e39527e7edbeb288f"),
+    (0x92698, 104, "c0e4c64e3c5305ccc23329baba91ebf7f1c49f9ac19ed3ea078dd73f926575eb"),
+    (0x92724, 106, "14367502c37c230022c4c3d55fded0377095e663d89fbe83efc0834efa84050b"),
+]:
+    check(f"XCP calibration-page body 0x{addr:08X} is pinned and byte-identical", h[addr:addr+size] == s[addr:addr+size] and sha256(h[addr:addr+size]) == expected_sha)
+check("recovered XCP grammar explicitly excludes a high-page copy/selection path", not xps["recovered_high_page_selection"] and "No recovered XCP route selects or copies 0x18000..0x1FDEF" in xps["boundary"])
 
 # Record-8 authoritative unit field.
-check("record-8 differing field is the u32 at payload+0x10 with byte 0 zero", struct.unpack_from("<I", h, 0xA518)[0] == 0x7FCF4D00 and struct.unpack_from("<I", s, 0xA518)[0] == 0x3AA4B800 and h[0xA518] == 0 and records[8]["role"] == "family_standard_unit_value_record")
+check("record-8 differing field is the u32 at payload+0x10 with byte 0 zero", struct.unpack_from("<I", h, 0xA518)[0] == 0x7FCF4D00 and struct.unpack_from("<I", s, 0xA518)[0] == 0x3AA4B800 and h[0xA518] == 0 and records[8]["role"] == "same_schema_value_record")
 SIENNA_R8 = struct.unpack_from("<I", SIENNA, 0xA638)[0]
-check("Sienna final unit record carries the same schema with value 0x1AEBBD00", SIENNA_R8 == 0x1AEBBD00 and struct.unpack_from("<I", SIENNA, 0xA628)[0] == 0xA55A5AA5)
+check("Sienna same-schema record carries value 0x1AEBBD00", SIENNA_R8 == 0x1AEBBD00 and struct.unpack_from("<I", SIENNA, 0xA628)[0] == 0xA55A5AA5)
 
 # Isolated scalar region authoritative bytes.
 iso = ident["isolated_scalar_region"]

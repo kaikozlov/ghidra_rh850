@@ -76,7 +76,11 @@ FUNCTIONS = {
     0x42720: (462, "record3_angle_offset_consumer"),
     0x5C992: (36, "startup_low_codeflash_shadow_copy"),
     0x5CAAC: (98, "application_startup_initializer"),
+    0x9225C: (34, "xcp_cal_page_state_initializer"),
+    0x9261E: (122, "xcp_set_cal_page_state"),
+    0x92698: (104, "xcp_get_cal_page_state"),
     0x92700: (36, "xcp_e4_low_codeflash_shadow_copy"),
+    0x92724: (106, "xcp_e4_cal_page_copy_handler"),
     0x60010: (92, "calibration_family_dispatch_write_runtime_shadow"),
     0x6009E: (50, "calibration_family_dispatch_validate_read"),
     0x602A0: (98, "a000_record_ram_clear_init"),
@@ -146,8 +150,8 @@ RECORD_ROLES = {
     },
     8: {
         "classification": "changed-unit-record-unresolved-field",
-        "role": "family_standard_unit_value_record",
-        "boundary": "Payload is marker A55A5AA5, u16 1, u16 20 (0x14), eight zero bytes, a 4-byte unit-specific value at payload+0x10 (u32 LE; bytes 1..3 carry the value, byte 0 is zero: baseline 0x7FCF4D00, target 0x3AA4B800), and four zero bytes. Sienna's final same-family record at 0xA628 has the identical schema with value 0x1AEBBD00. Only the three value bytes differ (0xA519..0xA51B). The differing field is unit-record content, not a checksum (records are CRC-terminated separately). No recovered fixed-index consumer; the field remains an opaque family-standard unit value — do not assign an OEM meaning.",
+        "role": "same_schema_value_record",
+        "boundary": "Payload is marker A55A5AA5, u16 1, u16 20 (0x14), eight zero bytes, a 4-byte unit-specific value at payload+0x10 (u32 LE; bytes 1..3 carry the value, byte 0 is zero: baseline 0x7FCF4D00, target 0x3AA4B800), and four zero bytes. Sienna has a same-schema record at 0xA628 with value 0x1AEBBD00. Only the three value bytes differ (0xA519..0xA51B). The differing field is unit-record content, not a checksum (records are CRC-terminated separately). No recovered fixed-index consumer; the field remains a same-schema specimen-varying content value — do not assign an OEM meaning.",
     },
 }
 
@@ -315,7 +319,7 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
     changed_low = [i for i in range(0x10000, 0x17DF0) if h[i] != s[i]]
     high_matches_h = sum(1 for i in changed_low if h[0x18000 + (i - 0x10000)] == h[i])
     high_matches_span = sum(1 for i in changed_low if h[0x18000 + (i - 0x10000)] == s[i])
-    high_third_value = len(changed_low) - high_matches_h - high_matches_span
+    high_matches_neither = len(changed_low) - high_matches_h - high_matches_span
 
     # Bank-A exact structural partition (corrected 32x0x28 row family).
     def row_changes(start: int, end: int, stride: int) -> list[int]:
@@ -332,18 +336,18 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
     if not all(struct.unpack_from("<I", h, a + 0x24)[0] == 0x7FFFFFFF for a in range(0x10B54, 0x11054, 0x28)):
         raise ValueError("bank-A 0x28-row terminal sentinel drift")
 
-    # Compiled default blocks for records 0/2/3: zero in both images; readers seed from
-    # these defaults then overlay the persistent A000 record values.
-    default_blocks = {
+    # Fixed staging-seed blocks for records 0/2/3: zero in both images; readers
+    # initialize staging from these bytes before validated persistent-record reads.
+    seed_blocks = {
         "rec3_default": (0x21000, 0x10, 0x203),
         "rec0_default": (0x21010, 0x28, 0x200),
         "rec2_default": (0x21038, 0x40, 0x202),
     }
-    default_rows = []
-    for name, (va, ln, family_idx) in default_blocks.items():
+    seed_rows = []
+    for name, (va, ln, family_idx) in seed_blocks.items():
         blk_h = h[va:va + ln]
         blk_s = s[va:va + ln]
-        default_rows.append({
+        seed_rows.append({
             "name": name, "va": f"0x{va:X}", "length": ln, "family_index": f"0x{family_idx:X}",
             "identical_between_variants": blk_h == blk_s,
             "all_zero_baseline": not any(blk_h), "all_zero_target": not any(blk_s),
@@ -363,8 +367,8 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             "cmac_tag_address": f"0x{tag:X}", "marker_address": f"0x{marker:X}",
             "field_10": f"0x{field_10:X}", "enabled": enabled, "crc_descriptor_table": f"0x{crc_desc:X}",
             "tag_is_final_16_bytes_of_region": tag == end_incl - 0xF,
-            "marker_value_baseline": f"0x{struct.unpack_from('<I', h, marker)[0]:08X}",
-            "marker_value_target": f"0x{struct.unpack_from('<I', s, marker)[0]:08X}",
+            "marker_value_baseline": None if marker == 0 else f"0x{struct.unpack_from('<I', h, marker)[0]:08X}",
+            "marker_value_target": None if marker == 0 else f"0x{struct.unpack_from('<I', s, marker)[0]:08X}",
         })
     cmac_tag_h = h[0x17DF0:0x17E00]
     cmac_tag_s = s[0x17DF0:0x17E00]
@@ -381,7 +385,6 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             "all_differences_below_0x17e00": all(i < 0x17E00 for i in changed),
             "a000_record_bank_changed_bytes": diff_count(h, s, 0xA000, 0xA528),
             "low_shadow_source_changed_bytes": diff_count(h, s, SHADOW_SOURCE_START, SHADOW_SOURCE_END),
-            "post_crc_opaque_tag_changed_bytes": diff_count(h, s, 0x17DF0, 0x17E00),
             "region0_cmac_tag_changed_bytes": diff_count(h, s, 0x17DF0, 0x17E00),
             "delta_partition_complete": len(changed) == (diff_count(h, s, 0xA000, 0xA528) + diff_count(h, s, SHADOW_SOURCE_START, SHADOW_SOURCE_END) + diff_count(h, s, 0x17DF0, 0x17E00)),
         },
@@ -411,7 +414,7 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
                 "sentinel_offsets_baseline": sentinel_offsets_h, "sentinel_offsets_target": sentinel_offsets_s,
                 "sentinel_geometry_identical": sentinel_offsets_h == sentinel_offsets_s,
                 "exact_partition": {
-                    "curve_rows_0x44": {"start": "0x10100", "end_exclusive": "0x109C4", "count": 33,
+                    "packed_point_rows_0x44": {"start": "0x10100", "end_exclusive": "0x109C4", "count": 33,
                                           "row_shape": "16 packed (u16 axis, i16 value) dwords + u32 0xFFFF7FFF terminal",
                                           "per_row_changed_bytes": rows44_changes,
                                           "unchanged_row_indices": [i for i, c in enumerate(rows44_changes) if c == 0],
@@ -440,32 +443,33 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             },
             "runtime_shadow_liveness": {
                 "captures": shadow_verifications,
-                "conclusion": "All five retained runtime snapshots (albino 3x PE1, Span PE1, Span self-alias) hold FEBF7C00..FEBFF9EF byte-identical to the same specimen's CodeFlash 0x10000..0x17DEF. The low page is therefore the live runtime shadow actually consumed at runtime, not a dormant copy.",
+                "conclusion": "All five retained runtime snapshots (albino 3x PE1, Span PE1, Span self-alias) hold FEBF7C00..FEBFF9EF byte-identical to the same specimen's CodeFlash 0x10000..0x17DEF. This proves the low page is materialized verbatim in the runtime LocalRAM shadow; it does not by itself prove a semantic CPU consumer of the copied calibration contents.",
             },
             "high_template_boundary": {
                 "range": "0x18000..0x1FDEF",
                 "identical_between_variants": h[0x18000:0x1FDF0] == s[0x18000:0x1FDF0],
                 "byte_homology_fraction_with_low_page": round(high_homology / 0x7DF0, 4),
-                "at_changed_low_offsets": {"high_equals_baseline": high_matches_h, "high_equals_target": high_matches_span, "third_value": high_third_value},
+                "at_changed_low_offsets": {"high_equals_baseline": high_matches_h, "high_equals_target": high_matches_span, "high_matches_neither": high_matches_neither},
                 "no_marker_at_0x1FE00": struct.unpack_from("<I", h, 0x1FE00)[0] != 0x5AA5A55A,
-                "xcp_config_area_0x261F0_all_zero": not any(h[0x261F0:0x26230]),
-                "boundary": "The high block is an invariant structurally homologous template/reference-like region. No CodeFlash content reader/copy from it is recovered, and there is no 0x1FE00 marker/tag structure. It is NOT proven to be factory/default calibration and NOT proven XCP-selectable; no alternate-page selection is claimed (the checked XCP config area is all zero in the raw image). At the 1,311 changed low offsets it matches the baseline only 60 times and Span 11 times, so it is not simply either specimen's calibration.",
+                "boundary": "The high block is an invariant structurally homologous template/reference-like region. No CodeFlash content reader/copy from it is recovered, and the dword at 0x1FE00 is not the `0x5AA5A55A` validity marker used by the low region. Target-native H review of the recovered XCP page grammar finds no route that selects or copies this high block: SET/GET_CAL_PAGE only manipulate/report FEBE5DB0/5DB1 and E4 hardcodes the 0x10000..0x17DEF low-page copy. It is still NOT proven to be factory/default calibration, and its manufacturing/tooling origin remains bounded. At the 1,311 changed low offsets it matches the baseline only 60 times, Span 11 times, and neither specimen 1,240 times, so it is not simply either specimen's calibration.",
             },
-            "compiled_default_override_semantics": {
-                "default_blocks": default_rows,
+            "compiled_staging_seed_semantics": {
+                "seed_blocks": seed_rows,
                 "reader_chain": {
-                    "0x2DAA8": "seeds its 0x10-byte staging buffer from CodeFlash 0x21000 (all zero), then calls 0x6009E(0x203) whose successful read (0x10) overwrites staging with the persistent record-3 values",
-                    "0x2DF98": "seeds its 0x28-byte staging buffer from CodeFlash 0x21010 (all zero), then calls 0x6009E(0x200) to overlay record-0 values",
-                    "0x2FB36": "seeds its 0x40-byte staging buffer from CodeFlash 0x21038 (all zero), then calls 0x6009E(0x202) to overlay record-2 values",
+                    "0x2DAA8": "initializes its 0x10-byte staging buffer from CodeFlash 0x21000 (all zero), then calls 0x6009E(0x203); only a successful 0x10-byte persistent-record read is copied onward to live record-3 state",
+                    "0x2DF98": "initializes its 0x28-byte staging buffer from CodeFlash 0x21010 (all zero), then calls 0x6009E(0x200); only a successful persistent-record read is copied onward to live record-0 state",
+                    "0x2FB36": "initializes its 0x40-byte staging buffer from CodeFlash 0x21038 (all zero), then calls 0x6009E(0x202); only a successful persistent-record read is copied onward to live record-2 state",
                 },
-                "interpretation": "Because the compiled fallback defaults are byte-identical zero blocks in both specimens while the persistent A000 values differ, records 0/2/3 are demonstrably per-unit (or service-written) calibration overrides relative to unchanged software defaults — not a compile-time 2023->2025 tuning revision. Techstream's exact OEM vocabulary (Torque Sensor Adjustment; Torque Sensor 1..4 Zero Point Value; Motor Rotation Angle Sensor Calibration; Torque Sensor Missing Calibration of Adjustment Value Non-Memory/Incomplete in NA EMPS_P5/EMPS2_P5 section 87/65; EPS Motor Angle Zero Point Value family) corroborates the adjustment/calibration class but does not assign individual record channels without offset-level dataflow.",
+                "interpretation": "The three readers use byte-identical all-zero staging seeds in the shared application and then admit persistent A000 records only on successful validation/read. The differing record 0/2/3 values are therefore persistent calibration state, not differing compiled software constants; this does not require treating the zero seeds as fallback defaults. Factory adjustment and/or later service writing remain possible origins. Techstream's exact OEM vocabulary (Torque Sensor Adjustment; Torque Sensor 1..4 Zero Point Value; Motor Rotation Angle Sensor Calibration; EPS Motor Angle Zero Point Value, plus missing/incomplete-calibration failure text) corroborates the adjustment/calibration class but does not assign individual record channels without an offset-level join.",
             },
             "xcp_page_state": {
                 "set_cal_page_handler": "0x9261E (custom selector 0xEB)", "get_cal_page_handler": "0x92698 (custom selector 0xEA)",
                 "e4_copy_handler": "0x92724 (custom selector 0xE4) -> 0x92700",
                 "state_cells": ["0xFEBE5DB0", "0xFEBE5DB1"],
                 "writer_flag_mask": 3, "writer_accepts_values": [0, 1],
-                "boundary": "XCP EB/EA only reference the page-state cells FEBE5DB0/5DB1; E4 copies CodeFlash 0x10000..0x17DEF into the RAM shadow. This supports a calibration-page interpretation of the low bank, but individual CPU consumers of the copied values remain unproven.",
+                "state_initializer": "0x9225C (FEBE5DB0=1, FEBE5DB1=0)",
+                "recovered_high_page_selection": False,
+                "boundary": "Target-native H review finds FEBE5DB0/5DB1 only in the page-state initializer 0x9225C and SET/GET_CAL_PAGE handlers 0x9261E/0x92698. E4 0x92724 accepts page selectors 0/1 but invokes 0x92700 only for selector 0, and 0x92700 hardcodes CodeFlash 0x10000..0x17DEF -> FEBF7C00. No recovered XCP route selects or copies 0x18000..0x1FDEF. This supports a calibration-page interpretation of the low bank while individual CPU consumers of the copied values remain unproven.",
             },
             "cpu_consumer_boundary": "Target-native H/Span review found no recovered application CPU semantic dereference of the 0x10000+ shadow beyond the startup/E4 copies and XCP calibration-page bookkeeping. Apparent low-address references reviewed in the decompiler resolve to scalar/control-word uses or numeric/packed metadata rather than reads of the low-bank contents. Computed-pointer or undocumented hardware-overlay use is not disproved.",
             "aligned_application_numeric_hits_near_changed_low_bytes": aligned_numeric_hits,
@@ -503,9 +507,8 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             "low_region_crc32_residue_baseline": f"0x{zlib.crc32(h[0x10000:0x17DF0]) & 0xFFFFFFFF:08X}",
             "low_region_crc32_residue_target": f"0x{zlib.crc32(s[0x10000:0x17DF0]) & 0xFFFFFFFF:08X}",
             "low_region_crc_geometry": "zlib.crc32(0x10000..0x17DEF including terminal fixup)==0xFFFFFFFF",
-            "post_crc_opaque_tag_baseline": cmac_tag_h.hex(), "post_crc_opaque_tag_target": cmac_tag_s.hex(),
-            "opaque_tag_cpu_xref_status": "superseded: the 16 bytes at 0x17DF0..0x17DFF are the region-0 AES-CMAC tag per boot_integrity_regions; no separate opaque-tag interpretation remains",
-            "opaque_tag_algorithm": "superseded-by-boot-integrity-region-0-aes-cmac-tag",
+            "region0_cmac_tag_baseline": cmac_tag_h.hex(), "region0_cmac_tag_target": cmac_tag_s.hex(),
+            "region0_cmac_tag_role": "AES-CMAC tag for boot integrity region 0; see boot_integrity_regions",
             "isolated_scalar_region": {
                 "va": "0x13E40", "u16_sequence_baseline": list(struct.unpack_from("<8H", h, 0x13E40)),
                 "u16_sequence_target": list(struct.unpack_from("<8H", s, 0x13E40)),
@@ -521,7 +524,7 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
         "interpretation": {
             "same_executable_generation": True,
             "low_delta_is_not_identity_only": True,
-            "unit_specific_motor_calibration_differs": True,
+            "specimen_specific_motor_calibration_differs": True,
             "model_year_tuning_change_proven": False,
             "security_secoc_diagnostic_xcp_code_changed": False,
             "steering_command_interface_changed_by_code": False,

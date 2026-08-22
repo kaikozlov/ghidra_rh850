@@ -351,7 +351,7 @@
           0,
           0
         ],
-        "boundary": "Payload is marker A55A5AA5, u16 1, u16 20 (0x14), eight zero bytes, a 4-byte unit-specific value at payload+0x10 (u32 LE; bytes 1..3 carry the value, byte 0 is zero: baseline 0x7FCF4D00, target 0x3AA4B800), and four zero bytes. Sienna's final same-family record at 0xA628 has the identical schema with value 0x1AEBBD00. Only the three value bytes differ (0xA519..0xA51B). The differing field is unit-record content, not a checksum (records are CRC-terminated separately). No recovered fixed-index consumer; the field remains an opaque family-standard unit value \u2014 do not assign an OEM meaning.",
+        "boundary": "Payload is marker A55A5AA5, u16 1, u16 20 (0x14), eight zero bytes, a 4-byte unit-specific value at payload+0x10 (u32 LE; bytes 1..3 carry the value, byte 0 is zero: baseline 0x7FCF4D00, target 0x3AA4B800), and four zero bytes. Sienna has a same-schema record at 0xA628 with value 0x1AEBBD00. Only the three value bytes differ (0xA519..0xA51B). The differing field is unit-record content, not a checksum (records are CRC-terminated separately). No recovered fixed-index consumer; the field remains a same-schema specimen-varying content value \u2014 do not assign an OEM meaning.",
         "classification": "changed-unit-record-unresolved-field",
         "codeflash_source": "0xA508",
         "descriptor_va": "0x2ABEC",
@@ -363,7 +363,7 @@
         "payload_changed_bytes": 3,
         "payload_target_sha256": "193a50dc092c600a600379ee9fb3140b40deeb90ecc12ae245d4b8a723878e62",
         "ram_destination": "0xFEBEFB08",
-        "role": "family_standard_unit_value_record",
+        "role": "same_schema_value_record",
         "standard_terminal_residue_ffffffff_baseline": true,
         "standard_terminal_residue_ffffffff_target": true,
         "stored_crc_fixup_baseline": "0xCC9B0CC2",
@@ -711,12 +711,44 @@
       "target_body_sha256": "409571e44bfaebf6e0f487fec3695879e968cbc031a7aca2fb1c79e823a01b3e"
     },
     {
+      "baseline_body_sha256": "3ac0034cf5cf5e1e7a6f7b1a13d1aadad6c3dee342d5fca5a8e8cbf86657e8e5",
+      "body_size": 34,
+      "byte_identical": true,
+      "entry": "0x0009225C",
+      "role": "xcp_cal_page_state_initializer",
+      "target_body_sha256": "3ac0034cf5cf5e1e7a6f7b1a13d1aadad6c3dee342d5fca5a8e8cbf86657e8e5"
+    },
+    {
+      "baseline_body_sha256": "5b27d286030f7058d2db0856bbaeaec90bbd920c2c5dc22e39527e7edbeb288f",
+      "body_size": 122,
+      "byte_identical": true,
+      "entry": "0x0009261E",
+      "role": "xcp_set_cal_page_state",
+      "target_body_sha256": "5b27d286030f7058d2db0856bbaeaec90bbd920c2c5dc22e39527e7edbeb288f"
+    },
+    {
+      "baseline_body_sha256": "c0e4c64e3c5305ccc23329baba91ebf7f1c49f9ac19ed3ea078dd73f926575eb",
+      "body_size": 104,
+      "byte_identical": true,
+      "entry": "0x00092698",
+      "role": "xcp_get_cal_page_state",
+      "target_body_sha256": "c0e4c64e3c5305ccc23329baba91ebf7f1c49f9ac19ed3ea078dd73f926575eb"
+    },
+    {
       "baseline_body_sha256": "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2",
       "body_size": 36,
       "byte_identical": true,
       "entry": "0x00092700",
       "role": "xcp_e4_low_codeflash_shadow_copy",
       "target_body_sha256": "969ee65ec1d2a2523c1bd97a317de7923bc05a7e5ca3785760e5cb78296dc8b2"
+    },
+    {
+      "baseline_body_sha256": "14367502c37c230022c4c3d55fded0377095e663d89fbe83efc0834efa84050b",
+      "body_size": 106,
+      "byte_identical": true,
+      "entry": "0x00092724",
+      "role": "xcp_e4_cal_page_copy_handler",
+      "target_body_sha256": "14367502c37c230022c4c3d55fded0377095e663d89fbe83efc0834efa84050b"
     }
   ],
   "baseline": {
@@ -808,8 +840,8 @@
         "end_inclusive": "0xFEBF0FFF",
         "field_10": "0x0",
         "marker_address": "0x0",
-        "marker_value_baseline": "0x06E0001F",
-        "marker_value_target": "0x06E0001F",
+        "marker_value_baseline": null,
+        "marker_value_target": null,
         "row": 2,
         "start": "0xFEBF0000",
         "tag_is_final_16_bytes_of_region": true
@@ -850,10 +882,9 @@
     "low_region_crc_fixup_baseline": "bd112672",
     "low_region_crc_fixup_target": "a011a001",
     "low_region_crc_geometry": "zlib.crc32(0x10000..0x17DEF including terminal fixup)==0xFFFFFFFF",
-    "opaque_tag_algorithm": "superseded-by-boot-integrity-region-0-aes-cmac-tag",
-    "opaque_tag_cpu_xref_status": "superseded: the 16 bytes at 0x17DF0..0x17DFF are the region-0 AES-CMAC tag per boot_integrity_regions; no separate opaque-tag interpretation remains",
-    "post_crc_opaque_tag_baseline": "52ba323a89692008e2ebd9afd6204049",
-    "post_crc_opaque_tag_target": "05de41cb041b5a0ab538e7f4bc94a339",
+    "region0_cmac_tag_baseline": "52ba323a89692008e2ebd9afd6204049",
+    "region0_cmac_tag_role": "AES-CMAC tag for boot integrity region 0; see boot_integrity_regions",
+    "region0_cmac_tag_target": "05de41cb041b5a0ab538e7f4bc94a339",
     "shadow_identity_mirrors": {
       "0x17D80_to_ram": "0xFEBFF980",
       "0x17DC0_to_ram": "0xFEBFF9C0"
@@ -867,8 +898,8 @@
     "note": "The changed A000 records contain active motor/sensor calibration, including motor-rotation-angle correction. Because the specimens are different physical ECUs, the bytes may be per-unit manufacturing calibration, service calibration, or variant tuning rather than a 2023->2025 software-generation tune change. The evidence does not distinguish those origins.",
     "same_executable_generation": true,
     "security_secoc_diagnostic_xcp_code_changed": false,
-    "steering_command_interface_changed_by_code": false,
-    "unit_specific_motor_calibration_differs": true
+    "specimen_specific_motor_calibration_differs": true,
+    "steering_command_interface_changed_by_code": false
   },
   "low_region_bins": [
     {
@@ -1797,8 +1828,14 @@
         "numeric_value": "0x10F7A"
       }
     ],
-    "compiled_default_override_semantics": {
-      "default_blocks": [
+    "compiled_staging_seed_semantics": {
+      "interpretation": "The three readers use byte-identical all-zero staging seeds in the shared application and then admit persistent A000 records only on successful validation/read. The differing record 0/2/3 values are therefore persistent calibration state, not differing compiled software constants; this does not require treating the zero seeds as fallback defaults. Factory adjustment and/or later service writing remain possible origins. Techstream's exact OEM vocabulary (Torque Sensor Adjustment; Torque Sensor 1..4 Zero Point Value; Motor Rotation Angle Sensor Calibration; EPS Motor Angle Zero Point Value, plus missing/incomplete-calibration failure text) corroborates the adjustment/calibration class but does not assign individual record channels without an offset-level join.",
+      "reader_chain": {
+        "0x2DAA8": "initializes its 0x10-byte staging buffer from CodeFlash 0x21000 (all zero), then calls 0x6009E(0x203); only a successful 0x10-byte persistent-record read is copied onward to live record-3 state",
+        "0x2DF98": "initializes its 0x28-byte staging buffer from CodeFlash 0x21010 (all zero), then calls 0x6009E(0x200); only a successful persistent-record read is copied onward to live record-0 state",
+        "0x2FB36": "initializes its 0x40-byte staging buffer from CodeFlash 0x21038 (all zero), then calls 0x6009E(0x202); only a successful persistent-record read is copied onward to live record-2 state"
+      },
+      "seed_blocks": [
         {
           "all_zero_baseline": true,
           "all_zero_target": true,
@@ -1826,13 +1863,7 @@
           "name": "rec2_default",
           "va": "0x21038"
         }
-      ],
-      "interpretation": "Because the compiled fallback defaults are byte-identical zero blocks in both specimens while the persistent A000 values differ, records 0/2/3 are demonstrably per-unit (or service-written) calibration overrides relative to unchanged software defaults \u2014 not a compile-time 2023->2025 tuning revision. Techstream's exact OEM vocabulary (Torque Sensor Adjustment; Torque Sensor 1..4 Zero Point Value; Motor Rotation Angle Sensor Calibration; Torque Sensor Missing Calibration of Adjustment Value Non-Memory/Incomplete in NA EMPS_P5/EMPS2_P5 section 87/65; EPS Motor Angle Zero Point Value family) corroborates the adjustment/calibration class but does not assign individual record channels without offset-level dataflow.",
-      "reader_chain": {
-        "0x2DAA8": "seeds its 0x10-byte staging buffer from CodeFlash 0x21000 (all zero), then calls 0x6009E(0x203) whose successful read (0x10) overwrites staging with the persistent record-3 values",
-        "0x2DF98": "seeds its 0x28-byte staging buffer from CodeFlash 0x21010 (all zero), then calls 0x6009E(0x200) to overlay record-0 values",
-        "0x2FB36": "seeds its 0x40-byte staging buffer from CodeFlash 0x21038 (all zero), then calls 0x6009E(0x202) to overlay record-2 values"
-      }
+      ]
     },
     "cpu_consumer_boundary": "Target-native H/Span review found no recovered application CPU semantic dereference of the 0x10000+ shadow beyond the startup/E4 copies and XCP calibration-page bookkeeping. Apparent low-address references reviewed in the decompiler resolve to scalar/control-word uses or numeric/packed metadata rather than reads of the low-bank contents. Computed-pointer or undocumented hardware-overlay use is not disproved.",
     "destination_start": "0xFEBF7C00",
@@ -1840,14 +1871,13 @@
       "at_changed_low_offsets": {
         "high_equals_baseline": 60,
         "high_equals_target": 11,
-        "third_value": 1240
+        "high_matches_neither": 1240
       },
-      "boundary": "The high block is an invariant structurally homologous template/reference-like region. No CodeFlash content reader/copy from it is recovered, and there is no 0x1FE00 marker/tag structure. It is NOT proven to be factory/default calibration and NOT proven XCP-selectable; no alternate-page selection is claimed (the checked XCP config area is all zero in the raw image). At the 1,311 changed low offsets it matches the baseline only 60 times and Span 11 times, so it is not simply either specimen's calibration.",
+      "boundary": "The high block is an invariant structurally homologous template/reference-like region. No CodeFlash content reader/copy from it is recovered, and the dword at 0x1FE00 is not the `0x5AA5A55A` validity marker used by the low region. Target-native H review of the recovered XCP page grammar finds no route that selects or copies this high block: SET/GET_CAL_PAGE only manipulate/report FEBE5DB0/5DB1 and E4 hardcodes the 0x10000..0x17DEF low-page copy. It is still NOT proven to be factory/default calibration, and its manufacturing/tooling origin remains bounded. At the 1,311 changed low offsets it matches the baseline only 60 times, Span 11 times, and neither specimen 1,240 times, so it is not simply either specimen's calibration.",
       "byte_homology_fraction_with_low_page": 0.8488,
       "identical_between_variants": true,
       "no_marker_at_0x1FE00": true,
-      "range": "0x18000..0x1FDEF",
-      "xcp_config_area_0x261F0_all_zero": true
+      "range": "0x18000..0x1FDEF"
     },
     "length": 32240,
     "runtime_shadow_liveness": {
@@ -1888,7 +1918,7 @@
           "shadow_va": "0xFEDF7C00"
         }
       ],
-      "conclusion": "All five retained runtime snapshots (albino 3x PE1, Span PE1, Span self-alias) hold FEBF7C00..FEBFF9EF byte-identical to the same specimen's CodeFlash 0x10000..0x17DEF. The low page is therefore the live runtime shadow actually consumed at runtime, not a dormant copy."
+      "conclusion": "All five retained runtime snapshots (albino 3x PE1, Span PE1, Span self-alias) hold FEBF7C00..FEBFF9EF byte-identical to the same specimen's CodeFlash 0x10000..0x17DEF. This proves the low page is materialized verbatim in the runtime LocalRAM shadow; it does not by itself prove a semantic CPU consumer of the copied calibration contents."
     },
     "source_end_exclusive": "0x17DF0",
     "source_start": "0x10000",
@@ -1902,7 +1932,12 @@
       "changed_bytes": 1143,
       "end_exclusive": "0x11400",
       "exact_partition": {
-        "curve_rows_0x44": {
+        "interstitial": {
+          "changed_bytes": 28,
+          "end_exclusive": "0x10B54",
+          "start": "0x10A54"
+        },
+        "packed_point_rows_0x44": {
           "count": 33,
           "end_exclusive": "0x109C4",
           "per_row_changed_bytes": [
@@ -1950,11 +1985,6 @@
             24,
             32
           ]
-        },
-        "interstitial": {
-          "changed_bytes": 28,
-          "end_exclusive": "0x10B54",
-          "start": "0x10A54"
         },
         "rows_0x24": {
           "count": 4,
@@ -2314,14 +2344,16 @@
     },
     "xcp_e4_copy_function": "0x00092700",
     "xcp_page_state": {
-      "boundary": "XCP EB/EA only reference the page-state cells FEBE5DB0/5DB1; E4 copies CodeFlash 0x10000..0x17DEF into the RAM shadow. This supports a calibration-page interpretation of the low bank, but individual CPU consumers of the copied values remain unproven.",
+      "boundary": "Target-native H review finds FEBE5DB0/5DB1 only in the page-state initializer 0x9225C and SET/GET_CAL_PAGE handlers 0x9261E/0x92698. E4 0x92724 accepts page selectors 0/1 but invokes 0x92700 only for selector 0, and 0x92700 hardcodes CodeFlash 0x10000..0x17DEF -> FEBF7C00. No recovered XCP route selects or copies 0x18000..0x1FDEF. This supports a calibration-page interpretation of the low bank while individual CPU consumers of the copied values remain unproven.",
       "e4_copy_handler": "0x92724 (custom selector 0xE4) -> 0x92700",
       "get_cal_page_handler": "0x92698 (custom selector 0xEA)",
+      "recovered_high_page_selection": false,
       "set_cal_page_handler": "0x9261E (custom selector 0xEB)",
       "state_cells": [
         "0xFEBE5DB0",
         "0xFEBE5DB1"
       ],
+      "state_initializer": "0x9225C (FEBE5DB0=1, FEBE5DB1=0)",
       "writer_accepts_values": [
         0,
         1
@@ -2393,7 +2425,6 @@
     "first_difference": "0xA004",
     "last_difference": "0x17DFF",
     "low_shadow_source_changed_bytes": 1311,
-    "post_crc_opaque_tag_changed_bytes": 16,
     "region0_cmac_tag_changed_bytes": 16
   },
   "target": {
