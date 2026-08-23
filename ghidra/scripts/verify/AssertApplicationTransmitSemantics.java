@@ -178,7 +178,7 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
         assertExactRefs(0xfebe6680L,
                 "0004b70a:READ", "00051c76:READ", "000531fe:READ",
                 "000554a2:READ", "00059684:WRITE", "0005c5f2:WRITE",
-                "000354f2:READ");
+                "000354f2:READ", "0004cf12:READ");
         assertExactRefs(0xfebe810aL,
                 "0004b732:WRITE", "0004b7f6:READ", "0004bd22:READ",
                 "00057282:READ", "00058192:WRITE", "000fcc82:READ");
@@ -379,7 +379,8 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
         assertExactRefs(0xfebe7ce6L,
                 "00047074:WRITE", "0004b7cc:READ", "00051d12:READ",
                 "00052e10:READ", "00053056:READ", "0005329e:READ",
-                "00055314:READ", "000554ae:READ", "000590f0:WRITE");
+                "00055314:READ", "000554ae:READ", "000590f0:WRITE",
+                "0004cf86:READ");
         assertCall(0x4703eL, 0x6956aL);
         assertCall(0x4b7baL, 0x6f080L);
         assertCall(0x4b7baL, 0x6953cL);

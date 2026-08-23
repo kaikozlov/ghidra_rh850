@@ -8,7 +8,7 @@ page is a denominator/index, not a claim ledger or priority order: use
 reports for interpretation.
 
 Snapshot date: **2026-08-15**. Corrected normalized project-inventory SHA-256:
-`8921b64db16f13ad588e661fc45d13bac0986da214aeec9f3eb0aa99190d9cac`.
+`19d5a7fc1c0465b6ab62936e5f12fc95f130197ee3e095f77215c982b11f02c8`.
 The inventory was produced byte-identically by two separately invoked four-stage
 rebuilds. Committed-project promotion is a separate final lifecycle gate.
 

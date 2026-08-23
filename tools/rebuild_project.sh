@@ -86,7 +86,7 @@ if [[ ! -x "$ROOT/build/ghidra-cli/ghidra" ]]; then
 fi
 
 # --- Shared environment setup -------------------------------------------------
-# This resolves GHIDRA_HOME (honoring --ghidra-home), validates version 12.1.2,
+# This resolves GHIDRA_HOME (honoring --ghidra-home), validates version 12.1.3,
 # installs the isolated processor extension, sources the env file, and validates
 # the processor fingerprint.
 # shellcheck disable=SC1091

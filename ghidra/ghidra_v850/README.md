@@ -60,4 +60,4 @@ point. Notable areas under active modification for the P1M-E target:
   load/store and arithmetic p-code semantics (`sld.b`/`sld.h` sext, signed
   `divh`, saturating `PSW.SAT`/`OV`).
 - `data/languages/v850_float.sinc` — `ceilf.suw` constructor correction.
-- Language version `0.2` / extension metadata `12.1.2` (see `PROVENANCE.json`).
+- Language version `0.2` / extension metadata `12.1.3` (see `PROVENANCE.json`).

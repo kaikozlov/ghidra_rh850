@@ -6,7 +6,7 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
 ## Prerequisites
 
 - [Astral UV](https://docs.astral.sh/uv/) for the locked Python environment.
-- Ghidra **12.1.2** (tested Homebrew location `/opt/homebrew/opt/ghidra/libexec`).
+- Ghidra **12.1.3** (tested Homebrew location `/opt/homebrew/opt/ghidra/libexec`).
 - Rust `ghidra` CLI **0.2.1** (`ghidra doctor` must pass). The CLI source is
   **vendored in-tree** at `ghidra/ghidra-cli/` (fork of
   `akiselev/ghidra-cli`). Run `make ghidra-cli` to build it into
@@ -329,7 +329,10 @@ Rows that remain `reviewed_unknown` carry no evidence grade.
 
 CI (`.github/workflows/ci.yml`) always runs `make verify`. Processor-path
 changes run SLEIGH, synthetic fixtures, and committed-project audits on macOS
-with pinned Ghidra 12.1.2 / ghidra CLI 0.2.1. Processor, script, and snapshot
+with pinned Ghidra 12.1.3 / ghidra CLI 0.2.1. The 12.1.2 -> 12.1.3 migration
+was verified by two independent clean rebuilds and changed no canonical semantic
+record; see [the migration journal](history/2026-08/GHIDRA_12_1_3_MIGRATION_2026-08-22.md).
+Processor, script, and snapshot
 changes — plus `main`, manual, and nightly runs — execute the full four-stage
 rebuild (plus convention finalizer), project invariants, and exact normalized
 inventory comparison, then upload the generated inventory and audit artifacts.

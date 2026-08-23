@@ -5,9 +5,10 @@ Status: active plan, drafted 2026-07-16. Companion to `NEXT.md` (design record).
 API-verified work. It covers **Slice 4 (script & module runtime)** first, then
 **Slice 3 (durable corpus scheduler)**, matching the chosen build order.
 
-All Ghidra API signatures below were verified with `javap` against the installed
+All Ghidra API signatures below were originally verified with `javap` against
 `ghidra_12.1.2_PUBLIC` (`Base.jar`) and JDK 21. Anything marked "verified" is a
-real method on the classpath the bridge already compiles against.
+real method on that classpath. The 2026-08-22 repository migration then compiled
+and exercised the same bridge against Ghidra 12.1.3 with JDK 26.
 
 ---
 
@@ -30,7 +31,7 @@ Every new command returns a stable envelope, not ad-hoc JSON:
     "binary_sha256": "…",
     "program": "pskernel.dll",
     "project": "parasolid-re",
-    "ghidra_version": "12.1.2",
+    "ghidra_version": "12.1.3",
     "tool_version": "0.2.1",
     "module_hash": "…"          // present for script/module jobs
   },
@@ -85,7 +86,7 @@ folded into Phase 4.4.
 ### 4.1 Verified Ghidra API (the whole slice rests on these)
 
 ```
-// ghidra.app.script.GhidraScript  — all public, present on 12.1.2
+// ghidra.app.script.GhidraScript  — all public on 12.1.2; confirmed on 12.1.3
 public final void   runScript(String, String[]) throws Exception;
 public       void   setScriptArgs(String[]);
 public       String[] getScriptArgs();
@@ -136,7 +137,9 @@ Two facts this unlocks:
 (`GhidraCliBridge.java`), `getArgStringArray`/`toJsonArray` helpers added, Rust
 client canonicalizes the path (`src/main.rs`), fixture
 `tests/fixtures/scripts/EchoArgs.java` + `test_script_run_java_args` added.
-All 5 `script_tests` pass against live Ghidra 12.1.2; clippy clean.
+The original implementation run passed all 5 then-current `script_tests`
+against live Ghidra 12.1.2. The 2026-08-22 migration run passes all 6 current
+`script_tests` against live Ghidra 12.1.3; clippy remains clean.
 
 The implemented shape (differs from the original sketch — see the two OSGi
 gotchas below):
@@ -224,7 +227,7 @@ Define a small contract:
 ```jsonc
 { "path": "…/functions.jsonl", "schema": "function-record@1",
   "rows": 45246, "bytes": 91234567, "sha256": "…",
-  "binary_sha256": "…", "program": "…", "ghidra_version": "12.1.2",
+  "binary_sha256": "…", "program": "…", "ghidra_version": "12.1.3",
   "module_hash": "…", "args": ["…"], "failures": 3 }
 ```
 

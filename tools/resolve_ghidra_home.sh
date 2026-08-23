@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Resolve GHIDRA_HOME for this repo's pinned Ghidra 12.1.2 install.
+# Resolve GHIDRA_HOME for this repo's pinned Ghidra 12.1.3 install.
 set -euo pipefail
 
 if [[ -n ${GHIDRA_HOME:-} ]]; then

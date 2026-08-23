@@ -10,12 +10,14 @@ Tests that the vendored database.json:
 
 This is a firmware-byte-level test — no Ghidra dependency.
 """
-import json, sys
+import hashlib, json, sys, zipfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 DB_PATH = REPO / "ghidra" / "ghidra-findcrypt" / "data" / "database.json"
 CF_PATH = REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin"
+PROVENANCE_PATH = REPO / "ghidra" / "ghidra-findcrypt" / "PROVENANCE.json"
+ZIP_PATH = REPO / "ghidra" / "ghidra-findcrypt" / "ghidra_12.1.3_PUBLIC_20260822_GhidraFindcrypt.zip"
 
 ok = 0
 bad = 0
@@ -25,6 +27,23 @@ def check(name, cond, detail=""):
     if cond: ok += 1
     else: bad += 1
     print(f"[{status}] {name}" + (f"  ({detail})" if detail else ""))
+
+# ---- 0. Vendored extension identity / Ghidra compatibility ----
+print("\n== 0. vendored extension identity ==")
+provenance = json.loads(PROVENANCE_PATH.read_text())
+check("FindCrypt source commit pinned", provenance["upstream"]["baseline_commit"] == "fcaa49e545b131e2cc631168c6c168c1aec862a6")
+check("FindCrypt Ghidra pin is 12.1.3", provenance["ghidra"]["required_version"] == "12.1.3")
+check("12.1.3 extension zip exists", ZIP_PATH.is_file(), str(ZIP_PATH))
+zip_hash = hashlib.sha256(ZIP_PATH.read_bytes()).hexdigest()
+check("FindCrypt extension artifact hash pinned", zip_hash == provenance["local_rebuild"]["artifact_sha256"], zip_hash)
+with zipfile.ZipFile(ZIP_PATH) as zf:
+    props = zf.read("GhidraFindcrypt/extension.properties").decode("utf-8")
+    jar = zf.read("GhidraFindcrypt/lib/GhidraFindcrypt.jar")
+    packaged_db = zf.read("GhidraFindcrypt/data/database.json")
+check("packaged extension declares Ghidra 12.1.3", "version=12.1.3" in props)
+check("FindCrypt JAR identity pinned", hashlib.sha256(jar).hexdigest() == provenance["local_rebuild"]["jar_sha256"])
+check("packaged database matches tracked database", packaged_db == DB_PATH.read_bytes())
+check("FindCrypt database identity pinned", hashlib.sha256(packaged_db).hexdigest() == provenance["local_rebuild"]["database_sha256"])
 
 # ---- 1. Database loads and has expected signatures ----
 print("\n== 1. database.json structure ==")

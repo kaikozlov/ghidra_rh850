@@ -105,7 +105,7 @@ public class AssertSecocRxControlSurface extends GhidraScript {
         exact(0xfebe8076L,
                 "0004b3ae:READ", "0004b45c:WRITE", "000573cc:READ", "00058032:WRITE",
                 "000fcc8e:READ", "0004a0dc:READ", "0003550a:READ",
-                "0004ef70:READ", "0004efb4:READ");
+                "0004ef70:READ", "0004efb4:READ", "0004f51e:READ");
         exact(0xfebef094L,
                 "000573d0:WRITE", "0005b442:WRITE", "000b63a6:READ", "000ba9f2:READ");
 

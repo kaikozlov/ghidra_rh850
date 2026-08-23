@@ -9,14 +9,14 @@ VENDOR="$ROOT/ghidra/ghidra_v850"
 BUILD_EXT="$ROOT/build/processor-extension-src/Renesas_v850"
 LANG="$BUILD_EXT/data/languages"
 USER_HOME="${GHIDRA_ISOLATED_HOME:-$ROOT/build/ghidra-home}"
-SETTINGS_DIR="$USER_HOME/Library/ghidra/ghidra_12.1.2_PUBLIC"
+SETTINGS_DIR="$USER_HOME/Library/ghidra/ghidra_12.1.3_PUBLIC"
 EXT_DIR="${V850_EXT_DIR:-$SETTINGS_DIR/Extensions/Renesas_v850}"
 LOG_DIR="$ROOT/build/sleigh-logs"
 MANIFEST="${PROCESSOR_MANIFEST:-$ROOT/build/processor_manifest.json}"
 
 GHIDRA_VERSION=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
-[[ "$GHIDRA_VERSION" == "12.1.2" ]] || {
-  echo "Ghidra 12.1.2 is required (found ${GHIDRA_VERSION:-unknown})" >&2
+[[ "$GHIDRA_VERSION" == "12.1.3" ]] || {
+  echo "Ghidra 12.1.3 is required (found ${GHIDRA_VERSION:-unknown})" >&2
   exit 1
 }
 CLI_VERSION="missing"

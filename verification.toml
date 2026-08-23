@@ -76,6 +76,9 @@ tests = ["tests/verify_findcrypt_database.py"]
 paths = [
   "ghidra/ghidra-findcrypt/data/database.json",
   "ghidra/ghidra-findcrypt/PROVENANCE.json",
+  "ghidra/ghidra-findcrypt/ghidra_12.1.3_PUBLIC_20260822_GhidraFindcrypt.zip",
+  "ghidra/ghidra-findcrypt/README.md",
+  "tools/install_findcrypt_extension.sh",
 ]
 
 [suite.can_transport]

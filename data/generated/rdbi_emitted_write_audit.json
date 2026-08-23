@@ -3826,7 +3826,7 @@
     "corpus": "data/generated/decompilations.jsonl",
     "corpus_executable_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
     "corpus_function_count": 6376,
-    "corpus_inventory_sha256": "8921b64db16f13ad588e661fc45d13bac0986da214aeec9f3eb0aa99190d9cac",
+    "corpus_inventory_sha256": "19d5a7fc1c0465b6ab62936e5f12fc95f130197ee3e095f77215c982b11f02c8",
     "firmware": "firmware/RH850_P1M-E_CodeFlash.bin"
   },
   "question": "can any configured RDBI producer callback write beyond the declared per-DID length it is handed?",

@@ -51,11 +51,18 @@ public class AssertApplicationReceiveMap extends GhidraScript {
     private static final Set<Long> BOUNDED_READ_COOWNERS = Set.of(
             0x4a1e8L,
             0x4b7baL,
+            // RDBI callbacks consume recovered signal state in addition to the
+            // normal first-consumer path. These exact readers were already in
+            // the canonical graph but were missing from this strict census.
+            0x4d8b6L,
+            0x4d930L,
+            0x4d95aL,
             // CAN-FD 0x0D7 signal 280 persists through FEBE8076 and is
             // consumed by diagnostic/routine gating plus the normal 56FC2
             // application staging path. These readers are exact and bounded.
             0x4ef68L,
             0x4efacL,
+            0x4f500L,
             0xfcc4eL,
             0x52f82L,
             0x531c8L,

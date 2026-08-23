@@ -61,6 +61,15 @@ the doctor compiled the embedded Java bridge against installed Ghidra 12.1.2
 and JDK 21. The only diagnostic is the pre-existing unused-import warning in
 `src/ghidra/setup.rs` tests.
 
+On 2026-08-22 the repository moved to Ghidra 12.1.3. `ghidra doctor` compiles
+the embedded bridge against 12.1.3 with JDK 26, all 6 current `script_tests`
+pass, and `cargo check --all-targets` passes with the same pre-existing
+unused-import warning. The current `readonly_tests` suite has 7 stale failures
+(three obsolete batch/query flag forms and four fixture-disassembly expectations)
+and 5 ignored snapshot tests; running that exact suite against the untouched
+12.1.2 baseline reproduces the same 43 pass / 7 fail / 5 ignored result, so none
+of those failures is a 12.1.3 compatibility regression.
+
 Live process samples during analysis showed the Ghidra JVM using roughly
 114--186% CPU, direct evidence that "Ghidra is single-core" is not a valid
 process-wide rule. `project_tests` also exercised independent project JVMs at
@@ -605,7 +614,7 @@ variables. This is fragile, global, stateful, and hostile to concurrent agents.
 
 ### Ghidra capabilities already available
 
-Ghidra 12.1.2 provides:
+Ghidra 12.1.3 provides:
 
 - `GhidraScript.runScript(String, String[])` and `setScriptArgs`;
 - `analyzeHeadless -scriptPath` plus pre/post-script arguments;

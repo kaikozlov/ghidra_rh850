@@ -116,14 +116,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - name: Install Ghidra 12.1.2
+      - name: Install Ghidra 12.1.3
         run: |
           set -euo pipefail
           brew install ghidra
           GHIDRA_HOME="$(brew --prefix ghidra)/libexec"
           VER=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
           echo "Ghidra version: $VER"
-          test "$VER" = "12.1.2"
+          test "$VER" = "12.1.3"
           echo "GHIDRA_HOME=$GHIDRA_HOME" >> "$GITHUB_ENV"
           echo "GHIDRA_INSTALL_DIR=$GHIDRA_HOME" >> "$GITHUB_ENV"
       - name: Install pinned ghidra CLI
@@ -184,13 +184,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - name: Install Ghidra 12.1.2
+      - name: Install Ghidra 12.1.3
         run: |
           set -euo pipefail
           brew install ghidra
           GHIDRA_HOME="$(brew --prefix ghidra)/libexec"
           VER=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
-          test "$VER" = "12.1.2"
+          test "$VER" = "12.1.3"
           echo "GHIDRA_HOME=$GHIDRA_HOME" >> "$GITHUB_ENV"
           echo "GHIDRA_INSTALL_DIR=$GHIDRA_HOME" >> "$GITHUB_ENV"
       - name: Install pinned ghidra CLI

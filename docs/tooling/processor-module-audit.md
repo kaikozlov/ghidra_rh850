@@ -255,6 +255,16 @@ Instruction inventory for this firmware is committed as
 `data/instruction_inventory.csv` (regenerate via
 `InventoryUsedInstructions.java` after a rebuild if coverage changes).
 
+### Ghidra 12.1.3 migration
+
+The repository is pinned to Ghidra **12.1.3**. Two independent clean 12.1.3
+rebuilds produce byte-identical normalized inventories. Relative to the prior
+12.1.2 baseline, only the inventory metadata version changes; the compiled
+`v850e3.sla` hash, all semantic project records, and all 6,376 persisted
+decompiler function records are unchanged. See
+[the migration journal](../history/2026-08/GHIDRA_12_1_3_MIGRATION_2026-08-22.md)
+for the reproducibility and FindCrypt compatibility evidence.
+
 ## Exact project parity
 
 The current normalized project inventory has **6,376 functions, 183,240

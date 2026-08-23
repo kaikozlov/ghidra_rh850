@@ -29,7 +29,7 @@ with tempfile.TemporaryDirectory() as td:
     temp = Path(td)
     fake_home = temp / "ghidra"
     (fake_home / "Ghidra").mkdir(parents=True)
-    (fake_home / "Ghidra/application.properties").write_text("application.version=12.1.2\n")
+    (fake_home / "Ghidra/application.properties").write_text("application.version=12.1.3\n")
     ext = temp / "extension"
     (ext / "data/languages").mkdir(parents=True)
     sla = ext / "data/languages/v850e3.sla"
@@ -48,7 +48,7 @@ with tempfile.TemporaryDirectory() as td:
             f'export V850_EXT_DIR="{ext}"\n'
             f'export V850_BUILD_DIR="{temp / "build-ext"}"\n'
             f'export PROCESSOR_MANIFEST="{manifest}"\n'
-            'export GHIDRA_VERSION="12.1.2"\n'
+            'export GHIDRA_VERSION="12.1.3"\n'
             'export GHIDRA_CLI_VERSION="0.2.1"\n'
             f'export GHIDRA_JAVA_OPTIONS="-Duser.home={temp / "user-home"}"\n'
             f'export GHIDRA_HEADLESS_JAVA_OPTIONS="-Duser.home={temp / "user-home"}"\n'
@@ -124,6 +124,16 @@ with tempfile.TemporaryDirectory() as td:
     check(
         "stale env installer called again",
         install_count.exists() and install_count.read_text().strip() == "2",
+    )
+
+    # A cache produced by the previous pinned Ghidra release must never be reused.
+    stale_text = env_template.read_text().replace('GHIDRA_VERSION="12.1.3"', 'GHIDRA_VERSION="12.1.2"')
+    env_file.write_text(stale_text)
+    result = source()
+    check("previous-version cache triggers installer", result.returncode == 0, result.stderr)
+    check(
+        "previous-version cache is replaced",
+        install_count.exists() and install_count.read_text().strip() == "3",
     )
 
     result = source("full")

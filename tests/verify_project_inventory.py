@@ -41,7 +41,7 @@ def write_inventory(path: Path, function_name: str = "entry") -> None:
         {
             "record": "meta",
             "schema_version": 1,
-            "ghidra_version": "12.1.2",
+            "ghidra_version": "12.1.3",
             "program_name": "firmware.bin",
             "executable_sha256": "a" * 64,
             "executable_format": "Raw Binary",

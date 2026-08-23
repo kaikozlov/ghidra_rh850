@@ -26,11 +26,11 @@ _source_processor_env() {
 
 _cached_env_is_current() {
   _source_processor_env || return 1
-  [[ "${GHIDRA_VERSION:-}" == "12.1.2" ]] || return 1
+  [[ "${GHIDRA_VERSION:-}" == "12.1.3" ]] || return 1
   [[ "${GHIDRA_CLI_VERSION:-}" == "0.2.1" ]] || return 1
   [[ -d "${GHIDRA_HOME:-}" ]] || return 1
   [[ -f "$GHIDRA_HOME/Ghidra/application.properties" ]] || return 1
-  [[ "$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")" == "12.1.2" ]] || return 1
+  [[ "$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")" == "12.1.3" ]] || return 1
   [[ -f "${V850_EXT_DIR:-}/data/languages/v850e3.sla" ]] || return 1
   [[ -f "${PROCESSOR_MANIFEST:-}" ]] || return 1
   python3 "$_GHIDRA_FINGERPRINT" \
