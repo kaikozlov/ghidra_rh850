@@ -19,8 +19,11 @@ framing (synthetic-fixture validated, specimen validation pending).
 
 Do not start another undirected V18 or firmware sweep to continue that queue.
 The remaining high-value blockers now require genuinely new evidence: a matching
-`.cuw`/`.cal` package, a retained labeled GTS+/J2534 session, newer GTS+/CUW+,
-gateway/camera/other steering-controller firmware, or missing target CodeFlash.
+modern-EPS `.cuw`/`.cal` package (the six-package FRC delta corpus closed by
+TMS-042 is front-camera ReproStd, not EPS Unified), a retained labeled
+GTS+/J2534 session, newer GTS+/CUW+ host material beyond the unpacked CUWPlus
+subset already pinned, gateway/camera/other steering-controller firmware, or
+missing target CodeFlash.
 The concrete live capture requirements are in
 [../tooling/techstream-capture-procedure.md](../tooling/techstream-capture-procedure.md),
 and unresolved static/dynamic boundaries remain in
@@ -56,13 +59,25 @@ implements neither.
 firmware** (Front Recognition Camera 2) for a true-TSS 3 vehicle and recover
 its lateral-control producer contract: which in-vehicle message(s) carry the
 LTA target state, and whether/where they join the EMPS/EMPS2 steering
-observer domain. The read-only Operation FFD surface
-(`AB 11/12/13` → `EB …`, parser at 0x10001A70) is one reference capture
-protocol once live probes are justified; fixed FRC routine `0x1588` (LTA
-Steering Vibration) is a second, higher-specificity trigger for isolating the
+observer domain. TMS-042 makes the same acquisition the highest-value
+reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
+uploads the package routine with DFI `0x01` / `10F5`, then the compact
+`DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as
+opaque bytes. A matching FRC boot/programming image is therefore the missing
+consumer that can explain both the routine/blob transform and the delta
+representation; do not look for those handlers in the tracked Sienna/H EPS,
+where TMS-029 already closes standard ReproStd `10F5/10F6` as absent/rejected.
+The V18 Unified CID path now gives a concrete identity checklist for that
+acquisition: preserve generic F181, F18C, the package/current CID, and especially
+the camera-special direct `0x792→0x79A` `22 1F FF` / `62 1F FF` SWIN response
+(`GetSWINForFCM`; distinct from F181). The read-only Operation FFD surface
+(`AB 11/12/13` → `EB …`, parser at 0x10001A70) is one reference capture protocol
+once live probes are justified; fixed FRC routine `0x1588` (LTA Steering
+Vibration) is a second, higher-specificity trigger for isolating the
 camera-to-steering output. The repository deliberately ships no live writer
-for either proprietary path. A newer EMPS/EMPS2 image that implements `0x1CEE/0x1CEF`
-remains the complementary steering-side acquisition.
+for either proprietary path. A
+newer EMPS/EMPS2 image that implements `0x1CEE/0x1CEF` remains the
+complementary steering-side acquisition.
 
 The community `NEW_MSG_8A_LAT_CONTROL` heatmap is a high-value lead because it
 independently names torque/target-angle/confidence-like fields, and the

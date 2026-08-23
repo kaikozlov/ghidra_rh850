@@ -1,0 +1,1656 @@
+{
+  "contrast_packages": [
+    {
+      "attach_sha256": "948286c7189abefd209493220b1ddda8be08fc8070ce01910220a4cb62944c72",
+      "attach_size": 1420,
+      "declared_total_matches_file": true,
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101"
+        ],
+        "areas": {
+          "EraseAndReproRoutine101": {
+            "cmac_empty": false,
+            "crc_empty": true,
+            "digital_signature_length": 0,
+            "digital_signature_sha256": "",
+            "length": "00000800",
+            "start_address": "FEEF7800"
+          },
+          "ReproData101": {
+            "cmac_empty": false,
+            "crc_empty": true,
+            "digital_signature_length": 0,
+            "digital_signature_sha256": "",
+            "length": "00280000",
+            "start_address": "00018000"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2025-01-23",
+        "diag_id": "07D2",
+        "engine_type": "T24A-FTS",
+        "format_version": "104",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "0",
+        "model_year": "24",
+        "new_cid": "8A2520E01200",
+        "nonce_decoded": "082163A560054CADEA32BD2A5871FC08",
+        "p4_server_max_time": "03",
+        "repro_method": "01",
+        "required_spec_repro_ver": "03",
+        "security_property2": "98",
+        "service_auth_key_decoded": "A34C53C7B1FD7ADE8B51BBE1E0EFEF57",
+        "source_target_calibration_1": "8A2520E01100",
+        "vehicle_name": "GRAND HIGHLANDER",
+        "vehicle_type": "TASH15",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "EPF",
+        "EraseAndReproRoutine101",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "Node01",
+        "ReproData101",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "errors": [],
+      "filename": "T-0003-25.cuw",
+      "format_type": "0x67",
+      "member_count": 1,
+      "members": [
+        {
+          "name": "01-8A2520E01200.xx",
+          "payload_crc_ok": true,
+          "payload_length": 7870516,
+          "payload_sha256": "1b469a213d3d2b33efec0dc25930f29a3e2aef737de6665da2d3aecd1af4672b"
+        }
+      ],
+      "outer_crc_ok": true,
+      "sha256": "ec52b1b673d9bf1c1497fc6f0ac2c5f7bfd8bf330907a2e9162c0c84eb9824b4",
+      "size": 7872007
+    },
+    {
+      "attach_sha256": "f07ed3e153a414d051490d66426079574d321e90d0075e9c8305becaf261ddf0",
+      "attach_size": 1444,
+      "declared_total_matches_file": true,
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101"
+        ],
+        "areas": {
+          "EraseAndReproRoutine101": {
+            "cmac_empty": false,
+            "crc_empty": true,
+            "digital_signature_length": 0,
+            "digital_signature_sha256": "",
+            "length": "00000800",
+            "start_address": "FEEF7800"
+          },
+          "ReproData101": {
+            "cmac_empty": false,
+            "crc_empty": true,
+            "digital_signature_length": 0,
+            "digital_signature_sha256": "",
+            "length": "00280000",
+            "start_address": "00018000"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2024-09-10",
+        "diag_id": "07D2",
+        "engine_type": "T24A-FTS",
+        "format_version": "104",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "0",
+        "model_year": "24",
+        "new_cid": "8A2523002400",
+        "nonce_decoded": "2C0AF3AD32DC8B28B85104E02B900B67",
+        "p4_server_max_time": "03",
+        "repro_method": "01",
+        "required_spec_repro_ver": "03",
+        "security_property2": "98",
+        "service_auth_key_decoded": "A34C53C7B1FD7ADE8B51BBE1E0EFEF57",
+        "source_target_calibration_1": "8A2523002200",
+        "vehicle_name": "CROWN",
+        "vehicle_type": "TZSH35",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "EPF",
+        "EraseAndReproRoutine101",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "Node01",
+        "ReproData101",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "errors": [],
+      "filename": "T-0005-25.cuw",
+      "format_type": "0x67",
+      "member_count": 1,
+      "members": [
+        {
+          "name": "01-8A2523002400.xx",
+          "payload_crc_ok": true,
+          "payload_length": 7870516,
+          "payload_sha256": "50bf27babe58749d29d0c7e64952b8409e456108d9e4d53b4427ead7fecdb91d"
+        }
+      ],
+      "outer_crc_ok": true,
+      "sha256": "3f72d67aa4da84aa02d4a9a3661ae458e1d2015c9fcba2f1e4a9961cb39f419e",
+      "size": 7872031
+    },
+    {
+      "attach_sha256": "5b7b2723ae705e2c5c2881500b55b5ee4a1f70790f72369474fbd36cf21af5dc",
+      "attach_size": 3144,
+      "declared_total_matches_file": true,
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101"
+        ],
+        "areas": {
+          "EraseAndReproRoutine101": {
+            "cmac_empty": false,
+            "crc_empty": false,
+            "digital_signature_length": 0,
+            "digital_signature_sha256": "",
+            "length": "00000B90",
+            "start_address": "FEBE4000"
+          },
+          "ReproData101": {
+            "cmac_empty": false,
+            "crc_empty": false,
+            "digital_signature_length": 0,
+            "digital_signature_sha256": "",
+            "length": "00A13A10",
+            "start_address": "02000000"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2022-01-18",
+        "diag_id": "07506D",
+        "engine_type": "-",
+        "format_version": "104",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "0",
+        "model_year": "22-22",
+        "new_cid": "8646G0C15000",
+        "nonce_decoded": "4AE2467420ED576E0C08973530E006EB",
+        "p4_server_max_time": "08",
+        "repro_method": "01",
+        "required_spec_repro_ver": "03",
+        "security_property2": "98",
+        "service_auth_key_decoded": "38EF43F658E9945B9B377BC6D2C0DE32",
+        "source_target_calibration_1": "8646G0C11000",
+        "vehicle_name": "Tundra",
+        "vehicle_type": "SR",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "EPF",
+        "EraseAndReproRoutine101",
+        "EraseAndReproRoutine102",
+        "EraseAndReproRoutine103",
+        "EraseAndReproRoutine104",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "LogicalBlock102",
+        "LogicalBlock103",
+        "LogicalBlock104",
+        "Node01",
+        "ReproData101",
+        "ReproData102",
+        "ReproData103",
+        "ReproData104",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "errors": [],
+      "filename": "T-0008-22.cuw",
+      "format_type": "0x67",
+      "member_count": 4,
+      "members": [
+        {
+          "name": "01-8646G0C15000.xx",
+          "payload_crc_ok": true,
+          "payload_length": 31707416,
+          "payload_sha256": "64ea4a1cc76a2e707256fa98098219bfba398985472342f885d89c3bc2653d8f"
+        },
+        {
+          "name": "02-8646F0C13000.xx",
+          "payload_crc_ok": true,
+          "payload_length": 121784,
+          "payload_sha256": "3db9abe56f2e52b26d091f2d8ec661c214c044002c04d611dd542f9ab5a97449"
+        },
+        {
+          "name": "03-8646F0C13000.xx",
+          "payload_crc_ok": true,
+          "payload_length": 74936,
+          "payload_sha256": "fe9fd5c71290a309018fd13337b615db91187bff027653f5407b506419cf76a0"
+        },
+        {
+          "name": "04-8646F0C13000.xx",
+          "payload_crc_ok": true,
+          "payload_length": 3643832,
+          "payload_sha256": "fec89d63010aa5a85f72d92208ba28fdc5b5faf87d3caa4e1fe9c86262326eb8"
+        }
+      ],
+      "outer_crc_ok": true,
+      "sha256": "df77121f29aa45a8ebc203f9bec22147ed2e62362c8d267380ef21637ff90630",
+      "size": 35551267
+    },
+    {
+      "attach_sha256": "a5a97724554ade35ae8b249fc4c63ba7fe57b04d41aee562fd85b3945b9d382c",
+      "attach_size": 1295,
+      "declared_total_matches_file": true,
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101"
+        ],
+        "areas": {
+          "EraseAndReproRoutine101": {
+            "cmac_empty": false,
+            "crc_empty": false,
+            "digital_signature_length": 0,
+            "digital_signature_sha256": "",
+            "length": "000002F0",
+            "start_address": "40000520"
+          },
+          "ReproData101": {
+            "cmac_empty": false,
+            "crc_empty": false,
+            "digital_signature_length": 0,
+            "digital_signature_sha256": "",
+            "length": "001BDBF0",
+            "start_address": "00FC0400"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2022-01-14",
+        "diag_id": "07500F",
+        "engine_type": "-",
+        "format_version": "104",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "0",
+        "model_year": "22-22",
+        "new_cid": "8821F0C13000",
+        "nonce_decoded": "AA22DA49B2BE6E82EE580FAFCC9683B7",
+        "p4_server_max_time": "03",
+        "repro_method": "01",
+        "required_spec_repro_ver": "03",
+        "security_property2": "98",
+        "service_auth_key_decoded": "6A66C37C6638A82142310D972A16B720",
+        "source_target_calibration_1": "8821F0C11000",
+        "vehicle_name": "Tundra",
+        "vehicle_type": "SR",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "EPF",
+        "EraseAndReproRoutine101",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "Node01",
+        "ReproData101",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "errors": [],
+      "filename": "T-0009-22.cuw",
+      "format_type": "0x67",
+      "member_count": 1,
+      "members": [
+        {
+          "name": "01-8821F0C13000.xx",
+          "payload_crc_ok": true,
+          "payload_length": 5479640,
+          "payload_sha256": "6d9ec57f5f1b619408b04a06a6843b9b56f900aa035be404af5e5169860b05f4"
+        }
+      ],
+      "outer_crc_ok": true,
+      "sha256": "a2cdb0667ae07822e5622569b8fbc9e552e51a94c616aff18d5fa66b29574018",
+      "size": 5481006
+    },
+    {
+      "attach_sha256": "d9f88ebbdace203c300db27a935d3646b9efedd568de9b764a7cc13ec18700bc",
+      "attach_size": 7159,
+      "declared_total_matches_file": true,
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101"
+        ],
+        "areas": {
+          "EraseAndReproRoutine101": {
+            "cmac_empty": false,
+            "crc_empty": false,
+            "digital_signature_length": 0,
+            "digital_signature_sha256": "",
+            "length": "00000800",
+            "start_address": "FEEFB800"
+          },
+          "ReproData101": {
+            "cmac_empty": false,
+            "crc_empty": false,
+            "digital_signature_length": 0,
+            "digital_signature_sha256": "",
+            "length": "00098000",
+            "start_address": "00020000"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2026-03-06",
+        "diag_id": "0724",
+        "engine_type": "A25A-FXS",
+        "format_version": "104",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "0",
+        "model_year": "25-26",
+        "new_cid": "8A2810602100",
+        "nonce_decoded": "7ADDC5C6D23BBDF2B0308E10195A5958",
+        "p4_server_max_time": "03",
+        "repro_method": "01",
+        "required_spec_repro_ver": "03",
+        "security_property2": "98",
+        "service_auth_key_decoded": "3DF2FE55C6C84111BF77B9F52453FF18",
+        "source_target_calibration_1": "8A2810602000",
+        "vehicle_name": "CAMRY",
+        "vehicle_type": "AXVH85",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "EPF",
+        "EraseAndReproRoutine101",
+        "EraseAndReproRoutine102",
+        "EraseAndReproRoutine103",
+        "EraseAndReproRoutine104",
+        "EraseAndReproRoutine105",
+        "EraseAndReproRoutine106",
+        "EraseAndReproRoutine107",
+        "EraseAndReproRoutine108",
+        "EraseAndReproRoutine109",
+        "EraseAndReproRoutine110",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "LogicalBlock102",
+        "LogicalBlock103",
+        "LogicalBlock104",
+        "LogicalBlock105",
+        "LogicalBlock106",
+        "LogicalBlock107",
+        "LogicalBlock108",
+        "LogicalBlock109",
+        "LogicalBlock110",
+        "Node01",
+        "ReproData101",
+        "ReproData102",
+        "ReproData103",
+        "ReproData104",
+        "ReproData105",
+        "ReproData106",
+        "ReproData107",
+        "ReproData108",
+        "ReproData109",
+        "ReproData110",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "errors": [],
+      "filename": "T-0051-26.cuw",
+      "format_type": "0x67",
+      "member_count": 10,
+      "members": [
+        {
+          "name": "01-8A2810602100.xx",
+          "payload_crc_ok": true,
+          "payload_length": 1873972,
+          "payload_sha256": "60e13b1f8c15e42d6c3899783246d374e49739115584ea4aea779bd345485e91"
+        },
+        {
+          "name": "02-8A2810602100.xx",
+          "payload_crc_ok": true,
+          "payload_length": 2365492,
+          "payload_sha256": "48b5d5d19fe94b490c7047b9564620acb710c9653d5b223d0558ba4db1266951"
+        },
+        {
+          "name": "03-8A2810602100.xx",
+          "payload_crc_ok": true,
+          "payload_length": 104500,
+          "payload_sha256": "1c9ed5ba2fe72c9612808c1d77ebb1927422456a39c5d191a010dc3de458eb2e"
+        },
+        {
+          "name": "04-8A2A10602100.xx",
+          "payload_crc_ok": true,
+          "payload_length": 1775668,
+          "payload_sha256": "d4f0262874827524450330a68ea972f6130c733f375ea74bfd2b0b2917031a55"
+        },
+        {
+          "name": "05-8A2A10602100.xx",
+          "payload_crc_ok": true,
+          "payload_length": 2267188,
+          "payload_sha256": "8f9eba6319850cf027761421dc91e89d64418e9c9bd46ff46622760aa4bdb8e5"
+        },
+        {
+          "name": "06-8A2A10602100.xx",
+          "payload_crc_ok": true,
+          "payload_length": 104500,
+          "payload_sha256": "60e43c31852edaeeb0cb1b1b23c6df685d7ebf85fb4af3933de88e62efab4fd8"
+        },
+        {
+          "name": "07-8A2A10602100.xx",
+          "payload_crc_ok": true,
+          "payload_length": 202804,
+          "payload_sha256": "36fdb290ccfc22196c507c96f4298e9155755a45244ee88c36335003fed37010"
+        },
+        {
+          "name": "08-8A2910601100.xx",
+          "payload_crc_ok": true,
+          "payload_length": 1873972,
+          "payload_sha256": "78ae046ab1c00ef5964a2d92466aa04263794a6d064575a07ce69467089571a7"
+        },
+        {
+          "name": "09-8A2910601100.xx",
+          "payload_crc_ok": true,
+          "payload_length": 2365492,
+          "payload_sha256": "21246bc0d0ccb911223631e9605d847458b0fe9f7d96434755cbf5a3c3163bbe"
+        },
+        {
+          "name": "10-8A2910601100.xx",
+          "payload_crc_ok": true,
+          "payload_length": 104500,
+          "payload_sha256": "a7c3c387e62f7683926ea39250d0e726669fffb9f2870b451ceff429fb28558d"
+        }
+      ],
+      "outer_crc_ok": true,
+      "sha256": "536bf4c05e7c135445547574c4bb321d4521e413765be0c6c2ec42d13a1c0117",
+      "size": 13045570
+    }
+  ],
+  "corpus": {
+    "contrast_descriptor_signature": {
+      "is_controlled_by_scc": "0",
+      "repro_method": "01",
+      "security_property2": "98"
+    },
+    "contrast_format67_package_count": 5,
+    "directory": "REFERENCE/cuw",
+    "frc_descriptor_signature": {
+      "contact_type": "P5-Unified",
+      "diag_id": "0792",
+      "gateway_diag_id_1": "07505F",
+      "is_blank_ecu": "0",
+      "is_controlled_by_scc": "1",
+      "repro_method": "07",
+      "required_spec_repro_ver": "04",
+      "security_property2": "9C"
+    },
+    "frc_package_count": 6
+  },
+  "cross_package_invariants": {
+    "datx_interior_cross_package_shared_blocks": 0,
+    "datx_shared_leading_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+    "datx_shared_single_leading_block": true,
+    "datx_sizes_are_16_byte_multiples": true,
+    "decoded_images_share_first_32_bytes": true,
+    "distinct_decoded_image_count": 5,
+    "first_32_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc",
+    "first_32_bytes_is_exactly_the_shared_prefix": true,
+    "routine_member_raw_identical_across_all": true,
+    "routine_member_raw_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f",
+    "routine_slot_in_whole_image_equals_routine_member": true,
+    "whole_repro_shared_target_groups": {
+      "04b07fb4a817eaa340a7e34bb9e3d2a367989403671cf4f9968ee7c3b25c8dd3": [
+        "T-0058-23.cuw",
+        "T-0060-23.cuw"
+      ]
+    }
+  },
+  "delta_chains": [
+    {
+      "new_calibration": "8646F1204500",
+      "package": "T-0058-23.cuw",
+      "source_calibration": "8646F1204300",
+      "source_package_in_corpus": ""
+    },
+    {
+      "new_calibration": "8646F1204500",
+      "package": "T-0060-23.cuw",
+      "source_calibration": "8646F1204400",
+      "source_package_in_corpus": ""
+    },
+    {
+      "new_calibration": "8646F1606300",
+      "package": "T-0061-23.cuw",
+      "source_calibration": "8646F1606200",
+      "source_package_in_corpus": ""
+    },
+    {
+      "new_calibration": "8646F4206400",
+      "package": "T-0062-23.cuw",
+      "source_calibration": "8646F4206200",
+      "source_package_in_corpus": ""
+    },
+    {
+      "new_calibration": "8646F4206700",
+      "package": "T-0149-24.cuw",
+      "source_calibration": "8646F4206400",
+      "source_package_in_corpus": "T-0062-23.cuw"
+    },
+    {
+      "new_calibration": "8646F1611200",
+      "package": "T-0150-24.cuw",
+      "source_calibration": "8646F1606300",
+      "source_package_in_corpus": "T-0061-23.cuw"
+    }
+  ],
+  "direct_update_comparisons": [
+    {
+      "exact_32b_prefix_shared": true,
+      "expected_chance_fraction": 0.003906,
+      "identical_byte_count": 333710,
+      "identical_fraction": 0.003905,
+      "length": 85458944,
+      "longest_run_beyond_prefix32": 3,
+      "new_package": "T-0149-24.cuw",
+      "old_package": "T-0062-23.cuw",
+      "prefix32_is_exactly_shared": true,
+      "shared_16b_block_count": 2,
+      "shared_16b_blocks_beyond_prefix": 0
+    },
+    {
+      "exact_32b_prefix_shared": true,
+      "expected_chance_fraction": 0.003906,
+      "identical_byte_count": 333671,
+      "identical_fraction": 0.003904,
+      "length": 85458944,
+      "longest_run_beyond_prefix32": 3,
+      "new_package": "T-0150-24.cuw",
+      "old_package": "T-0061-23.cuw",
+      "prefix32_is_exactly_shared": true,
+      "shared_16b_block_count": 2,
+      "shared_16b_blocks_beyond_prefix": 0
+    }
+  ],
+  "packages": [
+    {
+      "attach_sha256": "fb1f3f988bef19a664a66c9bfcfb8fa8b984203a9272de13a04acca571b89633",
+      "attach_size": 5853,
+      "declared_total_matches_file": true,
+      "delta_datx": {
+        "block_count": 574,
+        "entropy_bits_per_byte": 7.978,
+        "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "length": 9184,
+        "length_mod_16": 0,
+        "repeated_block_count": 0,
+        "sha256": "f9bf53cd6157f9f426beae2c5037ff27a5bf7d73e8c64ccbe148f96e82818465",
+        "unique_block_count": 574
+      },
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101",
+          "DeltaReproData101",
+          "DeltaEraseAndReproRoutine101"
+        ],
+        "areas": {
+          "DeltaEraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "DeltaReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
+            "length": "05180000",
+            "start_address": "08E80000"
+          },
+          "EraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "ReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
+            "length": "05180000",
+            "start_address": "08E80000"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2022-12-01",
+        "diag_id": "0792",
+        "engine_type": "M##AFKS 2ZRFXE",
+        "format_version": "105",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "1",
+        "model_year": "2022/10-2022/11",
+        "new_cid": "8646F1204500",
+        "nonce_decoded": "5587BF845F3FF525E610A8A5EC9BD6E5",
+        "p4_server_max_time": "03",
+        "repro_method": "07",
+        "required_spec_repro_ver": "04",
+        "security_property2": "9C",
+        "service_auth_key_decoded": "3A8A90AE0ED81B6C37E21C1C5179A93E",
+        "source_target_calibration_1": "8646F1204300",
+        "vehicle_name": "COROLLA Series",
+        "vehicle_type": "MZEA1# ZWE21#",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "DeltaEraseAndReproRoutine101",
+        "DeltaReproData101",
+        "EPF",
+        "EraseAndReproRoutine101",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "Node01",
+        "ReproData101",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "entropy_probe": {
+        "ff_fraction": 0.003917,
+        "global_entropy_bits": 7.9999977,
+        "min_window_entropy_bits": 7.93098,
+        "package": "T-0058-23.cuw",
+        "printable_ascii_fraction": 0.37056,
+        "routine_range_entropy_bits": 7.879802,
+        "window_count": 20864,
+        "window_size": 4096,
+        "zero_fraction": 0.003894
+      },
+      "errors": [],
+      "filename": "T-0058-23.cuw",
+      "format_type": "0x67",
+      "member_count": 3,
+      "members": [
+        {
+          "name": "01-8646F1204500.xx",
+          "payload_crc_ok": true,
+          "payload_length": 256381036,
+          "payload_sha256": "3aba0ef14e5f62754cd8b4370085697ce46948c0fa6d24397ca3126be8f772e9"
+        },
+        {
+          "name": "Delta-01-8646F1204300-8646F1204500-write.datx",
+          "payload_crc_ok": true,
+          "payload_length": 9184,
+          "payload_sha256": "f9bf53cd6157f9f426beae2c5037ff27a5bf7d73e8c64ccbe148f96e82818465"
+        },
+        {
+          "name": "Delta-01-8646F1204300-8646F1204500-routine.xx",
+          "payload_crc_ok": true,
+          "payload_length": 4192,
+          "payload_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f"
+        }
+      ],
+      "outer_crc_ok": true,
+      "routine_member": {
+        "bad_record_count": 0,
+        "decoded_length": 1392,
+        "decoded_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb",
+        "member": "Delta-01-8646F1204300-8646F1204500-routine.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          }
+        ],
+        "raw_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f",
+        "record_count": 88,
+        "record_kinds": {
+          "3": 87,
+          "7": 1
+        }
+      },
+      "sha256": "ac5015118d3c5541c62ac3b0626a2d676681b3c4dee2ce6cb84ad547d116fdd9",
+      "size": 256400446,
+      "whole_repro": {
+        "bad_record_count": 0,
+        "decoded_image_entropy_bits": 7.9999977,
+        "decoded_image_length": 85458944,
+        "decoded_image_sha256": "04b07fb4a817eaa340a7e34bb9e3d2a367989403671cf4f9968ee7c3b25c8dd3",
+        "first_32_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc",
+        "first_64_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc7ef87ff058ecf46847379a5587e3561371979275bc1a5571b23a552eba9efed3",
+        "flash_region": {
+          "end": 234881024,
+          "length": 85458944,
+          "start": 149422080
+        },
+        "member": "01-8646F1204500.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          },
+          {
+            "end": 234881024,
+            "length": 85458944,
+            "start": 149422080
+          }
+        ],
+        "record_count": 5341273,
+        "record_kinds": {
+          "0": 1,
+          "3": 5341271,
+          "7": 1
+        },
+        "routine_slot_length": 1392,
+        "routine_slot_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb"
+      }
+    },
+    {
+      "attach_sha256": "5e2be994a902091d06dcd3a3849a8748268e1c26026f0d4efe7e09b9adc36a18",
+      "attach_size": 5853,
+      "declared_total_matches_file": true,
+      "delta_datx": {
+        "block_count": 517,
+        "entropy_bits_per_byte": 7.977,
+        "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "length": 8272,
+        "length_mod_16": 0,
+        "repeated_block_count": 0,
+        "sha256": "08f3e00a4adb1b78821353762d868fb0e5dd319ca2543a7df4192be7142ac02a",
+        "unique_block_count": 517
+      },
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101",
+          "DeltaReproData101",
+          "DeltaEraseAndReproRoutine101"
+        ],
+        "areas": {
+          "DeltaEraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "DeltaReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
+            "length": "05180000",
+            "start_address": "08E80000"
+          },
+          "EraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "ReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "88524e2f8dc9dee187d1be1e2886c0425fd7f13f384f588c41354bba509f72c6",
+            "length": "05180000",
+            "start_address": "08E80000"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2022-12-01",
+        "diag_id": "0792",
+        "engine_type": "M##AFKS 2ZRFXE",
+        "format_version": "105",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "1",
+        "model_year": "2022/10-2022/11",
+        "new_cid": "8646F1204500",
+        "nonce_decoded": "5587BF845F3FF525E610A8A5EC9BD6E5",
+        "p4_server_max_time": "03",
+        "repro_method": "07",
+        "required_spec_repro_ver": "04",
+        "security_property2": "9C",
+        "service_auth_key_decoded": "3A8A90AE0ED81B6C37E21C1C5179A93E",
+        "source_target_calibration_1": "8646F1204400",
+        "vehicle_name": "COROLLA Series",
+        "vehicle_type": "MZEA1# ZWE21#",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "DeltaEraseAndReproRoutine101",
+        "DeltaReproData101",
+        "EPF",
+        "EraseAndReproRoutine101",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "Node01",
+        "ReproData101",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "errors": [],
+      "filename": "T-0060-23.cuw",
+      "format_type": "0x67",
+      "member_count": 3,
+      "members": [
+        {
+          "name": "01-8646F1204500.xx",
+          "payload_crc_ok": true,
+          "payload_length": 256381036,
+          "payload_sha256": "3aba0ef14e5f62754cd8b4370085697ce46948c0fa6d24397ca3126be8f772e9"
+        },
+        {
+          "name": "Delta-01-8646F1204400-8646F1204500-write.datx",
+          "payload_crc_ok": true,
+          "payload_length": 8272,
+          "payload_sha256": "08f3e00a4adb1b78821353762d868fb0e5dd319ca2543a7df4192be7142ac02a"
+        },
+        {
+          "name": "Delta-01-8646F1204400-8646F1204500-routine.xx",
+          "payload_crc_ok": true,
+          "payload_length": 4192,
+          "payload_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f"
+        }
+      ],
+      "outer_crc_ok": true,
+      "routine_member": {
+        "bad_record_count": 0,
+        "decoded_length": 1392,
+        "decoded_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb",
+        "member": "Delta-01-8646F1204400-8646F1204500-routine.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          }
+        ],
+        "raw_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f",
+        "record_count": 88,
+        "record_kinds": {
+          "3": 87,
+          "7": 1
+        }
+      },
+      "sha256": "b3e4a7a951c74ef9985cf05f5151a36538e57bd84392da988d5f8102c652837f",
+      "size": 256399534,
+      "whole_repro": {
+        "bad_record_count": 0,
+        "decoded_image_entropy_bits": 7.9999977,
+        "decoded_image_length": 85458944,
+        "decoded_image_sha256": "04b07fb4a817eaa340a7e34bb9e3d2a367989403671cf4f9968ee7c3b25c8dd3",
+        "first_32_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc",
+        "first_64_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc7ef87ff058ecf46847379a5587e3561371979275bc1a5571b23a552eba9efed3",
+        "flash_region": {
+          "end": 234881024,
+          "length": 85458944,
+          "start": 149422080
+        },
+        "member": "01-8646F1204500.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          },
+          {
+            "end": 234881024,
+            "length": 85458944,
+            "start": 149422080
+          }
+        ],
+        "record_count": 5341273,
+        "record_kinds": {
+          "0": 1,
+          "3": 5341271,
+          "7": 1
+        },
+        "routine_slot_length": 1392,
+        "routine_slot_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb"
+      }
+    },
+    {
+      "attach_sha256": "b520b682b719674b6e40acdd2a52749bbd197c9b42d77839d2f4830f950c4a36",
+      "attach_size": 5795,
+      "declared_total_matches_file": true,
+      "delta_datx": {
+        "block_count": 648,
+        "entropy_bits_per_byte": 7.979,
+        "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "length": 10368,
+        "length_mod_16": 0,
+        "repeated_block_count": 0,
+        "sha256": "815db5e7d79aaa528fc2b61a25e744a55805fdfebcd994a6b0098e02f0b16e37",
+        "unique_block_count": 648
+      },
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101",
+          "DeltaReproData101",
+          "DeltaEraseAndReproRoutine101"
+        ],
+        "areas": {
+          "DeltaEraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "DeltaReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "8ffa0003cbeb89b6d844e3bbdfa34679c09b89b39d94ea55607273be3d2eb7c2",
+            "length": "05180000",
+            "start_address": "08E80000"
+          },
+          "EraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "ReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "8ffa0003cbeb89b6d844e3bbdfa34679c09b89b39d94ea55607273be3d2eb7c2",
+            "length": "05180000",
+            "start_address": "08E80000"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2022-12-01",
+        "diag_id": "0792",
+        "engine_type": "",
+        "format_version": "105",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "1",
+        "model_year": "",
+        "new_cid": "8646F1606300",
+        "nonce_decoded": "5587BF845F3FF525E610A8A5EC9BD6E5",
+        "p4_server_max_time": "03",
+        "repro_method": "07",
+        "required_spec_repro_ver": "04",
+        "security_property2": "9C",
+        "service_auth_key_decoded": "3A8A90AE0ED81B6C37E21C1C5179A93E",
+        "source_target_calibration_1": "8646F1606200",
+        "vehicle_name": "",
+        "vehicle_type": "",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "DeltaEraseAndReproRoutine101",
+        "DeltaReproData101",
+        "EPF",
+        "EraseAndReproRoutine101",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "Node01",
+        "ReproData101",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "errors": [],
+      "filename": "T-0061-23.cuw",
+      "format_type": "0x67",
+      "member_count": 3,
+      "members": [
+        {
+          "name": "01-8646F1606300.xx",
+          "payload_crc_ok": true,
+          "payload_length": 256381036,
+          "payload_sha256": "f4fe7a0e263197e0c578df25bb7a3430b3bcef1d14ce3fde6b29779509d78c4d"
+        },
+        {
+          "name": "Delta-01-8646F1606200-8646F1606300-write.datx",
+          "payload_crc_ok": true,
+          "payload_length": 10368,
+          "payload_sha256": "815db5e7d79aaa528fc2b61a25e744a55805fdfebcd994a6b0098e02f0b16e37"
+        },
+        {
+          "name": "Delta-01-8646F1606200-8646F1606300-routine.xx",
+          "payload_crc_ok": true,
+          "payload_length": 4192,
+          "payload_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f"
+        }
+      ],
+      "outer_crc_ok": true,
+      "routine_member": {
+        "bad_record_count": 0,
+        "decoded_length": 1392,
+        "decoded_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb",
+        "member": "Delta-01-8646F1606200-8646F1606300-routine.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          }
+        ],
+        "raw_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f",
+        "record_count": 88,
+        "record_kinds": {
+          "3": 87,
+          "7": 1
+        }
+      },
+      "sha256": "007a351fa0ac096af6c9c7c8085c6690c79abefea058e1fc438033ef3512bf94",
+      "size": 256401572,
+      "whole_repro": {
+        "bad_record_count": 0,
+        "decoded_image_entropy_bits": 7.9999978,
+        "decoded_image_length": 85458944,
+        "decoded_image_sha256": "e913553bdf47d91bb51114b82d851991001f1efa7293721718cd513d07f018d0",
+        "first_32_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc",
+        "first_64_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc7144d021f18005452db7189de3dc129ea4195e722cb06147ed027b880a3f8f42",
+        "flash_region": {
+          "end": 234881024,
+          "length": 85458944,
+          "start": 149422080
+        },
+        "member": "01-8646F1606300.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          },
+          {
+            "end": 234881024,
+            "length": 85458944,
+            "start": 149422080
+          }
+        ],
+        "record_count": 5341273,
+        "record_kinds": {
+          "0": 1,
+          "3": 5341271,
+          "7": 1
+        },
+        "routine_slot_length": 1392,
+        "routine_slot_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb"
+      }
+    },
+    {
+      "attach_sha256": "01e26a4ee78deb8fa3498310c05e794506fddb8c09864831ee8094d790e99c7e",
+      "attach_size": 5734,
+      "declared_total_matches_file": true,
+      "delta_datx": {
+        "block_count": 46937,
+        "entropy_bits_per_byte": 8.0,
+        "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "length": 750992,
+        "length_mod_16": 0,
+        "repeated_block_count": 0,
+        "sha256": "11844a535d88f524a9d6bcaee54020d3dc64576566bd3f7a36bf0f3c9e2d4a45",
+        "unique_block_count": 46937
+      },
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101",
+          "DeltaReproData101",
+          "DeltaEraseAndReproRoutine101"
+        ],
+        "areas": {
+          "DeltaEraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "DeltaReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "b743d282c552d6bc3c04123ff52e81b38f28b0834813678f63b3b2799861e896",
+            "length": "05180000",
+            "start_address": "08E80000"
+          },
+          "EraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "ReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "b743d282c552d6bc3c04123ff52e81b38f28b0834813678f63b3b2799861e896",
+            "length": "05180000",
+            "start_address": "08E80000"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2023-01-10",
+        "diag_id": "0792",
+        "engine_type": "",
+        "format_version": "105",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "1",
+        "model_year": "",
+        "new_cid": "8646F4206400",
+        "nonce_decoded": "5587BF845F3FF525E610A8A5EC9BD6E5",
+        "p4_server_max_time": "03",
+        "repro_method": "07",
+        "required_spec_repro_ver": "04",
+        "security_property2": "9C",
+        "service_auth_key_decoded": "3A8A90AE0ED81B6C37E21C1C5179A93E",
+        "source_target_calibration_1": "8646F4206200",
+        "vehicle_name": "",
+        "vehicle_type": "",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "DeltaEraseAndReproRoutine101",
+        "DeltaReproData101",
+        "EPF",
+        "EraseAndReproRoutine101",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "Node01",
+        "ReproData101",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "errors": [],
+      "filename": "T-0062-23.cuw",
+      "format_type": "0x67",
+      "member_count": 3,
+      "members": [
+        {
+          "name": "01-8646F4206400.xx",
+          "payload_crc_ok": true,
+          "payload_length": 256381036,
+          "payload_sha256": "96ce895f0aa59074c27cc14ce90d65e1f9babfed8922456362d709bf7937a8d0"
+        },
+        {
+          "name": "Delta-01-8646F4206200-8646F4206400-write.datx",
+          "payload_crc_ok": true,
+          "payload_length": 750992,
+          "payload_sha256": "11844a535d88f524a9d6bcaee54020d3dc64576566bd3f7a36bf0f3c9e2d4a45"
+        },
+        {
+          "name": "Delta-01-8646F4206200-8646F4206400-routine.xx",
+          "payload_crc_ok": true,
+          "payload_length": 4192,
+          "payload_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f"
+        }
+      ],
+      "outer_crc_ok": true,
+      "routine_member": {
+        "bad_record_count": 0,
+        "decoded_length": 1392,
+        "decoded_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb",
+        "member": "Delta-01-8646F4206200-8646F4206400-routine.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          }
+        ],
+        "raw_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f",
+        "record_count": 88,
+        "record_kinds": {
+          "3": 87,
+          "7": 1
+        }
+      },
+      "sha256": "9971e3052d63dfe1fb262509ec59bcc8924db0082210117c63e9b01b73070e5b",
+      "size": 257142135,
+      "whole_repro": {
+        "bad_record_count": 0,
+        "decoded_image_entropy_bits": 7.9999979,
+        "decoded_image_length": 85458944,
+        "decoded_image_sha256": "403a3049e34fa326cccd1e6ee819576ec5e831b9e382086625a1ae81afd4d217",
+        "first_32_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc",
+        "first_64_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc8d60a0415effda66b5c380dc5cfe1433ce36bdf149054767706ca1d1c95e0aa1",
+        "flash_region": {
+          "end": 234881024,
+          "length": 85458944,
+          "start": 149422080
+        },
+        "member": "01-8646F4206400.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          },
+          {
+            "end": 234881024,
+            "length": 85458944,
+            "start": 149422080
+          }
+        ],
+        "record_count": 5341273,
+        "record_kinds": {
+          "0": 1,
+          "3": 5341271,
+          "7": 1
+        },
+        "routine_slot_length": 1392,
+        "routine_slot_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb"
+      }
+    },
+    {
+      "attach_sha256": "2c36caf29e632949d1f34c058670bb079fd99e8c5a034412b819af3a23df5fff",
+      "attach_size": 5802,
+      "declared_total_matches_file": true,
+      "delta_datx": {
+        "block_count": 93940,
+        "entropy_bits_per_byte": 8.0,
+        "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "length": 1503040,
+        "length_mod_16": 0,
+        "repeated_block_count": 0,
+        "sha256": "46d7d332a5c92336a53474fba2fb3e559b84744817f4682df437f683bd0a0677",
+        "unique_block_count": 93940
+      },
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101",
+          "DeltaReproData101",
+          "DeltaEraseAndReproRoutine101"
+        ],
+        "areas": {
+          "DeltaEraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "DeltaReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "52dc8b80f6b2ff1f27a4e059183d91a7b46156e4f5a1aaf3bb4309aaec931b4d",
+            "length": "05180000",
+            "start_address": "08E80000"
+          },
+          "EraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "ReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "52dc8b80f6b2ff1f27a4e059183d91a7b46156e4f5a1aaf3bb4309aaec931b4d",
+            "length": "05180000",
+            "start_address": "08E80000"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2024-04-01",
+        "diag_id": "0792",
+        "engine_type": "1XM 1YM",
+        "format_version": "105",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "1",
+        "model_year": "2022/03-2023/11",
+        "new_cid": "8646F4206700",
+        "nonce_decoded": "5587BF845F3FF525E610A8A5EC9BD6E5",
+        "p4_server_max_time": "03",
+        "repro_method": "07",
+        "required_spec_repro_ver": "04",
+        "security_property2": "9C",
+        "service_auth_key_decoded": "3A8A90AE0ED81B6C37E21C1C5179A93E",
+        "source_target_calibration_1": "8646F4206400",
+        "vehicle_name": "bZ4X",
+        "vehicle_type": "XEAM10 YEAM15",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "DeltaEraseAndReproRoutine101",
+        "DeltaReproData101",
+        "EPF",
+        "EraseAndReproRoutine101",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "Node01",
+        "ReproData101",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "errors": [],
+      "filename": "T-0149-24.cuw",
+      "format_type": "0x67",
+      "member_count": 3,
+      "members": [
+        {
+          "name": "01-8646F4206700.xx",
+          "payload_crc_ok": true,
+          "payload_length": 256381036,
+          "payload_sha256": "6ac68234547b512353da9b74e2e74002245f668c82aa5e9f233c2a5c04d3c9ab"
+        },
+        {
+          "name": "Delta-01-8646F4206400-8646F4206700-write.datx",
+          "payload_crc_ok": true,
+          "payload_length": 1503040,
+          "payload_sha256": "46d7d332a5c92336a53474fba2fb3e559b84744817f4682df437f683bd0a0677"
+        },
+        {
+          "name": "Delta-01-8646F4206400-8646F4206700-routine.xx",
+          "payload_crc_ok": true,
+          "payload_length": 4192,
+          "payload_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f"
+        }
+      ],
+      "outer_crc_ok": true,
+      "routine_member": {
+        "bad_record_count": 0,
+        "decoded_length": 1392,
+        "decoded_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb",
+        "member": "Delta-01-8646F4206400-8646F4206700-routine.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          }
+        ],
+        "raw_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f",
+        "record_count": 88,
+        "record_kinds": {
+          "3": 87,
+          "7": 1
+        }
+      },
+      "sha256": "70bea932f3ae641e0d9fab99419aeb59ac76b08adcfeca97b9278d59d15ad6a8",
+      "size": 257894251,
+      "whole_repro": {
+        "bad_record_count": 0,
+        "decoded_image_entropy_bits": 7.9999977,
+        "decoded_image_length": 85458944,
+        "decoded_image_sha256": "95d5d6abed93b6d0225418ec497c81a379fba8fcd70dae723933f00ecc8ce3b3",
+        "first_32_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc",
+        "first_64_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfccb10ce5ff866e3c836997aed1a19ebeb2a7a18ebd4fb5a5b00ae40192f2d8517",
+        "flash_region": {
+          "end": 234881024,
+          "length": 85458944,
+          "start": 149422080
+        },
+        "member": "01-8646F4206700.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          },
+          {
+            "end": 234881024,
+            "length": 85458944,
+            "start": 149422080
+          }
+        ],
+        "record_count": 5341273,
+        "record_kinds": {
+          "0": 1,
+          "3": 5341271,
+          "7": 1
+        },
+        "routine_slot_length": 1392,
+        "routine_slot_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb"
+      }
+    },
+    {
+      "attach_sha256": "1cad17270d2ba878f9fb8dd46cba399723c7f9d2a6ec630d41fd0538d11f0f9d",
+      "attach_size": 5778,
+      "declared_total_matches_file": true,
+      "delta_datx": {
+        "block_count": 78436,
+        "entropy_bits_per_byte": 8.0,
+        "first_block_hex": "0a4aba7f300a8745e2acb15b5b59a046",
+        "length": 1254976,
+        "length_mod_16": 0,
+        "repeated_block_count": 0,
+        "sha256": "78c3954f095a1959b7f297e5fc799dc50abdf28302c3652ed0201506cd7f75bf",
+        "unique_block_count": 78436
+      },
+      "descriptor": {
+        "area_sections_present": [
+          "ReproData101",
+          "EraseAndReproRoutine101",
+          "DeltaReproData101",
+          "DeltaEraseAndReproRoutine101"
+        ],
+        "areas": {
+          "DeltaEraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "DeltaReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "de4d63632dc9c54488b55a10d78c52fa436f3351b46106e5415e4ad943ba076c",
+            "length": "05180000",
+            "start_address": "08E80000"
+          },
+          "EraseAndReproRoutine101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "375f9862be4c06ac579d0193b19abad70a09c592fb708ca6b730c62f36439a87",
+            "length": "00000570",
+            "start_address": "008F6C00"
+          },
+          "ReproData101": {
+            "cmac_empty": true,
+            "crc_empty": true,
+            "digital_signature_length": 512,
+            "digital_signature_sha256": "de4d63632dc9c54488b55a10d78c52fa436f3351b46106e5415e4ad943ba076c",
+            "length": "05180000",
+            "start_address": "08E80000"
+          }
+        },
+        "contact_type": "P5-Unified",
+        "date_of_issue": "2024-03-19",
+        "diag_id": "0792",
+        "engine_type": "",
+        "format_version": "105",
+        "gateway_diag_id_1": "07505F",
+        "gateway_mode_1": "01",
+        "is_blank_ecu": "0",
+        "is_controlled_by_scc": "1",
+        "model_year": "",
+        "new_cid": "8646F1611200",
+        "nonce_decoded": "5587BF845F3FF525E610A8A5EC9BD6E5",
+        "p4_server_max_time": "03",
+        "repro_method": "07",
+        "required_spec_repro_ver": "04",
+        "security_property2": "9C",
+        "service_auth_key_decoded": "3A8A90AE0ED81B6C37E21C1C5179A93E",
+        "source_target_calibration_1": "8646F1606300",
+        "vehicle_name": "",
+        "vehicle_type": "",
+        "version_for_cfm2": "1"
+      },
+      "descriptor_sections": [
+        "DeltaEraseAndReproRoutine101",
+        "DeltaReproData101",
+        "EPF",
+        "EraseAndReproRoutine101",
+        "Format",
+        "KindOfCal",
+        "LogicalBlock101",
+        "Node01",
+        "ReproData101",
+        "Vehicle",
+        "VehicleForEUOT",
+        "VehicleForNA"
+      ],
+      "errors": [],
+      "filename": "T-0150-24.cuw",
+      "format_type": "0x67",
+      "member_count": 3,
+      "members": [
+        {
+          "name": "01-8646F1611200.xx",
+          "payload_crc_ok": true,
+          "payload_length": 256381036,
+          "payload_sha256": "3de51e60df86f069e19fee3912b2a49a235ff745e9b020fa7aff89f79576a93b"
+        },
+        {
+          "name": "Delta-01-8646F1606300-8646F1611200-write.datx",
+          "payload_crc_ok": true,
+          "payload_length": 1254976,
+          "payload_sha256": "78c3954f095a1959b7f297e5fc799dc50abdf28302c3652ed0201506cd7f75bf"
+        },
+        {
+          "name": "Delta-01-8646F1606300-8646F1611200-routine.xx",
+          "payload_crc_ok": true,
+          "payload_length": 4192,
+          "payload_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f"
+        }
+      ],
+      "outer_crc_ok": true,
+      "routine_member": {
+        "bad_record_count": 0,
+        "decoded_length": 1392,
+        "decoded_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb",
+        "member": "Delta-01-8646F1606300-8646F1611200-routine.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          }
+        ],
+        "raw_sha256": "5baa1feba14586b13b131095b44213481292bd3e87a62efceba7a55aed0c430f",
+        "record_count": 88,
+        "record_kinds": {
+          "3": 87,
+          "7": 1
+        }
+      },
+      "sha256": "c28455c5b4ee6b48b4bf7b0fc51c6110969c6de9294bf488583e50727f91b5f1",
+      "size": 257646163,
+      "whole_repro": {
+        "bad_record_count": 0,
+        "decoded_image_entropy_bits": 7.9999979,
+        "decoded_image_length": 85458944,
+        "decoded_image_sha256": "1dcf7a3f61bc202b85182bf76b3610f444e5b7b97fbd980f793f47bdb8380303",
+        "first_32_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc",
+        "first_64_bytes_hex": "8b273e8284a5baca96e562b7be41591f25a12998b328c64741b28e63e6d23dfc0c5fac0584f1c0c007297ff387015a8d80c468d39bf91522e57782886780dbed",
+        "flash_region": {
+          "end": 234881024,
+          "length": 85458944,
+          "start": 149422080
+        },
+        "member": "01-8646F1611200.xx",
+        "ranges": [
+          {
+            "end": 9400688,
+            "length": 1392,
+            "start": 9399296
+          },
+          {
+            "end": 234881024,
+            "length": 85458944,
+            "start": 149422080
+          }
+        ],
+        "record_count": 5341273,
+        "record_kinds": {
+          "0": 1,
+          "3": 5341271,
+          "7": 1
+        },
+        "routine_slot_length": 1392,
+        "routine_slot_sha256": "161fd56df2bc3454184e63d92aaad43fc5baedd63c112da830bc99304d96cedb"
+      }
+    }
+  ],
+  "schema_version": 1,
+  "transform_boundary": {
+    "datx_members": "DeltaReproData payload; downloaded by the ReproStd writer with RequestDownload DFI 0x21 as the ECU-side delta input; exact representation grammar and transform are unknown.",
+    "entropy_support": "decoded flash body is high-entropy throughout (T-0058: global 7.9999977 bits/byte, minimum complete 4-KiB window 7.93098; routine range 7.8798 over 1392 B); this supports opacity of the encoded body only and does not distinguish any specific cryptographic transform.",
+    "host_transform": "host parses S-record framing for .xx members and passes the decoded payload bytes; .datx remains an opaque raw member buffer. No host-side decryption/decompression of the encoded payload body is recovered in the pinned path.",
+    "member_read_path": "format-0x67 members are raw length+CRC32 payloads; the CUW.dll read path is a chunked fread(dst,1,0xFFF) loop (reader 0x1002BEB0, push site 0x1002BF83) with a whole-file CRC32 gate (0x1002A3B0, called from loader 0x10031A20 at 0x10031C0C; mismatch -> Error FileCRC); CDeltaReproArchiveCtrlr (RTTI 0x1008A9A0, vtable 0x1007C918, single deleting-dtor virtual 0x10066DC0, global instance 0x1008CA0C) holds only 0xAC-stride path/name/count entries with no payload pointer or byte fields - orchestration-only; CAES encrypt/decrypt callers are only 0x1001B9B2/0x1005AC52/0x1005AD02 (INI parameter decode, SecurityUp helpers), never the member path; TCUWCalibrationFile.dll and TCUWCanReproStdFlashWriter.dll have no crypto or compression imports.",
+    "routine_member": "byte-identical high-entropy encoded blob in all six packages; exact representation, transform, and ECU-side interpretation are unknown.",
+    "xx_members": "Motorola S-record framing only; decoded flash data is high-entropy and its exact encoding is unknown (no plaintext claim)."
+  }
+}

@@ -25,8 +25,14 @@ The framing implemented here is *statically recovered* from Techstream V18
   tail      format-specific CPU-image remainder.  For Format Version 4 only,
               Techstream's parser reads a u8 CPU-image count followed by the
               same member grammar above.  This branch is independently
-              validated by the T-0087-17 Corolla specimen.  Other tail
-              variants remain opaque.
+              validated by the T-0087-17 Corolla specimen.  Format type 0x67
+              (a newer-distribution value inside the same membership table)
+              carries the same `count:u8 || member[count]` tail shape; this is
+              not disassembly-anchored in V18 but is validated byte-exactly
+              (outer CRC, every member CRC, and exact declared-total
+              consumption) on six external format-0x67 FRC packages
+              (T-0058-23/T-0060-23/T-0061-23/T-0062-23/T-0149-24/T-0150-24).
+              Other tail variants remain opaque.
 
 Outer checks performed by 0x413BF0 at its tail (0x41403B..0x41407A):
 
@@ -40,10 +46,11 @@ Outer checks performed by 0x413BF0 at its tail (0x41403B..0x41407A):
 
 This module validates the outer framing, extracts the first named member (the
 embedded `attach.att` descriptor), verifies both CRCs and size bounds, and
-preserves all remaining bytes.  Format Version 4 additionally decodes the
-CPU-image archive count/member framing recovered from Cuw.exe and validated
-against the external T-0087-17 specimen.  No semantic mapping of other tail
-variants is attempted.
+preserves all remaining bytes.  Format Version 4 and format type 0x67
+additionally decode the `count:u8 || member[count]` tail grammar (Version 4:
+recovered from Cuw.exe and validated against the external T-0087-17 specimen;
+0x67: validated byte-exactly against the six external FRC specimens).  No
+semantic mapping of other tail variants is attempted.
 """
 from __future__ import annotations
 
@@ -96,6 +103,9 @@ def parse(data: bytes) -> dict[str, Any]:
         "format4_archive_count": None,
         "format4_archives": [],
         "format4_archive_bytes_consumed": None,
+        "format67_member_count": None,
+        "format67_members": [],
+        "format67_bytes_consumed": None,
         "notes": [],
         "errors": [],
     }
@@ -241,6 +251,63 @@ def parse(data: bytes) -> dict[str, Any]:
         res["format4_archive_bytes_consumed"] = arch_off - off
         if not res["errors"] and arch_off != declared:
             err(f"format-4 archive records end at {arch_off}, declared total is {declared}")
+
+    # Format type 0x67 (newer distributions; membership-table member) carries
+    # the same `count:u8 || member[count]` tail grammar as Format Version 4.
+    # Not disassembly-anchored: validated byte-exactly on six external FRC
+    # packages (outer CRC + every member CRC + exact declared-total
+    # consumption).  See inspect_cuw_frc_corpus.py for the corpus evidence.
+    if fmt == 0x67 and tail:
+        mem_off = off
+        count = data[mem_off]
+        mem_off += 1
+        res["format67_member_count"] = count
+        members = []
+        for idx in range(count):
+            start = mem_off
+            if mem_off + 2 > declared:
+                err(f"truncated before format-0x67 member[{idx}] name length at offset {mem_off}")
+                break
+            (mem_name_len,) = struct.unpack_from(">H", data, mem_off)
+            mem_off += 2
+            if mem_off + mem_name_len > declared:
+                err(f"truncated inside format-0x67 member[{idx}] name at offset {mem_off} (need {mem_name_len} bytes)")
+                break
+            mem_name_raw = data[mem_off:mem_off + mem_name_len]
+            mem_off += mem_name_len
+            try:
+                mem_name = mem_name_raw.decode("ascii")
+            except UnicodeDecodeError:
+                mem_name = mem_name_raw.hex()
+            if mem_off + 8 > declared:
+                err(f"truncated before format-0x67 member[{idx}] payload length/CRC at offset {mem_off}")
+                break
+            mem_len, mem_crc = struct.unpack_from(">II", data, mem_off)
+            mem_off += 8
+            if mem_off + mem_len > declared:
+                err(f"truncated inside format-0x67 member[{idx}] payload at offset {mem_off} (need {mem_len} bytes)")
+                break
+            mem_payload = data[mem_off:mem_off + mem_len]
+            mem_off += mem_len
+            computed_mem_crc = zlib.crc32(mem_payload) & 0xFFFFFFFF
+            if computed_mem_crc != mem_crc:
+                err(f"format-0x67 member[{idx}] payload CRC mismatch: computed 0x{computed_mem_crc:08x} != stored 0x{mem_crc:08x}")
+            members.append({
+                "index": idx,
+                "record_offset": start,
+                "name": mem_name,
+                "name_length": mem_name_len,
+                "payload_offset": mem_off - mem_len,
+                "payload_length": mem_len,
+                "payload_crc32": mem_crc,
+                "computed_payload_crc32": computed_mem_crc,
+                "payload_sha256": _sha256(mem_payload),
+                "record_end": mem_off,
+            })
+        res["format67_members"] = members
+        res["format67_bytes_consumed"] = mem_off - off
+        if not res["errors"] and mem_off != declared:
+            err(f"format-0x67 member records end at {mem_off}, declared total is {declared}")
 
     return res
 

@@ -206,7 +206,10 @@ check("modern EPS transfer explicitly rejected", "comparative only" in sec["mode
 
 if CORPUS.is_dir():
     print("\n== local raw-corpus cross-check ==")
-    local = sorted(path for path in CORPUS.glob("T-*.cuw") if path.name != "T-0087-17.cuw")
+    # The corpus directory also carries non-Tacoma specimens pinned by other
+    # suites (FRC format-0x67 packages, contrast set, T-0087-17); this suite
+    # verifies the 11 pinned Tacoma packages and ignores the rest.
+    local = sorted(path for path in CORPUS.glob("T-*.cuw") if path.name in EXPECTED_PACKAGES)
     check("all 11 pinned Tacoma CUWs present", len(local) == 11 and {path.name for path in local} == set(EXPECTED_PACKAGES))
     local_image_hashes = {}
     for path in local:

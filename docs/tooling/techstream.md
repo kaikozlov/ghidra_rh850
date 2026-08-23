@@ -1126,6 +1126,189 @@ J2534 frames after reset — CAN `0x777‖10 81` (len 6) and `0x7F7‖FE 10 81`
 (len 7, TxFlag `0x80`) — preserved as capture observables; their target-side
 interpretation is bounded.
 
+#### 5.2.4 Real format-0x67 FRC delta corpus: six `ReproMethod=07` packages and the modern unpacked GTS+ host
+
+The external corpus now includes six **format-`0x67` FRC packages** (front
+recognition camera, DiagID `0792`, Corolla-family; TMS-040/041 category-498
+counterpart on the ECU side): `T-0058-23` (`8646F1204300→8646F1204500`),
+`T-0060-23` (`…04400→…04500`), `T-0061-23` (`8646F1606200→…6300`),
+`T-0062-23` (`8646F4206200→…6400`), `T-0149-24` (`…6400→…6700`), and
+`T-0150-24` (`8646F1606300→…11200`).  `inspect_cuw_frc_corpus.py` +
+`verify_techstream_cuw_frc_corpus.py` close the container, descriptor, framing,
+and cross-package evidence; the generated artifact is
+`data/generated/techstream_v18/cuw_frc_corpus.json`.
+
+**Container (verified).** Format `0x67` is a membership-table member whose
+tail is the same `count:u8 || member[count]` grammar as Version 4 (TMS-034):
+`u16-BE namelen || name || u32-BE len || u32-BE crc32(zlib) || payload`,
+three members, both outer and all member CRCs valid, consumed bytes ==
+declared total exactly on all six files (`parse_cuw_container.py` implements
+the branch).  Members are exactly `01-<NewCID>.xx`,
+`Delta-01-<src>-<new>-write.datx`, and `Delta-01-<src>-<new>-routine.xx`.
+
+**Descriptor (verified).** `[Format] Version=105, VersionForCFM2=1`;
+`[Vehicle] ContactType=P5-Unified` (`VehicleName "COROLLA Series"`);
+`[Node01] RequiredSpecReproVer=04`, `DiagID=0792`, gateway
+`01_GatewayDiagID=07505F`; `[KindOfCal] IsControlledBySCC=1, IsBlankECU=0`;
+`[LogicalBlock101] ReproMethod=07, SecurityProperty2=9C`, one source target.
+All six carry the **same** index-subtraction-obfuscated `ServiceAuthKey`
+(Node section; decodes to ASCII `3A8A90AE0ED81B6C37E21C1C5179A93E`) and
+`Nonce` (LogicalBlock section; `5587BF845F3FF525E610A8A5EC9BD6E5`).  Area
+descriptors: `ReproData`/`DeltaReproData` share one 512-byte
+`DigitalSignature` (flash area `08E80000/05180000`),
+`EraseAndReproRoutine`/`DeltaEraseAndReproRoutine` share another
+(`008F6C00/00000570`); CRC/CMAC empty.  The whole/delta entries for each
+target area share the same 512-byte `DigitalSignature`, so it is **not a direct
+signature of the differing serialized member bytes**; the exact signed object remains bounded.
+
+**Payload boundary (verified/bounded).** The `01-….xx` members are plain
+Motorola S-record **framing** (5,341,273 records, zero invalid, two ranges:
+the `0x8F6C00` routine slot and flash `0x08E80000..0x0E000000` = 85,458,944
+B); the **decoded data is high-entropy with unknown encoding** — T-0058
+global entropy 7.9999977 bits/byte, minimum complete 4-KiB window 7.93098
+(no plaintext island), printable/00/FF fractions random-like; the same
+holds on all six.  The `Delta-…-routine.xx` member is byte-identical in all
+six packages (sha256 `5baa1feb…430f`), decodes to exactly the same 1,392 B
+(`161fd56d…cedb`) that every whole image embeds at `0x8F6C00`, and is itself
+high-entropy (7.8798) — a byte-identical deterministic encoded
+representation whose interpretation/transform is unknown.  The `write.datx`
+members are 16-byte
+multiples, share exactly one leading 16-byte block
+(`0a4aba7f300a8745e2acb15b5b59a046`), and have **zero** interior block
+collisions across packages; sizes scale with version distance
+(8,272–1,503,040 B).  Consecutive-version stored images are statistically
+independent: both corpus-internal chains (`T-0062→T-0149`, `T-0061→T-0150`)
+show byte identity 0.00390–0.00391 (chance is 0.003906), zero shared
+16-byte blocks beyond the 32-byte constant image prefix
+(`8b273e82…d23dfc`), and no identical run ≥ 8 beyond it — the stored
+representation changes globally rather than as localized edits; the exact
+transform remains bounded.  Five further format-`0x67` camera
+packages (Tundra/Crown/Camry/GH, DiagID `07D2/07506D/07500F/0724`) carry
+`ReproMethod=01`/`SecurityProperty2=98`/`IsControlledBySCC=0` and no delta
+sections — the pinned whole-repro contrast set.
+
+**Modern host (recovered, from the statically unpacked GTS+ CUWPlus
+binaries in `REFERENCE/gtsplus_cuwplus`; provenance and sha256 pins in its
+README).**  The shipped 2026-06-18 native DLLs are Crackproof-style stubs;
+the evidence images are statically reconstructed (adapted Senbei PE32
+unpacker) and every anchor below is byte-checked by the test against those
+pinned images (image base `0x10000000`):
+
+- **Route**: decoded CUWPlus `Ini/P5-Unified04.ini` (per-nibble
+  `enc = 0x23 + 4*nibble` obfuscation) selects
+  `TCUWCanUnifiedCIDGetter.dll` + `TCUWCanReproStdPrepareWriter.dll` +
+  `TCUWCanReproStdFlashWriter.dll`, `PrepareRetryFlag=0` — the ReproStd
+  pair serves `P5-Unified04`, so these FRC packages use the standard
+  ReproStd route, not the Unified flash writers of TMS-032.
+- **Descriptor parser (modern `CUW.dll`)**: the `[LogicalBlock]` section
+  names map to `CLogicalBlockInfo` area objects through `FUN_1000DD60`'s
+  store sequence — `ReproDatanxx→+0x24`, `EraseAndReproRoutinenxx→+0xCC`,
+  `DeltaReproDatanxx→+0x174`, `DeltaEraseAndReproRoutinenxx→+0x21C`,
+  `Compression…→+0x2C4/+0x36C`, plus `+0x414/+0x4BC` and an `0xA8`-stride
+  `ReproDataSegment0nxx..2nxx` loop — and the `CLogicalBlockInfo`
+  constructor (`TCUWCalibrationFile.unpack.dll @0x10001400`, symbol
+  present) builds area objects at exactly those offsets minus `0x1C`
+  (`+0x08/+0xB0/+0x158/+0x200/+0x2A8/+0x350`), so the `+0x158/+0x200`
+  area names are **recovered, not inferred**.  `IsControlledBySCC` is
+  compared against `[KindOfCal]` and stored at calibration `+0x24`
+  (`0x1000CF89`); when SCC is set and `IsBlankECU` clear, the parser calls
+  `FUN_100115E0`, which consumes `VehicleForNA`/`VehicleForEUOT` sections.
+  **`IsControlledBySCC` does not select the RKS flow.**
+- **ReproMethod enum (modern `TCUWCalibrationFile.dll`)**: method-code slot
+  array `0x10009100` embeds the classic six `01/05/07/08/09/0A` plus Phase-6
+  `00/02/03`; exported `mlptrReproMethod_*` slots at `0xE000..0xE020`;
+  strings pin `DeltaReproRoutinePackageDLType` (`0x1000D5C4`) and
+  `Compression/Delta/Whole…Phase6` (`0x1000D540/0x1000D460`).  `07` =
+  DeltaReproRoutinePackageDLType as in V18.
+- **Writer wire grammar (modern `TCUWCanReproStdFlashWriter.dll`)**:
+  RequestDownload builder `0x10002810` emits `34 || DFI || 44 ||
+  StartAddress[4] || Length[4]`, expected `74`, `74`-length capped at
+  `0x0FFF` minus two; the DFI selector (`0x100031E0` region, jump table at
+  `0x10003410`) maps method-family tags `0/1→0x01`, `2→0x21`, `3→0x11`.
+  The FRC delta route therefore downloads the `write.datx` member with
+  **DFI `0x21`**.  The recovered `ReproMethod==2` (delta) worker sequence
+  (`0x10001B40`) is: select the PackageDL **routine** area `+0x200`
+  (`0x10002171`, tag `0` at `0x10002186` → DFI `0x01`) and close it with
+  StartRoutine SID `31 01` + RID `10 F5` (selector dword `0x4D` at
+  `0x10002BE9`; `31 01` at `0x10002CA1`, `44` at `0x10002CAD`); then select
+  the **DeltaReproData** area `+0x158` (`0x100022A8`, tag `2` at
+  `0x100022B5` → DFI `0x21`) and close it with RID `10 F6` (dword `0x45` at
+  `0x10002C03`).  `FF00` exists in the builder's selector-1 slot (dword
+  `0x56` at `0x10002C16`) but is not used by this delta sequence.  These are
+  **pre-data/post-data routine-control steps only** — the host does not
+  execute or jump to the `0x8F6C00` bytes; it downloads them and invokes the
+  ECU via RoutineControl.  No erase/verify semantics are claimed for
+  `10F5`/`10F6` without ECU firmware.
+- **DFI semantics are named by host code (not ISO nibble speculation)**:
+  `TCUWP6CanReprostdFlashWriter.dll` compares the ReproMethod string
+  against imported `mlptrReproMethod_CompressionReproPhase6` → DFI `0x11`
+  (`0x10004063`), `mlptrReproMethod_DeltaReproPhase6` → DFI `0x21`
+  (`0x10004086`, `cmovne`), default/Whole Phase6 → `0x01` (`0x10004043`).
+  Toyota's own code names `0x21` the delta-data DFI and `0x11` the
+  compression-data DFI; the ReproStd FRC matrix is routine-PackageDL
+  tag0→`0x01`, whole-data tag1→`0x01`, delta-data tag2→`0x21`,
+  compression-data tag3→`0x11`.  No high/low nibble meaning is claimed
+  beyond what these code paths name.
+- **What the `0x21` bytes are**: the compact **delta representation** the
+  ECU consumes as its delta input.  The exact transform (decryption,
+  decompression, patch grammar) is **unknown** — "decrypted ECU-side" is not claimed, and
+  no host-side decryption exists in the pinned writer anchors.
+- **The host treats `.datx` as opaque bytes end-to-end (bounded closure)**:
+  format-`0x67` members are raw length+CRC32 payloads (T-0058 `write.datx`:
+  offset 256,387,015, length 9,184, stored CRC == computed, sha256
+  `f9bf53cd…8465`); the CUW.dll read path is a chunked
+  `fread(dst,1,0xFFF)` loop (reader `0x1002BEB0`, push site `0x1002BF83`)
+  behind a whole-file CRC32 gate (`0x1002A3B0`, called from loader
+  `0x10031A20` at `0x10031C0C`; mismatch → "Error FileCRC"); S-record
+  grammar parsing applies only to `.xx` members, while `.datx`/`.binx` are
+  length-delimited binary.  `CDeltaReproArchiveCtrlr` (RTTI `0x1008A9A0`,
+  vtable `0x1007C918`, single deleting-dtor virtual `0x10066DC0`, global
+  instance `0x1008CA0C`) is **orchestration-only**: its `0xAC`-stride
+  entries hold extracted-file paths, node/area names, and block counts —
+  no payload pointer or byte fields — and its methods are path/map/list
+  bookkeeping (`0x10066E20` map getter, `0x10067240` release,
+  `0x100674A0` ownership transfer, `0x100679D0` chain assembly,
+  `0x10067EC0` growth).  CAES encrypt/decrypt are called only by the INI
+  parameter decode and SecurityUp seed-key helpers
+  (`0x1001B9B2`/`0x1005AC52`/`0x1005AD02`), never the member path, and
+  `TCUWCalibrationFile.dll` + `TCUWCanReproStdFlashWriter.dll` have **no
+  crypto or compression imports at all**.  The host's last action is
+  handing the untouched buffer + declared lengths to RequestDownload
+  DFI `0x21`.
+- **RKS selection is runtime**: `TCUWCanCommonPrepareWriter.dll` exports
+  `CCanCommonPrepareWriter::JudgeReproGWNodeForP4AndP5 @0x10001820`
+  (plus `CalcSeedKeyForSecurityUp @0x100014A0`); it probes the gateway
+  with TesterPresent templates against strings `000007505F`/`000007585F`
+  and returns the node class; modern prepare consumes that result at the
+  `CollateSeedKeyFor*CentralGW` dispatch.  In modern `CUW.dll` the RKS
+  SecurityAccess sink is byte-pinned: `27 21` request (`0x1001C102`,
+  expected `67 21`) → 16-byte seed → 256-byte token → `27 22 || token[256]`
+  (request length `0x107` at `0x1001C2C5`, expected `67 22`) via
+  `rep movsd ecx=0x40` (`0x1001C5D4`).
+- **Matching-camera software identity is directly queryable before acquisition**
+  (V18 Unified CID path, byte-pinned by TMS-042):
+  `TCUWCanUnifiedCIDGetter.dll` contains separate `0105` and `F18C` reads
+  (positive prefixes `62 01 05` and `62 F1 8C`) and an explicit global
+  discriminator string `0792`.  In its mode-2 `0792` branch it waits until
+  5000 ms have elapsed and calls `CUnifiedUtils::GetSWINForFCM`.
+  `TCUWUnifiedUtils.dll`'s generic `ReadSoftwareID` is independently
+  `22 F1 81` / `62 F1 81`; **GetSWINForFCM is not that F181 path**.  The FCM
+  helper binds direct CAN request/response strings `00000792` / `0000079A`
+  and builds `22 1F FF`, expecting `62 1F FF`.  Therefore a live acquisition
+  should retain the direct `0x792→0x79A` DID-`1FFF` response alongside F181,
+  F18C, and the package CID.  This is an identity/provenance bridge for
+  selecting the matching FRC firmware; it does not decode the camera image or
+  prove that every vehicle exposes all auxiliary identity reads on the same
+  route.
+
+Boundary: this closes the host-side container/descriptor/route/writer
+grammar, the payload *representation* facts, and the host-side opaque-byte
+handling of `.datx` (raw read + CRC + verbatim pass, orchestration-only
+archive controller); it does **not** recover the `.datx`/image decoding,
+the routine blob's transform/format, `10F5`/`10F6` ECU-side semantics, or any
+other ECU behavior, and none of it is EPS-specific (Corolla front camera,
+not the tracked Sienna/Corolla-H EPS Unified routes of TMS-032/TMS-036).
+
 ### 5.3 Reprogramming-key authorization (RKS / TIS portal) — Layer A
 
 The reflash passes through two independent authorization layers that never

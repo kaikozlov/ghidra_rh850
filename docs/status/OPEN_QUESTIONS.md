@@ -545,16 +545,37 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `OffsetAddress`, download ranges, area choice, required-spec branch, and
   actual integrity/header values. Other CUW format-tail variants remain
   specimen-bound. `DigitalSignature` remains unrelated to TIS/RKS `Signature`
-  absent a real dataflow edge.
+  absent a real dataflow edge. TMS-042 now closes the format-`0x67` tail
+  grammar, the `ReproMethod=07` delta descriptor/route (ReproStd writers,
+  DFI `0x21`), and the modern unpacked GTS+ host anchors on a real six-package
+  FRC corpus — but that is a Corolla **front camera**, not EPS: its
+  `ServiceAuthKey`/`Nonce`/ranges do not transfer, and the EPS Unified-row
+  choice/credentials above remain open.
 - **RKS exact target/region policy (Layer A).** TMS-028/TMS-033 close the static
   client completely: state machine, request-field provenance (incl. shipped
   `Ini/RKS.ini` `[ReproKeyRequest]` values), online/offline/import convergence,
   fixed token format, the `IsStored` flag, and the full SeedValue producer
   chain (CentralGW P5-CAN `27 21` seed → callback → ReproKeyRequest; portal
-  token returned to the ECU as `27 22 || token[256]`). The shipped client
+  token returned to the ECU as `27 22 || token[256]`, byte-pinned in the
+  modern GTS+ CUW.dll by TMS-042). The shipped client
   explicitly supports continuing without Signature Request when the repair
   manual says it is unnecessary, and no calibration-schema or flash-writer edge
-  makes RKS universal. What remains is external policy evidence: determine
+  makes RKS universal — modern-host selection is the runtime
+  `JudgeReproGWNodeForP4AndP5` probe result, **not** the
+  `IsControlledBySCC` descriptor bit (which parses `VehicleForNA`/
+  `VehicleForEUOT`). TMS-042 additionally closes the host side of the delta
+  transfer itself: `.datx` is read raw+CRC-gated and passed verbatim
+  (`CDeltaReproArchiveCtrlr` is orchestration-only; no crypto/compression
+  imports on the writer path), with the routine-area (`10 F5`, DFI `0x01`)
+  then delta-data (`10 F6`, DFI `0x21`) RoutineControl framing — so any
+  `.datx` grammar, the routine blob format, and `10F5/10F6` ECU semantics
+  now require **matching FRC/front-camera reprogramming firmware or a camera
+  dump** — not more host RE, and explicitly not the tracked Sienna/H EPS
+  (TMS-029 already proves standard ReproStd `10F5`/`10F6` are absent/rejected
+  there). Bind the acquisition with the camera-special direct
+  `0x792→0x79A` DID-`1FFF` SWIN response recovered from `GetSWINForFCM`, plus
+  generic F181/F18C and the package/current CID; `GetSWINForFCM` is a distinct
+  path from generic F181. What remains is external policy evidence: determine
   whether a particular EPS calibration/region requires RKS during a legitimate
   GTS+/TIS session, plus the live gateway seed value and the server-side
   signing algorithm/private key — both external to the shipped client, which

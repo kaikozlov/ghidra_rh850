@@ -2533,3 +2533,28 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/techstream_v18/cuw_t0011_21_04c21_specimen.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §4.5.2;
   [../history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md](../history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md).
+
+### CORR-104 — the FRC `.xx` payload is not plaintext, `.datx` is not "decrypted ECU-side", and `IsControlledBySCC` does not select RKS
+
+- **Earlier interim framing (session working notes, never promoted to a
+  canonical report):** the FRC `.xx` member was described as "plain Motorola
+  S-records / no encryption", the delta `write.datx` as "decrypted ECU-side",
+  and `IsControlledBySCC=1` as the gate that "makes the reprogramming state
+  machine require the ReprogrammingKey (RKS) workflow".
+- **Correction from the packages and the modern unpacked host (TMS-042):**
+  only the Motorola S-record **framing** is plaintext — the decoded flash body
+  is high-entropy with unknown encoding (global 7.9999977 bits/byte, minimum
+  complete 4-KiB window 7.93098, no plaintext island). The `write.datx`
+  member is downloaded with RequestDownload DFI `0x21` — Toyota's own P6
+  writer names `0x21` the delta-data DFI (`DeltaReproPhase6 → 0x21`,
+  `CompressionReproPhase6 → 0x11` by string comparison) — and is a compact
+  delta representation consumed ECU-side as its delta input; the exact
+  transform is unknown and "decrypted" is not claimed. `IsControlledBySCC` is stored at
+  calibration `+0x24` from `[KindOfCal]` and, when set with `IsBlankECU`
+  clear, invokes `FUN_100115E0`, which consumes the `VehicleForNA`/
+  `VehicleForEUOT` descriptor sections; RKS selection is instead the runtime
+  `JudgeReproGWNodeForP4AndP5` probe result.
+- **Canonical:** TMS-042;
+  `tests/verify_techstream_cuw_frc_corpus.py`;
+  `data/generated/techstream_v18/cuw_frc_corpus.json`;
+  [../tooling/techstream.md](../tooling/techstream.md) §5.2.4.

@@ -17,6 +17,14 @@ path = "Techstream/unpacked/toyota/Toyota Diagnostics"
 env = "TECHSTREAM_UNPACKED_ROOT"
 description = "Pinned proprietary Techstream V18 extracted distribution"
 
+[external.cuw_reference_corpus]
+path = "REFERENCE/cuw"
+description = "Pinned external Toyota CUW specimen corpus"
+
+[external.gtsplus_cuwplus]
+path = "REFERENCE/gtsplus_cuwplus/CUWPlus"
+description = "Pinned GTS+ CUWPlus distribution and statically unpacked evidence images"
+
 [suite.architecture]
 tests = ["tests/verify_architecture.py"]
 paths = [
@@ -1126,6 +1134,21 @@ paths = [
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "exploit/findings_coverage.json",
+]
+
+[suite.techstream_cuw_frc_corpus]
+tests = ["tests/verify_techstream_cuw_frc_corpus.py"]
+requires_external = ["techstream_v18", "cuw_reference_corpus", "gtsplus_cuwplus"]
+oracle = "independent_external_artifact"
+paths = [
+  "tools/techstream/parse_cuw_container.py",
+  "tools/techstream/inspect_cuw_frc_corpus.py",
+  "tests/verify_techstream_cuw_frc_corpus.py",
+  "data/generated/techstream_v18/cuw_frc_corpus.json",
+  "REFERENCE/gtsplus_cuwplus/README.md",
+  "docs/tooling/techstream.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
 ]
 
 [suite.techstream_cuw_security_up]
