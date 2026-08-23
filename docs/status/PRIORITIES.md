@@ -38,9 +38,15 @@ is not asserted), it holds dedicated master plugin roles 233/234
 (`GetTSS3ImageFFDP5_DT.dll` / `GetTSS3OperationFFDP5_DT.dll`), it pins the
 LTA/LDA/LCA installation/customize/control/hands-off DID surface, and its
 read-only `AB/EB` Operation FFD capture path is byte-anchored. Category 498
-also binds an **Active-Test surface** (master roles 6/8/99/112/173) that is
-separate from the read-only FFD path and whose actuation semantics remain
-bounded. The ADS_Eth_P5 target-angle order rows (406/407, rad/s and rad via
+also binds an **Active-Test surface**. TMS-041 closes the steering-relevant
+part of that surface as fixed type-71 routine control, not a parameterized
+lateral writer: `FRC_P5` has no type-68 direct P5 Active-Test table, and LDA/
+LTA/LCA Steering Vibration are fixed routines `0x1508/0x1588/0x15C8` with no
+command/output-mask/button payload variables. `SingleRoutineActTstP5_DT.dll`
+uses a `D5 -> D7 -> D6` `21 E2 <RID BE16>` sequence; the vibration status
+pattern is byte `02`. The remaining unknown is the camera's downstream
+vehicle-network effect of those routines. The ADS_Eth_P5 target-angle order
+rows (406/407, rad/s and rad via
 the PhyData→Unit chain) are recorded-snapshot evidence, and a 402-file corpus
 scan proves the `0x1CEE/0x1CEF` steering-observer **type-62 primary Data-ID
 declarations** occur only in `EMPS_P5`/`EMPS2_P5` — exact Corolla H
@@ -51,9 +57,11 @@ firmware** (Front Recognition Camera 2) for a true-TSS 3 vehicle and recover
 its lateral-control producer contract: which in-vehicle message(s) carry the
 LTA target state, and whether/where they join the EMPS/EMPS2 steering
 observer domain. The read-only Operation FFD surface
-(`AB 11/12/13` → `EB …`, parser at 0x10001A70) is the reference capture
-protocol once live probes are justified; the repository deliberately ships no
-live writer for it. A newer EMPS/EMPS2 image that implements `0x1CEE/0x1CEF`
+(`AB 11/12/13` → `EB …`, parser at 0x10001A70) is one reference capture
+protocol once live probes are justified; fixed FRC routine `0x1588` (LTA
+Steering Vibration) is a second, higher-specificity trigger for isolating the
+camera-to-steering output. The repository deliberately ships no live writer
+for either proprietary path. A newer EMPS/EMPS2 image that implements `0x1CEE/0x1CEF`
 remains the complementary steering-side acquisition.
 
 The community `NEW_MSG_8A_LAT_CONTROL` heatmap is a high-value lead because it

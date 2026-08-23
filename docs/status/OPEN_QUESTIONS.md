@@ -86,8 +86,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   lacks. The unresolved task is
   now firmware-side: acquire `FRC_P5` camera firmware and recover the lateral
   producer contract and its join (if any) to the steering observers, using the
-  read-only `AB/EB` Operation FFD surface as the capture reference (category
-  498's separate Active-Test surface stays bounded). Wire
+  read-only `AB/EB` Operation FFD surface plus fixed routine `0x1588` (LTA
+  Steering Vibration) as capture references. TMS-041 closes the host-side
+  Active-Test semantics: it is a `21 E2 <RID BE16>` fixed-routine path with no
+  tunable angle/torque/amplitude payload. The remaining Active-Test question is
+  the FRC's downstream vehicle-network output. Wire
   arbitration ID, producer identity, and any relation to the community
   `NEW_MSG_8A_LAT_CONTROL` (`0x18A` — the Reference screenshot corpus records
   only that it is one of 22 CAN-FD 64-byte IDs on buses 0 and 2) remain

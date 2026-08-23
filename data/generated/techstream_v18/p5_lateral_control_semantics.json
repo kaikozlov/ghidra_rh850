@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "source": "Techstream V18.00.003",
   "sources": {
     "EMPS_P5.ddb": {
@@ -123,6 +123,18 @@
     "CommandCommon.dll": {
       "size": 1028096,
       "sha256": "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7"
+    },
+    "GetRoutineActTstInitP5_DT.dll": {
+      "size": 65536,
+      "sha256": "1bc3fa58221a015a9f5ea70e5ddc98845994728927c034f062060dddc6213267"
+    },
+    "GetRoutineActTstSignalInfoP5_DT.dll": {
+      "size": 65536,
+      "sha256": "d3de07e1f5bf42b86fc8138147455e67310a9e116a17276bfa5b83dd759c2f9d"
+    },
+    "SingleRoutineActTstP5_DT.dll": {
+      "size": 57344,
+      "sha256": "f4be7b48751ea328f0111d8a0628d114af5391799cde43b72aa87b5b647e7adf"
     },
     "IT3Data_BDC_NA.vds": {
       "size": 13172736,
@@ -2472,9 +2484,524 @@
     ],
     "boundary": "VDS proves ECUNo/category 498 is configured for these VIN descriptor patterns in the Techstream Setting_Table; ECUNo 499 has zero Setting_Table rows in all three regions, which is VDS Setting_Table absence, not vehicle absence. The 5YF entries are exact NA descriptor families; no repository-verified Toyota source joins them to a model name, so they are not labeled by model from VDS alone."
   },
+  "frc_routine_active_test": {
+    "factory_identity": {
+      "type68": "CDbActTestP5Table (absent from FRC_P5 NA/EU/JP)",
+      "type71": "CDbRoutineActTestP5Table",
+      "type72": "CDbRoutineStatusTable",
+      "type73": "CDbPatDispVariableTable"
+    },
+    "regions": {
+      "NA": {
+        "type68_direct_p5_active_test_present": false,
+        "type71_routine_active_test_count": 69,
+        "type72_routine_status_count": 2,
+        "type73_pattern_display_variable_count": 192,
+        "steering_related_rows": [
+          {
+            "record_index": 13,
+            "name": "LDA Steering Vibration",
+            "name_string_index": "0x00029596",
+            "lookup_key": "0xA41D",
+            "routine_id": "0x1508",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0002",
+            "sort_key": 511,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "1c794f92739a55e904dccb72d1c1972fb9e94ef1e10c1d41c5403dd4d34e5eac"
+          },
+          {
+            "record_index": 24,
+            "name": "LTA Steering Vibration",
+            "name_string_index": "0x0002959A",
+            "lookup_key": "0xA429",
+            "routine_id": "0x1588",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0002",
+            "sort_key": 542,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "4be7953a8e9b70a99d1bbf2fb60c06c3725a9687240b32ce66322a6bdaa91308"
+          },
+          {
+            "record_index": 36,
+            "name": "LCA Steering Vibration",
+            "name_string_index": "0x0002958B",
+            "lookup_key": "0xA435",
+            "routine_id": "0x15C8",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0002",
+            "sort_key": 573,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "a7340dc495dfd557a71ecb556889b7fda1ad4045cdb83a782c93e246c9db5fc6"
+          },
+          {
+            "record_index": 42,
+            "name": "AES Automatic Steering in Control Notification",
+            "name_string_index": "0x00029570",
+            "lookup_key": "0xA43B",
+            "routine_id": "0x160B",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0000",
+            "sort_key": 609,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "9b7d179acd03fe8ede74469d78e1c42fac79739082a52665fe5767c49563234d"
+          }
+        ],
+        "steering_vibration_status_pattern": {
+          "key": "0x0002",
+          "raw_record": "020054000100000000000000",
+          "pattern_variable": "0x0054",
+          "pattern_bytes": "02",
+          "raw_sha256": "10b2bf7c2298cc1fa90717a8ca9c12963528dd8adf8515912e144d7a3f3935f2"
+        },
+        "comm_frames": {
+          "0xD5": {
+            "selector": "0xD5",
+            "raw_record": "d50049018302de01",
+            "record_size": 8,
+            "variable_refs": {
+              "send_frame": "0x0149",
+              "receive_mask": "0x0283",
+              "receive_check": "0x01DE"
+            },
+            "resolved": {
+              "send_frame": "21e2",
+              "receive_mask": "0000000800",
+              "receive_check": "61e2"
+            },
+            "raw_sha256": "f565c85a294e1365f68b7928c568480a0dbcb0f6bc2cdb600f5523c2c12bab44"
+          },
+          "0xD6": {
+            "selector": "0xD6",
+            "raw_record": "d60049018402de01",
+            "record_size": 8,
+            "variable_refs": {
+              "send_frame": "0x0149",
+              "receive_mask": "0x0284",
+              "receive_check": "0x01DE"
+            },
+            "resolved": {
+              "send_frame": "21e2",
+              "receive_mask": "0000000400",
+              "receive_check": "61e2"
+            },
+            "raw_sha256": "8be55e0dbc48670788287ab02df0cfcaef04ab2458098cfff98f94196583cec2"
+          },
+          "0xD7": {
+            "selector": "0xD7",
+            "raw_record": "d70049018502de01",
+            "record_size": 8,
+            "variable_refs": {
+              "send_frame": "0x0149",
+              "receive_mask": "0x0285",
+              "receive_check": "0x01DE"
+            },
+            "resolved": {
+              "send_frame": "21e2",
+              "receive_mask": "0000000200",
+              "receive_check": "61e2"
+            },
+            "raw_sha256": "d81d0c0efb4ac379ef60f324ca630e291407f03a58176296e9ad99ac82e57d96"
+          }
+        }
+      },
+      "EU": {
+        "type68_direct_p5_active_test_present": false,
+        "type71_routine_active_test_count": 69,
+        "type72_routine_status_count": 2,
+        "type73_pattern_display_variable_count": 192,
+        "steering_related_rows": [
+          {
+            "record_index": 13,
+            "name": "LDA Steering Vibration",
+            "name_string_index": "0x00029596",
+            "lookup_key": "0xA41D",
+            "routine_id": "0x1508",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0002",
+            "sort_key": 511,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "1c794f92739a55e904dccb72d1c1972fb9e94ef1e10c1d41c5403dd4d34e5eac"
+          },
+          {
+            "record_index": 24,
+            "name": "LTA Steering Vibration",
+            "name_string_index": "0x0002959A",
+            "lookup_key": "0xA429",
+            "routine_id": "0x1588",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0002",
+            "sort_key": 542,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "4be7953a8e9b70a99d1bbf2fb60c06c3725a9687240b32ce66322a6bdaa91308"
+          },
+          {
+            "record_index": 36,
+            "name": "LCA Steering Vibration",
+            "name_string_index": "0x0002958B",
+            "lookup_key": "0xA435",
+            "routine_id": "0x15C8",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0002",
+            "sort_key": 573,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "a7340dc495dfd557a71ecb556889b7fda1ad4045cdb83a782c93e246c9db5fc6"
+          },
+          {
+            "record_index": 42,
+            "name": "AES Automatic Steering in Control Notification",
+            "name_string_index": "0x00029570",
+            "lookup_key": "0xA43B",
+            "routine_id": "0x160B",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0000",
+            "sort_key": 609,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "9b7d179acd03fe8ede74469d78e1c42fac79739082a52665fe5767c49563234d"
+          }
+        ],
+        "steering_vibration_status_pattern": {
+          "key": "0x0002",
+          "raw_record": "020054000100000000000000",
+          "pattern_variable": "0x0054",
+          "pattern_bytes": "02",
+          "raw_sha256": "10b2bf7c2298cc1fa90717a8ca9c12963528dd8adf8515912e144d7a3f3935f2"
+        },
+        "comm_frames": {
+          "0xD5": {
+            "selector": "0xD5",
+            "raw_record": "d50049018302de01",
+            "record_size": 8,
+            "variable_refs": {
+              "send_frame": "0x0149",
+              "receive_mask": "0x0283",
+              "receive_check": "0x01DE"
+            },
+            "resolved": {
+              "send_frame": "21e2",
+              "receive_mask": "0000000800",
+              "receive_check": "61e2"
+            },
+            "raw_sha256": "f565c85a294e1365f68b7928c568480a0dbcb0f6bc2cdb600f5523c2c12bab44"
+          },
+          "0xD6": {
+            "selector": "0xD6",
+            "raw_record": "d60049018402de01",
+            "record_size": 8,
+            "variable_refs": {
+              "send_frame": "0x0149",
+              "receive_mask": "0x0284",
+              "receive_check": "0x01DE"
+            },
+            "resolved": {
+              "send_frame": "21e2",
+              "receive_mask": "0000000400",
+              "receive_check": "61e2"
+            },
+            "raw_sha256": "8be55e0dbc48670788287ab02df0cfcaef04ab2458098cfff98f94196583cec2"
+          },
+          "0xD7": {
+            "selector": "0xD7",
+            "raw_record": "d70049018502de01",
+            "record_size": 8,
+            "variable_refs": {
+              "send_frame": "0x0149",
+              "receive_mask": "0x0285",
+              "receive_check": "0x01DE"
+            },
+            "resolved": {
+              "send_frame": "21e2",
+              "receive_mask": "0000000200",
+              "receive_check": "61e2"
+            },
+            "raw_sha256": "d81d0c0efb4ac379ef60f324ca630e291407f03a58176296e9ad99ac82e57d96"
+          }
+        }
+      },
+      "JP": {
+        "type68_direct_p5_active_test_present": false,
+        "type71_routine_active_test_count": 70,
+        "type72_routine_status_count": 2,
+        "type73_pattern_display_variable_count": 192,
+        "steering_related_rows": [
+          {
+            "record_index": 13,
+            "name": "LDA Steering Vibration",
+            "name_string_index": "0x00029596",
+            "lookup_key": "0xA41D",
+            "routine_id": "0x1508",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0002",
+            "sort_key": 511,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "1c794f92739a55e904dccb72d1c1972fb9e94ef1e10c1d41c5403dd4d34e5eac"
+          },
+          {
+            "record_index": 25,
+            "name": "LTA Steering Vibration",
+            "name_string_index": "0x0002959A",
+            "lookup_key": "0xA429",
+            "routine_id": "0x1588",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0002",
+            "sort_key": 542,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "4be7953a8e9b70a99d1bbf2fb60c06c3725a9687240b32ce66322a6bdaa91308"
+          },
+          {
+            "record_index": 37,
+            "name": "LCA Steering Vibration",
+            "name_string_index": "0x0002958B",
+            "lookup_key": "0xA435",
+            "routine_id": "0x15C8",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0002",
+            "sort_key": 573,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "a7340dc495dfd557a71ecb556889b7fda1ad4045cdb83a782c93e246c9db5fc6"
+          },
+          {
+            "record_index": 43,
+            "name": "AES Automatic Steering in Control Notification",
+            "name_string_index": "0x00029570",
+            "lookup_key": "0xA43B",
+            "routine_id": "0x160B",
+            "routine_command_variable": "0x0000",
+            "output_mask_variable": "0x0000",
+            "output_mask_button_variable": "0x0000",
+            "routine_status_pattern_key": "0x0000",
+            "sort_key": 609,
+            "exception_handler_id": "0x0000",
+            "exception_handler_flag": 0,
+            "raw_sha256": "9b7d179acd03fe8ede74469d78e1c42fac79739082a52665fe5767c49563234d"
+          }
+        ],
+        "steering_vibration_status_pattern": {
+          "key": "0x0002",
+          "raw_record": "020054000100000000000000",
+          "pattern_variable": "0x0054",
+          "pattern_bytes": "02",
+          "raw_sha256": "10b2bf7c2298cc1fa90717a8ca9c12963528dd8adf8515912e144d7a3f3935f2"
+        },
+        "comm_frames": {
+          "0xD5": {
+            "selector": "0xD5",
+            "raw_record": "d50049018302de01",
+            "record_size": 8,
+            "variable_refs": {
+              "send_frame": "0x0149",
+              "receive_mask": "0x0283",
+              "receive_check": "0x01DE"
+            },
+            "resolved": {
+              "send_frame": "21e2",
+              "receive_mask": "0000000800",
+              "receive_check": "61e2"
+            },
+            "raw_sha256": "f565c85a294e1365f68b7928c568480a0dbcb0f6bc2cdb600f5523c2c12bab44"
+          },
+          "0xD6": {
+            "selector": "0xD6",
+            "raw_record": "d60049018402de01",
+            "record_size": 8,
+            "variable_refs": {
+              "send_frame": "0x0149",
+              "receive_mask": "0x0284",
+              "receive_check": "0x01DE"
+            },
+            "resolved": {
+              "send_frame": "21e2",
+              "receive_mask": "0000000400",
+              "receive_check": "61e2"
+            },
+            "raw_sha256": "8be55e0dbc48670788287ab02df0cfcaef04ab2458098cfff98f94196583cec2"
+          },
+          "0xD7": {
+            "selector": "0xD7",
+            "raw_record": "d70049018502de01",
+            "record_size": 8,
+            "variable_refs": {
+              "send_frame": "0x0149",
+              "receive_mask": "0x0285",
+              "receive_check": "0x01DE"
+            },
+            "resolved": {
+              "send_frame": "21e2",
+              "receive_mask": "0000000200",
+              "receive_check": "61e2"
+            },
+            "raw_sha256": "d81d0c0efb4ac379ef60f324ca630e291407f03a58176296e9ad99ac82e57d96"
+          }
+        }
+      }
+    },
+    "record_field_proof": {
+      "active_test_name": "type-71 u32 +0x08 -> CDbStringTable::GetString in CDbRoutineActTestP5ResRecords::SetRecString @ 0x10044D40",
+      "lookup_key": "type-71 u16 +0x1E -> CDbRoutineActTestP5Table::FindDbItem1/ComparativeKey @ 0x100452C9/0x10045484",
+      "routine_id": "type-71 u16 +0x1C -> SingleRoutineActTstP5_DT.dll internal state +0x08 and request items 2/3",
+      "routine_command_variable": "type-71 u16 +0x28 -> CDbVariableTable::GetVariable in SetRecVariableData @ 0x10044E2B -> GetRoutineCommand",
+      "output_mask_variable": "type-71 u16 +0x2A -> CDbVariableTable::GetVariable -> GetOutputMaskValue",
+      "output_mask_button_variable": "type-71 u16 +0x2C -> CDbVariableTable::GetVariable -> GetOutputMaskButtonData",
+      "routine_status_pattern_key": "type-71 u16 +0x2E -> SingleRoutineActTstP5_DT.dll internal state +0x0A -> type-72 CDbRoutineStatusResRecords",
+      "sort_key": "type-71 u16 +0x38 -> CDbRoutineActTestP5ResRecords::SortInOrder @ 0x10044C58"
+    },
+    "executor": {
+      "dll": "SingleRoutineActTstP5_DT.dll",
+      "execute_va": "0x10001010",
+      "phase_sequence": [
+        {
+          "selector": "0xD5",
+          "helper_va": "0x10001430",
+          "then_sleep_ms": 200
+        },
+        {
+          "selector": "0xD7",
+          "helper_va": "0x100017A0",
+          "then_sleep_ms_on_success": 5000
+        },
+        {
+          "selector": "0xD6",
+          "helper_va": "0x10001AC0",
+          "final_phase": true
+        }
+      ],
+      "outgoing_layout": "Each D5/D7/D6 comm-frame template resolves to send prefix 21 E2. The executor overwrites request items 2/3 with routine-id high/low bytes. Only D5 appends GetRoutineCommand bytes when the type-71 command variable is nonzero.",
+      "follow_up_status": "D7 accumulates response data after the four-item header in big-endian order and compares it through type-72 CDbRoutineStatusResRecords; the steering-vibration records use status key 2, whose master variable 0x0054 resolves to byte 02.",
+      "explicit_auth_named_imports": [],
+      "auth_boundary": "No explicit SecurityAccess/authentication/session-named import is present in the SingleRoutine/Init/SignalInfo plugin chain. This does NOT prove the ECU accepts the routine without a session or authentication established by surrounding Techstream.",
+      "byte_anchors": {
+        "call_initial_D5_helper": {
+          "va": "0x10001125",
+          "file_offset": "0x1125",
+          "bytes": "e8 06 03 00 00"
+        },
+        "sleep_200ms": {
+          "va": "0x10001136",
+          "file_offset": "0x1136",
+          "bytes": "68 c8 00 00 00"
+        },
+        "call_followup_D7_helper": {
+          "va": "0x10001140",
+          "file_offset": "0x1140",
+          "bytes": "e8 5b 06 00 00"
+        },
+        "sleep_5000ms": {
+          "va": "0x1000114B",
+          "file_offset": "0x114B",
+          "bytes": "68 88 13 00 00"
+        },
+        "call_final_D6_helper": {
+          "va": "0x10001155",
+          "file_offset": "0x1155",
+          "bytes": "e8 66 09 00 00"
+        },
+        "D5_selector": {
+          "va": "0x100014C7",
+          "file_offset": "0x14C7",
+          "bytes": "68 d5 00 00 00"
+        },
+        "D7_selector": {
+          "va": "0x10001828",
+          "file_offset": "0x1828",
+          "bytes": "68 d7 00 00 00"
+        },
+        "D6_selector": {
+          "va": "0x10001B48",
+          "file_offset": "0x1B48",
+          "bytes": "68 d6 00 00 00"
+        },
+        "D5_routine_high_byte": {
+          "va": "0x100015B7",
+          "file_offset": "0x15B7",
+          "bytes": "8a 4e 09 88 48 08"
+        },
+        "D5_routine_low_byte": {
+          "va": "0x100015C1",
+          "file_offset": "0x15C1",
+          "bytes": "8a 4e 08"
+        },
+        "D5_optional_command_length_gate": {
+          "va": "0x100015C9",
+          "file_offset": "0x15C9",
+          "bytes": "66 39 6e 10"
+        },
+        "D5_optional_command_pointer": {
+          "va": "0x100015CF",
+          "file_offset": "0x15CF",
+          "bytes": "8b 56 0c"
+        },
+        "D7_routine_high_byte": {
+          "va": "0x100018B4",
+          "file_offset": "0x18B4",
+          "bytes": "8a 4d 09 88 48 08"
+        },
+        "D7_routine_low_byte": {
+          "va": "0x100018BE",
+          "file_offset": "0x18BE",
+          "bytes": "8a 4d 08"
+        },
+        "D6_routine_high_byte": {
+          "va": "0x10001C18",
+          "file_offset": "0x1C18",
+          "bytes": "8a 4d 09 88 48 08"
+        },
+        "D6_routine_low_byte": {
+          "va": "0x10001C22",
+          "file_offset": "0x1C22",
+          "bytes": "8a 4d 08"
+        },
+        "status_key_load": {
+          "va": "0x10001D37",
+          "file_offset": "0x1D37",
+          "bytes": "66 8b 56 0a"
+        }
+      }
+    },
+    "fixed_request_examples": {
+      "LDA Steering Vibration": "21 E2 15 08",
+      "LTA Steering Vibration": "21 E2 15 88",
+      "LCA Steering Vibration": "21 E2 15 C8",
+      "note": "The same four request bytes are used by D5/D7/D6 for these vibration rows because their routine-command variable is zero; the selectors differ in receive-mask semantics, not in the resolved 21 E2 send prefix."
+    },
+    "conclusion": "The FRC_P5 steering-related Active-Test surface is routine-only in the pinned corpus: there are no type-68 direct P5 Active-Test records, and LDA/LTA/LCA Steering Vibration are fixed routine selectors with no variable-backed command, output-mask, or button-data payload. Techstream therefore exposes no controllable steering angle, torque, amplitude, or other continuous lateral setpoint through these records. The downstream effect of FRC routines 0x1508/0x1588/0x15C8 is not visible in host software; 0x1588 is instead a concrete camera-side probe/capture trigger for identifying the FRC-to-steering transport once live capture or FRC firmware is available.",
+    "boundary": "The fixed 21 E2 routine path is sent to the FRC diagnostic domain; it does not prove which in-vehicle message the camera emits, that the EPS is the direct downstream recipient, or that any such message is unauthenticated. It is not the missing arbitrary lateral writer."
+  },
   "tss3_operation_ffd_protocol": {
     "dll": "GetTSS3OperationFFDP5_DT.dll",
-    "direction": "read-only proprietary Operation FFD observation; the AB/EB FFD protocol itself is read-only capture infrastructure. Category 498 separately exposes an Active-Test surface (roles 6/8/99/112/173) whose actuation semantics are not recovered here and remain bounded.",
+    "direction": "read-only proprietary Operation FFD observation; the AB/EB FFD protocol itself is read-only capture infrastructure. Category 498 separately exposes an Active-Test surface (roles 6/8/99/112/173); its steering-relevant branch is recovered separately in this artifact as fixed routine control, not a live setpoint writer.",
     "transport": "CCommCachePlus::CommFrameSendReceiveExt; comm-frame info selector 0x66 via CCommCachePlus::GetCommFrmInfo",
     "execute_va": "0x100032F0",
     "evidence_grading": {
@@ -3525,9 +4052,9 @@
       "any producer/bit-layout/authentication join from FRC_P5 to community NEW_MSG_8A_LAT_CONTROL (0x18A; the Reference screenshot corpus records 0x18A as one of 22 CAN-FD 64-byte IDs on buses 0 and 2, nothing more)",
       "that FRC_P5 equals the old Fr_Camera_P5 (430) or ADS_Eth_P5 (476) software domain",
       "that the Corolla-family 498+405 install sets imply EMPS2_P5 (499) vehicles use the same lateral contract",
-      "the semantics of any category-498 Active-Test entry beyond its role bindings",
+      "the downstream in-vehicle FRC output caused by fixed routine-active-test IDs 0x1508/0x1588/0x15C8",
       "a unique 5YF-descriptor-to-VehicleId mapping (the per-pattern join is bounded, not unique)"
     ],
-    "next_static_target": "FRC_P5 firmware acquisition and the true-TSS3 producer contract: recover the FRC lateral-control output path and its join (if any) to EMPS/EMPS2 steering observers, using the read-only Operation FFD surface as the capture reference."
+    "next_static_target": "FRC_P5 firmware acquisition and the true-TSS3 producer contract: recover the FRC lateral-control output path and its join (if any) to EMPS/EMPS2 steering observers, using the read-only Operation FFD surface and fixed 0x1588 LTA Steering Vibration routine as capture references."
   }
 }

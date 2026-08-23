@@ -5,7 +5,8 @@ Re-derives every pinned identity straight from the raw Techstream corpus:
 exact file hashes, master category/DLL-role identities, the type-44
 installing-ECU-list join, FRC_P5 DID/behavior rows and negatives, the ADS DDR
 unit chain, the 0x1CEE/0x1CEF corpus exclusivity, and the plugin-DLL
-machine-code byte anchors for the read-only AB/EB Operation FFD protocol.
+machine-code byte anchors for the read-only AB/EB Operation FFD protocol and
+the fixed FRC routine Active-Test executor.
 No Ghidra and no importer on the generating tool: the oracle is the pinned
 external corpus itself.
 """
@@ -56,6 +57,14 @@ def records(section) -> list[bytes]:
     return [data[i * size : (i + 1) * size] for i in range(section.header.record_count)]
 
 
+def master_variable_blob(master, index: int) -> bytes:
+    sec = master.sections[0]
+    count = sec.header.record_count
+    table_end = count * 6
+    rel, length = struct.unpack_from("<IH", sec.decoded_data, (index - 1) * 6)
+    return sec.decoded_data[table_end + rel : table_end + rel + length]
+
+
 if not ROOT.is_dir():
     print("[SKIP] Techstream V18 unavailable")
     raise SystemExit(77)
@@ -65,7 +74,7 @@ p = DDBParser()
 
 # ── schema and exact source identities ───────────────────────────────────────
 
-check("schema version", ev["schema_version"] == 2)
+check("schema version", ev["schema_version"] == 3)
 
 EXPECTED_FRC = {
     "NA": (49806, "63307a9b8a6bcafdc5ee4b3a04f67abdc2501ba296a2779e5edc7dbff846fe42"),
@@ -140,6 +149,18 @@ EXPECTED_DLLS = {
     "GetADSOperationFFDP5_DT.dll": (
         77824,
         "c5549207080aabc0a7d415caa610818fd0df4ca2afc78a14b3c5a6e1861d8bce",
+    ),
+    "GetRoutineActTstInitP5_DT.dll": (
+        65536,
+        "1bc3fa58221a015a9f5ea70e5ddc98845994728927c034f062060dddc6213267",
+    ),
+    "GetRoutineActTstSignalInfoP5_DT.dll": (
+        65536,
+        "d3de07e1f5bf42b86fc8138147455e67310a9e116a17276bfa5b83dd759c2f9d",
+    ),
+    "SingleRoutineActTstP5_DT.dll": (
+        57344,
+        "f4be7b48751ea328f0111d8a0628d114af5391799cde43b72aa87b5b647e7adf",
     ),
 }
 for name, (size, sha) in EXPECTED_DLLS.items():
@@ -228,7 +249,8 @@ check(
     "Operation FFD direction keeps read-only wording scoped to the AB/EB protocol",
     "read-only" in ev["tss3_operation_ffd_protocol"]["direction"]
     and "Active-Test" in ev["tss3_operation_ffd_protocol"]["direction"]
-    and "bounded" in ev["tss3_operation_ffd_protocol"]["direction"],
+    and "fixed routine control" in ev["tss3_operation_ffd_protocol"]["direction"]
+    and "not a live setpoint writer" in ev["tss3_operation_ffd_protocol"]["direction"],
 )
 
 # ── type-44 installing ECU list ──────────────────────────────────────────────
@@ -813,7 +835,8 @@ check(
     in not_proved[3]
     and "Fr_Camera_P5" in not_proved[4]
     and "498+405" in not_proved[5]
-    and "Active-Test" in not_proved[6]
+    and "downstream" in not_proved[6]
+    and "0x1588" in not_proved[6]
     and "not unique" in not_proved[7],
 )
 check(
@@ -1288,6 +1311,197 @@ check(
     and "no named lateral/LTA monitor content"
     in ev["tss3_image_ffd"]["content_boundary"],
 )
+
+
+# ── FRC_P5 fixed routine Active-Test surface ────────────────────────────────
+
+EXPECTED_ROUTINES = {
+    "LDA Steering Vibration": (0x1508, 511, 2),
+    "LTA Steering Vibration": (0x1588, 542, 2),
+    "LCA Steering Vibration": (0x15C8, 573, 2),
+    "AES Automatic Steering in Control Notification": (0x160B, 609, 0),
+}
+EXPECTED_FRAME_RECORDS = {
+    0xD5: ("d50049018302de01", 0x149, 0x283, 0x1DE, "0000000800"),
+    0xD6: ("d60049018402de01", 0x149, 0x284, 0x1DE, "0000000400"),
+    0xD7: ("d70049018502de01", 0x149, 0x285, 0x1DE, "0000000200"),
+}
+for region in ("NA", "EU", "JP"):
+    db = p.parse_ecu_db(ROOT / region / "DB/FRC_P5.ddb")
+    strings = p.load_string_db(ROOT / region / "DB/M_English.ddb")
+    check(
+        f"{region} FRC_P5 has no type-68 direct P5 Active-Test table",
+        68 not in db.sections
+        and ev["frc_routine_active_test"]["regions"][region][
+            "type68_direct_p5_active_test_present"
+        ]
+        is False,
+    )
+    check(
+        f"{region} FRC_P5 routine/status table census",
+        db.sections[71].decoded_record_size == 64
+        and db.sections[71].header.record_count == (70 if region == "JP" else 69)
+        and db.sections[72].decoded_record_size == 12
+        and db.sections[72].header.record_count == 2
+        and db.sections[73].header.record_count == 192,
+    )
+    rows = {}
+    for idx, raw in enumerate(records(db.sections[71])):
+        name = strings.get_string(u32(raw, 0x08))
+        if name in EXPECTED_ROUTINES:
+            rows[name] = (idx, raw)
+    check(
+        f"{region} exact steering-related routine row set",
+        set(rows) == set(EXPECTED_ROUTINES),
+    )
+    artifact_rows = {
+        row["name"]: row
+        for row in ev["frc_routine_active_test"]["regions"][region][
+            "steering_related_rows"
+        ]
+    }
+    for name, (rid, sort_key, status_key) in EXPECTED_ROUTINES.items():
+        idx, raw = rows[name]
+        check(
+            f"{region} {name} exact type-71 fields",
+            u16(raw, 0x1C) == rid
+            and u16(raw, 0x38) == sort_key
+            and u16(raw, 0x2E) == status_key
+            and u16(raw, 0x28) == 0
+            and u16(raw, 0x2A) == 0
+            and u16(raw, 0x2C) == 0
+            and artifact_rows[name]["record_index"] == idx
+            and artifact_rows[name]["routine_id"] == f"0x{rid:04X}"
+            and artifact_rows[name]["routine_command_variable"] == "0x0000"
+            and artifact_rows[name]["output_mask_variable"] == "0x0000"
+            and artifact_rows[name]["output_mask_button_variable"] == "0x0000",
+        )
+
+    status_rows = [raw for raw in records(db.sections[72]) if u16(raw, 0x00) == 2]
+    master = p.parse_master_db(ROOT / region / "DB/Toyota.ddb")
+    check(
+        f"{region} vibration status key 2 resolves to byte 02",
+        len(status_rows) == 1
+        and status_rows[0].hex() == "020054000100000000000000"
+        and u16(status_rows[0], 0x02) == 0x54
+        and master_variable_blob(master, 0x54) == b"\x02"
+        and ev["frc_routine_active_test"]["regions"][region][
+            "steering_vibration_status_pattern"
+        ]["pattern_bytes"]
+        == "02",
+    )
+
+    frame_sec = master.sections[17]
+    for selector, (
+        raw_hex,
+        send_ref,
+        mask_ref,
+        check_ref,
+        mask_hex,
+    ) in EXPECTED_FRAME_RECORDS.items():
+        matches = [raw for raw in records(frame_sec) if u16(raw, 0) == selector]
+        check(
+            f"{region} master comm-frame 0x{selector:02X} exact raw/resolved bytes",
+            len(matches) == 1
+            and matches[0].hex() == raw_hex
+            and u16(matches[0], 2) == send_ref
+            and u16(matches[0], 4) == mask_ref
+            and u16(matches[0], 6) == check_ref
+            and master_variable_blob(master, send_ref) == bytes.fromhex("21e2")
+            and master_variable_blob(master, mask_ref) == bytes.fromhex(mask_hex)
+            and master_variable_blob(master, check_ref) == bytes.fromhex("61e2"),
+        )
+
+# The generic routine executor is byte-checked independently from the generated artifact.
+single_data, single_pe = pe_of("SingleRoutineActTstP5_DT.dll")
+ACTIVE_EXECUTOR_ANCHORS = {
+    "call_initial_D5_helper": (0x10001125, "e8 06 03 00 00"),
+    "sleep_200ms": (0x10001136, "68 c8 00 00 00"),
+    "call_followup_D7_helper": (0x10001140, "e8 5b 06 00 00"),
+    "sleep_5000ms": (0x1000114B, "68 88 13 00 00"),
+    "call_final_D6_helper": (0x10001155, "e8 66 09 00 00"),
+    "D5_selector": (0x100014C7, "68 d5 00 00 00"),
+    "D7_selector": (0x10001828, "68 d7 00 00 00"),
+    "D6_selector": (0x10001B48, "68 d6 00 00 00"),
+    "D5_routine_high_byte": (0x100015B7, "8a 4e 09 88 48 08"),
+    "D5_routine_low_byte": (0x100015C1, "8a 4e 08"),
+    "D5_optional_command_length_gate": (0x100015C9, "66 39 6e 10"),
+    "D5_optional_command_pointer": (0x100015CF, "8b 56 0c"),
+    "D7_routine_high_byte": (0x100018B4, "8a 4d 09 88 48 08"),
+    "D7_routine_low_byte": (0x100018BE, "8a 4d 08"),
+    "D6_routine_high_byte": (0x10001C18, "8a 4d 09 88 48 08"),
+    "D6_routine_low_byte": (0x10001C22, "8a 4d 08"),
+    "status_key_load": (0x10001D37, "66 8b 56 0a"),
+}
+for name, (va, expected_hex) in ACTIVE_EXECUTOR_ANCHORS.items():
+    check(
+        f"SingleRoutine Active-Test byte anchor {name}",
+        anchor(single_data, single_pe, va, expected_hex)
+        and ev["frc_routine_active_test"]["executor"]["byte_anchors"][name][
+            "bytes"
+        ].replace(" ", "")
+        == expected_hex.replace(" ", ""),
+    )
+
+
+# Imports prove what this plugin chain explicitly calls, while keeping the outer-session boundary.
+def import_names(filename: str) -> set[str]:
+    pe = pefile.PE(str(ROOT / "bin" / filename), fast_load=True)
+    pe.parse_data_directories(
+        directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_IMPORT"]]
+    )
+    return {
+        imp.name.decode()
+        for entry in pe.DIRECTORY_ENTRY_IMPORT
+        for imp in entry.imports
+        if imp.name
+    }
+
+
+single_imports = import_names("SingleRoutineActTstP5_DT.dll")
+init_imports = import_names("GetRoutineActTstInitP5_DT.dll")
+signal_imports = import_names("GetRoutineActTstSignalInfoP5_DT.dll")
+check(
+    "routine executor imports exact frame/status primitives",
+    "?GetRoutineCommand@CDbRoutineActTestP5ResRecords@@QAEPAEFPAG@Z" in single_imports
+    and "?GetRoutineStatusPattern@CDbRoutineStatusResRecords@@QAEPAEFPAG@Z"
+    in single_imports
+    and "?CommFrameSendReceiveExt@CCommCachePlus@@QAEKPAVCCommFrameData@@G@Z"
+    in single_imports
+    and "?CheckSupportPanel@CCommCachePlusP5@@UAEKPAUtagCOMMAND_DATA@@GEPAH@Z"
+    in init_imports
+    and "?CheckSupportPanel@CCommCachePlusP5@@UAEKPAUtagCOMMAND_DATA@@GEPAH@Z"
+    in signal_imports,
+)
+explicit_auth = {
+    n
+    for n in single_imports | init_imports | signal_imports
+    if any(
+        term in n
+        for term in ("Security", "Authenticate", "Seed", "KeyAccess", "Session")
+    )
+}
+check(
+    "routine plugin chain has no explicit auth/session-named import and preserves boundary",
+    not explicit_auth
+    and ev["frc_routine_active_test"]["executor"]["explicit_auth_named_imports"] == []
+    and "does NOT prove" in ev["frc_routine_active_test"]["executor"]["auth_boundary"],
+)
+check(
+    "fixed vibration requests are 21 E2 + BE16 routine ID with no setpoint payload",
+    ev["frc_routine_active_test"]["fixed_request_examples"]
+    == {
+        "LDA Steering Vibration": "21 E2 15 08",
+        "LTA Steering Vibration": "21 E2 15 88",
+        "LCA Steering Vibration": "21 E2 15 C8",
+        "note": ev["frc_routine_active_test"]["fixed_request_examples"]["note"],
+    }
+    and "no controllable steering angle, torque, amplitude"
+    in ev["frc_routine_active_test"]["conclusion"]
+    and "not the missing arbitrary lateral writer"
+    in ev["frc_routine_active_test"]["boundary"],
+)
+
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

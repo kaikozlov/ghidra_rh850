@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract the Techstream P5 lateral-control evidence surface (schema v2).
+"""Extract the Techstream P5 lateral-control evidence surface (schema v3).
 
 Directed evidence pass over the true-TSS3 Front Recognition Camera 2
 (``FRC_P5``) path, its dedicated read-only Operation/Image FFD plugin DLLs,
@@ -49,6 +49,9 @@ TARGET_DLLS = (
     "GetADSDDRInfoP5_DT.dll",
     "GetADSOperationFFDP5_DT.dll",
     "CommandCommon.dll",
+    "GetRoutineActTstInitP5_DT.dll",
+    "GetRoutineActTstSignalInfoP5_DT.dll",
+    "SingleRoutineActTstP5_DT.dll",
 )
 ADS_NAMES = (
     "Advanced Drive Control Target Steering Angle Speed Order Value",
@@ -818,8 +821,8 @@ def tss3_operation_protocol(root: Path) -> dict:
         "direction": (
             "read-only proprietary Operation FFD observation; the AB/EB FFD protocol "
             "itself is read-only capture infrastructure. Category 498 separately exposes "
-            "an Active-Test surface (roles 6/8/99/112/173) whose actuation semantics are "
-            "not recovered here and remain bounded."
+            "an Active-Test surface (roles 6/8/99/112/173); its steering-relevant branch is "
+            "recovered separately in this artifact as fixed routine control, not a live setpoint writer."
         ),
         "transport": (
             "CCommCachePlus::CommFrameSendReceiveExt; comm-frame info selector 0x66 via "
@@ -1315,6 +1318,266 @@ def corpus_did_scan(root: Path, data_ids: tuple[int, ...]) -> dict:
     }
 
 
+# ── FRC_P5 routine Active-Test surface ──────────────────────────────────────
+
+FRC_ROUTINE_TESTS = (
+    ("LDA Steering Vibration", 0x1508, 511),
+    ("LTA Steering Vibration", 0x1588, 542),
+    ("LCA Steering Vibration", 0x15C8, 573),
+    ("AES Automatic Steering in Control Notification", 0x160B, 609),
+)
+
+
+def _master_variable_blob(master, index: int) -> bytes:
+    """Resolve a 1-based format-1 CDbVariableTable entry to its raw byte blob."""
+    section = master.sections[0]
+    count = section.header.record_count
+    if index <= 0 or index > count:
+        raise ValueError(f"master variable index 0x{index:X} outside 1..{count}")
+    table_end = count * 6
+    rel, length = struct.unpack_from("<IH", section.decoded_data, (index - 1) * 6)
+    start = table_end + rel
+    end = start + length
+    if end > len(section.decoded_data):
+        raise ValueError(f"master variable index 0x{index:X} overruns variable pool")
+    return section.decoded_data[start:end]
+
+
+def _master_comm_frame(
+    parser: DDBParser, root: Path, region: str, selector: int
+) -> dict:
+    master = parser.parse_master_db(root / region / "DB/Toyota.ddb")
+    section = master.sections[17]
+    size = section.decoded_record_size
+    matches = [raw for raw in records(section) if u16(raw, 0x00) == selector]
+    if len(matches) != 1:
+        raise ValueError(
+            f"{region} comm-frame selector 0x{selector:02X}: {len(matches)} matches"
+        )
+    raw = matches[0]
+    refs = {
+        "send_frame": u16(raw, 0x02),
+        "receive_mask": u16(raw, 0x04),
+        "receive_check": u16(raw, 0x06),
+    }
+    return {
+        "selector": f"0x{selector:02X}",
+        "raw_record": raw.hex(),
+        "record_size": size,
+        "variable_refs": {k: f"0x{v:04X}" for k, v in refs.items()},
+        "resolved": {
+            k: _master_variable_blob(master, v).hex() for k, v in refs.items()
+        },
+        "raw_sha256": sha256(raw),
+    }
+
+
+def _frc_routine_rows(parser: DDBParser, root: Path, region: str) -> list[dict]:
+    db = parser.parse_ecu_db(root / region / "DB/FRC_P5.ddb")
+    strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+    section = db.sections[71]
+    if section.decoded_record_size != 64:
+        raise ValueError(f"{region} FRC_P5 type-71 size {section.decoded_record_size}")
+    wanted = {name: (rid, sort_key) for name, rid, sort_key in FRC_ROUTINE_TESTS}
+    out = []
+    for index, raw in enumerate(records(section)):
+        name = strings.get_string(u32(raw, 0x08))
+        if name not in wanted:
+            continue
+        rid, sort_key = wanted[name]
+        row = {
+            "record_index": index,
+            "name": name,
+            "name_string_index": f"0x{u32(raw, 0x08):08X}",
+            "lookup_key": f"0x{u16(raw, 0x1E):04X}",
+            "routine_id": f"0x{u16(raw, 0x1C):04X}",
+            "routine_command_variable": f"0x{u16(raw, 0x28):04X}",
+            "output_mask_variable": f"0x{u16(raw, 0x2A):04X}",
+            "output_mask_button_variable": f"0x{u16(raw, 0x2C):04X}",
+            "routine_status_pattern_key": f"0x{u16(raw, 0x2E):04X}",
+            "sort_key": u16(raw, 0x38),
+            "exception_handler_id": f"0x{u16(raw, 0x3A):04X}",
+            "exception_handler_flag": raw[0x3D],
+            "raw_sha256": sha256(raw),
+        }
+        if u16(raw, 0x1C) != rid or u16(raw, 0x38) != sort_key:
+            raise ValueError(f"{region} {name}: routine/sort key changed: {row}")
+        if any(u16(raw, off) for off in (0x28, 0x2A, 0x2C)):
+            raise ValueError(
+                f"{region} {name}: unexpected variable-backed command/mask/button data"
+            )
+        if "Steering Vibration" in name and u16(raw, 0x2E) != 2:
+            raise ValueError(f"{region} {name}: status pattern key is not 2")
+        if name.startswith("AES ") and u16(raw, 0x2E) != 0:
+            raise ValueError(
+                f"{region} {name}: AES status pattern unexpectedly nonzero"
+            )
+        out.append(row)
+    if {row["name"] for row in out} != set(wanted):
+        raise ValueError(f"{region}: missing FRC routine test rows")
+    return sorted(out, key=lambda row: row["sort_key"])
+
+
+def _frc_status_pattern(parser: DDBParser, root: Path, region: str, key: int) -> dict:
+    db = parser.parse_ecu_db(root / region / "DB/FRC_P5.ddb")
+    section = db.sections[72]
+    if section.decoded_record_size != 12:
+        raise ValueError(f"{region} FRC_P5 type-72 size {section.decoded_record_size}")
+    matches = [raw for raw in records(section) if u16(raw, 0x00) == key]
+    if len(matches) != 1:
+        raise ValueError(f"{region} FRC_P5 type-72 key {key}: {len(matches)} matches")
+    raw = matches[0]
+    variable = u16(raw, 0x02)
+    master = parser.parse_master_db(root / region / "DB/Toyota.ddb")
+    return {
+        "key": f"0x{key:04X}",
+        "raw_record": raw.hex(),
+        "pattern_variable": f"0x{variable:04X}",
+        "pattern_bytes": _master_variable_blob(master, variable).hex(),
+        "raw_sha256": sha256(raw),
+    }
+
+
+def frc_routine_active_test_surface(parser: DDBParser, root: Path) -> dict:
+    dll = PE(root / "bin/SingleRoutineActTstP5_DT.dll")
+    imports = dll.imports()
+    required = {
+        "?GetRoutineCommand@CDbRoutineActTestP5ResRecords@@QAEPAEFPAG@Z",
+        "?GetRoutineStatusPattern@CDbRoutineStatusResRecords@@QAEPAEFPAG@Z",
+        "?GetCommFrmInfo@CCommCachePlus@@QAEKGPAUtagCOMMAND_DATA@@PAV?$CCmdList@VCCommFrameData@@@@K@Z",
+        "?CommFrameSendReceiveExt@CCommCachePlus@@QAEKPAVCCommFrameData@@G@Z",
+    }
+    missing = sorted(required - imports)
+    if missing:
+        raise ValueError(f"SingleRoutineActTstP5_DT.dll missing imports {missing}")
+
+    init_imports = PE(root / "bin/GetRoutineActTstInitP5_DT.dll").imports()
+    signal_imports = PE(root / "bin/GetRoutineActTstSignalInfoP5_DT.dll").imports()
+    auth_terms = ("Security", "Authenticate", "Seed", "KeyAccess", "Session")
+    explicit_auth_imports = sorted(
+        n
+        for n in imports | init_imports | signal_imports
+        if any(term in n for term in auth_terms)
+    )
+
+    region_tables = {}
+    for region in REGIONS:
+        db = parser.parse_ecu_db(root / region / "DB/FRC_P5.ddb")
+        region_tables[region] = {
+            "type68_direct_p5_active_test_present": 68 in db.sections,
+            "type71_routine_active_test_count": db.sections[71].header.record_count,
+            "type72_routine_status_count": db.sections[72].header.record_count,
+            "type73_pattern_display_variable_count": db.sections[
+                73
+            ].header.record_count,
+            "steering_related_rows": _frc_routine_rows(parser, root, region),
+            "steering_vibration_status_pattern": _frc_status_pattern(
+                parser, root, region, 2
+            ),
+            "comm_frames": {
+                f"0x{selector:02X}": _master_comm_frame(parser, root, region, selector)
+                for selector in (0xD5, 0xD6, 0xD7)
+            },
+        }
+        if region_tables[region]["type68_direct_p5_active_test_present"]:
+            raise ValueError(
+                f"{region} FRC_P5 unexpectedly gained type-68 direct Active-Test records"
+            )
+
+    return {
+        "factory_identity": {
+            "type68": "CDbActTestP5Table (absent from FRC_P5 NA/EU/JP)",
+            "type71": "CDbRoutineActTestP5Table",
+            "type72": "CDbRoutineStatusTable",
+            "type73": "CDbPatDispVariableTable",
+        },
+        "regions": region_tables,
+        "record_field_proof": {
+            "active_test_name": "type-71 u32 +0x08 -> CDbStringTable::GetString in CDbRoutineActTestP5ResRecords::SetRecString @ 0x10044D40",
+            "lookup_key": "type-71 u16 +0x1E -> CDbRoutineActTestP5Table::FindDbItem1/ComparativeKey @ 0x100452C9/0x10045484",
+            "routine_id": "type-71 u16 +0x1C -> SingleRoutineActTstP5_DT.dll internal state +0x08 and request items 2/3",
+            "routine_command_variable": "type-71 u16 +0x28 -> CDbVariableTable::GetVariable in SetRecVariableData @ 0x10044E2B -> GetRoutineCommand",
+            "output_mask_variable": "type-71 u16 +0x2A -> CDbVariableTable::GetVariable -> GetOutputMaskValue",
+            "output_mask_button_variable": "type-71 u16 +0x2C -> CDbVariableTable::GetVariable -> GetOutputMaskButtonData",
+            "routine_status_pattern_key": "type-71 u16 +0x2E -> SingleRoutineActTstP5_DT.dll internal state +0x0A -> type-72 CDbRoutineStatusResRecords",
+            "sort_key": "type-71 u16 +0x38 -> CDbRoutineActTestP5ResRecords::SortInOrder @ 0x10044C58",
+        },
+        "executor": {
+            "dll": "SingleRoutineActTstP5_DT.dll",
+            "execute_va": "0x10001010",
+            "phase_sequence": [
+                {"selector": "0xD5", "helper_va": "0x10001430", "then_sleep_ms": 200},
+                {
+                    "selector": "0xD7",
+                    "helper_va": "0x100017A0",
+                    "then_sleep_ms_on_success": 5000,
+                },
+                {"selector": "0xD6", "helper_va": "0x10001AC0", "final_phase": True},
+            ],
+            "outgoing_layout": (
+                "Each D5/D7/D6 comm-frame template resolves to send prefix 21 E2. "
+                "The executor overwrites request items 2/3 with routine-id high/low bytes. "
+                "Only D5 appends GetRoutineCommand bytes when the type-71 command variable is nonzero."
+            ),
+            "follow_up_status": (
+                "D7 accumulates response data after the four-item header in big-endian order and "
+                "compares it through type-72 CDbRoutineStatusResRecords; the steering-vibration "
+                "records use status key 2, whose master variable 0x0054 resolves to byte 02."
+            ),
+            "explicit_auth_named_imports": explicit_auth_imports,
+            "auth_boundary": (
+                "No explicit SecurityAccess/authentication/session-named import is present in the "
+                "SingleRoutine/Init/SignalInfo plugin chain. This does NOT prove the ECU accepts the "
+                "routine without a session or authentication established by surrounding Techstream."
+            ),
+            "byte_anchors": {
+                "call_initial_D5_helper": dll.check(0x10001125, "e8 06 03 00 00"),
+                "sleep_200ms": dll.check(0x10001136, "68 c8 00 00 00"),
+                "call_followup_D7_helper": dll.check(0x10001140, "e8 5b 06 00 00"),
+                "sleep_5000ms": dll.check(0x1000114B, "68 88 13 00 00"),
+                "call_final_D6_helper": dll.check(0x10001155, "e8 66 09 00 00"),
+                "D5_selector": dll.check(0x100014C7, "68 d5 00 00 00"),
+                "D7_selector": dll.check(0x10001828, "68 d7 00 00 00"),
+                "D6_selector": dll.check(0x10001B48, "68 d6 00 00 00"),
+                "D5_routine_high_byte": dll.check(0x100015B7, "8a 4e 09 88 48 08"),
+                "D5_routine_low_byte": dll.check(0x100015C1, "8a 4e 08"),
+                "D5_optional_command_length_gate": dll.check(0x100015C9, "66 39 6e 10"),
+                "D5_optional_command_pointer": dll.check(0x100015CF, "8b 56 0c"),
+                "D7_routine_high_byte": dll.check(0x100018B4, "8a 4d 09 88 48 08"),
+                "D7_routine_low_byte": dll.check(0x100018BE, "8a 4d 08"),
+                "D6_routine_high_byte": dll.check(0x10001C18, "8a 4d 09 88 48 08"),
+                "D6_routine_low_byte": dll.check(0x10001C22, "8a 4d 08"),
+                "status_key_load": dll.check(0x10001D37, "66 8b 56 0a"),
+            },
+        },
+        "fixed_request_examples": {
+            "LDA Steering Vibration": "21 E2 15 08",
+            "LTA Steering Vibration": "21 E2 15 88",
+            "LCA Steering Vibration": "21 E2 15 C8",
+            "note": (
+                "The same four request bytes are used by D5/D7/D6 for these vibration rows because "
+                "their routine-command variable is zero; the selectors differ in receive-mask semantics, "
+                "not in the resolved 21 E2 send prefix."
+            ),
+        },
+        "conclusion": (
+            "The FRC_P5 steering-related Active-Test surface is routine-only in the pinned corpus: "
+            "there are no type-68 direct P5 Active-Test records, and LDA/LTA/LCA Steering Vibration "
+            "are fixed routine selectors with no variable-backed command, output-mask, or button-data "
+            "payload. Techstream therefore exposes no controllable steering angle, torque, amplitude, "
+            "or other continuous lateral setpoint through these records. The downstream effect of FRC "
+            "routines 0x1508/0x1588/0x15C8 is not visible in host software; 0x1588 is instead a concrete "
+            "camera-side probe/capture trigger for identifying the FRC-to-steering transport once live "
+            "capture or FRC firmware is available."
+        ),
+        "boundary": (
+            "The fixed 21 E2 routine path is sent to the FRC diagnostic domain; it does not prove which "
+            "in-vehicle message the camera emits, that the EPS is the direct downstream recipient, or "
+            "that any such message is unauthenticated. It is not the missing arbitrary lateral writer."
+        ),
+    }
+
+
 # ── assembly ─────────────────────────────────────────────────────────────────
 
 
@@ -1337,7 +1600,7 @@ def build(root: Path) -> dict:
         raise ValueError("NA cat498/cat499 co-occurrence keys changed")
 
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "source": "Techstream V18.00.003",
         "sources": source_identities(root),
         "master_categories": {
@@ -1393,6 +1656,7 @@ def build(root: Path) -> dict:
             ),
         },
         "vds_setting_table": vds_setting_table_evidence(root),
+        "frc_routine_active_test": frc_routine_active_test_surface(parser, root),
         "tss3_operation_ffd_protocol": tss3_operation_protocol(root),
         "tss3_image_ffd": tss3_image_protocol(root),
         "advanced_drive_control": {
@@ -1447,13 +1711,13 @@ def build(root: Path) -> dict:
                 "any producer/bit-layout/authentication join from FRC_P5 to community NEW_MSG_8A_LAT_CONTROL (0x18A; the Reference screenshot corpus records 0x18A as one of 22 CAN-FD 64-byte IDs on buses 0 and 2, nothing more)",
                 "that FRC_P5 equals the old Fr_Camera_P5 (430) or ADS_Eth_P5 (476) software domain",
                 "that the Corolla-family 498+405 install sets imply EMPS2_P5 (499) vehicles use the same lateral contract",
-                "the semantics of any category-498 Active-Test entry beyond its role bindings",
+                "the downstream in-vehicle FRC output caused by fixed routine-active-test IDs 0x1508/0x1588/0x15C8",
                 "a unique 5YF-descriptor-to-VehicleId mapping (the per-pattern join is bounded, not unique)",
             ],
             "next_static_target": (
                 "FRC_P5 firmware acquisition and the true-TSS3 producer contract: recover the FRC "
                 "lateral-control output path and its join (if any) to EMPS/EMPS2 steering observers, "
-                "using the read-only Operation FFD surface as the capture reference."
+                "using the read-only Operation FFD surface and fixed 0x1588 LTA Steering Vibration routine as capture references."
             ),
         },
     }
