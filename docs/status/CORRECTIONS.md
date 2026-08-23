@@ -2474,3 +2474,35 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   §§20.1–20.3; `tests/verify_keyless_application_diagnostic_transport.py`;
   `tests/verify_keyless_application_event_formatter.py`;
   `tests/verify_exploit_interest_reviewed_candidates.py`.
+
+### CORR-102 — the legacy CUW software password was not one generic value with an unknown wire consumer
+
+- **Earlier wording (TMS-037 / T-0087 history):** `79EF38FF` was described as
+  the selected legacy software password without distinguishing source versus
+  new-image state; `SelectRetryPassword` was known only as a selector mutation,
+  the ECU-facing password request was left bounded, and the downstream
+  S-record body-coding path was left open.
+- **Correction:** the real descriptor's `TargetData` fields encode the three
+  **old/source** passwords. `Cuw.exe:0x4B3880` hex-decodes each eight-byte value
+  and subtracts output-byte indices `0..7`; the uint-reader path parses the
+  resulting ASCII hex as `A5CD46B3`, `AC8C4F0D`, and `727D3713`. The archived
+  `79EF38FF` at `0x1FFF00` is instead the **new-image** password selected by
+  `GetNewPassword` fallback for `302U1300`.
+- **Wire closure:** `CCanCommonFlashWriter::CheckIDWithWaitOfSFs @ 0x45C86C`
+  sends exactly five payloads after the common four-byte CAN/J2534 prefix:
+  `00`, `00`, `LocationID[7,6,3,2,1,0]`, `LocationID[5,4]`, and the selected
+  password in little-endian order. For this package's new password the payloads
+  are `00 / 00 / 200701000200 / 0300 / FF38EF79`. This raw CheckID exchange is
+  distinct from UDS `27 01/27 02` SecurityAccess. `SelectRetryPassword @
+  0x46CAB0` explicitly selects new on true, toggles on false when writer status
+  `+0x78 == 7`, and otherwise selects old; the semantic name of status `7` is
+  still unclaimed.
+- **Body-path closure:** the selected S-record parser/materializer
+  (`0x4A9A9C`/`0x4AB2D4`) and CCanFlashWriter sender `0x45C700` copy the
+  materialized image bytes into the J2534 transmit path without host-side
+  crypto/recode. What `A1DFE103` and the encoded-looking representation mean to
+  the ECU remains bounded; an ECU-side decoding algorithm is not inferred.
+- **Canonical:** TMS-037; `tests/verify_techstream_cuw_legacy.py`;
+  `data/generated/techstream_v18/cuw_t0087_17_specimen.json`;
+  [../tooling/techstream.md](../tooling/techstream.md) §4.5.0/§5.2.1;
+  [../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md](../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md).

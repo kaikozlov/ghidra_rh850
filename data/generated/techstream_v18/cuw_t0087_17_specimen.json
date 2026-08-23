@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "source": {
     "filename": "T-0087-17.cuw",
     "availability": "external user-supplied specimen; raw package intentionally not committed",
@@ -89,6 +89,23 @@
       "unknown_word_after_password": "2D75EB31",
       "cpu_image_name_ascii_at_1fff08": "89663-02U13     ",
       "location_id_bytes_at_1fff18": "0002000100030720"
+    },
+    "repeated_word_summary": {
+      "word_hex": "A1DFE103",
+      "aligned_word_count": 70726,
+      "full_64k_regions": [
+        {
+          "start": "0x050000",
+          "end_exclusive": "0x060000",
+          "length": 65536
+        },
+        {
+          "start": "0x1E0000",
+          "end_exclusive": "0x1F0000",
+          "length": 65536
+        }
+      ],
+      "interpretation_boundary": "the representation is encoded-looking; this statistic does not identify its semantic meaning or an ECU-side algorithm"
     }
   },
   "techstream_v18_route": {
@@ -153,9 +170,101 @@
       "retry_selector": {
         "va": "0x0046CAB0",
         "sha256_0x6c": "c653fcca83bc5b43d5b710bcc93d8240950ea4980a941f1c7ebe87910bf7e48a",
-        "semantics": "CFlashWriter::SelectRetryPassword changes/toggles a boolean selector at object+0x8C; it does not itself construct or transmit a password-bearing frame"
+        "semantics": "CFlashWriter::SelectRetryPassword controls the old/new selector at object+0x8C: explicit true selects new (1); false with object+0x78 == 7 toggles it; other false cases select old (0). The meaning of status value 7 is not promoted.",
+        "consumer_branch": {
+          "selector_test_va": "0x0045F4BC",
+          "zero_old_path_va": "0x0045F7F1",
+          "nonzero_new_path_helper_call_va": "0x0045F7CF",
+          "semantics": "selector 0 takes the per-target decoded TargetData slot; selector nonzero reaches the archived/new-password helper path"
+        }
       },
-      "wire_consumer_boundary": "the selected old/new password source is proven, but no byte-pinned ECU-facing request carrying 79EF38FF was recovered in this pass; do not infer that the four bytes are sent verbatim or conflate this selector with SecurityAccess"
+      "role": "new-image software password; GetNewPassword fallback for 302U1300 because the descriptor has no explicit NewPassword override",
+      "wire_password": "FF38EF79",
+      "check_id_payloads_after_can_id": [
+        "00",
+        "00",
+        "200701000200",
+        "0300",
+        "FF38EF79"
+      ],
+      "wire_consumer": {
+        "function": "CCanCommonFlashWriter::CheckIDWithWaitOfSFs",
+        "va": "0x0045C86C",
+        "size": "0x570",
+        "sha256": "302c53c53cd78441ce2c989def17ba5f1f910053f3d1d59c61c9ba772d653c9e",
+        "payloads_after_4byte_can_j2534_prefix": [
+          "00",
+          "00",
+          "200701000200",
+          "0300",
+          "<password little-endian>"
+        ],
+        "location_id_permutation": "frame3 = LocationID[7,6,3,2,1,0]; frame4 = LocationID[5,4]",
+        "classification": "legacy proprietary raw CheckID handshake; separate from UDS SecurityAccess",
+        "instruction_anchors": {
+          "frame3_location_reads": [
+            "0x45CA89:-0x105",
+            "0x45CA95:-0x106",
+            "0x45CAA1:-0x109",
+            "0x45CAAD:-0x10A",
+            "0x45CAB9:-0x10B",
+            "0x45CAC5:-0x10C"
+          ],
+          "frame4_location_reads": [
+            "0x45CB19:-0x107",
+            "0x45CB25:-0x108"
+          ],
+          "password_reverse_loop": "0x45CB82..0x45CB9F",
+          "five_frame_send_loop": "0x45CBB4..0x45CC1F"
+        }
+      },
+      "fallback_selector_evidence": {
+        "get_new_password": {
+          "va": "0x10003090",
+          "size": "0x3C",
+          "sha256": "efe7a275c16909454cfe40418c22da35e5cf7a2ba5d2cb134ed7c6cae08c46fc"
+        },
+        "get_password": {
+          "va": "0x10002EF0",
+          "size": "0x15F",
+          "sha256": "13cd12218291ebbe2d147d2ea9c2cdecd020bf73d4c9f1505c6cdbbeae799164"
+        },
+        "semantics": "GetNewPassword returns the explicit per-CPU override when its presence byte is nonzero; otherwise it calls CalibArchivedFile::GetPassword"
+      }
+    },
+    "target_data_passwords": {
+      "decoder": {
+        "escaped_string_decoder_va": "0x004B3880",
+        "escaped_string_decoder_size": "0x170",
+        "escaped_string_decoder_sha256": "a62f3f89276881a88b6cff421772fd4ee43e2fa273a8c39f9ca0bc4737cf20fa",
+        "uint_reader_va": "0x004B3F34",
+        "uint_reader_size": "0x122",
+        "uint_reader_sha256": "5c21c78aea493daf5d2c817aeef7bb5f615c63381c7e8c246eebd681f88bb042",
+        "algorithm": "hex-decode 8 bytes; subtract zero-based output-byte index; parse resulting 8 ASCII hex digits as uint32"
+      },
+      "targets": [
+        {
+          "calibration": "302U1000",
+          "target_data": "41364547383B483A",
+          "decoded_ascii": "A5CD46B3",
+          "password": "A5CD46B3",
+          "wire_password": "B346CDA5"
+        },
+        {
+          "calibration": "302U1100",
+          "target_data": "41443A46384B364B",
+          "decoded_ascii": "AC8C4F0D",
+          "password": "AC8C4F0D",
+          "wire_password": "0D4F8CAC"
+        },
+        {
+          "calibration": "302U1200",
+          "target_data": "37333947373C373A",
+          "decoded_ascii": "727D3713",
+          "password": "727D3713",
+          "wire_password": "13377D72"
+        }
+      ]
     }
   },
   "legacy_flash_protocol": {
@@ -188,6 +297,46 @@
       "the 79EF38FF engine-calibration password to RH850 EPS",
       "the SH72544R memory map/proprietary flash command set to modern Unified writers"
     ],
-    "body_coding_boundary": "S-record data are encoded-looking and include repeated A1DFE103 in erased-looking space. The S-record parser is recovered and contains no crypto operation; the exact legacy body coding/decoding semantics are not yet promoted without a downstream consumer proof."
+    "body_coding_boundary": "On this selected legacy route, the S-record parser/materializer and CCanFlashWriter sender pass the materialized image bytes to the J2534 transmit buffer without a host-side crypto/recode transform. The semantic meaning or ECU-side interpretation of encoded-looking A1DFE103-filled regions remains bounded.",
+    "legacy_image_transmission_evidence": {
+      "srecord_parser": {
+        "va": "0x004A9A9C",
+        "size": "0x61F",
+        "sha256": "f2f19629ec980462b042bd7abed3c7f73fda6ec894593037159b2d23282a17ba"
+      },
+      "srecord_materializer": {
+        "va": "0x004AB2D4",
+        "size": "0x1D3",
+        "sha256": "abe8a1e2a26ed78326ebfed08f551256edc2fa66394115b0de34fc0d0e6f6e31"
+      },
+      "write_block_va": "0x00465C74",
+      "data_sender": {
+        "va": "0x0045C700",
+        "size": "0x165",
+        "sha256": "cf272798d1980d6ab166fc661ddd100bbd323079dc4ded957be124149d063261"
+      },
+      "conclusion": "selected legacy host path copies materialized S-record image bytes unchanged into the transmit path; no host-side coding transform is present"
+    }
+  },
+  "official_provenance": {
+    "bulletin": "T-SB-0336-17",
+    "date": "2017-12-21",
+    "title": "MIL \"ON\" DTC P2610",
+    "source": "Toyota bulletin mirrored by NHTSA as MC-10127065-9999",
+    "source_url": "https://static.nhtsa.gov/odi/tsbs/2017/MC-10127065-9999.pdf",
+    "match": {
+      "model": "Corolla",
+      "model_year": "2015-2016",
+      "engine": "2ZR-FAE",
+      "drivetrain": "CVT-Gate",
+      "ecu_type": "Main",
+      "previous_calibrations": [
+        "302U1000",
+        "302U1100",
+        "302U1200"
+      ],
+      "new_calibration": "302U1300"
+    },
+    "scope": "official bulletin independently corroborates package applicability and calibration transition; it is not protocol evidence"
   }
 }

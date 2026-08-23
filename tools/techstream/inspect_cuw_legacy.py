@@ -151,6 +151,64 @@ def exported_value_labels(path: Path, marker: str) -> dict[str, str]:
     return result
 
 
+def decode_legacy_target_data(value: str) -> int:
+    """Decode a legacy descriptor TargetData value into its 32-bit check-ID password.
+
+    TMemIniEx's escaped-string reader (Cuw.exe:0x4B3880) hex-decodes each pair
+    and subtracts the zero-based output byte index.  The uint reader then parses
+    the resulting eight ASCII hex characters (Cuw.exe:0x402380).
+    """
+    encoded = bytes.fromhex(value)
+    if len(encoded) != 8:
+        raise ValueError("legacy TargetData must decode to exactly eight bytes")
+    decoded = bytes((byte - index) & 0xFF for index, byte in enumerate(encoded))
+    try:
+        text = decoded.decode("ascii")
+        if len(text) != 8 or any(ch not in "0123456789abcdefABCDEF" for ch in text):
+            raise ValueError
+        return int(text, 16)
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise ValueError("legacy TargetData does not decode to eight ASCII hex digits") from exc
+
+
+def legacy_check_id_payloads(location_id: bytes, password: int) -> list[bytes]:
+    """Build the five raw CheckIDWithWaitOfSFs payloads after the 4-byte CAN ID.
+
+    Cuw.exe parses LocationID as eight hexadecimal bytes, packs the selected
+    software-password integer as four big-endian CBytes bytes, then explicitly
+    reverses that four-byte value in the fifth frame.  This is the legacy raw
+    CCanCommonFlashWriter handshake, not UDS SecurityAccess.
+    """
+    if len(location_id) != 8:
+        raise ValueError("legacy LocationID must be exactly eight bytes")
+    if not 0 <= password <= 0xFFFFFFFF:
+        raise ValueError("legacy software password must fit in 32 bits")
+    return [
+        b"\x00",
+        b"\x00",
+        bytes((location_id[7], location_id[6], location_id[3], location_id[2], location_id[1], location_id[0])),
+        bytes((location_id[5], location_id[4])),
+        password.to_bytes(4, "little"),
+    ]
+
+
+def summarize_repeated_word(image: bytes, word: bytes = bytes.fromhex("a1dfe103"), region_size: int = 0x10000) -> dict[str, Any]:
+    """Summarize aligned repeated-word regions in a reconstructed image."""
+    if not word or len(image) % len(word):
+        raise ValueError("image length must be a multiple of the repeated-word size")
+    aligned_count = sum(image[i:i + len(word)] == word for i in range(0, len(image), len(word)))
+    full_regions = []
+    for start in range(0, len(image), region_size):
+        chunk = image[start:start + region_size]
+        if len(chunk) % len(word) == 0 and chunk == word * (len(chunk) // len(word)):
+            full_regions.append({"start": start, "end_exclusive": start + len(chunk), "length": len(chunk)})
+    return {
+        "word_hex": word.hex().upper(),
+        "aligned_word_count": aligned_count,
+        "full_regions": full_regions,
+    }
+
+
 def legacy_seed_key(seed: bytes) -> bytes:
     """CCanFlashWriter legacy four-round BasicConversion, simplified."""
     if len(seed) != 4:
@@ -201,6 +259,27 @@ def main() -> int:
         route["kind_of_ecu_export"] = kinds.get(vehicle.get("KindOfECU", ""))
     result["techstream_route"] = route
 
+    target_passwords = []
+    location_hex = cpu.get("LocationID", "")
+    for index in range(1, int(cpu.get("NumberOfTargets", "0") or 0) + 1):
+        calibration = cpu.get(f"{index:02d}_TargetCalibration", "")
+        target_data = cpu.get(f"{index:02d}_TargetData", "")
+        try:
+            password = decode_legacy_target_data(target_data)
+            location = bytes.fromhex(location_hex)
+            payloads = legacy_check_id_payloads(location, password)
+        except ValueError:
+            continue
+        target_passwords.append({
+            "target_calibration": calibration,
+            "target_data": target_data,
+            "decoded_password_hex": f"{password:08X}",
+            "check_id_payloads_after_can_id": [x.hex().upper() for x in payloads],
+            "wire_password_hex": payloads[-1].hex().upper(),
+        })
+    if target_passwords:
+        result["legacy_target_passwords"] = target_passwords
+
     if c["format4_archive_count"]:
         archives = []
         for a in c["format4_archives"]:
@@ -213,6 +292,10 @@ def main() -> int:
                 entry["srec_error"] = str(e)
                 archives.append(entry)
                 continue
+            if len(srec["ranges"]) == 1:
+                rr = srec["ranges"][0]
+                image = bytes(bytes_by_addr[x] for x in range(rr["start"], rr["end_exclusive"]))
+                srec["repeated_word_summary"] = summarize_repeated_word(image)
             entry["srec"] = srec
             archives.append(entry)
             # The legacy package has one CPU archive; password extraction is
@@ -224,13 +307,25 @@ def main() -> int:
                 if all((addr + i) in bytes_by_addr for i in range(4)):
                     byte_order = int(rows[0].get("ByteOrder", "0") or 0)
                     ordered = raw_pw if byte_order != 0 else raw_pw[::-1]
-                    result["legacy_flash_password"] = {
+                    password = int.from_bytes(ordered, "big")
+                    password_result: dict[str, Any] = {
                         "address": addr,
                         "byte_order_parameter": byte_order,
                         "raw_image_bytes_hex": raw_pw.hex(),
                         "password_hex": ordered.hex().upper(),
+                        "role": "new-image software password (GetNewPassword fallback when no descriptor override is present)",
                         "source": "TCUWCalibrationFile.dll CalibArchivedFile::GetPassword @ 0x10002EF0",
                     }
+                    location_hex = cpu.get("LocationID", "")
+                    try:
+                        location = bytes.fromhex(location_hex)
+                        payloads = legacy_check_id_payloads(location, password)
+                    except ValueError:
+                        pass
+                    else:
+                        password_result["check_id_payloads_after_can_id"] = [x.hex().upper() for x in payloads]
+                        password_result["wire_password_hex"] = payloads[-1].hex().upper()
+                    result["legacy_flash_password"] = password_result
             if args.image_out is not None and len(srec["ranges"]) == 1:
                 r = srec["ranges"][0]
                 args.image_out.write_bytes(bytes(bytes_by_addr[x] for x in range(r["start"], r["end_exclusive"])))

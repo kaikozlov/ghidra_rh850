@@ -356,21 +356,32 @@ simplify exactly to:
 key = seed XOR 00 60 60 00
 ```
 
-This is independent of the calibration software password. The same package's
-selected `0CAN70` row sets `PasswordAddress=001FFF00`, `ByteOrder=1`; the
-reconstructed 2-MiB S-record image has `79 EF 38 FF` at `0x1FFF00`.
-`TCUWCalibrationFile.dll!CalibArchivedFile::GetPassword @ 0x10002EF0` reads
-that address from the archived image, while `CalibrationFile::GetNewPassword @
-0x10003090` falls back to it when no descriptor `NewPassword` override exists.
-Thus `0x79EF38FF` is package-derived reflash password material, **not** the
-`27 02` key. The descriptor parser at `0x408CE8` stores an optional
-`NewPassword` override in the per-CPU source record (`+0x1C`, presence at
-`+0x20`), while `CFlashWriter::SelectRetryPassword @ 0x46CAB0` only mutates the
-retry-selection boolean at writer `+0x8C`. This pass did not recover a
-byte-pinned ECU-facing request carrying the selected four-byte password, so its
-wire encoding remains bounded and must not be inferred as a verbatim send.
-This old two-control design is useful architectural precedent but does not
-transfer either value/algorithm to RH850 EPS. Canonical specimen analysis:
+This is independent of the calibration software-password handshake. The
+`TargetData` fields encode the **old/source** passwords: `0x4B3880` hex-decodes
+eight bytes and subtracts output-byte indices `0..7`, then the uint-reader path
+(`0x4B3F34` / `0x402380`) parses the resulting eight ASCII hex digits. The
+three real targets decode as `302U1000 -> A5CD46B3`, `302U1100 -> AC8C4F0D`,
+and `302U1200 -> 727D3713`.
+
+Separately, the selected `0CAN70` row sets `PasswordAddress=001FFF00`,
+`ByteOrder=1`; the reconstructed **new** 2-MiB S-record image has `79 EF 38 FF`
+at `0x1FFF00`. `CalibArchivedFile::GetPassword @ 0x10002EF0` reads that value,
+and `CalibrationFile::GetNewPassword @ 0x10003090` falls back to it because
+this descriptor has no `NewPassword` override. Thus `0x79EF38FF` is the
+**new-image** software password for `302U1300`, not the first-attempt/source
+password and not the `27 02` SecurityAccess key.
+
+`CFlashWriter::SelectRetryPassword @ 0x46CAB0` controls old/new selection at
+object `+0x8C`: explicit true selects new; false with status `+0x78 == 7`
+toggles; other false cases select old. The status-7 semantic name remains
+unclaimed. The consumer is now exact:
+`CCanCommonFlashWriter::CheckIDWithWaitOfSFs @ 0x45C86C` sends five raw frames
+after the four-byte CAN/J2534 prefix. With `LocationID=0002000100030720`, the
+new-password payloads are `00`, `00`, `200701000200`, `0300`, `FF38EF79`; the
+last frame is the selected uint32 password in little-endian wire order. This is
+a proprietary CheckID exchange, separate from UDS SecurityAccess. This old
+two-control design is useful architectural precedent but does not transfer
+either value/algorithm to RH850 EPS. Canonical specimen analysis:
 [historical T-0087-17 CUW analysis](../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md).
 
 #### 4.5.1 `CalcSeedKeyForSecurityUp`: exact modern CUW construction
@@ -853,6 +864,15 @@ consumes its declared tail exactly. Its payload is a valid S-record stream with
 65,536 S2 records covering `0x000000..0x1FFFFF`, S8 entry `0x014B00`, and
 reconstructed-image SHA-256
 `2b2db1d9766405d74706e56fc1baea544e2a00bbaf09ee36f5994f1617852735`.
+The image contains 70,726 aligned `A1DFE103` words, including complete 64-KiB
+regions `0x050000..0x05FFFF` and `0x1E0000..0x1EFFFF`. The selected legacy
+S-record parser/materializer (`0x4A9A9C`/`0x4AB2D4`) and sender `0x45C700`
+pass the materialized image bytes unchanged into the J2534 transmit path; there
+is no host-side coding transform on this route. The semantic meaning or
+ECU-side interpretation of that encoded-looking representation remains bounded.
+Toyota bulletin T-SB-0336-17 independently corroborates the package's
+2015–2016 Corolla / 2ZR-FAE / CVT-Gate Main ECM transition from the three
+`302U1x00` calibrations to `302U1300`.
 
 `tools/techstream/parse_cuw_container.py` now decodes/validates this Version-4
 archive grammar; `tools/techstream/inspect_cuw_legacy.py` adds S-record, route,

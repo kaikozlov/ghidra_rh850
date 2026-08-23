@@ -520,10 +520,12 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   package: choose between the two byte-compatible Unified rows and recover its
   `ServiceAuthKey`, `ECUAuthKey`, `SeedKey`, `Nonce`, `OffsetAddress`, download
   ranges, area choice, required-spec branch, and actual integrity/header values.
-  Other CUW format-tail variants and the exact legacy T-0087 body-coding
-  semantics remain bounded but are no longer blockers for parsing a Version-4
-  package. `DigitalSignature` remains unrelated to TIS/RKS `Signature` absent a
-  real dataflow edge.
+  Other CUW format-tail variants remain specimen-bound. TMS-037 now closes the
+  legacy T-0087 **host-side** body path: the selected S-record materializer and
+  writer send image bytes unchanged. Only the semantic/ECU-side meaning of its
+  encoded-looking representation remains bounded, and that is not a blocker for
+  parsing a Version-4 package. `DigitalSignature` remains unrelated to TIS/RKS
+  `Signature` absent a real dataflow edge.
 - **RKS exact target/region policy (Layer A).** TMS-028/TMS-033 close the static
   client completely: state machine, request-field provenance (incl. shipped
   `Ini/RKS.ini` `[ReproKeyRequest]` values), online/offline/import convergence,
