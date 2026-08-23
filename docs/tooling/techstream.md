@@ -538,10 +538,82 @@ as AES keys without data-flow proof.
 **EMPS V850E PS2** uses a **static password** SA (key bytes `5A 5A 00 00`,
 no seed/key derivation). This is an older EPS generation on V850E, not RH850.
 
-**FOREST/RH850** (`CCanVFORESTFlashWriter`) has no `CollateSeedKey` or
-`CalcSeedKey` in its own methods — it only implements `FlashWrite`,
-`WriteWithErase`, and `VerifyCompData`. SA is handled by its companion
-`PrepareWriter` (separate object in the CUW's two-phase architecture).
+**VFOREST is a writer-family label, not an RH850 proof.** The dynamic
+VFOREST flash-writer classes have no `CollateSeedKey` or `CalcSeedKey` in their
+own methods; security is supplied by the selected prepare/orchestration route.
+A real legacy VFOREST package now proves that this qualifier matters:
+`T-0011-21 / 304C21` selects `0P5-CAN86`, `FORESTTypeFlag=1`, and
+`FlagToUseCIDGetterAndFlashWriterDLL=0`, so `Cuw.exe` dispatches its integrated
+`CCanVFORESTFlashWriter` from the common `CCanFlashWriter::Execute` body. That
+common Execute path calls `ChangeReprogrammingForECU @ 0x464254` first and thus
+uses the legacy four-byte `27 01/02` SecurityAccess recovered in §4.5.0. By
+contrast, the separate dynamic Security-VFOREST family discussed in §4.6 uses
+the newer prepare+flash architecture and its calibration-file nonce/seed-key
+transfer. Do not transfer the security behavior of one factory family to the
+other merely because both contain `VFOREST` in the class name.
+
+Techstream's CPU export for the real package is `CPUType=86 ->
+VFOREST_2_0M`; its same export table separately names explicit V850 families.
+Independent tuning-tool data places `89663-04C21 / 304C2100` in Toyota Denso
+Gen2/newGen D76F0xxx 2-MiB support. The CUW does not establish an exact MCU
+suffix or ISA/core, so earlier shorthand `FOREST/RH850` was too broad
+(CORR-103).
+
+#### 4.5.2 Real VFOREST/LZF case: `T-0011-21 / 304C21`
+
+External `T-0011-21 - 04C21.cuw` is a 2020–2021 Tacoma GRN305/GRN310,
+2GR-FKS ENG&ECT package. It updates `8966304C2000 -> 8966304C2100`; the Toyota
+TIS calibration list independently associates that transition with
+T-SB-0045-21, `Reduced Crawl Control Functionality`.
+
+The CPU archive `8966304C2100.txt` is ASCII hex rather than S-record. After
+whitespace removal and hex decoding it is a 1,329,128-byte stream (SHA-256
+`37b832f7899776c27d64483365ac83d9144cf590ba81483320afd5f3313d47db`).
+`Cuw.exe:0x43F4CC` calls the format **`LZF-Format data`** and recognizes `5A5600`
+and `5A5601`; the VFOREST walker `0x587D8C` closes the binary grammar as:
+
+```text
+ZV 00 || storedLength:u16be || raw[storedLength]
+ZV 01 || storedLength:u16be || expandedLength:u16be || lzf[storedLength]
+```
+
+The real stream has 512 records: 6 raw and 506 compressed. Every record
+represents exactly `0x1000` expanded bytes. Standard LZF expansion succeeds for
+all 506 compressed records and reconstructs an exact 2-MiB logical image:
+
+```text
+length  0x200000
+sha256  feb1e7ff00f7268ece3f043a56ac39a33bd22dffbe4f7f23fad1286b53db8e04
+```
+
+The image contains `89663-04C21` at `0x100C`. Records 396..510 all expand to
+repeated `E203F133`, so **LZF compression is closed but native firmware
+interpretation is not**: the two-megabyte representation has not been proven to
+be direct plaintext CPU code.
+
+The host writer does not perform that expansion. Integrated VFOREST
+`FlashWrite @ 0x587AD4` parses the stored ZV records, then `WriteWithErase @
+0x587F5C` / `VerifyCompData @ 0x58827C` feed stored chunks to sender `0x58859C`;
+`0x58861A -> 0x5AA540` is a direct copy into the J2534 TX buffer. Therefore the
+ECU receives the raw/compressed VFOREST representation. Exact ECU-side LZF and
+final storage semantics remain bounded.
+
+This package also closes a route-dependent `PasswordAddress` subtlety. Its
+selected row is `PasswordAddress=0000100E`, `ByteOrder=0`; that address indexes
+the **hex-decoded ZV archive buffer**, not the LZF-expanded image. Bytes
+`FF 0C EF 56` at stream offset `0x100E` become host uint32 password
+`0x56EF0CFF` under `GetPassword`, and shared CheckID emits them little-endian as
+`FF 0C EF 56`. The old/source `TargetData=3532323734463D4A` decodes to
+`0x51040A7C` (wire `7C 0A 04 51`). With
+`LocationID=0002000100070720`, the new-password CheckID payloads after the
+four-byte CAN/J2534 prefix are `00 / 00 / 200701000200 / 0700 / FF0CEF56`.
+The software password is independent of the shared legacy `27` SecurityAccess.
+
+Canonical evidence:
+`tools/techstream/inspect_cuw_vforest.py`,
+`tests/verify_techstream_cuw_vforest.py`,
+`data/generated/techstream_v18/cuw_t0011_21_04c21_specimen.json`, and the
+[historical analysis](../history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md).
 
 The recovered standard and unified prepare writers both derive the `27 02`
 response from `CalibrationFile::GetServiceAuthKey()` and the 16-byte ECU seed;
@@ -742,7 +814,7 @@ code; do not reinterpret the ASCII character value (CORR-083).
 
 ECU-specific flash writers include:
 `TCUWCanReproStdFlashWriter` (standard CAN), `TCUWCanUnifiedFlashWriter`
-(unified), `TCUWCanSecurityVFORESTFlashWriter` (FOREST/RH850 security),
+(unified), `TCUWCanSecurityVFORESTFlashWriter` (Security-VFOREST family),
 `TCUWCanPowerTrainFlashWriter`, and variants for airbag, chassis, body, HINO,
 M16C, MMC, PSA, and SBR ECUs.
 

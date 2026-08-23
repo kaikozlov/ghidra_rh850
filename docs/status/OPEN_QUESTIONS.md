@@ -511,21 +511,22 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `0016..0019`, `0033/0034/0036`, `0421/0422`, `07D1/07D2`, and
   `26AC/26AD/26C1/26C3`. This is now a capture task, not a static-RE blocker.
 - **Matching modern calibration package and target-specific integrity values.**
-  TMS-026/TMS-034/TMS-037 close the generic specimen blocker: external
-  `T-0087-17.cuw` validates the recovered outer CRC/member framing and closes
-  Format-Version-4 as `cpuImageCount:u8 || member[count]`; it also proves the
-  descriptor→`0CAN70` legacy route join and archived-password extraction. It is
-  a 2015–2016 Corolla ENG&ECT / SH72544R package, however, so it does **not**
-  resolve the Sienna/H target. What remains needs a matching modern EPS
-  package: choose between the two byte-compatible Unified rows and recover its
-  `ServiceAuthKey`, `ECUAuthKey`, `SeedKey`, `Nonce`, `OffsetAddress`, download
-  ranges, area choice, required-spec branch, and actual integrity/header values.
-  Other CUW format-tail variants remain specimen-bound. TMS-037 now closes the
-  legacy T-0087 **host-side** body path: the selected S-record materializer and
-  writer send image bytes unchanged. Only the semantic/ECU-side meaning of its
-  encoded-looking representation remains bounded, and that is not a blocker for
-  parsing a Version-4 package. `DigitalSignature` remains unrelated to TIS/RKS
-  `Signature` absent a real dataflow edge.
+  TMS-026/TMS-034/TMS-037/TMS-038 close two real legacy specimen families.
+  `T-0087-17.cuw` validates the recovered outer CRC/member framing, Format-4
+  archive grammar, S-record route, and legacy software-password consumer.
+  `T-0011-21 - 04C21.cuw` independently validates a P5-CAN integrated VFOREST
+  route and fully closes its `.xxz` transport layer as ASCII-hex `ZV00/ZV01`
+  LZF framing, reconstructing the exact 2-MiB logical image. Neither specimen is
+  a tracked modern EPS package: the former is SH72544R ENG&ECT; the latter is
+  Tacoma ENG&ECT `VFOREST_2_0M` / Denso Gen2-newGen family. What remains still
+  needs a **matching modern EPS CUW**: choose between the two byte-compatible
+  Unified rows and recover its `ServiceAuthKey`, `ECUAuthKey`, `SeedKey`,
+  `Nonce`, `OffsetAddress`, download ranges, area choice, required-spec branch,
+  and actual integrity/header values. Other CUW format-tail variants remain
+  specimen-bound. The remaining encoded-image questions in the two legacy
+  packages concern final ECU/native representation semantics, not ability to
+  parse or extract their CUW payload bytes. `DigitalSignature` remains unrelated
+  to TIS/RKS `Signature` absent a real dataflow edge.
 - **RKS exact target/region policy (Layer A).** TMS-028/TMS-033 close the static
   client completely: state machine, request-field provenance (incl. shipped
   `Ini/RKS.ini` `[ReproKeyRequest]` values), online/offline/import convergence,

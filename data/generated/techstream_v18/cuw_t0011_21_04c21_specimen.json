@@ -1,0 +1,369 @@
+{
+  "descriptor": {
+    "CPU01": {
+      "01_TargetCalibration": "8966304C2000",
+      "01_TargetData": "3532323734463D4A",
+      "CPUImageName": "304C21.xxz",
+      "CPUType": "86",
+      "FlashCodeName": "",
+      "LocationID": "0002000100070720",
+      "NewCID": "8966304C2100",
+      "NumberOfTargets": "1"
+    },
+    "Format": {
+      "Version": "4"
+    },
+    "Vehicle": {
+      "ContactType": "P5-CAN",
+      "DateOfIssue": "2021-03-15",
+      "EngineType": "2GR-FKS",
+      "KindOfECU": "0",
+      "ModelYear": "20-21",
+      "Number": "0",
+      "NumberOfCalibration": "1",
+      "VehicleName": "Tacoma",
+      "VehicleType": "GRN305/GRN310"
+    }
+  },
+  "format4_archive": {
+    "computed_payload_crc32": "2BD15E25",
+    "count": 1,
+    "name": "8966304C2100.txt",
+    "name_length": 16,
+    "payload_crc32": "2BD15E25",
+    "payload_length": 2824778,
+    "payload_sha256": "c6dec16cafe641d66a1f4c7a0628b405ac4178f251483ae87177ef19278af9a7",
+    "record_consumes_tail_exactly": true
+  },
+  "host_transfer_boundary": {
+    "conclusion": "Techstream decodes ASCII hex into ZV/LZF records but sends each record's stored raw/compressed body through CCanVFORESTFlashWriter; it does not LZF-expand the image before J2534 transmission",
+    "ecu_side": "LZF expansion / final image interpretation occurs downstream of this host writer; exact ECU-side implementation is not claimed from this package alone"
+  },
+  "legacy_security": {
+    "new_image_password": {
+      "byte_order_parameter": 0,
+      "byte_order_semantics": "ByteOrder=0 reverses the four archived bytes when formatting the uint32 password; CheckID later emits that uint32 little-endian, reproducing the archived byte order on wire",
+      "check_id_payloads_after_can_id": [
+        "00",
+        "00",
+        "200701000200",
+        "0700",
+        "FF0CEF56"
+      ],
+      "important_boundary": "PasswordAddress indexes Techstream's decoded ZV/LZF archive buffer, not the LZF-expanded 2-MiB logical image",
+      "password_hex": "56EF0CFF",
+      "raw_bytes_hex": "FF0CEF56",
+      "role": "new-image software password via CalibrationFile::GetNewPassword fallback when no descriptor override is present",
+      "source": "TCUWCalibrationFile.dll CalibArchivedFile::GetPassword @ 0x10002EF0; GetNewPassword @ 0x10003090",
+      "source_address_in_decoded_zv_stream": "0x100E",
+      "wire_password_hex": "FF0CEF56"
+    },
+    "security_access": {
+      "boundary": "same integrated CCanFlashWriter SecurityAccess path as the legacy T-0087 route; independent from CheckID software password",
+      "grammar": "27 01 -> 67 01 || seed[4]; 27 02 || (seed XOR 00 60 60 00) -> 67 02",
+      "shared_integrated_writer": true
+    },
+    "source_passwords": [
+      {
+        "calibration": "8966304C2000",
+        "check_id_payloads_after_can_id": [
+          "00",
+          "00",
+          "200701000200",
+          "0700",
+          "7C0A0451"
+        ],
+        "password_hex": "51040A7C",
+        "target_data": "3532323734463D4A",
+        "wire_password_hex": "7C0A0451"
+      }
+    ]
+  },
+  "lzf_stream": {
+    "ascii_hex_payload": true,
+    "compressed_stored_length_max": 4093,
+    "compressed_stored_length_min": 57,
+    "decoded_length": 1329128,
+    "decoded_sha256": "37b832f7899776c27d64483365ac83d9144cf590ba81483320afd5f3313d47db",
+    "expanded_length_counts": {
+      "4096": 512
+    },
+    "format_name_from_cuw_exe": "LZF-Format data",
+    "raw_record_indices": [
+      0,
+      1,
+      149,
+      150,
+      168,
+      181
+    ],
+    "record_count": 512,
+    "record_manifest_sha256": "531febd84c9851c724567c505bfa6138852f567df1a4fc4f34bd1dd995628aa6",
+    "repeated_fill_block": {
+      "expanded_block_sha256": "4e1da2228f2acfec26fbd1054db55e95b393986119bde211ccabb0f182ab479e",
+      "record_count": 115,
+      "record_indices": [
+        396,
+        397,
+        398,
+        399,
+        400,
+        401,
+        402,
+        403,
+        404,
+        405,
+        406,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        421,
+        422,
+        423,
+        424,
+        425,
+        426,
+        427,
+        428,
+        429,
+        430,
+        431,
+        432,
+        433,
+        434,
+        435,
+        436,
+        437,
+        438,
+        439,
+        440,
+        441,
+        442,
+        443,
+        444,
+        445,
+        446,
+        447,
+        448,
+        449,
+        450,
+        451,
+        452,
+        453,
+        454,
+        455,
+        456,
+        457,
+        458,
+        459,
+        460,
+        461,
+        462,
+        463,
+        464,
+        465,
+        466,
+        467,
+        468,
+        469,
+        470,
+        471,
+        472,
+        473,
+        474,
+        475,
+        476,
+        477,
+        478,
+        479,
+        480,
+        481,
+        482,
+        483,
+        484,
+        485,
+        486,
+        487,
+        488,
+        489,
+        490,
+        491,
+        492,
+        493,
+        494,
+        495,
+        496,
+        497,
+        498,
+        499,
+        500,
+        501,
+        502,
+        503,
+        504,
+        505,
+        506,
+        507,
+        508,
+        509,
+        510
+      ],
+      "word_hex": "E203F133"
+    },
+    "stream_consumed_exactly": true,
+    "type_counts": {
+      "0": 6,
+      "1": 506
+    }
+  },
+  "modern_unified_boundary": {
+    "descriptor_fields_absent": [
+      "ECUAuthKey",
+      "ServiceAuthKey",
+      "SeedKey",
+      "Nonce",
+      "OffsetAddress",
+      "SecurityProperty2"
+    ],
+    "selected_route": "legacy integrated CCanFlashWriter / CCanVFORESTFlashWriter, not modern dynamic Unified prepare+flash"
+  },
+  "outer_container": {
+    "computed_crc32": "2615F236",
+    "declared_total_size": 2825257,
+    "first_member_crc32": "DE1824C4",
+    "first_member_end": 452,
+    "first_member_length": 410,
+    "first_member_name": "attach.att",
+    "first_member_sha256": "a1edd8a8767ade5b30f5795a3d71d005212c146426ddb600d61589c50f43032e",
+    "format_type": 4,
+    "stored_crc32": "2615F236",
+    "tail_length": 2824805,
+    "tail_sha256": "c4209ef70e21486237c5e0311ad8fb762c011cc8ec584fed419dc22ff7ed9a33"
+  },
+  "reconstructed_image": {
+    "boundary": "LZF compression is fully decoded; whether the resulting 2-MiB representation is native plaintext CPU code or retains Denso/VFOREST coding remains unproven",
+    "cpu_image_name_ascii": "89663-04C21",
+    "cpu_image_name_offset": 4108,
+    "length": 2097152,
+    "sha256": "feb1e7ff00f7268ece3f043a56ac39a33bd22dffbe4f7f23fad1286b53db8e04"
+  },
+  "source": {
+    "filename": "T-0011-21 - 04C21.cuw",
+    "sha256": "e0525b4fe0224772a3dde68d16bf2fb7a808d6d937fa32a337db34d95f5ba61d",
+    "size": 2825257
+  },
+  "techstream_pe_evidence": {
+    "anchors": {
+      "sender_direct_memcpy": {
+        "bytes": "E8211F0200",
+        "target": "0x005AA540",
+        "va": "0x0058861A"
+      },
+      "shared_execute_to_change_reprogramming": {
+        "bytes": "E850590000",
+        "target": "0x00464254",
+        "va": "0x0045E8FF"
+      },
+      "shared_execute_to_vforest_flashwrite": {
+        "bytes": "E88D5B1200",
+        "target": "0x00587AD4",
+        "va": "0x00461F42"
+      },
+      "vforest_factory_constructor": {
+        "bytes": "E8D40B1100",
+        "target": "0x005886EC",
+        "va": "0x00477B13"
+      }
+    },
+    "ascii_hex_decode_helper": {
+      "sha256": "a52fd347fdc75c426e8612e551b055336ea1994493a94181f6f5a61008307c0e",
+      "size": "0x70",
+      "va": "0x0043F730"
+    },
+    "ascii_lzf_parser": {
+      "sha256": "f80f34dd9ea7d8892c8a84afa119ac5a96c81a3e828374370900655f0bade55e",
+      "size": "0x262",
+      "va": "0x0043F4CC"
+    },
+    "data_sender": {
+      "sha256": "1c59cc8f403569796e2e5fe1e839db0f6f3b3b51c0aba513d84e780bc8076829",
+      "size": "0x130",
+      "va": "0x0058859C"
+    },
+    "literal_strings": [
+      "5A5600",
+      "5A5601",
+      "LZF-Format data"
+    ],
+    "verify_comp_data": {
+      "sha256": "62ef0ac3dcfdb29ddcb3834765b8262431d2059e00e553d52ab2242eda4d51fc",
+      "size": "0x320",
+      "va": "0x0058827C"
+    },
+    "vforest_flashwrite": {
+      "sha256": "ca32c157f997ac78c5a1762f400a1b2650aec3cf55c97ddbdf957fa8dcb8108e",
+      "size": "0x2B8",
+      "va": "0x00587AD4"
+    },
+    "write_with_erase": {
+      "sha256": "3254e7b5cead2622b0527b4d453069c4f111ce8efad2949052ea2be614c7b0f6",
+      "size": "0x320",
+      "va": "0x00587F5C"
+    },
+    "zv_record_parser": {
+      "sha256": "0c1016b9a7ef845b5a2d6ba75530b5cad8ded6431dcf9f54daaaa1cb7902f2cb",
+      "size": "0x1D0",
+      "va": "0x00587D8C"
+    }
+  },
+  "techstream_v18_route": {
+    "cpu_type_export": "?glptrCPUType_VFOREST_2_0M@@3PBDB",
+    "kind_of_ecu_export": "?glptrKindOfECU_ENGAndECT@@3PBDB",
+    "parameter_key": "0P5-CAN86",
+    "parameter_rows": [
+      {
+        "ByteOrder": "0",
+        "CPUTypeWithModeChangeAtCPUTypeChangeFlag": "0",
+        "CalibrationType": "2",
+        "ClassNameForOEMVINReader": "",
+        "EngineTypeFlag": "1",
+        "FORESTTypeFlag": "1",
+        "FlagToCancelAutomaticIGOFF": "1",
+        "FlagToChangeProtocolAtSuccessGetCID": "0",
+        "FlagToChangeToReprogGWModeForCentralGW": "1",
+        "FlagToChangeWFSE": "0",
+        "FlagToClearDTCOfENGECTWithMode04": "0",
+        "FlagToDisableSelectNewCalButton": "",
+        "FlagToDisplayPSACableAttachOrRemoveScreen": "",
+        "FlagToDoIGOFFONAtCPUTypeChange": "0",
+        "FlagToHoldSFormatRecords": "",
+        "FlagToNonVerifyProcess": "",
+        "FlagToOutputAllAttachedInformation": "1",
+        "FlagToReceiveRespForFinish": "",
+        "FlagToUseCIDGetterAndFlashWriterDLL": "0",
+        "FlagToUseGetFlashSizeFunc": "1",
+        "FlagToWriteCIDAfterRepro": "0",
+        "KindOfECUNames": "ENG & ECT\nENG & ECT\nENG & ECT\nENG & ECT",
+        "M16CTypeFlag": "0",
+        "ParamFileKeySystemProtocolMicon": "0P5-CAN86",
+        "PasswordAddress": "0000100E",
+        "WaitTimeAfterBatteryConnected": "",
+        "WaitTimeAfterBatteryDisconnected": "",
+        "WaitTimeAfterIGOn": "10000",
+        "WaitTimeForIGOFFON": "10",
+        "WriteDataSize": ""
+      }
+    ]
+  }
+}

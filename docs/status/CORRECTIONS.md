@@ -2506,3 +2506,30 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/techstream_v18/cuw_t0087_17_specimen.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §4.5.0/§5.2.1;
   [../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md](../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md).
+
+### CORR-103 — `VFOREST` is not an RH850 synonym, and its security orchestration is route-specific
+
+- **Earlier shorthand:** Techstream notes labeled `CCanVFORESTFlashWriter` as
+  `FOREST/RH850` and summarized VFOREST SecurityAccess as if every VFOREST
+  writer necessarily belonged to the separate prepare+flash architecture.
+- **Correction from a real package:** external `T-0011-21 - 04C21.cuw` selects
+  `CPUType=86 -> VFOREST_2_0M`, `FORESTTypeFlag=1`, route `0P5-CAN86`, and
+  `FlagToUseCIDGetterAndFlashWriterDLL=0`. `Cuw.exe` therefore constructs its
+  **integrated** VFOREST writer. Shared `CCanFlashWriter::Execute` calls
+  `ChangeReprogrammingForECU @ 0x464254` before its direct
+  `0x461F42 -> CCanVFORESTFlashWriter::FlashWrite @ 0x587AD4` dispatch, so this
+  real route uses the legacy four-byte `27 01/02` SecurityAccess path. The
+  dynamic Security-VFOREST family of TMS-010 is a different factory route with
+  its own prepare/key-material-transfer architecture.
+- **Architecture label:** Toyota's V18 export table explicitly names
+  `VFOREST_2_0M` while separately naming several `V850...` CPU types. Third-party
+  exact-software/tooling evidence places `89663-04C21 / 304C2100` in the Denso
+  Gen2/newGen D76F0xxx 2-MiB ecosystem, but sources disagree on the exact
+  D76F0xxx suffix. The CUW itself does not establish an RH850 core, exact MCU
+  suffix, or instruction set. `VFOREST` must therefore remain the recovered
+  Toyota/Techstream family name unless stronger target-native evidence exists.
+- **Canonical:** TMS-038;
+  `tests/verify_techstream_cuw_vforest.py`;
+  `data/generated/techstream_v18/cuw_t0011_21_04c21_specimen.json`;
+  [../tooling/techstream.md](../tooling/techstream.md) §4.5.2;
+  [../history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md](../history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md).
