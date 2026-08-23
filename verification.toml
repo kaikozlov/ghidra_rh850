@@ -1084,6 +1084,24 @@ paths = [
   "docs/status/OPEN_QUESTIONS.md",
 ]
 
+[suite.techstream_cuw_vforest_corpus]
+tests = ["tests/verify_techstream_cuw_vforest_corpus.py"]
+requires_external = ["techstream_v18"]
+oracle = "independent_external_artifact"
+paths = [
+  "tools/techstream/parse_cuw_container.py",
+  "tools/techstream/inspect_cuw_legacy.py",
+  "tools/techstream/inspect_cuw_vforest.py",
+  "tools/techstream/inspect_cuw_vforest_corpus.py",
+  "tests/verify_techstream_cuw_vforest_corpus.py",
+  "data/generated/techstream_v18/cuw_tacoma_vforest_corpus.json",
+  "docs/tooling/techstream.md",
+  "docs/history/2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.techstream_cuw_security_up]
 tests = ["tests/verify_techstream_cuw_security_up.py"]
 requires_external = ["techstream_v18"]

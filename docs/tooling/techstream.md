@@ -615,6 +615,65 @@ Canonical evidence:
 `data/generated/techstream_v18/cuw_t0011_21_04c21_specimen.json`, and the
 [historical analysis](../history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md).
 
+#### 4.5.3 Real Tacoma VFOREST corpus: 11 packages / 16 CPU images
+
+The broader local Tacoma corpus generalizes the `04C21` result instead of
+leaving it as a one-package observation. Eleven real `P5-CAN` ENG&ECT CUWs
+contain 16 CPU images across three Techstream size classes: CPUType86 =
+`VFOREST_2_0M` (`0x200000`, nine images), CPUType87 = `VFOREST_1_5M`
+(`0x180000`, two images), and CPUType89 = `VFOREST_1_25M` (`0x140000`, five
+images). Every member decodes completely as ASCII-hex `ZV00/ZV01` plus standard
+LZF, with no residual transport layer.
+
+Five packages are dual-CPU. Both archive members in one such package use the
+same compound filename `<CPU01NewCID>_<CPU02NewCID>.txt`, so member names do
+not identify the CPU. Archive order does: member 1 maps to `CPU01` / CPUType89
+and member 2 maps to `CPU02` / CPUType86 or 87. The mapping is byte-validated by
+each reconstructed image's part identity at logical `0x100C`, image size, and
+cross-package password closure.
+
+The selected `0P5-CAN86`, `0P5-CAN87`, and `0P5-CAN89` rows are identical in
+the relevant legacy security/orchestration fields: `PasswordAddress=0x100E`,
+`ByteOrder=0`, `FORESTTypeFlag=1`, `M16CTypeFlag=0`, dynamic writer flag 0,
+`WaitTimeAfterIGOn=10000`, and `WaitTimeForIGOFFON=10`. Thus the real size
+classes expose no separate credential schema. Source passwords remain encoded
+in `TargetData`; each image's new password is at decoded-ZV `0x100E` and also
+appears at logical image `0x1004`. Two update chains close independently:
+`04A71`'s new password `74B53E44` becomes `04A72`'s source password for
+`8966304A7100`, and `04B81`'s new password `59CF08BF` becomes `04B82`'s source
+password for `8966304B8100`.
+
+All 16 expanded images share an exact `0x1004`-byte prefix. At logical
+`0x1004` the per-image password begins; `0x1008` is the stable marker
+`9E5D123A`; `0x100C` is the plaintext Toyota part identity. Every image ends in
+one common 52-byte footer grammar:
+
+```text
+B270AD78E88F32B558FEEB58D03B3B1D || 00000000 || image[0x1004:0x1024]
+```
+
+Unused logical space immediately before that footer is a word-aligned run of
+`E203F133`. Across all nine CPUType86 images, the 4-KiB blocks common to every
+version are exactly block 0 and blocks 396..510.
+
+The strongest differential is the direct `04B81 -> 04B82` update. Both packages
+carry the exact same CPUType89 `896650410100` member byte-for-byte, while the
+CPUType86 image advances from `8966304B8100` to `8966304B8200`. Those two 2-MiB
+images differ in 135,465 bytes across 73 blocks: many low/mid-image blocks have
+only 1–15 changed bytes, while blocks 362..395 form a densely rewritten region.
+This locality proves the expanded representation is strongly structured and is
+not behaving as one whole-image cryptographic ciphertext. It still does not
+prove direct native CPU plaintext; an ECU-side Denso/VFOREST storage/coding
+transform remains bounded.
+
+Canonical corpus evidence:
+`tools/techstream/inspect_cuw_vforest_corpus.py`,
+`tests/verify_techstream_cuw_vforest_corpus.py`,
+`data/generated/techstream_v18/cuw_tacoma_vforest_corpus.json`, and the
+[corpus analysis](../history/2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md).
+The complete artifact pins all package/image hashes, source/new passwords,
+member order, fill boundaries, and pairwise CPUType86 block-diff counts.
+
 The recovered standard and unified prepare writers both derive the `27 02`
 response from `CalibrationFile::GetServiceAuthKey()` and the 16-byte ECU seed;
 the modern `CalcSeedKeyForSecurityUp` implementation is now recovered exactly
