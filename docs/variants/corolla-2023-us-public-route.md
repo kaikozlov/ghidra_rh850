@@ -1519,8 +1519,8 @@ promotion:
 named canonical functions                 1113
 verified exact-body transfers              288
 target-native inspected unique-shape      126
-target-native role-recovered                235
-complete target-surface recensuses          464
+target-native role-recovered                238
+complete target-surface recensuses          461
 structural candidates only                    0
 genuinely unresolved                          0
 ```
@@ -1536,8 +1536,12 @@ been independently enumerated—for example all H RDBI producers, all 19
 RoutineControl callback rows, or every direct stage in the 94→123 steering
 supervisor comparison. A raw structural candidate with no later H-native evidence would stay
 structural-only; after §7.33, none remain. There are now **zero genuinely-unresolved
-canonical named functions and zero structural-only rows**. The 126 inspected
-unique-shape rows preserve the boundary between target-native operand/dataflow
+canonical named functions and zero structural-only rows**. CORR-101's later
+keyless re-audit promotes three former direct-call-surface rows (`0x54910`,
+`0x549FA`, `0x54A7E`) to explicit H-native event-formatter roles, producing the
+current 238/461 role-recovered/surface-recensused split without changing the
+1,113-function denominator. The 126 inspected unique-shape rows preserve the
+boundary between target-native operand/dataflow
 inspection and stronger semantic role recovery.
 
 This matrix is intentionally conservative. It does **not** mean every promoted
@@ -2261,8 +2265,8 @@ The evidence-graded 1,113-function denominator is therefore now fully classified
 
 ```text
 verified exact-body transfers              288
-target-native role-recovered                235
-complete target-surface recensuses          464
+target-native role-recovered                238
+complete target-surface recensuses          461
 target-native inspected unique-shape        126
 structural candidates only                    0
 genuinely unresolved                          0
@@ -2293,8 +2297,8 @@ role equivalence. The final 1,113-function evidence distribution is therefore:
 
 ```text
 verified exact-body transfers              288
-target-native role-recovered                235
-complete target-surface recensuses          464
+target-native role-recovered                238
+complete target-surface recensuses          461
 target-native inspected unique-shape        126
 structural candidates only                    0
 genuinely unresolved                          0

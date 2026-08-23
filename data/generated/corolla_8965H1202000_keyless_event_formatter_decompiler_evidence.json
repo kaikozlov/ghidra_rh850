@@ -1,0 +1,66 @@
+{
+  "boundary": "This artifact establishes the H formatter/wrapper/sibling/config helper and AB worker semantics. Reachable output bounds remain a separate deterministic raw-table calculation.",
+  "function_count": 6,
+  "functions": [
+    {
+      "body_sha256": "f0ecb9142540abb24c94cd64f7abb68c7ce09770af2d19afa7590b29052507d9",
+      "body_size": 234,
+      "decompiled_c": "\nint FUN_00050038(short param_1,short param_2,int param_3,char param_4)\n\n{\n  int iVar1;\n  uint uVar2;\n  int iVar3;\n  int iVar4;\n  ushort uVar5;\n  undefined1 uVar6;\n  ushort uVar7;\n  short *psVar8;\n  int iVar9;\n  ushort auStack_2a [3];\n  \n  uVar7 = 0;\n  iVar9 = 0;\n  uVar5 = 0;\n  psVar8 = (short *)0xfebe839c;\n  if (param_4 == '\\0') {\n    psVar8 = (short *)0xfebe833c;\n  }\n  if ((param_3 != 0) && (iVar3 = FUN_00050d10(auStack_2a), iVar3 != 0)) {\n    if ((param_1 == *psVar8) && ((param_2 == psVar8[0x23] || (param_2 == 0)))) {\n      uVar2 = 0;\n      do {\n        if (param_1 == *(short *)(&DAT_0002a770 + uVar2 * 8)) {\n          uVar5 = *(ushort *)(uVar2 * 8 + 0x2a772);\n          break;\n        }\n        uVar2 = uVar2 + 1;\n      } while (uVar2 < 0x40);\n    }\n    if (uVar5 != 0) {\n      FUN_00063824(psVar8[0x23],param_3);\n      iVar9 = 3;\n      for (uVar2 = 0; uVar2 < auStack_2a[0]; uVar2 = uVar2 + 1 & 0xffff) {\n        iVar1 = uVar2 * 0x18 + iVar3;\n        if (((*(ushort *)(iVar1 + 0x14) & uVar5) != 0) &&\n           (iVar4 = FUN_0004d862(uVar2,1), iVar4 == 0x5a)) {\n          uVar7 = uVar7 + 1;\n          FUN_00063824(*(undefined2 *)(iVar1 + 8),iVar9 + param_3);\n          *(undefined1 *)(iVar9 + 2 + param_3) = *(undefined1 *)(iVar1 + 0x16);\n          (**(code **)(iVar1 + 0xc))(param_4,iVar9 + 3 + param_3);\n          iVar9 = iVar9 + 3 + (uint)*(byte *)(iVar1 + 0x16);\n        }\n      }\n      if (uVar7 < 0x100) {\n        uVar6 = (undefined1)uVar7;\n      }\n      else {\n        uVar6 = 0;\n      }\n      *(undefined1 *)(param_3 + 2) = uVar6;\n    }\n  }\n  return iVar9;\n}\n\n",
+      "decompiled_c_sha256": "161582097a37227af9f1cb389a0bc680e6d8176afa6d2242f627b0da39de3ae9",
+      "entry": "0x00050038",
+      "name": "FUN_00050038"
+    },
+    {
+      "body_sha256": "4483276afe5a687704575d7c9f5e8042529629ac96afd7345e57bf4de573d2c5",
+      "body_size": 90,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nuint FUN_00050122(undefined2 param_1,undefined2 param_2,int param_3,uint param_4)\n\n{\n  undefined1 *puVar1;\n  int iVar2;\n  uint uVar3;\n  \n  puVar1 = &LAB_febeb800;\n  uVar3 = 0;\n  if ((_DAT_febe839e != 0x1111) && (_DAT_febe839e != 0x2222)) {\n    puVar1 = &LAB_febeb800;\n    uVar3 = FUN_00050038(param_1,param_2,param_3,1);\n  }\n  if ((*(short *)(puVar1 + -0x34c2) != 0x1111) && (*(short *)(puVar1 + -0x34c2) != 0x2222)) {\n    iVar2 = FUN_00050038(param_1,param_2,uVar3 + param_3,0);\n    uVar3 = uVar3 + iVar2;\n  }\n  iVar2 = uVar3 - (param_4 & 0xffff);\n  if (iVar2 < 0 == ((int)uVar3 < 0 && -1 < iVar2) && uVar3 != (param_4 & 0xffff)) {\n    uVar3 = 0xffffffff;\n  }\n  return uVar3;\n}\n\n",
+      "decompiled_c_sha256": "dfcba0854ca966bfa6a7c62858d9f2d7562b149d834fbd6763a3a489b9f5e394",
+      "entry": "0x00050122",
+      "name": "FUN_00050122"
+    },
+    {
+      "body_sha256": "e28671cb608827ccccf344d86d16cdf7ac50aefced4fdc34db5e50efb1abde38",
+      "body_size": 228,
+      "decompiled_c": "\nuint FUN_000501a6(int param_1,ushort param_2,int param_3,uint param_4)\n\n{\n  undefined2 *puVar1;\n  int iVar2;\n  int iVar3;\n  int iVar4;\n  uint uVar5;\n  ushort uVar6;\n  uint uVar7;\n  ushort uStack_30;\n  ushort uStack_2e;\n  \n  iVar4 = 0;\n  uStack_30 = 0;\n  if (param_1 == 0) {\n    return 0;\n  }\n  if (param_3 == 0) {\n    return 0;\n  }\n  if (2 < (param_4 & 0xffff)) {\n    uStack_2e = param_2;\n    FUN_00063824((*(ushort *)(param_1 + 2) + 4) % 5 + 1,param_3);\n    uVar7 = 3;\n    iVar2 = func_0x00050d20(&uStack_30);\n    if (iVar2 == 0) {\n      return 3;\n    }\n    uVar6 = 0;\n    uVar5 = 0;\n    while ((uVar5 < uStack_30 && (iVar4 != 0x5a))) {\n      puVar1 = (undefined2 *)(uVar5 * 0x10 + iVar2);\n      if (((puVar1[6] & uStack_2e) != 0) &&\n         ((*(code **)(puVar1 + 4) == (code *)0x0 ||\n          (iVar3 = (**(code **)(puVar1 + 4))(), iVar3 == 0x5a)))) {\n        if ((param_4 & 0xffff) < (*(byte *)(puVar1 + 7) + uVar7 + 3 & 0xffff)) {\n          iVar4 = 0x5a;\n        }\n        else {\n          FUN_00063824(*puVar1);\n          *(undefined1 *)(uVar7 + param_3 + 2) = *(undefined1 *)(puVar1 + 7);\n          (**(code **)(puVar1 + 2))(param_1,uVar7 + param_3 + 3);\n          uVar6 = uVar6 + 1;\n          uVar7 = uVar7 + *(byte *)(puVar1 + 7) + 3 & 0xffff;\n        }\n      }\n      uVar5 = uVar5 + 1 & 0xffff;\n    }\n    if (0xff < uVar6) {\n      uVar6 = 0;\n    }\n    *(char *)(param_3 + 2) = (char)uVar6;\n    if (iVar4 != 0x5a) {\n      return uVar7;\n    }\n  }\n  return 0xffffffff;\n}\n\n",
+      "decompiled_c_sha256": "7e29063af16a5d9b264a82a84ef81a07218808d3095f603ae3563624e4193f7d",
+      "entry": "0x000501A6",
+      "name": "FUN_000501a6"
+    },
+    {
+      "body_sha256": "8d019308f5b00635eb49043ce607e8948e375d7f72ad67a7e1e7d79ccca2c567",
+      "body_size": 114,
+      "decompiled_c": "\nundefined4 FUN_0005031a(short param_1,ushort param_2)\n\n{\n  char cVar1;\n  undefined4 uVar2;\n  uint uVar3;\n  int iVar4;\n  \n  uVar3 = 0;\n  cVar1 = '\\0';\n  do {\n    iVar4 = uVar3 * 8;\n    if (param_1 == *(short *)(&DAT_0002a770 + iVar4)) {\n      cVar1 = (&DAT_0002a774)[iVar4];\n      if ((*(byte *)(iVar4 + 0x2a775) < param_2) && (*(byte *)(iVar4 + 0x2a775) != 0))\n      goto LAB_00050386;\n      break;\n    }\n    uVar3 = uVar3 + 1 & 0xff;\n  } while (uVar3 < 0x40);\n  if (cVar1 == '\\x11') {\n    uVar2 = FUN_00050122();\n  }\n  else if (((cVar1 == '\\\"') || (cVar1 == 'D')) || (cVar1 == 'U')) {\n    uVar2 = func_0x0005028a();\n  }\n  else {\nLAB_00050386:\n    uVar2 = 0xfffffffc;\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "98b088e338717aba087d7281da62184fb3b218fd4fb49f6554a0c8e90a90560c",
+      "entry": "0x0005031A",
+      "name": "FUN_0005031a"
+    },
+    {
+      "body_sha256": "e37e41d71e993be174988842c50cd48f18c4bb14630475168eb1f988bf26492a",
+      "body_size": 16,
+      "decompiled_c": "\nundefined ** FUN_00050d10(undefined2 *param_1)\n\n{\n  *param_1 = 0x4e;\n  return &PTR_DAT_00029f1c;\n}\n\n",
+      "decompiled_c_sha256": "730cb5d7a92faa15c65305e8b027ab7763d622a1c109a44beb7b5ecc5b3328ab",
+      "entry": "0x00050D10",
+      "name": "FUN_00050d10"
+    },
+    {
+      "body_sha256": "90915bddcffc1836eb920807ebb2f0476fb1a66e98004a99e7c4d53726ec57c0",
+      "body_size": 364,
+      "decompiled_c": "\n/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */\n\nvoid FUN_00087384(undefined4 param_1,uint *param_2,undefined4 param_3)\n\n{\n  char cVar1;\n  char cVar2;\n  undefined1 uVar3;\n  undefined1 uVar4;\n  undefined1 uVar5;\n  undefined2 uVar6;\n  short sVar7;\n  short sVar8;\n  uint uVar9;\n  short sStack_62;\n  ushort uStack_60;\n  undefined1 auStack_5e [2];\n  undefined2 uStack_5c;\n  undefined2 uStack_5a;\n  uint *puStack_58;\n  undefined4 uStack_54;\n  undefined4 uStack_50;\n  undefined4 uStack_4c;\n  ushort *puStack_48;\n  undefined1 *puStack_44;\n  undefined4 uStack_40;\n  char cStack_3c;\n  undefined1 uStack_3b;\n  undefined2 uStack_3a;\n  undefined4 uStack_38;\n  undefined1 uStack_34;\n  undefined1 uStack_33;\n  short sStack_32;\n  undefined4 uStack_30;\n  \n  uVar3 = DAT_febf45e2;\n  uVar5 = DAT_febf45e0;\n  cVar2 = DAT_febf45df;\n  uVar4 = DAT_febf45de;\n  cVar1 = DAT_febf45dc;\n  uVar6 = _DAT_febf45d8;\n  sVar7 = _DAT_febf45d6;\n  sVar8 = _DAT_febf45d4;\n  uStack_5c = _DAT_febf45d0;\n  uStack_5a = _DAT_febf45d2;\n  uVar9 = (uint)DAT_febf45dd;\n  uStack_60 = 0;\n  puStack_58 = param_2;\n  uStack_54 = param_1;\n  uStack_50 = param_3;\n  if (DAT_febf45e1 == '\\0') {\n    if (*param_2 < 0x10000) {\n      sStack_62 = (short)*param_2;\n    }\n    else {\n      sStack_62 = -1;\n    }\n    uVar9 = func_0x0004af74(0xfebf45e4,&sStack_62);\n    sVar7 = sVar7 - sStack_62;\n    sVar8 = sVar8 + sStack_62;\n    if ((uVar9 != 0) && (uVar9 != 2)) {\n      uVar4 = func_0x000871ce(uVar9);\n    }\n    cStack_3c = '\\x01';\n  }\n  else {\n    if (DAT_febf45e1 != '\\x02') {\n      uVar9 = 1;\n      sVar8 = 0;\n      cStack_3c = '\\x01';\n      uVar6 = 0;\n      uStack_33 = DAT_febf45de;\n      uStack_3b = DAT_febf45e0;\n      goto LAB_0008745e;\n    }\n    if (uVar9 == 2) {\n      sStack_62 = _DAT_febf45d6;\n      uVar9 = func_0x0004af74(0xfebf45e4,&sStack_62);\n      sVar7 = sVar7 - sStack_62;\n      sVar8 = sVar8 + sStack_62;\n      if ((uVar9 != 0) && (uVar9 != 2)) {\n        uVar4 = func_0x000871ce(uVar9);\n      }\n    }\n    cStack_3c = cVar2;\n    if (cVar2 == '\\x02') {\n      uVar6 = 0;\n      uVar5 = func_0x000871ce(1);\n      cStack_3c = '\\x01';\n    }\n  }\n  uStack_33 = uVar4;\n  uStack_3b = uVar5;\n  if (uVar9 == 2) {\n    _DAT_febf45d0 = uStack_5c;\n    _DAT_febf45d2 = uStack_5a;\n    _DAT_febf45d4 = sVar8;\n    _DAT_febf45d6 = sVar7;\n    _DAT_febf45d8 = uVar6;\n    DAT_febf45dc = cVar1;\n    DAT_febf45dd = 2;\n    DAT_febf45de = uVar4;\n    DAT_febf45df = cStack_3c;\n    DAT_febf45e0 = uVar5;\n    DAT_febf45e1 = 2;\n    DAT_febf45e2 = uVar3;\n    DAT_febf45e3 = 10;\n    return;\n  }\nLAB_0008745e:\n  puStack_48 = &uStack_60;\n  uStack_34 = (undefined1)uVar9;\n  puStack_44 = auStack_5e;\n  uStack_30 = 0xfebf45e4;\n  uStack_38 = 0;\n  uStack_4c = uStack_54;\n  uStack_40 = uStack_50;\n  uStack_3a = uVar6;\n  sStack_32 = sVar8;\n  if (cVar1 == '\\x01') {\n    DAT_febf45e3 = func_0x000871f2();\n  }\n  else {\n    DAT_febf45e3 = func_0x00087306(&uStack_34,&cStack_3c,&uStack_4c);\n  }\n  *puStack_58 = (uint)uStack_60;\n  DAT_febf45dc = 0;\n  _DAT_febf45d0 = 0;\n  DAT_febf45e1 = 0;\n  DAT_febf45dd = 1;\n  _DAT_febf45d4 = 0;\n  _DAT_febf45d2 = 0;\n  _DAT_febf45d6 = 0x300;\n  DAT_febf45de = 0;\n  DAT_febf45df = 1;\n  _DAT_febf45d8 = 0;\n  DAT_febf45e0 = 0;\n  DAT_febf45e2 = uVar3;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "622d6820baf0ac95aae77c5b0c4ccdfc15cddf6b3577cefc9946ca3430b7c058",
+      "entry": "0x00087384",
+      "name": "FUN_00087384"
+    }
+  ],
+  "image": {
+    "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "codeflash_size": 1048576,
+    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+  },
+  "schema": "corolla-h-keyless-event-formatter-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "boundary": "six target-native functions recovered from the disposable H Ghidra project; downstream verification consumes only this compact image-bound evidence",
+    "path": "build/h_8965H1202000_keyless_event_formatter_decompilations.jsonl",
+    "sha256": "623d28ae6f7929c3829c3d6cd9b56d38f7d3ac2007ac64d60e1b2ea72260b76c"
+  }
+}

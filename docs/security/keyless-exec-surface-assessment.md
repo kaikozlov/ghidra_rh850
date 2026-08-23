@@ -16,8 +16,12 @@
 > TransferData state, RequestDownload pre-SA side effects, CTBP retention,
 > alternate credential-read engines, the 18 Corolla boot residuals, the
 > effectively-keyless application-SA surface, live-handoff DMA state, and a
-> target-native H computed-control-flow census. The conclusions remain bounded
-> to the software-visible static surface. Deterministic regressions are
+> target-native H computed-control-flow census. These are **mechanism-specific**
+> closures, not a claim that all software-visible static avenues have been
+> enumerated. Static parser/dataflow, copy-sink, state-composition, and variant-
+> specific searches remain valid work; CORR-101 records the correction after a
+> fresh re-audit found additional unaudited application transport and formatter
+> surfaces. Deterministic regressions are
 > `tests/verify_keyless_exec_surface.py`,
 > `tests/verify_keyless_boot_variant_residuals.py`, and
 > `tests/verify_keyless_live_handoff_dma.py`; the fuller Sienna no-auth control-
@@ -519,6 +523,93 @@ execution architecture is functional on all three tracked dumps**. It does not
 make a payload/key from one target portable to an arbitrary future ECU whose
 boot credentials or payload policy have changed.
 
+## 20.1 Application CanTp/DCM reassembly is bounded, but was not part of the prior closure
+
+The application has a separate diagnostic transport/reassembly stack below the
+individual UDS service handlers. That surface was not established by the
+XCP/boot mechanism audits and therefore had to be checked independently.
+
+The CanTp First-Frame parser accepts the protocol/configuration ceiling
+`CodeFlash[0x22D20] = 0x0FFF`. Three configured diagnostic TP connections route
+upper PDU IDs `0x802/0x803/0x804`. PduR then maps receive allocation/copy to
+`StartOfReception @ 0x903A8` and `CopyRxData @ 0x9043C`; the superficially
+interesting generic byte copier `0x90916` is instead below `CopyTxData @
+0x909BC` and belongs to ECU response transmission.
+
+The actual DCM receive allocation is much smaller and independently bounded:
+three fixed 256-byte slots at `FEBE5629`, `FEBE5729`, and `FEBE5829`.
+`StartOfReception` rejects a nonzero requested total length above the selected
+slot's `0x100` capacity. Every later `CopyRxData` obtains the per-slot remaining
+capacity through `0x92398` and requires `chunk_length <= remaining` before the
+copy helper `0x920D2` advances the destination and subtracts the copied length.
+The CanTp CF path at `0x79FDA` separately clips the current transport chunk to
+the remaining TP total.
+
+Thus ordinary segmented application diagnostics do not provide a pre-SID
+buffer overflow on this image. The important methodological result is that this
+was a **new static avenue**, not something implied by KEYLESS-015/016. It is
+pinned as `KEYLESS-019` by
+`tests/verify_keyless_application_diagnostic_transport.py`.
+
+## 20.2 The event snapshot formatter is structurally unchecked but configuration-safe on S/H/F
+
+A second reopened path found a real bounds asymmetry. Sienna
+`direct_call_target_00054910` appends event snapshot records by
+`3 + descriptor.length` with no capacity argument/check inside the record loop.
+Its wrapper `0x549FA` can append both retained snapshot banks and compares the
+final total against the supplied capacity only **after** those formatter calls.
+The neighboring formatter `0x54A7E`, by contrast, performs an in-loop
+`capacity < current + 3 + length` check before each callback/copy.
+
+This is not an overflow on any tracked image because the configured event masks
+bound the reachable record subsets well below the `0x300` AB staging capacity:
+
+| Image | Formatter / helper | Descriptor count | Max one bank | Conservative two-bank max | Headroom in `0x300` |
+|---|---:|---:|---:|---:|---:|
+| Sienna `8965B4512000` | `0x54910` / `0x555E8` | 75 | 207 | 414 | 354 |
+| Corolla H `8965H1202000` | `0x50038` / `0x50D10` | 78 | 202 | 404 | 364 |
+| Corolla F `8965F1208000` | H-byte-identical path | 78 | 202 | 404 | 364 |
+
+The Corolla conclusion is target-native, not inferred only from Sienna. A fresh
+H Ghidra recovery shows `0x50038` retains the unchecked append loop,
+`0x50122` retains the two-bank/post-write total check, `0x501A6` retains the
+bounded sibling, `0x50D10` selects 78 descriptors at `0x29F1C`, and the AB
+worker `0x87384` resets the staging capacity to `0x300`. H and F are
+byte-identical for these functions and descriptor/event tables.
+
+Therefore the current images are safe, but the safety is **configuration-
+dependent rather than structural**. A future or alternate calibration that
+changes event-mask membership, descriptor count/length, or staging capacity can
+invalidate the arithmetic without changing the unchecked formatter itself.
+This is `KEYLESS-020`, pinned by
+`tests/verify_keyless_application_event_formatter.py` and the compact H-native
+artifact
+`data/generated/corolla_8965H1202000_keyless_event_formatter_decompiler_evidence.json`.
+
+## 20.3 What the reopened static audit does and does not establish
+
+CORR-101 corrects the earlier analysis mistake: closing a collection of known
+compositions is not equivalent to exhausting the firmware's software-visible
+attack surface. The exploit-interest ranking itself is explicitly a candidate
+generator, not an absence proof. Its reviewed-candidate ledger covers selected
+cohorts, not every one of the 1,055 pre-SA-reachable ranked functions.
+
+The three rows that were still explicitly `open` when this re-audit began are
+now individually closed as bounded negatives: `0x539A8` is a parameterless
+fixed-state/NvM-object-`0x0E` reset helper; `0x58404` is a parameterless AUTOSAR
+OS task with a fixed caller; and `0x7C7C2` is COM-Tx maintenance called with an
+internally generated index bounded by the one-entry Tx-PDU configuration. Zero
+`open` rows in that **reviewed ledger** still does not imply that every ranked
+function or every possible cross-function composition has been manually
+reviewed.
+
+Static work therefore remains legitimate and potentially productive. New
+candidate discovery can come from previously unmodeled parser/reassembly
+layers, configuration-dependent copy/formatting paths, indirect dataflow,
+state-machine compositions, target-native variant deltas, or other software
+mechanisms. Hardware/ROM/fault evidence is an additional class of evidence, not
+a prerequisite for making further progress.
+
 ## 21. Techstream Unified recovery does not reveal a target-compatible no-SA retry
 
 The two V18 CUW rows whose prepare+flash grammar is byte-compatible with the
@@ -557,8 +648,13 @@ roots separate throughout the bootstrap documentation.
 
 ## 23. Evidence boundary
 
-This is a bounded negative static result over the software-visible surface of
-three images, not a universal impossibility proof. New boot generations,
-undocumented peripheral effects, alternate hardware routing, or physical fault
-injection can change the result. Hardware glitching is out of scope here; the
-question is a software-only keyless path.
+This is a set of bounded negative static results over **enumerated mechanisms**
+in three images, not a universal impossibility proof and not proof that the
+software-only static search is exhausted. CORR-101 is the controlling
+methodological boundary: an unmodeled software parser, copy sink, state
+composition, indirect-control chain, or target-native variant difference can
+still change the result without requiring new hardware evidence. New boot
+generations, undocumented peripheral effects, alternate hardware routing, and
+physical fault injection can also change the result, but they are not the only
+remaining research directions. Hardware glitching remains out of scope for the
+software-only question in this document.

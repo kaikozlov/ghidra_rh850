@@ -456,6 +456,23 @@ def main() -> None:
         for item in final_residue.get("surface_recensus", []):
             recensus[int(item["reference_entry"],16)].add("boot-eiint-complete-table-recensus")
 
+    keyless_event_path = REPO / "data/generated/corolla_8965H1202000_keyless_event_formatter.json"
+    if keyless_event_path.is_file():
+        keyless_event = load_json(keyless_event_path)
+        keyless_event_rel = str(keyless_event_path.relative_to(REPO))
+        evidence_file_hashes[keyless_event_rel] = sha256(keyless_event_path.read_bytes())
+        keyless_event_ev_path = REPO / keyless_event["evidence"]["decompiler_evidence"]
+        keyless_event_ev_rel = str(keyless_event_ev_path.relative_to(REPO))
+        evidence_file_hashes[keyless_event_ev_rel] = sha256(keyless_event_ev_path.read_bytes())
+        keyless_event_targets = {int(x,16) for x in keyless_event.get("target_evidence_entries", [])}
+        for item in keyless_event.get("role_closure", []):
+            ref=int(item["reference_entry"],16); target=int(item["target_entry"],16)
+            if target not in keyless_event_targets:
+                raise ValueError(f"keyless event formatter target lacks evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate keyless event formatter role recovery: {ref:#x}")
+            role_recovery[ref]={"target_entry":item["target_entry"],"report":keyless_event_rel,"evidence":keyless_event_ev_rel,"role":item["role"]}
+
     direct_call_surface_path = REPO / "data/generated/corolla_8965H1202000_direct_call_surface.json"
     if direct_call_surface_path.is_file():
         direct_call_surface = load_json(direct_call_surface_path)

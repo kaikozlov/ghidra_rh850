@@ -624,10 +624,13 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   verification gate requires every ingress-reachable top-15 cohort member to
   carry a disposition there. Rank-3 `0x00068368` is now promoted to
   SECOC-047/048 by the parallel bank-0 audit; the other fresh batch-2 reviews
-  are bounded negatives or duplicates. Remaining `open` ledger rows: `0x00058404`/`0x0007c7c2`
-  (no recovered ingress root) and `0x000539a8` (event-log cluster adjacency
-  unverified). Beyond the ledger, the remaining ranked candidates are review
-  input, not absence claims.
+  are bounded negatives or duplicates. The 2026-08-22 static re-audit also
+  closed the three formerly `open` rows (`0x00058404`, `0x000539a8`,
+  `0x0007c7c2`) with direct firmware bounds, so the reviewed ledger currently
+  has zero `open` rows. **That is a ledger statement, not a global coverage
+  statement**: ranked functions and cross-function compositions outside the
+  manually consumed cohorts remain valid review input and are not absence
+  claims (CORR-101).
 - **Cross-calibration structural triage of future P1M-E images.** The offline
   structural fingerprint scanner (`tools/analyze_rh850_codeflash_structure.py`)
   now flags boot-CRC geometry, RAM-exec/MEM-SAFE-001 package anchors, and XCP

@@ -2241,3 +2241,33 @@ paths = [
   "docs/status/FINDINGS.md",
 ]
 oracle = "cfg_dataflow"
+
+[suite.keyless_application_diagnostic_transport]
+tests = ["tests/verify_keyless_application_diagnostic_transport.py"]
+paths = [
+  "tests/verify_keyless_application_diagnostic_transport.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "data/generated/decompilations.jsonl",
+  "docs/security/keyless-exec-surface-assessment.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+]
+oracle = "cfg_dataflow"
+
+[suite.keyless_application_event_formatter]
+tests = ["tests/verify_keyless_application_event_formatter.py"]
+paths = [
+  "tests/verify_keyless_application_event_formatter.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+  "data/generated/decompilations.jsonl",
+  "data/generated/corolla_8965H1202000_keyless_event_formatter_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_keyless_event_formatter.json",
+  "tools/extract_corolla_h_keyless_event_formatter_evidence.py",
+  "tools/build_corolla_h_keyless_event_formatter.py",
+  "docs/security/keyless-exec-surface-assessment.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+]
+oracle = "cfg_dataflow"

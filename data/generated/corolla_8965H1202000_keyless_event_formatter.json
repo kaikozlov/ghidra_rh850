@@ -1,0 +1,105 @@
+{
+  "bounds": {
+    "corolla_f": {
+      "conservative_two_bank_max": 404,
+      "descriptor_base": "0x00029F1C",
+      "descriptor_count": 78,
+      "event_map_base": "0x0002A770",
+      "event_map_slots": 64,
+      "headroom": 364,
+      "max_event_id": 8204,
+      "max_event_mask": 1,
+      "max_one_bank": 202,
+      "max_selected_count": 39,
+      "staging_capacity": 768
+    },
+    "corolla_h": {
+      "conservative_two_bank_max": 404,
+      "descriptor_base": "0x00029F1C",
+      "descriptor_count": 78,
+      "event_map_base": "0x0002A770",
+      "event_map_slots": 64,
+      "headroom": 364,
+      "max_event_id": 8204,
+      "max_event_mask": 1,
+      "max_one_bank": 202,
+      "max_selected_count": 39,
+      "staging_capacity": 768
+    },
+    "sienna": {
+      "conservative_two_bank_max": 414,
+      "descriptor_base": "0x0002A504",
+      "descriptor_count": 75,
+      "event_map_base": "0x0002AD10",
+      "event_map_slots": 64,
+      "headroom": 354,
+      "max_event_id": 8204,
+      "max_event_mask": 1,
+      "max_one_bank": 207,
+      "max_selected_count": 40,
+      "staging_capacity": 768
+    }
+  },
+  "evidence": {
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_keyless_event_formatter_decompiler_evidence.json",
+    "decompiler_evidence_sha256": "be45c7a613434a9c6c9ec9c4b21606a043df099f2221cf23da7c263e80eea3d4"
+  },
+  "h_f_equivalence": {
+    "ab_worker": true,
+    "bounded_sibling": true,
+    "descriptor_table": true,
+    "event_map": true,
+    "formatter": true,
+    "wrapper": true
+  },
+  "images": {
+    "f_sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+    "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+  },
+  "role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00054910",
+      "reference_name": "direct_call_target_00054910",
+      "role": "unchecked-event-snapshot-formatter",
+      "target_entry": "0x00050038"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x000549FA",
+      "reference_name": "direct_call_target_000549fa",
+      "role": "two-bank-event-snapshot-wrapper",
+      "target_entry": "0x00050122"
+    },
+    {
+      "classification": "target-native-role-recovered",
+      "reference_entry": "0x00054A7E",
+      "reference_name": "direct_call_target_00054a7e",
+      "role": "bounded-event-detail-formatter-sibling",
+      "target_entry": "0x000501A6"
+    }
+  ],
+  "role_closure_count": 3,
+  "schema": "corolla-h-keyless-event-formatter-v1",
+  "software_id": "8965H1202000",
+  "static_conclusion": {
+    "boundary": "Current S/H/F event masks bound reachable output inside the 0x300 staging area. The inner formatter itself has no capacity check, so this is a portability-sensitive configuration bound, not a structural memory-safety proof and not a global static-attack absence claim.",
+    "configuration_dependent_safety": true,
+    "structural_in_loop_capacity_check": false,
+    "tracked_images_overflow": false
+  },
+  "supporting_target_entries": [
+    "0x0005031A",
+    "0x00050D10",
+    "0x00087384"
+  ],
+  "target_evidence_entries": [
+    "0x00050038",
+    "0x00050122",
+    "0x000501A6",
+    "0x0005031A",
+    "0x00050D10",
+    "0x00087384"
+  ]
+}

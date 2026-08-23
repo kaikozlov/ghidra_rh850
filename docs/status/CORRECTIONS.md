@@ -2439,3 +2439,33 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   §4.2.2–§4.2.3; VAR-048;
   `tests/verify_spanconstant_low_calibration_delta.py`;
   `data/generated/corolla_8965F1208000_low_calibration_delta.json`.
+
+### CORR-101 — mechanism-specific keyless closures do not exhaust software-visible static work
+
+- **Overstatement:** after KEYLESS-015..018, the analysis was summarized as if
+  further progress necessarily required a new firmware generation,
+  undocumented hardware/ROM behavior, runtime-only corruption, or physical
+  fault/debug evidence.
+- **Right:** those findings close only the mechanisms they actually enumerate.
+  They do not prove that every parser, copy sink, state-machine composition,
+  indirect-control path, or target-native variant delta has been statically
+  reviewed. The exploit-interest ranking is itself explicitly a candidate
+  generator rather than an absence proof.
+- **Fresh counterexample to the methodology:** reopening the software-only
+  search immediately exposed two previously unpinned application surfaces.
+  CanTp accepts First-Frame totals up to `0x0FFF`, but DCM independently bounds
+  the three receive buffers to 256 bytes and checks every segmented copy
+  (KEYLESS-019). The event snapshot formatter `0x54910` / Corolla `0x50038`
+  has no in-loop capacity check; its current event-mask configuration keeps the
+  reachable two-bank output at 414 bytes on Sienna and 404 bytes on H/F versus
+  a 768-byte staging area (KEYLESS-020). The latter is configuration-safe, not
+  structurally safe.
+- **Reviewed-ledger cleanup:** the three rows that were still explicitly
+  `open` (`0x539A8`, `0x58404`, `0x7C7C2`) now have direct bounded-negative
+  firmware explanations. Zero `open` rows in that curated ledger remains a
+  statement about reviewed rows only, not global static coverage.
+- **Canonical:**
+  [../security/keyless-exec-surface-assessment.md](../security/keyless-exec-surface-assessment.md)
+  §§20.1–20.3; `tests/verify_keyless_application_diagnostic_transport.py`;
+  `tests/verify_keyless_application_event_formatter.py`;
+  `tests/verify_exploit_interest_reviewed_candidates.py`.
