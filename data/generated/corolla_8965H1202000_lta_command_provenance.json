@@ -156,8 +156,9 @@
     }
   },
   "corpus": {
-    "path": "build/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
-    "sha256": "98fbd903f71165a433cb01dbb2e17bf3471824881760e6420d65ecef9f4f8dfa"
+    "binding": "semantic-projection",
+    "boundary": "The disposable whole-image decompiler corpus is an analysis workspace input, not a canonical tracked artifact. Exact regeneration is bound to the corpus-derived occurrence/write/API facts emitted below and to compact raw-body evidence, not to the byte hash of unrelated decompiler output.",
+    "path": "build/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
   },
   "d7_hidden_payload_census": {
     "boundary": "D7 has 28 authenticated application bytes; recovered scalar IDs are 240/243/246. Configured nonscalar IDs 241/242/244/245/247 are absent from every literal block/group receive call; no full-PDU copy uses PDU40; and the D7 COM buffer base has no raw absolute pointer literal. Techstream independently identifies scalar243 as CAN Vehicle Speed (SP1).",
@@ -528,7 +529,7 @@
       "source": "0xFEBEC26D"
     }
   },
-  "schema": "corolla-8965H1202000-lta-command-provenance-v1",
+  "schema": "corolla-8965H1202000-lta-command-provenance-v2",
   "shared_can025_sensor_ingress": {
     "boundary": "The public DBC is corroboration rather than sole naming evidence: target-native H arithmetic independently distinguishes angle+fraction and rate semantics. This closes the adversarial possibility that an unchanged-shape large scalar was silently repurposed as the missing LTA command.",
     "can_id": "0x025",

@@ -417,13 +417,21 @@ def main() -> int:
     }
 
     out = {
-        "schema": "corolla-8965H1202000-lta-command-provenance-v1",
+        "schema": "corolla-8965H1202000-lta-command-provenance-v2",
         "software_id": "8965H1202000",
         "images": {
             "corolla_h": {"path": str(H_IMAGE.relative_to(REPO)), "sha256": sha(h), "size": len(h)},
             "sienna_reference": {"path": str(S_IMAGE.relative_to(REPO)), "sha256": sha(s), "size": len(s)},
         },
-        "corpus": {"path": str(H_CORPUS.relative_to(REPO)), "sha256": sha(H_CORPUS.read_bytes())},
+        "corpus": {
+            "path": str(H_CORPUS.relative_to(REPO)),
+            "binding": "semantic-projection",
+            "boundary": (
+                "The disposable whole-image decompiler corpus is an analysis workspace input, not a canonical tracked artifact. "
+                "Exact regeneration is bound to the corpus-derived occurrence/write/API facts emitted below and to compact raw-body evidence, "
+                "not to the byte hash of unrelated decompiler output."
+            ),
+        },
         "evidence": {"path": str(EVIDENCE.relative_to(REPO)), "sha256": sha(EVIDENCE.read_bytes()), "function_count": ev["function_count"]},
         "supporting_inputs": {
             "supervisor_external_ingress_census": {"path": str(SUPERVISOR.relative_to(REPO)), "sha256": sha(SUPERVISOR.read_bytes())},

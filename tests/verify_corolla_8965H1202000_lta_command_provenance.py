@@ -38,6 +38,7 @@ image = IMAGE.read_bytes()
 print("\n== evidence identity ==")
 check("report is exact H image-bound", d["software_id"] == "8965H1202000" and d["images"]["corolla_h"]["sha256"] == hashlib.sha256(image).hexdigest())
 check("36 target-native functions support provenance closure", e["function_count"] == 36)
+check("LTA report uses scope-stable corpus provenance", d["schema"] == "corolla-8965H1202000-lta-command-provenance-v2" and d["corpus"].get("binding") == "semantic-projection" and "sha256" not in d["corpus"])
 for row in e["functions"]:
     start = int(row["entry"], 16); size = row["body_size"]
     check(f"raw body hash {row['entry']}", hashlib.sha256(image[start:start+size]).hexdigest() == row["body_sha256"])
