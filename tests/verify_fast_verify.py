@@ -54,12 +54,22 @@ for required in (
     check(f"required claim gate is owned: {required}", len(ownership.get(required, [])) == 1)
 
 default_oracle = manifest["verification"]["default_oracle"]
+default_modes = manifest["verification"]["default_modes"]
 check("manifest default oracle is valid", default_oracle in ALLOWED_ORACLES)
+check("manifest default modes define core/full/local tiers", default_modes == ["core", "full", "local"])
+check("all explicit suite modes are known",
+      all(set(entry.get("modes", default_modes)) <= {"core", "full", "local"}
+          for entry in suites.values()))
 check("all suite oracle classifications are valid",
       all(entry.get("oracle", default_oracle) in ALLOWED_ORACLES for entry in suites.values()))
 external_names = set(manifest.get("external", {}))
 check("every external requirement resolves to manifest metadata",
       all(set(entry.get("requires_external", [])) <= external_names for entry in suites.values()))
+check("external-backed suites are local-only",
+      all(entry.get("modes") == ["local"]
+          for entry in suites.values() if entry.get("requires_external")))
+check("exhaustive Corolla DataFlash scan is outside the edit-loop core",
+      suites["albinoelephant_corolla_dataflash"].get("modes") == ["full", "local"])
 manifest_paths = [
     (suite_name, kind, value)
     for suite_name, entry in suites.items()
@@ -100,6 +110,7 @@ makefile = MAKEFILE.read_text(encoding="utf-8")
 check("Makefile has no duplicate VERIFY_SUITES manifest", "VERIFY_SUITES" not in makefile)
 for target, mode in (
     ("verify-core", "--core"),
+    ("verify-full", "--full"),
     ("verify-local", "--local"),
     ("verify-changed", "--changed"),
     ("verify-agent", "--agent"),
@@ -132,12 +143,27 @@ with tempfile.TemporaryDirectory(prefix="verify-runner-") as directory:
         "raise SystemExit(77)\n",
         encoding="utf-8",
     )
+    (root / "tests/portable_env.py").write_text(
+        "import os\n"
+        "ok = os.environ.get('RH850_VERIFY_EXTERNAL') == '0'\n"
+        "print(('[PASS]' if ok else '[FAIL]') + '[raw_bytes] portable external flag')\n"
+        "raise SystemExit(0 if ok else 1)\n",
+        encoding="utf-8",
+    )
+    (root / "tests/local_env.py").write_text(
+        "import os\n"
+        "ok = os.environ.get('RH850_VERIFY_EXTERNAL') == '1'\n"
+        "print(('[PASS]' if ok else '[FAIL]') + '[raw_bytes] local external flag')\n"
+        "raise SystemExit(0 if ok else 1)\n",
+        encoding="utf-8",
+    )
     synthetic_manifest = root / "verification.toml"
     synthetic_manifest.write_text(
         """[verification]
 default_oracle = "raw_bytes"
 skip_exit_code = 77
 gate_glob = "tests/*.py"
+default_modes = ["core", "full", "local"]
 
 [external.techstream_v18]
 path = "missing-techstream"
@@ -163,16 +189,30 @@ paths = ["tests/printed_fail.py"]
 oracle = "raw_bytes"
 modes = []
 
+[suite.portable_env]
+tests = ["tests/portable_env.py"]
+paths = ["tests/portable_env.py"]
+modes = ["core", "full"]
+oracle = "raw_bytes"
+
+[suite.local_env]
+tests = ["tests/local_env.py"]
+paths = ["tests/local_env.py"]
+modes = ["local"]
+oracle = "raw_bytes"
+
 [suite.external]
 tests = ["tests/pass.py"]
 paths = ["external/"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "raw_bytes"
 
 [suite.external_late_skip]
 tests = ["tests/late_skip.py"]
 paths = ["external/"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "independent_external_artifact"
 """,
         encoding="utf-8",
@@ -187,8 +227,15 @@ oracle = "independent_external_artifact"
 
     core_missing = run("--core")
     check("repository-only mode succeeds with absent optional source", core_missing.returncode == 0)
-    check("absent external source is a skip, not a pass",
-          "[SKIP] external" in core_missing.stdout and "2 skipped" in core_missing.stdout)
+    check("core excludes external-backed suites instead of probing local state",
+          "external:" not in core_missing.stdout and "0 skipped" in core_missing.stdout)
+    full_missing = run("--full")
+    check("portable full mode also excludes external-backed suites",
+          full_missing.returncode == 0
+          and "external:" not in full_missing.stdout and "0 skipped" in full_missing.stdout)
+    check("core/full children explicitly disable opportunistic external reads",
+          "[PASS] portable_env: tests/portable_env.py" in core_missing.stdout
+          and "[PASS] portable_env: tests/portable_env.py" in full_missing.stdout)
 
     required_missing = run("--required-external")
     check("required-external mode fails for the same missing source",
@@ -197,29 +244,38 @@ oracle = "independent_external_artifact"
 
     external_root = root / "pinned-techstream"
     external_root.mkdir()
-    local_present = run("--agent", "--external-root", str(external_root))
-    summary = json.loads(local_present.stdout)
-    external_result = next(item for item in summary["results"] if item["suite"] == "external")
-    late_skip_result = next(
-        item for item in summary["results"] if item["suite"] == "external_late_skip"
-    )
-    identity_result = next(item for item in summary["results"] if item["suite"] == "identity")
+    local_present = run("--local", "--external-root", str(external_root))
     check("available local source executes and passes",
-          local_present.returncode == 0 and external_result["status"] == "pass"
-          and late_skip_result["status"] == "skip")
-    check("available source reports nonzero raw assertions",
-          external_result["assertions"]["passed"].get("raw_bytes", 0) > 0)
+          local_present.returncode == 0
+          and "[PASS] external: tests/pass.py" in local_present.stdout
+          and "[SKIP] external_late_skip: tests/late_skip.py" in local_present.stdout)
+    check("local children explicitly enable opportunistic external reads",
+          "[PASS] local_env: tests/local_env.py" in local_present.stdout)
+
+    agent_core = run("--agent", "--external-root", str(external_root))
+    summary = json.loads(agent_core.stdout)
+    core_result = next(item for item in summary["results"] if item["suite"] == "core")
+    identity_result = next(item for item in summary["results"] if item["suite"] == "identity")
+    check("agent mode is compact core, not the expensive local superset",
+          agent_core.returncode == 0 and summary["mode"] == "core"
+          and all(item["suite"] not in {"external", "external_late_skip"}
+                  for item in summary["results"]))
+    check("core agent summary reports nonzero raw assertions",
+          core_result["assertions"]["passed"].get("raw_bytes", 0) > 0)
     check("identity hashes are counted separately",
           summary["assertions"]["passed_by_oracle"]["identity_hash"] > 0)
     check("identity-only suite cannot claim semantic verification",
           identity_result["semantic_status"] == "not_semantic")
     check("raw-byte suite can claim semantic verification",
-          external_result["semantic_status"] == "verified")
+          core_result["semantic_status"] == "verified")
     check("aggregate retains each suite's declared default oracle",
-          external_result["oracle"] == "raw_bytes"
+          core_result["oracle"] == "raw_bytes"
           and identity_result["oracle"] == "identity_hash")
     check("aggregate lists pass/fail/skip separately",
           all(key in summary for key in ("passed", "failed", "skipped")))
+    check("aggregate reports per-test execution durations",
+          "test_duration_seconds" in summary
+          and all("duration_seconds" in item for item in summary["results"]))
 
     legacy = run("--suite", "legacy")
     check("legacy PASS: assertions are counted with the declared oracle",

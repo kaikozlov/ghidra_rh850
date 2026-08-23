@@ -13,6 +13,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 import tomllib
 from collections import Counter
 from pathlib import Path
@@ -85,7 +86,9 @@ def assertion_counts(output: str, default_oracle: str) -> tuple[dict, dict]:
 
 def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
              *, require_external: bool = False,
-             external_root: Path | None = None) -> dict:
+             external_root: Path | None = None,
+             allow_optional_external: bool = False) -> dict:
+    started = time.monotonic()
     full = root / test_path
     default_oracle = entry.get(
         "oracle", manifest.get("verification", {}).get("default_oracle", "raw_bytes")
@@ -104,6 +107,7 @@ def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
             "oracle": default_oracle,
             "assertions": {"passed": {}, "failed": {}},
             "semantic_status": "not_executed",
+            "duration_seconds": round(time.monotonic() - started, 3),
         }
     if not full.is_file():
         return {
@@ -114,14 +118,18 @@ def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
             "oracle": default_oracle,
             "assertions": {"passed": {}, "failed": {}},
             "semantic_status": "not_executed",
+            "duration_seconds": round(time.monotonic() - started, 3),
         }
 
+    child_env = dict(os.environ)
+    child_env["RH850_VERIFY_EXTERNAL"] = "1" if allow_optional_external else "0"
     try:
         proc = subprocess.run(
             [sys.executable, str(full), *entry.get("args", [])],
             capture_output=True,
             text=True,
             cwd=root,
+            env=child_env,
             timeout=entry.get("timeout", 300),
         )
         exit_code = proc.returncode
@@ -158,6 +166,7 @@ def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
             "oracle": default_oracle,
             "assertions": {"passed": passed, "failed": failed},
             "semantic_status": semantic_status,
+            "duration_seconds": round(time.monotonic() - started, 3),
         }
     except subprocess.TimeoutExpired as error:
         return {
@@ -170,6 +179,7 @@ def run_test(root: Path, test_path: str, entry: dict, manifest: dict,
             "stderr": error.stderr or "",
             "assertions": {"passed": {}, "failed": {}},
             "semantic_status": "not_executed",
+            "duration_seconds": round(time.monotonic() - started, 3),
         }
 
 
@@ -200,9 +210,12 @@ def selected_suites(manifest: dict, mode: str) -> list[str]:
     suites = manifest.get("suite", {})
     if mode == "required-external":
         return sorted(name for name, entry in suites.items() if entry.get("requires_external"))
+    default_modes = manifest.get("verification", {}).get(
+        "default_modes", ["core", "full", "local"]
+    )
     return sorted(
         name for name, entry in suites.items()
-        if mode in entry.get("modes", ["core", "local"])
+        if mode in entry.get("modes", default_modes)
     )
 
 
@@ -219,6 +232,7 @@ def summarize(results: list[dict], mode: str) -> dict:
         "passed": statuses["pass"],
         "failed": statuses["fail"],
         "skipped": statuses["skip"],
+        "test_duration_seconds": round(sum(item.get("duration_seconds", 0.0) for item in results), 3),
         "assertions": {
             "passed_by_oracle": {name: oracle_passed[name] for name in sorted(ORACLE_CLASSES)},
             "failed_by_oracle": {name: oracle_failed[name] for name in sorted(ORACLE_CLASSES)},
@@ -230,6 +244,7 @@ def summarize(results: list[dict], mode: str) -> dict:
                 "status": item["status"],
                 "oracle": item["oracle"],
                 "semantic_status": item["semantic_status"],
+                "duration_seconds": item.get("duration_seconds", 0.0),
                 "assertions": item["assertions"],
                 **({"detail": item["detail"]} if item.get("detail") else {}),
             }
@@ -241,7 +256,9 @@ def summarize(results: list[dict], mode: str) -> dict:
 def execute_suites(root: Path, manifest: dict, suite_names: list[str], *,
                    mode: str, require_external: bool = False,
                    external_root: Path | None = None,
-                   out_dir: Path | None = None, compact: bool = False) -> int:
+                   out_dir: Path | None = None, compact: bool = False,
+                   allow_optional_external: bool = False) -> int:
+    started = time.monotonic()
     results = []
     suites = manifest.get("suite", {})
     for suite_name in suite_names:
@@ -251,6 +268,7 @@ def execute_suites(root: Path, manifest: dict, suite_names: list[str], *,
                 root, test, entry, manifest,
                 require_external=require_external,
                 external_root=external_root,
+                allow_optional_external=allow_optional_external,
             )
             result["suite"] = suite_name
             results.append(result)
@@ -265,13 +283,22 @@ def execute_suites(root: Path, manifest: dict, suite_names: list[str], *,
     if compact:
         print(json.dumps(summary, indent=2))
     else:
+        wall_seconds = time.monotonic() - started
         print(
             f"\nSummary: {summary['passed']} passed, {summary['failed']} failed, "
-            f"{summary['skipped']} skipped"
+            f"{summary['skipped']} skipped in {wall_seconds:.2f}s"
         )
         print("Assertion passes by oracle: " + json.dumps(
             summary["assertions"]["passed_by_oracle"], sort_keys=True
         ))
+        slow = sorted(results, key=lambda item: item.get("duration_seconds", 0.0), reverse=True)
+        slow = [item for item in slow[:5] if item.get("duration_seconds", 0.0) >= 1.0]
+        if slow:
+            print("Slowest tests:")
+            for item in slow:
+                print(
+                    f"  {item['duration_seconds']:.2f}s  {item['suite']}: {item['test']}"
+                )
     for result in results:
         if result["status"] == "fail":
             print_failure(result)
@@ -301,6 +328,7 @@ def main() -> int:
     group.add_argument("--suite")
     group.add_argument("--changed", action="store_true")
     group.add_argument("--core", action="store_true")
+    group.add_argument("--full", action="store_true")
     group.add_argument("--local", action="store_true")
     group.add_argument("--required-external", action="store_true")
     group.add_argument("--agent", action="store_true")
@@ -355,14 +383,16 @@ def main() -> int:
             print(f"Required external prerequisite missing: {detail}", file=sys.stderr)
             return 1
     elif args.agent:
-        names, mode, required, compact = selected_suites(manifest, "local"), "local", False, True
+        names, mode, required, compact = selected_suites(manifest, "core"), "core", False, True
     else:
-        mode = "core" if args.core else "local"
+        mode = "core" if args.core else "full" if args.full else "local"
         names, required, compact = selected_suites(manifest, mode), False, False
 
+    allow_optional_external = mode in {"local", "required-external"}
     return execute_suites(
         root, manifest, names, mode=mode, require_external=required,
         external_root=args.external_root, out_dir=args.out_dir, compact=compact,
+        allow_optional_external=allow_optional_external,
     )
 
 

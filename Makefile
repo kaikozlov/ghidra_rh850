@@ -15,7 +15,7 @@ SNAPSHOT_DIR ?= $(CURDIR)/project
 override PROJECT_INVENTORY := $(BUILD_OUT)/ghidra_project_inventory.jsonl
 override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.baseline.jsonl
 
-.PHONY: sync verify verify-core verify-local verify-one verify-changed verify-agent verify-exploit verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
+.PHONY: sync verify verify-core verify-full verify-local verify-one verify-changed verify-agent verify-exploit verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
 	ghidra-cli \
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
@@ -47,6 +47,11 @@ verify: verify-core
 verify-core:
 	$(PYTHON) tools/fast_verify.py --core
 
+# Exhaustive portable gate: all tracked repository evidence, no ignored/external corpora.
+verify-full:
+	$(PYTHON) tools/fast_verify.py --full
+
+# Local superset: portable full + available proprietary/external + live-project suites.
 verify-local:
 	$(PYTHON) tools/fast_verify.py --local
 
@@ -93,7 +98,7 @@ verify-processor:
 verify-semantic-coverage-live:
 	$(PYTHON) tests/verify_semantic_coverage_live.py --project-dir "$(PROJECT_DIR)"
 
-verify-ghidra: verify-core verify-sleigh verify-processor verify-semantic-coverage-live verify-project-parity
+verify-ghidra: verify-full verify-sleigh verify-processor verify-semantic-coverage-live verify-project-parity
 
 generate-dataflash:
 	$(PYTHON) tools/generate_dataflash_layout.py

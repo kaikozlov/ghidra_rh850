@@ -82,7 +82,8 @@ TECHSTREAM_ROOT = Path(os.environ.get(
     REPO / "Techstream" / "unpacked" / "toyota" / "Toyota Diagnostics"
     / "Techstream",
 ))
-HAS_TECHSTREAM_SOURCE = all(
+ALLOW_EXTERNAL = os.environ.get("RH850_VERIFY_EXTERNAL") == "1"
+HAS_TECHSTREAM_SOURCE = ALLOW_EXTERNAL and all(
     (TECHSTREAM_ROOT / region / "DB" / filename).is_file()
     for region, filename in (
         ("NA", "EPS_P4DK3.ddb"),

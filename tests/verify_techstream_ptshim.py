@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import sys
 from pathlib import Path
 
@@ -72,7 +73,9 @@ check("v05 receive extra data boundary recovered",
 print("\n== pinned shim binaries ==")
 v4_path = BIN / "ptshim32.dll"
 v5_path = BIN / "ptshim32_0500.dll"
-if not v4_path.exists() or not v5_path.exists() or not J2534_CTRL.exists():
+if os.environ.get("RH850_VERIFY_EXTERNAL") != "1":
+    print("SKIP: optional ignored Techstream binary checks are disabled for portable verification")
+elif not v4_path.exists() or not v5_path.exists() or not J2534_CTRL.exists():
     print("SKIP: ignored Techstream tree is not present; parser fixtures still verified")
 else:
     expected_files = {

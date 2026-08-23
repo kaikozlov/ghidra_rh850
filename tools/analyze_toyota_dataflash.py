@@ -416,15 +416,18 @@ def grouped_protected(samples: list[ProtectedSample]) -> dict[int, list[Protecte
 
 def candidate_passes_any_probe(
     key: bytes,
-    sync_samples: list[SyncSample],
-    protected_samples: list[ProtectedSample],
+    sync_probe: SyncSample | None,
+    protected_probes: tuple[ProtectedSample, ...],
 ) -> bool:
-    if sync_samples and verify_sync_sample(key, sync_samples[0]):
+    """Cheaply reject a key before the full capture verification.
+
+    Probe selection is invariant across candidate keys.  Keep the selected
+    samples outside the sliding-window loop so a large capture is not regrouped
+    tens of thousands of times during an exhaustive DataFlash scan.
+    """
+    if sync_probe is not None and verify_sync_sample(key, sync_probe):
         return True
-    for samples in grouped_protected(protected_samples).values():
-        if samples and verify_protected_sample(key, samples[0])[0]:
-            return True
-    return False
+    return any(verify_protected_sample(key, sample)[0] for sample in protected_probes)
 
 
 def scan_key_domains(
@@ -439,9 +442,15 @@ def scan_key_domains(
 ) -> dict[str, object]:
     matches = []
     candidates_tested = 0
+    sync_probe = sync_samples[0] if sync_samples else None
+    protected_probes = tuple(
+        samples[0]
+        for samples in grouped_protected(protected_samples).values()
+        if samples
+    )
     for offset, key, h in iter_key_windows(dump, min_entropy=min_entropy):
         candidates_tested += 1
-        if not candidate_passes_any_probe(key, sync_samples, protected_samples):
+        if not candidate_passes_any_probe(key, sync_probe, protected_probes):
             continue
         verification = verify_key(key, sync_samples, protected_samples)
         classification = classify_verification(

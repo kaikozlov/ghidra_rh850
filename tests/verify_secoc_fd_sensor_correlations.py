@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Verify protected CAN-FD sensor correlations against committed evidence."""
 from __future__ import annotations
-import importlib.util, json, struct
+import importlib.util, json, os, struct
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 ART=ROOT/'data/generated/techstream_v18/secoc_fd_sensor_correlations.json'
@@ -41,12 +41,12 @@ check('firmware contains BC484 raw-clamp constant',struct.unpack_from('<H',FW,0x
 
 # If proprietary V18 inputs are locally available, regenerate in memory and demand exact artifact equality.
 tech=ROOT/'Techstream/unpacked/toyota/Toyota Diagnostics/Techstream'
-if tech.is_dir():
+if os.environ.get("RH850_VERIFY_EXTERNAL") == "1" and tech.is_dir():
  spec=importlib.util.spec_from_file_location('fdcorr',ROOT/'tools/techstream/extract_secoc_fd_sensor_correlations.py')
  mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
  check('artifact deterministically regenerates from pinned V18 tree',mod.build()==d)
 else:
- print('[SKIP] pinned Techstream V18 tree unavailable')
+ print('[SKIP] optional pinned Techstream V18 regeneration disabled or unavailable')
 
 print(f'\nSummary: {passed} passed, {failed} failed')
 raise SystemExit(1 if failed else 0)

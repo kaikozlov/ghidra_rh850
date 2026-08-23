@@ -32,9 +32,9 @@ Processor audits: [tooling/processor-module-audit.md](tooling/processor-module-a
 ## Build workspace contract
 
 `build/` is ignored **workspace state**, not a source of repository truth. A
-clean clone must be able to run `make verify` without any pre-existing build
-files. If a deterministic/core verifier needs bytes or compact facts, promote
-them to a tracked location (`community/`, `data/`, `exploit/.../audited/`, etc.)
+clean clone must be able to run `make verify` and `make verify-full` without any
+pre-existing build files. If a deterministic/core verifier needs bytes or compact
+facts, promote them to a tracked location (`community/`, `data/`, `exploit/.../audited/`, etc.)
 and bind their provenance there instead of reading an ignored file.
 
 Only five top-level namespaces are valid:
@@ -220,27 +220,47 @@ pointers and collapses disassembly.
 ## Verification
 
 ```bash
-uv sync --locked             # one-time
-make verify                  # repository/core gate; unavailable external suites SKIP
-make verify-changed          # suites owning the current git diff
-make verify-local            # every locally available manifest suite
-make verify-required-external # require the pinned Techstream V18 corpus
-make verify-agent            # compact JSON, including pass/fail/skip and oracle counts
-make verify-sleigh           # SLEIGH compile + isolated install
-make verify-processor        # fixtures + working-project audits
-make verify-project-parity # exact working-project inventory vs baseline
-make verify-ghidra           # core + Ghidra gates
+uv sync --locked              # one-time
+make verify                   # fast tracked-only edit-loop gate
+make verify-full              # exhaustive portable/tracked-repository gate
+make verify-changed           # suites owning the current git diff, regardless of tier
+make verify-local             # full + available proprietary/external + live-project suites
+make verify-required-external # require every pinned external prerequisite
+make verify-agent             # fast core as compact JSON with timings/oracle counts
+make verify-sleigh            # SLEIGH compile + isolated install
+make verify-processor         # fixtures + working-project audits
+make verify-project-parity    # exact working-project inventory vs baseline
+make verify-ghidra            # portable full + Ghidra gates
 ```
 
 `verification.toml` is the sole suite manifest. It owns each
-`tests/verify_*.py` gate exactly once, records changed-file routing and external
-prerequisites, and assigns the default evidence-oracle class. The runner uses
-exit code 77 for an unavailable optional artifact; required-external mode turns
-that same absence into a concise failure. Its machine summary keeps
-`identity_hash`, `documentation_lint`, and `generated_self_check` counts
-separate from `raw_bytes`, `instruction_semantics`, `cfg_dataflow`,
-`dynamic_trace`, and `independent_external_artifact`, so a drift or report-only
-gate cannot be reported as semantic verification.
+`tests/verify_*.py` gate exactly once, records changed-file routing, suite tier,
+external prerequisites, and the default evidence-oracle class. Suites without
+an explicit `modes` entry are in `core`, `full`, and `local`. Expensive but fully
+tracked exhaustive checks can be `full`/`local`; suites backed by ignored or
+proprietary corpora are `local` only. `--required-external` selects every suite
+with a declared external prerequisite independently of tier.
+
+The core and full modes deliberately set `RH850_VERIFY_EXTERNAL=0` in verifier
+children. This prevents a nominally portable gate from silently doing extra work
+just because `Techstream/unpacked/` or another ignored corpus happens to exist on
+one developer machine. Local and required-external modes enable those optional
+raw-source cross-checks. Exit code 77 remains the explicit artifact-level skip
+code; required-external mode turns the same absence into a concise failure.
+Runner summaries keep pass/fail/skip separate, report assertion counts by
+evidence oracle, and print the slowest test durations.
+
+The edit-loop tier is intentionally broad but not exhaustive. In particular, the
+32-KiB Corolla DataFlash all-window cryptographic domain scan remains in
+`full`/`local`: it tests 23,277 unique 16-byte candidates and is valuable evidence,
+but recomputing millions of CMAC probes after unrelated edits is not useful.
+`make verify-changed` still routes directly to that suite when its owned inputs or
+verifier change, so tiering does not hide relevant failures during focused work.
+
+The machine summary keeps `identity_hash`, `documentation_lint`, and
+`generated_self_check` counts separate from `raw_bytes`, `instruction_semantics`,
+`cfg_dataflow`, `dynamic_trace`, and `independent_external_artifact`, so a drift or
+report-only gate cannot be reported as semantic verification.
 
 Optional checks against pinned public repositories remain separate:
 
@@ -365,12 +385,12 @@ Rows that remain `reviewed_unknown` carry no evidence grade.
 
 ## CI
 
-CI (`.github/workflows/ci.yml`) always runs `make verify`. Processor-path
-changes run SLEIGH, synthetic fixtures, and committed-project audits on macOS
-with pinned Ghidra 12.1.3 / ghidra CLI 0.2.1. The 12.1.2 -> 12.1.3 migration
-was verified by two independent clean rebuilds and changed no canonical semantic
-record; see [the migration journal](history/2026-08/GHIDRA_12_1_3_MIGRATION_2026-08-22.md).
-Processor, script, and snapshot
-changes — plus `main`, manual, and nightly runs — execute the full four-stage
-rebuild (plus convention finalizer), project invariants, and exact normalized
-inventory comparison, then upload the generated inventory and audit artifacts.
+CI (`.github/workflows/ci.yml`) always runs `make verify-full`, so moving a slow
+portable check out of the edit-loop core does not reduce CI evidence coverage.
+Processor-path changes run SLEIGH, synthetic fixtures, and committed-project
+audits on macOS with pinned Ghidra 12.1.3 / ghidra CLI 0.2.1. Processor, script,
+and snapshot changes — plus `main`, manual, and nightly runs — execute the full
+four-stage rebuild (plus convention finalizer), project invariants, and exact
+normalized inventory comparison. The 12.1.2 -> 12.1.3 migration was verified by
+two independent clean rebuilds and changed no canonical semantic record; see
+[the migration journal](history/2026-08/GHIDRA_12_1_3_MIGRATION_2026-08-22.md).

@@ -11,6 +11,7 @@
 default_oracle = "raw_bytes"
 skip_exit_code = 77
 gate_glob = "tests/verify_*.py"
+default_modes = ["core", "full", "local"]
 
 [external.techstream_v18]
 path = "Techstream/unpacked/toyota/Toyota Diagnostics"
@@ -618,6 +619,7 @@ paths = [
 [suite.application_interface_correlation]
 tests = ["tests/verify_application_interface_correlations.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "instruction_semantics"
 paths = [
   "tools/techstream/extract_application_interface_correlations.py",
@@ -634,6 +636,7 @@ paths = [
 [suite.corolla_8965h_techstream_correlations]
 tests = ["tests/verify_corolla_8965H1202000_techstream_correlations.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "raw_bytes"
 paths = [
   "tests/verify_corolla_8965H1202000_techstream_correlations.py",
@@ -1086,6 +1089,7 @@ paths = [
 tests = ["tests/verify_techstream_rks.py"]
 paths = ["docs/tooling/techstream.md", "techstream.lock.json"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "cfg_dataflow"
 # External-tree suite: verifies TMS-009 (CUW RKS / two-layer reflash
 # authorization). SKIPs cleanly (exit 0) when the gitignored Techstream/
@@ -1101,6 +1105,7 @@ paths = ["docs/tooling/techstream.md", "tools/techstream/parse_ptshim_log.py", "
 [suite.techstream_ddb_residuals]
 tests = ["tests/verify_techstream_ddb_residuals.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "raw_bytes"
 paths = [
   "docs/tooling/techstream.md",
@@ -1116,6 +1121,7 @@ paths = [
 [suite.techstream_master_routes]
 tests = ["tests/verify_techstream_master_routes.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "raw_bytes"
 paths = [
   "tools/techstream/parse_ddb.py",
@@ -1128,6 +1134,7 @@ paths = [
 [suite.techstream_priority_ddb_semantics]
 tests = ["tests/verify_techstream_priority_ddb_semantics.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "instruction_semantics"
 paths = [
   "tools/techstream/parse_ddb.py",
@@ -1142,6 +1149,7 @@ tests = [
   "tests/verify_techstream_p5_lateral_control.py",
 ]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "independent_external_artifact"
 paths = [
   "tools/techstream/parse_ddb.py",
@@ -1161,6 +1169,7 @@ paths = [
 [suite.techstream_dtc_failure_types]
 tests = ["tests/verify_techstream_dtc_failure_types.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "instruction_semantics"
 paths = [
   "tools/techstream/parse_ddb.py",
@@ -1176,6 +1185,7 @@ paths = [
 tests = ["tests/verify_techstream_mackey.py"]
 paths = ["docs/security/mackey-registration.md", "docs/tooling/techstream.md", "tools/techstream/inspect_dotnet_il.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "cfg_dataflow"
 # External-tree suite: verifies TMS-011 against native exports/imports and the
 # managed IT3UtilityRevNK IL. Exits 77 when Techstream/unpacked is absent.
@@ -1183,6 +1193,7 @@ oracle = "cfg_dataflow"
 [suite.techstream_crypto_inventory]
 tests = ["tests/verify_techstream_crypto_inventory.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "generated_self_check"
 paths = [
   "tools/techstream/generate_crypto_inventory.py",
@@ -1202,17 +1213,20 @@ paths = [
   "docs/status/FINDINGS.md",
 ]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "independent_external_artifact"
 
 [suite.techstream_artifact_lock]
 tests = ["tests/verify_techstream_artifact_lock.py"]
 paths = ["techstream.lock.json"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "identity_hash"
 
 [suite.techstream_cuw_writer_routes]
 tests = ["tests/verify_techstream_cuw_writer_routes.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "cfg_dataflow"
 paths = [
   "tools/techstream/generate_cuw_writer_inventory.py",
@@ -1231,6 +1245,7 @@ tests = [
   "tests/verify_techstream_rks_client_state.py",
 ]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "cfg_dataflow"
 paths = [
   "tools/techstream/generate_sienna_techstream_did_semantics.py",
@@ -1257,6 +1272,7 @@ paths = [
 [suite.techstream_cuw_legacy]
 tests = ["tests/verify_techstream_cuw_legacy.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "independent_external_artifact"
 paths = [
   "tools/techstream/parse_cuw_container.py",
@@ -1272,6 +1288,7 @@ paths = [
 [suite.techstream_cuw_vforest]
 tests = ["tests/verify_techstream_cuw_vforest.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "independent_external_artifact"
 paths = [
   "tools/techstream/parse_cuw_container.py",
@@ -1289,6 +1306,7 @@ paths = [
 [suite.techstream_cuw_vforest_corpus]
 tests = ["tests/verify_techstream_cuw_vforest_corpus.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "independent_external_artifact"
 paths = [
   "tools/techstream/parse_cuw_container.py",
@@ -1307,6 +1325,7 @@ paths = [
 [suite.techstream_cuw_frc_corpus]
 tests = ["tests/verify_techstream_cuw_frc_corpus.py"]
 requires_external = ["techstream_v18", "cuw_reference_corpus", "gtsplus_cuwplus"]
+modes = ["local"]
 oracle = "independent_external_artifact"
 paths = [
   "tools/techstream/parse_cuw_container.py",
@@ -1321,6 +1340,7 @@ paths = [
 [suite.techstream_cuw_security_up]
 tests = ["tests/verify_techstream_cuw_security_up.py"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "instruction_semantics"
 paths = [
   "tools/techstream/cuw_security_up.py",
@@ -1334,6 +1354,7 @@ paths = [
 tests = ["tests/verify_techstream_layerb.py"]
 paths = ["docs/tooling/techstream.md"]
 requires_external = ["techstream_v18"]
+modes = ["local"]
 oracle = "instruction_semantics"
 # External-tree suite: verifies TMS-010 (VFOREST flash-writer SA transmission /
 # SendNonceAndSeedKey; no static AES in the CUW reflash toolchain). SKIPs
@@ -1735,9 +1756,11 @@ tests = ["tests/verify_corolla_2023_public_route_summary.py"]
 paths = ["docs/variants/", "data/"]
 
 [suite.albinoelephant_corolla_dataflash]
+modes = ["full", "local"]
 tests = ["tests/verify_albinoelephant_corolla_dataflash.py"]
 paths = [
   "community/albinoelephant/",
+  "tools/analyze_toyota_dataflash.py",
   "data/generated/corolla_2023_albino_dataflash_analysis.json",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/tooling/community-dataflash-secoc.md",

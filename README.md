@@ -63,7 +63,8 @@ Quick verification:
 
 ```bash
 uv sync --locked
-make verify
+make verify       # fast tracked-only edit-loop gate
+make verify-full  # exhaustive portable gate (also used by CI)
 ```
 
 Explore the committed analysis safely:

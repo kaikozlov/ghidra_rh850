@@ -56,10 +56,12 @@ task updates `project/` (via `make snapshot-project`).
 
 ```bash
 uv sync --locked          # one-time environment
-make verify               # firmware evidence, no Ghidra — run this first
+make verify               # fast tracked-only edit-loop gate, no Ghidra — run this first
+make verify-full          # exhaustive portable tracked-repository gate
 make verify-one SUITE=control_partition  # one subsystem suite (fast iteration)
-make verify-changed       # suites matching git changes only
-make verify-agent         # all suites, compact JSON summary
+make verify-changed       # suites matching git changes, regardless of tier
+make verify-local         # full + locally available external/live suites
+make verify-agent         # core gate with compact JSON summary
 make verify-required-external # require the pinned Techstream corpus
 make ghidra-cli           # build the vendored ghidra CLI into build/cache/ghidra-cli/
 make verify-sleigh        # SLEIGH compile + isolated install

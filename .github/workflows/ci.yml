@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   verify-firmware:
-    name: Firmware suites (make verify)
+    name: Portable full suites (make verify-full)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +22,7 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --locked
-      - run: make verify
+      - run: make verify-full
 
   changes:
     name: Path filter
