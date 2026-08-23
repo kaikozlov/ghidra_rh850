@@ -76,7 +76,22 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   read the H precursor/mode/contributor cells to find a state that moves before
   the autonomous component of the general torque command. If none does, acquire
   the camera/gateway/other steering-controller firmware. Static broad searching
-  of this H EPS should not be repeated without a new concrete lead.
+  of this H EPS should not be repeated without a new concrete lead. TMS-040 now
+  closes the acquisition choice: the true-TSS3 **diagnostic-domain holder** is
+  category 498 **`FRC_P5` = Front Recognition Camera 2** with dedicated plugin
+  roles 233/234 and the LTA/LDA/LCA DID surface (holder, not asserted physical
+  control-path owner); `ADS_Eth_P5` rows 406/407 remain recorded
+  snapshot evidence (rad/s, rad), and `EMPS_P5`/`EMPS2_P5` exclusively carry the
+  `0x1CEE/0x1CEF` **type-62 primary Data-ID** observer family that exact H
+  lacks. The unresolved task is
+  now firmware-side: acquire `FRC_P5` camera firmware and recover the lateral
+  producer contract and its join (if any) to the steering observers, using the
+  read-only `AB/EB` Operation FFD surface as the capture reference (category
+  498's separate Active-Test surface stays bounded). Wire
+  arbitration ID, producer identity, and any relation to the community
+  `NEW_MSG_8A_LAT_CONTROL` (`0x18A` — the Reference screenshot corpus records
+  only that it is one of 22 CAN-FD 64-byte IDs on buses 0 and 2) remain
+  unproved.
   Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3 ·
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §§7.34–7.35.
 

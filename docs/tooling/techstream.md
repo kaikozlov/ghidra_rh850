@@ -1927,6 +1927,152 @@ firmware routine linkage. Its former 122
 `eps` inside `steps`) and per-term truncation. They are now explicitly labeled
 steering-anchored `utility_string` vocabulary, never recovered procedures.
 
+#### 6.2.2 True-TSS3 lateral control: Front Recognition Camera 2 (`FRC_P5`) and its read-only FFD capture path
+
+A directed follow-up to the newer-Toyota lateral-control gap, closed at schema
+v2 from the raw corpus (not from the earlier ADS/LDA framing). Toyota's master
+database maps generation-20 categories identically in NA/EU/JP:
+`EMPS_P5.ddb` = **EMPS** (405), `LDA_P5.ddb` = **Lane Departure Alert** (418),
+`Fr_Camera_P5.ddb` = **Front Recognition Camera** (430), `ADS_Eth_P5.ddb` =
+**Advanced Drive Control** (476), `ADeU_Eth_P5.ddb` = **Advanced Drive eXtension
+Control** (477), **`FRC_P5.ddb` = `Front Recognition Camera 2` (498)**, and
+`EMPS2_P5.ddb` = **Steering Actuator** (499). `FRC_P5` is a distinct category
+from the old `Fr_Camera_P5` and from `ADS_Eth_P5`; its exact file identities
+are pinned per region (NA 49,806 bytes / SHA-256 `63307a9b…46fe42`, EU and JP
+49,662 bytes / `b35ca0ac…84e1cc` and `89db9903…7bba5e`).
+
+**Dedicated plugin roles.** The master type-19 DLL table assigns role 233
+`GetTSS3ImageFFDP5_DT.dll` and role 234 `GetTSS3OperationFFDP5_DT.dll`
+both to category 498; roles 224/225 (`GetADSOperationFFDP5_DT.dll` /
+`GetADSImageFFDP5_DT.dll`) are bound to `ADS_Eth_P5` category 476, and role
+229 (`GetADSDDRInfoP5_DT.dll`) is a **category-0/global** entry, not an
+ADS-category binding. This is the strongest role-association signal for the
+diagnostic domain: the true-TSS3 lateral-control diagnostic domain has its
+own capture-plugin roles bound to category 498, separate from the Advanced
+Drive Ethernet stack's category-476 roles. It is a diagnostic-domain/role
+association, not a claim of physical or control-path ownership.
+
+**Installation join (model-resolved, region-local).** The master type-44 table
+is `CDbInstallingEcuListTable` (format-1 factory `0x1001C9D0`); records are 24
+bytes with display-name string index `u32 +0x00`, **install-set ID `u16 +0x04`
+(the `FindDbItem1` lookup key)**, and ECU category `u16 +0x06`. The install-set
+ID resolves deterministically to model names through type-5 `CDbEcuGroupTable`
+(VehicleId `u16 +0x04` → install-set ID `u16 +0x06`) and type-43
+`CDbVehicleNameTable` (VehicleId `u16 +0x04` → name `u32 +0x00`); 2480/2481 NA,
+4924/4925 EU, 1627/1628 JP type-5 VehicleIds resolve to type-43 names (one
+sentinel each). In the **NA** master, categories 498 and 499 co-occur at
+exactly install sets `0x1967`, `0x1B1A`, `0x1D54`, `0x1E6E`. Those sets also
+contain 405 (EMPS), 418 (display name **`Lane Control`**), 430 (Front
+Recognition Camera), 476/477 (Advanced Drive Control / eXtension Control) plus
+brake/steering-angle/camera neighbors; `0x1D54`/`0x1E6E` resolve the steering
+trio as `EMPS / Steering Control Actuator` (405), `Front Recognition Camera`
+(498), and `Steering Torque Actuator` (499). The NA keys resolve by name to
+**MAC (0x1967/0x1B1A), RZ450e (0x1D54), bZ4X (0x1E6E)**; install-set
+numbering is **region-local — the numeric NA keys `0x1967/0x1B1A/0x1D54/0x1E6E`
+also exist in the EU/JP masters but resolve different category sets there and
+never carry the 498+499 pair**; each region has its own distinct 498+499 keys
+(EU nine: MAC×2, bZ4X×6, RZ450e; JP four: MAC×2, RZ450e, e-Palette). The 498+499 co-occurrence sets are **not Corolla
+evidence**. The direct Corolla-family evidence is separate: exact NA
+VehicleId/install-set rows 0x30E0/0x1D78, 0x30E1/0x1D7B, 0x30E4/0x1D84,
+0x30FE/0x1DD2, 0x30FF/0x1DD5 (Corolla), 0x30E2/0x1D7E, 0x30E3/0x1D81
+(Corolla HV), 0x311F/0x1E35, 0x3120/0x1E38 (Corolla Cross), 0x3121/0x1E3B
+(Corolla Cross HEV) all carry **FRC 498 + EMPS 405 and no EMPS2 499**;
+GR Corolla 0x3082/0x1C5E instead pairs 498 with **EMPS_P4 142**.
+
+**`FRC_P5` lateral-control surface (exact rows).** DID `0x1202` bits 12/13
+are `LDA`/`LTA Installation Availability`; DID `0x1501` carries `LDA Customize
+Condition Flag` (bits 0–7) and `LDA Control Condition` (bits 8–15); DID
+`0x1601` carries `LTA Switch Condition Flag` (0–7), `LTA Control Condition`
+(8–15), `Hands-Off Customize Condition Flag` (16–23), and `Hands-Off Control
+Condition` (24–31). `Steering Wheel Information` is DID `0x1308`; `Control
+Target Type (For DDR)` is `0x1806`; `Control Mode` is `0x1903`; `Forward
+Vehicle Lateral Position` is `0x1909` bits 0–31; and the control-target
+distance/side DDR values are `0x1804`/`0x1805` bits 0–31. Type 87 additionally
+carries `Lateral Control System Malfunction` (X2400), `Steering Angle Sensor
+Malfunction` (X2001), `Power Steering Control System for Steering Assist
+Steering Angle Malfunction` (X2082), and `Communication Error by ECU Security
+Key Not Registered (Power Steering Control Module "A")` (X2166). A verified
+negative: `FRC_P5` has **no** named `Target Steering Angle` monitor in the
+type-62 `CDbDatamonitorP5Table` or the type-88 `CDbBehaviorDataRecordP5Table`
+in any region — the target-angle observer text lives on the steering side, not
+the camera side.
+
+**Read-only proprietary Operation FFD protocol** (`GetTSS3OperationFFDP5_DT.dll`,
+SHA-256 `8d8461cf…38f86`, all claims anchored to exact machine-code bytes
+pinned by the independent test, no Ghidra required): the behavior-code query
+at `0x100010E0` builds request `AB 11` and expects `EB 11`; the behavior-frame
+query at `0x100021D0` builds `AB 12 <behavior_id BE16>`, expects `EB 12`, and
+parses subordinate BE16 IDs after offset 4; the data-record query at
+`0x100015A0` builds `AB 13 <behavior_id BE16><record_id BE16>` and expects
+`EB 13`. Its parser at `0x10001A70` starts data at offset 6 and parses
+`[DID BE16][len u8][len bytes]` blocks, using the first data byte as a block
+count when nonzero and deduplicating by DID; `0x10001F90` special-cases DID
+`0x0501`. `Execute` at `0x100032F0` obtains comm-frame info with selector
+`0x66` and runs through `CCommCachePlus::CommFrameSendReceiveExt`. A fixed
+special/excluded ID table at VA `0x100091D4` holds 15 LE u16s (`0x2270`,
+`0x2271`, `0x2272`, `0x2273`, `0x2274`, `0x2296`, `0x2297`, `0x2298`, `0x2299`,
+`0x227C`, `0x227D`, `0x229A`, `0x22B0`, `0x22B1`, `0x22B2`) — these are
+proprietary operation/behavior IDs, **not** UDS DIDs, unless independently
+resolved. This is observation/capture infrastructure only; the repository
+deliberately builds no live writer against it.
+
+**Image FFD plugin** (`GetTSS3ImageFFDP5_DT.dll`, SHA-256 `787f88b5…63e4`):
+the support probe at `0x10004420` issues `GetDataNoEnableList` for DID `0x1402`
+selector 1 then selector 2, and DID `0x1401` selector 2 — both DIDs exist in
+`FRC_P5` as `AHB Control ON Information` and `AHB/AHS Information`. The main
+capture path is `CCmdImgOpeDdr::GetTSS3ImageFFDInfo`. The immediate `0x1CE4`
+seen elsewhere in this DLL is an allocation size passed to the `0x1000C62E`
+allocator, **not** a DID.
+
+**ADS remains useful but secondary.** `ADS_Eth_P5` type-134 rows 406/407 name
+`Advanced Drive Control Target Steering Angle Speed Order Value` and
+`…Target Steering Angle Order Value` (row 143 = `Lateral Control Switch
+Status`). `GetADSDDRInfoP5_DT.dll` (SHA-256 `28a4474c…46df`) reads the row
+fields `+0x28` (PhysicalData key), `+0x2A`/`+0x2C` (bit start/end), and `+0x30`
+(PatternDisplay key); the unit chain row `+0x28` → CDbPhyData key `+0x0C` →
+PhyData `+0x0E` unit key → CDbUnit key `+0x04` → `GetDefaultUnitStr` resolves
+row 406 to bits 0–31 **rad/s** and row 407 to bits 0–31 **rad**. These are
+Operation-FFD/DDR recorded snapshot fields, **not** proven live wire command
+fields. The ADS Operation plugin probes its own plugin-specific DID `0x1C08`
+with selectors 1 and 6; that probe is not joined to rows 406/407 without
+further proof.
+
+**Steering-side observer domain.** Both `EMPS_P5` and `EMPS2_P5` carry the
+2069..2076 monitor family (`Target Lateral ID`, `Cooperative Control in
+Progress Flag`, `Target Steering Angle After Output Compensation`, `Advanced
+Drive Target Steering Angle`, plus System-2 variants) under DIDs
+`0x1CEE`/`0x1CEF`. A full corpus scan (402 P5 databases, NA/EU/JP) verifies
+these two DIDs are declared as **type-62 primary Data-IDs only** in
+`EMPS_P5` and `EMPS2_P5`. Exact Corolla H
+`8965H1202000` implements neither DID.
+
+`LDA_P5` still contributes the ownership vocabulary — `Steering Assist Request
+Invalid` and the exact Toyota text `Communication Error from Lane Control
+Module to Power Steering Control System` — without proving that `LDA_P5` is
+itself a physical Lane Control Module.
+
+This evidence deliberately stops short of a wire mapping: no CAN/CAN-FD
+arbitration ID, wire layout, producer ECU, or authentication is identified for
+any target-angle value, and the community `NEW_MSG_8A_LAT_CONTROL` lead
+remains unjoined to `FRC_P5`. The Reference screenshot corpus
+(REFERENCE/CorollaExp_Screenshots.md) pins exactly one fact — `0x18A` appears
+among the 22 CAN-FD 64-byte IDs observed on buses 0 and 2 — and nothing more;
+do not encode a DBC from it. Protocol claims in the artifact are graded:
+subtypes/markers/parser offsets/table bytes are byte-anchored, while
+response-layout wording and block-count/dedup semantics are recovered
+interpretation. The AB/EB FFD protocol is read-only capture infrastructure,
+but category 498 also exposes an **Active-Test surface** (master roles 6/8/99/
+112/173: list/init/multi-init/signal-info/datamon-for-act-test) whose actuation
+semantics are unrecovered and bounded. The next directed static target is
+`FRC_P5` firmware acquisition and its lateral-control producer contract;
+`FRC_P5` is the diagnostic-domain holder, and physical control-path ownership
+is not asserted.
+
+Machine-readable evidence is
+`data/generated/techstream_v18/p5_lateral_control_semantics.json` (schema v2),
+generated by `tools/techstream/extract_p5_lateral_control_semantics.py` and
+independently checked by `tests/verify_techstream_p5_lateral_control.py`.
+
 ## 7. MACKey Registration — ECU authentication key provisioning
 
 The canonical report is

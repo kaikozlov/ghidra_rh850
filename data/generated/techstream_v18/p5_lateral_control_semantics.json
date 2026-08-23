@@ -1,0 +1,3533 @@
+{
+  "schema_version": 2,
+  "source": "Techstream V18.00.003",
+  "sources": {
+    "EMPS_P5.ddb": {
+      "NA": {
+        "size": 49042,
+        "sha256": "1e5ffc4f998570458fa86dd0d563949006f9e0781f15d118d01e80656fadd199"
+      },
+      "EU": {
+        "size": 49554,
+        "sha256": "7bcac199a8faac0126175e3037309cc44d7957d425c7aafd17c1d45bc9228564"
+      },
+      "JP": {
+        "size": 49042,
+        "sha256": "350ee7b1ee9313306b6086b47116892f75b283581e2dee52aab33dc7638cd288"
+      }
+    },
+    "EMPS2_P5.ddb": {
+      "NA": {
+        "size": 44790,
+        "sha256": "e80d722f3b80077e3f7bdc4b815c2035b21a51cefb6cd26dc6de3ada20939312"
+      },
+      "EU": {
+        "size": 44858,
+        "sha256": "ce4b73781ea4dbd4cfaa0277c0ac5a3f8e50576cb4c21cfe1f2e496a37184438"
+      },
+      "JP": {
+        "size": 44858,
+        "sha256": "dc61d3b2a31dab79a543a58590e32804c5d4e4a9128b0dad688606517a8997c1"
+      }
+    },
+    "LDA_P5.ddb": {
+      "NA": {
+        "size": 11268,
+        "sha256": "10019b5cce2406110b5f064095f203bc1998d3997a6cf2e913512622773e3336"
+      },
+      "EU": {
+        "size": 11268,
+        "sha256": "445420a807ad66b638605c5f14c817870e8753658b56314541034f56c00de976"
+      },
+      "JP": {
+        "size": 11268,
+        "sha256": "84c86171a555407e30b3c64658ebe4b83e4e3ec6035ee0a5dd504deeca48e1cf"
+      }
+    },
+    "Fr_Camera_P5.ddb": {
+      "NA": {
+        "size": 14590,
+        "sha256": "364f792097ed3d04da534adf06f5064a316bc5420bea7ff6ac296c58fc0bc847"
+      },
+      "EU": {
+        "size": 14590,
+        "sha256": "344ffe456719a3aafebd537af0b39a8ce7de68282e1c02ef5194f6e4b4a1a130"
+      },
+      "JP": {
+        "size": 14590,
+        "sha256": "a686d111ee613cbac9edde24e01e8c58b358265949aafa591f0d5e4c6261214a"
+      }
+    },
+    "ADS_Eth_P5.ddb": {
+      "NA": {
+        "size": 94656,
+        "sha256": "deb8334a593efa5f98865f959c463f6803b7d72aa4d5ab86ba3de9b4cca39d70"
+      },
+      "EU": {
+        "size": 94656,
+        "sha256": "8a7b0d519f6c032f47022fdae2fca259519719cc7ae968c98316c7900725bd51"
+      },
+      "JP": {
+        "size": 94656,
+        "sha256": "1c474f7d949346f82debd2327672e4c0f1ca8ee46891e7f7fbc5b6373dd3ad03"
+      }
+    },
+    "ADeU_Eth_P5.ddb": {
+      "NA": {
+        "size": 11678,
+        "sha256": "cd5507130666eb2a5b25db29beff25c58c704be17bd6dcfddc7b4826ceff002c"
+      },
+      "EU": {
+        "size": 11678,
+        "sha256": "179648a184ff2061ae53361272e0c3448cd72110ec75ae09fcdd8a9aa6a85178"
+      },
+      "JP": {
+        "size": 11678,
+        "sha256": "a9abd83479f4db4e690bf3c5df5052649af8fa61394e5051c9a7c36e21469af1"
+      }
+    },
+    "FRC_P5.ddb": {
+      "NA": {
+        "size": 49806,
+        "sha256": "63307a9b8a6bcafdc5ee4b3a04f67abdc2501ba296a2779e5edc7dbff846fe42"
+      },
+      "EU": {
+        "size": 49662,
+        "sha256": "b35ca0ac6a0c12364b670e10baffeb81c6c73f5c4d0b7d47b962c21a5384e1cc"
+      },
+      "JP": {
+        "size": 49662,
+        "sha256": "89db9903921124475d50035cb6cd91a3f2cdf284b3990ed9b832692f487bba5e"
+      }
+    },
+    "KgpDataCtrl.dll": {
+      "size": 721008,
+      "sha256": "e5235bc0c241c6a450fe461031eed0915675032b1db994bd54d98818fac88aa9"
+    },
+    "GetTSS3ImageFFDP5_DT.dll": {
+      "size": 135168,
+      "sha256": "787f88b5e14b5aa38ae676df5e8986c3d0df1de297f3ff8915579078afac63e4"
+    },
+    "GetTSS3OperationFFDP5_DT.dll": {
+      "size": 73728,
+      "sha256": "8d8461cf1b1f9b9917919fa4ea366891e0867c2f3e82d56d1a27ae2990e38f86"
+    },
+    "GetADSDDRInfoP5_DT.dll": {
+      "size": 106496,
+      "sha256": "28a4474c71344970c3e9736af1d835215d0aac02d4f31cee832101981f1246df"
+    },
+    "GetADSOperationFFDP5_DT.dll": {
+      "size": 77824,
+      "sha256": "c5549207080aabc0a7d415caa610818fd0df4ca2afc78a14b3c5a6e1861d8bce"
+    },
+    "CommandCommon.dll": {
+      "size": 1028096,
+      "sha256": "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7"
+    },
+    "IT3Data_BDC_NA.vds": {
+      "size": 13172736,
+      "sha256": "16bff024a76083e3c3843cf651a7ac5b9d8e4e42416217b2e8910b8e6dbc00e7"
+    },
+    "IT3Data_BDC_EU.vds": {
+      "size": 6729728,
+      "sha256": "7968ae1666c2368353b284ead24b24516faebc7fb193cc5b0a56c1d83ae4544d"
+    },
+    "IT3Data_BDC_JP.vds": {
+      "size": 3604480,
+      "sha256": "3739a0c9e5a9a424d1e21030001f7afbd20571e2fa15f3db70e1548dc0533e2c"
+    }
+  },
+  "master_categories": {
+    "NA": {
+      "EMPS_P5.ddb": {
+        "record_index": 374,
+        "category_id": 405,
+        "generation": 20,
+        "resolved_ecu_name": "EMPS",
+        "raw_sha256": "a51a406e53c3a84a177475906279a2eb5781564e2fcb6287bcc0b3651794a24f"
+      },
+      "EMPS2_P5.ddb": {
+        "record_index": 467,
+        "category_id": 499,
+        "generation": 20,
+        "resolved_ecu_name": "Steering Actuator",
+        "raw_sha256": "73aed7afc0f96dbd6cc7224663242662df1f7a00abe4d8b408a051a0c394f95f"
+      },
+      "LDA_P5.ddb": {
+        "record_index": 387,
+        "category_id": 418,
+        "generation": 20,
+        "resolved_ecu_name": "Lane Departure Alert",
+        "raw_sha256": "6445567e0e3c721f0cfd2667da06637b0f91dfe7cdf302362d0505e57e4aed59"
+      },
+      "Fr_Camera_P5.ddb": {
+        "record_index": 399,
+        "category_id": 430,
+        "generation": 20,
+        "resolved_ecu_name": "Front Recognition Camera",
+        "raw_sha256": "c857fe0b7fba1ee5b5062adebaefe5645d7a7dac3e18ec96b24cccd339e478a0"
+      },
+      "ADS_Eth_P5.ddb": {
+        "record_index": 444,
+        "category_id": 476,
+        "generation": 20,
+        "resolved_ecu_name": "Advanced Drive Control",
+        "raw_sha256": "c758f4d9d39fb6644a90a28a2dae2d780048df80dbc29830d37dd49a6b2cea85"
+      },
+      "ADeU_Eth_P5.ddb": {
+        "record_index": 445,
+        "category_id": 477,
+        "generation": 20,
+        "resolved_ecu_name": "Advanced Drive eXtension Control",
+        "raw_sha256": "c04e43367a533b0406f3a332fd3f241a7fb2b52c0ff2bb418ce832f96b379701"
+      },
+      "FRC_P5.ddb": {
+        "record_index": 466,
+        "category_id": 498,
+        "generation": 20,
+        "resolved_ecu_name": "Front Recognition Camera 2",
+        "raw_sha256": "7706ec5721ae4cc929b03d03ff03b287461e31f07406512b879948d4218c1351"
+      }
+    },
+    "EU": {
+      "EMPS_P5.ddb": {
+        "record_index": 374,
+        "category_id": 405,
+        "generation": 20,
+        "resolved_ecu_name": "EMPS",
+        "raw_sha256": "a51a406e53c3a84a177475906279a2eb5781564e2fcb6287bcc0b3651794a24f"
+      },
+      "EMPS2_P5.ddb": {
+        "record_index": 467,
+        "category_id": 499,
+        "generation": 20,
+        "resolved_ecu_name": "Steering Actuator",
+        "raw_sha256": "73aed7afc0f96dbd6cc7224663242662df1f7a00abe4d8b408a051a0c394f95f"
+      },
+      "LDA_P5.ddb": {
+        "record_index": 387,
+        "category_id": 418,
+        "generation": 20,
+        "resolved_ecu_name": "Lane Departure Alert",
+        "raw_sha256": "6445567e0e3c721f0cfd2667da06637b0f91dfe7cdf302362d0505e57e4aed59"
+      },
+      "Fr_Camera_P5.ddb": {
+        "record_index": 399,
+        "category_id": 430,
+        "generation": 20,
+        "resolved_ecu_name": "Front Recognition Camera",
+        "raw_sha256": "c857fe0b7fba1ee5b5062adebaefe5645d7a7dac3e18ec96b24cccd339e478a0"
+      },
+      "ADS_Eth_P5.ddb": {
+        "record_index": 444,
+        "category_id": 476,
+        "generation": 20,
+        "resolved_ecu_name": "Advanced Drive Control",
+        "raw_sha256": "c758f4d9d39fb6644a90a28a2dae2d780048df80dbc29830d37dd49a6b2cea85"
+      },
+      "ADeU_Eth_P5.ddb": {
+        "record_index": 445,
+        "category_id": 477,
+        "generation": 20,
+        "resolved_ecu_name": "Advanced Drive eXtension Control",
+        "raw_sha256": "c04e43367a533b0406f3a332fd3f241a7fb2b52c0ff2bb418ce832f96b379701"
+      },
+      "FRC_P5.ddb": {
+        "record_index": 466,
+        "category_id": 498,
+        "generation": 20,
+        "resolved_ecu_name": "Front Recognition Camera 2",
+        "raw_sha256": "7706ec5721ae4cc929b03d03ff03b287461e31f07406512b879948d4218c1351"
+      }
+    },
+    "JP": {
+      "EMPS_P5.ddb": {
+        "record_index": 374,
+        "category_id": 405,
+        "generation": 20,
+        "resolved_ecu_name": "EMPS",
+        "raw_sha256": "a51a406e53c3a84a177475906279a2eb5781564e2fcb6287bcc0b3651794a24f"
+      },
+      "EMPS2_P5.ddb": {
+        "record_index": 467,
+        "category_id": 499,
+        "generation": 20,
+        "resolved_ecu_name": "Steering Actuator",
+        "raw_sha256": "73aed7afc0f96dbd6cc7224663242662df1f7a00abe4d8b408a051a0c394f95f"
+      },
+      "LDA_P5.ddb": {
+        "record_index": 387,
+        "category_id": 418,
+        "generation": 20,
+        "resolved_ecu_name": "Lane Departure Alert",
+        "raw_sha256": "6445567e0e3c721f0cfd2667da06637b0f91dfe7cdf302362d0505e57e4aed59"
+      },
+      "Fr_Camera_P5.ddb": {
+        "record_index": 399,
+        "category_id": 430,
+        "generation": 20,
+        "resolved_ecu_name": "Front Recognition Camera",
+        "raw_sha256": "c857fe0b7fba1ee5b5062adebaefe5645d7a7dac3e18ec96b24cccd339e478a0"
+      },
+      "ADS_Eth_P5.ddb": {
+        "record_index": 444,
+        "category_id": 476,
+        "generation": 20,
+        "resolved_ecu_name": "Advanced Drive Control",
+        "raw_sha256": "c758f4d9d39fb6644a90a28a2dae2d780048df80dbc29830d37dd49a6b2cea85"
+      },
+      "ADeU_Eth_P5.ddb": {
+        "record_index": 445,
+        "category_id": 477,
+        "generation": 20,
+        "resolved_ecu_name": "Advanced Drive eXtension Control",
+        "raw_sha256": "c04e43367a533b0406f3a332fd3f241a7fb2b52c0ff2bb418ce832f96b379701"
+      },
+      "FRC_P5.ddb": {
+        "record_index": 466,
+        "category_id": 498,
+        "generation": 20,
+        "resolved_ecu_name": "Front Recognition Camera 2",
+        "raw_sha256": "7706ec5721ae4cc929b03d03ff03b287461e31f07406512b879948d4218c1351"
+      }
+    }
+  },
+  "master_dll_roles": {
+    "NA": [
+      {
+        "dll_name": "GetADSDDRInfoP5_DT.dll",
+        "category_id": 0,
+        "dll_role_id": 229
+      },
+      {
+        "dll_name": "GetDatMonListP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 5
+      },
+      {
+        "dll_name": "GetActTstListP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 6
+      },
+      {
+        "dll_name": "GetActTstInitP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 8
+      },
+      {
+        "dll_name": "DelDiagCodeP4.dll",
+        "category_id": 498,
+        "dll_role_id": 25
+      },
+      {
+        "dll_name": "JudgeDiagStatusP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 41
+      },
+      {
+        "dll_name": "GetDatMonSignalInfoP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 65
+      },
+      {
+        "dll_name": "GetCID_SID22_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 82
+      },
+      {
+        "dll_name": "GetMultiActInitP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 99
+      },
+      {
+        "dll_name": "GetSupportP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 103
+      },
+      {
+        "dll_name": "GetATSignalInfoP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 112
+      },
+      {
+        "dll_name": "GetRoBP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 160
+      },
+      {
+        "dll_name": "DelRoBP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 161
+      },
+      {
+        "dll_name": "GetDatMonListP5ForActTest_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 173
+      },
+      {
+        "dll_name": "GetTSS3ImageFFDP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 233
+      },
+      {
+        "dll_name": "GetTSS3OperationFFDP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 234
+      }
+    ],
+    "EU": [
+      {
+        "dll_name": "GetADSDDRInfoP5_DT.dll",
+        "category_id": 0,
+        "dll_role_id": 229
+      },
+      {
+        "dll_name": "GetDatMonListP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 5
+      },
+      {
+        "dll_name": "GetActTstListP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 6
+      },
+      {
+        "dll_name": "GetActTstInitP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 8
+      },
+      {
+        "dll_name": "DelDiagCodeP4.dll",
+        "category_id": 498,
+        "dll_role_id": 25
+      },
+      {
+        "dll_name": "JudgeDiagStatusP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 41
+      },
+      {
+        "dll_name": "GetDatMonSignalInfoP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 65
+      },
+      {
+        "dll_name": "GetCID_SID22_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 82
+      },
+      {
+        "dll_name": "GetMultiActInitP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 99
+      },
+      {
+        "dll_name": "GetSupportP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 103
+      },
+      {
+        "dll_name": "GetATSignalInfoP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 112
+      },
+      {
+        "dll_name": "GetRoBP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 160
+      },
+      {
+        "dll_name": "DelRoBP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 161
+      },
+      {
+        "dll_name": "GetDatMonListP5ForActTest_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 173
+      },
+      {
+        "dll_name": "GetTSS3ImageFFDP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 233
+      },
+      {
+        "dll_name": "GetTSS3OperationFFDP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 234
+      }
+    ],
+    "JP": [
+      {
+        "dll_name": "GetADSDDRInfoP5_DT.dll",
+        "category_id": 0,
+        "dll_role_id": 229
+      },
+      {
+        "dll_name": "GetDatMonListP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 5
+      },
+      {
+        "dll_name": "GetActTstListP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 6
+      },
+      {
+        "dll_name": "GetActTstInitP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 8
+      },
+      {
+        "dll_name": "DelDiagCodeP4.dll",
+        "category_id": 498,
+        "dll_role_id": 25
+      },
+      {
+        "dll_name": "JudgeDiagStatusP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 41
+      },
+      {
+        "dll_name": "GetDatMonSignalInfoP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 65
+      },
+      {
+        "dll_name": "GetCID_SID22_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 82
+      },
+      {
+        "dll_name": "GetMultiActInitP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 99
+      },
+      {
+        "dll_name": "GetSupportP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 103
+      },
+      {
+        "dll_name": "GetATSignalInfoP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 112
+      },
+      {
+        "dll_name": "GetRoBP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 160
+      },
+      {
+        "dll_name": "DelRoBP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 161
+      },
+      {
+        "dll_name": "GetDatMonListP5ForActTest_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 173
+      },
+      {
+        "dll_name": "GetTSS3ImageFFDP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 233
+      },
+      {
+        "dll_name": "GetTSS3OperationFFDP5_DT.dll",
+        "category_id": 498,
+        "dll_role_id": 234
+      }
+    ]
+  },
+  "installing_ecu_list": {
+    "factory_identity": {
+      "factory_va": "0x1001C9D0",
+      "table_type": 44,
+      "class_name": "CDbInstallingEcuListTable",
+      "constructor_va": "0x1003A860",
+      "constructor_export": "??0CDbInstallingEcuListTable@@QAE@EE@Z"
+    },
+    "NA": {
+      "table_type": 44,
+      "factory_class": "CDbInstallingEcuListTable",
+      "record_size": 24,
+      "record_count": 67833,
+      "field_offsets": {
+        "display_name_string_index": "u32 +0x00",
+        "install_set_id": "u16 +0x04 (FindDbItem1 lookup key)",
+        "category": "u16 +0x06 (ECU category)"
+      },
+      "vehicle_resolution_chain": {
+        "type5_class": "CDbEcuGroupTable",
+        "type5_vehicle_id_offset": "u16 +0x04",
+        "type5_install_set_id_offset": "u16 +0x06",
+        "type43_class": "CDbVehicleNameTable",
+        "type43_vehicle_id_offset": "u16 +0x04",
+        "type43_name_string_offset": "u32 +0x00",
+        "type5_vehicle_ids_resolving_to_type43_names": "2480/2481"
+      },
+      "cooccurrence_keys": [
+        "0x1967",
+        "0x1B1A",
+        "0x1D54",
+        "0x1E6E"
+      ],
+      "cooccurrence_sets": [
+        {
+          "install_set_id": "0x1967",
+          "vehicle_names": [
+            "MAC"
+          ],
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x1B1A",
+          "vehicle_names": [
+            "MAC"
+          ],
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x1D54",
+          "vehicle_names": [
+            "RZ450e"
+          ],
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499,
+            5005
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator",
+            "5005": "Rear Camera"
+          }
+        },
+        {
+          "install_set_id": "0x1E6E",
+          "vehicle_names": [
+            "bZ4X"
+          ],
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        }
+      ],
+      "key_sets": {
+        "0x1967": {
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        "0x1B1A": {
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        "0x1D54": {
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499,
+            5005
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator",
+            "5005": "Rear Camera"
+          }
+        },
+        "0x1E6E": {
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        }
+      }
+    },
+    "EU": {
+      "table_type": 44,
+      "factory_class": "CDbInstallingEcuListTable",
+      "record_size": 24,
+      "record_count": 135565,
+      "field_offsets": {
+        "display_name_string_index": "u32 +0x00",
+        "install_set_id": "u16 +0x04 (FindDbItem1 lookup key)",
+        "category": "u16 +0x06 (ECU category)"
+      },
+      "vehicle_resolution_chain": {
+        "type5_class": "CDbEcuGroupTable",
+        "type5_vehicle_id_offset": "u16 +0x04",
+        "type5_install_set_id_offset": "u16 +0x06",
+        "type43_class": "CDbVehicleNameTable",
+        "type43_vehicle_id_offset": "u16 +0x04",
+        "type43_name_string_offset": "u32 +0x00",
+        "type5_vehicle_ids_resolving_to_type43_names": "4924/4925"
+      },
+      "cooccurrence_keys": [
+        "0x2CBA",
+        "0x31CD",
+        "0x38C3",
+        "0x38C6",
+        "0x38C9",
+        "0x38CC",
+        "0x3A85",
+        "0x3E72",
+        "0x3E75"
+      ],
+      "cooccurrence_sets": [
+        {
+          "install_set_id": "0x2CBA",
+          "vehicle_names": [
+            "MAC"
+          ],
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x31CD",
+          "vehicle_names": [
+            "MAC"
+          ],
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x38C3",
+          "vehicle_names": [
+            "bZ4X"
+          ],
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x38C6",
+          "vehicle_names": [
+            "bZ4X"
+          ],
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x38C9",
+          "vehicle_names": [
+            "bZ4X"
+          ],
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x38CC",
+          "vehicle_names": [
+            "bZ4X"
+          ],
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x3A85",
+          "vehicle_names": [
+            "RZ450e"
+          ],
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499,
+            5005
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator",
+            "5005": "Rear Camera"
+          }
+        },
+        {
+          "install_set_id": "0x3E72",
+          "vehicle_names": [
+            "bZ4X"
+          ],
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499,
+            5005
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator",
+            "5005": "Rear Camera"
+          }
+        },
+        {
+          "install_set_id": "0x3E75",
+          "vehicle_names": [
+            "bZ4X"
+          ],
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499,
+            5005
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator",
+            "5005": "Rear Camera"
+          }
+        }
+      ],
+      "key_sets": {
+        "0x2CBA": {
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        "0x31CD": {
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        "0x38C3": {
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        },
+        "0x38C6": {
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        },
+        "0x38C9": {
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        },
+        "0x38CC": {
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        },
+        "0x3A85": {
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499,
+            5005
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator",
+            "5005": "Rear Camera"
+          }
+        },
+        "0x3E72": {
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499,
+            5005
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator",
+            "5005": "Rear Camera"
+          }
+        },
+        "0x3E75": {
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499,
+            5005
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator",
+            "5005": "Rear Camera"
+          }
+        }
+      }
+    },
+    "JP": {
+      "table_type": 44,
+      "factory_class": "CDbInstallingEcuListTable",
+      "record_size": 24,
+      "record_count": 51797,
+      "field_offsets": {
+        "display_name_string_index": "u32 +0x00",
+        "install_set_id": "u16 +0x04 (FindDbItem1 lookup key)",
+        "category": "u16 +0x06 (ECU category)"
+      },
+      "vehicle_resolution_chain": {
+        "type5_class": "CDbEcuGroupTable",
+        "type5_vehicle_id_offset": "u16 +0x04",
+        "type5_install_set_id_offset": "u16 +0x06",
+        "type43_class": "CDbVehicleNameTable",
+        "type43_vehicle_id_offset": "u16 +0x04",
+        "type43_name_string_offset": "u32 +0x00",
+        "type5_vehicle_ids_resolving_to_type43_names": "1627/1628"
+      },
+      "cooccurrence_keys": [
+        "0x1C5B",
+        "0x1E0E",
+        "0x1F10",
+        "0x1FA0"
+      ],
+      "cooccurrence_sets": [
+        {
+          "install_set_id": "0x1C5B",
+          "vehicle_names": [
+            "MAC"
+          ],
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x1E0E",
+          "vehicle_names": [
+            "MAC"
+          ],
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x1F10",
+          "vehicle_names": [
+            "RZ450e"
+          ],
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        },
+        {
+          "install_set_id": "0x1FA0",
+          "vehicle_names": [
+            "e-Palette"
+          ],
+          "categories": [
+            405,
+            407,
+            435,
+            445,
+            452,
+            466,
+            470,
+            498,
+            499,
+            5002,
+            5027
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "407": "AHC",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator",
+            "5002": "Rear AHC",
+            "5027": "In-Vehicle Monitoring"
+          }
+        }
+      ],
+      "key_sets": {
+        "0x1C5B": {
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        "0x1E0E": {
+          "categories": [
+            405,
+            418,
+            430,
+            435,
+            445,
+            466,
+            470,
+            476,
+            477,
+            481,
+            482,
+            483,
+            484,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS",
+            "418": "Lane Control",
+            "430": "Front Recognition Camera",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "476": "Advanced Drive Control",
+            "477": "Advanced Drive eXtension Control",
+            "481": "Front LiDAR",
+            "482": "Rear LiDAR",
+            "483": "Right Side LiDAR",
+            "484": "Left Side LiDAR",
+            "498": "Front Recognition Camera 2",
+            "499": "Steering Actuator"
+          }
+        },
+        "0x1F10": {
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            470,
+            492,
+            498,
+            499
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "492": "Driver Monitor Camera Control",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator"
+          }
+        },
+        "0x1FA0": {
+          "categories": [
+            405,
+            407,
+            435,
+            445,
+            452,
+            466,
+            470,
+            498,
+            499,
+            5002,
+            5027
+          ],
+          "displays": {
+            "405": "EMPS / Steering Control Actuator",
+            "407": "AHC",
+            "435": "Brake/EPB",
+            "445": "Steering Angle Sensor",
+            "452": "Tire Pressure Monitor",
+            "466": "Brake Booster",
+            "470": "Circumference Monitoring Camera Control Module",
+            "498": "Front Recognition Camera",
+            "499": "Steering Torque Actuator",
+            "5002": "Rear AHC",
+            "5027": "In-Vehicle Monitoring"
+          }
+        }
+      }
+    },
+    "interpretation": "Type-44 +0x04 is the install-set id (CDbInstallingEcuListTable::FindDbItem1 key). It resolves deterministically to model names through the master chain type-5 CDbEcuGroupTable (VehicleId +0x04 -> install-set id +0x06) and type-43 CDbVehicleNameTable (VehicleId +0x04 -> name +0x00). Install-set numbering is region-local: the numeric NA co-occurrence keys 0x1967/0x1B1A/0x1D54/0x1E6E also exist in the EU/JP masters but resolve different category sets there and do not carry the 498+499 co-occurrence; each region carries its own distinct 498+499 keys. Sets with both FRC_P5 (498) and EMPS2_P5 (499) resolve to MAC/RZ450e/bZ4X/e-Palette-class models and are NOT Corolla evidence; Corolla-family TSS3 sets pair 498 with EMPS_P5 (405) instead."
+  },
+  "corolla_model_install_sets": {
+    "region": "NA",
+    "join": "type-43 VehicleName -> type-5 VehicleId/install-set -> type-44 categories",
+    "rows": [
+      {
+        "model_name": "Corolla",
+        "vehicle_id": "0x30E0",
+        "install_set_id": "0x1D78",
+        "categories": [
+          405,
+          435,
+          445,
+          452,
+          498
+        ]
+      },
+      {
+        "model_name": "Corolla",
+        "vehicle_id": "0x30E1",
+        "install_set_id": "0x1D7B",
+        "categories": [
+          405,
+          435,
+          445,
+          452,
+          498
+        ]
+      },
+      {
+        "model_name": "Corolla",
+        "vehicle_id": "0x30E4",
+        "install_set_id": "0x1D84",
+        "categories": [
+          405,
+          435,
+          445,
+          452,
+          498
+        ]
+      },
+      {
+        "model_name": "Corolla",
+        "vehicle_id": "0x30FE",
+        "install_set_id": "0x1DD2",
+        "categories": [
+          405,
+          435,
+          445,
+          452,
+          498
+        ]
+      },
+      {
+        "model_name": "Corolla",
+        "vehicle_id": "0x30FF",
+        "install_set_id": "0x1DD5",
+        "categories": [
+          405,
+          435,
+          445,
+          452,
+          498
+        ]
+      },
+      {
+        "model_name": "Corolla HV",
+        "vehicle_id": "0x30E2",
+        "install_set_id": "0x1D7E",
+        "categories": [
+          405,
+          435,
+          445,
+          452,
+          466,
+          498
+        ]
+      },
+      {
+        "model_name": "Corolla HV",
+        "vehicle_id": "0x30E3",
+        "install_set_id": "0x1D81",
+        "categories": [
+          405,
+          435,
+          445,
+          452,
+          466,
+          498
+        ]
+      },
+      {
+        "model_name": "Corolla Cross",
+        "vehicle_id": "0x311F",
+        "install_set_id": "0x1E35",
+        "categories": [
+          118,
+          405,
+          435,
+          445,
+          452,
+          498,
+          5005
+        ]
+      },
+      {
+        "model_name": "Corolla Cross",
+        "vehicle_id": "0x3120",
+        "install_set_id": "0x1E38",
+        "categories": [
+          118,
+          405,
+          435,
+          445,
+          452,
+          498,
+          5005
+        ]
+      },
+      {
+        "model_name": "Corolla Cross HEV",
+        "vehicle_id": "0x3121",
+        "install_set_id": "0x1E3B",
+        "categories": [
+          405,
+          435,
+          445,
+          452,
+          466,
+          498,
+          5005
+        ]
+      },
+      {
+        "model_name": "GR Corolla",
+        "vehicle_id": "0x3082",
+        "install_set_id": "0x1C5E",
+        "categories": [
+          142,
+          435,
+          445,
+          448,
+          452,
+          498
+        ]
+      }
+    ],
+    "finding": "Newer Corolla-family TSS3 configurations pair FRC_P5 (498) with EMPS_P5 (405) steering; EMPS2_P5 (499) is absent from these Corolla/HV/Cross/GR install sets. GR Corolla uses category 142 (display name EMPS) instead of 405."
+  },
+  "front_recognition_camera_2": {
+    "did_rows_NA": [
+      {
+        "record_index": 24,
+        "data_id": "0x1202",
+        "alternate_data_id": "0x3202",
+        "bit_range": [
+          12,
+          12
+        ],
+        "monitor_key": 25,
+        "name": "LDA Installation Availability",
+        "raw_sha256": "5d724e656f447869c9ccef7eeb6975b7541c42bad56237a7d202a87777d0d3d4"
+      },
+      {
+        "record_index": 25,
+        "data_id": "0x1202",
+        "alternate_data_id": "0x3202",
+        "bit_range": [
+          13,
+          13
+        ],
+        "monitor_key": 26,
+        "name": "LTA Installation Availability",
+        "raw_sha256": "efb8e2e8577184905eb947e767d665b4aeb758dedeb06631d53b86cecc1e81c2"
+      },
+      {
+        "record_index": 26,
+        "data_id": "0x1202",
+        "alternate_data_id": "0x3202",
+        "bit_range": [
+          14,
+          14
+        ],
+        "monitor_key": 27,
+        "name": "LCA Installation Availability",
+        "raw_sha256": "cc99a888b059a06ddcccf2640e3826ccdc58c74f6a5b6c9bb5b1c1d58359a0ee"
+      },
+      {
+        "record_index": 49,
+        "data_id": "0x1308",
+        "alternate_data_id": "0x3308",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 50,
+        "name": "Steering Wheel Information",
+        "raw_sha256": "3242c3b6fef5d0ea2fde2db6e4a631dc693145c09be5c1cbc600f2e2d6cdc009"
+      },
+      {
+        "record_index": 55,
+        "data_id": "0x1401",
+        "alternate_data_id": "0x3401",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 56,
+        "name": "AHB/AHS Information",
+        "raw_sha256": "5c75bbc0a19702ec47cda0676f95ec044443e7fc11bfe2e163fa924d17678355"
+      },
+      {
+        "record_index": 56,
+        "data_id": "0x1402",
+        "alternate_data_id": "0x3402",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 57,
+        "name": "AHB Control ON Information",
+        "raw_sha256": "ae411e1c82cb84da0aca8cc1849a5047715f3f1a305fadf93ae9eaf633cd1913"
+      },
+      {
+        "record_index": 63,
+        "data_id": "0x1501",
+        "alternate_data_id": "0x3501",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 64,
+        "name": "LDA Customize Condition Flag",
+        "raw_sha256": "21533c7b3363ee5b187616b632c2e3953697832f9897c9e771eb238c4b898d38"
+      },
+      {
+        "record_index": 64,
+        "data_id": "0x1501",
+        "alternate_data_id": "0x3501",
+        "bit_range": [
+          8,
+          15
+        ],
+        "monitor_key": 65,
+        "name": "LDA Control Condition",
+        "raw_sha256": "26714523f7db7d5426c947d3b2f93862285f57c82ef90910d790f42545c0da6f"
+      },
+      {
+        "record_index": 65,
+        "data_id": "0x1601",
+        "alternate_data_id": "0x3601",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 66,
+        "name": "LTA Switch Condition Flag",
+        "raw_sha256": "1f9c24db1931df0031fd2c43184717f8692f9b0328ce740bb32598cdf075c232"
+      },
+      {
+        "record_index": 66,
+        "data_id": "0x1601",
+        "alternate_data_id": "0x3601",
+        "bit_range": [
+          8,
+          15
+        ],
+        "monitor_key": 67,
+        "name": "LTA Control Condition",
+        "raw_sha256": "5f1934a29145954f8d65615c8b1b0cf0d8d68a449f9a0ef7225d4667bf19f4df"
+      },
+      {
+        "record_index": 67,
+        "data_id": "0x1601",
+        "alternate_data_id": "0x3601",
+        "bit_range": [
+          16,
+          23
+        ],
+        "monitor_key": 68,
+        "name": "Hands-Off Customize Condition Flag",
+        "raw_sha256": "5e30a9f281dcf85c881230f6b0b2136baf0af53bfc99de92d646d1d5c23735d7"
+      },
+      {
+        "record_index": 68,
+        "data_id": "0x1601",
+        "alternate_data_id": "0x3601",
+        "bit_range": [
+          24,
+          31
+        ],
+        "monitor_key": 69,
+        "name": "Hands-Off Control Condition",
+        "raw_sha256": "8a427cf575de435bd967a4ad241ed1c1326e509249ea0a3c76fd660c85a7a7fb"
+      },
+      {
+        "record_index": 69,
+        "data_id": "0x1681",
+        "alternate_data_id": "0x3681",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 70,
+        "name": "LCA Customize Condition Flag",
+        "raw_sha256": "2b61329695d9e12b08c663b9e997fc245f99d7f1fc4e7d72d570e51f34760259"
+      },
+      {
+        "record_index": 70,
+        "data_id": "0x1681",
+        "alternate_data_id": "0x3681",
+        "bit_range": [
+          8,
+          15
+        ],
+        "monitor_key": 71,
+        "name": "LCA Control Condition",
+        "raw_sha256": "ea690da789a1c60dc971f5e43903aac6c01932ca588193e6007693450303ad1a"
+      },
+      {
+        "record_index": 78,
+        "data_id": "0x1705",
+        "alternate_data_id": "0x3705",
+        "bit_range": [
+          12,
+          12
+        ],
+        "monitor_key": 79,
+        "name": "PCS AES Invalid Flag",
+        "raw_sha256": "f9d56e9c37e60af0755f32860f01ca915f8e2cda8de2a4e7b01e5802617a34c1"
+      },
+      {
+        "record_index": 92,
+        "data_id": "0x1806",
+        "alternate_data_id": "0x3806",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 93,
+        "name": "Control Target Type (For DDR)",
+        "raw_sha256": "9cd60c9221587559a39251b74380294f242a39d618f26de8d51c51438abbeb7f"
+      },
+      {
+        "record_index": 198,
+        "data_id": "0x1903",
+        "alternate_data_id": "0x3903",
+        "bit_range": [
+          0,
+          7
+        ],
+        "monitor_key": 199,
+        "name": "Control Mode",
+        "raw_sha256": "4c1ae45c03aa623a3e1e479184a9ee877429bea0b1b9a315e9625ce402599adb"
+      },
+      {
+        "record_index": 199,
+        "data_id": "0x1909",
+        "alternate_data_id": "0x3909",
+        "bit_range": [
+          0,
+          31
+        ],
+        "monitor_key": 200,
+        "name": "Forward Vehicle Lateral Position",
+        "raw_sha256": "b829fd4a2572a416a16ddaeb344bb2c7303d61d9bfd6f3b8329cffad6f420a21"
+      },
+      {
+        "record_index": 214,
+        "data_id": "0x1804",
+        "alternate_data_id": "0x3804",
+        "bit_range": [
+          0,
+          31
+        ],
+        "monitor_key": 215,
+        "name": "Control Target Vehicle Distance (DDR)",
+        "raw_sha256": "84506f426e78111ebc257eb87eb26ad896ce29e35506897567c2ad5d4068fe47"
+      },
+      {
+        "record_index": 215,
+        "data_id": "0x1805",
+        "alternate_data_id": "0x3805",
+        "bit_range": [
+          0,
+          31
+        ],
+        "monitor_key": 216,
+        "name": "Control Target Side Position (DDR)",
+        "raw_sha256": "ff9aa8c02bd07c578b90342ccf6d27e98776c255a3a3a77a687d4a91d8d8db0c"
+      }
+    ],
+    "did_rows_region_check": {
+      "NA": {
+        "matched_rows": 20,
+        "target_steering_angle_negative": {
+          "scanned_table_types": [
+            62,
+            88
+          ],
+          "scanned_table_classes": {
+            "62": "CDbDatamonitorP5Table",
+            "88": "CDbBehaviorDataRecordP5Table"
+          },
+          "name_substring": "target steering",
+          "matches": []
+        }
+      },
+      "EU": {
+        "matched_rows": 20,
+        "target_steering_angle_negative": {
+          "scanned_table_types": [
+            62,
+            88
+          ],
+          "scanned_table_classes": {
+            "62": "CDbDatamonitorP5Table",
+            "88": "CDbBehaviorDataRecordP5Table"
+          },
+          "name_substring": "target steering",
+          "matches": []
+        }
+      },
+      "JP": {
+        "matched_rows": 20,
+        "target_steering_angle_negative": {
+          "scanned_table_types": [
+            62,
+            88
+          ],
+          "scanned_table_classes": {
+            "62": "CDbDatamonitorP5Table",
+            "88": "CDbBehaviorDataRecordP5Table"
+          },
+          "name_substring": "target steering",
+          "matches": []
+        }
+      }
+    },
+    "behavior_code_rows": [
+      {
+        "record_index": 1,
+        "behavior_signature": "X2001",
+        "name_string_index": 109031,
+        "name": "Steering Angle Sensor Malfunction",
+        "raw_sha256": "79e5ee8efb46e725dd0cfe4a46147b0e96749b3b5c8df67d3987dae86a3067b5"
+      },
+      {
+        "record_index": 35,
+        "behavior_signature": "X2082",
+        "name_string_index": 120473,
+        "name": "Power Steering Control System for Steering Assist Steering Angle Malfunction",
+        "raw_sha256": "635e7145723291d3d767da1167f897b944a5da7711ca7c09db1cbc751f5070c2"
+      },
+      {
+        "record_index": 45,
+        "behavior_signature": "X2166",
+        "name_string_index": 169387,
+        "name": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")",
+        "raw_sha256": "92da644a197d7082ad1560f70a8d33018c650eb9b3a59f674839546f7a4715a6"
+      },
+      {
+        "record_index": 60,
+        "behavior_signature": "X2400",
+        "name_string_index": 169437,
+        "name": "Lateral Control System Malfunction",
+        "raw_sha256": "8090c0a791d1757c96b7648441a37173d7c9081d4fbb61233d04c4339812e2a4"
+      },
+      {
+        "record_index": 74,
+        "behavior_signature": "XF01B",
+        "name_string_index": 137410,
+        "name": "ECU Security Key Not Registered",
+        "raw_sha256": "46023afe42f222215e3d5fdd5dfee152505721ec006f763a4b00638e3e6c5f98"
+      }
+    ],
+    "security_state": {
+      "NA": {
+        "ecu_security_key_registered_incomplete_flag": {
+          "record_index": 194,
+          "monitor_key": 195,
+          "name": "ECU Security Key Registered Incomplete Flag",
+          "primary_data_id": "0x10AF",
+          "alternate_data_id": "0x30AF",
+          "bit_range": [
+            0,
+            7
+          ],
+          "pattern_display_key": 75,
+          "pattern_values": {
+            "0": "OFF",
+            "1": "ON",
+            "2": "Not Fixed"
+          },
+          "raw_sha256": "3a19e6731b1e5c0be938b6e1013a18453c7a49de763b563b613d432e5fd2acdd"
+        },
+        "pattern_display_join": {
+          "monitor_record_pattern_display_key_offset": "u16 +0x32 (type 62)",
+          "patdisp_table": "type 14 CDbPatDispTable",
+          "patdisp_key_offset": "u16 +0x0C",
+          "pattern_value_offset": "u32 +0x04",
+          "display_string_index_offset": "u32 +0x00"
+        },
+        "type87_security_behavior_codes": {
+          "XF01B": "ECU Security Key Not Registered",
+          "X2166": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")"
+        },
+        "boundary": "diagnostic-state evidence only: these rows expose ECU-security-key registration state and lateral-condition monitors; they are not proof of a live authenticated lateral message or of any transport"
+      },
+      "EU": {
+        "ecu_security_key_registered_incomplete_flag": {
+          "record_index": 191,
+          "monitor_key": 195,
+          "name": "ECU Security Key Registered Incomplete Flag",
+          "primary_data_id": "0x10AF",
+          "alternate_data_id": "0x30AF",
+          "bit_range": [
+            0,
+            7
+          ],
+          "pattern_display_key": 75,
+          "pattern_values": {
+            "0": "OFF",
+            "1": "ON",
+            "2": "Not Fixed"
+          },
+          "raw_sha256": "3a19e6731b1e5c0be938b6e1013a18453c7a49de763b563b613d432e5fd2acdd"
+        },
+        "pattern_display_join": {
+          "monitor_record_pattern_display_key_offset": "u16 +0x32 (type 62)",
+          "patdisp_table": "type 14 CDbPatDispTable",
+          "patdisp_key_offset": "u16 +0x0C",
+          "pattern_value_offset": "u32 +0x04",
+          "display_string_index_offset": "u32 +0x00"
+        },
+        "type87_security_behavior_codes": {
+          "XF01B": "ECU Security Key Not Registered",
+          "X2166": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")"
+        },
+        "boundary": "diagnostic-state evidence only: these rows expose ECU-security-key registration state and lateral-condition monitors; they are not proof of a live authenticated lateral message or of any transport"
+      },
+      "JP": {
+        "ecu_security_key_registered_incomplete_flag": {
+          "record_index": 191,
+          "monitor_key": 195,
+          "name": "ECU Security Key Registered Incomplete Flag",
+          "primary_data_id": "0x10AF",
+          "alternate_data_id": "0x30AF",
+          "bit_range": [
+            0,
+            7
+          ],
+          "pattern_display_key": 75,
+          "pattern_values": {
+            "0": "OFF",
+            "1": "ON",
+            "2": "Not Fixed"
+          },
+          "raw_sha256": "3a19e6731b1e5c0be938b6e1013a18453c7a49de763b563b613d432e5fd2acdd"
+        },
+        "pattern_display_join": {
+          "monitor_record_pattern_display_key_offset": "u16 +0x32 (type 62)",
+          "patdisp_table": "type 14 CDbPatDispTable",
+          "patdisp_key_offset": "u16 +0x0C",
+          "pattern_value_offset": "u32 +0x04",
+          "display_string_index_offset": "u32 +0x00"
+        },
+        "type87_security_behavior_codes": {
+          "XF01B": "ECU Security Key Not Registered",
+          "X2166": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")"
+        },
+        "boundary": "diagnostic-state evidence only: these rows expose ECU-security-key registration state and lateral-condition monitors; they are not proof of a live authenticated lateral message or of any transport"
+      }
+    },
+    "target_steering_angle_negative_note": "FRC_P5 carries no named Target Steering Angle monitor in the type-62 CDbDatamonitorP5Table or the type-88 CDbBehaviorDataRecordP5Table in any region"
+  },
+  "vds_setting_table": {
+    "scanner": "pure-Python raw Jet page scan (no external Java/JAR dependency)",
+    "page_size": 4096,
+    "page_layout": {
+      "data_page_indicator": "byte0 == 0x01",
+      "row_count": "u16 +0x0C",
+      "row_offset_table": "u16 entries from +0x0E, low 12 bits, descending addresses",
+      "row_count_sanity_bound": 100
+    },
+    "setting_table_row_layout": {
+      "column_count": "u16 +0x00 (== 5)",
+      "setting_no": "u32 +0x02",
+      "ecu_no": "u32 +0x06",
+      "connection_type": "u32 +0x0A",
+      "vin_pattern": "11-char UTF-16LE at +0x0E"
+    },
+    "regions": {
+      "NA": {
+        "file": "IT3Data_BDC_NA.vds",
+        "498": {
+          "setting_table_rows": 1923,
+          "vin_pattern_count": 52,
+          "vin_pattern_row_counts": {
+            "2T2BAMBA___": 60,
+            "2T2BAMCA___": 60,
+            "2T2BBMCA___": 60,
+            "2T2BCMEA___": 60,
+            "5YFB4MBE___": 60,
+            "5YFB4MCE___": 60,
+            "5YFB4MDE___": 60,
+            "5YFP4MCE___": 60,
+            "5YFS4MCE___": 60,
+            "5YFT4MCE___": 60,
+            "JTDACAAU___": 60,
+            "JTDACACU___": 60,
+            "JTDACBAU___": 60,
+            "JTDACBCU___": 60,
+            "JTDADABU___": 60,
+            "JTDADBBU___": 60,
+            "JTDB4MEE___": 60,
+            "JTDBCMFE___": 60,
+            "JTDBDMHE___": 60,
+            "JTDP4MCE___": 60,
+            "JTDS4MCE___": 60,
+            "JTDT4MCE___": 60,
+            "JTJAAAAB___": 60,
+            "JTJAABAB___": 60,
+            "JTJADCAZ___": 3,
+            "JTJADCEZ___": 3,
+            "JTJAGCEZ___": 3,
+            "JTJAKAEZ___": 3,
+            "JTJAKCEZ___": 3,
+            "JTJCHMAA___": 60,
+            "JTJCJAGA___": 60,
+            "JTJCJAJA___": 60,
+            "JTJCKAEZ___": 3,
+            "JTJCMAHA___": 60,
+            "JTJGDCAZ___": 3,
+            "JTJGDCEZ___": 3,
+            "JTJGGCEZ___": 3,
+            "JTJGKAEZ___": 3,
+            "JTJGKCEZ___": 3,
+            "JTJHDCAZ___": 3,
+            "JTJHDCEZ___": 3,
+            "JTJHGCEZ___": 3,
+            "JTJHKAEZ___": 3,
+            "JTJHKAFZ___": 3,
+            "JTJHKCEZ___": 3,
+            "JTJHKCFZ___": 3,
+            "JTJKGCEZ___": 3,
+            "JTJKKAFZ___": 3,
+            "JTJKKCFZ___": 3,
+            "JTNC4MBE___": 60,
+            "JTND4MBE___": 60,
+            "JTNK4MBE___": 60
+          }
+        },
+        "499": {
+          "setting_table_rows": 0,
+          "vin_pattern_count": 0,
+          "vin_pattern_row_counts": {}
+        }
+      },
+      "EU": {
+        "file": "IT3Data_BDC_EU.vds",
+        "498": {
+          "setting_table_rows": 27,
+          "vin_pattern_count": 9,
+          "vin_pattern_row_counts": {
+            "JTJCCBAZ___": 3,
+            "JTJCDBAZ___": 3,
+            "JTJCDBEZ___": 3,
+            "JTJCFBAZ___": 3,
+            "JTJCGDEZ___": 3,
+            "JTJCKBEZ___": 3,
+            "JTJCKBFZ___": 3,
+            "JTJCLBEZ___": 3,
+            "JTJCMBAZ___": 3
+          }
+        },
+        "499": {
+          "setting_table_rows": 0,
+          "vin_pattern_count": 0,
+          "vin_pattern_row_counts": {}
+        }
+      },
+      "JP": {
+        "file": "IT3Data_BDC_JP.vds",
+        "498": {
+          "setting_table_rows": 4212,
+          "vin_pattern_count": 39,
+          "vin_pattern_row_counts": {
+            "AALH10_____": 60,
+            "AALH15_____": 60,
+            "AALH16_____": 60,
+            "AAZA20_____": 166,
+            "AAZA25_____": 166,
+            "AAZH20_____": 166,
+            "AAZH25_____": 166,
+            "AAZH26_____": 166,
+            "AZSH30_____": 163,
+            "AZSH35_____": 163,
+            "MXPC10_____": 60,
+            "MXPC12_____": 60,
+            "MXPL10_____": 60,
+            "MXPL12_____": 60,
+            "MXPL15_____": 60,
+            "MXWH60_____": 60,
+            "MXWH61_____": 60,
+            "MXWH65_____": 60,
+            "MZEA12_____": 60,
+            "MZEA17_____": 60,
+            "MZRA90_____": 163,
+            "MZRA92_____": 163,
+            "MZRA95_____": 163,
+            "MZRA97_____": 163,
+            "TALA10_____": 60,
+            "TALA15_____": 60,
+            "TALH17_____": 60,
+            "TAZA25_____": 166,
+            "TZSH35_____": 163,
+            "XEAM10_____": 163,
+            "XEBM15_____": 60,
+            "YEAM15_____": 163,
+            "ZVW60______": 60,
+            "ZVW65______": 60,
+            "ZWE215_____": 60,
+            "ZWE219_____": 60,
+            "ZWR90______": 163,
+            "ZWR92______": 163,
+            "ZWR95______": 163
+          }
+        },
+        "499": {
+          "setting_table_rows": 0,
+          "vin_pattern_count": 0,
+          "vin_pattern_row_counts": {}
+        }
+      }
+    },
+    "pinned_na_5yf_families": {
+      "patterns": [
+        "5YFB4MBE___",
+        "5YFB4MCE___",
+        "5YFB4MDE___",
+        "5YFP4MCE___",
+        "5YFS4MCE___",
+        "5YFT4MCE___"
+      ],
+      "rows_each": 60
+    },
+    "representative_row": {
+      "page_index_zero_based": 1189,
+      "slot": 18,
+      "setting_no": 42,
+      "ecu_no": 498,
+      "connection_type": 6,
+      "vin_pattern": "5YFB4MBE___",
+      "raw36_sha256": "7731102e38782c937d6e9c00329d9840a301e68bff45d5fc99e6f2f41e92e14f"
+    },
+    "ecu_setting_table_anchors": [
+      {
+        "page_index_zero_based": 20,
+        "slot": 8,
+        "row_offset": 3706,
+        "ecu_no": 405,
+        "database": "EMPS_P5",
+        "phase": 5,
+        "address": "7A1",
+        "raw40_sha256": "1c4dbd01d8f2a08e387d88d8f1995f5dc558a17528da73688662f50c40995691",
+        "row_layout": {
+          "column_count": "u16 +0x00",
+          "ecu_no": "u32 +0x02",
+          "phase": "u32 +0x06",
+          "address": "3-byte ASCII after FF FE marker at +0x1A"
+        }
+      },
+      {
+        "page_index_zero_based": 20,
+        "slot": 24,
+        "row_offset": 3026,
+        "ecu_no": 498,
+        "database": "FRC_P5",
+        "phase": 5,
+        "address": "792",
+        "raw40_sha256": "8e0b4d4c25d6f9aa5a960d745b735a8b77f097b57ca7a3832900c8b03a10970a",
+        "row_layout": {
+          "column_count": "u16 +0x00",
+          "ecu_no": "u32 +0x02",
+          "phase": "u32 +0x06",
+          "address": "3-byte ASCII after FF FE marker at +0x1A"
+        }
+      }
+    ],
+    "boundary": "VDS proves ECUNo/category 498 is configured for these VIN descriptor patterns in the Techstream Setting_Table; ECUNo 499 has zero Setting_Table rows in all three regions, which is VDS Setting_Table absence, not vehicle absence. The 5YF entries are exact NA descriptor families; no repository-verified Toyota source joins them to a model name, so they are not labeled by model from VDS alone."
+  },
+  "tss3_operation_ffd_protocol": {
+    "dll": "GetTSS3OperationFFDP5_DT.dll",
+    "direction": "read-only proprietary Operation FFD observation; the AB/EB FFD protocol itself is read-only capture infrastructure. Category 498 separately exposes an Active-Test surface (roles 6/8/99/112/173) whose actuation semantics are not recovered here and remain bounded.",
+    "transport": "CCommCachePlus::CommFrameSendReceiveExt; comm-frame info selector 0x66 via CCommCachePlus::GetCommFrmInfo",
+    "execute_va": "0x100032F0",
+    "evidence_grading": {
+      "byte_anchored": [
+        "subtypes 0x11/0x12/0x13 and the AB/EB request/expected markers",
+        "parser length gate (>6), data offset 6, BE16 DID shift, u8 block length",
+        "special/excluded 15-entry LE-u16 table at 0x100091D4 and its scanning loop",
+        "GetCommFrmInfo selector 0x66"
+      ],
+      "recovered_interpretation": [
+        "response_layout wording (BE16 IDs after the 2-byte prefix / after offset 4)",
+        "first-data-byte-as-block-count and dedup-by-DID semantics",
+        "the AB31/AB33-style enumeration-vs-record roles of the subtypes"
+      ]
+    },
+    "behavior_code_query": {
+      "builder_va": "0x100010E0",
+      "request": "AB 11",
+      "expected_response": "EB 11",
+      "response_layout": "BE16 IDs follow the 2-byte prefix",
+      "response_layout_grade": "recovered"
+    },
+    "behavior_frame_query": {
+      "builder_va": "0x100021D0",
+      "request": "AB 12 <behavior_id BE16>",
+      "expected_response": "EB 12",
+      "response_layout": "subordinate BE16 IDs parsed after offset 4",
+      "response_layout_grade": "recovered"
+    },
+    "data_record_query": {
+      "builder_va": "0x100015A0",
+      "request": "AB 13 <behavior_id BE16><record_id BE16>",
+      "expected_response": "EB 13"
+    },
+    "data_record_parser": {
+      "va": "0x10001A70",
+      "data_offset": 6,
+      "data_offset_grade": "byte_anchored",
+      "block_layout": "[DID BE16][len u8][len bytes]",
+      "first_data_byte_used_as_block_count_if_nonzero": true,
+      "deduplicates_by_did": true,
+      "block_semantics_grade": "recovered",
+      "special_did": {
+        "did": "0x0501",
+        "handler_va": "0x10001F90"
+      }
+    },
+    "special_excluded_id_list": {
+      "table_va": "0x100091D4",
+      "count": 15,
+      "ids": [
+        "0x2270",
+        "0x2271",
+        "0x2272",
+        "0x2273",
+        "0x2274",
+        "0x2296",
+        "0x2297",
+        "0x2298",
+        "0x2299",
+        "0x227C",
+        "0x227D",
+        "0x229A",
+        "0x22B0",
+        "0x22B1",
+        "0x22B2"
+      ],
+      "scanned_by": "0x100030D0 (iterates until table end 0x100091F2)",
+      "note": "operation/behavior IDs in proprietary space; not UDS DIDs unless independently resolved"
+    },
+    "byte_anchors": {
+      "behavior_code_subtype_0x11": {
+        "va": "0x10001188",
+        "file_offset": "0x1188",
+        "bytes": "b1 11"
+      },
+      "behavior_code_request_marker_ab": {
+        "va": "0x100011A4",
+        "file_offset": "0x11A4",
+        "bytes": "c6 44 24 30 ab"
+      },
+      "behavior_code_expected_marker_eb": {
+        "va": "0x100011A9",
+        "file_offset": "0x11A9",
+        "bytes": "c6 44 24 60 eb"
+      },
+      "behavior_frame_subtype_0x12": {
+        "va": "0x100022B0",
+        "file_offset": "0x22B0",
+        "bytes": "b1 12"
+      },
+      "behavior_frame_request_marker_ab": {
+        "va": "0x100022C6",
+        "file_offset": "0x22C6",
+        "bytes": "c6 44 24 54 ab"
+      },
+      "behavior_frame_expected_marker_eb": {
+        "va": "0x100022D3",
+        "file_offset": "0x22D3",
+        "bytes": "c6 84 24 84 00 00 00 eb"
+      },
+      "data_record_subtype_0x13": {
+        "va": "0x10001681",
+        "file_offset": "0x1681",
+        "bytes": "b1 13"
+      },
+      "data_record_request_marker_ab": {
+        "va": "0x100016A0",
+        "file_offset": "0x16A0",
+        "bytes": "c6 44 24 54 ab"
+      },
+      "data_record_expected_marker_eb": {
+        "va": "0x100016A5",
+        "file_offset": "0x16A5",
+        "bytes": "c6 84 24 84 00 00 00 eb"
+      },
+      "parser_requires_len_over_6": {
+        "va": "0x10001ABD",
+        "file_offset": "0x1ABD",
+        "bytes": "8d 43 fa"
+      },
+      "parser_data_offset_6": {
+        "va": "0x10001ACB",
+        "file_offset": "0x1ACB",
+        "bytes": "be 06 00 00 00"
+      },
+      "parser_be16_did_shift": {
+        "va": "0x10001BC1",
+        "file_offset": "0x1BC1",
+        "bytes": "c1 e5 08"
+      },
+      "parser_block_len_byte": {
+        "va": "0x10001BCC",
+        "file_offset": "0x1BCC",
+        "bytes": "8a 40 08"
+      },
+      "parser_special_did_0x0501": {
+        "va": "0x10001FDD",
+        "file_offset": "0x1FDD",
+        "bytes": "66 81 7c 24 34 01 05"
+      },
+      "getcommfrinfo_selector_0x66": {
+        "va": "0x100031D7",
+        "file_offset": "0x31D7",
+        "bytes": "6a 66"
+      },
+      "excluded_list_table_pointer": {
+        "va": "0x100030F7",
+        "file_offset": "0x30F7",
+        "bytes": "be d4 91 00 10"
+      }
+    }
+  },
+  "tss3_image_ffd": {
+    "dll": "GetTSS3ImageFFDP5_DT.dll",
+    "direction": "read-only TSS3 Image FFD capture",
+    "main_path": "CCmdImgOpeDdr::GetTSS3ImageFFDInfo",
+    "support_probe_va": "0x10004420",
+    "support_probes": [
+      {
+        "data_id": "0x1402",
+        "selector": 1
+      },
+      {
+        "data_id": "0x1402",
+        "selector": 2
+      },
+      {
+        "data_id": "0x1401",
+        "selector": 2
+      }
+    ],
+    "probe_did_names_in_FRC_P5": {
+      "0x1402": "AHB Control ON Information",
+      "0x1401": "AHB/AHS Information"
+    },
+    "fixed_metadata_reads": [
+      {
+        "request": "22 11 04",
+        "expected_response": "62 11 04",
+        "builder_va": "0x100011E0",
+        "anchors": {
+          "did_high_0x11": [
+            268440219,
+            "b1 11"
+          ],
+          "sid_0x22": [
+            268440254,
+            "c6 44 24 38 22"
+          ],
+          "fixed_low_0x04": [
+            268440259,
+            "c6 44 24 50 04"
+          ],
+          "expected_sid_0x62": [
+            268440264,
+            "c6 84 24 80 00 00 00 62"
+          ],
+          "expected_low_0x04": [
+            268440272,
+            "c6 84 24 98 00 00 00 04"
+          ]
+        },
+        "note": "+0x50 write is the fixed request low byte (local_58=4), not a length field"
+      },
+      {
+        "request": "22 11 07",
+        "expected_response": "62 11 07",
+        "builder_va": "0x100016A0",
+        "anchors": {
+          "did_high_0x11": [
+            268441416,
+            "b1 11"
+          ],
+          "low_0x07_via_bl": [
+            268441438,
+            "b3 07"
+          ],
+          "sid_0x22": [
+            268441450,
+            "c6 44 24 28 22"
+          ],
+          "fixed_low_0x07": [
+            268441455,
+            "88 5c 24 40"
+          ],
+          "expected_sid_0x62": [
+            268441459,
+            "c6 44 24 70 62"
+          ],
+          "expected_low_0x07": [
+            268441464,
+            "88 9c 24 88 00 00 00"
+          ]
+        }
+      }
+    ],
+    "metadata_reads_via_command_common": {
+      "table_va": "0x100B1780..0x100B18F0",
+      "owner_dll": "CommandCommon.dll",
+      "requests": [
+        "22 11 01",
+        "22 11 03",
+        "22 20 81"
+      ],
+      "note": "frame template table shared by CCmdGetDdrInfoP5Base-family code; each 22 xx yy entry is paired with its expected 62 xx yy response"
+    },
+    "security_unlock": {
+      "service": "27 03 / 27 04",
+      "wire_templates": {
+        "27_03": "VA 0x100B17EC: 27 03 00 00 ff ff 00 00 00 00 00 00 67 03 00 00",
+        "27_04": "VA 0x100B1800: 27 04 00 00 ff ff 00 00 67 04 00 00",
+        "owner": "CommandCommon.dll frame-template table (shared with the 22 xx yy metadata templates)"
+      },
+      "seed_key_length": 6,
+      "key_algorithm": "CalculateKeyDataSecLv49 @ 0x1004AC40 (CommandCommon.dll, CCmdImgOpeDdr)",
+      "algorithm": "for i in 0..5: x=seed[i]; j=x&7; if j>=6: j-=6; add = key[j] if j<i else seed[j]; rot=[1,2,3,3,2,1]; d=(x>>rot[i])&3; key[i] = (rol8(x, d+1) + add) & 0xFF",
+      "known_vectors": [
+        {
+          "seed": "010203040506",
+          "key": "04070a0d1a64"
+        },
+        {
+          "seed": "123456789abc",
+          "key": "9e6a50252409"
+        },
+        {
+          "seed": "deadbeefcafe",
+          "key": "cbd8b6970cba"
+        },
+        {
+          "seed": "000000000000",
+          "key": "000000000000"
+        }
+      ]
+    },
+    "spec5_dynamic_dids": {
+      "did_table_va": "0x100134A8",
+      "selector_table_va": "0x100134C0",
+      "dids": [
+        "0x110A",
+        "0x110D",
+        "0x1110",
+        "0x1113",
+        "0x1116",
+        "0x1119",
+        "0x111C",
+        "0x111F",
+        "0x1122",
+        "0x1125"
+      ],
+      "selectors": [
+        "0x01",
+        "0x05",
+        "0x01",
+        "0x05",
+        "0x02",
+        "0x01",
+        "0x1E",
+        "0x0A",
+        "0x03",
+        "0x0A"
+      ],
+      "spec7_extension": {
+        "did": "0x1128",
+        "note": "present in the 12-entry table; its 11th selector (0x03) is bounded, not independently resolved"
+      }
+    },
+    "proprietary_enumeration": {
+      "request": "AB 31",
+      "expected_response": "EB 31",
+      "anchors": {
+        "subtype_0x31": [
+          268447380,
+          "b1 31"
+        ],
+        "request_marker_ab": [
+          268447411,
+          "c6 44 24 34 ab"
+        ],
+        "expected_marker_eb": [
+          268447416,
+          "c6 44 24 7c eb"
+        ]
+      }
+    },
+    "proprietary_record_retrieval": {
+      "request": "AB 33",
+      "expected_response": "EB 33",
+      "anchors": {
+        "subtype_0x33": [
+          268448642,
+          "b1 33"
+        ],
+        "request_marker_ab": [
+          268448686,
+          "c6 44 24 6c ab"
+        ],
+        "expected_marker_eb": [
+          268448691,
+          "c6 84 24 b4 00 00 00 eb"
+        ]
+      }
+    },
+    "content_boundary": "the pinned Image FFD surface contains no named lateral/LTA monitor content and no write path; 22 11 04 and 22 11 07 are the only fixed metadata reads promoted, both re-anchored in the plugin",
+    "not_a_did": {
+      "immediate": "0x1CE4",
+      "va": "0x1000A7FE",
+      "meaning": "allocation size passed to the 0x1000C62E allocator; not a diagnostic data identifier"
+    },
+    "byte_anchors": {
+      "probe_1402_selector_1": {
+        "va": "0x100044ED",
+        "file_offset": "0x44ED",
+        "bytes": "6a 01"
+      },
+      "probe_1402_selector_1_did": {
+        "va": "0x100044F6",
+        "file_offset": "0x44F6",
+        "bytes": "68 02 14 00 00"
+      },
+      "probe_1402_selector_2": {
+        "va": "0x10004526",
+        "file_offset": "0x4526",
+        "bytes": "6a 02"
+      },
+      "probe_1402_selector_2_did": {
+        "va": "0x1000452F",
+        "file_offset": "0x452F",
+        "bytes": "68 02 14 00 00"
+      },
+      "probe_1401_selector_2": {
+        "va": "0x1000456E",
+        "file_offset": "0x456E",
+        "bytes": "6a 02"
+      },
+      "probe_1401_selector_2_did": {
+        "va": "0x10004577",
+        "file_offset": "0x4577",
+        "bytes": "68 01 14 00 00"
+      },
+      "allocation_0x1ce4": {
+        "va": "0x1000A7FE",
+        "file_offset": "0xA7FE",
+        "bytes": "68 e4 1c 00 00"
+      },
+      "allocation_call": {
+        "va": "0x1000A806",
+        "file_offset": "0xA806",
+        "bytes": "e8 23 1e 00 00"
+      },
+      "22_11_04_did_high_0x11": {
+        "va": "0x1000129B",
+        "file_offset": "0x129B",
+        "bytes": "b1 11"
+      },
+      "22_11_04_sid_0x22": {
+        "va": "0x100012BE",
+        "file_offset": "0x12BE",
+        "bytes": "c6 44 24 38 22"
+      },
+      "22_11_04_fixed_low_0x04": {
+        "va": "0x100012C3",
+        "file_offset": "0x12C3",
+        "bytes": "c6 44 24 50 04"
+      },
+      "22_11_04_expected_sid_0x62": {
+        "va": "0x100012C8",
+        "file_offset": "0x12C8",
+        "bytes": "c6 84 24 80 00 00 00 62"
+      },
+      "22_11_04_expected_low_0x04": {
+        "va": "0x100012D0",
+        "file_offset": "0x12D0",
+        "bytes": "c6 84 24 98 00 00 00 04"
+      },
+      "22_11_07_did_high_0x11": {
+        "va": "0x10001748",
+        "file_offset": "0x1748",
+        "bytes": "b1 11"
+      },
+      "22_11_07_low_0x07_via_bl": {
+        "va": "0x1000175E",
+        "file_offset": "0x175E",
+        "bytes": "b3 07"
+      },
+      "22_11_07_sid_0x22": {
+        "va": "0x1000176A",
+        "file_offset": "0x176A",
+        "bytes": "c6 44 24 28 22"
+      },
+      "22_11_07_fixed_low_0x07": {
+        "va": "0x1000176F",
+        "file_offset": "0x176F",
+        "bytes": "88 5c 24 40"
+      },
+      "22_11_07_expected_sid_0x62": {
+        "va": "0x10001773",
+        "file_offset": "0x1773",
+        "bytes": "c6 44 24 70 62"
+      },
+      "22_11_07_expected_low_0x07": {
+        "va": "0x10001778",
+        "file_offset": "0x1778",
+        "bytes": "88 9c 24 88 00 00 00"
+      },
+      "enum_ab31_subtype": {
+        "va": "0x10002E94",
+        "file_offset": "0x2E94",
+        "bytes": "b1 31"
+      },
+      "enum_ab31_request": {
+        "va": "0x10002EB3",
+        "file_offset": "0x2EB3",
+        "bytes": "c6 44 24 34 ab"
+      },
+      "enum_ab31_expected": {
+        "va": "0x10002EB8",
+        "file_offset": "0x2EB8",
+        "bytes": "c6 44 24 7c eb"
+      },
+      "record_ab33_subtype": {
+        "va": "0x10003382",
+        "file_offset": "0x3382",
+        "bytes": "b1 33"
+      },
+      "record_ab33_request": {
+        "va": "0x100033AE",
+        "file_offset": "0x33AE",
+        "bytes": "c6 44 24 6c ab"
+      },
+      "record_ab33_expected": {
+        "va": "0x100033B3",
+        "file_offset": "0x33B3",
+        "bytes": "c6 84 24 b4 00 00 00 eb"
+      }
+    },
+    "command_common_anchors": {
+      "metadata_22_11_03_template": {
+        "va": "0x100B1830",
+        "file_offset": "0xB1830",
+        "bytes": "22 11 03 00 ff ff ff 00 62 11 03 00"
+      },
+      "metadata_22_11_01_template": {
+        "va": "0x100B17BC",
+        "file_offset": "0xB17BC",
+        "bytes": "22 11 01 00 ff ff ff 00 62 11 01 00"
+      },
+      "metadata_22_20_81_template": {
+        "va": "0x100B18C0",
+        "file_offset": "0xB18C0",
+        "bytes": "22 20 81 00 ff ff ff 00 62 20 81 00"
+      },
+      "key_rotation_table": {
+        "va": "0x100B1910",
+        "file_offset": "0xB1910",
+        "bytes": "01 02 03 03 02 01"
+      },
+      "calculate_key_data_sec_lv49": {
+        "va": "0x1004AC4D",
+        "file_offset": "0x4AC4D",
+        "bytes": "b8 10 19 0b 10"
+      },
+      "security_unlock_27_03_template": {
+        "va": "0x100B17EC",
+        "file_offset": "0xB17EC",
+        "bytes": "27 03 00 00 ff ff 00 00 00 00 00 00 67 03 00 00"
+      },
+      "security_unlock_27_04_template": {
+        "va": "0x100B1800",
+        "file_offset": "0xB1800",
+        "bytes": "27 04 00 00 ff ff 00 00 67 04 00 00"
+      }
+    }
+  },
+  "advanced_drive_control": {
+    "factory_semantics": {
+      "ddb_ddr_p5_tables": {
+        "133": {
+          "table_type": 133,
+          "class_name": "CDbDDRBehaviorCodeP5Table",
+          "factory_records": [
+            {
+              "table_type": 133,
+              "case_va": "0x10021E18",
+              "constructor_call_va": "0x10021E45",
+              "constructor_va": "0x10029610",
+              "constructor_export": "??0CDbDDRBehaviorCodeP5Table@@QAE@EE@Z",
+              "class_name": "CDbDDRBehaviorCodeP5Table",
+              "status": "constructed"
+            }
+          ]
+        },
+        "134": {
+          "table_type": 134,
+          "class_name": "CDbDDRBehaviorDataRecordP5Table",
+          "factory_records": [
+            {
+              "table_type": 134,
+              "case_va": "0x10021E7D",
+              "constructor_call_va": "0x10021EAA",
+              "constructor_va": "0x1002A630",
+              "constructor_export": "??0CDbDDRBehaviorDataRecordP5Table@@QAE@EE@Z",
+              "class_name": "CDbDDRBehaviorDataRecordP5Table",
+              "status": "constructed"
+            }
+          ],
+          "record_name_string_offset": "0x18",
+          "record_name_string_consumer": "CDbDDRBehaviorDataRecordP5ResRecords::SetRecString @ 0x1002A4BA loads record+0x18 at 0x1002A583 before CDbStringTable::GetString"
+        },
+        "135": {
+          "table_type": 135,
+          "class_name": "CDbDDRBehaviorDataInvalidP5Table",
+          "factory_records": [
+            {
+              "table_type": 135,
+              "case_va": "0x10021EE2",
+              "constructor_call_va": "0x10021F0F",
+              "constructor_va": "0x10029E10",
+              "constructor_export": "??0CDbDDRBehaviorDataInvalidP5Table@@QAE@EE@Z",
+              "class_name": "CDbDDRBehaviorDataInvalidP5Table",
+              "status": "constructed"
+            }
+          ]
+        }
+      }
+    },
+    "ddr_behavior_data_rows": {
+      "rows": [
+        {
+          "record_index": 143,
+          "name": "Lateral Control Switch Status",
+          "name_string_index": 159358,
+          "physical_data_key": 1,
+          "bit_range": [
+            7,
+            7
+          ],
+          "pattern_display_key": 104,
+          "unit_key": 0,
+          "resolved_unit": null,
+          "raw_sha256": "e37c6dc9c34d7ec5a8443e6cfd3089d0c695cc80f748466db5f73bbc2cbfc3e9"
+        },
+        {
+          "record_index": 406,
+          "name": "Advanced Drive Control Target Steering Angle Speed Order Value",
+          "name_string_index": 159213,
+          "physical_data_key": 60,
+          "bit_range": [
+            0,
+            31
+          ],
+          "pattern_display_key": 0,
+          "unit_key": 452,
+          "resolved_unit": "rad/s",
+          "raw_sha256": "7b74b48ea5575e0448496ca4dd59531ae1d4aca3c966d1cf49f018f2523be84d"
+        },
+        {
+          "record_index": 407,
+          "name": "Advanced Drive Control Target Steering Angle Order Value",
+          "name_string_index": 159212,
+          "physical_data_key": 61,
+          "bit_range": [
+            0,
+            31
+          ],
+          "pattern_display_key": 0,
+          "unit_key": 81,
+          "resolved_unit": "rad",
+          "raw_sha256": "f6fbb306d0c6ae710139c17edfd5d0ff777217d3fe67813789d8a367a5de9414"
+        }
+      ],
+      "row_field_consumers": {
+        "physical_data_key": "u16 +0x28 (read at GetADSDDRInfoP5_DT.dll 0x100080EA)",
+        "bit_start": "u16 +0x2A (subtracted at 0x10008258)",
+        "bit_end": "u16 +0x2C (read at 0x10008254)",
+        "pattern_display_key": "u16 +0x30 (read at 0x1000816A)"
+      },
+      "unit_resolution_chain": "DDR row +0x28 -> CDbPhyData key (+0x0C) -> PhyData +0x0E u16 unit key -> CDbUnit key (+0x04) -> unit string index (+0x00) via CDbUnitResRecords::GetDefaultUnitStr"
+    },
+    "protocol": {
+      "info_dll": "GetADSDDRInfoP5_DT.dll",
+      "byte_anchors": {
+        "physical_data_key_read": {
+          "va": "0x100080EA",
+          "file_offset": "0x80EA",
+          "bytes": "66 8b 4a 28"
+        },
+        "bit_end_read": {
+          "va": "0x10008254",
+          "file_offset": "0x8254",
+          "bytes": "66 8b 50 2c"
+        },
+        "bit_start_subtract": {
+          "va": "0x10008258",
+          "file_offset": "0x8258",
+          "bytes": "66 2b 50 2a"
+        },
+        "pattern_display_key_read": {
+          "va": "0x1000816A",
+          "file_offset": "0x816A",
+          "bytes": "66 8b 41 30"
+        }
+      },
+      "operation_plugin_did": {
+        "dll": "GetADSOperationFFDP5_DT.dll",
+        "data_id": "0x1C08",
+        "selectors": [
+          1,
+          6
+        ],
+        "note": "plugin-specific GetDataNoEnableList probes; not joined to DDR rows 406/407 without proof",
+        "byte_anchors": {
+          "selector_1": {
+            "va": "0x100012C7",
+            "file_offset": "0x12C7",
+            "bytes": "6a 01"
+          },
+          "did_0x1c08_selector_1": {
+            "va": "0x100012D7",
+            "file_offset": "0x12D7",
+            "bytes": "68 08 1c 00 00"
+          },
+          "selector_6": {
+            "va": "0x100012FB",
+            "file_offset": "0x12FB",
+            "bytes": "6a 06"
+          },
+          "did_0x1c08_selector_6": {
+            "va": "0x1000130B",
+            "file_offset": "0x130B",
+            "bytes": "68 08 1c 00 00"
+          }
+        }
+      }
+    },
+    "boundary": "ADS_Eth_P5 rows 406/407 are Operation-FFD/DDR recorded snapshot fields, not proven live wire command fields"
+  },
+  "lane_departure_alert": {
+    "behavior_code_rows": [
+      {
+        "record_index": 6,
+        "behavior_signature": "X2008",
+        "name_string_index": 120482,
+        "name": "Steering Assist Request Invalid",
+        "raw_sha256": "e6ec331c04132a201c880dae62f95b613d45eacbb1e5900c1acc497eb4b3e009"
+      },
+      {
+        "record_index": 39,
+        "behavior_signature": "X2073",
+        "name_string_index": 120423,
+        "name": "Communication Error from Lane Control Module to Power Steering Control System",
+        "raw_sha256": "7bf0bfbccf65aff09cafacce580aec8334acfa405ca19c9883ac7f0474d36902"
+      },
+      {
+        "record_index": 43,
+        "behavior_signature": "X2081",
+        "name_string_index": 120472,
+        "name": "Power Steering Control System for Steering Assist Invalid",
+        "raw_sha256": "d4fdbaa695f4ed996b9c9fbbd08e94b4c475aa0fb5fcd1c9b7d8b11507c75326"
+      },
+      {
+        "record_index": 44,
+        "behavior_signature": "X2082",
+        "name_string_index": 120473,
+        "name": "Power Steering Control System for Steering Assist Steering Angle Malfunction",
+        "raw_sha256": "635e7145723291d3d767da1167f897b944a5da7711ca7c09db1cbc751f5070c2"
+      }
+    ]
+  },
+  "power_steering": {
+    "EMPS_P5": [
+      {
+        "record_index": 193,
+        "monitor_key": 2069,
+        "name_string_index": 175417,
+        "name": "Target Lateral ID",
+        "bit_range": [
+          0,
+          7
+        ],
+        "primary_data_id": "0x1CEE",
+        "alternate_data_id": "0x3CEE",
+        "raw_sha256": "092214822e9907e5ea096fc5f9c3fbdcaa8a75d17c0bcb3ecea0fd76bfc6c7fb"
+      },
+      {
+        "record_index": 194,
+        "monitor_key": 2070,
+        "name_string_index": 175022,
+        "name": "Cooperative Control in Progress Flag",
+        "bit_range": [
+          8,
+          15
+        ],
+        "primary_data_id": "0x1CEE",
+        "alternate_data_id": "0x3CEE",
+        "raw_sha256": "f4e847aa53a82b2b52ef277ab7122706e770b4a75010900fd10fd89be3724dd4"
+      },
+      {
+        "record_index": 195,
+        "monitor_key": 2071,
+        "name_string_index": 175423,
+        "name": "Target Steering Angle After Output Compensation",
+        "bit_range": [
+          16,
+          31
+        ],
+        "primary_data_id": "0x1CEE",
+        "alternate_data_id": "0x3CEE",
+        "raw_sha256": "dccd4ff36b5d0bebb78f367218df904110e513bbf52396981bd71bdbe1d6a471"
+      },
+      {
+        "record_index": 196,
+        "monitor_key": 2072,
+        "name_string_index": 174949,
+        "name": "Advanced Drive Target Steering Angle",
+        "bit_range": [
+          32,
+          47
+        ],
+        "primary_data_id": "0x1CEE",
+        "alternate_data_id": "0x3CEE",
+        "raw_sha256": "59ce1f3ff48a500fe29da98cb33ac626d79e27704489f8f3bfd50eb657e66eaa"
+      },
+      {
+        "record_index": 197,
+        "monitor_key": 2073,
+        "name_string_index": 175416,
+        "name": "Target Lateral ID (System 2)",
+        "bit_range": [
+          0,
+          7
+        ],
+        "primary_data_id": "0x1CEF",
+        "alternate_data_id": "0x3CEF",
+        "raw_sha256": "b2480cf94c3c368a42e8ec8c2f97506f07171a8b7eae41ef26be44c667cdd014"
+      },
+      {
+        "record_index": 198,
+        "monitor_key": 2074,
+        "name_string_index": 175021,
+        "name": "Cooperative Control in Progress Flag (System 2)",
+        "bit_range": [
+          8,
+          15
+        ],
+        "primary_data_id": "0x1CEF",
+        "alternate_data_id": "0x3CEF",
+        "raw_sha256": "f615be1379df5b51746320b9785ea4698240e6ed5fbb281327914856d7fcbf48"
+      },
+      {
+        "record_index": 199,
+        "monitor_key": 2075,
+        "name_string_index": 175422,
+        "name": "Target Steering Angle After Output Compensation (System 2)",
+        "bit_range": [
+          16,
+          31
+        ],
+        "primary_data_id": "0x1CEF",
+        "alternate_data_id": "0x3CEF",
+        "raw_sha256": "084d6cdcaa9e41f8513420fa5c8a16bc9f476d05fbd40aa5f757b6262e20263f"
+      },
+      {
+        "record_index": 200,
+        "monitor_key": 2076,
+        "name_string_index": 174948,
+        "name": "Advanced Drive Target Steering Angle (System 2)",
+        "bit_range": [
+          32,
+          47
+        ],
+        "primary_data_id": "0x1CEF",
+        "alternate_data_id": "0x3CEF",
+        "raw_sha256": "257e413f867a59bf039f9037258eb57e191dce0301af432e3f8588efb9cda794"
+      }
+    ],
+    "EMPS2_P5": [
+      {
+        "record_index": 172,
+        "monitor_key": 2069,
+        "name_string_index": 175417,
+        "name": "Target Lateral ID",
+        "bit_range": [
+          0,
+          7
+        ],
+        "primary_data_id": "0x1CEE",
+        "alternate_data_id": "0x3CEE",
+        "raw_sha256": "dd42241f6e984bf62855d42332c31034635d472ef580757e351f88c99a93ee14"
+      },
+      {
+        "record_index": 173,
+        "monitor_key": 2070,
+        "name_string_index": 175022,
+        "name": "Cooperative Control in Progress Flag",
+        "bit_range": [
+          8,
+          15
+        ],
+        "primary_data_id": "0x1CEE",
+        "alternate_data_id": "0x3CEE",
+        "raw_sha256": "23e9bbc6b6e502189345890ebce8c20421428fa18eb69176d641220d620365c6"
+      },
+      {
+        "record_index": 174,
+        "monitor_key": 2071,
+        "name_string_index": 175423,
+        "name": "Target Steering Angle After Output Compensation",
+        "bit_range": [
+          16,
+          31
+        ],
+        "primary_data_id": "0x1CEE",
+        "alternate_data_id": "0x3CEE",
+        "raw_sha256": "91d8f11753e7402959143d2f6239a2894aa308b2f467abb1df417fde3a1397e4"
+      },
+      {
+        "record_index": 175,
+        "monitor_key": 2072,
+        "name_string_index": 174949,
+        "name": "Advanced Drive Target Steering Angle",
+        "bit_range": [
+          32,
+          47
+        ],
+        "primary_data_id": "0x1CEE",
+        "alternate_data_id": "0x3CEE",
+        "raw_sha256": "27edd44da6fa575f9d61348942f9a451bfab1aca6e3d42cf5abbc957a7325811"
+      },
+      {
+        "record_index": 176,
+        "monitor_key": 2073,
+        "name_string_index": 175416,
+        "name": "Target Lateral ID (System 2)",
+        "bit_range": [
+          0,
+          7
+        ],
+        "primary_data_id": "0x1CEF",
+        "alternate_data_id": "0x3CEF",
+        "raw_sha256": "56c0e7e7b5f251ce052f1f4227dca0ec1ec929b7cf77174d01a9357532636da4"
+      },
+      {
+        "record_index": 177,
+        "monitor_key": 2074,
+        "name_string_index": 175021,
+        "name": "Cooperative Control in Progress Flag (System 2)",
+        "bit_range": [
+          8,
+          15
+        ],
+        "primary_data_id": "0x1CEF",
+        "alternate_data_id": "0x3CEF",
+        "raw_sha256": "f5f9d7075946af23e454e6964859527da507a9a507d3d62f8f03ce468337600c"
+      },
+      {
+        "record_index": 178,
+        "monitor_key": 2075,
+        "name_string_index": 175422,
+        "name": "Target Steering Angle After Output Compensation (System 2)",
+        "bit_range": [
+          16,
+          31
+        ],
+        "primary_data_id": "0x1CEF",
+        "alternate_data_id": "0x3CEF",
+        "raw_sha256": "4744cc9c9728d4e2d6997bb08723a89541acb608a2c4e08d88b2a883b2ae8b59"
+      },
+      {
+        "record_index": 179,
+        "monitor_key": 2076,
+        "name_string_index": 174948,
+        "name": "Advanced Drive Target Steering Angle (System 2)",
+        "bit_range": [
+          32,
+          47
+        ],
+        "primary_data_id": "0x1CEF",
+        "alternate_data_id": "0x3CEF",
+        "raw_sha256": "aefc221ee3106f7e92e0f12a6e8b11097bf06e02ad3d35035b1be85ca8a9b108"
+      }
+    ],
+    "did_corpus_scan": {
+      "scan_scope": "type-62 CDbDatamonitorP5Table primary Data-ID field (record +0x36) of the NA/EU/JP *_P5*.ddb ECU databases; alternate Data-ID fields and non-P5 or non-type-62 tables are not covered by this scan",
+      "files_scanned": 402,
+      "data_ids": [
+        "0x1CEE",
+        "0x1CEF"
+      ],
+      "owner_databases": [
+        {
+          "region": "EU",
+          "database": "EMPS2_P5.ddb"
+        },
+        {
+          "region": "EU",
+          "database": "EMPS_P5.ddb"
+        },
+        {
+          "region": "JP",
+          "database": "EMPS2_P5.ddb"
+        },
+        {
+          "region": "JP",
+          "database": "EMPS_P5.ddb"
+        },
+        {
+          "region": "NA",
+          "database": "EMPS2_P5.ddb"
+        },
+        {
+          "region": "NA",
+          "database": "EMPS_P5.ddb"
+        }
+      ],
+      "row_counts": [
+        {
+          "region": "EU",
+          "database": "EMPS2_P5.ddb",
+          "data_id": "0x1CEE",
+          "rows": 4
+        },
+        {
+          "region": "EU",
+          "database": "EMPS2_P5.ddb",
+          "data_id": "0x1CEF",
+          "rows": 4
+        },
+        {
+          "region": "EU",
+          "database": "EMPS_P5.ddb",
+          "data_id": "0x1CEE",
+          "rows": 4
+        },
+        {
+          "region": "EU",
+          "database": "EMPS_P5.ddb",
+          "data_id": "0x1CEF",
+          "rows": 4
+        },
+        {
+          "region": "JP",
+          "database": "EMPS2_P5.ddb",
+          "data_id": "0x1CEE",
+          "rows": 4
+        },
+        {
+          "region": "JP",
+          "database": "EMPS2_P5.ddb",
+          "data_id": "0x1CEF",
+          "rows": 4
+        },
+        {
+          "region": "JP",
+          "database": "EMPS_P5.ddb",
+          "data_id": "0x1CEE",
+          "rows": 4
+        },
+        {
+          "region": "JP",
+          "database": "EMPS_P5.ddb",
+          "data_id": "0x1CEF",
+          "rows": 4
+        },
+        {
+          "region": "NA",
+          "database": "EMPS2_P5.ddb",
+          "data_id": "0x1CEE",
+          "rows": 4
+        },
+        {
+          "region": "NA",
+          "database": "EMPS2_P5.ddb",
+          "data_id": "0x1CEF",
+          "rows": 4
+        },
+        {
+          "region": "NA",
+          "database": "EMPS_P5.ddb",
+          "data_id": "0x1CEE",
+          "rows": 4
+        },
+        {
+          "region": "NA",
+          "database": "EMPS_P5.ddb",
+          "data_id": "0x1CEF",
+          "rows": 4
+        }
+      ]
+    },
+    "corolla_h_boundary": {
+      "software_id": "8965H1202000",
+      "modern_primary_data_ids": [
+        "0x1CEE",
+        "0x1CEF"
+      ],
+      "supports_any_primary_data_id": false
+    },
+    "emps2_scope_note": "EMPS2_P5 evidence here is limited to the 0x1CEE/0x1CEF monitor family and the VDS/master category identity; the steer-by-wire diagnostic vocabulary (steering-angle synchronization histories, dual-system ECU/motor overheat prevention, torque-sensor A/B calibration, reaction-force actuator angle offset) is intentionally not enumerated in this artifact and remains a separate bounded extraction if needed."
+  },
+  "interpretation_boundary": {
+    "recovered": "The true-TSS3 lateral-control diagnostic-domain holder is category 498 FRC_P5 (Front Recognition Camera 2) with dedicated master plugin roles 233/234 (GetTSS3ImageFFDP5_DT.dll / GetTSS3OperationFFDP5_DT.dll), LTA/LDA installation/customize/control/hands-off DID rows, and a read-only proprietary AB/EB Operation FFD protocol. VDS ECUNo 498 covers 52/9/39 NA/EU/JP VIN descriptor patterns including six NA 5YF families; the install-set chain joins 498+499 sets to MAC/RZ450e/bZ4X/e-Palette-class models and Corolla-family TSS3 sets to 498+EMPS_P5(405). The ADS_Eth_P5 target-steering-angle order rows remain Advanced Drive snapshot evidence, and EMPS_P5/EMPS2_P5 remain the steering-side observer domain whose type-62 primary Data-ID declarations exclusively carry 0x1CEE/0x1CEF across the scanned P5 corpus. Diagnostic-domain holder means exactly that: physical control-path ownership is not asserted.",
+    "not_proved": [
+      "the CAN/CAN-FD arbitration ID or wire encoding carrying any named target-angle value",
+      "that the ADS_Eth_P5 DDR snapshot rows are live wire command fields",
+      "that ADS Operation plugin DID 0x1C08 joins to ADS DDR rows 406/407",
+      "any producer/bit-layout/authentication join from FRC_P5 to community NEW_MSG_8A_LAT_CONTROL (0x18A; the Reference screenshot corpus records 0x18A as one of 22 CAN-FD 64-byte IDs on buses 0 and 2, nothing more)",
+      "that FRC_P5 equals the old Fr_Camera_P5 (430) or ADS_Eth_P5 (476) software domain",
+      "that the Corolla-family 498+405 install sets imply EMPS2_P5 (499) vehicles use the same lateral contract",
+      "the semantics of any category-498 Active-Test entry beyond its role bindings",
+      "a unique 5YF-descriptor-to-VehicleId mapping (the per-pattern join is bounded, not unique)"
+    ],
+    "next_static_target": "FRC_P5 firmware acquisition and the true-TSS3 producer contract: recover the FRC lateral-control output path and its join (if any) to EMPS/EMPS2 steering observers, using the read-only Operation FFD surface as the capture reference."
+  }
+}

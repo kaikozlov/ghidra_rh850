@@ -26,6 +26,49 @@ The concrete live capture requirements are in
 and unresolved static/dynamic boundaries remain in
 [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
 
+## Directed static exception — true-TSS3 FRC_P5 producer contract
+
+The previous pre-GTS static queue is still closed; do **not** reopen an
+undirected Techstream or Corolla-H firmware sweep. TMS-040 closed the
+software-ownership question that justified the exception: the true-TSS3
+lateral-control **diagnostic-domain holder** is generation-20 category **498
+`FRC_P5` = Front Recognition Camera 2** (distinct from `Fr_Camera_P5` 430 and
+`ADS_Eth_P5` 476; holder means exactly that — physical control-path ownership
+is not asserted), it holds dedicated master plugin roles 233/234
+(`GetTSS3ImageFFDP5_DT.dll` / `GetTSS3OperationFFDP5_DT.dll`), it pins the
+LTA/LDA/LCA installation/customize/control/hands-off DID surface, and its
+read-only `AB/EB` Operation FFD capture path is byte-anchored. Category 498
+also binds an **Active-Test surface** (master roles 6/8/99/112/173) that is
+separate from the read-only FFD path and whose actuation semantics remain
+bounded. The ADS_Eth_P5 target-angle order rows (406/407, rad/s and rad via
+the PhyData→Unit chain) are recorded-snapshot evidence, and a 402-file corpus
+scan proves the `0x1CEE/0x1CEF` steering-observer **type-62 primary Data-ID
+declarations** occur only in `EMPS_P5`/`EMPS2_P5` — exact Corolla H
+implements neither.
+
+**Next software-analysis target:** acquire and analyze **`FRC_P5` camera
+firmware** (Front Recognition Camera 2) for a true-TSS 3 vehicle and recover
+its lateral-control producer contract: which in-vehicle message(s) carry the
+LTA target state, and whether/where they join the EMPS/EMPS2 steering
+observer domain. The read-only Operation FFD surface
+(`AB 11/12/13` → `EB …`, parser at 0x10001A70) is the reference capture
+protocol once live probes are justified; the repository deliberately ships no
+live writer for it. A newer EMPS/EMPS2 image that implements `0x1CEE/0x1CEF`
+remains the complementary steering-side acquisition.
+
+The community `NEW_MSG_8A_LAT_CONTROL` heatmap is a high-value lead because it
+independently names torque/target-angle/confidence-like fields, and the
+Reference screenshot corpus (REFERENCE/CorollaExp_Screenshots.md) records
+`0x18A` as one of 22 CAN-FD 64-byte IDs observed on buses 0 and 2 — nothing
+more is pinned by that artifact. No bit/name/producer/authentication join to
+`FRC_P5` is proven. Do not encode it in a DBC from the screenshot alone;
+treat it as the candidate wire hypothesis the FRC firmware pass must confirm
+or refute.
+
+Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.2 ·
+[OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) ·
+[../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.35.
+
 ## P0 — highest information gain
 
 ### 1. Live slot-4 command-5 permission

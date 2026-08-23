@@ -956,6 +956,32 @@ paths = [
   "docs/tooling/techstream-ddb-pipeline.md",
 ]
 
+[suite.techstream_p5_lateral_control]
+tests = [
+  "tests/verify_techstream_p5_lateral_control.py",
+]
+requires_external = ["techstream_v18"]
+oracle = "independent_external_artifact"
+paths = [
+  "tools/techstream/parse_ddb.py",
+  "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll",
+  "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetTSS3ImageFFDP5_DT.dll",
+  "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetTSS3OperationFFDP5_DT.dll",
+  "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetADSDDRInfoP5_DT.dll",
+  "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetADSOperationFFDP5_DT.dll",
+  "tools/techstream/extract_p5_lateral_control_semantics.py",
+  "tests/verify_techstream_p5_lateral_control.py",
+  "data/generated/techstream_v18/p5_lateral_control_semantics.json",
+  "data/generated/techstream_v18/ddb_factory_table_map.json",
+  "data/generated/corolla_8965H1202000_techstream_correlations.json",
+  "docs/tooling/techstream.md",
+  "docs/reference/generated-artifacts.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.techstream_dtc_failure_types]
 tests = ["tests/verify_techstream_dtc_failure_types.py"]
 requires_external = ["techstream_v18"]
