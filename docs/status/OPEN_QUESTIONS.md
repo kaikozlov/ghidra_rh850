@@ -9,24 +9,24 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Bootloader
 
-- **Bootloader DID `0203` semantics.** It ignores its five bytes and only arms
+- **OQ-001 — Bootloader DID `0203` semantics.** It ignores its five bytes and only arms
   state 0 → 1. Whether any field ever carried meaning in other calibrations is
   unknown.
 
 ## Application
 
-- **`0xAB` event-record naming.** The configured graph is closed and its
+- **OQ-002 — `0xAB` event-record naming.** The configured graph is closed and its
   list/per-ID/detail structure is recovered, but the OEM service name and exact
   meanings of the event catalogue's encoded upper ID bits and record-kind
   values remain unknown.
-- **Live confirmation of the RDBI stale-response disclosure.** Firmware-static
+- **OQ-003 — Live confirmation of the RDBI stale-response disclosure.** Firmware-static
   analysis proves that DIDs `1CF4..1CFF` and `1D01..1D03` return 45 bytes that
   their success-stub producers never write, sourced from persistent Dcm buffer
   `FEBE59F8`. On an isolated Sienna `8965B4512000` bench, run the default-safe
   `exploit/followups/application_rdbi_stale_probe.py`: its discriminator seeds
   the buffer with a 47-byte SID-`0x23` read and requires `22 1C F4` to equal
   `62 1C F4 ‖ seed[2:47]`. Preserve F181, route, and raw request/response bytes.
-- **XCP physical reachability; dynamic-only write consumers.** COM-005 proves
+- **OQ-004 — XCP physical reachability; dynamic-only write consumers.** COM-005 proves
   both the unauthenticated `0x7F7/0x7F8` disclosure chain and a direct 32 KiB
   LocalRAM write primitive (`F0 DOWNLOAD` plus `EC MODIFY_BITS`). COM-007 now
   closes the adjacent DAQ direction: `E1 WRITE_DAQ` configures 112 one-byte
@@ -47,7 +47,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   diagnostic-state profiles, without implementing the generic F0/EC memory
   writers. Do not exercise generic write commands on a vehicle. Canonical:
   [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md).
-- **Dynamic authenticated-command actuation discriminator.** If COM-007's
+- **OQ-005 — Dynamic authenticated-command actuation discriminator.** If COM-007's
   `0x7F7/0x7F8` route is physically reachable on the bench,
   `exploit/followups/xcp_daq_probe.py --profile actuation-discriminator` can
   stream the already-pinned d/q-reference and TSG3-compare RAM directly during
@@ -100,7 +100,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## SecOC
 
-- **Cross-calibration ephemeral runtime transfer.** The Sienna fresh-import
+- **OQ-006 — Cross-calibration ephemeral runtime transfer.** The Sienna fresh-import
   resolver is now deterministic and the RH850 runtime sources are target-driven.
   What remains is external evidence: run `tools/resolve_ephemeral_runtime_image.sh`
   unchanged on the first foreign CodeFlash. A `semantic-resolved-geometry-unresolved`
@@ -113,7 +113,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   byte identity is not pinned. Canonical:
   [../tooling/ephemeral-runtime-semantic-resolver.md](../tooling/ephemeral-runtime-semantic-resolver.md).
 
-- **Ephemeral scheduler-bridge hardware validation.** ARCH-013/014 and
+- **OQ-007 — Ephemeral scheduler-bridge hardware validation.** ARCH-013/014 and
   SECOC-060/061 now close the static architecture without a post-init stock
   callback: the audited 704-byte runtime performs the stock boot/context/startup
   sequence, remains foreground scheduler owner, snapshots marked pre-verification
@@ -131,7 +131,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   specific static assumption. Canonical:
   [../security/ephemeral-secoc-bypass.md](../security/ephemeral-secoc-bypass.md);
   `exploit/ephemeral_runtime/`.
-- **Cross-calibration semantic patch resolver validation.** SECOC-045
+- **OQ-008 — Cross-calibration semantic patch resolver validation.** SECOC-045
   rediscovers the Sienna authenticated-delivery gate from a fresh unannotated
   CodeFlash-only import with no target/MAC-result/CRC addresses embedded in the
   resolver, and Span `8965F1208000` has now independently reproduced the same
@@ -147,7 +147,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   candidates require stronger crypto-result provenance. Do **not** add a
   software-ID offset table as the fallback. Canonical:
   [../tooling/secoc-semantic-patch-resolver.md](../tooling/secoc-semantic-patch-resolver.md).
-- **First live run of the generic read-only CodeFlash acquisition path.** The
+- **OQ-009 — First live run of the generic read-only CodeFlash acquisition path.** The
   addressed-word protocol/reassembler and 424-byte RH850 payload are locally
   complete and pinned-toolchain verified, including authenticated 4 KiB payload
   packaging, address-zero CodeFlash load retention, partial-dump preservation,
@@ -158,7 +158,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   acquired image. This read-only acquisition should precede every live APPLY and
   supplies the exact recovery source image. Canonical:
   `exploit/dumper/README.md`; [historical exploit-engineering journal](../history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md).
-- **Live Gate-2 MAC28 causal proof.** The local hardware-proof harness and the
+- **OQ-010 — Live Gate-2 MAC28 causal proof.** The local hardware-proof harness and the
   exact one-off openpilot ablation are complete. yc's 2026-08-16 external field
   report corroborates the corrected `cmp r0,r26 -> cmp r0,r0` direction on a
   2024 RAV4 Prime, but its forced older profile changes a broader message set and
@@ -171,14 +171,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   all three phases. `validate_trial.py` intentionally rejects flash/reboot
   success as proof. Canonical: `exploit/behavioral_proof/README.md` and
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md).
-- **RR versus RL ordering inside protected CAN-FD `0x090`.** Techstream
+- **OQ-011 — RR versus RL ordering inside protected CAN-FD `0x090`.** Techstream
   `EMPS2_P5` plus the firmware consumer shapes now identify signals 270/273 as
   the protected rear-wheel-speed RR/RL pair and signal 276 as `CAN Steering
   Angle Speed (SSAV)`. The static artifacts do **not** bind signal 270 versus
   273 individually to right versus left. Preserve the pair-level semantic until
   a CAN trace, exact DBC, or independently labeled diagnostic correlation fixes
   the ordering. Canonical: [../communications/application-rx.md](../communications/application-rx.md) §5.4; `secoc_fd_sensor_correlations.json`.
-- **Live slot-4 operation permissions.** Static CodeFlash proves slot-4
+- **OQ-012 — Live slot-4 operation permissions.** Static CodeFlash proves slot-4
   verification (command 7). The AUTOSAR SHE spec governs usage by a single
   binary `KEY_USAGE` flag (enc/dec ⊕ MAC-generate+verify; no verify-only
   facility — SECOC-023, CORR-017), so under standard SHE a MAC-usage slot 4
@@ -193,7 +193,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   compare mismatch; record status, output, latency, jitter, and debug-attached
   behavior. See
   [../security/secoc/key-recovery-assessment.md](../security/secoc/key-recovery-assessment.md) §1.3.
-- **Command 13 vendor semantics.** The SHE spec disproves the normal
+- **OQ-013 — Command 13 vendor semantics.** The SHE spec disproves the normal
   slot-4→`RAM_KEY`→export extraction route (SECOC-025): `CMD_EXPORT_RAM_KEY` is
   `RAM_KEY`-only/plain-only and no nonvolatile KEY has an export or copy command.
   Command-13 opcode identity is therefore moot for standard SHE extraction. Its
@@ -201,7 +201,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   deviation in opcode/selector/lifecycle behavior. This is lower priority than
   the live command-5 permission test. See
   [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md).
-- **`8965B4514000` runtime object-15 key path.** Vance's external field report
+- **OQ-014 — `8965B4514000` runtime object-15 key path.** Vance's external field report
   places a CMAC-validating candidate in the structural object-15 second field
   at `0xFF206E14`, but no `4514000` CodeFlash or runtime trace is public in the
   bounded Stage-8 acquisition corpus. Exact identifier/path/extension searches,
@@ -211,34 +211,34 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   selector/command-7 use, independent hardware-slot provisioning, or mixed use.
   See [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md)
   and [historical external-reference refresh](../history/2026-08/EXTERNAL_REFERENCE_REFRESH_2026-08-10.md).
-- **Same-vehicle `0x344` producer and key storage.** The same `4514000` partner
+- **OQ-015 — Same-vehicle `0x344` producer and key storage.** The same `4514000` partner
   key reportedly validates `PRE_COLLISION_2` (`0x344`) `112/113`, while
   `4512000` EPS has no `0x344` receive profile. Identify the physical producer
   by multi-segment capture, candidate-ECU isolation/reset, or candidate firmware
   analysis, then test it as a peer key-recovery target. OpenDBC's inherited
   `DS1`/`DSU` logical node is not physical-source proof; a gateway mirror must
   be excluded.
-- **SecOC key uniqueness across vehicles/calibrations.** Collect hash-only
+- **OQ-016 — SecOC key uniqueness across vehicles/calibrations.** Collect hash-only
   records with vehicle/sample pseudonym, software ID, region/build, validated
   CAN IDs, match counts, and source. One `4514000` partner observation cannot
   distinguish a per-vehicle key from calibration-, model-, region-, or
   fleet-shared provisioning.
-- **Command-7 power/EM leakage.** FD IDs `0x090`/`0x0D7` provide 14 chosen bytes
+- **OQ-017 — Command-7 power/EM leakage.** FD IDs `0x090`/`0x0D7` provide 14 chosen bytes
   in CMAC's first AES block. Run fixed-vs-random leakage detection, establish a
   stable trigger, attempt CPA for key bytes 2..15, and complete the two fixed
   Data-ID-aligned bytes by `2^16` search against multiple stock tags. ICU-S
   masking, byte order, trace count, and attainable SNR are unobserved.
-- **Physical power topology.** Confirm the chip marking and measure the actual
+- **OQ-018 — Physical power topology.** Confirm the chip marking and measure the actual
   core rail before power analysis or glitching. Renesas lists `R7F701381` as a
   DPS part with VDD pins 11/66/98, while a public same-part-number report
   describes VCL/eVR pins 11/66.
-- **Protected-tail serial read.** Determine whether a faulted serial read of
+- **OQ-019 — Protected-tail serial read.** Determine whether a faulted serial read of
   `0x1007800..0x1007FFF` bypasses only a mask-ROM range check or also exposes
   nonblank ICU-S storage. The current CPU-visible dump contains only `00/FF`;
   public P1M-E fault injection proves ordinary flash readout, not key-array
   access.
-- **Bank-0 command-8 production role and safe dynamic confirmation (SECOC-047/048).** Static firmware closes the CAN `0x13..0x1A` assembly and completion-misattribution mechanics. What remains useful is dynamic provenance, not random stimulation: determine whether RID `0x100E`/those CAN IDs occur during legitimate provisioning, whether any external monitor exposes bank-0 terminal state, and whether dealer tooling treats RID `0x1010` status `02` with zero proof as success. Reproduce the race only on a disposable/matching unit with a legitimately captured authenticated update package and complete recovery plan; preserve F181, route, M1–M5 hashes, timing, DTCs, and post-run key state. Do not synthesize command-8 packages on the only original ECU.
-- **Application command-5 signing capability — only hardware permission/timing remain dynamic.**
+- **OQ-020 — Bank-0 command-8 production role and safe dynamic confirmation (SECOC-047/048).** Static firmware closes the CAN `0x13..0x1A` assembly and completion-misattribution mechanics. What remains useful is dynamic provenance, not random stimulation: determine whether RID `0x100E`/those CAN IDs occur during legitimate provisioning, whether any external monitor exposes bank-0 terminal state, and whether dealer tooling treats RID `0x1010` status `02` with zero proof as success. Reproduce the race only on a disposable/matching unit with a legitimately captured authenticated update package and complete recovery plan; preserve F181, route, M1–M5 hashes, timing, DTCs, and post-run key state. Do not synthesize command-8 packages on the only original ECU.
+- **OQ-021 — Application command-5 signing capability — only hardware permission/timing remain dynamic.**
   Stock RoutineControl `31 01 10 0F` still supplies a fixed-16 diagnostic test,
   but SECOC-070 closes the alternate-caller problem: a 546-byte RAM-only runtime
   now invokes serialized dispatcher `0x88350` through clean driver record 0 with
@@ -260,30 +260,30 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   See
   [../security/secoc/command5-oracle-assessment.md](../security/secoc/command5-oracle-assessment.md) and
   [../security/secoc/sender-implementation.md](../security/secoc/sender-implementation.md) §5.
-- **Object-15 producer.** No static producer exists in this calibration.
+- **OQ-022 — Object-15 producer.** No static producer exists in this calibration.
   Where a provisioned unit writes object 15 from is unknown (dealer tool path
   hypothesis only).
-- **Reset-window replay.** Receiver freshness is zeroed at SecOC initialization,
+- **OQ-023 — Reset-window replay.** Receiver freshness is zeroed at SecOC initialization,
   so a captured positive synchronization value is structurally forward after
   reset. `exploit/followups/secoc_freshness_trials.py reset-replay` now validates
   the captured sync/protected frames and emits the exact offline phase artifact;
   a cold-boot bench run must still determine sync cadence, whether the old
   authenticated sync can win the startup race, which early ordinary frames can
   then replay, and how quickly legitimate sync closes the window.
-- **Tag-guess and saturation rate.** The static profile exposes 28 CMAC bits,
+- **OQ-024 — Tag-guess and saturation rate.** The static profile exposes 28 CMAC bits,
   does not advance freshness on failure, and has no recovered authentication
   failure lockout. `secoc_freshness_trials.py tag-guesses` now creates bounded
   offline candidate sets while preserving payload and transmitted freshness;
   live work still needs command-7 throughput, queue replacement, `0xE07`
   polling latency, watchdog load, legitimate-frame loss, and whether bus error
   behavior makes online guessing or only denial of service practical.
-- **Future-sync recovery.** A valid sync can jump arbitrarily forward.
+- **OQ-025 — Future-sync recovery.** A valid sync can jump arbitrarily forward.
   `secoc_freshness_trials.py future-sync` now rejects non-forward candidates and
   records the already-authenticated candidate/current epochs; verify on a bench
   whether a far-future signed sync blocks lower legitimate epochs until receiver
   reset, whether any external freshness manager repairs it, and which
   diagnostic/status signals expose the desynchronization.
-- **FD ignored-suffix behavior.** CAN-FD DLC 48/64 is accepted then clamped to 32.
+- **OQ-026 — FD ignored-suffix behavior.** CAN-FD DLC 48/64 is accepted then clamped to 32.
   `secoc_freshness_trials.py fd-suffix-alias` now constructs exact 48/64-byte
   aliases with an unchanged first 32-byte EPS authenticated view. Confirm whether
   gateways or peer ECUs preserve/interpret the suffix differently; the Sienna
@@ -291,14 +291,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Variants
 
-- **Sienna `8965B4514000`.** Acquire CodeFlash and completed partner
+- **OQ-027 — Sienna `8965B4514000`.** Acquire CodeFlash and completed partner
   dump/capture outputs. Stage 8 re-ran exact public/local acquisition searches
   and found neither, so this remains missing-artifact blocked rather than
   quietly unblocked. The object-15 field and CMAC counts are pinned external
   observations, but runtime crypto architecture, `0x344` EPS direction/owner,
   mismatch clustering, and key uniqueness remain open. See
   [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md).
-- **Corolla `8965F1208000`.** Acquisition and broad static comparison are
+- **OQ-028 — Corolla `8965F1208000`.** Acquisition and broad static comparison are
   closed against the tracked 2026-08-21 Span corpus. F181, all three static
   security roots, normal-Rx/SecOC topology, Sienna transfer, non-CodeFlash
   memory, and the `0xA000` active unit-calibration family are now pinned from
@@ -324,7 +324,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   all-zero staging seeds — not differing compiled model-year constants; factory
   vs service origin is not distinguished. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
-- **Separate 2023 US Corolla / tracked `8965H1202000` specimen.** The complete
+- **OQ-029 — Separate 2023 US Corolla / tracked `8965H1202000` specimen.** The complete
   memory corpus is now retained. CodeFlash internally identifies
   `8965H1202000/8A3111202000`, `R7F701383`, and serial
   `8965012N50A05G310920`; all three Sienna crypto roots transfer byte-for-byte,
@@ -406,11 +406,11 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   so the route-to-image/model-year join remains contributor attribution. See
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   and [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md).
-- **TSS 3.0 family breadth.** Which Sienna findings generalize across the
+- **OQ-030 — TSS 3.0 family breadth.** Which Sienna findings generalize across the
   family (Camry, RAV4, etc.) is unmapped. See
   [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).
 
-- **Boot SecurityAccess lifecycle measurement.** The bad-key backoff itself is
+- **OQ-031 — Boot SecurityAccess lifecycle measurement.** The bad-key backoff itself is
   statically closed at **10 seconds**: the second bad `27 02` arms
   `200000000` TAUJ1CNT0 ticks and `27 01` returns NRC `0x37`; TAUJ1CNT0 runs at
   20 MHz from the recovered P1M-E timer configuration. Separately, the ordinary
@@ -423,7 +423,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 
 ## Tooling
 
-- **Semantic coverage.** The current graph has 6,376 structurally discovered
+- **OQ-032 — Semantic coverage.** The current graph has 6,376 structurally discovered
   functions. A reproducible ranked sweep decompiled 100 entries, including all
   mandatory callback/dispatcher families, but 87 selected entries remain
   `reviewed_unknown`; across the whole ledger 6,257 functions remain
@@ -433,7 +433,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   decompilation into semantic confidence. The selection artifact and current
   boundary are in
   [historical corrected-graph re-audit](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
-- **RFP/P1M-E serial-protocol transfer.** The generic RV40F **host-side static
+- **OQ-033 — RFP/P1M-E serial-protocol transfer.** The generic RV40F **host-side static
   work is closed** (RFP-001..008): all 52 ordinary command IDs are censused,
   both connection/setup variants are recovered, the 8-byte `GetDeviceType`
   capability word and key `0x1106` are decoded, legacy `SetICUM` is bounded to
@@ -460,7 +460,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   Defer `ValidateICU_S 0x70` and `DisableSerialProgramming 0x29` until their
   silicon effect on P1M-E is observed. See CORR-092.
   See [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
-- **DID `0x1010` production use and slot-4 package.** Static firmware now
+- **OQ-034 — DID `0x1010` production use and slot-4 package.** Static firmware now
   recovers a SHE-compatible command-8 key-update service behind RoutineControl RID
   `0x1010`; selector `01` starts the 64-byte M1–M3 update and selector `03`
   reads status `01/02/FF` plus M4/M5 on success. Capture a legitimate
@@ -473,7 +473,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   16-byte identity from DID `0x1010`, but writes M1–M3 through Routine
   `0x3002`. RFP's `ValidateICU_S` is likewise a separate
   lifecycle-validation operation.
-- **MACKey `SafekeyNumber` physical meaning.** Techstream forwards the raw
+- **OQ-035 — MACKey `SafekeyNumber` physical meaning.** Techstream forwards the raw
   16-byte payload of `22 10 10` unchanged and uses it to associate returned
   exchange records with master/slave ECUs. Stage 8 now pins an external official
   rekey observation that Toyota requires both an **MCU ID and VIN** and rejects
@@ -483,7 +483,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   DID `0x1010` as that value. Resolve the final identity join only from target
   ECU firmware or a labeled legitimate vehicle transcript; do not equate the
   two fields from naming similarity alone.
-- **Techstream live-session capture.** `ptshim32.dll`/`ptshim32_0500.dll`
+- **OQ-036 — Techstream live-session capture.** `ptshim32.dll`/`ptshim32_0500.dll`
   (TMS-005) can capture a complete Techstream↔EPS J2534 transcript, and the log
   format is no longer a blocker. Both shipped text formats, performance-counter
   timestamps, address/data lines, save modes, and `J2534Ctrl.dll`'s timestamped
@@ -506,7 +506,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   SEC-APP-001, and DIAG-APP-001/003. Preserve raw logs
   privately and commit only reviewed/redacted derivatives or hashes. See
   [../tooling/techstream-capture-procedure.md](../tooling/techstream-capture-procedure.md).
-- **Sienna EPS exact CUW row and calibration material.** TMS-029/TMS-032 close
+- **OQ-037 — Sienna EPS exact CUW row and calibration material.** TMS-029/TMS-032 close
   the complete V18 static route census and both surviving Unified routes at
   body level (RequestDownload grammar incl. hex-decoded `SecurityProperty2`
   bit 3, per-CPU-image/area sequencing, `MakeSendData` verbatim copy, negative
@@ -519,7 +519,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `ECUAuthKey`, `SeedKey`, `Nonce`, `OffsetAddress`, download ranges,
   per-area choice, and actual target-integrity/header values. Do not promote
   byte compatibility into an exact transcript without that artifact.
-- **CUW retry/recovery live attribution.** TMS-030/TMS-031 close the V18 static
+- **OQ-038 — CUW retry/recovery live attribution.** TMS-030/TMS-031 close the V18 static
   timing tables, retry/reconnect controller, recovery-file schema, and useful
   P5 power-cycle observers. A live session is still needed to identify the
   selected target row and measure its actual SecurityAccess spacing,
@@ -528,7 +528,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   raw J2534 timestamps, selected factory/contact/CPU metadata, and Data IDs
   `0016..0019`, `0033/0034/0036`, `0421/0422`, `07D1/07D2`, and
   `26AC/26AD/26C1/26C3`. This is now a capture task, not a static-RE blocker.
-- **Matching modern calibration package and target-specific integrity values.**
+- **OQ-039 — Matching modern calibration package and target-specific integrity values.**
   TMS-026/TMS-034/TMS-037/TMS-038/TMS-039 now close two real legacy package
   families plus an 11-package Tacoma comparative corpus. `T-0087-17.cuw`
   validates the recovered outer CRC/member framing, Format-4 archive grammar,
@@ -551,7 +551,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   FRC corpus — but that is a Corolla **front camera**, not EPS: its
   `ServiceAuthKey`/`Nonce`/ranges do not transfer, and the EPS Unified-row
   choice/credentials above remain open.
-- **RKS exact target/region policy (Layer A).** TMS-028/TMS-033 close the static
+- **OQ-040 — RKS exact target/region policy (Layer A).** TMS-028/TMS-033 close the static
   client completely: state machine, request-field provenance (incl. shipped
   `Ini/RKS.ini` `[ReproKeyRequest]` values), online/offline/import convergence,
   fixed token format, the `IsStored` flag, and the full SeedValue producer
@@ -581,7 +581,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   signing algorithm/private key — both external to the shipped client, which
   never reaches the ECU security boundary or any firmware secret.
   See [../tooling/techstream.md](../tooling/techstream.md) §5.3.
-- **MEM-SAFE-001 transfer to newer SecOC/TSK targets.** The partial-AES-block
+- **OQ-041 — MEM-SAFE-001 transfer to newer SecOC/TSK targets.** The partial-AES-block
   raw-write primitive (MEM-SAFE-001) upgrades a prior authenticated payload into
   arbitrary RAM-code execution without repeating CMAC. The exact bounded host
   transactions are now implemented and tested under `exploit/followups/`; the
@@ -594,7 +594,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   experiments. If the target uses different download window sizes, callback
   offsets, or alignment requirements, the primitive may not apply. See
   [../security/memory-safety-audit.md](../security/memory-safety-audit.md).
-- **MEM-SAFE-003 equality-oracle reachability for variant identification.** The
+- **OQ-042 — MEM-SAFE-003 equality-oracle reachability for variant identification.** The
   `0x10F3` byte-compare oracle can read application CodeFlash at
   its two configured ranges without dumping the full image. The re-arm loop,
   range gates, request budget, simulator, and explicit live mode are now
@@ -604,13 +604,13 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   unknown is a live timing/reachability measurement; the 256-request worst case
   makes only small known signatures rational. See
   [../security/memory-safety-audit.md](../security/memory-safety-audit.md).
-- **Newer-TSK exact target bundle.** No exact target identity currently exists.
+- **OQ-043 — Newer-TSK exact target bundle.** No exact target identity currently exists.
   Acquire the part/calibration number plus `F181`, complete CodeFlash and
   DataFlash, matching Techstream/regional DDB set, exact `.cuw`, and the six
   synchronized labeled captures above. Use the redacted manifest schema in
   [../variants/newer-tsk-target-evidence.md](../variants/newer-tsk-target-evidence.md);
   until then every Sienna→newer-TSK transfer remains hypothesis.
-- **RoutineControl `1004` hardware-visible event-history rewrite consequence.**
+- **OQ-044 — RoutineControl `1004` hardware-visible event-history rewrite consequence.**
   Static recovery is closed: default-session `31 01 10 04 FF FF` has no recovered
   vehicle-speed gate and repeatably drives operation 5, which waits on persistent
   rewrites of event-log/history objects 17/18/19/20/21/23. No direct
@@ -618,7 +618,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   “ClearDTC” without external/dynamic evidence. Dynamic characterization is not
   packaged as a normal probe because it deliberately modifies persistent event
   history; use only a disposable/matching ECU with NVM backup/restore.
-- **RoutineControl `1108` hardware-visible persistent-reset consequence.**
+- **OQ-045 — RoutineControl `1108` hardware-visible persistent-reset consequence.**
   Static recovery is closed: unauthenticated default-session `31 01 11 08` has
   no recovered vehicle-speed gate and repeatedly starts/coalesces queue operation
   2, which resets/reinitializes runtime state and persists checkpoint objects
@@ -627,7 +627,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   deliberately not packaged as a normal probe because the routine modifies
   persistent state; use only a disposable/matching ECU with complete NVM
   backup/restore and recovery procedure.
-- **Application WDBI `0204` hardware-visible maintenance/reset consequence.**
+- **OQ-046 — Application WDBI `0204` hardware-visible maintenance/reset consequence.**
   Static recovery is closed: the write transitions/persists checkpoint object 7,
   and one branch then starts queue operation 6, which resets/reinitializes state
   and persists checkpoint objects 9/11/12/14/15 after WDBI completion. No direct
@@ -635,7 +635,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   deliberately not packaged as a normal bench probe because it modifies
   persistent state; use only a disposable/matching bench with complete NVM
   backup/restore and recovery procedure if the physical effect becomes important.
-- **Application WDBI `2012` hardware-visible lifecycle-inhibit consequence.**
+- **OQ-047 — Application WDBI `2012` hardware-visible lifecycle-inhibit consequence.**
   Static recovery now closes the software cone: after the scaled-supply snapshot
   reaches `0x0900`, `2012` suppresses the mode-specific transition block that
   normally performs task-signal clearing / NvM default-reset actions, and it
@@ -643,7 +643,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   unknown is what observable EPS behavior this inhibit produces on an isolated
   matching bench and how it recovers across session exit/reset. Static closure
   has no direct d/q/PWM join, so do not describe it as steering-current control.
-- **Application WDBI `2013/2014` hardware-visible consequence.** Their static
+- **OQ-048 — Application WDBI `2013/2014` hardware-visible consequence.** Their static
   cones are now closed. Both retain the vehicle-speed plus two-state-flag start
   gate. `2013` reaches motor-worker fields `FEBE6DCA/6DCC` but dead-ends in
   write-only task/RTE mirrors; `2014` changes threshold/mode eligibility and
@@ -651,14 +651,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   recovered direct d/q/PI/PWM join. The remaining question is what observable
   EPS behavior either write produces on an isolated matching bench and how the
   state recovers across diagnostic session exit/reset.
-- **Application CommunicationControl live effect.** Static recovery proves that
+- **OQ-049 — Application CommunicationControl live effect.** Static recovery proves that
   extended-session SID `0x28` reaches real communication-mode updates without a
   configured SecurityAccess policy or recovered speed gate. The isolated-bench
   probe is now ready under `exploit/followups/`; run it to determine which
   baseline-active EPS application Tx IDs are suppressed by `28 01 01` and prove
   all recover after `28 00 01`. This is an availability characterization, not a
   candidate steering interface.
-- **Exploit-interest cohort consumption (SWEEP-008).** The ranking pipeline
+- **OQ-050 — Exploit-interest cohort consumption (SWEEP-008).** The ranking pipeline
   produces anchored candidate cohorts (`pre_sa_write`, `computed_store`,
   `selector_dispatch`, ...). The first serious cohort and the 2026-08-15
   second batch (highest-ranked unresolved candidates after excluding the
@@ -674,7 +674,7 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   statement**: ranked functions and cross-function compositions outside the
   manually consumed cohorts remain valid review input and are not absence
   claims (CORR-101).
-- **Cross-calibration structural triage of future P1M-E images.** The offline
+- **OQ-051 — Cross-calibration structural triage of future P1M-E images.** The offline
   structural fingerprint scanner (`tools/analyze_rh850_codeflash_structure.py`)
   now flags boot-CRC geometry, RAM-exec/MEM-SAFE-001 package anchors, and XCP
   `0x7F7/0x7F8` route/command-map constants in arbitrary images. Every match is
