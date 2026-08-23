@@ -17,4 +17,4 @@ Techstream/decoded/
 Techstream/*.exe
 
 # Local reference corpus/handoffs. Context only; not repository truth.
-REFERENCE/
+/REFERENCE/
