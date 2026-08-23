@@ -182,6 +182,7 @@ When you produce a material conclusion:
 - Documentation map: [docs/README.md](docs/README.md)
 - Current priorities: [docs/status/PRIORITIES.md](docs/status/PRIORITIES.md)
 - Findings ledger: [docs/status/FINDINGS.md](docs/status/FINDINGS.md)
+- Generated cross-reference index (findings ↔ reports ↔ leads ↔ gates): [docs/reference/index.md](docs/reference/index.md)
 - Open questions: [docs/status/OPEN_QUESTIONS.md](docs/status/OPEN_QUESTIONS.md)
 - Corrections: [docs/status/CORRECTIONS.md](docs/status/CORRECTIONS.md)
 - Historical journals: [docs/history/README.md](docs/history/README.md)

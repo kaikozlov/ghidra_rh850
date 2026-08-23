@@ -15,7 +15,7 @@ SNAPSHOT_DIR ?= $(CURDIR)/project
 override PROJECT_INVENTORY := $(BUILD_OUT)/ghidra_project_inventory.jsonl
 override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.baseline.jsonl
 
-.PHONY: sync verify verify-core verify-full verify-local verify-one verify-changed verify-agent verify-exploit verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
+.PHONY: sync knowledge-index verify verify-core verify-full verify-local verify-one verify-changed verify-agent verify-exploit verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
 	ghidra-cli \
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
@@ -26,6 +26,9 @@ override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.b
 
 sync:
 	$(UV) sync --locked
+
+knowledge-index:
+	$(PYTHON) tools/build_knowledge_index.py
 
 build-init:
 	$(PYTHON) tools/build_layout.py init

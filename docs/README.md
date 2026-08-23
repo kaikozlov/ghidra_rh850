@@ -15,7 +15,9 @@ to make the evidence legible.
 4. **[WORKFLOW.md](WORKFLOW.md)** — how to operate the Ghidra/tooling stack.
 
 If you are looking up one specific assertion, skip the prose and go straight to
-[status/FINDINGS.md](status/FINDINGS.md).
+[status/FINDINGS.md](status/FINDINGS.md). If you are following a lead, open question,
+or the relationship between a finding, its canonical report, and the tests that
+assert it, use the generated [reference/index.md](reference/index.md).
 
 ## Document classes
 

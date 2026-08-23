@@ -10,6 +10,7 @@ from dated investigation journals, which live under [../history/](../history/REA
 | **What remains unresolved?** | [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) |
 | **How complete is the analysis?** | [ANALYSIS_STATUS.md](ANALYSIS_STATUS.md) |
 | **What did we previously get wrong?** | [CORRECTIONS.md](CORRECTIONS.md) |
+| **Where does a lead/finding/report/test live?** | [../reference/index.md](../reference/index.md) (generated cross-reference index) |
 
 ## Reading order
 

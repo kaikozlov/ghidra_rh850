@@ -1768,7 +1768,7 @@ fix (apart from the caller-selected output-path string). Canonical reports:
 [`../tooling/ephemeral-runtime-semantic-resolver.md`](../tooling/ephemeral-runtime-semantic-resolver.md)
 and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-public-route.md) §7.9.
 
-### CORR-073 — H `FEBEAE20` is not the retained torque-clamp input
+### CORR-105 — H `FEBEAE20` is not the retained torque-clamp input
 
 - **Earlier provisional transfer:** the first H steering pass followed Sienna's
   `2E4` staging geometry far enough to identify H `FEBE6D7A -> FEBEF156 ->
@@ -1787,7 +1787,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   §7.11; `tests/verify_corolla_8965H1202000_fd_control.py`.
 
-### CORR-074 — H `0xCEDAE` is 534 bytes, not 533
+### CORR-106 — H `0xCEDAE` is 534 bytes, not 533
 
 - **Earlier provisional count:** the first target-native steering pass described
   H `0xCEDAE` as a 533-byte supervisor body.

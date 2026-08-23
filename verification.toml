@@ -2586,3 +2586,20 @@ paths = [
   "docs/status/CORRECTIONS.md",
 ]
 oracle = "cfg_dataflow"
+
+[suite.knowledge_index]
+tests = ["tests/verify_knowledge_index.py"]
+paths = [
+  "tests/verify_knowledge_index.py",
+  "tools/build_knowledge_index.py",
+  "docs/reference/index.md",
+  "docs/reference/generated-artifacts.md",
+  "docs/reference/README.md",
+  "docs/README.md",
+  "docs/history/README.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "verification.toml",
+]
+oracle = "documentation_lint"
