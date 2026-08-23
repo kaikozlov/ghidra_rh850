@@ -10,7 +10,10 @@
     "format_type": 4,
     "stored_crc32": "D9AD63D2",
     "computed_crc32": "D9AD63D2",
-    "crc_region": [18, 5112447],
+    "crc_region": [
+      18,
+      5112447
+    ],
     "declared_total_size": 5112447,
     "first_member": {
       "name": "attach.att",
@@ -23,7 +26,9 @@
     "tail_sha256": "3109c0797242a1f389e622ea6f259bd5e43b9d523a8a6d9d8665288eede01864"
   },
   "descriptor": {
-    "Format": {"Version": "4"},
+    "Format": {
+      "Version": "4"
+    },
     "Vehicle": {
       "Number": "0",
       "DateOfIssue": "2017-06-16",
@@ -63,7 +68,11 @@
   },
   "srecord": {
     "line_count": 65538,
-    "record_counts": {"S0": 1, "S2": 65536, "S8": 1},
+    "record_counts": {
+      "S0": 1,
+      "S2": 65536,
+      "S8": 1
+    },
     "all_record_checksums_valid": true,
     "header_data_hex": "723034314236303130300000",
     "header_data_latin1_escaped": "r041B60100\\x00\\x00",
@@ -84,8 +93,16 @@
   },
   "techstream_v18_route": {
     "selection_key": "0CAN70",
-    "kind_of_ecu": {"value": "0", "export": "glptrKindOfECU_ENGAndECT", "meaning": "ENG & ECT"},
-    "cpu_type": {"value": "70", "export": "glptrCPUType_SH72544R_2560K", "meaning": "Renesas SH72544R, 2560K class"},
+    "kind_of_ecu": {
+      "value": "0",
+      "export": "glptrKindOfECU_ENGAndECT",
+      "meaning": "ENG & ECT"
+    },
+    "cpu_type": {
+      "value": "70",
+      "export": "glptrCPUType_SH72544R_2560K",
+      "meaning": "Renesas SH72544R, 2560K class"
+    },
     "parameter_row": {
       "PasswordAddress": "001FFF00",
       "ByteOrder": "1",
@@ -111,7 +128,12 @@
       "calc_seed_key_va": "0x0045A1B0",
       "basic_conversion_va": "0x0045A388",
       "round_initializer_va": "0x0047F098",
-      "round_words": ["A441", "2172", "A421", "4172"],
+      "round_words": [
+        "A441",
+        "2172",
+        "A421",
+        "4172"
+      ],
       "basic_conversion": "[s2, s3, s0 XOR round_hi, s1 XOR round_lo]",
       "simplified": "key = seed XOR 00 60 60 00"
     },
@@ -120,7 +142,20 @@
       "source_address": "0x1FFF00",
       "extractor": "TCUWCalibrationFile.dll!CalibArchivedFile::GetPassword @ 0x10002EF0",
       "fallback_selector": "CalibrationFile::GetNewPassword @ 0x10003090 falls back to archived GetPassword when no NewPassword override is present",
-      "relation_to_security_access": "distinct material; not the 27 02 seed-derived key"
+      "relation_to_security_access": "distinct material; not the 27 02 seed-derived key",
+      "new_password_override_parser": {
+        "field_name_va": "0x005D04A4",
+        "parser_site_va": "0x00408CE8",
+        "source_record_value_offset": "0x1C",
+        "source_record_present_offset": "0x20",
+        "semantics": "descriptor NewPassword is parsed into a per-CPU value slot and a separate presence flag"
+      },
+      "retry_selector": {
+        "va": "0x0046CAB0",
+        "sha256_0x6c": "c653fcca83bc5b43d5b710bcc93d8240950ea4980a941f1c7ebe87910bf7e48a",
+        "semantics": "CFlashWriter::SelectRetryPassword changes/toggles a boolean selector at object+0x8C; it does not itself construct or transmit a password-bearing frame"
+      },
+      "wire_consumer_boundary": "the selected old/new password source is proven, but no byte-pinned ECU-facing request carrying 79EF38FF was recovered in this pass; do not infer that the four bytes are sent verbatim or conflate this selector with SecurityAccess"
     }
   },
   "legacy_flash_protocol": {
@@ -133,7 +168,14 @@
     "classification": "legacy proprietary CAN reprogramming protocol; not the modern Unified UDS 34/36/37 path"
   },
   "modern_transfer_boundary": {
-    "descriptor_fields_absent": ["ECUAuthKey", "ServiceAuthKey", "SeedKey", "Nonce", "OffsetAddress", "SecurityProperty2"],
+    "descriptor_fields_absent": [
+      "ECUAuthKey",
+      "ServiceAuthKey",
+      "SeedKey",
+      "Nonce",
+      "OffsetAddress",
+      "SecurityProperty2"
+    ],
     "modern_security_up_not_selected": true,
     "does_transfer": [
       "outer CUW CRC/member framing",

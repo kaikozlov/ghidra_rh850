@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
 import json
 import struct
@@ -124,6 +125,10 @@ exports={(s.name or b'').decode('latin1'): cal.OPTIONAL_HEADER.ImageBase+s.addre
 check('GetPassword export VA exact', exports.get('?GetPassword@CalibArchivedFile@@QAEHAAVCParameter@@@Z') == 0x10002EF0)
 check('GetNewPassword export VA exact', exports.get('?GetNewPassword@CalibrationFile@@QAEHHAAVCParameter@@@Z') == 0x10003090)
 check('specimen password equals image bytes at selected address', ev['legacy_security']['calibration_password']['value'] == sr['security_trailer']['password_bytes'] == '79EF38FF' and ev['legacy_security']['calibration_password']['source_address'] == '0x1FFF00')
+cpw = ev['legacy_security']['calibration_password']
+check('NewPassword parser source slots are pinned', cpw['new_password_override_parser']['parser_site_va'] == '0x00408CE8' and cpw['new_password_override_parser']['source_record_value_offset'] == '0x1C' and cpw['new_password_override_parser']['source_record_present_offset'] == '0x20' and at(0x408CE0, 0x20) == bytes.fromhex('ffff0f8df2fdffff8b0da4045d00898d18edffff8b0da8045d00898d1cedffff'))
+check('SelectRetryPassword body is pinned as selector-only evidence', cpw['retry_selector']['va'] == '0x0046CAB0' and hashlib.sha256(at(0x46CAB0, 0x6C)).hexdigest() == cpw['retry_selector']['sha256_0x6c'] == 'c653fcca83bc5b43d5b710bcc93d8240950ea4980a941f1c7ebe87910bf7e48a' and 'does not itself construct or transmit' in cpw['retry_selector']['semantics'])
+check('legacy password wire consumer remains explicitly bounded', 'no byte-pinned ECU-facing request' in cpw['wire_consumer_boundary'] and 'do not infer' in cpw['wire_consumer_boundary'])
 check('modern credential fields absent from real legacy descriptor', set(ev['modern_transfer_boundary']['descriptor_fields_absent']) == {'ECUAuthKey','ServiceAuthKey','SeedKey','Nonce','OffsetAddress','SecurityProperty2'} and not any(x in ev['descriptor']['CPU01'] or x in ev['descriptor']['Vehicle'] for x in ev['modern_transfer_boundary']['descriptor_fields_absent']))
 
 print(f'\nResults: {p} passed, {f} failed')

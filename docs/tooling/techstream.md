@@ -363,9 +363,15 @@ reconstructed 2-MiB S-record image has `79 EF 38 FF` at `0x1FFF00`.
 that address from the archived image, while `CalibrationFile::GetNewPassword @
 0x10003090` falls back to it when no descriptor `NewPassword` override exists.
 Thus `0x79EF38FF` is package-derived reflash password material, **not** the
-`27 02` key. This old two-control design is useful architectural precedent but
-does not transfer either value/algorithm to RH850 EPS. Canonical specimen
-analysis: [historical T-0087-17 CUW analysis](../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md).
+`27 02` key. The descriptor parser at `0x408CE8` stores an optional
+`NewPassword` override in the per-CPU source record (`+0x1C`, presence at
+`+0x20`), while `CFlashWriter::SelectRetryPassword @ 0x46CAB0` only mutates the
+retry-selection boolean at writer `+0x8C`. This pass did not recover a
+byte-pinned ECU-facing request carrying the selected four-byte password, so its
+wire encoding remains bounded and must not be inferred as a verbatim send.
+This old two-control design is useful architectural precedent but does not
+transfer either value/algorithm to RH850 EPS. Canonical specimen analysis:
+[historical T-0087-17 CUW analysis](../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md).
 
 #### 4.5.1 `CalcSeedKeyForSecurityUp`: exact modern CUW construction
 
