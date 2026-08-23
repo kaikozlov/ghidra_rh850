@@ -2191,3 +2191,53 @@ paths = [
   "docs/security/bootloader-noauth-pc-pivot-assessment.md",
 ]
 oracle = "cfg_dataflow"
+
+[suite.keyless_application_pc_surfaces]
+tests = ["tests/verify_keyless_application_pc_surfaces.py"]
+paths = [
+  "tests/verify_keyless_application_pc_surfaces.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "data/generated/decompilations.jsonl",
+  "ghidra/scripts/investigate/FindExceptionAndXcpFlowOps.java",
+  "ghidra/scripts/investigate/FindStackPointerOps.java",
+  "docs/security/keyless-exec-surface-assessment.md",
+  "docs/status/FINDINGS.md",
+]
+oracle = "cfg_dataflow"
+
+[suite.keyless_xcp_composition]
+tests = ["tests/verify_keyless_xcp_composition.py"]
+paths = [
+  "tests/verify_keyless_xcp_composition.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "docs/security/keyless-exec-surface-assessment.md",
+  "docs/status/FINDINGS.md",
+]
+oracle = "raw_bytes"
+
+[suite.keyless_exec_portability]
+tests = ["tests/verify_keyless_exec_portability.py"]
+paths = [
+  "tests/verify_keyless_exec_portability.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/security_access_log.json",
+  "community/albinoelephant/raw-20260818/MANIFEST.txt",
+  "community/spanconstant/raw-20260821/MANIFEST.txt",
+  "data/variant_bootstrap_profiles.json",
+  "docs/security/keyless-exec-surface-assessment.md",
+  "docs/status/FINDINGS.md",
+]
+oracle = "raw_bytes"
+
+[suite.keyless_reset_entry]
+tests = ["tests/verify_keyless_reset_entry.py"]
+paths = [
+  "tests/verify_keyless_reset_entry.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "data/generated/decompilations.jsonl",
+  "docs/security/keyless-exec-surface-assessment.md",
+  "docs/status/FINDINGS.md",
+]
+oracle = "cfg_dataflow"

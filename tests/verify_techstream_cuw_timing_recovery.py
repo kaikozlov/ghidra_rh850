@@ -95,6 +95,22 @@ for rec in obj["function_identities"]:
     body = pe.get_data(rec["va"] - pe.OPTIONAL_HEADER.ImageBase, rec["size"])
     check(rec["role"], hashlib.sha256(body).hexdigest() == rec["sha256"])
 
+print("\n== target-compatible Unified recovery does not bypass SecurityAccess ==")
+tr = obj["target_unified_recovery"]
+rows = tr["target_compatible_rows"]
+check("exactly two target-compatible Unified recovery rows", [r["parameter_file"] for r in rows] == ["P5-Unified.ini", "P5-Unified10.ini"])
+check("both target-compatible rows disable PrepareRetry", all(r["prepare_retry_flag"] == "0" for r in rows))
+check("both target-compatible rows use the same Unified prepare writer", {r["prepare_writer"] for r in rows} == {"TCUWCanUnifiedPrepareWriter.dll"})
+check("Unified rows retain host IG-off retry capability", all(r["ig_off_retriable_flag"] == "1" for r in rows))
+for binary, expected in tr["exports"].items():
+    pe = pefile.PE(str(CUW / binary))
+    actual = sorted(s.name.decode("ascii", "replace") for s in pe.DIRECTORY_ENTRY_EXPORT.symbols if s.name)
+    check(f"{binary} export set", actual == expected, repr(actual))
+check("Unified prepare exports StartPrepareWrite only", tr["exports"]["TCUWCanUnifiedPrepareWriter.dll"] == ["StartPrepareWrite"])
+check("no target-compatible Unified writer exports a retry entrypoint", all(not x for x in tr["prepare_retry_entrypoints"].values()))
+check("normal Unified prepare grammar requires 18-byte 27 01", tr["normal_prepare_security_access"]["request_seed"] == "27 01 || 16 tester bytes; exact request length 0x12")
+check("normal Unified prepare grammar requires 16-byte 27 02 key", tr["normal_prepare_security_access"]["send_key"] == "27 02 || 16-byte key")
+
 print("\n== Flash Recovery schema and identity binding ==")
 cuw_data = (CUW / "Cuw.exe").read_bytes()
 cuw_pe = pefile.PE(data=cuw_data)

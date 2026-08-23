@@ -26,6 +26,7 @@ TECH = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics"
 CUW = TECH / "Calibration Update Wizard"
 INI = CUW / "Ini"
 DDB_ART = REPO / "data/generated/techstream_v18/priority_steering_ddb_semantics.json"
+PROTOCOL_ART = REPO / "data/generated/techstream_v18/cuw_writer_protocol_grammar.json"
 OUT = REPO / "data/generated/techstream_v18/cuw_timing_recovery.json"
 
 FACTORY_KEYS = [
@@ -256,6 +257,54 @@ def recovery_string_records() -> list[dict[str, Any]]:
     return out
 
 
+
+def pe_exports(path: Path) -> list[str]:
+    data = path.read_bytes()
+    pe = pefile.PE(data=data)
+    if not hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
+        return []
+    out: list[str] = []
+    for symbol in pe.DIRECTORY_ENTRY_EXPORT.symbols:
+        if symbol.name is not None:
+            out.append(symbol.name.decode("ascii", "replace"))
+    return sorted(out)
+
+
+def target_unified_recovery() -> dict[str, Any]:
+    protocol = json.loads(PROTOCOL_ART.read_text())
+    grammar = protocol["target_boot_grammar"]
+    rows = []
+    binaries: set[str] = set()
+    for ini_name in ("P5-Unified.ini", "P5-Unified10.ini"):
+        header, decoded = decoded_rows(INI / ini_name)
+        assert decoded and "DLLFileNameForPrepareWrite" in header
+        for row in decoded:
+            prepare = row.get("DLLFileNameForPrepareWrite", "")
+            flash = row.get("DLLFileNameForFlashWrite", "")
+            binaries.update((prepare, flash))
+            rows.append({
+                "parameter_file": ini_name,
+                "prepare_writer": prepare,
+                "flash_writer": flash,
+                "prepare_retry_flag": row.get("PrepareRetryFlag", ""),
+                "ig_off_retriable_flag": row.get("IGOffRetriableFlag", ""),
+                "receive_timeout_before_prepare_retry": row.get("ReceiveTimeoutBeforePrepareRetry", ""),
+                "flag_to_send_all_on_prepare_retry": row.get("FlagToSendAllOnPrepareRetry", ""),
+            })
+    exports = {name: pe_exports(CUW / name) for name in sorted(binaries) if name}
+    return {
+        "target_compatible_rows": rows,
+        "exports": exports,
+        "prepare_retry_entrypoints": {name: [x for x in names if "retry" in x.lower()] for name, names in exports.items()},
+        "normal_prepare_security_access": {
+            "request_seed": grammar["request_seed"],
+            "send_key": grammar["send_key"],
+        },
+        "conclusion": "the two target-compatible Unified rows set PrepareRetryFlag=0 and their shipped writer DLLs expose no PrepareRetry entrypoint; the only preparation export is StartPrepareWrite, whose target-compatible grammar includes 18-byte SecurityAccess",
+        "boundary": "UseNewSoftwarePassword and generic recovery state are host-side persistence facts; this static V18 result does not claim behavior for future Techstream versions, undocumented ECU ROM modes, or an unobserved dynamic plugin",
+    }
+
+
 def ddb_observables() -> list[dict[str, Any]]:
     src = json.loads(DDB_ART.read_text())
     wanted_sources = {"NA/DB/EMPS_P5.ddb", "NA/DB/EMPS2_P5.ddb"}
@@ -351,6 +400,7 @@ def main() -> int:
             "bus_type": "CANCommunicationSpeedAddress is interpreted by GetBusTypeFromCPUImage as a CPU-image byte location used to select one of the bus/speed modes; it is not a hardware register address",
             "host_ig": "Parameter.ini supplies WaitTimeForIGOFFON and WaitTimeAfterIGOn plus automatic-IG/gateway/CPU-type-change flags used by the host-side reprogramming flow",
         },
+        "target_unified_recovery": target_unified_recovery(),
         "flash_recovery": {
             "file": "Save/RecoveryInfo.ini",
             "section": "RecoveryInfo",

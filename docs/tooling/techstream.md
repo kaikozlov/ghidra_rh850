@@ -1307,6 +1307,31 @@ A v05.00 API variant (`ptshim32_0500.dll`, 18 MiB) supports the newer J2534
 v05.00 API surface including `PassThruLogicalConnect`,
 `PassThruQueueMsgs_v0500`, and `PassThruSelect_v0500`.
 
+
+#### 5.4.5 Target-compatible Unified retry is not a SecurityAccess bypass
+
+The recovery pass now distinguishes generic CUW retry machinery from the two
+writer rows that are actually byte-compatible with the tracked EPS boot
+grammar. `P5-Unified.ini` and `P5-Unified10.ini` both select
+`TCUWCanUnifiedPrepareWriter.dll`, both set `PrepareRetryFlag=0`, and both retain
+`IGOffRetriableFlag=1`. Direct PE export enumeration shows that the prepare DLL
+exports only `StartPrepareWrite`; `TCUWCanUnifiedFlashWriter.dll` and
+`TCUWCanUnifiedFlashWriterEachArea.dll` each export only `StartFlashWrite`.
+There is no separate `PrepareRetry` export in this target-compatible set.
+
+The normal Unified prepare grammar independently recovered in §5.2.2 starts
+with exact 18-byte SecurityAccess (`27 01 || testerData[16]`, then
+`27 02 || key[16]`). Therefore the shipped V18 target-compatible recovery rows
+do not expose a second no-SA preparation entrypoint. `RecoveryInfo.ini` and
+`UseNewSoftwarePassword` remain host-side persistence facts; they do not by
+themselves imply ECU authentication state survives a fresh boot.
+
+This is **TMS-036**. The generated `target_unified_recovery` record in
+`cuw_timing_recovery.json` pins both parameter rows, export sets, and the joined
+SecurityAccess grammar. The boundary is explicit: this result does not claim
+anything about future Techstream versions, undocumented ECU ROM/bootstrap
+modes, or an unobserved dynamically supplied plugin.
+
 ### 6.1 Recovered log format and save lifecycle
 
 The logger format is now statically recovered for both shipped variants and

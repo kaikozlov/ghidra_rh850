@@ -1178,6 +1178,50 @@
     },
     "rows": 380
   },
+  "target_unified_recovery": {
+    "boundary": "UseNewSoftwarePassword and generic recovery state are host-side persistence facts; this static V18 result does not claim behavior for future Techstream versions, undocumented ECU ROM modes, or an unobserved dynamic plugin",
+    "conclusion": "the two target-compatible Unified rows set PrepareRetryFlag=0 and their shipped writer DLLs expose no PrepareRetry entrypoint; the only preparation export is StartPrepareWrite, whose target-compatible grammar includes 18-byte SecurityAccess",
+    "exports": {
+      "TCUWCanUnifiedFlashWriter.dll": [
+        "StartFlashWrite"
+      ],
+      "TCUWCanUnifiedFlashWriterEachArea.dll": [
+        "StartFlashWrite"
+      ],
+      "TCUWCanUnifiedPrepareWriter.dll": [
+        "StartPrepareWrite"
+      ]
+    },
+    "normal_prepare_security_access": {
+      "request_seed": "27 01 || 16 tester bytes; exact request length 0x12",
+      "send_key": "27 02 || 16-byte key"
+    },
+    "prepare_retry_entrypoints": {
+      "TCUWCanUnifiedFlashWriter.dll": [],
+      "TCUWCanUnifiedFlashWriterEachArea.dll": [],
+      "TCUWCanUnifiedPrepareWriter.dll": []
+    },
+    "target_compatible_rows": [
+      {
+        "flag_to_send_all_on_prepare_retry": "",
+        "flash_writer": "TCUWCanUnifiedFlashWriter.dll",
+        "ig_off_retriable_flag": "1",
+        "parameter_file": "P5-Unified.ini",
+        "prepare_retry_flag": "0",
+        "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
+        "receive_timeout_before_prepare_retry": ""
+      },
+      {
+        "flag_to_send_all_on_prepare_retry": "",
+        "flash_writer": "TCUWCanUnifiedFlashWriterEachArea.dll",
+        "ig_off_retriable_flag": "1",
+        "parameter_file": "P5-Unified10.ini",
+        "prepare_retry_flag": "0",
+        "prepare_writer": "TCUWCanUnifiedPrepareWriter.dll",
+        "receive_timeout_before_prepare_retry": ""
+      }
+    ]
+  },
   "timing_semantics": {
     "bus_type": "CANCommunicationSpeedAddress is interpreted by GetBusTypeFromCPUImage as a CPU-image byte location used to select one of the bus/speed modes; it is not a hardware register address",
     "host_ig": "Parameter.ini supplies WaitTimeForIGOFFON and WaitTimeAfterIGOn plus automatic-IG/gateway/CPU-type-change flags used by the host-side reprogramming flow",

@@ -405,7 +405,138 @@ into that RAM is recovered. Span's executable code is byte-identical to H
 outside its calibration-only `0xA004..0x17DFF` delta, so this control-flow result
 transfers to F. This is `KEYLESS-014`.
 
-## 17. Payload fixtures and key rotation
+## 17. Application saved-PC/control-object search closes the obvious XCP-to-PC compositions
+
+The unauthenticated XCP write primitive is already unusually strong: a tester
+can place arbitrary bytes in executable LocalRAM `FEBF7C00..FEBFFBFF`. The
+remaining application-RCE problem is therefore control transfer, not code
+placement. A fresh pass widened the earlier computed-call census to include
+exception returns, saved PCs, stack geometry, near-window callbacks, MPU
+contexts, and the PE-local/self LocalRAM alias.
+
+Sienna has eight decoded exception-return sites: seven `eiret` and one `feret`.
+The common EIINT restore path at `0x70292` really does reload EIPC from a RAM
+frame before `eiret`, and the fast-exception path likewise spills/restores FEPC.
+However, the recovered live frames are on fixed application stacks in the
+`FEBE...` view (`FEBE0800`, `FEBE1000`, `FEBE1800`, with foreground stack
+`FEBE2000`), not inside the XCP shadow. The raw instruction census also finds
+zero direct CodeFlash flow edges into `FEBF7C00..FEBFFBFF`.
+
+The closest recovered writable-control object is more interesting:
+`FEBF7704`, only `0x4FC` below the XCP lower bound, is loaded at `0x72E52` and
+called indirectly at `0x72E56`. It has one canonical writer, `0x72E72` in the
+setter at `0x72E5E`; that setter can install only fixed CodeFlash targets
+`0x75664` or `0x7575A`. This is not an exploit today, but it is a concrete
+high-value target for any future four-byte write escape.
+
+The MPU context loader at `0x648EE` was also checked because an externally
+controlled selector could reinterpret adjacent CodeFlash as MPAT values. All
+11 recovered call sites obtain their selector from fixed CodeFlash bytes
+`0x3180C..0x31813`, whose values are only 0 or 1. No tester-derived selector
+feeds the loader.
+
+Finally, the second LocalRAM mapping does not create a hidden overlap. The PE1
+view `FEBE0000..FEBFFFFF` and self view `FEDE0000..FEDFFFFF` are same-offset
+aliases separated by `0x200000`; XCP address `FEBF7C00` therefore aliases
+`FEDF7C00`, not a lower `FEBE...` stack or `FEBF7704`. Span's paired PE1/self
+RAM captures are consistent with this same-offset mapping. These facts are
+pinned by `tests/verify_keyless_application_pc_surfaces.py` (`KEYLESS-015`).
+
+## 18. Complete configured XCP composition does not escape the write window
+
+The XCP audit was repeated as a command-composition problem rather than only a
+`DOWNLOAD` range check. The standard dispatcher has 18 fixed CodeFlash
+callbacks and a bounded command-to-slot map. `GET_SEED`/`UNLOCK` remain
+unconfigured; `DOWNLOAD` and `MODIFY_BITS` resolve to fixed handlers and the
+compiled writable interval remains exactly `FEBF7C00..FEBFFBFF`.
+
+DAQ does not provide a write-around. `WRITE_DAQ` installs validated addresses
+that the runtime sampler dereferences as **sources** into DTO staging. The
+configured `SET_DAQ_LIST_MODE` rejects the XCP direction/STIM bit, and the
+STIM-like command slots are absent. Thus an attacker-selected DAQ pointer is a
+read/exfiltration primitive, not a receive destination.
+
+The custom command family is likewise fixed. Selectors
+`FB/FA/F5/F3/EB/EA/E4` map to immutable CodeFlash handlers. `EB/EA` only alter
+page state 0/1; `E4` hardcodes a copy from CodeFlash `0x10000..0x17DEF` to the
+XCP shadow; `F3` uses the same bounded CodeFlash interval for checksum/read.
+Page selection is not fed into a destination calculation. Arithmetic edge
+cases were also checked: multi-byte XCP writes reject interval overflow, and
+the word-aligned `MODIFY_BITS` case cannot wrap `0xFFFFFFFC + 3` through zero.
+
+`tests/verify_keyless_xcp_composition.py` pins this closure (`KEYLESS-016`).
+It materially narrows the remaining application-RCE search: a useful future
+primitive must come from a different writer/corruption path, not from reversing
+DAQ direction or composing the currently configured XCP commands.
+
+## 19. Reset and alternate software-entry paths do not expose a keyless PC selector
+
+The application reset/re-entry machinery was traced separately from the live
+`0x9F00` programming handoff. `FUN_00061AFA` stores a reset sentinel in the
+triple-copy hardware area `FFC0A000/4/8` as raw, XOR-`0x55555555`, and
+XOR-`0xAAAAAAAA`; known producers supply fixed values such as
+`3E3E3E3E`, `6D6D6D6D`, and `D6D6D6D6`. The consumer at `0x61B18` moves these
+into ordinary application status state and replaces the hardware words with
+fixed sentinels. They are reset-cause/status bookkeeping, not a PC or ROM-loader
+address.
+
+The reset-mode translator `0x60870` has only three canonical callers and maps
+fixed internal mode values to fixed reset codes. The startup coordinator at
+`0x62BC6` is likewise internal and uses fixed action constants
+`11/22/33/44`. The normal application-to-boot programming path at `0x64EC8`
+explicitly zeroes `FFC0A000/4/8/C`, synchronizes, and directly calls `0x9F00`;
+`system_hard_reset()` remains fallback after that non-returning path.
+
+No software-visible tester-derived selector was recovered that chooses an
+alternate ROM monitor, serial/bootstrap entry, or attacker-selected reset PC.
+This is intentionally a **bounded** static conclusion (`KEYLESS-017`): boot-pin
+straps, undocumented on-chip ROM behavior, and fault-injection-only entry modes
+are outside the CodeFlash model. The software facts are pinned by
+`tests/verify_keyless_reset_entry.py`.
+
+## 20. Authenticated RAM execution is functional architecture across all three dumps
+
+The currently known authenticated path is not a one-image accident. Sienna
+boot SecurityAccess, RequestDownload, TransferData, RequestTransferExit,
+RoutineControl, request-seed/send-key helpers, and payload decrypt/verify logic
+all transfer to H/F at the dominant `-0x1C` relocation; H and F are byte-
+identical over the relevant boot domain. The three security roots remain
+byte-identical as documented in §0.
+
+There is also acquisition provenance, not only static similarity. Albino's
+raw manifest records owner-side OBD acquisition with TSK Manager using the
+public payload-build secret and explicitly rules out glitching, bench work, and
+module removal; the retained bootstrap profile separately grades the target-built
+range-payload execution as observed. Span's retained `security_access_log.json`
+records accepted `send_key` operations for CodeFlash, LocalRAM, and DataFlash
+range dumps, while the same bootstrap profile records the observed target-built
+`FEBF0000/0x1000 -> 10F0 -> FF00` range-payload architecture.
+`tests/verify_keyless_exec_portability.py` pins both the raw body transfer and
+this retained field provenance (`KEYLESS-018`).
+
+The portability conclusion is deliberately precise: **the authenticated RAM-
+execution architecture is functional on all three tracked dumps**. It does not
+make a payload/key from one target portable to an arbitrary future ECU whose
+boot credentials or payload policy have changed.
+
+## 21. Techstream Unified recovery does not reveal a target-compatible no-SA retry
+
+The two V18 CUW rows whose prepare+flash grammar is byte-compatible with the
+tracked EPS bootloader are `P5-Unified.ini` and `P5-Unified10.ini`. Both set
+`PrepareRetryFlag=0` while retaining the host's broader IG-off retry support.
+The DLL export sets are also exact: `TCUWCanUnifiedPrepareWriter.dll` exports
+only `StartPrepareWrite`; the two matching flash writers export only
+`StartFlashWrite`. None exposes a separate PrepareRetry entrypoint.
+
+That matters because the recovered `StartPrepareWrite` target grammar includes
+the same exact 18-byte SecurityAccess exchange required by firmware:
+`27 01 || testerData[16]`, followed by `27 02 || key[16]`. The generic CUW
+`UseNewSoftwarePassword`/RecoveryInfo state is therefore host persistence, not
+evidence that these target-compatible rows resume a fresh locked ECU without
+SecurityAccess. `TMS-036` and
+`tests/verify_techstream_cuw_timing_recovery.py` pin this V18-specific closure.
+
+## 22. Payload fixtures and key rotation
 
 A payload fixture proves possession of a payload accepted by the CMAC gate for
 the conditions under which that fixture was built. It can therefore avoid
@@ -424,7 +555,7 @@ Consequently key rotation has two separate effects:
 This distinction is the reason the repository keeps boot-SA and payload-build
 roots separate throughout the bootstrap documentation.
 
-## 18. Evidence boundary
+## 23. Evidence boundary
 
 This is a bounded negative static result over the software-visible surface of
 three images, not a universal impossibility proof. New boot generations,
