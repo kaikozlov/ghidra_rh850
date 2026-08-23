@@ -1753,6 +1753,16 @@ survives on H, but Sienna's exact exclusion addresses must not be reused.
 External gateway/connector reachability remains a separate topology/dynamic
 question.
 
+A security-relevant consequence is now firmware-static rather than merely
+observed in the contributor RAM captures. Startup copier `0x5C9B6` copies
+CodeFlash `0x20810..0x2084F` to `FEBF7B50..FEBF7B8F`, so the application
+SecurityAccess root at `0x20840` is materialized at **`FEBF7B80`** on every
+startup. That address is outside the H exclusion intervals above. H SID `0x23`
+is likewise extended-session-only with configured SecurityAccess count zero.
+Therefore either no-SA RMBA or XCP `F4` can recover the application-SA root
+without first authenticating. This is a credential-disclosure result, not a
+boot-SA or RAM-execution bypass; see `KEYLESS-006`.
+
 The `EB/EA` pair likewise survives as a shared page-state writer/reader, relocated
 from Sienna `FEBE5E9C/5E9D` to H **`FEBE5DB0/5DB1`**. `EB` still validates a
 0/1 value and flag mask `&3`; `EA` still reads selector 1 or 2. `E4` remains in

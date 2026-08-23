@@ -9,13 +9,20 @@
 > generation rotates both roots?
 >
 > **Status:** no software-only keyless execution path is recovered in the
-> tracked images. Four focused hypotheses were re-audited on 2026-08-22 against
-> raw CodeFlash plus the canonical Sienna control/data-flow graph. The checks
-> below are a fast **triage/regression screen**, not a substitute for the fuller
-> no-auth control-flow audit in
+> tracked images. One important keyless **credential-recovery** path is now
+> verified: the application SecurityAccess root is copied into a pre-auth
+> readable LocalRAM mirror on all three images. This does not bypass the
+> independent boot SecurityAccess gate. The follow-up audit closed retained
+> TransferData state, RequestDownload pre-SA side effects, CTBP retention,
+> alternate credential-read engines, the 18 Corolla boot residuals, the
+> effectively-keyless application-SA surface, live-handoff DMA state, and a
+> target-native H computed-control-flow census. The conclusions remain bounded
+> to the software-visible static surface. Deterministic regressions are
+> `tests/verify_keyless_exec_surface.py`,
+> `tests/verify_keyless_boot_variant_residuals.py`, and
+> `tests/verify_keyless_live_handoff_dma.py`; the fuller Sienna no-auth control-
+> flow audit remains in
 > [bootloader-noauth-pc-pivot-assessment.md](bootloader-noauth-pc-pivot-assessment.md).
-> Deterministic regression: `tests/verify_keyless_exec_surface.py` (suite
-> `keyless_exec_surface`).
 
 ## 0. Security boundary
 
@@ -154,7 +161,251 @@ A future image that differs should be escalated into the full ingress,
 indirect-call, lifecycle, and hardware-route audit rather than declared
 vulnerable from one signature alone.
 
-## 7. Payload fixtures and key rotation
+## 7. Keyless recovery of the application SecurityAccess root
+
+The application SecurityAccess secret at CodeFlash `0x20840` is not actually a
+secret from an unauthenticated application-side tester. Application startup
+explicitly copies the 64-byte CodeFlash interval `0x20810..0x2084F` into
+LocalRAM, and the final 16 bytes of that interval are the complete application
+SA root. The destination differs by variant:
+
+| image | startup copier | destination | application-SA mirror |
+|---|---:|---:|---:|
+| Sienna `8965B4512000` | `0x62662` | `FEBF7BB0..FEBF7BEF` | `FEBF7BE0..FEBF7BEF` |
+| Corolla H `8965H1202000` | `0x5C9B6` | `FEBF7B50..FEBF7B8F` | `FEBF7B80..FEBF7B8F` |
+| Corolla F `8965F1208000` | `0x5C9B6` | `FEBF7B50..FEBF7B8F` | `FEBF7B80..FEBF7B8F` |
+
+The H/F copy body is byte-identical and the Sienna body differs only in the
+LocalRAM destination immediate. This is firmware-static provenance for the
+previously observed H/F RAM mirror; it is not an artifact of the authenticated
+RAM-dump payload.
+
+Both application-side memory readers can reach the mirror **before
+SecurityAccess**:
+
+- UDS SID `0x23` ReadMemoryByAddress is extended-session-only but has no
+  configured SecurityAccess list on all three images. Its LocalRAM read class
+  covers `FEBE0000..FEBFFFFF`, subject to the compiled exclusion intervals.
+- XCP `SHORT_UPLOAD` (`0xF4`) is configured while XCP `GET_SEED`/`UNLOCK` are
+  unconfigured. It applies the same LocalRAM exclusion policy.
+
+The Sienna mirror at `FEBF7BE0` is above the final Sienna exclusion
+`FEBF6C00..FEBF78DF`; the H/F mirror at `FEBF7B80` is above the final H/F
+exclusion `FEBF6000..FEBF6CDF`. Therefore the complete 16-byte root is readable
+without first knowing it. `SHORT_UPLOAD` has a 7-byte maximum payload, so the
+root requires multiple reads there; SID `0x23` can return it in one request.
+
+**Consequence:** rotation of the *application* SecurityAccess root does not, by
+itself, strand a tester on this implementation if the startup-copy and read
+policies remain. A future image should be checked for this copy before treating
+an unknown application-SA key as a dumping/glitching requirement. This result
+does **not** recover the boot-SA root at `0xBFE8`, does not set boot SA state
+`FEBF2B0F`, and does not make boot `0x34`/execution RoutineControl keyless.
+
+Deterministic proof is in `tests/verify_keyless_exec_surface.py`
+(`KEYLESS-006`). The Sienna subsystem-level interpretation is also recorded in
+[application-security-access.md](application-security-access.md).
+
+## 8. Retained TransferData state does not skip RequestDownload
+
+A second composition was checked explicitly: pre-position the application XCP
+payload, carry boot download state across the live `10 02` handoff, and start at
+`TransferData (0x36)` instead of the SA-gated `RequestDownload (0x34)`.
+
+That fails because the normal programming-runtime initialization reinitializes
+the DCM transfer state before requests are serviced. The live path is
+`0x64EC8 -> 0x9F00 -> 0x148E -> 0x1398 -> 0x1338 -> 0x770 ->
+0x69D2/0x6A22 -> 0x5086`. `FUN_00005086` writes boot SA state
+`FEBF2B0F=1`, clears authorization `FEBF2B11`, active transfer state
+`FEBF2B13`, payload-ready state `FEBF2B16`, and transfer status `FEBF2B17`.
+`uds_transfer_data @ 0x4DBA` dispatches only when `FEBF2B13` has subsequently
+been armed by a successful download setup.
+
+The destination and remaining-length cells `FEBF2B00/04` are likewise reset and
+are not recovered from application-retained data. The complete TransferData and
+initialization cohort transfers to H/F with the established boot relocation.
+`KEYLESS-007` pins the chain and state reset.
+
+## 9. RequestDownload has a pre-SA near-miss, not a bypass
+
+`uds_request_download @ 0x5D68` is slightly more subtle than a simple
+"nothing happens until SA" description. On one request class it can perform
+flash-operation setup and write transfer-status `FEBF2B17=2` before the final
+`FEBF2B0F == 2` comparison at `0x5EFC`.
+
+That side effect is not independently reachable from a locked bootloader. The
+pre-SA branch first requires `FEBF2B16 == 1`. The complete writer census for
+`FEBF2B16` has only boot initialization (`0x50AE`, writing zero) and boot WDBI
+`0x4A76`, and that WDBI path has its own exact `SA == 2` gate at `0x49C6`.
+Furthermore RequestDownload does not commit the attacker-supplied destination
+and length (`FEBF2B00/04` at `0x5F1E/0x5F22`) until after the final SA check.
+Thus the ordering is a real pre-SA side effect but cannot bootstrap a fresh
+locked ECU into TransferData/programming. H/F carry the complete WDBI and
+RequestDownload bodies at `-0x1C`; `KEYLESS-009` pins this prerequisite chain.
+
+## 10. Live handoff CPU control state: CTBP is not attacker-retained
+
+`0x9F00` explicitly establishes most boot CPU state: it disables interrupts,
+masks them, writes fixed PSW/EBASE/INTBP values, installs boot SP/GP/TP, and
+sets `MPM=0`. It does not itself write CTBP, so the retained CALLT base was
+audited separately rather than assumed safe.
+
+Across all three images the raw instruction `ldsr r0,CTBP` occurs exactly once,
+at reset startup `0x25E`. There is no application CTBP writer. Therefore the
+live application-to-boot handoff inherits `CTBP=0`, not tester-selected state.
+The Sienna boot CALLT at `0x1D5C` uses selector `0x22`; with CTBP zero the table
+entry is the fixed CodeFlash halfword at `0x44`, target `0x1E1E`. H/F relocate
+the call site to `0x1D40` and the table target to `0x1E02`, exactly `-0x1C`.
+This closes the otherwise plausible "retain a system-register call-table base"
+pivot. `KEYLESS-008` pins the raw instruction/table facts.
+
+## 11. Failed boot-SA computation does not expose a response-stack oracle
+
+A deliberately wrong boot `27 02` does cause useful secret-dependent
+computation internally: the handler forms a working key from the boot-SA root,
+then computes the expected response before deciding the supplied key is wrong.
+The AES context at `FEBF2D48` is wiped after use, while the working-key and
+expected-response temporaries are stack-local.
+
+Two exfiltration routes were checked. First, application startup clears/reuses
+the relevant boot stack before application RMBA/XCP becomes useful. Second,
+boot response construction does not hand stack pointers to the transport:
+every recovered boot `Dcm_TransmitResponse` caller transmits from the fixed
+DCM response buffer rather than an uninitialized stack-local response object.
+Consequently the failed-key computation does not currently give a software-only
+credential leak. This remains a useful pattern to recheck on a future bootloader
+because a single uncleared global AES/key-schedule buffer or uninitialized
+response copy would change the result.
+
+## 12. Alternate read engines do not reach the boot roots
+
+The application-SA leak in §7 prompted a second question: can another pre-SA
+reader reach the two more valuable low-CodeFlash roots at `0xBFD8/0xBFE8`?
+A command-by-command census closes that shortcut on all three tracked images.
+
+For Sienna, XCP `SHORT_UPLOAD (F4)` and `UPLOAD (F5)` are LocalRAM readers after
+range/exclusion validation. The F5 helper has a second CodeFlash class, but it
+accepts only `0x10000..0x17DEF`; F5 itself is limited to 1..7 bytes, while the
+special `0x7DEC` length belongs to the checksum path. `E4` is a fixed copy from
+`0x10000..0x17DEF` to `FEBF7C00`, and `F3` uses the same CodeFlash interval.
+DAQ pointer installation is LocalRAM-bounded before the sampler dereferences it.
+Application SID `0x23` likewise has no active low-CodeFlash class. The boot
+`0x10F3` compare/oracle and RequestDownload range table also begin CodeFlash at
+`0x10000`; neither admits `0xBFD8` or `0xBFE8`.
+
+H carries the same command classes with target-native handlers (`F5 @ 0x92462`,
+`F3 @ 0x92576`, `E4 @ 0x92724`) and the same boot access-table geometry at
+`0x8D80`. Its E4 copy is fixed to `0x10000..0x17DEF`. Span differs from H only
+inside `0xA004..0x17DFF`, so its diagnostic/XCP code and boot access table are
+byte-identical. Fixed application copy engines, DMAC descriptors, and the
+P1M-E tuning-memory overlay were also checked; none provides a CPU-visible
+flash-to-RAM alias for low CodeFlash. Thus no recovered pre-SA reader discloses
+the boot-SA or payload-build root. This is `KEYLESS-010`; the underlying command
+bounds are independently pinned by the XCP, RMBA, payload-gate, and Corolla
+variant suites.
+
+## 13. Corolla H/F boot residuals do not add a keyless primitive
+
+The broad boot transfer in §3 left 18 functions that were not simple bodies at
+the dominant `-0x1C` relocation. They have now been closed individually. H and
+F are byte-identical through `0xA003`, so the complete residual disposition is
+shared by both specimens.
+
+The differences are startup/peripheral/linkage changes: the default exception
+thunk relinks `0x1E1E -> 0x1E02`; cold startup moves TP
+`0x869C -> 0x867C`, changes PSW/EIPSW/FEPSW `0x18020 -> 0x8020`, zeroes FPIPR,
+and removes the Sienna FPU-init block; CSIH moves to the target's other
+peripheral instance; EIC/TAUJ helpers are exact or direct re-links; the RAM
+configuration copier moves its immutable source table `0x8370 -> 0x8350` with
+all `0x32C` bytes preserved; and the pinned `0x9F00` live handoff differs only
+in the same PSW/TP values plus direct call `0x148E -> 0x1472`.
+
+None of the 18 introduces a request parser, tester-derived pointer, new DMA
+endpoint, retained vector base, credential reader, or alternate boot entry.
+`tests/verify_keyless_boot_variant_residuals.py` pins the raw-byte closure
+(`KEYLESS-011`).
+
+## 14. Recovering application SA mainly unlocks BA F7, not boot execution
+
+The application root disclosure changes how the application SecurityAccess
+surface should be described. A tester can recover the root, perform normal
+application SecurityAccess, and therefore satisfy any genuine application-SA
+condition without prior secret possession. That does **not** mean every
+application service suddenly becomes newly privileged: the primary Dcm service
+objects have security count zero, the 242 RDBI policies contain no effective
+nonzero level, all 19 RoutineControl RIDs have zero configured security levels,
+and the recovered WDBI policy records are likewise empty.
+
+The material callback-local exception is proprietary BA selector `F7/BAENA`.
+Sienna `0x34D96` calls the application security-state reader and tests level-2
+mask bit `0x02`; successful F7 then creates the already-documented persistent
+BA authorization window. H/F retain `BAENA` at `0x21078` and the same target-
+native level-2 bit-test tail at `0x30984`. The downstream BA operations remain
+fixed-token/state-machine operations; the separate lifecycle audit recovers no
+attacker-selected PC or boot credential read from them.
+
+Therefore KEYLESS-006 converts application SA2 from a secret-dependent gate
+into a recoverable protocol step, with BA F7 as the important newly practical
+capability. It still does not write boot SA state, expose `0xBFD8/0xBFE8`, or
+create application arbitrary-code execution. `KEYLESS-012` pins the Dcm and F7
+facts; the complete Sienna BA semantics remain in
+`tests/verify_application_proprietary_ba.py`.
+
+## 15. Live handoff retains peripheral state, but DMAC endpoints are fixed
+
+The normal application-to-boot transition is a live call, not a hardware reset.
+`FUN_00064ec8` calls `0x9F00` first; `system_hard_reset()` is a fallback after a
+non-returning path. It would therefore be incorrect to dismiss DMA/peripheral
+state merely because reset values are safe.
+
+The application DMAC programmer at `0x5F796` takes source/destination fields
+from descriptor records, but every recovered caller supplies one of seven fixed
+CodeFlash descriptor families (`0x31234`, `0x313E8`, `0x31438`, `0x31638`,
+`0x31688`, `0x316D8`, `0x317A8`). The reachable 22 records use fixed peripheral,
+GlobalRAM/LocalRAM, or ordinary CodeFlash endpoints. None points to the tester-
+writable XCP window and none points to `0xBFD8/0xBFE8`. The application Dcm table
+also has no SID `0x3D` WriteMemoryByAddress; the recovered generic tester write
+primitive remains the separately bounded XCP shadow window.
+
+Boot startup does touch the DMAC global control through `0x121A`, so retained
+channel state is not assumed quiescent. The security conclusion instead rests
+on endpoint provenance: without an application arbitrary-SFR/descriptor write,
+a tester cannot arm a retained DMA transfer whose source is a boot credential
+or whose destination is a control-flow cell. `tests/verify_keyless_live_handoff_dma.py`
+pins the live-call ordering, fixed descriptor provenance, endpoint census, and
+absence of an application WriteMemoryByAddress service (`KEYLESS-013`). This is
+a software-visible conclusion; undocumented peripheral behavior remains outside
+the static model.
+
+## 16. Target-native H computed-control-flow census finds no XCP-window PC source
+
+A disposable H Ghidra project was used for a target-native whole-image computed-
+control-flow census rather than transferring Sienna names. The analyzed graph
+contained 5,621 functions / 178,058 instructions and 589 computed control
+transfers (519 call-like, 70 jump-like). Of the **function-owned** computed
+transfers, only nine target-def chains read a LocalRAM cell: boot payload cell
+`FEBF0FD0`; fixed application callback cells `FEBF6B04`, `FEBF1040`,
+`FEBF1058`, and `FEBE5514`; the crypto job families around
+`FEBF1240..FEBF1260` appear in adjacent currently-unowned body fragments. Every
+one of these cells is below the XCP write window `FEBF7C00..FEBFFBFF`.
+
+The census also produced 98 decoded computed transfers outside a recognized
+function body. Their definition chains were reviewed separately: 16 are in the
+`0x10000..0x1FFFF` calibration region, two in the `0x20000` vector/identity
+area, and the remainder are auto-analysis gaps/data or target-specific callback
+fragments. None of their target-definition chains reads the XCP window. The
+real CALLT concern is independently closed by §10: CTBP is fixed to zero.
+Configured H XCP/async callback tables are separately raw-byte pinned by
+`verify_corolla_8965H1202000_application_callback_tables.py`.
+
+The result is therefore a **bounded target-native negative**, not a claim that
+Ghidra has perfect function ownership for every H byte: no recovered H computed
+control-transfer target is sourced from tester-writable XCP RAM, and no target
+into that RAM is recovered. Span's executable code is byte-identical to H
+outside its calibration-only `0xA004..0x17DFF` delta, so this control-flow result
+transfers to F. This is `KEYLESS-014`.
+
+## 17. Payload fixtures and key rotation
 
 A payload fixture proves possession of a payload accepted by the CMAC gate for
 the conditions under which that fixture was built. It can therefore avoid
@@ -173,7 +424,7 @@ Consequently key rotation has two separate effects:
 This distinction is the reason the repository keeps boot-SA and payload-build
 roots separate throughout the bootstrap documentation.
 
-## 8. Evidence boundary
+## 18. Evidence boundary
 
 This is a bounded negative static result over the software-visible surface of
 three images, not a universal impossibility proof. New boot generations,

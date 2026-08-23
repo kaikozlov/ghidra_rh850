@@ -42,6 +42,41 @@ it runs entirely within the AUTOSAR Dcm diagnostic stack.
 A third secret (`PAYLOAD_BUILD_SECRET` at `0xBFD8`) is used for bootloader
 payload encryption and is unrelated to either SecurityAccess path.
 
+### 1.1 The application-SA root is disclosed pre-authentication
+
+The Sienna application root at CodeFlash `0x20840` is copied into readable
+LocalRAM during normal application startup. `FUN_00062662`, called by
+`application_startup_coordinator @ 0x62758`, copies exactly 64 bytes from
+CodeFlash `0x20810..0x2084F` to `FEBF7BB0..FEBF7BEF`; consequently the 16-byte
+root at `0x20840..0x2084F` appears at `FEBF7BE0..FEBF7BEF`.
+
+That mirror is outside the final application LocalRAM exclusion interval
+`FEBF6C00..FEBF78DF`. Two independent unauthenticated read surfaces can reach
+it: extended-session SID `0x23` ReadMemoryByAddress has no configured
+SecurityAccess list, and XCP `SHORT_UPLOAD` is configured without an XCP
+GET_SEED/UNLOCK gate. The application-SA root can therefore be recovered before
+performing `27 03/04`; knowing it in advance is not a prerequisite on this
+calibration.
+
+The H/F Corolla generation has the same construction with copier `0x5C9B6` and
+destination `FEBF7B50..FEBF7B8F`, placing the same root at `FEBF7B80`. This
+cross-image result is owned by
+[keyless-exec-surface-assessment.md](keyless-exec-surface-assessment.md)
+(`KEYLESS-006`) and is pinned directly from all three raw CodeFlash images. It
+does not disclose or bypass the independent boot SecurityAccess root at
+`0xBFE8`.
+
+The practical application-side consequence is narrower than "all diagnostics
+become unlocked." The configured Dcm service objects, RDBI policies, all 19
+RoutineControl RIDs, and recovered WDBI policy records already have no effective
+nonzero application-SA requirement. The material callback-local exception is
+proprietary BA selector `F7/BAENA`: its local helper checks application-SA level
+2 before establishing the reset-persistent BA authorization state. Once the
+root above is read, that check is a recoverable protocol step rather than a
+secret-dependent barrier. The downstream BA state machine still supplies no
+recovered boot-SA write, low-CodeFlash credential read, or attacker-selected PC
+(`KEYLESS-012`; `tests/verify_application_proprietary_ba.py`).
+
 ## 2. Algorithm
 
 The level-2 key verification at `0x8C82A` is a two-stage AES-128-ECB

@@ -124,8 +124,13 @@ Use it as the first cognitive/search surface for broad static analysis:
 tools/pseudo 0x6fec                     # exact address -> pseudocode
 tools/pseudo security_access --list    # search function names
 tools/pseudo secoc --all               # emit all matching pseudocode
-tools/pseudo --data-ref 0xfebef02a    # canonical RAM references despite text aliases
+tools/pseudo --data-ref 0xfebef02a    # canonical function-owned RAM refs despite text aliases
 tools/pseudo --data-ref 0xfebe8001 --list
+# IMPORTANT: --data-ref is a function-owned corpus query, not an exhaustive live-xref census.
+# References at addresses outside Ghidra's current Function.body can be absent even when the
+# decompiler follows that code (boot send-key 0x54DC is a known example). For exhaustive
+# security-state writer closure, confirm with `tools/g x-ref to <address>` in a disposable/live
+# project and raw disassembly.
 make pseudocode                        # rebuild ignored build/pseudocode/*.c view
 rg 'ICUSCMD' build/pseudocode
 rg 'nvm_object_15' build/pseudocode

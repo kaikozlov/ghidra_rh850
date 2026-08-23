@@ -465,6 +465,19 @@ count, so this is **not a strict PKCS#7 padding validator**. The live IT3 Neo
 cipher is nevertheless AES-256-ECB keyed by the full 32-character string, not
 AES-128 keyed by the 16-character prefix. See CORR-091.
 
+That key also closes the formerly opaque `CONF/*.srp` UtilityNeo scripts. All
+18 pinned V18 SRPs decrypt under the recovered AES-256-ECB key; after the
+four-byte `48 02 48 02` wrapper the plaintext is BOM-marked UTF-16 XML.
+`tools/techstream/decode_srp.py` implements the decoder and
+`tests/verify_techstream_srp.py` proves every pinned file decodes plus pins the
+literal diagnostic-frame census. The decoded scripts contain service bytes
+`10/11/14/21/22/2E/2F/31/3B/50/51/54/61/62/6E/6F/71/7B/7F/A8/E8`; there is no
+literal `27`, `34`, `36`, or `37`, and no `SecurityAccess`, `SeedKey`,
+`ServiceAuthKey`, or `ECUAuthKey` vocabulary. These SRPs are therefore not a
+hidden modern reflash/boot-credential implementation in the pinned corpus.
+This is a literal decoded-script closure, not a claim that arbitrary future
+UtilityNeo scripts could never synthesize a request byte dynamically.
+
 All twelve IT3ACNK crypto exports are classified and extent-hashed in
 `data/generated/techstream_v18/crypto_inventory.json`. Besides `EncryptAds`,
 the direct constant consumers are `EncryptSecretKeyC` (`EnerGizerreLayXT`),

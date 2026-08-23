@@ -988,6 +988,17 @@ paths = [
   "techstream.lock.json",
 ]
 
+[suite.techstream_srp]
+tests = ["tests/verify_techstream_srp.py"]
+paths = [
+  "tests/verify_techstream_srp.py",
+  "tools/techstream/decode_srp.py",
+  "docs/tooling/techstream.md",
+  "docs/status/FINDINGS.md",
+]
+requires_external = ["techstream_v18"]
+oracle = "independent_external_artifact"
+
 [suite.techstream_artifact_lock]
 tests = ["tests/verify_techstream_artifact_lock.py"]
 paths = ["techstream.lock.json"]
@@ -2144,6 +2155,29 @@ paths = ["tools/toyota_secoc_session.py", "tests/fixtures/"]
 [suite.u023a87_monitor_map]
 tests = ["tests/verify_u023a87_monitor_map.py"]
 paths = ["data/generated/u023a87_monitor_map.json", "docs/"]
+
+[suite.keyless_boot_variant_residuals]
+tests = ["tests/verify_keyless_boot_variant_residuals.py"]
+paths = [
+  "tests/verify_keyless_boot_variant_residuals.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
+  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+  "docs/security/keyless-exec-surface-assessment.md",
+  "docs/status/FINDINGS.md",
+]
+oracle = "raw_bytes"
+
+[suite.keyless_live_handoff_dma]
+tests = ["tests/verify_keyless_live_handoff_dma.py"]
+paths = [
+  "tests/verify_keyless_live_handoff_dma.py",
+  "firmware/RH850_P1M-E_CodeFlash.bin",
+  "data/generated/decompilations.jsonl",
+  "docs/security/keyless-exec-surface-assessment.md",
+  "docs/status/FINDINGS.md",
+]
+oracle = "cfg_dataflow"
 
 [suite.keyless_exec_surface]
 tests = ["tests/verify_keyless_exec_surface.py"]

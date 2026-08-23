@@ -144,6 +144,17 @@ Writer/reader provenance is re-runnable via `ghidra x-ref to 0xFEBF2B0F`, and th
 byte behaviour at every site is asserted in `tests/verify_security_gate.py`
 (SEC-BOOT-007).
 
+There is one ordering nuance important for keyless-execution analysis. On one
+RequestDownload class the handler can perform flash-operation setup and write
+transfer-status `FEBF2B17=2` before reaching the final SA comparison at
+`0x5EFC`. That does **not** make the operation independently pre-authenticated:
+the branch first requires payload-ready byte `FEBF2B16==1`, whose only non-init
+writer is WDBI `0x4A76`, after WDBI's own `SA==2` check at `0x49C6`. Boot init
+clears both bytes, and RequestDownload commits destination/remaining length only
+after its final SA gate (`FEBF2B00/04 @ 0x5F1E/0x5F22`). Thus the exact claim is
+"SA is mandatory for a usable download context," not "RequestDownload has zero
+pre-SA side effects." See KEYLESS-009.
+
 Its positive response is `74 20 04 02`, advertising maximum block length
 `0x0402`: SID + block counter + at most `0x400` data bytes.
 
