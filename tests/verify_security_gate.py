@@ -21,7 +21,7 @@ All assertions are exact instruction bytes at exact CodeFlash VAs (VA == file
 offset in the standalone CodeFlash image; no Ghidra needed at test time). The
 writer/reader provenance is re-runnable with:
 
-    ghidra x-ref to 0xFEBF2B0F --projects-dir build/project --project rh850_p1me_mapped
+    ghidra x-ref to 0xFEBF2B0F --projects-dir build/work/project --project rh850_p1me_mapped
 """
 from pathlib import Path
 import sys

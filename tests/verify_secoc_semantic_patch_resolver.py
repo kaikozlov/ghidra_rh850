@@ -89,7 +89,7 @@ check("annotated import upgrades result provenance", resolution["mac_result_sour
 
 print("\n== arbitrary-image workflow contract ==")
 image_wrapper = (REPO / "tools" / "resolve_secoc_patch_image.sh").read_text(encoding="utf-8")
-check("arbitrary-image workflow uses a disposable build workspace", "build/secoc-targets" in image_wrapper)
+check("arbitrary-image workflow uses a disposable build workspace", "build/work/secoc-targets" in image_wrapper)
 check("arbitrary-image workflow performs a raw RH850/P1M-E import", "-import \"$IMAGE\"" in image_wrapper and "v850e3:LE:32:default" in image_wrapper)
 check("arbitrary-image workflow runs the semantic resolver", "ResolveSecocAcceptanceGate.java" in image_wrapper)
 check("arbitrary-image workflow opts into investigate scripts explicitly", "--with-investigate" in image_wrapper)

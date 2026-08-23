@@ -4,6 +4,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
 cd "$ROOT"
 
 usage() {
@@ -42,7 +44,7 @@ if not p.is_file(): raise SystemExit(f"not a file: {p}")
 print(p)
 PY
 )
-OUT="${2:-$ROOT/build/ephemeral_runtime_target_manifest.json}"
+OUT="${2:-$BUILD_OUT/ephemeral_runtime_target_manifest.json}"
 OUT=$(python3 - "$OUT" <<'PY'
 from pathlib import Path
 import sys
@@ -68,7 +70,7 @@ PY
 SHA=${IMAGE_INFO[0]}
 NORMALIZATION=${IMAGE_INFO[1]}
 SHORT=${SHA:0:16}
-WORK="$ROOT/build/ephemeral-runtime-targets/$SHORT"
+WORK="$BUILD_WORK/ephemeral-runtime-targets/$SHORT"
 PROJECT_DIR="$WORK/project"
 PROJECT_NAME="ephemeral_runtime_$SHORT"
 GATE="$WORK/gate-resolution.json"
@@ -76,7 +78,7 @@ SEMANTIC="$WORK/runtime-semantic.json"
 LOG="$WORK/ghidra-import.log"
 
 case "$PROJECT_DIR" in
-  "$ROOT/build/ephemeral-runtime-targets/"*) rm -rf "$WORK" ;;
+  "$BUILD_WORK/ephemeral-runtime-targets/"*) rm -rf "$WORK" ;;
   *) echo "refusing unexpected resolver workspace: $PROJECT_DIR" >&2; exit 1 ;;
 esac
 mkdir -p "$PROJECT_DIR"

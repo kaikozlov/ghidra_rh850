@@ -100,11 +100,11 @@
   "software_id": "8965H1202000",
   "source_corpora": [
     {
-      "path": "build/h_8965H1202000_xcp_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_xcp_decompilations.jsonl",
       "sha256": "c40b65647c1097f1497b2a4df8766c486ce150bd055ef289b7657c0927c76432"
     },
     {
-      "path": "build/h_8965H1202000_xcp_helpers_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_xcp_helpers_decompilations.jsonl",
       "sha256": "29d2be920b4eefe74ecb1d0767db2f81a7c60d1c34b6f5942223885435b5415c"
     }
   ]

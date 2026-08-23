@@ -649,7 +649,7 @@
   "software_id": "8965H1202000",
   "source_corpus": {
     "boundary": "disposable H corpus with exactly the 88 callback-table targets forced as functions before decompilation",
-    "path": "build/h_deadline_forced.jsonl",
+    "path": "build/work/corpora/h_deadline_forced.jsonl",
     "sha256": "50b3eda4b5564e9d20016af2ec5d1b6507259e829dc6b53f3573bceb161be94a"
   },
   "support_count": 3

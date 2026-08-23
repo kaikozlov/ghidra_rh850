@@ -1,11 +1,18 @@
 UV ?= uv
 PYTHON ?= $(UV) run --locked python
 EXTERNAL_REPOS_DIR ?= $(abspath ..)
-PROJECT_DIR ?= $(CURDIR)/build/project
+BUILD_ROOT ?= $(CURDIR)/build
+BUILD_CACHE ?= $(BUILD_ROOT)/cache
+BUILD_WORK ?= $(BUILD_ROOT)/work
+BUILD_OUT ?= $(BUILD_ROOT)/out
+BUILD_LOGS ?= $(BUILD_ROOT)/logs
+BUILD_TMP ?= $(BUILD_ROOT)/tmp
+export BUILD_ROOT BUILD_CACHE BUILD_WORK BUILD_OUT BUILD_LOGS BUILD_TMP
+PROJECT_DIR ?= $(BUILD_WORK)/project
 SNAPSHOT_DIR ?= $(CURDIR)/project
 # Canonical parity paths are not command-line overrides: allowing the current
 # output to alias the tracked baseline would turn verification into self-compare.
-override PROJECT_INVENTORY := $(CURDIR)/build/ghidra_project_inventory.jsonl
+override PROJECT_INVENTORY := $(BUILD_OUT)/ghidra_project_inventory.jsonl
 override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.baseline.jsonl
 
 .PHONY: sync verify verify-core verify-local verify-one verify-changed verify-agent verify-exploit verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
@@ -15,12 +22,23 @@ override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.b
 	generate-processor-fixture generate-function-discovery generate-semantic-coverage generate-project-inventory \
 	generate-semantic-sweep generate-decompiler-corpus pseudocode \
 	verify-project-parity update-project-baseline \
-	rebuild-project work-project snapshot-project finalize-project
+	rebuild-project work-project snapshot-project finalize-project build-init build-status clean-build
 
 sync:
 	$(UV) sync --locked
 
-# Build the vendored ghidra-cli (ghidra/ghidra-cli) into build/ghidra-cli/.
+build-init:
+	$(PYTHON) tools/build_layout.py init
+
+build-status:
+	$(PYTHON) tools/build_layout.py status
+
+# Safe default cleanup: transient logs and tmp only. Work/cache require an
+# explicit tools/build_layout.py clean ... --force invocation.
+clean-build:
+	$(PYTHON) tools/build_layout.py clean logs tmp
+
+# Build the vendored ghidra-cli (ghidra/ghidra-cli) into build/cache/ghidra-cli/.
 ghidra-cli:
 	tools/build_ghidra_cli.sh
 
@@ -147,12 +165,12 @@ update-project-baseline:
 		exit 2; \
 	fi
 	PROJECT_DIR="$(PROJECT_DIR_A)" tools/generate_project_inventory.sh \
-		"$(CURDIR)/build/ghidra_project_inventory.rebuild-a.jsonl"
+		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-a.jsonl"
 	PROJECT_DIR="$(PROJECT_DIR_B)" tools/generate_project_inventory.sh \
-		"$(CURDIR)/build/ghidra_project_inventory.rebuild-b.jsonl"
+		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-b.jsonl"
 	$(PYTHON) tools/project_inventory.py update \
-		"$(CURDIR)/build/ghidra_project_inventory.rebuild-a.jsonl" \
-		"$(CURDIR)/build/ghidra_project_inventory.rebuild-b.jsonl" \
+		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-a.jsonl" \
+		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-b.jsonl" \
 		"$(PROJECT_INVENTORY_BASELINE)"
 	@echo "Updated $(PROJECT_INVENTORY_BASELINE); review with:"
 	@echo "  git diff -- data/ghidra_project_inventory.baseline.jsonl"
@@ -160,9 +178,9 @@ update-project-baseline:
 rebuild-project:
 	tools/rebuild_project.sh --project-dir "$(PROJECT_DIR)"
 
-# Materialize the gitignored working project (build/project) from the committed
+# Materialize the gitignored working project (build/work/project) from the committed
 # snapshot (project/) if it does not already exist. Fast local copy (~2s). All
-# interactive `ghidra` CLI work targets build/project/ so the committed snapshot
+# interactive `ghidra` CLI work targets build/work/project/ so the committed snapshot
 # is never daemon-opened (any open compacts its DB and churns the tree).
 work-project:
 	@if [ -d "$(PROJECT_DIR)/rh850_p1me_mapped.rep" ]; then \
@@ -183,7 +201,7 @@ work-project:
 		echo "NOTE: no processor_manifest.json yet; run rebuild-project to create one"; \
 	fi
 
-# Push the working project (build/project) into the committed snapshot
+# Push the working project (build/work/project) into the committed snapshot
 # (project/) and stage it. The ONLY path that mutates the committed project/.
 # Verifies exact stats first and refuses if a daemon is still running.
 snapshot-project:

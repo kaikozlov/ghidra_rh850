@@ -182,12 +182,12 @@
   "software_id": "8965H1202000",
   "source_corpora": {
     "clean": {
-      "path": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl",
       "sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539"
     },
     "forced": {
       "boundary": "used only for transport entry points missing from the clean partition; no unrelated forced boundaries are promoted",
-      "path": "build/h_8965H1202000_can_com_rx_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_can_com_rx_decompilations.jsonl",
       "sha256": "b23464a05e1479deb8cf1ca6b602dc2da679734b974e7625701a289af17500d9"
     }
   }

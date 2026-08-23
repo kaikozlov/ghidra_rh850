@@ -558,31 +558,31 @@
   "software_id": "8965H1202000",
   "source_corpora": {
     "app": {
-      "path": "build/h_8965H1202000_secoc_app_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_secoc_app_decompilations.jsonl",
       "sha256": "5ce86a5aa18eedefe19e346f6df6b87057690b5c4464ec36fd253bc5816810d7"
     },
     "app_correct": {
-      "path": "build/h_8965H1202000_secoc_app_correct_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_secoc_app_correct_decompilations.jsonl",
       "sha256": "80de1e47d7e9a839a9cfec204a7da44fdfb7b43fff81e9864d92e6e5f78c08db"
     },
     "clean": {
-      "path": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl",
       "sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539"
     },
     "core": {
-      "path": "build/h_8965H1202000_secoc_core_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_secoc_core_decompilations.jsonl",
       "sha256": "f5402eba72eef63aeefbc7cc5aa398d0c9751f2965f272ce900211c0928b090b"
     },
     "freshness": {
-      "path": "build/h_8965H1202000_secoc_freshness_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_secoc_freshness_decompilations.jsonl",
       "sha256": "998cdfb659b05b0c62d61c2582de6923442c4f5bde411c1b2325169abe678ab5"
     },
     "key": {
-      "path": "build/h_8965H1202000_secoc_key_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_secoc_key_decompilations.jsonl",
       "sha256": "e83977603716f6e9e0fd3fbfae7a54c59a8cc3749a0a9766a348f219d875317a"
     },
     "rxind": {
-      "path": "build/h_8965H1202000_secoc_rxind_final_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_secoc_rxind_final_decompilations.jsonl",
       "sha256": "72a1aa940486d84bbb46ce399952ece0ed59f65119eeea7ccb4d5b4311277597"
     }
   }

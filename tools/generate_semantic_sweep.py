@@ -37,7 +37,7 @@ def parse_payload(stdout: str) -> dict:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--project-dir", type=Path, default=REPO / "build/project")
+    parser.add_argument("--project-dir", type=Path, default=REPO / "build/work/project")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
     project_dir = args.project_dir.resolve()
@@ -52,9 +52,10 @@ def main() -> int:
                     if row["selected_for_sweep"] == "true"]
     environment = os.environ.copy()
     environment.update({"GHIDRA_AGENT": "1", "GHIDRA_PROJECT": str(project_dir)})
+    (REPO / "build" / "tmp").mkdir(parents=True, exist_ok=True)
     # Refuse to attribute the committed inventory hash to an unrelated live
     # project.  Export and compare the selected project before decompiling it.
-    with tempfile.TemporaryDirectory(prefix="semantic-sweep-inventory-", dir=REPO / "build") as tmp:
+    with tempfile.TemporaryDirectory(prefix="semantic-sweep-inventory-", dir=REPO / "build" / "tmp") as tmp:
         live_inventory = Path(tmp) / "live-project.jsonl"
         inventory_env = environment.copy()
         inventory_env["PROJECT_DIR"] = str(project_dir)

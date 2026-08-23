@@ -11,7 +11,7 @@ if [[ $# -lt 1 || $# -gt 2 ]]; then
 fi
 
 IMAGE="$1"
-OUT="${2:-build/secoc_patch_manifest.json}"
+OUT="${2:-build/out/secoc_patch_manifest.json}"
 RESOLUTION="${OUT%.json}.semantic.json"
 mkdir -p "$(dirname "$OUT")"
 

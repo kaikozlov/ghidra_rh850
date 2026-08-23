@@ -4,13 +4,15 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
 cd "$ROOT"
 
 usage() {
   cat <<'EOF'
 Usage: tools/resolve_secoc_patch_image.sh CODEFLASH.bin [manifest.json]
 
-Imports CODEFLASH.bin into a disposable Ghidra project under build/secoc-targets,
+Imports CODEFLASH.bin into a disposable Ghidra project under build/work/secoc-targets,
 runs the calibration-independent semantic gate resolver, verifies the resolver
 SHA-256 against the exact input image, discovers boot-CRC geometry, and emits a
 patch manifest. The input image is never modified.
@@ -38,7 +40,7 @@ if not p.is_file():
 print(p)
 PY
 )
-OUT="${2:-$ROOT/build/secoc_patch_manifest.json}"
+OUT="${2:-$BUILD_OUT/secoc_patch_manifest.json}"
 OUT=$(python3 - "$OUT" <<'PY'
 from pathlib import Path
 import sys
@@ -66,7 +68,7 @@ except ValueError as exc:
 
 SHA=$(shasum -a 256 "$IMAGE" | awk '{print $1}')
 SHORT=${SHA:0:16}
-WORK="$ROOT/build/secoc-targets/$SHORT"
+WORK="$BUILD_WORK/secoc-targets/$SHORT"
 PROJECT_DIR="$WORK/project"
 PROJECT_NAME="secoc_target_$SHORT"
 RESOLUTION="$WORK/semantic-resolution.json"
@@ -75,7 +77,7 @@ LOG="$WORK/ghidra-import.log"
 # Always rebuild the disposable import so resolver behavior follows the current
 # processor module/script rather than a stale cached analysis database.
 case "$PROJECT_DIR" in
-  "$ROOT/build/secoc-targets/"*) rm -rf "$WORK" ;;
+  "$BUILD_WORK/secoc-targets/"*) rm -rf "$WORK" ;;
   *) echo "refusing unexpected resolver workspace: $PROJECT_DIR" >&2; exit 1 ;;
 esac
 mkdir -p "$PROJECT_DIR"

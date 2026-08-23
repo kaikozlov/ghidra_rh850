@@ -13,8 +13,8 @@ import json
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-DEFAULT_CORPUS = REPO / "build/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
-DEFAULT_IMAGE = REPO / "build/community-normalized/8965H1202000_CodeFlash.bin"
+DEFAULT_CORPUS = REPO / "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
+DEFAULT_IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json"
 
 # Initialization / retained LTA command path / final command composition / COM APIs.

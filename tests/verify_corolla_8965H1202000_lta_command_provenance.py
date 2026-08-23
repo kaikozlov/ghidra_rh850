@@ -13,7 +13,7 @@ REPO = Path(__file__).resolve().parents[1]
 ART = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
 EVID = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json"
 TOOL = REPO / "tools/build_corolla_h_lta_command_provenance.py"
-IMAGE = REPO / "build/community-normalized/8965H1202000_CodeFlash.bin"
+IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
 passed = failed = 0
 
 
@@ -38,7 +38,7 @@ image = IMAGE.read_bytes()
 print("\n== evidence identity ==")
 check("report is exact H image-bound", d["software_id"] == "8965H1202000" and d["images"]["corolla_h"]["sha256"] == hashlib.sha256(image).hexdigest())
 check("36 target-native functions support provenance closure", e["function_count"] == 36)
-check("LTA report uses scope-stable corpus provenance", d["schema"] == "corolla-8965H1202000-lta-command-provenance-v2" and d["corpus"].get("binding") == "semantic-projection" and "sha256" not in d["corpus"])
+check("LTA report consumes tracked compact whole-corpus census", d["schema"] == "corolla-8965H1202000-lta-command-provenance-v3" and d["whole_corpus_census"]["path"] == "data/generated/corolla_8965H1202000_lta_command_provenance_census.json" and d["whole_corpus_census"]["source_function_count"] > 5000)
 for row in e["functions"]:
     start = int(row["entry"], 16); size = row["body_size"]
     check(f"raw body hash {row['entry']}", hashlib.sha256(image[start:start+size]).hexdigest() == row["body_sha256"])

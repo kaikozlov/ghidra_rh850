@@ -3,7 +3,7 @@
 
 Committed snapshots deliberately use ``.gpr.snapshot`` / ``.rep.snapshot`` so
 raw Ghidra cannot open and compact ``project/``. Working copies use normal
-``.gpr`` / ``.rep`` names under ``build/project``.
+``.gpr`` / ``.rep`` names under ``build/work/project``.
 """
 from __future__ import annotations
 

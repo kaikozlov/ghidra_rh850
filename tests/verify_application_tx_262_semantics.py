@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import json
 from pathlib import Path
 import sys
 
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 MAP = REPO / "data" / "application_tx_map.csv"
-DBC = REPO / "REFERENCE" / "opendbc" / "opendbc" / "dbc" / "generator" / "toyota" / "toyota_secoc_pt.dbc"
+DBC_FACTS = REPO / "data/external/opendbc/toyota_dbc_facts.json"
 
 passed = failed = 0
 
@@ -45,12 +46,13 @@ for (address, size), expected in expected_bodies.items():
     check(f"producer 0x{address:X} body identity", sha(address, size) == expected)
 
 print("\n== public DBC field geometry is only corroboration ==")
-dbc = DBC.read_text(encoding="utf-8")
-check("pinned DBC has EPS_STATUS CAN 0x262", "BO_ 610 EPS_STATUS: 8 EPS" in dbc)
-check("DBC IPAS_STATE is B0 low nibble", "SG_ IPAS_STATE : 3|4@0+" in dbc)
-check("DBC LTA_STATE is B1[7:3]", "SG_ LTA_STATE : 15|5@0+" in dbc)
-check("DBC TYPE is B3[0]", "SG_ TYPE : 24|1@0+" in dbc)
-check("DBC LKA_STATE is B3[7:1]", "SG_ LKA_STATE : 31|7@0+" in dbc)
+facts = json.loads(DBC_FACTS.read_text(encoding="utf-8"))
+eps = facts["messages"]["EPS_STATUS"]
+check("pinned DBC fact has EPS_STATUS CAN 0x262", eps["can_id_decimal"] == 610 and eps["length"] == 8)
+check("DBC IPAS_STATE is B0 low nibble", eps["signals"]["IPAS_STATE"] == {"start_bit_motorola": 3, "bit_length": 4, "signed": False})
+check("DBC LTA_STATE is B1[7:3]", eps["signals"]["LTA_STATE"] == {"start_bit_motorola": 15, "bit_length": 5, "signed": False})
+check("DBC TYPE is B3[0]", eps["signals"]["TYPE"] == {"start_bit_motorola": 24, "bit_length": 1, "signed": False})
+check("DBC LKA_STATE is B3[7:1]", eps["signals"]["LKA_STATE"] == {"start_bit_motorola": 31, "bit_length": 7, "signed": False})
 
 print("\n== byte 0 / IPAS_STATE is runtime-zero in this calibration ==")
 # 0x4B90A uses ep=FEBE8094 and clears offsets 8,9,0x20,0xA..0xE.

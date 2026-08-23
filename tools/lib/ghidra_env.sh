@@ -3,8 +3,16 @@
 # Source as: source tools/lib/ghidra_env.sh [none|source|full] [manifest]
 
 _GHIDRA_ENV_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-_GHIDRA_ENV_FILE="${GHIDRA_PROCESSOR_ENV_FILE:-$_GHIDRA_ENV_ROOT/build/ghidra-processor.env}"
+_GHIDRA_ENV_CACHE="${BUILD_CACHE:-$_GHIDRA_ENV_ROOT/build/cache}"
+_GHIDRA_ENV_OUT="${BUILD_OUT:-$_GHIDRA_ENV_ROOT/build/out}"
+_GHIDRA_ENV_CANONICAL=1
+if [[ -n "${GHIDRA_PROCESSOR_ENV_FILE+x}" ]]; then
+  _GHIDRA_ENV_CANONICAL=0
+fi
+_GHIDRA_ENV_FILE="${GHIDRA_PROCESSOR_ENV_FILE:-$_GHIDRA_ENV_CACHE/ghidra-processor.env}"
 _GHIDRA_INSTALL="${GHIDRA_INSTALL_SCRIPT:-$_GHIDRA_ENV_ROOT/tools/install_v850_extension.sh}"
+_GHIDRA_CALLER_JAVA_OPTIONS="${GHIDRA_JAVA_OPTIONS:-}"
+_GHIDRA_CALLER_HEADLESS_JAVA_OPTIONS="${GHIDRA_HEADLESS_JAVA_OPTIONS:-}"
 _GHIDRA_FINGERPRINT="${GHIDRA_FINGERPRINT_TOOL:-$_GHIDRA_ENV_ROOT/tools/fingerprint_processor.py}"
 _GHIDRA_FINGERPRINT_MODE="${1:-none}"
 _GHIDRA_REQUESTED_MANIFEST="${2:-}"
@@ -33,11 +41,26 @@ _cached_env_is_current() {
   [[ "$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")" == "12.1.3" ]] || return 1
   [[ -f "${V850_EXT_DIR:-}/data/languages/v850e3.sla" ]] || return 1
   [[ -f "${PROCESSOR_MANIFEST:-}" ]] || return 1
+  if ((_GHIDRA_ENV_CANONICAL)); then
+    [[ "${GHIDRA_ISOLATED_HOME:-}" == "$_GHIDRA_ENV_CACHE/ghidra-home" ]] || return 1
+    [[ "${V850_EXT_DIR:-}" == "$_GHIDRA_ENV_CACHE/ghidra-home/Library/ghidra/ghidra_12.1.3_PUBLIC/Extensions/Renesas_v850" ]] || return 1
+    [[ "${V850_BUILD_DIR:-}" == "$_GHIDRA_ENV_CACHE/processor-extension-src/Renesas_v850" ]] || return 1
+    [[ "${PROCESSOR_MANIFEST:-}" == "$_GHIDRA_ENV_OUT/processor_manifest.json" ]] || return 1
+  fi
   python3 "$_GHIDRA_FINGERPRINT" \
     --source-only --expect "$PROCESSOR_MANIFEST" >/dev/null 2>&1
 }
 
 if [[ "${GHIDRA_ENV_FORCE_REBUILD:-0}" == "1" ]] || ! _cached_env_is_current; then
+  # A stale migrated env file may have exported pre-layout paths into this shell.
+  # Clear those values before invoking the canonical installer so stale cache
+  # metadata cannot redirect the rebuild back into legacy build/* locations.
+  if ((_GHIDRA_ENV_CANONICAL)); then
+    unset GHIDRA_ISOLATED_HOME V850_EXT_DIR V850_BUILD_DIR PROCESSOR_MANIFEST
+    unset GHIDRA_VERSION GHIDRA_CLI_VERSION
+    export GHIDRA_JAVA_OPTIONS="$_GHIDRA_CALLER_JAVA_OPTIONS"
+    export GHIDRA_HEADLESS_JAVA_OPTIONS="$_GHIDRA_CALLER_HEADLESS_JAVA_OPTIONS"
+  fi
   [[ -x "$_GHIDRA_INSTALL" ]] || {
     echo "ERROR: processor installer is not executable: $_GHIDRA_INSTALL" >&2
     exit 1

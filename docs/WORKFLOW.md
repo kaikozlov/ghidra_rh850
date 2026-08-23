@@ -10,7 +10,7 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
 - Rust `ghidra` CLI **0.2.1** (`ghidra doctor` must pass). The CLI source is
   **vendored in-tree** at `ghidra/ghidra-cli/` (fork of
   `akiselev/ghidra-cli`). Run `make ghidra-cli` to build it into
-  `build/ghidra-cli/`; the repo's tool scripts automatically prefer the
+  `build/cache/ghidra-cli/`; the repo's tool scripts automatically prefer the
   vendored build over any `ghidra` on `PATH`. See
   `ghidra/ghidra-cli/README.md` and `PROVENANCE.json`.
 - The Renesas v850/RH850 processor module, **vendored in-tree** at
@@ -20,14 +20,52 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
 
 There is no separate install step. `tools/install_v850_extension.sh` (invoked
 by `make verify-sleigh` and every project rebuild) compiles the vendored
-`.slaspec` sources from a disposable copy under `build/processor-extension-src/`
-and installs into an isolated Ghidra user-home under `build/ghidra-home/` via
+`.slaspec` sources from a disposable copy under `build/cache/processor-extension-src/`
+and installs into an isolated Ghidra user-home under `build/cache/ghidra-home/` via
 `-Duser.home`. It does **not** generate files in the vendored tree or mutate
 `$GHIDRA_HOME/Ghidra/Extensions`.
 
 The in-tree `v850.cspec` models the RH850/G3 calling convention (r6–r9 args,
 r10 return, callee-saved r20–r29, lp link register, `__interrupt` prototype).
 Processor audits: [tooling/processor-module-audit.md](tooling/processor-module-audit.md).
+
+## Build workspace contract
+
+`build/` is ignored **workspace state**, not a source of repository truth. A
+clean clone must be able to run `make verify` without any pre-existing build
+files. If a deterministic/core verifier needs bytes or compact facts, promote
+them to a tracked location (`community/`, `data/`, `exploit/.../audited/`, etc.)
+and bind their provenance there instead of reading an ignored file.
+
+Only five top-level namespaces are valid:
+
+- `build/cache/` — expensive reproducible caches: vendored CLI binary, its Cargo
+  target directory, isolated Ghidra home/extensions, and toolchain material. Safe
+  to delete, expensive to rebuild. Vendored source trees remain source-only.
+- `build/work/` — mutable persistent workspaces: live Ghidra projects, disposable
+  target projects, and full decompiler corpora used while promoting compact evidence.
+- `build/out/` — reproducible reviewable outputs that are not yet promoted: reports,
+  manifests, rebuilt shellcode, pseudocode, inventories.
+- `build/logs/` — execution logs.
+- `build/tmp/` — short-lived intermediates.
+
+Use `make build-status` to see category sizes and any legacy pre-layout
+entries. `make clean-build` removes only `logs/` and `tmp/`; deleting `work/` or
+`cache/` requires the explicit `tools/build_layout.py clean ... --force` path,
+and destructive layout operations are restricted to this repository's own
+`build/` root. `work/` and `cache/` cleanup refuse to run while an RH850 Ghidra
+daemon is active.
+
+Migration is explicit and non-destructive. `tools/build_layout.py migrate-known`
+dry-runs the recognized reusable cache/work/output moves; add `--apply` to
+perform them. `tools/build_layout.py migrate-legacy` dry-runs quarantine of any
+remaining pre-layout top-level entries under `build/work/legacy-root/`; add
+`--apply` only after review. Migration never deletes those opaque analysis
+artifacts, and canonical tools do not consume `legacy-root/` implicitly.
+
+Live-project assertions are `local` verification suites. Core verification uses
+tracked firmware/evidence only; external proprietary/public source trees are
+owned through explicit `requires_external` gates rather than `REFERENCE/` paths.
 
 ## The durability trap (read this first)
 
@@ -62,11 +100,11 @@ durable on disk until the daemon shuts down cleanly**.
 database is physically stored as `rh850_p1me_mapped.gpr.snapshot` and
 `rh850_p1me_mapped.rep.snapshot`; raw Ghidra cannot recognize those names.
 `make verify-sleigh` asserts that a direct `analyzeHeadless` open fails. All
-interactive work happens in the gitignored working copy at `build/project/`:
+interactive work happens in the gitignored working copy at `build/work/project/`:
 
 - `make work-project` — materialize live `.gpr` / `.rep` names under
-  `build/project/` from the committed non-live snapshot.
-- `make rebuild-project` — fresh from-scratch rebuild into `build/project/`.
+  `build/work/project/` from the committed non-live snapshot.
+- `make rebuild-project` — fresh from-scratch rebuild into `build/work/project/`.
 - `make snapshot-project` — the **only** path that mutates committed
   `project/`. Verifies floors, processor fingerprint, and exact normalized
   inventory; packs the working project back to non-live snapshot names; stages
@@ -79,7 +117,7 @@ interactive work happens in the gitignored working copy at `build/project/`:
   manually running `tools/g stop` + `make snapshot-project`.
 
 Mutation markers are project-affine records under
-`build/ghidra-session-dirty/`; each records the canonical working-project path.
+`build/work/ghidra-session-dirty/`; each records the canonical working-project path.
 `GHIDRA_PROJECT=/path/to/build-copy tools/g ...` therefore cannot mark or clear
 another working project, and finalization propagates its `PROJECT_DIR` to the
 daemon stop and snapshot steps. Markers are warnings about mutation-capable
@@ -91,10 +129,10 @@ promotion.
 `tools/g` is fully self-contained. It validates the cached isolated Ghidra
 environment (processor extension, Java options, fingerprint) and rebuilds it
 only when missing or stale — you never need to source
-`build/ghidra-processor.env`.
+`build/cache/ghidra-processor.env`.
 
 ```bash
-make work-project   # one-time: copy snapshot -> build/project
+make work-project   # one-time: copy snapshot -> build/work/project
 tools/g decompile 0x8db22
 tools/g x-ref to 0x8db22
 # e.g. ... stats | decompile 0x6fec | x-ref to 0xbfe8 | symbol list
@@ -131,9 +169,9 @@ tools/pseudo --data-ref 0xfebe8001 --list
 # decompiler follows that code (boot send-key 0x54DC is a known example). For exhaustive
 # security-state writer closure, confirm with `tools/g x-ref to <address>` in a disposable/live
 # project and raw disassembly.
-make pseudocode                        # rebuild ignored build/pseudocode/*.c view
-rg 'ICUSCMD' build/pseudocode
-rg 'nvm_object_15' build/pseudocode
+make pseudocode                        # rebuild ignored build/out/pseudocode/*.c view
+rg 'ICUSCMD' build/out/pseudocode
+rg 'nvm_object_15' build/out/pseudocode
 ```
 
 The `.c` tree is intentionally ignored; it can be reproduced from the tracked
@@ -147,8 +185,8 @@ from the committed snapshot may carry Ghidra version-control state that
 `analyzeHeadless -process` reports as hijacked, so use a fresh rebuild output:
 
 ```bash
-make rebuild-project PROJECT_DIR="$PWD/build/corpus-rebuild"
-make generate-decompiler-corpus PROJECT_DIR="$PWD/build/corpus-rebuild"
+make rebuild-project PROJECT_DIR="$PWD/build/work/corpus-rebuild"
+make generate-decompiler-corpus PROJECT_DIR="$PWD/build/work/corpus-rebuild"
 uv run --locked python tests/verify_decompiler_corpus.py
 ```
 
@@ -235,14 +273,14 @@ project from the reconstructed derivative; use the reconstruction only for
 explicit CRC/semantic experiments.
 
 ```bash
-make rebuild-project                                  # into build/project/
-make rebuild-project PROJECT_DIR="$PWD/build/parity-project"  # disposable sibling
+make rebuild-project                                  # into build/work/project/
+make rebuild-project PROJECT_DIR="$PWD/build/work/parity-project"  # disposable sibling
 ```
 
 Rebuild destinations are deliberately constrained to dedicated directories
-below `build/`; this keeps `--force` incapable of deleting committed or
+below `build/work/`; this keeps `--force` incapable of deleting committed or
 unrelated trees. To replace an existing disposable working build:
-`tools/rebuild_project.sh --project-dir "$PWD/build/project" --force`.
+`tools/rebuild_project.sh --project-dir "$PWD/build/work/project" --force`.
 Never point the rebuild at committed `project/`; promote only with
 `make snapshot-project`.
 
@@ -293,7 +331,7 @@ reproduce the committed statistics.
 6. Open the result through the CLI, record statistics, cleanly stop the daemon.
 7. Write `processor_manifest.json` beside the working project and require
    function/instruction/symbol floors plus the nine-block memory map.
-8. Export canonical compact JSONL to `build/ghidra_project_inventory.jsonl`
+8. Export canonical compact JSONL to `build/out/ghidra_project_inventory.jsonl`
    and compare every semantic record with
    `data/ghidra_project_inventory.baseline.jsonl`. The path-free inventory
    covers tool/program identity, memory mappings, complete function bodies and
@@ -316,9 +354,9 @@ After a graph-changing rebuild, regenerate the structural semantic ledger and
 the reproducible review cohort from a disposable project:
 
 ```bash
-PROJECT_DIR=build/rebuild-a make generate-semantic-coverage
+PROJECT_DIR=build/work/rebuild-a make generate-semantic-coverage
 uv run --locked python tools/generate_semantic_interest_ranking.py
-make generate-semantic-sweep PROJECT_DIR=build/rebuild-a
+make generate-semantic-sweep PROJECT_DIR=build/work/rebuild-a
 uv run --locked python tests/verify_semantic_sweep.py
 ```
 

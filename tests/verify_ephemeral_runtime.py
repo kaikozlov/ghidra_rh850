@@ -142,6 +142,10 @@ check("audited resident image fits manifest 0x308-byte pocket with 72-byte headr
       audit["compile_contract"]["target_codeflash_sha256"] == hashlib.sha256(CF).hexdigest())
 check("audited resident image has exact executable SHA",
       audit["shellcode"]["sha256"] == "8f486d36ae38d233165563ad2cc4a71d006cf5c8cf9a876345a3b6ab72f10495")
+AUDITED_RUNTIME = REPO / "exploit/ephemeral_runtime/audited/ephemeral_secoc_runtime.bin"
+check("tracked audited resident bytes match audit manifest",
+      AUDITED_RUNTIME.is_file() and len(AUDITED_RUNTIME.read_bytes()) == audit["shellcode"]["size"] and
+      hashlib.sha256(AUDITED_RUNTIME.read_bytes()).hexdigest() == audit["shellcode"]["sha256"])
 check("audited build pins zero relocations and entry offset zero",
       audit["compile_contract"]["relocations"] == 0 and audit["shellcode"]["entry_offset"] == 0)
 check("audited build is explicitly not bench-validated",
@@ -178,6 +182,10 @@ check("audited canary is 332 bytes with 444 bytes headroom",
       canary_audit["compile_contract"]["target_codeflash_sha256"] == hashlib.sha256(CF).hexdigest())
 check("audited canary executable SHA is pinned",
       canary_audit["shellcode"]["sha256"] == "81176c6e1c33451cfa63bd3b4a0e07b8b0fb952c70b3d67442f1a294ed6b651e")
+AUDITED_CANARY = REPO / "exploit/ephemeral_runtime/audited/ephemeral_scheduler_canary.bin"
+check("tracked audited canary bytes match audit manifest",
+      AUDITED_CANARY.is_file() and len(AUDITED_CANARY.read_bytes()) == canary_audit["shellcode"]["size"] and
+      hashlib.sha256(AUDITED_CANARY.read_bytes()).hexdigest() == canary_audit["shellcode"]["sha256"])
 check("canary is entry-zero, relocation-free, and explicitly unvalidated",
       canary_audit["shellcode"]["entry_offset"] == 0 and
       canary_audit["compile_contract"]["relocations"] == 0 and
@@ -238,6 +246,13 @@ check("block-operation helper loads FEBF0FD0 and indirect-calls it",
 check("canary is non-returning after application transition",
       "__attribute__((noreturn)) exploit" in canary_source and
       "static void post_context_startup(void) __attribute__((noreturn, noinline));" in canary_source)
+
+
+command5_audit = json.loads((REPO / "exploit/ephemeral_runtime/audited_command5_proxy_build.json").read_text())
+command5_runtime = REPO / "exploit/ephemeral_runtime/audited/ephemeral_command5_proxy.bin"
+check("tracked audited command5 proxy bytes match audit manifest",
+      command5_runtime.is_file() and len(command5_runtime.read_bytes()) == command5_audit["shellcode"]["size"] and
+      hashlib.sha256(command5_runtime.read_bytes()).hexdigest() == command5_audit["shellcode"]["sha256"])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 if failed:

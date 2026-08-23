@@ -27,7 +27,7 @@
     "crate_name": "ghidra-cli",
     "bin_name": "ghidra",
     "build_command": "tools/build_ghidra_cli.sh",
-    "output_dir": "build/ghidra-cli"
+    "output_dir": "build/cache/ghidra-cli"
   },
   "ghidra": {
     "required_version": "12.1.3",

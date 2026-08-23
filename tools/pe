@@ -3,7 +3,7 @@
 # tools/pe — ghidra CLI wrapper for x86 PE analysis (Techstream DLLs, etc.)
 #
 # Like tools/g but for arbitrary PE binaries. Uses a separate project under
-# build/pe-project/ so it never touches the committed RH850 snapshot.
+# build/work/pe-project/ so it never touches the committed RH850 snapshot.
 #
 # Usage:
 #   tools/pe import <path/to/file.dll>
@@ -24,12 +24,14 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
 PROJECT_NAME="${PE_PROJECT:-pe_dlls}"
-PROJECT_DIR="$ROOT/build/pe-project"
+PROJECT_DIR="$BUILD_WORK/pe-project"
 mkdir -p "$PROJECT_DIR"
 
 VENDOR_SRC="$ROOT/ghidra/ghidra-cli/src"
-VENDOR_BIN="$ROOT/build/ghidra-cli/ghidra"
+VENDOR_BIN="$BUILD_CACHE/ghidra-cli/ghidra"
 
 if [[ ! -x "$VENDOR_BIN" ]]; then
   if [[ -x "$ROOT/tools/build_ghidra_cli.sh" ]] && command -v cargo >/dev/null 2>&1; then

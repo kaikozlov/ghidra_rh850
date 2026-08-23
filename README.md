@@ -74,7 +74,9 @@ tools/g inspect 0x8db22 --decompile --callers --callees --xrefs --disasm 40
 ```
 
 **Never daemon-open `project/` directly.** `project/` is a committed snapshot;
-interactive work belongs in `build/project/`. The operating contract is in
+interactive work belongs in `build/work/project/`. `build/` is ignored workspace
+state only, split into `cache/`, `work/`, `out/`, `logs/`, and `tmp/`; run
+`make build-status` to inspect it. The operating contract is in
 [AGENTS.md](AGENTS.md) and the full mechanics are in
 [docs/WORKFLOW.md](docs/WORKFLOW.md).
 

@@ -8,7 +8,7 @@ PROGRAM='RH850_P1M-E_CodeFlash.bin'
 EXPECTED=('ASSERT application-routine-remaining-controls: op2_callers=2 op2_initializer_callers=1 '
           'mode1_callers=4 op1106_thunk_callers=1 op1109_thunk_callers=3 direct_actuation_refs=0 unexpected=0')
 def main():
- p=argparse.ArgumentParser(); p.add_argument('--project-dir',type=Path,default=REPO/'build/project'); a=p.parse_args(); project=a.project_dir.resolve()
+ p=argparse.ArgumentParser(); p.add_argument('--project-dir',type=Path,default=REPO/'build/work/project'); a=p.parse_args(); project=a.project_dir.resolve()
  if not (project/'rh850_p1me_mapped.rep').is_dir(): print(f'[FAIL] live remaining RoutineControl controls: missing project {project}'); return 1
  with tempfile.TemporaryDirectory(prefix='routine-remaining-') as d:
   log=Path(d)/'headless.log'

@@ -1,0 +1,43 @@
+{
+  "schema": "opendbc-toyota-corroboration-v1",
+  "repository": {
+    "url": "https://github.com/commaai/opendbc.git",
+    "commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93"
+  },
+  "sources": {
+    "toyota_2017": {
+      "path": "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
+      "sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48"
+    },
+    "toyota_secoc_pt": {
+      "path": "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
+      "sha256": "2d680b1b73102d1c88bd735da7683f9379c98f39e1ad608618b94bf037c76119"
+    }
+  },
+  "messages": {
+    "STEER_ANGLE_SENSOR": {
+      "source": "toyota_2017",
+      "can_id_decimal": 37,
+      "can_id_hex": "0x025",
+      "length": 8,
+      "signals": {
+        "STEER_ANGLE": {"start_bit_motorola": 3, "bit_length": 12, "signed": true},
+        "STEER_FRACTION": {"start_bit_motorola": 39, "bit_length": 4, "signed": true},
+        "STEER_RATE": {"start_bit_motorola": 35, "bit_length": 12, "signed": true}
+      }
+    },
+    "EPS_STATUS": {
+      "source": "toyota_secoc_pt",
+      "can_id_decimal": 610,
+      "can_id_hex": "0x262",
+      "length": 8,
+      "signals": {
+        "IPAS_STATE": {"start_bit_motorola": 3, "bit_length": 4, "signed": false},
+        "LTA_STATE": {"start_bit_motorola": 15, "bit_length": 5, "signed": false},
+        "TYPE": {"start_bit_motorola": 24, "bit_length": 1, "signed": false},
+        "LKA_STATE": {"start_bit_motorola": 31, "bit_length": 7, "signed": false}
+      }
+    }
+  },
+  "boundary": "Tracked compact corroboration only. Firmware bytes remain primary evidence; tests/verify_external_corroboration.py revalidates these facts against the pinned upstream checkout when available."
+}

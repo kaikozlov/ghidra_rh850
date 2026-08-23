@@ -59,7 +59,7 @@
   "decompiler_evidence": {
     "function_count": 22,
     "path": "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",
-    "sha256": "5233f222002644f854c8161e70306f3d89e6e0edfa0df5714154092cb180f851"
+    "sha256": "17352f256694dda51d78af2e676ef37090540306d13205c4beec4be97fe57a6a"
   },
   "evidence_boundary": "Static CPU/application proof: all configured H SecOC queue records select one generated config/job, whose config is {type=1, selector=4}; CryptoIf forwards that object into the command-7 descriptor and ICUSCMD receives selector 4. No 16-byte raw key is passed through the command-7 CPU descriptor. This does not reveal undocumented ICU-S internal storage/derivation. DataFlash raw-key negatives retain their acquisition-epoch boundary.",
   "images": {

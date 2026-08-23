@@ -5,12 +5,15 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-PROJECT_DIR="${PROJECT_DIR:-$ROOT/build/project}"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
+PROJECT_DIR="${PROJECT_DIR:-$BUILD_WORK/project}"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 FIXTURE_DIR="$ROOT/tests/fixtures/processor"
-FIXTURE_PROJECT_DIR="$ROOT/build/processor-fixture-project"
-mkdir -p "$ROOT/build"
+FIXTURE_PROJECT_DIR="$BUILD_WORK/processor-fixture-project"
+mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
 
 # Shared environment setup: resolve Ghidra, install processor extension,
 # source env file, validate fingerprint.
@@ -24,7 +27,7 @@ BINARY="$FIXTURE_DIR/rh850_semantic_fixture.bin"
 echo "==> Synthetic fixture project"
 rm -rf "$FIXTURE_PROJECT_DIR"
 mkdir -p "$FIXTURE_PROJECT_DIR"
-FIXTURE_LOG="$ROOT/build/verify-processor-fixture.log"
+FIXTURE_LOG="$BUILD_LOGS/verify-processor-fixture.log"
 "$ROOT/tools/run_headless" \
   --project-dir "$FIXTURE_PROJECT_DIR" \
   --project rh850_fixture \
@@ -57,9 +60,9 @@ if [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
   fi
 
   INV_OUT="$ROOT/data/instruction_inventory.csv"
-  DECOMPILER_REPORT="$ROOT/build/decompiler-signatures.txt"
+  DECOMPILER_REPORT="$BUILD_OUT/decompiler-signatures.txt"
   mkdir -p "$(dirname "$INV_OUT")"
-  PROJECT_LOG="$ROOT/build/verify-processor-project.log"
+  PROJECT_LOG="$BUILD_LOGS/verify-processor-project.log"
 
   # Use durable headless -process so GHIDRA_JAVA_OPTIONS/-Duser.home applies.
   "$ROOT/tools/run_headless" \

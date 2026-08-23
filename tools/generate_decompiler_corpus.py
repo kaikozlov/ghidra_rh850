@@ -15,13 +15,17 @@ from pathlib import Path
 from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
-BUILD = REPO / "build"
+BUILD_ROOT = Path(os.environ.get("BUILD_ROOT", REPO / "build")).expanduser().resolve()
+BUILD_WORK = Path(os.environ.get("BUILD_WORK", BUILD_ROOT / "work")).expanduser().resolve()
+BUILD_OUT = Path(os.environ.get("BUILD_OUT", BUILD_ROOT / "out")).expanduser().resolve()
+BUILD_LOGS = Path(os.environ.get("BUILD_LOGS", BUILD_ROOT / "logs")).expanduser().resolve()
+BUILD_TMP = Path(os.environ.get("BUILD_TMP", BUILD_ROOT / "tmp")).expanduser().resolve()
 COMMITTED_PROJECT = REPO / "project"
 PROJECT_NAME = "rh850_p1me_mapped"
 PROGRAM_NAME = "RH850_P1M-E_CodeFlash.bin"
 INVENTORY = REPO / "data/ghidra_project_inventory.baseline.jsonl"
 DEFAULT_OUTPUT = REPO / "data/generated/decompilations.jsonl"
-DEFAULT_VIEW = BUILD / "pseudocode"
+DEFAULT_VIEW = BUILD_OUT / "pseudocode"
 EXPORTER = REPO / "ghidra/scripts/verify/ExportDecompilerCorpus.java"
 
 
@@ -115,7 +119,8 @@ def export_raw_corpus(
     timeout_seconds: int,
     environment: dict[str, str],
 ) -> None:
-    log = BUILD / "generate-decompiler-corpus.log"
+    log = BUILD_LOGS / "generate-decompiler-corpus.log"
+    log.parent.mkdir(parents=True, exist_ok=True)
     run_checked([
         str(REPO / "tools/run_headless"),
         "--project-dir", str(project_dir),
@@ -300,8 +305,8 @@ def safe_name(name: str) -> str:
 
 def materialize_view(view_dir: Path, records: list[dict[str, Any]], metadata: dict[str, Any]) -> None:
     view_dir = view_dir.expanduser().resolve()
-    if not is_within(view_dir, BUILD) or view_dir == BUILD.resolve():
-        raise SystemExit(f"refusing pseudocode view outside a dedicated build/ directory: {view_dir}")
+    if not is_within(view_dir, BUILD_OUT) or view_dir == BUILD_OUT.resolve():
+        raise SystemExit(f"refusing pseudocode view outside build/out/: {view_dir}")
 
     parent = view_dir.parent
     parent.mkdir(parents=True, exist_ok=True)
@@ -345,7 +350,7 @@ def materialize_view(view_dir: Path, records: list[dict[str, Any]], metadata: di
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--project-dir", type=Path, default=BUILD / "project")
+    parser.add_argument("--project-dir", type=Path, default=BUILD_WORK / "project")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--view-dir", type=Path, default=DEFAULT_VIEW)
     parser.add_argument("--no-view", action="store_true")
@@ -369,7 +374,8 @@ def main() -> int:
     run_checked([str(REPO / "tools/g"), "stop"], env=environment)
 
     inventory_meta, inventory_functions, inventory_totals = load_inventory(INVENTORY)
-    with tempfile.TemporaryDirectory(prefix="decompiler-corpus-", dir=BUILD) as temp_name:
+    BUILD_TMP.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="decompiler-corpus-", dir=BUILD_TMP) as temp_name:
         temp_dir = Path(temp_name)
         verify_live_inventory(project_dir, environment, temp_dir)
         raw_output = temp_dir / "raw-decompilations.jsonl"

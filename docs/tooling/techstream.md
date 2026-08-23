@@ -197,7 +197,7 @@ or values apply to `8965B4512000`.
 
 `CommandCommon.dll` contains four independent SA implementations. All were
 decompiled with the vendored Ghidra CLI against the imported PE (project
-`pe_dlls` in `build/pe-project/`). The full algorithms follow.
+`pe_dlls` in `build/work/pe-project/`). The full algorithms follow.
 
 ### 4.1 CSecurityAccessAES128 (TSS 3.0) — ★ matches firmware SA
 

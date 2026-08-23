@@ -117,8 +117,8 @@ parsing, then normalize it with the locked environment:
 
 ```bash
 uv run --locked python tools/techstream/parse_ptshim_log.py \
-  build/target-evidence/private/j2534_MMDDYYYYhhmmss.log \
-  -o build/target-evidence/private/health_check.normalized.json
+  build/out/target-evidence/private/j2534_MMDDYYYYhhmmss.log \
+  -o build/out/target-evidence/private/health_check.normalized.json
 ```
 
 Hash the normalized JSON and record both hashes in the private manifest. Check

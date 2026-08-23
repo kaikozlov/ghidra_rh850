@@ -3,6 +3,9 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
 PROJECT_DIR=""
 PROJECT_NAME=""
 LOG=""
@@ -92,9 +95,9 @@ SCRIPT_PATH=${SCRIPT_PATH%;}
 
 TEMP_LOG=0
 if [[ -z "$LOG" ]]; then
-  mkdir -p "$ROOT/build/headless-logs"
+  mkdir -p "$BUILD_LOGS/headless"
   safe_label=$(printf '%s' "$LABEL" | tr -c '[:alnum:]_.-' '_')
-  LOG=$(mktemp "$ROOT/build/headless-logs/${safe_label}.XXXXXX.log")
+  LOG=$(mktemp "$BUILD_LOGS/headless/${safe_label}.XXXXXX.log")
   TEMP_LOG=1
 else
   LOG=$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).expanduser().resolve())' "$LOG")

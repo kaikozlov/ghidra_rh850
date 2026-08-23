@@ -35,7 +35,7 @@
   "software_id": "8965H1202000",
   "source_corpus": {
     "boundary": "disposable H corpus with only the three missing storage/NvM entry points forced",
-    "path": "build/h_8965H1202000_storage_nvm_decompilations.jsonl",
+    "path": "build/work/corpora/h_8965H1202000_storage_nvm_decompilations.jsonl",
     "sha256": "8d500f77c56a449d1b836f9a5773c58414f62a636ecf5b71e9f4ded1a48cb8c1"
   }
 }

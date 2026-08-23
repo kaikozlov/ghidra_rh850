@@ -4,11 +4,13 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-PROJECT_DIR="${PROJECT_DIR:-$ROOT/build/project}"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+PROJECT_DIR="${PROJECT_DIR:-$BUILD_WORK/project}"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 OUT="${1:-$ROOT/data/application_tx_producer_evidence.csv}"
-RAW_REFS="$ROOT/build/application_tx_producer_refs.csv"
+RAW_REFS="$BUILD_OUT/application_tx_producer_refs.csv"
 
 PROJECT_DIR=$(python3 - "$PROJECT_DIR" <<'PY'
 from pathlib import Path
@@ -35,8 +37,8 @@ esac
 
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/ghidra_env.sh" none
-mkdir -p "$ROOT/build" "$(dirname "$OUT")"
-LOG="$ROOT/build/generate-application-tx-producer-evidence.log"
+mkdir -p "$BUILD_OUT" "$BUILD_LOGS" "$(dirname "$OUT")"
+LOG="$BUILD_LOGS/generate-application-tx-producer-evidence.log"
 
 "$ROOT/tools/run_headless" \
   --project-dir "$PROJECT_DIR" \

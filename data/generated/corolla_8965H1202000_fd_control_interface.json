@@ -1,8 +1,8 @@
 {
   "evidence": {
     "function_count": 56,
-    "function_evidence_sha256": "23276acc88a2fa363ae0d78bbc16cebc9459caac80634aae6bf3c3756a058ab3",
-    "reference_census_sha256": "afff8633ed68a6d5f9425ffcefb637086ea6c56347f06d0dd0364c182f25eb77",
+    "function_evidence_sha256": "b7bbc66d9c30b16c77938dc002f4a6f752497c228a0229aa3f5316970130eb17",
+    "reference_census_sha256": "acbb28d5ff706377c8eed476de0eb675441a0db65058ea95fe9cebeede06de4d",
     "reference_term_count": 74
   },
   "evidence_boundary": "Raw generated CAN/PDU/signal configuration is exact-image byte evidence. Consumer roles are target-native decompiler recovery. No-consumer/no-writer statements are bounded to the complete direct textual-reference census of the tracked disposable H corpus and do not exclude computed-pointer/alias-only accesses.",

@@ -933,7 +933,7 @@
   "potential_changed_large_fields": [],
   "schema": "corolla-8965H1202000-supervisor-external-ingress-census-v1",
   "source_corpora": {
-    "corolla_h": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+    "corolla_h": "build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl",
     "corolla_h_sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539",
     "sienna": "data/generated/decompilations.jsonl",
     "sienna_sha256": "5879534a813f8162b6c12c00183cb6c284a68dac2c5218dd25b9265010da392c"

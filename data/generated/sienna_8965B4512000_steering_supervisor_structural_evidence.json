@@ -8430,7 +8430,7 @@
   "software_id": "8965B4512000",
   "source_fingerprints": {
     "note": "Disposable Ghidra export; provenance only.",
-    "path": "build/sienna_function_structural_fingerprints.jsonl",
+    "path": "build/work/corpora/sienna_function_structural_fingerprints.jsonl",
     "sha256": "0abf8be0fe8119295660ea9f7299735649a0f361fa52f3808be42408110c789a"
   }
 }

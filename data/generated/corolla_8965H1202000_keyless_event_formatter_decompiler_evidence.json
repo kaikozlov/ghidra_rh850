@@ -60,7 +60,7 @@
   "software_id": "8965H1202000",
   "source_corpus": {
     "boundary": "six target-native functions recovered from the disposable H Ghidra project; downstream verification consumes only this compact image-bound evidence",
-    "path": "build/h_8965H1202000_keyless_event_formatter_decompilations.jsonl",
+    "path": "build/work/corpora/h_8965H1202000_keyless_event_formatter_decompilations.jsonl",
     "sha256": "623d28ae6f7929c3829c3d6cd9b56d38f7d3ac2007ac64d60e1b2ea72260b76c"
   }
 }

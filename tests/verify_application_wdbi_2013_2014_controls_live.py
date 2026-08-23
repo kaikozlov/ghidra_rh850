@@ -10,7 +10,7 @@ EXPECTED=('ASSERT application-wdbi-2013-2014-controls: states=17 direct_actuatio
           'direct_actuation_calls=0 staging_mirrors_without_readers=4 unexpected=0')
 
 def main()->int:
-    p=argparse.ArgumentParser(); p.add_argument('--project-dir',type=Path,default=REPO/'build/project'); a=p.parse_args()
+    p=argparse.ArgumentParser(); p.add_argument('--project-dir',type=Path,default=REPO/'build/work/project'); a=p.parse_args()
     project=a.project_dir.resolve()
     if not (project/'rh850_p1me_mapped.rep').is_dir():
         print(f'[FAIL] live WDBI-2013/2014 controls: missing project {project}'); return 1

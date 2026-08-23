@@ -28,7 +28,9 @@ if (($#)); then
 fi
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-PROJECT_DIR="${PROJECT_DIR:-$ROOT/build/project}"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+PROJECT_DIR="${PROJECT_DIR:-$BUILD_WORK/project}"
 SNAPSHOT_DIR="$ROOT/project"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"

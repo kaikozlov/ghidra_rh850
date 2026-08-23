@@ -245,7 +245,7 @@ java = JAVA.read_text(encoding="utf-8").lower()
 forbidden = ["0x13b0", "0x62758", "0x70524", "0x64fcc", "0x65750", "0x7c640", "0x8d682", "0x8d74c", "0xfebe532c", "0xfebe5452", "0xfebe5488"]
 check("Ghidra semantic resolver embeds no Sienna target addresses", not any(x in java for x in forbidden), repr([x for x in forbidden if x in java]))
 wrapper = WRAPPER.read_text(encoding="utf-8")
-check("wrapper uses disposable build project, not committed project", "build/ephemeral-runtime-targets" in wrapper and 'ResolveSecocAcceptanceGate.java' in wrapper and 'ResolveEphemeralRuntime.java' in wrapper and "project/" not in wrapper)
+check("wrapper uses canonical disposable work project, not committed project", "source \"$ROOT/tools/lib/build_paths.sh\"" in wrapper and "$BUILD_WORK/ephemeral-runtime-targets" in wrapper and 'ResolveSecocAcceptanceGate.java' in wrapper and 'ResolveEphemeralRuntime.java' in wrapper and "$ROOT/project" not in wrapper)
 check("wrapper runs Gate-2 before runtime semantic resolver", wrapper.index("ResolveSecocAcceptanceGate.java") < wrapper.index("ResolveEphemeralRuntime.java"))
 check("wrapper normalizes tracked 2 MiB trailing-FF range dumps without modifying source",
       "load_codeflash" in wrapper and "normalized-CodeFlash.bin" in wrapper and "IMPORT_IMAGE" in wrapper)

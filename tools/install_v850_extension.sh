@@ -4,15 +4,18 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
 GHIDRA_HOME="$("$ROOT/tools/resolve_ghidra_home.sh")"
 VENDOR="$ROOT/ghidra/ghidra_v850"
-BUILD_EXT="$ROOT/build/processor-extension-src/Renesas_v850"
+BUILD_EXT="$BUILD_CACHE/processor-extension-src/Renesas_v850"
 LANG="$BUILD_EXT/data/languages"
-USER_HOME="${GHIDRA_ISOLATED_HOME:-$ROOT/build/ghidra-home}"
+USER_HOME="${GHIDRA_ISOLATED_HOME:-$BUILD_CACHE/ghidra-home}"
 SETTINGS_DIR="$USER_HOME/Library/ghidra/ghidra_12.1.3_PUBLIC"
 EXT_DIR="${V850_EXT_DIR:-$SETTINGS_DIR/Extensions/Renesas_v850}"
-LOG_DIR="$ROOT/build/sleigh-logs"
-MANIFEST="${PROCESSOR_MANIFEST:-$ROOT/build/processor_manifest.json}"
+LOG_DIR="$BUILD_LOGS/sleigh"
+MANIFEST="${PROCESSOR_MANIFEST:-$BUILD_OUT/processor_manifest.json}"
 
 GHIDRA_VERSION=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
 [[ "$GHIDRA_VERSION" == "12.1.3" ]] || {
@@ -21,8 +24,8 @@ GHIDRA_VERSION=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOM
 }
 CLI_VERSION="missing"
 GHIDRA_CLI_BIN=""
-if [[ -x "$ROOT/build/ghidra-cli/ghidra" ]]; then
-  GHIDRA_CLI_BIN="$ROOT/build/ghidra-cli/ghidra"
+if [[ -x "$BUILD_CACHE/ghidra-cli/ghidra" ]]; then
+  GHIDRA_CLI_BIN="$BUILD_CACHE/ghidra-cli/ghidra"
   CLI_VERSION=$("$GHIDRA_CLI_BIN" --version | awk 'NR == 1 { print $2 }')
   [[ "$CLI_VERSION" == "0.2.1" ]] || {
     echo "vendored ghidra CLI version mismatch (found $CLI_VERSION)" >&2
@@ -95,7 +98,7 @@ python3 "$ROOT/tools/fingerprint_processor.py" \
   --write "$MANIFEST"
 
 # Emit a small env file callers can source.
-ENV_FILE="$ROOT/build/ghidra-processor.env"
+ENV_FILE="$BUILD_CACHE/ghidra-processor.env"
 cat >"$ENV_FILE" <<EOF
 export GHIDRA_HOME="$GHIDRA_HOME"
 export GHIDRA_ISOLATED_HOME="$USER_HOME"

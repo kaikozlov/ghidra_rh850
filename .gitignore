@@ -1,6 +1,8 @@
 __pycache__/
 *.pyc
 .venv/
+# Ignored workspace only. Canonical namespaces: cache/, work/, out/, logs/, tmp/.
+# Core verification must never depend on contents here; see docs/WORKFLOW.md.
 build/
 .hermes
 .DS_Store

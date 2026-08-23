@@ -157,7 +157,7 @@
     }
   ],
   "image": {
-    "path": "build/community-normalized/8965H1202000_CodeFlash.bin",
+    "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
     "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "size": 1048576
   },
@@ -165,7 +165,7 @@
   "software_id": "8965H1202000",
   "source_corpus": {
     "note": "Disposable target-native Ghidra corpus; provenance only. Downstream checks use the compact image-bound records.",
-    "path": "build/h_8965H1202000_icus_prepare_decompilations.jsonl",
+    "path": "build/work/corpora/h_8965H1202000_icus_prepare_decompilations.jsonl",
     "sha256": "e83977603716f6e9e0fd3fbfae7a54c59a8cc3749a0a9766a348f219d875317a"
   }
 }

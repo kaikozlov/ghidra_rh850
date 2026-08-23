@@ -7,12 +7,13 @@ project_mutation_marker() {
   python3 - "$repository_root" "$project_dir" <<'PY'
 from hashlib import sha256
 from pathlib import Path
-import sys
+import os, sys
 
 root = Path(sys.argv[1]).resolve()
 project = Path(sys.argv[2]).expanduser().resolve(strict=False)
 key = sha256(str(project).encode()).hexdigest()
-print(root / "build" / "ghidra-session-dirty" / f"{key}.marker")
+work = Path(os.environ.get("BUILD_WORK", root / "build" / "work")).expanduser().resolve(strict=False)
+print(work / "ghidra-session-dirty" / f"{key}.marker")
 PY
 }
 

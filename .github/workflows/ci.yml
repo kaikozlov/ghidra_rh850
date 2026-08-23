@@ -139,11 +139,11 @@ jobs:
         with:
           name: processor-audit-logs
           path: |
-            build/sleigh-logs/
-            build/processor_manifest.json
-            build/verify-processor-*.log
-            build/decompiler-signatures.txt
-            build/ghidra_project_inventory.jsonl
+            build/logs/sleigh/
+            build/out/processor_manifest.json
+            build/logs/verify-processor-*.log
+            build/out/decompiler-signatures.txt
+            build/out/ghidra_project_inventory.jsonl
             data/instruction_inventory.csv
             tests/fixtures/processor/
           if-no-files-found: ignore
@@ -201,17 +201,17 @@ jobs:
       - run: make verify-processor
       - run: make verify-project-parity
       - name: Compare rebuilt processor manifest with snapshot
-        run: cmp build/project/processor_manifest.json project/processor_manifest.json
+        run: cmp build/work/project/processor_manifest.json project/processor_manifest.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: rebuild-parity-artifacts
           path: |
-            build/sleigh-logs/
-            build/processor_manifest.json
-            build/project/processor_manifest.json
-            build/verify-processor-*.log
-            build/decompiler-signatures.txt
-            build/ghidra_project_inventory.jsonl
+            build/logs/sleigh/
+            build/out/processor_manifest.json
+            build/work/project/processor_manifest.json
+            build/logs/verify-processor-*.log
+            build/out/decompiler-signatures.txt
+            build/out/ghidra_project_inventory.jsonl
             data/instruction_inventory.csv
           if-no-files-found: ignore

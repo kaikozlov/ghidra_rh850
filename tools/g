@@ -7,7 +7,7 @@
 # working project if absent, selects the pinned vendored CLI binary, and refuses
 # to operate against the committed project/ snapshot.
 #
-# You never need to `source build/ghidra-processor.env` before running this.
+# You never need to `source build/cache/ghidra-processor.env` before running this.
 #
 # Usage:
 #   tools/g decompile 0x8db22
@@ -19,16 +19,18 @@
 #
 # Environment:
 #   GHIDRA_AGENT=1            Force compact JSON output (for scripted/agent consumption).
-#   GHIDRA_PROJECT            Override the working project directory (default: build/project).
+#   GHIDRA_PROJECT            Override the working project directory (default: build/work/project).
 #   GHIDRA_ALLOW_SYSTEM_CLI=1 Allow falling back to a system-installed ghidra binary.
 #   GHIDRA_NO_BOOTSTRAP=1     Skip processor env bootstrap (assumes env already sourced).
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 SNAPSHOT_DIR="$ROOT/project"
-PROJECT_DIR="${GHIDRA_PROJECT:-$ROOT/build/project}"
+PROJECT_DIR="${GHIDRA_PROJECT:-$BUILD_WORK/project}"
 DAEMON_RE='AnalyzeHeadless.*rh850_p1me_mapped'
 
 # --- Canonicalize PROJECT_DIR -------------------------------------------------
@@ -50,7 +52,7 @@ MUTATION_MARKER=$(project_mutation_marker "$ROOT" "$ABS_PROJECT_DIR")
 case "$ABS_PROJECT_DIR" in
   "$SNAPSHOT_DIR"|"$SNAPSHOT_DIR"/*)
     echo "REFUSING: working project resolves inside committed snapshot ($SNAPSHOT_DIR)." >&2
-    echo "Use build/project (the default) or set GHIDRA_PROJECT to a disposable path." >&2
+    echo "Use build/work/project (the default) or set GHIDRA_PROJECT to a disposable path." >&2
     exit 1
     ;;
 esac
@@ -91,10 +93,44 @@ if [[ "$USER_SUBCMD" == "project" ]]; then
   exit 2
 fi
 
+# Determine project need before any cache/toolchain setup. Safety failures for a
+# user-supplied working directory must be side-effect-free and must not trigger a
+# Rust build or Ghidra bootstrap first.
+NEEDS_PROJECT=1
+for arg in "$@"; do
+  if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
+    NEEDS_PROJECT=0
+    break
+  fi
+done
+case "$USER_SUBCMD" in
+  session-status) NEEDS_PROJECT=0 ;;
+  stop|status|ping|jobs|cancel|version|doctor|setup|init|config)
+    if [[ ! -d "$ABS_PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
+      NEEDS_PROJECT=0
+    fi
+    ;;
+esac
+
+if ((NEEDS_PROJECT)) && [[ -n "${GHIDRA_PROJECT:-}" ]]    && [[ ! -d "$ABS_PROJECT_DIR/$PROJECT_NAME.rep" ]]    && [[ -d "$ABS_PROJECT_DIR" ]]    && [[ -n "$(find "$ABS_PROJECT_DIR" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)" ]]; then
+  echo "REFUSING: GHIDRA_PROJECT points at a nonempty directory without $PROJECT_NAME.rep: $ABS_PROJECT_DIR" >&2
+  echo "Choose an empty disposable directory or an existing working project." >&2
+  exit 1
+fi
+
+# session-status is deliberately toolchain-free. It must work in a clean clone
+# without building the Rust CLI, installing Ghidra extensions, or materializing
+# any ignored workspace state.
+STATUS_ONLY=0
+if [[ "$USER_SUBCMD" == "session-status" ]]; then
+  STATUS_ONLY=1
+fi
+
 # --- Resolve and build the ghidra CLI binary ----------------------------------
+if ((STATUS_ONLY == 0)); then
 
 VENDOR_SRC="$ROOT/ghidra/ghidra-cli/src"
-VENDOR_BIN="$ROOT/build/ghidra-cli/ghidra"
+VENDOR_BIN="$BUILD_CACHE/ghidra-cli/ghidra"
 
 # Rebuild if the binary is missing or stale (source newer than binary).
 if [[ -d "$VENDOR_SRC" ]]; then
@@ -140,6 +176,7 @@ fi
 if [[ -n "${GHIDRA_HOME:-}" ]]; then
   export GHIDRA_INSTALL_DIR="$GHIDRA_HOME"
 fi
+fi # STATUS_ONLY == 0
 
 # --- Special commands ---------------------------------------------------------
 
@@ -241,17 +278,6 @@ if [[ "${1:-}" == "session-status" ]]; then
   cmd_session_status
   exit 0
 fi
-
-# --- Determine if the command needs a project ---------------------------------
-
-NEEDS_PROJECT=1
-case "${1:-}" in
-  stop|status|ping|jobs|cancel|version|doctor|setup|init|config)
-    if [[ ! -d "$ABS_PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
-      NEEDS_PROJECT=0
-    fi
-    ;;
-esac
 
 # --- Materialize the working project if absent --------------------------------
 

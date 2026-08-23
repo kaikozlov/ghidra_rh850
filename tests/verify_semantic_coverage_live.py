@@ -14,7 +14,7 @@ REPO = Path(__file__).resolve().parents[1]
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--project-dir", type=Path, default=REPO / "build" / "project")
+    parser.add_argument("--project-dir", type=Path, default=REPO / "build" / "work" / "project")
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="semantic-coverage-live-") as directory:
         temporary = Path(directory)

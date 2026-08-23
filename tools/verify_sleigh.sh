@@ -3,6 +3,9 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
 
 # Shared environment setup: resolve Ghidra, install processor extension,
 # source env file, validate fingerprint.
@@ -33,8 +36,8 @@ fi
 
 # Resolve the language in a clean Ghidra subprocess. File existence alone does
 # not prove the isolated user-home extension is discoverable.
-RESOLVE_PROJECT="$ROOT/build/sleigh-resolution-project"
-RESOLVE_LOG="$ROOT/build/sleigh-logs/language-resolution.log"
+RESOLVE_PROJECT="$BUILD_WORK/sleigh-resolution-project"
+RESOLVE_LOG="$BUILD_LOGS/sleigh/language-resolution.log"
 rm -rf "$RESOLVE_PROJECT"
 mkdir -p "$RESOLVE_PROJECT"
 "$ROOT/tools/run_headless" \
@@ -61,7 +64,7 @@ grep -Eq 'Language.*v850e3:LE:32:default|v850e3:LE:32:default' "$RESOLVE_LOG" ||
 # prove a raw/subagent analyzeHeadless invocation cannot open project/.
 python3 "$ROOT/tools/project_layout.py" validate-snapshot \
   --snapshot-dir "$ROOT/project" --project-name rh850_p1me_mapped
-RAW_OPEN_LOG="$ROOT/build/sleigh-logs/committed-snapshot-raw-open.log"
+RAW_OPEN_LOG="$BUILD_LOGS/sleigh/committed-snapshot-raw-open.log"
 set +e
 "$GHIDRA_HOME/support/analyzeHeadless" "$ROOT/project" rh850_p1me_mapped \
   -process RH850_P1M-E_CodeFlash.bin -noanalysis -readOnly \

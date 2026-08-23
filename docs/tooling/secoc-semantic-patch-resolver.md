@@ -179,11 +179,11 @@ superseded wrong-direction branch patch.
 ```bash
 tools/resolve_secoc_patch_image.sh \
   /path/to/CodeFlash.bin \
-  build/secoc_patch_manifest.json
+  build/out/secoc_patch_manifest.json
 ```
 
 The wrapper validates bare 1 MiB P1M-E CodeFlash geometry before analysis,
-creates a disposable unannotated project under `build/secoc-targets/<sha>/`,
+creates a disposable unannotated project under `build/work/secoc-targets/<sha>/`,
 runs the read-only semantic resolver, joins the resolver SHA to the exact image,
 validates patch semantics/preimage, discovers CRC geometry, and emits a manifest.
 The input image is never modified.

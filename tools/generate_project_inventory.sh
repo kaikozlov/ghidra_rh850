@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
-# Export a deterministic normalized inventory from build/project.
+# Export a deterministic normalized inventory from build/work/project.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-PROJECT_DIR="${PROJECT_DIR:-$ROOT/build/project}"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
+PROJECT_DIR="${PROJECT_DIR:-$BUILD_WORK/project}"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
-OUT="${1:-$ROOT/build/ghidra_project_inventory.jsonl}"
-LOG="$ROOT/build/generate-project-inventory.log"
+OUT="${1:-$BUILD_OUT/ghidra_project_inventory.jsonl}"
+LOG="$BUILD_LOGS/generate-project-inventory.log"
 
 [[ -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]] || {
   echo "missing working project: $PROJECT_DIR/$PROJECT_NAME.rep" >&2
@@ -24,9 +27,9 @@ esac
 
 OUT=$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).resolve())' "$OUT")
 case "$OUT" in
-  "$ROOT/build/"*) ;;
+  "$BUILD_OUT/"*) ;;
   *)
-    echo "refusing inventory output outside $ROOT/build: $OUT" >&2
+    echo "refusing inventory output outside $BUILD_OUT: $OUT" >&2
     exit 1
     ;;
 esac

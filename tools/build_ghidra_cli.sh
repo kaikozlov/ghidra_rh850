@@ -4,9 +4,13 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
 VENDOR="$ROOT/ghidra/ghidra-cli"
-OUT_DIR="$ROOT/build/ghidra-cli"
+OUT_DIR="$BUILD_CACHE/ghidra-cli"
+CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$BUILD_CACHE/ghidra-cli-target}"
 REQUIRED_VERSION="0.2.1"
+export CARGO_TARGET_DIR
 
 command -v cargo >/dev/null 2>&1 || {
   echo "cargo is required to build the vendored ghidra-cli" >&2
@@ -18,8 +22,9 @@ mkdir -p "$OUT_DIR"
 echo "Building vendored ghidra-cli (release)..."
 cargo build --locked --release --manifest-path "$VENDOR/Cargo.toml"
 
-# Copy the binary into the isolated output dir.
-BIN_SRC="$VENDOR/target/release/ghidra"
+# Keep Cargo intermediates under the canonical ignored cache namespace too.
+# The vendored source tree must remain source-only.
+BIN_SRC="$CARGO_TARGET_DIR/release/ghidra"
 [[ -x "$BIN_SRC" ]] || {
   echo "expected binary not found: $BIN_SRC" >&2
   exit 1
@@ -33,7 +38,7 @@ BUILT_VERSION=$("$OUT_DIR/ghidra" --version | awk 'NR == 1 { print $2 }')
 }
 
 # Emit a small env file callers can source.
-ENV_FILE="$ROOT/build/ghidra-cli.env"
+ENV_FILE="$BUILD_CACHE/ghidra-cli.env"
 cat >"$ENV_FILE" <<EOF
 export VENDORED_GHIDRA_CLI="$OUT_DIR/ghidra"
 export GHIDRA_CLI_VERSION="$BUILT_VERSION"

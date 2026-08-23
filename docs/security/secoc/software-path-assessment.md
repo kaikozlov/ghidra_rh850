@@ -10,7 +10,7 @@
 > semantics, live slot permissions, and dynamic proxy behavior remain untested
 >
 > **Primary evidence:** firmware bytes and disposable working-project Ghidra
-> analysis in `build/project/`; existing reports are navigation aids, not proof
+> analysis in `build/work/project/`; existing reports are navigation aids, not proof
 >
 > **Verification:** `tests/verify_icus_software_paths.py`,
 > `tests/verify_payload_gate.py`, `tests/verify_secoc_application.py`
@@ -87,13 +87,13 @@ signing proxy is recorded as a separate capability.
 - Established that the prior writer census is a narrow negative result only.
 - Opened this report before deeper analysis so hypotheses, negative results, and
   evidence boundaries survive session compaction.
-- Opened only the disposable `build/project/` through the repository's isolated
+- Opened only the disposable `build/work/project/` through the repository's isolated
   V850 extension environment. That dated investigation used the then-current
   5,921-function graph; the corrected 2026-08-11 rebuild now has 6,037
   functions and the affected negatives were rerun separately.
 - The first bridge attempt used the default Ghidra user home and failed before
   loading the program because `v850e3:LE:32:default` was unavailable. Retrying
-  with `-Duser.home=build/ghidra-home` loaded the expected processor module.
+  with `-Duser.home=build/cache/ghidra-home` loaded the expected processor module.
 
 ### 2026-07-28 — application CAN/ISO-TP ingress
 
@@ -403,7 +403,7 @@ literal substitution alone is safe.
 
 #### Remaining literal commands
 
-Temporary function seeding in `build/project/` recovered command 11 as a
+Temporary function seeding in `build/work/project/` recovered command 11 as a
 no-caller-buffer/no-selector operation using only finalization, and command
 `0x22` as a one-input/two-output-block initialization/lifecycle-shaped operation
 with no selector. Neither body establishes persistent-slot-to-`RAM_KEY` copy or

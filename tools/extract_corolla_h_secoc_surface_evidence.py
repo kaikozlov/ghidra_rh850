@@ -7,13 +7,13 @@ ROOT=Path(__file__).resolve().parents[1]
 RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
 SC=ROOT/'data/generated/decompilations.jsonl'
 SOURCES={
- 'core':ROOT/'build/h_8965H1202000_secoc_core_decompilations.jsonl',
- 'key':ROOT/'build/h_8965H1202000_secoc_key_decompilations.jsonl',
- 'freshness':ROOT/'build/h_8965H1202000_secoc_freshness_decompilations.jsonl',
- 'rxind':ROOT/'build/h_8965H1202000_secoc_rxind_final_decompilations.jsonl',
- 'app':ROOT/'build/h_8965H1202000_secoc_app_decompilations.jsonl',
- 'app_correct':ROOT/'build/h_8965H1202000_secoc_app_correct_decompilations.jsonl',
- 'clean':ROOT/'build/h_8965H1202000_rdbihelper2_decompilations.jsonl',
+ 'core':ROOT/'build/work/corpora/h_8965H1202000_secoc_core_decompilations.jsonl',
+ 'key':ROOT/'build/work/corpora/h_8965H1202000_secoc_key_decompilations.jsonl',
+ 'freshness':ROOT/'build/work/corpora/h_8965H1202000_secoc_freshness_decompilations.jsonl',
+ 'rxind':ROOT/'build/work/corpora/h_8965H1202000_secoc_rxind_final_decompilations.jsonl',
+ 'app':ROOT/'build/work/corpora/h_8965H1202000_secoc_app_decompilations.jsonl',
+ 'app_correct':ROOT/'build/work/corpora/h_8965H1202000_secoc_app_correct_decompilations.jsonl',
+ 'clean':ROOT/'build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl',
 }
 OUT=ROOT/'data/generated/corolla_8965H1202000_secoc_surface_decompiler_evidence.json'
 CORE=[0x8704c,0x870a8,0x871a0,0x87610,0x87636,0x8783c,0x87b46,0x87bba,0x87c14,0x87c70,0x87ccc,0x87dd0,0x88028,0x88080,0x880dc,0x881dc,0x888fa,0x889cc,0x88b5c,0x88b6a,0x88b9c,0x88c0a,0x89448,0x894be,0x89510]

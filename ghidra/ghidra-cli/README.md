@@ -17,11 +17,11 @@ The compiled binary (`ghidra`) is **not** committed (see `.gitignore`); it is
 built from the vendored `src/` by `make ghidra-cli`:
 
 ```bash
-make ghidra-cli    # cargo build --release into build/ghidra-cli/
+make ghidra-cli    # cargo build --release into build/cache/ghidra-cli/
 ```
 
 `tools/build_ghidra_cli.sh` runs the isolated release build and emits
-`build/ghidra-cli.env`, which the repo's tool scripts source to find the
+`build/cache/ghidra-cli.env`, which the repo's tool scripts source to find the
 binary. When the vendored build is present, it is preferred over any `ghidra`
 on `PATH`; otherwise the PATH binary is used with a version check.
 

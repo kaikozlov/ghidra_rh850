@@ -5,7 +5,7 @@ import hashlib,json
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
-C1=ROOT/'build/h_8965H1202000_xcp_decompilations.jsonl';C2=ROOT/'build/h_8965H1202000_xcp_helpers_decompilations.jsonl';OUT=ROOT/'data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json'
+C1=ROOT/'build/work/corpora/h_8965H1202000_xcp_decompilations.jsonl';C2=ROOT/'build/work/corpora/h_8965H1202000_xcp_helpers_decompilations.jsonl';OUT=ROOT/'data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json'
 FUNCS=[0x9232A,0x92462,0x9261E,0x92698,0x9227E,0x92314,0x9238A,0x92436,0x7C390,0x7C39C,0x92724]
 def sha(b):return hashlib.sha256(b).hexdigest()
 def load(p):

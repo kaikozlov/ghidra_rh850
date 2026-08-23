@@ -95,7 +95,7 @@
   "schema": "corolla-h-plausibility-monitor-evidence-v1",
   "software_id": "8965H1202000",
   "source_corpus": {
-    "path": "build/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
+    "path": "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
     "sha256": "98fbd903f71165a433cb01dbb2e17bf3471824881760e6420d65ecef9f4f8dfa"
   }
 }

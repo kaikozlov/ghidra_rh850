@@ -59,7 +59,7 @@
   "schema": "corolla-h-application-interrupt-body-evidence-v1",
   "software_id": "8965H1202000",
   "source_corpus": {
-    "path": "build/h_small_adapters_forced.jsonl",
+    "path": "build/work/corpora/h_small_adapters_forced.jsonl",
     "sha256": "c4647bd02ecf142c80401baef7cfd2503c30cf7567b85adf93787334490a37eb"
   }
 }

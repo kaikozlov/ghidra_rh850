@@ -246,12 +246,12 @@
   "source_corpora": {
     "application": {
       "boundary": "clean disposable H application corpus; used for application function boundaries",
-      "path": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl",
       "sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539"
     },
     "forced_reset": {
       "boundary": "disposable corpus after forcing 0x1F2; used only for the non-contiguous reset-decision decompilation",
-      "path": "build/h_8965H1202000_boot1f2_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_boot1f2_decompilations.jsonl",
       "sha256": "a4b735d1569ad25abb596fbdaab32fa944f5b79913ccb90b1f3c42de44696516"
     }
   }

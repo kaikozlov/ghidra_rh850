@@ -53385,7 +53385,7 @@
     }
   ],
   "reference": {
-    "fingerprints": "build/sienna_function_structural_fingerprints.jsonl",
+    "fingerprints": "build/work/corpora/sienna_function_structural_fingerprints.jsonl",
     "function_count": 6376,
     "sha256": "0abf8be0fe8119295660ea9f7299735649a0f361fa52f3808be42408110c789a"
   },
@@ -53559,7 +53559,7 @@
     "unique_exact_shape_matches_min_8_instructions": 2324
   },
   "target": {
-    "fingerprints": "build/h_clean_function_structural_fingerprints.jsonl",
+    "fingerprints": "build/work/corpora/h_clean_function_structural_fingerprints.jsonl",
     "function_count": 5425,
     "sha256": "b7acbb2265b97d3811652d75900850b48d799eb5f0e59b7e14d0e6d4952b3051"
   }

@@ -1,0 +1,320 @@
+{
+  "all_literal_block_group_receive_ids": [
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    99,
+    100,
+    101,
+    102
+  ],
+  "all_literal_full_pdu_ids": [
+    0
+  ],
+  "block_group_calls": [
+    {
+      "entry": "0X000626A0",
+      "first_args": [
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96
+      ],
+      "raw_first_args": [
+        "DAT_000256be",
+        "DAT_000256c0",
+        "DAT_000256c2",
+        "DAT_000256c4",
+        "DAT_000256c6",
+        "DAT_000256c8",
+        "DAT_000256ca",
+        "DAT_000256cc"
+      ]
+    },
+    {
+      "entry": "0X00062A96",
+      "first_args": [
+        99,
+        100,
+        101,
+        102
+      ],
+      "raw_first_args": [
+        "DAT_000256d2",
+        "DAT_000256d4",
+        "DAT_000256d6",
+        "DAT_000256d8"
+      ]
+    }
+  ],
+  "cells": {
+    "0xFEBEC17C": {
+      "direct_lhs_writes": [
+        {
+          "entry": "0X000C97A8",
+          "lines": [
+            "uRamfebec17c = 0;"
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "entry": "0X000C97A8",
+          "lines": [
+            "uRamfebec17c = 0;"
+          ]
+        },
+        {
+          "entry": "0X000C9C16",
+          "lines": [
+            "iVar3 = (int)sRamfebec17c;"
+          ]
+        }
+      ]
+    },
+    "0xFEBEC17E": {
+      "direct_lhs_writes": [
+        {
+          "entry": "0X000C97A8",
+          "lines": [
+            "uRamfebec17e = 0;"
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "entry": "0X000C97A8",
+          "lines": [
+            "uRamfebec17e = 0;"
+          ]
+        },
+        {
+          "entry": "0X000C9C16",
+          "lines": [
+            "iRamfebec080 = (int)sRamfebec17e;"
+          ]
+        }
+      ]
+    },
+    "0xFEBEC184": {
+      "direct_lhs_writes": [
+        {
+          "entry": "0X000C97A8",
+          "lines": [
+            "uRamfebec184 = 0;"
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "entry": "0X000C97A8",
+          "lines": [
+            "uRamfebec184 = 0;"
+          ]
+        },
+        {
+          "entry": "0X000C9C16",
+          "lines": [
+            "if (((iVar3 == iRamfebec080) || (iVar3 == sRamfebec184)) || (iRamfebec080 != sRamfebec184)) {"
+          ]
+        }
+      ]
+    },
+    "0xFEBEC26D": {
+      "direct_lhs_writes": [
+        {
+          "entry": "0X000CB1C8",
+          "lines": [
+            "uRamfebec26d = 0;"
+          ]
+        }
+      ],
+      "occurrences": [
+        {
+          "entry": "0X000CB07C",
+          "lines": [
+            "bRamfebec226 = cRamfebec26d == '\\x01' && cRamfebeacbd == '\\0';"
+          ]
+        },
+        {
+          "entry": "0X000CB1C8",
+          "lines": [
+            "uRamfebec26d = 0;"
+          ]
+        },
+        {
+          "entry": "0X000CBE6E",
+          "lines": [
+            "if ((cRamfebeacbd == '\\0') && (cRamfebec26d == '\\x01')) {"
+          ]
+        }
+      ]
+    }
+  },
+  "direct_lhs_writes": {
+    "0xFEBEABB0": [
+      {
+        "entry": "0X000C584A",
+        "lines": [
+          "uRamfebeabb0 = 0;"
+        ]
+      }
+    ],
+    "0xFEBEB678": [
+      {
+        "entry": "0X000BDFF4",
+        "lines": [
+          "uRamfebeb678 = 0;"
+        ]
+      }
+    ],
+    "0xFEBEBCF8": [
+      {
+        "entry": "0X000C584A",
+        "lines": [
+          "uRamfebebcf8 = 0;"
+        ]
+      }
+    ],
+    "0xFEBEBD90": [
+      {
+        "entry": "0X000C6110",
+        "lines": [
+          "uRamfebebd90 = 0;"
+        ]
+      }
+    ],
+    "0xFEBEBE04": [
+      {
+        "entry": "0X000C68DA",
+        "lines": [
+          "uRamfebebe04 = 0;"
+        ]
+      }
+    ],
+    "0xFEBEBEC6": [
+      {
+        "entry": "0X000C7206",
+        "lines": [
+          "uRamfebebec6 = 0;"
+        ]
+      }
+    ],
+    "0xFEBEC2A6": [
+      {
+        "entry": "0X000CB696",
+        "lines": [
+          "uRamfebec2a6 = 0;"
+        ]
+      },
+      {
+        "entry": "0X000CB6CA",
+        "lines": [
+          "uRamfebec2a6 = 0;"
+        ]
+      },
+      {
+        "entry": "0X000CB8BA",
+        "lines": [
+          "cRamfebec2a6 = '\\x02';",
+          "cRamfebec2a6 = '\\0';"
+        ]
+      }
+    ],
+    "0xFEBEC2A8": [
+      {
+        "entry": "0X000CB696",
+        "lines": [
+          "uRamfebec2a8 = 0;"
+        ]
+      },
+      {
+        "entry": "0X000CB6CA",
+        "lines": [
+          "uRamfebec2a8 = 0;"
+        ]
+      },
+      {
+        "entry": "0X000CB9B6",
+        "lines": [
+          "sRamfebec2a8 = (short)uVar3;"
+        ]
+      }
+    ],
+    "0xFEBEC2D4": [
+      {
+        "entry": "0X000CC83C",
+        "lines": [
+          "uRamfebec2d4 = 0;"
+        ]
+      },
+      {
+        "entry": "0X000CC914",
+        "lines": [
+          "uRamfebec2d4 = 0;"
+        ]
+      }
+    ],
+    "0xFEBEC39C": [
+      {
+        "entry": "0X000CD2E8",
+        "lines": [
+          "uRamfebec39c = 0;"
+        ]
+      }
+    ]
+  },
+  "full_pdu_calls": [
+    {
+      "entry": "0X0004766A",
+      "first_args": [
+        0
+      ],
+      "raw_first_args": [
+        "0"
+      ]
+    }
+  ],
+  "image": {
+    "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+    "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+  },
+  "scalar_receive_ids": {
+    "b6": [
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265
+    ],
+    "d7": [
+      240,
+      243,
+      246
+    ]
+  },
+  "schema": "corolla-8965H1202000-lta-whole-corpus-census-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "boundary": "Source workspace corpus is intentionally untracked; this compact promoted census is the repository input.",
+    "function_count": 5478,
+    "kind": "disposable-ghidra-workspace-export",
+    "sha256": "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656"
+  }
+}

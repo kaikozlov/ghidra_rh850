@@ -2,16 +2,18 @@
 # Resolve the ghidra CLI binary for this repo.
 #
 # Preference order:
-#   1. $VENDORED_GHIDRA_CLI (set by build/ghidra-cli.env after make ghidra-cli)
-#   2. build/ghidra-cli/ghidra (auto-detected vendored build)
+#   1. $VENDORED_GHIDRA_CLI (set by build/cache/ghidra-cli.env after make ghidra-cli)
+#   2. build/cache/ghidra-cli/ghidra (auto-detected vendored build)
 #   3. ghidra on PATH (fallback, version-checked by callers)
 #
 # Prints the binary path to stdout. Exits 1 if none found.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-VENDORED_BIN="$ROOT/build/ghidra-cli/ghidra"
-ENV_FILE="$ROOT/build/ghidra-cli.env"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+VENDORED_BIN="$BUILD_CACHE/ghidra-cli/ghidra"
+ENV_FILE="$BUILD_CACHE/ghidra-cli.env"
 
 # If the env file exists, source it to pick up VENDORED_GHIDRA_CLI.
 if [[ -z "${VENDORED_GHIDRA_CLI:-}" && -f "$ENV_FILE" ]]; then

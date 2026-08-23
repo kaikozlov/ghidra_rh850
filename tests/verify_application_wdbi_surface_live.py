@@ -9,7 +9,7 @@ PROGRAM="RH850_P1M-E_CodeFlash.bin"
 EXPECTED="ASSERT application-wdbi-surface: implemented=13 speed_gated=12 no_speed_gate=2012 persistent_nvm_dids=8 live_override_refs=7 control_parameter_refs=4 control_mode_refs=5 unexpected=0"
 
 def main()->int:
-    p=argparse.ArgumentParser(); p.add_argument('--project-dir',type=Path,default=REPO/'build/project'); a=p.parse_args()
+    p=argparse.ArgumentParser(); p.add_argument('--project-dir',type=Path,default=REPO/'build/work/project'); a=p.parse_args()
     project=a.project_dir.resolve()
     if not (project/'rh850_p1me_mapped.rep').is_dir():
         print(f"[FAIL] live WDBI surface: missing project {project}"); return 1

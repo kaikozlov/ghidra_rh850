@@ -37,7 +37,7 @@ explicitly **not runtime-build-ready**. Missing steering records are reported as
 
 ```bash
 tools/resolve_ephemeral_runtime_image.sh path/to/CodeFlash.bin \
-  build/new_eps_ephemeral_runtime.json
+  build/out/new_eps_ephemeral_runtime.json
 ```
 
 The input may be either a bare 1 MiB CodeFlash image or the tracked range-dumper
@@ -45,7 +45,7 @@ shape: 2 MiB with an entirely `0xFF` upper 1 MiB. The latter is normalized only
 in a disposable workspace, while the output manifest preserves both source and
 normalized hashes. Any other oversized/truncated geometry fails closed. The
 wrapper creates a disposable project below
-`build/ephemeral-runtime-targets/<normalized-sha>/`; it never opens or changes
+`build/work/ephemeral-runtime-targets/<normalized-sha>/`; it never opens or changes
 committed `project/` and never modifies the input image.
 
 The same fresh import runs, in order:
@@ -222,10 +222,10 @@ from a generated `target_config.h`:
 
 ```bash
 uv run --locked python exploit/ephemeral_runtime/build_canary.py \
-  --manifest build/new_eps_ephemeral_runtime.json
+  --manifest build/out/new_eps_ephemeral_runtime.json
 
 uv run --locked python exploit/ephemeral_runtime/build_shellcode.py \
-  --manifest build/new_eps_ephemeral_runtime.json
+  --manifest build/out/new_eps_ephemeral_runtime.json
 ```
 
 `main.c` and `canary.c` contain no calibration addresses for boot calls,

@@ -115,7 +115,7 @@ Landmark decompiler checks (secrets at `0xBFD8`/`0xBFE8`, ISR calling
 convention, session-control decompilation, SecurityAccess expected-key,
 ICU dispatch callee, boot reset) live in
 `AssertDecompilerInvariants.java`; the gate writes deterministic normalized-C
-hashes to `build/decompiler-signatures.txt`, compares them with
+hashes to `build/out/decompiler-signatures.txt`, compares them with
 `data/decompiler_signatures.baseline.csv`, and uploads the report in CI.
 Every non-thunk function must carry an explicit `__stdcall` or `__interrupt`
 prototype — Ghidra's anonymous `unknown`/`default` is treated as a failure.
@@ -237,15 +237,15 @@ allowlist entry.
 
 ## Isolated install and processor fingerprint
 
-The module is copied to `build/processor-extension-src/`, compiled there, and
-installed into `build/ghidra-home/.../Extensions/Renesas_v850/` (via
+The module is copied to `build/cache/processor-extension-src/`, compiled there, and
+installed into `build/cache/ghidra-home/.../Extensions/Renesas_v850/` (via
 `-Duser.home`). Vendored sources and `$GHIDRA_HOME/Ghidra/Extensions` are never
 mutated. A conflicting install-tree copy causes an actionable failure, and a
 clean `analyzeHeadless` subprocess proves that the isolated language resolves.
 
 `tools/fingerprint_processor.py` hashes every `.slaspec` / `.sinc` / `.cspec` /
 `.pspec` / `.ldefs` / metadata file plus the compiled SLA and Ghidra versions.
-Rebuilds write `processor_manifest.json` beside `build/project/`.
+Rebuilds write `processor_manifest.json` beside `build/work/project/`.
 `make work-project` performs a Ghidra-free source check. Processor audits and
 `make snapshot-project` require source files, compiled SLA hash, Ghidra version,
 and CLI version all to match the project manifest. A committed full baseline lives at
@@ -287,7 +287,7 @@ spurious functions when `ghidra/scripts/investigate` was present.
 Whole-image structural function inventory (not full semantic understanding):
 
 - Exporter: `ghidra/scripts/verify/ExportSemanticCoverageLedger.java`
-  (read-only headless against `build/project/` only).
+  (read-only headless against `build/work/project/` only).
 - Generator: `make generate-semantic-coverage` /
   `tools/generate_semantic_coverage_ledger.sh`
 - Artifacts: `data/semantic_coverage_ledger.csv` and

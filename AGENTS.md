@@ -26,7 +26,7 @@ decompiling is slop. Verify claims from firmware gate code, not spec knowledge.
 
 - **Never open committed `project/` with a `ghidra` daemon.** Any open
   compacts its DB and dirties the tree even with no analysis change. Use
-  `build/project/` (via `make work-project`).
+  `build/work/project/` (via `make work-project`).
 - **Always `ghidra ... stop` before copying or committing the working
   project.** The daemon holds edits in memory; only teardown commits durably.
   Confirm `pgrep -f 'AnalyzeHeadless.*rh850'` is empty before snapshotting.
@@ -36,6 +36,10 @@ decompiling is slop. Verify claims from firmware gate code, not spec knowledge.
   CodeFlash VA = file offset − `0x8000`.
 - **Never point a rebuild at committed `project/`.** Promote only with
   `make snapshot-project`.
+- **`build/` is workspace state, never evidence authority.** Core `make verify`
+  must pass without it. Use only `build/cache/`, `build/work/`, `build/out/`,
+  `build/logs/`, and `build/tmp/`; promote any input that verification depends on
+  into a tracked repository location first.
 - **Do not collapse the four-stage rebuild.** Seed timing changes Ghidra's
   recovered graph. See `docs/WORKFLOW.md` §"The four-stage analysis".
 - **`legacy/flat-import/` is historical only.** Do not use it for current
@@ -57,17 +61,21 @@ make verify-one SUITE=control_partition  # one subsystem suite (fast iteration)
 make verify-changed       # suites matching git changes only
 make verify-agent         # all suites, compact JSON summary
 make verify-required-external # require the pinned Techstream corpus
-make ghidra-cli           # build the vendored ghidra CLI into build/ghidra-cli/
+make ghidra-cli           # build the vendored ghidra CLI into build/cache/ghidra-cli/
 make verify-sleigh        # SLEIGH compile + isolated install
-make verify-processor     # fixtures + asserting audits on build/project/
+make verify-processor     # fixtures + asserting audits on build/work/project/
 make snapshot-project     # the ONLY path that mutates committed project/
 make finalize-project     # stop daemon, verify, snapshot, print diff (end-of-session)
+make build-status         # namespace sizes + legacy top-level build entries
+make clean-build          # safe cleanup: build/logs + build/tmp only
+# Explicit legacy quarantine (dry-run first):
+uv run --locked python tools/build_layout.py migrate-legacy
 ```
 
 ### Interactive Ghidra via tools/g
 
 `tools/g` is fully self-contained — it bootstraps the isolated processor
-environment internally. **Never** `source build/ghidra-processor.env` manually;
+environment internally. **Never** `source build/cache/ghidra-processor.env` manually;
 the wrapper handles it.
 
 ```bash
@@ -102,8 +110,8 @@ tools/pseudo 0x6fec
 tools/pseudo security_access --list
 tools/pseudo secoc --all
 tools/pseudo --data-ref 0xfebef02a # canonical RAM xrefs, independent of decompiler aliases
-make pseudocode                    # materialize build/pseudocode/*.c from the tracked corpus
-rg 'ICUSCMD' build/pseudocode
+make pseudocode                    # materialize build/out/pseudocode/*.c from the tracked corpus
+rg 'ICUSCMD' build/out/pseudocode
 ```
 
 `data/generated/decompilations.jsonl` is derived evidence, provenance-locked to

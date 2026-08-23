@@ -14,7 +14,7 @@ EXPECTED = (
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--project-dir", type=Path, default=REPO / "build/project")
+    parser.add_argument("--project-dir", type=Path, default=REPO / "build/work/project")
     args = parser.parse_args()
     project = args.project_dir.resolve()
     if not (project / "rh850_p1me_mapped.rep").is_dir():

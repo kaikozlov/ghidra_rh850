@@ -3,7 +3,9 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-PROJECT_DIR="${PROJECT_DIR:-$ROOT/build/project}"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+PROJECT_DIR="${PROJECT_DIR:-$BUILD_WORK/project}"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 CSV_OUT="${CSV_OUT:-$ROOT/data/outside_function_candidates.csv}"
@@ -31,8 +33,8 @@ fi
 
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/ghidra_env.sh" none
-mkdir -p "$(dirname "$CSV_OUT")" "$(dirname "$SUMMARY_OUT")" "$ROOT/build"
-LOG="$ROOT/build/generate-outside-function-candidates.log"
+mkdir -p "$(dirname "$CSV_OUT")" "$(dirname "$SUMMARY_OUT")" "$BUILD_LOGS"
+LOG="$BUILD_LOGS/generate-outside-function-candidates.log"
 
 "$ROOT/tools/run_headless" \
   --project-dir "$PROJECT_DIR" \

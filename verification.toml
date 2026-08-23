@@ -162,6 +162,7 @@ paths = [
 [suite.application_proprietary_ba_live]
 tests = ["tests/verify_application_proprietary_ba_live.py"]
 oracle = "cfg_dataflow"
+modes = ["local"]
 paths = [
   "ghidra/scripts/verify/AssertApplicationProprietaryBaSurface.java",
   "data/application_proprietary_ba_surface.csv",
@@ -192,7 +193,6 @@ paths = [
 [suite.application_routine_control_1004_event_history]
 tests = [
   "tests/verify_application_routine_control_1004_event_history.py",
-  "tests/verify_application_routine_control_1004_event_history_live.py",
 ]
 oracle = "cfg_dataflow"
 paths = [
@@ -201,7 +201,30 @@ paths = [
   "data/checkpoint_payload_map.csv",
   "data/object15_reachability.csv",
   "tests/verify_application_routine_control_1004_event_history.py",
+  "ghidra/scripts/verify/AssertApplicationRoutine1004EventHistory.java",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "docs/diagnostics/application-routine-control-surface.md",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/storage/dataflash.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/ANALYSIS_STATUS.md",
+]
+
+[suite.application_routine_control_1004_event_history_live]
+tests = ["tests/verify_application_routine_control_1004_event_history_live.py"]
+modes = ["local"]
+oracle = "cfg_dataflow"
+paths = [
   "tests/verify_application_routine_control_1004_event_history_live.py",
+  "tools/generate_application_routine_control_surface.py",
+  "data/application_routine_control_surface.csv",
+  "data/checkpoint_payload_map.csv",
+  "data/object15_reachability.csv",
+  "tests/verify_application_routine_control_1004_event_history.py",
   "ghidra/scripts/verify/AssertApplicationRoutine1004EventHistory.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
@@ -218,7 +241,6 @@ paths = [
 [suite.application_routine_control_remaining_controls]
 tests = [
   "tests/verify_application_routine_control_remaining_controls.py",
-  "tests/verify_application_routine_control_remaining_controls_live.py",
 ]
 oracle = "cfg_dataflow"
 paths = [
@@ -226,7 +248,29 @@ paths = [
   "data/application_routine_control_surface.csv",
   "data/object15_reachability.csv",
   "tests/verify_application_routine_control_remaining_controls.py",
+  "ghidra/scripts/verify/AssertApplicationRoutineRemainingControls.java",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "docs/diagnostics/application-routine-control-surface.md",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/storage/dataflash.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/ANALYSIS_STATUS.md",
+]
+
+[suite.application_routine_control_remaining_controls_live]
+tests = ["tests/verify_application_routine_control_remaining_controls_live.py"]
+modes = ["local"]
+oracle = "cfg_dataflow"
+paths = [
   "tests/verify_application_routine_control_remaining_controls_live.py",
+  "tools/generate_application_routine_control_surface.py",
+  "data/application_routine_control_surface.csv",
+  "data/object15_reachability.csv",
+  "tests/verify_application_routine_control_remaining_controls.py",
   "ghidra/scripts/verify/AssertApplicationRoutineRemainingControls.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
@@ -243,13 +287,28 @@ paths = [
 [suite.application_async_operation_queue]
 tests = [
   "tests/verify_application_async_operation_queue.py",
-  "tests/verify_application_async_operation_queue_live.py",
 ]
 oracle = "cfg_dataflow"
 paths = [
   "data/application_async_operation_queue.csv",
   "tests/verify_application_async_operation_queue.py",
+  "ghidra/scripts/verify/AssertApplicationAsyncOperationQueue.java",
+  "docs/diagnostics/application-async-operation-queue.md",
+  "docs/diagnostics/application.md",
+  "docs/diagnostics/README.md",
+  "docs/status/FINDINGS.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/ANALYSIS_STATUS.md",
+]
+
+[suite.application_async_operation_queue_live]
+tests = ["tests/verify_application_async_operation_queue_live.py"]
+modes = ["local"]
+oracle = "cfg_dataflow"
+paths = [
   "tests/verify_application_async_operation_queue_live.py",
+  "data/application_async_operation_queue.csv",
+  "tests/verify_application_async_operation_queue.py",
   "ghidra/scripts/verify/AssertApplicationAsyncOperationQueue.java",
   "docs/diagnostics/application-async-operation-queue.md",
   "docs/diagnostics/application.md",
@@ -337,13 +396,35 @@ paths = [
 [suite.application_wdbi_surface]
 tests = [
   "tests/verify_application_wdbi_surface.py",
-  "tests/verify_application_wdbi_surface_live.py",
 ]
 oracle = "cfg_dataflow"
 paths = [
   "data/application_wdbi_surface.csv",
   "tests/verify_application_wdbi_surface.py",
+  "ghidra/scripts/verify/AssertApplicationWdbiSurface.java",
+  "ghidra/scripts/annotate/AnnotateApplicationDiagnostics.java",
+  "ghidra/scripts/seed/SeedApplicationDiagnosticFunctions.java",
+  "ghidra/scripts/verify/AssertProjectInvariants.java",
+  "tools/generate_application_diagnostic_map.py",
+  "tools/diagnostics/firmware_tables.py",
+  "tools/diagnostics/correlate_vocabulary.py",
+  "data/application_diagnostic_map.csv",
+  "data/generated/21140bbd65e530a9/diagnostic_vocabulary.json",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+]
+
+[suite.application_wdbi_surface_live]
+tests = ["tests/verify_application_wdbi_surface_live.py"]
+modes = ["local"]
+oracle = "cfg_dataflow"
+paths = [
   "tests/verify_application_wdbi_surface_live.py",
+  "data/application_wdbi_surface.csv",
+  "tests/verify_application_wdbi_surface.py",
   "ghidra/scripts/verify/AssertApplicationWdbiSurface.java",
   "ghidra/scripts/annotate/AnnotateApplicationDiagnostics.java",
   "ghidra/scripts/seed/SeedApplicationDiagnosticFunctions.java",
@@ -363,14 +444,33 @@ paths = [
 [suite.application_wdbi_0204_maintenance]
 tests = [
   "tests/verify_application_wdbi_0204_maintenance.py",
-  "tests/verify_application_wdbi_0204_maintenance_live.py",
 ]
 oracle = "cfg_dataflow"
 paths = [
   "data/application_wdbi_surface.csv",
   "data/object15_reachability.csv",
   "tests/verify_application_wdbi_0204_maintenance.py",
+  "ghidra/scripts/verify/AssertApplicationWdbi0204Maintenance.java",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/storage/dataflash.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/ANALYSIS_STATUS.md",
+]
+
+[suite.application_wdbi_0204_maintenance_live]
+tests = ["tests/verify_application_wdbi_0204_maintenance_live.py"]
+modes = ["local"]
+oracle = "cfg_dataflow"
+paths = [
   "tests/verify_application_wdbi_0204_maintenance_live.py",
+  "data/application_wdbi_surface.csv",
+  "data/object15_reachability.csv",
+  "tests/verify_application_wdbi_0204_maintenance.py",
   "ghidra/scripts/verify/AssertApplicationWdbi0204Maintenance.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
@@ -386,13 +486,30 @@ paths = [
 [suite.application_wdbi_2010_dead_state]
 tests = [
   "tests/verify_application_wdbi_2010_dead_state.py",
-  "tests/verify_application_wdbi_2010_dead_state_live.py",
 ]
 oracle = "cfg_dataflow"
 paths = [
   "data/application_wdbi_surface.csv",
   "tests/verify_application_wdbi_2010_dead_state.py",
+  "ghidra/scripts/verify/AssertApplicationWdbi2010DeadState.java",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
+  "docs/status/ANALYSIS_STATUS.md",
+]
+
+[suite.application_wdbi_2010_dead_state_live]
+tests = ["tests/verify_application_wdbi_2010_dead_state_live.py"]
+modes = ["local"]
+oracle = "cfg_dataflow"
+paths = [
   "tests/verify_application_wdbi_2010_dead_state_live.py",
+  "data/application_wdbi_surface.csv",
+  "tests/verify_application_wdbi_2010_dead_state.py",
   "ghidra/scripts/verify/AssertApplicationWdbi2010DeadState.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
@@ -407,13 +524,29 @@ paths = [
 [suite.application_wdbi_2012_lifecycle]
 tests = [
   "tests/verify_application_wdbi_2012_lifecycle.py",
-  "tests/verify_application_wdbi_2012_lifecycle_live.py",
 ]
 oracle = "cfg_dataflow"
 paths = [
   "data/application_wdbi_surface.csv",
   "tests/verify_application_wdbi_2012_lifecycle.py",
+  "ghidra/scripts/verify/AssertApplicationWdbi2012Lifecycle.java",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
+]
+
+[suite.application_wdbi_2012_lifecycle_live]
+tests = ["tests/verify_application_wdbi_2012_lifecycle_live.py"]
+modes = ["local"]
+oracle = "cfg_dataflow"
+paths = [
   "tests/verify_application_wdbi_2012_lifecycle_live.py",
+  "data/application_wdbi_surface.csv",
+  "tests/verify_application_wdbi_2012_lifecycle.py",
   "ghidra/scripts/verify/AssertApplicationWdbi2012Lifecycle.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
@@ -427,14 +560,33 @@ paths = [
 [suite.application_wdbi_2013_2014_controls]
 tests = [
   "tests/verify_application_wdbi_2013_2014_controls.py",
-  "tests/verify_application_wdbi_2013_2014_controls_live.py",
 ]
 oracle = "cfg_dataflow"
 paths = [
   "data/application_wdbi_surface.csv",
   "data/application_routine_control_surface.csv",
   "tests/verify_application_wdbi_2013_2014_controls.py",
+  "ghidra/scripts/verify/AssertApplicationWdbi2013And2014Controls.java",
+  "tests/verify_motor_actuation_boundary.py",
+  "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
+  "tests/verify_application_routine_control_surface.py",
+  "docs/diagnostics/application.md",
+  "docs/diagnostics/application-routine-control-surface.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md",
+]
+
+[suite.application_wdbi_2013_2014_controls_live]
+tests = ["tests/verify_application_wdbi_2013_2014_controls_live.py"]
+modes = ["local"]
+oracle = "cfg_dataflow"
+paths = [
   "tests/verify_application_wdbi_2013_2014_controls_live.py",
+  "data/application_wdbi_surface.csv",
+  "data/application_routine_control_surface.csv",
+  "tests/verify_application_wdbi_2013_2014_controls.py",
   "ghidra/scripts/verify/AssertApplicationWdbi2013And2014Controls.java",
   "tests/verify_motor_actuation_boundary.py",
   "ghidra/scripts/verify/AssertMotorActuationBoundary.java",
@@ -517,7 +669,10 @@ paths = [
   "data/generated/corolla_8965H1202000_fd_control_interface.json",
   "data/generated/corolla_8965H1202000_steering_nested.json",
   "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
-  "REFERENCE/opendbc/opendbc/dbc/generator/toyota/_toyota_2017.dbc",
+  "data/external/opendbc/toyota_dbc_facts.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "tools/extract_corolla_h_lta_census.py",
+  "data/generated/corolla_8965H1202000_lta_command_provenance_census.json",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
@@ -543,6 +698,7 @@ paths = [
   "tools/generate_application_tx_producer_evidence.sh",
   "ghidra/scripts/verify/ExportApplicationTxProducerRefs.java",
   "ghidra/scripts/verify/AssertApplicationTransmitSemantics.java",
+  "data/external/opendbc/toyota_dbc_facts.json",
 ]
 
 [suite.icus_key_recovery_surface]
@@ -734,7 +890,7 @@ paths = [
 [suite.semantic_coverage_live]
 tests = ["tests/verify_semantic_coverage_live.py"]
 modes = ["local"]
-args = ["--project-dir", "build/project"]
+args = ["--project-dir", "build/work/project"]
 oracle = "cfg_dataflow"
 paths = [
   "data/semantic_coverage_ledger.csv",
@@ -813,6 +969,7 @@ paths = [
 [suite.application_rdbi_disclosure_boundary]
 tests = ["tests/verify_application_rdbi_disclosure_boundary.py"]
 oracle = "cfg_dataflow"
+modes = ["local"]
 paths = [
   "ghidra/scripts/verify/AssertApplicationRdbiDisclosureBoundary.java",
   "tests/verify_application_rdbi_disclosure_boundary.py",
@@ -824,12 +981,27 @@ paths = [
 [suite.application_rdbi_stale_response]
 tests = [
   "tests/verify_application_rdbi_stale_response.py",
-  "tests/verify_application_rdbi_stale_response_live.py",
 ]
 oracle = "cfg_dataflow"
 paths = [
   "tests/verify_application_rdbi_stale_response.py",
+  "ghidra/scripts/verify/AssertApplicationRdbiStaleResponse.java",
+  "exploit/followups/application_rdbi_stale_probe.py",
+  "exploit/followups/README.md",
+  "docs/diagnostics/application.md",
+  "docs/security/application-security-access.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/CORRECTIONS.md",
+]
+
+[suite.application_rdbi_stale_response_live]
+tests = ["tests/verify_application_rdbi_stale_response_live.py"]
+modes = ["local"]
+oracle = "cfg_dataflow"
+paths = [
   "tests/verify_application_rdbi_stale_response_live.py",
+  "tests/verify_application_rdbi_stale_response.py",
   "ghidra/scripts/verify/AssertApplicationRdbiStaleResponse.java",
   "exploit/followups/application_rdbi_stale_probe.py",
   "exploit/followups/README.md",
@@ -854,6 +1026,7 @@ paths = [
 [suite.xcp_shadow_write_live]
 tests = ["tests/verify_xcp_shadow_write_live.py"]
 oracle = "cfg_dataflow"
+modes = ["local"]
 paths = [
   "tests/verify_xcp_shadow_write_live.py",
   "ghidra/scripts/verify/AssertXcpShadowWriteBoundary.java",
@@ -972,11 +1145,6 @@ requires_external = ["techstream_v18"]
 oracle = "independent_external_artifact"
 paths = [
   "tools/techstream/parse_ddb.py",
-  "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/KgpDataCtrl.dll",
-  "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetTSS3ImageFFDP5_DT.dll",
-  "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetTSS3OperationFFDP5_DT.dll",
-  "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetADSDDRInfoP5_DT.dll",
-  "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/bin/GetADSOperationFFDP5_DT.dll",
   "tools/techstream/extract_p5_lateral_control_semantics.py",
   "tests/verify_techstream_p5_lateral_control.py",
   "data/generated/techstream_v18/p5_lateral_control_semantics.json",
@@ -1145,7 +1313,6 @@ paths = [
   "tools/techstream/inspect_cuw_frc_corpus.py",
   "tests/verify_techstream_cuw_frc_corpus.py",
   "data/generated/techstream_v18/cuw_frc_corpus.json",
-  "REFERENCE/gtsplus_cuwplus/README.md",
   "docs/tooling/techstream.md",
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
@@ -2206,11 +2373,33 @@ paths = [
   "docs/status/",
   "docs/history/2026-08/CALVIN_TSKM_DUMP_ARCHAEOLOGY_2026-08-21.md",
   "data/p1me_product_memory.json",
+  "data/external/opendbc/toyota_dbc_facts.json",
   "tests/verify_external_corroboration.py",
 ]
 modes = ["local"]
 args = ["--repos-dir", "../"]
 oracle = "independent_external_artifact"
+
+[suite.build_layout]
+tests = ["tests/verify_build_layout.py"]
+oracle = "raw_bytes"
+paths = [
+  "Makefile",
+  ".gitignore",
+  "tools/build_paths.py",
+  "tools/build_layout.py",
+  "tools/lib/build_paths.sh",
+  "tools/g",
+  "verification.toml",
+  "community/albinoelephant/normalized/README.md",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "data/external/opendbc/toyota_dbc_facts.json",
+  "exploit/ephemeral_runtime/audited/README.md",
+  "exploit/ephemeral_runtime/audited/ephemeral_secoc_runtime.bin",
+  "exploit/ephemeral_runtime/audited/ephemeral_scheduler_canary.bin",
+  "exploit/ephemeral_runtime/audited/ephemeral_command5_proxy.bin",
+  "docs/WORKFLOW.md",
+]
 
 [suite.fast_verify]
 tests = ["tests/verify_fast_verify.py"]

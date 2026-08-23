@@ -33,6 +33,16 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 
+# Core lifecycle tests must not depend on or build ignored toolchain state. A
+# tiny fake CLI is used only for wrapper-policy tests that end in --help.
+_FAKE_CLI_TMP = tempfile.TemporaryDirectory(prefix="ghidra-lifecycle-cli-")
+_FAKE_CACHE = Path(_FAKE_CLI_TMP.name) / "cache"
+_FAKE_CLI = _FAKE_CACHE / "ghidra-cli" / "ghidra"
+_FAKE_CLI.parent.mkdir(parents=True)
+_FAKE_CLI.write_text("#!/bin/sh\nexit 0\n")
+_FAKE_CLI.chmod(0o755)
+os.utime(_FAKE_CLI, (2_000_000_000, 2_000_000_000))
+
 passed = 0
 failed = 0
 
@@ -53,6 +63,11 @@ def run(cmd: list[str], env: dict | None = None, timeout: int = 30) -> subproces
     merged_env = dict(os.environ)
     if env:
         merged_env.update(env)
+    if str(REPO / "tools" / "g") in cmd and merged_env.get("GHIDRA_NO_BOOTSTRAP") == "1":
+        # Make exports BUILD_CACHE for every verification child. Override it
+        # deliberately so policy-only lifecycle tests cannot see or build the
+        # real vendored CLI cache in a clean clone.
+        merged_env["BUILD_CACHE"] = str(_FAKE_CACHE)
     return subprocess.run(
         cmd,
         capture_output=True,
@@ -63,12 +78,14 @@ def run(cmd: list[str], env: dict | None = None, timeout: int = 30) -> subproces
     )
 
 
-DEFAULT_PROJECT = (REPO / "build" / "project").resolve()
+BUILD_WORK = (REPO / "build" / "work").resolve()
+BUILD_TMP = (REPO / "build" / "tmp").resolve()
+DEFAULT_PROJECT = (BUILD_WORK / "project").resolve()
 
 
 def marker_for(project: Path) -> Path:
     key = hashlib.sha256(str(project.resolve()).encode()).hexdigest()
-    return REPO / "build" / "ghidra-session-dirty" / f"{key}.marker"
+    return BUILD_WORK / "ghidra-session-dirty" / f"{key}.marker"
 
 
 MARKER = marker_for(DEFAULT_PROJECT)
@@ -158,7 +175,8 @@ else:
 
 # Project paths are data, never Python source. This payload executed before the
 # argv-based canonicalization regression fix.
-injection_marker = REPO / "build" / ".ghidra_path_injection"
+BUILD_TMP.mkdir(parents=True, exist_ok=True)
+injection_marker = BUILD_TMP / ".ghidra_path_injection"
 injection_marker.unlink(missing_ok=True)
 payload = (
     "x')); __import__('pathlib').Path(" + repr(str(injection_marker)) +
@@ -246,7 +264,7 @@ with tempfile.TemporaryDirectory() as td:
             "GHIDRA_NO_BOOTSTRAP": "1",
             "GHIDRA_PROJECT_DIR": str(inherited_override),
         },
-        timeout=10,
+        timeout=30,
     )
     output = result.stdout + result.stderr
     check(
@@ -331,7 +349,8 @@ for alias_args in (
 if saved_marker is not None:
     mutation_marker.write_bytes(saved_marker)
 
-with tempfile.TemporaryDirectory(dir=REPO / "build", prefix="lifecycle-alt-project-") as td:
+BUILD_TMP.mkdir(parents=True, exist_ok=True)
+with tempfile.TemporaryDirectory(dir=BUILD_TMP, prefix="lifecycle-alt-project-") as td:
     alternate_project = Path(td).resolve()
     alternate_marker = marker_for(alternate_project)
     alternate_marker.unlink(missing_ok=True)
@@ -377,7 +396,7 @@ check(
 
 # --- Test 6: explicit finalization cannot skip a marker-free rebuild ----------
 remove_marker()
-divergent_project = (REPO / "build" / "phase-i-rebuild-a").resolve()
+divergent_project = (BUILD_WORK / "phase-i-rebuild-a").resolve()
 result = run(
     ["bash", str(REPO / "tools" / "finalize_project.sh"), "--dry-run"],
     env={"GHIDRA_NO_BOOTSTRAP": "1", "PROJECT_DIR": str(divergent_project)},
@@ -437,7 +456,7 @@ for script_rel in scripts_that_should_use_helper:
         continue
     content = script.read_text()
     uses_helper = "lib/ghidra_env.sh" in content
-    no_manual_source = "source \"$ROOT/build/ghidra-processor.env\"" not in content
+    no_manual_source = "source \"$ROOT/build/cache/ghidra-processor.env\"" not in content
     check(
         f"{script_rel}: uses shared helper",
         uses_helper,

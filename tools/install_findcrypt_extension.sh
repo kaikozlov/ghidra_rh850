@@ -4,9 +4,11 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
 GHIDRA_HOME="$("$ROOT/tools/resolve_ghidra_home.sh")"
 VENDOR="$ROOT/ghidra/ghidra-findcrypt"
-USER_HOME="${GHIDRA_ISOLATED_HOME:-$ROOT/build/ghidra-home}"
+USER_HOME="${GHIDRA_ISOLATED_HOME:-$BUILD_CACHE/ghidra-home}"
 SETTINGS_DIR="$USER_HOME/Library/ghidra/ghidra_12.1.3_PUBLIC"
 EXT_DIR="$SETTINGS_DIR/Extensions/GhidraFindcrypt"
 ZIP_FILE="$VENDOR/ghidra_12.1.3_PUBLIC_20260822_GhidraFindcrypt.zip"

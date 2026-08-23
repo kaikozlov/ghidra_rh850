@@ -186,7 +186,7 @@ def print_failure(result: dict) -> None:
 
 
 def write_failure_log(root: Path, result: dict, out_dir: Path | None = None) -> None:
-    directory = out_dir or root / "build" / "verify"
+    directory = out_dir or Path(os.environ.get("BUILD_LOGS", root / "build" / "logs")) / "verify"
     directory.mkdir(parents=True, exist_ok=True)
     (directory / f"{result['suite']}.log").write_text(
         f"=== DETAIL ===\n{result.get('detail', '')}\n"

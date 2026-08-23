@@ -608,7 +608,7 @@ output, verification status, and command-8 M4/M5 proof.
 
 Three parallel subagents audited independent attack surfaces using Ghidra
 decompilation, disassembly, x-ref, and raw CodeFlash bytes against
-`build/project` only:
+`build/work/project` only:
 
 1. Application diagnostic receive path (ISO-TP → DCM → SID 0x22/0x2E/0x31/0xAB).
 2. Bootloader download/update path (SID 0x34/0x36/0x37, WDBI, RoutineControl

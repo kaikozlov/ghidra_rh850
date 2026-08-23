@@ -382,7 +382,7 @@
   "software_id": "8965H1202000",
   "source_corpus": {
     "boundary": "disposable H project seeded at diagnostic triage plus exact H WDBI table callback entries; only functions explicitly compacted here are promoted",
-    "path": "build/h_diag_wdbi_exact.jsonl",
+    "path": "build/work/corpora/h_diag_wdbi_exact.jsonl",
     "sha256": "c017ed95957bd333b428011776a84b5ae10747597a144ef07d1d0480e5a7d8f3"
   }
 }

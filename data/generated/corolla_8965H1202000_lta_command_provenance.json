@@ -155,11 +155,6 @@
       ]
     }
   },
-  "corpus": {
-    "binding": "semantic-projection",
-    "boundary": "The disposable whole-image decompiler corpus is an analysis workspace input, not a canonical tracked artifact. Exact regeneration is bound to the corpus-derived occurrence/write/API facts emitted below and to compact raw-body evidence, not to the byte hash of unrelated decompiler output.",
-    "path": "build/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
-  },
   "d7_hidden_payload_census": {
     "boundary": "D7 has 28 authenticated application bytes; recovered scalar IDs are 240/243/246. Configured nonscalar IDs 241/242/244/245/247 are absent from every literal block/group receive call; no full-PDU copy uses PDU40; and the D7 COM buffer base has no raw absolute pointer literal. Techstream independently identifies scalar243 as CAN Vehicle Speed (SP1).",
     "can_id": "0x0D7",
@@ -226,7 +221,7 @@
   "evidence": {
     "function_count": 36,
     "path": "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
-    "sha256": "df5c156d88cb930bd50d41dd05f124d8aaaf2de0d1f1a23a23793ee896fcb0aa"
+    "sha256": "65df5fdca0443b3d66f5c4fecc1c191ede8984b65a5c595335a4f38f833ea18e"
   },
   "evidence_boundary": "Static closure is exact for recovered direct RAM-symbol writes, raw absolute pointers, generated scalar receive calls, literal block/group receive calls, and literal full-PDU copy calls in the tracked H corpus. It does not prove absence of computed-pointer aliases, DMA/hardware writers, or an autonomous command produced by another ECU.",
   "final_command_composition": {
@@ -329,7 +324,7 @@
   },
   "images": {
     "corolla_h": {
-      "path": "build/community-normalized/8965H1202000_CodeFlash.bin",
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
       "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
       "size": 1048576
     },
@@ -529,7 +524,7 @@
       "source": "0xFEBEC26D"
     }
   },
-  "schema": "corolla-8965H1202000-lta-command-provenance-v2",
+  "schema": "corolla-8965H1202000-lta-command-provenance-v3",
   "shared_can025_sensor_ingress": {
     "boundary": "The public DBC is corroboration rather than sole naming evidence: target-native H arithmetic independently distinguishes angle+fraction and rate semantics. This closes the adversarial possibility that an unchanged-shape large scalar was silently repurposed as the missing LTA command.",
     "can_id": "0x025",
@@ -537,8 +532,8 @@
     "dbc": {
       "message": "STEER_ANGLE_SENSOR",
       "message_id_decimal": 37,
-      "path": "REFERENCE/opendbc/opendbc/dbc/generator/toyota/_toyota_2017.dbc",
-      "sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48",
+      "path": "data/external/opendbc/toyota_dbc_facts.json",
+      "sha256": "1c173a2b0e91ffdf5441c611d875ef9bfa46205ceb89d7ffd7c66db691b22fbe",
       "signals": {
         "STEER_ANGLE": {
           "bit_length": 12,
@@ -659,11 +654,18 @@
   "supporting_inputs": {
     "supervisor_external_ingress_census": {
       "path": "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
-      "sha256": "662944f3f9c58a0a2abaa655dedd22153ad6f95ed1239ba2a14752ed738e74bd"
+      "sha256": "c8f54f137977355fdb9e624ec4309e2e560139431a91fb3e8650dd2d00388b77"
     },
     "toyota_dbc": {
-      "path": "REFERENCE/opendbc/opendbc/dbc/generator/toyota/_toyota_2017.dbc",
-      "sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48"
+      "path": "data/external/opendbc/toyota_dbc_facts.json",
+      "sha256": "1c173a2b0e91ffdf5441c611d875ef9bfa46205ceb89d7ffd7c66db691b22fbe"
     }
+  },
+  "whole_corpus_census": {
+    "boundary": "Source workspace corpus is intentionally untracked; this compact promoted census is the repository input.",
+    "path": "data/generated/corolla_8965H1202000_lta_command_provenance_census.json",
+    "sha256": "82b9ee6b1cfbceda650396f33c4e984272f26eb95f2cecab72e7257d57ce4199",
+    "source_corpus_sha256": "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656",
+    "source_function_count": 5478
   }
 }

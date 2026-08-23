@@ -12273,7 +12273,7 @@
     }
   ],
   "image": {
-    "path": "build/community-normalized/8965H1202000_CodeFlash.bin",
+    "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
     "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "size": 1048576
   },
@@ -12281,7 +12281,7 @@
   "software_id": "8965H1202000",
   "source_fingerprints": {
     "note": "Disposable Ghidra export; provenance only.",
-    "path": "build/h_8965H1202000_ridfinal_function_structural_fingerprints.jsonl",
+    "path": "build/work/corpora/h_8965H1202000_ridfinal_function_structural_fingerprints.jsonl",
     "sha256": "773c192da8214af9c1310e0bcf80b4a5a1f77be04a67ad87e0994240d616bf32"
   }
 }

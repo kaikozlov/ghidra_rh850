@@ -6,9 +6,9 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 SRAW=ROOT/'firmware/RH850_P1M-E_CodeFlash.bin'
 HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
-SFP=ROOT/'build/sienna_function_structural_fingerprints.jsonl'
-HFP=ROOT/'build/h_clean_function_structural_fingerprints.jsonl'
-HDC=ROOT/'build/h_small_adapters_forced.jsonl'
+SFP=ROOT/'build/work/corpora/sienna_function_structural_fingerprints.jsonl'
+HFP=ROOT/'build/work/corpora/h_clean_function_structural_fingerprints.jsonl'
+HDC=ROOT/'build/work/corpora/h_small_adapters_forced.jsonl'
 OUT=ROOT/'data/generated/corolla_8965H1202000_final_named_residue_evidence.json'
 S_ENTRIES={
  0x5778C,0x57980,0x57A7E,0x58404,0x5DB6E,0x64F18,0x656F0,0x6578E,

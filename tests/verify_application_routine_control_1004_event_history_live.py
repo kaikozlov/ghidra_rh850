@@ -7,7 +7,7 @@ EXPECTED=('ASSERT application-routine-1004-event-history: op5_callers=2 op5_init
           'event_initializer_callers=1 persist_worker_callers=1 history_persist_callers=1 '
           'selector3_refs=4 direct_actuation_refs=0 unexpected=0')
 def main():
- p=argparse.ArgumentParser(); p.add_argument('--project-dir',type=Path,default=REPO/'build/project'); a=p.parse_args(); project=a.project_dir.resolve()
+ p=argparse.ArgumentParser(); p.add_argument('--project-dir',type=Path,default=REPO/'build/work/project'); a=p.parse_args(); project=a.project_dir.resolve()
  if not (project/'rh850_p1me_mapped.rep').is_dir(): print(f'[FAIL] live RoutineControl 1004: missing project {project}'); return 1
  with tempfile.TemporaryDirectory(prefix='routine-1004-') as d:
   log=Path(d)/'headless.log'

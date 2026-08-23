@@ -13,7 +13,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_MAP = REPO / "data" / "application_tx_map.csv"
-DEFAULT_REFS = REPO / "build" / "application_tx_producer_refs.csv"
+DEFAULT_REFS = REPO / "build" / "out" / "application_tx_producer_refs.csv"
 DEFAULT_OUT = REPO / "data" / "application_tx_producer_evidence.csv"
 
 FIELDS = [

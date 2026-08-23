@@ -75,11 +75,11 @@
   "software_id": "8965H1202000",
   "source_corpora": {
     "clean": {
-      "path": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl",
       "sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539"
     },
     "secoc_app": {
-      "path": "build/h_8965H1202000_secoc_app_decompilations.jsonl",
+      "path": "build/work/corpora/h_8965H1202000_secoc_app_decompilations.jsonl",
       "sha256": "5ce86a5aa18eedefe19e346f6df6b87057690b5c4464ec36fd253bc5816810d7"
     }
   }

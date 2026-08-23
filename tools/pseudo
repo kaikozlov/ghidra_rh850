@@ -119,7 +119,7 @@ def main() -> int:
     parser.add_argument(
         "--materialize",
         action="store_true",
-        help="rebuild build/pseudocode from the tracked corpus without running Ghidra",
+        help="rebuild build/out/pseudocode from the tracked corpus without running Ghidra",
     )
     parser.add_argument("--view-dir", type=Path, default=DEFAULT_VIEW)
     args = parser.parse_args()

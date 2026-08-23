@@ -21,11 +21,11 @@ by every project rebuild. Prefer the repo Make targets:
 ```bash
 make verify-sleigh      # compile + clean-process language resolution
 make verify-processor   # fixtures + project audits
-make rebuild-project    # full annotated rebuild into build/project/
+make rebuild-project    # full annotated rebuild into build/work/project/
 ```
 
 `tools/install_v850_extension.sh` copies the module to
-`build/processor-extension-src/`, compiles each `*.slaspec` there with Ghidra's
+`build/cache/processor-extension-src/`, compiles each `*.slaspec` there with Ghidra's
 `sleigh` compiler, and installs the result into an isolated user home. It never
 generates `.sla` files in this directory or mutates Ghidra's installation tree.
 A conflicting install-tree copy is reported for explicit user removal. No

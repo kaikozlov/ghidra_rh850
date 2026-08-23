@@ -10,7 +10,7 @@ import json,re,struct,hashlib
 from pathlib import Path
 GP=0xFEBEB800
 SIMG=Path('firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
-HIMG=Path('build/community-normalized/8965H1202000_CodeFlash.bin').read_bytes()
+HIMG=Path('community/albinoelephant/normalized/8965H1202000_CodeFlash.bin').read_bytes()
 
 def load_corpus(path):
  d={}
@@ -18,7 +18,7 @@ def load_corpus(path):
   r=json.loads(l)
   if 'entry_addr' in r:d[int(r['entry_addr'],16)]=r
  return d
-S=load_corpus('data/generated/decompilations.jsonl'); H=load_corpus('build/h_8965H1202000_rdbihelper2_decompilations.jsonl')
+S=load_corpus('data/generated/decompilations.jsonl'); H=load_corpus('build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl')
 
 def addr_from(expr,varnames=('iVar1','iVar2','iVar3','iVar4','iVar15','puVar1','puVar2')):
  e=expr.strip()
@@ -185,9 +185,9 @@ for x in uniq:
 out={'schema':'corolla-8965H1202000-supervisor-external-ingress-census-v1',
      'evidence_boundary':'Complete scalar generated-COM -> raw/staging/snapshot direct-reference census over the supplied target-native H decompiler corpus and CEDAE call cone to depth 5. Direct-reference and generated-copy proof does not exclude opaque/computed-pointer flows outside this model.',
      'images':{'sienna_sha256':hashlib.sha256(SIMG).hexdigest(),'corolla_h_sha256':hashlib.sha256(HIMG).hexdigest()},
-     'source_corpora':{'sienna':'data/generated/decompilations.jsonl','corolla_h':'build/h_8965H1202000_rdbihelper2_decompilations.jsonl',
+     'source_corpora':{'sienna':'data/generated/decompilations.jsonl','corolla_h':'build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl',
                       'sienna_sha256':hashlib.sha256(Path('data/generated/decompilations.jsonl').read_bytes()).hexdigest(),
-                      'corolla_h_sha256':hashlib.sha256(Path('build/h_8965H1202000_rdbihelper2_decompilations.jsonl').read_bytes()).hexdigest()},
+                      'corolla_h_sha256':hashlib.sha256(Path('build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl').read_bytes()).hexdigest()},
      'summary':summary,'potential_changed_large_fields':cands,'external_refs':uniq}
 Path('data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
 # Encode result into a small text artifact for easy inspection.

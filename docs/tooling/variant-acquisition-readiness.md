@@ -29,7 +29,7 @@ artifact:
 ```sh
 uv run --locked python tools/check_variant_acquisition.py CodeFlash.bin \
   --run-json CodeFlash.bin.run.json --notes "target X, bench Y" \
-  -o build/target-evidence/acquisition-readiness.json
+  -o build/out/target-evidence/acquisition-readiness.json
 ```
 
 Exit code `0` means ready-for-triage; any failure mode prints the exact reason

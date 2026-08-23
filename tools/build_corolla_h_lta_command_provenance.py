@@ -11,13 +11,13 @@ import struct
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-H_IMAGE = REPO / "build/community-normalized/8965H1202000_CodeFlash.bin"
+H_IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
 S_IMAGE = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
-H_CORPUS = REPO / "build/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
+H_CENSUS = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_census.json"
 S_CORPUS = REPO / "data/generated/decompilations.jsonl"
 EVIDENCE = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json"
 SUPERVISOR = REPO / "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json"
-TOYOTA_DBC = REPO / "REFERENCE/opendbc/opendbc/dbc/generator/toyota/_toyota_2017.dbc"
+TOYOTA_DBC_FACTS = REPO / "data/external/opendbc/toyota_dbc_facts.json"
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
 
 H_SIGNAL_TO_PDU = 0x223FC
@@ -123,8 +123,8 @@ def main() -> int:
     s = S_IMAGE.read_bytes()
     ev = load_json(EVIDENCE)
     supervisor = load_json(SUPERVISOR)
-    toyota_dbc = TOYOTA_DBC.read_text()
-    hf = load_corpus(H_CORPUS)
+    toyota_dbc_facts = load_json(TOYOTA_DBC_FACTS)
+    census = load_json(H_CENSUS)
     sf = load_corpus(S_CORPUS)
     ef = funcs_by_entry(ev)
     c = {entry: row["decompiled_c"] for entry, row in ef.items()}
@@ -132,13 +132,12 @@ def main() -> int:
     h_d7_signals = signal_ids_for_pdu(h, H_SIGNAL_TO_PDU, 274, H_D7_PDU)
     h_b6_signals = signal_ids_for_pdu(h, H_SIGNAL_TO_PDU, 274, H_B6_PDU)
     s_2e4_signals = signal_ids_for_pdu(s, S_SIGNAL_TO_PDU, 300, S_2E4_PDU)
-    h_d7_scalar = sorted(set(flatten_args(resolved_call_first_args([next(r for r in hf if int(r["entry_addr"], 16) == 0x468FA)], "FUN_0007643a", h))))
-    h_b6_scalar = sorted(set(flatten_args(resolved_call_first_args([next(r for r in hf if int(r["entry_addr"], 16) == 0x46A10)], "FUN_0007643a", h))))
-
-    h_group_calls = resolved_call_first_args(hf, "FUN_00077a3a", h)
-    h_full_pdu_calls = resolved_call_first_args(hf, "FUN_0007636c", h)
-    h_group_ids = sorted(set(flatten_args(h_group_calls)))
-    h_full_pdu_ids = sorted(set(flatten_args(h_full_pdu_calls)))
+    h_d7_scalar = census["scalar_receive_ids"]["d7"]
+    h_b6_scalar = census["scalar_receive_ids"]["b6"]
+    h_group_ids = census["all_literal_block_group_receive_ids"]
+    h_group_calls = census["block_group_calls"]
+    h_full_pdu_ids = census["all_literal_full_pdu_ids"]
+    h_full_pdu_calls = census["full_pdu_calls"]
 
     # Sienna's configured-but-nonscalar 2E4 rows are a useful control: generated
     # signal-table membership is not itself proof of an application data field.
@@ -175,8 +174,8 @@ def main() -> int:
     for addr in (0xFEBEC17C, 0xFEBEC17E, 0xFEBEC184, 0xFEBEC26D):
         suffix = f"{addr:08x}"
         direct_cells[f"0x{addr:08X}"] = {
-            "occurrences": term_occurrences(hf, suffix),
-            "direct_lhs_writes": lhs_writes(hf, suffix),
+            "occurrences": census["cells"][f"0x{addr:08X}"]["occurrences"],
+            "direct_lhs_writes": census["cells"][f"0x{addr:08X}"]["direct_lhs_writes"],
             "raw_u32_literal_pointer_hits": u32_literal_hits(h, addr),
         }
 
@@ -202,8 +201,8 @@ def main() -> int:
             {"entry": "0x000CD3CC", "relation": "C2A8 is one conditional additive contributor to final command composition", "recovered": require(c[0xCD3CC], "sRamfebec2a8", "iRamfebec3b8")},
         ],
         "command_state_writes": {
-            "0xFEBEC2A6": lhs_writes(hf, "febec2a6"),
-            "0xFEBEC2A8": lhs_writes(hf, "febec2a8"),
+            "0xFEBEC2A6": census["direct_lhs_writes"]["0xFEBEC2A6"],
+            "0xFEBEC2A8": census["direct_lhs_writes"]["0xFEBEC2A8"],
         },
         "classification": "retained-sienna-homolog-lta-branch-direct-write-inactive",
         "boundary": (
@@ -216,7 +215,7 @@ def main() -> int:
 
     zero_contributors = {}
     for addr in (0xFEBEBE04, 0xFEBEBD90, 0xFEBEB678, 0xFEBEBEC6, 0xFEBEC39C, 0xFEBEABB0, 0xFEBEBCF8, 0xFEBEC2D4):
-        zero_contributors[f"0x{addr:08X}"] = lhs_writes(hf, f"{addr:08x}")
+        zero_contributors[f"0x{addr:08X}"] = census["direct_lhs_writes"][f"0x{addr:08X}"]
 
     final_composition = {
         "entry": "0x000CD3CC",
@@ -350,28 +349,16 @@ def main() -> int:
             "consumer_entries": sorted({f"0x{row['consumer']:08X}" for row in rows}),
         }
 
-    dbc_signal_rows = {}
-    for name in ("STEER_ANGLE", "STEER_FRACTION", "STEER_RATE"):
-        match = re.search(
-            rf"^\s*SG_\s+{name}\s*:\s*(\d+)\|(\d+)@0([+-])",
-            toyota_dbc,
-            re.MULTILINE,
-        )
-        if match is None:
-            raise ValueError(f"missing pinned Toyota DBC signal {name}")
-        dbc_signal_rows[name] = {
-            "start_bit_motorola": int(match.group(1)),
-            "bit_length": int(match.group(2)),
-            "signed": match.group(3) == "-",
-        }
-    if "BO_ 37 STEER_ANGLE_SENSOR: 8 XXX" not in toyota_dbc:
-        raise ValueError("pinned Toyota DBC no longer defines CAN 0x025 STEER_ANGLE_SENSOR")
+    steer_dbc = toyota_dbc_facts["messages"]["STEER_ANGLE_SENSOR"]
+    if steer_dbc["can_id_decimal"] != 37 or steer_dbc["length"] != 8:
+        raise ValueError("tracked Toyota DBC facts no longer define CAN 0x025 STEER_ANGLE_SENSOR")
+    dbc_signal_rows = steer_dbc["signals"]
 
     shared_025 = {
         "can_id": "0x025",
         "dbc": {
-            "path": str(TOYOTA_DBC.relative_to(REPO)),
-            "sha256": sha(TOYOTA_DBC.read_bytes()),
+            "path": str(TOYOTA_DBC_FACTS.relative_to(REPO)),
+            "sha256": sha(TOYOTA_DBC_FACTS.read_bytes()),
             "message": "STEER_ANGLE_SENSOR",
             "message_id_decimal": 37,
             "signals": dbc_signal_rows,
@@ -417,25 +404,23 @@ def main() -> int:
     }
 
     out = {
-        "schema": "corolla-8965H1202000-lta-command-provenance-v2",
+        "schema": "corolla-8965H1202000-lta-command-provenance-v3",
         "software_id": "8965H1202000",
         "images": {
             "corolla_h": {"path": str(H_IMAGE.relative_to(REPO)), "sha256": sha(h), "size": len(h)},
             "sienna_reference": {"path": str(S_IMAGE.relative_to(REPO)), "sha256": sha(s), "size": len(s)},
         },
-        "corpus": {
-            "path": str(H_CORPUS.relative_to(REPO)),
-            "binding": "semantic-projection",
-            "boundary": (
-                "The disposable whole-image decompiler corpus is an analysis workspace input, not a canonical tracked artifact. "
-                "Exact regeneration is bound to the corpus-derived occurrence/write/API facts emitted below and to compact raw-body evidence, "
-                "not to the byte hash of unrelated decompiler output."
-            ),
+        "whole_corpus_census": {
+            "path": str(H_CENSUS.relative_to(REPO)),
+            "sha256": sha(H_CENSUS.read_bytes()),
+            "source_corpus_sha256": census["source_corpus"]["sha256"],
+            "source_function_count": census["source_corpus"]["function_count"],
+            "boundary": census["source_corpus"]["boundary"],
         },
         "evidence": {"path": str(EVIDENCE.relative_to(REPO)), "sha256": sha(EVIDENCE.read_bytes()), "function_count": ev["function_count"]},
         "supporting_inputs": {
             "supervisor_external_ingress_census": {"path": str(SUPERVISOR.relative_to(REPO)), "sha256": sha(SUPERVISOR.read_bytes())},
-            "toyota_dbc": {"path": str(TOYOTA_DBC.relative_to(REPO)), "sha256": sha(TOYOTA_DBC.read_bytes())},
+            "toyota_dbc": {"path": str(TOYOTA_DBC_FACTS.relative_to(REPO)), "sha256": sha(TOYOTA_DBC_FACTS.read_bytes())},
         },
         "retained_lta_branch": retained_lta,
         "d7_hidden_payload_census": d7,

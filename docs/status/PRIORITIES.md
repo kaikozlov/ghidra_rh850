@@ -167,7 +167,7 @@ The first command for any acquired EPS image remains:
 
 ```bash
 tools/resolve_ephemeral_runtime_image.sh path/to/CodeFlash.bin \
-  build/target-ephemeral-runtime.json
+  build/out/target-ephemeral-runtime.json
 ```
 
 This one result tests Gate-2 transfer, callback-free startup/scheduler transfer,

@@ -5,7 +5,7 @@ import hashlib,json
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
-SRC=ROOT/'build/h_8965H1202000_decompilations.corrected-context.raw.jsonl'
+SRC=ROOT/'build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl'
 OUT=ROOT/'data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json'
 TARGETS=[
  0xC9C16,0xC9CD2,

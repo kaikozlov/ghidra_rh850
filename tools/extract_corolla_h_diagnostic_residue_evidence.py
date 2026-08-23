@@ -5,7 +5,7 @@ import hashlib,json,struct
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 RAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
-SRC=ROOT/'build/h_diag_wdbi_exact.jsonl'
+SRC=ROOT/'build/work/corpora/h_diag_wdbi_exact.jsonl'
 OUT=ROOT/'data/generated/corolla_8965H1202000_diagnostic_residue_decompiler_evidence.json'
 ROLE_TARGETS=[
  0x4826A,0x7A510,0x8467E,0x85544,0x8E6D0,0x8E6FC,0x8EB7C,0x8EC88,

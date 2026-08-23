@@ -76,6 +76,17 @@ check(
     not missing_manifest_paths,
     str(missing_manifest_paths[:10]),
 )
+tracked_paths = set(subprocess.check_output(["git", "ls-files"], cwd=REPO, text=True).splitlines())
+untracked_manifest_paths = [
+    (suite_name, kind, value)
+    for suite_name, kind, value in manifest_paths
+    if not (any(path.startswith(value) for path in tracked_paths) if value.endswith("/") else value in tracked_paths)
+]
+check(
+    "every manifest change-routing path is tracked repository state",
+    not untracked_manifest_paths,
+    str(untracked_manifest_paths[:10]),
+)
 check("every external Techstream suite declares its prerequisite",
       all("techstream_v18" in suites[name].get("requires_external", []) for name in (
           "techstream_rks", "techstream_layerb", "techstream_ddb_residuals",

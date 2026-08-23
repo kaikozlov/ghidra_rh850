@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Export data/application_rx_signal_evidence.csv from the working Ghidra project
-# at build/project/. Read-only: never opens committed project/, never analyzes,
+# at build/work/project/. Read-only: never opens committed project/, never analyzes,
 # never commits daemon state.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-PROJECT_DIR="${PROJECT_DIR:-$ROOT/build/project}"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+PROJECT_DIR="${PROJECT_DIR:-$BUILD_WORK/project}"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 OUT="${1:-$ROOT/data/application_rx_signal_evidence.csv}"
@@ -34,7 +36,7 @@ fi
 case "$PROJECT_DIR" in
   "$ROOT/project"|"$ROOT/project/"*)
     echo "refusing to open committed project/: $PROJECT_DIR" >&2
-    echo "use build/project via make work-project" >&2
+    echo "use build/work/project via make work-project" >&2
     exit 1
     ;;
 esac
@@ -44,8 +46,8 @@ esac
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/ghidra_env.sh" none
 
-mkdir -p "$(dirname "$OUT")" "$ROOT/build"
-LOG="$ROOT/build/generate-application-rx-signal-evidence.log"
+mkdir -p "$(dirname "$OUT")" "$BUILD_LOGS"
+LOG="$BUILD_LOGS/generate-application-rx-signal-evidence.log"
 
 echo "Exporting Rx signal evidence from $PROJECT_DIR"
 echo "CSV: $OUT"

@@ -1,14 +1,14 @@
 {
   "evidence_boundary": "Complete exact-substring census over the supplied target-native decompiler corpus; bounded to direct textual references and does not exclude computed-pointer or alias-only accesses.",
   "image": {
-    "path": "build/community-normalized/8965H1202000_CodeFlash.bin",
+    "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
     "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "size": 1048576
   },
   "schema": "rh850-variant-decompiler-direct-reference-census-v1",
   "software_id": "8965H1202000",
   "source_corpus": {
-    "path": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+    "path": "build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl",
     "sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539"
   },
   "terms": {

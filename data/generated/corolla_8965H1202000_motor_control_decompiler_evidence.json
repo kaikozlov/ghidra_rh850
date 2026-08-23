@@ -115,7 +115,7 @@
   "software_id": "8965H1202000",
   "source_corpus": {
     "boundary": "clean disposable H application corpus; no motor entries were forced for this evidence set",
-    "path": "build/h_8965H1202000_rdbihelper2_decompilations.jsonl",
+    "path": "build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl",
     "sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539"
   }
 }

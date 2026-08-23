@@ -3902,7 +3902,7 @@
     },
     "corolla_diagnostics": {
       "path": "data/generated/corolla_8965H1202000_application_diagnostics_diff.json",
-      "sha256": "7443d8c7984a4dd8d7a807e9ac327acd93cca4ebe67542be374a5459835c8407"
+      "sha256": "0abff06e5e078870a504bd51a834ce309c3132350f45e9893d5c6ae83c347228"
     },
     "na_emps2_p5": {
       "relative_path": "NA/DB/EMPS2_P5.ddb",
@@ -3923,7 +3923,7 @@
     },
     "target_native_evidence": {
       "path": "data/generated/corolla_8965H1202000_techstream_steering_decompiler_evidence.json",
-      "sha256": "b2edf550eb3ef0b52bd2bfce884c8cdb07c9d2651783371bc67f5bf60b3ec01c"
+      "sha256": "63936939129e31c23253a51833439bd094254eb2ed07a2463f15d3ae484d7498"
     },
     "techstream_application_correlations": {
       "path": "data/generated/techstream_v18/application_interface_correlations.json",

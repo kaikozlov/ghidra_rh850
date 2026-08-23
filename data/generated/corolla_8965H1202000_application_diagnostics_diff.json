@@ -439,7 +439,7 @@
   "decompiler_evidence": {
     "function_count": 240,
     "path": "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
-    "sha256": "47c23950f0f540368319caa7e6318473f3cc8ab991356e0b9591b2d6296ccdd7"
+    "sha256": "2600eceba5a96a9b1dbe8cf4978c241bf4b85830fab6d169eca755ff880999a6"
   },
   "evidence_boundary": "Raw tables/configuration are verified byte evidence. RDBI output bounds and highlighted RoutineControl semantics additionally use the image-bound compact target-native Ghidra evidence set; no OEM names are inferred for H-only states.",
   "images": {

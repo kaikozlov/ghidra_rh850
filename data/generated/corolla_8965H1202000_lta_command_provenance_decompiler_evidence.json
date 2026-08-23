@@ -1,5 +1,5 @@
 {
-  "corpus": "build/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
+  "corpus": "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
   "evidence_boundary": "Target-native decompiler observations are raw-body SHA-bound to exact H CodeFlash. Direct-reference negatives cover the tracked corpus plus explicit raw literal-pointer/API-call scans; they do not prove absence of arbitrary computed aliases or undocumented hardware/DMA writers.",
   "function_count": 36,
   "functions": [
@@ -257,7 +257,7 @@
     }
   ],
   "image": {
-    "path": "build/community-normalized/8965H1202000_CodeFlash.bin",
+    "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
     "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "size": 1048576
   },

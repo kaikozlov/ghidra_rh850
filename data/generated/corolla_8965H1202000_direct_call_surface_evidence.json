@@ -50466,7 +50466,7 @@
   "schema": "corolla-h-direct-call-surface-evidence-v1",
   "software_id": "8965H1202000",
   "source": {
-    "path": "build/h_clean_function_structural_fingerprints.jsonl",
+    "path": "build/work/corpora/h_clean_function_structural_fingerprints.jsonl",
     "provenance": "fresh clean H CodeFlash import; ExportFunctionStructuralFingerprints.java before semantic seeding",
     "sha256": "b7acbb2265b97d3811652d75900850b48d799eb5f0e59b7e14d0e6d4952b3051"
   },

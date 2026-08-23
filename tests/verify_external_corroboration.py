@@ -869,6 +869,9 @@ def main() -> int:
         roots["opendbc"]
         / "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc"
     ).read_text(encoding="utf-8")
+    compact_dbc_facts = json.loads(
+        (REPO / "data/external/opendbc/toyota_dbc_facts.json").read_text(encoding="utf-8")
+    )
     opendbc_secoc = (
         roots["opendbc"] / "opendbc/car/secoc.py"
     ).read_text(encoding="utf-8")
@@ -1114,6 +1117,44 @@ def main() -> int:
         "STEER_ANGLE", "STEER_TORQUE_EPS", "CHECKSUM",
     ):
         check(f"pinned CAN 0x260 DBC contains {signal}", signal in toyota_2017_dbc)
+    print("\n== tracked compact opendbc corroboration ==")
+    check(
+        "compact DBC facts pin the locked opendbc commit",
+        compact_dbc_facts["repository"]["commit"] == lock["repositories"]["opendbc"]["commit"],
+    )
+    for key, rel in (
+        ("toyota_2017", "opendbc/dbc/generator/toyota/_toyota_2017.dbc"),
+        ("toyota_secoc_pt", "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc"),
+    ):
+        check(
+            f"compact DBC source hash {key} matches pinned checkout",
+            compact_dbc_facts["sources"][key]["sha256"] == sha256(roots["opendbc"] / rel),
+        )
+    steer_facts = compact_dbc_facts["messages"]["STEER_ANGLE_SENSOR"]
+    check(
+        "compact CAN 0x025 steering facts match pinned DBC",
+        steer_facts["can_id_decimal"] == 37
+        and steer_facts["signals"]["STEER_ANGLE"] == {"start_bit_motorola": 3, "bit_length": 12, "signed": True}
+        and steer_facts["signals"]["STEER_FRACTION"] == {"start_bit_motorola": 39, "bit_length": 4, "signed": True}
+        and steer_facts["signals"]["STEER_RATE"] == {"start_bit_motorola": 35, "bit_length": 12, "signed": True}
+        and "SG_ STEER_ANGLE : 3|12@0-" in toyota_2017_dbc
+        and "SG_ STEER_FRACTION : 39|4@0-" in toyota_2017_dbc
+        and "SG_ STEER_RATE : 35|12@0-" in toyota_2017_dbc,
+    )
+    eps_facts = compact_dbc_facts["messages"]["EPS_STATUS"]
+    check(
+        "compact CAN 0x262 EPS_STATUS facts match pinned DBC",
+        eps_facts["can_id_decimal"] == 610
+        and eps_facts["signals"]["IPAS_STATE"] == {"start_bit_motorola": 3, "bit_length": 4, "signed": False}
+        and eps_facts["signals"]["LTA_STATE"] == {"start_bit_motorola": 15, "bit_length": 5, "signed": False}
+        and eps_facts["signals"]["TYPE"] == {"start_bit_motorola": 24, "bit_length": 1, "signed": False}
+        and eps_facts["signals"]["LKA_STATE"] == {"start_bit_motorola": 31, "bit_length": 7, "signed": False}
+        and "SG_ IPAS_STATE : 3|4@0+" in toyota_secoc_dbc
+        and "SG_ LTA_STATE : 15|5@0+" in toyota_secoc_dbc
+        and "SG_ TYPE : 24|1@0+" in toyota_secoc_dbc
+        and "SG_ LKA_STATE : 31|7@0+" in toyota_secoc_dbc,
+    )
+
     check(
         "pinned Toyota DBC names CAN 0x262 EPS_STATUS",
         "BO_ 610 EPS_STATUS: 8 EPS" in toyota_secoc_dbc,

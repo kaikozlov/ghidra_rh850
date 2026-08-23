@@ -3,7 +3,10 @@
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-PROJECT_DIR="$ROOT/build/project"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
+PROJECT_DIR="$BUILD_WORK/project"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 PROCESSOR="v850e3:LE:32:default"
@@ -15,15 +18,15 @@ usage() {
 Usage: tools/rebuild_project.sh [options]
 
 Options:
-  --project-dir DIR   Output directory (default: build/project)
+  --project-dir DIR   Output directory (default: build/work/project)
   --ghidra-home DIR  Ghidra installation root (or set GHIDRA_HOME)
   --force            Remove an existing output project first
   --refresh-diagnostic-vocabulary
                      Regenerate the tracked vocabulary from local Techstream
   -h, --help         Show this help
 
-The output must resolve to a dedicated directory below build/. Committed
-project/ and arbitrary external paths are never rebuild destinations.
+The output must resolve to a dedicated directory below build/work/. Committed
+project/, cache/output namespaces, and arbitrary external paths are never rebuild destinations.
 EOF
 }
 
@@ -68,20 +71,20 @@ PY
 )
 
 case "$PROJECT_DIR" in
-  "$ROOT/build"|"$ROOT/build/")
-    echo "refusing to use the build root itself as a rebuild destination" >&2
+  "$BUILD_WORK"|"$BUILD_WORK/")
+    echo "refusing to use the work root itself as a rebuild destination" >&2
     exit 1
     ;;
-  "$ROOT/build/"*) ;;
+  "$BUILD_WORK/"*) ;;
   *)
-    echo "refusing rebuild destination outside $ROOT/build: $PROJECT_DIR" >&2
+    echo "refusing rebuild destination outside $BUILD_WORK: $PROJECT_DIR" >&2
     exit 1
     ;;
 esac
 
 command -v cargo >/dev/null 2>&1 || { echo "cargo is required (to build vendored ghidra-cli)" >&2; exit 1; }
 # Prefer the vendored ghidra-cli build; build it if missing.
-if [[ ! -x "$ROOT/build/ghidra-cli/ghidra" ]]; then
+if [[ ! -x "$BUILD_CACHE/ghidra-cli/ghidra" ]]; then
   "$ROOT/tools/build_ghidra_cli.sh"
 fi
 
@@ -128,7 +131,7 @@ run_headless() {
   local project_dir=$1
   local project_name=$2
   shift 2
-  local log="$ROOT/build/rebuild-${stage}.log"
+  local log="$BUILD_LOGS/rebuild-${stage}.log"
   "$ROOT/tools/run_headless" \
     --project-dir "$project_dir" \
     --project "$project_name" \
@@ -275,9 +278,9 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 BRIDGE_STARTED=1
-STATS_OUTPUT=$("$ROOT/build/ghidra-cli/ghidra" "${CLI_ARGS[@]}" stats)
+STATS_OUTPUT=$("$BUILD_CACHE/ghidra-cli/ghidra" "${CLI_ARGS[@]}" stats)
 printf '%s\n' "$STATS_OUTPUT"
-"$ROOT/build/ghidra-cli/ghidra" "${CLI_ARGS[@]}" stop
+"$BUILD_CACHE/ghidra-cli/ghidra" "${CLI_ARGS[@]}" stop
 BRIDGE_STARTED=0
 trap - EXIT INT TERM
 

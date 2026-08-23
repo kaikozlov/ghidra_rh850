@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Regenerate data/application_rx_consumer_audit.csv from build/project.
+# Regenerate data/application_rx_consumer_audit.csv from build/work/project.
 # Read-only; never opens committed project/ and never runs analysis.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-PROJECT_DIR="${PROJECT_DIR:-$ROOT/build/project}"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+PROJECT_DIR="${PROJECT_DIR:-$BUILD_WORK/project}"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
 MAP="${MAP:-$ROOT/data/application_rx_map.csv}"
@@ -32,8 +34,8 @@ esac
 
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/ghidra_env.sh" none
-mkdir -p "$(dirname "$OUT")" "$ROOT/build"
-LOG="$ROOT/build/generate-application-rx-consumer-audit.log"
+mkdir -p "$(dirname "$OUT")" "$BUILD_LOGS"
+LOG="$BUILD_LOGS/generate-application-rx-consumer-audit.log"
 
 "$ROOT/tools/run_headless" \
   --project-dir "$PROJECT_DIR" \

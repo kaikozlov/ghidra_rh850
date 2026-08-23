@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Push the working project (build/project) into the committed snapshot
+# Push the working project (build/work/project) into the committed snapshot
 # (project/) and stage it for commit. This is the ONLY path that mutates the
 # committed project/ directory.
 #
@@ -7,12 +7,14 @@
 # its DB (db.N.gbf -> db.N+1) and rewrites the change buffers on clean stop,
 # producing tree churn even when no analysis edit was made. So the committed
 # project/ is treated as a pure snapshot that is never daemon-opened; all
-# interactive work happens in the gitignored build/project/, and this script
+# interactive work happens in the gitignored build/work/project/, and this script
 # mirrors a finished, verified build back into the snapshot.
 set -euo pipefail
 
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-PROJECT_DIR="$ROOT/build/project"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
+PROJECT_DIR="$BUILD_WORK/project"
 SNAPSHOT_DIR="$ROOT/project"
 PROJECT_NAME="rh850_p1me_mapped"
 PROGRAM_NAME="RH850_P1M-E_CodeFlash.bin"
@@ -22,7 +24,7 @@ usage() {
 Usage: tools/snapshot_project.sh [options]
 
 Options:
-  --project-dir DIR    Working project to snapshot from (default: build/project)
+  --project-dir DIR    Working project to snapshot from (default: build/work/project)
   --snapshot-dir DIR   Committed snapshot to write; must resolve to repository project/
   -h, --help           Show this help
 EOF
@@ -65,10 +67,10 @@ fi
   exit 1
 }
 command -v cargo >/dev/null 2>&1 || { echo "cargo is required (to build vendored ghidra-cli)" >&2; exit 1; }
-if [[ ! -x "$ROOT/build/ghidra-cli/ghidra" ]]; then
+if [[ ! -x "$BUILD_CACHE/ghidra-cli/ghidra" ]]; then
   "$ROOT/tools/build_ghidra_cli.sh"
 fi
-GHIDRA_CLI="$ROOT/build/ghidra-cli/ghidra"
+GHIDRA_CLI="$BUILD_CACHE/ghidra-cli/ghidra"
 command -v rsync >/dev/null 2>&1 || { echo "rsync is required" >&2; exit 1; }
 [[ -d "$SNAPSHOT_DIR" ]] || { echo "snapshot dir does not exist: $SNAPSHOT_DIR" >&2; exit 1; }
 
@@ -130,12 +132,12 @@ fi
 
 echo "Verifying exact normalized project parity before snapshot..."
 PROJECT_DIR="$PROJECT_DIR" \
-  "$ROOT/tools/generate_project_inventory.sh" "$ROOT/build/ghidra_project_inventory.snapshot.jsonl"
+  "$ROOT/tools/generate_project_inventory.sh" "$BUILD_OUT/ghidra_project_inventory.snapshot.jsonl"
 python3 "$ROOT/tools/project_inventory.py" compare \
   "$ROOT/data/ghidra_project_inventory.baseline.jsonl" \
-  "$ROOT/build/ghidra_project_inventory.snapshot.jsonl"
+  "$BUILD_OUT/ghidra_project_inventory.snapshot.jsonl"
 
-PACKED_DIR=$(mktemp -d "$ROOT/build/project-snapshot-pack.XXXXXX")
+PACKED_DIR=$(mktemp -d "$BUILD_WORK/project-snapshot-pack.XXXXXX")
 cleanup_packed() { rm -rf "$PACKED_DIR"; }
 trap cleanup_packed EXIT
 
