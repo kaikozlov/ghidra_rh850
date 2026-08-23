@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -100,6 +101,47 @@ with tempfile.TemporaryDirectory() as td:
         check("scriptPath uses semicolon separators", script_path == ";".join(map(str, expected_dirs)), script_path)
         check("analysis-safe scriptPath excludes investigate by default", "/investigate" not in script_path)
     check("runner writes complete log", log.is_file() and "fake headless ok" in log.read_text())
+
+    # analyzeHeadless can return while launch.sh/java is still winding down.
+    # Simulate that shape with a detached child whose argv contains the exact
+    # AnalyzeHeadless/project identity; the runner must not return until it is gone.
+    quiesce_marker = temp / "quiesced"
+    fake.write_text(
+        "#!/usr/bin/env python3\n"
+        "import json, os, subprocess, sys\n"
+        "from pathlib import Path\n"
+        "Path(os.environ['FAKE_CAPTURE']).write_text(json.dumps(sys.argv[1:]))\n"
+        "marker = os.environ['FAKE_QUIESCE_MARKER']\n"
+        "code = 'import pathlib,sys,time; time.sleep(0.35); pathlib.Path(sys.argv[1]).write_text(\"done\")'\n"
+        "subprocess.Popen([sys.executable, '-c', code, marker, 'ghidra.app.util.headless.AnalyzeHeadless', sys.argv[1], sys.argv[2]], start_new_session=True)\n"
+        "print('fake headless parent returned')\n"
+    )
+    fake.chmod(0o755)
+    started = time.monotonic()
+    result = invoke(
+        fake_home,
+        "--project-dir", str(project_dir),
+        "--project", "fixture",
+        "--log", str(log),
+        "--label", "quiescence-run",
+        "--", "-process", "program",
+        extra_env={"FAKE_CAPTURE": str(capture), "FAKE_QUIESCE_MARKER": str(quiesce_marker)},
+    )
+    elapsed = time.monotonic() - started
+    check("runner waits for matching AnalyzeHeadless descendants",
+          result.returncode == 0 and quiesce_marker.is_file() and elapsed >= 0.30,
+          f"rc={result.returncode} elapsed={elapsed:.3f} stderr={result.stderr}")
+
+    # Restore the simple fake for the remaining argument/error tests.
+    fake.write_text(
+        "#!/usr/bin/env python3\n"
+        "import json, os, sys\n"
+        "from pathlib import Path\n"
+        "Path(os.environ['FAKE_CAPTURE']).write_text(json.dumps(sys.argv[1:]))\n"
+        "print(os.environ.get('FAKE_OUTPUT', 'fake headless ok'))\n"
+        "raise SystemExit(int(os.environ.get('FAKE_RC', '0')))\n"
+    )
+    fake.chmod(0o755)
 
     result = invoke(
         fake_home,

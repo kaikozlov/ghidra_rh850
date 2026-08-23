@@ -110,6 +110,52 @@ set +e
 rc=$?
 set -e
 
+# Ghidra's analyzeHeadless shell wrapper can return a fraction of a second
+# before its launch.sh/java descendants disappear.  A following verifier may
+# otherwise observe an active AnalyzeHeadless for the same project even though
+# this runner has returned.  Do not kill the descendant; fail closed unless the
+# exact project becomes quiescent.
+if ! python3 - "$PROJECT_DIR" "$PROJECT_NAME" "${GHIDRA_HEADLESS_QUIESCE_TIMEOUT:-10}" <<'PY'
+import subprocess
+import sys
+import time
+
+project_dir, project_name, raw_timeout = sys.argv[1:]
+try:
+    timeout = float(raw_timeout)
+except ValueError:
+    raise SystemExit(f"invalid GHIDRA_HEADLESS_QUIESCE_TIMEOUT: {raw_timeout!r}")
+if timeout < 0:
+    raise SystemExit("GHIDRA_HEADLESS_QUIESCE_TIMEOUT must be >= 0")
+
+needle = "ghidra.app.util.headless.AnalyzeHeadless"
+deadline = time.monotonic() + timeout
+while True:
+    result = subprocess.run(
+        ["ps", "-axo", "pid=,command="],
+        check=True, capture_output=True, text=True,
+    )
+    matches = []
+    for line in result.stdout.splitlines():
+        if needle not in line or project_dir not in line or project_name not in line:
+            continue
+        pid_text, _, command = line.strip().partition(" ")
+        if pid_text.isdigit():
+            matches.append((int(pid_text), command))
+    if not matches:
+        break
+    if time.monotonic() >= deadline:
+        for pid, command in matches:
+            print(f"headless descendant still active: pid={pid} {command}", file=sys.stderr)
+        raise SystemExit(1)
+    time.sleep(0.05)
+PY
+then
+  echo "ERROR: headless stage did not quiesce: $LABEL" >&2
+  echo "full log: $LOG" >&2
+  exit 1
+fi
+
 script_error=0
 if grep -E 'REPORT SCRIPT ERROR|IllegalStateException' "$LOG" >/dev/null 2>&1; then
   script_error=1
