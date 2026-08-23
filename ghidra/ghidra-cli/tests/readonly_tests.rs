@@ -1307,8 +1307,8 @@ fn test_batch_multiple_queries() {
 
     let batch_content = r#"
 # Test batch file
-query --address 0x100000
-query --function main
+function list --limit 1 --program sample_binary
+strings list --limit 1 --program sample_binary
 "#;
 
     let batch_file = create_batch_file(batch_content);
@@ -1362,10 +1362,10 @@ fn test_batch_with_comments() {
     harness();
 
     let batch_content = r#"
-# Query main function
-query --function main
-# Query by address
-query --address 0x100000
+# Query one function
+function list --limit 1 --program sample_binary
+# Query one string
+strings list --limit 1 --program sample_binary
 # Another comment
 "#;
 
@@ -1415,9 +1415,9 @@ fn test_batch_with_invalid_command() {
     harness();
 
     let batch_content = r#"
-query --function main
+function list --limit 1 --program sample_binary
 invalid-command --arg value
-query --address 0x100000
+strings list --limit 1 --program sample_binary
 "#;
 
     let batch_file = create_batch_file(batch_content);
@@ -1426,12 +1426,14 @@ query --address 0x100000
         .arg("batch")
         .arg("--project")
         .arg(TEST_PROJECT)
+        .arg("--continue-on-error")
         .arg(batch_file.to_str().unwrap())
         .run();
 
     result.assert_success();
     result.assert_stdout_contains("commands_parsed");
     result.assert_stdout_contains("3");
+    result.assert_stdout_contains("invalid-command");
 
     fs::remove_file(batch_file).ok();
 }

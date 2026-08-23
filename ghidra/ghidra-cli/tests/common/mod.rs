@@ -83,6 +83,22 @@ pub fn ensure_test_project(project: &str, program: &str) {
         let project_valid = gpr_file.exists() && idata_has_data;
 
         if project_valid {
+            // Integration-test binaries are separate processes, but several of
+            // them intentionally use the same cached `ci-test` project. A
+            // `DaemonTestHarness` stored in a static OnceLock is not dropped at
+            // process exit, so its analyzeHeadless child can outlive the test
+            // binary. Reusing that inherited bridge makes the next binary see
+            // whatever program state the previous binary left in memory rather
+            // than the durable cached project (for example, project mutation
+            // tests can leave `main` pointing at an unanalyzed code unit).
+            //
+            // Always retire a bridge left by an earlier test binary before
+            // opening the durable cache. `stop_bridge` is a no-op when no
+            // bridge is running and waits for the JVM/project lock to release
+            // when one is. Within this test binary SETUP runs only once, so we
+            // do not tear down our own harness after it has started.
+            let project_path = projects_dir.join(project);
+            let _ = ghidra_cli::ghidra::bridge::stop_bridge(&project_path);
             eprintln!("=== Using cached test project: {:?} ===", gpr_file);
             return;
         }
