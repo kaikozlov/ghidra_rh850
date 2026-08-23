@@ -153,7 +153,7 @@ def outer_container_framing(root: Path) -> dict[str, Any]:
     return {
         "grammar": "magic[13] || format_type:u8 || crc32:u32be || total_size:u32be || "
                    "{ name_len:u16be || name || payload_len:u32be || payload_crc32:u32be || payload } || "
-                   "format-specific tail (opaque)",
+                   "format-specific tail; Version 4 = cpu_image_count:u8 || member[cpu_image_count]",
         "magic": {
             "bytes_hex": magic.hex(), "length": 13,
             "const_va": 0x5D453C, "initializer_va": 0x412CE0,
@@ -196,8 +196,15 @@ def outer_container_framing(root: Path) -> dict[str, Any]:
             "0x5D4ED8": "Calibration file:\n\tFile is incorrect (File sizes don't match)",
             "0x5D4D6F": "Calibration file:\n\tData too big for storage.",
         },
-        "tail_policy": "everything after the first member record is preserved verbatim and never interpreted; "
-                       "format-specific CPU-image tail semantics are deliberately not mapped",
+        "format4_tail": {
+            "count": "u8 CPU-image archive count",
+            "count_read_site": "0x413E74..0x413E7D",
+            "member_loop": "0x413F42..0x413F70",
+            "member_reader_vtable_slot": "0x5D5E30 -> 0x412F9C",
+            "member_grammar": "name_len:u16be || name || payload_len:u32be || payload_crc32:u32be || payload",
+            "evidence": "the Version-4 branch reads one-byte count and dispatches the same member reader used for attach.att; external T-0087-17 independently exercises one archive and consumes exactly declaredTotal",
+        },
+        "tail_policy": "Format Version 4 CPU-image archive framing is mapped; tail layouts for the other supported/membership-only format values remain opaque",
         "parser": "tools/techstream/parse_cuw_container.py",
     }
 
@@ -335,19 +342,18 @@ def generate(root: Path) -> dict[str, Any]:
         "function_identities": funcs,
         "outer_container": outer_container_framing(root),
         "outer_container_boundary": {
-            "status": "framing-statically-recovered; specimen-validation-pending",
+            "status": "framing-statically-recovered; format4-specimen-validated",
             "recovered": "outer magic/format-type/CRC/size framing and first-member (attach.att) extraction are statically pinned "
-                         "from Cuw.exe 0x413BF0 and 0x412F9C and implemented in tools/techstream/parse_cuw_container.py "
-                         "against a synthetic fixture built from the recovered grammar",
-            "remaining": "the V18 tree still contains no real .cuw/.cal specimen; remaining artifact dependencies are "
-                         "(1) validating the recovered framing against a real package, (2) which format-type value and which "
-                         "format-specific tail layout real packages actually use, and (3) actual package values "
-                         "(credentials, ranges, integrity fields)",
+                         "from Cuw.exe 0x413BF0/0x412F9C; the Version-4 one-byte archive count plus repeated-member tail is pinned "
+                         "at 0x413E74/0x413F42 and independently validated by external T-0087-17",
+            "remaining": "the V18 installation itself still contains no .cuw/.cal payload; T-0087-17 validates the legacy Version-4 "
+                         "layout but does not supply the matching modern Sienna/H package. Tail semantics for other format values and "
+                         "target-specific modern credentials/ranges/integrity values remain specimen-bound",
             "no_overclaim": "the 11-entry type table is enforced as membership only; semantic meaning is claimed ONLY for "
-                            "gbytFORMAT_VERSIONS {01,03,04}; the meanings of 05,06,07,08,09,65,66,67 and of the tail are not recovered",
-            "ready_path": "tools/techstream/parse_cuw_container.py extracts and validates the first named member (attach.att); "
-                          "tools/techstream/parse_cuw_attach.py parses it; preserve the first acquired raw package before "
-                          "extending the format-specific tail decoder",
+                            "gbytFORMAT_VERSIONS {01,03,04}; Version-4 archive framing is recovered, while meanings/tails for "
+                            "05,06,07,08,09,65,66,67 remain unclaimed",
+            "ready_path": "tools/techstream/parse_cuw_container.py validates/extracts attach.att and Version-4 archive records; "
+                          "tools/techstream/inspect_cuw_legacy.py adds S-record, legacy-route, password, and SecurityAccess interpretation",
         },
     }
 

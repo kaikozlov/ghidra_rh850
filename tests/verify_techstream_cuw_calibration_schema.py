@@ -64,9 +64,9 @@ check('schema type table equals Cuw.exe table @0x5d5284 (count 11 @0x5d5290)',oc
 kal=pefile.PE(str(ROOT/'TCUWCalibrationFile.dll')); kb=kal.OPTIONAL_HEADER.ImageBase
 check('known format versions equal gbytFORMAT_VERSIONS @0x100063a4',oc['format_type']['known_format_versions']==list(kal.get_data(0x100063A4-kb,3))==[1,3,4])
 check('membership-only values not overclaimed',oc['format_type']['membership_only_values']==[5,6,7,8,9,0x65,0x66,0x67] and 'NOT claimed' in oc['format_type']['boundary'])
-check('boundary status reflects recovered-framing + specimen-pending',s['outer_container_boundary']['status']=='framing-statically-recovered; specimen-validation-pending' and 'no real .cuw' in s['outer_container_boundary']['remaining'])
+check('boundary status reflects recovered framing + format4 specimen validation',s['outer_container_boundary']['status']=='framing-statically-recovered; format4-specimen-validated' and 'T-0087-17' in s['outer_container_boundary']['remaining'])
 check('outer CRC region begins at total-size field',oc['outer_crc_check']['region']=='[18, declared_total)' and oc['outer_crc_check']['compare_va']==0x41405b)
-check('tail is explicitly opaque', 'never interpreted' in oc['tail_policy'])
+check('format4 tail is mapped while other tails remain opaque',oc['format4_tail']['member_reader_vtable_slot']=='0x5D5E30 -> 0x412F9C' and 'remain opaque' in oc['tail_policy'])
 
 print('\n== outer container parser: synthetic fixture from recovered grammar ==')
 # Fixture is assembled here independently of the parser module, straight from

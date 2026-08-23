@@ -1905,10 +1905,15 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   CRC32, CRC coverage `[18, declaredTotal)`, and a consumed==total size check.
   `tools/techstream/parse_cuw_container.py` implements it and is validated
   against a synthetic fixture built independently from the grammar.
-- **Preserved boundary:** real-package validation, format-type/tail semantics,
-  and actual values remain specimen-bound. Membership-only enforcement is not
-  promoted to per-value meaning.
-- **Canonical:** TMS-034; `tests/verify_techstream_cuw_calibration_schema.py`;
+- **Later closure (TMS-037):** external `T-0087-17.cuw` validates that recovered
+  framing byte-for-byte and closes Format Version 4 specifically as
+  `cpuImageCount:u8 || member[count]`. The remaining boundary is now narrower:
+  other format-tail variants and **matching modern EPS** package values/route
+  selection remain specimen-bound. Membership-only enforcement for the other
+  table values is still not promoted to per-value meaning.
+- **Canonical:** TMS-034/TMS-037;
+  `tests/verify_techstream_cuw_calibration_schema.py`;
+  `tests/verify_techstream_cuw_legacy.py`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.2.1.
 
 ### CORR-084 — the RKS SeedValue producer was called an unresolved upstream edge; it is fully static `Cuw.exe` code

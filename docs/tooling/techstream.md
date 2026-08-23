@@ -335,6 +335,38 @@ object the caller passes. Key findings from the binary:
 | `FUKUMORIYOSIYAMA` not present | CUW does not use the `CommandCommon.dll` AES key |
 | `SEED_KEY_SECRET` (`f05f36b7...`) not present | Firmware secret is not embedded in CUW |
 
+#### 4.5.0 Real legacy case: `T-0087-17` four-byte SecurityAccess
+
+The external `T-0087-17.cuw` specimen closes the older integrated CAN writer
+path that precedes the modern SecurityUp construction below. Its validated
+`attach.att` selects `KindOfECU=0`, `ContactType=CAN`, `CPUType=70`; the pinned
+export tables resolve these to ENG/ECT and Renesas SH72544R (2560-K class),
+and decoded `Parameter.ini` has exactly one `0CAN70` row. Crucially that row
+sets `FlagToUseCIDGetterAndFlashWriterDLL=0`, so it remains in `Cuw.exe`'s
+legacy `CCanFlashWriter` rather than loading a modern prepare/flash DLL pair.
+
+`CCanFlashWriter::CollateSeedKey @ 0x463E80` sends bare `27 01`, expects
+`67 01 || seed[4]`, invokes `CalcSeedKey`, sends `27 02 || key[4]`, and expects
+`67 02`. The concrete legacy writer initializes round words `A441`, `2172`,
+`A421`, `4172` at `0x47F0C4..0x47F112`. `BasicConversion @ 0x45A388` maps
+`[s0,s1,s2,s3] -> [s2,s3,s0^round_hi,s1^round_lo]`. Four rounds therefore
+simplify exactly to:
+
+```text
+key = seed XOR 00 60 60 00
+```
+
+This is independent of the calibration software password. The same package's
+selected `0CAN70` row sets `PasswordAddress=001FFF00`, `ByteOrder=1`; the
+reconstructed 2-MiB S-record image has `79 EF 38 FF` at `0x1FFF00`.
+`TCUWCalibrationFile.dll!CalibArchivedFile::GetPassword @ 0x10002EF0` reads
+that address from the archived image, while `CalibrationFile::GetNewPassword @
+0x10003090` falls back to it when no descriptor `NewPassword` override exists.
+Thus `0x79EF38FF` is package-derived reflash password material, **not** the
+`27 02` key. This old two-control design is useful architectural precedent but
+does not transfer either value/algorithm to RH850 EPS. Canonical specimen
+analysis: [historical T-0087-17 CUW analysis](../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md).
+
 #### 4.5.1 `CalcSeedKeyForSecurityUp`: exact modern CUW construction
 
 The previously unresolved modern path is implemented by
@@ -794,25 +826,37 @@ descriptor can be losslessly normalized with
 `tools/techstream/parse_cuw_attach.py`, which deliberately preserves unknown
 keys for a future newer calibration.
 
-The outer `.cuw` envelope framing is now statically recovered from `Cuw.exe`
+The outer `.cuw` envelope framing is statically recovered from `Cuw.exe`
 (container parser `0x413BF0`, first-member reader `0x412F9C`, zlib-CRC32
-helper `0x412C98`):
+helper `0x412C98`) and is now independently validated by the external
+`T-0087-17.cuw` specimen:
 `magic "\0CALIBRATION\0"[13] || formatType:u8 || crc32:u32BE ||
 totalSize:u32BE || { nameLen:u16BE || name || payloadLen:u32BE ||
-payloadCrc32:u32BE || payload } || opaque format-specific tail`. The type
-byte is membership-checked against an 11-entry table
+payloadCrc32:u32BE || payload } || format-specific tail`. The type byte is
+membership-checked against an 11-entry table
 (`{01,03,04,05,06,07,08,09,65,66,67}`; only `{01,03,04}` are additionally
-`gbytFORMAT_VERSIONS` — no per-value meaning is claimed for the others);
-the stored CRC32 covers `[18, declaredTotal)`, and the bytes consumed by
-parsing must equal the declared total. `tools/techstream/parse_cuw_container.py`
-implements exactly this framing and is fixture-validated against a synthetic
-package built from the recovered grammar (CORR-085). What still requires a
-real specimen: validating the framing against an actual package, which
-format-type/tail layout real packages use, and the actual
-credential/range/integrity values. Preserve the first acquired raw package
-before extending the tail decoder. `tests/verify_techstream_cuw_calibration_schema.py`
-pins all recovered function bodies, object geometry, standard-writer consumer,
-and deterministic parser/schema generation.
+`gbytFORMAT_VERSIONS`). Stored CRC32 covers `[18, declaredTotal)`, and parsed
+bytes must equal the declared total.
+
+The specimen specifically closes **Format Version 4**. Static code at
+`0x413E74` reads a one-byte CPU-image count; the loop at `0x413F42` dispatches
+the same member reader through vtable slot `0x5D5E30 -> 0x412F9C`. Therefore
+the Version-4 tail is `imageCount:u8 || member[imageCount]`. The real package
+contains one `302U1300.txt` member (`5,111,858` bytes, CRC32 `5CACED62`) and
+consumes its declared tail exactly. Its payload is a valid S-record stream with
+65,536 S2 records covering `0x000000..0x1FFFFF`, S8 entry `0x014B00`, and
+reconstructed-image SHA-256
+`2b2db1d9766405d74706e56fc1baea544e2a00bbaf09ee36f5994f1617852735`.
+
+`tools/techstream/parse_cuw_container.py` now decodes/validates this Version-4
+archive grammar; `tools/techstream/inspect_cuw_legacy.py` adds S-record, route,
+legacy-password, and four-byte SecurityAccess interpretation. Tail layouts for
+other format values remain unclaimed. Most importantly, this old engine package
+does **not** satisfy the still-open target-specific need for a matching modern
+Sienna/H EPS package and its actual `ECUAuthKey`/`ServiceAuthKey`/`SeedKey`/
+`Nonce`/range values. `tests/verify_techstream_cuw_calibration_schema.py` and
+`tests/verify_techstream_cuw_legacy.py` pin both the static grammar and specimen
+join.
 
 #### 5.2.2 Complete decoded-route writer census
 

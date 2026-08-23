@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "source": {
+    "filename": "T-0087-17.cuw",
+    "availability": "external user-supplied specimen; raw package intentionally not committed",
+    "size": 5112447,
+    "sha256": "d40cc0988f7310ce0417fba17e512ae915719b40fed9a98f829ca1c5639c3cbd"
+  },
+  "outer_container": {
+    "format_type": 4,
+    "stored_crc32": "D9AD63D2",
+    "computed_crc32": "D9AD63D2",
+    "crc_region": [18, 5112447],
+    "declared_total_size": 5112447,
+    "first_member": {
+      "name": "attach.att",
+      "payload_length": 524,
+      "payload_crc32": "057704E2",
+      "payload_sha256": "0bee70920ae24c1b6def0fbf60a7a2cec3f297dcb394eebf2ec947fc66939117",
+      "record_end": 566
+    },
+    "tail_length": 5111881,
+    "tail_sha256": "3109c0797242a1f389e622ea6f259bd5e43b9d523a8a6d9d8665288eede01864"
+  },
+  "descriptor": {
+    "Format": {"Version": "4"},
+    "Vehicle": {
+      "Number": "0",
+      "DateOfIssue": "2017-06-16",
+      "VehicleType": "ZRE172L",
+      "EngineType": "2ZR-FAE",
+      "VehicleName": "Corolla",
+      "ModelYear": "15-16",
+      "ContactType": "CAN",
+      "KindOfECU": "0",
+      "NumberOfCalibration": "1"
+    },
+    "CPU01": {
+      "CPUImageName": "89663-02U13.xx",
+      "FlashCodeName": "",
+      "NewCID": "302U1300",
+      "LocationID": "0002000100030720",
+      "CPUType": "70",
+      "NumberOfTargets": "3",
+      "01_TargetCalibration": "302U1000",
+      "01_TargetData": "41364547383B483A",
+      "02_TargetCalibration": "302U1100",
+      "02_TargetData": "41443A46384B364B",
+      "03_TargetCalibration": "302U1200",
+      "03_TargetData": "37333947373C373A"
+    }
+  },
+  "format4_archive": {
+    "count": 1,
+    "count_width": "u8",
+    "name": "302U1300.txt",
+    "name_length": 12,
+    "payload_length": 5111858,
+    "payload_crc32": "5CACED62",
+    "computed_payload_crc32": "5CACED62",
+    "payload_sha256": "4ae8fca66db5db3a1f1c80bb472bb88e35ec4682896b454b0eaf29c6ea27fb3c",
+    "record_consumes_tail_exactly": true
+  },
+  "srecord": {
+    "line_count": 65538,
+    "record_counts": {"S0": 1, "S2": 65536, "S8": 1},
+    "all_record_checksums_valid": true,
+    "header_data_hex": "723034314236303130300000",
+    "header_data_latin1_escaped": "r041B60100\\x00\\x00",
+    "entry_address": "0x014B00",
+    "data_start": "0x000000",
+    "data_end_exclusive": "0x200000",
+    "data_length": 2097152,
+    "data_record_bytes": 32,
+    "reconstructed_image_sha256": "2b2db1d9766405d74706e56fc1baea544e2a00bbaf09ee36f5994f1617852735",
+    "security_trailer": {
+      "password_address": "0x1FFF00",
+      "bytes_at_1fff00_1fff20": "79ef38ff2d75eb3138393636332d303255313320202020200002000100030720",
+      "password_bytes": "79EF38FF",
+      "unknown_word_after_password": "2D75EB31",
+      "cpu_image_name_ascii_at_1fff08": "89663-02U13     ",
+      "location_id_bytes_at_1fff18": "0002000100030720"
+    }
+  },
+  "techstream_v18_route": {
+    "selection_key": "0CAN70",
+    "kind_of_ecu": {"value": "0", "export": "glptrKindOfECU_ENGAndECT", "meaning": "ENG & ECT"},
+    "cpu_type": {"value": "70", "export": "glptrCPUType_SH72544R_2560K", "meaning": "Renesas SH72544R, 2560K class"},
+    "parameter_row": {
+      "PasswordAddress": "001FFF00",
+      "ByteOrder": "1",
+      "CalibrationType": "2",
+      "EngineTypeFlag": "1",
+      "FlagToUseGetFlashSizeFunc": "1",
+      "FlagToOutputAllAttachedInformation": "1",
+      "M16CTypeFlag": "0",
+      "FORESTTypeFlag": "0",
+      "FlagToUseCIDGetterAndFlashWriterDLL": "0",
+      "WaitTimeAfterIGOn": "6000",
+      "FlagToChangeToReprogGWModeForCentralGW": "1"
+    },
+    "route_class": "legacy in-process CCanFlashWriter path; not the modern factory-row DLL selector"
+  },
+  "legacy_security": {
+    "security_access": {
+      "request_seed": "27 01",
+      "positive_seed": "67 01 || seed[4]",
+      "send_key": "27 02 || key[4]",
+      "positive_key": "67 02",
+      "collate_seed_key_va": "0x00463E80",
+      "calc_seed_key_va": "0x0045A1B0",
+      "basic_conversion_va": "0x0045A388",
+      "round_initializer_va": "0x0047F098",
+      "round_words": ["A441", "2172", "A421", "4172"],
+      "basic_conversion": "[s2, s3, s0 XOR round_hi, s1 XOR round_lo]",
+      "simplified": "key = seed XOR 00 60 60 00"
+    },
+    "calibration_password": {
+      "value": "79EF38FF",
+      "source_address": "0x1FFF00",
+      "extractor": "TCUWCalibrationFile.dll!CalibArchivedFile::GetPassword @ 0x10002EF0",
+      "fallback_selector": "CalibrationFile::GetNewPassword @ 0x10003090 falls back to archived GetPassword when no NewPassword override is present",
+      "relation_to_security_access": "distinct material; not the 27 02 seed-derived key"
+    }
+  },
+  "legacy_flash_protocol": {
+    "change_reprogramming_mode": "10 <mode> -> 50",
+    "check_block": "0x35/0x36",
+    "erase_block": "0x25/0x26",
+    "write_continuation": "0x45",
+    "in_verify": "0x47/0x48",
+    "verify": "0x15/0x16",
+    "classification": "legacy proprietary CAN reprogramming protocol; not the modern Unified UDS 34/36/37 path"
+  },
+  "modern_transfer_boundary": {
+    "descriptor_fields_absent": ["ECUAuthKey", "ServiceAuthKey", "SeedKey", "Nonce", "OffsetAddress", "SecurityProperty2"],
+    "modern_security_up_not_selected": true,
+    "does_transfer": [
+      "outer CUW CRC/member framing",
+      "package-driven route selection architecture",
+      "precedent for security material carried inside calibration artifacts",
+      "separation between diagnostic SecurityAccess and additional reflash authorization/password material"
+    ],
+    "does_not_transfer": [
+      "the four-byte seed/key algorithm to RH850 EPS",
+      "the 79EF38FF engine-calibration password to RH850 EPS",
+      "the SH72544R memory map/proprietary flash command set to modern Unified writers"
+    ],
+    "body_coding_boundary": "S-record data are encoded-looking and include repeated A1DFE103 in erased-looking space. The S-record parser is recovered and contains no crypto operation; the exact legacy body coding/decoding semantics are not yet promoted without a downstream consumer proof."
+  }
+}

@@ -1032,6 +1032,7 @@ paths = [
   "data/generated/sienna_8965B4512000_techstream_did_semantics.json",
   "tools/techstream/generate_cuw_calibration_schema.py",
   "data/generated/techstream_v18/cuw_calibration_schema.json",
+  "tools/techstream/parse_cuw_container.py",
   "tools/techstream/generate_cuw_timing_recovery.py",
   "data/generated/techstream_v18/cuw_timing_recovery.json",
   "tools/techstream/generate_cuw_writer_family_matrix.py",
@@ -1046,6 +1047,21 @@ paths = [
   "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
+]
+
+[suite.techstream_cuw_legacy]
+tests = ["tests/verify_techstream_cuw_legacy.py"]
+requires_external = ["techstream_v18"]
+oracle = "independent_external_artifact"
+paths = [
+  "tools/techstream/parse_cuw_container.py",
+  "tools/techstream/inspect_cuw_legacy.py",
+  "tests/verify_techstream_cuw_legacy.py",
+  "data/generated/techstream_v18/cuw_t0087_17_specimen.json",
+  "docs/tooling/techstream.md",
+  "docs/history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
 ]
 
 [suite.techstream_cuw_security_up]

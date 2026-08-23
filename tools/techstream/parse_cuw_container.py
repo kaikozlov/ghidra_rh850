@@ -22,7 +22,11 @@ The framing implemented here is *statically recovered* from Techstream V18
               whose consumed-bytes return value is name_len + 8 + payload_len;
               the payload CRC is verified against the 0x412C98 zlib CRC32,
               raiser 0x4131B0 "File is corrupt (CRC Error)")
-  tail      format-specific CPU-image remainder, deliberately opaque here
+  tail      format-specific CPU-image remainder.  For Format Version 4 only,
+              Techstream's parser reads a u8 CPU-image count followed by the
+              same member grammar above.  This branch is independently
+              validated by the T-0087-17 Corolla specimen.  Other tail
+              variants remain opaque.
 
 Outer checks performed by 0x413BF0 at its tail (0x41403B..0x41407A):
 
@@ -34,11 +38,12 @@ Outer checks performed by 0x413BF0 at its tail (0x41403B..0x41407A):
   * Bytes consumed by parsing must equal the declared total
     (compare @ 0x41406B, raiser 0x4142E0 "File sizes don't match").
 
-This module validates everything above that does not require interpreting the
-format-specific tail, extracts the first named member (the embedded
-`attach.att` descriptor), verifies both CRCs and the size bounds, and
-preserves all remaining bytes as an opaque tail.  No semantic mapping of the
-tail or of individual format-type values is attempted.
+This module validates the outer framing, extracts the first named member (the
+embedded `attach.att` descriptor), verifies both CRCs and size bounds, and
+preserves all remaining bytes.  Format Version 4 additionally decodes the
+CPU-image archive count/member framing recovered from Cuw.exe and validated
+against the external T-0087-17 specimen.  No semantic mapping of other tail
+variants is attempted.
 """
 from __future__ import annotations
 
@@ -88,6 +93,9 @@ def parse(data: bytes) -> dict[str, Any]:
         "first_member_end": None,
         "tail_length": None,
         "tail_sha256": None,
+        "format4_archive_count": None,
+        "format4_archives": [],
+        "format4_archive_bytes_consumed": None,
         "notes": [],
         "errors": [],
     }
@@ -174,9 +182,66 @@ def parse(data: bytes) -> dict[str, Any]:
         err(f"outer CRC mismatch over [{DECLARED_TOTAL_OFFSET}, {declared}): "
             f"computed 0x{computed_outer:08x} != stored 0x{res['stored_crc32']:08x}")
 
-    tail = data[off:]
+    tail = data[off:declared]
     res["tail_length"] = len(tail)
     res["tail_sha256"] = _sha256(tail)
+
+    # Format Version 4 uses the legacy CPU-image archive branch in Cuw.exe:
+    # 0x413E74 consumes a u8 count; the loop at 0x413F42 dispatches the same
+    # member reader through vtable +8, whose slot at 0x5D5E30 is 0x412F9C.
+    # T-0087-17 independently validates this exact framing with one archive.
+    if fmt == 0x04 and tail:
+        arch_off = off
+        count = data[arch_off]
+        arch_off += 1
+        res["format4_archive_count"] = count
+        archives = []
+        for idx in range(count):
+            start = arch_off
+            if arch_off + 2 > declared:
+                err(f"truncated before format-4 archive[{idx}] name length at offset {arch_off}")
+                break
+            (arch_name_len,) = struct.unpack_from(">H", data, arch_off)
+            arch_off += 2
+            if arch_off + arch_name_len > declared:
+                err(f"truncated inside format-4 archive[{idx}] name at offset {arch_off} (need {arch_name_len} bytes)")
+                break
+            arch_name_raw = data[arch_off:arch_off + arch_name_len]
+            arch_off += arch_name_len
+            try:
+                arch_name = arch_name_raw.decode("ascii")
+            except UnicodeDecodeError:
+                arch_name = arch_name_raw.hex()
+            if arch_off + 8 > declared:
+                err(f"truncated before format-4 archive[{idx}] payload length/CRC at offset {arch_off}")
+                break
+            arch_len, arch_crc = struct.unpack_from(">II", data, arch_off)
+            arch_off += 8
+            if arch_off + arch_len > declared:
+                err(f"truncated inside format-4 archive[{idx}] payload at offset {arch_off} (need {arch_len} bytes)")
+                break
+            arch_payload = data[arch_off:arch_off + arch_len]
+            arch_off += arch_len
+            computed_arch_crc = zlib.crc32(arch_payload) & 0xFFFFFFFF
+            if computed_arch_crc != arch_crc:
+                err(f"format-4 archive[{idx}] payload CRC mismatch: computed 0x{computed_arch_crc:08x} != stored 0x{arch_crc:08x}")
+            archives.append({
+                "index": idx,
+                "record_offset": start,
+                "name": arch_name,
+                "name_length": arch_name_len,
+                "payload_offset": arch_off - arch_len,
+                "payload_length": arch_len,
+                "payload_crc32": arch_crc,
+                "computed_payload_crc32": computed_arch_crc,
+                "payload_sha256": _sha256(arch_payload),
+                "record_end": arch_off,
+            })
+        res["format4_archives"] = archives
+        res["format4_archive_bytes_consumed"] = arch_off - off
+        if not res["errors"] and arch_off != declared:
+            err(f"format-4 archive records end at {arch_off}, declared total is {declared}")
+
     return res
 
 
