@@ -68,11 +68,21 @@ lateral/pinion named catalog row; all four routines have zero variable-backed
 command/mask/button payloads. Do not spend another static pass looking for the normal
 B6 producer in that Active-Test catalog.
 
-**Next software-analysis target:** acquire and analyze **`FRC_P5` camera plus
-category-435 `ABS_P5`/Brake firmware** for a true-TSS 3 vehicle—or capture a
-synchronized stock-LTA session across those modules—and recover the remaining
-payload contract: how planner state becomes protected `0x0B6` signal254/255,
-which module signs it, and where SecOC routing/key/freshness ownership changes.
+TMS-045 closes the acquisition search key. Raw NA/EU/JP P5 VDS
+`ECU_Setting_Table` independently maps category 435 to request address **`7B0`**;
+legacy SUW independently maps VSC/ABS/ECB to `CANID1=7B0`, while modern
+`P5-Unified04` obtains CID/prepare/flash CAN IDs from `GetCanIDsFromCANIDTable`
+rather than a hard-coded FRC address. The complete current 26-package CUW
+reference inventory has six `0792` FRC and three `07A1` EPS positive controls
+but **no `07B0` package**. This is only a local-corpus absence.
+
+**Next software-analysis target:** acquire a true-TSS3 CUW whose
+**`Node01/DiagID=07B0`** (category-435 `ABS_P5`/Brake), ideally matched by
+vehicle/era to a `0792` FRC package, then analyze both producer-side images—or
+capture a synchronized stock-LTA session across those modules—and recover the
+remaining payload contract: how planner state becomes protected `0x0B6`
+signal254/255, which module signs it, and where SecOC routing/key/freshness
+ownership changes.
 TMS-042 makes the same acquisition the highest-value reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
 `DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as
@@ -301,8 +311,9 @@ Capture protected `0x0B6` during stock steering only to validate these static re
 rules, recover sender wall-clock cadence and exact secondary-field names where needed,
 and derive normal target/rate bounds. In parallel, recover the B6 **SecOC** freshness/
 source/key contract and determine whether slot-4 command-5 can produce the required
-authenticated domain on real hardware. Decoded `FRC_P5` plus category-435
-`ABS_P5`/Brake firmware is now the primary software target for the **remaining payload transform, sender cadence,
+authenticated domain on real hardware. A category-435 CUW with
+`Node01/DiagID=07B0` plus the matched `FRC_P5` image is now the primary software
+target for the **remaining payload transform, sender cadence,
 and routing/authentication ownership**, not for discovering the EPS setpoint/request/
 loss contract; TMS-043 has already closed the module-level topology. For a Sienna-style
 applicable EPS, separately retain the existing valid signed `0x2E4/0x131` command

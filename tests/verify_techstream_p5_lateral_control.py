@@ -1636,6 +1636,56 @@ for slot, ecu_no, phase, address, raw_sha in VDS_ECU_ANCHORS:
         ),
     )
 
+# Category-435 Brake/EPB acquisition address is region-invariant in raw
+# ECU_Setting_Table.  The second tagged ASCII token in this row is retained
+# as an uninterpreted value; only the first +0x1A address field is named.
+for region, expected_slot in (("NA", 9), ("EU", 8), ("JP", 9)):
+    vdata = (ROOT / f"DB/MDB/IT3Data_BDC_{region}.vds").read_bytes()
+    page = vdata[20 * 4096 : 21 * 4096]
+    offset = u16(page, 0x0E + 2 * expected_slot) & 0x0FFF
+    row = page[offset : offset + 40]
+    markers = []
+    pos = 0
+    while True:
+        marker = row.find(b"\xff\xfe", pos)
+        if marker < 0:
+            break
+        markers.append(row[marker + 2 : marker + 5].decode("ascii"))
+        pos = marker + 2
+    check(
+        f"VDS {region} category-435 Brake/EPB request address is 7B0",
+        u32(row, 0x02) == 435
+        and u32(row, 0x06) == 5
+        and markers[:1] == ["7B0"]
+        and hashlib.sha256(row).hexdigest()
+        == "09420f524175f28df36bf83fba517139a0a769600414f2864b753beb93303b07",
+    )
+
+# Legacy SUW routing is independent corroboration, not a P5 security/writer
+# transfer claim.  FileVersion 17.0.13 maps VSC/ABS/ECB to CANID1=7B0 and
+# EMPS to 7A1.  SK1 is recorded only as a legacy config token.
+rp_app = ROOT / "SUW/InternalCF/Db/RpAppOsT.ini"
+rp_raw = rp_app.read_bytes()
+rp_text = rp_raw.decode("utf-16")
+system9 = rp_text.split("[SYSTEM9_ECU_FORMAT]", 1)[1].split("[", 1)[0]
+system14 = rp_text.split("[SYSTEM14_ECU_FORMAT]", 1)[1].split("[", 1)[0]
+check(
+    "legacy SUW RpAppOsT exact identity and VSC/ABS/ECB 7B0 corroboration",
+    len(rp_raw) == 13002
+    and hashlib.sha256(rp_raw).hexdigest()
+    == "114d420979ab931c58d310e6162a3d36b630a66e01a1e67c537fea3b46d3bfe7"
+    and 'FileVersion="17.0.13"' in rp_text
+    and "SYSTEM9=8,VSC/ABS/ECB" in rp_text
+    and "CANID1=7B0" in system9
+    and "SK1=63511974" in system9,
+)
+check(
+    "legacy SUW independently maps EMPS to 7A1 with same legacy SK1 token",
+    "SYSTEM14=10,EMPS" in rp_text
+    and "CANID1=7A1" in system14
+    and "SK1=63511974" in system14,
+)
+
 # ── FRC_P5 security-state rows recomputed from raw DDB ───────────────────
 
 for region in ("NA", "EU", "JP"):

@@ -119,6 +119,12 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   normal steering-writer lead: 20 direct tests and four routines are brake-actuator-
   only, and every routine has zero variable command/mask/button payloads. Those tests
   remain useful as actuator probes, but they are not the missing B6 setpoint writer.
+  TMS-045 makes the firmware acquisition blocker exact: the category-435 P5 VDS
+  request address is `7B0` in NA/EU/JP, legacy SUW independently maps VSC/ABS/ECB
+  to `7B0`, and modern Unified routing takes CAN IDs from the package CAN-ID table.
+  The complete current 26-package `REFERENCE/cuw` inventory has six `0792` FRC
+  and three `07A1` EPS packages but no `07B0` package. Obtain a true-TSS3 CUW
+  whose `Node01/DiagID=07B0`; local absence does not imply Toyota/TIS absence.
   Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3 ·
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §§7.34–7.35.
 

@@ -331,6 +331,7 @@ for old, new in sorted(chains):
     check(f"{old} -> {new}: no identical run >= 8 beyond the prefix", longest < 8, f"longest {longest}")
 
 print("\n== whole-repro contrast set (ReproMethod 01) ==")
+contrast_descriptors: dict[str, dict] = {}
 for name, (size, digest) in CONTRAST_PACKAGES.items():
     data = (CORPUS / name).read_bytes()
     check(f"{name}: pinned identity", len(data) == size and sha256(data) == digest)
@@ -339,6 +340,7 @@ for name, (size, digest) in CONTRAST_PACKAGES.items():
     end = parsed["first_member_end"]
     attach = data[end - parsed["payload_length"]:end]
     desc = parse_attach(attach)
+    contrast_descriptors[name] = desc
     check(f"{name}: ReproMethod 01 / SecurityProperty2 98 / IsControlledBySCC 0",
           desc["LogicalBlock101"]["ReproMethod"] == "01"
           and desc["LogicalBlock101"]["SecurityProperty2"] == "98"
@@ -346,11 +348,95 @@ for name, (size, digest) in CONTRAST_PACKAGES.items():
     check(f"{name}: no Delta sections (whole-repro only)",
           "DeltaReproData101" not in desc and "DeltaEraseAndReproRoutine101" not in desc)
 
+print("\n== complete local CUW acquisition inventory ==")
+EXPECTED_REFERENCE_IDENTITIES = {
+    'T-0002-21 - 04A72.cuw': (2521231, '8329b19f4e02d6902bb1702b156a6890f578f87f83888c3a641e46ee1bc4847b'),
+    'T-0003-21 - 04B42.cuw': (2547117, '1424b70028e3eb4ec35e8f52e5d6dc6d2f76766ac287fada7f112e83da63cdd9'),
+    'T-0003-25.cuw': (7872007, 'ec52b1b673d9bf1c1497fc6f0ac2c5f7bfd8bf330907a2e9162c0c84eb9824b4'),
+    'T-0004-21 - 04B91.cuw': (2573420, '626153b7ea6092c482d7588866f8970cb23bf531b86e10958766f8f8d96cebba'),
+    'T-0005-25.cuw': (7872031, '3f72d67aa4da84aa02d4a9a3661ae458e1d2015c9fcba2f1e4a9961cb39f419e'),
+    'T-0008-22.cuw': (35551267, 'df77121f29aa45a8ebc203f9bec22147ed2e62362c8d267380ef21637ff90630'),
+    'T-0009-22.cuw': (5481006, 'a2cdb0667ae07822e5622569b8fbc9e552e51a94c616aff18d5fa66b29574018'),
+    'T-0011-21 - 04C21.cuw': (2825257, 'e0525b4fe0224772a3dde68d16bf2fb7a808d6d937fa32a337db34d95f5ba61d'),
+    'T-0012-21 - 04B82.cuw': (3939174, '6f88600c05ff90e05d55482caf41901b6a27e30c62d7fdf997c81ecc82f576be'),
+    'T-0014-20 - 04B14.cuw': (2413081, '1615d3f4e463f7088ada0149e9c42d7238a831ab693c4b7b6d93cb6c9c14196b'),
+    'T-0015-20.cuw': (9887355, 'a533dd59a4b73ab972d3cf4b6755c4dd7cb1811610df90c2ef9fff6d8edcfc3b'),
+    'T-0022-20 - 04B33.cuw': (3891207, '579c898a34e27b4b25ac5d233a4102a12f6eadb3f18e4e3bd1c95cf50c46b908'),
+    'T-0023-20 - 04B81.cuw': (3939040, '4a6d6616b0307b8f4b92d8a5b3eede1e5db43a884c781d6ff12777e991d57337'),
+    'T-0034-18 - 04B04.cuw': (3720924, '34480b3d167f0834d622992973408958ace89cd2b1ceb2bfb78b1f9ef868f246'),
+    'T-0035-22.cuw': (5725237, '9882b1b6dd6acda2d142a2825eda396b0a425e41c13f822b9a18e022d4c43e81'),
+    'T-0036-18 - 04A61.cuw': (3856075, '24aa61d71891d433b986e7e8819ffd7d763bcfc670201966a0d3e395846c5828'),
+    'T-0036-22.cuw': (5725230, '14521a416fccffe720d37afea8f07218ea031c27a5530fbcdd5415262d810b36'),
+    'T-0037-18 - 04A71.cuw': (2521449, 'a2462044980eb02c5f5b1073fe5fb2610c432d77889e85cf8eaaa2b86f56f770'),
+    'T-0051-26.cuw': (13045570, '536bf4c05e7c135445547574c4bb321d4521e413765be0c6c2ec42d13a1c0117'),
+    'T-0058-23.cuw': (256400446, 'ac5015118d3c5541c62ac3b0626a2d676681b3c4dee2ce6cb84ad547d116fdd9'),
+    'T-0060-23.cuw': (256399534, 'b3e4a7a951c74ef9985cf05f5151a36538e57bd84392da988d5f8102c652837f'),
+    'T-0061-23.cuw': (256401572, '007a351fa0ac096af6c9c7c8085c6690c79abefea058e1fc438033ef3512bf94'),
+    'T-0062-23.cuw': (257142135, '9971e3052d63dfe1fb262509ec59bcc8924db0082210117c63e9b01b73070e5b'),
+    'T-0087-17.cuw': (5112447, 'd40cc0988f7310ce0417fba17e512ae915719b40fed9a98f829ca1c5639c3cbd'),
+    'T-0149-24.cuw': (257894251, '70bea932f3ae641e0d9fab99419aeb59ac76b08adcfeca97b9278d59d15ad6a8'),
+    'T-0150-24.cuw': (257646163, 'c28455c5b4ee6b48b4bf7b0fc51c6110969c6de9294bf488583e50727f91b5f1'),
+}
+EXPECTED_REFERENCE_NAMES = set(EXPECTED_REFERENCE_IDENTITIES)
+reference_paths = sorted(CORPUS.glob("*.cuw"), key=lambda p: p.name)
+check("local CUW inventory is exact 26-file pinned set",
+      {p.name for p in reference_paths} == EXPECTED_REFERENCE_NAMES)
+check("all 26 local CUW package identities are pinned",
+      all((len(path.read_bytes()), sha256(path.read_bytes())) == EXPECTED_REFERENCE_IDENTITIES[path.name]
+          for path in reference_paths))
+reference_diag_ids: dict[str, str] = {
+    name: desc.get("Node01", {}).get("DiagID", "")
+    for name, desc in frc_descriptors.items()
+}
+reference_diag_ids.update({
+    name: desc.get("Node01", {}).get("DiagID", "")
+    for name, desc in contrast_descriptors.items()
+})
+for path in reference_paths:
+    if path.name in reference_diag_ids:
+        continue
+    data = path.read_bytes()
+    parsed = parse_container(data)
+    end = parsed["first_member_end"]
+    attach = data[end - parsed["payload_length"]:end]
+    desc = parse_attach(attach)
+    reference_diag_ids[path.name] = desc.get("Node01", {}).get("DiagID", "")
+reference_diag_counts = Counter(reference_diag_ids.values())
+EXPECTED_REFERENCE_DIAG_COUNTS = {
+    "": 12, "0724": 1, "07500F": 1, "07506D": 1, "0792": 6, "07A1": 3, "07D2": 2
+}
+check("local CUW DiagID census exact", dict(sorted(reference_diag_counts.items())) == EXPECTED_REFERENCE_DIAG_COUNTS)
+check("local CUW corpus has positive FRC/EPS controls but no category-435 07B0 package",
+      reference_diag_counts["0792"] == 6
+      and reference_diag_counts["07A1"] == 3
+      and reference_diag_counts["07B0"] == 0)
+
 print("\n== generated artifact self-check ==")
 if ev:
-    check("artifact schema/counts", ev["schema_version"] == 1
+    check("artifact schema/counts", ev["schema_version"] == 2
           and ev["corpus"]["frc_package_count"] == 6
           and ev["corpus"]["contrast_format67_package_count"] == 5)
+    ref_inv = ev["reference_inventory"]
+    check("artifact: complete local CUW acquisition inventory",
+          ref_inv["package_count"] == 26
+          and ref_inv["diag_id_counts"] == EXPECTED_REFERENCE_DIAG_COUNTS
+          and {row["filename"] for row in ref_inv["packages"]} == EXPECTED_REFERENCE_NAMES)
+    ref_by_name = {row["filename"]: row for row in ref_inv["packages"]}
+    identity_ok = True
+    for path in reference_paths:
+        row = ref_by_name.get(path.name, {})
+        expected_size, expected_sha = EXPECTED_REFERENCE_IDENTITIES[path.name]
+        identity_ok = identity_ok and row.get("size") == expected_size and row.get("sha256") == expected_sha
+        identity_ok = identity_ok and row.get("diag_id") == reference_diag_ids[path.name]
+    check("artifact: every reference package identity and DiagID matches raw corpus", identity_ok)
+    acq = ref_inv["category_435_acquisition"]
+    check("artifact: category-435 07B0 acquisition gap with positive controls",
+          acq["target_diag_id"] == "07B0"
+          and acq["matching_packages"] == []
+          and acq["positive_controls"] == {
+              "front_recognition_camera_0792": 6, "power_steering_07A1": 3
+          }
+          and "does not prove Toyota/TIS has no such calibration package" in acq["boundary"])
     inv = ev["cross_package_invariants"]
     check("artifact: routine identity + routine-slot embedding",
           inv["routine_member_raw_identical_across_all"]
@@ -623,6 +709,12 @@ else:
           and rec["DLLFileNameForPrepareWrite"] == "TCUWCanReproStdPrepareWriter.dll"
           and rec["DLLFileNameForFlashWrite"] == "TCUWCanReproStdFlashWriter.dll"
           and rec["PrepareRetryFlag"] == "0")
+    check("Ini: P5-Unified04 gets CID/prepare/flash CAN IDs from package CAN-ID table",
+          rec["GetCANIDFunctionNameForGetCID"] == "GetCanIDsFromCANIDTable"
+          and rec["GetCANIDFunctionNameForPrepareWrite"] == "GetCanIDsFromCANIDTable"
+          and rec["GetCANIDFunctionNameForFlashWrite"] == "GetCanIDsFromCANIDTable"
+          and rec["CanIDForGetCID"] == ""
+          and rec["CanIDForPrepareWrite"] == "")
     rks_ini = decode_ini(GTS / "Ini/RKS.ini")
     check("Ini: RKS.ini [ReproKeyRequest] fields",
           "[ReproKeyRequest]" in rks_ini and "SoftwareID=GTS" in rks_ini

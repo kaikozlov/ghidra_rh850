@@ -8,7 +8,10 @@ each container, decodes the attach descriptor (including the index-obfuscated
 ``ServiceAuthKey``/``Nonce`` and per-area ``DigitalSignature`` fields), decodes
 the Motorola S-record *framing* of the ``.xx`` members, and records corpus
 invariants.  Five further format-0x67 camera packages with ``ReproMethod=01``
-are recorded as the whole-repro contrast set.
+are recorded as the whole-repro contrast set. A lightweight identity/descriptor
+inventory of every ``REFERENCE/cuw/*.cuw`` package is also emitted so acquisition
+targets can be tested against the complete local corpus without deep-decoding every
+payload.
 
 Evidence boundaries kept by this tool (do not weaken them):
 
@@ -42,8 +45,8 @@ from parse_cuw_container import parse as parse_container
 DEFAULT_CORPUS = REPO / "REFERENCE/cuw"
 
 # Pinned FRC corpus (DiagID 0792 / ReproMethod 07) and pinned whole-repro
-# contrast set (ReproMethod 01).  Extra files in the corpus directory are
-# ignored; identities are asserted by the verification suite.
+# contrast set (ReproMethod 01).  The remaining corpus files are summarized in
+# ``reference_inventory`` only; identities are asserted by the verification suite.
 FRC_PACKAGES: dict[str, tuple[int, str]] = {
     "T-0058-23.cuw": (256400446, "ac5015118d3c5541c62ac3b0626a2d676681b3c4dee2ce6cb84ad547d116fdd9"),
     "T-0060-23.cuw": (256399534, "b3e4a7a951c74ef9985cf05f5151a36538e57bd84392da988d5f8102c652837f"),
@@ -374,6 +377,35 @@ def main() -> int:
             summary["errors"].append("contrast package identity mismatch against pinned corpus identity")
         contrast.append(summary)
 
+    # ---- complete local reference inventory (descriptor/identity only)
+    # Reuse the already-inspected focal/contrast packages and inspect only the
+    # remainder.  This keeps acquisition negatives tied to the actual local
+    # corpus without doing S-record/entropy work on unrelated packages.
+    cached = {row["filename"]: row for row in packages + contrast}
+    reference_inventory: list[dict[str, Any]] = []
+    diag_counts: Counter[str] = Counter()
+    for path in sorted(args.corpus.glob("*.cuw"), key=lambda p: p.name):
+        summary = cached.get(path.name)
+        if summary is None:
+            summary, _ = inspect_package(path, deep=False)
+        descriptor = summary.get("descriptor", {})
+        diag_id = descriptor.get("diag_id", "")
+        diag_counts[diag_id] += 1
+        reference_inventory.append({
+            "filename": summary["filename"],
+            "size": summary["size"],
+            "sha256": summary["sha256"],
+            "format_type": summary["format_type"],
+            "outer_crc_ok": summary["outer_crc_ok"],
+            "declared_total_matches_file": summary["declared_total_matches_file"],
+            "diag_id": diag_id,
+            "contact_type": descriptor.get("contact_type", ""),
+            "new_cid": descriptor.get("new_cid", ""),
+            "repro_method": descriptor.get("repro_method", ""),
+            "required_spec_repro_ver": descriptor.get("required_spec_repro_ver", ""),
+        })
+    abs_matches = [row["filename"] for row in reference_inventory if row["diag_id"] == "07B0"]
+
     # ---- cross-package invariants
     routine_shas = {p["filename"]: p["routine_member"]["raw_sha256"] for p in packages if "routine_member" in p}
     routine_slot_matches = all(
@@ -453,7 +485,25 @@ def main() -> int:
             cross_datx_shared_blocks += sum(1 for d in block_digests(datx_list[j][1])[1:] if d in set_a)
 
     result = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "reference_inventory": {
+            "package_count": len(reference_inventory),
+            "diag_id_counts": dict(sorted(diag_counts.items())),
+            "packages": reference_inventory,
+            "category_435_acquisition": {
+                "target_diag_id": "07B0",
+                "matching_packages": abs_matches,
+                "positive_controls": {
+                    "front_recognition_camera_0792": diag_counts.get("0792", 0),
+                    "power_steering_07A1": diag_counts.get("07A1", 0),
+                },
+                "boundary": (
+                    "Local REFERENCE/cuw inventory only. An empty 07B0 match list proves that the "
+                    "currently pinned local corpus lacks a category-435 candidate package; it does "
+                    "not prove Toyota/TIS has no such calibration package."
+                ),
+            },
+        },
         "corpus": {
             "directory": str(args.corpus.relative_to(REPO)) if args.corpus.is_relative_to(REPO) else str(args.corpus),
             "frc_package_count": len(packages),
