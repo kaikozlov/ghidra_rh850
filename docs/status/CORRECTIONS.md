@@ -1995,6 +1995,8 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 
 ### CORR-078 — the retained H Sienna-homolog LTA branch is direct-write inactive; B6 nonscalar rows are not a recovered hidden command
 
+**Superseded:** CORR-107 corrects the direct-write-inactive portion after the GP-relative writer audit; the D7/B6 nonscalar and shared-`0x025` closures below remain valid.
+
 - **Earlier residual possibilities:** after scalar COM closure, two static escape
   hatches remained: the retained `C9C16 -> CB8BA -> CB9B6` LTA conditioner might
   be fed through an overlooked alias, or B6 configured-but-nonscalar IDs
@@ -2558,3 +2560,59 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `tests/verify_techstream_cuw_frc_corpus.py`;
   `data/generated/techstream_v18/cuw_frc_corpus.json`;
   [../tooling/techstream.md](../tooling/techstream.md) §5.2.4.
+
+### CORR-107 — H has a live B6 target-angle command; direct-symbol/fixed-map census missed GP-relative writers and copies
+
+- **Superseded wording (CORR-078 / VAR-014 / VAR-017 / VAR-036 / COM-008):**
+  the retained `C9C16 -> CB8BA -> CB9B6 -> C2A8` branch was described as
+  direct-write inactive, and B6 signed16 signal255 was described as staged-only
+  with no command-sized H-only wire ingress.
+- **Root cause:** the earlier census matched named Ghidra RAM-symbol assignments
+  and direct references. H also emits steering-state stores/copies through the
+  fixed application GP base `0xFEBEB800` plus constant offsets. Those accesses do
+  not necessarily spell the absolute RAM symbols in decompiler text, so the
+  representation omitted both live writers and the B6 stage→snapshot alias.
+- **Mode/branch correction:** `CC7F8` writes `GP+0xA6D = FEBEC26D` from
+  communication-health selectors `0x10/0x18` plus B6 validity `FEBEADB9`.
+  `CC2EC -> CAD62` writes replicated magnitude `FEBEC17C/C17E/C184`; B6
+  signals262/263 percentage-modulate internal contributor families through
+  `CC442/CBFCE`. The retained conditioner is therefore live.
+- **B6 fixed-map correction:** generated unpacker `46A10` reads signal255 as
+  signed16 from protected FD `0x0B6` B4:B5 into `FEBE7D94`; `5262C` stages it at
+  `FEBEF1CC`; and `B8EEC` performs `GP+0x39CC -> GP-0x97E`, exactly
+  `FEBEF1CC -> FEBEAE82`. The same fixed map resolves signal254 B3[5:0] through
+  `FEBE7D96 -> FEBEF127 -> FEBEADB0`.
+- **Target-angle proof:** `C9DB0/C9E54` turn `FEBEAE82` into replicated target
+  state. Independently, `CBD7E/CB096` reconstruct the measured steering-angle
+  domain from FD `0x025` signals184/185/186. `CA138` applies the same
+  `0xB76/0x400` gain to both and forms target-minus-measured error before the
+  active controller. This is target-native evidence that B6 signal255 is a
+  **target steering-angle command**, not torque and not a staged-only value.
+- **Mode/control companion:** `CBE6E` decodes signal254 values `1/4/10/11/19`
+  into distinct cooperative steering-mode flags when communication/validity gates
+  permit. The exact OEM field name remains bounded; Techstream's `Target Lateral
+  ID` family is corroborating vocabulary, not a one-to-one H DID join.
+- **Downstream command bridge:** the B6-derived controller contribution reaches
+  `C2A8 -> CD3CC` and the general torque composition. Under the recovered normal
+  selection/current gates it propagates to DID `0x1C02 Command Value Torque` and
+  DID `0x1152 Command Value Current (Q Axis)`. Those DIDs observe the general
+  multi-contributor command/current path; they do not rename signal255 itself.
+- **What remains negative:** D7's 16-bit scalar is still exact `CAN Vehicle Speed
+  (SP1)`; B6/D7 nonscalar block/group/full-PDU escape routes remain negative; the
+  only shared command-sized generated-COM fields are target-native `0x025`
+  angle/rate sensor state; and the classic active camera/IPM-A
+  `2E4/131/191/2FD` monitor family remains removed/disabled.
+- **Correct boundary:** H/F EPS ingress is now identified as protected FD `0x0B6`
+  signal255 target angle with signal254 cooperative-mode selection. Still open:
+  physical B6 wire-to-degree scale/sign convention, exact companion
+  request/validity meanings, live sender freshness/key behavior, and the upstream
+  FRC→Brake/EPB producer/transport path. Arbitrary unrelated computed aliases or
+  undocumented hardware/DMA writers remain bounded, but no second command-sized
+  path was recovered in the audited surfaces.
+- **Canonical:**
+  `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json`;
+  `data/generated/corolla_8965H1202000_lta_command_provenance.json` v5;
+  `tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py`;
+  `tests/verify_corolla_8965H1202000_lta_command_provenance.py`;
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
+  §§7.11, 7.14, 7.35.

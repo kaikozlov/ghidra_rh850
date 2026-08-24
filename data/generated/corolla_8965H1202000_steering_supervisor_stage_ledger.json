@@ -1,9 +1,10 @@
 {
   "evidence_boundary": "Global order alignment is a navigation aid. Only unique complete instruction-shape pairs are semantic-transfer candidates; other pairs require target-native operand/dataflow review. H/S order-unpaired rows are not global absence proofs.",
   "explicit_command_mode_boundary": {
+    "canonical_proof": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
     "classic_131": "normal Rx/SecOC descriptor absent on H and Sienna lta_angle_command_smoothing 0xC8DE0 is order-unpaired",
-    "classic_2e4": "normal Rx descriptor absent on H and retained clamp branch is independently proven zero-fed",
-    "replacement_command": "no direct replacement is assigned; H-only expansion is classified as supervisor/estimation/plausibility/status unless stronger ingress evidence exists"
+    "classic_2e4": "normal Rx descriptor absent on H and retained torque-clamp input remains independently proven zero-fed",
+    "replacement_command": "protected FD 0x0B6 signal255 signed16 B4:B5 is the target-steering-angle command; signal254 B3 is the cooperative mode/control ID. Physical scale and exact OEM mode names remain open."
   },
   "h_order_unpaired": [
     {
@@ -335,7 +336,7 @@
     "sienna_body_size": 424,
     "sienna_direct_stage_count": 94
   },
-  "schema": "corolla-8965H1202000-steering-supervisor-stage-ledger-v1",
+  "schema": "corolla-8965H1202000-steering-supervisor-stage-ledger-v2",
   "sienna_order_unpaired": [
     {
       "bounded_description": "ADF6-indexed calibration lookup",

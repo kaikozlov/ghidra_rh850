@@ -1,11 +1,12 @@
 {
   "evidence": {
+    "b6_target_angle_ingress_sha256": "6de8ce963574b534553ab052043c30a483ad08e0ff877cda63d28d5973365a42",
     "function_count": 56,
     "function_evidence_sha256": "b7bbc66d9c30b16c77938dc002f4a6f752497c228a0229aa3f5316970130eb17",
     "reference_census_sha256": "acbb28d5ff706377c8eed476de0eb675441a0db65058ea95fe9cebeede06de4d",
     "reference_term_count": 74
   },
-  "evidence_boundary": "Raw generated CAN/PDU/signal configuration is exact-image byte evidence. Consumer roles are target-native decompiler recovery. No-consumer/no-writer statements are bounded to the complete direct textual-reference census of the tracked disposable H corpus and do not exclude computed-pointer/alias-only accesses.",
+  "evidence_boundary": "Raw generated CAN/PDU/signal configuration is exact-image byte evidence. Consumer roles are target-native decompiler recovery. Negative no-consumer/no-writer statements remain bounded to the direct textual-reference census, while B6 signals254/255 are explicitly corrected by the exact fixed-map GP-relative audit in the canonical target-angle ingress artifact.",
   "fd_0x030_transmit": {
     "checksum_like_signal_9": {
       "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
@@ -581,26 +582,47 @@
       {
         "bit_length": 6,
         "bit_offset": 0,
-        "direct_consumers": [],
-        "paths_from_0xCEDAE": {},
+        "direct_consumers": [
+          "0xCBE6E"
+        ],
+        "paths_from_0xCEDAE": {
+          "0xCBE6E": null
+        },
         "raw_destination": "0xFEBE7D96",
-        "role": "staged-only-direct-xref-negative",
+        "role": "target-lateral-control-id-mode-selector",
         "signal_id": 254,
         "signed": false,
-        "snapshot_destination": null,
+        "snapshot_destination": "0xFEBEADB0",
         "staging_destination": "0xFEBEF127",
         "wire_byte": 3
       },
       {
         "bit_length": 16,
         "bit_offset": 0,
-        "direct_consumers": [],
-        "paths_from_0xCEDAE": {},
+        "direct_consumers": [
+          "0xC86E8",
+          "0xC87FC",
+          "0xC9DB0",
+          "0xCB4F4"
+        ],
+        "paths_from_0xCEDAE": {
+          "0xC86E8": null,
+          "0xC87FC": [
+            "0xCEDAE",
+            "0xC87FC"
+          ],
+          "0xC9DB0": null,
+          "0xCB4F4": [
+            "0xCEDAE",
+            "0xCB582",
+            "0xCB4F4"
+          ]
+        },
         "raw_destination": "0xFEBE7D94",
-        "role": "signed16-staged-only-direct-xref-negative",
+        "role": "signed16-target-steering-angle-command",
         "signal_id": 255,
         "signed": true,
-        "snapshot_destination": null,
+        "snapshot_destination": "0xFEBEAE82",
         "staging_destination": "0xFEBEF1CC",
         "wire_byte": 4
       },
@@ -811,7 +833,13 @@
       264,
       265
     ],
-    "signed16_replacement_command_result": "signal 255 is the only 16-bit signed B6 scalar, but its staging cell has no direct runtime consumer in the target-native corpus; it is not evidence of a relocated 2E4 torque command",
+    "signed16_target_angle_command": {
+      "canonical_proof": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
+      "classification": "authenticated target-steering-angle command; not torque",
+      "physical_scale_closed": false,
+      "signal_id": 255,
+      "snapshot_destination": "0xFEBEAE82"
+    },
     "validity": {
       "direct_consumers": [
         "0xC7C70",

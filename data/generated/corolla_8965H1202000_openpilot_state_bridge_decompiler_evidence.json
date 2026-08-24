@@ -1,0 +1,81 @@
+{
+  "boundary": "Target-native decompiler evidence for H 0x4A3/0x351/0x394 state-message recovery. Raw body hashes are the firmware identity authority; structural Sienna matches are only corroboration.",
+  "function_count": 9,
+  "functions": [
+    {
+      "body_sha256": "2009ba909725b856201f2f84808ede2af941913c69666e4cacb6251523cc2275",
+      "body_size": 232,
+      "decompiled_c": "\nvoid FUN_00046c4c(void)\n\n{\n  ushort uVar1;\n  int iVar2;\n  ushort uVar3;\n  \n  uVar1 = uRamfebee8cc & 0xff00;\n  uRamfebe7dad = 0;\n  if (((uVar1 != 0x400) && ((uVar1 != 0x500 || (cRamfebee81f != '\\x11')))) ||\n     (uVar3 = uRamfebe65e4 & 0x1ff, (uRamfebe65e4 & 0x1ff) != 0)) {\n    uVar3 = 1;\n  }\n  uRamfebe7db1 = (char)uVar3;\n  if (((uVar1 != 0x400) && ((uVar1 != 0x500 || (cRamfebee81f != '\\x11')))) ||\n     ((cRamfebee886 != '\\0' || (uVar1 = uRamfebe65e4 & 0x1ff, (uRamfebe65e4 & 0x1ff) != 0)))) {\n    uVar1 = 1;\n  }\n  uRamfebe7db2 = (char)uVar1;\n  if ((((sRamfebe7f72 == 0) && (sRamfebe7f7a == 0)) && (sRamfebe7f7c == 0)) &&\n     ((cRamfebee856 != '\\\"' && (cRamfebee857 != '\\\"')))) {\n    bRamfebe7dae = cRamfebee858 == '\\\"';\n  }\n  else {\n    bRamfebe7dae = true;\n  }\n  if (uVar1 == 1) {\n    sRamfebe7e22 = 0;\n  }\n  else {\n    sRamfebe7e22 = (short)((sRamfebe6554 * 100) / 0x100);\n    iVar2 = (int)sRamfebe7e22;\n    if (iVar2 + -1000 < 0 == (iVar2 < 0 && -1 < iVar2 + -1000) && iVar2 != 1000) {\n      sRamfebe7e22 = 1000;\n    }\n    else if (iVar2 + 1000 < 0 != (-1 < iVar2 && iVar2 + 1000 < 0)) {\n      sRamfebe7e22 = -1000;\n    }\n  }\n  uRamfebe7e28 = 0;\n  if (uVar3 != 1) {\n    uRamfebe7e28 = (undefined2)((sRamfebe6592 * -100) / 0x80);\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "0a2b7aaa0bf70e43e891eb6f75b00c10846be7ee76d81da73da4a049103d1d11",
+      "entry": "0x00046C4C"
+    },
+    {
+      "body_sha256": "1f6bf2fa9172ff9df8698f828ec9ab5cb24ba26812c09e297a460bea8f1b2583",
+      "body_size": 114,
+      "decompiled_c": "\nvoid FUN_00046d9a(void)\n\n{\n  int iVar1;\n  undefined1 uStack_7;\n  undefined1 auStack_6 [6];\n  \n  iVar1 = -0x1414800;\n  uRamfebe7ddd = (undefined1)uRamfebe7d34;\n  bRamfebe7ddb = bRamfebe7dae | 0x20;\n  bRamfebe7ddc = (byte)((ushort)uRamfebe7d34 >> 8) & 0xf;\n  FUN_00069420((int)sRamfebe7a46,0x7ff,0xfffff800,auStack_6);\n  *(char *)(iVar1 + -0x3a21) = (char)auStack_6._0_2_;\n  *(byte *)(iVar1 + -0x3a22) = SUB21(auStack_6._0_2_,1) & 0xf;\n  FUN_0006387c((int)(*(short *)(iVar1 + -0x39de) / 10),&uStack_7);\n  *(undefined1 *)(iVar1 + -0x3a20) = uStack_7;\n  *(char *)(iVar1 + -0x3a1f) = (char)((ushort)*(undefined2 *)(iVar1 + -0x39d8) >> 8);\n  *(char *)(iVar1 + -0x3a1e) = (char)*(undefined2 *)(iVar1 + -0x39d8);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "546c3f79188384198a738bac615cd407065c936f121b01e40f84ee066424b1b1",
+      "entry": "0x00046D9A"
+    },
+    {
+      "body_sha256": "5bab5d63a69e0d4291dd9f3d4dd24df733d9d41f6dd80507ad7998fd34c53988",
+      "body_size": 86,
+      "decompiled_c": "\nchar FUN_00046e0c(void)\n\n{\n  char cVar1;\n  \n  if ((cRamfebe7dd0 == '\\x01') && (cRamfebee82b == '\\0')) {\n    cRamfebe7dfc = 'Z';\n    bRamfebe7dfb = 0;\n    cVar1 = cRamfebee82b;\n  }\n  else {\n    cVar1 = cRamfebe7dd0;\n    if (cRamfebe7dfc != 'Z') {\n      cRamfebe7dfa = cRamfebe5225;\n      return cRamfebee82b;\n    }\n  }\n  if ((bRamfebe7dfb < DAT_0002b930) && (cRamfebe7dfa == cRamfebe5225)) {\n    bRamfebe7dfb = bRamfebe7dfb + 1;\n  }\n  else {\n    bRamfebe7dfb = '\\0';\n    cRamfebe7dfc = '\\0';\n    cVar1 = cRamfebee82b;\n  }\n  cRamfebe7dfa = cRamfebe5225;\n  return cVar1;\n}\n\n",
+      "decompiled_c_sha256": "82b2e1a812e639cce67e81dfaa687113a8d259d5c14d74d1ab123ae96f627cf5",
+      "entry": "0x00046E0C"
+    },
+    {
+      "body_sha256": "027b6a7a0177a024f76b6cada35da115886d4e2fe7aec38d641d83c6fd597e93",
+      "body_size": 34,
+      "decompiled_c": "\nvoid FUN_00046e62(undefined1 param_1)\n\n{\n  if (((uRamfebe65e4 & 3) == 0) || (cRamfebe7e13 == '\\0')) {\n    uRamfebe7dd1 = 0;\n  }\n  else {\n    param_1 = 7;\n    uRamfebe7dd1 = 1;\n  }\n  uRamfebe7dd0 = param_1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "1018fc6f12a4b94b1be7359bb1552cc1ebd1c23c763d2938106caff30a63d682",
+      "entry": "0x00046E62"
+    },
+    {
+      "body_sha256": "652d9462be5a3952fbfd5dc28476ecc2bec06d00ff46c09a927be80226411516",
+      "body_size": 74,
+      "decompiled_c": "\nvoid FUN_00046e96(void)\n\n{\n  uint uVar1;\n  \n  uVar1 = bRamfebe7f58 - 1;\n  if (3 < uVar1) {\n    if (uVar1 == 4) {\n      uRamfebe7dd2 = uRamfebe7f66;\n      uRamfebe7dd5 = uRamfebe7f65;\n      uRamfebe7dd6 = uRamfebe7f62;\n      uRamfebe7dd7 = uRamfebe7f63;\n      uRamfebe7dd9 = uRamfebe7f64;\n      uRamfebe7dda = 1;\n      return;\n    }\n    if (0xd < uVar1) {\n      if (uVar1 == 0xe) {\n        uRamfebe7dd2 = uRamfebe7f66;\n        uRamfebe7dd5 = uRamfebe7f65;\n        uRamfebe7dd6 = uRamfebe7f62;\n        uRamfebe7dd7 = uRamfebe7f63;\n        uRamfebe7dd9 = uRamfebe7f64;\n        uRamfebe7dda = 2;\n        return;\n      }\n      if (uVar1 != 0xf) {\n        uRamfebe7dd2 = uRamfebe7f66;\n        uRamfebe7dd5 = uRamfebe7f65;\n        uRamfebe7dd6 = uRamfebe7f62;\n        uRamfebe7dd7 = uRamfebe7f63;\n        uRamfebe7dd9 = uRamfebe7f64;\n        uRamfebe7dda = 0;\n        return;\n      }\n    }\n  }\n  uRamfebe7dda = 3;\n  uRamfebe7dd2 = uRamfebe7f66;\n  uRamfebe7dd5 = uRamfebe7f65;\n  uRamfebe7dd6 = uRamfebe7f62;\n  uRamfebe7dd7 = uRamfebe7f63;\n  uRamfebe7dd9 = uRamfebe7f64;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "75fe63ba531713abf44578f6dc35e20d702885ef137da67e6f93718c987af54c",
+      "entry": "0x00046E96"
+    },
+    {
+      "body_sha256": "dce7e257812658cef5686f5bd5dd56cf59b2fffd32750d3f7994cfd65a62e1f5",
+      "body_size": 306,
+      "decompiled_c": "\nuint FUN_0004749a(void)\n\n{\n  char cVar1;\n  int iVar2;\n  uint uVar3;\n  uint uVar4;\n  \n  iVar2 = -0x1414800;\n  uRamfebe88f6 = uRamfebe7ddb;\n  uRamfebe88f7 = uRamfebe7ddc;\n  uRamfebe88f8 = uRamfebe7ddd;\n  uRamfebe88f9 = uRamfebe7dde;\n  uRamfebe88fa = uRamfebe7ddf;\n  uRamfebe88fb = uRamfebe7de0;\n  uRamfebe88fc = uRamfebe7de1;\n  uRamfebe88fd = uRamfebe7de2;\n  FUN_0007662e(0x2b,0x27,8,0,0xfebe88f6);\n  FUN_0007662e(0x2c,0x28,8,0,iVar2 + -0x2f09);\n  FUN_0007662e(0x2d,0x29,8,0,iVar2 + -0x2f08);\n  FUN_0007662e(0x2e,0x2a,8,0,iVar2 + -0x2f07);\n  FUN_0007662e(0x2f,0x2b,8,0,iVar2 + -0x2f06);\n  FUN_0007662e(0x30,0x2c,8,0,iVar2 + -0x2f05);\n  FUN_0007662e(0x31,0x2d,8,0,iVar2 + -0x2f04);\n  FUN_0007662e(0x32,0x2e,8,0,iVar2 + -0x2f03);\n  cVar1 = *(char *)(iVar2 + -0x3b7a);\n  uVar3 = FUN_000763fa(3);\n  if ((cVar1 == 'Z') && ((uVar3 & 0x10) == 0)) {\n    uVar4 = FUN_00077922(3);\n  }\n  else {\n    uVar4 = uVar3;\n    if ((cVar1 == '\\0') && (uVar4 = uVar3 >> 5, (uVar3 & 0x10) != 0)) {\n      FUN_0007777a(3,0x40);\n      uVar4 = FUN_000779a6(3);\n    }\n  }\n  return uVar4;\n}\n\n",
+      "decompiled_c_sha256": "00153b61544246e517bebc213ef5672fc54da434276d248443fbb3574b0fdfbc",
+      "entry": "0x0004749A"
+    },
+    {
+      "body_sha256": "0ca1a53a67cc07db523e0d0e7918744b4018ea33bb3f1a770cc99a087a3cdfa4",
+      "body_size": 196,
+      "decompiled_c": "\nuint FUN_00047ada(void)\n\n{\n  char cVar1;\n  int iVar2;\n  uint uVar3;\n  uint uVar4;\n  \n  iVar2 = -0x1414800;\n  uRamfebe88f2 = uRamfebe7dd5;\n  uRamfebe88f3 = uRamfebe7dd6;\n  uRamfebe88f4 = uRamfebe7dd7;\n  uRamfebe88f5 = uRamfebe7dd9;\n  FUN_000764ec(0x27,0x25,2,6,0xfebe88f2);\n  FUN_000764ec(0x28,0x25,3,3,iVar2 + -0x2f0d);\n  FUN_000764ec(0x29,0x26,3,1,iVar2 + -0x2f0c);\n  FUN_000764ec(0x2a,0x26,1,0,iVar2 + -0x2f0b);\n  cVar1 = *(char *)(iVar2 + -0x3b7a);\n  uVar3 = FUN_000763fa(2);\n  if ((cVar1 == 'Z') && ((uVar3 & 0x10) == 0)) {\n    uVar4 = FUN_00077922(2);\n  }\n  else {\n    uVar4 = uVar3;\n    if ((cVar1 == '\\0') && (uVar4 = uVar3 >> 5, (uVar3 & 0x10) != 0)) {\n      FUN_0007777a(2,0x40);\n      FUN_0007777a(2,0x80);\n      uVar4 = FUN_000779a6(2);\n    }\n  }\n  return uVar4;\n}\n\n",
+      "decompiled_c_sha256": "c236c9ad3da981fafdab1b75e99dd37931e5bcbf20e138d7f3510470e5e6a3bb",
+      "entry": "0x00047ADA"
+    },
+    {
+      "body_sha256": "99ecce93d551dbf35021ffed45962d0b104bc1112f5c1b3acc9765a105c19380",
+      "body_size": 136,
+      "decompiled_c": "\nuint FUN_00047ba2(void)\n\n{\n  char cVar1;\n  int iVar2;\n  uint uVar3;\n  uint uVar4;\n  \n  iVar2 = -0x1414800;\n  uRamfebe88fe = uRamfebe7dd0;\n  uRamfebe88ff = uRamfebe7dd1;\n  FUN_000764ec(0x25,0x22,3,5,0xfebe88fe);\n  FUN_000764ec(0x26,0x22,1,4,iVar2 + -0x2f01);\n  cVar1 = *(char *)(iVar2 + -0x3b7a);\n  uVar3 = FUN_000763fa(1);\n  if ((cVar1 == 'Z') && ((uVar3 & 0x10) == 0)) {\n    uVar4 = FUN_00077922(1);\n  }\n  else {\n    uVar4 = uVar3;\n    if ((cVar1 == '\\0') && (uVar4 = uVar3 >> 5, (uVar3 & 0x10) != 0)) {\n      FUN_0007777a(1,0x40);\n      FUN_0007777a(1,0x80);\n      uVar4 = FUN_000779a6(1);\n    }\n  }\n  return uVar4;\n}\n\n",
+      "decompiled_c_sha256": "9bf89eef8afcd0c28e43fec9a078b4f28c8d438de2003de2e09d31b4c28165c9",
+      "entry": "0x00047BA2"
+    },
+    {
+      "body_sha256": "144597d95884e0c4ea434cfee0483442b95cae0cc9c6ef37c9fd081031145357",
+      "body_size": 44,
+      "decompiled_c": "\nvoid FUN_0006387c(short param_1,undefined1 *param_2)\n\n{\n  undefined1 uVar1;\n  int iVar2;\n  \n  iVar2 = (int)param_1;\n  if (iVar2 + 0x7f < 0 == (-1 < iVar2 && iVar2 + 0x7f < 0)) {\n    if (iVar2 + -0x7f < 0 == (iVar2 < 0 && -1 < iVar2 + -0x7f) && iVar2 != 0x7f) {\n      uVar1 = 0x7f;\n    }\n    else {\n      if (iVar2 + 0x80 < 0 != (-1 < iVar2 && iVar2 + 0x80 < 0) || iVar2 == -0x80) {\n        iVar2 = -0x80;\n      }\n      uVar1 = (undefined1)iVar2;\n    }\n  }\n  else {\n    uVar1 = 0x81;\n  }\n  *param_2 = uVar1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "4b75bc4998b2948fa694b839259e63144058f07f75f6c9cb8585b31f80946787",
+      "entry": "0x0006387C"
+    }
+  ],
+  "image": {
+    "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+    "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "size": 1048576
+  },
+  "schema": "corolla-h-openpilot-state-bridge-decompiler-evidence-v1",
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "function_count": 5478,
+    "path": "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
+    "sha256": "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656"
+  }
+}

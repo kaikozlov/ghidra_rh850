@@ -21,7 +21,7 @@ sys.path.insert(0, str(REPO))
 from tools.build_ephemeral_runtime_manifest import load_codeflash  # noqa: E402
 from tools.compare_variant_application_rx import find_normal_rx_descriptor_table  # noqa: E402
 
-SCHEMA = "corolla-pre-tss3-opendbc-message-comparison-v1"
+SCHEMA = "corolla-pre-tss3-opendbc-message-comparison-v2"
 TX = struct.Struct("<IBBH")
 PDU = struct.Struct("<HBBHBB")
 
@@ -31,6 +31,7 @@ DEFAULT_CONTRACT = REPO / "data/external/opendbc/toyota_corolla_pre_tss3_contrac
 DEFAULT_FD = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"
 DEFAULT_LTA = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance.json"
 DEFAULT_EQ = REPO / "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json"
+DEFAULT_BRIDGE = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge.json"
 DEFAULT_OUT = REPO / "data/generated/corolla_pre_tss3_opendbc_message_comparison.json"
 
 
@@ -82,6 +83,9 @@ def build(args: argparse.Namespace) -> dict:
     fd = json.loads(args.fd_control.read_text())
     lta = json.loads(args.lta_provenance.read_text())
     eq = json.loads(args.equivalence.read_text())
+    bridge = json.loads(args.state_bridge.read_text())
+    if bridge["schema"] != "corolla-8965H1202000-openpilot-state-bridge-v3":
+        raise ValueError("openpilot state/command bridge schema drift")
 
     if len(h) != 0x100000 or len(f) != 0x100000:
         raise ValueError("normalized CodeFlash must be 1 MiB")
@@ -156,23 +160,38 @@ def build(args: argparse.Namespace) -> dict:
         role_row(
             role="driver_eps_torque_and_accurate_angle_feedback",
             old=old_260,
-            new={"old_id_present_in_tx": tx_fact("0x260") is not None, "replacement_candidate": {"id": "0x030", **tx_fact("0x030")}, "fd030_classification": fd030["classification"]},
-            classification="old_eps_tx_removed_feedback_consolidated_into_fd030_family",
-            consequence="A TSS3 CarState cannot wait for classic 0x260. Decode the proven 0x030 FD output and identify the driver-torque/EPS-torque/accurate-angle fields needed for override and Panda safety.",
+            new={
+                "old_id_present_in_tx": tx_fact("0x260") is not None,
+                "generation_native_carriers": ["0x4A3", "0x030"],
+                "0x4A3": bridge["state_bridge"]["0x4A3"],
+                "0x030_classification": bridge["state_bridge"]["0x030"]["classification"],
+            },
+            classification="old_eps_tx_removed_roles_split_across_newer_state_carriers",
+            consequence="Use 0x4A3 as the clearest H/F angle, driver-torque-source, and motor-response bridge, then decode only the remaining 0x030 validity/state needed for CarState/Panda safety. Do not assume old 0x260 torque scaling.",
         ),
         role_row(
             role="eps_lka_readiness_and_fault_feedback",
             old=old_262,
-            new={"old_id_present_in_tx": tx_fact("0x262") is not None, "replacement_candidate": {"id": "0x030", **tx_fact("0x030")}, "fd030_classification": fd030["classification"]},
-            classification="old_eps_status_tx_removed_feedback_consolidated_into_fd030_family",
-            consequence="Recover the new readiness/fault state from 0x030 (or another proven EPS output) before defining engagement/fault behavior; old numeric LKA_STATE values are not portable assumptions.",
+            new={
+                "old_id_present_in_tx": tx_fact("0x262") is not None,
+                "generation_native_candidates": ["0x351", "0x394", "0x030"],
+                "0x351": bridge["state_bridge"]["0x351"],
+                "0x394": bridge["state_bridge"]["0x394"],
+            },
+            classification="old_eps_status_tx_removed_status_roles_split_across_newer_carriers",
+            consequence="Correlate 0x351/0x394 against normal, active, inhibit, and fault transitions; use 0x030 only for remaining validity holes. Old numeric LKA_STATE values are not portable.",
         ),
         role_row(
-            role="active_lateral_torque_command",
+            role="active_lateral_steering_command",
             old=old_2e4,
-            new={"old_id_active_rx": rx_fact("0x2E4"), "secured_profiles": ["0x00F", "0x0D7", "0x0B6"], "obvious_fd_replacement_result": "bounded negative: no H-only/wire-changed supervisor-reaching scalar >=12 bits; 0x0B6 sole signed16 scalar is staged-only"},
-            classification="old_command_removed_no_eps_local_replacement_setpoint_recovered",
-            consequence="Do not port Corolla lateral control by extending/signing 0x2E4. Find the actual stock autonomous-lateral producer/route with full-bus capture and FRC/gateway firmware, then join it to EPS internal command/current state.",
+            new={
+                "old_id_active_rx": rx_fact("0x2E4"),
+                "secured_profiles": ["0x00F", "0x0D7", "0x0B6"],
+                "replacement": bridge["command_ingress_closure"]["b6_target_angle"],
+                "static_conclusion": bridge["command_ingress_closure"]["static_conclusion"],
+            },
+            classification="old_torque_command_replaced_by_protected_b6_target_angle_control",
+            consequence="Do not extend/sign classic 0x2E4. H/F instead consume protected FD 0x0B6 signal255 as a target steering-angle command, with signal254 selecting cooperative modes. Recover exact physical scale, request/validity, cadence, SecOC freshness/key behavior, and stock-source suppression before injection.",
         ),
         role_row(
             role="tss2_lta_coexistence_frame",
@@ -207,8 +226,8 @@ def build(args: argparse.Namespace) -> dict:
     return {
         "schema": SCHEMA,
         "evidence_boundary": (
-            "The 2023 H and 2025 F conclusions are exact application CodeFlash facts. "
-            "Whole-vehicle openpilot messages may legitimately be absent from an EPS image; only EPS-local command/feedback migrations are treated as architectural evidence."
+            "The 2023 H and 2025 F conclusions are exact application CodeFlash facts plus target-native fixed-map/dataflow proofs. "
+            "Whole-vehicle openpilot messages may legitimately be absent from an EPS image; only EPS-local command/feedback migrations are treated as architectural evidence. Physical B6 command scaling and upstream producer/authentication remain open."
         ),
         "upstream": {
             "contract": str(args.contract.relative_to(REPO)),
@@ -231,8 +250,8 @@ def build(args: argparse.Namespace) -> dict:
         "conclusion": {
             "survives_with_semantic_proof":"0x025 steering angle/rate",
             "survives_as_configuration_lead":"0x0AA wheel speeds",
-            "feedback_generation_change":"0x260 + 0x262 disappear; 32-byte FD 0x030 occupies the newer EPS feedback family",
-            "command_generation_change":"classic 5-byte 0x2E4 disappears from active EPS Rx; no target-native replacement setpoint is recovered in H/F",
+            "feedback_generation_change":"0x260 + 0x262 disappear; roles split across classic 0x4A3/0x351/0x394 plus mixed 32-byte FD 0x030",
+            "command_generation_change":"classic 5-byte torque 0x2E4 disappears; protected FD 0x0B6 signal255 is the H/F target-steering-angle command and signal254 selects cooperative modes",
             "tss2_lta_note":"0x191 was only a neutral coexistence/replacement frame on Corolla TSS2 torque control, not its active steering command",
             "longitudinal_ui_boundary":"0x343 and 0x412 are whole-vehicle camera/ACC/UI contracts; EPS-table absence does not answer their TSS3 replacements",
             "secoc_boundary":"0x131 and 0x183 are not pre-TSS3 Corolla messages and must not be included in the Corolla migration baseline",
@@ -248,6 +267,7 @@ def main() -> int:
     ap.add_argument('--fd-control',type=Path,default=DEFAULT_FD)
     ap.add_argument('--lta-provenance',type=Path,default=DEFAULT_LTA)
     ap.add_argument('--equivalence',type=Path,default=DEFAULT_EQ)
+    ap.add_argument('--state-bridge',type=Path,default=DEFAULT_BRIDGE)
     ap.add_argument('--output',type=Path,default=DEFAULT_OUT)
     args=ap.parse_args()
     report=build(args)

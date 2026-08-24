@@ -13,7 +13,6 @@ import json
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-DEFAULT_CORPUS = REPO / "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
 DEFAULT_IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
 DEFAULT_OUT = REPO / "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json"
 
@@ -55,6 +54,21 @@ ENTRIES = [
     0xCE974,  # active steering pipeline owner
     0xCEB8E,  # steering-state initialization owner
     0xCEDAE,  # steering supervisor owner
+    # Computed/GP-relative writer correction and local-source closure.
+    0x44C86,  # communication-health aggregate producer
+    0x44CFC,  # communication-health selector used by C26D writer
+    0xBA090,  # selector thunk used by C26D writer
+    0xCC7F8,  # GP-relative C26D/C26C writer
+    0xCC18E,  # locally synthesized base magnitude/state family
+    0xCC2EC,  # GP-relative C1F8/C1FC/C206 writer
+    0xCAD62,  # GP-relative C17C/C17E/C184 writer
+    0xCC442,  # B6 signal262 percentage-modulated replicated contributor
+    0xCBFCE,  # B6 signal263 percentage-modulated replicated contributor
+    0xC68F4,  # GP-relative BE04 local/calibration contributor
+    0xC6146,  # GP-relative BD90 local/calibration contributor
+    0xBE25A,  # GP-relative B678 local/calibration contributor
+    0xC76FA,  # GP-relative BEC6 local/calibration contributor
+    0xCD31A,  # GP-relative C39C local composition contributor
 ]
 
 
@@ -74,18 +88,21 @@ def load_corpus(path: Path) -> dict[int, dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
+    ap.add_argument("--corpus", type=Path, required=True,
+                    help="disposable corrected-context H decompiler corpus JSONL")
     ap.add_argument("--image", type=Path, default=DEFAULT_IMAGE)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = ap.parse_args()
+    corpus_path = args.corpus.resolve()
+    image_path = args.image.resolve()
 
-    corpus = load_corpus(args.corpus)
-    image = args.image.read_bytes()
+    corpus = load_corpus(corpus_path)
+    image = image_path.read_bytes()
     funcs = []
     for entry in ENTRIES:
         row = corpus.get(entry)
         if row is None:
-            raise SystemExit(f"missing 0x{entry:08X} in {args.corpus}")
+            raise SystemExit(f"missing 0x{entry:08X} in {corpus_path}")
         if not row.get("decompile_completed"):
             raise SystemExit(f"decompile incomplete at 0x{entry:08X}")
         size = int(row["body_size"])
@@ -105,17 +122,18 @@ def main() -> int:
         "schema": "corolla-h-lta-command-provenance-decompiler-evidence-v1",
         "software_id": "8965H1202000",
         "image": {
-            "path": str(args.image.relative_to(REPO)),
+            "path": str(image_path.relative_to(REPO)) if image_path.is_relative_to(REPO) else str(image_path),
             "size": len(image),
             "sha256": sha(image),
         },
-        "corpus": str(args.corpus.relative_to(REPO)),
+        "corpus": str(corpus_path.relative_to(REPO)) if corpus_path.is_relative_to(REPO) else str(corpus_path),
         "function_count": len(funcs),
         "functions": funcs,
         "evidence_boundary": (
             "Target-native decompiler observations are raw-body SHA-bound to exact H CodeFlash. "
-            "Direct-reference negatives cover the tracked corpus plus explicit raw literal-pointer/API-call scans; "
-            "they do not prove absence of arbitrary computed aliases or undocumented hardware/DMA writers."
+            "Direct-reference negatives cover the tracked corpus plus explicit raw literal-pointer/API-call scans. "
+            "The promoted computed/GP-relative writer set corrects the previously missed named command-branch aliases; "
+            "undocumented hardware/DMA writers and arbitrary computed aliases outside the audited branch remain bounded."
         ),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

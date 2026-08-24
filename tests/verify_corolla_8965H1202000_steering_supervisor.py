@@ -31,7 +31,8 @@ check('S clamp/gain -> H C91B6 is exact-shape',pair('0xC853A','0xC91B6')['pair_e
 check('S rate-limit -> H C9232 is exact-shape',pair('0xC85B6','0xC9232')['pair_evidence']=='unique-exact-instruction-shape')
 removed={x['sienna_entry']:x for x in d['sienna_order_unpaired']}
 check('authenticated 131 smoothing C8DE0 is order-unpaired',removed['0xC8DE0']['role_class']=='sienna_lta_angle_command')
-check('replacement command remains deliberately unassigned','no direct replacement is assigned' in d['explicit_command_mode_boundary']['replacement_command'])
+check('replacement command is protected B6 target angle','0x0B6 signal255' in d['explicit_command_mode_boundary']['replacement_command'] and 'signal254' in d['explicit_command_mode_boundary']['replacement_command'])
+check('replacement command proof linked',d['explicit_command_mode_boundary']['canonical_proof']=='data/generated/corolla_8965H1202000_b6_target_angle_ingress.json')
 print('\n== H expansion classification ==')
 roles=s['h_unpaired_role_counts']
 check('H expansion includes B6 mode/validity/status stages',roles['b6_mode_table']==roles['b6_validity_gate']==roles['b6_status_export']==1)

@@ -74,16 +74,22 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   profiles. TMS-021 now statically proves the general internal `1C02 Command
   Value Torque` contribution reaches Techstream-visible base Q command `1152`
   and then compensated-command/error/PI state in the closed-loop Q-current path.
-  VAR-036/VAR-037/CORR-078 separately close the retained LTA branch as
-  direct-write inactive, rule out recovered hidden D7/B6 group/full-PDU commands,
-  and classify the only shared command-sized CAN025 fields as steering-angle/rate
-  sensor state. The remaining Corolla experiment is therefore genuinely
-  external-provenance work:
-  during a known stock-LTA interval, capture all real incoming CAN-FD traffic and
-  read the H precursor/mode/contributor cells to find a state that moves before
-  the autonomous component of the general torque command. If none does, acquire
-  the camera/gateway/other steering-controller firmware. Static broad searching
-  of this H EPS should not be repeated without a new concrete lead. TMS-040 now
+  VAR-014/VAR-017/VAR-036/CORR-107 now close the receiver-side Corolla command
+  model positively. GP-relative `B8EEC` copies B6 signal255 staging
+  `FEBEF1CC -> FEBEAE82`; `C9DB0/C9E54` form target state; `CBD7E/CB096`
+  independently reconstruct measured angle from FD `0x025`; and `CA138` applies
+  the same gain before forming target-minus-measured error. The result reaches
+  `C2A8`, general `1C02 Command Value Torque`, and the Q-current command under
+  recovered gates. B6 signal254 is the companion 6-bit mode/control ID and
+  signals262/263 percentage-modulate internal contributors. D7/B6 group/full-PDU
+  alternatives remain closed and the shared large CAN025 fields remain sensor
+  state. The remaining Corolla experiment is therefore parameter/security and
+  upstream-producer work: during stock LTA, correlate B6 254/255/262/263 and
+  validity with measured angle, `1C02`, `1152`, and Q current to solve physical
+  scale, mode/request semantics, cadence/timeouts, limits, and SecOC behavior;
+  separately acquire FRC/Brake/gateway firmware to recover the producer/routing
+  chain. Static broad searching of this H EPS should not be repeated without a
+  new concrete lead. TMS-040 now
   closes the acquisition choice: the true-TSS3 **diagnostic-domain holder** is
   category 498 **`FRC_P5` = Front Recognition Camera 2** with dedicated plugin
   roles 233/234 and the LTA/LDA/LCA DID surface (holder, not asserted physical
@@ -376,14 +382,16 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   only 128 KiB total local RAM, so `FEDE` is an architectural self view rather
   than an additional bank. A direct H `local_ram_self` read would reproduce
   dynamic access behavior, but is no longer required to resolve memory extent.
-  The FD field pass now closes the obvious replacement-command candidates:
-  `025` is shared with Sienna and retains the `025 -> 4A3` telemetry join; B6's
-  signed16 scalar is staged-only under the complete direct-reference census;
-  active B6 fields are gate/mode/sequence/scaling/validity state; and the retained
-  Sienna-shaped clamp branch reads zero-fed `AE12`, while internal `AE20` is a
-  plausibility/status path. The H-only/reordered `0xCEDAE` stage ledger is now
-  complete, and the mapped generated-COM ingress has no H-only/wire-changed scalar
-  ≥12 bits; the only changed surviving fields are sub-12-bit B6 supervisory inputs.
+  The corrected FD/fixed-map pass now closes the replacement-command question
+  positively: `025` is shared measured-angle/rate state, while protected B6
+  signal255 is signed16 target steering angle via `7D94 -> F1CC -> AE82`, and
+  signal254 is the 6-bit cooperative mode/control ID via `7D96 -> F127 -> ADB0`.
+  The H-only/reordered `0xCEDAE` stage ledger is complete, and the corrected
+  generated-COM ingress census finds signal255 as the sole H-only/wire-changed
+  field ≥12 bits in the mapped command cone. The separate retained Sienna-shaped
+  torque-clamp branch still reads zero-fed `AE12`, while internal `AE20` remains
+  a plausibility/status path; those facts do not contradict the distinct B6
+  target-angle controller.
   SecOC provenance is also closed at the CPU↔ICU-S boundary: `00F/D7/B6` share
   config/job 0 and protected slot 4, with no raw key in the mapped command-7 CPU
   descriptor and authenticated command 8 as the recovered refresh interface.

@@ -57,9 +57,10 @@ implements neither.
 
 **Next software-analysis target:** acquire and analyze **`FRC_P5` camera
 firmware** (Front Recognition Camera 2) for a true-TSS 3 vehicle and recover
-its lateral-control producer contract: which in-vehicle message(s) carry the
-LTA target state, and whether/where they join the EMPS/EMPS2 steering
-observer domain. TMS-042 makes the same acquisition the highest-value
+its lateral-control producer contract: how the camera's target state reaches the
+now-proved EPS receiver surface — protected `0x0B6` signal254 mode/control ID +
+signal255 target steering angle — through the Brake System Control Module, and
+where SecOC/routing ownership changes between those ECUs. TMS-042 makes the same acquisition the highest-value
 reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
 `DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as
@@ -240,38 +241,49 @@ Actual Q/D current and the selected Q-current limit are independently named and
 mapped as `0x1151/0x1153/0x1156`. Another generic command→motor xref sweep is no
 longer useful.
 
-The pre-TSS3 Corolla comparison now makes the generation break explicit rather
-than treating older Toyota IDs as a loose search list. Both supported older
-Corolla generations actively steer with 5-byte `0x2E4`; TSS2 `0x191` is only a
-neutral coexistence frame. In H/F, `0x2E4` is gone while `0x025` survives as a
-32-byte FD steering-sensor interface and the old EPS feedback pair `0x260/0x262`
-is replaced by the 32-byte FD `0x030` family. Because Albino H and Span F are
-byte-identical over the full application region, this split is common to both
-dumps. The immediate state-side task is therefore to recover the `0x030` fields
-that replace driver/EPS torque and steering readiness/fault feedback; the
-command-side task remains external provenance, not another blind `0x2E4` search.
-See
-[../variants/corolla-pre-tss3-openpilot-message-comparison.md](../variants/corolla-pre-tss3-openpilot-message-comparison.md).
+The pre-TSS3 Corolla comparison makes the generation break explicit rather than
+treating older Toyota IDs as a loose search list. Both supported older Corolla
+generations actively steer with 5-byte `0x2E4`; TSS2 `0x191` is only a neutral
+coexistence frame. In H/F, `0x2E4` is gone while `0x025` survives as a 32-byte
+FD steering-sensor interface. Albino H and Span F are byte-identical over the
+full application region, so the split is common to both dumps.
 
-The remaining H question is **external autonomous-lateral provenance**, not
-ordinary EPS torque provenance. The dedicated static census now closes the
-EPS-local escape hatches: the retained Sienna-homolog LTA magnitude cells and
-mode source are direct-write zero/inactive; D7's only 16-bit scalar is
-Techstream `CAN Vehicle Speed (SP1)`; B6's sole 16-bit scalar is staged-only and
-its nonscalar rows have no recovered block/group/full-PDU/direct-literal
-consumer; and the only shared supervisor-reaching >=12-bit fields on CAN `0x025`
-are target-natively proved steering angle/rate sensor state. `1C02` is a general
-internal torque-command observable with local assist contributors, so watching
-it alone cannot identify stock LTA.
+The deeper state recovery now corrects the earlier "decode `0x030` first"
+priority. H/F still transmit classic `0x4A3`, and target-native dataflow joins it
+to Techstream **Steering Angle**, **Steering Wheel Torque**, and **Motor Actual
+Current (Q Axis)** sources. `0x351` retains the old plausibility/debounce status
+architecture, while `0x394` remains a strong EPS internal status/fault-family
+carrier. `0x030` is a mixed 32-byte telemetry/status/validity message and should
+now fill remaining state gaps rather than be treated as a monolithic
+`0x260+0x262` replacement. The state-side priority is therefore `0x4A3` scaling
+and `0x351/0x394` readiness/fault correlation, then targeted `0x030` recovery.
+See [../variants/corolla-pre-tss3-openpilot-message-comparison.md](../variants/corolla-pre-tss3-openpilot-message-comparison.md)
+and [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
-The next H evidence must therefore be same-vehicle dynamic correlation: capture a
-known stock-LTA steering interval on **all genuine incoming buses** while reading
-`1C02`, `1152`, and the retained/H-native upstream mode/contributor cells with
-read-only XCP/DAQ if reachable. Look for a state transition that precedes the
-increment attributable to autonomous steering. If no EPS-local precursor moves,
-the next firmware target is the camera/gateway/other steering controller rather
-than another generic pass over this EPS image. For a Sienna-style applicable EPS,
-separately retain the existing valid signed `0x2E4/0x131` command experiment.
+The EPS receiver-side command question is now **closed positively**. The corrected
+fixed-map/RTE audit resolves protected B6 signal255 from
+`FEBE7D94 -> FEBEF1CC -> FEBEAE82`; `C9DB0/C9E54` build target state,
+`CBD7E/CB096` independently reconstruct measured steering angle from FD `0x025`,
+and `CA138` applies the same gain before forming target-minus-measured error. The
+result reaches the cooperative steering controller, `C2A8`, general
+`1C02 Command Value Torque`, and, under the recovered output gates, `1152 Command
+Value Current (Q Axis)`. Companion B6 signal254 follows `7D96 -> F127 -> ADB0` and
+selects mode families for values `1/4/10/11/19`; signals262/263 remain percentage-
+like contributor modifiers. D7's command-sized field remains vehicle speed and the
+B6 nonscalar/group/full-PDU alternatives remain negative.
+
+The next H evidence is therefore **parameter and security recovery for this known
+interface**, not another provenance search inside the EPS. Capture protected
+`0x0B6` during stock LTA while synchronizing signal254/255/262/263, B6 validity,
+measured angle, `1C02`, `1152`, and actual Q current. Determine signal255 physical
+angle scale/sign, active mode-ID meaning, request/validity rules, cadence/timeout,
+normal target/rate bounds, and stock-source loss behavior. In parallel, recover the
+B6 SecOC freshness/counter/source contract and determine whether slot-4 command-5
+can produce the required authenticated domain on real hardware. `FRC_P5` plus
+Brake/EPB/gateway firmware remains the software target for **upstream ownership and
+routing/authentication**, not for discovering the EPS setpoint. For a Sienna-style
+applicable EPS, separately retain the existing valid signed `0x2E4/0x131` command
+experiment.
 
 Canonical:
 [../architecture/control-partition.md](../architecture/control-partition.md) ·
@@ -369,17 +381,16 @@ startup/COM recovery also closes the old classic-CAN assumption: app GP remains
 `260/262` with a 32-byte FD `030`. The application diagnostic surface is now
 re-censused target-natively too: H has 226 readable DIDs / 32 exact-stub stale
 selectors and the same 19 RoutineControl policy rows, but `110A/C/D` become no-op
-while `110B` becomes a new active lifecycle. The obvious FD replacement-command
-hypothesis is now bounded negative: `025` is a shared pre-existing FD interface;
-B6's only signed16 scalar is staged-only under the complete direct-reference
-census; active B6 fields are supervisor gate/mode/sequence/scaling state; and the
-retained Sienna-shaped clamp input is zero-fed while `AE20` is an internal
-plausibility/status branch. The two remaining high-value H gaps identified there
-are now also closed at the
-firmware-static boundary. A complete generated-COM→snapshot→`0xCEDAE` ingress
-census finds no H-only/wire-changed scalar ≥12 bits and no changed shared-CAN
-field in the mapped supervisor cone; all changed surviving fields are sub-12-bit
-`0x0B6` supervisor state. Separately, all `00F/D7/B6` SecOC profiles use config
+while `110B` becomes a new active lifecycle. The former FD replacement-command negative is now corrected by the fixed-map/RTE
+audit: `025` remains shared sensor state, but B6 signal255 is a live signed16 target-
+steering-angle command that the direct-reference census missed because
+`B8EEC` copies `FEBEF1CC -> FEBEAE82` through GP-relative addressing. Signal254
+similarly reaches `ADB0` as the cooperative mode/control ID. The complete corrected
+COM→snapshot→`0xCEDAE` census therefore has exactly one H-only/wire-changed field
+at least 12 bits in the command cone — B6 signal255 — while the shared large fields
+remain `0x025` angle/rate sensor state and no second nonscalar/group/full-PDU command
+surface is recovered. The separate retained Sienna `0x2E4` clamp input remains
+zero-fed; that does not describe the B6 target-angle controller. Separately, all `00F/D7/B6` SecOC profiles use config
 ID/job 0 and select one protected ICU-S **slot 4**; the raw key is opaque to the
 mapped CPU command-7 path, while authenticated command 8 is the recovered refresh
 interface. The remaining H-static work should therefore be driven by the named

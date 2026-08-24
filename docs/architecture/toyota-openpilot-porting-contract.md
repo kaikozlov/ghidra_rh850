@@ -106,10 +106,18 @@ command is therefore a lead, not a finished or upstream-safety-approved lateral
 interface.
 
 Our exact Sienna donor contains a real protected `0x131` LTA command path and
-converges it with the protected `0x2E4` torque mode. In exact Corolla H, the
-Sienna-homolog retained LTA branch is direct-write inactive and the active
-SecOC profiles do not contain `0x131`. The replacement producer/transport must
-be found rather than inferred from the retained code.
+converges it with the protected `0x2E4` torque mode. Exact Corolla H removes both
+classic command profiles, but the deeper fixed-map audit now recovers the replacement
+receiver contract on protected FD `0x0B6`: signal254 B3[5:0] is a cooperative
+mode/control ID and signal255 B4:B5 is a signed target-steering-angle command.
+`C9DB0/C9E54` form target state, `CBD7E/CB096` independently form measured angle
+from FD `0x025`, and `CA138` applies the same gain to both before computing the
+control error. The result conditionally reaches `C2A8`, general DID `0x1C02 Command
+Value Torque`, and DID `0x1152 Command Value Current (Q Axis)`. B6 signals262/263
+also percentage-modulate internal contributors. The remaining problem is therefore
+safe reproduction of a known EPS receiver contract — physical scale, mode/request/
+validity semantics, cadence/timeouts, SecOC freshness/key state, and upstream
+FRC→Brake producer/routing — not discovery of another steering message.
 
 ### 2.3 Longitudinal control
 
@@ -197,13 +205,13 @@ work must recover the second and fourth boxes for each new generation as well.
 | Semantic role from prior art | Sienna `8965B4512000` | Corolla H / Span family | True-TSS3 work still required |
 |---|---|---|---|
 | Platform identity / generation | exact firmware identity and P1M-E profile known | exact H and Span corpora known | bind each candidate vehicle to FRC/EPS/gateway firmware and real bus topology |
-| Torque steering command | protected `0x2E4` request/torque path recovered | active H/Span EPS SecOC queue lacks `0x2E4` | identify actual producer message/transport and receiver-side contribution |
-| LTA/angle command | protected `0x131` path recovered and converges with torque mode | retained homolog inactive; active queue lacks `0x131` | recover replacement LTA target contract; do not revive the old path by assumption |
-| Steering feedback | `0x025`, `0x260`, `0x262` roles strongly mapped | H `0x025` large fields proved angle/rate sensor, not command | establish new EPS status/fault/readiness contract and any CAN-FD replacements |
+| Torque steering command | protected `0x2E4` request/torque path recovered | classic `0x2E4` absent; H/F instead receive protected B6 target-angle control | do not port torque limits/scales; characterize B6 target-angle scale/modes/SecOC contract |
+| LTA/angle command | protected `0x131` path recovered and converges with torque mode | active queue lacks `0x131`; protected `0x0B6` signal255 is the recovered signed target-angle command and signal254 selects cooperative modes | recover physical scale/request/validity/cadence and upstream FRC→Brake producer/authentication; do not transplant old `0x131` wire scaling |
+| Steering feedback | `0x025`, `0x260`, `0x262` roles strongly mapped | H `0x025` is FD angle/rate; state roles split across `0x4A3/0x351/0x394/0x030` | derive H/F-native driver override, response, readiness/fault, and validity semantics |
 | Longitudinal command | older SecOC DBC provides a useful comparator, not an EPS-local proof | route `0x183` is 64-byte CAN-FD and disproves old wire-shape transfer | locate ACC producer, target command, feedback, stock suppression, AEB coexistence |
 | Stock producer ownership | old openpilot architecture gives camera/radar replacement model | physical Toyota-B/network differences already observed | map FRC/radar/gateway ownership and safe duplicate blocking for each command family |
 | UI / alerts | older `0x412` is historical reference | old-camera U023A87 path is disabled residue in H | identify FRC/cluster LTA/LDA/LCA status and warning outputs |
-| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | secured sensor profiles differ materially | characterize protection only after semantic producer/receiver role is identified |
+| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6 using H slot-4 SecOC configuration | recover B6 freshness/counter/source behavior and production-safe signing/key path before actuation |
 
 ## 5. The concrete TSS3 investigation roadmap
 

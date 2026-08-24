@@ -1,6 +1,6 @@
 {
   "b6_hidden_payload_census": {
-    "boundary": "B6 has 28 authenticated application bytes, but only scalar IDs 254..265 are consumed by its recovered unpacker. The four configured nonscalar IDs 252/253/266/267 are absent from every literal block/group receive call; no full-PDU copy uses PDU42; and the B6 COM buffer base has no raw absolute pointer literal. This closes the generated scalar/group/full-PDU/direct-literal surfaces, not arbitrary computed aliases or hardware access.",
+    "boundary": "B6 has 28 authenticated application bytes and scalar IDs 254..265 are consumed by its recovered unpacker. Signal255 is separately recovered through a GP-relative RTE snapshot copy as the signed16 target-angle command. The four configured nonscalar IDs 252/253/266/267 are absent from every literal block/group receive call; no full-PDU copy uses PDU42; and the B6 COM buffer base has no raw absolute pointer literal. This closes the remaining nonscalar/group/full-PDU/direct-literal escape surfaces, not arbitrary unrelated computed aliases or hardware access.",
     "can_id": "0x0B6",
     "classification": "no-recovered-hidden-b6-group-or-full-pdu-command-consumer",
     "com": {
@@ -155,6 +155,126 @@
       ]
     }
   },
+  "b6_signed16_target_angle_ingress": {
+    "measured_angle_feedback": {
+      "classification": "independent-target-versus-measured-steering-angle-control-loop",
+      "comparison": "0xCA138 applies the same 0xB76/0x400 gain to the B6-derived target and 0x025-derived measured angle, then subtracts measured from target",
+      "reconstruction": "0xCBD7E: (fraction + coarse*15) * 0x6FB / 0x200; 0xCB096 algebraically republishes the valid measured-angle domain as C23C/C23E/C240",
+      "snapshots": {
+        "184": "0xFEBEADF0",
+        "185": "0xFEBEACC5",
+        "186": "0xFEBEAE14"
+      },
+      "source_can_id": "0x025",
+      "source_signals": [
+        184,
+        185,
+        186
+      ]
+    },
+    "scaling": {
+      "exact_internal_relation": "target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5)); measured_internal = (FD025_fraction + 15*FD025_coarse) * 0x6FB / 0x200 before matched comparator gain",
+      "physical_degree_scale_closed": false,
+      "reason": "The target-native loop proves angle-domain equivalence, but no exact H wire-to-degree calibration join has yet been recovered. Do not reuse Sienna 0x131 scaling by assumption."
+    },
+    "static_conclusion": {
+      "command_domain": "target steering angle",
+      "external_autonomous_lateral_ingress_identified": true,
+      "immediate_sender_relationship": "Brake System Control Module",
+      "ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5",
+      "mode_ingress": "protected CAN-FD 0x0B6 signal254 6-bit B3",
+      "next_static_target": "recover B6 companion request/mode semantics and target-angle physical scale; then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain",
+      "physical_scale_identified": false,
+      "reaches_command_value_torque_and_q_current": true,
+      "torque_command": false,
+      "upstream_feature_producer_identified": false
+    },
+    "target_angle_pipeline": [
+      {
+        "entry": "0x000C9DB0",
+        "relation": "AE82 * 2 -> saturated C14C -> C094, then target interpolation/history C0FC/C11C"
+      },
+      {
+        "entry": "0x000C9E54",
+        "relation": "C094 with mode-dependent delta/rate limits -> replicated target C098/C100/C120"
+      },
+      {
+        "entry": "0x000CA138",
+        "relation": "median(C098/C100/C120) and median(C23C/C23E/C240) receive identical 0xB76/0x400 gain; C0C0 = scaled_target - scaled_measured"
+      },
+      {
+        "entry": "0x000CAC24/0x000CA940",
+        "relation": "target-angle error enters active steering controller/filter/gain pipeline"
+      },
+      {
+        "entry": "0x000CAD1C",
+        "relation": "decoded cooperative mode C272 selects active controller path; controller output feeds CC18E"
+      },
+      {
+        "entry": "0x000CC18E -> 0x000CC2EC -> 0x000CAD62",
+        "relation": "controller/local state becomes replicated C17C/C17E/C184 magnitude"
+      },
+      {
+        "entry": "0x000C9C16 -> 0x000CB8BA -> 0x000CB9B6",
+        "relation": "replicated magnitude is voted/rate-limited into C2A8"
+      },
+      {
+        "entry": "0x000CD3CC",
+        "relation": "C2A8 contributes to general EPS torque-command composition C3B8"
+      }
+    ],
+    "techstream": {
+      "corolla_p5_topology": {
+        "interpretation": "Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves the immediate module relationship, not the upstream FRC-to-Brake wire route.",
+        "names": {
+          "405": "EMPS",
+          "435": "Brake/EPB",
+          "498": "Front Recognition Camera 2"
+        },
+        "required_categories": [
+          405,
+          435,
+          498
+        ]
+      },
+      "family_angle_vocabulary": [
+        {
+          "monitor_key": 2071,
+          "name": "Target Steering Angle After Output Compensation",
+          "primary_data_id": "0x1CEE"
+        },
+        {
+          "monitor_key": 2072,
+          "name": "Advanced Drive Target Steering Angle",
+          "primary_data_id": "0x1CEE"
+        }
+      ],
+      "immediate_sender_monitor": {
+        "description": "Lost Communication with Brake System Control Module",
+        "dtc": "U012987",
+        "failure": "Missing Message"
+      },
+      "vocabulary_boundary": "EMPS_P5 family vocabulary corroborates the target-angle interpretation, but exact H lacks DID 0x1CEE; neither family observer name nor a physical degree scale is assigned one-to-one to B6 signal255."
+    },
+    "wire_ingress": {
+      "bit_length": 16,
+      "can_fd": true,
+      "can_id": "0x0B6",
+      "classification": "authenticated-signed16-target-steering-angle-command",
+      "gp_relative_snapshot_copy": "0x000B8EEC",
+      "pdu_buffer_offset": "0x01A7",
+      "pdu_id": 42,
+      "raw_destination": "0xFEBE7D94",
+      "secured": true,
+      "signal_id": 255,
+      "signed": true,
+      "snapshot_destination": "0xFEBEAE82",
+      "staging_copy": "0x0005262C",
+      "staging_destination": "0xFEBEF1CC",
+      "unpacker": "0x00046A10",
+      "wire_byte": 4
+    }
+  },
   "d7_hidden_payload_census": {
     "boundary": "D7 has 28 authenticated application bytes; recovered scalar IDs are 240/243/246. Configured nonscalar IDs 241/242/244/245/247 are absent from every literal block/group receive call; no full-PDU copy uses PDU40; and the D7 COM buffer base has no raw absolute pointer literal. Techstream independently identifies scalar243 as CAN Vehicle Speed (SP1).",
     "can_id": "0x0D7",
@@ -219,12 +339,13 @@
     "secured_length": 32
   },
   "evidence": {
-    "function_count": 36,
+    "function_count": 50,
     "path": "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
-    "sha256": "65df5fdca0443b3d66f5c4fecc1c191ede8984b65a5c595335a4f38f833ea18e"
+    "sha256": "5414fead091374eaa6ba0f65b404e5cce2cc296efb117a624b2ba2aff5b353fb"
   },
-  "evidence_boundary": "Static closure is exact for recovered direct RAM-symbol writes, raw absolute pointers, generated scalar receive calls, literal block/group receive calls, and literal full-PDU copy calls in the tracked H corpus. It does not prove absence of computed-pointer aliases, DMA/hardware writers, or an autonomous command produced by another ECU.",
+  "evidence_boundary": "Static closure is exact for the B6 signal255 generated extraction, GP-relative stage-to-snapshot copy, target-vs-measured angle controller, promoted direct/GP-relative retained-branch writers, raw absolute pointers, literal block/group receives, and literal full-PDU copies in the tracked H corpus. The EPS ingress and angle-command domain are identified; physical wire scaling, exact mode/request/validity semantics, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof.",
   "final_command_composition": {
+    "all_promoted_computed_writers_recovered": true,
     "bd0e_local_chain": {
       "entry": "0x000C5932",
       "recovered": true,
@@ -237,80 +358,35 @@
       "recovered": true,
       "relation": "FEBEC392 + FEBEC2D4 -> bounded FEBEC358"
     },
-    "direct_zero_writer_census": {
-      "0xFEBEABB0": [
-        {
-          "entry": "0X000C584A",
-          "lines": [
-            "uRamfebeabb0 = 0;"
-          ]
-        }
-      ],
-      "0xFEBEB678": [
-        {
-          "entry": "0X000BDFF4",
-          "lines": [
-            "uRamfebeb678 = 0;"
-          ]
-        }
-      ],
-      "0xFEBEBCF8": [
-        {
-          "entry": "0X000C584A",
-          "lines": [
-            "uRamfebebcf8 = 0;"
-          ]
-        }
-      ],
-      "0xFEBEBD90": [
-        {
-          "entry": "0X000C6110",
-          "lines": [
-            "uRamfebebd90 = 0;"
-          ]
-        }
-      ],
-      "0xFEBEBE04": [
-        {
-          "entry": "0X000C68DA",
-          "lines": [
-            "uRamfebebe04 = 0;"
-          ]
-        }
-      ],
-      "0xFEBEBEC6": [
-        {
-          "entry": "0X000C7206",
-          "lines": [
-            "uRamfebebec6 = 0;"
-          ]
-        }
-      ],
-      "0xFEBEC2D4": [
-        {
-          "entry": "0X000CC83C",
-          "lines": [
-            "uRamfebec2d4 = 0;"
-          ]
-        },
-        {
-          "entry": "0X000CC914",
-          "lines": [
-            "uRamfebec2d4 = 0;"
-          ]
-        }
-      ],
-      "0xFEBEC39C": [
-        {
-          "entry": "0X000CD2E8",
-          "lines": [
-            "uRamfebec39c = 0;"
-          ]
-        }
-      ]
+    "computed_writer_audit": {
+      "0xFEBEB678": {
+        "recovered": true,
+        "relation": "local/calibration interpolation -> B678",
+        "writer": "0x000BE25A"
+      },
+      "0xFEBEBD90": {
+        "recovered": true,
+        "relation": "local/calibration interpolation/limit -> BD90",
+        "writer": "0x000C6146"
+      },
+      "0xFEBEBE04": {
+        "recovered": true,
+        "relation": "local/calibration lookup product/limit -> BE04",
+        "writer": "0x000C68F4"
+      },
+      "0xFEBEBEC6": {
+        "recovered": true,
+        "relation": "conditioned local/calibration term -> BEC6",
+        "writer": "0x000C76FA"
+      },
+      "0xFEBEC39C": {
+        "recovered": true,
+        "relation": "bounded sum of local high-level contributors -> C39C",
+        "writer": "0x000CD31A"
+      }
     },
     "entry": "0x000CD3CC",
-    "interpretation": "1C02 Command Value Torque is a general EPS-internal torque-command observable, not an LTA-only value. The retained C2A8 lateral-command term is only one conditional additive contributor. Under direct-writer evidence, the other zero-censused terms collapse while C358 remains a local/internal assist-control contribution.",
+    "interpretation": "1C02 Command Value Torque is a general EPS-internal torque-command observable, not an LTA-only value. The computed-writer audit corrects the earlier direct-zero inference: BE04/BD90/B678/BEC6/C39C and the retained C2A8 branch have live local/calibration producers. No one of those live internal terms is thereby identified as a direct external autonomous setpoint.",
     "recovered_terms": [
       "FEBEBE04",
       "FEBEBD90",
@@ -335,9 +411,24 @@
     }
   },
   "retained_lta_branch": {
-    "boundary": "C17C/C17E/C184 have exactly init-zero plus consumer references in the complete tracked target corpus; C26D has exactly init-zero plus readers, and no raw absolute pointer literals exist for any of them. Under recovered direct writes, the decoded mode never activates and the retained C2A8 contribution remains zero. Computed-pointer/DMA/undocumented writers remain a bounded unknown, so this is not proof that the vehicle has no LTA.",
-    "classification": "retained-sienna-homolog-lta-branch-direct-write-inactive",
+    "boundary": "The earlier direct-symbol-only conclusion was incomplete. GP-relative writers CC7F8, CC2EC and CAD62 make the mode enable and replicated magnitude branch live. B6 signals262/263 modulate internal magnitude contributors as 8-bit percentage-like values. A deeper GP-relative copy audit additionally recovers signed16 B6 signal255 at AE82 as the target-steering-angle command feeding the upstream target-vs-measured controller. This closes the named retained-branch computed aliases; arbitrary unrelated computed aliases and undocumented hardware/DMA writers remain outside this proof.",
+    "classification": "retained-sienna-homolog-conditioner-live-b6-target-angle-driven-and-b6-modulated",
     "command_conditioning": [
+      {
+        "entry": "0x000CC18E",
+        "recovered": true,
+        "relation": "local/mode/calibration state -> base replicated magnitude family"
+      },
+      {
+        "entry": "0x000CC442 / 0x000CBFCE",
+        "recovered": true,
+        "relation": "B6 signal262/263 percentage-modulate two internal contributor families"
+      },
+      {
+        "entry": "0x000CC2EC -> 0x000CAD62",
+        "recovered": true,
+        "relation": "condition/select/scale -> C17C/C17E/C184 replicated magnitude"
+      },
       {
         "entry": "0x000C9C16",
         "recovered": true,
@@ -346,7 +437,7 @@
       {
         "entry": "0x000CB8BA",
         "recovered": true,
-        "relation": "C1E0/C200/C20A -> C278; if decoded mode C272 is not active and C2A6 is zero, C278 is forced zero"
+        "relation": "C1E0/C200/C20A -> C278 under decoded mode state"
       },
       {
         "entry": "0x000CB9B6",
@@ -402,9 +493,66 @@
         }
       ]
     },
-    "magnitude_inputs": {
+    "computed_writer_correction": {
+      "b6_modulators": [
+        {
+          "bit_length": 8,
+          "consumer": "0x000CC442",
+          "recovered": true,
+          "relation": "B6 signal262 is interpreted as an 8-bit percentage/special selector and scales the replicated C1B8/C1C8/C1D4 contributor",
+          "signal_id": 262,
+          "snapshot": "0xFEBEADBD",
+          "wire_byte": 8
+        },
+        {
+          "bit_length": 8,
+          "consumer": "0x000CBFCE",
+          "recovered": true,
+          "relation": "B6 signal263 scales a locally lookup-derived replicated C1F0/C1FA/C204 contributor by /100",
+          "signal_id": 263,
+          "snapshot": "0xFEBEADBE",
+          "wire_byte": 9
+        }
+      ],
+      "direct_symbol_census_was_incomplete": true,
+      "local_base_synthesis": {
+        "entry": "0x000CC18E",
+        "recovered": true,
+        "relation": "mode/calibration/local-state synthesis produces C1AC/C1C4/C1D0/C1BC, which CC442/CC2EC consume upstream of the retained magnitude triplet"
+      },
+      "mode_enable_0xFEBEC26D": {
+        "health_aggregate": "0x00044C86",
+        "health_aggregate_recovered": true,
+        "interpretation": "C26D is a communication-health/validity-derived enable, not an init-only zero cell.",
+        "recovered": true,
+        "relation": "(health(slot0x10) | health(slot0x18)) != 0x5A and B6-validity snapshot FEBEADB9==0 -> GP+0xA6D/FEBEC26D",
+        "selector_recovered": true,
+        "selector_slots": {
+          "0x10": {
+            "health_class": 2,
+            "raw_hex": "025a2300000bb801",
+            "record": "0x00028E2A"
+          },
+          "0x18": {
+            "health_class": 2,
+            "raw_hex": "02002b00000bffff",
+            "record": "0x00028E6A"
+          }
+        },
+        "selector_thunk": "0x000BA090 -> 0x00044CFC",
+        "writer": "0x000CC7F8"
+      },
+      "replicated_magnitude_0xFEBEC17C_17E_184": {
+        "interpretation": "The three retained magnitude words are live locally synthesized state; they are not copied from a command-sized COM scalar.",
+        "recovered": true,
+        "relation": "CC2EC produces replicated C1F8/C1FC/C206; CAD62 selects/scales that state and writes the same value through GP+0x97C/+0x97E/+0x984 to C17C/C17E/C184",
+        "upstream_conditioner": "0x000CC2EC",
+        "writer": "0x000CAD62"
+      }
+    },
+    "direct_symbol_observations": {
       "0xFEBEC17C": {
-        "direct_lhs_writes": [
+        "direct_symbol_lhs_writes": [
           {
             "entry": "0X000C97A8",
             "lines": [
@@ -412,7 +560,7 @@
             ]
           }
         ],
-        "occurrences": [
+        "direct_symbol_occurrences": [
           {
             "entry": "0X000C97A8",
             "lines": [
@@ -429,7 +577,7 @@
         "raw_u32_literal_pointer_hits": []
       },
       "0xFEBEC17E": {
-        "direct_lhs_writes": [
+        "direct_symbol_lhs_writes": [
           {
             "entry": "0X000C97A8",
             "lines": [
@@ -437,7 +585,7 @@
             ]
           }
         ],
-        "occurrences": [
+        "direct_symbol_occurrences": [
           {
             "entry": "0X000C97A8",
             "lines": [
@@ -454,7 +602,7 @@
         "raw_u32_literal_pointer_hits": []
       },
       "0xFEBEC184": {
-        "direct_lhs_writes": [
+        "direct_symbol_lhs_writes": [
           {
             "entry": "0X000C97A8",
             "lines": [
@@ -462,7 +610,7 @@
             ]
           }
         ],
-        "occurrences": [
+        "direct_symbol_occurrences": [
           {
             "entry": "0X000C97A8",
             "lines": [
@@ -479,7 +627,7 @@
         "raw_u32_literal_pointer_hits": []
       },
       "0xFEBEC26D": {
-        "direct_lhs_writes": [
+        "direct_symbol_lhs_writes": [
           {
             "entry": "0X000CB1C8",
             "lines": [
@@ -487,7 +635,7 @@
             ]
           }
         ],
-        "occurrences": [
+        "direct_symbol_occurrences": [
           {
             "entry": "0X000CB07C",
             "lines": [
@@ -513,18 +661,26 @@
     "magnitude_vote_and_rate_limit": {
       "entry": "0x000C9C16",
       "recovered": true,
-      "role": "majority/select three command-magnitude words, rate/clip, publish replicated command state"
+      "role": "majority/select three replicated magnitude words, rate/clip, publish replicated command state"
     },
     "mode_enable": {
+      "computed_writer": "0x000CC7F8",
       "cyclic_decoder": "0x000CBE6E",
       "cyclic_decoder_owner": "0x000CB68A -> 0x000CEDAE",
+      "decoded_modes": [
+        "FEBEC272",
+        "FEBEC273",
+        "FEBEC26E",
+        "FEBEC26F",
+        "FEBEC270",
+        "FEBEC271"
+      ],
       "decoder_requires_one": true,
       "decoder_zeroes_all_outputs_when_gate_false": true,
-      "init_entry": "0x000CB1C8",
       "source": "0xFEBEC26D"
     }
   },
-  "schema": "corolla-8965H1202000-lta-command-provenance-v3",
+  "schema": "corolla-8965H1202000-lta-command-provenance-v5",
   "shared_can025_sensor_ingress": {
     "boundary": "The public DBC is corroboration rather than sole naming evidence: target-native H arithmetic independently distinguishes angle+fraction and rate semantics. This closes the adversarial possibility that an unchanged-shape large scalar was silently repurposed as the missing LTA command.",
     "can_id": "0x025",
@@ -640,21 +796,37 @@
   },
   "software_id": "8965H1202000",
   "static_conclusion": {
+    "b6_percentage_modulates_retained_branch": true,
+    "b6_signed16_target_angle_command_recovered": true,
     "broad_static_search_closed": true,
     "command_value_torque_is_lta_only": false,
-    "external_autonomous_lateral_ingress_identified": false,
+    "earlier_direct_write_inactive_conclusion_superseded": true,
+    "external_autonomous_lateral_ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5 target steering angle",
+    "external_autonomous_lateral_ingress_identified": true,
+    "h_only_or_wire_changed_command_sized_scalar_recovered": true,
     "hidden_b6_group_or_full_pdu_command_recovered": false,
     "hidden_d7_group_or_full_pdu_command_recovered": false,
-    "next_evidence": "Use same-vehicle stock-LTA capture plus read-only XCP/RDBI to identify a state changing upstream of the general internal torque command; or acquire the camera/gateway/other steering-controller firmware if the command is generated outside this EPS image.",
-    "retained_sienna_lta_branch_active_under_recovered_direct_writes": false,
-    "retained_sienna_lta_enable_direct_write_zero": true,
-    "retained_sienna_lta_magnitude_direct_write_zero": true,
-    "shared_command_sized_ingress_classified_as_sensor_state": true
+    "immediate_sender_relationship": "Brake System Control Module",
+    "named_retained_branch_computed_alias_audit_closed": true,
+    "next_evidence": "Recover B6 signal255 physical angle scaling, exact signal254 mode-ID meanings, request/validity/cadence semantics, and SecOC freshness/key behavior; then acquire/analyze FRC_P5 and Brake/EPB firmware or synchronized captures to close the upstream producer route.",
+    "retained_sienna_lta_branch_statically_dead": false,
+    "retained_sienna_lta_enable_computed_writer_recovered": true,
+    "retained_sienna_lta_magnitude_computed_writer_recovered": true,
+    "shared_command_sized_ingress_classified_as_sensor_state": true,
+    "upstream_feature_producer_identified": false
   },
   "supporting_inputs": {
+    "b6_target_angle_ingress": {
+      "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
+      "sha256": "6de8ce963574b534553ab052043c30a483ad08e0ff877cda63d28d5973365a42"
+    },
+    "fd_control_interface": {
+      "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
+      "sha256": "08652b934a54fbfb7fab0bbe7041b777c34016ee4aedf6b3075f0a2c18cf19aa"
+    },
     "supervisor_external_ingress_census": {
       "path": "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
-      "sha256": "c8f54f137977355fdb9e624ec4309e2e560139431a91fb3e8650dd2d00388b77"
+      "sha256": "cb8d37c7e64130dfd8d4fe4b20a7de08d246fa21c1c1a6e5a6d4cdebbceb8c96"
     },
     "toyota_dbc": {
       "path": "data/external/opendbc/toyota_dbc_facts.json",

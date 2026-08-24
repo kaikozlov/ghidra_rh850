@@ -155,8 +155,11 @@ outputs before the shared `0x351/0x394/0x4A3/0x4C8` tail. The H/F `0x030` PDU is
 
 Thus the two exact messages that pre-TSS3 Corolla openpilot uses for
 **driver/EPS torque + accurate angle (`0x260`)** and **EPS LKA readiness/fault
-state (`0x262`)** are no longer transmitted by this EPS generation. Their
-feedback family has been consolidated/replaced by FD `0x030`.
+state (`0x262`)** are no longer transmitted by this EPS generation. FD `0x030`
+occupies the new generated-feedback slot, but later target-native recovery shows
+that the surviving classic `0x4A3/0x351/0x394` messages preserve clearer pieces
+of those state roles; `0x030` is a mixed telemetry/status/validity carrier rather
+than a proved monolithic `0x260+0x262` replacement.
 
 The existing H-native field census already proves substantial runtime-produced
 content inside `0x030`, including steering-angle-like coarse/fraction packing,
@@ -165,42 +168,48 @@ However, this report does **not** prematurely label individual `0x030` fields as
 `STEER_TORQUE_DRIVER`, `STEER_TORQUE_EPS`, or `LKA_STATE` without a direct
 semantic join.
 
-**Porting consequence:** decoding `0x030` is now a concrete openpilot requirement,
-not optional cleanup. We need at minimum:
+**Porting consequence:** do not treat FD `0x030` as a monolithic `0x260/0x262`
+replacement. H `0x4A3` is already the clearest state bridge: it carries steering
+angle, a source joined to Techstream **Steering Wheel Torque**, and motor Q-current
+response. `0x351/0x394` are the strongest readiness/fault candidates. Decode only
+the remaining `0x030` validity/control-state fields needed to complete CarState and
+Panda safety, and derive H/F-native scales rather than copying old Corolla values.
 
-1. driver steering torque / override;
-2. EPS applied/measured torque used for command limiting;
-3. accurate steering angle and initialization validity if still distinct from
-   `0x025`; and
-4. temporary/permanent steering readiness/fault state.
-
-Those are the roles old Corolla `CarState` and Panda safety consume from
-`0x260/0x262`.
-
-### 5.4 `0x2E4`: the old active steering command is gone
+### 5.4 `0x2E4`: torque control is replaced by protected B6 target-angle control
 
 The complete H/F normal-Rx descriptor table has **no `0x2E4`**. The secured
-application profile set is `0x00F / 0x0D7 / 0x0B6`, also with no `0x2E4`.
-The old `0x2E4` request staging cell is periodically forced to zero in the H
-application.
+application profile set is `0x00F / 0x0D7 / 0x0B6`, also with no classic `0x2E4`.
+The retained Sienna-shaped torque-clamp input (`C91B6` / `AE12`) remains zero-fed,
+so this is not an encoded or merely signed version of the old torque command.
 
-We already audited the obvious “perhaps the torque command merely moved into an
-FD scalar” possibilities. The result is bounded negative:
+The corrected fixed-map audit instead finds the H/F receiver contract on protected
+CAN-FD `0x0B6`:
 
-- `0x0B6` has one signed 16-bit scalar, but it is staging-only under the complete
-  direct-reference census;
-- the active `0x0B6` fields reaching the steering supervisor are smaller
-  gate/mode/sequence/scaling/validity state;
-- the complete generated-COM ingress into the H steering supervisor has no
-  H-only/wire-changed scalar >=12 bits; and
-- the retained Sienna-shaped command/clamp branch is zero-fed in this
-  calibration.
+- **signal 254**, B3, unsigned 6-bit: control/mode ID. Its hidden GP-relative
+  snapshot reaches `FEBEADB0`, and `0xCBE6E` decodes values `1/4/10/11/19` into
+  five cooperative steering modes;
+- **signal 255**, B4:B5, signed16: target steering-angle command. It follows
+  `FEBE7D94 -> FEBEF1CC -> FEBEAE82`;
+- `0xC9DB0/0xC9E54` turn signal 255 into target state while `0xCBD7E/0xCB096`
+  independently reconstruct the measured angle from FD `0x025`;
+- `0xCA138` applies the same gain to both and computes target minus measured; and
+- that error drives the steering controller, ultimately contributing to Techstream
+  DID `0x1C02` **Command Value Torque** and DID `0x1152` **Command Value Current
+  (Q Axis)**.
 
-**Porting consequence:** the evidence does not support “find the new `0x2E4` and
-sign it.” No EPS-local replacement setpoint has been recovered. The remaining
-problem is **external autonomous-lateral provenance**: identify what FRC/gateway/
-other controller state changes before the EPS's internal autonomous command/current
-state changes.
+B6 signals 262/263 are additional 8-bit percentage-like modifiers on internal
+controller contributors. Techstream identifies the immediate monitored source
+relationship as **Brake System Control Module** traffic (U012987), while its P5
+steering vocabulary independently contains **Target Lateral ID** and **Target
+Steering Angle After Output Compensation**. Exact H lacks the corresponding
+`0x1CEE` observer DID, so those names corroborate the domain rather than naming B6
+fields one-to-one.
+
+**Porting consequence:** the old Corolla command API did not merely move IDs; it
+changed from classic torque command to protected target-angle control. Do not port
+`0x2E4` limits or scaling. Before any injection, recover B6 signal 255 physical
+angle scaling, exact mode/request/validity semantics, cadence/timeouts, SecOC
+freshness/key behavior, stock-source suppression, and H/F-native safety bounds.
 
 ### 5.5 `0x191`: gone, but it was not Corolla's active steering path
 
@@ -223,9 +232,9 @@ relevant FRC/radar/brake/gateway firmware. An EPS dump cannot settle them.
 |---|---|---|---|
 | steering angle/rate | `0x025`, 8B | `0x025`, **32B FD** | **role survives; wire format changed** |
 | wheel speeds | `0x0AA`, 8B | `0x0AA`, 8B | strong continuity lead; validate fields |
-| driver/EPS torque + accurate angle | `0x260`, 8B TX from EPS | no `0x260`; **FD `0x030`** family | feedback interface generation changed |
-| EPS readiness/fault | `0x262`, 5/8B TX from EPS | no `0x262`; **FD `0x030`** family | recover new readiness/fault fields |
-| active lateral torque command | `0x2E4`, 5B RX to EPS | **absent** | active control interface moved elsewhere |
+| driver/EPS torque + accurate angle | `0x260`, 8B TX from EPS | no `0x260`; **`0x4A3` + FD `0x030`** | roles split across newer state carriers |
+| EPS readiness/fault | `0x262`, 5/8B TX from EPS | no `0x262`; **`0x351/0x394` + FD `0x030`** | recover H/F-native state meanings |
+| active lateral steering command | `0x2E4`, 5B torque RX | **protected FD `0x0B6` signal 255 target angle** | control law + protection generation changed |
 | TSS2 neutral LTA coexistence | `0x191`, 8B | absent | not evidence of lost active angle control |
 | longitudinal command/source replacement | `0x343`, 8B | absent from EPS | EPS-local comparison is non-diagnostic |
 | lane/HUD replacement | `0x412`, 8B | absent from EPS | EPS-local comparison is non-diagnostic |
@@ -236,18 +245,22 @@ relevant FRC/radar/brake/gateway firmware. An EPS dump cannot settle them.
 The pre-TSS3 Corolla implementation gives us two immediate, concrete work items
 that are more useful than another generic EPS search.
 
-**First, finish the feedback side.** Decode FD `0x030` specifically against the
-roles openpilot previously got from `0x260/0x262`. This is likely tractable with
-Techstream monitor names plus controlled steering/driver-torque captures and
-will unlock a large part of `CarState`/Panda safety before command injection is
-solved.
+**First, finish the feedback side using the recovered state bridge.** Start with
+`0x4A3` for angle / driver-torque-source / motor-Q-current response, correlate
+`0x351/0x394` against readiness and fault transitions, and then decode the subset
+of FD `0x030` needed to close remaining validity/control state. The target-native
+recovery is documented in
+[corolla-h-f-openpilot-state-bridge.md](corolla-h-f-openpilot-state-bridge.md).
+This is more direct than treating all 37 `0x030` fields as equally likely old
+`0x260/0x262` replacements.
 
-**Second, move the command search upstream.** The old active `0x2E4` torque
-interface is absent and the exhaustive H EPS-local replacement-scalar search is
-negative. The next autonomous-lateral evidence should correlate stock LTA across
-all genuine incoming buses with FRC/gateway firmware state and EPS internal
-`Command Value Torque` / q-axis current state. This reinforces the existing
-`FRC_P5` acquisition priority rather than creating another blind EPS-ID search.
+**Second, characterize the recovered B6 command contract rather than searching for
+another message.** Protected `0x0B6` signal 255 is the H/F target-angle ingress and
+signal 254 selects cooperative modes. The next dynamic work is to correlate those
+fields with stock LTA, `0x1C02`, `0x1152`, measured steering angle, and B6 validity
+to recover physical scale, active IDs, cadence/timeouts, and limits. `FRC_P5` plus
+Brake/EPB/gateway analysis remains high priority for the **upstream producer and
+SecOC/routing contract**, not for discovering the EPS receiver setpoint.
 
 Longitudinal and HUD remain separate whole-vehicle workstreams. The old Corolla
 prior art tells us exactly what roles must eventually be replaced, but the EPS
@@ -261,8 +274,9 @@ firmware does not identify their TSS3 wire messages.
   Corolla baseline and target-native migration conclusions.
 - `data/generated/corolla_8965H1202000_fd_control_interface.json` provides the
   exact H FD `0x030` / `0x0B6` generated-interface evidence.
-- `data/generated/corolla_8965H1202000_lta_command_provenance.json` provides the
-  target-native `0x025` semantic proof and replacement-command negative.
+- `data/generated/corolla_8965H1202000_lta_command_provenance.json` and
+  `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json` provide the
+  target-native `0x025` sensor proof and protected-B6 target-angle command proof.
 - `data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json`
   proves the H/F application-byte identity.
 

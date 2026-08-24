@@ -49,10 +49,13 @@ check("B6 has 16 configured IDs but 12 scalar extracts",
 check("B6 configured non-scalar IDs are 252/253/266/267",
       b6["configured_without_recovered_scalar_extract"] == [252, 253, 266, 267])
 by = {row["signal_id"]: row for row in b6["fields"]}
+check("B6 signal254 is 6-bit B3 mode/control ID", not by[254]["signed"] and by[254]["bit_length"] == 6 and by[254]["wire_byte"] == 3 and by[254]["snapshot_destination"] == "0xFEBEADB0" and by[254]["role"] == "target-lateral-control-id-mode-selector" and by[254]["direct_consumers"] == ["0xCBE6E"])
 check("B6 signal255 is signed16 at wire byte4", by[255]["signed"] and by[255]["bit_length"] == 16 and by[255]["wire_byte"] == 4)
-check("B6 signed16 field is staged-only under direct-xref census",
-      by[255]["role"] == "signed16-staged-only-direct-xref-negative" and by[255]["direct_consumers"] == [])
-check("B6 signals254/259 are also staged-only", by[254]["snapshot_destination"] is None and by[259]["snapshot_destination"] is None)
+check("B6 signed16 field reaches AE82 target-angle snapshot",
+      by[255]["role"] == "signed16-target-steering-angle-command" and by[255]["snapshot_destination"] == "0xFEBEAE82")
+check("B6 signed16 target-angle consumers are explicit", by[255]["direct_consumers"] == ["0xC86E8","0xC87FC","0xC9DB0","0xCB4F4"])
+check("B6 signed16 canonical result is target angle not torque", b6["signed16_target_angle_command"]["classification"] == "authenticated target-steering-angle command; not torque" and b6["signed16_target_angle_command"]["physical_scale_closed"] is False)
+check("B6 signal259 remains staging-only", by[259]["snapshot_destination"] is None)
 check("B6 signals256/257 reach snapshots but no recovered runtime consumer",
       all(by[x]["role"] == "snapshot-only-direct-xref-negative" for x in (256, 257)))
 check("B6 signal260 selects/ramp-controls mode tables", by[260]["role"] == "mode-table-selector" and "0xC89D2" in by[260]["direct_consumers"])
@@ -62,6 +65,7 @@ check("B6 signal264 is a validity/reset gate", by[264]["role"] == "validity-rese
 check("B6 signal265 is validity-gated mode/status", by[265]["role"] == "validity-gated-mode-status")
 check("active B6 consumers have target-native CEDAE paths where expected",
       all(by[x]["paths_from_0xCEDAE"][next(iter(by[x]["paths_from_0xCEDAE"]))] is not None for x in (258, 261, 262, 263, 264, 265)))
+check("B6 target-angle canonical proof linked", b6["signed16_target_angle_command"]["canonical_proof"] == "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json" and b6["signed16_target_angle_command"]["physical_scale_closed"] is False)
 
 print("\n== Sienna-shaped steering-branch corrections ==")
 corr = d["sienna_shaped_branch_corrections"]

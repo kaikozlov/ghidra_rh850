@@ -543,10 +543,10 @@ def main() -> int:
             "techstream_source_dtc": next(row for row in communication_rows if row["can_id"] == "0x0B6")["dtc"],
             "largest_recovered_scalar_bits": 16,
             "largest_scalar_signal_id": 255,
-            "largest_scalar_role": "signed16-staged-only-direct-xref-negative",
-            "interpretation": "B6's sole 16-bit scalar is the already-censused staged-only signal255; all supervisor-reaching changed fields are <=8 bits, and its nonscalar/group/full-PDU surfaces are separately closed.",
+            "largest_scalar_role": "target-native-role-deferred-to-computed-ingress-provenance",
+            "interpretation": "B6's sole 16-bit scalar is signal255. The earlier direct-xref-only staged-cell negative is not a safe semantic conclusion because GP-relative snapshot copies are outside that representation; this Techstream artifact therefore classifies only the B6 sender/DTC relationship and defers signal255 control semantics to the dedicated target-native ingress proof.",
         },
-        "conclusion": "Both protected brake-originated profiles are inconsistent with a recovered hidden autonomous steering-magnitude replacement: D7's 16-bit field is SP1 vehicle speed and B6's 16-bit field has no runtime consumer under the complete direct-xref census.",
+        "conclusion": "D7's 16-bit field is exactly SP1 vehicle speed. B6 is independently tied to the Brake System Control Module by U012987, but this Techstream-only join does not classify B6 signal255; computed target-native provenance owns that semantic question.",
     }
 
     camera_ipm_a_residue = {
@@ -659,11 +659,12 @@ def main() -> int:
                 row["can_id"] == "0x0B6" and row["dtc"] is not None and row["dtc"]["techstream_code"] == "U012987"
                 for row in communication_rows
             ),
-            "protected_brake_profiles_have_no_recovered_steering_magnitude": protected_brake_profile_semantics["d7"]["sp1_vehicle_speed"]["callback_recovered"] and protected_brake_profile_semantics["b6"]["largest_scalar_role"] == "signed16-staged-only-direct-xref-negative",
+            "d7_command_sized_scalar_is_vehicle_speed": protected_brake_profile_semantics["d7"]["sp1_vehicle_speed"]["callback_recovered"],
+            "b6_signal255_semantics_deferred_to_target_native_provenance": protected_brake_profile_semantics["b6"]["largest_scalar_role"] == "target-native-role-deferred-to-computed-ingress-provenance",
             "camera_ipm_a_dtc_disabled": camera_ipm_a_residue["techstream_code"] == "U023A87" and camera_ipm_a_residue["h_enabled_word"] == 0,
             "sienna_ipm_a_monitor_rows_removed_in_h": all(not row["corolla_h_active_monitor_row_present"] for row in s_ipm_rows),
             "external_can_field_equivalence": False,
-            "next_use": "Use a same-vehicle stock-LTA interval plus all-bus capture and read-only RDBI/XCP to identify the autonomous contribution before it enters the general internal torque/current chain. If no EPS-local precursor moves, acquire the camera/gateway/other steering-controller firmware rather than repeating broad EPS static analysis.",
+            "next_use": "Combine this sender/DTC and P5 vocabulary evidence with the dedicated B6 target-native ingress proof; then recover physical scaling, request/mode semantics, and the upstream FRC_P5/Brake producer route.",
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

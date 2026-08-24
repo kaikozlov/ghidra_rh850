@@ -17,7 +17,8 @@ hsrc=HRAW.read_bytes();h=hsrc[:0x100000];s=SIMG.read_bytes();d=json.loads(ART.re
 print('== image/corpus evidence boundary ==')
 check('H normalized image hash is pinned',sha(h)==d['images']['corolla_h_sha256'])
 check('Sienna image hash is pinned',sha(s)==d['images']['sienna_sha256'])
-check('census explicitly bounds computed/opaque flows','computed-pointer' in d['evidence_boundary'] or 'opaque' in d['evidence_boundary'])
+check('census uses corrected fixed-map model','fixed-map-snapshot' in d['evidence_boundary'] and 'corrected-context' in d['evidence_boundary'])
+check('schema v2',d['schema']=='corolla-8965H1202000-supervisor-external-ingress-census-v2')
 check('H COM data-offset table is recovered',d['summary']['h_offset_table']=='0x22788')
 check('S COM data-offset table is uniquely recovered in generated-data region',0x22000 <= int(d['summary']['s_offset_table'],16) < 0x23000)
 print('\n== exact consumer binding ==')
@@ -32,14 +33,17 @@ for row in d['external_refs']:
 check('every cited consumer raw-body hash validates',all_hash)
 check('every cited source-unpacker raw-body hash validates',all_unpack)
 print('\n== replacement-command closure ==')
-check('no H-only/wire-changed >=12-bit supervisor scalar remains',d['potential_changed_large_fields']==[])
 changed=[x for x in d['external_refs'] if x['wire_class']!='shared_wire_field']
 check('all H-only/wire-changed supervisor fields are from B6',bool(changed) and all(x['can']==0xB6 for x in changed))
 check('no non-B6 changed wire field reaches mapped supervisor cone',not [x for x in changed if x['can']!=0xB6])
-check('B6 signed16 signal255 never reaches mapped supervisor cone',not [x for x in d['external_refs'] if x['signal']==255])
+large=d['potential_changed_large_fields']
+check('only changed >=12-bit ingress is B6 signal255',bool(large) and {(x['can'],x['signal'],x['bits'],x['signed'],x['wire_byte']) for x in large}=={(0xB6,255,16,1,4)})
+positive=d['positive_changed_large_field']
+check('positive B6 signal255 fixed-map path exact',positive['raw']=='0xFEBE7D94' and positive['stage']=='0xFEBEF1CC' and positive['snapshot']=='0xFEBEAE82')
+check('positive B6 signal255 reaches steering cone',positive['consumer_entries']==['0x000C86E8','0x000C87FC','0x000C9DB0'])
 active_b6={x['signal'] for x in changed if x['can']==0xB6}
-check('exact directly referenced B6 supervisor field set is pinned',active_b6 == {258,260,261,262,263,264})
-check('B6 changed fields are all sub-12-bit',all(x['bits']<12 for x in changed))
+check('exact fixed-map B6 supervisor field set is pinned',active_b6 == {254,255,258,260,261,262,263,264})
+check('all changed B6 fields except signal255 are sub-12-bit',all(x['bits']<12 for x in changed if x['signal']!=255))
 print('\n== shared-CAN boundary ==')
 shared_nonb6=[x for x in d['external_refs'] if x['can']!=0xB6]
 check('non-B6 external supervisor refs are same-wire fields on Sienna',bool(shared_nonb6) and all(x['wire_class']=='shared_wire_field' for x in shared_nonb6))

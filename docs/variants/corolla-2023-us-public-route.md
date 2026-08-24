@@ -1140,7 +1140,7 @@ body SHA-256. `tests/verify_corolla_8965H1202000_application_diagnostics.py`
 regenerates the comparison and pins the evidence boundary.
 
 
-### 7.11 FD control interface: B6 is supervisory, 025 is shared, and the retained torque branch is zero-fed
+### 7.11 FD control interface: B6 carries the target-angle command, 025 is measured feedback, and the old torque branch is separate
 
 A full target-native field/consumer pass now closes the obvious "the command
 must have moved to one of the new FD frames" hypothesis much more strongly.
@@ -1176,8 +1176,8 @@ map is:
 
 | signal | wire field | signed | staged / snapshot | recovered role |
 |---:|---|:---:|---|---|
-| 254 | B3[5:0] | no | `FEBEF127` / none | staged only; no direct runtime consumer |
-| 255 | B4..B5 | **yes, 16b** | `FEBEF1CC` / none | staged only; no direct runtime consumer |
+| 254 | B3[5:0] | no | `FEBEF127` / `FEBEADB0` | 6-bit control/mode ID; `CBE6E` decodes values `1/4/10/11/19` into cooperative steering-mode flags |
+| 255 | B4..B5 | **yes, 16b** | `FEBEF1CC` / `FEBEAE82` | **target steering-angle command**; `C9DB0/C9E54 -> CA138` target-vs-measured controller |
 | 256 | B6[7] | no | `FEBEF147` / `FEBEADDD` | snapshot only; no direct runtime consumer |
 | 257 | B6[6:4] | no | `FEBEF128` / `FEBEADB1` | snapshot only; no direct runtime consumer |
 | 258 | B6[2] | no | `FEBEF129` / `FEBEADBB` | steering-cone gate (`CBEEE`) |
@@ -1190,20 +1190,33 @@ map is:
 | 265 | B10[2:0] | no | `FEBEF141` / `FEBEADD9` | validity-gated mode/status (`CCF58`) |
 
 The queue/update validity state is separately staged to `FEBEF132` and reaches
-`FEBEADB9`; it gates `C7C70`, `C819E`, `CC7F8`, and `CCF58`. The active
-B6 consumers above have target-native call paths inside the `0xCEDAE` supervisor
-cone. In contrast, the **only signed 16-bit B6 scalar is signal 255, and its
-staging cell has no direct runtime consumer in the complete H decompiler
-reference census**. Signals 254/259 likewise stop at staging; 256/257 stop at
-the copied snapshot. These are bounded direct-reference negatives: a future
-computed-pointer/alias proof could override them, but there is no static basis
-to rename signal 255 as a relocated `2E4 STEER_TORQUE_CMD`.
+`FEBEADB9`; it gates `C7C70`, `C819E`, `CC7F8`, and `CCF58`. The earlier
+**direct-reference-only** census missed two fixed-GP copies in `B8EEC`:
+`GP+0x3927 -> GP-0xA50` is exactly `FEBEF127 -> FEBEADB0`, and
+`GP+0x39CC -> GP-0x97E` is exactly `FEBEF1CC -> FEBEAE82` for
+`GP=0xFEBEB800`. Thus signals 254 and 255 do not stop at staging.
 
-The positive B6 result is therefore narrower and more useful: `0x0B6` is a
-**secured supervisory/control-status interface** supplying gates, mode/table
-selection, a sequence-like delta, percentage/scaling inputs, and validity state.
-It is not statically demonstrated to carry the removed Sienna torque/angle
-command payloads.
+Signal 255 is now a positive command result. `C9DB0` starts from
+`signed16(FEBEAE82) * 2`, saturates it into target state, and `C9E54` applies
+mode-dependent target history/rate conditioning. Independently, `CBD7E/CB096`
+reconstruct the measured steering-angle domain from FD `0x025` signals
+184/185/186. `CA138` votes both replicated domains, applies the **same
+`0xB76/0x400` gain to target and measured angle**, and forms target-minus-measured
+error before the active steering controller. This proves signal 255 is a
+**target steering-angle command**, not a relocated `2E4 STEER_TORQUE_CMD`.
+The exact wire-to-degree scale and sign convention remain open.
+
+Signal 254 is its companion 6-bit control/mode ID. Under communication/validity
+gates, `CBE6E` decodes values `1`, `4`, `10`, `11`, and `19` into distinct
+cooperative steering-mode flags; value `1` sets the mode used by the clearest
+signal-255 target-angle path. The exact OEM field name remains bounded.
+
+The complete B6 result is therefore: `0x0B6` is a **secured steering-control and
+supervisory interface**. It carries the recovered target-angle magnitude plus
+mode/table/sequence/scaling/validity state. Techstream independently identifies
+its immediate monitored sender relationship as **Brake System Control Module**;
+that does not make the target-angle value a brake quantity, and it does not yet
+identify the upstream FRC→Brake producer route.
 
 #### The retained Sienna-shaped torque branch is dormant on H
 
@@ -1328,11 +1341,11 @@ proves their H input is zero-fed.
 The combination matters more than any one address: **H retains generic steering
 supervisor/control framework code while removing the two known Sienna external
 command modes and inserting substantial supervisor/estimator machinery.** The
-repo therefore does not invent a replacement steering-command frame merely
-because the physical EPS obviously still performs normal steering assist. The
-remaining question is narrower: whether any other nonzero externally sourced H
-supervisor input constitutes a remotely commanded mode, or whether this
-calibration's externally authenticated interfaces are supervisory/status-only.
+later fixed-map audit (§§7.14/7.35) resolves the missing replacement rather than
+inventing it from stage similarity: protected B6 signal255 is the H target-angle
+command and signal254 selects cooperative modes. The remaining architecture
+question is therefore upstream ownership/transport and exact scaling, not whether
+this EPS has any externally sourced autonomous steering command at all.
 
 The order-alignment boundary is explicit. A nonexact order-paired row is not
 semantic transfer proof, and an order-unpaired row is not proof that no analogous
@@ -1443,69 +1456,70 @@ H-native function set
 the result.
 
 
-### 7.14 External supervisor ingress: no hidden H command-sized wire field remains in the mapped COM path
+### 7.14 External supervisor ingress: corrected fixed-map census identifies B6 signal255
 
-The final steering-ingress pass removes one remaining loophole in the earlier
-argument. It is not enough to observe that `0x0B6` is the only new CAN ID: H
-could in principle have reused a Sienna CAN ID while changing one field into a
-new command. The complete generated-COM provenance census therefore compares
-**wire fields**, not signal numbers or names.
-
-For every H scalar receive call, the census resolves:
+The steering-ingress census compares **wire fields**, not signal numbers or names.
+For every H scalar receive call it resolves:
 
 ```text
 CAN ID + relative PDU byte + bit length + bit offset + signedness
     -> raw COM destination
     -> periodic FEBEF* staging destination
-    -> FEBEAD*/FEBEAE* supervisor snapshot
-    -> direct reference inside the CEDAE call cone
+    -> fixed GP-relative FEBEAD*/FEBEAE* snapshot
+    -> consumer inside the CEDAE steering cone
 ```
 
 The same wire tuple is reconstructed independently from Sienna's generated COM
-configuration. An H field is classified `shared_wire_field` only when the same
-CAN ID carries the same relative byte/bit/signed shape on Sienna. This catches
-CAN-ID reuse with changed field geometry.
+configuration, so a reused CAN ID with changed field geometry remains visible.
+The important correction is the third arrow. The first implementation searched
+for named/direct snapshot assignments and therefore missed fixed-GP copies that
+Ghidra renders only as `GP+offset` expressions.
 
-Two closure conditions are then enforced by the extraction tool and regression:
+With `GP=0xFEBEB800`, `B8EEC` proves two previously hidden B6 snapshots:
 
-1. **Every H-only or H-wire-changed scalar that reaches the mapped supervisor
-   cone comes from `0x0B6`.** No changed field on a shared non-B6 CAN ID survives
-   the generated raw→staging→snapshot provenance into the supervisor.
-2. **No H-only/wire-changed scalar of 12 bits or wider reaches that cone.** In
-   particular, B6's signed-16 signal 255 is absent from the resulting consumer
-   census, agreeing with the independent §7.11 direct-xref negative.
+```text
+signal254: FEBE7D96 -> FEBEF127 -> GP-0xA50 = FEBEADB0
+signal255: FEBE7D94 -> FEBEF1CC -> GP-0x97E = FEBEAE82
+```
 
-The B6 fields that *do* survive are the already classified sub-12-bit
-supervisory inputs: gate, mode/table selector, modulo/sequence delta,
-percentage/scaling inputs, and validity/status. Non-B6 supervisor inputs that
-survive the census are wire-shape matches to Sienna's corresponding CAN fields;
-shared FD `0x025` remains a shared field source rather than an H-only transport.
+The regenerated census now contains **22 distinct external scalar signals** in
+the mapped supervisor cone. Its closure conditions are:
 
-This closes the static **obvious replacement-command ingress** question much
-more strongly than an ID census alone. Within the mapped scalar COM path feeding
-`0xCEDAE`, H has neither:
+1. **Every H-only or wire-changed supervisor field still comes from `0x0B6`.**
+   No changed non-B6 field survives the generated ingress path.
+2. **B6 signal255 is the only H-only/wire-changed field at least 12 bits wide.**
+   It is signed16 at B4:B5 and is consumed through the recovered target-angle
+   path (`C86E8`, `C87FC`, `C9DB0`, `CB4F4`).
+3. Signal254 is the companion 6-bit B3[5:0] mode/control field. The remaining
+   changed B6 fields are sub-12-bit gate/table/sequence/scaling/validity state.
+4. The only shared large fields remain FD `0x025` steering angle/rate sensor
+   state; target-native arithmetic independently proves those are feedback, not
+   a second command reference.
 
-- a new/reformatted large torque/angle-like scalar on a shared CAN ID; nor
-- an active large scalar on H-only `0x0B6`.
+This reverses the earlier bounded negative. The mapped generated-COM path does
+contain a replacement command-sized external scalar: **protected FD `0x0B6`
+signal255**. The positive role is not inferred from width alone. §7.11 and §7.35
+show that its `FEBEAE82` snapshot becomes target state, is compared against an
+independently reconstructed `0x025` measured steering-angle domain with matched
+gain, and enters the active steering controller. Thus the command search closes
+positively as **target steering angle**, while the old `0x2E4` torque and `0x131`
+wire formats remain absent.
 
-Combined with the raw removal of `2E4/131`, the order-unpaired Sienna `0x131`
-angle stage, and the zero-fed retained torque clamp branch, the supported static
-interpretation is that this exact H calibration **does not expose a recovered
-Sienna-style external steering-command mode through its mapped application COM
-supervisor ingress**. That statement is intentionally narrower than "the EPS
-cannot be commanded": opaque/group signals, computed-pointer flows outside the
-modeled generated-copy chain, undocumented hardware paths, or a different ECU
-remain separate hypotheses. The normal local motor/assist control system is also
-unaffected by this negative.
+The corrected boundary is now narrower and more useful. The EPS-side command
+magnitude and its companion mode/control ID are identified, but the physical
+B6 wire-to-degree scale/sign convention, exact request/validity field meanings,
+SecOC sender freshness/key contract, and upstream FRC→Brake/EPB producer route
+remain open. B6 nonscalar block/group/full-PDU alternatives and D7's large-field
+alternative remain negative; no second command-sized path was recovered in the
+audited scalar/descriptor surfaces.
 
 The machine-readable census is
 `data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json`,
 generated by `tools/extract_corolla_h_supervisor_external_ingress_census.py` from
 the complete target-native H decompiler corpus. Every cited consumer and source
-unpacker carries an exact raw-body SHA-256 so
-`tests/verify_corolla_8965H1202000_supervisor_external_ingress.py` can bind the
-tracked result back to the immutable H CodeFlash without committing the full
-disposable corpus.
+unpacker carries an exact raw-body SHA-256, and
+`tests/verify_corolla_8965H1202000_supervisor_external_ingress.py` explicitly
+regresses the `FEBEF1CC -> FEBEAE82` fixed-map correction.
 
 ### 7.15 Named-function coverage denominator
 
@@ -2421,129 +2435,83 @@ Machine-readable ownership:
 `tests/verify_corolla_8965H1202000_techstream_correlations.py` regenerates the
 join and raw-binds all cited H functions and Techstream databases.
 
-### 7.35 Autonomous-lateral provenance closure: retained LTA is inactive and protected D7/B6 expose no recovered hidden command
+### 7.35 Autonomous-lateral command closure: protected B6 carries target steering angle
 
-The Techstream join made it possible to separate the **general EPS torque command**
-from the specific autonomous-lateral contribution. Re-auditing the latter closes
-the remaining EPS-local static escape hatches.
+The deepest fixed-map audit corrects the last important negative in the H steering
+analysis. The retained Sienna-homolog conditioner is live, and protected CAN-FD
+`0x0B6` supplies the external target that drives it.
 
-First, the retained Sienna-homolog LTA conditioner is present but direct-write
-inactive in this H calibration:
-
-```text
-FEBEC17C  direct writer: C97A8 = 0; only other direct reference: C9C16
-FEBEC17E  direct writer: C97A8 = 0; only other direct reference: C9C16
-FEBEC184  direct writer: C97A8 = 0; only other direct reference: C9C16
-
-C9C16  majority/select + rate/limit -> C1E0 / C200 / C20A
-CB8BA  select -> C278
-CB9B6  gain/slew/clip -> C2A8
-CD3CC  C2A8 is one conditional additive term in the general command
-```
-
-All three magnitude cells have zero raw absolute-pointer literals. The mode side
-has the same shape: `FEBEC26D` has one direct writer (`CB1C8`, zero) and only two
-readers (`CB07C`, `CBE6E`), with no raw absolute-pointer literal. Cyclic decoder
-`CBE6E` requires `C26D == 1`; otherwise its decoded mode outputs remain zero.
-`CB8BA` cannot latch a nonzero selected LTA command from the recovered state, and
-`CB9B6` therefore has no recovered nonzero source for `C2A8`.
-
-Second, the four B6 configuration rows that were outside the scalar census do
-**not** reveal an opaque command path. B6 is a 32-byte secured profile with a
-28-bit authenticator and 4 transmitted freshness bits, leaving **28 authenticated
-application bytes**. Its generated signal IDs are `252..267`, while the actual
-scalar receive calls are exactly `254..265`. The remaining `252/253/266/267` do
-not occur in any block/group receive: all resolved calls to `FUN_00077A3A` use
-only IDs `89..96,99..102`. The full-PDU helper `FUN_0007636C` is called only for
-PDU 0, never B6/PDU42. B6's COM buffer base `FEBE4AF4` also has zero raw absolute
-pointer literals. As a control, Sienna's known `2E4` profile itself has configured
-IDs `58..65` but scalar reads only `58..63`; configured nonscalar rows are thus
-not evidence for a hidden wire command by themselves.
-
-The other protected brake-module profile, `0x0D7`, also closes without a hidden
-steering magnitude. Its configured PDU40 signal IDs are `240..247`, but the
-regenerated scalar unpacker reads only signal 240 (1 bit), signal 243 (16 bits),
-and signal 246 (4 bits). Signal 243 lands at `FEBE7D82`; H RDBI DID `0x1185`
-reads that exact cell, and `EMPS_P5` names it **`CAN Vehicle Speed (SP1)`**. The
-nonscalar D7 IDs `241/242/244/245/247` occur in no resolved block/group receive,
-no full-PDU read uses PDU40, and D7's COM buffer `FEBE4ACC` has no raw absolute-
-pointer literal. Thus D7's only recovered command-sized scalar is OEM-identified
-vehicle speed, not lateral command magnitude.
-
-Techstream's DTC vocabulary independently identifies the B6 source domain. H's
-six-row communication-monitor table `27F68` associates receive-status slot
-`0x18` with row 5. Slot `0x18` is the B6 unpacker `46A10`, whose scalar signals
-all belong to PDU42 / CAN `0x0B6`. Its failure row selects Dem event `0x0143`;
-H's event table `2B988` maps that to DTC index 82, and the DTC table at `2C588`
-contains packed code `0xC12987`. `EMPS_P5` resolves that exact packed record as
-**U012987 — `Lost Communication with Brake System Control Module`, failure
-`Missing Message`**. Protected `0x0D7` and classic `0x0D5` independently resolve
-to the same DTC, which is consistent with their brake/vehicle-dynamics role.
-Thus B6 is not merely "supervisory by field shape"; Toyota's own P5 diagnostic
-model classifies it as **brake-system-originated**. This does not assign every B6
-field or prove brake-originated state cannot influence steering, but it strongly
-rejects B6 as a hidden Image Processing Module A / camera steering-command
-replacement.
-
-The old camera diagnostic surface survives only as disabled residue. H DTC index
-93 contains packed `0xC23A87`, which the same `EMPS_P5` corpus names **U023A87
-`Lost Communication with Image Processing Module "A"` / `Missing Message`**, but
-H's DTC enable word is zero. This is the same logical DTC that the Sienna monitor
-map joins to active rows for `0x2E4` (event B0), `0x131` (138), `0x191` (13C), and
-`0x2FD` (13D). H still retains those four Dem event records pointing to DTC index
-93, but none of the four events appears in H's active six-row communication-
-monitor table. The old Sienna B3 residue is even weaker in H: its event record no
-longer points to DTC93 at all. In other words, the exact H image did not simply
-rename the classic Image Processing Module A messages: **the active camera/IPM-A
-communication-monitor surface was removed while disabled diagnostic scaffolding
-remained**.
-
-A final adversarial pass also closes the only **shared** command-sized scalar
-inputs that the changed-field census deliberately did not count. H signals
-`184/185/186` on CAN `0x025` are byte/shape compatible with the pinned Toyota
-`STEER_ANGLE_SENSOR` definition:
+The representation bug was specific: H snapshots generated COM state through the
+fixed application `GP=0xFEBEB800`, so direct-symbol searches miss stores/copies that
+Ghidra renders only as `GP+offset`. Two such aliases close the B6 command surface:
 
 ```text
-H signal 184  signed 12 bit  wire byte 0        -> STEER_ANGLE
-H signal 185  signed  4 bit  wire byte 4 nibble -> STEER_FRACTION
-H signal 186  signed 12 bit  wire byte 4        -> STEER_RATE
+signal254 B3[5:0]:  FEBE7D96 -> FEBEF127 -> GP-0xA50 = FEBEADB0
+signal255 B4:B5:    FEBE7D94 -> FEBEF1CC -> GP-0x97E = FEBEAE82
 ```
 
-This is not being named from the DBC alone. H `C2176` independently reconstructs
-`FEBEADF0 * 15 + FEBEACC5`, exactly combining signal 184's coarse angle with
-signal 185's fractional component; `CB2E0` takes the absolute value of signal
-186's snapshot `FEBEAE14` and thresholds it as a rate magnitude; `CBD7E` jointly
-uses the reconstructed angle and rate in plausibility logic. Signals 184 and 186
-are the only shared supervisor-reaching fields at least 12 bits wide. They are
-therefore steering-sensor measurements, not an unchanged-shape field whose
-semantics silently became an autonomous command.
+Signal254 is an unsigned 6-bit control/mode ID. `CBE6E`, once communication and
+validity gates are satisfied, decodes values `1/4/10/11/19` into distinct cooperative
+steering-mode families. The exact OEM names for those values remain open.
 
-Finally, `CD3CC` confirms why `1C02` cannot be treated as an LTA-only endpoint.
-Its command composition includes retained `C2A8` only as one conditional additive
-term. Several sibling terms (`BE04`, `BD90`, `B678`, `BEC6`, `C39C`) are also
-zero-fed under complete direct-writer evidence; `BD0E` collapses from two
-zero-initialized local terms, while `C358` remains a real internally generated
-assist/control term via `CCE8C <- CD1E8`. Ordinary EPS assist can therefore move
-`Command Value Torque` without any autonomous request.
+Signal255 is the command magnitude. `C9DB0/C9E54` turn signed16 `FEBEAE82` into a
+replicated target state. Independently, `CBD7E/CB096` reconstruct the measured
+steering-angle domain from FD `0x025` signals184/185/186. `CA138` applies the same
+`0xB76/0x400` gain to target and measured state and forms target-minus-measured error.
+That target-native symmetry is the decisive semantic proof: **B6 signal255 is a
+target steering-angle command**, not torque and not an opaque supervisory value.
 
-The supportable static conclusion is now narrow and strong: **this exact
-`8965H1202000` image contains no recovered stock autonomous-lateral ingress.**
-The classic Sienna path is absent, the retained homolog is direct-write inactive,
-the H-only protected input is both supervisory under all recovered scalar
-consumers **and Techstream-classified as Brake System Control Module traffic**,
-D7's only large scalar is SP1 vehicle speed, and the remaining shared large
-fields are target-natively proved steering angle/rate sensor state. Their
-nonscalar/group/full-PDU escape routes are closed. This is still not proof
-that the vehicle lacks LTA: a computed alias or hardware writer remains bounded,
-and the autonomous request may be generated or transformed in another ECU. The
-next evidence must therefore be same-vehicle dynamic provenance or another ECU's
-firmware, not another undirected pass over this EPS CodeFlash.
+The controller path then continues through the already recovered H pipeline:
+
+```text
+B6 signal255 target
+  -> C9DB0/C9E54 target state
+  -> CA138 target - measured-angle error
+  -> CAC24/CA614/CA83A/CAA44/CAD1C selection and conditioning
+  -> CC18E/CC2EC/CAD62 replicated magnitude
+  -> C9C16/CB8BA/CB9B6 -> C2A8
+  -> CD3CC general command composition
+  -> C3B8 -> C3BC -> C3BE -> C3D0 -> C3C0 -> C3D2
+  -> DID 1C02 Command Value Torque
+  -> Q-current command path -> DID 1152 Command Value Current (Q Axis)
+```
+
+The propagation is conditional on the recovered mode/output gates, as expected for a
+cooperative controller. `1C02` remains a general multi-contributor torque observer;
+it is not a wire echo of signal255. B6 signals262/263 also remain live percentage-like
+modifiers of internal contributor families through `CC442/CBFCE`.
+
+Techstream independently classifies `0x0B6` missing-message ownership as U012987
+**Lost Communication with Brake System Control Module / Missing Message**. That pins
+the immediate monitored sender relationship. It does not prove that the Brake ECU is
+the original feature planner; `FRC_P5`/gateway/Brake producer and routing ownership
+remain a separate upstream question. Techstream's P5 steering vocabulary also contains
+**Target Lateral ID** and **Target Steering Angle After Output Compensation**, but
+exact H implements neither corresponding `0x1CEE/0x1CEF` observer DID, so those names
+are corroboration rather than a one-to-one B6 signal-name transfer.
+
+The negative residue is now useful and narrow. D7's only 16-bit scalar is still
+`CAN Vehicle Speed (SP1)`; B6/D7 nonscalar block/group/full-PDU alternatives remain
+negative; the shared command-sized `0x025` fields are proved measured angle/rate; and
+the separate retained Sienna `0x2E4` torque-clamp input remains zero-fed. The recovered scalar and literal block/group/full-PDU surfaces expose no second
+command-sized ingress comparable to signal255; arbitrary computed aliases and
+DMA/peripheral mutation remain outside this static proof.
+
+The exact H/F EPS receiver contract is therefore known at the semantic level:
+**protected FD `0x0B6` signal254 selects cooperative modes and signal255 commands
+target steering angle.** What remains before production use is physical signal255
+scale/sign, exact mode/request/validity semantics, cadence and timeout behavior,
+normal target/rate limits, SecOC freshness/key/source behavior, stock-source
+suppression, and the upstream FRC→Brake/EPB producer route.
 
 Machine-readable ownership:
-`data/generated/corolla_8965H1202000_lta_command_provenance.json` and
-`data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json`;
-`tests/verify_corolla_8965H1202000_lta_command_provenance.py` pins the complete
-raw-byte/API/direct-reference/DBC-correlated closure.
+`data/generated/corolla_8965H1202000_b6_target_angle_ingress.json`,
+`data/generated/corolla_8965H1202000_lta_command_provenance.json` v5, and
+`data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json` v2;
+`tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py`,
+`tests/verify_corolla_8965H1202000_lta_command_provenance.py`, and
+`tests/verify_corolla_8965H1202000_supervisor_external_ingress.py` pin the exact raw
+bodies, GP aliases, field geometry, controller path, and bounded alternatives.
 
 ## 8. Remaining evidence boundary
 
@@ -2563,10 +2531,11 @@ The remaining questions require **different evidence**, not more generic static
 coverage of this image. The corpus still does **not** provide:
 
 - a same-vehicle capture of a known **stock LTA steering interval** synchronized
-  to all incoming buses and the H internal command/mode state, so the true
-  autonomous-lateral provenance remains unidentified;
-- proof that the missing autonomous contribution is produced inside this EPS at
-  all rather than by a camera/gateway/other steering controller;
+  to protected B6 signal254/255/262/263, B6 validity, measured angle, `1C02`,
+  `1152`, and actual Q current; this is needed to recover physical scale, active
+  mode IDs, cadence/timeouts, and operational bounds;
+- proof of the upstream feature producer and route that causes the Brake System
+  Control Module to emit the recovered B6 target-angle command;
 - a direct UDS `F181` transcript from the same acquisition;
 - a stock passive `carFw` inventory joining the public route to the firmware;
 - proof of where the selected slot-4 key value is physically stored or internally derived inside ICU-S;
@@ -2574,8 +2543,10 @@ coverage of this image. The corpus still does **not** provide:
 - a retained Techstream transcript proving that this exact vehicle session chose
   category-405 `EMPS_P5` (the 124-DID overlap and exact `1C02` join make it the
   strongest static vocabulary fit, not a captured session-selection proof);
-- proof that this `8965H1202000` specimen is architecturally identical to
-  Span's separately probed `8965F1208000` Corolla.
+- proof that the low boot/calibration differences between `8965H1202000` and
+  Span `8965F1208000` do not alter any vehicle-level limit or calibration needed
+  for a production command implementation; their entire application region is
+  already byte-identical.
 
 The firmware artifact identifies itself strongly; the vehicle/model-year link
 remains contributor attribution rather than route-contained identity.
@@ -2583,20 +2554,21 @@ remains contributor attribution rather than route-contained identity.
 ## 9. Highest-value next evidence
 
 For **Corolla steering support**, the highest-value experiment is now a
-same-vehicle stock-LTA provenance capture, not another firmware-wide static pass:
+same-vehicle B6 **parameter-recovery capture**, not another firmware-wide static pass:
 
 1. establish an interval where factory LTA is visibly applying steering;
-2. record all genuine incoming CAN/CAN-FD segments without openpilot-generated
+2. record protected `0x0B6` and measured-angle `0x025` without openpilot-generated
    echoes being mistaken for stock traffic;
 3. simultaneously read `1C02 Command Value Torque`, `1152 Command Value Current
-   (Q Axis)`, and the retained/H-native upstream mode/contributor cells with
-   read-only XCP if the `7F7/7F8` route is physically reachable;
-4. identify what changes **before** the autonomous component appears in the
-   general torque/current chain.
+   (Q Axis)`, and actual Q current with read-only XCP/DAQ if `7F7/7F8` is reachable;
+4. solve signal255 physical angle scale/sign and characterize signal254 active-mode
+   values, B6 request/validity bits, cadence, timeout/loss response, and rate/target
+   bounds; and
+5. join the captured B6 producer to FRC/Brake/gateway state so the upstream routing
+   and SecOC source contract is explicit.
 
-If nothing EPS-local moves upstream, stop treating the EPS as the missing-source
-firmware and acquire the camera/gateway/other steering-controller image. That is
-now a discriminating experiment rather than a generic data-collection request.
+That experiment turns the recovered receiver semantics into the quantitative limits
+needed for a safe openpilot/Panda implementation.
 
 For the separate key/provisioning question, retain the controlled paired capture:
 full-bus synchronization/protected CAN immediately before the programming/range-
@@ -2608,9 +2580,8 @@ For Sienna-style steering-bridge portability, the higher-value next EPS CodeFlas
 is still a foreign calibration whose Gate-2 queue actually contains classic
 `0x2E4/0x131` records—for example Span's distinct `8965F1208000` if that image
 becomes available. The `8965H1202000` corpus has now served two purposes: it is a
-negative-capability regression for the classic bridge **and** a fully analyzed
-counterexample showing that downstream general torque/current control can remain
-while the recovered Sienna-homolog autonomous ingress is inactive.
+negative-capability regression for the classic `0x2E4/0x131` bridge **and** a fully
+analyzed positive example of the replacement protected-B6 target-angle architecture.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -2619,5 +2590,5 @@ Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
 - Findings with this document as canonical home: [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040)
-- Corrections with this document as canonical home: [CORR-070](../reference/index.md#correction-corr-070), [CORR-073](../reference/index.md#correction-corr-073), [CORR-074](../reference/index.md#correction-corr-074), [CORR-075](../reference/index.md#correction-corr-075), [CORR-076](../reference/index.md#correction-corr-076), [CORR-077](../reference/index.md#correction-corr-077), [CORR-078](../reference/index.md#correction-corr-078), [CORR-105](../reference/index.md#correction-corr-105), [CORR-106](../reference/index.md#correction-corr-106)
+- Corrections with this document as canonical home: [CORR-070](../reference/index.md#correction-corr-070), [CORR-073](../reference/index.md#correction-corr-073), [CORR-074](../reference/index.md#correction-corr-074), [CORR-075](../reference/index.md#correction-corr-075), [CORR-076](../reference/index.md#correction-corr-076), [CORR-077](../reference/index.md#correction-corr-077), [CORR-078](../reference/index.md#correction-corr-078), [CORR-105](../reference/index.md#correction-corr-105), [CORR-106](../reference/index.md#correction-corr-106), [CORR-107](../reference/index.md#correction-corr-107)
 <!-- knowledge-cross-references:end -->

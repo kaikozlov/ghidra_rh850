@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
-"""Extract and close H generated-COM provenance into the CEDAE supervisor cone.
+"""Promote H generated-COM provenance into the CEDAE supervisor cone.
 
-This is an exact-image/corpus extraction tool. It compares wire fields by CAN ID,
-relative byte/bit layout and signedness, then follows generated raw->staging->snapshot
-copies into the H steering-supervisor call cone. It fails closed if a non-B6
-H-only/wire-changed field or a changed >=12-bit scalar survives.
+This is a promotion extractor, not a portable verifier. The target whole-image
+Ghidra corpus is disposable workspace state and must be supplied explicitly;
+the tracked compact JSON is what repository verification consumes. The extractor
+compares exact wire fields, follows raw->staging->fixed-map snapshot copies, and
+fails closed unless the only changed command-sized field is B6 signal255.
 """
-import json,re,struct,hashlib
+import argparse,json,re,struct,hashlib
 from pathlib import Path
+REPO=Path(__file__).resolve().parents[1]
 GP=0xFEBEB800
-SIMG=Path('firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
-HIMG=Path('community/albinoelephant/normalized/8965H1202000_CodeFlash.bin').read_bytes()
+ap=argparse.ArgumentParser(description=__doc__)
+ap.add_argument('--h-corpus',type=Path,required=True,help='disposable corrected-context H decompiler corpus JSONL')
+ap.add_argument('--out',type=Path,default=REPO/'data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json')
+ARGS=ap.parse_args()
+SIMG=(REPO/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
+HIMG=(REPO/'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin').read_bytes()
 
 def load_corpus(path):
  d={}
@@ -18,7 +24,9 @@ def load_corpus(path):
   r=json.loads(l)
   if 'entry_addr' in r:d[int(r['entry_addr'],16)]=r
  return d
-S=load_corpus('data/generated/decompilations.jsonl'); H=load_corpus('build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl')
+SCORPUS=REPO/'data/generated/decompilations.jsonl'
+HCORPUS=ARGS.h_corpus.resolve()
+S=load_corpus(SCORPUS); H=load_corpus(HCORPUS)
 
 def addr_from(expr,varnames=('iVar1','iVar2','iVar3','iVar4','iVar15','puVar1','puVar2')):
  e=expr.strip()
@@ -26,7 +34,13 @@ def addr_from(expr,varnames=('iVar1','iVar2','iVar3','iVar4','iVar15','puVar1','
  if m:return int(m.group(1),16)
  m=re.search(r'0x(febe[0-9a-f]{4})',e,re.I)
  if m:return int(m.group(1),16)
+ # Corrected-context Ghidra sometimes renders GP-relative fixed-map sources as
+ # &DAT_000039cc + iVar15 or FUN_00003926[iVar15 + 1] rather than a RAM symbol.
  for var in varnames:
+  m=re.search(r'&?(?:DAT_|FUN_)([0-9a-f]+)\s*\+\s*'+re.escape(var),e,re.I)
+  if m:return (GP+int(m.group(1),16))&0xffffffff
+  m=re.search(r'(?:DAT_|FUN_)([0-9a-f]+)\s*\[\s*'+re.escape(var)+r'\s*\+\s*(0x[0-9a-f]+|\d+)\s*\]',e,re.I)
+  if m:return (GP+int(m.group(1),16)+int(m.group(2),0))&0xffffffff
   m=re.search(re.escape(var)+r'\s*\+\s*(-?0x[0-9a-f]+)',e,re.I)
   if m:return (GP+int(m.group(1),0))&0xffffffff
   m=re.search(re.escape(var)+r'\s*-\s*(0x[0-9a-f]+)',e,re.I)
@@ -182,21 +196,33 @@ for x in uniq:
     x['source_unpackers']=sorted(
         ({'entry':r['unpacker'],'body_size':H[r['unpacker']]['body_size'],'body_sha256':fhash(H,r['unpacker'],HIMG)} for r in rows),
         key=lambda q:q['entry'])
-out={'schema':'corolla-8965H1202000-supervisor-external-ingress-census-v1',
-     'evidence_boundary':'Complete scalar generated-COM -> raw/staging/snapshot direct-reference census over the supplied target-native H decompiler corpus and CEDAE call cone to depth 5. Direct-reference and generated-copy proof does not exclude opaque/computed-pointer flows outside this model.',
+out={'schema':'corolla-8965H1202000-supervisor-external-ingress-census-v2',
+     'evidence_boundary':'Complete scalar generated-COM -> raw/staging/fixed-map-snapshot census over the corrected-context H decompiler corpus and CEDAE call cone to depth 5. The fixed-map parser resolves ordinary GP offsets plus Ghidra DAT/FUN array forms. Companion provenance artifacts close the recovered literal block/group and full-PDU receive alternatives; arbitrary computed aliases, DMA/peripheral mutation, and diagnostic/debugger writes remain outside this model.',
      'images':{'sienna_sha256':hashlib.sha256(SIMG).hexdigest(),'corolla_h_sha256':hashlib.sha256(HIMG).hexdigest()},
-     'source_corpora':{'sienna':'data/generated/decompilations.jsonl','corolla_h':'build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl',
-                      'sienna_sha256':hashlib.sha256(Path('data/generated/decompilations.jsonl').read_bytes()).hexdigest(),
-                      'corolla_h_sha256':hashlib.sha256(Path('build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl').read_bytes()).hexdigest()},
+     'source_corpora':{'sienna':'data/generated/decompilations.jsonl','corolla_h':str(HCORPUS.relative_to(REPO)) if HCORPUS.is_relative_to(REPO) else str(HCORPUS),
+                      'sienna_sha256':hashlib.sha256(SCORPUS.read_bytes()).hexdigest(),
+                      'corolla_h_sha256':hashlib.sha256(HCORPUS.read_bytes()).hexdigest()},
      'summary':summary,'potential_changed_large_fields':cands,'external_refs':uniq}
-Path('data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json').write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
 # Encode result into a small text artifact for easy inspection.
 lines=[json.dumps(summary,sort_keys=True),'CANDIDATES:']
 for x in cands:lines.append(json.dumps(x,sort_keys=True))
 changed=[x for x in uniq if x['wire_class']!='shared_wire_field']
 other=[x for x in changed if x['can']!=0xB6]
-if cands:
-    raise SystemExit(f'H supervisor ingress retains H-only/wire-changed >=12-bit candidates: {cands}')
+# The corrected fixed-map RTE audit must recover exactly one changed command-sized
+# wire field: protected B6 signal255, signed16 at bytes4:5. Multiple rows are
+# expected because the same signal reaches several supervisor consumers.
+cand_shapes={(x['can'],x['signal'],x['bits'],x['signed'],x['wire_byte']) for x in cands}
+expected={(0xB6,255,16,1,4)}
+if cand_shapes != expected:
+    raise SystemExit(f'H changed >=12-bit ingress drift: {sorted(cand_shapes)} expected {sorted(expected)}')
 if other:
     raise SystemExit(f'H supervisor ingress retains non-B6 H-only/wire-changed fields: {other}')
+out['positive_changed_large_field']={
+    'can':'0x0B6','signal':255,'bits':16,'signed':True,'wire_byte':4,
+    'raw':'0xFEBE7D94','stage':'0xFEBEF1CC','snapshot':'0xFEBEAE82',
+    'classification':'wire-reachable-signed-steering-target-magnitude',
+    'consumer_entries':[f"0x{x['consumer']:08X}" for x in cands if x['signal']==255],
+}
+ARGS.out.parent.mkdir(parents=True,exist_ok=True)
+ARGS.out.write_text(json.dumps(out,indent=2,sort_keys=True)+'\n')
 print(json.dumps(summary,sort_keys=True))

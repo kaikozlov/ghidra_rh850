@@ -1,0 +1,207 @@
+{
+  "evidence_boundary": "The H target-angle role is firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream independently names B6 loss as Brake System Control Module loss and supplies P5 target-angle vocabulary. Exact physical wire scaling and the upstream FRC/Brake producer route remain unresolved.",
+  "final_command_bridge": {
+    "boundary": "Signal255 is one conditional contributor to the general EPS command composition; the final torque/current chain also contains local assist/control terms and gating.",
+    "local_chain": "C2A8 -> CD3CC:C3B8 -> CD440:C3BC -> CD496:C3BE -> CD53E:C3D0 -> CD55A:C3C0 -> CD5DC:C3D2 -> CE928:AC56",
+    "q_axis_command": {
+      "did": "0x1152",
+      "name": "Command Value Current (Q Axis)",
+      "unit": "A"
+    },
+    "recovered": true,
+    "techstream_command_torque": {
+      "did": "0x1C02",
+      "name": "Command Value Torque",
+      "unit": "Nm"
+    }
+  },
+  "independent_safety_consumer": {
+    "boundary": "algorithmic safety/plausibility role; OEM monitor name not assigned",
+    "entry": "0x000CB4F4",
+    "role": "absolute target magnitude / threshold / validity supervision",
+    "source": "0xFEBEAE82"
+  },
+  "measured_angle_feedback": {
+    "classification": "independent-target-versus-measured-steering-angle-control-loop",
+    "comparison": "0xCA138 applies the same 0xB76/0x400 gain to the B6-derived target and 0x025-derived measured angle, then subtracts measured from target",
+    "reconstruction": "0xCBD7E: (fraction + coarse*15) * 0x6FB / 0x200; 0xCB096 algebraically republishes the valid measured-angle domain as C23C/C23E/C240",
+    "snapshots": {
+      "184": "0xFEBEADF0",
+      "185": "0xFEBEACC5",
+      "186": "0xFEBEAE14"
+    },
+    "source_can_id": "0x025",
+    "source_signals": [
+      184,
+      185,
+      186
+    ]
+  },
+  "migration": {
+    "corolla_h_f": "protected FD 0x0B6 signed16 B4:B5 target-angle command through a new target-vs-measured controller architecture",
+    "pre_tss3_corolla": "classic 0x2E4 5-byte torque command",
+    "sienna_secoc_prior_art": "protected 0x131 signed16 STEER_ANGLE_CMD uses a different wire position/path",
+    "wire_compatibility": "none claimed; H/F scaling, request/mode fields, freshness and authentication are generation-specific"
+  },
+  "mode_ingress": {
+    "bit_length": 6,
+    "boundary": "Target-native H proves a 6-bit control/mode ID and its decoded branches. Techstream Target Lateral ID is corroborating family vocabulary, not an exact signal-name join.",
+    "classification": "target-lateral/control-id-mode-selector",
+    "decoded_values": {
+      "1": [
+        "C272",
+        "C273"
+      ],
+      "10": [
+        "C272",
+        "C270"
+      ],
+      "11": [
+        "C272",
+        "C26F"
+      ],
+      "19": [
+        "C272",
+        "C271"
+      ],
+      "4": [
+        "C272",
+        "C26E"
+      ]
+    },
+    "decoder": "0x000CBE6E",
+    "raw_destination": "0xFEBE7D96",
+    "required_gates": [
+      "FEBEACBD==0",
+      "FEBEC26D==1"
+    ],
+    "signal_id": 254,
+    "signed": false,
+    "snapshot_destination": "0xFEBEADB0",
+    "staging_destination": "0xFEBEF127",
+    "wire_byte": 3
+  },
+  "scaling": {
+    "exact_internal_relation": "target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5)); measured_internal = (FD025_fraction + 15*FD025_coarse) * 0x6FB / 0x200 before matched comparator gain",
+    "physical_degree_scale_closed": false,
+    "reason": "The target-native loop proves angle-domain equivalence, but no exact H wire-to-degree calibration join has yet been recovered. Do not reuse Sienna 0x131 scaling by assumption."
+  },
+  "schema": "corolla-8965H1202000-b6-target-angle-ingress-v1",
+  "software_id": "8965H1202000",
+  "sources": {
+    "codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "decompiler_evidence": {
+      "function_count": 35,
+      "path": "data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json",
+      "sha256": "025805f0b859488838bbb6a6f85c21e377b127f90d2a6503234d8773aef0c0ab"
+    },
+    "p5_lateral_semantics": {
+      "path": "data/generated/techstream_v18/p5_lateral_control_semantics.json",
+      "sha256": "7218fc0b642e270b21958a6d2d3d755850550f75bae70db271990dd20fc98829"
+    },
+    "techstream_correlations": {
+      "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
+      "sha256": "9ef9d859f54f4fe77dcca82a4742ae48cfe4889dbb40eb24849f55379ab42992"
+    }
+  },
+  "static_conclusion": {
+    "command_domain": "target steering angle",
+    "external_autonomous_lateral_ingress_identified": true,
+    "immediate_sender_relationship": "Brake System Control Module",
+    "ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5",
+    "mode_ingress": "protected CAN-FD 0x0B6 signal254 6-bit B3",
+    "next_static_target": "recover B6 companion request/mode semantics and target-angle physical scale; then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain",
+    "physical_scale_identified": false,
+    "reaches_command_value_torque_and_q_current": true,
+    "torque_command": false,
+    "upstream_feature_producer_identified": false
+  },
+  "target_angle_pipeline": [
+    {
+      "entry": "0x000C9DB0",
+      "relation": "AE82 * 2 -> saturated C14C -> C094, then target interpolation/history C0FC/C11C"
+    },
+    {
+      "entry": "0x000C9E54",
+      "relation": "C094 with mode-dependent delta/rate limits -> replicated target C098/C100/C120"
+    },
+    {
+      "entry": "0x000CA138",
+      "relation": "median(C098/C100/C120) and median(C23C/C23E/C240) receive identical 0xB76/0x400 gain; C0C0 = scaled_target - scaled_measured"
+    },
+    {
+      "entry": "0x000CAC24/0x000CA940",
+      "relation": "target-angle error enters active steering controller/filter/gain pipeline"
+    },
+    {
+      "entry": "0x000CAD1C",
+      "relation": "decoded cooperative mode C272 selects active controller path; controller output feeds CC18E"
+    },
+    {
+      "entry": "0x000CC18E -> 0x000CC2EC -> 0x000CAD62",
+      "relation": "controller/local state becomes replicated C17C/C17E/C184 magnitude"
+    },
+    {
+      "entry": "0x000C9C16 -> 0x000CB8BA -> 0x000CB9B6",
+      "relation": "replicated magnitude is voted/rate-limited into C2A8"
+    },
+    {
+      "entry": "0x000CD3CC",
+      "relation": "C2A8 contributes to general EPS torque-command composition C3B8"
+    }
+  ],
+  "techstream": {
+    "corolla_p5_topology": {
+      "interpretation": "Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves the immediate module relationship, not the upstream FRC-to-Brake wire route.",
+      "names": {
+        "405": "EMPS",
+        "435": "Brake/EPB",
+        "498": "Front Recognition Camera 2"
+      },
+      "required_categories": [
+        405,
+        435,
+        498
+      ]
+    },
+    "family_angle_vocabulary": [
+      {
+        "monitor_key": 2071,
+        "name": "Target Steering Angle After Output Compensation",
+        "primary_data_id": "0x1CEE"
+      },
+      {
+        "monitor_key": 2072,
+        "name": "Advanced Drive Target Steering Angle",
+        "primary_data_id": "0x1CEE"
+      }
+    ],
+    "immediate_sender_monitor": {
+      "description": "Lost Communication with Brake System Control Module",
+      "dtc": "U012987",
+      "failure": "Missing Message"
+    },
+    "vocabulary_boundary": "EMPS_P5 family vocabulary corroborates the target-angle interpretation, but exact H lacks DID 0x1CEE; neither family observer name nor a physical degree scale is assigned one-to-one to B6 signal255."
+  },
+  "wire_ingress": {
+    "bit_length": 16,
+    "can_fd": true,
+    "can_id": "0x0B6",
+    "classification": "authenticated-signed16-target-steering-angle-command",
+    "gp_relative_snapshot_copy": "0x000B8EEC",
+    "pdu_buffer_offset": "0x01A7",
+    "pdu_id": 42,
+    "raw_destination": "0xFEBE7D94",
+    "secured": true,
+    "signal_id": 255,
+    "signed": true,
+    "snapshot_destination": "0xFEBEAE82",
+    "staging_copy": "0x0005262C",
+    "staging_destination": "0xFEBEF1CC",
+    "unpacker": "0x00046A10",
+    "wire_byte": 4
+  }
+}

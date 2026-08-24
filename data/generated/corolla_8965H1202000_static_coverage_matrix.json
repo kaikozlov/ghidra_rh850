@@ -6116,7 +6116,8 @@
       "coverage": "target-native-inspected-unique-shape",
       "coverage_basis": [
         "unique complete instruction-shape target",
-        "target-native:data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json"
+        "target-native:data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
+        "target-native:data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
       ],
       "reference_entry": "0x0004BB1E",
       "reference_name": "application_pack_can_4a3",
@@ -6125,7 +6126,8 @@
       "surface_recensus": [],
       "target_entry": "0x0004749a",
       "target_native_evidence_files": [
-        "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json"
+        "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
+        "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
       ],
       "transfer_status": "unique-instruction-shape-candidate"
     },
@@ -6210,6 +6212,7 @@
       "coverage": "target-native-inspected-unique-shape",
       "coverage_basis": [
         "unique complete instruction-shape target",
+        "target-native:data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
         "target-native:data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json"
       ],
       "reference_entry": "0x0004C25C",
@@ -6219,6 +6222,7 @@
       "surface_recensus": [],
       "target_entry": "0x00047ba2",
       "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
         "data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json"
       ],
       "transfer_status": "unique-instruction-shape-candidate"
@@ -21057,6 +21061,7 @@
       "coverage": "target-native-inspected-unique-shape",
       "coverage_basis": [
         "unique complete instruction-shape target",
+        "target-native:data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json",
         "target-native:data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
         "target-native:data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
       ],
@@ -21069,6 +21074,7 @@
       "surface_recensus": [],
       "target_entry": "0x000cd440",
       "target_native_evidence_files": [
+        "data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json",
         "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
         "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json"
       ],
@@ -21605,6 +21611,7 @@
       "data/generated/corolla_8965H1202000_application_interrupt_vectors.json": "1ba4b3fd7baf74f5221a482c53a6dd707bc2022daa4ce76dbe1e2404798afc7c",
       "data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json": "f31acfabe929077337a49cd11785d1a161847fd21dcba538659c6844923cdc69",
       "data/generated/corolla_8965H1202000_application_transport_residue.json": "50dff3fa2e7d3f0ce1aaf06635829046ecded0fc9fc39876f8e6e18786ac6c86",
+      "data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json": "025805f0b859488838bbb6a6f85c21e377b127f90d2a6503234d8773aef0c0ab",
       "data/generated/corolla_8965H1202000_can_com.json": "4b09e7090e59d92aab8ae82e6b71bd23a2885dba6067c2fbce35a7eaf03575cb",
       "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json": "cfd7e28a934f06d17e146da4fa60c029ceeedcffd1dc4f67513fd7f40a8e1129",
       "data/generated/corolla_8965H1202000_crypto_residue.json": "0619483d6ea92fc67a8089b566b43c1aada1a3c955ef041a631645d5476b9c1d",
@@ -21620,9 +21627,10 @@
       "data/generated/corolla_8965H1202000_final_named_residue_evidence.json": "912a007e418e64449131eeb2e32de5b00d36d3a7e35dbd3dd87789bba86f0432",
       "data/generated/corolla_8965H1202000_keyless_event_formatter.json": "90ae4609e0819c99f8e5cc6b2a84f9ec077117c85a276eb22c5d26bea19dd6fc",
       "data/generated/corolla_8965H1202000_keyless_event_formatter_decompiler_evidence.json": "6aeebb4cae3d469cf3cd51eb97856d6aedac1c8aa3306251faafd160d82bc25d",
-      "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json": "65df5fdca0443b3d66f5c4fecc1c191ede8984b65a5c595335a4f38f833ea18e",
+      "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json": "5414fead091374eaa6ba0f65b404e5cce2cc296efb117a624b2ba2aff5b353fb",
       "data/generated/corolla_8965H1202000_motor_control.json": "eca55432652bac286223b181602ca62f4a64d207c39cf0698e508731a909b756",
       "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json": "22ca7f5efaa94d27623a834891fca729e2e8060870df8cf6090843e6b65d2e22",
+      "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json": "b6f7775fcde6d453d78fa688fde2545885ef6ca347a4d58e91f01a3662cda7fb",
       "data/generated/corolla_8965H1202000_plausibility_monitor.json": "6c52c691fba55a999e14236a85be317eb17762a49b4b0598cb79c3df3478accc",
       "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json": "f63dbc8889103b7cd1b2dbad08cdea723146488ce1592aec7f4e8c9b4299fa59",
       "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json": "17352f256694dda51d78af2e676ef37090540306d13205c4beec4be97fe57a6a",
@@ -21653,7 +21661,7 @@
       "verified-exact-body-transfer": 288
     },
     "genuinely_unresolved_count": 0,
-    "h_native_evidence_functions_without_unique_sienna_pair": 588,
+    "h_native_evidence_functions_without_unique_sienna_pair": 599,
     "named_function_count": 1113,
     "structural_candidate_only_count": 0,
     "surface_recensus_reference_function_count": 614,
@@ -21710,6 +21718,6 @@
         "verified-exact-body-transfer": 3
       }
     },
-    "target_native_inspected_reference_function_count": 164
+    "target_native_inspected_reference_function_count": 173
   }
 }

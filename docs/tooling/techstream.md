@@ -1944,10 +1944,14 @@ command-torque chain.
 
 Thus Techstream now supplies both the OEM vocabulary **and** an independent
 firmware-static semantic bridge from H's general internal torque command through
-the Q-current PI loop. That command is not LTA-specific. The separate provenance
-census in the Corolla variant report shows the retained Sienna-homolog LTA
-contribution is direct-write inactive in this calibration and B6 has no recovered
-opaque/group/full-PDU command consumer.
+the Q-current PI loop. That command is not LTA-specific. The corrected
+fixed-map provenance in the Corolla variant report goes further: the retained
+Sienna-homolog conditioner is live under GP-relative writers; B6 signals262/263
+percentage-modulate contributors; and B6 signal255 is recovered as the signed16
+target-steering-angle command through `FEBE7D94 -> FEBEF1CC -> FEBEAE82`.
+Its target-vs-measured controller conditionally feeds the same general torque/Q-
+current chain observed here. Physical B6 scaling and upstream producer semantics
+remain separate from these Techstream observer names.
 
 The same exact Data-ID vocabulary now also closes the corresponding **Sienna
 `8965B4512000` observer semantics target-natively**, rather than borrowing H RAM
@@ -2036,15 +2040,17 @@ and `EMPS_P5` names it **`CAN Vehicle Speed (SP1)`**. D7's nonscalar configured
 rows have no recovered group/full-PDU consumer. Its only command-sized scalar is
 therefore OEM-identified vehicle speed, not a hidden steering magnitude.
 
-The P5 DTC path strengthens that B6 conclusion with an OEM source label. H's
+The P5 DTC path supplies an OEM **immediate sender relationship** for B6. H's
 six-row communication-monitor scheduler maps receive-status slot `0x18` to the
 B6 unpacker/PDU42. Failure of that row selects Dem event `0x0143`; H's event
 and DTC tables resolve it to packed `0xC12987`, and the exact `EMPS_P5` type-65
 record names it **U012987 `Lost Communication with Brake System Control Module`
-/ `Missing Message`**. `0x0D7` and `0x0D5` share the same DTC. This is an exact
-firmware→Techstream join and makes B6 a brake-system-originated protected message
-in Toyota's own diagnostic model, not a plausible hidden camera/IPM-A steering
-command merely because it is H-only.
+/ `Missing Message`**. `0x0D7` and `0x0D5` share the same DTC. This exact
+firmware→Techstream join means EPS monitors B6 as Brake-System-Control-Module
+traffic. It does **not** classify each B6 field as a brake quantity: the independent
+H control-dataflow proof now shows signal255 is target steering angle. What remains
+unresolved is how FRC/gateway state reaches the brake-side producer and how that
+protected command is sourced/authenticated.
 
 Conversely, the old Image Processing Module A diagnostic remains only as disabled
 residue. H DTC index 93 is packed `0xC23A87`, exactly the `EMPS_P5` U023A87

@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "Complete scalar generated-COM -> raw/staging/snapshot direct-reference census over the supplied target-native H decompiler corpus and CEDAE call cone to depth 5. Direct-reference and generated-copy proof does not exclude opaque/computed-pointer flows outside this model.",
+  "evidence_boundary": "Complete scalar generated-COM -> raw/staging/fixed-map-snapshot census over the corrected-context H decompiler corpus and CEDAE call cone to depth 5. The fixed-map parser resolves ordinary GP offsets plus Ghidra DAT/FUN array forms. Companion provenance artifacts close the recovered literal block/group and full-PDU receive alternatives; arbitrary computed aliases, DMA/peripheral mutation, and diagnostic/debugger writes remain outside this model.",
   "external_refs": [
     {
       "address": 4273909232,
@@ -601,6 +601,90 @@
       "wire_class": "h_only_can"
     },
     {
+      "address": 4273909168,
+      "bitoff": 0,
+      "bits": 6,
+      "can": 182,
+      "consumer": 819802,
+      "consumer_body_sha256": "a36c6af4efb3a088dae985dd6bcb4982ce950944b910bf637c3229df7e65e185",
+      "consumer_body_size": 258,
+      "consumer_path": [
+        847278,
+        820060,
+        819802
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 254,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 3,
+      "wire_class": "h_only_can"
+    },
+    {
+      "address": 4273909378,
+      "bitoff": 0,
+      "bits": 16,
+      "can": 182,
+      "consumer": 820968,
+      "consumer_body_sha256": "d59453912660147db34f784398f50cd5c4e0f0eb991fb6cee7f0d3eab8739a23",
+      "consumer_body_size": 276,
+      "consumer_path": [
+        847278,
+        820060,
+        819802,
+        820968
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 255,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "h_only_can"
+    },
+    {
+      "address": 4273909378,
+      "bitoff": 0,
+      "bits": 16,
+      "can": 182,
+      "consumer": 821244,
+      "consumer_body_sha256": "1bb39fd04ee9b3957ae09e46fd17fdbe3c34a94a172e3acb2c0355fef6b58192",
+      "consumer_body_size": 242,
+      "consumer_path": [
+        847278,
+        821244
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 255,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "h_only_can"
+    },
+    {
       "address": 4273909186,
       "bitoff": 6,
       "bits": 2,
@@ -625,6 +709,34 @@
       ],
       "tier": "snapshot",
       "wire_byte": 7,
+      "wire_class": "h_only_can"
+    },
+    {
+      "address": 4273909378,
+      "bitoff": 0,
+      "bits": 16,
+      "can": 182,
+      "consumer": 826800,
+      "consumer_body_sha256": "dedf200a1bc237d02faa523b073f413e950692115d8590617787c9b99a847cb0",
+      "consumer_body_size": 164,
+      "consumer_path": [
+        847278,
+        827088,
+        826800
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 255,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
       "wire_class": "h_only_can"
     },
     {
@@ -837,6 +949,34 @@
       "wire_class": "shared_wire_field"
     },
     {
+      "address": 4273909168,
+      "bitoff": 0,
+      "bits": 6,
+      "can": 182,
+      "consumer": 835182,
+      "consumer_body_sha256": "ba528c9b2ed22a57c5bc519285dedbb1cd3d3ee52838adeadafbd01849359b41",
+      "consumer_body_size": 128,
+      "consumer_path": [
+        847278,
+        833162,
+        835182
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 254,
+      "signed": 0,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 3,
+      "wire_class": "h_only_can"
+    },
+    {
       "address": 4273909179,
       "bitoff": 2,
       "bits": 1,
@@ -930,13 +1070,114 @@
     "corolla_h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
   },
-  "potential_changed_large_fields": [],
-  "schema": "corolla-8965H1202000-supervisor-external-ingress-census-v1",
+  "positive_changed_large_field": {
+    "bits": 16,
+    "can": "0x0B6",
+    "classification": "wire-reachable-signed-steering-target-magnitude",
+    "consumer_entries": [
+      "0x000C86E8",
+      "0x000C87FC",
+      "0x000C9DB0"
+    ],
+    "raw": "0xFEBE7D94",
+    "signal": 255,
+    "signed": true,
+    "snapshot": "0xFEBEAE82",
+    "stage": "0xFEBEF1CC",
+    "wire_byte": 4
+  },
+  "potential_changed_large_fields": [
+    {
+      "address": 4273909378,
+      "bitoff": 0,
+      "bits": 16,
+      "can": 182,
+      "consumer": 820968,
+      "consumer_body_sha256": "d59453912660147db34f784398f50cd5c4e0f0eb991fb6cee7f0d3eab8739a23",
+      "consumer_body_size": 276,
+      "consumer_path": [
+        847278,
+        820060,
+        819802,
+        820968
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 255,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "h_only_can"
+    },
+    {
+      "address": 4273909378,
+      "bitoff": 0,
+      "bits": 16,
+      "can": 182,
+      "consumer": 821244,
+      "consumer_body_sha256": "1bb39fd04ee9b3957ae09e46fd17fdbe3c34a94a172e3acb2c0355fef6b58192",
+      "consumer_body_size": 242,
+      "consumer_path": [
+        847278,
+        821244
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 255,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "h_only_can"
+    },
+    {
+      "address": 4273909378,
+      "bitoff": 0,
+      "bits": 16,
+      "can": 182,
+      "consumer": 826800,
+      "consumer_body_sha256": "dedf200a1bc237d02faa523b073f413e950692115d8590617787c9b99a847cb0",
+      "consumer_body_size": 164,
+      "consumer_path": [
+        847278,
+        827088,
+        826800
+      ],
+      "fd": true,
+      "s_same_shape_signals": [],
+      "signal": 255,
+      "signed": 1,
+      "source_unpackers": [
+        {
+          "body_sha256": "776295d290b45a2f2704a3336c37cfbf1788c00250db64a51e95bb18691c6a63",
+          "body_size": 364,
+          "entry": 289296
+        }
+      ],
+      "tier": "snapshot",
+      "wire_byte": 4,
+      "wire_class": "h_only_can"
+    }
+  ],
+  "schema": "corolla-8965H1202000-supervisor-external-ingress-census-v2",
   "source_corpora": {
-    "corolla_h": "build/work/corpora/h_8965H1202000_rdbihelper2_decompilations.jsonl",
-    "corolla_h_sha256": "67b135759d4ff4af095057c7a7aaf66cb463d8dbb2e78767a6ac8660461ee539",
+    "corolla_h": "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
+    "corolla_h_sha256": "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656",
     "sienna": "data/generated/decompilations.jsonl",
-    "sienna_sha256": "5879534a813f8162b6c12c00183cb6c284a68dac2c5218dd25b9265010da392c"
+    "sienna_sha256": "62cfae5194102d44456c2cdf1183ee76b51111fa3dc8b5cf190545618b1fd4f8"
   },
   "summary": {
     "can_counts": {
@@ -945,20 +1186,20 @@
       "0x25": 14,
       "0x90": 2,
       "0xaa": 4,
-      "0xb6": 6,
+      "0xb6": 11,
       "0xd5": 2
     },
-    "external_refs": 30,
-    "external_signals": 20,
-    "h_com_snapshot_cells": 32,
+    "external_refs": 35,
+    "external_signals": 22,
+    "h_com_snapshot_cells": 34,
     "h_com_stage_cells": 90,
     "h_cone_functions": 303,
     "h_offset_table": "0x22788",
     "h_scalar_rx_calls": 101,
-    "potential_changed_large_fields": 0,
+    "potential_changed_large_fields": 3,
     "s_offset_table": "0x228e4",
     "wire_class_counts": {
-      "h_only_can": 6,
+      "h_only_can": 11,
       "shared_wire_field": 24
     }
   }

@@ -668,6 +668,7 @@ paths = [
   "tools/build_corolla_h_lta_command_provenance.py",
   "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_lta_command_provenance.json",
+  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
   "data/generated/corolla_8965H1202000_fd_control_interface.json",
   "data/generated/corolla_8965H1202000_steering_nested.json",
   "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
@@ -680,6 +681,7 @@ paths = [
   "docs/status/CORRECTIONS.md",
   "docs/status/PRIORITIES.md",
   "docs/status/OPEN_QUESTIONS.md",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
   "docs/reference/generated-artifacts.md",
 ]
 
@@ -1104,7 +1106,57 @@ paths = [
   "data/generated/corolla_8965H1202000_fd_control_interface.json",
   "data/generated/corolla_8965H1202000_lta_command_provenance.json",
   "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
   "external-references.lock.json",
+]
+
+[suite.corolla_8965h_b6_target_angle_ingress]
+tests = ["tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py",
+  "tools/extract_corolla_h_b6_target_angle_evidence.py",
+  "tools/build_corolla_h_b6_target_angle_ingress.py",
+  "data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
+  "data/generated/corolla_8965H1202000_techstream_correlations.json",
+  "data/generated/techstream_v18/p5_lateral_control_semantics.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
+  "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "exploit/findings_coverage.json",
+]
+
+[suite.corolla_h_openpilot_state_bridge]
+tests = ["tests/verify_corolla_8965H1202000_openpilot_state_bridge.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_corolla_8965H1202000_openpilot_state_bridge.py",
+  "tools/extract_corolla_h_openpilot_state_bridge_evidence.py",
+  "tools/build_corolla_h_openpilot_state_bridge.py",
+  "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+  "data/generated/corolla_8965H1202000_fd_control_interface.json",
+  "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
+  "data/generated/corolla_8965H1202000_lta_command_provenance.json",
+  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
+  "data/generated/corolla_8965H1202000_techstream_correlations.json",
+  "data/generated/corolla_8965H1202000_structural_function_transfer.json",
+  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+  "data/external/opendbc/toyota_corolla_pre_tss3_contract.json",
+  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
+  "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md",
+  "docs/variants/README.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/PRIORITIES.md",
+  "exploit/findings_coverage.json",
 ]
 
 [suite.target_artifact_manifest]
@@ -1925,6 +1977,7 @@ paths = [
   "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_fd_control_reference_census.json",
   "data/generated/corolla_8965H1202000_fd_control_interface.json",
+  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
   "data/generated/corolla_8965H1202000_structural_function_transfer.json",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "community/albinoelephant/raw-20260818/",
@@ -1948,6 +2001,7 @@ paths = [
   "data/generated/corolla_8965H1202000_steering_supervisor_structural_evidence.json",
   "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json",
+  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
   "data/generated/corolla_8965H1202000_structural_function_transfer.json",
   "data/generated/decompilations.jsonl",
   "firmware/RH850_P1M-E_CodeFlash.bin",
@@ -1989,6 +2043,7 @@ paths = [
   "tests/verify_corolla_8965H1202000_supervisor_external_ingress.py",
   "tools/extract_corolla_h_supervisor_external_ingress_census.py",
   "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
+  "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
   "data/generated/corolla_8965H1202000_fd_control_interface.json",
   "firmware/RH850_P1M-E_CodeFlash.bin",
   "community/albinoelephant/raw-20260818/",

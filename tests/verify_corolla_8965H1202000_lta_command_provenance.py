@@ -37,35 +37,35 @@ image = IMAGE.read_bytes()
 
 print("\n== evidence identity ==")
 check("report is exact H image-bound", d["software_id"] == "8965H1202000" and d["images"]["corolla_h"]["sha256"] == hashlib.sha256(image).hexdigest())
-check("36 target-native functions support provenance closure", e["function_count"] == 36)
-check("LTA report consumes tracked compact whole-corpus census", d["schema"] == "corolla-8965H1202000-lta-command-provenance-v3" and d["whole_corpus_census"]["path"] == "data/generated/corolla_8965H1202000_lta_command_provenance_census.json" and d["whole_corpus_census"]["source_function_count"] > 5000)
+check("50 target-native functions support direct+computed provenance closure", e["function_count"] == 50)
+check("LTA report consumes tracked compact whole-corpus census", d["schema"] == "corolla-8965H1202000-lta-command-provenance-v5" and d["whole_corpus_census"]["path"] == "data/generated/corolla_8965H1202000_lta_command_provenance_census.json" and d["whole_corpus_census"]["source_function_count"] > 5000)
 for row in e["functions"]:
     start = int(row["entry"], 16); size = row["body_size"]
     check(f"raw body hash {row['entry']}", hashlib.sha256(image[start:start+size]).hexdigest() == row["body_sha256"])
 
-print("\n== retained Sienna-homolog LTA magnitude branch ==")
+print("\n== retained Sienna-homolog branch: computed-writer correction ==")
 r = d["retained_lta_branch"]
-for addr, init, consumer in [
-    ("0xFEBEC17C", "0X000C97A8", "0X000C9C16"),
-    ("0xFEBEC17E", "0X000C97A8", "0X000C9C16"),
-    ("0xFEBEC184", "0X000C97A8", "0X000C9C16"),
-]:
-    cell = r["magnitude_inputs"][addr]
-    check(f"{addr} has exactly init plus rate-limit consumer", [x["entry"] for x in cell["occurrences"]] == [init, consumer])
-    check(f"{addr} only direct writer is zero init", len(cell["direct_lhs_writes"]) == 1 and "= 0;" in cell["direct_lhs_writes"][0]["lines"][0])
-    check(f"{addr} has no raw absolute pointer literal", cell["raw_u32_literal_pointer_hits"] == [])
-check("C9C16 recovers three-word magnitude vote/rate-limit", r["magnitude_vote_and_rate_limit"]["recovered"])
+for addr in ("0xFEBEC17C", "0xFEBEC17E", "0xFEBEC184", "0xFEBEC26D"):
+    cell = r["direct_symbol_observations"][addr]
+    check(f"{addr} direct-symbol census retained as bounded observation", cell["direct_symbol_lhs_writes"] and cell["raw_u32_literal_pointer_hits"] == [])
 
-print("\n== retained LTA mode activation ==")
-c26d = r["magnitude_inputs"]["0xFEBEC26D"]
-check("C26D occurrence set is two readers plus one zero init", [x["entry"] for x in c26d["occurrences"]] == ["0X000CB07C", "0X000CB1C8", "0X000CBE6E"])
-check("C26D only direct writer is zero", len(c26d["direct_lhs_writes"]) == 1 and "= 0;" in c26d["direct_lhs_writes"][0]["lines"][0])
-check("C26D has no raw absolute pointer literal", c26d["raw_u32_literal_pointer_hits"] == [])
-check("cyclic decoder explicitly requires C26D==1", r["mode_enable"]["decoder_requires_one"])
-check("decoder initializes all mode outputs to zero before gate", r["mode_enable"]["decoder_zeroes_all_outputs_when_gate_false"])
+corr = r["computed_writer_correction"]
+check("direct-symbol-only census is explicitly marked incomplete", corr["direct_symbol_census_was_incomplete"] is True)
+mode = corr["mode_enable_0xFEBEC26D"]
+check("CC7F8 recovers GP-relative C26D writer", mode["writer"] == "0x000CC7F8" and mode["recovered"] and mode["selector_recovered"] and mode["health_aggregate_recovered"])
+check("health selectors 0x10/0x18 both use class2", mode["selector_slots"]["0x10"]["health_class"] == 2 and mode["selector_slots"]["0x18"]["health_class"] == 2)
+check("raw selector rows pinned", mode["selector_slots"]["0x10"]["raw_hex"] == "025a2300000bb801" and mode["selector_slots"]["0x18"]["raw_hex"] == "02002b00000bffff")
+mag = corr["replicated_magnitude_0xFEBEC17C_17E_184"]
+check("CC2EC->CAD62 recovers GP-relative magnitude triplet writers", mag["writer"] == "0x000CAD62" and mag["upstream_conditioner"] == "0x000CC2EC" and mag["recovered"])
+mods = {x["signal_id"]: x for x in corr["b6_modulators"]}
+check("B6 signal262 is 8-bit byte8 ADBD modifier", mods[262]["wire_byte"] == 8 and mods[262]["bit_length"] == 8 and mods[262]["snapshot"] == "0xFEBEADBD" and mods[262]["consumer"] == "0x000CC442" and mods[262]["recovered"])
+check("B6 signal263 is 8-bit byte9 ADBE modifier", mods[263]["wire_byte"] == 9 and mods[263]["bit_length"] == 8 and mods[263]["snapshot"] == "0xFEBEADBE" and mods[263]["consumer"] == "0x000CBFCE" and mods[263]["recovered"])
+check("base magnitude synthesis is target-native local state", corr["local_base_synthesis"]["entry"] == "0x000CC18E" and corr["local_base_synthesis"]["recovered"])
+check("C9C16 still recovers three-word magnitude vote/rate-limit", r["magnitude_vote_and_rate_limit"]["recovered"])
+check("mode decoder explicitly requires C26D==1", r["mode_enable"]["decoder_requires_one"])
+check("mode decoder initializes all outputs zero before gate", r["mode_enable"]["decoder_zeroes_all_outputs_when_gate_false"])
 check("retained command conditioning chain is recovered", all(x["recovered"] for x in r["command_conditioning"]))
-check("C2A6 writers are init/reset plus CB8BA state machine", [x["entry"] for x in r["command_state_writes"]["0xFEBEC2A6"]] == ["0X000CB696", "0X000CB6CA", "0X000CB8BA"])
-check("C2A8 writers are init/reset plus CB9B6 conditioner", [x["entry"] for x in r["command_state_writes"]["0xFEBEC2A8"]] == ["0X000CB696", "0X000CB6CA", "0X000CB9B6"])
+check("retained branch classification records live local B6-modulated path", r["classification"] == "retained-sienna-homolog-conditioner-live-b6-target-angle-driven-and-b6-modulated")
 
 print("\n== D7 hidden-payload census ==")
 d7 = d["d7_hidden_payload_census"]
@@ -119,21 +119,50 @@ print("\n== final internal torque-command composition ==")
 f = d["final_command_composition"]
 check("BD0E is recovered from local ABB0+BCF8 chain", f["bd0e_local_chain"]["recovered"])
 check("C358 is recovered from local C392+C2D4 chain", f["c358_local_chain"]["recovered"] and f["c358_local_chain"]["c392_recovered_local_state"])
-for addr in ["0xFEBEBE04","0xFEBEBD90","0xFEBEB678","0xFEBEBEC6","0xFEBEC39C","0xFEBEABB0","0xFEBEBCF8"]:
-    writes = f["direct_zero_writer_census"][addr]
-    check(f"{addr} direct writers are zero-only", writes and all("= 0;" in line for x in writes for line in x["lines"]))
+writers = f["computed_writer_audit"]
+expected = {
+    "0xFEBEBE04":"0x000C68F4", "0xFEBEBD90":"0x000C6146", "0xFEBEB678":"0x000BE25A",
+    "0xFEBEBEC6":"0x000C76FA", "0xFEBEC39C":"0x000CD31A",
+}
+check("all promoted GP-relative final-command writers recover", f["all_promoted_computed_writers_recovered"] and all(writers[a]["writer"] == e and writers[a]["recovered"] for a,e in expected.items()))
 
-print("\n== bounded static conclusion ==")
+print("\n== B6 signed16 target-angle ingress ==")
+ta=d["b6_signed16_target_angle_ingress"]
+check("B6 signed16 snapshot is AE82", ta["wire_ingress"]["signal_id"] == 255 and ta["wire_ingress"]["snapshot_destination"] == "0xFEBEAE82")
+check("B6 signed16 domain is target angle", ta["wire_ingress"]["classification"] == "authenticated-signed16-target-steering-angle-command")
+check("target-vs-measured loop is independently recovered", ta["measured_angle_feedback"]["classification"] == "independent-target-versus-measured-steering-angle-control-loop")
+check("physical B6 angle scale remains open", ta["scaling"]["physical_degree_scale_closed"] is False)
+check("Techstream identifies B6 immediate sender as brake", ta["techstream"]["immediate_sender_monitor"]["description"] == "Lost Communication with Brake System Control Module")
+
+print("\n== corrected bounded static conclusion ==")
 s = d["static_conclusion"]
-check("retained LTA magnitudes are direct-write zero", s["retained_sienna_lta_magnitude_direct_write_zero"])
-check("retained LTA enable is direct-write zero", s["retained_sienna_lta_enable_direct_write_zero"])
-check("retained LTA branch is not active under recovered direct writes", s["retained_sienna_lta_branch_active_under_recovered_direct_writes"] is False)
+check("earlier direct-write inactive conclusion is superseded", s["earlier_direct_write_inactive_conclusion_superseded"] is True)
+check("retained magnitude computed writer is recovered", s["retained_sienna_lta_magnitude_computed_writer_recovered"] is True)
+check("retained enable computed writer is recovered", s["retained_sienna_lta_enable_computed_writer_recovered"] is True)
+check("retained branch is not statically dead", s["retained_sienna_lta_branch_statically_dead"] is False)
+check("B6 percentage modifiers reach retained branch", s["b6_percentage_modulates_retained_branch"] is True)
+check("B6 signed16 target-angle command is recovered", s["b6_signed16_target_angle_command_recovered"] is True)
 check("no hidden D7 group/full-PDU command is recovered", s["hidden_d7_group_or_full_pdu_command_recovered"] is False)
 check("no hidden B6 group/full-PDU command is recovered", s["hidden_b6_group_or_full_pdu_command_recovered"] is False)
 check("all shared command-sized ingress is sensor state", s["shared_command_sized_ingress_classified_as_sensor_state"])
+check("H-only command-sized scalar is now recovered", s["h_only_or_wire_changed_command_sized_scalar_recovered"] is True)
+check("named retained-branch computed alias audit is closed", s["named_retained_branch_computed_alias_audit_closed"] is True)
 check("Command Value Torque is not classified LTA-only", s["command_value_torque_is_lta_only"] is False)
-check("external autonomous lateral ingress remains unidentified", s["external_autonomous_lateral_ingress_identified"] is False)
-check("broad static search is closed", s["broad_static_search_closed"] is True)
+check("external autonomous lateral ingress is identified", s["external_autonomous_lateral_ingress_identified"] is True and "0x0B6 signal255" in s["external_autonomous_lateral_ingress"])
+check("immediate sender relationship is Brake System Control Module", s["immediate_sender_relationship"] == "Brake System Control Module")
+check("upstream feature producer remains open", s["upstream_feature_producer_identified"] is False)
+check("broad static search remains closed", s["broad_static_search_closed"] is True)
+
+print("\n== correction/documentation integration ==")
+corrections=(REPO / "docs/status/CORRECTIONS.md").read_text()
+findings=(REPO / "docs/status/FINDINGS.md").read_text()
+variant=(REPO / "docs/variants/corolla-2023-us-public-route.md").read_text()
+priorities=(REPO / "docs/status/PRIORITIES.md").read_text()
+check("CORR-107 records GP-relative target-angle correction", "### CORR-107" in corrections and "CC7F8" in corrections and "CAD62" in corrections and "signal255" in corrections and "signals262/263" in corrections and "FEBEAE82" in corrections)
+check("CORR-078 is explicitly superseded", "**Superseded:** CORR-107" in corrections)
+check("VAR-036 current finding is corrected", "| VAR-036 | **Correction" in findings and "CC2EC -> CAD62" in findings)
+check("canonical Corolla report carries corrected B6 target-angle branch", "protected B6 carries target steering angle" in variant and "FEBEF1CC -> FEBEAE82" in variant and "CA138" in variant and "CAD62" in variant)
+check("priority promotes recovered B6 target-angle command", "B6 signal255" in priorities and "target-minus-measured" in priorities and "signal255 physical" in priorities and "signed16 scalar is staged-only" not in priorities)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

@@ -23,6 +23,11 @@ It compares the exact message roles used by current pre-TSS3 Corolla openpilot
 support against both tracked H/F applications and separates EPS-local migrations
 from camera/ACC/UI roles that an EPS dump cannot resolve.
 
+The deeper H/F state recovery is in
+[corolla-h-f-openpilot-state-bridge.md](corolla-h-f-openpilot-state-bridge.md).
+It recovers target-native `0x4A3`, `0x351`, and `0x394` state roles, reframes
+`0x030`, and records the complete generated-COM command-ingress boundary.
+
 ## The transfer rule
 
 Matching application DID/service tables in a related EPS are strong

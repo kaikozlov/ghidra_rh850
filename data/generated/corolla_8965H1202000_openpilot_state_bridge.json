@@ -1,0 +1,404 @@
+{
+  "command_ingress_closure": {
+    "b6_target_angle": {
+      "bit_length": 16,
+      "can_id": "0x0B6",
+      "classification": "authenticated-signed16-target-steering-angle-command",
+      "decoded_mode_values": {
+        "1": [
+          "C272",
+          "C273"
+        ],
+        "10": [
+          "C272",
+          "C270"
+        ],
+        "11": [
+          "C272",
+          "C26F"
+        ],
+        "19": [
+          "C272",
+          "C271"
+        ],
+        "4": [
+          "C272",
+          "C26E"
+        ]
+      },
+      "immediate_sender_relationship": "Brake System Control Module",
+      "mode_signal_id": 254,
+      "mode_wire_byte": 3,
+      "physical_scale_closed": false,
+      "signal_id": 255,
+      "signed": true,
+      "snapshot": "0xFEBEAE82",
+      "target_vs_measured_loop": "independent-target-versus-measured-steering-angle-control-loop",
+      "wire_byte": 4
+    },
+    "brake_domain_conclusion": "D7's 16-bit field is exactly SP1 vehicle speed. B6 is independently tied to the Brake System Control Module by U012987, but this Techstream-only join does not classify B6 signal255; computed target-native provenance owns that semantic question.",
+    "computed_retained_branch": {
+      "b6_modulator_signal_ids": [
+        262,
+        263
+      ],
+      "classification": "retained-sienna-homolog-conditioner-live-b6-target-angle-driven-and-b6-modulated",
+      "command_sized_wire_scalar_recovered": true,
+      "magnitude_writer": "0x000CAD62",
+      "mode_enable_writer": "0x000CC7F8",
+      "statically_dead": false
+    },
+    "fixed_map_correction_recovered_b6_target": true,
+    "generated_scalar_rx_calls": 101,
+    "old_camera_interface_removed": "H retains disabled U023A87 Image Processing Module A diagnostic residue at DTC index 93. The four Sienna active communication-monitor rows that joined this DTC to CAN 0x2E4, 0x131, 0x191, and 0x2FD are absent from H's active six-row monitor table, although their Dem event records still point to disabled DTC index 93. Together with the missing 2E4/131 SecOC/COM profiles, this is strong evidence that the classic direct camera/IPM-A steering interface was disabled/removed rather than renumbered to B6.",
+    "protected_0x0B6_techstream_boundary": "B6's sole 16-bit scalar is signal255. The earlier direct-xref-only staged-cell negative is not a safe semantic conclusion because GP-relative snapshot copies are outside that representation; this Techstream artifact therefore classifies only the B6 sender/DTC relationship and defers signal255 control semantics to the dedicated target-native ingress proof.",
+    "protected_0x0D7": "D7's only recovered 16-bit scalar is signal243 at FEBE7D82, exactly exposed by H DID 0x1185 and named by EMPS_P5 as CAN Vehicle Speed (SP1). Its other recovered scalars are 1-bit signal240 and 4-bit signal246 status fields. Together with the U012987 Brake System Control Module missing-message DTC, D7 does not expose a recovered steering-command magnitude.",
+    "static_conclusion": "Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. The target is rate/limit conditioned, compared against independently reconstructed 0x025 measured steering angle with matched gain, and then drives the cooperative steering controller and torque/current synthesis. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. Physical wire scaling and the upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
+    "supervisor_external_signals": 22,
+    "supervisor_reaching_ge12bit_fields": [
+      {
+        "bits": 12,
+        "can_id": "0x025",
+        "signal_id": 184
+      },
+      {
+        "bits": 12,
+        "can_id": "0x025",
+        "signal_id": 186
+      },
+      {
+        "bits": 16,
+        "can_id": "0x0B6",
+        "signal_id": 255
+      }
+    ]
+  },
+  "evidence_boundary": "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. Sienna/openpilot structures are used only to identify which roles a port needs, not to transplant field scales or fault codes. The command side is additionally audited for GP-relative/computed writers: protected B6 signal255 is recovered through a hidden RTE snapshot as a signed16 target-steering-angle command, then compared against independently reconstructed 0x025 measured angle before entering the steering controller. Physical B6 scaling, exact OEM naming of the mode IDs, and the upstream producer/authentication route remain bounded; no second command-sized generated scalar or recovered literal block/group/full-PDU route is identified, while arbitrary computed aliases and DMA/peripheral mutation remain outside this proof.",
+  "h_tx_pdu_descriptors": [
+    {
+      "can_id": "0x030",
+      "cycle_or_timeout_raw": 2,
+      "descriptor": [
+        2,
+        0,
+        0,
+        32,
+        0,
+        3
+      ],
+      "length": 32,
+      "pdu": 0
+    },
+    {
+      "can_id": "0x351",
+      "cycle_or_timeout_raw": 200,
+      "descriptor": [
+        200,
+        0,
+        0,
+        4,
+        0,
+        3
+      ],
+      "length": 4,
+      "pdu": 1
+    },
+    {
+      "can_id": "0x394",
+      "cycle_or_timeout_raw": 60,
+      "descriptor": [
+        60,
+        0,
+        0,
+        3,
+        0,
+        3
+      ],
+      "length": 3,
+      "pdu": 2
+    },
+    {
+      "can_id": "0x4A3",
+      "cycle_or_timeout_raw": 100,
+      "descriptor": [
+        100,
+        0,
+        0,
+        8,
+        0,
+        3
+      ],
+      "length": 8,
+      "pdu": 3
+    },
+    {
+      "can_id": "0x4C8",
+      "cycle_or_timeout_raw": 196,
+      "descriptor": [
+        196,
+        0,
+        0,
+        8,
+        0,
+        3
+      ],
+      "length": 8,
+      "pdu": 4
+    }
+  ],
+  "images": {
+    "corolla_f": {
+      "application_byte_identical_to_h": true,
+      "application_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
+      "software_id": "8965F1208000"
+    },
+    "corolla_h": {
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+      "software_id": "8965H1202000"
+    }
+  },
+  "next_discriminators": [
+    "Recover the physical B6 target-angle scale and exact OEM meaning of signal254 mode IDs plus remaining validity/request fields before any injection experiment.",
+    "Acquire/analyze true-TSS3 FRC_P5 and Brake/EPB producer/Tx descriptors or synchronized captures to close the upstream FRC -> chassis -> EPS route and authentication contract.",
+    "Derive H-native driver override, motor-response, readiness/fault, rate and message-loss limits before defining Panda safety; do not reuse old 0x260/0x262 scales or fault codes."
+  ],
+  "pre_tss3_openpilot_requirements": {
+    "eps_status_0x262_roles": [
+      "LKA readiness/fault state"
+    ],
+    "old_fault_states_are_not_portable": {
+      "permanent": [
+        3,
+        17
+      ],
+      "temporary": [
+        0,
+        9,
+        11,
+        21,
+        25
+      ]
+    },
+    "panda_safety_inputs": [
+      {
+        "id": "0x0AA",
+        "name": "WHEEL_SPEEDS",
+        "rate_hz": 83
+      },
+      {
+        "id": "0x260",
+        "name": "STEER_TORQUE_SENSOR",
+        "rate_hz": 50
+      },
+      {
+        "id": "0x1D2",
+        "name": "PCM_CRUISE",
+        "rate_hz": 33
+      },
+      {
+        "id_by_profile": {
+          "corolla_2017_2019": "0x224",
+          "corolla_tss2_2020_2022": "0x226"
+        },
+        "name": "BRAKE_MODULE",
+        "rate_hz": 40
+      }
+    ],
+    "steer_torque_sensor_0x260_roles": [
+      "driver steering torque",
+      "EPS steering torque",
+      "accurate steering angle",
+      "angle initialization"
+    ]
+  },
+  "schema": "corolla-8965H1202000-openpilot-state-bridge-v3",
+  "state_bridge": {
+    "0x030": {
+      "additive_field": {
+        "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
+        "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte",
+        "wire_byte": 7
+      },
+      "classification": "mixed 32-byte FD EPS telemetry/status/validity carrier; still requires field recovery",
+      "configured_signals": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36
+      ],
+      "direct_packed_signals": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "length": 32,
+      "openpilot_consequence": "Decode remaining validity/control-state fields after exploiting the clearer 0x4A3/0x351/0x394 bridges; do not assume it is a monolithic 0x260+0x262 replacement.",
+      "pdu": 0
+    },
+    "0x351": {
+      "boundary": "The H upstream boolean/state source is not given an old OEM semantic name solely from structural similarity.",
+      "classification": "structural continuity of EPS plausibility/debounce status carrier",
+      "length": 4,
+      "openpilot_consequence": "Useful readiness/inhibit candidate and dynamic correlation target; do not hard-code it as LKA_STATE yet.",
+      "pdu": 1,
+      "producer": "0x46E62 forces status code 7 and flag 1 under its active gate; 0x46E0C retains the old seven-count hold/debounce architecture",
+      "wire": "B2[7:5] = FEBE7DD0; B2[4] = FEBE7DD1"
+    },
+    "0x394": {
+      "boundary": "Exact H code meanings and old 0x262 LKA_STATE numeric values are unresolved/non-portable.",
+      "classification": "strong EPS internal status/fault-family carrier",
+      "length": 3,
+      "openpilot_consequence": "Primary candidate for generation-native steering readiness/fault state; correlate against Techstream DTCs and stock-LTA transitions.",
+      "pdu": 2,
+      "producer": "0x46E96 projects internal FEBE7F58 class plus FEBE7F65/62/63/64 staging state",
+      "wire": "B1[7:6]=7DD5; B1[5:3]=7DD6; B2[3:1]=7DD7; B2[0]=7DD9"
+    },
+    "0x4A3": {
+      "classification": "high-confidence newer Corolla openpilot state bridge",
+      "fields": [
+        {
+          "confidence": "recovered",
+          "semantic": "status/validity family; exact OEM bit meaning unresolved",
+          "source": "FEBE7DAE | 0x20",
+          "wire": "B0"
+        },
+        {
+          "confidence": "verified dataflow",
+          "semantic": "mirror of the target-native signed-12 steering-angle sensor field",
+          "source": "FEBE7D34 from FD 0x025 signal184",
+          "wire": "B1:B2"
+        },
+        {
+          "confidence": "verified dataflow + official name",
+          "semantic": "same target-native signed-12 quantity exposed by Techstream DID 0x1037 Steering Angle",
+          "source": "FEBE7A46",
+          "wire": "B3:B4"
+        },
+        {
+          "confidence": "verified dataflow + official name",
+          "semantic": "same native source as Techstream DID 0x1035 Steering Wheel Torque; exact physical B5 scaling not yet promoted",
+          "source": "FEBE6554 -> *100/0x100 -> /10 -> signed-byte saturation",
+          "wire": "B5"
+        },
+        {
+          "confidence": "verified dataflow + official name",
+          "semantic": "exact sign-inverted raw quantity used by DID 0x1151 Motor Actual Current (Q Axis), unit A; motor-current response, not assumed old STEER_TORQUE_EPS",
+          "source": "FEBE6592 * -100 / 0x80, big-endian signed16",
+          "wire": "B6:B7"
+        }
+      ],
+      "length": 8,
+      "openpilot_consequence": "0x4A3 can supply generation-native angle, driver-torque-source, and motor-response observables before 0x030 is fully decoded; Panda limits/scales must be derived for this generation.",
+      "pdu": 3
+    }
+  },
+  "structural_corroboration": {
+    "0x00046C4C": {
+      "boundary": "complete mnemonic+instruction-length shape is unique on both sides; operands/constants/data addresses/call targets are not part of the signature and must be checked before semantic transfer",
+      "classification": "unique-exact-shape",
+      "reference_entry": "0x0004b66c",
+      "role": "0x4A3 source preparation"
+    },
+    "0x00046D9A": {
+      "boundary": "complete mnemonic+instruction-length shape is unique on both sides; operands/constants/data addresses/call targets are not part of the signature and must be checked before semantic transfer",
+      "classification": "unique-exact-shape",
+      "reference_entry": "0x0004b7ba",
+      "role": "0x4A3 staging"
+    },
+    "0x00046E0C": {
+      "boundary": "complete mnemonic+instruction-length shape is unique on both sides; operands/constants/data addresses/call targets are not part of the signature and must be checked before semantic transfer",
+      "classification": "unique-exact-shape",
+      "reference_entry": "0x0004b82c",
+      "role": "0x351 debounce"
+    },
+    "0x00046E62": {
+      "boundary": "complete mnemonic+instruction-length shape is unique on both sides; operands/constants/data addresses/call targets are not part of the signature and must be checked before semantic transfer",
+      "classification": "unique-exact-shape",
+      "reference_entry": "0x0004b882",
+      "role": "0x351 producer"
+    },
+    "0x00046E96": {
+      "boundary": "complete mnemonic+instruction-length shape is unique on both sides; operands/constants/data addresses/call targets are not part of the signature and must be checked before semantic transfer",
+      "classification": "unique-exact-shape",
+      "reference_entry": "0x0004b8b6",
+      "role": "0x394 state projection"
+    },
+    "0x0004749A": {
+      "boundary": "complete mnemonic+instruction-length shape is unique on both sides; operands/constants/data addresses/call targets are not part of the signature and must be checked before semantic transfer",
+      "classification": "unique-exact-shape",
+      "reference_entry": "0x0004bb1e",
+      "role": "0x4A3 packer"
+    },
+    "0x00047BA2": {
+      "boundary": "complete mnemonic+instruction-length shape is unique on both sides; operands/constants/data addresses/call targets are not part of the signature and must be checked before semantic transfer",
+      "classification": "unique-exact-shape",
+      "reference_entry": "0x0004c25c",
+      "role": "0x351 packer"
+    }
+  }
+}

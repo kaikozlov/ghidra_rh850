@@ -124,7 +124,7 @@ pb = d["protected_brake_profile_semantics"]
 check("D7 configured/scalar split is 240..247 versus 240/243/246", pb["d7"]["configured_signal_ids"] == list(range(240,248)) and [x["signal_id"] for x in pb["d7"]["scalar_calls"]] == [240,243,246])
 check("D7 only 16-bit scalar is signal243", [x for x in pb["d7"]["scalar_calls"] if x["bit_length"] == 16] == [{"bit_length":16,"bit_offset_in_byte":0,"packed_bit_offset":384,"signal_id":243}])
 check("D7 signal243 is exact DID1185 CAN Vehicle Speed SP1", pb["d7"]["sp1_vehicle_speed"]["signal_id"] == 243 and pb["d7"]["sp1_vehicle_speed"]["primary_data_id"] == "0x1185" and pb["d7"]["sp1_vehicle_speed"]["name"] == "CAN Vehicle Speed (SP1)" and pb["d7"]["sp1_vehicle_speed"]["callback_recovered"])
-check("B6 sole 16-bit scalar remains staged-only", pb["b6"]["largest_scalar_signal_id"] == 255 and pb["b6"]["largest_scalar_role"] == "signed16-staged-only-direct-xref-negative")
+check("B6 signal255 role is deferred beyond direct-xref Techstream join", pb["b6"]["largest_scalar_signal_id"] == 255 and pb["b6"]["largest_scalar_role"] == "target-native-role-deferred-to-computed-ingress-provenance")
 
 print("\n== disabled camera/IPM-A diagnostic residue ==")
 ipm = d["camera_ipm_a_residue"]
@@ -150,7 +150,8 @@ check("Q-axis limit observer closure is asserted", c["q_axis_limit_observer_reco
 check("classic Active Test surface remains absent", c["classic_active_test_surface_present"] is False)
 check("live Cooperation Control State monitor remains absent", c["live_cooperation_control_state_monitor"] is False)
 check("B6 brake-system DTC join is asserted", c["b6_brake_system_missing_message_dtc_join"])
-check("protected brake profiles have no recovered steering magnitude", c["protected_brake_profiles_have_no_recovered_steering_magnitude"])
+check("D7 command-sized scalar is exact vehicle speed", c["d7_command_sized_scalar_is_vehicle_speed"])
+check("B6 signal255 semantics are deferred to target-native provenance", c["b6_signal255_semantics_deferred_to_target_native_provenance"])
 check("camera/IPM-A DTC is asserted disabled", c["camera_ipm_a_dtc_disabled"])
 check("Sienna active IPM-A monitor rows are asserted removed", c["sienna_ipm_a_monitor_rows_removed_in_h"])
 check("external CAN-field equivalence remains false", c["external_can_field_equivalence"] is False)

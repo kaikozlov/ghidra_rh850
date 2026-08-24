@@ -22,6 +22,7 @@ sys.path.insert(0, str(REPO))
 GP = 0xFEBEB800
 TX = struct.Struct("<IBBH")
 PDU = struct.Struct("<HBBHBB")
+TARGET_ANGLE = REPO / "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json"
 
 
 def sha256(data: bytes) -> str:
@@ -139,6 +140,8 @@ def main() -> None:
     fmeta, funcs = validate_function_evidence(args.function_evidence, h)
     census = validate_reference_census(args.reference_census, h)
     structural = json.loads(args.structural.read_text())
+    target_angle = json.loads(TARGET_ANGLE.read_text())
+    if target_angle["sources"]["codeflash"]["sha256"] != sha256(h): raise ValueError("B6 target-angle artifact image drift")
     graph = call_graph(funcs)
 
     # ---- FD receive descriptor boundary ----
@@ -177,8 +180,8 @@ def main() -> None:
     cb6 = funcs[0x46A10]["decompiled_c"]
     expected_b6 = [
         # signal, COM offset, bits, bitoff, signed, raw, stage, snapshot, class, consumers
-        (254, 0x1AA, 6, 0, 0, 0xFEBE7D96, 0xFEBEF127, None, "staged-only-direct-xref-negative", []),
-        (255, 0x1AB, 16, 0, 1, 0xFEBE7D94, 0xFEBEF1CC, None, "signed16-staged-only-direct-xref-negative", []),
+        (254, 0x1AA, 6, 0, 0, 0xFEBE7D96, 0xFEBEF127, 0xFEBEADB0, "target-lateral-control-id-mode-selector", [0xCBE6E]),
+        (255, 0x1AB, 16, 0, 1, 0xFEBE7D94, 0xFEBEF1CC, 0xFEBEAE82, "signed16-target-steering-angle-command", [0xC86E8, 0xC87FC, 0xC9DB0, 0xCB4F4]),
         (256, 0x1AD, 1, 7, 0, 0xFEBE7DA2, 0xFEBEF147, 0xFEBEADDD, "snapshot-only-direct-xref-negative", []),
         (257, 0x1AD, 3, 4, 0, 0xFEBE7D97, 0xFEBEF128, 0xFEBEADB1, "snapshot-only-direct-xref-negative", []),
         (258, 0x1AD, 1, 2, 0, 0xFEBE7D98, 0xFEBEF129, 0xFEBEADBB, "steering-cone-gate", [0xCBEEE]),
@@ -206,9 +209,17 @@ def main() -> None:
         # The compact direct-reference census bounds dead/staged-only claims.
         stage_name = f"b6_sig{sig}_stage_abs"
         stage_refs = refs(census, stage_name)
-        if role.startswith("staged-only") or role.startswith("signed16-staged"):
+        if role.startswith("staged-only"):
             if stage_refs != {0x5262C}:
                 raise ValueError(f"B6 signal {sig} gained direct stage consumers: {stage_refs}")
+        if sig == 254:
+            mode = target_angle["mode_ingress"]
+            if mode["snapshot_destination"] != "0xFEBEADB0" or mode["decoder"] != "0x000CBE6E":
+                raise ValueError("B6 signal254 mode-ID join drift")
+        if sig == 255:
+            ta = target_angle["wire_ingress"]
+            if ta["snapshot_destination"] != "0xFEBEAE82" or ta["classification"] != "authenticated-signed16-target-steering-angle-command":
+                raise ValueError("B6 signal255 target-angle join drift")
         if role.startswith("snapshot-only"):
             rel_name = f"b6_sig{sig}_snapshot"
             abs_name = f"b6_sig{sig}_snapshot_abs"
@@ -333,7 +344,7 @@ def main() -> None:
         "schema": "corolla-8965H1202000-fd-control-interface-v1",
         "evidence_boundary": (
             "Raw generated CAN/PDU/signal configuration is exact-image byte evidence. Consumer roles are target-native decompiler recovery. "
-            "No-consumer/no-writer statements are bounded to the complete direct textual-reference census of the tracked disposable H corpus and do not exclude computed-pointer/alias-only accesses."
+            "Negative no-consumer/no-writer statements remain bounded to the direct textual-reference census, while B6 signals254/255 are explicitly corrected by the exact fixed-map GP-relative audit in the canonical target-angle ingress artifact."
         ),
         "images": {
             "sienna_sha256": sha256(s),
@@ -372,9 +383,13 @@ def main() -> None:
                 "direct_consumers": ["0xC7C70", "0xC819E", "0xCC7F8", "0xCCF58"],
                 "role": "control/status validity gating",
             },
-            "signed16_replacement_command_result": (
-                "signal 255 is the only 16-bit signed B6 scalar, but its staging cell has no direct runtime consumer in the target-native corpus; it is not evidence of a relocated 2E4 torque command"
-            ),
+            "signed16_target_angle_command": {
+                "signal_id": 255,
+                "snapshot_destination": "0xFEBEAE82",
+                "classification": "authenticated target-steering-angle command; not torque",
+                "canonical_proof": str(TARGET_ANGLE.relative_to(REPO)),
+                "physical_scale_closed": target_angle["scaling"]["physical_degree_scale_closed"],
+            },
         },
         "sienna_shaped_branch_corrections": {
             "old_2e4_monitor_branch": {
@@ -408,6 +423,7 @@ def main() -> None:
         "evidence": {
             "function_evidence_sha256": sha256(args.function_evidence.read_bytes()),
             "function_count": fmeta["function_count"],
+            "b6_target_angle_ingress_sha256": sha256(TARGET_ANGLE.read_bytes()),
             "reference_census_sha256": sha256(args.reference_census.read_bytes()),
             "reference_term_count": len(census["terms"]),
         },

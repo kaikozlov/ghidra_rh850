@@ -126,6 +126,7 @@ def main():
  ap.add_argument('--h-struct',type=Path,default=REPO/'data/generated/corolla_8965H1202000_steering_supervisor_structural_evidence.json')
  ap.add_argument('--h-insertions',type=Path,default=REPO/'data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json')
  ap.add_argument('--exact-transfer',type=Path,default=REPO/'data/generated/corolla_8965H1202000_structural_function_transfer.json')
+ ap.add_argument('--b6-target',type=Path,default=REPO/'data/generated/corolla_8965H1202000_b6_target_angle_ingress.json')
  ap.add_argument('--out',type=Path,default=REPO/'data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json')
  a=ap.parse_args();si=a.sienna_image.read_bytes();hi=a.h_image.read_bytes()
  Sf=validate_struct(loadj(a.sienna_struct),si);Hf=validate_struct(loadj(a.h_struct),hi)
@@ -162,14 +163,16 @@ def main():
  for addr,needles in pins.items():
   for needle in needles:
    if needle not in Hdec[addr]:raise ValueError(f'H insertion semantic pin missing {addr:#x} {needle}')
+ target=loadj(a.b6_target)
+ if target['sources']['codeflash']['sha256']!=sha(hi) or target['wire_ingress']['signal_id']!=255 or target['mode_ingress']['signal_id']!=254: raise ValueError('B6 target-angle command proof drift')
  lta=next(r for r in decs if int(r['entry_addr'],16)==0xC8DE0)['decompiled_c']
  if 'authenticated 0x131 STEERING_LTA_2' not in lta or 'DAT_febeae60' not in lta:raise ValueError('Sienna LTA command stage semantic pin missing')
- payload={'schema':'corolla-8965H1202000-steering-supervisor-stage-ledger-v1',
+ payload={'schema':'corolla-8965H1202000-steering-supervisor-stage-ledger-v2',
   'evidence_boundary':'Global order alignment is a navigation aid. Only unique complete instruction-shape pairs are semantic-transfer candidates; other pairs require target-native operand/dataflow review. H/S order-unpaired rows are not global absence proofs.',
   'roots':{'sienna':'0xCB86E','corolla_h':'0xCEDAE','sienna_body_size':sroot['body_size'],'corolla_h_body_size':hroot['body_size'],'sienna_direct_stage_count':len(S),'corolla_h_direct_stage_count':len(H)},
   'summary':{'paired':len(matched),'paired_unique_exact_shape':sum(r['pair_evidence']=='unique-exact-instruction-shape' for r in matched),'paired_high_similarity_nonexact':sum(r['pair_evidence']=='order-aligned-high-similarity' for r in matched),'paired_order_candidate':sum(r['pair_evidence']=='order-aligned-candidate' for r in matched),'h_order_unpaired':len(honly),'sienna_order_unpaired':len(sonly),'h_unpaired_role_counts':{}},
   'stages':stages,'h_order_unpaired':honly,'sienna_order_unpaired':sonly,
-  'explicit_command_mode_boundary':{'classic_2e4':'normal Rx descriptor absent on H and retained clamp branch is independently proven zero-fed','classic_131':'normal Rx/SecOC descriptor absent on H and Sienna lta_angle_command_smoothing 0xC8DE0 is order-unpaired','replacement_command':'no direct replacement is assigned; H-only expansion is classified as supervisor/estimation/plausibility/status unless stronger ingress evidence exists'}}
+  'explicit_command_mode_boundary':{'classic_2e4':'normal Rx descriptor absent on H and retained torque-clamp input remains independently proven zero-fed','classic_131':'normal Rx/SecOC descriptor absent on H and Sienna lta_angle_command_smoothing 0xC8DE0 is order-unpaired','replacement_command':'protected FD 0x0B6 signal255 signed16 B4:B5 is the target-steering-angle command; signal254 B3 is the cooperative mode/control ID. Physical scale and exact OEM mode names remain open.','canonical_proof':str(a.b6_target.relative_to(REPO))}}
  from collections import Counter
  payload['summary']['h_unpaired_role_counts']=dict(sorted(Counter(r['role_class'] for r in honly).items()))
  a.out.parent.mkdir(parents=True,exist_ok=True);a.out.write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')
