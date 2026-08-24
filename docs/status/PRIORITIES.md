@@ -101,10 +101,20 @@ server search input is now joined to the vehicle: `GetPartNumber_DT.dll` uses
 `22 01 05` for `ecuAssyNo` and **`22 F1 81` for the `baseSwNo` array**, reading
 byte 3 as a count and 16-byte records from byte 4. `SaveEcuSupplyChangeSendXmlFile`
 serializes those records under `baseSwNoLst`; the web API's separate
-`strSoftwareId` is `CTISCommon::GetPecID` client identity, not ECU F181. The next
-step is therefore operational rather than another host-static search: read Brake
+`strSoftwareId` is `CTISCommon::GetPecID` client identity, not ECU F181.
+
+TMS-050 closes the client-side result-selection step that remained between search
+and download. Techstream parses `resData/systemAssyInfo`, applies its wired/update
+policy to the improvement records, parses per-ECU `selectSwInfo` records, and
+normalizes selected software into 0x64-byte targets. For the supply-candidate
+path, server `swId` becomes get-cal `swNo`, `fileName` is preserved, and `swType`
+is derived client-side; `systemAssyNo` is a separate assembly/policy identifier.
+`FindCalFile` then removes targets already available in the local `*.cuw` store,
+and only the missing subset is serialized into the get-cal request. The next step
+is therefore operational rather than another host-static search: read Brake
 `7B0/F181` plus `0105` and VIN on the target, run/record the normal Toyota ECU
-Supply Change lookup, and retain the returned package if the service offers one.
+Supply Change lookup, preserve the returned `resData`, and retain the `07B0`
+package if the service offers one.
 
 **Next software-analysis target:** acquire a true-TSS3 CUW whose
 **`Node01/DiagID=07B0`** (category-435 `ABS_P5`/Brake), ideally matched by

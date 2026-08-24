@@ -1304,6 +1304,20 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.techstream_tis_calibration_selection]
+tests = ["tests/verify_techstream_tis_calibration_selection.py"]
+requires_external = ["techstream_v18"]
+modes = ["local"]
+oracle = "independent_external_artifact"
+paths = [
+  "tests/verify_techstream_tis_calibration_selection.py",
+  "docs/tooling/techstream.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.techstream_dtc_failure_types]
 tests = ["tests/verify_techstream_dtc_failure_types.py"]
 requires_external = ["techstream_v18"]

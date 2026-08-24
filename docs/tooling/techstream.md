@@ -2455,7 +2455,43 @@ in TMS-047 is directly the Toyota/TIS **`baseSwNo` search input** at physical
 `7B0`; `22 01 05` supplies the accompanying `ecuAssyNo`. This is a stronger join
 than merely calling F181 a generic CID.
 
-The returned calibration URL then enters `CEcuSupplyChangeFuncProc::DownloadCalFiles`,
+TMS-050 closes the previously bounded **search-result → selected get-cal request**
+bridge. `LoadEcuSupplyChangeDownloadXmlData` parses the returned `resData` tree,
+including `systemAssyInfo/improvementInfo` and `systemAssyInfo/restoreInfo`.
+Each system-assembly record contains, in order, `systemAssyNo`, `displayVersion`,
+`numberingType`, `canOTA`, `canWired`, `updateFlg`, and `comment`. The recovered
+wired-choice control flow requires the first improvement record to have
+`canWired == "1"`; with multiple records it walks subsequent records and marks
+the **last entry in the leading contiguous `canWired == "1"` prefix** (with the
+single-entry case selecting that first record). A later, independent eligibility
+pass checks whether an improvement record has `updateFlg == "1"`. `canOTA` is
+parsed, but no direct `canOTA` test occurs in the two byte-pinned wired/update
+policy blocks; this is a bounded negative, not a claim that the field is unused
+everywhere in Techstream.
+
+Per-ECU `supplyInfo/selectSwInfo` candidates independently parse `swId`, `comment`,
+`fileName`, and `downloadFlg`. The selection page carries the software identity,
+filename, and download flag into hidden columns consumed by
+`SetTargetCalFileInfo`. That routine accepts selected rows, derives `swType`
+client-side from candidate kind/subtype, normalizes them into **0x64-byte target
+records**, and deduplicates on target offsets `+0x18` / `+0x1C`. For the
+`selectSwInfo` supply-candidate path, recovered dataflow identifies the server
+`swId` as the value eventually serialized as get-cal **`swNo`**, while the
+server `fileName` becomes get-cal **`fileName`**. `systemAssyNo` remains a
+distinct assembly/policy identifier; no equality with `swId`/`swNo` is inferred.
+`downloadFlg` is preserved as integer target metadata, but local-file presence is
+checked separately.
+
+Before the remote request, `FindCalFile` clears a dedicated remote-needed list,
+walks the selected 0x64-byte target array, resolves each local calibration
+filename against the `*.cuw` store, and appends only missing targets. The get-cal
+serializer then walks that filtered list (`this+0x144`, count at `+0x14C`) and
+writes repeated **`swNo` / `fileName` / `swType`** fields to
+`SC_<id>_<timestamp>.xml`. `ExecuteEcuSupplyChangeGetCalFile` hands that request
+to `DownloadCalFiles`; its wrappers call `TisServiceDownloadCalFile` and, while
+the URL/result is pending, `TisServiceGetCalFileURL`.
+
+The resulting calibration URL enters `CEcuSupplyChangeFuncProc::DownloadCalFiles`,
 which dynamically loads `IT3TechstreamDotNetUtilityAPI.dll` and resolves
 `EcuSupplyChangeAutoDownloadCalFileAPI`. That bridge calls managed
 `IT3TechstreamDotNetUtility.dll::CEcuSupplyChange::EcuSupplyChangeAutoDownloadCalFile`.
@@ -2463,20 +2499,22 @@ The managed IL validates `strDownloadUrl` / `strDestinationDir`, creates a
 timestamped temporary tree, executes `System.Net.WebClient::DownloadFile`,
 uncompresses the downloaded archive, recursively expands nested `*.zip` files,
 copies the extracted files into the destination with overwrite enabled, and
-removes the temporary tree. The closed end-to-end host path is therefore
-**vehicle ECU identity → F181 `baseSwNo` + `0105` `ecuAssyNo` + VIN → Toyota/TIS
-search → filename/size → calibration URL → ZIP download/extraction → local
-calibration store → SearchCal/CUW processing**. Static analysis does not prove
-that Toyota's current service will return a package for any particular VIN/
-`baseSwNo`, does not recover the server-side matching algorithm, and does not
-supply the missing live Brake values by itself.
+removes the temporary tree. The closed host path is therefore **vehicle ECU
+identity → F181 `baseSwNo` + `0105` `ecuAssyNo` + VIN → Toyota/TIS search →
+`resData` candidate/assembly policy → selected `swId`/`fileName` → local-presence
+filter → get-cal `swNo`/`fileName`/`swType` → calibration URL → ZIP
+download/extraction → local calibration store → SearchCal/CUW processing**.
+Static analysis still does not prove that Toyota's current service will return a
+package for any particular VIN/`baseSwNo`, does not recover the server-side
+matching algorithm, and does not supply the missing live Brake values by itself.
 
 Therefore the next directed acquisition step is now external and exact: on the
 target vehicle, read category-435 Brake/EPB at physical **`7B0`** with **F181**
 (and preserve the `22 01 05` ECU-part-number response plus VIN), then submit the
-normal ECU-supply-change search and retain the returned `07B0` package if Toyota
-serves one. Once acquired, analyze that category-435 firmware together with a
-vehicle/era-matched `0792` FRC image—or capture synchronized stock-LTA traffic—to
+normal ECU-supply-change search, preserve the returned `resData`, and retain the
+returned `07B0` package if Toyota serves one. Once acquired, analyze that
+category-435 firmware together with a vehicle/era-matched `0792` FRC image—or
+capture synchronized stock-LTA traffic—to
 recover the remaining FRC/Brake→protected-B6 transformation and SecOC signer/key/
 freshness ownership. The FRC and Brake/EPB Techstream Active-Test catalogs are
 exhausted as setpoint-writer candidates.
@@ -2605,6 +2643,6 @@ Techstream on a vehicle or bench. The findings describe the *capability* and
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [TMS-001](../reference/index.md#finding-tms-001), [TMS-002](../reference/index.md#finding-tms-002), [TMS-003](../reference/index.md#finding-tms-003), [TMS-004](../reference/index.md#finding-tms-004), [TMS-005](../reference/index.md#finding-tms-005), [TMS-006](../reference/index.md#finding-tms-006), [TMS-007](../reference/index.md#finding-tms-007), [TMS-008](../reference/index.md#finding-tms-008), [TMS-009](../reference/index.md#finding-tms-009), [TMS-010](../reference/index.md#finding-tms-010), [TMS-012](../reference/index.md#finding-tms-012), [TMS-013](../reference/index.md#finding-tms-013), [TMS-017](../reference/index.md#finding-tms-017), [TMS-019](../reference/index.md#finding-tms-019), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [TMS-024](../reference/index.md#finding-tms-024), [TMS-025](../reference/index.md#finding-tms-025), [TMS-026](../reference/index.md#finding-tms-026), [TMS-027](../reference/index.md#finding-tms-027), [TMS-028](../reference/index.md#finding-tms-028), [TMS-029](../reference/index.md#finding-tms-029), [TMS-030](../reference/index.md#finding-tms-030), [TMS-031](../reference/index.md#finding-tms-031), [TMS-032](../reference/index.md#finding-tms-032), [TMS-033](../reference/index.md#finding-tms-033), [TMS-034](../reference/index.md#finding-tms-034), [TMS-035](../reference/index.md#finding-tms-035), [TMS-036](../reference/index.md#finding-tms-036), [TMS-037](../reference/index.md#finding-tms-037), [TMS-038](../reference/index.md#finding-tms-038), [TMS-039](../reference/index.md#finding-tms-039), [TMS-040](../reference/index.md#finding-tms-040), [TMS-041](../reference/index.md#finding-tms-041), [TMS-042](../reference/index.md#finding-tms-042), [TMS-043](../reference/index.md#finding-tms-043), [TMS-044](../reference/index.md#finding-tms-044), [TMS-045](../reference/index.md#finding-tms-045), [TMS-046](../reference/index.md#finding-tms-046), [TMS-047](../reference/index.md#finding-tms-047), [TMS-048](../reference/index.md#finding-tms-048), [TMS-049](../reference/index.md#finding-tms-049)
+- Findings with this document as canonical home: [TMS-001](../reference/index.md#finding-tms-001), [TMS-002](../reference/index.md#finding-tms-002), [TMS-003](../reference/index.md#finding-tms-003), [TMS-004](../reference/index.md#finding-tms-004), [TMS-005](../reference/index.md#finding-tms-005), [TMS-006](../reference/index.md#finding-tms-006), [TMS-007](../reference/index.md#finding-tms-007), [TMS-008](../reference/index.md#finding-tms-008), [TMS-009](../reference/index.md#finding-tms-009), [TMS-010](../reference/index.md#finding-tms-010), [TMS-012](../reference/index.md#finding-tms-012), [TMS-013](../reference/index.md#finding-tms-013), [TMS-017](../reference/index.md#finding-tms-017), [TMS-019](../reference/index.md#finding-tms-019), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [TMS-024](../reference/index.md#finding-tms-024), [TMS-025](../reference/index.md#finding-tms-025), [TMS-026](../reference/index.md#finding-tms-026), [TMS-027](../reference/index.md#finding-tms-027), [TMS-028](../reference/index.md#finding-tms-028), [TMS-029](../reference/index.md#finding-tms-029), [TMS-030](../reference/index.md#finding-tms-030), [TMS-031](../reference/index.md#finding-tms-031), [TMS-032](../reference/index.md#finding-tms-032), [TMS-033](../reference/index.md#finding-tms-033), [TMS-034](../reference/index.md#finding-tms-034), [TMS-035](../reference/index.md#finding-tms-035), [TMS-036](../reference/index.md#finding-tms-036), [TMS-037](../reference/index.md#finding-tms-037), [TMS-038](../reference/index.md#finding-tms-038), [TMS-039](../reference/index.md#finding-tms-039), [TMS-040](../reference/index.md#finding-tms-040), [TMS-041](../reference/index.md#finding-tms-041), [TMS-042](../reference/index.md#finding-tms-042), [TMS-043](../reference/index.md#finding-tms-043), [TMS-044](../reference/index.md#finding-tms-044), [TMS-045](../reference/index.md#finding-tms-045), [TMS-046](../reference/index.md#finding-tms-046), [TMS-047](../reference/index.md#finding-tms-047), [TMS-048](../reference/index.md#finding-tms-048), [TMS-049](../reference/index.md#finding-tms-049), [TMS-050](../reference/index.md#finding-tms-050)
 - Corrections with this document as canonical home: [CORR-018](../reference/index.md#correction-corr-018), [CORR-019](../reference/index.md#correction-corr-019), [CORR-020](../reference/index.md#correction-corr-020), [CORR-021](../reference/index.md#correction-corr-021), [CORR-022](../reference/index.md#correction-corr-022), [CORR-023](../reference/index.md#correction-corr-023), [CORR-027](../reference/index.md#correction-corr-027), [CORR-034](../reference/index.md#correction-corr-034), [CORR-035](../reference/index.md#correction-corr-035), [CORR-039](../reference/index.md#correction-corr-039), [CORR-079](../reference/index.md#correction-corr-079), [CORR-080](../reference/index.md#correction-corr-080), [CORR-081](../reference/index.md#correction-corr-081), [CORR-082](../reference/index.md#correction-corr-082), [CORR-083](../reference/index.md#correction-corr-083), [CORR-084](../reference/index.md#correction-corr-084), [CORR-085](../reference/index.md#correction-corr-085), [CORR-091](../reference/index.md#correction-corr-091), [CORR-102](../reference/index.md#correction-corr-102), [CORR-103](../reference/index.md#correction-corr-103), [CORR-104](../reference/index.md#correction-corr-104)
 <!-- knowledge-cross-references:end -->

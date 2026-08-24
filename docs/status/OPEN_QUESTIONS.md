@@ -135,10 +135,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   number and VIN, then run/record the Toyota ECU Supply Change lookup. TMS-048
   proves `SearchCal.dll` is local-only; TMS-049 closes the real remote handoff and
   proves the uploaded search XML uses F181's 16-byte records as `baseSwNo` values
-  while `0105` supplies `ecuAssyNo`. Toyota's server then returns filename/size and
-  a calibration URL, which the managed utility downloads/unzips into the local
-  store. The unresolved external facts are the **actual Brake F181/0105 values and
-  whether Toyota's live service returns the desired `07B0` package for that VIN**.
+  while `0105` supplies `ecuAssyNo`. TMS-050 closes the returned-result client
+  policy: Techstream parses `systemAssyInfo` and per-ECU `selectSwInfo`, resolves
+  selected software to server `swId`/`fileName`, filters targets already present
+  as local `*.cuw`, then emits the missing subset as get-cal
+  `swNo`/`fileName`/`swType` before URL polling and managed download. In that
+  path `swNo` is the selected server `swId`, not `systemAssyNo`. The unresolved
+  external facts are the **actual Brake F181/0105 values, the live `resData`, and
+  whether Toyota's service returns the desired `07B0` package for that VIN**.
   The FRC-only `1FFF` SWIN path remains unrelated.
   Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3 ·
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §§7.34–7.35.
