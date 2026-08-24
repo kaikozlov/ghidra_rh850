@@ -48,20 +48,32 @@ LTA/LCA Steering Vibration are fixed routines `0x1508/0x1588/0x15C8` with no
 command/output-mask/button payload variables. `SingleRoutineActTstP5_DT.dll`
 uses a `D5 -> D7 -> D6` `21 E2 <RID BE16>` sequence; the vibration status
 pattern is byte `02`. The remaining unknown is the camera's downstream
-vehicle-network effect of those routines. The ADS_Eth_P5 target-angle order
-rows (406/407, rad/s and rad via
-the PhyData→Unit chain) are recorded-snapshot evidence, and a 402-file corpus
-scan proves the `0x1CEE/0x1CEF` steering-observer **type-62 primary Data-ID
-declarations** occur only in `EMPS_P5`/`EMPS2_P5` — exact Corolla H
-implements neither.
+vehicle-network effect of those routines. TMS-043 now closes the **module-level
+upstream topology** without claiming payload forwarding: Corolla P5 sets pair
+`FRC_P5` 498 and `EMPS_P5` 405 with category **435 `ABS_P5` = Brake/EPB**;
+`FRC_P5` carries X216E `Front Recognition Camera => BRK Communication Invalid`
+plus brake/EPS/ADS-interface missing-message DTCs; `ABS_P5` monitors EPS
+communication and exposes `0x107E ADS Control EPS Pinion Angle2` at a verified
+0.00025 rad/count. The same `0x107E` engineering conversion is shared by the
+Brake-Booster and EPB P5 diagnostic databases. Exact H independently maps B6
+loss to U012987 Brake System Control Module. Because FRC also monitors EPS
+directly and both FRC/ABS reference an Automated Driving System Interface
+module, this is not proof of an FRC→ABS→B6 byte-forwarding chain. The ADS_Eth_P5
+target-angle order rows remain recorded-snapshot evidence, and `0x1CEE/0x1CEF`
+remain steering-observer DIDs absent from exact H.
 
-**Next software-analysis target:** acquire and analyze **`FRC_P5` camera
-firmware** (Front Recognition Camera 2) for a true-TSS 3 vehicle and recover
-its lateral-control producer contract: how the camera's target state reaches the
-now-proved EPS receiver surface — protected `0x0B6` signal254 mode/control ID +
-signal255 target steering angle — through the Brake System Control Module, and
-where SecOC/routing ownership changes between those ECUs. TMS-042 makes the same acquisition the highest-value
-reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
+TMS-044 additionally closes the category-435 Techstream Active-Test avenue: its
+20 direct tests and four routines are brake-actuator-only, with no steering/EPS/ADS/
+lateral/pinion named catalog row; all four routines have zero variable-backed
+command/mask/button payloads. Do not spend another static pass looking for the normal
+B6 producer in that Active-Test catalog.
+
+**Next software-analysis target:** acquire and analyze **`FRC_P5` camera plus
+category-435 `ABS_P5`/Brake firmware** for a true-TSS 3 vehicle—or capture a
+synchronized stock-LTA session across those modules—and recover the remaining
+payload contract: how planner state becomes protected `0x0B6` signal254/255,
+which module signs it, and where SecOC routing/key/freshness ownership changes.
+TMS-042 makes the same acquisition the highest-value reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
 `DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as
 opaque bytes. A matching FRC boot/programming image is therefore the missing
@@ -289,9 +301,10 @@ Capture protected `0x0B6` during stock steering only to validate these static re
 rules, recover sender wall-clock cadence and exact secondary-field names where needed,
 and derive normal target/rate bounds. In parallel, recover the B6 **SecOC** freshness/
 source/key contract and determine whether slot-4 command-5 can produce the required
-authenticated domain on real hardware. `FRC_P5` plus Brake/EPB/gateway firmware is
-now the primary software target for **upstream ownership, sender cadence, and routing/
-authentication**, not for discovering the EPS setpoint/request/loss contract. For a Sienna-style
+authenticated domain on real hardware. Decoded `FRC_P5` plus category-435
+`ABS_P5`/Brake firmware is now the primary software target for the **remaining payload transform, sender cadence,
+and routing/authentication ownership**, not for discovering the EPS setpoint/request/
+loss contract; TMS-043 has already closed the module-level topology. For a Sienna-style
 applicable EPS, separately retain the existing valid signed `0x2E4/0x131` command
 experiment.
 

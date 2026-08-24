@@ -374,10 +374,16 @@ mean?", or "how quickly does the EPS drop a missing B6 in its own scheduler?"
 Receiver request selection, the 7-tick primary loss cutoff, and modulo-64 sequence
 handling are closed. The remaining command-side unknowns are the **sender-side**
 wall-clock cadence, SecOC freshness/key/source contract, stock-source suppression,
-exact OEM names for the secondary B6 fields, and the upstream
-`FRC_P5 -> Brake/EPB -> EPS` producer/routing chain. The literal OEM engineering-
-unit name for signal255 is also still unjoined even though its controller-equivalent
-degree/radian scale is closed.
+exact OEM names for the secondary B6 fields, and the upstream **payload/SecOC
+producer contract**. Techstream now closes the module-level topology more tightly:
+Corolla P5 pairs `FRC_P5` 498 with category 435 **`ABS_P5` = Brake/EPB** and
+`EMPS_P5` 405; FRC has X216E `Front Recognition Camera => BRK Communication
+Invalid`, ABS monitors EPS communication, and H maps B6 loss to U012987 Brake
+System Control Module. `ABS_P5` DID `0x107E ADS Control EPS Pinion Angle2` is a
+signed 0.00025-rad/count diagnostic observer. This still does not prove a
+byte-level FRC→ABS→B6 forwarding chain or identify the SecOC signer. The literal
+OEM engineering-unit name for signal255 is also still unjoined even though its
+controller-equivalent degree/radian scale is closed.
 
 ## 9. Porting roadmap after this recovery
 
@@ -409,9 +415,9 @@ The receiver-side command carrier is now identified, so the decisive experiment 
   names/behavior, and normal target/rate bounds before any injection attempt;
 - recover the B6 SecOC freshness/key/source contract and stock-source suppression
   requirements; and
-- acquire/analyze true-TSS3 `FRC_P5` plus Brake/EPB/gateway producer-side firmware
-  or synchronized captures to explain how the target is generated and routed to the
-  EPS.
+- acquire/analyze true-TSS3 `FRC_P5` plus category-435 `ABS_P5`/Brake firmware,
+  or synchronized FRC/Brake/EPS captures, to explain the still-open byte-level target
+  transformation and SecOC sender/key/freshness ownership.
 
 The command-side unknown is therefore upstream ownership and safe reproduction of a
 known EPS receiver contract, not discovery of another replacement `0x2E4`.

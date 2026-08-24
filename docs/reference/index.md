@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 293 · Corrections: 107 · Open questions: 52 · Docs: 99 · Suites: 191
+Findings: 295 · Corrections: 107 · Open questions: 52 · Docs: 99 · Suites: 191
 
 ## Reading this index
 
@@ -262,8 +262,10 @@ Findings: 293 · Corrections: 107 · Open questions: 52 · Docs: 99 · Suites: 1
 | <a id="finding-tms-038"></a>**TMS-038** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md](../history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md) | [TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23](../history/2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md), [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_techstream_cuw_vforest.py` | OQ-039 |
 | <a id="finding-tms-039"></a>**TMS-039** | [docs/tooling/techstream.md](../tooling/techstream.md), [docs/history/2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md](../history/2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_techstream_cuw_vforest_corpus.py` | OQ-039 |
 | <a id="finding-tms-040"></a>**TMS-040** | [docs/tooling/techstream.md](../tooling/techstream.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_techstream_p5_lateral_control.py`, `tests/verify_corolla_8965H1202000_techstream_correlations.py` | OQ-005 |
-| <a id="finding-tms-041"></a>**TMS-041** | [docs/tooling/techstream.md](../tooling/techstream.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_techstream_p5_lateral_control.py` | OQ-005 |
+| <a id="finding-tms-041"></a>**TMS-041** | [docs/tooling/techstream.md](../tooling/techstream.md) | [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_techstream_p5_lateral_control.py` | — |
 | <a id="finding-tms-042"></a>**TMS-042** | [docs/tooling/techstream.md](../tooling/techstream.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_techstream_cuw_frc_corpus.py` | OQ-039, OQ-040 |
+| <a id="finding-tms-043"></a>**TMS-043** | [docs/tooling/techstream.md](../tooling/techstream.md) | [CORRECTIONS](../status/CORRECTIONS.md), [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md), [corolla-2023-us-public-route](../variants/corolla-2023-us-public-route.md) (+1) | `tests/verify_techstream_p5_lateral_control.py`, `tests/verify_corolla_8965H1202000_techstream_correlations.py` | OQ-005 |
+| <a id="finding-tms-044"></a>**TMS-044** | [docs/tooling/techstream.md](../tooling/techstream.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md), [PRIORITIES](../status/PRIORITIES.md) | `tests/verify_techstream_p5_lateral_control.py` | OQ-005 |
 | <a id="finding-var-001"></a>**VAR-001** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | [ANALYSIS_STATUS](../status/ANALYSIS_STATUS.md) | `tests/verify_tss3_variant_matrix.py` | — |
 | <a id="finding-var-002"></a>**VAR-002** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_spanconstant_corolla_equivalence.py`, `tests/verify_spanconstant_corolla_cross_variant.py`, `tests/verify_tss3_variant_matrix.py` | — |
 | <a id="finding-var-003"></a>**VAR-003** | [docs/variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md) | — | `tests/verify_spanconstant_corolla_codeflash.py`, `tests/verify_tss3_variant_matrix.py` | — |
@@ -321,7 +323,7 @@ Findings: 293 · Corrections: 107 · Open questions: 52 · Docs: 99 · Suites: 1
 | <a id="open-question-oq-002"></a>**OQ-002** | `0xAB` event-record naming | Application | — |
 | <a id="open-question-oq-003"></a>**OQ-003** | Live confirmation of the RDBI stale-response disclosure | Application | — |
 | <a id="open-question-oq-004"></a>**OQ-004** | XCP physical reachability; dynamic-only write consumers | Application | COM-005, COM-007, CORR-060 |
-| <a id="open-question-oq-005"></a>**OQ-005** | Dynamic authenticated-command actuation discriminator | Application | COM-007, TMS-021, VAR-014, VAR-017, VAR-036, CORR-107, TMS-040, TMS-041 |
+| <a id="open-question-oq-005"></a>**OQ-005** | Dynamic authenticated-command actuation discriminator | Application | COM-007, TMS-021, VAR-014, VAR-017, VAR-036, CORR-107, TMS-040, TMS-043, TMS-044 |
 | <a id="open-question-oq-006"></a>**OQ-006** | Cross-calibration ephemeral runtime transfer | SecOC | — |
 | <a id="open-question-oq-007"></a>**OQ-007** | Ephemeral scheduler-bridge hardware validation | SecOC | ARCH-013, SECOC-060 |
 | <a id="open-question-oq-008"></a>**OQ-008** | Cross-calibration semantic patch resolver validation | SecOC | SECOC-045 |

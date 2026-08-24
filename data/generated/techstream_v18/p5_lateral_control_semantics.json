@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "source": "Techstream V18.00.003",
   "sources": {
     "EMPS_P5.ddb": {
@@ -98,6 +98,48 @@
       "JP": {
         "size": 49662,
         "sha256": "89db9903921124475d50035cb6cd91a3f2cdf284b3990ed9b832692f487bba5e"
+      }
+    },
+    "ABS_P5.ddb": {
+      "NA": {
+        "size": 114334,
+        "sha256": "d5e1b2f955aba6a94e7c3182833573561acc6154704adbffa08b93c60dced471"
+      },
+      "EU": {
+        "size": 115150,
+        "sha256": "5988f41c51faaf983df11fd749bbd71aaf449e2dad4f49389433e4d171ebe86a"
+      },
+      "JP": {
+        "size": 114334,
+        "sha256": "37935f7c364da635651547a781e45c050da962e39948b7bbbb30390867913d41"
+      }
+    },
+    "Brk_Bst_P5.ddb": {
+      "NA": {
+        "size": 114350,
+        "sha256": "065022b19c90a8fa7a056754b84e4a2e8cb08b2fbfc54cd47aaa8270d070de60"
+      },
+      "EU": {
+        "size": 114350,
+        "sha256": "4ba78c6a709befc266dd1bb495fef529cf1628178fa97d28d75f74ad854e4de4"
+      },
+      "JP": {
+        "size": 114350,
+        "sha256": "22f7aa9b9b33051fef5fb154d7083e8b52455803892916c512b2217bfd0636e1"
+      }
+    },
+    "EPB_P5.ddb": {
+      "NA": {
+        "size": 111980,
+        "sha256": "4ef2cc921829a222e429c2359d31ef1470a2eb1d08acf14ef1db827febd48db7"
+      },
+      "EU": {
+        "size": 111980,
+        "sha256": "d56290989a729cde8d5f4914de803b4c3f463ad6b93875b11fe15392bd1df462"
+      },
+      "JP": {
+        "size": 111980,
+        "sha256": "528e5acddca0f362521cb252645dcd6ea5fb71b507e74ca18778b9fab320fb0f"
       }
     },
     "KgpDataCtrl.dll": {
@@ -203,6 +245,27 @@
         "generation": 20,
         "resolved_ecu_name": "Front Recognition Camera 2",
         "raw_sha256": "7706ec5721ae4cc929b03d03ff03b287461e31f07406512b879948d4218c1351"
+      },
+      "ABS_P5.ddb": {
+        "record_index": 404,
+        "category_id": 435,
+        "generation": 20,
+        "resolved_ecu_name": "Brake/EPB",
+        "raw_sha256": "c04cc08392eab52fbca2193fae576ebc557b7a2d25ca85b73025c7a0b319765c"
+      },
+      "Brk_Bst_P5.ddb": {
+        "record_index": 434,
+        "category_id": 466,
+        "generation": 20,
+        "resolved_ecu_name": "Brake Booster",
+        "raw_sha256": "31a123395ca02d61e6014064082ca65060f54543e5c1fedaa6b0ed183eb2ec16"
+      },
+      "EPB_P5.ddb": {
+        "record_index": 453,
+        "category_id": 485,
+        "generation": 20,
+        "resolved_ecu_name": "Electric Parking Brake",
+        "raw_sha256": "df554d7b6df38f1beea1236aa138a7d1edb42563dd03eadc57976d6da2f7a623"
       }
     },
     "EU": {
@@ -254,6 +317,27 @@
         "generation": 20,
         "resolved_ecu_name": "Front Recognition Camera 2",
         "raw_sha256": "7706ec5721ae4cc929b03d03ff03b287461e31f07406512b879948d4218c1351"
+      },
+      "ABS_P5.ddb": {
+        "record_index": 404,
+        "category_id": 435,
+        "generation": 20,
+        "resolved_ecu_name": "Brake/EPB",
+        "raw_sha256": "c04cc08392eab52fbca2193fae576ebc557b7a2d25ca85b73025c7a0b319765c"
+      },
+      "Brk_Bst_P5.ddb": {
+        "record_index": 434,
+        "category_id": 466,
+        "generation": 20,
+        "resolved_ecu_name": "Brake Booster",
+        "raw_sha256": "31a123395ca02d61e6014064082ca65060f54543e5c1fedaa6b0ed183eb2ec16"
+      },
+      "EPB_P5.ddb": {
+        "record_index": 453,
+        "category_id": 485,
+        "generation": 20,
+        "resolved_ecu_name": "Electric Parking Brake",
+        "raw_sha256": "df554d7b6df38f1beea1236aa138a7d1edb42563dd03eadc57976d6da2f7a623"
       }
     },
     "JP": {
@@ -305,6 +389,27 @@
         "generation": 20,
         "resolved_ecu_name": "Front Recognition Camera 2",
         "raw_sha256": "7706ec5721ae4cc929b03d03ff03b287461e31f07406512b879948d4218c1351"
+      },
+      "ABS_P5.ddb": {
+        "record_index": 404,
+        "category_id": 435,
+        "generation": 20,
+        "resolved_ecu_name": "Brake/EPB",
+        "raw_sha256": "c04cc08392eab52fbca2193fae576ebc557b7a2d25ca85b73025c7a0b319765c"
+      },
+      "Brk_Bst_P5.ddb": {
+        "record_index": 434,
+        "category_id": 466,
+        "generation": 20,
+        "resolved_ecu_name": "Brake Booster",
+        "raw_sha256": "31a123395ca02d61e6014064082ca65060f54543e5c1fedaa6b0ed183eb2ec16"
+      },
+      "EPB_P5.ddb": {
+        "record_index": 453,
+        "category_id": 485,
+        "generation": 20,
+        "resolved_ecu_name": "Electric Parking Brake",
+        "raw_sha256": "df554d7b6df38f1beea1236aa138a7d1edb42563dd03eadc57976d6da2f7a623"
       }
     }
   },
@@ -1845,6 +1950,1758 @@
     ],
     "finding": "Newer Corolla-family TSS3 configurations pair FRC_P5 (498) with EMPS_P5 (405) steering; EMPS2_P5 (499) is absent from these Corolla/HV/Cross/GR install sets. GR Corolla uses category 142 (display name EMPS) instead of 405."
   },
+  "upstream_lateral_route": {
+    "module_topology": {
+      "corolla_install_sets": [
+        {
+          "model_name": "Corolla",
+          "vehicle_id": "0x30E0",
+          "install_set_id": "0x1D78",
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            498
+          ]
+        },
+        {
+          "model_name": "Corolla",
+          "vehicle_id": "0x30E1",
+          "install_set_id": "0x1D7B",
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            498
+          ]
+        },
+        {
+          "model_name": "Corolla",
+          "vehicle_id": "0x30E4",
+          "install_set_id": "0x1D84",
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            498
+          ]
+        },
+        {
+          "model_name": "Corolla",
+          "vehicle_id": "0x30FE",
+          "install_set_id": "0x1DD2",
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            498
+          ]
+        },
+        {
+          "model_name": "Corolla",
+          "vehicle_id": "0x30FF",
+          "install_set_id": "0x1DD5",
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            498
+          ]
+        },
+        {
+          "model_name": "Corolla HV",
+          "vehicle_id": "0x30E2",
+          "install_set_id": "0x1D7E",
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            498
+          ]
+        },
+        {
+          "model_name": "Corolla HV",
+          "vehicle_id": "0x30E3",
+          "install_set_id": "0x1D81",
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            498
+          ]
+        },
+        {
+          "model_name": "Corolla Cross",
+          "vehicle_id": "0x311F",
+          "install_set_id": "0x1E35",
+          "categories": [
+            118,
+            405,
+            435,
+            445,
+            452,
+            498,
+            5005
+          ]
+        },
+        {
+          "model_name": "Corolla Cross",
+          "vehicle_id": "0x3120",
+          "install_set_id": "0x1E38",
+          "categories": [
+            118,
+            405,
+            435,
+            445,
+            452,
+            498,
+            5005
+          ]
+        },
+        {
+          "model_name": "Corolla Cross HEV",
+          "vehicle_id": "0x3121",
+          "install_set_id": "0x1E3B",
+          "categories": [
+            405,
+            435,
+            445,
+            452,
+            466,
+            498,
+            5005
+          ]
+        }
+      ],
+      "required_categories": {
+        "498": "FRC_P5 / Front Recognition Camera 2",
+        "435": "ABS_P5 / Brake/EPB",
+        "405": "EMPS_P5 / EMPS"
+      },
+      "interpretation": "Every Corolla-family install set in this artifact that contains FRC_P5(498) and EMPS_P5(405) also contains category 435, which Toyota.ddb resolves exactly to ABS_P5.ddb / Brake/EPB."
+    },
+    "regions": {
+      "NA": {
+        "category_435": {
+          "database": "ABS_P5.ddb",
+          "resolved_ecu_name": "Brake/EPB",
+          "generation": 20,
+          "raw_sha256": "c04cc08392eab52fbca2193fae576ebc557b7a2d25ca85b73025c7a0b319765c"
+        },
+        "frc_behavior": {
+          "frc_to_brake_invalid": {
+            "record_index": 47,
+            "behavior_signature": "X216E",
+            "name": "Front Recognition Camera => BRK Communication Invalid",
+            "raw_sha256": "28c005ac872ed05982857248c100ca978c436eb3e6600e557a7803f1ae44fddd"
+          },
+          "eps_security_key_not_registered": {
+            "record_index": 45,
+            "behavior_signature": "X2166",
+            "name": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")",
+            "raw_sha256": "92da644a197d7082ad1560f70a8d33018c650eb9b3a59f674839546f7a4715a6"
+          },
+          "vsc_security_key_not_registered": {
+            "record_index": 46,
+            "behavior_signature": "X2167",
+            "name": "Communication Error by ECU Security Key Not Registered (VSC)",
+            "raw_sha256": "6dbba3401c07a4a21c56b5e9b5d115730fb9d5a5a058e59d8af3f88f7f4842a8"
+          }
+        },
+        "frc_communication_dtcs": {
+          "brake": {
+            "record_index": 24,
+            "code": "U012987",
+            "description": "Lost Communication with Brake System Control Module \"A\"",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC12987",
+            "raw_sha256": "a5a742f6f6d06c7ec5cc177a94bb3e1b0d510e0cccee1c3964d4f82c08a00521"
+          },
+          "eps": {
+            "record_index": 25,
+            "code": "U013187",
+            "description": "Lost Communication with Power Steering Control Module \"A\"",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC13187",
+            "raw_sha256": "db571b801e8f3d30b0545eb568560e685ec47ff5f596181b06db762e4d55aeb0"
+          },
+          "ads_interface": {
+            "record_index": 31,
+            "code": "U015E87",
+            "description": "Lost Communication with Automated Driving System Interface Module \"A\"",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC15E87",
+            "raw_sha256": "8cff1c3be0b0f04adb4c150a58c69dd6087cb9902b268cfd3dffc4ea6de4e2f6"
+          }
+        },
+        "brake_communication_dtcs": {
+          "eps": {
+            "record_index": 622,
+            "code": "U013187",
+            "description": "Lost Communication with Power Steering Control Module",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC13187",
+            "raw_sha256": "3f63ed5fbf8ede58cc7b86b213973d30871947434fa17785ae1f5ef618be5873"
+          },
+          "eps_ch2": {
+            "record_index": 665,
+            "code": "U11B187",
+            "description": "Lost Communication with Power Steering Control Module \"A\" (ch2)",
+            "failure": "Missing Message",
+            "packed_dtc": "0xD1B187",
+            "raw_sha256": "413e431c6b14822b004e2d57fb57320b18e15319c1e8d3e728c209d323b1d56f"
+          },
+          "ads_interface_ch3": {
+            "record_index": 664,
+            "code": "U11A987",
+            "description": "Lost Communication with Automated Driving System Interface Module \"A\" (ch3)",
+            "failure": "Missing Message",
+            "packed_dtc": "0xD1A987",
+            "raw_sha256": "7d13b9bd164f44ee2d9812f25c9d65f87e8a110521fac31482e59b6308bb60bf"
+          }
+        },
+        "brake_monitors": {
+          "eps_communication_open": {
+            "record_index": 489,
+            "monitor_key": 500,
+            "name": "EPS/Steering Control Actuator ECU Communication Open",
+            "primary_data_id": "0x102F",
+            "bit_range": [
+              74,
+              74
+            ],
+            "raw_sha256": "02e9692a5f75ad8317adc93a2502571395aab6b477f5d0053517b4cc43571c33"
+          },
+          "ads_control_eps_pinion_angle2": {
+            "record_index": 306,
+            "monitor_key": 314,
+            "name": "ADS Control EPS Pinion Angle2",
+            "primary_data_id": "0x107E",
+            "alternate_data_id": "0x307E",
+            "bit_range": [
+              0,
+              23
+            ],
+            "physical_data_key": 65,
+            "physical_record_index": 64,
+            "mul": 25,
+            "div": 1,
+            "offset": 0,
+            "signed": true,
+            "decimal_point_count": 5,
+            "unit_key": 81,
+            "unit_record_index": 11,
+            "unit": "rad",
+            "data_range": [
+              -131072,
+              131071
+            ],
+            "graph_range": [
+              -3276800,
+              3276775
+            ],
+            "display_scale_per_raw_count": 0.00025,
+            "monitor_raw_sha256": "b0c0d18224e2b88a150e3de7f4442f09dd6fc4b5779ccd1c47dd33089257cf3c",
+            "physical_raw_sha256": "a7dcb890a79664a32975e8db2d08f1041ece2704b2fd75aec61cf245e778c2d7"
+          }
+        },
+        "abs_target_lateral_name_negative": {
+          "scanned_table_types": [
+            62,
+            88
+          ],
+          "matches": []
+        }
+      },
+      "EU": {
+        "category_435": {
+          "database": "ABS_P5.ddb",
+          "resolved_ecu_name": "Brake/EPB",
+          "generation": 20,
+          "raw_sha256": "c04cc08392eab52fbca2193fae576ebc557b7a2d25ca85b73025c7a0b319765c"
+        },
+        "frc_behavior": {
+          "frc_to_brake_invalid": {
+            "record_index": 47,
+            "behavior_signature": "X216E",
+            "name": "Front Recognition Camera => BRK Communication Invalid",
+            "raw_sha256": "28c005ac872ed05982857248c100ca978c436eb3e6600e557a7803f1ae44fddd"
+          },
+          "eps_security_key_not_registered": {
+            "record_index": 45,
+            "behavior_signature": "X2166",
+            "name": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")",
+            "raw_sha256": "92da644a197d7082ad1560f70a8d33018c650eb9b3a59f674839546f7a4715a6"
+          },
+          "vsc_security_key_not_registered": {
+            "record_index": 46,
+            "behavior_signature": "X2167",
+            "name": "Communication Error by ECU Security Key Not Registered (VSC)",
+            "raw_sha256": "6dbba3401c07a4a21c56b5e9b5d115730fb9d5a5a058e59d8af3f88f7f4842a8"
+          }
+        },
+        "frc_communication_dtcs": {
+          "brake": {
+            "record_index": 24,
+            "code": "U012987",
+            "description": "Lost Communication with Brake System Control Module \"A\"",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC12987",
+            "raw_sha256": "a5a742f6f6d06c7ec5cc177a94bb3e1b0d510e0cccee1c3964d4f82c08a00521"
+          },
+          "eps": {
+            "record_index": 25,
+            "code": "U013187",
+            "description": "Lost Communication with Power Steering Control Module \"A\"",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC13187",
+            "raw_sha256": "db571b801e8f3d30b0545eb568560e685ec47ff5f596181b06db762e4d55aeb0"
+          },
+          "ads_interface": {
+            "record_index": 31,
+            "code": "U015E87",
+            "description": "Lost Communication with Automated Driving System Interface Module \"A\"",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC15E87",
+            "raw_sha256": "8cff1c3be0b0f04adb4c150a58c69dd6087cb9902b268cfd3dffc4ea6de4e2f6"
+          }
+        },
+        "brake_communication_dtcs": {
+          "eps": {
+            "record_index": 622,
+            "code": "U013187",
+            "description": "Lost Communication with Power Steering Control Module",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC13187",
+            "raw_sha256": "3f63ed5fbf8ede58cc7b86b213973d30871947434fa17785ae1f5ef618be5873"
+          },
+          "eps_ch2": {
+            "record_index": 665,
+            "code": "U11B187",
+            "description": "Lost Communication with Power Steering Control Module \"A\" (ch2)",
+            "failure": "Missing Message",
+            "packed_dtc": "0xD1B187",
+            "raw_sha256": "413e431c6b14822b004e2d57fb57320b18e15319c1e8d3e728c209d323b1d56f"
+          },
+          "ads_interface_ch3": {
+            "record_index": 664,
+            "code": "U11A987",
+            "description": "Lost Communication with Automated Driving System Interface Module \"A\" (ch3)",
+            "failure": "Missing Message",
+            "packed_dtc": "0xD1A987",
+            "raw_sha256": "7d13b9bd164f44ee2d9812f25c9d65f87e8a110521fac31482e59b6308bb60bf"
+          }
+        },
+        "brake_monitors": {
+          "eps_communication_open": {
+            "record_index": 489,
+            "monitor_key": 500,
+            "name": "EPS/Steering Control Actuator ECU Communication Open",
+            "primary_data_id": "0x102F",
+            "bit_range": [
+              74,
+              74
+            ],
+            "raw_sha256": "02e9692a5f75ad8317adc93a2502571395aab6b477f5d0053517b4cc43571c33"
+          },
+          "ads_control_eps_pinion_angle2": {
+            "record_index": 306,
+            "monitor_key": 314,
+            "name": "ADS Control EPS Pinion Angle2",
+            "primary_data_id": "0x107E",
+            "alternate_data_id": "0x307E",
+            "bit_range": [
+              0,
+              23
+            ],
+            "physical_data_key": 65,
+            "physical_record_index": 64,
+            "mul": 25,
+            "div": 1,
+            "offset": 0,
+            "signed": true,
+            "decimal_point_count": 5,
+            "unit_key": 81,
+            "unit_record_index": 11,
+            "unit": "rad",
+            "data_range": [
+              -131072,
+              131071
+            ],
+            "graph_range": [
+              -3276800,
+              3276775
+            ],
+            "display_scale_per_raw_count": 0.00025,
+            "monitor_raw_sha256": "b0c0d18224e2b88a150e3de7f4442f09dd6fc4b5779ccd1c47dd33089257cf3c",
+            "physical_raw_sha256": "a7dcb890a79664a32975e8db2d08f1041ece2704b2fd75aec61cf245e778c2d7"
+          }
+        },
+        "abs_target_lateral_name_negative": {
+          "scanned_table_types": [
+            62,
+            88
+          ],
+          "matches": []
+        }
+      },
+      "JP": {
+        "category_435": {
+          "database": "ABS_P5.ddb",
+          "resolved_ecu_name": "Brake/EPB",
+          "generation": 20,
+          "raw_sha256": "c04cc08392eab52fbca2193fae576ebc557b7a2d25ca85b73025c7a0b319765c"
+        },
+        "frc_behavior": {
+          "frc_to_brake_invalid": {
+            "record_index": 47,
+            "behavior_signature": "X216E",
+            "name": "Front Recognition Camera => BRK Communication Invalid",
+            "raw_sha256": "28c005ac872ed05982857248c100ca978c436eb3e6600e557a7803f1ae44fddd"
+          },
+          "eps_security_key_not_registered": {
+            "record_index": 45,
+            "behavior_signature": "X2166",
+            "name": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")",
+            "raw_sha256": "92da644a197d7082ad1560f70a8d33018c650eb9b3a59f674839546f7a4715a6"
+          },
+          "vsc_security_key_not_registered": {
+            "record_index": 46,
+            "behavior_signature": "X2167",
+            "name": "Communication Error by ECU Security Key Not Registered (VSC)",
+            "raw_sha256": "6dbba3401c07a4a21c56b5e9b5d115730fb9d5a5a058e59d8af3f88f7f4842a8"
+          }
+        },
+        "frc_communication_dtcs": {
+          "brake": {
+            "record_index": 24,
+            "code": "U012987",
+            "description": "Lost Communication with Brake System Control Module \"A\"",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC12987",
+            "raw_sha256": "a5a742f6f6d06c7ec5cc177a94bb3e1b0d510e0cccee1c3964d4f82c08a00521"
+          },
+          "eps": {
+            "record_index": 25,
+            "code": "U013187",
+            "description": "Lost Communication with Power Steering Control Module \"A\"",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC13187",
+            "raw_sha256": "db571b801e8f3d30b0545eb568560e685ec47ff5f596181b06db762e4d55aeb0"
+          },
+          "ads_interface": {
+            "record_index": 31,
+            "code": "U015E87",
+            "description": "Lost Communication with Automated Driving System Interface Module \"A\"",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC15E87",
+            "raw_sha256": "8cff1c3be0b0f04adb4c150a58c69dd6087cb9902b268cfd3dffc4ea6de4e2f6"
+          }
+        },
+        "brake_communication_dtcs": {
+          "eps": {
+            "record_index": 622,
+            "code": "U013187",
+            "description": "Lost Communication with Power Steering Control Module",
+            "failure": "Missing Message",
+            "packed_dtc": "0xC13187",
+            "raw_sha256": "3f63ed5fbf8ede58cc7b86b213973d30871947434fa17785ae1f5ef618be5873"
+          },
+          "eps_ch2": {
+            "record_index": 665,
+            "code": "U11B187",
+            "description": "Lost Communication with Power Steering Control Module \"A\" (ch2)",
+            "failure": "Missing Message",
+            "packed_dtc": "0xD1B187",
+            "raw_sha256": "413e431c6b14822b004e2d57fb57320b18e15319c1e8d3e728c209d323b1d56f"
+          },
+          "ads_interface_ch3": {
+            "record_index": 664,
+            "code": "U11A987",
+            "description": "Lost Communication with Automated Driving System Interface Module \"A\" (ch3)",
+            "failure": "Missing Message",
+            "packed_dtc": "0xD1A987",
+            "raw_sha256": "7d13b9bd164f44ee2d9812f25c9d65f87e8a110521fac31482e59b6308bb60bf"
+          }
+        },
+        "brake_monitors": {
+          "eps_communication_open": {
+            "record_index": 489,
+            "monitor_key": 500,
+            "name": "EPS/Steering Control Actuator ECU Communication Open",
+            "primary_data_id": "0x102F",
+            "bit_range": [
+              74,
+              74
+            ],
+            "raw_sha256": "02e9692a5f75ad8317adc93a2502571395aab6b477f5d0053517b4cc43571c33"
+          },
+          "ads_control_eps_pinion_angle2": {
+            "record_index": 306,
+            "monitor_key": 314,
+            "name": "ADS Control EPS Pinion Angle2",
+            "primary_data_id": "0x107E",
+            "alternate_data_id": "0x307E",
+            "bit_range": [
+              0,
+              23
+            ],
+            "physical_data_key": 65,
+            "physical_record_index": 64,
+            "mul": 25,
+            "div": 1,
+            "offset": 0,
+            "signed": true,
+            "decimal_point_count": 5,
+            "unit_key": 81,
+            "unit_record_index": 11,
+            "unit": "rad",
+            "data_range": [
+              -131072,
+              131071
+            ],
+            "graph_range": [
+              -3276800,
+              3276775
+            ],
+            "display_scale_per_raw_count": 0.00025,
+            "monitor_raw_sha256": "b0c0d18224e2b88a150e3de7f4442f09dd6fc4b5779ccd1c47dd33089257cf3c",
+            "physical_raw_sha256": "a7dcb890a79664a32975e8db2d08f1041ece2704b2fd75aec61cf245e778c2d7"
+          }
+        },
+        "abs_target_lateral_name_negative": {
+          "scanned_table_types": [
+            62,
+            88
+          ],
+          "matches": []
+        }
+      }
+    },
+    "eps_h_endpoint": {
+      "software_id": "8965H1202000",
+      "can_id": "0x0B6",
+      "pdu_id": 42,
+      "dtc": {
+        "base_dtc": "0xC129",
+        "enabled_word": 1,
+        "failure_type": "0x87",
+        "h_dtc_index": 82,
+        "h_raw_hex": "8729c10001000000",
+        "h_record_address": "0x0002C818",
+        "packed_dtc": "0xC12987",
+        "techstream_code": "U012987",
+        "techstream_description": "Lost Communication with Brake System Control Module",
+        "techstream_failure": "Missing Message",
+        "techstream_raw_sha256": "b9b22676cbb4f869c419e0d5c9fbf1197c3cda91cb38cc9eacf98142383f64b4"
+      },
+      "interpretation": "Exact H maps protected B6/PDU42 loss to U012987 Lost Communication with Brake System Control Module / Missing Message, pinning the immediate monitored B6 sender relationship at the EPS endpoint."
+    },
+    "brake_family_angle_observer": {
+      "canonical_region": "NA",
+      "record_index": 306,
+      "monitor_key": 314,
+      "name": "ADS Control EPS Pinion Angle2",
+      "primary_data_id": "0x107E",
+      "alternate_data_id": "0x307E",
+      "bit_range": [
+        0,
+        23
+      ],
+      "physical_data_key": 65,
+      "physical_record_index": 64,
+      "mul": 25,
+      "div": 1,
+      "offset": 0,
+      "signed": true,
+      "decimal_point_count": 5,
+      "unit_key": 81,
+      "unit_record_index": 11,
+      "unit": "rad",
+      "data_range": [
+        -131072,
+        131071
+      ],
+      "graph_range": [
+        -3276800,
+        3276775
+      ],
+      "display_scale_per_raw_count": 0.00025,
+      "monitor_raw_sha256": "b0c0d18224e2b88a150e3de7f4442f09dd6fc4b5779ccd1c47dd33089257cf3c",
+      "physical_raw_sha256": "a7dcb890a79664a32975e8db2d08f1041ece2704b2fd75aec61cf245e778c2d7",
+      "conversion_formula": "display = (raw * mul / div + offset) / 10^decimal_point_count",
+      "display_scale": "0.00025 rad/count",
+      "family_members": {
+        "ABS_P5.ddb": {
+          "category_id": 435,
+          "resolved_ecu_name": "Brake/EPB",
+          "regions": {
+            "NA": {
+              "category_id": 435,
+              "resolved_ecu_name": "Brake/EPB",
+              "monitor_record_index": 306,
+              "monitor_key": 314,
+              "primary_data_id": "0x107E",
+              "alternate_data_id": "0x307E",
+              "bit_range": [
+                0,
+                23
+              ],
+              "physical_data_key": 65,
+              "physical_record_index": 64,
+              "mul": 25,
+              "div": 1,
+              "offset": 0,
+              "signed": true,
+              "decimal_point_count": 5,
+              "unit_key": 81,
+              "unit_record_index": 11,
+              "unit": "rad",
+              "data_range": [
+                -131072,
+                131071
+              ],
+              "graph_range": [
+                -3276800,
+                3276775
+              ],
+              "display_scale_per_raw_count": 0.00025,
+              "monitor_raw_sha256": "b0c0d18224e2b88a150e3de7f4442f09dd6fc4b5779ccd1c47dd33089257cf3c",
+              "physical_raw_sha256": "a7dcb890a79664a32975e8db2d08f1041ece2704b2fd75aec61cf245e778c2d7"
+            },
+            "EU": {
+              "category_id": 435,
+              "resolved_ecu_name": "Brake/EPB",
+              "monitor_record_index": 306,
+              "monitor_key": 314,
+              "primary_data_id": "0x107E",
+              "alternate_data_id": "0x307E",
+              "bit_range": [
+                0,
+                23
+              ],
+              "physical_data_key": 65,
+              "physical_record_index": 64,
+              "mul": 25,
+              "div": 1,
+              "offset": 0,
+              "signed": true,
+              "decimal_point_count": 5,
+              "unit_key": 81,
+              "unit_record_index": 11,
+              "unit": "rad",
+              "data_range": [
+                -131072,
+                131071
+              ],
+              "graph_range": [
+                -3276800,
+                3276775
+              ],
+              "display_scale_per_raw_count": 0.00025,
+              "monitor_raw_sha256": "b0c0d18224e2b88a150e3de7f4442f09dd6fc4b5779ccd1c47dd33089257cf3c",
+              "physical_raw_sha256": "a7dcb890a79664a32975e8db2d08f1041ece2704b2fd75aec61cf245e778c2d7"
+            },
+            "JP": {
+              "category_id": 435,
+              "resolved_ecu_name": "Brake/EPB",
+              "monitor_record_index": 306,
+              "monitor_key": 314,
+              "primary_data_id": "0x107E",
+              "alternate_data_id": "0x307E",
+              "bit_range": [
+                0,
+                23
+              ],
+              "physical_data_key": 65,
+              "physical_record_index": 64,
+              "mul": 25,
+              "div": 1,
+              "offset": 0,
+              "signed": true,
+              "decimal_point_count": 5,
+              "unit_key": 81,
+              "unit_record_index": 11,
+              "unit": "rad",
+              "data_range": [
+                -131072,
+                131071
+              ],
+              "graph_range": [
+                -3276800,
+                3276775
+              ],
+              "display_scale_per_raw_count": 0.00025,
+              "monitor_raw_sha256": "b0c0d18224e2b88a150e3de7f4442f09dd6fc4b5779ccd1c47dd33089257cf3c",
+              "physical_raw_sha256": "a7dcb890a79664a32975e8db2d08f1041ece2704b2fd75aec61cf245e778c2d7"
+            }
+          }
+        },
+        "Brk_Bst_P5.ddb": {
+          "category_id": 466,
+          "resolved_ecu_name": "Brake Booster",
+          "regions": {
+            "NA": {
+              "category_id": 466,
+              "resolved_ecu_name": "Brake Booster",
+              "monitor_record_index": 306,
+              "monitor_key": 314,
+              "primary_data_id": "0x107E",
+              "alternate_data_id": "0x307E",
+              "bit_range": [
+                0,
+                23
+              ],
+              "physical_data_key": 53,
+              "physical_record_index": 52,
+              "mul": 25,
+              "div": 1,
+              "offset": 0,
+              "signed": true,
+              "decimal_point_count": 5,
+              "unit_key": 81,
+              "unit_record_index": 11,
+              "unit": "rad",
+              "data_range": [
+                -131072,
+                131071
+              ],
+              "graph_range": [
+                -3276800,
+                3276775
+              ],
+              "display_scale_per_raw_count": 0.00025,
+              "monitor_raw_sha256": "24a23ad0fb63c80ae5ec5647bf9f63471dc9213913784952da1b28a2576acacd",
+              "physical_raw_sha256": "a8bdf8993a56d5e308d1a848849338006b63942c9048f7813c41d7ac7252c8cf"
+            },
+            "EU": {
+              "category_id": 466,
+              "resolved_ecu_name": "Brake Booster",
+              "monitor_record_index": 306,
+              "monitor_key": 314,
+              "primary_data_id": "0x107E",
+              "alternate_data_id": "0x307E",
+              "bit_range": [
+                0,
+                23
+              ],
+              "physical_data_key": 53,
+              "physical_record_index": 52,
+              "mul": 25,
+              "div": 1,
+              "offset": 0,
+              "signed": true,
+              "decimal_point_count": 5,
+              "unit_key": 81,
+              "unit_record_index": 11,
+              "unit": "rad",
+              "data_range": [
+                -131072,
+                131071
+              ],
+              "graph_range": [
+                -3276800,
+                3276775
+              ],
+              "display_scale_per_raw_count": 0.00025,
+              "monitor_raw_sha256": "24a23ad0fb63c80ae5ec5647bf9f63471dc9213913784952da1b28a2576acacd",
+              "physical_raw_sha256": "a8bdf8993a56d5e308d1a848849338006b63942c9048f7813c41d7ac7252c8cf"
+            },
+            "JP": {
+              "category_id": 466,
+              "resolved_ecu_name": "Brake Booster",
+              "monitor_record_index": 306,
+              "monitor_key": 314,
+              "primary_data_id": "0x107E",
+              "alternate_data_id": "0x307E",
+              "bit_range": [
+                0,
+                23
+              ],
+              "physical_data_key": 53,
+              "physical_record_index": 52,
+              "mul": 25,
+              "div": 1,
+              "offset": 0,
+              "signed": true,
+              "decimal_point_count": 5,
+              "unit_key": 81,
+              "unit_record_index": 11,
+              "unit": "rad",
+              "data_range": [
+                -131072,
+                131071
+              ],
+              "graph_range": [
+                -3276800,
+                3276775
+              ],
+              "display_scale_per_raw_count": 0.00025,
+              "monitor_raw_sha256": "24a23ad0fb63c80ae5ec5647bf9f63471dc9213913784952da1b28a2576acacd",
+              "physical_raw_sha256": "a8bdf8993a56d5e308d1a848849338006b63942c9048f7813c41d7ac7252c8cf"
+            }
+          }
+        },
+        "EPB_P5.ddb": {
+          "category_id": 485,
+          "resolved_ecu_name": "Electric Parking Brake",
+          "regions": {
+            "NA": {
+              "category_id": 485,
+              "resolved_ecu_name": "Electric Parking Brake",
+              "monitor_record_index": 306,
+              "monitor_key": 314,
+              "primary_data_id": "0x107E",
+              "alternate_data_id": "0x307E",
+              "bit_range": [
+                0,
+                23
+              ],
+              "physical_data_key": 61,
+              "physical_record_index": 60,
+              "mul": 25,
+              "div": 1,
+              "offset": 0,
+              "signed": true,
+              "decimal_point_count": 5,
+              "unit_key": 81,
+              "unit_record_index": 11,
+              "unit": "rad",
+              "data_range": [
+                -131072,
+                131071
+              ],
+              "graph_range": [
+                -3276800,
+                3276775
+              ],
+              "display_scale_per_raw_count": 0.00025,
+              "monitor_raw_sha256": "a1aba49afae02a675fe9c25371e421464938d207123785df2584c535c80cdaae",
+              "physical_raw_sha256": "7e53f9a5ca93b4109c03c914482c9c48688c96dd78216e599c1282676c6e5da3"
+            },
+            "EU": {
+              "category_id": 485,
+              "resolved_ecu_name": "Electric Parking Brake",
+              "monitor_record_index": 306,
+              "monitor_key": 314,
+              "primary_data_id": "0x107E",
+              "alternate_data_id": "0x307E",
+              "bit_range": [
+                0,
+                23
+              ],
+              "physical_data_key": 61,
+              "physical_record_index": 60,
+              "mul": 25,
+              "div": 1,
+              "offset": 0,
+              "signed": true,
+              "decimal_point_count": 5,
+              "unit_key": 81,
+              "unit_record_index": 11,
+              "unit": "rad",
+              "data_range": [
+                -131072,
+                131071
+              ],
+              "graph_range": [
+                -3276800,
+                3276775
+              ],
+              "display_scale_per_raw_count": 0.00025,
+              "monitor_raw_sha256": "a1aba49afae02a675fe9c25371e421464938d207123785df2584c535c80cdaae",
+              "physical_raw_sha256": "7e53f9a5ca93b4109c03c914482c9c48688c96dd78216e599c1282676c6e5da3"
+            },
+            "JP": {
+              "category_id": 485,
+              "resolved_ecu_name": "Electric Parking Brake",
+              "monitor_record_index": 306,
+              "monitor_key": 314,
+              "primary_data_id": "0x107E",
+              "alternate_data_id": "0x307E",
+              "bit_range": [
+                0,
+                23
+              ],
+              "physical_data_key": 61,
+              "physical_record_index": 60,
+              "mul": 25,
+              "div": 1,
+              "offset": 0,
+              "signed": true,
+              "decimal_point_count": 5,
+              "unit_key": 81,
+              "unit_record_index": 11,
+              "unit": "rad",
+              "data_range": [
+                -131072,
+                131071
+              ],
+              "graph_range": [
+                -3276800,
+                3276775
+              ],
+              "display_scale_per_raw_count": 0.00025,
+              "monitor_raw_sha256": "a1aba49afae02a675fe9c25371e421464938d207123785df2584c535c80cdaae",
+              "physical_raw_sha256": "7e53f9a5ca93b4109c03c914482c9c48688c96dd78216e599c1282676c6e5da3"
+            }
+          }
+        }
+      },
+      "shared_conversion": "ABS_P5, Brk_Bst_P5 and EPB_P5 all expose monitor key 314 / DID 0x107E bits 0..23 as signed 0.00025 rad/count, despite using database-local PhyData keys.",
+      "scope": "Corolla category 435 selects ABS_P5. The identical engineering conversion across the three brake-family diagnostic databases proves shared diagnostic vocabulary. It does not prove which physical ECU computes the value or that it is the B6 wire scalar."
+    },
+    "topology_conclusion": {
+      "frc_to_brake_dependency_identified": true,
+      "brake_to_eps_dependency_identified": true,
+      "frc_to_eps_dependency_also_identified": true,
+      "payload_forwarding_or_transform_identified": false,
+      "secoc_sender_ownership_identified": false,
+      "strongest_static_model": "FRC_P5 has an explicit 'Front Recognition Camera => BRK Communication Invalid' behavior plus U012987 brake and U013187 EPS missing-message DTCs. Corolla's category-435 ABS_P5 brake domain monitors EPS communication and exposes an ADS Control EPS Pinion Angle2 observer. Exact H receives protected B6 from the Brake System Control Module. These facts establish a real FRC/brake/EPS communication topology and make a brake-mediated steering-target route plausible, but they do not prove that FRC target bytes are forwarded/transformed into B6; FRC also has a direct EPS communication dependency and both FRC/ABS reference an Automated Driving System Interface module.",
+      "next_evidence": "Acquire decoded FRC_P5 and category-435 Brake/ABS firmware or a synchronized stock-LTA capture spanning FRC/Brake/EPS buses. Join the FRC lateral state to ABS_P5 0x107E (if live), protected EPS B6 signal254/255, counters/freshness and SecOC source/key state before assigning producer/forwarder ownership."
+    },
+    "boundary": "Diagnostic module-dependency and observer evidence only. This section does not identify a CAN/CAN-FD arbitration ID for the FRC->Brake leg, a byte-level FRC->B6 transformation, category-435 transmit code, or the SecOC sender/key/freshness owner."
+  },
+  "brake_active_test_surface": {
+    "database": "ABS_P5.ddb",
+    "category_id": 435,
+    "oem_ecu_name": "Brake/EPB",
+    "factory_classes": {
+      "type68": "CDbActTestP5Table",
+      "type71": "CDbRoutineActTestP5Table"
+    },
+    "record_field_proof": {
+      "type68_record_size": "64 bytes; GetRecordAddress shifts record index by 6",
+      "type68_active_test_name_string_index": "u32 +0x0C loaded by CDbActTestP5ResRecords::SetRecString",
+      "type68_lookup_key": "u16 +0x20 used by CDbActTestP5Table::FindDbItem1/ComparativeKey",
+      "type68_sort_key": "u16 +0x2C used by CDbActTestP5ResRecords::SortInOrder",
+      "type68_exception_id": "u16 +0x2E returned by CDbActTestP5Table::GetExceptahandId",
+      "type68_exception_flag": "u8 +0x3B returned by CDbActTestP5Table::GetExceptahandFlag",
+      "type71_fields": "same consumer-proven RoutineActTestP5 layout used by the FRC routine extraction",
+      "byte_anchors": {
+        "type68_name_string_index_load": {
+          "va": "0x100050D3",
+          "file_offset": "0x50D3",
+          "bytes": "8b 42 0c"
+        },
+        "type68_lookup_key_load": {
+          "va": "0x1000525B",
+          "file_offset": "0x525B",
+          "bytes": "66 8b 42 20"
+        },
+        "type68_sort_key_load": {
+          "va": "0x10004FAD",
+          "file_offset": "0x4FAD",
+          "bytes": "66 8b 51 2c"
+        },
+        "type68_record_stride_shift6": {
+          "va": "0x100052E1",
+          "file_offset": "0x52E1",
+          "bytes": "c1 e1 06"
+        },
+        "type68_exception_id_load": {
+          "va": "0x10005320",
+          "file_offset": "0x5320",
+          "bytes": "66 8b 44 0a 2e"
+        },
+        "type68_exception_flag_load": {
+          "va": "0x1000535A",
+          "file_offset": "0x535A",
+          "bytes": "8a 44 0a 3b"
+        }
+      }
+    },
+    "regions": {
+      "NA": {
+        "type68_direct_active_tests": [
+          {
+            "record_index": 0,
+            "lookup_key": 11,
+            "active_test_name_string_index": 38256,
+            "active_test_name": "Motor Relay",
+            "sort_key": 30,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "4da38a6de631c85449981e9f537974d2c231c67d1011b267d214cb18b9a626a8"
+          },
+          {
+            "record_index": 1,
+            "lookup_key": 12,
+            "active_test_name_string_index": 77209,
+            "active_test_name": "Solenoid Relay",
+            "sort_key": 40,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "aea84929da2148e93cbe8e7ae12b80912f16829959d279f77f62337ee1185567"
+          },
+          {
+            "record_index": 2,
+            "lookup_key": 25,
+            "active_test_name_string_index": 38256,
+            "active_test_name": "Motor Relay",
+            "sort_key": 70,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "a99d099b8d7740db9eea0d688e2d38fbdaa38d7f4aa01a10d21ea1ffafa413f0"
+          },
+          {
+            "record_index": 3,
+            "lookup_key": 26,
+            "active_test_name_string_index": 77209,
+            "active_test_name": "Solenoid Relay",
+            "sort_key": 80,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "b6c900cea09a53008ee0c6c51a4fab07a5a8fc0c89ee680866a621e5a6d1433d"
+          },
+          {
+            "record_index": 4,
+            "lookup_key": 27,
+            "active_test_name_string_index": 126629,
+            "active_test_name": "Stop Lamp Relay",
+            "sort_key": 90,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "b220c4fdb4d7cbadd42c9b45f486704523d9c45aaafb7187ad848d29ef2aad8c"
+          },
+          {
+            "record_index": 5,
+            "lookup_key": 28,
+            "active_test_name_string_index": 126628,
+            "active_test_name": "EXO",
+            "sort_key": 100,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "ef2e07e1deff376cd225e40c12dbb404cb5e953cee90a7d4ac743ca45172f3c5"
+          },
+          {
+            "record_index": 6,
+            "lookup_key": 37,
+            "active_test_name_string_index": 38256,
+            "active_test_name": "Motor Relay",
+            "sort_key": 120,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "fbfb25e44ee72758b650ecdd9763f51e87a8b22634339febd35ab04c2f936460"
+          },
+          {
+            "record_index": 7,
+            "lookup_key": 38,
+            "active_test_name_string_index": 77209,
+            "active_test_name": "Solenoid Relay",
+            "sort_key": 130,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "d65d9191032316b782e2574993ab66d7d0d1ba836723e3ed312402b6f2e63cac"
+          },
+          {
+            "record_index": 8,
+            "lookup_key": 41,
+            "active_test_name_string_index": 126627,
+            "active_test_name": "ECB Main Relay",
+            "sort_key": 150,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "7e376b3513dcf811ce4da0f0332eae5664bb64ff62f4982a6612d64c1bc7d768"
+          },
+          {
+            "record_index": 9,
+            "lookup_key": 42,
+            "active_test_name_string_index": 104298,
+            "active_test_name": "ECB Solenoid (SLR)",
+            "sort_key": 160,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "2539e0e7824c32d81d566fa0268ece9b7acd5fe28bd2786068c318a88cfb25de"
+          },
+          {
+            "record_index": 10,
+            "lookup_key": 43,
+            "active_test_name_string_index": 104280,
+            "active_test_name": "ECB Solenoid (SLA)",
+            "sort_key": 170,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "18dacdfdd5fc4019961493a22ec4f6f1c978a5b09999dbb00027aacca2596962"
+          },
+          {
+            "record_index": 11,
+            "lookup_key": 44,
+            "active_test_name_string_index": 173445,
+            "active_test_name": "Brake Booster Motor",
+            "sort_key": 151,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "eba7e4b5b3d70e97fefc58ae401451883dc2de3d7f2159de3e2bdeb665d0fa39"
+          },
+          {
+            "record_index": 12,
+            "lookup_key": 45,
+            "active_test_name_string_index": 173450,
+            "active_test_name": "Linear Solenoid (SLM1)",
+            "sort_key": 180,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "074f5700018128c18185724d300cbe9bfdaec1f55a4cb6106a840fe7693adfd9"
+          },
+          {
+            "record_index": 13,
+            "lookup_key": 46,
+            "active_test_name_string_index": 173451,
+            "active_test_name": "Linear Solenoid (SLM2)",
+            "sort_key": 190,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "0c00fc6dee9349b386e21bb9c6d73e0520f41371f9a0b929bef9a6315e1011e5"
+          },
+          {
+            "record_index": 14,
+            "lookup_key": 8502,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "sort_key": 1,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "f77fec632c6fe566d70b1eb538d96a0a187eef14feb5db509d877a1ea0eb0493"
+          },
+          {
+            "record_index": 15,
+            "lookup_key": 8503,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "sort_key": 2,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "51c975cb081531dfa1ba327891100308fcb9936e49e796a106e676c6e2865f91"
+          },
+          {
+            "record_index": 16,
+            "lookup_key": 8504,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "sort_key": 3,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "fb2bff4eacbaf3d8287200b98c2210948ecded6857d2ca1c259bee1973ee6353"
+          },
+          {
+            "record_index": 17,
+            "lookup_key": 8505,
+            "active_test_name_string_index": 127161,
+            "active_test_name": "VSC Solenoid",
+            "sort_key": 4,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "7d97ed5117005008e072430863811fa247c4f2da705325f8f23270e61b1785df"
+          },
+          {
+            "record_index": 18,
+            "lookup_key": 8506,
+            "active_test_name_string_index": 127161,
+            "active_test_name": "VSC Solenoid",
+            "sort_key": 5,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "6b3a717ae7f6a8f4f7bc5de5160d17ec0751956daf05ebad66a706efd334073b"
+          },
+          {
+            "record_index": 19,
+            "lookup_key": 8507,
+            "active_test_name_string_index": 127157,
+            "active_test_name": "ECB Solenoid",
+            "sort_key": 6,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "c966f9d898f866397b1bd503ef686a8c7a3bbc8f6d0170d0f31f06585169ff1d"
+          }
+        ],
+        "type71_routine_active_tests": [
+          {
+            "record_index": 0,
+            "lookup_key": 42000,
+            "active_test_name_string_index": 84763,
+            "active_test_name": "EBS Relay",
+            "routine_id": "0x110B",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 1,
+            "raw_sha256": "b20ad5e7fdb4a62465ef5060d08638fea1183b99341894a27459efadbfb7d906"
+          },
+          {
+            "record_index": 1,
+            "lookup_key": 42001,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "routine_id": "0xFFFF",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 2,
+            "raw_sha256": "15f9c4eacfd7cfd67cdb0c549602f4a5c7cf9dcf48f28cf3ed312f9506a5ebb1"
+          },
+          {
+            "record_index": 2,
+            "lookup_key": 42002,
+            "active_test_name_string_index": 127161,
+            "active_test_name": "VSC Solenoid",
+            "routine_id": "0xFFFF",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 3,
+            "raw_sha256": "c21535678af63205f451f7f54a2c1a2d75e79c2c5e19bc509e6b8a56dc04d795"
+          },
+          {
+            "record_index": 3,
+            "lookup_key": 42003,
+            "active_test_name_string_index": 127157,
+            "active_test_name": "ECB Solenoid",
+            "routine_id": "0xFFFF",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 4,
+            "raw_sha256": "724f13fb9190fd7e5259b2754b7cda0facbca6a7e903db3d2e73c846fb195d39"
+          }
+        ],
+        "steering_eps_ads_lateral_name_hits": []
+      },
+      "EU": {
+        "type68_direct_active_tests": [
+          {
+            "record_index": 0,
+            "lookup_key": 11,
+            "active_test_name_string_index": 38256,
+            "active_test_name": "Motor Relay",
+            "sort_key": 30,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "4da38a6de631c85449981e9f537974d2c231c67d1011b267d214cb18b9a626a8"
+          },
+          {
+            "record_index": 1,
+            "lookup_key": 12,
+            "active_test_name_string_index": 77209,
+            "active_test_name": "Solenoid Relay",
+            "sort_key": 40,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "aea84929da2148e93cbe8e7ae12b80912f16829959d279f77f62337ee1185567"
+          },
+          {
+            "record_index": 2,
+            "lookup_key": 25,
+            "active_test_name_string_index": 38256,
+            "active_test_name": "Motor Relay",
+            "sort_key": 70,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "a99d099b8d7740db9eea0d688e2d38fbdaa38d7f4aa01a10d21ea1ffafa413f0"
+          },
+          {
+            "record_index": 3,
+            "lookup_key": 26,
+            "active_test_name_string_index": 77209,
+            "active_test_name": "Solenoid Relay",
+            "sort_key": 80,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "b6c900cea09a53008ee0c6c51a4fab07a5a8fc0c89ee680866a621e5a6d1433d"
+          },
+          {
+            "record_index": 4,
+            "lookup_key": 27,
+            "active_test_name_string_index": 126629,
+            "active_test_name": "Stop Lamp Relay",
+            "sort_key": 90,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "b220c4fdb4d7cbadd42c9b45f486704523d9c45aaafb7187ad848d29ef2aad8c"
+          },
+          {
+            "record_index": 5,
+            "lookup_key": 28,
+            "active_test_name_string_index": 126628,
+            "active_test_name": "EXO",
+            "sort_key": 100,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "ef2e07e1deff376cd225e40c12dbb404cb5e953cee90a7d4ac743ca45172f3c5"
+          },
+          {
+            "record_index": 6,
+            "lookup_key": 37,
+            "active_test_name_string_index": 38256,
+            "active_test_name": "Motor Relay",
+            "sort_key": 120,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "fbfb25e44ee72758b650ecdd9763f51e87a8b22634339febd35ab04c2f936460"
+          },
+          {
+            "record_index": 7,
+            "lookup_key": 38,
+            "active_test_name_string_index": 77209,
+            "active_test_name": "Solenoid Relay",
+            "sort_key": 130,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "d65d9191032316b782e2574993ab66d7d0d1ba836723e3ed312402b6f2e63cac"
+          },
+          {
+            "record_index": 8,
+            "lookup_key": 41,
+            "active_test_name_string_index": 126627,
+            "active_test_name": "ECB Main Relay",
+            "sort_key": 150,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "7e376b3513dcf811ce4da0f0332eae5664bb64ff62f4982a6612d64c1bc7d768"
+          },
+          {
+            "record_index": 9,
+            "lookup_key": 42,
+            "active_test_name_string_index": 104298,
+            "active_test_name": "ECB Solenoid (SLR)",
+            "sort_key": 160,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "2539e0e7824c32d81d566fa0268ece9b7acd5fe28bd2786068c318a88cfb25de"
+          },
+          {
+            "record_index": 10,
+            "lookup_key": 43,
+            "active_test_name_string_index": 104280,
+            "active_test_name": "ECB Solenoid (SLA)",
+            "sort_key": 170,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "18dacdfdd5fc4019961493a22ec4f6f1c978a5b09999dbb00027aacca2596962"
+          },
+          {
+            "record_index": 11,
+            "lookup_key": 44,
+            "active_test_name_string_index": 173445,
+            "active_test_name": "Brake Booster Motor",
+            "sort_key": 151,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "eba7e4b5b3d70e97fefc58ae401451883dc2de3d7f2159de3e2bdeb665d0fa39"
+          },
+          {
+            "record_index": 12,
+            "lookup_key": 45,
+            "active_test_name_string_index": 173450,
+            "active_test_name": "Linear Solenoid (SLM1)",
+            "sort_key": 180,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "074f5700018128c18185724d300cbe9bfdaec1f55a4cb6106a840fe7693adfd9"
+          },
+          {
+            "record_index": 13,
+            "lookup_key": 46,
+            "active_test_name_string_index": 173451,
+            "active_test_name": "Linear Solenoid (SLM2)",
+            "sort_key": 190,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "0c00fc6dee9349b386e21bb9c6d73e0520f41371f9a0b929bef9a6315e1011e5"
+          },
+          {
+            "record_index": 14,
+            "lookup_key": 8502,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "sort_key": 1,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "f77fec632c6fe566d70b1eb538d96a0a187eef14feb5db509d877a1ea0eb0493"
+          },
+          {
+            "record_index": 15,
+            "lookup_key": 8503,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "sort_key": 2,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "51c975cb081531dfa1ba327891100308fcb9936e49e796a106e676c6e2865f91"
+          },
+          {
+            "record_index": 16,
+            "lookup_key": 8504,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "sort_key": 3,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "fb2bff4eacbaf3d8287200b98c2210948ecded6857d2ca1c259bee1973ee6353"
+          },
+          {
+            "record_index": 17,
+            "lookup_key": 8505,
+            "active_test_name_string_index": 127161,
+            "active_test_name": "VSC Solenoid",
+            "sort_key": 4,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "7d97ed5117005008e072430863811fa247c4f2da705325f8f23270e61b1785df"
+          },
+          {
+            "record_index": 18,
+            "lookup_key": 8506,
+            "active_test_name_string_index": 127161,
+            "active_test_name": "VSC Solenoid",
+            "sort_key": 5,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "6b3a717ae7f6a8f4f7bc5de5160d17ec0751956daf05ebad66a706efd334073b"
+          },
+          {
+            "record_index": 19,
+            "lookup_key": 8507,
+            "active_test_name_string_index": 127157,
+            "active_test_name": "ECB Solenoid",
+            "sort_key": 6,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "c966f9d898f866397b1bd503ef686a8c7a3bbc8f6d0170d0f31f06585169ff1d"
+          }
+        ],
+        "type71_routine_active_tests": [
+          {
+            "record_index": 0,
+            "lookup_key": 42000,
+            "active_test_name_string_index": 84763,
+            "active_test_name": "EBS Relay",
+            "routine_id": "0x110B",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 1,
+            "raw_sha256": "b20ad5e7fdb4a62465ef5060d08638fea1183b99341894a27459efadbfb7d906"
+          },
+          {
+            "record_index": 1,
+            "lookup_key": 42001,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "routine_id": "0xFFFF",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 2,
+            "raw_sha256": "15f9c4eacfd7cfd67cdb0c549602f4a5c7cf9dcf48f28cf3ed312f9506a5ebb1"
+          },
+          {
+            "record_index": 2,
+            "lookup_key": 42002,
+            "active_test_name_string_index": 127161,
+            "active_test_name": "VSC Solenoid",
+            "routine_id": "0xFFFF",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 3,
+            "raw_sha256": "c21535678af63205f451f7f54a2c1a2d75e79c2c5e19bc509e6b8a56dc04d795"
+          },
+          {
+            "record_index": 3,
+            "lookup_key": 42003,
+            "active_test_name_string_index": 127157,
+            "active_test_name": "ECB Solenoid",
+            "routine_id": "0xFFFF",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 4,
+            "raw_sha256": "724f13fb9190fd7e5259b2754b7cda0facbca6a7e903db3d2e73c846fb195d39"
+          }
+        ],
+        "steering_eps_ads_lateral_name_hits": []
+      },
+      "JP": {
+        "type68_direct_active_tests": [
+          {
+            "record_index": 0,
+            "lookup_key": 11,
+            "active_test_name_string_index": 38256,
+            "active_test_name": "Motor Relay",
+            "sort_key": 30,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "4da38a6de631c85449981e9f537974d2c231c67d1011b267d214cb18b9a626a8"
+          },
+          {
+            "record_index": 1,
+            "lookup_key": 12,
+            "active_test_name_string_index": 77209,
+            "active_test_name": "Solenoid Relay",
+            "sort_key": 40,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "aea84929da2148e93cbe8e7ae12b80912f16829959d279f77f62337ee1185567"
+          },
+          {
+            "record_index": 2,
+            "lookup_key": 25,
+            "active_test_name_string_index": 38256,
+            "active_test_name": "Motor Relay",
+            "sort_key": 70,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "a99d099b8d7740db9eea0d688e2d38fbdaa38d7f4aa01a10d21ea1ffafa413f0"
+          },
+          {
+            "record_index": 3,
+            "lookup_key": 26,
+            "active_test_name_string_index": 77209,
+            "active_test_name": "Solenoid Relay",
+            "sort_key": 80,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "b6c900cea09a53008ee0c6c51a4fab07a5a8fc0c89ee680866a621e5a6d1433d"
+          },
+          {
+            "record_index": 4,
+            "lookup_key": 27,
+            "active_test_name_string_index": 126629,
+            "active_test_name": "Stop Lamp Relay",
+            "sort_key": 90,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "b220c4fdb4d7cbadd42c9b45f486704523d9c45aaafb7187ad848d29ef2aad8c"
+          },
+          {
+            "record_index": 5,
+            "lookup_key": 28,
+            "active_test_name_string_index": 126628,
+            "active_test_name": "EXO",
+            "sort_key": 100,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "ef2e07e1deff376cd225e40c12dbb404cb5e953cee90a7d4ac743ca45172f3c5"
+          },
+          {
+            "record_index": 6,
+            "lookup_key": 37,
+            "active_test_name_string_index": 38256,
+            "active_test_name": "Motor Relay",
+            "sort_key": 120,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "fbfb25e44ee72758b650ecdd9763f51e87a8b22634339febd35ab04c2f936460"
+          },
+          {
+            "record_index": 7,
+            "lookup_key": 38,
+            "active_test_name_string_index": 77209,
+            "active_test_name": "Solenoid Relay",
+            "sort_key": 130,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "d65d9191032316b782e2574993ab66d7d0d1ba836723e3ed312402b6f2e63cac"
+          },
+          {
+            "record_index": 8,
+            "lookup_key": 41,
+            "active_test_name_string_index": 126627,
+            "active_test_name": "ECB Main Relay",
+            "sort_key": 150,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "7e376b3513dcf811ce4da0f0332eae5664bb64ff62f4982a6612d64c1bc7d768"
+          },
+          {
+            "record_index": 9,
+            "lookup_key": 42,
+            "active_test_name_string_index": 104298,
+            "active_test_name": "ECB Solenoid (SLR)",
+            "sort_key": 160,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "2539e0e7824c32d81d566fa0268ece9b7acd5fe28bd2786068c318a88cfb25de"
+          },
+          {
+            "record_index": 10,
+            "lookup_key": 43,
+            "active_test_name_string_index": 104280,
+            "active_test_name": "ECB Solenoid (SLA)",
+            "sort_key": 170,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "18dacdfdd5fc4019961493a22ec4f6f1c978a5b09999dbb00027aacca2596962"
+          },
+          {
+            "record_index": 11,
+            "lookup_key": 44,
+            "active_test_name_string_index": 173445,
+            "active_test_name": "Brake Booster Motor",
+            "sort_key": 151,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "eba7e4b5b3d70e97fefc58ae401451883dc2de3d7f2159de3e2bdeb665d0fa39"
+          },
+          {
+            "record_index": 12,
+            "lookup_key": 45,
+            "active_test_name_string_index": 173450,
+            "active_test_name": "Linear Solenoid (SLM1)",
+            "sort_key": 180,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "074f5700018128c18185724d300cbe9bfdaec1f55a4cb6106a840fe7693adfd9"
+          },
+          {
+            "record_index": 13,
+            "lookup_key": 46,
+            "active_test_name_string_index": 173451,
+            "active_test_name": "Linear Solenoid (SLM2)",
+            "sort_key": 190,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "0c00fc6dee9349b386e21bb9c6d73e0520f41371f9a0b929bef9a6315e1011e5"
+          },
+          {
+            "record_index": 14,
+            "lookup_key": 8502,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "sort_key": 1,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "f77fec632c6fe566d70b1eb538d96a0a187eef14feb5db509d877a1ea0eb0493"
+          },
+          {
+            "record_index": 15,
+            "lookup_key": 8503,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "sort_key": 2,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "51c975cb081531dfa1ba327891100308fcb9936e49e796a106e676c6e2865f91"
+          },
+          {
+            "record_index": 16,
+            "lookup_key": 8504,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "sort_key": 3,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "fb2bff4eacbaf3d8287200b98c2210948ecded6857d2ca1c259bee1973ee6353"
+          },
+          {
+            "record_index": 17,
+            "lookup_key": 8505,
+            "active_test_name_string_index": 127161,
+            "active_test_name": "VSC Solenoid",
+            "sort_key": 4,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "7d97ed5117005008e072430863811fa247c4f2da705325f8f23270e61b1785df"
+          },
+          {
+            "record_index": 18,
+            "lookup_key": 8506,
+            "active_test_name_string_index": 127161,
+            "active_test_name": "VSC Solenoid",
+            "sort_key": 5,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "6b3a717ae7f6a8f4f7bc5de5160d17ec0751956daf05ebad66a706efd334073b"
+          },
+          {
+            "record_index": 19,
+            "lookup_key": 8507,
+            "active_test_name_string_index": 127157,
+            "active_test_name": "ECB Solenoid",
+            "sort_key": 6,
+            "exception_id": 0,
+            "exception_flag": 0,
+            "raw_sha256": "c966f9d898f866397b1bd503ef686a8c7a3bbc8f6d0170d0f31f06585169ff1d"
+          }
+        ],
+        "type71_routine_active_tests": [
+          {
+            "record_index": 0,
+            "lookup_key": 42000,
+            "active_test_name_string_index": 84763,
+            "active_test_name": "EBS Relay",
+            "routine_id": "0x110B",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 1,
+            "raw_sha256": "b20ad5e7fdb4a62465ef5060d08638fea1183b99341894a27459efadbfb7d906"
+          },
+          {
+            "record_index": 1,
+            "lookup_key": 42001,
+            "active_test_name_string_index": 81588,
+            "active_test_name": "ABS Solenoid",
+            "routine_id": "0xFFFF",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 2,
+            "raw_sha256": "15f9c4eacfd7cfd67cdb0c549602f4a5c7cf9dcf48f28cf3ed312f9506a5ebb1"
+          },
+          {
+            "record_index": 2,
+            "lookup_key": 42002,
+            "active_test_name_string_index": 127161,
+            "active_test_name": "VSC Solenoid",
+            "routine_id": "0xFFFF",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 3,
+            "raw_sha256": "c21535678af63205f451f7f54a2c1a2d75e79c2c5e19bc509e6b8a56dc04d795"
+          },
+          {
+            "record_index": 3,
+            "lookup_key": 42003,
+            "active_test_name_string_index": 127157,
+            "active_test_name": "ECB Solenoid",
+            "routine_id": "0xFFFF",
+            "routine_command_variable": 0,
+            "output_mask_variable": 0,
+            "output_mask_button_variable": 0,
+            "routine_status_pattern_key": 0,
+            "sort_key": 4,
+            "raw_sha256": "724f13fb9190fd7e5259b2754b7cda0facbca6a7e903db3d2e73c846fb195d39"
+          }
+        ],
+        "steering_eps_ads_lateral_name_hits": []
+      }
+    },
+    "conclusion": "The pinned category-435 ABS_P5 Techstream Active-Test catalog is brake-actuator-only: 20 direct type-68 tests and four type-71 routines resolve to relays, booster motor, linear solenoids, and ABS/VSC/ECB solenoids. No catalog row is named for steering, EPS, ADS, lateral control, or pinion angle, and all four routine rows have zero variable-backed command/mask/button payloads.",
+    "boundary": "This is a catalog/host-schema negative, not proof that brake actuator tests have no indirect network effects. It rules out a named Techstream category-435 steering/ADS Active-Test writer in the pinned corpus; it does not resolve the normal B6 producer path."
+  },
   "front_recognition_camera_2": {
     "did_rows_NA": [
       {
@@ -2156,6 +4013,20 @@
         "name_string_index": 169387,
         "name": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")",
         "raw_sha256": "92da644a197d7082ad1560f70a8d33018c650eb9b3a59f674839546f7a4715a6"
+      },
+      {
+        "record_index": 46,
+        "behavior_signature": "X2167",
+        "name_string_index": 167703,
+        "name": "Communication Error by ECU Security Key Not Registered (VSC)",
+        "raw_sha256": "6dbba3401c07a4a21c56b5e9b5d115730fb9d5a5a058e59d8af3f88f7f4842a8"
+      },
+      {
+        "record_index": 47,
+        "behavior_signature": "X216E",
+        "name_string_index": 167713,
+        "name": "Front Recognition Camera => BRK Communication Invalid",
+        "raw_sha256": "28c005ac872ed05982857248c100ca978c436eb3e6600e557a7803f1ae44fddd"
       },
       {
         "record_index": 60,
@@ -4755,6 +6626,8 @@
     "recovered": "The true-TSS3 lateral-control diagnostic-domain holder is category 498 FRC_P5 (Front Recognition Camera 2) with dedicated master plugin roles 233/234 (GetTSS3ImageFFDP5_DT.dll / GetTSS3OperationFFDP5_DT.dll), LTA/LDA installation/customize/control/hands-off DID rows, and a read-only proprietary AB/EB Operation FFD protocol. VDS ECUNo 498 covers 52/9/39 NA/EU/JP VIN descriptor patterns including six NA 5YF families; the install-set chain joins 498+499 sets to MAC/RZ450e/bZ4X/e-Palette-class models and Corolla-family TSS3 sets to 498+EMPS_P5(405). The ADS_Eth_P5 target-steering-angle order rows remain Advanced Drive snapshot evidence, and EMPS_P5/EMPS2_P5 remain the steering-side observer domain whose type-62 primary Data-ID declarations exclusively carry 0x1CEE/0x1CEF across the scanned P5 corpus. Diagnostic-domain holder means exactly that: physical control-path ownership is not asserted.",
     "not_proved": [
       "the CAN/CAN-FD arbitration ID or wire encoding carrying any named target-angle value",
+      "a byte-level FRC-to-Brake-to-B6 forwarding/transformation path despite the now-closed module dependency topology",
+      "which ECU owns SecOC signing/freshness/key state for B6 or any upstream protected leg",
       "that the ADS_Eth_P5 DDR snapshot rows are live wire command fields",
       "that ADS Operation plugin DID 0x1C08 joins to ADS DDR rows 406/407",
       "any producer/bit-layout/authentication join from FRC_P5 to community NEW_MSG_8A_LAT_CONTROL (0x18A; the Reference screenshot corpus records 0x18A as one of 22 CAN-FD 64-byte IDs on buses 0 and 2, nothing more)",
@@ -4763,6 +6636,6 @@
       "the downstream in-vehicle FRC output caused by fixed routine-active-test IDs 0x1508/0x1588/0x15C8",
       "a unique 5YF-descriptor-to-VehicleId mapping (the per-pattern join is bounded, not unique)"
     ],
-    "next_static_target": "FRC_P5 firmware acquisition and the true-TSS3 producer contract: recover the FRC lateral-control output path and its join (if any) to EMPS/EMPS2 steering observers, using the read-only Operation FFD surface and fixed 0x1588 LTA Steering Vibration routine as capture references."
+    "next_static_target": "Decoded FRC_P5 plus category-435 ABS/Brake firmware acquisition (or a synchronized stock-LTA capture) to resolve the still-open payload transformation and SecOC sender ownership across the now-proved FRC/Brake/EPS communication topology. Use the read-only Operation FFD surface, ABS_P5 DID 0x107E, protected EPS B6, and fixed 0x1588 LTA Steering Vibration routine as correlation references."
   }
 }

@@ -24,6 +24,7 @@ import pefile
 REPO = Path(__file__).resolve().parents[1]
 ROOT = REPO / "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream"
 ARTIFACT = REPO / "data/generated/techstream_v18/p5_lateral_control_semantics.json"
+H_CORR = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 FACTORY = REPO / "data/generated/techstream_v18/ddb_factory_table_map.json"
 sys.path.insert(0, str(REPO / "tools/techstream"))
 from parse_ddb import DDBParser
@@ -74,7 +75,7 @@ p = DDBParser()
 
 # ── schema and exact source identities ───────────────────────────────────────
 
-check("schema version", ev["schema_version"] == 4)
+check("schema version", ev["schema_version"] == 5)
 
 EXPECTED_FRC = {
     "NA": (49806, "63307a9b8a6bcafdc5ee4b3a04f67abdc2501ba296a2779e5edc7dbff846fe42"),
@@ -93,6 +94,37 @@ for region, expected in EXPECTED_FRC.items():
         )
         == expected,
     )
+
+EXPECTED_BRAKE_SOURCES = {
+    "ABS_P5.ddb": {
+        "NA": (114334, "d5e1b2f955aba6a94e7c3182833573561acc6154704adbffa08b93c60dced471"),
+        "EU": (115150, "5988f41c51faaf983df11fd749bbd71aaf449e2dad4f49389433e4d171ebe86a"),
+        "JP": (114334, "37935f7c364da635651547a781e45c050da962e39948b7bbbb30390867913d41"),
+    },
+    "Brk_Bst_P5.ddb": {
+        "NA": (114350, "065022b19c90a8fa7a056754b84e4a2e8cb08b2fbfc54cd47aaa8270d070de60"),
+        "EU": (114350, "4ba78c6a709befc266dd1bb495fef529cf1628178fa97d28d75f74ad854e4de4"),
+        "JP": (114350, "22f7aa9b9b33051fef5fb154d7083e8b52455803892916c512b2217bfd0636e1"),
+    },
+    "EPB_P5.ddb": {
+        "NA": (111980, "4ef2cc921829a222e429c2359d31ef1470a2eb1d08acf14ef1db827febd48db7"),
+        "EU": (111980, "d56290989a729cde8d5f4914de803b4c3f463ad6b93875b11fe15392bd1df462"),
+        "JP": (111980, "528e5acddca0f362521cb252645dcd6ea5fb71b507e74ca18778b9fab320fb0f"),
+    },
+}
+for database, regions in EXPECTED_BRAKE_SOURCES.items():
+    for region, expected in regions.items():
+        data = (ROOT / region / "DB" / database).read_bytes()
+        actual = (len(data), hashlib.sha256(data).hexdigest())
+        check(
+            f"{database} {region} exact identity",
+            actual == expected
+            and (
+                ev["sources"][database][region]["size"],
+                ev["sources"][database][region]["sha256"],
+            )
+            == expected,
+        )
 
 EXPECTED_SOURCES_NA = {
     "EMPS_P5.ddb": (
@@ -187,6 +219,9 @@ EXPECTED_CATEGORIES = {
     "ADS_Eth_P5.ddb": (476, 20, "Advanced Drive Control"),
     "ADeU_Eth_P5.ddb": (477, 20, "Advanced Drive eXtension Control"),
     "FRC_P5.ddb": (498, 20, "Front Recognition Camera 2"),
+    "ABS_P5.ddb": (435, 20, "Brake/EPB"),
+    "Brk_Bst_P5.ddb": (466, 20, "Brake Booster"),
+    "EPB_P5.ddb": (485, 20, "Electric Parking Brake"),
 }
 for region in ("NA", "EU", "JP"):
     master = p.parse_master_db(ROOT / region / "DB/Toyota.ddb")
@@ -410,13 +445,15 @@ frc_behavior = {
     )
     for row in p.extract_priority_records(frc_na.sections[87])
     if row.fields.get("behavior_signature")
-    in {"X2400", "X2001", "X2082", "X2166", "XF01B"}
+    in {"X2400", "X2001", "X2082", "X2166", "X2167", "X216E", "XF01B"}
 }
 EXPECTED_FRC_BEHAVIOR = {
     "X2400": "Lateral Control System Malfunction",
     "X2001": "Steering Angle Sensor Malfunction",
     "X2082": "Power Steering Control System for Steering Assist Steering Angle Malfunction",
     "X2166": 'Communication Error by ECU Security Key Not Registered (Power Steering Control Module "A")',
+    "X2167": "Communication Error by ECU Security Key Not Registered (VSC)",
+    "X216E": "Front Recognition Camera => BRK Communication Invalid",
     "XF01B": "ECU Security Key Not Registered",
 }
 check(
@@ -932,19 +969,21 @@ check(
 
 not_proved = ev["interpretation_boundary"]["not_proved"]
 check(
-    "interpretation keeps wire/snapshot/0x18A/Active-Test boundaries explicit",
-    len(not_proved) == 8
+    "interpretation keeps wire/forwarding/SecOC/snapshot/0x18A/Active-Test boundaries explicit",
+    len(not_proved) == 10
     and "arbitration ID" in not_proved[0]
-    and "snapshot" in not_proved[1]
-    and "0x1C08" in not_proved[2]
-    and "NEW_MSG_8A_LAT_CONTROL" in not_proved[3]
+    and "forwarding/transformation" in not_proved[1]
+    and "SecOC" in not_proved[2]
+    and "snapshot" in not_proved[3]
+    and "0x1C08" in not_proved[4]
+    and "NEW_MSG_8A_LAT_CONTROL" in not_proved[5]
     and "screenshot corpus records 0x18A as one of 22 CAN-FD 64-byte IDs"
-    in not_proved[3]
-    and "Fr_Camera_P5" in not_proved[4]
-    and "498+405" in not_proved[5]
-    and "downstream" in not_proved[6]
-    and "0x1588" in not_proved[6]
-    and "not unique" in not_proved[7],
+    in not_proved[5]
+    and "Fr_Camera_P5" in not_proved[6]
+    and "498+405" in not_proved[7]
+    and "downstream" in not_proved[8]
+    and "0x1588" in not_proved[8]
+    and "not unique" in not_proved[9],
 )
 check(
     "recovered framing uses diagnostic-domain holder wording",
@@ -1097,6 +1136,386 @@ check(
         for r in ev["corolla_model_install_sets"]["rows"]
     ]
     == EXPECTED_COROLLA,
+)
+
+# ── FRC / Brake-EPB / EPS upstream lateral topology ────────────────────────
+
+route = ev["upstream_lateral_route"]
+check(
+    "Corolla P5 lateral install topology includes FRC 498 + Brake/EPB 435 + EMPS 405",
+    route["module_topology"]["required_categories"]
+    == {
+        "498": "FRC_P5 / Front Recognition Camera 2",
+        "435": "ABS_P5 / Brake/EPB",
+        "405": "EMPS_P5 / EMPS",
+    }
+    and len(route["module_topology"]["corolla_install_sets"]) == 10
+    and all(
+        {405, 435, 498} <= set(row["categories"])
+        for row in route["module_topology"]["corolla_install_sets"]
+    ),
+)
+
+EXPECTED_UPSTREAM_HASHES = {
+    "frc_to_brake": "28c005ac872ed05982857248c100ca978c436eb3e6600e557a7803f1ae44fddd",
+    "frc_eps_key": "92da644a197d7082ad1560f70a8d33018c650eb9b3a59f674839546f7a4715a6",
+    "frc_vsc_key": "6dbba3401c07a4a21c56b5e9b5d115730fb9d5a5a058e59d8af3f88f7f4842a8",
+    "frc_brake_dtc": "a5a742f6f6d06c7ec5cc177a94bb3e1b0d510e0cccee1c3964d4f82c08a00521",
+    "frc_eps_dtc": "db571b801e8f3d30b0545eb568560e685ec47ff5f596181b06db762e4d55aeb0",
+    "frc_ads_dtc": "8cff1c3be0b0f04adb4c150a58c69dd6087cb9902b268cfd3dffc4ea6de4e2f6",
+    "abs_eps_dtc": "3f63ed5fbf8ede58cc7b86b213973d30871947434fa17785ae1f5ef618be5873",
+    "abs_eps_ch2_dtc": "413e431c6b14822b004e2d57fb57320b18e15319c1e8d3e728c209d323b1d56f",
+    "abs_ads_dtc": "7d13b9bd164f44ee2d9812f25c9d65f87e8a110521fac31482e59b6308bb60bf",
+    "abs_eps_open_monitor": "02e9692a5f75ad8317adc93a2502571395aab6b477f5d0053517b4cc43571c33",
+    "abs_ads_angle_monitor": "b0c0d18224e2b88a150e3de7f4442f09dd6fc4b5779ccd1c47dd33089257cf3c",
+    "abs_ads_angle_phy": "a7dcb890a79664a32975e8db2d08f1041ece2704b2fd75aec61cf245e778c2d7",
+}
+
+
+def raw_dtc(db, strings, code: str, description: str):
+    hits = [
+        e
+        for e in p.extract_dtc_failure_entries(db.sections[65])
+        if e.code == code and strings.get_string(e.description_string_index) == description
+    ]
+    return hits[0] if len(hits) == 1 else None
+
+
+for region in ("NA", "EU", "JP"):
+    strings = p.load_string_db(ROOT / region / "DB/M_English.ddb")
+    master = p.parse_master_db(ROOT / region / "DB/Toyota.ddb")
+    categories = p.extract_master_ecu_categories(master.sections[16])
+    cat435 = [r for r in categories if r.category_id == 435]
+    check(
+        f"{region} category 435 is exactly ABS_P5 / Brake/EPB generation 20",
+        len(cat435) == 1
+        and cat435[0].database_name == "ABS_P5.ddb"
+        and cat435[0].generation == 20
+        and strings.get_string(cat435[0].ecu_name_string_index) == "Brake/EPB"
+        and route["regions"][region]["category_435"]["database"] == "ABS_P5.ddb",
+    )
+
+    frc = p.parse_ecu_db(ROOT / region / "DB/FRC_P5.ddb")
+    absdb = p.parse_ecu_db(ROOT / region / "DB/ABS_P5.ddb")
+    behaviors = {
+        row.fields["behavior_signature"]: (
+            strings.get_string(row.fields["name_string_index"]), hashlib.sha256(row.raw).hexdigest()
+        )
+        for row in p.extract_priority_records(frc.sections[87])
+    }
+    check(
+        f"{region} FRC->BRK invalid behavior is exact raw DDB evidence",
+        behaviors.get("X216E")
+        == (
+            "Front Recognition Camera => BRK Communication Invalid",
+            EXPECTED_UPSTREAM_HASHES["frc_to_brake"],
+        )
+        and route["regions"][region]["frc_behavior"]["frc_to_brake_invalid"]["raw_sha256"]
+        == EXPECTED_UPSTREAM_HASHES["frc_to_brake"],
+    )
+    check(
+        f"{region} FRC EPS/VSC security-key communication behaviors exact",
+        behaviors.get("X2166")
+        == (
+            'Communication Error by ECU Security Key Not Registered (Power Steering Control Module "A")',
+            EXPECTED_UPSTREAM_HASHES["frc_eps_key"],
+        )
+        and behaviors.get("X2167")
+        == (
+            "Communication Error by ECU Security Key Not Registered (VSC)",
+            EXPECTED_UPSTREAM_HASHES["frc_vsc_key"],
+        ),
+    )
+
+    dtc_specs = (
+        (frc, "U012987", 'Lost Communication with Brake System Control Module "A"', "frc_brake_dtc"),
+        (frc, "U013187", 'Lost Communication with Power Steering Control Module "A"', "frc_eps_dtc"),
+        (frc, "U015E87", 'Lost Communication with Automated Driving System Interface Module "A"', "frc_ads_dtc"),
+        (absdb, "U013187", "Lost Communication with Power Steering Control Module", "abs_eps_dtc"),
+        (absdb, "U11B187", 'Lost Communication with Power Steering Control Module "A" (ch2)', "abs_eps_ch2_dtc"),
+        (absdb, "U11A987", 'Lost Communication with Automated Driving System Interface Module "A" (ch3)', "abs_ads_dtc"),
+    )
+    for db, code, description, hash_key in dtc_specs:
+        row = raw_dtc(db, strings, code, description)
+        check(
+            f"{region} {code} {description} exact missing-message DTC",
+            row is not None
+            and strings.get_string(row.failure_string_index) == "Missing Message"
+            and hashlib.sha256(row.raw).hexdigest() == EXPECTED_UPSTREAM_HASHES[hash_key],
+        )
+
+    abs_monitors = [
+        raw for raw in records(absdb.sections[62])
+        if strings.get_string(u32(raw, 0x18))
+        == "EPS/Steering Control Actuator ECU Communication Open"
+    ]
+    check(
+        f"{region} ABS_P5 EPS communication-open monitor exact",
+        len(abs_monitors) == 1
+        and u16(abs_monitors[0], 0x24) == 500
+        and (u16(abs_monitors[0], 0x2C), u16(abs_monitors[0], 0x2E)) == (74, 74)
+        and u16(abs_monitors[0], 0x36) == 0x102F
+        and hashlib.sha256(abs_monitors[0]).hexdigest()
+        == EXPECTED_UPSTREAM_HASHES["abs_eps_open_monitor"],
+    )
+
+    angle_rows = [
+        raw for raw in records(absdb.sections[62])
+        if strings.get_string(u32(raw, 0x18)) == "ADS Control EPS Pinion Angle2"
+    ]
+    angle_raw = angle_rows[0] if len(angle_rows) == 1 else None
+    phy_rows = (
+        [raw for raw in records(absdb.sections[13]) if u16(raw, 0x0C) == u16(angle_raw, 0x2A)]
+        if angle_raw is not None else []
+    )
+    phy = phy_rows[0] if len(phy_rows) == 1 else None
+    unit_rows = (
+        [raw for raw in records(absdb.sections[15]) if u32(raw, 0x04) == u16(phy, 0x0E)]
+        if phy is not None else []
+    )
+    unit = unit_rows[0] if len(unit_rows) == 1 else None
+    check(
+        f"{region} ABS_P5 ADS Control EPS Pinion Angle2 raw geometry and scale",
+        angle_raw is not None
+        and phy is not None
+        and unit is not None
+        and u16(angle_raw, 0x24) == 314
+        and u16(angle_raw, 0x2A) == 65
+        and (u16(angle_raw, 0x2C), u16(angle_raw, 0x2E)) == (0, 23)
+        and u16(angle_raw, 0x36) == 0x107E
+        and u16(angle_raw, 0x38) == 0x307E
+        and (struct.unpack_from("<i", phy, 0)[0], struct.unpack_from("<i", phy, 4)[0], struct.unpack_from("<i", phy, 8)[0])
+        == (25, 1, 0)
+        and bool(phy[0x14]) is True
+        and phy[0x15] == 5
+        and strings.get_string(u32(unit, 0x00)) == "rad"
+        and (struct.unpack_from("<i", angle_raw, 0x10)[0], struct.unpack_from("<i", angle_raw, 0x0C)[0])
+        == (-131072, 131071)
+        and (struct.unpack_from("<i", angle_raw, 0x08)[0], struct.unpack_from("<i", angle_raw, 0x04)[0])
+        == (-3276800, 3276775)
+        and hashlib.sha256(angle_raw).hexdigest()
+        == EXPECTED_UPSTREAM_HASHES["abs_ads_angle_monitor"]
+        and hashlib.sha256(phy).hexdigest() == EXPECTED_UPSTREAM_HASHES["abs_ads_angle_phy"]
+        and abs(route["regions"][region]["brake_monitors"]["ads_control_eps_pinion_angle2"]["display_scale_per_raw_count"] - 0.00025) < 1e-15,
+    )
+
+    target_name_hits = [
+        strings.get_string(u32(raw, 0x18)) or ""
+        for table_type in (62, 88)
+        for raw in records(absdb.sections[table_type])
+        if any(
+            token in (strings.get_string(u32(raw, 0x18)) or "").lower()
+            for token in ("target lateral", "target steering")
+        )
+    ]
+    check(
+        f"{region} ABS_P5 has no named Target Lateral/Target Steering type62/88 row",
+        target_name_hits == []
+        and route["regions"][region]["abs_target_lateral_name_negative"]["matches"] == [],
+    )
+
+expected_family_categories = {
+    "ABS_P5.ddb": (435, "Brake/EPB"),
+    "Brk_Bst_P5.ddb": (466, "Brake Booster"),
+    "EPB_P5.ddb": (485, "Electric Parking Brake"),
+}
+for region in ("NA", "EU", "JP"):
+    strings = p.load_string_db(ROOT / region / "DB/M_English.ddb")
+    for dbname, (category_id, ecu_name) in expected_family_categories.items():
+        db = p.parse_ecu_db(ROOT / region / "DB" / dbname)
+        rows = [
+            raw for raw in records(db.sections[62])
+            if strings.get_string(u32(raw, 0x18)) == "ADS Control EPS Pinion Angle2"
+        ]
+        row = rows[0] if len(rows) == 1 else None
+        phy_rows = (
+            [raw for raw in records(db.sections[13]) if u16(raw, 0x0C) == u16(row, 0x2A)]
+            if row is not None else []
+        )
+        phy = phy_rows[0] if len(phy_rows) == 1 else None
+        unit_rows = (
+            [raw for raw in records(db.sections[15]) if u32(raw, 0x04) == u16(phy, 0x0E)]
+            if phy is not None else []
+        )
+        unit = unit_rows[0] if len(unit_rows) == 1 else None
+        member = route["brake_family_angle_observer"]["family_members"][dbname]
+        art = member["regions"][region]
+        check(
+            f"{region} {dbname} shares brake-family ADS Control EPS Pinion Angle2 conversion",
+            row is not None
+            and phy is not None
+            and unit is not None
+            and member["category_id"] == category_id
+            and member["resolved_ecu_name"] == ecu_name
+            and u16(row, 0x24) == 314
+            and (u16(row, 0x2C), u16(row, 0x2E)) == (0, 23)
+            and u16(row, 0x36) == 0x107E
+            and u16(row, 0x38) == 0x307E
+            and (struct.unpack_from("<i", phy, 0)[0], struct.unpack_from("<i", phy, 4)[0], struct.unpack_from("<i", phy, 8)[0]) == (25, 1, 0)
+            and bool(phy[0x14]) is True
+            and phy[0x15] == 5
+            and strings.get_string(u32(unit, 0)) == "rad"
+            and (struct.unpack_from("<i", row, 0x10)[0], struct.unpack_from("<i", row, 0x0C)[0]) == (-131072, 131071)
+            and (struct.unpack_from("<i", row, 0x08)[0], struct.unpack_from("<i", row, 0x04)[0]) == (-3276800, 3276775)
+            and art["physical_data_key"] == u16(row, 0x2A)
+            and abs(art["display_scale_per_raw_count"] - 0.00025) < 1e-15,
+        )
+check(
+    "brake-family observer records shared engineering conversion without claiming implementation owner",
+    "0.00025 rad/count" in route["brake_family_angle_observer"]["shared_conversion"]
+    and "does not prove" in route["brake_family_angle_observer"]["scope"],
+)
+
+h_corr = json.loads(H_CORR.read_text())
+h_b6 = next(
+    row for row in h_corr["communication_monitor_dtc"]["rows"] if row["can_id"] == "0x0B6"
+)
+check(
+    "upstream route binds to exact H B6/PDU42 Brake-System missing-message endpoint",
+    h_b6["pdu_id"] == 42
+    and h_b6["dtc"]["techstream_code"] == "U012987"
+    and h_b6["dtc"]["techstream_description"] == "Lost Communication with Brake System Control Module"
+    and h_b6["dtc"]["techstream_failure"] == "Missing Message"
+    and route["eps_h_endpoint"]["can_id"] == "0x0B6"
+    and route["eps_h_endpoint"]["pdu_id"] == 42
+    and route["eps_h_endpoint"]["dtc"] == h_b6["dtc"],
+)
+check(
+    "upstream topology remains bounded short of forwarding and SecOC sender ownership",
+    route["topology_conclusion"]["frc_to_brake_dependency_identified"] is True
+    and route["topology_conclusion"]["brake_to_eps_dependency_identified"] is True
+    and route["topology_conclusion"]["frc_to_eps_dependency_also_identified"] is True
+    and route["topology_conclusion"]["payload_forwarding_or_transform_identified"] is False
+    and route["topology_conclusion"]["secoc_sender_ownership_identified"] is False
+    and "does not" in route["boundary"].lower(),
+)
+
+# ── Category-435 Brake/EPB Active-Test negative ────────────────────────────
+
+brake_at = ev["brake_active_test_surface"]
+EXPECTED_ABS_DIRECT_ACTIVE_TESTS = [
+    (11, "Motor Relay", 30),
+    (12, "Solenoid Relay", 40),
+    (25, "Motor Relay", 70),
+    (26, "Solenoid Relay", 80),
+    (27, "Stop Lamp Relay", 90),
+    (28, "EXO", 100),
+    (37, "Motor Relay", 120),
+    (38, "Solenoid Relay", 130),
+    (41, "ECB Main Relay", 150),
+    (42, "ECB Solenoid (SLR)", 160),
+    (43, "ECB Solenoid (SLA)", 170),
+    (44, "Brake Booster Motor", 151),
+    (45, "Linear Solenoid (SLM1)", 180),
+    (46, "Linear Solenoid (SLM2)", 190),
+    (8502, "ABS Solenoid", 1),
+    (8503, "ABS Solenoid", 2),
+    (8504, "ABS Solenoid", 3),
+    (8505, "VSC Solenoid", 4),
+    (8506, "VSC Solenoid", 5),
+    (8507, "ECB Solenoid", 6),
+]
+EXPECTED_ABS_ROUTINES = [
+    (42000, "EBS Relay", 0x110B, 0, 0, 0, 0, 1),
+    (42001, "ABS Solenoid", 0xFFFF, 0, 0, 0, 0, 2),
+    (42002, "VSC Solenoid", 0xFFFF, 0, 0, 0, 0, 3),
+    (42003, "ECB Solenoid", 0xFFFF, 0, 0, 0, 0, 4),
+]
+canonical_direct_hashes = None
+canonical_routine_hashes = None
+for region in ("NA", "EU", "JP"):
+    db = p.parse_ecu_db(ROOT / region / "DB/ABS_P5.ddb")
+    strings = p.load_string_db(ROOT / region / "DB/M_English.ddb")
+    direct_raw = records(db.sections[68])
+    routine_raw = records(db.sections[71])
+    check(
+        f"{region} ABS_P5 direct/routine Active-Test table census exact",
+        db.sections[68].decoded_record_size == 64
+        and len(direct_raw) == 20
+        and db.sections[71].decoded_record_size == 64
+        and len(routine_raw) == 4,
+    )
+    direct = [
+        (u16(raw, 0x20), strings.get_string(u32(raw, 0x0C)), u16(raw, 0x2C))
+        for raw in direct_raw
+    ]
+    routines = [
+        (
+            u16(raw, 0x1E),
+            strings.get_string(u32(raw, 0x08)),
+            u16(raw, 0x1C),
+            u16(raw, 0x28),
+            u16(raw, 0x2A),
+            u16(raw, 0x2C),
+            u16(raw, 0x2E),
+            u16(raw, 0x38),
+        )
+        for raw in routine_raw
+    ]
+    check(
+        f"{region} ABS_P5 direct Active-Test catalog is exact brake-actuator set",
+        direct == EXPECTED_ABS_DIRECT_ACTIVE_TESTS
+        and [
+            (row["lookup_key"], row["active_test_name"], row["sort_key"])
+            for row in brake_at["regions"][region]["type68_direct_active_tests"]
+        ] == EXPECTED_ABS_DIRECT_ACTIVE_TESTS,
+    )
+    check(
+        f"{region} ABS_P5 routine Active-Test catalog and zero variable payloads exact",
+        routines == EXPECTED_ABS_ROUTINES
+        and [
+            (
+                row["lookup_key"],
+                row["active_test_name"],
+                int(row["routine_id"], 16),
+                row["routine_command_variable"],
+                row["output_mask_variable"],
+                row["output_mask_button_variable"],
+                row["routine_status_pattern_key"],
+                row["sort_key"],
+            )
+            for row in brake_at["regions"][region]["type71_routine_active_tests"]
+        ] == EXPECTED_ABS_ROUTINES,
+    )
+    names = [name for _, name, _ in direct] + [row[1] for row in routines]
+    check(
+        f"{region} ABS_P5 has no steering/EPS/ADS/lateral/pinion named Active Test",
+        not any(
+            term in name.lower()
+            for name in names
+            for term in ("steer", "eps", "ads", "lateral", "pinion")
+        )
+        and brake_at["regions"][region]["steering_eps_ads_lateral_name_hits"] == [],
+    )
+    direct_hashes = [hashlib.sha256(raw).hexdigest() for raw in direct_raw]
+    routine_hashes = [hashlib.sha256(raw).hexdigest() for raw in routine_raw]
+    if canonical_direct_hashes is None:
+        canonical_direct_hashes = direct_hashes
+        canonical_routine_hashes = routine_hashes
+    check(
+        f"{region} ABS_P5 Active-Test raw rows match canonical regional corpus",
+        direct_hashes == canonical_direct_hashes
+        and routine_hashes == canonical_routine_hashes,
+    )
+
+ABS_ACTTEST_KGP_ANCHORS = {
+    "type68_name_string_index_load": (0x100050D3, "8b 42 0c"),
+    "type68_lookup_key_load": (0x1000525B, "66 8b 42 20"),
+    "type68_sort_key_load": (0x10004FAD, "66 8b 51 2c"),
+    "type68_record_stride_shift6": (0x100052E1, "c1 e1 06"),
+    "type68_exception_id_load": (0x10005320, "66 8b 44 0a 2e"),
+    "type68_exception_flag_load": (0x1000535A, "8a 44 0a 3b"),
+}
+for name, (va, expected_hex) in ABS_ACTTEST_KGP_ANCHORS.items():
+    check(
+        f"KgpDataCtrl category-435 Active-Test field byte anchor {name}",
+        anchor(kgp_data, kgp_pe, va, expected_hex)
+        and brake_at["record_field_proof"]["byte_anchors"][name]["bytes"] == expected_hex,
+    )
+check(
+    "category-435 Techstream Active-Test surface is bounded as brake-actuator catalog, not normal B6 producer",
+    "brake-actuator-only" in brake_at["conclusion"]
+    and "does not resolve the normal B6 producer path" in brake_at["boundary"],
 )
 
 # ── VDS Setting_Table scan (recomputed from raw VDS) ────────────────────────

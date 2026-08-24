@@ -163,7 +163,7 @@
     },
     "p5_lateral_semantics": {
       "path": "data/generated/techstream_v18/p5_lateral_control_semantics.json",
-      "sha256": "6ccb354e9eeb2e12019a06565951d41a9f59a06d45b31f2e2897b301208449ca"
+      "sha256": "2b1585fe738868220b04fcbc8534ae1da865dd9b1474831059be5b2683a19f8b"
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",

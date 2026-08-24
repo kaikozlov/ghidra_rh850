@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract the Techstream P5 lateral-control evidence surface (schema v3).
+"""Extract the Techstream P5 lateral-control evidence surface (schema v5).
 
 Directed evidence pass over the true-TSS3 Front Recognition Camera 2
 (``FRC_P5``) path, its dedicated read-only Operation/Image FFD plugin DLLs,
@@ -41,6 +41,9 @@ TARGET_DATABASES = (
     "ADS_Eth_P5.ddb",
     "ADeU_Eth_P5.ddb",
     "FRC_P5.ddb",
+    "ABS_P5.ddb",
+    "Brk_Bst_P5.ddb",
+    "EPB_P5.ddb",
 )
 TARGET_DLLS = (
     "KgpDataCtrl.dll",
@@ -61,7 +64,7 @@ ADS_NAMES = (
 )
 LDA_SIGNATURES = ("X2008", "X2073", "X2081", "X2082")
 EMPS_MONITORS = tuple(range(2069, 2077))
-FRC_BEHAVIOR_SIGNATURES = ("X2400", "X2001", "X2082", "X2166", "XF01B")
+FRC_BEHAVIOR_SIGNATURES = ("X2400", "X2001", "X2082", "X2166", "X2167", "X216E", "XF01B")
 # FRC_P5 type-62 data rows pinned as the LTA/LDA lateral-control surface.
 FRC_DID_ROWS = (
     (0x1202, 12, 12, "LDA Installation Availability"),
@@ -788,6 +791,694 @@ def emps_target_lateral_id_semantics(parser: DDBParser, root: Path) -> dict:
         "boundary": (
             "This is the exact P5 EMPS diagnostic value dictionary. Joining any non-DID "
             "wire field to it still requires independent target-firmware/dataflow evidence."
+        ),
+    }
+
+
+def abs_p5_active_test_surface(parser: DDBParser, root: Path) -> dict:
+    """Bound the category-435 Techstream Active-Test surface.
+
+    Type-68 direct Active-Test names/keys and type-71 routine rows are recovered
+    from consumer-proven KgpDataCtrl fields.  This is a catalog-level negative:
+    it proves the pinned ABS_P5 database exposes brake-actuator tests, not a
+    named steering/EPS/ADS/lateral Active Test.  It does not prove those tests
+    have no indirect network effects.
+    """
+    expected_direct = [
+        (11, "Motor Relay", 30),
+        (12, "Solenoid Relay", 40),
+        (25, "Motor Relay", 70),
+        (26, "Solenoid Relay", 80),
+        (27, "Stop Lamp Relay", 90),
+        (28, "EXO", 100),
+        (37, "Motor Relay", 120),
+        (38, "Solenoid Relay", 130),
+        (41, "ECB Main Relay", 150),
+        (42, "ECB Solenoid (SLR)", 160),
+        (43, "ECB Solenoid (SLA)", 170),
+        (44, "Brake Booster Motor", 151),
+        (45, "Linear Solenoid (SLM1)", 180),
+        (46, "Linear Solenoid (SLM2)", 190),
+        (8502, "ABS Solenoid", 1),
+        (8503, "ABS Solenoid", 2),
+        (8504, "ABS Solenoid", 3),
+        (8505, "VSC Solenoid", 4),
+        (8506, "VSC Solenoid", 5),
+        (8507, "ECB Solenoid", 6),
+    ]
+    expected_routines = [
+        (42000, "EBS Relay", 0x110B, 0, 0, 0, 0, 1),
+        (42001, "ABS Solenoid", 0xFFFF, 0, 0, 0, 0, 2),
+        (42002, "VSC Solenoid", 0xFFFF, 0, 0, 0, 0, 3),
+        (42003, "ECB Solenoid", 0xFFFF, 0, 0, 0, 0, 4),
+    ]
+    forbidden = ("steer", "eps", "ads", "lateral", "pinion")
+    regions: dict[str, dict] = {}
+    canonical_direct_hashes = None
+    canonical_routine_hashes = None
+    for region in REGIONS:
+        db = parser.parse_ecu_db(root / region / "DB/ABS_P5.ddb")
+        strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+        if not (
+            db.sections[68].decoded_record_size == 64
+            and db.sections[68].header.record_count == 20
+            and db.sections[71].decoded_record_size == 64
+            and db.sections[71].header.record_count == 4
+        ):
+            raise ValueError(f"{region}: ABS_P5 Active-Test table census drift")
+        direct = []
+        for index, raw in enumerate(records(db.sections[68])):
+            direct.append(
+                {
+                    "record_index": index,
+                    "lookup_key": u16(raw, 0x20),
+                    "active_test_name_string_index": u32(raw, 0x0C),
+                    "active_test_name": strings.get_string(u32(raw, 0x0C)),
+                    "sort_key": u16(raw, 0x2C),
+                    "exception_id": u16(raw, 0x2E),
+                    "exception_flag": raw[0x3B],
+                    "raw_sha256": sha256(raw),
+                }
+            )
+        direct_tuple = [
+            (row["lookup_key"], row["active_test_name"], row["sort_key"])
+            for row in direct
+        ]
+        if direct_tuple != expected_direct:
+            raise ValueError(f"{region}: ABS_P5 direct Active-Test catalog drift")
+
+        routines = []
+        for index, raw in enumerate(records(db.sections[71])):
+            routines.append(
+                {
+                    "record_index": index,
+                    "lookup_key": u16(raw, 0x1E),
+                    "active_test_name_string_index": u32(raw, 0x08),
+                    "active_test_name": strings.get_string(u32(raw, 0x08)),
+                    "routine_id": f"0x{u16(raw, 0x1C):04X}",
+                    "routine_command_variable": u16(raw, 0x28),
+                    "output_mask_variable": u16(raw, 0x2A),
+                    "output_mask_button_variable": u16(raw, 0x2C),
+                    "routine_status_pattern_key": u16(raw, 0x2E),
+                    "sort_key": u16(raw, 0x38),
+                    "raw_sha256": sha256(raw),
+                }
+            )
+        routine_tuple = [
+            (
+                row["lookup_key"],
+                row["active_test_name"],
+                int(row["routine_id"], 16),
+                row["routine_command_variable"],
+                row["output_mask_variable"],
+                row["output_mask_button_variable"],
+                row["routine_status_pattern_key"],
+                row["sort_key"],
+            )
+            for row in routines
+        ]
+        if routine_tuple != expected_routines:
+            raise ValueError(f"{region}: ABS_P5 routine Active-Test catalog drift")
+        name_hits = [
+            row["active_test_name"]
+            for row in direct + routines
+            if any(term in row["active_test_name"].lower() for term in forbidden)
+        ]
+        if name_hits:
+            raise ValueError(f"{region}: ABS_P5 steering/ADS-named Active-Test rows: {name_hits}")
+        direct_hashes = [row["raw_sha256"] for row in direct]
+        routine_hashes = [row["raw_sha256"] for row in routines]
+        if canonical_direct_hashes is None:
+            canonical_direct_hashes = direct_hashes
+            canonical_routine_hashes = routine_hashes
+        elif direct_hashes != canonical_direct_hashes or routine_hashes != canonical_routine_hashes:
+            raise ValueError(f"{region}: ABS_P5 Active-Test raw rows differ across regions")
+        regions[region] = {
+            "type68_direct_active_tests": direct,
+            "type71_routine_active_tests": routines,
+            "steering_eps_ads_lateral_name_hits": name_hits,
+        }
+
+    kgp = PE(root / "bin/KgpDataCtrl.dll")
+    return {
+        "database": "ABS_P5.ddb",
+        "category_id": 435,
+        "oem_ecu_name": "Brake/EPB",
+        "factory_classes": {
+            "type68": "CDbActTestP5Table",
+            "type71": "CDbRoutineActTestP5Table",
+        },
+        "record_field_proof": {
+            "type68_record_size": "64 bytes; GetRecordAddress shifts record index by 6",
+            "type68_active_test_name_string_index": "u32 +0x0C loaded by CDbActTestP5ResRecords::SetRecString",
+            "type68_lookup_key": "u16 +0x20 used by CDbActTestP5Table::FindDbItem1/ComparativeKey",
+            "type68_sort_key": "u16 +0x2C used by CDbActTestP5ResRecords::SortInOrder",
+            "type68_exception_id": "u16 +0x2E returned by CDbActTestP5Table::GetExceptahandId",
+            "type68_exception_flag": "u8 +0x3B returned by CDbActTestP5Table::GetExceptahandFlag",
+            "type71_fields": "same consumer-proven RoutineActTestP5 layout used by the FRC routine extraction",
+            "byte_anchors": {
+                "type68_name_string_index_load": kgp.check(0x100050D3, "8b 42 0c"),
+                "type68_lookup_key_load": kgp.check(0x1000525B, "66 8b 42 20"),
+                "type68_sort_key_load": kgp.check(0x10004FAD, "66 8b 51 2c"),
+                "type68_record_stride_shift6": kgp.check(0x100052E1, "c1 e1 06"),
+                "type68_exception_id_load": kgp.check(0x10005320, "66 8b 44 0a 2e"),
+                "type68_exception_flag_load": kgp.check(0x1000535A, "8a 44 0a 3b"),
+            },
+        },
+        "regions": regions,
+        "conclusion": (
+            "The pinned category-435 ABS_P5 Techstream Active-Test catalog is brake-actuator-only: "
+            "20 direct type-68 tests and four type-71 routines resolve to relays, booster motor, "
+            "linear solenoids, and ABS/VSC/ECB solenoids. No catalog row is named for steering, EPS, "
+            "ADS, lateral control, or pinion angle, and all four routine rows have zero variable-backed "
+            "command/mask/button payloads."
+        ),
+        "boundary": (
+            "This is a catalog/host-schema negative, not proof that brake actuator tests have no "
+            "indirect network effects. It rules out a named Techstream category-435 steering/ADS "
+            "Active-Test writer in the pinned corpus; it does not resolve the normal B6 producer path."
+        ),
+    }
+
+
+def p5_upstream_lateral_route(parser: DDBParser, root: Path) -> dict:
+    """Recover the strongest Techstream-static FRC/brake/EPS topology evidence.
+
+    This intentionally stops short of claiming that the FRC payload is forwarded
+    or transformed into EPS B6.  The P5 diagnostic corpus can prove module
+    installation, directed communication-health vocabulary, brake-family
+    steering-target observers, and endpoint DTCs.  Producer code or synchronized
+    traffic is still required for the payload/transport/authentication join.
+    """
+    h_corr = json.loads(H_CORR.read_text())
+    h_b6 = next(
+        row
+        for row in h_corr["communication_monitor_dtc"]["rows"]
+        if row["can_id"] == "0x0B6"
+    )
+    if not (
+        h_b6["pdu_id"] == 42
+        and h_b6["dtc"]["techstream_code"] == "U012987"
+        and h_b6["dtc"]["techstream_description"]
+        == "Lost Communication with Brake System Control Module"
+        and h_b6["dtc"]["techstream_failure"] == "Missing Message"
+    ):
+        raise ValueError("H B6 Brake-System communication join drift")
+
+    def dtc_row(db, strings, code: str, description: str) -> dict:
+        hits = []
+        for index, entry in enumerate(parser.extract_dtc_failure_entries(db.sections[65])):
+            if entry.code != code:
+                continue
+            resolved = strings.get_string(entry.description_string_index) or ""
+            failure = strings.get_string(entry.failure_string_index) or ""
+            if resolved == description:
+                hits.append((index, entry, failure))
+        if len(hits) != 1:
+            raise ValueError(f"{code} {description!r}: expected one DTC row, got {len(hits)}")
+        index, entry, failure = hits[0]
+        return {
+            "record_index": index,
+            "code": entry.code,
+            "description": description,
+            "failure": failure,
+            "packed_dtc": f"0x{entry.packed_dtc:06X}",
+            "raw_sha256": sha256(entry.raw),
+        }
+
+    def behavior_row(db, strings, signature: str, name: str) -> dict:
+        hits = []
+        for index, row in enumerate(parser.extract_priority_records(db.sections[87])):
+            if row.fields.get("behavior_signature") != signature:
+                continue
+            resolved = strings.get_string(row.fields["name_string_index"])
+            if resolved == name:
+                hits.append((index, row))
+        if len(hits) != 1:
+            raise ValueError(f"{signature} {name!r}: expected one behavior row, got {len(hits)}")
+        index, row = hits[0]
+        return {
+            "record_index": index,
+            "behavior_signature": signature,
+            "name": name,
+            "raw_sha256": sha256(row.raw),
+        }
+
+    def monitor_row(db, strings, name: str) -> tuple[int, bytes]:
+        hits = [
+            (index, raw)
+            for index, raw in enumerate(records(db.sections[62]))
+            if strings.get_string(u32(raw, 0x18)) == name
+        ]
+        if len(hits) != 1:
+            raise ValueError(f"ABS_P5 monitor {name!r}: expected one row, got {len(hits)}")
+        return hits[0]
+
+    region_rows: dict[str, dict] = {}
+    for region in REGIONS:
+        strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+        master = parser.parse_master_db(root / region / "DB/Toyota.ddb")
+        categories = parser.extract_master_ecu_categories(master.sections[16])
+        abs_category = [row for row in categories if row.category_id == 435]
+        if len(abs_category) != 1:
+            raise ValueError(f"{region}: category 435 count {len(abs_category)}")
+        abs_category = abs_category[0]
+        if not (
+            abs_category.database_name == "ABS_P5.ddb"
+            and abs_category.generation == 20
+            and strings.get_string(abs_category.ecu_name_string_index) == "Brake/EPB"
+        ):
+            raise ValueError(f"{region}: category 435 identity drift")
+
+        frc = parser.parse_ecu_db(root / region / "DB/FRC_P5.ddb")
+        absdb = parser.parse_ecu_db(root / region / "DB/ABS_P5.ddb")
+        frc_to_brk = behavior_row(
+            frc,
+            strings,
+            "X216E",
+            "Front Recognition Camera => BRK Communication Invalid",
+        )
+        frc_eps_key = behavior_row(
+            frc,
+            strings,
+            "X2166",
+            'Communication Error by ECU Security Key Not Registered (Power Steering Control Module "A")',
+        )
+        frc_vsc_key = behavior_row(
+            frc,
+            strings,
+            "X2167",
+            "Communication Error by ECU Security Key Not Registered (VSC)",
+        )
+        frc_brake_dtc = dtc_row(
+            frc,
+            strings,
+            "U012987",
+            'Lost Communication with Brake System Control Module "A"',
+        )
+        frc_eps_dtc = dtc_row(
+            frc,
+            strings,
+            "U013187",
+            'Lost Communication with Power Steering Control Module "A"',
+        )
+        frc_ads_dtc = dtc_row(
+            frc,
+            strings,
+            "U015E87",
+            'Lost Communication with Automated Driving System Interface Module "A"',
+        )
+        abs_eps_dtc = dtc_row(
+            absdb,
+            strings,
+            "U013187",
+            "Lost Communication with Power Steering Control Module",
+        )
+        abs_eps_ch2_dtc = dtc_row(
+            absdb,
+            strings,
+            "U11B187",
+            'Lost Communication with Power Steering Control Module "A" (ch2)',
+        )
+        abs_ads_dtc = dtc_row(
+            absdb,
+            strings,
+            "U11A987",
+            'Lost Communication with Automated Driving System Interface Module "A" (ch3)',
+        )
+
+        comm_index, comm_raw = monitor_row(
+            absdb, strings, "EPS/Steering Control Actuator ECU Communication Open"
+        )
+        if not (
+            u16(comm_raw, 0x24) == 500
+            and u16(comm_raw, 0x2C) == 74
+            and u16(comm_raw, 0x2E) == 74
+            and u16(comm_raw, 0x36) == 0x102F
+        ):
+            raise ValueError(f"{region}: ABS EPS-communication monitor geometry drift")
+
+        angle_index, angle_raw = monitor_row(absdb, strings, "ADS Control EPS Pinion Angle2")
+        phy_key = u16(angle_raw, 0x2A)
+        phy_hits = [
+            (index, raw)
+            for index, raw in enumerate(records(absdb.sections[13]))
+            if u16(raw, 0x0C) == phy_key
+        ]
+        if len(phy_hits) != 1:
+            raise ValueError(f"{region}: ABS ADS/EPS pinion-angle phy key {phy_key} count {len(phy_hits)}")
+        phy_index, phy = phy_hits[0]
+        unit_key = u16(phy, 0x0E)
+        unit_hits = [
+            (index, raw)
+            for index, raw in enumerate(records(absdb.sections[15]))
+            if u32(raw, 0x04) == unit_key
+        ]
+        if len(unit_hits) != 1:
+            raise ValueError(f"{region}: ABS pinion-angle unit key {unit_key} count {len(unit_hits)}")
+        unit_index, unit = unit_hits[0]
+        angle = {
+            "record_index": angle_index,
+            "monitor_key": u16(angle_raw, 0x24),
+            "name": "ADS Control EPS Pinion Angle2",
+            "primary_data_id": did_str(u16(angle_raw, 0x36)),
+            "alternate_data_id": did_str(u16(angle_raw, 0x38)),
+            "bit_range": [u16(angle_raw, 0x2C), u16(angle_raw, 0x2E)],
+            "physical_data_key": phy_key,
+            "physical_record_index": phy_index,
+            "mul": struct.unpack_from("<i", phy, 0x00)[0],
+            "div": struct.unpack_from("<i", phy, 0x04)[0],
+            "offset": struct.unpack_from("<i", phy, 0x08)[0],
+            "signed": bool(phy[0x14]),
+            "decimal_point_count": phy[0x15],
+            "unit_key": unit_key,
+            "unit_record_index": unit_index,
+            "unit": strings.get_string(u32(unit, 0x00)),
+            "data_range": [
+                struct.unpack_from("<i", angle_raw, 0x10)[0],
+                struct.unpack_from("<i", angle_raw, 0x0C)[0],
+            ],
+            "graph_range": [
+                struct.unpack_from("<i", angle_raw, 0x08)[0],
+                struct.unpack_from("<i", angle_raw, 0x04)[0],
+            ],
+            "display_scale_per_raw_count": (
+                struct.unpack_from("<i", phy, 0x00)[0]
+                / struct.unpack_from("<i", phy, 0x04)[0]
+                / (10 ** phy[0x15])
+            ),
+            "monitor_raw_sha256": sha256(angle_raw),
+            "physical_raw_sha256": sha256(phy),
+        }
+        if not (
+            angle["monitor_key"] == 314
+            and angle["primary_data_id"] == "0x107E"
+            and angle["alternate_data_id"] == "0x307E"
+            and angle["bit_range"] == [0, 23]
+            and angle["physical_data_key"] == 65
+            and angle["mul"] == 25
+            and angle["div"] == 1
+            and angle["offset"] == 0
+            and angle["signed"]
+            and angle["decimal_point_count"] == 5
+            and angle["unit"] == "rad"
+            and angle["data_range"] == [-131072, 131071]
+            and angle["graph_range"] == [-3276800, 3276775]
+            and abs(angle["display_scale_per_raw_count"] - 0.00025) < 1e-15
+        ):
+            raise ValueError(f"{region}: ABS ADS Control EPS Pinion Angle2 conversion drift")
+
+        # A hidden copy of the EPS Target-Lateral dictionary would be significant.
+        # It is absent in ABS_P5, and no type-62/88 row names Target Lateral or
+        # Target Steering.  Keep that negative explicit so the route section is
+        # not mistaken for a recovered B6 payload definition.
+        forbidden_name_hits = []
+        for table_type in (62, 88):
+            for index, raw in enumerate(records(absdb.sections[table_type])):
+                name = strings.get_string(u32(raw, 0x18)) or ""
+                lower = name.lower()
+                if "target lateral" in lower or "target steering" in lower:
+                    forbidden_name_hits.append(
+                        {"table_type": table_type, "record_index": index, "name": name}
+                    )
+        if forbidden_name_hits:
+            raise ValueError(f"{region}: ABS_P5 unexpectedly has target-lateral/steering names")
+
+        region_rows[region] = {
+            "category_435": {
+                "database": abs_category.database_name,
+                "resolved_ecu_name": strings.get_string(abs_category.ecu_name_string_index),
+                "generation": abs_category.generation,
+                "raw_sha256": sha256(abs_category.raw),
+            },
+            "frc_behavior": {
+                "frc_to_brake_invalid": frc_to_brk,
+                "eps_security_key_not_registered": frc_eps_key,
+                "vsc_security_key_not_registered": frc_vsc_key,
+            },
+            "frc_communication_dtcs": {
+                "brake": frc_brake_dtc,
+                "eps": frc_eps_dtc,
+                "ads_interface": frc_ads_dtc,
+            },
+            "brake_communication_dtcs": {
+                "eps": abs_eps_dtc,
+                "eps_ch2": abs_eps_ch2_dtc,
+                "ads_interface_ch3": abs_ads_dtc,
+            },
+            "brake_monitors": {
+                "eps_communication_open": {
+                    "record_index": comm_index,
+                    "monitor_key": u16(comm_raw, 0x24),
+                    "name": "EPS/Steering Control Actuator ECU Communication Open",
+                    "primary_data_id": did_str(u16(comm_raw, 0x36)),
+                    "bit_range": [u16(comm_raw, 0x2C), u16(comm_raw, 0x2E)],
+                    "raw_sha256": sha256(comm_raw),
+                },
+                "ads_control_eps_pinion_angle2": angle,
+            },
+            "abs_target_lateral_name_negative": {
+                "scanned_table_types": [62, 88],
+                "matches": forbidden_name_hits,
+            },
+        }
+
+    # These promoted raw records are byte-identical across the three regional DBs;
+    # fail generation if a future corpus breaks that fact.
+    canonical = region_rows["NA"]
+    invariant_paths = (
+        ("category_435", "raw_sha256"),
+        ("frc_behavior", "frc_to_brake_invalid", "raw_sha256"),
+        ("frc_behavior", "eps_security_key_not_registered", "raw_sha256"),
+        ("frc_behavior", "vsc_security_key_not_registered", "raw_sha256"),
+        ("frc_communication_dtcs", "brake", "raw_sha256"),
+        ("frc_communication_dtcs", "eps", "raw_sha256"),
+        ("frc_communication_dtcs", "ads_interface", "raw_sha256"),
+        ("brake_communication_dtcs", "eps", "raw_sha256"),
+        ("brake_communication_dtcs", "eps_ch2", "raw_sha256"),
+        ("brake_communication_dtcs", "ads_interface_ch3", "raw_sha256"),
+        ("brake_monitors", "eps_communication_open", "raw_sha256"),
+        ("brake_monitors", "ads_control_eps_pinion_angle2", "monitor_raw_sha256"),
+        ("brake_monitors", "ads_control_eps_pinion_angle2", "physical_raw_sha256"),
+    )
+    for region in ("EU", "JP"):
+        for path in invariant_paths:
+            a = canonical
+            b = region_rows[region]
+            for key in path:
+                a = a[key]
+                b = b[key]
+            if a != b:
+                raise ValueError(f"{region}: upstream-route regional invariant differs: {path}")
+
+    brake_family_specs = {
+        "ABS_P5.ddb": (435, "Brake/EPB"),
+        "Brk_Bst_P5.ddb": (466, "Brake Booster"),
+        "EPB_P5.ddb": (485, "Electric Parking Brake"),
+    }
+    brake_family_members: dict[str, dict] = {}
+    shared_semantics = None
+    for database, (category_id, ecu_name) in brake_family_specs.items():
+        per_region: dict[str, dict] = {}
+        for region in REGIONS:
+            strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+            master = parser.parse_master_db(root / region / "DB/Toyota.ddb")
+            categories = parser.extract_master_ecu_categories(master.sections[16])
+            cat_hits = [row for row in categories if row.database_name == database]
+            if len(cat_hits) != 1:
+                raise ValueError(f"{region}: {database} master-category count {len(cat_hits)}")
+            cat = cat_hits[0]
+            if not (
+                cat.category_id == category_id
+                and cat.generation == 20
+                and strings.get_string(cat.ecu_name_string_index) == ecu_name
+            ):
+                raise ValueError(f"{region}: {database} category identity drift")
+            db = parser.parse_ecu_db(root / region / "DB" / database)
+            monitor_hits = [
+                (index, raw)
+                for index, raw in enumerate(records(db.sections[62]))
+                if strings.get_string(u32(raw, 0x18)) == "ADS Control EPS Pinion Angle2"
+            ]
+            if len(monitor_hits) != 1:
+                raise ValueError(
+                    f"{region}: {database} ADS Control EPS Pinion Angle2 count {len(monitor_hits)}"
+                )
+            monitor_index, monitor = monitor_hits[0]
+            phy_key = u16(monitor, 0x2A)
+            phy_hits = [
+                (index, raw)
+                for index, raw in enumerate(records(db.sections[13]))
+                if u16(raw, 0x0C) == phy_key
+            ]
+            if len(phy_hits) != 1:
+                raise ValueError(f"{region}: {database} PhyData key {phy_key} count {len(phy_hits)}")
+            phy_index, phy = phy_hits[0]
+            unit_key = u16(phy, 0x0E)
+            unit_hits = [
+                (index, raw)
+                for index, raw in enumerate(records(db.sections[15]))
+                if u32(raw, 0x04) == unit_key
+            ]
+            if len(unit_hits) != 1:
+                raise ValueError(f"{region}: {database} unit key {unit_key} count {len(unit_hits)}")
+            unit_index, unit = unit_hits[0]
+            row = {
+                "category_id": category_id,
+                "resolved_ecu_name": ecu_name,
+                "monitor_record_index": monitor_index,
+                "monitor_key": u16(monitor, 0x24),
+                "primary_data_id": did_str(u16(monitor, 0x36)),
+                "alternate_data_id": did_str(u16(monitor, 0x38)),
+                "bit_range": [u16(monitor, 0x2C), u16(monitor, 0x2E)],
+                "physical_data_key": phy_key,
+                "physical_record_index": phy_index,
+                "mul": struct.unpack_from("<i", phy, 0x00)[0],
+                "div": struct.unpack_from("<i", phy, 0x04)[0],
+                "offset": struct.unpack_from("<i", phy, 0x08)[0],
+                "signed": bool(phy[0x14]),
+                "decimal_point_count": phy[0x15],
+                "unit_key": unit_key,
+                "unit_record_index": unit_index,
+                "unit": strings.get_string(u32(unit, 0x00)),
+                "data_range": [
+                    struct.unpack_from("<i", monitor, 0x10)[0],
+                    struct.unpack_from("<i", monitor, 0x0C)[0],
+                ],
+                "graph_range": [
+                    struct.unpack_from("<i", monitor, 0x08)[0],
+                    struct.unpack_from("<i", monitor, 0x04)[0],
+                ],
+                "display_scale_per_raw_count": (
+                    struct.unpack_from("<i", phy, 0x00)[0]
+                    / struct.unpack_from("<i", phy, 0x04)[0]
+                    / (10 ** phy[0x15])
+                ),
+                "monitor_raw_sha256": sha256(monitor),
+                "physical_raw_sha256": sha256(phy),
+            }
+            semantic_tuple = (
+                row["monitor_key"],
+                row["primary_data_id"],
+                row["alternate_data_id"],
+                tuple(row["bit_range"]),
+                row["mul"],
+                row["div"],
+                row["offset"],
+                row["signed"],
+                row["decimal_point_count"],
+                row["unit"],
+                tuple(row["data_range"]),
+                tuple(row["graph_range"]),
+                row["display_scale_per_raw_count"],
+            )
+            expected_tuple = (
+                314,
+                "0x107E",
+                "0x307E",
+                (0, 23),
+                25,
+                1,
+                0,
+                True,
+                5,
+                "rad",
+                (-131072, 131071),
+                (-3276800, 3276775),
+                0.00025,
+            )
+            if semantic_tuple != expected_tuple:
+                raise ValueError(f"{region}: {database} 0x107E conversion drift: {semantic_tuple!r}")
+            if shared_semantics is None:
+                shared_semantics = semantic_tuple
+            elif semantic_tuple != shared_semantics:
+                raise ValueError(f"{region}: {database} brake-family 0x107E semantics differ")
+            per_region[region] = row
+        brake_family_members[database] = {
+            "category_id": category_id,
+            "resolved_ecu_name": ecu_name,
+            "regions": per_region,
+        }
+
+    install_rows = corolla_model_install_sets(parser, root)["rows"]
+    p5_corolla = [
+        row
+        for row in install_rows
+        if 498 in row["categories"] and 405 in row["categories"]
+    ]
+    if not p5_corolla or any(435 not in row["categories"] for row in p5_corolla):
+        raise ValueError("Corolla 498+405 install sets do not all contain category 435 Brake/EPB")
+
+    return {
+        "module_topology": {
+            "corolla_install_sets": p5_corolla,
+            "required_categories": {
+                "498": "FRC_P5 / Front Recognition Camera 2",
+                "435": "ABS_P5 / Brake/EPB",
+                "405": "EMPS_P5 / EMPS",
+            },
+            "interpretation": (
+                "Every Corolla-family install set in this artifact that contains FRC_P5(498) "
+                "and EMPS_P5(405) also contains category 435, which Toyota.ddb resolves exactly "
+                "to ABS_P5.ddb / Brake/EPB."
+            ),
+        },
+        "regions": region_rows,
+        "eps_h_endpoint": {
+            "software_id": "8965H1202000",
+            "can_id": h_b6["can_id"],
+            "pdu_id": h_b6["pdu_id"],
+            "dtc": h_b6["dtc"],
+            "interpretation": (
+                "Exact H maps protected B6/PDU42 loss to U012987 Lost Communication with "
+                "Brake System Control Module / Missing Message, pinning the immediate monitored "
+                "B6 sender relationship at the EPS endpoint."
+            ),
+        },
+        "brake_family_angle_observer": {
+            "canonical_region": "NA",
+            **canonical["brake_monitors"]["ads_control_eps_pinion_angle2"],
+            "conversion_formula": "display = (raw * mul / div + offset) / 10^decimal_point_count",
+            "display_scale": "0.00025 rad/count",
+            "family_members": brake_family_members,
+            "shared_conversion": (
+                "ABS_P5, Brk_Bst_P5 and EPB_P5 all expose monitor key 314 / DID 0x107E "
+                "bits 0..23 as signed 0.00025 rad/count, despite using database-local PhyData keys."
+            ),
+            "scope": (
+                "Corolla category 435 selects ABS_P5. The identical engineering conversion across "
+                "the three brake-family diagnostic databases proves shared diagnostic vocabulary. "
+                "It does not prove which physical ECU computes the value or that it is the B6 wire scalar."
+            ),
+        },
+        "topology_conclusion": {
+            "frc_to_brake_dependency_identified": True,
+            "brake_to_eps_dependency_identified": True,
+            "frc_to_eps_dependency_also_identified": True,
+            "payload_forwarding_or_transform_identified": False,
+            "secoc_sender_ownership_identified": False,
+            "strongest_static_model": (
+                "FRC_P5 has an explicit 'Front Recognition Camera => BRK Communication Invalid' "
+                "behavior plus U012987 brake and U013187 EPS missing-message DTCs. Corolla's "
+                "category-435 ABS_P5 brake domain monitors EPS communication and exposes an ADS "
+                "Control EPS Pinion Angle2 observer. Exact H receives protected B6 from the Brake "
+                "System Control Module. These facts establish a real FRC/brake/EPS communication "
+                "topology and make a brake-mediated steering-target route plausible, but they do "
+                "not prove that FRC target bytes are forwarded/transformed into B6; FRC also has "
+                "a direct EPS communication dependency and both FRC/ABS reference an Automated "
+                "Driving System Interface module."
+            ),
+            "next_evidence": (
+                "Acquire decoded FRC_P5 and category-435 Brake/ABS firmware or a synchronized "
+                "stock-LTA capture spanning FRC/Brake/EPS buses. Join the FRC lateral state to "
+                "ABS_P5 0x107E (if live), protected EPS B6 signal254/255, counters/freshness and "
+                "SecOC source/key state before assigning producer/forwarder ownership."
+            ),
+        },
+        "boundary": (
+            "Diagnostic module-dependency and observer evidence only. This section does not "
+            "identify a CAN/CAN-FD arbitration ID for the FRC->Brake leg, a byte-level FRC->B6 "
+            "transformation, category-435 transmit code, or the SecOC sender/key/freshness owner."
         ),
     }
 
@@ -1807,7 +2498,7 @@ def build(root: Path) -> dict:
         raise ValueError("NA cat498/cat499 co-occurrence keys changed")
 
     return {
-        "schema_version": 4,
+        "schema_version": 5,
         "source": "Techstream V18.00.003",
         "sources": source_identities(root),
         "master_categories": {
@@ -1842,6 +2533,8 @@ def build(root: Path) -> dict:
             ),
         },
         "corolla_model_install_sets": corolla_model_install_sets(parser, root),
+        "upstream_lateral_route": p5_upstream_lateral_route(parser, root),
+        "brake_active_test_surface": abs_p5_active_test_surface(parser, root),
         "front_recognition_camera_2": {
             "did_rows_NA": frc_did_rows(parser, root, "NA"),
             "did_rows_region_check": {
@@ -1915,6 +2608,8 @@ def build(root: Path) -> dict:
             ),
             "not_proved": [
                 "the CAN/CAN-FD arbitration ID or wire encoding carrying any named target-angle value",
+                "a byte-level FRC-to-Brake-to-B6 forwarding/transformation path despite the now-closed module dependency topology",
+                "which ECU owns SecOC signing/freshness/key state for B6 or any upstream protected leg",
                 "that the ADS_Eth_P5 DDR snapshot rows are live wire command fields",
                 "that ADS Operation plugin DID 0x1C08 joins to ADS DDR rows 406/407",
                 "any producer/bit-layout/authentication join from FRC_P5 to community NEW_MSG_8A_LAT_CONTROL (0x18A; the Reference screenshot corpus records 0x18A as one of 22 CAN-FD 64-byte IDs on buses 0 and 2, nothing more)",
@@ -1924,9 +2619,11 @@ def build(root: Path) -> dict:
                 "a unique 5YF-descriptor-to-VehicleId mapping (the per-pattern join is bounded, not unique)",
             ],
             "next_static_target": (
-                "FRC_P5 firmware acquisition and the true-TSS3 producer contract: recover the FRC "
-                "lateral-control output path and its join (if any) to EMPS/EMPS2 steering observers, "
-                "using the read-only Operation FFD surface and fixed 0x1588 LTA Steering Vibration routine as capture references."
+                "Decoded FRC_P5 plus category-435 ABS/Brake firmware acquisition (or a synchronized "
+                "stock-LTA capture) to resolve the still-open payload transformation and SecOC sender "
+                "ownership across the now-proved FRC/Brake/EPS communication topology. Use the "
+                "read-only Operation FFD surface, ABS_P5 DID 0x107E, protected EPS B6, and fixed "
+                "0x1588 LTA Steering Vibration routine as correlation references."
             ),
         },
     }

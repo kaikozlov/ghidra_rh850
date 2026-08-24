@@ -1230,8 +1230,10 @@ The complete B6 result is therefore: `0x0B6` is a **secured steering-control and
 supervisory interface**. It carries the recovered target-angle magnitude plus
 mode/table/sequence/scaling/validity state. Techstream independently identifies
 its immediate monitored sender relationship as **Brake System Control Module**;
-that does not make the target-angle value a brake quantity, and it does not yet
-identify the upstream FRC→Brake producer route.
+that does not make the target-angle value a brake quantity. TMS-043 now identifies
+the module-level upstream topology as `FRC_P5` 498 + category-435 `ABS_P5`/Brake-EPB
++ `EMPS_P5` 405, but the byte-level planner→B6 forwarding transform and SecOC signer
+remain unresolved.
 
 #### The retained Sienna-shaped torque branch is dormant on H
 
@@ -1521,10 +1523,12 @@ positively as **target steering angle**, while the old `0x2E4` torque and `0x131
 wire formats remain absent.
 
 The corrected boundary is now narrower and more useful. The EPS-side command
-magnitude and its companion mode/control ID are identified, but the physical
-B6 wire-to-degree scale/sign convention, exact request/validity field meanings,
-SecOC sender freshness/key contract, and upstream FRC→Brake/EPB producer route
-remain open. B6 nonscalar block/group/full-PDU alternatives and D7's large-field
+magnitude, its controller-equivalent physical scale, and its companion mode/control
+ID are identified. What remains open is the literal OEM B6 engineering-unit name,
+the vehicle-level left/right sign convention, exact request/validity field meanings,
+and the SecOC sender freshness/key contract. The FRC/Brake/EPS module topology
+is now closed by TMS-043; the still-open upstream piece is the byte-level planner→B6
+transform and signing/forwarding owner. B6 nonscalar block/group/full-PDU alternatives and D7's large-field
 alternative remain negative; no second command-sized path was recovered in the
 audited scalar/descriptor surfaces.
 
@@ -2521,9 +2525,14 @@ healthy. Their literal OEM names are not assigned from family vocabulary alone.
 
 Techstream independently classifies `0x0B6` missing-message ownership as U012987
 **Lost Communication with Brake System Control Module / Missing Message**. That pins
-the immediate monitored sender relationship. It does not prove that the Brake ECU is
-the original feature planner; `FRC_P5`/gateway/Brake producer and routing ownership
-remain a separate upstream question. Techstream's P5 steering vocabulary also contains
+the immediate monitored sender relationship. Techstream now also closes the
+module-dependency topology: Corolla P5 installs category 498 `FRC_P5`, category 435
+**`ABS_P5` = Brake/EPB**, and category 405 `EMPS_P5`; FRC carries X216E `Front
+Recognition Camera => BRK Communication Invalid`, while ABS monitors EPS communication
+and exposes DID `0x107E ADS Control EPS Pinion Angle2` at signed 0.00025 rad/count.
+FRC also monitors EPS directly and both FRC/ABS reference an Automated Driving System
+Interface module, so this still does not prove that category 435 forwards or transforms
+the planner bytes into B6. Techstream's P5 steering vocabulary also contains
 **Target Lateral ID** and **Target Steering Angle After Output Compensation**, but
 exact H implements neither corresponding `0x1CEE/0x1CEF` observer DID, so those names
 are corroboration rather than a one-to-one B6 signal-name transfer.
@@ -2542,7 +2551,8 @@ drops missing B6 after seven foreground ticks, and signal261 supplies the modulo
 sequence state.** What remains before production use is the literal signal255 OEM
 unit, sender wall-clock cadence, exact names for secondary B6 fields, normal
 target/rate limits, SecOC freshness/key/source behavior, stock-source suppression,
-and the upstream FRC→Brake/EPB producer route.
+and the upstream byte-level producer/forwarding transform despite the now-closed
+FRC/`ABS_P5`/EPS module topology.
 
 Machine-readable ownership:
 `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json`,

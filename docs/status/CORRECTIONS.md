@@ -2627,8 +2627,10 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   first expiry propagates through slot18 -> `FEBEADB9` and disables `C26D`, and
   signal261 is a modulo-64 rolling sequence counter with effective-gap cap 8.
   Still open: the exact OEM signal255 unit label, sender wall-clock cadence, exact
-  secondary-field names, live **SecOC** freshness/key/source behavior, and the
-  upstream FRC→Brake/EPB producer/transport path. Arbitrary unrelated computed
+  secondary-field names and live **SecOC** freshness/key/source behavior. TMS-043
+  now closes the module-level FRC/Brake/EPS dependency topology and identifies Corolla
+  category 435 exactly as `ABS_P5` / Brake-EPB; the still-open part is the byte-level
+  planner→B6 forwarding/transformation and SecOC sender ownership. Arbitrary unrelated computed
   aliases or undocumented hardware/DMA writers remain bounded, but no second
   command-sized path was recovered in the audited surfaces.
 - **Canonical:**

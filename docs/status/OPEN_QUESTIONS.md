@@ -96,27 +96,29 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   CH3 tick period remains unsupported. The remaining Corolla work is therefore
   sender wall-clock cadence, exact secondary-field naming where safety-relevant,
   H/F-native limits, **SecOC** freshness/key/source behavior, stock-source
-  suppression, and upstream FRC/Brake/gateway producer/routing. Static broad
-  searching of this H EPS should not be repeated without a
-  new concrete lead. TMS-040 now
-  closes the acquisition choice: the true-TSS3 **diagnostic-domain holder** is
-  category 498 **`FRC_P5` = Front Recognition Camera 2** with dedicated plugin
-  roles 233/234 and the LTA/LDA/LCA DID surface (holder, not asserted physical
-  control-path owner); `ADS_Eth_P5` rows 406/407 remain recorded
-  snapshot evidence (rad/s, rad), and `EMPS_P5`/`EMPS2_P5` exclusively carry the
-  `0x1CEE/0x1CEF` **type-62 primary Data-ID** observer family that exact H
-  lacks. The unresolved task is
-  now firmware-side: acquire `FRC_P5` camera firmware and recover the lateral
-  producer contract and its join (if any) to the steering observers, using the
-  read-only `AB/EB` Operation FFD surface plus fixed routine `0x1588` (LTA
-  Steering Vibration) as capture references. TMS-041 closes the host-side
-  Active-Test semantics: it is a `21 E2 <RID BE16>` fixed-routine path with no
-  tunable angle/torque/amplitude payload. The remaining Active-Test question is
-  the FRC's downstream vehicle-network output. Wire
-  arbitration ID, producer identity, and any relation to the community
-  `NEW_MSG_8A_LAT_CONTROL` (`0x18A` — the Reference screenshot corpus records
-  only that it is one of 22 CAN-FD 64-byte IDs on buses 0 and 2) remain
-  unproved.
+  suppression, and the upstream payload/SecOC producer contract. Static broad
+  searching of this H EPS should not be repeated without a new concrete lead.
+  TMS-040/041 close the `FRC_P5` diagnostic domain and fixed-routine probe surface;
+  TMS-043 now closes the **module-dependency topology**: Corolla P5 installs
+  category 498 `FRC_P5`, category 435 **`ABS_P5` = Brake/EPB**, and category 405
+  `EMPS_P5`; FRC records X216E `Front Recognition Camera => BRK Communication
+  Invalid`, ABS monitors EPS communication, and exact H maps protected-B6 loss
+  to U012987 Brake System Control Module. `ABS_P5` also exposes DID `0x107E ADS
+  Control EPS Pinion Angle2` at signed 0.00025 rad/count, a conversion shared by
+  the brake-family P5 diagnostic databases. This does **not** close payload
+  forwarding: FRC also has a direct EPS missing-message dependency and both FRC
+  and ABS reference an Automated Driving System Interface module. The unresolved
+  task is firmware/dynamic: acquire decoded `FRC_P5` plus category-435 `ABS_P5`
+  firmware or synchronized stock-LTA traffic and join planner state to B6 bytes,
+  sender cadence, SecOC freshness/key/source ownership, and stock-source
+  suppression. The read-only `AB/EB` Operation FFD surface plus fixed routine
+  `0x1588` remain capture references. Wire arbitration ID for the FRC/Brake leg,
+  exact producer/forwarder identity, and any relation to community
+  `NEW_MSG_8A_LAT_CONTROL` (`0x18A`) remain unproved.
+  TMS-044 also closes the category-435 Techstream Active-Test catalog as a
+  normal steering-writer lead: 20 direct tests and four routines are brake-actuator-
+  only, and every routine has zero variable command/mask/button payloads. Those tests
+  remain useful as actuator probes, but they are not the missing B6 setpoint writer.
   Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3 ·
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §§7.34–7.35.
 

@@ -282,9 +282,10 @@ now-labeled `PCS/LDA/Hands Off LTA/LTA-LCA/PDA` profiles. The next dynamic work 
 to correlate those fields with stock LTA, `0x1C02`, `0x1152`, measured steering
 angle, and B6 companion fields to validate the statically closed 7-tick loss and
 modulo-64 sequence rules while recovering sender wall-clock cadence and production
-bounds. `FRC_P5` plus Brake/EPB/gateway analysis remains high priority for the
-**upstream producer and SecOC/routing contract**, not for discovering the EPS
-receiver setpoint, physical scale, profile labels, request selector, or loss tick
+bounds. `FRC_P5` plus exact category-435 `ABS_P5`/Brake analysis remains high
+priority for the **byte-level upstream producer/forwarding and SecOC/routing contract**;
+the module dependency topology itself is closed by TMS-043, so this is not for
+discovering the EPS receiver setpoint, physical scale, profile labels, request selector, or loss tick
 boundary.
 
 Longitudinal and HUD remain separate whole-vehicle workstreams. The old Corolla
