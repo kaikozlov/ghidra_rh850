@@ -93,9 +93,18 @@ calibration profile fields, and opens a selected local result. It has no network
 database, or XML client and Techstream invokes its sole export with an initially
 empty C-string rather than a CID/catalog object. Thus once `7B0/F181` supplies the
 current Brake CID, **SearchCal can only match a CUW already downloaded locally**.
-The next acquisition task is to recover the actual Toyota/TIS package catalog or
-download handoff and determine how a missing `07B0` CUW reaches the local repro
-data store.
+TMS-049 closes that missing handoff. `tiswebapi.dll` owns the remote
+SendSearchInfo → GetSearchInfo → DownloadCalFile → GetCalFileURL sequence, and
+the managed utility downloads the returned ZIP, expands nested ZIPs, and copies
+the calibration files into Techstream's local store. More importantly, the
+server search input is now joined to the vehicle: `GetPartNumber_DT.dll` uses
+`22 01 05` for `ecuAssyNo` and **`22 F1 81` for the `baseSwNo` array**, reading
+byte 3 as a count and 16-byte records from byte 4. `SaveEcuSupplyChangeSendXmlFile`
+serializes those records under `baseSwNoLst`; the web API's separate
+`strSoftwareId` is `CTISCommon::GetPecID` client identity, not ECU F181. The next
+step is therefore operational rather than another host-static search: read Brake
+`7B0/F181` plus `0105` and VIN on the target, run/record the normal Toyota ECU
+Supply Change lookup, and retain the returned package if the service offers one.
 
 **Next software-analysis target:** acquire a true-TSS3 CUW whose
 **`Node01/DiagID=07B0`** (category-435 `ABS_P5`/Brake), ideally matched by
