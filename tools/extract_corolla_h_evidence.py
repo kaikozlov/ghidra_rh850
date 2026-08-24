@@ -55,6 +55,10 @@ class Profile:
     boundary: str | None = None
     extra: dict[str, Any] = field(default_factory=dict)
     sort_functions: bool = False
+    # Some retired extractors merged multiple corpora before target lookup.
+    # Preserve that exact "later source wins" behavior when specified instead
+    # of assuming the target is unique to one corpus.
+    row_source_precedence: tuple[str, ...] | None = None
 
 
 def _selections(addresses: list[int], source: str = "default") -> tuple[Selection, ...]:
@@ -229,6 +233,9 @@ PROFILES: dict[str, Profile] = {
         + _selections([0x9227E, 0x92314, 0x9238A, 0x92436, 0x7C390, 0x7C39C, 0x92724], "helpers"),
         include_name=True,
         source_format="list",
+        # The retired extractor did rows=load(commands); rows.update(load(helpers)).
+        # Keep helper-corpus precedence for every target if the corpora overlap.
+        row_source_precedence=("commands", "helpers"),
         boundary_key="boundary",
         boundary="only forced XCP command/helper boundaries are promoted; unrelated disposable-project partitioning is ignored",
     ),
@@ -288,9 +295,11 @@ def build_artifact(
     raw_path: Path = RAW,
     source_paths: dict[str, Path] | None = None,
 ) -> dict[str, Any]:
-    resolved_sources = source_paths or {
-        name: ROOT / source.path for name, source in profile.sources.items()
-    }
+    resolved_sources = (
+        {name: ROOT / source.path for name, source in profile.sources.items()}
+        if source_paths is None
+        else source_paths
+    )
     if set(resolved_sources) != set(profile.sources):
         raise ValueError("source override names must exactly match the profile")
 
@@ -303,13 +312,34 @@ def build_artifact(
         )
         for name, source in profile.sources.items()
     }
+    merged_rows: dict[int, dict[str, Any]] | None = None
+    if profile.row_source_precedence is not None:
+        if profile.include_source_label:
+            raise ValueError("merged source precedence cannot be combined with source labels")
+        if len(set(profile.row_source_precedence)) != len(profile.row_source_precedence):
+            raise ValueError("row source precedence contains duplicates")
+        unknown = set(profile.row_source_precedence) - set(profile.sources)
+        if unknown:
+            raise ValueError(f"unknown row source precedence entries: {sorted(unknown)}")
+        merged_rows = {}
+        for source_name in profile.row_source_precedence:
+            merged_rows.update(corpora[source_name])
+
     functions: list[dict[str, Any]] = []
     for selection in profile.selections:
-        row = corpora[selection.source].get(selection.target)
+        row = (
+            merged_rows.get(selection.target)
+            if merged_rows is not None
+            else corpora[selection.source].get(selection.target)
+        )
         if not row or not row.get("decompile_completed") or not row.get("decompiled_c"):
+            source_description = (
+                " merged sources " + " -> ".join(profile.row_source_precedence)
+                if profile.row_source_precedence is not None
+                else f" source {selection.source}"
+            )
             raise ValueError(
-                f"missing completed decompilation {selection.target:#x} "
-                f"from source {selection.source}"
+                f"missing completed decompilation {selection.target:#x} from{source_description}"
             )
         body_size = int(row["body_size"])
         decompiled = row["decompiled_c"]

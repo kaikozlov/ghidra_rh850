@@ -185,11 +185,13 @@ belong there rather than in a new top-level file:
 |---|---|
 | Corolla-H surface evidence compaction (fixed known targets, one/two JSONL corpora) | `uv run --locked python tools/extract_corolla_h_evidence.py list` |
 | Read-only exports from `build/work/project` (signals/consumers/producers/coverage/inventory) | `tools/export_ghidra_project.sh list` |
-| Cross-variant image-bound evidence (structural fingerprints, decompaction, callback-table selection, substring census) | `uv run --locked python tools/extract_variant_evidence.py list` |
+| Cross-variant image-bound evidence (structural fingerprints, decompilation, callback-table selection, substring census) | `uv run --locked python tools/extract_variant_evidence.py list` |
 
-All three expose a `list` discovery command reporting their profiles/modes,
-inputs, and tracked outputs. Their scope boundaries — which extractors stay
-separate and why — are documented in
+All three expose a `list` discovery command. The Corolla-H runner reports its
+profile inputs and tracked outputs; the argument-driven variant runner reports
+mode purpose/input/selection semantics; the exporter lists its profile names,
+with defaults documented in the tooling guide. Their scope boundaries — which
+extractors stay separate and why — are documented in
 [tooling/README.md](tooling/README.md#task-oriented-entry-points).
 
 The `.c` tree is intentionally ignored; it can be reproduced from the tracked

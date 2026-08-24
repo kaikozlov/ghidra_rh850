@@ -60,17 +60,18 @@ def display_path(path: Path, root: Path) -> str:
         return str(path)
 
 
-def load_codeflash(image: Path) -> bytes:
+def load_codeflash(image: Path, *, description: str = "CodeFlash") -> bytes:
     data = image.read_bytes()
     if len(data) != 0x100000:
-        raise SystemExit(f"expected 1 MiB CodeFlash, got {len(data):#x}")
+        raise SystemExit(f"expected 1 MiB {description}, got {len(data):#x}")
     return data
 
 
 def iter_corpus(path: Path) -> Iterator[dict[str, Any]]:
     for line in path.read_text(encoding="utf-8").splitlines():
-        if line:
-            yield json.loads(line)
+        # Preserve the retired extractors' strict JSONL contract: a blank line
+        # is malformed input, not whitespace to silently ignore.
+        yield json.loads(line)
 
 
 def write_payload(out: Path, payload: dict[str, Any]) -> None:
@@ -80,7 +81,7 @@ def write_payload(out: Path, payload: dict[str, Any]) -> None:
 
 def run_structural(args: argparse.Namespace) -> None:
     root = Path(__file__).resolve().parents[1]
-    image = load_codeflash(args.image)
+    image = load_codeflash(args.image, description="image")
     want = set(args.address)
     rows: dict[int, dict[str, Any]] = {}
     for record in iter_corpus(args.fingerprints):

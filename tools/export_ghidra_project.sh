@@ -53,6 +53,11 @@ resolve_path() {
   python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).expanduser().resolve())' "$1"
 }
 
+# Compare canonical paths to canonical paths. BUILD_ROOT may itself be reached
+# through a symlink (for example macOS /tmp -> /private/tmp), while output paths
+# are always resolved below.
+BUILD_OUT_CANON=$(resolve_path "$BUILD_OUT")
+BUILD_TMP_CANON=$(resolve_path "$BUILD_TMP")
 PROJECT_DIR=$(resolve_path "$PROJECT_DIR")
 if [[ ! -d "$PROJECT_DIR/$PROJECT_NAME.rep" ]]; then
   cat >&2 <<EOF
@@ -124,13 +129,15 @@ case "$PROFILE" in
     (($# <= 1)) || { usage >&2; exit 2; }
     PRIMARY_OUT=$(resolve_path "${1:-$BUILD_OUT/ghidra_project_inventory.jsonl}")
     case "$PRIMARY_OUT" in
-      "$BUILD_OUT/"*|"$BUILD_TMP/"*) ;;
+      "$BUILD_OUT_CANON/"*|"$BUILD_TMP_CANON/"*) ;;
       *)
-        echo "refusing inventory output outside $BUILD_OUT or $BUILD_TMP: $PRIMARY_OUT" >&2
+        echo "refusing inventory output outside $BUILD_OUT_CANON or $BUILD_TMP_CANON: $PRIMARY_OUT" >&2
         exit 1
         ;;
     esac
-    rm -f "$PRIMARY_OUT"
+    # ExportProjectInventory opens the destination with a truncating writer, so
+    # no pre-delete is needed. Keeping an existing artifact intact until the
+    # headless safety gate succeeds makes failed/unsafe invocations non-destructive.
     LABEL="project-inventory"
     LOG_NAME="generate-project-inventory.log"
     SUCCESS_MARKER="ExportProjectInventory: wrote "

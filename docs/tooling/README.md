@@ -86,9 +86,9 @@ hide:
 
 - **Techstream CUW inspectors and writer generators.** `parse_cuw_container.py`
   already packages the shared container parser; `inspect_cuw_legacy.py` exports
-  the shared legacy attach/parameter decoders, and `generate_cuw_writer_inventory.py`
-  exports the shared parameter-INI decoder and factory-route table — every
-  `inspect_cuw_*` and `generate_cuw_writer_*` tool imports them. The remaining
+  the shared legacy attach/parameter decoders used by the other inspectors, and
+  `generate_cuw_writer_inventory.py` exports the shared parameter-INI decoder
+  and factory-route table consumed by the writer-analysis tools. The remaining
   per-tool code encodes distinct evidence boundaries and proof outputs
   (whole-repro vs delta corpus invariants, per-family route verdicts, timing
   recovery, calibration schema), each pinned by its own deterministic test
