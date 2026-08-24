@@ -1,0 +1,1057 @@
+{
+  "direct_reuse_evidence": {
+    "0x025": {
+      "steer_angle_deg": {
+        "count": 6003,
+        "max": 123.0,
+        "min": -511.5,
+        "unique_count": 337
+      },
+      "steer_fraction_deg": {
+        "count": 6003,
+        "max": 0.7000000000000001,
+        "min": -0.7000000000000001,
+        "unique_count": 15
+      },
+      "steer_rate_deg_s": {
+        "count": 6003,
+        "max": 800,
+        "min": -700,
+        "unique_count": 186
+      },
+      "wire": "32-byte CAN-FD; exact H firmware independently proves the older steering angle/fraction/rate positions survive"
+    },
+    "0x030": {
+      "boundary": "Every Span-rlog 0x030 frame matches the exact-H/F firmware-derived additive-byte rule; this strengthens format/producer-family continuity without creating an exact firmware identity join.",
+      "exact_h_f_additive_rule": {
+        "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
+        "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte",
+        "wire_byte": 7
+      },
+      "frame_count": 6000,
+      "rule_matches": 6000,
+      "wire": "32-byte generation-native EPS telemetry/status PDU"
+    },
+    "0x0AA": {
+      "fault_values": {
+        "FL": [
+          0
+        ],
+        "FR": [
+          0
+        ],
+        "RL": [
+          0
+        ],
+        "RR": [
+          0
+        ]
+      },
+      "speeds_kph": {
+        "FL": {
+          "count": 6000,
+          "max": 23.5,
+          "min": 0.0,
+          "unique_count": 1069
+        },
+        "FR": {
+          "count": 6000,
+          "max": 24.010000000000005,
+          "min": 0.0,
+          "unique_count": 1033
+        },
+        "RL": {
+          "count": 6000,
+          "max": 23.5,
+          "min": 0.0,
+          "unique_count": 1056
+        },
+        "RR": {
+          "count": 6000,
+          "max": 24.049999999999997,
+          "min": 0.0,
+          "unique_count": 1003
+        }
+      },
+      "wire": "classic 8-byte WHEEL_SPEEDS"
+    },
+    "0x101": {
+      "brake_pressed_values": [
+        0,
+        1
+      ],
+      "checksum_valid": 3000,
+      "frame_count": 3000,
+      "wire": "classic 8-byte BRAKE_MODULE"
+    },
+    "0x116": {
+      "gas_pedal_user": {
+        "count": 2548,
+        "max": 0.73,
+        "min": 0.0,
+        "unique_count": 121
+      },
+      "wire": "classic 8-byte GAS_PEDAL with Toyota classic SecOC trailer"
+    },
+    "0x127": {
+      "boundary": "This capture exercises only D (raw value 3). Carrier, bit position, checksum, and D enum compatibility are directly supported; P/R/N/B transitions still require dynamic validation.",
+      "checksum_valid": 3662,
+      "decoded_values": [
+        "D"
+      ],
+      "frame_count": 3662,
+      "gear_raw_values": [
+        3
+      ],
+      "prior_art_value_map": {
+        "0": "P",
+        "1": "R",
+        "2": "N",
+        "3": "D",
+        "4": "B"
+      },
+      "wire": "classic 8-byte GEAR_PACKET_HYBRID"
+    },
+    "0x176": {
+      "checksum_valid": 1890,
+      "cruise_active_values": [
+        false
+      ],
+      "cruise_state_values": [
+        0
+      ],
+      "dynamic_boundary": "Vehicle motion is exercised, but cruise never engages in this segment; active-state semantics remain untested.",
+      "frame_count": 1890,
+      "wire": "classic 8-byte PCM_CRUISE with Toyota additive checksum"
+    }
+  },
+  "exact_h_f_visibility": {
+    "boundary": "The moving Span rlog exposes 0x00F/0x0D7 but no B6, and only 0x030 from the exact-H/F five-PDU Tx set. Because all Panda-state samples are ELM327 param=1, logical bus 1 was attached to the normal harness CAN1 wires throughout; lack of the physical CAN0/CAN1 repin therefore blocks interception/side attribution rather than passive CAN1 observation. B6 absence is still only a segment-level negative: no stock-LTA off->active->off transition or exact F181 join is present, so feature/request gating and specimen/segment differences remain open.",
+    "secoc_rx_expected": [
+      "0x00F/8",
+      "0x0D7/32",
+      "0x0B6/32"
+    ],
+    "secoc_rx_observed_counts": {
+      "0x00F/8": 600,
+      "0x0B6/32": 0,
+      "0x0D7/32": 3000
+    },
+    "tx_expected": [
+      "0x030/32",
+      "0x351/4",
+      "0x394/3",
+      "0x4A3/8",
+      "0x4C8/8"
+    ],
+    "tx_observed_counts": {
+      "0x030/32": 6000,
+      "0x351/4": 0,
+      "0x394/3": 0,
+      "0x4A3/8": 0,
+      "0x4C8/8": 0
+    }
+  },
+  "harness_observation_boundary": {
+    "all_samples_controls_disallowed": true,
+    "all_samples_elm327_param1": true,
+    "all_samples_harness_status_flipped": true,
+    "field_context": "The maintainer reports Span had not physically swapped the Toyota-B CAN0/CAN1 pairs for this log.",
+    "interpretation": "Panda harnessStatus=flipped is USB-C harness orientation, not the Toyota-B physical CAN0/CAN1 repin. ELM327 param=1 keeps logical bus 1/FDCAN2 on the normal harness CAN1 wires, so an unmodified harness can passively observe that unsplit network. The missing physical repin prevents CAN0/CAN2 relay interception and camera-side-vs-car-side producer attribution; it does not by itself make stock CAN1 traffic invisible to logical bus 1.",
+    "panda_state_samples": 599
+  },
+  "moving_vehicle_evidence": {
+    "brake_pressed_values": [
+      0,
+      1
+    ],
+    "gas_pedal_user": {
+      "count": 2548,
+      "max": 0.73,
+      "min": 0.0,
+      "unique_count": 121
+    },
+    "interpretation": "Raw vehicle signals are dynamic and wheel speed exceeds zero, so this is a moving/driving CAN capture even though the embedded MOCK CarState remains zeroed. Motion does not by itself prove that stock LTA was active or exercise every READY-state subsystem contract.",
+    "steering_angle_deg": {
+      "count": 6003,
+      "max": 123.0,
+      "min": -511.5,
+      "unique_count": 337
+    },
+    "steering_rate_deg_s": {
+      "count": 6003,
+      "max": 800,
+      "min": -700,
+      "unique_count": 186
+    },
+    "wheel_speed_max_kph": 24.049999999999997,
+    "wheel_speed_min_kph": 0.0
+  },
+  "radar_parser_boundary": {
+    "interpretation": "Span's tskdash log contains radarTracks/radarState services, but radarTracks carries no parsed points and radarState model leads have radar=false. The source branch therefore supplies no hidden TSS3 radar decoder for the 0x180-family.",
+    "nonempty_parsed_track_samples": 0,
+    "radar_tracks_samples": 1200
+  },
+  "role_inventory": [
+    {
+      "can_id": "0x00F",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 600,
+          "dlc": 8,
+          "first_payload": "162d0040d8a0a606",
+          "rate_hz": 10.000083483167721
+        }
+      ],
+      "role": "SECOC_SYNCHRONIZATION"
+    },
+    {
+      "can_id": "0x025",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 6003,
+          "dlc": 32,
+          "first_payload": "0ff800005fff0092000000000000000000000000000000000000000091f9fcc0",
+          "rate_hz": 100.04988712742795
+        }
+      ],
+      "role": "STEER_ANGLE_SENSOR"
+    },
+    {
+      "can_id": "0x030",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 6000,
+          "dlc": 32,
+          "first_payload": "fa0000ff850000b6f9ff80ff3680000002030000ff36fd7a0000000095a195c1",
+          "rate_hz": 99.99987885328895
+        }
+      ],
+      "role": "generation-native EPS FD telemetry"
+    },
+    {
+      "can_id": "0x0AA",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 6000,
+          "dlc": 8,
+          "first_payload": "1a6f1a6f1a6f1a6f",
+          "rate_hz": 99.99987885328895
+        }
+      ],
+      "role": "WHEEL_SPEEDS"
+    },
+    {
+      "can_id": "0x0B6",
+      "instances": [],
+      "role": "exact-H/F protected lateral command (visibility check)"
+    },
+    {
+      "can_id": "0x0D7",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 3000,
+          "dlc": 32,
+          "first_payload": "05000000000000e40000000000000000000000000000000000000000dd8abb7b",
+          "rate_hz": 50.00016613342963
+        }
+      ],
+      "role": "exact-H/F protected vehicle-speed carrier (visibility check)"
+    },
+    {
+      "can_id": "0x101",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 3000,
+          "dlc": 8,
+          "first_payload": "8800003a000000cc",
+          "rate_hz": 50.00016613342963
+        }
+      ],
+      "role": "BRAKE_MODULE"
+    },
+    {
+      "can_id": "0x116",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 2548,
+          "dlc": 8,
+          "first_payload": "000000001bb2d3b6",
+          "rate_hz": 42.457024744011825
+        }
+      ],
+      "role": "GAS_PEDAL"
+    },
+    {
+      "can_id": "0x127",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 3662,
+          "dlc": 8,
+          "first_payload": "001000000738d857",
+          "rate_hz": 61.03721514320969
+        }
+      ],
+      "role": "GEAR_PACKET_HYBRID"
+    },
+    {
+      "can_id": "0x176",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 1890,
+          "dlc": 8,
+          "first_payload": "8800000000000007",
+          "rate_hz": 31.498656282538718
+        }
+      ],
+      "role": "PCM_CRUISE"
+    },
+    {
+      "can_id": "0x1D3",
+      "instances": [],
+      "role": "PCM_CRUISE_2"
+    },
+    {
+      "can_id": "0x260",
+      "instances": [],
+      "role": "STEER_TORQUE_SENSOR"
+    },
+    {
+      "can_id": "0x262",
+      "instances": [],
+      "role": "EPS_STATUS"
+    },
+    {
+      "can_id": "0x283",
+      "instances": [],
+      "role": "PRE_COLLISION"
+    },
+    {
+      "can_id": "0x320",
+      "instances": [],
+      "role": "VSC1S07"
+    },
+    {
+      "can_id": "0x343",
+      "instances": [],
+      "role": "ACC_CONTROL"
+    },
+    {
+      "can_id": "0x351",
+      "instances": [],
+      "role": "exact-H/F EPS Tx plausibility/debounce carrier (visibility check)"
+    },
+    {
+      "can_id": "0x394",
+      "instances": [],
+      "role": "exact-H/F EPS Tx fault/status carrier (visibility check)"
+    },
+    {
+      "can_id": "0x399",
+      "instances": [],
+      "role": "PCM_CRUISE_SM"
+    },
+    {
+      "can_id": "0x3B7",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 202,
+          "dlc": 8,
+          "first_payload": "0000000020000008",
+          "rate_hz": 3.3668123609032166
+        }
+      ],
+      "role": "ESP_CONTROL"
+    },
+    {
+      "can_id": "0x3BC",
+      "instances": [],
+      "role": "GEAR_PACKET"
+    },
+    {
+      "can_id": "0x3F6",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 60,
+          "dlc": 8,
+          "first_payload": "80ea6e0080ba0000",
+          "rate_hz": 0.9996565576880607
+        }
+      ],
+      "role": "BSM"
+    },
+    {
+      "can_id": "0x411",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 60,
+          "dlc": 8,
+          "first_payload": "0020000000008000",
+          "rate_hz": 0.9999908206266345
+        }
+      ],
+      "role": "PCS_HUD"
+    },
+    {
+      "can_id": "0x412",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 60,
+          "dlc": 8,
+          "first_payload": "1200002202ee9303",
+          "rate_hz": 1.0000076288887079
+        }
+      ],
+      "role": "LKAS_HUD"
+    },
+    {
+      "can_id": "0x4A3",
+      "instances": [],
+      "role": "exact-H/F EPS Tx state bridge (visibility check)"
+    },
+    {
+      "can_id": "0x4C8",
+      "instances": [],
+      "role": "exact-H/F EPS Tx carrier (visibility check)"
+    },
+    {
+      "can_id": "0x610",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 140,
+          "dlc": 8,
+          "first_payload": "0000006490fffde0",
+          "rate_hz": 2.3334132571636017
+        }
+      ],
+      "role": "BODY_CONTROL_STATE_2"
+    },
+    {
+      "can_id": "0x614",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 62,
+          "dlc": 8,
+          "first_payload": "000036300000ef04",
+          "rate_hz": 1.034244959190717
+        }
+      ],
+      "role": "BLINKERS_STATE"
+    },
+    {
+      "can_id": "0x620",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 200,
+          "dlc": 8,
+          "first_payload": "0000000080000000",
+          "rate_hz": 3.3338538552512453
+        }
+      ],
+      "role": "BODY_CONTROL_STATE"
+    },
+    {
+      "can_id": "0x622",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 60,
+          "dlc": 8,
+          "first_payload": "0000000000220000",
+          "rate_hz": 0.9999832954485381
+        }
+      ],
+      "role": "LIGHT_STALK"
+    }
+  ],
+  "runtime_boundary": {
+    "controls_allowed": false,
+    "interpretation": "Openpilot control was disabled and Panda controlsAllowed was false. Raw src<128 CAN is used as vehicle evidence; logged MOCK CarState is not used for physical-state semantics.",
+    "lat_active_values": [
+      false
+    ],
+    "long_active_values": [
+      false
+    ],
+    "mock_carstate": {
+      "canValid": [
+        true
+      ],
+      "gearShifter": [
+        "unknown"
+      ],
+      "steeringAngleDeg": [
+        0.0
+      ],
+      "steeringTorque": [
+        0.0
+      ],
+      "vEgo": [
+        0.0
+      ]
+    },
+    "selfdrive_state_values": [
+      "disabled"
+    ]
+  },
+  "schema": "corolla-2025-span-discord-rlog-opendbc-evidence-v1",
+  "source": {
+    "attribution": "Span / spanconstant, comma Discord; rlog recorded 2026-07-29 and imported 2026-08-24",
+    "can_source_filter": "Only src<128 records are treated as incoming vehicle traffic; Panda returned/Tx and rejected echoes are excluded from every inventory and baseline.",
+    "can_window_s": 59.990072676000004,
+    "car_params": {
+      "brand": "mock",
+      "car_fingerprint": "MOCK",
+      "car_fw": [
+        {
+          "address": 1971,
+          "ecu": "hvac",
+          "fw_version_hex": "f1000000000000000000000000000000000084100000000000000000000000000000"
+        },
+        {
+          "address": 1988,
+          "ecu": "fwdCamera",
+          "fw_version_hex": "f1000000000000000000000000000000000084000000000000000000000000000000"
+        },
+        {
+          "address": 2000,
+          "ecu": "fwdRadar",
+          "fw_version_hex": "f1000000000000000000000000000000000004100000000000000000000000000000"
+        }
+      ],
+      "safety_configs": [
+        {
+          "model": "noOutput",
+          "param": 0
+        }
+      ]
+    },
+    "identity_boundary": {
+      "firmware_dump_preflight_dongle_id": "23257862c6bf2f83",
+      "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. Treat this as Span-attributed vehicle-level evidence, not an exact 8965F1208000 firmware-to-route join.",
+      "rlog_car_params_is_mock": true,
+      "rlog_dongle_id": "67fd5b833889fedf",
+      "rlog_has_no_usable_f181_join": true,
+      "same_dongle": false
+    },
+    "init_data": {
+      "device_type": "mici",
+      "dongle_id": "67fd5b833889fedf",
+      "git_branch": "tskdash",
+      "git_commit": "7e78a9d89728c4bd106838d40b5891ce3931de43",
+      "git_remote": "https://github.com/spanconstant5/openpilot.git",
+      "version": "0.11.2"
+    },
+    "notes": "Moving/driving whole-vehicle CAN evidence. Embedded carParams is MOCK/noOutput and does not contain an F181 identity join; this rlog must not be equated byte-for-byte with the separate 2026-08-21 8965F1208000 TSKM dump solely from contributor attribution. Maintainer field context: Span had not physically repinned the Toyota-B CAN0/CAN1 pairs for this capture; Panda harnessStatus=flipped is a separate orientation state.",
+    "panda_state": {
+      "controls_allowed": false,
+      "harness_status": "flipped",
+      "panda_type": "cuatro",
+      "safety_model": "elm327",
+      "safety_param": 1
+    },
+    "panda_state_samples": 599,
+    "panda_state_unique": [
+      {
+        "controls_allowed": false,
+        "harness_status": "flipped",
+        "panda_type": "cuatro",
+        "safety_model": "elm327",
+        "safety_param": 1
+      }
+    ],
+    "path": "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
+    "provenance": "Rlog file supplied by Span in comma Discord and added to the repository by the maintainer. Embedded initData independently records dongle 67fd5b833889fedf, spanconstant5/openpilot branch tskdash, commit 7e78a9d89728c4bd106838d40b5891ce3931de43, version 0.11.2, and mici hardware; no Discord message permalink is retained.",
+    "sha256": "f1ae7c40ad8e9ff8c462a3f5367d914873e93575d902ccb82f2c74984acd439f",
+    "size": 11365866
+  },
+  "tss3_fd_network": {
+    "bus0": [
+      {
+        "can_id": "0x020",
+        "count": 1200,
+        "dlc": 12,
+        "first_payload": "a82430300000000000000000",
+        "rate_hz": 20.000017800516257
+      },
+      {
+        "can_id": "0x123",
+        "count": 600,
+        "dlc": 16,
+        "first_payload": "b3f217010c0800a00000000000000000",
+        "rate_hz": 9.998226174634686
+      },
+      {
+        "can_id": "0x160",
+        "count": 2400,
+        "dlc": 32,
+        "first_payload": "44905f82800040034defa3007eaff080023fff100a8fffe40000000000000000",
+        "rate_hz": 39.99636669270413
+      },
+      {
+        "can_id": "0x180",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "fee22f353839fdeffcff0051ea01700cffef0ba2032ff9ff020ebdf44fddff0f5fc4053001ff001a6004fff6ffff0c51f1ae36ff195c6804f001ff0000000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x181",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "e33e2f35143c008000ff18207a047fffffff0de2104ff7ff010cd5f93fd6ffff5ac6002ff6ffbd0433fe8ffaff003047fc6000ffe2155616900fff3000000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x182",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "68012f3522ae0e0000ff3e565402bff2ff760b6805a000ffff23f80e2ffeff520a02133ff7ff000f83eadff1ffff0699fad01aff010ca5e67009ffff00000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x183",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "74792f3500000000008300000000ff0003000800000000030200000ff4000902000000fe008200003fff0004834200001c1b600b00003ffffb00030100000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x184",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "caa12f3518ffdd7f000102003ff30004830000400300000b4208005f00640900000000fe000300020000ff00820008000000000302003ff900008a0200000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x185",
+        "count": 1199,
+        "dlc": 64,
+        "first_payload": "4fc02f35000000fe0083020000000000820100000000040102000000ff00820300400600008a0200c00200040b02100007fa00090200000700048b0200000000",
+        "rate_hz": 19.996599102610517
+      },
+      {
+        "can_id": "0x186",
+        "count": 1199,
+        "dlc": 64,
+        "first_payload": "d2192f35000033e0070f08000022f0050000000022f00400000000320e030001000020f0070000000032000600f00000326113400f000022f005000000000000",
+        "rate_hz": 19.996599102610517
+      },
+      {
+        "can_id": "0x187",
+        "count": 1199,
+        "dlc": 64,
+        "first_payload": "c4ca2f350004221663000a000030f0080000000020000602000000324321400f000022f005010000002300e80f09000022f0030000000021000a09f700000000",
+        "rate_hz": 19.996599102610517
+      },
+      {
+        "can_id": "0x188",
+        "count": 1199,
+        "dlc": 64,
+        "first_payload": "6ac22f35003c200007000000002310070778000032f0030001000020f0070600000060000a01f000003200030001000032f0020001000071000a01f000000000",
+        "rate_hz": 19.996599102610517
+      },
+      {
+        "can_id": "0x189",
+        "count": 1199,
+        "dlc": 64,
+        "first_payload": "a6ba2f353c0502140000005006fe1d0000090806ff080007fd0006030a0087ef1e06fb200000030009fd14fffffc0006020600ef1c1e06fb22fff80400000000",
+        "rate_hz": 19.996599102610517
+      },
+      {
+        "can_id": "0x18A",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "44e32e344e080113fd78000008fd14ff98000006fc0a0007ff0006030a02ffec5006ff1e0007fd6406040d0007fe000603120000000007fa0cffc00a00000000",
+        "rate_hz": 20.000002509424835
+      },
+      {
+        "can_id": "0x18B",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "c35f2e340008fa130000013706fd1c0007fc0006ff080000000006fb0f0000000008fb09001ffe0009060e0017f90008010e00400a0008060a00380500000000",
+        "rate_hz": 20.000002509424835
+      },
+      {
+        "can_id": "0x18C",
+        "count": 1200,
+        "dlc": 48,
+        "first_payload": "53eb2e340729f941fe41fff00003fc401487e8000000210fc6e000006b1f18000000018000012fffc009000000000000",
+        "rate_hz": 20.000002509424835
+      },
+      {
+        "can_id": "0x1A0",
+        "count": 1200,
+        "dlc": 48,
+        "first_payload": "685c2e347fff0e33003c01fffa00fa00015e00000403f807f00fe0000000000000000000000000000000000000000000",
+        "rate_hz": 20.000002509424835
+      },
+      {
+        "can_id": "0x200",
+        "count": 600,
+        "dlc": 64,
+        "first_payload": "1edd17348008008008008008008008008008008008008008002d72ec31333a800800800800800800800800800800800800800800800800000000000000000000",
+        "rate_hz": 9.998419003250023
+      },
+      {
+        "can_id": "0x201",
+        "count": 600,
+        "dlc": 64,
+        "first_payload": "77c11734800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800000000000000000000",
+        "rate_hz": 9.998419003250023
+      },
+      {
+        "can_id": "0x230",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "f31030a0000000000000000000000000000000000000000000000000000000000000513cf9ff67ffdd7635fc00fe000000000000000000000000000000000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x440",
+        "count": 120,
+        "dlc": 32,
+        "first_payload": "f9696c0001643e37eb65ee001240feabffc0ffd80041561479414f6400000000",
+        "rate_hz": 2.0000586839739545
+      },
+      {
+        "can_id": "0x450",
+        "count": 120,
+        "dlc": 32,
+        "first_payload": "60ae6b000000020037eb65ee001240feabffc0ffd80000000000000000000000",
+        "rate_hz": 1.999664078817553
+      }
+    ],
+    "bus0_bus2_payload_sequences_equal": true,
+    "bus0_bus2_same_id_dlc_set": true,
+    "bus2": [
+      {
+        "can_id": "0x020",
+        "count": 1200,
+        "dlc": 12,
+        "first_payload": "a82430300000000000000000",
+        "rate_hz": 20.000017800516257
+      },
+      {
+        "can_id": "0x123",
+        "count": 600,
+        "dlc": 16,
+        "first_payload": "b3f217010c0800a00000000000000000",
+        "rate_hz": 9.998226174634686
+      },
+      {
+        "can_id": "0x160",
+        "count": 2400,
+        "dlc": 32,
+        "first_payload": "44905f82800040034defa3007eaff080023fff100a8fffe40000000000000000",
+        "rate_hz": 39.99636669270413
+      },
+      {
+        "can_id": "0x180",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "fee22f353839fdeffcff0051ea01700cffef0ba2032ff9ff020ebdf44fddff0f5fc4053001ff001a6004fff6ffff0c51f1ae36ff195c6804f001ff0000000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x181",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "e33e2f35143c008000ff18207a047fffffff0de2104ff7ff010cd5f93fd6ffff5ac6002ff6ffbd0433fe8ffaff003047fc6000ffe2155616900fff3000000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x182",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "68012f3522ae0e0000ff3e565402bff2ff760b6805a000ffff23f80e2ffeff520a02133ff7ff000f83eadff1ffff0699fad01aff010ca5e67009ffff00000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x183",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "74792f3500000000008300000000ff0003000800000000030200000ff4000902000000fe008200003fff0004834200001c1b600b00003ffffb00030100000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x184",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "caa12f3518ffdd7f000102003ff30004830000400300000b4208005f00640900000000fe000300020000ff00820008000000000302003ff900008a0200000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x185",
+        "count": 1199,
+        "dlc": 64,
+        "first_payload": "4fc02f35000000fe0083020000000000820100000000040102000000ff00820300400600008a0200c00200040b02100007fa00090200000700048b0200000000",
+        "rate_hz": 19.996599102610517
+      },
+      {
+        "can_id": "0x186",
+        "count": 1199,
+        "dlc": 64,
+        "first_payload": "d2192f35000033e0070f08000022f0050000000022f00400000000320e030001000020f0070000000032000600f00000326113400f000022f005000000000000",
+        "rate_hz": 19.996599102610517
+      },
+      {
+        "can_id": "0x187",
+        "count": 1199,
+        "dlc": 64,
+        "first_payload": "c4ca2f350004221663000a000030f0080000000020000602000000324321400f000022f005010000002300e80f09000022f0030000000021000a09f700000000",
+        "rate_hz": 19.996599102610517
+      },
+      {
+        "can_id": "0x188",
+        "count": 1199,
+        "dlc": 64,
+        "first_payload": "6ac22f35003c200007000000002310070778000032f0030001000020f0070600000060000a01f000003200030001000032f0020001000071000a01f000000000",
+        "rate_hz": 19.996599102610517
+      },
+      {
+        "can_id": "0x189",
+        "count": 1199,
+        "dlc": 64,
+        "first_payload": "a6ba2f353c0502140000005006fe1d0000090806ff080007fd0006030a0087ef1e06fb200000030009fd14fffffc0006020600ef1c1e06fb22fff80400000000",
+        "rate_hz": 19.996599102610517
+      },
+      {
+        "can_id": "0x18A",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "44e32e344e080113fd78000008fd14ff98000006fc0a0007ff0006030a02ffec5006ff1e0007fd6406040d0007fe000603120000000007fa0cffc00a00000000",
+        "rate_hz": 20.000002509424835
+      },
+      {
+        "can_id": "0x18B",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "c35f2e340008fa130000013706fd1c0007fc0006ff080000000006fb0f0000000008fb09001ffe0009060e0017f90008010e00400a0008060a00380500000000",
+        "rate_hz": 20.000002509424835
+      },
+      {
+        "can_id": "0x18C",
+        "count": 1200,
+        "dlc": 48,
+        "first_payload": "53eb2e340729f941fe41fff00003fc401487e8000000210fc6e000006b1f18000000018000012fffc009000000000000",
+        "rate_hz": 20.000002509424835
+      },
+      {
+        "can_id": "0x1A0",
+        "count": 1200,
+        "dlc": 48,
+        "first_payload": "685c2e347fff0e33003c01fffa00fa00015e00000403f807f00fe0000000000000000000000000000000000000000000",
+        "rate_hz": 20.000002509424835
+      },
+      {
+        "can_id": "0x200",
+        "count": 600,
+        "dlc": 64,
+        "first_payload": "1edd17348008008008008008008008008008008008008008002d72ec31333a800800800800800800800800800800800800800800800800000000000000000000",
+        "rate_hz": 9.998419003250023
+      },
+      {
+        "can_id": "0x201",
+        "count": 600,
+        "dlc": 64,
+        "first_payload": "77c11734800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800000000000000000000",
+        "rate_hz": 9.998419003250023
+      },
+      {
+        "can_id": "0x230",
+        "count": 1200,
+        "dlc": 64,
+        "first_payload": "f31030a0000000000000000000000000000000000000000000000000000000000000513cf9ff67ffdd7635fc00fe000000000000000000000000000000000000",
+        "rate_hz": 19.999910719998212
+      },
+      {
+        "can_id": "0x440",
+        "count": 120,
+        "dlc": 32,
+        "first_payload": "f9696c0001643e37eb65ee001240feabffc0ffd80041561479414f6400000000",
+        "rate_hz": 2.0000586839739545
+      },
+      {
+        "can_id": "0x450",
+        "count": 120,
+        "dlc": 32,
+        "first_payload": "60ae6b000000020037eb65ee001240feabffc0ffd80000000000000000000000",
+        "rate_hz": 1.999664078817553
+      }
+    ],
+    "equality_by_id": [
+      {
+        "can_id": "0x020",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 12,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x123",
+        "count_bus0": 600,
+        "count_bus2": 600,
+        "dlc": 16,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x160",
+        "count_bus0": 2400,
+        "count_bus2": 2400,
+        "dlc": 32,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x180",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x181",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x182",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x183",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x184",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x185",
+        "count_bus0": 1199,
+        "count_bus2": 1199,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x186",
+        "count_bus0": 1199,
+        "count_bus2": 1199,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x187",
+        "count_bus0": 1199,
+        "count_bus2": 1199,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x188",
+        "count_bus0": 1199,
+        "count_bus2": 1199,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x189",
+        "count_bus0": 1199,
+        "count_bus2": 1199,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x18A",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x18B",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x18C",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 48,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x1A0",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 48,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x200",
+        "count_bus0": 600,
+        "count_bus2": 600,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x201",
+        "count_bus0": 600,
+        "count_bus2": 600,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x230",
+        "count_bus0": 1200,
+        "count_bus2": 1200,
+        "dlc": 64,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x440",
+        "count_bus0": 120,
+        "count_bus2": 120,
+        "dlc": 32,
+        "payload_sequence_equal": true
+      },
+      {
+        "can_id": "0x450",
+        "count_bus0": 120,
+        "count_bus2": 120,
+        "dlc": 32,
+        "payload_sequence_equal": true
+      }
+    ],
+    "interpretation": "The full moving capture carries the same 22 incoming CAN-FD ID/DLC shapes on buses 0 and 2 with byte-identical payload sequences. This upgrades the prior Span NRtD structure result to a dynamic/moving topology invariant; it still does not assign field semantics or physical producer ownership."
+  }
+}

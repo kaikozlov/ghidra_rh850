@@ -15,7 +15,7 @@ REPO = Path(__file__).resolve().parents[1]
 CONTRACT = REPO / "data/external/opendbc/toyota_porting_contract.json"
 REPORT = REPO / "docs/architecture/toyota-openpilot-porting-contract.md"
 LOCK = REPO / "external-references.lock.json"
-MATRIX = REPO / "data/tss3_eps_variant_matrix.csv"
+MATRIX = REPO / "data/toyota_eps_variant_matrix.csv"
 FINDINGS = REPO / "docs/status/FINDINGS.md"
 PRIORITIES = REPO / "docs/status/PRIORITIES.md"
 
@@ -120,6 +120,8 @@ with MATRIX.open(newline="", encoding="utf-8") as fh:
     rows = list(csv.DictReader(fh))
 corolla_h = next(r for r in rows if r["application_software_id"] == "8965H1202000")
 check("tracked Corolla H remains a direct old-steering-ID counterexample", "no 0x2E4/0x131" in corolla_h["secured_can_ids"])
+check("variant matrix separates ADAS and security axes", all(k in corolla_h for k in ("adas_generation", "security_architecture")) and "SecOC/TSK" in corolla_h["security_architecture"])
+check("report explicitly separates TSS generation from SecOC/TSK", all(x in report for x in ("Two orthogonal axes", "TSS generation", "SecOC/TSK")))
 
 for token in (
     "control contract",
@@ -127,7 +129,7 @@ for token in (
     "0x18A",
     "64-byte CAN-FD",
     "stock producer safely suppressed",
-    "SecOC makes a valid TSS3 command deliverable",
+    "When the target command is SecOC-protected, SecOC makes that command deliverable",
 ):
     check(f"report preserves roadmap token {token}", token in report)
 

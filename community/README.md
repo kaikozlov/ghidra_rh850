@@ -229,6 +229,15 @@ now reconciles the identity records exactly: the byte-identical F181 producer
 reads `8965F1208000 @ 0x20860` and `8A3111213000 @ 0x17DC0`, while
 `8965H1213000 @ 0x17D80` belongs to a separate one-record identity path.
 
+A separate Span-supplied Discord rlog,
+`spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst`, was
+recorded 2026-07-29 and added 2026-08-24. It is **not** part of the Aug-21 TSKM
+bundle and is not an exact F181 join (`carParams=MOCK`, different logging dongle),
+but it supplies a real moving whole-vehicle CAN sample. The maintainer reports the
+Toyota-B CAN0/CAN1 pairs were not physically repinned during that capture;
+`harnessStatus=flipped` in the rlog is Panda cable orientation, not the repin.
+See `spanconstant/README.md` for the evidence boundary.
+
 The full comparative pass is tracked rather than left as preliminary triage.
 Span differs from albino's normalized 1-MiB CodeFlash in only 2,190 low-region
 bytes and is identical from `0x17E00` onward; a fresh clean target-native Ghidra

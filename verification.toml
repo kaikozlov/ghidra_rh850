@@ -1071,9 +1071,9 @@ paths = ["data/application_security_consumers.csv"]
 tests = ["tests/verify_toyota_secoc_signer.py"]
 paths = ["tools/toyota_secoc_signer.py"]
 
-[suite.tss3_variant_matrix]
-tests = ["tests/verify_tss3_variant_matrix.py"]
-paths = ["data/tss3_eps_variant_matrix.csv", "docs/variants/"]
+[suite.toyota_eps_variant_matrix]
+tests = ["tests/verify_toyota_eps_variant_matrix.py"]
+paths = ["data/toyota_eps_variant_matrix.csv", "docs/variants/"]
 
 [suite.toyota_porting_contract]
 tests = ["tests/verify_toyota_porting_contract.py"]
@@ -1086,7 +1086,87 @@ paths = [
   "docs/status/FINDINGS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
-  "data/tss3_eps_variant_matrix.csv",
+  "data/toyota_eps_variant_matrix.csv",
+  "external-references.lock.json",
+]
+
+[suite.corolla_2023_public_route_opendbc_evidence]
+tests = ["tests/verify_corolla_2023_public_route_opendbc_evidence.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_corolla_2023_public_route_opendbc_evidence.py",
+  "tools/extract_corolla_2023_public_route_opendbc_evidence.py",
+  "tools/toyota_route_opendbc_common.py",
+  "data/generated/corolla_2023_public_route_opendbc_evidence.json",
+  "data/generated/corolla_2023_public_route_summary.json",
+  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+  "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json",
+  "external-references.lock.json",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/status/FINDINGS.md",
+]
+
+
+[suite.span_2025_discord_rlog_opendbc_evidence]
+tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_span_2025_discord_rlog_opendbc_evidence.py",
+  "tools/extract_span_2025_discord_rlog_opendbc_evidence.py",
+  "tools/toyota_route_opendbc_common.py",
+  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+  "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
+  "external-references.lock.json",
+  "community/spanconstant/README.md",
+  "community/README.md",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/status/FINDINGS.md",
+]
+
+[suite.corolla_tss3_opendbc_readiness]
+tests = ["tests/verify_corolla_tss3_opendbc_readiness.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_corolla_tss3_opendbc_readiness.py",
+  "tools/build_corolla_tss3_opendbc_readiness.py",
+  "data/generated/corolla_tss3_opendbc_readiness.json",
+  "data/generated/corolla_2023_public_route_opendbc_evidence.json",
+  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+  "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json",
+  "data/toyota_eps_variant_matrix.csv",
+  "community/spanconstant/spanconstant_tsk.zip",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/variants/toyota-eps-variant-comparison.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "exploit/findings_coverage.json",
+]
+
+[suite.corolla_2023_public_route_opendbc_evidence_external]
+tests = ["tests/verify_corolla_2023_public_route_opendbc_evidence_external.py"]
+oracle = "independent_external_artifact"
+modes = ["local"]
+paths = [
+  "tests/verify_corolla_2023_public_route_opendbc_evidence_external.py",
+  "tools/extract_corolla_2023_public_route_opendbc_evidence.py",
+  "tools/toyota_route_opendbc_common.py",
+  "data/generated/corolla_2023_public_route_opendbc_evidence.json",
+]
+
+[suite.span_2025_discord_rlog_opendbc_evidence_external]
+tests = ["tests/verify_span_2025_discord_rlog_opendbc_evidence_external.py"]
+oracle = "independent_external_artifact"
+modes = ["local"]
+paths = [
+  "tests/verify_span_2025_discord_rlog_opendbc_evidence_external.py",
+  "tools/extract_span_2025_discord_rlog_opendbc_evidence.py",
+  "tools/toyota_route_opendbc_common.py",
+  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+  "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
   "external-references.lock.json",
 ]
 
@@ -2002,7 +2082,7 @@ paths = [
   "data/variant_bootstrap_profiles.json",
   "community/spanconstant/",
   "community/albinoelephant/raw-20260818/",
-  "data/tss3_eps_variant_matrix.csv",
+  "data/toyota_eps_variant_matrix.csv",
   "docs/variants/corolla-8965F1208000.md",
   "docs/architecture/boot-validity-and-flash-lifecycle.md",
   "docs/communications/xcp-command-dispatch.md",

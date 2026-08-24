@@ -2642,3 +2642,33 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `tests/verify_corolla_8965H1202000_lta_command_provenance.py`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   §§7.11, 7.14, 7.35.
+
+### CORR-108 — SecOC/TSK is not a TSS-generation classifier
+
+- **Wrong model:** the former `data/tss3_eps_variant_matrix.csv` and its
+  `tss3-family-comparison.md` orientation put the SecOC/TSK Sienna donor, true-TSS3
+  Corolla targets, and empty speculative Camry/RAV4 rows under one "TSS3 EPS"
+  umbrella. Even where individual cells were qualified, that schema invited the
+  false inference **SecOC/TSK car ⇒ TSS3 car** and blurred security prior art with
+  ADAS/control-generation evidence.
+- **Right:** TSS/TSS2/TSS3 is the **ADAS/control architecture** axis; SecOC/TSK is
+  the **security/authentication** axis. They are independent. All three tracked
+  firmware dump families (Sienna `8965B4512000`, Corolla H, Corolla F) are
+  SecOC/TSK evidence, but `8965B4512000` now explicitly carries
+  `adas_generation=not established by retained evidence; do not infer from SecOC`.
+  H/F carry separate TSS3 vehicle/P5 control-generation evidence. The external
+  `8965B4514000` row retains its reported-TSS3 label as an external claim that is
+  explicitly independent of its SecOC evidence.
+- **Data-model fix:** the matrix is renamed
+  `data/toyota_eps_variant_matrix.csv`, adds separate `adas_generation` and
+  `security_architecture` columns, and removes the all-unknown Camry/RAV4
+  placeholders. Unacquired family targets remain in the open-question/acquisition
+  queue instead of masquerading as populated evidence rows.
+- **Porting consequence:** a TSS3 opendbc platform must not acquire the `SECOC`
+  flag merely because it is TSS3, and a SecOC-capable Sienna command path must not
+  be treated as a TSS3 wire/API template. Reuse security plumbing only where the
+  target independently proves SecOC; recover command/state/ownership by TSS
+  generation from target-native bytes/captures.
+- **Canonical:** [../variants/toyota-eps-variant-comparison.md](../variants/toyota-eps-variant-comparison.md);
+  [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md);
+  `tests/verify_toyota_eps_variant_matrix.py`; COM-013.

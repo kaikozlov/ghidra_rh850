@@ -457,13 +457,31 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   so the route-to-image/model-year join remains contributor attribution. See
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   and [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md).
-- **OQ-030 — TSS 3.0 family breadth and generation control contract.** Which Sienna findings generalize across the
-  family (Camry, RAV4, etc.) is unmapped. ARCH-016 now supplies the upstream
-  Toyota role checklist that each real TSS3 target must close independently:
-  command, feedback/readiness, producer/route, stock-source suppression, limits/faults,
-  UI, and authentication. Exact Corolla H already disproves blind reuse of the older
-  steering IDs. See [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md)
-  and [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).
+- **OQ-030 — TSS 3.0 family breadth and generation control contract.** TSS
+  generation and SecOC/TSK remain explicitly separate axes (CORR-108). COM-013
+  now combines three vehicle-level oracles with exact H/F firmware. The public
+  2023 route preserves substantial old-state structure but lacks `carFw`; Span's
+  July-29 driving rlog independently exercises motion, brake/gas/steering and
+  restores `0x127/8` as a strong gear reuse candidate (3,662/3,662 valid Toyota
+  checksums, observed `GEAR=3/D`) while its embedded `carParams=MOCK` and different
+  dongle prevent an exact `8965F1208000` identity join. All 599 Span Panda-state
+  samples are `ELM327 param=1`; that is direct observation of the normal unsplit
+  harness CAN1 path. Span had not physically repinned Toyota-B CAN0/CAN1, so the
+  capture cannot establish relay-side producer ownership or stock suppression,
+  but the lack of repin does not itself make CAN1 traffic invisible. B6 remains
+  absent in this no-stock-LTA-transition segment and is therefore only a bounded
+  negative. The public route, old Span static capture, and moving Span rlog all
+  preserve the same 22-ID/DLC ADAS-FD geometry. The next decisive Corolla
+  discriminator is a **firmware-identified H/F-family capture with the target
+  network physically repinned onto the CAN0/CAN2 relay pair and stock LTA
+  exercised off→active→off**, with `carFw`/F181 preserved; also exercise cruise
+  and P/R/N/D so the remaining state contract can close. Family breadth beyond
+  Corolla (Camry, RAV4, etc.) still must close command, feedback/readiness,
+  producer/route, stock suppression, limits/faults, UI and authentication
+  independently. Canonical machine-readable state:
+  `data/generated/corolla_tss3_opendbc_readiness.json`. See
+  [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md)
+  and [../variants/toyota-eps-variant-comparison.md](../variants/toyota-eps-variant-comparison.md).
 
 - **OQ-031 — Boot SecurityAccess lifecycle measurement.** The bad-key backoff itself is
   statically closed at **10 seconds**: the second bad `27 02` arms
@@ -739,15 +757,20 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
 - **OQ-052 — True-TSS3 longitudinal producer/control contract.** Older Toyota prior
   art makes longitudinal ownership a separate generation-specific architecture:
   ordinary TSS2 treats the camera as the ACC command source, `RADAR_ACC` moves
-  ownership to the radar, and SecOC splits the acceleration command across classic
-  `0x343` plus authenticated `0x183`. The newer Corolla route already disproves
-  direct wire-shape transfer because its `0x183` is 64-byte CAN-FD. For one exact
-  TSS3 target, identify the real ACC producer (FRC, radar/ADS, gateway, brake/ACC
-  controller, or other), command/feedback fields and cadence, AEB/brake arbitration,
+  ownership to the radar, and some SecOC-protected profiles split acceleration
+  across classic `0x343` plus authenticated `0x183`. That SecOC fact is orthogonal
+  to TSS generation. The pinned 2023 Corolla route has **no `0x343`** and its
+  `0x183` is a 64-byte ~20-Hz CAN-FD member of the wider `0x180..0x18B` family;
+  the retained 2025 Span capture reproduces the same ID/DLC family. This proves the
+  old `0x183/8` ACC_CONTROL_2 wire contract does not transfer and makes the numeric
+  ID alone non-semantic. For one exact TSS3 target, identify the real ACC producer
+  (FRC, radar/ADS, gateway, brake/ACC controller, or other), command/feedback fields
+  and cadence, lead/distance/standstill state, AEB/brake arbitration,
   integrity/authentication, and the safe stock-source suppression/fallback point.
   Do not add a TSS3 longitudinal builder or Panda whitelist until that ownership
   contract is target-native. Canonical:
-  [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4/§5D.
+  [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4.1/§5D and
+  `data/generated/corolla_tss3_opendbc_readiness.json`.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

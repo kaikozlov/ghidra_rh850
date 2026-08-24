@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Independent checks for data/tss3_eps_variant_matrix.csv.
+"""Independent checks for data/toyota_eps_variant_matrix.csv.
 
 Validates column integrity, evidence-grade correctness, and known factual
 constraints (sync IDs, CAN routing, Sienna-vs-Corolla separation).
@@ -12,7 +12,7 @@ import sys
 
 REPO = Path(__file__).resolve().parents[1]
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
-MATRIX = REPO / "data" / "tss3_eps_variant_matrix.csv"
+MATRIX = REPO / "data" / "toyota_eps_variant_matrix.csv"
 
 passed = 0
 failed = 0
@@ -30,7 +30,7 @@ def check(name, cond, detail=""):
     print(f"[{mark}] {name}{suffix}")
 
 
-print("== TSS3 EPS variant matrix ==")
+print("== Toyota EPS security/control variant matrix ==")
 
 check("variant matrix CSV exists", MATRIX.is_file())
 
@@ -41,6 +41,12 @@ check("matrix has at least Sienna and Corolla rows", len(rows) >= 2)
 vehicles = [r["vehicle"] for r in rows]
 check("Sienna row present", any("Sienna" in v for v in vehicles))
 check("Corolla row present", any("Corolla" in v for v in vehicles))
+check("matrix contains only evidence-backed rows", len(rows) == 4 and all(r["application_software_id"] != "unknown" for r in rows))
+check("matrix models ADAS and security as separate columns", all("adas_generation" in r and "security_architecture" in r for r in rows))
+check("all three tracked dump families are SecOC/TSK", all(
+    next(r for r in rows if r["application_software_id"] == sw)["security_architecture"].startswith("SecOC/TSK")
+    for sw in ("8965B4512000", "8965H1202000", "8965F1208000")
+))
 
 sienna_4512000 = next(
     (r for r in rows if r["application_software_id"] == "8965B4512000"),
@@ -52,6 +58,10 @@ sienna_4514000 = next(
 )
 corolla = next((r for r in rows if r["application_software_id"] == "8965F1208000"), None)
 corolla_h = next((r for r in rows if r["application_software_id"] == "8965H1202000"), None)
+
+check("Sienna 4512000 ADAS generation is not inferred from security", sienna_4512000 is not None and "not established" in sienna_4512000["adas_generation"] and "do not infer from SecOC" in sienna_4512000["adas_generation"])
+check("Sienna 4514000 external TSS3 label is independent of SecOC evidence", sienna_4514000 is not None and "reported TSS3" in sienna_4514000["adas_generation"] and "independent of SecOC" in sienna_4514000["adas_generation"])
+check("Span and H rows carry TSS3 control-generation evidence separately", corolla is not None and corolla_h is not None and corolla["adas_generation"].startswith("TSS3") and corolla_h["adas_generation"].startswith("TSS3"))
 
 # ── Sienna 4512000 row: firmware-derived facts ──────────────────
 check("Sienna 4512000 row present", sienna_4512000 is not None)
@@ -175,7 +185,7 @@ if corolla_h:
 
 # ── Global structural checks ────────────────────────────────────
 required_cols = {
-    "vehicle", "eps_part_number", "application_software_id",
+    "vehicle", "adas_generation", "security_architecture", "eps_part_number", "application_software_id",
     "secoc_sync_id", "secured_can_ids", "evidence_grade", "source",
 }
 for row in rows:

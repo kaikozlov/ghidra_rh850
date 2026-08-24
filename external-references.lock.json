@@ -718,6 +718,14 @@
       "sha256": "9db9eaf86eb3faf524c550dc8628f14b8f2ecea40920dc9b18c0779d32760c35",
       "provenance": "Exact-byte extraction from retained Span 2026-08-21 TSKM source ZIP",
       "notes": "Source ZIP member path and acquisition interpretation are pinned in community/spanconstant/raw-20260821/MANIFEST.txt."
+    },
+    {
+      "source": "Span / spanconstant, comma Discord; rlog recorded 2026-07-29 and imported 2026-08-24",
+      "path": "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
+      "size": 11365866,
+      "sha256": "f1ae7c40ad8e9ff8c462a3f5367d914873e93575d902ccb82f2c74984acd439f",
+      "provenance": "Rlog file supplied by Span in comma Discord and added to the repository by the maintainer. Embedded initData independently records dongle 67fd5b833889fedf, spanconstant5/openpilot branch tskdash, commit 7e78a9d89728c4bd106838d40b5891ce3931de43, version 0.11.2, and mici hardware; no Discord message permalink is retained.",
+      "notes": "Moving/driving whole-vehicle CAN evidence. Embedded carParams is MOCK/noOutput and does not contain an F181 identity join; this rlog must not be equated byte-for-byte with the separate 2026-08-21 8965F1208000 TSKM dump solely from contributor attribution. Maintainer field context: Span had not physically repinned the Toyota-B CAN0/CAN1 pairs for this capture; Panda harnessStatus=flipped is a separate orientation state."
     }
   ],
   "public_routes": [

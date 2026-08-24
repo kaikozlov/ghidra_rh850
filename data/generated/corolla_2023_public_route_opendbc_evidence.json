@@ -1,0 +1,652 @@
+{
+  "axis_boundary": "TSS generation describes ADAS/control architecture. SecOC/TSK describes security/authentication. Presence of 0x00F or authenticated messages does not classify TSS generation.",
+  "boundaries": [
+    "No exact carFw/F181 inventory exists in the route metadata, so exact H/F firmware state carriers must not be attributed to this route.",
+    "Same CAN ID does not imply same semantics; 0x025 changes DLC and 0x123/0x180-family geometry differs from older Toyota radar definitions.",
+    "A retained ID with static values is only a reuse lead unless signal meaning is independently recovered or dynamically exercised.",
+    "Panda logical bus numbering is not physical producer ownership; Toyota-B relay topology must be solved separately before stock-source suppression is designed."
+  ],
+  "bus0_canfd_baseline": [
+    {
+      "can_id": "0x020",
+      "count": 217,
+      "dlc": 12,
+      "first_payload": "dd6715150000000000000000",
+      "rate_hz": 19.914779043766448
+    },
+    {
+      "can_id": "0x123",
+      "count": 610,
+      "dlc": 16,
+      "first_payload": "cae80a010c0800a00000000000000000",
+      "rate_hz": 9.9819394016767
+    },
+    {
+      "can_id": "0x160",
+      "count": 433,
+      "dlc": 32,
+      "first_payload": "0a702a82800040034de873007e4ff48000bfff100a8fffd40000000000000000",
+      "rate_hz": 39.90238906523841
+    },
+    {
+      "can_id": "0x180",
+      "count": 1222,
+      "dlc": 64,
+      "first_payload": "2825141afff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff00000000",
+      "rate_hz": 20.000163792332376
+    },
+    {
+      "can_id": "0x181",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "1916141afff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff00000000",
+      "rate_hz": 19.980446278405598
+    },
+    {
+      "can_id": "0x182",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "4a43141afff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000fffffff8000000ffff00000000",
+      "rate_hz": 19.980446278405598
+    },
+    {
+      "can_id": "0x183",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "6f62141a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "rate_hz": 19.980446278405598
+    },
+    {
+      "can_id": "0x184",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "f8fb141a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "rate_hz": 19.980446278405598
+    },
+    {
+      "can_id": "0x185",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "c9c8141a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "rate_hz": 19.980446278405598
+    },
+    {
+      "can_id": "0x186",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "9a9d141a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "rate_hz": 19.980446278405598
+    },
+    {
+      "can_id": "0x187",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "abae141a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "rate_hz": 19.98378120347043
+    },
+    {
+      "can_id": "0x188",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "95be141a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "rate_hz": 19.98378120347043
+    },
+    {
+      "can_id": "0x189",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "a48d141a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "rate_hz": 19.98378120347043
+    },
+    {
+      "can_id": "0x18A",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "f7d8141a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "rate_hz": 19.98378120347043
+    },
+    {
+      "can_id": "0x18B",
+      "count": 1221,
+      "dlc": 64,
+      "first_payload": "c6eb141a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "rate_hz": 19.98062141501639
+    },
+    {
+      "can_id": "0x18C",
+      "count": 1221,
+      "dlc": 48,
+      "first_payload": "d775141a00ac00002c00029406804003ffe00007f807ffc0000ff00fff80001fe00000000c0000000000000000000000",
+      "rate_hz": 19.98062141501639
+    },
+    {
+      "can_id": "0x1A0",
+      "count": 1221,
+      "dlc": 48,
+      "first_payload": "22e5141a7fff0219003c00000200fa00015e00001403f807f00fe0000000000000000000000000000000000000000000",
+      "rate_hz": 19.98062141501639
+    },
+    {
+      "can_id": "0x200",
+      "count": 610,
+      "dlc": 64,
+      "first_payload": "ce6b0a1a800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800000000000000000000",
+      "rate_hz": 9.982129841671357
+    },
+    {
+      "can_id": "0x201",
+      "count": 610,
+      "dlc": 64,
+      "first_payload": "ff580a1a800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800800000000000000000000",
+      "rate_hz": 9.982129841671357
+    },
+    {
+      "can_id": "0x230",
+      "count": 216,
+      "dlc": 64,
+      "first_payload": "bfb01560000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "rate_hz": 19.91384407440935
+    },
+    {
+      "can_id": "0x440",
+      "count": 21,
+      "dlc": 32,
+      "first_payload": "90f7360001643e382614b8fffc40ffa30023ff88004a561479414f6400000000",
+      "rate_hz": 2.000546316590156
+    },
+    {
+      "can_id": "0x450",
+      "count": 122,
+      "dlc": 32,
+      "first_payload": "43f7350000000200382614b8fffc40ffa30023ff880000000000000000000000",
+      "rate_hz": 1.9996820795364807
+    }
+  ],
+  "direct_reuse_evidence": {
+    "0x025": {
+      "steer_angle_deg": {
+        "count": 5887,
+        "max": 348.0,
+        "min": -471.0,
+        "unique_count": 515
+      },
+      "steer_fraction_deg": {
+        "count": 5887,
+        "max": 0.7000000000000001,
+        "min": -0.7000000000000001,
+        "unique_count": 15
+      },
+      "steer_rate_deg_s": {
+        "count": 5887,
+        "max": 410.0,
+        "min": -270.0,
+        "unique_count": 128
+      },
+      "wire": "32-byte CAN-FD; exact H firmware independently proves legacy STEER_ANGLE/STEER_FRACTION/STEER_RATE bit positions survive inside the new PDU"
+    },
+    "0x030": {
+      "boundary": "All route 0x030 frames matching the exact-H/F firmware-derived additive-byte rule is a strong format/producer-family continuity join, not an exact firmware/vehicle identity join.",
+      "exact_h_f_additive_rule": {
+        "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
+        "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte",
+        "wire_byte": 7
+      },
+      "frame_count": 5888,
+      "rule_matches": 5888,
+      "wire": "32-byte CAN-FD generation-native EPS telemetry/status PDU"
+    },
+    "0x0AA": {
+      "fault_values": {
+        "FL": [
+          0
+        ],
+        "FR": [
+          0
+        ],
+        "RL": [
+          0
+        ],
+        "RR": [
+          0
+        ]
+      },
+      "speeds_kph": {
+        "FL": {
+          "count": 5888,
+          "max": 41.61,
+          "min": 0.0,
+          "unique_count": 2093
+        },
+        "FR": {
+          "count": 5888,
+          "max": 41.57000000000001,
+          "min": 0.0,
+          "unique_count": 2020
+        },
+        "RL": {
+          "count": 5888,
+          "max": 41.5,
+          "min": 0.0,
+          "unique_count": 2058
+        },
+        "RR": {
+          "count": 5888,
+          "max": 41.58,
+          "min": 0.0,
+          "unique_count": 1949
+        }
+      },
+      "wire": "classic 8-byte WHEEL_SPEEDS"
+    },
+    "0x101": {
+      "brake_pressed_values": [
+        0,
+        1
+      ],
+      "wire": "classic 8-byte BRAKE_MODULE"
+    },
+    "0x116": {
+      "gas_pedal_user": {
+        "count": 2499,
+        "max": 0.375,
+        "min": 0.0,
+        "unique_count": 76
+      },
+      "wire": "classic 8-byte GAS_PEDAL with Toyota classic SecOC trailer"
+    },
+    "0x176": {
+      "checksum_valid": 1855,
+      "cruise_active_values": [
+        false
+      ],
+      "cruise_state_values": [
+        0
+      ],
+      "dynamic_boundary": "This segment never engages cruise, so ID/DLC/checksum compatibility is proved while active-state semantics still need a dynamic TSS3 capture.",
+      "frame_count": 1855,
+      "wire": "classic 8-byte PCM_CRUISE with Toyota additive checksum"
+    }
+  },
+  "forced_old_profile_result": {
+    "fields": {
+      "brakePressed": [
+        false
+      ],
+      "canValid": [
+        false
+      ],
+      "cruiseAvailable": [
+        false
+      ],
+      "cruiseEnabled": [
+        false
+      ],
+      "gasPressed": [
+        false,
+        true
+      ],
+      "steerFaultPermanent": [
+        false
+      ],
+      "steerFaultTemporary": [
+        true
+      ],
+      "steeringAngleDeg": [
+        0.0
+      ],
+      "steeringRateDeg": [
+        0.0
+      ],
+      "steeringTorque": [
+        0.0
+      ],
+      "steeringTorqueEps": [
+        0.0
+      ],
+      "vEgo": [
+        0.0
+      ]
+    },
+    "interpretation": "The forced TOYOTA_COROLLA_TSS2 parser remained canValid=false and reported zero vehicle speed/steering despite coherent TSS3 traffic. This proves a new generation-specific bus/DBC parser is required; it does not invalidate individual compatible signal layouts recovered directly from raw frames.",
+    "sample_count": 5639
+  },
+  "incoming_state_inventory": [
+    {
+      "can_id": "0x00F",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 588,
+          "dlc": 8,
+          "first_payload": "0ce9000e0b3e61d5",
+          "rate_hz": 9.622989900211655
+        }
+      ],
+      "older_toyota_role": "SECOC_SYNCHRONIZATION",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x025",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 5887,
+          "dlc": 32,
+          "first_payload": "0009000040000076000000000000000000000000000000000000000087d9b5d7",
+          "rate_hz": 96.33421930319075
+        }
+      ],
+      "older_toyota_role": "STEER_ANGLE_SENSOR",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x030",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 5888,
+          "dlc": 32,
+          "first_payload": "00000000920000ca00009000f0c00000000100000000000f000000004c72b7cc",
+          "rate_hz": 96.35058597313693
+        }
+      ],
+      "older_toyota_role": "generation-native EPS FD telemetry",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x0AA",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 5888,
+          "dlc": 8,
+          "first_payload": "1a6f1a6f1a6f1a6f",
+          "rate_hz": 96.35058597313693
+        }
+      ],
+      "older_toyota_role": "WHEEL_SPEEDS",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x0B6",
+      "instances": [],
+      "older_toyota_role": "exact-H/F protected lateral-command carrier (cross-specimen visibility check)",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x0D7",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 2943,
+          "dlc": 32,
+          "first_payload": "00000000000000df0000000000000000000000000000000000000000c1b3c5e7",
+          "rate_hz": 48.166635456782515
+        }
+      ],
+      "older_toyota_role": "exact-H/F protected vehicle-speed carrier (cross-specimen visibility check)",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x101",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 2943,
+          "dlc": 8,
+          "first_payload": "800000000000008a",
+          "rate_hz": 48.166635456782515
+        }
+      ],
+      "older_toyota_role": "BRAKE_MODULE",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x116",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 2499,
+          "dlc": 8,
+          "first_payload": "00000011cae9d0a5",
+          "rate_hz": 40.897435544202146
+        }
+      ],
+      "older_toyota_role": "GAS_PEDAL",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x127",
+      "instances": [],
+      "older_toyota_role": "GEAR_PACKET_HYBRID",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x176",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 1855,
+          "dlc": 8,
+          "first_payload": "8800000000b300ba",
+          "rate_hz": 30.353640904756972
+        }
+      ],
+      "older_toyota_role": "PCM_CRUISE",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x1D3",
+      "instances": [],
+      "older_toyota_role": "PCM_CRUISE_2",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x260",
+      "instances": [],
+      "older_toyota_role": "STEER_TORQUE_SENSOR",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x262",
+      "instances": [],
+      "older_toyota_role": "EPS_STATUS",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x283",
+      "instances": [],
+      "older_toyota_role": "PRE_COLLISION",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x320",
+      "instances": [],
+      "older_toyota_role": "VSC1S07",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x343",
+      "instances": [],
+      "older_toyota_role": "ACC_CONTROL",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x351",
+      "instances": [],
+      "older_toyota_role": "exact-H/F EPS Tx plausibility/debounce carrier (cross-specimen visibility check)",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x394",
+      "instances": [],
+      "older_toyota_role": "exact-H/F EPS Tx fault/status carrier (cross-specimen visibility check)",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x399",
+      "instances": [],
+      "older_toyota_role": "PCM_CRUISE_SM",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x3B7",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 196,
+          "dlc": 8,
+          "first_payload": "0000000020000008",
+          "rate_hz": 3.2014138495856295
+        }
+      ],
+      "older_toyota_role": "ESP_CONTROL",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x3BC",
+      "instances": [],
+      "older_toyota_role": "GEAR_PACKET",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x3F6",
+      "instances": [],
+      "older_toyota_role": "BSM",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x411",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 59,
+          "dlc": 8,
+          "first_payload": "0020040000008000",
+          "rate_hz": 0.9666719484816371
+        }
+      ],
+      "older_toyota_role": "PCS_HUD",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x412",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 59,
+          "dlc": 8,
+          "first_payload": "1200002202ee9300",
+          "rate_hz": 0.9665125233833873
+        }
+      ],
+      "older_toyota_role": "LKAS_HUD",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x4A3",
+      "instances": [],
+      "older_toyota_role": "exact-H/F EPS Tx state bridge (cross-specimen visibility check)",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x4C8",
+      "instances": [],
+      "older_toyota_role": "exact-H/F EPS Tx carrier (cross-specimen visibility check)",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x610",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 192,
+          "dlc": 8,
+          "first_payload": "0000000cd0fffde0",
+          "rate_hz": 3.131674621844645
+        }
+      ],
+      "older_toyota_role": "BODY_CONTROL_STATE_2",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x614",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 65,
+          "dlc": 8,
+          "first_payload": "0000643000005c67",
+          "rate_hz": 1.066851912201133
+        }
+      ],
+      "older_toyota_role": "BLINKERS_STATE",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x620",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 198,
+          "dlc": 8,
+          "first_payload": "0000000080000010",
+          "rate_hz": 3.2356477539423585
+        }
+      ],
+      "older_toyota_role": "BODY_CONTROL_STATE",
+      "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x622",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 59,
+          "dlc": 8,
+          "first_payload": "0000000000720000",
+          "rate_hz": 0.9511299160998
+        }
+      ],
+      "older_toyota_role": "LIGHT_STALK",
+      "required_by_older_toyota_contract": true
+    }
+  ],
+  "route_vs_exact_h_f_visibility": {
+    "boundary": "The public route exposes 0x00F and 0x0D7 but no 0x0B6, and only 0x030 from the exact-H/F five-PDU Tx set. Because the route has no carFw/F181 join, this cannot prove B6 is feature-gated or absent on an exact H/F EPS bus; it instead proves the route is not evidence of a complete exact-H/F EPS-bus mirror.",
+    "exact_h_f_secoc_rx_search_vocabulary": [
+      "0x00F/8",
+      "0x0D7/32",
+      "0x0B6/32"
+    ],
+    "exact_h_f_tx_search_vocabulary": [
+      "0x030/32",
+      "0x351/4",
+      "0x394/3",
+      "0x4A3/8",
+      "0x4C8/8"
+    ],
+    "secoc_rx_observed_counts": {
+      "0x00F/8": 588,
+      "0x0B6/32": 0,
+      "0x0D7/32": 2943
+    },
+    "tx_observed_counts": {
+      "0x030/32": 5888,
+      "0x351/4": 0,
+      "0x394/3": 0,
+      "0x4A3/8": 0,
+      "0x4C8/8": 0
+    }
+  },
+  "schema": "corolla-2023-public-route-opendbc-evidence-v1",
+  "source": {
+    "can_source_filter": "Only CAN records with src<128 are treated as incoming vehicle traffic. Panda returned/Tx echoes (src=bus+128) and rejected echoes (src=bus+192) are excluded from every inventory and baseline in this artifact.",
+    "duration_s": 61.099784091000004,
+    "identity_note": "Route carParams was forced TOYOTA_COROLLA_TSS2 and contains no carFw; this is a TSS3 Corolla whole-vehicle route oracle, not an exact H/F firmware-to-route join.",
+    "route": "a74eba85c97eaf67|00000004--555953f500",
+    "segment": 0,
+    "sha256": "d246a55988889253c8d155f04b132b1bb443fdd74f1e6bad68eef8879a5c477b",
+    "size": 9125881
+  }
+}

@@ -153,18 +153,67 @@ separate TSS3 longitudinal ownership/command problem is tracked explicitly as
 [OQ-052](OPEN_QUESTIONS.md) and must be closed before production longitudinal
 support.
 
-The community `NEW_MSG_8A_LAT_CONTROL` heatmap is a high-value lead because it
-independently names torque/target-angle/confidence-like fields, and the
-Reference screenshot corpus (REFERENCE/CorollaExp_Screenshots.md) records
-`0x18A` as one of 22 CAN-FD 64-byte IDs observed on buses 0 and 2 — nothing
-more is pinned by that artifact. No bit/name/producer/authentication join to
-`FRC_P5` is proven. Do not encode it in a DBC from the screenshot alone;
-treat it as the candidate wire hypothesis the FRC firmware pass must confirm
-or refute.
+The community `NEW_MSG_8A_LAT_CONTROL` heatmap remains a useful naming lead, but
+COM-013 now gives it a stronger negative boundary. The exact pinned 2023 public
+route and the retained 2025 Span capture share the **same 22-ID/DLC CAN-FD
+baseline**, and `0x18A` is simply one 64-byte ~20-Hz member of the broader
+`0x180..0x18B` family. Span's capture is probably NRtD despite its filename, so
+this is topology/geometry evidence only. No bit/name/producer/authentication join
+to `FRC_P5` is proved. Do not encode `0x18A` in a DBC from the heatmap/screenshot;
+treat it as one candidate member the matched FRC/Brake firmware or a synchronized
+stock-LTA capture must confirm or refute.
 
 Canonical: [../tooling/techstream.md](../tooling/techstream.md) §6.2.2 ·
 [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) ·
 [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.35.
+
+## Parallel integration target — firmware-identified, relay-correct TSS3 capture
+
+COM-013 closes much more of the whole-vehicle side than the earlier EPS-only
+roadmap. TSS generation and SecOC/TSK are **orthogonal** (CORR-108). The public
+2023 route already proved partial state continuity; Span's newly retained July-29
+driving rlog now independently proves real motion plus dynamic brake/gas/steering,
+6,000/6,000 exact-H/F `0x030` rule matches, and `0x127 GEAR_PACKET_HYBRID` carrier/
+checksum/`D` compatibility. The old Span `ready_capture.ndjson` remains useful as
+structural corroboration, but it is no longer our only 2025-attributed CAN sample.
+
+Do not overread the new log's wiring. All 599 Panda-state samples are
+`ELM327 param=1`, `harnessStatus=flipped`, controls disallowed. The maintainer
+reports Span had **not physically swapped the Toyota-B CAN0/CAN1 pairs**.
+`harnessStatus=flipped` is only Panda harness orientation; ELM327 param1 keeps
+logical bus 1/FDCAN2 on the normal harness CAN1 wires, so passive observation of
+that unsplit network is valid. What the missing physical repin prevents is normal
+comma **interception**: the target network is not moved onto the CAN0/CAN2 relay
+pair, so the capture cannot identify camera-side versus car-side producer
+ownership or prove stock-source suppression behavior.
+
+Span's moving capture still has `00F/D7` but no B6 and only `030` from the exact
+H/F Tx set. That rules out treating the earlier absence as merely an NRtD/static
+artifact, but it does **not** prove B6 is absent from the vehicle: there is no
+stock-LTA off→active→off transition and no exact F181 join. Treat it as a bounded
+segment-level negative.
+
+**Highest-value dynamic artifact now:** on a firmware-identified H/F-family target,
+physically repin Toyota-B CAN0/CAN1 so the target network lands on the CAN0/CAN2
+relay pair, preserve `carFw`/F181, and log all buses while safely exercising:
+
+1. stock LTA off → active → off plus ordinary driver steering;
+2. cruise main, engage/cancel and standstill where safe;
+3. brake and gas transitions;
+4. stationary P/R/N/D transitions (the `0x127` D value is already validated); and
+5. lane/LTA UI state changes and one recoverable message-loss/fault condition if
+   a safe diagnostic trigger exists.
+
+This capture should close B6 visibility/cadence and producer side, exact physical
+relay path, stock-source suppression, driver-torque/actuator-response scale,
+`0x351/0x394/0x030` readiness/fault semantics, remaining gear enums, missing
+cruise roles, and the correct Panda parser/safety bus. Current Toyota safety
+assumes checked state on logical bus 0; direct diagnostic/passive observation on
+bus 1 is not itself the production relay topology.
+
+Machine-readable checklist: `data/generated/corolla_tss3_opendbc_readiness.json`.
+This target runs in parallel with static `07B0` Brake + `0792` FRC acquisition;
+neither replaces the other.
 
 ## P0 — highest information gain
 
@@ -317,9 +366,20 @@ Current (Q Axis)** sources. `0x351` retains the old plausibility/debounce status
 architecture, while `0x394` remains a strong EPS internal status/fault-family
 carrier. `0x030` is a mixed 32-byte telemetry/status/validity message and should
 now fill remaining state gaps rather than be treated as a monolithic
-`0x260+0x262` replacement. The state-side priority is therefore `0x4A3` scaling
-and `0x351/0x394` readiness/fault correlation, then targeted `0x030` recovery.
-See [../variants/corolla-pre-tss3-openpilot-message-comparison.md](../variants/corolla-pre-tss3-openpilot-message-comparison.md)
+`0x260+0x262` replacement.
+
+COM-013 adds the whole-vehicle half that was previously missing. The public TSS3
+Corolla route preserves useful old-state structure in `0x0AA/0x101/0x116/0x176`
+and the exact-H-proved `0x025` fields. Span's moving rlog further restores `0x127`
+as a checksum-valid gear reuse candidate and independently exercises those retained
+state fields, while `0x1D3/0x260/0x262/0x343/0x399` remain unresolved. Because neither
+vehicle-level route has an exact F181 join and Span's harness was not physically
+repinned onto the relay pair, the state-side priority is now a **firmware-identified,
+relay-correct H/F capture with stock LTA transitions**, not another static EPS
+sweep: join `0x4A3/0x351/0x394/0x030` to driver torque, actual assist and
+readiness/fault transitions while closing cruise and remaining gear enums. See
+`data/generated/corolla_tss3_opendbc_readiness.json`,
+[../variants/corolla-pre-tss3-openpilot-message-comparison.md](../variants/corolla-pre-tss3-openpilot-message-comparison.md),
 and [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 The EPS receiver-side command question is now **closed positively**. The corrected

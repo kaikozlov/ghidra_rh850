@@ -17,6 +17,29 @@ The normalized subset intentionally excludes duplicate macOS resource forks,
 the source ZIP, so normalization is lossless with respect to provenance while
 keeping the directly analyzed corpus compact.
 
+## Separate July-29 driving rlog
+
+`span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst` is a **separate**
+Span-supplied comma Discord artifact, not a member of `spanconstant_tsk.zip`.
+It was recorded 2026-07-29 and added to this corpus on 2026-08-24. SHA-256:
+`f1ae7c40ad8e9ff8c462a3f5367d914873e93575d902ccb82f2c74984acd439f`.
+Embedded `initData` records `spanconstant5/openpilot`, branch `tskdash`, commit
+`7e78a9d89728c4bd106838d40b5891ce3931de43`, dongle `67fd5b833889fedf` and
+mici hardware. Embedded `carParams` is `MOCK`, so the rlog has no usable F181
+identity join; its dongle also differs from the later dump-preflight Panda
+`23257862c6bf2f83`. Contributor attribution therefore does not make it an exact
+`8965F1208000` firmware-to-route join.
+
+The rlog is nevertheless high-value whole-vehicle evidence. Raw incoming CAN
+shows real motion plus dynamic brake/gas/steering, and the opendbc extraction is
+persisted as `data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json`.
+All 599 Panda-state samples are `ELM327 param=1`, `harnessStatus=flipped`, controls
+disallowed. The maintainer reports Span had **not physically repinned** the
+Toyota-B CAN0/CAN1 pairs for this capture. `harnessStatus=flipped` is Panda harness
+orientation, not that physical repin: param1 + logical bus1 directly observes the
+normal unsplit harness CAN1 network, while the absent repin means the network is
+not on the CAN0/CAN2 relay pair for normal comma interception/suppression.
+
 ## Memory corpus
 
 The tracked subset contains:
