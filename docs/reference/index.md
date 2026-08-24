@@ -5,7 +5,7 @@ the three status ledgers. Do not hand-edit generated blocks; rerun the
 generator. Canonical reports carry visible generated cross-reference footers
 back to the IDs below.
 
-Findings: 291 · Corrections: 107 · Open questions: 52 · Docs: 99 · Suites: 190
+Findings: 292 · Corrections: 107 · Open questions: 52 · Docs: 99 · Suites: 190
 
 ## Reading this index
 
@@ -45,6 +45,7 @@ Findings: 291 · Corrections: 107 · Open questions: 52 · Docs: 99 · Suites: 1
 | <a id="finding-com-008"></a>**COM-008** | [docs/variants/corolla-pre-tss3-openpilot-message-comparison.md](../variants/corolla-pre-tss3-openpilot-message-comparison.md) | [CORRECTIONS](../status/CORRECTIONS.md) | `tests/verify_corolla_pre_tss3_message_comparison.py`, `tests/verify_external_corroboration.py` | — |
 | <a id="finding-com-009"></a>**COM-009** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | — | — | — |
 | <a id="finding-com-010"></a>**COM-010** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | — | `tests/verify_techstream_p5_lateral_control.py` | — |
+| <a id="finding-com-011"></a>**COM-011** | [docs/variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) | — | `tests/verify_techstream_p5_lateral_control.py` | — |
 | <a id="finding-diag-app-001"></a>**DIAG-APP-001** | [docs/diagnostics/application.md](../diagnostics/application.md) | [OPEN_QUESTIONS](../status/OPEN_QUESTIONS.md) | `tests/verify_application_diagnostics.py`, `tests/verify_application_routine_control_surface.py`, `tests/verify_application_wdbi_surface.py` | OQ-036 |
 | <a id="finding-diag-app-002"></a>**DIAG-APP-002** | [docs/diagnostics/application.md](../diagnostics/application.md) | — | `tests/verify_application_diagnostics.py` | — |
 | <a id="finding-diag-app-003"></a>**DIAG-APP-003** | [docs/diagnostics/application.md](../diagnostics/application.md) | [system-mode-cluster](../architecture/system-mode-cluster.md), [techstream](../tooling/techstream.md) | `tests/verify_application_diagnostics.py` | — |

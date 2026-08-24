@@ -204,19 +204,20 @@ CAN-FD `0x0B6`:
 
 B6 signals 262/263 are additional 8-bit percentage-like modifiers on internal
 controller contributors. Techstream identifies the immediate monitored source
-relationship as **Brake System Control Module** traffic (U012987), while its P5
-steering vocabulary independently contains **Target Lateral ID** and **Target
-Steering Angle After Output Compensation**. Exact H lacks the corresponding
-`0x1CEE` observer DID, so those names corroborate the domain rather than naming B6
-fields one-to-one.
+relationship as **Brake System Control Module** traffic (U012987). Its exact P5
+`Target Lateral ID` dictionary closes H signal254 values as **`1=PCS`, `4=LDA`,
+`10=Hands Off LTA`, `11=LTA/LCA`, `19=PDA`**; the H-special values `25/27` are
+**AP/Remote Parking**. `Target Steering Angle After Output Compensation` remains
+observer-side family vocabulary because exact H lacks the corresponding `0x1CEE`
+DID.
 
 **Porting consequence:** the old Corolla command API did not merely move IDs; it
 changed from classic torque command to protected target-angle control. Do not port
-`0x2E4` limits or scaling. Signal255's controller-equivalent scale is now closed;
-before any injection, recover the exact Toyota feature labels for signal254 profiles,
-request/validity semantics, cadence/timeouts, SecOC freshness/key behavior,
-stock-source suppression, and H/F-native safety bounds. The literal OEM B6
-engineering-unit name remains unjoined even though the degree/radian scale is known.
+`0x2E4` limits or scaling. Signal255's controller-equivalent scale and signal254
+feature labels are now closed; before any injection, recover request/validity
+semantics, cadence/timeouts, SecOC freshness/key behavior, stock-source suppression,
+and H/F-native safety bounds. The literal OEM B6 engineering-unit name remains
+unjoined even though the degree/radian scale is known.
 
 ### 5.5 `0x191`: gone, but it was not Corolla's active steering path
 
@@ -263,13 +264,13 @@ This is more direct than treating all 37 `0x030` fields as equally likely old
 
 **Second, characterize the recovered B6 command contract rather than searching for
 another message.** Protected `0x0B6` signal 255 is the H/F target-angle ingress at
-`1024/17870 deg/count` controller-equivalent scale, and signal 254 selects five
-cooperative-control profiles. The next dynamic work is to correlate those fields
-with stock LTA, `0x1C02`, `0x1152`, measured steering angle, and B6 validity to map
-profiles `1/4/10/11/19` to exact Toyota feature labels and recover cadence/timeouts,
-request/validity semantics, and production bounds. `FRC_P5` plus Brake/EPB/gateway
-analysis remains high priority for the **upstream producer and SecOC/routing
-contract**, not for discovering the EPS receiver setpoint or physical scale.
+`1024/17870 deg/count` controller-equivalent scale, and signal 254 selects the
+now-labeled `PCS/LDA/Hands Off LTA/LTA-LCA/PDA` profiles. The next dynamic work is
+to correlate those fields with stock LTA, `0x1C02`, `0x1152`, measured steering
+angle, and B6 validity to recover cadence/timeouts, request/validity semantics, and
+production bounds. `FRC_P5` plus Brake/EPB/gateway analysis remains high priority
+for the **upstream producer and SecOC/routing contract**, not for discovering the
+EPS receiver setpoint, physical scale, or profile labels.
 
 Longitudinal and HUD remain separate whole-vehicle workstreams. The old Corolla
 prior art tells us exactly what roles must eventually be replaced, but the EPS

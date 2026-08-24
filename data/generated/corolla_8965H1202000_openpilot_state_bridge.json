@@ -30,15 +30,24 @@
       },
       "immediate_sender_relationship": "Brake System Control Module",
       "mode_profile_semantics": {
-        "additional_raw_id_use": "C825A separately treats raw IDs 25 (0x19) and 27 (0x1B) as a special monitor/state pair; only 25 is one of CBE6E steering-controller accepted profiles",
+        "additional_raw_id_use": "C825A separately treats raw IDs 25 (0x19) and 27 (0x1B); Techstream Target Lateral ID identifies them as AP and Remote Parking respectively. Only 25/AP is one of CBE6E steering-controller accepted profiles.",
         "calibration_selection": "C9CEA/C9FAE/CB72A/CB900 and later controller helpers select distinct calibration banks from these five profile flags",
         "common_active_flag": "C272 is asserted for every accepted value",
+        "join_proof": "H CBE6E accepts exactly IDs 1/4/10/11/19 and C825A separately recognizes 25/27. Techstream P5 EMPS Target Lateral ID uses the same numeric dictionary: 1 PCS, 4 LDA, 10 Hands Off LTA, 11 LTA/LCA, 19 PDA, 25 AP, 27 Remote Parking. The dictionary is identical in EMPS_P5/EMPS2_P5 across NA/EU/JP.",
         "mutually_exclusive_profile_flags": {
           "1": "C273",
           "10": "C270",
           "11": "C26F",
           "19": "C271",
           "4": "C26E"
+        },
+        "oem_dictionary_name": "Target Lateral ID",
+        "oem_feature_labels": {
+          "1": "PCS",
+          "10": "Hands Off LTA",
+          "11": "LTA/LCA",
+          "19": "PDA",
+          "4": "LDA"
         }
       },
       "mode_signal_id": 254,
@@ -68,7 +77,7 @@
     "old_camera_interface_removed": "H retains disabled U023A87 Image Processing Module A diagnostic residue at DTC index 93. The four Sienna active communication-monitor rows that joined this DTC to CAN 0x2E4, 0x131, 0x191, and 0x2FD are absent from H's active six-row monitor table, although their Dem event records still point to disabled DTC index 93. Together with the missing 2E4/131 SecOC/COM profiles, this is strong evidence that the classic direct camera/IPM-A steering interface was disabled/removed rather than renumbered to B6.",
     "protected_0x0B6_techstream_boundary": "B6's sole 16-bit scalar is signal255. The earlier direct-xref-only staged-cell negative is not a safe semantic conclusion because GP-relative snapshot copies are outside that representation; this Techstream artifact therefore classifies only the B6 sender/DTC relationship and defers signal255 control semantics to the dedicated target-native ingress proof.",
     "protected_0x0D7": "D7's only recovered 16-bit scalar is signal243 at FEBE7D82, exactly exposed by H DID 0x1185 and named by EMPS_P5 as CAN Vehicle Speed (SP1). Its other recovered scalars are 1-bit signal240 and 4-bit signal246 status fields. Together with the U012987 Brake System Control Module missing-message DTC, D7 does not expose a recovered steering-command magnitude.",
-    "static_conclusion": "Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks, but their exact Toyota feature labels remain open. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. The OEM B6 unit label and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
+    "static_conclusion": "Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks; Techstream Target Lateral ID closes them as 1=PCS, 4=LDA, 10=Hands Off LTA, 11=LTA/LCA, and 19=PDA. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. The OEM signal255 unit label, remaining request/validity/cadence semantics, and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
     "supervisor_external_signals": 22,
     "supervisor_reaching_ge12bit_fields": [
       {
@@ -173,7 +182,7 @@
     }
   },
   "next_discriminators": [
-    "Recover the exact Toyota feature labels for signal254 profile IDs plus remaining validity/request/cadence fields before any injection experiment; the signal255 controller-equivalent scale is already closed.",
+    "Recover the remaining signal254 validity/request/cadence/loss fields before any injection experiment; the profile labels and signal255 controller-equivalent scale are already closed.",
     "Acquire/analyze true-TSS3 FRC_P5 and Brake/EPB producer/Tx descriptors or synchronized captures to close the upstream FRC -> chassis -> EPS route and authentication contract.",
     "Derive H-native driver override, motor-response, readiness/fault, rate and message-loss limits before defining Panda safety; do not reuse old 0x260/0x262 scales or fault codes."
   ],
@@ -226,7 +235,7 @@
       "angle initialization"
     ]
   },
-  "schema": "corolla-8965H1202000-openpilot-state-bridge-v4",
+  "schema": "corolla-8965H1202000-openpilot-state-bridge-v5",
   "state_bridge": {
     "0x030": {
       "additive_field": {

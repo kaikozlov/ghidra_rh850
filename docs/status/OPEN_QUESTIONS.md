@@ -88,11 +88,13 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   makes it 1.5 deg/count, signed4 signal185 supplies a 0.1-deg fraction, and the
   matched H controller makes B6 signal255 `1024/17870 deg/count`
   (`~1.000121519 mrad/count`) controller-equivalent. The remaining Corolla
-  experiment is therefore profile/security and upstream-producer work: during
-  stock LTA, correlate B6 254/255/262/263 and validity with measured angle,
-  `1C02`, `1152`, and Q current to map signal254 profiles `1/4/10/11/19` to exact
-  Toyota feature labels, request/validity semantics, cadence/timeouts, limits, and
-  SecOC behavior; separately acquire FRC/Brake/gateway firmware to recover the
+  experiment is therefore request/validity/security and upstream-producer work:
+  Techstream's exact `Target Lateral ID` dictionary already closes signal254
+  profiles `1/4/10/11/19` as `PCS/LDA/Hands Off LTA/LTA-LCA/PDA` and H-special
+  IDs `25/27` as `AP/Remote Parking`. During stock LTA, correlate B6
+  254/255/262/263 and validity with measured angle, `1C02`, `1152`, and Q current
+  to recover request/validity semantics, cadence/timeouts, limits, and SecOC
+  behavior; separately acquire FRC/Brake/gateway firmware to recover the
   producer/routing chain. Static broad searching of this H EPS should not be repeated without a
   new concrete lead. TMS-040 now
   closes the acquisition choice: the true-TSS3 **diagnostic-domain holder** is

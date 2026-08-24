@@ -119,13 +119,13 @@ def build() -> dict:
 
     pb=tech["protected_brake_profile_semantics"]
     ipm=tech["camera_ipm_a_residue"]
-    if lta["schema"] != "corolla-8965H1202000-lta-command-provenance-v6":
+    if lta["schema"] != "corolla-8965H1202000-lta-command-provenance-v7":
         raise ValueError("corrected LTA provenance schema drift")
     lta_static = lta["static_conclusion"]
     if not (lta_static["named_retained_branch_computed_alias_audit_closed"] and lta_static["b6_percentage_modulates_retained_branch"]):
         raise ValueError("computed retained-branch audit not closed")
     return {
-      "schema":"corolla-8965H1202000-openpilot-state-bridge-v4",
+      "schema":"corolla-8965H1202000-openpilot-state-bridge-v5",
       "evidence_boundary": (
         "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. "
         "Sienna/openpilot structures are used only to identify which roles a port needs, not to transplant field scales or fault codes. "
@@ -221,11 +221,11 @@ def build() -> dict:
           "statically_dead": lta_static["retained_sienna_lta_branch_statically_dead"],
           "command_sized_wire_scalar_recovered": lta_static["h_only_or_wire_changed_command_sized_scalar_recovered"],
         },
-        "static_conclusion":"Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks, but their exact Toyota feature labels remain open. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. The OEM B6 unit label and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
+        "static_conclusion":"Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks; Techstream Target Lateral ID closes them as 1=PCS, 4=LDA, 10=Hands Off LTA, 11=LTA/LCA, and 19=PDA. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. The OEM signal255 unit label, remaining request/validity/cadence semantics, and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
       },
       "structural_corroboration":structural,
       "next_discriminators":[
-        "Recover the exact Toyota feature labels for signal254 profile IDs plus remaining validity/request/cadence fields before any injection experiment; the signal255 controller-equivalent scale is already closed.",
+        "Recover the remaining signal254 validity/request/cadence/loss fields before any injection experiment; the profile labels and signal255 controller-equivalent scale are already closed.",
         "Acquire/analyze true-TSS3 FRC_P5 and Brake/EPB producer/Tx descriptors or synchronized captures to close the upstream FRC -> chassis -> EPS route and authentication contract.",
         "Derive H-native driver override, motor-response, readiness/fault, rate and message-loss limits before defining Panda safety; do not reuse old 0x260/0x262 scales or fault codes.",
       ],

@@ -26,7 +26,7 @@ with tempfile.TemporaryDirectory() as td:
  r=subprocess.run([sys.executable,str(BUILD),'--out',str(out)],cwd=REPO,capture_output=True,text=True)
  check('bridge builder succeeds',r.returncode==0,r.stderr[-300:])
  check('bridge artifact regenerates exactly',r.returncode==0 and out.read_bytes()==ART.read_bytes())
-check('bridge schema v4',art['schema']=='corolla-8965H1202000-openpilot-state-bridge-v4')
+check('bridge schema v5',art['schema']=='corolla-8965H1202000-openpilot-state-bridge-v5')
 check('compact evidence schema v1',evid['schema']=='corolla-h-openpilot-state-bridge-decompiler-evidence-v1')
 check('exact H image identity',len(image)==0x100000 and sha(image)==art['images']['corolla_h']['sha256']==evid['image']['sha256'])
 check('H/F application identity carried forward',art['images']['corolla_f']['application_byte_identical_to_h'])
@@ -82,6 +82,7 @@ check('B6 target-vs-measured loop recovered','target-versus-measured-steering-an
 check('B6 controller-equivalent physical scale is closed',c['b6_target_angle']['physical_scale_closed'] is True and abs(c['b6_target_angle']['controller_equivalent_deg_per_count']-(1024/17870))<1e-15 and abs(c['b6_target_angle']['controller_equivalent_mrad_per_count']-1.0001215187701138)<1e-12)
 check('B6 OEM unit label remains bounded',c['b6_target_angle']['oem_wire_unit_name_closed'] is False)
 check('B6 mode profiles select distinct calibrations','distinct calibration banks' in c['b6_target_angle']['mode_profile_semantics']['calibration_selection'])
+check('B6 mode profiles carry exact OEM labels',c['b6_target_angle']['mode_profile_semantics']['oem_feature_labels']=={'1':'PCS','4':'LDA','10':'Hands Off LTA','11':'LTA/LCA','19':'PDA'})
 check('classic camera/IPM-A interface removal retained',all(x in c['old_camera_interface_removed'] for x in ('0x2E4','0x131','0x191','0x2FD','disabled/removed')))
 cr=c['computed_retained_branch']
 check('computed retained branch is live, not statically dead',cr['statically_dead'] is False and 'live' in cr['classification'])

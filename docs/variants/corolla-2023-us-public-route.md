@@ -1219,10 +1219,12 @@ strong interpretation of this fixed-point result, not an imported Sienna scale.
 
 Signal 254 is its companion 6-bit control/profile ID. Under communication/validity
 gates, `CBE6E` decodes values `1`, `4`, `10`, `11`, and `19` into five mutually
-exclusive cooperative-control profile flags plus a common active flag. Multiple
-later helpers select distinct calibration banks from those profile flags. `C825A`
-also treats raw IDs `25/27` as a special monitor/state pair; only `25` is in the
-accepted steering-controller profile set. Exact Toyota feature labels remain bounded.
+exclusive cooperative-control profile flags plus a common active flag. Techstream's
+exact `Target Lateral ID` pattern dictionary closes those values as **PCS, LDA,
+Hands Off LTA, LTA/LCA, and PDA** respectively. Multiple later helpers select
+distinct calibration banks from those profile flags. `C825A` also treats raw IDs
+`25/27`, which the same OEM dictionary names **AP** and **Remote Parking**; only
+`25/AP` is in the accepted steering-controller profile set.
 
 The complete B6 result is therefore: `0x0B6` is a **secured steering-control and
 supervisory interface**. It carries the recovered target-angle magnitude plus
@@ -2574,9 +2576,9 @@ same-vehicle B6 **parameter-recovery capture**, not another firmware-wide static
    echoes being mistaken for stock traffic;
 3. simultaneously read `1C02 Command Value Torque`, `1152 Command Value Current
    (Q Axis)`, and actual Q current with read-only XCP/DAQ if `7F7/7F8` is reachable;
-4. use the closed `1024/17870 deg/count` signal255 scale to characterize the exact
-   Toyota meaning of signal254 profiles `1/4/10/11/19`, B6 request/validity bits,
-   cadence, timeout/loss response, and rate/target bounds; and
+4. use the closed `1024/17870 deg/count` signal255 scale and closed signal254
+   `PCS/LDA/Hands Off LTA/LTA-LCA/PDA` profile map to characterize B6
+   request/validity bits, cadence, timeout/loss response, and rate/target bounds; and
 5. join the captured B6 producer to FRC/Brake/gateway state so the upstream routing
    and SecOC source contract is explicit.
 

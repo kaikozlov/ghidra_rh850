@@ -1,5 +1,5 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "source": "Techstream V18.00.003",
   "sources": {
     "EMPS_P5.ddb": {
@@ -4078,6 +4078,454 @@
         }
       },
       "physical_interpretation": "EMPS_P5 steering raw count is 1.5 degrees: raw*15 produces a graph integer with one decimal place in degrees."
+    },
+    "target_lateral_id_semantics": {
+      "oem_name": "Target Lateral ID",
+      "value_dictionary": {
+        "0": "No Request (Manual Operation)",
+        "1": "PCS",
+        "4": "LDA",
+        "10": "Hands Off LTA",
+        "11": "LTA/LCA",
+        "13": "DESA (Slow Deceleration Control)",
+        "15": "DESA (Deceleration Stop Control)",
+        "18": "SDG",
+        "19": "PDA",
+        "25": "AP",
+        "27": "Remote Parking",
+        "35": "AD (Lv.3)",
+        "37": "EM (Lv.3)",
+        "39": "DES (Lv.3)",
+        "41": "AD (Lv.4)",
+        "43": "EM (Lv.4)",
+        "45": "DES (Lv.4)",
+        "49": "Self-Propelled Transport",
+        "63": "Driver Operation"
+      },
+      "regions": {
+        "NA": {
+          "EMPS_P5.ddb": {
+            "system1": {
+              "monitor_key": 2069,
+              "name": "Target Lateral ID",
+              "primary_data_id": "0x1CEE",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 39,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "092214822e9907e5ea096fc5f9c3fbdcaa8a75d17c0bcb3ecea0fd76bfc6c7fb"
+            },
+            "system2": {
+              "monitor_key": 2073,
+              "name": "Target Lateral ID (System 2)",
+              "primary_data_id": "0x1CEF",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 39,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "b2480cf94c3c368a42e8ec8c2f97506f07171a8b7eae41ef26be44c667cdd014"
+            }
+          },
+          "EMPS2_P5.ddb": {
+            "system1": {
+              "monitor_key": 2069,
+              "name": "Target Lateral ID",
+              "primary_data_id": "0x1CEE",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 29,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "dd42241f6e984bf62855d42332c31034635d472ef580757e351f88c99a93ee14"
+            },
+            "system2": {
+              "monitor_key": 2073,
+              "name": "Target Lateral ID (System 2)",
+              "primary_data_id": "0x1CEF",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 29,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "56c0e7e7b5f251ce052f1f4227dca0ec1ec929b7cf77174d01a9357532636da4"
+            }
+          }
+        },
+        "EU": {
+          "EMPS_P5.ddb": {
+            "system1": {
+              "monitor_key": 2069,
+              "name": "Target Lateral ID",
+              "primary_data_id": "0x1CEE",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 39,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "092214822e9907e5ea096fc5f9c3fbdcaa8a75d17c0bcb3ecea0fd76bfc6c7fb"
+            },
+            "system2": {
+              "monitor_key": 2073,
+              "name": "Target Lateral ID (System 2)",
+              "primary_data_id": "0x1CEF",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 39,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "b2480cf94c3c368a42e8ec8c2f97506f07171a8b7eae41ef26be44c667cdd014"
+            }
+          },
+          "EMPS2_P5.ddb": {
+            "system1": {
+              "monitor_key": 2069,
+              "name": "Target Lateral ID",
+              "primary_data_id": "0x1CEE",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 29,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "dd42241f6e984bf62855d42332c31034635d472ef580757e351f88c99a93ee14"
+            },
+            "system2": {
+              "monitor_key": 2073,
+              "name": "Target Lateral ID (System 2)",
+              "primary_data_id": "0x1CEF",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 29,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "56c0e7e7b5f251ce052f1f4227dca0ec1ec929b7cf77174d01a9357532636da4"
+            }
+          }
+        },
+        "JP": {
+          "EMPS_P5.ddb": {
+            "system1": {
+              "monitor_key": 2069,
+              "name": "Target Lateral ID",
+              "primary_data_id": "0x1CEE",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 39,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "092214822e9907e5ea096fc5f9c3fbdcaa8a75d17c0bcb3ecea0fd76bfc6c7fb"
+            },
+            "system2": {
+              "monitor_key": 2073,
+              "name": "Target Lateral ID (System 2)",
+              "primary_data_id": "0x1CEF",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 39,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "b2480cf94c3c368a42e8ec8c2f97506f07171a8b7eae41ef26be44c667cdd014"
+            }
+          },
+          "EMPS2_P5.ddb": {
+            "system1": {
+              "monitor_key": 2069,
+              "name": "Target Lateral ID",
+              "primary_data_id": "0x1CEE",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 29,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "dd42241f6e984bf62855d42332c31034635d472ef580757e351f88c99a93ee14"
+            },
+            "system2": {
+              "monitor_key": 2073,
+              "name": "Target Lateral ID (System 2)",
+              "primary_data_id": "0x1CEF",
+              "physical_data_key": 1,
+              "bit_range": [
+                0,
+                7
+              ],
+              "pattern_display_key": 29,
+              "pattern_values": {
+                "0": "No Request (Manual Operation)",
+                "1": "PCS",
+                "4": "LDA",
+                "10": "Hands Off LTA",
+                "11": "LTA/LCA",
+                "13": "DESA (Slow Deceleration Control)",
+                "15": "DESA (Deceleration Stop Control)",
+                "18": "SDG",
+                "19": "PDA",
+                "25": "AP",
+                "27": "Remote Parking",
+                "35": "AD (Lv.3)",
+                "37": "EM (Lv.3)",
+                "39": "DES (Lv.3)",
+                "41": "AD (Lv.4)",
+                "43": "EM (Lv.4)",
+                "45": "DES (Lv.4)",
+                "49": "Self-Propelled Transport",
+                "63": "Driver Operation"
+              },
+              "raw_sha256": "56c0e7e7b5f251ce052f1f4227dca0ec1ec929b7cf77174d01a9357532636da4"
+            }
+          }
+        }
+      },
+      "pattern_display_join": {
+        "monitor_record_pattern_display_key_offset": "u16 +0x32 (type 62)",
+        "patdisp_table": "type 14 CDbPatDispTable",
+        "patdisp_key_offset": "u16 +0x0C",
+        "pattern_value_offset": "u32 +0x04",
+        "display_string_index_offset": "u32 +0x00"
+      },
+      "boundary": "This is the exact P5 EMPS diagnostic value dictionary. Joining any non-DID wire field to it still requires independent target-firmware/dataflow evidence."
     },
     "EMPS2_P5": [
       {

@@ -2593,9 +2593,11 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   active flag when communication/validity gates permit. `C9CEA/C9FAE/CB72A/CB900`
   and later helpers select distinct calibration banks from those profile flags;
   `C825A` also treats raw IDs `25/27` as a special state/monitor pair, with only
-  `25` in the accepted steering-controller set. The exact Toyota feature labels
-  remain bounded; Techstream's `Target Lateral ID` family is corroborating
-  vocabulary, not a one-to-one H DID join.
+  `25` in the accepted steering-controller set. Techstream's byte-anchored
+  `Target Lateral ID` pattern dictionary now closes the exact numeric labels:
+  `1=PCS`, `4=LDA`, `10=Hands Off LTA`, `11=LTA/LCA`, `19=PDA`, while H-special
+  `25/27` are `AP/Remote Parking`. This is an exact value-domain join even though
+  H itself does not expose the literal wire-field name.
 - **Downstream command bridge:** the B6-derived controller contribution reaches
   `C2A8 -> CD3CC` and the general torque composition. Under the recovered normal
   selection/current gates it propagates to DID `0x1C02 Command Value Torque` and
@@ -2620,14 +2622,15 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   not a string/name join.
 - **Correct boundary:** H/F EPS ingress and controller-equivalent physical scale are
   identified as protected FD `0x0B6` signal255 target angle with signal254
-  cooperative-profile selection. Still open: exact OEM B6 unit/profile labels,
-  companion request/validity/cadence meanings, live sender freshness/key behavior,
+  cooperative-profile selection. Signal254 feature labels are now closed by the
+  Techstream dictionary. Still open: the exact OEM signal255 unit label, companion
+  request/validity/cadence/loss meanings, live sender freshness/key behavior,
   and the upstream FRC→Brake/EPB producer/transport path. Arbitrary unrelated
   computed aliases or undocumented hardware/DMA writers remain bounded, but no
   second command-sized path was recovered in the audited surfaces.
 - **Canonical:**
-  `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json` v2;
-  `data/generated/corolla_8965H1202000_lta_command_provenance.json` v6;
+  `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json` v3;
+  `data/generated/corolla_8965H1202000_lta_command_provenance.json` v7;
   `tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py`;
   `tests/verify_corolla_8965H1202000_lta_command_provenance.py`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)

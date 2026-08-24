@@ -119,9 +119,12 @@ without importing the old `0x131` scale: FD025 coarse/fraction feedback is
 1.5 deg + 0.1-deg fraction, and the matched controller makes signal255
 `1024/17870 deg/count` (`~1.000121519 mrad/count`) controller-equivalent. The
 remaining problem is therefore safe reproduction of a known EPS receiver contract —
-exact OEM unit/profile labels, mode/request/validity semantics, cadence/timeouts,
-SecOC freshness/key state, and upstream FRC→Brake producer/routing — not discovery
-of another steering message or its physical scale.
+exact OEM signal255 unit naming, remaining mode/request/validity semantics,
+cadence/timeouts, SecOC freshness/key state, and upstream FRC→Brake
+producer/routing — not discovery of another steering message, its physical scale,
+or signal254 feature labels. Techstream's `Target Lateral ID` dictionary closes the
+accepted signal254 profiles as `1=PCS`, `4=LDA`, `10=Hands Off LTA`, `11=LTA/LCA`,
+and `19=PDA`.
 
 ### 2.3 Longitudinal control
 

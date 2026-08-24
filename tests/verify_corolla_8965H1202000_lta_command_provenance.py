@@ -38,7 +38,7 @@ image = IMAGE.read_bytes()
 print("\n== evidence identity ==")
 check("report is exact H image-bound", d["software_id"] == "8965H1202000" and d["images"]["corolla_h"]["sha256"] == hashlib.sha256(image).hexdigest())
 check("50 target-native functions support direct+computed provenance closure", e["function_count"] == 50)
-check("LTA report consumes tracked compact whole-corpus census", d["schema"] == "corolla-8965H1202000-lta-command-provenance-v6" and d["whole_corpus_census"]["path"] == "data/generated/corolla_8965H1202000_lta_command_provenance_census.json" and d["whole_corpus_census"]["source_function_count"] > 5000)
+check("LTA report consumes tracked compact whole-corpus census", d["schema"] == "corolla-8965H1202000-lta-command-provenance-v7" and d["whole_corpus_census"]["path"] == "data/generated/corolla_8965H1202000_lta_command_provenance_census.json" and d["whole_corpus_census"]["source_function_count"] > 5000)
 for row in e["functions"]:
     start = int(row["entry"], 16); size = row["body_size"]
     check(f"raw body hash {row['entry']}", hashlib.sha256(image[start:start+size]).hexdigest() == row["body_sha256"])
@@ -154,7 +154,7 @@ check("immediate sender relationship is Brake System Control Module", s["immedia
 check("upstream feature producer remains open", s["upstream_feature_producer_identified"] is False)
 check("physical B6 scale is promoted", s["physical_scale_identified"] is True and abs(s["controller_equivalent_deg_per_count"]-(1024/17870))<1e-15)
 check("OEM B6 wire-unit label remains open", s["oem_wire_unit_name_identified"] is False)
-check("signal254 accepted profiles recovered", s["signal254_profile_values_recovered"] == [1,4,10,11,19] and s["signal254_exact_feature_labels_identified"] is False)
+check("signal254 accepted profiles and OEM labels recovered", s["signal254_profile_values_recovered"] == [1,4,10,11,19] and s["signal254_exact_feature_labels_identified"] is True and s["signal254_profile_labels"] == {'1':'PCS','4':'LDA','10':'Hands Off LTA','11':'LTA/LCA','19':'PDA'})
 check("broad static search remains closed", s["broad_static_search_closed"] is True)
 
 print("\n== correction/documentation integration ==")

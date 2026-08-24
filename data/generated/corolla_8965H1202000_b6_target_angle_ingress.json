@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, and independently names B6 loss as Brake System Control Module loss. The exact OEM engineering-unit label for B6, exact feature labels for signal254 profile values, and the upstream FRC/Brake producer route remain unresolved.",
+  "evidence_boundary": "The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, independently names B6 loss as Brake System Control Module loss, and closes H signal254 feature labels through the exact Target Lateral ID numeric dictionary. The OEM engineering-unit label for B6 signal255, remaining request/validity/cadence semantics, and the upstream FRC/Brake producer route remain unresolved.",
   "final_command_bridge": {
     "boundary": "Signal255 is one conditional contributor to the general EPS command composition; the final torque/current chain also contains local assist/control terms and gating.",
     "local_chain": "C2A8 -> CD3CC:C3B8 -> CD440:C3BC -> CD496:C3BE -> CD53E:C3D0 -> CD55A:C3C0 -> CD5DC:C3D2 -> CE928:AC56",
@@ -65,7 +65,7 @@
   },
   "mode_ingress": {
     "bit_length": 6,
-    "boundary": "Target-native H proves a 6-bit cooperative-control profile ID, five accepted steering-controller profiles, and distinct per-profile calibration banks. Exact Toyota feature labels for profile values remain unjoined; Techstream Target Lateral ID is corroborating family vocabulary, not an exact signal-name join.",
+    "boundary": "Target-native H proves a 6-bit cooperative-control profile ID, five accepted steering-controller profiles, and distinct per-profile calibration banks. Techstream closes the OEM feature labels for all five accepted values through the exact Target Lateral ID numeric dictionary. The literal on-wire field name is not exposed by H firmware itself.",
     "classification": "target-lateral/control-id-mode-selector",
     "decoded_values": {
       "1": [
@@ -91,15 +91,24 @@
     },
     "decoder": "0x000CBE6E",
     "profile_semantics": {
-      "additional_raw_id_use": "C825A separately treats raw IDs 25 (0x19) and 27 (0x1B) as a special monitor/state pair; only 25 is one of CBE6E steering-controller accepted profiles",
+      "additional_raw_id_use": "C825A separately treats raw IDs 25 (0x19) and 27 (0x1B); Techstream Target Lateral ID identifies them as AP and Remote Parking respectively. Only 25/AP is one of CBE6E steering-controller accepted profiles.",
       "calibration_selection": "C9CEA/C9FAE/CB72A/CB900 and later controller helpers select distinct calibration banks from these five profile flags",
       "common_active_flag": "C272 is asserted for every accepted value",
+      "join_proof": "H CBE6E accepts exactly IDs 1/4/10/11/19 and C825A separately recognizes 25/27. Techstream P5 EMPS Target Lateral ID uses the same numeric dictionary: 1 PCS, 4 LDA, 10 Hands Off LTA, 11 LTA/LCA, 19 PDA, 25 AP, 27 Remote Parking. The dictionary is identical in EMPS_P5/EMPS2_P5 across NA/EU/JP.",
       "mutually_exclusive_profile_flags": {
         "1": "C273",
         "10": "C270",
         "11": "C26F",
         "19": "C271",
         "4": "C26E"
+      },
+      "oem_dictionary_name": "Target Lateral ID",
+      "oem_feature_labels": {
+        "1": "PCS",
+        "10": "Hands Off LTA",
+        "11": "LTA/LCA",
+        "19": "PDA",
+        "4": "LDA"
       }
     },
     "raw_destination": "0xFEBE7D96",
@@ -128,7 +137,7 @@
     "physical_degree_scale_closed": true,
     "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above is the exact linearized conversion implied by the two fixed-point gains, not a claim that every individual integer target code has a unique exact degree value."
   },
-  "schema": "corolla-8965H1202000-b6-target-angle-ingress-v2",
+  "schema": "corolla-8965H1202000-b6-target-angle-ingress-v3",
   "software_id": "8965H1202000",
   "sources": {
     "codeflash": {
@@ -142,7 +151,7 @@
     },
     "p5_lateral_semantics": {
       "path": "data/generated/techstream_v18/p5_lateral_control_semantics.json",
-      "sha256": "bed60fd2d46b42a9a3db331599169404ad523ddc242a6fd1258578bbaf037190"
+      "sha256": "6ccb354e9eeb2e12019a06565951d41a9f59a06d45b31f2e2897b301208449ca"
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
@@ -156,10 +165,18 @@
     "immediate_sender_relationship": "Brake System Control Module",
     "ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5",
     "mode_ingress": "protected CAN-FD 0x0B6 signal254 6-bit B3",
-    "next_static_target": "recover exact Toyota feature labels/behavior for B6 signal254 profiles, then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain",
+    "next_static_target": "recover remaining B6 request/validity/cadence/loss semantics and SecOC sender state, then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain",
     "oem_wire_unit_name_identified": false,
     "physical_scale_identified": true,
     "reaches_command_value_torque_and_q_current": true,
+    "signal254_feature_labels_identified": true,
+    "signal254_profile_labels": {
+      "1": "PCS",
+      "10": "Hands Off LTA",
+      "11": "LTA/LCA",
+      "19": "PDA",
+      "4": "LDA"
+    },
     "torque_command": false,
     "upstream_feature_producer_identified": false
   },
@@ -236,7 +253,22 @@
       "physical_data_key": 3,
       "raw_scale": "1.5 deg/count"
     },
-    "vocabulary_boundary": "EMPS_P5 family vocabulary corroborates the target-angle interpretation, but exact H lacks DID 0x1CEE; the H controller closes B6 physical equivalence independently through DID1037/FD025, while the exact OEM engineering-unit name for B6 signal255 remains unjoined."
+    "target_lateral_id_dictionary": {
+      "accepted_h_profile_labels": {
+        "1": "PCS",
+        "10": "Hands Off LTA",
+        "11": "LTA/LCA",
+        "19": "PDA",
+        "4": "LDA"
+      },
+      "name": "Target Lateral ID",
+      "pattern_display_key": 39,
+      "special_h_ids": {
+        "25": "AP",
+        "27": "Remote Parking"
+      }
+    },
+    "vocabulary_boundary": "EMPS_P5 family vocabulary corroborates the target-angle interpretation. The Target Lateral ID numeric dictionary exactly labels every H-observed signal254 profile/special ID, while exact H lacks DID 0x1CEE and the OEM engineering-unit name for B6 signal255 remains unjoined."
   },
   "wire_ingress": {
     "bit_length": 16,

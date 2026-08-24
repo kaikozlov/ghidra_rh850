@@ -272,16 +272,17 @@ selects mode families for values `1/4/10/11/19`; signals262/263 remain percentag
 like contributor modifiers. D7's command-sized field remains vehicle speed and the
 B6 nonscalar/group/full-PDU alternatives remain negative.
 
-The next H evidence is therefore **profile/security and upstream-producer recovery
-for this known interface**, not another provenance or scale search inside the EPS.
-The physical controller relation is now closed: FD `0x025` signal184 is
-1.5 deg/count, signal185 is a signed 0.1-deg fraction, and B6 signal255 is
-`1024/17870 deg/count` (`~1.000121519 mrad/count`) in the matched controller domain.
-Capture protected `0x0B6` during stock LTA while synchronizing
+The next H evidence is therefore **request/validity/security and upstream-producer
+recovery for this known interface**, not another provenance, scale, or profile-label
+search inside the EPS. The physical controller relation is now closed: FD `0x025`
+signal184 is 1.5 deg/count, signal185 is a signed 0.1-deg fraction, and B6 signal255
+is `1024/17870 deg/count` (`~1.000121519 mrad/count`) in the matched controller
+domain. Techstream's exact `Target Lateral ID` dictionary closes signal254 profiles
+`1/4/10/11/19` as `PCS/LDA/Hands Off LTA/LTA-LCA/PDA`; H-special IDs `25/27` are
+`AP/Remote Parking`. Capture protected `0x0B6` during stock LTA while synchronizing
 signal254/255/262/263, B6 validity, measured angle, `1C02`, `1152`, and actual Q
-current to map signal254 profiles `1/4/10/11/19` to exact Toyota feature meanings,
-request/validity rules, cadence/timeout, normal target/rate bounds, and stock-source
-loss behavior. In parallel, recover the B6 SecOC freshness/counter/source contract
+current to recover request/validity rules, cadence/timeout, normal target/rate bounds,
+and stock-source loss behavior. In parallel, recover the B6 SecOC freshness/counter/source contract
 and determine whether slot-4 command-5 can produce the required authenticated domain
 on real hardware. `FRC_P5` plus Brake/EPB/gateway firmware remains the software
 target for **upstream ownership and routing/authentication**, not for discovering the

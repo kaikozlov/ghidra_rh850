@@ -74,7 +74,7 @@ p = DDBParser()
 
 # ── schema and exact source identities ───────────────────────────────────────
 
-check("schema version", ev["schema_version"] == 3)
+check("schema version", ev["schema_version"] == 4)
 
 EXPECTED_FRC = {
     "NA": (49806, "63307a9b8a6bcafdc5ee4b3a04f67abdc2501ba296a2779e5edc7dbff846fe42"),
@@ -783,6 +783,66 @@ for dbname in ("EMPS_P5", "EMPS2_P5"):
         [x[2] for x in raw_rows] == ["0x1CEE"] * 4 + ["0x1CEF"] * 4
         and [x["primary_data_id"] for x in rows] == ["0x1CEE"] * 4 + ["0x1CEF"] * 4,
     )
+
+# Type-62 +0x32 selects type-14 CDbPatDisp entries.  The value dictionary is
+# identical across EMPS/EMPS2 and all three regions.
+target_id = ev["power_steering"]["target_lateral_id_semantics"]
+expected_target_ids = {
+    0: "No Request (Manual Operation)", 1: "PCS", 4: "LDA", 10: "Hands Off LTA",
+    11: "LTA/LCA", 13: "DESA (Slow Deceleration Control)",
+    15: "DESA (Deceleration Stop Control)", 18: "SDG", 19: "PDA", 25: "AP",
+    27: "Remote Parking", 35: "AD (Lv.3)", 37: "EM (Lv.3)", 39: "DES (Lv.3)",
+    41: "AD (Lv.4)", 43: "EM (Lv.4)", 45: "DES (Lv.4)",
+    49: "Self-Propelled Transport", 63: "Driver Operation",
+}
+check(
+    "P5 Target Lateral ID exact OEM value dictionary",
+    target_id["oem_name"] == "Target Lateral ID"
+    and {int(k): v for k, v in target_id["value_dictionary"].items()} == expected_target_ids,
+)
+for region in ("NA", "EU", "JP"):
+    region_strings = p.load_string_db(ROOT / region / "DB/M_English.ddb")
+    for database in ("EMPS_P5.ddb", "EMPS2_P5.ddb"):
+        edb = p.parse_ecu_db(ROOT / region / "DB" / database)
+        expected_pat_key = 39 if database == "EMPS_P5.ddb" else 29
+        raw_monitors = {
+            u16(raw, 0x24): raw for raw in records(edb.sections[62])
+            if u16(raw, 0x24) in (2069, 2073)
+        }
+        raw_patterns = {
+            u32(raw, 0x04): region_strings.get_string(u32(raw, 0x00))
+            for raw in records(edb.sections[14])
+            if u16(raw, 0x0C) == expected_pat_key
+        }
+        check(
+            f"{region} {database} Target Lateral ID raw monitor/pattern join",
+            set(raw_monitors) == {2069, 2073}
+            and all(
+                u16(raw, 0x2A) == 1
+                and (u16(raw, 0x2C), u16(raw, 0x2E)) == (0, 7)
+                and u16(raw, 0x32) == expected_pat_key
+                and u16(raw, 0x36) == (0x1CEE if key == 2069 else 0x1CEF)
+                for key, raw in raw_monitors.items()
+            )
+            and raw_patterns == expected_target_ids,
+        )
+check(
+    "P5 Target Lateral ID dictionary is identical across EMPS/EMPS2 and regions",
+    all(
+        row["pattern_display_key"] == (39 if database == "EMPS_P5.ddb" else 29)
+        and row["physical_data_key"] == 1
+        and row["bit_range"] == [0, 7]
+        and {int(k): v for k, v in row["pattern_values"].items()} == expected_target_ids
+        for region in ("NA", "EU", "JP")
+        for database in ("EMPS_P5.ddb", "EMPS2_P5.ddb")
+        for row in target_id["regions"][region][database].values()
+    ),
+)
+check(
+    "Target Lateral ID exact H-relevant OEM labels exist",
+    {k: expected_target_ids[k] for k in (1, 4, 10, 11, 19, 25, 27)}
+    == {1: "PCS", 4: "LDA", 10: "Hands Off LTA", 11: "LTA/LCA", 19: "PDA", 25: "AP", 27: "Remote Parking"},
+)
 
 conv = ev["power_steering"]["emps_angle_conversion"]
 steer_conv = conv["steering_angle"]

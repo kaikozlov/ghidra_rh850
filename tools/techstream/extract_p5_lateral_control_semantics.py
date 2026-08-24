@@ -693,7 +693,7 @@ def frc_target_steering_negative(parser: DDBParser, root: Path, region: str) -> 
     }
 
 
-def frc_pattern_values(db, strings, patdisp_key: int) -> dict[int, str]:
+def pattern_values(db, strings, patdisp_key: int) -> dict[int, str]:
     """Resolve a type-14 CDbPatDispTable key to its value->display map.
 
     Verified join: the type-62 monitor record carries the pattern-display key
@@ -705,6 +705,91 @@ def frc_pattern_values(db, strings, patdisp_key: int) -> dict[int, str]:
         if u16(raw, 0x0C) == patdisp_key:
             out[u32(raw, 0x04)] = strings.get_string(u32(raw, 0x00))
     return dict(sorted(out.items()))
+
+
+def emps_target_lateral_id_semantics(parser: DDBParser, root: Path) -> dict:
+    """Recover the OEM Target Lateral ID value dictionary used by P5 EMPS."""
+    expected = {
+        0: "No Request (Manual Operation)",
+        1: "PCS",
+        4: "LDA",
+        10: "Hands Off LTA",
+        11: "LTA/LCA",
+        13: "DESA (Slow Deceleration Control)",
+        15: "DESA (Deceleration Stop Control)",
+        18: "SDG",
+        19: "PDA",
+        25: "AP",
+        27: "Remote Parking",
+        35: "AD (Lv.3)",
+        37: "EM (Lv.3)",
+        39: "DES (Lv.3)",
+        41: "AD (Lv.4)",
+        43: "EM (Lv.4)",
+        45: "DES (Lv.4)",
+        49: "Self-Propelled Transport",
+        63: "Driver Operation",
+    }
+    regions: dict[str, dict] = {}
+    for region in REGIONS:
+        strings = parser.load_string_db(root / region / "DB/M_English.ddb")
+        region_rows: dict[str, dict] = {}
+        for database in ("EMPS_P5.ddb", "EMPS2_P5.ddb"):
+            db = parser.parse_ecu_db(root / region / "DB" / database)
+            monitors = records(db.sections[62])
+            systems = {}
+            for monitor_key, name, did in (
+                (2069, "Target Lateral ID", 0x1CEE),
+                (2073, "Target Lateral ID (System 2)", 0x1CEF),
+            ):
+                hits = [raw for raw in monitors if u16(raw, 0x24) == monitor_key]
+                if len(hits) != 1:
+                    raise ValueError(
+                        f"{region} {database} monitor {monitor_key} count {len(hits)}"
+                    )
+                raw = hits[0]
+                patdisp_key = u16(raw, 0x32)
+                values = pattern_values(db, strings, patdisp_key)
+                expected_patdisp_key = 39 if database == "EMPS_P5.ddb" else 29
+                if not (
+                    strings.get_string(u32(raw, 0x18)) == name
+                    and u16(raw, 0x2A) == 1
+                    and [u16(raw, 0x2C), u16(raw, 0x2E)] == [0, 7]
+                    and u16(raw, 0x36) == did
+                    and patdisp_key == expected_patdisp_key
+                    and values == expected
+                ):
+                    raise ValueError(
+                        f"{region} {database} {name} semantic dictionary drift"
+                    )
+                systems["system1" if monitor_key == 2069 else "system2"] = {
+                    "monitor_key": monitor_key,
+                    "name": name,
+                    "primary_data_id": did_str(did),
+                    "physical_data_key": u16(raw, 0x2A),
+                    "bit_range": [u16(raw, 0x2C), u16(raw, 0x2E)],
+                    "pattern_display_key": patdisp_key,
+                    "pattern_values": values,
+                    "raw_sha256": sha256(raw),
+                }
+            region_rows[database] = systems
+        regions[region] = region_rows
+    return {
+        "oem_name": "Target Lateral ID",
+        "value_dictionary": expected,
+        "regions": regions,
+        "pattern_display_join": {
+            "monitor_record_pattern_display_key_offset": "u16 +0x32 (type 62)",
+            "patdisp_table": "type 14 CDbPatDispTable",
+            "patdisp_key_offset": "u16 +0x0C",
+            "pattern_value_offset": "u32 +0x04",
+            "display_string_index_offset": "u32 +0x00",
+        },
+        "boundary": (
+            "This is the exact P5 EMPS diagnostic value dictionary. Joining any non-DID "
+            "wire field to it still requires independent target-firmware/dataflow evidence."
+        ),
+    }
 
 
 def frc_security_state(parser: DDBParser, root: Path, region: str) -> dict:
@@ -719,7 +804,7 @@ def frc_security_state(parser: DDBParser, root: Path, region: str) -> dict:
         if name != "ECU Security Key Registered Incomplete Flag":
             continue
         patdisp_key = u16(raw, 0x32)
-        patterns = frc_pattern_values(db, strings, patdisp_key)
+        patterns = pattern_values(db, strings, patdisp_key)
         if patterns != {0: "OFF", 1: "ON", 2: "Not Fixed"}:
             raise ValueError(f"{region} 0x10AF pattern join resolved {patterns!r}")
         incomplete = {
@@ -1722,7 +1807,7 @@ def build(root: Path) -> dict:
         raise ValueError("NA cat498/cat499 co-occurrence keys changed")
 
     return {
-        "schema_version": 3,
+        "schema_version": 4,
         "source": "Techstream V18.00.003",
         "sources": source_identities(root),
         "master_categories": {
@@ -1796,6 +1881,7 @@ def build(root: Path) -> dict:
         "power_steering": {
             "EMPS_P5": emps_rows(parser, root, "EMPS_P5.ddb"),
             "emps_angle_conversion": emps_angle_conversion(parser, root),
+            "target_lateral_id_semantics": emps_target_lateral_id_semantics(parser, root),
             "EMPS2_P5": emps_rows(parser, root, "EMPS2_P5.ddb"),
             "did_corpus_scan": corpus_did_scan(root, (0x1CEE, 0x1CEF)),
             "corolla_h_boundary": {

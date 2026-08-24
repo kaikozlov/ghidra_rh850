@@ -84,13 +84,18 @@ def main()->int:
     conv=p5['power_steering']['emps_angle_conversion']; steer_conv=conv['steering_angle']
     if not (steer_conv['name']=='Steering Angle' and steer_conv['physical_data_key']==3 and steer_conv['mul']==15 and steer_conv['div']==1 and steer_conv['offset']==0 and steer_conv['signed'] is True and steer_conv['decimal_point_count']==1 and steer_conv['unit']=='deg' and steer_conv['data_range']==[-2048,2047] and steer_conv['graph_range']==[-30720,30705]): raise ValueError('P5 steering-angle conversion drift')
     if 'raw * mul / div + offset' not in conv['formula'] or '0.0..300.0 km/h' not in conv['direction_witness']: raise ValueError('P5 conversion-direction proof drift')
+    target_id=p5['power_steering']['target_lateral_id_semantics']
+    target_id_values={int(k):v for k,v in target_id['value_dictionary'].items()}
+    profile_labels={1:'PCS',4:'LDA',10:'Hands Off LTA',11:'LTA/LCA',19:'PDA'}
+    if target_id['oem_name']!='Target Lateral ID' or any(target_id_values.get(k)!=v for k,v in profile_labels.items()): raise ValueError('P5 Target Lateral ID profile dictionary drift')
+    if target_id_values.get(25)!='AP' or target_id_values.get(27)!='Remote Parking': raise ValueError('P5 Target Lateral ID AP/Remote Parking dictionary drift')
     did1037=next(x for x in tech['ddb_overlap']['emps_p5']['monitor_rows'] if x['monitor_key']==17)
     if did1037['name']!='Steering Angle' or did1037['primary_data_id']!='0x1037' or did1037['h_callback']!='0x488A8': raise ValueError('H DID1037 join drift')
     controller_deg_num=1024; controller_deg_den=17870
     controller_deg_per_count=controller_deg_num/controller_deg_den
     controller_mrad_per_count=controller_deg_per_count*math.pi/180*1000
     out={
-      'schema':'corolla-8965H1202000-b6-target-angle-ingress-v2','software_id':'8965H1202000',
+      'schema':'corolla-8965H1202000-b6-target-angle-ingress-v3','software_id':'8965H1202000',
       'sources':{
         'codeflash':{'path':str(a.image.relative_to(REPO)),'sha256':sha(h)},
         'decompiler_evidence':{'path':str(a.evidence.relative_to(REPO)),'sha256':sha(a.evidence.read_bytes()),'function_count':e['function_count']},
@@ -106,10 +111,13 @@ def main()->int:
         'profile_semantics':{
           'common_active_flag':'C272 is asserted for every accepted value',
           'mutually_exclusive_profile_flags':{'1':'C273','4':'C26E','10':'C270','11':'C26F','19':'C271'},
+          'oem_feature_labels':{str(k):v for k,v in profile_labels.items()},
+          'oem_dictionary_name':'Target Lateral ID',
           'calibration_selection':'C9CEA/C9FAE/CB72A/CB900 and later controller helpers select distinct calibration banks from these five profile flags',
-          'additional_raw_id_use':'C825A separately treats raw IDs 25 (0x19) and 27 (0x1B) as a special monitor/state pair; only 25 is one of CBE6E steering-controller accepted profiles',
+          'additional_raw_id_use':'C825A separately treats raw IDs 25 (0x19) and 27 (0x1B); Techstream Target Lateral ID identifies them as AP and Remote Parking respectively. Only 25/AP is one of CBE6E steering-controller accepted profiles.',
+          'join_proof':'H CBE6E accepts exactly IDs 1/4/10/11/19 and C825A separately recognizes 25/27. Techstream P5 EMPS Target Lateral ID uses the same numeric dictionary: 1 PCS, 4 LDA, 10 Hands Off LTA, 11 LTA/LCA, 19 PDA, 25 AP, 27 Remote Parking. The dictionary is identical in EMPS_P5/EMPS2_P5 across NA/EU/JP.',
         },
-        'boundary':'Target-native H proves a 6-bit cooperative-control profile ID, five accepted steering-controller profiles, and distinct per-profile calibration banks. Exact Toyota feature labels for profile values remain unjoined; Techstream Target Lateral ID is corroborating family vocabulary, not an exact signal-name join.'
+        'boundary':'Target-native H proves a 6-bit cooperative-control profile ID, five accepted steering-controller profiles, and distinct per-profile calibration banks. Techstream closes the OEM feature labels for all five accepted values through the exact Target Lateral ID numeric dictionary. The literal on-wire field name is not exposed by H firmware itself.'
       },
       'wire_ingress':{
         'can_id':'0x0B6','can_fd':True,'secured':True,'pdu_id':42,'pdu_buffer_offset':'0x01A7',
@@ -165,8 +173,9 @@ def main()->int:
         'immediate_sender_monitor':{'dtc':b6row['dtc']['techstream_code'],'description':b6row['dtc']['techstream_description'],'failure':b6row['dtc']['techstream_failure']},
         'corolla_p5_topology':{'required_categories':[405,435,498],'names':{'405':'EMPS','435':'Brake/EPB','498':'Front Recognition Camera 2'},'interpretation':'Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves the immediate module relationship, not the upstream FRC-to-Brake wire route.'},
         'family_angle_vocabulary':[{'monitor_key':2071,'name':names[2071],'primary_data_id':'0x1CEE'},{'monitor_key':2072,'name':names[2072],'primary_data_id':'0x1CEE'}],
+        'target_lateral_id_dictionary':{'name':target_id['oem_name'],'accepted_h_profile_labels':{str(k):v for k,v in profile_labels.items()},'special_h_ids':{'25':target_id_values[25],'27':target_id_values[27]},'pattern_display_key':39},
         'steering_angle_conversion':{'did':'0x1037','name':'Steering Angle','h_callback':'0x488A8','raw_scale':'1.5 deg/count','physical_data_key':3,'conversion_plugin':'GetDatMonSignalInfoP5_DT.dll'},
-        'vocabulary_boundary':'EMPS_P5 family vocabulary corroborates the target-angle interpretation, but exact H lacks DID 0x1CEE; the H controller closes B6 physical equivalence independently through DID1037/FD025, while the exact OEM engineering-unit name for B6 signal255 remains unjoined.'
+        'vocabulary_boundary':'EMPS_P5 family vocabulary corroborates the target-angle interpretation. The Target Lateral ID numeric dictionary exactly labels every H-observed signal254 profile/special ID, while exact H lacks DID 0x1CEE and the OEM engineering-unit name for B6 signal255 remains unjoined.'
       },
       'migration':{
         'pre_tss3_corolla':'classic 0x2E4 5-byte torque command',
@@ -186,9 +195,11 @@ def main()->int:
         'physical_scale_identified':True,
         'controller_equivalent_deg_per_count':controller_deg_per_count,
         'oem_wire_unit_name_identified':False,
-        'next_static_target':'recover exact Toyota feature labels/behavior for B6 signal254 profiles, then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain'
+        'signal254_feature_labels_identified':True,
+        'signal254_profile_labels':{str(k):v for k,v in profile_labels.items()},
+        'next_static_target':'recover remaining B6 request/validity/cadence/loss semantics and SecOC sender state, then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain'
       },
-      'evidence_boundary':'The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, and independently names B6 loss as Brake System Control Module loss. The exact OEM engineering-unit label for B6, exact feature labels for signal254 profile values, and the upstream FRC/Brake producer route remain unresolved.'
+      'evidence_boundary':'The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, independently names B6 loss as Brake System Control Module loss, and closes H signal254 feature labels through the exact Target Lateral ID numeric dictionary. The OEM engineering-unit label for B6 signal255, remaining request/validity/cadence semantics, and the upstream FRC/Brake producer route remain unresolved.'
     }
     a.out.parent.mkdir(parents=True,exist_ok=True); a.out.write_text(json.dumps(out,indent=2,sort_keys=True)+'\n'); print(json.dumps({'out':str(a.out),'classification':out['wire_ingress']['classification']},indent=2)); return 0
 if __name__=='__main__': raise SystemExit(main())
