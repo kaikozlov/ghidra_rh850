@@ -79,9 +79,13 @@ additionally closes the VDS pair as **`Address=7B0`, `FuncAddress=7E5`** from
 Techstream's own SQL schema and the exact `7E0..7E7` phase-5 family. V18 Unified
 CID retrieval calls generic `ReadSoftwareID` (`22 F1 81` / `62 F1 81`) before
 mode dispatch; the alternate `1FFF` SWIN reader is uniquely gated to `0792` FRC.
-Use F181 as the generic Unified live/acquisition identity probe, but do not call
-it a Brake-specific DID until a `07B0` package or live category-435 ECU confirms
-that route.
+TMS-047 now independently proves the category-435 **diagnostic** reader itself:
+master role 82 is `GetCID_SID22_SAS_DT.dll`; `(435, 0xDC)` resolves through
+ComSet 1 / CommFrame `0x444` to exact `22 F1 81` / mask `FF FF FF` / expected
+`62 F1 81`. The parser skips the first four response bytes and groups the rest
+into 16-byte `CID1`, `CID2`, … values. Therefore a read-only F181 at physical
+`7B0` is the exact Techstream path to acquire the current Brake/EPB CID; what is
+still missing is the **value**, not the DID/protocol.
 
 **Next software-analysis target:** acquire a true-TSS3 CUW whose
 **`Node01/DiagID=07B0`** (category-435 `ABS_P5`/Brake), ideally matched by

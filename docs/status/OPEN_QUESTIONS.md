@@ -125,13 +125,15 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   The complete current 26-package `REFERENCE/cuw` inventory has six `0792` FRC
   and three `07A1` EPS packages but no `07B0` package. Obtain a true-TSS3 CUW
   whose `Node01/DiagID=07B0`; local absence does not imply Toyota/TIS absence.
-  TMS-046 closes the second VDS token as Toyota's exact `FuncAddress=7E5` and
-  proves V18 Unified CID retrieval uses generic F181 before mode dispatch while
-  `1FFF` is an `0792`-only FRC special case. The remaining acquisition unknown is
-  the **actual category-435 current software/calibration identity and package**:
-  obtain/read F181 on the target or identify it from matching Toyota calibration
-  metadata, then locate the corresponding `07B0` CUW. Do not infer a Brake-specific
-  SWIN DID from the camera branch.
+  TMS-046 closes the second VDS token as Toyota's exact `FuncAddress=7E5`; TMS-047
+  then closes the category-435 diagnostic CID reader itself. Brake/EPB role 82
+  `GetCID_SID22_SAS_DT.dll` resolves selector `0xDC` to `22 F1 81`, mask `FF FF FF`,
+  expected `62 F1 81`, and parses the post-prefix response into 16-byte `CID1`,
+  `CID2`, … entries. The remaining acquisition unknown is therefore only the
+  **actual category-435 current software/calibration identity value and package**:
+  read F181 at physical `7B0` on the target or recover that value from matching
+  Toyota calibration metadata, then locate the corresponding `07B0` CUW. The
+  FRC-only `1FFF` SWIN path remains unrelated.
   Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3 ·
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §§7.34–7.35.
 

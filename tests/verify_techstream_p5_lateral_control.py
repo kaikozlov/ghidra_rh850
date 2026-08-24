@@ -1720,6 +1720,139 @@ check(
     phase5_pairs[435] == ("7B0", "7E5"),
 )
 
+# Category-435 diagnostic current-CID path. This is independent of the
+# Calibration Update Wizard route: the P5 master binds Brake/EPB role 82 to
+# GetCID_SID22_SAS_DT.dll, whose primary helper resolves selector 0xDC through
+# the master FuncCommFrame -> CommFrame -> Variable chain.
+EXPECTED_BRAKE_CID_FUNC = bytes.fromhex("b301dc00010044040000010000000000")
+EXPECTED_F181_FRAME = bytes.fromhex("440481059f008305")
+for region in ("NA", "EU", "JP"):
+    master = p.parse_master_db(ROOT / region / "DB/Toyota.ddb")
+    dlls = p.extract_master_dlls(master.sections[19])
+    role82 = [
+        row for row in dlls
+        if row.category_id == 435 and row.dll_role_id == 82
+    ]
+    check(
+        f"{region} category-435 role 82 is GetCID_SID22_SAS_DT.dll",
+        len(role82) == 1 and role82[0].dll_name == "GetCID_SID22_SAS_DT.dll",
+    )
+
+    func_rows = [
+        raw for raw in records(master.sections[18])
+        if u16(raw, 0x00) == 435 and u16(raw, 0x02) == 0x00DC
+    ]
+    check(
+        f"{region} category-435 CID selector 0xDC -> ComSet1/CommFrame0x444",
+        func_rows == [EXPECTED_BRAKE_CID_FUNC]
+        and tuple(u16(func_rows[0], off) for off in (0x04, 0x06)) == (1, 0x0444),
+    )
+
+    frame_rows = [
+        raw for raw in records(master.sections[17])
+        if u16(raw, 0x00) == 0x0444
+    ]
+    check(
+        f"{region} CommFrame0x444 variable references are exact",
+        frame_rows == [EXPECTED_F181_FRAME]
+        and tuple(u16(frame_rows[0], off) for off in (0x02, 0x04, 0x06))
+        == (0x0581, 0x009F, 0x0583),
+    )
+    check(
+        f"{region} category-435 CID wire frame is 22 F1 81 / mask FF FF FF / check 62 F1 81",
+        master_variable_blob(master, 0x0581) == bytes.fromhex("22f181")
+        and master_variable_blob(master, 0x009F) == bytes.fromhex("ffffff")
+        and master_variable_blob(master, 0x0583) == bytes.fromhex("62f181"),
+    )
+
+cid_data, cid_pe = pe_of("GetCID_SID22_SAS_DT.dll")
+cc_data, cc_pe = pe_of("CommandCommon.dll")
+kgp_data, kgp_pe = pe_of("KgpDataCtrl.dll")
+cmd_data, cmd_pe = pe_of("CommandDataLib.dll")
+check(
+    "GetCID_SID22_SAS_DT.dll exact identity",
+    len(cid_data) == 61440
+    and hashlib.sha256(cid_data).hexdigest()
+    == "d639ced33119706b01512f5711daf885c3519bc84b1d110914e3fe4f5cdee378",
+)
+check(
+    "CommandCommon/KgpDataCtrl/CommandDataLib exact identities for CID path",
+    (len(cc_data), hashlib.sha256(cc_data).hexdigest())
+    == (1028096, "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7")
+    and (len(kgp_data), hashlib.sha256(kgp_data).hexdigest())
+    == (721008, "e5235bc0c241c6a450fe461031eed0915675032b1db994bd54d98818fac88aa9")
+    and (len(cmd_data), hashlib.sha256(cmd_data).hexdigest())
+    == (1327104, "9ad2a99f528211910b22faa8be23448e3d3426ffa1c50df15cf132b3b9afa964"),
+)
+# The same DLL contains a separate 0xAC/0xAD helper for non-SAS ECUs.
+# Category 435 has no corresponding master rows, and Execute explicitly clears
+# a nonzero helper result, so it is supplemental rather than the primary CID
+# transaction above.
+for region in ("NA", "EU", "JP"):
+    master = p.parse_master_db(ROOT / region / "DB/Toyota.ddb")
+    supplemental = [
+        raw for raw in records(master.sections[18])
+        if u16(raw, 0x00) == 435 and u16(raw, 0x02) in (0x00AC, 0x00AD)
+    ]
+    check(f"{region} category-435 has no 0xAC/0xAD FuncCommFrame mapping", supplemental == [])
+
+check(
+    "CID plugin primary helper asks GetCommFrmInfo for selector 0xDC then sends frame 0",
+    anchor(cid_data, cid_pe, 0x100012B8, "4c241c55515068dc0000008d4c2470ff1528800010")
+    and anchor(cid_data, cid_pe, 0x1000139B, "8b3d1c80001055558d4c2424ffd7508d4c2468ff1518800010"),
+)
+check(
+    "CommandCommon GetCommFrmInfo materializes FuncCommFrame through class 0x112",
+    bytes.fromhex("6812010000") in cc_data
+    and bytes.fromhex("ff1530070b10") in cc_data
+    and bytes.fromhex("ff1558070b10") in cc_data,
+)
+check(
+    "Kgp FuncCommFrame table keys are record +0x00 then +0x02 with 16-byte stride",
+    anchor(kgp_data, kgp_pe, 0x10038749, "33c0668b02")
+    and anchor(kgp_data, kgp_pe, 0x10038857, "33c0668b4202")
+    and anchor(kgp_data, kgp_pe, 0x100388DF, "c1e1048b45fc03c1"),
+)
+check(
+    "CommandCommon SetCommFrame obtains send/mask/check and receive transport fills +0x58 list",
+    anchor(cc_data, cc_pe, 0x1006A9B3, "8d5424108d4c243c5257ff153c070b10")
+    and anchor(cc_data, cc_pe, 0x1006A9C5, "8d44241450578d4c2444895c2424ff1500050b10")
+    and anchor(cc_data, cc_pe, 0x1006A9E1, "51578d4c2444ff154c070b10")
+    and anchor(cc_data, cc_pe, 0x1005D6FA, "8b2d10010b1083c658"),
+)
+check(
+    "CommandDataLib list count ABI is +0x10, matching CCommFrameData receive-list count at +0x68",
+    anchor(cmd_data, cmd_pe, 0x10001280, "8b4110c3")
+    and anchor(cid_data, cid_pe, 0x10001418, "558d4c2420ffd78b40688d70fc"),
+)
+check(
+    "CID parser verifies F181 DID bytes at receive indexes 1/2 and copies payload from index 4",
+    anchor(cid_data, cid_pe, 0x10001492, "558d4c2420ffd783c030538b1d8c800010")
+    and anchor(cid_data, cid_pe, 0x100014B5, "83c0586a018bc8ffd3")
+    and anchor(cid_data, cid_pe, 0x100014CD, "558d4c2420ffd783c0306a02")
+    and anchor(cid_data, cid_pe, 0x100014EB, "83c0586a028bc8ffd3")
+    and anchor(cid_data, cid_pe, 0x10001507, "8d55048d4c241c526a00ffd78bc883c158ffd3"),
+)
+check(
+    "CID parser chunks the post-prefix payload into fixed 16-byte CID records",
+    anchor(cid_data, cid_pe, 0x10001578, "c744241410000000")
+    and anchor(cid_data, cid_pe, 0x1000160A, "8d9424b00000006a1152")
+    and anchor(cid_data, cid_pe, 0x1000162D, "8d8424b00100005768a0a200106898a20010")
+    and cid_data.count(b"CID\0") >= 1
+    and cid_data.count(b"%s%d\0") >= 1,
+)
+check(
+    "CID plugin 0xAC/0xAD helper is non-SAS supplemental and its error is swallowed",
+    anchor(cid_data, cid_pe, 0x10001175, "ff150880001083f80174125356e8790600008bf883c40885ff740233ff")
+    and anchor(cid_data, cid_pe, 0x1000188A, "68ad00000068ac00000050"),
+)
+
+check(
+    "CID parser terminates grouping by copied response length, not the skipped byte at response index 3",
+    anchor(cid_data, cid_pe, 0x10001503, "85f67e45")
+    and anchor(cid_data, cid_pe, 0x100016D8, "3b6c24180f8c80feffff"),
+)
+
 # Legacy SUW routing is independent corroboration, not a P5 security/writer
 # transfer claim.  FileVersion 17.0.13 maps VSC/ABS/ECB to CANID1=7B0 and
 # EMPS to 7A1.  SK1 is recorded only as a legacy config token.
