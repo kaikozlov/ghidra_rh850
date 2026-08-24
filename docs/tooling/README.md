@@ -53,6 +53,30 @@ selector policies, supervisor alignment, diagnostic joins, and so on) is
 subsystem-specific. Consolidation should expose shared mechanics without hiding
 those distinctions.
 
+Cross-variant image-bound evidence extraction uses one subcommand runner:
+
+```bash
+uv run --locked python tools/extract_variant_evidence.py list
+uv run --locked python tools/extract_variant_evidence.py structural --image ... --fingerprints ... \
+  --software-id 8965H1202000 --address 0xCEDAE ... --out data/generated/...json
+uv run --locked python tools/extract_variant_evidence.py function --image ... --corpus ... \
+  --software-id 8965H1202000 --address 0xB6 ... --out data/generated/...json
+uv run --locked python tools/extract_variant_evidence.py application-diagnostics --image ... \
+  --corpus ... --did-table 0x... --did-count 180 --routine-callback-table 0x... \
+  --software-id 8965H1202000 --out data/generated/...json
+uv run --locked python tools/extract_variant_evidence.py reference-census --image ... \
+  --corpus ... --software-id 8965H1202000 --term B6=... --out data/generated/...json
+```
+
+The four modes share exactly one abstraction — select function records from a
+disposable JSONL corpus and bind them to raw CodeFlash bytes with SHA-256 — and
+differ only in selection strategy (explicit addresses, image-resolved callback
+tables, or whole-corpus substring census). Unlike the Corolla-H profile runner,
+these stay argument-driven rather than profile-driven because each invocation
+names its own image, corpus, and output path: the same mode serves both the
+Sienna and Corolla calibrations, so baking per-artifact profiles here would just
+duplicate the generated-artifacts table.
+
 Read-only exports from `build/work/project` use a second shared profile runner:
 
 ```bash

@@ -143,7 +143,68 @@ for stem in retired_exporters:
     )
     check(proc.returncode == 1, f"no stale export-wrapper references: {stem}")
 
+# --- Cross-variant image-bound evidence extraction -------------------------
+#
+# The former one-file-per-selection variant extractors are consolidated behind
+# one subcommand runner. The four modes must remain enumerated, each must keep
+# its selection contract, and no tracked reference to the retired files may
+# survive.
+VARIANT_TOOL = ROOT / "tools/extract_variant_evidence.py"
+VARIANT_MODES = {
+    "structural": "explicit --address list",
+    "function": "explicit --address list",
+    "application-diagnostics": "DID/routine callback tables read from the image plus explicit --extra addresses",
+    "reference-census": "whole-corpus --term NAME=SUBSTRING census",
+}
+listed_modes = json.loads(
+    subprocess.check_output(
+        [sys.executable, str(VARIANT_TOOL), "list"], cwd=ROOT, text=True
+    )
+)
+check(set(listed_modes) == set(VARIANT_MODES), "variant evidence mode set is exact")
+for mode, selection in VARIANT_MODES.items():
+    check(listed_modes[mode]["selection"] == selection, f"{mode}: selection contract")
+
+variant_source = VARIANT_TOOL.read_text()
+for mode in VARIANT_MODES:
+    check(f'"{mode}"' in variant_source, f"{mode}: subcommand implemented")
+# All four modes must share the single 1 MiB CodeFlash binding invariant.
+check(
+    variant_source.count("expected 1 MiB CodeFlash, got") == 1,
+    "variant modes share one CodeFlash size guard",
+)
+check(
+    variant_source.count("def sha256") == 1,
+    "variant modes share one hashing helper",
+)
+for stem in [
+    "extract_variant_structural_evidence",
+    "extract_variant_function_evidence",
+    "extract_variant_application_diagnostic_evidence",
+    "extract_variant_decompiler_reference_census",
+]:
+    retired = f"tools/{stem}.py"
+    check(not (ROOT / retired).exists(), f"retired variant extractor removed: {stem}")
+    proc = subprocess.run(
+        ["git", "grep", "-n", "-F", retired, "--", *search_roots],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+    check(proc.returncode == 1, f"no stale variant-extractor references: {stem}")
+# Distinct semantic variant tools that deliberately stay separate.
+for separate in [
+    "tools/check_variant_acquisition.py",
+    "tools/compare_variant_application_diagnostics.py",
+    "tools/compare_variant_application_rx.py",
+    "tools/compare_variant_function_bodies.py",
+    "tools/match_variant_function_structure.py",
+    "tools/build_variant_named_transfer_ledger.py",
+]:
+    check((ROOT / separate).exists(), f"semantic variant tool stays separate: {separate}")
+
 print(
-    f"verified {len(EXPECTED)} Corolla-H evidence profiles and "
-    f"{len(EXPORT_PROFILES)} working-project export profiles"
+    f"verified {len(EXPECTED)} Corolla-H evidence profiles, "
+    f"{len(EXPORT_PROFILES)} working-project export profiles, and "
+    f"{len(VARIANT_MODES)} variant evidence modes"
 )

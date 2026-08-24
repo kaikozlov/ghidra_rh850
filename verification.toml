@@ -1862,7 +1862,7 @@ oracle = "raw_bytes"
 tests = ["tests/verify_corolla_8965H1202000_application_diagnostics.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_application_diagnostics.py",
-  "tools/extract_variant_application_diagnostic_evidence.py",
+  "tools/extract_variant_evidence.py",
   "tools/compare_variant_application_diagnostics.py",
   "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_application_diagnostics_diff.json",
@@ -1882,8 +1882,7 @@ oracle = "raw_bytes"
 tests = ["tests/verify_corolla_8965H1202000_fd_control.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_fd_control.py",
-  "tools/extract_variant_function_evidence.py",
-  "tools/extract_variant_decompiler_reference_census.py",
+  "tools/extract_variant_evidence.py",
   "tools/build_corolla_h_fd_control_interface.py",
   "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_fd_control_reference_census.json",
@@ -1905,7 +1904,7 @@ oracle = "raw_bytes"
 tests = ["tests/verify_corolla_8965H1202000_steering_supervisor.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_steering_supervisor.py",
-  "tools/extract_variant_structural_evidence.py",
+  "tools/extract_variant_evidence.py",
   "tools/build_corolla_h_steering_supervisor_stage_ledger.py",
   "data/generated/sienna_8965B4512000_steering_supervisor_structural_evidence.json",
   "data/generated/corolla_8965H1202000_steering_supervisor_structural_evidence.json",
@@ -1930,7 +1929,7 @@ tests = ["tests/verify_corolla_8965H1202000_secoc_key_provenance.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_secoc_key_provenance.py",
   "tools/build_corolla_h_secoc_key_provenance.py",
-  "tools/extract_variant_function_evidence.py",
+  "tools/extract_variant_evidence.py",
   "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
   "data/generated/corolla_2023_albino_dataflash_analysis.json",
@@ -2592,6 +2591,7 @@ oracle = "generated_self_check"
 paths = [
   "tests/verify_tooling_consolidation.py",
   "tools/extract_corolla_h_evidence.py",
+  "tools/extract_variant_evidence.py",
   "tools/export_ghidra_project.sh",
   "docs/tooling/README.md",
 ]
