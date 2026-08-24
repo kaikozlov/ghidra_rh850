@@ -36,7 +36,7 @@ metadata, functions = records[0], records[1:]
 print("== semantic sweep provenance ==")
 generator_source = GENERATOR.read_text(encoding="utf-8")
 check("generator exports and compares the selected live project inventory",
-      "generate_project_inventory.sh" in generator_source
+      "export_ghidra_project.sh" in generator_source and "project-inventory" in generator_source
       and '"compare"' in generator_source
       and "live project does not match" in generator_source)
 check("metadata schema", metadata == {

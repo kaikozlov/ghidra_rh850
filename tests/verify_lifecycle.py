@@ -291,7 +291,7 @@ with tempfile.TemporaryDirectory() as td:
 inventory_baseline = REPO / "data" / "ghidra_project_inventory.baseline.jsonl"
 inventory_before = inventory_baseline.read_bytes()
 result = run(
-    ["bash", str(REPO / "tools" / "generate_project_inventory.sh"), str(inventory_baseline)],
+    ["bash", str(REPO / "tools" / "export_ghidra_project.sh"), "project-inventory", str(inventory_baseline)],
     timeout=10,
 )
 check(
@@ -445,8 +445,7 @@ scripts_that_should_use_helper = [
     "tools/verify_processor.sh",
     "tools/verify_sleigh.sh",
     "tools/snapshot_project.sh",
-    "tools/generate_application_rx_signal_evidence.sh",
-    "tools/generate_semantic_coverage_ledger.sh",
+    "tools/run_headless",
     "tools/g",
 ]
 for script_rel in scripts_that_should_use_helper:

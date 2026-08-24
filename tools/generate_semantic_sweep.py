@@ -60,7 +60,7 @@ def main() -> int:
         inventory_env = environment.copy()
         inventory_env["PROJECT_DIR"] = str(project_dir)
         exported = subprocess.run(
-            [str(REPO / "tools/generate_project_inventory.sh"), str(live_inventory)],
+            [str(REPO / "tools/export_ghidra_project.sh"), "project-inventory", str(live_inventory)],
             cwd=REPO, env=inventory_env, capture_output=True, text=True,
         )
         if exported.returncode:

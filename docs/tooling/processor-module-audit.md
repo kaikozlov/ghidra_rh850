@@ -289,7 +289,7 @@ Whole-image structural function inventory (not full semantic understanding):
 - Exporter: `ghidra/scripts/verify/ExportSemanticCoverageLedger.java`
   (read-only headless against `build/work/project/` only).
 - Generator: `make generate-semantic-coverage` /
-  `tools/generate_semantic_coverage_ledger.sh`
+  `tools/export_ghidra_project.sh semantic-coverage`
 - Artifacts: `data/semantic_coverage_ledger.csv` and
   `data/semantic_coverage_summary.json`
 - Gate: `tests/verify_semantic_coverage.py` (registered in `make verify`)

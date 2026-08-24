@@ -103,7 +103,7 @@ def verify_live_inventory(project_dir: Path, environment: dict[str, str], temp_d
     live_inventory = temp_dir / "live-project.jsonl"
     inventory_env = environment.copy()
     inventory_env["PROJECT_DIR"] = str(project_dir)
-    run_checked([str(REPO / "tools/generate_project_inventory.sh"), str(live_inventory)], env=inventory_env)
+    run_checked([str(REPO / "tools/export_ghidra_project.sh"), "project-inventory", str(live_inventory)], env=inventory_env)
     run_checked([
         sys.executable,
         str(REPO / "tools/project_inventory.py"),

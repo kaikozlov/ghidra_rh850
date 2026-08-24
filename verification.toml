@@ -376,8 +376,7 @@ paths = [
   "data/application_rx_signal_evidence.csv",
   "data/application_rx_consumer_audit.csv",
   "tools/generate_application_rx_map.py",
-  "tools/generate_application_rx_signal_evidence.sh",
-  "tools/generate_application_rx_consumer_audit.sh",
+  "tools/export_ghidra_project.sh",
   "ghidra/scripts/verify/ExportApplicationRxSignalEvidence.java",
   "ghidra/scripts/verify/ExportApplicationRxConsumerAudit.java",
   "ghidra/scripts/verify/AssertApplicationReceiveMap.java",
@@ -698,7 +697,7 @@ paths = [
   "data/application_tx_producer_evidence.csv",
   "tools/generate_application_tx_map.py",
   "tools/generate_application_tx_producer_evidence.py",
-  "tools/generate_application_tx_producer_evidence.sh",
+  "tools/export_ghidra_project.sh",
   "ghidra/scripts/verify/ExportApplicationTxProducerRefs.java",
   "ghidra/scripts/verify/AssertApplicationTransmitSemantics.java",
   "data/external/opendbc/toyota_dbc_facts.json",
@@ -887,7 +886,7 @@ paths = [
   "data/semantic_review_status.csv",
   "ghidra/scripts/verify/ExportSemanticCoverageLedger.java",
   "tools/apply_semantic_review_status.py",
-  "tools/generate_semantic_coverage_ledger.sh",
+  "tools/export_ghidra_project.sh",
 ]
 
 [suite.semantic_coverage_live]
@@ -901,7 +900,7 @@ paths = [
   "data/semantic_review_status.csv",
   "ghidra/scripts/verify/ExportSemanticCoverageLedger.java",
   "tools/apply_semantic_review_status.py",
-  "tools/generate_semantic_coverage_ledger.sh",
+  "tools/export_ghidra_project.sh",
 ]
 
 [suite.semantic_review_promotions]
@@ -965,7 +964,7 @@ paths = [
   "ghidra/scripts/verify/AssertReviewedPointerClusters.java",
   "ghidra/scripts/verify/ExportOutsideFunctionCandidates.java",
   "tools/apply_function_discovery_adjudications.py",
-  "tools/generate_outside_function_candidates.sh",
+  "tools/export_ghidra_project.sh",
   "tools/rebuild_project.sh",
 ]
 
@@ -1734,7 +1733,7 @@ paths = [
   "tools/project_inventory.py",
   "tools/lib/",
   "tools/finalize_project.sh",
-  "tools/generate_project_inventory.sh",
+  "tools/export_ghidra_project.sh",
   "tools/snapshot_project.sh",
   "tools/rebuild_project.sh",
   "tools/verify_processor.sh",
@@ -2593,6 +2592,7 @@ oracle = "generated_self_check"
 paths = [
   "tests/verify_tooling_consolidation.py",
   "tools/extract_corolla_h_evidence.py",
+  "tools/export_ghidra_project.sh",
   "docs/tooling/README.md",
 ]
 

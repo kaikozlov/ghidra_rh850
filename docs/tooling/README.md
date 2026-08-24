@@ -53,6 +53,25 @@ selector policies, supervisor alignment, diagnostic joins, and so on) is
 subsystem-specific. Consolidation should expose shared mechanics without hiding
 those distinctions.
 
+Read-only exports from `build/work/project` use a second shared profile runner:
+
+```bash
+tools/export_ghidra_project.sh list
+tools/export_ghidra_project.sh application-rx-signals
+tools/export_ghidra_project.sh application-rx-consumers
+tools/export_ghidra_project.sh application-tx-producers
+tools/export_ghidra_project.sh outside-functions
+tools/export_ghidra_project.sh semantic-coverage
+tools/export_ghidra_project.sh project-inventory
+```
+
+This replaces the former one-shell-wrapper-per-export pattern. The profile
+runner owns artifact defaults and deterministic postprocessing; the existing
+`tools/run_headless` remains the single owner of committed-project rejection,
+Ghidra environment bootstrap, controlled script paths, logging, and headless
+failure detection. Keep new read-only project exports in this profile runner
+unless their lifecycle or safety semantics are genuinely different.
+
 ## Vendored processor module
 
 The RH850 language `v850e3:LE:32:default` is the **vendored in-tree fork** at

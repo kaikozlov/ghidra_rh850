@@ -148,7 +148,7 @@ def wire_field(pdu: int, abs_buf_off: int, bit_len: int, start_arg: int, kind: s
 def load_evidence(path: Path) -> dict[int, dict]:
     if not path.is_file():
         raise FileNotFoundError(
-            f"missing evidence artifact {path}; run tools/generate_application_rx_signal_evidence.sh"
+            f"missing evidence artifact {path}; run tools/export_ghidra_project.sh application-rx-signals"
         )
     out: dict[int, dict] = {}
     with path.open(newline="", encoding="utf-8") as stream:

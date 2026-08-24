@@ -134,7 +134,7 @@ generator_source = GENERATOR.read_text(encoding="utf-8")
 check(
     "generator proves live-project inventory parity before decompilation",
     "verify_live_inventory(project_dir" in generator_source
-    and "generate_project_inventory.sh" in generator_source
+    and "export_ghidra_project.sh" in generator_source and "project-inventory" in generator_source
     and '"compare"' in generator_source,
 )
 check(

@@ -124,7 +124,7 @@ generate-diagnostic-vocabulary: generate-techstream-corpus
 	cd tools/diagnostics && $(PYTHON) correlate_vocabulary.py
 
 generate-application-receive-evidence:
-	tools/generate_application_rx_signal_evidence.sh
+	tools/export_ghidra_project.sh application-rx-signals
 
 generate-application-receive: generate-application-receive-evidence
 	$(PYTHON) tools/generate_application_rx_map.py
@@ -136,10 +136,10 @@ generate-processor-fixture:
 	$(PYTHON) tools/build_processor_fixture.py
 
 generate-function-discovery:
-	tools/generate_outside_function_candidates.sh
+	tools/export_ghidra_project.sh outside-functions
 
 generate-semantic-coverage:
-	tools/generate_semantic_coverage_ledger.sh
+	tools/export_ghidra_project.sh semantic-coverage
 
 generate-semantic-sweep:
 	$(PYTHON) tools/generate_semantic_sweep.py --project-dir "$(PROJECT_DIR)"
@@ -151,12 +151,12 @@ pseudocode:
 	$(PYTHON) tools/pseudo --materialize
 
 generate-project-inventory:
-	tools/generate_project_inventory.sh "$(PROJECT_INVENTORY)"
+	tools/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
 
 # Exact normalized parity: aggregate floors remain the fast collapse detector;
 # this catches substitutions and metadata drift that equal totals cannot.
 verify-project-parity:
-	tools/generate_project_inventory.sh "$(PROJECT_INVENTORY)"
+	tools/export_ghidra_project.sh project-inventory "$(PROJECT_INVENTORY)"
 	$(PYTHON) tools/project_inventory.py compare \
 		"$(PROJECT_INVENTORY_BASELINE)" "$(PROJECT_INVENTORY)"
 
@@ -172,9 +172,9 @@ update-project-baseline:
 		echo "PROJECT_DIR_A and PROJECT_DIR_B must be independent rebuilds" >&2; \
 		exit 2; \
 	fi
-	PROJECT_DIR="$(PROJECT_DIR_A)" tools/generate_project_inventory.sh \
+	PROJECT_DIR="$(PROJECT_DIR_A)" tools/export_ghidra_project.sh project-inventory \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-a.jsonl"
-	PROJECT_DIR="$(PROJECT_DIR_B)" tools/generate_project_inventory.sh \
+	PROJECT_DIR="$(PROJECT_DIR_B)" tools/export_ghidra_project.sh project-inventory \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-b.jsonl"
 	$(PYTHON) tools/project_inventory.py update \
 		"$(BUILD_OUT)/ghidra_project_inventory.rebuild-a.jsonl" \

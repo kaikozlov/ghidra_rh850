@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the task-oriented Corolla-H evidence extractor consolidation."""
+"""Verify task-oriented tooling consolidation and stale-wrapper removal."""
 from __future__ import annotations
 
 import importlib.util
@@ -107,4 +107,43 @@ for _name, (stem, *_rest) in EXPECTED.items():
     )
     check(proc.returncode == 1, f"no stale tracked references: {stem}")
 
-print(f"verified {len(EXPECTED)} consolidated Corolla-H evidence profiles")
+EXPORTER = ROOT / "tools/export_ghidra_project.sh"
+EXPORT_PROFILES = [
+    "application-rx-signals",
+    "application-rx-consumers",
+    "application-tx-producers",
+    "outside-functions",
+    "semantic-coverage",
+    "project-inventory",
+]
+export_list = subprocess.check_output([str(EXPORTER), "list"], cwd=ROOT, text=True).splitlines()
+check(export_list == EXPORT_PROFILES, "working-project exporter lists the six semantic profiles")
+export_source = EXPORTER.read_text()
+check("tools/run_headless" in export_source, "working-project exporter delegates headless safety")
+check("-noanalysis" in export_source and "-readOnly" in export_source, "all shared exports are read-only/no-analysis")
+check("lib/ghidra_env.sh" not in export_source, "export profiles do not duplicate environment bootstrap")
+check("refusing inventory output outside" in export_source, "project inventory retains build-owned output guard")
+
+retired_exporters = [
+    "application_rx_signal_evidence",
+    "application_rx_consumer_audit",
+    "application_tx_producer_evidence",
+    "outside_function_candidates",
+    "semantic_coverage_ledger",
+    "project_inventory",
+]
+for stem in retired_exporters:
+    retired = f"tools/generate_{stem}.sh"
+    check(not (ROOT / retired).exists(), f"retired export wrapper removed: {stem}")
+    proc = subprocess.run(
+        ["git", "grep", "-n", "-F", retired, "--", *search_roots],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+    check(proc.returncode == 1, f"no stale export-wrapper references: {stem}")
+
+print(
+    f"verified {len(EXPECTED)} Corolla-H evidence profiles and "
+    f"{len(EXPORT_PROFILES)} working-project export profiles"
+)

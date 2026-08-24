@@ -27,7 +27,7 @@ def main() -> int:
             "SUMMARY_OUT": str(summary_out),
         })
         subprocess.run(
-            [str(REPO / "tools" / "generate_semantic_coverage_ledger.sh")],
+            [str(REPO / "tools" / "export_ghidra_project.sh"), "semantic-coverage"],
             cwd=REPO, env=environment, check=True,
         )
         expected_csv = REPO / "data" / "semantic_coverage_ledger.csv"

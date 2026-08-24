@@ -132,7 +132,7 @@ fi
 
 echo "Verifying exact normalized project parity before snapshot..."
 PROJECT_DIR="$PROJECT_DIR" \
-  "$ROOT/tools/generate_project_inventory.sh" "$BUILD_OUT/ghidra_project_inventory.snapshot.jsonl"
+  "$ROOT/tools/export_ghidra_project.sh" project-inventory "$BUILD_OUT/ghidra_project_inventory.snapshot.jsonl"
 python3 "$ROOT/tools/project_inventory.py" compare \
   "$ROOT/data/ghidra_project_inventory.baseline.jsonl" \
   "$BUILD_OUT/ghidra_project_inventory.snapshot.jsonl"
