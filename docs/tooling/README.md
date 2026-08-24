@@ -77,6 +77,49 @@ names its own image, corpus, and output path: the same mode serves both the
 Sienna and Corolla calibrations, so baking per-artifact profiles here would just
 duplicate the generated-artifacts table.
 
+## Deliberate non-consolidations
+
+Several tool families *look* consolidatable but are not, because they only share
+incidental boilerplate, not one operation. Each of these carries distinct proof
+logic, fail-closed boundaries, or safety contracts that a shared runner would
+hide:
+
+- **Techstream CUW inspectors and writer generators.** `parse_cuw_container.py`
+  already packages the shared container parser; `inspect_cuw_legacy.py` exports
+  the shared legacy attach/parameter decoders, and `generate_cuw_writer_inventory.py`
+  exports the shared parameter-INI decoder and factory-route table — every
+  `inspect_cuw_*` and `generate_cuw_writer_*` tool imports them. The remaining
+  per-tool code encodes distinct evidence boundaries and proof outputs
+  (whole-repro vs delta corpus invariants, per-family route verdicts, timing
+  recovery, calibration schema), each pinned by its own deterministic test
+  suite. Merging them would bury fail-closed boundary contracts, and their
+  shared mechanics are already factored where genuinely common.
+- **Corolla-H semantic extractors and builders.** The remaining
+  `extract_corolla_h_*_evidence.py` tools each embed distinct discovery logic:
+  whole-corpus literal-call closure (`direct_call_surface`), image-resolved
+  callback tables (`deadline_monitor_surface`, `diagnostic_residue`),
+  artifact-derived cohort joins (`structural_residue`), a seven-corpus
+  reference-pair join with fragmented-body pinning (`secoc_surface`), and a
+  dual-image Sienna/H fingerprint join (`final_named_residue`). The
+  `build_corolla_h_*` semantic builders likewise encode subsystem-specific
+  proof logic (routing tables, selector policies, supervisor alignment,
+  diagnostic joins). These are different operations, not variants of one.
+- **Arbitrary-image resolver wrappers.** `resolve_secoc_patch_image.sh` and
+  `resolve_ephemeral_runtime_image.sh` both import a disposable Ghidra project,
+  but their input contracts (bare 1 MiB only vs 2 MiB range-dumper
+  normalization), fail-closed gates (CRC-geometry ambiguity vs
+  geometry-unresolved/steering-unsupported outcomes), resolvers, and output
+  manifests are distinct safety pipelines. A merged CLI would hide which
+  fail-closed contract is being enforced; they stay separate. The
+  working-project variant `resolve_secoc_patch.sh` is lifecycle-adjacent
+  (drives `tools/g`) and is likewise untouched.
+
+Do not add a helper that merely centralizes `sha256`/`load_jsonl` boilerplate
+across these families: that moves code without strengthening any invariant. The
+consolidation test (`tests/verify_tooling_consolidation.py`) pins this taxonomy
+in both directions — retired files must stay gone, and the deliberately
+separate tools must stay present.
+
 Read-only exports from `build/work/project` use a second shared profile runner:
 
 ```bash

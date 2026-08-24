@@ -174,6 +174,24 @@ rg 'ICUSCMD' build/out/pseudocode
 rg 'nvm_object_15' build/out/pseudocode
 ```
 
+## Task-oriented tooling discovery
+
+Before writing a new one-file-per-surface script, check the three consolidated
+entry points — several earlier one-off extractors and export wrappers are now
+profiles or subcommands behind them, and new variants of the same operation
+belong there rather than in a new top-level file:
+
+| Operation | Entry point |
+|---|---|
+| Corolla-H surface evidence compaction (fixed known targets, one/two JSONL corpora) | `uv run --locked python tools/extract_corolla_h_evidence.py list` |
+| Read-only exports from `build/work/project` (signals/consumers/producers/coverage/inventory) | `tools/export_ghidra_project.sh list` |
+| Cross-variant image-bound evidence (structural fingerprints, decompaction, callback-table selection, substring census) | `uv run --locked python tools/extract_variant_evidence.py list` |
+
+All three expose a `list` discovery command reporting their profiles/modes,
+inputs, and tracked outputs. Their scope boundaries — which extractors stay
+separate and why — are documented in
+[tooling/README.md](tooling/README.md#task-oriented-entry-points).
+
 The `.c` tree is intentionally ignored; it can be reproduced from the tracked
 JSONL without opening Ghidra. The JSONL is generated in one read-only headless
 Ghidra pass rather than thousands of individual CLI calls.
