@@ -381,13 +381,38 @@ Therefore "parse bus 1" is not itself a production architecture. We still need a
 relay-correct capture to establish the B6 producer side, duplicate-suppression
 point, and safe forwarding/transmit topology.
 
-**What can be scaffolded now:** an explicit TSS3 control-generation axis separate
-from `SECOC`, a 32-byte `0x025` definition with the proved steering fields,
-carefully gated reuse candidates for `0x0AA/0x101/0x116/0x176`, and a TSS3
-`0x127 GEAR_PACKET_HYBRID` reuse candidate whose checksum/bitfield/D value are
-already dynamically supported. What cannot yet be made production-ready is the
-lateral sender/safety contract, complete `CarState`, radar parsing, or longitudinal
-control. The artifact records the exact blockers.
+**Read-only implementation checkpoint (2026-08-24):** the scaffold above is now
+implemented in the maintained forks rather than remaining a paper design. Opendbc commit
+`200dfa78bbda4228f5e9bb1f7281659f5b6df8a6` adds `TOYOTA_COROLLA_TSS3`, a dedicated
+`toyota_tss3_pt_generated` DBC, an explicit `TSS3` generation flag independent from
+`SECOC`, a TSS3-specific `CarState`, and the exact H/F B6 receiver fields for inspection.
+Kai-openpilot commit `bb786e2c29f1ad433b1e3d08c0129a0f769a6d91` pins that submodule and records
+the operational gate. The implementation is deliberately **non-actuating**:
+`CarParams.dashcamOnly=True`, Panda uses `SafetyModel.noOutput`, radar and longitudinal
+control are disabled, and the TSS3 `CarController` returns zero CAN messages even when an
+enabled lateral/longitudinal request is supplied. B6's DBC definition is therefore a
+receiver/packing-analysis surface, not an enabled sender.
+
+The read-only parser keeps the specimen/topology boundary explicit. Its provisional
+147-message CAN fingerprint is copied from Span's July-29 moving rlog and is **not** an
+F181 identity record; no guessed `FW_VERSIONS` row was added. Startup `0x025/32` +
+`0x0AA/8` on logical bus 1 selects the observed unmodified Toyota-B CAN1 topology; absent
+that exclusive bus-1 evidence, the parser defaults to bus 0 for the intended relay-correct
+placement. That choice affects observation only and does not claim producer-side ownership
+or stock-source suppression. `CarState` promotes the proved steering/wheel/brake/gas fields,
+promotes only the dynamically exercised `0x127` raw value `3=D` (all other gear values stay
+`unknown`), and deliberately holds cruise, driver torque, EPS torque and steering-fault
+semantics neutral until their target-native transitions are recovered.
+
+As an independent integration check, the complete tracked Span rlog was replayed through the
+new parser: after the first 100 startup samples, **5,900/5,900** samples remained
+`canValid`; speed reached `6.576 m/s`, brake and gas both transitioned, steering covered
+`-511.1..122.4 deg` and `-700..800 deg/s`, gear remained `D`, and cruise remained neutral.
+`tests/verify_corolla_tss3_opendbc_readonly_external.py` reproduces this against the sibling
+maintained forks. What still cannot be made production-ready is the B6 sender/SecOC/safety
+contract, target-native driver-torque/readiness/fault limits, radar parsing, or longitudinal
+control. The readiness artifact continues to record those evidence blockers rather than
+implementation state.
 
 ## 5. The concrete TSS3 investigation roadmap
 

@@ -1170,6 +1170,18 @@ paths = [
   "external-references.lock.json",
 ]
 
+[suite.corolla_tss3_opendbc_readonly_external]
+tests = ["tests/verify_corolla_tss3_opendbc_readonly_external.py"]
+oracle = "independent_external_artifact"
+modes = ["local"]
+paths = [
+  "tests/verify_corolla_tss3_opendbc_readonly_external.py",
+  "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/PRIORITIES.md",
+]
+
 [suite.corolla_pre_tss3_message_comparison]
 tests = ["tests/verify_corolla_pre_tss3_message_comparison.py"]
 oracle = "raw_bytes"

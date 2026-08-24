@@ -215,6 +215,18 @@ Machine-readable checklist: `data/generated/corolla_tss3_opendbc_readiness.json`
 This target runs in parallel with static `07B0` Brake + `0792` FRC acquisition;
 neither replaces the other.
 
+**Read-only opendbc scaffold is complete.** Opendbc `200dfa78bbda4228f5e9bb1f7281659f5b6df8a6`
+and kai-openpilot `bb786e2c29f1ad433b1e3d08c0129a0f769a6d91` now provide the dedicated TSS3
+platform/DBC/CarState while remaining `dashcamOnly` + Panda `noOutput`; the TSS3 controller
+emits no CAN. The tracked Span rlog replays through that parser with 5,900/5,900 post-startup
+samples CAN-valid. Therefore **do not spend the next pass rebuilding basic state parsing**.
+Use the implementation as the dynamic measurement harness and focus the next evidence on:
+exact target/F181 binding, physical relay-correct stock-LTA transitions, B6 sender cadence
+and full payload, SecOC freshness/key/source ownership, producer-side suppression, and
+`0x4A3/0x351/0x394/0x030` driver-torque/readiness/fault/limit semantics. Gear values other
+than the observed `D` and cruise engagement remain deliberately neutral in the implementation
+until transition captures justify them.
+
 ## P0 — highest information gain
 
 ### 1. Live slot-4 command-5 permission

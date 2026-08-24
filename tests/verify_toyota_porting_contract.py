@@ -123,6 +123,18 @@ check("tracked Corolla H remains a direct old-steering-ID counterexample", "no 0
 check("variant matrix separates ADAS and security axes", all(k in corolla_h for k in ("adas_generation", "security_architecture")) and "SecOC/TSK" in corolla_h["security_architecture"])
 check("report explicitly separates TSS generation from SecOC/TSK", all(x in report for x in ("Two orthogonal axes", "TSS generation", "SecOC/TSK")))
 
+check(
+    "report records the passive TSS3 implementation checkpoint",
+    all(token in report for token in (
+        "200dfa78bbda4228f5e9bb1f7281659f5b6df8a6",
+        "bb786e2c29f1ad433b1e3d08c0129a0f769a6d91",
+        "SafetyModel.noOutput",
+        "5,900/5,900",
+        "147-message CAN fingerprint",
+    )),
+)
+check("priority queue marks the read-only scaffold complete", "Read-only opendbc scaffold is complete" in priorities)
+
 for token in (
     "control contract",
     "FRC_P5",
