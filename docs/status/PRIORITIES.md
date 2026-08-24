@@ -87,6 +87,16 @@ into 16-byte `CID1`, `CID2`, … values. Therefore a read-only F181 at physical
 `7B0` is the exact Techstream path to acquire the current Brake/EPB CID; what is
 still missing is the **value**, not the DID/protocol.
 
+TMS-048 eliminates `SearchCal.dll` as a hidden offline catalog path: the V18
+helper enumerates local `\*.cuw` files, parses their Vehicle/CPU/CID/target
+calibration profile fields, and opens a selected local result. It has no network,
+database, or XML client and Techstream invokes its sole export with an initially
+empty C-string rather than a CID/catalog object. Thus once `7B0/F181` supplies the
+current Brake CID, **SearchCal can only match a CUW already downloaded locally**.
+The next acquisition task is to recover the actual Toyota/TIS package catalog or
+download handoff and determine how a missing `07B0` CUW reaches the local repro
+data store.
+
 **Next software-analysis target:** acquire a true-TSS3 CUW whose
 **`Node01/DiagID=07B0`** (category-435 `ABS_P5`/Brake), ideally matched by
 vehicle/era to a `0792` FRC package, then analyze both producer-side images—or

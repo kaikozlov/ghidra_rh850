@@ -131,9 +131,12 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   expected `62 F1 81`, and parses the post-prefix response into 16-byte `CID1`,
   `CID2`, … entries. The remaining acquisition unknown is therefore only the
   **actual category-435 current software/calibration identity value and package**:
-  read F181 at physical `7B0` on the target or recover that value from matching
-  Toyota calibration metadata, then locate the corresponding `07B0` CUW. The
-  FRC-only `1FFF` SWIN path remains unrelated.
+  read F181 at physical `7B0` on the target, then locate the corresponding `07B0`
+  CUW. TMS-048 proves V18 `SearchCal.dll` cannot supply a missing package from an
+  offline/remote catalog: it scans local `\*.cuw` files and compares their
+  descriptor metadata only. Recover the real Toyota/TIS catalog/download handoff
+  that populates the local CUW store. The FRC-only `1FFF` SWIN path remains
+  unrelated.
   Canonical: [../architecture/control-partition.md](../architecture/control-partition.md) §9.3 ·
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §§7.34–7.35.
 
