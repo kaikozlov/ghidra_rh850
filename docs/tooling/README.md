@@ -24,6 +24,35 @@ The analysis toolchain: processor module, scripts, verification.
 For the day-to-day Ghidra workflow (durability trap, working copy vs.
 committed snapshot, rebuild procedure), see [../WORKFLOW.md](../WORKFLOW.md).
 
+## Task-oriented entry points
+
+Prefer a task-oriented entry point when several analyses share the same
+mechanics. Do not add another one-file wrapper merely to bake in a different
+address list.
+
+The repeated Corolla-H corpus-compaction scripts are consolidated behind one
+profile-driven command:
+
+```bash
+uv run --locked python tools/extract_corolla_h_evidence.py list
+uv run --locked python tools/extract_corolla_h_evidence.py extract can-com
+uv run --locked python tools/extract_corolla_h_evidence.py extract xcp
+```
+
+`list` is the discovery surface: it reports each profile's purpose, tracked
+output, input corpora, and function count. The profiles cover only the common
+operation of selecting known target-native functions from disposable JSONL
+corpora and binding their decompilation to CodeFlash bytes. Extractors that do
+dynamic discovery, whole-corpus censuses, call-graph construction, or semantic
+joins remain separate tools because those are different operations, not
+variants of the same one.
+
+Likewise, the `build_corolla_h_*` programs remain separate semantic builders.
+Their envelopes look similar, but the proof logic they encode (routing tables,
+selector policies, supervisor alignment, diagnostic joins, and so on) is
+subsystem-specific. Consolidation should expose shared mechanics without hiding
+those distinctions.
+
 ## Vendored processor module
 
 The RH850 language `v850e3:LE:32:default` is the **vendored in-tree fork** at

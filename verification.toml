@@ -1989,7 +1989,7 @@ oracle = "raw_bytes"
 tests = ["tests/verify_corolla_8965H1202000_can_com.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_can_com.py",
-  "tools/extract_corolla_h_can_com_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "tools/build_corolla_h_can_com.py",
   "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_can_com.json",
@@ -2009,7 +2009,7 @@ oracle = "raw_bytes"
 tests = ["tests/verify_corolla_8965H1202000_storage_nvm.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_storage_nvm.py",
-  "tools/extract_corolla_h_storage_nvm_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "tools/build_corolla_h_storage_nvm.py",
   "data/generated/corolla_8965H1202000_storage_nvm_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_storage_nvm.json",
@@ -2031,7 +2031,7 @@ oracle = "raw_bytes"
 tests = ["tests/verify_corolla_8965H1202000_xcp.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_xcp.py",
-  "tools/extract_corolla_h_xcp_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "tools/build_corolla_h_xcp.py",
   "data/generated/corolla_8965H1202000_xcp_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_xcp.json",
@@ -2052,7 +2052,7 @@ oracle = "raw_bytes"
 tests = ["tests/verify_corolla_8965H1202000_motor_control.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_motor_control.py",
-  "tools/extract_corolla_h_motor_control_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "tools/build_corolla_h_motor_control.py",
   "data/generated/corolla_8965H1202000_motor_control_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_motor_control.json",
@@ -2074,7 +2074,7 @@ tests = ["tests/verify_corolla_8965H1202000_crypto_residue.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_crypto_residue.py",
   "tools/build_corolla_h_crypto_residue.py",
-  "tools/extract_corolla_h_crypto_residue_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "data/generated/corolla_8965H1202000_crypto_residue.json",
   "data/generated/corolla_8965H1202000_crypto_residue_decompiler_evidence.json",
   "data/generated/decompilations.jsonl",
@@ -2111,7 +2111,7 @@ tests = ["tests/verify_corolla_8965H1202000_steering_nested.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_steering_nested.py",
   "tools/build_corolla_h_steering_nested.py",
-  "tools/extract_corolla_h_steering_nested_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "data/generated/corolla_8965H1202000_steering_nested.json",
   "data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json",
@@ -2171,7 +2171,7 @@ tests = ["tests/verify_corolla_8965H1202000_plausibility_monitor.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_plausibility_monitor.py",
   "tools/build_corolla_h_plausibility_monitor.py",
-  "tools/extract_corolla_h_plausibility_monitor_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "data/generated/corolla_8965H1202000_plausibility_monitor.json",
   "data/generated/corolla_8965H1202000_plausibility_monitor_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json",
@@ -2191,7 +2191,7 @@ tests = ["tests/verify_corolla_8965H1202000_small_adapters.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_small_adapters.py",
   "tools/build_corolla_h_small_adapters.py",
-  "tools/extract_corolla_h_small_adapter_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "data/generated/corolla_8965H1202000_small_adapters.json",
   "data/generated/corolla_8965H1202000_application_callback_tables.json",
   "data/generated/corolla_8965H1202000_veneer_bank.json",
@@ -2255,7 +2255,7 @@ tests = ["tests/verify_corolla_8965H1202000_application_transport_residue.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_application_transport_residue.py",
   "tools/build_corolla_h_application_transport_residue.py",
-  "tools/extract_corolla_h_application_transport_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "data/generated/corolla_8965H1202000_application_transport_residue.json",
   "data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json",
   "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
@@ -2283,7 +2283,7 @@ tests = ["tests/verify_corolla_8965H1202000_application_interrupt_bodies.py"]
 paths = [
   "tests/verify_corolla_8965H1202000_application_interrupt_bodies.py",
   "tools/build_corolla_h_application_interrupt_bodies.py",
-  "tools/extract_corolla_h_application_interrupt_body_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "data/generated/corolla_8965H1202000_application_interrupt_bodies.json",
   "data/generated/corolla_8965H1202000_application_interrupt_body_decompiler_evidence.json",
   "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
@@ -2579,13 +2579,22 @@ paths = [
   "data/generated/decompilations.jsonl",
   "data/generated/corolla_8965H1202000_keyless_event_formatter_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_keyless_event_formatter.json",
-  "tools/extract_corolla_h_keyless_event_formatter_evidence.py",
+  "tools/extract_corolla_h_evidence.py",
   "tools/build_corolla_h_keyless_event_formatter.py",
   "docs/security/keyless-exec-surface-assessment.md",
   "docs/status/FINDINGS.md",
   "docs/status/CORRECTIONS.md",
 ]
 oracle = "cfg_dataflow"
+
+[suite.tooling_consolidation]
+tests = ["tests/verify_tooling_consolidation.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_tooling_consolidation.py",
+  "tools/extract_corolla_h_evidence.py",
+  "docs/tooling/README.md",
+]
 
 [suite.knowledge_index]
 tests = ["tests/verify_knowledge_index.py"]
