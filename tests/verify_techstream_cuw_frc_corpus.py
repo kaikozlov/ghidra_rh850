@@ -752,6 +752,25 @@ else:
               and bytes.fromhex("80bdc9edffff62") in v18raw(cid, 0x1000141E, 40)
               and bytes.fromhex("80bdcaedfffff1") in v18raw(cid, 0x1000141E, 40)
               and bytes.fromhex("80bdcbedffff8c") in v18raw(cid, 0x1000141E, 40))
+        cid_pe = pefile.PE(str(cid), fast_load=False)
+        cid_imports = {
+            imp.address: ((entry.dll or b"").decode(errors="replace"), (imp.name or b"").decode(errors="replace"))
+            for entry in cid_pe.DIRECTORY_ENTRY_IMPORT
+            for imp in entry.imports
+        }
+        check("V18 CIDGetter import slots pin generic ReadSoftwareID and FRC SWIN helpers",
+              cid_imports.get(0x10004180) == (
+                  "TCUWUnifiedUtils.dll",
+                  "?ReadSoftwareID@CUnifiedUtils@@QAEXABVCBytes@@0PAUPASSTHRU_MSG@@@Z",
+              )
+              and cid_imports.get(0x10004178) == (
+                  "TCUWUnifiedUtils.dll",
+                  "?GetSWINForFCM@CUnifiedUtils@@QAEXPAD@Z",
+              ))
+        check("V18 CIDGetter normal node path reads generic software ID before mode dispatch",
+              v18raw(cid, 0x10002781, 6) == bytes.fromhex("ff1580410010")
+              and v18raw(cid, 0x10002795, 7) == bytes.fromhex("8a43243c017521")
+              and v18raw(cid, 0x100027BD, 5) == bytes.fromhex("3c02757d8b"))
         check("V18 CIDGetter: global camera discriminator is 0792",
               v18cstr(cid, 0x10004294) == "0792"
               and v18raw(cid, 0x10003E90, 10) == bytes.fromhex("6894420010b9d8600010"))
@@ -779,6 +798,20 @@ else:
               and bytes.fromhex("889c3542caffff") in v18raw(uu, 0x100015E3, 40)
               and bytes.fromhex("c68435b0eaffff62") in v18raw(uu, 0x10001613, 40)
               and bytes.fromhex("c68435b1eaffff1f") in v18raw(uu, 0x10001613, 40))
+        check("V18 CIDGetter FRC-only 1FFF path is unique and gated by mode2 + DiagID 0792",
+              cid.read_bytes().count(bytes.fromhex("ff1578410010")) == 1
+              and v18raw(cid, 0x10002E9B, 6) == bytes.fromhex("807e2402756a")
+              and v18raw(cid, 0x10003E90, 10) == bytes.fromhex("6894420010b9d8600010")
+              and v18cstr(cid, 0x10004294) == "0792"
+              and v18raw(cid, 0x10002EA1, 17)[:5] == bytes.fromhex("68d8600010")
+              and v18raw(cid, 0x10002EAC, 6) == bytes.fromhex("ff15d0400010")
+              and v18raw(cid, 0x10002EE9, 6) == bytes.fromhex("ff1578410010"))
+        check("07B0 search target has no CIDGetter special-case literal; Unified route uses generic F181 before mode dispatch",
+              ev["reference_inventory"]["category_435_acquisition"]["target_diag_id"] == "07B0"
+              and cid.read_bytes().count(b"07B0") == 0
+              and cid.read_bytes().count(b"0792") == 1
+              and v18raw(cid, 0x10002781, 6) == bytes.fromhex("ff1580410010"))
+
     else:
         print("[SKIP] V18 CUW binaries unavailable (FRC software-ID anchors not checked)")
 

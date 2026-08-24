@@ -1637,8 +1637,9 @@ for slot, ecu_no, phase, address, raw_sha in VDS_ECU_ANCHORS:
     )
 
 # Category-435 Brake/EPB acquisition address is region-invariant in raw
-# ECU_Setting_Table.  The second tagged ASCII token in this row is retained
-# as an uninterpreted value; only the first +0x1A address field is named.
+# ECU_Setting_Table. This first assertion pins Address=7B0; the independent
+# Techstream SQL/schema join immediately below closes the second token as
+# FuncAddress=7E5.
 for region, expected_slot in (("NA", 9), ("EU", 8), ("JP", 9)):
     vdata = (ROOT / f"DB/MDB/IT3Data_BDC_{region}.vds").read_bytes()
     page = vdata[20 * 4096 : 21 * 4096]
@@ -1660,6 +1661,64 @@ for region, expected_slot in (("NA", 9), ("EU", 8), ("JP", 9)):
         and hashlib.sha256(row).hexdigest()
         == "09420f524175f28df36bf83fba517139a0a769600414f2864b753beb93303b07",
     )
+
+# Techstream's own CGetBigDataSettingInfo SQL names the two variable ECU
+# address columns exactly: Address and FuncAddress. The raw phase-5 rows make
+# the join unambiguous because the already-pinned first Address is followed by
+# the standardized 7E0..7E7 functional-address family where present.
+techstream_exe = ROOT / "bin/Techstream.exe"
+techstream_raw = techstream_exe.read_bytes()
+check(
+    "Techstream.exe exact identity for ECU_Setting_Table schema vocabulary",
+    len(techstream_raw) == 35852288
+    and hashlib.sha256(techstream_raw).hexdigest()
+    == "e6b7ab884c99a941d603251fb856a77a515639fdcd1d266e875cbd1abceb5e54",
+)
+for token in (
+    b"CGetBigDataSettingInfo",
+    b"ECU_Setting_Table         AS ECUSetting",
+    b"ECUSetting.Address        AS Address",
+    b"ECUSetting.FuncAddress    AS FuncAddress",
+):
+    check(
+        f"Techstream CGetBigDataSettingInfo SQL token {token.decode('ascii')}",
+        techstream_raw.count(token) == 1,
+    )
+
+EXPECTED_P5_ADDRESS_PAIRS = {
+    372: ("700", "7E0"),  # Engine
+    373: ("701", "7E1"),  # ECT
+    395: ("724", "7E6"),  # Motor Generator
+    397: ("7D2", "7E2"),  # Hybrid Control
+    398: ("747", "7E3"),  # HV Battery
+    400: ("745", "7E7"),  # Plug-in Control
+    435: ("7B0", "7E5"),  # Brake/EPB
+    450: ("7C4", "7E4"),  # Air Conditioner
+}
+phase5_pairs = {}
+for slot in range(u16(page20, 0x0C)):
+    offset = u16(page20, 0x0E + 2 * slot) & 0x0FFF
+    row = page20[offset : offset + 40]
+    if len(row) < 40 or u16(row, 0x00) != 8 or u32(row, 0x06) != 5:
+        continue
+    values = []
+    pos = 0
+    while True:
+        marker = row.find(b"\xff\xfe", pos)
+        if marker < 0 or marker + 5 > len(row):
+            break
+        values.append(row[marker + 2 : marker + 5].decode("ascii"))
+        pos = marker + 5
+    if len(values) == 2:
+        phase5_pairs[u32(row, 0x02)] = tuple(values)
+check(
+    "P5 ECU_Setting rows with FuncAddress are exact 7E0..7E7 family",
+    phase5_pairs == EXPECTED_P5_ADDRESS_PAIRS,
+)
+check(
+    "category-435 exact OEM Address/FuncAddress pair is 7B0/7E5",
+    phase5_pairs[435] == ("7B0", "7E5"),
+)
 
 # Legacy SUW routing is independent corroboration, not a P5 security/writer
 # transfer claim.  FileVersion 17.0.13 maps VSC/ABS/ECB to CANID1=7B0 and

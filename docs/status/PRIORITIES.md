@@ -74,7 +74,14 @@ legacy SUW independently maps VSC/ABS/ECB to `CANID1=7B0`, while modern
 `P5-Unified04` obtains CID/prepare/flash CAN IDs from `GetCanIDsFromCANIDTable`
 rather than a hard-coded FRC address. The complete current 26-package CUW
 reference inventory has six `0792` FRC and three `07A1` EPS positive controls
-but **no `07B0` package**. This is only a local-corpus absence.
+but **no `07B0` package**. This is only a local-corpus absence. TMS-046
+additionally closes the VDS pair as **`Address=7B0`, `FuncAddress=7E5`** from
+Techstream's own SQL schema and the exact `7E0..7E7` phase-5 family. V18 Unified
+CID retrieval calls generic `ReadSoftwareID` (`22 F1 81` / `62 F1 81`) before
+mode dispatch; the alternate `1FFF` SWIN reader is uniquely gated to `0792` FRC.
+Use F181 as the generic Unified live/acquisition identity probe, but do not call
+it a Brake-specific DID until a `07B0` package or live category-435 ECU confirms
+that route.
 
 **Next software-analysis target:** acquire a true-TSS3 CUW whose
 **`Node01/DiagID=07B0`** (category-435 `ABS_P5`/Brake), ideally matched by
