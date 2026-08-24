@@ -87,15 +87,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   signal184 unchanged into DID `0x1037 Steering Angle`; Techstream physical key 3
   makes it 1.5 deg/count, signed4 signal185 supplies a 0.1-deg fraction, and the
   matched H controller makes B6 signal255 `1024/17870 deg/count`
-  (`~1.000121519 mrad/count`) controller-equivalent. The remaining Corolla
-  experiment is therefore request/validity/security and upstream-producer work:
-  Techstream's exact `Target Lateral ID` dictionary already closes signal254
-  profiles `1/4/10/11/19` as `PCS/LDA/Hands Off LTA/LTA-LCA/PDA` and H-special
-  IDs `25/27` as `AP/Remote Parking`. During stock LTA, correlate B6
-  254/255/262/263 and validity with measured angle, `1C02`, `1152`, and Q current
-  to recover request/validity semantics, cadence/timeouts, limits, and SecOC
-  behavior; separately acquire FRC/Brake/gateway firmware to recover the
-  producer/routing chain. Static broad searching of this H EPS should not be repeated without a
+  (`~1.000121519 mrad/count`) controller-equivalent. Receiver-side request/loss/
+  sequence semantics are now closed too: Techstream's `Target Lateral ID` defines
+  `0=No Request` and labels active signal254 IDs `1/4/10/11/19` as
+  `PCS/LDA/Hands Off LTA/LTA-LCA/PDA`; PDU42 reloads to **7 TAUJ0-CH3 foreground
+  ticks** and first expiry disables cooperative selection through slot18/`ADB9`;
+  signal261 is a modulo-64 sequence counter with effective-gap cap `8`. The absolute
+  CH3 tick period remains unsupported. The remaining Corolla work is therefore
+  sender wall-clock cadence, exact secondary-field naming where safety-relevant,
+  H/F-native limits, **SecOC** freshness/key/source behavior, stock-source
+  suppression, and upstream FRC/Brake/gateway producer/routing. Static broad
+  searching of this H EPS should not be repeated without a
   new concrete lead. TMS-040 now
   closes the acquisition choice: the true-TSS3 **diagnostic-domain holder** is
   category 498 **`FRC_P5` = Front Recognition Camera 2** with dedicated plugin

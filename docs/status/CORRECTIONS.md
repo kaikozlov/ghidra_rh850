@@ -2622,16 +2622,21 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   not a string/name join.
 - **Correct boundary:** H/F EPS ingress and controller-equivalent physical scale are
   identified as protected FD `0x0B6` signal255 target angle with signal254
-  cooperative-profile selection. Signal254 feature labels are now closed by the
-  Techstream dictionary. Still open: the exact OEM signal255 unit label, companion
-  request/validity/cadence/loss meanings, live sender freshness/key behavior,
-  and the upstream FRC→Brake/EPB producer/transport path. Arbitrary unrelated
-  computed aliases or undocumented hardware/DMA writers remain bounded, but no
-  second command-sized path was recovered in the audited surfaces.
+  Target-Lateral request selection. COM-012 now additionally closes the receiver
+  liveness/sequence side: PDU42 reloads to seven TAUJ0-CH3 foreground ticks,
+  first expiry propagates through slot18 -> `FEBEADB9` and disables `C26D`, and
+  signal261 is a modulo-64 rolling sequence counter with effective-gap cap 8.
+  Still open: the exact OEM signal255 unit label, sender wall-clock cadence, exact
+  secondary-field names, live **SecOC** freshness/key/source behavior, and the
+  upstream FRC→Brake/EPB producer/transport path. Arbitrary unrelated computed
+  aliases or undocumented hardware/DMA writers remain bounded, but no second
+  command-sized path was recovered in the audited surfaces.
 - **Canonical:**
-  `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json` v3;
-  `data/generated/corolla_8965H1202000_lta_command_provenance.json` v7;
+  `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json` v4;
+  `data/generated/corolla_8965H1202000_b6_receiver_contract.json` v1;
+  `data/generated/corolla_8965H1202000_lta_command_provenance.json` v8;
   `tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py`;
+  `tests/verify_corolla_8965H1202000_b6_receiver_contract.py`;
   `tests/verify_corolla_8965H1202000_lta_command_provenance.py`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   §§7.11, 7.14, 7.35.

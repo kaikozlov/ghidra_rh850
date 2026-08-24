@@ -1,0 +1,185 @@
+{
+  "communication_supervision": {
+    "can_id": "0x0B6",
+    "deadline_expiry": {
+      "absolute_time_boundary": "Both paths run from the TAUJ0-CH3 foreground cyclic tick, but the CH3 timer prescaler/TDR is not statically recoverable from this image; do not convert the 7-tick receiver deadline to milliseconds.",
+      "absolute_time_supported": false,
+      "countdown": "0x0007683C",
+      "expiry_action": "0x87AA0(pdu) sets activity[pdu] to 0x5A",
+      "primary_cutout_after_foreground_ticks": 7
+    },
+    "pdu_descriptor": {
+      "activity_tracking_enabled": true,
+      "address": "0x00022770",
+      "deadline_value_ticks": 6,
+      "flags": 12,
+      "length": 32,
+      "raw_hex": "060000002000000c",
+      "successful_rx_reload_ticks": 7
+    },
+    "pdu_id": 42,
+    "scheduler": {
+      "foreground_loop": "0x0005F30C",
+      "lower_deadline_chain": "5F30C -> 5FAF2 -> 73564 -> 7683C",
+      "same_tick_domain": true,
+      "status_chain": "5F30C -> 5FAF2 -> 53030 -> (58BBC transition | 59574 steady) -> 446EC/46A10/5262C",
+      "tick_source": "TAUJ0 CH3 EIRF at 0xFFFFB111 bit 0x10"
+    },
+    "status_dataflow": {
+      "healthy_value": 0,
+      "initial_value": 1,
+      "loss_value": "nonzero immediately on activity[PDU42]==0x5A; extended bit 0x02 may appear after the slower qualifier",
+      "raw": "0xFEBE7DA0",
+      "slot_accessor": "0x44744(0x18)",
+      "snapshot": "0xFEBEADB9",
+      "staging": "0xFEBEF132"
+    },
+    "status_qualifier": {
+      "config_address": "0x00028D8C",
+      "configured_extended_threshold_ticks": 440,
+      "extended_state_condition": "0x445C0 emits state 0x22 only after its counter exceeds 440 while activity[PDU42] remains 0x5A; 0x44658 exposes bit/value 2 for that extended state",
+      "pdu_id": 42,
+      "primary_cutout_precedes_extended_state": true,
+      "raw_hex": "2a00000bb8010200"
+    },
+    "status_slot": "0x18",
+    "steering_enable_gate": {
+      "condition": "combined slot health is not 0x5A and B6 receive-status snapshot 0xFEBEADB9 == 0",
+      "effect": "CBE6E cannot assert any cooperative profile/common-active flag when this gate is false",
+      "entry": "0x000CC7F8",
+      "health_slots": [
+        "0x10 (CAN 0x025)",
+        "0x18 (CAN 0x0B6)"
+      ],
+      "output": "0xFEBEC26D"
+    },
+    "successful_receive": {
+      "actions": [
+        "0x769F6(pdu, 1) reloads the deadline countdown",
+        "0x87A82(pdu) clears activity[pdu] to 0 when descriptor flag 0x04 is set"
+      ],
+      "entry": "0x00076A3C"
+    },
+    "techstream": {
+      "dem_event": "0x0143",
+      "description": "Lost Communication with Brake System Control Module",
+      "dtc": "U012987",
+      "failure": "Missing Message"
+    }
+  },
+  "companion_fields": {
+    "258": {
+      "boundary": "The P5 diagnostic family exposes this OEM name, but exact H lacks DID 0x1CEE and static evidence does not prove signal258 is that diagnostic field.",
+      "consumer": "0x000CBEEE",
+      "family_vocabulary_candidate": "Cooperative Control in Progress Flag",
+      "oem_name_identified": false,
+      "semantics": "profile-dependent cooperative-control contribution gate; value 1 is required for one B6/profile-dependent controller contribution when profile flags are active",
+      "snapshot": "0xFEBEADBB",
+      "wire": "B6 bit2"
+    },
+    "260": {
+      "consumers": [
+        "0x000C89D2",
+        "0x000C8D42"
+      ],
+      "oem_name_identified": false,
+      "semantics": "four-state controller mode/transition selector with distinct behavior for 0/1/2/3",
+      "snapshot": "0xFEBEADC2",
+      "wire": "B7 bits7:6"
+    },
+    "261": {
+      "classification": "rolling-sequence-counter",
+      "consumer": "0x000CB246",
+      "counter_bits": 6,
+      "delta_formula": "delta = (current - previous) mod 64",
+      "downstream": "raw delta and capped effective gap are stored at GP+0xA4A/GP+0xA4C; CB4F4 consumes the capped gap in target plausibility/supervision",
+      "effective_gap_formula": "effective_gap = 1 when delta <= 1, otherwise min(delta, 8)",
+      "gap_cap": 8,
+      "modulus": 64,
+      "snapshot": "0xFEBEADBC",
+      "strict_plus_one_required": false,
+      "wire": "B7 bits5:0",
+      "wrap_max": 63
+    },
+    "264": {
+      "consumer": "0x000C819E",
+      "oem_name_identified": false,
+      "scope_boundary": "C825A uses that latch around AP/Remote Parking IDs 25/27, so this must not be generalized as the primary LTA request bit.",
+      "semantics": "special-control validity/inhibit input; zero is required to enter/retain the C819E latch and nonzero clears it",
+      "snapshot": "0xFEBEADC1",
+      "wire": "B10 bit7"
+    },
+    "265": {
+      "consumer": "0x000CCF58",
+      "oem_name_identified": false,
+      "semantics": "mode/status value republished only while B6 receive status is healthy",
+      "snapshot": "0xFEBEADD9",
+      "wire": "B10 bits2:0"
+    }
+  },
+  "evidence_boundary": "This closes the H/F EPS receiver-side request and communication-loss contract in scheduler ticks: signal254 selects the active Target Lateral ID, PDU42 is reloaded to 7 foreground ticks on successful reception, expiry marks B6 unhealthy and disables cooperative selection through ADB9/C26D, and signal261 is a modulo-64 rolling sequence counter with an 8-gap cap. It does not infer milliseconds, sender cadence, sender implementation, SecOC freshness/key behavior, or exact OEM names for the secondary B6 fields.",
+  "request_contract": {
+    "accepted_active_requests": {
+      "1": "PCS",
+      "10": "Hands Off LTA",
+      "11": "LTA/LCA",
+      "19": "PDA",
+      "4": "LDA"
+    },
+    "bit_length": 6,
+    "boundary": "Signal254 itself carries the OEM request/source ID. H only activates the common cooperative-control flag for the five supported active IDs; unsupported/No-Request values do not select the active controller.",
+    "classification": "supported-target-lateral-request-id",
+    "common_active_flag": "0xFEBEC272",
+    "decoder": "0x000CBE6E",
+    "no_request": {
+      "label": "No Request (Manual Operation)",
+      "value": 0
+    },
+    "oem_dictionary": "Target Lateral ID",
+    "receiver_gates": [
+      "0xFEBEACBD == 0",
+      "0xFEBEC26D == 1"
+    ],
+    "signal_id": 254,
+    "snapshot": "0xFEBEADB0",
+    "wire_byte": 3
+  },
+  "schema": "corolla-8965H1202000-b6-receiver-contract-v1",
+  "software_id": "8965H1202000",
+  "sources": {
+    "can_com_evidence": {
+      "path": "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json",
+      "rx_indication": "0x00076A3C",
+      "sha256": "cfd7e28a934f06d17e146da4fa60c029ceeedcffd1dc4f67513fd7f40a8e1129"
+    },
+    "codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "decompiler_evidence": {
+      "function_count": 33,
+      "path": "data/generated/corolla_8965H1202000_b6_receiver_contract_decompiler_evidence.json",
+      "sha256": "e8292af561f34f72994c16d8d7b71195e5f2ff50d8721cd2b05669cab5fc1b41"
+    },
+    "p5_lateral_semantics": {
+      "path": "data/generated/techstream_v18/p5_lateral_control_semantics.json",
+      "sha256": "6ccb354e9eeb2e12019a06565951d41a9f59a06d45b31f2e2897b301208449ca"
+    },
+    "techstream_correlations": {
+      "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
+      "sha256": "d3935ee3e63976ce11e0372a3c24c4135f55bc089e07b58b7d8775b1d15a2ab8"
+    }
+  },
+  "static_conclusion": {
+    "next_static_target": "recover the upstream FRC_P5/Brake producer and SecOC sender/freshness contract; exact signal258/260/264/265 OEM names remain bounded unless an independent producer/diagnostic join appears",
+    "primary_loss_cutout_closed_in_ticks": true,
+    "primary_loss_cutout_ticks": 7,
+    "request_selection_closed": true,
+    "secondary_field_names_closed": false,
+    "sequence_counter_closed": true,
+    "sequence_gap_cap": 8,
+    "sequence_modulus": 64,
+    "upstream_producer_closed": false,
+    "wall_clock_timeout_closed": false
+  }
+}

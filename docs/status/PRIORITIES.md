@@ -272,21 +272,26 @@ selects mode families for values `1/4/10/11/19`; signals262/263 remain percentag
 like contributor modifiers. D7's command-sized field remains vehicle speed and the
 B6 nonscalar/group/full-PDU alternatives remain negative.
 
-The next H evidence is therefore **request/validity/security and upstream-producer
-recovery for this known interface**, not another provenance, scale, or profile-label
-search inside the EPS. The physical controller relation is now closed: FD `0x025`
-signal184 is 1.5 deg/count, signal185 is a signed 0.1-deg fraction, and B6 signal255
-is `1024/17870 deg/count` (`~1.000121519 mrad/count`) in the matched controller
-domain. Techstream's exact `Target Lateral ID` dictionary closes signal254 profiles
-`1/4/10/11/19` as `PCS/LDA/Hands Off LTA/LTA-LCA/PDA`; H-special IDs `25/27` are
-`AP/Remote Parking`. Capture protected `0x0B6` during stock LTA while synchronizing
-signal254/255/262/263, B6 validity, measured angle, `1C02`, `1152`, and actual Q
-current to recover request/validity rules, cadence/timeout, normal target/rate bounds,
-and stock-source loss behavior. In parallel, recover the B6 SecOC freshness/counter/source contract
-and determine whether slot-4 command-5 can produce the required authenticated domain
-on real hardware. `FRC_P5` plus Brake/EPB/gateway firmware remains the software
-target for **upstream ownership and routing/authentication**, not for discovering the
-EPS setpoint or its scale. For a Sienna-style
+The next H evidence is therefore **security/upstream-producer and production-limit
+recovery**, not another request/validity/loss search inside the EPS. The physical
+controller relation is closed: FD `0x025` signal184 is 1.5 deg/count, signal185 is a
+signed 0.1-deg fraction, and B6 signal255 is `1024/17870 deg/count`
+(`~1.000121519 mrad/count`) controller-equivalent. Techstream's `Target Lateral ID`
+dictionary defines `0=No Request` and closes H's active signal254 IDs as
+`PCS/LDA/Hands Off LTA/LTA-LCA/PDA`; H-special IDs `25/27` are `AP/Remote Parking`.
+The dedicated receiver contract now also proves PDU42 reload/expiry at **7 TAUJ0-CH3
+foreground ticks**, immediate cooperative cutout through slot18→`FEBEADB9`→`C26D`,
+and B6 signal261 as a modulo-64 sequence counter with effective-gap cap `8`. The CH3
+wall-clock period remains unknown, so sender cadence still needs capture/producer
+evidence rather than a guessed millisecond value.
+
+Capture protected `0x0B6` during stock steering only to validate these static receiver
+rules, recover sender wall-clock cadence and exact secondary-field names where needed,
+and derive normal target/rate bounds. In parallel, recover the B6 **SecOC** freshness/
+source/key contract and determine whether slot-4 command-5 can produce the required
+authenticated domain on real hardware. `FRC_P5` plus Brake/EPB/gateway firmware is
+now the primary software target for **upstream ownership, sender cadence, and routing/
+authentication**, not for discovering the EPS setpoint/request/loss contract. For a Sienna-style
 applicable EPS, separately retain the existing valid signed `0x2E4/0x131` command
 experiment.
 

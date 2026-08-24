@@ -119,18 +119,18 @@ def build() -> dict:
 
     pb=tech["protected_brake_profile_semantics"]
     ipm=tech["camera_ipm_a_residue"]
-    if lta["schema"] != "corolla-8965H1202000-lta-command-provenance-v7":
+    if lta["schema"] != "corolla-8965H1202000-lta-command-provenance-v8":
         raise ValueError("corrected LTA provenance schema drift")
     lta_static = lta["static_conclusion"]
     if not (lta_static["named_retained_branch_computed_alias_audit_closed"] and lta_static["b6_percentage_modulates_retained_branch"]):
         raise ValueError("computed retained-branch audit not closed")
     return {
-      "schema":"corolla-8965H1202000-openpilot-state-bridge-v5",
+      "schema":"corolla-8965H1202000-openpilot-state-bridge-v6",
       "evidence_boundary": (
         "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. "
         "Sienna/openpilot structures are used only to identify which roles a port needs, not to transplant field scales or fault codes. "
         "The command side is additionally audited for GP-relative/computed writers: protected B6 signal255 is recovered through a hidden RTE snapshot as a signed16 target-steering-angle command, then compared against independently reconstructed 0x025 measured angle before entering the steering controller. "
-        "Physical B6 scaling, exact OEM naming of the mode IDs, and the upstream producer/authentication route remain bounded; no second command-sized generated scalar or recovered literal block/group/full-PDU route is identified, while arbitrary computed aliases and DMA/peripheral mutation remain outside this proof."
+        "Physical B6 scaling and OEM mode/request semantics are closed, as are the seven-tick receiver-loss cutoff and modulo-64 sequence handling; wall-clock cadence, exact secondary B6 field names, and the upstream producer/authentication route remain bounded; no second command-sized generated scalar or recovered literal block/group/full-PDU route is identified, while arbitrary computed aliases and DMA/peripheral mutation remain outside this proof."
       ),
       "images": {
         "corolla_h":{"software_id":"8965H1202000","sha256":sha(image)},
@@ -210,6 +210,11 @@ def build() -> dict:
           "oem_wire_unit_name_closed": target["scaling"]["oem_wire_unit_name_closed"],
           "mode_profile_semantics": target["mode_ingress"]["profile_semantics"],
           "immediate_sender_relationship": target["static_conclusion"]["immediate_sender_relationship"],
+          "request_selection_closed": lta_static["request_selection_identified"],
+          "receiver_loss_cutout_ticks": lta_static["receiver_loss_cutout_ticks"],
+          "wall_clock_timeout_closed": lta_static["wall_clock_timeout_identified"],
+          "sequence_modulus": lta_static["sequence_modulus"],
+          "sequence_gap_cap": lta_static["sequence_gap_cap"],
         },
         "brake_domain_conclusion":pb["conclusion"],
         "old_camera_interface_removed":ipm["interpretation"],
@@ -221,11 +226,11 @@ def build() -> dict:
           "statically_dead": lta_static["retained_sienna_lta_branch_statically_dead"],
           "command_sized_wire_scalar_recovered": lta_static["h_only_or_wire_changed_command_sized_scalar_recovered"],
         },
-        "static_conclusion":"Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks; Techstream Target Lateral ID closes them as 1=PCS, 4=LDA, 10=Hands Off LTA, 11=LTA/LCA, and 19=PDA. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. The OEM signal255 unit label, remaining request/validity/cadence semantics, and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
+        "static_conclusion":"Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks; Techstream Target Lateral ID closes them as 1=PCS, 4=LDA, 10=Hands Off LTA, 11=LTA/LCA, and 19=PDA. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. Signal254 request selection, a seven-foreground-tick primary receiver-loss cutoff, and modulo-64 sequence handling with gap cap 8 are also closed. The OEM signal255 unit label, wall-clock sender cadence, exact secondary B6 field names, and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
       },
       "structural_corroboration":structural,
       "next_discriminators":[
-        "Recover the remaining signal254 validity/request/cadence/loss fields before any injection experiment; the profile labels and signal255 controller-equivalent scale are already closed.",
+        "Treat signal254 request selection, the 7-tick receiver deadline, and modulo-64 sequence rules as closed receiver requirements; recover wall-clock sender cadence and exact secondary-field names only if needed for safety validation.",
         "Acquire/analyze true-TSS3 FRC_P5 and Brake/EPB producer/Tx descriptors or synchronized captures to close the upstream FRC -> chassis -> EPS route and authentication contract.",
         "Derive H-native driver override, motor-response, readiness/fault, rate and message-loss limits before defining Panda safety; do not reuse old 0x260/0x262 scales or fault codes.",
       ],

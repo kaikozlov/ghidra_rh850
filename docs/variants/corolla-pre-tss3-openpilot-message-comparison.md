@@ -211,13 +211,26 @@ relationship as **Brake System Control Module** traffic (U012987). Its exact P5
 observer-side family vocabulary because exact H lacks the corresponding `0x1CEE`
 DID.
 
+The H/F receiver-side liveness/counter contract is also now exact. PDU42's raw
+descriptor `060000002000000c` gives a receive deadline value of `6`; each successful
+B6 reception reloads the countdown to **7 TAUJ0-CH3 foreground ticks**, and expiry
+marks the B6 activity state `0x5A`. Status slot `0x18` then propagates
+`44744(0x18) -> FEBE7DA0 -> FEBEF132 -> FEBEADB9`, and `CC7F8` requires
+`ADB9==0` before cooperative mode selection can remain enabled. The slower slot-18
+qualifier uses threshold `440`, but first expiry already disables selection. The
+absolute CH3 tick period is not statically known, so this is not converted to
+milliseconds. B6 signal261 is separately a modulo-64 rolling sequence counter;
+forward/repeated deltas are normalized/capped to an effective gap of at most `8`
+for downstream plausibility supervision.
+
 **Porting consequence:** the old Corolla command API did not merely move IDs; it
 changed from classic torque command to protected target-angle control. Do not port
-`0x2E4` limits or scaling. Signal255's controller-equivalent scale and signal254
-feature labels are now closed; before any injection, recover request/validity
-semantics, cadence/timeouts, SecOC freshness/key behavior, stock-source suppression,
-and H/F-native safety bounds. The literal OEM B6 engineering-unit name remains
-unjoined even though the degree/radian scale is known.
+`0x2E4` limits or scaling. Signal255's controller-equivalent scale, signal254
+feature/request semantics, the seven-tick receiver loss cutoff, and signal261
+sequence arithmetic are now closed. Before any injection, recover sender wall-clock
+cadence, SecOC freshness/key behavior, stock-source suppression, exact secondary B6
+field names where safety-relevant, and H/F-native safety bounds. The literal OEM B6
+engineering-unit name remains unjoined even though the degree/radian scale is known.
 
 ### 5.5 `0x191`: gone, but it was not Corolla's active steering path
 
@@ -267,10 +280,12 @@ another message.** Protected `0x0B6` signal 255 is the H/F target-angle ingress 
 `1024/17870 deg/count` controller-equivalent scale, and signal 254 selects the
 now-labeled `PCS/LDA/Hands Off LTA/LTA-LCA/PDA` profiles. The next dynamic work is
 to correlate those fields with stock LTA, `0x1C02`, `0x1152`, measured steering
-angle, and B6 validity to recover cadence/timeouts, request/validity semantics, and
-production bounds. `FRC_P5` plus Brake/EPB/gateway analysis remains high priority
-for the **upstream producer and SecOC/routing contract**, not for discovering the
-EPS receiver setpoint, physical scale, or profile labels.
+angle, and B6 companion fields to validate the statically closed 7-tick loss and
+modulo-64 sequence rules while recovering sender wall-clock cadence and production
+bounds. `FRC_P5` plus Brake/EPB/gateway analysis remains high priority for the
+**upstream producer and SecOC/routing contract**, not for discovering the EPS
+receiver setpoint, physical scale, profile labels, request selector, or loss tick
+boundary.
 
 Longitudinal and HUD remain separate whole-vehicle workstreams. The old Corolla
 prior art tells us exactly what roles must eventually be replaced, but the EPS
@@ -284,9 +299,11 @@ firmware does not identify their TSS3 wire messages.
   Corolla baseline and target-native migration conclusions.
 - `data/generated/corolla_8965H1202000_fd_control_interface.json` provides the
   exact H FD `0x030` / `0x0B6` generated-interface evidence.
-- `data/generated/corolla_8965H1202000_lta_command_provenance.json` and
-  `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json` provide the
-  target-native `0x025` sensor proof and protected-B6 target-angle command proof.
+- `data/generated/corolla_8965H1202000_lta_command_provenance.json`,
+  `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json`, and
+  `data/generated/corolla_8965H1202000_b6_receiver_contract.json` provide the
+  target-native `0x025` sensor proof plus protected-B6 target-angle, request, loss,
+  and sequence contracts.
 - `data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json`
   proves the H/F application-byte identity.
 

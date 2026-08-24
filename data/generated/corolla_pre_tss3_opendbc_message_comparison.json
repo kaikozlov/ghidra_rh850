@@ -8,7 +8,7 @@
     "survives_with_semantic_proof": "0x025 steering angle/rate",
     "tss2_lta_note": "0x191 was only a neutral coexistence/replacement frame on Corolla TSS2 torque control, not its active steering command"
   },
-  "evidence_boundary": "The 2023 H and 2025 F conclusions are exact application CodeFlash facts plus target-native fixed-map/dataflow proofs. Whole-vehicle openpilot messages may legitimately be absent from an EPS image; only EPS-local command/feedback migrations are treated as architectural evidence. B6 controller-equivalent physical scaling and signal254 feature labels are closed; the exact OEM signal255 unit, remaining request/validity/cadence semantics, and upstream producer/authentication remain open.",
+  "evidence_boundary": "The 2023 H and 2025 F conclusions are exact application CodeFlash facts plus target-native fixed-map/dataflow proofs. Whole-vehicle openpilot messages may legitimately be absent from an EPS image; only EPS-local command/feedback migrations are treated as architectural evidence. B6 controller-equivalent physical scaling, signal254 feature/request selection, the 7-tick receiver loss cutoff, and modulo-64 sequence handling are closed; the exact OEM signal255 unit, wall-clock sender cadence, exact secondary-field names, and upstream producer/authentication remain open.",
   "explicit_non_corolla_prior_art": [
     {
       "id": "0x131",
@@ -577,10 +577,15 @@
           "mode_wire_byte": 3,
           "oem_wire_unit_name_closed": false,
           "physical_scale_closed": true,
+          "receiver_loss_cutout_ticks": 7,
+          "request_selection_closed": true,
+          "sequence_gap_cap": 8,
+          "sequence_modulus": 64,
           "signal_id": 255,
           "signed": true,
           "snapshot": "0xFEBEAE82",
           "target_vs_measured_loop": "independent-target-versus-measured-steering-angle-control-loop",
+          "wall_clock_timeout_closed": false,
           "wire_byte": 4
         },
         "secured_profiles": [
@@ -588,9 +593,9 @@
           "0x0D7",
           "0x0B6"
         ],
-        "static_conclusion": "Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks; Techstream Target Lateral ID closes them as 1=PCS, 4=LDA, 10=Hands Off LTA, 11=LTA/LCA, and 19=PDA. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. The OEM signal255 unit label, remaining request/validity/cadence semantics, and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open."
+        "static_conclusion": "Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks; Techstream Target Lateral ID closes them as 1=PCS, 4=LDA, 10=Hands Off LTA, 11=LTA/LCA, and 19=PDA. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. Signal254 request selection, a seven-foreground-tick primary receiver-loss cutoff, and modulo-64 sequence handling with gap cap 8 are also closed. The OEM signal255 unit label, wall-clock sender cadence, exact secondary B6 field names, and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open."
       },
-      "porting_consequence": "Do not extend/sign classic 0x2E4. H/F instead consume protected FD 0x0B6 signal255 as a target steering-angle command, with signal254 selecting cooperative-control profiles. The controller-equivalent signal255 scale is 1024/17870 deg/count (~1.000121519 mrad/count), and Techstream Target Lateral ID closes profiles 1/4/10/11/19 as PCS/LDA/Hands Off LTA/LTA-LCA/PDA. Recover the exact OEM signal255 unit plus remaining request/validity/cadence semantics, SecOC freshness/key behavior, and stock-source suppression before injection.",
+      "porting_consequence": "Do not extend/sign classic 0x2E4. H/F instead consume protected FD 0x0B6 signal255 as a target steering-angle command, with signal254 selecting cooperative-control profiles. The controller-equivalent signal255 scale is 1024/17870 deg/count (~1.000121519 mrad/count), and Techstream Target Lateral ID closes profiles 1/4/10/11/19 as PCS/LDA/Hands Off LTA/LTA-LCA/PDA. Receiver-side request selection, the 7-tick loss cutoff, and modulo-64 sequence rules are closed; recover the exact OEM signal255 unit, wall-clock sender cadence, SecOC freshness/key behavior, and stock-source suppression before injection.",
       "pre_tss3": {
         "cadence_hz": 100,
         "id": "0x2E4",
@@ -720,7 +725,7 @@
       "h_f_tx": null
     }
   ],
-  "schema": "corolla-pre-tss3-opendbc-message-comparison-v4",
+  "schema": "corolla-pre-tss3-opendbc-message-comparison-v5",
   "upstream": {
     "canonical_commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93",
     "contract": "data/external/opendbc/toyota_corolla_pre_tss3_contract.json",

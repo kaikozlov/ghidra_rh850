@@ -3950,7 +3950,7 @@
     "d_axis_command_path_separate": true,
     "external_can_field_equivalence": false,
     "live_cooperation_control_state_monitor": false,
-    "next_use": "Combine this sender/DTC and P5 vocabulary evidence with the dedicated B6 target-native ingress proof. That proof now closes controller-equivalent signal255 physical scaling; next recover exact signal254 feature labels/request-validity-cadence semantics and the upstream FRC_P5/Brake producer route.",
+    "next_use": "Combine this sender/DTC evidence with the dedicated B6 target-angle and receiver-contract proofs. Profile labels, request selection, receiver-loss behavior in scheduler ticks, and sequence handling are closed there; the remaining software target is the upstream FRC_P5/Brake producer plus SecOC sender/freshness behavior.",
     "q_axis_limit_observer_recovered": true,
     "q_d_actual_current_observers_recovered": true,
     "sienna_ipm_a_monitor_rows_removed_in_h": true,

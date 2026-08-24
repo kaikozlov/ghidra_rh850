@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, independently names B6 loss as Brake System Control Module loss, and closes H signal254 feature labels through the exact Target Lateral ID numeric dictionary. The OEM engineering-unit label for B6 signal255, remaining request/validity/cadence semantics, and the upstream FRC/Brake producer route remain unresolved.",
+  "evidence_boundary": "The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, independently names B6 loss as Brake System Control Module loss, and closes H signal254 feature labels through the exact Target Lateral ID numeric dictionary. The dedicated receiver contract additionally closes signal254 request selection, the seven-foreground-tick primary loss cutout, and modulo-64 sequence handling with gap cap 8. The OEM engineering-unit label for B6 signal255, wall-clock cadence, exact secondary-field names, and the upstream FRC/Brake producer route remain unresolved.",
   "final_command_bridge": {
     "boundary": "Signal255 is one conditional contributor to the general EPS command composition; the final torque/current chain also contains local assist/control terms and gating.",
     "local_chain": "C2A8 -> CD3CC:C3B8 -> CD440:C3BC -> CD496:C3BE -> CD53E:C3D0 -> CD55A:C3C0 -> CD5DC:C3D2 -> CE928:AC56",
@@ -137,9 +137,13 @@
     "physical_degree_scale_closed": true,
     "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above is the exact linearized conversion implied by the two fixed-point gains, not a claim that every individual integer target code has a unique exact degree value."
   },
-  "schema": "corolla-8965H1202000-b6-target-angle-ingress-v3",
+  "schema": "corolla-8965H1202000-b6-target-angle-ingress-v4",
   "software_id": "8965H1202000",
   "sources": {
+    "b6_receiver_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+      "sha256": "8c8108d6f7e7e94876d78a8f3f2becf72154a7483e0c883f86428bbac9505832"
+    },
     "codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
       "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
@@ -155,7 +159,7 @@
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "b663692d58606fa31a5f14edd7ef8d6156e8f4cc9e886372838fd563012d8ca3"
+      "sha256": "d3935ee3e63976ce11e0372a3c24c4135f55bc089e07b58b7d8775b1d15a2ab8"
     }
   },
   "static_conclusion": {
@@ -165,10 +169,15 @@
     "immediate_sender_relationship": "Brake System Control Module",
     "ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5",
     "mode_ingress": "protected CAN-FD 0x0B6 signal254 6-bit B3",
-    "next_static_target": "recover remaining B6 request/validity/cadence/loss semantics and SecOC sender state, then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain",
+    "next_static_target": "recover upstream FRC_P5 -> Brake/EPB producer/transport and SecOC sender/freshness behavior; wall-clock cadence and exact secondary B6 field names remain bounded",
     "oem_wire_unit_name_identified": false,
     "physical_scale_identified": true,
     "reaches_command_value_torque_and_q_current": true,
+    "receiver_loss_cutout_ticks": 7,
+    "request_selection_identified": true,
+    "sequence_counter_identified": true,
+    "sequence_gap_cap": 8,
+    "sequence_modulus": 64,
     "signal254_feature_labels_identified": true,
     "signal254_profile_labels": {
       "1": "PCS",
@@ -178,7 +187,8 @@
       "4": "LDA"
     },
     "torque_command": false,
-    "upstream_feature_producer_identified": false
+    "upstream_feature_producer_identified": false,
+    "wall_clock_timeout_identified": false
   },
   "target_angle_pipeline": [
     {

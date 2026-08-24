@@ -475,7 +475,7 @@ def main() -> int:
     }
 
     out = {
-        "schema": "corolla-8965H1202000-lta-command-provenance-v7",
+        "schema": "corolla-8965H1202000-lta-command-provenance-v8",
         "software_id": "8965H1202000",
         "images": {
             "corolla_h": {"path": str(H_IMAGE.relative_to(REPO)), "sha256": sha(h), "size": len(h)},
@@ -535,14 +535,20 @@ def main() -> int:
             "signal254_profile_values_recovered": sorted(int(x) for x in target_angle["mode_ingress"]["decoded_values"]),
             "signal254_exact_feature_labels_identified": target_angle["static_conclusion"]["signal254_feature_labels_identified"],
             "signal254_profile_labels": target_angle["static_conclusion"]["signal254_profile_labels"],
+            "request_selection_identified": target_angle["static_conclusion"]["request_selection_identified"],
+            "receiver_loss_cutout_ticks": target_angle["static_conclusion"]["receiver_loss_cutout_ticks"],
+            "wall_clock_timeout_identified": target_angle["static_conclusion"]["wall_clock_timeout_identified"],
+            "sequence_counter_identified": target_angle["static_conclusion"]["sequence_counter_identified"],
+            "sequence_modulus": target_angle["static_conclusion"]["sequence_modulus"],
+            "sequence_gap_cap": target_angle["static_conclusion"]["sequence_gap_cap"],
             "broad_static_search_closed": True,
             "next_evidence": (
-                "Recover remaining request/validity/cadence/loss semantics for B6 signal254 plus SecOC freshness/key behavior; then acquire/analyze FRC_P5 and Brake/EPB firmware or synchronized captures to close the upstream producer route."
+                "Receiver-side request selection, the seven-foreground-tick primary loss cutoff, and modulo-64 sequence handling are closed. Acquire/analyze FRC_P5 and Brake/EPB producer firmware or synchronized captures to close sender cadence, SecOC freshness/key behavior, stock-source suppression, and exact secondary-field names."
             ),
         },
         "evidence_boundary": (
             "Static closure is exact for the B6 signal255 generated extraction, GP-relative stage-to-snapshot copy, target-vs-measured angle controller, promoted direct/GP-relative retained-branch writers, raw absolute pointers, literal block/group receives, and literal full-PDU copies in the tracked H corpus. "
-            "The EPS ingress, angle-command domain, FD025 physical angle representation, B6 controller-equivalent physical scale, and signal254 feature labels are identified. The exact OEM B6 signal255 unit label, remaining signal254 request/validity/cadence/loss semantics, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof."
+            "The EPS ingress, angle-command domain, FD025 physical angle representation, B6 controller-equivalent physical scale, signal254 feature/request selection, seven-foreground-tick primary receiver-loss cutoff, and modulo-64 sequence handling are identified. The exact OEM B6 signal255 unit label, wall-clock sender cadence, exact secondary-field names, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof."
         ),
     }
 

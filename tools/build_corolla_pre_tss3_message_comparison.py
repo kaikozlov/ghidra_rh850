@@ -21,7 +21,7 @@ sys.path.insert(0, str(REPO))
 from tools.build_ephemeral_runtime_manifest import load_codeflash  # noqa: E402
 from tools.compare_variant_application_rx import find_normal_rx_descriptor_table  # noqa: E402
 
-SCHEMA = "corolla-pre-tss3-opendbc-message-comparison-v4"
+SCHEMA = "corolla-pre-tss3-opendbc-message-comparison-v5"
 TX = struct.Struct("<IBBH")
 PDU = struct.Struct("<HBBHBB")
 
@@ -84,7 +84,7 @@ def build(args: argparse.Namespace) -> dict:
     lta = json.loads(args.lta_provenance.read_text())
     eq = json.loads(args.equivalence.read_text())
     bridge = json.loads(args.state_bridge.read_text())
-    if bridge["schema"] != "corolla-8965H1202000-openpilot-state-bridge-v5":
+    if bridge["schema"] != "corolla-8965H1202000-openpilot-state-bridge-v6":
         raise ValueError("openpilot state/command bridge schema drift")
 
     if len(h) != 0x100000 or len(f) != 0x100000:
@@ -191,7 +191,7 @@ def build(args: argparse.Namespace) -> dict:
                 "static_conclusion": bridge["command_ingress_closure"]["static_conclusion"],
             },
             classification="old_torque_command_replaced_by_protected_b6_target_angle_control",
-            consequence="Do not extend/sign classic 0x2E4. H/F instead consume protected FD 0x0B6 signal255 as a target steering-angle command, with signal254 selecting cooperative-control profiles. The controller-equivalent signal255 scale is 1024/17870 deg/count (~1.000121519 mrad/count), and Techstream Target Lateral ID closes profiles 1/4/10/11/19 as PCS/LDA/Hands Off LTA/LTA-LCA/PDA. Recover the exact OEM signal255 unit plus remaining request/validity/cadence semantics, SecOC freshness/key behavior, and stock-source suppression before injection.",
+            consequence="Do not extend/sign classic 0x2E4. H/F instead consume protected FD 0x0B6 signal255 as a target steering-angle command, with signal254 selecting cooperative-control profiles. The controller-equivalent signal255 scale is 1024/17870 deg/count (~1.000121519 mrad/count), and Techstream Target Lateral ID closes profiles 1/4/10/11/19 as PCS/LDA/Hands Off LTA/LTA-LCA/PDA. Receiver-side request selection, the 7-tick loss cutoff, and modulo-64 sequence rules are closed; recover the exact OEM signal255 unit, wall-clock sender cadence, SecOC freshness/key behavior, and stock-source suppression before injection.",
         ),
         role_row(
             role="tss2_lta_coexistence_frame",
@@ -227,7 +227,7 @@ def build(args: argparse.Namespace) -> dict:
         "schema": SCHEMA,
         "evidence_boundary": (
             "The 2023 H and 2025 F conclusions are exact application CodeFlash facts plus target-native fixed-map/dataflow proofs. "
-            "Whole-vehicle openpilot messages may legitimately be absent from an EPS image; only EPS-local command/feedback migrations are treated as architectural evidence. B6 controller-equivalent physical scaling and signal254 feature labels are closed; the exact OEM signal255 unit, remaining request/validity/cadence semantics, and upstream producer/authentication remain open."
+            "Whole-vehicle openpilot messages may legitimately be absent from an EPS image; only EPS-local command/feedback migrations are treated as architectural evidence. B6 controller-equivalent physical scaling, signal254 feature/request selection, the 7-tick receiver loss cutoff, and modulo-64 sequence handling are closed; the exact OEM signal255 unit, wall-clock sender cadence, exact secondary-field names, and upstream producer/authentication remain open."
         ),
         "upstream": {
             "contract": str(args.contract.relative_to(REPO)),

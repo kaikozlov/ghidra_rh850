@@ -214,10 +214,15 @@
       "immediate_sender_relationship": "Brake System Control Module",
       "ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5",
       "mode_ingress": "protected CAN-FD 0x0B6 signal254 6-bit B3",
-      "next_static_target": "recover remaining B6 request/validity/cadence/loss semantics and SecOC sender state, then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain",
+      "next_static_target": "recover upstream FRC_P5 -> Brake/EPB producer/transport and SecOC sender/freshness behavior; wall-clock cadence and exact secondary B6 field names remain bounded",
       "oem_wire_unit_name_identified": false,
       "physical_scale_identified": true,
       "reaches_command_value_torque_and_q_current": true,
+      "receiver_loss_cutout_ticks": 7,
+      "request_selection_identified": true,
+      "sequence_counter_identified": true,
+      "sequence_gap_cap": 8,
+      "sequence_modulus": 64,
       "signal254_feature_labels_identified": true,
       "signal254_profile_labels": {
         "1": "PCS",
@@ -227,7 +232,8 @@
         "4": "LDA"
       },
       "torque_command": false,
-      "upstream_feature_producer_identified": false
+      "upstream_feature_producer_identified": false,
+      "wall_clock_timeout_identified": false
     },
     "target_angle_pipeline": [
       {
@@ -406,7 +412,7 @@
     "path": "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
     "sha256": "5414fead091374eaa6ba0f65b404e5cce2cc296efb117a624b2ba2aff5b353fb"
   },
-  "evidence_boundary": "Static closure is exact for the B6 signal255 generated extraction, GP-relative stage-to-snapshot copy, target-vs-measured angle controller, promoted direct/GP-relative retained-branch writers, raw absolute pointers, literal block/group receives, and literal full-PDU copies in the tracked H corpus. The EPS ingress, angle-command domain, FD025 physical angle representation, B6 controller-equivalent physical scale, and signal254 feature labels are identified. The exact OEM B6 signal255 unit label, remaining signal254 request/validity/cadence/loss semantics, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof.",
+  "evidence_boundary": "Static closure is exact for the B6 signal255 generated extraction, GP-relative stage-to-snapshot copy, target-vs-measured angle controller, promoted direct/GP-relative retained-branch writers, raw absolute pointers, literal block/group receives, and literal full-PDU copies in the tracked H corpus. The EPS ingress, angle-command domain, FD025 physical angle representation, B6 controller-equivalent physical scale, signal254 feature/request selection, seven-foreground-tick primary receiver-loss cutoff, and modulo-64 sequence handling are identified. The exact OEM B6 signal255 unit label, wall-clock sender cadence, exact secondary-field names, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof.",
   "final_command_composition": {
     "all_promoted_computed_writers_recovered": true,
     "bd0e_local_chain": {
@@ -743,7 +749,7 @@
       "source": "0xFEBEC26D"
     }
   },
-  "schema": "corolla-8965H1202000-lta-command-provenance-v7",
+  "schema": "corolla-8965H1202000-lta-command-provenance-v8",
   "shared_can025_sensor_ingress": {
     "boundary": "The public DBC is corroboration rather than sole naming evidence: target-native H arithmetic independently distinguishes angle+fraction and rate semantics. This closes the adversarial possibility that an unchanged-shape large scalar was silently repurposed as the missing LTA command.",
     "can_id": "0x025",
@@ -872,12 +878,17 @@
     "hidden_d7_group_or_full_pdu_command_recovered": false,
     "immediate_sender_relationship": "Brake System Control Module",
     "named_retained_branch_computed_alias_audit_closed": true,
-    "next_evidence": "Recover remaining request/validity/cadence/loss semantics for B6 signal254 plus SecOC freshness/key behavior; then acquire/analyze FRC_P5 and Brake/EPB firmware or synchronized captures to close the upstream producer route.",
+    "next_evidence": "Receiver-side request selection, the seven-foreground-tick primary loss cutoff, and modulo-64 sequence handling are closed. Acquire/analyze FRC_P5 and Brake/EPB producer firmware or synchronized captures to close sender cadence, SecOC freshness/key behavior, stock-source suppression, and exact secondary-field names.",
     "oem_wire_unit_name_identified": false,
     "physical_scale_identified": true,
+    "receiver_loss_cutout_ticks": 7,
+    "request_selection_identified": true,
     "retained_sienna_lta_branch_statically_dead": false,
     "retained_sienna_lta_enable_computed_writer_recovered": true,
     "retained_sienna_lta_magnitude_computed_writer_recovered": true,
+    "sequence_counter_identified": true,
+    "sequence_gap_cap": 8,
+    "sequence_modulus": 64,
     "shared_command_sized_ingress_classified_as_sensor_state": true,
     "signal254_exact_feature_labels_identified": true,
     "signal254_profile_labels": {
@@ -894,16 +905,17 @@
       11,
       19
     ],
-    "upstream_feature_producer_identified": false
+    "upstream_feature_producer_identified": false,
+    "wall_clock_timeout_identified": false
   },
   "supporting_inputs": {
     "b6_target_angle_ingress": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "023568d9f7e330bd23d2e1069783de7bbe8a6361675815120620fa54a57f1890"
+      "sha256": "f127cee09bc71f14eefea3d3be18b2cb39f2eea0422dec5dac04eb2a29d95a4d"
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
-      "sha256": "f101dd0278af4545a5fee5d09426806226199587913a9c8a97d5fe7aa3d36be4"
+      "sha256": "16ba6fcf85b84ee9a64467ba77119face3e3bd4924514dda0b6eb53d65665fc1"
     },
     "supervisor_external_ingress_census": {
       "path": "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",

@@ -9,6 +9,7 @@ IMAGE=REPO/'community/albinoelephant/normalized/8965H1202000_CodeFlash.bin'
 EVID=REPO/'data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json'
 TECH=REPO/'data/generated/corolla_8965H1202000_techstream_correlations.json'
 P5=REPO/'data/generated/techstream_v18/p5_lateral_control_semantics.json'
+RECEIVER=REPO/'data/generated/corolla_8965H1202000_b6_receiver_contract.json'
 OUT=REPO/'data/generated/corolla_8965H1202000_b6_target_angle_ingress.json'
 
 def sha(b:bytes)->str:return hashlib.sha256(b).hexdigest()
@@ -18,8 +19,9 @@ def need(s:str,*xs:str)->bool:
 
 def main()->int:
     ap=argparse.ArgumentParser(description=__doc__); ap.add_argument('--image',type=Path,default=IMAGE); ap.add_argument('--evidence',type=Path,default=EVID); ap.add_argument('--out',type=Path,default=OUT); a=ap.parse_args()
-    h=a.image.read_bytes(); e=json.loads(a.evidence.read_text()); tech=json.loads(TECH.read_text()); p5=json.loads(P5.read_text())
+    h=a.image.read_bytes(); e=json.loads(a.evidence.read_text()); tech=json.loads(TECH.read_text()); p5=json.loads(P5.read_text()); receiver=json.loads(RECEIVER.read_text())
     if len(h)!=0x100000 or sha(h)!=e['image']['sha256']: raise ValueError('H identity drift')
+    if receiver['schema']!='corolla-8965H1202000-b6-receiver-contract-v1' or receiver['static_conclusion']['primary_loss_cutout_ticks']!=7 or receiver['static_conclusion']['sequence_modulus']!=64: raise ValueError('B6 receiver contract drift')
     funcs={int(x['entry'],16):x['decompiled_c'] for x in e['functions']}
     if e['function_count']!=41: raise ValueError('target-angle evidence count drift')
     # Raw generated COM geometry.
@@ -95,12 +97,13 @@ def main()->int:
     controller_deg_per_count=controller_deg_num/controller_deg_den
     controller_mrad_per_count=controller_deg_per_count*math.pi/180*1000
     out={
-      'schema':'corolla-8965H1202000-b6-target-angle-ingress-v3','software_id':'8965H1202000',
+      'schema':'corolla-8965H1202000-b6-target-angle-ingress-v4','software_id':'8965H1202000',
       'sources':{
         'codeflash':{'path':str(a.image.relative_to(REPO)),'sha256':sha(h)},
         'decompiler_evidence':{'path':str(a.evidence.relative_to(REPO)),'sha256':sha(a.evidence.read_bytes()),'function_count':e['function_count']},
         'techstream_correlations':{'path':str(TECH.relative_to(REPO)),'sha256':sha(TECH.read_bytes())},
         'p5_lateral_semantics':{'path':str(P5.relative_to(REPO)),'sha256':sha(P5.read_bytes())},
+        'b6_receiver_contract':{'path':str(RECEIVER.relative_to(REPO)),'sha256':sha(RECEIVER.read_bytes())},
       },
       'mode_ingress':{
         'signal_id':254,'wire_byte':3,'bit_length':6,'signed':False,
@@ -197,9 +200,15 @@ def main()->int:
         'oem_wire_unit_name_identified':False,
         'signal254_feature_labels_identified':True,
         'signal254_profile_labels':{str(k):v for k,v in profile_labels.items()},
-        'next_static_target':'recover remaining B6 request/validity/cadence/loss semantics and SecOC sender state, then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain'
+        'request_selection_identified':receiver['static_conclusion']['request_selection_closed'],
+        'receiver_loss_cutout_ticks':receiver['static_conclusion']['primary_loss_cutout_ticks'],
+        'wall_clock_timeout_identified':receiver['static_conclusion']['wall_clock_timeout_closed'],
+        'sequence_counter_identified':receiver['static_conclusion']['sequence_counter_closed'],
+        'sequence_modulus':receiver['static_conclusion']['sequence_modulus'],
+        'sequence_gap_cap':receiver['static_conclusion']['sequence_gap_cap'],
+        'next_static_target':'recover upstream FRC_P5 -> Brake/EPB producer/transport and SecOC sender/freshness behavior; wall-clock cadence and exact secondary B6 field names remain bounded'
       },
-      'evidence_boundary':'The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, independently names B6 loss as Brake System Control Module loss, and closes H signal254 feature labels through the exact Target Lateral ID numeric dictionary. The OEM engineering-unit label for B6 signal255, remaining request/validity/cadence semantics, and the upstream FRC/Brake producer route remain unresolved.'
+      'evidence_boundary':'The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, independently names B6 loss as Brake System Control Module loss, and closes H signal254 feature labels through the exact Target Lateral ID numeric dictionary. The dedicated receiver contract additionally closes signal254 request selection, the seven-foreground-tick primary loss cutout, and modulo-64 sequence handling with gap cap 8. The OEM engineering-unit label for B6 signal255, wall-clock cadence, exact secondary-field names, and the upstream FRC/Brake producer route remain unresolved.'
     }
     a.out.parent.mkdir(parents=True,exist_ok=True); a.out.write_text(json.dumps(out,indent=2,sort_keys=True)+'\n'); print(json.dumps({'out':str(a.out),'classification':out['wire_ingress']['classification']},indent=2)); return 0
 if __name__=='__main__': raise SystemExit(main())

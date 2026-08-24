@@ -118,13 +118,17 @@ also percentage-modulate internal contributors. The physical relation is now clo
 without importing the old `0x131` scale: FD025 coarse/fraction feedback is
 1.5 deg + 0.1-deg fraction, and the matched controller makes signal255
 `1024/17870 deg/count` (`~1.000121519 mrad/count`) controller-equivalent. The
-remaining problem is therefore safe reproduction of a known EPS receiver contract —
-exact OEM signal255 unit naming, remaining mode/request/validity semantics,
-cadence/timeouts, SecOC freshness/key state, and upstream FRC→Brake
-producer/routing — not discovery of another steering message, its physical scale,
-or signal254 feature labels. Techstream's `Target Lateral ID` dictionary closes the
-accepted signal254 profiles as `1=PCS`, `4=LDA`, `10=Hands Off LTA`, `11=LTA/LCA`,
-and `19=PDA`.
+receiver contract is now stronger still: Techstream's `Target Lateral ID` dictionary
+defines `0=No Request (Manual Operation)` and closes the accepted H active requests
+as `1=PCS`, `4=LDA`, `10=Hands Off LTA`, `11=LTA/LCA`, and `19=PDA`; PDU42's
+receive deadline reloads to **7 TAUJ0-CH3 foreground ticks**, first expiry disables
+cooperative selection through the slot-18 receive-status path, and signal261 is a
+modulo-64 rolling sequence counter with effective-gap cap `8`. The CH3 wall-clock
+period is not statically known. The remaining problem is therefore safe reproduction
+of a known EPS receiver contract — exact OEM signal255 unit naming, sender wall-clock
+cadence, exact secondary-field semantics where safety-relevant, SecOC freshness/key
+state, stock-source suppression, and upstream FRC→Brake producer/routing — not
+discovery of another steering message, its scale, request selector, or loss rule.
 
 ### 2.3 Longitudinal control
 
@@ -212,13 +216,13 @@ work must recover the second and fourth boxes for each new generation as well.
 | Semantic role from prior art | Sienna `8965B4512000` | Corolla H / Span family | True-TSS3 work still required |
 |---|---|---|---|
 | Platform identity / generation | exact firmware identity and P1M-E profile known | exact H and Span corpora known | bind each candidate vehicle to FRC/EPS/gateway firmware and real bus topology |
-| Torque steering command | protected `0x2E4` request/torque path recovered | classic `0x2E4` absent; H/F instead receive protected B6 target-angle control | do not port torque limits/scales; characterize B6 target-angle scale/modes/SecOC contract |
-| LTA/angle command | protected `0x131` path recovered and converges with torque mode | active queue lacks `0x131`; protected `0x0B6` signal255 is the recovered signed target-angle command and signal254 selects cooperative modes | recover physical scale/request/validity/cadence and upstream FRC→Brake producer/authentication; do not transplant old `0x131` wire scaling |
+| Torque steering command | protected `0x2E4` request/torque path recovered | classic `0x2E4` absent; H/F instead receive protected B6 target-angle control | do not port torque limits/scales; derive H/F-native limits and finish SecOC sender/producer contract |
+| LTA/angle command | protected `0x131` path recovered and converges with torque mode | active queue lacks `0x131`; protected `0x0B6` signal255 is target angle, signal254 is the OEM request selector, receiver loss is 7 foreground ticks, and signal261 is modulo-64 sequence state | recover sender wall-clock cadence, limits, secondary-field names as needed, and upstream FRC→Brake producer/authentication; do not transplant old `0x131` wire scaling |
 | Steering feedback | `0x025`, `0x260`, `0x262` roles strongly mapped | H `0x025` is FD angle/rate; state roles split across `0x4A3/0x351/0x394/0x030` | derive H/F-native driver override, response, readiness/fault, and validity semantics |
 | Longitudinal command | older SecOC DBC provides a useful comparator, not an EPS-local proof | route `0x183` is 64-byte CAN-FD and disproves old wire-shape transfer | locate ACC producer, target command, feedback, stock suppression, AEB coexistence |
 | Stock producer ownership | old openpilot architecture gives camera/radar replacement model | physical Toyota-B/network differences already observed | map FRC/radar/gateway ownership and safe duplicate blocking for each command family |
 | UI / alerts | older `0x412` is historical reference | old-camera U023A87 path is disabled residue in H | identify FRC/cluster LTA/LDA/LCA status and warning outputs |
-| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6 using H slot-4 SecOC configuration | recover B6 freshness/counter/source behavior and production-safe signing/key path before actuation |
+| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6 using H slot-4 SecOC configuration; application signal261 sequence handling is separately closed | recover **SecOC** freshness/source behavior and production-safe signing/key path before actuation; do not confuse the application 6-bit sequence counter with SecOC freshness |
 
 ## 5. The concrete TSS3 investigation roadmap
 

@@ -2465,9 +2465,12 @@ signal254 B3[5:0]:  FEBE7D96 -> FEBEF127 -> GP-0xA50 = FEBEADB0
 signal255 B4:B5:    FEBE7D94 -> FEBEF1CC -> GP-0x97E = FEBEAE82
 ```
 
-Signal254 is an unsigned 6-bit control/mode ID. `CBE6E`, once communication and
-validity gates are satisfied, decodes values `1/4/10/11/19` into distinct cooperative
-steering-mode families. The exact OEM names for those values remain open.
+Signal254 is the unsigned 6-bit **Target Lateral ID** request selector. Techstream's
+exact P5 pattern dictionary gives `0=No Request (Manual Operation)` and closes H's
+accepted active values as `1=PCS`, `4=LDA`, `10=Hands Off LTA`, `11=LTA/LCA`, and
+`19=PDA`; H-special IDs `25/27` are `AP/Remote Parking`. `CBE6E`, once
+`FEBEACBD==0` and communication gate `FEBEC26D==1` hold, asserts the common active
+flag only for the five supported active IDs.
 
 Signal255 is the command magnitude. `C9DB0/C9E54` turn signed16 `FEBEAE82` into a
 replicated target state. Independently, `CBD7E/CB096` reconstruct the measured
@@ -2496,6 +2499,26 @@ cooperative controller. `1C02` remains a general multi-contributor torque observ
 it is not a wire echo of signal255. B6 signals262/263 also remain live percentage-like
 modifiers of internal contributor families through `CC442/CBFCE`.
 
+The B6 **receiver-loss path is also closed in scheduler ticks**. Status slot `0x18`
+flows through `44744(0x18) -> FEBE7DA0 -> FEBEF132 -> FEBEADB9`; `CC7F8` requires
+`ADB9==0` before it can assert `FEBEC26D`. PDU42's raw descriptor at `0x22770` is
+`060000002000000c`: successful reception reloads its deadline to `6+1 = 7` foreground
+ticks and clears activity[PDU42], while `7683C -> 87AA0` marks it `0x5A` when that
+countdown expires. Because the lower deadline and higher status paths run in the
+same TAUJ0-CH3 foreground tick, the first expiry makes B6 status nonzero and drops
+cooperative selection immediately. The slower slot-18 row `2a00000bb8010200` has a
+configured threshold of `440` ticks for an extended status state; it is not the first
+steering cutout. The CH3 wall-clock period remains statically unsupported, so the
+receiver timeout is **7 ticks, not a claimed number of milliseconds**.
+
+B6 signal261 (B7[5:0]) is a 6-bit rolling sequence counter: `CB246` computes the
+modulo-64 delta, normalizes delta `0/1` to an effective gap of `1`, and caps larger
+gaps at `8` before plausibility/supervision consumes them. Signal258 gates one
+profile-dependent controller contribution when equal to `1`; signal260 is a
+four-state controller selector; signal264 participates in the AP/Remote-Parking
+validity/inhibit state; and signal265 is republished only while B6 communication is
+healthy. Their literal OEM names are not assigned from family vocabulary alone.
+
 Techstream independently classifies `0x0B6` missing-message ownership as U012987
 **Lost Communication with Brake System Control Module / Missing Message**. That pins
 the immediate monitored sender relationship. It does not prove that the Brake ECU is
@@ -2512,16 +2535,19 @@ the separate retained Sienna `0x2E4` torque-clamp input remains zero-fed. The re
 command-sized ingress comparable to signal255; arbitrary computed aliases and
 DMA/peripheral mutation remain outside this static proof.
 
-The exact H/F EPS receiver contract is therefore known at the semantic level:
-**protected FD `0x0B6` signal254 selects cooperative modes and signal255 commands
-target steering angle.** What remains before production use is physical signal255
-scale/sign, exact mode/request/validity semantics, cadence and timeout behavior,
-normal target/rate limits, SecOC freshness/key/source behavior, stock-source
-suppression, and the upstream FRC→Brake/EPB producer route.
+The exact H/F EPS receiver contract is therefore substantially closed:
+**protected FD `0x0B6` signal254 selects the OEM Target Lateral request, signal255
+commands target steering angle at a closed controller-equivalent scale, the receiver
+drops missing B6 after seven foreground ticks, and signal261 supplies the modulo-64
+sequence state.** What remains before production use is the literal signal255 OEM
+unit, sender wall-clock cadence, exact names for secondary B6 fields, normal
+target/rate limits, SecOC freshness/key/source behavior, stock-source suppression,
+and the upstream FRC→Brake/EPB producer route.
 
 Machine-readable ownership:
 `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json`,
-`data/generated/corolla_8965H1202000_lta_command_provenance.json` v5, and
+`data/generated/corolla_8965H1202000_b6_receiver_contract.json`,
+`data/generated/corolla_8965H1202000_lta_command_provenance.json` v8, and
 `data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json` v2;
 `tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py`,
 `tests/verify_corolla_8965H1202000_lta_command_provenance.py`, and
@@ -2546,9 +2572,11 @@ The remaining questions require **different evidence**, not more generic static
 coverage of this image. The corpus still does **not** provide:
 
 - a same-vehicle capture of a known **stock LTA steering interval** synchronized
-  to protected B6 signal254/255/262/263, B6 validity, measured angle, `1C02`,
-  `1152`, and actual Q current; this is needed to recover physical scale, active
-  mode IDs, cadence/timeouts, and operational bounds;
+  to protected B6 signal254/255/258/260/261/262/263/264/265, measured angle,
+  `1C02`, `1152`, and actual Q current; the receiver-side request IDs, 7-tick loss
+  cutoff, and sequence arithmetic are already static facts, while the capture is
+  still needed for sender wall-clock cadence, secondary-field naming, and operational
+  target/rate bounds;
 - proof of the upstream feature producer and route that causes the Brake System
   Control Module to emit the recovered B6 target-angle command;
 - a direct UDS `F181` transcript from the same acquisition;
@@ -2576,9 +2604,10 @@ same-vehicle B6 **parameter-recovery capture**, not another firmware-wide static
    echoes being mistaken for stock traffic;
 3. simultaneously read `1C02 Command Value Torque`, `1152 Command Value Current
    (Q Axis)`, and actual Q current with read-only XCP/DAQ if `7F7/7F8` is reachable;
-4. use the closed `1024/17870 deg/count` signal255 scale and closed signal254
-   `PCS/LDA/Hands Off LTA/LTA-LCA/PDA` profile map to characterize B6
-   request/validity bits, cadence, timeout/loss response, and rate/target bounds; and
+4. validate the statically closed signal254 request map, 7-foreground-tick receiver
+   loss cutoff, and signal261 modulo-64/gap-cap-8 rule against stock traffic while
+   recovering sender wall-clock cadence, exact secondary-field semantics, and
+   rate/target bounds; and
 5. join the captured B6 producer to FRC/Brake/gateway state so the upstream routing
    and SecOC source contract is explicit.
 

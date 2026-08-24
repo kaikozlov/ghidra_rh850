@@ -246,6 +246,36 @@ value dictionary is now an exact semantic join for every H-observed signal254
 profile/special ID even though H firmware itself does not expose a literal wire
 field name.
 
+The receiver-side request and loss contract is also now statically closed in the
+EPS scheduler domain. `Target Lateral ID=0` is the OEM **No Request (Manual
+Operation)** state, while `CBE6E` asserts the common cooperative-control flag only
+for the five supported active IDs above and only when the system gate
+`FEBEACBD==0` and communication gate `FEBEC26D==1` hold. The communication gate
+is target-native: B6 receive-status slot `0x18` follows
+`44744(0x18) -> FEBE7DA0 -> FEBEF132 -> FEBEADB9`, and `CC7F8` requires that
+snapshot to be zero. PDU42's exact descriptor is `060000002000000c`; successful
+reception calls `769F6(pdu,1)` and reloads its first-u16 deadline value `6` to a
+countdown of **7 foreground ticks**, while the deadline monitor `7683C` marks
+activity[PDU42] `0x5A` on expiry. The same TAUJ0-CH3 foreground tick runs the
+higher status path, so that first expiry makes `ADB9` nonzero and disables
+cooperative selection immediately. The separate slot-18 status record
+`2a00000bb8010200` carries a slower threshold of `440` ticks and can expose the
+extended status bit `0x02`; it is not the primary steering cutout. The CH3 timer's
+absolute period is not statically recoverable here, so **7 ticks must not be
+restated as milliseconds**.
+
+B6 signal261 (B7[5:0]) is independently closed as a 6-bit rolling sequence
+counter. `CB246` computes `(current-previous) mod 64`; deltas `0/1` normalize to an
+effective gap of `1`, while larger gaps are retained up to a cap of `8`. The capped
+gap reaches `CB4F4` plausibility/supervision. Signal258 (B6 bit2) gates one
+profile-dependent controller contribution when equal to `1`; signal260 (B7[7:6])
+is a four-state controller selector; signal264 (B10 bit7) is a special-control
+validity/inhibit input used around the AP/Remote-Parking state machine; and
+signal265 (B10[2:0]) is republished only while B6 communication is healthy. Their
+literal OEM field names remain bounded; in particular, Techstream's
+`Cooperative Control in Progress Flag` is family vocabulary, not a proved
+one-to-one name for signal258.
+
 Signals 262 and 263 remain important companion modifiers: B8/B9 feed `0xCC442` and
 `0xCBFCE` as percentage-like scaling inputs to internal steering contributors.
 The four configured nonscalar B6 IDs `252/253/266/267` still have no recovered
@@ -339,12 +369,15 @@ route was identified. Arbitrary computed aliases and DMA/peripheral mutation rem
 outside this static proof.
 
 What remains open is no longer "where does the EPS get an autonomous target?",
-"what is its physical scale?", or "which Toyota features do the accepted profile
-IDs mean?" It is how to operate this known interface safely: remaining
-request/validity semantics, cadence and loss behavior, SecOC freshness/key contract,
-and the upstream `FRC_P5 -> Brake/EPB -> EPS` producer/routing chain. The literal
-OEM engineering-unit name for signal255 is also still unjoined even though its
-controller-equivalent degree/radian scale is closed.
+"what is its physical scale?", "which Toyota features do the accepted profile IDs
+mean?", or "how quickly does the EPS drop a missing B6 in its own scheduler?"
+Receiver request selection, the 7-tick primary loss cutoff, and modulo-64 sequence
+handling are closed. The remaining command-side unknowns are the **sender-side**
+wall-clock cadence, SecOC freshness/key/source contract, stock-source suppression,
+exact OEM names for the secondary B6 fields, and the upstream
+`FRC_P5 -> Brake/EPB -> EPS` producer/routing chain. The literal OEM engineering-
+unit name for signal255 is also still unjoined even though its controller-equivalent
+degree/radian scale is closed.
 
 ## 9. Porting roadmap after this recovery
 
@@ -370,10 +403,10 @@ The receiver-side command carrier is now identified, so the decisive experiment 
 - capture protected `0x0B6` during known stock-LTA intervals and correlate signal
   254, signed16 signal 255, signals 262/263, and B6 validity with steering angle,
   `0x1C02`, `0x1152`, and actual Q-current;
-- use the now-closed `1024/17870 deg/count` signal255 scale and the closed
-  signal254 profile map (`PCS/LDA/Hands Off LTA/LTA-LCA/PDA`) to recover the
-  remaining request/validity rules, update cadence, timeout behavior, and normal
-  target/rate bounds before any injection attempt;
+- treat signal254 request selection, the 7-foreground-tick receiver deadline, and
+  the signal261 modulo-64/gap-cap-8 sequence rule as closed receiver requirements;
+  use a stock capture to recover **sender wall-clock cadence**, exact secondary-field
+  names/behavior, and normal target/rate bounds before any injection attempt;
 - recover the B6 SecOC freshness/key/source contract and stock-source suppression
   requirements; and
 - acquire/analyze true-TSS3 `FRC_P5` plus Brake/EPB/gateway producer-side firmware
@@ -391,15 +424,15 @@ real H/F openpilot port, recover and validate:
 - exact driver-torque wire scale and override thresholds;
 - an actuator-response quantity and its allowable command error;
 - readiness and temporary/permanent fault semantics;
-- command cadence, loss-of-message behavior, and stock-source suppression;
+- sender wall-clock cadence, stock-source suppression, and dynamic confirmation of the statically closed 7-tick loss behavior;
 - actual H/F rate and magnitude limits;
 - fallback behavior when comma disappears;
 - coexistence with brake/AEB and stock LTA/LDA/LCA functions.
 
 The machine-readable evidence is
-`data/generated/corolla_8965H1202000_openpilot_state_bridge.json` with compact
-raw-body-bound decompiler evidence in
-`data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json`.
+`data/generated/corolla_8965H1202000_openpilot_state_bridge.json`, plus the dedicated
+`data/generated/corolla_8965H1202000_b6_receiver_contract.json`; their compact
+raw-body-bound decompiler evidence is tracked alongside each artifact.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references
@@ -407,6 +440,6 @@ raw-body-bound decompiler evidence in
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011)
+- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-012](../reference/index.md#finding-com-012)
 - Corrections with this document as canonical home: —
 <!-- knowledge-cross-references:end -->

@@ -54,10 +54,15 @@
       "mode_wire_byte": 3,
       "oem_wire_unit_name_closed": false,
       "physical_scale_closed": true,
+      "receiver_loss_cutout_ticks": 7,
+      "request_selection_closed": true,
+      "sequence_gap_cap": 8,
+      "sequence_modulus": 64,
       "signal_id": 255,
       "signed": true,
       "snapshot": "0xFEBEAE82",
       "target_vs_measured_loop": "independent-target-versus-measured-steering-angle-control-loop",
+      "wall_clock_timeout_closed": false,
       "wire_byte": 4
     },
     "brake_domain_conclusion": "D7's 16-bit field is exactly SP1 vehicle speed. B6 is independently tied to the Brake System Control Module by U012987, but this Techstream-only join does not classify B6 signal255; computed target-native provenance owns that semantic question.",
@@ -77,7 +82,7 @@
     "old_camera_interface_removed": "H retains disabled U023A87 Image Processing Module A diagnostic residue at DTC index 93. The four Sienna active communication-monitor rows that joined this DTC to CAN 0x2E4, 0x131, 0x191, and 0x2FD are absent from H's active six-row monitor table, although their Dem event records still point to disabled DTC index 93. Together with the missing 2E4/131 SecOC/COM profiles, this is strong evidence that the classic direct camera/IPM-A steering interface was disabled/removed rather than renumbered to B6.",
     "protected_0x0B6_techstream_boundary": "B6's sole 16-bit scalar is signal255. The earlier direct-xref-only staged-cell negative is not a safe semantic conclusion because GP-relative snapshot copies are outside that representation; this Techstream artifact therefore classifies only the B6 sender/DTC relationship and defers signal255 control semantics to the dedicated target-native ingress proof.",
     "protected_0x0D7": "D7's only recovered 16-bit scalar is signal243 at FEBE7D82, exactly exposed by H DID 0x1185 and named by EMPS_P5 as CAN Vehicle Speed (SP1). Its other recovered scalars are 1-bit signal240 and 4-bit signal246 status fields. Together with the U012987 Brake System Control Module missing-message DTC, D7 does not expose a recovered steering-command magnitude.",
-    "static_conclusion": "Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks; Techstream Target Lateral ID closes them as 1=PCS, 4=LDA, 10=Hands Off LTA, 11=LTA/LCA, and 19=PDA. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. The OEM signal255 unit label, remaining request/validity/cadence semantics, and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
+    "static_conclusion": "Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks; Techstream Target Lateral ID closes them as 1=PCS, 4=LDA, 10=Hands Off LTA, 11=LTA/LCA, and 19=PDA. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. Signal254 request selection, a seven-foreground-tick primary receiver-loss cutoff, and modulo-64 sequence handling with gap cap 8 are also closed. The OEM signal255 unit label, wall-clock sender cadence, exact secondary B6 field names, and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
     "supervisor_external_signals": 22,
     "supervisor_reaching_ge12bit_fields": [
       {
@@ -97,7 +102,7 @@
       }
     ]
   },
-  "evidence_boundary": "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. Sienna/openpilot structures are used only to identify which roles a port needs, not to transplant field scales or fault codes. The command side is additionally audited for GP-relative/computed writers: protected B6 signal255 is recovered through a hidden RTE snapshot as a signed16 target-steering-angle command, then compared against independently reconstructed 0x025 measured angle before entering the steering controller. Physical B6 scaling, exact OEM naming of the mode IDs, and the upstream producer/authentication route remain bounded; no second command-sized generated scalar or recovered literal block/group/full-PDU route is identified, while arbitrary computed aliases and DMA/peripheral mutation remain outside this proof.",
+  "evidence_boundary": "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. Sienna/openpilot structures are used only to identify which roles a port needs, not to transplant field scales or fault codes. The command side is additionally audited for GP-relative/computed writers: protected B6 signal255 is recovered through a hidden RTE snapshot as a signed16 target-steering-angle command, then compared against independently reconstructed 0x025 measured angle before entering the steering controller. Physical B6 scaling and OEM mode/request semantics are closed, as are the seven-tick receiver-loss cutoff and modulo-64 sequence handling; wall-clock cadence, exact secondary B6 field names, and the upstream producer/authentication route remain bounded; no second command-sized generated scalar or recovered literal block/group/full-PDU route is identified, while arbitrary computed aliases and DMA/peripheral mutation remain outside this proof.",
   "h_tx_pdu_descriptors": [
     {
       "can_id": "0x030",
@@ -182,7 +187,7 @@
     }
   },
   "next_discriminators": [
-    "Recover the remaining signal254 validity/request/cadence/loss fields before any injection experiment; the profile labels and signal255 controller-equivalent scale are already closed.",
+    "Treat signal254 request selection, the 7-tick receiver deadline, and modulo-64 sequence rules as closed receiver requirements; recover wall-clock sender cadence and exact secondary-field names only if needed for safety validation.",
     "Acquire/analyze true-TSS3 FRC_P5 and Brake/EPB producer/Tx descriptors or synchronized captures to close the upstream FRC -> chassis -> EPS route and authentication contract.",
     "Derive H-native driver override, motor-response, readiness/fault, rate and message-loss limits before defining Panda safety; do not reuse old 0x260/0x262 scales or fault codes."
   ],
@@ -235,7 +240,7 @@
       "angle initialization"
     ]
   },
-  "schema": "corolla-8965H1202000-openpilot-state-bridge-v5",
+  "schema": "corolla-8965H1202000-openpilot-state-bridge-v6",
   "state_bridge": {
     "0x030": {
       "additive_field": {
