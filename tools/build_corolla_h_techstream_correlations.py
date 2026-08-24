@@ -664,7 +664,7 @@ def main() -> int:
             "camera_ipm_a_dtc_disabled": camera_ipm_a_residue["techstream_code"] == "U023A87" and camera_ipm_a_residue["h_enabled_word"] == 0,
             "sienna_ipm_a_monitor_rows_removed_in_h": all(not row["corolla_h_active_monitor_row_present"] for row in s_ipm_rows),
             "external_can_field_equivalence": False,
-            "next_use": "Combine this sender/DTC and P5 vocabulary evidence with the dedicated B6 target-native ingress proof; then recover physical scaling, request/mode semantics, and the upstream FRC_P5/Brake producer route.",
+            "next_use": "Combine this sender/DTC and P5 vocabulary evidence with the dedicated B6 target-native ingress proof. That proof now closes controller-equivalent signal255 physical scaling; next recover exact signal254 feature labels/request-validity-cadence semantics and the upstream FRC_P5/Brake producer route.",
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

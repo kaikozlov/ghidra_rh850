@@ -1853,7 +1853,16 @@ identical in NA/EU/JP. Its eight DLL roles include
 `GetDatMonListP5_DT.dll` and `GetDatMonSignalInfoP5_DT.dll`. The latter provides
 the consumer proof for additional type-62 monitor metadata: physical-data key
 at `+0x2A`, bit range at `+0x2C/+0x2E`, and pattern-display key at `+0x32`.
-The physical-data record then selects a unit-table record.
+The physical-data record then selects a unit-table record. The same plugin now
+also closes the numeric conversion layout: exact machine-code copies
+`CDbPhyData +0/+4/+8` into `CCmdConversionTbl` Mul/Div/Offset and carries
+`+0x14/+0x15` into signed/decimal-point metadata. For monitor 17 `Steering
+Angle`, physical-data key 3 is identical across NA/EU/JP: Mul `15`, Div `1`,
+Offset `0`, signed, decimal-point count `1`, unit `deg`, raw range
+`-2048..2047`, graph range `-30720..30705`. Therefore the displayed raw H DID
+`0x1037` count is exactly **1.5 degrees/count**. Monitor 305 `CAN Vehicle Speed
+(SP1)` independently pins conversion direction (`0..30000`, Mul/Div `1/10` ->
+graph `0..3000`, one decimal place -> `0.0..300.0 km/h`).
 
 Three steering monitors were tested against the recovered firmware state, with
 explicit dispositions in

@@ -170,21 +170,53 @@
         184,
         185,
         186
-      ]
+      ],
+      "wire_representation": {
+        "combined": "15 * signal184 + signal185",
+        "combined_unit": "0.1 deg",
+        "full_turn_counts": 3600,
+        "proof": "4636A unpacks signed12 signal184 and signed4 signal185; 42676 copies signal184 without scale into DID1037 source; P5 CDbPhyData key3 defines 1.5 deg/count; B24D0 recombines 15*coarse+fraction and B23A2 divides that combined count by 3600 for a revolution/phase conversion.",
+        "signal184": {
+          "bits": 12,
+          "physical_scale_deg_per_count": 1.5,
+          "role": "coarse steering angle",
+          "signed": true,
+          "techstream_did": "0x1037",
+          "techstream_name": "Steering Angle"
+        },
+        "signal185": {
+          "bits": 4,
+          "physical_scale_deg_per_count": 0.1,
+          "role": "signed fractional steering angle",
+          "signed": true
+        }
+      }
     },
     "scaling": {
-      "exact_internal_relation": "target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5)); measured_internal = (FD025_fraction + 15*FD025_coarse) * 0x6FB / 0x200 before matched comparator gain",
-      "physical_degree_scale_closed": false,
-      "reason": "The target-native loop proves angle-domain equivalence, but no exact H wire-to-degree calibration join has yet been recovered. Do not reuse Sienna 0x131 scaling by assumption."
+      "controller_equivalent_deg_per_b6_count": 0.05730274202574147,
+      "controller_equivalent_fraction_deg_per_b6_count": {
+        "denominator": 17870,
+        "numerator": 1024
+      },
+      "controller_equivalent_mrad_per_b6_count": 1.0001215187701138,
+      "difference_from_exact_1_mrad_percent": 0.01215187701137932,
+      "exact_internal_relation": "target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5)); measured_internal = trunc((FD025_fraction + 15*FD025_coarse) * 1787 / 512) before matched comparator gain",
+      "interpretation": "In the matched target-vs-measured controller domain, one B6 signal255 count is equivalent to 1024/17870 deg (~0.057302742 deg), or ~1.000121519 mrad. The 0.0122% offset from exactly 1 mrad is consistent with the firmware fixed-point 1787/512 degree-to-internal approximation, but static evidence does not directly name the B6 engineering unit as milliradians.",
+      "measured_wire_physical_relation": "FD025 signal184 = 1.5 deg/count from H DID1037 + Techstream CDbPhyData key3; signed4 signal185 supplies 0.1-deg fraction, so 15*signal184+signal185 is tenths of a degree",
+      "oem_wire_unit_name_closed": false,
+      "physical_degree_scale_closed": true,
+      "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above is the exact linearized conversion implied by the two fixed-point gains, not a claim that every individual integer target code has a unique exact degree value."
     },
     "static_conclusion": {
       "command_domain": "target steering angle",
+      "controller_equivalent_deg_per_count": 0.05730274202574147,
       "external_autonomous_lateral_ingress_identified": true,
       "immediate_sender_relationship": "Brake System Control Module",
       "ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5",
       "mode_ingress": "protected CAN-FD 0x0B6 signal254 6-bit B3",
-      "next_static_target": "recover B6 companion request/mode semantics and target-angle physical scale; then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain",
-      "physical_scale_identified": false,
+      "next_static_target": "recover exact Toyota feature labels/behavior for B6 signal254 profiles, then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain",
+      "oem_wire_unit_name_identified": false,
+      "physical_scale_identified": true,
       "reaches_command_value_torque_and_q_current": true,
       "torque_command": false,
       "upstream_feature_producer_identified": false
@@ -254,7 +286,15 @@
         "dtc": "U012987",
         "failure": "Missing Message"
       },
-      "vocabulary_boundary": "EMPS_P5 family vocabulary corroborates the target-angle interpretation, but exact H lacks DID 0x1CEE; neither family observer name nor a physical degree scale is assigned one-to-one to B6 signal255."
+      "steering_angle_conversion": {
+        "conversion_plugin": "GetDatMonSignalInfoP5_DT.dll",
+        "did": "0x1037",
+        "h_callback": "0x488A8",
+        "name": "Steering Angle",
+        "physical_data_key": 3,
+        "raw_scale": "1.5 deg/count"
+      },
+      "vocabulary_boundary": "EMPS_P5 family vocabulary corroborates the target-angle interpretation, but exact H lacks DID 0x1CEE; the H controller closes B6 physical equivalence independently through DID1037/FD025, while the exact OEM engineering-unit name for B6 signal255 remains unjoined."
     },
     "wire_ingress": {
       "bit_length": 16,
@@ -343,7 +383,7 @@
     "path": "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
     "sha256": "5414fead091374eaa6ba0f65b404e5cce2cc296efb117a624b2ba2aff5b353fb"
   },
-  "evidence_boundary": "Static closure is exact for the B6 signal255 generated extraction, GP-relative stage-to-snapshot copy, target-vs-measured angle controller, promoted direct/GP-relative retained-branch writers, raw absolute pointers, literal block/group receives, and literal full-PDU copies in the tracked H corpus. The EPS ingress and angle-command domain are identified; physical wire scaling, exact mode/request/validity semantics, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof.",
+  "evidence_boundary": "Static closure is exact for the B6 signal255 generated extraction, GP-relative stage-to-snapshot copy, target-vs-measured angle controller, promoted direct/GP-relative retained-branch writers, raw absolute pointers, literal block/group receives, and literal full-PDU copies in the tracked H corpus. The EPS ingress, angle-command domain, FD025 physical angle representation, and B6 controller-equivalent physical scale are identified. The exact OEM B6 unit label, exact signal254 feature labels/request/validity/cadence semantics, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof.",
   "final_command_composition": {
     "all_promoted_computed_writers_recovered": true,
     "bd0e_local_chain": {
@@ -680,7 +720,7 @@
       "source": "0xFEBEC26D"
     }
   },
-  "schema": "corolla-8965H1202000-lta-command-provenance-v5",
+  "schema": "corolla-8965H1202000-lta-command-provenance-v6",
   "shared_can025_sensor_ingress": {
     "boundary": "The public DBC is corroboration rather than sole naming evidence: target-native H arithmetic independently distinguishes angle+fraction and rate semantics. This closes the adversarial possibility that an unchanged-shape large scalar was silently repurposed as the missing LTA command.",
     "can_id": "0x025",
@@ -800,6 +840,7 @@
     "b6_signed16_target_angle_command_recovered": true,
     "broad_static_search_closed": true,
     "command_value_torque_is_lta_only": false,
+    "controller_equivalent_deg_per_count": 0.05730274202574147,
     "earlier_direct_write_inactive_conclusion_superseded": true,
     "external_autonomous_lateral_ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5 target steering angle",
     "external_autonomous_lateral_ingress_identified": true,
@@ -808,21 +849,31 @@
     "hidden_d7_group_or_full_pdu_command_recovered": false,
     "immediate_sender_relationship": "Brake System Control Module",
     "named_retained_branch_computed_alias_audit_closed": true,
-    "next_evidence": "Recover B6 signal255 physical angle scaling, exact signal254 mode-ID meanings, request/validity/cadence semantics, and SecOC freshness/key behavior; then acquire/analyze FRC_P5 and Brake/EPB firmware or synchronized captures to close the upstream producer route.",
+    "next_evidence": "Recover exact Toyota feature labels and request/validity/cadence semantics for B6 signal254, plus SecOC freshness/key behavior; then acquire/analyze FRC_P5 and Brake/EPB firmware or synchronized captures to close the upstream producer route.",
+    "oem_wire_unit_name_identified": false,
+    "physical_scale_identified": true,
     "retained_sienna_lta_branch_statically_dead": false,
     "retained_sienna_lta_enable_computed_writer_recovered": true,
     "retained_sienna_lta_magnitude_computed_writer_recovered": true,
     "shared_command_sized_ingress_classified_as_sensor_state": true,
+    "signal254_exact_feature_labels_identified": false,
+    "signal254_profile_values_recovered": [
+      1,
+      4,
+      10,
+      11,
+      19
+    ],
     "upstream_feature_producer_identified": false
   },
   "supporting_inputs": {
     "b6_target_angle_ingress": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "6de8ce963574b534553ab052043c30a483ad08e0ff877cda63d28d5973365a42"
+      "sha256": "183d09b13b327559c4e1aa8cd1346270391249c2d4d936c5b1c867559b45f2a5"
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
-      "sha256": "08652b934a54fbfb7fab0bbe7041b777c34016ee4aedf6b3075f0a2c18cf19aa"
+      "sha256": "33692e2107e14eb73dd749c40291302ce3bb23eff62c0a6b39650326f361af75"
     },
     "supervisor_external_ingress_census": {
       "path": "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",

@@ -200,13 +200,27 @@ name: its missing-message DTC is U012987 **Lost Communication with Brake System
 Control Module**. Target-native H firmware then supplies the command semantics:
 
 - signal 254 is an unsigned 6-bit field at B3. It follows
-  `FEBE7D96 -> FEBEF127 -> FEBEADB0`; `0xCBE6E` decodes values
-  `1/4/10/11/19` into five cooperative steering mode families;
+  `FEBE7D96 -> FEBEF127 -> FEBEADB0`; `0xCBE6E` accepts values
+  `1/4/10/11/19`, asserts one common active flag, and selects one of five mutually
+  exclusive cooperative-control profile flags. Downstream helpers select distinct
+  calibration banks from those profile flags. `0xC825A` additionally treats raw
+  IDs `25/27` as a special state/monitor pair; only `25` is in the accepted
+  steering-controller profile set;
 - signal 255 is signed16 at B4:B5. It follows
   `FEBE7D94 -> FEBEF1CC -> 0xFEBEAE82`;
-- `0xC9DB0/0xC9E54` turn signal 255 into replicated target state;
-- independently, `0xCBD7E/0xCB096` reconstruct the measured steering-angle domain
-  from FD `0x025` signals 184/185/186;
+- `0xC9DB0/0xC9E54` turn signal 255 into replicated target state, beginning with
+  `2 * signal255`;
+- independently, FD `0x025` signal184 is signed12 coarse steering angle and
+  signal185 is signed4 fractional steering angle. `0x42676` carries signal184
+  without scaling into the exact H DID `0x1037 Steering Angle` source. Techstream
+  `CDbPhyData` key 3 converts that raw count as `raw * 15`, with one decimal place
+  and unit `deg`, proving **1.5 deg/count** for signal184;
+- `0xB24D0` recombines `15 * signal184 + signal185`, and `0xB23A2` divides that
+  combined quantity by `3600` for a full-revolution representation. Therefore
+  signal185 is a signed **0.1-degree fraction** and the combined FD025 angle is in
+  tenths of a degree;
+- `0xCBD7E/0xCB096` convert the same measured angle into the controller domain as
+  `trunc((15*coarse + fraction) * 1787 / 512)`;
 - `0xCA138` applies the **same `0xB76/0x400` gain** to target and measured state and
   computes target minus measured; and
 - that error enters the active steering controller and eventually contributes through
@@ -214,12 +228,17 @@ Control Module**. Target-native H firmware then supplies the command semantics:
   `0x1C02` **Command Value Torque**, then DID `0x1152` **Command Value Current
   (Q Axis)**.
 
-This is sufficient target-native evidence to classify signal 255 as a **target
-steering-angle command**, not a torque command. The physical B6 angle scale is not
-yet closed, and no Sienna `0x131` scale is transplanted. Techstream's P5 family also
-contains the names **Target Lateral ID** and **Target Steering Angle After Output
-Compensation**, but exact H lacks their `0x1CEE` observer DID, so those names are
-corroboration rather than a one-to-one signal-name assignment.
+This closes both the command domain and the controller-equivalent physical scale.
+Equating the pre-comparator target and measured gains gives
+`2 * signal255 = tenths_degree * 1787 / 512`, so **one signal255 count is
+`1024/17870 deg = 0.057302742... deg = 1.000121519... mrad`** in the matched
+controller domain. The 0.0122% offset from exactly 1 mrad/count is consistent with
+H's `1787/512` fixed-point approximation; the firmware/Techstream evidence does not
+itself name the B6 engineering unit as `mrad`, so that literal OEM wire-unit label
+remains bounded. No Sienna `0x131` scale is transplanted. Techstream's P5 family
+also contains **Target Lateral ID** and **Target Steering Angle After Output
+Compensation**, but exact H lacks their `0x1CEE` observer DID, so those names remain
+family corroboration rather than one-to-one signal-name assignments.
 
 Signals 262 and 263 remain important companion modifiers: B8/B9 feed `0xCC442` and
 `0xCBFCE` as percentage-like scaling inputs to internal steering contributors.
@@ -313,10 +332,13 @@ fields are sensor state; and no second command-sized generated scalar or recover
 route was identified. Arbitrary computed aliases and DMA/peripheral mutation remain
 outside this static proof.
 
-What remains open is no longer "where does the EPS get an autonomous target?" It is
-how to operate this interface safely: exact physical angle scale, request/validity
-semantics, active mode-ID meaning, cadence and loss behavior, SecOC freshness/key
-contract, and the upstream `FRC_P5 -> Brake/EPB -> EPS` producer/routing chain.
+What remains open is no longer "where does the EPS get an autonomous target?" or
+"what is its physical scale?" It is how to operate this known interface safely:
+exact Toyota feature labels for signal254's five controller profiles, remaining
+request/validity semantics, cadence and loss behavior, SecOC freshness/key contract,
+and the upstream `FRC_P5 -> Brake/EPB -> EPS` producer/routing chain. The literal
+OEM engineering-unit name for signal255 is also still unjoined even though its
+controller-equivalent degree/radian scale is closed.
 
 ## 9. Porting roadmap after this recovery
 
@@ -342,8 +364,10 @@ The receiver-side command carrier is now identified, so the decisive experiment 
 - capture protected `0x0B6` during known stock-LTA intervals and correlate signal
   254, signed16 signal 255, signals 262/263, and B6 validity with steering angle,
   `0x1C02`, `0x1152`, and actual Q-current;
-- determine the physical angle scale, active mode-ID values, request/validity rules,
-  update cadence, timeout behavior, and normal bounds before any injection attempt;
+- use the now-closed `1024/17870 deg/count` signal255 scale to determine the exact
+  Toyota feature meaning of signal254 profiles `1/4/10/11/19`, request/validity
+  rules, update cadence, timeout behavior, and normal target/rate bounds before any
+  injection attempt;
 - recover the B6 SecOC freshness/key/source contract and stock-source suppression
   requirements; and
 - acquire/analyze true-TSS3 `FRC_P5` plus Brake/EPB/gateway producer-side firmware
@@ -377,6 +401,6 @@ raw-body-bound decompiler evidence in
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009)
+- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010)
 - Corrections with this document as canonical home: —
 <!-- knowledge-cross-references:end -->

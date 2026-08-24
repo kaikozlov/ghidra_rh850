@@ -114,10 +114,14 @@ mode/control ID and signal255 B4:B5 is a signed target-steering-angle command.
 from FD `0x025`, and `CA138` applies the same gain to both before computing the
 control error. The result conditionally reaches `C2A8`, general DID `0x1C02 Command
 Value Torque`, and DID `0x1152 Command Value Current (Q Axis)`. B6 signals262/263
-also percentage-modulate internal contributors. The remaining problem is therefore
-safe reproduction of a known EPS receiver contract — physical scale, mode/request/
-validity semantics, cadence/timeouts, SecOC freshness/key state, and upstream
-FRC→Brake producer/routing — not discovery of another steering message.
+also percentage-modulate internal contributors. The physical relation is now closed
+without importing the old `0x131` scale: FD025 coarse/fraction feedback is
+1.5 deg + 0.1-deg fraction, and the matched controller makes signal255
+`1024/17870 deg/count` (`~1.000121519 mrad/count`) controller-equivalent. The
+remaining problem is therefore safe reproduction of a known EPS receiver contract —
+exact OEM unit/profile labels, mode/request/validity semantics, cadence/timeouts,
+SecOC freshness/key state, and upstream FRC→Brake producer/routing — not discovery
+of another steering message or its physical scale.
 
 ### 2.3 Longitudinal control
 

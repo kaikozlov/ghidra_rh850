@@ -48,6 +48,7 @@ TARGET_DLLS = (
     "GetTSS3OperationFFDP5_DT.dll",
     "GetADSDDRInfoP5_DT.dll",
     "GetADSOperationFFDP5_DT.dll",
+    "GetDatMonSignalInfoP5_DT.dll",
     "CommandCommon.dll",
     "GetRoutineActTstInitP5_DT.dll",
     "GetRoutineActTstSignalInfoP5_DT.dll",
@@ -1205,6 +1206,127 @@ def ads_ddr_rows(parser: DDBParser, root: Path) -> dict:
     }
 
 
+def emps_angle_conversion(parser: DDBParser, root: Path) -> dict:
+    """Recover the P5 data-monitor numeric conversion for steering angle.
+
+    GetDatMonSignalInfoP5_DT.dll copies CDbPhyData record +0/+4/+8 into
+    CCmdConversionTbl m_lMul/m_lDiv/m_lOffset, and +0x14/+0x15 into the signed
+    and decimal-point fields. The monitor's raw/graph ranges independently pin
+    the conversion direction. This keeps the UI conversion separate from the
+    H firmware's wire/controller proof.
+    """
+    names = parser.load_string_db(root / "NA/DB/M_English.ddb")
+
+    def db_rows(region: str) -> dict:
+        db = parser.parse_ecu_db(root / f"{region}/DB/EMPS_P5.ddb")
+        monitors = records(db.sections[62])
+        physical = records(db.sections[13])
+        units = records(db.sections[15])
+        phy_by_key = {u16(raw, 0x0C): (i, raw) for i, raw in enumerate(physical)}
+        unit_by_key = {u16(raw, 0x04): (i, raw) for i, raw in enumerate(units)}
+
+        def monitor_by_key(key: int) -> tuple[int, bytes]:
+            found = [(i, raw) for i, raw in enumerate(monitors) if u16(raw, 0x24) == key]
+            if len(found) != 1:
+                raise ValueError(f"{region} EMPS_P5 monitor key {key} count {len(found)}")
+            return found[0]
+
+        def decode(key: int) -> dict:
+            idx, raw = monitor_by_key(key)
+            phy_key = u16(raw, 0x2A)
+            phy_idx, phy = phy_by_key[phy_key]
+            unit_key = u16(phy, 0x0E)
+            unit_idx, unit = unit_by_key[unit_key]
+            return {
+                "monitor_key": key,
+                "record_index": idx,
+                "name": names.get_string(u32(raw, 0x18)),
+                "physical_data_key": phy_key,
+                "physical_record_index": phy_idx,
+                "physical_raw_hex": phy.hex(),
+                "mul": struct.unpack_from("<i", phy, 0x00)[0],
+                "div": struct.unpack_from("<i", phy, 0x04)[0],
+                "offset": struct.unpack_from("<i", phy, 0x08)[0],
+                "signed": bool(phy[0x14]),
+                "decimal_point_count": phy[0x15],
+                "unit_key": unit_key,
+                "unit_record_index": unit_idx,
+                "unit": names.get_string(u32(unit, 0x00)),
+                "data_range": [struct.unpack_from("<i", raw, 0x10)[0], struct.unpack_from("<i", raw, 0x0C)[0]],
+                "graph_range": [struct.unpack_from("<i", raw, 0x08)[0], struct.unpack_from("<i", raw, 0x04)[0]],
+                "monitor_raw_sha256": sha256(raw),
+            }
+
+        return {"steering_angle": decode(17), "vehicle_speed_sp1": decode(305)}
+
+    regions = {region: db_rows(region) for region in REGIONS}
+    canonical = regions["NA"]
+    for region in ("EU", "JP"):
+        for field in ("physical_data_key", "physical_raw_hex", "mul", "div", "offset", "signed", "decimal_point_count", "unit", "data_range", "graph_range"):
+            if regions[region]["steering_angle"][field] != canonical["steering_angle"][field]:
+                raise ValueError(f"EMPS steering-angle conversion differs in {region}: {field}")
+
+    steer = canonical["steering_angle"]
+    speed = canonical["vehicle_speed_sp1"]
+    if not (
+        steer["name"] == "Steering Angle"
+        and steer["physical_data_key"] == 3
+        and steer["mul"] == 15
+        and steer["div"] == 1
+        and steer["offset"] == 0
+        and steer["signed"]
+        and steer["decimal_point_count"] == 1
+        and steer["unit"] == "deg"
+        and steer["data_range"] == [-2048, 2047]
+        and steer["graph_range"] == [-30720, 30705]
+    ):
+        raise ValueError("EMPS steering-angle conversion drift")
+    if not (
+        speed["name"] == "CAN Vehicle Speed (SP1)"
+        and speed["mul"] == 1
+        and speed["div"] == 10
+        and speed["offset"] == 0
+        and speed["decimal_point_count"] == 1
+        and speed["data_range"] == [0, 30000]
+        and speed["graph_range"] == [0, 3000]
+    ):
+        raise ValueError("EMPS SP1 conversion-direction witness drift")
+
+    dll = PE(root / "bin/GetDatMonSignalInfoP5_DT.dll")
+    debug_strings = {
+        "mul": (0x10009344, b"[CMD]%s(%d): m_ConversionTbl.m_lMul=%ld\x00"),
+        "div": (0x1000931C, b"[CMD]%s(%d): m_ConversionTbl.m_lDiv=%ld\x00"),
+        "offset": (0x100092F0, b"[CMD]%s(%d): m_ConversionTbl.m_lOffset=%ld\x00"),
+        "decimal_point_count": (0x1000943C, b"[CMD]%s(%d): m_lstSignalInfo:m_byDecPntCount=%d\x00"),
+    }
+    for field, (va, expected) in debug_strings.items():
+        if dll.read(va, len(expected)) != expected:
+            raise ValueError(f"GetDatMonSignalInfoP5_DT.dll debug string drift: {field}")
+
+    return {
+        "formula": "graph_integer = raw * mul / div + offset; displayed_value = graph_integer / 10^decimal_point_count",
+        "direction_witness": "CAN Vehicle Speed (SP1): raw 0..30000, mul/div 1/10 -> graph 0..3000; decimal-point-count 1 -> 0.0..300.0 km/h",
+        "steering_angle": steer,
+        "regions": regions,
+        "plugin": {
+            "dll": "GetDatMonSignalInfoP5_DT.dll",
+            "byte_anchors": {
+                "decimal_point_read": dll.check(0x10001965, "8a5115"),
+                "decimal_point_store": dll.check(0x1000196C, "88573d"),
+                "mul_copy": dll.check(0x1000197A, "8b14068b0a894f58"),
+                "div_copy": dll.check(0x10001982, "8b14068b4a04894f5c"),
+                "offset_copy": dll.check(0x1000198B, "8b14068b4a08894f60"),
+                "signed_copy": dll.check(0x10001994, "8b14068a4214884766"),
+                "mul_debug_binding": dll.check(0x10001416, "8b50585268b9000000683c9500106844930010"),
+                "div_debug_binding": dll.check(0x10001438, "8b405c5068ba000000683c950010681c930010"),
+                "offset_debug_binding": dll.check(0x1000145A, "8b48605168bb000000683c95001068f0920010"),
+            },
+            "debug_strings": {field: {"va": f"0x{va:X}", "value": expected[:-1].decode()} for field, (va, expected) in debug_strings.items()},
+        },
+        "physical_interpretation": "EMPS_P5 steering raw count is 1.5 degrees: raw*15 produces a graph integer with one decimal place in degrees.",
+    }
+
+
 def ads_ddr_protocol(root: Path) -> dict:
     dll = PE(root / "bin/GetADSDDRInfoP5_DT.dll")
     imports = dll.imports()
@@ -1673,6 +1795,7 @@ def build(root: Path) -> dict:
         },
         "power_steering": {
             "EMPS_P5": emps_rows(parser, root, "EMPS_P5.ddb"),
+            "emps_angle_conversion": emps_angle_conversion(parser, root),
             "EMPS2_P5": emps_rows(parser, root, "EMPS2_P5.ddb"),
             "did_corpus_scan": corpus_did_scan(root, (0x1CEE, 0x1CEF)),
             "corolla_h_boundary": {

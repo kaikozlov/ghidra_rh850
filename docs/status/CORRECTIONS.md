@@ -2589,9 +2589,13 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   active controller. This is target-native evidence that B6 signal255 is a
   **target steering-angle command**, not torque and not a staged-only value.
 - **Mode/control companion:** `CBE6E` decodes signal254 values `1/4/10/11/19`
-  into distinct cooperative steering-mode flags when communication/validity gates
-  permit. The exact OEM field name remains bounded; Techstream's `Target Lateral
-  ID` family is corroborating vocabulary, not a one-to-one H DID join.
+  into five mutually exclusive cooperative-control profile flags plus a common
+  active flag when communication/validity gates permit. `C9CEA/C9FAE/CB72A/CB900`
+  and later helpers select distinct calibration banks from those profile flags;
+  `C825A` also treats raw IDs `25/27` as a special state/monitor pair, with only
+  `25` in the accepted steering-controller set. The exact Toyota feature labels
+  remain bounded; Techstream's `Target Lateral ID` family is corroborating
+  vocabulary, not a one-to-one H DID join.
 - **Downstream command bridge:** the B6-derived controller contribution reaches
   `C2A8 -> CD3CC` and the general torque composition. Under the recovered normal
   selection/current gates it propagates to DID `0x1C02 Command Value Torque` and
@@ -2602,16 +2606,28 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   only shared command-sized generated-COM fields are target-native `0x025`
   angle/rate sensor state; and the classic active camera/IPM-A
   `2E4/131/191/2FD` monitor family remains removed/disabled.
-- **Correct boundary:** H/F EPS ingress is now identified as protected FD `0x0B6`
-  signal255 target angle with signal254 cooperative-mode selection. Still open:
-  physical B6 wire-to-degree scale/sign convention, exact companion
-  request/validity meanings, live sender freshness/key behavior, and the upstream
-  FRC→Brake/EPB producer/transport path. Arbitrary unrelated computed aliases or
-  undocumented hardware/DMA writers remain bounded, but no second command-sized
-  path was recovered in the audited surfaces.
+- **Physical-scale closure:** H `4636A` unpacks FD025 signal184 as signed12 and
+  signal185 as signed4. `42676 -> 488A8` carries signal184 unchanged into DID
+  `0x1037 Steering Angle`; Techstream P5 physical-data key 3 is byte/code-bound as
+  `Mul=15`, `Div=1`, `Offset=0`, signed, one decimal place, unit `deg`, proving
+  1.5 deg/count. `B24D0` recombines `15*signal184 + signal185`, while `B23A2`
+  divides that value by 3600 for a full revolution, proving signal185 is a signed
+  0.1-degree fraction. In the matched controller, target begins at `2*signal255`
+  and measured angle is `trunc((15*coarse+fraction)*1787/512)`, so signal255 is
+  controller-equivalent to exactly `1024/17870 deg/count` =
+  `1.000121519... mrad/count`. The literal OEM B6 engineering-unit name is not
+  directly recovered; calling it nominal 1 mrad/count remains an interpretation,
+  not a string/name join.
+- **Correct boundary:** H/F EPS ingress and controller-equivalent physical scale are
+  identified as protected FD `0x0B6` signal255 target angle with signal254
+  cooperative-profile selection. Still open: exact OEM B6 unit/profile labels,
+  companion request/validity/cadence meanings, live sender freshness/key behavior,
+  and the upstream FRC→Brake/EPB producer/transport path. Arbitrary unrelated
+  computed aliases or undocumented hardware/DMA writers remain bounded, but no
+  second command-sized path was recovered in the audited surfaces.
 - **Canonical:**
-  `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json`;
-  `data/generated/corolla_8965H1202000_lta_command_provenance.json` v5;
+  `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json` v2;
+  `data/generated/corolla_8965H1202000_lta_command_provenance.json` v6;
   `tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py`;
   `tests/verify_corolla_8965H1202000_lta_command_provenance.py`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)

@@ -21611,7 +21611,7 @@
       "data/generated/corolla_8965H1202000_application_interrupt_vectors.json": "1ba4b3fd7baf74f5221a482c53a6dd707bc2022daa4ce76dbe1e2404798afc7c",
       "data/generated/corolla_8965H1202000_application_transport_decompiler_evidence.json": "f31acfabe929077337a49cd11785d1a161847fd21dcba538659c6844923cdc69",
       "data/generated/corolla_8965H1202000_application_transport_residue.json": "50dff3fa2e7d3f0ce1aaf06635829046ecded0fc9fc39876f8e6e18786ac6c86",
-      "data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json": "025805f0b859488838bbb6a6f85c21e377b127f90d2a6503234d8773aef0c0ab",
+      "data/generated/corolla_8965H1202000_b6_target_angle_decompiler_evidence.json": "7ef213073e0950245e448774b117475c8dd29e6c7da50bbc73b0303b7e4d53ce",
       "data/generated/corolla_8965H1202000_can_com.json": "4b09e7090e59d92aab8ae82e6b71bd23a2885dba6067c2fbce35a7eaf03575cb",
       "data/generated/corolla_8965H1202000_can_com_decompiler_evidence.json": "cfd7e28a934f06d17e146da4fa60c029ceeedcffd1dc4f67513fd7f40a8e1129",
       "data/generated/corolla_8965H1202000_crypto_residue.json": "0619483d6ea92fc67a8089b566b43c1aada1a3c955ef041a631645d5476b9c1d",
@@ -21661,7 +21661,7 @@
       "verified-exact-body-transfer": 288
     },
     "genuinely_unresolved_count": 0,
-    "h_native_evidence_functions_without_unique_sienna_pair": 599,
+    "h_native_evidence_functions_without_unique_sienna_pair": 603,
     "named_function_count": 1113,
     "structural_candidate_only_count": 0,
     "surface_recensus_reference_function_count": 614,
@@ -21718,6 +21718,6 @@
         "verified-exact-body-transfer": 3
       }
     },
-    "target_native_inspected_reference_function_count": 173
+    "target_native_inspected_reference_function_count": 174
   }
 }

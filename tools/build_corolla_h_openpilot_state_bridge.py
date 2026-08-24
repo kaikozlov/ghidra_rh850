@@ -119,13 +119,13 @@ def build() -> dict:
 
     pb=tech["protected_brake_profile_semantics"]
     ipm=tech["camera_ipm_a_residue"]
-    if lta["schema"] != "corolla-8965H1202000-lta-command-provenance-v5":
+    if lta["schema"] != "corolla-8965H1202000-lta-command-provenance-v6":
         raise ValueError("corrected LTA provenance schema drift")
     lta_static = lta["static_conclusion"]
     if not (lta_static["named_retained_branch_computed_alias_audit_closed"] and lta_static["b6_percentage_modulates_retained_branch"]):
         raise ValueError("computed retained-branch audit not closed")
     return {
-      "schema":"corolla-8965H1202000-openpilot-state-bridge-v3",
+      "schema":"corolla-8965H1202000-openpilot-state-bridge-v4",
       "evidence_boundary": (
         "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. "
         "Sienna/openpilot structures are used only to identify which roles a port needs, not to transplant field scales or fault codes. "
@@ -205,6 +205,10 @@ def build() -> dict:
           "classification": target["wire_ingress"]["classification"],
           "target_vs_measured_loop": target["measured_angle_feedback"]["classification"],
           "physical_scale_closed": target["scaling"]["physical_degree_scale_closed"],
+          "controller_equivalent_deg_per_count": target["scaling"]["controller_equivalent_deg_per_b6_count"],
+          "controller_equivalent_mrad_per_count": target["scaling"]["controller_equivalent_mrad_per_b6_count"],
+          "oem_wire_unit_name_closed": target["scaling"]["oem_wire_unit_name_closed"],
+          "mode_profile_semantics": target["mode_ingress"]["profile_semantics"],
           "immediate_sender_relationship": target["static_conclusion"]["immediate_sender_relationship"],
         },
         "brake_domain_conclusion":pb["conclusion"],
@@ -217,11 +221,11 @@ def build() -> dict:
           "statically_dead": lta_static["retained_sienna_lta_branch_statically_dead"],
           "command_sized_wire_scalar_recovered": lta_static["h_only_or_wire_changed_command_sized_scalar_recovered"],
         },
-        "static_conclusion":"Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. The target is rate/limit conditioned, compared against independently reconstructed 0x025 measured steering angle with matched gain, and then drives the cooperative steering controller and torque/current synthesis. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. Physical wire scaling and the upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
+        "static_conclusion":"Protected CAN-FD 0x0B6 signal255 is the recovered H/F external target-steering-angle ingress. The direct-reference-only supervisor census missed it because FEBEF1CC is copied to FEBEAE82 through GP-relative RTE code. FD 0x025 feedback is exactly 1.5 deg/coarse count plus a signed 0.1-deg fractional nibble, and the matched controller closes signal255 at 1024/17870 deg/count (~1.000121519 mrad/count) controller-equivalent scale. Signal254 selects five accepted cooperative-control profiles with distinct calibration banks, but their exact Toyota feature labels remain open. Techstream identifies the immediate monitored sender relationship as Brake System Control Module. The OEM B6 unit label and upstream FRC_P5 -> Brake/EPB producer/authentication route remain open.",
       },
       "structural_corroboration":structural,
       "next_discriminators":[
-        "Recover the physical B6 target-angle scale and exact OEM meaning of signal254 mode IDs plus remaining validity/request fields before any injection experiment.",
+        "Recover the exact Toyota feature labels for signal254 profile IDs plus remaining validity/request/cadence fields before any injection experiment; the signal255 controller-equivalent scale is already closed.",
         "Acquire/analyze true-TSS3 FRC_P5 and Brake/EPB producer/Tx descriptors or synchronized captures to close the upstream FRC -> chassis -> EPS route and authentication contract.",
         "Derive H-native driver override, motor-response, readiness/fault, rate and message-loss limits before defining Panda safety; do not reuse old 0x260/0x262 scales or fault codes.",
       ],

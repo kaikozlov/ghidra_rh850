@@ -150,6 +150,10 @@ EXPECTED_DLLS = {
         77824,
         "c5549207080aabc0a7d415caa610818fd0df4ca2afc78a14b3c5a6e1861d8bce",
     ),
+    "GetDatMonSignalInfoP5_DT.dll": (
+        57344,
+        "8f9e6149fca5e4fe6d9827f394f43019e6ee415c6f0ffc3b381ce6ca4c298f2a",
+    ),
     "GetRoutineActTstInitP5_DT.dll": (
         65536,
         "1bc3fa58221a015a9f5ea70e5ddc98845994728927c034f062060dddc6213267",
@@ -779,6 +783,49 @@ for dbname in ("EMPS_P5", "EMPS2_P5"):
         [x[2] for x in raw_rows] == ["0x1CEE"] * 4 + ["0x1CEF"] * 4
         and [x["primary_data_id"] for x in rows] == ["0x1CEE"] * 4 + ["0x1CEF"] * 4,
     )
+
+conv = ev["power_steering"]["emps_angle_conversion"]
+steer_conv = conv["steering_angle"]
+check(
+    "EMPS steering-angle conversion is raw 1.5 deg/count",
+    steer_conv["name"] == "Steering Angle"
+    and steer_conv["physical_data_key"] == 3
+    and (steer_conv["mul"], steer_conv["div"], steer_conv["offset"]) == (15, 1, 0)
+    and steer_conv["signed"] is True
+    and steer_conv["decimal_point_count"] == 1
+    and steer_conv["unit"] == "deg"
+    and steer_conv["data_range"] == [-2048, 2047]
+    and steer_conv["graph_range"] == [-30720, 30705]
+    and "raw * mul / div + offset" in conv["formula"],
+)
+check(
+    "EMPS conversion direction has independent SP1 witness",
+    conv["regions"]["NA"]["vehicle_speed_sp1"]["monitor_key"] == 305
+    and conv["regions"]["NA"]["vehicle_speed_sp1"]["data_range"] == [0, 30000]
+    and conv["regions"]["NA"]["vehicle_speed_sp1"]["graph_range"] == [0, 3000]
+    and (conv["regions"]["NA"]["vehicle_speed_sp1"]["mul"], conv["regions"]["NA"]["vehicle_speed_sp1"]["div"]) == (1, 10)
+    and "0.0..300.0 km/h" in conv["direction_witness"],
+)
+check(
+    "EMPS steering-angle conversion is cross-region identical",
+    all(
+        conv["regions"][region]["steering_angle"][field] == steer_conv[field]
+        for region in ("NA", "EU", "JP")
+        for field in ("physical_data_key", "physical_raw_hex", "mul", "div", "offset", "signed", "decimal_point_count", "unit", "data_range", "graph_range")
+    ),
+)
+check(
+    "GetDatMonSignalInfo P5 binds CDbPhyData to conversion fields",
+    conv["plugin"]["dll"] == "GetDatMonSignalInfoP5_DT.dll"
+    and set(conv["plugin"]["byte_anchors"]) == {
+        "decimal_point_read", "decimal_point_store", "mul_copy", "div_copy", "offset_copy", "signed_copy",
+        "mul_debug_binding", "div_debug_binding", "offset_debug_binding",
+    }
+    and conv["plugin"]["debug_strings"]["mul"]["value"].endswith("m_lMul=%ld")
+    and conv["plugin"]["debug_strings"]["div"]["value"].endswith("m_lDiv=%ld")
+    and conv["plugin"]["debug_strings"]["offset"]["value"].endswith("m_lOffset=%ld")
+    and "m_byDecPntCount" in conv["plugin"]["debug_strings"]["decimal_point_count"]["value"],
+)
 
 scan_hits = {}
 for path in sorted(ROOT.glob("*/DB/*_P5*.ddb")):

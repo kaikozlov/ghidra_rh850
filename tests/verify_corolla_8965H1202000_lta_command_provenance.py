@@ -38,7 +38,7 @@ image = IMAGE.read_bytes()
 print("\n== evidence identity ==")
 check("report is exact H image-bound", d["software_id"] == "8965H1202000" and d["images"]["corolla_h"]["sha256"] == hashlib.sha256(image).hexdigest())
 check("50 target-native functions support direct+computed provenance closure", e["function_count"] == 50)
-check("LTA report consumes tracked compact whole-corpus census", d["schema"] == "corolla-8965H1202000-lta-command-provenance-v5" and d["whole_corpus_census"]["path"] == "data/generated/corolla_8965H1202000_lta_command_provenance_census.json" and d["whole_corpus_census"]["source_function_count"] > 5000)
+check("LTA report consumes tracked compact whole-corpus census", d["schema"] == "corolla-8965H1202000-lta-command-provenance-v6" and d["whole_corpus_census"]["path"] == "data/generated/corolla_8965H1202000_lta_command_provenance_census.json" and d["whole_corpus_census"]["source_function_count"] > 5000)
 for row in e["functions"]:
     start = int(row["entry"], 16); size = row["body_size"]
     check(f"raw body hash {row['entry']}", hashlib.sha256(image[start:start+size]).hexdigest() == row["body_sha256"])
@@ -131,7 +131,8 @@ ta=d["b6_signed16_target_angle_ingress"]
 check("B6 signed16 snapshot is AE82", ta["wire_ingress"]["signal_id"] == 255 and ta["wire_ingress"]["snapshot_destination"] == "0xFEBEAE82")
 check("B6 signed16 domain is target angle", ta["wire_ingress"]["classification"] == "authenticated-signed16-target-steering-angle-command")
 check("target-vs-measured loop is independently recovered", ta["measured_angle_feedback"]["classification"] == "independent-target-versus-measured-steering-angle-control-loop")
-check("physical B6 angle scale remains open", ta["scaling"]["physical_degree_scale_closed"] is False)
+check("physical B6 controller-equivalent scale is closed", ta["scaling"]["physical_degree_scale_closed"] is True and ta["scaling"]["controller_equivalent_fraction_deg_per_b6_count"] == {"numerator":1024,"denominator":17870} and abs(ta["scaling"]["controller_equivalent_mrad_per_b6_count"]-1.0001215187701138)<1e-12)
+check("B6 OEM wire-unit label remains open", ta["scaling"]["oem_wire_unit_name_closed"] is False)
 check("Techstream identifies B6 immediate sender as brake", ta["techstream"]["immediate_sender_monitor"]["description"] == "Lost Communication with Brake System Control Module")
 
 print("\n== corrected bounded static conclusion ==")
@@ -151,6 +152,9 @@ check("Command Value Torque is not classified LTA-only", s["command_value_torque
 check("external autonomous lateral ingress is identified", s["external_autonomous_lateral_ingress_identified"] is True and "0x0B6 signal255" in s["external_autonomous_lateral_ingress"])
 check("immediate sender relationship is Brake System Control Module", s["immediate_sender_relationship"] == "Brake System Control Module")
 check("upstream feature producer remains open", s["upstream_feature_producer_identified"] is False)
+check("physical B6 scale is promoted", s["physical_scale_identified"] is True and abs(s["controller_equivalent_deg_per_count"]-(1024/17870))<1e-15)
+check("OEM B6 wire-unit label remains open", s["oem_wire_unit_name_identified"] is False)
+check("signal254 accepted profiles recovered", s["signal254_profile_values_recovered"] == [1,4,10,11,19] and s["signal254_exact_feature_labels_identified"] is False)
 check("broad static search remains closed", s["broad_static_search_closed"] is True)
 
 print("\n== correction/documentation integration ==")
@@ -162,7 +166,7 @@ check("CORR-107 records GP-relative target-angle correction", "### CORR-107" in 
 check("CORR-078 is explicitly superseded", "**Superseded:** CORR-107" in corrections)
 check("VAR-036 current finding is corrected", "| VAR-036 | **Correction" in findings and "CC2EC -> CAD62" in findings)
 check("canonical Corolla report carries corrected B6 target-angle branch", "protected B6 carries target steering angle" in variant and "FEBEF1CC -> FEBEAE82" in variant and "CA138" in variant and "CAD62" in variant)
-check("priority promotes recovered B6 target-angle command", "B6 signal255" in priorities and "target-minus-measured" in priorities and "signal255 physical" in priorities and "signed16 scalar is staged-only" not in priorities)
+check("priority promotes recovered B6 target-angle command", "B6 signal255" in priorities and "target-minus-measured" in priorities and "1024/17870" in priorities and "signed16 scalar is staged-only" not in priorities)
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

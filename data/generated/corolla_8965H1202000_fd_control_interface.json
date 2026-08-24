@@ -1,6 +1,6 @@
 {
   "evidence": {
-    "b6_target_angle_ingress_sha256": "6de8ce963574b534553ab052043c30a483ad08e0ff877cda63d28d5973365a42",
+    "b6_target_angle_ingress_sha256": "183d09b13b327559c4e1aa8cd1346270391249c2d4d936c5b1c867559b45f2a5",
     "function_count": 56,
     "function_evidence_sha256": "b7bbc66d9c30b16c77938dc002f4a6f752497c228a0229aa3f5316970130eb17",
     "reference_census_sha256": "acbb28d5ff706377c8eed476de0eb675441a0db65058ea95fe9cebeede06de4d",
@@ -836,7 +836,10 @@
     "signed16_target_angle_command": {
       "canonical_proof": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
       "classification": "authenticated target-steering-angle command; not torque",
-      "physical_scale_closed": false,
+      "controller_equivalent_deg_per_count": 0.05730274202574147,
+      "controller_equivalent_mrad_per_count": 1.0001215187701138,
+      "oem_wire_unit_name_closed": false,
+      "physical_scale_closed": true,
       "signal_id": 255,
       "snapshot_destination": "0xFEBEAE82"
     },

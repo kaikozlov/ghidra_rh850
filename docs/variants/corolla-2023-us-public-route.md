@@ -1204,12 +1204,25 @@ reconstruct the measured steering-angle domain from FD `0x025` signals
 `0xB76/0x400` gain to target and measured angle**, and forms target-minus-measured
 error before the active steering controller. This proves signal 255 is a
 **target steering-angle command**, not a relocated `2E4 STEER_TORQUE_CMD`.
-The exact wire-to-degree scale and sign convention remain open.
 
-Signal 254 is its companion 6-bit control/mode ID. Under communication/validity
-gates, `CBE6E` decodes values `1`, `4`, `10`, `11`, and `19` into distinct
-cooperative steering-mode flags; value `1` sets the mode used by the clearest
-signal-255 target-angle path. The exact OEM field name remains bounded.
+The physical relation is also closed. Signal184 is the signed12 coarse angle that
+`42676 -> 488A8` carries unchanged into DID `0x1037 Steering Angle`; Techstream
+P5 physical-data key 3 converts it as 1.5 deg/count. Signal185 is signed4;
+`B24D0` recombines `15*signal184 + signal185`, and `B23A2` divides that combined
+value by `3600` for a full-turn representation, proving a 0.1-deg fractional
+unit. The measured controller state is
+`trunc((15*coarse+fraction)*1787/512)`, while the B6 target begins at
+`2*signal255`. Therefore one signal255 count is controller-equivalent to exactly
+**`1024/17870 deg = 0.057302742... deg = 1.000121519... mrad`**. The literal OEM
+B6 engineering-unit name is not directly recovered; nominal `1 mrad/count` is a
+strong interpretation of this fixed-point result, not an imported Sienna scale.
+
+Signal 254 is its companion 6-bit control/profile ID. Under communication/validity
+gates, `CBE6E` decodes values `1`, `4`, `10`, `11`, and `19` into five mutually
+exclusive cooperative-control profile flags plus a common active flag. Multiple
+later helpers select distinct calibration banks from those profile flags. `C825A`
+also treats raw IDs `25/27` as a special monitor/state pair; only `25` is in the
+accepted steering-controller profile set. Exact Toyota feature labels remain bounded.
 
 The complete B6 result is therefore: `0x0B6` is a **secured steering-control and
 supervisory interface**. It carries the recovered target-angle magnitude plus
@@ -2561,9 +2574,9 @@ same-vehicle B6 **parameter-recovery capture**, not another firmware-wide static
    echoes being mistaken for stock traffic;
 3. simultaneously read `1C02 Command Value Torque`, `1152 Command Value Current
    (Q Axis)`, and actual Q current with read-only XCP/DAQ if `7F7/7F8` is reachable;
-4. solve signal255 physical angle scale/sign and characterize signal254 active-mode
-   values, B6 request/validity bits, cadence, timeout/loss response, and rate/target
-   bounds; and
+4. use the closed `1024/17870 deg/count` signal255 scale to characterize the exact
+   Toyota meaning of signal254 profiles `1/4/10/11/19`, B6 request/validity bits,
+   cadence, timeout/loss response, and rate/target bounds; and
 5. join the captured B6 producer to FRC/Brake/gateway state so the upstream routing
    and SecOC source contract is explicit.
 

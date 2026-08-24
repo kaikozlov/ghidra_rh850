@@ -120,6 +120,10 @@
       "size": 77824,
       "sha256": "c5549207080aabc0a7d415caa610818fd0df4ca2afc78a14b3c5a6e1861d8bce"
     },
+    "GetDatMonSignalInfoP5_DT.dll": {
+      "size": 57344,
+      "sha256": "8f9e6149fca5e4fe6d9827f394f43019e6ee415c6f0ffc3b381ce6ca4c298f2a"
+    },
     "CommandCommon.dll": {
       "size": 1028096,
       "sha256": "07547a9e47378d37c3ef7d96c2f33f6c62c4151626d98d3f3ff03b7c74909de7"
@@ -3819,6 +3823,262 @@
         "raw_sha256": "257e413f867a59bf039f9037258eb57e191dce0301af432e3f8588efb9cda794"
       }
     ],
+    "emps_angle_conversion": {
+      "formula": "graph_integer = raw * mul / div + offset; displayed_value = graph_integer / 10^decimal_point_count",
+      "direction_witness": "CAN Vehicle Speed (SP1): raw 0..30000, mul/div 1/10 -> graph 0..3000; decimal-point-count 1 -> 0.0..300.0 km/h",
+      "steering_angle": {
+        "monitor_key": 17,
+        "record_index": 8,
+        "name": "Steering Angle",
+        "physical_data_key": 3,
+        "physical_record_index": 2,
+        "physical_raw_hex": "0f000000010000000000000003002e000000000001010000",
+        "mul": 15,
+        "div": 1,
+        "offset": 0,
+        "signed": true,
+        "decimal_point_count": 1,
+        "unit_key": 46,
+        "unit_record_index": 6,
+        "unit": "deg",
+        "data_range": [
+          -2048,
+          2047
+        ],
+        "graph_range": [
+          -30720,
+          30705
+        ],
+        "monitor_raw_sha256": "fb5db46f4bba587ee5a6217107a8380e58b93f9846eba8838e38eb623b022969"
+      },
+      "regions": {
+        "NA": {
+          "steering_angle": {
+            "monitor_key": 17,
+            "record_index": 8,
+            "name": "Steering Angle",
+            "physical_data_key": 3,
+            "physical_record_index": 2,
+            "physical_raw_hex": "0f000000010000000000000003002e000000000001010000",
+            "mul": 15,
+            "div": 1,
+            "offset": 0,
+            "signed": true,
+            "decimal_point_count": 1,
+            "unit_key": 46,
+            "unit_record_index": 6,
+            "unit": "deg",
+            "data_range": [
+              -2048,
+              2047
+            ],
+            "graph_range": [
+              -30720,
+              30705
+            ],
+            "monitor_raw_sha256": "fb5db46f4bba587ee5a6217107a8380e58b93f9846eba8838e38eb623b022969"
+          },
+          "vehicle_speed_sp1": {
+            "monitor_key": 305,
+            "record_index": 85,
+            "name": "CAN Vehicle Speed (SP1)",
+            "physical_data_key": 19,
+            "physical_record_index": 18,
+            "physical_raw_hex": "010000000a00000000000000130015000000000000010000",
+            "mul": 1,
+            "div": 10,
+            "offset": 0,
+            "signed": false,
+            "decimal_point_count": 1,
+            "unit_key": 21,
+            "unit_record_index": 5,
+            "unit": "km/h",
+            "data_range": [
+              0,
+              30000
+            ],
+            "graph_range": [
+              0,
+              3000
+            ],
+            "monitor_raw_sha256": "df9cce739aa225b14a6f37bca1339c603f59df554252767f4506af8b75bf799f"
+          }
+        },
+        "EU": {
+          "steering_angle": {
+            "monitor_key": 17,
+            "record_index": 8,
+            "name": "Steering Angle",
+            "physical_data_key": 3,
+            "physical_record_index": 2,
+            "physical_raw_hex": "0f000000010000000000000003002e000000000001010000",
+            "mul": 15,
+            "div": 1,
+            "offset": 0,
+            "signed": true,
+            "decimal_point_count": 1,
+            "unit_key": 46,
+            "unit_record_index": 6,
+            "unit": "deg",
+            "data_range": [
+              -2048,
+              2047
+            ],
+            "graph_range": [
+              -30720,
+              30705
+            ],
+            "monitor_raw_sha256": "fb5db46f4bba587ee5a6217107a8380e58b93f9846eba8838e38eb623b022969"
+          },
+          "vehicle_speed_sp1": {
+            "monitor_key": 305,
+            "record_index": 85,
+            "name": "CAN Vehicle Speed (SP1)",
+            "physical_data_key": 19,
+            "physical_record_index": 18,
+            "physical_raw_hex": "010000000a00000000000000130015000000000000010000",
+            "mul": 1,
+            "div": 10,
+            "offset": 0,
+            "signed": false,
+            "decimal_point_count": 1,
+            "unit_key": 21,
+            "unit_record_index": 5,
+            "unit": "km/h",
+            "data_range": [
+              0,
+              30000
+            ],
+            "graph_range": [
+              0,
+              3000
+            ],
+            "monitor_raw_sha256": "df9cce739aa225b14a6f37bca1339c603f59df554252767f4506af8b75bf799f"
+          }
+        },
+        "JP": {
+          "steering_angle": {
+            "monitor_key": 17,
+            "record_index": 8,
+            "name": "Steering Angle",
+            "physical_data_key": 3,
+            "physical_record_index": 2,
+            "physical_raw_hex": "0f000000010000000000000003002e000000000001010000",
+            "mul": 15,
+            "div": 1,
+            "offset": 0,
+            "signed": true,
+            "decimal_point_count": 1,
+            "unit_key": 46,
+            "unit_record_index": 6,
+            "unit": "deg",
+            "data_range": [
+              -2048,
+              2047
+            ],
+            "graph_range": [
+              -30720,
+              30705
+            ],
+            "monitor_raw_sha256": "fb5db46f4bba587ee5a6217107a8380e58b93f9846eba8838e38eb623b022969"
+          },
+          "vehicle_speed_sp1": {
+            "monitor_key": 305,
+            "record_index": 85,
+            "name": "CAN Vehicle Speed (SP1)",
+            "physical_data_key": 19,
+            "physical_record_index": 18,
+            "physical_raw_hex": "010000000a00000000000000130015000000000000010000",
+            "mul": 1,
+            "div": 10,
+            "offset": 0,
+            "signed": false,
+            "decimal_point_count": 1,
+            "unit_key": 21,
+            "unit_record_index": 5,
+            "unit": "km/h",
+            "data_range": [
+              0,
+              30000
+            ],
+            "graph_range": [
+              0,
+              3000
+            ],
+            "monitor_raw_sha256": "df9cce739aa225b14a6f37bca1339c603f59df554252767f4506af8b75bf799f"
+          }
+        }
+      },
+      "plugin": {
+        "dll": "GetDatMonSignalInfoP5_DT.dll",
+        "byte_anchors": {
+          "decimal_point_read": {
+            "va": "0x10001965",
+            "file_offset": "0x1965",
+            "bytes": "8a5115"
+          },
+          "decimal_point_store": {
+            "va": "0x1000196C",
+            "file_offset": "0x196C",
+            "bytes": "88573d"
+          },
+          "mul_copy": {
+            "va": "0x1000197A",
+            "file_offset": "0x197A",
+            "bytes": "8b14068b0a894f58"
+          },
+          "div_copy": {
+            "va": "0x10001982",
+            "file_offset": "0x1982",
+            "bytes": "8b14068b4a04894f5c"
+          },
+          "offset_copy": {
+            "va": "0x1000198B",
+            "file_offset": "0x198B",
+            "bytes": "8b14068b4a08894f60"
+          },
+          "signed_copy": {
+            "va": "0x10001994",
+            "file_offset": "0x1994",
+            "bytes": "8b14068a4214884766"
+          },
+          "mul_debug_binding": {
+            "va": "0x10001416",
+            "file_offset": "0x1416",
+            "bytes": "8b50585268b9000000683c9500106844930010"
+          },
+          "div_debug_binding": {
+            "va": "0x10001438",
+            "file_offset": "0x1438",
+            "bytes": "8b405c5068ba000000683c950010681c930010"
+          },
+          "offset_debug_binding": {
+            "va": "0x1000145A",
+            "file_offset": "0x145A",
+            "bytes": "8b48605168bb000000683c95001068f0920010"
+          }
+        },
+        "debug_strings": {
+          "mul": {
+            "va": "0x10009344",
+            "value": "[CMD]%s(%d): m_ConversionTbl.m_lMul=%ld"
+          },
+          "div": {
+            "va": "0x1000931C",
+            "value": "[CMD]%s(%d): m_ConversionTbl.m_lDiv=%ld"
+          },
+          "offset": {
+            "va": "0x100092F0",
+            "value": "[CMD]%s(%d): m_ConversionTbl.m_lOffset=%ld"
+          },
+          "decimal_point_count": {
+            "va": "0x1000943C",
+            "value": "[CMD]%s(%d): m_lstSignalInfo:m_byDecPntCount=%d"
+          }
+        }
+      },
+      "physical_interpretation": "EMPS_P5 steering raw count is 1.5 degrees: raw*15 produces a graph integer with one decimal place in degrees."
+    },
     "EMPS2_P5": [
       {
         "record_index": 172,

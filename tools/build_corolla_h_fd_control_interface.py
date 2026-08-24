@@ -389,6 +389,9 @@ def main() -> None:
                 "classification": "authenticated target-steering-angle command; not torque",
                 "canonical_proof": str(TARGET_ANGLE.relative_to(REPO)),
                 "physical_scale_closed": target_angle["scaling"]["physical_degree_scale_closed"],
+                "controller_equivalent_deg_per_count": target_angle["scaling"]["controller_equivalent_deg_per_b6_count"],
+                "controller_equivalent_mrad_per_count": target_angle["scaling"]["controller_equivalent_mrad_per_b6_count"],
+                "oem_wire_unit_name_closed": target_angle["scaling"]["oem_wire_unit_name_closed"],
             },
         },
         "sienna_shaped_branch_corrections": {

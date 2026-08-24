@@ -475,7 +475,7 @@ def main() -> int:
     }
 
     out = {
-        "schema": "corolla-8965H1202000-lta-command-provenance-v5",
+        "schema": "corolla-8965H1202000-lta-command-provenance-v6",
         "software_id": "8965H1202000",
         "images": {
             "corolla_h": {"path": str(H_IMAGE.relative_to(REPO)), "sha256": sha(h), "size": len(h)},
@@ -529,14 +529,19 @@ def main() -> int:
             "external_autonomous_lateral_ingress": "protected CAN-FD 0x0B6 signal255 signed16 B4:B5 target steering angle",
             "immediate_sender_relationship": "Brake System Control Module",
             "upstream_feature_producer_identified": False,
+            "physical_scale_identified": target_angle["static_conclusion"]["physical_scale_identified"],
+            "controller_equivalent_deg_per_count": target_angle["static_conclusion"]["controller_equivalent_deg_per_count"],
+            "oem_wire_unit_name_identified": target_angle["static_conclusion"]["oem_wire_unit_name_identified"],
+            "signal254_profile_values_recovered": sorted(int(x) for x in target_angle["mode_ingress"]["decoded_values"]),
+            "signal254_exact_feature_labels_identified": False,
             "broad_static_search_closed": True,
             "next_evidence": (
-                "Recover B6 signal255 physical angle scaling, exact signal254 mode-ID meanings, request/validity/cadence semantics, and SecOC freshness/key behavior; then acquire/analyze FRC_P5 and Brake/EPB firmware or synchronized captures to close the upstream producer route."
+                "Recover exact Toyota feature labels and request/validity/cadence semantics for B6 signal254, plus SecOC freshness/key behavior; then acquire/analyze FRC_P5 and Brake/EPB firmware or synchronized captures to close the upstream producer route."
             ),
         },
         "evidence_boundary": (
             "Static closure is exact for the B6 signal255 generated extraction, GP-relative stage-to-snapshot copy, target-vs-measured angle controller, promoted direct/GP-relative retained-branch writers, raw absolute pointers, literal block/group receives, and literal full-PDU copies in the tracked H corpus. "
-            "The EPS ingress and angle-command domain are identified; physical wire scaling, exact mode/request/validity semantics, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof."
+            "The EPS ingress, angle-command domain, FD025 physical angle representation, and B6 controller-equivalent physical scale are identified. The exact OEM B6 unit label, exact signal254 feature labels/request/validity/cadence semantics, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof."
         ),
     }
 

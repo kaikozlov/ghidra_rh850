@@ -272,16 +272,20 @@ selects mode families for values `1/4/10/11/19`; signals262/263 remain percentag
 like contributor modifiers. D7's command-sized field remains vehicle speed and the
 B6 nonscalar/group/full-PDU alternatives remain negative.
 
-The next H evidence is therefore **parameter and security recovery for this known
-interface**, not another provenance search inside the EPS. Capture protected
-`0x0B6` during stock LTA while synchronizing signal254/255/262/263, B6 validity,
-measured angle, `1C02`, `1152`, and actual Q current. Determine signal255 physical
-angle scale/sign, active mode-ID meaning, request/validity rules, cadence/timeout,
-normal target/rate bounds, and stock-source loss behavior. In parallel, recover the
-B6 SecOC freshness/counter/source contract and determine whether slot-4 command-5
-can produce the required authenticated domain on real hardware. `FRC_P5` plus
-Brake/EPB/gateway firmware remains the software target for **upstream ownership and
-routing/authentication**, not for discovering the EPS setpoint. For a Sienna-style
+The next H evidence is therefore **profile/security and upstream-producer recovery
+for this known interface**, not another provenance or scale search inside the EPS.
+The physical controller relation is now closed: FD `0x025` signal184 is
+1.5 deg/count, signal185 is a signed 0.1-deg fraction, and B6 signal255 is
+`1024/17870 deg/count` (`~1.000121519 mrad/count`) in the matched controller domain.
+Capture protected `0x0B6` during stock LTA while synchronizing
+signal254/255/262/263, B6 validity, measured angle, `1C02`, `1152`, and actual Q
+current to map signal254 profiles `1/4/10/11/19` to exact Toyota feature meanings,
+request/validity rules, cadence/timeout, normal target/rate bounds, and stock-source
+loss behavior. In parallel, recover the B6 SecOC freshness/counter/source contract
+and determine whether slot-4 command-5 can produce the required authenticated domain
+on real hardware. `FRC_P5` plus Brake/EPB/gateway firmware remains the software
+target for **upstream ownership and routing/authentication**, not for discovering the
+EPS setpoint or its scale. For a Sienna-style
 applicable EPS, separately retain the existing valid signed `0x2E4/0x131` command
 experiment.
 

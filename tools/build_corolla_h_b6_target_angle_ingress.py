@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the exact Corolla H protected-B6 target-angle ingress proof."""
 from __future__ import annotations
-import argparse, hashlib, json, struct
+import argparse, hashlib, json, math, struct
 from pathlib import Path
 
 REPO=Path(__file__).resolve().parents[1]
@@ -21,20 +21,27 @@ def main()->int:
     h=a.image.read_bytes(); e=json.loads(a.evidence.read_text()); tech=json.loads(TECH.read_text()); p5=json.loads(P5.read_text())
     if len(h)!=0x100000 or sha(h)!=e['image']['sha256']: raise ValueError('H identity drift')
     funcs={int(x['entry'],16):x['decompiled_c'] for x in e['functions']}
-    if e['function_count']!=35: raise ValueError('target-angle evidence count drift')
+    if e['function_count']!=41: raise ValueError('target-angle evidence count drift')
     # Raw generated COM geometry.
     sig254_pdu=struct.unpack_from('<H',h,0x223FC+254*2)[0]
     sig255_pdu=struct.unpack_from('<H',h,0x223FC+255*2)[0]
     b6_off=struct.unpack_from('<H',h,0x22788+42*2)[0]
     if sig254_pdu!=42 or sig255_pdu!=42 or b6_off!=0x1A7: raise ValueError('B6 signal/PDU geometry drift')
     need(funcs[0x46A10], 'FUN_0007643a(0xfe,0x1aa,6,0,0,0xfebe7d96);', 'FUN_0007643a(0xff,0x1ab,0x10,0,1,', '-0x3a6c')
-    need(funcs[0x5262C], 'uRamfebef127 = uRamfebe7d96;', 'uRamfebef1cc = uRamfebe7d94;')
-    need(funcs[0xB8EEC], '*(code *)(iVar15 + -0xa50) = FUN_00003926[iVar15 + 1];', '*(undefined2 *)(iVar15 + -0x97e) = *(undefined2 *)(&DAT_000039cc + iVar15);')
+    need(funcs[0x5262C], 'uRamfebef127 = uRamfebe7d96;', 'uRamfebef1cc = uRamfebe7d94;', 'uRamfebef182 = uRamfebe7d34;', 'uRamfebef06f = uRamfebe7d3b;')
+    need(funcs[0xB8EEC], '*(code *)(iVar15 + -0xa50) = FUN_00003926[iVar15 + 1];', '*(undefined2 *)(iVar15 + -0x97e) = *(undefined2 *)(&DAT_000039cc + iVar15);', '*(undefined2 *)(iVar15 + -0xa10) = *(undefined2 *)(iVar15 + 0x3982);', '*(undefined1 *)(iVar15 + -0xb3b) = *(undefined1 *)(iVar15 + 0x386f);')
     # GP is hardcoded by these functions as FEBEB800; resolve the hidden copy exactly.
     gp=0xFEBEB800
     if gp+0x3927!=0xFEBEF127 or gp-0xA50!=0xFEBEADB0 or gp+0x39CC!=0xFEBEF1CC or gp-0x97E!=0xFEBEAE82: raise AssertionError('GP arithmetic')
+    # FD025 measured-angle wire representation and independent physical-unit closure.
+    need(funcs[0x4636A], 'FUN_0007643a(0xb8,0x11f,0xc,0,1,0xfebe7d34);', 'FUN_0007643a(0xb9,0x123,4,4,1,')
+    need(funcs[0x42676], 'FUN_000638aa((int)sRamfebe7d34,auStack_e);', 'iVar5 + -0x3dba')
+    need(funcs[0x638AA], 'param_1 + 0x7fff', 'param_1 + -0x7fff', '*param_2 = uVar1;')
+    need(funcs[0xB24D0], 'sRamfebeb140 = sRamfebef182 * 0xf + (short)cRamfebef06f;')
+    need(funcs[0xB23A2], '((int)sRamfebeb140 << 0x10) / 0xe10')
     # B6 signal254 is the target/control ID that selects H steering modes.
     need(funcs[0xCBE6E], "cRamfebeacbd == '\\0'", "cRamfebec26d == '\\x01'", "cRamfebeadb0 == '\\x01'", "cRamfebeadb0 == '\\x04'", "cRamfebeadb0 == '\\n'", "cRamfebeadb0 == '\\v'", "cRamfebeadb0 == '\\x13'", 'iVar2 + 0xa72', 'iVar2 + 0xa73', 'iVar2 + 0xa6e', 'iVar2 + 0xa6f', 'iVar2 + 0xa70', 'iVar2 + 0xa71')
+    need(funcs[0xC825A], "cRamfebeadb0 != '\\x19'", "cRamfebeadb0 != '\\x1b'", "cRamfebeadb0 == '\\x19'", "cRamfebeadb0 == '\\x1b'")
     # Target branch.
     need(funcs[0xC9DB0], 'iVar1 = sRamfebeae82 * 2;', 'sRamfebec14c = (short)iVar2;', 'iRamfebec094 = (int)sRamfebec14c;', 'iRamfebec0fc = iRamfebec094;', 'iRamfebec11c = iRamfebec094;')
     need(funcs[0xC9E54], 'uRamfebec098 = uVar4;', 'uRamfebec100 = uRamfebec098;', 'uRamfebec120 = uRamfebec098;', "if (cRamfebec272 == '\\x01')")
@@ -74,8 +81,16 @@ def main()->int:
     if qbridge['techstream_monitors']['252']['primary_data_id']!='0x1152' or qbridge['techstream_monitors']['252']['name']!='Command Value Current (Q Axis)' or not all(x['recovered'] for x in qbridge['q_axis_command_chain']): raise ValueError('Q-current bridge drift')
     corolla_sets=p5['corolla_model_install_sets']['rows']
     if not any(x['model_name']=='Corolla' and 405 in x['categories'] and 435 in x['categories'] and 498 in x['categories'] for x in corolla_sets): raise ValueError('Corolla P5 topology drift')
+    conv=p5['power_steering']['emps_angle_conversion']; steer_conv=conv['steering_angle']
+    if not (steer_conv['name']=='Steering Angle' and steer_conv['physical_data_key']==3 and steer_conv['mul']==15 and steer_conv['div']==1 and steer_conv['offset']==0 and steer_conv['signed'] is True and steer_conv['decimal_point_count']==1 and steer_conv['unit']=='deg' and steer_conv['data_range']==[-2048,2047] and steer_conv['graph_range']==[-30720,30705]): raise ValueError('P5 steering-angle conversion drift')
+    if 'raw * mul / div + offset' not in conv['formula'] or '0.0..300.0 km/h' not in conv['direction_witness']: raise ValueError('P5 conversion-direction proof drift')
+    did1037=next(x for x in tech['ddb_overlap']['emps_p5']['monitor_rows'] if x['monitor_key']==17)
+    if did1037['name']!='Steering Angle' or did1037['primary_data_id']!='0x1037' or did1037['h_callback']!='0x488A8': raise ValueError('H DID1037 join drift')
+    controller_deg_num=1024; controller_deg_den=17870
+    controller_deg_per_count=controller_deg_num/controller_deg_den
+    controller_mrad_per_count=controller_deg_per_count*math.pi/180*1000
     out={
-      'schema':'corolla-8965H1202000-b6-target-angle-ingress-v1','software_id':'8965H1202000',
+      'schema':'corolla-8965H1202000-b6-target-angle-ingress-v2','software_id':'8965H1202000',
       'sources':{
         'codeflash':{'path':str(a.image.relative_to(REPO)),'sha256':sha(h)},
         'decompiler_evidence':{'path':str(a.evidence.relative_to(REPO)),'sha256':sha(a.evidence.read_bytes()),'function_count':e['function_count']},
@@ -88,7 +103,13 @@ def main()->int:
         'classification':'target-lateral/control-id-mode-selector',
         'decoder':'0x000CBE6E','required_gates':['FEBEACBD==0','FEBEC26D==1'],
         'decoded_values':{'1':['C272','C273'],'4':['C272','C26E'],'10':['C272','C270'],'11':['C272','C26F'],'19':['C272','C271']},
-        'boundary':'Target-native H proves a 6-bit control/mode ID and its decoded branches. Techstream Target Lateral ID is corroborating family vocabulary, not an exact signal-name join.'
+        'profile_semantics':{
+          'common_active_flag':'C272 is asserted for every accepted value',
+          'mutually_exclusive_profile_flags':{'1':'C273','4':'C26E','10':'C270','11':'C26F','19':'C271'},
+          'calibration_selection':'C9CEA/C9FAE/CB72A/CB900 and later controller helpers select distinct calibration banks from these five profile flags',
+          'additional_raw_id_use':'C825A separately treats raw IDs 25 (0x19) and 27 (0x1B) as a special monitor/state pair; only 25 is one of CBE6E steering-controller accepted profiles',
+        },
+        'boundary':'Target-native H proves a 6-bit cooperative-control profile ID, five accepted steering-controller profiles, and distinct per-profile calibration banks. Exact Toyota feature labels for profile values remain unjoined; Techstream Target Lateral ID is corroborating family vocabulary, not an exact signal-name join.'
       },
       'wire_ingress':{
         'can_id':'0x0B6','can_fd':True,'secured':True,'pdu_id':42,'pdu_buffer_offset':'0x01A7',
@@ -116,6 +137,12 @@ def main()->int:
       },
       'measured_angle_feedback':{
         'source_can_id':'0x025','source_signals':[184,185,186],
+        'wire_representation':{
+          'signal184':{'bits':12,'signed':True,'role':'coarse steering angle','techstream_did':'0x1037','techstream_name':'Steering Angle','physical_scale_deg_per_count':1.5},
+          'signal185':{'bits':4,'signed':True,'role':'signed fractional steering angle','physical_scale_deg_per_count':0.1},
+          'combined':'15 * signal184 + signal185','combined_unit':'0.1 deg','full_turn_counts':3600,
+          'proof':'4636A unpacks signed12 signal184 and signed4 signal185; 42676 copies signal184 without scale into DID1037 source; P5 CDbPhyData key3 defines 1.5 deg/count; B24D0 recombines 15*coarse+fraction and B23A2 divides that combined count by 3600 for a revolution/phase conversion.'
+        },
         'snapshots':{'184':'0xFEBEADF0','185':'0xFEBEACC5','186':'0xFEBEAE14'},
         'reconstruction':'0xCBD7E: (fraction + coarse*15) * 0x6FB / 0x200; 0xCB096 algebraically republishes the valid measured-angle domain as C23C/C23E/C240',
         'comparison':'0xCA138 applies the same 0xB76/0x400 gain to the B6-derived target and 0x025-derived measured angle, then subtracts measured from target',
@@ -123,15 +150,23 @@ def main()->int:
       },
       'independent_safety_consumer':{'entry':'0x000CB4F4','source':'0xFEBEAE82','role':'absolute target magnitude / threshold / validity supervision','boundary':'algorithmic safety/plausibility role; OEM monitor name not assigned'},
       'scaling':{
-        'exact_internal_relation':'target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5)); measured_internal = (FD025_fraction + 15*FD025_coarse) * 0x6FB / 0x200 before matched comparator gain',
-        'physical_degree_scale_closed':False,
-        'reason':'The target-native loop proves angle-domain equivalence, but no exact H wire-to-degree calibration join has yet been recovered. Do not reuse Sienna 0x131 scaling by assumption.'
+        'exact_internal_relation':'target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5)); measured_internal = trunc((FD025_fraction + 15*FD025_coarse) * 1787 / 512) before matched comparator gain',
+        'measured_wire_physical_relation':'FD025 signal184 = 1.5 deg/count from H DID1037 + Techstream CDbPhyData key3; signed4 signal185 supplies 0.1-deg fraction, so 15*signal184+signal185 is tenths of a degree',
+        'controller_equivalent_fraction_deg_per_b6_count':{'numerator':controller_deg_num,'denominator':controller_deg_den},
+        'controller_equivalent_deg_per_b6_count':controller_deg_per_count,
+        'controller_equivalent_mrad_per_b6_count':controller_mrad_per_count,
+        'difference_from_exact_1_mrad_percent':(controller_mrad_per_count-1.0)*100,
+        'physical_degree_scale_closed':True,
+        'oem_wire_unit_name_closed':False,
+        'interpretation':'In the matched target-vs-measured controller domain, one B6 signal255 count is equivalent to 1024/17870 deg (~0.057302742 deg), or ~1.000121519 mrad. The 0.0122% offset from exactly 1 mrad is consistent with the firmware fixed-point 1787/512 degree-to-internal approximation, but static evidence does not directly name the B6 engineering unit as milliradians.',
+        'quantization_boundary':'The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above is the exact linearized conversion implied by the two fixed-point gains, not a claim that every individual integer target code has a unique exact degree value.'
       },
       'techstream':{
         'immediate_sender_monitor':{'dtc':b6row['dtc']['techstream_code'],'description':b6row['dtc']['techstream_description'],'failure':b6row['dtc']['techstream_failure']},
         'corolla_p5_topology':{'required_categories':[405,435,498],'names':{'405':'EMPS','435':'Brake/EPB','498':'Front Recognition Camera 2'},'interpretation':'Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves the immediate module relationship, not the upstream FRC-to-Brake wire route.'},
         'family_angle_vocabulary':[{'monitor_key':2071,'name':names[2071],'primary_data_id':'0x1CEE'},{'monitor_key':2072,'name':names[2072],'primary_data_id':'0x1CEE'}],
-        'vocabulary_boundary':'EMPS_P5 family vocabulary corroborates the target-angle interpretation, but exact H lacks DID 0x1CEE; neither family observer name nor a physical degree scale is assigned one-to-one to B6 signal255.'
+        'steering_angle_conversion':{'did':'0x1037','name':'Steering Angle','h_callback':'0x488A8','raw_scale':'1.5 deg/count','physical_data_key':3,'conversion_plugin':'GetDatMonSignalInfoP5_DT.dll'},
+        'vocabulary_boundary':'EMPS_P5 family vocabulary corroborates the target-angle interpretation, but exact H lacks DID 0x1CEE; the H controller closes B6 physical equivalence independently through DID1037/FD025, while the exact OEM engineering-unit name for B6 signal255 remains unjoined.'
       },
       'migration':{
         'pre_tss3_corolla':'classic 0x2E4 5-byte torque command',
@@ -148,10 +183,12 @@ def main()->int:
         'reaches_command_value_torque_and_q_current':True,
         'immediate_sender_relationship':'Brake System Control Module',
         'upstream_feature_producer_identified':False,
-        'physical_scale_identified':False,
-        'next_static_target':'recover B6 companion request/mode semantics and target-angle physical scale; then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain'
+        'physical_scale_identified':True,
+        'controller_equivalent_deg_per_count':controller_deg_per_count,
+        'oem_wire_unit_name_identified':False,
+        'next_static_target':'recover exact Toyota feature labels/behavior for B6 signal254 profiles, then recover FRC_P5 -> Brake/EPB producer/transport/authentication chain'
       },
-      'evidence_boundary':'The H target-angle role is firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream independently names B6 loss as Brake System Control Module loss and supplies P5 target-angle vocabulary. Exact physical wire scaling and the upstream FRC/Brake producer route remain unresolved.'
+      'evidence_boundary':'The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, and independently names B6 loss as Brake System Control Module loss. The exact OEM engineering-unit label for B6, exact feature labels for signal254 profile values, and the upstream FRC/Brake producer route remain unresolved.'
     }
     a.out.parent.mkdir(parents=True,exist_ok=True); a.out.write_text(json.dumps(out,indent=2,sort_keys=True)+'\n'); print(json.dumps({'out':str(a.out),'classification':out['wire_ingress']['classification']},indent=2)); return 0
 if __name__=='__main__': raise SystemExit(main())

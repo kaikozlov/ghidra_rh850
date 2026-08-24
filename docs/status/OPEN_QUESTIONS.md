@@ -83,12 +83,17 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   recovered gates. B6 signal254 is the companion 6-bit mode/control ID and
   signals262/263 percentage-modulate internal contributors. D7/B6 group/full-PDU
   alternatives remain closed and the shared large CAN025 fields remain sensor
-  state. The remaining Corolla experiment is therefore parameter/security and
-  upstream-producer work: during stock LTA, correlate B6 254/255/262/263 and
-  validity with measured angle, `1C02`, `1152`, and Q current to solve physical
-  scale, mode/request semantics, cadence/timeouts, limits, and SecOC behavior;
-  separately acquire FRC/Brake/gateway firmware to recover the producer/routing
-  chain. Static broad searching of this H EPS should not be repeated without a
+  state. The physical scale is now closed statically as well: H carries FD025
+  signal184 unchanged into DID `0x1037 Steering Angle`; Techstream physical key 3
+  makes it 1.5 deg/count, signed4 signal185 supplies a 0.1-deg fraction, and the
+  matched H controller makes B6 signal255 `1024/17870 deg/count`
+  (`~1.000121519 mrad/count`) controller-equivalent. The remaining Corolla
+  experiment is therefore profile/security and upstream-producer work: during
+  stock LTA, correlate B6 254/255/262/263 and validity with measured angle,
+  `1C02`, `1152`, and Q current to map signal254 profiles `1/4/10/11/19` to exact
+  Toyota feature labels, request/validity semantics, cadence/timeouts, limits, and
+  SecOC behavior; separately acquire FRC/Brake/gateway firmware to recover the
+  producer/routing chain. Static broad searching of this H EPS should not be repeated without a
   new concrete lead. TMS-040 now
   closes the acquisition choice: the true-TSS3 **diagnostic-domain holder** is
   category 498 **`FRC_P5` = Front Recognition Camera 2** with dedicated plugin
