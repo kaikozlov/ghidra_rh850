@@ -869,8 +869,15 @@ def main() -> int:
         roots["opendbc"]
         / "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc"
     ).read_text(encoding="utf-8")
+    toyota_nodsu_dbc = (
+        roots["opendbc"]
+        / "opendbc/dbc/generator/toyota/toyota_nodsu_pt.dbc"
+    ).read_text(encoding="utf-8")
     compact_dbc_facts = json.loads(
         (REPO / "data/external/opendbc/toyota_dbc_facts.json").read_text(encoding="utf-8")
+    )
+    toyota_porting_contract = json.loads(
+        (REPO / "data/external/opendbc/toyota_porting_contract.json").read_text(encoding="utf-8")
     )
     opendbc_secoc = (
         roots["opendbc"] / "opendbc/car/secoc.py"
@@ -883,6 +890,15 @@ def main() -> int:
     ).read_text(encoding="utf-8")
     opendbc_toyota_values = (
         roots["opendbc"] / "opendbc/car/toyota/values.py"
+    ).read_text(encoding="utf-8")
+    opendbc_toyota_interface = (
+        roots["opendbc"] / "opendbc/car/toyota/interface.py"
+    ).read_text(encoding="utf-8")
+    opendbc_toyota_carstate = (
+        roots["opendbc"] / "opendbc/car/toyota/carstate.py"
+    ).read_text(encoding="utf-8")
+    opendbc_toyota_radar = (
+        roots["opendbc"] / "opendbc/car/toyota/radar_interface.py"
     ).read_text(encoding="utf-8")
     vance_final = (
         roots["vance_sienna_2024"]
@@ -1201,6 +1217,140 @@ def main() -> int:
                 f"CAN {can_id:#x} {message_name} carries {signal}",
                 signal in block,
             )
+
+    print("\n== tracked Toyota porting contract ==")
+    check(
+        "Toyota porting contract pins the locked opendbc commit",
+        toyota_porting_contract["repository"]["commit"] == lock["repositories"]["opendbc"]["commit"],
+    )
+    for metadata in toyota_porting_contract["sources"].values():
+        source_path = roots["opendbc"] / metadata["path"]
+        if source_path.is_file():
+            source_hash = sha256(source_path)
+        else:
+            # The pinned opendbc checkout is sparse; verify excluded tracked files
+            # directly from the pinned git object instead of weakening coverage.
+            proc = subprocess.run(
+                ["git", "-C", str(roots["opendbc"]), "show",
+                 f"{toyota_porting_contract['repository']['commit']}:{metadata['path']}"],
+                capture_output=True,
+            )
+            source_hash = hashlib.sha256(proc.stdout).hexdigest() if proc.returncode == 0 else ""
+        check(
+            f"Toyota porting source hash {metadata['path']}",
+            source_hash == metadata["sha256"],
+        )
+    check(
+        "upstream TSS2 config is TSS2 plus NO_DSU",
+        "class ToyotaTSS2PlatformConfig(PlatformConfig):" in opendbc_toyota_values
+        and "self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_DSU" in opendbc_toyota_values,
+    )
+    check(
+        "upstream SecOC config layers SECOC onto TSS2 plus NO_DSU",
+        "class ToyotaSecOCPlatformConfig(PlatformConfig):" in opendbc_toyota_values
+        and "self.flags |= ToyotaFlags.TSS2 | ToyotaFlags.NO_DSU | ToyotaFlags.SECOC" in opendbc_toyota_values,
+    )
+    check(
+        "upstream platform-code ECUs include camera radar and EPS with EPS lateral-API semantics",
+        "PLATFORM_CODE_ECUS = (Ecu.fwdCamera, Ecu.fwdRadar, Ecu.eps)" in opendbc_toyota_values
+        and "eps: describes lateral API changes for the EPS" in opendbc_toyota_values
+        and "rejecting LKA messages" in opendbc_toyota_values,
+    )
+    check(
+        "upstream radar track ranges move between pre-TSS2 and TSS2",
+        "list(range(0x180, 0x190))" in opendbc_toyota_radar
+        and "list(range(0x190, 0x1a0))" in opendbc_toyota_radar.lower()
+        and "list(range(0x210, 0x220))" in opendbc_toyota_radar
+        and "list(range(0x220, 0x230))" in opendbc_toyota_radar,
+    )
+    check(
+        "upstream interface distinguishes angle-control safety and timing",
+        "ret.steerControlType = SteerControlType.angle" in opendbc_toyota_interface
+        and "ret.steerActuatorDelay = 0.18" in opendbc_toyota_interface
+        and "ret.steerLimitTimer = 0.8" in opendbc_toyota_interface
+        and "ret.steerActuatorDelay = 0.12" in opendbc_toyota_interface
+        and "ret.steerLimitTimer = 0.4" in opendbc_toyota_interface,
+    )
+    check(
+        "upstream TSS2 architecture treats camera as longitudinal source unless RADAR_ACC",
+        "# In TSS2 cars, the camera does long control" in opendbc_toyota_interface
+        and "candidate in (TSS2_CAR - RADAR_ACC_CAR)" in opendbc_toyota_interface
+        and "cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp" in opendbc_toyota_carstate,
+    )
+    check(
+        "upstream radar-ACC takeover explicitly disables radar transmission",
+        "disable_ecu(can_recv, can_send, bus=0, addr=0x750, sub_addr=0xf" in opendbc_toyota_interface,
+    )
+    check(
+        "classic and SecOC STEERING_LKA preserve semantic ID while changing wire length",
+        "BO_ 740 STEERING_LKA: 5" in toyota_adas_dbc
+        and "BO_ 740 STEERING_LKA: 8" in toyota_secoc_dbc,
+    )
+    check(
+        "TSS2 LTA primary and SecOC companion are distinct messages",
+        "BO_ 401 STEERING_LTA: 8" in toyota_nodsu_dbc
+        and "BO_ 305 STEERING_LTA_2: 8" in toyota_secoc_dbc,
+    )
+    check(
+        "classic and secure longitudinal commands are 0x343 and 0x183",
+        "BO_ 835 ACC_CONTROL: 8" in toyota_2017_dbc
+        and "BO_ 387 ACC_CONTROL_2: 8" in toyota_secoc_dbc,
+    )
+    check(
+        "controller schedules LTA at frame modulo 2 and longitudinal at modulo 3",
+        "if self.frame % 2 == 0 and self.CP.carFingerprint in TSS2_CAR:" in opendbc_toyota_controller
+        and "if self.frame % 3 == 0:" in opendbc_toyota_controller,
+    )
+    toyota_safety = git_show(
+        roots["opendbc"],
+        f"{toyota_porting_contract['repository']['commit']}:opendbc/safety/modes/toyota.h",
+    )
+    check(
+        "pinned Panda safety suppresses replaced Toyota command sources",
+        "{0x2E4, 0, 8, .check_relay = true}" in toyota_safety
+        and "{0x131, 0, 8, .check_relay = true}" in toyota_safety,
+    )
+    check(
+        "pinned Panda safety blocks all SecOC LTA2 actuation",
+        "SecOC cars block any form of LTA actuation for now" in toyota_safety
+        and "if (toyota_secoc && (msg->addr == 0x131U))" in toyota_safety,
+    )
+    check(
+        "controller moves SecOC acceleration into ACC_CONTROL_2",
+        "main_accel_cmd = 0. if self.CP.flags & ToyotaFlags.SECOC.value else pcm_accel_cmd" in opendbc_toyota_controller
+        and "acc_cmd_2 = toyotacan.create_accel_command_2(self.packer, pcm_accel_cmd)" in opendbc_toyota_controller,
+    )
+    check(
+        "CarState consumes driver/EPS torque and both LKA/LTA fault state",
+        'ret.steeringTorque = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_DRIVER"]' in opendbc_toyota_carstate
+        and 'ret.steeringTorqueEps = cp.vl["STEER_TORQUE_SENSOR"]["STEER_TORQUE_EPS"]' in opendbc_toyota_carstate
+        and 'cp.vl["EPS_STATUS"]["LKA_STATE"]' in opendbc_toyota_carstate
+        and 'cp.vl["EPS_STATUS"]["LTA_STATE"]' in opendbc_toyota_carstate,
+    )
+    check(
+        "upstream steering fault state sets match tracked contract",
+        "TEMP_STEER_FAULTS = (0, 9, 11, 21, 25)" in opendbc_toyota_carstate
+        and "PERM_STEER_FAULTS = (3, 17)" in opendbc_toyota_carstate
+        and toyota_porting_contract["control_roles"]["steering_feedback"]["fault_contract"]["temporary_states"] == [0, 9, 11, 21, 25]
+        and toyota_porting_contract["control_roles"]["steering_feedback"]["fault_contract"]["permanent_states"] == [3, 17],
+    )
+    for commit, subject_fragment in (
+        ("e1ce3619", "DBC for RAV4 Prime and Sienna"),
+        ("fb4ac268", "DBC message for SecOC longitudinal control"),
+        ("0ebc4cb4", "Add 2021-23 Toyota Sienna with SecOC"),
+        ("4d93a559", "Add SECOC longitudinal control"),
+        ("5e71fde2", "SecOC platforms should use torque control"),
+        ("e76c2cf5", "make RAV4 TSS2 use torque control"),
+    ):
+        proc = subprocess.run(
+            ["git", "-C", str(roots["opendbc"]), "show", "-s", "--format=%s", commit],
+            capture_output=True, text=True,
+        )
+        check(
+            f"Toyota prior-art history {commit} is pinned and readable",
+            proc.returncode == 0 and subject_fragment.lower() in proc.stdout.lower(),
+            proc.stdout.strip(),
+        )
 
     print("\n== pinned opendbc SecOC sender ==")
     check(

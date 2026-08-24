@@ -413,9 +413,13 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   so the route-to-image/model-year join remains contributor attribution. See
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
   and [../tooling/panda-toyota-routing.md](../tooling/panda-toyota-routing.md).
-- **OQ-030 — TSS 3.0 family breadth.** Which Sienna findings generalize across the
-  family (Camry, RAV4, etc.) is unmapped. See
-  [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).
+- **OQ-030 — TSS 3.0 family breadth and generation control contract.** Which Sienna findings generalize across the
+  family (Camry, RAV4, etc.) is unmapped. ARCH-016 now supplies the upstream
+  Toyota role checklist that each real TSS3 target must close independently:
+  command, feedback/readiness, producer/route, stock-source suppression, limits/faults,
+  UI, and authentication. Exact Corolla H already disproves blind reuse of the older
+  steering IDs. See [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md)
+  and [../variants/tss3-family-comparison.md](../variants/tss3-family-comparison.md).
 
 - **OQ-031 — Boot SecurityAccess lifecycle measurement.** The bad-key backoff itself is
   statically closed at **10 seconds**: the second bad `27 02` arms
@@ -688,6 +692,18 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   a triage candidate only; whether each mechanism transfers must be verified
   against the new firmware bytes before anything is recorded beyond
   `docs/variants/` hypothesis.
+- **OQ-052 — True-TSS3 longitudinal producer/control contract.** Older Toyota prior
+  art makes longitudinal ownership a separate generation-specific architecture:
+  ordinary TSS2 treats the camera as the ACC command source, `RADAR_ACC` moves
+  ownership to the radar, and SecOC splits the acceleration command across classic
+  `0x343` plus authenticated `0x183`. The newer Corolla route already disproves
+  direct wire-shape transfer because its `0x183` is 64-byte CAN-FD. For one exact
+  TSS3 target, identify the real ACC producer (FRC, radar/ADS, gateway, brake/ACC
+  controller, or other), command/feedback fields and cadence, AEB/brake arbitration,
+  integrity/authentication, and the safe stock-source suppression/fallback point.
+  Do not add a TSS3 longitudinal builder or Panda whitelist until that ownership
+  contract is target-native. Canonical:
+  [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4/§5D.
 
 <!-- knowledge-cross-references:begin -->
 ## Knowledge cross-references

@@ -79,6 +79,17 @@ for either proprietary path. A
 newer EMPS/EMPS2 image that implements `0x1CEE/0x1CEF` remains the
 complementary steering-side acquisition.
 
+The pinned comma Toyota implementation is now captured as a role-level porting
+contract in [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md).
+Use that contract as the acceptance checklist for this FRC pass: recover not
+only the lateral payload, but its feedback/readiness state, physical producer
+and route, stock-source suppression point, fault/driver-override envelope, UI
+coexistence, and authentication requirements. Older IDs are search vocabulary,
+not TSS3 wire facts. Lateral acquisition is the immediate software target; the
+separate TSS3 longitudinal ownership/command problem is tracked explicitly as
+[OQ-052](OPEN_QUESTIONS.md) and must be closed before production longitudinal
+support.
+
 The community `NEW_MSG_8A_LAT_CONTROL` heatmap is a high-value lead because it
 independently names torque/target-angle/confidence-like fields, and the
 Reference screenshot corpus (REFERENCE/CorollaExp_Screenshots.md) records

@@ -1,0 +1,343 @@
+{
+  "schema": "opendbc-toyota-porting-contract-v1",
+  "repository": {
+    "url": "https://github.com/commaai/opendbc.git",
+    "commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93"
+  },
+  "boundary": "This file records what the pinned commaai/opendbc Toyota implementation does. It is prior art for semantic roles and integration architecture, not evidence that a TSS3 vehicle reuses any CAN identifier, wire layout, producer ECU, timing, or safety limit. Target firmware and captures remain authoritative.",
+  "sources": {
+    "interface": {
+      "path": "opendbc/car/toyota/interface.py",
+      "sha256": "0bf684e8512539eac0134839b6f0c547c8d10ee2addbd9d1405408b0ba9a3c00"
+    },
+    "carstate": {
+      "path": "opendbc/car/toyota/carstate.py",
+      "sha256": "69362ebbb1d8f3ec505a3b570c15efbd89ecdde55fadac373eba0c7fe54496e1"
+    },
+    "radar_interface": {
+      "path": "opendbc/car/toyota/radar_interface.py",
+      "sha256": "61a857122266d41297d2ac528d8af5085a7fe545001b219b77e1e8c9378442d3"
+    },
+    "carcontroller": {
+      "path": "opendbc/car/toyota/carcontroller.py",
+      "sha256": "57cc1cb138b7d257128b33b17e45e4bbda119610f8827c676b5c56125785dc95"
+    },
+    "toyotacan": {
+      "path": "opendbc/car/toyota/toyotacan.py",
+      "sha256": "aac2d2fe4785f337c9b412a2a358082c57907091522bf092d336735a08dc89b2"
+    },
+    "values": {
+      "path": "opendbc/car/toyota/values.py",
+      "sha256": "acef77680fdfb8ea58396f66d834556b7f8049ecdb91c4050950bf7c6ef3a7af"
+    },
+    "secoc": {
+      "path": "opendbc/car/secoc.py",
+      "sha256": "62ce41680ab05db11807d73370806372ad0623015e2f23b41d7167d00280b13c"
+    },
+    "safety": {
+      "path": "opendbc/safety/modes/toyota.h",
+      "sha256": "5f248ef75fc269b087282e6434a63c2918a2e4ae350741796f40365576d6ac34"
+    },
+    "toyota_2017": {
+      "path": "opendbc/dbc/generator/toyota/_toyota_2017.dbc",
+      "sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48"
+    },
+    "toyota_adas_standard": {
+      "path": "opendbc/dbc/generator/toyota/_toyota_adas_standard.dbc",
+      "sha256": "432ca7e0c0e42d05030042f14f0c9fd1036fed44e90f297465c51fa45032aa34"
+    },
+    "toyota_nodsu": {
+      "path": "opendbc/dbc/generator/toyota/toyota_nodsu_pt.dbc",
+      "sha256": "d513d18b0c0337bbfeb6cb131f071d38dd7e47a05bdb9751b87bfdfbc6d0142d"
+    },
+    "toyota_secoc": {
+      "path": "opendbc/dbc/generator/toyota/toyota_secoc_pt.dbc",
+      "sha256": "2d680b1b73102d1c88bd735da7683f9379c98f39e1ad608618b94bf037c76119"
+    }
+  },
+  "platform_model": {
+    "tss2": {
+      "type": "ToyotaTSS2PlatformConfig",
+      "flags": [
+        "TSS2",
+        "NO_DSU"
+      ],
+      "default_pt_dbc": "toyota_nodsu_pt_generated",
+      "default_radar_dbc": "toyota_tss2_adas",
+      "architectural_fact": "The camera is treated as the longitudinal-control source on TSS2 cars unless the RADAR_ACC flag selects a radar-originated ACC architecture."
+    },
+    "secoc_tss2": {
+      "type": "ToyotaSecOCPlatformConfig",
+      "flags": [
+        "TSS2",
+        "NO_DSU",
+        "SECOC"
+      ],
+      "default_pt_dbc": "toyota_secoc_pt_generated",
+      "default_radar_dbc": "toyota_tss2_adas",
+      "architectural_fact": "SecOC is layered onto the TSS2 platform model rather than replacing the state, ownership, actuation-limit, or stock-suppression model."
+    },
+    "orthogonal_flags": [
+      "RADAR_ACC",
+      "ANGLE_CONTROL",
+      "UNSUPPORTED_DSU",
+      "HYBRID",
+      "DISABLE_RADAR",
+      "RAISED_ACCEL_LIMIT"
+    ]
+  },
+  "control_roles": {
+    "lateral_torque_command": {
+      "message": "STEERING_LKA",
+      "classic": {
+        "can_id_hex": "0x2E4",
+        "length": 5,
+        "source": "toyota_adas_standard"
+      },
+      "secoc": {
+        "can_id_hex": "0x2E4",
+        "length": 8,
+        "source": "toyota_secoc"
+      },
+      "builder": "create_steer_command",
+      "controller_behavior": "Generated every CarController update. On SecOC platforms the message is MACed with its own message counter.",
+      "command_signals": [
+        "STEER_REQUEST",
+        "STEER_TORQUE_CMD"
+      ],
+      "feedback_dependencies": [
+        "STEER_TORQUE_SENSOR.STEER_TORQUE_DRIVER",
+        "STEER_TORQUE_SENSOR.STEER_TORQUE_EPS",
+        "STEER_ANGLE_SENSOR.STEER_RATE",
+        "EPS_STATUS.LKA_STATE"
+      ]
+    },
+    "lateral_angle_command": {
+      "primary_message": {
+        "name": "STEERING_LTA",
+        "can_id_hex": "0x191",
+        "length": 8,
+        "source": "toyota_nodsu",
+        "integrity": "Toyota additive checksum"
+      },
+      "secoc_companion": {
+        "name": "STEERING_LTA_2",
+        "can_id_hex": "0x131",
+        "length": 8,
+        "source": "toyota_secoc",
+        "integrity": "SecOC MAC28"
+      },
+      "builders": [
+        "create_lta_steer_command",
+        "create_lta_steer_command_2"
+      ],
+      "controller_behavior": "Generated on frame modulo 2 for TSS2. When angle control is selected, the torque command is zeroed and LTA angle control becomes active; SecOC platforms also emit the authenticated companion.",
+      "command_signals": [
+        "STEER_ANGLE_CMD",
+        "STEER_REQUEST",
+        "STEER_REQUEST_2",
+        "TORQUE_WIND_DOWN",
+        "COUNTER"
+      ],
+      "feedback_dependencies": [
+        "STEER_TORQUE_SENSOR.STEER_ANGLE",
+        "STEER_ANGLE_SENSOR.STEER_ANGLE",
+        "EPS_STATUS.LTA_STATE",
+        "EPS_STATUS.LKA_STATE"
+      ]
+    },
+    "longitudinal_command": {
+      "primary_message": {
+        "name": "ACC_CONTROL",
+        "can_id_hex": "0x343",
+        "length": 8,
+        "source": "toyota_2017",
+        "integrity": "Toyota additive checksum"
+      },
+      "secoc_command": {
+        "name": "ACC_CONTROL_2",
+        "can_id_hex": "0x183",
+        "length": 8,
+        "source": "toyota_secoc",
+        "integrity": "SecOC MAC28"
+      },
+      "builders": [
+        "create_accel_command",
+        "create_accel_command_2"
+      ],
+      "controller_behavior": "Openpilot longitudinal runs on frame modulo 3. On the SecOC profile ACC_CONTROL carries zero acceleration while ACC_CONTROL_2 carries the signed acceleration command and its own SecOC counter.",
+      "command_signals": [
+        "ACCEL_CMD",
+        "CANCEL_REQ",
+        "PERMIT_BRAKING",
+        "RELEASE_STANDSTILL",
+        "ACC_TYPE",
+        "DISTANCE"
+      ],
+      "ownership": "TSS2 camera unless RADAR_ACC; radar-originated ACC can be disabled via diagnostic communication control before openpilot assumes longitudinal ownership."
+    },
+    "steering_feedback": {
+      "messages": [
+        {
+          "name": "STEER_ANGLE_SENSOR",
+          "can_id_hex": "0x025",
+          "signals": [
+            "STEER_ANGLE",
+            "STEER_FRACTION",
+            "STEER_RATE"
+          ]
+        },
+        {
+          "name": "STEER_TORQUE_SENSOR",
+          "can_id_hex": "0x260",
+          "signals": [
+            "STEER_TORQUE_DRIVER",
+            "STEER_TORQUE_EPS",
+            "STEER_ANGLE",
+            "STEER_ANGLE_INITIALIZING"
+          ]
+        },
+        {
+          "name": "EPS_STATUS",
+          "can_id_hex": "0x262",
+          "signals": [
+            "LKA_STATE",
+            "LTA_STATE"
+          ]
+        }
+      ],
+      "fault_contract": {
+        "temporary_states": [
+          0,
+          9,
+          11,
+          21,
+          25
+        ],
+        "permanent_states": [
+          3,
+          17
+        ],
+        "angle_control_requires_initialized_torque_sensor_angle": true
+      }
+    },
+    "cruise_state_and_cancel": {
+      "messages": [
+        "PCM_CRUISE",
+        "PCM_CRUISE_2",
+        "PCM_CRUISE_SM",
+        "DSU_CRUISE"
+      ],
+      "behavior": "CarState selects different availability/fault sources for unsupported-DSU and TSS2 architectures. Stock-long cancel uses PCM_CRUISE on unsupported-DSU cars and ACC_CONTROL otherwise."
+    },
+    "driver_ui": {
+      "message": {
+        "name": "LKAS_HUD",
+        "can_id_hex": "0x412",
+        "length": 8
+      },
+      "builder": "create_ui_command",
+      "controller_behavior": "Sent on frame modulo 20 or immediately on alert/cancel transitions; selected stock camera fields are preserved when available."
+    }
+  },
+  "actuation_and_safety_contract": {
+    "steer_max": 1500,
+    "steer_error_max": 350,
+    "max_user_torque": 500,
+    "max_steer_rate_deg_s": 100,
+    "max_steer_rate_frames": 17,
+    "lta_max_angle_deg": 94.9461,
+    "lta_max_driver_torque_allowance": 150,
+    "steer_actuator_delay_s": {
+      "torque": 0.12,
+      "angle": 0.18
+    },
+    "steer_limit_timer_s": {
+      "torque": 0.4,
+      "angle": 0.8
+    },
+    "note": "These are implementation limits in the pinned older-Toyota port, not values to transplant into an uncharacterized TSS3 EPS.",
+    "secoc_lta2_actuation_policy": "The pinned Toyota Panda safety hook allows the 0x131 frame shape but rejects any STEERING_LTA_2 actuation request or nonzero angle; pinned SecOC control is therefore torque-only at the safety boundary."
+  },
+  "stock_source_ownership": {
+    "camera_longitudinal": "TSS2 non-RADAR_ACC uses camera-side ACC state and is designed around replacing camera-originated command traffic.",
+    "radar_longitudinal": "RADAR_ACC requires a different ownership path; openpilot can disable radar transmission with UDS CommunicationControl to 0x750/subaddress 0xF when experimental longitudinal is selected.",
+    "generic_replacement_rule": "Toyota safety marks replaced command/UI frames with check_relay so generic Panda forwarding blocks the stock copy when openpilot transmits the replacement.",
+    "implication": "Finding the TSS3 command payload is insufficient: the physical/logical producer, route, duplicate-suppression point, and safe stock fallback must also be recovered."
+  },
+  "secoc_layer": {
+    "authenticated_outputs": [
+      "STEERING_LKA",
+      "STEERING_LTA_2",
+      "ACC_CONTROL_2"
+    ],
+    "synchronization_message": "SECOC_SYNCHRONIZATION",
+    "sync_can_id_hex": "0x00F",
+    "freshness_inputs": [
+      "TRIP_CNT",
+      "RESET_CNT",
+      "per-message counter",
+      "reset-counter low 2 bits"
+    ],
+    "authenticator_bits": 28,
+    "architectural_fact": "The controller keeps independent LKA, LTA, and ACC SecOC message counters and resets all three when RESET_CNT changes."
+  },
+  "history": [
+    {
+      "commit": "e1ce3619",
+      "date": "2024-10-01",
+      "subject": "Toyota: DBC for RAV4 Prime and Sienna (#1310)",
+      "lesson": "Define the vehicle-specific wire vocabulary first."
+    },
+    {
+      "commit": "fb4ac268",
+      "date": "2024-10-03",
+      "subject": "Toyota: DBC message for SecOC longitudinal control (#1337)",
+      "lesson": "Longitudinal command discovery was a separate step from initial SecOC vehicle support."
+    },
+    {
+      "commit": "0ebc4cb4",
+      "date": "2024-10-07",
+      "subject": "Toyota: Add 2021-23 Toyota Sienna with SecOC (#1344)",
+      "lesson": "Platform support binds DBCs, flags, firmware identity, state, and safety together."
+    },
+    {
+      "commit": "4d93a559",
+      "date": "2025-09-29",
+      "subject": "Toyota: Add SECOC longitudinal control (#1385)",
+      "lesson": "Usable longitudinal control arrived after the initial secure-platform definition."
+    },
+    {
+      "commit": "5e71fde2",
+      "date": "2026-01-29",
+      "subject": "Toyota SecOC platforms should use torque control (#3086)",
+      "lesson": "A message that can be authenticated and sent is not automatically the preferred production control mode."
+    },
+    {
+      "commit": "e76c2cf5",
+      "date": "2026-01-30",
+      "subject": "Toyota: make RAV4 TSS2 use torque control (#3091)",
+      "lesson": "Per-platform behavior and fault/tuning evidence can override a nominally available angle-control path."
+    }
+  ],
+  "platform_identity": {
+    "platform_code_ecus": [
+      "fwdCamera",
+      "fwdRadar",
+      "eps"
+    ],
+    "eps_role": "The upstream source explicitly says EPS firmware describes lateral API changes, including use of LTA for lane keeping and rejection of LKA messages.",
+    "porting_implication": "Collect and bind camera, radar, and EPS firmware identities before choosing a TSS3 DBC/control profile; EPS software identity is evidence about lateral API generation, not merely a fingerprint string."
+  },
+  "radar_generation": {
+    "tss2_track_id_ranges": [
+      "0x180..0x18F",
+      "0x190..0x19F"
+    ],
+    "pre_tss2_track_id_ranges": [
+      "0x210..0x21F",
+      "0x220..0x22F"
+    ],
+    "implication": "Even observation inputs moved with Toyota generation changes; TSS3 radar/camera state should be re-censused rather than inherited from TSS-P/TSS2."
+  }
+}
