@@ -1,0 +1,623 @@
+{
+  "conclusion": {
+    "command_generation_change": "classic 5-byte 0x2E4 disappears from active EPS Rx; no target-native replacement setpoint is recovered in H/F",
+    "feedback_generation_change": "0x260 + 0x262 disappear; 32-byte FD 0x030 occupies the newer EPS feedback family",
+    "longitudinal_ui_boundary": "0x343 and 0x412 are whole-vehicle camera/ACC/UI contracts; EPS-table absence does not answer their TSS3 replacements",
+    "secoc_boundary": "0x131 and 0x183 are not pre-TSS3 Corolla messages and must not be included in the Corolla migration baseline",
+    "survives_as_configuration_lead": "0x0AA wheel speeds",
+    "survives_with_semantic_proof": "0x025 steering angle/rate",
+    "tss2_lta_note": "0x191 was only a neutral coexistence/replacement frame on Corolla TSS2 torque control, not its active steering command"
+  },
+  "evidence_boundary": "The 2023 H and 2025 F conclusions are exact application CodeFlash facts. Whole-vehicle openpilot messages may legitimately be absent from an EPS image; only EPS-local command/feedback migrations are treated as architectural evidence.",
+  "explicit_non_corolla_prior_art": [
+    {
+      "id": "0x131",
+      "name": "STEERING_LTA_2"
+    },
+    {
+      "id": "0x183",
+      "name": "ACC_CONTROL_2"
+    }
+  ],
+  "firmware": {
+    "application_region": {
+      "byte_identical": true,
+      "end_exclusive": "0x00100000",
+      "sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
+      "start": "0x00020000"
+    },
+    "corolla_2023_albino": {
+      "image": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+      "software_id": "8965H1202000",
+      "source": {
+        "normalization": "bare-codeflash",
+        "path": "/Users/kai/dev/inspect/repos/ghidra_rh850_analysis/community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+        "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+        "size": 1048576
+      }
+    },
+    "corolla_2025_span": {
+      "image": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+      "sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+      "software_id": "8965F1208000",
+      "source": {
+        "normalization": "trim-all-ff-upper-1mib-from-2mib-range-dump",
+        "path": "/Users/kai/dev/inspect/repos/ghidra_rh850_analysis/community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+        "sha256": "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d",
+        "size": 2097152
+      }
+    },
+    "normal_rx": {
+      "descriptor_count": 40,
+      "descriptors": [
+        {
+          "can_fd": false,
+          "can_id": "0x3B0",
+          "index": 0,
+          "length": 8,
+          "software_id": "0x000003B0"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x63B",
+          "index": 1,
+          "length": 8,
+          "software_id": "0x0000063B"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x624",
+          "index": 2,
+          "length": 8,
+          "software_id": "0x00000624"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x63D",
+          "index": 3,
+          "length": 8,
+          "software_id": "0x0000063D"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x00F",
+          "index": 4,
+          "length": 8,
+          "software_id": "0x0000000F"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x013",
+          "index": 5,
+          "length": 8,
+          "software_id": "0x00000013"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x014",
+          "index": 6,
+          "length": 8,
+          "software_id": "0x00000014"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x015",
+          "index": 7,
+          "length": 8,
+          "software_id": "0x00000015"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x016",
+          "index": 8,
+          "length": 8,
+          "software_id": "0x00000016"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x017",
+          "index": 9,
+          "length": 8,
+          "software_id": "0x00000017"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x018",
+          "index": 10,
+          "length": 8,
+          "software_id": "0x00000018"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x019",
+          "index": 11,
+          "length": 8,
+          "software_id": "0x00000019"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x01A",
+          "index": 12,
+          "length": 8,
+          "software_id": "0x0000001A"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x01B",
+          "index": 13,
+          "length": 8,
+          "software_id": "0x0000001B"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x01C",
+          "index": 14,
+          "length": 8,
+          "software_id": "0x0000001C"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x01D",
+          "index": 15,
+          "length": 8,
+          "software_id": "0x0000001D"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x01E",
+          "index": 16,
+          "length": 8,
+          "software_id": "0x0000001E"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x01F",
+          "index": 17,
+          "length": 8,
+          "software_id": "0x0000001F"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x0D0",
+          "index": 18,
+          "length": 8,
+          "software_id": "0x000000D0"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x3BF",
+          "index": 19,
+          "length": 8,
+          "software_id": "0x000003BF"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x127",
+          "index": 20,
+          "length": 8,
+          "software_id": "0x00000127"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x115",
+          "index": 21,
+          "length": 8,
+          "software_id": "0x00000115"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x1C5",
+          "index": 22,
+          "length": 8,
+          "software_id": "0x000001C5"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x294",
+          "index": 23,
+          "length": 8,
+          "software_id": "0x00000294"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x51E",
+          "index": 24,
+          "length": 8,
+          "software_id": "0x0000051E"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x611",
+          "index": 25,
+          "length": 8,
+          "software_id": "0x00000611"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x2D1",
+          "index": 26,
+          "length": 8,
+          "software_id": "0x000002D1"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x675",
+          "index": 27,
+          "length": 8,
+          "software_id": "0x00000675"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x2E8",
+          "index": 28,
+          "length": 8,
+          "software_id": "0x000002E8"
+        },
+        {
+          "can_fd": true,
+          "can_id": "0x025",
+          "index": 29,
+          "length": 32,
+          "software_id": "0x40000025"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x0AA",
+          "index": 30,
+          "length": 8,
+          "software_id": "0x000000AA"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x101",
+          "index": 31,
+          "length": 8,
+          "software_id": "0x00000101"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x0D5",
+          "index": 32,
+          "length": 8,
+          "software_id": "0x000000D5"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x13B",
+          "index": 33,
+          "length": 8,
+          "software_id": "0x0000013B"
+        },
+        {
+          "can_fd": true,
+          "can_id": "0x090",
+          "index": 34,
+          "length": 32,
+          "software_id": "0x40000090"
+        },
+        {
+          "can_fd": true,
+          "can_id": "0x0D7",
+          "index": 35,
+          "length": 32,
+          "software_id": "0x400000D7"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x64F",
+          "index": 36,
+          "length": 8,
+          "software_id": "0x0000064F"
+        },
+        {
+          "can_fd": true,
+          "can_id": "0x0B6",
+          "index": 37,
+          "length": 32,
+          "software_id": "0x400000B6"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x403",
+          "index": 38,
+          "length": 8,
+          "software_id": "0x00000403"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x490",
+          "index": 39,
+          "length": 1,
+          "software_id": "0x00000490"
+        }
+      ],
+      "table_start": "0x00021F94"
+    },
+    "tx": {
+      "descriptor_count": 5,
+      "descriptors": [
+        {
+          "can_fd": true,
+          "can_id": "0x030",
+          "software_id": "0x40000030"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x351",
+          "software_id": "0x00000351"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x394",
+          "software_id": "0x00000394"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x4A3",
+          "software_id": "0x000004A3"
+        },
+        {
+          "can_fd": false,
+          "can_id": "0x4C8",
+          "software_id": "0x000004C8"
+        }
+      ],
+      "fd030_pdu": {
+        "cycle_or_timeout": 2,
+        "descriptor": "0x00022620",
+        "flags": 3,
+        "length": 32
+      },
+      "table_start": "0x00021F04"
+    }
+  },
+  "message_role_comparison": [
+    {
+      "classification": "same_id_role_continuity_wire_migrated_to_can_fd",
+      "corolla_h_f": {
+        "can_fd": true,
+        "descriptor_index": 29,
+        "direction": "rx",
+        "id": "0x025",
+        "length": 32,
+        "target_native_semantics": "signed-12 coarse angle + signed-4 fraction + signed-12 rate; H recombines angle/fraction and independently consumes rate magnitude"
+      },
+      "porting_consequence": "Keep 0x025 as a high-confidence semantic anchor, but build a generation-specific 32-byte CAN-FD definition; do not reuse the old 8-byte bit layout blindly.",
+      "pre_tss3": {
+        "id": "0x025",
+        "length": 8,
+        "name": "STEER_ANGLE_SENSOR",
+        "profiles": [
+          "corolla_2017_2019",
+          "corolla_tss2_2020_2022"
+        ]
+      },
+      "role": "steering_angle_and_rate_input",
+      "scope": "eps-local"
+    },
+    {
+      "classification": "same_id_same_length_configured_continuity_semantics_not_reproved_here",
+      "corolla_h_f": {
+        "can_fd": false,
+        "descriptor_index": 30,
+        "direction": "rx",
+        "id": "0x0AA",
+        "length": 8
+      },
+      "porting_consequence": "0x0AA is a strong capture/DBC starting point because ID and 8-byte classic descriptor survive, but exact old field offsets remain a separate target-native validation task.",
+      "pre_tss3": {
+        "id": "0x0AA",
+        "length": 8,
+        "name": "WHEEL_SPEEDS",
+        "profiles": [
+          "corolla_2017_2019",
+          "corolla_tss2_2020_2022"
+        ]
+      },
+      "role": "wheel_speed_input",
+      "scope": "eps-local"
+    },
+    {
+      "classification": "old_eps_tx_removed_feedback_consolidated_into_fd030_family",
+      "corolla_h_f": {
+        "fd030_classification": "H-generation replacement/consolidation for Sienna 0x260/0x262 transmit slots; field-for-field equivalence not claimed",
+        "old_id_present_in_tx": false,
+        "replacement_candidate": {
+          "can_fd": true,
+          "direction": "tx",
+          "id": "0x030",
+          "length": 32
+        }
+      },
+      "porting_consequence": "A TSS3 CarState cannot wait for classic 0x260. Decode the proven 0x030 FD output and identify the driver-torque/EPS-torque/accurate-angle fields needed for override and Panda safety.",
+      "pre_tss3": {
+        "id": "0x260",
+        "length": 8,
+        "name": "STEER_TORQUE_SENSOR",
+        "profiles": [
+          "corolla_2017_2019",
+          "corolla_tss2_2020_2022"
+        ]
+      },
+      "role": "driver_eps_torque_and_accurate_angle_feedback",
+      "scope": "eps-local"
+    },
+    {
+      "classification": "old_eps_status_tx_removed_feedback_consolidated_into_fd030_family",
+      "corolla_h_f": {
+        "fd030_classification": "H-generation replacement/consolidation for Sienna 0x260/0x262 transmit slots; field-for-field equivalence not claimed",
+        "old_id_present_in_tx": false,
+        "replacement_candidate": {
+          "can_fd": true,
+          "direction": "tx",
+          "id": "0x030",
+          "length": 32
+        }
+      },
+      "porting_consequence": "Recover the new readiness/fault state from 0x030 (or another proven EPS output) before defining engagement/fault behavior; old numeric LKA_STATE values are not portable assumptions.",
+      "pre_tss3": {
+        "id": "0x262",
+        "length_by_profile": {
+          "corolla_2017_2019": 5,
+          "corolla_tss2_2020_2022": 8
+        },
+        "name": "EPS_STATUS"
+      },
+      "role": "eps_lka_readiness_and_fault_feedback",
+      "scope": "eps-local"
+    },
+    {
+      "classification": "old_command_removed_no_eps_local_replacement_setpoint_recovered",
+      "corolla_h_f": {
+        "obvious_fd_replacement_result": "bounded negative: no H-only/wire-changed supervisor-reaching scalar >=12 bits; 0x0B6 sole signed16 scalar is staged-only",
+        "old_id_active_rx": null,
+        "secured_profiles": [
+          "0x00F",
+          "0x0D7",
+          "0x0B6"
+        ]
+      },
+      "porting_consequence": "Do not port Corolla lateral control by extending/signing 0x2E4. Find the actual stock autonomous-lateral producer/route with full-bus capture and FRC/gateway firmware, then join it to EPS internal command/current state.",
+      "pre_tss3": {
+        "cadence_hz": 100,
+        "id": "0x2E4",
+        "length": 5,
+        "name": "STEERING_LKA",
+        "profiles": [
+          "corolla_2017_2019",
+          "corolla_tss2_2020_2022"
+        ],
+        "role": "active torque steering command"
+      },
+      "role": "active_lateral_torque_command",
+      "scope": "eps-local"
+    },
+    {
+      "classification": "old_neutral_tss2_replacement_removed",
+      "corolla_h_f": {
+        "old_id_active_rx": null
+      },
+      "porting_consequence": "0x191 was not Corolla TSS2's active steering actuator path in openpilot; its disappearance is not evidence for a missing angle-command replacement.",
+      "pre_tss3": {
+        "cadence_hz": 50,
+        "id": "0x191",
+        "length": 8,
+        "name": "STEERING_LTA",
+        "profiles": [
+          "corolla_tss2_2020_2022"
+        ],
+        "role": "neutral/inactive replacement under Corolla torque control"
+      },
+      "role": "tss2_lta_coexistence_frame",
+      "scope": "eps-local"
+    },
+    {
+      "classification": "not_eps_local_absence_non_diagnostic",
+      "corolla_h_f": {
+        "eps_rx": null,
+        "eps_tx": null
+      },
+      "porting_consequence": "The EPS dump cannot answer the TSS3 longitudinal question. Analyze/capture the FRC/radar/brake/gateway ownership path separately.",
+      "pre_tss3": {
+        "id": "0x343",
+        "name": "ACC_CONTROL",
+        "pre_tss2": "cancel-only",
+        "tss2": "active 33.3 Hz openpilot longitudinal replacement of camera source"
+      },
+      "role": "longitudinal_command_and_stock_source_replacement",
+      "scope": "whole-vehicle"
+    },
+    {
+      "classification": "not_eps_local_absence_non_diagnostic",
+      "corolla_h_f": {
+        "eps_rx": null,
+        "eps_tx": null
+      },
+      "porting_consequence": "Recover TSS3 camera/cluster UI separately; no conclusion follows from 0x412 being absent from EPS application tables.",
+      "pre_tss3": {
+        "cadence_hz": 5,
+        "id": "0x412",
+        "length": 8,
+        "name": "LKAS_HUD",
+        "source_state": "camera bus 2"
+      },
+      "role": "lkas_hud_and_lane_ui_replacement",
+      "scope": "whole-vehicle"
+    }
+  ],
+  "old_core_id_inventory": [
+    {
+      "can_id": "0x025",
+      "h_f_rx": {
+        "can_fd": true,
+        "descriptor_index": 29,
+        "direction": "rx",
+        "length": 32
+      },
+      "h_f_tx": null
+    },
+    {
+      "can_id": "0x0AA",
+      "h_f_rx": {
+        "can_fd": false,
+        "descriptor_index": 30,
+        "direction": "rx",
+        "length": 8
+      },
+      "h_f_tx": null
+    },
+    {
+      "can_id": "0x224",
+      "h_f_rx": null,
+      "h_f_tx": null
+    },
+    {
+      "can_id": "0x226",
+      "h_f_rx": null,
+      "h_f_tx": null
+    },
+    {
+      "can_id": "0x260",
+      "h_f_rx": null,
+      "h_f_tx": null
+    },
+    {
+      "can_id": "0x262",
+      "h_f_rx": null,
+      "h_f_tx": null
+    },
+    {
+      "can_id": "0x2E4",
+      "h_f_rx": null,
+      "h_f_tx": null
+    },
+    {
+      "can_id": "0x191",
+      "h_f_rx": null,
+      "h_f_tx": null
+    },
+    {
+      "can_id": "0x343",
+      "h_f_rx": null,
+      "h_f_tx": null
+    },
+    {
+      "can_id": "0x412",
+      "h_f_rx": null,
+      "h_f_tx": null
+    }
+  ],
+  "schema": "corolla-pre-tss3-opendbc-message-comparison-v1",
+  "upstream": {
+    "canonical_commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93",
+    "contract": "data/external/opendbc/toyota_corolla_pre_tss3_contract.json",
+    "corolla_profiles": [
+      "corolla_2017_2019",
+      "corolla_tss2_2020_2022"
+    ],
+    "current_upstream_checked": "2026-08-23",
+    "current_upstream_commit": "7343a66d46213d5f73528afc6c6db713ebd88a9d",
+    "secoc_exclusion": "This is the pre-TSS3 Corolla openpilot/opendbc contract. SecOC Toyota messages 0x131 STEERING_LTA_2 and 0x183 ACC_CONTROL_2 are intentionally excluded because neither Corolla profile has the SECOC flag or emits those messages."
+  }
+}

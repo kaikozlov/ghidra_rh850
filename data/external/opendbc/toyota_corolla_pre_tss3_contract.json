@@ -1,0 +1,550 @@
+{
+  "schema": "opendbc-toyota-corolla-pre-tss3-contract-v1",
+  "repository": "https://github.com/commaai/opendbc",
+  "canonical_commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93",
+  "current_upstream_commit": "7343a66d46213d5f73528afc6c6db713ebd88a9d",
+  "current_upstream_checked": "2026-08-23",
+  "contract_equivalence": "Current upstream changes only platform-set membership checks into equivalent flag tests and adds FW-version regex handling; Toyota Corolla DBCs, safety policy, command builders, message IDs/DLCs, cadences, and platform definitions used here are unchanged.",
+  "boundary": "This is the pre-TSS3 Corolla openpilot/opendbc contract. SecOC Toyota messages 0x131 STEERING_LTA_2 and 0x183 ACC_CONTROL_2 are intentionally excluded because neither Corolla profile has the SECOC flag or emits those messages.",
+  "profiles": {
+    "corolla_2017_2019": {
+      "platform": "TOYOTA_COROLLA",
+      "docs_model_years": "2017-19",
+      "tss2": false,
+      "secoc": false,
+      "steer_control": "torque",
+      "eps_scale": 88,
+      "pt_dbc": "toyota_new_mc_pt_generated",
+      "radar_dbc": "toyota_adas",
+      "openpilot_longitudinal": false,
+      "stock_longitudinal_source": "powertrain/stock ACC; not replaced for normal operation",
+      "eps_fw_versions": [
+        "8965B02181",
+        "8965B02191",
+        "8965B48150"
+      ],
+      "transmit": [
+        {
+          "name": "STEERING_LKA",
+          "id": "0x2E4",
+          "length": 5,
+          "bus": 0,
+          "cadence_hz": 100,
+          "role": "active torque steering command",
+          "check_relay": true
+        },
+        {
+          "name": "ACC_CONTROL",
+          "id": "0x343",
+          "length": 8,
+          "bus": 0,
+          "cadence": "cancel-event only when stock longitudinal",
+          "role": "inactive acceleration plus cancel request",
+          "check_relay": false
+        },
+        {
+          "name": "LKAS_HUD",
+          "id": "0x412",
+          "length": 8,
+          "bus": 0,
+          "cadence_hz": 5,
+          "cadence_note": "also immediate on alert transition/cancel",
+          "role": "lane/HUD replacement",
+          "check_relay": true
+        }
+      ]
+    },
+    "corolla_tss2_2020_2022": {
+      "platform": "TOYOTA_COROLLA_TSS2",
+      "docs_model_years": "2020-22 (platform entry also covers listed related Corolla/Lexus variants)",
+      "tss2": true,
+      "secoc": false,
+      "steer_control": "torque",
+      "eps_scale": 73,
+      "pt_dbc": "toyota_nodsu_pt_generated",
+      "radar_dbc": "toyota_tss2_adas",
+      "openpilot_longitudinal": true,
+      "stock_longitudinal_source": "forward camera on bus 2; openpilot replaces its ACC command traffic",
+      "eps_fw_versions": [
+        "8965B12350",
+        "8965B12470",
+        "8965B12490",
+        "8965B12500",
+        "8965B12510",
+        "8965B12520",
+        "8965B12530",
+        "8965B1254000",
+        "8965B1255000",
+        "8965B1256000",
+        "8965B1270000",
+        "8965B12361",
+        "8965B12451",
+        "8965B16011",
+        "8965B16101",
+        "8965B16170",
+        "8965B16260",
+        "8965B76012",
+        "8965B76050",
+        "8965B76091",
+        "8965B76101"
+      ],
+      "transmit": [
+        {
+          "name": "STEERING_LKA",
+          "id": "0x2E4",
+          "length": 5,
+          "bus": 0,
+          "cadence_hz": 100,
+          "role": "active torque steering command",
+          "check_relay": true
+        },
+        {
+          "name": "STEERING_LTA",
+          "id": "0x191",
+          "length": 8,
+          "bus": 0,
+          "cadence_hz": 50,
+          "role": "neutral/inactive LTA replacement while torque steering is selected",
+          "check_relay": true,
+          "neutral_contract": "STEER_REQUEST=false, STEER_REQUEST_2=false, angle=0, TORQUE_WIND_DOWN=0"
+        },
+        {
+          "name": "ACC_CONTROL",
+          "id": "0x343",
+          "length": 8,
+          "bus": 0,
+          "cadence_hz": 33.333333333333336,
+          "role": "active longitudinal acceleration/cancel/standstill/distance command",
+          "check_relay": true
+        },
+        {
+          "name": "LKAS_HUD",
+          "id": "0x412",
+          "length": 8,
+          "bus": 0,
+          "cadence_hz": 5,
+          "cadence_note": "also immediate on alert transition/cancel",
+          "role": "lane/HUD replacement",
+          "check_relay": true
+        }
+      ]
+    }
+  },
+  "state_messages": [
+    {
+      "name": "STEER_ANGLE_SENSOR",
+      "id": "0x025",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "steering angle",
+        "steering-angle fraction",
+        "steering rate"
+      ]
+    },
+    {
+      "name": "WHEEL_SPEEDS",
+      "id": "0x0AA",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "four wheel speeds",
+        "wheel-speed validity/fault state"
+      ]
+    },
+    {
+      "name": "PCM_CRUISE",
+      "id": "0x1D2",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "cruise active state",
+        "standstill/non-adaptive state",
+        "gas-release state"
+      ]
+    },
+    {
+      "name": "PCM_CRUISE_2",
+      "id": "0x1D3",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "main availability",
+        "set speed",
+        "ACC fault",
+        "low-speed lockout",
+        "follow distance"
+      ]
+    },
+    {
+      "name": "BRAKE_MODULE",
+      "id": "0x224",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "brake pressed"
+      ]
+    },
+    {
+      "name": "BRAKE_MODULE",
+      "id": "0x226",
+      "length": 8,
+      "profiles": [
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "brake pressed"
+      ]
+    },
+    {
+      "name": "STEER_TORQUE_SENSOR",
+      "id": "0x260",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "driver steering torque",
+        "EPS steering torque",
+        "accurate steering angle",
+        "angle initialization"
+      ]
+    },
+    {
+      "name": "EPS_STATUS",
+      "id": "0x262",
+      "length_by_profile": {
+        "corolla_2017_2019": 5,
+        "corolla_tss2_2020_2022": 8
+      },
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "LKA readiness/fault state"
+      ],
+      "note": "TSS2 DBC also has LTA_STATE, but Corolla TSS2 remains torque-control so CarState faulting uses LKA_STATE."
+    },
+    {
+      "name": "PRE_COLLISION",
+      "id": "0x283",
+      "length": 7,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus_by_profile": {
+        "corolla_2017_2019": "pt0",
+        "corolla_tss2_2020_2022": "cam2"
+      },
+      "roles": [
+        "stock AEB state"
+      ]
+    },
+    {
+      "name": "VSC1S07",
+      "id": "0x320",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "GVC longitudinal feedback"
+      ]
+    },
+    {
+      "name": "ACC_CONTROL",
+      "id": "0x343",
+      "length": 8,
+      "profiles": [
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "cam2",
+      "roles": [
+        "stock ACC type",
+        "distance-button state"
+      ],
+      "note": "TSS2 Corolla camera is the stock longitudinal command source."
+    },
+    {
+      "name": "PCM_CRUISE_SM",
+      "id": "0x399",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "temporary ACC fault",
+        "cluster set speed"
+      ]
+    },
+    {
+      "name": "ESP_CONTROL",
+      "id": "0x3B7",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "brake hold",
+        "traction-control disabled"
+      ]
+    },
+    {
+      "name": "GEAR_PACKET",
+      "id": "0x3BC",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "gear selection"
+      ]
+    },
+    {
+      "name": "BSM",
+      "id": "0x3F6",
+      "length": 8,
+      "profiles": [
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "blindspot state"
+      ],
+      "note": "Parsed only when fingerprint detects the message."
+    },
+    {
+      "name": "PCS_HUD",
+      "id": "0x411",
+      "length": 8,
+      "profiles": [
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "cam2",
+      "roles": [
+        "stock FCW indication"
+      ]
+    },
+    {
+      "name": "LKAS_HUD",
+      "id": "0x412",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "cam2",
+      "roles": [
+        "stock lane/HUD state",
+        "TSS2 LKA-button event"
+      ]
+    },
+    {
+      "name": "BODY_CONTROL_STATE_2",
+      "id": "0x610",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "cluster unit selection"
+      ]
+    },
+    {
+      "name": "BLINKERS_STATE",
+      "id": "0x614",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "turn indicators"
+      ]
+    },
+    {
+      "name": "BODY_CONTROL_STATE",
+      "id": "0x620",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "doors",
+        "driver seatbelt",
+        "parking brake"
+      ]
+    },
+    {
+      "name": "LIGHT_STALK",
+      "id": "0x622",
+      "length": 8,
+      "profiles": [
+        "corolla_2017_2019",
+        "corolla_tss2_2020_2022"
+      ],
+      "parser_bus": "pt0",
+      "roles": [
+        "auto-high-beam generic toggle"
+      ]
+    }
+  ],
+  "safety_inputs": [
+    {
+      "id": "0x0AA",
+      "name": "WHEEL_SPEEDS",
+      "rate_hz": 83
+    },
+    {
+      "id": "0x260",
+      "name": "STEER_TORQUE_SENSOR",
+      "rate_hz": 50
+    },
+    {
+      "id": "0x1D2",
+      "name": "PCM_CRUISE",
+      "rate_hz": 33
+    },
+    {
+      "id_by_profile": {
+        "corolla_2017_2019": "0x224",
+        "corolla_tss2_2020_2022": "0x226"
+      },
+      "name": "BRAKE_MODULE",
+      "rate_hz": 40
+    }
+  ],
+  "steering_fault_states": {
+    "temporary": [
+      0,
+      9,
+      11,
+      21,
+      25
+    ],
+    "permanent": [
+      3,
+      17
+    ]
+  },
+  "limits": {
+    "steer_max": 1500,
+    "steer_delta_up": 15,
+    "steer_delta_down": 25,
+    "steer_error_max": 350,
+    "steering_pressed_threshold": 100,
+    "controller_user_torque_cutoff": 500,
+    "high_steering_rate_deg_s": 100,
+    "high_steering_rate_frames": 17
+  },
+  "radar": {
+    "corolla_2017_2019": {
+      "status": "0x123/7B/10Hz",
+      "tracks_a": "0x210..0x21F/8B/20Hz",
+      "tracks_b": "0x220..0x227/8B and 0x228..0x22F/6B/20Hz"
+    },
+    "corolla_tss2_2020_2022": {
+      "status": "0x123/7B/10Hz",
+      "tracks_a": "0x180..0x18F/8B/20Hz",
+      "tracks_b": "0x190..0x19F/8B/20Hz"
+    }
+  },
+  "explicit_non_corolla_secoc_messages": [
+    {
+      "id": "0x131",
+      "name": "STEERING_LTA_2"
+    },
+    {
+      "id": "0x183",
+      "name": "ACC_CONTROL_2"
+    }
+  ],
+  "sources": {
+    "opendbc/car/toyota/values.py": {
+      "canonical_sha256": "acef77680fdfb8ea58396f66d834556b7f8049ecdb91c4050950bf7c6ef3a7af",
+      "current_sha256": "4ff30309d61ef4c9848bb9c5e2fb34f96ba576f5b87a20c9eb1f8f5412a56d9b"
+    },
+    "opendbc/car/toyota/fingerprints.py": {
+      "canonical_sha256": "729603dccdfbea9c0df9e64f22a265cfa8f9fefa8b2b0a6146b3b11dd1622b97",
+      "current_sha256": "729603dccdfbea9c0df9e64f22a265cfa8f9fefa8b2b0a6146b3b11dd1622b97"
+    },
+    "opendbc/car/toyota/interface.py": {
+      "canonical_sha256": "0bf684e8512539eac0134839b6f0c547c8d10ee2addbd9d1405408b0ba9a3c00",
+      "current_sha256": "f7f2cabd5243a687acdae1b54a8ce9161a9d5b5a43daac4fe4a4f5770801adeb"
+    },
+    "opendbc/car/toyota/carstate.py": {
+      "canonical_sha256": "69362ebbb1d8f3ec505a3b570c15efbd89ecdde55fadac373eba0c7fe54496e1",
+      "current_sha256": "10366a54213883c5a426f6249d726c07c11b5067278cec7faa459eeb837da658"
+    },
+    "opendbc/car/toyota/carcontroller.py": {
+      "canonical_sha256": "57cc1cb138b7d257128b33b17e45e4bbda119610f8827c676b5c56125785dc95",
+      "current_sha256": "99846e1e9a3780a106e3bc6c4c31b0546e9cae119af201bf63b15d36f7411946"
+    },
+    "opendbc/car/toyota/toyotacan.py": {
+      "canonical_sha256": "aac2d2fe4785f337c9b412a2a358082c57907091522bf092d336735a08dc89b2",
+      "current_sha256": "aac2d2fe4785f337c9b412a2a358082c57907091522bf092d336735a08dc89b2"
+    },
+    "opendbc/car/toyota/radar_interface.py": {
+      "canonical_sha256": "61a857122266d41297d2ac528d8af5085a7fe545001b219b77e1e8c9378442d3",
+      "current_sha256": "4cc6430fcb4f3701a99e44c9200917f56dd8a072f30a09ccdd5602f0e777ea32"
+    },
+    "opendbc/safety/modes/toyota.h": {
+      "canonical_sha256": "5f248ef75fc269b087282e6434a63c2918a2e4ae350741796f40365576d6ac34",
+      "current_sha256": "5f248ef75fc269b087282e6434a63c2918a2e4ae350741796f40365576d6ac34"
+    },
+    "opendbc/dbc/generator/toyota/_toyota_2017.dbc": {
+      "canonical_sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48",
+      "current_sha256": "818872b1c1034983f61a51460a9b175b4bfe01f3d34f537c3d21f420991a8a48"
+    },
+    "opendbc/dbc/generator/toyota/_toyota_adas_standard.dbc": {
+      "canonical_sha256": "432ca7e0c0e42d05030042f14f0c9fd1036fed44e90f297465c51fa45032aa34",
+      "current_sha256": "432ca7e0c0e42d05030042f14f0c9fd1036fed44e90f297465c51fa45032aa34"
+    },
+    "opendbc/dbc/generator/toyota/toyota_new_mc_pt.dbc": {
+      "canonical_sha256": "1071a58c8a7fe70f70914c99073f5ef25dc2145256d66862cf81deac3e96a522",
+      "current_sha256": "1071a58c8a7fe70f70914c99073f5ef25dc2145256d66862cf81deac3e96a522"
+    },
+    "opendbc/dbc/generator/toyota/toyota_nodsu_pt.dbc": {
+      "canonical_sha256": "d513d18b0c0337bbfeb6cb131f071d38dd7e47a05bdb9751b87bfdfbc6d0142d",
+      "current_sha256": "d513d18b0c0337bbfeb6cb131f071d38dd7e47a05bdb9751b87bfdfbc6d0142d"
+    }
+  }
+}

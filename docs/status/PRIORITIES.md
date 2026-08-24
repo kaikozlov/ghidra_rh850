@@ -240,6 +240,19 @@ Actual Q/D current and the selected Q-current limit are independently named and
 mapped as `0x1151/0x1153/0x1156`. Another generic command→motor xref sweep is no
 longer useful.
 
+The pre-TSS3 Corolla comparison now makes the generation break explicit rather
+than treating older Toyota IDs as a loose search list. Both supported older
+Corolla generations actively steer with 5-byte `0x2E4`; TSS2 `0x191` is only a
+neutral coexistence frame. In H/F, `0x2E4` is gone while `0x025` survives as a
+32-byte FD steering-sensor interface and the old EPS feedback pair `0x260/0x262`
+is replaced by the 32-byte FD `0x030` family. Because Albino H and Span F are
+byte-identical over the full application region, this split is common to both
+dumps. The immediate state-side task is therefore to recover the `0x030` fields
+that replace driver/EPS torque and steering readiness/fault feedback; the
+command-side task remains external provenance, not another blind `0x2E4` search.
+See
+[../variants/corolla-pre-tss3-openpilot-message-comparison.md](../variants/corolla-pre-tss3-openpilot-message-comparison.md).
+
 The remaining H question is **external autonomous-lateral provenance**, not
 ordinary EPS torque provenance. The dedicated static census now closes the
 EPS-local escape hatches: the retained Sienna-homolog LTA magnitude cells and

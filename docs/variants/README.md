@@ -17,6 +17,12 @@ their own narrower evidence boundaries.
 | TSS 3.0 family | various | Partial comparison matrix | [tss3-family-comparison.md](tss3-family-comparison.md) |
 | Newer TSK target | exact part pending | Artifact/capture contract only; all transfer claims remain hypothesis | [newer-tsk-target-evidence.md](newer-tsk-target-evidence.md) |
 
+For the control-interface migration specifically, see
+[corolla-pre-tss3-openpilot-message-comparison.md](corolla-pre-tss3-openpilot-message-comparison.md).
+It compares the exact message roles used by current pre-TSS3 Corolla openpilot
+support against both tracked H/F applications and separates EPS-local migrations
+from camera/ACC/UI roles that an EPS dump cannot resolve.
+
 ## The transfer rule
 
 Matching application DID/service tables in a related EPS are strong

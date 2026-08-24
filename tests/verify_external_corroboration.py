@@ -873,11 +873,18 @@ def main() -> int:
         roots["opendbc"]
         / "opendbc/dbc/generator/toyota/toyota_nodsu_pt.dbc"
     ).read_text(encoding="utf-8")
+    toyota_new_mc_dbc = (
+        roots["opendbc"]
+        / "opendbc/dbc/generator/toyota/toyota_new_mc_pt.dbc"
+    ).read_text(encoding="utf-8")
     compact_dbc_facts = json.loads(
         (REPO / "data/external/opendbc/toyota_dbc_facts.json").read_text(encoding="utf-8")
     )
     toyota_porting_contract = json.loads(
         (REPO / "data/external/opendbc/toyota_porting_contract.json").read_text(encoding="utf-8")
+    )
+    toyota_corolla_contract = json.loads(
+        (REPO / "data/external/opendbc/toyota_corolla_pre_tss3_contract.json").read_text(encoding="utf-8")
     )
     opendbc_secoc = (
         roots["opendbc"] / "opendbc/car/secoc.py"
@@ -890,6 +897,9 @@ def main() -> int:
     ).read_text(encoding="utf-8")
     opendbc_toyota_values = (
         roots["opendbc"] / "opendbc/car/toyota/values.py"
+    ).read_text(encoding="utf-8")
+    opendbc_toyota_fingerprints = (
+        roots["opendbc"] / "opendbc/car/toyota/fingerprints.py"
     ).read_text(encoding="utf-8")
     opendbc_toyota_interface = (
         roots["opendbc"] / "opendbc/car/toyota/interface.py"
@@ -1351,6 +1361,87 @@ def main() -> int:
             proc.returncode == 0 and subject_fragment.lower() in proc.stdout.lower(),
             proc.stdout.strip(),
         )
+
+    print("\n== Corolla-specific pre-TSS3 openpilot contract ==")
+    check(
+        "Corolla contract pins the canonical locked opendbc commit",
+        toyota_corolla_contract["canonical_commit"] == lock["repositories"]["opendbc"]["commit"],
+    )
+    for rel, metadata in toyota_corolla_contract["sources"].items():
+        source_path = roots["opendbc"] / rel
+        if source_path.is_file():
+            source_hash = sha256(source_path)
+        else:
+            proc = subprocess.run(
+                ["git", "-C", str(roots["opendbc"]), "show",
+                 f"{toyota_corolla_contract['canonical_commit']}:{rel}"],
+                capture_output=True,
+            )
+            source_hash = hashlib.sha256(proc.stdout).hexdigest() if proc.returncode == 0 else ""
+        check(
+            f"Corolla contract canonical source hash {rel}",
+            source_hash == metadata["canonical_sha256"],
+        )
+    check(
+        "pre-TSS3 Corolla platform is classic and Corolla TSS2 uses ToyotaTSS2PlatformConfig",
+        "TOYOTA_COROLLA = PlatformConfig(" in opendbc_toyota_values
+        and "TOYOTA_COROLLA_TSS2 = ToyotaTSS2PlatformConfig(" in opendbc_toyota_values
+        and "TOYOTA_COROLLA = ToyotaSecOCPlatformConfig(" not in opendbc_toyota_values
+        and "TOYOTA_COROLLA_TSS2 = ToyotaSecOCPlatformConfig(" not in opendbc_toyota_values,
+    )
+    check(
+        "classic Corolla selects new-MC powertrain DBC and old radar DBC",
+        "dbc_dict('toyota_new_mc_pt_generated', 'toyota_adas')" in opendbc_toyota_values,
+    )
+    check(
+        "classic Corolla EPS_STATUS is 5 bytes and TSS2 EPS_STATUS is 8 bytes",
+        "BO_ 610 EPS_STATUS: 5 EPS" in toyota_new_mc_dbc
+        and "BO_ 610 EPS_STATUS: 8 EPS" in toyota_nodsu_dbc,
+    )
+    check(
+        "pre-TSS3 Corolla steering command is classic five-byte 0x2E4",
+        "BO_ 740 STEERING_LKA: 5" in toyota_adas_dbc
+        and 'make_can_msg("STEERING_LKA", 0, values)' in opendbc_toyotacan,
+    )
+    check(
+        "TSS2 Corolla has the unsigned 0x191 LTA coexistence message",
+        "BO_ 401 STEERING_LTA: 8" in toyota_nodsu_dbc
+        and 'make_can_msg("STEERING_LTA", 0, values)' in opendbc_toyotacan,
+    )
+    check(
+        "Corolla TSS2 remains torque control so scheduled LTA request is inactive",
+        "lta_active = lat_active and self.CP.steerControlType == SteerControlType.angle" in opendbc_toyota_controller
+        and "if self.frame % 2 == 0 and self.CP.carFingerprint in TSS2_CAR:" in opendbc_toyota_controller
+        and toyota_corolla_contract["profiles"]["corolla_tss2_2020_2022"]["steer_control"] == "torque",
+    )
+    check(
+        "TSS2 Corolla camera-side longitudinal ownership is explicit",
+        "# In TSS2 cars, the camera does long control" in opendbc_toyota_interface
+        and "candidate in (TSS2_CAR - RADAR_ACC_CAR)" in opendbc_toyota_interface
+        and "cp_acc = cp_cam if self.CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR) else cp" in opendbc_toyota_carstate,
+    )
+    check(
+        "Corolla TSS2 controller uses classic 0x343 ACC_CONTROL rather than SecOC 0x183",
+        "BO_ 835 ACC_CONTROL: 8" in toyota_2017_dbc
+        and 'make_can_msg("ACC_CONTROL", 0, values)' in opendbc_toyotacan
+        and not toyota_corolla_contract["profiles"]["corolla_tss2_2020_2022"]["secoc"],
+    )
+    check(
+        "Corolla UI replacement remains classic 0x412 LKAS_HUD",
+        "BO_ 1042 LKAS_HUD: 8" in toyota_2017_dbc
+        and 'make_can_msg("LKAS_HUD", 0, values)' in opendbc_toyotacan,
+    )
+    check(
+        "Corolla baseline explicitly excludes SecOC 0x131 and 0x183 companions",
+        {row["id"] for row in toyota_corolla_contract["explicit_non_corolla_secoc_messages"]} == {"0x131", "0x183"},
+    )
+    check(
+        "pinned fingerprints carry both classic and TSS2 Corolla EPS firmware families",
+        all(token in opendbc_toyota_fingerprints for token in (
+            "8965B02181", "8965B02191", "8965B48150",
+            "8965B12350", "8965B12470", "8965B12530", "8965B1270000",
+        )),
+    )
 
     print("\n== pinned opendbc SecOC sender ==")
     check(
