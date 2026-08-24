@@ -16,7 +16,7 @@ override PROJECT_INVENTORY := $(BUILD_OUT)/ghidra_project_inventory.jsonl
 override PROJECT_INVENTORY_BASELINE := $(CURDIR)/data/ghidra_project_inventory.baseline.jsonl
 
 .PHONY: sync knowledge-index verify verify-core verify-full verify-local verify-one verify-changed verify-agent verify-exploit verify-required-external verify-external verify-corroboration verify-rfp verify-sleigh verify-processor verify-semantic-coverage-live verify-ghidra \
-	ghidra-cli \
+	ghidra-cli test-ghidra-cli \
 	generate-dataflash generate-application-diagnostics generate-diagnostic-vocabulary generate-techstream-corpus \
 	generate-application-receive-evidence generate-application-receive generate-application-transmit \
 	generate-processor-fixture generate-function-discovery generate-semantic-coverage generate-project-inventory \
@@ -44,6 +44,15 @@ clean-build:
 # Build the vendored ghidra-cli (ghidra/ghidra-cli) into build/cache/ghidra-cli/.
 ghidra-cli:
 	tools/build_ghidra_cli.sh
+
+# Complete portable verification for the vendored CLI. `--no-run` compile-checks
+# every integration target; the remaining commands execute all Ghidra-free tests,
+# including src/main.rs parser/safety tests that `--lib` alone would miss.
+test-ghidra-cli:
+	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --no-run
+	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --lib
+	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --bin ghidra
+	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --test batch_tests
 
 verify: verify-core
 

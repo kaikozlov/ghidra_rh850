@@ -12,7 +12,8 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
   `akiselev/ghidra-cli`). Run `make ghidra-cli` to build it into
   `build/cache/ghidra-cli/`; the repo's tool scripts automatically prefer the
   vendored build over any `ghidra` on `PATH`. See
-  `ghidra/ghidra-cli/README.md` and `PROVENANCE.json`.
+  `ghidra/ghidra-cli/README.md` and `PROVENANCE.json`. Use
+  `make test-ghidra-cli` for the complete portable CLI compile/unit gate.
 - The Renesas v850/RH850 processor module, **vendored in-tree** at
   `ghidra/ghidra_v850/` (fork of `esaulenka/ghidra_v850` at commit
   `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
@@ -88,11 +89,12 @@ durable on disk until the daemon shuts down cleanly**.
    (the teardown commit races the JVM kill). Treat `stop` as the only reliable
    persist. For a guaranteed-durable rebuild, use a `tools/run_headless`
    `-process -commit` one-shot instead of the daemon.
-   The vendored CLI adds `program save --message` and `stop --save` for explicit
-   persistence boundaries (see `ghidra program save --help`). Until save-and-
-   reopen tests exist for this project, continue to treat `stop` as the
-   authoritative boundary and use explicit `program save` as a belt-and-suspenders
-   extra commit.
+   The persistent bridge itself owns an outer Ghidra transaction, so direct
+   in-bridge `program save` is not an authoritative persistence boundary. Clean
+   `stop` is authoritative. The vendored `script run --save` and compatibility
+   `stop --save` spellings therefore persist by clean bridge teardown rather than
+   calling `Program.save()` inside that transaction. One-shot headless jobs that
+   need an explicit commit use `tools/run_headless ... -commit` instead.
 
 ## Working copy vs. committed snapshot
 
@@ -138,10 +140,54 @@ tools/g x-ref to 0x8db22
 # e.g. ... stats | decompile 0x6fec | x-ref to 0xbfe8 | symbol list
 ```
 
+For the common multi-command read paths, prefer the compound CLI operations:
+
+```bash
+# Single-target output is unchanged; two or more targets return an ordered aggregate.
+tools/g inspect 0xc853a 0x8db22 --decompile --callees --disasm 40
+
+# Exact refs-to census, unique containing functions, and owner decompilations.
+tools/g x-ref trace-to 0xfebef02a --disasm 20
+
+# No temporary batch file; every command is parsed and checked before command 1 runs.
+printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
+```
+
+These paths are deliberately bounded and fail closed. `inspect` and `x-ref
+trace-to` default to at most 20 targets/source functions; `batch` defaults to
+100 commands. They abort rather than truncate, and the bound can be raised only
+with the corresponding `--max-targets`, `--max-functions`, or `--max-commands`
+option. Multi-target inspection resolves every target before decompiling any of
+them. `batch --read-only` preflights the complete batch against a conservative
+allowlist and rejects mutation-capable commands, nested batches, lifecycle
+operations, and executable scripts before its first command. Without
+`--read-only`, batch retains its existing mutation-capable behavior and
+`tools/g` conservatively marks the working session potentially mutated.
+
 If you re-run `analyze` or any `script run` and want to keep the result in the
 working copy, run `tools/g stop` afterward. To promote a finished working copy
 into the committed snapshot, run `make finalize-project` (which orchestrates
 daemon stop, verification, snapshot, and diff).
+
+### Persistent mechanical annotations
+
+Do not transcribe every rename or comment into another one-off Java class. Simple
+function renames, data labels, and listing comments live in the tracked
+`data/annotations/annotation_ledger.jsonl` ledger and are edited through
+`tools/annotations`:
+
+```bash
+tools/annotations add function 0x8db22 uds_security_access_handler --comment '...'
+tools/annotations add label 0xfebef02a security_state
+tools/annotations add comment 0x8db36 '...' --comment-type eol
+tools/annotations apply              # replay into build/work/project, then cleanly stop/persist
+```
+
+The canonical rebuild validates and applies the complete ledger at the end of
+stage 4. The applier preflights the complete ledger before mutation and fails on missing
+functions, symbol collisions, unmapped addresses, or malformed operations. Function discovery, signatures, types, overlays, and semantic
+recovery remain purpose-built seed/annotation scripts. See
+[tooling/annotation-ledger.md](tooling/annotation-ledger.md).
 
 ## Persistent whole-image pseudocode
 
@@ -156,10 +202,13 @@ interior field (`DAT_base._n_m_`) or a base-relative expression (`LAB_base +
 offset`). Its metadata pins the exact canonical project-inventory hash,
 Ghidra/program identity, and the exporter/generator source hashes.
 
-Use it as the first cognitive/search surface for broad static analysis:
+Use it as the first cognitive/search surface for broad static analysis. Address
+lookup accepts either a function entry or any address inside an exact body range
+from the provenance-matched project inventory:
 
 ```bash
-tools/pseudo 0x6fec                     # exact address -> pseudocode
+tools/pseudo 0x6fec                     # function entry -> pseudocode
+tools/pseudo 0x6fee                     # interior address -> containing function pseudocode
 tools/pseudo security_access --list    # search function names
 tools/pseudo secoc --all               # emit all matching pseudocode
 tools/pseudo --data-ref 0xfebef02a    # canonical function-owned RAM refs despite text aliases
@@ -362,7 +411,8 @@ reproduce the committed statistics.
    `AnnotateCanTransport`, `AnnotateApplicationDiagnostics`,
    `AnnotateBootloaderDiagnostics`, `RecoverVectorHandlers`,
    `RecoverSwitchTables`, `AnnotateArchitecture`,
-   `AnnotateApplicationTransmit`, `ApplyCallingConventions`).
+   `AnnotateApplicationTransmit`, `ApplyCallingConventions`), then replay the
+   tracked mechanical annotation ledger with `ApplyAnnotationLedger`.
 5. `-noanalysis` convention finalizer: re-run `ApplyCallingConventions.java`.
    After the annotate-stage reopen, Ghidra surfaces two additional non-ISR
    bodies (`0x3b0be`, `0x6f0d0`) that stage 4 never saw; without the finalizer

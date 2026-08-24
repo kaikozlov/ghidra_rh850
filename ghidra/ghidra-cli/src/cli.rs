@@ -170,7 +170,7 @@ pub enum Commands {
         /// Project path
         #[arg(long)]
         project: Option<String>,
-        /// Save the program before stopping the bridge
+        /// Compatibility flag; clean bridge teardown is already the durable save boundary
         #[arg(long)]
         save: bool,
     },
@@ -230,9 +230,15 @@ pub enum Commands {
 
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]
 pub struct InspectArgs {
-    // target: name | 0xaddr | FUN_<hex> (same pattern as DecompileArgs)
-    #[arg(value_name = "TARGET", required_unless_present = "target")]
-    pub positional_target: Option<String>,
+    /// One or more function targets (name | address | FUN_<hex>)
+    #[arg(
+        value_name = "TARGET",
+        num_args = 1..,
+        required_unless_present = "target",
+        conflicts_with = "target"
+    )]
+    pub positional_targets: Vec<String>,
+    /// Single-target compatibility form
     #[arg(long = "target", value_name = "TARGET")]
     pub target: Option<String>,
     #[arg(long)]
@@ -245,16 +251,20 @@ pub struct InspectArgs {
     pub xrefs: bool, // includes both xrefs_to and xrefs_from
     #[arg(long)]
     pub disasm: Option<usize>, // number of instructions (None = skip)
+    /// Refuse larger target sets unless the analyst explicitly raises the bound
+    #[arg(long, default_value_t = 20)]
+    pub max_targets: usize,
     #[command(flatten)]
     pub options: QueryOptions,
 }
 
 impl InspectArgs {
-    pub fn resolved_target(&self) -> &str {
-        self.target
-            .as_deref()
-            .or(self.positional_target.as_deref())
-            .expect("clap should ensure target is provided")
+    pub fn resolved_targets(&self) -> Vec<&str> {
+        if let Some(target) = self.target.as_deref() {
+            vec![target]
+        } else {
+            self.positional_targets.iter().map(String::as_str).collect()
+        }
     }
 }
 
@@ -679,6 +689,9 @@ pub enum XRefCommands {
     From(XRefArgs),
     /// List all cross-references
     List(XRefArgs),
+    /// Inspect every function with a direct reference to an address
+    #[command(alias = "trace")]
+    TraceTo(XRefTraceArgs),
 }
 
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]
@@ -694,6 +707,41 @@ pub struct XRefArgs {
 }
 
 impl XRefArgs {
+    pub fn resolved_target(&self) -> &str {
+        self.target
+            .as_deref()
+            .or(self.positional_target.as_deref())
+            .expect("clap should ensure target is provided")
+    }
+}
+
+#[derive(Args, Clone, Serialize, Deserialize, Debug)]
+pub struct XRefTraceArgs {
+    /// Referenced address or symbol
+    #[arg(value_name = "TARGET", required_unless_present = "target")]
+    pub positional_target: Option<String>,
+    #[arg(long = "target", value_name = "TARGET")]
+    pub target: Option<String>,
+    /// Include callers for each referencing function
+    #[arg(long)]
+    pub callers: bool,
+    /// Include callees for each referencing function
+    #[arg(long)]
+    pub callees: bool,
+    /// Include function-entry xrefs for each referencing function
+    #[arg(long)]
+    pub xrefs: bool,
+    /// Number of instructions to disassemble for each referencing function
+    #[arg(long)]
+    pub disasm: Option<usize>,
+    /// Refuse larger source-function sets unless the analyst explicitly raises the bound
+    #[arg(long, default_value_t = 20)]
+    pub max_functions: usize,
+    #[command(flatten)]
+    pub options: QueryOptions,
+}
+
+impl XRefTraceArgs {
     pub fn resolved_target(&self) -> &str {
         self.target
             .as_deref()
@@ -1142,7 +1190,7 @@ pub struct ScriptRunArgs {
     /// Allow an expected artifact to exist but be empty.
     #[arg(long)]
     pub allow_empty: bool,
-    /// Save the program after the script completes successfully.
+    /// Persist successful script changes by clean bridge teardown (stops the bridge).
     #[arg(long)]
     pub save: bool,
     /// Script arguments (after --)
@@ -1171,6 +1219,7 @@ pub struct ScriptInlineArgs {
 
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]
 pub struct BatchArgs {
+    /// Batch file, or '-' to read commands from stdin
     pub script_file: String,
 
     #[arg(long)]
@@ -1184,6 +1233,14 @@ pub struct BatchArgs {
     /// first error and exits non-zero.
     #[arg(long)]
     pub continue_on_error: bool,
+
+    /// Reject every command unless the whole batch is provably read-only
+    #[arg(long)]
+    pub read_only: bool,
+
+    /// Refuse larger batches unless the analyst explicitly raises the bound
+    #[arg(long, default_value_t = 100)]
+    pub max_commands: usize,
 }
 
 #[derive(Subcommand, Clone, Serialize, Deserialize, Debug)]
@@ -1319,6 +1376,94 @@ mod tests {
                 assert_eq!(args.resolved_target(), "main");
             }
             _ => panic!("expected function get command"),
+        }
+    }
+
+    #[test]
+    fn inspect_preserves_single_target_flag() {
+        let cli = Cli::try_parse_from(["ghidra", "inspect", "--target", "FUN_00401000"])
+            .expect("single inspect --target should parse");
+        match cli.command {
+            Commands::Inspect(args) => {
+                assert_eq!(args.resolved_targets(), vec!["FUN_00401000"]);
+                assert_eq!(args.max_targets, 20);
+            }
+            _ => panic!("expected inspect command"),
+        }
+    }
+
+    #[test]
+    fn inspect_accepts_multiple_positional_targets() {
+        let cli = Cli::try_parse_from([
+            "ghidra",
+            "inspect",
+            "0x100",
+            "FUN_00000200",
+            "main",
+            "--decompile",
+            "--max-targets",
+            "3",
+        ])
+        .expect("multi-target inspect should parse");
+        match cli.command {
+            Commands::Inspect(args) => {
+                assert_eq!(
+                    args.resolved_targets(),
+                    vec!["0x100", "FUN_00000200", "main"]
+                );
+                assert!(args.decompile);
+                assert_eq!(args.max_targets, 3);
+            }
+            _ => panic!("expected inspect command"),
+        }
+    }
+
+    #[test]
+    fn inspect_rejects_mixed_target_forms() {
+        assert!(Cli::try_parse_from(["ghidra", "inspect", "0x100", "--target", "0x200"]).is_err());
+    }
+
+    #[test]
+    fn parses_xref_trace_to_with_explicit_bound() {
+        let cli = Cli::try_parse_from([
+            "ghidra",
+            "xref",
+            "trace-to",
+            "0xfebe0000",
+            "--disasm",
+            "20",
+            "--max-functions",
+            "7",
+        ])
+        .expect("xref trace-to should parse");
+        match cli.command {
+            Commands::XRef(XRefCommands::TraceTo(args)) => {
+                assert_eq!(args.resolved_target(), "0xfebe0000");
+                assert_eq!(args.disasm, Some(20));
+                assert_eq!(args.max_functions, 7);
+            }
+            _ => panic!("expected xref trace-to command"),
+        }
+    }
+
+    #[test]
+    fn parses_bounded_read_only_stdin_batch() {
+        let cli = Cli::try_parse_from([
+            "ghidra",
+            "batch",
+            "--read-only",
+            "--max-commands",
+            "12",
+            "-",
+        ])
+        .expect("stdin batch should parse");
+        match cli.command {
+            Commands::Batch(args) => {
+                assert_eq!(args.script_file, "-");
+                assert!(args.read_only);
+                assert_eq!(args.max_commands, 12);
+            }
+            _ => panic!("expected batch command"),
         }
     }
 }

@@ -1738,7 +1738,11 @@ paths = [
   "tools/rebuild_project.sh",
   "tools/verify_processor.sh",
   "tools/verify_sleigh.sh",
+  "ghidra/ghidra-cli/",
   "ghidra/scripts/verify/ExportProjectInventory.java",
+  "tests/verify_lifecycle.py",
+  "docs/WORKFLOW.md",
+  "AGENTS.md",
   "data/ghidra_project_inventory.baseline.jsonl",
   "project/",
   "Makefile",
@@ -2594,6 +2598,22 @@ paths = [
   "tools/extract_variant_evidence.py",
   "tools/export_ghidra_project.sh",
   "docs/tooling/README.md",
+]
+
+[suite.annotation_ledger]
+tests = ["tests/verify_annotation_ledger.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_annotation_ledger.py",
+  "tools/annotations",
+  "data/annotations/",
+  "ghidra/scripts/annotate/ApplyAnnotationLedger.java",
+  "ghidra/scripts/annotate/AnnotatePayloadGate.java",
+  "tools/rebuild_project.sh",
+  "docs/tooling/annotation-ledger.md",
+  "docs/tooling/README.md",
+  "docs/WORKFLOW.md",
+  "AGENTS.md",
 ]
 
 [suite.knowledge_index]

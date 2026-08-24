@@ -784,6 +784,8 @@ public class GhidraCliBridge extends GhidraScript {
             case "read_memory":     return handleReadMemory(args);
             // Compound inspection — atomic single-job read of all sections
             case "inspect":         return handleInspect(args);
+            case "inspect_many":    return handleInspectMany(args);
+            case "xrefs_trace_to":  return handleXrefsTraceTo(args);
             default:                return null;
         }
     }
@@ -900,6 +902,159 @@ public class GhidraCliBridge extends GhidraScript {
         }
 
         return result;
+    }
+
+    /** Inspect several functions atomically while preserving single-inspect output. */
+    private JsonObject handleInspectMany(JsonObject args) {
+        if (currentProgram == null) return errorResult("No program loaded");
+        if (args == null || !args.has("targets") || !args.get("targets").isJsonArray()) {
+            return errorResult("No targets provided");
+        }
+
+        JsonArray targets = args.getAsJsonArray("targets");
+        int maxTargets = getArgInt(args, "max_targets", 20);
+        if (maxTargets < 1) return errorResult("max_targets must be at least 1");
+        if (targets.size() < 2) return errorResult("inspect_many requires at least two targets");
+        if (targets.size() > maxTargets) {
+            return errorResult("Target count " + targets.size() +
+                " exceeds max_targets " + maxTargets);
+        }
+
+        // Resolve every target before doing expensive work. A bad final target
+        // must not produce a deceptively partial multi-inspection.
+        FunctionManager fm = currentProgram.getFunctionManager();
+        for (JsonElement element : targets) {
+            if (!element.isJsonPrimitive() || !element.getAsJsonPrimitive().isString()) {
+                return errorResult("Every inspect target must be a string");
+            }
+            String target = element.getAsString();
+            Address addr = resolveAddress(target);
+            Function func = addr == null ? null : fm.getFunctionContaining(addr);
+            if (func == null && addr != null) func = fm.getFunctionAt(addr);
+            if (func == null) return errorResult("No function at target " + target);
+        }
+
+        JsonArray inspections = new JsonArray();
+        for (JsonElement element : targets) {
+            String target = element.getAsString();
+            JsonObject inspectArgs = copyInspectionOptions(args, target, false);
+            JsonObject inspection = handleInspect(inspectArgs);
+            if (inspection.has("error") || inspectionHasSectionError(inspection)) {
+                return errorResult("Inspection failed for target " + target + ": " +
+                    firstInspectionError(inspection));
+            }
+            JsonObject item = new JsonObject();
+            item.addProperty("target", target);
+            item.add("inspection", inspection);
+            inspections.add(item);
+        }
+
+        JsonObject result = new JsonObject();
+        result.addProperty("target_count", inspections.size());
+        result.add("inspections", inspections);
+        return result;
+    }
+
+    /**
+     * Follow direct references to an address into their owning functions and
+     * decompile each unique owner in one queued, consistent read-only job.
+     */
+    private JsonObject handleXrefsTraceTo(JsonObject args) {
+        if (currentProgram == null) return errorResult("No program loaded");
+        String target = getArgString(args, "target");
+        if (target == null || target.isEmpty()) return errorResult("No target provided");
+        Address targetAddress = resolveAddress(target);
+        if (targetAddress == null) return errorResult(buildFunctionTargetHint(target));
+
+        int maxFunctions = getArgInt(args, "max_functions", 20);
+        if (maxFunctions < 1) return errorResult("max_functions must be at least 1");
+
+        ReferenceManager refMgr = currentProgram.getReferenceManager();
+        FunctionManager fm = currentProgram.getFunctionManager();
+        java.util.TreeMap<String, Function> functions = new java.util.TreeMap<>();
+        java.util.TreeMap<String, JsonArray> sites = new java.util.TreeMap<>();
+        JsonArray unownedSites = new JsonArray();
+
+        for (Reference ref : refMgr.getReferencesTo(targetAddress)) {
+            Address from = ref.getFromAddress();
+            Function owner = fm.getFunctionContaining(from);
+            if (owner == null) {
+                JsonObject site = new JsonObject();
+                site.addProperty("from", from.toString());
+                site.addProperty("ref_type", ref.getReferenceType().toString());
+                unownedSites.add(site);
+                continue;
+            }
+            String entry = owner.getEntryPoint().toString();
+            functions.put(entry, owner);
+            JsonArray ownerSites = sites.computeIfAbsent(entry, ignored -> new JsonArray());
+            JsonObject site = new JsonObject();
+            site.addProperty("from", from.toString());
+            site.addProperty("ref_type", ref.getReferenceType().toString());
+            ownerSites.add(site);
+        }
+
+        if (functions.size() > maxFunctions) {
+            return errorResult("Reference trace found " + functions.size() +
+                " source functions, exceeding max_functions " + maxFunctions +
+                " (raise --max-functions explicitly to continue)");
+        }
+
+        JsonArray tracedFunctions = new JsonArray();
+        for (java.util.Map.Entry<String, Function> entry : functions.entrySet()) {
+            JsonObject inspectArgs = copyInspectionOptions(args, entry.getKey(), true);
+            JsonObject inspection = handleInspect(inspectArgs);
+            if (inspection.has("error") || inspectionHasSectionError(inspection)) {
+                return errorResult("Inspection failed for referencing function " +
+                    entry.getKey() + ": " + firstInspectionError(inspection));
+            }
+            JsonObject item = new JsonObject();
+            item.addProperty("entry", entry.getKey());
+            item.addProperty("name", entry.getValue().getName());
+            item.add("reference_sites", sites.get(entry.getKey()));
+            item.add("inspection", inspection);
+            tracedFunctions.add(item);
+        }
+
+        JsonObject result = new JsonObject();
+        result.addProperty("target", targetAddress.toString());
+        result.add("references", handleXrefsTo(makeArg("address", targetAddress.toString())));
+        result.addProperty("source_function_count", tracedFunctions.size());
+        result.add("source_functions", tracedFunctions);
+        result.add("unowned_reference_sites", unownedSites);
+        return result;
+    }
+
+    /** Copy shared inspect switches; trace-to defaults to decompilation only. */
+    private JsonObject copyInspectionOptions(JsonObject source, String target, boolean traceDefault) {
+        JsonObject result = makeArg("target", target);
+        result.addProperty("decompile", traceDefault || getArgBool(source, "decompile", false));
+        result.addProperty("callers", getArgBool(source, "callers", false));
+        result.addProperty("callees", getArgBool(source, "callees", false));
+        result.addProperty("xrefs", getArgBool(source, "xrefs", false));
+        if (source.has("disasm") && !source.get("disasm").isJsonNull()) {
+            result.addProperty("disasm", getArgInt(source, "disasm", 40));
+        }
+        return result;
+    }
+
+    private boolean inspectionHasSectionError(JsonObject inspection) {
+        for (java.util.Map.Entry<String, JsonElement> entry : inspection.entrySet()) {
+            JsonElement value = entry.getValue();
+            if (value.isJsonObject() && value.getAsJsonObject().has("error")) return true;
+        }
+        return false;
+    }
+
+    private String firstInspectionError(JsonObject inspection) {
+        if (inspection.has("error")) return inspection.get("error").getAsString();
+        for (java.util.Map.Entry<String, JsonElement> entry : inspection.entrySet()) {
+            JsonElement value = entry.getValue();
+            if (value.isJsonObject() && value.getAsJsonObject().has("error")) {
+                return entry.getKey() + ": " + value.getAsJsonObject().get("error").getAsString();
+            }
+        }
+        return "unknown inspection error";
     }
 
     /** Build a single-key {@link JsonObject}. */

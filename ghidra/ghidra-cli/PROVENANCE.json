@@ -15,8 +15,10 @@
     "changes": [
       "Structured error protocol: BridgeError{code,message,diagnostics}, CommandError type, JSON stderr rendering in JSON mode",
       "Batch fix: shlex parsing, fail-fast default, --continue-on-error, JSON array input with token-vector preservation",
-      "Durable save: program save --message, stop --save, script run --save, bridge handleProgramSave",
-      "Compound inspect command: single bridge-side atomic job (decompile+xrefs+callers+callees+disasm+metadata)",
+      "Durable interactive save: script run --save and stop --save use clean bridge teardown because the persistent AnalyzeHeadless bridge owns an outer transaction; direct program save remains an in-bridge best-effort command",
+      "Compound inspect command: compatibility-preserving single target or bounded atomic multi-target inspection (decompile+xrefs+callers+callees+disasm+metadata)",
+      "Reference-owner trace: x-ref trace-to performs an exact refs-to census and bounded atomic inspection of unique containing functions",
+      "Batch ergonomics and safety: stdin via '-', whole-batch parse preflight, explicit command-count bound, and conservative --read-only allowlist",
       "Script check: compile-only Java script via handleScriptCheck (no execute())",
       "Enriched bridge status: dirty/last_modified/active_transaction/queued_job_count via volatile snapshots (thread-safe)",
       "Structured errorResponse(code, message, diagnostics) overload in Java bridge",

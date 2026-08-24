@@ -249,6 +249,7 @@ fn extract_project_from_command(command: &Commands) -> Option<String> {
             cli::XRefCommands::To(args) => args.options.project.clone(),
             cli::XRefCommands::From(args) => args.options.project.clone(),
             cli::XRefCommands::List(args) => args.options.project.clone(),
+            cli::XRefCommands::TraceTo(args) => args.options.project.clone(),
         },
         Commands::Stats(args) => args.options.project.clone(),
         Commands::Disasm(args) => args.options.project.clone(),
@@ -367,6 +368,7 @@ fn extract_program_from_command(command: &Commands) -> Option<String> {
             cli::XRefCommands::To(args) => args.options.program.clone(),
             cli::XRefCommands::From(args) => args.options.program.clone(),
             cli::XRefCommands::List(args) => args.options.program.clone(),
+            cli::XRefCommands::TraceTo(args) => args.options.program.clone(),
         },
         Commands::Stats(args) => args.options.program.clone(),
         Commands::Disasm(args) => args.options.program.clone(),
@@ -486,6 +488,7 @@ fn extract_query_options(command: &Commands) -> Option<QueryOptions> {
             cli::XRefCommands::To(args) => Some(args.options.clone()),
             cli::XRefCommands::From(args) => Some(args.options.clone()),
             cli::XRefCommands::List(args) => Some(args.options.clone()),
+            cli::XRefCommands::TraceTo(args) => Some(args.options.clone()),
         },
         Commands::Symbol(cmd) => match cmd {
             cli::SymbolCommands::List(opts) => Some(opts.clone()),
@@ -518,6 +521,71 @@ fn extract_query_options(command: &Commands) -> Option<QueryOptions> {
             cli::FindCommands::Interesting(opts) => Some(opts.clone()),
         },
         _ => None,
+    }
+}
+
+/// Commands whose successful completion must be followed by clean bridge
+/// teardown so the persistent AnalyzeHeadless transaction is committed.
+fn command_requires_teardown_persist(command: &Commands) -> bool {
+    matches!(
+        command,
+        Commands::Script(cli::ScriptCommands::Run(args)) if args.save
+    )
+}
+
+/// Conservative project-mutation allowlist for `batch --read-only`.
+///
+/// Unknown, lifecycle, scripting, and output-writing operations are rejected.
+/// A whole batch is preflighted against this list before its first command.
+fn command_is_read_only(command: &Commands) -> bool {
+    match command {
+        Commands::Query(_)
+        | Commands::Decompile(_)
+        | Commands::Inspect(_)
+        | Commands::Strings(_)
+        | Commands::XRef(_)
+        | Commands::Graph(_)
+        | Commands::Find(_)
+        | Commands::Diff(_)
+        | Commands::Dump(_)
+        | Commands::Disasm(_)
+        | Commands::Summary(_)
+        | Commands::Stats(_) => true,
+        Commands::Function(cmd) => matches!(
+            cmd,
+            cli::FunctionCommands::List(_)
+                | cli::FunctionCommands::Get(_)
+                | cli::FunctionCommands::Decompile(_)
+                | cli::FunctionCommands::Disasm(_)
+                | cli::FunctionCommands::Calls(_)
+                | cli::FunctionCommands::XRefs(_)
+        ),
+        Commands::Symbol(cmd) => matches!(
+            cmd,
+            cli::SymbolCommands::List(_) | cli::SymbolCommands::Get(_)
+        ),
+        Commands::Memory(cmd) => matches!(
+            cmd,
+            cli::MemoryCommands::Map(_)
+                | cli::MemoryCommands::Read(_)
+                | cli::MemoryCommands::Search(_)
+        ),
+        Commands::Type(cmd) => {
+            matches!(cmd, cli::TypeCommands::List(_) | cli::TypeCommands::Get(_))
+        }
+        Commands::Comment(cmd) => matches!(
+            cmd,
+            cli::CommentCommands::List(_) | cli::CommentCommands::Get(_)
+        ),
+        Commands::Program(cmd) => matches!(
+            cmd,
+            cli::ProgramCommands::List(_) | cli::ProgramCommands::Info(_)
+        ),
+        Commands::Script(cmd) => matches!(
+            cmd,
+            cli::ScriptCommands::Check(_) | cli::ScriptCommands::List
+        ),
+        _ => false,
     }
 }
 
@@ -758,6 +826,13 @@ fn run_with_bridge(cli: Cli) -> anyhow::Result<()> {
             }
         }
     };
+
+    if command_requires_teardown_persist(&cli.command) {
+        if !cli.quiet {
+            eprintln!("Persisting script changes by clean bridge teardown...");
+        }
+        bridge::stop_bridge(&project_path)?;
+    }
 
     // Check for .NET decompilation and warn
     if !cli.quiet {
@@ -1095,6 +1170,22 @@ fn execute_via_bridge(
                     "xrefs_list",
                     Some(json!({"address": args.resolved_target()})),
                 ),
+                XRefCommands::TraceTo(args) => {
+                    if args.max_functions == 0 {
+                        anyhow::bail!("--max-functions must be at least 1");
+                    }
+                    client.send_command(
+                        "xrefs_trace_to",
+                        Some(json!({
+                            "target": args.resolved_target(),
+                            "callers": args.callers,
+                            "callees": args.callees,
+                            "xrefs": args.xrefs,
+                            "disasm": args.disasm,
+                            "max_functions": args.max_functions,
+                        })),
+                    )
+                }
             }
         }
         Commands::Program(cmd) => {
@@ -1279,12 +1370,10 @@ fn execute_via_bridge(
                         .unwrap_or_else(|_| args.script_path.clone());
                     let expect: Vec<serde_json::Value> =
                         args.expect.iter().map(|s| parse_expect_spec(s)).collect();
-                    let result = client.script_run(&path, &args.args, &expect, args.allow_empty)?;
-                    // Save after successful script execution if requested.
-                    if args.save {
-                        client.program_save(Some(&format!("Script: {}", args.script_path)))?;
-                    }
-                    Ok(result)
+                    // `--save` is handled by run_with_bridge after this job succeeds:
+                    // clean bridge teardown is the only reliable persistence boundary
+                    // while the persistent AnalyzeHeadless script owns an outer transaction.
+                    client.script_run(&path, &args.args, &expect, args.allow_empty)
                 }
                 ScriptCommands::Check(args) => {
                     let path = std::fs::canonicalize(&args.script_path)
@@ -1299,9 +1388,19 @@ fn execute_via_bridge(
         }
         Commands::Disasm(args) => client.disasm(args.resolved_target(), args.num_instructions),
         Commands::Batch(args) => {
-            // Read batch file and execute each command locally.
-            let content = std::fs::read_to_string(&args.script_file)
-                .map_err(|e| anyhow::anyhow!("Failed to read batch file: {}", e))?;
+            // Read batch input before opening any subcommand. '-' makes
+            // scripted investigations pipeable without a disposable file.
+            let content = if args.script_file == "-" {
+                use std::io::Read as _;
+                let mut input = String::new();
+                std::io::stdin()
+                    .read_to_string(&mut input)
+                    .map_err(|e| anyhow::anyhow!("Failed to read batch from stdin: {}", e))?;
+                input
+            } else {
+                std::fs::read_to_string(&args.script_file)
+                    .map_err(|e| anyhow::anyhow!("Failed to read batch file: {}", e))?
+            };
 
             // Parse batch content (JSON array or plain-text, one command per
             // line). The parsing logic lives in the shared `batch` module so it
@@ -1310,17 +1409,50 @@ fn execute_via_bridge(
             // preserved exactly (no re-splitting) in JSON mode.
             let commands = batch::parse_batch(&content)?;
 
-            let mut results = Vec::new();
-            for cmd in &commands {
+            if args.max_commands == 0 {
+                anyhow::bail!("--max-commands must be at least 1");
+            }
+            if commands.len() > args.max_commands {
+                anyhow::bail!(
+                    "batch contains {} commands, exceeding --max-commands {} (raise it explicitly to continue)",
+                    commands.len(),
+                    args.max_commands
+                );
+            }
+
+            // Parse and validate the entire batch before executing command 1.
+            // This prevents a malformed or mutating later entry from leaving a
+            // partially executed supposedly read-only investigation.
+            let mut parsed = Vec::with_capacity(commands.len());
+            for (index, cmd) in commands.iter().enumerate() {
                 let words: Vec<&str> = std::iter::once("ghidra")
                     .chain(cmd.argv.iter().map(|s| s.as_str()))
                     .collect();
-                let sub_result = match Cli::try_parse_from(&words) {
-                    Ok(sub_cli) => {
-                        execute_via_bridge(client, &sub_cli.command, true, default_limit)
-                    }
-                    Err(e) => Err(anyhow::anyhow!("{}", e)),
-                };
+                let sub_cli = Cli::try_parse_from(&words).map_err(|e| {
+                    anyhow::anyhow!("batch command {} failed preflight: {}", index + 1, e)
+                })?;
+                if args.read_only && !command_is_read_only(&sub_cli.command) {
+                    anyhow::bail!(
+                        "batch command {} is not allowed by --read-only: {}",
+                        index + 1,
+                        cmd.display
+                    );
+                }
+                if matches!(
+                    &sub_cli.command,
+                    Commands::Script(cli::ScriptCommands::Run(script_args)) if script_args.save
+                ) {
+                    anyhow::bail!(
+                        "batch command {} requests script run --save; run that command separately so clean bridge teardown can persist it",
+                        index + 1
+                    );
+                }
+                parsed.push(sub_cli);
+            }
+
+            let mut results = Vec::new();
+            for (cmd, sub_cli) in commands.iter().zip(parsed.iter()) {
+                let sub_result = execute_via_bridge(client, &sub_cli.command, true, default_limit);
                 match &sub_result {
                     Ok(val) => results.push(json!({"command": cmd.display, "result": val})),
                     Err(e) => {
@@ -1342,21 +1474,39 @@ fn execute_via_bridge(
         Commands::Stats(_) => client.stats(),
         Commands::Rename(args) => client.symbol_rename(&args.old_name, &args.new_name),
         Commands::Inspect(args) => {
-            let target = args.resolved_target().to_string();
+            let targets = args.resolved_targets();
+            if args.max_targets == 0 {
+                anyhow::bail!("--max-targets must be at least 1");
+            }
+            if targets.len() > args.max_targets {
+                anyhow::bail!(
+                    "inspect resolved {} targets, exceeding --max-targets {} (raise it explicitly to continue)",
+                    targets.len(),
+                    args.max_targets
+                );
+            }
             let want_all = !args.decompile
                 && !args.callers
                 && !args.callees
                 && !args.xrefs
                 && args.disasm.is_none();
             let payload = json!({
-                "target": target,
                 "decompile": args.decompile || want_all,
                 "callers": args.callers || want_all,
                 "callees": args.callees || want_all,
                 "xrefs": args.xrefs || want_all,
                 "disasm": if want_all { Some(40) } else { args.disasm },
             });
-            client.send_command("inspect", Some(payload))
+            if targets.len() == 1 {
+                let mut single = payload;
+                single["target"] = json!(targets[0]);
+                client.send_command("inspect", Some(single))
+            } else {
+                let mut multiple = payload;
+                multiple["targets"] = json!(targets);
+                multiple["max_targets"] = json!(args.max_targets);
+                client.send_command("inspect_many", Some(multiple))
+            }
         }
         _ => anyhow::bail!("Command not supported"),
     }
@@ -1375,16 +1525,10 @@ fn handle_bridge_command(cli: Cli) -> anyhow::Result<()> {
             program.or(global_program),
             &projects_dir,
         ),
-        Commands::Stop { project, save } => {
-            if save {
-                // Save the program before stopping the bridge.
-                let config = load_config(&projects_dir)?;
-                let proj_path = resolve_project_path(&project.clone().or(global_project.clone()), &config)?;
-                if let Some(port) = bridge::is_bridge_running(&proj_path) {
-                    let client = BridgeClient::new(port);
-                    client.program_save(Some("Pre-stop save"))?;
-                }
-            }
+        Commands::Stop { project, save: _ } => {
+            // Teardown itself is the durable boundary for the persistent
+            // AnalyzeHeadless bridge. Retain --save as a compatibility spelling
+            // without attempting Program.save() inside the active transaction.
             handle_bridge_stop(project.or(global_project), &projects_dir)
         }
         Commands::Restart { project, program } => {
@@ -2324,5 +2468,43 @@ mod tests {
         std::fs::create_dir_all(temp.path().join("populated.rep/idata/00")).unwrap();
 
         assert!(project_has_program_data(&project));
+    }
+
+    #[test]
+    fn read_only_batch_allowlist_accepts_analysis_queries() {
+        for argv in [
+            vec!["ghidra", "inspect", "0x100", "0x200"],
+            vec!["ghidra", "xref", "trace-to", "0xfebe0000"],
+            vec!["ghidra", "memory", "read", "0x100", "16"],
+            vec!["ghidra", "query", "functions", "--count"],
+        ] {
+            let cli = Cli::try_parse_from(argv).expect("read-only fixture should parse");
+            assert!(command_is_read_only(&cli.command));
+        }
+    }
+
+    #[test]
+    fn read_only_batch_allowlist_rejects_mutations_and_recursion() {
+        for argv in [
+            vec!["ghidra", "rename", "old", "new"],
+            vec!["ghidra", "memory", "write", "0x100", "00"],
+            vec!["ghidra", "script", "run", "Mutate.java"],
+            vec!["ghidra", "batch", "nested.txt"],
+            vec!["ghidra", "program", "save"],
+        ] {
+            let cli = Cli::try_parse_from(argv).expect("mutating fixture should parse");
+            assert!(!command_is_read_only(&cli.command));
+        }
+    }
+
+    #[test]
+    fn script_save_uses_teardown_persistence_boundary() {
+        let save = Cli::try_parse_from(["ghidra", "script", "run", "Annotate.java", "--save"])
+            .expect("script --save should parse");
+        assert!(command_requires_teardown_persist(&save.command));
+
+        let ordinary = Cli::try_parse_from(["ghidra", "script", "run", "Inspect.java"])
+            .expect("ordinary script should parse");
+        assert!(!command_requires_teardown_persist(&ordinary.command));
     }
 }

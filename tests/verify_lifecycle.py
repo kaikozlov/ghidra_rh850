@@ -309,7 +309,8 @@ check(
 )
 check(
     "Mutation marker written for 'analyze'",
-    "analyze|import|rename|batch" in g_content and "MUTATION_MARKER" in g_content,
+    "analyze|import|rename" in g_content and "batch)" in g_content
+    and "MUTATION_MARKER" in g_content,
 )
 check(
     "Mutation marker NOT written for decompile",
@@ -326,6 +327,38 @@ result = run(
 )
 check(
     "function mutation subcommands write the session marker",
+    result.returncode == 0 and mutation_marker.is_file(),
+    result.stderr,
+)
+mutation_marker.unlink(missing_ok=True)
+result = run(
+    ["bash", str(REPO / "tools" / "g"), "batch", "--read-only", "--help"],
+    env={"GHIDRA_NO_BOOTSTRAP": "1"},
+    timeout=10,
+)
+check(
+    "preflight-enforced read-only batch does not write the session marker",
+    result.returncode == 0 and not mutation_marker.exists(),
+    result.stderr,
+)
+result = run(
+    ["bash", str(REPO / "tools" / "g"), "batch", "--help"],
+    env={"GHIDRA_NO_BOOTSTRAP": "1"},
+    timeout=10,
+)
+check(
+    "ordinary batch remains conservatively mutation-marked",
+    result.returncode == 0 and mutation_marker.is_file(),
+    result.stderr,
+)
+mutation_marker.unlink(missing_ok=True)
+result = run(
+    ["bash", str(REPO / "tools" / "g"), "batch", "--", "--read-only", "--help"],
+    env={"GHIDRA_NO_BOOTSTRAP": "1"},
+    timeout=10,
+)
+check(
+    "batch filename cannot spoof the read-only marker exemption",
     result.returncode == 0 and mutation_marker.is_file(),
     result.stderr,
 )

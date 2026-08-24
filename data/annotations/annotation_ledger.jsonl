@@ -1,0 +1,1 @@
+{"op": "function", "address": "0x000032d2", "name": "boot_memory_range_check_access", "comment_type": "plate", "comment": "Validate address/length and operation bit against boot_memory_access_table; return memory class."}

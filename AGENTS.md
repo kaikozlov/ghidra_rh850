@@ -48,9 +48,12 @@ decompiling is slop. Verify claims from firmware gate code, not spec knowledge.
 ## Snapshot policy
 
 Direct CLI mutations are exploratory. Any persistent rename, function
-creation, signature, type, comment, or overlay must be represented in a
-seed/annotation script before snapshotting. Only the designated integration
-task updates `project/` (via `make snapshot-project`).
+creation, signature, type, comment, or overlay must be represented in tracked
+rebuild inputs before snapshotting. Use `tools/annotations` /
+`data/annotations/annotation_ledger.jsonl` for mechanical renames, data labels,
+and listing comments; use seed/annotation scripts for semantic recovery, function creation,
+signatures, types, and overlays. Only the designated integration task updates
+`project/` (via `make snapshot-project`).
 
 ## Standard commands
 
@@ -84,6 +87,9 @@ the wrapper handles it.
 tools/g decompile 0x8db22
 tools/g x-ref to 0x8db22
 tools/g inspect 0xc853a --decompile --callers --callees --xrefs --disasm 40
+tools/g inspect 0xc853a 0x8db22 --decompile
+tools/g x-ref trace-to 0xfebef02a --disasm 20
+printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
 tools/g script run ghidra/scripts/investigate/Foo.java -- arg1
 tools/g session-status
 tools/g stop

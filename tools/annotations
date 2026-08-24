@@ -1,0 +1,451 @@
+#!/usr/bin/env python3
+"""Curate the tracked declarative annotation ledger (data/annotations/annotation_ledger.jsonl).
+
+The ledger records mechanical Ghidra annotations — function renames, data
+labels, and explicit comments — as deterministic JSONL so they can be replayed
+by ApplyAnnotationLedger.java during stage 4 of the canonical rebuild instead
+of being transcribed by hand into a bespoke Java script.
+
+Every mutation goes through this tool. The tool is the single writer: it
+validates the whole resulting ledger (schema, canonical serialization,
+uniqueness, conflict rules) before an atomic rename, so a failed or conflicting
+edit can never leave a partially written or drifting file.
+
+Scope is deliberately narrow: pure naming/comment overlays. Discovery,
+signatures, types, and structured overlays stay in dedicated Java scripts.
+
+See docs/tooling/annotation-ledger.md for the schema, invariants, and workflow.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_LEDGER = REPO_ROOT / "data" / "annotations" / "annotation_ledger.jsonl"
+
+OPS = ("function", "label", "comment")
+COMMENT_TYPES = ("plate", "pre", "post", "eol", "repeatable")
+DEFAULT_COMMENT_TYPE = "plate"
+
+# Field order is part of the canonical record form.
+FIELDS = ("op", "address", "name", "comment_type", "comment")
+
+ADDRESS_RE = re.compile(r"^0x[0-9a-f]{8}$")
+NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,199}$")
+
+
+class LedgerError(Exception):
+    """Any validation or curation failure; message is user-facing."""
+
+
+def canonical_address(raw: str) -> str:
+    """Normalize a user-supplied address to the canonical 0x%08x form."""
+    text = raw.strip().lower()
+    if text.startswith("0x"):
+        text = text[2:]
+    if not re.fullmatch(r"[0-9a-f]{1,8}", text):
+        raise LedgerError(f"address is not a 32-bit hex value: {raw!r}")
+    return f"0x{int(text, 16):08x}"
+
+
+def canonical_line(record: dict) -> str:
+    return json.dumps(
+        {field: record[field] for field in FIELDS if field in record},
+        ensure_ascii=False,
+    )
+
+
+def parse_ledger(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    records: list[dict] = []
+    text = path.read_text(encoding="utf-8")
+    for number, line in enumerate(text.splitlines(), 1):
+        if not line.strip():
+            raise LedgerError(f"{path}:{number}: blank line")
+        try:
+            value = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise LedgerError(f"{path}:{number}: invalid JSON ({exc.msg})") from exc
+        if not isinstance(value, dict):
+            raise LedgerError(f"{path}:{number}: record must be a JSON object")
+        if canonical_line(value) != line:
+            raise LedgerError(
+                f"{path}:{number}: record is not in canonical form "
+                f"(expected: {canonical_line(value)})"
+            )
+        records.append(value)
+    return records
+
+
+def validate_record(record: dict, origin: str) -> None:
+    op = record.get("op")
+    if op not in OPS:
+        raise LedgerError(f"{origin}: unknown op {op!r} (expected one of {', '.join(OPS)})")
+
+    address = record.get("address")
+    if not isinstance(address, str) or not ADDRESS_RE.match(address):
+        raise LedgerError(f"{origin}: address must be canonical lowercase 0x%08x hex, got {address!r}")
+
+    if op in ("function", "label"):
+        expected_fields = {"op", "address", "name", "comment", "comment_type"}
+        name = record.get("name")
+        if not isinstance(name, str) or not NAME_RE.match(name):
+            raise LedgerError(f"{origin}: name must match {NAME_RE.pattern}, got {name!r}")
+    else:
+        expected_fields = {"op", "address", "comment", "comment_type"}
+
+    extras = set(record) - expected_fields
+    if extras:
+        raise LedgerError(f"{origin}: unexpected field(s) {sorted(extras)} for op {op!r}")
+
+    comment = record.get("comment")
+    if op == "comment" and (not isinstance(comment, str) or not comment.strip()):
+        raise LedgerError(f"{origin}: op 'comment' requires nonempty 'comment' text")
+    if "comment" in record and not isinstance(comment, str):
+        raise LedgerError(f"{origin}: 'comment' must be a string")
+    if "comment" in record and not comment.strip():
+        raise LedgerError(f"{origin}: 'comment' text must be nonempty")
+    if "comment" not in record and "comment_type" in record:
+        raise LedgerError(f"{origin}: 'comment_type' set without 'comment'")
+
+    comment_type = record.get("comment_type")
+    if "comment" in record and comment_type not in COMMENT_TYPES:
+        raise LedgerError(f"{origin}: comment_type must be one of {', '.join(COMMENT_TYPES)}, got {comment_type!r}")
+
+
+def _record_key(record: dict) -> tuple:
+    return (
+        int(record["address"], 16),
+        record["op"],
+        record.get("name", ""),
+        record.get("comment_type", ""),
+    )
+
+
+def sort_records(records: list[dict]) -> list[dict]:
+    return sorted(records, key=_record_key)
+
+
+def _target_key(record: dict) -> tuple:
+    """Identity of the object a record annotates."""
+    if record["op"] == "comment":
+        return ("comment", record["address"], record["comment_type"])
+    return (record["op"], record["address"])
+
+
+def _overlay_comment_writers(records: list[dict]) -> None:
+    """Fail closed if two records would write different text to one (address, comment_type)."""
+    writers: dict[tuple[str, str], str] = {}
+    for record in records:
+        if "comment" not in record:
+            continue
+        key = (
+            record["address"],
+            record["comment_type"] if record["op"] == "comment" else record.get("comment_type", DEFAULT_COMMENT_TYPE),
+        )
+        text = record["comment"]
+        existing = writers.get(key)
+        if existing is not None and existing != text:
+            raise LedgerError(
+                f"conflict at {key[0]}: multiple records write different text to the "
+                f"{key[1]} comment"
+            )
+        writers[key] = text
+
+
+def validate_ledger(records: list[dict], origin: str = "ledger") -> list[dict]:
+    for index, record in enumerate(records, 1):
+        validate_record(record, f"{origin}:{index}")
+
+    # A label record on a function entry would silently rename the function's
+    # primary symbol, so function/label records may never share an address.
+    ops_by_address: dict[str, set[str]] = {}
+    for record in records:
+        if record["op"] in ("function", "label"):
+            ops_by_address.setdefault(record["address"], set()).add(record["op"])
+    for address, ops in sorted(ops_by_address.items()):
+        if len(ops) > 1:
+            raise LedgerError(
+                f"conflict at {address}: records for both {sorted(ops)} target one address"
+            )
+
+    name_owners: dict[str, str] = {}
+    for record in records:
+        if record["op"] not in ("function", "label"):
+            continue
+        name = record["name"]
+        prior_address = name_owners.get(name)
+        if prior_address is not None and prior_address != record["address"]:
+            raise LedgerError(
+                f"conflict: symbol name {name!r} is assigned to both "
+                f"{prior_address} and {record['address']}"
+            )
+        name_owners[name] = record["address"]
+
+    seen: dict[tuple, dict] = {}
+    for record in records:
+        key = _target_key(record)
+        prior = seen.get(key)
+        if prior is not None:
+            suffix = f", comment_type {record['comment_type']}" if record["op"] == "comment" else ""
+            raise LedgerError(
+                f"{'duplicate' if prior == record else 'conflict'} record at "
+                f"{record['address']} (op {record['op']}{suffix})"
+            )
+        seen[key] = record
+
+    _overlay_comment_writers(records)
+
+    if sort_records(records) != records:
+        raise LedgerError("ledger is not in canonical (address, op, name, comment_type) order")
+    return records
+
+
+def read_validated(path: Path) -> list[dict]:
+    return validate_ledger(parse_ledger(path), str(path))
+
+
+def write_atomic(path: Path, records: list[dict]) -> None:
+    payload = "".join(canonical_line(record) + "\n" for record in records)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_name = tempfile.mkstemp(
+        dir=str(path.parent), prefix=".annotation-ledger.", suffix=".tmp"
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp_name, path)
+    except BaseException:
+        try:
+            os.unlink(tmp_name)
+        except FileNotFoundError:
+            pass
+        raise
+
+
+def build_record(
+    op: str, address: str, name: str | None, comment: str | None, comment_type: str | None
+) -> dict:
+    record: dict = {"op": op, "address": canonical_address(address)}
+    if name is not None:
+        record["name"] = name
+    if comment is not None:
+        if comment_type is None:
+            comment_type = DEFAULT_COMMENT_TYPE
+        if not comment.strip():
+            raise LedgerError("comment text must be nonempty")
+        record["comment"] = comment
+        record["comment_type"] = comment_type
+    elif comment_type is not None:
+        raise LedgerError("--comment-type requires --comment")
+    return record
+
+
+def cmd_add(args: argparse.Namespace) -> int:
+    path: Path = args.ledger
+    try:
+        existing = read_validated(path) if path.exists() else []
+        record = build_record(args.op, args.address, args.name, args.comment, args.comment_type)
+        if record in existing:
+            print(f"already present: {record['op']} {record['address']} (no change)")
+            if getattr(args, "apply", False):
+                return apply_ledger(path)
+            return 0
+        candidate = sort_records(existing + [record])
+        validate_ledger(candidate)
+        write_atomic(path, candidate)
+        name_suffix = f" {record['name']}" if record.get("name") else ""
+        print(f"added: {record['op']} {record['address']}{name_suffix}")
+        if getattr(args, "apply", False):
+            return apply_ledger(path)
+        return 0
+    except LedgerError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+
+def cmd_remove(args: argparse.Namespace) -> int:
+    path: Path = args.ledger
+    try:
+        if not path.exists():
+            raise LedgerError(f"ledger does not exist: {path}")
+        records = read_validated(path)
+        address = canonical_address(args.address)
+        kept = [
+            record
+            for record in records
+            if not (
+                record["op"] == args.op
+                and record["address"] == address
+                and (args.op != "comment" or record["comment_type"] == args.comment_type)
+            )
+        ]
+        if len(kept) == len(records):
+            raise LedgerError(f"no {args.op} record at {address}")
+        write_atomic(path, kept)
+        print(f"removed: {args.op} {address}")
+        return 0
+    except LedgerError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+
+def cmd_list(args: argparse.Namespace) -> int:
+    path: Path = args.ledger
+    try:
+        records = read_validated(path) if path.exists() else []
+        address = canonical_address(args.address) if args.address else None
+    except LedgerError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    for record in records:
+        if args.op and record["op"] != args.op:
+            continue
+        if address and record["address"] != address:
+            continue
+        print(canonical_line(record))
+    return 0
+
+
+def cmd_validate(args: argparse.Namespace) -> int:
+    path: Path = args.ledger
+    if not path.exists():
+        print(f"error: annotation ledger does not exist: {path}", file=sys.stderr)
+        return 2
+    try:
+        records = read_validated(path)
+    except LedgerError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    counts = {op: sum(1 for record in records if record["op"] == op) for op in OPS}
+    print(
+        f"valid: {len(records)} records "
+        f"(function={counts['function']} label={counts['label']} comment={counts['comment']}) in {path}"
+    )
+    return 0
+
+
+def apply_ledger(path: Path) -> int:
+    try:
+        records = read_validated(path)
+    except LedgerError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    if not records:
+        print(f"error: annotation ledger is empty: {path}", file=sys.stderr)
+        return 2
+    runner = str(REPO_ROOT / "tools" / "g")
+    script = str(REPO_ROOT / "ghidra" / "scripts" / "annotate" / "ApplyAnnotationLedger.java")
+    return subprocess.run(
+        [runner, "script", "run", "--save", script, "--", str(path.resolve())],
+        cwd=REPO_ROOT,
+        check=False,
+    ).returncode
+
+
+def cmd_apply(args: argparse.Namespace) -> int:
+    return apply_ledger(args.ledger)
+
+
+def cmd_path(_: argparse.Namespace) -> int:
+    print(DEFAULT_LEDGER)
+    return 0
+
+
+def _add_name_parser(sub: argparse._SubParsersAction, op: str, help_text: str) -> argparse.ArgumentParser:
+    parser = sub.add_parser(op, help=help_text)
+    parser.add_argument("address")
+    parser.add_argument("name")
+    parser.add_argument("--comment", help="comment text to attach")
+    parser.add_argument(
+        "--comment-type",
+        choices=COMMENT_TYPES,
+        help=f"comment type used with --comment (default with comment: {DEFAULT_COMMENT_TYPE})",
+    )
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="replay the updated complete ledger into build/work/project and save it",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="tools/annotations",
+        description="Curate the tracked declarative annotation ledger.",
+    )
+    parser.add_argument(
+        "--ledger",
+        type=Path,
+        default=DEFAULT_LEDGER,
+        help=f"ledger path (default: {DEFAULT_LEDGER})",
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    add = sub.add_parser("add", help="append one record (validates and rewrites canonically)")
+    add_sub = add.add_subparsers(dest="op", required=True)
+    _add_name_parser(add_sub, "function", "rename a recovered function entry").set_defaults(
+        func=cmd_add, name=None
+    )
+    _add_name_parser(add_sub, "label", "label a data address").set_defaults(
+        func=cmd_add, name=None
+    )
+    add_comment = add_sub.add_parser("comment", help="set an explicit comment at an address")
+    add_comment.add_argument("address")
+    add_comment.add_argument("comment", help="comment text")
+    add_comment.add_argument("--comment-type", required=True, choices=COMMENT_TYPES)
+    add_comment.add_argument(
+        "--apply",
+        action="store_true",
+        help="replay the updated complete ledger into build/work/project and save it",
+    )
+    add_comment.set_defaults(func=cmd_add, name=None)
+
+    remove = sub.add_parser("remove", help="remove records by target")
+    remove_sub = remove.add_subparsers(dest="op", required=True)
+    remove_function = remove_sub.add_parser("function")
+    remove_function.add_argument("address")
+    remove_function.set_defaults(func=cmd_remove, name=None, comment_type=None)
+    remove_label = remove_sub.add_parser("label")
+    remove_label.add_argument("address")
+    remove_label.set_defaults(func=cmd_remove, name=None, comment_type=None)
+    remove_comment = remove_sub.add_parser("comment")
+    remove_comment.add_argument("address")
+    remove_comment.add_argument("--comment-type", required=True, choices=COMMENT_TYPES)
+    remove_comment.set_defaults(func=cmd_remove, name=None)
+
+    list_cmd = sub.add_parser("list", help="print canonical records (optionally filtered)")
+    list_cmd.add_argument("--op", choices=OPS)
+    list_cmd.add_argument("--address")
+    list_cmd.set_defaults(func=cmd_list)
+
+    validate_cmd = sub.add_parser(
+        "validate", help="validate the whole ledger; nonzero on any drift"
+    )
+    validate_cmd.set_defaults(func=cmd_validate)
+
+    apply_cmd = sub.add_parser(
+        "apply", help="replay the complete ledger into build/work/project and save it"
+    )
+    apply_cmd.set_defaults(func=cmd_apply)
+
+    path_cmd = sub.add_parser("path", help="print the default tracked ledger path")
+    path_cmd.set_defaults(func=cmd_path)
+
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

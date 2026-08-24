@@ -25,6 +25,21 @@ make ghidra-cli    # cargo build --release into build/cache/ghidra-cli/
 binary. When the vendored build is present, it is preferred over any `ghidra`
 on `PATH`; otherwise the PATH binary is used with a version check.
 
+Repository-facing ergonomic extensions are exposed through `tools/g`:
+
+```bash
+tools/g inspect TARGET [TARGET ...]
+tools/g x-ref trace-to ADDRESS [--max-functions N]
+printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
+```
+
+A one-target `inspect` retains the original response shape. Multi-target
+inspection and reference tracing execute as one queued bridge job, resolve and
+bound their full scope before expensive work, and return errors rather than
+partial aggregates. Batch input accepts `-` for stdin, preflights every command
+before execution, defaults to 100 commands, and offers a conservative
+`--read-only` allowlist for scripted investigation.
+
 ## What's here
 
 Everything in this directory is the fork's source tree as of the baseline

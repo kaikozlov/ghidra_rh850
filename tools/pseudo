@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
 from typing import Any
 
 from generate_decompiler_corpus import DEFAULT_OUTPUT, DEFAULT_VIEW, materialize_view
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_INVENTORY = ROOT / "data/ghidra_project_inventory.baseline.jsonl"
 
 
 def load_corpus(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -46,12 +50,72 @@ def normalize_address(query: str) -> str | None:
     return None
 
 
-def find_matches(query: str, functions: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], bool]:
+def load_function_body_ranges(
+    inventory_path: Path, corpus_metadata: dict[str, Any]
+) -> dict[str, list[tuple[int, int]]]:
+    if not inventory_path.is_file():
+        raise SystemExit(
+            f"missing project inventory: {inventory_path}\n"
+            "the tracked inventory is required to resolve interior function addresses"
+        )
+    expected_sha = corpus_metadata.get("project_inventory_sha256")
+    if not isinstance(expected_sha, str) or not expected_sha:
+        raise SystemExit(
+            "pseudocode corpus lacks project_inventory_sha256 provenance; "
+            "cannot resolve interior function addresses safely"
+        )
+    actual_sha = hashlib.sha256(inventory_path.read_bytes()).hexdigest()
+    if actual_sha != expected_sha:
+        raise SystemExit(
+            f"project inventory does not match pseudocode corpus: {inventory_path}\n"
+            f"expected sha256 {expected_sha}, got {actual_sha}"
+        )
+
+    ranges: dict[str, list[tuple[int, int]]] = {}
+    for line_number, line in enumerate(inventory_path.read_text(encoding="utf-8").splitlines(), 1):
+        record = json.loads(line)
+        if record.get("record") != "function":
+            continue
+        entry = record.get("entry", {})
+        if entry.get("space") != "ram":
+            continue
+        entry_addr = f"0x{int(entry['offset'], 16):08x}"
+        body_ranges: list[tuple[int, int]] = []
+        for body_range in record.get("body_ranges", []):
+            minimum = body_range.get("min", {})
+            maximum = body_range.get("max", {})
+            if minimum.get("space") != "ram" or maximum.get("space") != "ram":
+                continue
+            body_ranges.append((int(minimum["offset"], 16), int(maximum["offset"], 16)))
+        ranges[entry_addr] = body_ranges
+    return ranges
+
+
+def find_matches(
+    query: str,
+    functions: list[dict[str, Any]],
+    *,
+    corpus_metadata: dict[str, Any],
+    inventory_path: Path,
+) -> tuple[list[dict[str, Any]], bool]:
     address = normalize_address(query)
     if address is not None:
         exact = [record for record in functions if record["entry_addr"] == address]
         if exact:
             return exact, True
+
+        target = int(address, 16)
+        ranges = load_function_body_ranges(inventory_path, corpus_metadata)
+        containing = [
+            record
+            for record in functions
+            if any(start <= target <= end for start, end in ranges.get(record["entry_addr"], []))
+        ]
+        if len(containing) > 1:
+            names = ", ".join(f"{r['entry_addr']} {r['name']}" for r in containing)
+            raise SystemExit(f"address {address} belongs to multiple functions: {names}")
+        if containing:
+            return containing, True
 
     folded = query.casefold()
     exact_names = [record for record in functions if str(record["name"]).casefold() == folded]
@@ -113,6 +177,10 @@ def main() -> int:
         help="find functions whose canonical Ghidra data-reference graph targets ADDRESS",
     )
     parser.add_argument("--corpus", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--inventory", type=Path, default=DEFAULT_INVENTORY,
+        help="project inventory used for exact interior-address containment",
+    )
     parser.add_argument("--all", action="store_true", help="print pseudocode for every substring match")
     parser.add_argument("--list", action="store_true", help="list matching functions instead of pseudocode")
     parser.add_argument("--stats", action="store_true", help="show corpus provenance and counts")
@@ -156,7 +224,9 @@ def main() -> int:
     if args.query is None:
         parser.error("query is required unless --data-ref, --stats, or --materialize is used")
 
-    matches, exact = find_matches(args.query, functions)
+    matches, exact = find_matches(
+        args.query, functions, corpus_metadata=metadata, inventory_path=args.inventory
+    )
     if not matches:
         raise SystemExit(f"no pseudocode function matches {args.query!r}")
     if args.list:

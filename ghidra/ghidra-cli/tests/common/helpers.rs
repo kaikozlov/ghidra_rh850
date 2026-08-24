@@ -133,6 +133,7 @@ pub struct GhidraCommand {
     project: Option<String>,
     program: Option<String>,
     env_vars: Vec<(String, String)>,
+    stdin: Option<String>,
     timeout_secs: u64,
 }
 
@@ -144,6 +145,7 @@ impl GhidraCommand {
             project: None,
             program: None,
             env_vars: Vec::new(),
+            stdin: None,
             timeout_secs: 120,
         }
     }
@@ -169,6 +171,12 @@ impl GhidraCommand {
     /// Set an environment variable.
     pub fn env(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
         self.env_vars.push((key.into(), value.into()));
+        self
+    }
+
+    /// Supply stdin to the command.
+    pub fn stdin(mut self, input: impl Into<String>) -> Self {
+        self.stdin = Some(input.into());
         self
     }
 
@@ -206,6 +214,10 @@ impl GhidraCommand {
 
         for arg in &self.args {
             cmd.arg(arg);
+        }
+
+        if let Some(input) = &self.stdin {
+            cmd.write_stdin(input.as_str());
         }
 
         // Add --project and --program after the subcommand and its args

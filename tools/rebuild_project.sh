@@ -149,6 +149,11 @@ echo "Ghidra: $GHIDRA_HOME"
 echo "Isolated v850 plugin: $V850_EXT_DIR"
 echo "Processor manifest: $PROCESSOR_MANIFEST"
 
+# Fail before any expensive analysis if the tracked mechanical-annotation recipe
+# is malformed or missing. Stage 4 consumes this exact validated path.
+ANNOTATION_LEDGER="$ROOT/data/annotations/annotation_ledger.jsonl"
+"$ROOT/tools/annotations" --ledger "$ANNOTATION_LEDGER" validate >/dev/null
+
 # Analysis is intentionally staged. Ghidra discovers a different graph if all
 # seeds are injected before its first pass; these four durable analysis commits
 # reproduce the checked-in project's exact function/instruction/symbol counts.
@@ -247,6 +252,7 @@ run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -postScript AnnotateLargeFunctions.java \
   -postScript SeedDirectCallTargets.java \
   -postScript ApplyCallingConventions.java \
+  -postScript ApplyAnnotationLedger.java "$ANNOTATION_LEDGER" \
   -commit "Complete reproducible RH850 analysis"
 
 # Convention finalizer (not an analysis stage): after the annotate-stage commit,

@@ -882,6 +882,86 @@ fn test_stats_json_format() {
 }
 
 // ============================================================================
+// Compound Investigation Tests
+// ============================================================================
+
+#[test]
+#[serial]
+fn test_inspect_single_target_response_is_compatible() {
+    require_ghidra!();
+    let harness = harness();
+    let main_addr = get_function_address(harness, TEST_PROJECT, TEST_PROGRAM, "main");
+
+    let result = ghidra(harness)
+        .args(["inspect", &main_addr, "--decompile"])
+        .with_project(TEST_PROJECT, TEST_PROGRAM)
+        .json_format()
+        .run();
+
+    result.assert_success();
+    let payload: serde_json::Value = result.json();
+    let payload = &payload.as_array().expect("query result array")[0];
+    assert!(payload.get("function").is_some());
+    assert!(payload.get("decompilation").is_some());
+    assert!(payload.get("inspections").is_none());
+}
+
+#[test]
+#[serial]
+fn test_inspect_multiple_targets_is_atomic_and_ordered() {
+    require_ghidra!();
+    let harness = harness();
+    let main_addr = get_function_address(harness, TEST_PROJECT, TEST_PROGRAM, "main");
+    let add_addr = get_function_address(harness, TEST_PROJECT, TEST_PROGRAM, "add_numbers");
+
+    let result = ghidra(harness)
+        .args(["inspect", &main_addr, &add_addr, "--decompile"])
+        .with_project(TEST_PROJECT, TEST_PROGRAM)
+        .json_format()
+        .run();
+
+    result.assert_success();
+    let payload: serde_json::Value = result.json();
+    let payload = &payload.as_array().expect("query result array")[0];
+    assert_eq!(payload["target_count"], 2);
+    let rows = payload["inspections"].as_array().expect("inspection array");
+    assert_eq!(rows[0]["target"], main_addr);
+    assert_eq!(rows[1]["target"], add_addr);
+    assert!(rows
+        .iter()
+        .all(|row| row["inspection"]["decompilation"].is_object()));
+}
+
+#[test]
+#[serial]
+fn test_xref_trace_to_decompiles_unique_source_functions() {
+    require_ghidra!();
+    let harness = harness();
+    let add_addr = get_function_address(harness, TEST_PROJECT, TEST_PROGRAM, "add_numbers");
+
+    let result = ghidra(harness)
+        .args(["xref", "trace-to", &add_addr])
+        .with_project(TEST_PROJECT, TEST_PROGRAM)
+        .json_format()
+        .run();
+
+    result.assert_success();
+    let payload: serde_json::Value = result.json();
+    let payload = &payload.as_array().expect("query result array")[0];
+    assert!(payload["references"]["count"].as_u64().unwrap_or(0) > 0);
+    assert!(payload["source_function_count"].as_u64().unwrap_or(0) > 0);
+    let sources = payload["source_functions"]
+        .as_array()
+        .expect("source functions");
+    assert!(sources.iter().all(|row| {
+        row["reference_sites"]
+            .as_array()
+            .is_some_and(|sites| !sites.is_empty())
+            && row["inspection"]["decompilation"].is_object()
+    }));
+}
+
+// ============================================================================
 // Disassembly Tests
 // ============================================================================
 
@@ -1410,7 +1490,7 @@ fn test_batch_invalid_file() {
 
 #[test]
 #[serial]
-fn test_batch_with_invalid_command() {
+fn test_batch_preflights_invalid_command_even_with_continue_on_error() {
     require_ghidra!();
     harness();
 
@@ -1430,12 +1510,61 @@ strings list --limit 1 --program sample_binary
         .arg(batch_file.to_str().unwrap())
         .run();
 
-    result.assert_success();
-    result.assert_stdout_contains("commands_parsed");
-    result.assert_stdout_contains("3");
-    result.assert_stdout_contains("invalid-command");
+    result.assert_failure();
+    result.assert_stderr_contains("failed preflight");
 
     fs::remove_file(batch_file).ok();
+}
+
+#[test]
+#[serial]
+fn test_batch_reads_bounded_read_only_commands_from_stdin() {
+    require_ghidra!();
+    let harness = harness();
+
+    let result = ghidra(harness)
+        .args(["batch", "--read-only", "--max-commands", "2", "-"])
+        .stdin("stats\nfunction list --limit 1\n")
+        .with_project(TEST_PROJECT, TEST_PROGRAM)
+        .run();
+
+    result.assert_success();
+    let payload: serde_json::Value = result.json();
+    let payload = &payload.as_array().expect("batch result array")[0];
+    assert_eq!(payload["commands_parsed"], 2);
+    assert_eq!(payload["results"].as_array().map(Vec::len), Some(2));
+}
+
+#[test]
+#[serial]
+fn test_read_only_stdin_batch_rejects_mutation_before_execution() {
+    require_ghidra!();
+    let harness = harness();
+
+    let result = ghidra(harness)
+        .args(["batch", "--read-only", "-"])
+        .stdin("stats\ncomment set 0x0 forbidden\n")
+        .with_project(TEST_PROJECT, TEST_PROGRAM)
+        .run();
+
+    result.assert_failure();
+    result.assert_stderr_contains("not allowed by --read-only");
+}
+
+#[test]
+#[serial]
+fn test_stdin_batch_refuses_implicit_truncation() {
+    require_ghidra!();
+    let harness = harness();
+
+    let result = ghidra(harness)
+        .args(["batch", "--read-only", "--max-commands", "1", "-"])
+        .stdin("stats\nstats\n")
+        .with_project(TEST_PROJECT, TEST_PROGRAM)
+        .run();
+
+    result.assert_failure();
+    result.assert_stderr_contains("exceeding --max-commands 1");
 }
 
 // ============================================================================

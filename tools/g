@@ -13,6 +13,9 @@
 #   tools/g decompile 0x8db22
 #   tools/g x-ref to 0x8db22
 #   tools/g inspect 0xc853a --decompile --callers --callees --xrefs --disasm 40
+#   tools/g inspect 0xc853a 0x8db22
+#   tools/g x-ref trace-to 0xfebef02a --disasm 20
+#   printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
 #   tools/g script run ghidra/scripts/investigate/Foo.java -- arg1
 #   tools/g session-status
 #   tools/g stop
@@ -337,7 +340,21 @@ case "$ACTION" in
 esac
 MUTATES=0
 case "$SUBCMD" in
-  analyze|import|rename|batch) MUTATES=1 ;;
+  analyze|import|rename) MUTATES=1 ;;
+  batch)
+    MUTATES=1
+    for arg in "$@"; do
+      if [[ "$arg" == "--" ]]; then
+        break
+      fi
+      if [[ "$arg" == "--read-only" ]]; then
+        # The vendored CLI preflights the complete batch against a conservative
+        # read-only allowlist before executing its first command.
+        MUTATES=0
+        break
+      fi
+    done
+    ;;
   script)
     case "$ACTION" in
       run|python|java) MUTATES=1 ;;

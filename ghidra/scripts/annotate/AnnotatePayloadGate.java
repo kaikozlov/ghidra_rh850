@@ -34,7 +34,6 @@ public class AnnotatePayloadGate extends GhidraScript {
         label(0x8F14L,"boot_did_table","DID backing records including 0x201 key, 0x202 IV, and 0x203 state.");
         label(0x8F44L,"boot_routine_table","RoutineControl records for 0x10F0..0x10F3 and 0xFF00.");
 
-        fn(0x32D2L,"boot_memory_range_check_access","Validate address/length and operation bit against boot_memory_access_table; return memory class.");
         fn(0x3318L,"boot_memory_range_get_auth_bit","Return the authorization-bit index for a validated memory range.");
         fn(0x335EL,"boot_memory_region_find","Find the region-table index containing an address range.");
         fn(0x3392L,"boot_memory_region_get_cmac_tag","Return the firmware-owned CMAC tag address for a contained range.");

@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -152,6 +153,38 @@ check(
     "tools/pseudo resolves a canonical address to persisted pseudocode",
     probe.returncode == 0 and "security_access_derive_stage1_key" in probe.stdout,
     probe.stderr.strip(),
+)
+interior_probe = subprocess.run(
+    [str(PSEUDO), "0x6fee", "--corpus", str(CORPUS)],
+    cwd=REPO,
+    capture_output=True,
+    text=True,
+)
+check(
+    "tools/pseudo resolves an interior address to its containing function",
+    interior_probe.returncode == 0
+    and "security_access_derive_stage1_key" in interior_probe.stdout,
+    interior_probe.stderr.strip(),
+)
+with tempfile.TemporaryDirectory() as td:
+    unpinned = Path(td) / "unpinned.jsonl"
+    stripped_metadata = dict(metadata)
+    stripped_metadata.pop("project_inventory_sha256", None)
+    function_6fec = next(record for record in functions if record["entry_addr"] == "0x00006fec")
+    unpinned.write_text(
+        json.dumps(stripped_metadata, sort_keys=True) + "\n"
+        + json.dumps(function_6fec, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    unpinned_probe = subprocess.run(
+        [str(PSEUDO), "0x6fee", "--corpus", str(unpinned)],
+        cwd=REPO, capture_output=True, text=True,
+    )
+check(
+    "tools/pseudo refuses interior lookup without corpus-to-inventory provenance",
+    unpinned_probe.returncode != 0
+    and "lacks project_inventory_sha256 provenance" in unpinned_probe.stderr,
+    unpinned_probe.stderr.strip(),
 )
 search = subprocess.run(
     [str(PSEUDO), "security_access", "--list", "--corpus", str(CORPUS)],

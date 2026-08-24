@@ -162,12 +162,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Compile-check all tests (catches compile errors in Ghidra-backed tests too)
-        run: cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --no-run
-      - name: Run Ghidra-free unit tests
-        run: |
-          cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --lib
-          cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --test batch_tests
+      - name: Compile-check all tests and run Ghidra-free unit tests
+        run: make test-ghidra-cli
 
   rebuild-parity:
     name: Four-stage rebuild parity
