@@ -2634,14 +2634,177 @@ Machine-readable ownership:
 `data/generated/corolla_8965H1202000_b6_receiver_contract.json`,
 `data/generated/corolla_8965H1202000_b6_full_receiver_contract.json`,
 `data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json`,
+`data/generated/corolla_8965H1202000_b6_secoc_verification.json`,
+`data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json`,
 `data/generated/corolla_8965H1202000_lta_command_provenance.json` v8, and
 `data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json` v2;
 `tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py`,
 `tests/verify_corolla_8965H1202000_b6_full_receiver_contract.py`,
+`tests/verify_corolla_8965H1202000_b6_secoc_verification.py`,
 `tests/verify_corolla_8965H1202000_lta_command_provenance.py`, and
 `tests/verify_corolla_8965H1202000_supervisor_external_ingress.py` pin the exact raw
-bodies, GP aliases, 256-bit wire partition, freshness/trailer arithmetic, CMAC-input
-shape, field geometry, controller path, H/F identity, and bounded alternatives.
+bodies, GP aliases, 256-bit wire partition, freshness/trailer arithmetic, complete
+freshness-window/CMAC/commit state machine, field geometry, controller path, H/F
+identity, and bounded alternatives.
+
+### 7.36 Protected-B6 SecOC verification closure: authenticated epoch, window, CMAC, and commit
+
+The previous receiver-envelope closure established what B6 authenticates. The remaining
+question was whether the receiver's **stateful verification policy** could be recovered
+well enough to reproduce the authenticated envelope rather than merely its byte layout.
+It can. The exact H target-native path is now closed from B28 FV4 extraction through
+freshness candidate selection, ICU-S command 7, post-CMAC state commit, and PDU42
+release. The corresponding H/F application bytes are identical, so the result transfers
+byte-for-byte to `8965F1208000`.
+
+B6 is SecOC record 2 at `0x257CC`, but freshness ID 2 is the second **ordinary**
+freshness slot because record 0 (`0x00F`) is the synchronization profile and records 1
+(`0x0D7`) and 2 (`0x0B6`) are ordinary profiles. `0x89558` performs that distinction
+explicitly while walking the three records. Therefore B6's committed 12-byte state is
+`FEBE54D4..FEBE54DF`, its pre-authentication candidate is staged at
+`FEBE54EC..FEBE54F7`, and each slot is laid out as `trip_u32`, `reset_u32`,
+`message_u16`, plus two auxiliary/pad bytes. Global authenticated synchronization state
+from `0x00F` lives separately at `FEBE54AC`/`FEBE54B0` (current trip/reset) and
+`FEBE54B4`/`FEBE54B8` (pending trip/reset). Application initialization `0x89812`
+zeros those current/pending cells and both ordinary current/pending slots; this is an
+exact initialization write, not a whole-program claim that no external/NvM restoration
+could ever exist.
+
+The four transmitted freshness bits are exactly `B28[7:4]`:
+
+- `B28[7:6]` = the low two bits of the SecOC **8-bit message counter**;
+- `B28[5:4]` = the low two bits of the **20-bit reset counter**.
+
+`0x89CDA` reconstructs reset freshness around the current authenticated `0x00F` reset
+counter. Its trial order is exact:
+
+1. current reset;
+2. current - 1;
+3. current + 1;
+4. current - 2;
+5. current + 2,
+
+with the 20-bit domain bounded to `0..0xFFFFF`. A trial is eligible only when its low
+two reset bits equal the transmitted `reset_low2`. The same-PDU authentication retry
+counter at `FEBE5406` selects the Nth eligible trial. With only two reset bits on the
+wire, the only ambiguity inside this five-candidate window is `current-2` versus
+`current+2`: both have the same low two bits. Attempt 0 therefore tries `current-2`,
+and B6 record `+0x10=1` permits exactly one retry capable of trying `current+2`.
+This gives the otherwise opaque retry count a concrete protocol role.
+
+Within an unchanged trip/reset epoch, `0x89D58` reconstructs the next message counter
+as the strictly forward value congruent with the received low two bits:
+
+`candidate = (committed & ~3) | received_low2`, adding 4 when
+`received_low2 <= (committed & 3)`.
+
+The ordinary accepted advance is therefore 1..4 counts, not an arbitrary modulo-4
+match. When the epoch changes, the candidate must be lexicographically newer under
+`global_trip > committed_trip` or `global_trip == committed_trip && candidate_reset >
+committed_reset`; its initial message counter is then the received low-two-bit value
+`0..3`. An older/equal candidate returns `0x23` while another reset trial can still be
+attempted, then `0x22` once the reset search is exhausted.
+
+The message/reset terminal boundary has a non-obvious behavior that is now pinned.
+When the next congruent 8-bit message value would exceed `0xFF`, or the selected reset
+is already `0xFFFFF`, the reconstructed message is forced to `0xFF`; outer
+`0x89E9A` returns status `0x24`. **`0x24` is not a rejection.** `0x88A56` invokes the
+configured freshness-boundary callback through `0x88908`, leaves the queue in verify
+state C3, and falls through to the same CMAC-build/command-7 path as status 0. By
+contrast, `0x22` moves to freshness-failure A5 and never submits command 7, while
+`0x23` requests another reset candidate through `0x8891E(...,0x201)`.
+
+The authenticated synchronization profile also handles 16-bit trip wrap explicitly.
+H's threshold byte is `0x0F`: when current trip is at least `0xFFFF-15`, a nonzero
+new trip through 16 can be considered forward wrap by `0x89F6E`. A successful sync
+CMAC causes `0x8A130` to commit the pending global trip/reset. If wrap was accepted,
+`0x8A130` calls `0x8A0AE(0)`, which clears both current and pending ordinary freshness
+slots whose internal record `+0x04` linkage field is zero. That includes both D7 and
+B6. The receiver therefore does not carry a stale lexicographic B6 epoch across an
+authenticated trip wrap.
+
+Once a candidate is accepted by the freshness layer, `0x89E9A` stages it in the B6
+pending slot **before** authentication. The generic worker then builds the already
+recovered 36-byte input
+
+`00 B6 || B0..B27 || freshness[6]`
+
+and submits AES-CMAC verification with a 28-bit received tag. B6 selects SecOC config
+0 / CryptoIf job 0; the exact config bytes at `0x2570C` are type 1 with protected
+ICU-S selector 4. `0x822D0` moves that selector into the driver descriptor and
+`0x83BF4` issues command word `(4 << 16) | 7 = 0x00040007`. There is no separately
+recovered source/profile identifier concatenated into the CMAC input: the authenticated
+prefix is the 16-bit DataID `0x00B6`; freshness ID 2 selects receiver state rather
+than adding another CMAC field. The slot-4 **secret value** remains opaque to mapped
+CPU/application code.
+
+Command-7 polarity is closed independently two ways. Live post-CMAC gate `0x88C16`
+treats `FEBE5450 != 0` as mismatch. The target-native disabled command-7 KAT at
+`0x62430` initializes its verify-result byte to 1 and only reports success if command 7
+changes it to zero. Therefore command-7 result `0` means CMAC match.
+
+The post-authentication state ordering is exact:
+
+- `0x88C9C` calls post-CMAC gate `0x88C16` only when verify worker `0x88A56`
+  returns 0;
+- `0x88C16` invokes `0x88BE2` **before** upper delivery;
+- on CMAC match, `0x88BE2` passes freshness ID 2 with high16 clear to `0x89758`,
+  which resolves ordinary slot 1 and `0x8A07A` copies the 12-byte pending B6
+  freshness into committed state;
+- only after that commit does the verified-PDU path release route/PDU42 to COM at
+  `0x76A3C`;
+- on CMAC mismatch, `0x88BE2` sets high16 in the callback argument, so `0x8A07A`
+  does **not** commit the pending freshness, `0x8891E(...,0x200)` may retry the same
+  queued PDU, and PDU42 is not delivered.
+
+Freshness-valid but MAC-invalid B6 therefore cannot advance committed freshness and
+cannot reach the steering application.
+
+The two retry counters are also different mechanisms. B6 record `+0x10=1` bounds the
+same-queued-PDU freshness-candidate/CMAC-mismatch retry at `FEBE5406`; record
+`+0x2E=2` separately bounds CryptoIf submit/busy-result-2 retries at `FEBE5404`.
+`0x88702` resets both counters when a **new** PDU transitions D2→C3. Its B4→C3 path
+itself performs no additional reset, but the authentication-retry scheduler `0x8891E`
+has already incremented `FEBE5406` **and cleared `FEBE5404`** before entering B4.
+By contrast, `0x889C2` increments only `FEBE5404` on CryptoIf result 2, so B4→C3
+preserves that busy count across retries of the current authentication candidate. The
+exact scopes are therefore: one auth/candidate retry for the current queued PDU, and up
+to two CryptoIf-busy retries per authentication candidate/verification attempt. Neither
+is a cross-frame guess throttle.
+
+Finally, B6 has two independent rolling counters. SecOC's message counter is 8 bits
+internally and only low2 is transmitted in FV4. Signal261 is a separate application
+counter in `B7[5:0]`, modulo 64 with the already recovered effective-gap cap 8. It is
+inside authenticated B0..B27, but it is unpacked/consumed only after verified PDU42
+delivery and does not participate in freshness candidate selection. A conforming sender
+must therefore maintain **both** the SecOC trip/reset/message state and the independent
+signal261 application sequence; matching one does not synchronize the other.
+
+The exact receiver-required sender envelope is consequently known:
+
+1. maintain a full freshness tuple consistent with authenticated `0x00F` trip/reset
+   state and B6's 8-bit message progression;
+2. encode FV4 as `message_low2||reset_low2` in `B28[7:4]`;
+3. build freshness48 as `trip16||reset20||message8||reset_low2||00b`;
+4. compute AES-CMAC-128 over `00 B6 || B0..B27 || freshness48` with the protected
+   key selected by ICU-S slot 4;
+5. transmit CMAC_MSB28 in `B28[3:0],B29,B30,B31`; and
+6. independently maintain signal261's modulo-64 application sequence.
+
+This closes the **EPS receiver-side verification algorithm**, not the upstream sender.
+Still open are the slot-4 secret or an available approved ICU-S operation that can
+produce the tag, sender-side ownership/source of the live trip/reset/message state,
+stock B6 wall-clock cadence, and the upstream FRC/Brake/gateway payload/signing
+producer. Those are now the actual sender blockers; another generic pass over the H/F
+receiver path is not.
+
+Machine-readable proof:
+`data/generated/corolla_8965H1202000_b6_secoc_verification.json` and
+`data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json`;
+`tests/verify_corolla_8965H1202000_b6_secoc_verification.py` independently regenerates
+the model and pins the H/F bytes, profile geometry, RAM slots, reset/message candidate
+arithmetic, `0x24` and trip-wrap edge cases, command-7 result polarity, retry scopes,
+commit-before-delivery ordering, slot-4 selector, and signal261 separation.
 
 ## 8. Remaining evidence boundary
 
@@ -2722,6 +2885,6 @@ analyzed positive example of the replacement protected-B6 target-angle architect
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-012](../reference/index.md#finding-com-012), [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040)
+- Findings with this document as canonical home: [COM-012](../reference/index.md#finding-com-012), [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [SECOC-071](../reference/index.md#finding-secoc-071), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040)
 - Corrections with this document as canonical home: [CORR-070](../reference/index.md#correction-corr-070), [CORR-073](../reference/index.md#correction-corr-073), [CORR-074](../reference/index.md#correction-corr-074), [CORR-075](../reference/index.md#correction-corr-075), [CORR-076](../reference/index.md#correction-corr-076), [CORR-077](../reference/index.md#correction-corr-077), [CORR-078](../reference/index.md#correction-corr-078), [CORR-105](../reference/index.md#correction-corr-105), [CORR-106](../reference/index.md#correction-corr-106), [CORR-107](../reference/index.md#correction-corr-107)
 <!-- knowledge-cross-references:end -->

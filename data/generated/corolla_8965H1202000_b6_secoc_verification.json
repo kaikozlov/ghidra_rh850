@@ -1,0 +1,488 @@
+{
+  "acceptance_state_machine": {
+    "crypto_submit_result_2": "0x889C2(...,0x202) uses B6 record +0x2E limit2 for CryptoIf submit/busy retries of the current authentication candidate; B4->C3 preserves that counter across busy retries, while 0x8891E resets it when advancing to a new auth/freshness attempt",
+    "freshness_commit": {
+      "dispatcher": "0x00089758",
+      "failure_action": "no copy; committed B6 freshness is unchanged",
+      "normal_commit": "0x0008A07A",
+      "success_action": "copy pending 12-byte B6 slot 0xfebe54ec -> committed slot 0xfebe54d4"
+    },
+    "freshness_results": {
+      "0x00": "candidate staged; continue to command7",
+      "0x22": "hard freshness failure -> A5 -> cleanup; no command7 and no delivery",
+      "0x23": "0x8891E(...,0x201) candidate retry; if below B6 limit1, C3->B4 and auth-candidate counter increments",
+      "0x24": "call freshness-boundary callback through 0x88908; state remains C3 and command7 still executes"
+    },
+    "gate1": "0x88C9C reaches post-CMAC gate only when 0x88A56 returns 0",
+    "gate2": {
+      "commit_before_delivery": true,
+      "function": "0x00088C16",
+      "mismatch": "result!=0: freshness commit callback receives 0x00010002 so pending state does not commit; 0x8891E(...,0x200) may retry the same queued PDU; no PDU42 delivery on mismatch",
+      "result_cell": "0xFEBE5450",
+      "success": "result==0: freshness commit callback receives freshness ID2 with high16 clear, pending slot commits, then PDU42 routes to COM"
+    },
+    "new_pdu_transition": "0x88702: D2->C3 and resets auth-candidate + CryptoIf-submit retry counters to zero",
+    "queue_states": {
+      "freshness_failure": "A5",
+      "generic_failure": "96",
+      "idle": "E1",
+      "new": "D2",
+      "retry": "B4",
+      "verify": "C3"
+    },
+    "retry_budgets": {
+      "authentication_candidate_or_mac_mismatch": {
+        "counter": "0xFEBE5406",
+        "interaction": "0x8891E increments this counter and resets the CryptoIf-submit counter before B4 retry",
+        "limit": 1,
+        "record_offset": "0x10",
+        "scope": "current queued PDU"
+      },
+      "cryptoif_submit_busy": {
+        "counter": "0xFEBE5404",
+        "interaction": "0x889C2 increments it on driver result2; 0x8891E clears it when an auth/freshness retry is scheduled",
+        "limit": 2,
+        "record_offset": "0x2E",
+        "scope": "current authentication candidate/verification attempt within the queued PDU"
+      }
+    },
+    "same_pdu_retry_transition": "0x88702 itself performs B4->C3 without an additional reset; the caller that schedules an authentication retry (0x8891E) has already incremented the auth counter and reset the CryptoIf-submit counter to zero",
+    "verified_delivery": {
+      "length_boundary": "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. Static evidence does not prove that B28..B31 are physically stripped before COM RAM; the application-consumer census, not a stripping assumption, is the basis for classifying them as SecOC-only.",
+      "queue_getter": "0x00087E2C",
+      "queue_ingress": "0x0008865A",
+      "resolved_upper_callback": "0x00076A3C",
+      "route_id": 42,
+      "upper_callback_role": "COM RxIndication for PDU42",
+      "upper_wrapper": "0x00088856 -> 0x00089514 -> 0x0007AFB6",
+      "verify_worker": "0x00088A56"
+    }
+  },
+  "application_sequence_relation": {
+    "application_consumer": {
+      "classification": "rolling-sequence-counter",
+      "consumer": "0x000CB246",
+      "counter_bits": 6,
+      "delta_formula": "delta = (current - previous) mod 64",
+      "downstream": "raw delta and capped effective gap are stored at GP+0xA4A/GP+0xA4C; CB4F4 consumes the capped gap in target plausibility/supervision",
+      "effective_gap_formula": "effective_gap = 1 when delta <= 1, otherwise min(delta, 8)",
+      "gap_cap": 8,
+      "modulus": 64,
+      "snapshot": "0xFEBEADBC",
+      "strict_plus_one_required": false,
+      "wire": "B7 bits5:0",
+      "wrap_max": 63
+    },
+    "application_counter_bits": 6,
+    "application_gap_cap": 8,
+    "application_modulus": 64,
+    "independent_counters": true,
+    "relationship": "signal261 is ordinary authenticated application data inside B0..B27. SecOC freshness is reconstructed from B28[7:4] plus SecOC RAM state. Signal261 is unpacked/consumed only on the post-verification COM/application side and does not select the SecOC freshness candidate.",
+    "secoc_message_counter_bits": 8,
+    "secoc_transmitted_message_bits": 2,
+    "sender_requirement": "Maintain both counters: a SecOC message8/reset/trip state for CMAC/FV4 and the independent application signal261 modulo-64 sequence for steering plausibility.",
+    "signal_id": 261,
+    "wire": "B7[5:0]"
+  },
+  "applies_to": [
+    "8965H1202000",
+    "8965F1208000"
+  ],
+  "authenticated_envelope": {
+    "application_bytes": 28,
+    "authenticated_input_bytes": 36,
+    "cmac_algorithm": "AES-CMAC-128",
+    "cmac_input": "00 B6 || B0..B27 || reconstructed_freshness[6]",
+    "icus_command_word": "(slot_selector << 16) | 7 = 0x00040007",
+    "key_selection": "config0 type1 -> protected ICU-S slot4",
+    "key_value_cpu_visible": false,
+    "received_tag_bits": 28,
+    "result_evidence": "live 0x88C16 tests result!=0 as mismatch; disabled 0x62430 command7 KAT initializes result=1 and reports pass only when result becomes 0",
+    "result_polarity": "command7 result byte 0 means verified/match; nonzero means mismatch",
+    "submit_path": "0x88A56 -> 0x88986 -> CryptoIf job0 -> driver dispatch -> command7 prepare 0x822D0 -> ICU-S command7 0x83BF4",
+    "trailer": "B28[3:0] || B29 || B30 || B31 after FV4 removal/top-alignment",
+    "transmitted_tag": "MSB28"
+  },
+  "cross_variant": {
+    "all_verification_functions_and_tables_inside_identical_range": true,
+    "b6_secoc_verification_contract_byte_identical": true,
+    "boundary": "H and F application bytes are identical for every record/config/function used by this proof. This does not transfer low-region calibration values or identify the upstream sender.",
+    "h_f_application_identical": true,
+    "identical_range": [
+      "0x20000",
+      "0x100000"
+    ]
+  },
+  "evidence_boundary": "This closes the H/F EPS receiver-side SecOC verification algorithm for protected 0x0B6, including exact freshness state, candidate/window rules, retry scopes, CMAC input/slot selection, commit timing, and application-sequence separation. It does not recover the protected slot-4 secret, sender-side ownership of live freshness state, stock sender cadence, or the upstream FRC/Brake payload/signing producer.",
+  "freshness_acceptance": {
+    "epoch_transition": {
+      "new_epoch_message": "received_message_low2 (0..3)",
+      "not_newer_rule": "older/equal candidate returns 0x23 while reset trial index <=3, otherwise 0x22",
+      "staging": "accepted/reconstructed candidate is copied to B6 pending slot 0xfebe54ec before CMAC",
+      "strictly_newer_rule": "global_trip > committed_trip OR (global_trip == committed_trip AND candidate_reset > committed_reset)"
+    },
+    "global_epoch_source": {
+      "commit": "0x0008A130",
+      "commit_only_after_authentication_success": true,
+      "current_state": [
+        "0xFEBE54AC",
+        "0xFEBE54B0"
+      ],
+      "reconstruct": "0x00089F6E",
+      "secured_sync_can_id": "0x00F",
+      "sync_freshness_id": 0,
+      "sync_full_and_transmitted_bits": 36
+    },
+    "message_reconstruction_same_epoch": {
+      "condition": "global_trip == committed_trip and candidate_reset == committed_reset",
+      "examples": {
+        "message_10_rx2": [
+          14,
+          false
+        ],
+        "message_10_rx3": [
+          11,
+          false
+        ],
+        "message_253_rx0": [
+          255,
+          true
+        ],
+        "message_254_rx3": [
+          255,
+          false
+        ]
+      },
+      "formula": "candidate=(committed_message & ~3)|received_message_low2; if received_low2 <= (committed_message & 3), candidate += 4",
+      "function": "0x00089D58",
+      "ordinary_forward_delta": [
+        1,
+        4
+      ],
+      "overflow_behavior": "If the next congruent value would exceed 0xFF, the candidate message is forced to 0xFF and outer 0x89E9A returns status 0x24. The same 0xFF/status0x24 boundary is also reached when the selected reset is already 0xFFFFF.",
+      "strictly_forward": true
+    },
+    "reset_candidate_search": {
+      "base": "current authenticated 0x00F reset counter",
+      "domain": [
+        0,
+        1048575
+      ],
+      "examples": {
+        "reset_current_100_rx0_attempt0": [
+          0,
+          100
+        ],
+        "reset_current_100_rx1_attempt0": [
+          2,
+          101
+        ],
+        "reset_current_100_rx2_attempt0": [
+          3,
+          98
+        ],
+        "reset_current_100_rx2_attempt1": [
+          4,
+          102
+        ],
+        "reset_current_100_rx3_attempt0": [
+          1,
+          99
+        ]
+      },
+      "filter": "candidate_reset & 3 == transmitted reset_low2",
+      "function": "0x00089CDA",
+      "important_ambiguity": "Only current-2 and current+2 collide in the two-bit transmitted reset domain; attempt0 chooses -2 (trial3) and the one allowed same-PDU retry can choose +2 (trial4).",
+      "ordered_trials": [
+        "current",
+        "current-1",
+        "current+1",
+        "current-2",
+        "current+2"
+      ],
+      "ordinary_b6_retry_limit": 1,
+      "selection": "authentication_candidate_retry_counter selects the Nth matching trial"
+    },
+    "special_status_0x24": {
+      "callback_dispatch": "0x00088908",
+      "cmac_still_runs": true,
+      "hard_reject": false,
+      "meaning": "message-0xFF or reset-0xFFFFF boundary candidate notification",
+      "reason": "0x88A56 calls 0x88908 then reaches the common C3 path that builds/submits command 7; unlike 0x23 it does not transition C3->B4."
+    },
+    "trip_wrap": {
+      "b6_state_cleared_on_authenticated_trip_wrap": true,
+      "post_verified_sync_action": "0x8A130 commits pending global trip/reset; on wrap it calls 0x8A0AE(0), which clears current+pending ordinary freshness slots whose internal record+0x04 linkage field equals 0, including D7 and B6",
+      "sync_threshold": 15,
+      "wrap_acceptance": "when current trip >= 0xFFFF-15, a nonzero new trip <=16 is treated as forward wrap by 0x89F6E"
+    }
+  },
+  "identifiers": {
+    "application_pdu_id": 42,
+    "boundary": "The authenticated prefix is the 16-bit DataID 0x00B6. Freshness ID2 selects receiver state but is not separately concatenated into the 36-byte CMAC input. No additional source/profile identifier was recovered in that input.",
+    "can_id": "0x0B6",
+    "cryptoif_job_handle": 0,
+    "data_id_authenticated_be16": "0x00B6",
+    "freshness_id": 2,
+    "freshness_kind": "normal",
+    "icus_command": 7,
+    "icus_slot_selector": 4,
+    "normal_freshness_slot": 1,
+    "normal_linkage_field_plus_0x04": 0,
+    "secoc_crypto_config_id": 0,
+    "secoc_record_address": "0x000257CC",
+    "secoc_record_index": 2,
+    "separate_source_identifier_in_cmac_input": false,
+    "upper_route_id": 42
+  },
+  "ram_state": {
+    "authentication_candidate_retry_counter": "0xFEBE5406",
+    "b6_committed_slot": {
+      "address": "0xFEBE54D4",
+      "bytes": 12,
+      "fields": {
+        "message_u16": 8,
+        "reset_u32": 4,
+        "trip_u32": 0
+      }
+    },
+    "b6_pending_slot": {
+      "address": "0xFEBE54EC",
+      "bytes": 12,
+      "fields": {
+        "message_u16": 8,
+        "reset_u32": 4,
+        "trip_u32": 0
+      }
+    },
+    "b6_queue_state": "0xFEBE5412",
+    "cmac_verify_result_byte": "0xFEBE5450",
+    "crypto_submit_retry_counter": "0xFEBE5404",
+    "global_sync_current_reset": "0xFEBE54B0",
+    "global_sync_current_trip": "0xFEBE54AC",
+    "global_sync_pending_reset": "0xFEBE54B8",
+    "global_sync_pending_trip": "0xFEBE54B4",
+    "gp": "0xFEBEB800",
+    "initialization": {
+      "freshness": "0x00089812 zeros current/pending global sync state and both 12-byte ordinary current/pending slots",
+      "persistence_boundary": "This proves application initialization writes these RAM cells; it does not by itself claim a whole-program negative for every possible external/NvM restoration path.",
+      "verify_engine": "0x0008857C clears both retry counters and initializes all three queue states to E1"
+    }
+  },
+  "schema": "corolla-8965H1202000-b6-secoc-verification-v1",
+  "sender_recipe": {
+    "cryptographic_blocker": "The exact receiver selector is closed, but the slot-4 secret value remains opaque to mapped CPU/application code. A sender still needs that secret or an approved/available ICU-S operation that can produce the required tag.",
+    "receiver_required_steps": [
+      "Maintain a full freshness tuple consistent with the receiver's authenticated 0x00F trip/reset epoch and B6 message8 progression.",
+      "Encode FV4 in B28[7:4] as message_low2||reset_low2.",
+      "Build freshness48 as trip16||reset20||message8||reset_low2||00b.",
+      "Compute AES-CMAC-128 over 00 B6 || B0..B27 || freshness48 using the key selected by protected ICU-S slot4.",
+      "Transmit CMAC_MSB28 in B28[3:0],B29,B30,B31.",
+      "Independently maintain application signal261 in B7[5:0] for steering sequence/plausibility semantics."
+    ],
+    "runtime_state_blocker": "The receiver algorithm is closed, but sender ownership/source of the live trip/reset/message state and stock wall-clock cadence remain outside this EPS receiver image."
+  },
+  "sienna_prior_art": {
+    "boundary": "Sienna supplies role anchors for the generic acceptance engine. The H functions occupy the same control roles near a +0x5A64 Sienna relocation but are not claimed byte-identical: raw differences include relocated calls, GP/table displacements, and generated-profile geometry. H freshness/window conclusions below must be recovered from the target-native H bodies rather than transferred from Sienna.",
+    "rows": [
+      {
+        "body_size": 66,
+        "different_byte_count": 8,
+        "different_offsets": [
+          10,
+          11,
+          14,
+          15,
+          46,
+          47,
+          56,
+          57
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x00088702",
+        "h_sha256": "706072cfdd3f30f10684f5b63089048d2f0a3e12ee3fc54e01aa4199acd057c2",
+        "role": "secoc_new_or_retry_transition",
+        "sienna_entry": "0x0008E166",
+        "sienna_sha256": "36a81b38ac5106dee1068526e91b7c33aff0fd8e6df4540868229a0bb2b58dfc"
+      },
+      {
+        "body_size": 104,
+        "different_byte_count": 10,
+        "different_offsets": [
+          12,
+          13,
+          18,
+          19,
+          28,
+          29,
+          60,
+          61,
+          88,
+          89
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x0008891E",
+        "h_sha256": "359f2f45e592be34e4b3c3c19fd7c7afe992ee5c34b1a05c9a8f3977fef39610",
+        "role": "authentication_candidate_retry",
+        "sienna_entry": "0x0008E382",
+        "sienna_sha256": "6d1250c3a12079c7de2ca965822e7c091c84ad0ba74db083bc3d918478d7ade2"
+      },
+      {
+        "body_size": 92,
+        "different_byte_count": 10,
+        "different_offsets": [
+          14,
+          15,
+          20,
+          21,
+          28,
+          29,
+          58,
+          59,
+          76,
+          77
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x000889C2",
+        "h_sha256": "b8bf401aef55411cf005505e0955cf119e9ce97d2948f2e28db400783eede66e",
+        "role": "crypto_submit_retry",
+        "sienna_entry": "0x0008E426",
+        "sienna_sha256": "3562b9de405f3ae6069011d43fcef0349dbe072c62e7bce653fcb26c3e489046"
+      },
+      {
+        "body_size": 396,
+        "different_byte_count": 16,
+        "different_offsets": [
+          16,
+          17,
+          20,
+          21,
+          36,
+          37,
+          40,
+          41,
+          62,
+          63,
+          130,
+          131,
+          256,
+          257,
+          316,
+          317
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x00088A56",
+        "h_sha256": "58ba4592f15a5c9b0bc13c96c7b9cd471c40d1ace55759ea7f477e0e8cef10ca",
+        "role": "secoc_verify_worker",
+        "sienna_entry": "0x0008E4BA",
+        "sienna_sha256": "db69bf24d3ce490afdfbcac2049ed054a0097227e4a3eea3f3749cedcb72ee2c"
+      },
+      {
+        "body_size": 52,
+        "different_byte_count": 4,
+        "different_offsets": [
+          14,
+          15,
+          18,
+          19
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x00088BE2",
+        "h_sha256": "ea091ae5d5e376662bd636303ff499150f10576a8434d26c0fdf39c01683e7d2",
+        "role": "freshness_commit_callback_dispatch",
+        "sienna_entry": "0x0008E646",
+        "sienna_sha256": "7e4798c4acaf8f8ee9c2db52c526bcb2b4b6b471fa58f216f689b768715c78af"
+      },
+      {
+        "body_size": 134,
+        "different_byte_count": 8,
+        "different_offsets": [
+          14,
+          15,
+          24,
+          25,
+          28,
+          29,
+          38,
+          39
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x00088C16",
+        "h_sha256": "0220bb150af7ed42ef5114a4ce66ad562a6a61481ce20a22b78ec7405e92f5ba",
+        "role": "post_cmac_acceptance_gate",
+        "sienna_entry": "0x0008E67A",
+        "sienna_sha256": "fbe3753387d3e9de73baee0496c2a3777b0ebe7b252ef3654ddb88f7bae402ff"
+      },
+      {
+        "body_size": 58,
+        "different_byte_count": 2,
+        "different_offsets": [
+          22,
+          23
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x00088C9C",
+        "h_sha256": "f05b334c3f7b1a28cd80a4cd04acde7cd7d726a65ae427b2fd47c30d5108ed7b",
+        "role": "secoc_queue_dispatch",
+        "sienna_entry": "0x0008E700",
+        "sienna_sha256": "bc23c41b082715bae1f85434c08343d7c3566f2be983c304e2f25d020f7479af"
+      }
+    ]
+  },
+  "software_id": "8965H1202000",
+  "sources": {
+    "base_receiver_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+      "sha256": "0cb7b5aff0978c6903e74ce9778c75e0e1f878e8238614b99e65d3f2b7b502e0"
+    },
+    "codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "decompiler_evidence": {
+      "function_count": 36,
+      "path": "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
+      "sha256": "eea6eab24adf08468d677c110fd95f5878b131fe28e7d893e56851ae1e4a0570"
+    },
+    "full_receiver_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
+      "sha256": "10e5bcf8c1bdf5d173ee4ccd56f26ddf86e8edb05a0a6f88acb2dcb1e156cecf"
+    },
+    "hf_equivalence": {
+      "path": "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+      "sha256": "a1c28ae4787a131ad1cc46310a73e11649b5cf92985b79eefa13aae71d519e7c"
+    },
+    "key_provenance": {
+      "path": "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
+      "sha256": "80a8f926d5db6172d3edb8ba3dc1d79708166af8c4c1d5379142188cf153f43e"
+    }
+  },
+  "static_conclusion": {
+    "b6_accept_reject_state_machine_closed": true,
+    "b6_commit_timing_closed": true,
+    "b6_freshness_extraction_closed": true,
+    "b6_freshness_window_closed": true,
+    "b6_h_f_receiver_verification_identical": true,
+    "b6_key_slot_selection_closed": true,
+    "b6_mac_input_closed": true,
+    "b6_profile_identifiers_closed": true,
+    "b6_sequence_relation_closed": true,
+    "sender_freshness_state_ownership_closed": false,
+    "sender_wall_clock_cadence_closed": false,
+    "short_form": "FV4 reconstructs against authenticated 00F state; candidate is staged, command7 verifies CMAC28 with slot4, and only result0 commits freshness then delivers PDU42.",
+    "slot4_secret_value_closed": false,
+    "upstream_producer_closed": false
+  },
+  "transmitted_freshness": {
+    "bits": 4,
+    "decode": {
+      "message_low2": "B28[7:6]",
+      "reset_low2": "B28[5:4]"
+    },
+    "full_bits": 46,
+    "full_freshness": "trip16 || reset20 || message8 || reset_low2 || 00b",
+    "packer": "0x00089876",
+    "parser": "0x00089A46",
+    "wire": "B28[7:4]"
+  }
+}

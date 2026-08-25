@@ -98,11 +98,18 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   exact FV4+CMAC28, full freshness is `trip16||reset20||message8||reset_low2||00b`,
   and the CMAC input is `00 B6 || B0..B27 || freshness[6]` through ICU-S slot 4.
   The bounded application census finds recovered semantics only in selected B3..B10
-  bits. The remaining Corolla work is therefore sender wall-clock cadence, exact
-  secondary-field naming where safety-relevant, H/F-native limits, **sender-side
-  SecOC freshness-state ownership and the slot-4 secret value**, stock-source
-  suppression, and the upstream payload/SecOC producer contract. Static broad
-  searching of this H EPS should not be repeated without a new concrete lead.
+  bits. SECOC-071 now also closes the receiver-side SecOC policy behind that envelope:
+  B6 is normal freshness slot1; reset candidates are tried `current,-1,+1,-2,+2` with
+  the one same-PDU retry resolving the `±2` modulo-4 ambiguity; same-epoch message8
+  reconstruction accepts the next congruent forward value (+1..+4); `0x24` still
+  proceeds to CMAC; authenticated trip wrap clears linked B6 state; command7 result0
+  commits pending freshness before PDU42 delivery while mismatch neither commits nor
+  delivers; and application signal261 is a separate modulo-64 counter. The remaining
+  Corolla work is therefore sender wall-clock cadence, exact secondary-field naming
+  where safety-relevant, H/F-native limits, **sender-side SecOC freshness-state ownership
+  and the slot-4 secret value or an available approved MAC operation**, stock-source
+  suppression, and the upstream payload/SecOC producer contract. Static broad searching
+  of this H EPS should not be repeated without a new concrete lead.
   TMS-040/041 close the `FRC_P5` diagnostic domain and fixed-routine probe surface;
   TMS-043 now closes the **module-dependency topology**: Corolla P5 installs
   category 498 `FRC_P5`, category 435 **`ABS_P5` = Brake/EPB**, and category 405
@@ -116,8 +123,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   task is firmware/dynamic: acquire decoded `FRC_P5` plus category-435 `ABS_P5`
   firmware or synchronized stock-LTA traffic and join planner state to B6 bytes,
   sender cadence, sender freshness-state/signing ownership, and stock-source
-  suppression. Receiver freshness/trailer reconstruction and ICU-S slot selection
-  are no longer open; the slot-4 key value remains unknown. The read-only `AB/EB`
+  suppression. Receiver freshness/trailer reconstruction, candidate-window/retry
+  policy, command7 result handling, commit timing, authenticated trip-wrap behavior,
+  signal261 separation, and ICU-S slot selection are no longer open; the slot-4 key
+  value remains unknown. The read-only `AB/EB`
   Operation FFD surface plus fixed routine
   `0x1588` remain capture references. Wire arbitration ID for the FRC/Brake leg,
   exact producer/forwarder identity, and any relation to community

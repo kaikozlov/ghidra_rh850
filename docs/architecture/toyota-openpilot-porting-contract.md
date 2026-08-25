@@ -154,11 +154,19 @@ consumer; and 167 authenticated application bits have no recovered consumer unde
 bounded COM/direct-reference census. B28..B31 are exactly FV4+CMAC28; full freshness
 is `trip16||reset20||message8||reset_low2||00b`; the CMAC input is
 `00 B6 || B0..B27 || freshness[6]`; and generated config/job0 selects ICU-S slot4.
-The remaining problem is therefore safe **sender-side** reproduction of a known EPS
-receiver contract — exact OEM signal255 unit naming, sender wall-clock cadence,
-secondary-field dynamics where safety-relevant, sender freshness-state/signing
-ownership, the slot-4 secret value or approved slot use, stock-source suppression,
-and the upstream payload/SecOC producer contract. Techstream now verifies the Corolla P5 module topology as `FRC_P5` 498 + category-435
+SECOC-071 closes the stateful verification policy too. Freshness ID2 is ordinary slot1;
+reset candidates are tried `current,-1,+1,-2,+2`, with B6's one same-PDU retry resolving
+the `±2` low-two-bit ambiguity. Same-epoch message8 reconstruction chooses the next
+strictly-forward congruent value (+1..+4). Freshness result `0x24` is a boundary
+notification that still executes command7, authenticated `0x00F` trip wrap clears the
+linked B6 freshness slots, and command7 result0 commits pending freshness before PDU42
+is released to COM. CMAC mismatch neither commits freshness nor delivers the command.
+Signal261 is a separate authenticated application modulo-64 sequence; it is not the
+SecOC message counter. The remaining problem is therefore safe **sender-side**
+reproduction of a known EPS receiver contract — exact OEM signal255 unit naming,
+sender wall-clock cadence, secondary-field dynamics where safety-relevant, sender
+freshness-state/signing ownership, the slot-4 secret value or approved slot use,
+stock-source suppression, and the upstream payload/SecOC producer contract. Techstream now verifies the Corolla P5 module topology as `FRC_P5` 498 + category-435
 `ABS_P5`/Brake-EPB + `EMPS_P5` 405, but not a byte-level forwarding transform or
 SecOC signer — so the remaining work is not discovery of another steering message,
 its scale, request selector, or loss rule.
@@ -255,7 +263,7 @@ work must recover the second and fourth boxes for each new generation as well.
 | Longitudinal command | older SecOC DBC provides a useful comparator, not an EPS-local proof | route `0x183` is 64-byte CAN-FD and disproves old wire-shape transfer | locate ACC producer, target command, feedback, stock suppression, AEB coexistence |
 | Stock producer ownership | old openpilot architecture gives camera/radar replacement model | physical Toyota-B/network differences already observed | map FRC/radar/gateway ownership and safe duplicate blocking for each command family |
 | UI / alerts | older `0x412` is historical reference | old-camera U023A87 path is disabled residue in H | identify FRC/cluster LTA/LDA/LCA status and warning outputs |
-| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6; receiver-side FV4/CMAC28 trailer, 46-bit freshness reconstruction, exact 36-byte CMAC input, and config/job0→ICU-S slot4 selection are closed; application signal261 sequence handling is separate | recover **sender-side** freshness-state/signing ownership and a production-safe way to use/provision the slot-4 secret before actuation; do not confuse the application 6-bit sequence counter with SecOC freshness |
+| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6; receiver-side FV4/CMAC28 trailer, 46-bit freshness reconstruction, reset/message candidate window, retry scopes, trip-wrap handling, exact 36-byte CMAC input, command7 result/commit ordering, and config/job0→ICU-S slot4 selection are closed; application signal261 sequence handling is a separate authenticated counter | recover **sender-side** freshness-state/signing ownership and a production-safe way to use/provision the slot-4 secret before actuation; do not confuse the application 6-bit sequence counter with SecOC freshness |
 | Techstream producer probes | older diagnostic controls are only contextual | FRC fixed vibration routines and category-435 ABS/Brake Active Tests are now cataloged; the latter are brake-actuator-only and expose no named steering setpoint writer | use these as capture/probe triggers only; normal B6 payload production still requires FRC/ABS firmware or synchronized traffic |
 
 ### 4.1 Route-backed Corolla implementation readiness

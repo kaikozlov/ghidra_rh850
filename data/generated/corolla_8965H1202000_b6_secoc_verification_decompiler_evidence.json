@@ -1,0 +1,461 @@
+{
+  "boundary": "Exact-H disposable-project decompilations for the protected 0x0B6 freshness/verification state machine, raw-byte-bound to 8965H1202000. This evidence is intended to complement, not replace, the separately verified byte-complete receiver envelope and ICU-S key-selector provenance artifacts.",
+  "function_count": 36,
+  "functions": [
+    {
+      "body_sha256": "8e66dada3ad10bda4f8850c5dc4f4886ff78ef2144b0fc7c894b68c48e4dadb1",
+      "body_size": 144,
+      "decompiled_c": "\nvoid FUN_00062430(void)\n\n{\n  int unaff_tp;\n  int iVar1;\n  undefined4 uVar2;\n  char cStack_21;\n  undefined4 uStack_20;\n  undefined1 uStack_1c;\n  \n  cStack_21 = '\\x01';\n  if (DAT_0002ca9f == 'Z') {\n    iVar1 = FUN_00082f6a(0,unaff_tp + -0x27bc);\n    if ((iVar1 == 0) && (iVar1 = FUN_00082f9c(0,unaff_tp + -0x27dc,0x10), iVar1 == 0)) {\n      uVar2 = FUN_000694b0();\n      FUN_000694fa(0);\n      __enable_irq();\n      iVar1 = FUN_00082fa8(0,unaff_tp + -0x27cc,0x10,&cStack_21);\n      __disable_irq();\n      FUN_000694b6(uVar2);\n      if (iVar1 == 0) goto LAB_000624a0;\n    }\n    cStack_21 = '\\x01';\n  }\nLAB_000624a0:\n  uStack_20 = 1;\n  uStack_1c = cStack_21 == '\\0';\n  FUN_00088126(0xff,&uStack_20);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "65343943c65918480c41838b608d1d4500974a422ea59ca89d6e3451da68e29a",
+      "entry": "0x00062430",
+      "role": "disabled_slot4_command7_kat"
+    },
+    {
+      "body_sha256": "15b846d700ccb8f1f83aa836b1e6ad4cbd4a788a8fc0bbc9bd17171ae85beff0",
+      "body_size": 172,
+      "decompiled_c": "\nundefined4 FUN_000822d0(int *param_1,int param_2,uint param_3,int param_4,uint param_5,uint param_6)\n\n{\n  int unaff_gp;\n  undefined4 uVar1;\n  int iVar2;\n  \n  if (((((param_1 == (int *)0x0) || (param_2 == 0)) || (param_4 == 0)) ||\n      ((param_6 == 0 || (*param_1 != 1)))) ||\n     ((0x50 < param_3 || ((param_5 == 0 || (0x80 < param_5)))))) {\n    uVar1 = 1;\n  }\n  else {\n    iVar2 = unaff_gp + 0x597c;\n    uVar1 = 0;\n    *(uint *)(unaff_gp + 0x59dc) = param_6;\n    *(uint *)(unaff_gp + 0x5950) = ~param_6;\n    FUN_0008323e(iVar2);\n    if ((~param_3 + 1 & 0xf) != 0) {\n      FUN_00083444(param_3 + iVar2);\n    }\n    FUN_0008323e(unaff_gp + 0x59cc,param_4,param_5 + 7 >> 3);\n    *(int *)(unaff_gp + 0x5960) = unaff_gp + 0x5978;\n    *(int *)(unaff_gp + 0x595c) = unaff_gp + 0x5964;\n    *(int *)(unaff_gp + 0x5964) = iVar2;\n    *(uint *)(unaff_gp + 0x5968) = param_3 << 3;\n    *(int *)(unaff_gp + 0x596c) = unaff_gp + 0x59cc;\n    *(uint *)(unaff_gp + 0x5970) = param_5 & 0x7f;\n    *(uint *)(unaff_gp + 0x5974) = (uint)*(byte *)(param_1 + 1);\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "70ef7a0bc45a04eccc02f9440472cccfdb265216515a67e466585631c4cfd637",
+      "entry": "0x000822D0",
+      "role": "icus_command7_descriptor_prepare"
+    },
+    {
+      "body_sha256": "356bb2eb3a0fd37b2656465f93929d239b25ed9bb6e3f5f0e27e7070da44c461",
+      "body_size": 50,
+      "decompiled_c": "\nundefined4 FUN_00082f6a(undefined4 param_1,undefined4 param_2)\n\n{\n  int unaff_gp;\n  int iVar1;\n  byte abStack_9 [5];\n  \n  abStack_9[0] = 3;\n  iVar1 = FUN_00083182(abStack_9);\n  if (iVar1 == 0) {\n    if (abStack_9[0] == 1) {\n      *(undefined4 *)(unaff_gp + 0x5a74) = param_2;\n      return 0;\n    }\n    if (abStack_9[0] == 2) {\n      return 2;\n    }\n  }\n  return 1;\n}\n\n",
+      "decompiled_c_sha256": "864f919894706f3582f79f4e971a1fcc0f21ccdc30461fed3fd056e8d0889f92",
+      "entry": "0x00082F6A",
+      "role": "cryptoif_begin"
+    },
+    {
+      "body_sha256": "dd61e2b4ee8cc988d00e9b96492013fce453067852ae5735c1ba4d72a90bffe3",
+      "body_size": 12,
+      "decompiled_c": "\nundefined4 FUN_00082f9c(undefined4 param_1,undefined4 param_2,undefined4 param_3)\n\n{\n  int unaff_gp;\n  \n  *(undefined4 *)(unaff_gp + 0x5a78) = param_2;\n  *(undefined4 *)(unaff_gp + 0x5a7c) = param_3;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "16ef83e309c1b88b9e1c71638e63025e66e765bf07586b0d303f2395d74cc8cd",
+      "entry": "0x00082F9C",
+      "role": "cryptoif_update"
+    },
+    {
+      "body_sha256": "039ab65df12fd56c9edf6967b01c07cdc991a7501c1f731872dfe444971fad66",
+      "body_size": 98,
+      "decompiled_c": "\nuint FUN_00082fa8(undefined2 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)\n\n{\n  uint uVar1;\n  int unaff_gp;\n  uint uVar2;\n  \n  *(undefined1 *)(unaff_gp + 0x5a82) = 0;\n  *(undefined1 *)(unaff_gp + 0x5a83) = 1;\n  uVar2 = FUN_00082956(param_1,*(undefined4 *)(unaff_gp + 0x5a74),*(undefined4 *)(unaff_gp + 0x5a78)\n                       ,*(undefined4 *)(unaff_gp + 0x5a7c),param_2,param_3,param_4);\n  if (uVar2 == 0) {\n    uVar1 = 0;\n    do {\n      if (*(char *)(unaff_gp + 0x5a82) == '\\x01') {\n        uVar2 = (uint)(*(char *)(unaff_gp + 0x5a83) != '\\0');\n        break;\n      }\n      uVar1 = uVar1 + 1;\n    } while (uVar1 < 0xe07);\n    if (*(char *)(unaff_gp + 0x5a82) == '\\0') {\n      uVar2 = 2;\n    }\n  }\n  else if (uVar2 != 2) {\n    uVar2 = 1;\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "c28b480ab85fd073990901b7fbddaa70c0b56a0b5bfd19e7f62adf44fffce9f8",
+      "entry": "0x00082FA8",
+      "role": "cryptoif_finish"
+    },
+    {
+      "body_sha256": "4df300ac78795b6c939dbd65693237be6469afe3b8c50637efc922a768643d82",
+      "body_size": 148,
+      "decompiled_c": "\nint FUN_00082956(undefined2 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,\n                undefined4 param_5,undefined4 param_6,undefined4 param_7)\n\n{\n  char cVar1;\n  int unaff_gp;\n  undefined4 uVar2;\n  int iVar3;\n  uint uVar4;\n  code *pcVar5;\n  \n  iVar3 = FUN_000828e0();\n  if (iVar3 == 1) {\n    cVar1 = *(char *)(unaff_gp + 0x5a48);\n    if (cVar1 == -0x1f) {\n      uVar4 = FUN_00082908(param_1);\n      if ((uVar4 == 0) || (pcVar5 = *(code **)(uVar4 + 0x14), pcVar5 == (code *)0x0)) {\n        FUN_0008292a();\n        iVar3 = 1;\n      }\n      else {\n        uVar2 = *(undefined4 *)(uVar4 + 0x1c);\n        *(uint *)(unaff_gp + 0x5a44) = ~uVar4;\n        *(uint *)(unaff_gp + 0x5a40) = uVar4;\n        *(undefined1 *)(unaff_gp + 0x5a48) = 0xa5;\n        iVar3 = (*pcVar5)(uVar2,param_2,param_3,param_4,param_5,param_6,param_7);\n        if (iVar3 != 0) {\n          FUN_0008292a();\n        }\n      }\n    }\n    else if (cVar1 == -0x5b) {\n      iVar3 = 2;\n    }\n    else {\n      iVar3 = 1;\n      if (cVar1 != '\\0') {\n        *(undefined1 *)(unaff_gp + 0x5a48) = 0;\n      }\n    }\n    FUN_0008293e();\n  }\n  else {\n    iVar3 = 2;\n  }\n  return iVar3;\n}\n\n",
+      "decompiled_c_sha256": "9041ffbf31ccc20bcec7e701e68431f33ca26a5b710f64414d46dbc578115ccc",
+      "entry": "0x00082956",
+      "role": "crypto_driver_dispatch"
+    },
+    {
+      "body_sha256": "5a1afc51cd2c28b360984d6ca54a731f75af1bb06100869f0b49535b512b7767",
+      "body_size": 288,
+      "decompiled_c": "\nundefined4 FUN_00083bf4(int *param_1)\n\n{\n  uint uVar1;\n  uint *puVar2;\n  uint uVar3;\n  int unaff_gp;\n  undefined4 uVar4;\n  uint uVar5;\n  uint uVar6;\n  uint uVar7;\n  uint uVar8;\n  uint uVar9;\n  uint uVar10;\n  \n  if (*(char *)(unaff_gp + 0x5a30) == '\\0') {\n    return 0x10;\n  }\n  if (((param_1 != (int *)0x0) && (puVar2 = (uint *)*param_1, puVar2 != (uint *)0x0)) &&\n     (uVar5 = param_1[1], uVar5 != 0)) {\n    uVar3 = puVar2[1];\n    uVar9 = puVar2[4];\n    uVar8 = puVar2[3];\n    if ((((uVar9 < 0xf) && (uVar8 < 0x80)) && ((uVar6 = *puVar2, uVar6 != 0 || (uVar3 == 0)))) &&\n       (uVar7 = puVar2[2], uVar7 != 0)) {\n      uVar10 = Ramffc5d00c;\n      uVar4 = 2;\n      uVar1 = Ramffc5d014;\n      if (((*(char *)(unaff_gp + 0x5a30) == -0x1f) && ((uVar10 & 1) == 0)) && ((uVar1 & 3) == 0)) {\n        uVar10 = 0x2000000;\n        if (uVar3 < 0xffffff81) {\n          uVar10 = uVar3 + 0x7f >> 7;\n        }\n        *(uint *)(unaff_gp + 0x5a08) = uVar5;\n        *(uint *)(unaff_gp + 0x5a0c) = uVar7;\n        *(uint *)(unaff_gp + 0x5a04) = uVar6;\n        Ramffc5d004 = 0;\n        *(undefined4 *)(unaff_gp + 0x59f8) = 1;\n        *(uint *)(unaff_gp + 0x59f0) = uVar10 + 1;\n        Ramffc5d004 = uVar3 >> 0x18 | uVar3 >> 8 & 0xff00 | (uVar3 & 0xff00) << 8 | uVar3 << 0x18;\n        *(uint *)((int)&USHORT_00005a14 + unaff_gp) = ~uVar6;\n        *(undefined4 *)(unaff_gp + 0x59fc) = 0;\n        *(uint *)(unaff_gp + 0x5a1c) = ~uVar7;\n        *(undefined4 *)(unaff_gp + 0x59f4) = 0;\n        *(uint *)(unaff_gp + 0x5a18) = ~uVar5;\n        *(undefined4 *)(unaff_gp + 0x59ec) = 7;\n        *(undefined1 **)(unaff_gp + 0x59e0) = &LAB_00083b42;\n        *(undefined1 **)(unaff_gp + 0x59e4) = &LAB_00083ba8;\n        *(undefined4 *)(unaff_gp + 0x5a24) = 0xfff7c4bd;\n        Ramffc5d004 = uVar8;\n        *(undefined4 *)(unaff_gp + 0x5a28) = 0xfff7c457;\n        *(undefined1 **)(FUN_000059e8 + unaff_gp) = &LAB_00083910;\n        *(undefined4 *)(unaff_gp + 0x5a2c) = 0xfff7c6ef;\n        Ramffc5d004 = 0;\n        *(undefined1 *)(unaff_gp + 0x5a30) = 0xd2;\n        uVar4 = 0;\n      }\n      Ramffc5d000 = uVar9 << 0x10 | 7;\n      return uVar4;\n    }\n  }\n  return 0x11;\n}\n\n",
+      "decompiled_c_sha256": "9b50f820637f125ef3d48a75c4478cfac052aebdae46d1d4889144ceb4fa6380",
+      "entry": "0x00083BF4",
+      "role": "icus_command7_driver"
+    },
+    {
+      "body_sha256": "ca94bbf9799a15c0f78d7a7036a0eb2f299143dd8a2ef63011ba873088736660",
+      "body_size": 54,
+      "decompiled_c": "\nbool FUN_000884aa(short param_1,undefined4 *param_2)\n\n{\n  int unaff_gp;\n  \n  if (param_1 == 0) {\n    FUN_00091f5a(0);\n    *param_2 = *(undefined4 *)(unaff_gp + -0x6410);\n    FUN_0008323e(param_2 + 1,unaff_gp + -0x640c,0x10);\n    FUN_00091f66();\n  }\n  return param_1 != 0;\n}\n\n",
+      "decompiled_c_sha256": "0462a47bb52586e76c7fc31a9571e8629d88dcb737fe0da79547ae37cd4ae984",
+      "entry": "0x000884AA",
+      "role": "secoc_crypto_config_get"
+    },
+    {
+      "body_sha256": "a5c0ef3f71d5789932ef220b8f98392347a1b76e92ade8adbb074a1691c16d3e",
+      "body_size": 68,
+      "decompiled_c": "\nvoid FUN_0008857c(void)\n\n{\n  int iVar1;\n  uint uVar2;\n  int unaff_gp;\n  \n  FUN_00083444(unaff_gp + -0x63fc,4);\n  FUN_00083444(unaff_gp + -0x63f8,4);\n  FUN_00083444(unaff_gp + -0x63ec,0x40);\n  *(undefined2 *)(unaff_gp + -0x63f4) = 0;\n  uVar2 = 0;\n  *(undefined2 *)(unaff_gp + -0x63f2) = 0;\n  do {\n    iVar1 = uVar2 + unaff_gp;\n    uVar2 = uVar2 + 1;\n    *(undefined1 *)(iVar1 + -0x63f0) = 0xe1;\n  } while (uVar2 < 3);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "9a9b1fa26f25d5f15aecf554e366db1acc5f54d3708a2c8cf56957654a8ad5f0",
+      "entry": "0x0008857C",
+      "role": "secoc_verify_engine_init"
+    },
+    {
+      "body_sha256": "706072cfdd3f30f10684f5b63089048d2f0a3e12ee3fc54e01aa4199acd057c2",
+      "body_size": 66,
+      "decompiled_c": "\nvoid FUN_00088702(uint param_1)\n\n{\n  char *pcVar1;\n  char cVar2;\n  char cVar3;\n  int unaff_gp;\n  \n  FUN_00091f42();\n  pcVar1 = (char *)(unaff_gp + -0x63f0 + (param_1 & 0xffff));\n  cVar2 = *pcVar1;\n  if ((cVar2 == -0x2e) || (cVar2 == -0x4c)) {\n    cVar3 = -0x3d;\n  }\n  else {\n    cVar3 = -0x6a;\n  }\n  *pcVar1 = cVar3;\n  FUN_00091f4e();\n  if (cVar2 == -0x2e) {\n    *(undefined2 *)(unaff_gp + -0x63fc) = 0;\n    *(undefined2 *)(unaff_gp + -0x63fa) = 0;\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "2ccf2aa665313a8fc260f5e4a571a636059f1fea6eaa015a6e82daeb227febfc",
+      "entry": "0x00088702",
+      "role": "secoc_new_or_retry_transition"
+    },
+    {
+      "body_sha256": "40344f44b8b7f5a04a189fed3c44946c6c9815911ed737c70c400f1b2fdc7a85",
+      "body_size": 156,
+      "decompiled_c": "\nvoid FUN_00088744(short param_1,int *param_2,undefined4 param_3)\n\n{\n  int iVar1;\n  char *pcVar2;\n  byte bVar3;\n  int unaff_gp;\n  int unaff_tp;\n  uint uVar4;\n  uint uVar5;\n  uint uVar6;\n  byte local_30 [20];\n  \n  iVar1 = param_1 * 0x50 + unaff_tp;\n  if (*(ushort *)(&LAB_000019c6 + iVar1) <= *(ushort *)(param_2 + 1)) {\n    bVar3 = *(byte *)(iVar1 + 0x19d5);\n    uVar4 = (uint)(ushort)(*(ushort *)(param_2 + 1) - *(ushort *)(&LAB_000019c6 + iVar1));\n    FUN_0008323e(param_3,*param_2 + uVar4,bVar3 + 7 >> 3);\n    uVar5 = bVar3 & 7;\n    uVar6 = *(ushort *)(&LAB_000019c2 + iVar1) + 7 >> 3;\n    FUN_0008323e(local_30,*param_2 + (bVar3 >> 3) + uVar4,uVar6);\n    *(byte *)(unaff_gp + -0x63c0) = local_30[0] << uVar5;\n    for (uVar4 = 1; uVar4 < uVar6; uVar4 = uVar4 + 1 & 0xffff) {\n      bVar3 = local_30[uVar4];\n      pcVar2 = (char *)(uVar4 + unaff_gp + -0x63c0);\n      pcVar2[-1] = pcVar2[-1] | (byte)((int)(uint)bVar3 >> 8 - uVar5);\n      *pcVar2 = bVar3 << uVar5;\n    }\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "268be481496d41e461a5a681728eb411d2218cdebbb842b70cb7523e2bacf600",
+      "entry": "0x00088744",
+      "role": "secoc_trailer_extract"
+    },
+    {
+      "body_sha256": "d1e16041f8e55bec3173a949a783c8dfe9742447c88a3c737fd23e253c4064eb",
+      "body_size": 98,
+      "decompiled_c": "\nvoid FUN_00087fc2(undefined4 *param_1,undefined1 *param_2,uint *param_3)\n\n{\n  int iVar1;\n  \n  if ((((param_1 != (undefined4 *)0x0) && (param_2 != (undefined1 *)0x0)) &&\n      (param_3 != (uint *)0x0)) &&\n     ((uint)*(ushort *)(param_1 + 3) + (uint)*(ushort *)((int)param_1 + 10) + 2 <= *param_3)) {\n    *param_2 = (char)((ushort)*(undefined2 *)(param_1 + 2) >> 8);\n    param_2[1] = *(undefined1 *)(param_1 + 2);\n    FUN_0008323e(param_2 + 2,*param_1,*(undefined2 *)((int)param_1 + 10));\n    iVar1 = *(ushort *)((int)param_1 + 10) + 2;\n    FUN_0008323e(param_2 + iVar1,param_1[1],*(undefined2 *)(param_1 + 3));\n    *param_3 = (uint)*(ushort *)(param_1 + 3) + iVar1;\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "f5d0aa93dd948eb8a6f4bcac68788348fd83ee618886af59631c427e6264f6a2",
+      "entry": "0x00087FC2",
+      "role": "secoc_authenticated_input_build"
+    },
+    {
+      "body_sha256": "632b5bd15f1199f233d124185c5c20e4f1d9033d43e3b7ff5b378a6489ab7adb",
+      "body_size": 22,
+      "decompiled_c": "\nvoid FUN_00088908(undefined2 param_1)\n\n{\n  int unaff_tp;\n  \n  if (*(code **)(unaff_tp + 0x1994) != (code *)0x0) {\n    (**(code **)(unaff_tp + 0x1994))(param_1);\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "c177e648fbeb1d64abc7f47d8a0a167a4d16d52e747a2140fc0ee479d9bdf74a",
+      "entry": "0x00088908",
+      "role": "freshness_boundary_callback_dispatch"
+    },
+    {
+      "body_sha256": "359f2f45e592be34e4b3c3c19fd7c7afe992ee5c34b1a05c9a8f3977fef39610",
+      "body_size": 104,
+      "decompiled_c": "\nshort FUN_0008891e(ushort param_1,short param_2)\n\n{\n  char *pcVar1;\n  ushort uVar2;\n  int unaff_gp;\n  int unaff_tp;\n  uint uVar3;\n  undefined4 uVar4;\n  short sVar5;\n  \n  uVar3 = (uint)param_1;\n  uVar2 = *(ushort *)(unaff_gp + -0x63fa);\n  if (uVar2 < *(ushort *)((short)param_1 * 0x50 + unaff_tp + 0x19d0)) {\n    pcVar1 = (char *)(uVar3 + unaff_gp + -0x63f0);\n    sVar5 = 0x103;\n    if (*pcVar1 == -0x3d) {\n      *pcVar1 = -0x4c;\n      *(ushort *)(unaff_gp + -0x63fa) = uVar2 + 1;\n      *(undefined2 *)(unaff_gp + -0x63fc) = 0;\n      sVar5 = param_2;\n    }\n    if (param_2 == 0x201) {\n      uVar4 = 2;\n    }\n    else {\n      uVar4 = 1;\n    }\n    FUN_000887e0(uVar3,uVar4);\n  }\n  else {\n    *(undefined1 *)(uVar3 + unaff_gp + -0x63f0) = 0x96;\n    FUN_000888a6();\n    sVar5 = 0x102;\n  }\n  return sVar5;\n}\n\n",
+      "decompiled_c_sha256": "c48c8e25e6aa54859fbdc9e8cb686ace51ade7bb36fdc2d023c453c9cb3d86e0",
+      "entry": "0x0008891E",
+      "role": "authentication_candidate_retry"
+    },
+    {
+      "body_sha256": "2f941613ea8f15562c61114e9f9a5b8bf363f2ebd2bbf16c9bce96c370437c0a",
+      "body_size": 60,
+      "decompiled_c": "\nvoid FUN_00088986(undefined2 param_1)\n\n{\n  int unaff_gp;\n  int iVar1;\n  \n  iVar1 = FUN_00082f6a();\n  if ((iVar1 == 0) &&\n     (iVar1 = FUN_00082f9c(param_1,unaff_gp + -0x63e8,*(undefined4 *)(unaff_gp + -0x63ec)),\n     iVar1 == 0)) {\n    FUN_00082fa8(param_1,unaff_gp + -0x63c0,*(undefined4 *)(unaff_gp + -0x63c4),unaff_gp + -0x63b0);\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "8ee742db1b9cdf94802c7bc96a83e189afd668546a7847f2dfa472fb56a8569a",
+      "entry": "0x00088986",
+      "role": "secoc_cmac_submit"
+    },
+    {
+      "body_sha256": "b8bf401aef55411cf005505e0955cf119e9ce97d2948f2e28db400783eede66e",
+      "body_size": 92,
+      "decompiled_c": "\nundefined2 FUN_000889c2(ushort param_1,undefined2 param_2)\n\n{\n  char *pcVar1;\n  ushort uVar2;\n  int unaff_gp;\n  int unaff_tp;\n  uint uVar3;\n  undefined2 uVar4;\n  \n  uVar3 = (uint)param_1;\n  uVar2 = *(ushort *)(unaff_gp + -0x63fc);\n  if (uVar2 < *(ushort *)(&LAB_000019ee + (short)param_1 * 0x50 + unaff_tp)) {\n    pcVar1 = (char *)(uVar3 + unaff_gp + -0x63f0);\n    uVar4 = 0x103;\n    if (*pcVar1 == -0x3d) {\n      *pcVar1 = -0x4c;\n      *(ushort *)(unaff_gp + -0x63fc) = uVar2 + 1;\n      uVar4 = param_2;\n    }\n    FUN_000887e0(uVar3,1);\n  }\n  else {\n    *(undefined1 *)(uVar3 + unaff_gp + -0x63f0) = 0x96;\n    FUN_000888a6();\n    uVar4 = 0x102;\n  }\n  return uVar4;\n}\n\n",
+      "decompiled_c_sha256": "25e2ab0b347c994d5328cc607d8c107fa57067f4150d5280a8fd97b8ee5ab88b",
+      "entry": "0x000889C2",
+      "role": "crypto_submit_retry"
+    },
+    {
+      "body_sha256": "58ba4592f15a5c9b0bc13c96c7b9cd471c40d1ace55759ea7f477e0e8cef10ca",
+      "body_size": 396,
+      "decompiled_c": "\nundefined4 FUN_00088a56(ushort param_1)\n\n{\n  int unaff_gp;\n  int unaff_tp;\n  uint uVar1;\n  int iVar2;\n  int iVar3;\n  int iVar4;\n  undefined4 uVar5;\n  char *pcVar6;\n  int iVar7;\n  uint uStack_5c;\n  undefined1 auStack_58 [8];\n  undefined1 auStack_50 [8];\n  undefined1 auStack_48 [20];\n  undefined4 uStack_34;\n  ushort uStack_30;\n  undefined4 uStack_2c;\n  undefined1 *puStack_28;\n  undefined2 uStack_24;\n  short sStack_22;\n  undefined2 uStack_20;\n  \n  uVar1 = (uint)param_1;\n  iVar4 = (short)param_1 * 0x50 + unaff_tp;\n  uStack_5c = (uint)*(byte *)(iVar4 + 0x19d4);\n  FUN_00088702();\n  pcVar6 = (char *)(uVar1 + unaff_gp + -0x63f0);\n  if (*(char *)(uVar1 + unaff_gp + -0x63f0) == -0x3d) {\n    iVar7 = 1;\n    uVar5 = 0;\n    iVar2 = FUN_00087e2c(1,uVar1,&uStack_34);\n    iVar3 = FUN_000884aa(*(undefined2 *)(&LAB_000019d6 + iVar4),auStack_48);\n    if ((iVar2 == 0) && (iVar3 == 0)) {\n      if (uStack_30 < *(ushort *)(&LAB_000019c6 + iVar4)) {\nLAB_00088afe:\n        uVar5 = 0x100;\n        *pcVar6 = -0x5b;\n        FUN_000888a6(uVar1);\n        goto LAB_00088b46;\n      }\n      FUN_00088744(uVar1,&uStack_34,auStack_50);\n      if (*(short *)(iVar4 + 0x19ec) == 2) {\n        if (*(code **)(iVar4 + 0x1a08) != (code *)0x0) {\n          iVar7 = (**(code **)(iVar4 + 0x1a08))\n                            (*(undefined2 *)(&LAB_000019d2 + iVar4),auStack_50,\n                             *(undefined1 *)(iVar4 + 0x19d5),*(undefined2 *)(unaff_gp + -0x63fa),\n                             auStack_58,&uStack_5c);\n        }\n        if (iVar7 == 0x22) goto LAB_00088afe;\n        if (iVar7 == 0x24) {\n          FUN_00088908(*(undefined2 *)(&LAB_000019d2 + iVar4));\n          goto LAB_00088b46;\n        }\n        if (iVar7 == 0x23) {\n          uVar5 = FUN_0008891e(uVar1,0x201);\n          goto LAB_00088b46;\n        }\n        if (iVar7 == 0) goto LAB_00088b46;\n      }\n    }\n    *pcVar6 = -0x6a;\n  }\n  uVar5 = 0x103;\nLAB_00088b46:\n  if (*pcVar6 == -0x3d) {\n    *(undefined4 *)(unaff_gp + -0x63ec) = 0x24;\n    *(uint *)(unaff_gp + -0x63c4) = (uint)*(ushort *)(&LAB_000019c2 + iVar4);\n    uStack_24 = *(undefined2 *)(&LAB_000019ca + iVar4);\n    uStack_2c = uStack_34;\n    sStack_22 = uStack_30 - *(short *)(&LAB_000019c6 + iVar4);\n    puStack_28 = auStack_58;\n    uStack_20 = (undefined2)(uStack_5c + 7 >> 3);\n    FUN_00087fc2(&uStack_2c,unaff_gp + -0x63e8);\n    iVar4 = FUN_00088986(*(undefined2 *)(iVar4 + 0x19e0),auStack_48);\n    if (iVar4 != 0) {\n      if (iVar4 == 2) {\n        uVar5 = FUN_000889c2(uVar1,0x202);\n      }\n      else {\n        uVar5 = 0x101;\n        *pcVar6 = -0x6a;\n        FUN_000888a6(uVar1);\n      }\n    }\n  }\n  if ((*pcVar6 != -0x3d) && (*pcVar6 != -0x4c)) {\n    FUN_00088a1e(uVar1);\n  }\n  return uVar5;\n}\n\n",
+      "decompiled_c_sha256": "7135ef34a5f1f02495f19370e8e2d9f393bd8370506bc50f9c568edcb01af4eb",
+      "entry": "0x00088A56",
+      "role": "secoc_verify_worker"
+    },
+    {
+      "body_sha256": "ea091ae5d5e376662bd636303ff499150f10576a8434d26c0fdf39c01683e7d2",
+      "body_size": 52,
+      "decompiled_c": "\nvoid FUN_00088be2(short param_1,char param_2)\n\n{\n  int iVar1;\n  int unaff_tp;\n  uint uVar2;\n  \n  iVar1 = param_1 * 0x50 + unaff_tp;\n  if (*(short *)(iVar1 + 0x19ec) == 2) {\n    uVar2 = *(ushort *)(&LAB_000019d2 + iVar1) | 0x10000;\n    if (param_2 == '\\0') {\n      uVar2 = (uint)*(ushort *)(&LAB_000019d2 + iVar1);\n    }\n    if (*(code **)(iVar1 + 0x19f0) != (code *)0x0) {\n      (**(code **)(iVar1 + 0x19f0))(uVar2);\n    }\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "b6e3930d0eacc40a5896af10849371edf277a8a03b01f20928c9f1e8220d81c0",
+      "entry": "0x00088BE2",
+      "role": "freshness_commit_callback_dispatch"
+    },
+    {
+      "body_sha256": "0220bb150af7ed42ef5114a4ce66ad562a6a61481ce20a22b78ec7405e92f5ba",
+      "body_size": 134,
+      "decompiled_c": "\nundefined4 FUN_00088c16(ushort param_1)\n\n{\n  bool bVar1;\n  int unaff_gp;\n  int unaff_tp;\n  bool bVar2;\n  int iVar3;\n  undefined4 uVar4;\n  uint uVar5;\n  \n  uVar5 = (uint)param_1;\n  if (*(char *)(uVar5 + unaff_gp + -0x63f0) == -0x3d) {\n    bVar1 = *(char *)(unaff_gp + -0x63b0) != '\\0';\n    iVar3 = FUN_00088512();\n    bVar2 = bVar1;\n    if ((iVar3 == 1) && (*(char *)((short)param_1 * 0x50 + unaff_tp + 0x19c9) == '\\x01')) {\n      bVar2 = false;\n    }\n    FUN_00088be2(uVar5,bVar2);\n    if (bVar1) {\n      uVar4 = FUN_0008891e(uVar5,0x200);\n    }\n    else {\n      FUN_000887e0(uVar5,0);\n      uVar4 = FUN_00088856(uVar5,0);\n    }\n  }\n  else {\n    uVar4 = 0x103;\n  }\n  if (*(char *)(uVar5 + unaff_gp + -0x63f0) != -0x4c) {\n    FUN_00088a1e(uVar5);\n  }\n  return uVar4;\n}\n\n",
+      "decompiled_c_sha256": "c8080368c339098813ab4ecaf72fc17decd9e2bf270e5ace4ae2e0949852f0e7",
+      "entry": "0x00088C16",
+      "role": "post_cmac_acceptance_gate"
+    },
+    {
+      "body_sha256": "f05b334c3f7b1a28cd80a4cd04acde7cd7d726a65ae427b2fd47c30d5108ed7b",
+      "body_size": 58,
+      "decompiled_c": "\nint FUN_00088c9c(void)\n\n{\n  int iVar1;\n  int iVar2;\n  undefined2 auStack_a [3];\n  \n  iVar2 = 0x300;\n  auStack_a[0] = 0;\n  iVar1 = FUN_00087bb0(1,0,auStack_a);\n  if ((iVar1 == 0) && (iVar2 = FUN_00088a56(auStack_a[0]), iVar2 == 0)) {\n    iVar2 = FUN_00088c16(auStack_a[0]);\n  }\n  return iVar2;\n}\n\n",
+      "decompiled_c_sha256": "8378c9ac4326ffe41a72548338db83de54dec7e12552f052424d7d204a9a4c9a",
+      "entry": "0x00088C9C",
+      "role": "secoc_queue_dispatch"
+    },
+    {
+      "body_sha256": "9f0e8f5478810905c0911ad0f69dc662c6753f8269b9661f908110fd9521faa7",
+      "body_size": 104,
+      "decompiled_c": "\nvoid FUN_00089558(short param_1,undefined2 *param_2)\n\n{\n  bool bVar1;\n  int iVar2;\n  short sVar3;\n  int unaff_tp;\n  int iVar4;\n  uint uVar5;\n  short sVar6;\n  undefined1 auStack_1c [2];\n  undefined2 uStack_1a;\n  \n  iVar4 = 0;\n  sVar6 = 0;\n  uVar5 = 0;\n  do {\n    if (*(short *)(&LAB_000019b6 + unaff_tp) == 0) {\n      iVar2 = (short)uVar5 * 0x50 + unaff_tp;\n      if (param_1 == *(short *)(&LAB_000019d2 + iVar2)) {\n        FUN_0008953a(*(undefined2 *)(unaff_tp + 0x19b4),auStack_1c);\n        *param_2 = uStack_1a;\n        bVar1 = *(char *)(iVar2 + 0x19c9) == '\\x01';\n        sVar3 = sVar6;\n        if (bVar1) {\n          sVar3 = 0;\n        }\n        param_2[1] = sVar3;\n        if (bVar1) {\n          iVar4 = 3;\n        }\n        else {\n          iVar4 = 1;\n        }\n      }\n      if (*(char *)(iVar2 + 0x19c9) != '\\x01') {\n        sVar6 = sVar6 + 1;\n      }\n      if (iVar4 != 0) {\n        return;\n      }\n    }\n    uVar5 = uVar5 + 1;\n    if (2 < uVar5) {\n      return;\n    }\n  } while( true );\n}\n\n",
+      "decompiled_c_sha256": "6dcd0f7348baed6fbed3a33ae8297cc04385ff9da9a35e3fc3a38cfa1748cdab",
+      "entry": "0x00089558",
+      "role": "freshness_profile_lookup"
+    },
+    {
+      "body_sha256": "031775b45fb23dce7c0b12fe8ed8d8bb48db0c3390a98bfb7243783710246cd5",
+      "body_size": 86,
+      "decompiled_c": "\nundefined4\nFUN_000896b0(undefined2 param_1,undefined4 param_2,undefined4 param_3,undefined2 param_4,\n            undefined4 param_5,undefined4 param_6)\n\n{\n  int iVar1;\n  undefined4 uVar2;\n  undefined1 auStack_20 [4];\n  undefined4 uStack_1c;\n  undefined4 uStack_18;\n  undefined4 uStack_14;\n  undefined4 uStack_10;\n  \n  uStack_1c = param_5;\n  uStack_18 = param_6;\n  uStack_14 = param_2;\n  uStack_10 = param_3;\n  iVar1 = FUN_00089558(param_1,auStack_20);\n  if (iVar1 == 1) {\n    uVar2 = FUN_00089e9a(auStack_20,&uStack_14,param_4,&uStack_1c);\n  }\n  else {\n    uVar2 = 1;\n    if ((iVar1 != 2) && (iVar1 == 3)) {\n      uVar2 = FUN_00089f6e(auStack_20,&uStack_14,param_4,&uStack_1c);\n    }\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "71f05da868f2553427d0687bb6cbb545d78342b10317c374bd53836339336ba1",
+      "entry": "0x000896B0",
+      "role": "freshness_get_dispatch"
+    },
+    {
+      "body_sha256": "da3592af256b9d473ab9697f5642b95c4f1d6c47fe32b68479cc50aed958b63a",
+      "body_size": 58,
+      "decompiled_c": "\nvoid FUN_00089758(uint param_1)\n\n{\n  bool bVar1;\n  int iVar2;\n  undefined2 local_c;\n  undefined2 uStack_a;\n  \n  bVar1 = param_1 >> 0x10 == 0;\n  iVar2 = FUN_00089558(param_1 & 0xffff,&local_c);\n  if (iVar2 == 1) {\n    FUN_0008a07a(uStack_a,bVar1);\n  }\n  else if ((iVar2 != 2) && (iVar2 == 3)) {\n    FUN_0008a130(local_c,bVar1);\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "6fab8412455c57da930e0fab975354ec6ed81b00b536cfca0e227127d26dbef3",
+      "entry": "0x00089758",
+      "role": "freshness_commit_dispatch"
+    },
+    {
+      "body_sha256": "12523e9ff16853b55be43a48626a55dd58e90d9e5810ad2c0a8a157f2f5a9a99",
+      "body_size": 100,
+      "decompiled_c": "\nvoid FUN_00089812(void)\n\n{\n  int unaff_gp;\n  \n  FUN_00083444(unaff_gp + -0x6354,8);\n  FUN_00083444(unaff_gp + -0x634c,8);\n  *(undefined2 *)(unaff_gp + -0x633c) = 0;\n  *(undefined1 *)(unaff_gp + -0x633a) = 0;\n  *(uint *)(unaff_gp + -0x6344) = ~*(uint *)(unaff_gp + -0x6354);\n  *(uint *)(unaff_gp + -0x6340) = ~*(uint *)(unaff_gp + -0x6350);\n  FUN_00083444(unaff_gp + -0x6308,0xc);\n  FUN_00083444(unaff_gp + -0x62fc,0xc);\n  FUN_00083444(unaff_gp + -0x6338,0x18);\n  FUN_00083444(unaff_gp + -0x6320,0x18);\n  return;\n}\n\n",
+      "decompiled_c_sha256": "27fe7c911fb85e80f443f64f730b1bd8237574df950f619fa2ce637bcaf19009",
+      "entry": "0x00089812",
+      "role": "freshness_state_init"
+    },
+    {
+      "body_sha256": "5683f2780a5aeb96e677416e2cf2f7459a36d09b96713f7a1c50ea38fad484f8",
+      "body_size": 120,
+      "decompiled_c": "\nvoid FUN_00089876(undefined4 *param_1,byte *param_2,uint *param_3)\n\n{\n  byte bVar1;\n  uint uVar2;\n  \n  bVar1 = *(byte *)((int)param_1 + 0xb);\n  if ((byte)*param_3 < bVar1) {\n    return;\n  }\n  if (bVar1 == 0x2e) {\n    *param_2 = (byte)((uint)*param_1 >> 8);\n    param_2[1] = (byte)*param_1;\n    param_2[2] = (byte)((uint)param_1[1] >> 0xc);\n    param_2[3] = (byte)((uint)param_1[1] >> 4);\n    bVar1 = (byte)(param_1[1] << 4);\n    param_2[4] = bVar1;\n    param_2[4] = (byte)(*(ushort *)(param_1 + 2) >> 4) | bVar1;\n    bVar1 = (char)*(undefined2 *)(param_1 + 2) << 4;\n    param_2[5] = bVar1;\n    param_2[5] = *(char *)((int)param_1 + 10) << 2 | bVar1;\n  }\n  else {\n    if (bVar1 != 4) {\n      uVar2 = 0;\n      goto LAB_000898e8;\n    }\n    bVar1 = (char)*(undefined2 *)(param_1 + 2) << 6;\n    *param_2 = bVar1;\n    *param_2 = *(char *)((int)param_1 + 10) << 4 | bVar1;\n  }\n  uVar2 = (uint)*(byte *)((int)param_1 + 0xb);\nLAB_000898e8:\n  *param_3 = uVar2;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "cdee04739704d74c52a5e55fb2c1809f98271e3e3757abe641eabb35afee926d",
+      "entry": "0x00089876",
+      "role": "full_freshness_pack"
+    },
+    {
+      "body_sha256": "73ba74740845adad428b7a6f60297a45ecfa13f36ad942aa623fc11dfeb341b0",
+      "body_size": 62,
+      "decompiled_c": "\nvoid FUN_000899b4(undefined4 *param_1,undefined1 *param_2,uint *param_3)\n\n{\n  uint uVar1;\n  \n  if ((byte)*param_3 < *(byte *)((int)param_1 + 0xb)) {\n    uVar1 = 0;\n  }\n  else {\n    *param_2 = (char)((uint)*param_1 >> 8);\n    param_2[1] = (char)*param_1;\n    param_2[2] = (char)((uint)param_1[1] >> 0xc);\n    param_2[3] = (char)((uint)param_1[1] >> 4);\n    param_2[4] = (char)(param_1[1] << 4);\n    uVar1 = (uint)*(byte *)((int)param_1 + 0xb);\n  }\n  *param_3 = uVar1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "779e81d5f74885f4b9546121e2cc7c9e1e8a120684bee86297b86384ac8812bb",
+      "entry": "0x000899B4",
+      "role": "sync_freshness_pack"
+    },
+    {
+      "body_sha256": "686f0eec344c1661f8074016e751e9021d50ca752f7368aabf1d003c040d7389",
+      "body_size": 116,
+      "decompiled_c": "\nvoid FUN_00089a46(byte *param_1,int param_2,uint *param_3)\n\n{\n  byte bVar1;\n  \n  if (param_2 == 4) {\n    *param_3 = 0;\n    param_3[1] = 0;\n    *(ushort *)(param_3 + 2) = (ushort)(*param_1 >> 6);\n    bVar1 = *param_1 >> 4;\n  }\n  else {\n    if (param_2 != 0x2e) {\n      *param_3 = 0;\n      param_2 = 0;\n      param_3[1] = 0;\n      *(undefined2 *)(param_3 + 2) = 0;\n      *(undefined1 *)((int)param_3 + 10) = 0;\n      goto LAB_00089ab6;\n    }\n    *param_3 = (uint)CONCAT11(*param_1,param_1[1]);\n    param_3[1] = (uint)(param_1[4] >> 4) | (uint)param_1[3] << 4 | (uint)param_1[2] << 0xc;\n    *(ushort *)(param_3 + 2) = (ushort)(param_1[5] >> 4) | (param_1[4] & 0xf) << 4;\n    bVar1 = param_1[5] >> 2;\n  }\n  *(byte *)((int)param_3 + 10) = bVar1 & 3;\nLAB_00089ab6:\n  *(char *)((int)param_3 + 0xb) = (char)param_2;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "ce4ff67fd8831aabf5621429f8b8a17cbb372e412fcf7050cb2bfee4e4f9329e",
+      "entry": "0x00089A46",
+      "role": "transmitted_freshness_parse"
+    },
+    {
+      "body_sha256": "5b3ed2f84e07b33dea18ac1931fa3410c1d5817e08a6fdb04c6c80bf1007b86b",
+      "body_size": 62,
+      "decompiled_c": "\nvoid FUN_00089b46(undefined1 *param_1,int param_2,uint *param_3)\n\n{\n  undefined1 uVar1;\n  uint uVar2;\n  \n  if (param_2 == 0x24) {\n    *param_3 = (uint)CONCAT11(*param_1,param_1[1]);\n    uVar2 = (uint)((byte)param_1[4] >> 4) |\n            (uint)(byte)param_1[3] << 4 | (uint)(byte)param_1[2] << 0xc;\n    uVar1 = 0x24;\n  }\n  else {\n    *param_3 = 0;\n    uVar2 = 0;\n    uVar1 = 0;\n  }\n  param_3[1] = uVar2;\n  *(undefined2 *)(param_3 + 2) = 0;\n  *(undefined1 *)((int)param_3 + 10) = 0;\n  *(undefined1 *)((int)param_3 + 0xb) = uVar1;\n  return;\n}\n\n",
+      "decompiled_c_sha256": "b3811eb6f7bb216980d656481282c9292e7a9169e53170cc546d282e9143e2e5",
+      "entry": "0x00089B46",
+      "role": "sync_freshness_parse"
+    },
+    {
+      "body_sha256": "a3fc81b8d72524c1ca2751624089fd8dee8ce54954193868cef1d40ac13879ac",
+      "body_size": 126,
+      "decompiled_c": "\nundefined4 FUN_00089cda(undefined4 param_1,int param_2,int param_3)\n\n{\n  uint uVar1;\n  int unaff_gp;\n  short sVar2;\n  ushort uVar3;\n  \n  sVar2 = *(short *)(param_3 + 0xc);\n  *(undefined2 *)(param_3 + 0xe) = 0;\n  uVar3 = 0;\n  do {\n    if (4 < uVar3) {\n      return 0;\n    }\n    uVar1 = *(uint *)(unaff_gp + -0x6350);\n    *(uint *)(param_3 + 8) = uVar1;\n    if (uVar3 == 0) {\nLAB_00089d28:\n      if ((uint)*(byte *)(param_2 + 10) == ((1 << *(int *)(param_3 + 4)) - 1U & uVar1 & 0xff)) {\n        if (sVar2 == 0) {\n          return 1;\n        }\n        sVar2 = sVar2 + -1;\n      }\n    }\n    else if (uVar3 == 1) {\n      if (uVar1 != 0) {\n        uVar1 = uVar1 - 1;\n        goto LAB_00089d26;\n      }\n    }\n    else if (uVar3 == 2) {\n      if (uVar1 < 0xfffff) {\n        uVar1 = uVar1 + 1;\n        goto LAB_00089d26;\n      }\n    }\n    else if (uVar3 == 3) {\n      if (1 < uVar1) {\n        uVar1 = uVar1 - 2;\nLAB_00089d26:\n        *(uint *)(param_3 + 8) = uVar1;\n        goto LAB_00089d28;\n      }\n    }\n    else if (uVar1 < 0xffffe) {\n      uVar1 = uVar1 + 2;\n      goto LAB_00089d26;\n    }\n    uVar3 = uVar3 + 1;\n    *(ushort *)(param_3 + 0xe) = uVar3;\n  } while( true );\n}\n\n",
+      "decompiled_c_sha256": "0ad5633ca4d97fc6c5d51e187e29d8008a5993c94328a7e4ff28f2a51da07ce1",
+      "entry": "0x00089CDA",
+      "role": "reset_candidate_search"
+    },
+    {
+      "body_sha256": "c272f96cd668ccd0f7f07a29a3afae45c265e9ffa891d688d7b8b377a78ea444",
+      "body_size": 212,
+      "decompiled_c": "\nundefined4 FUN_00089d58(int param_1,int param_2,uint *param_3,uint *param_4)\n\n{\n  uint *puVar1;\n  ushort uVar2;\n  undefined2 uVar3;\n  ushort uVar4;\n  int unaff_gp;\n  uint uVar5;\n  uint uVar6;\n  uint uVar7;\n  \n  uVar6 = *(uint *)(unaff_gp + -0x6354);\n  FUN_00091f72();\n  puVar1 = (uint *)(*(short *)(param_1 + 2) * 0xc + unaff_gp + -0x6338);\n  uVar5 = *puVar1;\n  uVar7 = puVar1[1];\n  uVar2 = (ushort)puVar1[2];\n  FUN_00091f7e();\n  if ((uVar6 == uVar5) && (param_3[2] == uVar7)) {\n    *param_4 = uVar5;\n    param_4[1] = uVar7;\n    if (uVar7 < 0xfffff) {\n      uVar6 = *param_3;\n      uVar7 = 1 << uVar6;\n      uVar4 = *(ushort *)(param_2 + 8) | ~((short)uVar7 - 1U) & uVar2;\n      uVar5 = param_3[4];\n      *(ushort *)(param_4 + 2) = uVar4;\n      if ((char)uVar5 != '\\x01') {\n        return 0;\n      }\n      uVar5 = 0;\n      if (uVar6 < 8) {\n        uVar5 = uVar7 & 0xffff;\n      }\n      uVar6 = uVar5 + uVar2;\n      if (((uint)uVar2 < (uVar6 & 0xffff)) && ((int)(uVar6 - 0xff) < 0 || uVar6 == 0xff)) {\n        *(ushort *)(param_4 + 2) = (short)uVar5 + uVar4;\n        return 0;\n      }\n    }\n  }\n  else {\n    if ((uVar6 <= uVar5) && ((uVar6 < uVar5 || (param_3[2] <= uVar7)))) {\n      if (3 < *(ushort *)((int)param_3 + 0xe)) {\n        return 0x22;\n      }\n      return 0x23;\n    }\n    uVar3 = *(undefined2 *)(param_2 + 8);\n    *param_4 = uVar6;\n    uVar5 = param_3[2];\n    *(undefined2 *)(param_4 + 2) = uVar3;\n    param_4[1] = uVar5;\n    if (uVar5 < 0xfffff) {\n      return 0;\n    }\n  }\n  *(undefined2 *)(param_4 + 2) = 0xff;\n  return 0;\n}\n\n",
+      "decompiled_c_sha256": "071f843065225d12aeeb660db0ccab2820738ee86000dfb9d3b4bc0107e7508d",
+      "entry": "0x00089D58",
+      "role": "normal_freshness_window_check"
+    },
+    {
+      "body_sha256": "dbd4204d0ce72af5e5ec85dd7d588cbbc6469ef4390da06911666c56a172d625",
+      "body_size": 110,
+      "decompiled_c": "\nundefined4 FUN_00089e2c(int param_1,int param_2,undefined2 param_3)\n\n{\n  int unaff_gp;\n  int iVar1;\n  undefined4 uVar2;\n  int local_28;\n  uint uStack_24;\n  undefined4 uStack_20;\n  undefined2 uStack_1c;\n  undefined2 uStack_1a;\n  undefined1 uStack_18;\n  \n  uStack_24 = (uint)*(byte *)(param_2 + 0xb);\n  uStack_1a = 5;\n  uStack_20 = 0;\n  uVar2 = 0x22;\n  if (uStack_24 < 0xb) {\n    if (uStack_24 < 2) {\n      local_28 = 0;\n      goto LAB_00089e5a;\n    }\n    local_28 = uStack_24 - 2;\n  }\n  else {\n    local_28 = 8;\n  }\n  uStack_24 = 2;\nLAB_00089e5a:\n  uStack_18 = (uint)*(ushort *)(param_2 + 8) <=\n              ((1 << local_28) - 1U &\n              (uint)*(ushort *)(*(short *)(param_1 + 2) * 0xc + unaff_gp + -0x6330));\n  uStack_1c = param_3;\n  iVar1 = FUN_00089cda(param_1,param_2,&local_28);\n  if (iVar1 == 1) {\n    uVar2 = FUN_00089d58();\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "bbccb170031b957e5c8d8cde9994b4562406c7064ccbf31ee99268c56c06ae3b",
+      "entry": "0x00089E2C",
+      "role": "normal_freshness_candidate_build"
+    },
+    {
+      "body_sha256": "b77e9159cd9ad6450e60423edb2752b3830e7ee6bc5aef7a41c5e684bdebc5ec",
+      "body_size": 212,
+      "decompiled_c": "\nint FUN_00089e9a(short *param_1,int *param_2,undefined2 param_3,int *param_4)\n\n{\n  undefined4 *puVar1;\n  uint uVar2;\n  int unaff_gp;\n  int iVar3;\n  undefined4 local_2c;\n  undefined4 uStack_28;\n  short sStack_24;\n  undefined4 uStack_20;\n  undefined4 uStack_1c;\n  short sStack_18;\n  byte bStack_16;\n  undefined1 uStack_15;\n  \n  iVar3 = 1;\n  if ((((*param_1 == 0) && ((ushort)param_1[1] < 2)) && (*param_2 != 0)) &&\n     (((*param_4 != 0 && ((uint *)param_4[1] != (uint *)0x0)) && (0x2d < *(uint *)param_4[1])))) {\n    FUN_00089a46(*param_2,param_2[1],&uStack_20);\n    iVar3 = FUN_00089e2c(param_1,&uStack_20,param_3,&local_2c);\n    if (iVar3 == 0) {\n      if (sStack_24 == 0xff) {\n        iVar3 = 0x24;\n      }\n      FUN_00091f72();\n      puVar1 = (undefined4 *)(param_1[1] * 0xc + unaff_gp + -0x6320);\n      *puVar1 = local_2c;\n      puVar1[1] = uStack_28;\n      *(short *)(puVar1 + 2) = sStack_24;\n      FUN_00091f7e();\n      uStack_20 = local_2c;\n      sStack_18 = sStack_24;\n      uStack_1c = uStack_28;\n      bStack_16 = (byte)uStack_28 & 3;\n      uVar2 = *(uint *)param_4[1];\n      if (0x2e < uVar2) {\n        uVar2 = 0x2e;\n        *(uint *)param_4[1] = 0x2e;\n      }\n      uStack_15 = (undefined1)uVar2;\n      FUN_00089876(&uStack_20,*param_4);\n    }\n  }\n  return iVar3;\n}\n\n",
+      "decompiled_c_sha256": "6574936d57bf4cb2acebe3ce92bacaefb3db0a728852614a2b7bff66dfde9403",
+      "entry": "0x00089E9A",
+      "role": "normal_freshness_reconstruct"
+    },
+    {
+      "body_sha256": "cb4ccb9eb50927751a12fb6b53ead42fe8668adcdaeafe98dbb12626b6888362",
+      "body_size": 228,
+      "decompiled_c": "\nundefined4 FUN_00089f6e(short *param_1,int *param_2,short param_3,int *param_4)\n\n{\n  bool bVar1;\n  int unaff_gp;\n  int unaff_tp;\n  uint uVar2;\n  uint uVar3;\n  uint local_24;\n  uint uStack_20;\n  \n  bVar1 = false;\n  if (*param_1 != 0) {\n    return 1;\n  }\n  if (*param_2 == 0) {\n    return 1;\n  }\n  if (*param_4 == 0) {\n    return 1;\n  }\n  if ((uint *)param_4[1] != (uint *)0x0) {\n    if (*(uint *)param_4[1] < 0x24) {\n      return 1;\n    }\n    if ((param_2[1] == 0x24) && (param_3 == 0)) {\n      FUN_00089b46(*param_2,0x24,&local_24);\n      FUN_00091f72();\n      uVar3 = *(uint *)(unaff_gp + -0x6354);\n      uVar2 = *(uint *)(unaff_gp + -0x6350);\n      FUN_00091f7e();\n      if ((0xffff - *(byte *)(unaff_tp + 0x19bc) <= uVar3) && (local_24 != 0)) {\n        bVar1 = local_24 <= *(byte *)(unaff_tp + 0x19bc) + 1;\n      }\n      if ((uVar3 < local_24) || (((uVar3 <= local_24 && (uVar2 < uStack_20)) || (bVar1)))) {\n        FUN_00091f72();\n        *(bool *)(unaff_gp + -0x633a) = bVar1;\n        *(uint *)(unaff_gp + -0x634c) = local_24;\n        *(uint *)(unaff_gp + -0x6348) = uStack_20;\n        FUN_00091f7e();\n        if (0x24 < *(uint *)param_4[1]) {\n          *(uint *)param_4[1] = 0x24;\n        }\n        FUN_000899b4(&local_24,*param_4);\n        return 0;\n      }\n      if ((local_24 == uVar3) && (uStack_20 == uVar2)) {\n        return 1;\n      }\n    }\n    return 0x22;\n  }\n  return 1;\n}\n\n",
+      "decompiled_c_sha256": "a7a3dcdf4f1d7f6c0e12485dcfb1eb134cce40e32c58ed0e44ef4823a7c16257",
+      "entry": "0x00089F6E",
+      "role": "sync_freshness_reconstruct"
+    },
+    {
+      "body_sha256": "bd4d87c592b4cefb63be86bf4b3c3a489c8ef95f7571a6892f6b5b04febaad57",
+      "body_size": 52,
+      "decompiled_c": "\nvoid FUN_0008a07a(ushort param_1,char param_2)\n\n{\n  int unaff_gp;\n  \n  if ((param_1 < 2) && (param_2 == '\\x01')) {\n    FUN_00091f72();\n    FUN_0008323e(unaff_gp + -0x6338 + (short)param_1 * 0xc,(short)param_1 * 0xc + unaff_gp + -0x6320\n                 ,0xc);\n    FUN_00091f7e();\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "2eb00a00e3d2f740a4cd525a9e891da7d3dac40f40ec05a62eb8a47d93b82623",
+      "entry": "0x0008A07A",
+      "role": "normal_freshness_commit"
+    },
+    {
+      "body_sha256": "3fb2a92135b7e8cb36722a114ca4f75e3bb2c73b23e4f1fc54a49253b60e3d1e",
+      "body_size": 130,
+      "decompiled_c": "\nvoid FUN_0008a0ae(short param_1)\n\n{\n  int iVar1;\n  short sVar2;\n  int unaff_gp;\n  int unaff_tp;\n  uint uVar3;\n  short sVar4;\n  \n  sVar4 = 0;\n  uVar3 = 0;\n  do {\n    sVar2 = *(short *)(&LAB_000019b6 + unaff_tp);\n    if ((sVar2 == 0) &&\n       (iVar1 = (short)uVar3 * 0x50 + unaff_tp + 0x19c0, *(char *)(iVar1 + 9) != '\\x01')) {\n      if (*(short *)(iVar1 + 4) == param_1) {\n        FUN_00091f72();\n        FUN_00083444(unaff_gp + -0x6338 + sVar4 * 0xc,0xc);\n        FUN_00083444(unaff_gp + -0x6320 + sVar4 * 0xc,0xc);\n        FUN_00091f7e();\n      }\n      sVar4 = sVar4 + 1;\n    }\n    uVar3 = uVar3 + 1;\n  } while (uVar3 < 3);\n  if ((sVar2 == 0) && (*(short *)(unaff_tp + 0x1ab4) == param_1)) {\n    FUN_00091f72();\n    FUN_00083444(unaff_gp + -0x6308,0xc);\n    FUN_00083444(unaff_gp + -0x62fc,0xc);\n    FUN_00091f7e();\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "742623e4256ded743ec7f89181a4b505a7a998301917aa33ec827cf094a0da95",
+      "entry": "0x0008A0AE",
+      "role": "trip_wrap_normal_state_clear"
+    },
+    {
+      "body_sha256": "9510d235ca9a0677088d6933f10e6803b43bbb6b2af1057bd0a254ac00b4762b",
+      "body_size": 78,
+      "decompiled_c": "\nvoid FUN_0008a130(short param_1,char param_2)\n\n{\n  int unaff_gp;\n  \n  if (param_1 == 0) {\n    if (param_2 == '\\x01') {\n      FUN_00091f72(0);\n      FUN_0008323e(unaff_gp + -0x6354,unaff_gp + -0x634c,8);\n      *(uint *)(unaff_gp + -0x6344) = ~*(uint *)(unaff_gp + -0x6354);\n      *(uint *)(unaff_gp + -0x6340) = ~*(uint *)(unaff_gp + -0x6350);\n      FUN_00091f7e();\n      if (*(char *)(unaff_gp + -0x633a) == '\\x01') {\n        FUN_0008a0ae(0);\n      }\n    }\n    *(undefined1 *)(unaff_gp + -0x633a) = 0;\n  }\n  return;\n}\n\n",
+      "decompiled_c_sha256": "d88f647570a446201bcc5077ac68d73a233b93f604c3b8049f5530632532e4d6",
+      "entry": "0x0008A130",
+      "role": "sync_freshness_commit"
+    }
+  ],
+  "generator": {
+    "path": "tools/extract_corolla_h_b6_secoc_verification_evidence.py",
+    "sha256": "6240bb692cec23214fb33c857fd52cce4bf445d06a5372047cc1778648e0cd29"
+  },
+  "image": {
+    "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+    "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+    "size": 1048576
+  },
+  "schema": "corolla-h-b6-secoc-verification-decompiler-evidence-v1",
+  "sienna_reference": {
+    "path": "firmware/RH850_P1M-E_CodeFlash.bin",
+    "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+    "size": 1048576
+  },
+  "sienna_upper_engine_comparison": {
+    "boundary": "Sienna supplies role anchors for the generic acceptance engine. The H functions occupy the same control roles near a +0x5A64 Sienna relocation but are not claimed byte-identical: raw differences include relocated calls, GP/table displacements, and generated-profile geometry. H freshness/window conclusions below must be recovered from the target-native H bodies rather than transferred from Sienna.",
+    "rows": [
+      {
+        "body_size": 66,
+        "different_byte_count": 8,
+        "different_offsets": [
+          10,
+          11,
+          14,
+          15,
+          46,
+          47,
+          56,
+          57
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x00088702",
+        "h_sha256": "706072cfdd3f30f10684f5b63089048d2f0a3e12ee3fc54e01aa4199acd057c2",
+        "role": "secoc_new_or_retry_transition",
+        "sienna_entry": "0x0008E166",
+        "sienna_sha256": "36a81b38ac5106dee1068526e91b7c33aff0fd8e6df4540868229a0bb2b58dfc"
+      },
+      {
+        "body_size": 104,
+        "different_byte_count": 10,
+        "different_offsets": [
+          12,
+          13,
+          18,
+          19,
+          28,
+          29,
+          60,
+          61,
+          88,
+          89
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x0008891E",
+        "h_sha256": "359f2f45e592be34e4b3c3c19fd7c7afe992ee5c34b1a05c9a8f3977fef39610",
+        "role": "authentication_candidate_retry",
+        "sienna_entry": "0x0008E382",
+        "sienna_sha256": "6d1250c3a12079c7de2ca965822e7c091c84ad0ba74db083bc3d918478d7ade2"
+      },
+      {
+        "body_size": 92,
+        "different_byte_count": 10,
+        "different_offsets": [
+          14,
+          15,
+          20,
+          21,
+          28,
+          29,
+          58,
+          59,
+          76,
+          77
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x000889C2",
+        "h_sha256": "b8bf401aef55411cf005505e0955cf119e9ce97d2948f2e28db400783eede66e",
+        "role": "crypto_submit_retry",
+        "sienna_entry": "0x0008E426",
+        "sienna_sha256": "3562b9de405f3ae6069011d43fcef0349dbe072c62e7bce653fcb26c3e489046"
+      },
+      {
+        "body_size": 396,
+        "different_byte_count": 16,
+        "different_offsets": [
+          16,
+          17,
+          20,
+          21,
+          36,
+          37,
+          40,
+          41,
+          62,
+          63,
+          130,
+          131,
+          256,
+          257,
+          316,
+          317
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x00088A56",
+        "h_sha256": "58ba4592f15a5c9b0bc13c96c7b9cd471c40d1ace55759ea7f477e0e8cef10ca",
+        "role": "secoc_verify_worker",
+        "sienna_entry": "0x0008E4BA",
+        "sienna_sha256": "db69bf24d3ce490afdfbcac2049ed054a0097227e4a3eea3f3749cedcb72ee2c"
+      },
+      {
+        "body_size": 52,
+        "different_byte_count": 4,
+        "different_offsets": [
+          14,
+          15,
+          18,
+          19
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x00088BE2",
+        "h_sha256": "ea091ae5d5e376662bd636303ff499150f10576a8434d26c0fdf39c01683e7d2",
+        "role": "freshness_commit_callback_dispatch",
+        "sienna_entry": "0x0008E646",
+        "sienna_sha256": "7e4798c4acaf8f8ee9c2db52c526bcb2b4b6b471fa58f216f689b768715c78af"
+      },
+      {
+        "body_size": 134,
+        "different_byte_count": 8,
+        "different_offsets": [
+          14,
+          15,
+          24,
+          25,
+          28,
+          29,
+          38,
+          39
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x00088C16",
+        "h_sha256": "0220bb150af7ed42ef5114a4ce66ad562a6a61481ce20a22b78ec7405e92f5ba",
+        "role": "post_cmac_acceptance_gate",
+        "sienna_entry": "0x0008E67A",
+        "sienna_sha256": "fbe3753387d3e9de73baee0496c2a3777b0ebe7b252ef3654ddb88f7bae402ff"
+      },
+      {
+        "body_size": 58,
+        "different_byte_count": 2,
+        "different_offsets": [
+          22,
+          23
+        ],
+        "entry_delta": "0x5A64",
+        "h_entry": "0x00088C9C",
+        "h_sha256": "f05b334c3f7b1a28cd80a4cd04acde7cd7d726a65ae427b2fd47c30d5108ed7b",
+        "role": "secoc_queue_dispatch",
+        "sienna_entry": "0x0008E700",
+        "sienna_sha256": "bc23c41b082715bae1f85434c08343d7c3566f2be983c304e2f25d020f7479af"
+      }
+    ]
+  },
+  "software_id": "8965H1202000",
+  "source_corpus": {
+    "path": "build/work/corpora/h_8965H1202000_b6_full_forced.raw.jsonl",
+    "sha256": "5cc79174e8ea917356b9d4758d086df1209c85c9665f122782cff7d88261c387"
+  }
+}

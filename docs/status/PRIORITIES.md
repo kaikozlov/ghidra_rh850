@@ -123,8 +123,12 @@ capture a synchronized stock-LTA session across those modules—and recover the
 remaining **producer-side** contract: how planner state becomes the now-exhausted
 protected `0x0B6` receiver payload, which module signs it, what values it places in
 the authenticated-but-EPS-unconsumed bytes, and where sender freshness/signing
-ownership changes. The EPS-side 32-byte partition, FV4/CMAC28 trailer, full-freshness
-packing, CMAC input, and ICU-S slot-4 selection are already closed.
+ownership changes. SECOC-071 now closes the EPS-side verification algorithm itself:
+B6 freshness ID2/slot1 state, `00F`-anchored reset/message candidate window, retry
+scopes, `0x24` boundary behavior, trip-wrap reset, 36-byte CMAC input, ICU-S slot-4
+selection, result polarity, commit-before-delivery ordering, and separation from
+application signal261. Do not spend another pass rediscovering receiver freshness
+logic; the remaining SecOC problem is sender state/key-use/ownership.
 TMS-042 makes the same acquisition the highest-value reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
 `DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as
@@ -430,15 +434,21 @@ are extracted without a recovered downstream consumer, and the remaining 167
 authenticated application bits have no recovered consumer under the bounded generic
 COM/direct-reference census. B28..B31 are exactly FV4+CMAC28; full freshness is
 `trip16||reset20||message8||reset_low2||00b`; the CMAC input is
-`00 B6 || B0..B27 || freshness[6]`; and config/job0 selects ICU-S slot4. The CH3
-wall-clock period remains unknown, so sender cadence still needs capture/producer
+`00 B6 || B0..B27 || freshness[6]`; and config/job0 selects ICU-S slot4. SECOC-071
+now closes the remaining receiver policy too: reset trials are `current,-1,+1,-2,+2`,
+B6's one same-PDU retry resolves the `±2` low-two-bit ambiguity, same-epoch message8
+advances to the next congruent value by 1..4, `0x24` still proceeds to CMAC, authenticated
+trip wrap clears linked B6 freshness state, and only command7 result0 commits pending
+freshness before PDU42 delivery. Signal261 is a separate application modulo-64 counter.
+The CH3 wall-clock period remains unknown, so sender cadence still needs capture/producer
 evidence rather than a guessed millisecond value.
 
 Capture protected `0x0B6` during stock steering to validate sender wall-clock cadence,
 secondary-field dynamics where needed, and normal target/rate bounds—not to rediscover
-the receiver envelope. In parallel, recover **sender-side** freshness-state/signing
-ownership and the slot-4 key value or an approved way to use the slot; receiver
-freshness reconstruction and key-slot selection are already known. A category-435 CUW with
+the receiver envelope or verification state machine. In parallel, recover **sender-side**
+freshness-state/signing ownership and the slot-4 key value or an approved way to use
+the slot; receiver freshness extraction/window/retry/commit and key-slot selection are
+now closed. A category-435 CUW with
 `Node01/DiagID=07B0` plus the matched `FRC_P5` image is now the primary software
 target for the **remaining payload transform, sender cadence,
 and routing/authentication ownership**, not for discovering the EPS setpoint/request/
@@ -448,7 +458,7 @@ experiment.
 
 Canonical:
 [../architecture/control-partition.md](../architecture/control-partition.md) ·
-[../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §§7.34–7.35.
+[../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §§7.34–7.36.
 
 ### 6. Passive command-8 / provisioning provenance
 
