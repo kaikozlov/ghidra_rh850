@@ -921,11 +921,11 @@
     },
     "h_b6_secoc_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
-      "sha256": "79e36fe6d8b27b0c7b899344031ef5c371e4f5767bec5dc2f0aeda857084675b"
+      "sha256": "a7f8dccfb146e78381ef894d2da2d42570951e77fc0821a35b4922a6793c0a3f"
     },
     "h_target_native_decompiler_evidence": {
       "path": "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
-      "sha256": "eea6eab24adf08468d677c110fd95f5878b131fe28e7d893e56851ae1e4a0570"
+      "sha256": "72f802e03cc1a77278299cbd2f1a7ff9fb0688620f34000062de9b20337c8c9c"
     },
     "raw_function_transfer_ledger": {
       "path": "data/generated/corolla_8965H1202000_named_function_transfer_ledger.json",

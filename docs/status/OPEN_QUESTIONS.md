@@ -534,9 +534,20 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   override policy remains open. Measured `0x4A3` Q-current is observable, but no
   cooperative-supervisor measured-Q comparator is recovered; any actuator-response
   limit is therefore a future Panda/sender policy to validate dynamically rather than
-  an OEM threshold still waiting to be copied. Extended fault mapping remains open;
-  sender template/cadence/SecOC and relay suppression remain deployment blockers.
-  The next decisive Corolla discriminator is therefore a **firmware-identified
+  an OEM threshold still waiting to be copied. Extended fault mapping remains open.
+  COM-016 now closes **receiver-side competing-B6 arbitration**: there is no recovered
+  sender identity or Target-Lateral-ID priority; one pending SecOC slot coalesces
+  arrivals, in-flight arrivals are ignored, one shared freshness state rejects replay
+  but can be advanced by any future-valid slot4-capable sender, and signal261 delta0 is
+  tolerated rather than used as a duplicate filter. CORR-111 further closes a bounded
+  generated fail-open mode: B6 verification failures can still reach COM without
+  freshness commit while `FEBE5408 < 204` or a separate global D2 override is active.
+  Deterministic lateral authority
+  therefore requires exclusive B6 control. The remaining suppression question is
+  physical/deployment-specific: identify the producer side and validate the relay-side
+  isolation point; do not use freshness racing as coexistence. Sender template/cadence,
+  slot4 MAC capability/key policy and that physical suppression implementation remain
+  deployment blockers. The next decisive Corolla discriminator is therefore a **firmware-identified
   H/F-family capture with the target network physically repinned onto the CAN0/CAN2
   relay pair and stock LTA exercised off→active→off**, with `carFw`/F181 preserved;
   also exercise cruise and P/R/N/D so the remaining state contract can close. Family

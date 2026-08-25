@@ -3,13 +3,13 @@
     "crypto_submit_result_2": "0x889C2(...,0x202) uses B6 record +0x2E limit2 for CryptoIf submit/busy retries of the current authentication candidate; B4->C3 preserves that counter across busy retries, while 0x8891E resets it when advancing to a new auth/freshness attempt",
     "freshness_commit": {
       "dispatcher": "0x00089758",
-      "failure_action": "no copy; committed B6 freshness is unchanged",
+      "failure_action": "no copy; committed B6 freshness is unchanged even when failure-forwarding routes the queued payload",
       "normal_commit": "0x0008A07A",
       "success_action": "copy pending 12-byte B6 slot 0xfebe54ec -> committed slot 0xfebe54d4"
     },
     "freshness_results": {
       "0x00": "candidate staged; continue to command7",
-      "0x22": "hard freshness failure -> A5 -> cleanup; no command7 and no delivery",
+      "0x22": "hard freshness failure -> A5; no command7; 0x88A56 calls generic failure handler 0x888A6, whose generated failure-forwarding policy can still route the queued B6 to COM while the grace counter is below 204 or the global D2 override mode is active",
       "0x23": "0x8891E(...,0x201) candidate retry; if below B6 limit1, C3->B4 and auth-candidate counter increments",
       "0x24": "call freshness-boundary callback through 0x88908; state remains C3 and command7 still executes"
     },
@@ -17,7 +17,7 @@
     "gate2": {
       "commit_before_delivery": true,
       "function": "0x00088C16",
-      "mismatch": "result!=0: freshness commit callback receives 0x00010002 so pending state does not commit; 0x8891E(...,0x200) may retry the same queued PDU; no PDU42 delivery on mismatch",
+      "mismatch": "result!=0: freshness commit callback receives 0x00010002 so pending state does not commit; 0x8891E(...,0x200) uses the one same-PDU retry. If that retry budget is exhausted, 0x8891E enters generic failure state 0x96 and calls 0x888A6; the generated failure-forwarding policy may then route the queued PDU42 during the bounded grace/global-override modes. Outside those modes no failed PDU is routed.",
       "result_cell": "0xFEBE5450",
       "success": "result==0: freshness commit callback receives freshness ID2 with high16 clear, pending slot commits, then PDU42 routes to COM"
     },
@@ -47,6 +47,24 @@
       }
     },
     "same_pdu_retry_transition": "0x88702 itself performs B4->C3 without an additional reset; the caller that schedules an authentication retry (0x8891E) has already incremented the auth counter and reset the CryptoIf-submit counter to zero",
+    "verification_failure_delivery_policy": {
+      "authentication_boundary": "failure-forwarded payloads are not authenticated successes and do not commit pending freshness. Do not describe this as CMAC acceptance; it is explicit generated delivery despite verification failure.",
+      "b6_profile_is_sync": false,
+      "b6_profile_plus_0x09": 0,
+      "cmac_mismatch_path": "the first result-nonzero mismatch schedules B4 retry; once the one B6 auth/freshness retry is exhausted, 0x8891E sets generic failure 0x96 and calls 0x888A6, so the same conditional failure-forwarding path applies",
+      "delivery_condition": "0x888A6 routes the queued PDU if global override D2 is active OR (profile+0x09 != 1 AND grace_counter < 204). B6 profile+0x09 is 0, so the bounded counter branch applies to B6.",
+      "freshness_0x22_path": "0x88A56 sets A5 then calls 0x888A6 immediately; command7 is never submitted, but the queued payload can still reach COM under the failure-forwarding condition",
+      "global_override_state": "0xFEBE53EE",
+      "global_override_test": "0x00088512 returns true when the state byte is D2; 0x000884E0 can set E1 or D2, but its OEM mode name is not promoted",
+      "grace_counter": "0xFEBE5408",
+      "grace_increment": "0x00088308 -> 0x00088288 -> 0x000886DA increments the counter by one while below configured 204; wall-clock period is not recovered here",
+      "grace_init": "0x0008857C zeros the counter",
+      "grace_limit_raw": 204,
+      "grace_reset": "0x000886FC can reset the counter to zero; its callers remain a separate lifecycle-policy question",
+      "handler": "0x000888A6",
+      "steady_state_boundary": "once grace_counter >= 204 and global override D2 is inactive, the recovered failure handler does not route B6 verification failures through 0x88856",
+      "upper_delivery_helper": "0x00088856 -> 0x00089514 -> PduR/COM PDU42"
+    },
     "verified_delivery": {
       "length_boundary": "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. Static evidence does not prove that B28..B31 are physically stripped before COM RAM; the application-consumer census, not a stripping assumption, is the basis for classifying them as SecOC-only.",
       "queue_getter": "0x00087E2C",
@@ -113,7 +131,7 @@
       "0x100000"
     ]
   },
-  "evidence_boundary": "This closes the H/F EPS receiver-side SecOC verification algorithm for protected 0x0B6, including exact freshness state, candidate/window rules, retry scopes, CMAC input/slot selection, commit timing, and application-sequence separation. It does not recover the protected slot-4 secret, sender-side ownership of live freshness state, stock sender cadence, or the upstream FRC/Brake payload/signing producer.",
+  "evidence_boundary": "This closes the H/F EPS receiver-side SecOC verification algorithm for protected 0x0B6, including exact freshness state, candidate/window rules, retry scopes, CMAC input/slot selection, commit timing, generated verification-failure forwarding policy, and application-sequence separation. It does not recover the protected slot-4 secret, sender-side ownership of live freshness state, stock sender cadence, or the upstream FRC/Brake payload/signing producer.",
   "freshness_acceptance": {
     "epoch_transition": {
       "new_epoch_message": "received_message_low2 (0..3)",
@@ -440,9 +458,9 @@
       "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
     },
     "decompiler_evidence": {
-      "function_count": 36,
+      "function_count": 44,
       "path": "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
-      "sha256": "eea6eab24adf08468d677c110fd95f5878b131fe28e7d893e56851ae1e4a0570"
+      "sha256": "72f802e03cc1a77278299cbd2f1a7ff9fb0688620f34000062de9b20337c8c9c"
     },
     "full_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
@@ -467,9 +485,10 @@
     "b6_mac_input_closed": true,
     "b6_profile_identifiers_closed": true,
     "b6_sequence_relation_closed": true,
+    "b6_verification_failure_delivery_policy_closed": true,
     "sender_freshness_state_ownership_closed": false,
     "sender_wall_clock_cadence_closed": false,
-    "short_form": "FV4 reconstructs against authenticated 00F state; candidate is staged, command7 verifies CMAC28 with slot4, and only result0 commits freshness then delivers PDU42.",
+    "short_form": "FV4 reconstructs against authenticated 00F state; candidate is staged and command7 verifies CMAC28 with slot4. Only result0 commits freshness, but generated failure-forwarding can still deliver an uncommitted queued B6 during the bounded grace/global-override modes; post-grace normal mode routes only verified success.",
     "slot4_secret_value_closed": false,
     "upstream_producer_closed": false
   },

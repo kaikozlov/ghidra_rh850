@@ -2751,3 +2751,37 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `data/generated/corolla_8965H1202000_steering_limits_reference_census.json`;
   `tests/verify_corolla_hf_steering_limits.py`;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
+
+
+### CORR-111 — B6 verification failure is not universally non-delivering
+
+- **Superseded framing:** SECOC-071 and the first H/F B6 verification artifact
+  correctly proved that CMAC mismatch never commits pending freshness, but then
+  overextended the normal verified-delivery gate into the unconditional claim that
+  mismatch/hard freshness failure could never release PDU42 to COM.
+- **Exact correction:** target-native H functions close a generated
+  verification-failure forwarding policy. `0x8857C` zeros global counter
+  `FEBE5408`; receive-main chain `0x88308→0x88288→0x886DA` increments it while it
+  is below raw configured limit **204** (`0x25726`), and `0x886FC` can reset it.
+  B6 profile byte `+0x09` is 0. Generic failure handler `0x888A6` routes the queued
+  PDU through `0x88856` when either global state `FEBE53EE` is D2 (`0x88512`) or
+  profile `+0x09 != 1` and `FEBE5408 < 204`. Hard freshness result `0x22` enters
+  A5 and calls `0x888A6` without submitting command7; a CMAC mismatch first uses
+  B6's one retry, then retry exhaustion enters state `0x96` and calls the same
+  handler. Under the forwarding condition, the failed queued B6 can therefore reach
+  PDU42/COM.
+- **What remains unchanged:** verification failure never commits the pending B6
+  freshness slot. The forwarded PDU is **not** an authenticated success. Once the
+  counter is >=204 and the global D2 mode is inactive, the recovered failure handler
+  does not route failed B6 through `0x88856`.
+- **Boundary:** the wall-clock duration of the 204-count interval and the OEM name/
+  activation policy of global D2 mode remain unrecovered. This correction does not
+  authorize unauthenticated injection; it strengthens the requirement for exclusive,
+  deterministic B6 authority during production control.
+- **Canonical:**
+  `data/generated/corolla_8965H1202000_b6_secoc_verification.json`;
+  `data/generated/corolla_hf_b6_competing_sender_arbitration.json`;
+  `tests/verify_corolla_8965H1202000_b6_secoc_verification.py`;
+  `tests/verify_corolla_hf_b6_competing_sender_arbitration.py`;
+  [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.36;
+  [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).

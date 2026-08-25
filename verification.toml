@@ -1311,6 +1311,7 @@ paths = [
   "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
   "docs/variants/corolla-2023-us-public-route.md",
   "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "docs/reference/generated-artifacts.md",
@@ -1405,6 +1406,32 @@ paths = [
   "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
   "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
   "data/generated/corolla_8965F1208000_low_calibration_delta.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+  "exploit/findings_coverage.json",
+]
+
+[suite.corolla_hf_b6_competing_sender_arbitration]
+tests = ["tests/verify_corolla_hf_b6_competing_sender_arbitration.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_corolla_hf_b6_competing_sender_arbitration.py",
+  "tools/extract_corolla_h_b6_competing_sender_evidence.py",
+  "tools/build_corolla_hf_b6_competing_sender_arbitration.py",
+  "data/generated/corolla_8965H1202000_b6_competing_sender_decompiler_evidence.json",
+  "data/generated/corolla_hf_b6_competing_sender_arbitration.json",
+  "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
+  "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
+  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+  "data/generated/corolla_hf_steering_limits.json",
+  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
   "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
   "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
   "docs/variants/corolla-h-f-openpilot-state-bridge.md",

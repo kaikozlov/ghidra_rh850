@@ -399,9 +399,22 @@ observed on logical bus 1. Official Toyota-B hardware makes CAN0/CAN2 the
 intercept-relay pair and CAN1 an unsplit network. `ELM327 param=1 + logical bus 1`
 is sufficient for direct diagnostics and passive observation of that stock CAN1
 network; it is **not** relay-topology-equivalent to the physical CAN0/CAN1 repin.
-Therefore "parse bus 1" is not itself a production architecture. We still need a
-relay-correct capture to establish the B6 producer side, duplicate-suppression
-point, and safe forwarding/transmit topology.
+Therefore "parse bus 1" is not itself a production architecture. Exact H/F
+receiver arbitration now closes **why exclusive B6 authority is required** even
+before that capture: there is one source-agnostic B6 SecOC profile/freshness state,
+one coalescing pending queue slot, and one PDU42 COM shadow; signal261 is not a
+duplicate filter and Target Lateral ID has no cross-frame priority ranking. A
+pending second frame can replace the first before verification, in-flight arrivals
+are ignored, the first successful commit consumes a given freshness value, and a
+later future-valid delivery becomes the current application command. CORR-111 also
+closes a bounded generated failure-forwarding mode: a hard freshness failure or
+retry-exhausted CMAC failure can still reach COM without freshness commit while
+`FEBE5408 < 204` or a separate global D2 override is active. Thus parallel
+stock+openpilot B6 is timing-dependent rather than safely arbitrated even if one
+hoped verification failure would separate the streams. We still need
+a relay-correct capture to establish the **physical producer side and actual
+suppression/isolation point**, plus safe forwarding/transmit topology. Freshness
+racing must not be used as a coexistence mechanism.
 
 **Read-only implementation checkpoint (2026-08-24):** the scaffold above is now
 implemented in the maintained forks rather than remaining a paper design. Opendbc commit
@@ -470,9 +483,11 @@ vehicle with the Toyota-B CAN0/CAN1 pairs physically repinned onto the CAN0/CAN2
 relay topology**, `carFw`/F181 preserved, and all buses logged while exercising
 stock LTA off→active→off, ordinary driver steering, cruise main/engage/cancel,
 brake/gas, and stationary P/R/N/D transitions. That one capture can simultaneously
-close B6 sender cadence and producer side, stock-source suppression, remaining
-gear enums, cruise-state replacements, safety-bus placement, driver override,
-and readiness/fault behavior.
+close B6 sender cadence and producer side, locate/validate the relay-side
+stock-source suppression point, remaining gear enums, cruise-state replacements,
+safety-bus placement, driver override, and readiness/fault behavior. The receiver
+side no longer needs the capture to decide whether deterministic authority requires
+exclusivity: it does; the capture is needed to implement that exclusivity correctly.
 
 ### B. Acquire and analyze `FRC_P5` and category-435 Brake firmware
 

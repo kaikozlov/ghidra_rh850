@@ -1,0 +1,167 @@
+{
+  "application_delivery": {
+    "behavior": "each successfully verified delivery copies the received PDU into the same COM PDU42 shadow, reloads the same deadline, and clears the same activity state",
+    "effective_policy": "last successfully delivered PDU is the current application command/profile, subject to task sampling",
+    "entry": "0x00076A3C",
+    "sequential_valid_frames": "later successfully delivered B6 overwrites the current COM/application snapshot; there is no per-sender merge or priority state",
+    "shared_shadow_pdu": 42
+  },
+  "application_sequence_arbitration": {
+    "conclusion": "signal261 is a steering plausibility/time-gap input, not a duplicate-sender winner selector",
+    "duplicate_sequence_rejected": false,
+    "effective_gap": "1 for delta<=1, otherwise min(delta,8)",
+    "examples": {
+      "gap_four": {
+        "effective_gap": 4,
+        "raw_delta": 4
+      },
+      "large_gap_capped": {
+        "effective_gap": 8,
+        "raw_delta": 19
+      },
+      "same_application_sequence": {
+        "effective_gap": 1,
+        "raw_delta": 0
+      },
+      "strict_plus_one": {
+        "effective_gap": 1,
+        "raw_delta": 1
+      },
+      "wrap_gap_three": {
+        "effective_gap": 3,
+        "raw_delta": 3
+      }
+    },
+    "modulus": 64,
+    "plausibility_use": "0xCB4F4 consumes effective_gap; H/F target-jump allowance is 78 raw per effective gap",
+    "raw_delta": "(current - previous) mod 64",
+    "signal_id": 261,
+    "strict_plus_one_required_by_eps": false
+  },
+  "applies_to": [
+    "8965H1202000",
+    "8965F1208000"
+  ],
+  "cross_variant": {
+    "boundary": "Every function/table used by this contract lies in the H/F byte-identical application region 0x20000..0x100000, so the receiver arbitration transfers exactly between 8965H1202000 and 8965F1208000.",
+    "h_f_application_byte_identical": true
+  },
+  "evidence_boundary": "Receiver-side static result only. It does not authorize parallel injection, identify the physical stock producer side, recover sender cadence, reveal the ICU-S slot-4 secret, or prove stock B6 activity during any vehicle feature state.",
+  "freshness_arbitration": {
+    "commit_before_normal_verified_application_delivery": true,
+    "committed_state_is_shared_per_b6_profile": true,
+    "consequence": "two independently transmitting slot-4-capable senders race one shared freshness state rather than coexist as independently tracked sources",
+    "future_freshness_from_another_capable_sender": "receiver has no source lock; a PDU that reconstructs to an acceptable future B6 freshness and carries a valid slot-4 CMAC can be accepted and then advances the single shared committed B6 freshness state",
+    "same_full_freshness_replay_after_commit": "does not authenticate as the same freshness: same-epoch reconstruction chooses the next congruent message8 value; the old CMAC therefore authenticates different freshness and fails verification absent a CMAC collision. During the separately recovered verification-failure forwarding grace/global-override modes, that failed queued payload can nevertheless be delivered to COM without committing freshness; outside those modes the failure handler does not route it.",
+    "same_low2_reference_examples": {
+      "committed10_received_low2_2": 14,
+      "committed10_received_low2_3": 11,
+      "committed11_received_low2_3": 15
+    },
+    "verification_failure_forwarding_exception": {
+      "arbitration_effect": "the failure-forwarding window weakens freshness as an application-level duplicate barrier during that bounded mode; it does not turn the failed PDU into an authenticated success",
+      "b6_profile_plus_0x09": 0,
+      "behavior": "0x888A6 can route a freshness-hard-failed or retry-exhausted CMAC-failed queued B6 to COM while the global grace counter is below 204 or the separate global D2 override mode is active; failure forwarding never commits freshness",
+      "grace_limit": 204
+    }
+  },
+  "hypothesis_resolution": {
+    "first_or_last_frame_wins": "stage-dependent: D2 pending coalescing is last-arrival-wins; C3/B4 inflight arrivals are ignored; first successful commit consumes a given full freshness; across sequential accepted future freshness values the last COM delivery becomes current",
+    "freshness_rejects_competing_sender": "only indirectly: stale/replayed freshness fails authentication and freshness is not source-specific; additionally, the bounded verification-failure forwarding mode can still deliver a failed queued B6 without committing freshness. A valid future freshness from another capable sender can advance the same shared state normally.",
+    "newest_application_sequence_wins": "disproved: signal261 does not select a winner and delta0 is tolerated as effective gap1",
+    "request_id_priority": "disproved: CBE6E decodes only the current value and has no cross-frame priority ranking",
+    "source_specific_acceptance": "not recovered: one source-agnostic B6 SecOC profile/freshness/COM state is used"
+  },
+  "receiver_identity": {
+    "application_pdu_id": 42,
+    "authenticated_data_id": "0x00B6",
+    "boundary": "The receiver authenticates one generated B6/DataID/freshness profile. No sender/source identity is concatenated into the recovered CMAC input or used after verification. This is a receiver-side negative, not proof that upstream network topology has only one producer.",
+    "can_id": "0x0B6",
+    "crypto_slot": 4,
+    "freshness_id": 2,
+    "normal_freshness_slot": 1,
+    "separate_source_identifier_in_authenticated_input": false,
+    "source_specific_acceptance_recovered": false
+  },
+  "request_id_arbitration": {
+    "accepted_active_ids": {
+      "1": "PCS",
+      "10": "Hands Off LTA",
+      "11": "LTA/LCA",
+      "19": "PDA",
+      "4": "LDA"
+    },
+    "behavior": "the decoder clears all profile flags each call and selects at most the one profile encoded by the current B6 snapshot; it retains no competing-request history or priority ranking",
+    "conclusion": "a later successfully delivered B6 can replace the active request/profile simply by carrying a different supported Target Lateral ID",
+    "decoder": "0x000CBE6E",
+    "priority_order_recovered": null,
+    "signal_id": 254
+  },
+  "schema": "corolla-hf-b6-competing-sender-arbitration-v1",
+  "single_profile_queue": {
+    "idle_E1": "first arrival changes E1->D2 and inserts the B6 profile once via 0x87CD6",
+    "inflight_arbitration": "once the worker transitions that profile to C3 (or B4 retry), later arrivals are ignored until cleanup returns the profile to E1",
+    "ingress": "0x0008865A",
+    "not_a_source_priority_queue": true,
+    "pending_D2": "another arrival while still D2 updates the existing B6 profile storage via 0x87DB0; it does not create a second queued B6 profile",
+    "pending_arbitration": "last B6 arrival that updates the D2 pending slot before D2->C3 is the payload presented to verification",
+    "queue_multiplicity": 1,
+    "verify_C3_or_retry_B4": "0x8865A has no update/insert branch for C3 or B4, so newly arriving B6 PDUs during verification/retry are not admitted into the profile queue"
+  },
+  "sources": {
+    "decompiler_evidence": {
+      "path": "data/generated/corolla_8965H1202000_b6_competing_sender_decompiler_evidence.json",
+      "sha256": "3e112016286b823154d0fc32cea563fa8731d3a84ffcf28674ef3d253fc6a533"
+    },
+    "f_codeflash": {
+      "application_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
+      "path": "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin"
+    },
+    "full_receiver": {
+      "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
+      "sha256": "7dd3af51a5b169fc1a341aaf1916c0de1ce88fd2451929f86df50fe1b4e88563"
+    },
+    "h_codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "hf_equivalence": {
+      "path": "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+      "sha256": "a1c28ae4787a131ad1cc46310a73e11649b5cf92985b79eefa13aae71d519e7c"
+    },
+    "receiver_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+      "sha256": "123ba1a29f6e8247fca9432688a8a0d33c28949440f925d4f0d0dd7cea626c60"
+    },
+    "secoc_verification": {
+      "path": "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
+      "sha256": "a7f8dccfb146e78381ef894d2da2d42570951e77fc0821a35b4922a6793c0a3f"
+    },
+    "steering_limits": {
+      "path": "data/generated/corolla_hf_steering_limits.json",
+      "sha256": "cee6a3c3a87960c62c1060e79ac38157de77de9eb9668bb696257889a724dc81"
+    }
+  },
+  "static_conclusion": {
+    "application_sequence_not_duplicate_filter": true,
+    "inflight_arrival_drop_closed": true,
+    "parallel_injection_authorized": false,
+    "pending_last_arrival_coalescing_closed": true,
+    "production_stock_suppression_still_required": true,
+    "request_id_priority_absent": true,
+    "same_freshness_replay_fails_authentication_by_forward_freshness_model": true,
+    "sequential_delivery_last_snapshot_wins": true,
+    "single_pending_profile_queue_closed": true,
+    "source_specific_arbitration_absent": true,
+    "verification_failure_forwarding_exception_closed": true
+  },
+  "suppression_conclusion": {
+    "deterministic_lateral_authority_requires_exclusive_b6_control": true,
+    "eps_protocol_requires_named_stock_source": false,
+    "freshness_preemption_is_safe_coexistence": false,
+    "parallel_injection_safe": false,
+    "physical_topology_boundary": "Static receiver logic cannot identify the relay side of the stock producer. The physical repin/capture is still required to locate and validate the actual suppression boundary.",
+    "production_policy": "Suppress/isolate the stock B6 producer on the relay-correct path before openpilot emits B6, unless future capture proves the stock sender is quiescent for every state in which openpilot transmits. Do not use freshness racing/preemption as the coexistence mechanism.",
+    "why": "The EPS has no source preference or request priority. Competing senders race a single pending queue slot and a single freshness state; whichever future-valid PDU is successfully delivered most recently becomes the one application command, while the bounded failure-forwarding mode can even expose a verification-failed queued PDU to COM without advancing freshness. That timing-dependent behavior is incompatible with deterministic openpilot authority and transparent fallback."
+  }
+}

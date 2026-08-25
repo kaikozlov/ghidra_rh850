@@ -236,8 +236,8 @@ relay pair, preserve `carFw`/F181, and log all buses while safely exercising:
    a safe diagnostic trigger exists.
 
 This capture should close B6 visibility/cadence and producer side, exact physical
-relay path, stock-source suppression, the remaining physical driver-override policy,
-a deliberately chosen/validated `0x4A3` Q-current actuator-response policy,
+relay path and the concrete stock-source suppression/isolation point, the remaining
+physical driver-override policy, a deliberately chosen/validated `0x4A3` Q-current actuator-response policy,
 `0x351/0x394` plus DID `0x1033` Ready/fault transition mapping, remaining gear enums,
 missing cruise roles, and the correct Panda parser/safety bus. The **core H/F Panda
 command envelope itself is now statically derived** (COM-014/COM-015): ID11-only
@@ -247,9 +247,17 @@ selected-bank per-task LTA slew. Static recovery also finds no measured-Q-curren
 comparator in the cooperative supervisor and no speed-dependent reduction of the hard
 ±1745 B6 ceiling. Do not spend another pass copying old Toyota angle/current limits;
 focus the live capture on still-parameterized driver/fault/response policy and
-deployment topology. Current Toyota safety assumes checked state on logical
-bus 0; direct diagnostic/passive observation on bus 1 is not itself the production
-relay topology.
+deployment topology. **COM-016 now closes the receiver-side suppression question:**
+B6 has one source-agnostic SecOC queue/freshness/COM state, pending arrivals coalesce,
+in-flight arrivals are ignored, signal261 is not a duplicate filter, and Target
+Lateral ID has no priority arbiter. CORR-111 additionally proves a bounded generated
+failure-forwarding mode: while `FEBE5408 < 204` (or the separate global D2 override
+is active), freshness-hard-failed or retry-exhausted CMAC-failed B6 can still reach
+COM without committing freshness. Deterministic production control therefore
+requires exclusive B6 authority; the live capture is needed to locate/validate the
+physical stock suppression point, not to decide whether racing two streams is
+acceptable. Current Toyota safety assumes checked state on logical bus 0; direct
+diagnostic/passive observation on bus 1 is not itself the production relay topology.
 
 Machine-readable checklist: `data/generated/corolla_tss3_opendbc_readiness.json`.
 This target runs in parallel with static `07B0` Brake + `0792` FRC acquisition;
@@ -262,8 +270,8 @@ emits no CAN. The tracked Span rlog replays through that parser with 5,900/5,900
 samples CAN-valid. Therefore **do not spend the next pass rebuilding basic state parsing**.
 Use the implementation as the dynamic measurement harness and focus the next evidence on:
 exact target/F181 binding, physical relay-correct stock-LTA transitions, B6 sender cadence
-and active-LTA secondary-field template, SecOC freshness/key/source ownership,
-producer-side suppression, the physical driver-override policy for the now-live `0x030`
+and active-LTA secondary-field template, SecOC freshness/key ownership,
+the physical producer side plus suppression/isolation implementation, the physical driver-override policy for the now-live `0x030`
 torque, a deliberately chosen/validated `0x4A3` Q-current response policy, and
 `0x351/0x394` + DID `0x1033` Ready/fault transitions. Static firmware recovery has
 already bounded the ~±8.238 N.m torque acquisition clamp and ±10 N.m telemetry

@@ -91,7 +91,7 @@ def main() -> int:
     equiv = json.loads(EQUIV.read_text())
     if len(h) != 0x100000 or sha(h) != ev["image"]["sha256"]:
         raise ValueError("H image/evidence identity drift")
-    if ev["function_count"] != 36:
+    if ev["function_count"] != 44:
         raise ValueError("H B6 SecOC verification evidence count drift")
     funcs = {int(row["entry"], 16): row["decompiled_c"] for row in ev["functions"]}
 
@@ -123,10 +123,23 @@ def main() -> int:
         and struct.unpack_from("<H", record, 0x04)[0] == 0
     ):
         raise ValueError("B6 profile/retry/slot geometry drift")
+    failure_delivery_grace_limit = struct.unpack_from("<H", h, TP + 0x19BA)[0]
+    if record[0x09] != 0 or failure_delivery_grace_limit != 204:
+        raise ValueError("B6 verification-failure forwarding policy drift")
 
     # Target-native function semantics.  These intentionally cover the details
-    # that the earlier byte-complete receiver artifact left open.
-    need(funcs[0x8857C], "FUN_00083444(unaff_gp + -0x63fc,4);", "*(undefined1 *)(iVar1 + -0x63f0) = 0xe1;", "uVar2 < 3")
+    # that the earlier byte-complete receiver artifact left open, including the
+    # generated verification-failure forwarding policy discovered during the
+    # competing-sender audit.
+    need(funcs[0x88288], "FUN_000886da")
+    need(funcs[0x88308], "FUN_00088288", "FUN_00088294", "FUN_000882d6")
+    need(funcs[0x884E0], "param_1 == '\\x01'", "uVar1 = 0xd2", "uVar1 = 0xe1", "-0x6412")
+    need(funcs[0x88512], "-0x6412", "== -0x2e")
+    need(funcs[0x8857C], "FUN_00083444(unaff_gp + -0x63fc,4);", "FUN_00083444(unaff_gp + -0x63f8,4);", "*(undefined1 *)(iVar1 + -0x63f0) = 0xe1;", "uVar2 < 3")
+    need(funcs[0x886DA], "unaff_gp + -0x63f8", "LAB_000019ba", "+ 1")
+    need(funcs[0x886FC], "unaff_gp + -0x63f8", "= 0")
+    need(funcs[0x88856], "FUN_00087e2c", "FUN_00089514")
+    need(funcs[0x888A6], "FUN_000887e0", "FUN_00088816", "FUN_00088838", "FUN_00088512", "unaff_tp + 0x19c9", "unaff_gp + -0x63f8", "LAB_000019ba", "FUN_00088856")
     need(funcs[0x88702], "cVar2 == -0x2e", "cVar2 == -0x4c", "cVar3 = -0x3d", "unaff_gp + -0x63fa) = 0;")
     need(funcs[0x8891E], "unaff_gp + -0x63fa", "unaff_tp + 0x19d0", "*pcVar1 = -0x4c", "uVar2 + 1", "unaff_gp + -0x63fc) = 0;", "uVar4 = 2", "uVar4 = 1")
     need(funcs[0x889C2], "unaff_gp + -0x63fc", "LAB_000019ee", "*pcVar1 = -0x4c", "uVar2 + 1")
@@ -339,7 +352,7 @@ def main() -> int:
             "same_pdu_retry_transition": "0x88702 itself performs B4->C3 without an additional reset; the caller that schedules an authentication retry (0x8891E) has already incremented the auth counter and reset the CryptoIf-submit counter to zero",
             "freshness_results": {
                 "0x00": "candidate staged; continue to command7",
-                "0x22": "hard freshness failure -> A5 -> cleanup; no command7 and no delivery",
+                "0x22": "hard freshness failure -> A5; no command7; 0x88A56 calls generic failure handler 0x888A6, whose generated failure-forwarding policy can still route the queued B6 to COM while the grace counter is below 204 or the global D2 override mode is active",
                 "0x23": "0x8891E(...,0x201) candidate retry; if below B6 limit1, C3->B4 and auth-candidate counter increments",
                 "0x24": "call freshness-boundary callback through 0x88908; state remains C3 and command7 still executes",
             },
@@ -349,7 +362,7 @@ def main() -> int:
                 "function": "0x00088C16",
                 "result_cell": f"0x{GP - 0x63B0:08X}",
                 "success": "result==0: freshness commit callback receives freshness ID2 with high16 clear, pending slot commits, then PDU42 routes to COM",
-                "mismatch": "result!=0: freshness commit callback receives 0x00010002 so pending state does not commit; 0x8891E(...,0x200) may retry the same queued PDU; no PDU42 delivery on mismatch",
+                "mismatch": "result!=0: freshness commit callback receives 0x00010002 so pending state does not commit; 0x8891E(...,0x200) uses the one same-PDU retry. If that retry budget is exhausted, 0x8891E enters generic failure state 0x96 and calls 0x888A6; the generated failure-forwarding policy may then route the queued PDU42 during the bounded grace/global-override modes. Outside those modes no failed PDU is routed.",
                 "commit_before_delivery": True,
             },
             "retry_budgets": {
@@ -360,7 +373,25 @@ def main() -> int:
                 "dispatcher": "0x00089758",
                 "normal_commit": "0x0008A07A",
                 "success_action": f"copy pending 12-byte B6 slot {pending_slot:#010x} -> committed slot {current_slot:#010x}",
-                "failure_action": "no copy; committed B6 freshness is unchanged",
+                "failure_action": "no copy; committed B6 freshness is unchanged even when failure-forwarding routes the queued payload",
+            },
+            "verification_failure_delivery_policy": {
+                "handler": "0x000888A6",
+                "upper_delivery_helper": "0x00088856 -> 0x00089514 -> PduR/COM PDU42",
+                "b6_profile_plus_0x09": record[0x09],
+                "b6_profile_is_sync": False,
+                "grace_counter": f"0x{GP - 0x63F8:08X}",
+                "grace_limit_raw": failure_delivery_grace_limit,
+                "grace_init": "0x0008857C zeros the counter",
+                "grace_increment": "0x00088308 -> 0x00088288 -> 0x000886DA increments the counter by one while below configured 204; wall-clock period is not recovered here",
+                "grace_reset": "0x000886FC can reset the counter to zero; its callers remain a separate lifecycle-policy question",
+                "global_override_state": f"0x{GP - 0x6412:08X}",
+                "global_override_test": "0x00088512 returns true when the state byte is D2; 0x000884E0 can set E1 or D2, but its OEM mode name is not promoted",
+                "delivery_condition": "0x888A6 routes the queued PDU if global override D2 is active OR (profile+0x09 != 1 AND grace_counter < 204). B6 profile+0x09 is 0, so the bounded counter branch applies to B6.",
+                "freshness_0x22_path": "0x88A56 sets A5 then calls 0x888A6 immediately; command7 is never submitted, but the queued payload can still reach COM under the failure-forwarding condition",
+                "cmac_mismatch_path": "the first result-nonzero mismatch schedules B4 retry; once the one B6 auth/freshness retry is exhausted, 0x8891E sets generic failure 0x96 and calls 0x888A6, so the same conditional failure-forwarding path applies",
+                "authentication_boundary": "failure-forwarded payloads are not authenticated successes and do not commit pending freshness. Do not describe this as CMAC acceptance; it is explicit generated delivery despite verification failure.",
+                "steady_state_boundary": "once grace_counter >= 204 and global override D2 is inactive, the recovered failure handler does not route B6 verification failures through 0x88856",
             },
             "verified_delivery": full["verified_delivery"],
         },
@@ -406,16 +437,17 @@ def main() -> int:
             "b6_sequence_relation_closed": True,
             "b6_accept_reject_state_machine_closed": True,
             "b6_commit_timing_closed": True,
+            "b6_verification_failure_delivery_policy_closed": True,
             "b6_h_f_receiver_verification_identical": True,
             "slot4_secret_value_closed": False,
             "sender_freshness_state_ownership_closed": False,
             "sender_wall_clock_cadence_closed": False,
             "upstream_producer_closed": False,
-            "short_form": "FV4 reconstructs against authenticated 00F state; candidate is staged, command7 verifies CMAC28 with slot4, and only result0 commits freshness then delivers PDU42."
+            "short_form": "FV4 reconstructs against authenticated 00F state; candidate is staged and command7 verifies CMAC28 with slot4. Only result0 commits freshness, but generated failure-forwarding can still deliver an uncommitted queued B6 during the bounded grace/global-override modes; post-grace normal mode routes only verified success."
         },
         "evidence_boundary": (
             "This closes the H/F EPS receiver-side SecOC verification algorithm for protected 0x0B6, including exact freshness state, "
-            "candidate/window rules, retry scopes, CMAC input/slot selection, commit timing, and application-sequence separation. It "
+            "candidate/window rules, retry scopes, CMAC input/slot selection, commit timing, generated verification-failure forwarding policy, and application-sequence separation. It "
             "does not recover the protected slot-4 secret, sender-side ownership of live freshness state, stock sender cadence, or the "
             "upstream FRC/Brake payload/signing producer."
         ),

@@ -595,6 +595,86 @@ until a stock active-LTA sender template is captured/recovered and then whitelis
 Likewise relay-side bus ownership/suppression, sender cadence and SecOC MAC/freshness
 construction are deployment blockers outside the numeric Panda envelope.
 
+#### Competing valid B6 senders: receiver arbitration and suppression requirement
+
+The exact H/F receiver does **not** authenticate or arbitrate a named physical B6
+sender. Generated SecOC has one B6 profile (`DataID=0x00B6`, freshness ID 2,
+normal freshness slot 1, ICU-S slot 4), and the recovered 36-byte CMAC input is
+`00 B6 || B0..B27 || freshness48`; no additional sender/source identifier is
+concatenated. The application likewise has one PDU42 COM shadow. This means
+"stock sender" versus "openpilot sender" is a network/topology distinction, not
+an identity the EPS can prefer after authentication.
+
+The ingress path nevertheless has deterministic **stage-dependent** arbitration:
+
+- `0x8865A` gives each SecOC profile a single queue slot. From idle `E1`, the first
+  B6 becomes pending `D2` and is inserted once through `0x87CD6`. A second B6
+  arriving while that same profile is still `D2` calls `0x87DB0`, which updates
+  the existing pending storage rather than inserting a second queue node. Thus the
+  **last arrival before verification starts** is the payload presented to the verifier.
+- `0x88702` changes `D2` (or retry `B4`) to verify state `C3`. `0x8865A` has no
+  insert/update branch for `C3` or `B4`, so additional B6 arrivals while the current
+  candidate is being verified/retried are not admitted to the profile queue.
+- After a successful CMAC, the pending B6 freshness state commits before delivery.
+  `0x76A3C` then copies the accepted PDU into the one PDU42 COM shadow and reloads
+  the same communication deadline. Across separately accepted future-freshness
+  frames, the **last successfully delivered B6** is therefore the current
+  application command/profile, subject only to normal task sampling.
+
+Freshness is the only recovered anti-replay arbiter, and it is shared rather than
+source-specific. Once one B6 commits a full freshness value, replaying that same
+full freshness does not authenticate again: same-epoch reconstruction chooses the
+next congruent message8 candidate (for example committed message10 with received
+low2=`2` reconstructs message14), so the old CMAC is checked against different
+freshness. Conversely, another sender that can produce a valid slot-4 CMAC for an
+acceptable **future** B6 freshness is not rejected merely for being a different
+source; it advances the same committed B6 freshness state. Two capable senders thus
+race one freshness timeline rather than receiving independent windows.
+
+There is one important generated **verification-failure forwarding exception** that
+an earlier receiver summary missed. B6 record byte `+0x09` is 0. `0x8857C` zeros a
+global counter at `FEBE5408`; `0x88308→0x88288→0x886DA` increments it up to the raw
+configured limit **204**, while `0x886FC` can reset it. On hard freshness result
+`0x22`, `0x88A56` enters A5 and calls `0x888A6` without ever submitting command7.
+On CMAC mismatch, the first failure uses B6's one retry; if that retry is exhausted,
+`0x8891E` enters generic failure 96 and likewise calls `0x888A6`. For an ordinary
+profile such as B6 (`+0x09 != 1`), `0x888A6` calls upper-delivery helper `0x88856`
+while `FEBE5408 < 204`; it also does so whenever a separate global state at
+`FEBE53EE` is D2 (`0x88512`), whose OEM mode name remains unrecovered. The queued
+PDU can therefore reach COM **despite failed verification** during those bounded
+modes. Its freshness is not committed, so this is fail-open delivery, not an
+authenticated success. Once the counter is >=204 and that global D2 mode is inactive,
+the recovered failure handler no longer routes B6 verification failures. The
+wall-clock length of the 204-count window is not invented here.
+
+Signal261 does not solve that race. `CB246` computes `(current-previous) mod 64`;
+delta 0 and delta 1 both become effective gap 1, while larger gaps are capped at 8.
+`CB4F4` uses that effective gap for target plausibility (78 raw target counts per
+effective gap). A duplicate application sequence is therefore **not rejected** and
+"newest sequence wins" is not an EPS arbitration rule. Target Lateral ID also has
+no cross-frame priority scheme: `CBE6E` clears the profile flags and decodes only
+the current B6 value (`1/4/10/11/19`). A later accepted B6 can simply replace the
+active request/profile with another supported ID.
+
+The production conclusion is consequently stricter than "parallel injection might
+work": **deterministic lateral authority requires exclusive B6 control**. This is
+not because the EPS demands a named stock source; it is because the EPS provides no
+source preference, no request-ID priority, and no duplicate-sequence rejection to
+resolve two valid streams. Depending on timing, pending frames coalesce, in-flight
+arrivals are ignored, the first successful commit consumes a freshness value, and a
+later future-valid delivery becomes the current command. Freshness racing or
+pre-empting stock is therefore not a safe coexistence/fallback mechanism.
+
+For production openpilot, suppress/isolate the stock B6 producer on the relay-correct
+path before emitting replacement B6, **unless a future firmware-identified stock-LTA
+capture proves that the stock producer is quiescent in every state where openpilot
+would transmit**. Static receiver logic cannot identify which physical relay side
+contains that producer, so the repinned capture remains required for the actual
+suppression point. Machine-readable contract:
+`data/generated/corolla_hf_b6_competing_sender_arbitration.json`; exact-H compact
+queue/application evidence:
+`data/generated/corolla_8965H1202000_b6_competing_sender_decompiler_evidence.json`.
+
 All cited safety functions (`C9CEA/C9DB0/C9E54/CADE4/CAE18/CB14E/CB22E/CB246/CB2E0/
 CB394/CB46E/CB4F4/CB59A/CBD7E/CBE6E`) are byte-identical between H and F, and the
 cited calibration values are byte-identical as well. Machine-readable contract:
@@ -611,13 +691,14 @@ actuation. Before a real H/F openpilot port, recover and validate:
 - a deliberate Panda/sender Q-current actuator-response policy validated against relay-correct dynamics, plus extended fault-policy mapping (the cooperative EPS supervisor exposes no recovered measured-Q-current comparator);
 - a Tx join for Ready Status and dynamic temporary/permanent fault semantics;
 - sender wall-clock cadence and the active-LTA template for the bounded secondary B6 fields;
-- relay-correct stock-source suppression and dynamic confirmation of the statically closed 7-tick loss behavior;
+- relay-correct **physical stock-B6 producer isolation/suppression point** and dynamic confirmation of the statically closed 7-tick loss behavior (receiver-side competing-stream arbitration is already closed above);
 - the approved SecOC slot4 MAC/freshness sender path; and
 - fallback/coexistence behavior with brake/AEB and stock LTA/LDA/LCA functions.
 
 The machine-readable evidence is
 `data/generated/corolla_8965H1202000_openpilot_state_bridge.json`,
 `data/generated/corolla_8965H1202000_b6_receiver_contract.json`,
+`data/generated/corolla_hf_b6_competing_sender_arbitration.json`,
 `data/generated/corolla_hf_steering_limits.json`, and
 `data/generated/corolla_hf_panda_lateral_safety_contract.json`; their compact
 raw-body-bound decompiler/reference evidence is tracked alongside each artifact.
@@ -628,6 +709,6 @@ raw-body-bound decompiler/reference evidence is tracked alongside each artifact.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014), [COM-015](../reference/index.md#finding-com-015)
-- Corrections with this document as canonical home: [CORR-109](../reference/index.md#correction-corr-109), [CORR-110](../reference/index.md#correction-corr-110)
+- Findings with this document as canonical home: [COM-009](../reference/index.md#finding-com-009), [COM-010](../reference/index.md#finding-com-010), [COM-011](../reference/index.md#finding-com-011), [COM-014](../reference/index.md#finding-com-014), [COM-015](../reference/index.md#finding-com-015), [COM-016](../reference/index.md#finding-com-016)
+- Corrections with this document as canonical home: [CORR-109](../reference/index.md#correction-corr-109), [CORR-110](../reference/index.md#correction-corr-110), [CORR-111](../reference/index.md#correction-corr-111)
 <!-- knowledge-cross-references:end -->

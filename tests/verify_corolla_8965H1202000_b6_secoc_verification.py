@@ -83,7 +83,7 @@ funcs = {int(row["entry"], 16): row for row in ev["functions"]}
 print("\n== exact source and cross-variant binding ==")
 check("schema exact", art["schema"] == "corolla-8965H1202000-b6-secoc-verification-v1")
 check("H image exact", len(h) == 0x100000 and sha(h) == "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f")
-check("36 target-native functions promoted", ev["function_count"] == len(funcs) == 36)
+check("44 target-native functions promoted", ev["function_count"] == len(funcs) == 44)
 check("extractor source pinned", ev["generator"] == {"path": "tools/extract_corolla_h_b6_secoc_verification_evidence.py", "sha256": sha(EXTRACTOR.read_bytes())})
 check("whole forced H source corpus pinned", ev["source_corpus"]["sha256"] == "5cc79174e8ea917356b9d4758d086df1209c85c9665f122782cff7d88261c387")
 check("all promoted H bodies raw-bound",
@@ -169,15 +169,26 @@ check("CryptoIf busy retry budget2 is per auth attempt", rb["cryptoif_submit_bus
 check("CryptoIf result2 increments busy counter without clearing auth counter", "unaff_gp + -0x63fc" in funcs[0x889C2]["decompiled_c"] and "unaff_gp + -0x63fa" not in funcs[0x889C2]["decompiled_c"])
 fr = sm["freshness_results"]
 check("freshness 0x22 hard fails before command7", "hard freshness failure" in fr["0x22"] and "no command7" in fr["0x22"])
+check("freshness 0x22 records conditional failure-forwarding", "0x888A6" in fr["0x22"] and "grace counter" in fr["0x22"])
 check("freshness 0x23 retries candidate", "candidate retry" in fr["0x23"] and "C3->B4" in fr["0x23"])
 check("freshness 0x24 stays verify and continues command7", "state remains C3" in fr["0x24"] and "command7 still executes" in fr["0x24"])
 check("Gate1 requires verify-worker zero", "only when 0x88A56 returns 0" in sm["gate1"])
 g2 = sm["gate2"]
 check("Gate2 result cell exact", g2["result_cell"] == "0xFEBE5450")
 check("success commits before delivery", g2["commit_before_delivery"] is True and "pending slot commits" in g2["success"] and "then PDU42 routes" in g2["success"])
-check("mismatch cannot commit or deliver", "does not commit" in g2["mismatch"] and "no PDU42 delivery" in g2["mismatch"])
+check("mismatch never commits freshness", "does not commit" in g2["mismatch"])
+check("exhausted mismatch records conditional failure-forwarding", "retry budget is exhausted" in g2["mismatch"] and "0x888A6" in g2["mismatch"])
 fc = sm["freshness_commit"]
-check("normal commit copies pending to committed only on success", "copy pending" in fc["success_action"] and fc["failure_action"] == "no copy; committed B6 freshness is unchanged")
+check("normal commit copies pending only on success", "copy pending" in fc["success_action"] and "no copy" in fc["failure_action"] and "unchanged" in fc["failure_action"])
+fd = sm["verification_failure_delivery_policy"]
+check("B6 failure-forward grace policy exact", fd["b6_profile_plus_0x09"] == 0 and fd["grace_limit_raw"] == 204 and fd["grace_counter"] == "0xFEBE5408")
+check("failure grace raw config exact", struct.unpack_from("<H", h, 0x25726)[0] == 204)
+check("failure grace lifecycle promoted", all(a in funcs for a in (0x88288, 0x88308, 0x8857C, 0x886DA, 0x886FC)))
+check("failure delivery handler promoted", all(a in funcs for a in (0x88512, 0x88856, 0x888A6)))
+check("hard freshness fail can conditionally reach COM", "0x88A56 sets A5" in fd["freshness_0x22_path"] and "still reach COM" in fd["freshness_0x22_path"])
+check("exhausted CMAC mismatch can conditionally reach COM", "retry is exhausted" in fd["cmac_mismatch_path"] and "0x888A6" in fd["cmac_mismatch_path"])
+check("failure forwarding never commits freshness", "not authenticated successes" in fd["authentication_boundary"] and "do not commit" in fd["authentication_boundary"])
+check("post-grace normal failure route closed", "grace_counter >= 204" in fd["steady_state_boundary"] and "does not route" in fd["steady_state_boundary"])
 check("verified upper route remains COM PDU42", sm["verified_delivery"]["route_id"] == 42 and sm["verified_delivery"]["resolved_upper_callback"] == "0x00076A3C")
 
 print("\n== application signal261 is independent from SecOC freshness ==")
@@ -201,7 +212,7 @@ con = art["static_conclusion"]
 check("all receiver verification dimensions closed", all(con[k] is True for k in (
     "b6_freshness_extraction_closed", "b6_freshness_window_closed", "b6_mac_input_closed",
     "b6_key_slot_selection_closed", "b6_profile_identifiers_closed", "b6_sequence_relation_closed",
-    "b6_accept_reject_state_machine_closed", "b6_commit_timing_closed", "b6_h_f_receiver_verification_identical")))
+    "b6_accept_reject_state_machine_closed", "b6_commit_timing_closed", "b6_verification_failure_delivery_policy_closed", "b6_h_f_receiver_verification_identical")))
 check("true sender/key boundaries remain open", con["slot4_secret_value_closed"] is False and con["sender_freshness_state_ownership_closed"] is False and con["sender_wall_clock_cadence_closed"] is False and con["upstream_producer_closed"] is False)
 check("evidence boundary rejects sender/key overclaim", "does not recover the protected slot-4 secret" in art["evidence_boundary"] and "upstream FRC/Brake" in art["evidence_boundary"])
 
