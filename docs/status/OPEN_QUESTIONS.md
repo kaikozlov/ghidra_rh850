@@ -137,7 +137,22 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   Operation FFD surface plus fixed routine
   `0x1588` remain capture references. Wire arbitration ID for the FRC/Brake leg,
   exact producer/forwarder identity, and any relation to community
-  `NEW_MSG_8A_LAT_CONTROL` (`0x18A`) remain unproved.
+  `NEW_MSG_8A_LAT_CONTROL` (`0x18A`) remain unproved. TMS-051 now exhausts the
+  current-corpus sender-attribution branch: exact H U012987 plus the shared D7/B6
+  Brake source label, Corolla category-435 `ABS_P5 = Brake/EPB`, and common H
+  SecOC config0/ICU-S slot4 across `00F/D7/B6` identify the **immediate
+  authenticated B6 source family** as Brake System Control / category-435
+  Brake/EPB. They do not identify the unique upstream target originator or prove
+  that category 435 executes CMAC/freshness generation. The six local `0792` FRC
+  CUWs are opaque/high-entropy ReproMethod07 stored images and there is still no
+  `07B0` Brake application, so Tx-descriptor/SecOC-call literal searches cannot be
+  performed against decoded producer code. FRC/ABS expose no named producer-side
+  Target-Lateral/Target-Steering monitor; the exact request-ID dictionary remains
+  on the EMPS observer side. ADS DDR target-angle/angle-speed snapshots are signed
+  32-bit rad/rad-s values with unity numeric conversion, while Brake DID `107E` is
+  a separate `0.00025 rad/count` observer; neither has a proved B6 dataflow join.
+  The next static evidence is therefore a decoded matched `07B0` + `0792` pair,
+  not another broad scan of the existing corpus.
   TMS-044 also closes the category-435 Techstream Active-Test catalog as a
   normal steering-writer lead: 20 direct tests and four routines are brake-actuator-
   only, and every routine has zero variable command/mask/button payloads. Those tests

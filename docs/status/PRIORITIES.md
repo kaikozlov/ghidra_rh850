@@ -116,14 +116,20 @@ is therefore operational rather than another host-static search: read Brake
 Supply Change lookup, preserve the returned `resData`, and retain the `07B0`
 package if the service offers one.
 
-**Next software-analysis target:** acquire a true-TSS3 CUW whose
-**`Node01/DiagID=07B0`** (category-435 `ABS_P5`/Brake), ideally matched by
-vehicle/era to a `0792` FRC package, then analyze both producer-side images—or
-capture a synchronized stock-LTA session across those modules—and recover the
-remaining **producer-side** contract: how planner state becomes the now-exhausted
-protected `0x0B6` receiver payload, which module signs it, what values it places in
-the authenticated-but-EPS-unconsumed bytes, and where sender freshness/signing
-ownership changes. SECOC-071 now closes the EPS-side verification algorithm itself:
+**Next software-analysis target:** TMS-051 closes what can be learned about B6
+sender attribution from the **current** CUW/P5 corpus. The immediate authenticated
+source family is Brake System Control / category-435 Brake/EPB, but the six local
+`0792` FRC CUWs are still opaque/high-entropy ReproMethod07 stored images and the
+current corpus contains no `07B0` Brake application. Do **not** spend another pass
+literal-searching those encoded FRC bodies for Tx descriptors or SecOC calls.
+Acquire a true-TSS3 CUW whose **`Node01/DiagID=07B0`** (category-435
+`ABS_P5`/Brake), ideally matched by vehicle/era to a `0792` FRC package, and decode
+both producer-side applications—or capture a synchronized stock-LTA session across
+those modules. Then recover the remaining **producer-side** contract: whether FRC,
+Brake, or another interface is the target originator/forwarder; the 32-byte B6 Tx
+builder; wall-clock cadence; CMAC/freshness ownership; authenticated-but-EPS-
+unconsumed byte values; and stock-source suppression. SECOC-071 now closes the
+EPS-side verification algorithm itself:
 B6 freshness ID2/slot1 state, `00F`-anchored reset/message candidate window, retry
 scopes, `0x24` boundary behavior, trip-wrap reset, 36-byte CMAC input, ICU-S slot-4
 selection, result polarity, commit-before-delivery ordering, and separation from

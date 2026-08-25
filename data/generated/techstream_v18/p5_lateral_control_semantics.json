@@ -5461,6 +5461,16 @@
           "pattern_display_key": 104,
           "unit_key": 0,
           "resolved_unit": null,
+          "numeric_conversion": {
+            "mul": 1,
+            "div": 1,
+            "offset": 0,
+            "signed": false,
+            "decimal_point_count": 0,
+            "physical_raw_hex": "010000000100000000000000010000000000000000000000",
+            "physical_raw_sha256": "cfa5d2443cc64713d1064977716d6a7dd89dd07c906f2d048e8a705cfbe21a86",
+            "formula": "display = (raw * mul / div + offset) / 10^decimal_point_count"
+          },
           "raw_sha256": "e37c6dc9c34d7ec5a8443e6cfd3089d0c695cc80f748466db5f73bbc2cbfc3e9"
         },
         {
@@ -5475,6 +5485,16 @@
           "pattern_display_key": 0,
           "unit_key": 452,
           "resolved_unit": "rad/s",
+          "numeric_conversion": {
+            "mul": 1000,
+            "div": 1,
+            "offset": 0,
+            "signed": true,
+            "decimal_point_count": 3,
+            "physical_raw_hex": "e803000001000000000000003c00c4010000000001030000",
+            "physical_raw_sha256": "598589451e77671631dc9ac6119ce1295520d365ff07cc4474420e5fb8909d50",
+            "formula": "display = (raw * mul / div + offset) / 10^decimal_point_count"
+          },
           "raw_sha256": "7b74b48ea5575e0448496ca4dd59531ae1d4aca3c966d1cf49f018f2523be84d"
         },
         {
@@ -5489,6 +5509,16 @@
           "pattern_display_key": 0,
           "unit_key": 81,
           "resolved_unit": "rad",
+          "numeric_conversion": {
+            "mul": 1000,
+            "div": 1,
+            "offset": 0,
+            "signed": true,
+            "decimal_point_count": 3,
+            "physical_raw_hex": "e803000001000000000000003d0051000000000001030000",
+            "physical_raw_sha256": "c7cbd6651ddfacf826f14c95750c7f2ef1f06f73f7b6e66c83283d86ced60281",
+            "formula": "display = (raw * mul / div + offset) / 10^decimal_point_count"
+          },
           "raw_sha256": "f6fbb306d0c6ae710139c17edfd5d0ff777217d3fe67813789d8a367a5de9414"
         }
       ],

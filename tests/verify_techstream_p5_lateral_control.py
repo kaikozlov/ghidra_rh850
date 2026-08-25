@@ -658,6 +658,35 @@ check(
     "ADS DDR row 407 unit resolves rad via PhyData 61 -> unit key 81",
     units[phy[61]] == "rad",
 )
+phy_rows = {u16(raw, 0x0C): raw for raw in records(ads.sections[13])}
+for key, unit in ((60, "rad/s"), (61, "rad")):
+    raw = phy_rows[key]
+    check(
+        f"ADS DDR target-order PhyData {key} exact signed unity numeric conversion",
+        struct.unpack_from("<iii", raw, 0) == (1000, 1, 0)
+        and raw[0x14] == 1
+        and raw[0x15] == 3
+        and units[u16(raw, 0x0E)] == unit,
+    )
+    artifact_row = next(
+        r
+        for r in ev["advanced_drive_control"]["ddr_behavior_data_rows"]["rows"]
+        if r["physical_data_key"] == key
+    )
+    check(
+        f"artifact pins ADS DDR target-order PhyData {key} numeric conversion",
+        artifact_row["numeric_conversion"]
+        == {
+            "mul": 1000,
+            "div": 1,
+            "offset": 0,
+            "signed": True,
+            "decimal_point_count": 3,
+            "physical_raw_hex": raw.hex(),
+            "physical_raw_sha256": hashlib.sha256(raw).hexdigest(),
+            "formula": "display = (raw * mul / div + offset) / 10^decimal_point_count",
+        },
+    )
 check(
     "artifact pins ADS rows with units",
     {

@@ -1,0 +1,292 @@
+{
+  "authenticated_source_family": {
+    "boundary": "Shared key selection is not proof that the category-435 application owns the secret; the slot-4 value is hardware-protected and no producer application is decoded in the current corpus.",
+    "h_protected_profiles": [
+      "0x00F",
+      "0x0D7",
+      "0x0B6"
+    ],
+    "identified": true,
+    "interpretation": "H's sync 0x00F plus ordinary 0x0D7/0x0B6 all select the same protected ICU-S slot-4 key. D7 and B6 independently carry the Brake System Control Module loss label. This supports one authenticated brake-system source family rather than unrelated per-PDU key selection.",
+    "shared_icus_slot_selector": 4,
+    "shared_secoc_crypto_config_id": 0,
+    "slot4_key_value_cpu_visible": false
+  },
+  "corpus_boundary": {
+    "all_reference_diag_id_counts": {
+      "": 12,
+      "0724": 1,
+      "07500F": 1,
+      "07506D": 1,
+      "0792": 6,
+      "07A1": 3,
+      "07D2": 2
+    },
+    "brake_runtime_code_available": false,
+    "category_435_brake_diag_id": "07B0",
+    "category_435_brake_package_count": 0,
+    "consequence": "The requested 32-byte Tx-descriptor and SecOC-generation-call searches cannot be performed honestly against decoded producer code in the current corpus. Re-scanning the six 0792 stored images for literals would treat an unknown high-entropy representation as executable plaintext.",
+    "frc_diag_id": "0792",
+    "frc_package_count": 6,
+    "frc_packages": [
+      {
+        "contact_type": "P5-Unified",
+        "decoded_image_entropy_bits_per_byte": 7.9999977,
+        "decoded_image_length": 85458944,
+        "diag_id": "0792",
+        "filename": "T-0058-23.cuw",
+        "new_cid": "8646F1204500",
+        "repro_method": "07",
+        "source_cid": "8646F1204300"
+      },
+      {
+        "contact_type": "P5-Unified",
+        "decoded_image_entropy_bits_per_byte": 7.9999977,
+        "decoded_image_length": 85458944,
+        "diag_id": "0792",
+        "filename": "T-0060-23.cuw",
+        "new_cid": "8646F1204500",
+        "repro_method": "07",
+        "source_cid": "8646F1204400"
+      },
+      {
+        "contact_type": "P5-Unified",
+        "decoded_image_entropy_bits_per_byte": 7.9999978,
+        "decoded_image_length": 85458944,
+        "diag_id": "0792",
+        "filename": "T-0061-23.cuw",
+        "new_cid": "8646F1606300",
+        "repro_method": "07",
+        "source_cid": "8646F1606200"
+      },
+      {
+        "contact_type": "P5-Unified",
+        "decoded_image_entropy_bits_per_byte": 7.9999979,
+        "decoded_image_length": 85458944,
+        "diag_id": "0792",
+        "filename": "T-0062-23.cuw",
+        "new_cid": "8646F4206400",
+        "repro_method": "07",
+        "source_cid": "8646F4206200"
+      },
+      {
+        "contact_type": "P5-Unified",
+        "decoded_image_entropy_bits_per_byte": 7.9999977,
+        "decoded_image_length": 85458944,
+        "diag_id": "0792",
+        "filename": "T-0149-24.cuw",
+        "new_cid": "8646F4206700",
+        "repro_method": "07",
+        "source_cid": "8646F4206400"
+      },
+      {
+        "contact_type": "P5-Unified",
+        "decoded_image_entropy_bits_per_byte": 7.9999979,
+        "decoded_image_length": 85458944,
+        "diag_id": "0792",
+        "filename": "T-0150-24.cuw",
+        "new_cid": "8646F1611200",
+        "repro_method": "07",
+        "source_cid": "8646F1606300"
+      }
+    ],
+    "frc_runtime_code_searchable": false,
+    "why_brake_not_searchable": "No current REFERENCE/cuw package has Node01/DiagID=07B0. This is a local-corpus absence only.",
+    "why_frc_not_searchable": "Motorola S-record framing only; decoded flash data is high-entropy and its exact encoding is unknown (no plaintext claim)."
+  },
+  "immediate_b6_sender_domain": {
+    "boundary": "This identifies the immediate monitored source domain at the EPS endpoint. It does not distinguish originator from forwarder or prove which ECU executes CMAC/freshness generation.",
+    "corolla_p5_category": {
+      "category_id": 435,
+      "database": "ABS_P5.ddb",
+      "diagnostic_request_address": "0x7B0",
+      "display_name": "Brake/EPB",
+      "functional_address": "0x7E5"
+    },
+    "domain": "Brake System Control Module",
+    "eps_receive_can_id": "0x0B6",
+    "eps_receive_pdu_id": 42,
+    "identified": true,
+    "supporting_brake_profile": {
+      "can_id": "0x0D7",
+      "relationship": "Exact H maps protected 0x0D7 and 0x0B6 to the same Brake System Control Module missing-message DTC; classic 0x0D5 is a third control."
+    },
+    "techstream_dtc": {
+      "base_dtc": "0xC129",
+      "dem_event": "0x0143",
+      "dem_event_raw_hex": "4200520000010000",
+      "dem_event_record_address": "0x0002C3A0",
+      "enabled_word": 1,
+      "failure_type": "0x87",
+      "h_dtc_index": 82,
+      "h_raw_hex": "8729c10001000000",
+      "h_record_address": "0x0002C818",
+      "packed_dtc": "0xC12987",
+      "techstream_code": "U012987",
+      "techstream_description": "Lost Communication with Brake System Control Module",
+      "techstream_failure": "Missing Message",
+      "techstream_raw_sha256": "b9b22676cbb4f869c419e0d5c9fbf1197c3cda91cb38cc9eacf98142383f64b4"
+    }
+  },
+  "requested_search_axes": {
+    "fd32_transmit_descriptor": {
+      "result": "No decoded FRC or Brake producer application is available. The exact H receiver proves B6 is a 32-byte secured PDU; it cannot identify the sender Tx descriptor.",
+      "status": "blocked_by_corpus_representation"
+    },
+    "secoc_generation_calls": {
+      "result": "No producer-side CMAC/freshness generation call is recoverable from the current FRC CUWs, and no category-435 Brake image is present. H proves the verification envelope and shared slot selection only.",
+      "status": "blocked_by_corpus_representation"
+    },
+    "steering_angle_constants": {
+      "ads_ddr_target_angle_order": {
+        "bit_range": [
+          0,
+          31
+        ],
+        "name": "Advanced Drive Control Target Steering Angle Order Value",
+        "numeric_conversion": {
+          "decimal_point_count": 3,
+          "div": 1,
+          "formula": "display = (raw * mul / div + offset) / 10^decimal_point_count",
+          "mul": 1000,
+          "offset": 0,
+          "physical_raw_hex": "e803000001000000000000003d0051000000000001030000",
+          "physical_raw_sha256": "c7cbd6651ddfacf826f14c95750c7f2ef1f06f73f7b6e66c83283d86ced60281",
+          "signed": true
+        },
+        "record_index": 407,
+        "role": "Operation-FFD/DDR recorded snapshot",
+        "unit": "rad"
+      },
+      "ads_ddr_target_angle_speed_order": {
+        "bit_range": [
+          0,
+          31
+        ],
+        "name": "Advanced Drive Control Target Steering Angle Speed Order Value",
+        "numeric_conversion": {
+          "decimal_point_count": 3,
+          "div": 1,
+          "formula": "display = (raw * mul / div + offset) / 10^decimal_point_count",
+          "mul": 1000,
+          "offset": 0,
+          "physical_raw_hex": "e803000001000000000000003c00c4010000000001030000",
+          "physical_raw_sha256": "598589451e77671631dc9ac6119ce1295520d365ff07cc4474420e5fb8909d50",
+          "signed": true
+        },
+        "record_index": 406,
+        "role": "Operation-FFD/DDR recorded snapshot",
+        "unit": "rad/s"
+      },
+      "b6_to_brake_observer_scale_ratio": 4.000486075080455,
+      "boundary": "These three numeric domains are not joined by a producer dataflow. In particular, 0x107E is an actual/pinion observer and does not reveal B6 packing merely because its scale is approximately one quarter of the B6 controller-equivalent scale.",
+      "brake_ads_control_eps_pinion_angle2": {
+        "did": "0x107E",
+        "role": "observer",
+        "scale_rad_per_count": 0.00025,
+        "signed_bits": 24
+      },
+      "h_b6_controller_equivalent_rad_per_count": 0.0010001215187701138,
+      "h_b6_oem_wire_unit_name_identified": false
+    },
+    "target_lateral_request_ids": {
+      "abs_named_target_monitor_matches": [],
+      "accepted_h_request_ids": {
+        "1": "PCS",
+        "10": "Hands Off LTA",
+        "11": "LTA/LCA",
+        "19": "PDA",
+        "4": "LDA"
+      },
+      "boundary": "The numeric request vocabulary is exact, but no FRC/ABS P5 data-monitor row exposes the producer-side field carrying it.",
+      "dictionary_location": "EMPS_P5/EMPS2_P5 Target Lateral ID observer DID 0x1CEE/0x1CEF",
+      "frc_named_target_steering_monitor_matches": [],
+      "p5_oem_dictionary": {
+        "0": "No Request (Manual Operation)",
+        "1": "PCS",
+        "10": "Hands Off LTA",
+        "11": "LTA/LCA",
+        "13": "DESA (Slow Deceleration Control)",
+        "15": "DESA (Deceleration Stop Control)",
+        "18": "SDG",
+        "19": "PDA",
+        "25": "AP",
+        "27": "Remote Parking",
+        "35": "AD (Lv.3)",
+        "37": "EM (Lv.3)",
+        "39": "DES (Lv.3)",
+        "4": "LDA",
+        "41": "AD (Lv.4)",
+        "43": "EM (Lv.4)",
+        "45": "DES (Lv.4)",
+        "49": "Self-Propelled Transport",
+        "63": "Driver Operation"
+      },
+      "status": "observer_dictionary_identified_producer_field_not_identified"
+    },
+    "timing_deadline_constants": {
+      "boundary": "The TAUJ0-CH3 foreground tick source is known but its period is not; CUW flashing P4/retry timing is unrelated to runtime B6 cadence and is not transferred.",
+      "receiver_primary_cutout_foreground_ticks": 7,
+      "sender_wall_clock_cadence_identified": false,
+      "status": "receiver_deadline_only",
+      "wall_clock_timeout_identified": false
+    }
+  },
+  "schema_version": 1,
+  "sender_recipe_boundary": {
+    "authenticated_input": "00 B6 || B0..B27 || reconstructed_freshness[6]",
+    "authenticated_input_bytes": 36,
+    "eps_verifier_envelope_known": true,
+    "freshness_id": 2,
+    "icus_slot_selector": 4,
+    "normal_freshness_slot": 1,
+    "sender_freshness_state_owner_identified": false,
+    "sender_mac_implementation_identified": false,
+    "slot4_secret_value_identified": false
+  },
+  "sources": {
+    "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin": {
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "data/generated/corolla_8965H1202000_b6_secoc_verification.json": {
+      "sha256": "79e36fe6d8b27b0c7b899344031ef5c371e4f5767bec5dc2f0aeda857084675b"
+    },
+    "data/generated/corolla_8965H1202000_lta_command_provenance.json": {
+      "sha256": "341155ae436e02024f5346931c42d01f5badbd18019aa5feea85f658076e467e"
+    },
+    "data/generated/corolla_8965H1202000_secoc_key_provenance.json": {
+      "sha256": "80a8f926d5db6172d3edb8ba3dc1d79708166af8c4c1d5379142188cf153f43e"
+    },
+    "data/generated/corolla_8965H1202000_techstream_correlations.json": {
+      "sha256": "f22b1e99cf5ef38c03932ff105e6abbe2d2c6eb9d1262afa3f7fdf137102457f"
+    },
+    "data/generated/techstream_v18/cuw_frc_corpus.json": {
+      "sha256": "d8fc59bf36de75813265c12a2544f7b64bcc6f4a89628b1d96f6e8df1af54956"
+    },
+    "data/generated/techstream_v18/p5_lateral_control_semantics.json": {
+      "sha256": "d86dc9c016dd94cbbc3f4435d09eadc0796192bfd258c8ea264722a163e6b86b"
+    }
+  },
+  "static_conclusion": {
+    "architectural_immediate_sender_domain": "Brake System Control Module / Corolla category-435 Brake/EPB family",
+    "architectural_immediate_sender_domain_identified": true,
+    "authenticated_brake_source_family_supported": true,
+    "b6_secoc_signing_implementation_owner_identified": false,
+    "b6_sender_freshness_owner_identified": false,
+    "byte_level_frc_to_brake_transform_identified": false,
+    "current_corpus_static_search_exhausted": true,
+    "next_evidence": "Acquire the category-435 07B0 Brake/EPB CUW matched to the target vehicle and decode its application representation; pair it with the matched 0792 FRC image or a synchronized stock-LTA capture. Then search the decoded producer images for the 32-byte B6 Tx descriptor, request-ID state, angle conversion, cadence, freshness state and CMAC submission path.",
+    "producer_side_runtime_code_available_in_current_corpus": false,
+    "unique_upstream_originator_identified": false
+  },
+  "title": "Toyota TSS3 Corolla protected-B6 sender attribution from current Techstream/CUW corpus",
+  "upstream_origin_search": {
+    "brake_to_eps_dependency_identified": true,
+    "conclusion": "A brake-mediated FRC/ADS target route remains the strongest static architecture, but direct FRC->EPS dependency and ADS-interface references prevent assigning FRC as the unique originator or ABS as a pure forwarder.",
+    "frc_to_brake_dependency_identified": true,
+    "frc_to_eps_dependency_also_identified": true,
+    "payload_forwarding_or_transform_identified": false,
+    "secoc_signing_owner_identified": false,
+    "strongest_static_model": "FRC_P5 has an explicit 'Front Recognition Camera => BRK Communication Invalid' behavior plus U012987 brake and U013187 EPS missing-message DTCs. Corolla's category-435 ABS_P5 brake domain monitors EPS communication and exposes an ADS Control EPS Pinion Angle2 observer. Exact H receives protected B6 from the Brake System Control Module. These facts establish a real FRC/brake/EPS communication topology and make a brake-mediated steering-target route plausible, but they do not prove that FRC target bytes are forwarded/transformed into B6; FRC also has a direct EPS communication dependency and both FRC/ABS reference an Automated Driving System Interface module."
+  }
+}

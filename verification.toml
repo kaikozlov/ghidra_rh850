@@ -1444,6 +1444,29 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.tss3_b6_sender_attribution]
+tests = ["tests/verify_tss3_b6_sender_attribution.py"]
+oracle = "generated_self_check"
+paths = [
+  "tools/techstream/build_tss3_b6_sender_attribution.py",
+  "tests/verify_tss3_b6_sender_attribution.py",
+  "data/generated/techstream_v18/tss3_b6_sender_attribution.json",
+  "data/generated/techstream_v18/p5_lateral_control_semantics.json",
+  "data/generated/techstream_v18/cuw_frc_corpus.json",
+  "data/generated/corolla_8965H1202000_techstream_correlations.json",
+  "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
+  "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
+  "data/generated/corolla_8965H1202000_lta_command_provenance.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "docs/tooling/techstream.md",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.techstream_searchcal]
 tests = ["tests/verify_techstream_searchcal.py"]
 requires_external = ["techstream_v18"]

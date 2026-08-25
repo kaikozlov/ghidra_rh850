@@ -1934,7 +1934,16 @@ def ads_ddr_rows(parser: DDBParser, root: Path) -> dict:
     db = parser.parse_ecu_db(root / "NA/DB/ADS_Eth_P5.ddb")
     strings = parser.load_string_db(root / "NA/DB/M_English.ddb")
     phy = {
-        u16(raw, 0x0C): {"unit_key": u16(raw, 0x0E), "raw_sha256": sha256(raw)}
+        u16(raw, 0x0C): {
+            "mul": struct.unpack_from("<i", raw, 0x00)[0],
+            "div": struct.unpack_from("<i", raw, 0x04)[0],
+            "offset": struct.unpack_from("<i", raw, 0x08)[0],
+            "unit_key": u16(raw, 0x0E),
+            "signed": bool(raw[0x14]),
+            "decimal_point_count": raw[0x15],
+            "raw_hex": raw.hex(),
+            "raw_sha256": sha256(raw),
+        }
         for raw in records(db.sections[13])
     }
     units = {
@@ -1960,6 +1969,16 @@ def ads_ddr_rows(parser: DDBParser, root: Path) -> dict:
                 "pattern_display_key": u16(raw, 0x30),
                 "unit_key": unit_key,
                 "resolved_unit": units.get(unit_key),
+                "numeric_conversion": {
+                    "mul": phy[phy_key]["mul"],
+                    "div": phy[phy_key]["div"],
+                    "offset": phy[phy_key]["offset"],
+                    "signed": phy[phy_key]["signed"],
+                    "decimal_point_count": phy[phy_key]["decimal_point_count"],
+                    "physical_raw_hex": phy[phy_key]["raw_hex"],
+                    "physical_raw_sha256": phy[phy_key]["raw_sha256"],
+                    "formula": "display = (raw * mul / div + offset) / 10^decimal_point_count",
+                },
                 "raw_sha256": sha256(raw),
             }
         )
@@ -1967,6 +1986,28 @@ def ads_ddr_rows(parser: DDBParser, root: Path) -> dict:
         r["record_index"] for r in rows
     ) != [143, 406, 407]:
         raise ValueError("ADS DDR lateral rows do not resolve to records 143/406/407")
+
+    # The two target-order rows use signed 32-bit physical records whose numeric
+    # conversion is unity after Techstream's decimal-point convention:
+    # (raw * 1000 / 1) / 10^3.  Pin the raw PhyData records in all three
+    # regions, but keep these DDR snapshot values separate from the B6 wire
+    # scalar -- there is no proven transport/dataflow join between them.
+    for key in (60, 61):
+        if not (
+            phy[key]["mul"] == 1000
+            and phy[key]["div"] == 1
+            and phy[key]["offset"] == 0
+            and phy[key]["signed"]
+            and phy[key]["decimal_point_count"] == 3
+        ):
+            raise ValueError(f"ADS DDR target-order PhyData key {key} conversion drift")
+    target_phy_hex = {key: phy[key]["raw_hex"] for key in (60, 61)}
+    for region in ("EU", "JP"):
+        other = parser.parse_ecu_db(root / region / "DB/ADS_Eth_P5.ddb")
+        other_phy = {u16(raw, 0x0C): raw.hex() for raw in records(other.sections[13])}
+        if {key: other_phy[key] for key in (60, 61)} != target_phy_hex:
+            raise ValueError(f"ADS DDR target-order PhyData differs in {region}")
+
     return {
         "rows": rows,
         "row_field_consumers": {
