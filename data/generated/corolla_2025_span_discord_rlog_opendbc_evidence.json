@@ -354,14 +354,15 @@
       "wire": "classic 8-byte GAS_PEDAL with Toyota classic SecOC trailer"
     },
     "0x127": {
-      "boundary": "This capture exercises only D (raw value 3). Carrier, bit position, checksum, and D enum compatibility are directly supported; P/R/N/B transitions still require dynamic validation.",
+      "boundary": "This forward-driving capture exercises only raw value 3. Carrier, bit position, checksum, and compatibility with the prior-art D enum are supported; target-native D semantics are not independently validated, and P/R/N/B transitions still require live validation.",
       "checksum_valid": 3662,
-      "decoded_values": [
-        "D"
-      ],
+      "decode_basis": "The D label comes only from the retained Toyota prior-art GEAR_PACKET_HYBRID enum; embedded carParams is MOCK and supplies no independent gear-state oracle.",
       "frame_count": 3662,
       "gear_raw_values": [
         3
+      ],
+      "prior_art_decoded_values": [
+        "D"
       ],
       "prior_art_value_map": {
         "0": "P",
@@ -373,6 +374,46 @@
       "wire": "classic 8-byte GEAR_PACKET_HYBRID"
     },
     "0x176": {
+      "b0_bit3_context": {
+        "0": {
+          "brake_pressed_fraction": 0.0,
+          "frame_count": 319,
+          "gas_pedal_user": {
+            "count": 319,
+            "max": 0.73,
+            "min": 0.0,
+            "unique_count": 108
+          },
+          "gas_positive_fraction": 0.9717868338557993,
+          "speed_kph": {
+            "count": 319,
+            "max": 23.63,
+            "min": 0.0,
+            "unique_count": 278
+          }
+        },
+        "1": {
+          "brake_pressed_fraction": 0.8472310630171865,
+          "frame_count": 1571,
+          "gas_pedal_user": {
+            "count": 1571,
+            "max": 0.075,
+            "min": 0.0,
+            "unique_count": 9
+          },
+          "gas_positive_fraction": 0.006365372374283896,
+          "speed_kph": {
+            "count": 1571,
+            "max": 23.657500000000002,
+            "min": 0.0,
+            "unique_count": 494
+          }
+        }
+      },
+      "b0_bit3_values": [
+        0,
+        1
+      ],
       "checksum_valid": 1890,
       "cruise_active_values": [
         false
@@ -380,9 +421,42 @@
       "cruise_state_values": [
         0
       ],
-      "dynamic_boundary": "Vehicle motion is exercised, but cruise never engages in this segment; active-state semantics remain untested.",
+      "dynamic_boundary": "Vehicle motion is exercised, but this capture has no independent cruise-main/engagement oracle. The older CRUISE_ACTIVE/CRUISE_STATE positions stay 0 while B0[3] toggles strongly with accelerator/brake context, so B0[3] is not justified as a TSS3 cruise-main/engaged replacement from this capture.",
       "frame_count": 1890,
       "wire": "classic 8-byte PCM_CRUISE with Toyota additive checksum"
+    },
+    "0x24D": {
+      "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival is evidence for a retained carrier, not proof that the old button semantics are unchanged on TSS3.",
+      "frame_count": 60,
+      "prior_art_button_values": {
+        "cancel": [
+          0
+        ],
+        "decrease": [
+          0
+        ],
+        "distance": [
+          0
+        ],
+        "enable": [
+          0
+        ],
+        "increase": [
+          0
+        ]
+      },
+      "wire": "classic 8-byte PCM_CRUISE_4 / SecOC cruise-switch prior-art carrier"
+    },
+    "0x51E": {
+      "boundary": "Exact H firmware independently joins B0[7] to Techstream DID 0x1033 Ready Status. Span's moving capture corroborates Ready Status=1 operationally, but carParams is MOCK and the rlog is not an exact F181-to-firmware identity join; Ready Status=0 is not exercised.",
+      "frame_count": 60,
+      "ready_status_values": [
+        1
+      ],
+      "unique_payloads": [
+        "86001a0000000000"
+      ],
+      "wire": "classic 8-byte target-native H/F Ready Status input carrier"
     }
   },
   "exact_h_f_visibility": {
@@ -576,9 +650,32 @@
       "role": "PCM_CRUISE"
     },
     {
+      "can_id": "0x177",
+      "instances": [],
+      "role": "PCM_CRUISE_3"
+    },
+    {
+      "can_id": "0x1A2",
+      "instances": [],
+      "role": "CRUISE_RELATED"
+    },
+    {
       "can_id": "0x1D3",
       "instances": [],
       "role": "PCM_CRUISE_2"
+    },
+    {
+      "can_id": "0x24D",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 60,
+          "dlc": 8,
+          "first_payload": "00fb00806fdf8d08",
+          "rate_hz": 1.000154300042118
+        }
+      ],
+      "role": "PCM_CRUISE_4 / cruise-switch SecOC prior art"
     },
     {
       "can_id": "0x260",
@@ -686,6 +783,19 @@
       "can_id": "0x4C8",
       "instances": [],
       "role": "exact-H/F EPS Tx carrier (visibility check)"
+    },
+    {
+      "can_id": "0x51E",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 60,
+          "dlc": 8,
+          "first_payload": "86001a0000000000",
+          "rate_hz": 0.9996500018805559
+        }
+      ],
+      "role": "exact-H Ready Status input carrier (target-native join)"
     },
     {
       "can_id": "0x610",

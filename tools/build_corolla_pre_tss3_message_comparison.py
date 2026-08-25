@@ -86,7 +86,7 @@ def build(args: argparse.Namespace) -> dict:
     lta = json.loads(args.lta_provenance.read_text())
     eq = json.loads(args.equivalence.read_text())
     bridge = json.loads(args.state_bridge.read_text())
-    if bridge["schema"] != "corolla-8965H1202000-openpilot-state-bridge-v7":
+    if bridge["schema"] != "corolla-8965H1202000-openpilot-state-bridge-v8":
         raise ValueError("openpilot state/command bridge schema drift")
 
     if len(h) != 0x100000 or len(f) != 0x100000:

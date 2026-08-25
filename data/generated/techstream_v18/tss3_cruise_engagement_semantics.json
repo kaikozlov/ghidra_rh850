@@ -1,0 +1,530 @@
+{
+  "frc_p5": {
+    "boundary": "These are exact Toyota P5 diagnostic monitor names, primary Data IDs, bit ranges, conversions, and display dictionaries. The Data IDs are not automatically UDS ReadDataByIdentifier DIDs; they define validation oracles for cruise/engagement semantics but do not identify the corresponding CAN wire fields or diagnostic transport service.",
+    "database": "FRC_P5.ddb",
+    "monitors": [
+      {
+        "bit_range": [
+          10,
+          10
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 23,
+        "monitor_record_sha256": "98ae945132d1f4a469e9e79f5b60fff99df43af39fbf81a98bf0a5c9067e972b",
+        "name": "ACC Installation Availability",
+        "pattern_display_key": 13,
+        "pattern_values": {
+          "0": "Not Installed",
+          "1": "Installed"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1202"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 94,
+        "monitor_record_sha256": "1e340405866db340d60b09d55fa5f961d7333052d5d28accf734b1d1296e0339",
+        "name": "Cruise Control Permission Flag",
+        "pattern_display_key": 39,
+        "pattern_values": {
+          "0": "Cruise Control Not Allowed",
+          "1": "Cruise Control Allowed"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1905"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 95,
+        "monitor_record_sha256": "1d305b4ae9323616d117a356d9df771d66b411f16276ba11e11e7668d8a94c8c",
+        "name": "Main Switch Recognition Flag",
+        "pattern_display_key": 24,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1906"
+      },
+      {
+        "bit_range": [
+          9,
+          9
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 96,
+        "monitor_record_sha256": "b0b131d9c59d947146e0074b2dd7f889fb77e1619977f7ad8fd6c32efc60a0ac",
+        "name": "Set Cancel Switch Condition",
+        "pattern_display_key": 40,
+        "pattern_values": {
+          "0": "No Operation",
+          "1": "Operation Exists"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1906"
+      },
+      {
+        "bit_range": [
+          40,
+          40
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 101,
+        "monitor_record_sha256": "490e6bf6f3992c4a98779f0d0d46a16ba2b7c8a3c38e7855dbd13b4319f312e2",
+        "name": "ACC Not Available Icon Lighting Request Flag",
+        "pattern_display_key": 24,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1906"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 102,
+        "monitor_record_sha256": "35d60bdb7b98000664de7919591430eb122e1669a9e74e6713982bf24d7ea097",
+        "name": "ACC Control in Operation Flag",
+        "pattern_display_key": 41,
+        "pattern_values": {
+          "0": "Cruise Control Not in Operation",
+          "1": "Cruise Control in Operation"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1914"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 104,
+        "monitor_record_sha256": "f395702951f83febb5dce430974ec3eb5400fcd6ffadada816390818109ca5b8",
+        "name": "ACC Brake Control in Operation",
+        "pattern_display_key": 42,
+        "pattern_values": {
+          "0": "ACC Brake Control in Operation",
+          "1": "No ACC Brake Control Operation"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1918"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 106,
+        "monitor_record_sha256": "07bfc873b6f0e13956fb483d3c77eb90e2d6ff77bfc8958c0eefe9c2f034a5d4",
+        "name": "ACC Installed Flag",
+        "pattern_display_key": 24,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1928"
+      },
+      {
+        "bit_range": [
+          0,
+          7
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 201,
+        "monitor_record_sha256": "b85d0f5b9a5892e822c275853b18bd908c6277d4051d878a8605799be3d016a7",
+        "name": "Set Vehicle Interval Time",
+        "pattern_display_key": 86,
+        "pattern_values": {
+          "1": "Set Vehicle Interval Time4",
+          "2": "Set Vehicle Interval Time3",
+          "3": "Set Vehicle Interval Time2",
+          "4": "Set Vehicle Interval Time1"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1912"
+      },
+      {
+        "bit_range": [
+          0,
+          31
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": "km/h"
+        },
+        "monitor_key": 217,
+        "monitor_record_sha256": "8b2857017a472f26076f0f9ad5d1a1eeeffc1a4f26dd414f0ecb907f47cf977d",
+        "name": "Current Vehicle Speed",
+        "pattern_display_key": 0,
+        "pattern_values": {},
+        "physical_data_key": 2,
+        "primary_data_id": "0x1901"
+      },
+      {
+        "bit_range": [
+          32,
+          63
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": "km/h"
+        },
+        "monitor_key": 218,
+        "monitor_record_sha256": "1e1358e15ffd535570fbb7dd21fb5c2fa1fd47cffc71e1c21d782bd69536fd8a",
+        "name": "Memory Vehicle Speed",
+        "pattern_display_key": 0,
+        "pattern_values": {},
+        "physical_data_key": 2,
+        "primary_data_id": "0x1901"
+      }
+    ],
+    "openpilot_oracle_mapping": {
+      "brake_control_activity": [
+        "ACC Brake Control in Operation"
+      ],
+      "current_speed_reference": [
+        "Current Vehicle Speed"
+      ],
+      "driver_switch_activity": [
+        "Set Cancel Switch Condition"
+      ],
+      "enabled": [
+        "ACC Control in Operation Flag"
+      ],
+      "following_interval": [
+        "Set Vehicle Interval Time"
+      ],
+      "main_switch": [
+        "Main Switch Recognition Flag"
+      ],
+      "not_available_or_fault_display": [
+        "ACC Not Available Icon Lighting Request Flag"
+      ],
+      "permission": [
+        "Cruise Control Permission Flag"
+      ],
+      "platform_installed": [
+        "ACC Installation Availability",
+        "ACC Installed Flag"
+      ],
+      "set_speed_candidate": [
+        "Memory Vehicle Speed"
+      ]
+    }
+  },
+  "interpretation": "P5 diagnostics separate ACC installation, cruise permission, main-switch recognition, and actual ACC control-in-operation. A TSS3 CarState implementation should preserve those distinctions instead of guessing a single replacement for older MAIN_ON/CRUISE_ACTIVE.",
+  "schema": "techstream-p5-tss3-cruise-engagement-semantics-v1",
+  "sources": [
+    {
+      "path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/M_English.ddb",
+      "sha256": "d88b131e2f56c71cdb60b353f410f877e0889635ec2b5df0becf4e0002aebf96",
+      "size": 3003919
+    },
+    {
+      "path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/FRC_P5.ddb",
+      "sha256": "63307a9b8a6bcafdc5ee4b3a04f67abdc2501ba296a2779e5edc7dbff846fe42",
+      "size": 49806
+    },
+    {
+      "path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/Engine_P5.ddb",
+      "sha256": "82b8e6faab24dffd2fc9c910f0193f98d22a70355186a46ddb8e183e8dfcbc81",
+      "size": 392124
+    },
+    {
+      "path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/ECT_P5.ddb",
+      "sha256": "3ccede15a89f13d08378ae56ff8518ad570e4b3521073d48ff67324a22223fbb",
+      "size": 373934
+    },
+    {
+      "path": "Techstream/unpacked/toyota/Toyota Diagnostics/Techstream/NA/DB/Meter_P5.ddb",
+      "sha256": "4d32101a403e7d05377757675193585fa28f2513a87b807b30ab0d86fbe1e868",
+      "size": 107016
+    }
+  ],
+  "supporting_p5": {
+    "ECT_P5.ddb": [
+      {
+        "bit_range": [
+          75,
+          75
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 400,
+        "monitor_record_sha256": "c0f6d9941c58fe5e9737e5e8f2fd33bc1e8e1163e04779c7a88d4ddac15cd28a",
+        "name": "Cruise Main SW",
+        "pattern_display_key": 29,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 3,
+        "primary_data_id": "0x1011"
+      }
+    ],
+    "Engine_P5.ddb": [
+      {
+        "bit_range": [
+          75,
+          75
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 400,
+        "monitor_record_sha256": "c0f6d9941c58fe5e9737e5e8f2fd33bc1e8e1163e04779c7a88d4ddac15cd28a",
+        "name": "Cruise Main SW",
+        "pattern_display_key": 29,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 3,
+        "primary_data_id": "0x1011"
+      }
+    ],
+    "Meter_P5.ddb": [
+      {
+        "bit_range": [
+          11,
+          11
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 63,
+        "monitor_record_sha256": "89f161e490f24e5fed07934008e07c1e9239bf93fca93047828c0daeafff0ca5",
+        "name": "Radar Cruise System",
+        "pattern_display_key": 7,
+        "pattern_values": {
+          "0": "Without",
+          "1": "With"
+        },
+        "physical_data_key": 2,
+        "primary_data_id": "0x15A1"
+      },
+      {
+        "bit_range": [
+          10,
+          10
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 217,
+        "monitor_record_sha256": "6700536d9cb3c1c8a4f06109eec48cb383570905f20dda2561471dd1e0ce060e",
+        "name": "Radar Cruise Indicator",
+        "pattern_display_key": 2,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 2,
+        "primary_data_id": "0x2951"
+      },
+      {
+        "bit_range": [
+          11,
+          11
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 218,
+        "monitor_record_sha256": "96603e4bea9fd4f3c6dbc23b648b40fc80be27e392331a69e5d9dc330e78ee88",
+        "name": "Radar Cruise Indicator (Yellow)",
+        "pattern_display_key": 2,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 2,
+        "primary_data_id": "0x2951"
+      },
+      {
+        "bit_range": [
+          12,
+          12
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 219,
+        "monitor_record_sha256": "a6c67cfe8e0e1220f1c6b9927af49227186728d177191aa6706078cee8b0210d",
+        "name": "Cruise Indicator",
+        "pattern_display_key": 2,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 2,
+        "primary_data_id": "0x2951"
+      },
+      {
+        "bit_range": [
+          13,
+          13
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 220,
+        "monitor_record_sha256": "9d7b396596c22263ecacf84dd9665bf920d81c09333554ebd7616bb27146d748",
+        "name": "Cruise Indicator (Yellow)",
+        "pattern_display_key": 2,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 2,
+        "primary_data_id": "0x2951"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 440,
+        "monitor_record_sha256": "00cc398d197ffe2622e8ca151e097b658ac8c2561f688896cbc414f3702eae81",
+        "name": "Main Switch",
+        "pattern_display_key": 2,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 2,
+        "primary_data_id": "0x1003"
+      }
+    ]
+  }
+}

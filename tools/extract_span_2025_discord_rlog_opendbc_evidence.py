@@ -9,6 +9,7 @@ exact H/F firmware-derived rules.
 from __future__ import annotations
 
 import argparse
+from bisect import bisect_right
 import collections
 import json
 import re
@@ -38,7 +39,10 @@ ROLE_IDS = {
     0x116: "GAS_PEDAL",
     0x127: "GEAR_PACKET_HYBRID",
     0x176: "PCM_CRUISE",
+    0x177: "PCM_CRUISE_3",
+    0x1A2: "CRUISE_RELATED",
     0x1D3: "PCM_CRUISE_2",
+    0x24D: "PCM_CRUISE_4 / cruise-switch SecOC prior art",
     0x260: "STEER_TORQUE_SENSOR",
     0x262: "EPS_STATUS",
     0x283: "PRE_COLLISION",
@@ -54,6 +58,7 @@ ROLE_IDS = {
     0x412: "LKAS_HUD",
     0x4A3: "exact-H/F EPS Tx state bridge (visibility check)",
     0x4C8: "exact-H/F EPS Tx carrier (visibility check)",
+    0x51E: "exact-H Ready Status input carrier (target-native join)",
     0x610: "BODY_CONTROL_STATE_2",
     0x614: "BLINKERS_STATE",
     0x620: "BODY_CONTROL_STATE",
@@ -228,6 +233,50 @@ def main() -> int:
     cruise = rows(0x176, 8)
     cruise_active = [bool((dat[0] >> 5) & 1) for _, dat in cruise]
     cruise_state = [be_raw(dat, 31, 4) for _, dat in cruise]
+    cruise_b0_bit3 = [(dat[0] >> 3) & 1 for _, dat in cruise]
+    cruise_switch = rows(0x24D, 8)
+    cruise_switch_prior_art = {
+        "distance": [be_raw(dat, 2, 1) for _, dat in cruise_switch],
+        "cancel": [be_raw(dat, 4, 1) for _, dat in cruise_switch],
+        "decrease": [be_raw(dat, 5, 1) for _, dat in cruise_switch],
+        "enable": [be_raw(dat, 6, 1) for _, dat in cruise_switch],
+        "increase": [be_raw(dat, 7, 1) for _, dat in cruise_switch],
+    }
+    ready = rows(0x51E, 8)
+    ready_bit = [be_raw(dat, 7, 1) for _, dat in ready]
+
+    def preceding(series: list[tuple[int, bytes]], t: int) -> bytes | None:
+        if not series:
+            return None
+        times = [x[0] for x in series]
+        idx = bisect_right(times, t) - 1
+        return series[idx][1] if idx >= 0 else None
+
+    cruise_bit3_context: dict[str, dict[str, Any]] = {}
+    for bit in (0, 1):
+        speeds: list[float] = []
+        brakes: list[int] = []
+        gases: list[float] = []
+        for t, dat in cruise:
+            if ((dat[0] >> 3) & 1) != bit:
+                continue
+            wd = preceding(wheel, t)
+            bd = preceding(brake, t)
+            gd = preceding(gas, t)
+            if wd is not None:
+                speeds.append(sum(be_raw(wd, start, 15) * 0.01 - 67.67 for start in (6, 22, 38, 54)) / 4)
+            if bd is not None:
+                brakes.append(be_raw(bd, 3, 1))
+            if gd is not None:
+                gases.append(be_raw(gd, 15, 8) * 0.005)
+        cruise_bit3_context[str(bit)] = {
+            "frame_count": sum(x == bit for x in cruise_b0_bit3),
+            "speed_kph": stats(speeds) if speeds else None,
+            "brake_pressed_fraction": (sum(brakes) / len(brakes)) if brakes else None,
+            "gas_pedal_user": stats(gases) if gases else None,
+            "gas_positive_fraction": (sum(x > 0 for x in gases) / len(gases)) if gases else None,
+        }
+
     fd30 = rows(0x030, 32)
     # Exact H/F firmware maps four single-bit steering-state fields into byte 6
     # of the 0x030 EPS Tx PDU. Keep these direct masks separate from the generic
@@ -429,10 +478,11 @@ def main() -> int:
                 "wire": "classic 8-byte GEAR_PACKET_HYBRID",
                 "gear_raw_values": unique(gear_values),
                 "prior_art_value_map": {str(k): v for k, v in GEAR_PRIOR_ART.items()},
-                "decoded_values": unique([GEAR_PRIOR_ART.get(x, f"UNKNOWN_{x}") for x in gear_values]),
+                "prior_art_decoded_values": unique([GEAR_PRIOR_ART.get(x, f"UNKNOWN_{x}") for x in gear_values]),
+                "decode_basis": "The D label comes only from the retained Toyota prior-art GEAR_PACKET_HYBRID enum; embedded carParams is MOCK and supplies no independent gear-state oracle.",
                 "checksum_valid": sum(toyota_checksum(0x127, dat) == dat[-1] for _, dat in gear),
                 "frame_count": len(gear),
-                "boundary": "This capture exercises only D (raw value 3). Carrier, bit position, checksum, and D enum compatibility are directly supported; P/R/N/B transitions still require dynamic validation.",
+                "boundary": "This forward-driving capture exercises only raw value 3. Carrier, bit position, checksum, and compatibility with the prior-art D enum are supported; target-native D semantics are not independently validated, and P/R/N/B transitions still require live validation.",
             },
             "0x176": {
                 "wire": "classic 8-byte PCM_CRUISE with Toyota additive checksum",
@@ -440,7 +490,22 @@ def main() -> int:
                 "frame_count": len(cruise),
                 "cruise_active_values": unique(cruise_active),
                 "cruise_state_values": unique(cruise_state),
-                "dynamic_boundary": "Vehicle motion is exercised, but cruise never engages in this segment; active-state semantics remain untested.",
+                "b0_bit3_values": unique(cruise_b0_bit3),
+                "b0_bit3_context": cruise_bit3_context,
+                "dynamic_boundary": "Vehicle motion is exercised, but this capture has no independent cruise-main/engagement oracle. The older CRUISE_ACTIVE/CRUISE_STATE positions stay 0 while B0[3] toggles strongly with accelerator/brake context, so B0[3] is not justified as a TSS3 cruise-main/engaged replacement from this capture.",
+            },
+            "0x24D": {
+                "wire": "classic 8-byte PCM_CRUISE_4 / SecOC cruise-switch prior-art carrier",
+                "frame_count": len(cruise_switch),
+                "prior_art_button_values": {k: unique(v) for k, v in cruise_switch_prior_art.items()},
+                "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival is evidence for a retained carrier, not proof that the old button semantics are unchanged on TSS3.",
+            },
+            "0x51E": {
+                "wire": "classic 8-byte target-native H/F Ready Status input carrier",
+                "frame_count": len(ready),
+                "ready_status_values": unique(ready_bit),
+                "unique_payloads": unique([dat.hex() for _, dat in ready]),
+                "boundary": "Exact H firmware independently joins B0[7] to Techstream DID 0x1033 Ready Status. Span's moving capture corroborates Ready Status=1 operationally, but carParams is MOCK and the rlog is not an exact F181-to-firmware identity join; Ready Status=0 is not exercised.",
             },
         },
         "harness_observation_boundary": {

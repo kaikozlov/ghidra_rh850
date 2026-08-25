@@ -2785,3 +2785,29 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `tests/verify_corolla_hf_b6_competing_sender_arbitration.py`;
   [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md) §7.36;
   [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
+
+
+### CORR-112 — H/F `Ready Status` is an incoming `0x51E B0[7]` field, not diagnostic-only
+
+- **Superseded framing:** COM-009 and the first H/F state-bridge pass correctly
+  recovered Techstream DID `0x1033 Ready Status` through
+  `FEBE7D1B -> FEBEF052 -> FEBEB5A8 -> FEBEE811`, but stopped one generated-COM
+  layer early and described it as a diagnostic oracle with no proved CAN-field join.
+- **Exact correction:** exact H Rx PDU29 is classic CAN `0x51E/8`; generated
+  signal154 at `0x46144` extracts **B0[7]** directly into `FEBE7D1B`. The complete
+  proved ingress is therefore
+  `0x51E B0[7] -> FEBE7D1B -> FEBEF052 -> FEBEB5A8 -> FEBEE811 -> DID 0x1033`.
+  `FEBEF052 -> FEBEB5A8` has two operational copy sites (`0xBAB58`, `0xBAC16`),
+  and the RAM nodes also have initialization/reset writers, so this is a dataflow
+  proof rather than an exclusive-writer claim.
+- **Dynamic corroboration:** the public 2023 route carries 59/59 `0x51E` samples
+  with B0[7]=1; Span's 2025 moving rlog carries 60/60. Neither capture exercises
+  Ready=0, so the transition/policy meaning remains bounded.
+- **Boundary:** this proves an **incoming Ready Status field**. It does not prove
+  that `0x030/0x351/0x394/0x4A3` republishes the same boolean, and it does not by
+  itself justify mapping Ready=0 to an openpilot temporary/permanent fault class.
+- **Canonical:**
+  `data/generated/corolla_hf_nonsteering_engagement_state.json`;
+  `data/generated/corolla_8965H1202000_openpilot_state_bridge.json`;
+  `tests/verify_corolla_hf_nonsteering_engagement_state.py`;
+  [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md) §6.4.

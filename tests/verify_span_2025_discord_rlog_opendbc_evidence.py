@@ -76,10 +76,16 @@ for wheel, max_expected in (("FR", 24.01), ("FL", 23.5), ("RR", 24.05), ("RL", 2
 check("0x101 old brake bit and checksum survive", reuse["0x101"]["brake_pressed_values"] == [0, 1] and reuse["0x101"]["checksum_valid"] == reuse["0x101"]["frame_count"] == 3000)
 check("0x116 old user-pedal field is dynamic", reuse["0x116"]["gas_pedal_user"] == move["gas_pedal_user"])
 gear = reuse["0x127"]
-check("0x127 carrier/checksum/D enum survive", gear["frame_count"] == gear["checksum_valid"] == 3662 and gear["gear_raw_values"] == [3] and gear["decoded_values"] == ["D"] and gear["prior_art_value_map"] == {"0": "P", "1": "R", "2": "N", "3": "D", "4": "B"})
-check("0x127 unobserved gears remain bounded", all(x in gear["boundary"] for x in ("only D", "P/R/N/B transitions", "require dynamic validation")))
+check("0x127 carrier/checksum/raw3 prior-art-D compatibility survives", gear["frame_count"] == gear["checksum_valid"] == 3662 and gear["gear_raw_values"] == [3] and gear["prior_art_decoded_values"] == ["D"] and gear["prior_art_value_map"] == {"0": "P", "1": "R", "2": "N", "3": "D", "4": "B"} and "MOCK" in gear["decode_basis"])
+check("0x127 target-native gear semantics remain bounded", all(x in gear["boundary"] for x in ("raw value 3", "prior-art D enum", "not independently validated", "P/R/N/B transitions")))
 cruise = reuse["0x176"]
-check("0x176 checksum survives but active cruise stays open", cruise["frame_count"] == cruise["checksum_valid"] == 1890 and cruise["cruise_active_values"] == [False] and cruise["cruise_state_values"] == [0] and "cruise never engages" in cruise["dynamic_boundary"])
+check("0x176 checksum survives but active cruise stays open", cruise["frame_count"] == cruise["checksum_valid"] == 1890 and cruise["cruise_active_values"] == [False] and cruise["cruise_state_values"] == [0] and "no independent cruise-main/engagement oracle" in cruise["dynamic_boundary"])
+ctx176 = cruise["b0_bit3_context"]
+check("0x176 B0[3] follows accelerator-release context rather than old cruise-active state", cruise["b0_bit3_values"] == [0, 1] and ctx176["1"]["gas_positive_fraction"] < 0.01 and ctx176["0"]["gas_positive_fraction"] > 0.97 and ctx176["1"]["brake_pressed_fraction"] > 0.84 and ctx176["0"]["brake_pressed_fraction"] == 0.0)
+check("0x24D survives but legacy cruise-switch bits are inactive", reuse["0x24D"]["frame_count"] == 60 and all(v == [0] for v in reuse["0x24D"]["prior_art_button_values"].values()))
+check("0x51E Ready Status input is high throughout Span moving segment", reuse["0x51E"]["frame_count"] == 60 and reuse["0x51E"]["ready_status_values"] == [1] and reuse["0x51E"]["unique_payloads"] == ["86001a0000000000"])
+roles = {x["can_id"]: x for x in ART["role_inventory"]}
+check("legacy cruise replacement IDs remain absent", all(roles[x]["instances"] == [] for x in ("0x177", "0x1A2", "0x1D3", "0x399")))
 
 print("\n== unswapped-harness observation boundary ==")
 harness = ART["harness_observation_boundary"]

@@ -512,9 +512,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   now combines three vehicle-level oracles with exact H/F firmware. The public
   2023 route preserves substantial old-state structure but lacks `carFw`; Span's
   July-29 driving rlog independently exercises motion, brake/gas/steering and
-  restores `0x127/8` as a strong gear reuse candidate (3,662/3,662 valid Toyota
-  checksums, observed `GEAR=3/D`) while its embedded `carParams=MOCK` and different
-  dongle prevent an exact `8965F1208000` identity join. All 599 Span Panda-state
+  restores `0x127/8` as a strong carrier reuse candidate (3,662/3,662 valid Toyota
+  checksums, raw value `3`, prior-art-compatible with D) while its embedded
+  `carParams=MOCK` provides no independent gear-state oracle and its different dongle
+  prevents an exact `8965F1208000` identity join. All 599 Span Panda-state
   samples are `ELM327 param=1`; that is direct observation of the normal unsplit
   harness CAN1 path. Span had not physically repinned Toyota-B CAN0/CAN1, so the
   capture cannot establish relay-side producer ownership or stock suppression,
@@ -547,16 +548,29 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   physical/deployment-specific: identify the producer side and validate the relay-side
   isolation point; do not use freshness racing as coexistence. Sender template/cadence,
   slot4 MAC capability/key policy and that physical suppression implementation remain
-  deployment blockers. The next decisive Corolla discriminator is therefore a **firmware-identified
-  H/F-family capture with the target network physically repinned onto the CAN0/CAN2
-  relay pair and stock LTA exercised off→active→off**, with `carFw`/F181 preserved;
-  also exercise cruise and P/R/N/D so the remaining state contract can close. Family
+  deployment blockers. COM-017 independently narrows the **non-steering engagement
+  state**: exact H receives `0x51E B0[7]` as the source of DID `0x1033 Ready Status`,
+  both retained operational routes show Ready=1, and Span observes checksum-valid `0x127`
+  raw `3`, compatible with the retained prior-art D enum but not independently gear-oracled;
+  target-native D semantics and P/R/N/B remain transition-gated. `0x176 B0[3]` strongly
+  tracks accelerator/brake context and is therefore not justified as a cruise-main/engaged
+  replacement from these captures; without an independent cruise oracle it is not
+  categorically disproved as every possible cruise-related meaning. FRC_P5 Data IDs
+  `1905/1906/1914/1901/1912` provide exact OEM
+  permission/main/operation/set-speed/interval correlation oracles. Those are P5
+  diagnostic Data IDs, not automatically direct UDS RDBI DIDs, so use Techstream/GTS+
+  data monitor unless the FRC service mapping is separately recovered. The next decisive
+  Corolla discriminator is therefore a **firmware-identified H/F-family capture with the
+  target network physically repinned onto the CAN0/CAN2 relay pair and stock LTA
+  exercised off→active→off**, with `carFw`/F181 preserved; also exercise cruise and
+  P/R/N/D so the remaining state contract can close. Family
   breadth beyond Corolla (Camry, RAV4, etc.) still must close command,
   feedback/readiness, producer/route, stock suppression, limits/faults, UI and
   authentication independently. Canonical machine-readable state:
   `data/generated/corolla_tss3_opendbc_readiness.json`; firmware steering-limit ledger:
   `data/generated/corolla_hf_steering_limits.json`; candidate safety contract:
-  `data/generated/corolla_hf_panda_lateral_safety_contract.json`. See
+  `data/generated/corolla_hf_panda_lateral_safety_contract.json`; bounded non-steering
+  engagement contract: `data/generated/corolla_hf_nonsteering_engagement_state.json`. See
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md)
   and [../variants/toyota-eps-variant-comparison.md](../variants/toyota-eps-variant-comparison.md).
 

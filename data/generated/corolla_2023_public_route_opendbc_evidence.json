@@ -255,6 +255,46 @@
       "wire": "classic 8-byte GAS_PEDAL with Toyota classic SecOC trailer"
     },
     "0x176": {
+      "b0_bit3_context": {
+        "0": {
+          "brake_pressed_fraction": 0.0,
+          "frame_count": 759,
+          "gas_pedal_user": {
+            "count": 759,
+            "max": 0.375,
+            "min": 0.0,
+            "unique_count": 72
+          },
+          "gas_positive_fraction": 0.9986824769433466,
+          "speed_kph": {
+            "count": 759,
+            "max": 41.457499999999996,
+            "min": 0.0,
+            "unique_count": 713
+          }
+        },
+        "1": {
+          "brake_pressed_fraction": 0.6788321167883211,
+          "frame_count": 1096,
+          "gas_pedal_user": {
+            "count": 1096,
+            "max": 0.0,
+            "min": 0.0,
+            "unique_count": 1
+          },
+          "gas_positive_fraction": 0.0,
+          "speed_kph": {
+            "count": 1096,
+            "max": 41.375,
+            "min": 0.0,
+            "unique_count": 827
+          }
+        }
+      },
+      "b0_bit3_values": [
+        0,
+        1
+      ],
       "checksum_valid": 1855,
       "cruise_active_values": [
         false
@@ -262,9 +302,42 @@
       "cruise_state_values": [
         0
       ],
-      "dynamic_boundary": "This segment never engages cruise, so ID/DLC/checksum compatibility is proved while active-state semantics still need a dynamic TSS3 capture.",
+      "dynamic_boundary": "This segment has no independent cruise-main/engagement oracle. The older CRUISE_ACTIVE/CRUISE_STATE positions stay 0 while B0[3] toggles strongly with accelerator/brake context, so B0[3] is not justified as a TSS3 cruise-main/engaged replacement from this route.",
       "frame_count": 1855,
       "wire": "classic 8-byte PCM_CRUISE with Toyota additive checksum"
+    },
+    "0x24D": {
+      "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival is evidence for a retained carrier, not proof that the old button semantics are unchanged on TSS3.",
+      "frame_count": 59,
+      "prior_art_button_values": {
+        "cancel": [
+          0
+        ],
+        "decrease": [
+          0
+        ],
+        "distance": [
+          0
+        ],
+        "enable": [
+          0
+        ],
+        "increase": [
+          0
+        ]
+      },
+      "wire": "classic 8-byte PCM_CRUISE_4 / SecOC cruise-switch prior-art carrier"
+    },
+    "0x51E": {
+      "boundary": "Exact H firmware independently joins B0[7] to Techstream DID 0x1033 Ready Status. This route supplies operational-state corroboration only because it has no carFw/F181 identity join and does not exercise Ready Status=0.",
+      "frame_count": 59,
+      "ready_status_values": [
+        1
+      ],
+      "unique_payloads": [
+        "8000004500000000"
+      ],
+      "wire": "classic 8-byte target-native H/F Ready Status input carrier"
     }
   },
   "forced_old_profile_result": {
@@ -436,10 +509,36 @@
       "required_by_older_toyota_contract": true
     },
     {
+      "can_id": "0x177",
+      "instances": [],
+      "older_toyota_role": "PCM_CRUISE_3",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x1A2",
+      "instances": [],
+      "older_toyota_role": "CRUISE_RELATED",
+      "required_by_older_toyota_contract": false
+    },
+    {
       "can_id": "0x1D3",
       "instances": [],
       "older_toyota_role": "PCM_CRUISE_2",
       "required_by_older_toyota_contract": true
+    },
+    {
+      "can_id": "0x24D",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 59,
+          "dlc": 8,
+          "first_payload": "00fb008052b1a741",
+          "rate_hz": 0.9668323889893823
+        }
+      ],
+      "older_toyota_role": "PCM_CRUISE_4 / cruise-switch SecOC prior art",
+      "required_by_older_toyota_contract": false
     },
     {
       "can_id": "0x260",
@@ -553,6 +652,20 @@
       "can_id": "0x4C8",
       "instances": [],
       "older_toyota_role": "exact-H/F EPS Tx carrier (cross-specimen visibility check)",
+      "required_by_older_toyota_contract": false
+    },
+    {
+      "can_id": "0x51E",
+      "instances": [
+        {
+          "bus": 1,
+          "count": 59,
+          "dlc": 8,
+          "first_payload": "8000004500000000",
+          "rate_hz": 0.950199016153126
+        }
+      ],
+      "older_toyota_role": "exact-H Ready Status input carrier (target-native join)",
       "required_by_older_toyota_contract": false
     },
     {

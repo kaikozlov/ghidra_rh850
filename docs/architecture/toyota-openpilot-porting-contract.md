@@ -335,14 +335,48 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
   candidate.** The 2023 route has no incoming `0x127`, `0x1D3`, `0x260`, `0x262`,
   `0x283`, `0x320`, `0x343`, `0x399`, `0x3BC`, or `0x3F6`. Span's driving rlog
   independently restores `0x127/8`: all **3,662/3,662** frames pass Toyota's
-  existing additive checksum and the existing `GEAR_PACKET_HYBRID.GEAR` bitfield
-  decodes raw `3 = D` throughout. That proves carrier, bit position, checksum and
-  the D enum on this capture; P/R/N/B transitions remain untested. Exact H partially
-  closes the physical driver-torque scale on live `0x030`, the `0x030` selected
-  steering fault/inhibit status plus torque-validity gate, the `0x351` C159B49-linked
-  base path plus its separate force-7 override, and the `0x394` deepest clear/normal classifier path. Cruise availability/set speed/fault/follow-distance,
-  a physical driver-override threshold, Q-current response limits, and production
-  Ready/temporary/permanent fault transitions still require vehicle-level evidence.
+  existing additive checksum and the retained prior-art `GEAR_PACKET_HYBRID.GEAR`
+  enum maps raw `3` to `D` throughout. The embedded `carParams` is MOCK, however,
+  so there is no independent logged gear-state oracle. Exact H independently retains
+  `0x127/8` as Rx PDU25 and regenerates signals 123..132; its scalar unpacker consumes
+  three conserved fields at B0/B1/B3-B4 but does **not** consume the older B5[3:0]
+  gear nibble. Thus carrier/layout continuity and raw-3 compatibility with prior-art D
+  are strong; target-native D semantics and P/R/N/B still require an independent gear
+  oracle or live transitions rather than a static EPS-side guess.
+- **Ready Status is no longer a diagnostic-only oracle.** Exact H `0x51E/8`
+  PDU29 signal154 unpacks **B0[7]** directly to `FEBE7D1B`, then
+  `FEBE7D1B -> FEBEF052 -> FEBEB5A8 -> FEBEE811 -> DID 0x1033 Ready Status`.
+  Both retained operational routes corroborate value 1 (public 59/59; Span
+  60/60), although neither exercises value 0. This closes the incoming wire
+  carrier while keeping Ready transition/fault policy bounded.
+- **Cruise engagement is narrowed without inventing a replacement bit.** Both
+  routes retain checksum-valid `0x176/8` and `0x24D/8`, but the older
+  `CRUISE_ACTIVE` and `CRUISE_STATE` positions stay zero and every prior-art `0x24D`
+  switch bit stays inactive. Neither route supplies an independent cruise-main or
+  engagement oracle. `0x176 B0[3]` is therefore **not justified** as a cruise
+  replacement: across both captures it tracks accelerator-release/brake context,
+  which is insufficient evidence for cruise-main/engaged semantics but does not
+  categorically disprove every possible cruise-related meaning. Older `0x177`,
+  `0x1A2`, `0x1D3`, and `0x399`
+  are absent in both captures. Techstream `FRC_P5` now gives exact validation
+  oracles instead: P5 Data ID `0x1905` **Cruise Control Permission Flag**; Data ID
+  `0x1906` **Main Switch Recognition Flag**, **Set Cancel Switch Condition**, and
+  **ACC Not Available Icon Lighting Request Flag**; Data ID `0x1914` **ACC Control
+  in Operation Flag**; Data ID `0x1901` **Current Vehicle Speed** and **Memory
+  Vehicle Speed**; and Data ID `0x1912` **Set Vehicle Interval Time**. These are
+  P5 diagnostic Data IDs, not automatically UDS RDBI DIDs; use Techstream/GTS+
+  data-monitor access unless the FRC service mapping is separately recovered.
+  Those names/Data IDs/bits define what future CAN candidates must correlate with,
+  but they do not by themselves identify the wire fields. Production
+  `cruiseState.available/enabled/speed` must
+  remain neutral until a synchronized transition or producer-firmware join closes
+  that mapping.
+- Exact H partially closes the physical driver-torque scale on live `0x030`, the
+  `0x030` selected steering fault/inhibit status plus torque-validity gate, the
+  `0x351` C159B49-linked base path plus its separate force-7 override, and the
+  `0x394` deepest clear/normal classifier path. A physical driver-override threshold,
+  Q-current response limits, and production temporary/permanent fault transitions
+  still require vehicle-level evidence.
 - **Same ID is not enough for body/UI reuse.** `0x3B7`, `0x411`, `0x412`,
   `0x610`, `0x614`, `0x620`, and `0x622` remain 8-byte frames, but most relevant
   transitions are static in this segment. One concrete warning is `0x610`: the
@@ -416,14 +450,17 @@ a relay-correct capture to establish the **physical producer side and actual
 suppression/isolation point**, plus safe forwarding/transmit topology. Freshness
 racing must not be used as a coexistence mechanism.
 
-**Read-only implementation checkpoint (2026-08-24):** the scaffold above is now
-implemented in the maintained forks rather than remaining a paper design. Opendbc commit
-`6b124c546381350b8c7285980ffed3f14aef8f53` adds `TOYOTA_COROLLA_TSS3`, a dedicated
-`toyota_tss3_pt_generated` DBC, an explicit `TSS3` generation flag independent from
-`SECOC`, a TSS3-specific `CarState`, the conservatively named
-`STEERING_FAULT_INHIBIT_STATUS` field, and the exact H/F B6 receiver fields for inspection.
-Kai-openpilot commit `263b339480eabf8be242b486bd76f1df835241b2` pins that submodule and records
-the operational gate. The implementation is deliberately **non-actuating**:
+**Read-only implementation checkpoint (2026-08-25):** the scaffold above is now
+implemented in the maintained forks rather than remaining a paper design. The initial
+non-actuating TSS3 scaffold landed in opendbc commit
+`6b124c546381350b8c7285980ffed3f14aef8f53` and kai-openpilot commit
+`263b339480eabf8be242b486bd76f1df835241b2`: `TOYOTA_COROLLA_TSS3`, the dedicated
+`toyota_tss3_pt_generated` DBC, independent `TSS3` generation flag, TSS3-specific
+`CarState`, bounded steering status naming, and B6 inspection surface. Follow-up opendbc
+commit `fa1847d7ee66a221f2960ec5cf7a840e737ca521` adds incoming `0x51E B0[7]` as
+`TSS3_READY_STATUS.READY_STATUS` for observation only; kai-openpilot commit
+`ddc6e532ecb8640d5771234b0017d84839e28ae2` advances the submodule to that revision.
+The implementation is deliberately **non-actuating**:
 `CarParams.dashcamOnly=True`, Panda uses `SafetyModel.noOutput`, radar and longitudinal
 control are disabled, and the TSS3 `CarController` returns zero CAN messages even when an
 enabled lateral/longitudinal request is supplied. B6's DBC definition is therefore a
@@ -440,7 +477,8 @@ and now reconstructs live physical **Steering Wheel Torque** from `0x030` as
 `signed(B8)*0.1 + signed4(B17[3:0])*0.01 N.m`; the target-native torque-invalid gate
 suppresses invalid samples. It still promotes only the dynamically exercised `0x127` raw
 value `3=D`, and deliberately leaves cruise, EPS actuator torque/current, driver-override
-policy, Ready mapping and temporary/permanent steering-fault classes neutral. The decoded
+policy, Ready-to-fault/engagement policy and temporary/permanent steering-fault classes
+neutral. `0x51E B0[7]` is parsed as Ready Status but does not yet alter CarState policy. The decoded
 B6[2] `STEERING_FAULT_INHIBIT_STATUS` is explicitly a selected steering fault/inhibit
 aggregate, not an exhaustive EPS-fault state.
 
@@ -448,7 +486,8 @@ As an independent integration check, the complete tracked Span rlog was replayed
 new parser: after the first 100 startup samples, **5,900/5,900** samples remained
 `canValid`; speed reached `6.576 m/s`, brake and gas both transitioned, steering covered
 `-511.1..122.4 deg` and `-700..800 deg/s`, gear remained `D`, cruise remained neutral,
-and physical driver torque spans `-8.23..+2.85 N.m` with 482 distinct post-startup
+all 60 observed `0x51E` samples decoded Ready=1, and physical driver torque spans
+`-8.23..+2.85 N.m` with 482 distinct post-startup
 hundredth-N.m values. `steeringPressed` and both openpilot steering-fault flags remain false
 by design because their policy mapping is not yet proved.
 `tests/verify_corolla_tss3_opendbc_readonly_external.py` reproduces this against the sibling
@@ -649,6 +688,6 @@ command path.
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [ARCH-016](../reference/index.md#finding-arch-016), [COM-013](../reference/index.md#finding-com-013)
+- Findings with this document as canonical home: [ARCH-016](../reference/index.md#finding-arch-016), [COM-013](../reference/index.md#finding-com-013), [COM-017](../reference/index.md#finding-com-017)
 - Corrections with this document as canonical home: [CORR-108](../reference/index.md#correction-corr-108)
 <!-- knowledge-cross-references:end -->

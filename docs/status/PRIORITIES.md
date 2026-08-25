@@ -229,17 +229,22 @@ physically repin Toyota-B CAN0/CAN1 so the target network lands on the CAN0/CAN2
 relay pair, preserve `carFw`/F181, and log all buses while safely exercising:
 
 1. stock LTA off → active → off plus ordinary driver steering;
-2. cruise main, engage/cancel and standstill where safe;
+2. cruise main, engage/cancel and standstill where safe while observing FRC P5
+   Data IDs `0x1905` (Cruise Control Permission), `0x1906` (Main Switch Recognition /
+   Set-Cancel / not-available icon), `0x1914` (ACC Control in Operation), `0x1901`
+   (Current/Memory Vehicle Speed), and `0x1912` (Set Vehicle Interval Time) through
+   Techstream/GTS+ data monitor; these P5 Data IDs are not automatically direct UDS RDBI DIDs;
 3. brake and gas transitions;
-4. stationary P/R/N/D transitions (the `0x127` D value is already validated); and
+4. stationary P/R/N/D transitions with an independent gear-state oracle (`0x127` raw 3 is only prior-art-compatible with D today); and
 5. lane/LTA UI state changes and one recoverable message-loss/fault condition if
    a safe diagnostic trigger exists.
 
 This capture should close B6 visibility/cadence and producer side, exact physical
 relay path and the concrete stock-source suppression/isolation point, the remaining
 physical driver-override policy, a deliberately chosen/validated `0x4A3` Q-current actuator-response policy,
-`0x351/0x394` plus DID `0x1033` Ready/fault transition mapping, remaining gear enums,
-missing cruise roles, and the correct Panda parser/safety bus. The **core H/F Panda
+`0x351/0x394` fault transitions plus the now-wire-closed `0x51E B0[7] -> DID 0x1033`
+Ready Status transition, remaining gear enums, the CAN fields that correspond to the
+now-exact FRC cruise diagnostic oracles, and the correct Panda parser/safety bus. The **core H/F Panda
 command envelope itself is now statically derived** (COM-014/COM-015): ID11-only
 candidate active control, ±1745 raw (~100 deg) target, strict candidate +1 sequence /
 <=78-raw target step, 7-tick EPS loss cutoff, raw steering-rate cutout 100, and
@@ -263,17 +268,23 @@ Machine-readable checklist: `data/generated/corolla_tss3_opendbc_readiness.json`
 This target runs in parallel with static `07B0` Brake + `0792` FRC acquisition;
 neither replaces the other.
 
-**Read-only opendbc scaffold is complete.** Opendbc `6b124c546381350b8c7285980ffed3f14aef8f53`
-and kai-openpilot `263b339480eabf8be242b486bd76f1df835241b2` now provide the dedicated TSS3
-platform/DBC/CarState while remaining `dashcamOnly` + Panda `noOutput`; the TSS3 controller
-emits no CAN. The tracked Span rlog replays through that parser with 5,900/5,900 post-startup
-samples CAN-valid. Therefore **do not spend the next pass rebuilding basic state parsing**.
+**Read-only opendbc scaffold is complete.** The initial passive TSS3 platform/DBC/CarState
+landed in opendbc `6b124c546381350b8c7285980ffed3f14aef8f53` and kai-openpilot
+`263b339480eabf8be242b486bd76f1df835241b2`. Follow-up opendbc
+`fa1847d7ee66a221f2960ec5cf7a840e737ca521` adds exact-H `0x51E B0[7]` Ready Status for
+read-only observation, and kai-openpilot `ddc6e532ecb8640d5771234b0017d84839e28ae2`
+advances that submodule revision. The platform remains `dashcamOnly` + Panda `noOutput`;
+the TSS3 controller emits no CAN and Ready has no fault/engagement policy. The tracked Span
+rlog replays through that parser with 5,900/5,900 post-startup samples CAN-valid. Therefore **do not spend the next pass rebuilding basic state parsing**.
 Use the implementation as the dynamic measurement harness and focus the next evidence on:
 exact target/F181 binding, physical relay-correct stock-LTA transitions, B6 sender cadence
 and active-LTA secondary-field template, SecOC freshness/key ownership,
 the physical producer side plus suppression/isolation implementation, the physical driver-override policy for the now-live `0x030`
 torque, a deliberately chosen/validated `0x4A3` Q-current response policy, and
-`0x351/0x394` + DID `0x1033` Ready/fault transitions. Static firmware recovery has
+`0x351/0x394` fault transitions plus a `0x51E B0[7]` Ready `1->0->1` transition.
+Ready's incoming wire source is no longer open; cruise availability/main/enabled/set-speed
+is narrowed to the exact FRC P5 Data-ID oracle set above but still lacks a CAN-wire join.
+Static firmware recovery has
 already bounded the ~±8.238 N.m torque acquisition clamp and ±10 N.m telemetry
 saturation as representation limits—not override thresholds—and found no measured-Q
 comparator in the cooperative supervisor. The firmware limit ledger is tracked in
@@ -281,7 +292,9 @@ comparator in the cooperative supervisor. The firmware limit ledger is tracked i
 is `data/generated/corolla_hf_panda_lateral_safety_contract.json`. Keep it disabled
 until those policy/deployment blockers close. Gear values other than the observed `D` and
 cruise engagement remain deliberately neutral in the implementation until transition
-captures justify them.
+captures justify them. Static/non-active engagement closure is machine-readable at
+`data/generated/corolla_hf_nonsteering_engagement_state.json`; do not redo the basic
+`0x51E`/`0x127`/inactive-`0x176` census.
 
 ## P0 — highest information gain
 
@@ -436,20 +449,26 @@ writer correction also removes eleven false `default-init-only` classifications.
 `0x4A3` is now the alternate torque/Q-current bridge (0.1 N.m/count and -0.01
 A/count respectively); `0x351` is mixed status with a C159B49-linked motor-B
 electrical-monitor base path plus a separate force-7 override; and `0x394` has a recovered 17-state classifier whose state 0 is the
-deepest recovered clear/normal path, not a proved Ready boolean. DID `0x1033 Ready Status` is target-native but still lacks a Tx-field
-join. Do not redo driver-torque producer/scale recovery.
+deepest recovered clear/normal path, not a Ready boolean. Ready itself is now closed
+on the **incoming** side: exact H `0x51E B0[7] -> FEBE7D1B -> FEBEF052 -> FEBEB5A8 ->
+FEBEE811 -> DID 0x1033 Ready Status`, corroborated as value1 in both operational
+routes. No EPS-Tx Ready duplicate is required for observation. Do not redo driver-torque
+producer/scale or Ready-wire recovery.
 
 COM-013 adds the whole-vehicle half that was previously missing. The public TSS3
 Corolla route preserves useful old-state structure in `0x0AA/0x101/0x116/0x176`
 and the exact-H-proved `0x025` fields. Span's moving rlog further restores `0x127`
 as a checksum-valid gear reuse candidate and independently exercises those retained
-state fields, while `0x1D3/0x260/0x262/0x343/0x399` remain unresolved. Because neither
-vehicle-level route has an exact F181 join and Span's harness was not physically
-repinned onto the relay pair, the state-side priority is now a **firmware-identified,
-relay-correct H/F capture with stock LTA transitions**, not another static EPS
-sweep: observe `0x4A3/0x351/0x394`, correlate DID `0x1033 Ready Status` and
-asserted fault states, derive a physical driver-override threshold from the already
-closed `0x030` torque signal, and close cruise and remaining gear enums. See
+state fields, while `0x1D3/0x260/0x262/0x343/0x399` remain unresolved. The surviving
+`0x176/0x24D` cruise carriers are inactive in both routes, and exact FRC P5 diagnostic
+oracles now define permission/main/operation/memory-speed/follow-distance semantics
+without yet locating their CAN fields. Because neither vehicle-level route has an exact
+F181 join and Span's harness was not physically repinned onto the relay pair, the
+state-side priority is now a **firmware-identified, relay-correct H/F capture with stock
+LTA and cruise transitions**, not another static EPS sweep: observe `0x4A3/0x351/0x394`,
+exercise `0x51E Ready Status` through value0, synchronize the FRC P5 cruise **Data IDs** with
+CAN, derive a physical driver-override threshold from the already closed `0x030` torque
+signal, and obtain an independent gear-state oracle plus P/R/N/B transitions. See
 `data/generated/corolla_tss3_opendbc_readiness.json`,
 [../variants/corolla-pre-tss3-openpilot-message-comparison.md](../variants/corolla-pre-tss3-openpilot-message-comparison.md),
 and [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).

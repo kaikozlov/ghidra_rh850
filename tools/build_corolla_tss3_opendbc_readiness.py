@@ -32,6 +32,7 @@ H_RUNTIME = REPO / "data/generated/ephemeral_runtime_target_manifest_8965H120200
 SPAN_ZIP = REPO / "community/spanconstant/spanconstant_tsk.zip"
 SPAN_MEMBER = "tsk/uds-sweep/ready_capture.ndjson"
 SPAN_RLOG = REPO / "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json"
+ENGAGEMENT = REPO / "data/generated/corolla_hf_nonsteering_engagement_state.json"
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -139,6 +140,11 @@ def main() -> int:
     h_runtime = json.loads(H_RUNTIME.read_text())
     span = span_capture()
     span_rlog = json.loads(SPAN_RLOG.read_text())
+    engagement = json.loads(ENGAGEMENT.read_text())
+    if engagement["schema"] != "corolla-hf-nonsteering-engagement-state-v1":
+        raise ValueError("non-steering engagement contract schema drift")
+    if not (engagement["ready_status"]["can_id"] == "0x51E" and engagement["ready_status"]["wire"] == "B0[7]"):
+        raise ValueError("Ready Status engagement-contract drift")
 
     pub_set = {(r["can_id"], r["dlc"]) for r in public["bus0_canfd_baseline"]}
     span0_set = {(r["can_id"], r["dlc"]) for r in span["buses"]["0"]}
@@ -193,8 +199,8 @@ def main() -> int:
             "cruise engaged",
             "wire_reuse_dynamic_semantics_open",
             "SecOC Toyota Panda/CarState uses 0x176 PCM_CRUISE.CRUISE_ACTIVE/CRUISE_STATE",
-            "Public route has 0x176/8 at ~30 Hz and all 1,855 frames pass the existing Toyota additive checksum. Span's moving rlog independently has 1,890/1,890 checksum-valid frames. Cruise remains inactive in both segments.",
-            "public route + Span moving rlog raw checksum",
+            "Public route has 0x176/8 at ~30 Hz and all 1,855 frames pass the existing Toyota additive checksum. Span's moving rlog independently has 1,890/1,890 checksum-valid frames. Cruise remains inactive in both segments. 0x176 B0[3] is specifically rejected as a cruise replacement because it tracks accelerator-release/brake context in both captures.",
+            "public route + Span moving rlog raw checksum + non-steering engagement contract",
             "Capture cruise main/engage/standstill transitions on a firmware-identified target before treating active/state values as production-ready.",
         ),
         row(
@@ -217,25 +223,25 @@ def main() -> int:
             "EPS readiness / steering faults",
             "generation_native_replacement_open_dynamic_join",
             f"Older Toyota uses 0x262 LKA/LTA states; temporary={old_temp}, permanent={old_perm}",
-            "0x262 is absent from the TSS3 routes. Exact H closes 0x030 B6[2] as a live selected steering fault/inhibit status aggregate (nominal-clear 6000/6000; not an exhaustive EPS-fault state), 0x351 as a mixed status carrier with a C159B49-linked motor-B electrical-monitor base path plus a separate force-7 override, and 0x394 as a lossy 17-state fault/status projection whose state 0 is the deepest recovered clear/normal classifier path, not a proved Ready boolean. DID 0x1033 Ready Status is target-native but not yet joined to a Tx field.",
-            "exact H state bridge + Techstream DTC/DID joins + Span moving-rlog 0x030 polarity",
-            "Correlate both 0x351 paths (C159B49-linked base status and force-7 override), 0x394, and DID 0x1033 against standby, stock LTA active, message loss, temporary fault and latched fault. Old numeric fault enums and temporary/permanent classes are not portable.",
+            "0x262 is absent from the TSS3 routes. Exact H closes 0x030 B6[2] as a live selected steering fault/inhibit status aggregate (nominal-clear 6000/6000; not an exhaustive EPS-fault state), 0x351 as a mixed status carrier with a C159B49-linked motor-B electrical-monitor base path plus a separate force-7 override, and 0x394 as a lossy 17-state fault/status projection whose state 0 is the deepest recovered clear/normal classifier path, not a proved Ready boolean. Exact H now also closes incoming 0x51E B0[7] as DID 0x1033 Ready Status; both retained operational routes show Ready=1, while Ready=0 remains uncaptured.",
+            "exact H state bridge + non-steering engagement contract + Techstream DTC/DID joins + Span moving-rlog 0x030 polarity",
+            "Correlate both 0x351 paths (C159B49-linked base status and force-7 override), 0x394, and a 0x51E Ready 1->0->1 transition against standby, stock LTA active, message loss, temporary fault and latched fault. Old numeric fault enums and temporary/permanent classes are not portable.",
         ),
         row(
             "gear",
             "strong_reuse_candidate_partial_dynamic",
             "Current SecOC Toyota CarState uses 0x127 GEAR_PACKET_HYBRID; older non-SecOC profiles use 0x3BC",
-            "The public 2023 route lacks 0x127, but Span's moving Discord rlog carries 3,662 0x127/8 frames; all 3,662 pass the existing Toyota additive checksum and the prior-art GEAR field decodes raw 3='D' throughout.",
-            "Span moving rlog raw bytes + current opendbc prior art",
-            "Validate P/R/N/B transitions and bind the capture to exact target firmware before declaring the full enum production-ready.",
+            "The public 2023 route lacks 0x127, but Span's moving Discord rlog carries 3,662 0x127/8 frames; all 3,662 pass the existing Toyota additive checksum and raw value 3 maps to D only through the retained Toyota prior-art GEAR enum. Embedded carParams is MOCK, so there is no independent gear-state oracle. Exact H retains 0x127/8 and its generated receive layout, but its scalar unpacker does not consume the legacy B5[3:0] gear nibble.",
+            "Span moving rlog raw bytes + exact H receive layout + current opendbc prior art",
+            "Obtain an independent gear-state oracle or explicit D transition, validate P/R/N/B transitions, and bind the capture to exact target firmware before declaring any target-native gear enum production-ready.",
         ),
         row(
             "cruise availability / set speed / ACC faults / follow distance",
-            "missing_whole_vehicle_role",
+            "diagnostic_oracles_closed_wire_mapping_open",
             "0x1D3 PCM_CRUISE_2 and 0x399 PCM_CRUISE_SM supply main availability, set speed, fault, lockout, distance and cluster set speed",
-            "0x1D3 and 0x399 are absent from the public TSS3 route.",
-            "public route",
-            "Identify generation-native replacements; these are required for a normal CarState contract even if lateral actuation is solved.",
+            "0x1D3/0x399 are absent from both retained routes; 0x177/0x1A2 are also absent. Techstream FRC_P5 supplies exact P5 Data-ID oracles: 0x1905 Cruise Control Permission, 0x1906 Main Switch Recognition / Set-Cancel / ACC Not Available icon, 0x1914 ACC Control in Operation, 0x1901 Current/Memory Vehicle Speed, and 0x1912 Set Vehicle Interval Time. These Data IDs are not automatically direct UDS RDBI DIDs.",
+            "public route + Span moving rlog + exact Techstream FRC_P5 Data-ID semantics",
+            "Synchronize all-bus CAN with Techstream/GTS+ FRC data-monitor transitions to identify generation-native CAN fields for available/enabled/set speed/fault/follow distance.",
         ),
         row(
             "brake hold / stability state",
@@ -345,6 +351,12 @@ def main() -> int:
                 "harness_observation_boundary": span_rlog["harness_observation_boundary"],
                 "exact_h_f_visibility": span_rlog["exact_h_f_visibility"],
             },
+            "nonsteering_engagement_contract": {
+                "ready_status": engagement["ready_status"],
+                "gear": engagement["gear"],
+                "cruise_wire_mapping_status": engagement["cruise"]["wire_mapping_status"],
+                "cruise_diagnostic_transport_boundary": engagement["cruise"]["diagnostic_transport_boundary"],
+            },
             "critical_warning": "Do not attribute exact H/F Tx/Rx state carriers to the public 2023 route: that route has no carFw, exposes 0x00F/0x0D7 but not B6 from H/F's three-PDU SecOC Rx set, and contains only 0x030 from H/F's five-PDU Tx set. It is not evidence of a complete exact-H/F EPS-bus mirror.",
         },
         "role_readiness": readiness,
@@ -363,8 +375,9 @@ def main() -> int:
                 "Add an explicit TSS3 control-generation axis independent of the existing SECOC security flag.",
                 "Define a TSS3 0x025/32 DBC PDU carrying the firmware-proved steering angle/fraction/rate fields.",
                 "Decode live 0x030 physical Steering Wheel Torque and its raw fault/validity gates without importing the legacy override threshold or 0x262 fault classes.",
-                "Carry forward 0x0AA/0x101/0x116/0x176 only behind generation-specific validation; do not copy the entire old DBC.",
-                "Scaffold 0x127 GEAR_PACKET_HYBRID as a TSS3 reuse candidate: carrier/checksum/D are dynamically supported, while the remaining gear enums stay gated on validation.",
+                "Carry forward 0x0AA/0x101/0x116/0x176 only behind generation-specific validation; do not copy the entire old DBC, and do not relabel 0x176 B0[3] as cruise state.",
+                "Expose incoming 0x51E B0[7] as target-native Ready Status for read-only observation without yet mapping Ready=0 to an openpilot fault/engagement policy.",
+                "Scaffold 0x127 GEAR_PACKET_HYBRID only as a read-only reuse candidate: carrier/checksum/raw3 are observed and raw3 is prior-art-compatible with D, while target-native gear semantics remain gated on an independent oracle/transitions.",
                 "Model exact H/F B6 signal254/255/261 receiver requirements in analysis/tests without enabling live actuation.",
                 "Create a new TSS3 radar/CAN-FD namespace rather than extending the old 8-byte TSS2 radar DBC by ID.",
             ],
@@ -376,7 +389,7 @@ def main() -> int:
             ],
             "blocks_normal_carstate": [
                 "Validate P/R/N/B transitions on the retained 0x127 GEAR_PACKET_HYBRID carrier and bind them to the exact target.",
-                "Cruise availability/set speed/follow-distance/ACC-fault replacements for missing 0x1D3/0x399.",
+                "Cruise CAN-field mapping for available/enabled/set speed/follow distance/ACC not-available state; exact FRC_P5 Data-ID oracles are already recovered and should be synchronized through Techstream/GTS+.",
                 "Generation-native steering fault/readiness mapping; driver-torque physical scaling is already closed.",
                 "Dynamic validation of retained body/UI fields used by openpilot.",
             ],
@@ -388,7 +401,7 @@ def main() -> int:
             ],
         },
         "highest_value_next_evidence": [
-            "Capture an exact H/F-family vehicle with carFw/F181 preserved, the Toyota-B CAN0/CAN1 network physically repinned onto the CAN0/CAN2 relay pair, and all buses logged during stock LTA off->active->off, steering input, cruise main/engage, brake/gas and P/R/N/D transitions.",
+            "Capture an exact H/F-family vehicle with carFw/F181 preserved, the Toyota-B CAN0/CAN1 network physically repinned onto the CAN0/CAN2 relay pair, and all buses logged during stock LTA off->active->off, steering input, cruise main/engage, brake/gas and P/R/N/D transitions; simultaneously record 0x51E Ready and the exact FRC_P5 Data-ID oracles through Techstream/GTS+.",
             "Acquire matched category-435 07B0 Brake/EPB firmware and 0792 FRC_P5 firmware; join planner state -> upstream FD traffic -> protected B6 -> EPS response and signer/freshness ownership.",
             "Use that firmware-identified relay-correct capture to choose TSS3 CarState/Panda input buses, validate 0x127 gear enums, and recover the missing 0x1D3/0x399/0x260/0x262 roles before implementing production safety.",
             "Treat longitudinal as a separate architecture and close OQ-052 rather than inferring it from lateral/FRC progress.",

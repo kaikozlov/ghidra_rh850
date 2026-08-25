@@ -43,7 +43,7 @@ with tempfile.TemporaryDirectory() as td:
     proc = subprocess.run([sys.executable, str(BUILD), "--out", str(out)], cwd=REPO, capture_output=True, text=True, check=False)
     check("bridge builder succeeds", proc.returncode == 0, proc.stderr[-300:])
     check("bridge artifact regenerates exactly", proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
-check("bridge schema v7", art["schema"] == "corolla-8965H1202000-openpilot-state-bridge-v7")
+check("bridge schema v8", art["schema"] == "corolla-8965H1202000-openpilot-state-bridge-v8")
 check("compact evidence schema v2", evid["schema"] == "corolla-h-openpilot-state-bridge-decompiler-evidence-v2")
 check("exact H image identity", len(image) == 0x100000 and sha(image) == art["images"]["corolla_h"]["sha256"] == evid["image"]["sha256"])
 check("H/F application identity carried forward", art["images"]["corolla_f"]["application_byte_identical_to_h"])
@@ -105,11 +105,12 @@ check("030 eleven GP-relative false negatives corrected", [x["signal_id"] for x 
 check("underlying FD artifact carries the GP correction", fd["schema"] == "corolla-8965H1202000-fd-control-interface-v2" and fd["fd_0x030_transmit"]["gp_relative_writer_correction"]["affected_signal_ids"] == [0, 1, 10, 14, 16, 17, 18, 27, 28, 31, 34])
 check("030 Q-current derivative remains scale-bounded", s030["q_current_derived_field"]["signal_id"] == 34 and "calibration-dependent" in s030["q_current_derived_field"]["classification"])
 
-print("\n== Ready Status diagnostic oracle ==")
-ready = art["state_bridge"]["techstream_ready_status_oracle"]
-check("Ready Status DID and exact source chain", ready["did"] == "0x1033" and ready["name"] == "Ready Status" and ready["source_chain"][:4] == ["0xFEBE7D1B", "0xFEBEF052", "0xFEBEB5A8", "0xFEBEE811"])
-check("Ready Status firmware chain verified", ready["firmware_chain_verified"] is True)
-check("Ready Status is not invented as Tx bit", "not yet joined" in ready["boundary"] and "do not invent a CAN ready bit" in ready["openpilot_consequence"])
+print("\n== Ready Status input wire join ==")
+ready = art["state_bridge"]["ready_status_input_0x51E"]
+check("Ready Status exact input wire and DID", ready["can_id"] == "0x51E" and ready["wire"] == "B0[7]" and ready["firmware_signal_id"] == 154 and ready["did"] == "0x1033" and ready["name"] == "Ready Status")
+check("Ready Status exact source chain", ready["source_chain"] == ["0x51E B0[7]", "0xFEBE7D1B", "0xFEBEF052", "0xFEBEB5A8", "0xFEBEE811", "DID 0x1033"] and ready["firmware_chain_verified"] is True)
+check("Ready Status operational value1 is observed but value0 remains bounded", ready["span_operational_frames"] == 60 and ready["span_values"] == [1] and "value 0" in ready["boundary"] and "does not imply" in ready["boundary"])
+check("Ready Status is explicitly an input, not invented as EPS Tx field", "can be parsed as the target-native Ready Status input" in ready["openpilot_consequence"] and "distinct from 0x030/0x351/0x394" in ready["openpilot_consequence"])
 
 print("\n== CarState/Panda closure ==")
 closure = art["carstate_and_panda_input_closure"]

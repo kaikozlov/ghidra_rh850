@@ -15,8 +15,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 OPENPILOT = (REPO / "../kai-openpilot").resolve()
 OPENPILOT_PYTHON = OPENPILOT / ".venv/bin/python"
-OPENPILOT_COMMIT = "263b339480eabf8be242b486bd76f1df835241b2"
-OPENDBC_COMMIT = "6b124c546381350b8c7285980ffed3f14aef8f53"
+OPENPILOT_COMMIT = "ddc6e532ecb8640d5771234b0017d84839e28ae2"
+OPENDBC_COMMIT = "fa1847d7ee66a221f2960ec5cf7a840e737ca521"
 RLOG = REPO / "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst"
 
 passed = failed = 0
@@ -74,6 +74,7 @@ probe = textwrap.dedent(
     ci = CarInterface(cp1)
     eps_parser = CANParser("toyota_tss3_pt_generated", [("TSS3_EPS_TELEMETRY", float("nan"))], 1)
     eps_fields = eps_parser.vl["TSS3_EPS_TELEMETRY"]
+    ready_parser = CANParser("toyota_tss3_pt_generated", [("TSS3_READY_STATUS", float("nan"))], 1)
 
     cc = structs.CarControl()
     cc.enabled = True
@@ -85,11 +86,16 @@ probe = textwrap.dedent(
     _, can_sends = ci.apply(cc.as_reader(), 1_000_000_000)
 
     values = []
+    ready_values = []
     for ev in LogReader(rlog, sort_by_time=True):
       if ev.which() != 'can':
         continue
       can = [CanData(int(c.address), bytes(c.dat), int(c.src)) for c in ev.can]
-      values.append(ci.update([(int(ev.logMonoTime), can)]))
+      t = int(ev.logMonoTime)
+      ready_parser.update([(t, can)])
+      if any(int(c.address) == 0x51E and int(c.src) == 1 for c in ev.can):
+        ready_values.append(int(ready_parser.vl["TSS3_READY_STATUS"]["READY_STATUS"]))
+      values.append(ci.update([(t, can)]))
 
     post = values[100:]
     fp = FINGERPRINTS[CAR.TOYOTA_COROLLA_TSS3][0]
@@ -120,6 +126,8 @@ probe = textwrap.dedent(
       'gas_values': sorted(set(bool(x.gasPressed) for x in post)),
       'gear_values': sorted(set(str(x.gearShifter) for x in post)),
       'cruise_enabled_values': sorted(set(bool(x.cruiseState.enabled) for x in post)),
+      'ready_sample_count': len(ready_values),
+      'ready_values': sorted(set(ready_values)),
       'min_driver_torque_nm': min(float(x.steeringTorque) for x in post),
       'max_driver_torque_nm': max(float(x.steeringTorque) for x in post),
       'driver_torque_unique_2dp': len(set(round(float(x.steeringTorque), 2) for x in post)),
@@ -167,8 +175,9 @@ if proc.returncode == 0:
     check("replayed steering range matches dynamic evidence", result["min_angle_deg"] < -500 and result["max_angle_deg"] > 100)
     check("replayed steering-rate range matches dynamic evidence", result["min_rate_deg_s"] <= -700 and result["max_rate_deg_s"] >= 800)
     check("brake and gas both transition", result["brake_values"] == [False, True] and result["gas_values"] == [False, True])
-    check("only dynamically proven D gear is promoted", result["gear_values"] == ["drive"])
+    check("read-only parser retains only the raw3-to-prior-art-drive decode", result["gear_values"] == ["drive"])
     check("cruise remains neutral without an engaged transition", result["cruise_enabled_values"] == [False])
+    check("0x51E Ready Status is observable through the maintained DBC", result["ready_sample_count"] == 60 and result["ready_values"] == [1])
     check(
         "live physical driver torque is promoted from 0x030",
         result["min_driver_torque_nm"] < -8.0 and result["max_driver_torque_nm"] > 2.8

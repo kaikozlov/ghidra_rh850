@@ -139,7 +139,7 @@
     },
     "steering_limits": {
       "path": "data/generated/corolla_hf_steering_limits.json",
-      "sha256": "cee6a3c3a87960c62c1060e79ac38157de77de9eb9668bb696257889a724dc81"
+      "sha256": "11a852f2abd43078b8cc299ef7a72af0cf9d790fbc8137c06a03a7a97375b876"
     }
   },
   "static_conclusion": {

@@ -1,0 +1,792 @@
+{
+  "cruise": {
+    "boundary": "Neither retained route supplies an independent cruise-main/engagement oracle. Exact Toyota diagnostics now define what each missing semantic must correlate with, but no CAN field may be promoted to available/enabled/set-speed/fault until a wire-to-oracle transition is observed or statically recovered from the producer firmware.",
+    "capture_recipe": [
+      "Use Techstream/GTS+ FRC_P5 Data ID 0x1905 (Cruise Control Permission Flag) while toggling cruise main and engagement.",
+      "Use Techstream/GTS+ FRC_P5 Data ID 0x1906 (Main Switch Recognition Flag, Set Cancel Switch Condition, ACC Not Available Icon Lighting Request Flag) synchronized with all-bus CAN.",
+      "Use Techstream/GTS+ FRC_P5 Data ID 0x1914 (ACC Control in Operation Flag) through disengaged -> engaged -> cancelled transitions.",
+      "Use Techstream/GTS+ FRC_P5 Data ID 0x1901 (Current Vehicle Speed, Memory Vehicle Speed) while changing set speed.",
+      "Use Techstream/GTS+ FRC_P5 Data ID 0x1912 (Set Vehicle Interval Time) while cycling following distance."
+    ],
+    "classification": "diagnostic semantics narrowed; live CAN mapping not closed",
+    "diagnostic_transport_boundary": "The 0x19xx values above are P5 diagnostic Data IDs from FRC_P5, not automatically UDS ReadDataByIdentifier DIDs. Use Techstream/GTS+ data-monitor access unless a separate FRC service mapping proves direct 0x22 support.",
+    "legacy_ids_absent_in_both_captures": [
+      "0x177",
+      "0x1A2",
+      "0x1D3",
+      "0x399"
+    ],
+    "openpilot_oracle_mapping": {
+      "brake_control_activity": [
+        "ACC Brake Control in Operation"
+      ],
+      "current_speed_reference": [
+        "Current Vehicle Speed"
+      ],
+      "driver_switch_activity": [
+        "Set Cancel Switch Condition"
+      ],
+      "enabled": [
+        "ACC Control in Operation Flag"
+      ],
+      "following_interval": [
+        "Set Vehicle Interval Time"
+      ],
+      "main_switch": [
+        "Main Switch Recognition Flag"
+      ],
+      "not_available_or_fault_display": [
+        "ACC Not Available Icon Lighting Request Flag"
+      ],
+      "permission": [
+        "Cruise Control Permission Flag"
+      ],
+      "platform_installed": [
+        "ACC Installation Availability",
+        "ACC Installed Flag"
+      ],
+      "set_speed_candidate": [
+        "Memory Vehicle Speed"
+      ]
+    },
+    "retained_wire_prior_art": {
+      "0x176": {
+        "b0_bit3_interpretation": "Strongly tracks accelerator-release/driver-input context in both captures. Without an independent cruise-state oracle this does not disprove every possible cruise-related meaning, but it is insufficient evidence to promote B0[3] as TSS3 main/active cruise state.",
+        "b0_bit3_values": [
+          0,
+          1
+        ],
+        "checksums_all_valid": true,
+        "legacy_cruise_active_values": [
+          false
+        ],
+        "legacy_cruise_state_values": [
+          0
+        ],
+        "public_2023_b0_bit3_context": {
+          "0": {
+            "brake_pressed_fraction": 0.0,
+            "frame_count": 759,
+            "gas_pedal_user": {
+              "count": 759,
+              "max": 0.375,
+              "min": 0.0,
+              "unique_count": 72
+            },
+            "gas_positive_fraction": 0.9986824769433466,
+            "speed_kph": {
+              "count": 759,
+              "max": 41.457499999999996,
+              "min": 0.0,
+              "unique_count": 713
+            }
+          },
+          "1": {
+            "brake_pressed_fraction": 0.6788321167883211,
+            "frame_count": 1096,
+            "gas_pedal_user": {
+              "count": 1096,
+              "max": 0.0,
+              "min": 0.0,
+              "unique_count": 1
+            },
+            "gas_positive_fraction": 0.0,
+            "speed_kph": {
+              "count": 1096,
+              "max": 41.375,
+              "min": 0.0,
+              "unique_count": 827
+            }
+          }
+        },
+        "public_2023_frames": 1855,
+        "span_2025_b0_bit3_context": {
+          "0": {
+            "brake_pressed_fraction": 0.0,
+            "frame_count": 319,
+            "gas_pedal_user": {
+              "count": 319,
+              "max": 0.73,
+              "min": 0.0,
+              "unique_count": 108
+            },
+            "gas_positive_fraction": 0.9717868338557993,
+            "speed_kph": {
+              "count": 319,
+              "max": 23.63,
+              "min": 0.0,
+              "unique_count": 278
+            }
+          },
+          "1": {
+            "brake_pressed_fraction": 0.8472310630171865,
+            "frame_count": 1571,
+            "gas_pedal_user": {
+              "count": 1571,
+              "max": 0.075,
+              "min": 0.0,
+              "unique_count": 9
+            },
+            "gas_positive_fraction": 0.006365372374283896,
+            "speed_kph": {
+              "count": 1571,
+              "max": 23.657500000000002,
+              "min": 0.0,
+              "unique_count": 494
+            }
+          }
+        },
+        "span_2025_frames": 1890
+      },
+      "0x24D": {
+        "boundary": "The carrier survives, but neither segment exercises a cruise-switch transition, so old button semantics remain a prior-art lead only.",
+        "legacy_button_fields": {
+          "cancel": [
+            0
+          ],
+          "decrease": [
+            0
+          ],
+          "distance": [
+            0
+          ],
+          "enable": [
+            0
+          ],
+          "increase": [
+            0
+          ]
+        },
+        "public_2023_frames": 59,
+        "span_2025_frames": 60
+      }
+    },
+    "supporting_p5_oracles": {
+      "ECT_P5.ddb": [
+        {
+          "bit_range": [
+            75,
+            75
+          ],
+          "conversion": {
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "offset": 0,
+            "signed": false,
+            "unit": null
+          },
+          "monitor_key": 400,
+          "monitor_record_sha256": "c0f6d9941c58fe5e9737e5e8f2fd33bc1e8e1163e04779c7a88d4ddac15cd28a",
+          "name": "Cruise Main SW",
+          "pattern_display_key": 29,
+          "pattern_values": {
+            "0": "OFF",
+            "1": "ON"
+          },
+          "physical_data_key": 3,
+          "primary_data_id": "0x1011"
+        }
+      ],
+      "Engine_P5.ddb": [
+        {
+          "bit_range": [
+            75,
+            75
+          ],
+          "conversion": {
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "offset": 0,
+            "signed": false,
+            "unit": null
+          },
+          "monitor_key": 400,
+          "monitor_record_sha256": "c0f6d9941c58fe5e9737e5e8f2fd33bc1e8e1163e04779c7a88d4ddac15cd28a",
+          "name": "Cruise Main SW",
+          "pattern_display_key": 29,
+          "pattern_values": {
+            "0": "OFF",
+            "1": "ON"
+          },
+          "physical_data_key": 3,
+          "primary_data_id": "0x1011"
+        }
+      ],
+      "Meter_P5.ddb": [
+        {
+          "bit_range": [
+            11,
+            11
+          ],
+          "conversion": {
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "offset": 0,
+            "signed": false,
+            "unit": null
+          },
+          "monitor_key": 63,
+          "monitor_record_sha256": "89f161e490f24e5fed07934008e07c1e9239bf93fca93047828c0daeafff0ca5",
+          "name": "Radar Cruise System",
+          "pattern_display_key": 7,
+          "pattern_values": {
+            "0": "Without",
+            "1": "With"
+          },
+          "physical_data_key": 2,
+          "primary_data_id": "0x15A1"
+        },
+        {
+          "bit_range": [
+            10,
+            10
+          ],
+          "conversion": {
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "offset": 0,
+            "signed": false,
+            "unit": null
+          },
+          "monitor_key": 217,
+          "monitor_record_sha256": "6700536d9cb3c1c8a4f06109eec48cb383570905f20dda2561471dd1e0ce060e",
+          "name": "Radar Cruise Indicator",
+          "pattern_display_key": 2,
+          "pattern_values": {
+            "0": "OFF",
+            "1": "ON"
+          },
+          "physical_data_key": 2,
+          "primary_data_id": "0x2951"
+        },
+        {
+          "bit_range": [
+            11,
+            11
+          ],
+          "conversion": {
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "offset": 0,
+            "signed": false,
+            "unit": null
+          },
+          "monitor_key": 218,
+          "monitor_record_sha256": "96603e4bea9fd4f3c6dbc23b648b40fc80be27e392331a69e5d9dc330e78ee88",
+          "name": "Radar Cruise Indicator (Yellow)",
+          "pattern_display_key": 2,
+          "pattern_values": {
+            "0": "OFF",
+            "1": "ON"
+          },
+          "physical_data_key": 2,
+          "primary_data_id": "0x2951"
+        },
+        {
+          "bit_range": [
+            12,
+            12
+          ],
+          "conversion": {
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "offset": 0,
+            "signed": false,
+            "unit": null
+          },
+          "monitor_key": 219,
+          "monitor_record_sha256": "a6c67cfe8e0e1220f1c6b9927af49227186728d177191aa6706078cee8b0210d",
+          "name": "Cruise Indicator",
+          "pattern_display_key": 2,
+          "pattern_values": {
+            "0": "OFF",
+            "1": "ON"
+          },
+          "physical_data_key": 2,
+          "primary_data_id": "0x2951"
+        },
+        {
+          "bit_range": [
+            13,
+            13
+          ],
+          "conversion": {
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "offset": 0,
+            "signed": false,
+            "unit": null
+          },
+          "monitor_key": 220,
+          "monitor_record_sha256": "9d7b396596c22263ecacf84dd9665bf920d81c09333554ebd7616bb27146d748",
+          "name": "Cruise Indicator (Yellow)",
+          "pattern_display_key": 2,
+          "pattern_values": {
+            "0": "OFF",
+            "1": "ON"
+          },
+          "physical_data_key": 2,
+          "primary_data_id": "0x2951"
+        },
+        {
+          "bit_range": [
+            8,
+            8
+          ],
+          "conversion": {
+            "decimal_point_count": 0,
+            "div": 1,
+            "mul": 1,
+            "offset": 0,
+            "signed": false,
+            "unit": null
+          },
+          "monitor_key": 440,
+          "monitor_record_sha256": "00cc398d197ffe2622e8ca151e097b658ac8c2561f688896cbc414f3702eae81",
+          "name": "Main Switch",
+          "pattern_display_key": 2,
+          "pattern_values": {
+            "0": "OFF",
+            "1": "ON"
+          },
+          "physical_data_key": 2,
+          "primary_data_id": "0x1003"
+        }
+      ]
+    },
+    "techstream_p5_frc_oracles": [
+      {
+        "bit_range": [
+          10,
+          10
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 23,
+        "monitor_record_sha256": "98ae945132d1f4a469e9e79f5b60fff99df43af39fbf81a98bf0a5c9067e972b",
+        "name": "ACC Installation Availability",
+        "pattern_display_key": 13,
+        "pattern_values": {
+          "0": "Not Installed",
+          "1": "Installed"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1202"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 94,
+        "monitor_record_sha256": "1e340405866db340d60b09d55fa5f961d7333052d5d28accf734b1d1296e0339",
+        "name": "Cruise Control Permission Flag",
+        "pattern_display_key": 39,
+        "pattern_values": {
+          "0": "Cruise Control Not Allowed",
+          "1": "Cruise Control Allowed"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1905"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 95,
+        "monitor_record_sha256": "1d305b4ae9323616d117a356d9df771d66b411f16276ba11e11e7668d8a94c8c",
+        "name": "Main Switch Recognition Flag",
+        "pattern_display_key": 24,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1906"
+      },
+      {
+        "bit_range": [
+          9,
+          9
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 96,
+        "monitor_record_sha256": "b0b131d9c59d947146e0074b2dd7f889fb77e1619977f7ad8fd6c32efc60a0ac",
+        "name": "Set Cancel Switch Condition",
+        "pattern_display_key": 40,
+        "pattern_values": {
+          "0": "No Operation",
+          "1": "Operation Exists"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1906"
+      },
+      {
+        "bit_range": [
+          40,
+          40
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 101,
+        "monitor_record_sha256": "490e6bf6f3992c4a98779f0d0d46a16ba2b7c8a3c38e7855dbd13b4319f312e2",
+        "name": "ACC Not Available Icon Lighting Request Flag",
+        "pattern_display_key": 24,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1906"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 102,
+        "monitor_record_sha256": "35d60bdb7b98000664de7919591430eb122e1669a9e74e6713982bf24d7ea097",
+        "name": "ACC Control in Operation Flag",
+        "pattern_display_key": 41,
+        "pattern_values": {
+          "0": "Cruise Control Not in Operation",
+          "1": "Cruise Control in Operation"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1914"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 104,
+        "monitor_record_sha256": "f395702951f83febb5dce430974ec3eb5400fcd6ffadada816390818109ca5b8",
+        "name": "ACC Brake Control in Operation",
+        "pattern_display_key": 42,
+        "pattern_values": {
+          "0": "ACC Brake Control in Operation",
+          "1": "No ACC Brake Control Operation"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1918"
+      },
+      {
+        "bit_range": [
+          8,
+          8
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 106,
+        "monitor_record_sha256": "07bfc873b6f0e13956fb483d3c77eb90e2d6ff77bfc8958c0eefe9c2f034a5d4",
+        "name": "ACC Installed Flag",
+        "pattern_display_key": 24,
+        "pattern_values": {
+          "0": "OFF",
+          "1": "ON"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1928"
+      },
+      {
+        "bit_range": [
+          0,
+          7
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": null
+        },
+        "monitor_key": 201,
+        "monitor_record_sha256": "b85d0f5b9a5892e822c275853b18bd908c6277d4051d878a8605799be3d016a7",
+        "name": "Set Vehicle Interval Time",
+        "pattern_display_key": 86,
+        "pattern_values": {
+          "1": "Set Vehicle Interval Time4",
+          "2": "Set Vehicle Interval Time3",
+          "3": "Set Vehicle Interval Time2",
+          "4": "Set Vehicle Interval Time1"
+        },
+        "physical_data_key": 1,
+        "primary_data_id": "0x1912"
+      },
+      {
+        "bit_range": [
+          0,
+          31
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": "km/h"
+        },
+        "monitor_key": 217,
+        "monitor_record_sha256": "8b2857017a472f26076f0f9ad5d1a1eeeffc1a4f26dd414f0ecb907f47cf977d",
+        "name": "Current Vehicle Speed",
+        "pattern_display_key": 0,
+        "pattern_values": {},
+        "physical_data_key": 2,
+        "primary_data_id": "0x1901"
+      },
+      {
+        "bit_range": [
+          32,
+          63
+        ],
+        "conversion": {
+          "decimal_point_count": 0,
+          "div": 1,
+          "mul": 1,
+          "offset": 0,
+          "signed": false,
+          "unit": "km/h"
+        },
+        "monitor_key": 218,
+        "monitor_record_sha256": "1e1358e15ffd535570fbb7dd21fb5c2fa1fd47cffc71e1c21d782bd69536fd8a",
+        "name": "Memory Vehicle Speed",
+        "pattern_display_key": 0,
+        "pattern_values": {},
+        "physical_data_key": 2,
+        "primary_data_id": "0x1901"
+      }
+    ],
+    "wire_mapping_status": {
+      "acc_not_available_or_fault": "open: diagnose against ACC Not Available Icon Lighting Request Flag and permission state",
+      "cruise_available": "open: diagnose against Main Switch Recognition Flag and Cruise Control Permission Flag",
+      "cruise_enabled": "open: diagnose against ACC Control in Operation Flag",
+      "follow_distance": "open: diagnose against Set Vehicle Interval Time",
+      "set_speed": "open: diagnose against Memory Vehicle Speed; Current Vehicle Speed is an independent reference"
+    }
+  },
+  "evidence_sources": {
+    "h_decompiler": {
+      "path": "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json",
+      "sha256": "529b85a9fb23edf6af47f810c02545770b42d9f3a611b64f0490f6c2faed7861"
+    },
+    "h_rx_diff": {
+      "path": "data/generated/corolla_8965H1202000_application_rx_diff.json",
+      "sha256": "5f3010636ad1c865f0855e68fc07b57537a1db1b40ededd3dcb31fb878e3c5e3"
+    },
+    "public_route": {
+      "path": "data/generated/corolla_2023_public_route_opendbc_evidence.json",
+      "sha256": "48140f61e5c4c92cae78343d27c9e13b408dd2058ae6deeadd57eb17e194e2c9"
+    },
+    "span_route": {
+      "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+      "sha256": "b2ec1446624981dbb63d353f20df0d9919e33f6c2aec6c295675fcf2a2a19366"
+    },
+    "state_bridge": {
+      "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+      "sha256": "1b7dbab547765c6971119ebc3d2412a74a515e6f35050d4a48a6bb5abe06192a"
+    },
+    "techstream_cruise": {
+      "path": "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
+      "sha256": "cddc1d2916e4632a8df30a12f3fb6645df5346935063acb183894f978ad8e2d8"
+    },
+    "techstream_ready": {
+      "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
+      "sha256": "f22b1e99cf5ef38c03932ff105e6abbe2d2c6eb9d1262afa3f7fdf137102457f"
+    }
+  },
+  "gear": {
+    "can_id": "0x127",
+    "classification": "carrier/layout retained; raw 3 observed and prior-art-compatible with D; target-native enum semantics not independently validated",
+    "h_rx_descriptor_index": 20,
+    "h_scalar_extractions": [
+      {
+        "length": 6,
+        "signal_id": 123,
+        "wire": "B0[7:2]"
+      },
+      {
+        "length": 1,
+        "signal_id": 125,
+        "wire": "B1[3]"
+      },
+      {
+        "length": 11,
+        "signal_id": 129,
+        "wire": "B3/B4 signed11 domain"
+      }
+    ],
+    "h_signal_ids": [
+      123,
+      124,
+      125,
+      126,
+      127,
+      128,
+      129,
+      130,
+      131,
+      132
+    ],
+    "h_static_boundary": "Exact H retains 0x127 and three scalar fields at the same wire positions as the older SecOC Toyota family, but its generated scalar unpacker does not consume the legacy B5[3:0] gear nibble. The EPS therefore cannot statically validate P/R/N/B enum semantics.",
+    "legacy_gear_field": {
+      "prior_art_values": {
+        "0": "P",
+        "1": "R",
+        "2": "N",
+        "3": "D",
+        "4": "B"
+      },
+      "wire": "B5[3:0]"
+    },
+    "length": 8,
+    "production_boundary": "Raw value 3 is operationally observed and compatible with the retained Toyota prior-art D enum, but the MOCK rlog provides no independent gear-state oracle. Treat target-native D semantics as bounded until an independent gear oracle or explicit transition confirms them; P/R/N/B still require live transitions.",
+    "span_dynamic": {
+      "checksum_valid": 3662,
+      "decode_basis": "The D label comes only from the retained Toyota prior-art GEAR_PACKET_HYBRID enum; embedded carParams is MOCK and supplies no independent gear-state oracle.",
+      "frames": 3662,
+      "prior_art_decoded_values": [
+        "D"
+      ],
+      "raw_values": [
+        3
+      ]
+    }
+  },
+  "implementation_consequence": {
+    "not_safe_yet": [
+      "Treat 0x176 B0[3] as cruise main/active state.",
+      "Assume surviving 0x24D button bit semantics without a button transition.",
+      "Map diagnostic permission/main/active/fault/set-speed semantics to CAN without a producer/static or synchronized live join.",
+      "Promote P/R/N/B gear enums without live transitions."
+    ],
+    "safe_now": [
+      "Add/inspect 0x51E B0[7] as target-native Ready Status input.",
+      "The current read-only parser may retain prior-art raw3->D decoding as an observation aid, but do not call D target-native validated; preserve P/R/N/B as unvalidated prior-art enums.",
+      "Keep TSS3 cruiseState.available/enabled/set-speed neutral in production CarState.",
+      "Use the exact FRC P5 Data-ID oracle set through Techstream/GTS+ for the next synchronized capture instead of guessing replacement CAN bits."
+    ]
+  },
+  "ready_status": {
+    "boundary": "Both operational captures show only value 1; value 0 and a Ready transition remain uncaptured. This is an incoming Ready Status field, not proof that an EPS Tx PDU republishes the same boolean.",
+    "can_id": "0x51E",
+    "classification": "wire field closed",
+    "h_rx_descriptor_index": 24,
+    "h_signal_id": 154,
+    "length": 8,
+    "operational_copy_sites": [
+      "0x000BAB58",
+      "0x000BAC16"
+    ],
+    "route_corroboration": {
+      "public_2023": {
+        "frames": 59,
+        "payloads": [
+          "8000004500000000"
+        ],
+        "values": [
+          1
+        ]
+      },
+      "span_2025": {
+        "frames": 60,
+        "payloads": [
+          "86001a0000000000"
+        ],
+        "values": [
+          1
+        ]
+      }
+    },
+    "source_chain": [
+      "0x51E B0[7]",
+      "0xFEBE7D1B",
+      "0xFEBEF052",
+      "0xFEBEB5A8",
+      "0xFEBEE811",
+      "DID 0x1033"
+    ],
+    "techstream": {
+      "boolean_domain": [
+        0,
+        1
+      ],
+      "did": "0x1033",
+      "name": "Ready Status"
+    },
+    "wire": "B0[7]",
+    "writer_boundary": "FEBEF052 reaches FEBEB5A8 through two operational copy sites and the RAM nodes also have initialization/reset writers. The Ready Status dataflow is proved; exclusive-writer provenance is not claimed."
+  },
+  "schema": "corolla-hf-nonsteering-engagement-state-v1",
+  "software_family": {
+    "application_byte_identical": true,
+    "f": "8965F1208000",
+    "h": "8965H1202000"
+  }
+}

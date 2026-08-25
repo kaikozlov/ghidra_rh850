@@ -42,6 +42,8 @@ for cid, dlc, count in (
     ("0x101", 8, 2943),
     ("0x116", 8, 2499),
     ("0x176", 8, 1855),
+    ("0x24D", 8, 59),
+    ("0x51E", 8, 59),
 ):
     i = instance(cid, bus=1, dlc=dlc)
     check(f"{cid}/{dlc} is observed on logical bus 1", i is not None and i["count"] == count)
@@ -55,10 +57,14 @@ check("0x0AA wheel fault bits are all clear in segment", all(v == [0] for v in r
 check("0x101 old brake bit toggles", reuse["0x101"]["brake_pressed_values"] == [0, 1])
 check("0x116 old user-pedal field has dynamic range", reuse["0x116"]["gas_pedal_user"]["unique_count"] == 76 and reuse["0x116"]["gas_pedal_user"]["max"] == 0.375)
 check("all 0x176 checksums validate", reuse["0x176"]["checksum_valid"] == reuse["0x176"]["frame_count"] == 1855)
-check("0x176 active semantics remain dynamically untested", reuse["0x176"]["cruise_active_values"] == [False] and reuse["0x176"]["cruise_state_values"] == [0] and "never engages" in reuse["0x176"]["dynamic_boundary"])
+check("0x176 active semantics remain dynamically untested", reuse["0x176"]["cruise_active_values"] == [False] and reuse["0x176"]["cruise_state_values"] == [0] and "no independent cruise-main/engagement oracle" in reuse["0x176"]["dynamic_boundary"])
+ctx176 = reuse["0x176"]["b0_bit3_context"]
+check("0x176 B0[3] follows accelerator-release context rather than old cruise-active state", reuse["0x176"]["b0_bit3_values"] == [0, 1] and ctx176["1"]["gas_positive_fraction"] == 0.0 and ctx176["0"]["gas_positive_fraction"] > 0.99 and ctx176["1"]["brake_pressed_fraction"] > 0.67 and ctx176["0"]["brake_pressed_fraction"] == 0.0)
+check("0x24D survives but legacy cruise-switch bits are inactive", reuse["0x24D"]["frame_count"] == 59 and all(v == [0] for v in reuse["0x24D"]["prior_art_button_values"].values()))
+check("0x51E Ready Status input is high throughout public operational segment", reuse["0x51E"]["frame_count"] == 59 and reuse["0x51E"]["ready_status_values"] == [1] and reuse["0x51E"]["unique_payloads"] == ["8000004500000000"])
 
 print("\n== old-contract holes ==")
-for cid in ("0x127", "0x1D3", "0x260", "0x262", "0x283", "0x320", "0x343", "0x399", "0x3BC", "0x3F6"):
+for cid in ("0x127", "0x177", "0x1A2", "0x1D3", "0x260", "0x262", "0x283", "0x320", "0x343", "0x399", "0x3BC", "0x3F6"):
     check(f"{cid} is absent from incoming route", rows[cid]["instances"] == [])
 for cid in ("0x3B7", "0x411", "0x412", "0x610", "0x614", "0x620", "0x622"):
     check(f"{cid} same-ID/8-byte lead remains present", any(x["bus"] == 1 and x["dlc"] == 8 for x in rows[cid]["instances"]))

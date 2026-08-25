@@ -1133,6 +1133,7 @@ paths = [
   "data/generated/corolla_2023_public_route_opendbc_evidence.json",
   "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
   "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+  "data/generated/corolla_hf_nonsteering_engagement_state.json",
   "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
   "data/generated/ephemeral_runtime_target_manifest_8965H1202000.json",
   "data/toyota_eps_variant_matrix.csv",
@@ -1144,6 +1145,32 @@ paths = [
   "docs/status/OPEN_QUESTIONS.md",
   "docs/status/PRIORITIES.md",
   "exploit/findings_coverage.json",
+]
+
+[suite.corolla_hf_nonsteering_engagement_state]
+tests = ["tests/verify_corolla_hf_nonsteering_engagement_state.py"]
+oracle = "generated_self_check"
+paths = [
+  "tests/verify_corolla_hf_nonsteering_engagement_state.py",
+  "tools/build_corolla_hf_nonsteering_engagement_state.py",
+  "tools/extract_corolla_h_nonsteering_engagement_evidence.py",
+  "tools/techstream/extract_tss3_cruise_engagement_semantics.py",
+  "data/generated/corolla_hf_nonsteering_engagement_state.json",
+  "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json",
+  "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
+  "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
+  "data/generated/corolla_8965H1202000_application_rx_diff.json",
+  "data/generated/corolla_8965H1202000_techstream_correlations.json",
+  "data/generated/corolla_2023_public_route_opendbc_evidence.json",
+  "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
+  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/CORRECTIONS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
 ]
 
 [suite.corolla_2023_public_route_opendbc_evidence_external]
@@ -1168,6 +1195,27 @@ paths = [
   "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
   "community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst",
   "external-references.lock.json",
+]
+
+[suite.corolla_h_nonsteering_engagement_evidence_external]
+tests = ["tests/verify_corolla_h_nonsteering_engagement_evidence_external.py"]
+oracle = "independent_external_artifact"
+modes = ["local"]
+paths = [
+  "tests/verify_corolla_h_nonsteering_engagement_evidence_external.py",
+  "tools/extract_corolla_h_nonsteering_engagement_evidence.py",
+  "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+]
+
+[suite.tss3_cruise_engagement_semantics_external]
+tests = ["tests/verify_tss3_cruise_engagement_semantics_external.py"]
+oracle = "independent_external_artifact"
+modes = ["local"]
+paths = [
+  "tests/verify_tss3_cruise_engagement_semantics_external.py",
+  "tools/techstream/extract_tss3_cruise_engagement_semantics.py",
+  "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
 ]
 
 [suite.corolla_hf_secoc_00f_freshness_bridge_external]

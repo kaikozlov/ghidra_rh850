@@ -305,11 +305,11 @@
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "180661a834618a74323ae6334c6dc045e3d57a03bda640c7e192ce07a3654014"
+      "sha256": "1b7dbab547765c6971119ebc3d2412a74a515e6f35050d4a48a6bb5abe06192a"
     },
     "steering_limits": {
       "path": "data/generated/corolla_hf_steering_limits.json",
-      "sha256": "cee6a3c3a87960c62c1060e79ac38157de77de9eb9668bb696257889a724dc81"
+      "sha256": "11a852f2abd43078b8cc299ef7a72af0cf9d790fbc8137c06a03a7a97375b876"
     },
     "target_angle_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",

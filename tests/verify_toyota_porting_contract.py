@@ -127,6 +127,11 @@ check(
     all(token in report for token in (
         "6b124c546381350b8c7285980ffed3f14aef8f53",
         "263b339480eabf8be242b486bd76f1df835241b2",
+        "non-actuating TSS3 scaffold landed",
+        "fa1847d7ee66a221f2960ec5cf7a840e737ca521",
+        "ddc6e532ecb8640d5771234b0017d84839e28ae2",
+        "adds incoming `0x51E B0[7]`",
+        "advances the submodule to that revision",
         "SafetyModel.noOutput",
         "5,900/5,900",
         "147-message CAN fingerprint",

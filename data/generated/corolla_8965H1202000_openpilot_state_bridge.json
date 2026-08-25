@@ -4,7 +4,7 @@
     "driver_torque_validity": "closed on live 0x030 B6[0]; Span nominal-clear 6000/6000 and asserted firmware state zeroes driver-torque telemetry",
     "electrical_motor_fault": "the 0x351 base-status path is statically joined through FEBEB514/FEBEE82B to Dem event 4 -> C159B49, but 0x351 also has a separate force-7 override from FEBE65E4/FEBE7E13; route availability/asserted transitions are not captured",
     "eps_classifier_clear_normal_path": "0x394 state 0 is the deepest recovered clear/normal classifier path; it is not a proved Ready boolean, and route availability/transitions are not captured",
-    "eps_ready": "Techstream DID 0x1033 Ready Status exists and is target-native, but no four-PDU Tx-field join is proved",
+    "eps_ready": "closed as incoming 0x51E B0[7] -> FEBE7D1B -> FEBEF052 -> FEBEB5A8 -> FEBEE811 -> Techstream DID 0x1033 Ready Status; Span moving route carries value 1 on 60/60 frames, but Ready=0 transition remains uncaptured",
     "motor_actuator_response": "closed statically at 0x4A3 B6:B7 as sign-inverted DID 0x1151 Motor Actual Current (Q Axis), -0.01 A/count, but current routes do not carry 0x4A3",
     "production_safety_boundary": "These results close most semantic input roles but do not authorize actuation. Panda safety still requires relay-correct message availability/side attribution, stock-LTA transitions, asserted fault captures, and validated control limits/suppression.",
     "steering_fault_inhibit_status": "selected steering fault/inhibit status closed on live 0x030 B6[2] and duplicated in 0x4A3 B0[0]; Span nominal-clear 6000/6000; not an exhaustive EPS-fault state",
@@ -210,7 +210,7 @@
   },
   "next_discriminators": [
     "Treat live 0x030 driver torque plus selected steering fault/inhibit/validity status, 0x4A3 Q-current response/alternate torque, the 0x351 C159B49-linked base path plus separate force-7 override, and the 0x394 state-0 deepest clear/normal classifier path as closed at their stated evidence grades; do not redo their basic producer recovery.",
-    "Acquire a firmware-identified relay-correct H/F-family capture that actually carries 0x4A3/0x351/0x394 and exercises stock LTA off->active->off plus EPS Ready Status/DTC transitions. This is required to close packet availability, state-15 meaning, and temporary/permanent CarState mapping.",
+    "Acquire a firmware-identified relay-correct H/F-family capture that actually carries 0x4A3/0x351/0x394 and exercises stock LTA off->active->off plus 0x51E Ready Status 1->0 and DTC transitions. This is required to close packet availability, state-15 meaning, and temporary/permanent CarState mapping; the Ready Status wire field itself is already closed.",
     "Acquire/analyze true-TSS3 FRC_P5 and Brake/EPB producer/Tx descriptors or synchronized captures to close the upstream FRC -> chassis -> EPS route, SecOC sender/freshness contract, suppression ownership, and production control limits."
   ],
   "pre_tss3_openpilot_requirements": {
@@ -262,7 +262,7 @@
       "angle initialization"
     ]
   },
-  "schema": "corolla-8965H1202000-openpilot-state-bridge-v7",
+  "schema": "corolla-8965H1202000-openpilot-state-bridge-v8",
   "state_bridge": {
     "0x030": {
       "additive_field": {
@@ -791,19 +791,29 @@
       "openpilot_consequence": "Generation-native driver torque and actuator-response observables are closed without old 0x260 semantics. They can feed a future Panda safety model once relay-correct routing/availability is captured; absence from the current route prevents using them as required CarState inputs today.",
       "pdu": 3
     },
-    "techstream_ready_status_oracle": {
-      "boundary": "This target-native diagnostic ready observable is not yet joined to a field in 0x030/0x351/0x394/0x4A3, so it is a future live-correlation oracle rather than a current CarState bit.",
+    "ready_status_input_0x51E": {
+      "boundary": "Exact H proves the incoming CAN field that feeds Techstream Ready Status. Neither retained route exercises value 0, and this does not imply that any EPS Tx PDU republishes the same boolean.",
+      "can_id": "0x51E",
       "did": "0x1033",
       "firmware_chain_verified": true,
+      "firmware_signal_id": 154,
+      "length": 8,
       "name": "Ready Status",
-      "openpilot_consequence": "Use as a diagnostic correlation oracle for future stock-LTA/fault captures; do not invent a CAN ready bit until a Tx-field join exists.",
+      "openpilot_consequence": "0x51E B0[7] can be parsed as the target-native Ready Status input. Keep it distinct from 0x030/0x351/0x394 steering-fault state, and validate a Ready 1->0 transition before using it as an engagement/fault classifier.",
+      "raw_destination": "0xFEBE7D1B",
       "source_chain": [
+        "0x51E B0[7]",
         "0xFEBE7D1B",
         "0xFEBEF052",
         "0xFEBEB5A8",
         "0xFEBEE811",
         "DID 0x1033"
-      ]
+      ],
+      "span_operational_frames": 60,
+      "span_values": [
+        1
+      ],
+      "wire": "B0[7]"
     }
   },
   "structural_corroboration": {

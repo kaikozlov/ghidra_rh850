@@ -601,7 +601,7 @@
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "180661a834618a74323ae6334c6dc045e3d57a03bda640c7e192ce07a3654014"
+      "sha256": "1b7dbab547765c6971119ebc3d2412a74a515e6f35050d4a48a6bb5abe06192a"
     },
     "target_angle_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",

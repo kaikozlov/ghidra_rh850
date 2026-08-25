@@ -11,6 +11,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 IMAGE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"
 EVID = REPO / "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json"
+ENG_EVID = REPO / "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json"
 TECH = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 FD = REPO / "data/generated/corolla_8965H1202000_fd_control_interface.json"
 DIAG_EVID = REPO / "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json"
@@ -51,6 +52,7 @@ def monitor(tech: dict, key: int) -> dict:
 def build() -> dict:
     image = IMAGE.read_bytes()
     evid = json.loads(EVID.read_text())
+    eng_evid = json.loads(ENG_EVID.read_text())
     tech = json.loads(TECH.read_text())
     fd = json.loads(FD.read_text())
     diag_evid = json.loads(DIAG_EVID.read_text())
@@ -72,12 +74,33 @@ def build() -> dict:
         raise ValueError("H steering-state compact evidence schema/count drift")
     if eq["application_equivalence"]["different_bytes"] != 0:
         raise ValueError("H/F application equivalence drift")
+    if eng_evid["schema"] != "corolla-h-nonsteering-engagement-decompiler-evidence-v1" or eng_evid["function_count"] != 6:
+        raise ValueError("H non-steering engagement compact evidence schema/count drift")
+    if eng_evid["image"]["sha256"] != sha(image):
+        raise ValueError("H non-steering engagement evidence image drift")
 
     f = fnmap(evid)
-    for row in evid["functions"]:
+    ef = fnmap(eng_evid)
+    for row in [*evid["functions"], *eng_evid["functions"]]:
         start = int(row["entry"], 16); size = row["body_size"]
         if sha(image[start:start+size]) != row["body_sha256"]:
             raise ValueError(f"raw body drift {row['entry']}")
+
+    cgear = ef[0x45EDE]["decompiled_c"]
+    cready = ef[0x46144]["decompiled_c"]
+    cready_stage = ef[0x5262C]["decompiled_c"]
+    cready_copy_secondary = ef[0xBAB58]["decompiled_c"]
+    cready_copy_primary = ef[0xBAC16]["decompiled_c"]
+    cready_publish = ef[0xBBA48]["decompiled_c"]
+    need(cgear,
+         "FUN_0007643a(0x7b,0xd7,6,2,0,",
+         "FUN_0007643a(0x7d,0xd8,1,3,0,",
+         "FUN_0007643a(0x81,0xda,0xb,0,1,0xfebe7cfc);")
+    need(cready, "FUN_0007643a(0x9a,0xf7,1,7,0,0xfebe7d1b);")
+    need(cready_stage, "uRamfebef052 = uRamfebe7d1b;")
+    need(cready_copy_secondary, "uVar1 = uRamfebef052;", "*(undefined1 *)(iVar3 + -600) = uVar1;")
+    need(cready_copy_primary, "cRamfebeb5a8 = cRamfebef052;")
+    need(cready_publish, "uRamfebee811 = uRamfebeb5a8;")
 
     c3738c=f[0x3738C]["decompiled_c"]
     c46c4c=f[0x46C4C]["decompiled_c"]; c46d9a=f[0x46D9A]["decompiled_c"]; c4749a=f[0x4749A]["decompiled_c"]
@@ -157,6 +180,7 @@ def build() -> dict:
     span030=span["direct_reuse_evidence"]["0x030"]
     span030_bridge=span030["steering_state_bridge"]
     span_torque=span030_bridge["steering_wheel_torque"]
+    span_ready=span["direct_reuse_evidence"]["0x51E"]
     if (m15["name"],m15["primary_data_id"],m15["h_callback"]) != ("Steering Wheel Torque","0x1035","0x48820"):
         raise ValueError("Steering Wheel Torque Techstream join drift")
     if (m17["name"],m17["primary_data_id"],m17["h_callback"]) != ("Steering Angle","0x1037","0x488A8"):
@@ -171,6 +195,8 @@ def build() -> dict:
         raise ValueError("0x351 event/DTC semantic join drift")
     if not (ready_sem["name"] == "Ready Status" and ready_sem["primary_data_id"] == "0x1033" and ready_sem["source_chain"][:4] == ["0xFEBE7D1B","0xFEBEF052","0xFEBEB5A8","0xFEBEE811"]):
         raise ValueError("Ready Status diagnostic oracle drift")
+    if not (span_ready["frame_count"] == 60 and span_ready["ready_status_values"] == [1]):
+        raise ValueError("Span 0x51E Ready Status operational-state evidence drift")
     if not (span030["frame_count"] == span030["rule_matches"] == 6000 and span030_bridge["steering_fault_inhibit_status"]["values"] == [0] and span030_bridge["driver_torque_invalid"]["values"] == [0]):
         raise ValueError("Span 0x030 nominal steering-state bridge drift")
     if not (span_torque["torque_nm"]["count"] == 6000 and span_torque["fine_values"] == [-5,-4,-3,-2,-1,0,1,2,3,4,5] and span_torque["coarse_rounding_delta_values"] == [-1,0,1]):
@@ -213,7 +239,7 @@ def build() -> dict:
     if not (lta_static["named_retained_branch_computed_alias_audit_closed"] and lta_static["b6_percentage_modulates_retained_branch"]):
         raise ValueError("computed retained-branch audit not closed")
     return {
-      "schema":"corolla-8965H1202000-openpilot-state-bridge-v7",
+      "schema":"corolla-8965H1202000-openpilot-state-bridge-v8",
       "evidence_boundary": (
         "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. "
         "Sienna/openpilot structures are used only to identify which roles a port needs, not to transplant field scales or fault codes. "
@@ -351,13 +377,20 @@ def build() -> dict:
           "boundary":"The available moving log proves 0x030 is live and both safety-relevant gates are clear in all 6,000 nominal frames. The prior direct-reference writer census was incomplete: eleven additional fields have exact GP-relative runtime writers, including a redundant driver-torque representation and a Q-current-derived field. It contains no induced fault or stock-LTA transition, so asserted-state operational consequences remain firmware-static and temporary/permanent fault semantics remain unresolved.",
           "openpilot_consequence":"0x030 can immediately supply physical driver steering torque, nominal selected steering fault/inhibit status, and driver-torque-validity state to the read-only measurement harness without making unseen 0x4A3/0x394/0x351 mandatory for CAN validity.",
         },
-        "techstream_ready_status_oracle":{
+        "ready_status_input_0x51E":{
+          "can_id":"0x51E",
+          "length":8,
+          "firmware_signal_id":154,
+          "wire":"B0[7]",
+          "raw_destination":"0xFEBE7D1B",
           "did":"0x1033",
           "name":"Ready Status",
-          "source_chain":ready_sem["source_chain"],
+          "source_chain":["0x51E B0[7]", *ready_sem["source_chain"]],
           "firmware_chain_verified":True,
-          "boundary":ready_sem["boundary"],
-          "openpilot_consequence":"Use as a diagnostic correlation oracle for future stock-LTA/fault captures; do not invent a CAN ready bit until a Tx-field join exists.",
+          "span_operational_frames":span_ready["frame_count"],
+          "span_values":span_ready["ready_status_values"],
+          "boundary":"Exact H proves the incoming CAN field that feeds Techstream Ready Status. Neither retained route exercises value 0, and this does not imply that any EPS Tx PDU republishes the same boolean.",
+          "openpilot_consequence":"0x51E B0[7] can be parsed as the target-native Ready Status input. Keep it distinct from 0x030/0x351/0x394 steering-fault state, and validate a Ready 1->0 transition before using it as an engagement/fault classifier.",
         },
       },
       "carstate_and_panda_input_closure": {
@@ -367,7 +400,7 @@ def build() -> dict:
         "driver_torque_validity":"closed on live 0x030 B6[0]; Span nominal-clear 6000/6000 and asserted firmware state zeroes driver-torque telemetry",
         "electrical_motor_fault":"the 0x351 base-status path is statically joined through FEBEB514/FEBEE82B to Dem event 4 -> C159B49, but 0x351 also has a separate force-7 override from FEBE65E4/FEBE7E13; route availability/asserted transitions are not captured",
         "eps_classifier_clear_normal_path":"0x394 state 0 is the deepest recovered clear/normal classifier path; it is not a proved Ready boolean, and route availability/transitions are not captured",
-        "eps_ready":"Techstream DID 0x1033 Ready Status exists and is target-native, but no four-PDU Tx-field join is proved",
+        "eps_ready":"closed as incoming 0x51E B0[7] -> FEBE7D1B -> FEBEF052 -> FEBEB5A8 -> FEBEE811 -> Techstream DID 0x1033 Ready Status; Span moving route carries value 1 on 60/60 frames, but Ready=0 transition remains uncaptured",
         "temporary_vs_permanent_fault":"not closed; no safe static mapping from 0x394 classes to openpilot steerFaultTemporary/steerFaultPermanent",
         "production_safety_boundary":"These results close most semantic input roles but do not authorize actuation. Panda safety still requires relay-correct message availability/side attribution, stock-LTA transitions, asserted fault captures, and validated control limits/suppression.",
       },
@@ -417,7 +450,7 @@ def build() -> dict:
       "structural_corroboration":structural,
       "next_discriminators":[
         "Treat live 0x030 driver torque plus selected steering fault/inhibit/validity status, 0x4A3 Q-current response/alternate torque, the 0x351 C159B49-linked base path plus separate force-7 override, and the 0x394 state-0 deepest clear/normal classifier path as closed at their stated evidence grades; do not redo their basic producer recovery.",
-        "Acquire a firmware-identified relay-correct H/F-family capture that actually carries 0x4A3/0x351/0x394 and exercises stock LTA off->active->off plus EPS Ready Status/DTC transitions. This is required to close packet availability, state-15 meaning, and temporary/permanent CarState mapping.",
+        "Acquire a firmware-identified relay-correct H/F-family capture that actually carries 0x4A3/0x351/0x394 and exercises stock LTA off->active->off plus 0x51E Ready Status 1->0 and DTC transitions. This is required to close packet availability, state-15 meaning, and temporary/permanent CarState mapping; the Ready Status wire field itself is already closed.",
         "Acquire/analyze true-TSS3 FRC_P5 and Brake/EPB producer/Tx descriptors or synchronized captures to close the upstream FRC -> chassis -> EPS route, SecOC sender/freshness contract, suppression ownership, and production control limits.",
       ],
     }
