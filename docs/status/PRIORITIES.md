@@ -120,9 +120,11 @@ package if the service offers one.
 **`Node01/DiagID=07B0`** (category-435 `ABS_P5`/Brake), ideally matched by
 vehicle/era to a `0792` FRC package, then analyze both producer-side images—or
 capture a synchronized stock-LTA session across those modules—and recover the
-remaining payload contract: how planner state becomes protected `0x0B6`
-signal254/255, which module signs it, and where SecOC routing/key/freshness
-ownership changes.
+remaining **producer-side** contract: how planner state becomes the now-exhausted
+protected `0x0B6` receiver payload, which module signs it, what values it places in
+the authenticated-but-EPS-unconsumed bytes, and where sender freshness/signing
+ownership changes. The EPS-side 32-byte partition, FV4/CMAC28 trailer, full-freshness
+packing, CMAC input, and ICU-S slot-4 selection are already closed.
 TMS-042 makes the same acquisition the highest-value reprogramming target too: modern GTS+ proves the FRC `ReproMethod=07` path
 uploads the package routine with DFI `0x01` / `10F5`, then the compact
 `DeltaReproData` with DFI `0x21` / `10F6`, while the host treats `.datx` as
@@ -421,15 +423,22 @@ dictionary defines `0=No Request` and closes H's active signal254 IDs as
 `PCS/LDA/Hands Off LTA/LTA-LCA/PDA`; H-special IDs `25/27` are `AP/Remote Parking`.
 The dedicated receiver contract now also proves PDU42 reload/expiry at **7 TAUJ0-CH3
 foreground ticks**, immediate cooperative cutout through slot18→`FEBEADB9`→`C26D`,
-and B6 signal261 as a modulo-64 sequence counter with effective-gap cap `8`. The CH3
+and B6 signal261 as a modulo-64 sequence counter with effective-gap cap `8`. The full
+receiver envelope is now exhausted too: B0..B27 are all authenticated, recovered EPS
+application semantics occupy only 51 bits concentrated in B3..B10, another six bits
+are extracted without a recovered downstream consumer, and the remaining 167
+authenticated application bits have no recovered consumer under the bounded generic
+COM/direct-reference census. B28..B31 are exactly FV4+CMAC28; full freshness is
+`trip16||reset20||message8||reset_low2||00b`; the CMAC input is
+`00 B6 || B0..B27 || freshness[6]`; and config/job0 selects ICU-S slot4. The CH3
 wall-clock period remains unknown, so sender cadence still needs capture/producer
 evidence rather than a guessed millisecond value.
 
-Capture protected `0x0B6` during stock steering only to validate these static receiver
-rules, recover sender wall-clock cadence and exact secondary-field names where needed,
-and derive normal target/rate bounds. In parallel, recover the B6 **SecOC** freshness/
-source/key contract and determine whether slot-4 command-5 can produce the required
-authenticated domain on real hardware. A category-435 CUW with
+Capture protected `0x0B6` during stock steering to validate sender wall-clock cadence,
+secondary-field dynamics where needed, and normal target/rate bounds—not to rediscover
+the receiver envelope. In parallel, recover **sender-side** freshness-state/signing
+ownership and the slot-4 key value or an approved way to use the slot; receiver
+freshness reconstruction and key-slot selection are already known. A category-435 CUW with
 `Node01/DiagID=07B0` plus the matched `FRC_P5` image is now the primary software
 target for the **remaining payload transform, sender cadence,
 and routing/authentication ownership**, not for discovering the EPS setpoint/request/

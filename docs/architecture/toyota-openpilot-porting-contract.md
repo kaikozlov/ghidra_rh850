@@ -147,11 +147,18 @@ as `1=PCS`, `4=LDA`, `10=Hands Off LTA`, `11=LTA/LCA`, and `19=PDA`; PDU42's
 receive deadline reloads to **7 TAUJ0-CH3 foreground ticks**, first expiry disables
 cooperative selection through the slot-18 receive-status path, and signal261 is a
 modulo-64 rolling sequence counter with effective-gap cap `8`. The CH3 wall-clock
-period is not statically known. The remaining problem is therefore safe reproduction
-of a known EPS receiver contract — exact OEM signal255 unit naming, sender wall-clock
-cadence, exact secondary-field semantics where safety-relevant, SecOC freshness/key
-state, stock-source suppression, and the upstream payload/SecOC producer contract.
-Techstream now verifies the Corolla P5 module topology as `FRC_P5` 498 + category-435
+period is not statically known. The 32-byte receiver envelope is now exhausted as
+well: B0..B27 are authenticated application data; recovered EPS semantics occupy 51
+bits concentrated in B3..B10; 6 more bits are extracted without a recovered downstream
+consumer; and 167 authenticated application bits have no recovered consumer under the
+bounded COM/direct-reference census. B28..B31 are exactly FV4+CMAC28; full freshness
+is `trip16||reset20||message8||reset_low2||00b`; the CMAC input is
+`00 B6 || B0..B27 || freshness[6]`; and generated config/job0 selects ICU-S slot4.
+The remaining problem is therefore safe **sender-side** reproduction of a known EPS
+receiver contract — exact OEM signal255 unit naming, sender wall-clock cadence,
+secondary-field dynamics where safety-relevant, sender freshness-state/signing
+ownership, the slot-4 secret value or approved slot use, stock-source suppression,
+and the upstream payload/SecOC producer contract. Techstream now verifies the Corolla P5 module topology as `FRC_P5` 498 + category-435
 `ABS_P5`/Brake-EPB + `EMPS_P5` 405, but not a byte-level forwarding transform or
 SecOC signer — so the remaining work is not discovery of another steering message,
 its scale, request selector, or loss rule.
@@ -248,7 +255,7 @@ work must recover the second and fourth boxes for each new generation as well.
 | Longitudinal command | older SecOC DBC provides a useful comparator, not an EPS-local proof | route `0x183` is 64-byte CAN-FD and disproves old wire-shape transfer | locate ACC producer, target command, feedback, stock suppression, AEB coexistence |
 | Stock producer ownership | old openpilot architecture gives camera/radar replacement model | physical Toyota-B/network differences already observed | map FRC/radar/gateway ownership and safe duplicate blocking for each command family |
 | UI / alerts | older `0x412` is historical reference | old-camera U023A87 path is disabled residue in H | identify FRC/cluster LTA/LDA/LCA status and warning outputs |
-| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6 using H slot-4 SecOC configuration; application signal261 sequence handling is separately closed | recover **SecOC** freshness/source behavior and production-safe signing/key path before actuation; do not confuse the application 6-bit sequence counter with SecOC freshness |
+| Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6; receiver-side FV4/CMAC28 trailer, 46-bit freshness reconstruction, exact 36-byte CMAC input, and config/job0→ICU-S slot4 selection are closed; application signal261 sequence handling is separate | recover **sender-side** freshness-state/signing ownership and a production-safe way to use/provision the slot-4 secret before actuation; do not confuse the application 6-bit sequence counter with SecOC freshness |
 | Techstream producer probes | older diagnostic controls are only contextual | FRC fixed vibration routines and category-435 ABS/Brake Active Tests are now cataloged; the latter are brake-actuator-only and expose no named steering setpoint writer | use these as capture/probe triggers only; normal B6 payload production still requires FRC/ABS firmware or synchronized traffic |
 
 ### 4.1 Route-backed Corolla implementation readiness

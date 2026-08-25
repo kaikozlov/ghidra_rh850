@@ -226,11 +226,15 @@ for downstream plausibility supervision.
 **Porting consequence:** the old Corolla command API did not merely move IDs; it
 changed from classic torque command to protected target-angle control. Do not port
 `0x2E4` limits or scaling. Signal255's controller-equivalent scale, signal254
-feature/request semantics, the seven-tick receiver loss cutoff, and signal261
-sequence arithmetic are now closed. Before any injection, recover sender wall-clock
-cadence, SecOC freshness/key behavior, stock-source suppression, exact secondary B6
-field names where safety-relevant, and H/F-native safety bounds. The literal OEM B6
-engineering-unit name remains unjoined even though the degree/radian scale is known.
+feature/request semantics, the seven-tick receiver loss cutoff, signal261 sequence
+arithmetic, and the complete B6 receiver-side SecOC envelope are now closed. B0..B27
+are authenticated application data, B28..B31 are FV4+CMAC28, full freshness is
+46 bits, and the exact CMAC input is `00 B6 || B0..B27 || freshness[6]` through ICU-S
+slot4. Before any injection, recover sender wall-clock cadence, sender freshness-state/
+signing ownership and safe slot4-key use, stock-source suppression, exact secondary
+B6 field dynamics where safety-relevant, and H/F-native safety bounds. The literal
+OEM B6 engineering-unit name remains unjoined even though the degree/radian scale is
+known.
 
 ### 5.5 `0x191`: gone, but it was not Corolla's active steering path
 

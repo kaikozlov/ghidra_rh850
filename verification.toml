@@ -1251,6 +1251,34 @@ paths = [
   "exploit/findings_coverage.json",
 ]
 
+[suite.corolla_8965h_b6_full_receiver_contract]
+tests = ["tests/verify_corolla_8965H1202000_b6_full_receiver_contract.py"]
+oracle = "raw_bytes"
+paths = [
+  "tests/verify_corolla_8965H1202000_b6_full_receiver_contract.py",
+  "tools/extract_corolla_h_b6_full_receiver_evidence.py",
+  "tools/build_corolla_h_b6_full_receiver_contract.py",
+  "data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
+  "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+  "data/generated/corolla_8965H1202000_fd_control_interface.json",
+  "data/generated/corolla_8965H1202000_lta_command_provenance.json",
+  "data/generated/corolla_8965H1202000_lta_command_provenance_census.json",
+  "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
+  "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+  "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+  "community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+  "docs/variants/corolla-2023-us-public-route.md",
+  "docs/variants/corolla-h-f-openpilot-state-bridge.md",
+  "docs/variants/corolla-pre-tss3-openpilot-message-comparison.md",
+  "docs/architecture/toyota-openpilot-porting-contract.md",
+  "docs/status/FINDINGS.md",
+  "docs/status/OPEN_QUESTIONS.md",
+  "docs/status/PRIORITIES.md",
+  "docs/reference/generated-artifacts.md",
+  "exploit/findings_coverage.json",
+]
+
 [suite.corolla_h_openpilot_state_bridge]
 tests = ["tests/verify_corolla_8965H1202000_openpilot_state_bridge.py"]
 oracle = "raw_bytes"
@@ -2609,6 +2637,7 @@ paths = [
   "data/generated/corolla_8965H1202000_steering_supervisor_stage_ledger.json",
   "data/generated/corolla_8965H1202000_application_diagnostic_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_fd_control_decompiler_evidence.json",
+  "data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_secoc_key_provenance_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_steering_supervisor_insertions_decompiler_evidence.json",
   "data/generated/corolla_8965H1202000_system_orchestration_decompiler_evidence.json",

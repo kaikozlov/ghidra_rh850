@@ -2523,6 +2523,70 @@ four-state controller selector; signal264 participates in the AP/Remote-Parking
 validity/inhibit state; and signal265 is republished only while B6 communication is
 healthy. Their literal OEM names are not assigned from family vocabulary alone.
 
+The **entire 32-byte receiver envelope is now byte/bit classified**, rather than
+leaving the rest of the CAN-FD payload as an opaque tail. H SecOC record 2 at
+`0x257CC` is a normal-freshness profile for Data ID `0x00B6`, application/route PDU
+42, secured length 32, full freshness 46 bits, transmitted freshness 4 bits, and
+transmitted authenticator 28 bits. Thus B0..B27 are the 28-byte authenticated
+application region and B28..B31 are the four-byte security trailer. Target-native
+`88744` extracts that trailer exactly as:
+
+```text
+B28[7:4]              FV4 = message_counter_low2 || reset_counter_low2
+B28[3:0] + B29..B31  transmitted CMAC_MSB28
+```
+
+The normal-freshness path is exact too. `89A46/89E2C/89E9A/89876` reconstruct and
+pack six bytes as
+`trip16 || reset20 || message8 || reset_low2 || 00b`, i.e. 46 meaningful bits
+left-aligned with two zero pad bits. `87FC2` then constructs the CMAC verification
+input as exactly **36 bytes**:
+
+```text
+00 B6 || B0..B27 || reconstructed_freshness[6]
+```
+
+The receiver computes AES-CMAC-128 through generated config/job 0 and ICU-S slot 4
+and compares the transmitted MSB28. The **slot selector** is closed; the live
+slot-4 key value remains CPU-opaque. Successful verification routes through
+`88856 -> 89514 -> 7AFB6`, whose raw PduR tables resolve route 42 to `76A3C`
+(COM RxIndication PDU42). The queue/COM path retains a 32-byte PDU geometry, so the
+static proof deliberately does **not** claim that the trailer is physically stripped
+before COM RAM. Instead, the application-consumer census proves what matters: there
+is no recovered application consumer for the trailer.
+
+The application side is much smaller than the authenticated envelope:
+
+| Wire bytes | Recovered EPS-application use |
+|---|---|
+| B0..B2 | authenticated; no recovered application consumer |
+| B3 | bits5:0 = signal254 Target Lateral ID; bits7:6 have no recovered consumer |
+| B4..B5 | signal255 signed target steering angle |
+| B6 | signal256 B7 and signal257 B6:4 are extracted/snapshotted but have no recovered downstream consumer; signal258 B2 is a live steering-cone gate; signal259 B1:0 is staged but has no recovered downstream consumer; B3 has no scalar extraction |
+| B7 | signal260 B7:6 four-state selector; signal261 B5:0 modulo-64 sequence |
+| B8 | signal262 live percentage-like contributor modifier |
+| B9 | signal263 live percentage-like contributor modifier |
+| B10 | signal264 B7 validity/inhibit and signal265 B2:0 valid-gated mode/status; B6:3 have no recovered consumer |
+| B11..B27 | authenticated; no recovered application consumer |
+| B28..B31 | SecOC only under the recovered application surface: FV4 + CMAC28 as above |
+
+Across all 256 wire bits this partitions to **51 bits with recovered downstream EPS
+semantics, 6 bits extracted but with no recovered downstream consumer, 167
+authenticated application bits with no recovered application consumer, and 32 SecOC
+trailer bits**. That negative is not based only on the generated scalar unpacker: a
+5,138-function application-corpus scan finds no B6 use through the literal block/group
+receive API, no full-PDU PDU42 copy, no raw absolute B6-buffer pointer, and no
+named/absolute/simple-GP-alias constant-displacement reference into
+`FEBE4AF4..FEBE4B13`. Arbitrary value-set/computed-base aliases and hardware/DMA
+access remain outside that bounded static proof.
+
+This distinction matters for a future sender. The EPS imposes no **recovered
+application-semantic** constraint on most of B0..B2/B11..B27, but those bytes are not
+cryptographically irrelevant: every B0..B27 bit is in the CMAC input. Upstream
+producer-side formatting may also constrain reserved/unused values, so this is not a
+claim that openpilot may fill those bytes arbitrarily. It does show that the receiver
+contract is far narrower than the raw 32-byte DLC suggests.
+
 Techstream independently classifies `0x0B6` missing-message ownership as U012987
 **Lost Communication with Brake System Control Module / Missing Message**. That pins
 the immediate monitored sender relationship. Techstream now also closes the
@@ -2540,29 +2604,44 @@ are corroboration rather than a one-to-one B6 signal-name transfer.
 The negative residue is now useful and narrow. D7's only 16-bit scalar is still
 `CAN Vehicle Speed (SP1)`; B6/D7 nonscalar block/group/full-PDU alternatives remain
 negative; the shared command-sized `0x025` fields are proved measured angle/rate; and
-the separate retained Sienna `0x2E4` torque-clamp input remains zero-fed. The recovered scalar and literal block/group/full-PDU surfaces expose no second
-command-sized ingress comparable to signal255; arbitrary computed aliases and
+the separate retained Sienna `0x2E4` torque-clamp input remains zero-fed. The recovered
+scalar and literal block/group/full-PDU surfaces expose no second command-sized ingress
+comparable to signal255; the new exact COM-window census also finds no
+named/absolute/simple-GP-alias constant-displacement B6-buffer reference anywhere in
+5,138 application functions. Arbitrary value-set/computed-base aliases and
 DMA/peripheral mutation remain outside this static proof.
 
-The exact H/F EPS receiver contract is therefore substantially closed:
-**protected FD `0x0B6` signal254 selects the OEM Target Lateral request, signal255
-commands target steering angle at a closed controller-equivalent scale, the receiver
-drops missing B6 after seven foreground ticks, and signal261 supplies the modulo-64
-sequence state.** What remains before production use is the literal signal255 OEM
-unit, sender wall-clock cadence, exact names for secondary B6 fields, normal
-target/rate limits, SecOC freshness/key/source behavior, stock-source suppression,
+The exact **H/F receiver-side B6 contract is therefore closed under the repository's
+bounded CPU/application evidence model**: protected FD `0x0B6` signal254 selects the
+OEM Target Lateral request, signal255 commands target steering angle at a closed
+controller-equivalent scale, signal261 supplies modulo-64 sequence state, missing B6
+cuts cooperative control after seven foreground ticks, all 32 wire bytes are assigned
+to authenticated application data versus SecOC trailer, and the normal-freshness/
+CMAC verification input and ICU-S slot selection are exact. Every table/function used
+for this result lies inside H/F's byte-identical application region, so the receiver
+wire/application/SecOC contract transfers exactly to `8965F1208000`.
+
+What remains before production use is now **sender-side or control-policy work**, not
+another receiver-payload search: the literal signal255 OEM unit and exact names for
+secondary live fields, sender wall-clock cadence, sender freshness-state ownership,
+the slot-4 secret value, normal target/rate/driver limits, stock-source suppression,
 and the upstream byte-level producer/forwarding transform despite the now-closed
-FRC/`ABS_P5`/EPS module topology.
+FRC/`ABS_P5`/EPS module topology. Receiver freshness **format and reconstruction** are
+no longer open.
 
 Machine-readable ownership:
 `data/generated/corolla_8965H1202000_b6_target_angle_ingress.json`,
 `data/generated/corolla_8965H1202000_b6_receiver_contract.json`,
+`data/generated/corolla_8965H1202000_b6_full_receiver_contract.json`,
+`data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json`,
 `data/generated/corolla_8965H1202000_lta_command_provenance.json` v8, and
 `data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json` v2;
 `tests/verify_corolla_8965H1202000_b6_target_angle_ingress.py`,
+`tests/verify_corolla_8965H1202000_b6_full_receiver_contract.py`,
 `tests/verify_corolla_8965H1202000_lta_command_provenance.py`, and
 `tests/verify_corolla_8965H1202000_supervisor_external_ingress.py` pin the exact raw
-bodies, GP aliases, field geometry, controller path, and bounded alternatives.
+bodies, GP aliases, 256-bit wire partition, freshness/trailer arithmetic, CMAC-input
+shape, field geometry, controller path, H/F identity, and bounded alternatives.
 
 ## 8. Remaining evidence boundary
 
@@ -2643,6 +2722,6 @@ analyzed positive example of the replacement protected-B6 target-angle architect
 Generated by `tools/build_knowledge_index.py` from the status ledgers;
 do not edit this block by hand.
 
-- Findings with this document as canonical home: [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040)
+- Findings with this document as canonical home: [COM-012](../reference/index.md#finding-com-012), [SECOC-042](../reference/index.md#finding-secoc-042), [SECOC-045](../reference/index.md#finding-secoc-045), [SECOC-063](../reference/index.md#finding-secoc-063), [TMS-020](../reference/index.md#finding-tms-020), [TMS-021](../reference/index.md#finding-tms-021), [TMS-022](../reference/index.md#finding-tms-022), [TMS-023](../reference/index.md#finding-tms-023), [VAR-004](../reference/index.md#finding-var-004), [VAR-005](../reference/index.md#finding-var-005), [VAR-007](../reference/index.md#finding-var-007), [VAR-008](../reference/index.md#finding-var-008), [VAR-009](../reference/index.md#finding-var-009), [VAR-010](../reference/index.md#finding-var-010), [VAR-011](../reference/index.md#finding-var-011), [VAR-012](../reference/index.md#finding-var-012), [VAR-013](../reference/index.md#finding-var-013), [VAR-014](../reference/index.md#finding-var-014), [VAR-015](../reference/index.md#finding-var-015), [VAR-016](../reference/index.md#finding-var-016), [VAR-017](../reference/index.md#finding-var-017), [VAR-018](../reference/index.md#finding-var-018), [VAR-019](../reference/index.md#finding-var-019), [VAR-020](../reference/index.md#finding-var-020), [VAR-021](../reference/index.md#finding-var-021), [VAR-022](../reference/index.md#finding-var-022), [VAR-023](../reference/index.md#finding-var-023), [VAR-024](../reference/index.md#finding-var-024), [VAR-025](../reference/index.md#finding-var-025), [VAR-026](../reference/index.md#finding-var-026), [VAR-027](../reference/index.md#finding-var-027), [VAR-028](../reference/index.md#finding-var-028), [VAR-029](../reference/index.md#finding-var-029), [VAR-030](../reference/index.md#finding-var-030), [VAR-031](../reference/index.md#finding-var-031), [VAR-032](../reference/index.md#finding-var-032), [VAR-033](../reference/index.md#finding-var-033), [VAR-034](../reference/index.md#finding-var-034), [VAR-035](../reference/index.md#finding-var-035), [VAR-036](../reference/index.md#finding-var-036), [VAR-037](../reference/index.md#finding-var-037), [VAR-038](../reference/index.md#finding-var-038), [VAR-040](../reference/index.md#finding-var-040)
 - Corrections with this document as canonical home: [CORR-070](../reference/index.md#correction-corr-070), [CORR-073](../reference/index.md#correction-corr-073), [CORR-074](../reference/index.md#correction-corr-074), [CORR-075](../reference/index.md#correction-corr-075), [CORR-076](../reference/index.md#correction-corr-076), [CORR-077](../reference/index.md#correction-corr-077), [CORR-078](../reference/index.md#correction-corr-078), [CORR-105](../reference/index.md#correction-corr-105), [CORR-106](../reference/index.md#correction-corr-106), [CORR-107](../reference/index.md#correction-corr-107)
 <!-- knowledge-cross-references:end -->

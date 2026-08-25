@@ -1,0 +1,844 @@
+{
+  "application_consumption": {
+    "application_semantic_signal_ids": [
+      254,
+      255,
+      258,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265
+    ],
+    "bit_category_counts": {
+      "application_semantic": 51,
+      "authenticated_application_no_recovered_consumer": 167,
+      "extracted_no_recovered_downstream_consumer": 6,
+      "secoc_transmitted_authenticator": 28,
+      "secoc_transmitted_freshness": 4
+    },
+    "byte_map": [
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 0,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 1,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 2,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 3,
+        "role": "authenticated_application_data",
+        "scalar_fields": [
+          {
+            "bit_length": 6,
+            "bit_offset": 0,
+            "direct_consumers": [
+              "0xCBE6E"
+            ],
+            "role": "target-lateral-control-id-mode-selector",
+            "signal_id": 254
+          }
+        ]
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic"
+        ],
+        "byte": 4,
+        "role": "authenticated_application_data",
+        "scalar_fields": [
+          {
+            "bit_length": 16,
+            "bit_offset": 0,
+            "direct_consumers": [
+              "0xC86E8",
+              "0xC87FC",
+              "0xC9DB0",
+              "0xCB4F4"
+            ],
+            "role": "signed16-target-steering-angle-command",
+            "signal_id": 255
+          }
+        ]
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic"
+        ],
+        "byte": 5,
+        "role": "authenticated_application_data",
+        "scalar_fields": [
+          {
+            "bit_length": 16,
+            "bit_offset": 0,
+            "direct_consumers": [
+              "0xC86E8",
+              "0xC87FC",
+              "0xC9DB0",
+              "0xCB4F4"
+            ],
+            "role": "signed16-target-steering-angle-command",
+            "signal_id": 255
+          }
+        ]
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "extracted_no_recovered_downstream_consumer",
+          "extracted_no_recovered_downstream_consumer",
+          "application_semantic",
+          "authenticated_application_no_recovered_consumer",
+          "extracted_no_recovered_downstream_consumer",
+          "extracted_no_recovered_downstream_consumer",
+          "extracted_no_recovered_downstream_consumer",
+          "extracted_no_recovered_downstream_consumer"
+        ],
+        "byte": 6,
+        "role": "authenticated_application_data",
+        "scalar_fields": [
+          {
+            "bit_length": 1,
+            "bit_offset": 7,
+            "direct_consumers": [],
+            "role": "snapshot-only-direct-xref-negative",
+            "signal_id": 256
+          },
+          {
+            "bit_length": 3,
+            "bit_offset": 4,
+            "direct_consumers": [],
+            "role": "snapshot-only-direct-xref-negative",
+            "signal_id": 257
+          },
+          {
+            "bit_length": 1,
+            "bit_offset": 2,
+            "direct_consumers": [
+              "0xCBEEE"
+            ],
+            "role": "steering-cone-gate",
+            "signal_id": 258
+          },
+          {
+            "bit_length": 2,
+            "bit_offset": 0,
+            "direct_consumers": [],
+            "role": "staged-only-direct-xref-negative",
+            "signal_id": 259
+          }
+        ]
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic"
+        ],
+        "byte": 7,
+        "role": "authenticated_application_data",
+        "scalar_fields": [
+          {
+            "bit_length": 2,
+            "bit_offset": 6,
+            "direct_consumers": [
+              "0xC89D2",
+              "0xC8D42"
+            ],
+            "role": "mode-table-selector",
+            "signal_id": 260
+          },
+          {
+            "bit_length": 6,
+            "bit_offset": 0,
+            "direct_consumers": [
+              "0xCB246"
+            ],
+            "role": "modulo-sequence-delta",
+            "signal_id": 261
+          }
+        ]
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic"
+        ],
+        "byte": 8,
+        "role": "authenticated_application_data",
+        "scalar_fields": [
+          {
+            "bit_length": 8,
+            "bit_offset": 0,
+            "direct_consumers": [
+              "0xCC442"
+            ],
+            "role": "percentage-scaling",
+            "signal_id": 262
+          }
+        ]
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "application_semantic"
+        ],
+        "byte": 9,
+        "role": "authenticated_application_data",
+        "scalar_fields": [
+          {
+            "bit_length": 8,
+            "bit_offset": 0,
+            "direct_consumers": [
+              "0xCBFCE"
+            ],
+            "role": "percentage-scaling",
+            "signal_id": 263
+          }
+        ]
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "application_semantic",
+          "application_semantic",
+          "application_semantic",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "application_semantic"
+        ],
+        "byte": 10,
+        "role": "authenticated_application_data",
+        "scalar_fields": [
+          {
+            "bit_length": 1,
+            "bit_offset": 7,
+            "direct_consumers": [
+              "0xC819E"
+            ],
+            "role": "validity-reset-gate",
+            "signal_id": 264
+          },
+          {
+            "bit_length": 3,
+            "bit_offset": 0,
+            "direct_consumers": [
+              "0xCCF58"
+            ],
+            "role": "validity-gated-mode-status",
+            "signal_id": 265
+          }
+        ]
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 11,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 12,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 13,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 14,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 15,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 16,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 17,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 18,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 19,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 20,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 21,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 22,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 23,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 24,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 25,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 26,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer",
+          "authenticated_application_no_recovered_consumer"
+        ],
+        "byte": 27,
+        "role": "authenticated_application_data",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_freshness",
+          "secoc_transmitted_freshness",
+          "secoc_transmitted_freshness",
+          "secoc_transmitted_freshness"
+        ],
+        "byte": 28,
+        "role": "secoc_security_trailer",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator"
+        ],
+        "byte": 29,
+        "role": "secoc_security_trailer",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator"
+        ],
+        "byte": 30,
+        "role": "secoc_security_trailer",
+        "scalar_fields": []
+      },
+      {
+        "bit_categories_lsb_to_msb": [
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator",
+          "secoc_transmitted_authenticator"
+        ],
+        "byte": 31,
+        "role": "secoc_security_trailer",
+        "scalar_fields": []
+      }
+    ],
+    "com_buffer": "0xFEBE4AF4",
+    "configured_signal_ids": [
+      252,
+      253,
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265,
+      266,
+      267
+    ],
+    "configured_without_scalar_receive": [
+      252,
+      253,
+      266,
+      267
+    ],
+    "extracted_no_recovered_downstream_consumer_signal_ids": [
+      256,
+      257,
+      259
+    ],
+    "generic_escape_census": {
+      "all_literal_block_group_receive_ids": [
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        99,
+        100,
+        101,
+        102
+      ],
+      "all_literal_full_pdu_ids": [
+        0
+      ],
+      "b6_full_pdu_copy_present": false,
+      "boundary": "Closes generated scalar plus all literal block/group/full-PDU APIs, direct raw-u32 buffer pointers, and the complete application-corpus named/absolute/simple-GP-alias constant-displacement census; arbitrary value-set/computed-base aliases and hardware/DMA accesses remain outside the proof.",
+      "direct_com_region_reference_census": {
+        "application_end_exclusive": "0x00100000",
+        "application_first": "0x00020000",
+        "boundary": "Complete source-corpus application-function sweep for named absolute references and simple GP aliases/constants/copies with constant displacements. Bootloader reuse is outside the post-SecOC application question; arbitrary computed-base/value-set aliases remain outside this bounded census.",
+        "direct_hits": [],
+        "first_byte": "0xFEBE4AF4",
+        "gp": "0xFEBEB800",
+        "hit_count": 0,
+        "last_byte": "0xFEBE4B13",
+        "scanned_application_function_count": 5138
+      },
+      "non_scalar_ids_used_by_block_group_api": [],
+      "raw_u32_buffer_pointer_hits": []
+    },
+    "receiver_semantic_concentration": "Recovered EPS application semantics are confined to selected bits in B3..B10. B0..B2 and B11..B27 are authenticated but have no recovered application consumer under the bounded generic-access census.",
+    "scalar_extracted_signal_ids": [
+      254,
+      255,
+      256,
+      257,
+      258,
+      259,
+      260,
+      261,
+      262,
+      263,
+      264,
+      265
+    ],
+    "sender_boundary": "No recovered EPS application semantic consumer means these bytes impose no recovered receiver-application meaning, not that a sender may choose them freely: all B0..B27 are inside the CMAC input, and upstream producer-side formatting constraints remain unexamined."
+  },
+  "applies_to": [
+    "8965H1202000",
+    "8965F1208000"
+  ],
+  "cross_variant": {
+    "boundary": "All receiver tables and functions used by this proof lie inside the byte-identical application range. Low-region H/F calibration/identity differences are outside this proof and can still affect downstream limits/calibration.",
+    "different_bytes_in_range": 0,
+    "h_f_application_identical": true,
+    "identical_range": [
+      "0x20000",
+      "0x100000"
+    ],
+    "range_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
+    "receiver_contract_byte_identical": true
+  },
+  "evidence_boundary": "This closes the exact H/F receiver-side 32-byte partition, normal-freshness/trailer format, CMAC input, slot selection, verified upper route, and bounded application-consumer surface. It does not recover the ICU-S slot-4 secret value, sender cadence, sender freshness-state ownership, upstream producer formatting, arbitrary hardware/DMA aliases, or OEM names for every secondary B6 scalar.",
+  "schema": "corolla-8965H1202000-b6-full-receiver-contract-v1",
+  "software_id": "8965H1202000",
+  "sources": {
+    "base_receiver_contract": {
+      "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
+      "sha256": "0cb7b5aff0978c6903e74ce9778c75e0e1f878e8238614b99e65d3f2b7b502e0"
+    },
+    "codeflash": {
+      "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "decompiler_evidence": {
+      "function_count": 15,
+      "path": "data/generated/corolla_8965H1202000_b6_full_receiver_decompiler_evidence.json",
+      "sha256": "0310f737eb6c07ee6098c01a3692154119324a0fee02f917a436ac6de174b424"
+    },
+    "fd_control_interface": {
+      "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
+      "sha256": "1586afd9d76c132ccf57961886bbfc1271530ec1b77019ba1b6e7bdb4c137856"
+    },
+    "hf_equivalence": {
+      "path": "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
+      "sha256": "a1c28ae4787a131ad1cc46310a73e11649b5cf92985b79eefa13aae71d519e7c"
+    },
+    "lta_provenance": {
+      "path": "data/generated/corolla_8965H1202000_lta_command_provenance.json",
+      "sha256": "3ed676f7abce405f7f471da13584186c88bcddf2a85ea6b8abc4c939b4f38a14"
+    },
+    "secoc_key_provenance": {
+      "path": "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
+      "sha256": "80a8f926d5db6172d3edb8ba3dc1d79708166af8c4c1d5379142188cf153f43e"
+    },
+    "whole_corpus_census": {
+      "path": "data/generated/corolla_8965H1202000_lta_command_provenance_census.json",
+      "sha256": "82b9ee6b1cfbceda650396f33c4e984272f26eb95f2cecab72e7257d57ce4199"
+    }
+  },
+  "static_conclusion": {
+    "full_32_byte_receiver_partition_closed": true,
+    "receiver_application_generic_consumption_closed": true,
+    "receiver_authenticated_input_closed": true,
+    "receiver_freshness_layout_closed": true,
+    "receiver_key_slot_selection_closed": true,
+    "receiver_key_value_closed": false,
+    "receiver_secoc_envelope_closed": true,
+    "receiver_transmitted_trailer_layout_closed": true,
+    "secondary_oem_field_names_closed": false,
+    "sender_freshness_state_ownership_closed": false,
+    "sender_wall_clock_cadence_closed": false,
+    "short_form": "EPS semantics are concentrated in B3..B10; B0..B27 are all authenticated; B28..B31 are FV4+CMAC28 SecOC trailer.",
+    "upstream_producer_closed": false
+  },
+  "verified_delivery": {
+    "length_boundary": "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. Static evidence does not prove that B28..B31 are physically stripped before COM RAM; the application-consumer census, not a stripping assumption, is the basis for classifying them as SecOC-only.",
+    "queue_getter": "0x00087E2C",
+    "queue_ingress": "0x0008865A",
+    "resolved_upper_callback": "0x00076A3C",
+    "route_id": 42,
+    "upper_callback_role": "COM RxIndication for PDU42",
+    "upper_wrapper": "0x00088856 -> 0x00089514 -> 0x0007AFB6",
+    "verify_worker": "0x00088A56"
+  },
+  "wire_envelope": {
+    "authenticated_application_region": {
+      "bytes": 28,
+      "first_byte": 0,
+      "last_byte": 27
+    },
+    "authenticated_input": {
+      "algorithm": "AES-CMAC-128 via ICU-S slot 4; receiver compares transmitted MSB28",
+      "application_bytes": 28,
+      "builder": "0x00087FC2",
+      "bytes": 36,
+      "data_id_bytes": "00b6",
+      "freshness_storage_bytes": 6,
+      "packing": "DataID_be16(0x00B6) || B0..B27 || reconstructed_freshness48"
+    },
+    "can_id": "0x0B6",
+    "full_freshness": {
+      "meaningful_bits": 46,
+      "normal_reconstruction": "0x00089E2C/0x00089E9A",
+      "packer": "0x00089876",
+      "packing": "trip16 || reset20 || message8 || reset_low2 || 00b",
+      "parser": "0x00089A46",
+      "storage_bytes": 6,
+      "transmitted_nibble": "message_low2 || reset_low2"
+    },
+    "pdu_id": 42,
+    "profile": {
+      "cryptoif_job_handle": 0,
+      "freshness_id": 2,
+      "freshness_kind": "normal",
+      "full_authenticator_bits": 128,
+      "full_freshness_bits": 46,
+      "icus_slot_selector": 4,
+      "key_value_cpu_visible": false,
+      "secoc_crypto_config_id": 0,
+      "transmitted_authenticator_bits": 28,
+      "transmitted_freshness_bits": 4
+    },
+    "profile_record": {
+      "address": "0x000257CC",
+      "raw_hex": "80001c00000004008000b60000000000010002002e040000000000000000000000000000200000002800000002000200589708002a002a0000000000200000000000000020000000b0960800ba340600"
+    },
+    "secured_bytes": 32,
+    "security_trailer_region": {
+      "bytes": 4,
+      "first_byte": 28,
+      "last_byte": 31
+    },
+    "trailer_bits": {
+      "B28[3:0]": "CMAC_MSB28 bits27:24",
+      "B28[7:4]": "transmitted freshness FV4 = message_counter_low2 || reset_counter_low2",
+      "B29": "CMAC_MSB28 bits23:16",
+      "B30": "CMAC_MSB28 bits15:8",
+      "B31": "CMAC_MSB28 bits7:0"
+    }
+  }
+}

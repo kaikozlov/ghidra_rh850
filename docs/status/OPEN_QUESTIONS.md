@@ -93,9 +93,14 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   `PCS/LDA/Hands Off LTA/LTA-LCA/PDA`; PDU42 reloads to **7 TAUJ0-CH3 foreground
   ticks** and first expiry disables cooperative selection through slot18/`ADB9`;
   signal261 is a modulo-64 sequence counter with effective-gap cap `8`. The absolute
-  CH3 tick period remains unsupported. The remaining Corolla work is therefore
-  sender wall-clock cadence, exact secondary-field naming where safety-relevant,
-  H/F-native limits, **SecOC** freshness/key/source behavior, stock-source
+  CH3 tick period remains unsupported. The receiver-side 32-byte envelope is now
+  separately exhausted: B0..B27 are authenticated application data, B28..B31 are
+  exact FV4+CMAC28, full freshness is `trip16||reset20||message8||reset_low2||00b`,
+  and the CMAC input is `00 B6 || B0..B27 || freshness[6]` through ICU-S slot 4.
+  The bounded application census finds recovered semantics only in selected B3..B10
+  bits. The remaining Corolla work is therefore sender wall-clock cadence, exact
+  secondary-field naming where safety-relevant, H/F-native limits, **sender-side
+  SecOC freshness-state ownership and the slot-4 secret value**, stock-source
   suppression, and the upstream payload/SecOC producer contract. Static broad
   searching of this H EPS should not be repeated without a new concrete lead.
   TMS-040/041 close the `FRC_P5` diagnostic domain and fixed-routine probe surface;
@@ -110,8 +115,10 @@ claim moves to [CORRECTIONS.md](CORRECTIONS.md).
   and ABS reference an Automated Driving System Interface module. The unresolved
   task is firmware/dynamic: acquire decoded `FRC_P5` plus category-435 `ABS_P5`
   firmware or synchronized stock-LTA traffic and join planner state to B6 bytes,
-  sender cadence, SecOC freshness/key/source ownership, and stock-source
-  suppression. The read-only `AB/EB` Operation FFD surface plus fixed routine
+  sender cadence, sender freshness-state/signing ownership, and stock-source
+  suppression. Receiver freshness/trailer reconstruction and ICU-S slot selection
+  are no longer open; the slot-4 key value remains unknown. The read-only `AB/EB`
+  Operation FFD surface plus fixed routine
   `0x1588` remain capture references. Wire arbitration ID for the FRC/Brake leg,
   exact producer/forwarder identity, and any relation to community
   `NEW_MSG_8A_LAT_CONTROL` (`0x18A`) remain unproved.
